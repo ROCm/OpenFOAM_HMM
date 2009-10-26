@@ -23,45 +23,70 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Write primitive and binary block from OPstream
+    Read token and binary block from IPstream
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-#include "OPstream.H"
+#include "UIPstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-Foam::OPstream::~OPstream()
+Foam::UIPstream::UIPstream
+(
+    const commsTypes commsType,
+    const int fromProcNo,
+    DynamicList<char>& externalBuf,
+    const label tag,
+    streamFormat format,
+    versionNumber version
+)
+:
+    UPstream(commsType),
+    Istream(format, version),
+    fromProcNo_(fromProcNo),
+    externalBuf_(externalBuf),
+    externalBufPosition_(0),
+    tag_(tag),
+    messageSize_(0)
 {
-    notImplemented("OPstream::~OPstream()");
+     notImplemented
+     (
+         "UIPstream::UIPstream"
+         "("
+             "const commsTypes,"
+             "const int fromProcNo,"
+             "DynamicList<char>&,"
+             "const label tag,"
+             "streamFormat, versionNumber"
+         ")"
+     );
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::OPstream::write
+int Foam::UIPstream::read
 (
     const commsTypes commsType,
-    const int toProcNo,
-    const char* buf,
+    const int fromProcNo,
+    char* buf,
     const std::streamsize bufSize
 )
 {
-     notImplemented
-     (
-         "IPstream::write"
-         "("
-             "const commsTypes commsType,"
-             "const int fromProcNo,"
-             "char* buf,"
-             "const label bufSize"
-         ")"
+    notImplemented
+    (
+        "UIPstream::read"
+        "("
+            "const commsTypes,"
+            "const int fromProcNo,"
+            "char* buf,"
+            "const label bufSize"
+        ")"
      );
 
-     return false;
+     return 0;
 }
 
 

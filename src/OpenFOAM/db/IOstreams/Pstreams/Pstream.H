@@ -30,22 +30,18 @@ Description
 
 SourceFiles
     Pstream.C
-    PstreamsPrint.C
-    PstreamCommsStruct.C
     gatherScatter.C
     combineGatherScatter.C
     gatherScatterList.C
+    exchange.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef Pstream_H
 #define Pstream_H
 
-#include "labelList.H"
+#include "UPstream.H"
 #include "DynamicList.H"
-#include "HashTable.H"
-#include "string.H"
-#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,182 +53,21 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class Pstream
+:
+    public UPstream
 {
-
-public:
-
-    //- Types of communications
-    enum commsTypes
-    {
-        blocking,
-        scheduled,
-        nonBlocking
-    };
-
-    static const NamedEnum<commsTypes, 3> commsTypeNames;
-
-    //- Structure for communicating between processors
-    class commsStruct
-    {
-        // Private data
-
-            //- procID of above processor
-            label above_;
-
-            //- procIDs of processors directly below me
-            labelList below_;
-
-            //- procIDs of all processors below (so not just directly below)
-            labelList allBelow_;
-
-            //- procIDs of all processors not below. (inverse set of allBelow_
-            //  and minus myProcNo)
-            labelList allNotBelow_;
-
-
-    public:
-
-        // Constructors
-
-            //- Construct null
-            commsStruct();
-
-            //- Construct from components
-            commsStruct
-            (
-                const label,
-                const labelList&,
-                const labelList&,
-                const labelList&
-            );
-
-            //- Construct from components; construct allNotBelow_
-            commsStruct
-            (
-                const label nProcs,
-                const label myProcID,
-                const label,
-                const labelList&,
-                const labelList&
-            );
-
-
-        // Member Functions
-
-            // Access
-
-                label above() const
-                {
-                    return above_;
-                }
-
-                const labelList& below() const
-                {
-                    return below_;
-                }
-
-                const labelList& allBelow() const
-                {
-                    return allBelow_;
-                }
-
-                const labelList& allNotBelow() const
-                {
-                    return allNotBelow_;
-                }
-
-
-        // Member operators
-
-            bool operator==(const commsStruct&) const;
-
-            bool operator!=(const commsStruct&) const;
-
-
-         // Ostream Operator
-
-            friend Ostream& operator<<(Ostream&, const commsStruct&);
-    };
-
-
-private:
-
-    // Private data
-
-        static int myProcNo_;
-        static bool parRun_;
-
-        static List<int> procIDs_;
-        static int msgType_;
-
-        static List<commsStruct> linearCommunication_;
-        static List<commsStruct> treeCommunication_;
-
-
-    // Private member functions
-
-        //- Set data for parallel running
-        static void setParRun();
-
-        //- Calculate linear communication schedule
-        static void calcLinearComm(const label nProcs);
-
-        //- Calculate tree communication schedule
-        static void calcTreeComm(const label nProcs);
-
-        //- Helper function for tree communication schedule determination
-        //  Collects all processorIDs below a processor
-        static void collectReceives
-        (
-            const label procID,
-            const List<DynamicList<label> >& receives,
-            DynamicList<label>& allReceives
-        );
-
-        //- Initialize all communication schedules. Callback from
-        //  Pstream::init()
-        static void initCommunicationSchedule();
-
 
 protected:
 
     // Protected data
 
-        //- Communications type of this stream
-        commsTypes commsType_;
-
         //- Transfer buffer
-        List<char> buf_;
-
-        //- Current buffer read/write location
-        int bufPosition_;
-
-
-    // Protected member functions
-
-        //- Increase the size of the transfer buffer
-        inline void enlargeBuffer(size_t count);
-
+        DynamicList<char> buf_;
 
 public:
 
     // Declare name of the class and its debug switch
     ClassName("Pstream");
-
-
-    // Static data
-
-        //- Should compact transfer be used in which floats replace doubles
-        //  reducing the bandwidth requirement at the expense of some loss
-        //  in accuracy
-        static bool floatTransfer;
-
-        //- Number of processors at which the sum algorithm changes from linear
-        //  to tree
-        static int nProcsSimpleSum;
-
-        //- Default commsType
-        static commsTypes defaultCommsType;
 
 
     // Constructors
@@ -244,149 +79,14 @@ public:
             const label bufSize = 0
         )
         :
-            commsType_(commsType),
-            bufPosition_(0)
+            UPstream(commsType),
+            buf_(0)
         {
             if (bufSize)
             {
-                buf_.setSize(bufSize + 2*sizeof(scalar) + 1);
+                buf_.setCapacity(bufSize + 2*sizeof(scalar) + 1);
             }
         }
-
-
-    // Member functions
-
-        //- Add the valid option this type of communications library
-        //  adds/requires on the command line
-        static void addValidParOptions(HashTable<string>& validParOptions);
-
-        //- Initialisation function called from main
-        //  Spawns slave processes and initialises inter-communication
-        static bool init(int& argc, char**& argv);
-
-        //- Non-blocking comms: wait until all have finished.
-        static void waitRequests();
-
-        //- Non-blocking comms: has request i finished?
-        static bool finishedRequest(const label i);
-
-        //- Is this a parallel run?
-        static bool parRun()
-        {
-            return parRun_;
-        }
-
-        //- Number of processes in parallel run
-        static label nProcs()
-        {
-            return procIDs_.size();
-        }
-
-        //- Am I the master process
-        static bool master()
-        {
-            return myProcNo_ == 0;
-        }
-
-        //- Process index of the master
-        static int masterNo()
-        {
-            return 0;
-        }
-
-        //- Number of this process (starting from masterNo() = 0)
-        static int myProcNo()
-        {
-            return myProcNo_;
-        }
-
-        //- Process IDs
-        static const List<int>& procIDs()
-        {
-            return procIDs_;
-        }
-
-        //- Process ID of given process index
-        static int procID(int procNo)
-        {
-            return procIDs_[procNo];
-        }
-
-        //- Process index of first slave
-        static int firstSlave()
-        {
-            return 1;
-        }
-
-        //- Process index of last slave
-        static int lastSlave()
-        {
-            return nProcs() - 1;
-        }
-
-        //- Communication schedule for linear all-to-master (proc 0)
-        static const List<commsStruct>& linearCommunication()
-        {
-            return linearCommunication_;
-        }
-
-        //- Communication schedule for tree all-to-master (proc 0)
-        static const List<commsStruct>& treeCommunication()
-        {
-            return treeCommunication_;
-        }
-
-        //- Message tag of standard messages
-        static int& msgType()
-        {
-            return msgType_;
-        }
-
-
-            //- Get the communications type of the stream
-            commsTypes commsType() const
-            {
-                return commsType_;
-            }
-
-            //- Set the communications type of the stream
-            commsTypes commsType(const commsTypes ct)
-            {
-                commsTypes oldCommsType = commsType_;
-                commsType_ = ct;
-                return oldCommsType;
-            }
-
-            //- Transfer buffer
-            const List<char>& buf() const
-            {
-                return buf_;
-            }
-
-            //- Transfer buffer
-            List<char>& buf()
-            {
-                return buf_;
-            }
-
-            //- Current buffer read/write location
-            int bufPosition() const
-            {
-                return bufPosition_;
-            }
-
-            //- Current buffer read/write location
-            int& bufPosition()
-            {
-                return bufPosition_;
-            }
-
-
-        //- Exit program
-        static void exit(int errnum = 1);
-
-        //- Abort program
-        static void abort();
 
 
         // Gather and scatter
@@ -501,8 +201,8 @@ public:
 
 
         // Gather/scatter keeping the individual processor data separate.
-        // Values is a List of size Pstream::nProcs() where
-        // Values[Pstream::myProcNo()] is the data for the current processor.
+        // Values is a List of size UPstream::nProcs() where
+        // Values[UPstream::myProcNo()] is the data for the current processor.
 
             //- Gather data but keep individual values separate
             template <class T>
@@ -527,16 +227,24 @@ public:
             //- Like above but switches between linear/tree communication
             template <class T>
             static void scatterList(List<T>& Values);
+
+
+        // Exchange
+
+            //- Exchange data. Sends sendData, receives into recvData, sets
+            //  sizes (not bytes). sizes[p0][p1] is what processor p0 has
+            //  sent to p1. Continuous data only.
+            //template <template<class> class ListType, class T>
+            template <class Container, class T>
+            static void exchange
+            (
+                const List<Container >&,
+                List<Container >&,
+                labelListList& sizes,
+                const label tag = UPstream::msgType()
+            );
+
 };
-
-
-inline void Pstream::enlargeBuffer(size_t count)
-{
-    buf_.setSize(max(int(buf_.size() + count), 2*buf_.size()));
-}
-
-
-Ostream& operator<<(Ostream&, const Pstream::commsStruct&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -549,8 +257,8 @@ Ostream& operator<<(Ostream&, const Pstream::commsStruct&);
 #   include "gatherScatter.C"
 #   include "combineGatherScatter.C"
 #   include "gatherScatterList.C"
+#   include "exchange.C"
 #endif
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

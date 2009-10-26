@@ -29,49 +29,12 @@ Description
 
 #include "mpi.h"
 
-#include "OPstream.H"
+#include "UOPstream.H"
 #include "PstreamGlobals.H"
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::OPstream::~OPstream()
-{
-    if (commsType_ == nonBlocking)
-    {
-        // alloc nonBlocking only if empty buffer. This denotes the buffer
-        // having been transfered out.
-        if (bufPosition_ > 0)
-        {
-            FatalErrorIn("OPstream::~OPstream()")
-                << "OPstream contains buffer so cannot be used with nonBlocking"
-                << " since destructor would destroy buffer whilst possibly"
-                << " still sending." << Foam::abort(FatalError);
-        }
-    }
-    else
-    {
-        if
-        (
-           !write
-            (
-                commsType_,
-                toProcNo_,
-                buf_.begin(),
-                bufPosition_
-            )
-        )
-        {
-            FatalErrorIn("OPstream::~OPstream()")
-                << "MPI cannot send outgoing message"
-                << Foam::abort(FatalError);
-        }
-    }
-}
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::OPstream::write
+bool Foam::UOPstream::write
 (
     const commsTypes commsType,
     const int toProcNo,
@@ -126,7 +89,7 @@ bool Foam::OPstream::write
     {
         FatalErrorIn
         (
-            "OPstream::write"
+            "UOPstream::write"
             "(const int fromProcNo, char* buf, std::streamsize bufSize)"
         )   << "Unsupported communications type " << commsType
             << Foam::abort(FatalError);

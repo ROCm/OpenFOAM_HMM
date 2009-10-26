@@ -26,7 +26,7 @@ License
 
 #include "mpi.h"
 
-#include "Pstream.H"
+#include "UPstream.H"
 #include "PstreamReduceOps.H"
 #include "OSspecific.H"
 #include "PstreamGlobals.H"
@@ -50,7 +50,7 @@ License
 // valid parallel options vary between implementations, but flag common ones.
 // if they are not removed by MPI_Init(), the subsequent argument processing
 // will notice that they are wrong
-void Foam::Pstream::addValidParOptions(HashTable<string>& validParOptions)
+void Foam::UPstream::addValidParOptions(HashTable<string>& validParOptions)
 {
     validParOptions.insert("np", "");
     validParOptions.insert("p4pg", "PI file");
@@ -62,7 +62,7 @@ void Foam::Pstream::addValidParOptions(HashTable<string>& validParOptions)
 }
 
 
-bool Foam::Pstream::init(int& argc, char**& argv)
+bool Foam::UPstream::init(int& argc, char**& argv)
 {
     MPI_Init(&argc, &argv);
 
@@ -72,8 +72,8 @@ bool Foam::Pstream::init(int& argc, char**& argv)
 
     if (numprocs <= 1)
     {
-        FatalErrorIn("Pstream::init(int& argc, char**& argv)")
-            << "bool Pstream::init(int& argc, char**& argv) : "
+        FatalErrorIn("UPstream::init(int& argc, char**& argv)")
+            << "bool IPstream::init(int& argc, char**& argv) : "
                "attempt to run parallel on 1 processor"
             << Foam::abort(FatalError);
     }
@@ -101,8 +101,8 @@ bool Foam::Pstream::init(int& argc, char**& argv)
     }
     else
     {
-        FatalErrorIn("Pstream::init(int& argc, char**& argv)")
-            << "Pstream::init(int& argc, char**& argv) : "
+        FatalErrorIn("UPstream::init(int& argc, char**& argv)")
+            << "UPstream::init(int& argc, char**& argv) : "
             << "environment variable MPI_BUFFER_SIZE not defined"
             << Foam::abort(FatalError);
     }
@@ -122,7 +122,7 @@ bool Foam::Pstream::init(int& argc, char**& argv)
 }
 
 
-void Foam::Pstream::exit(int errnum)
+void Foam::UPstream::exit(int errnum)
 {
 #   ifndef SGIMPI
     int size;
@@ -136,10 +136,10 @@ void Foam::Pstream::exit(int errnum)
         label n = PstreamGlobals::outstandingRequests_.size();
         PstreamGlobals::outstandingRequests_.clear();
 
-        WarningIn("Pstream::exit(int)")
+        WarningIn("UPstream::exit(int)")
             << "There are still " << n << " outstanding MPI_Requests." << endl
             << "This means that your code exited before doing a"
-            << " Pstream::waitRequests()." << endl
+            << " UPstream::waitRequests()." << endl
             << "This should not happen for a normal code exit."
             << endl;
     }
@@ -156,7 +156,7 @@ void Foam::Pstream::exit(int errnum)
 }
 
 
-void Foam::Pstream::abort()
+void Foam::UPstream::abort()
 {
     MPI_Abort(MPI_COMM_WORLD, 1);
 }
@@ -164,19 +164,19 @@ void Foam::Pstream::abort()
 
 void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
 {
-    if (!Pstream::parRun())
+    if (!UPstream::parRun())
     {
         return;
     }
 
-    if (Pstream::nProcs() <= Pstream::nProcsSimpleSum)
+    if (UPstream::nProcs() <= UPstream::nProcsSimpleSum)
     {
-        if (Pstream::master())
+        if (UPstream::master())
         {
             for
             (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
+                int slave=UPstream::firstSlave();
+                slave<=UPstream::lastSlave();
                 slave++
             )
             {
@@ -189,8 +189,8 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
                         &value,
                         1,
                         MPI_SCALAR,
-                        Pstream::procID(slave),
-                        Pstream::msgType(),
+                        UPstream::procID(slave),
+                        UPstream::msgType(),
                         MPI_COMM_WORLD,
                         MPI_STATUS_IGNORE
                     )
@@ -215,8 +215,8 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
                     &Value,
                     1,
                     MPI_SCALAR,
-                    Pstream::procID(Pstream::masterNo()),
-                    Pstream::msgType(),
+                    UPstream::procID(UPstream::masterNo()),
+                    UPstream::msgType(),
                     MPI_COMM_WORLD
                 )
             )
@@ -230,12 +230,12 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
         }
 
 
-        if (Pstream::master())
+        if (UPstream::master())
         {
             for
             (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
+                int slave=UPstream::firstSlave();
+                slave<=UPstream::lastSlave();
                 slave++
             )
             {
@@ -246,8 +246,8 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
                         &Value,
                         1,
                         MPI_SCALAR,
-                        Pstream::procID(slave),
-                        Pstream::msgType(),
+                        UPstream::procID(slave),
+                        UPstream::msgType(),
                         MPI_COMM_WORLD
                     )
                 )
@@ -269,8 +269,8 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
                     &Value,
                     1,
                     MPI_SCALAR,
-                    Pstream::procID(Pstream::masterNo()),
-                    Pstream::msgType(),
+                    UPstream::procID(UPstream::masterNo()),
+                    UPstream::msgType(),
                     MPI_COMM_WORLD,
                     MPI_STATUS_IGNORE
                 )
@@ -291,8 +291,8 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
         Value = sum;
 
         /*
-        int myProcNo = Pstream::myProcNo();
-        int nProcs = Pstream::nProcs();
+        int myProcNo = UPstream::myProcNo();
+        int nProcs = UPstream::nProcs();
 
         //
         // receive from children
@@ -321,8 +321,8 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
                         &value,
                         1,
                         MPI_SCALAR,
-                        Pstream::procID(childProcId),
-                        Pstream::msgType(),
+                        UPstream::procID(childProcId),
+                        UPstream::msgType(),
                         MPI_COMM_WORLD,
                         MPI_STATUS_IGNORE
                     )
@@ -346,7 +346,7 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
         //
         // send and receive from parent
         //
-        if (!Pstream::master())
+        if (!UPstream::master())
         {
             int parentId = myProcNo - (myProcNo % thisLevelOffset);
 
@@ -357,8 +357,8 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
                     &Value,
                     1,
                     MPI_SCALAR,
-                    Pstream::procID(parentId),
-                    Pstream::msgType(),
+                    UPstream::procID(parentId),
+                    UPstream::msgType(),
                     MPI_COMM_WORLD
                 )
             )
@@ -377,8 +377,8 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
                     &Value,
                     1,
                     MPI_SCALAR,
-                    Pstream::procID(parentId),
-                    Pstream::msgType(),
+                    UPstream::procID(parentId),
+                    UPstream::msgType(),
                     MPI_COMM_WORLD,
                     MPI_STATUS_IGNORE
                 )
@@ -413,8 +413,8 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
                         &Value,
                         1,
                         MPI_SCALAR,
-                        Pstream::procID(childProcId),
-                        Pstream::msgType(),
+                        UPstream::procID(childProcId),
+                        UPstream::msgType(),
                         MPI_COMM_WORLD
                     )
                 )
@@ -436,7 +436,7 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
 }
 
 
-void Foam::Pstream::waitRequests()
+void Foam::UPstream::waitRequests()
 {
     if (PstreamGlobals::outstandingRequests_.size())
     {
@@ -452,7 +452,7 @@ void Foam::Pstream::waitRequests()
         {
             FatalErrorIn
             (
-                "Pstream::waitRequests()"
+                "UPstream::waitRequests()"
             )   << "MPI_Waitall returned with error" << Foam::endl;
         }
 
@@ -461,13 +461,13 @@ void Foam::Pstream::waitRequests()
 }
 
 
-bool Foam::Pstream::finishedRequest(const label i)
+bool Foam::UPstream::finishedRequest(const label i)
 {
     if (i >= PstreamGlobals::outstandingRequests_.size())
     {
         FatalErrorIn
         (
-            "Pstream::finishedRequest(const label)"
+            "UPstream::finishedRequest(const label)"
         )   << "There are " << PstreamGlobals::outstandingRequests_.size()
             << " outstanding send requests and you are asking for i=" << i
             << nl

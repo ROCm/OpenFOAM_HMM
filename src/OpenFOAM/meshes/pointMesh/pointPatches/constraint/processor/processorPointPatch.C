@@ -229,11 +229,7 @@ void processorPointPatch::initPatchPatchPoints()
 
     // Send the patchPatchPoints to the neighbouring processor
 
-    OPstream toNeighbProc
-    (
-        Pstream::blocking,
-        neighbProcNo()
-    );
+    OPstream toNeighbProc(Pstream::blocking, neighbProcNo());
 
     toNeighbProc
         << ppmp.size()              // number of points for checking
@@ -252,11 +248,7 @@ void processorPointPatch::initPatchPatchPoints()
 void Foam::processorPointPatch::calcPatchPatchPoints()
 {
     // Get the patchPatchPoints from the neighbouring processor
-    IPstream fromNeighbProc
-    (
-        Pstream::blocking,
-        neighbProcNo()
-    );
+    IPstream fromNeighbProc(Pstream::blocking, neighbProcNo());
 
     label nbrNPoints(readLabel(fromNeighbProc));
     labelListList patchPatchPoints(fromNeighbProc);

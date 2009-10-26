@@ -22,67 +22,53 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Read token and binary block from IPstream
-
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-#include "IPstream.H"
+#include "UPstream.H"
+#include "PstreamReduceOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
+void Foam::UPstream::addValidParOptions(HashTable<string>& validParOptions)
+{}
 
-Foam::IPstream::IPstream
-(
-    const commsTypes commsType,
-    const int fromProcNo,
-    const label bufSize,
-    streamFormat format,
-    versionNumber version
-)
-:
-    Pstream(commsType, bufSize),
-    Istream(format, version),
-    fromProcNo_(fromProcNo),
-    messageSize_(0)
+
+bool Foam::UPstream::init(int& argc, char**& argv)
 {
-     notImplemented
-     (
-         "IPsream::IPstream"
-         "("
-             "const commsTypes,"
-             "const int fromProcNo," 
-             "const label bufSize,"
-             "streamFormat, versionNumber"
-         ")"
-     );
+    FatalErrorIn("UPstream::init(int& argc, char**& argv)")
+        << "Trying to use the dummy Pstream library." << nl
+        << "This dummy library cannot be used in parallel mode"
+        << Foam::exit(FatalError);
+
+    return false;
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-int Foam::IPstream::read
-(
-    const commsTypes commsType,
-    const int fromProcNo,
-    char* buf,
-    const std::streamsize bufSize
-)
+void Foam::UPstream::exit(int errnum)
 {
-    notImplemented
-    (
-        "IPstream::read"
-        "("
-            "const commsTypes,"
-            "const int fromProcNo,"
-            "char* buf,"
-            "const label bufSize"
-        ")"
-     );
+    notImplemented("UPstream::exit(int errnum)");
+}
 
-     return 0;
+
+void Foam::UPstream::abort()
+{
+    notImplemented("UPstream::abort()");
+}
+
+
+void Foam::reduce(scalar&, const sumOp<scalar>&)
+{}
+
+
+
+void Foam::UPstream::waitRequests()
+{}
+
+
+bool Foam::UPstream::finishedRequest(const label i)
+{
+    notImplemented("UPstream::finishedRequest()");
+    return false;
 }
 
 

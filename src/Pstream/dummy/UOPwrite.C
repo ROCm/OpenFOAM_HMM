@@ -23,26 +23,36 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Prints out a description of the streams
+    Write primitive and binary block from OPstream
 
 \*---------------------------------------------------------------------------*/
 
-#include "IPstream.H"
-#include "OPstream.H"
+#include "UOPstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::IPstream::print(Ostream& os) const
-{
-    os  << "Reading from processor " << fromProcNo_
-        << " to processor " << myProcNo() << Foam::endl;
-}
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
-void Foam::OPstream::print(Ostream& os) const
+bool Foam::UOPstream::write
+(
+    const commsTypes commsType,
+    const int toProcNo,
+    const char* buf,
+    const std::streamsize bufSize
+)
 {
-    os  << "Writing from processor " << toProcNo_
-        << " to processor " << myProcNo() << Foam::endl;
+     notImplemented
+     (
+         "UOPstream::write"
+         "("
+             "const commsTypes commsType,"
+             "const int fromProcNo,"
+             "char* buf,"
+             "const label bufSize"
+         ")"
+     );
+
+     return false;
 }
 
 
