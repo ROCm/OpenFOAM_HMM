@@ -27,6 +27,7 @@ Class
 
 Description
     Define a basic spline on nKnots knots.
+
     The spline does not go anywhere near these knots
     (will act as a base type for various splines that will have real uses)
 
@@ -59,7 +60,7 @@ class spline
     // Private Member Functions
 
         //- Blending function for constructing spline
-        scalar B(const scalar&) const;
+        static scalar B(const scalar&);
 
         //- Disallow default bitwise copy construct
         spline(const spline&);

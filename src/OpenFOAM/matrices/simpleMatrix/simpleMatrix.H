@@ -26,7 +26,7 @@ Class
     Foam::simpleMatrix
 
 Description
-    Foam::simpleMatrix
+    A simple square matrix solver with scalar coefficients.
 
 SourceFiles
     simpleMatrix.C
@@ -74,10 +74,10 @@ public:
 
     // Constructors
 
-        //- Construct given size
+        //- Construct given size, initializing matrix coefficients to zero
         simpleMatrix(const label);
 
-        //- Construct given size and initial value
+        //- Construct given size, and initial value for matrix coefficients
         simpleMatrix(const label, const scalar&);
 
         //- Construct from components
@@ -94,11 +94,13 @@ public:
 
         // Access
 
+            //- Return access to the source
             Field<Type>& source()
             {
                 return source_;
             }
 
+            //- Return const-access to the source
             const Field<Type>& source() const
             {
                 return source_;

@@ -75,7 +75,7 @@ Foam::cylindricalCS Foam::arcEdge::calcAngle()
     angle_ = radToDeg(acos(tmp));
 
     // check if the vectors define an exterior or an interior arcEdge
-    if (((r1  ^ r2)&(r1 ^ r3)) < 0.0)
+    if (((r1 ^ r2)&(r1 ^ r3)) < 0.0)
     {
         angle_ = 360.0 - angle_;
     }

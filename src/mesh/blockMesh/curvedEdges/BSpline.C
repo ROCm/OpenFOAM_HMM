@@ -46,7 +46,7 @@ Foam::pointField Foam::BSpline::findKnots
     register const scalar oneSixth = 1.0/6.0;
     register const scalar twoThird = 2.0/3.0;
 
-    simpleMatrix<vector> M(NKnots+2, pTraits<scalar>::zero);
+    simpleMatrix<vector> M(NKnots+2);
 
     // set up the matrix
     M[0][0] = -0.5*scalar(NKnots - 1);
@@ -68,9 +68,9 @@ Foam::pointField Foam::BSpline::findKnots
         M.source()[i] = allknots[i-1];
     }
 
+    // set the gradients at the ends:
 
-    // set the gradients at the two ends
-    if (mag(fstend)<1e-8)
+    if (mag(fstend) < 1e-8)
     {
         // default : forward differences on the end knots
         M.source()[0] = allknots[1] - allknots[0];
@@ -78,7 +78,7 @@ Foam::pointField Foam::BSpline::findKnots
     }
     else
     {
-        // set to the gradient vector provided
+        // use the gradient vector provided
         M.source()[0] = fstend/mag(fstend);
     }
 
@@ -90,7 +90,7 @@ Foam::pointField Foam::BSpline::findKnots
     }
     else
     {
-        // set to the gradient vector provided
+        // use the gradient vector provided
         M.source()[NKnots+1] = sndend/mag(sndend);
     }
 

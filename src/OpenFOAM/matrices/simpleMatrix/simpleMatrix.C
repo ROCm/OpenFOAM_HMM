@@ -31,7 +31,7 @@ License
 template<class Type>
 Foam::simpleMatrix<Type>::simpleMatrix(const label mSize)
 :
-    scalarSquareMatrix(mSize),
+    scalarSquareMatrix(mSize, mSize, pTraits<scalar>::zero),
     source_(mSize, pTraits<Type>::zero)
 {}
 
