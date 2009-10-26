@@ -26,6 +26,7 @@ $(nutWallFunctions)/nutkWallFunction/nutkWallFunctionFvPatchScalarField.C
 $(nutWallFunctions)/nutURoughWallFunction/nutURoughWallFunctionFvPatchScalarField.C
 $(nutWallFunctions)/nutUSpaldingWallFunction/nutUSpaldingWallFunctionFvPatchScalarField.C
 $(nutWallFunctions)/nutUWallFunction/nutUWallFunctionFvPatchScalarField.C
+$(nutWallFunctions)/nutUTabulatedWallFunction/nutUTabulatedWallFunctionFvPatchScalarField.C
 
 epsilonWallFunctions = $(wallFunctions)/epsilonWallFunctions
 $(epsilonWallFunctions)/epsilonWallFunction/epsilonWallFunctionFvPatchScalarField.C
