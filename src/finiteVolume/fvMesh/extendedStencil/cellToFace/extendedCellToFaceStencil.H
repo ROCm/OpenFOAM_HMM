@@ -112,14 +112,6 @@ public:
 
     // Member Functions
 
-        //- Calculate distribute map
-        static autoPtr<mapDistribute> calcDistributeMap
-        (
-            const polyMesh& mesh,
-            const globalIndex& globalNumbering,
-            labelListList& faceStencil
-        );
-
         //- Use map to get the data into stencil order
         template<class T>
         static void collectData
