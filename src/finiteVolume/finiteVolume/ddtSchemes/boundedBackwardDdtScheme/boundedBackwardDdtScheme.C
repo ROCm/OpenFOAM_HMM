@@ -21,7 +21,7 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-    
+
 \*---------------------------------------------------------------------------*/
 
 #include "boundedBackwardDdtScheme.H"
@@ -413,7 +413,7 @@ boundedBackwardDdtScheme::fvcDdt
 tmp<fvScalarMatrix>
 boundedBackwardDdtScheme::fvmDdt
 (
-    volScalarField& vf
+    const volScalarField& vf
 )
 {
     tmp<fvScalarMatrix> tfvm
@@ -484,7 +484,7 @@ tmp<fvScalarMatrix>
 boundedBackwardDdtScheme::fvmDdt
 (
     const dimensionedScalar& rho,
-    volScalarField& vf
+    const volScalarField& vf
 )
 {
     tmp<fvScalarMatrix> tfvm
@@ -554,7 +554,7 @@ tmp<fvScalarMatrix>
 boundedBackwardDdtScheme::fvmDdt
 (
     const volScalarField& rho,
-    volScalarField& vf
+    const volScalarField& vf
 )
 {
     tmp<fvScalarMatrix> tfvm

@@ -21,7 +21,7 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-    
+
 \*---------------------------------------------------------------------------*/
 
 #include "CoEulerDdtScheme.H"
@@ -69,10 +69,10 @@ tmp<volScalarField> CoEulerDdtScheme<Type>::CorDeltaT() const
 
     forAll(owner, faceI)
     {
-        corDeltaT[owner[faceI]] = 
+        corDeltaT[owner[faceI]] =
             max(corDeltaT[owner[faceI]], cofrDeltaT[faceI]);
 
-        corDeltaT[neighbour[faceI]] = 
+        corDeltaT[neighbour[faceI]] =
             max(corDeltaT[neighbour[faceI]], cofrDeltaT[faceI]);
     }
 
@@ -127,7 +127,7 @@ tmp<surfaceScalarField> CoEulerDdtScheme<Type>::CofrDeltaT() const
         const volScalarField& rho =
             static_cast<const objectRegistry&>(mesh())
            .lookupObject<volScalarField>(rhoName_).oldTime();
- 
+
         surfaceScalarField Co
         (
             mesh().surfaceInterpolation::deltaCoeffs()
@@ -369,7 +369,7 @@ template<class Type>
 tmp<fvMatrix<Type> >
 CoEulerDdtScheme<Type>::fvmDdt
 (
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm
@@ -386,7 +386,7 @@ CoEulerDdtScheme<Type>::fvmDdt
     scalarField rDeltaT = CorDeltaT()().internalField();
 
     fvm.diag() = rDeltaT*mesh().V();
-    
+
     if (mesh().moving())
     {
         fvm.source() = rDeltaT*vf.oldTime().internalField()*mesh().V0();
@@ -405,7 +405,7 @@ tmp<fvMatrix<Type> >
 CoEulerDdtScheme<Type>::fvmDdt
 (
     const dimensionedScalar& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm
@@ -421,7 +421,7 @@ CoEulerDdtScheme<Type>::fvmDdt
     scalarField rDeltaT = CorDeltaT()().internalField();
 
     fvm.diag() = rDeltaT*rho.value()*mesh().V();
-    
+
     if (mesh().moving())
     {
         fvm.source() = rDeltaT
@@ -442,7 +442,7 @@ tmp<fvMatrix<Type> >
 CoEulerDdtScheme<Type>::fvmDdt
 (
     const volScalarField& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm
@@ -588,7 +588,7 @@ CoEulerDdtScheme<Type>::fvcDdtPhiCorr
                 )
             );
         }
-        else if 
+        else if
         (
             U.dimensions() == dimVelocity
          && phi.dimensions() == dimDensity*dimVelocity*dimArea
@@ -617,7 +617,7 @@ CoEulerDdtScheme<Type>::fvcDdtPhiCorr
                 )
             );
         }
-        else if 
+        else if
         (
             U.dimensions() == dimDensity*dimVelocity
          && phi.dimensions() == dimDensity*dimVelocity*dimArea

@@ -21,7 +21,7 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-    
+
 \*---------------------------------------------------------------------------*/
 
 #include "EulerD2dt2Scheme.H"
@@ -181,7 +181,7 @@ EulerD2dt2Scheme<Type>::fvcD2dt2
                     coefft
                    *(rho.boundaryField() + rho.oldTime().boundaryField())
                    *vf.boundaryField()
-                        
+
                   - (
                         coefft
                        *(
@@ -232,7 +232,7 @@ template<class Type>
 tmp<fvMatrix<Type> >
 EulerD2dt2Scheme<Type>::fvmD2dt2
 (
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm
@@ -292,7 +292,7 @@ tmp<fvMatrix<Type> >
 EulerD2dt2Scheme<Type>::fvmD2dt2
 (
     const dimensionedScalar& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm
@@ -353,7 +353,7 @@ tmp<fvMatrix<Type> >
 EulerD2dt2Scheme<Type>::fvmD2dt2
 (
     const volScalarField& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm
