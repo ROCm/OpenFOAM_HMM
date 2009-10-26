@@ -56,8 +56,8 @@ class BSpline
         pointField findKnots
         (
             const pointField&,
-            const vector& fstend = vector::zero,
-            const vector& sndend = vector::zero
+            const vector& fstend,
+            const vector& sndend
         );
 
         //- Disallow default bitwise copy construct
@@ -72,14 +72,11 @@ public:
     // Constructors
 
         //- Construct from components
-        BSpline(const pointField& knots);
-
-        //- Construct from components
         BSpline
         (
             const pointField& knots,
-            const vector& fstend,
-            const vector& sndend
+            const vector& fstend = vector::zero,
+            const vector& sndend = vector::zero
         );
 
 
