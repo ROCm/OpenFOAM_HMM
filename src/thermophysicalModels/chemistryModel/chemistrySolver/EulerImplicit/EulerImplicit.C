@@ -116,8 +116,7 @@ Foam::scalar Foam::EulerImplicit<CompType, ThermoType>::solve
             RR[si][lRef] -= sr*pf*corr;
             RR[si][rRef] += sr*pr*corr;
         }
-
-    } // end for(label i...
+    }
 
 
     for (label i=0; i<nSpecie; i++)

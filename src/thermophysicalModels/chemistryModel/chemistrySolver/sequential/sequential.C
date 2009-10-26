@@ -111,8 +111,7 @@ Foam::scalar Foam::sequential<CompType, ThermoType>::solve
             c[si] += dt*sr*omeg;
             c[si] = max(0.0, c[si]);
         }
-
-    } // end for (label i...
+    }
 
     return cTauChem_/tChemInv;
 }

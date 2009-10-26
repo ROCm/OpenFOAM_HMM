@@ -116,19 +116,13 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        liquidMixture
-        (
-            const dictionary&
-        );
+        liquidMixture(const dictionary&);
 
 
     // Selectors
 
         //- Select construct from dictionary
-        static autoPtr<liquidMixture> New
-        (
-            const dictionary&
-        );
+        static autoPtr<liquidMixture> New(const dictionary&);
 
 
     // Member Functions
