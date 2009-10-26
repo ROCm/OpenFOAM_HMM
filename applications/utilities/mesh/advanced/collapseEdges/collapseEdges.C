@@ -47,9 +47,10 @@ Description
 #include "polyTopoChanger.H"
 #include "polyMesh.H"
 #include "mapPolyMesh.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "PackedBoolList.H"
 #include "SortableList.H"
+#include "unitConversion.H"
 
 using namespace Foam;
 
@@ -467,7 +468,7 @@ int main(int argc, char *argv[])
     scalar angle(readScalar(IStringStream(args.additionalArgs()[1])()));
     bool overwrite = args.optionFound("overwrite");
 
-    scalar maxCos = Foam::cos(angle*180/constant::math::pi);
+    scalar maxCos = Foam::cos(degToRad(angle));
 
     Info<< "Merging:" << nl
         << "    edges with length less than " << minLen << " meters" << nl

@@ -27,7 +27,7 @@ License
 #include "multiHoleInjector.H"
 #include "addToRunTimeSelectionTable.H"
 #include "Random.H"
-#include "mathConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 namespace Foam
@@ -165,9 +165,8 @@ Foam::multiHoleInjector::~multiHoleInjector()
 
 void Foam::multiHoleInjector::setTangentialVectors()
 {
-    scalar pi180 = constant::math::pi/180.0;
-    scalar alpha = xyAngle_*pi180;
-    scalar phi = zAngle_*pi180;
+    scalar alpha = degToRad(xyAngle_);
+    scalar phi = degToRad(zAngle_);
 
     vector xp(cos(alpha), sin(alpha), 0.0);
     vector zp(cos(alpha)*sin(phi), sin(alpha)*sin(phi), cos(phi));
@@ -184,11 +183,11 @@ void Foam::multiHoleInjector::setTangentialVectors()
 //    Info << "zp = " << zp << endl;
 
     scalar angle = 0.0;
-    scalar u = umbrellaAngle_*pi180/2.0;
+    scalar u = degToRad(umbrellaAngle_/2.0);
     for (label i=0; i<nHoles_; i++)
     {
         angle += angleSpacing_[i];
-        scalar v = angle*pi180;
+        scalar v = degToRad(angle);
         direction_[i] = cos(v)*sin(u)*xp + sin(v)*sin(u)*yp + cos(u)*zp;
         vector dp = direction_[i] - (direction_[i] & zp)*direction_[i];
         if (mag(dp) > SMALL)
@@ -267,7 +266,7 @@ Foam::vector Foam::multiHoleInjector::position
     {
         // otherwise, disc injection
         scalar iRadius = d_*rndGen.scalar01();
-        scalar iAngle = constant::math::twoPi*rndGen.scalar01();
+        scalar iAngle = constant::mathematical::twoPi*rndGen.scalar01();
 
         return
         (
@@ -319,7 +318,7 @@ Foam::scalar Foam::multiHoleInjector::mass
     // correct mass if calculation is 2D
     if (twoD)
     {
-        mInj *= 0.5*angleOfWedge/constant::math::pi;
+        mInj *= 0.5*angleOfWedge/constant::mathematical::pi;
     }
 
     return mInj;
@@ -429,7 +428,7 @@ void Foam::multiHoleInjector::correctProfiles
     const scalar referencePressure
 )
 {
-    scalar A = nHoles_*0.25*constant::math::pi*sqr(d_);
+    scalar A = nHoles_*0.25*constant::mathematical::pi*sqr(d_);
 
     forAll(velocityProfile_, i)
     {

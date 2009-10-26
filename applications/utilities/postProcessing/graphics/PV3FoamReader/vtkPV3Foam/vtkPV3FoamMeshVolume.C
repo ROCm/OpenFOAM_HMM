@@ -31,7 +31,7 @@ Description
 // Foam includes
 #include "fvMesh.H"
 #include "cellModeller.H"
-#include "vtkPV3FoamPoints.H"
+#include "vtkOpenFOAMPoints.H"
 
 // VTK includes
 #include "vtkCellArray.h"
@@ -143,7 +143,7 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
 
     forAll(points, i)
     {
-        vtkPV3FoamInsertNextPoint(vtkpoints, points[i]);
+        vtkInsertNextOpenFOAMPoint(vtkpoints, points[i]);
     }
 
 
@@ -267,7 +267,7 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
 
             // Insert the new vertex from the cell-centre
             label newVertexLabel = mesh.nPoints() + addPointI;
-            vtkPV3FoamInsertNextPoint(vtkpoints, mesh.C()[cellI]);
+            vtkInsertNextOpenFOAMPoint(vtkpoints, mesh.C()[cellI]);
 
             // Whether to insert cell in place of original or not.
             bool substituteCell = true;

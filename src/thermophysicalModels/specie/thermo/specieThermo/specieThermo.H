@@ -131,23 +131,23 @@ public:
 
     // Member Functions
 
-        // Fundamaental properties
+        // Fundamental properties
         // (These functions must be provided in derived types)
 
             // Heat capacity at constant pressure [J/(kmol K)]
-            //scalar cp(const scalar) const;
+            // scalar cp(const scalar) const;
 
             // Enthalpy [J/kmol]
-            //scalar h(const scalar) const;
+            // scalar h(const scalar) const;
 
             // Sensible enthalpy [J/kmol]
-            //scalar hs(const scalar) const;
+            // scalar hs(const scalar) const;
 
             // Chemical enthalpy [J/kmol]
-            //scalar hc(const scalar) const;
+            // scalar hc(const scalar) const;
 
             // Entropy [J/(kmol K)]
-            //scalar s(const scalar) const;
+            // scalar s(const scalar) const;
 
 
         // Calculate and return derived properties

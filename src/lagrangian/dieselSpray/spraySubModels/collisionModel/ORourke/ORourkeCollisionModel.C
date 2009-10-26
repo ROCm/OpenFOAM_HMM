@@ -26,7 +26,7 @@ License
 
 #include "ORourkeCollisionModel.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

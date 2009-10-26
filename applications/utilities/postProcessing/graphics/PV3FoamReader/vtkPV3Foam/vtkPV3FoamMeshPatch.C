@@ -31,7 +31,7 @@ Description
 // Foam includes
 #include "polyPatch.H"
 #include "primitivePatch.H"
-#include "vtkPV3FoamPoints.H"
+#include "vtkOpenFOAMPoints.H"
 
 // VTK includes
 #include "vtkCellArray.h"
@@ -60,7 +60,7 @@ vtkPolyData* Foam::vtkPV3Foam::patchVTKMesh
     vtkpoints->Allocate( points.size() );
     forAll(points, i)
     {
-        vtkPV3FoamInsertNextPoint(vtkpoints, points[i]);
+        vtkInsertNextOpenFOAMPoint(vtkpoints, points[i]);
     }
 
     vtkmesh->SetPoints(vtkpoints);

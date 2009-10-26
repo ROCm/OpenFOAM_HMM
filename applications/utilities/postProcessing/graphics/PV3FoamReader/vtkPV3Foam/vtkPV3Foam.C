@@ -590,218 +590,202 @@ double* Foam::vtkPV3Foam::findTimes(int& nTimeSteps)
 }
 
 
-void Foam::vtkPV3Foam::addPatchNames(vtkRenderer* renderer)
+void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
 {
-    // Remove any patch names previously added to the renderer
-    removePatchNames(renderer);
+    // always remove old actors first
 
-    // get the display patches, strip off any suffix
-    wordHashSet selectedPatches = getSelected
-    (
-        reader_->GetPartSelection(),
-        partInfoPatches_
-    );
-
-    if (!selectedPatches.size())
-    {
-        return;
-    }
-
-    if (debug)
-    {
-        Info<< "<beg> Foam::vtkPV3Foam::addPatchNames" << nl
-            <<"... add patches: " << selectedPatches << endl;
-    }
-
-    const polyBoundaryMesh& pbMesh = meshPtr_->boundaryMesh();
-
-    // Find the total number of zones
-    // Each zone will take the patch name
-    // Number of zones per patch ... zero zones should be skipped
-    labelList nZones(pbMesh.size(), 0);
-
-    // Per global zone number the average face centre position
-    DynamicList<point> zoneCentre(pbMesh.size());
-
-    if (debug)
-    {
-        Info<< "... determining patch zones" << endl;
-    }
-
-    // Loop through all patches to determine zones, and centre of each zone
-    forAll(pbMesh, patchI)
-    {
-        const polyPatch& pp = pbMesh[patchI];
-
-        // Only include the patch if it is selected
-        if (!selectedPatches.found(pp.name()))
-        {
-            continue;
-        }
-
-        const labelListList& edgeFaces = pp.edgeFaces();
-        const vectorField& n = pp.faceNormals();
-
-        boolList featEdge(pp.nEdges(), false);
-
-        forAll(edgeFaces, edgeI)
-        {
-            const labelList& eFaces = edgeFaces[edgeI];
-
-            if (eFaces.size() == 1)
-            {
-                // Note: could also do ones with > 2 faces but this gives
-                // too many zones for baffles
-                featEdge[edgeI] = true;
-            }
-            else if (mag(n[eFaces[0]] & n[eFaces[1]]) < 0.5)
-            {
-                featEdge[edgeI] = true;
-            }
-        }
-
-        // Do topological analysis of patch, find disconnected regions
-        patchZones pZones(pp, featEdge);
-
-        nZones[patchI] = pZones.nZones();
-
-        labelList zoneNFaces(pZones.nZones(), 0);
-
-        // Save start of information for current patch
-        label patchStart = zoneCentre.size();
-
-        // Create storage for additional zone centres
-        forAll(zoneNFaces, zoneI)
-        {
-            zoneCentre.append(vector::zero);
-        }
-
-        // Do averaging per individual zone
-        forAll(pp, faceI)
-        {
-            label zoneI = pZones[faceI];
-            zoneCentre[patchStart+zoneI] += pp[faceI].centre(pp.points());
-            zoneNFaces[zoneI]++;
-        }
-
-        for (label i=0; i<nZones[patchI]; i++)
-        {
-            zoneCentre[patchStart + i] /= zoneNFaces[i];
-        }
-    }
-
-    // Count number of zones we're actually going to display. This is truncated
-    // to a max per patch
-
-    const label MAXPATCHZONES = 20;
-
-    label displayZoneI = 0;
-
-    forAll(pbMesh, patchI)
-    {
-        displayZoneI += min(MAXPATCHZONES, nZones[patchI]);
-    }
-
-
-    zoneCentre.shrink();
-
-    if (debug)
-    {
-        Info<< "patch zone centres = " << zoneCentre << nl
-            << "displayed zone centres = " << displayZoneI << nl
-            << "zones per patch = " << nZones << endl;
-    }
-
-    // Set the size of the patch labels to max number of zones
-    patchTextActorsPtrs_.setSize(displayZoneI);
-
-    if (debug)
-    {
-        Info<< "constructing patch labels" << endl;
-    }
-
-    // Actor index
-    displayZoneI = 0;
-
-    // Index in zone centres
-    label globalZoneI = 0;
-
-    forAll(pbMesh, patchI)
-    {
-        const polyPatch& pp = pbMesh[patchI];
-
-        // Only selected patches will have a non-zero number of zones
-        label nDisplayZones = min(MAXPATCHZONES, nZones[patchI]);
-        label increment = 1;
-        if (nZones[patchI] >= MAXPATCHZONES)
-        {
-            increment = nZones[patchI]/MAXPATCHZONES;
-        }
-
-        for (label i = 0; i < nDisplayZones; i++)
-        {
-            if (debug)
-            {
-                Info<< "patch name = " << pp.name() << nl
-                    << "anchor = " << zoneCentre[globalZoneI] << nl
-                    << "globalZoneI = " << globalZoneI << endl;
-            }
-
-            vtkTextActor* txt = vtkTextActor::New();
-
-            txt->SetInput(pp.name().c_str());
-
-            // Set text properties
-            vtkTextProperty* tprop = txt->GetTextProperty();
-            tprop->SetFontFamilyToArial();
-            tprop->BoldOff();
-            tprop->ShadowOff();
-            tprop->SetLineSpacing(1.0);
-            tprop->SetFontSize(12);
-            tprop->SetColor(1.0, 0.0, 0.0);
-            tprop->SetJustificationToCentered();
-
-            // Set text to use 3-D world co-ordinates
-            txt->GetPositionCoordinate()->SetCoordinateSystemToWorld();
-
-            txt->GetPositionCoordinate()->SetValue
-            (
-                zoneCentre[globalZoneI].x(),
-                zoneCentre[globalZoneI].y(),
-                zoneCentre[globalZoneI].z()
-            );
-
-            // Add text to each renderer
-            renderer->AddViewProp(txt);
-
-            // Maintain a list of text labels added so that they can be
-            // removed later
-            patchTextActorsPtrs_[displayZoneI] = txt;
-
-            globalZoneI += increment;
-            displayZoneI++;
-        }
-    }
-
-    // Resize the patch names list to the actual number of patch names added
-    patchTextActorsPtrs_.setSize(displayZoneI);
-
-    if (debug)
-    {
-        Info<< "<end> Foam::vtkPV3Foam::addPatchNames" << endl;
-    }
-}
-
-
-void Foam::vtkPV3Foam::removePatchNames(vtkRenderer* renderer)
-{
     forAll(patchTextActorsPtrs_, patchI)
     {
         renderer->RemoveViewProp(patchTextActorsPtrs_[patchI]);
         patchTextActorsPtrs_[patchI]->Delete();
     }
     patchTextActorsPtrs_.clear();
+
+    if (show)
+    {
+        // get the display patches, strip off any suffix
+        wordHashSet selectedPatches = getSelected
+        (
+            reader_->GetPartSelection(),
+            partInfoPatches_
+        );
+
+        if (!selectedPatches.size())
+        {
+            return;
+        }
+
+        const polyBoundaryMesh& pbMesh = meshPtr_->boundaryMesh();
+
+        // Find the total number of zones
+        // Each zone will take the patch name
+        // Number of zones per patch ... zero zones should be skipped
+        labelList nZones(pbMesh.size(), 0);
+
+        // Per global zone number the average face centre position
+        DynamicList<point> zoneCentre(pbMesh.size());
+
+
+        // Loop through all patches to determine zones, and centre of each zone
+        forAll(pbMesh, patchI)
+        {
+            const polyPatch& pp = pbMesh[patchI];
+
+            // Only include the patch if it is selected
+            if (!selectedPatches.found(pp.name()))
+            {
+                continue;
+            }
+
+            const labelListList& edgeFaces = pp.edgeFaces();
+            const vectorField& n = pp.faceNormals();
+
+            boolList featEdge(pp.nEdges(), false);
+
+            forAll(edgeFaces, edgeI)
+            {
+                const labelList& eFaces = edgeFaces[edgeI];
+
+                if (eFaces.size() == 1)
+                {
+                    // Note: could also do ones with > 2 faces but this gives
+                    // too many zones for baffles
+                    featEdge[edgeI] = true;
+                }
+                else if (mag(n[eFaces[0]] & n[eFaces[1]]) < 0.5)
+                {
+                    featEdge[edgeI] = true;
+                }
+            }
+
+            // Do topological analysis of patch, find disconnected regions
+            patchZones pZones(pp, featEdge);
+
+            nZones[patchI] = pZones.nZones();
+
+            labelList zoneNFaces(pZones.nZones(), 0);
+
+            // Save start of information for current patch
+            label patchStart = zoneCentre.size();
+
+            // Create storage for additional zone centres
+            forAll(zoneNFaces, zoneI)
+            {
+                zoneCentre.append(vector::zero);
+            }
+
+            // Do averaging per individual zone
+            forAll(pp, faceI)
+            {
+                label zoneI = pZones[faceI];
+                zoneCentre[patchStart+zoneI] += pp[faceI].centre(pp.points());
+                zoneNFaces[zoneI]++;
+            }
+
+            for (label i=0; i<nZones[patchI]; i++)
+            {
+                zoneCentre[patchStart + i] /= zoneNFaces[i];
+            }
+        }
+
+        // Count number of zones we're actually going to display. This is truncated
+        // to a max per patch
+
+        const label MAXPATCHZONES = 20;
+
+        label displayZoneI = 0;
+
+        forAll(pbMesh, patchI)
+        {
+            displayZoneI += min(MAXPATCHZONES, nZones[patchI]);
+        }
+
+
+        zoneCentre.shrink();
+
+        if (debug)
+        {
+            Info<< "patch zone centres = " << zoneCentre << nl
+                << "displayed zone centres = " << displayZoneI << nl
+                << "zones per patch = " << nZones << endl;
+        }
+
+        // Set the size of the patch labels to max number of zones
+        patchTextActorsPtrs_.setSize(displayZoneI);
+
+        if (debug)
+        {
+            Info<< "constructing patch labels" << endl;
+        }
+
+        // Actor index
+        displayZoneI = 0;
+
+        // Index in zone centres
+        label globalZoneI = 0;
+
+        forAll(pbMesh, patchI)
+        {
+            const polyPatch& pp = pbMesh[patchI];
+
+            // Only selected patches will have a non-zero number of zones
+            label nDisplayZones = min(MAXPATCHZONES, nZones[patchI]);
+            label increment = 1;
+            if (nZones[patchI] >= MAXPATCHZONES)
+            {
+                increment = nZones[patchI]/MAXPATCHZONES;
+            }
+
+            for (label i = 0; i < nDisplayZones; i++)
+            {
+                if (debug)
+                {
+                    Info<< "patch name = " << pp.name() << nl
+                        << "anchor = " << zoneCentre[globalZoneI] << nl
+                        << "globalZoneI = " << globalZoneI << endl;
+                }
+
+                vtkTextActor* txt = vtkTextActor::New();
+
+                txt->SetInput(pp.name().c_str());
+
+                // Set text properties
+                vtkTextProperty* tprop = txt->GetTextProperty();
+                tprop->SetFontFamilyToArial();
+                tprop->BoldOff();
+                tprop->ShadowOff();
+                tprop->SetLineSpacing(1.0);
+                tprop->SetFontSize(12);
+                tprop->SetColor(1.0, 0.0, 0.0);
+                tprop->SetJustificationToCentered();
+
+                // Set text to use 3-D world co-ordinates
+                txt->GetPositionCoordinate()->SetCoordinateSystemToWorld();
+
+                txt->GetPositionCoordinate()->SetValue
+                (
+                    zoneCentre[globalZoneI].x(),
+                    zoneCentre[globalZoneI].y(),
+                    zoneCentre[globalZoneI].z()
+                );
+
+                // Add text to each renderer
+                renderer->AddViewProp(txt);
+
+                // Maintain a list of text labels added so that they can be
+                // removed later
+                patchTextActorsPtrs_[displayZoneI] = txt;
+
+                globalZoneI += increment;
+                displayZoneI++;
+            }
+        }
+
+        // Resize the patch names list to the actual number of patch names added
+        patchTextActorsPtrs_.setSize(displayZoneI);
+    }
 }
+
 
 
 void Foam::vtkPV3Foam::PrintSelf(ostream& os, vtkIndent indent) const

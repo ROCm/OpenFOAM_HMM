@@ -1,0 +1,98 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="sources">
+  <SourceProxy
+    name="PV3blockMeshReader"
+    class="vtkPV3blockMeshReader">
+
+    <!-- File name - compulsory -->
+    <StringVectorProperty
+      name="FileName"
+      command="SetFileName"
+      number_of_elements="1"
+      animateable="0">
+      <FileListDomain name="files"/>
+      <Documentation>
+        Specifies the filename for the OpenFOAM blockMesh Reader.
+      </Documentation>
+    </StringVectorProperty>
+
+    <!-- Global settings -->
+
+    <!-- Show Point Numbers check-box -->
+    <IntVectorProperty
+      name="ShowPointNumbers"
+      command="SetShowPointNumbers"
+      number_of_elements="1"
+      default_values="1"
+      animateable="0">
+      <BooleanDomain name="bool"/>
+      <Documentation>
+        Show point numbers in render window.
+      </Documentation>
+    </IntVectorProperty>
+
+    <!-- Update GUI check box -->
+    <IntVectorProperty
+      name="UpdateGUI"
+      command="SetUpdateGUI"
+      number_of_elements="1"
+      default_values="0"
+      animateable="0">
+      <BooleanDomain name="bool"/>
+      <Documentation>
+        A simple way to cause a reader GUI modification.
+      </Documentation>
+    </IntVectorProperty>
+
+
+    <!-- Selections -->
+
+    <!-- Available Parts (blocks) array -->
+    <StringVectorProperty
+      name="PartArrayInfo"
+      information_only="1">
+      <ArraySelectionInformationHelper attribute_name="Part"/>
+    </StringVectorProperty>
+    <StringVectorProperty
+      name="PartStatus"
+      label="Blocks"
+      command="SetPartArrayStatus"
+      number_of_elements="0"
+      repeat_command="1"
+      number_of_elements_per_command="2"
+      element_types="2 0"
+      information_property="PartArrayInfo"
+      animateable="0">
+      <ArraySelectionDomain name="array_list">
+        <RequiredProperties>
+          <Property name="PartArrayInfo" function="ArrayList"/>
+        </RequiredProperties>
+      </ArraySelectionDomain>
+    </StringVectorProperty>
+
+    <!-- Available Parts (blocks) array -->
+    <StringVectorProperty
+      name="CurvedEdgesArrayInfo"
+      information_only="1">
+      <ArraySelectionInformationHelper attribute_name="CurvedEdges"/>
+    </StringVectorProperty>
+    <StringVectorProperty
+      name="CurvedEdgesStatus"
+      label="Curved Edges"
+      command="SetCurvedEdgesArrayStatus"
+      number_of_elements="0"
+      repeat_command="1"
+      number_of_elements_per_command="2"
+      element_types="2 0"
+      information_property="CurvedEdgesArrayInfo"
+      animateable="0">
+      <ArraySelectionDomain name="array_list">
+        <RequiredProperties>
+          <Property name="CurvedEdgesArrayInfo" function="ArrayList"/>
+        </RequiredProperties>
+      </ArraySelectionDomain>
+    </StringVectorProperty>
+
+  </SourceProxy>
+  </ProxyGroup>
+</ServerManagerConfiguration>

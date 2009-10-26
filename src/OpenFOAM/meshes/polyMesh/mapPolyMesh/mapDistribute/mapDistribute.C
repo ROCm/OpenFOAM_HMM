@@ -27,7 +27,7 @@ License
 #include "mapDistribute.H"
 #include "commSchedule.H"
 #include "HashSet.H"
-#include "ListOps.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -257,6 +257,292 @@ Foam::mapDistribute::mapDistribute
 }
 
 
+Foam::mapDistribute::mapDistribute
+(
+    const globalIndex& globalNumbering,
+    labelList& elements,
+    List<Map<label> >& compactMap
+)
+:
+    constructSize_(0),
+    schedulePtr_()
+{
+    // 1. Construct per processor compact addressing of the global elements
+    //    needed. The ones from the local processor are not included since
+    //    these are always all needed.
+    compactMap.setSize(Pstream::nProcs());
+    {
+        // Count all (non-local) elements needed. Just for presizing map.
+        labelList nNonLocal(Pstream::nProcs(), 0);
+
+        forAll(elements, i)
+        {
+            label globalIndex = elements[i];
+
+            if (!globalNumbering.isLocal(globalIndex))
+            {
+                label procI = globalNumbering.whichProcID(globalIndex);
+                nNonLocal[procI]++;
+            }
+        }
+
+        forAll(compactMap, procI)
+        {
+            if (procI != Pstream::myProcNo())
+            {
+                compactMap[procI].resize(2*nNonLocal[procI]);
+            }
+        }
+
+
+        // Collect all (non-local) elements needed.
+        forAll(elements, i)
+        {
+            label globalIndex = elements[i];
+
+            if (!globalNumbering.isLocal(globalIndex))
+            {
+                label procI = globalNumbering.whichProcID(globalIndex);
+                label index = globalNumbering.toLocal(procI, globalIndex);
+                label nCompact = compactMap[procI].size();
+                compactMap[procI].insert(index, nCompact);
+            }
+        }
+
+        //// Sort remote elements needed (not really necessary)
+        //forAll(compactMap, procI)
+        //{
+        //    if (procI != Pstream::myProcNo())
+        //    {
+        //        Map<label>& globalMap = compactMap[procI];
+        //
+        //        SortableList<label> sorted(globalMap.toc().xfer());
+        //
+        //        forAll(sorted, i)
+        //        {
+        //            Map<label>::iterator iter = globalMap.find(sorted[i]);
+        //            iter() = i;
+        //        }
+        //    }
+        //}
+    }
+
+
+    // 2. The overall compact addressing is
+    // - myProcNo data first (uncompacted)
+    // - all other processors consecutively
+
+    labelList compactStart(Pstream::nProcs());
+    compactStart[Pstream::myProcNo()] = 0;
+    constructSize_ = globalNumbering.localSize();
+    forAll(compactStart, procI)
+    {
+        if (procI != Pstream::myProcNo())
+        {
+            compactStart[procI] = constructSize_;
+            constructSize_ += compactMap[procI].size();
+        }
+    }
+
+
+
+    // 3. Find out what to receive/send in compact addressing.
+
+    // What I want to receive is what others have to send
+    labelListList wantedRemoteElements(Pstream::nProcs());
+    // Compact addressing for received data
+    constructMap_.setSize(Pstream::nProcs());
+    forAll(compactMap, procI)
+    {
+        if (procI == Pstream::myProcNo())
+        {
+            // All my own elements are used
+            label nLocal = globalNumbering.localSize();
+            wantedRemoteElements[procI] = identity(nLocal);
+            constructMap_[procI] = identity(nLocal);
+        }
+        else
+        {
+            // Remote elements wanted from processor procI
+            labelList& remoteElem = wantedRemoteElements[procI];
+            labelList& localElem = constructMap_[procI];
+            remoteElem.setSize(compactMap[procI].size());
+            localElem.setSize(compactMap[procI].size());
+            label i = 0;
+            forAllIter(Map<label>, compactMap[procI], iter)
+            {
+                remoteElem[i] = iter.key();
+                label compactI = compactStart[procI]+iter();
+                localElem[i] = compactI;
+                iter() = compactI;
+                i++;
+            }
+        }
+    }
+
+    subMap_.setSize(Pstream::nProcs());
+    exchange(wantedRemoteElements, subMap_);
+
+    // Renumber elements
+    forAll(elements, i)
+    {
+        elements[i] = renumber(globalNumbering, compactMap, elements[i]);
+    }
+}
+
+
+Foam::mapDistribute::mapDistribute
+(
+    const globalIndex& globalNumbering,
+    labelListList& cellCells,
+    List<Map<label> >& compactMap
+)
+:
+    constructSize_(0),
+    schedulePtr_()
+{
+    // 1. Construct per processor compact addressing of the global elements
+    //    needed. The ones from the local processor are not included since
+    //    these are always all needed.
+    compactMap.setSize(Pstream::nProcs());
+    {
+        // Count all (non-local) elements needed. Just for presizing map.
+        labelList nNonLocal(Pstream::nProcs(), 0);
+
+        forAll(cellCells, cellI)
+        {
+            const labelList& cCells = cellCells[cellI];
+
+            forAll(cCells, i)
+            {
+                label globalIndex = cCells[i];
+
+                if (!globalNumbering.isLocal(globalIndex))
+                {
+                    label procI = globalNumbering.whichProcID(globalIndex);
+                    nNonLocal[procI]++;
+                }
+            }
+        }
+
+        forAll(compactMap, procI)
+        {
+            if (procI != Pstream::myProcNo())
+            {
+                compactMap[procI].resize(2*nNonLocal[procI]);
+            }
+        }
+
+
+        // Collect all (non-local) elements needed.
+
+
+        // Collect all (non-local) elements needed.
+        forAll(cellCells, cellI)
+        {
+            const labelList& cCells = cellCells[cellI];
+
+            forAll(cCells, i)
+            {
+                label globalIndex = cCells[i];
+
+                if (!globalNumbering.isLocal(globalIndex))
+                {
+                    label procI = globalNumbering.whichProcID(globalIndex);
+                    label index = globalNumbering.toLocal(procI, globalIndex);
+                    label nCompact = compactMap[procI].size();
+                    compactMap[procI].insert(index, nCompact);
+                }
+            }
+        }
+
+        //// Sort remote elements needed (not really necessary)
+        //forAll(compactMap, procI)
+        //{
+        //    if (procI != Pstream::myProcNo())
+        //    {
+        //        Map<label>& globalMap = compactMap[procI];
+        //
+        //        SortableList<label> sorted(globalMap.toc().xfer());
+        //
+        //        forAll(sorted, i)
+        //        {
+        //            Map<label>::iterator iter = globalMap.find(sorted[i]);
+        //            iter() = i;
+        //        }
+        //    }
+        //}
+    }
+
+
+    // 2. The overall compact addressing is
+    // - myProcNo data first (uncompacted)
+    // - all other processors consecutively
+
+    labelList compactStart(Pstream::nProcs());
+    compactStart[Pstream::myProcNo()] = 0;
+    constructSize_ = globalNumbering.localSize();
+    forAll(compactStart, procI)
+    {
+        if (procI != Pstream::myProcNo())
+        {
+            compactStart[procI] = constructSize_;
+            constructSize_ += compactMap[procI].size();
+        }
+    }
+
+
+
+    // 3. Find out what to receive/send in compact addressing.
+
+    // What I want to receive is what others have to send
+    labelListList wantedRemoteElements(Pstream::nProcs());
+    // Compact addressing for received data
+    constructMap_.setSize(Pstream::nProcs());
+    forAll(compactMap, procI)
+    {
+        if (procI == Pstream::myProcNo())
+        {
+            // All my own elements are used
+            label nLocal = globalNumbering.localSize();
+            wantedRemoteElements[procI] = identity(nLocal);
+            constructMap_[procI] = identity(nLocal);
+        }
+        else
+        {
+            // Remote elements wanted from processor procI
+            labelList& remoteElem = wantedRemoteElements[procI];
+            labelList& localElem = constructMap_[procI];
+            remoteElem.setSize(compactMap[procI].size());
+            localElem.setSize(compactMap[procI].size());
+            label i = 0;
+            forAllIter(Map<label>, compactMap[procI], iter)
+            {
+                remoteElem[i] = iter.key();
+                label compactI = compactStart[procI]+iter();
+                localElem[i] = compactI;
+                iter() = compactI;
+                i++;
+            }
+        }
+    }
+
+    subMap_.setSize(Pstream::nProcs());
+    exchange(wantedRemoteElements, subMap_);
+
+    // Renumber elements
+    forAll(cellCells, cellI)
+    {
+        labelList& cCells = cellCells[cellI];
+
+        forAll(cCells, i)
+        {
+            cCells[i] = renumber(globalNumbering, compactMap, cCells[i]);
+        }
+    }
+}
+
+
 Foam::mapDistribute::mapDistribute(const mapDistribute& map)
 :
     constructSize_(map.constructSize_),
@@ -266,7 +552,27 @@ Foam::mapDistribute::mapDistribute(const mapDistribute& map)
 {}
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+Foam::label Foam::mapDistribute::renumber
+(
+    const globalIndex& globalNumbering,
+    const List<Map<label> >& compactMap,
+    const label globalI
+)
+{
+    if (globalNumbering.isLocal(globalI))
+    {
+        return globalNumbering.toLocal(globalI);
+    }
+    else
+    {
+        label procI = globalNumbering.whichProcID(globalI);
+        label index = globalNumbering.toLocal(procI, globalI);
+        return compactMap[procI][index];
+    }
+}
+
 
 void Foam::mapDistribute::compact(const boolList& elemIsUsed)
 {

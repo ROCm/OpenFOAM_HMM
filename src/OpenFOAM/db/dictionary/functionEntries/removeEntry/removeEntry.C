@@ -66,7 +66,9 @@ bool Foam::functionEntries::removeEntry::execute
 )
 {
     wordList dictKeys = parentDict.toc();
-    labelList indices = findStrings<word>(readList<wordRe>(is), dictKeys);
+    wordReList patterns(is);
+
+    labelList indices = findStrings(patterns, dictKeys);
 
     forAll(indices, indexI)
     {

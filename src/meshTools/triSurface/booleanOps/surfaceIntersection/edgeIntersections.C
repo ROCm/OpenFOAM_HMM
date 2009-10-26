@@ -36,15 +36,14 @@ License
 #include "meshTools.H"
 #include "plane.H"
 #include "Random.H"
-#include "mathConstants.H"
+#include "unitConversion.H"
 #include "treeBoundBox.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Foam::edgeIntersections, 0);
 
-Foam::scalar Foam::edgeIntersections::alignedCos_ =
-    Foam::cos(89.0*Foam::constant::math::pi/180.0);
+Foam::scalar Foam::edgeIntersections::alignedCos_ = Foam::cos(degToRad(89.0));
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

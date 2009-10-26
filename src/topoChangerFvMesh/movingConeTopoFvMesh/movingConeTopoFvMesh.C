@@ -420,7 +420,7 @@ bool Foam::movingConeTopoFvMesh::update()
 //                     )/
 //                     (curLeft_ - leftEdge_)
 //                 )
-            )*curMotionVel_*time().deltaT().value();
+            )*curMotionVel_*time().deltaTValue();
     }
     else
     {
@@ -442,11 +442,11 @@ bool Foam::movingConeTopoFvMesh::update()
 //                     )/
 //                     (curLeft_ - leftEdge_)
 //                 )
-            )*curMotionVel_*time().deltaT().value();
+            )*curMotionVel_*time().deltaTValue();
     }
 
-//    curLeft_ += curMotionVel_.x()*time().deltaT().value();
-//    curRight_ += curMotionVel_.x()*time().deltaT().value();
+//    curLeft_ += curMotionVel_.x()*time().deltaTValue();
+//    curRight_ += curMotionVel_.x()*time().deltaTValue();
     curLeft_ = average
     (
         faceZones()

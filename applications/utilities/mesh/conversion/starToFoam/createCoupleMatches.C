@@ -33,7 +33,7 @@ Description
 #include "IOmanip.H"
 #include "boundBox.H"
 #include "Map.H"
-#include "mathConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -99,7 +99,7 @@ void starMesh::createCoupleMatches()
                  << coupleI << ". STAR couple ID: "
                  << couples_[coupleI].coupleID() << endl
                  << "The angle between face normals is "
-                 << Foam::acos(faceAreaAngle)/constant::math::pi*180
+                 << radToDeg(Foam::acos(faceAreaAngle))
                  << " deg." << endl
                  << "master cell: " << fp.masterCell()
                  << " STAR number: " << starCellID_[fp.masterCell()]

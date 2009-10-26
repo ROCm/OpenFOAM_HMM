@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SyamlalViscosity.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -69,7 +69,7 @@ Foam::tmp<Foam::volScalarField> Foam::kineticTheoryModels::SyamlalViscosity::mua
     const dimensionedScalar& e
 ) const
 {
-    const scalar sqrtPi = sqrt(constant::math::pi);
+    const scalar sqrtPi = sqrt(constant::mathematical::pi);
 
     return rhoa*da*sqrt(Theta)*
     (

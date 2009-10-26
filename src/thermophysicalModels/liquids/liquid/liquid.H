@@ -219,7 +219,7 @@ public:
             //- Liquid heat capacity [J/(kg K)]
             virtual scalar cp(scalar p, scalar T) const = 0;
 
-            //- Liquid h [J/kg]
+            //- Liquid enthalpy [J/kg] - reference to 298.15 K
             virtual scalar h(scalar p, scalar T) const = 0;
 
             //- Ideal gas heat capacity [J/(kg K)]

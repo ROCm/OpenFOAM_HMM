@@ -26,7 +26,7 @@ License
 
 #include "toroidalCS.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -72,8 +72,8 @@ Foam::vector Foam::toroidalCS::localToGlobal
 ) const
 {
     // Notation: r = local.x()
-    scalar theta = local.y()*constant::math::pi/180.0;
-    scalar phi = local.z()*constant::math::pi/180.0;
+    scalar theta = degToRad(local.y());
+    scalar phi = degToRad(local.z());
 
     scalar rprime = radius_ + local.x()*sin(phi);
 
@@ -101,10 +101,10 @@ Foam::tmp<Foam::vectorField> Foam::toroidalCS::localToGlobal
     const scalarField r = local.component(vector::X);
 
     const scalarField theta =
-        local.component(vector::Y)*constant::math::pi/180.0;
+        local.component(vector::Y)*constant::mathematical::pi/180.0;
 
     const scalarField phi =
-        local.component(vector::Z)*constant::math::pi/180.0;
+        local.component(vector::Z)*constant::mathematical::pi/180.0;
 
     const scalarField rprime = radius_ + r*sin(phi);
 

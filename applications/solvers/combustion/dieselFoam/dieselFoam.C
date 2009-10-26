@@ -41,7 +41,7 @@ Description
 #include "IFstream.H"
 #include "OFstream.H"
 #include "Switch.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,8 +80,8 @@ int main(int argc, char *argv[])
 
         chemistry.solve
         (
-            runTime.value() - runTime.deltaT().value(),
-            runTime.deltaT().value()
+            runTime.value() - runTime.deltaTValue(),
+            runTime.deltaTValue()
         );
 
         // turbulent time scale

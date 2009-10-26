@@ -27,6 +27,7 @@ License
 #include "constants.H"
 
 using namespace Foam::constant;
+using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -127,7 +128,7 @@ inline Foam::Random& Foam::DsmcCloud<ParcelType>::rndGen()
 template<class ParcelType>
 inline void Foam::DsmcCloud<ParcelType>::storeDeltaT()
 {
-    cachedDeltaT_ = mesh().time().deltaT().value();
+    cachedDeltaT_ = mesh().time().deltaTValue();
 }
 
 
@@ -317,7 +318,7 @@ inline Foam::scalar Foam::DsmcCloud<ParcelType>::maxwellianAverageSpeed
 ) const
 {
     return
-        2.0*sqrt(2.0*physicoChemical::k.value()*temperature/(math::pi*mass));
+        2.0*sqrt(2.0*physicoChemical::k.value()*temperature/(pi*mass));
 }
 
 
@@ -329,7 +330,7 @@ inline Foam::scalarField Foam::DsmcCloud<ParcelType>::maxwellianAverageSpeed
 ) const
 {
     return
-        2.0*sqrt(2.0*physicoChemical::k.value()*temperature/(math::pi*mass));
+        2.0*sqrt(2.0*physicoChemical::k.value()*temperature/(pi*mass));
 }
 
 

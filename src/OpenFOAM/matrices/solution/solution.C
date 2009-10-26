@@ -59,11 +59,8 @@ Foam::solution::solution(const objectRegistry& obr, const fileName& dictName)
             IOobject::NO_WRITE
         )
     ),
-    relaxationFactors_
-    (
-        ITstream("relaxationFactors",
-        tokenList())()
-    ),
+    cache_(ITstream("cache", tokenList())()),
+    relaxationFactors_(ITstream("relaxationFactors", tokenList())()),
     defaultRelaxationFactor_(0),
     solvers_(ITstream("solvers", tokenList())())
 {
@@ -151,44 +148,14 @@ Foam::label Foam::solution::upgradeSolverDict
 }
 
 
-bool Foam::solution::read()
+bool Foam::solution::cache(const word& name) const
 {
-    if (regIOobject::read())
+    if (debug)
     {
-        const dictionary& dict = solutionDict();
-
-        if (dict.found("relaxationFactors"))
-        {
-            relaxationFactors_ = dict.subDict("relaxationFactors");
-        }
-
-        relaxationFactors_.readIfPresent("default", defaultRelaxationFactor_);
-
-        if (dict.found("solvers"))
-        {
-            solvers_ = dict.subDict("solvers");
-            upgradeSolverDict(solvers_);
-        }
-
-        return true;
+        Info<< "Find cache entry for " << name << endl;
     }
-    else
-    {
-        return false;
-    }
-}
 
-
-const Foam::dictionary& Foam::solution::solutionDict() const
-{
-    if (found("select"))
-    {
-        return subDict(word(lookup("select")));
-    }
-    else
-    {
-        return *this;
-    }
+    return cache_.found(name);
 }
 
 
@@ -235,6 +202,19 @@ Foam::scalar Foam::solution::relaxationFactor(const word& name) const
 }
 
 
+const Foam::dictionary& Foam::solution::solutionDict() const
+{
+    if (found("select"))
+    {
+        return subDict(word(lookup("select")));
+    }
+    else
+    {
+        return *this;
+    }
+}
+
+
 const Foam::dictionary& Foam::solution::solverDict(const word& name) const
 {
     if (debug)
@@ -256,6 +236,39 @@ const Foam::dictionary& Foam::solution::solver(const word& name) const
     }
 
     return solvers_.subDict(name);
+}
+
+
+bool Foam::solution::read()
+{
+    if (regIOobject::read())
+    {
+        const dictionary& dict = solutionDict();
+
+        if (dict.found("cache"))
+        {
+            cache_ = dict.subDict("cache");
+        }
+
+        if (dict.found("relaxationFactors"))
+        {
+            relaxationFactors_ = dict.subDict("relaxationFactors");
+        }
+
+        relaxationFactors_.readIfPresent("default", defaultRelaxationFactor_);
+
+        if (dict.found("solvers"))
+        {
+            solvers_ = dict.subDict("solvers");
+            upgradeSolverDict(solvers_);
+        }
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 
