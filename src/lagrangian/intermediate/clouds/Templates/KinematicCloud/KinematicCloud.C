@@ -167,7 +167,7 @@ void Foam::KinematicCloud<ParcelType>::checkParcelProperties
         parcel.rho() = constProps_.rho0();
     }
 
-    scalar carrierDt = this->db().time().deltaT().value();
+    scalar carrierDt = this->db().time().deltaTValue();
     parcel.stepFraction() = (carrierDt - lagrangianDt)/carrierDt;
 }
 

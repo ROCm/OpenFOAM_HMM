@@ -351,7 +351,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     }
 
     const scalar time = owner_.db().time().value();
-    const scalar carrierDt = owner_.db().time().deltaT().value();
+    const scalar carrierDt = owner_.db().time().deltaTValue();
     const polyMesh& mesh = owner_.mesh();
 
     // Prepare for next time step

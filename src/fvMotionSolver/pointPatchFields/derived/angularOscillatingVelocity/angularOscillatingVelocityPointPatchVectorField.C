@@ -146,7 +146,7 @@ void angularOscillatingVelocityPointPatchVectorField::updateCoeffs()
           + (axisHat ^ p0Rel*sin(angle))
           + (axisHat & p0Rel)*(1 - cos(angle))*axisHat
           - p.localPoints()
-        )/t.deltaT().value()
+        )/t.deltaTValue()
     );
 
     fixedValuePointPatchField<vector>::updateCoeffs();

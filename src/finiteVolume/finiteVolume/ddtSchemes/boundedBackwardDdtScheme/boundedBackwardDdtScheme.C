@@ -42,13 +42,13 @@ namespace fv
 
 scalar boundedBackwardDdtScheme::deltaT_() const
 {
-    return mesh().time().deltaT().value();
+    return mesh().time().deltaTValue();
 }
 
 
 scalar boundedBackwardDdtScheme::deltaT0_() const
 {
-    return mesh().time().deltaT0().value();
+    return mesh().time().deltaT0Value();
 }
 
 

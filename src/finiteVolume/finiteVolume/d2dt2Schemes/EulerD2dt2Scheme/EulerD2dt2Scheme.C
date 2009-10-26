@@ -59,8 +59,8 @@ EulerD2dt2Scheme<Type>::fvcD2dt2
         IOobject::NO_WRITE
     );
 
-    scalar deltaT = mesh().time().deltaT().value();
-    scalar deltaT0 = mesh().time().deltaT0().value();
+    scalar deltaT = mesh().time().deltaTValue();
+    scalar deltaT0 = mesh().time().deltaT0Value();
 
     scalar coefft   = (deltaT + deltaT0)/(2*deltaT);
     scalar coefft00 = (deltaT + deltaT0)/(2*deltaT0);
@@ -137,8 +137,8 @@ EulerD2dt2Scheme<Type>::fvcD2dt2
         IOobject::NO_WRITE
     );
 
-    scalar deltaT = mesh().time().deltaT().value();
-    scalar deltaT0 = mesh().time().deltaT0().value();
+    scalar deltaT = mesh().time().deltaTValue();
+    scalar deltaT0 = mesh().time().deltaT0Value();
 
     scalar coefft   = (deltaT + deltaT0)/(2*deltaT);
     scalar coefft00 = (deltaT + deltaT0)/(2*deltaT0);
@@ -246,8 +246,8 @@ EulerD2dt2Scheme<Type>::fvmD2dt2
 
     fvMatrix<Type>& fvm = tfvm();
 
-    scalar deltaT = mesh().time().deltaT().value();
-    scalar deltaT0 = mesh().time().deltaT0().value();
+    scalar deltaT = mesh().time().deltaTValue();
+    scalar deltaT0 = mesh().time().deltaT0Value();
 
     scalar coefft   = (deltaT + deltaT0)/(2*deltaT);
     scalar coefft00 = (deltaT + deltaT0)/(2*deltaT0);
@@ -307,8 +307,8 @@ EulerD2dt2Scheme<Type>::fvmD2dt2
 
     fvMatrix<Type>& fvm = tfvm();
 
-    scalar deltaT = mesh().time().deltaT().value();
-    scalar deltaT0 = mesh().time().deltaT0().value();
+    scalar deltaT = mesh().time().deltaTValue();
+    scalar deltaT0 = mesh().time().deltaT0Value();
 
     scalar coefft   = (deltaT + deltaT0)/(2*deltaT);
     scalar coefft00 = (deltaT + deltaT0)/(2*deltaT0);
@@ -368,8 +368,8 @@ EulerD2dt2Scheme<Type>::fvmD2dt2
 
     fvMatrix<Type>& fvm = tfvm();
 
-    scalar deltaT = mesh().time().deltaT().value();
-    scalar deltaT0 = mesh().time().deltaT0().value();
+    scalar deltaT = mesh().time().deltaTValue();
+    scalar deltaT0 = mesh().time().deltaT0Value();
 
     scalar coefft   = (deltaT + deltaT0)/(2*deltaT);
     scalar coefft00 = (deltaT + deltaT0)/(2*deltaT0);

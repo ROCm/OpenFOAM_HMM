@@ -28,9 +28,6 @@ License
 #include "extendedCentredFaceToCellStencil.H"
 #include "faceToCellStencil.H"
 
-// Only for access to calcDistributeMap <- needs to be moved out
-#include "extendedCellToFaceStencil.H"
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::extendedCentredFaceToCellStencil::extendedCentredFaceToCellStencil
@@ -38,16 +35,19 @@ Foam::extendedCentredFaceToCellStencil::extendedCentredFaceToCellStencil
     const faceToCellStencil& stencil
 )
 :
-    extendedFaceToCellStencil(stencil.mesh())
+    extendedFaceToCellStencil(stencil.mesh()),
+    stencil_(stencil)
 {
-    stencil_ = stencil;
-
     // Calculate distribute map (also renumbers elements in stencil)
-    mapPtr_ = extendedCellToFaceStencil::calcDistributeMap
+    List<Map<label> > compactMap(Pstream::nProcs());
+    mapPtr_.reset
     (
-        stencil.mesh(),
-        stencil.globalNumbering(),
-        stencil_
+        new mapDistribute
+        (
+            stencil.globalNumbering(),
+            stencil_,
+            compactMap
+        )
     );
 }
 

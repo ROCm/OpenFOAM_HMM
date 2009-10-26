@@ -223,7 +223,7 @@ void Foam::activeBaffleVelocityFvPatchVectorField::updateCoeffs()
                 openFraction_
               + max
                 (
-                    this->db().time().deltaT().value()/openingTime_,
+                    this->db().time().deltaTValue()/openingTime_,
                     maxOpenFractionDelta_
                 )
                *(orientation_*sign(forceDiff)),

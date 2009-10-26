@@ -419,19 +419,32 @@ Foam::extendedUpwindCellToFaceStencil::extendedUpwindCellToFaceStencil
         neiStencil_
     );
 
-    ownMapPtr_ = calcDistributeMap
-    (
-        stencil.mesh(),
-        stencil.globalNumbering(),
-        ownStencil_
-    );
+    {
+        List<Map<label> > compactMap(Pstream::nProcs());
+        ownMapPtr_.reset
+        (
+            new mapDistribute
+            (
+                stencil.globalNumbering(),
+                ownStencil_,
+                compactMap
+            )
+        );
+    }
 
-    neiMapPtr_ = calcDistributeMap
-    (
-        stencil.mesh(),
-        stencil.globalNumbering(),
-        neiStencil_
-    );
+    {
+
+        List<Map<label> > compactMap(Pstream::nProcs());
+        neiMapPtr_.reset
+        (
+            new mapDistribute
+            (
+                stencil.globalNumbering(),
+                neiStencil_,
+                compactMap
+            )
+        );
+    }
 
     // stencil now in compact form
     if (pureUpwind_)
@@ -515,12 +528,18 @@ Foam::extendedUpwindCellToFaceStencil::extendedUpwindCellToFaceStencil
 
     ownStencil_ = stencil;
 
-    ownMapPtr_ = calcDistributeMap
-    (
-        stencil.mesh(),
-        stencil.globalNumbering(),
-        ownStencil_
-    );
+    {
+        List<Map<label> > compactMap(Pstream::nProcs());
+        ownMapPtr_.reset
+        (
+            new mapDistribute
+            (
+                stencil.globalNumbering(),
+                ownStencil_,
+                compactMap
+            )
+        );
+    }
 
     const fvMesh& mesh = dynamic_cast<const fvMesh&>(stencil.mesh());
 

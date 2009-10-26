@@ -161,7 +161,7 @@ void Foam::LiquidEvaporation<CloudType>::calculate
         // vapour diffusivity [m2/s]
         scalar Dab = liquids_->properties()[lid].D(pc, Ts);
 
-        // Saturation pressure for species i [pa]
+        // saturation pressure for species i [pa]
         // - carrier phase pressure assumed equal to the liquid vapour pressure
         //   close to the surface
         // NOTE: if pSat > pc then particle is superheated

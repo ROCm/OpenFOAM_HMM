@@ -276,7 +276,7 @@ EulerDdtScheme<Type>::fvmDdt
 
     fvMatrix<Type>& fvm = tfvm();
 
-    scalar rDeltaT = 1.0/mesh().time().deltaT().value();
+    scalar rDeltaT = 1.0/mesh().time().deltaTValue();
 
     fvm.diag() = rDeltaT*mesh().V();
 
@@ -311,7 +311,7 @@ EulerDdtScheme<Type>::fvmDdt
     );
     fvMatrix<Type>& fvm = tfvm();
 
-    scalar rDeltaT = 1.0/mesh().time().deltaT().value();
+    scalar rDeltaT = 1.0/mesh().time().deltaTValue();
 
     fvm.diag() = rDeltaT*rho.value()*mesh().V();
 
@@ -348,7 +348,7 @@ EulerDdtScheme<Type>::fvmDdt
     );
     fvMatrix<Type>& fvm = tfvm();
 
-    scalar rDeltaT = 1.0/mesh().time().deltaT().value();
+    scalar rDeltaT = 1.0/mesh().time().deltaTValue();
 
     fvm.diag() = rDeltaT*rho.internalField()*mesh().V();
 

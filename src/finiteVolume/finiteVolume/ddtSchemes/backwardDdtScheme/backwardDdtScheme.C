@@ -44,14 +44,14 @@ namespace fv
 template<class Type>
 scalar backwardDdtScheme<Type>::deltaT_() const
 {
-    return mesh().time().deltaT().value();
+    return mesh().time().deltaTValue();
 }
 
 
 template<class Type>
 scalar backwardDdtScheme<Type>::deltaT0_() const
 {
-    return mesh().time().deltaT0().value();
+    return mesh().time().deltaT0Value();
 }
 
 

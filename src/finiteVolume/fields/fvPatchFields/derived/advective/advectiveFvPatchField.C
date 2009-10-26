@@ -202,7 +202,7 @@ void advectiveFvPatchField<Type>::updateCoeffs()
         this->dimensionedInternalField().mesh()
        .ddtScheme(this->dimensionedInternalField().name())
     );
-    scalar deltaT = this->db().time().deltaT().value();
+    scalar deltaT = this->db().time().deltaTValue();
 
     const GeometricField<Type, fvPatchField, volMesh>& field =
         this->db().objectRegistry::

@@ -79,7 +79,7 @@ public:
             wf_(wf),
             wa_(wa),
             alpha_(sqrt(1/wf_ + 1/wa_)),
-            beta_(sqr((cbrt(a_) + cbrt(b_))))
+            beta_(sqr(cbrt(a_) + cbrt(b_)))
         {}
 
         //- Construct from Istream

@@ -121,7 +121,7 @@ void Foam::SIBS::solve
         kMax_ = kOpt_;
     }
 
-    label k=0;
+    label k = 0;
     scalar h = hTry;
     yTemp_ = y;
 
@@ -213,7 +213,7 @@ void Foam::SIBS::solve
 
     x = xNew_;
     hDid = h;
-    first_=0;
+    first_ = 0;
     scalar wrkmin = GREAT;
     scalar scale = 1.0;
 

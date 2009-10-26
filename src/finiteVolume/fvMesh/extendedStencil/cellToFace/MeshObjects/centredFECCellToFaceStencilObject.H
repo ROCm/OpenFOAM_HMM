@@ -55,7 +55,7 @@ class centredFECCellToFaceStencilObject
 
 public:
 
-    TypeName("centredCFCCellToFaceStencil");
+    TypeName("centredFECCellToFaceStencil");
 
     // Constructors
 

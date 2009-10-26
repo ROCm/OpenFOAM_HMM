@@ -40,15 +40,15 @@ if (mesh.nInternalFaces())
         mesh.surfaceInterpolation::deltaCoeffs()*mag(phiv);
 
     CoNum = max(SfUfbyDelta/mesh.magSf())
-        .value()*runTime.deltaT().value();
+        .value()*runTime.deltaTValue();
 
     meanCoNum = (sum(SfUfbyDelta)/sum(mesh.magSf()))
-        .value()*runTime.deltaT().value();
+        .value()*runTime.deltaTValue();
 
     acousticCoNum = max
     (
         mesh.surfaceInterpolation::deltaCoeffs()/sqrt(fvc::interpolate(psi))
-    ).value()*runTime.deltaT().value();
+    ).value()*runTime.deltaTValue();
 }
 
 Info<< "phiv Courant Number mean: " << meanCoNum
