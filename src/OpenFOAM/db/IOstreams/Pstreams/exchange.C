@@ -94,7 +94,7 @@ void Pstream::exchange
         {
             label nRecv = sizes[procI][UPstream::myProcNo()];
 
-            if (nRecv > 0)
+            if (procI != Pstream::myProcNo() && nRecv > 0)
             {
                 recvBufs[procI].setSize(nRecv);
                 label oldTag = UPstream::msgType();
@@ -116,7 +116,7 @@ void Pstream::exchange
 
         forAll(sendBufs, procI)
         {
-            if (sendBufs[procI].size() > 0)
+            if (procI != Pstream::myProcNo() && sendBufs[procI].size() > 0)
             {
                 label oldTag = UPstream::msgType();
                 UPstream::msgType() = tag;
@@ -148,6 +148,9 @@ void Pstream::exchange
 
         Pstream::waitRequests();
     }
+
+    // Do myself
+    recvBufs[Pstream::myProcNo()] = sendBufs[Pstream::myProcNo()];
 }
 
 

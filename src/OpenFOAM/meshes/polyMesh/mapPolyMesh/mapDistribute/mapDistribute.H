@@ -93,15 +93,6 @@ class mapDistribute
         mutable autoPtr<List<labelPair> > schedulePtr_;
 
 
-        //- Exchange data. sendBuf[procI] : data to send to processor procI
-        //  To be moved into Pstream.
-        template<class T>
-        static void exchange
-        (
-            const List<List<T> >& sendBuf,
-            List<List<T> >& recvBuf
-        );
-
 public:
 
     // Constructors
