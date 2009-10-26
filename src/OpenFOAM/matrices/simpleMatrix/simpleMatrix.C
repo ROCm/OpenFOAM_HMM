@@ -37,6 +37,14 @@ Foam::simpleMatrix<Type>::simpleMatrix(const label mSize)
 
 
 template<class Type>
+Foam::simpleMatrix<Type>::simpleMatrix(const label mSize, const scalar& t)
+:
+    scalarSquareMatrix(mSize, mSize, t),
+    source_(mSize, pTraits<Type>::zero)
+{}
+
+
+template<class Type>
 Foam::simpleMatrix<Type>::simpleMatrix
 (
     const scalarSquareMatrix& matrix,

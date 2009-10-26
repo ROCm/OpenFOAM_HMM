@@ -77,6 +77,9 @@ public:
         //- Construct given size
         simpleMatrix(const label);
 
+        //- Construct given size and initial value
+        simpleMatrix(const label, const scalar&);
+
         //- Construct from components
         simpleMatrix(const scalarSquareMatrix&, const Field<Type>&);
 
