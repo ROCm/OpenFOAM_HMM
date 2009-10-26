@@ -37,6 +37,7 @@ SourceFiles
 #define solution_H
 
 #include "IOdictionary.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,6 +56,9 @@ class solution
 
         //- Dictionary of temporary fields to cache
         dictionary cache_;
+
+        //- Switch for the caching mechanism
+        Switch caching_;
 
         //- Dictionary of relaxation factors for all the fields
         dictionary relaxationFactors_;
