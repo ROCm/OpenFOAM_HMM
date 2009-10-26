@@ -509,7 +509,6 @@ meshes/preservePatchTypes/preservePatchTypes.C
 interpolations = interpolations
 interpolation = $(interpolations)/interpolation
 $(interpolations)/patchToPatchInterpolation/PatchToPatchInterpolationName.C
-$(interpolations)/uniformInterpolationTable/uniformInterpolationTable.C
 
 algorithms/MeshWave/MeshWaveName.C
 algorithms/MeshWave/FaceCellWaveName.C

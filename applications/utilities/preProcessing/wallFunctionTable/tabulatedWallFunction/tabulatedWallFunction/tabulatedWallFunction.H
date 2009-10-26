@@ -72,7 +72,7 @@ protected:
         word invertedTableName_;
 
         //- Inverted table
-        uniformInterpolationTable invertedTable_;
+        uniformInterpolationTable<scalar> invertedTable_;
 
 
 public:
@@ -121,7 +121,8 @@ public:
             inline const word& invertedTableName() const;
 
             //- Return the inverted table
-            inline const uniformInterpolationTable& invertedTable() const;
+            inline const uniformInterpolationTable<scalar>&
+                invertedTable() const;
 
 
         // I-O

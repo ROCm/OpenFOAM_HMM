@@ -27,20 +27,14 @@ License
 #include "uniformInterpolationTable.H"
 #include "Time.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    defineTypeNameAndDebug(uniformInterpolationTable, 0);
-}
-
 // * * * * * * * * * * * *  Private Member Functions * * * * * * * * * * * * //
 
-void Foam::uniformInterpolationTable::checkTable() const
+template <class Type>
+void Foam::uniformInterpolationTable<Type>::checkTable() const
 {
     if (size() < 2)
     {
-        FatalErrorIn("uniformInterpolationTable::checkTable()")
+        FatalErrorIn("uniformInterpolationTable<Type>::checkTable()")
             << "Table " << name() << ": must have at least 2 values." << nl
             << "Table size = " << size() << nl
             << "    min, interval width = " << x0_ << ", " << dx_ << nl
@@ -51,7 +45,8 @@ void Foam::uniformInterpolationTable::checkTable() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::uniformInterpolationTable::uniformInterpolationTable
+template <class Type>
+Foam::uniformInterpolationTable<Type>::uniformInterpolationTable
 (
     const IOobject& io,
     bool readFields
@@ -79,7 +74,8 @@ Foam::uniformInterpolationTable::uniformInterpolationTable
 }
 
 
-Foam::uniformInterpolationTable::uniformInterpolationTable
+template <class Type>
+Foam::uniformInterpolationTable<Type>::uniformInterpolationTable
 (
     const word& tableName,
     const objectRegistry& db,
@@ -106,7 +102,7 @@ Foam::uniformInterpolationTable::uniformInterpolationTable
     {
         scalar xMax = readScalar(dict.lookup("xMax"));
         label nIntervals = static_cast<label>(xMax - x0_)/dx_ + 1;
-        setSize(nIntervals);
+        this->setSize(nIntervals);
     }
     else
     {
@@ -117,7 +113,11 @@ Foam::uniformInterpolationTable::uniformInterpolationTable
 }
 
 
-Foam::uniformInterpolationTable::uniformInterpolationTable(const uniformInterpolationTable& uit)
+template <class Type>
+Foam::uniformInterpolationTable<Type>::uniformInterpolationTable
+(
+    const uniformInterpolationTable& uit
+)
 :
     IOobject(uit),
     List<scalar>(uit),
@@ -132,13 +132,15 @@ Foam::uniformInterpolationTable::uniformInterpolationTable(const uniformInterpol
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::uniformInterpolationTable::~uniformInterpolationTable()
+template <class Type>
+Foam::uniformInterpolationTable<Type>::~uniformInterpolationTable()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::scalar Foam::uniformInterpolationTable::interpolate(scalar x) const
+template <class Type>
+Type Foam::uniformInterpolationTable<Type>::interpolate(scalar x) const
 {
     if (bound_)
     {
@@ -148,16 +150,20 @@ Foam::scalar Foam::uniformInterpolationTable::interpolate(scalar x) const
     {
         if (x < x0_)
         {
-            FatalErrorIn("uniformInterpolationTable::interpolate(scalar x)")
-                << "Supplied value is less than minimum table value:" << nl
+            FatalErrorIn
+            (
+                "uniformInterpolationTable<Type>::interpolate(scalar x)"
+            )   << "Supplied value is less than minimum table value:" << nl
                 << "xMin=" << x0_ << ", xMax=" << xMax() << ", x=" << x << nl
                 << exit(FatalError);
         }
 
         if (x > xMax())
         {
-            FatalErrorIn("uniformInterpolationTable::interpolate(scalar x)")
-                << "Supplied value is greater than maximum table value:" << nl
+            FatalErrorIn
+            (
+                "uniformInterpolationTable<Type>::interpolate(scalar x)"
+            )   << "Supplied value is greater than maximum table value:" << nl
                 << "xMin=" << x0_ << ", xMax=" << xMax() << ", x=" << x << nl
                 << exit(FatalError);
         }
@@ -167,7 +173,7 @@ Foam::scalar Foam::uniformInterpolationTable::interpolate(scalar x) const
 
     scalar xLo = x0_ + i*dx_;
 
-    scalar fx = (x - xLo)/dx_*(operator[](i+1) - operator[](i)) + operator[](i);
+    Type fx = (x - xLo)/dx_*(operator[](i+1) - operator[](i)) + operator[](i);
 
     if (debug)
     {
@@ -181,7 +187,11 @@ Foam::scalar Foam::uniformInterpolationTable::interpolate(scalar x) const
 }
 
 
-Foam::scalar Foam::uniformInterpolationTable::interpolateLog10(scalar x) const
+template <class Type>
+Type Foam::uniformInterpolationTable<Type>::interpolateLog10
+(
+    scalar x
+) const
 {
     if (log10_)
     {
@@ -197,7 +207,7 @@ Foam::scalar Foam::uniformInterpolationTable::interpolateLog10(scalar x) const
         {
             FatalErrorIn
             (
-                "uniformInterpolationTable::interpolateLog10(scalar x)"
+                "uniformInterpolationTable<Type>::interpolateLog10(scalar x)"
             )   << "Table " << name() << nl
                 << "Supplied value must be greater than 0 when in log10 mode"
                 << nl << "x=" << x << nl << exit(FatalError);
@@ -208,7 +218,8 @@ Foam::scalar Foam::uniformInterpolationTable::interpolateLog10(scalar x) const
 }
 
 
-void Foam::uniformInterpolationTable::write() const
+template <class Type>
+void Foam::uniformInterpolationTable<Type>::write() const
 {
     IOdictionary dict(*this);
 

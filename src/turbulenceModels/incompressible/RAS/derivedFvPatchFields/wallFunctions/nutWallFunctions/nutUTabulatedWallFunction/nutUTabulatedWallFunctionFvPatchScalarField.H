@@ -68,7 +68,7 @@ protected:
         word uPlusTableName_;
 
         //- U+ table
-        uniformInterpolationTable uPlusTable_;
+        uniformInterpolationTable<scalar> uPlusTable_;
 
 
     // Protected member functions

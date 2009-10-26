@@ -24,63 +24,73 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-Foam::scalar Foam::uniformInterpolationTable::x0() const
+template <class Type>
+Foam::scalar Foam::uniformInterpolationTable<Type>::x0() const
 {
     return x0_;
 }
 
 
-Foam::scalar Foam::uniformInterpolationTable::dx() const
+template <class Type>
+Foam::scalar Foam::uniformInterpolationTable<Type>::dx() const
 {
     return dx_;
 }
 
 
-const Foam::Switch& Foam::uniformInterpolationTable::log10() const
+template <class Type>
+const Foam::Switch& Foam::uniformInterpolationTable<Type>::log10() const
 {
     return log10_;
 }
 
 
-const Foam::Switch& Foam::uniformInterpolationTable::bound() const
+template <class Type>
+const Foam::Switch& Foam::uniformInterpolationTable<Type>::bound() const
 {
     return bound_;
 }
 
 
-Foam::scalar& Foam::uniformInterpolationTable::x0()
+template <class Type>
+Foam::scalar& Foam::uniformInterpolationTable<Type>::x0()
 {
     return x0_;
 }
 
 
-Foam::scalar& Foam::uniformInterpolationTable::dx()
+template <class Type>
+Foam::scalar& Foam::uniformInterpolationTable<Type>::dx()
 {
     return dx_;
 }
 
 
-Foam::Switch& Foam::uniformInterpolationTable::log10()
+template <class Type>
+Foam::Switch& Foam::uniformInterpolationTable<Type>::log10()
 {
     return log10_;
 }
 
 
-Foam::Switch& Foam::uniformInterpolationTable::bound()
+template <class Type>
+Foam::Switch& Foam::uniformInterpolationTable<Type>::bound()
 {
     return bound_;
 }
 
 
-Foam::scalar Foam::uniformInterpolationTable::xMin() const
+template <class Type>
+Foam::scalar Foam::uniformInterpolationTable<Type>::xMin() const
 {
     return x0_;
 }
 
 
-Foam::scalar Foam::uniformInterpolationTable::xMax() const
+template <class Type>
+Foam::scalar Foam::uniformInterpolationTable<Type>::xMax() const
 {
-    return x0_ + (size()-1)*dx_;
+    return x0_ + dx_*(size() - 1);
 }
 
 

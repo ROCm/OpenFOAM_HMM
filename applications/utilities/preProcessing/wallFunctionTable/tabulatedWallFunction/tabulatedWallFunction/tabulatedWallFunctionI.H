@@ -35,7 +35,7 @@ Foam::tabulatedWallFunctions::tabulatedWallFunction::invertedTableName() const
 }
 
 
-inline const Foam::uniformInterpolationTable&
+inline const Foam::uniformInterpolationTable<Foam::scalar>&
 Foam::tabulatedWallFunctions::tabulatedWallFunction::invertedTable() const
 {
     return invertedTable_;

@@ -29,7 +29,7 @@ Description
     Table with uniform interval in independant variable, with linear
     interpolation
 
-    Values specified in a dictionary:
+    Example usage (scalar): values specified in a dictionary:
 
     {
         x0              0;      // lower limit
@@ -66,10 +66,11 @@ namespace Foam
                  Class uniformInterpolationTable Declaration
 \*---------------------------------------------------------------------------*/
 
+template <class Type>
 class uniformInterpolationTable
 :
     public IOobject,
-    public List<scalar>
+    public List<Type>
 {
     // Private data
 
@@ -98,10 +99,6 @@ class uniformInterpolationTable
 
 
 public:
-
-    //- Runtime type information
-    TypeName("uniformInterpolationTable");
-
 
     // Constructors
 
@@ -169,10 +166,10 @@ public:
             inline scalar xMax() const;
 
             //- Interpolate
-            scalar interpolate(scalar x) const;
+            Type interpolate(scalar x) const;
 
             //- Interpolate - takes log10 flag into account
-            scalar interpolateLog10(scalar x) const;
+            Type interpolateLog10(scalar x) const;
 
 
         // Override ancestor size() function and [] operator
@@ -180,19 +177,19 @@ public:
             //- Return the size of the table
             label size() const
             {
-                return List<scalar>::size();
+                return List<Type>::size();
             }
 
             //- Use List[] operator for read access
-            scalar operator[](label x) const
+            Type operator[](label x) const
             {
-                return List<scalar>::operator[](x);
+                return List<Type>::operator[](x);
             }
 
             //- Use List[] operator for write access
-            scalar& operator[](label x)
+            Type& operator[](label x)
             {
-                return List<scalar>::operator[](x);
+                return List<Type>::operator[](x);
             }
 
 
@@ -210,6 +207,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "uniformInterpolationTable.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
