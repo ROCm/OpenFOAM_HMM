@@ -103,7 +103,7 @@ public:
         //- Assign the value to represent undef in the results
         //  Returns the previous value
         //  NB: do not use values larger than floatScalarVGREAT
-        static scalar undefValue(const scalar&);
+        static scalar undefValue(const scalar);
 
 
     // Output
@@ -124,13 +124,13 @@ public:
         Ostream& write(const string& value);
 
         //- write integer as "%10d" or as binary
-        Ostream& write(const label& value);
+        Ostream& write(const label value);
 
         //- write integer with specified width or as binary
-        Ostream& write(const label& value, const label fieldWidth);
+        Ostream& write(const label value, const label fieldWidth);
 
         //- write float as "%12.5e" or as binary
-        Ostream& write(const scalar& value);
+        Ostream& write(const scalar value);
 
         //- Add carriage return to ascii stream
         void newline();

@@ -158,10 +158,6 @@ public:
         static const FixedList<vector, 6> faceNormals;
 
 
-        //- Face on which neighbour is
-        static direction neighbourFaceBits(const label&);
-
-
     // Constructors
 
         //- Construct null setting points to zero

@@ -55,7 +55,7 @@ namespace Foam
     class ifEqEqOp
     {
         public:
-        void operator()(label& x, const label& y) const
+        void operator()(label x, const label y) const
         {
             x = (x==y) ? x : value;
         }
