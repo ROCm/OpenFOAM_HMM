@@ -130,7 +130,7 @@ Foam::fv::gradScheme<Type>::grad
     {
         if (!mesh().objectRegistry::foundObject<GradFieldType>(name))
         {
-            cachePrintMessage("Caching", name, vsf);
+            cachePrintMessage("Calculating and caching", name, vsf);
             tmp<GradFieldType> tgGrad = calcGrad(vsf, name);
             regIOobject::store(tgGrad.ptr());
         }
@@ -168,8 +168,6 @@ Foam::fv::gradScheme<Type>::grad
     {
         if (mesh().objectRegistry::foundObject<GradFieldType>(name))
         {
-            cachePrintMessage("Retreiving", name, vsf);
-
             GradFieldType& gGrad = const_cast<GradFieldType&>
             (
                 mesh().objectRegistry::lookupObject<GradFieldType>(name)
