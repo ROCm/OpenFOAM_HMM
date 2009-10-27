@@ -39,7 +39,7 @@ Description
         valueOutput     true;       // Write values at run-time output times?
         source          faceZone;   // Type of face source: faceZone, patch
         sourceName      f0;
-        operation       sum;        // none, sum, areaAverage, areaIntegrate
+        operation       sum;
         fields
         (
             p
@@ -47,6 +47,13 @@ Description
             U
         );
     }
+
+    where operation is one of:
+      - none
+      - sum
+      - areaAverage
+      - areaIntegrate
+      - weightedAverage
 
 SourceFiles
     faceSource.C
@@ -100,11 +107,12 @@ public:
             opNone,
             opSum,
             opAreaAverage,
-            opAreaIntegrate
+            opAreaIntegrate,
+            opWeightedAverage
         };
 
         //- Operation type names
-        static const NamedEnum<operationType, 4> operationTypeNames_;
+        static const NamedEnum<operationType, 5> operationTypeNames_;
 
 
 private:
@@ -143,11 +151,14 @@ protected:
         //- Output file pointer
         autoPtr<OFstream> outputFilePtr_;
 
+        //- Weight field name - only used for opWeightedAverage mode
+        word weightFieldName_;
+
 
     // Protected member functions
 
         //- Initialise, e.g. face addressing
-        void initialise();
+        void initialise(const dictionary& dict);
 
         //- Insert field values into values list
         template<class Type>
