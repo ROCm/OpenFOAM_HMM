@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,44 +22,46 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-InNamespace
-    Foam
-
-Description
-    Unit conversion functions
-
 \*---------------------------------------------------------------------------*/
+#include "argList.H"
 
-#ifndef unitConversion_H
-#define unitConversion_H
+#include "vector.H"
+#include "IFstream.H"
+#include "BSpline.H"
 
-#include "mathematicalConstants.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Main program:
 
-//- Conversion from degrees to radians
-inline scalar degToRad(const scalar deg)
+int main(int argc, char *argv[])
 {
-    return (deg * constant::mathematical::pi/180.0);
+    argList::noParallel();
+    argList::validArgs.insert("file .. fileN");
+
+    argList args(argc, argv, false, true);
+
+    forAll(args.additionalArgs(), argI)
+    {
+        const string& srcFile = args.additionalArgs()[argI];
+        Info<< nl << "reading " << srcFile << nl;
+        IFstream ifs(srcFile);
+
+        List<pointField> splinePointFields(ifs);
+
+        forAll(splinePointFields, splineI)
+        {
+            Info<<"convert " << splinePointFields[splineI] << " to bspline" << endl;
+
+            BSpline spl(splinePointFields[splineI], vector::zero, vector::zero);
+
+            Info<< "1/2 = " << spl.position(0.5) << endl;
+        }
+    }
+
+
+    return 0;
 }
 
-//- Conversion from radians to degrees
-inline scalar radToDeg(const scalar rad)
-{
-    return (rad * 180.0/constant::mathematical::pi);
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //
