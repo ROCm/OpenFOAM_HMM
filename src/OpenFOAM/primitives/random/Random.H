@@ -61,7 +61,7 @@ public:
     // Constructors
 
         //- Construct given seed
-        Random(const label&);
+        Random(const label);
 
 
     // Member functions
@@ -70,14 +70,19 @@ public:
 
         //- scalar [0..1] (so including 0,1)
         scalar scalar01();
+
         //- vector with every component scalar01
         vector vector01();
+
         //- sphericalTensor with every component scalar01
         sphericalTensor sphericalTensor01();
+
         //- symmTensor with every component scalar01
         symmTensor symmTensor01();
+
         //- tensor with every component scalar01
         tensor tensor01();
+
         //- label [lower..upper]
         label integer(const label lower, const label upper);
 

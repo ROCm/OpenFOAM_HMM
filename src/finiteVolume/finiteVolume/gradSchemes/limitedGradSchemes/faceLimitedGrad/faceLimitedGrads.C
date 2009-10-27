@@ -21,7 +21,7 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-    
+
 \*---------------------------------------------------------------------------*/
 
 #include "faceLimitedGrad.H"
@@ -36,49 +36,26 @@ License
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 namespace fv
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-makeFvGradScheme(faceLimitedGrad)
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-inline void faceLimitedGrad<Type>::limitFace
-(
-    scalar& limiter,
-    const scalar maxDelta,
-    const scalar minDelta,
-    const scalar extrapolate
-) const
-{
-    if (extrapolate > maxDelta + VSMALL)
-    {
-        limiter = min(limiter, maxDelta/extrapolate);
-    }
-    else if (extrapolate < minDelta - VSMALL)
-    {
-        limiter = min(limiter, minDelta/extrapolate);
-    }
+    makeFvGradScheme(faceLimitedGrad)
+}
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<>
-tmp<volVectorField> faceLimitedGrad<scalar>::grad
+Foam::tmp<Foam::volVectorField>
+Foam::fv::faceLimitedGrad<Foam::scalar>::calcGrad
 (
-    const volScalarField& vsf
+    const volScalarField& vsf,
+    const word& name
 ) const
 {
     const fvMesh& mesh = vsf.mesh();
 
-    tmp<volVectorField> tGrad = basicGradScheme_().grad(vsf);
+    tmp<volVectorField> tGrad = basicGradScheme_().calcGrad(vsf, name);
 
     if (k_ < SMALL)
     {
@@ -205,14 +182,16 @@ tmp<volVectorField> faceLimitedGrad<scalar>::grad
 
 
 template<>
-tmp<volTensorField> faceLimitedGrad<vector>::grad
+Foam::tmp<Foam::volTensorField>
+Foam::fv::faceLimitedGrad<Foam::vector>::calcGrad
 (
-    const volVectorField& vvf
+    const volVectorField& vvf,
+    const word& name
 ) const
 {
     const fvMesh& mesh = vvf.mesh();
 
-    tmp<volTensorField> tGrad = basicGradScheme_().grad(vvf);
+    tmp<volTensorField> tGrad = basicGradScheme_().calcGrad(vvf, name);
 
     if (k_ < SMALL)
     {
@@ -362,13 +341,5 @@ tmp<volTensorField> faceLimitedGrad<vector>::grad
     return tGrad;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace fv
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

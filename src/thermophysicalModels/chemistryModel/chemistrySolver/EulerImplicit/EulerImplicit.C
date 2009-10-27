@@ -63,11 +63,8 @@ Foam::scalar Foam::EulerImplicit<CompType, ThermoType>::solve
     const scalar dt
 ) const
 {
-    scalar pf, cf, pr, cr;
-    label lRef, rRef;
-
-    label nSpecie = this->model_.nSpecie();
-    simpleMatrix<scalar> RR(nSpecie);
+    const label nSpecie = this->model_.nSpecie();
+    simpleMatrix<scalar> RR(nSpecie, 0, 0);
 
     for (label i=0; i<nSpecie; i++)
     {
@@ -82,6 +79,9 @@ Foam::scalar Foam::EulerImplicit<CompType, ThermoType>::solve
     for (label i=0; i<this->model_.reactions().size(); i++)
     {
         const Reaction<ThermoType>& R = this->model_.reactions()[i];
+
+        scalar pf, cf, pr, cr;
+        label lRef, rRef;
 
         scalar omegai = this->model_.omega
         (
@@ -133,7 +133,7 @@ Foam::scalar Foam::EulerImplicit<CompType, ThermoType>::solve
 
     // estimate the next time step
     scalar tMin = GREAT;
-    label nEqns = this->model_.nEqns();
+    const label nEqns = this->model_.nEqns();
     scalarField c1(nEqns, 0.0);
 
     for (label i=0; i<nSpecie; i++)

@@ -99,6 +99,10 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
     const dictionary& solverControls
 )
 {
+    GeometricField<scalar, fvPatchField, volMesh>& psi =
+        const_cast<GeometricField<scalar, fvPatchField, volMesh>&>
+        (fvMat_.psi());
+
     scalarField saveDiag = fvMat_.diag();
     fvMat_.addBoundaryDiag(fvMat_.diag(), 0);
 
@@ -108,14 +112,17 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
     // assign new solver controls
     solver_->read(solverControls);
 
-    lduMatrix::solverPerformance solverPerf =
-        solver_->solve(fvMat_.psi().internalField(), totalSource);
+    lduMatrix::solverPerformance solverPerf = solver_->solve
+    (
+        psi.internalField(),
+        totalSource
+    );
 
     solverPerf.print();
 
     fvMat_.diag() = saveDiag;
 
-    fvMat_.psi().correctBoundaryConditions();
+    psi.correctBoundaryConditions();
 
     return solverPerf;
 }
@@ -134,6 +141,9 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::solve
             << endl;
     }
 
+    GeometricField<scalar, fvPatchField, volMesh>& psi =
+       const_cast<GeometricField<scalar, fvPatchField, volMesh>&>(psi_);
+
     scalarField saveDiag = diag();
     addBoundaryDiag(diag(), 0);
 
@@ -143,19 +153,19 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::solve
     // Solver call
     lduMatrix::solverPerformance solverPerf = lduMatrix::solver::New
     (
-        psi_.name(),
+        psi.name(),
         *this,
         boundaryCoeffs_,
         internalCoeffs_,
-        psi_.boundaryField().interfaces(),
+        psi.boundaryField().interfaces(),
         solverControls
-    )->solve(psi_.internalField(), totalSource);
+    )->solve(psi.internalField(), totalSource);
 
     solverPerf.print();
 
     diag() = saveDiag;
 
-    psi_.correctBoundaryConditions();
+    psi.correctBoundaryConditions();
 
     return solverPerf;
 }

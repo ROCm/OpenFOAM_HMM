@@ -25,7 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 #include "argList.H"
 
-#include "simpleMatrix.H"
 #include "vector.H"
 #include "IFstream.H"
 #include "BSpline.H"

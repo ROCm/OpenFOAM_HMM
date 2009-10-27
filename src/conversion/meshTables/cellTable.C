@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "cellTable.H"
@@ -81,7 +79,7 @@ void Foam::cellTable::addDefaults()
 
 void Foam::cellTable::setEntry
 (
-    const label& id,
+    const label id,
     const word& keyWord,
     const word& value
 )
@@ -192,7 +190,7 @@ Foam::Map<Foam::word> Foam::cellTable::names
 }
 
 
-Foam::word Foam::cellTable::name(const label& id) const
+Foam::word Foam::cellTable::name(const label id) const
 {
     word theName("cellTable_" + Foam::name(id));
 
@@ -289,19 +287,19 @@ Foam::Map<Foam::word> Foam::cellTable::shells() const
 
 
 
-void Foam::cellTable::setMaterial(const label& id, const word& matlType)
+void Foam::cellTable::setMaterial(const label id, const word& matlType)
 {
     setEntry(id, "MaterialType", matlType);
 }
 
 
-void Foam::cellTable::setName(const label& id, const word& name)
+void Foam::cellTable::setName(const label id, const word& name)
 {
     setEntry(id, "Label", name);
 }
 
 
-void Foam::cellTable::setName(const label& id)
+void Foam::cellTable::setName(const label id)
 {
     iterator iter = find(id);
 

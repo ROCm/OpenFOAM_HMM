@@ -60,7 +60,7 @@ class spline
     // Private Member Functions
 
         //- Blending function for constructing spline
-        static scalar B(const scalar&);
+        static scalar B(const scalar);
 
         //- Disallow default bitwise copy construct
         spline(const spline&);

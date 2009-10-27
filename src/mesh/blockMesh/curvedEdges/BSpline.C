@@ -46,7 +46,7 @@ Foam::pointField Foam::BSpline::findKnots
     register const scalar oneSixth = 1.0/6.0;
     register const scalar twoThird = 2.0/3.0;
 
-    simpleMatrix<vector> M(NKnots+2);
+    simpleMatrix<vector> M(NKnots+2, 0, vector::zero);
 
     // set up the matrix
     M[0][0] = -0.5*scalar(NKnots - 1);

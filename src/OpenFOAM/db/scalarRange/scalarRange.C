@@ -42,7 +42,7 @@ Foam::scalarRange::scalarRange()
 {}
 
 
-Foam::scalarRange::scalarRange(const scalar& lower, const scalar& upper)
+Foam::scalarRange::scalarRange(const scalar lower, const scalar upper)
 :
     type_(RANGE),
     value_(lower),
@@ -123,7 +123,7 @@ Foam::scalar Foam::scalarRange::upper() const
 }
 
 
-bool Foam::scalarRange::selected(const scalar& value) const
+bool Foam::scalarRange::selected(const scalar value) const
 {
     switch (type_)
     {

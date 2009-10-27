@@ -28,7 +28,7 @@ License
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::scalar Foam::spline::B(const scalar& tau)
+Foam::scalar Foam::spline::B(const scalar tau)
 {
     if (tau <= -2.0 || tau >= 2.0)
     {
@@ -52,7 +52,7 @@ Foam::scalar Foam::spline::B(const scalar& tau)
     }
     else
     {
-        FatalErrorIn("spline::B(const scalar&)")
+        FatalErrorIn("spline::B(const scalar)")
             << "Programming error???, "
             << "tau = " << tau
             << abort(FatalError);
