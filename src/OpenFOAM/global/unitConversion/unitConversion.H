@@ -45,13 +45,13 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Conversion from degrees to radians
-inline scalar degToRad(const scalar& deg)
+inline scalar degToRad(const scalar deg)
 {
     return (deg*pi/180.0);
 }
 
 //- Conversion from radians to degrees
-inline scalar radToDeg(const scalar& rad)
+inline scalar radToDeg(const scalar rad)
 {
     return (rad*180.0/pi);
 }

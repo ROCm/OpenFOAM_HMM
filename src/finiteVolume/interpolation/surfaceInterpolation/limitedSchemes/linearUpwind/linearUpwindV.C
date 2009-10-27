@@ -74,9 +74,22 @@ Foam::linearUpwindV<Type>::correction
     const vectorField& C = mesh.C();
     const vectorField& Cf = mesh.Cf();
 
-    GeometricField
-        <typename outerProduct<vector, Type>::type, fvPatchField, volMesh>
-        gradVf = gradScheme_().grad(vf);
+    tmp
+    <
+        GeometricField
+        <
+            typename outerProduct<vector, Type>::type,
+            fvPatchField,
+            volMesh
+        >
+    > tgradVf = gradScheme_().grad(vf, gradSchemeName_);
+
+    const GeometricField
+    <
+        typename outerProduct<vector, Type>::type,
+        fvPatchField,
+        volMesh
+    >& gradVf = tgradVf();
 
     forAll(faceFlux, facei)
     {

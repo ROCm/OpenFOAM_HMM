@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Simple central-difference snGrad scheme with non-orthogonal correction.
-
 \*---------------------------------------------------------------------------*/
 
 #include "correctedSnGrad.H"
@@ -34,28 +31,44 @@ Description
 #include "fvcGrad.H"
 #include "gaussGrad.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace fv
-{
-
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
-correctedSnGrad<Type>::~correctedSnGrad()
+Foam::fv::correctedSnGrad<Type>::~correctedSnGrad()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
-correctedSnGrad<Type>::correction
+Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh> >
+Foam::fv::correctedSnGrad<Type>::fullGradCorrection
+(
+    const GeometricField<Type, fvPatchField, volMesh>& vf
+) const
+{
+    const fvMesh& mesh = this->mesh();
+
+    // construct GeometricField<Type, fvsPatchField, surfaceMesh>
+    tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tssf =
+        mesh.correctionVectors()
+      & linear<typename outerProduct<vector, Type>::type>(mesh).interpolate
+        (
+            gradScheme<Type>::New
+            (
+                mesh,
+                mesh.gradScheme(vf.name())
+            )().grad(vf, "grad(" + vf.name() + ')')
+        );
+    tssf().rename("snGradCorr(" + vf.name() + ')');
+
+    return tssf;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh> >
+Foam::fv::correctedSnGrad<Type>::correction
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf
 ) const
@@ -89,7 +102,7 @@ correctedSnGrad<Type>::correction
             mesh.correctionVectors()
           & linear
             <
-                typename 
+                typename
                 outerProduct<vector, typename pTraits<Type>::cmptType>::type
             >(mesh).interpolate
             (
@@ -107,13 +120,5 @@ correctedSnGrad<Type>::correction
     return tssf;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace fv
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

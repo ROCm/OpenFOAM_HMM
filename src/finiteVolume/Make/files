@@ -285,6 +285,7 @@ $(divSchemes)/gaussDivScheme/gaussDivSchemes.C
 gradSchemes = finiteVolume/gradSchemes
 $(gradSchemes)/gradScheme/gradSchemes.C
 $(gradSchemes)/gaussGrad/gaussGrads.C
+
 $(gradSchemes)/leastSquaresGrad/leastSquaresVectors.C
 $(gradSchemes)/leastSquaresGrad/leastSquaresGrads.C
 $(gradSchemes)/extendedLeastSquaresGrad/extendedLeastSquaresVectors.C

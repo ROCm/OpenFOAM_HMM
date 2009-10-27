@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    
-
 \*---------------------------------------------------------------------------*/
 
 #include "volFields.H"
@@ -48,7 +45,7 @@ template<class Type>
 tmp<fvMatrix<Type> >
 d2dt2
 (
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     return fv::d2dt2Scheme<Type>::New
@@ -64,7 +61,7 @@ tmp<fvMatrix<Type> >
 d2dt2
 (
     const dimensionedScalar& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     return fv::d2dt2Scheme<Type>::New
@@ -80,7 +77,7 @@ tmp<fvMatrix<Type> >
 d2dt2
 (
     const volScalarField& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     return fv::d2dt2Scheme<Type>::New

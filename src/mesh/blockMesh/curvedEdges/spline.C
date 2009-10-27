@@ -36,7 +36,7 @@ Foam::spline::spline(const pointField& knotPoints)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::spline::B(const scalar& tau) const
+Foam::scalar Foam::spline::B(const scalar tau) const
 {
     if (tau <= -2.0 || tau >= 2.0)
     {
@@ -60,7 +60,7 @@ Foam::scalar Foam::spline::B(const scalar& tau) const
     }
     else
     {
-        FatalErrorIn("spline::B(const scalar&)")
+        FatalErrorIn("spline::B(const scalar)")
             << "Programming error???, "
             << "tau = " << tau
             << abort(FatalError);

@@ -625,7 +625,7 @@ template<class Type>
 tmp<fvMatrix<Type> >
 CrankNicholsonDdtScheme<Type>::fvmDdt
 (
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     DDt0Field<GeometricField<Type, fvPatchField, volMesh> >& ddt0 =
@@ -709,7 +709,7 @@ tmp<fvMatrix<Type> >
 CrankNicholsonDdtScheme<Type>::fvmDdt
 (
     const dimensionedScalar& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     DDt0Field<GeometricField<Type, fvPatchField, volMesh> >& ddt0 =
@@ -791,7 +791,7 @@ tmp<fvMatrix<Type> >
 CrankNicholsonDdtScheme<Type>::fvmDdt
 (
     const volScalarField& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     DDt0Field<GeometricField<Type, fvPatchField, volMesh> >& ddt0 =

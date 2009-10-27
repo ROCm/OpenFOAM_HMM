@@ -507,7 +507,7 @@ void Foam::MeshedSurface<Face>::movePoints(const pointField& newPoints)
 
 
 template<class Face>
-void Foam::MeshedSurface<Face>::scalePoints(const scalar& scaleFactor)
+void Foam::MeshedSurface<Face>::scalePoints(const scalar scaleFactor)
 {
     // avoid bad scaling
     if (scaleFactor > 0 && scaleFactor != 1.0)

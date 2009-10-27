@@ -45,7 +45,7 @@ template<class Type>
 tmp<fvMatrix<Type> >
 laplacian
 (
-    GeometricField<Type, fvPatchField, volMesh>& vf,
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
     const word& name
 )
 {
@@ -70,7 +70,7 @@ template<class Type>
 tmp<fvMatrix<Type> >
 laplacian
 (
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     surfaceScalarField Gamma
@@ -100,7 +100,7 @@ tmp<fvMatrix<Type> >
 laplacian
 (
     const zeroField&,
-    GeometricField<Type, fvPatchField, volMesh>& vf,
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
     const word& name
 )
 {
@@ -116,7 +116,7 @@ tmp<fvMatrix<Type> >
 laplacian
 (
     const zeroField&,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     return tmp<fvMatrix<Type> >
@@ -131,7 +131,7 @@ tmp<fvMatrix<Type> >
 laplacian
 (
     const oneField&,
-    GeometricField<Type, fvPatchField, volMesh>& vf,
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
     const word& name
 )
 {
@@ -144,7 +144,7 @@ tmp<fvMatrix<Type> >
 laplacian
 (
     const oneField&,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     return fvm::laplacian(vf);
@@ -156,11 +156,11 @@ tmp<fvMatrix<Type> >
 laplacian
 (
     const dimensioned<GType>& gamma,
-    GeometricField<Type, fvPatchField, volMesh>& vf,
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
     const word& name
 )
 {
-    GeometricField<GType, fvsPatchField, surfaceMesh> Gamma
+    const GeometricField<GType, fvsPatchField, surfaceMesh> Gamma
     (
         IOobject
         (
@@ -182,10 +182,10 @@ tmp<fvMatrix<Type> >
 laplacian
 (
     const dimensioned<GType>& gamma,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    GeometricField<GType, fvsPatchField, surfaceMesh> Gamma
+    const GeometricField<GType, fvsPatchField, surfaceMesh> Gamma
     (
         IOobject
         (
@@ -209,7 +209,7 @@ tmp<fvMatrix<Type> >
 laplacian
 (
     const GeometricField<GType, fvPatchField, volMesh>& gamma,
-    GeometricField<Type, fvPatchField, volMesh>& vf,
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
     const word& name
 )
 {
@@ -226,7 +226,7 @@ tmp<fvMatrix<Type> >
 laplacian
 (
     const tmp<GeometricField<GType, fvPatchField, volMesh> >& tgamma,
-    GeometricField<Type, fvPatchField, volMesh>& vf,
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
     const word& name
 )
 {
@@ -241,7 +241,7 @@ tmp<fvMatrix<Type> >
 laplacian
 (
     const GeometricField<GType, fvPatchField, volMesh>& gamma,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     return fvm::laplacian
@@ -258,7 +258,7 @@ tmp<fvMatrix<Type> >
 laplacian
 (
     const tmp<GeometricField<GType, fvPatchField, volMesh> >& tgamma,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > Laplacian(fvm::laplacian(tgamma(), vf));
@@ -274,7 +274,7 @@ tmp<fvMatrix<Type> >
 laplacian
 (
     const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
-    GeometricField<Type, fvPatchField, volMesh>& vf,
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
     const word& name
 )
 {
@@ -291,7 +291,7 @@ tmp<fvMatrix<Type> >
 laplacian
 (
     const tmp<GeometricField<GType, fvsPatchField, surfaceMesh> >& tgamma,
-    GeometricField<Type, fvPatchField, volMesh>& vf,
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
     const word& name
 )
 {
@@ -306,7 +306,7 @@ tmp<fvMatrix<Type> >
 laplacian
 (
     const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     return fvm::laplacian
@@ -323,7 +323,7 @@ tmp<fvMatrix<Type> >
 laplacian
 (
     const tmp<GeometricField<GType, fvsPatchField, surfaceMesh> >& tGamma,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm(fvm::laplacian(tGamma(), vf));

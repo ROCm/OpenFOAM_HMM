@@ -86,7 +86,7 @@ public:
 
     // Convert to VTK and store
 
-        static void insert(const scalar&, DynamicList<floatScalar>&);
+        static void insert(const scalar, DynamicList<floatScalar>&);
         static void insert(const point&, DynamicList<floatScalar>&);
         static void insert(const sphericalTensor&, DynamicList<floatScalar>&);
         static void insert(const symmTensor&, DynamicList<floatScalar>&);
