@@ -36,20 +36,6 @@ namespace Foam
     addToRunTimeSelectionTable(curvedEdge, polySplineEdge, Istream);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    //! @cond fileScope
-    inline label nsize(const label otherKnotsSize, const label nBetweenKnots)
-    {
-        return otherKnotsSize*(1 + nBetweenKnots) + nBetweenKnots + 2;
-    }
-    //! @endcond fileScope
-}
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // intervening : returns a list of the points making up the polyLineEdge
@@ -75,7 +61,10 @@ Foam::pointField Foam::polySplineEdge::intervening
         sndend
     );
 
-    const label nSize(nsize(otherknots.size(), nBetweenKnots));
+    const label nSize
+    (
+        otherknots.size() * (1 + nBetweenKnots) + nBetweenKnots + 2
+    );
 
     const label NKnots = spl.nKnots();
     const scalar init = 1.0/(NKnots - 1);
