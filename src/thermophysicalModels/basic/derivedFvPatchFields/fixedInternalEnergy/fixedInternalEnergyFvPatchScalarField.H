@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                Class fixedInternalEnergyFvPatchScalarField Declaration
+           Class fixedInternalEnergyFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class fixedInternalEnergyFvPatchScalarField

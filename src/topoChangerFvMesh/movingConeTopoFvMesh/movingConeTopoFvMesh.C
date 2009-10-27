@@ -52,8 +52,8 @@ namespace Foam
 Foam::tmp<Foam::scalarField> Foam::movingConeTopoFvMesh::vertexMarkup
 (
     const pointField& p,
-    const scalar& curLeft,
-    const scalar& curRight
+    const scalar curLeft,
+    const scalar curRight
 ) const
 {
     Info<< "Updating vertex markup.  curLeft: "

@@ -33,8 +33,6 @@ License
 #include "SortableList.H"
 #include "PackedBoolList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 namespace Foam
 {
@@ -783,7 +781,6 @@ const Foam::labelList& Foam::triSurface::edgeOwner() const
 }
 
 
-//- Move points
 void Foam::triSurface::movePoints(const pointField& newPoints)
 {
     // Remove all geometry dependent data
@@ -797,8 +794,7 @@ void Foam::triSurface::movePoints(const pointField& newPoints)
 }
 
 
-// scale points
-void Foam::triSurface::scalePoints(const scalar& scaleFactor)
+void Foam::triSurface::scalePoints(const scalar scaleFactor)
 {
     // avoid bad scaling
     if (scaleFactor > 0 && scaleFactor != 1.0)

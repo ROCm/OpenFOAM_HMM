@@ -273,7 +273,7 @@ public:
             }
 
             //- Return porosity
-            const scalar& porosity() const
+            scalar porosity() const
             {
                 return porosity_;
             }

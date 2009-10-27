@@ -66,8 +66,10 @@ tmp<surfaceScalarField> LimitedScheme<Type, Limiter, LimitFunc>::limiter
     const GeometricField<typename Limiter::phiType, fvPatchField, volMesh>&
         lPhi = tlPhi();
 
-    GeometricField<typename Limiter::gradPhiType, fvPatchField, volMesh>
-        gradc(fvc::grad(lPhi));
+    tmp<GeometricField<typename Limiter::gradPhiType, fvPatchField, volMesh> >
+        tgradc(fvc::grad(lPhi));
+    const GeometricField<typename Limiter::gradPhiType, fvPatchField, volMesh>&
+        gradc = tgradc();
 
     const surfaceScalarField& CDweights = mesh.surfaceInterpolation::weights();
 
@@ -116,7 +118,7 @@ tmp<surfaceScalarField> LimitedScheme<Type, Limiter, LimitFunc>::limiter
                 gradc.boundaryField()[patchi].patchNeighbourField();
 
             // Build the d-vectors
-            vectorField pd = 
+            vectorField pd =
                 mesh.Sf().boundaryField()[patchi]
                /(
                    mesh.magSf().boundaryField()[patchi]

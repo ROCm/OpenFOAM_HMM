@@ -143,6 +143,7 @@ void Foam::basicThermo::eBoundaryCorrection(volScalarField& e)
     }
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::basicThermo::basicThermo(const fvMesh& mesh)

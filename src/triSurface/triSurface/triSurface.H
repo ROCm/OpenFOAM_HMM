@@ -324,7 +324,7 @@ public:
             virtual void movePoints(const pointField&);
 
             //- Scale points. A non-positive factor is ignored
-            virtual void scalePoints(const scalar&);
+            virtual void scalePoints(const scalar);
 
             //- Check/remove duplicate/degenerate triangles
             void checkTriangles(const bool verbose);

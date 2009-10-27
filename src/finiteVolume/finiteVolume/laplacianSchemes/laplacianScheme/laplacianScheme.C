@@ -102,7 +102,7 @@ tmp<fvMatrix<Type> >
 laplacianScheme<Type, GType>::fvmLaplacian
 (
     const GeometricField<GType, fvPatchField, volMesh>& gamma,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     return fvmLaplacian(tinterpGammaScheme_().interpolate(gamma)(), vf);

@@ -168,7 +168,7 @@ public:
 
 
         // Chemistry model functions (overriding abstract functions in
-        // chemistryModel.H)
+        // basicChemistryModel.H)
 
             //- Return const access to the chemical source terms
             inline tmp<volScalarField> RR(const label i) const;

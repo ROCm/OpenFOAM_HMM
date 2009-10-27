@@ -47,8 +47,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// construct given seed
-Random::Random(const label& seed)
+Random::Random(const label seed)
 {
     if (seed > 1)
     {

@@ -182,7 +182,7 @@ public:
             virtual bool writeSurface
             (
                 const fileName& timeName = fileName::null,
-                const bool& triangulate = false
+                const bool triangulate = false
             ) const
             {
                 return false;

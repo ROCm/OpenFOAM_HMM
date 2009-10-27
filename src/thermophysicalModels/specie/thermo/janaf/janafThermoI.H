@@ -153,7 +153,7 @@ template<class equationOfState>
 inline Foam::scalar Foam::janafThermo<equationOfState>::hc() const
 {
     const coeffArray& a = lowCpCoeffs_;
-    const scalar& Tstd = specie::Tstd;
+    const scalar Tstd = specie::Tstd;
     return this->RR*
     (
         (
