@@ -264,11 +264,11 @@ public:
             inline const List<label>& gasToLiquidIndex() const;
             inline const List<bool>& isLiquidFuel() const;
 
-            inline const bool& twoD() const;
+            inline bool twoD() const;
             inline const vector& axisOfSymmetry() const;
             inline const vector& axisOfWedge() const;
             inline const vector& axisOfWedgeNormal() const;
-            inline const scalar& angleOfWedge() const;
+            inline scalar angleOfWedge() const;
 
             inline const interpolation<vector>& UInterpolator() const;
             inline const interpolation<scalar>& rhoInterpolator() const;
@@ -284,9 +284,9 @@ public:
             inline PtrList<scalarField>& srhos();
             inline const PtrList<scalarField>& srhos() const;
 
-            inline const scalar& ambientPressure() const;
+            inline scalar ambientPressure() const;
 
-            inline const scalar& ambientTemperature() const;
+            inline scalar ambientTemperature() const;
 
 
         // Check

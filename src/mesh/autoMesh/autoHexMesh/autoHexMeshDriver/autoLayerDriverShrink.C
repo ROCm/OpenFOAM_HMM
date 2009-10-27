@@ -94,7 +94,7 @@ void Foam::autoLayerDriver::smoothField
     const PackedBoolList& isMasterEdge,
     const labelList& meshEdges,
     const scalarField& fieldMin,
-    const label& nSmoothDisp,
+    const label nSmoothDisp,
     scalarField& field
 ) const
 {

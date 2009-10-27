@@ -109,7 +109,7 @@ namespace Foam
                 }
             }
 
-            const scalar& v = values[elemI];
+            const scalar v = values[elemI];
             os << float(v);
         }
         os << nl;

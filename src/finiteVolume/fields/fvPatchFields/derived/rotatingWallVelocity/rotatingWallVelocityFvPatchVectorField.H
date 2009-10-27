@@ -149,7 +149,7 @@ public:
             }
 
             //- Return the rotational speed
-            const scalar& omega() const
+            scalar omega() const
             {
                 return omega_;
             }
