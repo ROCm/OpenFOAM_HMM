@@ -33,7 +33,7 @@ Foam::OPstream::OPstream
     const commsTypes commsType,
     const int toProcNo,
     const label bufSize,
-    const label tag,
+    const int tag,
     streamFormat format,
     versionNumber version
 )

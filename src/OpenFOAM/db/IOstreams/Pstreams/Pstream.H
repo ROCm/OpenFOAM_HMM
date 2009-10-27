@@ -234,14 +234,15 @@ public:
             //- Exchange data. Sends sendData, receives into recvData, sets
             //  sizes (not bytes). sizes[p0][p1] is what processor p0 has
             //  sent to p1. Continuous data only.
-            //template <template<class> class ListType, class T>
+            //  If block=true will wait for all transfers to finish.
             template <class Container, class T>
             static void exchange
             (
                 const List<Container >&,
                 List<Container >&,
                 labelListList& sizes,
-                const label tag = UPstream::msgType()
+                const int tag = UPstream::msgType(),
+                const bool block = true
             );
 
 };

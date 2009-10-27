@@ -23,13 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Read token and binary block from IPstream
+    Read from UIPstream
 
 \*---------------------------------------------------------------------------*/
 
 #include "UIPstream.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
@@ -38,7 +36,7 @@ Foam::UIPstream::UIPstream
     const commsTypes commsType,
     const int fromProcNo,
     DynamicList<char>& externalBuf,
-    const label tag,
+    const int tag,
     streamFormat format,
     versionNumber version
 )
@@ -51,28 +49,29 @@ Foam::UIPstream::UIPstream
     tag_(tag),
     messageSize_(0)
 {
-     notImplemented
-     (
-         "UIPstream::UIPstream"
-         "("
-             "const commsTypes,"
-             "const int fromProcNo,"
-             "DynamicList<char>&,"
-             "const label tag,"
-             "streamFormat, versionNumber"
-         ")"
-     );
+    notImplemented
+    (
+        "UIPstream::UIPstream"
+        "("
+            "const commsTypes,"
+            "const int fromProcNo,"
+            "DynamicList<char>&,"
+            "const int tag,"
+            "streamFormat, versionNumber"
+        ")"
+    );
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-int Foam::UIPstream::read
+Foam::label Foam::UIPstream::read
 (
     const commsTypes commsType,
     const int fromProcNo,
     char* buf,
-    const std::streamsize bufSize
+    const std::streamsize bufSize,
+    const int tag
 )
 {
     notImplemented
@@ -82,7 +81,8 @@ int Foam::UIPstream::read
             "const commsTypes,"
             "const int fromProcNo,"
             "char* buf,"
-            "const label bufSize"
+            "const label bufSize,"
+            "const int tag"
         ")"
      );
 

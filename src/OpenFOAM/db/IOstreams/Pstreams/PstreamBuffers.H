@@ -50,7 +50,6 @@ Description
         }
 
         pBuffers.finishedSends();   // no-op for blocking
-        Pstream::waitRequests();    // no-op for blocking
 
         for (label procI = 0; procI < Pstream::nProcs(); procI++)
         {
@@ -95,7 +94,7 @@ class PstreamBuffers
         //- Communications type of this stream
         const UPstream::commsTypes commsType_;
 
-        const label tag_;
+        const int tag_;
 
         const IOstream::streamFormat format_;
 
@@ -125,7 +124,7 @@ public:
         PstreamBuffers
         (
             const UPstream::commsTypes commsType,
-            const label tag = UPstream::msgType(),
+            const int tag = UPstream::msgType(),
             IOstream::streamFormat format=IOstream::BINARY,
             IOstream::versionNumber version=IOstream::currentVersion
         );
@@ -134,12 +133,13 @@ public:
     // Member functions
 
         //- Mark all sends as having been done. This will start receives
-        //  in non-blocking mode.
-        void finishedSends();
+        //  in non-blocking mode. If block will wait for all transfers to
+        //  finish (only relevant for nonBlocking mode)
+        void finishedSends(const bool block = true);
 
         //- Mark all sends as having been done. Same as above but also returns
         //  sizes (bytes) transferred.
-        void finishedSends(labelListList& sizes);
+        void finishedSends(labelListList& sizes, const bool block = true);
 
 };
 

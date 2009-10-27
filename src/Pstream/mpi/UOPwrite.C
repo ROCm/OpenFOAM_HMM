@@ -39,7 +39,8 @@ bool Foam::UOPstream::write
     const commsTypes commsType,
     const int toProcNo,
     const char* buf,
-    const std::streamsize bufSize
+    const std::streamsize bufSize,
+    const int tag
 )
 {
     bool transferFailed = true;
@@ -52,7 +53,7 @@ bool Foam::UOPstream::write
             bufSize,
             MPI_PACKED,
             procID(toProcNo),
-            msgType(),
+            tag,
             MPI_COMM_WORLD
         );
     }
@@ -64,7 +65,7 @@ bool Foam::UOPstream::write
             bufSize,
             MPI_PACKED,
             procID(toProcNo),
-            msgType(),
+            tag,
             MPI_COMM_WORLD
         );
     }
@@ -78,7 +79,7 @@ bool Foam::UOPstream::write
             bufSize,
             MPI_PACKED,
             procID(toProcNo),
-            msgType(),
+            tag,
             MPI_COMM_WORLD,
             &request
         );
@@ -90,7 +91,8 @@ bool Foam::UOPstream::write
         FatalErrorIn
         (
             "UOPstream::write"
-            "(const int fromProcNo, char* buf, std::streamsize bufSize)"
+            "(const int fromProcNo, char* buf, std::streamsize bufSize"
+            ", const int)"
         )   << "Unsupported communications type " << commsType
             << Foam::abort(FatalError);
     }

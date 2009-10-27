@@ -46,7 +46,8 @@ void Pstream::exchange
     const List<Container >& sendBufs,
     List<Container >& recvBufs,
     labelListList& sizes,
-    const label tag
+    const int tag,
+    const bool block
 )
 {
     if (UPstream::parRun())
@@ -80,7 +81,7 @@ void Pstream::exchange
         }
 
         // Send sizes across.
-        label oldTag = UPstream::msgType();
+        int oldTag = UPstream::msgType();
         UPstream::msgType() = tag;
         combineReduce(sizes, UPstream::listEq());
         UPstream::msgType() = oldTag;
@@ -97,16 +98,14 @@ void Pstream::exchange
             if (procI != Pstream::myProcNo() && nRecv > 0)
             {
                 recvBufs[procI].setSize(nRecv);
-                label oldTag = UPstream::msgType();
-                UPstream::msgType() = tag;
                 UIPstream::read
                 (
                     UPstream::nonBlocking,
                     procI,
                     reinterpret_cast<char*>(recvBufs[procI].begin()),
-                    nRecv*sizeof(T)
+                    nRecv*sizeof(T),
+                    tag
                 );
-                UPstream::msgType() = oldTag;
             }
         }
 
@@ -118,9 +117,6 @@ void Pstream::exchange
         {
             if (procI != Pstream::myProcNo() && sendBufs[procI].size() > 0)
             {
-                label oldTag = UPstream::msgType();
-                UPstream::msgType() = tag;
-
                 if
                 (
                    !UOPstream::write
@@ -128,7 +124,8 @@ void Pstream::exchange
                         UPstream::nonBlocking,
                         procI,
                         reinterpret_cast<const char*>(sendBufs[procI].begin()),
-                        sendBufs[procI].size()*sizeof(T)
+                        sendBufs[procI].size()*sizeof(T),
+                        tag
                     )
                 )
                 {
@@ -138,7 +135,6 @@ void Pstream::exchange
                         << label(sendBufs[procI].size()*sizeof(T))
                         << Foam::abort(FatalError);
                 }
-                UPstream::msgType() = oldTag;
             }
         }
 
@@ -146,7 +142,10 @@ void Pstream::exchange
         // Wait for all to finish
         // ~~~~~~~~~~~~~~~~~~~~~~
 
-        Pstream::waitRequests();
+        if (block)
+        {
+            Pstream::waitRequests();
+        }
     }
 
     // Do myself

@@ -40,7 +40,7 @@ namespace Foam
 Foam::PstreamBuffers::PstreamBuffers
 (
     const UPstream::commsTypes commsType,
-    const label tag,
+    const int tag,
     IOstream::streamFormat format,
     IOstream::versionNumber version
 )
@@ -57,7 +57,7 @@ Foam::PstreamBuffers::PstreamBuffers
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::PstreamBuffers::finishedSends()
+void Foam::PstreamBuffers::finishedSends(const bool block)
 {
     finishedSendsCalled_ = true;
 
@@ -69,13 +69,14 @@ void Foam::PstreamBuffers::finishedSends()
             sendBuf_,
             recvBuf_,
             sizes,
-            tag_
+            tag_,
+            block
         );
     }
 }
 
 
-void Foam::PstreamBuffers::finishedSends(labelListList& sizes)
+void Foam::PstreamBuffers::finishedSends(labelListList& sizes, const bool block)
 {
     finishedSendsCalled_ = true;
 
@@ -89,7 +90,8 @@ void Foam::PstreamBuffers::finishedSends(labelListList& sizes)
             sendBuf_,
             recvBuf_,
             sizes,
-            tag_
+            tag_,
+            block
         );
     }
     else
@@ -104,7 +106,7 @@ void Foam::PstreamBuffers::finishedSends(labelListList& sizes)
         }
 
         // Send sizes across.
-        label oldTag = UPstream::msgType();
+        int oldTag = UPstream::msgType();
         UPstream::msgType() = tag_;
         combineReduce(sizes, UPstream::listEq());
         UPstream::msgType() = oldTag;

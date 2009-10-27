@@ -91,7 +91,7 @@ Foam::UOPstream::UOPstream
     const commsTypes commsType,
     const int toProcNo,
     DynamicList<char>& sendBuf,
-    const label tag,
+    const int tag,
     const bool sendAtDestruct,
     streamFormat format,
     versionNumber version
@@ -129,9 +129,6 @@ Foam::UOPstream::~UOPstream()
 {
     if (sendAtDestruct_)
     {
-        label oldTag = Pstream::msgType();
-        Pstream::msgType() = tag_;
-
         if
         (
            !UOPstream::write
@@ -139,7 +136,8 @@ Foam::UOPstream::~UOPstream()
                 commsType_,
                 toProcNo_,
                 sendBuf_.begin(),
-                sendBuf_.size()
+                sendBuf_.size(),
+                tag_
             )
         )
         {
@@ -148,8 +146,6 @@ Foam::UOPstream::~UOPstream()
                 << " to processor " << toProcNo_
                 << Foam::abort(FatalError);
         }
-
-        UPstream::msgType() = oldTag;
     }
 }
 

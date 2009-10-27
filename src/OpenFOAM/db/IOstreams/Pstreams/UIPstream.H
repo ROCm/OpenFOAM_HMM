@@ -65,7 +65,7 @@ class UIPstream
 
         label externalBufPosition_;
 
-        const label tag_;
+        const int tag_;
 
         label messageSize_;
 
@@ -94,7 +94,7 @@ public:
             const commsTypes commsType,
             const int fromProcNo,
             DynamicList<char>& externalBuf,
-            const label tag = UPstream::msgType(),
+            const int tag = UPstream::msgType(),
             streamFormat format=BINARY,
             versionNumber version=currentVersion
         );
@@ -128,7 +128,8 @@ public:
                 const commsTypes commsType,
                 const int fromProcNo,
                 char* buf,
-                const std::streamsize bufSize
+                const std::streamsize bufSize,
+                const int tag = UPstream::msgType()
             );
 
             //- Return next token from stream

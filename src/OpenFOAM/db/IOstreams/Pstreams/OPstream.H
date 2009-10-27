@@ -66,7 +66,7 @@ public:
             const commsTypes commsType,
             const int toProcNo,
             const label bufSize = 0,
-            const label tag = UPstream::msgType(),
+            const int tag = UPstream::msgType(),
             streamFormat format=BINARY,
             versionNumber version=currentVersion
         );
