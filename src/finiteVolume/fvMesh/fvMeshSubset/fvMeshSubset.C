@@ -27,9 +27,6 @@ Description
     list of selected cells, it creates the mesh consisting only of the
     desired cells, with the mapping list for points, faces, and cells.
 
-    MJ 23/03/05 on coupled faces change the patch of the face to the
-    oldInternalFaces patch.
-
 \*---------------------------------------------------------------------------*/
 
 #include "fvMeshSubset.H"

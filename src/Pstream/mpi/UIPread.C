@@ -23,91 +23,161 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Read token and binary block from IPstream
+    Read from UIPstream
 
 \*---------------------------------------------------------------------------*/
 
 #include "mpi.h"
 
-#include "IPstream.H"
+#include "UIPstream.H"
 #include "PstreamGlobals.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-// Outstanding non-blocking operations.
-//! @cond fileScope
-//Foam::DynamicList<MPI_Request> IPstream_outstandingRequests_;
-//! @endcond fileScope
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-Foam::IPstream::IPstream
+Foam::UIPstream::UIPstream
 (
     const commsTypes commsType,
     const int fromProcNo,
-    const label bufSize,
+    DynamicList<char>& externalBuf,
+    const int tag,
     streamFormat format,
     versionNumber version
 )
 :
-    Pstream(commsType, bufSize),
+    UPstream(commsType),
     Istream(format, version),
     fromProcNo_(fromProcNo),
+    externalBuf_(externalBuf),
+    externalBufPosition_(0),
+    tag_(tag),
     messageSize_(0)
 {
     setOpened();
     setGood();
 
-    MPI_Status status;
-
-    // Cannot use buf_.size() since appends a few bytes extra
-    label realBufSize = bufSize;
-
-    // If the buffer size is not specified, probe the incomming message
-    // and set it
-    if (!bufSize)
+    if (commsType == UPstream::nonBlocking)
     {
-        if (commsType == nonBlocking)
+        // Message is already received into externalBuf
+    }
+    else
+    {
+        MPI_Status status;
+
+        label wantedSize = externalBuf_.capacity();
+
+        // If the buffer size is not specified, probe the incomming message
+        // and set it
+        if (!wantedSize)
+        {
+            MPI_Probe(procID(fromProcNo_), tag_, MPI_COMM_WORLD, &status);
+            MPI_Get_count(&status, MPI_BYTE, &messageSize_);
+
+            externalBuf_.setCapacity(messageSize_);
+            wantedSize = messageSize_;
+        }
+
+        messageSize_ = UIPstream::read
+        (
+            commsType,
+            fromProcNo_,
+            externalBuf_.begin(),
+            wantedSize,
+            tag_
+        );
+
+        // Set addressed size. Leave actual allocated memory intact.
+        externalBuf_.setSize(messageSize_);
+
+        if (!messageSize_)
         {
             FatalErrorIn
             (
-                "IPstream::IPstream(const commsTypes, const int, "
-                "const label, streamFormat, versionNumber)"
-            )   << "Can use nonBlocking mode only with pre-allocated buffers"
+                "UIPstream::UIPstream(const commsTypes, const int, "
+                "DynamicList<char>&, streamFormat, versionNumber)"
+            )   << "read failed"
                 << Foam::abort(FatalError);
         }
+    }
+}
 
-        MPI_Probe(procID(fromProcNo_), msgType(), MPI_COMM_WORLD, &status);
-        MPI_Get_count(&status, MPI_BYTE, &messageSize_);
 
-        buf_.setSize(messageSize_);
-        realBufSize = buf_.size();
+Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
+:
+    UPstream(buffers.commsType_),
+    Istream(buffers.format_, buffers.version_),
+    fromProcNo_(fromProcNo),
+    externalBuf_(buffers.recvBuf_[fromProcNo]),
+    externalBufPosition_(0),
+    tag_(buffers.tag_),
+    messageSize_(0)
+{
+    if (commsType() != UPstream::scheduled && !buffers.finishedSendsCalled_)
+    {
+        FatalErrorIn("UIPstream::UIPstream(const int, PstreamBuffers&)")
+            << "PstreamBuffers::finishedSends() never called." << endl
+            << "Please call PstreamBuffers::finishedSends() after doing"
+            << " all your sends (using UOPstream) and before doing any"
+            << " receives (using UIPstream)" << Foam::exit(FatalError);
     }
 
-    messageSize_ = read(commsType, fromProcNo_, buf_.begin(), realBufSize);
+    setOpened();
+    setGood();
 
-    if (!messageSize_)
+    if (commsType() == UPstream::nonBlocking)
     {
-        FatalErrorIn
+        // Message is already received into externalBuf
+    }
+    else
+    {
+        MPI_Status status;
+
+        label wantedSize = externalBuf_.capacity();
+
+        // If the buffer size is not specified, probe the incomming message
+        // and set it
+        if (!wantedSize)
+        {
+            MPI_Probe(procID(fromProcNo_), tag_, MPI_COMM_WORLD, &status);
+            MPI_Get_count(&status, MPI_BYTE, &messageSize_);
+
+            externalBuf_.setCapacity(messageSize_);
+            wantedSize = messageSize_;
+        }
+
+        messageSize_ = UIPstream::read
         (
-            "IPstream::IPstream(const commsTypes, const int, "
-            "const label, streamFormat, versionNumber)"
-        )   << "read failed"
-            << Foam::abort(FatalError);
+            commsType(),
+            fromProcNo_,
+            externalBuf_.begin(),
+            wantedSize,
+            tag_
+        );
+
+        // Set addressed size. Leave actual allocated memory intact.
+        externalBuf_.setSize(messageSize_);
+
+        if (!messageSize_)
+        {
+            FatalErrorIn
+            (
+                "UIPstream::UIPstream(const int, PstreamBuffers&)"
+            )   << "read failed"
+                << Foam::abort(FatalError);
+        }
     }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::IPstream::read
+Foam::label Foam::UIPstream::read
 (
     const commsTypes commsType,
     const int fromProcNo,
     char* buf,
-    const std::streamsize bufSize
+    const std::streamsize bufSize,
+    const int tag
 )
 {
     if (commsType == blocking || commsType == scheduled)
@@ -122,7 +192,7 @@ Foam::label Foam::IPstream::read
                 bufSize,
                 MPI_PACKED,
                 procID(fromProcNo),
-                msgType(),
+                tag,
                 MPI_COMM_WORLD,
                 &status
             )
@@ -130,7 +200,7 @@ Foam::label Foam::IPstream::read
         {
             FatalErrorIn
             (
-                "IPstream::read"
+                "UIPstream::read"
                 "(const int fromProcNo, char* buf, std::streamsize bufSize)"
             )   << "MPI_Recv cannot receive incomming message"
                 << Foam::abort(FatalError);
@@ -148,7 +218,7 @@ Foam::label Foam::IPstream::read
         {
             FatalErrorIn
             (
-                "IPstream::read"
+                "UIPstream::read"
                 "(const int fromProcNo, char* buf, std::streamsize bufSize)"
             )   << "buffer (" << label(bufSize)
                 << ") not large enough for incomming message ("
@@ -170,7 +240,7 @@ Foam::label Foam::IPstream::read
                 bufSize,
                 MPI_PACKED,
                 procID(fromProcNo),
-                msgType(),
+                tag,
                 MPI_COMM_WORLD,
                 &request
             )
@@ -178,7 +248,7 @@ Foam::label Foam::IPstream::read
         {
             FatalErrorIn
             (
-                "IPstream::read"
+                "UIPstream::read"
                 "(const int fromProcNo, char* buf, std::streamsize bufSize)"
             )   << "MPI_Recv cannot start non-blocking receive"
                 << Foam::abort(FatalError);
@@ -195,7 +265,7 @@ Foam::label Foam::IPstream::read
     {
         FatalErrorIn
         (
-            "IPstream::read"
+            "UIPstream::read"
             "(const int fromProcNo, char* buf, std::streamsize bufSize)"
         )   << "Unsupported communications type " << commsType
             << Foam::abort(FatalError);
@@ -204,7 +274,5 @@ Foam::label Foam::IPstream::read
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

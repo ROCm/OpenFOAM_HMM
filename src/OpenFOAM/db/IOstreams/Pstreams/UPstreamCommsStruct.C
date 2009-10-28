@@ -24,12 +24,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Pstream.H"
+#include "UPstream.H"
 #include "boolList.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::Pstream::commsStruct::commsStruct()
+Foam::UPstream::commsStruct::commsStruct()
 :
     above_(-1),
     below_(0),
@@ -38,7 +38,7 @@ Foam::Pstream::commsStruct::commsStruct()
 {}
 
 
-Foam::Pstream::commsStruct::commsStruct
+Foam::UPstream::commsStruct::commsStruct
 (
     const label above,
     const labelList& below,
@@ -53,7 +53,7 @@ Foam::Pstream::commsStruct::commsStruct
 {}
 
 
-Foam::Pstream::commsStruct::commsStruct
+Foam::UPstream::commsStruct::commsStruct
 (
     const label nProcs,
     const label myProcID,
@@ -91,7 +91,7 @@ Foam::Pstream::commsStruct::commsStruct
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-bool Foam::Pstream::commsStruct::operator==(const commsStruct& comm) const
+bool Foam::UPstream::commsStruct::operator==(const commsStruct& comm) const
 {
     return
     (
@@ -103,7 +103,7 @@ bool Foam::Pstream::commsStruct::operator==(const commsStruct& comm) const
 }
 
 
-bool Foam::Pstream::commsStruct::operator!=(const commsStruct& comm) const
+bool Foam::UPstream::commsStruct::operator!=(const commsStruct& comm) const
 {
     return !operator==(comm);
 }
@@ -111,7 +111,7 @@ bool Foam::Pstream::commsStruct::operator!=(const commsStruct& comm) const
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const Pstream::commsStruct& comm)
+Foam::Ostream& Foam::operator<<(Ostream& os, const UPstream::commsStruct& comm)
 {
     os  << comm.above_ << token::SPACE
         << comm.below_ << token::SPACE

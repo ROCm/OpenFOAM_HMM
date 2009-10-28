@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "Pstream.H"
+#include "PstreamBuffers.H"
 #include "PstreamCombineReduceOps.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -185,17 +186,9 @@ void Foam::mapDistribute::distribute
     {
         if (!contiguous<T>())
         {
-            // 1. convert to contiguous buffer
-            // 2. send buffer
-            // 3. receive buffer
-            // 4. read from buffer into List<T>
+            PstreamBuffers pBuffs(Pstream::nonBlocking);
 
-            List<List<char> > sendFields(Pstream::nProcs());
-            labelListList allNTrans(Pstream::nProcs());
-            labelList& nsTransPs = allNTrans[Pstream::myProcNo()];
-            nsTransPs.setSize(Pstream::nProcs(), 0);
-
-            // Stream data into sendField buffers
+            // Stream data into buffer
             for (label domain = 0; domain < Pstream::nProcs(); domain++)
             {
                 const labelList& map = subMap[domain];
@@ -203,66 +196,13 @@ void Foam::mapDistribute::distribute
                 if (domain != Pstream::myProcNo() && map.size())
                 {
                     // Put data into send buffer
-                    OPstream toDomain(Pstream::nonBlocking, domain);
+                    UOPstream toDomain(domain, pBuffs);
                     toDomain << UIndirectList<T>(field, map);
-
-                    // Store the size
-                    nsTransPs[domain] = toDomain.bufPosition();
-
-                    // Transfer buffer out
-                    sendFields[domain].transfer(toDomain.buf());
-                    toDomain.bufPosition() = 0;
-
                 }
             }
 
-            // Send sizes across
-            combineReduce(allNTrans, listEq());
-
-            // Start sending buffers
-            for (label domain = 0; domain < Pstream::nProcs(); domain++)
-            {
-                const labelList& map = subMap[domain];
-
-                if (domain != Pstream::myProcNo() && map.size())
-                {
-                    OPstream::write
-                    (
-                        Pstream::nonBlocking,
-                        domain,
-                        reinterpret_cast<const char*>
-                        (
-                            sendFields[domain].begin()
-                        ),
-                        nsTransPs[domain]
-                    );
-                }
-            }
-
-            // Set up receives from neighbours
-
-            PtrList<IPstream> fromSlave(Pstream::nProcs());
-
-            for (label domain = 0; domain < Pstream::nProcs(); domain++)
-            {
-                const labelList& map = constructMap[domain];
-
-                if (domain != Pstream::myProcNo() && map.size())
-                {
-                    // Start receiving
-                    fromSlave.set
-                    (
-                        domain,
-                        new IPstream
-                        (
-                            Pstream::nonBlocking,
-                            domain,
-                            allNTrans[domain][Pstream::myProcNo()]
-                        )
-                    );
-                }
-            }
-
+            // Start receiving
+            pBuffs.finishedSends();
 
             {
                 // Set up 'send' to myself
@@ -285,10 +225,6 @@ void Foam::mapDistribute::distribute
                 }
             }
 
-
-            // Wait till all finished
-            Pstream::waitRequests();
-
             // Consume
             for (label domain = 0; domain < Pstream::nProcs(); domain++)
             {
@@ -296,7 +232,8 @@ void Foam::mapDistribute::distribute
 
                 if (domain != Pstream::myProcNo() && map.size())
                 {
-                    List<T> recvField(fromSlave[domain]);
+                    UIPstream str(domain, pBuffs);
+                    List<T> recvField(str);
 
                     if (recvField.size() != map.size())
                     {
@@ -322,9 +259,6 @@ void Foam::mapDistribute::distribute
                     {
                         field[map[i]] = recvField[i];
                     }
-
-                    // Delete receive buffer
-                    fromSlave.set(domain, NULL);
                 }
             }
         }
@@ -618,17 +552,10 @@ void Foam::mapDistribute::distribute
     {
         if (!contiguous<T>())
         {
-            // 1. convert to contiguous buffer
-            // 2. send buffer
-            // 3. receive buffer
-            // 4. read from buffer into List<T>
+//XXXXXX
+            PstreamBuffers pBuffs(Pstream::nonBlocking);
 
-            List<List<char> > sendFields(Pstream::nProcs());
-            labelListList allNTrans(Pstream::nProcs());
-            labelList& nsTransPs = allNTrans[Pstream::myProcNo()];
-            nsTransPs.setSize(Pstream::nProcs());
-
-            // Stream data into sendField buffers
+            // Stream data into buffer
             for (label domain = 0; domain < Pstream::nProcs(); domain++)
             {
                 const labelList& map = subMap[domain];
@@ -636,65 +563,13 @@ void Foam::mapDistribute::distribute
                 if (domain != Pstream::myProcNo() && map.size())
                 {
                     // Put data into send buffer
-                    OPstream toDomain(Pstream::nonBlocking, domain);
+                    UOPstream toDomain(domain, pBuffs);
                     toDomain << UIndirectList<T>(field, map);
-
-                    // Store the size
-                    nsTransPs[domain] = toDomain.bufPosition();
-
-                    // Transfer buffer out
-                    sendFields[domain].transfer(toDomain.buf());
-                    toDomain.bufPosition() = 0;
                 }
             }
 
-            // Send sizes across
-            combineReduce(allNTrans, listEq());
-
-            // Start sending buffers
-            for (label domain = 0; domain < Pstream::nProcs(); domain++)
-            {
-                const labelList& map = subMap[domain];
-
-                if (domain != Pstream::myProcNo() && map.size())
-                {
-                    OPstream::write
-                    (
-                        Pstream::nonBlocking,
-                        domain,
-                        reinterpret_cast<const char*>
-                        (
-                            sendFields[domain].begin()
-                        ),
-                        nsTransPs[domain]
-                    );
-                }
-            }
-
-            // Set up receives from neighbours
-
-            PtrList<IPstream> fromSlave(Pstream::nProcs());
-
-            for (label domain = 0; domain < Pstream::nProcs(); domain++)
-            {
-                const labelList& map = constructMap[domain];
-
-                if (domain != Pstream::myProcNo() && map.size())
-                {
-                    // Start receiving
-                    fromSlave.set
-                    (
-                        domain,
-                        new IPstream
-                        (
-                            Pstream::nonBlocking,
-                            domain,
-                            allNTrans[domain][Pstream::myProcNo()]
-                        )
-                    );
-                }
-            }
-
+            // Start receiving
+            pBuffs.finishedSends();
 
             {
                 // Set up 'send' to myself
@@ -715,7 +590,7 @@ void Foam::mapDistribute::distribute
 
 
             // Wait till all finished
-            Pstream::waitRequests();
+            UPstream::waitRequests();
 
             // Consume
             for (label domain = 0; domain < Pstream::nProcs(); domain++)
@@ -724,7 +599,8 @@ void Foam::mapDistribute::distribute
 
                 if (domain != Pstream::myProcNo() && map.size())
                 {
-                    List<T> recvField(fromSlave[domain]);
+                    UIPstream str(domain, pBuffs);
+                    List<T> recvField(str);
 
                     if (recvField.size() != map.size())
                     {
@@ -750,9 +626,6 @@ void Foam::mapDistribute::distribute
                     {
                         cop(field[map[i]], recvField[i]);
                     }
-
-                    // Delete receive buffer
-                    fromSlave.set(domain, NULL);
                 }
             }
         }
@@ -796,7 +669,7 @@ void Foam::mapDistribute::distribute
                 if (domain != Pstream::myProcNo() && map.size())
                 {
                     recvFields[domain].setSize(map.size());
-                    IPstream::read
+                    UIPstream::read
                     (
                         Pstream::nonBlocking,
                         domain,
@@ -883,80 +756,6 @@ void Foam::mapDistribute::distribute
             << "Unknown communication schedule " << commsType
             << abort(FatalError);
     }
-}
-
-
-template<class T>
-void Foam::mapDistribute::exchange
-(
-    const List<List<T> >& sendBuf,
-    List<List<T> >& recvBuf
-)
-{
-    if (!contiguous<T>())
-    {
-        FatalErrorIn("mapDistribute::exchange(..)")
-            << "Not contiguous" << exit(FatalError);
-    }
-
-    if (Pstream::parRun())
-    {
-
-        // Determine sizes
-        // ~~~~~~~~~~~~~~~
-
-        labelListList allNTrans(Pstream::nProcs());
-        allNTrans[Pstream::myProcNo()].setSize(Pstream::nProcs());
-
-        forAll(allNTrans, procI)
-        {
-            allNTrans[Pstream::myProcNo()][procI] = sendBuf[procI].size();
-        }
-        combineReduce(allNTrans, listEq());
-
-
-        // Set up receives
-        // ~~~~~~~~~~~~~~~
-
-        recvBuf.setSize(Pstream::nProcs());
-        forAll(recvBuf, procI)
-        {
-            if (procI != Pstream::myProcNo())
-            {
-                recvBuf[procI].setSize(allNTrans[procI][Pstream::myProcNo()]);
-                IPstream::read
-                (
-                    Pstream::nonBlocking,
-                    procI,
-                    reinterpret_cast<char*>(recvBuf[procI].begin()),
-                    recvBuf[procI].byteSize()
-                );
-            }
-        }
-
-        // Set up sends
-        // ~~~~~~~~~~~~
-
-        forAll(sendBuf, procI)
-        {
-            if (procI != Pstream::myProcNo())
-            {
-                OPstream::write
-                (
-                    Pstream::nonBlocking,
-                    procI,
-                    reinterpret_cast<const char*>(sendBuf[procI].begin()),
-                    sendBuf[procI].byteSize()
-                );
-            }
-        }
-
-        // Wait for completion
-        Pstream::waitRequests();
-    }
-
-    // Do myself
-    recvBuf[Pstream::myProcNo()] = sendBuf[Pstream::myProcNo()];
 }
 
 
