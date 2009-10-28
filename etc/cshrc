@@ -32,7 +32,7 @@
 #------------------------------------------------------------------------------
 
 setenv WM_PROJECT OpenFOAM
-setenv WM_PROJECT_VERSION UPstream
+setenv WM_PROJECT_VERSION dev
 
 ################################################################################
 # USER EDITABLE PART
@@ -96,8 +96,8 @@ if ( ! $?WM_PRECISION_OPTION ) setenv WM_PRECISION_OPTION DP
 if ( ! $?WM_COMPILE_OPTION ) setenv WM_COMPILE_OPTION Opt
 
 # WM_MPLIB = | OPENMPI | MPICH | MPICH-GM | HPMPI | GAMMA | MPI | QSMPI
-#if ( ! $?WM_MPLIB ) setenv WM_MPLIB OPENMPI
-setenv WM_MPLIB OPENMPI
+if ( ! $?WM_MPLIB ) setenv WM_MPLIB OPENMPI
+
 
 # Run options (floating-point signal handling and memory initialisation)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
