@@ -22,27 +22,53 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Prints out a description of the streams
-
 \*---------------------------------------------------------------------------*/
 
-#include "IPstream.H"
-#include "OPstream.H"
+#include "UPstream.H"
+#include "PstreamReduceOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::IPstream::print(Ostream& os) const
+void Foam::UPstream::addValidParOptions(HashTable<string>& validParOptions)
+{}
+
+
+bool Foam::UPstream::init(int& argc, char**& argv)
 {
-    os  << "Reading from processor " << fromProcNo_
-        << " to processor " << myProcNo() << Foam::endl;
+    FatalErrorIn("UPstream::init(int& argc, char**& argv)")
+        << "Trying to use the dummy Pstream library." << nl
+        << "This dummy library cannot be used in parallel mode"
+        << Foam::exit(FatalError);
+
+    return false;
 }
 
 
-void Foam::OPstream::print(Ostream& os) const
+void Foam::UPstream::exit(int errnum)
 {
-    os  << "Writing from processor " << toProcNo_
-        << " to processor " << myProcNo() << Foam::endl;
+    notImplemented("UPstream::exit(int errnum)");
+}
+
+
+void Foam::UPstream::abort()
+{
+    notImplemented("UPstream::abort()");
+}
+
+
+void Foam::reduce(scalar&, const sumOp<scalar>&)
+{}
+
+
+
+void Foam::UPstream::waitRequests()
+{}
+
+
+bool Foam::UPstream::finishedRequest(const label i)
+{
+    notImplemented("UPstream::finishedRequest()");
+    return false;
 }
 
 

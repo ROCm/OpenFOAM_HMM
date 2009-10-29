@@ -227,7 +227,7 @@ Foam::fvMatrix<Type>::fvMatrix
         );
     }
 
-    // Update the boundary coefficients of psi without changing it's event No.
+    // Update the boundary coefficients of psi without changing its event No.
     GeometricField<Type, fvPatchField, volMesh>& psiRef =
        const_cast<GeometricField<Type, fvPatchField, volMesh>&>(psi_);
 

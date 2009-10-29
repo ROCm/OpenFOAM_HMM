@@ -22,64 +22,72 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::OPstream
-
 Description
-    Output inter-processor communications stream.
-
-SourceFiles
-    OPstream.C
+    Read from UIPstream
 
 \*---------------------------------------------------------------------------*/
 
-#include "Pstream.H"
+#include "UIPstream.H"
 
-#ifndef OPstream_H
-#define OPstream_H
+// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-#include "UOPstream.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-/*---------------------------------------------------------------------------*\
-                          Class OPstream Declaration
-\*---------------------------------------------------------------------------*/
-
-class OPstream
+Foam::UIPstream::UIPstream
+(
+    const commsTypes commsType,
+    const int fromProcNo,
+    DynamicList<char>& externalBuf,
+    const int tag,
+    streamFormat format,
+    versionNumber version
+)
 :
-    public Pstream,
-    public UOPstream
+    UPstream(commsType),
+    Istream(format, version),
+    fromProcNo_(fromProcNo),
+    externalBuf_(externalBuf),
+    externalBufPosition_(0),
+    tag_(tag),
+    messageSize_(0)
 {
-
-public:
-
-    // Constructors
-
-        //- Construct given process index to send to and optional buffer size,
-        //  write format and IO version
-        OPstream
-        (
-            const commsTypes commsType,
-            const int toProcNo,
-            const label bufSize = 0,
-            const int tag = UPstream::msgType(),
-            streamFormat format=BINARY,
-            versionNumber version=currentVersion
-        );
-
-};
+    notImplemented
+    (
+        "UIPstream::UIPstream"
+        "("
+            "const commsTypes,"
+            "const int fromProcNo,"
+            "DynamicList<char>&,"
+            "const int tag,"
+            "streamFormat, versionNumber"
+        ")"
+    );
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-} // End namespace Foam
+Foam::label Foam::UIPstream::read
+(
+    const commsTypes commsType,
+    const int fromProcNo,
+    char* buf,
+    const std::streamsize bufSize,
+    const int tag
+)
+{
+    notImplemented
+    (
+        "UIPstream::read"
+        "("
+            "const commsTypes,"
+            "const int fromProcNo,"
+            "char* buf,"
+            "const label bufSize,"
+            "const int tag"
+        ")"
+     );
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+     return 0;
+}
 
-#endif
 
 // ************************************************************************* //

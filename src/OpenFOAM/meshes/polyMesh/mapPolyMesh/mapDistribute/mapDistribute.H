@@ -93,38 +93,7 @@ class mapDistribute
         mutable autoPtr<List<labelPair> > schedulePtr_;
 
 
-        //- Exchange data. sendBuf[procI] : data to send to processor procI
-        //  To be moved into Pstream.
-        template<class T>
-        static void exchange
-        (
-            const List<List<T> >& sendBuf,
-            List<List<T> >& recvBuf
-        );
-
 public:
-
-    // Public classes
-
-        //- combineReduce operator for lists. Used for counting.
-        class listEq
-        {
-
-        public:
-
-            template<class T>
-            void operator()(T& x, const T& y) const
-            {
-                forAll(y, i)
-                {
-                    if (y[i].size())
-                    {
-                        x[i] = y[i];
-                    }
-                }
-            }
-        };
-
 
     // Constructors
 

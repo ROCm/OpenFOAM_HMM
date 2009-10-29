@@ -1,5 +1,5 @@
-Pstream.C
-IPread.C
-OPwrite.C
+UPstream.C
+UIPread.C
+UOPwrite.C
 
 LIB = $(FOAM_LIBBIN)/dummy/libPstream

@@ -23,66 +23,36 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Read token and binary block from IPstream
+    Write primitive and binary block from OPstream
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-#include "IPstream.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
-
-Foam::IPstream::IPstream
-(
-    const commsTypes commsType,
-    const int fromProcNo,
-    const label bufSize,
-    streamFormat format,
-    versionNumber version
-)
-:
-    Pstream(commsType, bufSize),
-    Istream(format, version),
-    fromProcNo_(fromProcNo),
-    messageSize_(0)
-{
-     notImplemented
-     (
-         "IPsream::IPstream"
-         "("
-             "const commsTypes,"
-             "const int fromProcNo," 
-             "const label bufSize,"
-             "streamFormat, versionNumber"
-         ")"
-     );
-}
-
+#include "UOPstream.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-int Foam::IPstream::read
+bool Foam::UOPstream::write
 (
     const commsTypes commsType,
-    const int fromProcNo,
-    char* buf,
-    const std::streamsize bufSize
+    const int toProcNo,
+    const char* buf,
+    const std::streamsize bufSize,
+    const int tag
 )
 {
     notImplemented
     (
-        "IPstream::read"
+        "UOPstream::write"
         "("
-            "const commsTypes,"
+            "const commsTypes commsType,"
             "const int fromProcNo,"
             "char* buf,"
-            "const label bufSize"
+            "const label bufSize,"
+            "const int tag"
         ")"
-     );
+    );
 
-     return 0;
+    return false;
 }
 
 

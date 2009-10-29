@@ -29,54 +29,18 @@ Description
 
 #include "mpi.h"
 
-#include "OPstream.H"
+#include "UOPstream.H"
 #include "PstreamGlobals.H"
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::OPstream::~OPstream()
-{
-    if (commsType_ == nonBlocking)
-    {
-        // alloc nonBlocking only if empty buffer. This denotes the buffer
-        // having been transfered out.
-        if (bufPosition_ > 0)
-        {
-            FatalErrorIn("OPstream::~OPstream()")
-                << "OPstream contains buffer so cannot be used with nonBlocking"
-                << " since destructor would destroy buffer whilst possibly"
-                << " still sending." << Foam::abort(FatalError);
-        }
-    }
-    else
-    {
-        if
-        (
-           !write
-            (
-                commsType_,
-                toProcNo_,
-                buf_.begin(),
-                bufPosition_
-            )
-        )
-        {
-            FatalErrorIn("OPstream::~OPstream()")
-                << "MPI cannot send outgoing message"
-                << Foam::abort(FatalError);
-        }
-    }
-}
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::OPstream::write
+bool Foam::UOPstream::write
 (
     const commsTypes commsType,
     const int toProcNo,
     const char* buf,
-    const std::streamsize bufSize
+    const std::streamsize bufSize,
+    const int tag
 )
 {
     bool transferFailed = true;
@@ -89,7 +53,7 @@ bool Foam::OPstream::write
             bufSize,
             MPI_PACKED,
             procID(toProcNo),
-            msgType(),
+            tag,
             MPI_COMM_WORLD
         );
     }
@@ -101,7 +65,7 @@ bool Foam::OPstream::write
             bufSize,
             MPI_PACKED,
             procID(toProcNo),
-            msgType(),
+            tag,
             MPI_COMM_WORLD
         );
     }
@@ -115,7 +79,7 @@ bool Foam::OPstream::write
             bufSize,
             MPI_PACKED,
             procID(toProcNo),
-            msgType(),
+            tag,
             MPI_COMM_WORLD,
             &request
         );
@@ -126,8 +90,9 @@ bool Foam::OPstream::write
     {
         FatalErrorIn
         (
-            "OPstream::write"
-            "(const int fromProcNo, char* buf, std::streamsize bufSize)"
+            "UOPstream::write"
+            "(const int fromProcNo, char* buf, std::streamsize bufSize"
+            ", const int)"
         )   << "Unsupported communications type " << commsType
             << Foam::abort(FatalError);
     }

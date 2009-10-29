@@ -22,46 +22,45 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Write primitive and binary block from OPstream
-
 \*---------------------------------------------------------------------------*/
+#include "argList.H"
 
-#include "error.H"
-#include "OPstream.H"
+#include "vector.H"
+#include "IFstream.H"
+#include "BSpline.H"
+
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Main program:
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::OPstream::~OPstream()
+int main(int argc, char *argv[])
 {
-    notImplemented("OPstream::~OPstream()");
-}
+    argList::noParallel();
+    argList::validArgs.insert("file .. fileN");
+
+    argList args(argc, argv, false, true);
+
+    forAll(args.additionalArgs(), argI)
+    {
+        const string& srcFile = args.additionalArgs()[argI];
+        Info<< nl << "reading " << srcFile << nl;
+        IFstream ifs(srcFile);
+
+        List<pointField> splinePointFields(ifs);
+
+        forAll(splinePointFields, splineI)
+        {
+            Info<<"convert " << splinePointFields[splineI] << " to bspline" << endl;
+
+            BSpline spl(splinePointFields[splineI], vector::zero, vector::zero);
+
+            Info<< "1/2 = " << spl.position(0.5) << endl;
+        }
+    }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::OPstream::write
-(
-    const commsTypes commsType,
-    const int toProcNo,
-    const char* buf,
-    const std::streamsize bufSize
-)
-{
-     notImplemented
-     (
-         "IPstream::write"
-         "("
-             "const commsTypes commsType,"
-             "const int fromProcNo,"
-             "char* buf,"
-             "const label bufSize"
-         ")"
-     );
-
-     return false;
+    return 0;
 }
 
 
