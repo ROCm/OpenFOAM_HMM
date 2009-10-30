@@ -74,6 +74,8 @@ int main(int argc, char *argv[])
         {
             map.erase(elemI++);
         }
+
+        map.shrink();
         Info<< "loop " << iLoop << " - Erased " << nBase << " elements"
             << " (size " << map.size() << " capacity " << map.capacity() << ") "
             << timer.cpuTimeIncrement() << " s\n";

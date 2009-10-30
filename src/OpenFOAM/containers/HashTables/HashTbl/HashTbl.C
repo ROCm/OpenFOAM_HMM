@@ -543,6 +543,19 @@ void Foam::HashTbl<T, Key, Hash>::clearStorage()
 
 
 template<class T, class Key, class Hash>
+void Foam::HashTbl<T, Key, Hash>::shrink()
+{
+    const label newSize = canonicalSize(nElmts_);
+
+    if (newSize < tableSize_)
+    {
+        // avoid having the table disappear on us
+        resize(newSize ? newSize : 2);
+    }
+}
+
+
+template<class T, class Key, class Hash>
 void Foam::HashTbl<T, Key, Hash>::transfer(HashTbl<T, Key, Hash>& ht)
 {
     // as per the Destructor
