@@ -56,15 +56,16 @@ int main(int argc, char *argv[])
     HashTbl<label, label, Hash<label> > map(2 * nSize);
 
     Info<< "Constructed map of size: " << nSize
+        << " (size " << map.size() << " capacity " << map.capacity() << ") "
         << "  " << timer.cpuTimeIncrement() << " s\n\n";
 
     for (label i = 0; i < nSize; i++)
     {
         map.insert(i, i);
     }
-    Info<< "Inserted " << nSize << " elements: "
-        << timer.cpuTimeIncrement() << " s\n\n";
-
+    Info<< "Inserted " << nSize << " elements"
+        << " (size " << map.size() << " capacity " << map.capacity() << ") "
+        << timer.cpuTimeIncrement() << " s\n";
 
     label elemI = 0;
     for (label iLoop = 0; iLoop < nLoops; iLoop++)
@@ -73,8 +74,9 @@ int main(int argc, char *argv[])
         {
             map.erase(elemI++);
         }
-        Info<< "loop " << iLoop << " - Erased " << nBase << " elements: "
-            << "  " << timer.cpuTimeIncrement() << " s\n";
+        Info<< "loop " << iLoop << " - Erased " << nBase << " elements"
+            << " (size " << map.size() << " capacity " << map.capacity() << ") "
+            << timer.cpuTimeIncrement() << " s\n";
     }
 
     return 0;

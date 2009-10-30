@@ -56,6 +56,13 @@ Foam::HashTbl<T, Key, Hash>::hashKeyIndex(const Key& key) const
 // * * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
+inline Foam::label Foam::HashTbl<T, Key, Hash>::capacity() const
+{
+    return tableSize_;
+}
+
+
+template<class T, class Key, class Hash>
 inline Foam::label Foam::HashTbl<T, Key, Hash>::size() const
 {
     return nElmts_;
@@ -256,15 +263,16 @@ inline
 typename Foam::HashTbl<T, Key, Hash>::iterator&
 Foam::HashTbl<T, Key, Hash>::iterator::operator++()
 {
-    // Check for special value from erase. (sets hashIndex to -1)
-    if (hashIndex_ >= 0)
+    // Check for special value (from erase) - this indicates the previous bin
+    if (hashIndex_ < 0)
+    {
+        hashIndex_ = -hashIndex_;
+    }
+    else if (elmtPtr_ && elmtPtr_->next_)
     {
         // Do we have additional elements on the SLList?
-        if (elmtPtr_ && elmtPtr_->next_)
-        {
-            elmtPtr_ = elmtPtr_->next_;
-            return *this;
-        }
+        elmtPtr_ = elmtPtr_->next_;
+        return *this;
     }
 
     // Step to the next table entry
@@ -275,9 +283,9 @@ Foam::HashTbl<T, Key, Hash>::iterator::operator++()
     )
     {}
 
-    if (hashIndex_ == hashTable_.tableSize_)
+    if (hashIndex_ >= hashTable_.tableSize_)
     {
-        // make end iterator
+        // make an end iterator
         elmtPtr_ = 0;
         hashIndex_ = 0;
     }

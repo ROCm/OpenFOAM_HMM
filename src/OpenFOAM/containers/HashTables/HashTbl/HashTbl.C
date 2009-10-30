@@ -346,55 +346,41 @@ bool Foam::HashTbl<T, Key, Hash>::erase(const iterator& cit)
 {
     if (cit.elmtPtr_)    // note: endIter_ also has 0 elmtPtr_
     {
-        iterator& it = const_cast<iterator&>(cit);
-
         // Search element before elmtPtr_
         hashedEntry* prev = 0;
 
-        for (hashedEntry* ep = table_[it.hashIndex_]; ep; ep = ep->next_)
+        for (hashedEntry* ep = table_[cit.hashIndex_]; ep; ep = ep->next_)
         {
-            if (ep == it.elmtPtr_)
+            if (ep == cit.elmtPtr_)
             {
                 break;
             }
             prev = ep;
         }
 
+        // adjust iterator after erase
+        iterator& iter = const_cast<iterator&>(cit);
+
         if (prev)
         {
-            // Have element before elmtPtr
-            prev->next_ = it.elmtPtr_->next_;
-            delete it.elmtPtr_;
-            it.elmtPtr_ = prev;
+            // has an element before elmtPtr - reposition to there
+            prev->next_ = iter.elmtPtr_->next_;
+            delete iter.elmtPtr_;
+            iter.elmtPtr_ = prev;
         }
         else
         {
-            // elmtPtr is first element on SLList
-            table_[it.hashIndex_] = it.elmtPtr_->next_;
-            delete it.elmtPtr_;
+            // elmtPtr was first element on SLList
+            table_[iter.hashIndex_] = iter.elmtPtr_->next_;
+            delete iter.elmtPtr_;
 
-            // Search back for previous non-zero table entry
-            while (--it.hashIndex_ >= 0 && !table_[it.hashIndex_])
-            {}
+            // assign an non-NULL value so it doesn't look like end()/cend()
+            iter.elmtPtr_ = reinterpret_cast<hashedEntry*>(this);
 
-            if (it.hashIndex_ >= 0)
-            {
-                // In table entry search for last element
-                it.elmtPtr_ = table_[it.hashIndex_];
-
-                while (it.elmtPtr_ && it.elmtPtr_->next_)
-                {
-                    it.elmtPtr_ = it.elmtPtr_->next_;
-                }
-            }
-            else
-            {
-                // No previous found. Mark with special value which is
-                // - not end()/cend()
-                // - handled by operator++
-                it.elmtPtr_ = reinterpret_cast<hashedEntry*>(this);
-                it.hashIndex_ = -1;
-            }
+            // mark with special hashIndex value
+            // to signal that it has been rewound
+            // the next increment will bring it bach to the present location
+            iter.hashIndex_ = -iter.hashIndex_ - 1;
         }
 
         nElmts_--;
@@ -402,8 +388,8 @@ bool Foam::HashTbl<T, Key, Hash>::erase(const iterator& cit)
 #       ifdef FULLDEBUG
         if (debug)
         {
-            Info<< "HashTbl<T, Key, Hash>::erase(iterator&) : "
-                << "hashedEntry " << it.elmtPtr_->key_ << " removed.\n";
+            Info<< "HashTbl<T, Key, Hash>::erase(const iterator&) : "
+                << "hashedEntry " << iter.elmtPtr_->key_ << " removed.\n";
         }
 #       endif
 

@@ -178,6 +178,9 @@ public:
 
         // Access
 
+            //- The size of the underlying table
+            inline label capacity() const;
+
             //- Return number of elements in table.
             inline label size() const;
 
