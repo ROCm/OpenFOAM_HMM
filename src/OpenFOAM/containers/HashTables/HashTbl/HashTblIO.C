@@ -37,8 +37,8 @@ Foam::HashTbl<T, Key, Hash>::HashTbl(Istream& is, const label size)
     nElmts_(0),
     tableSize_(canonicalSize(size)),
     table_(new hashedEntry*[tableSize_]),
-    endIter_(*this, NULL, 0),
-    endConstIter_(*this, NULL, 0)
+    endIter_(),
+    endConstIter_()
 {
     for (label hashIdx = 0; hashIdx < tableSize_; hashIdx++)
     {

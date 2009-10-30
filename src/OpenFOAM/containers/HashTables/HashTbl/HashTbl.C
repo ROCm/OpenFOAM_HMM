@@ -66,8 +66,8 @@ Foam::HashTbl<T, Key, Hash>::HashTbl(const label size)
     nElmts_(0),
     tableSize_(canonicalSize(size)),
     table_(NULL),
-    endIter_(*this, NULL, 0),
-    endConstIter_(*this, NULL, 0)
+    endIter_(),
+    endConstIter_()
 {
     if (tableSize_)
     {
@@ -88,8 +88,8 @@ Foam::HashTbl<T, Key, Hash>::HashTbl(const HashTbl<T, Key, Hash>& ht)
     nElmts_(0),
     tableSize_(ht.tableSize_),
     table_(NULL),
-    endIter_(*this, NULL, 0),
-    endConstIter_(*this, NULL, 0)
+    endIter_(),
+    endConstIter_()
 {
     if (tableSize_)
     {
@@ -117,8 +117,8 @@ Foam::HashTbl<T, Key, Hash>::HashTbl
     nElmts_(0),
     tableSize_(0),
     table_(NULL),
-    endIter_(*this, NULL, 0),
-    endConstIter_(*this, NULL, 0)
+    endIter_(),
+    endConstIter_()
 {
     transfer(ht());
 }
@@ -182,7 +182,7 @@ Foam::HashTbl<T, Key, Hash>::find
         {
             if (key == ep->key_)
             {
-                return iterator(*this, ep, hashIdx);
+                return iterator(this, ep, hashIdx);
             }
         }
     }
@@ -214,7 +214,7 @@ Foam::HashTbl<T, Key, Hash>::find
         {
             if (key == ep->key_)
             {
-                return const_iterator(*this, ep, hashIdx);
+                return const_iterator(this, ep, hashIdx);
             }
         }
     }
@@ -344,7 +344,8 @@ bool Foam::HashTbl<T, Key, Hash>::set
 template<class T, class Key, class Hash>
 bool Foam::HashTbl<T, Key, Hash>::erase(const iterator& cit)
 {
-    if (cit.elmtPtr_)    // note: endIter_ also has 0 elmtPtr_
+    // note: endIter_ has NULL elmtPtr_, so this also catches that
+    if (cit.elmtPtr_)
     {
         // Search element before elmtPtr_
         hashedEntry* prev = 0;
@@ -377,9 +378,8 @@ bool Foam::HashTbl<T, Key, Hash>::erase(const iterator& cit)
             // assign an non-NULL value so it doesn't look like end()/cend()
             iter.elmtPtr_ = reinterpret_cast<hashedEntry*>(this);
 
-            // mark with special hashIndex value
-            // to signal that it has been rewound
-            // the next increment will bring it bach to the present location
+            // mark with special hashIndex value to signal it has been rewound
+            // the next increment will bring it back to the present location
             iter.hashIndex_ = -iter.hashIndex_ - 1;
         }
 
@@ -400,7 +400,7 @@ bool Foam::HashTbl<T, Key, Hash>::erase(const iterator& cit)
 #       ifdef FULLDEBUG
         if (debug)
         {
-            Info<< "HashTbl<T, Key, Hash>::erase(iterator&) : "
+            Info<< "HashTbl<T, Key, Hash>::erase(const iterator&) : "
                 << "cannot remove hashedEntry from hash table\n";
         }
 #       endif
@@ -448,10 +448,10 @@ Foam::label Foam::HashTbl<T, Key, Hash>::erase(const UList<Key>& keys)
 
 
 template<class T, class Key, class Hash>
-template<class AnyType>
+template<class AnyType, class AnyHash>
 Foam::label Foam::HashTbl<T, Key, Hash>::erase
 (
-    const HashTbl<AnyType, Key, Hash>& rhs
+    const HashTbl<AnyType, Key, AnyHash>& rhs
 )
 {
     label count = 0;

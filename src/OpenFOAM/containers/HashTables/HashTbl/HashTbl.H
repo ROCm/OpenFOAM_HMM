@@ -119,7 +119,7 @@ class HashTbl
         //- The current number of elements in table
         label nElmts_;
 
-        //- Number of primary entries allocated in table (not necessarily used)
+        //- Number of primary entries allocated in table
         label tableSize_;
 
         //- The table of primary entries
@@ -140,17 +140,18 @@ class HashTbl
 
 public:
 
+    // Forward declaration of STL iterators
+        class iterator;
+        class const_iterator;
+
         //- Declare friendship with the HashPtrTable class
         template<class T2, class Key2, class Hash2>
         friend class HashPtrTable;
 
-
-    // Forward declaration of STL iterators
-
-        class iterator;
+        //- Declare friendship with the iterator
         friend class iterator;
 
-        class const_iterator;
+        //- Declare friendship with the const_iterator
         friend class const_iterator;
 
 
@@ -181,7 +182,7 @@ public:
             //- The size of the underlying table
             inline label capacity() const;
 
-            //- Return number of elements in table.
+            //- Return number of elements in table
             inline label size() const;
 
             //- Return true if the hash table is empty
@@ -215,10 +216,11 @@ public:
             //- Assign a new hashedEntry, overwriting existing entries
             inline bool set(const Key&, const T& newElmt);
 
-            //- Erase an hashedEntry specified by given iterator
+            //- Erase a hashedEntry specified by given iterator
+            //  This invalidates the iterator until the operator++
             bool erase(const iterator&);
 
-            //- Erase an hashedEntry specified by given key if in table
+            //- Erase a hashedEntry specified by the given key
             bool erase(const Key&);
 
             //- Remove entries given by the listed keys from this HashTbl
@@ -227,10 +229,10 @@ public:
 
             //- Remove entries given by the given keys from this HashTbl
             //  Return the number of elements removed.
-            //  The parameter HashTbl needs the same type of keys, but
-            //  but the type of values held is arbitrary.
-            template<class AnyType>
-            label erase(const HashTbl<AnyType, Key, Hash>&);
+            //  The parameter HashTbl needs the same type of key, but the
+            //  type of values held and the hashing function is arbitrary.
+            template<class AnyType, class AnyHash>
+            label erase(const HashTbl<AnyType, Key, AnyHash>&);
 
             //- Resize the hash table for efficiency
             void resize(const label newSize);
@@ -255,13 +257,13 @@ public:
 
     // Member Operators
 
-        //- Find and return an hashedEntry
+        //- Find and return a hashedEntry
         inline T& operator[](const Key&);
 
-        //- Find and return an hashedEntry
+        //- Find and return a hashedEntry
         inline const T& operator[](const Key&) const;
 
-        //- Find and return an hashedEntry, create it null if not present.
+        //- Find and return a hashedEntry, create it null if not present
         inline T& operator()(const Key&);
 
         //- Assignment
@@ -295,7 +297,7 @@ public:
         typedef label size_type;
 
 
-    // STL iterator
+    // Iterators and helpers
 
         //- An STL-conforming iterator
         class iterator
@@ -305,8 +307,9 @@ public:
 
             // Private data
 
-                //- Reference to the HashTbl this is an iterator for
-                HashTbl<T, Key, Hash>& hashTable_;
+                //- Pointer to the HashTbl for which this is an iterator
+                //  This also lets us use the default bitwise copy/assignment
+                HashTbl<T, Key, Hash>* hashTable_;
 
                 //- Current element
                 hashedEntry* elmtPtr_;
@@ -318,34 +321,43 @@ public:
 
             // Constructors
 
+                //- Construct null (end iterator)
+                inline iterator();
+
                 //- Construct from hash table, element and hash index
                 inline iterator
                 (
-                    HashTbl<T, Key, Hash>& curHashTbl,
+                    HashTbl<T, Key, Hash>* curHashTbl,
                     hashedEntry* elmt,
-                    label hashIndex
+                    const label hashIndex
                 );
+
 
             // Member operators
 
-                inline void operator=(const iterator&);
+                // Access
 
+                //- Return the Key corresponding to the iterator
+                inline const Key& key() const;
+
+                //- Compare hashedEntry element pointers
                 inline bool operator==(const iterator&) const;
                 inline bool operator!=(const iterator&) const;
 
+                //- Compare hashedEntry element pointers
                 inline bool operator==(const const_iterator&) const;
                 inline bool operator!=(const const_iterator&) const;
 
+                //- Return referenced hash value
                 inline T& operator*();
                 inline T& operator()();
 
+                //- Return referenced hash value
                 inline const T& operator*() const;
                 inline const T& operator()() const;
 
                 inline iterator& operator++();
                 inline iterator operator++(int);
-
-                inline const Key& key() const;
         };
 
 
@@ -365,8 +377,9 @@ public:
 
             // Private data
 
-                //- Reference to the HashTbl this is an iterator for
-                const HashTbl<T, Key, Hash>& hashTable_;
+                //- Pointer to the HashTbl for which this is an iterator
+                //  This also lets us use the default bitwise copy/assignment
+                const HashTbl<T, Key, Hash>* hashTable_;
 
                 //- Current element
                 const hashedEntry* elmtPtr_;
@@ -374,17 +387,19 @@ public:
                 //- Current hash index
                 label hashIndex_;
 
-
         public:
 
             // Constructors
 
+                //- Construct null (end iterator)
+                inline const_iterator();
+
                 //- Construct from hash table, element and hash index
                 inline const_iterator
                 (
-                    const HashTbl<T, Key, Hash>& curHashTbl,
+                    const HashTbl<T, Key, Hash>* curHashTbl,
                     const hashedEntry* elmt,
-                    label hashIndex
+                    const label hashIndex
                 );
 
                 //- Construct from the non-const iterator
@@ -393,21 +408,26 @@ public:
 
             // Member operators
 
-                inline void operator=(const const_iterator&);
+                // Access
 
+                //- Return the Key corresponding to the iterator
+                inline const Key& key() const;
+
+                //- Compare hashedEntry element pointers
                 inline bool operator==(const const_iterator&) const;
                 inline bool operator!=(const const_iterator&) const;
 
+                //- Compare hashedEntry element pointers
                 inline bool operator==(const iterator&) const;
                 inline bool operator!=(const iterator&) const;
 
+                //- Return referenced hash value
                 inline const T& operator*() const;
                 inline const T& operator()() const;
 
                 inline const_iterator& operator++();
                 inline const_iterator operator++(int);
 
-                inline const Key& key() const;
         };
 
 

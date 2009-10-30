@@ -164,9 +164,9 @@ inline T& Foam::HashTbl<T, Key, Hash>::operator()(const Key& key)
 template<class T, class Key, class Hash>
 inline Foam::HashTbl<T, Key, Hash>::iterator::iterator
 (
-    HashTbl<T, Key, Hash>& hashTbl,
+    HashTbl<T, Key, Hash>* hashTbl,
     hashedEntry* elmt,
-    label hashIndex
+    const label hashIndex
 )
 :
     hashTable_(hashTbl),
@@ -176,14 +176,12 @@ inline Foam::HashTbl<T, Key, Hash>::iterator::iterator
 
 
 template<class T, class Key, class Hash>
-inline void Foam::HashTbl<T, Key, Hash>::iterator::operator=
-(
-    const iterator& iter
-)
-{
-    elmtPtr_ = iter.elmtPtr_;
-    hashIndex_ = iter.hashIndex_;
-}
+inline Foam::HashTbl<T, Key, Hash>::iterator::iterator()
+:
+    hashTable_(0),
+    elmtPtr_(0),
+    hashIndex_(0)
+{}
 
 
 template<class T, class Key, class Hash>
@@ -278,12 +276,12 @@ Foam::HashTbl<T, Key, Hash>::iterator::operator++()
     // Step to the next table entry
     while
     (
-        ++hashIndex_ < hashTable_.tableSize_
-     && !(elmtPtr_ = hashTable_.table_[hashIndex_])
+        ++hashIndex_ < hashTable_->tableSize_
+     && !(elmtPtr_ = hashTable_->table_[hashIndex_])
     )
     {}
 
-    if (hashIndex_ >= hashTable_.tableSize_)
+    if (hashIndex_ >= hashTable_->tableSize_)
     {
         // make an end iterator
         elmtPtr_ = 0;
@@ -318,19 +316,19 @@ template<class T, class Key, class Hash>
 inline typename Foam::HashTbl<T, Key, Hash>::iterator
 Foam::HashTbl<T, Key, Hash>::begin()
 {
-    label i = 0;
+    label hashIdx = 0;
 
     if (nElmts_)
     {
-        while (table_ && !table_[i] && ++i < tableSize_)
+        while (table_ && !table_[hashIdx] && ++hashIdx < tableSize_)
         {}
     }
     else
     {
-        i = tableSize_;
+        hashIdx = tableSize_;
     }
 
-    if (i == tableSize_)
+    if (hashIdx >= tableSize_)
     {
 #       ifdef FULLDEBUG
         if (debug)
@@ -343,7 +341,7 @@ Foam::HashTbl<T, Key, Hash>::begin()
     }
     else
     {
-        return iterator(*this, table_[i], i);
+        return iterator(this, table_[hashIdx], hashIdx);
     }
 }
 
@@ -359,11 +357,20 @@ Foam::HashTbl<T, Key, Hash>::end()
 // * * * * * * * * * * * * * * * STL const_iterator * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
+inline Foam::HashTbl<T, Key, Hash>::const_iterator::const_iterator()
+:
+    hashTable_(0),
+    elmtPtr_(0),
+    hashIndex_(0)
+{}
+
+
+template<class T, class Key, class Hash>
 inline Foam::HashTbl<T, Key, Hash>::const_iterator::const_iterator
 (
-    const HashTbl<T, Key, Hash>& hashTbl,
+    const HashTbl<T, Key, Hash>* hashTbl,
     const hashedEntry* elmt,
-    label hashIndex
+    const label hashIndex
 )
 :
     hashTable_(hashTbl),
@@ -382,17 +389,6 @@ inline Foam::HashTbl<T, Key, Hash>::const_iterator::const_iterator
     elmtPtr_(iter.elmtPtr_),
     hashIndex_(iter.hashIndex_)
 {}
-
-
-template<class T, class Key, class Hash>
-inline void Foam::HashTbl<T, Key, Hash>::const_iterator::operator=
-(
-    const const_iterator& iter
-)
-{
-    elmtPtr_ = iter.elmtPtr_;
-    hashIndex_ = iter.hashIndex_;
-}
 
 
 template<class T, class Key, class Hash>
@@ -458,14 +454,14 @@ Foam::HashTbl<T, Key, Hash>::const_iterator::operator++()
     if
     (
         !(elmtPtr_ = elmtPtr_->next_)
-     && ++hashIndex_ < hashTable_.tableSize_
-     && !(elmtPtr_ = hashTable_.table_[hashIndex_])
+     && ++hashIndex_ < hashTable_->tableSize_
+     && !(elmtPtr_ = hashTable_->table_[hashIndex_])
     )
     {
         while
         (
-            ++hashIndex_ < hashTable_.tableSize_
-         && !(elmtPtr_ = hashTable_.table_[hashIndex_])
+            ++hashIndex_ < hashTable_->tableSize_
+         && !(elmtPtr_ = hashTable_->table_[hashIndex_])
         )
         {}
     }
@@ -499,19 +495,19 @@ template<class T, class Key, class Hash>
 inline typename Foam::HashTbl<T, Key, Hash>::const_iterator
 Foam::HashTbl<T, Key, Hash>::cbegin() const
 {
-    label i = 0;
+    label hashIdx = 0;
 
     if (nElmts_)
     {
-        while (table_ && !table_[i] && ++i < tableSize_)
+        while (table_ && !table_[hashIdx] && ++hashIdx < tableSize_)
         {}
     }
     else
     {
-        i = tableSize_;
+        hashIdx = tableSize_;
     }
 
-    if (i == tableSize_)
+    if (hashIdx >= tableSize_)
     {
 #       ifdef FULLDEBUG
         if (debug)
@@ -524,7 +520,7 @@ Foam::HashTbl<T, Key, Hash>::cbegin() const
     }
     else
     {
-        return const_iterator(*this, table_[i], i);
+        return const_iterator(this, table_[hashIdx], hashIdx);
     }
 }
 
