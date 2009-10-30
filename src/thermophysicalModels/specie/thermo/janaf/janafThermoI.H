@@ -56,7 +56,7 @@ inline Foam::janafThermo<equationOfState>::janafThermo
 template<class equationOfState>
 inline void Foam::janafThermo<equationOfState>::checkT(const scalar T) const
 {
-    if (T <  Tlow_ || T > Thigh_)
+    if (T < Tlow_ || T > Thigh_)
     {
         FatalErrorIn
         (

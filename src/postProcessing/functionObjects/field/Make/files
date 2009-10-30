@@ -7,10 +7,10 @@ fieldMinMax/fieldMinMax.C
 fieldMinMax/fieldMinMaxFunctionObject.C
 
 fieldValues/fieldValue/fieldValue.C
-fieldValues/face/faceSource.C
-fieldValues/face/faceSourceFunctionObject.C
-fieldValues/cell/cellSource.C
-fieldValues/cell/cellSourceFunctionObject.C
+fieldValues/faceSource/faceSource.C
+fieldValues/faceSource/faceSourceFunctionObject.C
+fieldValues/cellSource/cellSource.C
+fieldValues/cellSource/cellSourceFunctionObject.C
 
 streamLine/streamLine.C
 streamLine/streamLineParticle.C

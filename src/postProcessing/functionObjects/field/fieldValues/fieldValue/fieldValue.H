@@ -137,7 +137,7 @@ public:
             //- Return the output field values flag
             const Switch& valueOutput() const;
 
-            //- Helper funvction to return the reference to the mesh
+            //- Helper function to return the reference to the mesh
             const fvMesh& mesh() const;
 
 
