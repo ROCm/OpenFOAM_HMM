@@ -269,9 +269,8 @@ public:
         //- Assignment
         void operator=(const HashTbl<T, Key, Hash>&);
 
-        //- Equality. Two hash tables are equal if all contents of first are
-        //  also in second and vice versa. So does not depend on table size or
-        //  order!
+        //- Equality. Hash tables are equal if the keys and values are equal.
+        //  Independent of table storage size and table order.
         bool operator==(const HashTbl<T, Key, Hash>&) const;
 
         //- The opposite of the equality operation. Takes linear time.

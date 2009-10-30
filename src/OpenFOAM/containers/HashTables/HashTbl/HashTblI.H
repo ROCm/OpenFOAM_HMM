@@ -261,10 +261,12 @@ inline
 typename Foam::HashTbl<T, Key, Hash>::iterator&
 Foam::HashTbl<T, Key, Hash>::iterator::operator++()
 {
-    // Check for special value (from erase) - this indicates the previous bin
+    // A negative index is a special value from erase
     if (hashIndex_ < 0)
     {
-        hashIndex_ = -hashIndex_;
+        // old position 'X' was marked as '-(X+1)'
+        // but we wish to continue at 'X-1'
+        hashIndex_ = -hashIndex_ - 2;
     }
     else if (elmtPtr_ && elmtPtr_->next_)
     {

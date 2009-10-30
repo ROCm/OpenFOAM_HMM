@@ -341,10 +341,15 @@ bool Foam::HashTbl<T, Key, Hash>::set
 }
 
 
+// NOTE:
+// We use (const iterator&) here, but manipulate its contents anyhow.
+// The parameter should be (iterator&), but then the compiler doesn't find
+// it correctly and tries to call as (iterator) instead.
+//
 template<class T, class Key, class Hash>
 bool Foam::HashTbl<T, Key, Hash>::erase(const iterator& cit)
 {
-    // note: endIter_ has NULL elmtPtr_, so this also catches that
+    // note: elmtPtr_ is NULL for end(), so this catches that too
     if (cit.elmtPtr_)
     {
         // Search element before elmtPtr_
@@ -378,8 +383,14 @@ bool Foam::HashTbl<T, Key, Hash>::erase(const iterator& cit)
             // assign an non-NULL value so it doesn't look like end()/cend()
             iter.elmtPtr_ = reinterpret_cast<hashedEntry*>(this);
 
-            // mark with special hashIndex value to signal it has been rewound
-            // the next increment will bring it back to the present location
+            // Mark with special hashIndex value to signal it has been rewound.
+            // The next increment will bring it back to the present location.
+            //
+            // For the current position 'X', mark it as '-(X+1)', which is
+            // written as '-X-1' to avoid overflow.
+            // The extra '-1' is needed to avoid ambiguity for position '0'.
+            // To retrieve the previous position 'X-1' we would later
+            // use '-(-X-1) - 2'
             iter.hashIndex_ = -iter.hashIndex_ - 1;
         }
 
@@ -413,6 +424,7 @@ bool Foam::HashTbl<T, Key, Hash>::erase(const iterator& cit)
 template<class T, class Key, class Hash>
 bool Foam::HashTbl<T, Key, Hash>::erase(const Key& key)
 {
+    // we could also simply do:   erase(find(key));
     iterator fnd = find(key);
 
     if (fnd != end())
@@ -429,17 +441,15 @@ bool Foam::HashTbl<T, Key, Hash>::erase(const Key& key)
 template<class T, class Key, class Hash>
 Foam::label Foam::HashTbl<T, Key, Hash>::erase(const UList<Key>& keys)
 {
+    const label nTotal = nElmts_;
     label count = 0;
 
-    // Remove listed keys from this table
-    if (this->size())
+    // Remove listed keys from this table - terminates early if possible
+    for (label keyI = 0; count < nTotal && keyI < keys.size(); ++keyI)
     {
-        forAll(keys, keyI)
+        if (erase(keys[keyI]))
         {
-            if (erase(keys[keyI]))
-            {
-                count++;
-            }
+            count++;
         }
     }
 
@@ -456,16 +466,13 @@ Foam::label Foam::HashTbl<T, Key, Hash>::erase
 {
     label count = 0;
 
-    // Remove rhs elements from this table
-    if (this->size())
+    // Remove rhs keys from this table - terminates early if possible
+    // Could optimize depending on which hash is smaller ...
+    for (iterator iter = begin(); iter != end(); ++iter)
     {
-        // NOTE: could further optimize depending on which hash is smaller
-        for (iterator iter = begin(); iter != end(); ++iter)
+        if (rhs.found(iter.key()) && erase(iter))
         {
-            if (rhs.found(iter.key()) && erase(iter))
-            {
-                count++;
-            }
+            count++;
         }
     }
 
@@ -618,18 +625,12 @@ bool Foam::HashTbl<T, Key, Hash>::operator==
     const HashTbl<T, Key, Hash>& rhs
 ) const
 {
-    // Are all my elements in rhs?
-    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
+    // sizes (ie, number of keys) must match
+    if (size() != rhs.size())
     {
-        const_iterator fnd = rhs.find(iter.key());
-
-        if (fnd == rhs.cend() || fnd() != iter())
-        {
-            return false;
-        }
+        return false;
     }
 
-    // Are all rhs elements in me?
     for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
         const_iterator fnd = find(iter.key());
@@ -639,6 +640,7 @@ bool Foam::HashTbl<T, Key, Hash>::operator==
             return false;
         }
     }
+
     return true;
 }
 
