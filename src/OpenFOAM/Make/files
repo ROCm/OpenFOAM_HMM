@@ -61,6 +61,7 @@ $(sha1)/SHA1Digest.C
 
 primitives/random/Random.C
 
+containers/HashTables/HashTbl/HashTblName.C
 containers/HashTables/HashTable/HashTableName.C
 containers/HashTables/StaticHashTable/StaticHashTableName.C
 containers/Lists/SortableList/ParSortableListName.C
