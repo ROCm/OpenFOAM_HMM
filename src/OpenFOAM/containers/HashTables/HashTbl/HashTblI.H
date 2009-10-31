@@ -162,6 +162,142 @@ inline T& Foam::HashTbl<T, Key, Hash>::operator()(const Key& key)
 // * * * * * * * * * * * * * * * * STL iterator  * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
+inline Foam::HashTbl<T, Key, Hash>::iteratorBase::iteratorBase()
+:
+    hashTable_(0),
+    elmtPtr_(0),
+    hashIndex_(0)
+{}
+
+
+template<class T, class Key, class Hash>
+inline Foam::HashTbl<T, Key, Hash>::iteratorBase::iteratorBase
+(
+    const HashTbl<T, Key, Hash>* hashTbl
+)
+:
+    hashTable_(const_cast<HashTbl<T, Key, Hash>*>(hashTbl)),
+    elmtPtr_(0),
+    hashIndex_(0)
+{
+    if (hashTable_->nElmts_ && hashTable_->table_)
+    {
+        // find first non-NULL table entry
+        while
+        (
+            !(elmtPtr_ = hashTable_->table_[hashIndex_])
+         && ++hashIndex_ < hashTable_->tableSize_
+        )
+        {}
+
+        if (hashIndex_ >= hashTable_->tableSize_)
+        {
+            // make into an end iterator
+            elmtPtr_ = 0;
+            hashIndex_ = 0;
+        }
+        else
+        {
+            Info<<"OK  key is " << this->key() << endl;
+        }
+    }
+}
+
+
+template<class T, class Key, class Hash>
+inline Foam::HashTbl<T, Key, Hash>::iteratorBase::iteratorBase
+(
+    const HashTbl<T, Key, Hash>* hashTbl,
+    const hashedEntry* elmt,
+    const label hashIndex
+)
+:
+    hashTable_(const_cast<HashTbl<T, Key, Hash>*>(hashTbl)),
+    elmtPtr_(const_cast<hashedEntry*>(elmt)),
+    hashIndex_(hashIndex)
+{}
+
+
+template<class T, class Key, class Hash>
+inline typename Foam::HashTbl<T, Key, Hash>::iteratorBase
+Foam::HashTbl<T, Key, Hash>::beginBase()
+{
+    return iteratorBase(this);
+}
+
+
+template<class T, class Key, class Hash>
+inline void
+Foam::HashTbl<T, Key, Hash>::iteratorBase::incr()
+{
+    // A negative index is a special value from erase
+    if (hashIndex_ < 0)
+    {
+        // old position 'X' was marked as '-(X+1)'
+        // but we wish to continue at 'X-1'
+        hashIndex_ = -hashIndex_ - 2;
+    }
+    else if (elmtPtr_ && elmtPtr_->next_)
+    {
+        // Do we have additional elements on the SLList?
+        elmtPtr_ = elmtPtr_->next_;
+        return;
+    }
+
+    // Step to the next table entry
+    while
+    (
+        ++hashIndex_ < hashTable_->tableSize_
+     && !(elmtPtr_ = hashTable_->table_[hashIndex_])
+    )
+    {}
+
+    if (hashIndex_ >= hashTable_->tableSize_)
+    {
+        // make into an end iterator
+        elmtPtr_ = 0;
+        hashIndex_ = 0;
+    }
+}
+
+
+template<class T, class Key, class Hash>
+inline
+const Key& Foam::HashTbl<T, Key, Hash>::iteratorBase::key() const
+{
+    return elmtPtr_->key_;
+}
+
+
+template<class T, class Key, class Hash>
+inline const T&
+Foam::HashTbl<T, Key, Hash>::iteratorBase::object() const
+{
+    return elmtPtr_->obj_;
+}
+
+
+template<class T, class Key, class Hash>
+inline bool Foam::HashTbl<T, Key, Hash>::iteratorBase::operator==
+(
+    const iteratorBase& iter
+) const
+{
+    return elmtPtr_ == iter.elmtPtr_;
+}
+
+
+template<class T, class Key, class Hash>
+inline bool Foam::HashTbl<T, Key, Hash>::iteratorBase::operator!=
+(
+    const iteratorBase& iter
+) const
+{
+    return elmtPtr_ != iter.elmtPtr_;
+}
+
+
+template<class T, class Key, class Hash>
 inline Foam::HashTbl<T, Key, Hash>::iterator::iterator
 (
     HashTbl<T, Key, Hash>* hashTbl,

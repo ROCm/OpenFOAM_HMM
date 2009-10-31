@@ -341,6 +341,68 @@ bool Foam::HashTbl<T, Key, Hash>::set
 }
 
 
+template<class T, class Key, class Hash>
+bool Foam::HashTbl<T, Key, Hash>::iteratorBase::erase()
+{
+    // note: elmtPtr_ is NULL for end(), so this catches that too
+    if (elmtPtr_)
+    {
+        // Search element before elmtPtr_
+        hashedEntry* prev = 0;
+
+        for
+        (
+            hashedEntry* ep = hashTable_->table_[hashIndex_];
+            ep;
+            ep = ep->next_
+        )
+        {
+            if (ep == elmtPtr_)
+            {
+                break;
+            }
+            prev = ep;
+        }
+
+        if (prev)
+        {
+            // has an element before elmtPtr - reposition to there
+            prev->next_ = elmtPtr_->next_;
+            delete elmtPtr_;
+            elmtPtr_ = prev;
+        }
+        else
+        {
+            // elmtPtr was first element on SLList
+            hashTable_->table_[hashIndex_] = elmtPtr_->next_;
+            delete elmtPtr_;
+
+            // assign any non-NULL value so it doesn't look like end()/cend()
+            elmtPtr_ = reinterpret_cast<hashedEntry*>(hashTable_);
+
+            // Mark with special hashIndex value to signal it has been rewound.
+            // The next increment will bring it back to the present location.
+            //
+            // For the current position 'X', mark it as '-(X+1)', which is
+            // written as '-X-1' to avoid overflow.
+            // The extra '-1' is needed to avoid ambiguity for position '0'.
+            // To retrieve the previous position 'X-1' we would later
+            // use '-(-X-1) - 2'
+            hashIndex_ = -hashIndex_ - 1;
+        }
+
+        hashTable_->nElmts_--;
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+
 // NOTE:
 // We use (const iterator&) here, but manipulate its contents anyhow.
 // The parameter should be (iterator&), but then the compiler doesn't find

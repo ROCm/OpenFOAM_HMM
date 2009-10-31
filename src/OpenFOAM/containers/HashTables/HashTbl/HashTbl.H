@@ -140,13 +140,18 @@ class HashTbl
 
 public:
 
-    // Forward declaration of STL iterators
+    // Forward declaration of iterators
+
+        class iteratorBase;
         class iterator;
         class const_iterator;
 
         //- Declare friendship with the HashPtrTable class
         template<class T2, class Key2, class Hash2>
         friend class HashPtrTable;
+
+        //- Declare friendship with the iteratorBase
+        friend class iteratorBase;
 
         //- Declare friendship with the iterator
         friend class iterator;
@@ -298,6 +303,70 @@ public:
 
     // Iterators and helpers
 
+        //- The iterator base for HashTbl
+        //  Note: data and functions are protected, to allow reuse by iterator
+        //  and prevent most external usage.
+        class iteratorBase
+        {
+            friend class HashTbl;
+
+        public:
+
+            // Protected Data
+
+                //- Pointer to the HashTbl for which this is an iterator
+                //  This also lets us use the default bitwise copy/assignment
+                HashTbl<T, Key, Hash>* hashTable_;
+
+                //- Current element
+                hashedEntry* elmtPtr_;
+
+                //- Current hash index
+                label hashIndex_;
+
+
+            // Protected Member Functions
+
+            // Constructors
+
+                //- Construct null - equivalent to an 'end' position
+                inline iteratorBase();
+
+                //- Construct from hash table, moving to its 'begin' position
+                inline iteratorBase
+                (
+                    const HashTbl<T, Key, Hash>* curHashTbl
+                );
+
+                //- Construct from hash table, element and hash index
+                inline iteratorBase
+                (
+                    const HashTbl<T, Key, Hash>* curHashTbl,
+                    const hashedEntry* elmt,
+                    const label hashIndex
+                );
+
+                inline void incr();
+
+                bool erase();
+        public:
+
+            // Member operators
+
+                // Access
+
+                //- Return the Key corresponding to the iterator
+                inline const Key& key() const;
+
+                //- Return referenced object
+                inline const T& object() const;
+
+                //- Compare hashedEntry element pointers
+                inline bool operator==(const iteratorBase&) const;
+                inline bool operator!=(const iteratorBase&) const;
+        };
+
+
         //- An STL-conforming iterator
         class iterator
         {
@@ -316,12 +385,7 @@ public:
                 //- Current hash index
                 label hashIndex_;
 
-        public:
-
-            // Constructors
-
-                //- Construct null (end iterator)
-                inline iterator();
+            // Private Member Functions
 
                 //- Construct from hash table, element and hash index
                 inline iterator
@@ -331,6 +395,12 @@ public:
                     const label hashIndex
                 );
 
+        public:
+
+            // Constructors
+
+                //- Construct null (end iterator)
+                inline iterator();
 
             // Member operators
 
@@ -359,6 +429,8 @@ public:
                 inline iterator operator++(int);
         };
 
+        //- iterator set to the begining of the HashTbl
+        inline iteratorBase beginBase();
 
         //- iterator set to the begining of the HashTbl
         inline iterator begin();
@@ -372,6 +444,7 @@ public:
         //- An STL-conforming const_iterator
         class const_iterator
         {
+            friend class HashTbl;
             friend class iterator;
 
             // Private data
@@ -386,12 +459,7 @@ public:
                 //- Current hash index
                 label hashIndex_;
 
-        public:
-
-            // Constructors
-
-                //- Construct null (end iterator)
-                inline const_iterator();
+            // Private Member Functions
 
                 //- Construct from hash table, element and hash index
                 inline const_iterator
@@ -400,6 +468,13 @@ public:
                     const hashedEntry* elmt,
                     const label hashIndex
                 );
+
+        public:
+
+            // Constructors
+
+                //- Construct null (end iterator)
+                inline const_iterator();
 
                 //- Construct from the non-const iterator
                 inline const_iterator(const iterator&);
