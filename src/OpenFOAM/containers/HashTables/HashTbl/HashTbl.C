@@ -65,9 +65,7 @@ Foam::HashTbl<T, Key, Hash>::HashTbl(const label size)
     HashTblName(),
     nElmts_(0),
     tableSize_(canonicalSize(size)),
-    table_(NULL),
-    endIter_(),
-    endConstIter_()
+    table_(NULL)
 {
     if (tableSize_)
     {
@@ -87,9 +85,7 @@ Foam::HashTbl<T, Key, Hash>::HashTbl(const HashTbl<T, Key, Hash>& ht)
     HashTblName(),
     nElmts_(0),
     tableSize_(ht.tableSize_),
-    table_(NULL),
-    endIter_(),
-    endConstIter_()
+    table_(NULL)
 {
     if (tableSize_)
     {
@@ -116,9 +112,7 @@ Foam::HashTbl<T, Key, Hash>::HashTbl
     HashTblName(),
     nElmts_(0),
     tableSize_(0),
-    table_(NULL),
-    endIter_(),
-    endConstIter_()
+    table_(NULL)
 {
     transfer(ht());
 }
@@ -344,10 +338,10 @@ bool Foam::HashTbl<T, Key, Hash>::set
 template<class T, class Key, class Hash>
 bool Foam::HashTbl<T, Key, Hash>::iteratorBase::erase()
 {
-    // note: elmtPtr_ is NULL for end(), so this catches that too
-    if (elmtPtr_)
+    // note: entryPtr_ is NULL for end(), so this catches that too
+    if (entryPtr_)
     {
-        // Search element before elmtPtr_
+        // Search element before entryPtr_
         hashedEntry* prev = 0;
 
         for
@@ -357,7 +351,7 @@ bool Foam::HashTbl<T, Key, Hash>::iteratorBase::erase()
             ep = ep->next_
         )
         {
-            if (ep == elmtPtr_)
+            if (ep == entryPtr_)
             {
                 break;
             }
@@ -366,19 +360,20 @@ bool Foam::HashTbl<T, Key, Hash>::iteratorBase::erase()
 
         if (prev)
         {
-            // has an element before elmtPtr - reposition to there
-            prev->next_ = elmtPtr_->next_;
-            delete elmtPtr_;
-            elmtPtr_ = prev;
+            // has an element before entryPtr - reposition to there
+            prev->next_ = entryPtr_->next_;
+            delete entryPtr_;
+            entryPtr_ = prev;
         }
         else
         {
-            // elmtPtr was first element on SLList
-            hashTable_->table_[hashIndex_] = elmtPtr_->next_;
-            delete elmtPtr_;
+            // entryPtr was first element on SLList
+            hashTable_->table_[hashIndex_] = entryPtr_->next_;
+            delete entryPtr_;
 
-            // assign any non-NULL value so it doesn't look like end()/cend()
-            elmtPtr_ = reinterpret_cast<hashedEntry*>(hashTable_);
+            // assign any non-NULL pointer value so it doesn't look
+            // like end()/cend()
+            entryPtr_ = reinterpret_cast<hashedEntry*>(this);
 
             // Mark with special hashIndex value to signal it has been rewound.
             // The next increment will bring it back to the present location.
@@ -411,92 +406,15 @@ bool Foam::HashTbl<T, Key, Hash>::iteratorBase::erase()
 template<class T, class Key, class Hash>
 bool Foam::HashTbl<T, Key, Hash>::erase(const iterator& cit)
 {
-    // note: elmtPtr_ is NULL for end(), so this catches that too
-    if (cit.elmtPtr_)
-    {
-        // Search element before elmtPtr_
-        hashedEntry* prev = 0;
-
-        for (hashedEntry* ep = table_[cit.hashIndex_]; ep; ep = ep->next_)
-        {
-            if (ep == cit.elmtPtr_)
-            {
-                break;
-            }
-            prev = ep;
-        }
-
-        // adjust iterator after erase
-        iterator& iter = const_cast<iterator&>(cit);
-
-        if (prev)
-        {
-            // has an element before elmtPtr - reposition to there
-            prev->next_ = iter.elmtPtr_->next_;
-            delete iter.elmtPtr_;
-            iter.elmtPtr_ = prev;
-        }
-        else
-        {
-            // elmtPtr was first element on SLList
-            table_[iter.hashIndex_] = iter.elmtPtr_->next_;
-            delete iter.elmtPtr_;
-
-            // assign an non-NULL value so it doesn't look like end()/cend()
-            iter.elmtPtr_ = reinterpret_cast<hashedEntry*>(this);
-
-            // Mark with special hashIndex value to signal it has been rewound.
-            // The next increment will bring it back to the present location.
-            //
-            // For the current position 'X', mark it as '-(X+1)', which is
-            // written as '-X-1' to avoid overflow.
-            // The extra '-1' is needed to avoid ambiguity for position '0'.
-            // To retrieve the previous position 'X-1' we would later
-            // use '-(-X-1) - 2'
-            iter.hashIndex_ = -iter.hashIndex_ - 1;
-        }
-
-        nElmts_--;
-
-#       ifdef FULLDEBUG
-        if (debug)
-        {
-            Info<< "HashTbl<T, Key, Hash>::erase(const iterator&) : "
-                << "hashedEntry " << iter.elmtPtr_->key_ << " removed.\n";
-        }
-#       endif
-
-        return true;
-    }
-    else
-    {
-#       ifdef FULLDEBUG
-        if (debug)
-        {
-            Info<< "HashTbl<T, Key, Hash>::erase(const iterator&) : "
-                << "cannot remove hashedEntry from hash table\n";
-        }
-#       endif
-
-        return false;
-    }
+    // adjust iterator after erase
+    return const_cast<iterator&>(cit).erase();
 }
 
 
 template<class T, class Key, class Hash>
 bool Foam::HashTbl<T, Key, Hash>::erase(const Key& key)
 {
-    // we could also simply do:   erase(find(key));
-    iterator fnd = find(key);
-
-    if (fnd != end())
-    {
-        return erase(fnd);
-    }
-    else
-    {
-        return false;
-    }
+    return erase(find(key));
 }
 
 
@@ -560,22 +478,22 @@ void Foam::HashTbl<T, Key, Hash>::resize(const label sz)
         return;
     }
 
-    HashTbl<T, Key, Hash>* newTable = new HashTbl<T, Key, Hash>(newSize);
+    HashTbl<T, Key, Hash>* tmpTable = new HashTbl<T, Key, Hash>(newSize);
 
     for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
-        newTable->insert(iter.key(), *iter);
+        tmpTable->insert(iter.key(), *iter);
     }
 
-    label oldTableSize = tableSize_;
-    tableSize_ = newTable->tableSize_;
-    newTable->tableSize_ = oldTableSize;
+    label oldSize = tableSize_;
+    tableSize_ = tmpTable->tableSize_;
+    tmpTable->tableSize_ = oldSize;
 
     hashedEntry** oldTable = table_;
-    table_ = newTable->table_;
-    newTable->table_ = oldTable;
+    table_ = tmpTable->table_;
+    tmpTable->table_ = oldTable;
 
-    delete newTable;
+    delete tmpTable;
 }
 
 
@@ -687,7 +605,7 @@ bool Foam::HashTbl<T, Key, Hash>::operator==
     const HashTbl<T, Key, Hash>& rhs
 ) const
 {
-    // sizes (ie, number of keys) must match
+    // sizes (number of keys) must match
     if (size() != rhs.size())
     {
         return false;

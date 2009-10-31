@@ -36,13 +36,16 @@ Foam::HashTbl<T, Key, Hash>::HashTbl(Istream& is, const label size)
     HashTblName(),
     nElmts_(0),
     tableSize_(canonicalSize(size)),
-    table_(new hashedEntry*[tableSize_]),
-    endIter_(),
-    endConstIter_()
+    table_(NULL)
 {
-    for (label hashIdx = 0; hashIdx < tableSize_; hashIdx++)
+    if (tableSize_)
     {
-        table_[hashIdx] = 0;
+        table_ = new hashedEntry*[tableSize_];
+
+        for (label hashIdx = 0; hashIdx < tableSize_; hashIdx++)
+        {
+            table_[hashIdx] = 0;
+        }
     }
 
     operator>>(is, *this);
