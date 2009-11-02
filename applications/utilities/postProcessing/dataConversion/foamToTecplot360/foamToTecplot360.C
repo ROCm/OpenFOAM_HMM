@@ -23,14 +23,47 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    foamToTecplot-bin
+    foamToTecplot360
 
 Description
     Tecplot binary file format writer.
 
 Usage
 
-    - foamToTecplot-bin [OPTION]
+    - foamToTecplot360 [OPTION]
+
+    @param -fields \<fields\>\n
+    Convert selected fields only. For example,
+    @verbatim
+         -fields '( p T U )'
+    @endverbatim
+    The quoting is required to avoid shell expansions and to pass the
+    information as a single argument.
+
+    @param -cellSet \<name\>\n
+    @param -faceSet \<name\>\n
+    Restrict conversion to the cellSet, faceSet.
+
+    @param -nearCellValue \n
+    Output cell value on patches instead of patch value itself
+
+    @param -noInternal \n
+    Do not generate file for mesh, only for patches
+
+    @param -noPointValues \n
+    No pointFields
+
+    @param -noFaceZones \n
+    No faceZones
+
+    @param -excludePatches \<patchNames\>\n
+    Specify patches (wildcards) to exclude. For example,
+    @verbatim
+         -excludePatches '( inlet_1 inlet_2 "proc.*")'
+    @endverbatim
+    The quoting is required to avoid shell expansions and to pass the
+    information as a single argument. The double quotes denote a regular
+    expression.
 
 \*---------------------------------------------------------------------------*/
 
@@ -107,8 +140,12 @@ labelList getSelectedPatches
             Info<< "    discarding empty/processor patch " << patchI
                 << " " << pp.name() << endl;
         }
-        //else if (!excludePatches.found(pp.name()))
-        else if (!findStrings(excludePatches, pp.name()))
+        else if (findStrings(excludePatches, pp.name()))
+        {
+            Info<< "    excluding patch " << patchI
+                << " " << pp.name() << endl;
+        }
+        else
         {
             patchIDs.append(patchI);
             Info<< "    patch " << patchI << " " << pp.name() << endl;
