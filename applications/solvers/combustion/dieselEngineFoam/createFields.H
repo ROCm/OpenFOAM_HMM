@@ -13,6 +13,14 @@ PtrList<volScalarField>& Y = composition.Y();
 
 word inertSpecie(thermo.lookup("inertSpecie"));
 
+if (!composition.contains(inertSpecie))
+{
+    FatalErrorIn(args.executable())
+        << "Specified inert specie '" << inertSpecie << "' not found in "
+        << "species list. Available species:" << composition.species()
+        << exit(FatalError);
+}
+
 volScalarField rho
 (
     IOobject

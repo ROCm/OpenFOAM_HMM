@@ -129,6 +129,47 @@ Type Foam::fieldValues::faceSource::processValues
             result = sum(values*filterField(mesh().magSf()));
             break;
         }
+        case opWeightedAverage:
+        {
+            if (mesh().foundObject<volScalarField>(weightFieldName_))
+            {
+                tmp<scalarField> wField =
+                    filterField
+                    (
+                        mesh().lookupObject<volScalarField>(weightFieldName_)
+                    );
+               result = sum(values*wField())/sum(wField());
+            }
+            else if (mesh().foundObject<surfaceScalarField>(weightFieldName_))
+            {
+                tmp<scalarField> wField =
+                    filterField
+                    (
+                        mesh().lookupObject<surfaceScalarField>
+                        (
+                            weightFieldName_
+                        )
+                    );
+               result = sum(values*wField())/sum(wField());
+            }
+            else
+            {
+                FatalErrorIn
+                (
+                    "fieldValues::faceSource::processValues"
+                    "("
+                        "List<Type>&"
+                    ") const"
+                )   << type() << " " << name_ << ": "
+                    << sourceTypeNames_[source_] << "(" << sourceName_ << "):"
+                    << nl
+                    << "    Weight field " << weightFieldName_
+                    << " must be either a " << volScalarField::typeName
+                    << " or " << surfaceScalarField::typeName << nl
+                    << abort(FatalError);
+            }
+            break;
+        }
         default:
         {
             // Do nothing

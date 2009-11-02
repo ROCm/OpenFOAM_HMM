@@ -50,10 +50,13 @@ namespace Foam
         fieldValues::faceSource::sourceTypeNames_;
 
     template<>
-    const char* NamedEnum<fieldValues::faceSource::operationType, 4>::
-        names[] = {"none", "sum", "areaAverage", "areaIntegrate"};
+    const char* NamedEnum<fieldValues::faceSource::operationType, 5>::
+        names[] =
+        {
+            "none", "sum", "areaAverage", "areaIntegrate", "weightedAverage"
+        };
 
-    const NamedEnum<fieldValues::faceSource::operationType, 4>
+    const NamedEnum<fieldValues::faceSource::operationType, 5>
         fieldValues::faceSource::operationTypeNames_;
 
 }
@@ -68,7 +71,9 @@ void Foam::fieldValues::faceSource::setFaceZoneFaces()
     if (zoneId < 0)
     {
         FatalErrorIn("faceSource::faceSource::setFaceZoneFaces()")
-            << "Unknown face zone name: " << sourceName_
+            << type() << " " << name_ << ": "
+            << sourceTypeNames_[source_] << "(" << sourceName_ << "):" << nl
+            << "    Unknown face zone name: " << sourceName_
             << ". Valid face zones are: " << mesh().faceZones().names()
             << nl << exit(FatalError);
     }
@@ -164,7 +169,9 @@ void Foam::fieldValues::faceSource::setPatchFaces()
     if (patchId < 0)
     {
         FatalErrorIn("faceSource::constructFaceAddressing()")
-            << "Unknown patch name: " << sourceName_
+            << type() << " " << name_ << ": "
+            << sourceTypeNames_[source_] << "(" << sourceName_ << "):" << nl
+            << "    Unknown patch name: " << sourceName_
             << ". Valid patch names are: "
             << mesh().boundaryMesh().names() << nl
             << exit(FatalError);
@@ -197,7 +204,7 @@ void Foam::fieldValues::faceSource::setPatchFaces()
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::fieldValues::faceSource::initialise()
+void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
 {
     switch (source_)
     {
@@ -214,15 +221,40 @@ void Foam::fieldValues::faceSource::initialise()
         default:
         {
             FatalErrorIn("faceSource::constructFaceAddressing()")
-                << "Unknown source type. Valid source types are:"
+                << type() << " " << name_ << ": "
+                << sourceTypeNames_[source_] << "(" << sourceName_ << "):"
+                << nl << "    Unknown source type. Valid source types are:"
                 << sourceTypeNames_ << nl << exit(FatalError);
         }
     }
 
     Info<< type() << " " << name_ << ":" << nl
-        << "    total faces = " << faceId_.size() << nl
-        << "    total area  = " << sum(filterField(mesh().magSf()))
-        << nl << endl;
+        << "    total faces  = " << faceId_.size() << nl
+        << "    total area   = " << sum(filterField(mesh().magSf())) << nl;
+
+    if (operation_ == opWeightedAverage)
+    {
+        dict.lookup("weightField") >> weightFieldName_;
+        if
+        (
+            obr().foundObject<volScalarField>(weightFieldName_)
+         || obr().foundObject<surfaceScalarField>(weightFieldName_)
+        )
+        {
+            Info<< "    weight field = " << weightFieldName_;
+        }
+        else
+        {
+            FatalErrorIn("faceSource::constructFaceAddressing()")
+                << type() << " " << name_ << ": "
+                << sourceTypeNames_[source_] << "(" << sourceName_ << "):"
+                << nl << "    Weight field " << weightFieldName_
+                << " must be either a " << volScalarField::typeName << " or "
+                << surfaceScalarField::typeName << nl << exit(FatalError);
+        }
+    }
+
+    Info<< nl << endl;
 }
 
 
@@ -302,12 +334,13 @@ Foam::fieldValues::faceSource::faceSource
     faceId_(),
     facePatchId_(),
     flipMap_(),
-    outputFilePtr_(NULL)
+    outputFilePtr_(NULL),
+    weightFieldName_("undefinedWeightedFieldName")
 {
-    initialise();
-
     if (active_)
     {
+        initialise(dict);
+
         // Create the output file if not already created
         makeFile();
     }
@@ -327,7 +360,7 @@ void Foam::fieldValues::faceSource::read(const dictionary& dict)
     if (active_)
     {
         fieldValue::read(dict);
-        initialise();
+        initialise(dict);
     }
 }
 

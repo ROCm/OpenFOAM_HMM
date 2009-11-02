@@ -121,7 +121,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
         return;
     }
 
-    // Far field gas molar fractions
+    // Far field carrier  molar fractions
     scalarField Xinf(Y_.size());
 
     forAll(Xinf, i)
@@ -135,7 +135,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
     // Molar fraction of far field species at particle surface
     const scalar Xsff = 1.0 - min(sum(Cs)*specie::RR*this->T_/pc_, 1.0);
 
-    // Surface gas total molar concentration
+    // Surface carrier total molar concentration
     const scalar CsTot = pc_/(specie::RR*this->T_);
 
     // Surface carrier composition (molar fraction)
@@ -171,10 +171,10 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
             cbrt(td.cloud().mcCarrierThermo().speciesData()[i].W());
 
         rhos += Xs[i]*td.cloud().mcCarrierThermo().speciesData()[i].W();
-        cps += Xs[i]*td.cloud().mcCarrierThermo().speciesData()[i].Cp(T);
         mus += Ys[i]*sqrtW*td.cloud().mcCarrierThermo().speciesData()[i].mu(T);
         kappa +=
             Ys[i]*cbrtW*td.cloud().mcCarrierThermo().speciesData()[i].kappa(T);
+        cps += Xs[i]*td.cloud().mcCarrierThermo().speciesData()[i].Cp(T);
 
         sumYiSqrtW += Ys[i]*sqrtW;
         sumYiCbrtW += Ys[i]*cbrtW;
@@ -417,7 +417,7 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     const scalarField& YComponents,
     scalarField& dMassPC,
     scalar& Sh,
-    scalar& dhsTrans,
+    scalar& dhsTrans,               // TODO: not used
     scalar& N,
     scalar& NCpW,
     scalarField& Cs
