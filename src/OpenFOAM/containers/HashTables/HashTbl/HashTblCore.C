@@ -28,6 +28,6 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::HashTblName, 0);
+defineTypeNameAndDebug(Foam::HashTblCore, 0);
 
 // ************************************************************************* //

@@ -196,10 +196,6 @@ inline Foam::HashTbl<T, Key, Hash>::iteratorBase::iteratorBase
             entryPtr_ = 0;
             hashIndex_ = 0;
         }
-        else
-        {
-            Info<<"OK  key is " << this->key() << endl;
-        }
     }
 }
 
@@ -229,12 +225,21 @@ Foam::HashTbl<T, Key, Hash>::iteratorBase::increment()
         // but we wish to continue at 'X-1'
         hashIndex_ = -hashIndex_ - 2;
     }
-    else if (entryPtr_ && entryPtr_->next_)
+    else if (entryPtr_)
     {
-        // Move to next element on the SLList
-        entryPtr_ = entryPtr_->next_;
-        return;
+        if (entryPtr_->next_)
+        {
+            // Move to next element on the SLList
+            entryPtr_ = entryPtr_->next_;
+            return;
+        }
     }
+    // else
+    // {
+    //     // if we reach here (entryPtr_ is NULL) it is already at the end()
+    //     // we should probably stop
+    // }
+
 
     // Step to the next table entry
     while
@@ -297,10 +302,40 @@ inline bool Foam::HashTbl<T, Key, Hash>::iteratorBase::operator!=
 }
 
 
+template<class T, class Key, class Hash>
+inline bool Foam::HashTbl<T, Key, Hash>::iteratorBase::operator==
+(
+    const iteratorEnd&
+) const
+{
+    return !entryPtr_;
+}
+
+
+template<class T, class Key, class Hash>
+inline bool Foam::HashTbl<T, Key, Hash>::iteratorBase::operator!=
+(
+    const iteratorEnd&
+) const
+{
+    return entryPtr_;
+}
+
+
 // * * * * * * * * * * * * * * * * STL iterator  * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
 inline Foam::HashTbl<T, Key, Hash>::iterator::iterator()
+:
+    iteratorBase()
+{}
+
+
+template<class T, class Key, class Hash>
+inline Foam::HashTbl<T, Key, Hash>::iterator::iterator
+(
+    const iteratorEnd&
+)
 :
     iteratorBase()
 {}
@@ -399,18 +434,20 @@ Foam::HashTbl<T, Key, Hash>::begin()
 }
 
 
-template<class T, class Key, class Hash>
-inline const typename Foam::HashTbl<T, Key, Hash>::iterator&
-Foam::HashTbl<T, Key, Hash>::end()
-{
-    return HashTbl<T, Key, Hash>::endIter_;
-}
-
-
 // * * * * * * * * * * * * * * * STL const_iterator * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
 inline Foam::HashTbl<T, Key, Hash>::const_iterator::const_iterator()
+:
+    iteratorBase()
+{}
+
+
+template<class T, class Key, class Hash>
+inline Foam::HashTbl<T, Key, Hash>::const_iterator::const_iterator
+(
+    const iteratorEnd&
+)
 :
     iteratorBase()
 {}
@@ -483,26 +520,10 @@ Foam::HashTbl<T, Key, Hash>::cbegin() const
 
 
 template<class T, class Key, class Hash>
-inline const typename Foam::HashTbl<T, Key, Hash>::const_iterator&
-Foam::HashTbl<T, Key, Hash>::cend() const
-{
-    return HashTbl<T, Key, Hash>::endConstIter_;
-}
-
-
-template<class T, class Key, class Hash>
 inline typename Foam::HashTbl<T, Key, Hash>::const_iterator
 Foam::HashTbl<T, Key, Hash>::begin() const
 {
     return this->cbegin();
-}
-
-
-template<class T, class Key, class Hash>
-inline const typename Foam::HashTbl<T, Key, Hash>::const_iterator&
-Foam::HashTbl<T, Key, Hash>::end() const
-{
-    return this->cend();
 }
 
 

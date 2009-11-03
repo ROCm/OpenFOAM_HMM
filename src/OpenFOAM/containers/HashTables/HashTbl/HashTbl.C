@@ -32,8 +32,7 @@ License
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-template<class T, class Key, class Hash>
-Foam::label Foam::HashTbl<T, Key, Hash>::canonicalSize(const label size)
+Foam::label Foam::HashTblCore::canonicalSize(const label size)
 {
     if (size < 1)
     {
@@ -62,9 +61,9 @@ Foam::label Foam::HashTbl<T, Key, Hash>::canonicalSize(const label size)
 template<class T, class Key, class Hash>
 Foam::HashTbl<T, Key, Hash>::HashTbl(const label size)
 :
-    HashTblName(),
+    HashTblCore(),
     nElmts_(0),
-    tableSize_(canonicalSize(size)),
+    tableSize_(HashTblCore::canonicalSize(size)),
     table_(NULL)
 {
     if (tableSize_)
@@ -82,7 +81,7 @@ Foam::HashTbl<T, Key, Hash>::HashTbl(const label size)
 template<class T, class Key, class Hash>
 Foam::HashTbl<T, Key, Hash>::HashTbl(const HashTbl<T, Key, Hash>& ht)
 :
-    HashTblName(),
+    HashTblCore(),
     nElmts_(0),
     tableSize_(ht.tableSize_),
     table_(NULL)
@@ -109,7 +108,7 @@ Foam::HashTbl<T, Key, Hash>::HashTbl
     const Xfer<HashTbl<T, Key, Hash> >& ht
 )
 :
-    HashTblName(),
+    HashTblCore(),
     nElmts_(0),
     tableSize_(0),
     table_(NULL)
@@ -189,7 +188,7 @@ Foam::HashTbl<T, Key, Hash>::find
     }
 #   endif
 
-    return end();
+    return iterator();
 }
 
 
@@ -221,7 +220,7 @@ Foam::HashTbl<T, Key, Hash>::find
     }
 #   endif
 
-    return cend();
+    return const_iterator();
 }
 
 
@@ -463,7 +462,7 @@ Foam::label Foam::HashTbl<T, Key, Hash>::erase
 template<class T, class Key, class Hash>
 void Foam::HashTbl<T, Key, Hash>::resize(const label sz)
 {
-    label newSize = canonicalSize(sz);
+    label newSize = HashTblCore::canonicalSize(sz);
 
     if (newSize == tableSize_)
     {
@@ -532,7 +531,7 @@ void Foam::HashTbl<T, Key, Hash>::clearStorage()
 template<class T, class Key, class Hash>
 void Foam::HashTbl<T, Key, Hash>::shrink()
 {
-    const label newSize = canonicalSize(nElmts_);
+    const label newSize = HashTblCore::canonicalSize(nElmts_);
 
     if (newSize < tableSize_)
     {

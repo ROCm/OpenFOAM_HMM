@@ -33,9 +33,9 @@ License
 template<class T, class Key, class Hash>
 Foam::HashTbl<T, Key, Hash>::HashTbl(Istream& is, const label size)
 :
-    HashTblName(),
+    HashTblCore(),
     nElmts_(0),
-    tableSize_(canonicalSize(size)),
+    tableSize_(HashTblCore::canonicalSize(size)),
     table_(NULL)
 {
     if (tableSize_)

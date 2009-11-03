@@ -71,20 +71,53 @@ Ostream& operator<<(Ostream&, const HashTbl<T, Key, Hash>&);
 
 
 /*---------------------------------------------------------------------------*\
-                        Class HashTblName Declaration
+                         Class HashTblCore Declaration
 \*---------------------------------------------------------------------------*/
 
-TemplateName(HashTbl);
+//- Template-invariant bits for HashTbl
+struct HashTblCore
+{
+    //- Return a canonical (power-of-two) size
+    static label canonicalSize(const label);
+
+    //- Construct null
+    HashTblCore()
+    {}
+
+    //- Define template name and debug
+    ClassName("HashTbl");
+
+    //- A zero-sized end iterator
+    struct iteratorEnd
+    {
+        //- Construct null
+        iteratorEnd()
+        {}
+    };
+
+    //- iteratorEnd set to beyond the end of any HashTbl
+    static iteratorEnd cend()
+    {
+        return iteratorEnd();
+    }
+
+    //- iteratorEnd set to beyond the end of any HashTbl
+    static iteratorEnd end()
+    {
+        return iteratorEnd();
+    }
+
+};
 
 
 /*---------------------------------------------------------------------------*\
-                          Class HashTbl Declaration
+                           Class HashTbl Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T, class Key=word, class Hash=string::hash>
 class HashTbl
 :
-    public HashTblName
+    public HashTblCore
 {
     // Private data type for table entries
 
@@ -368,6 +401,10 @@ public:
                 //- Compare hashedEntry element pointers
                 inline bool operator==(const iteratorBase&) const;
                 inline bool operator!=(const iteratorBase&) const;
+
+                //- Compare hashedEntry to iteratorEnd pointers
+                inline bool operator==(const iteratorEnd&) const;
+                inline bool operator!=(const iteratorEnd&) const;
         };
 
 
@@ -401,6 +438,9 @@ public:
                 //- Construct null (end iterator)
                 inline iterator();
 
+                //- Construct end iterator
+                inline iterator(const iteratorEnd&);
+
             // Member operators
 
                 //- Conversion to a const_iterator
@@ -422,9 +462,6 @@ public:
 
         //- iterator set to the begining of the HashTbl
         inline iterator begin();
-
-        //- iterator set to beyond the end of the HashTbl
-        inline const iterator& end();
 
 
     // STL const_iterator
@@ -459,6 +496,9 @@ public:
                 //- Construct null (end iterator)
                 inline const_iterator();
 
+                //- Construct end iterator
+                inline const_iterator(const iteratorEnd&);
+
             // Member operators
 
                 // Access
@@ -476,14 +516,8 @@ public:
         //- const_iterator set to the beginning of the HashTbl
         inline const_iterator cbegin() const;
 
-        //- const_iterator set to beyond the end of the HashTbl
-        inline const const_iterator& cend() const;
-
         //- const_iterator set to the beginning of the HashTbl
         inline const_iterator begin() const;
-
-        //- const_iterator set to beyond the end of the HashTbl
-        inline const const_iterator& end() const;
 
 
     // IOstream Operator
@@ -500,14 +534,6 @@ public:
             const HashTbl<T, Key, Hash>&
         );
 
-
-private:
-
-        //- iterator returned by end()
-        iterator endIter_;
-
-        //- const_iterator returned by end()
-        const_iterator endConstIter_;
 };
 
 
