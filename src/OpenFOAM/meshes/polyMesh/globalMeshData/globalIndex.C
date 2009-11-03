@@ -30,7 +30,7 @@ License
 
 Foam::globalIndex::globalIndex(const label localSize)
 :
-    offsets_(Pstream::nProcs())
+    offsets_(Pstream::nProcs()+1)
 {
     labelList localSizes(Pstream::nProcs());
     localSizes[Pstream::myProcNo()] = localSize;
@@ -38,7 +38,8 @@ Foam::globalIndex::globalIndex(const label localSize)
     Pstream::scatterList(localSizes);   // just to balance out comms
 
     label offset = 0;
-    forAll(offsets_, procI)
+    offsets_[0] = 0;
+    for (label procI = 0; procI < Pstream::nProcs(); procI++)
     {
         label oldOffset = offset;
         offset += localSizes[procI];
@@ -51,7 +52,7 @@ Foam::globalIndex::globalIndex(const label localSize)
                 << "). Please recompile with larger datatype for label."
                 << exit(FatalError);
         }
-        offsets_[procI] = offset;
+        offsets_[procI+1] = offset;
     }
 }
 
