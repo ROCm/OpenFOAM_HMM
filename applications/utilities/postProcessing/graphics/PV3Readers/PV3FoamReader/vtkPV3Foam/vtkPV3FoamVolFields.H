@@ -109,6 +109,13 @@ void Foam::vtkPV3Foam::convertVolFields
         //
         // Convert patches - if activated
         //
+
+        // the name for the interpolated patch point field must be consistent
+        // with the interpolated volume point field
+
+        // this could be done better
+        const word pointFldName = "volPointInterpolate(" + tf.name() + ')';
+
         for
         (
             int partId = partInfoPatches_.start();
@@ -155,7 +162,7 @@ void Foam::vtkPV3Foam::convertVolFields
 
                 convertPatchPointField
                 (
-                    tf.name(),
+                    pointFldName,
                     ppInterpList[patchId].faceToPointInterpolate(tpptf)(),
                     output,
                     partInfoPatches_,
@@ -175,7 +182,7 @@ void Foam::vtkPV3Foam::convertVolFields
 
                 convertPatchPointField
                 (
-                    tf.name(),
+                    pointFldName,
                     ppInterpList[patchId].faceToPointInterpolate(ptf)(),
                     output,
                     partInfoPatches_,
