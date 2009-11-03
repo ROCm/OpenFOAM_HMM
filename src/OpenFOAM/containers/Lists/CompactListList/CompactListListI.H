@@ -24,11 +24,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "ListOps.H"
+#include "SubList.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
 inline Foam::CompactListList<T>::CompactListList()
+:
+    size_(0)
 {}
 
 
@@ -39,7 +43,8 @@ inline Foam::CompactListList<T>::CompactListList
     const label nData
 )
 :
-    offsets_(nRows, 0),
+    size_(nRows),
+    offsets_(nRows+1, 0),
     m_(nData)
 {}
 
@@ -52,7 +57,8 @@ inline Foam::CompactListList<T>::CompactListList
     const T& t
 )
 :
-    offsets_(nRows, 0),
+    size_(nRows),
+    offsets_(nRows+1, 0),
     m_(nData, t)
 {}
 
@@ -77,14 +83,14 @@ inline const Foam::CompactListList<T>& Foam::CompactListList<T>::null()
 template<class T>
 inline Foam::label Foam::CompactListList<T>::size() const
 {
-    return offsets_.size();
+    return size_;
 }
 
 
 template<class T>
 inline bool Foam::CompactListList<T>::empty() const
 {
-    return offsets_.empty();
+    return !size_;
 }
 
 
@@ -123,14 +129,7 @@ inline Foam::label Foam::CompactListList<T>::index
     const label j
 ) const
 {
-    if (i == 0)
-    {
-        return j;
-    }
-    else
-    {
-        return offsets_[i-1] + j;
-    }
+    return offsets_[i] + j;
 }
 
 
@@ -146,15 +145,7 @@ inline Foam::label Foam::CompactListList<T>::whichRow(const label i) const
             << abort(FatalError);
     }
 
-    forAll(offsets_, rowI)
-    {
-        if (i < offsets_[rowI])
-        {
-            return rowI;
-        }
-    }
-
-    return -1;
+    return findLower(offsets_, i+1);
 }
 
 
@@ -221,14 +212,9 @@ inline Foam::UList<T> Foam::CompactListList<T>::operator[]
     const label i
 )
 {
-    if (i == 0)
-    {
-        return UList<T>(m_.begin(), offsets_[i]);
-    }
-    else
-    {
-        return UList<T>(&m_[offsets_[i-1]], offsets_[i] - offsets_[i-1]);
-    }
+    //return SubList<T>(m_, offsets_[i+1]-start, start);
+    label start = offsets_[i];
+    return UList<T>(&m_[start], offsets_[i+1] - start);
 }
 
 
@@ -238,14 +224,9 @@ inline const Foam::UList<T> Foam::CompactListList<T>::operator[]
     const label i
 ) const
 {
-    if (i == 0)
-    {
-        return UList<T>(m_.begin(), offsets_[i]);
-    }
-    else
-    {
-        return UList<T>(&m_[offsets_[i-1]], offsets_[i] - offsets_[i-1]);
-    }
+    label start = offsets_[i];
+    //return SubList<T>(m_, offsets_[i+1]-start, start);
+    return UList<T>(const_cast<T*>(&m_[start]), offsets_[i+1] - start);
 }
 
 

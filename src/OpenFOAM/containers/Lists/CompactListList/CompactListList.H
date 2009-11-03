@@ -29,14 +29,16 @@ Description
     A packed storage unstructured matrix of objects of type \<T\>
     using an offset table for access.
 
-    The offset table is the size of the number of rows whose elements are the
+    The offset table is the size of the number of rows+1
+    whose elements are the
     accumulated sizes of the rows, i.e.
-      - offset[i] gives the index of first element of row i + 1
-      - offset[i] - offset[i-1] is the number of elements in row i
-
-    and for i = 0, offset[i-1] = 0.
+      - offset[i] gives the index of first element of row i
+      - offset[i+1] - offset[i] is the number of elements in row i
 
     Storage is allocated on free-store during construction.
+
+    As a special case a null-contructed CompactListList has an empty
+    offsets_ (instead of size 1).
 
 SourceFiles
     CompactListList.C
@@ -72,6 +74,8 @@ class CompactListList
 {
     // Private data
 
+        label size_;
+
         //- Offset table
         List<label> offsets_;
 
@@ -92,7 +96,7 @@ public:
         inline CompactListList();
 
         //- Construct by converting given List<List<T> >
-        CompactListList(const List<List<T> >&);
+        explicit CompactListList(const List<List<T> >&);
 
         //- Construct given size of offset table (number of rows)
         //  and number of data.
@@ -103,13 +107,13 @@ public:
         inline CompactListList(const label nRows, const label nData, const T&);
 
         //- Construct given list of row-sizes.
-        CompactListList(const UList<label>& rowSizes);
+        explicit CompactListList(const UList<label>& rowSizes);
 
         //- Construct given list of row-sizes
         CompactListList(const UList<label>& rowSizes, const T&);
 
         //- Construct by transferring the parameter contents
-        CompactListList(const Xfer<CompactListList<T> >&);
+        explicit CompactListList(const Xfer<CompactListList<T> >&);
 
         //- Construct as copy or re-use as specified.
         CompactListList(CompactListList<T>&, bool reUse);
@@ -131,7 +135,7 @@ public:
             //- Return true if the number of rows is zero
             inline bool empty() const;
 
-            //- Return the offset table
+            //- Return the offset table (= size()+1)
             inline const List<label>& offsets() const;
 
             //- Return non-const access to the offset table

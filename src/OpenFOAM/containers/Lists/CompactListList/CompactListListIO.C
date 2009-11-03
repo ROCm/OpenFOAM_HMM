@@ -42,6 +42,15 @@ template<class T>
 Foam::Istream& Foam::operator>>(Istream& is, CompactListList<T>& lst)
 {
     is  >> lst.offsets_ >> lst.m_;
+    // Note: empty list gets output as two empty lists
+    if (lst.offsets_.size() == 0)
+    {
+        lst.size_ = 0;
+    }
+    else
+    {
+        lst.size_ = lst.offsets_.size()-1;
+    }
     return is;
 }
 
