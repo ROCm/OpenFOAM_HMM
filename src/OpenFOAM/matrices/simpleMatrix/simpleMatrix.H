@@ -74,8 +74,11 @@ public:
 
     // Constructors
 
-        //- Construct given size
+        //- Construct given size, initialize coefficients to zero.
         simpleMatrix(const label);
+
+        //- Construct given size and initial coefficient value
+        simpleMatrix(const label, const scalar, const Field<Type>&);
 
         //- Construct from components
         simpleMatrix(const scalarSquareMatrix&, const Field<Type>&);
