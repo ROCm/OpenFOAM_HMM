@@ -227,25 +227,25 @@ Foam::HashTbl<T, Key, Hash>::find
 template<class T, class Key, class Hash>
 Foam::List<Key> Foam::HashTbl<T, Key, Hash>::toc() const
 {
-    List<Key> tofc(nElmts_);
-    label i = 0;
+    List<Key> keys(nElmts_);
+    label keyI = 0;
 
     for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
-        tofc[i++] = iter.key();
+        keys[keyI++] = iter.key();
     }
 
-    return tofc;
+    return keys;
 }
 
 
 template<class T, class Key, class Hash>
 Foam::List<Key> Foam::HashTbl<T, Key, Hash>::sortedToc() const
 {
-    List<Key> sortedList = this->toc();
-    sort(sortedList);
+    List<Key> sortedLst = this->toc();
+    sort(sortedLst);
 
-    return sortedList;
+    return sortedLst;
 }
 
 
@@ -283,7 +283,7 @@ bool Foam::HashTbl<T, Key, Hash>::set
         table_[hashIdx] = new hashedEntry(key, table_[hashIdx], newEntry);
         nElmts_++;
 
-        if (double(nElmts_)/tableSize_ > 0.8)
+        if (double(nElmts_)/tableSize_ > 0.8 && tableSize_ < maxTableSize)
         {
 #           ifdef FULLDEBUG
             if (debug)
@@ -377,11 +377,11 @@ bool Foam::HashTbl<T, Key, Hash>::iteratorBase::erase()
             // Mark with special hashIndex value to signal it has been rewound.
             // The next increment will bring it back to the present location.
             //
-            // For the current position 'X', mark it as '-(X+1)', which is
-            // written as '-X-1' to avoid overflow.
-            // The extra '-1' is needed to avoid ambiguity for position '0'.
-            // To retrieve the previous position 'X-1' we would later
-            // use '-(-X-1) - 2'
+            // From the current position 'curPos', we wish to continue at
+            // prevPos='curPos-1', which we mark as markPos='-curPos-1'.
+            // The negative lets us notice it is special, the extra '-1'
+            // is needed to avoid ambiguity for position '0'.
+            // To retrieve prevPos, we would later use '-(markPos+1) - 1'
             hashIndex_ = -hashIndex_ - 1;
         }
 

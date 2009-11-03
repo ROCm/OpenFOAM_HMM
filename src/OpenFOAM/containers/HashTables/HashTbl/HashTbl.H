@@ -80,6 +80,9 @@ struct HashTblCore
     //- Return a canonical (power-of-two) size
     static label canonicalSize(const label);
 
+    //- Maximum allowable table size
+    static const label maxTableSize;
+
     //- Construct null
     HashTblCore()
     {}
@@ -288,7 +291,7 @@ public:
             void transfer(HashTbl<T, Key, Hash>&);
 
             //- Transfer contents to the Xfer container
-            inline Xfer<HashTbl<T, Key, Hash> > xfer();
+            inline Xfer< HashTbl<T, Key, Hash> > xfer();
 
 
     // Member Operators

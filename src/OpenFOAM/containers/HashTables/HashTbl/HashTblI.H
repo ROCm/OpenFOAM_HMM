@@ -221,9 +221,9 @@ Foam::HashTbl<T, Key, Hash>::iteratorBase::increment()
     // A negative index is a special value from erase
     if (hashIndex_ < 0)
     {
-        // old position 'X' was marked as '-(X+1)'
-        // but we wish to continue at 'X-1'
-        hashIndex_ = -hashIndex_ - 2;
+        // the markPos='-curPos-1', but we wish to continue at 'curPos-1'
+        // thus use '-(markPos+1) -1'
+        hashIndex_ = -(hashIndex_+1) - 1;
     }
     else if (entryPtr_)
     {

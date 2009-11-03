@@ -30,4 +30,12 @@ License
 
 defineTypeNameAndDebug(Foam::HashTblCore, 0);
 
+const Foam::label Foam::HashTblCore::maxTableSize
+(
+    Foam::HashTblCore::canonicalSize
+    (
+        Foam::labelMax/2
+    )
+);
+
 // ************************************************************************* //
