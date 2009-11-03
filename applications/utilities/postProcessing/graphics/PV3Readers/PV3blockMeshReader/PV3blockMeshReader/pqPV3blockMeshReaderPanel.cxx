@@ -39,6 +39,7 @@ License
 #include "pqApplicationCore.h"
 #include "pqPipelineRepresentation.h"
 #include "pqServerManagerModel.h"
+#include "pqView.h"
 
 // Paraview Server Manager
 #include "vtkSMDoubleVectorProperty.h"
@@ -94,6 +95,14 @@ void pqPV3blockMeshReaderPanel::ShowPointNumbersToggled()
     (
         sourceProxy_->GetProperty("UiShowPointNumbers")
     )->SetElement(0, ShowPointNumbers_->isChecked());
+
+    // update the active view
+    if (this->view())
+    {
+        this->view()->render();
+    }
+    // OR: update all views
+    // pqApplicationCore::instance()->render();
 }
 
 

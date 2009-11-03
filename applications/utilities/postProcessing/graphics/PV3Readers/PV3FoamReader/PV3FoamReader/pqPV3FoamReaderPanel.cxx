@@ -39,6 +39,7 @@ License
 #include "pqApplicationCore.h"
 #include "pqPipelineRepresentation.h"
 #include "pqServerManagerModel.h"
+#include "pqView.h"
 
 // Paraview Server Manager
 #include "vtkSMDoubleVectorProperty.h"
@@ -120,6 +121,14 @@ void pqPV3FoamReaderPanel::ShowPatchNamesToggled()
     (
         sourceProxy_->GetProperty("UiShowPatchNames")
     )->SetElement(0, ShowPatchNames_->isChecked());
+
+    // update the active view
+    if (this->view())
+    {
+        this->view()->render();
+    }
+    // OR: update all views
+    // pqApplicationCore::instance()->render();
 }
 
 
