@@ -29,8 +29,8 @@ License
 
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
-template<class T>
-Foam::CompactListList<T>::CompactListList(Istream& is)
+template<class T, class Container>
+Foam::CompactListList<T, Container>::CompactListList(Istream& is)
 {
     operator>>(is, *this);
 }
@@ -38,8 +38,8 @@ Foam::CompactListList<T>::CompactListList(Istream& is)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-template<class T>
-Foam::Istream& Foam::operator>>(Istream& is, CompactListList<T>& lst)
+template<class T, class Container>
+Foam::Istream& Foam::operator>>(Istream& is, CompactListList<T, Container>& lst)
 {
     is  >> lst.offsets_ >> lst.m_;
     // Note: empty list gets output as two empty lists
@@ -55,8 +55,8 @@ Foam::Istream& Foam::operator>>(Istream& is, CompactListList<T>& lst)
 }
 
 
-template<class T>
-Foam::Ostream& Foam::operator<<(Ostream& os, const CompactListList<T>& lst)
+template<class T, class Container>
+Foam::Ostream& Foam::operator<<(Ostream& os, const CompactListList<T, Container>& lst)
 {
     os  << lst.offsets_ << lst.m_;
     return os;

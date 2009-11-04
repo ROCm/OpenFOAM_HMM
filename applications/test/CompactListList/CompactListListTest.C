@@ -34,6 +34,7 @@ Description
 #include "IOstreams.H"
 #include "OStringStream.H"
 #include "IStringStream.H"
+#include "faceList.H"
 
 using namespace Foam;
 
@@ -137,6 +138,18 @@ int main(int argc, char *argv[])
         IStringStream istr(ostr.str());
         CompactListList<label> cll5(istr);
         Info<< "cll5 = " << cll5 << endl;
+    }
+
+    {
+        faceList fcs(2);
+        fcs[0] = face(labelList(1, 111));
+        fcs[1] = face(labelList(2, 222));
+
+        CompactListList<label, face> compactFcs(fcs);
+        Info<< "comactFcs:" << compactFcs << endl;
+
+        faceList fcs2 = compactFcs();
+        Info<< "fcs2:" << fcs2 << endl;
     }
 
     return 0;
