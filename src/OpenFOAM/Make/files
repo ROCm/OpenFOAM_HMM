@@ -109,11 +109,14 @@ StringStreams = $(Streams)/StringStreams
 $(StringStreams)/StringStreamsPrint.C
 
 Pstreams = $(Streams)/Pstreams
-$(Pstreams)/Pstream.C
-$(Pstreams)/PstreamCommsStruct.C
+$(Pstreams)/UIPstream.C
 $(Pstreams)/IPstream.C
+$(Pstreams)/UPstream.C
+$(Pstreams)/UPstreamCommsStruct.C
+$(Pstreams)/Pstream.C
+$(Pstreams)/UOPstream.C
 $(Pstreams)/OPstream.C
-$(Pstreams)/PstreamsPrint.C
+$(Pstreams)/PstreamBuffers.C
 
 dictionary = db/dictionary
 $(dictionary)/dictionary.C

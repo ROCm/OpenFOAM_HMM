@@ -110,10 +110,9 @@ void Foam::vtkPV3Foam::convertVolFields
         // Convert patches - if activated
         //
 
-        // the name for the interpolated patch point field must be consistent
-        // with the interpolated volume point field
-
-        // this could be done better
+        // The name for the interpolated patch point field must be consistent
+        // with the interpolated volume point field.
+        // This could be done better.
         const word pointFldName = "volPointInterpolate(" + tf.name() + ')';
 
         for

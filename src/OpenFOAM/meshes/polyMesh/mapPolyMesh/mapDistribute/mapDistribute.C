@@ -381,7 +381,13 @@ Foam::mapDistribute::mapDistribute
     }
 
     subMap_.setSize(Pstream::nProcs());
-    exchange(wantedRemoteElements, subMap_);
+    labelListList sendSizes;
+    Pstream::exchange<labelList, label>
+    (
+        wantedRemoteElements,
+        subMap_,
+        sendSizes
+    );
 
     // Renumber elements
     forAll(elements, i)
@@ -528,7 +534,13 @@ Foam::mapDistribute::mapDistribute
     }
 
     subMap_.setSize(Pstream::nProcs());
-    exchange(wantedRemoteElements, subMap_);
+    labelListList sendSizes;
+    Pstream::exchange<labelList, label>
+    (
+        wantedRemoteElements,
+        subMap_,
+        sendSizes
+    );
 
     // Renumber elements
     forAll(cellCells, cellI)
