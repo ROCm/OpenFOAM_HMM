@@ -144,6 +144,7 @@ public:
         // Access
 
             //- Reference to point field defining the block mesh
+            //  these points have not been scaled by scaleFactor
             const pointField& blockPointField() const;
 
             const polyMesh& topology() const;
@@ -153,6 +154,11 @@ public:
                 return edges_;
             }
 
+            //- The scaling factor used to convert to meters
+            scalar scaleFactor() const;
+
+            //- The points for the entire mesh
+            //  these points have been scaled by scaleFactor
             const pointField& points() const;
 
             const cellShapeList& cells() const;

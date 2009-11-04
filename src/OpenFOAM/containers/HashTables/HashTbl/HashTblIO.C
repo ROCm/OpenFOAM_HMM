@@ -24,33 +24,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "StaticHashTable.H"
+#include "HashTbl.H"
 #include "Istream.H"
 #include "Ostream.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
-Foam::StaticHashTable<T, Key, Hash>::StaticHashTable
-(
-    Istream& is,
-    const label size
-)
+Foam::HashTbl<T, Key, Hash>::HashTbl(Istream& is, const label size)
 :
-    StaticHashTableCore(),
-    keys_(StaticHashTableCore::canonicalSize(size)),
-    objects_(StaticHashTableCore::canonicalSize(size)),
+    HashTblCore(),
     nElmts_(0),
-    endIter_(*this, keys_.size(), 0),
-    endConstIter_(*this, keys_.size(), 0)
+    tableSize_(HashTblCore::canonicalSize(size)),
+    table_(NULL)
 {
-    if (size < 1)
+    if (tableSize_)
     {
-        FatalErrorIn
-        (
-            "StaticHashTable<T, Key, Hash>::StaticHashTable(const label size)"
-        )   << "Illegal size " << size << " for StaticHashTable."
-            << " Minimum size is 1" << abort(FatalError);
+        table_ = new hashedEntry*[tableSize_];
+
+        for (label hashIdx = 0; hashIdx < tableSize_; hashIdx++)
+        {
+            table_[hashIdx] = 0;
+        }
     }
 
     operator>>(is, *this);
@@ -61,16 +56,20 @@ Foam::StaticHashTable<T, Key, Hash>::StaticHashTable
 
 template<class T, class Key, class Hash>
 Foam::Ostream&
-Foam::StaticHashTable<T, Key, Hash>::printInfo(Ostream& os) const
+Foam::HashTbl<T, Key, Hash>::printInfo(Ostream& os) const
 {
     label used = 0;
     label maxChain = 0;
     unsigned avgChain = 0;
 
-    // Find first non-empty entry
-    forAll(keys_, hashIdx)
+    for (label hashIdx = 0; hashIdx < tableSize_; ++hashIdx)
     {
-        const label count = keys_[hashIdx].size();
+        label count = 0;
+        for (hashedEntry* ep = table_[hashIdx]; ep; ep = ep->next_)
+        {
+            ++count;
+        }
+
         if (count)
         {
             ++used;
@@ -83,9 +82,9 @@ Foam::StaticHashTable<T, Key, Hash>::printInfo(Ostream& os) const
         }
     }
 
-    os  << "StaticHashTable<T,Key,Hash>"
-        << " elements:" << size() << " slots:" << used << "/" << keys_.size()
-        << " chaining(avg/max):" << (used ? float(avgChain/used) : 0)
+    os  << "HashTbl<T,Key,Hash>"
+        << " elements:" << size() << " slots:" << used << "/" << tableSize_
+        << " chaining(avg/max):" << (used ? (float(avgChain)/used) : 0)
         << "/" << maxChain << endl;
 
     return os;
@@ -95,20 +94,24 @@ Foam::StaticHashTable<T, Key, Hash>::printInfo(Ostream& os) const
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
-Foam::Istream& Foam::operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
+Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    HashTbl<T, Key, Hash>& L
+)
 {
-    is.fatalCheck("operator>>(Istream&, StaticHashTable<T, Key, Hash>&)");
+    is.fatalCheck("operator>>(Istream&, HashTbl<T, Key, Hash>&)");
 
     // Anull list
     L.clear();
 
-    is.fatalCheck("operator>>(Istream&, StaticHashTable<T, Key, Hash>&)");
+    is.fatalCheck("operator>>(Istream&, HashTbl<T, Key, Hash>&)");
 
     token firstToken(is);
 
     is.fatalCheck
     (
-        "operator>>(Istream&, StaticHashTable<T, Key, Hash>&) : "
+        "operator>>(Istream&, HashTbl<T, Key, Hash>&) : "
         "reading first token"
     );
 
@@ -117,11 +120,11 @@ Foam::Istream& Foam::operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
         label s = firstToken.labelToken();
 
         // Read beginning of contents
-        char delimiter = is.readBeginList("StaticHashTable<T, Key, Hash>");
+        char delimiter = is.readBeginList("HashTbl<T, Key, Hash>");
 
         if (s)
         {
-            if (2*s > L.keys_.size())
+            if (2*s > L.tableSize_)
             {
                 L.resize(2*s);
             }
@@ -136,8 +139,8 @@ Foam::Istream& Foam::operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
 
                     is.fatalCheck
                     (
-                        "operator>>(Istream&, StaticHashTable<T, Key, Hash>&)"
-                        " : reading entry"
+                        "operator>>(Istream&, HashTbl<T, Key, Hash>&) : "
+                        "reading entry"
                     );
                 }
             }
@@ -145,7 +148,7 @@ Foam::Istream& Foam::operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
             {
                 FatalIOErrorIn
                 (
-                    "operator>>(Istream&, StaticHashTable<T, Key, Hash>&)",
+                    "operator>>(Istream&, HashTbl<T, Key, Hash>&)",
                     is
                 )   << "incorrect first token, '(', found " << firstToken.info()
                     << exit(FatalIOError);
@@ -153,7 +156,7 @@ Foam::Istream& Foam::operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
         }
 
         // Read end of contents
-        is.readEndList("StaticHashTable");
+        is.readEndList("HashTbl");
     }
     else if (firstToken.isPunctuation())
     {
@@ -161,7 +164,7 @@ Foam::Istream& Foam::operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
         {
             FatalIOErrorIn
             (
-                "operator>>(Istream&, StaticHashTable<T, Key, Hash>&)",
+                "operator>>(Istream&, HashTbl<T, Key, Hash>&)",
                 is
             )   << "incorrect first token, '(', found " << firstToken.info()
                 << exit(FatalIOError);
@@ -188,7 +191,7 @@ Foam::Istream& Foam::operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
 
             is.fatalCheck
             (
-                "operator>>(Istream&, StaticHashTable<T, Key, Hash>&) : "
+                "operator>>(Istream&, HashTbl<T, Key, Hash>&) : "
                 "reading entry"
             );
 
@@ -199,14 +202,14 @@ Foam::Istream& Foam::operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
     {
         FatalIOErrorIn
         (
-            "operator>>(Istream&, StaticHashTable<T, Key, Hash>&)",
+            "operator>>(Istream&, HashTbl<T, Key, Hash>&)",
             is
         )   << "incorrect first token, expected <int> or '(', found "
             << firstToken.info()
             << exit(FatalIOError);
     }
 
-    is.fatalCheck("operator>>(Istream&, StaticHashTable<T, Key, Hash>&)");
+    is.fatalCheck("operator>>(Istream&, HashTbl<T, Key, Hash>&)");
 
     return is;
 }
@@ -216,7 +219,8 @@ template<class T, class Key, class Hash>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const StaticHashTable<T, Key, Hash>& L)
+    const HashTbl<T, Key, Hash>& L
+)
 {
     // Write size and start delimiter
     os << nl << L.size() << nl << token::BEGIN_LIST << nl;
@@ -224,8 +228,8 @@ Foam::Ostream& Foam::operator<<
     // Write contents
     for
     (
-        typename StaticHashTable<T, Key, Hash>::const_iterator iter = L.begin();
-        iter != L.end();
+        typename HashTbl<T, Key, Hash>::const_iterator iter = L.cbegin();
+        iter != L.cend();
         ++iter
     )
     {
@@ -236,7 +240,7 @@ Foam::Ostream& Foam::operator<<
     os << token::END_LIST;
 
     // Check state of IOstream
-    os.check("Ostream& operator<<(Ostream&, const StaticHashTable&)");
+    os.check("Ostream& operator<<(Ostream&, const HashTbl&)");
 
     return os;
 }
