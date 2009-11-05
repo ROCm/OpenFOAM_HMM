@@ -136,7 +136,7 @@ public:
         PtrList(PtrList<T>&, bool reUse);
 
         //- Construct as copy of SLPtrList<T>
-        PtrList(const SLPtrList<T>&);
+        explicit PtrList(const SLPtrList<T>&);
 
         //- Construct from Istream using given Istream constructor class
         template<class INew>

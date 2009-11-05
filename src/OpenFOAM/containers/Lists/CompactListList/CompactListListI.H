@@ -24,142 +24,140 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "ListOps.H"
+#include "SubList.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class T>
-inline Foam::CompactListList<T>::CompactListList()
+template<class T, class Container>
+inline Foam::CompactListList<T, Container>::CompactListList()
+:
+    size_(0)
 {}
 
 
-template<class T>
-inline Foam::CompactListList<T>::CompactListList
+template<class T, class Container>
+inline Foam::CompactListList<T, Container>::CompactListList
 (
     const label nRows,
     const label nData
 )
 :
-    offsets_(nRows, 0),
+    size_(nRows),
+    offsets_(nRows+1, 0),
     m_(nData)
 {}
 
 
-template<class T>
-inline Foam::CompactListList<T>::CompactListList
+template<class T, class Container>
+inline Foam::CompactListList<T, Container>::CompactListList
 (
     const label nRows,
     const label nData,
     const T& t
 )
 :
-    offsets_(nRows, 0),
+    size_(nRows),
+    offsets_(nRows+1, 0),
     m_(nData, t)
 {}
 
 
-template<class T>
-inline Foam::autoPtr<Foam::CompactListList<T> >
-Foam::CompactListList<T>::clone() const
+template<class T, class Container>
+inline Foam::autoPtr<Foam::CompactListList<T, Container> >
+Foam::CompactListList<T, Container>::clone() const
 {
-    return autoPtr<CompactListList<T> >(new CompactListList<T>(*this));
+    return autoPtr<CompactListList<T, Container> >
+    (
+        new CompactListList<T, Container>(*this)
+    );
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class T>
-inline const Foam::CompactListList<T>& Foam::CompactListList<T>::null()
+template<class T, class Container>
+inline const Foam::CompactListList<T, Container>&
+Foam::CompactListList<T, Container>::null()
 {
-    return *reinterpret_cast< CompactListList<T>* >(0);
+    return *reinterpret_cast< CompactListList<T, Container>* >(0);
 }
 
 
-template<class T>
-inline Foam::label Foam::CompactListList<T>::size() const
+template<class T, class Container>
+inline Foam::label Foam::CompactListList<T, Container>::size() const
 {
-    return offsets_.size();
+    return size_;
 }
 
 
-template<class T>
-inline bool Foam::CompactListList<T>::empty() const
+template<class T, class Container>
+inline bool Foam::CompactListList<T, Container>::empty() const
 {
-    return offsets_.empty();
+    return !size_;
 }
 
 
-template<class T>
-inline const Foam::List<Foam::label>& Foam::CompactListList<T>::offsets() const
-{
-    return offsets_;
-}
-
-
-template<class T>
-inline Foam::List<Foam::label>& Foam::CompactListList<T>::offsets()
+template<class T, class Container>
+inline const Foam::List<Foam::label>&
+Foam::CompactListList<T, Container>::offsets() const
 {
     return offsets_;
 }
 
 
-template<class T>
-inline const Foam::List<T>& Foam::CompactListList<T>::m() const
+template<class T, class Container>
+inline Foam::List<Foam::label>& Foam::CompactListList<T, Container>::offsets()
+{
+    return offsets_;
+}
+
+
+template<class T, class Container>
+inline const Foam::List<T>& Foam::CompactListList<T, Container>::m()
+const
 {
     return m_;
 }
 
 
-template<class T>
-inline Foam::List<T>& Foam::CompactListList<T>::m()
+template<class T, class Container>
+inline Foam::List<T>& Foam::CompactListList<T, Container>::m()
 {
     return m_;
 }
 
 
-template<class T>
-inline Foam::label Foam::CompactListList<T>::index
+template<class T, class Container>
+inline Foam::label Foam::CompactListList<T, Container>::index
 (
     const label i,
     const label j
 ) const
 {
-    if (i == 0)
-    {
-        return j;
-    }
-    else
-    {
-        return offsets_[i-1] + j;
-    }
+    return offsets_[i] + j;
 }
 
 
-template<class T>
-inline Foam::label Foam::CompactListList<T>::whichRow(const label i) const
+template<class T, class Container>
+inline Foam::label Foam::CompactListList<T, Container>::whichRow(const label i)
+const
 {
     if (i < 0 || i >= m_.size())
     {
         FatalErrorIn
         (
-            "CompactListList<T>::whichRow(const label) const"
+            "CompactListList<T, Container>::whichRow(const label) const"
         )   << "Index " << i << " outside 0.." << m_.size()
             << abort(FatalError);
     }
 
-    forAll(offsets_, rowI)
-    {
-        if (i < offsets_[rowI])
-        {
-            return rowI;
-        }
-    }
-
-    return -1;
+    return findLower(offsets_, i+1);
 }
 
 
-template<class T>
-inline Foam::label Foam::CompactListList<T>::whichColumn
+template<class T, class Container>
+inline Foam::label Foam::CompactListList<T, Container>::whichColumn
 (
     const label row,
     const label i
@@ -169,22 +167,23 @@ inline Foam::label Foam::CompactListList<T>::whichColumn
 }
 
 
-template<class T>
-inline Foam::Xfer<Foam::CompactListList<T> > Foam::CompactListList<T>::xfer()
+template<class T, class Container>
+inline Foam::Xfer<Foam::CompactListList<T, Container> >
+Foam::CompactListList<T, Container>::xfer()
 {
     return xferMove(*this);
 }
 
 
-template<class T>
-inline void Foam::CompactListList<T>::resize(const label nRows)
+template<class T, class Container>
+inline void Foam::CompactListList<T, Container>::resize(const label nRows)
 {
     this->setSize(nRows);
 }
 
 
-template<class T>
-inline void Foam::CompactListList<T>::resize
+template<class T, class Container>
+inline void Foam::CompactListList<T, Container>::resize
 (
     const label nRows,
     const label nData
@@ -194,8 +193,8 @@ inline void Foam::CompactListList<T>::resize
 }
 
 
-template<class T>
-inline void Foam::CompactListList<T>::resize
+template<class T, class Container>
+inline void Foam::CompactListList<T, Container>::resize
 (
     const label nRows,
     const label nData,
@@ -206,8 +205,11 @@ inline void Foam::CompactListList<T>::resize
 }
 
 
-template<class T>
-inline void Foam::CompactListList<T>::resize(const UList<label>& rowSizes)
+template<class T, class Container>
+inline void Foam::CompactListList<T, Container>::resize
+(
+    const UList<label>& rowSizes
+)
 {
     this->setSize(rowSizes);
 }
@@ -215,42 +217,35 @@ inline void Foam::CompactListList<T>::resize(const UList<label>& rowSizes)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-template<class T>
-inline Foam::UList<T> Foam::CompactListList<T>::operator[]
+template<class T, class Container>
+inline Foam::UList<T> Foam::CompactListList<T, Container>::operator[]
 (
     const label i
 )
 {
-    if (i == 0)
-    {
-        return UList<T>(m_.begin(), offsets_[i]);
-    }
-    else
-    {
-        return UList<T>(&m_[offsets_[i-1]], offsets_[i] - offsets_[i-1]);
-    }
+    label start = offsets_[i];
+    return UList<T>(&m_[start], offsets_[i+1] - start);
 }
 
 
-template<class T>
-inline const Foam::UList<T> Foam::CompactListList<T>::operator[]
+template<class T, class Container>
+inline const Foam::UList<T>
+Foam::CompactListList<T, Container>::operator[]
 (
     const label i
 ) const
 {
-    if (i == 0)
-    {
-        return UList<T>(m_.begin(), offsets_[i]);
-    }
-    else
-    {
-        return UList<T>(&m_[offsets_[i-1]], offsets_[i] - offsets_[i-1]);
-    }
+    label start = offsets_[i];
+    return UList<T>
+    (
+        const_cast<T*>(&m_[start]),
+        offsets_[i+1] - start
+    );
 }
 
 
-template<class T>
-inline T& Foam::CompactListList<T>::operator()
+template<class T, class Container>
+inline T& Foam::CompactListList<T, Container>::operator()
 (
     const label i,
     const label j
@@ -260,8 +255,8 @@ inline T& Foam::CompactListList<T>::operator()
 }
 
 
-template<class T>
-inline const T& Foam::CompactListList<T>::operator()
+template<class T, class Container>
+inline const T& Foam::CompactListList<T, Container>::operator()
 (
     const label i,
     const label j
@@ -271,8 +266,8 @@ inline const T& Foam::CompactListList<T>::operator()
 }
 
 
-template<class T>
-inline void Foam::CompactListList<T>::operator=(const T& t)
+template<class T, class Container>
+inline void Foam::CompactListList<T, Container>::operator=(const T& t)
 {
     m_ = t;
 }

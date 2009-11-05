@@ -49,7 +49,10 @@ Foam::reactingMixture<ThermoType>::reactingMixture
     ),
     PtrList<Reaction<ThermoType> >
     (
-        autoPtr<chemistryReader<ThermoType> >::operator()().reactions(),
+        PtrList<Reaction<ThermoType> >
+        (
+            autoPtr<chemistryReader<ThermoType> >::operator()().reactions()
+        ),
         this->species_
     )
 {

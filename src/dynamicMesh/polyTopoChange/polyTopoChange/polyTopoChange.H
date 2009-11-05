@@ -64,18 +64,12 @@ SourceFiles
 #ifndef polyTopoChange_H
 #define polyTopoChange_H
 
-#include "autoPtr.H"
 #include "DynamicList.H"
 #include "labelList.H"
-#include "IOobject.H"
-#include "typeInfo.H"
 #include "pointField.H"
-#include "PtrList.H"
-#include "cellList.H"
 #include "Map.H"
 #include "HashSet.H"
 #include "mapPolyMesh.H"
-#include "CompactListList.H"
 #include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -95,6 +89,8 @@ class polyPatch;
 class dictionary;
 class topoAction;
 class objectMap;
+class IOobject;
+template<class T, class Container> class CompactListList;
 
 /*---------------------------------------------------------------------------*\
                            Class polyTopoChange Declaration
@@ -273,11 +269,15 @@ class polyTopoChange
         void makeCellCells
         (
             const label nActiveFaces,
-            CompactListList<label>& cellCells
+            CompactListList<label, labelList>& cellCells
         ) const;
 
         //- Cell ordering (bandCompression). Returns number of remaining cells.
-        label getCellOrder(const CompactListList<label>&, labelList&) const;
+        label getCellOrder
+        (
+            const CompactListList<label, labelList>&,
+            labelList&
+        ) const;
 
         //- Do upper-triangular ordering and patch ordering.
         void getFaceOrder

@@ -162,7 +162,7 @@ public:
         inline PackedList();
 
         //- Construct with given size, initializes list to 0.
-        inline PackedList(const label size);
+        explicit inline PackedList(const label size);
 
         //- Construct with given size and value for all elements.
         PackedList(const label size, const unsigned val);
@@ -174,7 +174,7 @@ public:
         inline PackedList(const Xfer< PackedList<nBits> >&);
 
         //- Construct from a list of labels
-        PackedList(const UList<label>&);
+        explicit PackedList(const UList<label>&);
 
         //- Clone
         inline autoPtr< PackedList<nBits> > clone() const;

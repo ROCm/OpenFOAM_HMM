@@ -85,7 +85,8 @@ const Foam::label edgesArray[12][2] =
 
 const Foam::edgeList Foam::treeBoundBox::edges
 (
-    initListList<edge, label, 12, 2>(edgesArray)
+    //initListList<edge, label, 12, 2>(edgesArray)
+    calcEdges(edgesArray)
 );
 
 
@@ -96,6 +97,18 @@ const Foam::FixedList<Foam::vector, 6> Foam::treeBoundBox::faceNormals
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::edgeList Foam::treeBoundBox::calcEdges(const label edgesArray[12][2])
+{
+    edgeList edges(12);
+    forAll(edges, edgeI)
+    {
+        edges[edgeI][0] = edgesArray[edgeI][0];
+        edges[edgeI][1] = edgesArray[edgeI][1];
+    }
+    return edges;
+}
+
 
 Foam::FixedList<Foam::vector, 6> Foam::treeBoundBox::calcFaceNormals()
 {
