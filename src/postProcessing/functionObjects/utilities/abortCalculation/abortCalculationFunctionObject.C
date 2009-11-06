@@ -22,34 +22,22 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Typedef
-    Foam::systemCallFunctionObject
-
-Description
-    FunctionObject wrapper around systemCall to allow them to be created via
-    the functions entry within controlDict.
-
-SourceFiles
-    systemCallFunctionObject.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef systemCallFunctionObject_H
-#define systemCallFunctionObject_H
+#include "abortCalculationFunctionObject.H"
 
-#include "systemCall.H"
-#include "OutputFilterFunctionObject.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef OutputFilterFunctionObject<systemCall>
-        systemCallFunctionObject;
+    defineNamedTemplateTypeNameAndDebug(abortCalculationFunctionObject, 0);
+
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        abortCalculationFunctionObject,
+        dictionary
+    );
 }
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

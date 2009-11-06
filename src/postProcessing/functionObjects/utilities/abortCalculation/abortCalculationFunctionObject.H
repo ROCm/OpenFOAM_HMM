@@ -23,29 +23,29 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Typedef
-    Foam::systemCallFunctionObject
+    Foam::abortCalculationFunctionObject
 
 Description
-    FunctionObject wrapper around systemCall to allow them to be created via
+    FunctionObject wrapper around abortCalculation to allow it to be created via
     the functions entry within controlDict.
 
 SourceFiles
-    systemCallFunctionObject.C
+    abortCalculationFunctionObject.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef systemCallFunctionObject_H
-#define systemCallFunctionObject_H
+#ifndef abortCalculationFunctionObject_H
+#define abortCalculationFunctionObject_H
 
-#include "systemCall.H"
+#include "abortCalculation.H"
 #include "OutputFilterFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef OutputFilterFunctionObject<systemCall>
-        systemCallFunctionObject;
+    typedef OutputFilterFunctionObject<abortCalculation>
+        abortCalculationFunctionObject;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

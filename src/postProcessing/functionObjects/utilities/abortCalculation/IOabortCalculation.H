@@ -23,29 +23,24 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Typedef
-    Foam::systemCallFunctionObject
+    Foam::IOabortCalculation
 
 Description
-    FunctionObject wrapper around systemCall to allow them to be created via
-    the functions entry within controlDict.
-
-SourceFiles
-    systemCallFunctionObject.C
+    Instance of the generic IOOutputFilter for abortCalculation.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef systemCallFunctionObject_H
-#define systemCallFunctionObject_H
+#ifndef IOabortCalculation_H
+#define IOabortCalculation_H
 
-#include "systemCall.H"
-#include "OutputFilterFunctionObject.H"
+#include "abortCalculation.H"
+#include "IOOutputFilter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef OutputFilterFunctionObject<systemCall>
-        systemCallFunctionObject;
+    typedef IOOutputFilter<abortCalculation> IOabortCalculation;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

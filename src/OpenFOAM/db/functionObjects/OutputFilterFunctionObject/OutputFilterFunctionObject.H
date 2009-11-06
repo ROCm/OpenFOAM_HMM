@@ -27,7 +27,7 @@ Class
 
 Description
     A functionObject wrapper around OutputFilter to allow them to be
-    created via the functions list within controlDict.
+    created via the functions entry within controlDict.
 
 Note
     Since the timeIndex is used directly from Foam::Time, it is unaffected

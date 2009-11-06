@@ -532,6 +532,22 @@ bool Foam::Time::end() const
 }
 
 
+void Foam::Time::stopAt(const stopAtControls sa) const
+{
+    stopAt_ = sa;
+
+    // adjust endTime
+    if (sa == saEndTime)
+    {
+        controlDict_.lookup("endTime") >> endTime_;
+    }
+    else
+    {
+        endTime_ = GREAT;
+    }
+}
+
+
 void Foam::Time::setTime(const Time& t)
 {
     value() = t.value();
