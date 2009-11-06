@@ -32,7 +32,7 @@
 #------------------------------------------------------------------------------
 
 setenv WM_PROJECT OpenFOAM
-setenv WM_PROJECT_VERSION dev
+if ( ! $?WM_PROJECT_VERSION ) setenv WM_PROJECT_VERSION 1.6
 
 ################################################################################
 # USER EDITABLE PART
@@ -120,7 +120,6 @@ case Linux:
     case x86_64:
         switch ($WM_ARCH_OPTION)
         case 32:
-            setenv WM_ARCH linux
             setenv WM_COMPILER_ARCH '-64'
             setenv WM_CC 'gcc'
             setenv WM_CXX 'g++'
