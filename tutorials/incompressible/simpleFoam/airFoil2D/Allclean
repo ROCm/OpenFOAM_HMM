@@ -3,4 +3,4 @@
 # Clean time folders only
 
 rm -rf *[1-9]*
-rm -f log.*
+rm -f log.* 2>/dev/null
