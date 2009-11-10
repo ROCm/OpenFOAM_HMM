@@ -108,10 +108,34 @@ public:
         }
 
         //- Return the explicit correction to the correctedSnGrad
-        //  for the given field
+        //  for the given field using the gradient of the field
+        tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        fullGradCorrection
+        (
+            const GeometricField<Type, fvPatchField, volMesh>&
+        ) const;
+
+        //- Return the explicit correction to the correctedSnGrad
+        //  for the given field using the gradients of the field components
         virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
         correction(const GeometricField<Type, fvPatchField, volMesh>&) const;
 };
+
+
+// * * * * * * * * Template Member Function Specialisations  * * * * * * * * //
+
+template<>
+tmp<surfaceScalarField> correctedSnGrad<scalar>::correction
+(
+    const volScalarField& vsf
+) const;
+
+
+template<>
+tmp<surfaceVectorField> correctedSnGrad<vector>::correction
+(
+    const volVectorField& vvf
+) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -26,17 +26,9 @@ License
 
 #include "spline.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::spline::spline(const pointField& knotPoints)
-:
-    knots_(knotPoints)
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::scalar Foam::spline::B(const scalar& tau) const
+Foam::scalar Foam::spline::B(const scalar tau)
 {
     if (tau <= -2.0 || tau >= 2.0)
     {
@@ -44,7 +36,7 @@ Foam::scalar Foam::spline::B(const scalar& tau) const
     }
     else if (tau <= -1.0)
     {
-        return pow((2.0 + tau),3.0)/6.0;
+        return pow((2.0 + tau), 3.0)/6.0;
     }
     else if (tau <= 0.0)
     {
@@ -56,11 +48,11 @@ Foam::scalar Foam::spline::B(const scalar& tau) const
     }
     else if (tau <= 2.0)
     {
-        return pow((2.0 - tau),3.0)/6.0;
+        return pow((2.0 - tau), 3.0)/6.0;
     }
     else
     {
-        FatalErrorIn("spline::B(const scalar&)")
+        FatalErrorIn("spline::B(const scalar)")
             << "Programming error???, "
             << "tau = " << tau
             << abort(FatalError);
@@ -70,13 +62,23 @@ Foam::scalar Foam::spline::B(const scalar& tau) const
 }
 
 
-Foam::vector Foam::spline::position(const scalar mu1) const
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::spline::spline(const pointField& knotPoints)
+:
+    knots_(knotPoints)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::vector Foam::spline::position(const scalar mu) const
 {
     vector loc(vector::zero);
 
-    for (register label i=0; i<knots_.size(); i++)
+    for (register label i=0; i < knots_.size(); i++)
     {
-        loc += B((knots_.size() - 1)*mu1 - i)*knots_[i];
+        loc += B((knots_.size() - 1)*mu - i)*knots_[i];
     }
 
     return loc;

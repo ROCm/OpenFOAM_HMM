@@ -28,26 +28,15 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//inline const Foam::labelList& Foam::globalIndex::offsets() const
-//{
-//    return offsets_;
-//}
-
-
 inline Foam::label Foam::globalIndex::offset(const label procI) const
 {
-    return (procI == 0 ? 0 : offsets_[procI-1]);
+    return offsets_[procI];
 }
 
 
 inline Foam::label Foam::globalIndex::localSize(const label procI) const
 {
-    return
-    (
-        procI == 0
-      ? offsets_[procI]
-      : offsets_[procI] - offsets_[procI-1]
-    );
+    return offsets_[procI+1] - offsets_[procI];
 }
 
 
@@ -59,7 +48,7 @@ inline Foam::label Foam::globalIndex::localSize() const
 
 inline Foam::label Foam::globalIndex::size() const
 {
-    return offsets_[Pstream::nProcs()-1];
+    return offsets_[Pstream::nProcs()];
 }
 
 
@@ -69,7 +58,7 @@ inline Foam::label Foam::globalIndex::toGlobal
     const label i
 ) const
 {
-    return(procI == 0 ? i : i + offsets_[procI-1]);
+    return i + offsets_[procI];
 }
 
 
@@ -82,9 +71,7 @@ inline Foam::label Foam::globalIndex::toGlobal(const label i) const
 //- Is on local processor
 inline bool Foam::globalIndex::isLocal(const label procI, const label i) const
 {
-    return
-        (i < offsets_[procI])
-     && (i >= (procI == 0 ? 0 : offsets_[procI-1]));
+    return i >= offsets_[procI] && i < offsets_[procI+1];
 }
 
 
@@ -97,9 +84,9 @@ inline bool Foam::globalIndex::isLocal(const label i) const
 inline Foam::label Foam::globalIndex::toLocal(const label procI, const label i)
 const
 {
-    label localI = (procI == 0 ? i : i - offsets_[procI-1]);
+    label localI = i - offsets_[procI];
 
-    if (localI < 0 || i >= offsets_[procI])
+    if (localI < 0 || i >= offsets_[procI+1])
     {
         FatalErrorIn("globalIndex::toLocal(const label, const label)")
             << "Global " << i << " does not belong on processor "
@@ -118,9 +105,7 @@ inline Foam::label Foam::globalIndex::toLocal(const label i) const
 
 inline Foam::label Foam::globalIndex::whichProcID(const label i) const
 {
-    label index = findLower(offsets_, i+1);
-
-    if (index == Pstream::nProcs()-1)
+    if (i < 0 || i >= offsets_[Pstream::nProcs()])
     {
         FatalErrorIn("globalIndex::whichProcID(const label)")
             << "Global " << i << " does not belong on any processor."
@@ -128,7 +113,7 @@ inline Foam::label Foam::globalIndex::whichProcID(const label i) const
             << abort(FatalError);
     }
 
-    return index+1;
+    return findLower(offsets_, i+1);
 }
 
 

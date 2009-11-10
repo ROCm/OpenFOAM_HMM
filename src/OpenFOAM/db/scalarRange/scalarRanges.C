@@ -57,7 +57,7 @@ Foam::scalarRanges::scalarRanges(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::scalarRanges::selected(const scalar& value) const
+bool Foam::scalarRanges::selected(const scalar value) const
 {
     forAll(*this, i)
     {

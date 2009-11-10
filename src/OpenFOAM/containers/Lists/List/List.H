@@ -123,22 +123,22 @@ public:
 
         //- Construct as copy of FixedList<T, Size>
         template<unsigned Size>
-        List(const FixedList<T, Size>&);
+        explicit List(const FixedList<T, Size>&);
 
         //- Construct as copy of PtrList<T>
-        List(const PtrList<T>&);
+        explicit List(const PtrList<T>&);
 
         //- Construct as copy of SLList<T>
-        List(const SLList<T>&);
+        explicit List(const SLList<T>&);
 
         //- Construct as copy of IndirectList<T>
-        List(const IndirectList<T>&);
+        explicit List(const IndirectList<T>&);
 
         //- Construct as copy of UIndirectList<T>
-        List(const UIndirectList<T>&);
+        explicit List(const UIndirectList<T>&);
 
         //- Construct as copy of BiIndirectList<T>
-        List(const BiIndirectList<T>&);
+        explicit List(const BiIndirectList<T>&);
 
         //- Construct from Istream.
         List(Istream&);

@@ -13,6 +13,14 @@
 
     word inertSpecie(thermo.lookup("inertSpecie"));
 
+    if (!composition.contains(inertSpecie))
+    {
+        FatalErrorIn(args.executable())
+            << "Specified inert specie '" << inertSpecie << "' not found in "
+            << "species list. Available species:" << composition.species()
+            << exit(FatalError);
+    }
+
     volScalarField& p = thermo.p();
     volScalarField& h = thermo.h();
     const volScalarField& T = thermo.T();

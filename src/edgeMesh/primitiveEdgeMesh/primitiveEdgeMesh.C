@@ -31,8 +31,6 @@ License
 #include "meshTools.H"
 #include "OFstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::primitiveEdgeMesh::calcPointEdges() const
@@ -217,7 +215,7 @@ void Foam::primitiveEdgeMesh::mergePoints(const scalar mergeDist)
         }
 
         // Compact using a hashtable and commutative hash of edge.
-        StaticHashTable<label, edge, Hash<edge> > edgeToLabel
+        HashTable<label, edge, Hash<edge> > edgeToLabel
         (
             2*edges_.size()
         );
@@ -241,7 +239,7 @@ void Foam::primitiveEdgeMesh::mergePoints(const scalar mergeDist)
 
         for
         (
-            StaticHashTable<label, edge, Hash<edge> >::const_iterator iter =
+            HashTable<label, edge, Hash<edge> >::const_iterator iter =
                 edgeToLabel.begin();
             iter != edgeToLabel.end();
             ++iter

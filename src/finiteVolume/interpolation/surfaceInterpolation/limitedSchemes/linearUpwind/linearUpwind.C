@@ -67,9 +67,22 @@ Foam::linearUpwind<Type>::correction
     const volVectorField& C = mesh.C();
     const surfaceVectorField& Cf = mesh.Cf();
 
-    GeometricField
-        <typename outerProduct<vector, Type>::type, fvPatchField, volMesh>
-        gradVf = gradScheme_().grad(vf);
+    tmp
+    <
+        GeometricField
+        <
+            typename outerProduct<vector, Type>::type,
+            fvPatchField,
+            volMesh
+        >
+    > tgradVf = gradScheme_().grad(vf, gradSchemeName_);
+
+    const GeometricField
+    <
+        typename outerProduct<vector, Type>::type,
+        fvPatchField,
+        volMesh
+    >& gradVf = tgradVf();
 
     forAll(faceFlux, facei)
     {
@@ -95,7 +108,7 @@ Foam::linearUpwind<Type>::correction
 
         if (pSfCorr.coupled())
         {
-            const unallocLabelList& pOwner = 
+            const unallocLabelList& pOwner =
                 mesh.boundary()[patchi].faceCells();
 
             const vectorField& pCf = Cf.boundaryField()[patchi];
@@ -106,7 +119,7 @@ Foam::linearUpwind<Type>::correction
                 gradVf.boundaryField()[patchi].patchNeighbourField();
 
             // Build the d-vectors
-            vectorField pd = 
+            vectorField pd =
                 mesh.Sf().boundaryField()[patchi]
                /(
                    mesh.magSf().boundaryField()[patchi]
@@ -129,7 +142,7 @@ Foam::linearUpwind<Type>::correction
                 }
                 else
                 {
-                    pSfCorr[facei] = 
+                    pSfCorr[facei] =
                         (pCf[facei] - pd[facei] - C[own]) & pGradVfNei[facei];
                 }
             }

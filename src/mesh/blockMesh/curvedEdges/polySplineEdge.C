@@ -36,20 +36,6 @@ namespace Foam
     addToRunTimeSelectionTable(curvedEdge, polySplineEdge, Istream);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    //! @cond fileScope
-    inline label nsize(const label otherKnotsSize, const label nBetweenKnots)
-    {
-        return otherKnotsSize*(1 + nBetweenKnots) + nBetweenKnots + 2;
-    }
-    //! @endcond fileScope
-}
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // intervening : returns a list of the points making up the polyLineEdge
@@ -68,18 +54,25 @@ Foam::pointField Foam::polySplineEdge::intervening
     const vector& sndend
 )
 {
-    BSpline spl(knotlist(points_, start_, end_, otherknots), fstend, sndend);
+    BSpline spl
+    (
+        knotlist(points_, start_, end_, otherknots),
+        fstend,
+        sndend
+    );
 
-    label nSize(nsize(otherknots.size(), nBetweenKnots));
+    const label nSize
+    (
+        otherknots.size() * (1 + nBetweenKnots) + nBetweenKnots + 2
+    );
 
-    pointField ans(nSize);
-
-    label N = spl.nKnots();
-    scalar init = 1.0/(N - 1);
-    scalar interval = (N - scalar(3))/N;
+    const label NKnots = spl.nKnots();
+    const scalar init = 1.0/(NKnots - 1);
+    scalar interval = (NKnots - scalar(3.0))/NKnots;
     interval /= otherknots.size() + 1;
     interval /= nBetweenKnots + 1;
 
+    pointField ans(nSize);
     ans[0] = points_[start_];
 
     register scalar index(init);
@@ -135,17 +128,8 @@ Foam::polySplineEdge::polySplineEdge
     vector fstend(is);
     vector sndend(is);
 
-    controlPoints_.setSize(nsize(otherKnots_.size(), nInterKnots));
-    // why does this need to be here (to avoid a crash)?
-    // 'intervening' uses BSpline to solve the new points
-    // it seems to be going badly there
-    distances_.setSize(controlPoints_.size());
-
     controlPoints_ = intervening(otherKnots_, nInterKnots, fstend, sndend);
     calcDistances();
-
-    // Info<< "polyLine[" << start_ << " " << end_
-    //     << "] controlPoints " << controlPoints_ << endl;
 }
 
 

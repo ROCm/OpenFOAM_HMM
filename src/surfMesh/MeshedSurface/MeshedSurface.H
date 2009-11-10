@@ -338,7 +338,7 @@ public:
         virtual void movePoints(const pointField&);
 
         //- Scale points. A non-positive factor is ignored
-        virtual void scalePoints(const scalar&);
+        virtual void scalePoints(const scalar);
 
         //- Reset primitive data (points, faces and zones)
         //  Note, optimized to avoid overwriting data (with Xfer::null)

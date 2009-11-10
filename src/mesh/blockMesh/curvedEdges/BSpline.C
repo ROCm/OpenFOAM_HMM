@@ -38,73 +38,69 @@ Foam::pointField Foam::BSpline::findKnots
     const vector& sndend
 )
 {
-    label newnKnots(allknots.size() + 2);
-    label NKnots(allknots.size());
-    pointField newknots(newnKnots);
+    const label NKnots = allknots.size();
 
     // set up 1/6 and 2/3 which are the matrix elements throughout most
     // of the matrix
 
-    register scalar oneSixth = 1.0/6.0;
-    register scalar twoThird = 2.0/3.0;
+    register const scalar oneSixth = 1.0/6.0;
+    register const scalar twoThird = 2.0/3.0;
 
-    simpleMatrix<vector> M(newnKnots);
+    simpleMatrix<vector> M(NKnots+2, 0, vector::zero);
 
     // set up the matrix
-
     M[0][0] = -0.5*scalar(NKnots - 1);
     M[0][2] =  0.5*scalar(NKnots - 1);
 
-    for (register label i=1; i<newnKnots-1; i++)
+    for (register label i = 1; i <= NKnots; i++)
     {
         M[i][i-1] = oneSixth;
         M[i][i] = twoThird;
         M[i][i+1] = oneSixth;
     }
 
-    M[newnKnots - 1][newnKnots - 3] = -0.5*scalar(NKnots - 1);
-    M[newnKnots - 1][newnKnots - 1] =  0.5*scalar(NKnots - 1);
+    M[NKnots+1][NKnots-1] = -0.5*scalar(NKnots - 1);
+    M[NKnots+1][NKnots+1] =  0.5*scalar(NKnots - 1);
 
     // set up the vector
-
-    for (label i=1; i<=NKnots; i++)
+    for (register label i = 1; i <= NKnots; i++)
     {
         M.source()[i] = allknots[i-1];
     }
 
-    // set the gradients at the two ends
+    // set the gradients at the ends:
 
-    if (mag(fstend)<1e-8)
+    if (mag(fstend) < 1e-8)
     {
-        // set to the default : forward differences on the end knots
+        // default : forward differences on the end knots
         M.source()[0] = allknots[1] - allknots[0];
         M.source()[0] /= mag(M.source()[0]);
+    }
+    else
+    {
+        // use the gradient vector provided
+        M.source()[0] = fstend/mag(fstend);
+    }
 
+    if (mag(sndend)<1e-8)
+    {
+        // default : forward differences on the end knots
         M.source()[NKnots+1] = M.source()[NKnots-1] - M.source()[NKnots];
         M.source()[NKnots+1] /= mag(M.source()[NKnots+1]);
     }
     else
     {
-        // set to the gradient vectors provided
-        M.source()[0] = fstend/mag(fstend);
+        // use the gradient vector provided
         M.source()[NKnots+1] = sndend/mag(sndend);
     }
 
+
     // invert the equation to find the control knots
-
-    newknots = M.solve();
-
-    return newknots;
+    return M.solve();
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::BSpline::BSpline(const pointField& Knots)
-:
-    spline(findKnots(Knots))
-{}
-
 
 Foam::BSpline::BSpline
 (

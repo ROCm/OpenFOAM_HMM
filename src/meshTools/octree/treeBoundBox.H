@@ -80,6 +80,9 @@ class treeBoundBox
 
 private:
 
+        //- To initialise edges.
+        static edgeList calcEdges(const label[12][2]);
+
         //- To initialise faceNormals.
         static FixedList<vector, 6> calcFaceNormals();
 
@@ -156,10 +159,6 @@ public:
 
         //- Per face the unit normal
         static const FixedList<vector, 6> faceNormals;
-
-
-        //- Face on which neighbour is
-        static direction neighbourFaceBits(const label&);
 
 
     // Constructors

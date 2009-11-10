@@ -98,8 +98,8 @@ class movingConeTopoFvMesh
         tmp<scalarField> vertexMarkup
         (
             const pointField& p,
-            const scalar& curLeft,
-            const scalar& curRight
+            const scalar curLeft,
+            const scalar curRight
         ) const;
 
 

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 InClass
-    Foam::Pstream
+    Foam
 
 Description
     Combination-Reduction operation for a parallel run.  The
@@ -37,6 +37,7 @@ Description
 #ifndef PstreamCombineReduceOps_H
 #define PstreamCombineReduceOps_H
 
+#include "UPstream.H"
 #include "Pstream.H"
 #include "ops.H"
 
@@ -50,7 +51,7 @@ namespace Foam
 template <class T, class CombineOp>
 void combineReduce
 (
-    const List<Pstream::commsStruct>& comms,
+    const List<UPstream::commsStruct>& comms,
     T& Value,
     const CombineOp& cop
 )
@@ -63,15 +64,15 @@ void combineReduce
 template <class T, class CombineOp>
 void combineReduce(T& Value, const CombineOp& cop)
 {
-    if (Pstream::nProcs() < Pstream::nProcsSimpleSum)
+    if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
     {
-        Pstream::combineGather(Pstream::linearCommunication(), Value, cop);
-        Pstream::combineScatter(Pstream::linearCommunication(), Value);
+        Pstream::combineGather(UPstream::linearCommunication(), Value, cop);
+        Pstream::combineScatter(UPstream::linearCommunication(), Value);
     }
     else
     {
-        Pstream::combineGather(Pstream::treeCommunication(), Value, cop);
-        Pstream::combineScatter(Pstream::treeCommunication(), Value);
+        Pstream::combineGather(UPstream::treeCommunication(), Value, cop);
+        Pstream::combineScatter(UPstream::treeCommunication(), Value);
     }
 }
 

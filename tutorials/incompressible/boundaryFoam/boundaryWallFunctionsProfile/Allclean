@@ -7,5 +7,3 @@ cleanCase
 
 rm -rf logs
 rm -f *.eps yPlus_vs_uPlus
-
-echo "done"

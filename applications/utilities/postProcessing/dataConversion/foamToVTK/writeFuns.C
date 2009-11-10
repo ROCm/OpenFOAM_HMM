@@ -220,7 +220,7 @@ void Foam::writeFuns::writePointDataHeader
 }
 
 
-void Foam::writeFuns::insert(const scalar& pt, DynamicList<floatScalar>& dest)
+void Foam::writeFuns::insert(const scalar pt, DynamicList<floatScalar>& dest)
 {
     dest.append(float(pt));
 }

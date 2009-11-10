@@ -154,7 +154,7 @@ public:
         // Access
 
             //- Return the roughness height scale
-            const scalar& roughnessHeight() const
+            scalar roughnessHeight() const
             {
                 return roughnessHeight_;
             }
@@ -166,7 +166,7 @@ public:
             }
 
             //- Return the roughness constant scale
-            const scalar& roughnessConstant() const
+            scalar roughnessConstant() const
             {
                 return roughnessConstant_;
             }
@@ -178,7 +178,7 @@ public:
             }
 
             //- Return the roughness scale factor
-            const scalar& roughnessFactor() const
+            scalar roughnessFactor() const
             {
                 return roughnessFactor_;
             }

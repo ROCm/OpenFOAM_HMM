@@ -135,7 +135,7 @@ public:
             virtual bool writeSurface
             (
                 const fileName& meshName = fileName::null,
-                const bool& triangulate = false
+                const bool triangulate = false
             ) const;
 };
 

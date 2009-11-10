@@ -64,19 +64,13 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        solidMixture
-        (
-            const dictionary&
-        );
+        solidMixture(const dictionary&);
 
 
     // Selectors
 
         //- Select construct from dictionary
-        static autoPtr<solidMixture> New
-        (
-            const dictionary&
-        );
+        static autoPtr<solidMixture> New(const dictionary&);
 
 
     // Member Functions
@@ -101,17 +95,11 @@ public:
 
         //- Calculate the mixture density [kg/m^3] as a function of
         //  volume fractions
-        scalar rho
-        (
-            const scalarField& X
-        ) const;
+        scalar rho(const scalarField& X) const;
 
         //- Calculate the mixture heat capacity [J/(kg K)] as a function
         //  of mass fractions
-        scalar cp
-        (
-            const scalarField& Y
-        ) const;
+        scalar cp(const scalarField& Y) const;
 };
 
 

@@ -183,7 +183,7 @@ void Foam::fvMatrix<Type>::addBoundarySource
 template<class Type>
 Foam::fvMatrix<Type>::fvMatrix
 (
-    GeometricField<Type, fvPatchField, volMesh>& psi,
+    const GeometricField<Type, fvPatchField, volMesh>& psi,
     const dimensionSet& ds
 )
 :
@@ -227,7 +227,13 @@ Foam::fvMatrix<Type>::fvMatrix
         );
     }
 
-    psi_.boundaryField().updateCoeffs();
+    // Update the boundary coefficients of psi without changing its event No.
+    GeometricField<Type, fvPatchField, volMesh>& psiRef =
+       const_cast<GeometricField<Type, fvPatchField, volMesh>&>(psi_);
+
+    label currentStatePsi = psiRef.eventNo();
+    psiRef.boundaryField().updateCoeffs();
+    psiRef.eventNo() = currentStatePsi;
 }
 
 
@@ -322,7 +328,7 @@ Foam::fvMatrix<Type>::fvMatrix(const tmp<fvMatrix<Type> >& tfvm)
 template<class Type>
 Foam::fvMatrix<Type>::fvMatrix
 (
-    GeometricField<Type, fvPatchField, volMesh>& psi,
+    const GeometricField<Type, fvPatchField, volMesh>& psi,
     Istream& is
 )
 :
@@ -404,12 +410,17 @@ void Foam::fvMatrix<Type>::setValues
     const unallocLabelList& nei = mesh.neighbour();
 
     scalarField& Diag = diag();
+    Field<Type>& psi =
+        const_cast
+        <
+            GeometricField<Type, fvPatchField, volMesh>&
+        >(psi_).internalField();
 
     forAll(cellLabels, i)
     {
         label celli = cellLabels[i];
 
-        psi_[celli] = values[i];
+        psi[celli] = values[i];
         source_[celli] = values[i]*Diag[celli];
 
         if (symmetric() || asymmetric())
