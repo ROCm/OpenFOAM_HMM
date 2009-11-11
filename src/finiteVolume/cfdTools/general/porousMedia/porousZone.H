@@ -42,7 +42,7 @@ Description
 
     Darcy-Forchheimer (@e d and @e f parameters)
     @f[
-        S = - (\mu \, d \, U + \frac{\rho |U|}{2} \, f) U
+        S = - (\mu \, d + \frac{\rho |U|}{2} \, f) U
     @f]
 
 
