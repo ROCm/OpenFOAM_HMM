@@ -45,7 +45,7 @@ template<class Type>
 tmp<fvMatrix<Type> >
 ddt
 (
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     return fv::ddtScheme<Type>::New
@@ -61,7 +61,7 @@ tmp<fvMatrix<Type> >
 ddt
 (
     const oneField&,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     return ddt(vf);
@@ -73,7 +73,7 @@ tmp<fvMatrix<Type> >
 ddt
 (
     const dimensionedScalar& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     return fv::ddtScheme<Type>::New
@@ -89,7 +89,7 @@ tmp<fvMatrix<Type> >
 ddt
 (
     const volScalarField& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     return fv::ddtScheme<Type>::New

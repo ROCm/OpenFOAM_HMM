@@ -114,9 +114,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~gradScheme();
+    //- Destructor
+    virtual ~gradScheme();
 
 
     // Member Functions
@@ -127,15 +126,54 @@ public:
             return mesh_;
         }
 
-        //- Calculate and return the grad of the given field
+        //- Calculate and return the grad of the given field.
+        //  Used by grad either to recalculate the cached gradient when it is
+        //  out of date with respect to the field or when it is not cached.
         virtual tmp
+        <
+            GeometricField
+            <typename outerProduct<vector, Type>::type, fvPatchField, volMesh>
+        > calcGrad
+        (
+            const GeometricField<Type, fvPatchField, volMesh>&,
+            const word& name
+        ) const = 0;
+
+        //- Calculate and return the grad of the given field
+        //  which may have been cached
+        tmp
+        <
+            GeometricField
+            <typename outerProduct<vector, Type>::type, fvPatchField, volMesh>
+        > grad
+        (
+            const GeometricField<Type, fvPatchField, volMesh>&,
+            const word& name
+        ) const;
+
+        //- Calculate and return the grad of the given field
+        //  with the default name
+        //  which may have been cached
+        tmp
         <
             GeometricField
             <typename outerProduct<vector, Type>::type, fvPatchField, volMesh>
         > grad
         (
             const GeometricField<Type, fvPatchField, volMesh>&
-        ) const = 0;
+        ) const;
+
+        //- Calculate and return the grad of the given field
+        //  with the default name
+        //  which may have been cached
+        tmp
+        <
+            GeometricField
+            <typename outerProduct<vector, Type>::type, fvPatchField, volMesh>
+        > grad
+        (
+            const tmp<GeometricField<Type, fvPatchField, volMesh> >&
+        ) const;
 };
 
 

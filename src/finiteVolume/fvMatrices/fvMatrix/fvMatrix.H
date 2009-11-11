@@ -117,8 +117,9 @@ public:
 
     // Private data
 
-        // Reference to GeometricField<Type, fvPatchField, volMesh>
-        GeometricField<Type, fvPatchField, volMesh>& psi_;
+        //- Const reference to GeometricField<Type, fvPatchField, volMesh>
+        //  Converted into a non-const reference at the point of solution.
+        const GeometricField<Type, fvPatchField, volMesh>& psi_;
 
         //- Dimension set
         dimensionSet dimensions_;
@@ -237,7 +238,7 @@ public:
         //- Construct given a field to solve for
         fvMatrix
         (
-            GeometricField<Type, fvPatchField, volMesh>&,
+            const GeometricField<Type, fvPatchField, volMesh>&,
             const dimensionSet&
         );
 
@@ -245,12 +246,12 @@ public:
         fvMatrix(const fvMatrix<Type>&);
 
         //- Construct as copy of tmp<fvMatrix<Type> > deleting argument
-#       ifdef ConstructFromTmp
+        #ifdef ConstructFromTmp
         fvMatrix(const tmp<fvMatrix<Type> >&);
-#       endif
+        #endif
 
         //- Construct from Istream given field to solve for
-        fvMatrix(GeometricField<Type, fvPatchField, volMesh>&, Istream&);
+        fvMatrix(const GeometricField<Type, fvPatchField, volMesh>&, Istream&);
 
 
     // Destructor
@@ -263,11 +264,6 @@ public:
         // Access
 
             const GeometricField<Type, fvPatchField, volMesh>& psi() const
-            {
-                return psi_;
-            }
-
-            GeometricField<Type, fvPatchField, volMesh>& psi()
             {
                 return psi_;
             }

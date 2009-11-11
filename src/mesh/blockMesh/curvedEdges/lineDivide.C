@@ -36,7 +36,7 @@ Foam::lineDivide::lineDivide
 (
     const curvedEdge& cedge,
     const label ndiv,
-    const scalar& xratio
+    const scalar xratio
 )
 :
     points_(ndiv + 1),

@@ -76,7 +76,7 @@ public:
         {}
 
         //- Construct from components
-        objectHit(const bool success, const label& obj)
+        objectHit(const bool success, const label obj)
         :
             hit_(success),
             hitObject_(obj)
@@ -111,7 +111,7 @@ public:
         {
             return ((a.hit_ == b.hit_) && (a.hitObject_ == b.hitObject_));
         }
-            
+
         friend bool operator!=(const objectHit& a, const objectHit& b)
         {
             return (!(a == b));

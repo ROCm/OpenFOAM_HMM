@@ -92,8 +92,7 @@ ManualInjectionCoeffs
 
 StandardWallInteractionCoeffs
 {
-    e               e [ 0 0 0 0 0 ] 1;
-    mu              mu [ 0 0 0 0 0 ] 0;
+    type            rebound;
 }
 
 RanzMarshallCoeffs

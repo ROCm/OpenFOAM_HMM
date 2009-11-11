@@ -106,14 +106,14 @@ class hPolynomialThermo
         //- Standard entropy [J/(kg.K)]
         scalar Sf_;
 
-        //- Specific heat at constant pressure
+        //- Specific heat at constant pressure [J/(kg.K)]
         Polynomial<PolySize> cpPolynomial_;
 
-        //- Enthalpy - derived from cp
+        //- Enthalpy - derived from cp [J/kg] - relative to Tstd
         typename Polynomial<PolySize>::intPolyType dhPolynomial_;
 
-        //- Entropy - derived from cp
-        Polynomial<PolySize> sPolynomial_;
+        //- Entropy - derived from cp [J/(kg.K)]
+        Polynomial<PolySize> dsPolynomial_;
 
 
     // Private member functions
@@ -125,8 +125,8 @@ class hPolynomialThermo
             const scalar Hf,
             const scalar Sf,
             const Polynomial<PolySize>& cpPoly,
-            const typename Polynomial<PolySize>::intPolyType& hPoly,
-            const Polynomial<PolySize>& sPoly
+            const typename Polynomial<PolySize>::intPolyType& dhPoly,
+            const Polynomial<PolySize>& dsPoly
         );
 
 

@@ -84,7 +84,7 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
             false
         ),
         this->mesh(),
-        dimensionedScalar("zero", dimensionSet(1, 2, -2, 0, 0), 0.0)
+        dimensionedScalar("zero", dimEnergy, 0.0)
     ),
     hcTrans_
     (
@@ -98,7 +98,7 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
             false
         ),
         this->mesh(),
-        dimensionedScalar("zero", dimensionSet(1, 2, -2, 0, 0), 0.0)
+        dimensionedScalar("zero", dimEnergy, 0.0)
     )
 {
     if (readFields)

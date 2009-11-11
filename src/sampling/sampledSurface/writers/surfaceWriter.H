@@ -128,7 +128,7 @@ public:
             const fileName& surfaceName,    // name of surface
             const pointField& points,
             const faceList& faces,
-            const fileName& fieldName,      // name of field
+            const word& fieldName,          // name of field
             const Field<Type>& values,
             const bool verbose = false
         ) const = 0;

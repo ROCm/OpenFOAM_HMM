@@ -233,7 +233,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 
     if (mag(htc) < ROOTVSMALL && !td.cloud().radiation())
     {
-        return  T + dt*Sh/(this->volume(d)*rho*cp);
+        return max(T + dt*Sh/(this->volume(d)*rho*cp), td.constProps().TMin());
     }
 
     const scalar As = this->areaS(d);
@@ -256,9 +256,11 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     IntegrationScheme<scalar>::integrationResult Tres =
         td.cloud().TIntegrator().integrate(T, dt, ap, bp);
 
-    dhsTrans += dt*htc*As*(Tres.average() - Tc_);
+    scalar Tnew = max(Tres.value(), td.constProps().TMin());
 
-    return Tres.value();
+    dhsTrans += dt*htc*As*(0.5*(T + Tnew) - Tc_);
+
+    return Tnew;
 }
 
 

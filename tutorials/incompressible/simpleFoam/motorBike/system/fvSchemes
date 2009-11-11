@@ -24,13 +24,13 @@ gradSchemes
     default         Gauss linear;
     grad(p)         Gauss linear;
     grad(U)         Gauss linear;
-//    grad(U)         cellLimited Gauss linear 1;
+    //grad(U)         cellLimited Gauss linear 1;
 }
 
 divSchemes
 {
     default         none;
-    div(phi,U)      Gauss linearUpwindV Gauss linear;
+    div(phi,U)      Gauss linearUpwind grad(U);
     div(phi,k)      Gauss upwind;
     div(phi,omega)  Gauss upwind;
     div((nuEff*dev(grad(U).T()))) Gauss linear;
@@ -39,8 +39,8 @@ divSchemes
 laplacianSchemes
 {
     default         Gauss linear corrected;
-//    default         Gauss linear limited 0.5;
-//    default         Gauss linear limited 0.333;
+    //default         Gauss linear limited 0.5;
+    //default         Gauss linear limited 0.333;
 }
 
 interpolationSchemes

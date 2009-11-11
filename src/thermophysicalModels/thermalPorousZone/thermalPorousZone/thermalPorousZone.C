@@ -55,9 +55,9 @@ Foam::thermalPorousZone::thermalPorousZone
             (
                 "thermalPorousZone::thermalPorousZone"
                 "("
-                "const word& name, "
-                "const fvMesh& mesh, "
-                "const dictionary& dict"
+                    "const word& name, "
+                    "const fvMesh& mesh, "
+                    "const dictionary& dict"
                 ")",
                 *dictPtr
             )   << "thermalModel " << thermalModel << " is not supported" << nl

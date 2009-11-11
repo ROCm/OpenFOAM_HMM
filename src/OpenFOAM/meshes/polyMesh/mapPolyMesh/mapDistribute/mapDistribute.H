@@ -39,6 +39,16 @@ Note:
     Note2: number of items send on one processor have to equal the number
     of items received on the other processor.
 
+    Constructors using compact numbering: all my own elements first
+    (whether used or not) followed by used-only remote elements.
+    So e.g 4 procs and on proc 1 the compact 
+    table will first have all globalIndex.localSize() elements from proc1
+    followed by used-only elements of proc0, proc2, proc3.
+    The constructed mapDistribute sends the local elements from and
+    receives the remote elements into their compact position.
+    compactMap[procI] is the position of elements from procI in the compact
+    map. compactMap[myProcNo()] is empty since trivial addressing. The indices
+    into compactMap[procI] are local, not global, indices.
 
 SourceFiles
     mapDistribute.C
@@ -52,6 +62,7 @@ SourceFiles
 #include "labelPair.H"
 #include "Pstream.H"
 #include "boolList.H"
+#include "Map.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,6 +70,7 @@ namespace Foam
 {
 
 class mapPolyMesh;
+class globalIndex;
 
 /*---------------------------------------------------------------------------*\
                            Class mapDistribute Declaration
@@ -83,28 +95,6 @@ class mapDistribute
 
 public:
 
-    // Public classes
-
-        //- combineReduce operator for lists. Used for counting.
-        class listEq
-        {
-
-        public:
-
-            template<class T>
-            void operator()(T& x, const T& y) const
-            {
-                forAll(y, i)
-                {
-                    if (y[i].size())
-                    {
-                        x[i] = y[i];
-                    }
-                }
-            }
-        };
-
-
     // Constructors
 
         //- Construct from components
@@ -121,6 +111,27 @@ public:
         (
             const labelList& sendProcs,
             const labelList& recvProcs
+        );
+
+        //- Construct from list of (possibly) remote elements in globalIndex
+        //  numbering. Determines compact numbering (see above) and
+        //  distribute map to get data into this ordering and renumbers the
+        //  elements to be in compact numbering.
+        mapDistribute
+        (
+            const globalIndex&,
+            labelList& elements,
+            List<Map<label> >& compactMap
+        );
+
+        //- Special variant that works with the into sorted into bins
+        //  according to local indices. E.g. think cellCells where
+        //  cellCells[localCellI] is a list of global cells
+        mapDistribute
+        (
+            const globalIndex&,
+            labelListList& cellCells,
+            List<Map<label> >& compactMap
         );
 
         //- Construct copy
@@ -179,6 +190,15 @@ public:
 
 
         // Other
+
+            //- Helper for construct from globalIndex. Renumbers element
+            //  (in globalIndex numbering) into compact indices.
+            static label renumber
+            (
+                const globalIndex&,
+                const List<Map<label> >& compactMap,
+                const label globalElement
+            );
 
             //- Compact maps. Gets per field a bool whether it is used (locally)
             //  and works out itself what this side and sender side can remove

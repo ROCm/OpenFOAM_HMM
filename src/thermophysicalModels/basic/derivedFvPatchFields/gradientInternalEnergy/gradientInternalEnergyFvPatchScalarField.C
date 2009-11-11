@@ -37,7 +37,8 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-gradientInternalEnergyFvPatchScalarField::gradientInternalEnergyFvPatchScalarField
+gradientInternalEnergyFvPatchScalarField::
+gradientInternalEnergyFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -47,7 +48,8 @@ gradientInternalEnergyFvPatchScalarField::gradientInternalEnergyFvPatchScalarFie
 {}
 
 
-gradientInternalEnergyFvPatchScalarField::gradientInternalEnergyFvPatchScalarField
+gradientInternalEnergyFvPatchScalarField::
+gradientInternalEnergyFvPatchScalarField
 (
     const gradientInternalEnergyFvPatchScalarField& ptf,
     const fvPatch& p,
@@ -59,7 +61,8 @@ gradientInternalEnergyFvPatchScalarField::gradientInternalEnergyFvPatchScalarFie
 {}
 
 
-gradientInternalEnergyFvPatchScalarField::gradientInternalEnergyFvPatchScalarField
+gradientInternalEnergyFvPatchScalarField::
+gradientInternalEnergyFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -70,7 +73,8 @@ gradientInternalEnergyFvPatchScalarField::gradientInternalEnergyFvPatchScalarFie
 {}
 
 
-gradientInternalEnergyFvPatchScalarField::gradientInternalEnergyFvPatchScalarField
+gradientInternalEnergyFvPatchScalarField::
+gradientInternalEnergyFvPatchScalarField
 (
     const gradientInternalEnergyFvPatchScalarField& tppsf
 )
@@ -79,7 +83,8 @@ gradientInternalEnergyFvPatchScalarField::gradientInternalEnergyFvPatchScalarFie
 {}
 
 
-gradientInternalEnergyFvPatchScalarField::gradientInternalEnergyFvPatchScalarField
+gradientInternalEnergyFvPatchScalarField::
+gradientInternalEnergyFvPatchScalarField
 (
     const gradientInternalEnergyFvPatchScalarField& tppsf,
     const DimensionedField<scalar, volMesh>& iF
@@ -102,10 +107,10 @@ void gradientInternalEnergyFvPatchScalarField::updateCoeffs()
     (
         "thermophysicalProperties"
     );
-    
+
     const label patchi = patch().index();
 
-    fvPatchScalarField& Tw = 
+    fvPatchScalarField& Tw =
         const_cast<fvPatchScalarField&>(thermo.T().boundaryField()[patchi]);
 
     Tw.evaluate();
@@ -123,7 +128,11 @@ void gradientInternalEnergyFvPatchScalarField::updateCoeffs()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, gradientInternalEnergyFvPatchScalarField);
+makePatchTypeField
+(
+    fvPatchScalarField,
+    gradientInternalEnergyFvPatchScalarField
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

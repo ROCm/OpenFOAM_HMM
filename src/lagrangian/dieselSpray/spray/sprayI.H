@@ -276,7 +276,7 @@ inline const List<bool>& spray::isLiquidFuel() const
 }
 
 
-inline const bool& spray::twoD() const
+inline bool spray::twoD() const
 {
     return twoD_;
 }
@@ -300,7 +300,7 @@ inline const vector& spray::axisOfWedgeNormal() const
 }
 
 
-inline const scalar& spray::angleOfWedge() const
+inline scalar spray::angleOfWedge() const
 {
     return angleOfWedge_;
 }
@@ -366,13 +366,13 @@ inline const PtrList<scalarField>& spray::srhos() const
 }
 
 
-inline const scalar& spray::ambientPressure() const
+inline scalar spray::ambientPressure() const
 {
     return ambientPressure_;
 }
 
 
-inline const scalar& spray::ambientTemperature() const
+inline scalar spray::ambientTemperature() const
 {
     return ambientTemperature_;
 }

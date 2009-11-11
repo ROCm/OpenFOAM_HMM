@@ -63,10 +63,13 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
             << endl;
     }
 
+    GeometricField<Type, fvPatchField, volMesh>& psi =
+       const_cast<GeometricField<Type, fvPatchField, volMesh>&>(psi_);
+
     lduMatrix::solverPerformance solverPerfVec
     (
         "fvMatrix<Type>::solve",
-        psi_.name()
+        psi.name()
     );
 
     scalarField saveDiag = diag();
@@ -82,7 +85,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
     (
         pow
         (
-            psi_.mesh().solutionD(),
+            psi.mesh().solutionD(),
             pTraits<typename powProduct<Vector<label>, Type::rank>::type>::zero
         )
     );
@@ -93,7 +96,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
 
         // copy field and source
 
-        scalarField psiCmpt = psi_.internalField().component(cmpt);
+        scalarField psiCmpt = psi.internalField().component(cmpt);
         addBoundaryDiag(diag(), cmpt);
 
         scalarField sourceCmpt = source.component(cmpt);
@@ -109,7 +112,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
         );
 
         lduInterfaceFieldPtrsList interfaces =
-            psi_.boundaryField().interfaces();
+            psi.boundaryField().interfaces();
 
         // Use the initMatrixInterfaces and updateMatrixInterfaces to correct
         // bouCoeffsCmpt for the explicit part of the coupled boundary
@@ -137,7 +140,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
         // Solver call
         solverPerf = lduMatrix::solver::New
         (
-            psi_.name() + pTraits<Type>::componentNames[cmpt],
+            psi.name() + pTraits<Type>::componentNames[cmpt],
             *this,
             bouCoeffsCmpt,
             intCoeffsCmpt,
@@ -156,11 +159,11 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
             solverPerfVec = solverPerf;
         }
 
-        psi_.internalField().replace(cmpt, psiCmpt);
+        psi.internalField().replace(cmpt, psiCmpt);
         diag() = saveDiag;
     }
 
-    psi_.correctBoundaryConditions();
+    psi.correctBoundaryConditions();
 
     return solverPerfVec;
 }

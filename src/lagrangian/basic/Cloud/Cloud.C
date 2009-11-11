@@ -306,29 +306,6 @@ void Foam::Cloud<ParticleType>::deleteParticle(ParticleType& p)
 }
 
 
-namespace Foam
-{
-
-class combineNsTransPs
-{
-
-public:
-
-    void operator()(labelListList& x, const labelListList& y) const
-    {
-        forAll(y, i)
-        {
-            if (y[i].size())
-            {
-                x[i] = y[i];
-            }
-        }
-    }
-};
-
-} // End namespace Foam
-
-
 template<class ParticleType>
 template<class TrackingData>
 void Foam::Cloud<ParticleType>::move(TrackingData& td)
@@ -404,7 +381,7 @@ void Foam::Cloud<ParticleType>::move(TrackingData& td)
             // processor patches for all the processors
             labelListList allNTrans(Pstream::nProcs());
             allNTrans[Pstream::myProcNo()] = nsTransPs;
-            combineReduce(allNTrans, combineNsTransPs());
+            combineReduce(allNTrans, UPstream::listEq());
 
             transfered = false;
 

@@ -106,7 +106,7 @@ void mixedInternalEnergyFvPatchScalarField::updateCoeffs()
     (
         "thermophysicalProperties"
     );
-    
+
     const label patchi = patch().index();
 
     mixedFvPatchScalarField& Tw = refCast<mixedFvPatchScalarField>
@@ -118,7 +118,8 @@ void mixedInternalEnergyFvPatchScalarField::updateCoeffs()
 
     valueFraction() = Tw.valueFraction();
     refValue() = thermo.e(Tw.refValue(), patchi);
-    refGrad() = thermo.Cv(Tw, patchi)*Tw.refGrad()
+    refGrad() =
+        thermo.Cv(Tw, patchi)*Tw.refGrad()
       + patch().deltaCoeffs()*
         (
             thermo.e(Tw, patchi)

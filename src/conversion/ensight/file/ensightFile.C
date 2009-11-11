@@ -74,7 +74,7 @@ bool Foam::ensightFile::allowUndef(bool value)
 }
 
 
-Foam::scalar Foam::ensightFile::undefValue(const scalar& value)
+Foam::scalar Foam::ensightFile::undefValue(const scalar value)
 {
     // enable its use too
     allowUndef_ = true;
@@ -133,7 +133,7 @@ Foam::Ostream& Foam::ensightFile::write(const string& value)
 }
 
 
-Foam::Ostream& Foam::ensightFile::write(const label& value)
+Foam::Ostream& Foam::ensightFile::write(const label value)
 {
     if (format() == IOstream::BINARY)
     {
@@ -157,7 +157,7 @@ Foam::Ostream& Foam::ensightFile::write(const label& value)
 
 Foam::Ostream& Foam::ensightFile::write
 (
-    const label& value,
+    const label value,
     const label fieldWidth
 )
 {
@@ -181,7 +181,7 @@ Foam::Ostream& Foam::ensightFile::write
 }
 
 
-Foam::Ostream& Foam::ensightFile::write(const scalar& value)
+Foam::Ostream& Foam::ensightFile::write(const scalar value)
 {
     if (format() == IOstream::BINARY)
     {

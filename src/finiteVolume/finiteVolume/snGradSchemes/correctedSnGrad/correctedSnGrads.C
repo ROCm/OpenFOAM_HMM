@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Simple central-difference snGrad scheme with non-orthogonal correction.
-
 \*---------------------------------------------------------------------------*/
 
 #include "correctedSnGrad.H"
@@ -39,5 +36,28 @@ namespace fv
     makeSnGradScheme(correctedSnGrad)
 }
 }
+
+
+template<>
+Foam::tmp<Foam::surfaceScalarField>
+Foam::fv::correctedSnGrad<Foam::scalar>::correction
+(
+    const volScalarField& vsf
+) const
+{
+    return fullGradCorrection(vsf);
+}
+
+
+template<>
+Foam::tmp<Foam::surfaceVectorField>
+Foam::fv::correctedSnGrad<Foam::vector>::correction
+(
+    const volVectorField& vvf
+) const
+{
+    return fullGradCorrection(vvf);
+}
+
 
 // ************************************************************************* //

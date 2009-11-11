@@ -22,7 +22,7 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Namespace
+InNamespace
     Foam
 
 Description
@@ -35,8 +35,6 @@ Description
 
 #include "mathematicalConstants.H"
 
-using namespace Foam::constant::mathematical;
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -45,15 +43,15 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Conversion from degrees to radians
-inline scalar degToRad(const scalar& deg)
+inline scalar degToRad(const scalar deg)
 {
-    return (deg*pi/180.0);
+    return (deg * constant::mathematical::pi/180.0);
 }
 
 //- Conversion from radians to degrees
-inline scalar radToDeg(const scalar& rad)
+inline scalar radToDeg(const scalar rad)
 {
-    return (rad*180.0/pi);
+    return (rad * 180.0/constant::mathematical::pi);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
