@@ -67,7 +67,7 @@ public:
         (
             const curvedEdge&,
             const label ndiv,
-            const scalar& xratio = 1.0
+            const scalar xratio = 1.0
         );
 
 

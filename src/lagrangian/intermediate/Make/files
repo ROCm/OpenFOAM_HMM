@@ -47,6 +47,7 @@ $(REACTINGMPPARCEL)/makeBasicReactingMultiphaseParcelSubmodels.C
 /* bolt-on models */
 submodels/addOns/radiation/absorptionEmission/cloudAbsorptionEmission/cloudAbsorptionEmission.C
 submodels/addOns/radiation/scatter/cloudScatter/cloudScatter.C
+submodels/Kinematic/PatchInteractionModel/LocalInteraction/patchInteractionData.C
 
 
 /* data entries */

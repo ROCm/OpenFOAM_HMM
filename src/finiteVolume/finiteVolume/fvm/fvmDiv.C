@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    
-
 \*---------------------------------------------------------------------------*/
 
 #include "fvmDiv.H"
@@ -49,7 +46,7 @@ tmp<fvMatrix<Type> >
 div
 (
     const surfaceScalarField& flux,
-    GeometricField<Type, fvPatchField, volMesh>& vf,
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
     const word& name
 )
 {
@@ -66,7 +63,7 @@ tmp<fvMatrix<Type> >
 div
 (
     const tmp<surfaceScalarField>& tflux,
-    GeometricField<Type, fvPatchField, volMesh>& vf,
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
     const word& name
 )
 {
@@ -81,7 +78,7 @@ tmp<fvMatrix<Type> >
 div
 (
     const surfaceScalarField& flux,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     return fvm::div(flux, vf, "div("+flux.name()+','+vf.name()+')');
@@ -92,7 +89,7 @@ tmp<fvMatrix<Type> >
 div
 (
     const tmp<surfaceScalarField>& tflux,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > Div(fvm::div(tflux(), vf));

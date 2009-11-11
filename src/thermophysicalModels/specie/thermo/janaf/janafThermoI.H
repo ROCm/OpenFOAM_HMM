@@ -56,7 +56,7 @@ inline Foam::janafThermo<equationOfState>::janafThermo
 template<class equationOfState>
 inline void Foam::janafThermo<equationOfState>::checkT(const scalar T) const
 {
-    if (T <  Tlow_ || T > Thigh_)
+    if (T < Tlow_ || T > Thigh_)
     {
         FatalErrorIn
         (
@@ -153,7 +153,7 @@ template<class equationOfState>
 inline Foam::scalar Foam::janafThermo<equationOfState>::hc() const
 {
     const coeffArray& a = lowCpCoeffs_;
-    const scalar& Tstd = specie::Tstd;
+    const scalar Tstd = specie::Tstd;
     return this->RR*
     (
         (

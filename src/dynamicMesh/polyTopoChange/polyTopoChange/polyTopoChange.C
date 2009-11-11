@@ -39,6 +39,7 @@ License
 #include "objectMap.H"
 #include "processorPolyPatch.H"
 #include "fvMesh.H"
+#include "CompactListList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -488,9 +489,6 @@ void Foam::polyTopoChange::makeCellCells
     // Neighbours per cell
     labelList nNbrs(cellMap_.size(), 0);
 
-    // Overall number of cellCells
-    label nCellCells = 0;
-
     // 1. Count neighbours (through internal faces) per cell
 
     for (label faceI = 0; faceI < nActiveFaces; faceI++)
@@ -499,22 +497,12 @@ void Foam::polyTopoChange::makeCellCells
         {
             nNbrs[faceOwner_[faceI]]++;
             nNbrs[faceNeighbour_[faceI]]++;
-            nCellCells += 2;
         }
     }
 
-    cellCells.setSize(cellMap_.size(), nCellCells);
+    // 2. Construct csr
+    cellCells.setSize(nNbrs);
 
-    // 2. Calculate offsets
-
-    labelList& offsets = cellCells.offsets();
-
-    label sumSize = 0;
-    forAll(nNbrs, cellI)
-    {
-        sumSize += nNbrs[cellI];
-        offsets[cellI] = sumSize;
-    }
 
     // 3. Fill faces per cell
 
@@ -543,8 +531,6 @@ Foam::label Foam::polyTopoChange::getCellOrder
     labelList& oldToNew
 ) const
 {
-    const labelList& offsets = cellCellAddressing.offsets();
-
     labelList newOrder(cellCellAddressing.size());
 
     // Fifo buffer for string of cells
@@ -560,7 +546,7 @@ Foam::label Foam::polyTopoChange::getCellOrder
     forAll (visited, cellI)
     {
         // find the first non-removed cell that has not been visited yet
-        if (!cellRemoved(cellI) && visited.get(cellI) == 0)
+        if (!cellRemoved(cellI) && visited[cellI] == 0)
         {
             // use this cell as a start
             nextCell.append(cellI);
@@ -574,23 +560,22 @@ Foam::label Foam::polyTopoChange::getCellOrder
             {
                 label currentCell = nextCell.removeHead();
 
-                if (visited.get(currentCell) == 0)
+                if (visited[currentCell] == 0)
                 {
-                    visited.set(currentCell, 1);
+                    visited[currentCell] = 1;
 
                     // add into cellOrder
                     newOrder[cellInOrder] = currentCell;
                     cellInOrder++;
 
                     // find if the neighbours have been visited
-                    label i0 = (currentCell == 0 ? 0 : offsets[currentCell-1]);
-                    label i1 = offsets[currentCell];
+                    const UList<label> cCells = cellCellAddressing[currentCell];
 
-                    for (label i = i0; i < i1; i++)
+                    forAll(cCells, i)
                     {
-                        label nbr = cellCellAddressing.m()[i];
+                        label nbr = cCells[i];
 
-                        if (!cellRemoved(nbr) && visited.get(nbr) == 0)
+                        if (!cellRemoved(nbr) && visited[nbr] == 0)
                         {
                             // not visited, add to the list
                             nextCell.append(nbr);

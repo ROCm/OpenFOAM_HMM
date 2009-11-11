@@ -313,14 +313,10 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& dict)
         Info<< "Creating topology mesh" << endl;
     }
 
-    PtrList<cellShape> tmpBlockShapes(blocks.size());
+    cellShapeList tmpBlockShapes(blocks.size());
     forAll(blocks, blockI)
     {
-        tmpBlockShapes.set
-        (
-            blockI,
-            new cellShape(blocks[blockI].blockShape())
-        );
+        tmpBlockShapes[blockI] = cellShape(blocks[blockI].blockShape());
 
         if (tmpBlockShapes[blockI].mag(blockPointField_) < 0.0)
         {

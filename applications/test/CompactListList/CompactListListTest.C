@@ -32,6 +32,9 @@ Description
 
 #include "CompactListList.H"
 #include "IOstreams.H"
+#include "OStringStream.H"
+#include "IStringStream.H"
+#include "faceList.H"
 
 using namespace Foam;
 
@@ -40,7 +43,29 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    CompactListList<label> cll1;
+    {
+        // null construct
+        CompactListList<label> cll1;
+        Info<< "cll1:" << cll1 << endl;
+
+        // Resize and assign row by row
+        labelList row0(2, 0);
+        labelList row1(3, 1);
+
+        labelList rowSizes(2);
+        rowSizes[0] = row0.size();
+        rowSizes[1] = row1.size();
+        cll1.resize(rowSizes);
+
+        cll1[0].assign(row0);   //note: operator= will not work since UList
+        cll1[1].assign(row1);
+        Info<< "cll1:" << cll1 << endl;
+
+        forAll(cll1.m(), i)
+        {
+            Info<< "i:" << i << " whichRow:" << cll1.whichRow(i) << endl;
+        }
+    }
 
     List<List<label> > lll(5);
     lll[0].setSize(3, 0);
@@ -61,10 +86,17 @@ int main(int argc, char *argv[])
     Info<< endl;
 
     Info<< "cll2(2, 3) = " << cll2(2, 3) << nl << endl;
+    cll2(2, 3) = 999;
+    Info<< "cll2(2, 3) = " << cll2(2, 3) << nl << endl;
 
-    Info<< "cll2 as List<List<label > > " << List<List<label > >(cll2) << endl;
+    Info<< "cll2 as List<List<label > > " << cll2()
+        << endl;
 
     cll2.setSize(3);
+
+    Info<< "cll2  = " << cll2 << endl;
+
+    cll2.setSize(0);
 
     Info<< "cll2  = " << cll2 << endl;
 
@@ -86,6 +118,39 @@ int main(int argc, char *argv[])
 
     Info<< "cll3 = " << cll3 << endl;
     Info<< "cll4 = " << cll4 << endl;
+
+
+    {
+        // IO
+        OStringStream ostr;
+        ostr << cll4;
+
+        IStringStream istr(ostr.str());
+        CompactListList<label> cll5(istr);
+        Info<< "cll5 = " << cll5 << endl;
+    }
+    {
+        // IO
+        cll4.clear();
+        OStringStream ostr;
+        ostr << cll4;
+
+        IStringStream istr(ostr.str());
+        CompactListList<label> cll5(istr);
+        Info<< "cll5 = " << cll5 << endl;
+    }
+
+    {
+        faceList fcs(2);
+        fcs[0] = face(labelList(1, 111));
+        fcs[1] = face(labelList(2, 222));
+
+        CompactListList<label, face> compactFcs(fcs);
+        Info<< "comactFcs:" << compactFcs << endl;
+
+        faceList fcs2 = compactFcs();
+        Info<< "fcs2:" << fcs2 << endl;
+    }
 
     return 0;
 }

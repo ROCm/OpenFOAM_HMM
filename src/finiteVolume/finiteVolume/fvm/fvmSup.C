@@ -35,7 +35,7 @@ Foam::tmp<Foam::fvMatrix<Type> >
 Foam::fvm::Su
 (
     const DimensionedField<Type, volMesh>& su,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     const fvMesh& mesh = vf.mesh();
@@ -60,7 +60,7 @@ Foam::tmp<Foam::fvMatrix<Type> >
 Foam::fvm::Su
 (
     const tmp<DimensionedField<Type, volMesh> >& tsu,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm = fvm::Su(tsu(), vf);
@@ -73,7 +73,7 @@ Foam::tmp<Foam::fvMatrix<Type> >
 Foam::fvm::Su
 (
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tsu,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm = fvm::Su(tsu(), vf);
@@ -86,7 +86,7 @@ Foam::zeroField
 Foam::fvm::Su
 (
     const zeroField&,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     return zeroField();
@@ -98,7 +98,7 @@ Foam::tmp<Foam::fvMatrix<Type> >
 Foam::fvm::Sp
 (
     const DimensionedField<scalar, volMesh>& sp,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     const fvMesh& mesh = vf.mesh();
@@ -123,7 +123,7 @@ Foam::tmp<Foam::fvMatrix<Type> >
 Foam::fvm::Sp
 (
     const tmp<DimensionedField<scalar, volMesh> >& tsp,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm = fvm::Sp(tsp(), vf);
@@ -136,7 +136,7 @@ Foam::tmp<Foam::fvMatrix<Type> >
 Foam::fvm::Sp
 (
     const tmp<volScalarField>& tsp,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm = fvm::Sp(tsp(), vf);
@@ -150,7 +150,7 @@ Foam::tmp<Foam::fvMatrix<Type> >
 Foam::fvm::Sp
 (
     const dimensionedScalar& sp,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     const fvMesh& mesh = vf.mesh();
@@ -175,7 +175,7 @@ Foam::zeroField
 Foam::fvm::Sp
 (
     const zeroField&,
-    GeometricField<Type, fvPatchField, volMesh>&
+    const GeometricField<Type, fvPatchField, volMesh>&
 )
 {
     return zeroField();
@@ -187,7 +187,7 @@ Foam::tmp<Foam::fvMatrix<Type> >
 Foam::fvm::SuSp
 (
     const DimensionedField<scalar, volMesh>& susp,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     const fvMesh& mesh = vf.mesh();
@@ -215,7 +215,7 @@ Foam::tmp<Foam::fvMatrix<Type> >
 Foam::fvm::SuSp
 (
     const tmp<DimensionedField<scalar, volMesh> >& tsusp,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm = fvm::SuSp(tsusp(), vf);
@@ -228,7 +228,7 @@ Foam::tmp<Foam::fvMatrix<Type> >
 Foam::fvm::SuSp
 (
     const tmp<volScalarField>& tsusp,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm = fvm::SuSp(tsusp(), vf);
@@ -241,7 +241,7 @@ Foam::zeroField
 Foam::fvm::SuSp
 (
     const zeroField&,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     return zeroField();

@@ -71,9 +71,10 @@ scalar pitchForkRing::energy(const vector r) const
 {
     scalar p = sqrt(r.x()*r.x() + r.y()*r.y());
 
-    scalar pMinusRSqr = (p - rOrbit_)*(p - rOrbit_);
+    scalar pMinusRSqr = sqr(p - rOrbit_);
 
-    return -0.5 * mu_ * pMinusRSqr
+    return
+       -0.5 * mu_ * pMinusRSqr
       + 0.25 * pMinusRSqr * pMinusRSqr
       + 0.5 * alpha_ * r.z() * r.z();
 }
@@ -87,9 +88,9 @@ vector pitchForkRing::force(const vector r) const
 
     return vector
     (
-        (mu_ - pMinusR * pMinusR) * pMinusR * r.x()/p,
-        (mu_ - pMinusR * pMinusR) * pMinusR * r.y()/p,
-        -alpha_ * r.z()
+        (mu_ - sqr(pMinusR)) * pMinusR * r.x()/(p + VSMALL),
+        (mu_ - sqr(pMinusR)) * pMinusR * r.y()/(p + VSMALL),
+      - alpha_ * r.z()
     );
 }
 

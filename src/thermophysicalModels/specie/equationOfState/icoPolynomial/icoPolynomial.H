@@ -99,7 +99,7 @@ class icoPolynomial
 {
     // Private data
 
-        //- Density
+        //- Density [kg/m^3]
         Polynomial<PolySize> rhoPolynomial_;
 
 

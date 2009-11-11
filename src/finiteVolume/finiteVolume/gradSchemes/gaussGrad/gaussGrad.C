@@ -21,7 +21,7 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-    
+
 \*---------------------------------------------------------------------------*/
 
 #include "gaussGrad.H"
@@ -29,27 +29,20 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace fv
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 template<class Type>
-tmp
+Foam::tmp
 <
-    GeometricField
+    Foam::GeometricField
     <
-        typename outerProduct<vector, Type>::type, fvPatchField, volMesh
+        typename Foam::outerProduct<Foam::vector, Type>::type,
+        Foam::fvPatchField,
+        Foam::volMesh
     >
 >
-gaussGrad<Type>::grad
+Foam::fv::gaussGrad<Type>::gradf
 (
-    const GeometricField<Type, fvsPatchField, surfaceMesh>& ssf
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& ssf,
+    const word& name
 )
 {
     typedef typename outerProduct<vector, Type>::type GradType;
@@ -62,7 +55,7 @@ gaussGrad<Type>::grad
         (
             IOobject
             (
-                "grad("+ssf.name()+')',
+                name,
                 ssf.instance(),
                 mesh,
                 IOobject::NO_READ,
@@ -119,27 +112,29 @@ gaussGrad<Type>::grad
 
 
 template<class Type>
-tmp
+Foam::tmp
 <
-    GeometricField
+    Foam::GeometricField
     <
-        typename outerProduct<vector, Type>::type, fvPatchField, volMesh
+        typename Foam::outerProduct<Foam::vector, Type>::type,
+        Foam::fvPatchField,
+        Foam::volMesh
     >
 >
-gaussGrad<Type>::grad
+Foam::fv::gaussGrad<Type>::calcGrad
 (
-    const GeometricField<Type, fvPatchField, volMesh>& vsf
+    const GeometricField<Type, fvPatchField, volMesh>& vsf,
+    const word& name
 ) const
 {
     typedef typename outerProduct<vector, Type>::type GradType;
 
     tmp<GeometricField<GradType, fvPatchField, volMesh> > tgGrad
     (
-        grad(tinterpScheme_().interpolate(vsf))
+        gradf(tinterpScheme_().interpolate(vsf), name)
     );
     GeometricField<GradType, fvPatchField, volMesh>& gGrad = tgGrad();
 
-    gGrad.rename("grad(" + vsf.name() + ')');
     correctBoundaryConditions(vsf, gGrad);
 
     return tgGrad;
@@ -147,7 +142,7 @@ gaussGrad<Type>::grad
 
 
 template<class Type>
-void gaussGrad<Type>::correctBoundaryConditions
+void Foam::fv::gaussGrad<Type>::correctBoundaryConditions
 (
     const GeometricField<Type, fvPatchField, volMesh>& vsf,
     GeometricField
@@ -173,13 +168,5 @@ void gaussGrad<Type>::correctBoundaryConditions
      }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace fv
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

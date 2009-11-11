@@ -78,6 +78,12 @@ const Foam::polyMesh& Foam::blockMesh::topology() const
 }
 
 
+Foam::scalar Foam::blockMesh::scaleFactor() const
+{
+    return scaleFactor_;
+}
+
+
 const Foam::pointField& Foam::blockMesh::points() const
 {
     if (points_.empty())

@@ -62,7 +62,7 @@ class gaussLaplacianScheme
         tmp<fvMatrix<Type> > fvmLaplacianUncorrected
         (
             const surfaceScalarField& gammaMagSf,
-            GeometricField<Type, fvPatchField, volMesh>&
+            const GeometricField<Type, fvPatchField, volMesh>&
         );
 
         tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > gammaSnGradCorr
@@ -126,7 +126,7 @@ public:
         tmp<fvMatrix<Type> > fvmLaplacian
         (
             const GeometricField<GType, fvsPatchField, surfaceMesh>&,
-            GeometricField<Type, fvPatchField, volMesh>&
+            const GeometricField<Type, fvPatchField, volMesh>&
         );
 
         tmp<GeometricField<Type, fvPatchField, volMesh> > fvcLaplacian
@@ -146,7 +146,7 @@ template<>                                                                  \
 tmp<fvMatrix<Type> > gaussLaplacianScheme<Type, scalar>::fvmLaplacian       \
 (                                                                           \
     const GeometricField<scalar, fvsPatchField, surfaceMesh>&,              \
-    GeometricField<Type, fvPatchField, volMesh>&                            \
+    const GeometricField<Type, fvPatchField, volMesh>&                      \
 );                                                                          \
                                                                             \
 template<>                                                                  \

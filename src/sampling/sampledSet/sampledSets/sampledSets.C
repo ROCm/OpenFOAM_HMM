@@ -212,7 +212,7 @@ void Foam::sampledSets::combineSampledSets
             (
                 samplePts.name(),
                 samplePts.axis(),
-                UIndirectList<point>(allPts, indexSets[seti]),
+                List<point>(UIndirectList<point>(allPts, indexSets[seti])),
                 refPt
             )
         );

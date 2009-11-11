@@ -107,7 +107,7 @@ public:
     //- Incrementally hash a label.
     //  This will necessarily return a different value than the
     //  non-incremental version.
-    unsigned operator()(const label& p, unsigned seed) const
+    unsigned operator()(const label p, unsigned seed) const
     {
         return Hasher(&p, sizeof(label), seed);
     }
@@ -115,11 +115,10 @@ public:
     //- Return the unsigned representation of a label.
     //  This helps if people have relied on the hash value corresponding to
     //  the natural order.
-    unsigned operator()(const label& p) const
+    unsigned operator()(const label p) const
     {
         return p;
     }
-
 };
 
 

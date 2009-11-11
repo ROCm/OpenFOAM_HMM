@@ -402,11 +402,7 @@ void Foam::syncTools::syncPointMap
             {
                 // Send to master
                 {
-                    OPstream toMaster
-                    (
-                        Pstream::blocking,
-                        Pstream::masterNo()
-                    );
+                    OPstream toMaster(Pstream::blocking, Pstream::masterNo());
                     toMaster << sharedPointValues;
                 }
                 // Receive merged values
