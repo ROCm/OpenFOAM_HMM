@@ -49,7 +49,6 @@ perfectInterface/perfectInterface.C
 
 boundaryMesh/boundaryMesh.C
 boundaryPatch/boundaryPatch.C
-boundaryMesh/octreeDataFaceList.C
 setUpdater/setUpdater.C
 
 meshModifiers = meshCut/meshModifiers
