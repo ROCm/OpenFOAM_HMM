@@ -22,80 +22,29 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::nullSurfaceWriter
+Typedef
+    Foam::uindirectPrimitivePatch
 
 Description
-
-SourceFiles
-    nullSurfaceWriter.C
+    Foam::uindirectPrimitivePatch
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef nullSurfaceWriter_H
-#define nullSurfaceWriter_H
+#ifndef uindirectPrimitivePatch_H
+#define uindirectPrimitivePatch_H
 
-#include "surfaceWriter.H"
+#include "PrimitivePatch.H"
+#include "face.H"
+#include "UIndirectList.H"
+#include "pointField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                     Class nullSurfaceWriter Declaration
-\*---------------------------------------------------------------------------*/
-
-template<class Type>
-class nullSurfaceWriter
-:
-    public surfaceWriter<Type>
-{
-
-public:
-
-    //- Runtime type information
-    TypeName("null");
-
-
-    // Constructors
-
-        //- Construct null
-        nullSurfaceWriter();
-
-
-    // Destructor
-
-        virtual ~nullSurfaceWriter();
-
-
-    // Member Functions
-
-        // Write
-
-        //- Writes single surface to file.
-        virtual void write
-        (
-            const fileName& outputDir,
-            const fileName& surfaceName,
-            const pointField& points,
-            const faceList& faces,
-            const word& fieldName,
-            const Field<Type>& values,
-            const bool verbose = false
-        ) const;
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "nullSurfaceWriter.C"
-#endif
+    typedef PrimitivePatch<face, UIndirectList, const pointField&>
+        uindirectPrimitivePatch;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

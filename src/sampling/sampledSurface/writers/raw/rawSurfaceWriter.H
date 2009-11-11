@@ -70,7 +70,7 @@ class rawSurfaceWriter
 
         static void writeData
         (
-            const fileName& fieldName,
+            const word& fieldName,
             const pointField& points,
             const faceList& faces,
             const scalarField& values,
@@ -79,7 +79,7 @@ class rawSurfaceWriter
 
         static void writeData
         (
-            const fileName& fieldName,
+            const word& fieldName,
             const pointField& points,
             const faceList& faces,
             const vectorField& values,
@@ -88,7 +88,7 @@ class rawSurfaceWriter
 
         static void writeData
         (
-            const fileName& fieldName,
+            const word& fieldName,
             const pointField& points,
             const faceList& faces,
             const sphericalTensorField& values,
@@ -97,7 +97,7 @@ class rawSurfaceWriter
 
         static void writeData
         (
-            const fileName& fieldName,
+            const word& fieldName,
             const pointField& points,
             const faceList& faces,
             const symmTensorField& values,
@@ -106,7 +106,7 @@ class rawSurfaceWriter
 
         static void writeData
         (
-            const fileName& fieldName,
+            const word& fieldName,
             const pointField& points,
             const faceList& faces,
             const tensorField& values,
@@ -152,7 +152,7 @@ public:
             const fileName& surfaceName,
             const pointField& points,
             const faceList& faces,
-            const fileName& fieldName,
+            const word& fieldName,
             const Field<Type>& values,
             const bool verbose = false
         ) const;

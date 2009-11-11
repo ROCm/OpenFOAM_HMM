@@ -266,7 +266,7 @@ void Foam::vtkSurfaceWriter<Type>::write
     const fileName& surfaceName,
     const pointField& points,
     const faceList& faces,
-    const fileName& fieldName,
+    const word& fieldName,
     const Field<Type>& values,
     const bool verbose
 ) const
