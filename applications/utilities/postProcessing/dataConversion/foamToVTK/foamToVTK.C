@@ -83,12 +83,13 @@ Usage
     Combine all patches into a single file
 
     @param -excludePatches \<patchNames\>\n
-    Specify patches to exclude. For example,
+    Specify patches (wildcards) to exclude. For example,
     @verbatim
-         -excludePatches "( inlet_1 inlet_2 )"
+         -excludePatches '( inlet_1 inlet_2 "proc.*")'
     @endverbatim
     The quoting is required to avoid shell expansions and to pass the
-    information as a single argument.
+    information as a single argument. The double quotes denote a regular
+    expression.
 
     @param -useTimeName \n
     use the time index in the VTK file name instead of the time index
@@ -140,6 +141,7 @@ Note
 #include "faceZoneMesh.H"
 #include "Cloud.H"
 #include "passiveParticle.H"
+#include "stringListOps.H"
 
 #include "vtkMesh.H"
 #include "readFields.H"
@@ -192,7 +194,7 @@ void print(Ostream& os, const wordList& flds)
 labelList getSelectedPatches
 (
     const polyBoundaryMesh& patches,
-    const HashSet<word>& excludePatches
+    const List<wordRe>& excludePatches  //HashSet<word>& excludePatches
 )
 {
     DynamicList<label> patchIDs(patches.size());
@@ -205,14 +207,19 @@ labelList getSelectedPatches
 
         if
         (
-            isA<emptyPolyPatch>(pp)
-            || (Pstream::parRun() && isA<processorPolyPatch>(pp))
+            isType<emptyPolyPatch>(pp)
+            || (Pstream::parRun() && isType<processorPolyPatch>(pp))
         )
         {
             Info<< "    discarding empty/processor patch " << patchI
                 << " " << pp.name() << endl;
         }
-        else if (!excludePatches.found(pp.name()))
+        else if (findStrings(excludePatches, pp.name()))
+        {
+            Info<< "    excluding patch " << patchI
+                << " " << pp.name() << endl;
+        }
+        else
         {
             patchIDs.append(patchI);
             Info<< "    patch " << patchI << " " << pp.name() << endl;
@@ -220,6 +227,8 @@ labelList getSelectedPatches
     }
     return patchIDs.shrink();
 }
+
+
 
 
 
@@ -283,7 +292,7 @@ int main(int argc, char *argv[])
 
     bool allPatches = args.optionFound("allPatches");
 
-    HashSet<word> excludePatches;
+    List<wordRe> excludePatches;
     if (args.optionFound("excludePatches"))
     {
         args.optionLookup("excludePatches")() >> excludePatches;
@@ -771,7 +780,7 @@ int main(int argc, char *argv[])
             {
                 const polyPatch& pp = patches[patchI];
 
-                if (!excludePatches.found(pp.name()))
+                if (!findStrings(excludePatches, pp.name()))
                 {
                     mkDir(fvPath/pp.name());
 

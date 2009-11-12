@@ -464,7 +464,10 @@ void Foam::searchableSurfaceCollection::getRegion
                 labelList surfRegion;
                 subGeom_[surfI].getRegion
                 (
-                    UIndirectList<pointIndexHit>(info, indices),
+                    List<pointIndexHit>
+                    (
+                        UIndirectList<pointIndexHit>(info, indices)
+                    ),
                     surfRegion
                 );
                 forAll(indices, i)
@@ -528,7 +531,10 @@ void Foam::searchableSurfaceCollection::getNormal
             vectorField surfNormal;
             subGeom_[surfI].getNormal
             (
-                UIndirectList<pointIndexHit>(info, indices),
+                List<pointIndexHit>
+                (
+                    UIndirectList<pointIndexHit>(info, indices)
+                ),
                 surfNormal
             );
             forAll(indices, i)

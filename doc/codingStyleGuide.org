@@ -1,0 +1,275 @@
+#                            -*- mode: org; -*-
+#
+#+TITLE:                 OpenFOAM C++ style guide
+#+AUTHOR:                      OpenCFD Ltd.
+#+DATE:                       November 2009
+#+LINK:                  http://www.opencfd.co.uk
+#+OPTIONS: author:nil ^:{}
+
+* OpenFOAM C++ style guide
+
+*** General
+    + 80 character lines max
+    + The body of control statements (eg, if, else, while, etc).
+      always delineated with brace brackets
+
+    + stream output
+      << is always four characters after the start of the stream, so that the <<
+      symbols align, i.e.
+
+      Info<<
+      os  <<
+
+
+      so
+
+      WarningIn("className::functionName()")
+          << "Warning message"
+
+      NOT
+
+      WarningIn("className::functionName()")
+      << "Warning message"
+
+    + no unnecessary class section headers, i.e. remove
+
+      // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+      // Check
+
+      // Edit
+
+      // Write
+
+      if they contain nothing, even if planned for 'future use'
+
+    + class titles are centred
+
+     /*---------------------------------------------------------------------------*\
+                             Class exampleClass Declaration
+     \*---------------------------------------------------------------------------*/
+
+    NOT
+
+     /*---------------------------------------------------------------------------*\
+                    Class exampleClass Declaration
+     \*---------------------------------------------------------------------------*/
+
+*** .H Files
+    + header file spacing
+      Leave two empty lines between sections (as per functions in the .C file etc)
+
+    + use "//- Comment" comments in header file
+      + add descriptions to class data and functions
+    + destructor
+      If adding a comment to the destructor - use //- and code as a normal function:
+
+      //- Destructor
+      ~className();
+    + inline functions
+      Use inline functions where appropriate in a separate classNameI.H file.
+      Do not clutter up the header file with function bodies
+
+*** .C Files
+    + Do not open/close namespaces in a .C file
+      Fully scope the function name, i.e.
+
+      Foam::returnType Foam::className::functionName()
+
+      NOT
+
+      namespace Foam
+      {
+          ...
+
+          returnType className::functionName()
+
+          ...
+      }
+
+      EXCEPTION
+
+      When there are multiple levels of namespace, they may be used in the .C
+      file, i.e.
+
+      namespace Foam
+      {
+      namespace compressible
+      {
+      namespace RASModels
+      {
+
+          ...
+
+      } // End namespace RASModels
+      } // End namespace compressible
+      } // End namespace Foam
+
+    + Use two empty lines between functions
+
+*** Coding Practise
+    + passing data as arguments or return
+      Pass label and scalar as copy, anything bigger by reference
+    + const
+      Use everywhere it is applicable.
+    + variable initialisation using "="
+
+      const className& variableName = otherClass.data();
+
+      NOT
+
+      const className& variableName(otherClass.data());
+
+    + virtual functions
+      If a class is virtual - make all derived classes virtual.
+
+*** Conditional Statements
+    if (condition)
+    {
+        code;
+    }
+
+    OR
+
+    if
+    (
+       long condition
+    )
+    {
+        code;
+    }
+
+    NOT (no space between "if" and "(")
+
+    if(condition)
+    {
+        code;
+    }
+
+*** `for' Loops
+    for (i = 0; i < maxI; i++)
+    {
+        code;
+    }
+
+    OR
+
+    for
+    (
+        i = 0;
+        i < maxI;
+        i++
+    )
+    {
+        code;
+    }
+
+    NOT (no space between "for" and "(")
+
+    for(i = 0; i < maxI; i++)
+    {
+        code;
+    }
+
+*** `forAll' loops
+    like for loops, but
+
+    forAll(
+
+    NOT
+
+    forAll (
+
+*** Splitting Over Multiple Lines
+   + splitting return type and function name
+     + split initially after the function return type and left align
+
+     + do not put "const" onto it's own line - use a split to keep it with the
+       function name and arguments.
+
+     so:
+
+     const Foam::longReturnTypeName&
+     Foam::longClassName::longFunctionName const
+
+     NOT
+
+     const Foam::longReturnTypeName&
+         Foam::longClassName::longFunctionName const
+
+     NOR
+
+     const Foam::longReturnTypeName& Foam::longClassName::longFunctionName
+     const
+
+     NOR
+
+     const Foam::longReturnTypeName& Foam::longClassName::
+     longFunctionName const
+
+
+     + if need to split again, split at the function name (leaving behind the
+         preceding scoping "::"'s), and again, left align, i.e.
+
+       const Foam::longReturnTypeName&
+       Foam::veryveryveryverylongClassName::
+       veryveryveryverylongFunctionName const
+
+   + splitting long lines at an "="
+
+     Indent after split
+
+     variableName =
+         longClassName.longFunctionName(longArgument);
+
+     OR (where necessary)
+
+     variableName =
+         longClassName.longFunctionName
+         (
+             longArgument1,
+             longArgument2
+         );
+
+     NOT
+
+     variableName =
+     longClassName.longFunctionName(longArgument);
+
+     NOR
+
+     variableName = longClassName.longFunctionName
+     (
+         longArgument1,
+         longArgument2
+     );
+
+*** Maths and Logic
+    + operator spacing
+      + a + b, a - b
+      + a*b, a/b
+      + a & b, a ^ b
+      + a = b, a != b
+      + a < b, a > b, a >= b, a <= b
+      + a || b, a && b
+
+    + splitting formulae over several lines
+      Split and indent as per "splitting long lines at an "=""
+      with the operator on the lower line.  Align operator so that first
+      variable, function or bracket on the next line is 4 spaces indented i.e.
+
+      variableName =
+          a*(a + b)
+        - exp(c/d)
+         *(k + t)
+
+    + splitting logical tests over several lines
+
+      indent operator so that the next variable to test is aligned with the
+      four space indentation, i.e.
+
+      if
+      (
+          a == true
+       && b == c
+      )

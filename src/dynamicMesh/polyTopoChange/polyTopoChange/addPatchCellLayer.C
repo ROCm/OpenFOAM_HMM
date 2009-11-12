@@ -110,7 +110,7 @@ Foam::labelListList Foam::addPatchCellLayer::calcGlobalEdgeFaces
     );
 
     // Extract pp part
-    return UIndirectList<labelList>(globalEdgeFaces, meshEdges);
+    return labelListList(UIndirectList<labelList>(globalEdgeFaces, meshEdges));
 }
 
 

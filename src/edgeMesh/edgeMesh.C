@@ -26,9 +26,6 @@ License
 
 #include "edgeMesh.H"
 #include "mergePoints.H"
-#include "StaticHashTable.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -204,7 +201,7 @@ void Foam::edgeMesh::mergePoints(const scalar mergeDist)
         }
 
         // Compact using a hashtable and commutative hash of edge.
-        StaticHashTable<label, edge, Hash<edge> > edgeToLabel
+        HashTable<label, edge, Hash<edge> > edgeToLabel
         (
             2*edges_.size()
         );
@@ -228,7 +225,7 @@ void Foam::edgeMesh::mergePoints(const scalar mergeDist)
 
         for
         (
-            StaticHashTable<label, edge, Hash<edge> >::const_iterator iter =
+            HashTable<label, edge, Hash<edge> >::const_iterator iter =
                 edgeToLabel.begin();
             iter != edgeToLabel.end();
             ++iter
