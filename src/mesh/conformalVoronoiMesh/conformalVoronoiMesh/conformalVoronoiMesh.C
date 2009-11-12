@@ -2079,6 +2079,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
                 cc1++;
 
                 cc2++;
+
             } while (cc1 != ccStart);
 
             if (verticesOnFace.size() >= 3)
@@ -2449,7 +2450,7 @@ void Foam::conformalVoronoiMesh::sortFaces
 
     for (label o = 1; o < owner.size(); o++)
     {
-         label blockLength = -1;
+        label blockLength = -1;
 
         if (owner[o] > owner[o-1])
         {
@@ -2468,7 +2469,7 @@ void Foam::conformalVoronoiMesh::sortFaces
             blockLength = o - ownerBlockStart + 1;
         }
 
-        if (blockLength > 1)
+        if (blockLength >= 1)
         {
             labelList blockIndices =
                 identity(blockLength) + ownerBlockStart;
