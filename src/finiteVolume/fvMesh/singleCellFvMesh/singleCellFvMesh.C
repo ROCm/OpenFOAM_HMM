@@ -146,6 +146,10 @@ void Foam::singleCellFvMesh::agglomerateMesh
     // From new patch face back to agglomeration
     patchFaceMap_.setSize(oldPatches.size());
 
+    // From fine face to coarse face (or -1)
+    reverseFaceMap_.setSize(mesh.nFaces());
+    reverseFaceMap_.labelList::operator=(-1);
+
     // Face counter
     coarseI = 0;
 
