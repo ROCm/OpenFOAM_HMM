@@ -43,6 +43,14 @@ bool Foam::UOPstream::write
     const int tag
 )
 {
+    if (debug)
+    {
+        Pout<< "UIPstream::write : starting write to:" << toProcNo
+            << " tag:" << tag << " size:" << label(bufSize)
+            << " commsType:" << UPstream::commsTypeNames[commsType]
+            << Foam::endl;
+    }
+
     bool transferFailed = true;
 
     if (commsType == blocking)
@@ -56,6 +64,14 @@ bool Foam::UOPstream::write
             tag,
             MPI_COMM_WORLD
         );
+
+        if (debug)
+        {
+            Pout<< "UIPstream::write : finished write to:" << toProcNo
+                << " tag:" << tag << " size:" << label(bufSize)
+                << " commsType:" << UPstream::commsTypeNames[commsType]
+                << Foam::endl;
+        }
     }
     else if (commsType == scheduled)
     {
@@ -68,6 +84,14 @@ bool Foam::UOPstream::write
             tag,
             MPI_COMM_WORLD
         );
+
+        if (debug)
+        {
+            Pout<< "UIPstream::write : finished write to:" << toProcNo
+                << " tag:" << tag << " size:" << label(bufSize)
+                << " commsType:" << UPstream::commsTypeNames[commsType]
+                << Foam::endl;
+        }
     }
     else if (commsType == nonBlocking)
     {
@@ -84,6 +108,15 @@ bool Foam::UOPstream::write
             &request
         );
 
+        if (debug)
+        {
+            Pout<< "UIPstream::write : started write to:" << toProcNo
+                << " tag:" << tag << " size:" << label(bufSize)
+                << " commsType:" << UPstream::commsTypeNames[commsType]
+                << " request:" << PstreamGlobals::outstandingRequests_.size()
+                << Foam::endl;
+        }
+
         PstreamGlobals::outstandingRequests_.append(request);
     }
     else
@@ -93,7 +126,8 @@ bool Foam::UOPstream::write
             "UOPstream::write"
             "(const int fromProcNo, char* buf, std::streamsize bufSize"
             ", const int)"
-        )   << "Unsupported communications type " << commsType
+        )   << "Unsupported communications type "
+            << UPstream::commsTypeNames[commsType]
             << Foam::abort(FatalError);
     }
 
