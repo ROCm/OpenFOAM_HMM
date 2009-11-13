@@ -46,6 +46,62 @@ inline Foam::scalar Foam::conformalVoronoiMesh::targetCellSize
 }
 
 
+inline Foam::scalar Foam::conformalVoronoiMesh::averageCellSize
+(
+    const Vertex_handle& vA,
+    const Vertex_handle& vB
+) const
+{
+    // Arithmetic mean
+    // return 0.5*(vA->targetCellSize() + vB->targetCellSize());
+
+    // Geometric mean
+    return sqrt(vA->targetCellSize()*vB->targetCellSize());
+
+    // Harmonic mean
+    // return
+    //     2.0*(vA->targetCellSize()*vB->targetCellSize())
+    //    /(vA->targetCellSize() + vB->targetCellSize());
+}
+
+
+inline Foam::scalar Foam::conformalVoronoiMesh::averageAnyCellSize
+(
+    const Vertex_handle& vA,
+    const Vertex_handle& vB
+) const
+{
+    if
+    (
+        !vA->internalOrBoundaryPoint()
+     && !vB->internalOrBoundaryPoint()
+    )
+    {
+        FatalErrorIn
+        (
+            "Foam::conformalVoronoiMesh::averageAnyCellSize"
+            "("
+                "const Vertex_handle& vA,"
+                "const Vertex_handle& vB"
+            ") const"
+        )
+            << "Requested averageCellSize for to external points"
+            << nl
+            << exit(FatalError);
+    }
+    else if (!vB->internalOrBoundaryPoint())
+    {
+        return vA->targetCellSize();
+    }
+    else if (!vA->internalOrBoundaryPoint())
+    {
+        return vB->targetCellSize();
+    }
+
+    return averageCellSize(vA, vB);
+}
+
+
 inline Foam::scalar Foam::conformalVoronoiMesh::pointPairDistance
 (
     const point& pt
@@ -217,7 +273,8 @@ inline void Foam::conformalVoronoiMesh::insertVb(const Vb& v, label offset)
     {
         FatalErrorIn("Foam::conformalVoronoiMesh::insertVb(const Vb& v")
             << "Failed to reinsert Vb at " << topoint(Pt)
-            << endl;
+            << nl
+            << exit(FatalError);
     }
     else
     {

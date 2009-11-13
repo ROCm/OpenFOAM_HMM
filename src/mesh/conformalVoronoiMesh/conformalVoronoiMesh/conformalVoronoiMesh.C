@@ -1760,7 +1760,16 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     labelList& patchStarts
 )
 {
-    // ~~~~~~~~~~~ removing short edges by indexing dual vertices ~~~~~~~~~~~~~~
+    timeCheck();
+
+    setVertexSizeAndAlignment();
+
+    timeCheck();
+
+    // Indexing cells, which are Dual vertices
+    label dualVertI = 0;
+
+    points.setSize(number_of_cells());
 
     for
     (
@@ -1769,211 +1778,240 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         ++cit
     )
     {
-        cit->cellIndex() = -1;
-    }
-
-    points.setSize(number_of_cells());
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Looking up minEdgeLenSqr with a dummy point, in future will be available
-    // as a local value to be looked up in-place.
-
-    scalar minEdgeLenSqr = sqr(minimumEdgeLength(vector::zero));
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    label dualVertI = 0;
-
-    // Scanning by number of short (dual) edges (nSE) attached to the
-    // circumcentre of each Delaunay tet.  A Delaunay tet may only have four
-    // dual edges emanating from its circumcentre, assigning positions and
-    // indices to those with 4 short edges attached first, then >= 3, then >= 2
-    // etc.
-    for (label nSE = 4; nSE >= 0; nSE--)
-    {
-        Info<< nl << "Scanning for dual vertices with >= "
-            << nSE
-            << " short edges attached." << endl;
-
-        for
+        if
         (
-            Triangulation::Finite_cells_iterator cit = finite_cells_begin();
-            cit != finite_cells_end();
-            ++cit
+            cit->vertex(0)->internalOrBoundaryPoint()
+         || cit->vertex(1)->internalOrBoundaryPoint()
+         || cit->vertex(2)->internalOrBoundaryPoint()
+         || cit->vertex(3)->internalOrBoundaryPoint()
         )
         {
-            // If the Delaunay tet has an index already then it has either
-            // evaluated itself and taken action or has had its index dictated
-            // by a neighbouring tet with more short edges attached.
-
-            if (cit->cellIndex() == -1)
-            {
-                point dualVertex = topoint(dual(cit));
-
-                label shortEdges = 0;
-
-                List<bool> edgeIsShort(4, false);
-
-                List<bool> neighbourAlreadyIndexed(4, false);
-
-                // Loop over the four facets of the Delaunay tet
-                for (label f = 0; f < 4; f++)
-                {
-                    // Check that at least one of the vertices of the facet is
-                    // an internal or boundary point
-                    if
-                    (
-                        cit->vertex(vertex_triple_index(f, 0))->
-                            internalOrBoundaryPoint()
-                     || cit->vertex(vertex_triple_index(f, 1))->
-                            internalOrBoundaryPoint()
-                     || cit->vertex(vertex_triple_index(f, 2))->
-                            internalOrBoundaryPoint()
-                    )
-                    {
-                        point neighDualVertex;
-
-                        label cNI = cit->neighbor(f)->cellIndex();
-
-                        if (cNI == -1)
-                        {
-                            neighDualVertex = topoint(dual(cit->neighbor(f)));
-                        }
-                        else
-                        {
-                            neighDualVertex = points[cNI];
-                        }
-
-                        if
-                        (
-                            magSqr(dualVertex - neighDualVertex) < minEdgeLenSqr
-                        )
-                        {
-                            edgeIsShort[f] = true;
-
-                            if (cNI > -1)
-                            {
-                                neighbourAlreadyIndexed[f] = true;
-                            }
-
-                            shortEdges++;
-                        }
-                    }
-                }
-
-                if (nSE == 0 && shortEdges == 0)
-                {
-                    // Final iteration and no short edges are found, index
-                    // remaining dual vertices.
-
-                    if
-                    (
-                        cit->vertex(0)->internalOrBoundaryPoint()
-                     || cit->vertex(1)->internalOrBoundaryPoint()
-                     || cit->vertex(2)->internalOrBoundaryPoint()
-                     || cit->vertex(3)->internalOrBoundaryPoint()
-                    )
-                    {
-                        cit->cellIndex() = dualVertI;
-                        points[dualVertI] = dualVertex;
-                        dualVertI++;
-                    }
-                }
-                else if
-                (
-                    shortEdges >= nSE
-                )
-                {
-                    // Info<< neighbourAlreadyIndexed << ' '
-                    //     << edgeIsShort << endl;
-
-                    label numUnindexedNeighbours = 1;
-
-                    for (label f = 0; f < 4; f++)
-                    {
-                        if (edgeIsShort[f] && !neighbourAlreadyIndexed[f])
-                        {
-                            dualVertex += topoint(dual(cit->neighbor(f)));
-
-                            numUnindexedNeighbours++;
-                        }
-                    }
-
-                    dualVertex /= numUnindexedNeighbours;
-
-                    label nearestExistingIndex = -1;
-
-                    point nearestIndexedNeighbourPos = vector::zero;
-
-                    scalar minDistSqrToNearestIndexedNeighbour = VGREAT;
-
-                    for (label f = 0; f < 4; f++)
-                    {
-                        if (edgeIsShort[f] && neighbourAlreadyIndexed[f])
-                        {
-                            label cNI = cit->neighbor(f)->cellIndex();
-
-                            point indexedNeighbourPos = points[cNI];
-
-                            if
-                            (
-                                magSqr(indexedNeighbourPos - dualVertex)
-                              < minDistSqrToNearestIndexedNeighbour
-                            )
-                            {
-                                nearestExistingIndex = cNI;
-
-                                nearestIndexedNeighbourPos =
-                                indexedNeighbourPos;
-
-                                minDistSqrToNearestIndexedNeighbour =
-                                magSqr(indexedNeighbourPos - dualVertex);
-                            }
-                        }
-                    }
-
-                    if
-                    (
-                        nearestExistingIndex > -1
-                     && minDistSqrToNearestIndexedNeighbour < minEdgeLenSqr
-                    )
-                    {
-                        points[nearestExistingIndex] =
-                        0.5*(dualVertex + nearestIndexedNeighbourPos);
-
-                        for (label f = 0; f < 4; f++)
-                        {
-                            if (edgeIsShort[f] && !neighbourAlreadyIndexed[f])
-                            {
-                                cit->neighbor(f)->cellIndex() =
-                                nearestExistingIndex;
-                            }
-                        }
-
-                        cit->cellIndex() = nearestExistingIndex;
-                    }
-                    else
-                    {
-                        for (label f = 0; f < 4; f++)
-                        {
-                            if (edgeIsShort[f] && !neighbourAlreadyIndexed[f])
-                            {
-                                cit->neighbor(f)->cellIndex() = dualVertI;
-                            }
-                        }
-
-                        cit->cellIndex() = dualVertI;
-
-                        points[dualVertI] = dualVertex;
-
-                        dualVertI++;
-                    }
-                }
-            }
+            cit->cellIndex() = dualVertI;
+            points[dualVertI] = topoint(dual(cit));
+            dualVertI++;
+        }
+        else
+        {
+            cit->cellIndex() = -1;
         }
     }
 
     points.setSize(dualVertI);
+
+    // // ~~~~~~~~~~~ removing short edges by indexing dual vertices ~~~~~~~~~~~~~~
+
+    // for
+    // (
+    //     Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+    //     cit != finite_cells_end();
+    //     ++cit
+    // )
+    // {
+    //     cit->cellIndex() = -1;
+    // }
+
+    // points.setSize(number_of_cells());
+
+    // // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // // Looking up minEdgeLenSqr with a dummy point, in future will be available
+    // // as a local value to be looked up in-place.
+
+    // scalar minEdgeLenSqr = sqr(minimumEdgeLength(vector::zero));
+
+    // // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // label dualVertI = 0;
+
+    // // Scanning by number of short (dual) edges (nSE) attached to the
+    // // circumcentre of each Delaunay tet.  A Delaunay tet may only have four
+    // // dual edges emanating from its circumcentre, assigning positions and
+    // // indices to those with 4 short edges attached first, then >= 3, then >= 2
+    // // etc.
+    // for (label nSE = 4; nSE >= 0; nSE--)
+    // {
+    //     Info<< nl << "Scanning for dual vertices with >= "
+    //         << nSE
+    //         << " short edges attached." << endl;
+
+    //     for
+    //     (
+    //         Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+    //         cit != finite_cells_end();
+    //         ++cit
+    //     )
+    //     {
+    //         // If the Delaunay tet has an index already then it has either
+    //         // evaluated itself and taken action or has had its index dictated
+    //         // by a neighbouring tet with more short edges attached.
+
+    //         if (cit->cellIndex() == -1)
+    //         {
+    //             point dualVertex = topoint(dual(cit));
+
+    //             label shortEdges = 0;
+
+    //             List<bool> edgeIsShort(4, false);
+
+    //             List<bool> neighbourAlreadyIndexed(4, false);
+
+    //             // Loop over the four facets of the Delaunay tet
+    //             for (label f = 0; f < 4; f++)
+    //             {
+    //                 // Check that at least one of the vertices of the facet is
+    //                 // an internal or boundary point
+    //                 if
+    //                 (
+    //                     cit->vertex(vertex_triple_index(f, 0))->
+    //                         internalOrBoundaryPoint()
+    //                  || cit->vertex(vertex_triple_index(f, 1))->
+    //                         internalOrBoundaryPoint()
+    //                  || cit->vertex(vertex_triple_index(f, 2))->
+    //                         internalOrBoundaryPoint()
+    //                 )
+    //                 {
+    //                     point neighDualVertex;
+
+    //                     label cNI = cit->neighbor(f)->cellIndex();
+
+    //                     if (cNI == -1)
+    //                     {
+    //                         neighDualVertex = topoint(dual(cit->neighbor(f)));
+    //                     }
+    //                     else
+    //                     {
+    //                         neighDualVertex = points[cNI];
+    //                     }
+
+    //                     if
+    //                     (
+    //                         magSqr(dualVertex - neighDualVertex) < minEdgeLenSqr
+    //                     )
+    //                     {
+    //                         edgeIsShort[f] = true;
+
+    //                         if (cNI > -1)
+    //                         {
+    //                             neighbourAlreadyIndexed[f] = true;
+    //                         }
+
+    //                         shortEdges++;
+    //                     }
+    //                 }
+    //             }
+
+    //             if (nSE == 0 && shortEdges == 0)
+    //             {
+    //                 // Final iteration and no short edges are found, index
+    //                 // remaining dual vertices.
+
+    //                 if
+    //                 (
+    //                     cit->vertex(0)->internalOrBoundaryPoint()
+    //                  || cit->vertex(1)->internalOrBoundaryPoint()
+    //                  || cit->vertex(2)->internalOrBoundaryPoint()
+    //                  || cit->vertex(3)->internalOrBoundaryPoint()
+    //                 )
+    //                 {
+    //                     cit->cellIndex() = dualVertI;
+    //                     points[dualVertI] = dualVertex;
+    //                     dualVertI++;
+    //                 }
+    //             }
+    //             else if
+    //             (
+    //                 shortEdges >= nSE
+    //             )
+    //             {
+    //                 // Info<< neighbourAlreadyIndexed << ' '
+    //                 //     << edgeIsShort << endl;
+
+    //                 label numUnindexedNeighbours = 1;
+
+    //                 for (label f = 0; f < 4; f++)
+    //                 {
+    //                     if (edgeIsShort[f] && !neighbourAlreadyIndexed[f])
+    //                     {
+    //                         dualVertex += topoint(dual(cit->neighbor(f)));
+
+    //                         numUnindexedNeighbours++;
+    //                     }
+    //                 }
+
+    //                 dualVertex /= numUnindexedNeighbours;
+
+    //                 label nearestExistingIndex = -1;
+
+    //                 point nearestIndexedNeighbourPos = vector::zero;
+
+    //                 scalar minDistSqrToNearestIndexedNeighbour = VGREAT;
+
+    //                 for (label f = 0; f < 4; f++)
+    //                 {
+    //                     if (edgeIsShort[f] && neighbourAlreadyIndexed[f])
+    //                     {
+    //                         label cNI = cit->neighbor(f)->cellIndex();
+
+    //                         point indexedNeighbourPos = points[cNI];
+
+    //                         if
+    //                         (
+    //                             magSqr(indexedNeighbourPos - dualVertex)
+    //                           < minDistSqrToNearestIndexedNeighbour
+    //                         )
+    //                         {
+    //                             nearestExistingIndex = cNI;
+
+    //                             nearestIndexedNeighbourPos =
+    //                             indexedNeighbourPos;
+
+    //                             minDistSqrToNearestIndexedNeighbour =
+    //                             magSqr(indexedNeighbourPos - dualVertex);
+    //                         }
+    //                     }
+    //                 }
+
+    //                 if
+    //                 (
+    //                     nearestExistingIndex > -1
+    //                  && minDistSqrToNearestIndexedNeighbour < minEdgeLenSqr
+    //                 )
+    //                 {
+    //                     points[nearestExistingIndex] =
+    //                     0.5*(dualVertex + nearestIndexedNeighbourPos);
+
+    //                     for (label f = 0; f < 4; f++)
+    //                     {
+    //                         if (edgeIsShort[f] && !neighbourAlreadyIndexed[f])
+    //                         {
+    //                             cit->neighbor(f)->cellIndex() =
+    //                             nearestExistingIndex;
+    //                         }
+    //                     }
+
+    //                     cit->cellIndex() = nearestExistingIndex;
+    //                 }
+    //                 else
+    //                 {
+    //                     for (label f = 0; f < 4; f++)
+    //                     {
+    //                         if (edgeIsShort[f] && !neighbourAlreadyIndexed[f])
+    //                         {
+    //                             cit->neighbor(f)->cellIndex() = dualVertI;
+    //                         }
+    //                     }
+
+    //                     cit->cellIndex() = dualVertI;
+
+    //                     points[dualVertI] = dualVertex;
+
+    //                     dualVertI++;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+
+    // points.setSize(dualVertI);
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~ dual cell indexing ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // assigns an index to the Delaunay vertices which will be the dual cell
@@ -2082,10 +2120,17 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
             } while (cc1 != ccStart);
 
-            if (verticesOnFace.size() >= 3)
-            {
-                face newDualFace(verticesOnFace);
+            face newDualFace(verticesOnFace);
 
+            bool keepFace = assessFace
+            (
+                newDualFace,
+                averageAnyCellSize(vA, vB),
+                points
+            );
+
+            if (verticesOnFace.size() >= 3 && keepFace)
+            {
                 label dcA = vA->index();
 
                 if (!vA->internalOrBoundaryPoint())
@@ -2402,6 +2447,71 @@ void Foam::conformalVoronoiMesh::calcTetMesh
         patchOwners,
         false
     );
+}
+
+
+bool Foam::conformalVoronoiMesh::assessFace
+(
+    const face& f,
+    scalar averageCellSize,
+    const pointField& pts
+) const
+{
+    scalar smallFaceAreaCoeff = 0.1;
+    scalar highAspectRatioFaceAreaCoeff = 0.2;
+    scalar aspectRatioLimit = 1.2;
+    scalar targetArea = sqr(averageCellSize);
+
+    const edgeList& eds = f.edges();
+
+    scalar perimeter = 0.0;
+
+    forAll(eds, i)
+    {
+        perimeter += eds[i].mag(pts);
+
+        vector edVec = eds[i].vec(pts);
+    };
+
+    scalar area = f.mag(pts);
+
+    scalar equivalentSqrPerimeter = 4.0*sqrt(area);
+
+    scalar aspectRatio = perimeter/max(equivalentSqrPerimeter, VSMALL);
+
+    bool keepFace = true;
+
+    if (area < smallFaceAreaCoeff*targetArea)
+    {
+        keepFace = false;
+    }
+
+    if
+    (
+        aspectRatio > aspectRatioLimit
+     && area < highAspectRatioFaceAreaCoeff*targetArea)
+    {
+        keepFace = false;
+    }
+
+    if (!keepFace)
+    {
+        Info<< nl << "Area " << area << nl
+            << "averageCellSize " << averageCellSize << nl
+            << "Area ratio "
+            << area/max(sqr(averageCellSize), VSMALL) << nl
+            << "aspectRatio " << aspectRatio << nl
+            << endl;
+
+        forAll(f, i)
+        {
+            meshTools::writeOBJ(Info, pts[f[i]]);
+        }
+
+        Info<< nl;
+    }
+
+    return keepFace;
 }
 
 
@@ -2753,18 +2863,7 @@ void Foam::conformalVoronoiMesh::move()
                   > cvMeshControls().cosAlignmentAcceptanceAngle()
                 )
                 {
-                    // Arithmetic mean
-                    // scalar targetCellSize =
-                    //     0.5*(vA->targetCellSize() + vB->targetCellSize());
-
-                    // Geometric mean
-                    scalar targetCellSize =
-                        sqrt(vA->targetCellSize()*vB->targetCellSize());
-
-                    // Harmonic mean
-                    // scalar targetCellSize =
-                    //     2.0*(vA->targetCellSize()*vB->targetCellSize())
-                    //    /(vA->targetCellSize() + vB->targetCellSize());
+                    scalar targetCellSize = averageCellSize(vA, vB);
 
                     scalar targetFaceArea = sqr(targetCellSize);
 

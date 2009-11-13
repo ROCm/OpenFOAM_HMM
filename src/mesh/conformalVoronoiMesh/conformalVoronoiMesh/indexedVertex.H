@@ -27,7 +27,7 @@ Class
 
 Description
     An indexed form of CGAL::Triangulation_vertex_base_3<K> used to keep
-    track of the vertices in the triangulation.
+    track of the Delaunay vertices in the tessellation.
 
 \*---------------------------------------------------------------------------*/
 
@@ -97,7 +97,7 @@ public:
         index_(INTERNAL_POINT),
         type_(INTERNAL_POINT),
         alignment_(),
-        targetCellSize_()
+        targetCellSize_(0.0)
     {}
 
     indexedVertex(const Point& p)
@@ -106,7 +106,7 @@ public:
         index_(INTERNAL_POINT),
         type_(INTERNAL_POINT),
         alignment_(),
-        targetCellSize_()
+        targetCellSize_(0.0)
     {}
 
     indexedVertex(const Point& p, Cell_handle f)
@@ -115,7 +115,7 @@ public:
         index_(INTERNAL_POINT),
         type_(INTERNAL_POINT),
         alignment_(),
-        targetCellSize_()
+        targetCellSize_(0.0)
     {}
 
     indexedVertex(Cell_handle f)
@@ -124,7 +124,7 @@ public:
         index_(INTERNAL_POINT),
         type_(INTERNAL_POINT),
         alignment_(),
-        targetCellSize_()
+        targetCellSize_(0.0)
     {}
 
 

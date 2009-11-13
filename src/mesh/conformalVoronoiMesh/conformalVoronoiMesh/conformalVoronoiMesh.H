@@ -171,6 +171,24 @@ private:
             bool isSurfacePoint = false
         ) const;
 
+        //- Return the target cell size from that stored on a pair of
+        //  Delaunay vertices, using a mean function.
+        inline scalar averageCellSize
+        (
+            const Vertex_handle& vA,
+            const Vertex_handle& vB
+        ) const;
+
+        //- Return the target cell size from that stored on a pair of
+        //  Delaunay vertices, including the possibility that one of
+        //  them is not an internalOrBoundaryPoint, and so will not
+        //  have valid data.
+        inline scalar averageAnyCellSize
+        (
+            const Vertex_handle& vA,
+            const Vertex_handle& vB
+        ) const;
+
         //- Return the local point pair separation at the given location
         inline scalar pointPairDistance(const point& pt) const;
 
@@ -424,6 +442,14 @@ private:
             labelList& patchSizes,
             labelList& patchStarts
         );
+
+        //- Assess face to see if it is a candidate for removal
+        bool assessFace
+        (
+            const face& f,
+            scalar averageCellSize,
+            const pointField& pts
+        ) const;
 
         //- Sort the faces, owner and neighbour lists into
         //  upper-triangular order.  For internal faces only, use

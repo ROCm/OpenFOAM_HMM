@@ -27,7 +27,7 @@ Class
 
 Description
     An indexed form of CGAL::Triangulation_cell_base_3<K> used to keep
-    track of the vertices in the triangulation.
+    track of the Delaunay cells (tets) in the tessellation.
 
 \*---------------------------------------------------------------------------*/
 
