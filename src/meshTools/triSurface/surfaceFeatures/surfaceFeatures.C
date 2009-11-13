@@ -757,6 +757,8 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
 ) const
 {
     // Build tree out of all samples.
+
+    //Note: cannot be done one the fly - gcc4.4 compiler bug.
     treeBoundBox bb(samples);
 
     octree<octreeDataPoint> ppTree
@@ -859,7 +861,7 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
     scalar maxSearch = max(maxDist);
     vector span(maxSearch, maxSearch, maxSearch);
 
-    // octree.shapes holds reference!
+    //Note: cannot be done one the fly - gcc4.4 compiler bug.
     treeBoundBox bb(samples);
 
     octree<octreeDataPoint> ppTree
