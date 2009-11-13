@@ -757,9 +757,11 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
 ) const
 {
     // Build tree out of all samples.
+    treeBoundBox bb(samples);
+
     octree<octreeDataPoint> ppTree
     (
-        treeBoundBox(samples),      // overall search domain
+        bb,                         // overall search domain
         octreeDataPoint(samples),   // all information needed to do checks
         1,          // min levels
         20.0,       // maximum ratio of cubes v.s. cells
@@ -858,9 +860,11 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
     vector span(maxSearch, maxSearch, maxSearch);
 
     // octree.shapes holds reference!
+    treeBoundBox bb(samples);
+
     octree<octreeDataPoint> ppTree
     (
-        treeBoundBox(samples),      // overall search domain
+        bb,                         // overall search domain
         octreeDataPoint(samples),   // all information needed to do checks
         1,          // min levels
         20.0,       // maximum ratio of cubes v.s. cells
