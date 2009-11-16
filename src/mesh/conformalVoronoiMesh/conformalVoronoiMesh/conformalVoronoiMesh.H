@@ -443,13 +443,30 @@ private:
             labelList& patchStarts
         );
 
+        //- Builds a dual face by circulating around the supplied edge
+        face buildDualFace
+        (
+            const Triangulation::Finite_edges_iterator& eit
+        ) const;
+
         //- Assess face to see if it is a candidate for removal
         bool assessFace
         (
             const face& f,
-            scalar averageCellSize,
+            const Vertex_handle& vA,
+            const Vertex_handle& vB,
             const pointField& pts
         ) const;
+
+        //- Collapse a face to a point or an edge, modifying and
+        //  mapping the points
+        // void collapseFace
+        // (
+        //     const face& f,
+        //     const Vertex_handle& vA,
+        //     const Vertex_handle& vB
+        //     pointField& pts,
+        // ) const;
 
         //- Sort the faces, owner and neighbour lists into
         //  upper-triangular order.  For internal faces only, use

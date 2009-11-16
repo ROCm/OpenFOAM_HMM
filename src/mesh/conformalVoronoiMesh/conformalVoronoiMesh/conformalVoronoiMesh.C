@@ -1766,7 +1766,8 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     timeCheck();
 
-    // Indexing cells, which are Dual vertices
+    // Indexing Delaunay cells, which are Dual vertices
+
     label dualVertI = 0;
 
     points.setSize(number_of_cells());
@@ -2042,6 +2043,38 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         }
     }
 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~ dual face filtering ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Loop over all dual faces and merge points to remove faces that
+    // are not wanted.
+
+    for
+    (
+        Triangulation::Finite_edges_iterator eit = finite_edges_begin();
+        eit != finite_edges_end();
+        ++eit
+    )
+    {
+        Cell_handle c = eit->first;
+        Vertex_handle vA = c->vertex(eit->second);
+        Vertex_handle vB = c->vertex(eit->third);
+
+        if
+        (
+            vA->internalOrBoundaryPoint()
+         || vB->internalOrBoundaryPoint()
+        )
+        {
+            face newDualFace = buildDualFace(eit);
+
+            bool keepFace = assessFace(newDualFace, vA, vB, points);
+
+            if (!keepFace)
+            {
+
+            }
+        }
+    }
+
     // ~~~~~~~~~~~~ dual face and owner neighbour construction ~~~~~~~~~~~~~~~~~
 
     patchNames = geometryToConformTo_.patchNames();
@@ -2081,55 +2114,9 @@ void Foam::conformalVoronoiMesh::calcDualMesh
          || vB->internalOrBoundaryPoint()
         )
         {
-            Cell_circulator ccStart = incident_cells(*eit);
-            Cell_circulator cc1 = ccStart;
-            Cell_circulator cc2 = cc1;
+            face newDualFace = buildDualFace(eit);
 
-            // Advance the second circulator so that it always stays on the next
-            // cell around the edge;
-            cc2++;
-
-            DynamicList<label> verticesOnFace;
-
-            do
-            {
-                label cc1I = cc1->cellIndex();
-
-                label cc2I = cc2->cellIndex();
-
-
-                if (cc1I < 0 || cc2I < 0)
-                {
-                    FatalErrorIn("Foam::conformalVoronoiMesh::calcDualMesh")
-                        << "Dual face uses circumcenter defined by a "
-                        << "Delaunay tetrahedron with no internal "
-                        << "or boundary points.  Defining Delaunay edge ends: "
-                        << topoint(vA->point()) << " "
-                        << topoint(vB->point()) << nl
-                        << exit(FatalError);
-                }
-
-                if (cc1I != cc2I)
-                {
-                    verticesOnFace.append(cc1I);
-                }
-
-                cc1++;
-
-                cc2++;
-
-            } while (cc1 != ccStart);
-
-            face newDualFace(verticesOnFace);
-
-            bool keepFace = assessFace
-            (
-                newDualFace,
-                averageAnyCellSize(vA, vB),
-                points
-            );
-
-            if (verticesOnFace.size() >= 3 && keepFace)
+            if (newDualFace.size() >= 3)
             {
                 label dcA = vA->index();
 
@@ -2450,16 +2437,85 @@ void Foam::conformalVoronoiMesh::calcTetMesh
 }
 
 
+Foam::face Foam::conformalVoronoiMesh::buildDualFace
+(
+    const Triangulation::Finite_edges_iterator& eit
+) const
+{
+    Cell_circulator ccStart = incident_cells(*eit);
+    Cell_circulator cc1 = ccStart;
+    Cell_circulator cc2 = cc1;
+
+    // Advance the second circulator so that it always stays on the next
+    // cell around the edge;
+    cc2++;
+
+    DynamicList<label> verticesOnFace;
+
+    do
+    {
+        label cc1I = cc1->cellIndex();
+
+        label cc2I = cc2->cellIndex();
+
+        if (cc1I < 0 || cc2I < 0)
+        {
+            Cell_handle c = eit->first;
+            Vertex_handle vA = c->vertex(eit->second);
+            Vertex_handle vB = c->vertex(eit->third);
+
+            FatalErrorIn("Foam::conformalVoronoiMesh::buildDualFace")
+                << "Dual face uses circumcenter defined by a "
+                << "Delaunay tetrahedron with no internal "
+                << "or boundary points.  Defining Delaunay edge ends: "
+                << topoint(vA->point()) << " "
+                << topoint(vB->point()) << nl
+                << exit(FatalError);
+        }
+
+        if (cc1I != cc2I)
+        {
+            verticesOnFace.append(cc1I);
+        }
+
+        cc1++;
+
+        cc2++;
+
+    } while (cc1 != ccStart);
+
+    return face(verticesOnFace);
+}
+
+
 bool Foam::conformalVoronoiMesh::assessFace
 (
     const face& f,
-    scalar averageCellSize,
+    const Vertex_handle& vA,
+    const Vertex_handle& vB,
     const pointField& pts
 ) const
 {
-    scalar smallFaceAreaCoeff = 0.1;
-    scalar highAspectRatioFaceAreaCoeff = 0.2;
-    scalar aspectRatioLimit = 1.2;
+    if (f.size() < 3)
+    {
+        // Invalid face, fewer than three points
+
+        return false;
+    }
+    else if (f.size() == 3)
+    {
+        // Triangle face, handle specially
+    }
+    else
+    {
+        // Polygonal face
+    }
+
+    scalar averageCellSize = averageAnyCellSize(vA, vB);
+
+    scalar smallFaceAreaCoeff = 0.01;
+    scalar highAspectRatioFaceAreaCoeff = 0.1;
+    scalar aspectRatioLimit = 2.0;
     scalar targetArea = sqr(averageCellSize);
 
     const edgeList& eds = f.edges();
@@ -2777,31 +2833,7 @@ void Foam::conformalVoronoiMesh::move()
          && eit->first->vertex(eit->third)->internalOrBoundaryPoint()
         )
         {
-            Cell_circulator ccStart = incident_cells(*eit);
-            Cell_circulator cc = ccStart;
-
-            DynamicList<label> verticesOnFace;
-
-            do
-            {
-                if (!is_infinite(cc))
-                {
-                    if (cc->cellIndex() < 0)
-                    {
-                        FatalErrorIn("conformalVoronoiMesh::move")
-                            << "Dual face uses circumcenter defined by a "
-                            << " Delaunay tetrahedron with no internal "
-                            << "or boundary points."
-                            << exit(FatalError);
-                    }
-
-                    verticesOnFace.append(cc->cellIndex());
-                }
-            } while (++cc != ccStart);
-
-            verticesOnFace.shrink();
-
-            face dualFace(verticesOnFace);
+            face dualFace = buildDualFace(eit);
 
             Cell_handle c = eit->first;
             Vertex_handle vA = c->vertex(eit->second);
