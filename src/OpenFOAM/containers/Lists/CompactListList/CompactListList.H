@@ -61,8 +61,16 @@ namespace Foam
 
 template<class T, class Container> class CompactListList;
 
-template<class T, class Container> Istream& operator>>(Istream&, CompactListList<T, Container>&);
-template<class T, class Container> Ostream& operator<<(Ostream&, const CompactListList<T, Container>&);
+template<class T, class Container> Istream& operator>>
+(
+    Istream&,
+    CompactListList<T, Container>&
+);
+template<class T, class Container> Ostream& operator<<
+(
+    Ostream&,
+    const CompactListList<T, Container>&
+);
 
 
 /*---------------------------------------------------------------------------*\
