@@ -90,7 +90,6 @@ int main(int argc, char *argv[])
             // --- PISO loop
             for (int corr=0; corr<nCorr; corr++)
             {
-                surfaceScalarField hf = fvc::interpolate(h);
                 volScalarField rUA = 1.0/hUEqn.A();
                 surfaceScalarField ghrUAf = magg*fvc::interpolate(h*rUA);
 

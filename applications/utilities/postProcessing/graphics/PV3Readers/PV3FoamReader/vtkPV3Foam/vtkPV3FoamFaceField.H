@@ -35,6 +35,7 @@ InClass
 #include "vtkFloatArray.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkPolyData.h"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -53,11 +54,11 @@ void Foam::vtkPV3Foam::convertFaceField
     const labelList& faceOwner = mesh.faceOwner();
     const labelList& faceNeigh = mesh.faceNeighbour();
 
-    vtkFloatArray *cellData = vtkFloatArray::New();
-    cellData->SetNumberOfTuples( faceLabels.size() );
-    cellData->SetNumberOfComponents( nComp );
-    cellData->Allocate( nComp*faceLabels.size() );
-    cellData->SetName( tf.name().c_str() );
+    vtkFloatArray* cellData = vtkFloatArray::New();
+    cellData->SetNumberOfTuples(faceLabels.size());
+    cellData->SetNumberOfComponents(nComp);
+    cellData->Allocate(nComp*faceLabels.size());
+    cellData->SetName(tf.name().c_str());
 
     if (debug)
     {
@@ -123,11 +124,11 @@ void Foam::vtkPV3Foam::convertFaceField
     const labelList& faceOwner = mesh.faceOwner();
     const labelList& faceNeigh = mesh.faceNeighbour();
 
-    vtkFloatArray *cellData = vtkFloatArray::New();
-    cellData->SetNumberOfTuples( fSet.size() );
-    cellData->SetNumberOfComponents( nComp );
-    cellData->Allocate( nComp*fSet.size() );
-    cellData->SetName( tf.name().c_str() );
+    vtkFloatArray* cellData = vtkFloatArray::New();
+    cellData->SetNumberOfTuples(fSet.size());
+    cellData->SetNumberOfComponents(nComp);
+    cellData->Allocate(nComp*fSet.size());
+    cellData->SetName(tf.name().c_str());
 
     if (debug)
     {

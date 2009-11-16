@@ -240,6 +240,9 @@ private:
 
     // Private member functions
 
+        //- Read the field from the dictionary
+        tmp<GeometricBoundaryField> readField(const dictionary&);
+
         //- Read the field from the given stream
         tmp<GeometricBoundaryField> readField(Istream& is);
 
@@ -325,6 +328,14 @@ public:
             const IOobject&,
             const Mesh&,
             Istream&
+        );
+
+        //- Construct from dictionary
+        GeometricField
+        (
+            const IOobject&,
+            const Mesh&,
+            const dictionary&
         );
 
         //- Construct as copy
