@@ -112,7 +112,7 @@ bool surfaceOffsetLinearDistance::cellSize
 
     if (hitInfo.hit())
     {
-        if (sideMode_ == BOTHSIDES)
+        if (sideMode_ == rmBothsides)
         {
             size = sizeFunction(mag(pt - hitInfo.hitPoint()));
 
@@ -137,7 +137,7 @@ bool surfaceOffsetLinearDistance::cellSize
 
         if
         (
-            sideMode_ == INSIDE
+            sideMode_ == smInside
          && vTL[0] == searchableSurface::INSIDE
         )
         {
@@ -147,7 +147,7 @@ bool surfaceOffsetLinearDistance::cellSize
         }
         else if
         (
-            sideMode_ == OUTSIDE
+            sideMode_ == smOutside
          && vTL[0] == searchableSurface::OUTSIDE
         )
         {

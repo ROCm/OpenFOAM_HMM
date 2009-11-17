@@ -63,9 +63,9 @@ public:
 
     enum cellTypes
     {
-        UNCHANGED           = 0,
-        CHANGED             = -1,
-        SAVE_CHANGED        = -2
+        ctUnchanged           = 0,
+        ctChanged             = -1,
+        ctSaveChanged         = -2
     };
 
     typedef typename Cb::Vertex_handle                   Vertex_handle;
@@ -82,7 +82,7 @@ public:
     indexedCell()
     :
         Cb(),
-        index_(CHANGED)
+        index_(ctChanged)
     {}
 
     indexedCell
@@ -91,7 +91,7 @@ public:
     )
     :
         Cb(v0, v1, v2, v3),
-        index_(CHANGED)
+        index_(ctChanged)
     {}
 
     indexedCell
@@ -107,18 +107,18 @@ public:
     )
     :
         Cb(v0, v1, v2, v3, n0, n1, n2, n3),
-        index_(CHANGED)
+        index_(ctChanged)
     {}
 
     void set_vertex(int i, Vertex_handle v)
     {
-        index_ = CHANGED;
+        index_ = ctChanged;
         Cb::set_vertex(i, v);
     }
 
     void set_vertices()
     {
-        index_ = CHANGED;
+        index_ = ctChanged;
         Cb::set_vertices();
     }
 
@@ -127,7 +127,7 @@ public:
         Vertex_handle v0, Vertex_handle v1, Vertex_handle v2, Vertex_handle v3
     )
     {
-        index_ = CHANGED;
+        index_ = ctChanged;
         Cb::set_vertices(v0, v1, v2, v3);
     }
 

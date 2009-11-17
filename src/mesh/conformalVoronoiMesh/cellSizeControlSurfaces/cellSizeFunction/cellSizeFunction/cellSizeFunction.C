@@ -63,15 +63,15 @@ cellSizeFunction::cellSizeFunction
     {
         if (mode == "inside")
         {
-            sideMode_ = INSIDE;
+            sideMode_ = smInside;
         }
         else if (mode == "outside")
         {
-            sideMode_ = OUTSIDE;
+            sideMode_ = smOutside;
         }
         else if (mode == "bothSides")
         {
-            sideMode_ = BOTHSIDES;
+            sideMode_ = rmBothsides;
         }
         else
         {
@@ -80,14 +80,14 @@ cellSizeFunction::cellSizeFunction
                 << exit(FatalError);
         }
     }
-    else if (mode != BOTHSIDES)
+    else if (mode != rmBothsides)
     {
         WarningIn("cellSizeFunction::cellSizeFunction")
             << "surface does not support volumeType, defaulting mode to "
             << "bothSides."
             << endl;
 
-        sideMode_ = BOTHSIDES;
+        sideMode_ = rmBothsides;
     }
 }
 

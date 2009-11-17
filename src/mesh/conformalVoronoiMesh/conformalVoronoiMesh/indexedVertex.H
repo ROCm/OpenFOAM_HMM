@@ -57,12 +57,12 @@ class indexedVertex
         //- The index for this triangle vertex
         int index_;
 
-        //- type of pair-point :
-        //  NEAR_BOUNDARY_POINT : internal near boundary point.
-        //  INTERNAL_POINT      : internal point.
-        //  FAR_POINT           : far-point.
-        //  >= 0                : part of point-pair. Index of other point.
-        //                        Lowest numbered is inside one (master).
+        //- type of pair-point   :
+        //  ptNearBoundaryPoint  : internal near boundary point.
+        //  ptInternalPoint      : internal point.
+        //  ptFarPoint           : far-point.
+        //  >= 0                 : part of point-pair. Index of other point.
+        //                         Lowest numbered is inside one (master).
         int type_;
 
         Foam::tensor alignment_;
@@ -74,10 +74,10 @@ public:
 
     enum pointTypes
     {
-        NEAR_BOUNDARY_POINT = -4,
-        INTERNAL_POINT      = -3,
-        MIRROR_POINT        = -2,
-        FAR_POINT           = -1
+        ptNearBoundaryPoint  = -4,
+        ptInternalPoint      = -3,
+        ptMirrorPoint        = -2,
+        ptFarPoint           = -1
     };
 
     typedef typename Vb::Vertex_handle      Vertex_handle;
@@ -94,8 +94,8 @@ public:
     indexedVertex()
     :
         Vb(),
-        index_(INTERNAL_POINT),
-        type_(INTERNAL_POINT),
+        index_(ptInternalPoint),
+        type_(ptInternalPoint),
         alignment_(),
         targetCellSize_(0.0)
     {}
@@ -103,8 +103,8 @@ public:
     indexedVertex(const Point& p)
     :
         Vb(p),
-        index_(INTERNAL_POINT),
-        type_(INTERNAL_POINT),
+        index_(ptInternalPoint),
+        type_(ptInternalPoint),
         alignment_(),
         targetCellSize_(0.0)
     {}
@@ -112,8 +112,8 @@ public:
     indexedVertex(const Point& p, Cell_handle f)
     :
         Vb(f, p),
-        index_(INTERNAL_POINT),
-        type_(INTERNAL_POINT),
+        index_(ptInternalPoint),
+        type_(ptInternalPoint),
         alignment_(),
         targetCellSize_(0.0)
     {}
@@ -121,8 +121,8 @@ public:
     indexedVertex(Cell_handle f)
     :
         Vb(f),
-        index_(INTERNAL_POINT),
-        type_(INTERNAL_POINT),
+        index_(ptInternalPoint),
+        type_(ptInternalPoint),
         alignment_(),
         targetCellSize_(0.0)
     {}
@@ -170,43 +170,43 @@ public:
 
     inline bool uninitialised() const
     {
-        return type_ == INTERNAL_POINT && index_ == INTERNAL_POINT;
+        return type_ == ptInternalPoint && index_ == ptInternalPoint;
     }
 
     //- Is point a far-point
     inline bool farPoint() const
     {
-        return type_ == FAR_POINT;
+        return type_ == ptFarPoint;
     }
 
     //- Is point internal, i.e. not on boundary
     inline bool internalPoint() const
     {
-        return type_ <= INTERNAL_POINT;
+        return type_ <= ptInternalPoint;
     }
 
     //- Set the point to be internal
     inline void setInternal()
     {
-        type_ = INTERNAL_POINT;
+        type_ = ptInternalPoint;
     }
 
     //- Is point internal and near the boundary
     inline bool nearBoundary() const
     {
-        return type_ == NEAR_BOUNDARY_POINT;
+        return type_ == ptNearBoundaryPoint;
     }
 
     //- Set the point to be near the boundary
     inline void setNearBoundary()
     {
-        type_ = NEAR_BOUNDARY_POINT;
+        type_ = ptNearBoundaryPoint;
     }
 
     //- Is point a mirror point
     inline bool mirrorPoint() const
     {
-        return type_ == MIRROR_POINT;
+        return type_ == ptMirrorPoint;
     }
 
     //- Either master or slave of pointPair.

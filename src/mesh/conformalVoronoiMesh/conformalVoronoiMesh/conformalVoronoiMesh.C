@@ -104,7 +104,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 
     insertInitialPoints();
 
-    buildSurfaceConformation(COARSE);
+    buildSurfaceConformation(rmCoarse);
 
     if(cvMeshControls().objOutput())
     {
@@ -546,14 +546,14 @@ void Foam::conformalVoronoiMesh::createFeaturePoints()
 
     scalar bigSpan = 10*cvMeshControls().span();
 
-    insertPoint(point(-bigSpan, -bigSpan, -bigSpan), Vb::FAR_POINT);
-    insertPoint(point(-bigSpan, -bigSpan,  bigSpan), Vb::FAR_POINT);
-    insertPoint(point(-bigSpan,  bigSpan, -bigSpan), Vb::FAR_POINT);
-    insertPoint(point(-bigSpan,  bigSpan,  bigSpan), Vb::FAR_POINT);
-    insertPoint(point( bigSpan, -bigSpan, -bigSpan), Vb::FAR_POINT);
-    insertPoint(point( bigSpan, -bigSpan,  bigSpan), Vb::FAR_POINT);
-    insertPoint(point( bigSpan,  bigSpan, -bigSpan), Vb::FAR_POINT);
-    insertPoint(point( bigSpan,  bigSpan , bigSpan), Vb::FAR_POINT);
+    insertPoint(point(-bigSpan, -bigSpan, -bigSpan), Vb::ptFarPoint);
+    insertPoint(point(-bigSpan, -bigSpan,  bigSpan), Vb::ptFarPoint);
+    insertPoint(point(-bigSpan,  bigSpan, -bigSpan), Vb::ptFarPoint);
+    insertPoint(point(-bigSpan,  bigSpan,  bigSpan), Vb::ptFarPoint);
+    insertPoint(point( bigSpan, -bigSpan, -bigSpan), Vb::ptFarPoint);
+    insertPoint(point( bigSpan, -bigSpan,  bigSpan), Vb::ptFarPoint);
+    insertPoint(point( bigSpan,  bigSpan, -bigSpan), Vb::ptFarPoint);
+    insertPoint(point( bigSpan,  bigSpan , bigSpan), Vb::ptFarPoint);
 
     Info<< nl << "Conforming to feature points" << endl;
 
@@ -953,7 +953,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 {
     reconformationMode reconfMode = reconformationControl();
 
-    if (reconfMode == NONE)
+    if (reconfMode == rmNone)
     {
         // Reinsert stored surface conformation
         reinsertSurfaceConformation();
@@ -973,7 +973,7 @@ Foam::conformalVoronoiMesh::reconformationControl() const
         Info<< nl << "    Rebuilding surface conformation for final output"
             << endl;
 
-        return FINE;
+        return rmFine;
     }
     else if
     (
@@ -985,10 +985,10 @@ Foam::conformalVoronoiMesh::reconformationControl() const
         Info<< nl << "    Rebuilding surface conformation for more iterations"
             << endl;
 
-        return COARSE;
+        return rmCoarse;
     }
 
-    return NONE;
+    return rmNone;
 }
 
 void Foam::conformalVoronoiMesh::buildSurfaceConformation
@@ -996,18 +996,18 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
     reconformationMode reconfMode
 )
 {
-    if (reconfMode == COARSE)
+    if (reconfMode == rmCoarse)
     {
         Info<< nl << "    Build coarse surface conformation" << endl;
     }
-    else if (reconfMode == FINE)
+    else if (reconfMode == rmFine)
     {
         Info<< nl << "    Build fine surface conformation" << endl;
     }
-    else if (reconfMode == NONE)
+    else if (reconfMode == rmNone)
     {
         WarningIn("buildSurfaceConformation(reconformationMode reconfMode)")
-            << "reconformationMode NONE specified, not building conformation"
+            << "reconformationMode rmNone specified, not building conformation"
             << endl;
 
         return;
@@ -2032,13 +2032,13 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     {
         if (vit->internalOrBoundaryPoint())
         {
-            vit->type() = Vb::INTERNAL_POINT;
+            vit->type() = Vb::ptInternalPoint;
             vit->index() = dualCelli;
             dualCelli++;
         }
         else
         {
-            vit->type() = Vb::FAR_POINT;
+            vit->type() = Vb::ptFarPoint;
             vit->index() = -1;
         }
     }

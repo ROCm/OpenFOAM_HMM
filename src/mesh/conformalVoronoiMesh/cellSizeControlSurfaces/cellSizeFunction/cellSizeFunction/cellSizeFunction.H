@@ -65,9 +65,9 @@ public:
     //- Surface side mode
     enum sideMode
     {
-        INSIDE,         // Control inside the surface
-        OUTSIDE,        // Control outside the surface
-        BOTHSIDES       // Control on both sides of a surface
+        smInside,         // Control inside the surface
+        smOutside,        // Control outside the surface
+        rmBothsides       // Control on both sides of a surface
     };
 
 

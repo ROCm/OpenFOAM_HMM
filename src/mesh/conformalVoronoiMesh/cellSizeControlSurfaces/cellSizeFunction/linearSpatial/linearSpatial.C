@@ -76,7 +76,7 @@ bool linearSpatial::cellSize
     bool isSurfacePoint
 ) const
 {
-    if (sideMode_ == BOTHSIDES || isSurfacePoint)
+    if (sideMode_ == rmBothsides || isSurfacePoint)
     {
         size = sizeFunction(pt);
 
@@ -114,8 +114,8 @@ bool linearSpatial::cellSize
 
     if
     (
-        sideMode_ == INSIDE
-        && vTL[0] == searchableSurface::INSIDE
+        sideMode_ == smInside
+     && vTL[0] == searchableSurface::INSIDE
     )
     {
         size = sizeFunction(pt);
@@ -124,8 +124,8 @@ bool linearSpatial::cellSize
     }
     else if
     (
-        sideMode_ == OUTSIDE
-        && vTL[0] == searchableSurface::OUTSIDE
+        sideMode_ == smOutside
+     && vTL[0] == searchableSurface::OUTSIDE
     )
     {
         size = sizeFunction(pt);

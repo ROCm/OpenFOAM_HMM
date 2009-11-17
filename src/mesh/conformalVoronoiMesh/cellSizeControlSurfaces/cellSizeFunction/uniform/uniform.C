@@ -60,7 +60,7 @@ bool uniform::cellSize
     bool isSurfacePoint
 ) const
 {
-    if (sideMode_ == BOTHSIDES || isSurfacePoint)
+    if (sideMode_ == rmBothsides || isSurfacePoint)
     {
         size = cellSize_;
 
@@ -98,7 +98,7 @@ bool uniform::cellSize
 
     if
     (
-        sideMode_ == INSIDE
+        sideMode_ == smInside
      && vTL[0] == searchableSurface::INSIDE
     )
     {
@@ -108,7 +108,7 @@ bool uniform::cellSize
     }
     else if
     (
-        sideMode_ == OUTSIDE
+        sideMode_ == smOutside
      && vTL[0] == searchableSurface::OUTSIDE
     )
     {
