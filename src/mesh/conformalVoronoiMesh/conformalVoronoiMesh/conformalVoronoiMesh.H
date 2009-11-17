@@ -458,15 +458,23 @@ private:
             const pointField& pts
         ) const;
 
+        //- Assess face to see if it is a candidate for removal, self
+        //  determined target size
+        bool assessFace
+        (
+            const face& f,
+            scalar targetFaceSize,
+            const pointField& pts
+        ) const;
+
         //- Collapse a face to a point or an edge, modifying and
-        //  mapping the points
-        // void collapseFace
-        // (
-        //     const face& f,
-        //     const Vertex_handle& vA,
-        //     const Vertex_handle& vB
-        //     pointField& pts,
-        // ) const;
+        //  mapping the points, returns the true if the face was
+        //  collapsed in this operation
+        bool collapseFace
+        (
+            const Triangulation::Finite_edges_iterator& eit,
+            pointField& pts
+        );
 
         //- Sort the faces, owner and neighbour lists into
         //  upper-triangular order.  For internal faces only, use
@@ -491,6 +499,13 @@ private:
             List<DynamicList<face> >& patchFaces,
             List<DynamicList<label> >& patchOwners,
             bool includeEmptyPatches
+        ) const;
+
+        //- Remove points that are no longer used by any faces.
+        void removeUnusedPoints
+        (
+            faceList& faces,
+            pointField& pts
         ) const;
 
         //- Disallow default bitwise copy construct

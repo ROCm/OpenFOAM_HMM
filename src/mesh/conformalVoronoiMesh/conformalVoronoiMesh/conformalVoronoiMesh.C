@@ -2047,33 +2047,41 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     // Loop over all dual faces and merge points to remove faces that
     // are not wanted.
 
-    for
-    (
-        Triangulation::Finite_edges_iterator eit = finite_edges_begin();
-        eit != finite_edges_end();
-        ++eit
-    )
-    {
-        Cell_handle c = eit->first;
-        Vertex_handle vA = c->vertex(eit->second);
-        Vertex_handle vB = c->vertex(eit->third);
+    Info<< nl << "    Collapsing unnecessary faces" << endl;
 
-        if
+    label nCollapsedFaces = 0;
+
+    do
+    {
+        nCollapsedFaces = 0;
+
+        for
         (
-            vA->internalOrBoundaryPoint()
-         || vB->internalOrBoundaryPoint()
+            Triangulation::Finite_edges_iterator eit = finite_edges_begin();
+            eit != finite_edges_end();
+            ++eit
         )
         {
-            face newDualFace = buildDualFace(eit);
+            Cell_handle c = eit->first;
+            Vertex_handle vA = c->vertex(eit->second);
+            Vertex_handle vB = c->vertex(eit->third);
 
-            bool keepFace = assessFace(newDualFace, vA, vB, points);
-
-            if (!keepFace)
+            if
+            (
+                vA->internalOrBoundaryPoint()
+                || vB->internalOrBoundaryPoint()
+            )
             {
-
+                if (collapseFace(eit, points))
+                {
+                    nCollapsedFaces++;
+                }
             }
         }
-    }
+
+        Info<< "        Collapsed " << nCollapsedFaces << " faces" << endl;
+
+    } while (nCollapsedFaces > 0);
 
     // ~~~~~~~~~~~~ dual face and owner neighbour construction ~~~~~~~~~~~~~~~~~
 
@@ -2116,8 +2124,14 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         {
             face newDualFace = buildDualFace(eit);
 
+            //bool keepFace = assessFace(newDualFace, vA, vB, points);
+
+            // if (newDualFace.size() >= 3 && keepFace)
+            // {
+
             if (newDualFace.size() >= 3)
             {
+
                 label dcA = vA->index();
 
                 if (!vA->internalOrBoundaryPoint())
@@ -2221,7 +2235,11 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     owner.setSize(nInternalFaces);
     neighbour.setSize(nInternalFaces);
 
+    timeCheck();
+
     sortFaces(faces, owner, neighbour);
+
+    timeCheck();
 
     addPatches
     (
@@ -2235,6 +2253,37 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         patchOwners,
         false
     );
+
+    removeUnusedPoints(faces, points);
+
+    timeCheck();
+
+    // Write out faces to be removed as a list of labels to be used in
+    // faceSet
+
+    // DynamicList<label> facesToBeRemoved;
+
+    // labelList nEdgeHistogram(12, 0);
+
+    // forAll(faces, fI)
+    // {
+    //     const face& f = faces[fI];
+
+    //     if (!assessFace(f, targetCellSize(f.centre(points)), points))
+    //     {
+    //         facesToBeRemoved.append(fI);
+
+    //         nEdgeHistogram[f.size()]++;
+    //     }
+    // }
+
+    // fileName fName = "facesToBeRemoved";
+
+    // OFstream str(fName);
+
+    // str << facesToBeRemoved;
+
+    // Info<< nEdgeHistogram << endl;
 }
 
 
@@ -2318,6 +2367,7 @@ void Foam::conformalVoronoiMesh::calcTetMesh
     label faceI = 0;
 
     labelList verticesOnTriFace(3, -1);
+
     face newFace(verticesOnTriFace);
 
     for
@@ -2513,10 +2563,21 @@ bool Foam::conformalVoronoiMesh::assessFace
 
     scalar averageCellSize = averageAnyCellSize(vA, vB);
 
-    scalar smallFaceAreaCoeff = 0.01;
+    return assessFace(f, averageCellSize, pts);
+}
+
+
+bool Foam::conformalVoronoiMesh::assessFace
+(
+    const face& f,
+    scalar targetFaceSize,
+    const pointField& pts
+) const
+{
+    scalar smallFaceAreaCoeff = 0.003;
     scalar highAspectRatioFaceAreaCoeff = 0.1;
     scalar aspectRatioLimit = 2.0;
-    scalar targetArea = sqr(averageCellSize);
+    scalar targetArea = sqr(targetFaceSize);
 
     const edgeList& eds = f.edges();
 
@@ -2550,24 +2611,243 @@ bool Foam::conformalVoronoiMesh::assessFace
         keepFace = false;
     }
 
-    if (!keepFace)
-    {
-        Info<< nl << "Area " << area << nl
-            << "averageCellSize " << averageCellSize << nl
-            << "Area ratio "
-            << area/max(sqr(averageCellSize), VSMALL) << nl
-            << "aspectRatio " << aspectRatio << nl
-            << endl;
+    // if (!keepFace)
+    // {
+    //     Info<< nl << "Area " << area << nl
+    //         << "targetFaceSize " << targetFaceSize << nl
+    //         << "Area ratio "
+    //         << area/max(sqr(targetFaceSize), VSMALL) << nl
+    //         << "aspectRatio " << aspectRatio << nl
+    //         << endl;
 
-        forAll(f, i)
-        {
-            meshTools::writeOBJ(Info, pts[f[i]]);
-        }
+    //     forAll(f, i)
+    //     {
+    //         meshTools::writeOBJ(Info, pts[f[i]]);
+    //     }
 
-        Info<< nl;
-    }
+    //     Info<< nl;
+    // }
 
     return keepFace;
+}
+
+
+bool Foam::conformalVoronoiMesh::collapseFace
+(
+    const Triangulation::Finite_edges_iterator& eit,
+    pointField& pts
+)
+{
+    scalar smallEdgeLengthCoeff = 1e-6;
+    scalar smallFaceAreaCoeff = sqr(smallEdgeLengthCoeff);
+    scalar collapseToEdgeCoeff = 10;
+
+    Cell_handle c = eit->first;
+    Vertex_handle vA = c->vertex(eit->second);
+    Vertex_handle vB = c->vertex(eit->third);
+
+    scalar targetFaceSize = averageAnyCellSize(vA, vB);
+    scalar targetArea = sqr(targetFaceSize);
+
+    face dualFace = buildDualFace(eit);
+
+    if (dualFace.size() < 3)
+    {
+        // This face has been collapsed already
+        return false;
+    }
+
+    scalar area = dualFace.mag(pts);
+
+    if (area < smallFaceAreaCoeff*targetArea)
+    {
+        // Collapse the dual face
+
+        // Determine if the face should be collapsed to a line or a
+        // point
+
+        const edgeList& eds = dualFace.edges();
+
+        label longestEdgeI = -1;
+
+        scalar longestEdgeLength = -SMALL;
+
+        forAll(eds, edI)
+        {
+            if (eds[edI].mag(pts) > longestEdgeLength)
+            {
+                longestEdgeI = edI;
+
+                longestEdgeLength = eds[edI].mag(pts);
+            }
+        }
+
+        if
+        (
+            longestEdgeLength
+          > collapseToEdgeCoeff*smallEdgeLengthCoeff*targetFaceSize
+        )
+        {
+            // Collapse to edge
+
+            // Start at either end of the longest edge and consume the
+            // rest of the points of the face
+
+            const edge& longestEd = eds[longestEdgeI];
+
+            label longestEdStartPtI = longestEd.start();
+            label longestEdEndPtI = longestEd.end();
+
+            label revEdI = longestEdgeI;
+            label fwdEdI = longestEdgeI;
+
+            point revPt = pts[longestEdStartPtI];
+            point fwdPt = pts[longestEdEndPtI];
+
+            // Circulate around the face
+
+            Info<< nl << "# Before" << dualFace << endl;
+
+            forAll(dualFace, fPtI)
+            {
+                meshTools::writeOBJ(Info, pts[dualFace[fPtI]]);
+            }
+
+            for (label fcI = 1; fcI <= label(eds.size()/2); fcI++)
+            {
+                revEdI = eds.rcIndex(revEdI);
+                fwdEdI = eds.fcIndex(fwdEdI);
+
+                const edge& revEd = eds[revEdI];
+                const edge& fwdEd = eds[fwdEdI];
+
+                if (fcI < label(eds.size()/2))
+                {
+                    revPt += pts[revEd.start()];
+                    fwdPt += pts[fwdEd.end()];
+
+                    // THE EDGE IS INDEXING THE POINTS DIRECTLY, NOT
+                    // VIA THE FACE
+                    // dualFace[revEd.start()] =
+                    // longestEdStartPtI; dualFace[fwdEd.end()] =
+                    // longestEdEndPtI;
+                }
+                else
+                {
+                    // Final circulation
+
+                    if
+                    (
+                        eds.size() % 2 == 1
+                     && revEd.start() == fwdEd.end()
+                    )
+                    {
+                        // Odd number of edges, give final point to
+                        // the edge direction that has the shorter
+                        // final edge
+
+                        if (fwdEd.mag(pts) < revEd.mag(pts))
+                        {
+                            fwdPt += pts[fwdEd.end()];
+                            // dualFace[fwdEd.end()] = longestEdEndPtI;
+
+                            fwdPt /= (fcI + 1);
+                            revPt /= fcI;
+                        }
+                        else
+                        {
+                            revPt += pts[revEd.start()];
+                            // dualFace[revEd.start()] = longestEdStartPtI;
+
+                            revPt /= (fcI + 1);
+                            fwdPt /= fcI;
+                        }
+                    }
+                    else if
+                    (
+                        eds.size() % 2 == 0
+                     && revEd.start() == fwdEd.start()
+                     && revEd.end() == fwdEd.end()
+                    )
+                    {
+                        // Even number of edges
+
+                        revPt /= fcI;
+                        fwdPt /= fcI;
+                    }
+                    else
+                    {
+                        FatalErrorIn("Foam::conformalVoronoiMesh::collapseFace")
+                            << "Face circulation failed for face "
+                            << dualFace << nl
+                            << exit(FatalError);
+                    }
+                }
+            }
+
+            Info<< "# Collapsed" << endl;
+
+            meshTools::writeOBJ(Info, revPt);
+            meshTools::writeOBJ(Info, fwdPt);
+
+            return false;
+        }
+        else
+        {
+            // Collapse to point
+
+            Cell_circulator ccStart = incident_cells(*eit);
+            Cell_circulator cc1 = ccStart;
+            Cell_circulator cc2 = cc1;
+
+            // Advance the second circulator so that it always stays on the next
+            // cell around the edge;
+            cc2++;
+
+            label nPts = 0;
+
+            point resultantPt = vector::zero;
+
+            label ccStartI = cc1->cellIndex();
+
+            do
+            {
+                label& cc1I = cc1->cellIndex();
+                label& cc2I = cc2->cellIndex();
+
+                if (cc1I < 0 || cc2I < 0)
+                {
+                    FatalErrorIn("Foam::conformalVoronoiMesh::collapseFace")
+                        << "Dual face uses circumcenter defined by a "
+                        << "Delaunay tetrahedron with no internal "
+                        << "or boundary points.  Defining Delaunay edge ends: "
+                        << topoint(vA->point()) << " "
+                        << topoint(vB->point()) << nl
+                        << exit(FatalError);
+                }
+
+                if (cc1I != cc2I)
+                {
+                    resultantPt += pts[cc1I];
+                    nPts++;
+                }
+
+                cc1I = ccStartI;
+                cc2I = ccStartI;
+                cc1++;
+                cc2++;
+
+            } while (cc1 != ccStart);
+
+            resultantPt /= nPts;
+
+            pts[ccStartI] = resultantPt;
+
+            return true;
+        }
+    }
+
+    return false;
 }
 
 
@@ -2583,7 +2863,7 @@ void Foam::conformalVoronoiMesh::sortFaces
     // + within each block of equal value for owner, neighbour is sorted in
     //   ascending cell order.
     // + faces sorted to correspond
-    // i.e:
+    // e.g.
     // owner | neighbour
     // 0     | 2
     // 0     | 23
@@ -2594,6 +2874,10 @@ void Foam::conformalVoronoiMesh::sortFaces
 
     // Two stage sort:
     // 1) sort by owner
+
+    Info<< nl
+        << "    Sorting faces, owner and neighbour into upper triangular order"
+        << endl;
 
     labelList oldToNew;
 
@@ -2751,6 +3035,60 @@ void Foam::conformalVoronoiMesh::addPatches
         }
     }
 }
+
+
+void Foam::conformalVoronoiMesh::removeUnusedPoints
+(
+    faceList& faces,
+    pointField& pts
+) const
+{
+    Info<< nl << "    Removing unused points after filtering" << endl;
+
+    PackedBoolList ptUsed(pts.size(), false);
+
+    // Scan all faces to find all of the points that are used
+
+    forAll(faces, fI)
+    {
+        const face& f = faces[fI];
+
+        forAll(f, fPtI)
+        {
+            ptUsed[f[fPtI]] = true;
+        }
+    }
+
+    label pointI = 0;
+    labelList oldToNew(pts.size(), -1);
+
+    // Move all of the used faces to the start of the pointField and
+    // truncate it
+
+    forAll(ptUsed, ptUI)
+    {
+        if (ptUsed[ptUI] == true)
+        {
+            oldToNew[ptUI] = pointI++;
+        }
+    }
+
+    inplaceReorder(oldToNew, pts);
+
+    Info<< "        Removing "
+        << pts.size() - pointI
+        << " unused points" << endl;
+
+    pts.setSize(pointI);
+
+    // Renumber the faces to use the new point numbers
+
+    forAll(faces, fI)
+    {
+        inplaceRenumber(oldToNew, faces[fI]);
+    }
+}
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
