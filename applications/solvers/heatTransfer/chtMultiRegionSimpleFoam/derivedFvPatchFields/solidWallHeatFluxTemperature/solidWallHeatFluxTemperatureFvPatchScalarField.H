@@ -23,46 +23,28 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    turbulentTemperatureCoupledBaffleFvPatchScalarField
+    solidWallHeatFluxTemperatureFvPatchScalarField
 
 Description
-    Harmonic fixed value boundary condition for temperature, to be used
-    for heat-transfer on back-to-back baffles.
-
-    If my temperature is T1, heat conductivity K1 and neighbour is T2,K2
-
-    both sides get fixedValue (K1/dx1*T1 + K2/dx2*T2)/(K1/dx1+K2/dx2)
+    Heat flux boundary condition for temperature on solid region
 
     Example usage:
-        myInterfacePatchName
+        myWallPatch
         {
-            type                turbulentTemperatureCoupledBaffle;
-            neighbourFieldName  T;
-            K                   K; // or none 
-            value               uniform 300;
+            type            solidWallHeatFluxTemperature;
+            K               K;                 // Name of K field
+            q               uniform 1000;      // Heat flux / [W/m2]
+            value           300.0;             // Initial temperature / [K]
         }
 
-    Needs to be on underlying directMapped(Wall)FvPatch.
-
-    Note: if K is "none" looks up RASModel and basicThermo, otherwise expects
-    the solver to calculate a 'K' field.
-
-    Note: runs in parallel with arbitrary decomposition. Uses directMapped
-    functionality to calculate exchange.
-
-    Note: lags interface data so both sides use same data.
-    - problem: schedule to calculate average would interfere
-    with standard processor swaps.
-    - so: updateCoeffs sets both to same Twall. Only need to do
-    this for last outer iteration but don't have access to this.
 
 SourceFiles
-    turbulentTemperatureCoupledBaffleFvPatchScalarField.C
+    solidWallHeatFluxTemperatureFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef turbulentTemperatureCoupledBaffleFvPatchScalarField_H
-#define turbulentTemperatureCoupledBaffleFvPatchScalarField_H
+#ifndef solidWallHeatFluxTemperatureFvPatchScalarField_H
+#define solidWallHeatFluxTemperatureFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
 
@@ -72,45 +54,39 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-        Class turbulentTemperatureCoupledBaffleFvPatchScalarField Declaration
+      Class solidWallHeatFluxTemperatureFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class turbulentTemperatureCoupledBaffleFvPatchScalarField
+class solidWallHeatFluxTemperatureFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
     // Private data
 
-        //- Name of field on the neighbour region
-        const word neighbourFieldName_;
-        
+        //- Heat flux / [W/m2]
+        scalarField q_;
+
         //- Name of thermal conductivity field
-        const word KName_;
-
-
-    // Private Member Functions
-
-        //- Am I or neighbour owner of interface
-        bool interfaceOwner(const polyMesh&, const polyPatch&) const;
+        word KName_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("turbulentTemperatureCoupledBaffle");
+    TypeName("solidWallHeatFluxTemperature");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        turbulentTemperatureCoupledBaffleFvPatchScalarField
+        solidWallHeatFluxTemperatureFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        turbulentTemperatureCoupledBaffleFvPatchScalarField
+        solidWallHeatFluxTemperatureFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -118,13 +94,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  turbulentTemperatureCoupledBaffleFvPatchScalarField onto a new patch
-        turbulentTemperatureCoupledBaffleFvPatchScalarField
+        // solidWallHeatFluxTemperatureFvPatchScalarField
+        // onto a new patch
+        solidWallHeatFluxTemperatureFvPatchScalarField
         (
-            const turbulentTemperatureCoupledBaffleFvPatchScalarField&,
+            const solidWallHeatFluxTemperatureFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
+        );
+
+        //- Construct as copy
+        solidWallHeatFluxTemperatureFvPatchScalarField
+        (
+            const solidWallHeatFluxTemperatureFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -132,14 +115,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new turbulentTemperatureCoupledBaffleFvPatchScalarField(*this)
+                new solidWallHeatFluxTemperatureFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        turbulentTemperatureCoupledBaffleFvPatchScalarField
+        solidWallHeatFluxTemperatureFvPatchScalarField
         (
-            const turbulentTemperatureCoupledBaffleFvPatchScalarField&,
+            const solidWallHeatFluxTemperatureFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -151,25 +134,39 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new turbulentTemperatureCoupledBaffleFvPatchScalarField
-                (
-                    *this,
-                    iF
-                )
+                new solidWallHeatFluxTemperatureFvPatchScalarField(*this, iF)
             );
         }
 
 
     // Member functions
 
-        //- Get corresponding K field
-        tmp<scalarField> K() const;
+        // Evaluation functions
 
-        //- Update the coefficients associated with the patch field
-        virtual void updateCoeffs();
+            //- Update the coefficients associated with the patch field
+            virtual void updateCoeffs();
 
-        //- Write
-        virtual void write(Ostream&) const;
+
+        // Mapping functions
+
+            //- Map (and resize as needed) from self given a mapping object
+            virtual void autoMap
+            (
+                const fvPatchFieldMapper&
+            );
+
+            //- Reverse map the given fvPatchField onto this fvPatchField
+            virtual void rmap
+            (
+                const fvPatchScalarField&,
+                const labelList&
+            );
+
+
+        // I-O
+
+            //- Write
+            void write(Ostream&) const;
 };
 
 
