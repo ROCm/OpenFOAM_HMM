@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "vtkPV3Foam.H"
@@ -40,10 +38,7 @@ Description
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-vtkPolyData* Foam::vtkPV3Foam::patchVTKMesh
-(
-    const polyPatch& p
-)
+vtkPolyData* Foam::vtkPV3Foam::patchVTKMesh(const polyPatch& p)
 {
     vtkPolyData* vtkmesh = vtkPolyData::New();
 
@@ -56,8 +51,8 @@ vtkPolyData* Foam::vtkPV3Foam::patchVTKMesh
     // Convert Foam mesh vertices to VTK
     const Foam::pointField& points = p.localPoints();
 
-    vtkPoints *vtkpoints = vtkPoints::New();
-    vtkpoints->Allocate( points.size() );
+    vtkPoints* vtkpoints = vtkPoints::New();
+    vtkpoints->Allocate(points.size());
     forAll(points, i)
     {
         vtkInsertNextOpenFOAMPoint(vtkpoints, points[i]);
@@ -71,7 +66,7 @@ vtkPolyData* Foam::vtkPV3Foam::patchVTKMesh
     const faceList& faces = p.localFaces();
 
     vtkCellArray* vtkcells = vtkCellArray::New();
-    vtkcells->Allocate( faces.size() );
+    vtkcells->Allocate(faces.size());
     forAll(faces, faceI)
     {
         const face& f = faces[faceI];

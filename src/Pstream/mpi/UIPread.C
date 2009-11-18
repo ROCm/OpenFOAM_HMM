@@ -66,6 +66,14 @@ Foam::UIPstream::UIPstream
 
         label wantedSize = externalBuf_.capacity();
 
+        if (debug)
+        {
+            Pout<< "UIPstream::UIPstream : read from:" << fromProcNo
+                << " tag:" << tag << " wanted size:" << wantedSize
+                << Foam::endl;
+        }
+
+
         // If the buffer size is not specified, probe the incomming message
         // and set it
         if (!wantedSize)
@@ -75,6 +83,12 @@ Foam::UIPstream::UIPstream
 
             externalBuf_.setCapacity(messageSize_);
             wantedSize = messageSize_;
+
+            if (debug)
+            {
+                Pout<< "UIPstream::UIPstream : probed size:" << wantedSize
+                    << Foam::endl;
+            }
         }
 
         messageSize_ = UIPstream::read
@@ -127,12 +141,21 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
     if (commsType() == UPstream::nonBlocking)
     {
         // Message is already received into externalBuf
+        messageSize_ = buffers.recvBuf_[fromProcNo].size();
     }
     else
     {
         MPI_Status status;
 
         label wantedSize = externalBuf_.capacity();
+
+        if (debug)
+        {
+            Pout<< "UIPstream::UIPstream PstreamBuffers :"
+                << " read from:" << fromProcNo
+                << " tag:" << tag_ << " wanted size:" << wantedSize
+                << Foam::endl;
+        }
 
         // If the buffer size is not specified, probe the incomming message
         // and set it
@@ -143,6 +166,12 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
 
             externalBuf_.setCapacity(messageSize_);
             wantedSize = messageSize_;
+
+            if (debug)
+            {
+                Pout<< "UIPstream::UIPstream PstreamBuffers : probed size:"
+                    << wantedSize << Foam::endl;
+            }
         }
 
         messageSize_ = UIPstream::read
@@ -180,6 +209,14 @@ Foam::label Foam::UIPstream::read
     const int tag
 )
 {
+    if (debug)
+    {
+        Pout<< "UIPstream::read : starting read from:" << fromProcNo
+            << " tag:" << tag << " wanted size:" << label(bufSize)
+            << " commsType:" << UPstream::commsTypeNames[commsType]
+            << Foam::endl;
+    }
+
     if (commsType == blocking || commsType == scheduled)
     {
         MPI_Status status;
@@ -213,6 +250,14 @@ Foam::label Foam::UIPstream::read
 
         label messageSize;
         MPI_Get_count(&status, MPI_BYTE, &messageSize);
+
+        if (debug)
+        {
+            Pout<< "UIPstream::read : finished read from:" << fromProcNo
+                << " tag:" << tag << " read size:" << label(bufSize)
+                << " commsType:" << UPstream::commsTypeNames[commsType]
+                << Foam::endl;
+        }
 
         if (messageSize > bufSize)
         {
@@ -256,6 +301,15 @@ Foam::label Foam::UIPstream::read
             return 0;
         }
 
+        if (debug)
+        {
+            Pout<< "UIPstream::read : started read from:" << fromProcNo
+                << " tag:" << tag << " read size:" << label(bufSize)
+                << " commsType:" << UPstream::commsTypeNames[commsType]
+                << " request:" << PstreamGlobals::outstandingRequests_.size()
+                << Foam::endl;
+        }
+
         PstreamGlobals::outstandingRequests_.append(request);
 
         // Assume the message is completely received.
@@ -267,7 +321,8 @@ Foam::label Foam::UIPstream::read
         (
             "UIPstream::read"
             "(const int fromProcNo, char* buf, std::streamsize bufSize)"
-        )   << "Unsupported communications type " << commsType
+        )   << "Unsupported communications type "
+            << commsType
             << Foam::abort(FatalError);
 
         return 0;

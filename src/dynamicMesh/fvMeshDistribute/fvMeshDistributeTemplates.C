@@ -184,7 +184,7 @@ void Foam::fvMeshDistribute::mapBoundaryFields
 
     if (flds.size() != oldBflds.size())
     {
-        FatalErrorIn("fvMeshDistribute::mapBoundaryFields") << "problem"
+        FatalErrorIn("fvMeshDistribute::mapBoundaryFields(..)") << "problem"
             << abort(FatalError);
     }
 
@@ -273,19 +273,40 @@ void Foam::fvMeshDistribute::initPatchFields
 
 
 // Send fields. Note order supplied so we can receive in exactly the same order.
+// Note that field gets written as entry in dictionary so we
+// can construct from subdictionary.
+// (since otherwise the reading as-a-dictionary mixes up entries from
+// consecutive fields)
+// The dictionary constructed is:
+//  volScalarField
+//  {
+//      p {internalField ..; boundaryField ..;}
+//      k {internalField ..; boundaryField ..;}
+//  }
+//  volVectorField
+//  {
+//      U {internalField ...  }
+//  }
+
+// volVectorField {U {internalField ..; boundaryField ..;}}
+// 
 template<class GeoField>
 void Foam::fvMeshDistribute::sendFields
 (
     const label domain,
     const wordList& fieldNames,
-    const fvMeshSubset& subsetter
+    const fvMeshSubset& subsetter,
+    UOPstream& toNbr
 )
 {
+    toNbr << GeoField::typeName << token::NL << token::BEGIN_BLOCK << token::NL;
     forAll(fieldNames, i)
     {
-        //Pout<< "Subsetting field " << fieldNames[i]
-        //    << " for domain:" << domain
-        //    << endl;
+        if (debug)
+        {
+            Pout<< "Subsetting field " << fieldNames[i]
+                << " for domain:" << domain << endl;
+        }
 
         // Send all fieldNames. This has to be exactly the same set as is
         // being received!
@@ -294,10 +315,12 @@ void Foam::fvMeshDistribute::sendFields
 
         tmp<GeoField> tsubfld = subsetter.interpolate(fld);
 
-        // Send
-        OPstream toNbr(Pstream::blocking, domain);
-        toNbr << tsubfld();
+        toNbr
+            << fieldNames[i] << token::NL << token::BEGIN_BLOCK
+            << tsubfld
+            << token::NL << token::END_BLOCK << token::NL;
     }
+    toNbr << token::END_BLOCK << token::NL;
 }
 
 
@@ -308,18 +331,25 @@ void Foam::fvMeshDistribute::receiveFields
     const label domain,
     const wordList& fieldNames,
     fvMesh& mesh,
-    PtrList<GeoField>& fields
+    PtrList<GeoField>& fields,
+    const dictionary& fieldDicts
 )
 {
+    if (debug)
+    {
+        Pout<< "Receiving fields " << fieldNames
+            << " from domain:" << domain << endl;
+    }
+
     fields.setSize(fieldNames.size());
 
     forAll(fieldNames, i)
     {
-        //Pout<< "Receiving field " << fieldNames[i]
-        //    << " from domain:" << domain
-        //    << endl;
-
-        IPstream fromNbr(Pstream::blocking, domain);
+        if (debug)
+        {
+            Pout<< "Constructing field " << fieldNames[i]
+                << " from domain:" << domain << endl;
+        }
 
         fields.set
         (
@@ -335,7 +365,7 @@ void Foam::fvMeshDistribute::receiveFields
                     IOobject::AUTO_WRITE
                 ),
                 mesh,
-                fromNbr
+                fieldDicts.subDict(fieldNames[i])
             )
         );
     }

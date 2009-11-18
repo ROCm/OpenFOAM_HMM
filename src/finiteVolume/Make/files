@@ -1,6 +1,7 @@
 fvMesh/fvMeshGeometry.C
 fvMesh/fvMesh.C
 
+fvMesh/singleCellFvMesh/singleCellFvMesh.C
 fvMesh/fvMeshSubset/fvMeshSubset.C
 
 fvBoundaryMesh = fvMesh/fvBoundaryMesh
@@ -121,6 +122,7 @@ $(derivedFvPatchFields)/inletOutletTotalTemperature/inletOutletTotalTemperatureF
 $(derivedFvPatchFields)/flowRateInletVelocity/flowRateInletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/movingWallVelocity/movingWallVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/rotatingWallVelocity/rotatingWallVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/translatingWallVelocity/translatingWallVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/oscillatingFixedValue/oscillatingFixedValueFvPatchFields.C
 $(derivedFvPatchFields)/outletInlet/outletInletFvPatchFields.C
 $(derivedFvPatchFields)/partialSlip/partialSlipFvPatchFields.C

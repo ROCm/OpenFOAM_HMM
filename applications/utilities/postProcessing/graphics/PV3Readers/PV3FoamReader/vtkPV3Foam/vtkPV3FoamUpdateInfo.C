@@ -140,7 +140,6 @@ void Foam::vtkPV3Foam::updateInfoInternalMesh()
 
         Info<< "<end> Foam::vtkPV3Foam::updateInfoInternalMesh" << endl;
     }
-
 }
 
 
@@ -440,14 +439,13 @@ void Foam::vtkPV3Foam::updateInfoLagrangianFields()
             << endl;
     }
 
-    vtkDataArraySelection *fieldSelection =
+    vtkDataArraySelection* fieldSelection =
         reader_->GetLagrangianFieldSelection();
 
     // preserve the enabled selections
     stringList enabledEntries = getSelectedArrayEntries(fieldSelection);
     fieldSelection->RemoveAllArrays();
 
-    //
     // TODO - currently only get fields from ONE cloud
     // have to decide if the second set of fields get mixed in
     // or dealt with separately

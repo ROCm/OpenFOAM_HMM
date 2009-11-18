@@ -110,9 +110,9 @@ void Foam::vtkPV3Foam::convertPointFields
             ++partId
         )
         {
-            const word  patchName = getPartName(partId);
+            const word patchName = getPartName(partId);
             const label datasetNo = partDataset_[partId];
-            const label   patchId = patches.findPatchID(patchName);
+            const label patchId = patches.findPatchID(patchName);
 
             if (!partStatus_[partId] || datasetNo < 0 || patchId < 0)
             {
@@ -187,7 +187,7 @@ void Foam::vtkPV3Foam::convertPointField
         nPoints = ptf.size();
     }
 
-    vtkFloatArray *pointData = vtkFloatArray::New();
+    vtkFloatArray* pointData = vtkFloatArray::New();
     pointData->SetNumberOfTuples(nPoints + addPointCellLabels.size());
     pointData->SetNumberOfComponents(nComp);
     pointData->Allocate(nComp*(nPoints + addPointCellLabels.size()));

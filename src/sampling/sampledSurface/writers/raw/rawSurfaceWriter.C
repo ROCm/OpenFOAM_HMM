@@ -65,7 +65,7 @@ void Foam::rawSurfaceWriter<Type>::writeGeometry
 template<class Type>
 void Foam::rawSurfaceWriter<Type>::writeData
 (
-    const fileName& fieldName,
+    const word& fieldName,
     const pointField& points,
     const faceList& faces,
     const scalarField& values,
@@ -101,7 +101,7 @@ void Foam::rawSurfaceWriter<Type>::writeData
 template<class Type>
 void Foam::rawSurfaceWriter<Type>::writeData
 (
-    const fileName& fieldName,
+    const word& fieldName,
     const pointField& points,
     const faceList& faces,
     const vectorField& values,
@@ -144,7 +144,7 @@ void Foam::rawSurfaceWriter<Type>::writeData
 template<class Type>
 void Foam::rawSurfaceWriter<Type>::writeData
 (
-    const fileName& fieldName,
+    const word& fieldName,
     const pointField& points,
     const faceList& faces,
     const sphericalTensorField& values,
@@ -183,7 +183,7 @@ void Foam::rawSurfaceWriter<Type>::writeData
 template<class Type>
 void Foam::rawSurfaceWriter<Type>::writeData
 (
-    const fileName& fieldName,
+    const word& fieldName,
     const pointField& points,
     const faceList& faces,
     const symmTensorField& values,
@@ -232,7 +232,7 @@ void Foam::rawSurfaceWriter<Type>::writeData
 template<class Type>
 void Foam::rawSurfaceWriter<Type>::writeData
 (
-    const fileName& fieldName,
+    const word& fieldName,
     const pointField& points,
     const faceList& faces,
     const tensorField& values,
@@ -344,7 +344,7 @@ namespace Foam
         const fileName& surfaceName,
         const pointField& points,
         const faceList& faces,
-        const fileName& fieldName,
+        const word& fieldName,
         const Field<bool>& values,
         const bool verbose
     ) const
@@ -359,7 +359,7 @@ void Foam::rawSurfaceWriter<Type>::write
     const fileName& surfaceName,
     const pointField& points,
     const faceList& faces,
-    const fileName& fieldName,
+    const word& fieldName,
     const Field<Type>& values,
     const bool verbose
 ) const
