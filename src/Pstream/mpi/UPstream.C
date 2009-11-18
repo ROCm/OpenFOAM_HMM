@@ -177,7 +177,7 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
 {
     if (Pstream::debug)
     {
-        Pout<< "UPstream::reduce : value:" << Value << endl;
+        Pout<< "Foam::reduce : value:" << Value << endl;
     }
 
     if (!UPstream::parRun())
@@ -452,7 +452,7 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
 
     if (Pstream::debug)
     {
-        Pout<< "UPstream::reduce : reduced value:" << Value << endl;
+        Pout<< "Foam::reduce : reduced value:" << Value << endl;
     }
 }
 
