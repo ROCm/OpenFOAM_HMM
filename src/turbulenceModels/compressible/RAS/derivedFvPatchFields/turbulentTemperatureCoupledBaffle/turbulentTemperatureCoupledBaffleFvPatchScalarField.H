@@ -97,7 +97,7 @@ class turbulentTemperatureCoupledBaffleFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("turbulentTemperatureCoupledBaffle");
+    TypeName("compressible::turbulentTemperatureCoupledBaffle");
 
 
     // Constructors
