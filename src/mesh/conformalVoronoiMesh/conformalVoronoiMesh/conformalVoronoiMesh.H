@@ -456,24 +456,6 @@ private:
             const Triangulation::Finite_edges_iterator& eit
         ) const;
 
-        //- Assess face to see if it is a candidate for removal
-        bool assessFace
-        (
-            const face& f,
-            const Vertex_handle& vA,
-            const Vertex_handle& vB,
-            const pointField& pts
-        ) const;
-
-        //- Assess face to see if it is a candidate for removal, self
-        //  determined target size
-        bool assessFace
-        (
-            const face& f,
-            scalar targetFaceSize,
-            const pointField& pts
-        ) const;
-
         //- Merge vertices that are very close together
         label mergeCloseDualVertices
         (
@@ -488,14 +470,6 @@ private:
         (
             pointField& pts,
             Map<label>& dualPtIndexMap
-        );
-
-        //- Re-index the Delaunay cells around a Delaunay edge,
-        //  i.e. the dual face
-        void reindexDualFace
-        (
-            const Triangulation::Finite_edges_iterator& eit,
-            const Map<label>& dualPtIndexMap
         );
 
         //- Re-index all of the the Delaunay cells

@@ -978,8 +978,7 @@ Foam::conformalVoronoiMesh::reconformationControl() const
     else if
     (
         runTime_.timeIndex()
-      % cvMeshControls().surfaceConformationRebuildFrequency()
-     == 0
+      % cvMeshControls().surfaceConformationRebuildFrequency() == 0
     )
     {
         Info<< nl << "    Rebuilding surface conformation for more iterations"
@@ -1993,8 +1992,8 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     // assigns an index to the Delaunay vertices which will be the dual cell
     // index used for owner neighbour assignment.
 
-    // The indices of the points are reset which destroys the point-pair
-    // matching, so the type of each vertex are reset to avoid any ambiguity.
+    // The indices of the points are reset *which **destroys** the point-pair
+    // matching*, so the type of each vertex are reset to avoid any ambiguity.
 
     label dualCelli = 0;
 
@@ -2130,11 +2129,6 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         {
             face newDualFace = buildDualFace(eit);
 
-            //bool keepFace = assessFace(newDualFace, vA, vB, points);
-
-            // if (newDualFace.size() >= 3 && keepFace)
-            // {
-
             if (newDualFace.size() >= 3)
             {
 
@@ -2263,33 +2257,6 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     removeUnusedPoints(faces, points);
 
     timeCheck();
-
-    // // Write out faces to be removed as a list of labels to be used in
-    // // faceSet
-
-    // DynamicList<label> facesToBeRemoved;
-
-    // labelList nEdgeHistogram(12, 0);
-
-    // forAll(faces, fI)
-    // {
-    //     const face& f = faces[fI];
-
-    //     if (!assessFace(f, targetCellSize(f.centre(points)), points))
-    //     {
-    //         facesToBeRemoved.append(fI);
-
-    //         nEdgeHistogram[f.size()]++;
-    //     }
-    // }
-
-    // fileName fName = "facesToBeRemoved";
-
-    // OFstream str(fName);
-
-    // str << facesToBeRemoved;
-
-    // Info<< nEdgeHistogram << endl;
 }
 
 
@@ -2544,100 +2511,6 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
 }
 
 
-bool Foam::conformalVoronoiMesh::assessFace
-(
-    const face& f,
-    const Vertex_handle& vA,
-    const Vertex_handle& vB,
-    const pointField& pts
-) const
-{
-    if (f.size() < 3)
-    {
-        // Invalid face, fewer than three points
-
-        return false;
-    }
-    else if (f.size() == 3)
-    {
-        // Triangle face, handle specially
-    }
-    else
-    {
-        // Polygonal face
-    }
-
-    scalar averageCellSize = averageAnyCellSize(vA, vB);
-
-    return assessFace(f, averageCellSize, pts);
-}
-
-
-bool Foam::conformalVoronoiMesh::assessFace
-(
-    const face& f,
-    scalar targetFaceSize,
-    const pointField& pts
-) const
-{
-    scalar smallFaceAreaCoeff = sqr(1e-5);
-    scalar highAspectRatioFaceAreaCoeff = 0.1;
-    scalar aspectRatioLimit = 2.0;
-    scalar targetArea = sqr(targetFaceSize);
-
-    const edgeList& eds = f.edges();
-
-    scalar perimeter = 0.0;
-
-    forAll(eds, i)
-    {
-        perimeter += eds[i].mag(pts);
-
-        vector edVec = eds[i].vec(pts);
-    };
-
-    scalar area = f.mag(pts);
-
-    scalar equivalentSqrPerimeter = 4.0*sqrt(area);
-
-    scalar aspectRatio = perimeter/max(equivalentSqrPerimeter, VSMALL);
-
-    bool keepFace = true;
-
-    if (area < smallFaceAreaCoeff*targetArea)
-    {
-        keepFace = false;
-    }
-
-    if
-    (
-        aspectRatio > aspectRatioLimit
-     && area < highAspectRatioFaceAreaCoeff*targetArea)
-    {
-        keepFace = false;
-    }
-
-    // if (!keepFace)
-    // {
-    //     Info<< nl << "Area " << area << nl
-    //         << "targetFaceSize " << targetFaceSize << nl
-    //         << "Area ratio "
-    //         << area/max(sqr(targetFaceSize), VSMALL) << nl
-    //         << "aspectRatio " << aspectRatio << nl
-    //         << endl;
-
-    //     forAll(f, i)
-    //     {
-    //         meshTools::writeOBJ(Info, pts[f[i]]);
-    //     }
-
-    //     Info<< nl;
-    // }
-
-    return keepFace;
-}
-
-
 Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
 (
     const pointField& pts,
@@ -2734,9 +2607,6 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
          || vB->internalOrBoundaryPoint()
         )
         {
-            scalar targetFaceSize = averageAnyCellSize(vA, vB);
-            scalar targetArea = sqr(targetFaceSize);
-
             face dualFace = buildDualFace(eit);
 
             if (dualFace.size() < 3)
@@ -2746,6 +2616,9 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
             }
 
             scalar area = dualFace.mag(pts);
+
+            scalar targetFaceSize = averageAnyCellSize(vA, vB);
+            scalar targetArea = sqr(targetFaceSize);
 
             if (area < smallFaceAreaCoeff*targetArea)
             {
@@ -2800,18 +2673,6 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
 
                     dualPtIndexMap.insert(longestEdStartPtI, longestEdStartPtI);
                     dualPtIndexMap.insert(longestEdEndPtI, longestEdEndPtI);
-
-                    // Circulate around the face
-
-                    // Info<< nl << "# Before " << dualFace << nl
-                    //     << "# area " << area << nl
-                    //     << "# " << longestEdStartPtI << " " << longestEdEndPtI << nl
-                    //     << endl;
-
-                    // forAll(dualFace, fPtI)
-                    // {
-                    //     meshTools::writeOBJ(Info, pts[dualFace[fPtI]]);
-                    // }
 
                     for (label fcI = 1; fcI <= label(eds.size()/2); fcI++)
                     {
@@ -2893,7 +2754,10 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
                             }
                             else
                             {
-                                FatalErrorIn("Foam::conformalVoronoiMesh::collapseFace")
+                                FatalErrorIn
+                                (
+                                    "Foam::conformalVoronoiMesh::collapseFace"
+                                )
                                     << "Face circulation failed for face "
                                     << dualFace << nl
                                     << exit(FatalError);
@@ -2901,22 +2765,9 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
                         }
                     }
 
-                    // Info<< "# dualPtIndexMap " << dualPtIndexMap << endl;
-
                     // Move the position of the accumulated points
                     pts[longestEdStartPtI] = revPt;
                     pts[longestEdEndPtI] = fwdPt;
-
-                    // {
-                    //     face checkDualFace = buildDualFace(eit);
-
-                    //     Info<< "# After " << checkDualFace << endl;
-                    // }
-
-                    // Info<< "# Collapsed" << endl;
-
-                    // meshTools::writeOBJ(Info, revPt);
-                    // meshTools::writeOBJ(Info, fwdPt);
 
                     nCollapsedFaces++;
                 }
@@ -2926,53 +2777,6 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
                 )
                 {
                     // Collapse to point
-
-                    // Cell_circulator ccStart = incident_cells(*eit);
-                    // Cell_circulator cc1 = ccStart;
-                    // Cell_circulator cc2 = cc1;
-
-                    // // Advance the second circulator so that it always stays on the next
-                    // // cell around the edge;
-                    // cc2++;
-
-                    // label nPts = 0;
-
-                    // point resultantPt = vector::zero;
-
-                    // label ccStartI = cc1->cellIndex();
-
-                    // do
-                    // {
-                    //     label& cc1I = cc1->cellIndex();
-                    //     label& cc2I = cc2->cellIndex();
-
-                    //     if (cc1I < 0 || cc2I < 0)
-                    //     {
-                    //         FatalErrorIn("Foam::conformalVoronoiMesh::collapseFace")
-                    //             << "Dual face uses circumcenter defined by a "
-                    //             << "Delaunay tetrahedron with no internal "
-                    //             << "or boundary points.  Defining Delaunay edge ends: "
-                    //             << topoint(vA->point()) << " "
-                    //             << topoint(vB->point()) << nl
-                    //             << exit(FatalError);
-                    //     }
-
-                    //     if (cc1I != cc2I)
-                    //     {
-                    //         resultantPt += pts[cc1I];
-                    //         nPts++;
-                    //     }
-
-                    //     cc1I = ccStartI;
-                    //     cc2I = ccStartI;
-                    //     cc1++;
-                    //     cc2++;
-
-                    // } while (cc1 != ccStart);
-
-                    // resultantPt /= nPts;
-
-                    // pts[ccStartI] = resultantPt;
 
                     point resultantPt = vector::zero;
 
@@ -2998,28 +2802,6 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
     }
 
     return nCollapsedFaces;
-}
-
-
-void Foam::conformalVoronoiMesh::reindexDualFace
-(
-    const Triangulation::Finite_edges_iterator& eit,
-    const Map<label>& dualPtIndexMap
-)
-{
-    Cell_circulator ccStart = incident_cells(*eit);
-    Cell_circulator cc = ccStart;
-
-    do
-    {
-        if (dualPtIndexMap.found(cc->cellIndex()))
-        {
-            cc->cellIndex() = dualPtIndexMap[cc->cellIndex()];
-        }
-
-        cc++;
-
-    } while (cc != ccStart);
 }
 
 
