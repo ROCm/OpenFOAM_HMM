@@ -258,6 +258,7 @@ bool Foam::cuttingPlane::walkCell
 void Foam::cuttingPlane::walkCellCuts
 (
     const primitiveMesh& mesh,
+    const bool triangulate,
     const UList<label>& edgePoint
 )
 {
@@ -293,7 +294,7 @@ void Foam::cuttingPlane::walkCellCuts
         // Check for the unexpected ...
         if (startEdgeI == -1)
         {
-            FatalErrorIn("Foam::cuttingPlane::walkCellCuts")
+            FatalErrorIn("Foam::cuttingPlane::walkCellCuts(..)")
                 << "Cannot find cut edge for cut cell " << cellI
                 << abort(FatalError);
         }
@@ -318,10 +319,18 @@ void Foam::cuttingPlane::walkCellCuts
                 f = f.reverseFace();
             }
 
-            // the cut faces are usually quite ugly, so always triangulate
-            label nTri = f.triangles(cutPoints, dynCutFaces);
-            while (nTri--)
+            // the cut faces are usually quite ugly, so optionally triangulate
+            if (triangulate)
             {
+                label nTri = f.triangles(cutPoints, dynCutFaces);
+                while (nTri--)
+                {
+                    dynCutCells.append(cellI);
+                }
+            }
+            else
+            {
+                dynCutFaces.append(f);
                 dynCutCells.append(cellI);
             }
         }
@@ -346,12 +355,13 @@ Foam::cuttingPlane::cuttingPlane
 (
     const plane& pln,
     const primitiveMesh& mesh,
+    const bool triangulate,
     const UList<label>& cellIdLabels
 )
 :
     plane(pln)
 {
-    reCut(mesh, cellIdLabels);
+    reCut(mesh, triangulate, cellIdLabels);
 }
 
 
@@ -362,6 +372,7 @@ Foam::cuttingPlane::cuttingPlane
 void Foam::cuttingPlane::reCut
 (
     const primitiveMesh& mesh,
+    const bool triangulate,
     const UList<label>& cellIdLabels
 )
 {
@@ -379,7 +390,7 @@ void Foam::cuttingPlane::reCut
     intersectEdges(mesh, dotProducts, edgePoint);
 
     // Do topological walk around cell to find closed loop.
-    walkCellCuts(mesh, edgePoint);
+    walkCellCuts(mesh, triangulate, edgePoint);
 }
 
 
