@@ -102,6 +102,51 @@ inline Foam::scalar Foam::conformalVoronoiMesh::averageAnyCellSize
 }
 
 
+inline Foam::scalar Foam::conformalVoronoiMesh::averageAnyCellSize
+(
+    const Triangulation::Finite_facets_iterator& fit
+) const
+{
+    // Geometric mean
+
+    scalar sizeProduct = 1;
+    label nProducts = 0;
+
+    const Cell_handle c(fit->first);
+    const int oppositeVertex = fit->second;
+
+    for (label i = 0; i < 3; i++)
+    {
+        Vertex_handle v = c->vertex(vertex_triple_index(oppositeVertex, i));
+
+        if (v->internalOrBoundaryPoint())
+        {
+
+            sizeProduct *= v->targetCellSize();
+
+            nProducts++;
+        }
+    }
+
+    if (nProducts < 1)
+    {
+        // There are no internalOrBoundaryPoints available, determine
+        // size from scratch
+
+        for (label i = 0; i < 3; i++)
+        {
+            Vertex_handle v = c->vertex(vertex_triple_index(oppositeVertex, i));
+
+            sizeProduct *= targetCellSize(topoint(v->point()));
+        }
+
+        nProducts = 3;
+    }
+
+    return pow(sizeProduct, (1.0/nProducts));
+}
+
+
 inline Foam::scalar Foam::conformalVoronoiMesh::pointPairDistance
 (
     const point& pt

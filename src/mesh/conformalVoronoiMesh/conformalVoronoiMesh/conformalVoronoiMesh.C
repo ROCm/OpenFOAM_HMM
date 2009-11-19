@@ -1766,39 +1766,6 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     timeCheck();
 
-    // Indexing Delaunay cells, which are Dual vertices
-
-    label dualVertI = 0;
-
-    points.setSize(number_of_cells());
-
-    for
-    (
-        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
-        cit != finite_cells_end();
-        ++cit
-    )
-    {
-        if
-        (
-            cit->vertex(0)->internalOrBoundaryPoint()
-         || cit->vertex(1)->internalOrBoundaryPoint()
-         || cit->vertex(2)->internalOrBoundaryPoint()
-         || cit->vertex(3)->internalOrBoundaryPoint()
-        )
-        {
-            cit->cellIndex() = dualVertI;
-            points[dualVertI] = topoint(dual(cit));
-            dualVertI++;
-        }
-        else
-        {
-            cit->cellIndex() = -1;
-        }
-    }
-
-    points.setSize(dualVertI);
-
     // // ~~~~~~~~~~~ removing short edges by indexing dual vertices ~~~~~~~~~~~~~~
 
     // for
@@ -1812,12 +1779,6 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     // }
 
     // points.setSize(number_of_cells());
-
-    // // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // // Looking up minEdgeLenSqr with a dummy point, in future will be available
-    // // as a local value to be looked up in-place.
-
-    // scalar minEdgeLenSqr = sqr(minimumEdgeLength(vector::zero));
 
     // // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1885,7 +1846,14 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     //                     if
     //                     (
-    //                         magSqr(dualVertex - neighDualVertex) < minEdgeLenSqr
+    //                         magSqr(dualVertex - neighDualVertex)
+    //                       < sqr
+    //                         (
+    //                             minimumEdgeLength
+    //                             (
+    //                                 0.5*(dualVertex + neighDualVertex)
+    //                             )
+    //                         )
     //                     )
     //                     {
     //                         edgeIsShort[f] = true;
@@ -1974,7 +1942,14 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     //                 if
     //                 (
     //                     nearestExistingIndex > -1
-    //                  && minDistSqrToNearestIndexedNeighbour < minEdgeLenSqr
+    //                  && minDistSqrToNearestIndexedNeighbour
+    //                   < sqr
+    //                     (
+    //                         minimumEdgeLength
+    //                         (
+    //                             0.5*(nearestIndexedNeighbourPos + dualVertex)
+    //                         )
+    //                     )
     //                 )
     //                 {
     //                     points[nearestExistingIndex] =
@@ -2047,37 +2022,68 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     // Loop over all dual faces and merge points to remove faces that
     // are not wanted.
 
-    Info<< nl << "    Collapsing unnecessary faces" << endl;
+    // Indexing Delaunay cells, which are Dual vertices
+
+    label dualVertI = 0;
+
+    points.setSize(number_of_cells());
+
+    for
+    (
+        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+        cit != finite_cells_end();
+        ++cit
+    )
+    {
+        if
+        (
+            cit->vertex(0)->internalOrBoundaryPoint()
+         || cit->vertex(1)->internalOrBoundaryPoint()
+         || cit->vertex(2)->internalOrBoundaryPoint()
+         || cit->vertex(3)->internalOrBoundaryPoint()
+        )
+        {
+            cit->cellIndex() = dualVertI;
+            points[dualVertI] = topoint(dual(cit));
+            dualVertI++;
+        }
+        else
+        {
+            cit->cellIndex() = -1;
+        }
+    }
+
+    points.setSize(dualVertI);
+
+    Info<< nl << "    Merging close points" << endl;
 
     label nCollapsedFaces = 0;
 
+    label nPtsMerged = 0;
+
     do
     {
+        Map<label> dualPtIndexMap;
+
+        nPtsMerged = mergeCloseDualVertices(points, dualPtIndexMap);
+
+        Info<< "        Merged " << nPtsMerged << " points" << endl;
+
+        reindexDualVertices(dualPtIndexMap);
+
+    } while (nPtsMerged > 0);
+
+    Info<< nl << "    Collapsing unnecessary faces" << endl;
+
+    do
+    {
+        Map<label> dualPtIndexMap;
+
         nCollapsedFaces = 0;
 
-        for
-        (
-            Triangulation::Finite_edges_iterator eit = finite_edges_begin();
-            eit != finite_edges_end();
-            ++eit
-        )
-        {
-            Cell_handle c = eit->first;
-            Vertex_handle vA = c->vertex(eit->second);
-            Vertex_handle vB = c->vertex(eit->third);
+        nCollapsedFaces = collapseFaces(points, dualPtIndexMap);
 
-            if
-            (
-                vA->internalOrBoundaryPoint()
-                || vB->internalOrBoundaryPoint()
-            )
-            {
-                if (collapseFace(eit, points))
-                {
-                    nCollapsedFaces++;
-                }
-            }
-        }
+        reindexDualVertices(dualPtIndexMap);
 
         Info<< "        Collapsed " << nCollapsedFaces << " faces" << endl;
 
@@ -2258,8 +2264,8 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     timeCheck();
 
-    // Write out faces to be removed as a list of labels to be used in
-    // faceSet
+    // // Write out faces to be removed as a list of labels to be used in
+    // // faceSet
 
     // DynamicList<label> facesToBeRemoved;
 
@@ -2381,13 +2387,13 @@ void Foam::conformalVoronoiMesh::calcTetMesh
         const int oppositeVertex = fit->second;
         const Cell_handle c2(c1->neighbor(oppositeVertex));
 
-        label c1Index = c1->cellIndex();
-        label c2Index = c2->cellIndex();
+        label c1I = c1->cellIndex();
+        label c2I = c2->cellIndex();
 
         label ownerCell = -1;
         label neighbourCell = -1;
 
-        if (c1Index == -1 && c2Index == -1)
+        if (c1I == -1 && c2I == -1)
         {
             // Both tets are outside, skip
             continue;
@@ -2403,18 +2409,18 @@ void Foam::conformalVoronoiMesh::calcTetMesh
 
         newFace = face(verticesOnTriFace);
 
-        if (c1Index == -1 || c2Index == -1)
+        if (c1I == -1 || c2I == -1)
         {
             // Boundary face...
-            if (c1Index == -1)
+            if (c1I == -1)
             {
                 //... with c1 outside
-                ownerCell = c2Index;
+                ownerCell = c2I;
             }
             else
             {
                 // ... with c2 outside
-                ownerCell = c1Index;
+                ownerCell = c1I;
 
                 reverse(newFace);
             }
@@ -2442,19 +2448,19 @@ void Foam::conformalVoronoiMesh::calcTetMesh
         else
         {
             // Internal face...
-            if (c1Index < c2Index)
+            if (c1I < c2I)
             {
                 // ...with c1 as the ownerCell
-                ownerCell = c1Index;
-                neighbourCell = c2Index;
+                ownerCell = c1I;
+                neighbourCell = c2I;
 
                 reverse(newFace);
             }
             else
             {
                 // ...with c2 as the ownerCell
-                ownerCell = c2Index;
-                neighbourCell = c1Index;
+                ownerCell = c2I;
+                neighbourCell = c1I;
             }
 
             faces[faceI] = newFace;
@@ -2574,7 +2580,7 @@ bool Foam::conformalVoronoiMesh::assessFace
     const pointField& pts
 ) const
 {
-    scalar smallFaceAreaCoeff = 0.003;
+    scalar smallFaceAreaCoeff = sqr(1e-5);
     scalar highAspectRatioFaceAreaCoeff = 0.1;
     scalar aspectRatioLimit = 2.0;
     scalar targetArea = sqr(targetFaceSize);
@@ -2632,223 +2638,410 @@ bool Foam::conformalVoronoiMesh::assessFace
 }
 
 
-bool Foam::conformalVoronoiMesh::collapseFace
+Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
 (
-    const Triangulation::Finite_edges_iterator& eit,
-    pointField& pts
+    const pointField& pts,
+    Map<label>& dualPtIndexMap
 )
 {
-    scalar smallEdgeLengthCoeff = 1e-6;
-    scalar smallFaceAreaCoeff = sqr(smallEdgeLengthCoeff);
-    scalar collapseToEdgeCoeff = 10;
+    label nPtsMerged = 0;
 
-    Cell_handle c = eit->first;
-    Vertex_handle vA = c->vertex(eit->second);
-    Vertex_handle vB = c->vertex(eit->third);
+    scalar closenessTolerance = 1e-4;
 
-    scalar targetFaceSize = averageAnyCellSize(vA, vB);
-    scalar targetArea = sqr(targetFaceSize);
-
-    face dualFace = buildDualFace(eit);
-
-    if (dualFace.size() < 3)
+    for
+    (
+        Triangulation::Finite_facets_iterator fit = finite_facets_begin();
+        fit != finite_facets_end();
+        ++fit
+    )
     {
-        // This face has been collapsed already
-        return false;
-    }
+        const Cell_handle c1(fit->first);
+        const int oppositeVertex = fit->second;
+        const Cell_handle c2(c1->neighbor(oppositeVertex));
 
-    scalar area = dualFace.mag(pts);
+        label& c1I = c1->cellIndex();
+        label& c2I = c2->cellIndex();
 
-    if (area < smallFaceAreaCoeff*targetArea)
-    {
-        // Collapse the dual face
-
-        // Determine if the face should be collapsed to a line or a
-        // point
-
-        const edgeList& eds = dualFace.edges();
-
-        label longestEdgeI = -1;
-
-        scalar longestEdgeLength = -SMALL;
-
-        forAll(eds, edI)
+        if (dualPtIndexMap.found(c1I) || dualPtIndexMap.found(c2I))
         {
-            if (eds[edI].mag(pts) > longestEdgeLength)
-            {
-                longestEdgeI = edI;
+            // One of the points of this edge has already been
+            // merged this sweep, leave for next sweep
 
-                longestEdgeLength = eds[edI].mag(pts);
+            continue;
+        }
+
+        if(c1I != -1 && c2I != -1 && (c1I != c2I))
+        {
+            if
+            (
+                magSqr(pts[c1I] - pts[c2I])
+              < sqr(averageAnyCellSize(fit)*closenessTolerance)
+            )
+            {
+                dualPtIndexMap.insert(c1I, c1I);
+                dualPtIndexMap.insert(c2I, c1I);
+
+                nPtsMerged++;
             }
         }
+    }
+
+    return nPtsMerged;
+}
+
+
+Foam::label Foam::conformalVoronoiMesh::collapseFaces
+(
+    pointField& pts,
+    Map<label>& dualPtIndexMap
+)
+{
+    label nCollapsedFaces = 0;
+
+    scalar smallEdgeLengthCoeff = 1e-3;
+    scalar smallFaceAreaCoeff = sqr(smallEdgeLengthCoeff);
+    scalar collapseToEdgeCoeff = 0.02;
+    scalar longestEdgeLengthRatio = 0.35;
+
+    for
+    (
+        Triangulation::Finite_edges_iterator eit = finite_edges_begin();
+        eit != finite_edges_end();
+        ++eit
+    )
+    {
+        Cell_circulator ccStart = incident_cells(*eit);
+        Cell_circulator cc = ccStart;
+
+        do
+        {
+            if (dualPtIndexMap.found(cc->cellIndex()))
+            {
+                // One of the points of this face has already been
+                // collapsed this sweep, leave for next sweep
+                continue;
+            }
+
+        } while (++cc != ccStart);
+
+        Cell_handle c = eit->first;
+        Vertex_handle vA = c->vertex(eit->second);
+        Vertex_handle vB = c->vertex(eit->third);
 
         if
         (
-            longestEdgeLength
-          > collapseToEdgeCoeff*smallEdgeLengthCoeff*targetFaceSize
+            vA->internalOrBoundaryPoint()
+         || vB->internalOrBoundaryPoint()
         )
         {
-            // Collapse to edge
+            scalar targetFaceSize = averageAnyCellSize(vA, vB);
+            scalar targetArea = sqr(targetFaceSize);
 
-            // Start at either end of the longest edge and consume the
-            // rest of the points of the face
+            face dualFace = buildDualFace(eit);
 
-            const edge& longestEd = eds[longestEdgeI];
-
-            label longestEdStartPtI = longestEd.start();
-            label longestEdEndPtI = longestEd.end();
-
-            label revEdI = longestEdgeI;
-            label fwdEdI = longestEdgeI;
-
-            point revPt = pts[longestEdStartPtI];
-            point fwdPt = pts[longestEdEndPtI];
-
-            // Circulate around the face
-
-            Info<< nl << "# Before" << dualFace << endl;
-
-            forAll(dualFace, fPtI)
+            if (dualFace.size() < 3)
             {
-                meshTools::writeOBJ(Info, pts[dualFace[fPtI]]);
+                // This face has been collapsed already
+                continue;
             }
 
-            for (label fcI = 1; fcI <= label(eds.size()/2); fcI++)
+            scalar area = dualFace.mag(pts);
+
+            if (area < smallFaceAreaCoeff*targetArea)
             {
-                revEdI = eds.rcIndex(revEdI);
-                fwdEdI = eds.fcIndex(fwdEdI);
+                // Collapse the dual face
 
-                const edge& revEd = eds[revEdI];
-                const edge& fwdEd = eds[fwdEdI];
+                // Determine if the face should be collapsed to a line or a
+                // point
 
-                if (fcI < label(eds.size()/2))
+                const edgeList& eds = dualFace.edges();
+
+                label longestEdgeI = -1;
+
+                scalar longestEdgeLength = -SMALL;
+
+                scalar perimeter = 0.0;
+
+                forAll(eds, edI)
                 {
-                    revPt += pts[revEd.start()];
-                    fwdPt += pts[fwdEd.end()];
+                    scalar edgeLength = eds[edI].mag(pts);
 
-                    // THE EDGE IS INDEXING THE POINTS DIRECTLY, NOT
-                    // VIA THE FACE
-                    // dualFace[revEd.start()] =
-                    // longestEdStartPtI; dualFace[fwdEd.end()] =
-                    // longestEdEndPtI;
-                }
-                else
-                {
-                    // Final circulation
+                    perimeter += edgeLength;
 
-                    if
-                    (
-                        eds.size() % 2 == 1
-                     && revEd.start() == fwdEd.end()
-                    )
+                    if (edgeLength > longestEdgeLength)
                     {
-                        // Odd number of edges, give final point to
-                        // the edge direction that has the shorter
-                        // final edge
+                        longestEdgeI = edI;
 
-                        if (fwdEd.mag(pts) < revEd.mag(pts))
+                        longestEdgeLength = edgeLength;
+                    }
+                }
+
+                if
+                (
+                    longestEdgeLength > collapseToEdgeCoeff*targetFaceSize
+                 && longestEdgeLength/perimeter > longestEdgeLengthRatio
+                )
+                {
+                    // Collapse to edge
+
+                    // Start at either end of the longest edge and consume the
+                    // rest of the points of the face
+
+                    const edge& longestEd = eds[longestEdgeI];
+
+                    label longestEdStartPtI = longestEd.start();
+                    label longestEdEndPtI = longestEd.end();
+
+                    label revEdI = longestEdgeI;
+                    label fwdEdI = longestEdgeI;
+
+                    point revPt = pts[longestEdStartPtI];
+                    point fwdPt = pts[longestEdEndPtI];
+
+                    dualPtIndexMap.insert(longestEdStartPtI, longestEdStartPtI);
+                    dualPtIndexMap.insert(longestEdEndPtI, longestEdEndPtI);
+
+                    // Circulate around the face
+
+                    // Info<< nl << "# Before " << dualFace << nl
+                    //     << "# area " << area << nl
+                    //     << "# " << longestEdStartPtI << " " << longestEdEndPtI << nl
+                    //     << endl;
+
+                    // forAll(dualFace, fPtI)
+                    // {
+                    //     meshTools::writeOBJ(Info, pts[dualFace[fPtI]]);
+                    // }
+
+                    for (label fcI = 1; fcI <= label(eds.size()/2); fcI++)
+                    {
+                        revEdI = eds.rcIndex(revEdI);
+                        fwdEdI = eds.fcIndex(fwdEdI);
+
+                        const edge& revEd = eds[revEdI];
+                        const edge& fwdEd = eds[fwdEdI];
+
+                        if (fcI < label(eds.size()/2))
                         {
+                            revPt += pts[revEd.start()];
                             fwdPt += pts[fwdEd.end()];
-                            // dualFace[fwdEd.end()] = longestEdEndPtI;
 
-                            fwdPt /= (fcI + 1);
-                            revPt /= fcI;
+                            dualPtIndexMap.insert
+                            (
+                                revEd.start(),
+                                longestEdStartPtI
+                            );
+
+                            dualPtIndexMap.insert
+                            (
+                                fwdEd.end(),
+                                longestEdEndPtI
+                            );
                         }
                         else
                         {
-                            revPt += pts[revEd.start()];
-                            // dualFace[revEd.start()] = longestEdStartPtI;
+                            // Final circulation
 
-                            revPt /= (fcI + 1);
-                            fwdPt /= fcI;
+                            if
+                            (
+                                eds.size() % 2 == 1
+                                && revEd.start() == fwdEd.end()
+                            )
+                            {
+                                // Odd number of edges, give final point to
+                                // the edge direction that has the shorter
+                                // final edge
+
+                                if (fwdEd.mag(pts) < revEd.mag(pts))
+                                {
+                                    fwdPt += pts[fwdEd.end()];
+
+                                    dualPtIndexMap.insert
+                                    (
+                                        fwdEd.end(),
+                                        longestEdEndPtI
+                                    );
+
+                                    revPt /= fcI;
+                                    fwdPt /= (fcI + 1);
+                                }
+                                else
+                                {
+                                    revPt += pts[revEd.start()];
+
+                                    dualPtIndexMap.insert
+                                    (
+                                        revEd.start(),
+                                        longestEdStartPtI
+                                    );
+
+                                    revPt /= (fcI + 1);
+                                    fwdPt /= fcI;
+                                }
+                            }
+                            else if
+                            (
+                                eds.size() % 2 == 0
+                             && revEd.start() == fwdEd.start()
+                             && revEd.end() == fwdEd.end()
+                            )
+                            {
+                                // Even number of edges
+
+                                revPt /= fcI;
+                                fwdPt /= fcI;
+                            }
+                            else
+                            {
+                                FatalErrorIn("Foam::conformalVoronoiMesh::collapseFace")
+                                    << "Face circulation failed for face "
+                                    << dualFace << nl
+                                    << exit(FatalError);
+                            }
                         }
                     }
-                    else if
-                    (
-                        eds.size() % 2 == 0
-                     && revEd.start() == fwdEd.start()
-                     && revEd.end() == fwdEd.end()
-                    )
-                    {
-                        // Even number of edges
 
-                        revPt /= fcI;
-                        fwdPt /= fcI;
-                    }
-                    else
+                    // Info<< "# dualPtIndexMap " << dualPtIndexMap << endl;
+
+                    // Move the position of the accumulated points
+                    pts[longestEdStartPtI] = revPt;
+                    pts[longestEdEndPtI] = fwdPt;
+
+                    // {
+                    //     face checkDualFace = buildDualFace(eit);
+
+                    //     Info<< "# After " << checkDualFace << endl;
+                    // }
+
+                    // Info<< "# Collapsed" << endl;
+
+                    // meshTools::writeOBJ(Info, revPt);
+                    // meshTools::writeOBJ(Info, fwdPt);
+
+                    nCollapsedFaces++;
+                }
+                else if
+                (
+                    longestEdgeLength <= collapseToEdgeCoeff*targetFaceSize
+                )
+                {
+                    // Collapse to point
+
+                    // Cell_circulator ccStart = incident_cells(*eit);
+                    // Cell_circulator cc1 = ccStart;
+                    // Cell_circulator cc2 = cc1;
+
+                    // // Advance the second circulator so that it always stays on the next
+                    // // cell around the edge;
+                    // cc2++;
+
+                    // label nPts = 0;
+
+                    // point resultantPt = vector::zero;
+
+                    // label ccStartI = cc1->cellIndex();
+
+                    // do
+                    // {
+                    //     label& cc1I = cc1->cellIndex();
+                    //     label& cc2I = cc2->cellIndex();
+
+                    //     if (cc1I < 0 || cc2I < 0)
+                    //     {
+                    //         FatalErrorIn("Foam::conformalVoronoiMesh::collapseFace")
+                    //             << "Dual face uses circumcenter defined by a "
+                    //             << "Delaunay tetrahedron with no internal "
+                    //             << "or boundary points.  Defining Delaunay edge ends: "
+                    //             << topoint(vA->point()) << " "
+                    //             << topoint(vB->point()) << nl
+                    //             << exit(FatalError);
+                    //     }
+
+                    //     if (cc1I != cc2I)
+                    //     {
+                    //         resultantPt += pts[cc1I];
+                    //         nPts++;
+                    //     }
+
+                    //     cc1I = ccStartI;
+                    //     cc2I = ccStartI;
+                    //     cc1++;
+                    //     cc2++;
+
+                    // } while (cc1 != ccStart);
+
+                    // resultantPt /= nPts;
+
+                    // pts[ccStartI] = resultantPt;
+
+                    point resultantPt = vector::zero;
+
+                    label collapseToPtI = dualFace[0];
+
+                    forAll(dualFace, fPtI)
                     {
-                        FatalErrorIn("Foam::conformalVoronoiMesh::collapseFace")
-                            << "Face circulation failed for face "
-                            << dualFace << nl
-                            << exit(FatalError);
+                        label ptI = dualFace[fPtI];
+
+                        resultantPt += pts[ptI];
+
+                        dualPtIndexMap.insert(ptI, collapseToPtI);
                     }
+
+                    resultantPt /= dualFace.size();
+
+                    pts[collapseToPtI] = resultantPt;
+
+                    nCollapsedFaces++;
                 }
             }
-
-            Info<< "# Collapsed" << endl;
-
-            meshTools::writeOBJ(Info, revPt);
-            meshTools::writeOBJ(Info, fwdPt);
-
-            return false;
-        }
-        else
-        {
-            // Collapse to point
-
-            Cell_circulator ccStart = incident_cells(*eit);
-            Cell_circulator cc1 = ccStart;
-            Cell_circulator cc2 = cc1;
-
-            // Advance the second circulator so that it always stays on the next
-            // cell around the edge;
-            cc2++;
-
-            label nPts = 0;
-
-            point resultantPt = vector::zero;
-
-            label ccStartI = cc1->cellIndex();
-
-            do
-            {
-                label& cc1I = cc1->cellIndex();
-                label& cc2I = cc2->cellIndex();
-
-                if (cc1I < 0 || cc2I < 0)
-                {
-                    FatalErrorIn("Foam::conformalVoronoiMesh::collapseFace")
-                        << "Dual face uses circumcenter defined by a "
-                        << "Delaunay tetrahedron with no internal "
-                        << "or boundary points.  Defining Delaunay edge ends: "
-                        << topoint(vA->point()) << " "
-                        << topoint(vB->point()) << nl
-                        << exit(FatalError);
-                }
-
-                if (cc1I != cc2I)
-                {
-                    resultantPt += pts[cc1I];
-                    nPts++;
-                }
-
-                cc1I = ccStartI;
-                cc2I = ccStartI;
-                cc1++;
-                cc2++;
-
-            } while (cc1 != ccStart);
-
-            resultantPt /= nPts;
-
-            pts[ccStartI] = resultantPt;
-
-            return true;
         }
     }
 
-    return false;
+    return nCollapsedFaces;
 }
+
+
+void Foam::conformalVoronoiMesh::reindexDualFace
+(
+    const Triangulation::Finite_edges_iterator& eit,
+    const Map<label>& dualPtIndexMap
+)
+{
+    Cell_circulator ccStart = incident_cells(*eit);
+    Cell_circulator cc = ccStart;
+
+    do
+    {
+        if (dualPtIndexMap.found(cc->cellIndex()))
+        {
+            cc->cellIndex() = dualPtIndexMap[cc->cellIndex()];
+        }
+
+        cc++;
+
+    } while (cc != ccStart);
+}
+
+
+void Foam::conformalVoronoiMesh::reindexDualVertices
+(
+    const Map<label>& dualPtIndexMap
+)
+{
+    for
+    (
+        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+        cit != finite_cells_end();
+        ++cit
+    )
+    {
+        if (dualPtIndexMap.found(cit->cellIndex()))
+        {
+            cit->cellIndex() = dualPtIndexMap[cit->cellIndex()];
+        }
+    }
+}
+
 
 
 void Foam::conformalVoronoiMesh::sortFaces

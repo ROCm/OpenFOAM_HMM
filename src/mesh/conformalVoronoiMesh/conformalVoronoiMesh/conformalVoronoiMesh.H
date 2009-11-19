@@ -150,7 +150,7 @@ private:
         //- Method for inserting initial points.  Runtime selectable.
         autoPtr<initialPointsMethod> initialPointsMethod_;
 
-        //- Relaxation coefficient model.  Runtime selectable
+        //- Relaxation coefficient model.  Runtime selectable.
         autoPtr<relaxationModel> relaxationModel_;
 
         //-  Face area weight function.  Runtime selectable.
@@ -189,6 +189,13 @@ private:
             const Vertex_handle& vB
         ) const;
 
+        //- The average target cell size of a Delaunay facet, i.e., of
+        //  a dual edge
+        inline scalar averageAnyCellSize
+        (
+            const Triangulation::Finite_facets_iterator& fit
+        ) const;
+
         //- Return the local point pair separation at the given location
         inline scalar pointPairDistance(const point& pt) const;
 
@@ -213,7 +220,7 @@ private:
         //- Return the required alignment directions at the given location
         tensor requiredAlignment(const point& pt) const;
 
-        //- Insert point and return it's index
+        //- Insert point and return its index
         inline label insertPoint
         (
             const point& pt,
@@ -298,7 +305,7 @@ private:
             const pointIndexHit& edHit
         );
 
-        //- Determine and insert point groups at the feature points.
+        //- Determine and insert point groups at the feature points
         void createFeaturePoints();
 
         //- Insert point groups at convex feature points
@@ -310,10 +317,10 @@ private:
         //- Insert point groups at mixed feature points
         void insertMixedFeaturePoints();
 
-        //- Store the locations of all of the features to be conformed to.
+        //- Store the locations of all of the features to be conformed to
         void constructFeaturePointLocations();
 
-        //- Reinsert stored feature point defining points.
+        //- Reinsert stored feature point defining points
         void reinsertFeaturePoints();
 
         //- Demand driven construction of octree for feature points
@@ -349,7 +356,7 @@ private:
         void buildSurfaceConformation(reconformationMode reconfMode);
 
         //- Check to see if dual cell specified by given vertex iterator
-        //  intersects the boundary and hence reqires a point-pair.
+        //  intersects the boundary and hence reqires a point-pair
         bool dualCellSurfaceAnyIntersection
         (
             const Triangulation::Finite_vertices_iterator& vit
@@ -365,7 +372,7 @@ private:
         ) const;
 
         //- Limit the displacement of a point so that it doesn't penetrate the
-        //  surface to be meshed or come too close to it.
+        //  surface to be meshed or come too close to it
         void limitDisplacement
         (
             const Triangulation::Finite_vertices_iterator& vit,
@@ -393,7 +400,7 @@ private:
         void buildSizeAndAlignmentTree() const;
 
         //- Process the surface conformation locations to decide which surface
-        //  and edge conformation locations to add.
+        //  and edge conformation locations to add
         void addSurfaceAndEdgeHits
         (
             const Triangulation::Finite_vertices_iterator& vit,
@@ -467,18 +474,36 @@ private:
             const pointField& pts
         ) const;
 
+        //- Merge vertices that are very close together
+        label mergeCloseDualVertices
+        (
+            const pointField& pts,
+            Map<label>& dualPtIndexMap
+        );
+
         //- Collapse a face to a point or an edge, modifying and
         //  mapping the points, returns the true if the face was
         //  collapsed in this operation
-        bool collapseFace
+        label collapseFaces
+        (
+            pointField& pts,
+            Map<label>& dualPtIndexMap
+        );
+
+        //- Re-index the Delaunay cells around a Delaunay edge,
+        //  i.e. the dual face
+        void reindexDualFace
         (
             const Triangulation::Finite_edges_iterator& eit,
-            pointField& pts
+            const Map<label>& dualPtIndexMap
         );
+
+        //- Re-index all of the the Delaunay cells
+        void reindexDualVertices(const Map<label>& dualPtIndexMap);
 
         //- Sort the faces, owner and neighbour lists into
         //  upper-triangular order.  For internal faces only, use
-        //  before adding patch faces.
+        //  before adding patch faces
         void sortFaces
         (
             faceList& faces,
@@ -501,7 +526,7 @@ private:
             bool includeEmptyPatches
         ) const;
 
-        //- Remove points that are no longer used by any faces.
+        //- Remove points that are no longer used by any faces
         void removeUnusedPoints
         (
             faceList& faces,
