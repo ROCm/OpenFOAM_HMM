@@ -2189,8 +2189,8 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
                         WarningIn("Foam::conformalVoronoiMesh::calcDualMesh")
                             << "Dual face found between Dv pair " << nl
-                            << "    ptA" << nl
-                            << "    ptB" << nl
+                            << "    " << ptA << nl
+                            << "    " << ptB << nl
                             << "    that is not on a surface patch. Adding to "
                             << patchNames[patchIndex]
                             << endl;
