@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
         // Sync how many to send
         labelListList allNTrans(Pstream::nProcs());
         allNTrans[Pstream::myProcNo()] = nSend;
-        combineReduce(allNTrans, mapDistribute::listEq());
+        combineReduce(allNTrans, UPstream::listEq());
 
         // Collect items to be sent
         labelListList sendMap(Pstream::nProcs());
@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
                 toMaster << data;
             }
 
-            Perr<< "slave receiving from master " 
+            Perr<< "slave receiving from master "
                 << Pstream::masterNo() << endl;
             IPstream fromMaster(Pstream::blocking, Pstream::masterNo());
             fromMaster >> data;
