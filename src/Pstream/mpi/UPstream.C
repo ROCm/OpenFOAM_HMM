@@ -70,6 +70,12 @@ bool Foam::UPstream::init(int& argc, char**& argv)
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &myProcNo_);
 
+    if (debug)
+    {
+        Pout<< "UPstream::init : initialised with numProcs:" << numprocs
+            << " myProcNo:" << myProcNo_ << endl;
+    }
+
     if (numprocs <= 1)
     {
         FatalErrorIn("UPstream::init(int& argc, char**& argv)")
@@ -124,6 +130,11 @@ bool Foam::UPstream::init(int& argc, char**& argv)
 
 void Foam::UPstream::exit(int errnum)
 {
+    if (debug)
+    {
+        Pout<< "UPstream::exit." << endl;
+    }
+
 #   ifndef SGIMPI
     int size;
     char* buff;
@@ -164,6 +175,11 @@ void Foam::UPstream::abort()
 
 void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
 {
+    if (Pstream::debug)
+    {
+        Pout<< "Foam::reduce : value:" << Value << endl;
+    }
+
     if (!UPstream::parRun())
     {
         return;
@@ -433,11 +449,23 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
         }
         */
     }
+
+    if (Pstream::debug)
+    {
+        Pout<< "Foam::reduce : reduced value:" << Value << endl;
+    }
 }
 
 
 void Foam::UPstream::waitRequests()
 {
+    if (debug)
+    {
+        Pout<< "UPstream::waitRequests : starting wait for "
+            << PstreamGlobals::outstandingRequests_.size()
+            << " outstanding requests." << endl;
+    }
+
     if (PstreamGlobals::outstandingRequests_.size())
     {
         if
@@ -458,11 +486,22 @@ void Foam::UPstream::waitRequests()
 
         PstreamGlobals::outstandingRequests_.clear();
     }
+
+    if (debug)
+    {
+        Pout<< "UPstream::waitRequests : finished wait." << endl;
+    }
 }
 
 
 bool Foam::UPstream::finishedRequest(const label i)
 {
+    if (debug)
+    {
+        Pout<< "UPstream::waitRequests : starting wait for request:" << i
+            << endl;
+    }
+
     if (i >= PstreamGlobals::outstandingRequests_.size())
     {
         FatalErrorIn
@@ -482,6 +521,12 @@ bool Foam::UPstream::finishedRequest(const label i)
        &flag,
         MPI_STATUS_IGNORE
     );
+
+    if (debug)
+    {
+        Pout<< "UPstream::waitRequests : finished wait for request:" << i
+            << endl;
+    }
 
     return flag != 0;
 }

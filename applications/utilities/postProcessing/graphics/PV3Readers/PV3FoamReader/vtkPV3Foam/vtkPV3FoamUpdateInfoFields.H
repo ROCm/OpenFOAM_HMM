@@ -35,7 +35,7 @@ InClass
 template<template<class> class patchType, class meshType>
 void Foam::vtkPV3Foam::updateInfoFields
 (
-    vtkDataArraySelection *select
+    vtkDataArraySelection* select
 )
 {
     if (debug)
@@ -112,4 +112,5 @@ void Foam::vtkPV3Foam::updateInfoFields
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
+
 // ************************************************************************* //

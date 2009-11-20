@@ -23,16 +23,15 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::compressible::turbulentTemperatureCoupledBaffleFvPatchScalarField
+    turbulentTemperatureCoupledBaffleFvPatchScalarField
 
 Description
-    Mixed boundary condition for temperature, to be used for heat-transfer
-    on back-to-back baffles.
+    Harmonic fixed value boundary condition for temperature, to be used
+    for heat-transfer on back-to-back baffles.
 
-    If my temperature is T1, neighbour is T2:
+    If my temperature is T1, heat conductivity K1 and neighbour is T2,K2
 
-    T1 > T2: my side becomes fixedValue T2 bc, other side becomes fixedGradient.
-    
+    both sides get fixedValue (K1/dx1*T1 + K2/dx2*T2)/(K1/dx1+K2/dx2)
 
     Example usage:
         myInterfacePatchName
@@ -65,15 +64,11 @@ SourceFiles
 #ifndef turbulentTemperatureCoupledBaffleFvPatchScalarField_H
 #define turbulentTemperatureCoupledBaffleFvPatchScalarField_H
 
-//#include "fvPatchFields.H"
-#include "mixedFvPatchFields.H"
-//#include "fvPatch.H"
+#include "fixedValueFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
-{
-namespace compressible
 {
 
 /*---------------------------------------------------------------------------*\
@@ -82,7 +77,7 @@ namespace compressible
 
 class turbulentTemperatureCoupledBaffleFvPatchScalarField
 :
-    public mixedFvPatchScalarField
+    public fixedValueFvPatchScalarField
 {
     // Private data
 
@@ -91,8 +86,6 @@ class turbulentTemperatureCoupledBaffleFvPatchScalarField
         
         //- Name of thermal conductivity field
         const word KName_;
-
-        bool fixesValue_;
 
 
     // Private Member Functions
@@ -104,7 +97,7 @@ class turbulentTemperatureCoupledBaffleFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("compressible::turbulentTemperatureCoupledBaffle");
+    TypeName("turbulentTemperatureCoupledBaffle");
 
 
     // Constructors
@@ -172,14 +165,6 @@ public:
         //- Get corresponding K field
         tmp<scalarField> K() const;
 
-        //- Return true if this patch field fixes a value.
-        //  Needed to check if a level has to be specified while solving
-        //  Poissons equations.
-        virtual bool fixesValue() const
-        {
-            return fixesValue_;
-        }
-
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
 
@@ -190,7 +175,6 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace compressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

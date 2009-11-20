@@ -239,7 +239,7 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
         // Molecular Prandtl number
         scalar Pr = muw[faceI]/alphaw[faceI];
 
-        // Molecular-to-turbulenbt Prandtl number ratio
+        // Molecular-to-turbulent Prandtl number ratio
         scalar Prat = Pr/Prt_;
 
         // Thermal sublayer thickness

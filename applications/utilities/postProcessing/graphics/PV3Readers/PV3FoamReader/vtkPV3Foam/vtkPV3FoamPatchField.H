@@ -52,10 +52,10 @@ void Foam::vtkPV3Foam::convertPatchField
     const label nComp = pTraits<Type>::nComponents;
 
     vtkFloatArray* cellData = vtkFloatArray::New();
-    cellData->SetNumberOfTuples( ptf.size() );
-    cellData->SetNumberOfComponents( nComp );
-    cellData->Allocate( nComp*ptf.size() );
-    cellData->SetName( name.c_str() );
+    cellData->SetNumberOfTuples(ptf.size());
+    cellData->SetNumberOfComponents(nComp);
+    cellData->Allocate(nComp*ptf.size());
+    cellData->SetName(name.c_str());
 
     float vec[nComp];
     forAll(ptf, i)
@@ -91,11 +91,11 @@ void Foam::vtkPV3Foam::convertPatchPointField
 {
     const label nComp = pTraits<Type>::nComponents;
 
-    vtkFloatArray *pointData = vtkFloatArray::New();
-    pointData->SetNumberOfTuples( pptf.size() );
-    pointData->SetNumberOfComponents( nComp );
-    pointData->Allocate( nComp*pptf.size() );
-    pointData->SetName( name.c_str() );
+    vtkFloatArray* pointData = vtkFloatArray::New();
+    pointData->SetNumberOfTuples(pptf.size());
+    pointData->SetNumberOfComponents(nComp);
+    pointData->Allocate(nComp*pptf.size());
+    pointData->SetName(name.c_str());
 
     float vec[nComp];
     forAll(pptf, i)
