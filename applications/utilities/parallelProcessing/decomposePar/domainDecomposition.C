@@ -38,7 +38,7 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void domainDecomposition::mark
+void Foam::domainDecomposition::mark
 (
     const labelList& zoneElems,
     const label zoneI,
@@ -66,7 +66,7 @@ void domainDecomposition::mark
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // from components
-domainDecomposition::domainDecomposition(const IOobject& io)
+Foam::domainDecomposition::domainDecomposition(const IOobject& io)
 :
     fvMesh(io),
     decompositionDict_
@@ -105,13 +105,13 @@ domainDecomposition::domainDecomposition(const IOobject& io)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-domainDecomposition::~domainDecomposition()
+Foam::domainDecomposition::~domainDecomposition()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool domainDecomposition::writeDecomposition()
+bool Foam::domainDecomposition::writeDecomposition()
 {
     Info<< "\nConstructing processor meshes" << endl;
 

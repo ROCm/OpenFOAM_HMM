@@ -29,16 +29,10 @@ Description
 
 #include "lagrangianFieldDecomposer.H"
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-lagrangianFieldDecomposer::lagrangianFieldDecomposer
+Foam::lagrangianFieldDecomposer::lagrangianFieldDecomposer
 (
     const polyMesh& mesh,
     const polyMesh& procMesh,
@@ -87,7 +81,5 @@ lagrangianFieldDecomposer::lagrangianFieldDecomposer
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

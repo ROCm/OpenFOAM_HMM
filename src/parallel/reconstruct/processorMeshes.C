@@ -127,8 +127,8 @@ Foam::processorMeshes::processorMeshes
     const word& meshName
 )
 :
-    databases_(databases),
     meshName_(meshName),
+    databases_(databases),
     meshes_(databases.size()),
     pointProcAddressing_(databases.size()),
     faceProcAddressing_(databases.size()),
@@ -165,20 +165,17 @@ Foam::fvMesh::readUpdateState Foam::processorMeshes::readUpdate()
         {
             stat = procStat;
         }
-        else
+        else if (stat != procStat)
         {
-            if (stat != procStat)
-            {
-                FatalErrorIn("processorMeshes::readUpdate()")
-                    << "Processor " << procI
-                    << " has a different polyMesh at time "
-                    << databases_[procI].timeName()
-                    << " compared to any previous processors." << nl
-                    << "Please check time " << databases_[procI].timeName()
-                    << " directories on all processors for consistent"
-                    << " mesh files."
-                    << exit(FatalError);
-            }
+            FatalErrorIn("processorMeshes::readUpdate()")
+                << "Processor " << procI
+                << " has a different polyMesh at time "
+                << databases_[procI].timeName()
+                << " compared to any previous processors." << nl
+                << "Please check time " << databases_[procI].timeName()
+                << " directories on all processors for consistent"
+                << " mesh files."
+                << exit(FatalError);
         }
     }
 

@@ -27,15 +27,10 @@ License
 #include "lagrangianFieldDecomposer.H"
 #include "IOobjectList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void lagrangianFieldDecomposer::readFields
+void Foam::lagrangianFieldDecomposer::readFields
 (
     const label cloudI,
     const IOobjectList& lagrangianObjects,
@@ -70,7 +65,8 @@ void lagrangianFieldDecomposer::readFields
 
 
 template<class Type>
-tmp<IOField<Type> > lagrangianFieldDecomposer::decomposeField
+Foam::tmp<Foam::IOField<Type> >
+Foam::lagrangianFieldDecomposer::decomposeField
 (
     const word& cloudName,
     const IOField<Type>& field
@@ -100,7 +96,7 @@ tmp<IOField<Type> > lagrangianFieldDecomposer::decomposeField
 
 
 template<class GeoField>
-void lagrangianFieldDecomposer::decomposeFields
+void Foam::lagrangianFieldDecomposer::decomposeFields
 (
     const word& cloudName,
     const PtrList<GeoField>& fields
@@ -115,9 +111,5 @@ void lagrangianFieldDecomposer::decomposeFields
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

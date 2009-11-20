@@ -40,7 +40,7 @@ Description
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
+void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 {
     // Decide which cell goes to which processor
     distributeCells();
@@ -775,3 +775,5 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
         sort(globallySharedPoints_);
     }
 }
+
+// ************************************************************************* //

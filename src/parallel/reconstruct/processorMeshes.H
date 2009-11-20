@@ -55,10 +55,10 @@ class processorMeshes
 {
     // Private data
 
+        const word meshName_;
+
         //- Processor databases
         PtrList<Time>& databases_;
-
-        const word meshName_;
 
         //- List of processor meshes
         PtrList<fvMesh> meshes_;
@@ -98,29 +98,32 @@ public:
 
     // Member Functions
 
-        //- Update the meshes based on the mesh files saved in
-        //  time directories
+        //- Update the meshes based on the mesh files saved in time directories
         fvMesh::readUpdateState readUpdate();
 
         //- Reconstruct point position after motion in parallel
-        void reconstructPoints(fvMesh& mesh);
+        void reconstructPoints(fvMesh&);
 
         PtrList<fvMesh>& meshes()
         {
             return meshes_;
         }
+
         const PtrList<labelIOList>& pointProcAddressing() const
         {
             return pointProcAddressing_;
         }
+
         PtrList<labelIOList>& faceProcAddressing()
         {
             return faceProcAddressing_;
         }
+
         const PtrList<labelIOList>& cellProcAddressing() const
         {
             return cellProcAddressing_;
         }
+
         const PtrList<labelIOList>& boundaryProcAddressing() const
         {
             return boundaryProcAddressing_;

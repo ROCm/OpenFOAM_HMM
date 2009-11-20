@@ -1,7 +1,7 @@
-decomposeMesh.C
 decomposePar.C
 domainDecomposition.C
-distributeCells.C
+domainDecompositionMesh.C
+domainDecompositionDistribute.C
 fvFieldDecomposer.C
 pointFieldDecomposer.C
 lagrangianFieldDecomposer.C
