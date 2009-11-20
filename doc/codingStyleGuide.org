@@ -184,7 +184,7 @@
    + splitting return type and function name
      + split initially after the function return type and left align
 
-     + do not put "const" onto it's own line - use a split to keep it with the
+     + do not put "const" onto its own line - use a split to keep it with the
        function name and arguments.
 
      so:
@@ -209,7 +209,7 @@
 
 
      + if need to split again, split at the function name (leaving behind the
-         preceding scoping "::"'s), and again, left align, i.e.
+         preceding scoping "::"s), and again, left align, i.e.
 
        const Foam::longReturnTypeName&
        Foam::veryveryveryverylongClassName::
