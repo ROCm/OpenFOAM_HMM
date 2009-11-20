@@ -152,6 +152,15 @@ class cvControls
         scalar minimumEdgeLengthCoeff_;
 
 
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        cvControls(const cvControls&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const cvControls&);
+
+
 public:
 
    // Constructors

@@ -196,11 +196,6 @@ Foam::conformationSurfaces::conformationSurfaces
             referenceVolumeTypes_[s] = vTypes[0];
         }
     }
-
-    if (cvMesh_.cvMeshControls().objOutput())
-    {
-        writeFeatureObj("cvMesh");
-    }
 }
 
 
