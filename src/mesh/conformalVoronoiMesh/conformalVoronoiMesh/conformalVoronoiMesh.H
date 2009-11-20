@@ -100,6 +100,9 @@ private:
         //- The time registry of the application
         const Time& runTime_;
 
+        //- Controls for the conformal Voronoi meshing process
+        cvControls cvMeshControls_;
+
         //- All geometry of the meshing process, including surfaces to be
         //  conformed to and those to be used for refinement
         searchableSurfaces allGeometry_;
@@ -109,9 +112,6 @@ private:
 
         //- The cell size control object
         cellSizeControlSurfaces cellSizeControl_;
-
-        //- Controls for the conformal Voronoi meshing process
-        cvControls cvMeshControls_;
 
         //- Keep track of the start of the internal points
         label startOfInternalPoints_;
@@ -517,9 +517,6 @@ private:
 public:
 
     // Constructors
-
-        //- Construct null
-        conformalVoronoiMesh();
 
         //- Construct from Time and cvMeshDict
         conformalVoronoiMesh

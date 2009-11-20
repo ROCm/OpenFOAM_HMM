@@ -197,7 +197,7 @@ Foam::conformationSurfaces::conformationSurfaces
         }
     }
 
-    if(cvMesh_.cvMeshControls().objOutput())
+    if (cvMesh_.cvMeshControls().objOutput())
     {
         writeFeatureObj("cvMesh");
     }
