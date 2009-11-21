@@ -82,9 +82,6 @@ void Foam::PstreamBuffers::finishedSends(labelListList& sizes, const bool block)
 
     if (commsType_ == UPstream::nonBlocking)
     {
-        labelListList sizes;
-        labelListList send,recv;
-
         Pstream::exchange<DynamicList<char>, char>
         (
             sendBuf_,
@@ -96,20 +93,30 @@ void Foam::PstreamBuffers::finishedSends(labelListList& sizes, const bool block)
     }
     else
     {
-        sizes.setSize(UPstream::nProcs());
-        labelList& nsTransPs = sizes[UPstream::myProcNo()];
-        nsTransPs.setSize(UPstream::nProcs());
+        FatalErrorIn
+        (
+            "PstreamBuffers::finishedSends(labelListList&, const bool)"
+        )   << "Obtaining sizes not supported in "
+            << UPstream::commsTypeNames[commsType_] << endl
+            << " since transfers already in progress. Use non-blocking instead."
+            << exit(FatalError);
 
-        forAll(sendBuf_, procI)
-        {
-            nsTransPs[procI] = sendBuf_[procI].size();
-        }
-
-        // Send sizes across.
-        int oldTag = UPstream::msgType();
-        UPstream::msgType() = tag_;
-        combineReduce(sizes, UPstream::listEq());
-        UPstream::msgType() = oldTag;
+        // Note: possible only if using different tag from write started
+        // by ~UOPstream. Needs some work.
+        //sizes.setSize(UPstream::nProcs());
+        //labelList& nsTransPs = sizes[UPstream::myProcNo()];
+        //nsTransPs.setSize(UPstream::nProcs());
+        //
+        //forAll(sendBuf_, procI)
+        //{
+        //    nsTransPs[procI] = sendBuf_[procI].size();
+        //}
+        //
+        //// Send sizes across.
+        //int oldTag = UPstream::msgType();
+        //UPstream::msgType() = tag_;
+        //combineReduce(sizes, UPstream::listEq());
+        //UPstream::msgType() = oldTag;
     }
 }
 
