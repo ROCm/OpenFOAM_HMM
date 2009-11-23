@@ -50,43 +50,42 @@ void Pstream::exchange
     const bool block
 )
 {
-    if (UPstream::parRun())
+    if (!contiguous<T>())
     {
-        if (!contiguous<T>())
-        {
-            FatalErrorIn
-            (
-                "Pstream::exchange(..)"
-            )   << "Continuous data only." << Foam::abort(FatalError);
-        }
+        FatalErrorIn
+        (
+            "Pstream::exchange(..)"
+        )   << "Continuous data only." << Foam::abort(FatalError);
+    }
 
-        if (sendBufs.size() != UPstream::nProcs())
-        {
-            FatalErrorIn
-            (
-                "Pstream::exchange(..)"
-            )   << "Size of list:" << sendBufs.size()
-                << " does not equal the number of processors:"
-                << UPstream::nProcs()
-                << Foam::abort(FatalError);
-        }
+    if (sendBufs.size() != UPstream::nProcs())
+    {
+        FatalErrorIn
+        (
+            "Pstream::exchange(..)"
+        )   << "Size of list:" << sendBufs.size()
+            << " does not equal the number of processors:"
+            << UPstream::nProcs()
+            << Foam::abort(FatalError);
+    }
 
-        sizes.setSize(UPstream::nProcs());
-        labelList& nsTransPs = sizes[UPstream::myProcNo()];
-        nsTransPs.setSize(UPstream::nProcs());
+    sizes.setSize(UPstream::nProcs());
+    labelList& nsTransPs = sizes[UPstream::myProcNo()];
+    nsTransPs.setSize(UPstream::nProcs());
 
-        forAll(sendBufs, procI)
-        {
-            nsTransPs[procI] = sendBufs[procI].size();
-        }
+    forAll(sendBufs, procI)
+    {
+        nsTransPs[procI] = sendBufs[procI].size();
+    }
 
-        // Send sizes across.
-        int oldTag = UPstream::msgType();
-        UPstream::msgType() = tag;
-        combineReduce(sizes, UPstream::listEq());
-        UPstream::msgType() = oldTag;
+    // Send sizes across.
+    int oldTag = UPstream::msgType();
+    UPstream::msgType() = tag;
+    combineReduce(sizes, UPstream::listEq());
+    UPstream::msgType() = oldTag;
 
-
+    if (Pstream::parRun())
+    {
         // Set up receives
         // ~~~~~~~~~~~~~~~
 

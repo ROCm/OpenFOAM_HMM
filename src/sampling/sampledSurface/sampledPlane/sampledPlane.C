@@ -150,11 +150,11 @@ bool Foam::sampledPlane::update()
 
     if (zoneId < 0)
     {
-        reCut(mesh());
+        reCut(mesh(), true);    // always triangulate. Note:Make option?
     }
     else
     {
-        reCut(mesh(), mesh().cellZones()[zoneId]);
+        reCut(mesh(), true, mesh().cellZones()[zoneId]);
     }
 
     if (debug)

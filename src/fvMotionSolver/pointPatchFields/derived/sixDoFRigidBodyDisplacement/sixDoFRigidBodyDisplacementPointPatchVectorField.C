@@ -93,7 +93,7 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
 :
     fixedValuePointPatchField<vector>(ptf, p, iF, mapper),
     motion_(ptf.motion_),
-    p0_(ptf.p0_),
+    p0_(ptf.p0_, mapper),
     rhoInf_(ptf.rhoInf_)
 {}
 
