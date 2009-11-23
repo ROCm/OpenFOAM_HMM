@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,115 +23,69 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::distribution
+    Foam::MixedDiffuseSpecular
 
 Description
-    Accumulating histogram of values.  Specified bin resolution
-    automatic generation of bins.
-
-SourceFiles
-    distributionI.H
-    distribution.C
+    Wall interaction setting microscopic velocity to a random one drawn from a
+    Maxwellian distribution corresponding to a specified temperature
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef distribution_H
-#define distribution_H
+#ifndef MixedDiffuseSpecular_H
+#define MixedDiffuseSpecular_H
 
-#include "Map.H"
-#include "Pair.H"
+#include "WallInteractionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
 /*---------------------------------------------------------------------------*\
-                        Class distribution Declaration
+                    Class MixedDiffuseSpecular Declaration
 \*---------------------------------------------------------------------------*/
 
-class distribution
+template<class CloudType>
+class MixedDiffuseSpecular
 :
-    public Map<label>
+    public WallInteractionModel<CloudType>
 {
     // Private data
 
-        scalar binWidth_;
+        //- Fraction of wall interactions that are diffuse
+        scalar diffuseFraction_;
 
 
 public:
 
     //- Runtime type information
-
-        TypeName("distribution");
-
-    // Static functions
-
-        //- write to file
-
-            static void write
-            (
-                const fileName& file,
-                const List<Pair<scalar> >& pairs
-            );
+    TypeName("MixedDiffuseSpecular");
 
 
     // Constructors
 
-        //- Construct null
-        distribution();
-
-        //- Construct from binWidth
-        distribution(const scalar binWidth);
-
-        //- Construct as copy
-        distribution(const distribution&);
+        //- Construct from dictionary
+        MixedDiffuseSpecular
+        (
+            const dictionary& dict,
+            CloudType& cloud
+        );
 
 
     // Destructor
-
-        virtual ~distribution();
+    virtual ~MixedDiffuseSpecular();
 
 
     // Member Functions
 
-        label totalEntries() const;
-
-        scalar approxTotalEntries() const;
-
-        scalar mean() const;
-
-        scalar median();
-
-        //- Add a value to the appropriate bin of the distribution.
-        void add(const scalar valueToAdd);
-
-        void add(const label valueToAdd);
-
-        void insertMissingKeys();
-
-        List<Pair<scalar> > normalised();
-
-        List<Pair<scalar> > normalisedMinusMean();
-
-        List<Pair<scalar> > normalisedShifted(scalar shiftValue);
-
-        List<Pair<scalar> > raw();
-
-
-        // Access
-
-            inline scalar binWidth() const;
-
-
-    // Member Operators
-
-        void operator=(const distribution&);
-
-
-    // IOstream Operators
-
-        friend Ostream& operator<<(Ostream&, const distribution&);
+        //- Apply wall correction
+        virtual void correct
+        (
+            const wallPolyPatch& wpp,
+            const label faceId,
+            vector& U,
+            scalar& Ei,
+            label typeId
+        );
 };
 
 
@@ -141,7 +95,9 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "distributionI.H"
+#ifdef NoRepository
+#   include "MixedDiffuseSpecular.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

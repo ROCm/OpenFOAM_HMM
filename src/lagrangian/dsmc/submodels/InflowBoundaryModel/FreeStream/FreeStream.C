@@ -129,7 +129,7 @@ void Foam::FreeStream<CloudType>::inflow()
 
     const polyMesh& mesh(cloud.mesh());
 
-    const scalar deltaT = cloud.cachedDeltaT();
+    const scalar deltaT = mesh.time().deltaTValue();
 
     Random& rndGen(cloud.rndGen());
 
@@ -139,12 +139,12 @@ void Foam::FreeStream<CloudType>::inflow()
 
     const volScalarField::GeometricBoundaryField& boundaryT
     (
-        cloud.T().boundaryField()
+        cloud.boundaryT().boundaryField()
     );
 
     const volVectorField::GeometricBoundaryField& boundaryU
     (
-        cloud.U().boundaryField()
+        cloud.boundaryU().boundaryField()
     );
 
     forAll(patches_, p)
@@ -168,7 +168,8 @@ void Foam::FreeStream<CloudType>::inflow()
             if (min(boundaryT[patchI]) < SMALL)
             {
                 FatalErrorIn ("Foam::FreeStream<CloudType>::inflow()")
-                    << "Zero boundary temperature detected, check boundaryT condition." << nl
+                    << "Zero boundary temperature detected, check boundaryT "
+                    << "condition." << nl
                     << nl << abort(FatalError);
             }
 
