@@ -60,35 +60,17 @@ Ostream& operator<<(Ostream&, const Distribution<Type>&);
 template<class Type>
 class Distribution
 :
-    public List< Map<label> >
+    public List< Map<scalar> >
 {
     // Private data
 
         Type binWidth_;
 
 
-    // Private Member Functions
-
-        // //- Disallow default bitwise copy construct
-        // Distribution(const Distribution<Type>&);
-
-        // //- Disallow default bitwise assignment
-        // void operator=(const Distribution<Type>&);
-
-
 public:
 
     //- Component type
     typedef typename pTraits<Type>::cmptType cmptType;
-
-
-    // Static data members
-
-        // static void write
-        // (
-        //     const fileName& file,
-        //     const List<Pair<scalar> >& pairs
-        // );
 
 
     // Constructors
@@ -99,7 +81,7 @@ public:
         //- Construct from separate binWidth for each component
         Distribution(const Type& binWidth);
 
-        // //- Construct from single binWidth for each component
+        //- Construct from single binWidth for each component
         // Distribution(const cmptType& binWidth);
 
         //- Construct as copy
@@ -111,17 +93,24 @@ public:
 
     // Member Functions
 
-        // Type totalEntries() const;
+        scalar totalWeight(direction cmpt) const;
 
-        // Type mean() const;
+        Type mean() const;
 
-        // Type median();
+        // From http://mathworld.wolfram.com/StatisticalMedian.html
+        // The statistical median is the value of the Distribution
+        // variable where the cumulative Distribution = 0.5.
+        Type median();
 
-        void add(const Type& valueToAdd);
+        void add
+        (
+            const Type& valueToAdd,
+            const Type& weight = pTraits<Type>::one
+        );
 
         void insertMissingKeys();
 
-        // List<Pair<scalar> > normalised();
+        List< List<Pair<scalar> > > normalised();
 
         // List<Pair<scalar> > normalisedMinusMean();
 
@@ -133,14 +122,18 @@ public:
 
         inline const Type& binWidth() const;
 
+    // Write
+
+        void write
+        (
+            const fileName& filePrefix,
+            const List< List<Pair<scalar> > >& pairs
+        ) const;
+
+
     // Member Operators
 
         void operator=(const Distribution<Type>&);
-
-
-    // Friend Functions
-
-    // Friend Operators
 
     // IOstream Operators
 
