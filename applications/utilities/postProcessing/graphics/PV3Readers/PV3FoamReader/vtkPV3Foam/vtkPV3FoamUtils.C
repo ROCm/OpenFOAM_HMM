@@ -75,12 +75,12 @@ void Foam::vtkPV3Foam::AddToBlock
 (
     vtkMultiBlockDataSet* output,
     vtkDataSet* dataset,
-    const partInfo& selector,
+    const arrayRange& range,
     const label datasetNo,
     const std::string& datasetName
 )
 {
-    const int blockNo = selector.block();
+    const int blockNo = range.block();
 
     vtkDataObject* blockDO = output->GetBlock(blockNo);
     vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast(blockDO);
@@ -116,7 +116,7 @@ void Foam::vtkPV3Foam::AddToBlock
         output->GetMetaData(blockNo)->Set
         (
             vtkCompositeDataSet::NAME(),
-            selector.name()
+            range.name()
         );
     }
 
@@ -134,11 +134,11 @@ void Foam::vtkPV3Foam::AddToBlock
 vtkDataSet* Foam::vtkPV3Foam::GetDataSetFromBlock
 (
     vtkMultiBlockDataSet* output,
-    const partInfo& selector,
+    const arrayRange& range,
     const label datasetNo
 )
 {
-    const int blockNo = selector.block();
+    const int blockNo = range.block();
 
     vtkDataObject* blockDO = output->GetBlock(blockNo);
     vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast(blockDO);
@@ -156,10 +156,10 @@ vtkDataSet* Foam::vtkPV3Foam::GetDataSetFromBlock
 Foam::label Foam::vtkPV3Foam::GetNumberOfDataSets
 (
     vtkMultiBlockDataSet* output,
-    const partInfo& selector
+    const arrayRange& range
 )
 {
-    const int blockNo = selector.block();
+    const int blockNo = range.block();
 
     vtkDataObject* blockDO = output->GetBlock(blockNo);
     vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast(blockDO);
@@ -172,7 +172,7 @@ Foam::label Foam::vtkPV3Foam::GetNumberOfDataSets
 }
 
 
-Foam::word Foam::vtkPV3Foam::getPartName(int partId)
+Foam::word Foam::vtkPV3Foam::getPartName(const int partId)
 {
     return getFirstWord(reader_->GetPartArrayName(partId));
 }
@@ -201,13 +201,13 @@ Foam::wordHashSet Foam::vtkPV3Foam::getSelected
 Foam::wordHashSet Foam::vtkPV3Foam::getSelected
 (
     vtkDataArraySelection* select,
-    const partInfo& selector
+    const arrayRange& range
 )
 {
     int nElem = select->GetNumberOfArrays();
     wordHashSet selections(2*nElem);
 
-    for (int elemI = selector.start(); elemI < selector.end(); ++elemI)
+    for (int elemI = range.start(); elemI < range.end(); ++elemI)
     {
         if (select->GetArraySetting(elemI))
         {
@@ -261,13 +261,13 @@ Foam::stringList Foam::vtkPV3Foam::getSelectedArrayEntries
 Foam::stringList Foam::vtkPV3Foam::getSelectedArrayEntries
 (
     vtkDataArraySelection* select,
-    const partInfo& selector
+    const arrayRange& range
 )
 {
-    stringList selections(selector.size());
+    stringList selections(range.size());
     label nElem = 0;
 
-    for (int elemI = selector.start(); elemI < selector.end(); ++elemI)
+    for (int elemI = range.start(); elemI < range.end(); ++elemI)
     {
         if (select->GetArraySetting(elemI))
         {
@@ -280,7 +280,7 @@ Foam::stringList Foam::vtkPV3Foam::getSelectedArrayEntries
     if (debug)
     {
         Info<< "available(";
-        for (int elemI = selector.start(); elemI < selector.end(); ++elemI)
+        for (int elemI = range.start(); elemI < range.end(); ++elemI)
         {
             Info<< " \"" << select->GetArrayName(elemI) << "\"";
         }

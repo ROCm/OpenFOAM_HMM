@@ -88,7 +88,7 @@ class vtkPV3blockMesh
     // Private classes
 
         //- Bookkeeping for GUI checklists and the multi-block organization
-        class partInfo
+        class arrayRange
         {
             const char *name_;
             int block_;
@@ -97,11 +97,11 @@ class vtkPV3blockMesh
 
         public:
 
-            partInfo(const char *name, const int blockNo=0)
+            arrayRange(const char *name, const int blockNo=0)
             :
                 name_(name),
                 block_(blockNo),
-                start_(-1),
+                start_(0),
                 size_(0)
             {}
 
@@ -119,21 +119,25 @@ class vtkPV3blockMesh
                 return prev;
             }
 
+            //- Return block name
             const char* name() const
             {
                 return name_;
             }
 
+            //- Return array start index
             int start() const
             {
                 return start_;
             }
 
+            //- Return array end index
             int end() const
             {
                 return start_ + size_;
             }
 
+            //- Return sublist size
             int size() const
             {
                 return size_;
@@ -144,16 +148,10 @@ class vtkPV3blockMesh
                 return !size_;
             }
 
-            void reset()
+            //- Reset the size to zero and optionally assign a new start
+            void reset(const int startAt = 0)
             {
-                start_ = -1;
-                size_ = 0;
-            }
-
-            //- Assign new start and reset the size
-            void operator=(const int i)
-            {
-                start_ = i;
+                start_ = startAt;
                 size_ = 0;
             }
 
@@ -177,22 +175,20 @@ class vtkPV3blockMesh
         blockMesh* meshPtr_;
 
         //- Selected geometrical parts
-        boolList partStatus_;
+        boolList blockStatus_;
 
         //- Selected curved edges
         boolList edgeStatus_;
 
         //- First instance and size of bleckMesh blocks
-        //  used to index into partStatus_
-        partInfo partInfoBlocks_;
+        //  used to index into blockStatus_
+        arrayRange arrayRangeBlocks_;
 
-        //- First instance and size of CurvedEdges
-        //  only partially used
-        partInfo partInfoEdges_;
+        //- First instance and size of CurvedEdges (only partially used)
+        arrayRange arrayRangeEdges_;
 
-        //- First instance and size of block corners
-        //  only partially used
-        partInfo partInfoCorners_;
+        //- First instance and size of block corners (only partially used)
+        arrayRange arrayRangeCorners_;
 
         //- List of point numbers for rendering to window
         List<vtkTextActor*> pointNumberTextActorsPtrs_;
@@ -205,7 +201,7 @@ class vtkPV3blockMesh
         (
             vtkMultiBlockDataSet* output,
             vtkDataSet* dataset,
-            const partInfo&,
+            const arrayRange&,
             const label datasetNo,
             const std::string& datasetName
         );
@@ -215,7 +211,7 @@ class vtkPV3blockMesh
         static vtkDataSet* GetDataSetFromBlock
         (
             vtkMultiBlockDataSet* output,
-            const partInfo&,
+            const arrayRange&,
             const label datasetNo
         );
 
@@ -224,7 +220,7 @@ class vtkPV3blockMesh
         static label GetNumberOfDataSets
         (
             vtkMultiBlockDataSet* output,
-            const partInfo&
+            const arrayRange&
         );
 
         //- Update boolList from GUI selection
@@ -240,10 +236,10 @@ class vtkPV3blockMesh
         // Update information helper functions
 
             //- Internal block info
-            void updateInfoBlocks();
+            void updateInfoBlocks(vtkDataArraySelection*);
 
             //- block curved edges info
-            void updateInfoEdges();
+            void updateInfoEdges(vtkDataArraySelection*);
 
         // Update helper functions
 
@@ -271,7 +267,7 @@ class vtkPV3blockMesh
             static wordHashSet getSelected
             (
                 vtkDataArraySelection*,
-                const partInfo&
+                const arrayRange&
             );
 
             //- Retrieve the current selections
@@ -281,7 +277,7 @@ class vtkPV3blockMesh
             static stringList getSelectedArrayEntries
             (
                 vtkDataArraySelection*,
-                const partInfo&
+                const arrayRange&
             );
 
             //- Set selection(s)

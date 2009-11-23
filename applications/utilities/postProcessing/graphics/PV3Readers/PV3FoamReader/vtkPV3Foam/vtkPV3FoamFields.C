@@ -51,7 +51,7 @@ void Foam::vtkPV3Foam::pruneObjectList
 )
 {
     // hash all the selected field names
-    if (!selected.size())
+    if (selected.empty())
     {
         objects.clear();
     }
@@ -79,7 +79,7 @@ void Foam::vtkPV3Foam::convertVolFields
         reader_->GetVolFieldSelection()
     );
 
-    if (!selectedFields.size())
+    if (selectedFields.empty())
     {
         return;
     }
@@ -89,7 +89,7 @@ void Foam::vtkPV3Foam::convertVolFields
     IOobjectList objects(mesh, dbPtr_().timeName());
     pruneObjectList(objects, selectedFields);
 
-    if (!objects.size())
+    if (objects.empty())
     {
         return;
     }
@@ -164,7 +164,7 @@ void Foam::vtkPV3Foam::convertPointFields
         reader_->GetPointFieldSelection()
     );
 
-    if (!selectedFields.size())
+    if (selectedFields.empty())
     {
         return;
     }
@@ -174,7 +174,7 @@ void Foam::vtkPV3Foam::convertPointFields
     IOobjectList objects(mesh, dbPtr_().timeName());
     pruneObjectList(objects, selectedFields);
 
-    if (!objects.size())
+    if (objects.empty())
     {
         return;
     }
@@ -229,7 +229,7 @@ void Foam::vtkPV3Foam::convertLagrangianFields
     vtkMultiBlockDataSet* output
 )
 {
-    partInfo& selector = partInfoLagrangian_;
+    arrayRange& range = arrayRangeLagrangian_;
     const fvMesh& mesh = *meshPtr_;
 
     wordHashSet selectedFields = getSelected
@@ -237,7 +237,7 @@ void Foam::vtkPV3Foam::convertLagrangianFields
         reader_->GetLagrangianFieldSelection()
     );
 
-    if (!selectedFields.size())
+    if (selectedFields.empty())
     {
         return;
     }
@@ -248,7 +248,7 @@ void Foam::vtkPV3Foam::convertLagrangianFields
         printMemory();
     }
 
-    for (int partId = selector.start(); partId < selector.end(); ++partId)
+    for (int partId = range.start(); partId < range.end(); ++partId)
     {
         const word  cloudName = getPartName(partId);
         const label datasetNo = partDataset_[partId];
@@ -270,7 +270,7 @@ void Foam::vtkPV3Foam::convertLagrangianFields
         );
         pruneObjectList(objects, selectedFields);
 
-        if (!objects.size())
+        if (objects.empty())
         {
             continue;
         }
