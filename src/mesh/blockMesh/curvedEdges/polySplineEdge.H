@@ -90,16 +90,16 @@ public:
         polySplineEdge(const pointField&, Istream&);
 
 
-    // Destructor
-
-        virtual ~polySplineEdge(){}
+    //- Destructor
+        virtual ~polySplineEdge()
+        {}
 
 
     // Member Functions
 
-        //- Return the position of a point on the curve given by
-        //  the parameter 0 <= lambda <= 1
-        vector position(const scalar mu) const;
+        //- Return the point position corresponding to the curve parameter
+        //  0 <= lambda <= 1
+        point position(const scalar mu) const;
 
         //- Return the length of the curve
         scalar length() const;

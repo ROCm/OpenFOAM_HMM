@@ -46,23 +46,19 @@ Foam::lineEdge::lineEdge
     const label end
 )
 :
-    curvedEdge(points, start, end),
-    startPoint_(points_[start_]),
-    direction_(points_[end_] - points_[start_])
+    curvedEdge(points, start, end)
 {}
 
 
 Foam::lineEdge::lineEdge(const pointField& points, Istream& is)
 :
-    curvedEdge(points, is),
-    startPoint_(points_[start_]),
-    direction_(points_[end_] - points_[start_])
+    curvedEdge(points, is)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::vector Foam::lineEdge::position(const scalar lambda) const
+Foam::point Foam::lineEdge::position(const scalar lambda) const
 {
     if (lambda < 0 || lambda > 1)
     {
@@ -71,13 +67,13 @@ Foam::vector Foam::lineEdge::position(const scalar lambda) const
             << abort(FatalError);
     }
 
-    return startPoint_ + lambda*direction_;
+    return points_[start_] + lambda * (points_[end_] - points_[start_]);
 }
 
 
 Foam::scalar Foam::lineEdge::length() const
 {
-    return mag(direction_);
+    return mag(points_[end_] - points_[start_]);
 }
 
 

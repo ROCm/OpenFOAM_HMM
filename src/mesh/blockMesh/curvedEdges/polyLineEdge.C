@@ -44,24 +44,24 @@ Foam::polyLineEdge::polyLineEdge
     const pointField& ps,
     const label start,
     const label end,
-    const pointField& otherpoints
+    const pointField& otherPoints
 )
 :
     curvedEdge(ps, start, end),
-    polyLine(knotlist(ps, start, end, otherpoints))
+    polyLine(fullKnotList(ps, start_, end_, otherPoints))
 {}
 
 
 Foam::polyLineEdge::polyLineEdge(const pointField& ps, Istream& is)
 :
     curvedEdge(ps, is),
-    polyLine(knotlist(ps, start_, end_, pointField(is)))
+    polyLine(fullKnotList(ps, start_, end_, pointField(is)))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::vector Foam::polyLineEdge::position(const scalar lambda) const
+Foam::point Foam::polyLineEdge::position(const scalar lambda) const
 {
     return polyLine::position(lambda);
 }

@@ -52,14 +52,6 @@ class lineEdge
 :
     public curvedEdge
 {
-    // Private data
-
-        //- Avoid repetitive calculation of the start point
-        const vector startPoint_;
-
-        //- Avoid repetitive calculation of the direction (end - start)
-        const vector direction_;
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -67,7 +59,6 @@ class lineEdge
 
         //- Disallow default bitwise assignment
         void operator=(const lineEdge&);
-
 
 public:
 
@@ -83,16 +74,16 @@ public:
         lineEdge(const pointField&, Istream&);
 
 
-    // Destructor
-
-        virtual ~lineEdge(){}
+    //- Destructor
+        virtual ~lineEdge()
+        {}
 
 
     // Member Functions
 
-        //- Return the position of a point on the curve given by
-        //  the parameter 0 <= lambda <= 1
-        vector position(const scalar) const;
+        //- Return the point position corresponding to the curve parameter
+        //  0 <= lambda <= 1
+        point position(const scalar) const;
 
         //- Return the length of the curve
         scalar length() const;

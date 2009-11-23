@@ -61,7 +61,7 @@ Foam::cylindricalCS Foam::arcEdge::calcAngle()
 
     scalar fact = 0.5*(bsqr - adotb)/denom;
 
-    vector centre = 0.5*a + fact*((a ^ b) ^ a);
+    point centre = 0.5*a + fact*((a ^ b) ^ a);
 
     centre += p1_;
 
@@ -75,7 +75,7 @@ Foam::cylindricalCS Foam::arcEdge::calcAngle()
     angle_ = radToDeg(acos(tmp));
 
     // check if the vectors define an exterior or an interior arcEdge
-    if (((r1 ^ r2)&(r1 ^ r3)) < 0.0)
+    if (((r1 ^ r2) & (r1 ^ r3)) < 0.0)
     {
         angle_ = 360.0 - angle_;
     }
@@ -133,7 +133,7 @@ Foam::arcEdge::arcEdge(const pointField& points, Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::vector Foam::arcEdge::position(const scalar lambda) const
+Foam::point Foam::arcEdge::position(const scalar lambda) const
 {
     if (lambda < 0 || lambda > 1)
     {
@@ -146,7 +146,7 @@ Foam::vector Foam::arcEdge::position(const scalar lambda) const
     {
         return p1_;
     }
-    else if (lambda > 1-SMALL)
+    else if (lambda > 1 - SMALL)
     {
         return p3_;
     }

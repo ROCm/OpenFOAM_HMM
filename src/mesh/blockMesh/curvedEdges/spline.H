@@ -81,6 +81,13 @@ public:
 
         // Access
 
+            //- Return the knot points in the spline
+            const pointField& knotPoints() const
+            {
+                return knots_;
+            }
+
+
             //- Return the number of knots in the spline
             label nKnots() const
             {
@@ -88,9 +95,9 @@ public:
             }
 
 
-        //- Return the position of a point on the curve given by
-        //  the parameter 0 <= lambda <= 1
-        vector position(const scalar) const;
+        //- Return the point position corresponding to the curve parameter
+        //  0 <= lambda <= 1
+        point position(const scalar) const;
 
         //- Return the length of the spline curve
         scalar length() const;

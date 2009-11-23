@@ -82,13 +82,13 @@ public:
 
     // Member Functions
 
-        //- Return the real position of a point on the curve given by
-        //  the parameter 0 <= lambda <= 1
-        vector realPosition(const scalar lambda) const;
+        //- Return the real point position corresponding to the curve parameter
+        //  0 <= lambda <= 1
+        point realPosition(const scalar lambda) const;
 
-        //- Return the position of a point on the curve given by
-        //  the parameter 0 <= lambda <= 1
-        vector position(const scalar lambda) const;
+        //- Return the point position corresponding to the curve parameter
+        //  0 <= lambda <= 1
+        point position(const scalar lambda) const;
 
         //- Return the length of the curve
         scalar length() const;

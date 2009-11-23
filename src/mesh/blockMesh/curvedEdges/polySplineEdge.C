@@ -56,7 +56,7 @@ Foam::pointField Foam::polySplineEdge::intervening
 {
     BSpline spl
     (
-        knotlist(points_, start_, end_, otherknots),
+        fullKnotList(points_, start_, end_, otherknots),
         fstend,
         sndend
     );
@@ -135,7 +135,7 @@ Foam::polySplineEdge::polySplineEdge
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::vector Foam::polySplineEdge::position(const scalar mu) const
+Foam::point Foam::polySplineEdge::position(const scalar mu) const
 {
     return polyLine::position(mu);
 }

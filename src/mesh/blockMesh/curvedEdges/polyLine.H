@@ -26,7 +26,8 @@ Class
     Foam::polyLine
 
 Description
-    Defines a curvedEdge in terms of a series of straight line segments.
+    Define a series of control points, which can also be interpreted as a
+    series of straight line segments.
 
     This is the basic polyLine class which implements just the line
     (no topology - it is not derived from curvedEdge)
@@ -66,14 +67,19 @@ protected:
 
     // Protected data
 
+        //- The control points or ends of each segmen
         pointField controlPoints_;
+
+        //- The rational (0-1) cumulative distance for each control-point
         scalarList distances_;
+
+        //- The real line length
         scalar lineLength_;
 
     // Protected member functions
 
+        //- Precalculate the rational cumulative distances and the line-length
         void calcDistances();
-
 
 public:
 
@@ -85,9 +91,12 @@ public:
 
     // Member Functions
 
-        //- Return the position of a point on the curve given by
-        //  the parameter 0 <= lambda <= 1
-        vector position(const scalar) const;
+        //- Return const-access to the control-points
+        const pointField& controlPoints() const;
+
+        //- Return the point position corresponding to the curve parameter
+        //  0 <= lambda <= 1
+        point position(const scalar) const;
 
         //- Return the length of the curve
         scalar length() const;

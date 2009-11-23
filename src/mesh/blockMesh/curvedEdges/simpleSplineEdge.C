@@ -48,7 +48,7 @@ Foam::simpleSplineEdge::simpleSplineEdge
 )
 :
     curvedEdge(points, start, end),
-    BSpline(knotlist(points, start, end, otherknots))
+    BSpline(fullKnotList(points, start, end, otherknots))
 {}
 
 
@@ -63,20 +63,20 @@ Foam::simpleSplineEdge::simpleSplineEdge
 )
 :
     curvedEdge(points, start, end),
-    BSpline(knotlist(points, start, end, otherknots), fstend, sndend)
+    BSpline(fullKnotList(points, start, end, otherknots), fstend, sndend)
 {}
 
 
 Foam::simpleSplineEdge::simpleSplineEdge(const pointField& points, Istream& is)
 :
     curvedEdge(points, is),
-    BSpline(knotlist(points, start_, end_, pointField(is)))
+    BSpline(fullKnotList(points, start_, end_, pointField(is)))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::vector Foam::simpleSplineEdge::position(const scalar mu) const
+Foam::point Foam::simpleSplineEdge::position(const scalar mu) const
 {
     return BSpline::position(mu);
 }

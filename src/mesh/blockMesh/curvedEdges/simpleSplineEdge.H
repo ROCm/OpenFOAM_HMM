@@ -102,9 +102,9 @@ public:
 
     // Member Functions
 
-        //- Return the position of a point on the simple spline curve given by
-        //  the parameter 0 <= lambda <= 1
-        vector position(const scalar mu) const;
+        //- Return the point position corresponding to the curve parameter
+        //  0 <= lambda <= 1
+        point position(const scalar) const;
 
         //- Return the length of the simple spline curve
         scalar length() const;

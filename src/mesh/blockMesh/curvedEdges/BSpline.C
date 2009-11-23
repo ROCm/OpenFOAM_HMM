@@ -115,13 +115,13 @@ Foam::BSpline::BSpline
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::vector Foam::BSpline::realPosition(const scalar mu) const
+Foam::point Foam::BSpline::realPosition(const scalar mu) const
 {
     return spline::position(mu);
 }
 
 
-Foam::vector Foam::BSpline::position(const scalar mu) const
+Foam::point Foam::BSpline::position(const scalar mu) const
 {
     return spline::position((1.0/(nKnots() - 1))*(1.0 + mu*(nKnots() - 3)));
 }

@@ -72,9 +72,9 @@ Foam::spline::spline(const pointField& knotPoints)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::vector Foam::spline::position(const scalar mu) const
+Foam::point Foam::spline::position(const scalar mu) const
 {
-    vector loc(vector::zero);
+    point loc(point::zero);
 
     for (register label i=0; i < knots_.size(); i++)
     {
