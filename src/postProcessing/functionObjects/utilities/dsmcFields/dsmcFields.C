@@ -62,7 +62,12 @@ Foam::dsmcFields::dsmcFields
         WarningIn
         (
             "dsmcFields::dsmcFields"
-            "(const objectRegistry&, const dictionary&)"
+            "("
+                "const word&, "
+                "const objectRegistry&, "
+                "const dictionary&, "
+                "const bool"
+            ")"
         )   << "No fvMesh available, deactivating." << nl
             << endl;
     }
