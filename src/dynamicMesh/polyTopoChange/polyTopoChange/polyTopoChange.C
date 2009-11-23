@@ -1844,6 +1844,8 @@ void Foam::polyTopoChange::reorderCoupledFaces
     // Rotation on new faces.
     labelList rotation(faces_.size(), 0);
 
+    PstreamBuffers pBufs(Pstream::nonBlocking);
+
     // Send ordering
     forAll(boundary, patchI)
     {
@@ -1851,6 +1853,7 @@ void Foam::polyTopoChange::reorderCoupledFaces
         {
             boundary[patchI].initOrder
             (
+                pBufs,
                 primitivePatch
                 (
                     SubList<face>
@@ -1865,6 +1868,8 @@ void Foam::polyTopoChange::reorderCoupledFaces
         }
     }
 
+    pBufs.finishedSends();
+
     // Receive and calculate ordering
 
     bool anyChanged = false;
@@ -1878,6 +1883,7 @@ void Foam::polyTopoChange::reorderCoupledFaces
 
             bool changed = boundary[patchI].order
             (
+                pBufs,
                 primitivePatch
                 (
                     SubList<face>

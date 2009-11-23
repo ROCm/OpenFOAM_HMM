@@ -150,44 +150,49 @@ Foam::directMappedWallPolyPatch::~directMappedWallPolyPatch()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 //- Initialise the calculation of the patch geometry
-void Foam::directMappedWallPolyPatch::initGeometry()
+void Foam::directMappedWallPolyPatch::initGeometry(PstreamBuffers& pBufs)
 {
-    wallPolyPatch::initGeometry();
-    directMappedPatchBase::clearOut();
+    wallPolyPatch::initGeometry(pBufs);
 }
 
 //- Calculate the patch geometry
-void Foam::directMappedWallPolyPatch::calcGeometry()
+void Foam::directMappedWallPolyPatch::calcGeometry(PstreamBuffers& pBufs)
 {
-    wallPolyPatch::calcGeometry();
+    wallPolyPatch::calcGeometry(pBufs);
     directMappedPatchBase::clearOut();
 }
 
 //- Initialise the patches for moving points
-void Foam::directMappedWallPolyPatch::initMovePoints(const pointField& p)
+void Foam::directMappedWallPolyPatch::initMovePoints
+(
+    PstreamBuffers& pBufs,
+    const pointField& p
+)
 {
-    wallPolyPatch::initMovePoints(p);
-    directMappedPatchBase::clearOut();
+    wallPolyPatch::initMovePoints(pBufs, p);
 }
 
 //- Correct patches after moving points
-void Foam::directMappedWallPolyPatch::movePoints(const pointField& p)
+void Foam::directMappedWallPolyPatch::movePoints
+(
+    PstreamBuffers& pBufs,
+    const pointField& p
+)
 {
-    wallPolyPatch::movePoints(p);
+    wallPolyPatch::movePoints(pBufs, p);
     directMappedPatchBase::clearOut();
 }
 
 //- Initialise the update of the patch topology
-void Foam::directMappedWallPolyPatch::initUpdateMesh()
+void Foam::directMappedWallPolyPatch::initUpdateMesh(PstreamBuffers& pBufs)
 {
-    wallPolyPatch::initUpdateMesh();
-    directMappedPatchBase::clearOut();
+    wallPolyPatch::initUpdateMesh(pBufs);
 }
 
 //- Update of the patch topology
-void Foam::directMappedWallPolyPatch::updateMesh()
+void Foam::directMappedWallPolyPatch::updateMesh(PstreamBuffers& pBufs)
 {
-    wallPolyPatch::updateMesh();
+    wallPolyPatch::updateMesh(pBufs);
     directMappedPatchBase::clearOut();
 }
 

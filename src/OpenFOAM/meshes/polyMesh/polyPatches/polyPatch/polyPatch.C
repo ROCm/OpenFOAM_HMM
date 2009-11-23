@@ -55,12 +55,12 @@ namespace Foam
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::polyPatch::movePoints(const pointField& p)
+void Foam::polyPatch::movePoints(PstreamBuffers&, const pointField& p)
 {
     primitivePatch::movePoints(p);
 }
 
-void Foam::polyPatch::updateMesh()
+void Foam::polyPatch::updateMesh(PstreamBuffers&)
 {
     clearAddressing();
 }
@@ -334,12 +334,13 @@ void Foam::polyPatch::write(Ostream& os) const
 }
 
 
-void Foam::polyPatch::initOrder(const primitivePatch&) const
+void Foam::polyPatch::initOrder(PstreamBuffers&, const primitivePatch&) const
 {}
 
 
 bool Foam::polyPatch::order
 (
+    PstreamBuffers&,
     const primitivePatch&,
     labelList& faceMap,
     labelList& rotation

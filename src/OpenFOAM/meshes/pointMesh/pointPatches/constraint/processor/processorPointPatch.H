@@ -68,30 +68,30 @@ class processorPointPatch
     // Private Member Functions
 
         //- Initialise the calculation of the patch geometry
-        virtual void initGeometry();
+        virtual void initGeometry(PstreamBuffers&);
 
         //- Calculate the patch geometry
-        virtual void calcGeometry();
+        virtual void calcGeometry(PstreamBuffers&);
 
         //- Initialise the points on this patch which are should also be 
         //  on a neighbouring patch but are not part of faces of that patch
-        void initPatchPatchPoints();
+        void initPatchPatchPoints(PstreamBuffers&);
 
         //- Calculate the points on this patch which are should also be 
         //  on a neighbouring patch but are not part of faces of that patch
-        void calcPatchPatchPoints();
+        void calcPatchPatchPoints(PstreamBuffers&);
 
         //- Initialise the patches for moving points
-        virtual void initMovePoints(const pointField&);
+        virtual void initMovePoints(PstreamBuffers&, const pointField&);
 
         //- Correct patches after moving points
-        virtual void movePoints(const pointField&);
+        virtual void movePoints(PstreamBuffers&, const pointField&);
 
         //- Initialise the update of the patch topology
-        virtual void initUpdateMesh();
+        virtual void initUpdateMesh(PstreamBuffers&);
 
         //- Update of the patch topology
-        virtual void updateMesh();
+        virtual void updateMesh(PstreamBuffers&);
 
 
         //- Disallow default construct as copy
