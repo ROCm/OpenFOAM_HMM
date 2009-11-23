@@ -117,45 +117,6 @@ void Foam::fieldValues::cellSource::initialise()
 }
 
 
-void Foam::fieldValues::cellSource::makeFile()
-{
-    // Create the forces file if not already created
-    if (outputFilePtr_.empty())
-    {
-        if (debug)
-        {
-            Info<< "Creating output file." << endl;
-        }
-
-        // File update
-        if (Pstream::master())
-        {
-            fileName outputDir;
-            if (Pstream::parRun())
-            {
-                // Put in undecomposed case (Note: gives problems for
-                // distributed data running)
-                outputDir =
-                    obr_.time().path()/".."/name_/obr_.time().timeName();
-            }
-            else
-            {
-                outputDir = obr_.time().path()/name_/obr_.time().timeName();
-            }
-
-            // Create directory if does not exist
-            mkDir(outputDir);
-
-            // Open new file at start up
-            outputFilePtr_.reset(new OFstream(outputDir/(type() + ".dat")));
-
-            // Add headers to output data
-            writeFileHeader();
-        }
-    }
-}
-
-
 void Foam::fieldValues::cellSource::writeFileHeader()
 {
     if (outputFilePtr_.valid())
@@ -190,16 +151,9 @@ Foam::fieldValues::cellSource::cellSource
     fieldValue(name, obr, dict, loadFromFiles),
     source_(sourceTypeNames_.read(dict.lookup("source"))),
     operation_(operationTypeNames_.read(dict.lookup("operation"))),
-    cellId_(),
-    outputFilePtr_(NULL)
+    cellId_()
 {
-    initialise();
-
-    if (active_)
-    {
-        // Create the output file if not already created
-        makeFile();
-    }
+    read(dict);
 }
 
 
@@ -213,9 +167,11 @@ Foam::fieldValues::cellSource::~cellSource()
 
 void Foam::fieldValues::cellSource::read(const dictionary& dict)
 {
+    fieldValue::read(dict);
+
     if (active_)
     {
-        fieldValue::read(dict);
+        // no additional info to read
         initialise();
     }
 }
@@ -223,13 +179,10 @@ void Foam::fieldValues::cellSource::read(const dictionary& dict)
 
 void Foam::fieldValues::cellSource::write()
 {
+    fieldValue::write();
+
     if (active_)
     {
-        if (log_)
-        {
-            Info<< type() << " " << name_ << " output:" << nl;
-        }
-
         outputFilePtr_()
             << obr_.time().value() << tab
             << sum(filterField(mesh().V()));

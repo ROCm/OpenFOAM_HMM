@@ -66,7 +66,6 @@ SourceFiles
 #include "NamedEnum.H"
 #include "fieldValue.H"
 #include "labelList.H"
-#include "OFstream.H"
 #include "surfaceFieldsFwd.H"
 #include "volFieldsFwd.H"
 
@@ -125,9 +124,6 @@ private:
         //- Set faces to evaluate based on a patch
         void setPatchFaces();
 
-        //- Create the output file if not already created
-        void makeFile();
-
 
 protected:
 
@@ -147,9 +143,6 @@ protected:
 
         //- List of +1/-1 representing face flip map
         labelList flipMap_;
-
-        //- Output file pointer
-        autoPtr<OFstream> outputFilePtr_;
 
         //- Weight field name - only used for opWeightedAverage mode
         word weightFieldName_;
