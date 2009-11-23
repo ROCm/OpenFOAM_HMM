@@ -81,9 +81,6 @@ public:
         //- Construct from separate binWidth for each component
         Distribution(const Type& binWidth);
 
-        //- Construct from single binWidth for each component
-        // Distribution(const cmptType& binWidth);
-
         //- Construct as copy
         Distribution(const Distribution& d);
 
@@ -93,6 +90,8 @@ public:
 
     // Member Functions
 
+        //- Sum the total weight added to the component in the
+        //  argument
         scalar totalWeight(direction cmpt) const;
 
         Type mean() const;
@@ -102,28 +101,31 @@ public:
         // variable where the cumulative Distribution = 0.5.
         Type median();
 
+        //- Add a value to the distribution, optionally specifying a weight
         void add
         (
             const Type& valueToAdd,
             const Type& weight = pTraits<Type>::one
         );
 
+        //- Add the missing keys to the Maps to fill any gaps
         void insertMissingKeys();
 
+        //- Return the normalised distribution and bins
         List< List<Pair<scalar> > > normalised();
 
-        // List<Pair<scalar> > normalisedMinusMean();
-
-        // List<Pair<scalar> > normalisedShifted(scalar shift Value);
-
+        //- Return the distribution of the total bin weights
         List< List < Pair<scalar> > > raw();
 
     // Access
 
+        //- Return the bin width
         inline const Type& binWidth() const;
 
     // Write
 
+        //- Write the distribution to file.  Produces a separate file
+        //  for each component.
         void write
         (
             const fileName& filePrefix,

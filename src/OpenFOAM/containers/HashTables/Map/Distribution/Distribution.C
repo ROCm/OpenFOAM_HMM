@@ -45,17 +45,6 @@ Foam::Distribution<Type>::Distribution(const Type& binWidth)
 {}
 
 
-// template<class Type>
-// Foam::Distribution<Type>::Distribution
-// (
-//     const cmptType& binWidth
-// )
-// :
-//     List< Map<scalar> >(pTraits<Type>::nComponents),
-//     binWidth_(binWidth*pTraits<Type>::one)
-// {}
-
-
 template<class Type>
 Foam::Distribution<Type>::Distribution(const Distribution<Type>& d)
 :
@@ -69,10 +58,6 @@ Foam::Distribution<Type>::Distribution(const Distribution<Type>& d)
 template<class Type>
 Foam::Distribution<Type>::~Distribution()
 {}
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
@@ -131,9 +116,7 @@ inline Type Foam::Distribution<Type>::median()
 
     for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
     {
-        List<Pair<scalar> >& normDist = normDistribution[cmpt];
-
-        scalar cumulative = 0.0;
+        List< Pair<scalar> >& normDist = normDistribution[cmpt];
 
         if (normDist.size())
         {
@@ -164,6 +147,8 @@ inline Type Foam::Distribution<Type>::median()
             {
                 label lastNonZeroIndex = 0;
 
+                scalar cumulative = 0.0;
+
                 forAll(normDist,nD)
                 {
                     if
@@ -188,7 +173,7 @@ inline Type Foam::Distribution<Type>::median()
 
                         break;
                     }
-                    else if (normDist[nD].second() > 0.0)
+                    else if (mag(normDist[nD].second()) > VSMALL)
                     {
                         cumulative +=
                             normDist[nD].second()*component(binWidth_, cmpt);
@@ -232,17 +217,6 @@ void Foam::Distribution<Type>::add
         {
             cmptDistribution[n] += component(weight, cmpt);
         }
-
-        // if (cmptDistribution[n] < 0)
-        // {
-        //     FatalErrorIn("Distribution::add(const scalar valueToAdd)")
-        //         << "Accumulated Distribution value has become negative: "
-        //         << "bin = " << (0.5 + scalar(n))*component(binWidth_, cmpt)
-        //         << ", value = " << cmptDistribution[n]
-        //         << ". This is most likely to be because too many samples "
-        //         << "have been added to a bin and the weight has 'rolled round'"
-        //         << abort(FatalError);
-        // }
     }
 }
 
@@ -290,7 +264,7 @@ Distribution<Type>::normalised()
 
         List<label> keys = cmptDistribution.sortedToc();
 
-        List<Pair<scalar> >& normDist = normDistribution[cmpt];
+        List< Pair<scalar> >& normDist = normDistribution[cmpt];
 
         normDist.setSize(keys.size());
 
@@ -326,7 +300,7 @@ Distribution<Type>::raw()
 
         List<label> keys = cmptDistribution.sortedToc();
 
-        List<Pair<scalar> >& rawDist = rawDistribution[cmpt];
+        List< Pair<scalar> >& rawDist = rawDistribution[cmpt];
 
         rawDist.setSize(keys.size());
 
@@ -348,7 +322,7 @@ template<class Type>
 void Foam::Distribution<Type>::write
 (
     const fileName& filePrefix,
-    const List< List<Pair<scalar> > >& pairs
+    const List< List< Pair<scalar> > >& pairs
 ) const
 {
     if (pairs.size() != pTraits<Type>::nComponents)
@@ -358,7 +332,7 @@ void Foam::Distribution<Type>::write
             "Distribution::write"
             "("
                 "const fileName& filePrefix,"
-                "const List< List<Pair<scalar> > >& pairs"
+                "const List< List< Pair<scalar> > >& pairs"
             ")"
         )
             << "List of pairs (" << pairs.size()
@@ -369,7 +343,7 @@ void Foam::Distribution<Type>::write
 
     for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
     {
-        const List<Pair<scalar> >& cmptPairs = pairs[cmpt];
+        const List< Pair<scalar> >& cmptPairs = pairs[cmpt];
 
         OFstream os(filePrefix + '_' + pTraits<Type>::componentNames[cmpt]);
 
