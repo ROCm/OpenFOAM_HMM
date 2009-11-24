@@ -1770,231 +1770,235 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     timeCheck();
 
-    // // ~~~~~~~~~~~ removing short edges by indexing dual vertices ~~~~~~~~~~~~~~
+    // ------>  OLD, FOR REFERENCE
+        // // ~~~~~~~~~~~ removing short edges by indexing dual vertices ~~~~~~~~~~~~~~
 
-    // for
-    // (
-    //     Triangulation::Finite_cells_iterator cit = finite_cells_begin();
-    //     cit != finite_cells_end();
-    //     ++cit
-    // )
-    // {
-    //     cit->cellIndex() = -1;
-    // }
+        // for
+        // (
+        //     Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+        //     cit != finite_cells_end();
+        //     ++cit
+        // )
+        // {
+        //     cit->cellIndex() = -1;
+        // }
 
-    // points.setSize(number_of_cells());
+        // points.setSize(number_of_cells());
 
-    // // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // label dualVertI = 0;
+        // label dualVertI = 0;
 
-    // // Scanning by number of short (dual) edges (nSE) attached to the
-    // // circumcentre of each Delaunay tet.  A Delaunay tet may only have four
-    // // dual edges emanating from its circumcentre, assigning positions and
-    // // indices to those with 4 short edges attached first, then >= 3, then >= 2
-    // // etc.
-    // for (label nSE = 4; nSE >= 0; nSE--)
-    // {
-    //     Info<< nl << "Scanning for dual vertices with >= "
-    //         << nSE
-    //         << " short edges attached." << endl;
+        // // Scanning by number of short (dual) edges (nSE) attached to the
+        // // circumcentre of each Delaunay tet.  A Delaunay tet may only have four
+        // // dual edges emanating from its circumcentre, assigning positions and
+        // // indices to those with 4 short edges attached first, then >= 3, then >= 2
+        // // etc.
+        // for (label nSE = 4; nSE >= 0; nSE--)
+        // {
+        //     Info<< nl << "Scanning for dual vertices with >= "
+        //         << nSE
+        //         << " short edges attached." << endl;
 
-    //     for
-    //     (
-    //         Triangulation::Finite_cells_iterator cit = finite_cells_begin();
-    //         cit != finite_cells_end();
-    //         ++cit
-    //     )
-    //     {
-    //         // If the Delaunay tet has an index already then it has either
-    //         // evaluated itself and taken action or has had its index dictated
-    //         // by a neighbouring tet with more short edges attached.
+        //     for
+        //     (
+        //         Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+        //         cit != finite_cells_end();
+        //         ++cit
+        //     )
+        //     {
+        //         // If the Delaunay tet has an index already then it has either
+        //         // evaluated itself and taken action or has had its index dictated
+        //         // by a neighbouring tet with more short edges attached.
 
-    //         if (cit->cellIndex() == -1)
-    //         {
-    //             point dualVertex = topoint(dual(cit));
+        //         if (cit->cellIndex() == -1)
+        //         {
+        //             point dualVertex = topoint(dual(cit));
 
-    //             label shortEdges = 0;
+        //             label shortEdges = 0;
 
-    //             List<bool> edgeIsShort(4, false);
+        //             List<bool> edgeIsShort(4, false);
 
-    //             List<bool> neighbourAlreadyIndexed(4, false);
+        //             List<bool> neighbourAlreadyIndexed(4, false);
 
-    //             // Loop over the four facets of the Delaunay tet
-    //             for (label f = 0; f < 4; f++)
-    //             {
-    //                 // Check that at least one of the vertices of the facet is
-    //                 // an internal or boundary point
-    //                 if
-    //                 (
-    //                     cit->vertex(vertex_triple_index(f, 0))->
-    //                         internalOrBoundaryPoint()
-    //                  || cit->vertex(vertex_triple_index(f, 1))->
-    //                         internalOrBoundaryPoint()
-    //                  || cit->vertex(vertex_triple_index(f, 2))->
-    //                         internalOrBoundaryPoint()
-    //                 )
-    //                 {
-    //                     point neighDualVertex;
+        //             // Loop over the four facets of the Delaunay tet
+        //             for (label f = 0; f < 4; f++)
+        //             {
+        //                 // Check that at least one of the vertices of the facet is
+        //                 // an internal or boundary point
+        //                 if
+        //                 (
+        //                     cit->vertex(vertex_triple_index(f, 0))->
+        //                         internalOrBoundaryPoint()
+        //                  || cit->vertex(vertex_triple_index(f, 1))->
+        //                         internalOrBoundaryPoint()
+        //                  || cit->vertex(vertex_triple_index(f, 2))->
+        //                         internalOrBoundaryPoint()
+        //                 )
+        //                 {
+        //                     point neighDualVertex;
 
-    //                     label cNI = cit->neighbor(f)->cellIndex();
+        //                     label cNI = cit->neighbor(f)->cellIndex();
 
-    //                     if (cNI == -1)
-    //                     {
-    //                         neighDualVertex = topoint(dual(cit->neighbor(f)));
-    //                     }
-    //                     else
-    //                     {
-    //                         neighDualVertex = points[cNI];
-    //                     }
+        //                     if (cNI == -1)
+        //                     {
+        //                         neighDualVertex = topoint(dual(cit->neighbor(f)));
+        //                     }
+        //                     else
+        //                     {
+        //                         neighDualVertex = points[cNI];
+        //                     }
 
-    //                     if
-    //                     (
-    //                         magSqr(dualVertex - neighDualVertex)
-    //                       < sqr
-    //                         (
-    //                             minimumEdgeLength
-    //                             (
-    //                                 0.5*(dualVertex + neighDualVertex)
-    //                             )
-    //                         )
-    //                     )
-    //                     {
-    //                         edgeIsShort[f] = true;
+        //                     if
+        //                     (
+        //                         magSqr(dualVertex - neighDualVertex)
+        //                       < sqr
+        //                         (
+        //                             minimumEdgeLength
+        //                             (
+        //                                 0.5*(dualVertex + neighDualVertex)
+        //                             )
+        //                         )
+        //                     )
+        //                     {
+        //                         edgeIsShort[f] = true;
 
-    //                         if (cNI > -1)
-    //                         {
-    //                             neighbourAlreadyIndexed[f] = true;
-    //                         }
+        //                         if (cNI > -1)
+        //                         {
+        //                             neighbourAlreadyIndexed[f] = true;
+        //                         }
 
-    //                         shortEdges++;
-    //                     }
-    //                 }
-    //             }
+        //                         shortEdges++;
+        //                     }
+        //                 }
+        //             }
 
-    //             if (nSE == 0 && shortEdges == 0)
-    //             {
-    //                 // Final iteration and no short edges are found, index
-    //                 // remaining dual vertices.
+        //             if (nSE == 0 && shortEdges == 0)
+        //             {
+        //                 // Final iteration and no short edges are found, index
+        //                 // remaining dual vertices.
 
-    //                 if
-    //                 (
-    //                     cit->vertex(0)->internalOrBoundaryPoint()
-    //                  || cit->vertex(1)->internalOrBoundaryPoint()
-    //                  || cit->vertex(2)->internalOrBoundaryPoint()
-    //                  || cit->vertex(3)->internalOrBoundaryPoint()
-    //                 )
-    //                 {
-    //                     cit->cellIndex() = dualVertI;
-    //                     points[dualVertI] = dualVertex;
-    //                     dualVertI++;
-    //                 }
-    //             }
-    //             else if
-    //             (
-    //                 shortEdges >= nSE
-    //             )
-    //             {
-    //                 // Info<< neighbourAlreadyIndexed << ' '
-    //                 //     << edgeIsShort << endl;
+        //                 if
+        //                 (
+        //                     cit->vertex(0)->internalOrBoundaryPoint()
+        //                  || cit->vertex(1)->internalOrBoundaryPoint()
+        //                  || cit->vertex(2)->internalOrBoundaryPoint()
+        //                  || cit->vertex(3)->internalOrBoundaryPoint()
+        //                 )
+        //                 {
+        //                     cit->cellIndex() = dualVertI;
+        //                     points[dualVertI] = dualVertex;
+        //                     dualVertI++;
+        //                 }
+        //             }
+        //             else if
+        //             (
+        //                 shortEdges >= nSE
+        //             )
+        //             {
+        //                 // Info<< neighbourAlreadyIndexed << ' '
+        //                 //     << edgeIsShort << endl;
 
-    //                 label numUnindexedNeighbours = 1;
+        //                 label numUnindexedNeighbours = 1;
 
-    //                 for (label f = 0; f < 4; f++)
-    //                 {
-    //                     if (edgeIsShort[f] && !neighbourAlreadyIndexed[f])
-    //                     {
-    //                         dualVertex += topoint(dual(cit->neighbor(f)));
+        //                 for (label f = 0; f < 4; f++)
+        //                 {
+        //                     if (edgeIsShort[f] && !neighbourAlreadyIndexed[f])
+        //                     {
+        //                         dualVertex += topoint(dual(cit->neighbor(f)));
 
-    //                         numUnindexedNeighbours++;
-    //                     }
-    //                 }
+        //                         numUnindexedNeighbours++;
+        //                     }
+        //                 }
 
-    //                 dualVertex /= numUnindexedNeighbours;
+        //                 dualVertex /= numUnindexedNeighbours;
 
-    //                 label nearestExistingIndex = -1;
+        //                 label nearestExistingIndex = -1;
 
-    //                 point nearestIndexedNeighbourPos = vector::zero;
+        //                 point nearestIndexedNeighbourPos = vector::zero;
 
-    //                 scalar minDistSqrToNearestIndexedNeighbour = VGREAT;
+        //                 scalar minDistSqrToNearestIndexedNeighbour = VGREAT;
 
-    //                 for (label f = 0; f < 4; f++)
-    //                 {
-    //                     if (edgeIsShort[f] && neighbourAlreadyIndexed[f])
-    //                     {
-    //                         label cNI = cit->neighbor(f)->cellIndex();
+        //                 for (label f = 0; f < 4; f++)
+        //                 {
+        //                     if (edgeIsShort[f] && neighbourAlreadyIndexed[f])
+        //                     {
+        //                         label cNI = cit->neighbor(f)->cellIndex();
 
-    //                         point indexedNeighbourPos = points[cNI];
+        //                         point indexedNeighbourPos = points[cNI];
 
-    //                         if
-    //                         (
-    //                             magSqr(indexedNeighbourPos - dualVertex)
-    //                           < minDistSqrToNearestIndexedNeighbour
-    //                         )
-    //                         {
-    //                             nearestExistingIndex = cNI;
+        //                         if
+        //                         (
+        //                             magSqr(indexedNeighbourPos - dualVertex)
+        //                           < minDistSqrToNearestIndexedNeighbour
+        //                         )
+        //                         {
+        //                             nearestExistingIndex = cNI;
 
-    //                             nearestIndexedNeighbourPos =
-    //                             indexedNeighbourPos;
+        //                             nearestIndexedNeighbourPos =
+        //                             indexedNeighbourPos;
 
-    //                             minDistSqrToNearestIndexedNeighbour =
-    //                             magSqr(indexedNeighbourPos - dualVertex);
-    //                         }
-    //                     }
-    //                 }
+        //                             minDistSqrToNearestIndexedNeighbour =
+        //                             magSqr(indexedNeighbourPos - dualVertex);
+        //                         }
+        //                     }
+        //                 }
 
-    //                 if
-    //                 (
-    //                     nearestExistingIndex > -1
-    //                  && minDistSqrToNearestIndexedNeighbour
-    //                   < sqr
-    //                     (
-    //                         minimumEdgeLength
-    //                         (
-    //                             0.5*(nearestIndexedNeighbourPos + dualVertex)
-    //                         )
-    //                     )
-    //                 )
-    //                 {
-    //                     points[nearestExistingIndex] =
-    //                     0.5*(dualVertex + nearestIndexedNeighbourPos);
+        //                 if
+        //                 (
+        //                     nearestExistingIndex > -1
+        //                  && minDistSqrToNearestIndexedNeighbour
+        //                   < sqr
+        //                     (
+        //                         minimumEdgeLength
+        //                         (
+        //                             0.5*(nearestIndexedNeighbourPos + dualVertex)
+        //                         )
+        //                     )
+        //                 )
+        //                 {
+        //                     points[nearestExistingIndex] =
+        //                     0.5*(dualVertex + nearestIndexedNeighbourPos);
 
-    //                     for (label f = 0; f < 4; f++)
-    //                     {
-    //                         if (edgeIsShort[f] && !neighbourAlreadyIndexed[f])
-    //                         {
-    //                             cit->neighbor(f)->cellIndex() =
-    //                             nearestExistingIndex;
-    //                         }
-    //                     }
+        //                     for (label f = 0; f < 4; f++)
+        //                     {
+        //                         if (edgeIsShort[f] && !neighbourAlreadyIndexed[f])
+        //                         {
+        //                             cit->neighbor(f)->cellIndex() =
+        //                             nearestExistingIndex;
+        //                         }
+        //                     }
 
-    //                     cit->cellIndex() = nearestExistingIndex;
-    //                 }
-    //                 else
-    //                 {
-    //                     for (label f = 0; f < 4; f++)
-    //                     {
-    //                         if (edgeIsShort[f] && !neighbourAlreadyIndexed[f])
-    //                         {
-    //                             cit->neighbor(f)->cellIndex() = dualVertI;
-    //                         }
-    //                     }
+        //                     cit->cellIndex() = nearestExistingIndex;
+        //                 }
+        //                 else
+        //                 {
+        //                     for (label f = 0; f < 4; f++)
+        //                     {
+        //                         if (edgeIsShort[f] && !neighbourAlreadyIndexed[f])
+        //                         {
+        //                             cit->neighbor(f)->cellIndex() = dualVertI;
+        //                         }
+        //                     }
 
-    //                     cit->cellIndex() = dualVertI;
+        //                     cit->cellIndex() = dualVertI;
 
-    //                     points[dualVertI] = dualVertex;
+        //                     points[dualVertI] = dualVertex;
 
-    //                     dualVertI++;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
+        //                     dualVertI++;
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
-    // points.setSize(dualVertI);
+        // points.setSize(dualVertI);
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~ dual cell indexing ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // assigns an index to the Delaunay vertices which will be the dual cell
+    // <------ OLD, FOR REFERENCE
+
+    // Dual cell indexing
+
+    // Assign an index to the Delaunay vertices which will be the dual cell
     // index used for owner neighbour assignment.
 
     // The indices of the points are reset *which **destroys** the point-pair
@@ -2022,9 +2026,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         }
     }
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~ dual face filtering ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Loop over all dual faces and merge points to remove faces that
-    // are not wanted.
+    // Dual face filtering
 
     // Indexing Delaunay cells, which are Dual vertices
 
@@ -2059,9 +2061,9 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     points.setSize(dualVertI);
 
-    Info<< nl << "    Merging close points" << endl;
+    // Assess close points to be merged
 
-    label nCollapsedFaces = 0;
+    Info<< nl << "    Merging close points" << endl;
 
     label nPtsMerged = 0;
 
@@ -2077,13 +2079,15 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     } while (nPtsMerged > 0);
 
+    // Assess faces for collapse
+
     Info<< nl << "    Collapsing unnecessary faces" << endl;
+
+    label nCollapsedFaces = 0;
 
     do
     {
         Map<label> dualPtIndexMap;
-
-        nCollapsedFaces = 0;
 
         nCollapsedFaces = collapseFaces(points, dualPtIndexMap);
 
@@ -2093,175 +2097,19 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     } while (nCollapsedFaces > 0);
 
-    // ~~~~~~~~~~~~ dual face and owner neighbour construction ~~~~~~~~~~~~~~~~~
+    // Final dual face and owner neighbour construction
 
-    patchNames = geometryToConformTo_.patchNames();
-
-    patchNames.setSize(patchNames.size() + 1);
-
-    patchNames[patchNames.size() - 1] = "cvMesh_defaultPatch";
-
-    label nPatches = patchNames.size();
-
-    List<DynamicList<face> > patchFaces(nPatches, DynamicList<face>(0));
-
-    List<DynamicList<label> > patchOwners(nPatches, DynamicList<label>(0));
-
-    faces.setSize(number_of_edges());
-
-    owner.setSize(number_of_edges());
-
-    neighbour.setSize(number_of_edges());
-
-    label dualFaceI = 0;
-
-    for
+    createFacesOwnerNeighbourAndPatches
     (
-        Triangulation::Finite_edges_iterator eit = finite_edges_begin();
-        eit != finite_edges_end();
-        ++eit
-    )
-    {
-        Cell_handle c = eit->first;
-        Vertex_handle vA = c->vertex(eit->second);
-        Vertex_handle vB = c->vertex(eit->third);
-
-        if
-        (
-            vA->internalOrBoundaryPoint()
-         || vB->internalOrBoundaryPoint()
-        )
-        {
-            face newDualFace = buildDualFace(eit);
-
-            if (newDualFace.size() >= 3)
-            {
-
-                label dcA = vA->index();
-
-                if (!vA->internalOrBoundaryPoint())
-                {
-                    dcA = -1;
-                }
-
-                label dcB = vB->index();
-
-                if (!vB->internalOrBoundaryPoint())
-                {
-                    dcB = -1;
-                }
-
-                label dcOwn = -1;
-                label dcNei = -1;
-
-                if (dcA == -1 && dcB == -1)
-                {
-                    FatalErrorIn("calcDualMesh")
-                        << "Attempting to create a face joining "
-                        << "two external dual cells "
-                        << exit(FatalError);
-                }
-                else if (dcA == -1 || dcB == -1)
-                {
-                    // boundary face, find which is the owner
-
-                    if (dcA == -1)
-                    {
-                        dcOwn = dcB;
-
-                        // reverse face order to correctly orientate normal
-                        reverse(newDualFace);
-                    }
-                    else
-                    {
-                        dcOwn = dcA;
-                    }
-
-                    // Find which patch this face is on by finding the
-                    // intersection with the surface of the Delaunay edge
-                    // generating the face and identify the region of the
-                    // intersection.
-
-                    point ptA = topoint(vA->point());
-
-                    point ptB = topoint(vB->point());
-
-                    label patchIndex = geometryToConformTo_.findPatch(ptA, ptB);
-
-                    if (patchIndex == -1)
-                    {
-                        patchIndex = patchNames.size() - 1;
-
-                        WarningIn("Foam::conformalVoronoiMesh::calcDualMesh")
-                            << "Dual face found between Dv pair " << nl
-                            << "    " << ptA << nl
-                            << "    " << ptB << nl
-                            << "    that is not on a surface patch. Adding to "
-                            << patchNames[patchIndex]
-                            << endl;
-                    }
-
-                    patchFaces[patchIndex].append(newDualFace);
-                    patchOwners[patchIndex].append(dcOwn);
-                }
-                else
-                {
-                    // internal face, find the lower cell to be the owner
-
-                    if (dcB > dcA)
-                    {
-                        dcOwn = dcA;
-                        dcNei = dcB;
-                    }
-                    else
-                    {
-                        dcOwn = dcB;
-                        dcNei = dcA;
-
-                        // reverse face order to correctly orientate normal
-                        reverse(newDualFace);
-                    }
-
-                    faces[dualFaceI] = newDualFace;
-
-                    owner[dualFaceI] = dcOwn;
-
-                    neighbour[dualFaceI] = dcNei;
-
-                    dualFaceI++;
-                }
-            }
-        }
-    }
-
-    label nInternalFaces = dualFaceI;
-
-    faces.setSize(nInternalFaces);
-    owner.setSize(nInternalFaces);
-    neighbour.setSize(nInternalFaces);
-
-    timeCheck();
-
-    sortFaces(faces, owner, neighbour);
-
-    timeCheck();
-
-    addPatches
-    (
-        nInternalFaces,
+        points,
         faces,
         owner,
+        neighbour,
         patchNames,
         patchSizes,
         patchStarts,
-        patchFaces,
-        patchOwners,
         false
     );
-
-    removeUnusedPoints(faces, points);
-
-    timeCheck();
 }
 
 
@@ -2829,6 +2677,187 @@ void Foam::conformalVoronoiMesh::reindexDualVertices
     }
 }
 
+
+void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
+(
+    pointField& points,
+    faceList& faces,
+    labelList& owner,
+    labelList& neighbour,
+    wordList& patchNames,
+    labelList& patchSizes,
+    labelList& patchStarts,
+    bool includeEmptyPatches
+) const
+{
+    patchNames = geometryToConformTo_.patchNames();
+
+    patchNames.setSize(patchNames.size() + 1);
+
+    patchNames[patchNames.size() - 1] = "cvMesh_defaultPatch";
+
+    label nPatches = patchNames.size();
+
+    List<DynamicList<face> > patchFaces(nPatches, DynamicList<face>(0));
+
+    List<DynamicList<label> > patchOwners(nPatches, DynamicList<label>(0));
+
+    faces.setSize(number_of_edges());
+
+    owner.setSize(number_of_edges());
+
+    neighbour.setSize(number_of_edges());
+
+    label dualFaceI = 0;
+
+    for
+    (
+        Triangulation::Finite_edges_iterator eit = finite_edges_begin();
+        eit != finite_edges_end();
+        ++eit
+    )
+    {
+        Cell_handle c = eit->first;
+        Vertex_handle vA = c->vertex(eit->second);
+        Vertex_handle vB = c->vertex(eit->third);
+
+        if
+        (
+            vA->internalOrBoundaryPoint()
+            || vB->internalOrBoundaryPoint()
+        )
+        {
+            face newDualFace = buildDualFace(eit);
+
+            if (newDualFace.size() >= 3)
+            {
+
+                label dcA = vA->index();
+
+                if (!vA->internalOrBoundaryPoint())
+                {
+                    dcA = -1;
+                }
+
+                label dcB = vB->index();
+
+                if (!vB->internalOrBoundaryPoint())
+                {
+                    dcB = -1;
+                }
+
+                label dcOwn = -1;
+                label dcNei = -1;
+
+                if (dcA == -1 && dcB == -1)
+                {
+                    FatalErrorIn("calcDualMesh")
+                    << "Attempting to create a face joining "
+                        << "two external dual cells "
+                        << exit(FatalError);
+                }
+                else if (dcA == -1 || dcB == -1)
+                {
+                    // boundary face, find which is the owner
+
+                    if (dcA == -1)
+                    {
+                        dcOwn = dcB;
+
+                        // reverse face order to correctly orientate normal
+                        reverse(newDualFace);
+                    }
+                    else
+                    {
+                        dcOwn = dcA;
+                    }
+
+                    // Find which patch this face is on by finding the
+                    // intersection with the surface of the Delaunay edge
+                    // generating the face and identify the region of the
+                    // intersection.
+
+                    point ptA = topoint(vA->point());
+
+                    point ptB = topoint(vB->point());
+
+                    label patchIndex = geometryToConformTo_.findPatch(ptA, ptB);
+
+                    if (patchIndex == -1)
+                    {
+                        patchIndex = patchNames.size() - 1;
+
+                        WarningIn("Foam::conformalVoronoiMesh::calcDualMesh")
+                            << "Dual face found between Dv pair " << nl
+                            << "    " << ptA << nl
+                            << "    " << ptB << nl
+                            << "    that is not on a surface patch. Adding to "
+                            << patchNames[patchIndex]
+                            << endl;
+                    }
+
+                    patchFaces[patchIndex].append(newDualFace);
+                    patchOwners[patchIndex].append(dcOwn);
+                }
+                else
+                {
+                    // internal face, find the lower cell to be the owner
+
+                    if (dcB > dcA)
+                    {
+                        dcOwn = dcA;
+                        dcNei = dcB;
+                    }
+                    else
+                    {
+                        dcOwn = dcB;
+                        dcNei = dcA;
+
+                        // reverse face order to correctly orientate normal
+                        reverse(newDualFace);
+                    }
+
+                    faces[dualFaceI] = newDualFace;
+
+                    owner[dualFaceI] = dcOwn;
+
+                    neighbour[dualFaceI] = dcNei;
+
+                    dualFaceI++;
+                }
+            }
+        }
+    }
+
+    label nInternalFaces = dualFaceI;
+
+    faces.setSize(nInternalFaces);
+    owner.setSize(nInternalFaces);
+    neighbour.setSize(nInternalFaces);
+
+    timeCheck();
+
+    sortFaces(faces, owner, neighbour);
+
+    timeCheck();
+
+    addPatches
+    (
+        nInternalFaces,
+        faces,
+        owner,
+        patchNames,
+        patchSizes,
+        patchStarts,
+        patchFaces,
+        patchOwners,
+        false
+    );
+
+    removeUnusedPoints(faces, points);
+
+    timeCheck();
+}
 
 
 void Foam::conformalVoronoiMesh::sortFaces

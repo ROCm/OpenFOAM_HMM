@@ -475,6 +475,19 @@ private:
         //- Re-index all of the the Delaunay cells
         void reindexDualVertices(const Map<label>& dualPtIndexMap);
 
+        //- Create all of the internal and boundary faces
+        void createFacesOwnerNeighbourAndPatches
+        (
+            pointField& points,
+            faceList& faces,
+            labelList& owner,
+            labelList& neighbour,
+            wordList& patchNames,
+            labelList& patchSizes,
+            labelList& patchStarts,
+            bool includeEmptyPatches = false
+        ) const;
+
         //- Sort the faces, owner and neighbour lists into
         //  upper-triangular order.  For internal faces only, use
         //  before adding patch faces
