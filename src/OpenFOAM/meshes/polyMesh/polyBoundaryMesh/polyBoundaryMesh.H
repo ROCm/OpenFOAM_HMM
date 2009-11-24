@@ -50,8 +50,6 @@ class polyMesh;
 
 // Forward declaration of friend functions and operators
 
-class polyBoundaryMesh;
-
 Ostream& operator<<(Ostream&, const polyBoundaryMesh&);
 
 

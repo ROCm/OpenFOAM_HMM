@@ -105,6 +105,7 @@ class cuttingPlane
         void walkCellCuts
         (
             const primitiveMesh& mesh,
+            const bool triangulate,
             const UList<label>& edgePoint
         );
 
@@ -122,6 +123,7 @@ protected:
         void reCut
         (
             const primitiveMesh&,
+            const bool triangulate,
             const UList<label>& cellIdLabels = UList<label>::null()
         );
 
@@ -138,6 +140,7 @@ public:
         (
             const plane&,
             const primitiveMesh&,
+            const bool triangulate,
             const UList<label>& cellIdLabels = UList<label>::null()
         );
 
