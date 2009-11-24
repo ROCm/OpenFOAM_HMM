@@ -53,9 +53,8 @@ void Foam::timeActivatedFileUpdate::updateFile()
 
     if (i > lastIndex_)
     {
-        Info<< "\ntimeActivatedFileUpdate: copying file" << nl
-            << timeVsFile_[i].second() << nl << "to:" << nl << fileToUpdate_
-            << nl << endl;
+        Info<< nl << type() << ": copying file" << nl << timeVsFile_[i].second()
+            << nl << "to:" << nl << fileToUpdate_ << nl << endl;
 
         cp(timeVsFile_[i].second(), fileToUpdate_);
         lastIndex_ = i;
@@ -102,7 +101,7 @@ void Foam::timeActivatedFileUpdate::read(const dictionary& dict)
         lastIndex_ = -1;
         fileToUpdate_.expand();
 
-        Info<< "timeActivatedFileUpdate: time vs file list:" << nl;
+        Info<< type() << ": time vs file list:" << nl;
         forAll(timeVsFile_, i)
         {
             timeVsFile_[i].second() = timeVsFile_[i].second().expand();
