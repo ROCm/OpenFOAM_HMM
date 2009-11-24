@@ -33,7 +33,6 @@ Description
 #include "HashPtrTable.H"
 #include "Map.H"
 #include "StaticHashTable.H"
-#include "HashTbl.H"
 #include "cpuTime.H"
 
 using namespace Foam;
@@ -53,7 +52,7 @@ int main(int argc, char *argv[])
     // Map<label> map(2 * nSize);
     // HashTable<label, label, Hash<label> > map(2 * nSize);
     // StaticHashTable<label, label, Hash<label> > map(2 * nSize);
-    HashTbl<label, label, Hash<label> > map(2 * nSize);
+    HashTable<label, label, Hash<label> > map(2 * nSize);
 
     Info<< "Constructed map of size: " << nSize
         << " (size " << map.size() << " capacity " << map.capacity() << ") "

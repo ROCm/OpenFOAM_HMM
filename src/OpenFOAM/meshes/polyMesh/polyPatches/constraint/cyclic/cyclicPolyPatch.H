@@ -176,22 +176,22 @@ protected:
     // Protected Member functions
 
         //- Initialise the calculation of the patch geometry
-        virtual void initGeometry();
+        virtual void initGeometry(PstreamBuffers&);
 
         //- Calculate the patch geometry
-        virtual void calcGeometry();
+        virtual void calcGeometry(PstreamBuffers&);
 
         //- Initialise the patches for moving points
-        virtual void initMovePoints(const pointField&);
+        virtual void initMovePoints(PstreamBuffers&, const pointField&);
 
         //- Correct patches after moving points
-        virtual void movePoints(const pointField&);
+        virtual void movePoints(PstreamBuffers&, const pointField&);
 
         //- Initialise the update of the patch topology
-        virtual void initUpdateMesh();
+        virtual void initUpdateMesh(PstreamBuffers&);
 
         //- Update of the patch topology
-        virtual void updateMesh();
+        virtual void updateMesh(PstreamBuffers&);
 
 public:
 
@@ -391,7 +391,7 @@ public:
 
         //- Initialize ordering for primitivePatch. Does not
         //  refer to *this (except for name() and type() etc.)
-        virtual void initOrder(const primitivePatch&) const;
+        virtual void initOrder(PstreamBuffers&, const primitivePatch&) const;
 
         //- Return new ordering for primitivePatch.
         //  Ordering is -faceMap: for every face
@@ -400,6 +400,7 @@ public:
         //  (faceMap is identity, rotation is 0), true otherwise.
         virtual bool order
         (
+            PstreamBuffers&,
             const primitivePatch&,
             labelList& faceMap,
             labelList& rotation

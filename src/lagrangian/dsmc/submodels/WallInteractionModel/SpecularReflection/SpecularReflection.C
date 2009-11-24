@@ -63,11 +63,11 @@ void Foam::SpecularReflection<CloudType>::correct
     vector nw = wpp.faceAreas()[wpp.whichFace(faceId)];
     nw /= mag(nw);
 
-    scalar magUn = U & nw;
+    scalar U_dot_nw = U & nw;
 
-    if (magUn > 0.0)
+    if (U_dot_nw > 0.0)
     {
-        U -= 2.0*magUn*nw;
+        U -= 2.0*U_dot_nw*nw;
     }
 }
 

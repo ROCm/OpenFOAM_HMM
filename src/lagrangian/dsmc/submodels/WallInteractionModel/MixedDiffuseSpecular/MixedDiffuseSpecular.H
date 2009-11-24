@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,99 +23,81 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::coupledPointPatch
+    Foam::MixedDiffuseSpecular
 
 Description
-    coupled patch for post-processing.  Used as the base class for processor
-    and cyclic pointPatches
-
-SourceFiles
-    coupledPointPatch.C
+    Wall interaction setting microscopic velocity to a random one drawn from a
+    Maxwellian distribution corresponding to a specified temperature
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coupledPointPatch_H
-#define coupledPointPatch_H
+#ifndef MixedDiffuseSpecular_H
+#define MixedDiffuseSpecular_H
 
-#include "coupledPolyPatch.H"
+#include "WallInteractionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-class pointBoundaryMesh;
-
 /*---------------------------------------------------------------------------*\
-                      Class coupledPointPatch Declaration
+                    Class MixedDiffuseSpecular Declaration
 \*---------------------------------------------------------------------------*/
 
-class coupledPointPatch
+template<class CloudType>
+class MixedDiffuseSpecular
+:
+    public WallInteractionModel<CloudType>
 {
-    // Private Member Functions
+    // Private data
 
-        //- Disallow default construct as copy
-        coupledPointPatch(const coupledPointPatch&);
-
-        //- Disallow default assignment
-        void operator=(const coupledPointPatch&);
-
-
-protected:
-
-    // Protected Member Functions
-
-        //- Initialise the calculation of the patch geometry
-        virtual void initGeometry(PstreamBuffers&) = 0;
-
-        //- Calculate the patch geometry
-        virtual void calcGeometry(PstreamBuffers&) = 0;
-
-        //- Initialise the patches for moving points
-        virtual void initMovePoints(PstreamBuffers&, const pointField&) = 0;
-
-        //- Correct patches after moving points
-        virtual void movePoints(PstreamBuffers&, const pointField&) = 0;
-
-        //- Initialise the update of the patch topology
-        virtual void initUpdateMesh(PstreamBuffers&) = 0;
-
-        //- Update of the patch topology
-        virtual void updateMesh(PstreamBuffers&) = 0;
+        //- Fraction of wall interactions that are diffuse
+        scalar diffuseFraction_;
 
 
 public:
 
     //- Runtime type information
-    TypeName(coupledPolyPatch::typeName_());
+    TypeName("MixedDiffuseSpecular");
 
 
     // Constructors
 
-        //- Construct from components
-        coupledPointPatch(const pointBoundaryMesh& bm);
+        //- Construct from dictionary
+        MixedDiffuseSpecular
+        (
+            const dictionary& dict,
+            CloudType& cloud
+        );
 
 
     // Destructor
-
-        virtual ~coupledPointPatch();
+    virtual ~MixedDiffuseSpecular();
 
 
     // Member Functions
 
-        // Access
-
-            //- Return true because this patch is coupled
-            virtual bool coupled() const
-            {
-                return true;
-            }
+        //- Apply wall correction
+        virtual void correct
+        (
+            const wallPolyPatch& wpp,
+            const label faceId,
+            vector& U,
+            scalar& Ei,
+            label typeId
+        );
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "MixedDiffuseSpecular.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

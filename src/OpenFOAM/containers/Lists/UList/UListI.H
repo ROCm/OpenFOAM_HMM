@@ -115,6 +115,20 @@ inline void Foam::UList<T>::checkIndex(const label i) const
 
 
 template<class T>
+inline T& Foam::UList<T>::last()
+{
+    return this->operator[](this->size()-1);
+}
+
+
+template<class T>
+inline const T& Foam::UList<T>::last() const
+{
+    return this->operator[](this->size()-1);
+}
+
+
+template<class T>
 inline const T* Foam::UList<T>::cdata() const
 {
     return v_;

@@ -49,6 +49,7 @@ namespace Foam
 
 class pointBoundaryMesh;
 class pointConstraint;
+class PstreamBuffers;
 
 /*---------------------------------------------------------------------------*\
                       Class pointPatch Declaration
@@ -79,27 +80,27 @@ protected:
         friend class pointBoundaryMesh;
 
         //- Initialise the calculation of the patch geometry
-        virtual void initGeometry()
+        virtual void initGeometry(PstreamBuffers&)
         {}
 
         //- Calculate the patch geometry
-        virtual void calcGeometry()
+        virtual void calcGeometry(PstreamBuffers&)
         {}
 
         //- Initialise the patches for moving points
-        virtual void initMovePoints(const pointField&)
+        virtual void initMovePoints(PstreamBuffers&, const pointField&)
         {}
 
         //- Correct patches after moving points
-        virtual void movePoints(const pointField&)
+        virtual void movePoints(PstreamBuffers&, const pointField&)
         {}
 
         //- Initialise the update of the patch topology
-        virtual void initUpdateMesh()
+        virtual void initUpdateMesh(PstreamBuffers&)
         {}
 
         //- Update of the patch topology
-        virtual void updateMesh()
+        virtual void updateMesh(PstreamBuffers&)
         {}
 
 

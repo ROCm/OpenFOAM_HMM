@@ -26,6 +26,8 @@ Class
     Foam::distribution
 
 Description
+    Accumulating histogram of values.  Specified bin resolution
+    automatic generation of bins.
 
 SourceFiles
     distributionI.H
@@ -59,6 +61,21 @@ class distribution
 
 public:
 
+    //- Runtime type information
+
+        TypeName("distribution");
+
+    // Static functions
+
+        //- write to file
+
+            static void write
+            (
+                const fileName& file,
+                const List<Pair<scalar> >& pairs
+            );
+
+
     // Constructors
 
         //- Construct null
@@ -73,7 +90,7 @@ public:
 
     // Destructor
 
-        ~distribution();
+        virtual ~distribution();
 
 
     // Member Functions
@@ -97,7 +114,7 @@ public:
 
         List<Pair<scalar> > normalisedMinusMean();
 
-        List<Pair<scalar> > normalisedShifted(const scalar shiftValue);
+        List<Pair<scalar> > normalisedShifted(scalar shiftValue);
 
         List<Pair<scalar> > raw();
 

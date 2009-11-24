@@ -91,7 +91,7 @@ oscillatingVelocityPointPatchVectorField
     fixedValuePointPatchField<vector>(ptf, p, iF, mapper),
     amplitude_(ptf.amplitude_),
     omega_(ptf.omega_),
-    p0_(ptf.p0_)
+    p0_(ptf.p0_, mapper)
 {}
 
 

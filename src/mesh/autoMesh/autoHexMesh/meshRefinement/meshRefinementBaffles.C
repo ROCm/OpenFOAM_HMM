@@ -2411,6 +2411,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     }
     syncTools::swapBoundaryFaceList(mesh_, neiCellZone, false);
 
+    // Get per face whether is it master (of a coupled set of faces)
+    PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
+
     // Set owner as no-flip
     forAll(patches, patchI)
     {
@@ -2428,13 +2431,26 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                 label neiZone = neiCellZone[faceI-mesh_.nInternalFaces()];
 
                 bool flip;
-                if (ownZone == max(ownZone, neiZone))
+
+                label maxZone = max(ownZone, neiZone);
+
+                if (maxZone == -1)
                 {
                     flip = false;
                 }
-                else
+                else if (ownZone == neiZone)
+                {
+                    // Can only happen for coupled boundaries. Keep master
+                    // face unflipped.
+                    flip = !isMasterFace[faceI];
+                }
+                else if (neiZone == maxZone)
                 {
                     flip = true;
+                }
+                else
+                {
+                    flip = false;
                 }
 
                 meshMod.setAction

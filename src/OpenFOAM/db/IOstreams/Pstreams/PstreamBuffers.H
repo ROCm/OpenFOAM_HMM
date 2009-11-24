@@ -138,7 +138,8 @@ public:
         void finishedSends(const bool block = true);
 
         //- Mark all sends as having been done. Same as above but also returns
-        //  sizes (bytes) transferred.
+        //  sizes (bytes) transferred. Note:currently only valid for
+        //  non-blocking.
         void finishedSends(labelListList& sizes, const bool block = true);
 
 };
