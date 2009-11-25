@@ -375,8 +375,8 @@ int main(int argc, char *argv[])
 
     bool cellsToSplit = cellsToPyramidise.size();
 
-    //List<Tuple<pointField,point> >
-    //  cellsToCreate(dict.lookup("cellsToCreate"));
+    // List<Tuple2<pointField,point> >
+    //     cellsToCreate(dict.lookup("cellsToCreate"));
 
     Info<< "Read from " << dict.name() << nl
         << "  Boundary cutting module:" << nl
