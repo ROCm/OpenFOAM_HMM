@@ -258,45 +258,6 @@ void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
 }
 
 
-void Foam::fieldValues::faceSource::makeFile()
-{
-    // Create the forces file if not already created
-    if (outputFilePtr_.empty())
-    {
-        if (debug)
-        {
-            Info<< "Creating output file." << endl;
-        }
-
-        // File update
-        if (Pstream::master())
-        {
-            fileName outputDir;
-            if (Pstream::parRun())
-            {
-                // Put in undecomposed case (Note: gives problems for
-                // distributed data running)
-                outputDir =
-                    obr_.time().path()/".."/name_/obr_.time().timeName();
-            }
-            else
-            {
-                outputDir = obr_.time().path()/name_/obr_.time().timeName();
-            }
-
-            // Create directory if does not exist
-            mkDir(outputDir);
-
-            // Open new file at start up
-            outputFilePtr_.reset(new OFstream(outputDir/(type() + ".dat")));
-
-            // Add headers to output data
-            writeFileHeader();
-        }
-    }
-}
-
-
 void Foam::fieldValues::faceSource::writeFileHeader()
 {
     if (outputFilePtr_.valid())
@@ -334,16 +295,9 @@ Foam::fieldValues::faceSource::faceSource
     faceId_(),
     facePatchId_(),
     flipMap_(),
-    outputFilePtr_(NULL),
     weightFieldName_("undefinedWeightedFieldName")
 {
-    if (active_)
-    {
-        initialise(dict);
-
-        // Create the output file if not already created
-        makeFile();
-    }
+    read(dict);
 }
 
 
@@ -357,9 +311,10 @@ Foam::fieldValues::faceSource::~faceSource()
 
 void Foam::fieldValues::faceSource::read(const dictionary& dict)
 {
+    fieldValue::read(dict);
+
     if (active_)
     {
-        fieldValue::read(dict);
         initialise(dict);
     }
 }
@@ -367,13 +322,10 @@ void Foam::fieldValues::faceSource::read(const dictionary& dict)
 
 void Foam::fieldValues::faceSource::write()
 {
+    fieldValue::write();
+
     if (active_)
     {
-        if (log_)
-        {
-            Info<< type() << " " << name_ << " output:" << nl;
-        }
-
         outputFilePtr_()
             << obr_.time().value() << tab
             << sum(filterField(mesh().magSf()));

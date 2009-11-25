@@ -58,7 +58,6 @@ SourceFiles
 #include "NamedEnum.H"
 #include "fieldValue.H"
 #include "labelList.H"
-#include "OFstream.H"
 #include "volFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -114,9 +113,6 @@ private:
         //- Set cells to evaluate based on a patch
         void setPatchCells();
 
-        //- Create the output file if not already created
-        void makeFile();
-
 
 protected:
 
@@ -130,9 +126,6 @@ protected:
 
         //- Local list of cell IDs
         labelList cellId_;
-
-        //- Output file pointer
-        autoPtr<OFstream> outputFilePtr_;
 
 
     // Protected member functions

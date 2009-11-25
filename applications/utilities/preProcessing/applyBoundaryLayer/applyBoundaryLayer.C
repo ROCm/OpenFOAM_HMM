@@ -37,6 +37,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "singlePhaseTransportModel.H"
+#include "RASModel.H"
 #include "wallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,54 +54,14 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("Cbl", "scalar");
     argList::validOptions.insert("writenut", "");
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "createFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    Info<< "Reading field U\n" << endl;
-    volVectorField U
-    (
-        IOobject
-        (
-            "U",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh
-    );
-
-#   include "createPhi.H"
-
-    Info<< "Calculating wall distance field" << endl;
-    volScalarField y = wallDist(mesh).y();
-
-    // Set the mean boundary-layer thickness
-    dimensionedScalar ybl("ybl", dimLength, 0);
-
-    if (args.optionFound("ybl"))
-    {
-        // If the boundary-layer thickness is provided use it
-        ybl.value() = args.optionRead<scalar>("ybl");
-    }
-    else if (args.optionFound("Cbl"))
-    {
-        // Calculate boundary layer thickness as Cbl * mean distance to wall
-        ybl.value() = gAverage(y) * args.optionRead<scalar>("Cbl");
-    }
-    else
-    {
-        FatalErrorIn(args.executable())
-            << "Neither option 'ybl' or 'Cbl' have been provided to calculate"
-               " the boundary-layer thickness"
-            << exit(FatalError);
-    }
-
-    Info<< "\nCreating boundary-layer for U of thickness "
-        << ybl.value() << " m" << nl << endl;
+    Info<< "Time = " << runTime.timeName() << nl << endl;
 
     // Modify velocity by applying a 1/7th power law boundary-layer
     // u/U0 = (y/ybl)^(1/7)
@@ -114,45 +76,18 @@ int main(int argc, char *argv[])
         }
     }
 
-    Info<< "Writing U" << endl;
+    Info<< "Writing U\n" << endl;
     U.write();
 
     // Update/re-write phi
     phi = fvc::interpolate(U) & mesh.Sf();
     phi.write();
 
-    // Read and modify turbulence fields if present
-
-    IOobject epsilonHeader
-    (
-        "epsilon",
-        runTime.timeName(),
-        mesh,
-        IOobject::MUST_READ
-    );
-
-    IOobject kHeader
-    (
-        "k",
-        runTime.timeName(),
-        mesh,
-        IOobject::MUST_READ
-    );
-
-    IOobject nuTildaHeader
-    (
-        "nuTilda",
-        runTime.timeName(),
-        mesh,
-        IOobject::MUST_READ
-    );
-
-    // First calculate nut
-    volScalarField nut
-    (
-        "nut",
-        sqr(kappa*min(y, ybl))*::sqrt(2)*mag(dev(symm(fvc::grad(U))))
-    );
+    // Calculate nut
+    tmp<volScalarField> tnut = turbulence->nut();
+    volScalarField& nut = tnut();
+    volScalarField S = mag(dev(symm(fvc::grad(U))));
+    nut = sqr(kappa*min(y, ybl))*::sqrt(2)*S;
 
     if (args.optionFound("writenut"))
     {
@@ -160,12 +95,69 @@ int main(int argc, char *argv[])
         nut.write();
     }
 
+    // Create G field - used by RAS wall functions
+    volScalarField G("RASModel::G", nut*2*sqr(S));
 
-    // Read and modify turbulence fields if present
+
+    //--- Read and modify turbulence fields
+
+    // Turbulence k
+    tmp<volScalarField> tk = turbulence->k();
+    volScalarField& k = tk();
+    scalar ck0 = pow025(Cmu)*kappa;
+    k = sqr(nut/(ck0*min(y, ybl)));
+    k.correctBoundaryConditions();
+
+    Info<< "Writing k\n" << endl;
+    k.write();
+
+
+    // Turbulence epsilon
+    tmp<volScalarField> tepsilon = turbulence->epsilon();
+    volScalarField& epsilon = tepsilon();
+    scalar ce0 = ::pow(Cmu, 0.75)/kappa;
+    epsilon = ce0*k*sqrt(k)/min(y, ybl);
+    epsilon.correctBoundaryConditions();
+
+    Info<< "Writing epsilon\n" << endl;
+    epsilon.write();
+
+
+    // Turbulence omega
+    IOobject omegaHeader
+    (
+        "omega",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false
+    );
+
+    if (omegaHeader.headerOk())
+    {
+        volScalarField omega(omegaHeader, mesh);
+        omega = epsilon/(Cmu*k);
+        omega.correctBoundaryConditions();
+
+        Info<< "Writing omega\n" << endl;
+        omega.write();
+    }
+
+
+    // Turbulence nuTilda
+    IOobject nuTildaHeader
+    (
+        "nuTilda",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false
+    );
 
     if (nuTildaHeader.headerOk())
     {
-        Info<< "Reading field nuTilda\n" << endl;
         volScalarField nuTilda(nuTildaHeader, mesh);
         nuTilda = nut;
         nuTilda.correctBoundaryConditions();
@@ -174,28 +166,6 @@ int main(int argc, char *argv[])
         nuTilda.write();
     }
 
-    if (kHeader.headerOk() && epsilonHeader.headerOk())
-    {
-        Info<< "Reading field k\n" << endl;
-        volScalarField k(kHeader, mesh);
-
-        Info<< "Reading field epsilon\n" << endl;
-        volScalarField epsilon(epsilonHeader, mesh);
-
-        scalar ck0 = ::pow(Cmu, 0.25)*kappa;
-        k = sqr(nut/(ck0*min(y, ybl)));
-        k.correctBoundaryConditions();
-
-        scalar ce0 = ::pow(Cmu, 0.75)/kappa;
-        epsilon = ce0*k*sqrt(k)/min(y, ybl);
-        epsilon.correctBoundaryConditions();
-
-        Info<< "Writing k\n" << endl;
-        k.write();
-
-        Info<< "Writing epsilon\n" << endl;
-        epsilon.write();
-    }
 
     Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
         << "  ClockTime = " << runTime.elapsedClockTime() << " s"

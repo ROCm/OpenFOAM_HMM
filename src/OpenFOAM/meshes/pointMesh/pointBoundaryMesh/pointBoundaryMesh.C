@@ -28,6 +28,9 @@ License
 #include "polyBoundaryMesh.H"
 #include "facePointPatch.H"
 #include "globalPointPatch.H"
+#include "PstreamBuffers.H"
+#include "lduSchedule.H"
+#include "globalMeshData.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -58,14 +61,46 @@ Foam::pointBoundaryMesh::pointBoundaryMesh
 
 void Foam::pointBoundaryMesh::calcGeometry()
 {
-    forAll(*this, patchi)
-    {
-        operator[](patchi).initGeometry();
-    }
+    PstreamBuffers pBufs(Pstream::defaultCommsType);
 
-    forAll(*this, patchi)
+    if
+    (
+        Pstream::defaultCommsType == Pstream::blocking
+     || Pstream::defaultCommsType == Pstream::nonBlocking
+    )
     {
-        operator[](patchi).calcGeometry();
+        forAll(*this, patchi)
+        {
+            operator[](patchi).initGeometry(pBufs);
+        }
+
+        pBufs.finishedSends();
+
+        forAll(*this, patchi)
+        {
+            operator[](patchi).calcGeometry(pBufs);
+        }
+    }
+    else if (Pstream::defaultCommsType == Pstream::scheduled)
+    {
+        const lduSchedule& patchSchedule = mesh().globalData().patchSchedule();
+
+        // Dummy.
+        pBufs.finishedSends();
+
+        forAll(patchSchedule, patchEvali)
+        {
+            label patchi = patchSchedule[patchEvali].patch;
+
+            if (patchSchedule[patchEvali].init)
+            {
+                operator[](patchi).initGeometry(pBufs);
+            }
+            else
+            {
+                operator[](patchi).calcGeometry(pBufs);
+            }
+        }
     }
 }
 
@@ -97,32 +132,92 @@ Foam::pointBoundaryMesh::globalPatch() const
 
 void Foam::pointBoundaryMesh::movePoints(const pointField& p)
 {
-    pointPatchList& patches = *this;
+    PstreamBuffers pBufs(Pstream::defaultCommsType);
 
-    forAll(patches, patchi)
+    if
+    (
+        Pstream::defaultCommsType == Pstream::blocking
+     || Pstream::defaultCommsType == Pstream::nonBlocking
+    )
     {
-        patches[patchi].initMovePoints(p);
+        forAll(*this, patchi)
+        {
+            operator[](patchi).initMovePoints(pBufs, p);
+        }
+
+        pBufs.finishedSends();
+
+        forAll(*this, patchi)
+        {
+            operator[](patchi).movePoints(pBufs, p);
+        }
     }
-
-    forAll(patches, patchi)
+    else if (Pstream::defaultCommsType == Pstream::scheduled)
     {
-        patches[patchi].movePoints(p);
+        const lduSchedule& patchSchedule = mesh().globalData().patchSchedule();
+
+        // Dummy.
+        pBufs.finishedSends();
+
+        forAll(patchSchedule, patchEvali)
+        {
+            label patchi = patchSchedule[patchEvali].patch;
+
+            if (patchSchedule[patchEvali].init)
+            {
+                operator[](patchi).initMovePoints(pBufs, p);
+            }
+            else
+            {
+                operator[](patchi).movePoints(pBufs, p);
+            }
+        }
     }
 }
 
 
 void Foam::pointBoundaryMesh::updateMesh()
 {
-    pointPatchList& patches = *this;
+    PstreamBuffers pBufs(Pstream::defaultCommsType);
 
-    forAll(patches, patchi)
+    if
+    (
+        Pstream::defaultCommsType == Pstream::blocking
+     || Pstream::defaultCommsType == Pstream::nonBlocking
+    )
     {
-        patches[patchi].initUpdateMesh();
+        forAll(*this, patchi)
+        {
+            operator[](patchi).initUpdateMesh(pBufs);
+        }
+
+        pBufs.finishedSends();
+
+        forAll(*this, patchi)
+        {
+            operator[](patchi).updateMesh(pBufs);
+        }
     }
-
-    forAll(patches, patchi)
+    else if (Pstream::defaultCommsType == Pstream::scheduled)
     {
-        patches[patchi].updateMesh();
+        const lduSchedule& patchSchedule = mesh().globalData().patchSchedule();
+
+        // Dummy.
+        pBufs.finishedSends();
+
+        forAll(patchSchedule, patchEvali)
+        {
+            label patchi = patchSchedule[patchEvali].patch;
+
+            if (patchSchedule[patchEvali].init)
+            {
+                operator[](patchi).initUpdateMesh(pBufs);
+            }
+            else
+            {
+                operator[](patchi).updateMesh(pBufs);
+            }
+        }
     }
 }
 
