@@ -61,7 +61,7 @@ scalar piecewiseLinearRamp::faceAreaWeight(scalar faceAreaFraction) const
     }
     else if (faceAreaFraction < uAF_)
     {
-        return faceAreaFraction/((uAF_ - lAF_)) - 1/((uAF_/lAF_) - 1);
+        return faceAreaFraction/((uAF_ - lAF_)) - lAF_/(uAF_ - lAF_);
     }
     else
     {
