@@ -1836,19 +1836,21 @@ bool Foam::primitiveMesh::checkFaceFaces
 
     if (nErrorDuplicate > 0 || nErrorOrder > 0)
     {
+        // These are actually warnings, not errors.
         if (nErrorDuplicate > 0)
         {
-            Info<< " ***Number of duplicate (not baffle) faces found: "
-                << nErrorDuplicate << endl;
+            Info<< "  <<Number of duplicate (not baffle) faces found: "
+                << nErrorDuplicate
+                << ". This might indicate a problem." << endl;
         }
 
         if (nErrorOrder > 0)
         {
-            Info<< " ***Number of faces with non-consecutive shared points: "
-                << nErrorOrder << endl;
+            Info<< "  <<Number of faces with non-consecutive shared points: "
+                << nErrorOrder << ". This might indicate a problem." << endl;
         }
 
-        return true;
+        return false;   //return true;
     }
     else
     {
