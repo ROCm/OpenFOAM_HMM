@@ -2,7 +2,7 @@
 #
 #+TITLE:             OpenFOAM README for version 1.6
 #+AUTHOR:                      OpenCFD Ltd.
-#+DATE:                         July 2009
+#+DATE:                       November 2009
 #+LINK:                  http://www.opencfd.co.uk
 #+OPTIONS: author:nil ^:{}
 
@@ -168,9 +168,9 @@
   + rm -rf paraview-3.6.1/platforms
   + ./makeParaView
 
-  The PV3FoamReader module is an OpenFOAM utility that can be compiled in the
-  usual manner as follows:
-  + cd $FOAM_UTILITIES/postProcessing/graphics/PV3FoamReader
+  The PV3blockMeshReader and the PV3FoamReader ParaView plugins are compiled
+  as usual for OpenFOAM utilities:
+  + cd $FOAM_UTILITIES/postProcessing/graphics/PV3Readers/
   + ./Allwclean
   + ./Allwmake
 
@@ -187,7 +187,8 @@
     newly built qmake as an argument:
     + makeParaView -qmake <path_to_qmake>
 
-    The user must then recompile the PV3FoamReader module as normal (see above).
+    The user must then recompile the PV3blockMeshReader and the
+    PV3FoamReader plugins as usual (see above).
 
 * Documentation
   http://www.OpenFOAM.org/doc
