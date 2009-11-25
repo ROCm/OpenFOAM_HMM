@@ -180,12 +180,12 @@
     downloads a supported version of Qt /e.g./ 4.3.5 as described in the section
     on "Qt".  The user should unpack the source pack in the $WM_THIRD_PARTY_DIR.
     Then the user can build Qt by executing from within $WM_THIRD_PARTY_DIR:
-    + makeQt
+    + ./makeQt
 
     The user should then compile ParaView using the local version of Qt by
     executing makeParaView with the -qmake option, giving the full path of the
     newly built qmake as an argument:
-    + makeParaView -qmake <path_to_qmake>
+    + ./makeParaView -qmake <path_to_qmake>
 
     The user must then recompile the PV3FoamReader module as normal (see above).
 
