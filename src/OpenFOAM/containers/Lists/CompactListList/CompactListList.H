@@ -191,7 +191,7 @@ public:
             labelList sizes() const;
 
             //- Transfer the contents of the argument CompactListList
-            //  into this CompactListList and annull the argument list.
+            //  into this CompactListList and annul the argument list.
             void transfer(CompactListList<T, Container>&);
 
             //- Transfer the contents to the Xfer container

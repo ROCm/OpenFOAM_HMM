@@ -188,16 +188,16 @@ public:
             inline void append(const UIndirectList<T>&);
 
             //- Transfer the contents of the argument List into this list
-            //  and annull the argument list.
+            //  and annul the argument list.
             void transfer(List<T>&);
 
             //- Transfer the contents of the argument List into this list
-            //  and annull the argument list.
+            //  and annul the argument list.
             template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
             void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
 
             //- Transfer the contents of the argument List into this list
-            //  and annull the argument list.
+            //  and annul the argument list.
             void transfer(SortableList<T>&);
 
             //- Transfer contents to the Xfer container

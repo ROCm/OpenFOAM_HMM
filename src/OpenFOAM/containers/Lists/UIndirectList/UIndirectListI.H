@@ -55,6 +55,34 @@ inline bool Foam::UIndirectList<T>::empty() const
 
 
 template<class T>
+inline T& Foam::UIndirectList<T>::first()
+{
+    return completeList_[addressing_.first()];
+}
+
+
+template<class T>
+inline const T& Foam::UIndirectList<T>::first() const
+{
+    return completeList_[addressing_.first()];
+}
+
+
+template<class T>
+inline T& Foam::UIndirectList<T>::last()
+{
+    return completeList_[addressing_.last()];
+}
+
+
+template<class T>
+inline const T& Foam::UIndirectList<T>::last() const
+{
+    return completeList_[addressing_.last()];
+}
+
+
+template<class T>
 inline const Foam::UList<T>& Foam::UIndirectList<T>::completeList() const
 {
     return completeList_;
