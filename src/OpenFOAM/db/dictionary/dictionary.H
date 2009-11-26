@@ -400,7 +400,7 @@ public:
             //- Clear the dictionary
             void clear();
 
-            //- Transfer the contents of the argument and annull the argument.
+            //- Transfer the contents of the argument and annul the argument.
             void transfer(dictionary&);
 
             //- Transfer contents to the Xfer container
