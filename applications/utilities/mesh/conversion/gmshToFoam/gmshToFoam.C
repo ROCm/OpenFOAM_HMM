@@ -885,7 +885,7 @@ int main(int argc, char *argv[])
     // Now use the patchFaces to patch up the outside faces of the mesh.
 
     // Get the patch for all the outside faces (= default patch added as last)
-    const polyPatch& pp = mesh.boundaryMesh()[mesh.boundaryMesh().size()-1];
+    const polyPatch& pp = mesh.boundaryMesh().last();
 
     // Storage for faceZones.
     List<DynamicList<label> > zoneFaces(patchFaces.size());

@@ -324,7 +324,7 @@ endOfSection               {space}")"{space}
         // point group type skipped
         strtol(endPtr, &endPtr, 16);
 
-        pointi = pointGroupStartIndex[pointGroupStartIndex.size()-1];
+        pointi = pointGroupStartIndex.last();
 
         // reset number of components to default
         pointGroupNumberOfComponents = 3;
@@ -336,11 +336,11 @@ endOfSection               {space}")"{space}
         }
 
         Info<< "PointGroup: "
-            << pointGroupZoneID[pointGroupZoneID.size()-1]
+            << pointGroupZoneID.last()
             << " start: "
-            << pointGroupStartIndex[pointGroupStartIndex.size()-1]
+            << pointGroupStartIndex.last()
             << " end: "
-            << pointGroupEndIndex[pointGroupEndIndex.size()-1] << flush;
+            << pointGroupEndIndex.last() << flush;
     }
 
 <readNumberOfPoints,readPointGroupData>{endOfSection} {
@@ -387,14 +387,14 @@ endOfSection               {space}")"{space}
         Info<< "done." << endl;
 
         // check read of points
-        if (pointi != pointGroupEndIndex[pointGroupEndIndex.size()-1]+1)
+        if (pointi != pointGroupEndIndex.last()+1)
         {
             Warning
                 << "Problem with reading points: " << nl
                 << "    start index: "
-                << pointGroupStartIndex[pointGroupStartIndex.size()-1]
+                << pointGroupStartIndex.last()
                 << " end index: "
-                << pointGroupEndIndex[pointGroupEndIndex.size()-1]
+                << pointGroupEndIndex.last()
                 << " last points read: " << pointi << nl
                 << "    on line " << lineNo << endl;
         }
@@ -440,14 +440,14 @@ endOfSection               {space}")"{space}
 
         faceGroupElementType = strtol(endPtr, &endPtr, 16);
 
-        facei = faceGroupStartIndex[faceGroupStartIndex.size()-1];
+        facei = faceGroupStartIndex.last();
 
         Info<< "FaceGroup: "
-            << faceGroupZoneID[faceGroupZoneID.size()-1]
+            << faceGroupZoneID.last()
             << " start: "
-            << faceGroupStartIndex[faceGroupStartIndex.size()-1]
+            << faceGroupStartIndex.last()
             << " end: "
-            << faceGroupEndIndex[faceGroupEndIndex.size()-1] << flush;
+            << faceGroupEndIndex.last() << flush;
     }
 
 <readNumberOfFaces,readFaceGroupData>{space}{endOfSection} {
@@ -507,14 +507,14 @@ endOfSection               {space}")"{space}
         Info<< "done." << endl;
 
         // check read of fluentFaces
-        if (facei != faceGroupEndIndex[faceGroupEndIndex.size()-1]+1)
+        if (facei != faceGroupEndIndex.last()+1)
         {
             Warning
                 << "Problem with reading fluentFaces: " << nl
                 << "    start index: "
-                << faceGroupStartIndex[faceGroupStartIndex.size()-1]
+                << faceGroupStartIndex.last()
                 << " end index: "
-                << faceGroupEndIndex[faceGroupEndIndex.size()-1]
+                << faceGroupEndIndex.last()
                 << " last fluentFaces read: " << facei << nl
                 << "    on line " << lineNo << endl;
         }
@@ -560,13 +560,13 @@ endOfSection               {space}")"{space}
         cellGroupType.append(strtol(endPtr, &endPtr, 16));
 
         Info<< "CellGroup: "
-            << cellGroupZoneID[cellGroupZoneID.size()-1]
+            << cellGroupZoneID.last()
             << " start: "
-            << cellGroupStartIndex[cellGroupStartIndex.size()-1]
+            << cellGroupStartIndex.last()
             << " end: "
-            << cellGroupEndIndex[cellGroupEndIndex.size()-1]
+            << cellGroupEndIndex.last()
             << " type: "
-            << cellGroupType[cellGroupType.size()-1]
+            << cellGroupType.last()
             << endl;
     }
 
@@ -587,13 +587,13 @@ endOfSection               {space}")"{space}
         strtol(endPtr, &endPtr, 16);
 
         Info<< "CellGroup: "
-            << cellGroupZoneID[cellGroupZoneID.size()-1]
+            << cellGroupZoneID.last()
             << " start: "
-            << cellGroupStartIndex[cellGroupStartIndex.size()-1]
+            << cellGroupStartIndex.last()
             << " end: "
-            << cellGroupEndIndex[cellGroupEndIndex.size()-1]
+            << cellGroupEndIndex.last()
             << " type: "
-            << cellGroupType[cellGroupType.size()-1]
+            << cellGroupType.last()
             << endl;
     }
 

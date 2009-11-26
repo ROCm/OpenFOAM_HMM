@@ -87,7 +87,7 @@ int USERD_set_filenames
 
     // set the number of fields and store their names
     // a valid field must exist for all time-steps
-    runTime.setTime(timeDirs[timeDirs.size()-1], timeDirs.size()-1);
+    runTime.setTime(timeDirs.last(), timeDirs.size()-1);
     IOobjectList objects(*meshPtr, runTime.timeName());
 
     fieldNames = objects.names();

@@ -165,7 +165,7 @@ void Foam::hierarchGeomDecomp::calculateSortedWeightedSizes
     // Non-dimensionalise and multiply by size.
     scalar globalCurrentLength = returnReduce
     (
-        sortedWeightedSizes[current.size()], 
+        sortedWeightedSizes[current.size()],
         sumOp<scalar>()
     );
     // Normalise weights by global sum of weights and multiply through
@@ -238,7 +238,7 @@ void Foam::hierarchGeomDecomp::findBinary
         if (returnReduce(hasNotChanged, andOp<bool>()))
         {
             WarningIn("hierarchGeomDecomp::findBinary(..)")
-                << "unable to find desired deomposition split, making do!" 
+                << "unable to find desired deomposition split, making do!"
                 << endl;
             break;
         }
@@ -288,7 +288,7 @@ void Foam::hierarchGeomDecomp::findBinary
             Pout<< "    low:" << low << " lowValue:" << lowValue
                 << " high:" << high << " highValue:" << highValue
                 << " mid:" << mid << " midValue:" << midValue << endl
-                << "    globalSize:" << weightedSize 
+                << "    globalSize:" << weightedSize
                 << " wantedSize:" << wantedSize
                 << " sizeTol:" << sizeTol << endl;
         }
@@ -318,7 +318,7 @@ void Foam::hierarchGeomDecomp::findBinary
         if (returnReduce(hasNotChanged, andOp<bool>()))
         {
             WarningIn("hierarchGeomDecomp::findBinary(..)")
-                << "unable to find desired deomposition split, making do!" 
+                << "unable to find desired deomposition split, making do!"
                 << endl;
             break;
         }
@@ -375,7 +375,7 @@ void Foam::hierarchGeomDecomp::sortComponent
     (
         (
             sortedCoord.size()
-          ? sortedCoord[sortedCoord.size()-1]
+          ? sortedCoord.last()
           : -GREAT
         ),
         maxOp<scalar>()
@@ -562,14 +562,14 @@ void Foam::hierarchGeomDecomp::sortComponent
     (
         (
             sortedCoord.size()
-          ? sortedCoord[sortedCoord.size()-1]
+          ? sortedCoord.last()
           : -GREAT
         ),
         maxOp<scalar>()
     );
 
     if (debug)
-    {   
+    {
         Pout<< "sortComponent : minCoord:" << minCoord
             << " maxCoord:" << maxCoord << endl;
     }
@@ -592,7 +592,7 @@ void Foam::hierarchGeomDecomp::sortComponent
 
         // Value at right of bin (leftIndex+localSize-1)
         scalar rightCoord = -GREAT;
-        
+
         if (bin == n_[compI]-1)
         {
             // Last bin. Copy all.
@@ -602,7 +602,7 @@ void Foam::hierarchGeomDecomp::sortComponent
         else
         {
             // For the current bin (starting at leftCoord) we want a rightCoord
-            // such that the sum of all weighted sizes are 
+            // such that the sum of all weighted sizes are
             // globalCurrentLength/n_[compI].
             // We have to iterate to obtain this.
 

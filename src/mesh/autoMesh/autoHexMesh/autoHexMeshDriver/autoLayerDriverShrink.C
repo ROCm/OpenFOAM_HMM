@@ -835,7 +835,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
                                 vector::zero    // passive data
                             )
                         );
-                        pointMedialDist[pointI] = maxInfo[maxInfo.size()-1];
+                        pointMedialDist[pointI] = maxInfo.last();
                     }
                 }
             }
@@ -879,7 +879,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
                                 vector::zero    // passive data
                             )
                         );
-                        pointMedialDist[pointI] = maxInfo[maxInfo.size()-1];
+                        pointMedialDist[pointI] = maxInfo.last();
                     }
                 }
             }

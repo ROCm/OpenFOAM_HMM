@@ -62,7 +62,7 @@ bool Foam::combineFaces::convexFace
     n /= mag(n);
 
     // Get edge from f[0] to f[size-1];
-    vector ePrev(points[f[0]] - points[f[f.size()-1]]);
+    vector ePrev(points[f.first()] - points[f.last()]);
     scalar magEPrev = mag(ePrev);
     ePrev /= magEPrev + VSMALL;
 

@@ -213,7 +213,7 @@ Foam::edgeSurface::edgeSurface
             (
                 edge
                 (
-                    extraVerts[extraVerts.size()-1] + nSurfacePoints_,
+                    extraVerts.last() + nSurfacePoints_,
                     e.end()
                 )
             );

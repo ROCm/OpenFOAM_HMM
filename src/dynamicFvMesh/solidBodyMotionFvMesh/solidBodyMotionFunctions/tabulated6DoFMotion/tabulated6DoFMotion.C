@@ -88,14 +88,14 @@ Foam::solidBodyMotionFunctions::tabulated6DoFMotion::transformation() const
             << exit(FatalError);
     }
 
-    if (t > times_[times_.size()-1])
+    if (t > times_.last())
     {
         FatalErrorIn
         (
             "solidBodyMotionFunctions::tabulated6DoFMotion::transformation()"
         )   << "current time (" << t
             << ") is greater than the maximum in the data table ("
-            << times_[times_.size()-1] << ')'
+            << times_.last() << ')'
             << exit(FatalError);
     }
 

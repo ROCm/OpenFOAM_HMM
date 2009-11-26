@@ -129,7 +129,7 @@ void Foam::Time::setControls()
         {
             if (timeDirs.size())
             {
-                startTime_ = timeDirs[timeDirs.size()-1].value();
+                startTime_ = timeDirs.last().value();
             }
         }
         else
@@ -419,9 +419,9 @@ Foam::instant Foam::Time::findClosestTime(const scalar t) const
     {
         return timeDirs[1];
     }
-    else if (t > timeDirs[timeDirs.size()-1].value())
+    else if (t > timeDirs.last().value())
     {
-        return timeDirs[timeDirs.size()-1];
+        return timeDirs.last();
     }
 
     label nearestIndex = -1;

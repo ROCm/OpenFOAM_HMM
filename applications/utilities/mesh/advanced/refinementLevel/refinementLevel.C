@@ -126,41 +126,41 @@ int main(int argc, char *argv[])
     // Create bin0. Have upperlimit as factor times lowerlimit.
     bins.append(DynamicList<label>());
     lowerLimits.append(sortedVols[0]);
-    upperLimits.append(1.1*lowerLimits[lowerLimits.size()-1]);
+    upperLimits.append(1.1 * lowerLimits.last());
 
     forAll(sortedVols, i)
     {
-        if (sortedVols[i] > upperLimits[upperLimits.size()-1])
+        if (sortedVols[i] > upperLimits.last())
         {
             // New value outside of current bin
 
             // Shrink old bin.
-            DynamicList<label>& bin = bins[bins.size()-1];
+            DynamicList<label>& bin = bins.last();
 
             bin.shrink();
 
             Info<< "Collected " << bin.size() << " elements in bin "
-                << lowerLimits[lowerLimits.size()-1] << " .. "
-                << upperLimits[upperLimits.size()-1] << endl;
+                << lowerLimits.last() << " .. "
+                << upperLimits.last() << endl;
 
             // Create new bin.
             bins.append(DynamicList<label>());
             lowerLimits.append(sortedVols[i]);
-            upperLimits.append(1.1*lowerLimits[lowerLimits.size()-1]);
+            upperLimits.append(1.1 * lowerLimits.last());
 
-            Info<< "Creating new bin " << lowerLimits[lowerLimits.size()-1]
-                << " .. " << upperLimits[upperLimits.size()-1]
+            Info<< "Creating new bin " << lowerLimits.last()
+                << " .. " << upperLimits.last()
                 << endl;
         }
 
         // Append to current bin.
-        DynamicList<label>& bin = bins[bins.size()-1];
+        DynamicList<label>& bin = bins.last();
 
         bin.append(sortedVols.indices()[i]);
     }
     Info<< endl;
 
-    bins[bins.size()-1].shrink();
+    bins.last().shrink();
     bins.shrink();
     lowerLimits.shrink();
     upperLimits.shrink();

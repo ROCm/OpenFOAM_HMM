@@ -47,7 +47,7 @@ void Foam::polyLine::calcDistances()
         }
 
         // normalize
-        lineLength_ = distances_[distances_.size()-1];
+        lineLength_ = distances_.last();
         for (label i=1; i<distances_.size(); i++)
         {
             distances_[i] /= lineLength_;
@@ -95,7 +95,7 @@ Foam::vector Foam::polyLine::position(const scalar lambda) const
     }
     else if (lambda > 1 - SMALL)
     {
-        return controlPoints_[controlPoints_.size()-1];
+        return controlPoints_.last();
     }
 
 

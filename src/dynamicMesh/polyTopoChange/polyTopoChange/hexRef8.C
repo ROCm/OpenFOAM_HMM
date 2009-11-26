@@ -2222,7 +2222,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
                     faceCount
                 )
             );
-            allFaceInfo[faceI] = seedFacesInfo[seedFacesInfo.size()-1];
+            allFaceInfo[faceI] = seedFacesInfo.last();
         }
         else
         {
@@ -2238,7 +2238,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
                     faceCount
                 )
             );
-            allFaceInfo[faceI] = seedFacesInfo[seedFacesInfo.size()-1];
+            allFaceInfo[faceI] = seedFacesInfo.last();
         }
     }
 

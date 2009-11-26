@@ -377,7 +377,7 @@ void Foam::surfMesh::checkZones()
                 << " ... extending final zone"
                 << endl;
 
-            zones[zones.size()-1].size() += count - nFaces();
+            zones.last().size() += count - nFaces();
         }
         else if (count > size())
         {
