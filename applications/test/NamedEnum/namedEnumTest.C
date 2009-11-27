@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     namedEnumTest::options hmm(namedEnumTest::namedEnum.read(Sin));
     Info<< namedEnumTest::namedEnum[hmm] << endl;
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

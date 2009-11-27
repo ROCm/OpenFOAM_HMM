@@ -50,14 +50,14 @@ int main(int argc, char *argv[])
 
     label nAveragingSteps = 0;
 
-    Info << "\nStarting time loop\n" << endl;
+    Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.loop())
     {
 
         nAveragingSteps++;
 
-        Info << "Time = " << runTime.timeName() << endl;
+        Info<< "Time = " << runTime.timeName() << endl;
 
         molecules.evolve();
 
@@ -74,12 +74,12 @@ int main(int argc, char *argv[])
             nAveragingSteps = 0;
         }
 
-        Info << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
             << nl << endl;
     }
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

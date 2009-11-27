@@ -70,7 +70,7 @@ void hexBlock::setHandedness()
                     }
                     else
                     {
-                        Info << "Left-handed block." << endl;
+                        Info<< "Left-handed block." << endl;
                         blockHandedness_ = left;
                     }
                     return;

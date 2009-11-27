@@ -341,7 +341,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    Info<< nl << "End" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

@@ -616,7 +616,7 @@ void Foam::parcel::updateParcelProperties
                     {
                         if (n>100)
                         {
-                            Info << "n = " << n << ", T = " << Td << ", pv = " << pAtSurface << endl;
+                            Info<< "n = " << n << ", T = " << Td << ", pv = " << pAtSurface << endl;
                         }
                     }
                 }

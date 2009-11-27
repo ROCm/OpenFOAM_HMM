@@ -12,27 +12,36 @@
     + 80 character lines max
     + The body of control statements (eg, if, else, while, etc).
       always delineated with brace brackets
+    + Use spaces for indentation, not tab characters.
+    + The normal indentation is 4 spaces per logical level.
+    + Avoid trailing whitespace.
 
     + stream output
-      << is always four characters after the start of the stream, so that the <<
-      symbols align, i.e.
+      << is always four characters after the start of the stream,
+      so that the << symbols align, i.e.
 
-      Info<<
-      os  <<
-
+#+BEGIN_EXAMPLE
+      Info<< ...
+      os  << ...
+#+END_EXAMPLE
 
       so
 
+#+BEGIN_EXAMPLE
       WarningIn("className::functionName()")
           << "Warning message"
+#+END_EXAMPLE
 
       NOT
 
+#+BEGIN_EXAMPLE
       WarningIn("className::functionName()")
       << "Warning message"
+#+END_EXAMPLE
 
     + no unnecessary class section headers, i.e. remove
 
+#+BEGIN_EXAMPLE
       // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
       // Check
@@ -40,20 +49,25 @@
       // Edit
 
       // Write
+#+END_EXAMPLE
 
       if they contain nothing, even if planned for 'future use'
 
     + class titles are centred
 
+#+BEGIN_EXAMPLE
      /*---------------------------------------------------------------------------*\
                              Class exampleClass Declaration
      \*---------------------------------------------------------------------------*/
+#+END_EXAMPLE
 
     NOT
 
+#+BEGIN_EXAMPLE
      /*---------------------------------------------------------------------------*\
                     Class exampleClass Declaration
      \*---------------------------------------------------------------------------*/
+#+END_EXAMPLE
 
 *** .H Files
     + header file spacing
@@ -64,20 +78,25 @@
     + destructor
       If adding a comment to the destructor - use //- and code as a normal function:
 
+#+BEGIN_EXAMPLE
       //- Destructor
       ~className();
+#+END_EXAMPLE
     + inline functions
       Use inline functions where appropriate in a separate classNameI.H file.
-      Do not clutter up the header file with function bodies
+      Avoid cluttering the header file with function bodies.
 
 *** .C Files
     + Do not open/close namespaces in a .C file
       Fully scope the function name, i.e.
 
+#+BEGIN_EXAMPLE
       Foam::returnType Foam::className::functionName()
+#+END_EXAMPLE
 
       NOT
 
+#+BEGIN_EXAMPLE
       namespace Foam
       {
           ...
@@ -86,12 +105,14 @@
 
           ...
       }
+#+END_EXAMPLE
 
       EXCEPTION
 
       When there are multiple levels of namespace, they may be used in the .C
       file, i.e.
 
+#+BEGIN_EXAMPLE
       namespace Foam
       {
       namespace compressible
@@ -104,33 +125,41 @@
       } // End namespace RASModels
       } // End namespace compressible
       } // End namespace Foam
+#+END_EXAMPLE
 
     + Use two empty lines between functions
 
 *** Coding Practise
     + passing data as arguments or return
-      Pass label and scalar as copy, anything bigger by reference
+      Pass bool, label and scalar as copy, anything larger by reference.
     + const
       Use everywhere it is applicable.
     + variable initialisation using "="
 
+#+BEGIN_EXAMPLE
       const className& variableName = otherClass.data();
+#+END_EXAMPLE
 
       NOT
 
+#+BEGIN_EXAMPLE
       const className& variableName(otherClass.data());
+#+END_EXAMPLE
 
     + virtual functions
       If a class is virtual - make all derived classes virtual.
 
 *** Conditional Statements
+#+BEGIN_EXAMPLE
     if (condition)
     {
         code;
     }
+#+END_EXAMPLE
 
     OR
 
+#+BEGIN_EXAMPLE
     if
     (
        long condition
@@ -138,22 +167,28 @@
     {
         code;
     }
+#+END_EXAMPLE
 
     NOT (no space between "if" and "(")
 
+#+BEGIN_EXAMPLE
     if(condition)
     {
         code;
     }
+#+END_EXAMPLE
 
 *** `for' Loops
+#+BEGIN_EXAMPLE
     for (i = 0; i < maxI; i++)
     {
         code;
     }
+#+END_EXAMPLE
 
     OR
 
+#+BEGIN_EXAMPLE
     for
     (
         i = 0;
@@ -163,86 +198,111 @@
     {
         code;
     }
+#+END_EXAMPLE
 
     NOT (no space between "for" and "(")
 
+#+BEGIN_EXAMPLE
     for(i = 0; i < maxI; i++)
     {
         code;
     }
+#+END_EXAMPLE
 
 *** `forAll' loops
     like for loops, but
 
+#+BEGIN_EXAMPLE
     forAll(
+#+END_EXAMPLE
 
     NOT
 
+#+BEGIN_EXAMPLE
     forAll (
+#+END_EXAMPLE
 
 *** Splitting Over Multiple Lines
    + splitting return type and function name
      + split initially after the function return type and left align
 
-     + do not put "const" onto it's own line - use a split to keep it with the
+     + do not put "const" onto its own line - use a split to keep it with the
        function name and arguments.
 
      so:
 
+#+BEGIN_EXAMPLE
      const Foam::longReturnTypeName&
      Foam::longClassName::longFunctionName const
+#+END_EXAMPLE
 
      NOT
 
+#+BEGIN_EXAMPLE
      const Foam::longReturnTypeName&
          Foam::longClassName::longFunctionName const
+#+END_EXAMPLE
 
      NOR
 
+#+BEGIN_EXAMPLE
      const Foam::longReturnTypeName& Foam::longClassName::longFunctionName
      const
+#+END_EXAMPLE
 
      NOR
 
+#+BEGIN_EXAMPLE
      const Foam::longReturnTypeName& Foam::longClassName::
      longFunctionName const
+#+END_EXAMPLE
 
 
      + if need to split again, split at the function name (leaving behind the
-         preceding scoping "::"'s), and again, left align, i.e.
+         preceding scoping "::"s), and again, left align, i.e.
 
+#+BEGIN_EXAMPLE
        const Foam::longReturnTypeName&
        Foam::veryveryveryverylongClassName::
        veryveryveryverylongFunctionName const
+#+END_EXAMPLE
 
    + splitting long lines at an "="
 
      Indent after split
 
+#+BEGIN_EXAMPLE
      variableName =
          longClassName.longFunctionName(longArgument);
+#+END_EXAMPLE
 
      OR (where necessary)
 
+#+BEGIN_EXAMPLE
      variableName =
          longClassName.longFunctionName
          (
              longArgument1,
              longArgument2
          );
+#+END_EXAMPLE
 
      NOT
 
+#+BEGIN_EXAMPLE
      variableName =
      longClassName.longFunctionName(longArgument);
+#+END_EXAMPLE
 
      NOR
 
+#+BEGIN_EXAMPLE
      variableName = longClassName.longFunctionName
      (
          longArgument1,
          longArgument2
      );
+#+END_EXAMPLE
 
 *** Maths and Logic
     + operator spacing
@@ -258,18 +318,34 @@
       with the operator on the lower line.  Align operator so that first
       variable, function or bracket on the next line is 4 spaces indented i.e.
 
+#+BEGIN_EXAMPLE
       variableName =
-          a*(a + b)
+          a * (a + b)
         - exp(c/d)
-         *(k + t)
+        * (k + t);
+#+END_EXAMPLE
+
+      This is sometime more legible when surrounded by extra parentheses:
+
+#+BEGIN_EXAMPLE
+      variableName =
+      (
+          a * (a + b)
+        - exp(c/d)
+        * (k + t)
+      );
+#+END_EXAMPLE
 
     + splitting logical tests over several lines
 
-      indent operator so that the next variable to test is aligned with the
-      four space indentation, i.e.
+      outdent the operator so that the next variable to test is aligned with
+      the four space indentation, i.e.
 
+#+BEGIN_EXAMPLE
       if
       (
           a == true
        && b == c
       )
+#+END_EXAMPLE
+

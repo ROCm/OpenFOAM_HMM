@@ -177,9 +177,9 @@ void Foam::multiHoleInjector::setTangentialVectors()
     }
     vector yp = zp^xp;
 
-//    Info << "xp = " << xp << endl;
-//    Info << "yp = " << yp << endl;
-//    Info << "zp = " << zp << endl;
+//    Info<< "xp = " << xp << endl;
+//    Info<< "yp = " << yp << endl;
+//    Info<< "zp = " << zp << endl;
 
     scalar angle = 0.0;
     scalar u = degToRad(umbrellaAngle_/2.0);

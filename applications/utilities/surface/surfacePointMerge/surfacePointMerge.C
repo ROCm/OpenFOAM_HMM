@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 
     cleanSurf.write(outFileName);
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

@@ -11,47 +11,47 @@ int USERD_get_part_elements_by_type
         << "element_type = " << element_type;
     if (element_type == Z_HEX08)
     {
-        Info << " Z_HEX08";
+        Info<< " Z_HEX08";
     }
     else if (element_type == Z_PEN06)
     {
-        Info << " Z_PEN06";
+        Info<< " Z_PEN06";
     }
     else if (element_type == Z_PYR05)
     {
-        Info << " Z_PYR05";
+        Info<< " Z_PYR05";
     }
     else if (element_type == Z_TET04)
     {
-        Info << " Z_TET04";
+        Info<< " Z_TET04";
     }
     else if (element_type == Z_TRI03)
     {
-        Info << " Z_TRI03";
+        Info<< " Z_TRI03";
     }
     else if (element_type == Z_QUA04)
     {
-        Info << " Z_QUA04";
+        Info<< " Z_QUA04";
     }
     else if (element_type == Z_NFACED)
     {
-        Info << " Z_NFACED";
+        Info<< " Z_NFACED";
     }
     else if (element_type == Z_NSIDED)
     {
-        Info << " Z_NSIDED";
+        Info<< " Z_NSIDED";
     }
     else
     {
-        Info << " unknown";
+        Info<< " unknown";
     }
-    Info << endl << flush;
+    Info<< endl << flush;
 #   endif
 
     if (part_number == 1)
     {
         const cellShapeList& cellShapes = meshPtr->cellShapes();
-        
+
         //================================
         // hexahedron
         //================================
@@ -64,7 +64,7 @@ int USERD_get_part_elements_by_type
             {
                 const cellShape& cellShape = cellShapes[celli];
                 const cellModel& cellModel = cellShape.model();
-                
+
                 if (cellModel == hex)
                 {
                     forAll(cellShape, ip)
@@ -87,7 +87,7 @@ int USERD_get_part_elements_by_type
             {
                 const cellShape& cellShape = cellShapes[celli];
                 const cellModel& cellModel = cellShape.model();
-                
+
                 if (cellModel == prism)
                 {
                     forAll(cellShape, ip)
@@ -110,7 +110,7 @@ int USERD_get_part_elements_by_type
             {
                 const cellShape& cellShape = cellShapes[celli];
                 const cellModel& cellModel = cellShape.model();
-                
+
                 if (cellModel == pyr)
                 {
                     forAll(cellShape, ip)
@@ -133,7 +133,7 @@ int USERD_get_part_elements_by_type
             {
                 const cellShape& cellShape = cellShapes[celli];
                 const cellModel& cellModel = cellShape.model();
-                
+
                 if (cellModel == tet)
                 {
                     forAll(cellShape, ip)

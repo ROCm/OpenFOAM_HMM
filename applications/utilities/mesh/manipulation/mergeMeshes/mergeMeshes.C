@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
     masterMesh.merge();
     masterMesh.polyMesh::write();
 
-    Info << nl << "End" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

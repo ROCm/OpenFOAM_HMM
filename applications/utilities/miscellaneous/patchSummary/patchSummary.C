@@ -98,11 +98,11 @@ int main(int argc, char *argv[])
             outputFieldList<sphericalTensor>(vsptf, patchI);
             outputFieldList<symmTensor>(vsytf, patchI);
             outputFieldList<tensor>(vtf, patchI);
-            Info << endl;
+            Info<< endl;
         }
     }
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

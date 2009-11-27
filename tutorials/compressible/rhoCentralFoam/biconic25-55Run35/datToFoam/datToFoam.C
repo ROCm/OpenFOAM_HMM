@@ -143,11 +143,11 @@ int main(int argc, char *argv[])
         pointsWedge[i+nPointsij] = cmptMultiply(vector(1.0, 1.0, -1.0), pointsWedge[i]);
     }
 
-    Info << "Writing points to: " << nl
+    Info<< "Writing points to: " << nl
          << "    " << pointsFile << endl;
     pFile << pointsWedge;
 
-    Info << "End" << endl;
+    Info<< "End" << endl;
 
     return 0;
 }

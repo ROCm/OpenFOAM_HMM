@@ -62,7 +62,7 @@ void writePoints(const polyMesh& mesh, const fileName& timeName)
 
     fileName pointFile(mesh.time().path()/"meshPoints_" + timeName + ".obj");
 
-    Info << "Writing mesh points and edges to " << pointFile << endl;
+    Info<< "Writing mesh points and edges to " << pointFile << endl;
 
     OFstream pointStream(pointFile);
 
@@ -91,7 +91,7 @@ void writePoints
 {
     fileName fName(mesh.time().path()/"meshPoints_" + timeName + ".obj");
 
-    Info << "Writing mesh points and edges to " << fName << endl;
+    Info<< "Writing mesh points and edges to " << fName << endl;
 
     OFstream str(fName);
 
@@ -162,7 +162,7 @@ void writePoints
       / "meshPoints_" + timeName + '_' + name(cellI) + ".obj"
     );
 
-    Info << "Writing mesh points and edges to " << fName << endl;
+    Info<< "Writing mesh points and edges to " << fName << endl;
 
     OFstream pointStream(fName);
 
@@ -182,7 +182,7 @@ void writeFaceCentres(const polyMesh& mesh,const fileName& timeName)
       / "meshFaceCentres_" + timeName + ".obj"
     );
 
-    Info << "Writing mesh face centres to " << faceFile << endl;
+    Info<< "Writing mesh face centres to " << faceFile << endl;
 
     OFstream faceStream(faceFile);
 
@@ -200,7 +200,7 @@ void writeCellCentres(const polyMesh& mesh, const fileName& timeName)
         mesh.time().path()/"meshCellCentres_" + timeName + ".obj"
     );
 
-    Info << "Writing mesh cell centres to " << cellFile << endl;
+    Info<< "Writing mesh cell centres to " << cellFile << endl;
 
     OFstream cellStream(cellFile);
 
@@ -228,7 +228,7 @@ void writePatchCentres
             mesh.time().path()/"patch_" + pp.name() + '_' + timeName + ".obj"
         );
 
-        Info << "Writing patch face centres to " << faceFile << endl;
+        Info<< "Writing patch face centres to " << faceFile << endl;
 
         OFstream patchFaceStream(faceFile);
 
@@ -258,7 +258,7 @@ void writePatchFaces
           / "patchFaces_" + pp.name() + '_' + timeName + ".obj"
         );
 
-        Info << "Writing patch faces to " << faceFile << endl;
+        Info<< "Writing patch faces to " << faceFile << endl;
 
         OFstream patchFaceStream(faceFile);
 
@@ -301,7 +301,7 @@ void writePatchBoundaryEdges
           / "patchEdges_" + pp.name() + '_' + timeName + ".obj"
         );
 
-        Info << "Writing patch edges to " << edgeFile << endl;
+        Info<< "Writing patch edges to " << edgeFile << endl;
 
         OFstream patchEdgeStream(edgeFile);
 
@@ -351,7 +351,7 @@ void writePointCells
       / "pointEdges_" + timeName + '_' + name(pointI) + ".obj"
     );
 
-    Info << "Writing pointEdges to " << pFile << endl;
+    Info<< "Writing pointEdges to " << pFile << endl;
 
     OFstream pointStream(pFile);
 
@@ -492,7 +492,7 @@ int main(int argc, char *argv[])
                   + ".obj"
                 );
 
-                Info << "Writing mesh points and edges to " << fName << endl;
+                Info<< "Writing mesh points and edges to " << fName << endl;
 
                 OFstream str(fName);
 
@@ -506,7 +506,7 @@ int main(int argc, char *argv[])
             }
             else if
             (
-                !patchFaces 
+                !patchFaces
              && !patchEdges
              && !doCell
              && !doPoint
@@ -530,14 +530,14 @@ int main(int argc, char *argv[])
         }
         else
         {
-            Info << "No mesh." << endl;
+            Info<< "No mesh." << endl;
         }
 
-        Info << nl << endl;
+        Info<< nl << endl;
     }
 
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

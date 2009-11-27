@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
     Info<< nl << "Analytical: y(2.0) = " << yEnd << endl;
     Info      << "Numerical:  y(2.0) = " << y << ", hEst = " << hEst << endl;
 
-    Info << "\nEnd\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

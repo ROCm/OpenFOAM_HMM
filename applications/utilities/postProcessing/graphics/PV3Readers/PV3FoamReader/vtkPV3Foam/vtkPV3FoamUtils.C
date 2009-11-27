@@ -363,7 +363,7 @@ void Foam::vtkPV3Foam::printMemory()
             }
         }
 
-        Info << "memUsed: " << (memTotal - memFree) << " kB\n";
+        Info<< "memUsed: " << (memTotal - memFree) << " kB\n";
     }
 }
 

@@ -13,7 +13,7 @@ int USERD_get_gold_part_build_info
 )
 {
 #ifdef ENSIGHTDEBUG
-    Info << "Entering: USERD_get_gold_part_build_info" << endl << flush;
+    Info<< "Entering: USERD_get_gold_part_build_info" << endl << flush;
 #endif
 
     //#   include "checkForNewMesh.H"
@@ -93,11 +93,11 @@ int USERD_get_gold_part_build_info
     number_of_elements[0][Z_NFACED] = nFaced;
 
     /*
-    Info << "nTet04 = " << nTet04 << endl;
-    Info << "nPyr05 = " << nPyr05 << endl;
-    Info << "nHex08 = " << nHex08 << endl;
-    Info << "nPen06 = " << nPen06 << endl;
-    Info << "nFaced = " << nFaced << endl;
+    Info<< "nTet04 = " << nTet04 << endl;
+    Info<< "nPyr05 = " << nPyr05 << endl;
+    Info<< "nHex08 = " << nHex08 << endl;
+    Info<< "nPen06 = " << nPen06 << endl;
+    Info<< "nFaced = " << nFaced << endl;
         */
 
     number_of_nodes[0] = meshPtr->nPoints();
@@ -148,7 +148,7 @@ int USERD_get_gold_part_build_info
     }
 
 #ifdef ENSIGHTDEBUG
-    Info << "Leaving: USERD_get_gold_part_build_info" << endl << flush;
+    Info<< "Leaving: USERD_get_gold_part_build_info" << endl << flush;
 #endif
 
     return Z_OK;

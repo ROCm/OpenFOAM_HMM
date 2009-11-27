@@ -1,6 +1,6 @@
 IOobject ioPoints
 (
-    "points", 
+    "points",
     runTime.timeName(),
     mesh.name(),
     mesh
@@ -8,7 +8,7 @@ IOobject ioPoints
 
 if (ioPoints.headerOk())
 {
-    Info << "new points available" << endl;
+    Info<< "new points available" << endl;
     // Reading new points
     pointIOField newPoints
     (
@@ -22,6 +22,6 @@ if (ioPoints.headerOk())
             IOobject::NO_WRITE
         )
     );
-    
+
     mesh.movePoints(newPoints);
 }

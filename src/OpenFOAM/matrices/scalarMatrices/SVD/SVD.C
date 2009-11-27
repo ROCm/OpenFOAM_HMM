@@ -368,7 +368,7 @@ Foam::SVD::SVD(const scalarRectangularMatrix& A, const scalar minCondition)
     {
         if (S_[i] <= minS)
         {
-            //Info << "Removing " << S_[i] << " < " << minS << endl;
+            //Info<< "Removing " << S_[i] << " < " << minS << endl;
             S_[i] = 0;
             nZeros_++;
         }
@@ -390,11 +390,11 @@ Foam::SVD::SVD(const scalarRectangularMatrix& A, const scalar minCondition)
             if (diff > maxDiff) maxDiff = diff;
         }
     }
-    Info << "Maximum discrepancy between A and svd(A) = " << maxDiff << endl;
+    Info<< "Maximum discrepancy between A and svd(A) = " << maxDiff << endl;
 
     if (maxDiff > 4)
     {
-        Info << "singular values " << S_ << endl;
+        Info<< "singular values " << S_ << endl;
     }
     */
 }

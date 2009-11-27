@@ -111,8 +111,8 @@ void sammMesh::createPolyBoundary()
     // reset the size of the face list
     meshFaces_.setSize(nCreatedFaces);
 
-    Info << "Number of boundary faces: " << nBoundaryFacesFound << endl;
-    Info << "Total number of faces: " << nCreatedFaces << endl;
+    Info<< "Number of boundary faces: " << nBoundaryFacesFound << endl;
+    Info<< "Total number of faces: " << nCreatedFaces << endl;
 }
 
 

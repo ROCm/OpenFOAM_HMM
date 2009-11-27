@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
     // Get name of patch
     word patchName(args.additionalArgs()[0]);
-    
+
     // Find the label in patches by name.
     label patchI = patches.findPatchID(patchName);
 
@@ -131,8 +131,7 @@ int main(int argc, char *argv[])
 
     psf.write();
 
-    Info << nl << "End" << endl;
-
+    Info<< "\nEnd\n" << endl;
     return 0;
 }
 

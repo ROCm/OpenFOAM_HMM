@@ -163,7 +163,7 @@ Foam::commonRailInjector::commonRailInjector
         }
     }
 
-    Info << "end constructor. in commonRail" << endl;
+    Info<< "end constructor. in commonRail" << endl;
 }
 
 

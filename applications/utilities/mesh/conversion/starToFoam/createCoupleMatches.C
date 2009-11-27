@@ -67,7 +67,7 @@ void starMesh::createCoupleMatches()
     {
         if (coupleI % infoJump == 0)
         {
-            Info << "Doing couple " << coupleI << ". STAR couple ID: "
+            Info<< "Doing couple " << coupleI << ". STAR couple ID: "
                 << couples_[coupleI].coupleID() << endl;
         }
 
@@ -179,7 +179,7 @@ void starMesh::createCoupleMatches()
                 d -= n*(n & d);
 
 #               ifdef DEBUG_COUPLE_INTERSECTION
-                Info << "curMasterEdge: " << curMasterEdge << endl
+                Info<< "curMasterEdge: " << curMasterEdge << endl
                     << "P: " << P << endl << "d: " << d << endl;
 #               endif
 
@@ -198,7 +198,7 @@ void starMesh::createCoupleMatches()
                     scalar det = -(e & (n ^ d));
 
 #                   ifdef DEBUG_COUPLE_INTERSECTION
-                    Info << "curSlaveEdge: " << curSlaveEdge << endl
+                    Info<< "curSlaveEdge: " << curSlaveEdge << endl
                         << "S: " << S << endl
                         << "e: " << e << endl;
 #                   endif
@@ -209,7 +209,7 @@ void starMesh::createCoupleMatches()
                         scalar beta = ((S - P) & (n ^ d))/det;
 
 #                       ifdef DEBUG_COUPLE_INTERSECTION
-                        Info << " beta: " << beta << endl;
+                        Info<< " beta: " << beta << endl;
 #                       endif
 
                         if (beta > -smallMergeTol_ && beta < 1 + smallMergeTol_)
@@ -219,7 +219,7 @@ void starMesh::createCoupleMatches()
                                 (((S - P) & d) + beta*(d & e))/magSqr(d);
 
 #                           ifdef DEBUG_COUPLE_INTERSECTION
-                            Info << " alpha: " << alpha << endl;
+                            Info<< " alpha: " << alpha << endl;
 #                           endif
 
                             if
@@ -413,7 +413,7 @@ void starMesh::createCoupleMatches()
                             scalar beta1 = (sp & e)/magSqr(e);
 
 #                           ifdef DEBUG_COUPLE_INTERSECTION
-                            Info << "P: " << P << " S: " << S << " d: " << d
+                            Info<< "P: " << P << " S: " << S << " d: " << d
                                 << " e: " << e << " sp: " << sp
                                 << " beta1: " << beta1 << endl;
 #                           endif
@@ -446,7 +446,7 @@ void starMesh::createCoupleMatches()
                             )
                             {
 #                               ifdef DEBUG_COUPLE_INTERSECTION
-                                Info << "adding irregular slave "
+                                Info<< "adding irregular slave "
                                     << "intersection2: "
                                     << points_[masterEdges[masterEdgeI].end()]
                                     << endl;
@@ -463,10 +463,10 @@ void starMesh::createCoupleMatches()
             } // end of master edges
 
 #           ifdef DEBUG_COUPLE_INTERSECTION
-            Info << "additional slave edge points: " << endl;
+            Info<< "additional slave edge points: " << endl;
             forAll (slaveEdgePoints, edgeI)
             {
-                Info << "edge: " << edgeI << ": " << slaveEdgePoints[edgeI]
+                Info<< "edge: " << edgeI << ": " << slaveEdgePoints[edgeI]
                     << endl;
             }
 #           endif
@@ -475,7 +475,7 @@ void starMesh::createCoupleMatches()
             if (nLivePoints + coupleFacePoints.size() >= points_.size())
             {
                 // increase the size of the points list
-                Info << "Resizing points list" << endl;
+                Info<< "Resizing points list" << endl;
                 points_.setSize(points_.size() + couples_.size());
             }
 
@@ -511,7 +511,7 @@ void starMesh::createCoupleMatches()
             label nTmpMasterLabels = 0;
 
 #           ifdef DEBUG_COUPLE_INTERSECTION
-            Info << "masterFace: " << masterFace << endl
+            Info<< "masterFace: " << masterFace << endl
                 << "nAdditionalMasterPoints: " << nAdditionalMasterPoints
                 << endl;
 #           endif
@@ -588,7 +588,7 @@ void starMesh::createCoupleMatches()
                         }
 
 #                       ifdef DEBUG_FACE_ORDERING
-                        Info << "nextPointLabel: " << nextPointLabel << endl;
+                        Info<< "nextPointLabel: " << nextPointLabel << endl;
 #                       endif
 
                         i++;
@@ -619,7 +619,7 @@ void starMesh::createCoupleMatches()
             tmpMasterFace.setSize(nTmpMasterLabels);
 
 #           ifdef DEBUG_FACE_ORDERING
-            Info << "tmpMasterFace: " << tmpMasterFace << endl;
+            Info<< "tmpMasterFace: " << tmpMasterFace << endl;
 #           endif
 
             // Eliminate all zero-length edges
@@ -657,7 +657,7 @@ void starMesh::createCoupleMatches()
                         );
 
 #                   ifdef DEBUG_FACE_ORDERING
-                    Info << "Collapsed: nMaster: " << nMaster
+                    Info<< "Collapsed: nMaster: " << nMaster
                         << " label: " << newMasterFace[nMaster] << endl;
 #                   endif
 
@@ -727,7 +727,7 @@ void starMesh::createCoupleMatches()
                 vector edgeVector = slaveEdges[slaveEdgeI].vec(points_);
 
 #               ifdef DEBUG_FACE_ORDERING
-                Info << "curSEdgePoints.size(): "
+                Info<< "curSEdgePoints.size(): "
                     << curSEdgePoints.size() << endl
                     << "edgeVector: " << edgeVector << endl;
 #               endif
@@ -782,7 +782,7 @@ void starMesh::createCoupleMatches()
                         }
 
 #                       ifdef DEBUG_FACE_ORDERING
-                        Info << "nextPointLabel: " << nextPointLabel << endl;
+                        Info<< "nextPointLabel: " << nextPointLabel << endl;
 #                       endif
 
                         i++;
@@ -813,7 +813,7 @@ void starMesh::createCoupleMatches()
             tmpSlaveFace.setSize(nTmpSlaveLabels);
 
 #           ifdef DEBUG_FACE_ORDERING
-            Info << "tmpSlaveFace: " << tmpSlaveFace << endl;
+            Info<< "tmpSlaveFace: " << tmpSlaveFace << endl;
 #           endif
 
             // Eliminate all zero-length edges
@@ -834,7 +834,7 @@ void starMesh::createCoupleMatches()
             forAll(slvEdgesToCollapse, edgeI)
             {
 #               ifdef DEBUG_FACE_ORDERING
-                Info << "slave edge length: " << edgeI << ", "
+                Info<< "slave edge length: " << edgeI << ", "
                     << slvEdgesToCollapse[edgeI].mag(points_)<< endl;
 #               endif
 
@@ -880,7 +880,7 @@ void starMesh::createCoupleMatches()
             edgeList newSlaveEdges = newSlaveFace.edges();
 
 #           ifdef DEBUG_RIGHT_HAND_WALK
-            Info << "newMasterEdges: " << newMasterEdges << endl
+            Info<< "newMasterEdges: " << newMasterEdges << endl
                 << "newSlaveEdges: " << newSlaveEdges << endl;
 #           endif
 
@@ -926,7 +926,7 @@ void starMesh::createCoupleMatches()
                     startEdgeFound = 2;
 
 #                   ifdef DEBUG_RIGHT_HAND_WALK
-                    Info << "slave edge found" << endl;
+                    Info<< "slave edge found" << endl;
 #                   endif
 
                     break;
@@ -969,7 +969,7 @@ void starMesh::createCoupleMatches()
                         startEdgeFound = 1;
 
 #                       ifdef DEBUG_RIGHT_HAND_WALK
-                        Info << "master edge found" << endl;
+                        Info<< "master edge found" << endl;
 #                       endif
 
                         break;
@@ -986,7 +986,7 @@ void starMesh::createCoupleMatches()
             if (startEdgeFound > 0)
             {
 #               ifdef DEBUG_RIGHT_HAND_WALK
-                Info << "start edge: " << startEdge << endl;
+                Info<< "start edge: " << startEdge << endl;
 #               endif
 
                 // Loop through both faces and add all edges
@@ -1004,7 +1004,7 @@ void starMesh::createCoupleMatches()
                 planeNormal /= mag(planeNormal) + VSMALL;
 
 #               ifdef DEBUG_RIGHT_HAND_WALK
-                Info << "planeNormal: " << planeNormal << endl;
+                Info<< "planeNormal: " << planeNormal << endl;
 #               endif
 
                 // Do a check to control the right-hand turn.  This is
@@ -1034,7 +1034,7 @@ void starMesh::createCoupleMatches()
                 if (tripleProduct < 0)
                 {
 #                   ifdef DEBUG_RIGHT_HAND_WALK
-                    Info << "Turning edge for right-hand turn rule" << endl;
+                    Info<< "Turning edge for right-hand turn rule" << endl;
 #                   endif
                     startEdge = startEdge.reverseEdge();
                 }
@@ -1155,7 +1155,7 @@ void starMesh::createCoupleMatches()
                         scalar curGoStraight = newDir & ahead;
 
 #                       ifdef DEBUG_RIGHT_HAND_WALK
-                        Info << "curRightTurn: " << curRightTurn
+                        Info<< "curRightTurn: " << curRightTurn
                             << " curGoStraight: " << curGoStraight << endl;
 #                       endif
 
@@ -1167,7 +1167,7 @@ void starMesh::createCoupleMatches()
                                 if (curGoStraight > goStraight)
                                 {
 #                                   ifdef DEBUG_RIGHT_HAND_WALK
-                                    Info << "a" << endl;
+                                    Info<< "a" << endl;
 #                                   endif
 
                                     // Good edge, turning left less than before
@@ -1179,7 +1179,7 @@ void starMesh::createCoupleMatches()
                             else // new edge turning right
                             {
 #                               ifdef DEBUG_RIGHT_HAND_WALK
-                                Info << "b" << endl;
+                                Info<< "b" << endl;
 #                               endif
 
                                 // good edge, turning right
@@ -1197,7 +1197,7 @@ void starMesh::createCoupleMatches()
                                 if (curGoStraight < goStraight)
                                 {
 #                                   ifdef DEBUG_RIGHT_HAND_WALK
-                                    Info << "c" << endl;
+                                    Info<< "c" << endl;
 #                                   endif
 
                                     // good edge, turning right more than before
@@ -1256,7 +1256,7 @@ void starMesh::createCoupleMatches()
                 intersectedFace.setSize(nIntFacePoints);
 
 #               ifdef DEBUG_COUPLE
-                Info << "intersectedFace: " << intersectedFace << endl;
+                Info<< "intersectedFace: " << intersectedFace << endl;
 #               endif
 
                 // check the intersection face for duplicate points
@@ -1315,7 +1315,7 @@ void starMesh::createCoupleMatches()
             forAll (intersectedFace, intPointI)
             {
 #               ifdef DEBUG_COUPLE_PROJECTION
-                Info << "Proj: old point: "
+                Info<< "Proj: old point: "
                     << points_[intersectedFace[intPointI]] << endl;
 #               endif
 
@@ -1501,7 +1501,7 @@ void starMesh::createCoupleMatches()
         points_.setSize(nLivePoints);
 
         // Finished
-        Info << "Finished doing couples" << endl;
+        Info<< "Finished doing couples" << endl;
     }
 }
 

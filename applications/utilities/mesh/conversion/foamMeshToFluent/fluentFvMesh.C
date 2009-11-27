@@ -63,7 +63,7 @@ void Foam::fluentFvMesh::writeFluentMesh() const
         ).c_str()
     );
 
-    Info << "Writing Header" << endl;
+    Info<< "Writing Header" << endl;
 
     fluentMeshFile
         << "(0 \"FOAM to Fluent Mesh File\")" << std::endl << std::endl

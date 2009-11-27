@@ -11,7 +11,7 @@ IOobject reducedUnitsDictIOobject
 
 if (reducedUnitsDictIOobject.headerOk())
 {
-    Info << nl
+    Info<< nl
         << "Reading reference quantities from reducedUnitsDict file." << endl;
 
     IOdictionary reducedUnitsDict(reducedUnitsDictIOobject);

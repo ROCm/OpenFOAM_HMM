@@ -303,7 +303,7 @@ scalar RutlandFlashBoil::boilingTime
 
             if (FgNeg > 0.0)
             {
-                Info << "no convergence" << endl;
+                Info<< "no convergence" << endl;
             }
 
 
@@ -333,7 +333,7 @@ scalar RutlandFlashBoil::boilingTime
 
                 if (k >= Niter - 1)
                 {
-                    Info << " No convergence for G " << endl;
+                    Info<< " No convergence for G " << endl;
                 }
             }
             else

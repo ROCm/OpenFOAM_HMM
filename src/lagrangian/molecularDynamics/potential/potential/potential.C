@@ -231,7 +231,7 @@ void Foam::potential::potential::readPotentialDict()
     if (potentialDict.found("external"))
     {
 
-        Info << nl << "Reading external forces:" << endl;
+        Info<< nl << "Reading external forces:" << endl;
 
         const dictionary& externalDict = potentialDict.subDict("external");
 
@@ -244,7 +244,7 @@ void Foam::potential::potential::readPotentialDict()
         }
     }
 
-    Info << nl << tab << "gravity = " << gravity_ << endl;
+    Info<< nl << tab << "gravity = " << gravity_ << endl;
 }
 
 

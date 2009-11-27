@@ -1356,7 +1356,7 @@ int main(int argc, char *argv[])
     mesh.write();
 
 
-    Info<< nl << "End" << endl;
+    Info<< "\nEnd\n" << endl;
     return 0;
 }
 

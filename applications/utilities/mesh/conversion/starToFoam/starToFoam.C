@@ -61,10 +61,10 @@ int main(int argc, char *argv[])
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(10);
 
-    Info << "Writing mesh" << endl;
+    Info<< "Writing mesh" << endl;
     makeMesh.writeMesh();
 
-    Info<< nl << "End" << nl << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     Info<< hmm.LUsolve() << endl;
     Info<< hmm << endl;
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

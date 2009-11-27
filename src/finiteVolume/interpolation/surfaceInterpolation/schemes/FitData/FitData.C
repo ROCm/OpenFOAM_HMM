@@ -153,7 +153,7 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
     // Reference point
     point p0 = this->mesh().faceCentres()[facei];
 
-    // Info << "Face " << facei << " at " << p0 << " stencil points at:\n"
+    // Info<< "Face " << facei << " at " << p0 << " stencil points at:\n"
     //     << C - p0 << endl;
 
     // p0 -> p vector in the face-local coordinate system
@@ -240,7 +240,7 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
 
         // if (goodFit && iIt > 0)
         // {
-            // Info << "FitData<Polynomial>::calcFit"
+            // Info<< "FitData<Polynomial>::calcFit"
             //     << "(const List<point>& C, const label facei" << nl
             //     << "Can now fit face " << facei << " iteration " << iIt
             //     << " with sum of weights " << sum(coeffsi) << nl

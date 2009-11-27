@@ -307,7 +307,7 @@ void Foam::radiation::fvDOM::calculate()
             maxResidual = max(maxBandResidual, maxResidual);
         }
 
-        Info << "Radiation solver iter: " << radIter << endl;
+        Info<< "Radiation solver iter: " << radIter << endl;
 
     } while(maxResidual > convergence_ && radIter < maxIter_);
 

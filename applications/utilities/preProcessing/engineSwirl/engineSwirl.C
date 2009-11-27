@@ -69,11 +69,11 @@ int main(int argc, char *argv[])
         }
     }
 
-    Info << "Umax = " << Umax << endl;
+    Info<< "Umax = " << Umax << endl;
 
     U.write();
 
-    Info << "\n end\n";
+    Info<< "\n end\n";
 
     return 0;
 }

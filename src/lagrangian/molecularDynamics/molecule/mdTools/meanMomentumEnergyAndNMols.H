@@ -176,7 +176,7 @@ if (singleStepNMols)
         /singleStepNMols
         << endl;
 
-        // Info << singleStepNMols << " "
+        // Info<< singleStepNMols << " "
         //     << singleStepTotalMomentum/singleStepTotalMass << " "
         //     << singleStepMaxVelocityMag << " "
         //     << singleStepTotalKE/singleStepNMols << " "

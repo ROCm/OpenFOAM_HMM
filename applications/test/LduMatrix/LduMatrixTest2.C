@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 
     Info<< psi << endl;
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

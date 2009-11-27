@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 
     surf.write(outFileName);
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

@@ -4,7 +4,7 @@
 int USERD_get_node_label_status(void)
 {
 #ifdef ENSIGHTDEBUG
-    Info << "Entering: USERD_node_label_status" << endl << flush;
+    Info<< "Entering: USERD_node_label_status" << endl << flush;
 #endif
 
     return TRUE;

@@ -1,8 +1,8 @@
     if(planeMapping && targetPatchNamePresent && cut.cut())
     {
         //Map variables U, phi & k
-        //Info << typeInfo("isoLESmodel") << endl;
-        //Info << "SGS model" << sgsModel.type() << endl;
+        //Info<< typeInfo("isoLESmodel") << endl;
+        //Info<< "SGS model" << sgsModel.type() << endl;
 
         scalarField planek(cutCells.size());
         scalarField planeNuTilda(cutCells.size());
@@ -23,21 +23,21 @@
 
         if(sgsModel.type() == "SpalartAllmaras")
         {
-            Info << "Mapping NuTilda." << endl;
+            Info<< "Mapping NuTilda." << endl;
             sgsModel.nuTilda()().boundaryField()[targetPatchNumber] ==
             interPatch.faceInterpolate(planeNuTilda)();
         }
         else
         {
-            Info << "Mapping k." << endl;
+            Info<< "Mapping k." << endl;
             sgsModel.k()().boundaryField()[targetPatchNumber] ==
             interPatch.faceInterpolate(planek)();
         }
-        
+
         U.boundaryField()[targetPatchNumber] ==
             interPatch.faceInterpolate(planeU)();
 
-/*         sgsModel.k()().boundaryField()[targetPatchNumber] == 
+/*         sgsModel.k()().boundaryField()[targetPatchNumber] ==
          toPatchInter.pointToFaceInterpolate
          (
              interPatch.pointInterpolate
@@ -49,7 +49,7 @@
              )
          );
 
-         U.boundaryField()[targetPatchNumber] == 
+         U.boundaryField()[targetPatchNumber] ==
          toPatchInter.pointToFaceInterpolate
          (
              interPatch.pointInterpolate
@@ -62,7 +62,7 @@
          );
 
 */
-          
+
         scalar Q = sum
         (
             mesh.Sf().boundaryField()[targetPatchNumber]
@@ -74,11 +74,11 @@
             mesh.Sf().boundaryField()[targetPatchNumber] &
             Ubar.value()
         );
-                
+
         U.boundaryField()[targetPatchNumber] ==
             U.boundaryField()[targetPatchNumber] * (Qbar/Q);
-        
-        Info << "Mass flux correction factor: " << (Qbar/Q) << endl; 
+
+        Info<< "Mass flux correction factor: " << (Qbar/Q) << endl;
 
         phi.boundaryField()[targetPatchNumber] ==
         (

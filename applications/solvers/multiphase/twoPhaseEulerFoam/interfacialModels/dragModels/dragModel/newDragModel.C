@@ -41,7 +41,7 @@ Foam::autoPtr<Foam::dragModel> Foam::dragModel::New
         interfaceDict.lookup("dragModel" + phasea.name())
     );
 
-    Info << "Selecting dragModel for phase " 
+    Info<< "Selecting dragModel for phase "
         << phasea.name()
         << ": "
         << dragModelType << endl;
@@ -57,7 +57,7 @@ Foam::autoPtr<Foam::dragModel> Foam::dragModel::New
                 << dragModelType
                 << ", constructor not in hash table" << endl << endl
                 << "    Valid dragModel types are : " << endl;
-        Info << dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
+        Info<< dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
     }
 
     return cstrIter()(interfaceDict, alpha, phasea, phaseb);

@@ -104,7 +104,7 @@ int Foam::vtkPV3Foam::setTime(int nRequest, const double requestTimes[])
 
             Info<< requestTimes[requestI];
         }
-        Info << ") - previousIndex = " << timeIndex_ << endl;
+        Info<< ") - previousIndex = " << timeIndex_ << endl;
     }
 
     Time& runTime = dbPtr_();

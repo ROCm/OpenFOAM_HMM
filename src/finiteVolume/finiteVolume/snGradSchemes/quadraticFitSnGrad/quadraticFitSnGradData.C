@@ -64,7 +64,7 @@ Foam::quadraticFitSnGradData::quadraticFitSnGradData
 {
     if (debug)
     {
-        Info << "Contructing quadraticFitSnGradData" << endl;
+        Info<< "Contructing quadraticFitSnGradData" << endl;
     }
 
     // check input

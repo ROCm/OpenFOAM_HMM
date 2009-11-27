@@ -48,9 +48,9 @@ void starMesh::mergeCoupleFacePoints()
     // merge set.  Once all cells (and thus points) are visited, go
     // through the renumbering list and for each merging point use the
     // label of the merge set as the new point label.
-    // This is VERY fancy. Use care if/when changing. 
+    // This is VERY fancy. Use care if/when changing.
 
-    Info << endl << "Creating merge sets" << endl;
+    Info<< endl << "Creating merge sets" << endl;
 
     // Create a renumbering list for points
     // In the first instance the renumbering list is used as a
@@ -162,7 +162,7 @@ void starMesh::mergeCoupleFacePoints()
 
                             if (nMergeSets >= mergeSetID.size())
                             {
-                                Info << "Resizing mergeSetID" << endl;
+                                Info<< "Resizing mergeSetID" << endl;
 
                                 mergeSetID.setSize
                                     (mergeSetID.size() + mergeIncrement);
@@ -327,7 +327,7 @@ void starMesh::mergeCoupleFacePoints()
             // This should be OK as the compressed points list will always
             // have less points that the original lists.  Even if there is
             // no points removed, this will copy the list back onto itself
-            // 
+            //
             renumberPoints[pointI] = nUsedPoints;
             points_[nUsedPoints] = points_[pointI];
 
@@ -345,7 +345,7 @@ void starMesh::mergeCoupleFacePoints()
     // reset number of points which need to be sorted
     points_.setSize(nUsedPoints);
 
-    Info << "Renumbering all faces" << endl;
+    Info<< "Renumbering all faces" << endl;
 
     forAll (cellFaces_, cellI)
     {
@@ -374,7 +374,7 @@ void starMesh::mergeCoupleFacePoints()
         }
     }
 
-    Info << "Renumbering all cell shapes" << endl;
+    Info<< "Renumbering all cell shapes" << endl;
 
     forAll (cellShapes_, cellI)
     {
@@ -402,7 +402,7 @@ void starMesh::mergeCoupleFacePoints()
         }
     }
 
-    Info << "Renumbering STAR point lookup" << endl;
+    Info<< "Renumbering STAR point lookup" << endl;
 
     labelList oldStarPointID = starPointID_;
 

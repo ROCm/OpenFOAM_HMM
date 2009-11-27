@@ -156,7 +156,7 @@ void Foam::mixerFvMesh::addZonesAndModifiers()
     }
 
     movingCells.setSize(nMovingCells);
-    Info << "Number of cells in the moving region: " << nMovingCells << endl;
+    Info<< "Number of cells in the moving region: " << nMovingCells << endl;
 
     cz[0] = new cellZone
     (
@@ -166,11 +166,11 @@ void Foam::mixerFvMesh::addZonesAndModifiers()
         cellZones()
     );
 
-    Info << "Adding point, face and cell zones" << endl;
+    Info<< "Adding point, face and cell zones" << endl;
     addZones(pz, fz, cz);
 
     // Add a topology modifier
-    Info << "Adding topology modifiers" << endl;
+    Info<< "Adding topology modifiers" << endl;
     topoChanger_.setSize(1);
     topoChanger_.set
     (
@@ -361,7 +361,7 @@ bool Foam::mixerFvMesh::update()
     {
         if (debug)
         {
-            Info << "Mesh topology is changing" << endl;
+            Info<< "Mesh topology is changing" << endl;
         }
 
         deleteDemandDrivenData(movingPointsMaskPtr_);
