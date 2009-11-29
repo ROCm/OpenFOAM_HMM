@@ -64,9 +64,9 @@ protected:
 
     // Protected Member Functions
 
-        //- Return a complete knotList by adding the start/end points
+        //- Return a complete point field by appending the start/end points
         //  to the given list
-        static pointField fullKnotList
+        static pointField appendEndPoints
         (
             const pointField&,
             const label start,

@@ -26,7 +26,7 @@ Class
     Foam::lineEdge
 
 Description
-    Defines a straight line between the start point and the end point.
+    A straight edge between the start point and the end point.
 
 SourceFiles
     lineEdge.C
@@ -70,13 +70,12 @@ public:
         //- Construct from components
         lineEdge(const pointField&, const label start, const label end);
 
-        //- Construct from Istream setting pointsList
+        //- Construct from Istream with a pointField
         lineEdge(const pointField&, Istream&);
 
 
-    //- Destructor
-        virtual ~lineEdge()
-        {}
+        //- Destructor
+        virtual ~lineEdge();
 
 
     // Member Functions

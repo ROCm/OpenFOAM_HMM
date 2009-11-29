@@ -23,21 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::arcEdge
+    Foam::splineEdge
 
 Description
-    Defines the arcEdge of a circle in terms of 3 points on its circumference
+    A curvedEdge interface for Catmull-Rom splines.
 
 SourceFiles
-    arcEdge.C
+    splineEdge.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef arcEdge_H
-#define arcEdge_H
+#ifndef splineEdge_H
+#define splineEdge_H
 
 #include "curvedEdge.H"
-#include "cylindricalCS.H"
+#include "CatmullRomSpline.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,64 +45,58 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class arcEdge Declaration
+                      Class splineEdge Declaration
 \*---------------------------------------------------------------------------*/
 
-class arcEdge
+class splineEdge
 :
-    public curvedEdge
+    public curvedEdge,
+    public CatmullRomSpline
 {
-    // Private data
-
-        point p1_, p2_, p3_;
-        cylindricalCS cs_;
-        scalar angle_;
-        scalar radius_;
-
     // Private Member Functions
 
-        //- Calculate the coordinate system, angle and radius
-        cylindricalCS calcAngle();
-
         //- Disallow default bitwise copy construct
-        arcEdge(const arcEdge&);
+        splineEdge(const splineEdge&);
 
         //- Disallow default bitwise assignment
-        void operator=(const arcEdge&);
+        void operator=(const splineEdge&);
+
 
 public:
 
     //- Runtime type information
-    TypeName("arc");
+    TypeName("spline");
 
 
     // Constructors
 
         //- Construct from components
-        arcEdge
+        splineEdge
         (
-            const pointField& points,
-            const label start, const label end,
-            const vector& pMid
+            const pointField&,
+            const label start,
+            const label end,
+            const pointField& otherKnots
         );
 
         //- Construct from Istream setting pointsList
-        arcEdge(const pointField& points, Istream&);
+        splineEdge(const pointField&, Istream&);
 
 
     // Destructor
 
-        virtual ~arcEdge(){}
+        virtual ~splineEdge()
+        {}
 
 
     // Member Functions
 
         //- Return the point position corresponding to the curve parameter
         //  0 <= lambda <= 1
-        point position(const scalar) const;
+        virtual point position(const scalar) const;
 
-        //- Return the length of the curve
-        scalar length() const;
+        //- Return the length of the simple spline curve
+        virtual scalar length() const;
 };
 
 

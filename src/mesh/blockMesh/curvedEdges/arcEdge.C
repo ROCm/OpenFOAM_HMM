@@ -71,8 +71,7 @@ Foam::cylindricalCS Foam::arcEdge::calcAngle()
     vector r3(p3_ - centre);
 
     // find angles
-    scalar tmp = (r3&r1)/(mag(r3)*mag(r1));
-    angle_ = radToDeg(acos(tmp));
+    angle_ = radToDeg(acos((r3 & r1)/(mag(r3) * mag(r1))));
 
     // check if the vectors define an exterior or an interior arcEdge
     if (((r1 ^ r2) & (r1 ^ r3)) < 0.0)
@@ -99,7 +98,7 @@ Foam::cylindricalCS Foam::arcEdge::calcAngle()
     radius_ = mag(r3);
 
     // set up and return the local coordinate system
-    return cylindricalCS("tmpCS", centre, tempAxis, r1);
+    return cylindricalCS("arcEdgeCS", centre, tempAxis, r1);
 }
 
 

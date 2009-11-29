@@ -23,21 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::arcEdge
+    Foam::polySplineEdge
 
 Description
-    Defines the arcEdge of a circle in terms of 3 points on its circumference
+    A curvedEdge interface for B-splines.
 
 SourceFiles
-    arcEdge.C
+    polySplineEdge.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef arcEdge_H
-#define arcEdge_H
+#ifndef polySplineEdge_H
+#define polySplineEdge_H
 
 #include "curvedEdge.H"
-#include "cylindricalCS.H"
+#include "polyLine.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,61 +45,61 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class arcEdge Declaration
+                       Class polySplineEdge Declaration
 \*---------------------------------------------------------------------------*/
 
-class arcEdge
+class polySplineEdge
 :
-    public curvedEdge
+    public curvedEdge,
+    public polyLine
 {
     // Private data
 
-        point p1_, p2_, p3_;
-        cylindricalCS cs_;
-        scalar angle_;
-        scalar radius_;
+        pointField otherKnots_;
 
-    // Private Member Functions
 
-        //- Calculate the coordinate system, angle and radius
-        cylindricalCS calcAngle();
+    // Private member functions
 
-        //- Disallow default bitwise copy construct
-        arcEdge(const arcEdge&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const arcEdge&);
+        pointField intervening
+        (
+            const pointField& otherKnots,
+            const label nBetweenKnots,
+            const vector&,
+            const vector&
+        );
 
 public:
 
     //- Runtime type information
-    TypeName("arc");
+    TypeName("polySpline");
 
 
     // Constructors
 
         //- Construct from components
-        arcEdge
+        polySplineEdge
         (
-            const pointField& points,
-            const label start, const label end,
-            const vector& pMid
+            const pointField&,
+            const label start,
+            const label end,
+            const pointField& otherKnots,
+            const label nInterKnots = 20
         );
 
         //- Construct from Istream setting pointsList
-        arcEdge(const pointField& points, Istream&);
+        polySplineEdge(const pointField&, Istream&);
 
 
-    // Destructor
-
-        virtual ~arcEdge(){}
+    //- Destructor
+        virtual ~polySplineEdge()
+        {}
 
 
     // Member Functions
 
         //- Return the point position corresponding to the curve parameter
         //  0 <= lambda <= 1
-        point position(const scalar) const;
+        point position(const scalar mu) const;
 
         //- Return the length of the curve
         scalar length() const;

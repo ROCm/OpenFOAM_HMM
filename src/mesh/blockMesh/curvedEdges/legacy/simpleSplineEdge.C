@@ -24,58 +24,68 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-#include "polyLineEdge.H"
+#include "simpleSplineEdge.H"
 #include "addToRunTimeSelectionTable.H"
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(polyLineEdge, 0);
-    addToRunTimeSelectionTable(curvedEdge, polyLineEdge, Istream);
+    defineTypeNameAndDebug(simpleSplineEdge, 0);
+    addToRunTimeSelectionTable(curvedEdge, simpleSplineEdge, Istream);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::polyLineEdge::polyLineEdge
+Foam::simpleSplineEdge::simpleSplineEdge
 (
-    const pointField& ps,
+    const pointField& points,
     const label start,
     const label end,
-    const pointField& otherPoints
+    const pointField& otherknots
 )
 :
-    curvedEdge(ps, start, end),
-    polyLine(appendEndPoints(ps, start_, end_, otherPoints))
+    curvedEdge(points, start, end),
+    BSpline(appendEndPoints(points, start, end, otherknots))
 {}
 
 
-Foam::polyLineEdge::polyLineEdge(const pointField& ps, Istream& is)
+Foam::simpleSplineEdge::simpleSplineEdge
+(
+    const pointField& points,
+    const label start,
+    const label end,
+    const pointField& otherknots,
+    const vector& fstend,
+    const vector& sndend
+)
 :
-    curvedEdge(ps, is),
-    polyLine(appendEndPoints(ps, start_, end_, pointField(is)))
+    curvedEdge(points, start, end),
+    BSpline(appendEndPoints(points, start, end, otherknots), fstend, sndend)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::polyLineEdge::~polyLineEdge()
+Foam::simpleSplineEdge::simpleSplineEdge(const pointField& points, Istream& is)
+:
+    curvedEdge(points, is),
+    BSpline(appendEndPoints(points, start_, end_, pointField(is)))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::point Foam::polyLineEdge::position(const scalar lambda) const
+Foam::point Foam::simpleSplineEdge::position(const scalar mu) const
 {
-    return polyLine::position(lambda);
+    return BSpline::position(mu);
 }
 
 
-Foam::scalar Foam::polyLineEdge::length() const
+Foam::scalar Foam::simpleSplineEdge::length() const
 {
-    return polyLine::lineLength_;
+    notImplemented("simpleSplineEdge::length() const");
+    return 1.0;
 }
 
 

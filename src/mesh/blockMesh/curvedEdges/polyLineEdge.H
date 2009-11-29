@@ -83,9 +83,8 @@ public:
         polyLineEdge(const pointField&, Istream&);
 
 
-    // Destructor
-
-        virtual ~polyLineEdge(){}
+        //- Destructor
+        virtual ~polyLineEdge();
 
 
     // Member Functions

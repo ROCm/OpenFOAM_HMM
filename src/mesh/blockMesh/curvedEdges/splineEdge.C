@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "simpleSplineEdge.H"
+#include "splineEdge.H"
 #include "addToRunTimeSelectionTable.H"
 
 
@@ -32,14 +32,14 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(simpleSplineEdge, 0);
-    addToRunTimeSelectionTable(curvedEdge, simpleSplineEdge, Istream);
+    defineTypeNameAndDebug(splineEdge, 0);
+    addToRunTimeSelectionTable(curvedEdge, splineEdge, Istream);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::simpleSplineEdge::simpleSplineEdge
+Foam::splineEdge::splineEdge
 (
     const pointField& points,
     const label start,
@@ -48,44 +48,38 @@ Foam::simpleSplineEdge::simpleSplineEdge
 )
 :
     curvedEdge(points, start, end),
-    BSpline(fullKnotList(points, start, end, otherknots))
+    CatmullRomSpline(appendEndPoints(points, start, end, otherknots))
 {}
 
 
-Foam::simpleSplineEdge::simpleSplineEdge
-(
-    const pointField& points,
-    const label start,
-    const label end,
-    const pointField& otherknots,
-    const vector& fstend,
-    const vector& sndend
-)
-:
-    curvedEdge(points, start, end),
-    BSpline(fullKnotList(points, start, end, otherknots), fstend, sndend)
-{}
-
-
-Foam::simpleSplineEdge::simpleSplineEdge(const pointField& points, Istream& is)
+Foam::splineEdge::splineEdge(const pointField& points, Istream& is)
 :
     curvedEdge(points, is),
-    BSpline(fullKnotList(points, start_, end_, pointField(is)))
-{}
+    CatmullRomSpline(appendEndPoints(points, start_, end_, pointField(is)))
+{
+    token t(is);
+    is.putBack(t);
+
+    // might have start/end tangents that we currently ignore
+    if (t == token::BEGIN_LIST)
+    {
+        vector fstend(is);
+        vector sndend(is);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::point Foam::simpleSplineEdge::position(const scalar mu) const
+Foam::point Foam::splineEdge::position(const scalar mu) const
 {
-    return BSpline::position(mu);
+    return CatmullRomSpline::position(mu);
 }
 
 
-Foam::scalar Foam::simpleSplineEdge::length() const
+Foam::scalar Foam::splineEdge::length() const
 {
-    notImplemented("simpleSplineEdge::length() const");
-    return 1.0;
+    return CatmullRomSpline::length();
 }
 
 

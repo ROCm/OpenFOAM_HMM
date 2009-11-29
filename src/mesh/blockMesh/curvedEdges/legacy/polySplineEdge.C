@@ -56,7 +56,7 @@ Foam::pointField Foam::polySplineEdge::intervening
 {
     BSpline spl
     (
-        fullKnotList(points_, start_, end_, otherknots),
+        appendEndPoints(curvedEdge::points_, start_, end_, otherknots),
         fstend,
         sndend
     );
@@ -73,7 +73,7 @@ Foam::pointField Foam::polySplineEdge::intervening
     interval /= nBetweenKnots + 1;
 
     pointField ans(nSize);
-    ans[0] = points_[start_];
+    ans[0] = curvedEdge::points_[start_];
 
     register scalar index(init);
     for (register label i=1; i<nSize-1; i++)
@@ -82,7 +82,7 @@ Foam::pointField Foam::polySplineEdge::intervening
         ans[i] = spl.realPosition(index);
     }
 
-    ans[nSize-1] = points_[end_];
+    ans[nSize-1] = curvedEdge::points_[end_];
 
     return ans;
 }
@@ -128,8 +128,8 @@ Foam::polySplineEdge::polySplineEdge
     vector fstend(is);
     vector sndend(is);
 
-    controlPoints_ = intervening(otherKnots_, nInterKnots, fstend, sndend);
-    calcDistances();
+    polyLine::points_ = intervening(otherKnots_, nInterKnots, fstend, sndend);
+    calcParam();
 }
 
 

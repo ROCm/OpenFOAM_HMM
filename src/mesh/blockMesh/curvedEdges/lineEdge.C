@@ -55,6 +55,10 @@ Foam::lineEdge::lineEdge(const pointField& points, Istream& is)
     curvedEdge(points, is)
 {}
 
+// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * * //
+
+Foam::lineEdge::~lineEdge()
+{}
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

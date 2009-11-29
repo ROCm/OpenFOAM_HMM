@@ -23,21 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::polySplineEdge
+    Foam::simpleSplineEdge
 
 Description
-    A spline representation via a polyLine
+    A curvedEdge interface for B-splines.
 
 SourceFiles
-    polySplineEdge.C
+    simpleSplineEdge.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef polySplineEdge_H
-#define polySplineEdge_H
+#ifndef simpleSplineEdge_H
+#define simpleSplineEdge_H
 
 #include "curvedEdge.H"
-#include "polyLine.H"
+#include "BSpline.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,53 +45,58 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class polySplineEdge Declaration
+                      Class simpleSplineEdge Declaration
 \*---------------------------------------------------------------------------*/
 
-class polySplineEdge
+class simpleSplineEdge
 :
     public curvedEdge,
-    public polyLine
+    public BSpline
 {
-    // Private data
+    // Private Member Functions
 
-        pointField otherKnots_;
+        //- Disallow default bitwise copy construct
+        simpleSplineEdge(const simpleSplineEdge&);
 
+        //- Disallow default bitwise assignment
+        void operator=(const simpleSplineEdge&);
 
-    // Private member functions
-
-        pointField intervening
-        (
-            const pointField& otherKnots,
-            const label nBetweenKnots,
-            const vector&,
-            const vector&
-        );
 
 public:
 
     //- Runtime type information
-    TypeName("polySpline");
+    TypeName("simpleSpline");
 
 
     // Constructors
 
         //- Construct from components
-        polySplineEdge
+        simpleSplineEdge
+        (
+            const pointField&,
+            const label start,
+            const label end,
+            const pointField& otherKnots
+        );
+
+        //- Construct from components
+        simpleSplineEdge
         (
             const pointField&,
             const label start,
             const label end,
             const pointField& otherKnots,
-            const label nInterKnots = 20
+            const vector& fstend,
+            const vector& sndend
         );
 
         //- Construct from Istream setting pointsList
-        polySplineEdge(const pointField&, Istream&);
+        simpleSplineEdge(const pointField&, Istream&);
 
 
-    //- Destructor
-        virtual ~polySplineEdge()
+    // Destructor
+
+        virtual ~simpleSplineEdge()
         {}
 
 
@@ -99,9 +104,9 @@ public:
 
         //- Return the point position corresponding to the curve parameter
         //  0 <= lambda <= 1
-        point position(const scalar mu) const;
+        point position(const scalar) const;
 
-        //- Return the length of the curve
+        //- Return the length of the simple spline curve
         scalar length() const;
 };
 

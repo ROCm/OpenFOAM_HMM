@@ -108,7 +108,7 @@ Foam::autoPtr<Foam::curvedEdge> Foam::curvedEdge::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::pointField Foam::curvedEdge::fullKnotList
+Foam::pointField Foam::curvedEdge::appendEndPoints
 (
     const pointField& points,
     const label start,
