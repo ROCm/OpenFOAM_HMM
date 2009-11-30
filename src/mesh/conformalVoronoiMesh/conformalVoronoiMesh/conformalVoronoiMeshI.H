@@ -337,6 +337,31 @@ inline void Foam::conformalVoronoiMesh::insertVb(const Vb& v, label offset)
 }
 
 
+inline bool Foam::conformalVoronoiMesh::isBoundaryDualFace
+(
+    const Triangulation::Finite_edges_iterator& eit
+) const
+{
+    Cell_handle c = eit->first;
+    Vertex_handle vA = c->vertex(eit->second);
+    Vertex_handle vB = c->vertex(eit->third);
+
+    // A dual face on the boundary will result from one Dv inside and
+    // one outside
+    return
+    (
+        (
+            vA->internalOrBoundaryPoint()
+         || vB->internalOrBoundaryPoint()
+        )
+     && (
+            !vA->internalOrBoundaryPoint()
+         || !vB->internalOrBoundaryPoint()
+        )
+    );
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 #ifdef CGAL_INEXACT

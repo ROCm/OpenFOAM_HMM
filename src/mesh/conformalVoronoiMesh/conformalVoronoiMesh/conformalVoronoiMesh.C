@@ -2079,6 +2079,25 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     } while (nPtsMerged > 0);
 
+    // Smooth the surface of the mesh
+
+    Info<< nl << "    Smoothing surface" << endl;
+
+    label nSmoothedVertices = 0;
+
+    do
+    {
+        Map<label> dualPtIndexMap;
+
+        nSmoothedVertices = smoothSurfaceDualFaces(points, dualPtIndexMap);
+
+        Info<< "        Smoothed " << nPtsMerged << " points (0 HARD CODED)"
+            << endl;
+
+        reindexDualVertices(dualPtIndexMap);
+
+    } while (nSmoothedVertices > 0);
+
     // Assess faces for collapse
 
     Info<< nl << "    Collapsing unnecessary faces" << endl;
@@ -2415,6 +2434,79 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
     return nPtsMerged;
 }
 
+Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
+(
+    pointField& pts,
+    Map<label>& dualPtIndexMap
+)
+{
+    label nSmoothedVertices = 0;
+
+    for
+    (
+        Triangulation::Finite_edges_iterator eit = finite_edges_begin();
+        eit != finite_edges_end();
+        ++eit
+    )
+    {
+        Cell_circulator ccStart = incident_cells(*eit);
+        Cell_circulator cc = ccStart;
+
+        do
+        {
+            if (dualPtIndexMap.found(cc->cellIndex()))
+            {
+                // One of the points of this face has already been
+                // collapsed this sweep, leave for next sweep
+                continue;
+            }
+
+        } while (++cc != ccStart);
+
+        // Cell_handle c = eit->first;
+        // Vertex_handle vA = c->vertex(eit->second);
+        // Vertex_handle vB = c->vertex(eit->third);
+
+        if (isBoundaryDualFace(eit))
+        {
+            face dualFace = buildDualFace(eit);
+
+            if (dualFace.size() < 3)
+            {
+                // This face has been collapsed already
+                continue;
+            }
+
+            forAll(dualFace, fPtI)
+            {
+                label ptI = dualFace[fPtI];
+
+                point& pt = pts[ptI];
+
+                pointIndexHit surfHit;
+                label hitSurface;
+
+                geometryToConformTo_.findSurfaceNearest
+                (
+                    pt,
+                    cvMeshControls().spanSqr(),
+                    surfHit,
+                    hitSurface
+                );
+
+                if (surfHit.hit())
+                {
+                    pt = surfHit.hitPoint();
+
+                    // dualPtIndexMap.insert(ptI, ptI);
+                }
+            }
+        }
+    }
+
+    return nSmoothedVertices;
+}
+
 
 Foam::label Foam::conformalVoronoiMesh::collapseFaces
 (
@@ -2724,7 +2816,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
         if
         (
             vA->internalOrBoundaryPoint()
-            || vB->internalOrBoundaryPoint()
+         || vB->internalOrBoundaryPoint()
         )
         {
             face newDualFace = buildDualFace(eit);

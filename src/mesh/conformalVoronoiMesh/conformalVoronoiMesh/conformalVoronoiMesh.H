@@ -456,10 +456,26 @@ private:
             const Triangulation::Finite_edges_iterator& eit
         ) const;
 
+        //- Determines if the dual face constructed by the Delaunay
+        //  edge is a boundary face
+        inline bool isBoundaryDualFace
+        (
+            const Triangulation::Finite_edges_iterator& eit
+        ) const;
+
         //- Merge vertices that are very close together
         label mergeCloseDualVertices
         (
             const pointField& pts,
+            Map<label>& dualPtIndexMap
+        );
+
+        //- Smooth the dual vertices of the dual faces on the boundary
+        //  so that they conform to the surface and remove any
+        //  small, normal oriented faces
+        label smoothSurfaceDualFaces
+        (
+            pointField& pts,
             Map<label>& dualPtIndexMap
         );
 
