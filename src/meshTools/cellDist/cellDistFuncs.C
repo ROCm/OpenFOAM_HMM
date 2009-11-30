@@ -121,7 +121,7 @@ Foam::scalar Foam::cellDistFuncs::smallestDist
     scalar minDist = GREAT;
     minFaceI = -1;
 
-    for(label wallFaceI = 0; wallFaceI < nWallFaces; wallFaceI++)
+    for (label wallFaceI = 0; wallFaceI < nWallFaces; wallFaceI++)
     {
         label patchFaceI = wallFaces[wallFaceI];
 

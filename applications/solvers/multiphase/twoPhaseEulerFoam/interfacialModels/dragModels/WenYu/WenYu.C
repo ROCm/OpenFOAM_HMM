@@ -77,7 +77,7 @@ Foam::tmp<Foam::volScalarField> Foam::WenYu::K
 
     forAll(Re, celli)
     {
-        if(Re[celli] > 1000.0)
+        if (Re[celli] > 1000.0)
         {
             Cds[celli] = 0.44;
         }

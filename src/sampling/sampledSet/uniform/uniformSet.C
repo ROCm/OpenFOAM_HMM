@@ -65,7 +65,7 @@ bool Foam::uniformSet::nextSample
     samplePt += offset;
     sampleI++;
 
-    for(; sampleI < nPoints_; sampleI++)
+    for (; sampleI < nPoints_; sampleI++)
     {
         scalar s = (samplePt - currentPt) & normOffset;
 
@@ -103,7 +103,7 @@ bool Foam::uniformSet::trackToBoundary
     // Alias
     const point& trackPt = singleParticle.position();
 
-    while(true)
+    while (true)
     {
         // Find next samplePt on/after trackPt. Update samplePt, sampleI
         if (!nextSample(trackPt, offset, smallDist, samplePt, sampleI))
@@ -305,7 +305,7 @@ void Foam::uniformSet::calcSamples
     // index in bHits; current boundary intersection
     label bHitI = 1;
 
-    while(true)
+    while (true)
     {
         // Initialize tracking starting from trackPt
         Cloud<passiveParticle> particles(mesh(), IDLList<passiveParticle>());
@@ -329,7 +329,7 @@ void Foam::uniformSet::calcSamples
         );
 
         // fill sampleSegments
-        for(label i = samplingPts.size() - 1; i >= startSegmentI; --i)
+        for (label i = samplingPts.size() - 1; i >= startSegmentI; --i)
         {
             samplingSegments.append(segmentI);
         }

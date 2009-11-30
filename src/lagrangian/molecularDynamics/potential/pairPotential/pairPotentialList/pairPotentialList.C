@@ -158,7 +158,7 @@ void Foam::pairPotentialList::readPairPotentialDict
     {
         OFstream ppTabFile(mesh.time().path()/"electrostatic");
 
-        if(!electrostaticPotential_->writeEnergyAndForceTables(ppTabFile))
+        if (!electrostaticPotential_->writeEnergyAndForceTables(ppTabFile))
         {
             FatalErrorIn("pairPotentialList::readPairPotentialDict")
                 << "Failed writing to "

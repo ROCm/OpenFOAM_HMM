@@ -813,7 +813,7 @@ int main(int argc, char *argv[])
 
     yyFlexLexer lexer(&fluentStream.stdStream());
 
-    while(lexer.yylex() != 0)
+    while (lexer.yylex() != 0)
     {}
 
     Info<< "\nFINISHED LEXING\n\n";
@@ -973,7 +973,7 @@ int main(int argc, char *argv[])
 
             // Set the owner of these faces to -1 so that they do not get
             // added to the mesh
-            for(label facei = start; facei <= end; facei++)
+            for (label facei = start; facei <= end; facei++)
             {
                 owner[facei] = -1;
             }

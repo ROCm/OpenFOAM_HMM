@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
                 plot3dFile >> coord;
 
                 // if statement ignores the first layer in i and j
-                if(i>0 && j>0)
+                if (i>0 && j>0)
                 {
                     points[p++][comp] = coord;
                 }
@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
     // correct error in biconic meshes
     forAll(points, i)
     {
-        if(points[i][1] < 1e-07)
+        if (points[i][1] < 1e-07)
         {
             points[i][1] = 0.0;
         }

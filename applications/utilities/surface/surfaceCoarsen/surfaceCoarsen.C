@@ -131,19 +131,19 @@ int main(int argc, char *argv[])
 
     // rearrange the vertex list
     ::List< ::Vector> temp_list;
-    for(int i=0;i<vert.num;i++)
+    for (int i=0;i<vert.num;i++)
     {
         temp_list.Add(vert[i]);
     }
-    for(int i=0;i<vert.num;i++)
+    for (int i=0;i<vert.num;i++)
     {
         vert[permutation[i]]=temp_list[i];
     }
 
     // update the changes in the entries in the triangle list
-    for(int i=0;i<tri.num;i++)
+    for (int i=0;i<tri.num;i++)
     {
-        for(int j=0;j<3;j++)
+        for (int j=0;j<3;j++)
         {
             tri[i].v[j] = permutation[tri[i].v[j]];
         }
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
     // Convert vert into pointField.
     pointField newPoints(vert.num);
 
-    for(int i=0; i<vert.num; i++)
+    for (int i=0; i<vert.num; i++)
     {
         const ::Vector & v = vert[i];
 

@@ -262,7 +262,7 @@ Foam::labelPair Foam::addPatchCellLayer::getEdgeString
             // - which hasn't been handled yet
             // - with same neighbour
             // - that needs extrusion
-            while(true)
+            while (true)
             {
                 label prevFp = fEdges.rcIndex(startFp);
 
@@ -286,7 +286,7 @@ Foam::labelPair Foam::addPatchCellLayer::getEdgeString
 
             // Search forward for end of string
             endFp = startFp;
-            while(true)
+            while (true)
             {
                 label nextFp = fEdges.fcIndex(endFp);
 

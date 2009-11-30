@@ -75,7 +75,7 @@ void writeBytes(char* start, int nBytes)
 
     cout<< start << " : ";
 
-    for(int i = 0; i < nBytes; i++)
+    for (int i = 0; i < nBytes; i++)
     {
         cout<< " " << start[i];
     }

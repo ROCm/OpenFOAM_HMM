@@ -30,7 +30,7 @@ int USERD_get_nsided_conn
             label nPoints = bMesh[patchi][facei].size();
             if ((nPoints != 3) && (nPoints != 4))
             {
-                for(label i=0; i<nPoints; i++)
+                for (label i=0; i<nPoints; i++)
                 {
                     nsided_conn_array[np++] = bMesh[patchi][facei][i] + 1;
                 }

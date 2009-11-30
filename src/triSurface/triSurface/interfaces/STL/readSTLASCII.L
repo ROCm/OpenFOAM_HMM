@@ -399,7 +399,7 @@ bool triSurface::readSTLASCII(const fileName& STLfileName)
     // Create the lexer obtaining the approximate number of vertices in the STL
     // from the file size
     STLLexer lexer(&STLstream.stdStream(), Foam::fileSize(STLfileName)/400);
-    while(lexer.lex() != 0)
+    while (lexer.lex() != 0)
     {}
 
     DynamicList<STLpoint>& STLpoints = lexer.STLpoints();

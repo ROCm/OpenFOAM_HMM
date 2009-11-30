@@ -54,7 +54,7 @@ void Foam::midPointSet::genSamples()
 
     label sampleI = 0;
 
-    while(true)
+    while (true)
     {
         // calculate midpoint between sampleI and sampleI+1 (if in same segment)
         while

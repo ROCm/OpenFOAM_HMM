@@ -280,7 +280,7 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
                                 blockHead = true;
                             }
                         }
-                        else if(cellPoints[pointI] == newEdgeEnd)
+                        else if (cellPoints[pointI] == newEdgeEnd)
                         {
                             if (pointUsage[pointI] > 2)
                             {
@@ -375,7 +375,7 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
                                             blockHead = true;
                                         }
                                     }
-                                    else if(cellPoints[pointI] == curEdgeEnd)
+                                    else if (cellPoints[pointI] == curEdgeEnd)
                                     {
                                         if (pointUsage[pointI] > 2)
                                         {

@@ -32,7 +32,7 @@ int USERD_get_gold_part_build_info
 
     strncpy(part_descriptions[0], meshName, Z_BUFL);
 
-    for(label i=0; i<nPatches; i++)
+    for (label i=0; i<nPatches; i++)
     {
         word patchName(meshPtr->boundary()[i].name());
         strncpy(part_descriptions[i+1], patchName.c_str(), Z_BUFL);
@@ -104,7 +104,7 @@ int USERD_get_gold_part_build_info
 
     const polyBoundaryMesh& bMesh = meshPtr->boundaryMesh();
 
-    for(label i=0; i<nPatches; i++)
+    for (label i=0; i<nPatches; i++)
     {
         label nTri03 = 0;
         label nQuad04 = 0;

@@ -314,14 +314,14 @@ void readPhysNames(IFstream& inFile, Map<word>& physicalNames)
         IStringStream lineStr(line);
         label nSpaces = lineStr.str().count(' ');
 
-        if(nSpaces == 1)
+        if (nSpaces == 1)
         {
             lineStr >> regionI >> regionName;
 
             Info<< "    " << regionI << '\t'
                 << string::validate<word>(regionName) << endl;
         }
-        else if(nSpaces == 2)
+        else if (nSpaces == 2)
         {
             // >= Gmsh2.4 physical types has tag in front.
             label physType;

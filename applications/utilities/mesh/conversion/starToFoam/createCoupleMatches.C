@@ -545,7 +545,7 @@ void starMesh::createCoupleMatches()
                     points_[masterEdges[masterEdgeI].start()];
 
                 // loop until the next label to add is -1
-                for(;;)
+                for (;;)
                 {
                     label nextPointLabel = -1;
                     label usedI = -1;
@@ -739,7 +739,7 @@ void starMesh::createCoupleMatches()
                     points_[slaveEdges[slaveEdgeI].start()];
 
                 // loop until the next label to add is -1
-                for(;;)
+                for (;;)
                 {
                     label nextPointLabel = -1;
                     label usedI = -1;

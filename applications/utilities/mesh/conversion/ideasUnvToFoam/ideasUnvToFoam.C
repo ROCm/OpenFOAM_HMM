@@ -412,7 +412,7 @@ void readPatches
     Sout<< "Starting reading patches at line " << is.lineNumber() << '.'
         << endl;
 
-    while(true)
+    while (true)
     {
         string line;
         is.getLine(line);

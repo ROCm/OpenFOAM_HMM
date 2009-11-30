@@ -77,7 +77,7 @@ scalar spray::injectedEnthalpy
         scalar Wl = fuels_->W(X);
         scalar hg = 0.0;
 
-        for(label j=0; j<Nf; j++)
+        for (label j=0; j<Nf; j++)
         {
             label k = liquidToGasIndex_[j];
             hg += gasProperties()[k].H(T)*gasProperties()[k].W()*X[j]/Wl;
@@ -133,7 +133,7 @@ scalar spray::liquidEnthalpy() const
         scalar hg = 0.0;
         scalar Wl = fuels().W(elmnt().X());
 
-        for(label j=0; j<Nf; j++)
+        for (label j=0; j<Nf; j++)
         {
             label k = liquidToGasIndex_[j];
 
@@ -177,7 +177,7 @@ scalar spray::liquidTotalEnthalpy() const
         scalar hg = 0.0;
         scalar Wl = fuels().W(elmnt().X());
 
-        for(label j=0; j<Nf; j++)
+        for (label j=0; j<Nf; j++)
         {
             label k = liquidToGasIndex_[j];
             hg +=
@@ -251,7 +251,7 @@ scalar spray::liquidPenetration
     vector ip(vector::zero);
     if (nHoles > 1)
     {
-        for(label i=0;i<nHoles;i++)
+        for (label i=0;i<nHoles;i++)
         {
             ip += injectors_[nozzlei].properties()->position(i);
         }
@@ -308,7 +308,7 @@ scalar spray::liquidPenetration
                 if (de < dist[i])
                 {
                     found = true;
-                    for(label j=n; j>i; j--)
+                    for (label j=n; j>i; j--)
                     {
                         m[j]    = m[j-1];
                         dist[j] = dist[j-1];

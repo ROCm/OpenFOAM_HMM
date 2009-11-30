@@ -1,4 +1,4 @@
-    if(planeMapping && targetPatchNamePresent && cut.cut())
+    if (planeMapping && targetPatchNamePresent && cut.cut())
     {
         //Map variables U, phi & k
         //Info<< typeInfo("isoLESmodel") << endl;
@@ -10,7 +10,7 @@
 
         forAll(cutCells, cCellsI)
         {
-            if(sgsModel.type() == "SpalartAllmaras")
+            if (sgsModel.type() == "SpalartAllmaras")
             {
                 planeNuTilda[cCellsI] = sgsModel.nuTilda()()[cutCells[cCellsI]];
             }
@@ -21,7 +21,7 @@
             planeU[cCellsI] = U[cutCells[cCellsI]];
         }
 
-        if(sgsModel.type() == "SpalartAllmaras")
+        if (sgsModel.type() == "SpalartAllmaras")
         {
             Info<< "Mapping NuTilda." << endl;
             sgsModel.nuTilda()().boundaryField()[targetPatchNumber] ==

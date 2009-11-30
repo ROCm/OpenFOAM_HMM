@@ -53,7 +53,7 @@ void Foam::potential::setSiteIdList(const IOdictionary& moleculePropertiesDict)
         {
             const word& siteId = siteIdNames[sI];
 
-            if(findIndex(siteIdList, siteId) == -1)
+            if (findIndex(siteIdList, siteId) == -1)
             {
                 siteIdList.append(siteId);
             }
@@ -65,14 +65,14 @@ void Foam::potential::setSiteIdList(const IOdictionary& moleculePropertiesDict)
         {
             const word& siteId = pairPotSiteIds[sI];
 
-            if(findIndex(siteIdNames, siteId) == -1)
+            if (findIndex(siteIdNames, siteId) == -1)
             {
                 FatalErrorIn("potential.C") << nl
                     << siteId << " in pairPotentialSiteIds is not in siteIds: "
                     << siteIdNames << nl << abort(FatalError);
             }
 
-            if(findIndex(pairPotentialSiteIdList, siteId) == -1)
+            if (findIndex(pairPotentialSiteIdList, siteId) == -1)
             {
                 pairPotentialSiteIdList.append(siteId);
             }
@@ -85,7 +85,7 @@ void Foam::potential::setSiteIdList(const IOdictionary& moleculePropertiesDict)
     {
         const word& siteId = siteIdList[aSIN];
 
-        if(findIndex(pairPotentialSiteIdList, siteId) == -1)
+        if (findIndex(pairPotentialSiteIdList, siteId) == -1)
         {
             pairPotentialSiteIdList.append(siteId);
         }
@@ -287,7 +287,7 @@ void Foam::potential::potential::readMdInitialiseDict
         {
             const word& id = latticeIds[i];
 
-            if(!moleculePropertiesDict.found(id))
+            if (!moleculePropertiesDict.found(id))
             {
                 FatalErrorIn("potential.C") << nl
                     << "Molecule type "

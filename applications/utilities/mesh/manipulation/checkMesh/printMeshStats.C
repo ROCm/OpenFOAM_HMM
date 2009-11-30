@@ -96,7 +96,7 @@ void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
     label nTetWedge = 0;
     label nUnknown = 0;
 
-    for(label cellI = 0; cellI < mesh.nCells(); cellI++)
+    for (label cellI = 0; cellI < mesh.nCells(); cellI++)
     {
         if (hex.isA(mesh, cellI))
         {

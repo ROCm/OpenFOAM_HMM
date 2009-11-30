@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     Info<< TimeList << endl;
     label nTimes = TimeList.size();
 
-    for(label n=1; n < nTimes; n++)
+    for (label n=1; n < nTimes; n++)
     {
         if (TimeList[n].value() > startTime)
         {

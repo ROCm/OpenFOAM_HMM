@@ -330,7 +330,7 @@ Foam::edgeSurface::edgeSurface
         labelList edgeLabels(edges_.size() - nSurfaceEdges_);
 
         label i = 0;
-        for(label edgeI = nSurfaceEdges_; edgeI < edges_.size(); edgeI++)
+        for (label edgeI = nSurfaceEdges_; edgeI < edges_.size(); edgeI++)
         {
             edgeLabels[i++] = edgeI;
         }

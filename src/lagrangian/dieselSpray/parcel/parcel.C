@@ -114,7 +114,7 @@ bool Foam::parcel::move(spray& sDB)
     scalarField Yfg(Nf, 0.0);
 
     scalar cpMixture = 0.0;
-    for(label i=0; i<Ns; i++)
+    for (label i=0; i<Ns; i++)
     {
         const volScalarField& Yi = sDB.composition().Y()[i];
         if (sDB.isLiquidFuel()[i])
@@ -341,7 +341,7 @@ void Foam::parcel::updateParcelProperties
 
     // calculate mean molecular weight
     scalar W = 0.0;
-    for(label i=0; i<Ns; i++)
+    for (label i=0; i<Ns; i++)
     {
         W += sDB.composition().Y()[i][celli]/sDB.gasProperties()[i].W();
 
@@ -357,7 +357,7 @@ void Foam::parcel::updateParcelProperties
 
     // correct the gaseous temperature for evaporated fuel
     scalar cpMix = 0.0;
-    for(label i=0; i<Ns; i++)
+    for (label i=0; i<Ns; i++)
     {
         cpMix += sDB.composition().Y()[i][celli]
                 *sDB.gasProperties()[i].Cp(T());
@@ -475,7 +475,7 @@ void Foam::parcel::updateParcelProperties
             newMass = m();
             newhg = 0.0;
             scalarField Ynew(fuels.Y(X()));
-            for(label i=0; i<Nf; i++)
+            for (label i=0; i<Nf; i++)
             {
                 label j = sDB.liquidToGasIndex()[i];
                 newhg += Ynew[i]*sDB.gasProperties()[j].H(Tnew);
@@ -523,7 +523,7 @@ void Foam::parcel::updateParcelProperties
         scalar liquidcL = sDB.fuels().cp(pg, TDroplet, X());
 
         cpMix = 0.0;
-        for(label i=0; i<Ns; i++)
+        for (label i=0; i<Ns; i++)
         {
             if (sDB.isLiquidFuel()[i])
             {
@@ -541,7 +541,7 @@ void Foam::parcel::updateParcelProperties
         scalar z = 0.0;
         scalar tauEvap = 0.0;
 
-        for(label i=0; i<Nf; i++)
+        for (label i=0; i<Nf; i++)
         {
             tauEvap += X()[i]*fuels.properties()[i].W()/tauEvaporation[i];
         }
@@ -628,7 +628,7 @@ void Foam::parcel::updateParcelProperties
         // if the droplet is NOT boiling use implicit scheme.
         if (sDB.evaporation().evaporation())
         {
-            for(label i=0; i<Nf; i++)
+            for (label i=0; i<Nf; i++)
             {
                 // immediately evaporate mass that has reached critical
                 // condition

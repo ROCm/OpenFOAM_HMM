@@ -468,7 +468,7 @@ void Foam::autoLayerDriver::findIsolatedRegions
     // Keep count of number of points unextruded
     label nPointCounter = 0;
 
-    while(true)
+    while (true)
     {
         // Stop layer growth where mesh wraps around edge with a
         // large feature angle

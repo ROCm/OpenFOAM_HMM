@@ -705,7 +705,7 @@ void Foam::surfaceIntersection::doCutEdges
                 doTrack = false;
             }
         }
-        while(doTrack);
+        while (doTrack);
     }
     intersection::setPlanarTol(oldTol);
 }

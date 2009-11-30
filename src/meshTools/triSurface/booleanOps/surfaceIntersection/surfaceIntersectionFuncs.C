@@ -155,7 +155,7 @@ void Foam::surfaceIntersection::removeDuplicates
         // Insert first
         elems[elemI++] = map[oldElems[0]];
 
-        for(label vertI = 1; vertI < oldElems.size(); vertI++)
+        for (label vertI = 1; vertI < oldElems.size(); vertI++)
         {
             // Insert others only if they differ from one before
             label newVertI = map[oldElems[vertI]];
@@ -294,7 +294,7 @@ void Foam::surfaceIntersection::writeIntersectedEdges
             os  << "l " << e.start()+1 << ' '
                 << extraVerts[0] + surf.nPoints() + 1 << endl;
 
-            for(label i = 1; i < extraVerts.size(); i++)
+            for (label i = 1; i < extraVerts.size(); i++)
             {
                 os  << "l " << extraVerts[i-1] + surf.nPoints() + 1  << ' '
                     << extraVerts[i] + surf.nPoints() + 1 << endl;

@@ -114,7 +114,7 @@ void Foam::patchZones::markZone(label faceI)
     // Zones on all edges.
     labelList edgeZone(pp_.nEdges(), -1);
 
-    while(1)
+    while (true)
     {
         changedEdges = faceToEdge(changedFaces, edgeZone);
 

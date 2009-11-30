@@ -175,7 +175,7 @@ bool Foam::primitiveMesh::checkClosedCells
     {
         scalar maxOpenness = 0;
 
-        for(direction cmpt=0; cmpt<vector::nComponents; cmpt++)
+        for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
         {
             maxOpenness = max
             (
@@ -654,7 +654,7 @@ bool Foam::primitiveMesh::checkFaceSkewness
             nWarnSkew++;
         }
 
-        if(skewness > maxSkew)
+        if (skewness > maxSkew)
         {
             maxSkew = skewness;
         }
@@ -702,7 +702,7 @@ bool Foam::primitiveMesh::checkFaceSkewness
             nWarnSkew++;
         }
 
-        if(skewness > maxSkew)
+        if (skewness > maxSkew)
         {
             maxSkew = skewness;
         }

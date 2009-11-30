@@ -105,7 +105,7 @@ Foam::scalar Foam::exponential::sample() const
         {
             p += ls_[i]*exp(-lambda_[i]*x);
         }
-    } while(p>y);
+    } while (p>y);
 
     return x;
 }

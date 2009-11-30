@@ -152,7 +152,7 @@ if (runTime.outputTime())
 
     forAll(totalTemperature.internalField(), tT)
     {
-        if(totalN_sum[tT] > 0)
+        if (totalN_sum[tT] > 0)
         {
             totalTemperature.internalField()[tT] =
                 totalTemperatureVTerms_sum[tT]
@@ -181,7 +181,7 @@ if (runTime.outputTime())
 
         forAll(singleSpeciesMeanKE, sSMKE)
         {
-            if(allSpeciesN_RU[mKE][sSMKE])
+            if (allSpeciesN_RU[mKE][sSMKE])
             {
                 singleSpeciesMeanKE[sSMKE] =
                     allSpeciesM_RU[mKE][sSMKE]
@@ -208,7 +208,7 @@ if (runTime.outputTime())
 
     forAll(totalMeanKE.internalField(), tMKE)
     {
-        if(totalN_sum[tMKE] > 0)
+        if (totalN_sum[tMKE] > 0)
         {
             totalMeanKE.internalField()[tMKE] =
                 totalKE_sum[tMKE]

@@ -342,7 +342,7 @@ Foam::label Foam::regionSplit::calcRegionSplit
         nRegions++;
         unsetCellI++;
     }
-    while(true);
+    while (true);
 
 
     if (debug)

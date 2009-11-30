@@ -165,7 +165,7 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
     // Matrix of the polynomial components
     scalarRectangularMatrix B(C.size(), minSize_, scalar(0));
 
-    for(label ip = 0; ip < C.size(); ip++)
+    for (label ip = 0; ip < C.size(); ip++)
     {
         const point& p = C[ip];
 
@@ -195,7 +195,7 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
     }
 
     // Additional weighting for constant and linear terms
-    for(label i = 0; i < B.n(); i++)
+    for (label i = 0; i < B.n(); i++)
     {
         B[i][0] *= wts[0];
         B[i][1] *= wts[0];
@@ -206,14 +206,14 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
     coeffsi.setSize(stencilSize);
 
     bool goodFit = false;
-    for(int iIt = 0; iIt < 8 && !goodFit; iIt++)
+    for (int iIt = 0; iIt < 8 && !goodFit; iIt++)
     {
         SVD svd(B, SMALL);
 
         scalar maxCoeff = 0;
         label maxCoeffi = 0;
 
-        for(label i=0; i<stencilSize; i++)
+        for (label i=0; i<stencilSize; i++)
         {
             coeffsi[i] = wts[0]*wts[i]*svd.VSinvUt()[0][i];
             if (mag(coeffsi[i]) > maxCoeff)
@@ -271,13 +271,13 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
                 wts[1] *= 10;
             }
 
-            for(label j = 0; j < B.m(); j++)
+            for (label j = 0; j < B.m(); j++)
             {
                 B[0][j] *= 10;
                 B[1][j] *= 10;
             }
 
-            for(label i = 0; i < B.n(); i++)
+            for (label i = 0; i < B.n(); i++)
             {
                 B[i][0] *= 10;
                 B[i][1] *= 10;

@@ -10,11 +10,12 @@
 
 *** General
     + 80 character lines max
-    + The body of control statements (eg, if, else, while, etc).
-      always delineated with brace brackets
-    + Use spaces for indentation, not tab characters.
     + The normal indentation is 4 spaces per logical level.
+    + Use spaces for indentation, not tab characters.
     + Avoid trailing whitespace.
+    + The body of control statements (eg, if, else, while, etc).
+      always delineated with brace brackets. A possible exception can be
+      made with 'break' or 'continue' as part of a control structure.
 
     + stream output
       =<<= is always four characters after the start of the stream,
@@ -152,7 +153,7 @@
     :    code;
     :}
 
-*** =for= Loops
+*** =for= and =while= Loops
     :for (i = 0; i < maxI; i++)
     :{
     :    code;
@@ -180,7 +181,7 @@
     Note that when indexing through iterators, it is often slightly more
     efficient to use the pre-increment form. Eg, =++iter= instead of =iter++=
 
-*** =forAll= loops
+*** =forAll= , =forAllIter=, etc. loops
     like =for= loops, but
 
     :forAll(

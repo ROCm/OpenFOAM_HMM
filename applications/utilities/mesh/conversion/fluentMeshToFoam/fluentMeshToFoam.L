@@ -898,7 +898,7 @@ int main(int argc, char *argv[])
     }
 
     yyFlexLexer lexer(&fluentStream);
-    while(lexer.yylex() != 0)
+    while (lexer.yylex() != 0)
     {}
 
     Info<< "\n\nFINISHED LEXING\n\n\n";
@@ -1388,7 +1388,7 @@ int main(int argc, char *argv[])
                 meshFaces[j] = cMeshFace;
                 pFaceSet.insert(cMeshFace);
             }
-            if(writeSets)
+            if (writeSets)
             {
                 Info<< "Writing patch " << patchNames[patchI]
                     << " of size " << sz << " to faceSet." << endl;
@@ -1404,7 +1404,11 @@ int main(int argc, char *argv[])
         //it will be put in a default wall boundary
         //internal boundaries are simply ignored
 
-        if(patchTypes[patchI] != "internal" && !pShapeMesh.isInternalFace(meshFaces[0]))
+        if
+        (
+            patchTypes[patchI] != "internal"
+         && !pShapeMesh.isInternalFace(meshFaces[0])
+        )
         {
             //first face is external and has valid non-internal type
 
@@ -1423,7 +1427,7 @@ int main(int argc, char *argv[])
                         << exit(FatalError);
                 }
 
-                if(facePatchID[faceI - pShapeMesh.nInternalFaces()]!= -1)
+                if (facePatchID[faceI - pShapeMesh.nInternalFaces()]!= -1)
                 {
                     FatalErrorIn(args.executable())
                         << "Face " << faceI << " on new patch "
@@ -1475,7 +1479,7 @@ int main(int argc, char *argv[])
         DynamicList<label> defaultBoundaryFaces(facePatchID.size());
         forAll(facePatchID, idI)
         {
-            if(facePatchID[idI] == -1)
+            if (facePatchID[idI] == -1)
             {
                 defaultBoundaryFaces.append(idI);
                 facePatchID[idI] = nBoundaries;
@@ -1575,50 +1579,50 @@ int main(int argc, char *argv[])
             boundaryZones[pI].append(bPatches[pI].name());
         }
 
-	    label cnt=0;
-	    SLList<label>::iterator cg = cellGroupZoneID.begin();
-	    SLList<label>::iterator start = cellGroupStartIndex.begin();
-	    SLList<label>::iterator end = cellGroupEndIndex.begin();
+        label cnt=0;
+        SLList<label>::iterator cg = cellGroupZoneID.begin();
+        SLList<label>::iterator start = cellGroupStartIndex.begin();
+        SLList<label>::iterator end = cellGroupEndIndex.begin();
 
-	    for (; cg != cellGroupZoneID.end(); ++cg, ++start, ++end)
-	    {
-	        const word& name = patchNameIDs[cg()];
-	        const word& type = patchTypeIDs[cg()];
+        for (; cg != cellGroupZoneID.end(); ++cg, ++start, ++end)
+        {
+            const word& name = patchNameIDs[cg()];
+            const word& type = patchTypeIDs[cg()];
 
-	        Info<< "Writing cell zone: " << name
+            Info<< "Writing cell zone: " << name
                 << " of type " << type << " starting at " << start() - 1
                 << " ending at " << end() - 1 << " to cellSet." << endl;
 
-	        labelList cls(end() - start() + 1);
+            labelList cls(end() - start() + 1);
 
             // Mark zone cells, used for finding faces
             boolList zoneCell(pShapeMesh.nCells(), false);
 
-	        // shift cell indizes by 1
-	        label nr=0;
-	        for (label celli = (start() - 1); celli < end(); celli++)
+            // shift cell indizes by 1
+            label nr=0;
+            for (label celli = (start() - 1); celli < end(); celli++)
             {
                 cls[nr]=celli;
                 zoneCell[celli] = true;
                 nr++;
-	        }
+            }
 
-	        cz[cnt] = new cellZone
-	        (
+            cz[cnt] = new cellZone
+            (
                 name,
                 cls,
                 cnt,
                 pShapeMesh.cellZones()
-	        );
+            );
 
             DynamicList<label> zoneFaces(pShapeMesh.nFaces());
             forAll(pShapeMesh.faceNeighbour(), faceI)
             {
                 label nei = pShapeMesh.faceNeighbour()[faceI];
                 label own = pShapeMesh.faceOwner()[faceI];
-                if(nei != -1)
+                if (nei != -1)
                 {
-                    if(zoneCell[nei] && zoneCell[own])
+                    if (zoneCell[nei] && zoneCell[own])
                     {
                         zoneFaces.append(faceI);
                     }
@@ -1641,7 +1645,7 @@ int main(int argc, char *argv[])
                 const labelList& faceCells = bPatches[pI].faceCells();
                 forAll(faceCells, fcI)
                 {
-                    if(zoneCell[faceCells[fcI] ])
+                    if (zoneCell[faceCells[fcI] ])
                     {
                         boundaryZones[pI].append(name);
                         break;
@@ -1649,8 +1653,8 @@ int main(int argc, char *argv[])
                 }
             }
 
-	        cnt++;
-	    }
+            cnt++;
+        }
 
         pShapeMesh.addZones(pz, fz, cz);
 
@@ -1715,7 +1719,7 @@ int main(int argc, char *argv[])
                 cellSet internal(pShapeMesh, name, end() - start());
 
                 // shift cell indizes by 1
-                for(label celli=start() - 1; celli<=end() - 1; celli++)
+                for (label celli = start() - 1; celli <= end() - 1; celli++)
                 {
                     internal.insert(celli);
                 }

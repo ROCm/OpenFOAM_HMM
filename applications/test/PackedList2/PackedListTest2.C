@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
     sum = 0;
     for (label iter = 0; iter < nIters; ++iter)
     {
-        for(unsigned int i = 0; i < stlVector.size(); i++)
+        for (unsigned int i = 0; i < stlVector.size(); i++)
         {
             sum += stlVector[i];
         }

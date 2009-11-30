@@ -223,7 +223,7 @@ Foam::SHA1::processBlock(const void *data, size_t len)
     {                                                                         \
         E += rol_uint32(A, 5) + F(B, C, D) + K + M;                           \
         B = rol_uint32(B, 30);                                                \
-    } while(0)
+    } while (0)
 
     while (words < endp)
     {

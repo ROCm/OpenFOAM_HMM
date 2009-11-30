@@ -38,7 +38,7 @@ int USERD_get_nfaced_nodes_per_face
                 {}
                 else
                 {
-                    for(label i=0; i<nFacesInCell; i++)
+                    for (label i=0; i<nFacesInCell; i++)
                     {
                         label facei = cells[n][i];
                         label nFacePoints = faces[facei].size();
@@ -48,7 +48,7 @@ int USERD_get_nfaced_nodes_per_face
             }
             else
             {
-                for(label i=0; i<nFacesInCell; i++)
+                for (label i=0; i<nFacesInCell; i++)
                 {
                     label facei = cells[n][i];
                     label nFacePoints = faces[facei].size();

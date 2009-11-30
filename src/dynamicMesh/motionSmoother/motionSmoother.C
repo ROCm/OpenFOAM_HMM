@@ -65,7 +65,7 @@ void Foam::motionSmoother::makePatchPatchAddressing()
 
     forAll(bm, patchi)
     {
-        if(!isA<emptyPolyPatch>(bm[patchi]))
+        if (!isA<emptyPolyPatch>(bm[patchi]))
         {
             nPatchPatchPoints += bm[patchi].boundaryPoints().size();
         }
@@ -83,7 +83,7 @@ void Foam::motionSmoother::makePatchPatchAddressing()
 
     forAll(bm, patchi)
     {
-        if(!isA<emptyPolyPatch>(bm[patchi]))
+        if (!isA<emptyPolyPatch>(bm[patchi]))
         {
             const labelList& bp = bm[patchi].boundaryPoints();
             const labelList& meshPoints = bm[patchi].meshPoints();

@@ -107,7 +107,7 @@ bool Foam::adjustPhi
         {
             massCorr = (massIn - fixedMassOut)/adjustableMassOut;
         }
-        else if(mag(fixedMassOut - massIn)/totalFlux > 1e-10)
+        else if (mag(fixedMassOut - massIn)/totalFlux > 1e-10)
         {
             FatalErrorIn
             (

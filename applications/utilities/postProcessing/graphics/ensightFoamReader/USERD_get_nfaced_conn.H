@@ -36,11 +36,11 @@ int USERD_get_nfaced_conn
                 {}
                 else
                 {
-                    for(label i=0; i<nFacesInCell; i++)
+                    for (label i=0; i<nFacesInCell; i++)
                     {
                         label facei = cells[n][i];
                         label nPoints = faces[facei].size();
-                        for(label j=0; j<nPoints; j++)
+                        for (label j=0; j<nPoints; j++)
                         {
                             nfaced_conn_array[nPoint++] = faces[facei][j] + 1;
                         }
@@ -49,11 +49,11 @@ int USERD_get_nfaced_conn
             }
             else
             {
-                for(label i=0; i<nFacesInCell; i++)
+                for (label i=0; i<nFacesInCell; i++)
                 {
                     label facei = cells[n][i];
                     label nPoints = faces[facei].size();
-                    for(label j=0; j<nPoints; j++)
+                    for (label j=0; j<nPoints; j++)
                     {
                         nfaced_conn_array[nPoint++] = faces[facei][j] + 1;
                     }

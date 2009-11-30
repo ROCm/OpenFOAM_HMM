@@ -2319,7 +2319,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
         allCellInfo
     );
 
-    while(true)
+    while (true)
     {
         if (debug)
         {
