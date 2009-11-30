@@ -24,71 +24,62 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "spline.H"
+#include "splineEdge.H"
+#include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::scalar Foam::spline::B(const scalar tau)
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    if (tau <= -2.0 || tau >= 2.0)
-    {
-        return 0.0;
-    }
-    else if (tau <= -1.0)
-    {
-        return pow((2.0 + tau), 3.0)/6.0;
-    }
-    else if (tau <= 0.0)
-    {
-        return (4.0 - 6.0*tau*tau - 3.0*tau*tau*tau)/6.0;
-    }
-    else if (tau <= 1.0)
-    {
-        return (4.0 - 6.0*tau*tau + 3.0*tau*tau*tau)/6.0;
-    }
-    else if (tau <= 2.0)
-    {
-        return pow((2.0 - tau), 3.0)/6.0;
-    }
-    else
-    {
-        FatalErrorIn("spline::B(const scalar)")
-            << "Programming error???, "
-            << "tau = " << tau
-            << abort(FatalError);
-    }
-
-    return 0.0;
+    defineTypeNameAndDebug(splineEdge, 0);
+    addToRunTimeSelectionTable(curvedEdge, splineEdge, Istream);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::spline::spline(const pointField& knotPoints)
+Foam::splineEdge::splineEdge
+(
+    const pointField& points,
+    const label start,
+    const label end,
+    const pointField& otherknots
+)
 :
-    knots_(knotPoints)
+    curvedEdge(points, start, end),
+    CatmullRomSpline(appendEndPoints(points, start, end, otherknots))
 {}
+
+
+Foam::splineEdge::splineEdge(const pointField& points, Istream& is)
+:
+    curvedEdge(points, is),
+    CatmullRomSpline(appendEndPoints(points, start_, end_, pointField(is)))
+{
+    token t(is);
+    is.putBack(t);
+
+    // might have start/end tangents that we currently ignore
+    if (t == token::BEGIN_LIST)
+    {
+        vector fstend(is);
+        vector sndend(is);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::vector Foam::spline::position(const scalar mu) const
+Foam::point Foam::splineEdge::position(const scalar mu) const
 {
-    vector loc(vector::zero);
-
-    for (register label i=0; i < knots_.size(); i++)
-    {
-        loc += B((knots_.size() - 1)*mu - i)*knots_[i];
-    }
-
-    return loc;
+    return CatmullRomSpline::position(mu);
 }
 
 
-Foam::scalar Foam::spline::length() const
+Foam::scalar Foam::splineEdge::length() const
 {
-    notImplemented("spline::length() const");
-    return 1.0;
+    return CatmullRomSpline::length();
 }
 
 

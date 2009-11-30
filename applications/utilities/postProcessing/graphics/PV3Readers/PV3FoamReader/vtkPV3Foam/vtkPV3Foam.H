@@ -111,7 +111,7 @@ class vtkPV3Foam
     // Private classes
 
         //- Bookkeeping for GUI checklists and the multi-block organization
-        class partInfo
+        class arrayRange
         {
             const char *name_;
             int block_;
@@ -120,11 +120,11 @@ class vtkPV3Foam
 
         public:
 
-            partInfo(const char *name, const int blockNo=0)
+            arrayRange(const char *name, const int blockNo=0)
             :
                 name_(name),
                 block_(blockNo),
-                start_(-1),
+                start_(0),
                 size_(0)
             {}
 
@@ -142,21 +142,25 @@ class vtkPV3Foam
                 return prev;
             }
 
+            //- Return block name
             const char* name() const
             {
                 return name_;
             }
 
+            //- Return array start index
             int start() const
             {
                 return start_;
             }
 
+            //- Return array end index
             int end() const
             {
                 return start_ + size_;
             }
 
+            //- Return sublist size
             int size() const
             {
                 return size_;
@@ -167,16 +171,10 @@ class vtkPV3Foam
                 return !size_;
             }
 
-            void reset()
+            //- Reset the size to zero and optionally assign a new start
+            void reset(const int startAt = 0)
             {
-                start_ = -1;
-                size_ = 0;
-            }
-
-            //- Assign new start and reset the size
-            void operator=(const int i)
-            {
-                start_ = i;
+                start_ = startAt;
                 size_ = 0;
             }
 
@@ -282,15 +280,15 @@ class vtkPV3Foam
 
         //- First instance and size of various mesh parts
         //  used to index into partStatus_ and partDataset_
-        partInfo partInfoVolume_;
-        partInfo partInfoPatches_;
-        partInfo partInfoLagrangian_;
-        partInfo partInfoCellZones_;
-        partInfo partInfoFaceZones_;
-        partInfo partInfoPointZones_;
-        partInfo partInfoCellSets_;
-        partInfo partInfoFaceSets_;
-        partInfo partInfoPointSets_;
+        arrayRange arrayRangeVolume_;
+        arrayRange arrayRangePatches_;
+        arrayRange arrayRangeLagrangian_;
+        arrayRange arrayRangeCellZones_;
+        arrayRange arrayRangeFaceZones_;
+        arrayRange arrayRangePointZones_;
+        arrayRange arrayRangeCellSets_;
+        arrayRange arrayRangeFaceSets_;
+        arrayRange arrayRangePointSets_;
 
         //- Decomposed cells information (mesh regions)
         //  TODO: regions
@@ -313,7 +311,7 @@ class vtkPV3Foam
         (
             vtkMultiBlockDataSet* output,
             vtkDataSet* dataset,
-            const partInfo&,
+            const arrayRange&,
             const label datasetNo,
             const std::string& datasetName
         );
@@ -323,7 +321,7 @@ class vtkPV3Foam
         static vtkDataSet* GetDataSetFromBlock
         (
             vtkMultiBlockDataSet* output,
-            const partInfo&,
+            const arrayRange&,
             const label datasetNo
         );
 
@@ -332,7 +330,7 @@ class vtkPV3Foam
         static label GetNumberOfDataSets
         (
             vtkMultiBlockDataSet* output,
-            const partInfo&
+            const arrayRange&
         );
 
         //- Reset data counters
@@ -344,19 +342,19 @@ class vtkPV3Foam
             void updateMeshPartsStatus();
 
             //- Internal mesh info
-            void updateInfoInternalMesh();
+            void updateInfoInternalMesh(vtkDataArraySelection*);
 
             //- Lagrangian info
-            void updateInfoLagrangian();
+            void updateInfoLagrangian(vtkDataArraySelection*);
 
             //- Patch info
-            void updateInfoPatches();
+            void updateInfoPatches(vtkDataArraySelection*);
 
             //- Set info
-            void updateInfoSets();
+            void updateInfoSets(vtkDataArraySelection*);
 
             //- Zone info
-            void updateInfoZones();
+            void updateInfoZones(vtkDataArraySelection*);
 
             //- Read zone names for zoneType from file
             wordList readZoneNames(const word& zoneType);
@@ -511,7 +509,7 @@ class vtkPV3Foam
                 const GeometricField<Type, fvPatchField, volMesh>&,
                 autoPtr<GeometricField<Type, pointPatchField, pointMesh> >&,
                 vtkMultiBlockDataSet* output,
-                const partInfo& selector,
+                const arrayRange&,
                 const List<polyDecomp>& decompLst
             );
 
@@ -521,7 +519,7 @@ class vtkPV3Foam
             (
                 const GeometricField<Type, fvPatchField, volMesh>&,
                 vtkMultiBlockDataSet* output,
-                const partInfo&,
+                const arrayRange&,
                 const label datasetNo,
                 const polyDecomp&
             );
@@ -533,7 +531,7 @@ class vtkPV3Foam
                 const word& name,
                 const Field<Type>&,
                 vtkMultiBlockDataSet* output,
-                const partInfo&,
+                const arrayRange&,
                 const label datasetNo
             );
 
@@ -543,7 +541,7 @@ class vtkPV3Foam
             (
                 const GeometricField<Type, fvPatchField, volMesh>&,
                 vtkMultiBlockDataSet* output,
-                const partInfo&,
+                const arrayRange&,
                 const label datasetNo,
                 const fvMesh&,
                 const labelList& faceLabels
@@ -555,7 +553,7 @@ class vtkPV3Foam
             (
                 const GeometricField<Type, fvPatchField, volMesh>&,
                 vtkMultiBlockDataSet* output,
-                const partInfo&,
+                const arrayRange&,
                 const label datasetNo,
                 const fvMesh&,
                 const faceSet&
@@ -576,7 +574,7 @@ class vtkPV3Foam
             (
                 const IOField<Type>&,
                 vtkMultiBlockDataSet* output,
-                const partInfo&,
+                const arrayRange&,
                 const label datasetNo
             );
 
@@ -596,7 +594,7 @@ class vtkPV3Foam
             (
                 const GeometricField<Type, pointPatchField, pointMesh>&,
                 vtkMultiBlockDataSet* output,
-                const partInfo& selector,
+                const arrayRange&,
                 const List<polyDecomp>&
             );
 
@@ -607,7 +605,7 @@ class vtkPV3Foam
                 const GeometricField<Type, pointPatchField, pointMesh>&,
                 const GeometricField<Type, fvPatchField, volMesh>&,
                 vtkMultiBlockDataSet* output,
-                const partInfo&,
+                const arrayRange&,
                 const label datasetNo,
                 const polyDecomp&
             );
@@ -619,7 +617,7 @@ class vtkPV3Foam
                 const word& name,
                 const Field<Type>&,
                 vtkMultiBlockDataSet* output,
-                const partInfo&,
+                const arrayRange&,
                 const label datasetNo
             );
 
@@ -640,7 +638,7 @@ class vtkPV3Foam
             static wordHashSet getSelected
             (
                 vtkDataArraySelection*,
-                const partInfo&
+                const arrayRange&
             );
 
             //- Retrieve the current selections
@@ -650,7 +648,7 @@ class vtkPV3Foam
             static stringList getSelectedArrayEntries
             (
                 vtkDataArraySelection*,
-                const partInfo&
+                const arrayRange&
             );
 
             //- Set selection(s)
@@ -661,7 +659,7 @@ class vtkPV3Foam
             );
 
             //- Get the first word from the mesh parts selection
-            word getPartName(int);
+            word getPartName(const int);
 
 
         //- Disallow default bitwise copy construct

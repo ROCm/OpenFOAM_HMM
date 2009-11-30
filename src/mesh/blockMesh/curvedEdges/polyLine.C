@@ -29,29 +29,26 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// calcDistances generates the distances_ lookup table (cumulative
-// distance along the line) from the individual vectors to the points
-
-void Foam::polyLine::calcDistances()
+void Foam::polyLine::calcParam()
 {
-    distances_.setSize(controlPoints_.size());
+    param_.setSize(points_.size());
 
-    if (distances_.size())
+    if (param_.size())
     {
-        distances_[0] = 0.0;
+        param_[0] = 0.0;
 
-        for (label i=1; i<distances_.size(); i++)
+        for (label i=1; i < param_.size(); i++)
         {
-            distances_[i] = distances_[i-1] +
-                mag(controlPoints_[i] - controlPoints_[i-1]);
+            param_[i] = param_[i-1] + mag(points_[i] - points_[i-1]);
         }
 
-        // normalize
-        lineLength_ = distances_.last();
-        for (label i=1; i<distances_.size(); i++)
+        // normalize on the interval 0-1
+        lineLength_ = param_.last();
+        for (label i=1; i < param_.size() - 1; i++)
         {
-            distances_[i] /= lineLength_;
+            param_[i] /= lineLength_;
         }
+        param_.last() = 1.0;
     }
     else
     {
@@ -65,20 +62,75 @@ void Foam::polyLine::calcDistances()
 
 Foam::polyLine::polyLine(const pointField& ps)
 :
-    controlPoints_(ps),
-    distances_(0),
-    lineLength_(0.0)
+    points_(ps),
+    lineLength_(0.0),
+    param_(0)
 {
-    calcDistances();
+    calcParam();
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::vector Foam::polyLine::position(const scalar lambda) const
+const Foam::pointField& Foam::polyLine::points() const
+{
+    return points_;
+}
+
+
+Foam::label Foam::polyLine::nSegments() const
+{
+    return points_.size()-1;
+}
+
+
+Foam::label Foam::polyLine::localParameter(scalar& lambda) const
 {
     // check range of lambda
+    if (lambda < 0 || lambda > 1)
+    {
+        FatalErrorIn("polyLine::localParameter(scalar&)")
+            << "Parameter out-of-range, "
+            << "lambda = " << lambda
+            << abort(FatalError);
+    }
 
+    // check endpoints
+    if (lambda < SMALL)
+    {
+        lambda = 0;
+        return 0;
+    }
+    else if (lambda > 1 - SMALL)
+    {
+        lambda = 1;
+        return nSegments();
+    }
+
+    // search table of cumulative distances to find which line-segment
+    // we are on. Check the upper bound.
+
+    label segmentI = 1;
+    while (param_[segmentI] < lambda)
+    {
+        segmentI++;
+    }
+    segmentI--;   // we want the corresponding lower bound
+
+    // the local parameter [0-1] on this line segment
+    lambda =
+    (
+        ( lambda - param_[segmentI] )
+      / ( param_[segmentI+1] - param_[segmentI] )
+    );
+
+    return segmentI;
+}
+
+
+Foam::point Foam::polyLine::position(const scalar lambda) const
+{
+    // check range of lambda
     if (lambda < 0 || lambda > 1)
     {
         FatalErrorIn("polyLine::position(const scalar)")
@@ -87,37 +139,36 @@ Foam::vector Foam::polyLine::position(const scalar lambda) const
             << abort(FatalError);
     }
 
-    // Quick calc of endpoints
-
+    // check endpoints
     if (lambda < SMALL)
     {
-        return controlPoints_[0];
+        return points_[0];
     }
     else if (lambda > 1 - SMALL)
     {
-        return controlPoints_.last();
+        return points_.last();
     }
 
 
-    // search table of cumulative distance to find which linesegment we
-    // are on
+    // search table of cumulative distances to find which line-segment
+    // we are on. Check the upper bound.
 
-    label i(0);
-    do
+    label segmentI = 1;
+    while (param_[segmentI] < lambda)
     {
-        i++;
-    } while (distances_[i] < lambda);
+        ++segmentI;
+    }
+    --segmentI;   // we now want the lower bound
 
-    i--;               // we overshot!
 
-    // construct position vector
-    scalar offsetDist =
-        (lambda - distances_[i])
-       /(distances_[i+1] - distances_[i]);
-
-    vector offsetV = controlPoints_[i+1] - controlPoints_[i];
-
-    return controlPoints_[i] + offsetDist*offsetV;
+    // linear interpolation
+    return
+    (
+        points_[segmentI]
+      + ( points_[segmentI+1] - points_[segmentI] )
+      * ( lambda - param_[segmentI] )
+      / ( param_[segmentI+1] - param_[segmentI] )
+    );
 }
 
 
