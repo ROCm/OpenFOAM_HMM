@@ -550,7 +550,7 @@ int main(int argc, char *argv[])
 
         fileName surfFileNameBase(surfFileName.name());
 
-        for(label zone = 0; zone < numZones; zone++)
+        for (label zone = 0; zone < numZones; zone++)
         {
             boolList includeMap(surf.size(), false);
 

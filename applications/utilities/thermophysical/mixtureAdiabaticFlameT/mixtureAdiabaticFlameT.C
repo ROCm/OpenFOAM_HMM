@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
             + 2*pMix[i].volFrac()*thermo(CpData.lookup(pMix[i].name()));
     }
 
-    Info << "Adiabatic flame temperature of mixture " << rMix.name() << " = "
+    Info<< "Adiabatic flame temperature of mixture " << rMix.name() << " = "
          << products.TH(reactants.H(T0), 1000.0) << " K" << endl;
 
     return 0;

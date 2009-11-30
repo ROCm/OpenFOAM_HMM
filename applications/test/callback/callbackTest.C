@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 
     cbr.testCallbackFunction();
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

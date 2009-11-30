@@ -973,7 +973,7 @@ int main(int argc, char *argv[])
 
     surf.write(outSurfName);
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

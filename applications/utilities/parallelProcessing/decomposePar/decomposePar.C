@@ -106,7 +106,6 @@ int main(int argc, char *argv[])
         Info<< "Decomposing mesh " << regionName << nl << endl;
     }
 
-
     bool writeCellDist           = args.optionFound("cellDist");
     bool copyUniform             = args.optionFound("copyUniform");
     bool decomposeFieldsOnly     = args.optionFound("fields");

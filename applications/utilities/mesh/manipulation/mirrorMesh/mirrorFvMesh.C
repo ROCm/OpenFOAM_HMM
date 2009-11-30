@@ -33,8 +33,8 @@ License
 const Foam::label Foam::mirrorFvMesh::cellRenumber[8][8] =
 {
     {-1, -1, -1, -1, -1, -1, -1, -1},    // unknown
-    {-1, -1, -1, -1, -1, -1, -1, -1},    // 
-    {-1, -1, -1, -1, -1, -1, -1, -1},    // 
+    {-1, -1, -1, -1, -1, -1, -1, -1},    //
+    {-1, -1, -1, -1, -1, -1, -1, -1},    //
     { 0,  3,  2,  1,  4,  7,  6,  5},    // hex
     { 2,  1,  0,  5,  4,  3,  6, -1},    // wedge
     { 0,  2,  1,  3,  5,  4, -1, -1},    // prism
@@ -74,7 +74,7 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     const polyPatchList& oldPatches = boundaryMesh();
 
     // Mirror the points
-    Info << "Mirroring points. Old points: " << oldPoints.size();
+    Info<< "Mirroring points. Old points: " << oldPoints.size();
 
     pointField newPoints(2*oldPoints.size());
     label nNewPoints = 0;
@@ -120,10 +120,10 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     }
 
     // Reset the size of the point list
-    Info << " New points: " << nNewPoints << endl;
+    Info<< " New points: " << nNewPoints << endl;
     newPoints.setSize(nNewPoints);
 
-    Info << "Mirroring faces. Old faces: " << oldFaces.size();
+    Info<< "Mirroring faces. Old faces: " << oldFaces.size();
 
     // Algorithm:
     // During mirroring, the faces that were previously boundary faces
@@ -329,14 +329,14 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
 
     // Tidy up the lists
     newFaces.setSize(nNewFaces);
-    Info << " New faces: " << nNewFaces << endl;
+    Info<< " New faces: " << nNewFaces << endl;
 
     newPatchTypes.setSize(nNewPatches);
     newPatchNames.setSize(nNewPatches);
     newPatchSizes.setSize(nNewPatches);
     newPatchStarts.setSize(nNewPatches);
 
-    Info << "Mirroring patches. Old patches: " << boundary().size()
+    Info<< "Mirroring patches. Old patches: " << boundary().size()
         << " New patches: " << nNewPatches << endl;
 
     Info<< "Mirroring cells.  Old cells: " << oldCells.size()
@@ -378,9 +378,9 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     }
 
     // Mirror the cell shapes
-    Info << "Mirroring cell shapes." << endl;
+    Info<< "Mirroring cell shapes." << endl;
 
-    Info << nl << "Creating new mesh" << endl;
+    Info<< nl << "Creating new mesh" << endl;
     mirrorMeshPtr_ = new fvMesh
     (
         io,

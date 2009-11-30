@@ -257,7 +257,7 @@ public:
             );
 
 
-            //- Transfer the contents of the argument and annull the argument
+            //- Transfer the contents of the argument and annul the argument
             void transfer(MeshedSurface<face>&);
 
 

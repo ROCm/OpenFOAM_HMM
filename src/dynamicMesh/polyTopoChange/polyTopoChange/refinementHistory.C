@@ -745,7 +745,7 @@ Pout<< "refinementHistory::distribute :"
                 newSplitCells.append(splitCells_[index]);
 
                 Pout<< "Added oldCell " << index
-                    << " info " << newSplitCells[newSplitCells.size()-1]
+                    << " info " << newSplitCells.last()
                     << " at position " << newSplitCells.size()-1
                     << endl;
             }

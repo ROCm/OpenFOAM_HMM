@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 {
     rmDir("hmm");
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

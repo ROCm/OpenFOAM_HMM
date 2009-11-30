@@ -26,7 +26,7 @@ wmake libso triSurface
 wmake libso surfMesh
 
 # Decomposition methods needed by meshTools
-decompositionMethods/Allwmake
+wmake libso parallel/decompositionMethods
 
 wmake libso meshTools
 wmake libso finiteVolume
@@ -47,6 +47,7 @@ thermophysicalModels/Allwmake
 transportModels/Allwmake
 turbulenceModels/Allwmake
 lagrangian/Allwmake
+parallel/Allwmake
 postProcessing/Allwmake
 conversion/Allwmake
 mesh/Allwmake

@@ -181,7 +181,7 @@ void error::printStack(Ostream& os)
     {
         IFstream is("/proc/" + name(pid()) + "/maps");
 
-        while(is.good())
+        while (is.good())
         {
             string line;
             is.getLine(line);

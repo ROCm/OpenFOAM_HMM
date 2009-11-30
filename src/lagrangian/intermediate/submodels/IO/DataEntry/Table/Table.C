@@ -64,7 +64,7 @@ template<class Type>
 Type Foam::Table<Type>::value(const scalar x) const
 {
     // Return zero if out of bounds
-    if ((x > table_[table_.size()-1].first()) || (x < table_[0].first()))
+    if (x < table_[0].first() || x > table_.last().first())
     {
         return pTraits<Type>::zero;
     }

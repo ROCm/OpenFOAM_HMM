@@ -55,12 +55,12 @@ void sammMesh::purgeCellShapes()
 
             if (!found)
             {
-                Info << "Purging cell shape " << cellI << endl;
+                Info<< "Purging cell shape " << cellI << endl;
                 cellShapes_[cellI] = cellShape(*unknownPtr_, labelList(0));
                 break;
             }
         }
-    }   
+    }
 }
 
 

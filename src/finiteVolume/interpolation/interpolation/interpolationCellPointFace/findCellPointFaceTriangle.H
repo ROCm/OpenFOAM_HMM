@@ -45,7 +45,7 @@ bool interpolationCellPointFace<Type>::findTriangle
         // calculate triangle edge vectors and triangle face normal
         // the 'i':th edge is opposite node i
         vector edge[3], normal[3];
-        for(label i=0; i<3; i++)
+        for (label i=0; i<3; i++)
         {
             label ip0 = (i+1) % 3;
             label ipp = (i+2) % 3;
@@ -55,7 +55,7 @@ bool interpolationCellPointFace<Type>::findTriangle
         vector triangleFaceNormal = edge[1] ^ edge[2];
         
         // calculate edge normal (pointing inwards)
-        for(label i=0; i<3; i++)
+        for (label i=0; i<3; i++)
         {
             normal[i] = triangleFaceNormal ^ edge[i];
             normal[i] /= mag(normal[i]) + VSMALL;
@@ -63,7 +63,7 @@ bool interpolationCellPointFace<Type>::findTriangle
 
         // check if position is inside triangle
         bool inside = true;
-        for(label i=0; i<3; i++)
+        for (label i=0; i<3; i++)
         {
             label ip = (i+1) % 3;
             inside = inside && (((newPos - tetPoints[ip]) & edge[i]) >= 0);
@@ -74,7 +74,7 @@ bool interpolationCellPointFace<Type>::findTriangle
             foundTriangle = true;
 
             // calculate phi-values
-            for(label i=0; i<3; i++)
+            for (label i=0; i<3; i++)
             {
                 label ip = (i+1) % 3;
                 scalar phiMax = max(VSMALL, normal[i] & edge[ip]);

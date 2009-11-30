@@ -93,8 +93,6 @@ void Foam::UPtrList<T>::clear()
 }
 
 
-// Transfer the contents of the argument List into this List
-// and anull the argument list
 template<class T>
 void Foam::UPtrList<T>::transfer(UPtrList<T>& a)
 {

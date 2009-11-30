@@ -81,7 +81,7 @@ void Foam::vtkPV3Foam::convertVolFields
             tf,
             ptfPtr,
             output,
-            partInfoVolume_,
+            arrayRangeVolume_,
             regionPolyDecomp_
         );
 
@@ -91,7 +91,7 @@ void Foam::vtkPV3Foam::convertVolFields
             tf,
             ptfPtr,
             output,
-            partInfoCellZones_,
+            arrayRangeCellZones_,
             zonePolyDecomp_
         );
 
@@ -101,7 +101,7 @@ void Foam::vtkPV3Foam::convertVolFields
             tf,
             ptfPtr,
             output,
-            partInfoCellSets_,
+            arrayRangeCellSets_,
             csetPolyDecomp_
         );
 
@@ -117,8 +117,8 @@ void Foam::vtkPV3Foam::convertVolFields
 
         for
         (
-            int partId = partInfoPatches_.start();
-            partId < partInfoPatches_.end();
+            int partId = arrayRangePatches_.start();
+            partId < arrayRangePatches_.end();
             ++partId
         )
         {
@@ -155,7 +155,7 @@ void Foam::vtkPV3Foam::convertVolFields
                     tf.name(),
                     tpptf(),
                     output,
-                    partInfoPatches_,
+                    arrayRangePatches_,
                     datasetNo
                 );
 
@@ -164,7 +164,7 @@ void Foam::vtkPV3Foam::convertVolFields
                     pointFldName,
                     ppInterpList[patchId].faceToPointInterpolate(tpptf)(),
                     output,
-                    partInfoPatches_,
+                    arrayRangePatches_,
                     datasetNo
                 );
             }
@@ -175,7 +175,7 @@ void Foam::vtkPV3Foam::convertVolFields
                     tf.name(),
                     ptf,
                     output,
-                    partInfoPatches_,
+                    arrayRangePatches_,
                     datasetNo
                 );
 
@@ -184,7 +184,7 @@ void Foam::vtkPV3Foam::convertVolFields
                     pointFldName,
                     ppInterpList[patchId].faceToPointInterpolate(ptf)(),
                     output,
-                    partInfoPatches_,
+                    arrayRangePatches_,
                     datasetNo
                 );
             }
@@ -195,8 +195,8 @@ void Foam::vtkPV3Foam::convertVolFields
         //
         for
         (
-            int partId = partInfoFaceZones_.start();
-            partId < partInfoFaceZones_.end();
+            int partId = arrayRangeFaceZones_.start();
+            partId < arrayRangeFaceZones_.end();
             ++partId
         )
         {
@@ -220,7 +220,7 @@ void Foam::vtkPV3Foam::convertVolFields
             (
                 tf,
                 output,
-                partInfoFaceZones_,
+                arrayRangeFaceZones_,
                 datasetNo,
                 mesh,
                 zMesh[zoneId]
@@ -234,8 +234,8 @@ void Foam::vtkPV3Foam::convertVolFields
         //
         for
         (
-            int partId = partInfoFaceSets_.start();
-            partId < partInfoFaceSets_.end();
+            int partId = arrayRangeFaceSets_.start();
+            partId < arrayRangeFaceSets_.end();
             ++partId
         )
         {
@@ -253,7 +253,7 @@ void Foam::vtkPV3Foam::convertVolFields
             (
                 tf,
                 output,
-                partInfoFaceSets_,
+                arrayRangeFaceSets_,
                 datasetNo,
                 mesh,
                 fSet
@@ -271,11 +271,11 @@ void Foam::vtkPV3Foam::convertVolFieldBlock
     const GeometricField<Type, fvPatchField, volMesh>& tf,
     autoPtr<GeometricField<Type, pointPatchField, pointMesh> >& ptfPtr,
     vtkMultiBlockDataSet* output,
-    const partInfo& selector,
+    const arrayRange& range,
     const List<polyDecomp>& decompLst
 )
 {
-    for (int partId = selector.start(); partId < selector.end(); ++partId)
+    for (int partId = range.start(); partId < range.end(); ++partId)
     {
         const label datasetNo = partDataset_[partId];
 
@@ -285,7 +285,7 @@ void Foam::vtkPV3Foam::convertVolFieldBlock
             (
                 tf,
                 output,
-                selector,
+                range,
                 datasetNo,
                 decompLst[datasetNo]
             );
@@ -309,7 +309,7 @@ void Foam::vtkPV3Foam::convertVolFieldBlock
                 ptfPtr(),
                 tf,
                 output,
-                selector,
+                range,
                 datasetNo,
                 decompLst[datasetNo]
             );
@@ -323,7 +323,7 @@ void Foam::vtkPV3Foam::convertVolField
 (
     const GeometricField<Type, fvPatchField, volMesh>& tf,
     vtkMultiBlockDataSet* output,
-    const partInfo& selector,
+    const arrayRange& range,
     const label datasetNo,
     const polyDecomp& decompInfo
 )
@@ -359,7 +359,7 @@ void Foam::vtkPV3Foam::convertVolField
 
     vtkUnstructuredGrid::SafeDownCast
     (
-        GetDataSetFromBlock(output, selector, datasetNo)
+        GetDataSetFromBlock(output, range, datasetNo)
     )   ->GetCellData()
         ->AddArray(celldata);
 

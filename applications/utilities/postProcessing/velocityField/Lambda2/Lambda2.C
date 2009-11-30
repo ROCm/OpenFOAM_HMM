@@ -72,7 +72,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             -eigenValues(SSplusWW)().component(vector::Y)
         );
 
-        Info << "    Writing -Lambda2" << endl;
+        Info<< "    Writing -Lambda2" << endl;
         Lambda2.write();
     }
     else

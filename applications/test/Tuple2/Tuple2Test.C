@@ -44,7 +44,7 @@ int main()
 
     Info<< t2 << " " << t2.first() << " " << t2.second() << endl;
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

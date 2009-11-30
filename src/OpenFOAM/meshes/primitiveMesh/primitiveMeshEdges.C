@@ -468,7 +468,7 @@ Foam::label Foam::primitiveMesh::findFirstCommonElementFromSortedLists
 
     while (iter1 != list1.end() && iter2 != list2.end())
     {
-        if( *iter1 < *iter2)
+        if (*iter1 < *iter2)
         {
             ++iter1;
         }

@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 
 #   include "createMesh.H"
 
-    runTime.setTime(timeDirs[timeDirs.size()-1], timeDirs.size()-1);
+    runTime.setTime(timeDirs.last(), timeDirs.size()-1);
 
     volScalarField pMean
     (

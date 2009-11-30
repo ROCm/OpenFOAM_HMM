@@ -183,7 +183,7 @@ void LISA::atomizeParcel
         scalar kOld = 0.0;
 
 
-        for(label i=0; i<40; i++)
+        for (label i=0; i<40; i++)
         {
 
             k = kPos

@@ -108,7 +108,7 @@ bool Foam::wedgeMatcher::matchShape
     const face& face0 = localFaces_[face0I];
 
     // Try all rotations of this face
-    for(label face0vert0 = 0; face0vert0 < faceSize_[face0I]; face0vert0++)
+    for (label face0vert0 = 0; face0vert0 < faceSize_[face0I]; face0vert0++)
     {
         //
         // Try to follow prespecified path on faces of cell,

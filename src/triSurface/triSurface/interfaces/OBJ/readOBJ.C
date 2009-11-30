@@ -107,7 +107,7 @@ bool triSurface::readOBJ(const fileName& OBJfileName)
             // Assume 'f' is followed by space.
             string::size_type endNum = 1;
 
-            while(true)
+            while (true)
             {
                 string::size_type startNum =
                     line.find_first_not_of(' ', endNum);

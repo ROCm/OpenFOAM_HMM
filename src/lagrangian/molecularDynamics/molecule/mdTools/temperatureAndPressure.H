@@ -53,7 +53,7 @@ if (runTime.outputTime())
 {
     if (accumulatedNMols)
     {
-        Info << "calculating averages" << endl;
+        Info<< "calculating averages" << endl;
 
         averageTemperature =
         (
@@ -77,7 +77,7 @@ if (runTime.outputTime())
             meshVolume
         );
 
-        Info << "----------------------------------------" << nl
+        Info<< "----------------------------------------" << nl
             << "Averaged properties" << nl
             << "Average |velocity| = "
             << mag(accumulatedTotalLinearMomentum)/accumulatedTotalMass << nl

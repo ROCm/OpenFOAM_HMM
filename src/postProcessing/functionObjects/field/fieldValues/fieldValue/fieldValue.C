@@ -26,6 +26,7 @@ License
 
 #include "fieldValue.H"
 #include "fvMesh.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -54,6 +55,73 @@ void Foam::fieldValue::movePoints(const Field<point>&)
 }
 
 
+void Foam::fieldValue::makeFile()
+{
+    // Create the forces file if not already created
+    if (outputFilePtr_.empty())
+    {
+        if (debug)
+        {
+            Info<< "Creating output file." << endl;
+        }
+
+        // File update
+        if (Pstream::master())
+        {
+            fileName outputDir;
+            word startTimeName =
+                obr_.time().timeName(obr_.time().startTime().value());
+
+            if (Pstream::parRun())
+            {
+                // Put in undecomposed case (Note: gives problems for
+                // distributed data running)
+                outputDir =
+                    obr_.time().path()/".."/name_/startTimeName;
+            }
+            else
+            {
+                outputDir = obr_.time().path()/name_/startTimeName;
+            }
+
+            // Create directory if does not exist
+            mkDir(outputDir);
+
+            // Open new file at start up
+            outputFilePtr_.reset(new OFstream(outputDir/(type() + ".dat")));
+
+            // Add headers to output data
+            writeFileHeader();
+        }
+    }
+}
+
+
+void Foam::fieldValue::read(const dictionary& dict)
+{
+    if (active_)
+    {
+        log_ = dict.lookupOrDefault<Switch>("log", false);
+        dict.lookup("fields") >> fields_;
+        dict.lookup("valueOutput") >> valueOutput_;
+    }
+}
+
+
+void Foam::fieldValue::write()
+{
+    if (active_)
+    {
+        if (log_)
+        {
+            Info<< type() << " " << name_ << " output:" << nl;
+        }
+
+        makeFile();
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fieldValue::fieldValue
@@ -70,7 +138,8 @@ Foam::fieldValue::fieldValue
     log_(false),
     sourceName_(dict.lookup("sourceName")),
     fields_(dict.lookup("fields")),
-    valueOutput_(dict.lookup("valueOutput"))
+    valueOutput_(dict.lookup("valueOutput")),
+    outputFilePtr_(NULL)
 {
     // Only active if obr is an fvMesh
     if (isA<fvMesh>(obr_))
@@ -102,65 +171,6 @@ Foam::fieldValue::~fieldValue()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-const Foam::word& Foam::fieldValue::name() const
-{
-    return name_;
-}
-
-
-const Foam::objectRegistry& Foam::fieldValue::obr() const
-{
-    return obr_;
-}
-
-
-bool Foam::fieldValue::active() const
-{
-    return active_;
-}
-
-
-const Foam::Switch& Foam::fieldValue::log() const
-{
-    return log_;
-}
-
-
-const Foam::word& Foam::fieldValue::sourceName() const
-{
-    return sourceName_;
-}
-
-
-const Foam::wordList& Foam::fieldValue::fields() const
-{
-    return fields_;
-}
-
-
-const Foam::Switch& Foam::fieldValue::valueOutput() const
-{
-    return valueOutput_;
-}
-
-
-const Foam::fvMesh& Foam::fieldValue::mesh() const
-{
-    return refCast<const fvMesh>(obr_);
-}
-
-
-void Foam::fieldValue::read(const dictionary& dict)
-{
-    if (active_)
-    {
-        log_ = dict.lookupOrDefault<Switch>("log", false);
-        dict.lookup("fields") >> fields_;
-        dict.lookup("valueOutput") >> valueOutput_;
-    }
-}
-
 
 void Foam::fieldValue::execute()
 {

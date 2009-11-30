@@ -140,7 +140,7 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::execute()
 
         ptr_->execute();
 
-        if (enabled_ && outputControl_.output())
+        if (outputControl_.output())
         {
             ptr_->write();
         }
@@ -167,7 +167,7 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::end()
 
         ptr_->end();
 
-        if (enabled_ && outputControl_.output())
+        if (outputControl_.output())
         {
             ptr_->write();
         }

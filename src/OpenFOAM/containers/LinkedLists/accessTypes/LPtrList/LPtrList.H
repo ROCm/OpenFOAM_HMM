@@ -156,7 +156,7 @@ public:
             void clear();
 
             //- Transfer the contents of the argument into this List
-            //  and annull the argument list.
+            //  and annul the argument list.
             void transfer(LPtrList<LListBase, T>&);
 
 

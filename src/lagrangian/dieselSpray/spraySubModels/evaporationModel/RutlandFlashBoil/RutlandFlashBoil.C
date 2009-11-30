@@ -160,7 +160,7 @@ scalar RutlandFlashBoil::relaxationTime
     scalar logXratio = log(1.0 + Xratio);
     scalar Fb = 1.0;
 
-    if(logXratio > SMALL)
+    if (logXratio > SMALL)
     {
         Fb = pow((1.0 + Xratio), FbExp)*log(1.0 + Xratio)/Xratio;
     }
@@ -286,7 +286,7 @@ scalar RutlandFlashBoil::boilingTime
                     Gneg = Gneg/10.0;
                     Gneg = max(Gneg, VSMALL);
                     FgNeg = Gneg + Gf - B*log(1.0 + (1.0 + Gf/Gneg)*A);
-                    if(FgNeg < 0.0)
+                    if (FgNeg < 0.0)
                     {
                         break;
                     }
@@ -303,7 +303,7 @@ scalar RutlandFlashBoil::boilingTime
 
             if (FgNeg > 0.0)
             {
-                Info << "no convergence" << endl;
+                Info<< "no convergence" << endl;
             }
 
 
@@ -333,7 +333,7 @@ scalar RutlandFlashBoil::boilingTime
 
                 if (k >= Niter - 1)
                 {
-                    Info << " No convergence for G " << endl;
+                    Info<< " No convergence for G " << endl;
                 }
             }
             else

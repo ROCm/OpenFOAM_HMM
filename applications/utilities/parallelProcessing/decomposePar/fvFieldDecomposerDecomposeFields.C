@@ -28,16 +28,11 @@ License
 #include "processorFvPatchField.H"
 #include "processorFvsPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-fvFieldDecomposer::decomposeField
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::fvFieldDecomposer::decomposeField
 (
     const GeometricField<Type, fvPatchField, volMesh>& field
 ) const
@@ -106,8 +101,8 @@ fvFieldDecomposer::decomposeField
 
 
 template<class Type>
-tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
-fvFieldDecomposer::decomposeField
+Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh> >
+Foam::fvFieldDecomposer::decomposeField
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& field
 ) const
@@ -217,7 +212,7 @@ fvFieldDecomposer::decomposeField
 
 
 template<class GeoField>
-void fvFieldDecomposer::decomposeFields
+void Foam::fvFieldDecomposer::decomposeFields
 (
     const PtrList<GeoField>& fields
 ) const
@@ -228,9 +223,5 @@ void fvFieldDecomposer::decomposeFields
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

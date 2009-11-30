@@ -43,7 +43,7 @@ void Foam::vtkPV3Foam::convertFaceField
 (
     const GeometricField<Type, fvPatchField, volMesh>& tf,
     vtkMultiBlockDataSet* output,
-    const partInfo& selector,
+    const arrayRange& range,
     const label datasetNo,
     const fvMesh& mesh,
     const labelList& faceLabels
@@ -100,7 +100,7 @@ void Foam::vtkPV3Foam::convertFaceField
 
     vtkPolyData::SafeDownCast
     (
-        GetDataSetFromBlock(output, selector, datasetNo)
+        GetDataSetFromBlock(output, range, datasetNo)
     )   ->GetCellData()
         ->AddArray(cellData);
 
@@ -113,7 +113,7 @@ void Foam::vtkPV3Foam::convertFaceField
 (
     const GeometricField<Type, fvPatchField, volMesh>& tf,
     vtkMultiBlockDataSet* output,
-    const partInfo& selector,
+    const arrayRange& range,
     const label datasetNo,
     const fvMesh& mesh,
     const faceSet& fSet
@@ -173,7 +173,7 @@ void Foam::vtkPV3Foam::convertFaceField
 
     vtkPolyData::SafeDownCast
     (
-        GetDataSetFromBlock(output, selector, datasetNo)
+        GetDataSetFromBlock(output, range, datasetNo)
     )   ->GetCellData()
         ->AddArray(cellData);
 

@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 
     insideCells.write();
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

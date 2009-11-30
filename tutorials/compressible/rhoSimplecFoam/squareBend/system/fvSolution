@@ -1,0 +1,199 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.6                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    p0
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0.01;
+    }
+
+    p
+    {
+        solver          GAMG;
+        tolerance       1e-08;
+        relTol          0.1;
+        smoother        GaussSeidel;
+        nPreSweeps      0;
+        nPostSweeps     2;
+        nFinestSweeps   2;
+        cacheAgglomeration true;
+        nCellsInCoarsestLevel 20;
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
+    }
+
+    U0
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0.1;
+    }
+
+    U1
+    {
+        solver          smoothSolver;
+        smoother        GaussSeidel;
+        nSweeps         1;
+        tolerance       1e-08;
+        relTol          0.1;
+    }
+
+    U
+    {
+        solver          GAMG;
+        tolerance       1e-08;
+        relTol          0.1;
+        smoother        GaussSeidel;
+        nPreSweeps      0;
+        nPostSweeps     2;
+        nFinestSweeps   2;
+        cacheAgglomeration true;
+        nCellsInCoarsestLevel 20;
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
+    }
+
+    h0
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0.1;
+    }
+
+    h1
+    {
+        solver          smoothSolver;
+        smoother        GaussSeidel;
+        nSweeps         1;
+        tolerance       1e-08;
+        relTol          0.1;
+    }
+
+    h
+    {
+        solver          GAMG;
+        tolerance       1e-08;
+        relTol          0.1;
+        smoother        GaussSeidel;
+        nPreSweeps      0;
+        nPostSweeps     2;
+        nFinestSweeps   2;
+        cacheAgglomeration true;
+        nCellsInCoarsestLevel 20;
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
+    }
+
+    k0
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0.1;
+    }
+
+    k1
+    {
+        solver          smoothSolver;
+        smoother        GaussSeidel;
+        nSweeps         1;
+        tolerance       1e-08;
+        relTol          0.1;
+    }
+
+    k
+    {
+        solver          GAMG;
+        tolerance       1e-08;
+        relTol          0.1;
+        smoother        GaussSeidel;
+        nPreSweeps      0;
+        nPostSweeps     2;
+        nFinestSweeps   2;
+        cacheAgglomeration true;
+        nCellsInCoarsestLevel 20;
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
+    }
+
+    epsilon0
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0.1;
+    }
+
+    epsilon1
+    {
+        solver          smoothSolver;
+        smoother        GaussSeidel;
+        nSweeps         1;
+        tolerance       1e-08;
+        relTol          0.1;
+    }
+
+    epsilon
+    {
+        solver          GAMG;
+        tolerance       1e-08;
+        relTol          0.1;
+        smoother        GaussSeidel;
+        nPreSweeps      0;
+        nPostSweeps     2;
+        nFinestSweeps   2;
+        cacheAgglomeration true;
+        nCellsInCoarsestLevel 20;
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
+    }
+}
+
+SIMPLE
+{
+    nNonOrthogonalCorrectors        0;
+    pMin                            pMin [1 -1 -2 0 0 0 0] 10000;
+    transonic                       yes;
+}
+
+relaxationFactors
+{
+    p           1;
+    rho         1; //0.1;
+    U           0.9;
+    h           0.95;
+    k           0.9;
+    epsilon     0.9;
+}
+
+relaxationFactors0
+{
+    p           0.3;
+    rho         0.1;
+    U           0.7;
+    h           0.7;
+    k           0.7;
+    epsilon     0.7;
+}
+
+// ************************************************************************* //

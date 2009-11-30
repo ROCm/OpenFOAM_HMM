@@ -53,15 +53,15 @@ int main(int argc, char *argv[])
 
     if (bananaIter == banana.end())
     {
-        Info << "not found" << endl;
+        Info<< "not found" << endl;
     }
     else
     {
-        Info << "5 is " << bananaIter() << endl;
+        Info<< "5 is " << bananaIter() << endl;
     }
 
     // Same with STL
-    Info << "Same with STL" << endl;
+    Info<< "Same with STL" << endl;
 
     std::map<label, bool> STLbanana;
     STLbanana[5] = true;
@@ -69,11 +69,11 @@ int main(int argc, char *argv[])
 
     if (STLbananaIter == STLbanana.end())
     {
-        Info << "not found" << endl;
+        Info<< "not found" << endl;
     }
     else
     {
-        Info << "5 is " << STLbananaIter->second << endl;
+        Info<< "5 is " << STLbananaIter->second << endl;
     }
 
 

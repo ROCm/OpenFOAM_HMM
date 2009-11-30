@@ -64,13 +64,13 @@ int main(int argc, char *argv[])
     // Read
     // ~~~~
 
-    Info << "Reading : " << inFileName << endl;
+    Info<< "Reading : " << inFileName << endl;
     triSurface surf(inFileName);
 
     Info<< "Read surface:" << endl;
     surf.writeStats(Info);
     Info<< endl;
-    
+
 
 
     // Construct features from surface&featureangle
@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
     }
 
 
-    Info << "Writing : " << outFileName << endl;
+    Info<< "Writing : " << outFileName << endl;
     surf.write(outFileName, true);
 
     Info<< "End\n" << endl;

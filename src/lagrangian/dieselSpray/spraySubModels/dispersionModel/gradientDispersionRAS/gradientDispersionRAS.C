@@ -109,7 +109,7 @@ void gradientDispersionRAS::disperseParcels() const
                 scalar x1 = 0.0;
                 scalar x2 = 0.0;
                 scalar rsq = 10.0;
-                while((rsq > 1.0) || (rsq == 0.0))
+                while ((rsq > 1.0) || (rsq == 0.0))
                 {
                     x1 = 2.0*spray_.rndGen().scalar01() - 1.0;
                     x2 = 2.0*spray_.rndGen().scalar01() - 1.0;

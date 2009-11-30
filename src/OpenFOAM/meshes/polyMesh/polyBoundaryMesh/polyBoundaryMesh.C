@@ -598,7 +598,7 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
         }
         else
         {
-            Info << "    Boundary definition OK." << endl;
+            Info<< "    Boundary definition OK." << endl;
         }
     }
 

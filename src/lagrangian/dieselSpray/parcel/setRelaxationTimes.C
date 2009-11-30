@@ -74,7 +74,7 @@ void parcel::setRelaxationTimes
     scalar cpMixture = 0.0;
     scalar muf = 0.0;
 
-    for(label i=0; i<Ns; i++)
+    for (label i=0; i<Ns; i++)
     {
         scalar Y = sDB.composition().Y()[i][celli];
         W += Y/sDB.gasProperties()[i].W();
@@ -90,7 +90,7 @@ void parcel::setRelaxationTimes
     scalarField psat(Nf, 0.0);
     scalarField msat(Nf, 0.0);
 
-    for(label i=0; i<Nf; i++)
+    for (label i=0; i<Nf; i++)
     {
         label j = sDB.liquidToGasIndex()[i];
         scalar Y = sDB.composition().Y()[j][celli];
@@ -121,14 +121,14 @@ void parcel::setRelaxationTimes
     scalarField Ys(Nf, 0.0);
     scalar Wliq = 0.0;
 
-    for(label i=0; i<Nf; i++)
+    for (label i=0; i<Nf; i++)
     {
         label j = sDB.liquidToGasIndex()[i];
         scalar Wi = sDB.gasProperties()[j].W();
         Wliq += Xs[i]*Wi;
     }
 
-    for(label i=0; i<Nf; i++)
+    for (label i=0; i<Nf; i++)
     {
         label j = sDB.liquidToGasIndex()[i];
         scalar Wi = sDB.gasProperties()[j].W();
@@ -140,9 +140,9 @@ void parcel::setRelaxationTimes
 
     // calculate the characteritic times
 
-    if(liquidCore_> 0.5)
+    if (liquidCore_> 0.5)
     {
-//      no drag for parcels in the liquid core..
+        // no drag for parcels in the liquid core.
         tauMomentum = GREAT;
     }
     else
@@ -177,7 +177,7 @@ void parcel::setRelaxationTimes
     // this is mainly to put a limit on the evaporation time,
     // since tauEvaporation is very very small close to the boiling point.
 
-    for(label i=0; i<Nf; i++)
+    for (label i=0; i<Nf; i++)
     {
         scalar Td = min(T(), 0.999*fuels.properties()[i].Tc());
         bool boiling = fuels.properties()[i].pv(pressure, Td) >= 0.999*pressure;
@@ -187,7 +187,7 @@ void parcel::setRelaxationTimes
         scalar partialPressure = Xf[i]*pressure;
 
 //      saturated vapour
-        if(partialPressure > psat[i])
+        if (partialPressure > psat[i])
         {
             tauEvaporation[i] = GREAT;
         }
@@ -259,7 +259,7 @@ void parcel::setRelaxationTimes
                 scalar vapourSurfaceEnthalpy = 0.0;
                 scalar vapourFarEnthalpy = 0.0;
 
-                for(label k = 0; k < sDB.gasProperties().size(); k++)
+                for (label k = 0; k < sDB.gasProperties().size(); k++)
                 {
                     vapourSurfaceEnthalpy += sDB.composition().Y()[k][celli]*sDB.gasProperties()[k].H(tBoilingSurface);
                     vapourFarEnthalpy += sDB.composition().Y()[k][celli]*sDB.gasProperties()[k].H(temperature);

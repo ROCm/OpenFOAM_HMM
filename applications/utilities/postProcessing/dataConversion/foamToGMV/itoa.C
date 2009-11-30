@@ -44,7 +44,7 @@ word itoa(const label n)
 
     label leftOfN = n;
 
-    for(label i=0; i<length; i++)
+    for (label i=0; i<length; i++)
     {
         label j = label(leftOfN/pow(10, length-i-1));
         leftOfN -= j*pow(10,length-i-1);

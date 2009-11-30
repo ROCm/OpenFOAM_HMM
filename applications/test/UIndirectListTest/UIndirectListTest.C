@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     dynList.append(UIndirectList<double>(completeList, addresses));
     Info<< "DynamicList::append(UIndirectList): " << dynList << endl;
 
-    Info << "\nEnd\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

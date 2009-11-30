@@ -28,16 +28,11 @@ License
 #include "processorPointPatchFields.H"
 #include "globalPointPatchFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, pointPatchField, pointMesh> >
-pointFieldDecomposer::decomposeField
+Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh> >
+Foam::pointFieldDecomposer::decomposeField
 (
     const GeometricField<Type, pointPatchField, pointMesh>& field
 ) const
@@ -117,7 +112,7 @@ pointFieldDecomposer::decomposeField
 
 
 template<class GeoField>
-void pointFieldDecomposer::decomposeFields
+void Foam::pointFieldDecomposer::decomposeFields
 (
     const PtrList<GeoField>& fields
 ) const
@@ -130,7 +125,5 @@ void pointFieldDecomposer::decomposeFields
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

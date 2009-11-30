@@ -127,7 +127,7 @@ void starMesh::markBoundaryFaces()
                 {
                     const label curCellIndex = facePointCells[cellI];
 
-                    const faceList& curCellFaces = 
+                    const faceList& curCellFaces =
                         cellFaces_[curCellIndex];
 
                     forAll(curCellFaces, cellFaceI)
@@ -159,11 +159,11 @@ void starMesh::markBoundaryFaces()
                 {
                     if (curFace[spI] > -1 && curFace[spI] < starPointID_.size())
                     {
-                        Info << "," << starPointID_[curFace[spI]];
+                        Info<< "," << starPointID_[curFace[spI]];
                     }
                     else
                     {
-                        Info << ",???";
+                        Info<< ",???";
                     }
                 }
 
@@ -176,7 +176,7 @@ void starMesh::markBoundaryFaces()
 
 void starMesh::collectBoundaryFaces()
 {
-    Info << "Collecting boundary faces" << endl;
+    Info<< "Collecting boundary faces" << endl;
     forAll(boundary_, patchI)
     {
         faceList& patchFaces = boundary_[patchI];
@@ -193,7 +193,7 @@ void starMesh::collectBoundaryFaces()
         }
     }
 
-    Info << "Finished collecting boundary faces" << endl;
+    Info<< "Finished collecting boundary faces" << endl;
 }
 
 

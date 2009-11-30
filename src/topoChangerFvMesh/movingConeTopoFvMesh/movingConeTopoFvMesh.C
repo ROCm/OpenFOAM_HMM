@@ -146,7 +146,7 @@ void Foam::movingConeTopoFvMesh::addZonesAndModifiers()
                 flipZone2[nZoneFaces2] = true;
             }
 
-            Info << "face " << faceI << " for zone 2.  Flip: "
+            Info<< "face " << faceI << " for zone 2.  Flip: "
                 << flipZone2[nZoneFaces2] << endl;
             nZoneFaces2++;
         }
@@ -158,8 +158,8 @@ void Foam::movingConeTopoFvMesh::addZonesAndModifiers()
     zone2.setSize(nZoneFaces2);
     flipZone2.setSize(nZoneFaces2);
 
-    Info << "zone: " << zone1 << endl;
-    Info << "zone: " << zone2 << endl;
+    Info<< "zone: " << zone1 << endl;
+    Info<< "zone: " << zone2 << endl;
 
     List<pointZone*> pz(0);
     List<faceZone*> fz(2);
@@ -191,7 +191,7 @@ void Foam::movingConeTopoFvMesh::addZonesAndModifiers()
 
     fz.setSize(nFz);
 
-    Info << "Adding mesh zones." << endl;
+    Info<< "Adding mesh zones." << endl;
     addZones(pz, fz, cz);
 
 
@@ -236,7 +236,7 @@ void Foam::movingConeTopoFvMesh::addZonesAndModifiers()
     nMods++;
     tm.setSize(nMods);
 
-    Info << "Adding " << nMods << " mesh modifiers" << endl;
+    Info<< "Adding " << nMods << " mesh modifiers" << endl;
     topoChanger_.addTopologyModifiers(tm);
 
     write();
@@ -334,11 +334,11 @@ bool Foam::movingConeTopoFvMesh::update()
 
     if (topoChangeMap.valid())
     {
-        Info << "Topology change. Calculating motion points" << endl;
+        Info<< "Topology change. Calculating motion points" << endl;
 
         if (topoChangeMap().hasMotionPoints())
         {
-            Info << "Topology change. Has premotion points" << endl;
+            Info<< "Topology change. Has premotion points" << endl;
             //Info<< "preMotionPoints:" << topoChangeMap().preMotionPoints()
             //    << endl;
 
@@ -390,7 +390,7 @@ bool Foam::movingConeTopoFvMesh::update()
         }
         else
         {
-            Info << "Topology change. Already set mesh points" << endl;
+            Info<< "Topology change. Already set mesh points" << endl;
 
             motionMask_ =
                 vertexMarkup
@@ -424,7 +424,7 @@ bool Foam::movingConeTopoFvMesh::update()
     }
     else
     {
-        Info << "No topology change" << endl;
+        Info<< "No topology change" << endl;
         // Set the mesh motion
         newPoints =
             points()
@@ -466,7 +466,7 @@ bool Foam::movingConeTopoFvMesh::update()
 
     // The mesh now contains the cells with zero volume
 
-    Info << "Executing mesh motion" << endl;
+    Info<< "Executing mesh motion" << endl;
     movePoints(newPoints);
 
     //  The mesh now has got non-zero volume cells

@@ -111,7 +111,7 @@ void stochasticDispersionRAS::disperseParcels() const
                 // numerical recipes... Ch. 7. Random Numbers...
                 scalar x1,x2;
                 scalar rsq = 10.0;
-                while((rsq > 1.0) || (rsq == 0.0))
+                while ((rsq > 1.0) || (rsq == 0.0))
                 {
                     x1 = 2.0*spray_.rndGen().scalar01() - 1.0;
                     x2 = 2.0*spray_.rndGen().scalar01() - 1.0;

@@ -284,7 +284,7 @@ void Foam::cellMatcher::write(Foam::Ostream& os) const
     {
         os  << "    ";
 
-        for(label fp = 0; fp < faceSize_[faceI]; fp++)
+        for (label fp = 0; fp < faceSize_[faceI]; fp++)
         {
             os  << ' ' << localFaces_[faceI][fp];
         }

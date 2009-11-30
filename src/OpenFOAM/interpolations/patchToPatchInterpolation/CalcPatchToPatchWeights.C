@@ -63,7 +63,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcPointAddressing() const
 
     if (debug)
     {
-        Info << "projecting points" << endl;
+        Info<< "projecting points" << endl;
     }
 
     List<objectHit> proj =
@@ -139,7 +139,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcPointAddressing() const
                   + projectionDirection[pointI]*ph.distance()
                   - ph.missPoint()
                 );
-                
+
             // Calculate the local tolerance
             scalar minEdgeLength = GREAT;
 
@@ -244,7 +244,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcFaceAddressing() const
 
     if (debug)
     {
-        Info << "projecting face centres" << endl;
+        Info<< "projecting face centres" << endl;
     }
 
     const pointField& fromPatchPoints = fromPatch_.points();
@@ -274,7 +274,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcFaceAddressing() const
         );
 
     faceAddressingPtr_ = new labelList(proj.size(), -1);
-    labelList& faceAddressing = *faceAddressingPtr_;        
+    labelList& faceAddressing = *faceAddressingPtr_;
 
     forAll (faceAddressing, faceI)
     {

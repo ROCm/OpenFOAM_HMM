@@ -8,7 +8,7 @@ HashTable< HashTable<word> > cloudFields;
 
 if (timeDirs.size())
 {
-    IOobjectList objs(mesh, timeDirs[timeDirs.size()-1].name());
+    IOobjectList objs(mesh, timeDirs.last().name());
 
     forAllConstIter(IOobjectList, objs, fieldIter)
     {
@@ -34,7 +34,7 @@ if (timeDirs.size())
     fileNameList cloudDirs = readDir
     (
         runTime.path()
-      / timeDirs[timeDirs.size()-1].name()
+      / timeDirs.last().name()
       / regionPrefix
       / cloud::prefix,
         fileName::DIRECTORY
@@ -54,7 +54,7 @@ if (timeDirs.size())
         IOobjectList objs
         (
             mesh,
-            timeDirs[timeDirs.size()-1].name(),
+            timeDirs.last().name(),
             cloud::prefix/cloudName
         );
 

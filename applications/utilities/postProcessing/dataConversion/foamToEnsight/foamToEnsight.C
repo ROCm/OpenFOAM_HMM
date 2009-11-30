@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
     ensightMesh eMesh(mesh, args, binary);
 
     // Set Time to the last time before looking for the lagrangian objects
-    runTime.setTime(Times[Times.size()-1], Times.size()-1);
+    runTime.setTime(Times.last(), Times.size()-1);
 
     IOobjectList objects(mesh, runTime.timeName());
 

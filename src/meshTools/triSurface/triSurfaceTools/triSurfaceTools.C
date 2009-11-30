@@ -2728,7 +2728,7 @@ void Foam::triSurfaceTools::calcInterpolationWeights
 
     // calculate edge normal (pointing inwards)
     FixedList<vector, 3> normal;
-    for(label i=0; i<3; i++)
+    for (label i=0; i<3; i++)
     {
         normal[i] = triangleFaceNormal ^ edge[i];
         normal[i] /= mag(normal[i]) + VSMALL;

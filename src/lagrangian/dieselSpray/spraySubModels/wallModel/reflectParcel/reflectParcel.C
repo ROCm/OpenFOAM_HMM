@@ -159,7 +159,7 @@ bool reflectParcel::wallTreatment
                 /*
                 if (mag(Ub-v) > SMALL)
                 {
-                    Info << "reflectParcel:: v = " << v
+                    Info<< "reflectParcel:: v = " << v
                         << ", Ub = " << Ub
                         << ", facei = " << facei
                         << ", patchi = " << patchi

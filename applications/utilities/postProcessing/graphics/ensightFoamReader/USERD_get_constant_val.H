@@ -9,7 +9,7 @@ float USERD_get_constant_val
 )
 {
 #ifdef ENSIGHTDEBUG
-    Info << "Entering: USERD_get_constant_val" << endl << flush;
+    Info<< "Entering: USERD_get_constant_val" << endl << flush;
 #endif
     return 0.0;
 }

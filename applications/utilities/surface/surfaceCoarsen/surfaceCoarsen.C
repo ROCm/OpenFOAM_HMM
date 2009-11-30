@@ -54,7 +54,7 @@ int mapVertex(::List<int>& collapse_map, int a, int mx)
         return 0;
     }
     while (a >= mx)
-    {  
+    {
 	a = collapse_map[a];
     }
     return a;
@@ -122,28 +122,28 @@ int main(int argc, char *argv[])
         td.v[1]=f[1];
         td.v[2]=f[2];
         tri.Add(td);
-    }        
+    }
 
     ::List<int> collapse_map;   // to which neighbor each vertex collapses
     ::List<int> permutation;
 
     ::ProgressiveMesh(vert,tri,collapse_map,permutation);
 
-    // rearrange the vertex list 
+    // rearrange the vertex list
     ::List< ::Vector> temp_list;
-    for(int i=0;i<vert.num;i++)
+    for (int i=0;i<vert.num;i++)
     {
         temp_list.Add(vert[i]);
     }
-    for(int i=0;i<vert.num;i++)
+    for (int i=0;i<vert.num;i++)
     {
         vert[permutation[i]]=temp_list[i];
     }
 
     // update the changes in the entries in the triangle list
-    for(int i=0;i<tri.num;i++)
+    for (int i=0;i<tri.num;i++)
     {
-        for(int j=0;j<3;j++)
+        for (int j=0;j<3;j++)
         {
             tri[i].v[j] = permutation[tri[i].v[j]];
         }
@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
         int p2 = mapVertex(collapse_map, tri[i].v[2], render_num);
 
         // note:  serious optimization opportunity here,
-        //  by sorting the triangles the following "continue" 
+        //  by sorting the triangles the following "continue"
         //  could have been made into a "break" statement.
         if (p0 == p1 || p1 == p2 || p2 == p0)
         {
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
     // Convert vert into pointField.
     pointField newPoints(vert.num);
 
-    for(int i=0; i<vert.num; i++)
+    for (int i=0; i<vert.num; i++)
     {
         const ::Vector & v = vert[i];
 
@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
 
     surf2.write(outFileName);
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

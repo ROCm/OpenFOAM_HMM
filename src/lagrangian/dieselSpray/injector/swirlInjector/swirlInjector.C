@@ -384,13 +384,13 @@ Foam::scalar Foam::swirlInjector::T(const scalar time) const
 
 Foam::scalar Foam::swirlInjector::tsoi() const
 {
-    return massFlowRateProfile_[0][0];
+    return massFlowRateProfile_.first()[0];
 }
 
 
 Foam::scalar Foam::swirlInjector::teoi() const
 {
-    return massFlowRateProfile_[massFlowRateProfile_.size()-1][0];
+    return massFlowRateProfile_.last()[0];
 }
 
 

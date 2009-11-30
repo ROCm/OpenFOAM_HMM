@@ -1,4 +1,4 @@
-    Info << "Reading field p\n" << endl;
+    Info<< "Reading field p\n" << endl;
     volScalarField p
     (
         IOobject
