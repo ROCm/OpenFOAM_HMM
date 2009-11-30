@@ -29,6 +29,9 @@ License
 #include "primitiveMesh.H"
 #include "processorPolyPatch.H"
 #include "stringListOps.H"
+#include "PstreamBuffers.H"
+#include "lduSchedule.H"
+#include "globalMeshData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -144,14 +147,46 @@ void Foam::polyBoundaryMesh::clearAddressing()
 
 void Foam::polyBoundaryMesh::calcGeometry()
 {
-    forAll(*this, patchi)
-    {
-        operator[](patchi).initGeometry();
-    }
+    PstreamBuffers pBufs(Pstream::defaultCommsType);
 
-    forAll(*this, patchi)
+    if
+    (
+        Pstream::defaultCommsType == Pstream::blocking
+     || Pstream::defaultCommsType == Pstream::nonBlocking
+    )
     {
-        operator[](patchi).calcGeometry();
+        forAll(*this, patchi)
+        {
+            operator[](patchi).initGeometry(pBufs);
+        }
+
+        pBufs.finishedSends();
+
+        forAll(*this, patchi)
+        {
+            operator[](patchi).calcGeometry(pBufs);
+        }
+    }
+    else if (Pstream::defaultCommsType == Pstream::scheduled)
+    {
+        const lduSchedule& patchSchedule = mesh().globalData().patchSchedule();
+
+        // Dummy.
+        pBufs.finishedSends();
+
+        forAll(patchSchedule, patchEvali)
+        {
+            label patchi = patchSchedule[patchEvali].patch;
+
+            if (patchSchedule[patchEvali].init)
+            {
+                operator[](patchi).initGeometry(pBufs);
+            }
+            else
+            {
+                operator[](patchi).calcGeometry(pBufs);
+            }
+        }
     }
 }
 
@@ -450,7 +485,7 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
 
     const polyBoundaryMesh& bm = *this;
 
-    bool boundaryError = false;
+    bool hasError = false;
 
     // Collect non-proc patches and check proc patches are last.
     wordList names(bm.size());
@@ -464,8 +499,8 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
         {
             if (nonProcI != patchI)
             {
-                // There is processor patch inbetween normal patches.
-                boundaryError = true;
+                // There is processor patch in between normal patches.
+                hasError = true;
 
                 if (debug || report)
                 {
@@ -508,7 +543,7 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
          || (allTypes[procI] != allTypes[0])
         )
         {
-            boundaryError = true;
+            hasError = true;
 
             if (debug || (report && Pstream::master()))
             {
@@ -523,7 +558,7 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
         }
     }
 
-    return boundaryError;
+    return hasError;
 }
 
 
@@ -532,13 +567,13 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
     label nextPatchStart = mesh().nInternalFaces();
     const polyBoundaryMesh& bm = *this;
 
-    bool boundaryError = false;
+    bool hasError = false;
 
     forAll (bm, patchI)
     {
-        if (bm[patchI].start() != nextPatchStart && !boundaryError)
+        if (bm[patchI].start() != nextPatchStart && !hasError)
         {
-            boundaryError = true;
+            hasError = true;
 
             Info<< " ****Problem with boundary patch " << patchI
                 << " named " << bm[patchI].name()
@@ -553,41 +588,66 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
         nextPatchStart += bm[patchI].size();
     }
 
-    reduce(boundaryError, orOp<bool>());
+    reduce(hasError, orOp<bool>());
 
-    if (boundaryError)
+    if (debug || report)
     {
-        if (debug || report)
+        if (hasError)
         {
             Pout << " ***Boundary definition is in error." << endl;
         }
-
-        return true;
-    }
-    else
-    {
-        if (debug || report)
+        else
         {
             Info << "    Boundary definition OK." << endl;
         }
-
-        return false;
     }
+
+    return hasError;
 }
 
 
 void Foam::polyBoundaryMesh::movePoints(const pointField& p)
 {
-    polyPatchList& patches = *this;
+    PstreamBuffers pBufs(Pstream::defaultCommsType);
 
-    forAll(patches, patchi)
+    if
+    (
+        Pstream::defaultCommsType == Pstream::blocking
+     || Pstream::defaultCommsType == Pstream::nonBlocking
+    )
     {
-        patches[patchi].initMovePoints(p);
+        forAll(*this, patchi)
+        {
+            operator[](patchi).initMovePoints(pBufs, p);
+        }
+
+        pBufs.finishedSends();
+
+        forAll(*this, patchi)
+        {
+            operator[](patchi).movePoints(pBufs, p);
+        }
     }
-
-    forAll(patches, patchi)
+    else if (Pstream::defaultCommsType == Pstream::scheduled)
     {
-        patches[patchi].movePoints(p);
+        const lduSchedule& patchSchedule = mesh().globalData().patchSchedule();
+
+        // Dummy.
+        pBufs.finishedSends();
+
+        forAll(patchSchedule, patchEvali)
+        {
+            label patchi = patchSchedule[patchEvali].patch;
+
+            if (patchSchedule[patchEvali].init)
+            {
+                operator[](patchi).initMovePoints(pBufs, p);
+            }
+            else
+            {
+                operator[](patchi).movePoints(pBufs, p);
+            }
+        }
     }
 }
 
@@ -596,16 +656,46 @@ void Foam::polyBoundaryMesh::updateMesh()
 {
     deleteDemandDrivenData(neighbourEdgesPtr_);
 
-    polyPatchList& patches = *this;
+    PstreamBuffers pBufs(Pstream::defaultCommsType);
 
-    forAll(patches, patchi)
+    if
+    (
+        Pstream::defaultCommsType == Pstream::blocking
+     || Pstream::defaultCommsType == Pstream::nonBlocking
+    )
     {
-        patches[patchi].initUpdateMesh();
+        forAll(*this, patchi)
+        {
+            operator[](patchi).initUpdateMesh(pBufs);
+        }
+
+        pBufs.finishedSends();
+
+        forAll(*this, patchi)
+        {
+            operator[](patchi).updateMesh(pBufs);
+        }
     }
-
-    forAll(patches, patchi)
+    else if (Pstream::defaultCommsType == Pstream::scheduled)
     {
-        patches[patchi].updateMesh();
+        const lduSchedule& patchSchedule = mesh().globalData().patchSchedule();
+
+        // Dummy.
+        pBufs.finishedSends();
+
+        forAll(patchSchedule, patchEvali)
+        {
+            label patchi = patchSchedule[patchEvali].patch;
+
+            if (patchSchedule[patchEvali].init)
+            {
+                operator[](patchi).initUpdateMesh(pBufs);
+            }
+            else
+            {
+                operator[](patchi).updateMesh(pBufs);
+            }
+        }
     }
 }
 

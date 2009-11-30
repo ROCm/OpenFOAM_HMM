@@ -33,6 +33,8 @@ License
 #include "OFstream.H"
 #include "polyMesh.H"
 #include "Time.H"
+#include "transformList.H"
+#include "PstreamBuffers.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -181,6 +183,26 @@ Foam::processorPolyPatch::processorPolyPatch
 }
 
 
+Foam::processorPolyPatch::processorPolyPatch
+(
+    const processorPolyPatch& pp,
+    const polyBoundaryMesh& bm,
+    const label index,
+     const unallocLabelList& mapAddressing,
+    const label newStart
+)
+:
+    coupledPolyPatch(pp, bm, index, mapAddressing, newStart),
+    myProcNo_(pp.myProcNo_),
+    neighbProcNo_(pp.neighbProcNo_),
+    neighbFaceCentres_(),
+    neighbFaceAreas_(),
+    neighbFaceCellCentres_(),
+    neighbPointsPtr_(NULL),
+    neighbEdgesPtr_(NULL)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::processorPolyPatch::~processorPolyPatch()
@@ -219,7 +241,7 @@ void Foam::processorPolyPatch::transformPosition(pointField& l) const
 }
 
 
-void Foam::processorPolyPatch::initGeometry()
+void Foam::processorPolyPatch::initGeometry(PstreamBuffers& pBufs)
 {
 Pout<< "**processorPolyPatch::initGeometry()" << endl;
     if (Pstream::parRun())
@@ -266,31 +288,21 @@ Pout<< "**processorPolyPatch::initGeometry()" << endl;
 
         Pout<< name() << " fc:" << fc << " fa:" << fa << " cc:" << cc << endl;
 
-
-        OPstream toNeighbProc
-        (
-            Pstream::blocking,
-            neighbProcNo(),
-            3*(sizeof(label) + size()*sizeof(vector) + sizeof(scalar))
-        );
+        UOPstream toNeighbProc(neighbProcNo(), pBufs);
 
         toNeighbProc << fc << fa << cc;
     }
 }
 
 
-void Foam::processorPolyPatch::calcGeometry()
+void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
 {
 Pout<< "processorPolyPatch::calcGeometry() for " << name() << endl;
     if (Pstream::parRun())
     {
         {
-            IPstream fromNeighbProc
-            (
-                Pstream::blocking,
-                neighbProcNo(),
-                3*(sizeof(label) + size()*sizeof(vector) + sizeof(scalar))
-            );
+            UIPstream fromNeighbProc(neighbProcNo(), pBufs);
+
             fromNeighbProc
                 >> neighbFaceCentres_
                 >> neighbFaceAreas_
@@ -343,24 +355,30 @@ Pout<< "**neighbFaceCellCentres_:" << neighbFaceCellCentres_ << endl;
 }
 
 
-void Foam::processorPolyPatch::initMovePoints(const pointField& p)
+void Foam::processorPolyPatch::initMovePoints
+(
+    PstreamBuffers& pBufs,
+    const pointField& p
+)
 {
-    // Update local polyPatch quantities
-    polyPatch::movePoints(p);
-    // Recalculate geometry
-    processorPolyPatch::initGeometry();
+    polyPatch::movePoints(pBufs, p);
+    processorPolyPatch::initGeometry(pBufs);
 }
 
 
-void Foam::processorPolyPatch::movePoints(const pointField&)
+void Foam::processorPolyPatch::movePoints
+(
+    PstreamBuffers& pBufs,
+    const pointField&
+)
 {
-    processorPolyPatch::calcGeometry();
+    processorPolyPatch::calcGeometry(pBufs);
 }
 
 
-void Foam::processorPolyPatch::initUpdateMesh()
+void Foam::processorPolyPatch::initUpdateMesh(PstreamBuffers& pBufs)
 {
-    polyPatch::initUpdateMesh();
+    polyPatch::initUpdateMesh(pBufs);
 
 //    deleteDemandDrivenData(neighbPointsPtr_);
 //    deleteDemandDrivenData(neighbEdgesPtr_);
@@ -415,10 +433,10 @@ void Foam::processorPolyPatch::initUpdateMesh()
 }
 
 
-void Foam::processorPolyPatch::updateMesh()
+void Foam::processorPolyPatch::updateMesh(PstreamBuffers& pBufs)
 {
     // For completeness
-    polyPatch::updateMesh();
+    polyPatch::updateMesh(pBufs);
 
 //    if (Pstream::parRun())
 //    {
@@ -604,7 +622,11 @@ Foam::label Foam::processorPolyPatch::whichSubPatch(const label facei) const
 }
 
 
-void Foam::processorPolyPatch::initOrder(const primitivePatch& pp) const
+void Foam::processorPolyPatch::initOrder
+(
+    PstreamBuffers& pBufs,
+    const primitivePatch& pp
+) const
 {
     if (!Pstream::parRun())
     {
@@ -647,7 +669,7 @@ void Foam::processorPolyPatch::initOrder(const primitivePatch& pp) const
         pointField anchors(getAnchorPoints(pp, pp.points()));
 
         // Now send all info over to the neighbour
-        OPstream toNeighbour(Pstream::blocking, neighbProcNo());
+        UOPstream toNeighbour(neighbProcNo(), pBufs);
         toNeighbour << ctrs << anchors;
     }
 }
@@ -659,6 +681,7 @@ void Foam::processorPolyPatch::initOrder(const primitivePatch& pp) const
 // is identity, rotation is 0)
 bool Foam::processorPolyPatch::order
 (
+    PstreamBuffers& pBufs,
     const primitivePatch& pp,
     labelList& faceMap,
     labelList& rotation
@@ -695,7 +718,7 @@ bool Foam::processorPolyPatch::order
 
         // Receive data from neighbour
         {
-            IPstream fromNeighbour(Pstream::blocking, neighbProcNo());
+            UIPstream fromNeighbour(neighbProcNo(), pBufs);
             fromNeighbour >> masterCtrs >> masterAnchors;
         }
 

@@ -150,10 +150,8 @@ vector eigenValues(const tensor& t)
                 scalar aBy3 = a/3;
 
                 i = m2SqrtQ*cos(theta/3) - aBy3;
-                ii = m2SqrtQ*cos((theta + mathematicalConstant::twoPi)/3)
-                    - aBy3;
-                iii = m2SqrtQ*cos((theta - mathematicalConstant::twoPi)/3)
-                    - aBy3;
+                ii = m2SqrtQ*cos((theta + constant::mathematical::twoPi)/3) - aBy3;
+                iii = m2SqrtQ*cos((theta - constant::mathematical::twoPi)/3) - aBy3;
             }
             else
             {
@@ -345,10 +343,8 @@ vector eigenValues(const symmTensor& t)
                 scalar aBy3 = a/3;
 
                 i = m2SqrtQ*cos(theta/3) - aBy3;
-                ii = m2SqrtQ*cos((theta + mathematicalConstant::twoPi)/3)
-                    - aBy3;
-                iii = m2SqrtQ*cos((theta - mathematicalConstant::twoPi)/3)
-                    - aBy3;
+                ii = m2SqrtQ*cos((theta + constant::mathematical::twoPi)/3) - aBy3;
+                iii = m2SqrtQ*cos((theta - constant::mathematical::twoPi)/3) - aBy3;
             }
             else
             {

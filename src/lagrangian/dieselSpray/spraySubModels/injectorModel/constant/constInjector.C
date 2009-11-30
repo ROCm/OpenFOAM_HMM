@@ -61,17 +61,19 @@ constInjector::constInjector
 {
     if (sm.injectors().size() != dropletNozzleDiameterRatio_.size())
     {
-        FatalError << "constInjector::constInjector"
-            << "(const dictionary& dict, spray& sm)\n"
-            << "Wrong number of entries in dropletNozzleDiameterRatio"
+        FatalErrorIn
+        (
+            "constInjector::constInjector(const dictionary& dict, spray& sm)"
+        )   << "Wrong number of entries in dropletNozzleDiameterRatio" << nl
             << abort(FatalError);
     }
 
     if (sm.injectors().size() != sprayAngle_.size())
     {
-        FatalError << "constInjector::constInjector"
-            << "(const dictionary& dict, spray& sm)\n"
-            << "Wrong number of entries in sprayAngle"
+        FatalErrorIn
+        (
+            "constInjector::constInjector(const dictionary& dict, spray& sm)"
+        )   << "Wrong number of entries in sprayAngle" << nl
             << abort(FatalError);
     }
 
@@ -80,9 +82,12 @@ constInjector::constInjector
     // correct velocity and pressure profiles
     forAll(sm.injectors(), i)
     {
-        sm.injectors()[i].properties()->correctProfiles(sm.fuels(), referencePressure);
+        sm.injectors()[i].properties()->correctProfiles
+        (
+            sm.fuels(),
+            referencePressure
+        );
     }
-
 }
 
 
@@ -96,7 +101,7 @@ constInjector::~constInjector()
 
 scalar constInjector::d0
 (
-    const label n, 
+    const label n,
     const scalar
 ) const
 {
@@ -119,54 +124,57 @@ vector constInjector::direction
         alpha = radius of the two normal vectors,
         = maximum sin(sprayAngle/2)
         beta = angle in the normal plane
-        
+
                         o                    / (beta)
                         |\                  /
                         | \                /)
                         |  \              o-----------> (x-axis)
                         |   \
                         v  (alpha)
-        */
+    */
 
-    scalar angle = rndGen_.scalar01()*sprayAngle_[n]*mathematicalConstant::pi/360.0;
+    scalar angle = rndGen_.scalar01()*sprayAngle_[n]*constant::mathematical::pi/360.0;
     scalar alpha = sin(angle);
     scalar dcorr = cos(angle);
 
-    scalar beta = 2.0*mathematicalConstant::pi*rndGen_.scalar01();
+    scalar beta = constant::mathematical::twoPi*rndGen_.scalar01();
 
     // randomly distributed vector normal to the injection vector
     vector normal = vector::zero;
-    
+
     if (sm_.twoD())
     {
         scalar reduce = 0.01;
         // correct beta if this is a 2D run
         // map it onto the 'angleOfWedge'
-        beta *= (1.0-2.0*reduce)*0.5*sm_.angleOfWedge()/mathematicalConstant::pi;
+        beta *= (1.0 - 2.0*reduce)*0.5*sm_.angleOfWedge()/constant::mathematical::pi;
         beta += reduce*sm_.angleOfWedge();
 
-        normal = alpha*
-        (
-            sm_.axisOfWedge()*cos(beta) +
-            sm_.axisOfWedgeNormal()*sin(beta)
-        );
+        normal =
+            alpha
+           *(
+                sm_.axisOfWedge()*cos(beta)
+              + sm_.axisOfWedgeNormal()*sin(beta)
+            );
 
     }
     else
     {
-        normal = alpha*
-        (
-            injectors_[n].properties()->tan1(hole)*cos(beta) +
-            injectors_[n].properties()->tan2(hole)*sin(beta)
-        );
+        normal =
+            alpha
+           *(
+                injectors_[n].properties()->tan1(hole)*cos(beta)
+              + injectors_[n].properties()->tan2(hole)*sin(beta)
+            );
     }
-    
+
     // set the direction of injection by adding the normal vector
     vector dir = dcorr*injectors_[n].properties()->direction(n, time) + normal;
     dir /= mag(dir);
 
     return dir;
 }
+
 
 scalar constInjector::velocity
 (
@@ -189,16 +197,17 @@ scalar constInjector::velocity
     }
 }
 
-scalar constInjector::averageVelocity
-(
-    const label i
-) const
-{    
+
+scalar constInjector::averageVelocity(const label i) const
+{
     const injectorType& it = sm_.injectors()[i].properties();
     scalar dt = it.teoi() - it.tsoi();
 
     return it.integrateTable(it.velocityProfile())/dt;
 }
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 

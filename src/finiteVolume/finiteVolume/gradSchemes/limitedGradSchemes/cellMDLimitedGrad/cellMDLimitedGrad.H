@@ -117,13 +117,16 @@ public:
             const vector& dcf
         );
 
-        tmp
+        //- Return the gradient of the given field to the gradScheme::grad
+        //  for optional caching
+        virtual tmp
         <
             GeometricField
             <typename outerProduct<vector, Type>::type, fvPatchField, volMesh>
-        > grad
+        > calcGrad
         (
-            const GeometricField<Type, fvPatchField, volMesh>&
+            const GeometricField<Type, fvPatchField, volMesh>& vsf,
+            const word& name
         ) const;
 };
 
@@ -176,6 +179,24 @@ inline void cellMDLimitedGrad<Type>::limitFace
         g[cmpt+6] = gi.z();
     }
 }
+
+
+// * * * * * * * * Template Member Function Specialisations  * * * * * * * * //
+
+template<>
+tmp<volVectorField> cellMDLimitedGrad<scalar>::calcGrad
+(
+    const volScalarField& vsf,
+    const word& name
+) const;
+
+
+template<>
+tmp<volTensorField> cellMDLimitedGrad<vector>::calcGrad
+(
+    const volVectorField& vsf,
+    const word& name
+) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

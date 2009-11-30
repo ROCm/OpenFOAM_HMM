@@ -25,6 +25,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "Pstream.H"
+#include "PstreamBuffers.H"
+#include "PstreamCombineReduceOps.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -184,138 +186,200 @@ void Foam::mapDistribute::distribute
     {
         if (!contiguous<T>())
         {
-            FatalErrorIn
-            (
-                "template<class T>\n"
-                "void mapDistribute::distribute\n"
-                "(\n"
-                "    const Pstream::commsTypes commsType,\n"
-                "    const List<labelPair>& schedule,\n"
-                "    const label constructSize,\n"
-                "    const labelListList& subMap,\n"
-                "    const labelListList& constructMap,\n"
-                "    List<T>& field\n"
-                ")\n"
-            )   << "Non-blocking only supported for contiguous data."
-                << exit(FatalError);
-        }
+            PstreamBuffers pBuffs(Pstream::nonBlocking);
 
-        // Set up sends to neighbours
-
-        List<List<T > > sendFields(Pstream::nProcs());
-
-        for (label domain = 0; domain < Pstream::nProcs(); domain++)
-        {
-            const labelList& map = subMap[domain];
-
-            if (domain != Pstream::myProcNo() && map.size())
+            // Stream data into buffer
+            for (label domain = 0; domain < Pstream::nProcs(); domain++)
             {
-                List<T>& subField = sendFields[domain];
+                const labelList& map = subMap[domain];
+
+                if (domain != Pstream::myProcNo() && map.size())
+                {
+                    // Put data into send buffer
+                    UOPstream toDomain(domain, pBuffs);
+                    toDomain << UIndirectList<T>(field, map);
+                }
+            }
+
+            // Start receiving
+            pBuffs.finishedSends();
+
+            {
+                // Set up 'send' to myself
+                const labelList& mySubMap = subMap[Pstream::myProcNo()];
+                List<T> mySubField(mySubMap.size());
+                forAll(mySubMap, i)
+                {
+                    mySubField[i] = field[mySubMap[i]];
+                }
+                // Combine bits. Note that can reuse field storage
+                field.setSize(constructSize);
+                // Receive sub field from myself
+                {
+                    const labelList& map = constructMap[Pstream::myProcNo()];
+
+                    forAll(map, i)
+                    {
+                        field[map[i]] = mySubField[i];
+                    }
+                }
+            }
+
+            // Consume
+            for (label domain = 0; domain < Pstream::nProcs(); domain++)
+            {
+                const labelList& map = constructMap[domain];
+
+                if (domain != Pstream::myProcNo() && map.size())
+                {
+                    UIPstream str(domain, pBuffs);
+                    List<T> recvField(str);
+
+                    if (recvField.size() != map.size())
+                    {
+                        FatalErrorIn
+                        (
+                            "template<class T>\n"
+                            "void mapDistribute::distribute\n"
+                            "(\n"
+                            "    const Pstream::commsTypes commsType,\n"
+                            "    const List<labelPair>& schedule,\n"
+                            "    const label constructSize,\n"
+                            "    const labelListList& subMap,\n"
+                            "    const labelListList& constructMap,\n"
+                            "    List<T>& field\n"
+                            ")\n"
+                        )   << "Expected from processor " << domain
+                            << " " << map.size() << " but received "
+                            << recvField.size() << " elements."
+                            << abort(FatalError);
+                    }
+
+                    forAll(map, i)
+                    {
+                        field[map[i]] = recvField[i];
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Set up sends to neighbours
+
+            List<List<T > > sendFields(Pstream::nProcs());
+
+            for (label domain = 0; domain < Pstream::nProcs(); domain++)
+            {
+                const labelList& map = subMap[domain];
+
+                if (domain != Pstream::myProcNo() && map.size())
+                {
+                    List<T>& subField = sendFields[domain];
+                    subField.setSize(map.size());
+                    forAll(map, i)
+                    {
+                        subField[i] = field[map[i]];
+                    }
+
+                    OPstream::write
+                    (
+                        Pstream::nonBlocking,
+                        domain,
+                        reinterpret_cast<const char*>(subField.begin()),
+                        subField.byteSize()
+                    );
+                }
+            }
+
+            // Set up receives from neighbours
+
+            List<List<T > > recvFields(Pstream::nProcs());
+
+            for (label domain = 0; domain < Pstream::nProcs(); domain++)
+            {
+                const labelList& map = constructMap[domain];
+
+                if (domain != Pstream::myProcNo() && map.size())
+                {
+                    recvFields[domain].setSize(map.size());
+                    IPstream::read
+                    (
+                        Pstream::nonBlocking,
+                        domain,
+                        reinterpret_cast<char*>(recvFields[domain].begin()),
+                        recvFields[domain].byteSize()
+                    );
+                }
+            }
+
+
+            // Set up 'send' to myself
+
+            {
+                const labelList& map = subMap[Pstream::myProcNo()];
+
+                List<T>& subField = sendFields[Pstream::myProcNo()];
                 subField.setSize(map.size());
                 forAll(map, i)
                 {
                     subField[i] = field[map[i]];
                 }
-
-                OPstream::write
-                (
-                    Pstream::nonBlocking,
-                    domain,
-                    reinterpret_cast<const char*>(subField.begin()),
-                    subField.size()*sizeof(T)
-                );
             }
-        }
 
-        // Set up receives from neighbours
 
-        List<List<T > > recvFields(Pstream::nProcs());
+            // Combine bits. Note that can reuse field storage
 
-        for (label domain = 0; domain < Pstream::nProcs(); domain++)
-        {
-            const labelList& map = constructMap[domain];
+            field.setSize(constructSize);
 
-            if (domain != Pstream::myProcNo() && map.size())
+
+            // Receive sub field from myself (sendFields[Pstream::myProcNo()])
             {
-                recvFields[domain].setSize(map.size());
-                IPstream::read
-                (
-                    Pstream::nonBlocking,
-                    domain,
-                    reinterpret_cast<char*>(recvFields[domain].begin()),
-                    recvFields[domain].size()*sizeof(T)
-                );
-            }
-        }
-
-
-        // Set up 'send' to myself
-
-        {
-            const labelList& map = subMap[Pstream::myProcNo()];
-
-            List<T>& subField = sendFields[Pstream::myProcNo()];
-            subField.setSize(map.size());
-            forAll(map, i)
-            {
-                subField[i] = field[map[i]];
-            }
-        }
-
-
-        // Combine bits. Note that can reuse field storage
-
-        field.setSize(constructSize);
-
-
-        // Receive sub field from myself (sendFields[Pstream::myProcNo()])
-        {
-            const labelList& map = constructMap[Pstream::myProcNo()];
-            const List<T>& subField = sendFields[Pstream::myProcNo()];
-
-            forAll(map, i)
-            {
-                field[map[i]] = subField[i];
-            }
-        }
-
-
-        // Wait for all to finish
-
-        OPstream::waitRequests();
-        IPstream::waitRequests();
-
-        // Collect neighbour fields
-
-        for (label domain = 0; domain < Pstream::nProcs(); domain++)
-        {
-            const labelList& map = constructMap[domain];
-
-            if (domain != Pstream::myProcNo() && map.size())
-            {
-                if (recvFields[domain].size() != map.size())
-                {
-                    FatalErrorIn
-                    (
-                        "template<class T>\n"
-                        "void mapDistribute::distribute\n"
-                        "(\n"
-                        "    const Pstream::commsTypes commsType,\n"
-                        "    const List<labelPair>& schedule,\n"
-                        "    const label constructSize,\n"
-                        "    const labelListList& subMap,\n"
-                        "    const labelListList& constructMap,\n"
-                        "    List<T>& field\n"
-                        ")\n"
-                    )   << "Expected from processor " << domain
-                        << " " << map.size() << " but received "
-                        << recvFields[domain].size() << " elements."
-                        << abort(FatalError);
-                }
+                const labelList& map = constructMap[Pstream::myProcNo()];
+                const List<T>& subField = sendFields[Pstream::myProcNo()];
 
                 forAll(map, i)
                 {
-                    field[map[i]] = recvFields[domain][i];
+                    field[map[i]] = subField[i];
+                }
+            }
+
+
+            // Wait for all to finish
+
+            Pstream::waitRequests();
+
+            // Collect neighbour fields
+
+            for (label domain = 0; domain < Pstream::nProcs(); domain++)
+            {
+                const labelList& map = constructMap[domain];
+
+                if (domain != Pstream::myProcNo() && map.size())
+                {
+                    if (recvFields[domain].size() != map.size())
+                    {
+                        FatalErrorIn
+                        (
+                            "template<class T>\n"
+                            "void mapDistribute::distribute\n"
+                            "(\n"
+                            "    const Pstream::commsTypes commsType,\n"
+                            "    const List<labelPair>& schedule,\n"
+                            "    const label constructSize,\n"
+                            "    const labelListList& subMap,\n"
+                            "    const labelListList& constructMap,\n"
+                            "    List<T>& field\n"
+                            ")\n"
+                        )   << "Expected from processor " << domain
+                            << " " << map.size() << " but received "
+                            << recvFields[domain].size() << " elements."
+                            << abort(FatalError);
+                    }
+
+                    forAll(map, i)
+                    {
+                        field[map[i]] = recvFields[domain][i];
+                    }
                 }
             }
         }
@@ -488,137 +552,200 @@ void Foam::mapDistribute::distribute
     {
         if (!contiguous<T>())
         {
-            FatalErrorIn
-            (
-                "template<class T>\n"
-                "void mapDistribute::distribute\n"
-                "(\n"
-                "    const Pstream::commsTypes commsType,\n"
-                "    const List<labelPair>& schedule,\n"
-                "    const label constructSize,\n"
-                "    const labelListList& subMap,\n"
-                "    const labelListList& constructMap,\n"
-                "    List<T>& field\n"
-                ")\n"
-            )   << "Non-blocking only supported for contiguous data."
-                << exit(FatalError);
-        }
+//XXXXXX
+            PstreamBuffers pBuffs(Pstream::nonBlocking);
 
-        // Set up sends to neighbours
-
-        List<List<T > > sendFields(Pstream::nProcs());
-
-        for (label domain = 0; domain < Pstream::nProcs(); domain++)
-        {
-            const labelList& map = subMap[domain];
-
-            if (domain != Pstream::myProcNo() && map.size())
+            // Stream data into buffer
+            for (label domain = 0; domain < Pstream::nProcs(); domain++)
             {
-                List<T>& subField = sendFields[domain];
+                const labelList& map = subMap[domain];
+
+                if (domain != Pstream::myProcNo() && map.size())
+                {
+                    // Put data into send buffer
+                    UOPstream toDomain(domain, pBuffs);
+                    toDomain << UIndirectList<T>(field, map);
+                }
+            }
+
+            // Start receiving
+            pBuffs.finishedSends();
+
+            {
+                // Set up 'send' to myself
+                List<T> mySubField(field, subMap[Pstream::myProcNo()]);
+                // Combine bits. Note that can reuse field storage
+                field.setSize(constructSize);
+                field = nullValue;
+                // Receive sub field from myself
+                {
+                    const labelList& map = constructMap[Pstream::myProcNo()];
+
+                    forAll(map, i)
+                    {
+                        cop(field[map[i]], mySubField[i]);
+                    }
+                }
+            }
+
+
+            // Wait till all finished
+            UPstream::waitRequests();
+
+            // Consume
+            for (label domain = 0; domain < Pstream::nProcs(); domain++)
+            {
+                const labelList& map = constructMap[domain];
+
+                if (domain != Pstream::myProcNo() && map.size())
+                {
+                    UIPstream str(domain, pBuffs);
+                    List<T> recvField(str);
+
+                    if (recvField.size() != map.size())
+                    {
+                        FatalErrorIn
+                        (
+                            "template<class T>\n"
+                            "void mapDistribute::distribute\n"
+                            "(\n"
+                            "    const Pstream::commsTypes commsType,\n"
+                            "    const List<labelPair>& schedule,\n"
+                            "    const label constructSize,\n"
+                            "    const labelListList& subMap,\n"
+                            "    const labelListList& constructMap,\n"
+                            "    List<T>& field\n"
+                            ")\n"
+                        )   << "Expected from processor " << domain
+                            << " " << map.size() << " but received "
+                            << recvField.size() << " elements."
+                            << abort(FatalError);
+                    }
+
+                    forAll(map, i)
+                    {
+                        cop(field[map[i]], recvField[i]);
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Set up sends to neighbours
+
+            List<List<T > > sendFields(Pstream::nProcs());
+
+            for (label domain = 0; domain < Pstream::nProcs(); domain++)
+            {
+                const labelList& map = subMap[domain];
+
+                if (domain != Pstream::myProcNo() && map.size())
+                {
+                    List<T>& subField = sendFields[domain];
+                    subField.setSize(map.size());
+                    forAll(map, i)
+                    {
+                        subField[i] = field[map[i]];
+                    }
+
+                    OPstream::write
+                    (
+                        Pstream::nonBlocking,
+                        domain,
+                        reinterpret_cast<const char*>(subField.begin()),
+                        subField.size()*sizeof(T)
+                    );
+                }
+            }
+
+            // Set up receives from neighbours
+
+            List<List<T > > recvFields(Pstream::nProcs());
+
+            for (label domain = 0; domain < Pstream::nProcs(); domain++)
+            {
+                const labelList& map = constructMap[domain];
+
+                if (domain != Pstream::myProcNo() && map.size())
+                {
+                    recvFields[domain].setSize(map.size());
+                    UIPstream::read
+                    (
+                        Pstream::nonBlocking,
+                        domain,
+                        reinterpret_cast<char*>(recvFields[domain].begin()),
+                        recvFields[domain].size()*sizeof(T)
+                    );
+                }
+            }
+
+            // Set up 'send' to myself
+
+            {
+                const labelList& map = subMap[Pstream::myProcNo()];
+
+                List<T>& subField = sendFields[Pstream::myProcNo()];
                 subField.setSize(map.size());
                 forAll(map, i)
                 {
                     subField[i] = field[map[i]];
                 }
-
-                OPstream::write
-                (
-                    Pstream::nonBlocking,
-                    domain,
-                    reinterpret_cast<const char*>(subField.begin()),
-                    subField.size()*sizeof(T)
-                );
             }
-        }
 
-        // Set up receives from neighbours
 
-        List<List<T > > recvFields(Pstream::nProcs());
+            // Combine bits. Note that can reuse field storage
 
-        for (label domain = 0; domain < Pstream::nProcs(); domain++)
-        {
-            const labelList& map = constructMap[domain];
+            field.setSize(constructSize);
+            field = nullValue;
 
-            if (domain != Pstream::myProcNo() && map.size())
+            // Receive sub field from myself (subField)
             {
-                recvFields[domain].setSize(map.size());
-                IPstream::read
-                (
-                    Pstream::nonBlocking,
-                    domain,
-                    reinterpret_cast<char*>(recvFields[domain].begin()),
-                    recvFields[domain].size()*sizeof(T)
-                );
-            }
-        }
-
-        // Set up 'send' to myself
-
-        {
-            const labelList& map = subMap[Pstream::myProcNo()];
-
-            List<T>& subField = sendFields[Pstream::myProcNo()];
-            subField.setSize(map.size());
-            forAll(map, i)
-            {
-                subField[i] = field[map[i]];
-            }
-        }
-
-
-        // Combine bits. Note that can reuse field storage
-
-        field.setSize(constructSize);
-        field = nullValue;
-
-        // Receive sub field from myself (subField)
-        {
-            const labelList& map = constructMap[Pstream::myProcNo()];
-            const List<T>& subField = sendFields[Pstream::myProcNo()];
-
-            forAll(map, i)
-            {
-                cop(field[map[i]], subField[i]);
-            }
-        }
-
-
-        // Wait for all to finish
-
-        OPstream::waitRequests();
-        IPstream::waitRequests();
-
-        // Collect neighbour fields
-
-        for (label domain = 0; domain < Pstream::nProcs(); domain++)
-        {
-            const labelList& map = constructMap[domain];
-
-            if (domain != Pstream::myProcNo() && map.size())
-            {
-                if (recvFields[domain].size() != map.size())
-                {
-                    FatalErrorIn
-                    (
-                        "template<class T>\n"
-                        "void mapDistribute::distribute\n"
-                        "(\n"
-                        "    const Pstream::commsTypes commsType,\n"
-                        "    const List<labelPair>& schedule,\n"
-                        "    const label constructSize,\n"
-                        "    const labelListList& subMap,\n"
-                        "    const labelListList& constructMap,\n"
-                        "    List<T>& field\n"
-                        ")\n"
-                    )   << "Expected from processor " << domain
-                        << " " << map.size() << " but received "
-                        << recvFields[domain].size() << " elements."
-                        << abort(FatalError);
-                }
+                const labelList& map = constructMap[Pstream::myProcNo()];
+                const List<T>& subField = sendFields[Pstream::myProcNo()];
 
                 forAll(map, i)
                 {
-                    cop(field[map[i]], recvFields[domain][i]);
+                    cop(field[map[i]], subField[i]);
+                }
+            }
+
+
+            // Wait for all to finish
+
+            Pstream::waitRequests();
+
+            // Collect neighbour fields
+
+            for (label domain = 0; domain < Pstream::nProcs(); domain++)
+            {
+                const labelList& map = constructMap[domain];
+
+                if (domain != Pstream::myProcNo() && map.size())
+                {
+                    if (recvFields[domain].size() != map.size())
+                    {
+                        FatalErrorIn
+                        (
+                            "template<class T>\n"
+                            "void mapDistribute::distribute\n"
+                            "(\n"
+                            "    const Pstream::commsTypes commsType,\n"
+                            "    const List<labelPair>& schedule,\n"
+                            "    const label constructSize,\n"
+                            "    const labelListList& subMap,\n"
+                            "    const labelListList& constructMap,\n"
+                            "    List<T>& field\n"
+                            ")\n"
+                        )   << "Expected from processor " << domain
+                            << " " << map.size() << " but received "
+                            << recvFields[domain].size() << " elements."
+                            << abort(FatalError);
+                    }
+
+                    forAll(map, i)
+                    {
+                        cop(field[map[i]], recvFields[domain][i]);
+                    }
                 }
             }
         }

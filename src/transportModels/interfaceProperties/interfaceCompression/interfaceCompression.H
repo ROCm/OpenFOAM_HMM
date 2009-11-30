@@ -60,10 +60,10 @@ public:
     (
         const scalar cdWeight,
         const scalar faceFlux,
-        const scalar& phiP,
-        const scalar& phiN,
+        const scalar phiP,
+        const scalar phiN,
         const vector&,
-        const scalar&
+        const scalar
     ) const
     {
         // Quadratic compression scheme

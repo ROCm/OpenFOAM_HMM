@@ -132,6 +132,9 @@ protected:
             //- Name of velocity field
             word UName_;
 
+            //- Name of density field (optional)
+            word rhoName_;
+
             //- Is the force density being supplied directly?
             Switch directForceDensity_;
 
@@ -140,6 +143,9 @@ protected:
 
             //- Reference density needed for incompressible calculations
             scalar rhoRef_;
+
+            //- Reference pressure
+            scalar pRef_;
 
             //- Centre of rotation
             vector CofR_;
@@ -154,8 +160,14 @@ protected:
         //- If the forces file has not been created create it
         void makeFile();
 
+        //- Output file header information
+        virtual void writeFileHeader();
+
         //- Return the effective viscous stress (laminar + turbulent).
         tmp<volSymmTensorField> devRhoReff() const;
+
+        //- Return rho if rhoName is specified otherwise rhoRef
+        tmp<volScalarField> rho() const;
 
         //- Return rhoRef if the pressure field is dynamic, i.e. p/rho
         //  otherwise return 1
@@ -166,9 +178,6 @@ protected:
 
         //- Disallow default bitwise assignment
         void operator=(const forces&);
-
-        //- Output file header information
-        virtual void writeFileHeader();
 
 
 public:
@@ -190,9 +199,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~forces();
+    //- Destructor
+    virtual ~forces();
 
 
     // Member Functions

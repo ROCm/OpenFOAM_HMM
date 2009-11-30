@@ -55,7 +55,7 @@ class upwindCPCCellToFaceStencilObject
 
 public:
 
-    TypeName("upwindCFCCellToFaceStencil");
+    TypeName("upwindCPCCellToFaceStencil");
 
     // Constructors
 

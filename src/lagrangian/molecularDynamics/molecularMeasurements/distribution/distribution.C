@@ -25,27 +25,49 @@ License
 \*----------------------------------------------------------------------------*/
 
 #include "distribution.H"
+#include "OFstream.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(distribution, 0);
+}
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+void Foam::distribution::write
+(
+    const fileName& file,
+    const List<Pair<scalar> >& pairs
+)
+{
+    OFstream os(file);
+
+    forAll(pairs, i)
+    {
+        os  << pairs[i].first() << ' ' << pairs[i].second() << nl;
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-distribution::distribution()
+Foam::distribution::distribution()
 :
     Map<label>(),
     binWidth_(1)
 {}
 
 
-distribution::distribution(const scalar binWidth)
+Foam::distribution::distribution(const scalar binWidth)
 :
     Map<label>(),
     binWidth_(binWidth)
 {}
 
 
-distribution::distribution(const distribution& d)
+Foam::distribution::distribution(const distribution& d)
 :
     Map<label>(static_cast< Map<label> >(d)),
     binWidth_(d.binWidth())
@@ -54,13 +76,13 @@ distribution::distribution(const distribution& d)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-distribution::~distribution()
+Foam::distribution::~distribution()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-label distribution::totalEntries() const
+Foam::label Foam::distribution::totalEntries() const
 {
     label sumOfEntries = 0;
 
@@ -88,7 +110,7 @@ label distribution::totalEntries() const
 }
 
 
-scalar distribution::approxTotalEntries() const
+Foam::scalar Foam::distribution::approxTotalEntries() const
 {
     scalar sumOfEntries = 0;
 
@@ -101,7 +123,7 @@ scalar distribution::approxTotalEntries() const
 }
 
 
-scalar distribution::mean() const
+Foam::scalar Foam::distribution::mean() const
 {
     scalar runningSum = 0;
 
@@ -124,7 +146,7 @@ scalar distribution::mean() const
 }
 
 
-scalar distribution::median()
+Foam::scalar Foam::distribution::median()
 {
     // From:
     // http://mathworld.wolfram.com/StatisticalMedian.html
@@ -188,7 +210,7 @@ scalar distribution::median()
 }
 
 
-void distribution::add(const scalar valueToAdd)
+void Foam::distribution::add(const scalar valueToAdd)
 {
     iterator iter(this->begin());
 
@@ -218,13 +240,13 @@ void distribution::add(const scalar valueToAdd)
 }
 
 
-void distribution::add(const label valueToAdd)
+void Foam::distribution::add(const label valueToAdd)
 {
     add(scalar(valueToAdd));
 }
 
 
-void distribution::insertMissingKeys()
+void Foam::distribution::insertMissingKeys()
 {
     iterator iter(this->begin());
 
@@ -247,7 +269,7 @@ void distribution::insertMissingKeys()
 }
 
 
-List< Pair<scalar> > distribution::normalised()
+Foam::List<Foam::Pair<Foam::scalar> > Foam::distribution::normalised()
 {
     scalar totEnt = approxTotalEntries();
 
@@ -268,17 +290,25 @@ List< Pair<scalar> > distribution::normalised()
         normDist[k].second() = scalar((*this)[key])/totEnt/binWidth_;
     }
 
+    if (debug)
+    {
+        Info<< "totEnt: " << totEnt << endl;
+    }
+
     return normDist;
 }
 
 
-List< Pair<scalar> > distribution::normalisedMinusMean()
+Foam::List<Foam::Pair<Foam::scalar> > Foam::distribution::normalisedMinusMean()
 {
     return normalisedShifted(mean());
 }
 
 
-List< Pair<scalar> > distribution::normalisedShifted(const scalar shiftValue)
+Foam::List<Foam::Pair<Foam::scalar> > Foam::distribution::normalisedShifted
+(
+    scalar shiftValue
+)
 {
     List<Pair<scalar> > oldDist(normalised());
 
@@ -301,20 +331,23 @@ List< Pair<scalar> > distribution::normalisedShifted(const scalar shiftValue)
 
     label newKey = lowestNewKey;
 
-//     Info << shiftValue
-//         << nl << lowestOldBin
-//         << nl << lowestNewKey
-//         << nl << interpolationStartDirection
-//         << endl;
+    if (debug)
+    {
+        Info<< shiftValue
+            << nl << lowestOldBin
+            << nl << lowestNewKey
+            << nl << interpolationStartDirection
+            << endl;
 
-//     scalar checkNormalisation = 0;
+        scalar checkNormalisation = 0;
 
-//     forAll (oldDist, oD)
-//     {
-//         checkNormalisation += oldDist[oD].second()*binWidth_;
-//     }
+        forAll (oldDist, oD)
+        {
+            checkNormalisation += oldDist[oD].second()*binWidth_;
+        }
 
-//     Info << "Initial normalisation = " << checkNormalisation << endl;
+        Info<< "Initial normalisation = " << checkNormalisation << endl;
+    }
 
     forAll(oldDist,u)
     {
@@ -368,20 +401,23 @@ List< Pair<scalar> > distribution::normalisedShifted(const scalar shiftValue)
         newKey++;
     }
 
-//     checkNormalisation = 0;
+    if (debug)
+    {
+        scalar checkNormalisation = 0;
 
-//     forAll (newDist, nD)
-//     {
-//         checkNormalisation += newDist[nD].second()*binWidth_;
-//     }
+        forAll (newDist, nD)
+        {
+            checkNormalisation += newDist[nD].second()*binWidth_;
+        }
 
-//     Info << "Shifted normalisation = " << checkNormalisation << endl;
+        Info<< "Shifted normalisation = " << checkNormalisation << endl;
+    }
 
     return newDist;
 }
 
 
-List<Pair<scalar> > distribution::raw()
+Foam::List<Foam::Pair<Foam::scalar> > Foam::distribution::raw()
 {
     insertMissingKeys();
 
@@ -406,7 +442,7 @@ List<Pair<scalar> > distribution::raw()
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void distribution::operator=(const distribution& rhs)
+void Foam::distribution::operator=(const distribution& rhs)
 {
     // Check for assignment to self
     if (this == &rhs)
@@ -424,7 +460,7 @@ void distribution::operator=(const distribution& rhs)
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const distribution& d)
+Foam::Ostream& Foam::operator<<(Ostream& os, const distribution& d)
 {
     os  << d.binWidth_
         << static_cast<const Map<label>&>(d);
@@ -439,9 +475,5 @@ Ostream& operator<<(Ostream& os, const distribution& d)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

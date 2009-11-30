@@ -115,9 +115,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~Gulders();
+    //- Destructor
+    virtual ~Gulders();
 
 
     // Member functions

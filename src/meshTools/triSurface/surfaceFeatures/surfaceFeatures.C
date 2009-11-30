@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "surfaceFeatures.H"
@@ -35,6 +33,7 @@ Description
 #include "linePointRef.H"
 #include "OFstream.H"
 #include "IFstream.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -491,12 +490,7 @@ Foam::labelList Foam::surfaceFeatures::selectFeatureEdges
 
 void Foam::surfaceFeatures::findFeatures(const scalar includedAngle)
 {
-    scalar minCos =
-        Foam::cos
-        (
-            (180.0-includedAngle)
-          * mathematicalConstant::pi/180.0
-        );
+    scalar minCos = Foam::cos(degToRad(180.0 - includedAngle));
 
     const labelListList& edgeFaces = surf_.edgeFaces();
     const vectorField& faceNormals = surf_.faceNormals();
@@ -763,9 +757,13 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
 ) const
 {
     // Build tree out of all samples.
+
+    //Note: cannot be done one the fly - gcc4.4 compiler bug.
+    treeBoundBox bb(samples);
+
     octree<octreeDataPoint> ppTree
     (
-        treeBoundBox(samples),      // overall search domain
+        bb,                         // overall search domain
         octreeDataPoint(samples),   // all information needed to do checks
         1,          // min levels
         20.0,       // maximum ratio of cubes v.s. cells
@@ -863,10 +861,12 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
     scalar maxSearch = max(maxDist);
     vector span(maxSearch, maxSearch, maxSearch);
 
-    // octree.shapes holds reference!
+    //Note: cannot be done one the fly - gcc4.4 compiler bug.
+    treeBoundBox bb(samples);
+
     octree<octreeDataPoint> ppTree
     (
-        treeBoundBox(samples),      // overall search domain
+        bb,                         // overall search domain
         octreeDataPoint(samples),   // all information needed to do checks
         1,          // min levels
         20.0,       // maximum ratio of cubes v.s. cells
@@ -1097,8 +1097,8 @@ Foam::Map<Foam::pointIndexHit> Foam::surfaceFeatures::nearestEdges
 
             // Step to next sample point using local distance.
             // Truncate to max 1/minSampleDist samples per feature edge.
-//            s += max(minSampleDist*eMag, sampleDist[e.start()]);
-s += 0.01*eMag;
+            // s += max(minSampleDist*eMag, sampleDist[e.start()]);
+            s += 0.01*eMag;
 
             if (s >= (1-minSampleDist)*eMag)
             {

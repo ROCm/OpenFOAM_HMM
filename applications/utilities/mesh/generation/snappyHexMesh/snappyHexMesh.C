@@ -203,8 +203,8 @@ int main(int argc, char *argv[])
         IOobject
         (
             "abc",                      // dummy name
-            //mesh.time().constant(),     // instance
-            mesh.time().findInstance("triSurface", word::null),// instance
+            mesh.time().constant(),     // instance
+            //mesh.time().findInstance("triSurface", word::null),// instance
             "triSurface",               // local
             mesh.time(),                // registry
             IOobject::MUST_READ,
@@ -363,6 +363,8 @@ int main(int argc, char *argv[])
 
     if (wantRefine)
     {
+        cpuTime timer;
+
         autoRefineDriver refineDriver
         (
             meshRefiner,
@@ -387,10 +389,15 @@ int main(int argc, char *argv[])
             meshRefiner,
             debug
         );
+
+        Info<< "Mesh refined in = "
+            << timer.cpuTimeIncrement() << " s." << endl;
     }
 
     if (wantSnap)
     {
+        cpuTime timer;
+
         autoSnapDriver snapDriver
         (
             meshRefiner,
@@ -413,10 +420,15 @@ int main(int argc, char *argv[])
             meshRefiner,
             debug
         );
+
+        Info<< "Mesh snapped in = "
+            << timer.cpuTimeIncrement() << " s." << endl;
     }
 
     if (wantLayers)
     {
+        cpuTime timer;
+
         autoLayerDriver layerDriver(meshRefiner);
 
         // Layer addition parameters
@@ -442,6 +454,9 @@ int main(int argc, char *argv[])
             meshRefiner,
             debug
         );
+
+        Info<< "Layers added in = "
+            << timer.cpuTimeIncrement() << " s." << endl;
     }
 
 

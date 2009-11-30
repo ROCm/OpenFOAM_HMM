@@ -22,17 +22,14 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Class calculates cell quality measures.
 
 \*---------------------------------------------------------------------------*/
 
 #include "cellQuality.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from mesh
 Foam::cellQuality::cellQuality(const polyMesh& mesh)
 :
     mesh_(mesh)
@@ -68,8 +65,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::nonOrthogonality() const
         scalar magS = mag(s);
 
         scalar cosDDotS =
-            Foam::acos(min(1.0, (d & s)/(mag(d)*magS + VSMALL)))
-            *180.0/mathematicalConstant::pi;
+            radToDeg(Foam::acos(min(1.0, (d & s)/(mag(d)*magS + VSMALL))));
 
         result[own[faceI]] = max(cosDDotS, result[own[faceI]]);
 
@@ -78,7 +74,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::nonOrthogonality() const
 
     forAll (mesh_.boundaryMesh(), patchI)
     {
-        const unallocLabelList& faceCells = 
+        const unallocLabelList& faceCells =
             mesh_.boundaryMesh()[patchI].faceCells();
 
         const vectorField::subField faceCentres =
@@ -94,8 +90,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::nonOrthogonality() const
             scalar magS = mag(s);
 
             scalar cosDDotS =
-                Foam::acos(min(1.0, (d & s)/(mag(d)*magS + VSMALL)))
-               *180.0/mathematicalConstant::pi;
+                radToDeg(Foam::acos(min(1.0, (d & s)/(mag(d)*magS + VSMALL))));
 
             result[faceCells[faceI]] = max(cosDDotS, result[faceCells[faceI]]);
         }
@@ -141,7 +136,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::skewness() const
             cellCtrs[own[faceI]]
           + (dOwn/(dOwn+dNei))*(cellCtrs[nei[faceI]] - cellCtrs[own[faceI]]);
 
-        scalar skewness = 
+        scalar skewness =
             mag(faceCtrs[faceI] - faceIntersection)
            /(mag(cellCtrs[nei[faceI]] - cellCtrs[own[faceI]]) + VSMALL);
 
@@ -152,7 +147,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::skewness() const
 
     forAll (mesh_.boundaryMesh(), patchI)
     {
-        const unallocLabelList& faceCells = 
+        const unallocLabelList& faceCells =
             mesh_.boundaryMesh()[patchI].faceCells();
 
         const vectorField::subField faceCentres =
@@ -169,10 +164,10 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::skewness() const
                 cellCtrs[faceCells[faceI]]
               + ((faceCentres[faceI] - cellCtrs[faceCells[faceI]])&n)*n;
 
-            scalar skewness = 
+            scalar skewness =
                 mag(faceCentres[faceI] - faceIntersection)
                /(
-                    mag(faceCentres[faceI] - cellCtrs[faceCells[faceI]]) 
+                    mag(faceCentres[faceI] - cellCtrs[faceCells[faceI]])
                   + VSMALL
                 );
 
@@ -209,8 +204,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceNonOrthogonality() const
         scalar magS = mag(s);
 
         scalar cosDDotS =
-            Foam::acos(min(1.0, (d & s)/(mag(d)*magS + VSMALL)))
-            *180.0/mathematicalConstant::pi;
+            radToDeg(Foam::acos(min(1.0, (d & s)/(mag(d)*magS + VSMALL))));
 
         result[faceI] = cosDDotS;
     }
@@ -219,7 +213,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceNonOrthogonality() const
 
     forAll (mesh_.boundaryMesh(), patchI)
     {
-        const unallocLabelList& faceCells = 
+        const unallocLabelList& faceCells =
             mesh_.boundaryMesh()[patchI].faceCells();
 
         const vectorField::subField faceCentres =
@@ -235,8 +229,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceNonOrthogonality() const
             scalar magS = mag(s);
 
             scalar cosDDotS =
-                Foam::acos(min(1.0, (d & s)/(mag(d)*magS + VSMALL)))
-               *180.0/mathematicalConstant::pi;
+                radToDeg(Foam::acos(min(1.0, (d & s)/(mag(d)*magS + VSMALL))));
 
             result[globalFaceI++] = cosDDotS;
         }
@@ -281,7 +274,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceSkewness() const
             cellCtrs[own[faceI]]
           + (dOwn/(dOwn+dNei))*(cellCtrs[nei[faceI]] - cellCtrs[own[faceI]]);
 
-        result[faceI] = 
+        result[faceI] =
             mag(faceCtrs[faceI] - faceIntersection)
            /(mag(cellCtrs[nei[faceI]] - cellCtrs[own[faceI]]) + VSMALL);
     }
@@ -291,7 +284,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceSkewness() const
 
     forAll (mesh_.boundaryMesh(), patchI)
     {
-        const unallocLabelList& faceCells = 
+        const unallocLabelList& faceCells =
             mesh_.boundaryMesh()[patchI].faceCells();
 
         const vectorField::subField faceCentres =
@@ -308,10 +301,10 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceSkewness() const
                 cellCtrs[faceCells[faceI]]
               + ((faceCentres[faceI] - cellCtrs[faceCells[faceI]])&n)*n;
 
-            result[globalFaceI++] = 
+            result[globalFaceI++] =
                 mag(faceCentres[faceI] - faceIntersection)
                /(
-                    mag(faceCentres[faceI] - cellCtrs[faceCells[faceI]]) 
+                    mag(faceCentres[faceI] - cellCtrs[faceCells[faceI]])
                   + VSMALL
                 );
         }

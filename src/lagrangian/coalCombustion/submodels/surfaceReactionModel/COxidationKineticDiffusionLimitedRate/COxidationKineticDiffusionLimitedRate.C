@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "COxidationKineticDiffusionLimitedRate.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -110,7 +111,7 @@ Foam::scalar Foam::COxidationKineticDiffusionLimitedRate<CloudType>::calculate
     const scalarField& YLiquid,
     const scalarField& YSolid,
     const scalarField& YMixture,
-    const scalarField& dMassVolatile,
+    const scalar N,
     scalarField& dMassGas,
     scalarField& dMassLiquid,
     scalarField& dMassSolid,
@@ -137,7 +138,7 @@ Foam::scalar Foam::COxidationKineticDiffusionLimitedRate<CloudType>::calculate
     const scalar Rk = C2_*exp(-E_/(specie::RR*Tc));
 
     // Particle surface area
-    const scalar Ap = mathematicalConstant::pi*sqr(d);
+    const scalar Ap = constant::mathematical::pi*sqr(d);
 
     // Change in C mass [kg]
     scalar dmC = Ap*rhoc*specie::RR*Tc*YO2/WO2_*D0*Rk/(D0 + Rk);

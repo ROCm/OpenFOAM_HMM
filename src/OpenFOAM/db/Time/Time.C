@@ -115,7 +115,14 @@ void Foam::Time::setControls()
         {
             if (timeDirs.size())
             {
-                startTime_ = timeDirs[0].value();
+                if (timeDirs[0].name() == constant() && timeDirs.size() >= 2)
+                {
+                    startTime_ = timeDirs[1].value();
+                }
+                else
+                {
+                    startTime_ = timeDirs[0].value();
+                }
             }
         }
         else if (startFrom == "latestTime")
@@ -127,11 +134,10 @@ void Foam::Time::setControls()
         }
         else
         {
-            WarningIn("Time::setControls()")
-                << "    expected startTime, firstTime or latestTime"
-                << " found '" << startFrom
-                << "' in dictionary " << controlDict_.name() << nl
-                << "    Setting time to " << startTime_ << endl;
+            FatalIOErrorIn("Time::setControls()", controlDict_)
+                << "expected startTime, firstTime or latestTime"
+                << " found '" << startFrom << "'"
+                << exit(FatalIOError);
         }
     }
 
@@ -151,10 +157,10 @@ void Foam::Time::setControls()
           > Pstream::nProcs()*deltaT_/10.0
         )
         {
-            FatalErrorIn("Time::setControls()")
+            FatalIOErrorIn("Time::setControls()", controlDict_)
                 << "Start time is not the same for all processors" << nl
                 << "processor " << Pstream::myProcNo() << " has startTime "
-                << startTime_ << exit(FatalError);
+                << startTime_ << exit(FatalIOError);
         }
     }
 
@@ -638,10 +644,10 @@ Foam::Time& Foam::Time::operator+=(const scalar deltaT)
 
 Foam::Time& Foam::Time::operator++()
 {
-    readModifiedObjects();
-
     if (!subCycling_)
     {
+        readModifiedObjects();
+
         if (timeIndex_ == startTimeIndex_)
         {
             functionObjects_.start();

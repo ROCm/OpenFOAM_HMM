@@ -25,6 +25,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "FreeStream.H"
+#include "constants.H"
+
+using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -49,7 +52,7 @@ Foam::FreeStream<CloudType>::FreeStream
     {
         const polyPatch& patch = cloud.mesh().boundaryMesh()[p];
 
-        if (patch.type() == polyPatch::typeName)
+        if (isType<polyPatch>(patch))
         {
             patches.append(p);
         }
@@ -126,22 +129,22 @@ void Foam::FreeStream<CloudType>::inflow()
 
     const polyMesh& mesh(cloud.mesh());
 
-    const scalar deltaT = cloud.cachedDeltaT();
+    const scalar deltaT = mesh.time().deltaTValue();
 
     Random& rndGen(cloud.rndGen());
 
-    scalar sqrtPi = sqrt(mathematicalConstant::pi);
+    scalar sqrtPi = sqrt(pi);
 
     label particlesInserted = 0;
 
     const volScalarField::GeometricBoundaryField& boundaryT
     (
-        cloud.T().boundaryField()
+        cloud.boundaryT().boundaryField()
     );
 
     const volVectorField::GeometricBoundaryField& boundaryU
     (
-        cloud.U().boundaryField()
+        cloud.boundaryU().boundaryField()
     );
 
     forAll(patches_, p)
@@ -165,7 +168,8 @@ void Foam::FreeStream<CloudType>::inflow()
             if (min(boundaryT[patchI]) < SMALL)
             {
                 FatalErrorIn ("Foam::FreeStream<CloudType>::inflow()")
-                    << "Zero boundary temperature detected, check boundaryT condition." << nl
+                    << "Zero boundary temperature detected, check boundaryT "
+                    << "condition." << nl
                     << nl << abort(FatalError);
             }
 
@@ -369,7 +373,7 @@ void Foam::FreeStream<CloudType>::inflow()
                     } while (P < rndGen.scalar01());
 
                     vector U =
-                        sqrt(CloudType::kb*faceTemperature/mass)
+                        sqrt(physicoChemical::k.value()*faceTemperature/mass)
                        *(
                             rndGen.GaussNormal()*t1
                           + rndGen.GaussNormal()*t2

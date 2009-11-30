@@ -99,13 +99,13 @@ Foam::label Foam::face::mostConcaveAngle
         if ((edgeNormal & n) > 0)
         {
             // Concave angle.
-            angle = mathematicalConstant::pi + edgeAngle;
+            angle = constant::mathematical::pi + edgeAngle;
         }
         else
         {
             // Convex angle. Note '-' to take into account that rightEdge
             // and leftEdge are head-to-tail connected.
-            angle = mathematicalConstant::pi - edgeAngle;
+            angle = constant::mathematical::pi - edgeAngle;
         }
 
         if (angle > maxAngle)
@@ -214,7 +214,7 @@ Foam::label Foam::face::split
         label index = fcIndex(fcIndex(startIndex));
 
         label minIndex = index;
-        scalar minDiff = Foam::mathematicalConstant::pi;
+        scalar minDiff = constant::mathematical::pi;
 
         for(label i = 0; i < size() - 3; i++)
         {

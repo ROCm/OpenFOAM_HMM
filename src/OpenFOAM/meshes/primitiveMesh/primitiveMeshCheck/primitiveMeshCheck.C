@@ -27,7 +27,7 @@ License
 #include "primitiveMesh.H"
 #include "pyramidPointFaceRef.H"
 #include "ListOps.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "SortableList.H"
 
 
@@ -410,7 +410,7 @@ bool Foam::primitiveMesh::checkFaceOrthogonality
 
     // Severe nonorthogonality threshold
     const scalar severeNonorthogonalityThreshold =
-        ::cos(nonOrthThreshold_/180.0*mathematicalConstant::pi);
+        ::cos(degToRad(nonOrthThreshold_));
 
     scalar minDDotS = GREAT;
 
@@ -472,9 +472,8 @@ bool Foam::primitiveMesh::checkFaceOrthogonality
             if (debug || report)
             {
                 Info<< "    Mesh non-orthogonality Max: "
-                    << ::acos(minDDotS)/mathematicalConstant::pi*180.0
-                    << " average: " <<
-                    ::acos(sumDDotS/neiSize)/mathematicalConstant::pi*180.0
+                    << radToDeg(::acos(minDDotS))
+                    << " average: " << radToDeg(::acos(sumDDotS/neiSize))
                     << endl;
             }
         }
@@ -626,7 +625,8 @@ bool Foam::primitiveMesh::checkFaceSkewness
         vector d = cellCtrs[nei[faceI]] - cellCtrs[own[faceI]];
 
         // Skewness vector
-        vector sv = Cpf - ((fAreas[faceI] & Cpf)/(fAreas[faceI] & d))*d;
+        vector sv =
+            Cpf - ((fAreas[faceI] & Cpf)/((fAreas[faceI] & d) + SMALL))*d;
         vector svHat = sv/(mag(sv) + VSMALL);
 
         // Normalisation distance calculated as the approximate distance
@@ -838,7 +838,7 @@ bool Foam::primitiveMesh::checkFaceAngles
             << exit(FatalError);
     }
 
-    const scalar maxSin = Foam::sin(maxDeg/180.0*mathematicalConstant::pi);
+    const scalar maxSin = Foam::sin(degToRad(maxDeg));
 
     const pointField& p = points();
     const faceList& fcs = faces();
@@ -914,8 +914,7 @@ bool Foam::primitiveMesh::checkFaceAngles
     if (nConcave > 0)
     {
         scalar maxConcaveDegr =
-            Foam::asin(Foam::min(1.0, maxEdgeSin))
-           *180.0/mathematicalConstant::pi;
+            radToDeg(Foam::asin(Foam::min(1.0, maxEdgeSin)));
 
         if (debug || report)
         {

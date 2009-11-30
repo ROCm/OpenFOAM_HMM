@@ -29,7 +29,7 @@ Description
     A wordRe is a word, but can also have a regular expression for matching
     words.
 
-    By default the constructors will generally preserve the argument as
+    By default the constructors will generally preserve the argument as a
     string literal and the assignment operators will use the wordRe::DETECT
     compOption to scan the string for regular expression meta characters
     and/or invalid word characters and react accordingly.
@@ -170,7 +170,7 @@ public:
 
         //- Smart match as regular expression or as a string
         //  Optionally specify a literal match only
-        inline bool match(const string&, bool literalMatch=false) const;
+        inline bool match(const std::string&, bool literalMatch=false) const;
 
     //- Miscellaneous
 

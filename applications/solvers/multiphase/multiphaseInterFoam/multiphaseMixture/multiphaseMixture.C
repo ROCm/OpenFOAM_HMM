@@ -29,11 +29,12 @@ License
 #include "Time.H"
 #include "subCycle.H"
 #include "fvCFD.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * //
 
 const scalar Foam::multiphaseMixture::convertToRad =
-    Foam::mathematicalConstant::pi/180.0;
+    Foam::constant::mathematical::pi/180.0;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -351,7 +352,7 @@ void Foam::multiphaseMixture::correctContactAngle
 
     forAll(boundary, patchi)
     {
-        if (typeid(gbf[patchi]) == typeid(alphaContactAngleFvPatchScalarField))
+        if (isA<alphaContactAngleFvPatchScalarField>(gbf[patchi]))
         {
             const alphaContactAngleFvPatchScalarField& acap =
                 refCast<const alphaContactAngleFvPatchScalarField>(gbf[patchi]);

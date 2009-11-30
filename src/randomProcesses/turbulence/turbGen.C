@@ -53,8 +53,6 @@ turbGen::turbGen(const Kmesh& k, const scalar EA, const scalar K0)
 // generate and return a velocity field
 vectorField turbGen::U()
 {
-    scalar pi2=2*mathematicalConstant::pi;
-
     vectorField s(K.size());
     scalarField rndPhases(K.size());
 
@@ -69,11 +67,13 @@ vectorField turbGen::U()
 
     s = Ek(Ea, k0, mag(K))*s;
 
-    complexVectorField up = fft::reverseTransform
-    (
-        ComplexField(cos(pi2*rndPhases)*s, sin(pi2*rndPhases)*s),
-        K.nn()
-    );
+    complexVectorField up =
+        fft::reverseTransform
+        (
+            ComplexField(cos(constant::mathematical::twoPi*rndPhases)*s,
+            sin(constant::mathematical::twoPi*rndPhases)*s),
+            K.nn()
+        );
 
     return ReImSum(up);
 }

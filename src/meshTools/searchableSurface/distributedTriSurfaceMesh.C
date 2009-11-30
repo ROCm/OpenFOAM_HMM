@@ -340,9 +340,8 @@ Foam::distributedTriSurfaceMesh::distributeSegments
         new mapDistribute
         (
             segmentI,       // size after construction
-            sendMap,
-            constructMap,
-            true            // reuse storage
+            sendMap.xfer(),
+            constructMap.xfer()
         )
     );
 }
@@ -642,9 +641,8 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
         new mapDistribute
         (
             segmentI,       // size after construction
-            sendMap,
-            constructMap,
-            true            // reuse storage
+            sendMap.xfer(),
+            constructMap.xfer()
         )
     );
     const mapDistribute& map = mapPtr();
@@ -806,9 +804,8 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
         new mapDistribute
         (
             segmentI,       // size after construction
-            sendMap,
-            constructMap,
-            true            // reuse storage
+            sendMap.xfer(),
+            constructMap.xfer()
         )
     );
     return mapPtr;
@@ -960,7 +957,7 @@ bool Foam::distributedTriSurfaceMesh::overlaps
     {
         const treeBoundBox& bb = bbs[bbI];
 
-        boundBox triBb(p0, p0);
+        treeBoundBox triBb(p0, p0);
         triBb.min() = min(triBb.min(), p1);
         triBb.min() = min(triBb.min(), p2);
 
@@ -1336,7 +1333,20 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
 )
 :
     triSurfaceMesh(io, s),
-    dict_(io, dict)
+    dict_
+    (
+        IOobject
+        (
+            searchableSurface::name() + "Dict",
+            searchableSurface::instance(),
+            searchableSurface::local(),
+            searchableSurface::db(),
+            searchableSurface::NO_READ,
+            searchableSurface::writeOpt(),
+            searchableSurface::registerObject()
+        ),
+        dict
+    )
 {
     read();
 
@@ -2399,9 +2409,8 @@ void Foam::distributedTriSurfaceMesh::distribute
         new mapDistribute
         (
             allTris.size(),
-            faceSendMap,
-            faceConstructMap,
-            true
+            faceSendMap.xfer(),
+            faceConstructMap.xfer()
         )
     );
     pointMap.reset
@@ -2409,9 +2418,8 @@ void Foam::distributedTriSurfaceMesh::distribute
         new mapDistribute
         (
             allPoints.size(),
-            pointSendMap,
-            pointConstructMap,
-            true
+            pointSendMap.xfer(),
+            pointConstructMap.xfer()
         )
     );
 

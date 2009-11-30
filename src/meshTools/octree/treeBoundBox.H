@@ -80,6 +80,9 @@ class treeBoundBox
 
 private:
 
+        //- To initialise edges.
+        static edgeList calcEdges(const label[12][2]);
+
         //- To initialise faceNormals.
         static FixedList<vector, 6> calcFaceNormals();
 
@@ -158,10 +161,6 @@ public:
         static const FixedList<vector, 6> faceNormals;
 
 
-        //- Face on which neighbour is
-        static direction neighbourFaceBits(const label&);
-
-
     // Constructors
 
         //- Construct null setting points to zero
@@ -171,11 +170,11 @@ public:
         inline treeBoundBox(const point& min, const point& max);
 
         //- Construct from components
-        inline treeBoundBox(const boundBox& bb);
+        explicit inline treeBoundBox(const boundBox& bb);
 
         //- Construct as the bounding box of the given pointField.
         //  Local processor domain only (no reduce as in boundBox)
-        treeBoundBox(const UList<point>&);
+        explicit treeBoundBox(const UList<point>&);
 
         //- Construct as subset of points
         //  Local processor domain only (no reduce as in boundBox)

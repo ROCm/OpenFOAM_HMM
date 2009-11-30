@@ -97,9 +97,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~wallModel();
+    //- Destructor
+    virtual ~wallModel();
 
 
     // Selector
@@ -120,7 +119,6 @@ public:
             parcel& parcel,
             const label facei
         ) const = 0;
-
 };
 
 

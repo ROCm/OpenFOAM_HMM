@@ -190,20 +190,19 @@ void replaceBoundaryType
     const_cast<word&>(IOdictionary::typeName) = oldTypeName;
     const_cast<word&>(dict.type()) = dict.headerClassName();
 
-    // Make a backup of the old field
-    word backupName(dict.name() + ".old");
-    Info<< "    copying " << dict.name() << " to "
-        << backupName << endl;
-    IOdictionary dictOld = dict;
-    dictOld.rename(backupName);
-    dictOld.regIOobject::write();
+    // Make a backup of the old file
+    if (mvBak(dict.objectPath(), "old"))
+    {
+        Info<< "    Backup original file to "
+            << (dict.objectPath() + ".old") << endl;
+    }
 
     // Loop through boundary patches and update
     const polyBoundaryMesh& bMesh = mesh.boundaryMesh();
     dictionary& boundaryDict = dict.subDict("boundaryField");
     forAll(bMesh, patchI)
     {
-        if (isType<wallPolyPatch>(bMesh[patchI]))
+        if (isA<wallPolyPatch>(bMesh[patchI]))
         {
             word patchName = bMesh[patchI].name();
             dictionary& oldPatch = boundaryDict.subDict(patchName);

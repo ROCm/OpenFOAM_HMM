@@ -29,6 +29,7 @@ License
 #include "RutlandFlashBoil.H"
 #include "addToRunTimeSelectionTable.H"
 #include "mathematicalConstants.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -49,10 +50,7 @@ addToRunTimeSelectionTable
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from dictionary
-RutlandFlashBoil::RutlandFlashBoil
-(
-    const dictionary& dict
-)
+RutlandFlashBoil::RutlandFlashBoil( const dictionary& dict)
 :
     evaporationModel(dict),
     evapDict_(dict.subDict(typeName + "Coeffs")),
@@ -62,20 +60,19 @@ RutlandFlashBoil::RutlandFlashBoil
     evaporationScheme_(evapDict_.lookup("evaporationScheme")),
     nEvapIter_(0)
 {
-    if (evaporationScheme_ == "implicit") 
+    if (evaporationScheme_ == "implicit")
     {
         nEvapIter_ = 2;
     }
-    else if (evaporationScheme_ == "explicit") 
+    else if (evaporationScheme_ == "explicit")
     {
         nEvapIter_ = 1;
     }
-    else 
+    else
     {
         FatalError
             << "evaporationScheme type " << evaporationScheme_
-            << " unknown.\n"
-            << "Use implicit or explicit."
+            << " unknown. Use implicit or explicit." << nl
             << abort(FatalError);
     }
 }
@@ -94,6 +91,7 @@ bool RutlandFlashBoil::evaporation() const
     return true;
 }
 
+
 // Correlation for the Sherwood Number
 scalar RutlandFlashBoil::Sh
 (
@@ -101,8 +99,13 @@ scalar RutlandFlashBoil::Sh
     const scalar SchmidtNumber
 ) const
 {
-    return 2.0 + preReScFactor_*pow(ReynoldsNumber,ReExponent_)*pow(SchmidtNumber,ScExponent_);
+    return
+        2.0
+      + preReScFactor_
+       *pow(ReynoldsNumber, ReExponent_)
+       *pow(SchmidtNumber,ScExponent_);
 }
+
 
 scalar RutlandFlashBoil::relaxationTime
 (
@@ -132,7 +135,7 @@ scalar RutlandFlashBoil::relaxationTime
         and Xratio -> infinity (as it should)
         ... this is numerically nasty
 
-    NB! by N. Nordin
+    NB!
         X_v,s = (p_v,s/p) X_v,d
         where X_v,d = 1 for single component fuel
         according to eq (3.136)
@@ -149,31 +152,29 @@ scalar RutlandFlashBoil::relaxationTime
     // From Equation (3.79) in C. Kralj's Thesis:
     // Note that the 2.0 (instead of 6.0) below is correct, since evaporation
     // is d(diameter)/dt and not d(mass)/dt
-    
+
     scalar Sherwood = Sh(ReynoldsNumber, SchmidtNumber);
-    
+
     scalar FbExp = 0.7;
-    
-    scalar logXratio = log(1.0+Xratio);
+
+    scalar logXratio = log(1.0 + Xratio);
     scalar Fb = 1.0;
-    
+
     if(logXratio > SMALL)
     {
-        Fb = pow((1.0 + Xratio),FbExp) * log(1.0+Xratio)/Xratio;
+        Fb = pow((1.0 + Xratio), FbExp)*log(1.0 + Xratio)/Xratio;
     }
 
-//  TL: proposed correction to sherwood number, implemented
+    // proposed correction to sherwood number, implemented
 
     Sherwood = 2.0 + (Sherwood - 2.0)/Fb;
 
     scalar denominator =
-        6.0 * massDiffusionCoefficient
-      * Sherwood
-      * rhoFuelVapor * lgExpr;
+        6.0*massDiffusionCoefficient*Sherwood*rhoFuelVapor*lgExpr;
 
     if (denominator > SMALL)
     {
-        time = max(VSMALL, liquidDensity * pow(diameter, 2.0)/denominator);
+        time = max(VSMALL, liquidDensity*sqr(diameter)/denominator);
     }
 
     return time;
@@ -200,7 +201,6 @@ scalar RutlandFlashBoil::boilingTime
     const scalar kLiq
 ) const
 {
-
     scalar time = GREAT;
 
     // the deltaTemperature is limited to not go below .5 deg K
@@ -208,30 +208,31 @@ scalar RutlandFlashBoil::boilingTime
     // This is probably not important, since it results in an upper
     // limit for the boiling time... which we have anyway.
 
-    //  TL kSet to the k value at the droplet temperature, not as in the Rutland Paper
-    
-    if(liquidCore > 0.5)
+    // k set to the k value at the droplet temperature, not as in the Rutland
+    // Paper
+
+    if (liquidCore > 0.5)
     {
-        if(tDrop > tBoilingSurface)
-        {               
-            //  Evaporation of the liquid sheet      
-           
+        if (tDrop > tBoilingSurface)
+        {
+            //  Evaporation of the liquid sheet
+
             scalar psi = 2.72;
-            scalar kIncreased = psi * kLiq;
-            scalar alfa = psi * kIncreased/(liquidDensity * cpFuel);
-            scalar F = alfa * ct/sqr(0.5 * diameter);
-    
+            scalar kIncreased = psi*kLiq;
+            scalar alfa = psi*kIncreased/(liquidDensity*cpFuel);
+            scalar F = alfa*ct/sqr(0.5*diameter);
+
             scalar expSum = 0.0;
             scalar expSumOld = expSum;
-        
+
             label Niter = 200;
-                
-            for(label k=0; k < Niter ; k++)
+
+            for (label k=0; k < Niter; k++)
             {
-                expSum += exp(sqr(-k*mathematicalConstant::pi*sqrt(F)/2.0));
-                if(mag(expSum-expSumOld)/expSum < 1.0e-3)
+                expSum += exp(sqr(-k*constant::mathematical::pi*sqrt(F)/2.0));
+                if (mag(expSum-expSumOld)/expSum < 1.0e-3)
                 {
-                    break;    
+                    break;
                 }
                 expSumOld = expSum;
             }
@@ -242,99 +243,95 @@ scalar RutlandFlashBoil::boilingTime
         scalar dTLB = min(0.5, tDrop -  tBoilingSurface);
         scalar alfaS = 0.0;
 
-        if(dTLB >= 0.0 &&  dTLB < 5.0)
+        if (dTLB >= 0.0 && dTLB < 5.0)
         {
-            alfaS = 0.76 * pow(dTLB, 0.26);
-        } 
-        if(dTLB >= 5.0 &&  dTLB < 25.0)
-        {
-            alfaS = 0.027 * pow(dTLB, 2.33);
+            alfaS = 0.76*pow(dTLB, 0.26);
         }
-        if(dTLB >= 25.0)
+        if (dTLB >= 5.0 &&  dTLB < 25.0)
         {
-            alfaS = 13.8 * pow(dTLB, 0.39);
-        } 
-        
-        scalar Gf = 
-        (
-            4.0 * alfaS * dTLB * mathematicalConstant::pi * sqr(diameter/2.0)
-        ) 
-        / 
-        heatOfVapour; 
-        
-        //  calculation of the heat transfer vapourization at superheated conditions (temperature>tBoilingSurface)
+            alfaS = 0.027*pow(dTLB, 2.33);
+        }
+        if (dTLB >= 25.0)
+        {
+            alfaS = 13.8*pow(dTLB, 0.39);
+        }
+
+        scalar Gf =
+            4.0*alfaS*dTLB*constant::mathematical::pi*sqr(diameter/2.0)/heatOfVapour;
+
+        // calculation of the heat transfer vapourization at superheated
+        // conditions (temperature>tBoilingSurface)
         scalar G = 0.0;
-        if(temperature > tBoilingSurface)
+        if (temperature > tBoilingSurface)
         {
             scalar NusseltCorr = Nusselt ;
-            scalar A = mag((vapourFarEnthalpy-vapourSurfaceEnthalpy)/heatOfVapour);
+            scalar A =
+                mag((vapourFarEnthalpy-vapourSurfaceEnthalpy)/heatOfVapour);
 
-            // TL : 2.0? or 1.0? try 1!
-            scalar B = 1.0*mathematicalConstant::pi*kappa/cpGas*diameter*NusseltCorr;
-            scalar nPos = B * log(1.0 + A)/Gf + 1.0;  
+            // 2.0? or 1.0? try 1!
+            scalar B = 1.0*constant::mathematical::pi*kappa/cpGas*diameter*NusseltCorr;
+            scalar nPos = B*log(1.0 + A)/Gf + 1.0;
             scalar nNeg = (1.0/A)*(exp(Gf/B) - 1.0 - A) + 1.0;
-        
+
             scalar Gpos = Gf*nPos;
             scalar Gneg = Gf/nNeg;
-            
-            //scalar FgPos = Gpos + Gf - B * log( 1.0 + ( 1.0 + Gf/Gpos ) * A);
-            scalar FgNeg = Gneg + Gf - B * log( 1.0 + ( 1.0 + Gf/Gneg ) * A);
-            
-            if(FgNeg > 0.0)
+
+            //scalar FgPos = Gpos + Gf - B * log( 1.0 + ( 1.0 + Gf/Gpos )*A);
+            scalar FgNeg = Gneg + Gf - B*log(1.0 + (1.0 + Gf/Gneg )*A);
+
+            if (FgNeg > 0.0)
             {
-                for(label j = 0; j < 20; j++)
+                for (label j = 0; j < 20; j++)
                 {
                     Gneg = Gneg/10.0;
                     Gneg = max(Gneg, VSMALL);
-                    FgNeg = Gneg + Gf - B * log( 1.0 + ( 1.0 + Gf/Gneg ) * A);
+                    FgNeg = Gneg + Gf - B*log(1.0 + (1.0 + Gf/Gneg)*A);
                     if(FgNeg < 0.0)
                     {
                         break;
-                    }            
+                    }
                 }
-            }        
-            
-            FgNeg = Gneg + Gf - B * log( 1.0 + ( 1.0 + Gf/Gneg ) * A);                
-            
-            G = 0.5*(Gpos+Gneg);
+            }
+
+            FgNeg = Gneg + Gf - B*log( 1.0 + ( 1.0 + Gf/Gneg)*A);
+
+            G = 0.5*(Gpos + Gneg);
             scalar Gold = -100;
-        
+
             label Niter = 200;
             label k=0;
-            
-            if(FgNeg > 0.0)
+
+            if (FgNeg > 0.0)
             {
-                Info << "no convergence" << endl;   
+                Info << "no convergence" << endl;
             }
-            
-            
-            if(FgNeg < 0.0)
+
+
+            if (FgNeg < 0.0)
             {
-            
-                for(k=0; k<Niter ; k++)
+                for (k=0; k<Niter; k++)
                 {
+                    scalar Fg = G + Gf - B*log( 1.0 + ( 1.0 + Gf/G )*A);
 
-                    scalar Fg = G + Gf - B * log( 1.0 + ( 1.0 + Gf/G ) * A);
-
-                    if(Fg > 0)
+                    if (Fg > 0)
                     {
                         Gpos = G;
-                        G = 0.5*(Gpos+Gneg);
+                        G = 0.5*(Gpos + Gneg);
                     }
                     else
                     {
                         Gneg = G;
-                        G = 0.5*(Gpos+Gneg);
-                    } 
-            
+                        G = 0.5*(Gpos + Gneg);
+                    }
+
                     Gold = G;
-                    if(mag(G-Gold)/Gold < 1.0e-3)
+                    if (mag(G - Gold)/Gold < 1.0e-3)
                     {
                         break;
                     }
                 }
-        
-                if(k >= Niter - 1)
+
+                if (k >= Niter - 1)
                 {
                     Info << " No convergence for G " << endl;
                 }
@@ -344,18 +341,22 @@ scalar RutlandFlashBoil::boilingTime
                 G = 0.0;
             }
         }
-        
-        time = ((4.0/3.0)*mathematicalConstant::pi*pow(diameter/2.0,3.0))*liquidDensity/(G+Gf);
+
+        time = (constant::mathematical::pi*pow3(diameter)/6.0)*liquidDensity/(G + Gf);
+
         time = max(VSMALL, time);
     }
 
     return time;
 }
 
+
 inline label RutlandFlashBoil::nEvapIter() const
 {
     return nEvapIter_;
 }
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

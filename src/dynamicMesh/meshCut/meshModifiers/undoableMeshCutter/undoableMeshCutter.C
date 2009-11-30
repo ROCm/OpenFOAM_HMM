@@ -32,16 +32,14 @@ License
 #include "cellCuts.H"
 #include "splitCell.H"
 #include "mapPolyMesh.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "meshTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
 defineTypeNameAndDebug(undoableMeshCutter, 0);
-
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -193,8 +191,8 @@ Foam::undoableMeshCutter::undoableMeshCutter
     liveSplitCells_(mesh.nCells()/100 + 100),
     faceRemover_
     (
-        mesh,   
-        Foam::cos(30./180. * mathematicalConstant::pi)
+        mesh,
+        Foam::cos(degToRad(30.0))
     )
 {}
 

@@ -100,7 +100,7 @@ bool Foam::parcel::move(spray& sDB)
 
     const liquidMixture& fuels = sDB.fuels();
 
-    scalar deltaT = sDB.runTime().deltaT().value();
+    scalar deltaT = sDB.runTime().deltaTValue();
     label Nf = fuels.components().size();
     label Ns = sDB.composition().Y().size();
 
@@ -314,7 +314,7 @@ bool Foam::parcel::move(spray& sDB)
         {
             if (face() > -1)
             {
-                if (isType<processorPolyPatch>(pbMesh[patch(face())]))
+                if (isA<processorPolyPatch>(pbMesh[patch(face())]))
                 {
                     switchProcessor = true;
                 }
@@ -459,7 +459,6 @@ void Foam::parcel::updateParcelProperties
 
     scalar Tnew = T();
 
-    // NN.
     // first calculate the new temperature and droplet mass,
     // then calculate the energy source and correct the
     // gaseous temperature, Tg, and mass fraction, Yfg,

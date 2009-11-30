@@ -530,7 +530,7 @@ bool Foam::meshWriters::STARCD::write(const fileName& meshName) const
 bool Foam::meshWriters::STARCD::writeSurface
 (
     const fileName& meshName,
-    const bool& triangulate
+    const bool triangulate
 ) const
 {
     fileName baseName(meshName);

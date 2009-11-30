@@ -28,6 +28,8 @@ License
 #include "mathematicalConstants.H"
 #include "meshTools.H"
 
+using namespace Foam::constant::mathematical;
+
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -195,9 +197,10 @@ Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
     {
         case pbMass:
         {
-            nP = volume/volumeTotal_
-                *massTotal_/rho
-               /(parcels*mathematicalConstant::pi/6.0*pow3(diameter));
+            nP =
+                volume/volumeTotal_
+               *massTotal_/rho
+               /(parcels*pi/6.0*pow3(diameter));
             break;
         }
         case pbNumber:
@@ -348,7 +351,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     }
 
     const scalar time = owner_.db().time().value();
-    const scalar carrierDt = owner_.db().time().deltaT().value();
+    const scalar carrierDt = owner_.db().time().deltaTValue();
     const polyMesh& mesh = owner_.mesh();
 
     // Prepare for next time step

@@ -27,6 +27,7 @@ License
 #include "polyMeshGeometry.H"
 #include "pyramidPointFaceRef.H"
 #include "syncTools.H"
+#include "unitConversion.H"
 
 namespace Foam
 {
@@ -247,7 +248,7 @@ Foam::scalar Foam::polyMeshGeometry::checkNonOrtho
                     << " between cells " << mesh.faceOwner()[faceI]
                     << " and " << nei
                     << ": Angle = "
-                    << ::acos(dDotS)/mathematicalConstant::pi*180.0
+                    << radToDeg(::acos(dDotS))
                     << " deg." << endl;
             }
 
@@ -268,7 +269,7 @@ Foam::scalar Foam::polyMeshGeometry::checkNonOrtho
                     << " between cells " << mesh.faceOwner()[faceI]
                     << " and " << nei
                     << ": Angle = "
-                    << ::acos(dDotS)/mathematicalConstant::pi*180.0
+                    << radToDeg(::acos(dDotS))
                     << " deg." << endl;
             }
 
@@ -367,8 +368,7 @@ bool Foam::polyMeshGeometry::checkFaceDotProduct
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     // Severe nonorthogonality threshold
-    const scalar severeNonorthogonalityThreshold =
-        ::cos(orthWarn/180.0*mathematicalConstant::pi);
+    const scalar severeNonorthogonalityThreshold = ::cos(degToRad(orthWarn));
 
 
     // Calculate coupled cell centre
@@ -503,9 +503,8 @@ bool Foam::polyMeshGeometry::checkFaceDotProduct
         if (nDDotS > 0)
         {
             Info<< "Mesh non-orthogonality Max: "
-                << ::acos(minDDotS)/mathematicalConstant::pi*180.0
-                << " average: " <<
-                   ::acos(sumDDotS/nDDotS)/mathematicalConstant::pi*180.0
+                << radToDeg(::acos(minDDotS))
+                << " average: " << radToDeg(::acos(sumDDotS/nDDotS))
                 << endl;
         }
     }
@@ -1170,7 +1169,7 @@ bool Foam::polyMeshGeometry::checkVolRatio
     {
         label face0 = baffles[i].first();
         label face1 = baffles[i].second();
-        
+
         scalar ownVol = mag(cellVolumes[own[face0]]);
 
         scalar neiVol = mag(cellVolumes[own[face1]]);
@@ -1257,7 +1256,7 @@ bool Foam::polyMeshGeometry::checkFaceAngles
             << abort(FatalError);
     }
 
-    const scalar maxSin = Foam::sin(maxDeg/180.0*mathematicalConstant::pi);
+    const scalar maxSin = Foam::sin(degToRad(maxDeg));
 
     const faceList& fcs = mesh.faces();
 
@@ -1337,8 +1336,7 @@ bool Foam::polyMeshGeometry::checkFaceAngles
         if (maxEdgeSin > SMALL)
         {
             scalar maxConcaveDegr =
-                Foam::asin(Foam::min(1.0, maxEdgeSin))
-             * 180.0/mathematicalConstant::pi;
+                radToDeg(Foam::asin(Foam::min(1.0, maxEdgeSin)));
 
             Info<< "There are " << nConcave
                 << " faces with concave angles between consecutive"
@@ -1823,7 +1821,7 @@ bool Foam::polyMeshGeometry::checkCellDeterminant
         forAll(cFaces, cFaceI)
         {
             label faceI = cFaces[cFaceI];
-    
+
             scalar magArea = mag(faceAreas[faceI]);
 
             magAreaSum += magArea;
@@ -1850,7 +1848,7 @@ bool Foam::polyMeshGeometry::checkCellDeterminant
             nWarnDet++;
         }
     }
-    
+
     reduce(minDet, minOp<scalar>());
     reduce(sumDet, sumOp<scalar>());
     reduce(nSumDet, sumOp<label>());

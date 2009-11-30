@@ -44,14 +44,14 @@ namespace fv
 template<class Type>
 scalar backwardDdtScheme<Type>::deltaT_() const
 {
-    return mesh().time().deltaT().value();
+    return mesh().time().deltaTValue();
 }
 
 
 template<class Type>
 scalar backwardDdtScheme<Type>::deltaT0_() const
 {
-    return mesh().time().deltaT0().value();
+    return mesh().time().deltaT0Value();
 }
 
 
@@ -361,7 +361,7 @@ template<class Type>
 tmp<fvMatrix<Type> >
 backwardDdtScheme<Type>::fvmDdt
 (
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm
@@ -413,7 +413,7 @@ tmp<fvMatrix<Type> >
 backwardDdtScheme<Type>::fvmDdt
 (
     const dimensionedScalar& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm
@@ -464,7 +464,7 @@ tmp<fvMatrix<Type> >
 backwardDdtScheme<Type>::fvmDdt
 (
     const volScalarField& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm

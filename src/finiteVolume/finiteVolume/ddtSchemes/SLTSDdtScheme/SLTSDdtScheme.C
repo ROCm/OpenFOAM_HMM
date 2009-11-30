@@ -21,7 +21,7 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-    
+
 \*---------------------------------------------------------------------------*/
 
 #include "SLTSDdtScheme.H"
@@ -369,7 +369,7 @@ template<class Type>
 tmp<fvMatrix<Type> >
 SLTSDdtScheme<Type>::fvmDdt
 (
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm
@@ -388,7 +388,7 @@ SLTSDdtScheme<Type>::fvmDdt
     Info<< "max/min rDeltaT " << max(rDeltaT) << " " << min(rDeltaT) << endl;
 
     fvm.diag() = rDeltaT*mesh().V();
-    
+
     if (mesh().moving())
     {
         fvm.source() = rDeltaT*vf.oldTime().internalField()*mesh().V0();
@@ -407,7 +407,7 @@ tmp<fvMatrix<Type> >
 SLTSDdtScheme<Type>::fvmDdt
 (
     const dimensionedScalar& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm
@@ -423,7 +423,7 @@ SLTSDdtScheme<Type>::fvmDdt
     scalarField rDeltaT = SLrDeltaT()().internalField();
 
     fvm.diag() = rDeltaT*rho.value()*mesh().V();
-    
+
     if (mesh().moving())
     {
         fvm.source() = rDeltaT
@@ -444,7 +444,7 @@ tmp<fvMatrix<Type> >
 SLTSDdtScheme<Type>::fvmDdt
 (
     const volScalarField& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm
@@ -590,7 +590,7 @@ SLTSDdtScheme<Type>::fvcDdtPhiCorr
                 )
             );
         }
-        else if 
+        else if
         (
             U.dimensions() == dimVelocity
          && phi.dimensions() == dimDensity*dimVelocity*dimArea
@@ -619,7 +619,7 @@ SLTSDdtScheme<Type>::fvcDdtPhiCorr
                 )
             );
         }
-        else if 
+        else if
         (
             U.dimensions() == dimDensity*dimVelocity
          && phi.dimensions() == dimDensity*dimVelocity*dimArea

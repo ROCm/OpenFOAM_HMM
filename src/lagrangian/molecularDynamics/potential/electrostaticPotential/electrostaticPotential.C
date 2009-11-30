@@ -31,7 +31,7 @@ License
 
 Foam::electrostaticPotential::electrostaticPotential()
 :
-    prefactor(1.0/(4.0 * mathematicalConstant::pi * 8.854187817e-12))
+    prefactor(1.0/(4.0*constant::mathematical::pi*8.854187817e-12))
 {}
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

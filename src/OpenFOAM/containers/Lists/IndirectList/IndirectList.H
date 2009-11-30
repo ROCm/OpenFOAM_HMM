@@ -63,6 +63,8 @@ public:
         //- Construct given the complete list and the addressing array
         inline IndirectList(const UList<T>&, const UList<label>&);
 
+        //- Construct given the complete list and by transferring addressing
+        inline IndirectList(const UList<T>&, const Xfer< List<label> >&);
 
     // Member Functions
 
@@ -77,7 +79,8 @@ public:
         // Edit
 
             //- Reset addressing
-            void resetAddressing(const UList<label>&);
+            inline void resetAddressing(const UList<label>&);
+            inline void resetAddressing(const Xfer< List<label> >&);
 
 
         // Member Operators

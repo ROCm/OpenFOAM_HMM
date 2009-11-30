@@ -41,7 +41,7 @@ License
 #include "symmetryPolyPatch.H"
 #include "wedgePolyPatch.H"
 
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -59,7 +59,8 @@ Foam::spray::spray
     const basicMultiComponentMixture& composition,
     const PtrList<gasThermoPhysics>& gasProperties,
     const dictionary&,
-    const dimensionedVector& g
+    const dimensionedVector& g,
+    bool readFields
 )
 :
     Cloud<parcel>(U.mesh(), false), // suppress className checking on positions
@@ -241,11 +242,11 @@ Foam::spray::spray
     // check for the type of boundary condition
     forAll(bMesh, patchi)
     {
-        if (isType<symmetryPolyPatch>(bMesh[patchi]))
+        if (isA<symmetryPolyPatch>(bMesh[patchi]))
         {
             symPlaneExist = true;
         }
-        else if (isType<wedgePolyPatch>(bMesh[patchi]))
+        else if (isA<wedgePolyPatch>(bMesh[patchi]))
         {
             wedgeExist = true;
             patches[n++] = patchi;
@@ -289,17 +290,17 @@ Foam::spray::spray
         axisOfWedgeNormal_ /= mag(axisOfWedgeNormal_);
 
         scalar arcCos = (v1 & v2)/mag(v1);
-        angleOfWedge_ = mathematicalConstant::pi - acos(arcCos);
+        angleOfWedge_ = constant::mathematical::pi - acos(arcCos);
 
         Info<< "Calculated angle of wedge is "
-            << angleOfWedge_*180/mathematicalConstant::pi << " deg."
+            << radToDeg(angleOfWedge_) << " deg."
             << endl;
     }
     else
     {
         if (symPlaneExist)
         {
-            angleOfWedge_ = mathematicalConstant::pi;
+            angleOfWedge_ = constant::mathematical::pi;
             Info<< "Constructing 180 deg three dimensional spray injection."
                 << endl;
         }
@@ -345,7 +346,10 @@ Foam::spray::spray
         }
     }
 
-    parcel::readFields(*this);
+    if (readFields)
+    {
+        parcel::readFields(*this);
+    }
 }
 
 
@@ -353,14 +357,6 @@ Foam::spray::spray
 
 Foam::spray::~spray()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::spray::writeFields() const
-{
-    parcel::writeFields(*this);
-}
 
 
 // ************************************************************************* //

@@ -87,4 +87,17 @@ Foam::emptyPolyPatch::emptyPolyPatch
 {}
 
 
+Foam::emptyPolyPatch::emptyPolyPatch
+(
+    const emptyPolyPatch& pp,
+    const polyBoundaryMesh& bm,
+    const label index,
+    const unallocLabelList& mapAddressing,
+    const label newStart
+)
+:
+    polyPatch(pp, bm, index, mapAddressing, newStart)
+{}
+
+
 // ************************************************************************* //

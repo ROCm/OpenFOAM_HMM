@@ -112,6 +112,7 @@ private:
 
         scalar corePerc_;
 
+
 public:
 
     //- Runtime type information
@@ -121,16 +122,11 @@ public:
     // Constructors
 
         //- Construct from components
-        SHF
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        SHF(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        ~SHF();
+    //- Destructor
+    virtual ~SHF();
 
 
     // Member Operators
@@ -142,7 +138,6 @@ public:
             const vector& vel,
             const liquidMixture& fuels
         ) const;
-
 };
 
 

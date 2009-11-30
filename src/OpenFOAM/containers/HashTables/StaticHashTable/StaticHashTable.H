@@ -76,7 +76,33 @@ template<class T, class Key, class Hash> Ostream& operator<<
                      Class StaticHashTableName Declaration
 \*---------------------------------------------------------------------------*/
 
-TemplateName(StaticHashTable);
+/*---------------------------------------------------------------------------*\
+                     Class StaticHashTableCore Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Template-invariant bits for StaticHashTable
+struct StaticHashTableCore
+{
+    //- Return a canonical (power-of-two) size
+    static label canonicalSize(const label);
+
+    //- Construct null
+    StaticHashTableCore()
+    {}
+
+    //- Define template name and debug
+    ClassName("StaticHashTable");
+
+    //- A zero-sized end iterator
+    struct iteratorEnd
+    {
+        //- Construct null
+        iteratorEnd()
+        {}
+    };
+
+};
+
 
 
 /*---------------------------------------------------------------------------*\
@@ -86,7 +112,7 @@ TemplateName(StaticHashTable);
 template<class T, class Key=word, class Hash=string::hash>
 class StaticHashTable
 :
-    public StaticHashTableName
+    public StaticHashTableCore
 {
     // Private data type for table entries
 

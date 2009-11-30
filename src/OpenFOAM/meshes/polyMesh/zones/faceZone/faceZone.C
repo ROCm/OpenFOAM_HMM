@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    A subset of mesh faces.
-
 \*---------------------------------------------------------------------------*/
 
 #include "faceZone.H"
@@ -44,6 +41,8 @@ namespace Foam
     defineRunTimeSelectionTable(faceZone, dictionary);
     addToRunTimeSelectionTable(faceZone, faceZone, dictionary);
 }
+
+const char* const Foam::faceZone::labelsName = "faceLabels";
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -100,54 +99,6 @@ void Foam::faceZone::calcFaceZonePatch() const
 }
 
 
-const Foam::Map<Foam::label>& Foam::faceZone::faceLookupMap() const
-{
-    if (!faceLookupMapPtr_)
-    {
-        calcFaceLookupMap();
-    }
-
-    return *faceLookupMapPtr_;
-}
-
-
-void Foam::faceZone::calcFaceLookupMap() const
-{
-    if (debug)
-    {
-        Info<< "void faceZone::calcFaceLookupMap() const : "
-            << "Calculating face lookup map"
-            << endl;
-    }
-
-    if (faceLookupMapPtr_)
-    {
-        FatalErrorIn
-        (
-            "void faceZone::calcFaceLookupMap() const"
-        )   << "face lookup map already calculated"
-            << abort(FatalError);
-    }
-
-    const labelList& addr = *this;
-
-    faceLookupMapPtr_ = new Map<label>(2*addr.size());
-    Map<label>& flm = *faceLookupMapPtr_;
-
-    forAll (addr, faceI)
-    {
-        flm.insert(addr[faceI], faceI);
-    }
-
-    if (debug)
-    {
-        Info<< "void faceZone::calcFaceLookupMap() const : "
-            << "Finished calculating face lookup map"
-            << endl;
-    }
-}
-
-
 void Foam::faceZone::calcCellLayers() const
 {
     if (debug)
@@ -185,16 +136,24 @@ void Foam::faceZone::calcCellLayers() const
 
         forAll (mf, faceI)
         {
+            label ownCellI = own[mf[faceI]];
+            label neiCellI =
+            (
+                zoneMesh().mesh().isInternalFace(mf[faceI])
+              ? nei[mf[faceI]]
+              : -1
+            );
+
             if (!faceFlip[faceI])
             {
                 // Face is oriented correctly, no flip needed
-                mc[faceI] = nei[mf[faceI]];
-                sc[faceI] = own[mf[faceI]];
+                mc[faceI] = neiCellI;
+                sc[faceI] = ownCellI;
             }
             else
             {
-                mc[faceI] = own[mf[faceI]];
-                sc[faceI] = nei[mf[faceI]];
+                mc[faceI] = ownCellI;
+                sc[faceI] = neiCellI;
             }
         }
         //Info << "masterCells: " << mc << endl;
@@ -228,16 +187,13 @@ Foam::faceZone::faceZone
     const faceZoneMesh& zm
 )
 :
-    labelList(addr),
-    name_(name),
+    zone(name, addr, index),
     flipMap_(fm),
-    index_(index),
     zoneMesh_(zm),
     patchPtr_(NULL),
     masterCellsPtr_(NULL),
     slaveCellsPtr_(NULL),
-    mePtr_(NULL),
-    faceLookupMapPtr_(NULL)
+    mePtr_(NULL)
 {
     checkAddressing();
 }
@@ -252,22 +208,18 @@ Foam::faceZone::faceZone
     const faceZoneMesh& zm
 )
 :
-    labelList(addr),
-    name_(name),
+    zone(name, addr, index),
     flipMap_(fm),
-    index_(index),
     zoneMesh_(zm),
     patchPtr_(NULL),
     masterCellsPtr_(NULL),
     slaveCellsPtr_(NULL),
-    mePtr_(NULL),
-    faceLookupMapPtr_(NULL)
+    mePtr_(NULL)
 {
     checkAddressing();
 }
 
 
-// Construct from dictionary
 Foam::faceZone::faceZone
 (
     const word& name,
@@ -276,23 +228,18 @@ Foam::faceZone::faceZone
     const faceZoneMesh& zm
 )
 :
-    labelList(dict.lookup("faceLabels")),
-    name_(name),
+    zone(name, dict, this->labelsName, index),
     flipMap_(dict.lookup("flipMap")),
-    index_(index),
     zoneMesh_(zm),
     patchPtr_(NULL),
     masterCellsPtr_(NULL),
     slaveCellsPtr_(NULL),
-    mePtr_(NULL),
-    faceLookupMapPtr_(NULL)
+    mePtr_(NULL)
 {
     checkAddressing();
 }
 
 
-// Construct given the original zone and resetting the
-// face list and zone mesh information
 Foam::faceZone::faceZone
 (
     const faceZone& fz,
@@ -302,16 +249,13 @@ Foam::faceZone::faceZone
     const faceZoneMesh& zm
 )
 :
-    labelList(addr),
-    name_(fz.name()),
+    zone(fz, addr, index),
     flipMap_(fm),
-    index_(index),
     zoneMesh_(zm),
     patchPtr_(NULL),
     masterCellsPtr_(NULL),
     slaveCellsPtr_(NULL),
-    mePtr_(NULL),
-    faceLookupMapPtr_(NULL)
+    mePtr_(NULL)
 {
     checkAddressing();
 }
@@ -326,16 +270,13 @@ Foam::faceZone::faceZone
     const faceZoneMesh& zm
 )
 :
-    labelList(addr),
-    name_(fz.name()),
+    zone(fz, addr, index),
     flipMap_(fm),
-    index_(index),
     zoneMesh_(zm),
     patchPtr_(NULL),
     masterCellsPtr_(NULL),
     slaveCellsPtr_(NULL),
-    mePtr_(NULL),
-    faceLookupMapPtr_(NULL)
+    mePtr_(NULL)
 {
     checkAddressing();
 }
@@ -351,26 +292,15 @@ Foam::faceZone::~faceZone()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::faceZone::whichFace(const label globalFaceID) const
-{
-    const Map<label>& flm = faceLookupMap();
-
-    Map<label>::const_iterator flmIter = flm.find(globalFaceID);
-
-    if (flmIter == flm.end())
-    {
-        return -1;
-    }
-    else
-    {
-        return flmIter();
-    }
-}
-
-
 const Foam::faceZoneMesh& Foam::faceZone::zoneMesh() const
 {
     return zoneMesh_;
+}
+
+
+Foam::label Foam::faceZone::whichFace(const label globalFaceID) const
+{
+    return zone::localID(globalFaceID);
 }
 
 
@@ -450,13 +380,14 @@ const Foam::labelList& Foam::faceZone::meshEdges() const
 
 void Foam::faceZone::clearAddressing()
 {
+    zone::clearAddressing();
+
     deleteDemandDrivenData(patchPtr_);
 
     deleteDemandDrivenData(masterCellsPtr_);
     deleteDemandDrivenData(slaveCellsPtr_);
 
     deleteDemandDrivenData(mePtr_);
-    deleteDemandDrivenData(faceLookupMapPtr_);
 }
 
 
@@ -504,30 +435,7 @@ void Foam::faceZone::updateMesh(const mapPolyMesh& mpm)
 
 bool Foam::faceZone::checkDefinition(const bool report) const
 {
-    const labelList& addr = *this;
-
-    bool boundaryError = false;
-
-    forAll(addr, i)
-    {
-        if (addr[i] < 0 || addr[i] >= zoneMesh().mesh().faces().size())
-        {
-            boundaryError = true;
-
-            if (report)
-            {
-                SeriousErrorIn
-                (
-                    "bool faceZone::checkDefinition("
-                    "const bool report) const"
-                )   << "Zone " << name()
-                    << " contains invalid face label " << addr[i] << nl
-                    << "Valid face labels are 0.."
-                    << zoneMesh().mesh().faces().size()-1 << endl;
-            }
-        }
-    }
-    return boundaryError;
+    return zone::checkDefinition(zoneMesh().mesh().faces().size(), report);
 }
 
 
@@ -536,7 +444,7 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
     const polyMesh& mesh = zoneMesh().mesh();
     const polyBoundaryMesh& bm = mesh.boundaryMesh();
 
-    bool boundaryError = false;
+    bool hasError = false;
 
 
     // Check that zone faces are synced
@@ -573,7 +481,7 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
                 // Check face in zone on both sides
                 if (myZoneFace[bFaceI] != neiZoneFace[bFaceI])
                 {
-                    boundaryError = true;
+                    hasError = true;
 
                     if (report)
                     {
@@ -585,12 +493,17 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
                             << " is not consistent with its coupled neighbour."
                             << endl;
                     }
+                    else
+                    {
+                        // w/o report - can stop checking now
+                        break;
+                    }
                 }
 
                 // Flip state should be opposite.
                 if (myZoneFlip[bFaceI] == neiZoneFlip[bFaceI])
                 {
-                    boundaryError = true;
+                    hasError = true;
 
                     if (report)
                     {
@@ -603,12 +516,17 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
                             << " across coupled faces."
                             << endl;
                     }
+                    else
+                    {
+                        // w/o report - can stop checking now
+                        break;
+                    }
                 }
             }
         }
     }
 
-    return returnReduce(boundaryError, orOp<bool>());
+    return returnReduce(hasError, orOp<bool>());
 }
 
 
@@ -633,7 +551,7 @@ void Foam::faceZone::writeDict(Ostream& os) const
     os  << nl << name() << nl << token::BEGIN_BLOCK << nl
         << "    type " << type() << token::END_STATEMENT << nl;
 
-    writeEntry("faceLabels", os);
+    writeEntry(this->labelsName, os);
     flipMap().writeEntry("flipMap", os);
 
     os  << token::END_BLOCK << endl;
@@ -642,10 +560,10 @@ void Foam::faceZone::writeDict(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const faceZone& p)
+Foam::Ostream& Foam::operator<<(Ostream& os, const faceZone& zn)
 {
-    p.write(os);
-    os.check("Ostream& operator<<(Ostream& f, const faceZone& p");
+    zn.write(os);
+    os.check("Ostream& operator<<(Ostream&, const faceZone&");
     return os;
 }
 

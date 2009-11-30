@@ -47,7 +47,7 @@ tmp<fvMatrix<Type> >
 gaussLaplacianScheme<Type, GType>::fvmLaplacianUncorrected
 (
     const surfaceScalarField& gammaMagSf,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<surfaceScalarField> tdeltaCoeffs =
@@ -67,9 +67,9 @@ gaussLaplacianScheme<Type, GType>::fvmLaplacianUncorrected
     fvm.upper() = deltaCoeffs.internalField()*gammaMagSf.internalField();
     fvm.negSumDiag();
 
-    forAll(fvm.psi().boundaryField(), patchI)
+    forAll(vf.boundaryField(), patchI)
     {
-        const fvPatchField<Type>& psf = fvm.psi().boundaryField()[patchI];
+        const fvPatchField<Type>& psf = vf.boundaryField()[patchI];
         const fvsPatchScalarField& patchGamma =
             gammaMagSf.boundaryField()[patchI];
 
@@ -149,7 +149,7 @@ tmp<fvMatrix<Type> >
 gaussLaplacianScheme<Type, GType>::fvmLaplacian
 (
     const GeometricField<GType, fvsPatchField, surfaceMesh>& gamma,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     const fvMesh& mesh = this->mesh();

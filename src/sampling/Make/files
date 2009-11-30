@@ -1,16 +1,17 @@
 probes/probes.C
 probes/probesFunctionObject.C
 
-sampledSet/coordSet/coordSet.C
-sampledSet/sampledSet/sampledSet.C
 sampledSet/cloud/cloudSet.C
-sampledSet/face/faceOnlySet.C
+sampledSet/coordSet/coordSet.C
 sampledSet/curve/curveSet.C
-sampledSet/uniform/uniformSet.C
+sampledSet/face/faceOnlySet.C
 sampledSet/midPoint/midPointSet.C
 sampledSet/midPointAndFace/midPointAndFaceSet.C
+sampledSet/sampledSet/sampledSet.C
 sampledSet/sampledSets/sampledSets.C
 sampledSet/sampledSetsFunctionObject/sampledSetsFunctionObject.C
+sampledSet/triSurfaceMeshPointSet/triSurfaceMeshPointSet.C
+sampledSet/uniform/uniformSet.C
 
 setWriters = sampledSet/writers
 
@@ -18,6 +19,7 @@ $(setWriters)/writers.C
 $(setWriters)/gnuplot/gnuplotSetWriterRunTime.C
 $(setWriters)/jplot/jplotSetWriterRunTime.C
 $(setWriters)/raw/rawSetWriterRunTime.C
+$(setWriters)/vtk/vtkSetWriterRunTime.C
 $(setWriters)/xmgrace/xmgraceSetWriterRunTime.C
 
 cuttingPlane/cuttingPlane.C

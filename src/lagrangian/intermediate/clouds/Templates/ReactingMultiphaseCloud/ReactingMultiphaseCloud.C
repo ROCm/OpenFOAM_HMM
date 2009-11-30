@@ -38,10 +38,11 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
-    basicThermo& thermo
+    basicThermo& thermo,
+    bool readFields
 )
 :
-    ReactingCloud<ParcelType>(cloudName, rho, U, g, thermo),
+    ReactingCloud<ParcelType>(cloudName, rho, U, g, thermo, false),
     reactingMultiphaseCloud(),
     constProps_(this->particleProperties()),
     devolatilisationModel_
@@ -61,7 +62,12 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
         )
     ),
     dMassDevolatilisation_(0.0)
-{}
+{
+    if (readFields)
+    {
+        ParcelType::readFields(*this);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

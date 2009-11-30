@@ -138,7 +138,7 @@ autoPtr<RASModel> RASModel::New
         )   << "Unknown RASModel type " << modelName
             << endl << endl
             << "Valid RASModel types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
@@ -169,9 +169,9 @@ tmp<scalarField> RASModel::yPlus(const label patchNo, const scalar Cmu) const
     tmp<scalarField> tYp(new scalarField(curPatch.size()));
     scalarField& Yp = tYp();
 
-    if (isType<wallFvPatch>(curPatch))
+    if (isA<wallFvPatch>(curPatch))
     {
-        Yp = pow(Cmu, 0.25)
+        Yp = pow025(Cmu)
             *y_[patchNo]
             *sqrt(k()().boundaryField()[patchNo].patchInternalField())
             /nu().boundaryField()[patchNo];

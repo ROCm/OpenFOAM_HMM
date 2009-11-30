@@ -66,7 +66,7 @@ public:
     // Member Functions
 
         //- Return true if the given value is within the ranges
-        bool selected(const scalar&) const;
+        bool selected(const scalar) const;
 
         //- Return the set of selected entries in the given list
         //  that are within the ranges

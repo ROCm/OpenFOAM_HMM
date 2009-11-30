@@ -24,7 +24,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "radiationConstants.H"
+#include "physicoChemicalConstants.H"
+
+using namespace Foam::constant;
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -229,7 +231,7 @@ Foam::ThermoCloud<ParcelType>::Ep() const
             Ep[cellI] += p.nParticle()*p.areaP()*pow4(p.T());
         }
 
-        Ep *= epsilon*radiation::sigmaSB.value()/V;
+        Ep *= epsilon*physicoChemical::sigma.value()/V;
     }
 
     return tEp;

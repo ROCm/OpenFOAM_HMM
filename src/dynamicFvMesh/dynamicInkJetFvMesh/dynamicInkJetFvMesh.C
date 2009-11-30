@@ -90,7 +90,7 @@ Foam::dynamicInkJetFvMesh::~dynamicInkJetFvMesh()
 bool Foam::dynamicInkJetFvMesh::update()
 {
     scalar scalingFunction =
-        0.5*(::cos(2*mathematicalConstant::pi*frequency_*time().value()) - 1.0);
+        0.5*(::cos(constant::mathematical::twoPi*frequency_*time().value()) - 1.0);
 
     Info<< "Mesh scaling. Time = " << time().value() << " scaling: "
         << scalingFunction << endl;
@@ -113,7 +113,7 @@ bool Foam::dynamicInkJetFvMesh::update()
 
     fvMesh::movePoints(newPoints);
 
-    volVectorField& U = 
+    volVectorField& U =
         const_cast<volVectorField&>(lookupObject<volVectorField>("U"));
     U.correctBoundaryConditions();
 

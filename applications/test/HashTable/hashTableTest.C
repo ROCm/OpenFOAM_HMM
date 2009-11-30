@@ -40,6 +40,7 @@ using namespace Foam;
 int main()
 {
     HASHTABLE_CLASS<double> table1(13);
+    HASHTABLE_CLASS<double>::iterator iter;
 
     table1.insert("aaa", 1.0);
     table1.insert("aba", 2.0);
@@ -52,10 +53,15 @@ int main()
     table1.insert("adx", 9.0);
     table1.insert("aec", 10.0);
 
+    // erase by key
     table1.erase("aaw");
-    table1.erase("abs");
+
+    // erase by iterator
+    iter = table1.find("abs");
+    table1.erase(iter);
 
     Info<< "\ntable1 toc: " << table1.toc() << endl;
+    Info<< "\ntable1 sortedToc: " << table1.sortedToc() << endl;
     table1.printInfo(Info)
         << "table1 [" << table1.size() << "] " << endl;
     forAllIter(HASHTABLE_CLASS<double>, table1, iter)

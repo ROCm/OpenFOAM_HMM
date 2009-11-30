@@ -14,28 +14,35 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Where to get surface from: either from surface ('surface') or
-// from (flipped) patch of existing case ('patch')
-constructFrom patch;    //surface;
+// What to extrude:
+//      patch   : from patch of another case ('sourceCase')
+//      mesh    : as above but with original case included
+//      surface : from externally read surface
 
-// If construct from (flipped) patch
-sourceCase "$FOAM_RUN/icoFoam/cavity";
-sourcePatch movingWall;
+//constructFrom mesh;
+constructFrom patch;
+//constructFrom surface;
+
+// If construct from patch/mesh:
+sourceCase "../cavity";
+sourcePatches (movingWall);
+// If construct from patch: patch to use for back (can be same as sourcePatch)
+exposedPatchName movingWall;
+// If construct from surface:
+surface "movingWall.stl";
+
+
 
 // Flip surface normals before usage.
 flipNormals false;
 
-// If construct from surface
-surface "movingWall.sMesh";
-
-
-// Do front and back need to be merged? Usually only makes sense for 360
-// degree wedges.
-mergeFaces true;
 
 
 //- Linear extrusion in point-normal direction
 //extrudeModel        linearNormal;
+
+//- Linear extrusion in specified direction
+//extrudeModel        linearDirection;
 
 //- Wedge extrusion. If nLayers is 1 assumes symmetry around plane.
 extrudeModel        wedge;
@@ -46,17 +53,25 @@ extrudeModel        wedge;
 //- Extrudes into sphere with grading according to pressure (atmospherics)
 //extrudeModel        sigmaRadial;
 
-nLayers             20;
+nLayers             10;
+
+expansionRatio      1.0;    //0.9;
 
 wedgeCoeffs
 {
-    axisPt      (0 0.1 0);
+    axisPt      (0 0.1 -0.05);
     axis        (-1 0 0);
     angle       360;  // For nLayers=1 assume symmetry so angle/2 on each side
 }
 
 linearNormalCoeffs
 {
+    thickness       0.05;
+}
+
+linearDirectionCoeffs
+{
+    direction       (0 1 0);
     thickness       0.05;
 }
 
@@ -71,6 +86,11 @@ sigmaRadialCoeffs
     pRef            1;
     pStrat          1;
 }
+
+
+// Do front and back need to be merged? Usually only makes sense for 360
+// degree wedges.
+mergeFaces false;   //true;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -262,7 +262,7 @@ template<class Type>
 tmp<fvMatrix<Type> >
 EulerDdtScheme<Type>::fvmDdt
 (
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm
@@ -276,7 +276,7 @@ EulerDdtScheme<Type>::fvmDdt
 
     fvMatrix<Type>& fvm = tfvm();
 
-    scalar rDeltaT = 1.0/mesh().time().deltaT().value();
+    scalar rDeltaT = 1.0/mesh().time().deltaTValue();
 
     fvm.diag() = rDeltaT*mesh().V();
 
@@ -298,7 +298,7 @@ tmp<fvMatrix<Type> >
 EulerDdtScheme<Type>::fvmDdt
 (
     const dimensionedScalar& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm
@@ -311,7 +311,7 @@ EulerDdtScheme<Type>::fvmDdt
     );
     fvMatrix<Type>& fvm = tfvm();
 
-    scalar rDeltaT = 1.0/mesh().time().deltaT().value();
+    scalar rDeltaT = 1.0/mesh().time().deltaTValue();
 
     fvm.diag() = rDeltaT*rho.value()*mesh().V();
 
@@ -335,7 +335,7 @@ tmp<fvMatrix<Type> >
 EulerDdtScheme<Type>::fvmDdt
 (
     const volScalarField& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm
@@ -348,7 +348,7 @@ EulerDdtScheme<Type>::fvmDdt
     );
     fvMatrix<Type>& fvm = tfvm();
 
-    scalar rDeltaT = 1.0/mesh().time().deltaT().value();
+    scalar rDeltaT = 1.0/mesh().time().deltaTValue();
 
     fvm.diag() = rDeltaT*rho.internalField()*mesh().V();
 

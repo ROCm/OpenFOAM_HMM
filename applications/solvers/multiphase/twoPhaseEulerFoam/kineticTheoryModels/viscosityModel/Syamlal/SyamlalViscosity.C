@@ -69,7 +69,7 @@ Foam::tmp<Foam::volScalarField> Foam::kineticTheoryModels::SyamlalViscosity::mua
     const dimensionedScalar& e
 ) const
 {
-    const scalar sqrtPi = sqrt(mathematicalConstant::pi);
+    const scalar sqrtPi = sqrt(constant::mathematical::pi);
 
     return rhoa*da*sqrt(Theta)*
     (

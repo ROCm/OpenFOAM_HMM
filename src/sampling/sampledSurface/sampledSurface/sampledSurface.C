@@ -141,7 +141,7 @@ Foam::sampledSurface::New
         )   << "Unknown sample type " << sampleType
             << endl << endl
             << "Valid sample types : " << endl
-            << wordConstructorTablePtr_->toc()
+            << wordConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

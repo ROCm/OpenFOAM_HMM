@@ -16,15 +16,13 @@ $(enrichedPatch)/enrichedPatchPointPoints.C
 $(enrichedPatch)/enrichedPatchCutFaces.C
 $(enrichedPatch)/enrichedPatchMasterPoints.C
 
-/* polyTopoChange/polyTopoChange/polyTopoChange.C */
-polyTopoChange/polyTopoChange/topoAction/topoActions.C
 
 polyMeshModifier = polyTopoChange/polyMeshModifier
 $(polyMeshModifier)/polyMeshModifier.C
 $(polyMeshModifier)/newPolyMeshModifier.C
 
+polyTopoChange/polyTopoChange/topoAction/topoActions.C
 polyTopoChange/polyTopoChanger/polyTopoChanger.C
-
 polyTopoChange/polyTopoChange/polyTopoChange.C
 polyTopoChange/polyTopoChange/addPatchCellLayer.C
 polyTopoChange/polyTopoChange/edgeCollapser.C
@@ -51,7 +49,6 @@ perfectInterface/perfectInterface.C
 
 boundaryMesh/boundaryMesh.C
 boundaryPatch/boundaryPatch.C
-boundaryMesh/octreeDataFaceList.C
 setUpdater/setUpdater.C
 
 meshModifiers = meshCut/meshModifiers

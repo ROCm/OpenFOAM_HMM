@@ -27,10 +27,7 @@ License
 #include "solidBodyMotionFvMesh.H"
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
-#include "mathematicalConstants.H"
 #include "transformField.H"
-
-using namespace Foam::mathematicalConstant;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -86,14 +83,27 @@ Foam::solidBodyMotionFvMesh::~solidBodyMotionFvMesh()
 
 bool Foam::solidBodyMotionFvMesh::update()
 {
+    static bool hasWarned = false;
+
     fvMesh::movePoints
     (
         transform(SBMFPtr_().transformation(),
         undisplacedPoints_)
     );
 
-    const_cast<volVectorField&>(lookupObject<volVectorField>("U"))
-        .correctBoundaryConditions();
+    if (foundObject<volVectorField>("U"))
+    {
+        const_cast<volVectorField&>(lookupObject<volVectorField>("U"))
+            .correctBoundaryConditions();
+    }
+    else if (!hasWarned)
+    {
+        hasWarned = true;
+
+        WarningIn("solidBodyMotionFvMesh::update()")
+            << "Did not find volVectorField U."
+            << " Not updating U boundary conditions." << endl;
+    }
 
     return true;
 }

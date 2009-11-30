@@ -34,6 +34,7 @@ License
 #include "Map.H"
 #include "globalMeshData.H"
 #include "DynamicList.H"
+#include "fvFieldDecomposer.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -303,12 +304,29 @@ bool domainDecomposition::writeDecomposition()
 
         forAll (curPatchSizes, patchi)
         {
+            // Get the face labels consistent with the field mapping
+            // (reuse the patch field mappers)
+            const polyPatch& meshPatch =
+                meshPatches[curBoundaryAddressing[patchi]];
+
+            fvFieldDecomposer::patchFieldDecomposer patchMapper
+            (
+                SubList<label>
+                (
+                    curFaceLabels,
+                    curPatchSizes[patchi],
+                    curPatchStarts[patchi]
+                ),
+                meshPatch.start()
+            );
+
+            // Map existing patches
             procPatches[nPatches] =
                 meshPatches[curBoundaryAddressing[patchi]].clone
                 (
                     procMesh.boundaryMesh(),
                     nPatches,
-                    curPatchSizes[patchi],
+                    patchMapper.directAddressing(),
                     curPatchStarts[patchi]
                 ).ptr();
 

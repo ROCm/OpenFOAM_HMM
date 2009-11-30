@@ -7,7 +7,7 @@ static char readerName[]           = "OpenFOAM";
 static char meshName[]             = "cells";
 static char readerVersion[]        = "2.03";
 
-// everything is one part in foam, except the spray
+// everything is one part in OpenFOAM, except the spray
 static int Num_unstructured_parts  = 1;
 static int Num_structured_parts    = 0;
 static int Numparts_available      = 1;

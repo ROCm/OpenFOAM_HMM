@@ -42,10 +42,7 @@ autoPtr<injectorModel> injectorModel::New
     spray& sm
 )
 {
-    word injectorModelType
-    (
-        dict.lookup("injectorModel")
-    );
+    word injectorModelType(dict.lookup("injectorModel"));
 
     Info<< "Selecting injectorModel "
          << injectorModelType << endl;
@@ -55,13 +52,12 @@ autoPtr<injectorModel> injectorModel::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalError
-            << "injectorModel::New(const dictionary&, spray&) : " << endl
-            << "    unknown injectorModelType type "
-            << injectorModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid injectorModel types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->toc() << abort(FatalError);
+        FatalErrorIn("injectorModel::New(const dictionary&, spray&)")
+            << "Unknown injectorModelType type " << injectorModelType
+            << ", constructor not in hash table" << nl << nl
+            << "    Valid injectorModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << abort(FatalError);
     }
 
     return autoPtr<injectorModel>(cstrIter()(dict, sm));

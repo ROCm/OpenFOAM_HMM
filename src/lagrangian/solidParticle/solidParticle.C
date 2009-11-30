@@ -36,7 +36,7 @@ bool Foam::solidParticle::move(solidParticle::trackData& td)
     const polyMesh& mesh = cloud().pMesh();
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
 
-    scalar deltaT = mesh.time().deltaT().value();
+    scalar deltaT = mesh.time().deltaTValue();
     scalar tEnd = (1.0 - stepFraction())*deltaT;
     scalar dtMax = tEnd;
 
@@ -84,7 +84,7 @@ bool Foam::solidParticle::move(solidParticle::trackData& td)
 
         if (onBoundary() && td.keepParticle)
         {
-            if (isType<processorPolyPatch>(pbMesh[patch(face())]))
+            if (isA<processorPolyPatch>(pbMesh[patch(face())]))
             {
                 td.switchProcessor = true;
             }

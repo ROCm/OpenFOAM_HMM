@@ -164,7 +164,7 @@ void mapConsistentSubMesh
 
     forAll(meshTarget.boundary(), patchi)
     {
-        if (typeid(meshTarget.boundary()[patchi]) != typeid(processorFvPatch))
+        if (!isA<processorFvPatch>(meshTarget.boundary()[patchi]))
         {
             patchMap.insert
             (
@@ -201,7 +201,7 @@ wordList addProcessorPatches
 
     forAll (meshTarget.boundary(), patchi)
     {
-        if (typeid(meshTarget.boundary()[patchi]) == typeid(processorFvPatch))
+        if (isA<processorFvPatch>(meshTarget.boundary()[patchi]))
         {
             if
             (
@@ -228,15 +228,8 @@ wordList addProcessorPatches
 
 int main(int argc, char *argv[])
 {
-#   include "setRoots.H"
-#   include "createTimes.H"
-#   include "setTimeIndex.H"
-
-    runTimeSource.setTime(sourceTimes[sourceTimeIndex], sourceTimeIndex);
-
-    Info<< "\nSource time: " << runTimeSource.value()
-        << "\nTarget time: " << runTimeTarget.value()
-        << endl;
+    #include "setRoots.H"
+    #include "createTimes.H"
 
     HashTable<word> patchMap;
     wordList cuttingPatches;
@@ -302,11 +295,7 @@ int main(int argc, char *argv[])
                 caseDirSource/fileName(word("processor") + name(procI))
             );
 
-            runTimeSource.setTime
-            (
-                sourceTimes[sourceTimeIndex],
-                sourceTimeIndex
-            );
+            #include "setTimeIndex.H"
 
             fvMesh meshSource
             (
@@ -347,6 +336,8 @@ int main(int argc, char *argv[])
         int nProcs(readInt(decompositionDict.lookup("numberOfSubdomains")));
 
         Info<< "Create source mesh\n" << endl;
+
+        #include "setTimeIndex.H"
 
         fvMesh meshSource
         (
@@ -450,11 +441,7 @@ int main(int argc, char *argv[])
                 caseDirSource/fileName(word("processor") + name(procISource))
             );
 
-            runTimeSource.setTime
-            (
-                sourceTimes[sourceTimeIndex],
-                sourceTimeIndex
-            );
+            #include "setTimeIndex.H"
 
             fvMesh meshSource
             (
@@ -529,6 +516,8 @@ int main(int argc, char *argv[])
     }
     else
     {
+        #include "setTimeIndex.H"
+
         Info<< "Create meshes\n" << endl;
 
         fvMesh meshSource

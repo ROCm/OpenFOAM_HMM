@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class pureMixture Declaration
+                         Class pureMixture Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ThermoType>
@@ -76,9 +76,8 @@ public:
         pureMixture(const dictionary&, const fvMesh&);
 
 
-    // Destructor
-
-        ~pureMixture();
+    //- Destructor
+    virtual ~pureMixture();
 
 
     // Member functions

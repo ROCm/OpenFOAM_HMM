@@ -24,6 +24,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "mathematicalConstants.H"
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class ParcelType>
@@ -101,7 +103,7 @@ template <class ParcelType>
 inline Foam::scalar
 Foam::DsmcParcel<ParcelType>::constantProperties::sigmaT() const
 {
-    return mathematicalConstant::pi*d_*d_;
+    return constant::mathematical::pi*d_*d_;
 }
 
 

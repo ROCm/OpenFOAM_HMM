@@ -248,7 +248,6 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
         subPatchStarts[procI].setSize(nInterfaces, labelList(1, 0));
     }
 
-
     // Processor boundaries from split cyclics
     forAll (patches, patchi)
     {

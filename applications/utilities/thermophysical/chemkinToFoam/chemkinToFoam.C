@@ -54,8 +54,8 @@ int main(int argc, char *argv[])
 
     OFstream reactionsFile(FOAMChemistryFileName);
     reactionsFile
-        << "species" << cr.species() << ';' << endl << endl
-        << "reactions" << cr.reactions() << ';' << endl;
+        << "species" << cr.species() << token::END_STATEMENT << nl << nl
+        << "reactions" << cr.reactions() << token::END_STATEMENT << endl;
 
     OFstream thermoFile(FOAMThermodynamicsFileName);
     thermoFile<< cr.speciesThermo() << endl;

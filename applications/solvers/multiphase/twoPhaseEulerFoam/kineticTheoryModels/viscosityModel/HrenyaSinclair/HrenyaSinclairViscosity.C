@@ -77,7 +77,7 @@ Foam::kineticTheoryModels::HrenyaSinclairViscosity::mua
     const dimensionedScalar& e
 ) const
 {
-    const scalar sqrtPi = sqrt(mathematicalConstant::pi);
+    const scalar sqrtPi = sqrt(constant::mathematical::pi);
 
     volScalarField lamda =
         scalar(1) + da/(6.0*sqrt(2.0)*(alpha + scalar(1.0e-5)))/L_;

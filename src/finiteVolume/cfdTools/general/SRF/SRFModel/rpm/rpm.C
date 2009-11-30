@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "rpm.H"
@@ -58,7 +56,7 @@ Foam::SRF::rpm::rpm
     rpm_(readScalar(SRFModelCoeffs_.lookup("rpm")))
 {
     // Initialise the angular velocity
-    omega_.value() = axis_*rpm_*2.0*mathematicalConstant::pi/60.0;
+    omega_.value() = axis_*rpm_*constant::mathematical::twoPi/60.0;
 }
 
 
@@ -78,7 +76,7 @@ bool Foam::SRF::rpm::read()
         SRFModelCoeffs_.lookup("rpm") >> rpm_;
 
         // Update angular velocity
-        omega_.value() = axis_*rpm_*(2.0*mathematicalConstant::pi/60.0);
+        omega_.value() = axis_*rpm_*(constant::mathematical::twoPi/60.0);
 
         return true;
     }

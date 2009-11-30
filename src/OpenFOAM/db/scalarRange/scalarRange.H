@@ -92,7 +92,7 @@ public:
         scalarRange();
 
         //- Construct a Range
-        scalarRange(const scalar& lower, const scalar& upper);
+        scalarRange(const scalar lower, const scalar upper);
 
         //- Construct from Istream.
         //  Since commas can be used as list delimiters,
@@ -119,7 +119,7 @@ public:
         scalar upper() const;
 
         //- Return true if the value is within the range
-        bool selected(const scalar&) const;
+        bool selected(const scalar) const;
 
 
     // Member Operators

@@ -27,9 +27,6 @@ Description
     list of selected cells, it creates the mesh consisting only of the
     desired cells, with the mapping list for points, faces, and cells.
 
-    MJ 23/03/05 on coupled faces change the patch of the face to the
-    oldInternalFaces patch.
-
 \*---------------------------------------------------------------------------*/
 
 #include "fvMeshSubset.H"
@@ -111,7 +108,7 @@ void Foam::fvMeshSubset::doCoupledPatches
         {
             const polyPatch& pp = oldPatches[oldPatchI];
 
-            if (typeid(pp) == typeid(processorPolyPatch))
+            if (isA<processorPolyPatch>(pp))
             {
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(pp);
@@ -133,7 +130,7 @@ void Foam::fvMeshSubset::doCoupledPatches
         {
             const polyPatch& pp = oldPatches[oldPatchI];
 
-            if (typeid(pp) == typeid(processorPolyPatch))
+            if (isA<processorPolyPatch>(pp))
             {
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(pp);
@@ -171,7 +168,7 @@ void Foam::fvMeshSubset::doCoupledPatches
     {
         const polyPatch& pp = oldPatches[oldPatchI];
 
-        if (typeid(pp) == typeid(cyclicPolyPatch))
+        if (isA<cyclicPolyPatch>(pp))
         {
             const cyclicPolyPatch& cycPatch =
                 refCast<const cyclicPolyPatch>(pp);

@@ -102,13 +102,13 @@ scalar parcel::Pr
 
 scalar parcel::N(const scalar rho) const
 {
-    return 6.0*m_/(rho*pow(d_, 3.0)*mathematicalConstant::pi);
+    return 6.0*m_/(rho*pow3(d_)*constant::mathematical::pi);
 }
 
 
 scalar parcel::Vd() const
 {
-    return pow(d_, 3.0)*mathematicalConstant::pi/6.0;
+    return pow3(d_)*constant::mathematical::pi/6.0;
 }
 
 

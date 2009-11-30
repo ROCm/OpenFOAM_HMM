@@ -77,8 +77,8 @@ Foam::unitInjector::unitInjector
         FatalErrorIn
         (
             "unitInjector::unitInjector(const time& t, const dictionary dict)"
-        )<< "start-times do not match for TemperatureProfile and "
-         << " massFlowRateProfile." << nl << exit (FatalError);
+        )   << "start-times do not match for TemperatureProfile and "
+            << " massFlowRateProfile." << nl << exit (FatalError);
     }
 
     if
@@ -91,8 +91,8 @@ Foam::unitInjector::unitInjector
         FatalErrorIn
         (
             "unitInjector::unitInjector(const time& t, const dictionary dict)"
-        )<< "end-times do not match for TemperatureProfile and "
-         << "massFlowRateProfile." << nl << exit(FatalError);
+        )   << "end-times do not match for TemperatureProfile and "
+            << "massFlowRateProfile." << nl << exit(FatalError);
     }
 
     // convert CA to real time
@@ -145,6 +145,7 @@ Foam::unitInjector::unitInjector
 
 }
 
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::unitInjector::~unitInjector()
@@ -169,7 +170,6 @@ void Foam::unitInjector::setTangentialVectors()
 
     tangentialInjectionVector1_ = tangent/magV;
     tangentialInjectionVector2_ = direction_ ^ tangentialInjectionVector1_;
-
 }
 
 
@@ -179,7 +179,8 @@ Foam::label Foam::unitInjector::nParcelsToInject
     const scalar time1
 ) const
 {
-    scalar mInj = mass_*(fractionOfInjection(time1)-fractionOfInjection(time0));
+    scalar mInj =
+        mass_*(fractionOfInjection(time1) - fractionOfInjection(time0));
     label nParcels = label(mInj/averageParcelMass_ + 0.49);
     return nParcels;
 }
@@ -219,7 +220,7 @@ Foam::vector Foam::unitInjector::position
     {
         // otherwise, disc injection
         scalar iRadius = d_*rndGen.scalar01();
-        scalar iAngle = 2.0*mathematicalConstant::pi*rndGen.scalar01();
+        scalar iAngle = constant::mathematical::twoPi*rndGen.scalar01();
 
         return
         (
@@ -230,7 +231,6 @@ Foam::vector Foam::unitInjector::position
             + tangentialInjectionVector2_*sin(iAngle)
           )
         );
-
     }
 
     return position_;
@@ -267,12 +267,13 @@ Foam::scalar Foam::unitInjector::mass
     const scalar angleOfWedge
 ) const
 {
-    scalar mInj = mass_*(fractionOfInjection(time1)-fractionOfInjection(time0));
+    scalar mInj =
+        mass_*(fractionOfInjection(time1) - fractionOfInjection(time0));
 
     // correct mass if calculation is 2D
     if (twoD)
     {
-        mInj *= 0.5*angleOfWedge/mathematicalConstant::pi;
+        mInj *= 0.5*angleOfWedge/constant::mathematical::pi;
     }
 
     return mInj;
@@ -363,7 +364,7 @@ void Foam::unitInjector::correctProfiles
     const scalar referencePressure
 )
 {
-    scalar A = 0.25*mathematicalConstant::pi*pow(d_, 2.0);
+    scalar A = 0.25*constant::mathematical::pi*sqr(d_);
     scalar pDummy = 1.0e+5;
 
     forAll(velocityProfile_, i)

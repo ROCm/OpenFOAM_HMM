@@ -36,70 +36,25 @@ License
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 namespace fv
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-makeFvGradScheme(cellLimitedGrad)
+    makeFvGradScheme(cellLimitedGrad)
+}
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<>
-inline void cellLimitedGrad<scalar>::limitFace
+Foam::tmp<Foam::volVectorField>
+Foam::fv::cellLimitedGrad<Foam::scalar>::calcGrad
 (
-    scalar& limiter,
-    const scalar& maxDelta,
-    const scalar& minDelta,
-    const scalar& extrapolate
-)
-{
-    if (extrapolate > maxDelta + VSMALL)
-    {
-        limiter = min(limiter, maxDelta/extrapolate);
-    }
-    else if (extrapolate < minDelta - VSMALL)
-    {
-        limiter = min(limiter, minDelta/extrapolate);
-    }
-}
-
-template<class Type>
-inline void cellLimitedGrad<Type>::limitFace
-(
-    Type& limiter,
-    const Type& maxDelta,
-    const Type& minDelta,
-    const Type& extrapolate
-)
-{
-    for(direction cmpt=0; cmpt<Type::nComponents; cmpt++)
-    {
-        cellLimitedGrad<scalar>::limitFace
-        (
-            limiter.component(cmpt),
-            maxDelta.component(cmpt),
-            minDelta.component(cmpt),
-            extrapolate.component(cmpt)
-        );
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<>
-tmp<volVectorField> cellLimitedGrad<scalar>::grad
-(
-    const volScalarField& vsf
+    const volScalarField& vsf,
+    const word& name
 ) const
 {
     const fvMesh& mesh = vsf.mesh();
 
-    tmp<volVectorField> tGrad = basicGradScheme_().grad(vsf);
+    tmp<volVectorField> tGrad = basicGradScheme_().calcGrad(vsf, name);
 
     if (k_ < SMALL)
     {
@@ -244,14 +199,16 @@ tmp<volVectorField> cellLimitedGrad<scalar>::grad
 
 
 template<>
-tmp<volTensorField> cellLimitedGrad<vector>::grad
+Foam::tmp<Foam::volTensorField>
+Foam::fv::cellLimitedGrad<Foam::vector>::calcGrad
 (
-    const volVectorField& vsf
+    const volVectorField& vsf,
+    const word& name
 ) const
 {
     const fvMesh& mesh = vsf.mesh();
 
-    tmp<volTensorField> tGrad = basicGradScheme_().grad(vsf);
+    tmp<volTensorField> tGrad = basicGradScheme_().calcGrad(vsf, name);
 
     if (k_ < SMALL)
     {
@@ -401,13 +358,5 @@ tmp<volTensorField> cellLimitedGrad<vector>::grad
     return tGrad;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace fv
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

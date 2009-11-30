@@ -217,14 +217,14 @@ void Foam::cellToFace::applyToSet
 {
     if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
     {
-        Pout<< "    Adding faces according to cellSet " << setName_
+        Info<< "    Adding faces according to cellSet " << setName_
             << " ..." << endl;
 
         combine(set, true);
     }
     else if (action == topoSetSource::DELETE)
     {
-        Pout<< "    Removing faces according to cellSet " << setName_
+        Info<< "    Removing faces according to cellSet " << setName_
             << " ..." << endl;
 
         combine(set, false);

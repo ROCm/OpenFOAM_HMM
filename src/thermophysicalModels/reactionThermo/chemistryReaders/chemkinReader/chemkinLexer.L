@@ -32,6 +32,8 @@ License
 
 #include "error.H"
 #include "IStringStream.H"
+// For EOF only
+#include <cstdio>
 
 // flex input buffer size
 int Foam::chemkinReader::yyBufSize = YY_BUF_SIZE;
@@ -67,8 +69,9 @@ int yyFlexLexer::yywrap()
 Foam::string foamSpecieString(const char* YYText)
 {
     Foam::string specieString(YYText);
-    specieString.replaceAll('(', '<');
-    specieString.replaceAll(')', '>');
+    // Transforming parentheses is no longer necessary
+    //specieString.replaceAll('(', '<');
+    //specieString.replaceAll(')', '>');
     return specieString;
 }
 
@@ -804,7 +807,7 @@ bool finishReaction = false;
         }
         else
         {
-            currentSpecieName = keyword;
+            currentSpecieName = foamName(foamSpecieString(YYText()));
 
             HashTable<label>::iterator specieIndexIter
             (

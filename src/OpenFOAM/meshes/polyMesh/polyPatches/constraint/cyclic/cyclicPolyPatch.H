@@ -177,7 +177,7 @@ protected:
     // Protected Member functions
 
         //- Initialise the calculation of the patch geometry
-        virtual void initGeometry();
+        virtual void initGeometry(PstreamBuffers&);
 
         //- Initialise the calculation of the patch geometry
         virtual void initGeometry
@@ -189,7 +189,7 @@ protected:
         );
 
         //- Calculate the patch geometry
-        virtual void calcGeometry();
+        virtual void calcGeometry(PstreamBuffers&);
 
         //- Calculate the patch geometry
         virtual void calcGeometry
@@ -204,16 +204,16 @@ protected:
         );
 
         //- Initialise the patches for moving points
-        virtual void initMovePoints(const pointField&);
+        virtual void initMovePoints(PstreamBuffers&, const pointField&);
 
         //- Correct patches after moving points
-        virtual void movePoints(const pointField&);
+        virtual void movePoints(PstreamBuffers&, const pointField&);
 
         //- Initialise the update of the patch topology
-        virtual void initUpdateMesh();
+        virtual void initUpdateMesh(PstreamBuffers&);
 
         //- Update of the patch topology
-        virtual void updateMesh();
+        virtual void updateMesh(PstreamBuffers&);
 
 public:
 
@@ -257,6 +257,16 @@ public:
             const word& neighbPatchName
         );
 
+        //- Construct given the original patch and a map
+        cyclicPolyPatch
+        (
+            const cyclicPolyPatch& pp,
+            const polyBoundaryMesh& bm,
+            const label index,
+            const unallocLabelList& mapAddressing,
+            const label newStart
+        );
+
         //- Construct and return a clone, resetting the boundary mesh
         virtual autoPtr<polyPatch> clone(const polyBoundaryMesh& bm) const
         {
@@ -284,6 +294,22 @@ public:
                     newStart,
                     neighbPatchName_
                 )
+            );
+        }
+
+        //- Construct and return a clone, resetting the face list
+        //  and boundary mesh
+        virtual autoPtr<polyPatch> clone
+        (
+            const polyBoundaryMesh& bm,
+            const label index,
+            const unallocLabelList& mapAddressing,
+            const label newStart
+        ) const
+        {
+            return autoPtr<polyPatch>
+            (
+                new cyclicPolyPatch(*this, bm, index, mapAddressing, newStart)
             );
         }
 
@@ -440,7 +466,7 @@ public:
 
         //- Initialize ordering for primitivePatch. Does not
         //  refer to *this (except for name() and type() etc.)
-        virtual void initOrder(const primitivePatch&) const;
+        virtual void initOrder(PstreamBuffers&, const primitivePatch&) const;
 
         //- Return new ordering for primitivePatch.
         //  Ordering is -faceMap: for every face
@@ -449,6 +475,7 @@ public:
         //  (faceMap is identity, rotation is 0), true otherwise.
         virtual bool order
         (
+            PstreamBuffers&,
             const primitivePatch&,
             labelList& faceMap,
             labelList& rotation

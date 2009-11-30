@@ -170,7 +170,7 @@ Foam::tmp<Foam::scalarField> Foam::noiseFFT::Hanning(const label N) const
 
     scalar T = N*deltat_;
 
-    return 2*(0.5 - 0.5*cos(2*mathematicalConstant::pi*t/T));
+    return 2*(0.5 - 0.5*cos(constant::mathematical::twoPi*t/T));
 }
 
 

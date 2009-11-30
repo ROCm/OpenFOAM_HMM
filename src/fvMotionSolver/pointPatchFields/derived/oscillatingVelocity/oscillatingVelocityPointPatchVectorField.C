@@ -91,7 +91,7 @@ oscillatingVelocityPointPatchVectorField
     fixedValuePointPatchField<vector>(ptf, p, iF, mapper),
     amplitude_(ptf.amplitude_),
     omega_(ptf.omega_),
-    p0_(ptf.p0_)
+    p0_(ptf.p0_, mapper)
 {}
 
 
@@ -125,7 +125,7 @@ void oscillatingVelocityPointPatchVectorField::updateCoeffs()
     Field<vector>::operator=
     (
         (p0_ + amplitude_*sin(omega_*t.value()) - p.localPoints())
-       /t.deltaT().value()
+       /t.deltaTValue()
     );
 
     fixedValuePointPatchField<vector>::updateCoeffs();

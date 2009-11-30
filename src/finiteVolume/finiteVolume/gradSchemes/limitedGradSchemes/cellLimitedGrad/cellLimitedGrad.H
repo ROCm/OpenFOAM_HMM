@@ -117,16 +117,80 @@ public:
             const Type& extrapolate
         );
 
-
-        tmp
+        //- Return the gradient of the given field to the gradScheme::grad
+        //  for optional caching
+        virtual tmp
         <
             GeometricField
             <typename outerProduct<vector, Type>::type, fvPatchField, volMesh>
-        > grad
+        > calcGrad
         (
-            const GeometricField<Type, fvPatchField, volMesh>&
+            const GeometricField<Type, fvPatchField, volMesh>& vsf,
+            const word& name
         ) const;
 };
+
+
+// * * * * * * * * * * * * Inline Member Function  * * * * * * * * * * * * * //
+
+template<>
+inline void cellLimitedGrad<scalar>::limitFace
+(
+    scalar& limiter,
+    const scalar& maxDelta,
+    const scalar& minDelta,
+    const scalar& extrapolate
+)
+{
+    if (extrapolate > maxDelta + VSMALL)
+    {
+        limiter = min(limiter, maxDelta/extrapolate);
+    }
+    else if (extrapolate < minDelta - VSMALL)
+    {
+        limiter = min(limiter, minDelta/extrapolate);
+    }
+}
+
+
+template<class Type>
+inline void cellLimitedGrad<Type>::limitFace
+(
+    Type& limiter,
+    const Type& maxDelta,
+    const Type& minDelta,
+    const Type& extrapolate
+)
+{
+    for(direction cmpt=0; cmpt<Type::nComponents; cmpt++)
+    {
+        cellLimitedGrad<scalar>::limitFace
+        (
+            limiter.component(cmpt),
+            maxDelta.component(cmpt),
+            minDelta.component(cmpt),
+            extrapolate.component(cmpt)
+        );
+    }
+}
+
+
+// * * * * * * * * Template Member Function Specialisations  * * * * * * * * //
+
+template<>
+tmp<volVectorField> cellLimitedGrad<scalar>::calcGrad
+(
+    const volScalarField& vsf,
+    const word& name
+) const;
+
+
+template<>
+tmp<volTensorField> cellLimitedGrad<vector>::calcGrad
+(
+    const volVectorField& vsf,
+    const word& name
+) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

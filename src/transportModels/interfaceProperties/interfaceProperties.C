@@ -35,7 +35,7 @@ License
 // * * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * //
 
 const Foam::scalar Foam::interfaceProperties::convertToRad =
-    Foam::mathematicalConstant::pi/180.0;
+    Foam::constant::mathematical::pi/180.0;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

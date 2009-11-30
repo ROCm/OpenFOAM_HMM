@@ -116,9 +116,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~forceCoeffs();
+    //- Destructor
+    virtual ~forceCoeffs();
 
 
     // Member Functions

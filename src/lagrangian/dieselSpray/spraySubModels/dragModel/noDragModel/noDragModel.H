@@ -52,21 +52,17 @@ class noDragModel
 public:
 
     //- Runtime type information
-        TypeName("noDragModel");
+    TypeName("noDragModel");
 
 
     // Constructors
 
         //- Construct from components
-        noDragModel
-        (
-            const dictionary& dict
-        );
+        noDragModel(const dictionary& dict);
 
 
-    // Destructor
-
-        ~noDragModel();
+    //- Destructor
+    virtual ~noDragModel();
 
 
     // Member Functions
@@ -86,7 +82,6 @@ public:
             const scalar nu,
             const scalar deviation
         ) const;
-
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

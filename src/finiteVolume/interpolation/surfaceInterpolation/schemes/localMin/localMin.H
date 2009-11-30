@@ -133,7 +133,7 @@ public:
                 (
                     IOobject
                     (
-                        vf.name(),
+                        "localMin::interpolate(" + vf.name() + ')',
                         mesh.time().timeName(),
                         mesh
                     ),

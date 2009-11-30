@@ -184,6 +184,12 @@ public:
         //  an out-of-range element returns false without any ill-effects
         inline const T& operator[](const label) const;
 
+        //- Return last element of UList.
+        inline T& last();
+
+        //- Return last element of UList.
+        inline const T& last() const;
+
         //- Allow cast to a const List<T>&
         inline operator const Foam::List<T>&() const;
 

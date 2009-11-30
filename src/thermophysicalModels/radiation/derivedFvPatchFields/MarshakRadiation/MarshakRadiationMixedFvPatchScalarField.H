@@ -148,7 +148,7 @@ public:
             }
 
             //- Return the emissivity
-            const scalar& emissivity() const
+            scalar emissivity() const
             {
                 return emissivity_;
             }

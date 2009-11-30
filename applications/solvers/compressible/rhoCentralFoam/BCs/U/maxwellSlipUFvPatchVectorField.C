@@ -147,7 +147,7 @@ void maxwellSlipUFvPatchVectorField::updateCoeffs()
     const fvPatchField<scalar>& ppsi =
         patch().lookupPatchField<volScalarField, scalar>("psi");
 
-    Field<scalar> C1 = sqrt(ppsi*mathematicalConstant::pi/2.0)
+    Field<scalar> C1 = sqrt(ppsi*constant::mathematical::piByTwo)
         *(2.0 - accommodationCoeff_)/accommodationCoeff_;
 
     Field<scalar> pnu = pmu/prho;

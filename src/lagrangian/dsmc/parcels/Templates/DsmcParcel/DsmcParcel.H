@@ -42,7 +42,6 @@ SourceFiles
 #include "IOstream.H"
 #include "autoPtr.H"
 #include "contiguous.H"
-#include "mathematicalConstants.H"
 
 #include "DsmcCloud.H"
 
@@ -309,9 +308,9 @@ public:
 
         // I-O
 
-            static void readFields(DsmcCloud<ParcelType>& c);
+            static void readFields(Cloud<ParcelType>& c);
 
-            static void writeFields(const DsmcCloud<ParcelType>& c);
+            static void writeFields(const Cloud<ParcelType>& c);
 
 
     // Ostream Operator

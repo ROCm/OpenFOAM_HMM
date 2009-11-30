@@ -52,7 +52,7 @@ addToRunTimeSelectionTable
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void Foam::processorPointPatch::initGeometry()
+void Foam::processorPointPatch::initGeometry(PstreamBuffers& pBufs)
 {
     // Algorithm:
     // Depending on whether the patch is a master or a slave, get the primitive
@@ -84,16 +84,16 @@ void Foam::processorPointPatch::initGeometry()
 
     if (Pstream::parRun())
     {
-        initPatchPatchPoints();
+        initPatchPatchPoints(pBufs);
     }
 }
 
 
-void Foam::processorPointPatch::calcGeometry()
+void Foam::processorPointPatch::calcGeometry(PstreamBuffers& pBufs)
 {
     if (Pstream::parRun())
     {
-        calcPatchPatchPoints();
+        calcPatchPatchPoints(pBufs);
     }
 
     // If it is not runing parallel or there are no global points
@@ -149,11 +149,11 @@ void Foam::processorPointPatch::calcGeometry()
 }
 
 
-void processorPointPatch::initPatchPatchPoints()
+void processorPointPatch::initPatchPatchPoints(PstreamBuffers& pBufs)
 {
     if (debug)
     {
-        Info<< "processorPointPatch::calcPatchPatchPoints() : "
+        Info<< "processorPointPatch::initPatchPatchPoints(PstreamBuffers&) : "
             << "constructing patch-patch points"
             << endl;
     }
@@ -229,11 +229,7 @@ void processorPointPatch::initPatchPatchPoints()
 
     // Send the patchPatchPoints to the neighbouring processor
 
-    OPstream toNeighbProc
-    (
-        Pstream::blocking,
-        neighbProcNo()
-    );
+    UOPstream toNeighbProc(neighbProcNo(), pBufs);
 
     toNeighbProc
         << ppmp.size()              // number of points for checking
@@ -242,21 +238,17 @@ void processorPointPatch::initPatchPatchPoints()
 
     if (debug)
     {
-        Info<< "processorPointPatch::calcPatchPatchPoints() : "
+        Info<< "processorPointPatch::initPatchPatchPoints() : "
             << "constructed patch-patch points"
             << endl;
     }
 }
 
 
-void Foam::processorPointPatch::calcPatchPatchPoints()
+void Foam::processorPointPatch::calcPatchPatchPoints(PstreamBuffers& pBufs)
 {
     // Get the patchPatchPoints from the neighbouring processor
-    IPstream fromNeighbProc
-    (
-        Pstream::blocking,
-        neighbProcNo()
-    );
+    UIPstream fromNeighbProc(neighbProcNo(), pBufs);
 
     label nbrNPoints(readLabel(fromNeighbProc));
     labelListList patchPatchPoints(fromNeighbProc);
@@ -273,7 +265,7 @@ void Foam::processorPointPatch::calcPatchPatchPoints()
     // separate.
     if (nbrNPoints != ppmp.size())
     {
-        WarningIn("processorPointPatch::calcPatchPatchPoints()")
+        WarningIn("processorPointPatch::calcPatchPatchPoints(PstreamBuffers&)")
             << "Processor patch " << name()
             << " has " << ppmp.size() << " points; coupled patch has "
             << nbrNPoints << " points." << endl
@@ -360,25 +352,25 @@ void Foam::processorPointPatch::calcPatchPatchPoints()
 }
 
 
-void processorPointPatch::initMovePoints(const pointField&)
+void processorPointPatch::initMovePoints(PstreamBuffers&, const pointField&)
 {}
 
 
-void processorPointPatch::movePoints(const pointField&)
+void processorPointPatch::movePoints(PstreamBuffers&, const pointField&)
 {}
 
 
-void processorPointPatch::initUpdateMesh()
+void processorPointPatch::initUpdateMesh(PstreamBuffers& pBufs)
 {
-    facePointPatch::initUpdateMesh();
-    processorPointPatch::initGeometry();
+    facePointPatch::initUpdateMesh(pBufs);
+    processorPointPatch::initGeometry(pBufs);
 }
 
 
-void processorPointPatch::updateMesh()
+void processorPointPatch::updateMesh(PstreamBuffers& pBufs)
 {
-    facePointPatch::updateMesh();
-    processorPointPatch::calcGeometry();
+    facePointPatch::updateMesh(pBufs);
+    processorPointPatch::calcGeometry(pBufs);
 }
 
 

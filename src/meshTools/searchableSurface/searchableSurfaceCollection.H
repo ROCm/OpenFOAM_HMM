@@ -125,6 +125,31 @@ public:
 
     // Member Functions
 
+        //- scaling vector per subsurface
+        const vectorField& scale() const
+        {
+            return scale_;
+        }
+
+        //- scaling vector per subsurface
+        vectorField& scale()
+        {
+            return scale_;
+        }
+
+        //- coordinate system per subsurface
+        const PtrList<coordinateSystem>& transform() const
+        {
+            return transform_;
+        }
+
+        //- coordinate system per subsurface
+        PtrList<coordinateSystem>& transform()
+        {
+            return transform_;
+        }
+
+
         virtual const wordList& regions() const;
 
         //- Whether supports volume type below

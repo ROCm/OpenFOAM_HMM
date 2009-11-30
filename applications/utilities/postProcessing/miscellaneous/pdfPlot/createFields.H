@@ -2,7 +2,7 @@
     (
         IOobject
         (
-            "pdfDictionary",
+            "pdfDict",
             runTime.constant(),
             runTime,
             IOobject::MUST_READ,
@@ -10,20 +10,9 @@
         )
     );
 
-    label nIntervals
-    (
-        readLabel(pdfDictionary.lookup("nIntervals"))
-    );
+    label nIntervals(readLabel(pdfDictionary.lookup("nIntervals")));
 
-    label nSamples
-    (
-        readLabel(pdfDictionary.lookup("nSamples"))
-    );
+    label nSamples(readLabel(pdfDictionary.lookup("nSamples")));
 
-    label samples[nIntervals];
-
-    for(label i=0;i<nIntervals;i++)
-    {
-        samples[i] = 0;
-    }
+    scalarField samples(nIntervals, 0);
 

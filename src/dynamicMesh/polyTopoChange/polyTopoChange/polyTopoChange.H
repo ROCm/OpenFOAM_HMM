@@ -63,20 +63,13 @@ SourceFiles
 #ifndef polyTopoChange_H
 #define polyTopoChange_H
 
-#include "autoPtr.H"
 #include "DynamicList.H"
 #include "labelList.H"
-#include "IOobject.H"
-#include "typeInfo.H"
-#include "labelPair.H"
-#include "PtrList.H"
-#include "cellList.H"
+#include "pointField.H"
 #include "Map.H"
 #include "HashSet.H"
 #include "mapPolyMesh.H"
-#include "CompactListList.H"
 #include "PackedBoolList.H"
-#include "primitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -95,6 +88,8 @@ class polyPatch;
 class dictionary;
 class topoAction;
 class objectMap;
+class IOobject;
+template<class T, class Container> class CompactListList;
 
 /*---------------------------------------------------------------------------*\
                            Class polyTopoChange Declaration
@@ -147,9 +142,6 @@ class polyTopoChange
 
             //- Patch for every external face (-1 for internal faces)
             DynamicList<label> region_;
-
-            //- Sub-patch (for processor faces).
-            Map<label> subRegion_;
 
             //- Owner for all faces
             DynamicList<label> faceOwner_;
@@ -264,9 +256,6 @@ class polyTopoChange
             const label zoneI
         ) const;
 
-        //- Return -1 or subRegion for face
-        label subRegion(const label faceI) const;
-
         //- Construct cells (in packed storage)
         void makeCells
         (
@@ -279,11 +268,15 @@ class polyTopoChange
         void makeCellCells
         (
             const label nActiveFaces,
-            CompactListList<label>& cellCells
+            CompactListList<label, labelList>& cellCells
         ) const;
 
         //- Cell ordering (bandCompression). Returns number of remaining cells.
-        label getCellOrder(const CompactListList<label>&, labelList&) const;
+        label getCellOrder
+        (
+            const CompactListList<label, labelList>&,
+            labelList&
+        ) const;
 
         //- Do upper-triangular ordering and patch ordering.
         void getFaceOrder
@@ -294,11 +287,7 @@ class polyTopoChange
 
             labelList& oldToNew,
             labelList& patchSizes,
-            labelList& patchStarts,
-
-            labelListList& subPatches,
-            labelListList& subPatchSizes,
-            labelListList& subPatchStarts
+            labelList& patchStarts
         ) const;
 
         //- Compact and reorder faces according to map
@@ -319,10 +308,7 @@ class polyTopoChange
             const bool orderPoints,
             label& nInternalPoints,
             labelList& patchSizes,
-            labelList& patchStarts,
-            labelListList& subPatches,
-            labelListList& subPatchSizes,
-            labelListList& subPatchStarts
+            labelList& patchStarts
         );
 
         //- Select either internal or external faces out of faceLabels
@@ -380,16 +366,6 @@ class polyTopoChange
             //- Rotate face by number of positions
             static face rotateFace(const face& f, const label nPos);
 
-            //- Order patch faces and merge into overall ordering
-            bool orderAndMerge
-            (
-                const polyPatch&,
-                const primitivePatch&,
-                const label start,
-                labelList& oldToNew,
-                labelList& rotation
-            ) const;
-
             //- Do all coupled patch face reordering
             void reorderCoupledFaces
             (
@@ -397,9 +373,6 @@ class polyTopoChange
                 const polyBoundaryMesh&,
                 const labelList& patchStarts,
                 const labelList& patchSizes,
-                const labelListList& subPatches,
-                const labelListList& subPatchSizes,
-                const labelListList& subPatchStarts,
                 const pointField& points
             );
 
@@ -413,9 +386,6 @@ class polyTopoChange
             pointField& newPoints,
             labelList& patchSizes,
             labelList& patchStarts,
-            labelListList& subPatches,
-            labelListList& subPatchSizes,
-            labelListList& subPatchStarts,
             List<objectMap>& pointsFromPoints,
             List<objectMap>& facesFromPoints,
             List<objectMap>& facesFromEdges,
@@ -533,12 +503,6 @@ public:
             //- Remove/merge point.
             void removePoint(const label, const label);
 
-            //- Helper function to get patchID and subPatchID for a global face
-            static labelPair whichPatch(const polyBoundaryMesh&, const label);
-
-            //- Helper function to get subPatchID for a global face on a patch
-            static label whichSubPatch(const polyPatch&, const label);
-
             //- Add face to cells. Return new face label.
             //  own,nei<0, zoneID>=0 : add inactive face (to end of face list)
             label addFace
@@ -552,8 +516,7 @@ public:
                 const bool flipFaceFlux,
                 const label patchID,
                 const label zoneID,
-                const bool zoneFlip,
-                const label subPatchID
+                const bool zoneFlip
             );
 
             //- Modify vertices or cell of face.
@@ -566,8 +529,7 @@ public:
                 const bool flipFaceFlux,
                 const label patchID,
                 const label zoneID,
-                const bool zoneFlip,
-                const label subPatchID
+                const bool zoneFlip
             );
 
             //- Remove/merge face.
@@ -622,7 +584,7 @@ public:
             (
                 autoPtr<fvMesh>& newMesh,
                 const IOobject& io,
-                const fvMesh& mesh,
+                const polyMesh& mesh,
                 const bool syncParallel = true,
                 const bool orderCells = false,
                 const bool orderPoints = false

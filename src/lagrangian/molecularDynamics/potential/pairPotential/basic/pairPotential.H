@@ -43,7 +43,6 @@ SourceFiles
 #include "List.H"
 #include "Pair.H"
 #include "Switch.H"
-#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

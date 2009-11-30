@@ -96,7 +96,7 @@ class cellTable
         //- Add required entries - MaterialType
         void addDefaults();
 
-        void setEntry(const label& id, const word& keyWord, const word& value);
+        void setEntry(const label id, const word& keyWord, const word& value);
 
         //- Disallow default bitwise copy construct
         cellTable(const cellTable&);
@@ -133,13 +133,13 @@ public:
 
         //- Return the name corresponding to id
         //  returns cellTable_ID if not otherwise defined
-        word name(const label& id) const;
+        word name(const label id) const;
 
         //- Return a Map of (id => name)
         Map<word> names() const;
 
         //- Return a Map of (id => names) selected by patterns
-        Map<word> names(const List<wordRe>& patterns) const;
+        Map<word> names(const UList<wordRe>& patterns) const;
 
         //- Return a Map of (id => name) for materialType (fluid | solid | shell)
         Map<word> selectType(const word& materialType) const;
@@ -157,13 +157,13 @@ public:
         Map<word> materialTypes() const;
 
         //- Assign material Type
-        void setMaterial(const label&, const word&);
+        void setMaterial(const label, const word&);
 
         //- Assign name
-        void setName(const label&, const word&);
+        void setName(const label, const word&);
 
         //- Assign default name if not already set
-        void setName(const label&);
+        void setName(const label);
 
         //- Read constant/cellTable
         void readDict

@@ -26,6 +26,7 @@ License
 
 #include "trajectoryModel.H"
 #include "addToRunTimeSelectionTable.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -88,22 +89,21 @@ void trajectoryCollisionModel::collideParcels(const scalar dt) const
 
         while (p2 != p1)
         {
-#           include "trajectoryCM.H"
+            #include "trajectoryCM.H"
 
             // remove coalesced droplets
-            if (p2().m() < VSMALL) 
+            if (p2().m() < VSMALL)
             {
                 spray::iterator tmpElmnt = p2;
                 ++tmpElmnt;
                 spray_.deleteParticle(p2());
                 p2 = tmpElmnt;
             }
-            else 
+            else
             {
                 ++p2;
             }
-
-        } // end - inner loop
+        }
 
         // remove coalesced droplets
         if (p1().m() < VSMALL)
@@ -117,9 +117,8 @@ void trajectoryCollisionModel::collideParcels(const scalar dt) const
         {
             ++p1;
         }
-    } // end - outer loop
-
-} // end
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

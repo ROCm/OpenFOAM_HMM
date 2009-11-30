@@ -59,9 +59,9 @@ void Foam::EulerCoordinateRotation::calcTransform
 
     if (inDegrees)
     {
-        phi   *= mathematicalConstant::pi/180.0;
-        theta *= mathematicalConstant::pi/180.0;
-        psi   *= mathematicalConstant::pi/180.0;
+        phi   *= constant::mathematical::pi/180.0;
+        theta *= constant::mathematical::pi/180.0;
+        psi   *= constant::mathematical::pi/180.0;
     }
 
     tensor::operator=

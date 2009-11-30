@@ -22,13 +22,11 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "shapeToCell.H"
 #include "polyMesh.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "hexMatcher.H"
 #include "cellFeatures.H"
 
@@ -58,8 +56,7 @@ Foam::topoSetSource::addToUsageTable Foam::shapeToCell::usage_
 
 
 // Angle for polys to be considered splitHexes.
-Foam::scalar Foam::shapeToCell::featureCos =
-    Foam::cos(10.0 * mathematicalConstant::pi/180.0);
+Foam::scalar Foam::shapeToCell::featureCos = Foam::cos(degToRad(10.0));
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

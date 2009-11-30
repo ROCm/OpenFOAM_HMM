@@ -55,12 +55,12 @@ namespace Foam
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::polyPatch::movePoints(const pointField& p)
+void Foam::polyPatch::movePoints(PstreamBuffers&, const pointField& p)
 {
     primitivePatch::movePoints(p);
 }
 
-void Foam::polyPatch::updateMesh()
+void Foam::polyPatch::updateMesh(PstreamBuffers&)
 {
     clearAddressing();
 }
@@ -156,6 +156,33 @@ Foam::polyPatch::polyPatch
         (
             bm.mesh().faces(),
             newSize,
+            newStart
+        ),
+        bm.mesh().points()
+    ),
+    start_(newStart),
+    boundaryMesh_(bm),
+    faceCellsPtr_(NULL),
+    mePtr_(NULL)
+{}
+
+
+Foam::polyPatch::polyPatch
+(
+    const polyPatch& pp,
+    const polyBoundaryMesh& bm,
+    const label index,
+    const unallocLabelList& mapAddressing,
+    const label newStart
+)
+:
+    patchIdentifier(pp, index),
+    primitivePatch
+    (
+        faceSubList
+        (
+            bm.mesh().faces(),
+            mapAddressing.size(),
             newStart
         ),
         bm.mesh().points()
@@ -307,12 +334,13 @@ void Foam::polyPatch::write(Ostream& os) const
 }
 
 
-void Foam::polyPatch::initOrder(const primitivePatch&) const
+void Foam::polyPatch::initOrder(PstreamBuffers&, const primitivePatch&) const
 {}
 
 
 bool Foam::polyPatch::order
 (
+    PstreamBuffers&,
     const primitivePatch&,
     labelList& faceMap,
     labelList& rotation

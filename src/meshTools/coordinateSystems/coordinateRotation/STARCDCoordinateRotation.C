@@ -60,9 +60,9 @@ void Foam::STARCDCoordinateRotation::calcTransform
 
     if (inDegrees)
     {
-        x *= mathematicalConstant::pi/180.0;
-        y *= mathematicalConstant::pi/180.0;
-        z *= mathematicalConstant::pi/180.0;
+        x *= constant::mathematical::pi/180.0;
+        y *= constant::mathematical::pi/180.0;
+        z *= constant::mathematical::pi/180.0;
     }
 
     tensor::operator=

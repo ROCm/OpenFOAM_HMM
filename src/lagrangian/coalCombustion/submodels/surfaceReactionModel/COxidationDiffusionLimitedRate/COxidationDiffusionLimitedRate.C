@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "COxidationDiffusionLimitedRate.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -102,7 +103,7 @@ Foam::scalar Foam::COxidationDiffusionLimitedRate<CloudType>::calculate
     const scalarField& YLiquid,
     const scalarField& YSolid,
     const scalarField& YMixture,
-    const scalarField& dMassVolatile,
+    const scalar N,
     scalarField& dMassGas,
     scalarField& dMassLiquid,
     scalarField& dMassSolid,
@@ -123,8 +124,7 @@ Foam::scalar Foam::COxidationDiffusionLimitedRate<CloudType>::calculate
     const scalar YO2 = this->owner().mcCarrierThermo().Y(O2GlobalId_)[cellI];
 
     // Change in C mass [kg]
-    scalar dmC =
-        4.0*mathematicalConstant::pi*d*D_*YO2*Tc*rhoc/(Sb_*(T + Tc))*dt;
+    scalar dmC = 4.0*constant::mathematical::pi*d*D_*YO2*Tc*rhoc/(Sb_*(T + Tc))*dt;
 
     // Limit mass transfer by availability of C
     dmC = min(mass*fComb, dmC);

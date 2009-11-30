@@ -63,6 +63,7 @@ class scotchDecomp
         (
             const List<int>& adjncy,
             const List<int>& xadj,
+            const scalarField& cWeights,
             List<int>& finalDecomp
         );
 
@@ -103,7 +104,11 @@ public:
 
         //- Return for every coordinate the wanted processor number. Use the
         //  mesh connectivity (if needed)
-        virtual labelList decompose(const pointField&);
+        virtual labelList decompose
+        (
+            const pointField& points,
+            const scalarField& pointWeights
+        );
 
         //- Return for every coordinate the wanted processor number. Gets
         //  passed agglomeration map (from fine to coarse cells) and coarse cell
@@ -112,7 +117,8 @@ public:
         virtual labelList decompose
         (
             const labelList& agglom,
-            const pointField&
+            const pointField& regionPoints,
+            const scalarField& regionWeights
         );
 
         //- Return for every coordinate the wanted processor number. Explicitly
@@ -125,15 +131,8 @@ public:
         virtual labelList decompose
         (
             const labelListList& globalCellCells,
-            const pointField& cc
-        );
-
-        //- Helper to convert cellcells into compact row storage
-        static void calcMetisCSR
-        (
-            const labelListList& globalCellCells,
-            List<int>& adjncy,
-            List<int>& xadj
+            const pointField& cc,
+            const scalarField& cWeights
         );
 
 };

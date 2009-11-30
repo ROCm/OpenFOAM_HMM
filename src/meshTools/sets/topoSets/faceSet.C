@@ -44,6 +44,7 @@ defineTypeNameAndDebug(faceSet, 0);
 
 addToRunTimeSelectionTable(topoSet, faceSet, word);
 addToRunTimeSelectionTable(topoSet, faceSet, size);
+addToRunTimeSelectionTable(topoSet, faceSet, set);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -77,6 +78,18 @@ faceSet::faceSet
 )
 :
     topoSet(mesh, name, size, w)
+{}
+
+
+faceSet::faceSet
+(
+    const polyMesh& mesh,
+    const word& name,
+    const topoSet& set,
+    writeOption w
+)
+:
+    topoSet(mesh, name, set, w)
 {}
 
 

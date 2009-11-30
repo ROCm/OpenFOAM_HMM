@@ -1,5 +1,6 @@
 global/global.Cver
-global/dimensionedConstants/dimensionedConstants.C
+global/constants/constants.C
+global/constants/dimensionedConstants.C
 global/argList/argList.C
 global/clock/clock.C
 
@@ -60,8 +61,8 @@ $(sha1)/SHA1Digest.C
 
 primitives/random/Random.C
 
-containers/HashTables/HashTable/HashTableName.C
-containers/HashTables/StaticHashTable/StaticHashTableName.C
+containers/HashTables/HashTable/HashTableCore.C
+containers/HashTables/StaticHashTable/StaticHashTableCore.C
 containers/Lists/SortableList/ParSortableListName.C
 containers/Lists/PackedList/PackedListName.C
 containers/Lists/ListOps/ListOps.C
@@ -107,11 +108,14 @@ StringStreams = $(Streams)/StringStreams
 $(StringStreams)/StringStreamsPrint.C
 
 Pstreams = $(Streams)/Pstreams
-$(Pstreams)/Pstream.C
-$(Pstreams)/PstreamCommsStruct.C
+$(Pstreams)/UIPstream.C
 $(Pstreams)/IPstream.C
+$(Pstreams)/UPstream.C
+$(Pstreams)/UPstreamCommsStruct.C
+$(Pstreams)/Pstream.C
+$(Pstreams)/UOPstream.C
 $(Pstreams)/OPstream.C
-$(Pstreams)/PstreamsPrint.C
+$(Pstreams)/PstreamBuffers.C
 
 dictionary = db/dictionary
 $(dictionary)/dictionary.C
@@ -349,6 +353,9 @@ $(globalMeshData)/globalIndex.C
 
 $(polyMesh)/syncTools/syncTools.C
 
+zone = $(polyMesh)/zones/zone
+$(zone)/zone.C
+
 cellZone = $(polyMesh)/zones/cellZone
 $(cellZone)/cellZone.C
 $(cellZone)/newCellZone.C
@@ -482,7 +489,6 @@ $(pointPatchFields)/pointPatchField/pointPatchFields.C
 
 basicPointPatchFields = $(pointPatchFields)/basic
 $(basicPointPatchFields)/calculated/calculatedPointPatchFields.C
-$(basicPointPatchFields)/generic/genericPointPatchFields.C
 $(basicPointPatchFields)/coupled/coupledPointPatchFields.C
 $(basicPointPatchFields)/value/valuePointPatchFields.C
 $(basicPointPatchFields)/fixedValue/fixedValuePointPatchFields.C

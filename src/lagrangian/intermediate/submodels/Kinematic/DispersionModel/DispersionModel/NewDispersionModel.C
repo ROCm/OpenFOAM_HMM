@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "DispersionModel.H"
@@ -58,7 +56,7 @@ Foam::DispersionModel<CloudType>::New
             << DispersionModelType
             << ", constructor not in hash table" << nl << nl
             << "    Valid DispersionModel types are:" << nl
-            << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
+            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
     }
 
     return autoPtr<DispersionModel<CloudType> >(cstrIter()(dict, owner));

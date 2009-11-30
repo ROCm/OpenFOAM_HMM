@@ -34,7 +34,7 @@ Description
 #include "fvCFD.H"
 #include "basicPsiThermo.H"
 #include "RASModel.H"
-#include "porousZones.H"
+#include "thermalPorousZones.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

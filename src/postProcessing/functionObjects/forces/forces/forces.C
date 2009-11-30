@@ -61,7 +61,7 @@ Foam::tmp<Foam::volSymmTensorField> Foam::forces::devRhoReff() const
         const incompressible::RASModel& ras
             = obr_.lookupObject<incompressible::RASModel>("RASProperties");
 
-        return rhoRef_*ras.devReff();
+        return rho()*ras.devReff();
     }
     else if (obr_.foundObject<compressible::LESModel>("LESProperties"))
     {
@@ -75,7 +75,7 @@ Foam::tmp<Foam::volSymmTensorField> Foam::forces::devRhoReff() const
         const incompressible::LESModel& les
             = obr_.lookupObject<incompressible::LESModel>("LESProperties");
 
-        return rhoRef_*les.devBeff();
+        return rho()*les.devBeff();
     }
     else if (obr_.foundObject<basicThermo>("thermophysicalProperties"))
     {
@@ -97,7 +97,7 @@ Foam::tmp<Foam::volSymmTensorField> Foam::forces::devRhoReff() const
 
         const volVectorField& U = obr_.lookupObject<volVectorField>(UName_);
 
-        return -rhoRef_*laminarT.nu()*dev(twoSymm(fvc::grad(U)));
+        return -rho()*laminarT.nu()*dev(twoSymm(fvc::grad(U)));
     }
     else if (obr_.foundObject<dictionary>("transportProperties"))
     {
@@ -108,7 +108,7 @@ Foam::tmp<Foam::volSymmTensorField> Foam::forces::devRhoReff() const
 
         const volVectorField& U = obr_.lookupObject<volVectorField>(UName_);
 
-        return -rhoRef_*nu*dev(twoSymm(fvc::grad(U)));
+        return -rho()*nu*dev(twoSymm(fvc::grad(U)));
     }
     else
     {
@@ -121,6 +121,34 @@ Foam::tmp<Foam::volSymmTensorField> Foam::forces::devRhoReff() const
 }
 
 
+Foam::tmp<Foam::volScalarField> Foam::forces::rho() const
+{
+    if (rhoName_ == "rhoInf")
+    {
+        const fvMesh& mesh = refCast<const fvMesh>(obr_);
+
+        return tmp<volScalarField>
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    "rho",
+                    mesh.time().timeName(),
+                    mesh
+                ),
+                mesh,
+                dimensionedScalar("rho", dimDensity, rhoRef_)
+            )
+        );
+    }
+    else
+    {
+        return(obr_.lookupObject<volScalarField>(rhoName_));
+    }
+}
+
+
 Foam::scalar Foam::forces::rho(const volScalarField& p) const
 {
     if (p.dimensions() == dimPressure)
@@ -129,6 +157,13 @@ Foam::scalar Foam::forces::rho(const volScalarField& p) const
     }
     else
     {
+        if (rhoName_ != "rhoInf")
+        {
+            FatalErrorIn("forces::rho(const volScalarField& p)")
+                << "Dynamic pressure is expected but kinematic is provided."
+                << exit(FatalError);
+        }
+
         return rhoRef_;
     }
 }
@@ -149,11 +184,13 @@ Foam::forces::forces
     active_(true),
     log_(false),
     patchSet_(),
-    pName_(""),
-    UName_(""),
+    pName_(word::null),
+    UName_(word::null),
+    rhoName_(word::null),
     directForceDensity_(false),
     fDName_(""),
-    rhoRef_(0),
+    rhoRef_(VGREAT),
+    pRef_(0),
     CofR_(vector::zero),
     forcesFilePtr_(NULL)
 {
@@ -222,24 +259,39 @@ void Foam::forces::read(const dictionary& dict)
             // Optional entries U and p
             pName_ = dict.lookupOrDefault<word>("pName", "p");
             UName_ = dict.lookupOrDefault<word>("UName", "U");
+            rhoName_ = dict.lookupOrDefault<word>("rhoName", "rho");
 
-            // Check whether UName and pName exists, if not deactivate forces
+            // Check whether UName, pName and rhoName exists,
+            // if not deactivate forces
             if
             (
                 !obr_.foundObject<volVectorField>(UName_)
              || !obr_.foundObject<volScalarField>(pName_)
+             || (
+                    rhoName_ != "rhoInf"
+                 && !obr_.foundObject<volScalarField>(rhoName_)
+                )
             )
             {
                 active_ = false;
+
                 WarningIn("void forces::read(const dictionary& dict)")
-                << "Could not find " << UName_ << " or "
-                    << pName_ << " in database." << nl
-                    << "    De-activating forces."
+                    << "Could not find " << UName_ << ", " << pName_;
+
+                if (rhoName_ != "rhoInf")
+                {
+                    Info<< " or " << rhoName_;
+                }
+
+                Info<< " in database." << nl << "    De-activating forces."
                     << endl;
             }
 
             // Reference density needed for incompressible calculations
             rhoRef_ = readScalar(dict.lookup("rhoInf"));
+
+            // Reference pressure, 0 by default
+            pRef_ = dict.lookupOrDefault<scalar>("pRef", 0.0);
         }
 
         // Centre of rotation for moment calculations
@@ -262,16 +314,18 @@ void Foam::forces::makeFile()
         if (Pstream::master())
         {
             fileName forcesDir;
+            word startTimeName =
+                obr_.time().timeName(obr_.time().startTime().value());
+
             if (Pstream::parRun())
             {
                 // Put in undecomposed case (Note: gives problems for
                 // distributed data running)
-                forcesDir =
-                obr_.time().path()/".."/name_/obr_.time().timeName();
+                forcesDir = obr_.time().path()/".."/name_/startTimeName;
             }
             else
             {
-                forcesDir = obr_.time().path()/name_/obr_.time().timeName();
+                forcesDir = obr_.time().path()/name_/startTimeName;
             }
 
             // Create directory if does not exist.
@@ -392,13 +446,16 @@ Foam::forces::forcesMoments Foam::forces::calcForcesMoment() const
         const volSymmTensorField::GeometricBoundaryField& devRhoReffb
             = tdevRhoReff().boundaryField();
 
+        // Scale pRef by density for incompressible simulations
+        scalar pRef = pRef_/rho(p);
+
         forAllConstIter(labelHashSet, patchSet_, iter)
         {
             label patchi = iter.key();
 
             vectorField Md = mesh.C().boundaryField()[patchi] - CofR_;
 
-            vectorField pf = Sfb[patchi]*p.boundaryField()[patchi];
+            vectorField pf = Sfb[patchi]*(p.boundaryField()[patchi] - pRef);
 
             fm.first().first() += rho(p)*sum(pf);
             fm.second().first() += rho(p)*sum(Md ^ pf);

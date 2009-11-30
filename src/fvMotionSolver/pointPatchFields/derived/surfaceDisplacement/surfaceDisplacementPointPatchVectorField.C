@@ -64,7 +64,7 @@ void surfaceDisplacementPointPatchVectorField::calcProjection
     const pointField& localPoints = patch().localPoints();
     const labelList& meshPoints = patch().meshPoints();
 
-    //const scalar deltaT = mesh.time().deltaT().value();
+    //const scalar deltaT = mesh.time().deltaTValue();
 
     // Construct large enough vector in direction of projectDir so
     // we're guaranteed to hit something.
@@ -329,7 +329,7 @@ surfaceDisplacementPointPatchVectorField
     surfacesDict_(dict.subDict("geometry")),
     projectMode_(projectModeNames_.read(dict.lookup("projectMode"))),
     projectDir_(dict.lookup("projectDirection")),
-    wedgePlane_(readLabel(dict.lookup("wedgePlane"))),
+    wedgePlane_(dict.lookupOrDefault("wedgePlane", -1)),
     frozenPointsZone_(dict.lookupOrDefault("frozenPointsZone", word::null))
 {
     if (velocity_.x() < 0 || velocity_.y() < 0 || velocity_.z() < 0)
@@ -451,7 +451,7 @@ void surfaceDisplacementPointPatchVectorField::updateCoeffs()
 
     // Clip offset to maximum displacement possible: velocity*timestep
 
-    const scalar deltaT = mesh.time().deltaT().value();
+    const scalar deltaT = mesh.time().deltaTValue();
     const vector clipVelocity = velocity_*deltaT;
 
     forAll(displacement, i)

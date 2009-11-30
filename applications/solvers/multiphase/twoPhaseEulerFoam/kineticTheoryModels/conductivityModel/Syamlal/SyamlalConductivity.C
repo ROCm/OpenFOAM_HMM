@@ -69,7 +69,7 @@ Foam::tmp<Foam::volScalarField> Foam::SyamlalConductivity::kappa
     const dimensionedScalar& e
 ) const
 {
-    const scalar sqrtPi = sqrt(mathematicalConstant::pi);
+    const scalar sqrtPi = sqrt(constant::mathematical::pi);
 
     return rhoa*da*sqrt(Theta)*
     (

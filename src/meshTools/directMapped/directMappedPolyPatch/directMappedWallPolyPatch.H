@@ -65,22 +65,22 @@ class directMappedWallPolyPatch
 protected:
 
         //- Initialise the calculation of the patch geometry
-        virtual void initGeometry();
+        virtual void initGeometry(PstreamBuffers&);
 
         //- Calculate the patch geometry
-        virtual void calcGeometry();
+        virtual void calcGeometry(PstreamBuffers&);
 
         //- Initialise the patches for moving points
-        virtual void initMovePoints(const pointField&);
+        virtual void initMovePoints(PstreamBuffers&, const pointField&);
 
         //- Correct patches after moving points
-        virtual void movePoints(const pointField&);
+        virtual void movePoints(PstreamBuffers&, const pointField&);
 
         //- Initialise the update of the patch topology
-        virtual void initUpdateMesh();
+        virtual void initUpdateMesh(PstreamBuffers&);
 
         //- Update of the patch topology
-        virtual void updateMesh();
+        virtual void updateMesh(PstreamBuffers&);
 
 
 public:
@@ -98,6 +98,20 @@ public:
             const label size,
             const label start,
             const label index,
+            const polyBoundaryMesh& bm
+        );
+
+        //- Construct from components
+        directMappedWallPolyPatch
+        (
+            const word& name,
+            const label size,
+            const label start,
+            const label index,
+            const word& sampleRegion,
+            const directMappedPatchBase::sampleMode mode,
+            const word& samplePatch,
+            const vectorField& offset,
             const polyBoundaryMesh& bm
         );
 
@@ -128,6 +142,16 @@ public:
             const label newStart
         );
 
+        //- Construct given the original patch and a map
+        directMappedWallPolyPatch
+        (
+            const directMappedWallPolyPatch& pp,
+            const polyBoundaryMesh& bm,
+            const label index,
+            const unallocLabelList& mapAddressing,
+            const label newStart
+        );
+
         //- Construct and return a clone, resetting the boundary mesh
         virtual autoPtr<polyPatch> clone(const polyBoundaryMesh& bm) const
         {
@@ -152,6 +176,29 @@ public:
                     bm,
                     index,
                     newSize,
+                    newStart
+                )
+            );
+        }
+
+        //- Construct and return a clone, resetting the face list
+        //  and boundary mesh
+        virtual autoPtr<polyPatch> clone
+        (
+            const polyBoundaryMesh& bm,
+            const label index,
+            const unallocLabelList& mapAddressing,
+            const label newStart
+        ) const
+        {
+            return autoPtr<polyPatch>
+            (
+                new directMappedWallPolyPatch
+                (
+                    *this,
+                    bm,
+                    index,
+                    mapAddressing,
                     newStart
                 )
             );

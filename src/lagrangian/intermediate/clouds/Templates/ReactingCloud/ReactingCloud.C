@@ -67,10 +67,11 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
-    basicThermo& thermo
+    basicThermo& thermo,
+    bool readFields
 )
 :
-    ThermoCloud<ParcelType>(cloudName, rho, U, g, thermo),
+    ThermoCloud<ParcelType>(cloudName, rho, U, g, thermo, false),
     reactingCloud(),
     constProps_(this->particleProperties()),
     mcCarrierThermo_
@@ -117,6 +118,11 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
                 dimensionedScalar("zero", dimMass, 0.0)
             )
         );
+    }
+
+    if (readFields)
+    {
+        ParcelType::readFields(*this);
     }
 }
 

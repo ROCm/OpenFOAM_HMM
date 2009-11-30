@@ -82,7 +82,6 @@ void reitzKHRT::breakupParcel
     const liquidMixture& fuels
 ) const
 {
-
     label celli = p.cell();
     scalar T = p.T();
     scalar r = 0.5*p.d();
@@ -93,7 +92,7 @@ void reitzKHRT::breakupParcel
     scalar muLiquid = fuels.mu(pc, T, p.X());
     scalar rhoGas = spray_.rho()[celli];
     scalar Np = p.N(rhoLiquid);
-    scalar semiMass = Np*pow(p.d(), 3.0);
+    scalar semiMass = Np*pow3(p.d());
 
     scalar weGas      = p.We(vel, rhoGas, sigma);
     scalar weLiquid   = p.We(vel, rhoLiquid, sigma);
@@ -110,7 +109,7 @@ void reitzKHRT::breakupParcel
     scalar omegaKH =
         (0.34 + 0.38*pow(weGas, 1.5))
        /((1 + ohnesorge)*(1 + 1.4*pow(taylor, 0.6)))
-       *sqrt(sigma/(rhoLiquid*pow(r, 3)));
+       *sqrt(sigma/(rhoLiquid*pow3(r)));
 
     // corresponding KH wave-length.
     scalar lambdaKH =
@@ -138,7 +137,7 @@ void reitzKHRT::breakupParcel
     scalar KRT = sqrt(helpVariable/(3.0*sigma + VSMALL));
 
     // wavelength of the fastest growing RT frequency
-    scalar lambdaRT = 2.0*mathematicalConstant::pi*cRT_/(KRT + VSMALL);
+    scalar lambdaRT = constant::mathematical::twoPi*cRT_/(KRT + VSMALL);
 
     // if lambdaRT < diameter, then RT waves are growing on the surface
     // and we start to keep track of how long they have been growing
@@ -165,14 +164,13 @@ void reitzKHRT::breakupParcel
         // no breakup below Weber = 12
         if (weGas > weberLimit_)
         {
-
             label injector = label(p.injector());
             scalar fraction = deltaT/tauKH;
 
             // reduce the diameter according to the rate-equation
             p.d() = (fraction*dc + p.d())/(1.0 + fraction);
 
-            scalar ms = rhoLiquid*Np*pow3(dc)*mathematicalConstant::pi/6.0;
+            scalar ms = rhoLiquid*Np*pow3(dc)*constant::mathematical::pi/6.0;
             p.ms() += ms;
 
             // Total number of parcels for the whole injection event
@@ -195,10 +193,7 @@ void reitzKHRT::breakupParcel
                 // mass of stripped child parcel
                 scalar mc = p.ms();
                 // Prevent child parcel from taking too much mass
-                if (mc > 0.5*p.m())
-                {
-                    mc = 0.5*p.m();
-                }
+                mc = min(mc, 0.5*p.m());
 
                 spray_.addParticle
                 (

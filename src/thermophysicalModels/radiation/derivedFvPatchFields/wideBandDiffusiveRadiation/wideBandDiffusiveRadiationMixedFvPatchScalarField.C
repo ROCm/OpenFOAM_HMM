@@ -31,8 +31,10 @@ License
 
 #include "fvDOM.H"
 #include "wideBandAbsorptionEmission.H"
-#include "radiationConstants.H"
-#include "mathematicalConstants.H"
+#include "constants.H"
+
+using namespace Foam::constant;
+using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -84,8 +86,7 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
         patch().lookupPatchField<volScalarField, scalar>(TName_);
 
     refValue() =
-        emissivity_*4.0*radiation::sigmaSB.value()*pow4(Tp)
-       /Foam::mathematicalConstant::pi;
+        emissivity_*4.0*physicoChemical::sigma.value()*pow4(Tp)/pi;
     refGrad() = 0.0;
 
     if (dict.found("value"))
@@ -197,8 +198,7 @@ updateCoeffs()
                 (
                     Ir*(1.0 - emissivity_)
                   + emissivity_*Eb[faceI]
-                )
-               /mathematicalConstant::pi;
+                )/pi;
         }
         else
         {

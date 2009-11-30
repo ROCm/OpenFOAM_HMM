@@ -71,7 +71,7 @@ void spray::inject()
             // deltaT is the duration of injection during this timestep
             scalar deltaT = min
             (
-                runTime_.deltaT().value(),
+                runTime_.deltaTValue(),
                 min
                 (
                     time - it->tsoi(),
@@ -150,8 +150,8 @@ void spray::inject()
                         scalar dt = time - toi;
 
                         pPtr->stepFraction() =
-                            (runTime_.deltaT().value() - dt)
-                           /runTime_.deltaT().value();
+                            (runTime_.deltaTValue() - dt)
+                           /runTime_.deltaTValue();
 
                         bool keepParcel = pPtr->move(*this);
 

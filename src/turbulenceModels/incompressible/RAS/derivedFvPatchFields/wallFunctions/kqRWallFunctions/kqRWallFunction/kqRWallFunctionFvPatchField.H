@@ -147,7 +147,7 @@ public:
         // I-O
 
             //- Write
-            void write(Ostream&) const;
+            virtual void write(Ostream&) const;
 };
 
 

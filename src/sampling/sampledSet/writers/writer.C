@@ -49,7 +49,7 @@ Foam::autoPtr<Foam::writer<Type> > Foam::writer<Type>::New
         )   << "Unknown write type " << writeType
             << endl << endl
             << "Valid write types : " << endl
-            << wordConstructorTablePtr_->toc()
+            << wordConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
@@ -110,7 +110,7 @@ void Foam::writer<Type>::writeTable
 
         os << token::SPACE;
         write(values[pointI], os);
-        os << endl;
+        os << nl;
     }
 }
 
@@ -133,7 +133,7 @@ void Foam::writer<Type>::writeTable
             const List<Type>& values = *valuesPtrList[i];
             write(values[pointI], os);
         }
-        os << endl;
+        os << nl;
     }
 }
 
@@ -179,7 +179,7 @@ Foam::Ostream& Foam::writer<Type>::writeVS
 
         if (d <= VSType::nComponents-1)
         {
-            os << token::TAB;
+            os << ' ' << token::TAB;
         }
     }
     return os;

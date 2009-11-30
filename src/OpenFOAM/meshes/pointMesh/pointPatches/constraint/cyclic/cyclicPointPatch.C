@@ -50,13 +50,13 @@ addToRunTimeSelectionTable
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void Foam::cyclicPointPatch::initGeometry()
+void Foam::cyclicPointPatch::initGeometry(PstreamBuffers&)
 {
     transformPairs_.setSize(0);
 }
 
 
-void Foam::cyclicPointPatch::calcGeometry()
+void Foam::cyclicPointPatch::calcGeometry(PstreamBuffers&)
 {
     const edgeList& cp = cyclicPolyPatch_.coupledPoints();
     const labelList& mp = cyclicPolyPatch_.meshPoints();
@@ -128,16 +128,20 @@ void Foam::cyclicPointPatch::calcGeometry()
             }
             else if (pointMap[cp[i][0]] == -1 && pointMap[cp[i][1]] != -1)
             {
-                FatalErrorIn("cyclicPointPatch::calcGeometry() const")
-                    << "Point " << cp[i][0] << "of point-pair " << i
+                FatalErrorIn
+                (
+                    "cyclicPointPatch::calcGeometry(PstreamBuffers&) const"
+                )   << "Point " << cp[i][0] << "of point-pair " << i
                     << " is a global point but the other point "
                     << cp[i][1] << " is not"
                     << exit(FatalError);
             }
             else if (pointMap[cp[i][0]] != -1 && pointMap[cp[i][1]] == -1)
             {
-                FatalErrorIn("cyclicPointPatch::calcGeometry() const")
-                    << "Point " << cp[i][1] << "of point-pair " << i
+                FatalErrorIn
+                (
+                    "cyclicPointPatch::calcGeometry(PstreamBuffers&) const"
+                )   << "Point " << cp[i][1] << "of point-pair " << i
                     << " is a global point but the other point "
                     << cp[i][0] << " is not"
                     << exit(FatalError);
@@ -149,25 +153,25 @@ void Foam::cyclicPointPatch::calcGeometry()
 }
 
 
-void cyclicPointPatch::initMovePoints(const pointField&)
+void cyclicPointPatch::initMovePoints(PstreamBuffers&, const pointField&)
 {}
 
 
-void cyclicPointPatch::movePoints(const pointField&)
+void cyclicPointPatch::movePoints(PstreamBuffers&, const pointField&)
 {}
 
 
-void cyclicPointPatch::initUpdateMesh()
+void cyclicPointPatch::initUpdateMesh(PstreamBuffers& pBufs)
 {
-    facePointPatch::initUpdateMesh();
-    cyclicPointPatch::initGeometry();
+    facePointPatch::initUpdateMesh(pBufs);
+    cyclicPointPatch::initGeometry(pBufs);
 }
 
 
-void cyclicPointPatch::updateMesh()
+void cyclicPointPatch::updateMesh(PstreamBuffers& pBufs)
 {
-    facePointPatch::updateMesh();
-    cyclicPointPatch::calcGeometry();
+    facePointPatch::updateMesh(pBufs);
+    cyclicPointPatch::calcGeometry(pBufs);
 }
 
 

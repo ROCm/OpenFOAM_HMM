@@ -31,7 +31,6 @@ Description
 SourceFiles
     noBreakupI.H
     noBreakup.C
-    noBreakupIO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class noBreakup Declaration
+                         Class noBreakup Declaration
 \*---------------------------------------------------------------------------*/
 
 class noBreakup
@@ -63,16 +62,11 @@ public:
     // Constructors
 
         //- Construct from components
-        noBreakup
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        noBreakup(const dictionary& dict, spray& sm);
 
 
     // Destructor
-
-        ~noBreakup();
+    virtual ~noBreakup();
 
 
     // Member Functions
@@ -84,7 +78,6 @@ public:
             const vector& vel,
             const liquidMixture& fuels
         ) const;
-
 };
 
 

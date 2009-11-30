@@ -51,7 +51,7 @@ addToRunTimeSelectionTable
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void facePointPatch::initGeometry()
+void facePointPatch::initGeometry(PstreamBuffers&)
 {
     meshPoints_.setSize(0);
     localPoints_.setSize(0);
@@ -59,25 +59,25 @@ void facePointPatch::initGeometry()
 }
 
 
-void facePointPatch::calcGeometry()
+void facePointPatch::calcGeometry(PstreamBuffers&)
 {}
 
 
-void facePointPatch::initMovePoints(const pointField&)
+void facePointPatch::initMovePoints(PstreamBuffers&, const pointField&)
 {}
 
 
-void facePointPatch::movePoints(const pointField&)
+void facePointPatch::movePoints(PstreamBuffers&, const pointField&)
 {}
 
 
-void facePointPatch::initUpdateMesh()
+void facePointPatch::initUpdateMesh(PstreamBuffers& pBufs)
 {
-    facePointPatch::initGeometry();
+    facePointPatch::initGeometry(pBufs);
 }
 
 
-void facePointPatch::updateMesh()
+void facePointPatch::updateMesh(PstreamBuffers&)
 {}
 
 

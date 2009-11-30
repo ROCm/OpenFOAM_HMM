@@ -50,6 +50,34 @@ namespace Foam
 
     const NamedEnum<directMappedPatchBase::sampleMode, 3>
         directMappedPatchBase::sampleModeNames_;
+
+
+    //- Private class for finding nearest
+    //  - point+local index
+    //  - sqr(distance)
+    //  - processor
+    typedef Tuple2<pointIndexHit, Tuple2<scalar, label> > nearInfo;
+
+    class nearestEqOp
+    {
+
+    public:
+
+        void operator()(nearInfo& x, const nearInfo& y) const
+        {
+            if (y.first().hit())
+            {
+                if (!x.first().hit())
+                {
+                    x = y;
+                }
+                else if (y.second().first() < x.second().first())
+                {
+                    x = y;
+                }
+            }
+        }
+    };
 }
 
 
@@ -70,7 +98,7 @@ void Foam::directMappedPatchBase::collectSamples
     labelListList globalFaces(Pstream::nProcs());
 
     globalFc[Pstream::myProcNo()] = patch_.faceCentres();
-    globalSamples[Pstream::myProcNo()] = globalFc[Pstream::myProcNo()]+offset_;
+    globalSamples[Pstream::myProcNo()] = globalFc[Pstream::myProcNo()]+offsets_;
     globalFaces[Pstream::myProcNo()] = identity(patch_.size());
 
     // Distribute to all processors
@@ -365,15 +393,25 @@ void Foam::directMappedPatchBase::calcMapping() const
 
     if
     (
-        offset_ == vector::zero
+        gAverage(mag(offsets_)) <= ROOTVSMALL
+     && mode_ == NEARESTPATCHFACE
      && sampleRegion_ == patch_.boundaryMesh().mesh().name()
+     && samplePatch_ == patch_.name()
     )
     {
-        FatalErrorIn("directMappedPatchBase::calcMapping() const")
-            << "Invalid offset " << offset_ << endl
+        WarningIn("directMappedPatchBase::calcMapping() const")
+            << "Invalid offset " << offsets_ << endl
             << "Offset is the vector added to the patch face centres to"
-            << " find the cell supplying the data."
-            << exit(FatalError);
+            << " find the patch face supplying the data." << endl
+            << "Setting it to " << offsets_
+            << " on the same patch, on the same region"
+            << " will find the faces themselves which does not make sense"
+            << " for anything but testing." << endl
+            << "patch_:" << patch_.name() << endl
+            << "sampleRegion_:" << sampleRegion_ << endl
+            << "mode_:" << sampleModeNames_[mode_] << endl
+            << "samplePatch_:" << samplePatch_ << endl
+            << "offsets_:" << offsets_ << endl;
     }
 
 
@@ -422,7 +460,7 @@ void Foam::directMappedPatchBase::calcMapping() const
           + "_directMapped.obj"
         );
         Pout<< "Dumping mapping as lines from patch faceCentres to"
-            << " sampled cellCentres to file " << str.name() << endl;
+            << " sampled cell/faceCentres to file " << str.name() << endl;
 
         label vertI = 0;
 
@@ -437,34 +475,38 @@ void Foam::directMappedPatchBase::calcMapping() const
     }
 
 
-    // Check that actual offset vector (sampleLocations - patchFc) is more or
-    // less constant.
-    if (Pstream::master())
-    {
-        const scalarField magOffset(mag(sampleLocations - patchFc));
-        const scalar avgOffset(average(magOffset));
-
-        forAll(magOffset, sampleI)
-        {
-            if (mag(magOffset[sampleI]-avgOffset) > max(SMALL, 0.001*avgOffset))
-            {
-                WarningIn("directMappedPatchBase::calcMapping() const")
-                    << "The actual cell/face centres picked up using offset "
-                    << offset_ << " are not" << endl
-                    << "    on a single plane."
-                    << " This might give numerical problems." << endl
-                    << "    At patchface " << patchFc[sampleI]
-                    << " the sampled cell/face " << sampleLocations[sampleI]
-                    << endl
-                    << "    is not on a plane " << avgOffset
-                    << " offset from the patch." << endl
-                    << "    You might want to shift your plane offset."
-                    << " Set the debug flag to get a dump of sampled cells."
-                    << endl;
-                break;
-            }
-        }
-    }
+    //// Check that actual offset vector (sampleLocations - patchFc) is more or
+    //// less constant.
+    //if (Pstream::master())
+    //{
+    //    const scalarField magOffset(mag(sampleLocations - patchFc));
+    //    const scalar avgOffset(average(magOffset));
+    //
+    //    forAll(magOffset, sampleI)
+    //    {
+    //        if
+    //        (
+    //            mag(magOffset[sampleI]-avgOffset)
+    //          > max(SMALL, 0.001*avgOffset)
+    //        )
+    //        {
+    //            WarningIn("directMappedPatchBase::calcMapping() const")
+    //                << "The actual cell/face centres picked up using offset "
+    //                << offsets_ << " are not" << endl
+    //                << "    on a single plane."
+    //                << " This might give numerical problems." << endl
+    //                << "    At patchface " << patchFc[sampleI]
+    //                << " the sampled cell/face " << sampleLocations[sampleI]
+    //                << endl
+    //                << "    is not on a plane " << avgOffset
+    //                << " offset from the patch." << endl
+    //                << "    You might want to shift your plane offset."
+    //                << " Set the debug flag to get a dump of sampled cells."
+    //                << endl;
+    //            break;
+    //        }
+    //    }
+    //}
 
 
     // Determine schedule.
@@ -546,14 +588,36 @@ void Foam::directMappedPatchBase::calcMapping() const
 
 Foam::directMappedPatchBase::directMappedPatchBase
 (
-     const polyPatch& pp
+    const polyPatch& pp
 )
 :
     patch_(pp),
     sampleRegion_(patch_.boundaryMesh().mesh().name()),
     mode_(NEARESTPATCHFACE),
     samplePatch_("none"),
+    uniformOffset_(true),
     offset_(vector::zero),
+    offsets_(pp.size(), offset_),
+    sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
+    mapPtr_(NULL)
+{}
+
+
+Foam::directMappedPatchBase::directMappedPatchBase
+(
+    const polyPatch& pp,
+    const word& sampleRegion,
+    const sampleMode mode,
+    const word& samplePatch,
+    const vectorField& offsets
+)
+:
+    patch_(pp),
+    sampleRegion_(sampleRegion),
+    mode_(mode),
+    samplePatch_(samplePatch),
+    uniformOffset_(false),
+    offsets_(offsets),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(NULL)
 {}
@@ -576,7 +640,19 @@ Foam::directMappedPatchBase::directMappedPatchBase
     ),
     mode_(sampleModeNames_.read(dict.lookup("sampleMode"))),
     samplePatch_(dict.lookup("samplePatch")),
-    offset_(dict.lookup("offset")),
+    uniformOffset_(dict.found("offset")),
+    offset_
+    (
+        uniformOffset_
+      ? point(dict.lookup("offset"))
+      : vector::zero
+    ),
+    offsets_
+    (
+        uniformOffset_
+      ? pointField(patch_.size(), offset_)
+      : dict.lookup("offsets")
+    ),
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(NULL)
 {}
@@ -592,7 +668,28 @@ Foam::directMappedPatchBase::directMappedPatchBase
     sampleRegion_(dmp.sampleRegion_),
     mode_(dmp.mode_),
     samplePatch_(dmp.samplePatch_),
+    uniformOffset_(dmp.uniformOffset_),
     offset_(dmp.offset_),
+    offsets_(dmp.offsets_),
+    sameRegion_(dmp.sameRegion_),
+    mapPtr_(NULL)
+{}
+
+
+Foam::directMappedPatchBase::directMappedPatchBase
+(
+    const polyPatch& pp,
+    const directMappedPatchBase& dmp,
+    const unallocLabelList& mapAddressing
+)
+:
+    patch_(pp),
+    sampleRegion_(dmp.sampleRegion_),
+    mode_(dmp.mode_),
+    samplePatch_(dmp.samplePatch_),
+    uniformOffset_(dmp.uniformOffset_),
+    offset_(dmp.offset_),
+    offsets_(dmp.offsets_, mapAddressing),
     sameRegion_(dmp.sameRegion_),
     mapPtr_(NULL)
 {}
@@ -650,7 +747,14 @@ void Foam::directMappedPatchBase::write(Ostream& os) const
         << token::END_STATEMENT << nl;
     os.writeKeyword("samplePatch") << samplePatch_
         << token::END_STATEMENT << nl;
-    os.writeKeyword("offset") << offset_ << token::END_STATEMENT << nl;
+    if (uniformOffset_)
+    {
+        os.writeKeyword("offset") << offset_ << token::END_STATEMENT << nl;
+    }
+    else
+    {
+        os.writeKeyword("offsets") << offsets_ << token::END_STATEMENT << nl;
+    }
 }
 
 

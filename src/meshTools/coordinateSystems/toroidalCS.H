@@ -46,7 +46,6 @@ SourceFiles
 namespace Foam
 {
 
-
 /*---------------------------------------------------------------------------*\
                         Class toroidalCS Declaration
 \*---------------------------------------------------------------------------*/
@@ -86,6 +85,7 @@ class toroidalCS
             bool translate
         ) const;
 
+
 public:
 
     //- Runtime type information
@@ -102,7 +102,6 @@ public:
             const coordinateRotation&,
             const scalar radius
         );
-
 
         //- Construct from dictionary
         toroidalCS(const word& name, const dictionary&);

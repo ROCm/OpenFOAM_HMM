@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "edgeIntersections.H"
@@ -38,15 +36,14 @@ Description
 #include "meshTools.H"
 #include "plane.H"
 #include "Random.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "treeBoundBox.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Foam::edgeIntersections, 0);
 
-Foam::scalar Foam::edgeIntersections::alignedCos_ =
-    Foam::cos(89.0 * Foam::mathematicalConstant::pi/180.0);
+Foam::scalar Foam::edgeIntersections::alignedCos_ = Foam::cos(degToRad(89.0));
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -719,15 +716,6 @@ Foam::label Foam::edgeIntersections::removeDegenerates
 
     return iter;
 }
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

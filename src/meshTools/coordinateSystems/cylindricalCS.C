@@ -133,7 +133,7 @@ Foam::vector Foam::cylindricalCS::localToGlobal
 {
     scalar theta
     (
-        local.y() * ( inDegrees_ ? mathematicalConstant::pi/180.0 : 1.0 )  
+        local.y()*(inDegrees_ ? constant::mathematical::pi/180.0 : 1.0)
     );
 
     return coordinateSystem::localToGlobal
@@ -153,7 +153,7 @@ Foam::tmp<Foam::vectorField> Foam::cylindricalCS::localToGlobal
     scalarField theta =
     (
         local.component(vector::Y)
-      * ( inDegrees_ ? mathematicalConstant::pi/180.0 : 1.0 )
+       *(inDegrees_ ? constant::mathematical::pi/180.0 : 1.0)
     );
 
 
@@ -181,7 +181,7 @@ Foam::vector Foam::cylindricalCS::globalToLocal
         (
             lc.y(),
             lc.x()
-        ) * ( inDegrees_ ? 180.0/mathematicalConstant::pi : 1.0 ),
+        )*(inDegrees_ ? 180.0/constant::mathematical::pi : 1.0),
         lc.z()
     );
 }
@@ -212,7 +212,7 @@ Foam::tmp<Foam::vectorField> Foam::cylindricalCS::globalToLocal
         (
             lc.component(vector::Y),
             lc.component(vector::X)
-        ) * ( inDegrees_ ? 180.0/mathematicalConstant::pi : 1.0 )
+        )*(inDegrees_ ? 180.0/constant::mathematical::pi : 1.0)
     );
 
     result.replace(vector::Z, lc.component(vector::Z));

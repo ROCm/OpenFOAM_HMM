@@ -86,7 +86,7 @@ protected:
         // Construction of demand-driven data
 
             //- Calculate mesh points
-            virtual void calcGeometry() = 0;
+            virtual void calcGeometry(PstreamBuffers&) = 0;
 
 
 public:

@@ -85,22 +85,22 @@ protected:
         ) const;
 
         //- Initialise the calculation of the patch geometry
-        virtual void initGeometry() = 0;
+        virtual void initGeometry(PstreamBuffers&) = 0;
 
         //- Calculate the patch geometry
-        virtual void calcGeometry() = 0;
+        virtual void calcGeometry(PstreamBuffers&) = 0;
 
         //- Initialise the patches for moving points
-        virtual void initMovePoints(const pointField&) = 0;
+        virtual void initMovePoints(PstreamBuffers&, const pointField&) = 0;
 
         //- Correct patches after moving points
-        virtual void movePoints(const pointField&) = 0;
+        virtual void movePoints(PstreamBuffers&, const pointField&) = 0;
 
         //- Initialise the update of the patch topology
-        virtual void initUpdateMesh() = 0;
+        virtual void initUpdateMesh(PstreamBuffers&) = 0;
 
         //- Update of the patch topology
-        virtual void updateMesh() = 0;
+        virtual void updateMesh(PstreamBuffers&) = 0;
 
 
         //- Write point in OBJ format
@@ -216,6 +216,16 @@ public:
             const label newStart
         );
 
+        //- Construct given the original patch and a map
+        coupledPolyPatch
+        (
+            const coupledPolyPatch& pp,
+            const polyBoundaryMesh& bm,
+            const label index,
+            const unallocLabelList& mapAddressing,
+            const label newStart
+        );
+
 
     // Destructor
 
@@ -285,7 +295,11 @@ public:
 
         //- Initialize ordering for primitivePatch. Does not
         //  refer to *this (except for name() and type() etc.)
-        virtual void initOrder(const primitivePatch&) const = 0;
+        virtual void initOrder
+        (
+            PstreamBuffers&,
+            const primitivePatch&
+        ) const = 0;
 
         //- Return new ordering for primitivePatch.
         //  Ordering is -faceMap: for every face
@@ -294,6 +308,7 @@ public:
         //  (faceMap is identity, rotation is 0), true otherwise.
         virtual bool order
         (
+            PstreamBuffers&,
             const primitivePatch&,
             labelList& faceMap,
             labelList& rotation

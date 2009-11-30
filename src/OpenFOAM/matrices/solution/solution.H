@@ -37,6 +37,7 @@ SourceFiles
 #define solution_H
 
 #include "IOdictionary.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,6 +54,12 @@ class solution
 {
     // Private data
 
+        //- Dictionary of temporary fields to cache
+        dictionary cache_;
+
+        //- Switch for the caching mechanism
+        Switch caching_;
+
         //- Dictionary of relaxation factors for all the fields
         dictionary relaxationFactors_;
 
@@ -61,6 +68,7 @@ class solution
 
         //- Dictionary of solver parameters for all the fields
         dictionary solvers_;
+
 
     // Private Member Functions
 
@@ -90,15 +98,18 @@ public:
 
         // Access
 
-            //- Return the selected sub-dictionary of solvers if the "select"
-            //  keyword is given, otherwise return the complete dictionary
-            const dictionary& solutionDict() const;
+            //- Return true if the given field should be cached
+            bool cache(const word& name) const;
 
             //- Return true if the relaxation factor is given for the field
             bool relax(const word& name) const;
 
             //- Return the relaxation factor for the given field
             scalar relaxationFactor(const word& name) const;
+
+            //- Return the selected sub-dictionary of solvers if the "select"
+            //  keyword is given, otherwise return the complete dictionary
+            const dictionary& solutionDict() const;
 
             //- Return the solver controls dictionary for the given field
             const dictionary& solverDict(const word& name) const;

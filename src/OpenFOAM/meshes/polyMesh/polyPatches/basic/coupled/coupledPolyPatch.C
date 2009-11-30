@@ -428,6 +428,19 @@ Foam::coupledPolyPatch::coupledPolyPatch
 {}
 
 
+Foam::coupledPolyPatch::coupledPolyPatch
+(
+    const coupledPolyPatch& pp,
+    const polyBoundaryMesh& bm,
+    const label index,
+    const unallocLabelList& mapAddressing,
+    const label newStart
+)
+:
+    polyPatch(pp, bm, index, mapAddressing, newStart)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::coupledPolyPatch::~coupledPolyPatch()

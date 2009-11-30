@@ -84,11 +84,12 @@ int main(int argc, char *argv[])
         }
         else
         {
-            mv
-            (
-                solutionDict.objectPath(),
-                solutionDict.objectPath() + ".old"
-            );
+            if (mvBak(solutionDict.objectPath(), "old"))
+            {
+                Info<< "Backup to    "
+                    << (solutionDict.objectPath() + ".old") << nl;
+            }
+
 
             solutionDict.writeObject
             (
@@ -97,8 +98,8 @@ int main(int argc, char *argv[])
                 IOstream::UNCOMPRESSED
             );
 
-            Info<< "Backup to    " << (solutionDict.objectPath() + ".old") << nl
-                << "Write  to    " << solutionDict.objectPath() << nl << endl;
+            Info<< "Write  to    "
+                << solutionDict.objectPath() << nl << endl;
         }
     }
 

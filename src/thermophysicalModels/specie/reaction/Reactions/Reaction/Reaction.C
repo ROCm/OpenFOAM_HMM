@@ -22,10 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Simple extension of ReactionThermo to handle Reaction kinetics in addition
-    to the equilibrium thermodynamics already handled.
-
 \*---------------------------------------------------------------------------*/
 
 #include "Reaction.H"
@@ -207,7 +203,7 @@ Reaction<ReactionThermo>::Reaction
     setLRhs(is);
     setThermo(thermoDatabase);
 }
-    
+
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
@@ -228,7 +224,7 @@ autoPtr<Reaction<ReactionThermo> > Reaction<ReactionThermo>::New
             is
         )   << "Reaction type not specified" << endl << endl
             << "Valid Reaction types are :" << endl
-            << IstreamConstructorTablePtr_->toc()
+            << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 
@@ -246,7 +242,7 @@ autoPtr<Reaction<ReactionThermo> > Reaction<ReactionThermo>::New
             is
         )   << "Unknown reaction type " << reactionTypeName << endl << endl
             << "Valid reaction types are :" << endl
-            << IstreamConstructorTablePtr_->toc()
+            << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 

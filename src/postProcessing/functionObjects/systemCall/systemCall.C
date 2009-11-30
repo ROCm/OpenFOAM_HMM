@@ -66,8 +66,8 @@ Foam::systemCall::~systemCall()
 void Foam::systemCall::read(const dictionary& dict)
 {
     dict.readIfPresent("executeCalls", executeCalls_);
-    dict.readIfPresent("endCalls",     endCalls_);
-    dict.readIfPresent("writeCalls",   writeCalls_);
+    dict.readIfPresent("endCalls", endCalls_);
+    dict.readIfPresent("writeCalls", writeCalls_);
 
     if (executeCalls_.empty() && endCalls_.empty() && writeCalls_.empty())
     {

@@ -75,9 +75,9 @@ tmp<scalarField> mutkRoughWallFunctionFvPatchScalarField::calcMut() const
     const volScalarField& k = tk();
     const scalarField& muw = rasModel.mu().boundaryField()[patchI];
 
-    const scalar Cmu25 = pow(Cmu_, 0.25);
+    const scalar Cmu25 = pow025(Cmu_);
 
-    tmp<scalarField> tmutw(new scalarField(patch().size(), 0.0));
+    tmp<scalarField> tmutw(new scalarField(*this));
     scalarField& mutw = tmutw();
 
     forAll(mutw, faceI)

@@ -35,6 +35,8 @@
 alias _foamAddPath 'set path=(\!* $path)'
 # prefix to LD_LIBRARY_PATH
 alias _foamAddLib 'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH}'
+# prefix to MANPATH
+alias _foamAddManPath 'setenv MANPATH \!*\:${MANPATH}'
 
 # location of the jobControl directory
 setenv FOAM_JOB_DIR $WM_PROJECT_INST_DIR/jobControl
@@ -85,12 +87,12 @@ switch ("$compilerInstall")
 case OpenFOAM:
     switch ("$WM_COMPILER")
     case Gcc:
-        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.3.3/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.4.2/platforms/$WM_ARCH$WM_COMPILER_ARCH
         _foamAddLib $WM_THIRD_PARTY_DIR/mpfr-2.4.1/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
         _foamAddLib $WM_THIRD_PARTY_DIR/gmp-4.2.4/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
     breaksw
     case Gcc44:
-        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.4.1/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.4.2/platforms/$WM_ARCH$WM_COMPILER_ARCH
         _foamAddLib $WM_THIRD_PARTY_DIR/mpfr-2.4.1/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
         _foamAddLib $WM_THIRD_PARTY_DIR/gmp-4.2.4/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
     breaksw
@@ -114,9 +116,10 @@ case OpenFOAM:
         echo
     endif
 
-    _foamAddPath ${WM_COMPILER_DIR}/bin
-    _foamAddLib  ${WM_COMPILER_DIR}/lib${WM_COMPILER_LIB_ARCH}
-    _foamAddLib  ${WM_COMPILER_DIR}/lib
+    _foamAddPath    ${WM_COMPILER_DIR}/bin
+    _foamAddLib     ${WM_COMPILER_DIR}/lib${WM_COMPILER_LIB_ARCH}
+    _foamAddLib     ${WM_COMPILER_DIR}/lib
+    _foamAddManPath ${WM_COMPILER_DIR}/man
 
     breaksw
 endsw
@@ -136,21 +139,22 @@ case OPENMPI:
     # Tell OpenMPI where to find its install directory
     setenv OPAL_PREFIX $MPI_ARCH_PATH
 
-    _foamAddPath $MPI_ARCH_PATH/bin
-    _foamAddLib  $MPI_ARCH_PATH/lib
+    _foamAddPath    $MPI_ARCH_PATH/bin
+    _foamAddLib     $MPI_ARCH_PATH/lib
+    _foamAddManPath $MPI_ARCH_PATH/man
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
     unset mpi_version
     breaksw
 
 case MPICH:
-    set mpi_version=mpich-1.2.4
+    set mpi_version=mpich2-1.1.1p1
     setenv MPI_HOME $WM_THIRD_PARTY_DIR/$mpi_version
     setenv MPI_ARCH_PATH $MPI_HOME/platforms/$WM_OPTIONS
-    setenv MPICH_ROOT $MPI_ARCH_PATH
 
-    _foamAddPath $MPI_ARCH_PATH/bin
-    _foamAddLib  $MPI_ARCH_PATH/lib
+    _foamAddPath    $MPI_ARCH_PATH/bin
+    _foamAddLib     $MPI_ARCH_PATH/lib
+    _foamAddManPath $MPI_ARCH_PATH/share/man
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -159,7 +163,6 @@ case MPICH:
 case MPICH-GM:
     setenv MPI_ARCH_PATH /opt/mpi
     setenv MPICH_PATH $MPI_ARCH_PATH
-    setenv MPICH_ROOT $MPI_ARCH_PATH
     setenv GM_LIB_PATH /opt/gm/lib64
 
     _foamAddPath $MPI_ARCH_PATH/bin
@@ -172,7 +175,6 @@ case MPICH-GM:
 case HPMPI:
     setenv MPI_HOME /opt/hpmpi
     setenv MPI_ARCH_PATH $MPI_HOME
-    setenv MPICH_ROOT=$MPI_ARCH_PATH
 
     _foamAddPath $MPI_ARCH_PATH/bin
 

@@ -47,7 +47,7 @@ Foam::autoPtr<Foam::extrudeModel> Foam::extrudeModel::New
             << extrudeModelType
             << ", constructor not in hash table" << nl << nl
             << "    Valid extrudeModel types are :" << nl
-            << dictionaryConstructorTablePtr_->toc() << nl
+            << dictionaryConstructorTablePtr_->sortedToc() << nl
             << exit(FatalError);
     }
 

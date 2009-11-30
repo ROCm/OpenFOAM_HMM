@@ -46,6 +46,8 @@ bool triSurface::stitchTriangles
     pointField newPoints;
     bool hasMerged = mergePoints(rawPoints, tol, verbose, pointMap, newPoints);
 
+
+
     if (hasMerged)
     {
         if (verbose)

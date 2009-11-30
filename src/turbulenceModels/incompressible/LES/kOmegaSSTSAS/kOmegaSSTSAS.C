@@ -98,16 +98,20 @@ tmp<volScalarField> kOmegaSSTSAS::Lvk2
     const volScalarField& S2
 ) const
 {
-    return kappa_*sqrt(S2)
-   /(
-       mag(fvc::laplacian(U()))
-     + dimensionedScalar
-       (
-           "ROOTVSMALL",
-           dimensionSet(0, -1 , -1, 0, 0, 0, 0),
-           ROOTVSMALL
-       )
-   );
+    return max
+    (
+        kappa_*sqrt(S2)
+       /(
+            mag(fvc::laplacian(U()))
+          + dimensionedScalar
+            (
+                "ROOTVSMALL",
+                dimensionSet(0, -1 , -1, 0, 0, 0, 0),
+                ROOTVSMALL
+            )
+        ),
+        Cs_*delta()
+    );
 }
 
 
@@ -222,6 +226,15 @@ kOmegaSSTSAS::kOmegaSSTSAS
             10.0
         )
     ),
+    Cs_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cs",
+            coeffDict_,
+            0.262
+        )
+    ),
     alphaPhi_
     (
         dimensioned<scalar>::lookupOrAddToDict
@@ -333,7 +346,7 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
 
     volVectorField gradK = fvc::grad(k_);
     volVectorField gradOmega = fvc::grad(omega_);
-    volScalarField L = sqrt(k_)/(pow(Cmu_, 0.25)*(omega_ + omegaSmall_));
+    volScalarField L = sqrt(k_)/(pow025(Cmu_)*(omega_ + omegaSmall_));
     volScalarField CDkOmega =
         (2.0*alphaOmega2_)*(gradK & gradOmega)/(omega_ + omegaSmall_);
     volScalarField F1 = this->F1(CDkOmega);
@@ -441,6 +454,7 @@ bool kOmegaSSTSAS::read()
         betaStar_.readIfPresent(coeffDict());
         a1_.readIfPresent(coeffDict());
         c1_.readIfPresent(coeffDict());
+        Cs_.readIfPresent(coeffDict());
         alphaPhi_.readIfPresent(coeffDict());
         zetaTilda2_.readIfPresent(coeffDict());
         FSAS_.readIfPresent(coeffDict());

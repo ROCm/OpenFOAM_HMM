@@ -31,7 +31,7 @@ License
 
 #include "fvc.H"
 #include "radiationModel.H"
-#include "radiationConstants.H"
+#include "physicoChemicalConstants.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -79,7 +79,7 @@ Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
     const scalarField& Tp =
         patch().lookupPatchField<volScalarField, scalar>(TName_);
 
-    refValue() = 4.0*radiation::sigmaSB.value()*pow4(Tp);
+    refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Tp);
     refGrad() = 0.0;
 
     if (dict.found("value"))
@@ -152,7 +152,7 @@ void Foam::MarshakRadiationFvPatchScalarField::updateCoeffs()
         patch().lookupPatchField<volScalarField, scalar>(TName_);
 
     // Re-calc reference value
-    refValue() = 4.0*radiation::sigmaSB.value()*pow4(Tp);
+    refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Tp);
 
     // Diffusion coefficient - created by radiation model's ::updateCoeffs()
     const scalarField& gamma =

@@ -42,7 +42,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class dispersionLESModel Declaration
+                      Class dispersionLESModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class dispersionLESModel
@@ -63,16 +63,11 @@ public:
     // Constructors
 
         //- Construct from components
-        dispersionLESModel
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        dispersionLESModel(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        virtual ~dispersionLESModel();
+    //- Destructor
+    virtual ~dispersionLESModel();
 
 
     // Member Functions

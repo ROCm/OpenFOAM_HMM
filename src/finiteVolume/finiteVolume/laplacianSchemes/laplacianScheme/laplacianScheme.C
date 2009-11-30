@@ -63,7 +63,7 @@ tmp<laplacianScheme<Type, GType> > laplacianScheme<Type, GType>::New
             schemeData
         )   << "Laplacian scheme not specified" << endl << endl
             << "Valid laplacian schemes are :" << endl
-            << IstreamConstructorTablePtr_->toc()
+            << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 
@@ -80,7 +80,7 @@ tmp<laplacianScheme<Type, GType> > laplacianScheme<Type, GType>::New
             schemeData
         )   << "unknown laplacian scheme " << schemeName << endl << endl
             << "Valid laplacian schemes are :" << endl
-            << IstreamConstructorTablePtr_->toc()
+            << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 
@@ -102,7 +102,7 @@ tmp<fvMatrix<Type> >
 laplacianScheme<Type, GType>::fvmLaplacian
 (
     const GeometricField<GType, fvPatchField, volMesh>& gamma,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     return fvmLaplacian(tinterpGammaScheme_().interpolate(gamma)(), vf);

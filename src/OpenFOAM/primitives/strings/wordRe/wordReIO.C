@@ -57,12 +57,22 @@ Foam::Istream& Foam::operator>>(Istream& is, wordRe& w)
     {
         // Auto-tests for regular expression
         w = t.stringToken();
+
+        // flag empty strings as an error
+        if (w.empty())
+        {
+            is.setBad();
+            FatalIOErrorIn("operator>>(Istream&, wordRe&)", is)
+                << "empty word/expression "
+                << exit(FatalIOError);
+            return is;
+        }
     }
     else
     {
         is.setBad();
         FatalIOErrorIn("operator>>(Istream&, wordRe&)", is)
-            << "wrong token type - expected word or string found "
+            << "wrong token type - expected word or string, found "
             << t.info()
             << exit(FatalIOError);
 

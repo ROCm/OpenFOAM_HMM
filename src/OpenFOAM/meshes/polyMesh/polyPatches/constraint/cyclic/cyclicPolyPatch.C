@@ -326,7 +326,8 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
         //    if (debug)
         //    {
         //        Pout<< "cyclicPolyPatch::getCentresAndAnchors :"
-        //            << "Specified translation : " << separationVector_ << endl;
+        //            << "Specified translation : " << separationVector_
+        //            << endl;
         //    }
         //
         //    half0Ctrs += separationVector_;
@@ -574,6 +575,26 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 }
 
 
+Foam::cyclicPolyPatch::cyclicPolyPatch
+(
+    const cyclicPolyPatch& pp,
+    const polyBoundaryMesh& bm,
+    const label index,
+    const unallocLabelList& mapAddressing,
+    const label newStart
+)
+:
+    coupledPolyPatch(pp, bm, index, mapAddressing, newStart),
+    coupledPointsPtr_(NULL),
+    coupledEdgesPtr_(NULL),
+    featureCos_(pp.featureCos_),
+    transform_(pp.transform_),
+    rotationAxis_(pp.rotationAxis_),
+    rotationCentre_(pp.rotationCentre_),
+    separationVector_(pp.separationVector_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::cyclicPolyPatch::~cyclicPolyPatch()
@@ -599,15 +620,9 @@ void Foam::cyclicPolyPatch::transformPosition(pointField& l) const
 }
 
 
-void Foam::cyclicPolyPatch::initGeometry()
+void Foam::cyclicPolyPatch::initGeometry(PstreamBuffers& pBufs)
 {
-    polyPatch::initGeometry();
-}
-
-void Foam::cyclicPolyPatch::calcGeometry()
-{
-    polyPatch::calcGeometry();
-    calcTransforms();
+    polyPatch::initGeometry(pBufs);
 }
 
 
@@ -648,25 +663,33 @@ Pout<< "cyclicPolyPatch::calcGeometry : name:" << name()
 }
 
 
-void Foam::cyclicPolyPatch::initMovePoints(const pointField& p)
+void Foam::cyclicPolyPatch::initMovePoints
+(
+    PstreamBuffers& pBufs,
+    const pointField& p
+)
 {
-    polyPatch::initMovePoints(p);
+    polyPatch::initMovePoints(pBufs, p);
 }
 
-void Foam::cyclicPolyPatch::movePoints(const pointField& p)
+void Foam::cyclicPolyPatch::movePoints
+(
+    PstreamBuffers& pBufs,
+    const pointField& p
+)
 {
-    polyPatch::movePoints(p);
+    polyPatch::movePoints(pBufs, p);
     calcTransforms();
 }
 
-void Foam::cyclicPolyPatch::initUpdateMesh()
+void Foam::cyclicPolyPatch::initUpdateMesh(PstreamBuffers& pBufs)
 {
-    polyPatch::initUpdateMesh();
+    polyPatch::initUpdateMesh(pBufs);
 }
 
-void Foam::cyclicPolyPatch::updateMesh()
+void Foam::cyclicPolyPatch::updateMesh(PstreamBuffers& pBufs)
 {
-    polyPatch::updateMesh();
+    polyPatch::updateMesh(pBufs);
     deleteDemandDrivenData(coupledPointsPtr_);
     deleteDemandDrivenData(coupledEdgesPtr_);
 }
@@ -916,7 +939,11 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
 }
 
 
-void Foam::cyclicPolyPatch::initOrder(const primitivePatch& pp) const
+void Foam::cyclicPolyPatch::initOrder
+(
+    PstreamBuffers&,
+    const primitivePatch& pp
+) const
 {
     if (owner())
     {
@@ -940,6 +967,7 @@ void Foam::cyclicPolyPatch::initOrder(const primitivePatch& pp) const
 //  is identity, rotation is 0)
 bool Foam::cyclicPolyPatch::order
 (
+    PstreamBuffers& pBufs,
     const primitivePatch& pp,
     labelList& faceMap,
     labelList& rotation
@@ -1029,6 +1057,8 @@ bool Foam::cyclicPolyPatch::order
                 << endl;
 
             // Recalculate untransformed face centres
+            //pointField rawHalf0Ctrs =
+            //    calcFaceCentres(half0Faces, pp.points());
             label vertI = 0;
 
             forAll(half1Ctrs, i)

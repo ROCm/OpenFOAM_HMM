@@ -63,7 +63,7 @@ void surfaceSlipDisplacementPointPatchVectorField::calcProjection
     const pointField& localPoints = patch().localPoints();
     const labelList& meshPoints = patch().meshPoints();
 
-    //const scalar deltaT = mesh.time().deltaT().value();
+    //const scalar deltaT = mesh.time().deltaTValue();
 
     // Construct large enough vector in direction of projectDir so
     // we're guaranteed to hit something.
@@ -326,7 +326,7 @@ surfaceSlipDisplacementPointPatchVectorField
     surfacesDict_(dict.subDict("geometry")),
     projectMode_(projectModeNames_.read(dict.lookup("projectMode"))),
     projectDir_(dict.lookup("projectDirection")),
-    wedgePlane_(readLabel(dict.lookup("wedgePlane"))),
+    wedgePlane_(dict.lookupOrDefault("wedgePlane", -1)),
     frozenPointsZone_(dict.lookupOrDefault("frozenPointsZone", word::null))
 {}
 

@@ -109,7 +109,7 @@ namespace Foam
                 }
             }
 
-            const scalar& v = values[elemI];
+            const scalar v = values[elemI];
             os << float(v);
         }
         os << nl;
@@ -266,7 +266,7 @@ void Foam::vtkSurfaceWriter<Type>::write
     const fileName& surfaceName,
     const pointField& points,
     const faceList& faces,
-    const fileName& fieldName,
+    const word& fieldName,
     const Field<Type>& values,
     const bool verbose
 ) const

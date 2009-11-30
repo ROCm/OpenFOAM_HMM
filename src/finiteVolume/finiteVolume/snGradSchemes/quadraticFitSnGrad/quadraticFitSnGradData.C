@@ -250,7 +250,7 @@ Foam::label Foam::quadraticFitSnGradData::calcFit
     scalarList singVals(minSize_);
     label nSVDzeros = 0;
 
-    const scalar& deltaCoeff = mesh().deltaCoeffs()[faci];
+    const scalar deltaCoeff = mesh().deltaCoeffs()[faci];
 
     bool goodFit = false;
     for(int iIt = 0; iIt < 10 && !goodFit; iIt++)
