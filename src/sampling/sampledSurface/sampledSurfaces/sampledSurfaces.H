@@ -41,6 +41,7 @@ SourceFiles
 #include "sampledSurface.H"
 #include "surfaceWriter.H"
 #include "volFieldsFwd.H"
+#include "wordReList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,7 +52,7 @@ class fvMesh;
 class dictionary;
 
 /*---------------------------------------------------------------------------*\
-                      Class sampledSurfaces Declaration
+                       Class sampledSurfaces Declaration
 \*---------------------------------------------------------------------------*/
 
 class sampledSurfaces
@@ -100,8 +101,8 @@ class sampledSurfaces
             void reset(const label nElem)
             {
                 formatter.clear();
-                DynamicList<word>::setCapacity(nElem);
-                DynamicList<word>::clear(); 
+                DynamicList<word>::reserve(nElem);
+                DynamicList<word>::clear();
             }
 
             void operator=(const word& writeFormat)
@@ -161,7 +162,7 @@ class sampledSurfaces
         // Read from dictonary
 
             //- Names of fields to sample
-            wordList fieldNames_;
+            wordReList fieldSelection_;
 
             //- Interpolation scheme to use
             word interpolationScheme_;
@@ -190,6 +191,9 @@ class sampledSurfaces
 
 
     // Private Member Functions
+
+        //- Append fieldName to the appropriate group
+        label appendFieldType(const word& fieldName, const word& fieldType);
 
         //- Classify field types, returns the number of fields
         label classifyFieldTypes();
