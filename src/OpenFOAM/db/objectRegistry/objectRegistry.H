@@ -132,8 +132,14 @@ public:
             //- Return the list of names of the IOobjects
             wordList names() const;
 
-            //- Return the list of names of the IOobjects of given class name
+            //- Return the sorted list of names of the IOobjects
+            wordList sortedNames() const;
+
+            //- Return the list of names of IOobjects of given class name
             wordList names(const word& className) const;
+
+            //- Return the sorted list of names of IOobjects of given class name
+            wordList sortedNames(const word& className) const;
 
             //- Return the list of names of the IOobjects of given type
             template<class Type>
@@ -142,11 +148,11 @@ public:
             //- Lookup and return a const sub-objectRegistry
             const objectRegistry& subRegistry(const word& name) const;
 
-            //- Lookup and return all the object of the given Type
+            //- Lookup and return all objects of the given Type
             template<class Type>
             HashTable<const Type*> lookupClass() const;
 
-            //- Is the named Type
+            //- Is the named Type found?
             template<class Type>
             bool foundObject(const word& name) const;
 
