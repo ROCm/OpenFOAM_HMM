@@ -104,26 +104,11 @@ Foam::label Foam::probes::prepare()
     {
         wordHashSet currentFields;
 
-        forAll(scalarFields_, fieldI)
-        {
-            currentFields.set(scalarFields_[fieldI]);
-        }
-        forAll(vectorFields_, fieldI)
-        {
-            currentFields.set(vectorFields_[fieldI]);
-        }
-        forAll(sphericalTensorFields_, fieldI)
-        {
-            currentFields.set(sphericalTensorFields_[fieldI]);
-        }
-        forAll(symmTensorFields_, fieldI)
-        {
-            currentFields.set(symmTensorFields_[fieldI]);
-        }
-        forAll(tensorFields_, fieldI)
-        {
-            currentFields.set(tensorFields_[fieldI]);
-        }
+        currentFields.insert(scalarFields_);
+        currentFields.insert(vectorFields_);
+        currentFields.insert(sphericalTensorFields_);
+        currentFields.insert(symmTensorFields_);
+        currentFields.insert(tensorFields_);
 
         if (debug)
         {
