@@ -71,7 +71,7 @@ boundaryField
     }
 
     // this should have no effect
-    #remove inactive
+    //#remove $inactive
 
     inlet_7  { $active }
     #inputMode overwrite
@@ -105,9 +105,9 @@ baz
 
 
 // this should work
-#remove active
+//#remove active
 
 // this should work too
-#remove ( bar baz )
+//#remove ( bar baz )
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
