@@ -145,7 +145,6 @@ Foam::sampledSets::sampledSets
     loadFromFiles_(loadFromFiles),
     outputPath_(fileName::null),
     searchEngine_(mesh_, true),
-    fieldSelection_(),
     interpolationScheme_(word::null),
     writeFormat_(word::null)
 {
