@@ -9,6 +9,7 @@ sampledSet/midPoint/midPointSet.C
 sampledSet/midPointAndFace/midPointAndFaceSet.C
 sampledSet/sampledSet/sampledSet.C
 sampledSet/sampledSets/sampledSets.C
+sampledSet/sampledSets/sampledSetsGrouping.C
 sampledSet/sampledSetsFunctionObject/sampledSetsFunctionObject.C
 sampledSet/triSurfaceMeshPointSet/triSurfaceMeshPointSet.C
 sampledSet/uniform/uniformSet.C
@@ -34,6 +35,7 @@ sampledSurface/distanceSurface/distanceSurface.C
 sampledSurface/sampledCuttingPlane/sampledCuttingPlane.C
 sampledSurface/sampledSurface/sampledSurface.C
 sampledSurface/sampledSurfaces/sampledSurfaces.C
+sampledSurface/sampledSurfaces/sampledSurfacesGrouping.C
 sampledSurface/sampledSurfacesFunctionObject/sampledSurfacesFunctionObject.C
 sampledSurface/thresholdCellFaces/thresholdCellFaces.C
 sampledSurface/thresholdCellFaces/sampledThresholdCellFaces.C

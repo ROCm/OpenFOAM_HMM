@@ -69,7 +69,7 @@ class sampledSurfaces
         {
         public:
 
-            //- Surface formatter
+            //- The surface formatter
             autoPtr< surfaceWriter<Type> > formatter;
 
             //- Construct null
@@ -86,34 +86,19 @@ class sampledSurfaces
                 formatter(surfaceWriter<Type>::New(writeFormat))
             {}
 
-            //- Construct for a particular surface format and a list of field
-            //  names
-            fieldGroup
-            (
-                const word& writeFormat,
-                const wordList& fieldNames
-            )
-            :
-                DynamicList<word>(fieldNames),
-                formatter(surfaceWriter<Type>::New(writeFormat))
-            {}
-
-            void reset(const label nElem)
+            //- Reset format and field list
+            void clear()
             {
-                formatter.clear();
-                DynamicList<word>::reserve(nElem);
                 DynamicList<word>::clear();
+                formatter.clear();
             }
 
+            //- Assign a new formatter
             void operator=(const word& writeFormat)
             {
                 formatter = surfaceWriter<Type>::New(writeFormat);
             }
 
-            void operator=(const wordList& fieldNames)
-            {
-                DynamicList<word>::operator=(fieldNames);
-            }
         };
 
 
@@ -192,11 +177,14 @@ class sampledSurfaces
 
     // Private Member Functions
 
+        //- Clear old field groups
+        void clearFieldGroups();
+
         //- Append fieldName to the appropriate group
-        label appendFieldType(const word& fieldName, const word& fieldType);
+        label appendFieldGroup(const word& fieldName, const word& fieldType);
 
         //- Classify field types, returns the number of fields
-        label classifyFieldTypes();
+        label classifyFields();
 
         //- Write geometry only
         void writeGeometry() const;
