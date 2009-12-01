@@ -58,10 +58,8 @@ Foam::dictionaryEntry::dictionaryEntry
 )
 :
     entry(key),
-    dictionary(parentDict, is)
+    dictionary(key, parentDict, is)
 {
-    name() += "::" + key;
-
     is.fatalCheck
     (
         "dictionaryEntry::dictionaryEntry"

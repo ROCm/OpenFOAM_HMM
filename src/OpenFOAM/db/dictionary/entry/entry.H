@@ -108,10 +108,9 @@ public:
         static autoPtr<entry> New(Istream& is);
 
 
-    // Destructor
-
-        virtual ~entry()
-        {}
+    //- Destructor
+    virtual ~entry()
+    {}
 
 
     // Member functions

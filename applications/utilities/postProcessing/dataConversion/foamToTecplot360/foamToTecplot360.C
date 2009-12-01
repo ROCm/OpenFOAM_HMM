@@ -65,6 +65,9 @@ Usage
     information as a single argument. The double quotes denote a regular
     expression.
 
+    @param -useTimeName \n
+    use the time index in the VTK file name instead of the time index
+
 \*---------------------------------------------------------------------------*/
 
 #include "pointMesh.H"
@@ -240,7 +243,7 @@ int main(int argc, char *argv[])
 #   include "createNamedMesh.H"
 
     // TecplotData/ directory in the case
-    fileName fvPath(runTime.path()/"TecplotData-bin");
+    fileName fvPath(runTime.path()/"Tecplot360");
     // Directory of mesh (region0 gets filtered out)
     fileName regionPrefix = "";
 
@@ -536,7 +539,8 @@ int main(int argc, char *argv[])
             varLocation
         );
 
-        // strandID (= some zone id)
+        // strandID (= piece id. Gets incremented for every piece of geometry
+        // that is output)
         INTEGER4 strandID = 1;
 
 
@@ -647,7 +651,7 @@ int main(int argc, char *argv[])
                     writer.writePolyhedralZone
                     (
                         mesh.name(),        // regionName
-                        1,  //strandID,           // strandID
+                        strandID,           // strandID
                         mesh,
                         List<INTEGER4>(3, ValueLocation_Nodal),
                         nFaceNodes
@@ -684,7 +688,7 @@ int main(int argc, char *argv[])
                 writer.writePolyhedralZone
                 (
                     mesh.name(),        // regionName
-                    1,  //strandID,           // strandID
+                    strandID++,         // strandID
                     mesh,
                     varLocation,
                     0
@@ -776,7 +780,7 @@ int main(int argc, char *argv[])
             writer.writePolygonalZone
             (
                 setName,
-                1,  //strandID,
+                strandID++,
                 ipp,
                 allVarLocation
             );
@@ -903,7 +907,7 @@ int main(int argc, char *argv[])
         {
             label patchID = patchIDs[i];
             const polyPatch& pp = patches[patchID];
-            INTEGER4 strandID = 1 + i;
+            //INTEGER4 strandID = 1 + i;
 
             Info<< "    Writing patch " << patchID << "\t" << pp.name()
                 << "\tstrand:" << strandID << nl << endl;
@@ -917,7 +921,7 @@ int main(int argc, char *argv[])
             writer.writePolygonalZone
             (
                 pp.name(),
-                strandID,
+                strandID++,     //strandID,
                 ipp,
                 allVarLocation
             );
@@ -1073,7 +1077,7 @@ int main(int argc, char *argv[])
                 writer.writePolygonalZone
                 (
                     pp.name(),
-                    1+patchIDs.size()+zoneI,    //strandID,
+                    strandID++, //1+patchIDs.size()+zoneI,    //strandID,
                     ipp,
                     allVarLocation
                 );
@@ -1196,29 +1200,29 @@ int main(int argc, char *argv[])
                 Info<< "        vectors           :";
                 print(Info, vectorNames);
 
-                wordList sphereNames
-                (
-                    sprayObjs.names
-                    (
-                        sphericalTensorIOField::typeName
-                    )
-                );
-                Info<< "        spherical tensors :";
-                print(Info, sphereNames);
-
-                wordList symmNames
-                (
-                    sprayObjs.names
-                    (
-                        symmTensorIOField::typeName
-                    )
-                );
-                Info<< "        symm tensors      :";
-                print(Info, symmNames);
-
-                wordList tensorNames(sprayObjs.names(tensorIOField::typeName));
-                Info<< "        tensors           :";
-                print(Info, tensorNames);
+                //wordList sphereNames
+                //(
+                //    sprayObjs.names
+                //    (
+                //        sphericalTensorIOField::typeName
+                //    )
+                //);
+                //Info<< "        spherical tensors :";
+                //print(Info, sphereNames);
+                //
+                //wordList symmNames
+                //(
+                //    sprayObjs.names
+                //    (
+                //        symmTensorIOField::typeName
+                //    )
+                //);
+                //Info<< "        symm tensors      :";
+                //print(Info, symmNames);
+                //
+                //wordList tensorNames(sprayObjs.names(tensorIOField::typeName));
+                //Info<< "        tensors           :";
+                //print(Info, tensorNames);
 
 
                 // Load cloud positions
@@ -1277,7 +1281,7 @@ int main(int argc, char *argv[])
                 writer.writeOrderedZone
                 (
                     cloudDirs[cloudI],
-                    strandID,
+                    strandID++,     //strandID,
                     parcels.size(),
                     allVarLocation
                 );

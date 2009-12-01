@@ -34,7 +34,6 @@ Description
 
 SourceFiles
     processorPolyPatch.C
-    processorPolyPatchMorph.C
 
 \*---------------------------------------------------------------------------*/
 

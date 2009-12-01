@@ -1,9 +1,0 @@
-#!/bin/sh
-cd ${0%/*} || exit 1    # run from this directory
-
-if [ "$TEC_360_2009" ]
-then
-    wmake
-fi
-
-# ----------------------------------------------------------------- end-of-file
