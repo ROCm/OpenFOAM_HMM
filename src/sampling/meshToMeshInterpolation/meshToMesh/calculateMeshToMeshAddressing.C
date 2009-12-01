@@ -36,14 +36,9 @@ Description
 #include "octreeDataCell.H"
 #include "octreeDataFace.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void meshToMesh::calcAddressing()
+void Foam::meshToMesh::calcAddressing()
 {
     if (debug)
     {
@@ -225,7 +220,7 @@ void meshToMesh::calcAddressing()
 }
 
 
-void meshToMesh::cellAddresses
+void Foam::meshToMesh::cellAddresses
 (
     labelList& cellAddressing_,
     const pointField& points,
@@ -355,9 +350,5 @@ void meshToMesh::cellAddresses
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

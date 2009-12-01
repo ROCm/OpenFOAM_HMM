@@ -56,7 +56,7 @@ class octree;
 class octreeDataCell;
 
 /*---------------------------------------------------------------------------*\
-                           Class meshToMesh Declaration
+                         Class meshToMesh Declaration
 \*---------------------------------------------------------------------------*/
 
 class meshToMesh
@@ -207,7 +207,7 @@ public:
             {
                 return fromMesh_;
             }
- 
+
             const fvMesh& toMesh() const
             {
                 return toMesh_;
