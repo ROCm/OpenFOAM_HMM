@@ -44,14 +44,18 @@ Foam::HashSet<Key, Hash>::HashSet(const UList<Key>& lst)
 
 
 template<class Key, class Hash>
-template<class AnyType>
-Foam::HashSet<Key, Hash>::HashSet(const HashTable<AnyType, Key, Hash>& h)
+template<class AnyType, class AnyHash>
+Foam::HashSet<Key, Hash>::HashSet
+(
+    const HashTable<AnyType, Key, AnyHash>& h
+)
 :
     HashTable<nil, Key, Hash>(h.size())
 {
     for
     (
-        typename HashTable<AnyType, Key, Hash>::const_iterator cit = h.cbegin();
+        typename HashTable<AnyType, Key, AnyHash>::const_iterator
+        cit = h.cbegin();
         cit != h.cend();
         ++cit
     )
