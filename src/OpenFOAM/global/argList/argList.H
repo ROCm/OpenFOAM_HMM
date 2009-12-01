@@ -234,35 +234,16 @@ public:
 
             //- Read a value from the named option
             template<class T>
-            T optionRead(const word& opt) const
-            {
-                T val;
-                optionLookup(opt)() >> val;
-                return val;
-            }
+            T optionRead(const word& opt) const;
 
             //- Read a value from the named option if present.
             //  Return true if the named option was found.
             template<class T>
-            bool optionReadIfPresent(const word& opt, T& val) const
-            {
-                if (optionFound(opt))
-                {
-                    optionLookup(opt)() >> val;
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
+            bool optionReadIfPresent(const word& opt, T& val) const;
 
             //- Read a List of values from the named option
             template<class T>
-            List<T> optionReadList(const word& opt) const
-            {
-                return readList<T>(optionLookup(opt)());
-            }
+            List<T> optionReadList(const word& opt) const;
 
 
         // Edit
@@ -297,6 +278,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "argListTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
