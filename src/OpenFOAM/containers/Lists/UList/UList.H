@@ -132,7 +132,7 @@ public:
             inline label fcIndex(const label i) const;
 
             //- Return the reverse circular index, i.e. the previous index
-            //  which returns to the last at the begining of the list
+            //  which returns to the last at the beginning of the list
             inline label rcIndex(const label i) const;
 
             //- Return the binary size in number of characters of the UList
@@ -150,6 +150,18 @@ public:
             //  similar to the STL front() method and the string::data() method
             //  This can be used (with caution) when interfacing with C code.
             inline T* data();
+
+            //- Return the first element of the list.
+            inline T& first();
+
+            //- Return first element of the list.
+            inline const T& first() const;
+
+            //- Return the last element of the list.
+            inline T& last();
+
+            //- Return the last element of the list.
+            inline const T& last() const;
 
 
         // Check
@@ -183,12 +195,6 @@ public:
         //  Note that the bool specialization adds lazy evaluation so reading
         //  an out-of-range element returns false without any ill-effects
         inline const T& operator[](const label) const;
-
-        //- Return last element of UList.
-        inline T& last();
-
-        //- Return last element of UList.
-        inline const T& last() const;
 
         //- Allow cast to a const List<T>&
         inline operator const Foam::List<T>&() const;

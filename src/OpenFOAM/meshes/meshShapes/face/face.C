@@ -216,7 +216,7 @@ Foam::label Foam::face::split
         label minIndex = index;
         scalar minDiff = constant::mathematical::pi;
 
-        for(label i = 0; i < size() - 3; i++)
+        for (label i = 0; i < size() - 3; i++)
         {
             vector splitEdge
             (

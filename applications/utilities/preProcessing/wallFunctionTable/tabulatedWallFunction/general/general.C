@@ -93,13 +93,13 @@ Foam::scalar Foam::tabulatedWallFunctions::general::interpolate
     {
         case itLinear:
         {
-            if (xi < x[0])
+            if (xi <= x[0])
             {
                 return fx[0];
             }
-            else if (xi > x[x.size()-1])
+            else if (xi >= x.last())
             {
-                return fx[x.size()-1];
+                return fx.last();
             }
             else
             {

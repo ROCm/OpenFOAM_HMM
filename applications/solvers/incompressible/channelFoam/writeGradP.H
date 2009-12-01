@@ -5,7 +5,7 @@
             runTime.path()/runTime.timeName()/"uniform"/"gradP.raw"
         );
 
-        if(gradPFile.good())
+        if (gradPFile.good())
         {
             gradPFile << gradP << endl;
         }

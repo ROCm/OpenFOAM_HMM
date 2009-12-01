@@ -256,7 +256,7 @@ void Foam::distribution::insertMissingKeys()
 
     if (keys.size())
     {
-        for (label k = keys[0]; k < keys[keys.size()-1]; k++)
+        for (label k = keys[0]; k < keys.last(); k++)
         {
             iter = find(k);
 

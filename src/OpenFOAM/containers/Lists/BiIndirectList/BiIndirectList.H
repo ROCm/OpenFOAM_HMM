@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class BiIndirectList Declaration
+                       Class BiIndirectList Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T>
@@ -82,11 +82,16 @@ public:
 
         // Access
 
+            //- Return the number of elements in the list
             inline label size() const;
-            inline bool  empty() const;
+
+            //- Return true if the list is empty (ie, size() is zero).
+            inline bool empty() const;
 
             inline const UList<T>& posList() const;
             inline const UList<T>& negList() const;
+
+            //- Return the list addressing
             inline const List<label>& addressing() const;
 
             //- Calculate index given whether index is into posList or negList

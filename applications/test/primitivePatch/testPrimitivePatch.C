@@ -137,7 +137,7 @@ void writeFaceEdges
         const labelList& myEdges = faceEdges[faceI];
 
         forAll(myEdges, i)
-        {   
+        {
             const edge& e = edges[myEdges[i]];
 
             feStream<< "l " << e.start()+1 << ' ' << e.end()+1 << endl;
@@ -172,7 +172,7 @@ void writeEdgeFaces
         const labelList& myFaces = edgeFaces[edgeI];
 
         forAll(myFaces, i)
-        {   
+        {
             efStream<< "l " << myFaces[0]+1 << ' ' << myFaces[i]+1 << endl;
         }
     }
@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
 
     writeFaceFaces(localPoints, localFaces, faceFaces);
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

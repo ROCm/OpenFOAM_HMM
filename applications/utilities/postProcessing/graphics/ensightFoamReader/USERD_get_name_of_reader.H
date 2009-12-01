@@ -8,7 +8,7 @@ int USERD_get_name_of_reader
 )
 {
 #ifdef ENSIGHTDEBUG
-    Info << "Entering: USERD_get_name_of_reader" << endl << flush;
+    Info<< "Entering: USERD_get_name_of_reader" << endl << flush;
 #endif
 
     strncpy(reader_name, readerName, Z_MAX_USERD_NAME);

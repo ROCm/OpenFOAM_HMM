@@ -42,7 +42,7 @@ void Foam::vtkPV3Foam::convertLagrangianFields
     const label datasetNo
 )
 {
-    const partInfo& selector = partInfoLagrangian_;
+    const arrayRange& range = arrayRangeLagrangian_;
 
     forAllConstIter(IOobjectList, objects, iter)
     {
@@ -50,7 +50,7 @@ void Foam::vtkPV3Foam::convertLagrangianFields
         if (iter()->headerClassName() == IOField<Type>::typeName)
         {
             IOField<Type> tf(*iter());
-            convertLagrangianField(tf, output, selector, datasetNo);
+            convertLagrangianField(tf, output, range, datasetNo);
         }
     }
 }
@@ -61,7 +61,7 @@ void Foam::vtkPV3Foam::convertLagrangianField
 (
     const IOField<Type>& tf,
     vtkMultiBlockDataSet* output,
-    const partInfo& selector,
+    const arrayRange& range,
     const label datasetNo
 )
 {
@@ -97,7 +97,7 @@ void Foam::vtkPV3Foam::convertLagrangianField
 
     vtkPolyData::SafeDownCast
     (
-        GetDataSetFromBlock(output, selector, datasetNo)
+        GetDataSetFromBlock(output, range, datasetNo)
     )   ->GetPointData()
         ->AddArray(pointData);
 

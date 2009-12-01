@@ -91,8 +91,7 @@ Foam::multiHoleInjector::multiHoleInjector
 
     if
     (
-        mag(massFlowRateProfile_[massFlowRateProfile_.size()-1][0]
-      - TProfile_[TProfile_.size()-1][0])
+        mag(massFlowRateProfile_.last()[0] - TProfile_.last()[0])
       > SMALL
     )
     {
@@ -178,9 +177,9 @@ void Foam::multiHoleInjector::setTangentialVectors()
     }
     vector yp = zp^xp;
 
-//    Info << "xp = " << xp << endl;
-//    Info << "yp = " << yp << endl;
-//    Info << "zp = " << zp << endl;
+//    Info<< "xp = " << xp << endl;
+//    Info<< "yp = " << yp << endl;
+//    Info<< "zp = " << zp << endl;
 
     scalar angle = 0.0;
     scalar u = degToRad(umbrellaAngle_/2.0);
@@ -351,13 +350,13 @@ Foam::scalar Foam::multiHoleInjector::T(const scalar time) const
 
 Foam::scalar Foam::multiHoleInjector::tsoi() const
 {
-    return massFlowRateProfile_[0][0];
+    return massFlowRateProfile_.first()[0];
 }
 
 
 Foam::scalar Foam::multiHoleInjector::teoi() const
 {
-    return massFlowRateProfile_[massFlowRateProfile_.size()-1][0];
+    return massFlowRateProfile_.last()[0];
 }
 
 

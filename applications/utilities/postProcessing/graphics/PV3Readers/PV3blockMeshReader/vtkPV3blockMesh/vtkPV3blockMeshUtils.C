@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,12 +71,12 @@ void Foam::vtkPV3blockMesh::AddToBlock
 (
     vtkMultiBlockDataSet* output,
     vtkDataSet* dataset,
-    const partInfo& selector,
+    const arrayRange& range,
     const label datasetNo,
     const std::string& datasetName
 )
 {
-    const int blockNo = selector.block();
+    const int blockNo = range.block();
 
     vtkDataObject* blockDO = output->GetBlock(blockNo);
     vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast(blockDO);
@@ -112,7 +112,7 @@ void Foam::vtkPV3blockMesh::AddToBlock
         output->GetMetaData(blockNo)->Set
         (
             vtkCompositeDataSet::NAME(),
-            selector.name()
+            range.name()
         );
     }
 
@@ -130,11 +130,11 @@ void Foam::vtkPV3blockMesh::AddToBlock
 vtkDataSet* Foam::vtkPV3blockMesh::GetDataSetFromBlock
 (
     vtkMultiBlockDataSet* output,
-    const partInfo& selector,
+    const arrayRange& range,
     const label datasetNo
 )
 {
-    const int blockNo = selector.block();
+    const int blockNo = range.block();
 
     vtkDataObject* blockDO = output->GetBlock(blockNo);
     vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast(blockDO);
@@ -152,10 +152,10 @@ vtkDataSet* Foam::vtkPV3blockMesh::GetDataSetFromBlock
 Foam::label Foam::vtkPV3blockMesh::GetNumberOfDataSets
 (
     vtkMultiBlockDataSet* output,
-    const partInfo& selector
+    const arrayRange& range
 )
 {
-    const int blockNo = selector.block();
+    const int blockNo = range.block();
 
     vtkDataObject* blockDO = output->GetBlock(blockNo);
     vtkMultiBlockDataSet* block = vtkMultiBlockDataSet::SafeDownCast(blockDO);
@@ -191,13 +191,13 @@ Foam::wordHashSet Foam::vtkPV3blockMesh::getSelected
 Foam::wordHashSet Foam::vtkPV3blockMesh::getSelected
 (
     vtkDataArraySelection* select,
-    const partInfo& selector
+    const arrayRange& range
 )
 {
     int nElem = select->GetNumberOfArrays();
     wordHashSet selections(2*nElem);
 
-    for (int elemI = selector.start(); elemI < selector.end(); ++elemI)
+    for (int elemI = range.start(); elemI < range.end(); ++elemI)
     {
         if (select->GetArraySetting(elemI))
         {
@@ -251,13 +251,13 @@ Foam::stringList Foam::vtkPV3blockMesh::getSelectedArrayEntries
 Foam::stringList Foam::vtkPV3blockMesh::getSelectedArrayEntries
 (
     vtkDataArraySelection* select,
-    const partInfo& selector
+    const arrayRange& range
 )
 {
-    stringList selections(selector.size());
+    stringList selections(range.size());
     label nElem = 0;
 
-    for (int elemI = selector.start(); elemI < selector.end(); ++elemI)
+    for (int elemI = range.start(); elemI < range.end(); ++elemI)
     {
         if (select->GetArraySetting(elemI))
         {
@@ -270,7 +270,7 @@ Foam::stringList Foam::vtkPV3blockMesh::getSelectedArrayEntries
     if (debug)
     {
         Info<< "available(";
-        for (int elemI = selector.start(); elemI < selector.end(); ++elemI)
+        for (int elemI = range.start(); elemI < range.end(); ++elemI)
         {
             Info<< " \"" << select->GetArrayName(elemI) << "\"";
         }

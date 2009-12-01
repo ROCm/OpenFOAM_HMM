@@ -423,7 +423,7 @@ int main()
 
 	fwrite(ibuf, sizeof(int), 3, outfp);
 
-	for(i = 0; i < num_faces_trim_cell; ++i) /* loop over the faces */
+	for (i = 0; i < num_faces_trim_cell; ++i) /* loop over the faces */
 	    fwrite(trim_cell_face[i], sizeof(int), trim_cell_face[i][0] + 1,
 		   outfp);
 
@@ -433,7 +433,7 @@ int main()
 
 	fwrite(ibuf, sizeof(int), 3, outfp);
 
-	for(i = 0; i < num_faces_hang_cell; ++i) /* loop over the faces */
+	for (i = 0; i < num_faces_hang_cell; ++i) /* loop over the faces */
 	    fwrite(hang_cell_face[i], sizeof(int), hang_cell_face[i][0] + 1,
 		   outfp);
 
@@ -519,7 +519,7 @@ int main()
 	ibuf[0] = A_WALL; /* wall value */
 	ibuf[1] = 0; /* number of hanging nodes */
 
-	for(i = 0; i < num_faces_trim_cell; ++i) /* write out face info */
+	for (i = 0; i < num_faces_trim_cell; ++i) /* write out face info */
 	{
 	    fwrite(ibuf, sizeof(int), 1, outfp); /* write wall value */
 	    fwrite(trim_cell_face[i], sizeof(int), trim_cell_face[i][0] + 1,
@@ -541,7 +541,7 @@ int main()
 	ibuf[2] = 1; /* number of hanging nodes for face 3 */
 	ibuf[3] = 31; /* the node number for the hanging node on face 3*/
 
-	for(i = 0; i < 2; ++i) /* write out face info for first 2 faces */
+	for (i = 0; i < 2; ++i) /* write out face info for first 2 faces */
 	{
 	    fwrite(ibuf, sizeof(int), 1, outfp); /* write wall value */
 	    fwrite(hang_cell_face[i], sizeof(int), hang_cell_face[i][0] + 1,
@@ -555,7 +555,7 @@ int main()
 	fwrite(&ibuf[2], sizeof(int), 2, outfp);
 
 	/* write out face info for last 3 faces */
-	for(i = 3; i < num_faces_hang_cell; ++i)
+	for (i = 3; i < num_faces_hang_cell; ++i)
 	{
 	    fwrite(ibuf, sizeof(int), 1, outfp); /* write wall value */
 	    fwrite(hang_cell_face[i], sizeof(int), hang_cell_face[i][0] + 1,

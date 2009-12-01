@@ -813,7 +813,7 @@ void Foam::chemkinReader::read
         yy_buffer_state* bufferPtr(yy_create_buffer(&thermoStream, yyBufSize));
         yy_switch_to_buffer(bufferPtr);
 
-        while(lex() != 0)
+        while (lex() != 0)
         {}
 
         yy_delete_buffer(bufferPtr);
@@ -838,7 +838,7 @@ void Foam::chemkinReader::read
 
     initReactionKeywordTable();
 
-    while(lex() != 0)
+    while (lex() != 0)
     {}
 
     yy_delete_buffer(bufferPtr);

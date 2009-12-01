@@ -96,7 +96,7 @@ Foam::scalar Foam::general::sample() const
           + (x - xy_[i][0])
            *(xy_[i+1][1] - xy_[i][1])
            /(xy_[i+1][0] - xy_[i][0]);
-    } while(p>y);
+    } while (p>y);
 
     return x;
 }

@@ -418,8 +418,8 @@ int main(int argc, char *argv[])
         frontPatchFaces.setSize(layerFaces.size());
         forAll(backPatchFaces, i)
         {
-            backPatchFaces[i] = layerFaces[i][0];
-            frontPatchFaces[i] = layerFaces[i][layerFaces[i].size()-1];
+            backPatchFaces[i]  = layerFaces[i].first();
+            frontPatchFaces[i] = layerFaces[i].last();
         }
 
         // Create dummy fvSchemes, fvSolution
@@ -693,7 +693,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

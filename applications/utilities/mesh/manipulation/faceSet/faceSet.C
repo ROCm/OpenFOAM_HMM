@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
         currentSet.write();
     }
 
-    Info << nl << "End" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

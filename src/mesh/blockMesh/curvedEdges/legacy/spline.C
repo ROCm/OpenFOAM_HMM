@@ -24,67 +24,70 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "simpleSplineEdge.H"
-#include "addToRunTimeSelectionTable.H"
+#include "spline.H"
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
+Foam::scalar Foam::spline::B(const scalar tau)
 {
-    defineTypeNameAndDebug(simpleSplineEdge, 0);
-    addToRunTimeSelectionTable(curvedEdge, simpleSplineEdge, Istream);
+    if (tau <= -2.0 || tau >= 2.0)
+    {
+        return 0.0;
+    }
+    else if (tau <= -1.0)
+    {
+        return pow((2.0 + tau), 3.0)/6.0;
+    }
+    else if (tau <= 0.0)
+    {
+        return (4.0 - 6.0*tau*tau - 3.0*tau*tau*tau)/6.0;
+    }
+    else if (tau <= 1.0)
+    {
+        return (4.0 - 6.0*tau*tau + 3.0*tau*tau*tau)/6.0;
+    }
+    else if (tau <= 2.0)
+    {
+        return pow((2.0 - tau), 3.0)/6.0;
+    }
+    else
+    {
+        FatalErrorIn("spline::B(const scalar)")
+            << "Programming error???, "
+            << "tau = " << tau
+            << abort(FatalError);
+    }
+
+    return 0.0;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::simpleSplineEdge::simpleSplineEdge
-(
-    const pointField& points,
-    const label start,
-    const label end,
-    const pointField& otherknots
-)
+Foam::spline::spline(const pointField& knotPoints)
 :
-    curvedEdge(points, start, end),
-    BSpline(knotlist(points, start, end, otherknots))
-{}
-
-
-Foam::simpleSplineEdge::simpleSplineEdge
-(
-    const pointField& points,
-    const label start,
-    const label end,
-    const pointField& otherknots,
-    const vector& fstend,
-    const vector& sndend
-)
-:
-    curvedEdge(points, start, end),
-    BSpline(knotlist(points, start, end, otherknots), fstend, sndend)
-{}
-
-
-Foam::simpleSplineEdge::simpleSplineEdge(const pointField& points, Istream& is)
-:
-    curvedEdge(points, is),
-    BSpline(knotlist(points, start_, end_, pointField(is)))
+    knots_(knotPoints)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::vector Foam::simpleSplineEdge::position(const scalar mu) const
+Foam::point Foam::spline::position(const scalar mu) const
 {
-    return BSpline::position(mu);
+    point loc(point::zero);
+
+    for (register label i=0; i < knots_.size(); i++)
+    {
+        loc += B((knots_.size() - 1)*mu - i)*knots_[i];
+    }
+
+    return loc;
 }
 
 
-Foam::scalar Foam::simpleSplineEdge::length() const
+Foam::scalar Foam::spline::length() const
 {
-    notImplemented("simpleSplineEdge::length() const");
+    notImplemented("spline::length() const");
     return 1.0;
 }
 

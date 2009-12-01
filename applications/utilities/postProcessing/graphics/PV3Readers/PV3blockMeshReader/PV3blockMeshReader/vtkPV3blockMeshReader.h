@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,15 +84,15 @@ public:
 
 
     // Description:
-    // Parts (blocks) selection list control
-    vtkDataArraySelection* GetPartSelection();
-    int  GetNumberOfPartArrays();
-    int  GetPartArrayStatus(const char*);
-    void SetPartArrayStatus(const char*, int status);
-    const char* GetPartArrayName(int index);
+    // Blocks selection list control
+    vtkDataArraySelection* GetBlockSelection();
+    int  GetNumberOfBlockArrays();
+    int  GetBlockArrayStatus(const char*);
+    void SetBlockArrayStatus(const char*, int status);
+    const char* GetBlockArrayName(int index);
 
     // Description:
-    // Parts (blocks) selection list control
+    // CurvedEdges selection list control
     vtkDataArraySelection* GetCurvedEdgesSelection();
     int  GetNumberOfCurvedEdgesArrays();
     int  GetCurvedEdgesArrayStatus(const char*);
@@ -109,8 +109,6 @@ public:
         void* clientdata,
         void* calldata
     );
-
-    void SelectionModified();
 
 
 protected:
@@ -164,7 +162,7 @@ private:
     //- Dummy variable/switch to invoke a reader update
     int UpdateGUI;
 
-    vtkDataArraySelection* PartSelection;
+    vtkDataArraySelection* BlockSelection;
 
     vtkDataArraySelection* CurvedEdgesSelection;
 

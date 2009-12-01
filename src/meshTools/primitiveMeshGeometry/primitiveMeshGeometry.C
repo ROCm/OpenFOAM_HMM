@@ -796,7 +796,7 @@ bool Foam::primitiveMeshGeometry::checkFaceAngles
         faceNormal /= mag(faceNormal) + VSMALL;
 
         // Get edge from f[0] to f[size-1];
-        vector ePrev(p[f[0]] - p[f[f.size()-1]]);
+        vector ePrev(p[f.first()] - p[f.last()]);
         scalar magEPrev = mag(ePrev);
         ePrev /= magEPrev + VSMALL;
 

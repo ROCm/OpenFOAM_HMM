@@ -95,8 +95,7 @@ int main(int argc, char *argv[])
         printCleaning(pathName);
     }
 
-    Info<< "\nEnd" << endl;
-
+    Info<< "\nEnd\n" << endl;
     return 0;
 }
 

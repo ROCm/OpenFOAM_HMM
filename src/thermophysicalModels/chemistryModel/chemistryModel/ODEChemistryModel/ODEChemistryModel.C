@@ -707,7 +707,7 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
         // calculate the chemical source terms
         scalar cTot = 0.0;
 
-        while(timeLeft > SMALL)
+        while (timeLeft > SMALL)
         {
             tauC = solver().solve(c, Ti, pi, t, dt);
             t += dt;

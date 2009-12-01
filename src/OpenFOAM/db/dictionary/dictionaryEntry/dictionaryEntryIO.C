@@ -39,7 +39,7 @@ Foam::dictionaryEntry::dictionaryEntry
     Istream& is
 )
 :
-    entry(is),
+    entry(keyType(is)),
     dictionary(parentDict, is)
 {
     is.fatalCheck

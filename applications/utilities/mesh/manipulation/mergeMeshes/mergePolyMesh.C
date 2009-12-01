@@ -385,7 +385,7 @@ void Foam::mergePolyMesh::merge()
     // Add the patches if necessary
     if (patchNames_.size() != boundaryMesh().size())
     {
-        Info << "Copying old patches" << endl;
+        Info<< "Copying old patches" << endl;
 
         List<polyPatch*> newPatches(patchNames_.size());
 
@@ -399,7 +399,7 @@ void Foam::mergePolyMesh::merge()
             newPatches[patchI] = oldPatches[patchI].clone(oldPatches).ptr();
         }
 
-        Info << "Adding new patches. " << endl;
+        Info<< "Adding new patches. " << endl;
 
         label endOfLastPatch =
             oldPatches[patchI - 1].start() + oldPatches[patchI - 1].size();

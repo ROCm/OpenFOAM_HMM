@@ -137,11 +137,11 @@ void Foam::linearValveFvMesh::addZonesAndModifiers()
 
     List<cellZone*> cz(0);
 
-    Info << "Adding point, face and cell zones" << endl;
+    Info<< "Adding point, face and cell zones" << endl;
     addZones(pz, fz, cz);
 
     // Add a topology modifier
-    Info << "Adding topology modifiers" << endl;
+    Info<< "Adding topology modifiers" << endl;
     topoChanger_.setSize(1);
     topoChanger_.set
     (
@@ -249,11 +249,11 @@ bool Foam::linearValveFvMesh::attached() const
 
     if (result)
     {
-        Info << "linearValveFvMesh: attached!" << endl;
+        Info<< "linearValveFvMesh: attached!" << endl;
     }
     else
     {
-        Info << "linearValveFvMesh: detached!" << endl;
+        Info<< "linearValveFvMesh: detached!" << endl;
     }
 
     return result;
@@ -299,7 +299,7 @@ void Foam::linearValveFvMesh::update()
     // Detaching the interface
     if (attached())
     {
-        Info << "Decoupling sliding interfaces" << endl;
+        Info<< "Decoupling sliding interfaces" << endl;
         makeSlidersLive();
 
         // Changing topology by hand
@@ -311,7 +311,7 @@ void Foam::linearValveFvMesh::update()
     }
     else
     {
-        Info << "Sliding interfaces decoupled" << endl;
+        Info<< "Sliding interfaces decoupled" << endl;
     }
 
     // Perform mesh motion
@@ -328,7 +328,7 @@ void Foam::linearValveFvMesh::update()
     {
         if (topoChangeMap().hasMotionPoints())
         {
-            Info << "Topology change; executing pre-motion" << endl;
+            Info<< "Topology change; executing pre-motion" << endl;
             movePoints(topoChangeMap().preMotionPoints());
         }
     }
@@ -339,17 +339,17 @@ void Foam::linearValveFvMesh::update()
     movePoints(msPtr_->curPoints());
 
     // Attach the interface
-    Info << "Coupling sliding interfaces" << endl;
+    Info<< "Coupling sliding interfaces" << endl;
     makeSlidersLive();
     resetMorph();
     setMorphTimeIndex(3*time().timeIndex() + 2);
     updateMesh();
 
-    Info << "Moving points post slider attach" << endl;
+    Info<< "Moving points post slider attach" << endl;
 
     msPtr_->updateMesh();
 
-    Info << "Sliding interfaces coupled: " << attached() << endl;
+    Info<< "Sliding interfaces coupled: " << attached() << endl;
 }
 
 

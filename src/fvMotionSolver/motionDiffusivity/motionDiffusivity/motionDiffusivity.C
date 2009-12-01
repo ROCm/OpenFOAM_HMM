@@ -54,7 +54,7 @@ Foam::autoPtr<Foam::motionDiffusivity> Foam::motionDiffusivity::New
 {
     word diffTypeName(mdData);
 
-    Info << "Selecting motion diffusion: " << diffTypeName << endl;
+    Info<< "Selecting motion diffusion: " << diffTypeName << endl;
 
     IstreamConstructorTable::iterator cstrIter =
         IstreamConstructorTablePtr_->find(diffTypeName);

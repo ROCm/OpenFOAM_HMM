@@ -58,15 +58,15 @@ void Foam::meshReader::warnDuplicates
     // warn about duplicate names
     if (duplicates)
     {
-        Info << nl << "WARNING: " << context << " with identical names:";
+        Info<< nl << "WARNING: " << context << " with identical names:";
         forAllConstIter(HashTable<label>, hashed, iter)
         {
             if (*iter > 1)
             {
-                Info << "  " << iter.key();
+                Info<< "  " << iter.key();
             }
         }
-        Info << nl << endl;
+        Info<< nl << endl;
     }
 }
 

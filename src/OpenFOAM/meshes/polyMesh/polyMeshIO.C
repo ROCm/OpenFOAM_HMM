@@ -89,7 +89,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
         // Topological change
         if (debug)
         {
-            Info << "Topological change" << endl;
+            Info<< "Topological change" << endl;
         }
 
         clearOut();
@@ -403,7 +403,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
         // Points moved
         if (debug)
         {
-            Info << "Point motion" << endl;
+            Info<< "Point motion" << endl;
         }
 
         clearGeom();
@@ -430,14 +430,14 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
         // Rotation can cause direction vector to change
         geometricD_ = Vector<label>::zero;
         solutionD_ = Vector<label>::zero;
-        
+
         return polyMesh::POINTS_MOVED;
     }
     else
     {
         if (debug)
         {
-            Info << "No change" << endl;
+            Info<< "No change" << endl;
         }
 
         return polyMesh::UNCHANGED;

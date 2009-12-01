@@ -331,11 +331,11 @@ Foam::spray::spray
         }
         if (liquidToGasIndex_[i] == -1)
         {
-            Info << "In composition:" << endl;
+            Info<< "In composition:" << endl;
             for (label k=0; k<Ns; k++)
             {
                 word specieName(composition_.Y()[k].name());
-                Info << specieName << endl;
+                Info<< specieName << endl;
             }
 
             FatalError<<

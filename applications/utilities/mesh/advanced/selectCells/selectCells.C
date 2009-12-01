@@ -469,7 +469,7 @@ int main(int argc, char *argv[])
             MESH,       // meshType
             NONMESH,    // fill type
             mesh.nCells()
-        ); 
+        );
 
 
         Info<< "Removing points connecting cells unconnected by faces ..."
@@ -510,7 +510,7 @@ int main(int argc, char *argv[])
     writeSet(selectedCells, "cells selected for meshing");
 
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

@@ -83,11 +83,11 @@
                 );
             }  // end of all merge pairs
 
-            Info << "Adding point and face zones" << endl;
+            Info<< "Adding point and face zones" << endl;
             mesh.addZones(pz, fz, cz);
 
 
-            Info << "Creating attachPolyTopoChanger" << endl;
+            Info<< "Creating attachPolyTopoChanger" << endl;
             attachPolyTopoChanger polyMeshAttacher(mesh);
             polyMeshAttacher.setSize(mergePatchPairs.size());
 

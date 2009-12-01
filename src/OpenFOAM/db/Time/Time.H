@@ -90,17 +90,17 @@ public:
         //- Stop-run control options
         enum stopAtControls
         {
-            saEndTime,
-            saNoWriteNow,
-            saWriteNow,
-            saNextWrite
+            saEndTime,    /*!< stop when Time reaches the prescribed endTime */
+            saNoWriteNow, /*!< set endTime to stop immediately w/o writing */
+            saWriteNow,   /*!< set endTime to stop immediately w/ writing */
+            saNextWrite   /*!< stop the next time data are written */
         };
 
-        //- Suported time directory name formats
+        //- Supported time directory name formats
         enum fmtflags
         {
-            general = 0,
-            fixed = ios_base::fixed,
+            general    = 0,
+            fixed      = ios_base::fixed,
             scientific = ios_base::scientific
         };
 
@@ -111,10 +111,10 @@ protected:
 
         label  startTimeIndex_;
         scalar startTime_;
-        scalar endTime_;
+        mutable scalar endTime_;
 
         static const NamedEnum<stopAtControls, 4> stopAtControlNames_;
-        stopAtControls stopAt_;
+        mutable stopAtControls stopAt_;
 
         static const NamedEnum<writeControls, 5> writeControlNames_;
         writeControls writeControl_;
@@ -389,6 +389,10 @@ public:
 
 
         // Edit
+
+            //- Adjust the current stopAtControl. Note that this value
+            //  only persists until the next time the dictionary is read.
+            virtual void stopAt(const stopAtControls) const;
 
             //- Reset the time and time-index to those of the given time
             virtual void setTime(const Time&);

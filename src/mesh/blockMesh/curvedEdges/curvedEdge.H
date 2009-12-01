@@ -26,8 +26,8 @@ Class
     Foam::curvedEdge
 
 Description
-    Define a curved edge in space that is parameterised for
-    0<lambda<1 from the beginning to the end point.
+    Define a curved edge that is parameterized for 0<lambda<1
+    between the start and end point.
 
 SourceFiles
     curvedEdge.C
@@ -61,6 +61,19 @@ protected:
         const pointField& points_;
         const label start_;
         const label end_;
+
+    // Protected Member Functions
+
+        //- Return a complete point field by appending the start/end points
+        //  to the given list
+        static pointField appendEndPoints
+        (
+            const pointField&,
+            const label start,
+            const label end,
+            const pointField& otherKnots
+        );
+
 
 public:
 
@@ -136,22 +149,12 @@ public:
         //  - -1: same edge, but different orientation
         inline int compare(const label start, const label end) const;
 
-        //- Return the position of a point on the curve given by
-        //  the parameter 0 <= lambda <= 1
-        virtual vector position(const scalar) const = 0;
+        //- Return the point position corresponding to the curve parameter
+        //  0 <= lambda <= 1
+        virtual point position(const scalar) const = 0;
 
         //- Return the length of the curve
         virtual scalar length() const = 0;
-
-        //- Return a complete knotList by adding the start/end points
-        //  to the given list
-        static pointField knotlist
-        (
-            const pointField&,
-            const label start,
-            const label end,
-            const pointField& otherknots
-        );
 
 
     // Member operators

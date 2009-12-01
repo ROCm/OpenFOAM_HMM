@@ -234,7 +234,7 @@ private:
             {
                 elementName[1] = tolower(elementName[1]);
             }
-            else if(elementName[0] == 'E')
+            else if (elementName[0] == 'E')
             {
                 elementName = 'e';
             }

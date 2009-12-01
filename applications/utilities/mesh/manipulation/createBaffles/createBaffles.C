@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
         {
             newPatches.append(findPatchID(mesh, patchNames[i]));
             Info<< "Using additional patch " << patchNames[i]
-                << " at index " << newPatches[newPatches.size()-1] << endl;
+                << " at index " << newPatches.last() << endl;
         }
     }
 

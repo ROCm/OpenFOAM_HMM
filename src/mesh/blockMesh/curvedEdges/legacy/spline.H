@@ -23,21 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::simpleSplineEdge
+    Foam::spline
 
 Description
-    The actual access class for Bspline
+    Define a basic spline on nKnots knots.
+
+    The spline does not go anywhere near these knots
+    (will act as a base type for various splines that will have real uses)
 
 SourceFiles
-    simpleSplineEdge.C
+    spline.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef simpleSplineEdge_H
-#define simpleSplineEdge_H
+#ifndef spline_H
+#define spline_H
 
-#include "curvedEdge.H"
-#include "BSpline.H"
+#include "pointField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,68 +47,59 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class simpleSplineEdge Declaration
+                           Class spline Declaration
 \*---------------------------------------------------------------------------*/
 
-class simpleSplineEdge
-:
-    public curvedEdge,
-    public BSpline
+class spline
 {
+    // Private data
+
+        //- The knots defining the spline
+        pointField knots_;
+
     // Private Member Functions
 
+        //- Blending function for constructing spline
+        static scalar B(const scalar);
+
         //- Disallow default bitwise copy construct
-        simpleSplineEdge(const simpleSplineEdge&);
+        spline(const spline&);
 
         //- Disallow default bitwise assignment
-        void operator=(const simpleSplineEdge&);
+        void operator=(const spline&);
 
 
 public:
 
-    //- Runtime type information
-    TypeName("simpleSpline");
-
-
     // Constructors
 
         //- Construct from components
-        simpleSplineEdge
-        (
-            const pointField&,
-            const label start,
-            const label end,
-            const pointField& otherKnots
-        );
-
-        //- Construct from components
-        simpleSplineEdge
-        (
-            const pointField&,
-            const label start,
-            const label end,
-            const pointField& otherKnots,
-            const vector& fstend,
-            const vector& sndend
-        );
-
-        //- Construct from Istream setting pointsList
-        simpleSplineEdge(const pointField&, Istream&);
-
-
-    // Destructor
-
-        virtual ~simpleSplineEdge()
-        {}
+        spline(const pointField&);
 
 
     // Member Functions
 
-        //- Return the position of a point on the simple spline curve given by
-        //  the parameter 0 <= lambda <= 1
-        vector position(const scalar mu) const;
+        // Access
 
-        //- Return the length of the simple spline curve
+            //- Return the knot points in the spline
+            const pointField& knotPoints() const
+            {
+                return knots_;
+            }
+
+
+            //- Return the number of knots in the spline
+            label nKnots() const
+            {
+                return knots_.size();
+            }
+
+
+        //- Return the point position corresponding to the curve parameter
+        //  0 <= lambda <= 1
+        point position(const scalar) const;
+
+        //- Return the length of the spline curve
         scalar length() const;
 };
 

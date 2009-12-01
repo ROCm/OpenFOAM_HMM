@@ -262,7 +262,7 @@ Foam::labelPair Foam::addPatchCellLayer::getEdgeString
             // - which hasn't been handled yet
             // - with same neighbour
             // - that needs extrusion
-            while(true)
+            while (true)
             {
                 label prevFp = fEdges.rcIndex(startFp);
 
@@ -286,7 +286,7 @@ Foam::labelPair Foam::addPatchCellLayer::getEdgeString
 
             // Search forward for end of string
             endFp = startFp;
-            while(true)
+            while (true)
             {
                 label nextFp = fEdges.fcIndex(endFp);
 
@@ -1278,7 +1278,7 @@ void Foam::addPatchCellLayer::setRefinement
                     doneEdge[fEdges[fp]] = true;
                     fp = f.fcIndex(fp);
                 }
-                stringedVerts[stringedVerts.size()-1] = f[fp];
+                stringedVerts.last() = f[fp];
 
 
                 // Now stringedVerts contains the vertices in order of face f.
@@ -1296,7 +1296,7 @@ void Foam::addPatchCellLayer::setRefinement
 
                 for (label i = 0; i < numEdgeSideFaces; i++)
                 {
-                    label vEnd = stringedVerts[stringedVerts.size()-1];
+                    label vEnd = stringedVerts.last();
                     label vStart = stringedVerts[0];
 
                     // calculate number of points making up a face

@@ -33,7 +33,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void domainDecomposition::distributeCells()
+void Foam::domainDecomposition::distributeCells()
 {
     Info<< "\nCalculating distribution of cells" << endl;
 

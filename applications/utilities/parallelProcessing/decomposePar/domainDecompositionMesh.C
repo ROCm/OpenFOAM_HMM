@@ -40,7 +40,7 @@ Description
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
+void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 {
     // Decide which cell goes to which processor
     distributeCells();
@@ -87,7 +87,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
         }
     }
 
-    Info << "\nDistributing faces to processors" << endl;
+    Info<< "\nDistributing faces to processors" << endl;
 
     // Loop through all internal faces and decide which processor they belong to
     // First visit all internal faces. If cells at both sides belong to the
@@ -158,7 +158,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                         SLList<label>::iterator curInterProcBdrsNeiIter =
                             interProcBoundaries[neighbourProc].begin();
 
-                        SLList<SLList<label> >::iterator 
+                        SLList<SLList<label> >::iterator
                             curInterProcBFacesNeiIter =
                             interProcBFaces[neighbourProc].begin();
 
@@ -307,7 +307,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                         SLList<label>::iterator curInterProcBdrsOwnIter =
                             interProcBoundaries[ownerProc].begin();
 
-                        SLList<SLList<label> >::iterator 
+                        SLList<SLList<label> >::iterator
                             curInterProcBFacesOwnIter =
                             interProcBFaces[ownerProc].begin();
 
@@ -432,7 +432,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                         // Note: I cannot add the other side of the cyclic
                         // boundary here because this would violate the order.
                         // They will be added in a separate loop below
-                        // 
+                        //
                     }
                 }
 
@@ -483,7 +483,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
             // calculate the size
             label nFacesOnProcessor = curProcFaces.size();
 
-            for 
+            for
             (
                 SLList<SLList<label> >::iterator curInterProcBFacesIter =
                     interProcBFaces[procI].begin();
@@ -506,7 +506,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
             // Add internal and boundary faces
             // Remember to increment the index by one such that the
-            // turning index works properly.  
+            // turning index works properly.
             for
             (
                 SLList<label>::iterator curProcFacesIter = curProcFaces.begin();
@@ -576,7 +576,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                     // add the face
 
                     // Remember to increment the index by one such that the
-                    // turning index works properly.  
+                    // turning index works properly.
                     if (cellToProc_[owner[curFacesIter()]] == procI)
                     {
                         curProcFaceAddressing[nFaces] = curFacesIter() + 1;
@@ -598,7 +598,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
         }
     }
 
-    Info << "\nCalculating processor boundary addressing" << endl;
+    Info<< "\nCalculating processor boundary addressing" << endl;
     // For every patch of processor boundary, find the index of the original
     // patch. Mis-alignment is caused by the fact that patches with zero size
     // are omitted. For processor patches, set index to -1.
@@ -656,7 +656,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
         curBoundaryAddressing.setSize(nPatches);
     }
 
-    Info << "\nDistributing points to processors" << endl;
+    Info<< "\nDistributing points to processors" << endl;
     // For every processor, loop through the list of faces for the processor.
     // For every face, loop through the list of points and mark the point as
     // used for the processor. Collect the list of used points for the
@@ -748,7 +748,7 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                 {
                     // Mark the original face as used
                     // Remember to decrement the index by one (turning index)
-                    // 
+                    //
                     const label curF = mag(curFaceLabels[facei]) - 1;
 
                     const face& f = fcs[curF];
@@ -775,3 +775,5 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
         sort(globallySharedPoints_);
     }
 }
+
+// ************************************************************************* //

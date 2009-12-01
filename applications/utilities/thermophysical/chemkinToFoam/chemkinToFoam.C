@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     OFstream thermoFile(FOAMThermodynamicsFileName);
     thermoFile<< cr.speciesThermo() << endl;
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

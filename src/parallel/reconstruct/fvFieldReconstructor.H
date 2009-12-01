@@ -23,70 +23,70 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::pointFieldReconstructor
+    Foam::fvFieldReconstructor
 
 Description
-    Point field reconstructor.
+    Finite volume reconstructor for volume and surface fields.
 
 SourceFiles
-    pointFieldReconstructor.C
+    fvFieldReconstructor.C
+    fvFieldReconstructorReconstructFields.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointFieldReconstructor_H
-#define pointFieldReconstructor_H
+#ifndef fvFieldReconstructor_H
+#define fvFieldReconstructor_H
 
-#include "pointMesh.H"
-#include "pointFields.H"
-#include "pointPatchFieldMapperPatchRef.H"
+#include "PtrList.H"
+#include "fvMesh.H"
 #include "IOobjectList.H"
+#include "fvPatchFieldMapper.H"
+#include "labelIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+
 /*---------------------------------------------------------------------------*\
-              Class pointFieldReconstructor Declaration
+                    Class fvFieldReconstructor Declaration
 \*---------------------------------------------------------------------------*/
 
-class pointFieldReconstructor
+class fvFieldReconstructor
 {
     // Private data
 
         //- Reconstructed mesh reference
-        const pointMesh& mesh_;
+        fvMesh& mesh_;
 
         //- List of processor meshes
-        const PtrList<pointMesh>& procMeshes_;
+        const PtrList<fvMesh>& procMeshes_;
 
-        //- List of processor point addressing lists
-        const PtrList<labelIOList>& pointProcAddressing_;
+        //- List of processor face addressing lists
+        const PtrList<labelIOList>& faceProcAddressing_;
+
+        //- List of processor cell addressing lists
+        const PtrList<labelIOList>& cellProcAddressing_;
 
         //- List of processor boundary addressing lists
         const PtrList<labelIOList>& boundaryProcAddressing_;
-
-        //- Point patch addressing
-        labelListListList patchPointAddressing_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        pointFieldReconstructor
-        (
-            const pointFieldReconstructor&
-        );
+        fvFieldReconstructor(const fvFieldReconstructor&);
 
         //- Disallow default bitwise assignment
-        void operator=(const pointFieldReconstructor&);
+        void operator=(const fvFieldReconstructor&);
 
 
 public:
 
-        class pointPatchFieldReconstructor
+        class fvPatchFieldReconstructor
         :
-            public pointPatchFieldMapper
+            public fvPatchFieldMapper
         {
             label size_;
 
@@ -95,7 +95,7 @@ public:
             // Constructors
 
                 //- Construct given size
-                pointPatchFieldReconstructor(const label size)
+                fvPatchFieldReconstructor(const label size)
                 :
                     size_(size)
                 {}
@@ -123,25 +123,49 @@ public:
     // Constructors
 
         //- Construct from components
-        pointFieldReconstructor
+        fvFieldReconstructor
         (
-            const pointMesh& mesh,
-            const PtrList<pointMesh>& procMeshes,
-            const PtrList<labelIOList>& pointProcAddressing,
+            fvMesh& mesh,
+            const PtrList<fvMesh>& procMeshes,
+            const PtrList<labelIOList>& faceProcAddressing,
+            const PtrList<labelIOList>& cellProcAddressing,
             const PtrList<labelIOList>& boundaryProcAddressing
         );
 
 
     // Member Functions
 
-        //- Reconstruct field
+        //- Reconstruct volume field
         template<class Type>
-        tmp<GeometricField<Type, pointPatchField, pointMesh> >
-        reconstructField(const IOobject& fieldIoObject);
+        tmp<GeometricField<Type, fvPatchField, volMesh> >
+        reconstructFvVolumeField
+        (
+            const IOobject& fieldIoObject
+        );
 
-        //- Reconstruct and write all fields
+        //- Reconstruct surface field
         template<class Type>
-        void reconstructFields(const IOobjectList& objects);
+        tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        reconstructFvSurfaceField
+        (
+            const IOobject& fieldIoObject
+        );
+
+        //- Reconstruct and write all/selected volume fields
+        template<class Type>
+        void reconstructFvVolumeFields
+        (
+            const IOobjectList& objects,
+            const HashSet<word>& selectedFields
+        );
+
+        //- Reconstruct and write all/selected volume fields
+        template<class Type>
+        void reconstructFvSurfaceFields
+        (
+            const IOobjectList& objects,
+            const HashSet<word>& selectedFields
+        );
 };
 
 
@@ -152,7 +176,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "pointFieldReconstructorReconstructFields.C"
+#   include "fvFieldReconstructorReconstructFields.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
