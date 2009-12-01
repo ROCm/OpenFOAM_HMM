@@ -40,7 +40,7 @@ void Foam::referredCellList::buildReferredCellList
     bool pointPointListBuild
 )
 {
-    Info << nl << "Building list of referred interaction neighbours" << endl;
+    Info<< nl << "Building list of referred interaction neighbours" << endl;
 
     const polyMesh& mesh(il_.mesh());
 

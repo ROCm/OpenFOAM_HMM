@@ -99,7 +99,7 @@ void starMesh::createPolyBoundary()
                                         << curCellFaces[cellFaceI]
                                         << endl;
 
-                                    Info << "PROSTAR Command: vset,news,vlis";
+                                    Info<< "PROSTAR Command: vset,news,vlis";
                                     forAll (curCellFaces[cellFaceI], spI)
                                     {
                                         // check if the point is given by STAR
@@ -118,10 +118,10 @@ void starMesh::createPolyBoundary()
                                         }
                                         else
                                         {
-                                            Info << ",???";
+                                            Info<< ",???";
                                         }
                                     }
-                                    Info << " $ bset,add,vset,all" << endl;
+                                    Info<< " $ bset,add,vset,all" << endl;
                                 }
                                 else
                                 {
@@ -135,7 +135,7 @@ void starMesh::createPolyBoundary()
                                         << curCellFaces[cellFaceI]
                                         << endl;
 
-                                    Info << "PROSTAR Command: vset,news,vlis";
+                                    Info<< "PROSTAR Command: vset,news,vlis";
                                     forAll (curCellFaces[cellFaceI], spI)
                                     {
                                         // check if the point is given by STAR
@@ -154,10 +154,10 @@ void starMesh::createPolyBoundary()
                                         }
                                         else
                                         {
-                                            Info << ",???";
+                                            Info<< ",???";
                                         }
                                     }
-                                    Info << " $ bset,add,vset,all" << endl;
+                                    Info<< " $ bset,add,vset,all" << endl;
 
                                 }
                             }
@@ -191,7 +191,7 @@ void starMesh::createPolyBoundary()
             {
                 const face& missingFace = cellFaces_[cellI][faceI];
 
-                Info << "starMesh::createPolyBoundary() : "
+                Info<< "starMesh::createPolyBoundary() : "
                     << "missing face found in cell " << cellI
                     << ".\nType: " << cellShapes_[cellI].model().name()
                     << ". STAR cell number: " << starCellID_[cellI]
@@ -199,7 +199,7 @@ void starMesh::createPolyBoundary()
 
                 nMissingFaceFound++;
 
-                Info << "PROSTAR Command: vset,news,vlis";
+                Info<< "PROSTAR Command: vset,news,vlis";
                 forAll (missingFace, spI)
                 {
                     // check if the point is given by STAR or created locally
@@ -209,21 +209,21 @@ void starMesh::createPolyBoundary()
                      && missingFace[spI] < starPointID_.size()
                     )
                     {
-                        Info << "," << starPointID_[missingFace[spI]];
+                        Info<< "," << starPointID_[missingFace[spI]];
                     }
                     else
                     {
-                        Info << ",???";
+                        Info<< ",???";
                     }
                 }
-                Info << " $ bset,add,vset,all" << endl;
+                Info<< " $ bset,add,vset,all" << endl;
             }
         }
     }
 
     if (nMissingFaceFound > 0)
     {
-        Info << "Number of unmatched faces: " << nMissingFaceFound << endl;
+        Info<< "Number of unmatched faces: " << nMissingFaceFound << endl;
     }
 
     // reset the size of the face list
@@ -256,14 +256,14 @@ void starMesh::createPolyBoundary()
         {
             const face& problemFace = meshFaces_[faceI];
 
-            Info << "starMesh::createPolyBoundary() : "
+            Info<< "starMesh::createPolyBoundary() : "
                 << "problem with face " << faceI << ": addressed "
                 << markupFaces[faceI] << " times (should be 2!). Face: "
                 << problemFace << endl;
 
             nProblemFacesFound++;
 
-            Info << "PROSTAR Command: vset,news,vlis";
+            Info<< "PROSTAR Command: vset,news,vlis";
             forAll (problemFace, spI)
             {
                 // check if the point is given by STAR or created locally
@@ -273,25 +273,25 @@ void starMesh::createPolyBoundary()
                  && problemFace[spI] < starPointID_.size()
                 )
                 {
-                    Info << "," << starPointID_[problemFace[spI]];
+                    Info<< "," << starPointID_[problemFace[spI]];
                 }
                 else
                 {
-                    Info << ",???";
+                    Info<< ",???";
                 }
             }
-            Info << " $ bset,add,vset,all" << endl;
+            Info<< " $ bset,add,vset,all" << endl;
         }
     }
 
     if (nProblemFacesFound > 0)
     {
-        Info << "Number of incorrectly matched faces: "
+        Info<< "Number of incorrectly matched faces: "
             << nProblemFacesFound << endl;
     }
 
-    Info << "Number of boundary faces: " << nBoundaryFacesFound << endl;
-    Info << "Total number of faces: " << nCreatedFaces << endl;
+    Info<< "Number of boundary faces: " << nBoundaryFacesFound << endl;
+    Info<< "Total number of faces: " << nCreatedFaces << endl;
 }
 
 

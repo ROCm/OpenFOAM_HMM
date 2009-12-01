@@ -180,7 +180,7 @@ inline Foam::HashTable<T, Key, Hash>::iteratorBase::iteratorBase
     entryPtr_(0),
     hashIndex_(0)
 {
-    if (hashTable_->nElmts_ && hashTable_->table_)
+    if (hashTable_->nElmts_)
     {
         // find first non-NULL table entry
         while

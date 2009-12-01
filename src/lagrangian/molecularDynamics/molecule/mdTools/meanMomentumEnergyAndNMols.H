@@ -73,7 +73,7 @@ label singleStepDOFs = 0;
         //singleStepCentreOfMass += mol().position()*molMass;
     }
 
-    // if(singleStepNMols)
+    // if (singleStepNMols)
     // {
     //     singleStepCentreOfMass /= singleStepTotalMass;
     // }
@@ -104,7 +104,7 @@ label singleStepDOFs = 0;
         singleStepTotalAngularMomentum += molPiGlobal;
         //+((mol().position() - singleStepCentreOfMass) ^ (molV * molMass));
 
-        if(mag(molV) > singleStepMaxVelocityMag)
+        if (mag(molV) > singleStepMaxVelocityMag)
         {
             singleStepMaxVelocityMag = mag(molV);
         }
@@ -176,7 +176,7 @@ if (singleStepNMols)
         /singleStepNMols
         << endl;
 
-        // Info << singleStepNMols << " "
+        // Info<< singleStepNMols << " "
         //     << singleStepTotalMomentum/singleStepTotalMass << " "
         //     << singleStepMaxVelocityMag << " "
         //     << singleStepTotalKE/singleStepNMols << " "

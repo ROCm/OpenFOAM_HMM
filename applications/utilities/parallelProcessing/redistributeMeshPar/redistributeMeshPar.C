@@ -33,11 +33,11 @@ Description
     Balances mesh and writes new mesh to new time directory.
 
     Can also work like decomposePar:
-
+    @verbatim
         mkdir processor0
         cp -r constant processor0
         mpirun -np ddd redistributeMeshPar -parallel
-
+    @endverbatim
 \*---------------------------------------------------------------------------*/
 
 #include "Field.H"

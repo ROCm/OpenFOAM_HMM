@@ -70,12 +70,12 @@ void hexBlock::readPoints(Istream& is)
 
     if (((i ^ j) & k) > 0)
     {
-        Info << "right-handed block" << endl;
+        Info<< "right-handed block" << endl;
         blockHandedness_ = right;
     }
     else
     {
-        Info << "left-handed block" << endl;
+        Info<< "left-handed block" << endl;
         blockHandedness_ = left;
     }
 }

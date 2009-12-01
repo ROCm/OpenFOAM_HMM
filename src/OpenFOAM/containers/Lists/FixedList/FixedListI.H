@@ -208,6 +208,34 @@ Foam::FixedList<T, Size>::data()
 }
 
 
+template<class T, unsigned Size>
+inline T& Foam::FixedList<T, Size>::first()
+{
+    return v_[0];
+}
+
+
+template<class T, unsigned Size>
+inline const T& Foam::FixedList<T, Size>::first() const
+{
+    return v_[0];
+}
+
+
+template<class T, unsigned Size>
+inline T& Foam::FixedList<T, Size>::last()
+{
+    return v_[Size-1];
+}
+
+
+template<class T, unsigned Size>
+inline const T& Foam::FixedList<T, Size>::last() const
+{
+    return v_[Size-1];
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 // element access

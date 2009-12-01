@@ -314,7 +314,7 @@ static void storeScalarField
         Info<< "Storing " << nTotPoints << " of dummy values of " << fieldName
             << endl;
 
-        for(label i = 0; i < nPoints; i++)
+        for (label i = 0; i < nPoints; i++)
         {
             vars[pointI++] = 0.0;
         }
@@ -388,7 +388,7 @@ static void storeVectorField
 
         for (direction d = 0; d < vector::nComponents; d++)
         {
-            for(label i = 0; i < nPoints; i++)
+            for (label i = 0; i < nPoints; i++)
             {
                 vars[pointI++] = 0.0;
             }

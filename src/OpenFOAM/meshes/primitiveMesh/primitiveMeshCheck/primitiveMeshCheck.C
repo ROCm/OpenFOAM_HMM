@@ -175,7 +175,7 @@ bool Foam::primitiveMesh::checkClosedCells
     {
         scalar maxOpenness = 0;
 
-        for(direction cmpt=0; cmpt<vector::nComponents; cmpt++)
+        for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
         {
             maxOpenness = max
             (
@@ -654,7 +654,7 @@ bool Foam::primitiveMesh::checkFaceSkewness
             nWarnSkew++;
         }
 
-        if(skewness > maxSkew)
+        if (skewness > maxSkew)
         {
             maxSkew = skewness;
         }
@@ -702,7 +702,7 @@ bool Foam::primitiveMesh::checkFaceSkewness
             nWarnSkew++;
         }
 
-        if(skewness > maxSkew)
+        if (skewness > maxSkew)
         {
             maxSkew = skewness;
         }
@@ -856,7 +856,7 @@ bool Foam::primitiveMesh::checkFaceAngles
         const face& f = fcs[faceI];
 
         // Get edge from f[0] to f[size-1];
-        vector ePrev(p[f[0]] - p[f[f.size()-1]]);
+        vector ePrev(p[f.first()] - p[f.last()]);
         scalar magEPrev = mag(ePrev);
         ePrev /= magEPrev + VSMALL;
 

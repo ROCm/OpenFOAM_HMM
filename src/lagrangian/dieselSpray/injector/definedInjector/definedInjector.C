@@ -99,8 +99,7 @@ Foam::definedInjector::definedInjector
 
     if
     (
-        mag(massFlowRateProfile_[massFlowRateProfile_.size()-1][0]
-      - velocityProfile_[velocityProfile_.size()-1][0])
+        mag(massFlowRateProfile_.last()[0] - velocityProfile_.last()[0])
       > SMALL
     )
     {
@@ -331,13 +330,13 @@ Foam::scalar Foam::definedInjector::T(const scalar time) const
 
 Foam::scalar Foam::definedInjector::tsoi() const
 {
-    return massFlowRateProfile_[0][0];
+    return massFlowRateProfile_.first()[0];
 }
 
 
 Foam::scalar Foam::definedInjector::teoi() const
 {
-    return massFlowRateProfile_[massFlowRateProfile_.size()-1][0];
+    return massFlowRateProfile_.last()[0];
 }
 
 

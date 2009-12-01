@@ -234,11 +234,11 @@ int main(int argc, char *argv[])
     }
 
     // Write resulting mesh
-    Info << "Writing refined morphMesh to time " << runTime.timeName() << endl;
+    Info<< "Writing refined morphMesh to time " << runTime.timeName() << endl;
 
     mesh.write();
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

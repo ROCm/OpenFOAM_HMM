@@ -63,7 +63,7 @@ inline Foam::label Foam::SVD::nZeros() const
 inline Foam::scalar Foam::SVD::minNonZeroS() const
 {
     scalar minS = S_[0];
-    for(label i = 1; i < S_.size(); i++)
+    for (label i = 1; i < S_.size(); i++)
     {
         scalar s = S_[i];
         if (s > VSMALL && s < minS) minS = s;

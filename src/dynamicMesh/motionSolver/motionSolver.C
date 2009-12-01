@@ -78,7 +78,7 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::New(const polyMesh& mesh)
 
     word solverTypeName(msData);
 
-    Info << "Selecting motion solver: " << solverTypeName << endl;
+    Info<< "Selecting motion solver: " << solverTypeName << endl;
 
     dlLibraryTable::open
     (

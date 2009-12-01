@@ -46,6 +46,34 @@ inline bool Foam::PtrList<T>::empty() const
 
 
 template<class T>
+inline T& Foam::PtrList<T>::first()
+{
+    return this->operator[](0);
+}
+
+
+template<class T>
+inline const T& Foam::PtrList<T>::first() const
+{
+    return this->operator[](0);
+}
+
+
+template<class T>
+inline T& Foam::PtrList<T>::last()
+{
+    return this->operator[](this->size()-1);
+}
+
+
+template<class T>
+inline const T& Foam::PtrList<T>::last() const
+{
+    return this->operator[](this->size()-1);
+}
+
+
+template<class T>
 inline void Foam::PtrList<T>::resize(const label newSize)
 {
     this->setSize(newSize);
@@ -63,9 +91,7 @@ template<class T>
 inline Foam::autoPtr<T> Foam::PtrList<T>::set(const label i, T* ptr)
 {
     autoPtr<T> old(ptrs_[i]);
-
     ptrs_[i] = ptr;
-
     return old;
 }
 
@@ -102,7 +128,7 @@ inline Foam::Xfer<Foam::PtrList<T> > Foam::PtrList<T>::xfer()
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-const T& Foam::PtrList<T>::operator[](const label i) const
+inline const T& Foam::PtrList<T>::operator[](const label i) const
 {
     if (!ptrs_[i])
     {
@@ -116,7 +142,7 @@ const T& Foam::PtrList<T>::operator[](const label i) const
 
 
 template<class T>
-T& Foam::PtrList<T>::operator[](const label i)
+inline T& Foam::PtrList<T>::operator[](const label i)
 {
     if (!ptrs_[i])
     {
@@ -130,7 +156,7 @@ T& Foam::PtrList<T>::operator[](const label i)
 
 
 template<class T>
-const T* Foam::PtrList<T>::operator()(const label i) const
+inline const T* Foam::PtrList<T>::operator()(const label i) const
 {
     return ptrs_[i];
 }
@@ -295,7 +321,6 @@ Foam::PtrList<T>::end()
 {
     return ptrs_.end();
 }
-
 
 
 // ************************************************************************* //

@@ -1015,7 +1015,7 @@ void Foam::polyDualMesh::calcDual
 
         {
             // Check orientation.
-            const face& f = dynDualFaces[dynDualFaces.size()-1];
+            const face& f = dynDualFaces.last();
             vector n = f.normal(dualPoints);
             if (((mesh.points()[owner] - dualPoints[f[0]]) & n) > 0)
             {
@@ -1130,7 +1130,7 @@ void Foam::polyDualMesh::calcDual
 
             {
                 // Check orientation.
-                const face& f = dynDualFaces[dynDualFaces.size()-1];
+                const face& f = dynDualFaces.last();
                 vector n = f.normal(dualPoints);
                 if (((mesh.points()[owner] - dualPoints[f[0]]) & n) > 0)
                 {

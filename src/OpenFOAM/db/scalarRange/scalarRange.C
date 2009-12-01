@@ -315,7 +315,7 @@ Foam::Istream& Foam::operator>>(Istream& is, scalarRange& range)
         Info<< "rejected ill-formed range:";
         for (label i=0; i<nTok; ++i)
         {
-            Info << " " << toks[i];
+            Info<< " " << toks[i];
         }
         Info<< endl;
     }

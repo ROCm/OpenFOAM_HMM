@@ -99,10 +99,10 @@ int main(int argc, char *argv[])
 
         if (THeader.headerOk() && Uheader.headerOk())
         {
-            Info << "Reading T" << endl;
+            Info<< "Reading T" << endl;
             volScalarField T(THeader, mesh);
 
-            Info << "Reading U" << endl;
+            Info<< "Reading U" << endl;
             volVectorField U(Uheader, mesh);
 
 #           include "createPhi.H"

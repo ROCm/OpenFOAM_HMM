@@ -60,7 +60,7 @@ bool Foam::curveSet::trackToBoundary
     // Alias
     const point& trackPt = singleParticle.position();
 
-    while(true)
+    while (true)
     {
         // Local geometry info
         const vector offset = sampleCoords_[sampleI+1] - sampleCoords_[sampleI];
@@ -145,7 +145,7 @@ void Foam::curveSet::calcSamples
             << sampleCoords_ << exit(FatalError);
     }
     point oldPoint = sampleCoords_[0];
-    for(label sampleI = 1; sampleI < sampleCoords_.size(); sampleI++)
+    for (label sampleI = 1; sampleI < sampleCoords_.size(); sampleI++)
     {
         if (mag(sampleCoords_[sampleI] - oldPoint) < SMALL)
         {
@@ -169,7 +169,7 @@ void Foam::curveSet::calcSamples
     label sampleI = 0;
 
     point lastSample(GREAT, GREAT, GREAT);
-    while(true)
+    while (true)
     {
         // Get boundary intersection
         point trackPt;
@@ -243,7 +243,7 @@ void Foam::curveSet::calcSamples
                 // No intersection found. Go to next point
                 sampleI++;
             }
-        } while((trackCellI == -1) && (sampleI < sampleCoords_.size() - 1));
+        } while ((trackCellI == -1) && (sampleI < sampleCoords_.size() - 1));
 
         if (sampleI == sampleCoords_.size() - 1)
         {
@@ -278,7 +278,7 @@ void Foam::curveSet::calcSamples
         );
 
         // fill sampleSegments
-        for(label i = samplingPts.size() - 1; i >= startSegmentI; --i)
+        for (label i = samplingPts.size() - 1; i >= startSegmentI; --i)
         {
             samplingSegments.append(segmentI);
         }

@@ -174,14 +174,14 @@ bool Foam::polyTopoChanger::changeTopology() const
             {
                 Info<< "Modifier " << morphI << " named "
                     << topoChanges[morphI].name();
-                
+
                 if (curTriggerChange)
                 {
-                    Info << " morphing" << endl;
+                    Info<< " morphing" << endl;
                 }
                 else
                 {
-                    Info << " unchanged" << endl;
+                    Info<< " unchanged" << endl;
                 }
             }
 
@@ -195,7 +195,7 @@ bool Foam::polyTopoChanger::changeTopology() const
                     << topoChanges[morphI].name() << " inactive" << endl;
             }
         }
-            
+
     }
 
     return triggerChange;
@@ -252,7 +252,7 @@ void Foam::polyTopoChanger::update(const mapPolyMesh& m)
 
     // Force the mesh modifiers to auto-write.  This allows us to
     // preserve the current state of modifiers corresponding with
-    // the mesh.  
+    // the mesh.
     writeOpt() = IOobject::AUTO_WRITE;
     instance() = mesh_.time().timeName();
 }

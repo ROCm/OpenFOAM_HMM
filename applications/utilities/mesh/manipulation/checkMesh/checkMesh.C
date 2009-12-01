@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                Info << "\nMesh OK.\n" << endl;
+                Info<< "\nMesh OK.\n" << endl;
             }
         }
     }

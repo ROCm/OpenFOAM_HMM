@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
     mesh.writeFluentMesh();
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

@@ -91,7 +91,7 @@ void triSurface::calcSortedEdgeFaces() const
             // e0 is reference so angle is 0
             faceAngles[0] = 0;
 
-            for(label nbI = 1; nbI < myFaceNbs.size(); nbI++)
+            for (label nbI = 1; nbI < myFaceNbs.size(); nbI++)
             {
                 // Get opposite vertex
                 const labelledTri& f = localFaces()[myFaceNbs[nbI]];

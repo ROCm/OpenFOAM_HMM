@@ -38,6 +38,7 @@ SourceFiles
 
 #include "Switch.H"
 #include "pointFieldFwd.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,8 +83,17 @@ protected:
         //- Output field values flag
         Switch valueOutput_;
 
+        //- Output file pointer
+        autoPtr<OFstream> outputFilePtr_;
+
 
         // Functions to be over-ridden from IOoutputFilter class
+
+            //- Make the output file
+            virtual void makeFile();
+
+            //- Write the output file header
+            virtual void writeFileHeader() = 0;
 
             //- Update mesh
             virtual void updateMesh(const mapPolyMesh&);
@@ -117,34 +127,37 @@ public:
         // Access
 
             //- Return the name of the geometric source
-            const word& name() const;
+            inline const word& name() const;
 
             //- Return the reference to the object registry
-            const objectRegistry& obr() const;
+            inline const objectRegistry& obr() const;
 
             //- Return the active flag
-            bool active() const;
+            inline bool active() const;
 
             //- Return the switch to send output to Info as well as to file
-            const Switch& log() const;
+            inline const Switch& log() const;
 
             //- Return the source name
-            const word& sourceName() const;
+            inline const word& sourceName() const;
 
             //- Return the list of field names
-            const wordList& fields() const;
+            inline const wordList& fields() const;
 
             //- Return the output field values flag
-            const Switch& valueOutput() const;
+            inline const Switch& valueOutput() const;
 
             //- Helper function to return the reference to the mesh
-            const fvMesh& mesh() const;
+            inline const fvMesh& mesh() const;
 
 
         // Function object functions
 
             //- Read from dictionary
             virtual void read(const dictionary& dict);
+
+            //- Write to screen/file
+            virtual void write();
 
             //- Execute
             virtual void execute();
@@ -157,6 +170,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "fieldValueI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

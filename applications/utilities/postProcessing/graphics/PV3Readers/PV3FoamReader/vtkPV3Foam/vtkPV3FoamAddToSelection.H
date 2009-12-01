@@ -50,11 +50,17 @@ Foam::label Foam::vtkPV3Foam::addToSelection
     {
         if (suffix.size())
         {
-            select->AddArray((names[nameI] + suffix).c_str());
+            select->AddArray
+            (
+                (names[nameI] + suffix).c_str()
+            );
         }
         else
         {
-            select->AddArray(names[nameI].c_str());
+            select->AddArray
+            (
+                (names[nameI]).c_str()
+            );
         }
     }
 

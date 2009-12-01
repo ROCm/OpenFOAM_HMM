@@ -29,7 +29,7 @@ if (nVar >= 0)
 }
 else
 {
-    // Info << "getLagrangianScalar: nVar = " << nVar << endl;
+    // Info<< "getLagrangianScalar: nVar = " << nVar << endl;
     return Z_UNDEF;
 }
 

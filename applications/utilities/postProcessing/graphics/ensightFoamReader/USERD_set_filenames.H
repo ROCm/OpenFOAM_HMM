@@ -10,7 +10,7 @@ int USERD_set_filenames
 )
 {
 #ifdef ENSIGHTDEBUG
-    Info << "Entering: USERD_set_filenames" << endl << flush;
+    Info<< "Entering: USERD_set_filenames" << endl << flush;
 #endif
 
     char tmp[100];
@@ -87,7 +87,7 @@ int USERD_set_filenames
 
     // set the number of fields and store their names
     // a valid field must exist for all time-steps
-    runTime.setTime(timeDirs[timeDirs.size()-1], timeDirs.size()-1);
+    runTime.setTime(timeDirs.last(), timeDirs.size()-1);
     IOobjectList objects(*meshPtr, runTime.timeName());
 
     fieldNames = objects.names();
@@ -173,7 +173,7 @@ int USERD_set_filenames
 
     if (sprayHeader.headerOk())
     {
-        Info << "[Found lagrangian]" << endl;
+        Info<< "[Found lagrangian]" << endl;
 
         delete sprayPtr;
 
@@ -201,7 +201,7 @@ int USERD_set_filenames
     Numparts_available = Num_unstructured_parts + Num_structured_parts + nPatches;
 
 #ifdef ENSIGHTDEBUG
-    Info << "Leaving: USERD_set_filenames" << endl << flush;
+    Info<< "Leaving: USERD_set_filenames" << endl << flush;
 #endif
 
     return Z_OK;

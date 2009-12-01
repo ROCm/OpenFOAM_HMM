@@ -104,7 +104,7 @@ List<const label*> sammMesh::sammAddressingTable
 // Make polyhedral mesh data (packing)
 void sammMesh::createPolyMeshData()
 {
-    Info << "Creating a polyMesh" << endl;
+    Info<< "Creating a polyMesh" << endl;
 
     createPolyCells();
 
@@ -124,7 +124,7 @@ void sammMesh::createPolyMeshData()
         {
             if (curFaceLabels[faceI] == -1)
             {
-                Info << "cell " << cellI
+                Info<< "cell " << cellI
                     << " has got an unmatched face. "
                     << "Index: " << cellShapes_[cellI].model().index() << endl
 //                     << "cell shape: " << cellShapes_[cellI] << endl
@@ -142,7 +142,7 @@ void sammMesh::createPolyMeshData()
 
     if (nProblemCells > 0)
     {
-        Info << "Number of problem cells: " << nProblemCells << endl;
+        Info<< "Number of problem cells: " << nProblemCells << endl;
     }
 }
 

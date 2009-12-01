@@ -396,10 +396,10 @@ public:
             const labelHashSet& include
         ) const;
 
-        //- Transfer the contents of the argument and annull the argument
+        //- Transfer the contents of the argument and annul the argument
         void transfer(MeshedSurface<Face>&);
 
-        //- Transfer the contents of the argument and annull the argument
+        //- Transfer the contents of the argument and annul the argument
         void transfer(UnsortedMeshedSurface<Face>&);
 
         //- Transfer contents to the Xfer container

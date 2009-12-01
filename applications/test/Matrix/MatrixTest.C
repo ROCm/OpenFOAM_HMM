@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     hmm4 = hmm5;
     Info<< hmm5 << endl;
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

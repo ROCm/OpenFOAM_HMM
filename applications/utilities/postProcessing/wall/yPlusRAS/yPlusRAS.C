@@ -126,7 +126,7 @@ void calcCompressibleYPlus
         return;
     }
 
-    Info << "Reading field rho\n" << endl;
+    Info<< "Reading field rho\n" << endl;
     volScalarField rho(rhoHeader, mesh);
 
     #include "compressibleCreatePhi.H"
@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
 
         if (UHeader.headerOk())
         {
-            Info << "Reading field U\n" << endl;
+            Info<< "Reading field U\n" << endl;
             volVectorField U(UHeader, mesh);
 
             if (compressible)

@@ -35,13 +35,9 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(setsToFaceZone, 0);
-
-addToRunTimeSelectionTable(topoSetSource, setsToFaceZone, word);
-
-addToRunTimeSelectionTable(topoSetSource, setsToFaceZone, istream);
-
+    defineTypeNameAndDebug(setsToFaceZone, 0);
+    addToRunTimeSelectionTable(topoSetSource, setsToFaceZone, word);
+    addToRunTimeSelectionTable(topoSetSource, setsToFaceZone, istream);
 }
 
 
@@ -155,7 +151,7 @@ void Foam::setsToFaceZone::applyToSet
                         {
                             flip = false;
                         }
-                        else if(!ownFound && neiFound)
+                        else if (!ownFound && neiFound)
                         {
                             flip = true;
                         }

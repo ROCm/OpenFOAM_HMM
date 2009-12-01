@@ -994,7 +994,7 @@ Foam::label Foam::PointEdgeWave<Type>::iterate(const label maxIter)
 
     label iter = 0;
 
-    while(iter < maxIter)
+    while (iter < maxIter)
     {
         if (debug)
         {

@@ -284,10 +284,10 @@ void printHelp(Ostream& os)
         << endl
         << "Zones can be set using zoneSets from corresponding sets:" << endl
         << "    cellZoneSet c0Zone new setToCellZone c0" << endl
-        << "    faceZoneSet f0Zone new setToFaceZone f0" << endl 
+        << "    faceZoneSet f0Zone new setToFaceZone f0" << endl
         << endl
         << "or if orientation is important:" << endl
-        << "    faceZoneSet f0Zone new setsToFaceZone f0 c0" << endl 
+        << "    faceZoneSet f0Zone new setsToFaceZone f0 c0" << endl
         << endl
         << "ZoneSets can be manipulated using the general actions:" << endl
         << "    list            - prints the contents of the set" << endl
@@ -992,7 +992,7 @@ int main(int argc, char *argv[])
         delete fileStreamPtr;
     }
 
-    Pout<< "\nEnd" << endl;
+    Pout<< "\nEnd\n" << endl;
 
     return 0;
 }

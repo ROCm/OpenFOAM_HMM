@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    Info << "\nStarting time loop\n" << endl;
+    Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
     {
@@ -72,11 +72,11 @@ int main(int argc, char *argv[])
         runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        Info << "Evolving Spray" << endl;
+        Info<< "Evolving Spray" << endl;
 
         dieselSpray.evolve();
 
-        Info << "Solving chemistry" << endl;
+        Info<< "Solving chemistry" << endl;
 
         chemistry.solve
         (

@@ -683,7 +683,7 @@ Foam::label Foam::cellClassification::fillHangingCells
 {
     label nTotChanged = 0;
 
-    for(label iter = 0; iter < maxIter; iter++)
+    for (label iter = 0; iter < maxIter; iter++)
     {
         label nChanged = 0;
 
@@ -740,7 +740,7 @@ Foam::label Foam::cellClassification::fillRegionEdges
 {
     label nTotChanged = 0;
 
-    for(label iter = 0; iter < maxIter; iter++)
+    for (label iter = 0; iter < maxIter; iter++)
     {
         // Get interface between meshType cells and non-meshType cells as a list
         // of faces and for each face the cell which is the meshType.
@@ -809,7 +809,7 @@ Foam::label Foam::cellClassification::fillRegionPoints
 {
     label nTotChanged = 0;
 
-    for(label iter = 0; iter < maxIter; iter++)
+    for (label iter = 0; iter < maxIter; iter++)
     {
         // Get interface between meshType cells and non-meshType cells as a list
         // of faces and for each face the cell which is the meshType.

@@ -597,7 +597,7 @@ Foam::face Foam::intersectedSurface::walkFace
     label vertI = startVertI;
     label edgeI = startEdgeI;
 
-    while(true)
+    while (true)
     {
         const edge& e = edges[edgeI];
 

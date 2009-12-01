@@ -50,16 +50,16 @@ defineTypeNameAndDebug(Foam::vtkPV3Foam, 0);
 
 void Foam::vtkPV3Foam::resetCounters()
 {
-    // Reset mesh part ids and sizes
-    partInfoVolume_.reset();
-    partInfoPatches_.reset();
-    partInfoLagrangian_.reset();
-    partInfoCellZones_.reset();
-    partInfoFaceZones_.reset();
-    partInfoPointZones_.reset();
-    partInfoCellSets_.reset();
-    partInfoFaceSets_.reset();
-    partInfoPointSets_.reset();
+    // Reset array range information (ids and sizes)
+    arrayRangeVolume_.reset();
+    arrayRangePatches_.reset();
+    arrayRangeLagrangian_.reset();
+    arrayRangeCellZones_.reset();
+    arrayRangeFaceZones_.reset();
+    arrayRangePointZones_.reset();
+    arrayRangeCellSets_.reset();
+    arrayRangeFaceSets_.reset();
+    arrayRangePointSets_.reset();
 }
 
 
@@ -92,21 +92,6 @@ void Foam::vtkPV3Foam::reduceMemory()
 
 int Foam::vtkPV3Foam::setTime(int nRequest, const double requestTimes[])
 {
-    if (debug)
-    {
-        Info<< "<beg> Foam::vtkPV3Foam::setTime(";
-        for (int requestI = 0; requestI < nRequest; ++requestI)
-        {
-            if (requestI)
-            {
-                Info<< ", ";
-            }
-
-            Info<< requestTimes[requestI];
-        }
-        Info << ") - previousIndex = " << timeIndex_ << endl;
-    }
-
     Time& runTime = dbPtr_();
 
     // Get times list
@@ -126,6 +111,22 @@ int Foam::vtkPV3Foam::setTime(int nRequest, const double requestTimes[])
     if (nearestIndex < 0)
     {
         nearestIndex = 0;
+    }
+
+    if (debug)
+    {
+        Info<< "<beg> Foam::vtkPV3Foam::setTime(";
+        for (int requestI = 0; requestI < nRequest; ++requestI)
+        {
+            if (requestI)
+            {
+                Info<< ", ";
+            }
+
+            Info<< requestTimes[requestI];
+        }
+        Info<< ") - previousIndex = " << timeIndex_
+            << ", nearestIndex = " << nearestIndex << endl;
     }
 
 
@@ -230,15 +231,15 @@ Foam::vtkPV3Foam::vtkPV3Foam
     timeIndex_(-1),
     meshChanged_(true),
     fieldsChanged_(true),
-    partInfoVolume_("unzoned"),
-    partInfoPatches_("patches"),
-    partInfoLagrangian_("lagrangian"),
-    partInfoCellZones_("cellZone"),
-    partInfoFaceZones_("faceZone"),
-    partInfoPointZones_("pointZone"),
-    partInfoCellSets_("cellSet"),
-    partInfoFaceSets_("faceSet"),
-    partInfoPointSets_("pointSet")
+    arrayRangeVolume_("unzoned"),
+    arrayRangePatches_("patches"),
+    arrayRangeLagrangian_("lagrangian"),
+    arrayRangeCellZones_("cellZone"),
+    arrayRangeFaceZones_("faceZone"),
+    arrayRangePointZones_("pointZone"),
+    arrayRangeCellSets_("cellSet"),
+    arrayRangeFaceSets_("faceSet"),
+    arrayRangePointSets_("pointSet")
 {
     if (debug)
     {
@@ -288,7 +289,7 @@ Foam::vtkPV3Foam::vtkPV3Foam
         meshRegion_ = caseName.substr(beg+1, end-beg-1);
 
         // some safety
-        if (!meshRegion_.size())
+        if (meshRegion_.empty())
         {
             meshRegion_ = polyMesh::defaultRegion;
         }
@@ -352,6 +353,14 @@ void Foam::vtkPV3Foam::updateInfo()
 
     vtkDataArraySelection* partSelection = reader_->GetPartSelection();
 
+    // there are two ways to ensure we have the correct list of parts:
+    // 1. remove everything and then set particular entries 'on'
+    // 2. build a 'char **' list and call SetArraysWithDefault()
+    //
+    // Nr. 2 has the potential advantage of not touching the modification
+    // time of the vtkDataArraySelection, but the qt/paraview proxy
+    // layer doesn't care about that anyhow.
+
     // enable 'internalMesh' on the first call
     // or preserve the enabled selections
     stringList enabledEntries;
@@ -369,11 +378,11 @@ void Foam::vtkPV3Foam::updateInfo()
     partSelection->RemoveAllArrays();
 
     // Update mesh parts list - add Lagrangian at the bottom
-    updateInfoInternalMesh();
-    updateInfoPatches();
-    updateInfoSets();
-    updateInfoZones();
-    updateInfoLagrangian();
+    updateInfoInternalMesh(partSelection);
+    updateInfoPatches(partSelection);
+    updateInfoSets(partSelection);
+    updateInfoZones(partSelection);
+    updateInfoLagrangian(partSelection);
 
     // restore the enabled selections
     setSelectedArrayEntries(partSelection, enabledEntries);
@@ -396,6 +405,8 @@ void Foam::vtkPV3Foam::updateInfo()
 
     if (debug)
     {
+        // just for debug info
+        getSelectedArrayEntries(partSelection);
         Info<< "<end> Foam::vtkPV3Foam::updateInfo" << endl;
     }
 
@@ -559,11 +570,25 @@ double* Foam::vtkPV3Foam::findTimes(int& nTimeSteps)
 
         nTimes = timeLst.size() - timeI;
 
-        // always skip "constant" time if possible
+        // skip "constant" time whenever possible
         if (timeI == 0 && nTimes > 1)
         {
-            timeI = 1;
-            --nTimes;
+            if (timeLst[timeI].name() == "constant")
+            {
+                ++timeI;
+                --nTimes;
+            }
+        }
+
+
+        // skip "0/" time if requested and possible
+        if (nTimes > 1 && reader_->GetSkipZeroTime())
+        {
+            if (mag(timeLst[timeI].value()) < SMALL)
+            {
+                ++timeI;
+                --nTimes;
+            }
         }
 
         if (nTimes)
@@ -607,10 +632,10 @@ void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
         wordHashSet selectedPatches = getSelected
         (
             reader_->GetPartSelection(),
-            partInfoPatches_
+            arrayRangePatches_
         );
 
-        if (!selectedPatches.size())
+        if (selectedPatches.empty())
         {
             return;
         }

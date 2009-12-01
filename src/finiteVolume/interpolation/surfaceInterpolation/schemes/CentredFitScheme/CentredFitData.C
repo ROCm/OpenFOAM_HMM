@@ -86,7 +86,7 @@ void Foam::CentredFitData<Polynomial>::calcFit()
 
     const surfaceScalarField& w = mesh.surfaceInterpolation::weights();
 
-    for(label facei = 0; facei < mesh.nInternalFaces(); facei++)
+    for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
     {
         FitData
         <

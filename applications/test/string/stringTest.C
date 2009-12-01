@@ -102,8 +102,7 @@ int main(int argc, char *argv[])
     Info<< "Ostream<<  >" << s2 << "<\n";
     Info<< "hash:" << hex << string::hash()(s2) << endl;
 
-    Info << "End\n" << endl;
-
+    Info<< "\nEnd\n" << endl;
     return 0;
 }
 

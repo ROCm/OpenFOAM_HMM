@@ -27,6 +27,7 @@ Class
 
 Description
     A List with indirect addressing.
+
     Like IndirectList but does not store addressing.
 
 SourceFiles
@@ -73,8 +74,24 @@ public:
 
         // Access
 
+            //- Return the number of elements in the list
             inline label size() const;
-            inline bool  empty() const;
+
+            //- Return true if the list is empty (ie, size() is zero).
+            inline bool empty() const;
+
+            //- Return the first element of the list.
+            inline T& first();
+
+            //- Return first element of the list.
+            inline const T& first() const;
+
+            //- Return the last element of the list.
+            inline T& last();
+
+            //- Return the last element of the list.
+            inline const T& last() const;
+
 
             inline const UList<T>& completeList() const;
             inline const List<label>& addressing() const;

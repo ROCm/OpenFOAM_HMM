@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 
 #   include "readKivaGrid.H"
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

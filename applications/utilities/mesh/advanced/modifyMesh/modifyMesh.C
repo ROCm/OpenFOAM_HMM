@@ -375,8 +375,8 @@ int main(int argc, char *argv[])
 
     bool cellsToSplit = cellsToPyramidise.size();
 
-    //List<Tuple<pointField,point> >
-    //  cellsToCreate(dict.lookup("cellsToCreate"));
+    // List<Tuple2<pointField,point> >
+    //     cellsToCreate(dict.lookup("cellsToCreate"));
 
     Info<< "Read from " << dict.name() << nl
         << "  Boundary cutting module:" << nl
@@ -560,7 +560,7 @@ int main(int argc, char *argv[])
         }
 
         // Write resulting mesh
-        Info << "Writing modified mesh to time " << runTime.timeName() << endl;
+        Info<< "Writing modified mesh to time " << runTime.timeName() << endl;
         mesh.write();
     }
     else if (edgeToPos.size())
@@ -613,7 +613,7 @@ int main(int argc, char *argv[])
         }
 
         // Write resulting mesh
-        Info << "Writing modified mesh to time " << runTime.timeName() << endl;
+        Info<< "Writing modified mesh to time " << runTime.timeName() << endl;
         mesh.write();
     }
     else
@@ -656,13 +656,12 @@ int main(int argc, char *argv[])
         }
 
         // Write resulting mesh
-        Info << "Writing modified mesh to time " << runTime.timeName() << endl;
+        Info<< "Writing modified mesh to time " << runTime.timeName() << endl;
         mesh.write();
     }
 
 
-    Info << nl << "End" << endl;
-
+    Info<< "\nEnd\n" << endl;
     return 0;
 }
 

@@ -130,18 +130,7 @@ OpenFOAM)
 esac
 
 case "$ParaView_VERSION" in
-2*)
-    trap "rm -f paraFoam.pvs $caseFile 2>/dev/null; exit 0" EXIT TERM INT
-    touch "$caseFile"
-
-    # since we are now in the cwd, %CASE% is '$PWD/$caseFile'
-    sed -e s@%CASE%@$PWD/$caseFile@g \
-        $WM_PROJECT_DIR/bin/tools/paraFoam.pvs > paraFoam.pvs
-
-    paraview paraFoam.pvs
-    ;;
-
-*)
+3*)
     # only create/remove caseFile if it didn't already exist
     [ -e $caseFile ] || {
         trap "rm -f $caseFile 2>/dev/null; exit 0" EXIT TERM INT

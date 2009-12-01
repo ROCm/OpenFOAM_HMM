@@ -262,7 +262,7 @@ projectPoints
 
             if (debug)
             {
-                Info << result[curLocalPointLabel] << nl;
+                Info<< result[curLocalPointLabel] << nl;
             }
         }
         else
@@ -505,7 +505,7 @@ projectFaceCentres
 
             if (debug)
             {
-                Info << result[curLocalFaceLabel] << nl;
+                Info<< result[curLocalFaceLabel] << nl;
             }
         }
         else

@@ -109,7 +109,7 @@ eg,
     |
     |    Within the implementation, a loop over all patches is done:
     |    @code
-    |        forAll (patches, patchI)
+    |        forAll(patches, patchI)
     |        {
     |            ...  // some operation
     |        }
@@ -222,4 +222,4 @@ The doc/Doxygen/tools directory contains miscellaneous scripts for finding
 and possibly repairing documentation issues.
 
 
-Updated: 2008-03-17
+Updated: 2009-11-27

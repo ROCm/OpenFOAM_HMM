@@ -253,7 +253,7 @@ public:
         inline void shrink();
 
         //- Transfer the contents of the argument list into this list
-        //  and annull the argument list.
+        //  and annul the argument list.
         inline void transfer(PackedList<nBits>&);
 
         //- Transfer contents to the Xfer container

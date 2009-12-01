@@ -258,12 +258,12 @@ bool Foam::edgeIntersections::inlinePerturb
         bool perturbEnd = false;
 
         // Check first intersection.
-        if (edgeEnds[0] == 0)
+        if (edgeEnds.first() == 0)
         {
             perturbStart = true;
         }
 
-        if (edgeEnds[edgeEnds.size()-1] == 1)
+        if (edgeEnds.last() == 1)
         {
             perturbEnd = true;
         }

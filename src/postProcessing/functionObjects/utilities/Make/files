@@ -1,7 +1,13 @@
+abortCalculation/abortCalculation.C
+abortCalculation/abortCalculationFunctionObject.C
+
 staticPressure/staticPressure.C
 staticPressure/staticPressureFunctionObject.C
 
 dsmcFields/dsmcFields.C
 dsmcFields/dsmcFieldsFunctionObject.C
+
+timeActivatedFileUpdate/timeActivatedFileUpdate.C
+timeActivatedFileUpdate/timeActivatedFileUpdateFunctionObject.C
 
 LIB = $(FOAM_LIBBIN)/libutilityFunctionObjects
