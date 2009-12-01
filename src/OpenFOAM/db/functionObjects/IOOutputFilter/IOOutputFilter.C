@@ -33,6 +33,19 @@ template<class OutputFilter>
 Foam::IOOutputFilter<OutputFilter>::IOOutputFilter
 (
     const word& outputFilterName,
+    const IOobject& ioDict,
+    const bool readFromFiles
+)
+:
+    IOdictionary(ioDict),
+    OutputFilter(outputFilterName, ioDict.db(), *this, readFromFiles)
+{}
+
+
+template<class OutputFilter>
+Foam::IOOutputFilter<OutputFilter>::IOOutputFilter
+(
+    const word& outputFilterName,
     const objectRegistry& obr,
     const fileName& dictName,
     const IOobject::readOption rOpt,
