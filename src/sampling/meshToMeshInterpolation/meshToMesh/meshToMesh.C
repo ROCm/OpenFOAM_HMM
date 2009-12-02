@@ -28,20 +28,15 @@ License
 #include "processorFvPatch.H"
 #include "demandDrivenData.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(meshToMesh, 0);
-
-const scalar meshToMesh::directHitTol = 1e-5;
+defineTypeNameAndDebug(Foam::meshToMesh, 0);
+const Foam::scalar Foam::meshToMesh::directHitTol = 1e-5;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-meshToMesh::meshToMesh
+Foam::meshToMesh::meshToMesh
 (
     const fvMesh& meshFrom,
     const fvMesh& meshTo,
@@ -114,7 +109,7 @@ meshToMesh::meshToMesh
 }
 
 
-meshToMesh::meshToMesh
+Foam::meshToMesh::meshToMesh
 (
     const fvMesh& meshFrom,
     const fvMesh& meshTo
@@ -159,7 +154,7 @@ meshToMesh::meshToMesh
                 << exit(FatalError);
         }
 
-        if 
+        if
         (
             fromMesh_.boundaryMesh()[patchi].type()
          != toMesh_.boundaryMesh()[patchi].type()
@@ -201,14 +196,10 @@ meshToMesh::meshToMesh
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-meshToMesh::~meshToMesh()
+Foam::meshToMesh::~meshToMesh()
 {
     deleteDemandDrivenData(inverseDistanceWeightsPtr_);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

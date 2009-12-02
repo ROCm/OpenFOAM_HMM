@@ -153,7 +153,7 @@ void Foam::vtkSetWriter<Type>::write
         label globalPtI = 0;
         forAll(tracks, trackI)
         {
-            const coordSet& points = tracks[trackI]; 
+            const coordSet& points = tracks[trackI];
 
             os  << points.size();
             forAll(points, i)
@@ -164,7 +164,7 @@ void Foam::vtkSetWriter<Type>::write
             os << nl;
         }
     }
-    
+
     os  << "POINT_DATA " << nPoints << nl
         << " FIELD attributes " << valueSetNames.size() << nl;
 

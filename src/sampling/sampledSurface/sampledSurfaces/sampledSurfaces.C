@@ -35,6 +35,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+defineTypeNameAndDebug(Foam::sampledSurfaces, 0);
+bool Foam::sampledSurfaces::verbose_ = false;
+Foam::scalar Foam::sampledSurfaces::mergeTol_ = 1e-10;
+
 namespace Foam
 {
     //- Used to offset faces in Pstream::combineOffset
@@ -60,100 +64,10 @@ namespace Foam
         }
     };
 
-
-    defineTypeNameAndDebug(sampledSurfaces, 0);
 }
 
-
-bool Foam::sampledSurfaces::verbose_(false);
-Foam::scalar Foam::sampledSurfaces::mergeTol_(1e-10);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-Foam::label Foam::sampledSurfaces::classifyFieldTypes()
-{
-    label nFields = 0;
-
-    scalarFields_.clear();
-    vectorFields_.clear();
-    sphericalTensorFields_.clear();
-    symmTensorFields_.clear();
-    tensorFields_.clear();
-
-    forAll(fieldNames_, fieldI)
-    {
-        const word& fieldName = fieldNames_[fieldI];
-        word fieldType = "";
-
-        // check files for a particular time
-        if (loadFromFiles_)
-        {
-            IOobject io
-            (
-                fieldName,
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false
-            );
-
-            if (io.headerOk())
-            {
-                fieldType = io.headerClassName();
-            }
-            else
-            {
-                continue;
-            }
-        }
-        else
-        {
-            // check objectRegistry
-            objectRegistry::const_iterator iter = mesh_.find(fieldName);
-
-            if (iter != mesh_.objectRegistry::end())
-            {
-                fieldType = iter()->type();
-            }
-            else
-            {
-                continue;
-            }
-        }
-
-
-        if (fieldType == volScalarField::typeName)
-        {
-            scalarFields_.append(fieldName);
-            nFields++;
-        }
-        else if (fieldType == volVectorField::typeName)
-        {
-            vectorFields_.append(fieldName);
-            nFields++;
-        }
-        else if (fieldType == volSphericalTensorField::typeName)
-        {
-            sphericalTensorFields_.append(fieldName);
-            nFields++;
-        }
-        else if (fieldType == volSymmTensorField::typeName)
-        {
-            symmTensorFields_.append(fieldName);
-            nFields++;
-        }
-        else if (fieldType == volTensorField::typeName)
-        {
-            tensorFields_.append(fieldName);
-            nFields++;
-        }
-
-    }
-
-    return nFields;
-}
-
 
 void Foam::sampledSurfaces::writeGeometry() const
 {
@@ -208,7 +122,7 @@ Foam::sampledSurfaces::sampledSurfaces
     mesh_(refCast<const fvMesh>(obr)),
     loadFromFiles_(loadFromFiles),
     outputPath_(fileName::null),
-    fieldNames_(),
+    fieldSelection_(),
     interpolationScheme_(word::null),
     writeFormat_(word::null),
     mergeList_(),
@@ -265,7 +179,7 @@ void Foam::sampledSurfaces::write()
         // finalize surfaces, merge points etc.
         update();
 
-        const label nFields = classifyFieldTypes();
+        const label nFields = classifyFields();
 
         if (Pstream::master())
         {
@@ -286,8 +200,8 @@ void Foam::sampledSurfaces::write()
             mkDir(outputPath_/mesh_.time().timeName());
         }
 
-        // write geometry first if required, or when no fields would otherwise
-        // be written
+        // write geometry first if required,
+        // or when no fields would otherwise be written
         if (nFields == 0 || genericFormatter_->separateFiles())
         {
             writeGeometry();
@@ -304,15 +218,8 @@ void Foam::sampledSurfaces::write()
 
 void Foam::sampledSurfaces::read(const dictionary& dict)
 {
-    fieldNames_ = wordList(dict.lookup("fields"));
-
-    const label nFields = fieldNames_.size();
-
-    scalarFields_.reset(nFields);
-    vectorFields_.reset(nFields);
-    sphericalTensorFields_.reset(nFields);
-    symmTensorFields_.reset(nFields);
-    tensorFields_.reset(nFields);
+    dict.lookup("fields") >> fieldSelection_;
+    clearFieldGroups();
 
     interpolationScheme_ = dict.lookupOrDefault<word>
     (
@@ -335,7 +242,6 @@ void Foam::sampledSurfaces::read(const dictionary& dict)
         dict.lookup("surfaces"),
         sampledSurface::iNew(mesh_)
     );
-
     transfer(newList);
 
     if (Pstream::parRun())
@@ -348,7 +254,7 @@ void Foam::sampledSurfaces::read(const dictionary& dict)
 
     if (Pstream::master() && debug)
     {
-        Pout<< "sample fields:" << fieldNames_ << nl
+        Pout<< "sample fields:" << fieldSelection_ << nl
             << "sample surfaces:" << nl << "(" << nl;
 
         forAll(*this, surfI)

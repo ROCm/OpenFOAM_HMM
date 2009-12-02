@@ -26,14 +26,9 @@ License
 
 #include "meshToMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void meshToMesh::calculateInverseDistanceWeights() const
+void Foam::meshToMesh::calculateInverseDistanceWeights() const
 {
     if (debug)
     {
@@ -93,7 +88,7 @@ void meshToMesh::calculateInverseDistanceWeights() const
                     invDistCoeffs[celli][ni + 1] = invDist;
                     sumInvDist += invDist;
                 }
-                
+
                 // divide by the total inverse-distance
                 forAll (invDistCoeffs[celli], i)
                 {
@@ -107,19 +102,15 @@ void meshToMesh::calculateInverseDistanceWeights() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const scalarListList& meshToMesh::inverseDistanceWeights() const
+const Foam::scalarListList& Foam::meshToMesh::inverseDistanceWeights() const
 {
     if (!inverseDistanceWeightsPtr_)
     {
         calculateInverseDistanceWeights();
     }
-    
+
     return *inverseDistanceWeightsPtr_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
