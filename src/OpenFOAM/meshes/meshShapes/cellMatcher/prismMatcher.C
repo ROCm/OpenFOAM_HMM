@@ -26,6 +26,7 @@ License
 
 #include "prismMatcher.H"
 #include "primitiveMesh.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -363,7 +364,7 @@ bool Foam::prismMatcher::isA(const faceList& faces)
         faces,                      // all faces in mesh
         labelList(faces.size(), 0), // cell 0 is owner of all faces
         0,                          // cell label
-        makeIdentity(faces.size())  // faces of cell 0
+        identity(faces.size())      // faces of cell 0
     );
 }
 

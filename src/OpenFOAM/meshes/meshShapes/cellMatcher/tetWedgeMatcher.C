@@ -29,6 +29,7 @@ License
 #include "primitiveMesh.H"
 #include "primitiveMesh.H"
 #include "cellModeller.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -291,7 +292,7 @@ bool Foam::tetWedgeMatcher::isA(const faceList& faces)
         faces,                      // all faces in mesh
         labelList(faces.size(), 0), // cell 0 is owner of all faces
         0,                          // cell label
-        makeIdentity(faces.size())  // faces of cell 0
+        identity(faces.size())      // faces of cell 0
     );
 }
 
