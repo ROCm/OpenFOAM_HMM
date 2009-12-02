@@ -157,14 +157,14 @@ namespace fvc
     );
 
 
-    //- Interpolate tmp field onto faces using central differencing
+    //- Interpolate tmp field onto faces using 'interpolate(<name>)'
     template<class Type>
     static tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > interpolate
     (
         const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf
     );
 
-    //- Interpolate field onto faces using central differencing
+    //- Interpolate tmp field onto faces using 'interpolate(<name>)'
     template<class Type>
     static tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > interpolate
     (
