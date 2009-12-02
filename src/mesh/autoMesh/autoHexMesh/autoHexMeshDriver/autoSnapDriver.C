@@ -47,12 +47,7 @@ Description
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-defineTypeNameAndDebug(autoSnapDriver, 0);
-
-} // End namespace Foam
+defineTypeNameAndDebug(Foam::autoSnapDriver, 0);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -1308,7 +1303,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::repatchToSurface
 
 
     // Faces that do not move
-    PackedBoolList isZonedFace(mesh.nFaces(), 0);
+    PackedBoolList isZonedFace(mesh.nFaces());
     {
         // 1. All faces on zoned surfaces
         const wordList& faceZoneNames = surfaces.faceZoneNames();
