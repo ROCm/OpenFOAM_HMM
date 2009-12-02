@@ -74,9 +74,9 @@ int main(int argc, char *argv[])
         args.printUsage();
     }
 
-    if (args.optionFound("case"))
+    fileName pathName;
+    if (args.optionReadIfPresent("case", pathName))
     {
-        fileName pathName = args.option("case");
         Info<< nl
             << "-case" << nl
             << "path = " << args.path() << nl
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 
     forAll(args.additionalArgs(), argI)
     {
-        fileName pathName = args.additionalArgs()[argI];
+        pathName = args.additionalArgs()[argI];
         printCleaning(pathName);
     }
 

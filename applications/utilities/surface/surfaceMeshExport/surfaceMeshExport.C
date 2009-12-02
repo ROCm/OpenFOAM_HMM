@@ -88,8 +88,7 @@ int main(int argc, char *argv[])
     const stringList& params = args.additionalArgs();
 
     fileName exportName(params[0]);
-    word importName("default");
-    args.optionReadIfPresent("name", importName);
+    word importName = args.optionLookupOrDefault<word>("name", "default");
 
     // check that writing is supported
     if (!MeshedSurface<face>::canWriteType(exportName.ext(), true))

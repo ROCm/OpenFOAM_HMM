@@ -50,8 +50,7 @@ int main(int argc, char *argv[])
         FatalError.exit();
     }
 
-    scalar scaleFactor = 1.0;
-    args.optionReadIfPresent("scale", scaleFactor);
+    scalar scaleFactor = args.optionLookupOrDefault("scale", 1.0);
 
 #   include "createTime.H"
 

@@ -59,10 +59,6 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Sin of angle between two consecutive edges on a face. If sin(angle) larger
-// than this the face will be considered concave.
-const scalar defaultConcaveAngle = 30;
-
 
 // Same check as snapMesh
 void checkSnapMesh
@@ -447,8 +443,9 @@ int main(int argc, char *argv[])
 
     scalar minCos = Foam::cos(degToRad(featureAngle));
 
-    scalar concaveAngle = defaultConcaveAngle;
-    args.optionReadIfPresent("concaveAngle", concaveAngle);
+    // Sin of angle between two consecutive edges on a face.
+    // If sin(angle) larger than this the face will be considered concave.
+    scalar concaveAngle = args.optionLookupOrDefault("concaveAngle", 30.0);
 
     scalar concaveSin = Foam::sin(degToRad(concaveAngle));
 
@@ -483,8 +480,8 @@ int main(int argc, char *argv[])
     // Merge points on straight edges and remove unused points
     if (snapMeshDict)
     {
-        Info<< "Merging all 'loose' points on surface edges"
-            << ", regardless of the angle they make." << endl;
+        Info<< "Merging all 'loose' points on surface edges, "
+            << "regardless of the angle they make." << endl;
 
         // Surface bnound to be used to extrude. Merge all loose points.
         nChanged += mergeEdges(-1, mesh);
@@ -510,7 +507,7 @@ int main(int argc, char *argv[])
         Info<< "Mesh unchanged." << endl;
     }
 
-    Info<< "End\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
     }
 
     word cellSetName;
-    string vtkName;
+    string vtkName = runTime.caseName();
 
     if (args.optionFound("cellSet"))
     {
@@ -311,18 +311,12 @@ int main(int argc, char *argv[])
     else if (Pstream::parRun())
     {
         // Strip off leading casename, leaving just processor_DDD ending.
-        vtkName = runTime.caseName();
-
         string::size_type i = vtkName.rfind("processor");
 
         if (i != string::npos)
         {
             vtkName = vtkName.substr(i);
         }
-    }
-    else
-    {
-        vtkName = runTime.caseName();
     }
 
 

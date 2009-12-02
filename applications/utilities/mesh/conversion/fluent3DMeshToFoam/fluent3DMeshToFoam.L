@@ -776,17 +776,11 @@ int main(int argc, char *argv[])
 
     args.optionReadIfPresent("scale", scaleFactor);
 
-    HashSet<word> ignoreCellGroups;
-    if (args.optionFound("ignoreCellGroups"))
-    {
-        args.optionLookup("ignoreCellGroups")() >> ignoreCellGroups;
-    }
+    wordHashSet ignoreCellGroups;
+    wordHashSet ignoreFaceGroups;
 
-    HashSet<word> ignoreFaceGroups;
-    if (args.optionFound("ignoreFaceGroups"))
-    {
-        args.optionLookup("ignoreFaceGroups")() >> ignoreFaceGroups;
-    }
+    args.optionReadIfPresent("ignoreCellGroups", ignoreCellGroups);
+    args.optionReadIfPresent("ignoreFaceGroups", ignoreFaceGroups);
 
     cubitFile = args.options().found("cubit");
 

@@ -71,19 +71,13 @@ int main(int argc, char *argv[])
     const stringList& params = args.additionalArgs();
 
     // default rescale from [mm] to [m]
-    scalar scaleFactor = 0.001;
-    if (args.optionReadIfPresent("scale", scaleFactor))
+    scalar scaleFactor = args.optionLookupOrDefault("scale", 0.001);
+    if (scaleFactor <= 0)
     {
-        if (scaleFactor <= 0)
-        {
-            scaleFactor = 1;
-        }
+        scaleFactor = 1;
     }
 
-    if (args.optionFound("solids"))
-    {
-        meshReaders::STARCD::keepSolids = true;
-    }
+    meshReaders::STARCD::keepSolids = args.optionFound("solids");
 
     // default to binary output, unless otherwise specified
     IOstream::streamFormat format = IOstream::BINARY;

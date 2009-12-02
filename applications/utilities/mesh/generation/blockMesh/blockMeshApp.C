@@ -83,10 +83,9 @@ int main(int argc, char *argv[])
     word regionName;
     fileName polyMeshDir;
 
-    if (args.optionFound("region"))
+    if (args.optionReadIfPresent("region", regionName, polyMesh::defaultRegion))
     {
         // constant/<region>/polyMesh/blockMeshDict
-        regionName  = args.option("region");
         polyMeshDir = regionName/polyMesh::meshSubDir;
 
         Info<< nl << "Generating mesh for region " << regionName << endl;
@@ -94,7 +93,6 @@ int main(int argc, char *argv[])
     else
     {
         // constant/polyMesh/blockMeshDict
-        regionName  = polyMesh::defaultRegion;
         polyMeshDir = polyMesh::meshSubDir;
     }
 

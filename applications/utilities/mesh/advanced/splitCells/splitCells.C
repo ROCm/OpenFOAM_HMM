@@ -546,8 +546,7 @@ int main(int argc, char *argv[])
     bool geometry  = args.optionFound("geometry");
     bool overwrite = args.optionFound("overwrite");
 
-    scalar edgeTol = 0.2;
-    args.optionReadIfPresent("tol", edgeTol);
+    scalar edgeTol = args.optionLookupOrDefault("tol", 0.2);
 
     Info<< "Trying to split cells with internal angles > feature angle\n" << nl
         << "featureAngle      : " << featureAngle << nl

@@ -159,8 +159,7 @@ public:
         );
 
 
-    // Destructor
-
+        //- Destructor
         virtual ~argList();
 
 
@@ -169,81 +168,75 @@ public:
         // Access
 
             //- Name of executable
-            const word& executable() const
-            {
-                return executable_;
-            }
+            inline const word& executable() const;
 
             //- Return root path
-            const fileName& rootPath() const
-            {
-                return rootPath_;
-            }
-
-            //- Return case name
-            const fileName& globalCaseName() const
-            {
-                return globalCase_;
-            }
+            inline const fileName& rootPath() const;
 
             //- Return case name (parallel run) or global case (serial run)
-            const fileName& caseName() const
-            {
-                return case_;
-            }
+            inline const fileName& caseName() const;
 
-            //- Return the path
-            fileName path() const
-            {
-                return rootPath()/caseName();
-            }
+            //- Return case name
+            inline const fileName& globalCaseName() const;
+
+            //- Return the path to the caseName
+            inline fileName path() const;
 
             //- Return arguments
-            const stringList& args() const
-            {
-                return args_;
-            }
+            inline const stringList& args() const;
 
             //- Return additionl arguments,
             //  i.e. those additional to the executable itself
             stringList::subList additionalArgs() const;
 
             //- Return options
-            const Foam::HashTable<string>& options() const
-            {
-                return options_;
-            }
+            inline const Foam::HashTable<string>& options() const;
 
             //- Return the argument string associated with the named option
-            const string& option(const word& opt) const
-            {
-                return options_.operator[](opt);
-            }
+            inline const string& option(const word& opt) const;
 
             //- Return true if the named option is found
-            bool optionFound(const word& opt) const
-            {
-                return options_.found(opt);
-            }
+            inline bool optionFound(const word& opt) const;
 
-            //- Return an IStringStream to the named option
-            IStringStream optionLookup(const word& opt) const
-            {
-                return IStringStream(option(opt));
-            }
+            //- Return an IStringStream from the named option
+            inline IStringStream optionLookup(const word& opt) const;
 
             //- Read a value from the named option
             template<class T>
-            T optionRead(const word& opt) const;
+            inline T optionRead(const word& opt) const;
 
             //- Read a value from the named option if present.
             //  Return true if the named option was found.
             template<class T>
-            bool optionReadIfPresent(const word& opt, T& val) const;
+            inline bool optionReadIfPresent(const word& opt, T&) const;
+
+            //- Read a value from the named option if present.
+            //  Return true if the named option was found, otherwise
+            //  use the supplied default and return false.
+            template<class T>
+            inline bool optionReadIfPresent
+            (
+                const word& opt,
+                T&,
+                const T& deflt
+            ) const;
+
+            //- Read a value from the named option if present.
+            //  Return true if the named option was found.
+            template<class T>
+            inline T optionLookupOrDefault
+            (
+                const word& opt,
+                const T& deflt
+            ) const;
 
             //- Read a List of values from the named option
             template<class T>
-            List<T> optionReadList(const word& opt) const;
+            List<T> optionReadList(const word& opt) const
+            {
+                return readList<T>(optionLookup(opt)());
+            }
+
 
 
         // Edit
@@ -281,9 +274,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifdef NoRepository
-#   include "argListTemplates.C"
-#endif
+#include "argListI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

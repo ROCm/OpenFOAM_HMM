@@ -49,11 +49,9 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv, false, true);
 
-    label repeat = 1;
-    args.optionReadIfPresent<label>("repeat", repeat);
+    const label repeat = args.optionLookupOrDefault<label>("repeat", 1);
 
     cpuTime timer;
-
     for (label count = 0; count < repeat; ++count)
     {
         forAll(args.additionalArgs(), argI)
