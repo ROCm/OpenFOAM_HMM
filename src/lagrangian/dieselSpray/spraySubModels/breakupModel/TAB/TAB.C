@@ -28,26 +28,25 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(TAB, 0);
+namespace Foam
+{
+    defineTypeNameAndDebug(TAB, 0);
 
-addToRunTimeSelectionTable
-(
-    breakupModel,
-    TAB,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        breakupModel,
+        TAB,
+        dictionary
+    );
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-TAB::TAB
+Foam::TAB::TAB
 (
     const dictionary& dict,
     spray& sm
@@ -75,13 +74,13 @@ TAB::TAB
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-TAB::~TAB()
+Foam::TAB::~TAB()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void TAB::breakupParcel
+void Foam::TAB::breakupParcel
 (
     parcel& p,
     const scalar deltaT,
@@ -206,9 +205,5 @@ void TAB::breakupParcel
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

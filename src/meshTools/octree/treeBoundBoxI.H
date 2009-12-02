@@ -242,7 +242,7 @@ inline void Foam::treeBoundBox::searchOrder
     if (dist.z() < 0)
     {
         octant |= treeBoundBox::FRONTHALF;
-	dist.z() *= -1;
+        dist.z() *= -1;
     }
 
     direction min = 0;
@@ -252,44 +252,44 @@ inline void Foam::treeBoundBox::searchOrder
     if (dist.x() < dist.y())
     {
         if (dist.y() < dist.z())
-	{
-	    min = treeBoundBox::RIGHTHALF;
-	    mid = treeBoundBox::TOPHALF;
-	    max = treeBoundBox::FRONTHALF;
-	}
-	else if (dist.z() < dist.x())
-	{
-	    min = treeBoundBox::FRONTHALF;
+        {
+            min = treeBoundBox::RIGHTHALF;
+            mid = treeBoundBox::TOPHALF;
+            max = treeBoundBox::FRONTHALF;
+        }
+        else if (dist.z() < dist.x())
+        {
+            min = treeBoundBox::FRONTHALF;
             mid = treeBoundBox::RIGHTHALF;
-	    max = treeBoundBox::TOPHALF;
-	}
-	else
-	{
-	    min = treeBoundBox::RIGHTHALF;
-	    mid = treeBoundBox::FRONTHALF;
-	    max = treeBoundBox::TOPHALF;
-	}
+            max = treeBoundBox::TOPHALF;
+        }
+        else
+        {
+            min = treeBoundBox::RIGHTHALF;
+            mid = treeBoundBox::FRONTHALF;
+            max = treeBoundBox::TOPHALF;
+        }
     }
     else
     {
         if (dist.z() < dist.y())
-	{
-	    min = treeBoundBox::FRONTHALF;
-	    mid = treeBoundBox::TOPHALF;
-	    max = treeBoundBox::RIGHTHALF;
-	}
-	else if (dist.x() < dist.z())
-	{
-	    min = treeBoundBox::TOPHALF;
-	    mid = treeBoundBox::RIGHTHALF;
-	    max = treeBoundBox::FRONTHALF;
-	}
-	else
-	{
-	    min = treeBoundBox::TOPHALF;
-	    mid = treeBoundBox::FRONTHALF;
-	    max = treeBoundBox::RIGHTHALF;
-	}
+        {
+            min = treeBoundBox::FRONTHALF;
+            mid = treeBoundBox::TOPHALF;
+            max = treeBoundBox::RIGHTHALF;
+        }
+        else if (dist.x() < dist.z())
+        {
+            min = treeBoundBox::TOPHALF;
+            mid = treeBoundBox::RIGHTHALF;
+            max = treeBoundBox::FRONTHALF;
+        }
+        else
+        {
+            min = treeBoundBox::TOPHALF;
+            mid = treeBoundBox::FRONTHALF;
+            max = treeBoundBox::RIGHTHALF;
+        }
     }
 
     // Primary subOctant

@@ -29,26 +29,24 @@ License
 #include "standardDragModel.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(standardDragModel, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+    addToRunTimeSelectionTable
+    (
+        dragModel,
+        standardDragModel,
+        dictionary
+    );
+}
 
-defineTypeNameAndDebug(standardDragModel, 0);
-
-addToRunTimeSelectionTable
-(
-    dragModel,
-    standardDragModel,
-    dictionary
-);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-standardDragModel::standardDragModel(const dictionary& dict)
+Foam::standardDragModel::standardDragModel(const dictionary& dict)
 :
     dragModel(dict),
     dragDict_(dict.subDict(typeName + "Coeffs")),
@@ -62,13 +60,13 @@ standardDragModel::standardDragModel(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-standardDragModel::~standardDragModel()
+Foam::standardDragModel::~standardDragModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar standardDragModel::Cd
+Foam::scalar Foam::standardDragModel::Cd
 (
     const scalar Re,
     const scalar dev
@@ -88,7 +86,7 @@ scalar standardDragModel::Cd
 }
 
 
-scalar standardDragModel::relaxationTime
+Foam::scalar Foam::standardDragModel::relaxationTime
 (
     const vector& URel,
     const scalar diameter,
@@ -118,9 +116,5 @@ scalar standardDragModel::relaxationTime
     return time;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

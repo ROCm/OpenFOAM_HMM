@@ -101,14 +101,7 @@ bool Foam::interpolationLookUpTable<Type>::checkRange
     const label interfield
 ) const
 {
-    if (lookUpValue >= min_[interfield] &&  lookUpValue <= max_[interfield])
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return lookUpValue >= min_[interfield] && lookUpValue <= max_[interfield];
 }
 
 

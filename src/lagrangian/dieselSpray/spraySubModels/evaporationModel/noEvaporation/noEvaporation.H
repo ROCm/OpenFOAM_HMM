@@ -111,7 +111,11 @@ public:
             const scalar kLiq
         ) const;
 
-        inline label nEvapIter() const;
+        inline label nEvapIter() const
+        {
+            return 0;
+        }
+
 };
 
 

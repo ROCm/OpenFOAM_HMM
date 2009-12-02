@@ -34,8 +34,7 @@ License
 #include "fvcSurfaceIntegrate.H"
 #include "slicedSurfaceFields.H"
 #include "syncTools.H"
-
-#include "fvCFD.H"
+#include "fvm.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -142,7 +141,7 @@ void Foam::MULES::implicitSolve
 {
     const fvMesh& mesh = psi.mesh();
 
-    const dictionary& MULEScontrols = 
+    const dictionary& MULEScontrols =
        mesh.solverDict(psi.name()).subDict("MULESImplicit");
 
     label maxIter
