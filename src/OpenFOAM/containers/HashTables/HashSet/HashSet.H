@@ -109,6 +109,7 @@ public:
         template<class AnyType, class AnyHash>
         HashSet(const HashTable<AnyType, Key, AnyHash>&);
 
+
     // Member Functions
 
         // Edit
@@ -134,6 +135,7 @@ public:
         {
             return insert(lst);
         }
+
 
     // Member Operators
 
@@ -165,7 +167,6 @@ public:
 
         //- Remove entries listed in the given HashSet from this HashSet
         void operator-=(const HashSet<Key, Hash>&);
-
 };
 
 
