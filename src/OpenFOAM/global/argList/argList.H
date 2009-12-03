@@ -121,7 +121,6 @@ class argList
         static void printOptionUsage
         (
             const label location,
-            const label padWidth,
             const string& str
         );
 
@@ -153,6 +152,12 @@ public:
 
         //- Short usage information for validOptions
         static HashTable<string> optionUsage;
+
+        //- Min offset for displaying usage (default: 16)
+        static string::size_type usageMin;
+
+        //- Max screen width for displaying usage (default: 80)
+        static string::size_type usageMax;
 
         //! @cond ignoreDocumentation
         class initValidTables

@@ -37,11 +37,13 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+bool Foam::argList::bannerEnabled = true;
 Foam::SLList<Foam::string>    Foam::argList::validArgs;
 Foam::HashTable<Foam::string> Foam::argList::validOptions;
 Foam::HashTable<Foam::string> Foam::argList::validParOptions;
 Foam::HashTable<Foam::string> Foam::argList::optionUsage;
-bool Foam::argList::bannerEnabled = true;
+Foam::string::size_type Foam::argList::usageMin = 16;
+Foam::string::size_type Foam::argList::usageMax = 80;
 
 
 Foam::argList::initValidTables::initValidTables()
@@ -129,20 +131,89 @@ void Foam::argList::noParallel()
 void Foam::argList::printOptionUsage
 (
     const label location,
-    const label padWidth,
     const string& str
 )
 {
-    if (!str.empty())
+    const string::size_type textWidth = usageMax - usageMin;
+    const string::size_type strLen = str.size();
+
+    if (strLen)
     {
-        for (label i = location; i < padWidth; ++i)
+        // minimum of 2 spaces between option and usage:
+        if (string::size_type(location) + 2 <= usageMin)
         {
-            Info<<' ';
+            for (string::size_type i = location; i < usageMin; ++i)
+            {
+                Info<<' ';
+            }
         }
-        // we could also add text wrapping if desired
-        Info<<"    " << str.c_str();
+        else
+        {
+            // or start a new line
+            Info<< nl;
+            for (string::size_type i = 0; i < usageMin; ++i)
+            {
+                Info<<' ';
+            }
+        }
+
+        // text wrap - this could probably be made more efficient
+        string::size_type pos = 0;
+        while (pos != string::npos && strLen - pos > textWidth)
+        {
+            string::size_type prev = pos;
+            string::size_type wordEnd = str.find_first_of(" \t\n", pos);
+            string::size_type next = string::npos;
+
+            while (wordEnd != string::npos && (wordEnd - pos) < textWidth)
+            {
+                prev = wordEnd;
+                next = str.find_first_not_of(" \t\n", wordEnd);
+
+                if (next == string::npos)
+                {
+                    wordEnd = string::npos;
+                }
+                else
+                {
+                    wordEnd = str.find_first_of(" \t\n", next);
+                }
+            }
+
+            if (pos != string::npos)
+            {
+                // indent next line
+                if (pos)
+                {
+                    for (string::size_type i = 0; i < usageMin; ++i)
+                    {
+                        Info<<' ';
+                    }
+                }
+
+                Info<< str.substr(pos, (prev - pos)).c_str() << nl;
+                pos = next;
+            }
+        }
+
+        if (pos != string::npos)
+        {
+            // indent next line
+            if (pos)
+            {
+                for (string::size_type i = 0; i < usageMin; ++i)
+                {
+                    Info<<' ';
+                }
+            }
+
+            Info<< str.substr(pos).c_str() << nl;
+        }
     }
-    Info<< nl;
+    else
+    {
+        Info<< nl;
+    }
 }
 
 
@@ -675,27 +746,6 @@ void Foam::argList::printUsage() const
 
     Info<< "\noptions:\n";
 
-    // min is length of the -srcDoc option
-    // first get the length of option + param
-    label padWidth = 6;
-
-    forAllConstIter(HashTable<string>, validOptions, iter)
-    {
-        label len = iter().size();
-        if (len)
-        {
-            len++;   // space between option and param
-        }
-
-        len += iter.key().size();
-        if (padWidth < len)
-        {
-            padWidth = len;
-        }
-    }
-
-    padWidth += 3;  // include leading "  -"
-
     wordList opts = validOptions.sortedToc();
     forAll(opts, optI)
     {
@@ -719,7 +769,6 @@ void Foam::argList::printUsage() const
             printOptionUsage
             (
                 len,
-                padWidth,
                 usageIter()
             );
         }
@@ -736,7 +785,6 @@ void Foam::argList::printUsage() const
     printOptionUsage
     (
         9,
-        padWidth,
         "display source code in browser"
     );
 
@@ -744,7 +792,6 @@ void Foam::argList::printUsage() const
     printOptionUsage
     (
         6,
-        padWidth,
         "display application documentation in browser"
     );
 
@@ -752,7 +799,6 @@ void Foam::argList::printUsage() const
     printOptionUsage
     (
         7,
-        padWidth,
         "print the usage"
     );
     Info<< endl;

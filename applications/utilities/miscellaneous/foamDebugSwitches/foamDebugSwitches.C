@@ -41,8 +41,18 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::addBoolOption("new");
-    argList::addBoolOption("old");
+    argList::addBoolOption
+    (
+        "new",
+        "output switches that are known from the libraries "
+        "but that do not seem to be known in the current etc/controlDict"
+    );
+    argList::addBoolOption
+    (
+        "old",
+        "output switches that appear to be unknown in "
+        "the current etc/controlDict"
+    );
 
     argList args(argc, argv);
 
