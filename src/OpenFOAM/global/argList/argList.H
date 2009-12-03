@@ -59,9 +59,10 @@ Description
 
 Note
     - Adjustment of the valid (mandatory) arguments
-      by directly manipulating the static member argList::validArgs.
+      by directly manipulating the argList::validArgs static member.
     - Adjustment of the valid options
-      by directly manipulating the static member argList::validOptions.
+      via the addOption/removeOption static methods or by directly
+      manipulating the argList::validOptions static member.
 
 SourceFiles
     argList.C
@@ -114,8 +115,22 @@ class argList
         sigSegv sigSegv_;
 
 
-    // Private member functions
+    // Private Member Functions
 
+        //- Helper function for printUsage
+        static void printOptionUsage
+        (
+            const label location,
+            const label padWidth,
+            const string& str
+        );
+
+        //- get rootPath_ / globalCase_ from one of the following forms
+        //   * [-case dir]
+        //   * cwd
+        //
+        // Also export FOAM_CASE and FOAM_CASENAME environment variables
+        // so they can be used immediately (eg, in decomposeParDict)
         void getRootCase();
 
         //- Transcribe argv into internal args_
@@ -135,6 +150,9 @@ public:
 
         //- A list of valid parallel options
         static HashTable<string> validParOptions;
+
+        //- Short usage information for validOptions
+        static HashTable<string> optionUsage;
 
         //! @cond ignoreDocumentation
         class initValidTables
@@ -185,7 +203,7 @@ public:
             //- Return arguments
             inline const stringList& args() const;
 
-            //- Return additionl arguments,
+            //- Return additional arguments,
             //  i.e. those additional to the executable itself
             stringList::subList additionalArgs() const;
 
@@ -240,6 +258,32 @@ public:
 
 
         // Edit
+
+            //- Add to a bool option to validOptions with usage information
+            static void addBoolOption
+            (
+                const word& opt,
+                const string& usage = ""
+            );
+
+            //- Add to an option to validOptions with usage information
+            //  An option with an empty param is a bool option
+            static void addOption
+            (
+                const word& opt,
+                const string& param = "",
+                const string& usage = ""
+            );
+
+            //- Add option usage information to optionUsage
+            static void addUsage
+            (
+                const word& opt,
+                const string& usage
+            );
+
+            //- Remove option from validOptions and from optionUsage
+            static void removeOption(const word& opt);
 
             //- Disable emitting the banner information
             static void noBanner();
