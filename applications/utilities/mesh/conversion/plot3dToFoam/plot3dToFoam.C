@@ -58,10 +58,10 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("PLOT3D geom file");
-    argList::validOptions.insert("scale", "scale factor");
-    argList::validOptions.insert("noBlank", "");
-    argList::validOptions.insert("singleBlock", "");
-    argList::validOptions.insert("2D", "thickness");
+    argList::addOption("scale", "scale factor");
+    argList::addBoolOption("noBlank");
+    argList::addBoolOption("singleBlock");
+    argList::addOption("2D", "thickness");
 
     argList args(argc, argv);
 

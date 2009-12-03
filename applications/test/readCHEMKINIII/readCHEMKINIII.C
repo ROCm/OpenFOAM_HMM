@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 {
     argList::validArgs.clear();
     argList::validArgs.append("CHEMKINIIIFile");
-    argList::validOptions.insert("thermo", "fileName");
+    argList::addOption("thermo", "fileName");
     argList args(argc, argv);
 
     fileName thermoFileName = fileName::null;

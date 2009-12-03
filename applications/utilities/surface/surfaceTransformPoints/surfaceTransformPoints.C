@@ -59,11 +59,11 @@ int main(int argc, char *argv[])
 
     argList::validArgs.append("surface file");
     argList::validArgs.append("output surface file");
-    argList::validOptions.insert("translate", "vector");
-    argList::validOptions.insert("rotate", "(vector vector)");
-    argList::validOptions.insert("scale", "vector");
-    argList::validOptions.insert("rollPitchYaw", "(roll pitch yaw)");
-    argList::validOptions.insert("yawPitchRoll", "(yaw pitch roll)");
+    argList::addOption("translate", "vector");
+    argList::addOption("rotate", "(vector vector)");
+    argList::addOption("scale", "vector");
+    argList::addOption("rollPitchYaw", "(roll pitch yaw)");
+    argList::addOption("yawPitchRoll", "(yaw pitch roll)");
     argList args(argc, argv);
 
     fileName surfFileName(args.additionalArgs()[0]);

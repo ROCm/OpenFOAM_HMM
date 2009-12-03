@@ -429,9 +429,9 @@ label mergeEdges(const scalar minCos, polyMesh& mesh)
 int main(int argc, char *argv[])
 {
     argList::validArgs.append("feature angle [0..180]");
-    argList::validOptions.insert("concaveAngle", "[0..180]");
-    argList::validOptions.insert("snapMesh", "");
-    argList::validOptions.insert("overwrite", "");
+    argList::addOption("concaveAngle", "[0..180]");
+    argList::addBoolOption("snapMesh");
+    argList::addBoolOption("overwrite");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

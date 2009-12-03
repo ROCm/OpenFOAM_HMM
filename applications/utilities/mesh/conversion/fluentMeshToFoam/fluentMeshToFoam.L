@@ -867,9 +867,9 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("Fluent mesh file");
-    argList::validOptions.insert("scale", "scale factor");
-    argList::validOptions.insert("writeSets", "");
-    argList::validOptions.insert("writeZones", "");
+    argList::addOption("scale", "scale factor");
+    argList::addBoolOption("writeSets");
+    argList::addBoolOption("writeZones");
 
     argList args(argc, argv);
 

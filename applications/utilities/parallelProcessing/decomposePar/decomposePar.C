@@ -87,12 +87,12 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
 #   include "addRegionOption.H"
-    argList::validOptions.insert("cellDist", "");
-    argList::validOptions.insert("copyUniform", "");
-    argList::validOptions.insert("fields", "");
-    argList::validOptions.insert("filterPatches", "");
-    argList::validOptions.insert("force", "");
-    argList::validOptions.insert("ifRequired", "");
+    argList::addBoolOption("cellDist");
+    argList::addBoolOption("copyUniform");
+    argList::addBoolOption("fields");
+    argList::addBoolOption("filterPatches");
+    argList::addBoolOption("force");
+    argList::addBoolOption("ifRequired");
 
 #   include "setRootCase.H"
 

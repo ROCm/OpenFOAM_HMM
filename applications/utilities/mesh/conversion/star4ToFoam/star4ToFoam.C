@@ -62,9 +62,9 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("pro-STAR prefix");
-    argList::validOptions.insert("ascii", "");
-    argList::validOptions.insert("scale", "scale");
-    argList::validOptions.insert("solids", "");
+    argList::addBoolOption("ascii");
+    argList::addOption("scale", "scale");
+    argList::addBoolOption("solids");
 
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());

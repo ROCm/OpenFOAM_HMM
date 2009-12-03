@@ -66,7 +66,8 @@ void interpolateFields
 
 int main(int argc, char *argv[])
 {
-    Foam::argList::validOptions.insert("overwrite", "");
+    argList::addBoolOption("overwrite");
+
 #   include "addTimeOptions.H"
 #   include "setRootCase.H"
 #   include "createTime.H"

@@ -47,11 +47,11 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validOptions.insert("reList", "reList");
-    argList::validOptions.insert("wordList", "wordList");
-    argList::validOptions.insert("stringList", "stringList");
-    argList::validOptions.insert("float", "xx");
-    argList::validOptions.insert("flag", "");
+    argList::addOption("reList", "reList");
+    argList::addOption("wordList", "wordList");
+    argList::addOption("stringList", "stringList");
+    argList::addOption("float", "xx");
+    argList::addBoolOption("flag");
 
 #   include "setRootCase.H"
 

@@ -525,10 +525,10 @@ void collectCuts
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validOptions.insert("set", "cellSet name");
-    argList::validOptions.insert("geometry", "");
-    argList::validOptions.insert("tol", "edge snap tolerance");
-    argList::validOptions.insert("overwrite", "");
+    argList::addOption("set", "cellSet name");
+    argList::addBoolOption("geometry");
+    argList::addOption("tol", "edge snap tolerance");
+    argList::addBoolOption("overwrite");
     argList::validArgs.append("edge angle [0..360]");
 
 #   include "setRootCase.H"

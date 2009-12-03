@@ -517,7 +517,7 @@ void syncPoints
 int main(int argc, char *argv[])
 {
 #   include "addRegionOption.H"
-    argList::validOptions.insert("overwrite", "");
+    argList::addBoolOption("overwrite");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

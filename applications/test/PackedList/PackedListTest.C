@@ -82,9 +82,9 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::validArgs.insert("file .. fileN");
 
-    argList::validOptions.insert("mask", "");
-    argList::validOptions.insert("count", "");
-    argList::validOptions.insert("info", "");
+    argList::addBoolOption("mask");
+    argList::addBoolOption("count");
+    argList::addBoolOption("info");
 
     argList args(argc, argv, false, true);
 

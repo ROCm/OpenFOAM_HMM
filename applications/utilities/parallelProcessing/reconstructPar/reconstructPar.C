@@ -50,8 +50,8 @@ int main(int argc, char *argv[])
     timeSelector::addOptions(true, true);
     argList::noParallel();
 #   include "addRegionOption.H"
-    argList::validOptions.insert("fields", "\"(list of fields)\"");
-    argList::validOptions.insert("noLagrangian", "");
+    argList::addOption("fields", "\"(list of fields)\"");
+    argList::addBoolOption("noLagrangian");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

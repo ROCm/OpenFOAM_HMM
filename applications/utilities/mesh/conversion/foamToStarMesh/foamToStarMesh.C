@@ -76,10 +76,10 @@ int main(int argc, char *argv[])
     argList::noParallel();
     timeSelector::addOptions();
 
-    argList::validOptions.insert("scale", "scale");
-    argList::validOptions.insert("noBnd", "");
-    argList::validOptions.insert("tri", "");
-    argList::validOptions.insert("surface", "");
+    argList::addOption("scale", "scale");
+    argList::addBoolOption("noBnd");
+    argList::addBoolOption("tri");
+    argList::addBoolOption("surface");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

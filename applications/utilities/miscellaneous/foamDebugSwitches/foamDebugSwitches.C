@@ -41,10 +41,10 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validOptions.insert("new", "");
-    argList::validOptions.insert("old", "");
+    argList::addBoolOption("new");
+    argList::addBoolOption("old");
 
-    Foam::argList args(argc, argv);
+    argList args(argc, argv);
 
     wordList currDebug(debug::debugSwitches().toc());
     wordList currInfo(debug::infoSwitches().toc());

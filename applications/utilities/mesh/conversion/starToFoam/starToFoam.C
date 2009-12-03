@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("STAR mesh file prefix");
-    argList::validOptions.insert("scale", "scale factor");
+    argList::addOption("scale", "scale factor");
 
     argList args(argc, argv);
 

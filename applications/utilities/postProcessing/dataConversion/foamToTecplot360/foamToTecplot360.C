@@ -168,18 +168,18 @@ int main(int argc, char *argv[])
 
 #   include "addRegionOption.H"
 
-    argList::validOptions.insert("fields", "fields");
-    argList::validOptions.insert("cellSet", "cellSet name");
-    argList::validOptions.insert("faceSet", "faceSet name");
-    argList::validOptions.insert("nearCellValue","");
-    argList::validOptions.insert("noInternal","");
-    argList::validOptions.insert("noPointValues","");
-    argList::validOptions.insert
+    argList::addOption("fields", "fields");
+    argList::addOption("cellSet", "cellSet name");
+    argList::addOption("faceSet", "faceSet name");
+    argList::addBoolOption("nearCellValue");
+    argList::addBoolOption("noInternal");
+    argList::addBoolOption("noPointValues");
+    argList::addOption
     (
         "excludePatches",
         "patches (wildcards) to exclude"
     );
-    argList::validOptions.insert("noFaceZones","");
+    argList::addBoolOption("noFaceZones");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

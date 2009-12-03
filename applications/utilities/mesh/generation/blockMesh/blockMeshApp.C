@@ -72,8 +72,8 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validOptions.insert("blockTopology", "");
-    argList::validOptions.insert("dict", "dictionary");
+    argList::addBoolOption("blockTopology");
+    argList::addOption("dict", "dictionary");
 #   include "addRegionOption.H"
 #   include "setRootCase.H"
 #   include "createTime.H"

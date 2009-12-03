@@ -166,8 +166,8 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("surface file");
-    argList::validOptions.insert("faceSet", "faceSet name");
-    argList::validOptions.insert("tol", "fraction of mesh size");
+    argList::addOption("faceSet", "faceSet name");
+    argList::addOption("tol", "fraction of mesh size");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

@@ -762,10 +762,10 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("Fluent mesh file");
-    argList::validOptions.insert("scale", "scale factor");
-    argList::validOptions.insert("ignoreCellGroups", "cell group names");
-    argList::validOptions.insert("ignoreFaceGroups", "face group names");
-    argList::validOptions.insert("cubit", "");
+    argList::addOption("scale", "scale factor");
+    argList::addOption("ignoreCellGroups", "cell group names");
+    argList::addOption("ignoreFaceGroups", "face group names");
+    argList::addBoolOption("cubit");
 
     argList args(argc, argv);
 

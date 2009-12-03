@@ -97,7 +97,7 @@ bool limitRefinementLevel
 
 int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("readLevel", "");
+    argList::addBoolOption("readLevel");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

@@ -172,8 +172,10 @@ int main(int argc, char *argv[])
 
     argList::validArgs.clear();
     argList::validArgs.append("surface file");
-    argList::validOptions.insert("checkSelfIntersection", "");
-    argList::validOptions.insert("verbose", "");
+
+    argList::addBoolOption("checkSelfIntersection");
+    argList::addBoolOption("verbose");
+
     argList args(argc, argv);
 
     bool checkSelfIntersection = args.optionFound("checkSelfIntersection");

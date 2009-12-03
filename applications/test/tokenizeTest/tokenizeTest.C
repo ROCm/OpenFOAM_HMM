@@ -44,8 +44,8 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.insert("string .. stringN");
-    argList::validOptions.insert("file", "name");
-    argList::validOptions.insert("repeat", "count");
+    argList::addOption("file", "name");
+    argList::addOption("repeat", "count");
 
     argList args(argc, argv, false, true);
 

@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
 
     #include "addRegionOption.H"
 
-    argList::validOptions.insert("compressible","");
+    argList::addBoolOption("compressible");
 
     #include "setRootCase.H"
     #include "createTime.H"

@@ -93,9 +93,10 @@ bool inFileNameList
 
 int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("ascii", "" );
-    argList::validOptions.insert("patches", "patchList");
-    argList::validOptions.insert("noPatches", "");
+    argList::addBoolOption("ascii");
+    argList::addBoolOption("noPatches");
+
+    argList::addOption("patches", "patchList");
 
 #   include "addTimeOptions.H"
 #   include "setRootCase.H"

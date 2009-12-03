@@ -128,9 +128,9 @@ int main(int argc, char *argv[])
 #   include "addRegionOption.H"
     argList::validArgs.append("faceZone");
     argList::validArgs.append("patch");
-    argList::validOptions.insert("additionalPatches", "(patch2 .. patchN)");
-    argList::validOptions.insert("internalFacesOnly", "");
-    argList::validOptions.insert("overwrite", "");
+    argList::addOption("additionalPatches", "(patch2 .. patchN)");
+    argList::addBoolOption("internalFacesOnly");
+    argList::addBoolOption("overwrite");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

@@ -79,9 +79,9 @@ int main(int argc, char *argv[])
     // afterwards anyhow
     timeSelector::addOptions(true, false);
     argList::noParallel();
-    argList::validOptions.insert("ascii", "");
-    argList::validOptions.insert("index",  "start");
-    argList::validOptions.insert("noMesh", "");
+    argList::addBoolOption("ascii");
+    argList::addOption("index",  "start");
+    argList::addBoolOption("noMesh");
 
     // the volume field types that we handle
     wordHashSet volFieldTypes;

@@ -39,8 +39,9 @@ int main(int argc, char *argv[])
     argList::noBanner();
     argList::noParallel();
     argList::validArgs.insert("file .. fileN");
-    argList::validOptions.erase("case");
-    argList::validOptions.insert("ext", "bak");
+
+    argList::removeOption("case");
+    argList::addOption("ext", "bak");
 
     argList args(argc, argv, false, true);
 
