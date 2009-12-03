@@ -51,15 +51,6 @@ class CPCCellToFaceStencil
 :
     public cellToFaceStencil
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        CPCCellToFaceStencil(const CPCCellToFaceStencil&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const CPCCellToFaceStencil&);
-
-
 public:
 
     // Constructors
