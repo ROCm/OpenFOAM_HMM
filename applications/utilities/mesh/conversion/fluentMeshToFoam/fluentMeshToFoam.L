@@ -490,7 +490,7 @@ endOfSection               {space}")"{space}
         // set size of label list
         curFaceLabels.setSize(readLabel(mixedFaceStream));
 
-        forAll (curFaceLabels, i)
+        forAll(curFaceLabels, i)
         {
             curFaceLabels[i] = readHexLabel(mixedFaceStream) - 1;
         }
@@ -511,7 +511,7 @@ endOfSection               {space}")"{space}
         // for edge is 2, for triangle is 3 and for quad is 4
         curFaceLabels.setSize(faceGroupElementType);
 
-        forAll (curFaceLabels, i)
+        forAll(curFaceLabels, i)
         {
             curFaceLabels[i] = readHexLabel(mixedFaceStream) - 1;
         }
@@ -915,14 +915,14 @@ int main(int argc, char *argv[])
 
     labelList nFacesInCell(nCells, 0);
 
-    forAll (cellFaces, celli)
+    forAll(cellFaces, celli)
     {
         cellFaces[celli].setSize(fluentModelNFaces[fluentCellModelID[celli] ]);
     }
 
     // fill in owner and neighbour
 
-    forAll (owner, faceI)
+    forAll(owner, faceI)
     {
         if (owner[faceI] > -1)
         {
@@ -933,7 +933,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    forAll (neighbour, faceI)
+    forAll(neighbour, faceI)
     {
         if (neighbour[faceI] > -1)
         {
@@ -976,7 +976,7 @@ int main(int argc, char *argv[])
         // points given by Fluent need to represent the FRONT plane of the
         // geometry. Therefore, the extrusion will be in -z direction
         //
-        forAll (oldPoints, pointI)
+        forAll(oldPoints, pointI)
         {
             points[nNewPoints] = oldPoints[pointI];
 
@@ -985,7 +985,7 @@ int main(int argc, char *argv[])
             nNewPoints++;
         }
 
-        forAll (oldPoints, pointI)
+        forAll(oldPoints, pointI)
         {
             points[nNewPoints] = oldPoints[pointI];
 
@@ -1000,7 +1000,7 @@ int main(int argc, char *argv[])
         // Set the number of empty faces
         frontAndBackFaces.setSize(2*nCells);
 
-        forAll (fluentCellModelID, celli)
+        forAll(fluentCellModelID, celli)
         {
             switch (fluentCellModelID[celli])
             {
@@ -1053,7 +1053,7 @@ int main(int argc, char *argv[])
         }
 
         // Create new faces
-        forAll (faces, faceI)
+        forAll(faces, faceI)
         {
 
             if (faces[faceI].size() != 2)
@@ -1078,7 +1078,7 @@ int main(int argc, char *argv[])
     {
         // 3-D shape recognition
         Info<< "Creating shapes for 3-D cells"<< endl;
-        forAll (fluentCellModelID, celli)
+        forAll(fluentCellModelID, celli)
         {
             if
             (
@@ -1116,7 +1116,7 @@ int main(int argc, char *argv[])
     // area vector points into the domain. Turn them round before making patches
     // for Foam compatibility
 
-    forAll (faces, faceI)
+    forAll(faces, faceI)
     {
         if (owner[faceI] == -1)
         {
@@ -1232,7 +1232,7 @@ int main(int argc, char *argv[])
 
         faceList patchFaces(faceGroupEndIndexIter() - faceLabel);
 
-        forAll (patchFaces, faceI)
+        forAll(patchFaces, faceI)
         {
             if
             (

@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
             Foam::Time::findTimes(args.rootPath()/args.caseName())
         );
 
-        forAll (times, i)
+        forAll(times, i)
         {
             Info<< times[i].name() << endl;
         }

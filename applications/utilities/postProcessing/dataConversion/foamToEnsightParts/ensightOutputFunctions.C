@@ -117,12 +117,12 @@ void Foam::ensightParticlePositions
     // binary write is Ensight6 - first ids, then positions
     if (format == IOstream::BINARY)
     {
-        forAll (parcels, i)
+        forAll(parcels, i)
         {
             os.write(i+1);
         }
 
-        forAllIter(Cloud<passiveParticle>, parcels, elmnt)
+        forAllConstIter(Cloud<passiveParticle>, parcels, elmnt)
         {
             const vector& p = elmnt().position();
 
@@ -135,7 +135,7 @@ void Foam::ensightParticlePositions
     {
         label nParcels = 0;
 
-        forAllIter(Cloud<passiveParticle>, parcels, elmnt)
+        forAllConstIter(Cloud<passiveParticle>, parcels, elmnt)
         {
             const vector& p = elmnt().position();
 

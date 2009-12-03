@@ -284,7 +284,7 @@ int main(int argc, char *argv[])
 
         labelList osf(slavePatch.size());
 
-        forAll (osf, i)
+        forAll(osf, i)
         {
             osf[i] = slavePatch.start() + i;
         }

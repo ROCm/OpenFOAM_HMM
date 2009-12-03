@@ -583,7 +583,7 @@ mtype                 {space}"MTYPE:"{space}
         {
             scalarList patchFaceValues(nValuesForPatchFaces);
 
-            forAll (patchFaceValues, fI)
+            forAll(patchFaceValues, fI)
             {
                 patchFaceValues[fI] = readScalar(patchFacesStream);
             }
@@ -673,7 +673,7 @@ int main(int argc, char *argv[])
     // make a point mapping array
     label maxPointIndex = 0;
 
-    forAll (pointMap, pointI)
+    forAll(pointMap, pointI)
     {
         if (pointMap[pointI] > maxPointIndex)
         {
@@ -684,7 +684,7 @@ int main(int argc, char *argv[])
 
     labelList pointLookup(maxPointIndex + 1, -1);
 
-    forAll (pointMap, pointI)
+    forAll(pointMap, pointI)
     {
         pointLookup[pointMap[pointI] ] = pointI;
     }
@@ -692,7 +692,7 @@ int main(int argc, char *argv[])
     // make a cell mapping array
     label maxCellIndex = 0;
 
-    forAll (cellMap, cellI)
+    forAll(cellMap, cellI)
     {
         if (cellMap[cellI] > maxCellIndex)
         {
@@ -702,7 +702,7 @@ int main(int argc, char *argv[])
 
     labelList cellLookup(maxCellIndex + 1);
 
-    forAll (cellMap, cellI)
+    forAll(cellMap, cellI)
     {
         cellLookup[cellMap[cellI] ] = cellI;
     }
@@ -719,7 +719,7 @@ int main(int argc, char *argv[])
 
     cellShapeList cells(cellLabels.size());
 
-    forAll (cellTypes, cellI)
+    forAll(cellTypes, cellI)
     {
         const labelList& curCellLabels = cellLabels[cellI];
 
@@ -798,7 +798,7 @@ int main(int argc, char *argv[])
         faceList& patchFaces = boundary[patchI];
         patchFaces.setSize(curCells.size());
 
-        forAll (curCells, faceI)
+        forAll(curCells, faceI)
         {
             patchFaces[faceI] =
                 cells[cellLookup[curCells[faceI] ] ].faces()

@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 
         PtrList<gasReaction> testReactions(nReactions);
 
-        forAll (testReactions, i)
+        forAll(testReactions, i)
         {
             testReactions.set
             (

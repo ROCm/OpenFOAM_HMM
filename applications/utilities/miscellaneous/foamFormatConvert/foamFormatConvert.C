@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     Foam::instantList timeDirs = Foam::timeSelector::select0(runTime, args);
 
-    forAll (timeDirs, timeI)
+    forAll(timeDirs, timeI)
     {
         runTime.setTime(timeDirs[timeI], timeI);
         Info<< "Time = " << runTime.timeName() << endl;

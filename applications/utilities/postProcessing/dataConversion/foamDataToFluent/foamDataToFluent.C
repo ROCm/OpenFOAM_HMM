@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
         // Writing number of faces
         label nFaces = mesh.nFaces();
 
-        forAll (mesh.boundary(), patchI)
+        forAll(mesh.boundary(), patchI)
         {
             nFaces += mesh.boundary()[patchI].size();
         }

@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     // Create the processor databases
     PtrList<Time> databases(nProcs);
 
-    forAll (databases, procI)
+    forAll(databases, procI)
     {
         databases.set
         (
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
     }
 
     // Set all times on processor meshes equal to reconstructed mesh
-    forAll (databases, procI)
+    forAll(databases, procI)
     {
         databases[procI].setTime(runTime.timeName(), runTime.timeIndex());
     }
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 #   include "checkFaceAddressingComp.H"
 
     // Loop over all times
-    forAll (timeDirs, timeI)
+    forAll(timeDirs, timeI)
     {
         // Set time for global database
         runTime.setTime(timeDirs[timeI], timeI);
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << endl << endl;
 
         // Set time for all databases
-        forAll (databases, procI)
+        forAll(databases, procI)
         {
             databases[procI].setTime(timeDirs[timeI], timeI);
         }
@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
             pointMesh pMesh(mesh);
             PtrList<pointMesh> pMeshes(procMeshes.meshes().size());
 
-            forAll (pMeshes, procI)
+            forAll(pMeshes, procI)
             {
                 pMeshes.set(procI, new pointMesh(procMeshes.meshes()[procI]));
             }
@@ -283,7 +283,7 @@ int main(int argc, char *argv[])
         {
             HashTable<IOobjectList> cloudObjects;
 
-            forAll (databases, procI)
+            forAll(databases, procI)
             {
                 fileNameList cloudDirs
                 (
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
                     )
                 );
 
-                forAll (cloudDirs, i)
+                forAll(cloudDirs, i)
                 {
                     // Check if we already have cloud objects for this cloudname
                     HashTable<IOobjectList>::const_iterator iter =

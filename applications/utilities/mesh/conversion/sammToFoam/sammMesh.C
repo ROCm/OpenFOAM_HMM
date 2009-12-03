@@ -116,11 +116,11 @@ void sammMesh::createPolyMeshData()
     label nProblemCells = 0;
 
     // check that there is no zeros in the cellPolys_
-    forAll (cellPolys_, cellI)
+    forAll(cellPolys_, cellI)
     {
         const labelList& curFaceLabels = cellPolys_[cellI];
 
-        forAll (curFaceLabels, faceI)
+        forAll(curFaceLabels, faceI)
         {
             if (curFaceLabels[faceI] == -1)
             {

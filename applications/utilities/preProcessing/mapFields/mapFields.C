@@ -194,12 +194,12 @@ wordList addProcessorPatches
 {
     // Add the processor patches to the cutting list
     HashTable<label> cuttingPatchTable;
-    forAll (cuttingPatches, i)
+    forAll(cuttingPatches, i)
     {
         cuttingPatchTable.insert(cuttingPatches[i], i);
     }
 
-    forAll (meshTarget.boundary(), patchi)
+    forAll(meshTarget.boundary(), patchi)
     {
         if (isA<processorFvPatch>(meshTarget.boundary()[patchi]))
         {

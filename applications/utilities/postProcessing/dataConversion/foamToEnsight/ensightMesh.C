@@ -112,7 +112,7 @@ Foam::ensightMesh::ensightMesh
 
         allPatchProcs_.setSize(allPatchNames_.size());
 
-        forAll (allPatchProcs_, patchi)
+        forAll(allPatchProcs_, patchi)
         {
             if (mesh_.boundary()[patchi].size())
             {
@@ -132,7 +132,7 @@ Foam::ensightMesh::ensightMesh
                 patchNameList = allPatchNames_;
             }
 
-            forAll (patchNameList, i)
+            forAll(patchNameList, i)
             {
                 patchNames_.insert(patchNameList[i]);
             }
@@ -217,7 +217,7 @@ Foam::ensightMesh::ensightMesh
 
     if (!args.optionFound("noPatches"))
     {
-        forAll (mesh.boundary(), patchi)
+        forAll(mesh.boundary(), patchi)
         {
             if (mesh.boundary()[patchi].size())
             {
@@ -945,7 +945,7 @@ Foam::faceList Foam::ensightMesh::map
 {
     faceList ppf(prims.size());
 
-    forAll (prims, i)
+    forAll(prims, i)
     {
         ppf[i] = patchFaces[prims[i]];
     }
@@ -981,7 +981,7 @@ void Foam::ensightMesh::writeAllFacePrims
                 );
             }
 
-            forAll (patchProcessors, i)
+            forAll(patchProcessors, i)
             {
                 if (patchProcessors[i] != 0)
                 {
@@ -1067,7 +1067,7 @@ void Foam::ensightMesh::writeAllNSided
                 );
             }
 
-            forAll (patchProcessors, i)
+            forAll(patchProcessors, i)
             {
                 if (patchProcessors[i] != 0)
                 {
@@ -1102,7 +1102,7 @@ void Foam::ensightMesh::writeAllNSided
                 );
             }
 
-            forAll (patchProcessors, i)
+            forAll(patchProcessors, i)
             {
                 if (patchProcessors[i] != 0)
                 {
@@ -1191,7 +1191,7 @@ void Foam::ensightMesh::writeAllNSidedBinary
                 );
             }
 
-            forAll (patchProcessors, i)
+            forAll(patchProcessors, i)
             {
                 if (patchProcessors[i] != 0)
                 {
@@ -1226,7 +1226,7 @@ void Foam::ensightMesh::writeAllNSidedBinary
                 );
             }
 
-            forAll (patchProcessors, i)
+            forAll(patchProcessors, i)
             {
                 if (patchProcessors[i] != 0)
                 {
@@ -1280,7 +1280,7 @@ void Foam::ensightMesh::writeAllFacePrimsBinary
                 );
             }
 
-            forAll (patchProcessors, i)
+            forAll(patchProcessors, i)
             {
                 if (patchProcessors[i] != 0)
                 {
@@ -1531,7 +1531,7 @@ void Foam::ensightMesh::writeAscii
 
                         patchPointOffsets = 0;
 
-                        forAll (patchProcessors, i)
+                        forAll(patchProcessors, i)
                         {
                             if (patchProcessors[i] != 0)
                             {
@@ -1820,7 +1820,7 @@ void Foam::ensightMesh::writeBinary
                         patchPointOffsets = 0;
 
 
-                        forAll (patchProcessors, i)
+                        forAll(patchProcessors, i)
                         {
                             if (patchProcessors[i] != 0)
                             {

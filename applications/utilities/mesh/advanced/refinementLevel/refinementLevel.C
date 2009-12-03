@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
 
     List<polyPatch*> p(patches.size());
 
-    forAll (p, patchI)
+    forAll(p, patchI)
     {
         p[patchI] = patches[patchI].clone(fMesh.boundaryMesh()).ptr();
     }

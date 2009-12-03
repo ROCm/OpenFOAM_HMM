@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 
         // pick up cells sharing the point
 
-        forAll (markedPoints, pointI)
+        forAll(markedPoints, pointI)
         {
             if
             (
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
             const labelList& curFaces =
                 surf1.pointFaces()[markedPoints[pointI]];
 
-            forAll (curFaces, i)
+            forAll(curFaces, i)
             {
                 facesToSubset[curFaces[i]] =  true;
             }
@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
 
         // pick up cells sharing the edge
 
-        forAll (markedEdges, edgeI)
+        forAll(markedEdges, edgeI)
         {
             if
             (
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 
             const labelList& curFaces = surf1.edgeFaces()[markedEdges[edgeI]];
 
-            forAll (curFaces, i)
+            forAll(curFaces, i)
             {
                 facesToSubset[curFaces[i]] =  true;
             }
@@ -298,7 +298,7 @@ int main(int argc, char *argv[])
         Info<< "Found " << markedFaces.size() << " marked face(s)." << endl;
 
         // Check and mark faces to pick up
-        forAll (markedFaces, faceI)
+        forAll(markedFaces, faceI)
         {
             if
             (
@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
                 const labelList& curFaces =
                     surf1.faceFaces()[markedFaces[faceI]];
 
-                forAll (curFaces, i)
+                forAll(curFaces, i)
                 {
                     label faceI = curFaces[i];
 

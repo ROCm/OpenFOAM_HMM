@@ -125,7 +125,7 @@ labelList regionFaceOrder
 
     label prevRegion = -1;
 
-    forAll (cellOrder, newCellI)
+    forAll(cellOrder, newCellI)
     {
         label oldCellI = cellOrder[newCellI];
 

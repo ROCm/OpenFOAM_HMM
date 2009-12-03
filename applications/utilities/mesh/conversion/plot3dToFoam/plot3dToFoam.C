@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     {
         label nx, ny, nz;
 
-        forAll (blocks, blockI)
+        forAll(blocks, blockI)
         {
             if (twoDThickness > 0)
             {
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
     label sumPoints(0);
     label nMeshCells(0);
 
-    forAll (blocks, blockI)
+    forAll(blocks, blockI)
     {
         Info<< "block " << blockI << ":" << nl;
         blocks[blockI].readPoints(readBlank, twoDThickness, plot3dFile);
@@ -144,11 +144,11 @@ int main(int argc, char *argv[])
     pointField points(sumPoints);
     labelList blockOffsets(blocks.size());
     sumPoints = 0;
-    forAll (blocks, blockI)
+    forAll(blocks, blockI)
     {
         const pointField& blockPoints = blocks[blockI].points();
         blockOffsets[blockI] = sumPoints;
-        forAll (blockPoints, i)
+        forAll(blockPoints, i)
         {
             points[sumPoints++] = blockPoints[i];
         }
@@ -186,15 +186,15 @@ int main(int argc, char *argv[])
 
     label nCreatedCells = 0;
 
-    forAll (blocks, blockI)
+    forAll(blocks, blockI)
     {
         labelListList curBlockCells = blocks[blockI].blockCells();
 
-        forAll (curBlockCells, blockCellI)
+        forAll(curBlockCells, blockCellI)
         {
             labelList cellPoints(curBlockCells[blockCellI].size());
 
-            forAll (cellPoints, pointI)
+            forAll(cellPoints, pointI)
             {
                 cellPoints[pointI] =
                     oldToNew

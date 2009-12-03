@@ -473,7 +473,7 @@ endOfSection               {space}")"{space}
         // set size of label list
         curFaceLabels.setSize(strtol(YYText(), &endPtr, 16));
 
-        forAll (curFaceLabels, i)
+        forAll(curFaceLabels, i)
         {
             curFaceLabels[i] = strtol(endPtr, &endPtr, 16) - 1;
         }
@@ -837,7 +837,7 @@ int main(int argc, char *argv[])
     // faces and move to neighbour
 
     boolList fm(faces.size(), false);
-    forAll (faces, facei)
+    forAll(faces, facei)
     {
         if
         (

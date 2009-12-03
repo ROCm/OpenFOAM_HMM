@@ -199,7 +199,7 @@ void writeAllFaceData
             {
                 writeData(map(pf, prims, cmpt), ensightFile);
 
-                forAll (patchProcessors, i)
+                forAll(patchProcessors, i)
                 {
                     if (patchProcessors[i] != 0)
                     {
@@ -245,7 +245,7 @@ void writeAllFaceDataBinary
             {
                 writeEnsDataBinary(map(pf, prims, cmpt), ensightFile);
 
-                forAll (patchProcessors, i)
+                forAll(patchProcessors, i)
                 {
                     if (patchProcessors[i] != 0)
                     {
