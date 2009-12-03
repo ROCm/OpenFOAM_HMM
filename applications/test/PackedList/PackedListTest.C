@@ -82,9 +82,13 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::validArgs.insert("file .. fileN");
 
-    argList::addBoolOption("mask");
-    argList::addBoolOption("count");
-    argList::addBoolOption("info");
+    argList::addBoolOption("mask", "report information about the bit masks");
+    argList::addBoolOption("count", "test the count() method");
+    argList::addBoolOption
+    (
+        "info",
+        "print an ascii representation of the storage"
+    );
 
     argList args(argc, argv, false, true);
 

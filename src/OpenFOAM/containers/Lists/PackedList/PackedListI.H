@@ -839,7 +839,24 @@ Foam::PackedList<nBits>::operator[](const label i)
 }
 
 
-// specialization for nBits=1 isn't worth the bother
+namespace Foam
+{
+    // specialization for nBits=1
+    template<>
+    inline void Foam::PackedList<1>::operator=(const unsigned int val)
+    {
+        if (val)
+        {
+            StorageList::operator=(~0u);
+        }
+        else
+        {
+            StorageList::operator=(0u);
+        }
+    }
+}
+
+
 template<unsigned nBits>
 inline void Foam::PackedList<nBits>::operator=(const unsigned int val)
 {
