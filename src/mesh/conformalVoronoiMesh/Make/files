@@ -19,6 +19,8 @@ $(cellSiseFunctions)/linearSpatial/linearSpatial.C
 
 initialPointsMethod/initialPointsMethod/initialPointsMethod.C
 initialPointsMethod/uniformGrid/uniformGrid.C
+initialPointsMethod/bodyCentredCubic/bodyCentredCubic.C
+initialPointsMethod/faceCentredCubic/faceCentredCubic.C
 initialPointsMethod/pointFile/pointFile.C
 initialPointsMethod/densityWeightedStochastic/densityWeightedStochastic.C
 

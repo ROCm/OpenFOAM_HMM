@@ -23,19 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::uniformGrid
+    Foam::faceCentredCubic
 
 Description
-    Generate a uniform grid of points inside the surfaces to be
+    Generate an FCC lattice of points inside the surfaces to be
     conformed to of the conformalVoronoiMesh
 
 SourceFiles
-    uniformGrid.C
+    faceCentredCubic.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef uniformGrid_H
-#define uniformGrid_H
+#ifndef faceCentredCubic_H
+#define faceCentredCubic_H
 
 #include "Switch.H"
 #include "Random.H"
@@ -47,10 +47,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class uniformGrid Declaration
+                        Class faceCentredCubic Declaration
 \*---------------------------------------------------------------------------*/
 
-class uniformGrid
+class faceCentredCubic
 :
     public initialPointsMethod
 {
@@ -72,12 +72,12 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("uniformGrid");
+    TypeName("faceCentredCubic");
 
     // Constructors
 
         //- Construct from components
-        uniformGrid
+        faceCentredCubic
         (
             const dictionary& initialPointsDict,
             const conformalVoronoiMesh& cvMesh
@@ -85,7 +85,7 @@ public:
 
 
     //- Destructor
-    virtual ~uniformGrid()
+    virtual ~faceCentredCubic()
     {}
 
 

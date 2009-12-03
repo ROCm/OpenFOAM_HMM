@@ -23,19 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::uniformGrid
+    Foam::bodyCentredCubic
 
 Description
-    Generate a uniform grid of points inside the surfaces to be
+    Generate a BCC lattice of points inside the surfaces to be
     conformed to of the conformalVoronoiMesh
 
 SourceFiles
-    uniformGrid.C
+    bodyCentredCubic.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef uniformGrid_H
-#define uniformGrid_H
+#ifndef bodyCentredCubic_H
+#define bodyCentredCubic_H
 
 #include "Switch.H"
 #include "Random.H"
@@ -47,10 +47,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class uniformGrid Declaration
+                       Class bodyCentredCubic Declaration
 \*---------------------------------------------------------------------------*/
 
-class uniformGrid
+class bodyCentredCubic
 :
     public initialPointsMethod
 {
@@ -72,12 +72,12 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("uniformGrid");
+    TypeName("bodyCentredCubic");
 
     // Constructors
 
         //- Construct from components
-        uniformGrid
+        bodyCentredCubic
         (
             const dictionary& initialPointsDict,
             const conformalVoronoiMesh& cvMesh
@@ -85,7 +85,7 @@ public:
 
 
     //- Destructor
-    virtual ~uniformGrid()
+    virtual ~bodyCentredCubic()
     {}
 
 
