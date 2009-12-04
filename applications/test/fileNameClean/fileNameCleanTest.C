@@ -66,10 +66,11 @@ int main(int argc, char *argv[])
     argList::noBanner();
     argList::noParallel();
     argList::validArgs.insert("fileName .. fileNameN");
+    argList::addOption("istream", "fileName", "test Istream values");
 
     argList args(argc, argv, false, true);
 
-    if (args.additionalArgs().empty())
+    if (args.additionalArgs().empty() && args.options().empty())
     {
         args.printUsage();
     }
@@ -92,6 +93,22 @@ int main(int argc, char *argv[])
     forAll(args.additionalArgs(), argI)
     {
         pathName = args.additionalArgs()[argI];
+        printCleaning(pathName);
+    }
+
+    if (args.optionFound("istream"))
+    {
+        args.optionLookup("istream")() >> pathName;
+
+        Info<< nl
+            << "-case" << nl
+            << "path = " << args.path() << nl
+            << "root = " << args.rootPath() << nl
+            << "case = " << args.caseName() << nl
+            << "FOAM_CASE=" << getEnv("FOAM_CASE") << nl
+            << "FOAM_CASENAME=" << getEnv("FOAM_CASENAME") << nl
+            << endl;
+
         printCleaning(pathName);
     }
 
