@@ -37,7 +37,6 @@ const Foam::label Foam::prismMatcher::maxVertPerFace = 4;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::prismMatcher::prismMatcher()
 :
     cellMatcher
@@ -89,7 +88,7 @@ bool Foam::prismMatcher::matchShape
     faceLabels_.setSize(facePerCell);
 
     //
-    // Try first triangular face. 
+    // Try first triangular face.
     // Only need to try one orientation of this face since prism is
     // rotation symmetric
     //
@@ -223,7 +222,7 @@ bool Foam::prismMatcher::matchShape
 
 
     // Walk face 0 from vertex 1 to 2
-    label face0vert2 = 
+    label face0vert2 =
         nextVert
         (
             face0vert1,
@@ -257,7 +256,7 @@ bool Foam::prismMatcher::matchShape
     //    << " at position " << face3vert2 << " in face " << face3
     //    << endl;
 
-    label face3vert5 = 
+    label face3vert5 =
         nextVert
         (
             face3vert2,
@@ -313,7 +312,7 @@ bool Foam::prismMatcher::faceSizeMatch
 
     label nTris = 0;
     label nQuads = 0;
-    
+
     forAll(myFaces, myFaceI)
     {
         label size = faces[myFaces[myFaceI]].size();

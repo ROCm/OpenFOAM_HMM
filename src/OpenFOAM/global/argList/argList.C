@@ -807,7 +807,11 @@ void Foam::argList::printUsage() const
         7,
         "print the usage"
     );
-    Info<< endl;
+
+    Info<< nl
+        <<"Using OpenFOAM-" << Foam::FOAMversion
+        <<" (build: " << Foam::FOAMbuild << ") - see www.OpenFOAM.org"
+        << nl << endl;
 }
 
 

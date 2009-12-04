@@ -40,7 +40,6 @@ const Foam::label Foam::tetWedgeMatcher::maxVertPerFace = 4;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct null
 Foam::tetWedgeMatcher::tetWedgeMatcher()
 :
     cellMatcher
@@ -241,7 +240,7 @@ bool Foam::tetWedgeMatcher::faceSizeMatch
 
     label nTris = 0;
     label nQuads = 0;
-    
+
     forAll(myFaces, myFaceI)
     {
         label size = faces[myFaces[myFaceI]].size();

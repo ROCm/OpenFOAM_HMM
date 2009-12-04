@@ -37,7 +37,6 @@ const Foam::label Foam::wedgeMatcher::maxVertPerFace = 4;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct null
 Foam::wedgeMatcher::wedgeMatcher()
 :
     cellMatcher
@@ -340,7 +339,7 @@ bool Foam::wedgeMatcher::faceSizeMatch
 
     label nTris = 0;
     label nQuads = 0;
-    
+
     forAll(myFaces, myFaceI)
     {
         label size = faces[myFaces[myFaceI]].size();
