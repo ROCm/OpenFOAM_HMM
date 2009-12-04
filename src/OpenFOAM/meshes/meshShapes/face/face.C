@@ -691,6 +691,44 @@ Foam::scalar Foam::face::sweptVol
 }
 
 
+Foam::tensor Foam::face::inertia
+(
+    const pointField& p,
+    const point& refPt,
+    scalar density
+) const
+{
+    // If the face is a triangle, do a direct calculation
+    if (size() == 3)
+    {
+        return triPointRef
+        (
+            p[operator[](0)],
+            p[operator[](1)],
+            p[operator[](2)]
+        ).inertia(refPt, density);
+    }
+
+    point c = centre(p);
+
+    tensor J = tensor::zero;
+
+    forAll(*this, i)
+    {
+        triPointRef t
+        (
+            p[operator[](i)],
+            p[operator[](fcIndex(i))],
+            c
+        );
+
+        J += t.inertia(refPt, density);
+    }
+
+    return J;
+}
+
+
 Foam::edgeList Foam::face::edges() const
 {
     const labelList& points = *this;
@@ -808,4 +846,3 @@ Foam::label Foam::face::trianglesQuads
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //
-
