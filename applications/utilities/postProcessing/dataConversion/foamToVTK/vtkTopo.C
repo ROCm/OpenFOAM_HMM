@@ -23,7 +23,6 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-
     Note: bug in vtk displaying wedges? Seems to display ok if we decompose
     them. Should be thoroughly tested!
     (they appear rarely in polyhedral meshes, do appear in some cut meshes)

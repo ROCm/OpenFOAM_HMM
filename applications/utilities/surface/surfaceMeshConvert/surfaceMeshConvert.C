@@ -26,7 +26,6 @@ Application
     surfaceMeshConvert
 
 Description
-
     Convert between surface formats with optional scaling or
     transformations (rotate/translate) on a coordinateSystem.
 
