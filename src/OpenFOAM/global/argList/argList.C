@@ -34,6 +34,7 @@ License
 #include "JobInfo.H"
 #include "labelList.H"
 
+#include <cctype>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -157,48 +158,53 @@ void Foam::argList::printOptionUsage
             }
         }
 
-        // text wrap - this could probably be made more efficient
+        // text wrap
         string::size_type pos = 0;
-        while (pos != string::npos && strLen - pos > textWidth)
+        while (pos != string::npos && pos + textWidth < strLen)
         {
-            string::size_type prev = pos;
-            string::size_type wordEnd = str.find_first_of(" \t\n", pos);
+            // potential end point and next point
+            string::size_type curr = pos + textWidth - 1;
             string::size_type next = string::npos;
 
-            while (wordEnd != string::npos && (wordEnd - pos) < textWidth)
+            if (isspace(str[curr]) || isspace(str[curr+1]))
             {
-                prev = wordEnd;
-                next = str.find_first_not_of(" \t\n", wordEnd);
+                // we were lucky: ended on a space or the next one is a space
+                next = str.find_first_not_of(" \t\n", curr + 1);
+            }
+            else
+            {
+                // search for end of the previous word break
+                string::size_type prev = str.find_last_of(" \t\n", curr);
 
-                if (next == string::npos)
+                // reposition to the end of the previous word if possible
+                if (prev != string::npos && prev > pos)
                 {
-                    wordEnd = string::npos;
-                }
-                else
-                {
-                    wordEnd = str.find_first_of(" \t\n", next);
+                    curr = prev;
                 }
             }
 
-            if (pos != string::npos)
+            if (next == string::npos)
             {
-                // indent next line
-                if (pos)
-                {
-                    for (string::size_type i = 0; i < usageMin; ++i)
-                    {
-                        Info<<' ';
-                    }
-                }
-
-                Info<< str.substr(pos, (prev - pos)).c_str() << nl;
-                pos = next;
+                next = curr + 1;
             }
+
+            // indent following lines (not the first one)
+            if (pos)
+            {
+                for (string::size_type i = 0; i < usageMin; ++i)
+                {
+                    Info<<' ';
+                }
+            }
+
+            Info<< str.substr(pos, (curr - pos)).c_str() << nl;
+            pos = next;
         }
 
+        // output the remainder of the string
         if (pos != string::npos)
         {
-            // indent next line
+            // indent following lines (not the first one)
             if (pos)
             {
                 for (string::size_type i = 0; i < usageMin; ++i)
