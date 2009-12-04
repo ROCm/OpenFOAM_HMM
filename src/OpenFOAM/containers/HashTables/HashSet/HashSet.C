@@ -32,20 +32,54 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Key, class Hash>
-template<class AnyType>
-Foam::HashSet<Key, Hash>::HashSet(const HashTable<AnyType, Key, Hash>& h)
+Foam::HashSet<Key, Hash>::HashSet(const UList<Key>& lst)
+:
+    HashTable<nil, Key, Hash>(2*lst.size())
+{
+    forAll(lst, elemI)
+    {
+        insert(lst[elemI]);
+    }
+}
+
+
+template<class Key, class Hash>
+template<class AnyType, class AnyHash>
+Foam::HashSet<Key, Hash>::HashSet
+(
+    const HashTable<AnyType, Key, AnyHash>& h
+)
 :
     HashTable<nil, Key, Hash>(h.size())
 {
     for
     (
-        typename HashTable<AnyType, Key, Hash>::const_iterator cit = h.cbegin();
+        typename HashTable<AnyType, Key, AnyHash>::const_iterator
+        cit = h.cbegin();
         cit != h.cend();
         ++cit
     )
     {
         insert(cit.key());
     }
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Key, class Hash>
+Foam::label Foam::HashSet<Key, Hash>::insert(const UList<Key>& lst)
+{
+    label count = 0;
+    forAll(lst, elemI)
+    {
+        if (insert(lst[elemI]))
+        {
+            ++count;
+        }
+    }
+
+    return count;
 }
 
 

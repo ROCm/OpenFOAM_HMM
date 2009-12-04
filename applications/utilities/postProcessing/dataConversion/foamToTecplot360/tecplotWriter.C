@@ -79,7 +79,7 @@ Pout<< endl
 void Foam::tecplotWriter::writePolyhedralZone
 (
     const word& zoneName,
-    const INTEGER4 strandID,
+    INTEGER4 strandID,
     const fvMesh& mesh,
     const List<INTEGER4>& varLocArray,
     INTEGER4 nFaceNodes
@@ -95,7 +95,6 @@ void Foam::tecplotWriter::writePolyhedralZone
     INTEGER4  KCellMax   = 0;         /* Not Used, set to zero */
 
     double    SolTime    = runTime_.value();     /* solution time   */
-    INTEGER4  StrandID   = 1;         /* static zone     */
     INTEGER4  ParentZone = 0;         /* no parent zone  */
 
     INTEGER4  IsBlock    = 1;         /* block format  */
@@ -135,7 +134,7 @@ Pout<< "zoneName:" << zoneName
             &JCellMax,                    
             &KCellMax,                    
             &SolTime,                
-            &StrandID,                    
+            &strandID,                    
             &ParentZone,                 
             &IsBlock,
             &NFConns,

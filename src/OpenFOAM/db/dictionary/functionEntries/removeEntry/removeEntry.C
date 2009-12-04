@@ -65,8 +65,8 @@ bool Foam::functionEntries::removeEntry::execute
     Istream& is
 )
 {
-    wordList dictKeys = parentDict.toc();
-    wordReList patterns(is);
+    wordList   dictKeys = parentDict.toc();
+    wordReList patterns = readList<wordRe>(is);
 
     labelList indices = findStrings(patterns, dictKeys);
 

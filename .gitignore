@@ -51,7 +51,9 @@ doc/[Dd]oxygen/latex
 doc/[Dd]oxygen/man
 
 # generated files in the main directory (e.g. ReleaseNotes-?.?.html)
+# and in the doc directory
 /*.html
+/doc/*.html
 
 # source packages - anywhere
 *.tar.bz2

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,51 +22,42 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::CECCellToFaceStencil
-
-Description
-    Combined corresponding cellToCellStencil of owner and neighbour.
-
-SourceFiles
-    CECCellToFaceStencil.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef CECCellToFaceStencil_H
-#define CECCellToFaceStencil_H
+#include "argList.H"
 
-#include "cellToFaceStencil.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+template<class T>
+T Foam::argList::optionRead(const word& opt) const
 {
+    T val;
 
-/*---------------------------------------------------------------------------*\
-                           Class CECCellToFaceStencil Declaration
-\*---------------------------------------------------------------------------*/
+    optionLookup(opt)() >> val;
+    return val;
+}
 
-class CECCellToFaceStencil
-:
-    public cellToFaceStencil
+
+template<class T>
+bool Foam::argList::optionReadIfPresent(const word& opt, T& val) const
 {
-public:
+    if (optionFound(opt))
+    {
+        val = optionRead<T>(opt);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
-    // Constructors
 
-        //- Construct from all cells and boundary faces
-        explicit CECCellToFaceStencil(const polyMesh&);
+template<class T>
+Foam::List<T> Foam::argList::optionReadList(const word& opt) const
+{
+    return readList<T>(optionLookup(opt)());
+}
 
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //
