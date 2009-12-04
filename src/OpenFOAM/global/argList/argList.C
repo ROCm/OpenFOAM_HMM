@@ -166,17 +166,23 @@ void Foam::argList::printOptionUsage
             string::size_type curr = pos + textWidth - 1;
             string::size_type next = string::npos;
 
-            if (isspace(str[curr]) || isspace(str[curr+1]))
+            if (isspace(str[curr]))
             {
-                // we were lucky: ended on a space or the next one is a space
-                next = str.find_first_not_of(" \t\n", curr + 1);
+                // we were lucky: ended on a space
+                next = str.find_first_not_of(" \t\n", curr);
+            }
+            else if (isspace(str[curr+1]))
+            {
+                // the next one is a space - so we are okay
+                curr++;  // otherwise the length is wrong
+                next = str.find_first_not_of(" \t\n", curr);
             }
             else
             {
-                // search for end of the previous word break
+                // search for end of a previous word break
                 string::size_type prev = str.find_last_of(" \t\n", curr);
 
-                // reposition to the end of the previous word if possible
+                // reposition to the end of previous word if possible
                 if (prev != string::npos && prev > pos)
                 {
                     curr = prev;

@@ -89,13 +89,13 @@ int main(int argc, char *argv[])
         "index",
         "start",
         "ignore the time index contained in the uniform/time file "
-        "and use a simple indexing when creating the files"
+        "and use simple indexing when creating the files"
     );
     argList::addBoolOption
     (
         "noMesh",
         "Suppress writing the geometry. "
-        "Can be useful for converting partial results for a static geometry."
+        "Can be useful for converting partial results for a static geometry"
     );
 
     // the volume field types that we handle
