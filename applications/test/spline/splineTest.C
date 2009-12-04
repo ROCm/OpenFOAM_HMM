@@ -28,6 +28,7 @@ License
 #include "vector.H"
 #include "IFstream.H"
 #include "BSpline.H"
+#include "CatmullRomSpline.H"
 
 using namespace Foam;
 
@@ -38,8 +39,31 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.insert("file .. fileN");
+    argList::addBoolOption("B", "B-Spline");
+    argList::addBoolOption("cmr", "catmull-rom spline (default)");
+    argList::addOption
+    (
+        "n",
+        "INT",
+        "number of segments for evaluation - default 20"
+    );
 
     argList args(argc, argv, false, true);
+
+    if (args.additionalArgs().empty())
+    {
+        args.printUsage();
+    }
+
+    bool useBSpline    = args.optionFound("B");
+    bool useCatmullRom = args.optionFound("cmr");
+    label nSeg = args.optionLookupOrDefault<label>("n", 20);
+
+    if (!useBSpline && !useCatmullRom)
+    {
+        Info<<"defaulting to Catmull-Rom spline" << endl;
+        useCatmullRom = true;
+    }
 
     forAll(args.additionalArgs(), argI)
     {
@@ -47,18 +71,46 @@ int main(int argc, char *argv[])
         Info<< nl << "reading " << srcFile << nl;
         IFstream ifs(srcFile);
 
-        List<pointField> splinePointFields(ifs);
+        List<pointField> pointFields(ifs);
 
-        forAll(splinePointFields, splineI)
+        forAll(pointFields, splineI)
         {
-            Info<<"convert " << splinePointFields[splineI] << " to bspline" << endl;
+            Info<<"\noriginal points: " << pointFields[splineI] << nl;
 
-            BSpline spl(splinePointFields[splineI], vector::zero, vector::zero);
+            if (useBSpline)
+            {
+                BSpline spl(pointFields[splineI], vector::zero, vector::zero);
 
-            Info<< "1/2 = " << spl.position(0.5) << endl;
+                Info<< nl
+                    << "B-Spline interpolation:" << nl
+                    << "----------------------" << endl;
+
+                for (label segI = 0; segI <= nSeg; ++segI)
+                {
+                    scalar lambda = scalar(segI)/scalar(nSeg);
+                    Info<< spl.position(lambda) << "    // " << lambda << endl;
+                }
+            }
+
+            if (useCatmullRom)
+            {
+                CatmullRomSpline spl
+                (
+                    pointFields[splineI]
+                );
+
+                Info<< nl
+                    <<"Catmull-Rom interpolation:" << nl
+                    << "-------------------------" << endl;
+
+                for (label segI = 0; segI <= nSeg; ++segI)
+                {
+                    scalar lambda = scalar(segI)/scalar(nSeg);
+                    Info<< spl.position(lambda) << "    // " << lambda << endl;
+                }
+            }
         }
     }
-
 
     return 0;
 }
