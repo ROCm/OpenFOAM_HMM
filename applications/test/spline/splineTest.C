@@ -27,7 +27,9 @@ License
 
 #include "vector.H"
 #include "IFstream.H"
+
 #include "BSpline.H"
+#include "BSpline2.H"
 #include "CatmullRomSpline.H"
 
 using namespace Foam;
@@ -39,8 +41,9 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.insert("file .. fileN");
-    argList::addBoolOption("B", "B-Spline");
-    argList::addBoolOption("cmr", "catmull-rom spline (default)");
+    argList::addBoolOption("Bold", "B-Spline implementation OLD");
+    argList::addBoolOption("Bnew", "B-Spline implementation NEW");
+    argList::addBoolOption("CMR", "catmull-rom spline (default)");
     argList::addOption
     (
         "n",
@@ -55,11 +58,12 @@ int main(int argc, char *argv[])
         args.printUsage();
     }
 
-    bool useBSpline    = args.optionFound("B");
-    bool useCatmullRom = args.optionFound("cmr");
+    bool useBSplineOld = args.optionFound("Bold");
+    bool useBSplineNew = args.optionFound("Bnew");
+    bool useCatmullRom = args.optionFound("CMR");
     label nSeg = args.optionLookupOrDefault<label>("n", 20);
 
-    if (!useBSpline && !useCatmullRom)
+    if (!useCatmullRom && !useBSplineOld && !useBSplineNew)
     {
         Info<<"defaulting to Catmull-Rom spline" << endl;
         useCatmullRom = true;
@@ -77,12 +81,27 @@ int main(int argc, char *argv[])
         {
             Info<<"\noriginal points: " << pointFields[splineI] << nl;
 
-            if (useBSpline)
+            if (useBSplineOld)
             {
-                BSpline spl(pointFields[splineI], vector::zero, vector::zero);
+                BSpline spl(pointFields[splineI]);
 
                 Info<< nl
-                    << "B-Spline interpolation:" << nl
+                    << "B-Spline interpolation: OLD" << nl
+                    << "----------------------" << endl;
+
+                for (label segI = 0; segI <= nSeg; ++segI)
+                {
+                    scalar lambda = scalar(segI)/scalar(nSeg);
+                    Info<< spl.position(lambda) << "    // " << lambda << endl;
+                }
+            }
+
+            if (useBSplineNew)
+            {
+                BSpline2 spl(pointFields[splineI]);
+
+                Info<< nl
+                    << "B-Spline interpolation: NEW" << nl
                     << "----------------------" << endl;
 
                 for (label segI = 0; segI <= nSeg; ++segI)
