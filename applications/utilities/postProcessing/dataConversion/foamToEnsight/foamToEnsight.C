@@ -93,10 +93,23 @@ bool inFileNameList
 
 int main(int argc, char *argv[])
 {
-    argList::addBoolOption("ascii");
-    argList::addBoolOption("noPatches");
-
-    argList::addOption("patches", "patchList");
+    argList::addBoolOption
+    (
+        "ascii",
+        "write in ASCII format instead of 'C Binary'"
+    );
+    argList::addBoolOption
+    (
+        "noPatches",
+        "Suppress writing any patches"
+    );
+    argList::addOption
+    (
+        "patches",
+        "patchList",
+        "Specify particular patches to write. "
+        "An empty list suppresses writing the internalMesh."
+    );
 
 #   include "addTimeOptions.H"
 #   include "setRootCase.H"

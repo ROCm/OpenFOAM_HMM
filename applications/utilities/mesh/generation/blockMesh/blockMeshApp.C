@@ -72,8 +72,18 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::addBoolOption("blockTopology");
-    argList::addOption("dict", "dictionary");
+    argList::addBoolOption
+    (
+        "blockTopology",
+        "write block edges and centres as .obj files"
+    );
+    argList::addOption
+    (
+        "dict",
+        "NAME",
+        "specify an alternative dictionary for the blockMesh description"
+    );
+
 #   include "addRegionOption.H"
 #   include "setRootCase.H"
 #   include "createTime.H"

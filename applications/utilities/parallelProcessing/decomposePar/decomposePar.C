@@ -88,20 +88,39 @@ int main(int argc, char *argv[])
     argList::noParallel();
 #   include "addRegionOption.H"
     argList::addBoolOption("cellDist");
-    argList::addBoolOption("copyUniform");
-    argList::addBoolOption("fields");
-    argList::addBoolOption("filterPatches");
-    argList::addBoolOption("force");
-    argList::addBoolOption("ifRequired");
+    argList::addBoolOption
+    (
+        "copyUniform",
+        "copy any uniform/ directories too"
+    );
+    argList::addBoolOption
+    (
+        "fields",
+        "use existing geometry decomposition and convert fields only"
+    );
+    argList::addBoolOption
+    (
+        "filterPatches",
+        "remove empty patches when decomposing the geometry"
+    );
+    argList::addBoolOption
+    (
+        "force",
+        "remove existing processor*/ subdirs before decomposing the geometry"
+    );
+    argList::addBoolOption
+    (
+        "ifRequired",
+        "only decompose geometry if the number of domains has changed"
+    );
 
 #   include "setRootCase.H"
 
     word regionName = fvMesh::defaultRegion;
     word regionDir = word::null;
 
-    if (args.optionFound("region"))
+    if (args.optionReadIfPresent("region", regionName))
     {
-        regionName = args.option("region");
         regionDir = regionName;
         Info<< "Decomposing mesh " << regionName << nl << endl;
     }
@@ -124,10 +143,10 @@ int main(int argc, char *argv[])
         isDir
         (
             runTime.path()
-           /(word("processor") + name(nProcs))
-           /runTime.constant()
-           /regionDir
-           /polyMesh::meshSubDir
+          / (word("processor") + name(nProcs))
+          / runTime.constant()
+          / regionDir
+          / polyMesh::meshSubDir
         )
     )
     {

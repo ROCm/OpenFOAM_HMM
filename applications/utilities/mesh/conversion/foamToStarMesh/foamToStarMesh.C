@@ -76,10 +76,27 @@ int main(int argc, char *argv[])
     argList::noParallel();
     timeSelector::addOptions();
 
-    argList::addOption("scale", "scale");
-    argList::addBoolOption("noBnd");
-    argList::addBoolOption("tri");
-    argList::addBoolOption("surface");
+    argList::addOption
+    (
+        "scale",
+        "factor",
+        "specify geometry scaling factor - default is 1000 ([m] to [mm])"
+    );
+    argList::addBoolOption
+    (
+        "noBnd",
+        "suppress writing the .bnd file"
+    );
+    argList::addBoolOption
+    (
+        "tri",
+        "Extract a triangulated surface. Implies -surface"
+    );
+    argList::addBoolOption
+    (
+        "surface",
+        "extract the surface of the volume mesh only"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"

@@ -62,9 +62,22 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("pro-STAR prefix");
-    argList::addBoolOption("ascii");
-    argList::addOption("scale", "scale");
-    argList::addBoolOption("solids");
+    argList::addBoolOption
+    (
+        "ascii",
+        "write in ASCII instead of binary format"
+    );
+    argList::addOption
+    (
+        "scale",
+        "scale",
+        "geometry scaling factor - default is 0.001 ([mm] to [m])"
+    );
+    argList::addBoolOption
+    (
+        "solids",
+        "retain solid cells and treat them like fluid cells"
+    );
 
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());
