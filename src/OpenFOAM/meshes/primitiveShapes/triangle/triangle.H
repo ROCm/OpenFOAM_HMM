@@ -100,7 +100,7 @@ public:
     //- Return types for classify
     enum proxType
     {
-        NONE, 
+        NONE,
         POINT,  // Close to point
         EDGE    // Close to edge
     };

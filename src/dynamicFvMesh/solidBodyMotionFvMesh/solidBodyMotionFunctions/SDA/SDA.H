@@ -81,7 +81,7 @@ class SDA
 
         //- Damping Coefficient [-]
         scalar Q_;
-    
+
         //- Time Period for liquid [sec]
         scalar Tp_;
 

@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
         autoRefineDriver::debug = debug;
         autoSnapDriver::debug = debug;
         autoLayerDriver::debug = debug;
-    }        
+    }
 
 
     // Read geometry

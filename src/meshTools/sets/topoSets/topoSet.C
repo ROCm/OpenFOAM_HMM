@@ -236,7 +236,7 @@ void topoSet::writeDebug
     topoSet::const_iterator& iter,
     label& elemI
 ) const
-{    
+{
     label n = 0;
 
     for (; (iter != end()) && (n < maxElem); ++iter)
@@ -262,7 +262,7 @@ void topoSet::writeDebug
     topoSet::const_iterator& iter,
     label& elemI
 ) const
-{    
+{
     label n = 0;
 
     for (; (iter != end()) && (n < maxElem); ++iter)
@@ -329,7 +329,7 @@ topoSet::topoSet(const IOobject& obj, const word& wantedType)
 :
     regIOobject(obj)
 {
-    if 
+    if
     (
         readOpt() == IOobject::MUST_READ
      || (
@@ -370,7 +370,7 @@ topoSet::topoSet
         )
     )
 {
-    if 
+    if
     (
         readOpt() == IOobject::MUST_READ
      || (
@@ -475,7 +475,7 @@ void topoSet::invert(const label maxLen)
             insert(cellI);
         }
     }
-    
+
 }
 
 

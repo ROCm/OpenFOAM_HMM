@@ -106,7 +106,7 @@ Foam::faceToPoint::faceToPoint
 Foam::faceToPoint::faceToPoint
 (
     const polyMesh& mesh,
-    const dictionary& dict          
+    const dictionary& dict
 )
 :
     topoSetSource(mesh),

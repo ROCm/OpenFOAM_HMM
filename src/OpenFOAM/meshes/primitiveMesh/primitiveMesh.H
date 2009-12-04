@@ -224,7 +224,7 @@ class primitiveMesh
             );
             //- For on-the-fly addressing calculation
             static label findFirstCommonElementFromSortedLists
-            ( 
+            (
                 const labelList&,
                 const labelList&
             );
@@ -556,7 +556,7 @@ public:
                 //- Check for negative cell volumes
                 bool checkCellVolumes
                 (
-                    
+
                     const bool report = false,
                     labelHashSet* setPtr = NULL
                 ) const;
@@ -645,7 +645,7 @@ public:
             //  Returns false for no error.
             bool checkTopology(const bool report = false) const;
 
-            //- Check mesh geometry (& implicitly topology) for correctness. 
+            //- Check mesh geometry (& implicitly topology) for correctness.
             //  Returns false for no error.
             bool checkGeometry(const bool report = false) const;
 

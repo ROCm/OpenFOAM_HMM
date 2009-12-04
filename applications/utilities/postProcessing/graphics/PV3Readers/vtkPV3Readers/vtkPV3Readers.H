@@ -67,7 +67,7 @@ class vtkIndent;
 
 namespace Foam
 {
-namespace vtkPV3Readers 
+namespace vtkPV3Readers
 {
     //- Declare name of the class and its debug switch
     NamespaceName("vtkPV3Readers");

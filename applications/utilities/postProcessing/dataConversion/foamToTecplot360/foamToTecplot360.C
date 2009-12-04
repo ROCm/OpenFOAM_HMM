@@ -674,7 +674,7 @@ int main(int argc, char *argv[])
                   + timeDesc
                   + ".plt"
                 );
-                
+
                 tecplotWriter writer(runTime);
 
                 writer.writeInit

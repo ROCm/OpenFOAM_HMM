@@ -1708,7 +1708,7 @@ Foam::label Foam::meshRefinement::addPatch
 
 Foam::label Foam::meshRefinement::addMeshedPatch
 (
-    const word& name,   
+    const word& name,
     const word& type
 )
 {

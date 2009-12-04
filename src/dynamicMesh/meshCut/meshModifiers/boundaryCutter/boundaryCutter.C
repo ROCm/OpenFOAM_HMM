@@ -159,7 +159,7 @@ void Foam::boundaryCutter::addFace
     getFaceInfo(faceI, patchID, zoneID, zoneFlip);
     label own = mesh_.faceOwner()[faceI];
     label masterPoint = mesh_.faces()[faceI][0];
-    
+
     if (!modifiedFace)
     {
         meshMod.setAction
@@ -203,7 +203,7 @@ void Foam::boundaryCutter::addFace
 
 
 
-// Splits a face using the cut edges and modified points 
+// Splits a face using the cut edges and modified points
 bool Foam::boundaryCutter::splitFace
 (
     const label faceI,
@@ -755,7 +755,7 @@ void Foam::boundaryCutter::setRefinement
 
         const labelList& eFaces = mesh_.edgeFaces()[edgeI];
 
-        forAll(eFaces, i)    
+        forAll(eFaces, i)
         {
             label faceI = eFaces[i];
 
@@ -781,7 +781,7 @@ void Foam::boundaryCutter::setRefinement
 
         const labelList& eFaces = mesh_.edgeFaces()[edgeI];
 
-        forAll(eFaces, i)    
+        forAll(eFaces, i)
         {
             label faceI = eFaces[i];
 

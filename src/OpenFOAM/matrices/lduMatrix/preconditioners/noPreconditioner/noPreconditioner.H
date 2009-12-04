@@ -71,7 +71,7 @@ public:
         //- Construct from matrix components and preconditioner solver controls
         noPreconditioner
         (
-            const lduMatrix::solver&, 
+            const lduMatrix::solver&,
             const dictionary& solverControlsUnused
         );
 
