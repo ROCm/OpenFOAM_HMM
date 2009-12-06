@@ -68,7 +68,12 @@ Foam::staticPressure::staticPressure
         WarningIn
         (
             "staticPressure::staticPressure"
-            "(const objectRegistry&, const dictionary&)"
+            "("
+                "const word&, "
+                "const objectRegistry&, "
+                "const dictionary&, "
+                "const bool"
+            ")"
         )   << "No fvMesh available, deactivating." << nl
             << endl;
     }
@@ -81,7 +86,12 @@ Foam::staticPressure::staticPressure
             WarningIn
             (
                 "staticPressure::staticPressure"
-                "(const objectRegistry&, const dictionary&)"
+                "("
+                    "const word&, "
+                    "const objectRegistry&, "
+                    "const dictionary&, "
+                    "const bool"
+                ")"
             )   << "Pressure is not kinematic pressure, deactivating." << nl
                 << endl;
         }

@@ -27,7 +27,7 @@ Typedef
 
 Description
     FunctionObject wrapper around sets to allow them to be created via the
-    functions list within controlDict.
+    functions entry within controlDict.
 
 SourceFiles
     sampledSetsFunctionObject.C

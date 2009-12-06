@@ -297,7 +297,7 @@ void Foam::DsmcCloud<ParcelType>::collisions()
     // Temporary storage for subCells
     List<DynamicList<label> > subCells(8);
 
-    scalar deltaT = cachedDeltaT();
+    scalar deltaT = mesh().time().deltaTValue();
 
     label collisionCandidates = 0;
 
@@ -380,7 +380,7 @@ void Foam::DsmcCloud<ParcelType>::collisions()
                     {
                         candidateQ = subCellPs[rndGen_.integer(0, nSC - 1)];
 
-                    } while(candidateP == candidateQ);
+                    } while (candidateP == candidateQ);
                 }
                 else
                 {
@@ -392,7 +392,7 @@ void Foam::DsmcCloud<ParcelType>::collisions()
                     {
                         candidateQ = rndGen_.integer(0, nC - 1);
 
-                    } while(candidateP == candidateQ);
+                    } while (candidateP == candidateQ);
                 }
 
                 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -405,7 +405,7 @@ void Foam::DsmcCloud<ParcelType>::collisions()
                 // label candidateQ = rndGen_.integer(0, nC-1);
 
                 // // If the same candidate is chosen, choose again
-                // while(candidateP == candidateQ)
+                // while (candidateP == candidateQ)
                 // {
                 //     candidateQ = rndGen_.integer(0, nC-1);
                 // }
@@ -1042,9 +1042,6 @@ Foam::DsmcCloud<ParcelType>::~DsmcCloud()
 template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::evolve()
 {
-    // cache the value of deltaT for this timestep
-    storeDeltaT();
-
     typename ParcelType::trackData td(*this);
 
     // Reset the data collection fields

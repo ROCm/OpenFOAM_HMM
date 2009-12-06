@@ -84,7 +84,7 @@ public:
 
     ~Scalar()
     {
-        Info <<"delete Scalar: " << data_ << endl;
+        Info<<"delete Scalar: " << data_ << endl;
     }
 
     friend Ostream& operator<<(Ostream& os, const Scalar& val)
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
     {
         Info<< " = " << iter() << endl;
     }
-    
+
     PtrDictionary<Scalar> scalarDict2;
     for (int i = 8; i<15; i++)
     {
@@ -186,22 +186,22 @@ int main(int argc, char *argv[])
     {
         Info<< "elem = " << *iter << endl;
     }
-    
+
     scalarDict.transfer(scalarDict2);
 
-    
+
     Scalar* p = scalarDict.lookupPtr("ent8");
-    
+
     // This does not (yet) work
     // Scalar* q = scalarDict.remove("ent10");
 
     if (p)
     {
-        Info << "found: " << *p << endl;
+        Info<< "found: " << *p << endl;
     }
     else
     {
-        Info << "no p: " << endl;
+        Info<< "no p: " << endl;
     }
 
     scalarDict.clear();

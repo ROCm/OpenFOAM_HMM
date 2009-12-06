@@ -27,7 +27,7 @@ Typedef
 
 Description
     FunctionObject wrapper around forces to allow them to be created via the
-    functions list within controlDict.
+    functions entry within controlDict.
 
 SourceFiles
     forcesFunctionObject.C

@@ -27,7 +27,7 @@ Class
 
 Description
     A functionObject wrapper around OutputFilter to allow them to be
-    created via the functions list within controlDict.
+    created via the functions entry within controlDict.
 
 Note
     Since the timeIndex is used directly from Foam::Time, it is unaffected
@@ -78,6 +78,10 @@ class OutputFilterFunctionObject
         //- Switch for the execution of the functionObject
         bool enabled_;
 
+        //- Switch to store filter in between writes or use on-the-fly
+        //  construction
+        bool storeFilter_;
+
         //- Output controls
         outputFilterOutputControl outputControl_;
 
@@ -89,6 +93,12 @@ class OutputFilterFunctionObject
 
         //- Read relevant dictionary entries
         void readDict();
+ 
+        //- Creates most of the data associated with this object.
+        void allocateFilter();
+
+        //- Destroys most of the data associated with this object.
+        void destroyFilter();
 
         //- Disallow default bitwise copy construct
         OutputFilterFunctionObject(const OutputFilterFunctionObject&);

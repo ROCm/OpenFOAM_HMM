@@ -156,8 +156,8 @@ void Foam::faceZone::calcCellLayers() const
                 sc[faceI] = neiCellI;
             }
         }
-        //Info << "masterCells: " << mc << endl;
-        //Info << "slaveCells: " << sc << endl;
+        //Info<< "masterCells: " << mc << endl;
+        //Info<< "slaveCells: " << sc << endl;
     }
 }
 

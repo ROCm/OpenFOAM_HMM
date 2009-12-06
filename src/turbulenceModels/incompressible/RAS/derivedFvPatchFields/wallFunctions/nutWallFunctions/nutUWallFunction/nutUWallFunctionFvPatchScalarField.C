@@ -98,7 +98,7 @@ tmp<scalarField> nutUWallFunctionFvPatchScalarField::calcYPlus
             yPlusLast = yp;
             yp = (kappaRe + yp)/(1.0 + log(E_*yp));
 
-        } while(mag(ryPlusLam*(yp - yPlusLast)) > 0.01 && ++iter < 10 );
+        } while (mag(ryPlusLam*(yp - yPlusLast)) > 0.01 && ++iter < 10 );
 
         yPlus[facei] = max(0.0, yp);
     }

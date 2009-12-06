@@ -63,7 +63,7 @@ bool triSurface::readTRI(const fileName& TRIfileName)
     // Max region number so far
     label maxRegion = 0;
 
-    while(TRIfile)
+    while (TRIfile)
     {
         string line = getLineNoComment(TRIfile);
 

@@ -84,7 +84,7 @@ Foam::vector Foam::streamLineParticle::interpolateFields
 
     const DynamicList<vector>& U = sampledVectors_[td.UIndex_];
 
-    return U[U.size()-1];
+    return U.last();
 }
 
 
@@ -226,21 +226,21 @@ bool Foam::streamLineParticle::move(streamLineParticle::trackData& td)
         // Transfer particle data into trackData.
         //td.allPositions_.append(sampledPositions_);
         td.allPositions_.append(vectorList());
-        vectorList& top = td.allPositions_[td.allPositions_.size()-1];
+        vectorList& top = td.allPositions_.last();
         top.transfer(sampledPositions_);
 
         forAll(sampledScalars_, i)
         {
             //td.allScalars_[i].append(sampledScalars_[i]);
             td.allScalars_[i].append(scalarList());
-            scalarList& top = td.allScalars_[i][td.allScalars_[i].size()-1];
+            scalarList& top = td.allScalars_[i].last();
             top.transfer(sampledScalars_[i]);
         }
         forAll(sampledVectors_, i)
         {
             //td.allVectors_[i].append(sampledVectors_[i]);
             td.allVectors_[i].append(vectorList());
-            vectorList& top = td.allVectors_[i][td.allVectors_[i].size()-1];
+            vectorList& top = td.allVectors_[i].last();
             top.transfer(sampledVectors_[i]);
         }
     }

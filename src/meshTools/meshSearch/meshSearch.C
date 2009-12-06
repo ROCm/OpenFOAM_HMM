@@ -791,7 +791,7 @@ Foam::label Foam::meshSearch::findCell
                       + offset(curHit.hitPoint(), curHit.index(), edgeVec);
                 }
             }
-            while(true);
+            while (true);
         }
         else
         {
@@ -928,7 +928,7 @@ Foam::List<Foam::pointIndexHit> Foam::meshSearch::intersections
               + offset(bHit.hitPoint(), bHit.index(), edgeVec);
         }
 
-    } while(bHit.hit());
+    } while (bHit.hit());
 
 
     hits.shrink();

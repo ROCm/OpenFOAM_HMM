@@ -129,28 +129,29 @@ void Foam::SHA1::processBytes(const void *data, size_t len)
     }
 
     // Process available complete blocks
-    if (len >= 64)
-    {
-#if !_STRING_ARCH_unaligned
-# define alignof(type) offsetof (struct { char c; type x; }, x)
-# define UNALIGNED_P(p) (((size_t) p) % alignof (uint32_t) != 0)
-        if (UNALIGNED_P (data))
-        {
-            while (len > 64)
+//    if (len >= 64)
+//    {
+//#if !_STRING_ARCH_unaligned
+//# define alignof(type) offsetof (struct { char c; type x; }, x)
+//# define UNALIGNED_P(p) (((size_t) p) % alignof (uint32_t) != 0)
+//        if (UNALIGNED_P (data))
+//        {
+//            while (len > 64)
+            while (len >= 64)
             {
                 processBlock(memcpy (buffer_, data, 64), 64);
                 data = reinterpret_cast<const unsigned char*>(data) + 64;
                 len -= 64;
             }
-        }
-        else
-#endif
-        {
-            processBlock(data, len & ~63);
-            data = reinterpret_cast<const unsigned char*>(data) + (len & ~63);
-            len &= 63;
-        }
-    }
+//        }
+//        else
+//#endif
+//        {
+//            processBlock(data, len & ~63);
+//            data = reinterpret_cast<const unsigned char*>(data) + (len & ~63);
+//            len &= 63;
+//        }
+//    }
 
     // Move remaining bytes in internal buffer.
     if (len > 0)
@@ -223,7 +224,7 @@ Foam::SHA1::processBlock(const void *data, size_t len)
     {                                                                         \
         E += rol_uint32(A, 5) + F(B, C, D) + K + M;                           \
         B = rol_uint32(B, 30);                                                \
-    } while(0)
+    } while (0)
 
     while (words < endp)
     {

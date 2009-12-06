@@ -100,7 +100,7 @@ angularOscillatingDisplacementPointPatchVectorField
     angle0_(ptf.angle0_),
     amplitude_(ptf.amplitude_),
     omega_(ptf.omega_),
-    p0_(ptf.p0_)
+    p0_(ptf.p0_, mapper)
 {}
 
 

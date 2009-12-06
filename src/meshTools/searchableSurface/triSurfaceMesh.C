@@ -632,7 +632,7 @@ void Foam::triSurfaceMesh::findLineAll
                 if
                 (
                     !inter.hit()
-                 || (inter.index() == hits[hits.size()-1].index())
+                 || (inter.index() == hits.last().index())
                 )
                 {
                     break;

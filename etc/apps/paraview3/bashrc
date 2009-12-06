@@ -46,21 +46,22 @@ do
     fi
 done
 
-paraviewMajor=paraview-3.6
-export ParaView_VERSION=3.6.1
+# set MAJOR and VERSION variables if not already set
+[ -z "$ParaView_MAJOR" ] && export ParaView_MAJOR=paraview-3.6
+[ -z "$ParaView_VERSION" ] && export ParaView_VERSION=3.6.1
 
 export ParaView_INST_DIR=$WM_THIRD_PARTY_DIR/paraview-$ParaView_VERSION
 export ParaView_DIR=$ParaView_INST_DIR/platforms/$WM_ARCH$WM_COMPILER
 
 # add in python libraries if required
-paraviewPython=$ParaView_DIR/Utilities/VTKPythonWrapping
-if [ -r $paraviewPython ]
+ParaView_PYTHON_DIR=$ParaView_DIR/Utilities/VTKPythonWrapping
+if [ -r $ParaView_PYTHON_DIR ]
 then
     if [ "$PYTHONPATH" ]
     then
-        export PYTHONPATH=$PYTHONPATH:$paraviewPython:$ParaView_DIR/lib/$paraviewMajor
+        export PYTHONPATH=$PYTHONPATH:$ParaView_PYTHON_DIR:$ParaView_DIR/lib/$ParaView_MAJOR
     else
-        export PYTHONPATH=$paraviewPython:$ParaView_DIR/lib/$paraviewMajor
+        export PYTHONPATH=$ParaView_PYTHON_DIR:$ParaView_DIR/lib/$ParaView_MAJOR
     fi
 fi
 
@@ -70,5 +71,5 @@ then
     export PV_PLUGIN_PATH=$FOAM_LIBBIN
 fi
 
-unset cmake paraviewMajor paraviewPython
+unset cmake ParaView_PYTHON_DIR
 # -----------------------------------------------------------------------------

@@ -313,20 +313,15 @@ void Foam::Cloud<ParticleType>::move(TrackingData& td)
     const globalMeshData& pData = polyMesh_.globalData();
     const labelList& processorPatches = pData.processorPatches();
     const labelList& processorPatchIndices = pData.processorPatchIndices();
-    const labelList& processorPatchNeighbours =
-        pData.processorPatchNeighbours();
 
-    // Initialise the setpFraction moved for the particles
+    // Initialise the stepFraction moved for the particles
     forAllIter(typename Cloud<ParticleType>, *this, pIter)
     {
         pIter().stepFraction() = 0;
     }
 
-    // Assume there will be particles to transfer
-    bool transfered = true;
-
     // While there are particles to transfer
-    while (transfered)
+    while (true)
     {
         // List of lists of particles to be transfered for all the processor
         // patches
@@ -366,104 +361,93 @@ void Foam::Cloud<ParticleType>::move(TrackingData& td)
             }
         }
 
-        if (Pstream::parRun())
+        if (!Pstream::parRun())
         {
-            // List of the numbers of particles to be transfered across the
-            // processor patches
-            labelList nsTransPs(transferList.size());
+            break;
+        }
 
-            forAll(transferList, i)
+
+        // Allocate transfer buffers
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
+        // Stream into send buffers
+        forAll(transferList, i)
+        {
+            if (transferList[i].size())
             {
-                nsTransPs[i] = transferList[i].size();
-            }
-
-            // List of the numbers of particles to be transfered across the
-            // processor patches for all the processors
-            labelListList allNTrans(Pstream::nProcs());
-            allNTrans[Pstream::myProcNo()] = nsTransPs;
-            combineReduce(allNTrans, UPstream::listEq());
-
-            transfered = false;
-
-            forAll(allNTrans, i)
-            {
-                forAll(allNTrans[i], j)
-                {
-                    if (allNTrans[i][j])
-                    {
-                        transfered = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!transfered)
-            {
-                break;
-            }
-
-            forAll(transferList, i)
-            {
-                if (transferList[i].size())
-                {
-                    OPstream particleStream
-                    (
-                        Pstream::blocking,
-                        refCast<const processorPolyPatch>
-                        (
-                            pMesh().boundaryMesh()[processorPatches[i]]
-                        ).neighbProcNo()
-                    );
-
-                    particleStream << transferList[i];
-                }
-            }
-
-            forAll(processorPatches, i)
-            {
-                label patchi = processorPatches[i];
-
-                const processorPolyPatch& procPatch =
+                UOPstream particleStream
+                (
                     refCast<const processorPolyPatch>
-                    (pMesh().boundaryMesh()[patchi]);
+                    (
+                        pMesh().boundaryMesh()[processorPatches[i]]
+                    ).neighbProcNo(),
+                    pBufs
+                );
 
-                label neighbProci =
-                    procPatch.neighbProcNo() - Pstream::masterNo();
+                particleStream << transferList[i];
+            }
+        }
 
-                label neighbProcPatchi = processorPatchNeighbours[patchi];
+        // Set up transfers when in non-blocking mode. Returns sizes (in bytes)
+        // to be sent/received.
+        labelListList allNTrans(Pstream::nProcs());
+        pBufs.finishedSends(allNTrans);
 
-                label nRecPs = allNTrans[neighbProci][neighbProcPatchi];
+        bool transfered = false;
 
-                if (nRecPs)
+        forAll(allNTrans, i)
+        {
+            forAll(allNTrans[i], j)
+            {
+                if (allNTrans[i][j])
                 {
-                    IPstream particleStream
-                    (
-                        Pstream::blocking,
-                        procPatch.neighbProcNo()
-                    );
-                    IDLList<ParticleType> newParticles
-                    (
-                        particleStream,
-                        typename ParticleType::iNew(*this)
-                    );
-
-                    forAllIter
-                    (
-                        typename Cloud<ParticleType>,
-                        newParticles,
-                        newpIter
-                    )
-                    {
-                        ParticleType& newp = newpIter();
-                        newp.correctAfterParallelTransfer(patchi, td);
-                        addParticle(newParticles.remove(&newp));
-                    }
+                    transfered = true;
+                    break;
                 }
             }
         }
-        else
+
+        if (!transfered)
         {
-            transfered = false;
+            break;
+        }
+
+
+        // Retrieve from receive buffers
+        forAll(processorPatches, i)
+        {
+            label patchi = processorPatches[i];
+
+            const processorPolyPatch& procPatch =
+                refCast<const processorPolyPatch>
+                (pMesh().boundaryMesh()[patchi]);
+
+            label neighbProci = procPatch.neighbProcNo();
+
+            label nRecPs = allNTrans[neighbProci][Pstream::myProcNo()];
+
+            if (nRecPs)
+            {
+                UIPstream particleStream(neighbProci, pBufs);
+
+                IDLList<ParticleType> newParticles
+                (
+                    particleStream,
+                    typename ParticleType::iNew(*this)
+                );
+
+                forAllIter
+                (
+                    typename Cloud<ParticleType>,
+                    newParticles,
+                    newpIter
+                )
+                {
+                    ParticleType& newp = newpIter();
+                    newp.correctAfterParallelTransfer(patchi, td);
+                    addParticle(newParticles.remove(&newp));
+                }
+            }
         }
     }
 }

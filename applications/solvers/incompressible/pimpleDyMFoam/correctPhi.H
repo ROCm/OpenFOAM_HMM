@@ -1,4 +1,26 @@
 {
+    if (mesh.changing())
+    {
+        forAll(U.boundaryField(), patchi)
+        {
+            if (U.boundaryField()[patchi].fixesValue())
+            {
+                U.boundaryField()[patchi].initEvaluate();
+            }
+        }
+
+        forAll(U.boundaryField(), patchi)
+        {
+            if (U.boundaryField()[patchi].fixesValue())
+            {
+                U.boundaryField()[patchi].evaluate();
+
+                phi.boundaryField()[patchi] =
+                U.boundaryField()[patchi] & mesh.Sf().boundaryField()[patchi];
+            }
+        }
+    }
+
     wordList pcorrTypes
     (
         p.boundaryField().size(),
@@ -7,7 +29,7 @@
 
     for (label i=0; i<p.boundaryField().size(); i++)
     {
-        if(p.boundaryField()[i].fixesValue())
+        if (p.boundaryField()[i].fixesValue())
         {
             pcorrTypes[i] = fixedValueFvPatchScalarField::typeName;
         }
@@ -28,7 +50,7 @@
         pcorrTypes
     );
 
-    for(int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
         fvScalarMatrix pcorrEqn
         (

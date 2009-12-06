@@ -446,7 +446,7 @@ int main(int argc, char *argv[])
                      }
                 } while (!finished);
 
-                Info << endl;
+                Info<< endl;
             } while (!finished);
 
             streamFunction.boundaryField() = 0.0;

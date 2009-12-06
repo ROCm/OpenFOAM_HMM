@@ -287,7 +287,7 @@ public:
             void shrink();
 
             //- Transfer the contents of the argument table into this table
-            //  and annull the argument table.
+            //  and annul the argument table.
             void transfer(HashTable<T, Key, Hash>&);
 
             //- Transfer contents to the Xfer container
@@ -463,7 +463,7 @@ public:
                 inline iterator operator++(int);
         };
 
-        //- iterator set to the begining of the HashTable
+        //- iterator set to the beginning of the HashTable
         inline iterator begin();
 
 

@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "vtkPV3Foam.H"
@@ -136,8 +134,8 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
     }
 
     // Convert Foam mesh vertices to VTK
-    vtkPoints *vtkpoints = vtkPoints::New();
-    vtkpoints->Allocate( mesh.nPoints() + nAddPoints );
+    vtkPoints* vtkpoints = vtkPoints::New();
+    vtkpoints->Allocate(mesh.nPoints() + nAddPoints);
 
     const Foam::pointField& points = mesh.points();
 
@@ -152,7 +150,7 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
         Info<< "... converting cells" << endl;
     }
 
-    vtkmesh->Allocate( mesh.nCells() + nAddCells );
+    vtkmesh->Allocate(mesh.nCells() + nAddCells);
 
     // Set counters for additional points and additional cells
     label addPointI = 0, addCellI = 0;

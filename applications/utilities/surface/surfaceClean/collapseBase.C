@@ -128,7 +128,7 @@ static void splitTri
             labelledTri
             (
                 f[fp2],
-                splitPoints[splitPoints.size()-1],
+                splitPoints.last(),
                 f[fp1],
                 f.region()
             )
@@ -144,7 +144,7 @@ static void splitTri
             (
                 f[fp1],
                 f[fp2],
-                splitPoints[splitPoints.size()-1],
+                splitPoints.last(),
                 f.region()
             )
         );

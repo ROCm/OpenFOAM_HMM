@@ -76,8 +76,8 @@ setenv WM_THIRD_PARTY_DIR $WM_PROJECT_INST_DIR/ThirdParty-$WM_PROJECT_VERSION
 if ( ! $?WM_OSTYPE ) setenv WM_OSTYPE POSIX
 
 
-# Compiler: set to Gcc, Gcc43 or Icc (for Intel's icc)
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Compiler: set to Gcc, Gcc43, Gcc44 or Icc (for Intel's icc)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if ( ! $?WM_COMPILER ) setenv WM_COMPILER Gcc
 
 setenv WM_COMPILER_ARCH

@@ -509,7 +509,7 @@ void Foam::moleculeCloud::initialiseMolecules
                     zoneDict.lookup("latticePositions")
                 );
 
-                if(latticeIds.size() != latticePositions.size())
+                if (latticeIds.size() != latticePositions.size())
                 {
                     FatalErrorIn("Foam::moleculeCloud::initialiseMolecules")
                         << "latticeIds and latticePositions must be the same "

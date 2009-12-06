@@ -510,7 +510,7 @@ int main(int argc, char *argv[])
         Info<< "Mesh unchanged." << endl;
     }
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

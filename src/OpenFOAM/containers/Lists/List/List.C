@@ -404,7 +404,7 @@ void Foam::List<T>::clear()
 
 
 // Transfer the contents of the argument List into this List
-// and anull the argument list
+// and annul the argument list
 template<class T>
 void Foam::List<T>::transfer(List<T>& a)
 {
@@ -418,7 +418,7 @@ void Foam::List<T>::transfer(List<T>& a)
 
 
 // Transfer the contents of the argument DynamicList into this List
-// and anull the argument list
+// and annul the argument list
 template<class T>
 template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 void Foam::List<T>::transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>& a)
@@ -431,7 +431,7 @@ void Foam::List<T>::transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>& a)
 
 
 // Transfer the contents of the argument SortableList into this List
-// and anull the argument list
+// and annul the argument list
 template<class T>
 void Foam::List<T>::transfer(SortableList<T>& a)
 {

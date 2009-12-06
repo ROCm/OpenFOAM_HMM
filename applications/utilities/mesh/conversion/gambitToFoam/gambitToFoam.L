@@ -41,6 +41,9 @@ Description
 #include "scalarList.H"
 #include "IStringStream.H"
 
+// For EOF only
+#include <cstdio>
+
 using namespace Foam;
 
 #include "argList.H"
@@ -230,7 +233,7 @@ mtype                 {space}"MTYPE:"{space}
 
 <readProgramID>{space}{word} {
 
-        Info << "Written by " << YYText() << " ";
+        Info<< "Written by " << YYText() << " ";
         BEGIN(controlInfo);
     }
 
@@ -242,20 +245,20 @@ mtype                 {space}"MTYPE:"{space}
 
 <readVersionID>{space}{versionNumber} {
 
-        Info << " version " << YYText() << endl;
+        Info<< " version " << YYText() << endl;
         BEGIN(controlInfo);
     }
 
 
 <controlInfo>{space}{dateDDMonYYYY}{space}{time} {
 
-        Info << "File written on " << YYText() << endl;
+        Info<< "File written on " << YYText() << endl;
     }
 
 
 <controlInfo>{space}{dateDDMMYYYY}{space}{time} {
 
-        Info << "File written on " << YYText() << endl;
+        Info<< "File written on " << YYText() << endl;
     }
 
 
@@ -301,7 +304,7 @@ mtype                 {space}"MTYPE:"{space}
 {nodalCoords}{spaceNl} {
 
         curNumberOfNodes = 0;
-        Info << "Reading nodal coordinates" << endl;
+        Info<< "Reading nodal coordinates" << endl;
         BEGIN(nodalCoords);
     }
 
@@ -329,7 +332,7 @@ mtype                 {space}"MTYPE:"{space}
 {cellsAndElements}{spaceNl} {
 
         curNumberOfCells = 0;
-        Info << "Reading cells" << endl;
+        Info<< "Reading cells" << endl;
         BEGIN(cellsAndElements);
     }
 
@@ -419,7 +422,7 @@ mtype                 {space}"MTYPE:"{space}
  /*             ------ Reading element group information ------               */
 
 {cellStreams}{spaceNl} {
-        Info << "Reading cell streams" << endl;
+        Info<< "Reading cell streams" << endl;
         BEGIN(cellStreams);
     }
 
@@ -501,7 +504,7 @@ mtype                 {space}"MTYPE:"{space}
 
 
 <cellStreamFlags>{labelList} {
-        Info << "Reading cell stream labels" << endl;
+        Info<< "Reading cell stream labels" << endl;
         BEGIN(cellStreamLabels);
     }
 
@@ -526,7 +529,7 @@ mtype                 {space}"MTYPE:"{space}
 
 <cellStreamLabels>{endOfSection}\n {
 
-        Info << "Finished reading cell stream labels" << endl;
+        Info<< "Finished reading cell stream labels" << endl;
 
         // reset current group ID and a number of flags
         curGroupID = 0;
@@ -538,7 +541,7 @@ mtype                 {space}"MTYPE:"{space}
 
 {boundaryPatch}{spaceNl} {
         curPatchFace = 0;
-        Info << "Reading patches" << endl;
+        Info<< "Reading patches" << endl;
         BEGIN(boundaryPatchParams);
     }
 
@@ -662,10 +665,10 @@ int main(int argc, char *argv[])
     }
 
     yyFlexLexer lexer(&gambitStream);
-    while(lexer.yylex() != 0)
+    while (lexer.yylex() != 0)
     {}
 
-    Info << "Finished lexing" << endl;
+    Info<< "Finished lexing" << endl;
 
     // make a point mapping array
     label maxPointIndex = 0;
@@ -812,7 +815,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    Info << "gambitToFoam: " << endl
+    Info<< "gambitToFoam: " << endl
         << "Gambit file format does not provide information about the type of "
         << "the patch (eg. wall, symmetry plane, cyclic etc)." << endl
         << "All the patches have been created "
@@ -861,10 +864,10 @@ int main(int argc, char *argv[])
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(10);
 
-    Info << "Writing polyMesh" << endl;
+    Info<< "Writing polyMesh" << endl;
     pShapeMesh.write();
 
-    Info<< nl << "End" << endl;
+    Info<< "\nEnd\n" << endl;
     return 0;
 }
 

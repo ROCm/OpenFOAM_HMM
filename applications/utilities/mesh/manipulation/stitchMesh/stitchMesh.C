@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
 
     // set up the tolerances for the sliding mesh
     dictionary slidingTolerances;
-    if (args.options().found("toleranceDict")) 
+    if (args.options().found("toleranceDict"))
     {
         IOdictionary toleranceFile(
             IOobject(
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
                 runTime.constant(),
                 mesh,
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE                 
+                IOobject::NO_WRITE
             )
         );
         slidingTolerances += toleranceFile;
@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
 
         // Note: make sure to add the zones BEFORE constructing polyMeshModifier
         // (since looks up various zones at construction time)
-        Info << "Adding point and face zones" << endl;
+        Info<< "Adding point and face zones" << endl;
         mesh.addZones(pz.shrink(), fz.shrink(), cz.shrink());
 
         // Add the perfect interface mesh modifier
@@ -316,7 +316,7 @@ int main(int argc, char *argv[])
 
         // Note: make sure to add the zones BEFORE constructing polyMeshModifier
         // (since looks up various zones at construction time)
-        Info << "Adding point and face zones" << endl;
+        Info<< "Adding point and face zones" << endl;
         mesh.addZones(pz.shrink(), fz.shrink(), cz.shrink());
 
         // Add the sliding interface mesh modifier
@@ -393,7 +393,7 @@ int main(int argc, char *argv[])
         mesh.setInstance(oldInstance);
         stitcher.instance() = oldInstance;
     }
-    Info << nl << "Writing polyMesh to time " << runTime.timeName() << endl;
+    Info<< nl << "Writing polyMesh to time " << runTime.timeName() << endl;
 
     IOstream::defaultPrecision(10);
 

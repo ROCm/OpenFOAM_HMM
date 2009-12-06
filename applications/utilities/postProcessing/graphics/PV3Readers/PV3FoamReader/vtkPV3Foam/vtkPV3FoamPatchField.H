@@ -45,17 +45,17 @@ void Foam::vtkPV3Foam::convertPatchField
     const word& name,
     const Field<Type>& ptf,
     vtkMultiBlockDataSet* output,
-    const partInfo& selector,
+    const arrayRange& range,
     const label datasetNo
 )
 {
     const label nComp = pTraits<Type>::nComponents;
 
     vtkFloatArray* cellData = vtkFloatArray::New();
-    cellData->SetNumberOfTuples( ptf.size() );
-    cellData->SetNumberOfComponents( nComp );
-    cellData->Allocate( nComp*ptf.size() );
-    cellData->SetName( name.c_str() );
+    cellData->SetNumberOfTuples(ptf.size());
+    cellData->SetNumberOfComponents(nComp);
+    cellData->Allocate(nComp*ptf.size());
+    cellData->SetName(name.c_str());
 
     float vec[nComp];
     forAll(ptf, i)
@@ -70,7 +70,7 @@ void Foam::vtkPV3Foam::convertPatchField
 
     vtkPolyData::SafeDownCast
     (
-        GetDataSetFromBlock(output, selector, datasetNo)
+        GetDataSetFromBlock(output, range, datasetNo)
     )   ->GetCellData()
         ->AddArray(cellData);
 
@@ -85,17 +85,17 @@ void Foam::vtkPV3Foam::convertPatchPointField
     const word& name,
     const Field<Type>& pptf,
     vtkMultiBlockDataSet* output,
-    const partInfo& selector,
+    const arrayRange& range,
     const label datasetNo
 )
 {
     const label nComp = pTraits<Type>::nComponents;
 
-    vtkFloatArray *pointData = vtkFloatArray::New();
-    pointData->SetNumberOfTuples( pptf.size() );
-    pointData->SetNumberOfComponents( nComp );
-    pointData->Allocate( nComp*pptf.size() );
-    pointData->SetName( name.c_str() );
+    vtkFloatArray* pointData = vtkFloatArray::New();
+    pointData->SetNumberOfTuples(pptf.size());
+    pointData->SetNumberOfComponents(nComp);
+    pointData->Allocate(nComp*pptf.size());
+    pointData->SetName(name.c_str());
 
     float vec[nComp];
     forAll(pptf, i)
@@ -111,7 +111,7 @@ void Foam::vtkPV3Foam::convertPatchPointField
 
     vtkPolyData::SafeDownCast
     (
-        GetDataSetFromBlock(output, selector, datasetNo)
+        GetDataSetFromBlock(output, range, datasetNo)
     )   ->GetPointData()
         ->AddArray(pointData);
 

@@ -27,7 +27,7 @@ Typedef
 
 Description
     FunctionObject wrapper around streamLines to allow them to be created via
-    the functions list within controlDict.
+    the functions entry within controlDict.
 
 SourceFiles
     streamLineFunctionObject.C

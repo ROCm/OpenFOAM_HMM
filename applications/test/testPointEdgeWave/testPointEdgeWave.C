@@ -48,13 +48,11 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createPolyMesh.H"
 
-    pointMesh pMesh(mesh);
-
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     // Get name of patch
     word patchName(args.additionalArgs()[0]);
-    
+
     // Find the label in patches by name.
     label patchI = patches.findPatchID(patchName);
 
@@ -99,7 +97,7 @@ int main(int argc, char *argv[])
 
     PointEdgeWave<pointEdgePoint> wallCalc
     (
-        pMesh,
+        mesh,
         wallPoints,
         wallInfo,
 
@@ -119,7 +117,7 @@ int main(int argc, char *argv[])
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        pMesh,
+        pointMesh::New(mesh),
         dimensionedScalar("wallDist", dimLength, 0.0)
     );
 
@@ -133,8 +131,7 @@ int main(int argc, char *argv[])
 
     psf.write();
 
-    Info << nl << "End" << endl;
-
+    Info<< "\nEnd\n" << endl;
     return 0;
 }
 

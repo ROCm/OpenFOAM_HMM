@@ -39,7 +39,7 @@ int main()
     Info<< fuel.rho(1e5, 300) << endl;
     Info<< fuel << endl;
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

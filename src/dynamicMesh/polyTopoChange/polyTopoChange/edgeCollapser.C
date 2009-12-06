@@ -456,7 +456,7 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
         {
             break;
         }
-    } while(true);
+    } while (true);
 
 
     // Keep track of faces that have been done already.

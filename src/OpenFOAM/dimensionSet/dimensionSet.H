@@ -27,6 +27,7 @@ Class
 
 Description
     Dimension set for the base types.
+
     This type may be used to implement rigorous dimension checking
     for algebraic manipulation.
 
@@ -105,7 +106,7 @@ Ostream& operator<<(Ostream&, const dimensionSet&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class dimensionSet Declaration
+                        Class dimensionSet Declaration
 \*---------------------------------------------------------------------------*/
 
 class dimensionSet
@@ -184,8 +185,13 @@ public:
 
     // Member functions
 
+        //- Return true if it is dimensionless
         bool dimensionless() const;
+
         void reset(const dimensionSet&);
+
+        //- Return a text representation for added readability
+        string asText() const;
 
 
     // Member operators

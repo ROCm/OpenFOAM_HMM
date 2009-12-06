@@ -55,14 +55,14 @@ class lineDivide
     // Private data
 
         pointField points_;
+
         scalarList divisions_;
 
 public:
 
     // Constructors
 
-        //- Construct from components
-        //  discretization and expansion ration
+        //- Construct from components with discretization and expansion ratio
         lineDivide
         (
             const curvedEdge&,

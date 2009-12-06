@@ -30,15 +30,10 @@ License
 #include "SubField.H"
 #include "mixedFvPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void meshToMesh::mapField
+void Foam::meshToMesh::mapField
 (
     Field<Type>& toF,
     const Field<Type>& fromVf,
@@ -60,7 +55,7 @@ void meshToMesh::mapField
 
 
 template<class Type>
-void meshToMesh::interpolateField
+void Foam::meshToMesh::interpolateField
 (
     Field<Type>& toF,
     const GeometricField<Type, fvPatchField, volMesh>& fromVf,
@@ -79,7 +74,7 @@ void meshToMesh::interpolateField
         {
             const labelList& neighbours = cc[adr[celli]];
             const scalarList& w = weights[celli];
-            
+
             toF[celli] = fromVf[adr[celli]]*w[0];
 
             for (label ni = 1; ni < w.size(); ni++)
@@ -92,7 +87,7 @@ void meshToMesh::interpolateField
 
 
 template<class Type>
-void meshToMesh::interpolateField
+void Foam::meshToMesh::interpolateField
 (
     Field<Type>& toF,
     const GeometricField<Type, fvPatchField, volMesh>& fromVf,
@@ -118,7 +113,7 @@ void meshToMesh::interpolateField
 
 
 template<class Type>
-void meshToMesh::interpolateInternalField
+void Foam::meshToMesh::interpolateInternalField
 (
     Field<Type>& toF,
     const GeometricField<Type, fvPatchField, volMesh>& fromVf,
@@ -160,7 +155,7 @@ void meshToMesh::interpolateInternalField
         case INTERPOLATE:
             interpolateField
             (
-                toF, 
+                toF,
                 fromVf,
                 cellAddressing_,
                 inverseDistanceWeights()
@@ -170,7 +165,7 @@ void meshToMesh::interpolateInternalField
         case CELL_POINT_INTERPOLATE:
             interpolateField
             (
-                toF, 
+                toF,
                 fromVf,
                 cellAddressing_,
                 toMesh_.cellCentres()
@@ -190,7 +185,7 @@ void meshToMesh::interpolateInternalField
 
 
 template<class Type>
-void meshToMesh::interpolateInternalField
+void Foam::meshToMesh::interpolateInternalField
 (
     Field<Type>& toF,
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tfromVf,
@@ -203,7 +198,7 @@ void meshToMesh::interpolateInternalField
 
 
 template<class Type>
-void meshToMesh::interpolate
+void Foam::meshToMesh::interpolate
 (
     GeometricField<Type, fvPatchField, volMesh>& toVf,
     const GeometricField<Type, fvPatchField, volMesh>& fromVf,
@@ -268,7 +263,7 @@ void meshToMesh::interpolate
                 ).refValue() = toVf.boundaryField()[patchi];
             }
         }
-        else if 
+        else if
         (
             patchMap_.found(toPatch.name())
          && fromMeshPatches_.found(patchMap_.find(toPatch.name())())
@@ -300,7 +295,7 @@ void meshToMesh::interpolate
 
 
 template<class Type>
-void meshToMesh::interpolate
+void Foam::meshToMesh::interpolate
 (
     GeometricField<Type, fvPatchField, volMesh>& toVf,
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tfromVf,
@@ -313,7 +308,8 @@ void meshToMesh::interpolate
 
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> > meshToMesh::interpolate
+Foam::tmp< Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::meshToMesh::interpolate
 (
     const GeometricField<Type, fvPatchField, volMesh>& fromVf,
     meshToMesh::order ord
@@ -387,7 +383,8 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > meshToMesh::interpolate
 
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> > meshToMesh::interpolate
+Foam::tmp< Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::meshToMesh::interpolate
 (
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tfromVf,
     meshToMesh::order ord
@@ -400,9 +397,5 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > meshToMesh::interpolate
     return tint;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

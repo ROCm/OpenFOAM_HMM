@@ -185,7 +185,7 @@ void Foam::orientedSurface::walkSurface
     // List of edges that were changed in the last iteration.
     labelList changedEdges;
 
-    while(true)
+    while (true)
     {
         changedEdges = faceToEdge(s, changedFaces);
 

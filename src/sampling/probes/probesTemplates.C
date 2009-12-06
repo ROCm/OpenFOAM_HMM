@@ -64,35 +64,6 @@ public:
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-Foam::label Foam::probes::countFields
-(
-    fieldGroup<Type>& fieldList,
-    const wordList& fieldTypes
-) const
-{
-    fieldList.setSize(fieldNames_.size());
-    label nFields = 0;
-
-    forAll(fieldNames_, fieldI)
-    {
-        if
-        (
-            fieldTypes[fieldI]
-         == GeometricField<Type, fvPatchField, volMesh>::typeName
-        )
-        {
-            fieldList[nFields] = fieldNames_[fieldI];
-            nFields++;
-        }
-    }
-
-    fieldList.setSize(nFields);
-
-    return nFields;
-}
-
-
-template<class Type>
 void Foam::probes::sampleAndWrite
 (
     const GeometricField<Type, fvPatchField, volMesh>& vField
@@ -103,15 +74,15 @@ void Foam::probes::sampleAndWrite
     if (Pstream::master())
     {
         unsigned int w = IOstream::defaultPrecision() + 7;
-        OFstream& probeStream = *probeFilePtrs_[vField.name()];
+        OFstream& os = *probeFilePtrs_[vField.name()];
 
-        probeStream << setw(w) << vField.time().value();
+        os  << setw(w) << vField.time().value();
 
         forAll(values, probeI)
         {
-            probeStream << ' ' << setw(w) << values[probeI];
+            os  << ' ' << setw(w) << values[probeI];
         }
-        probeStream << endl;
+        os  << endl;
     }
 }
 
@@ -133,30 +104,30 @@ void Foam::probes::sampleAndWrite
                     IOobject
                     (
                         fields[fieldI],
-                        obr_.time().timeName(),
-                        refCast<const polyMesh>(obr_),
+                        mesh_.time().timeName(),
+                        mesh_,
                         IOobject::MUST_READ,
                         IOobject::NO_WRITE,
                         false
                     ),
-                    refCast<const fvMesh>(obr_)
+                    mesh_
                 )
             );
         }
         else
         {
-            objectRegistry::const_iterator iter = obr_.find(fields[fieldI]);
+            objectRegistry::const_iterator iter = mesh_.find(fields[fieldI]);
 
             if
             (
-                iter != obr_.end()
+                iter != objectRegistry::end()
              && iter()->type()
              == GeometricField<Type, fvPatchField, volMesh>::typeName
             )
             {
                 sampleAndWrite
                 (
-                    obr_.lookupObject
+                    mesh_.lookupObject
                     <GeometricField<Type, fvPatchField, volMesh> >
                     (
                         fields[fieldI]
@@ -181,12 +152,12 @@ Foam::probes::sample
 
     tmp<Field<Type> > tValues
     (
-        new Field<Type>(probeLocations_.size(), unsetVal)
+        new Field<Type>(this->size(), unsetVal)
     );
 
     Field<Type>& values = tValues();
 
-    forAll(probeLocations_, probeI)
+    forAll(*this, probeI)
     {
         if (cellList_[probeI] >= 0)
         {
@@ -207,7 +178,7 @@ Foam::probes::sample(const word& fieldName) const
 {
     return sample
     (
-        obr_.lookupObject<GeometricField<Type, fvPatchField, volMesh> >
+        mesh_.lookupObject<GeometricField<Type, fvPatchField, volMesh> >
         (
             fieldName
         )

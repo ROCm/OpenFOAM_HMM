@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 
     surf2.write(outFileName);
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

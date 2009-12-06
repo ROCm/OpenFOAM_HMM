@@ -92,6 +92,8 @@ int main(int argc, char *argv[])
     labelHashSet setD(1);
     setD.insert(11);
     setD.insert(100);
+    setD.insert(49);
+    setD.insert(36);
     setD.insert(2008);
 
     Info<< "setD : " << setD << endl;
@@ -137,6 +139,17 @@ int main(int argc, char *argv[])
 
     // this doesn't work (yet?)
     // setD[12] = true;
+
+    List<label> someLst(10);
+    forAll(someLst, elemI)
+    {
+        someLst[elemI] = elemI*elemI;
+    }
+
+    label added = setD.set(someLst);
+    Info<< "added " << added << " from " << someLst.size() << endl;
+    Info<< "setD : " << setD << endl;
+
 
     return 0;
 }

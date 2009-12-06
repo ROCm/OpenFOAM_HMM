@@ -192,7 +192,7 @@ void Foam::rawSurfaceWriter<Type>::writeData
 {
     // header
     os  << "#  xx  xy  xz  yy  yz ";
-    for(int i=0; i<6; i++)
+    for (int i=0; i<6; i++)
     {
         os << fieldName << "_" << i << "  ";
     }

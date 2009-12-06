@@ -37,9 +37,9 @@ void starMesh::writeMesh()
 {
     if (isShapeMesh_)
     {
-        Info << "This is a shapeMesh." << endl;
+        Info<< "This is a shapeMesh." << endl;
 
-        Info << "Default patch type set to empty" << endl;
+        Info<< "Default patch type set to empty" << endl;
 
         clearExtraStorage();
 
@@ -61,7 +61,7 @@ void starMesh::writeMesh()
             patchPhysicalTypes_
         );
 
-        Info << "Writing polyMesh" << endl;
+        Info<< "Writing polyMesh" << endl;
         pShapeMesh.write();
     }
     else
@@ -70,7 +70,7 @@ void starMesh::writeMesh()
 
         createPolyMeshData();
 
-        Info << "This is a polyMesh" << endl;
+        Info<< "This is a polyMesh" << endl;
 
         clearExtraStorage();
 
@@ -90,7 +90,7 @@ void starMesh::writeMesh()
         // adding patches also checks the mesh
         pMesh.addPatches(polyBoundaryPatches(pMesh));
 
-        Info << "Writing polyMesh" << endl;
+        Info<< "Writing polyMesh" << endl;
         pMesh.write();
     }
 }

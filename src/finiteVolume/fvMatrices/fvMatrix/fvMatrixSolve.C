@@ -90,7 +90,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
         )
     );
 
-    for(direction cmpt=0; cmpt<Type::nComponents; cmpt++)
+    for (direction cmpt=0; cmpt<Type::nComponents; cmpt++)
     {
         if (validComponents[cmpt] == -1) continue;
 

@@ -242,8 +242,7 @@ void Foam::surfaceIntersection::storeIntersection
 
             // Check whether perhaps degenerate
             const point& prevHit = allCutPoints[*iter];
-
-            const point& thisHit = allCutPoints[allCutPoints.size()-1];
+            const point& thisHit = allCutPoints.last();
 
             if (mag(prevHit - thisHit) < SMALL)
             {
@@ -706,7 +705,7 @@ void Foam::surfaceIntersection::doCutEdges
                 doTrack = false;
             }
         }
-        while(doTrack);
+        while (doTrack);
     }
     intersection::setPlanarTol(oldTol);
 }

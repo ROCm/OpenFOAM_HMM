@@ -41,6 +41,7 @@ SourceFiles
 #include "sampledSurface.H"
 #include "surfaceWriter.H"
 #include "volFieldsFwd.H"
+#include "wordReList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,7 +52,7 @@ class fvMesh;
 class dictionary;
 
 /*---------------------------------------------------------------------------*\
-                      Class sampledSurfaces Declaration
+                       Class sampledSurfaces Declaration
 \*---------------------------------------------------------------------------*/
 
 class sampledSurfaces
@@ -68,7 +69,7 @@ class sampledSurfaces
         {
         public:
 
-            //- Surface formatter
+            //- The surface formatter
             autoPtr< surfaceWriter<Type> > formatter;
 
             //- Construct null
@@ -85,34 +86,19 @@ class sampledSurfaces
                 formatter(surfaceWriter<Type>::New(writeFormat))
             {}
 
-            //- Construct for a particular surface format and a list of field
-            //  names
-            fieldGroup
-            (
-                const word& writeFormat,
-                const wordList& fieldNames
-            )
-            :
-                DynamicList<word>(fieldNames),
-                formatter(surfaceWriter<Type>::New(writeFormat))
-            {}
-
-            void reset(const label nElem)
+            //- Reset format and field list
+            void clear()
             {
+                DynamicList<word>::clear();
                 formatter.clear();
-                DynamicList<word>::setCapacity(nElem);
-                DynamicList<word>::clear(); 
             }
 
+            //- Assign a new formatter
             void operator=(const word& writeFormat)
             {
                 formatter = surfaceWriter<Type>::New(writeFormat);
             }
 
-            void operator=(const wordList& fieldNames)
-            {
-                DynamicList<word>::operator=(fieldNames);
-            }
         };
 
 
@@ -161,7 +147,7 @@ class sampledSurfaces
         // Read from dictonary
 
             //- Names of fields to sample
-            wordList fieldNames_;
+            wordReList fieldSelection_;
 
             //- Interpolation scheme to use
             word interpolationScheme_;
@@ -191,8 +177,14 @@ class sampledSurfaces
 
     // Private Member Functions
 
+        //- Clear old field groups
+        void clearFieldGroups();
+
+        //- Append fieldName to the appropriate group
+        label appendFieldGroup(const word& fieldName, const word& fieldType);
+
         //- Classify field types, returns the number of fields
-        label classifyFieldTypes();
+        label classifyFields();
 
         //- Write geometry only
         void writeGeometry() const;

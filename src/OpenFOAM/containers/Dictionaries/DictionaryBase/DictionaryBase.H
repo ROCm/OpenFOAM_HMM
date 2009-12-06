@@ -144,7 +144,7 @@ public:
             void clear();
 
             //- Transfer the contents of the argument into this DictionaryBase
-            //  and annull the argument.
+            //  and annul the argument.
             void transfer(DictionaryBase<IDLListType, T>&);
 
     // Member operators

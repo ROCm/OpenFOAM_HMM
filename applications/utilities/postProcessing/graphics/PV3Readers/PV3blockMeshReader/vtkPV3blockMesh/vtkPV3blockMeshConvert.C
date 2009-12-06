@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,9 +52,9 @@ void Foam::vtkPV3blockMesh::convertMeshBlocks
     int& blockNo
 )
 {
-    vtkDataArraySelection* selection = reader_->GetPartSelection();
-    partInfo& selector = partInfoBlocks_;
-    selector.block(blockNo);   // set output block
+    vtkDataArraySelection* selection = reader_->GetBlockSelection();
+    arrayRange& range = arrayRangeBlocks_;
+    range.block(blockNo);   // set output block
     label datasetNo = 0;       // restart at dataset 0
 
     const blockMesh& blkMesh = *meshPtr_;
@@ -70,25 +70,18 @@ void Foam::vtkPV3blockMesh::convertMeshBlocks
 
     for
     (
-        int partId = selector.start();
-        partId < selector.end();
+        int partId = range.start();
+        partId < range.end();
         ++partId, ++blockI
     )
     {
-        if (!partStatus_[partId])
+        if (!blockStatus_[partId])
         {
             continue;
         }
 
         const blockDescriptor& blockDef = blkMesh[blockI].blockDef();
-        word partName("block");
 
-//         // append the (optional) zone name
-//         if (!blockDef.zoneName().empty())
-//         {
-//             partName += " - " + blockDef.zoneName();
-//         }
-//
         vtkUnstructuredGrid* vtkmesh = vtkUnstructuredGrid::New();
 
         // Convert Foam mesh vertices to VTK
@@ -123,7 +116,7 @@ void Foam::vtkPV3blockMesh::convertMeshBlocks
 
         AddToBlock
         (
-            output, vtkmesh, selector, datasetNo,
+            output, vtkmesh, range, datasetNo,
             selection->GetArrayName(partId)
         );
 
@@ -152,9 +145,9 @@ void Foam::vtkPV3blockMesh::convertMeshEdges
 )
 {
     vtkDataArraySelection* selection = reader_->GetCurvedEdgesSelection();
-    partInfo& selector = partInfoEdges_;
+    arrayRange& range = arrayRangeEdges_;
 
-    selector.block(blockNo);   // set output block
+    range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
 
     const blockMesh& blkMesh = *meshPtr_;
@@ -165,8 +158,8 @@ void Foam::vtkPV3blockMesh::convertMeshEdges
 
     for
     (
-        int partId = selector.start();
-        partId < selector.end();
+        int partId = range.start();
+        partId < range.end();
         ++partId, ++edgeI
     )
     {
@@ -187,9 +180,7 @@ void Foam::vtkPV3blockMesh::convertMeshEdges
 
             edgeList blkEdges = blockDef.blockShape().edges();
 
-
             // find the corresponding edge within the block
-
             label foundEdgeI = -1;
             forAll(blkEdges, blkEdgeI)
             {
@@ -236,7 +227,7 @@ void Foam::vtkPV3blockMesh::convertMeshEdges
 
                 AddToBlock
                 (
-                    output, vtkmesh, selector, datasetNo,
+                    output, vtkmesh, range, datasetNo,
                     selection->GetArrayName(partId)
                 );
 
@@ -269,8 +260,8 @@ void Foam::vtkPV3blockMesh::convertMeshCorners
     int& blockNo
 )
 {
-    partInfo& selector = partInfoCorners_;
-    selector.block(blockNo);   // set output block
+    arrayRange& range = arrayRangeCorners_;
+    range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
 
     const pointField& blockPoints = meshPtr_->blockPointField();
@@ -310,7 +301,11 @@ void Foam::vtkPV3blockMesh::convertMeshCorners
         vtkmesh->SetVerts(vtkcells);
         vtkcells->Delete();
 
-        AddToBlock(output, vtkmesh, selector, datasetNo, partInfoCorners_.name());
+        AddToBlock
+        (
+            output, vtkmesh, range, datasetNo,
+            arrayRangeCorners_.name()
+        );
         vtkmesh->Delete();
 
         datasetNo++;

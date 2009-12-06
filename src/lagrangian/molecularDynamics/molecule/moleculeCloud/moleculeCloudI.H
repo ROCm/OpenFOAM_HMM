@@ -75,7 +75,7 @@ inline void Foam::moleculeCloud::evaluatePair
 
                 scalar rsIsJMagSq = magSqr(rsIsJ);
 
-                if(pairPot.rCutSqr(idsI, idsJ, rsIsJMagSq))
+                if (pairPot.rCutSqr(idsI, idsJ, rsIsJMagSq))
                 {
                     scalar rsIsJMag = mag(rsIsJ);
 
@@ -118,7 +118,7 @@ inline void Foam::moleculeCloud::evaluatePair
 
                 scalar rsIsJMagSq = magSqr(rsIsJ);
 
-                if(rsIsJMagSq <= electrostatic.rCutSqr())
+                if (rsIsJMagSq <= electrostatic.rCutSqr())
                 {
                     scalar rsIsJMag = mag(rsIsJ);
 

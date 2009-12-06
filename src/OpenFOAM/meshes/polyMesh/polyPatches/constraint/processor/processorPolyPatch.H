@@ -28,15 +28,12 @@ Class
 Description
     Neighbour processor patch.
 
-    Note: morph patch face ordering comes geometric or topological.
-    Geometric: no cyclics allowed (assumes faces coincident)
-    Topological: needs unmodified faces on both sides to correspond. Also
-    needs at least one per connected patch area (so all patch faces can be
-    visited from an unmodified face)
+    Note: morph patch face ordering tries to do a geometric ordering.
+    (assumes faces coincident) Hence will have problems when cyclics
+    are present. 
 
 SourceFiles
     processorPolyPatch.C
-    processorPolyPatchMorph.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -97,22 +94,22 @@ protected:
     // Protected Member functions
 
         //- Initialise the calculation of the patch geometry
-        void initGeometry();
+        void initGeometry(PstreamBuffers&);
 
         //- Calculate the patch geometry
-        void calcGeometry();
+        void calcGeometry(PstreamBuffers&);
 
         //- Initialise the patches for moving points
-        void initMovePoints(const pointField&);
+        void initMovePoints(PstreamBuffers&, const pointField&);
 
         //- Correct patches after moving points
-        void movePoints(const pointField&);
+        void movePoints(PstreamBuffers&, const pointField&);
 
         //- Initialise the update of the patch topology
-        virtual void initUpdateMesh();
+        virtual void initUpdateMesh(PstreamBuffers&);
 
         //- Update of the patch topology
-        virtual void updateMesh();
+        virtual void updateMesh(PstreamBuffers&);
 
 
 public:
@@ -283,7 +280,7 @@ public:
 
         //- Initialize ordering for primitivePatch. Does not
         //  refer to *this (except for name() and type() etc.)
-        virtual void initOrder(const primitivePatch&) const;
+        virtual void initOrder(PstreamBuffers&, const primitivePatch&) const;
 
         //- Return new ordering for primitivePatch.
         //  Ordering is -faceMap: for every face
@@ -292,6 +289,7 @@ public:
         //  (faceMap is identity, rotation is 0), true otherwise.
         virtual bool order
         (
+            PstreamBuffers&,
             const primitivePatch&,
             labelList& faceMap,
             labelList& rotation

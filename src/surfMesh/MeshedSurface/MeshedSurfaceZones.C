@@ -53,7 +53,7 @@ void Foam::MeshedSurface<Face>::checkZones()
                 << " ... extending final zone"
                 << endl;
 
-            zones[zones.size()-1].size() += count - this->size();
+            zones.last().size() += count - this->size();
         }
         else if (count > this->size())
         {

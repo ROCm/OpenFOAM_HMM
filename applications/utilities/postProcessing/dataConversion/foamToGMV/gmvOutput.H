@@ -24,7 +24,7 @@ for (label i=0; i < nTypes; i++)
         {
             volScalarField gmvScalarField(fieldObject, mesh);
             gmvFile << fieldName << " 0" << nl;
-            for(label indx=0;indx<mesh.nCells();indx++)
+            for (label indx=0;indx<mesh.nCells();indx++)
             {
                 gmvFile << gmvScalarField[indx] << " ";
             }

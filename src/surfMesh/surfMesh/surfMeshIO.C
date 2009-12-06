@@ -75,7 +75,7 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
         // Topological change
         if (debug)
         {
-            Info << "Topological change" << endl;
+            Info<< "Topological change" << endl;
         }
 
         clearOut();
@@ -169,7 +169,7 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
         // Points moved
         if (debug)
         {
-            Info << "Point motion" << endl;
+            Info<< "Point motion" << endl;
         }
 
         clearGeom();
@@ -195,7 +195,7 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
     {
         if (debug)
         {
-            Info << "No change" << endl;
+            Info<< "No change" << endl;
         }
     }
 

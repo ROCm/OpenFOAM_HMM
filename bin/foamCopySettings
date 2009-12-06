@@ -1,9 +1,9 @@
 #!/bin/sh
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -36,7 +36,7 @@
 # Note
 #     The foamCopySettings.rc (found with the ~OpenFOAM expansion) can be used
 #     to add any custom rsync options.
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 Script=${0##*/}
 if [ "$1" = "-h" -o "$1" = "-help" -o "$#" -ne 2 ]
 then
@@ -48,8 +48,8 @@ Usage: $Script srcDir dstDir
     - requires rsync
 
 Note
-    The $Script.rc (found with the ~OpenFOAM expansion) can be used
-    to add any custom rsync options.
+    The $Script.rc (found via the ~OpenFOAM expansion - see foamEtcFile)
+    can be used to add any custom rsync options.
 
 USAGE
     exit 1
@@ -77,7 +77,6 @@ done
 # files and directories to copy
 # avoid processor directories here too to make for cleaner output
 fileList=$(find -H $srcDir -mindepth 1 -maxdepth 1 -not -name "processor*")
-
 
 # avoid polyMesh and processor* directories
 rsync="rsync --exclude polyMesh --exclude processor*"
@@ -108,15 +107,20 @@ do
     # skip numerical (results) directories (except 0)
     # and things that look like log files or queuing system output
     case "$name" in
-    [1-9] | [0-9]?* | log | *.log | foam.[eo][1-9]* )
+    ( [1-9] | [0-9]?* | log | *.log | foam.[eo][1-9]* )
         echo "$i  [skipped]"
         continue
         ;;
-    *)
+    # skip things that look sampled directories and converted data
+    ( probes | sets | surfaces | En[Ss]ight )
+        echo "$i  [skipped]"
+        continue
+        ;;
+    (*)
         echo "$i -> $dstDir/$name"
         $rsync -a $i $dstDir
         ;;
     esac
 done
 
-# --------------------------------------------------------------- end-of-file
+# ------------------------------------------------------------------ end-of-file

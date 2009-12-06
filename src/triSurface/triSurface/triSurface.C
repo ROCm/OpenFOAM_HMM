@@ -814,7 +814,7 @@ void Foam::triSurface::scalePoints(const scalar scaleFactor)
 void Foam::triSurface::cleanup(const bool verbose)
 {
     // Merge points (already done for STL, TRI)
-    stitchTriangles(pointField(points()), SMALL, verbose);
+    stitchTriangles(points(), SMALL, verbose);
 
     // Merging points might have changed geometric factors
     clearOut();
@@ -838,7 +838,7 @@ void Foam::triSurface::markZone
     // List of faces whose faceZone has been set.
     labelList changedFaces(1, faceI);
 
-    while(true)
+    while (true)
     {
         // Pick up neighbours of changedFaces
         DynamicList<label> newChangedFaces(2*changedFaces.size());

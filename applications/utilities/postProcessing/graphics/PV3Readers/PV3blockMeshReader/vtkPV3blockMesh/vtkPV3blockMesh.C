@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,13 +49,16 @@ defineTypeNameAndDebug(Foam::vtkPV3blockMesh, 0);
 void Foam::vtkPV3blockMesh::resetCounters()
 {
     // Reset mesh part ids and sizes
-    partInfoBlocks_.reset();
-    partInfoEdges_.reset();
-    partInfoCorners_.reset();
+    arrayRangeBlocks_.reset();
+    arrayRangeEdges_.reset();
+    arrayRangeCorners_.reset();
 }
 
 
-void Foam::vtkPV3blockMesh::updateInfoBlocks()
+void Foam::vtkPV3blockMesh::updateInfoBlocks
+(
+    vtkDataArraySelection* arraySelection
+)
 {
     if (debug)
     {
@@ -63,8 +66,7 @@ void Foam::vtkPV3blockMesh::updateInfoBlocks()
             << " [meshPtr=" << (meshPtr_ ? "set" : "NULL") << "]" << endl;
     }
 
-    vtkDataArraySelection* selection = reader_->GetPartSelection();
-    partInfoBlocks_ = selection->GetNumberOfArrays();
+    arrayRangeBlocks_.reset( arraySelection->GetNumberOfArrays() );
 
     const blockMesh& blkMesh = *meshPtr_;
     const int nBlocks = blkMesh.size();
@@ -81,22 +83,25 @@ void Foam::vtkPV3blockMesh::updateInfoBlocks()
         }
 
         // Add blockId and zoneName to GUI list
-        selection->AddArray(partName.c_str());
+        arraySelection->AddArray(partName.c_str());
     }
 
-    partInfoBlocks_ += nBlocks;
+    arrayRangeBlocks_ += nBlocks;
 
     if (debug)
     {
         // just for debug info
-        getSelectedArrayEntries(selection);
+        getSelectedArrayEntries(arraySelection);
 
         Info<< "<end> Foam::vtkPV3blockMesh::updateInfoBlocks" << endl;
     }
 }
 
 
-void Foam::vtkPV3blockMesh::updateInfoEdges()
+void Foam::vtkPV3blockMesh::updateInfoEdges
+(
+    vtkDataArraySelection* arraySelection
+)
 {
     if (debug)
     {
@@ -104,8 +109,7 @@ void Foam::vtkPV3blockMesh::updateInfoEdges()
             << " [meshPtr=" << (meshPtr_ ? "set" : "NULL") << "]" << endl;
     }
 
-    vtkDataArraySelection* selection = reader_->GetCurvedEdgesSelection();
-    partInfoEdges_ = selection->GetNumberOfArrays();
+    arrayRangeEdges_.reset( arraySelection->GetNumberOfArrays() );
 
     const blockMesh& blkMesh = *meshPtr_;
     const curvedEdgeList& edges = blkMesh.edges();
@@ -119,15 +123,15 @@ void Foam::vtkPV3blockMesh::updateInfoEdges()
             << edges[edgeI].type();
 
         // Add "beg:end - type" to GUI list
-        selection->AddArray(ostr.str().c_str());
+        arraySelection->AddArray(ostr.str().c_str());
     }
 
-    partInfoEdges_ += nEdges;
+    arrayRangeEdges_ += nEdges;
 
     if (debug)
     {
         // just for debug info
-        getSelectedArrayEntries(selection);
+        getSelectedArrayEntries(arraySelection);
 
         Info<< "<end> Foam::vtkPV3blockMesh::updateInfoEdges" << endl;
     }
@@ -145,9 +149,9 @@ Foam::vtkPV3blockMesh::vtkPV3blockMesh
     reader_(reader),
     dbPtr_(NULL),
     meshPtr_(NULL),
-    partInfoBlocks_("block"),
-    partInfoEdges_("edges"),
-    partInfoCorners_("corners")
+    arrayRangeBlocks_("block"),
+    arrayRangeEdges_("edges"),
+    arrayRangeCorners_("corners")
 {
     if (debug)
     {
@@ -243,7 +247,7 @@ void Foam::vtkPV3blockMesh::updateInfo()
 
     resetCounters();
 
-    vtkDataArraySelection* partSelection = reader_->GetPartSelection();
+    vtkDataArraySelection* blockSelection = reader_->GetBlockSelection();
     vtkDataArraySelection* edgeSelection = reader_->GetCurvedEdgesSelection();
 
     // enable 'internalMesh' on the first call
@@ -251,33 +255,33 @@ void Foam::vtkPV3blockMesh::updateInfo()
     stringList enabledParts;
     stringList enabledEdges;
     bool firstTime = false;
-    if (!partSelection->GetNumberOfArrays() && !meshPtr_)
+    if (!blockSelection->GetNumberOfArrays() && !meshPtr_)
     {
         firstTime = true;
     }
     else
     {
-        enabledParts = getSelectedArrayEntries(partSelection);
+        enabledParts = getSelectedArrayEntries(blockSelection);
         enabledEdges = getSelectedArrayEntries(edgeSelection);
     }
 
     // Clear current mesh parts list
-    partSelection->RemoveAllArrays();
+    blockSelection->RemoveAllArrays();
     edgeSelection->RemoveAllArrays();
 
     // need a blockMesh
     updateFoamMesh();
 
     // Update mesh parts list
-    updateInfoBlocks();
+    updateInfoBlocks( blockSelection );
 
     // Update curved edges list
-    updateInfoEdges();
+    updateInfoEdges( edgeSelection );
 
     // restore the enabled selections
     if (!firstTime)
     {
-        setSelectedArrayEntries(partSelection, enabledParts);
+        setSelectedArrayEntries(blockSelection, enabledParts);
         setSelectedArrayEntries(edgeSelection, enabledEdges);
     }
 
@@ -337,7 +341,7 @@ void Foam::vtkPV3blockMesh::Update
     reader_->UpdateProgress(0.1);
 
     // Set up mesh parts selection(s)
-    updateBoolListStatus(partStatus_, reader_->GetPartSelection());
+    updateBoolListStatus(blockStatus_, reader_->GetBlockSelection());
 
     // Set up curved edges selection(s)
     updateBoolListStatus(edgeStatus_, reader_->GetCurvedEdgesSelection());

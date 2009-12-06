@@ -29,6 +29,11 @@ Description
     IOdictionary wrapper around OutputFilter to allow them to read from
     their associated dictionaries.
 
+Note
+    The IOobject or the objectRegistry will normally have to be
+    derived from a fvMesh for a subsequent cast (within OutputFilter)
+    to work correctly.
+
 SourceFiles
     IOOutputFilter.C
 
@@ -68,6 +73,15 @@ class IOOutputFilter
 public:
 
     // Constructors
+
+        //- Construct from an IOobject for IOdictionary
+        //  Allow the possibility to load fields from files
+        IOOutputFilter
+        (
+            const word& outputFilterName,
+            const IOobject& ioDict,
+            const bool loadFromFile = false
+        );
 
         //- Construct for given objectRegistry and dictionary
         //  Allow dictionary to be optional

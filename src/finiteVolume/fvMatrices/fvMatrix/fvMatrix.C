@@ -725,7 +725,7 @@ Foam::fvMatrix<Type>::H() const
         )
     );
 
-    for(direction cmpt=0; cmpt<Type::nComponents; cmpt++)
+    for (direction cmpt=0; cmpt<Type::nComponents; cmpt++)
     {
         if (validComponents[cmpt] == -1)
         {

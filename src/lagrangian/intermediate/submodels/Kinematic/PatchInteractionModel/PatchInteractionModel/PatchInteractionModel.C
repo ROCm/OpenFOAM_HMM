@@ -67,6 +67,10 @@ Foam::word Foam::PatchInteractionModel<CloudType>::interactionTypeToWord
             return "other";
         }
     }
+#ifdef __ICC
+    // Prevent Icc complaining about missing return statement.
+    return word::null;
+#endif
 }
 
 

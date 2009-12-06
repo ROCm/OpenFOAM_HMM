@@ -29,7 +29,7 @@ int USERD_get_sol_times
         {
             solution_times[n] += addCAD;
 
-            Info << "Time[" << n << "] = " << timeDirs[n+1].value()
+            Info<< "Time[" << n << "] = " << timeDirs[n+1].value()
                 << " was corrected to " << solution_times[n]  << endl;
         }
 

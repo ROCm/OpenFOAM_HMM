@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
         // Set time for global database
         runTime.setTime(timeDirs[timeI], timeI);
 
-        Info << "Time = " << runTime.timeName() << endl << endl;
+        Info<< "Time = " << runTime.timeName() << endl << endl;
 
         // Set time for all databases
         forAll (databases, procI)
@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
          || objects.lookupClass(surfaceScalarField::typeName).size()
         )
         {
-            Info << "Reconstructing FV fields" << nl << endl;
+            Info<< "Reconstructing FV fields" << nl << endl;
 
             fvFieldReconstructor fvReconstructor
             (
@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            Info << "No FV fields" << nl << endl;
+            Info<< "No FV fields" << nl << endl;
         }
 
 
@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
          || objects.lookupClass(pointTensorField::typeName).size()
         )
         {
-            Info << "Reconstructing point fields" << nl << endl;
+            Info<< "Reconstructing point fields" << nl << endl;
 
             pointMesh pMesh(mesh);
             PtrList<pointMesh> pMeshes(procMeshes.meshes().size());
@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            Info << "No point fields" << nl << endl;
+            Info<< "No point fields" << nl << endl;
         }
 
 
@@ -388,7 +388,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                Info << "No lagrangian fields" << nl << endl;
+                Info<< "No lagrangian fields" << nl << endl;
             }
         }
 

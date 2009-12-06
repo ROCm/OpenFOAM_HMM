@@ -35,6 +35,7 @@ InClass
 #include "vtkFloatArray.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkPolyData.h"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -42,7 +43,7 @@ void Foam::vtkPV3Foam::convertFaceField
 (
     const GeometricField<Type, fvPatchField, volMesh>& tf,
     vtkMultiBlockDataSet* output,
-    const partInfo& selector,
+    const arrayRange& range,
     const label datasetNo,
     const fvMesh& mesh,
     const labelList& faceLabels
@@ -53,11 +54,11 @@ void Foam::vtkPV3Foam::convertFaceField
     const labelList& faceOwner = mesh.faceOwner();
     const labelList& faceNeigh = mesh.faceNeighbour();
 
-    vtkFloatArray *cellData = vtkFloatArray::New();
-    cellData->SetNumberOfTuples( faceLabels.size() );
-    cellData->SetNumberOfComponents( nComp );
-    cellData->Allocate( nComp*faceLabels.size() );
-    cellData->SetName( tf.name().c_str() );
+    vtkFloatArray* cellData = vtkFloatArray::New();
+    cellData->SetNumberOfTuples(faceLabels.size());
+    cellData->SetNumberOfComponents(nComp);
+    cellData->Allocate(nComp*faceLabels.size());
+    cellData->SetName(tf.name().c_str());
 
     if (debug)
     {
@@ -99,7 +100,7 @@ void Foam::vtkPV3Foam::convertFaceField
 
     vtkPolyData::SafeDownCast
     (
-        GetDataSetFromBlock(output, selector, datasetNo)
+        GetDataSetFromBlock(output, range, datasetNo)
     )   ->GetCellData()
         ->AddArray(cellData);
 
@@ -112,7 +113,7 @@ void Foam::vtkPV3Foam::convertFaceField
 (
     const GeometricField<Type, fvPatchField, volMesh>& tf,
     vtkMultiBlockDataSet* output,
-    const partInfo& selector,
+    const arrayRange& range,
     const label datasetNo,
     const fvMesh& mesh,
     const faceSet& fSet
@@ -123,11 +124,11 @@ void Foam::vtkPV3Foam::convertFaceField
     const labelList& faceOwner = mesh.faceOwner();
     const labelList& faceNeigh = mesh.faceNeighbour();
 
-    vtkFloatArray *cellData = vtkFloatArray::New();
-    cellData->SetNumberOfTuples( fSet.size() );
-    cellData->SetNumberOfComponents( nComp );
-    cellData->Allocate( nComp*fSet.size() );
-    cellData->SetName( tf.name().c_str() );
+    vtkFloatArray* cellData = vtkFloatArray::New();
+    cellData->SetNumberOfTuples(fSet.size());
+    cellData->SetNumberOfComponents(nComp);
+    cellData->Allocate(nComp*fSet.size());
+    cellData->SetName(tf.name().c_str());
 
     if (debug)
     {
@@ -172,7 +173,7 @@ void Foam::vtkPV3Foam::convertFaceField
 
     vtkPolyData::SafeDownCast
     (
-        GetDataSetFromBlock(output, selector, datasetNo)
+        GetDataSetFromBlock(output, range, datasetNo)
     )   ->GetCellData()
         ->AddArray(cellData);
 

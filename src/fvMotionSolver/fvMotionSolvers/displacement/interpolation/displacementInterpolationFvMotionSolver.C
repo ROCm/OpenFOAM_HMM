@@ -179,7 +179,7 @@ displacementInterpolationFvMotionSolver
 
         // Slightly tweak min and max face zone so points sort within
         zoneCoordinates[0] -= SMALL;
-        zoneCoordinates[zoneCoordinates.size()-1] += SMALL;
+        zoneCoordinates.last() += SMALL;
 
         // Check if we have static min and max mesh bounds
         const scalarField meshCoords = points0().component(dir);
@@ -237,7 +237,7 @@ displacementInterpolationFvMotionSolver
             }
             rangeI++;
         }
-        if (maxCoord > zoneCoordinates[zoneCoordinates.size()-1])
+        if (maxCoord > zoneCoordinates.last())
         {
             label sz = rangeToCoord.size();
             rangeToCoord.setSize(sz+1);

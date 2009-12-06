@@ -188,11 +188,11 @@ int main(int argc, char *argv[])
 //        (
 //            mesh
 //        );
-//        
+//
 //        Info<< "cellFaceCell:" << endl;
 //        writeStencilStats(addressing.stencil());
-//        
-//        
+//
+//
 //        //// Do some interpolation.
 //        //{
 //        //    const labelListList& stencil = addressing.stencil();
@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
 //            mesh.C(),
 //            stencilPoints
 //        );
-//        
+//
 //        forAll(stencilPoints, faceI)
 //        {
 //            if (stencilPoints[faceI].size() >= 15)
@@ -443,10 +443,10 @@ int main(int argc, char *argv[])
         (
             mesh
         );
-        
+
         Info<< "cellFaceCell:" << endl;
         writeStencilStats(addressing.stencil());
-        
+
         // Collect stencil face centres
         List<List<point> > stencilPoints(mesh.nCells());
         addressing.collectData
@@ -454,7 +454,7 @@ int main(int argc, char *argv[])
             mesh.Cf(),
             stencilPoints
         );
-        
+
         forAll(stencilPoints, cellI)
         {
             writeStencilOBJ
@@ -477,7 +477,7 @@ int main(int argc, char *argv[])
 //        vf,
 //        stencilData
 //    );
-//    for(label faci = 0; faci < mesh.nInternalFaces(); faci++)
+//    for (label faci = 0; faci < mesh.nInternalFaces(); faci++)
 //    {
 //        const scalarList& stData = stencilData[faceI];
 //        const scalarList& stWeight = fit[faceI];

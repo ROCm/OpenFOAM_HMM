@@ -65,7 +65,7 @@ bool Foam::faceOnlySet::trackToBoundary
     // Alias
     const point& trackPt = singleParticle.position();
 
-    while(true)
+    while (true)
     {
         point oldPoint = trackPt;
 
@@ -199,7 +199,7 @@ void Foam::faceOnlySet::calcSamples
     // index in bHits; current boundary intersection
     label bHitI = 1;
 
-    while(true)
+    while (true)
     {
         if (trackFaceI != -1)
         {
@@ -230,7 +230,7 @@ void Foam::faceOnlySet::calcSamples
         );
 
         // fill sampleSegments
-        for(label i = samplingPts.size() - 1; i >= startSegmentI; --i)
+        for (label i = samplingPts.size() - 1; i >= startSegmentI; --i)
         {
             samplingSegments.append(segmentI);
         }

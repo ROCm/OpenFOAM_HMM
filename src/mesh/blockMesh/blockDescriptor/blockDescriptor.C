@@ -89,7 +89,7 @@ Foam::blockDescriptor::blockDescriptor
     {
         zoneName_ = t.wordToken();
 
-        // Get the next token
+        // Examine next token
         is >> t;
     }
     is.putBack(t);
@@ -129,7 +129,12 @@ Foam::blockDescriptor::blockDescriptor
 
     scalarList expRatios(is);
 
-    if (expRatios.size() == 3)
+    if (expRatios.size() == 1)
+    {
+        // identical in x/y/z-directions
+        expand_ = expRatios[0];
+    }
+    else if (expRatios.size() == 3)
     {
         // x-direction
         expand_[0]  = expRatios[0];

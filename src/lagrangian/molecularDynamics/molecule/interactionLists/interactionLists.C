@@ -667,7 +667,7 @@ const Foam::labelList Foam::interactionLists::referredCellsInRangeOfSegment
                     )
                 )
                 {
-                    if(findIndex(referredCellsFoundInRange, rIL) == -1)
+                    if (findIndex(referredCellsFoundInRange, rIL) == -1)
                     {
                         referredCellsFoundInRange.append(rIL);
                     }

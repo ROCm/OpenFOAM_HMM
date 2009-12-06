@@ -42,7 +42,6 @@ template
     class PointField,
     class PointType
 >
-
 template <class ToPatch>
 Foam::List<Foam::objectHit>
 Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
@@ -263,7 +262,7 @@ projectPoints
 
             if (debug)
             {
-                Info << result[curLocalPointLabel] << nl;
+                Info<< result[curLocalPointLabel] << nl;
             }
         }
         else
@@ -290,7 +289,6 @@ template
     class PointField,
     class PointType
 >
-
 template <class ToPatch>
 Foam::List<Foam::objectHit>
 Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
@@ -507,7 +505,7 @@ projectFaceCentres
 
             if (debug)
             {
-                Info << result[curLocalFaceLabel] << nl;
+                Info<< result[curLocalFaceLabel] << nl;
             }
         }
         else

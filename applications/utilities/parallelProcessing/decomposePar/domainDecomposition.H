@@ -26,7 +26,7 @@ Class
     Foam::domainDecomposition
 
 Description
-    Automatic domain decomposition class for FOAM meshes
+    Automatic domain decomposition class for finite-volume meshes
 
 SourceFiles
     domainDecomposition.C
@@ -42,13 +42,11 @@ SourceFiles
 #include "PtrList.H"
 #include "point.H"
 
-#ifndef namespaceFoam
-#define namespaceFoam
-    using namespace Foam;
-#endif
+namespace Foam
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class domainDecomposition Declaration
+                     Class domainDecomposition Declaration
 \*---------------------------------------------------------------------------*/
 
 class domainDecomposition
@@ -79,7 +77,7 @@ class domainDecomposition
         // original face. In order to do this properly, all face
         // indices will be incremented by 1 and the decremented as
         // necessary t avoid the problem of face number zero having no
-        // sign.  
+        // sign.
         labelListList procFaceAddressing_;
 
         //- Labels of cells for each processor
@@ -163,6 +161,11 @@ public:
             return cellToProc_;
         }
 };
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

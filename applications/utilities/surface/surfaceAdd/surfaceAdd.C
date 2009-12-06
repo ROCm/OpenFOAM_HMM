@@ -263,12 +263,12 @@ int main(int argc, char *argv[])
 
     Info<< endl;
 
-    Info << "Writing : " << outFileName << endl;
+    Info<< "Writing : " << outFileName << endl;
 
     // No need to 'group' while writing since all in correct order anyway.
     combinedSurf.write(outFileName);
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

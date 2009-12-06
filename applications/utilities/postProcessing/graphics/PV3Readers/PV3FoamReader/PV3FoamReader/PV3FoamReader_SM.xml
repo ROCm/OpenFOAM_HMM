@@ -16,6 +16,17 @@
       </Documentation>
     </StringVectorProperty>
 
+    <!-- Send discrete time info to the animation panel -->
+    <DoubleVectorProperty
+      name="TimestepValues"
+      repeatable="1"
+      information_only="1">
+      <TimeStepsInformationHelper/>
+      <Documentation>
+        Available timestep values.
+      </Documentation>
+    </DoubleVectorProperty>
+
     <!-- Cache Mesh check-box -->
     <IntVectorProperty
       name="UiCacheMesh"
@@ -30,20 +41,33 @@
       </Documentation>
     </IntVectorProperty>
 
-
-    <!-- Send discrete time info to the animation panel -->
-    <DoubleVectorProperty
-      name="TimestepValues"
-      repeatable="1"
-      information_only="1">
-      <TimeStepsInformationHelper/>
+    <!-- Refresh button -->
+    <IntVectorProperty
+      name="UiRefresh"
+      command="SetRefresh"
+      number_of_elements="1"
+      is_internal="0"
+      default_values="0"
+      animateable="0">
+      <BooleanDomain name="bool"/>
       <Documentation>
-        Available timestep values.
+        Rescan for updated timesteps/fields.
       </Documentation>
-    </DoubleVectorProperty>
+    </IntVectorProperty>
 
-
-    <!-- Global settings -->
+    <!-- Skip Zero Time check-box -->
+    <IntVectorProperty
+      name="UiZeroTime"
+      command="SetSkipZeroTime"
+      number_of_elements="1"
+      is_internal="1"
+      default_values="0"
+      animateable="0">
+      <BooleanDomain name="bool"/>
+      <Documentation>
+        Skip including the 0/ time directory
+      </Documentation>
+    </IntVectorProperty>
 
     <!-- Extrapolate Patches check-box -->
     <IntVectorProperty
@@ -60,22 +84,24 @@
 
     <!-- Include Sets check-box -->
     <IntVectorProperty
-      name="IncludeSets"
+      name="UiIncludeSets"
       command="SetIncludeSets"
       number_of_elements="1"
+      is_internal="1"
       default_values="0"
       animateable="0">
       <Documentation>
-        Searches the polyMesh/sets/ directory
+        Search the polyMesh/sets/ directory
       </Documentation>
       <BooleanDomain name="bool"/>
     </IntVectorProperty>
 
     <!-- Include Zones check-box -->
     <IntVectorProperty
-      name="IncludeZones"
+      name="UiIncludeZones"
       command="SetIncludeZones"
       number_of_elements="1"
+      is_internal="1"
       default_values="0"
       animateable="0">
       <Documentation>
@@ -95,7 +121,7 @@
       animateable="0">
       <BooleanDomain name="bool"/>
       <Documentation>
-        Show patch names in render window.
+        Show patch names in render window
       </Documentation>
     </IntVectorProperty>
 
@@ -112,12 +138,13 @@
       </Documentation>
     </IntVectorProperty>
 
-
-    <!-- Selections -->
+    <!--
+       | Selections
+       -->
 
     <!-- Available Parts (volume, patches, lagrangian) array -->
     <StringVectorProperty
-      name="PartArrayInfo"
+      name="PartArrayStatus"
       information_only="1">
       <ArraySelectionInformationHelper attribute_name="Part"/>
     </StringVectorProperty>
@@ -129,18 +156,21 @@
       repeat_command="1"
       number_of_elements_per_command="2"
       element_types="2 0"
-      information_property="PartArrayInfo"
+      information_property="PartArrayStatus"
       animateable="0">
       <ArraySelectionDomain name="array_list">
         <RequiredProperties>
-          <Property name="PartArrayInfo" function="ArrayList"/>
+          <Property name="PartArrayStatus" function="ArrayList"/>
         </RequiredProperties>
       </ArraySelectionDomain>
+      <Documentation>
+        This property contains a list of the mesh parts (patches, sets, zones).
+      </Documentation>
     </StringVectorProperty>
 
     <!-- Available volFields array -->
     <StringVectorProperty
-      name="VolFieldArrayInfo"
+      name="VolFieldArrayStatus"
       information_only="1">
       <ArraySelectionInformationHelper attribute_name="VolField"/>
     </StringVectorProperty>
@@ -152,18 +182,21 @@
       repeat_command="1"
       number_of_elements_per_command="2"
       element_types="2 0"
-      information_property="VolFieldArrayInfo"
+      information_property="VolFieldArrayStatus"
       animateable="0">
       <ArraySelectionDomain name="array_list">
         <RequiredProperties>
-          <Property name="VolFieldArrayInfo" function="ArrayList"/>
+          <Property name="VolFieldArrayStatus" function="ArrayList"/>
         </RequiredProperties>
       </ArraySelectionDomain>
+      <Documentation>
+        This property contains a list of the volume fields
+      </Documentation>
     </StringVectorProperty>
 
     <!-- Available Lagrangian fields array -->
     <StringVectorProperty
-      name="LagrangianFieldArrayInfo"
+      name="LagrangianFieldArrayStatus"
       information_only="1">
       <ArraySelectionInformationHelper attribute_name="LagrangianField"/>
     </StringVectorProperty>
@@ -175,18 +208,21 @@
       repeat_command="1"
       number_of_elements_per_command="2"
       element_types="2 0"
-      information_property="LagrangianFieldArrayInfo"
+      information_property="LagrangianFieldArrayStatus"
       animateable="0">
       <ArraySelectionDomain name="array_list">
         <RequiredProperties>
-          <Property name="LagrangianFieldArrayInfo" function="ArrayList"/>
+          <Property name="LagrangianFieldArrayStatus" function="ArrayList"/>
         </RequiredProperties>
       </ArraySelectionDomain>
+      <Documentation>
+        This property contains a list of the lagrangian fields
+      </Documentation>
     </StringVectorProperty>
 
     <!-- Available pointFields array -->
     <StringVectorProperty
-      name="PointFieldArrayInfo"
+      name="PointFieldArrayStatus"
       information_only="1">
       <ArraySelectionInformationHelper attribute_name="PointField"/>
     </StringVectorProperty>
@@ -198,19 +234,26 @@
       repeat_command="1"
       number_of_elements_per_command="2"
       element_types="2 0"
-      information_property="PointFieldArrayInfo"
+      information_property="PointFieldArrayStatus"
       animateable="0">
       <ArraySelectionDomain name="array_list">
         <RequiredProperties>
-          <Property name="PointFieldArrayInfo" function="ArrayList"/>
+          <Property name="PointFieldArrayStatus" function="ArrayList"/>
         </RequiredProperties>
       </ArraySelectionDomain>
+      <Documentation>
+        This property contains a list of the point fields
+      </Documentation>
     </StringVectorProperty>
 
   <Hints>
     <Property name="FileName" show="0"/>
     <Property name="UiCacheMesh" show="0"/>
+    <Property name="UiZeroTime" show="0"/>
+    <Property name="UiRefresh" show="0"/>
     <Property name="UiShowPatchNames" show="0"/>
+    <Property name="UiIncludeSets" show="0"/>
+    <Property name="UiIncludeZones" show="0"/>
   </Hints>
 
 

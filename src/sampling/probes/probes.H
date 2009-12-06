@@ -44,6 +44,8 @@ SourceFiles
 #include "pointField.H"
 #include "volFieldsFwd.H"
 
+#include "wordReList.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -60,6 +62,8 @@ class mapPolyMesh;
 \*---------------------------------------------------------------------------*/
 
 class probes
+:
+    public pointField
 {
     // Private classes
 
@@ -67,20 +71,15 @@ class probes
         template<class Type>
         class fieldGroup
         :
-            public wordList
+            public DynamicList<word>
         {
         public:
             //- Construct null
             fieldGroup()
             :
-                wordList()
+                DynamicList<word>(0)
             {}
 
-            //- Construct for a list of field names
-            fieldGroup(const wordList& fieldNames)
-            :
-                wordList(fieldNames)
-            {}
         };
 
 
@@ -90,8 +89,8 @@ class probes
         //  Also used as the name of the probes directory.
         word name_;
 
-        //- Const reference to objectRegistry
-        const objectRegistry& obr_;
+        //- Const reference to fvMesh
+        const fvMesh& mesh_;
 
         //- Load fields from files (not from objectRegistry)
         bool loadFromFiles_;
@@ -100,11 +99,7 @@ class probes
         // Read from dictonary
 
             //- Names of fields to probe
-            wordList fieldNames_;
-
-            //- Locations to probe
-            vectorField probeLocations_;
-
+            wordReList fieldSelection_;
 
         // Calculated
 
@@ -124,19 +119,21 @@ class probes
 
     // Private Member Functions
 
+        //- Clear old field groups
+        void clearFieldGroups();
+
+        //- Append fieldName to the appropriate group
+        label appendFieldGroup(const word& fieldName, const word& fieldType);
+
+        //- Classify field types, returns the number of fields
+        label classifyFields();
+
         //- Find cells containing probes
         void findCells(const fvMesh&);
 
-        //- classify field types, return true if nFields > 0
-        bool checkFieldTypes();
-
-        //- Find the fields in the list of the given type, return count
-        template<class Type>
-        label countFields
-        (
-            fieldGroup<Type>& fieldList,
-            const wordList& fieldTypes
-        ) const;
+        //- Classify field type and Open/close file streams,
+        //  returns number of fields
+        label prepare();
 
         //- Sample and write a particular volume field
         template<class Type>
@@ -146,7 +143,7 @@ class probes
         );
 
         //- Sample and write all the fields of the given type
-        template <class Type>
+        template<class Type>
         void sampleAndWrite(const fieldGroup<Type>&);
 
         //- Disallow default bitwise copy construct
@@ -188,15 +185,21 @@ public:
         }
 
         //- Return names of fields to probe
-        virtual const wordList& fieldNames() const
+        virtual const wordReList& fieldNames() const
         {
-            return fieldNames_;
+            return fieldSelection_;
         }
 
         //- Return locations to probe
-        virtual const vectorField& probeLocations() const
+        virtual const pointField& probeLocations() const
         {
-            return probeLocations_;
+            return *this;
+        }
+
+        //- Return location for probe i
+        virtual const point& probe(const label i) const
+        {
+            return operator[](i);
         }
 
         //- Cells to be probed (obtained from the locations)

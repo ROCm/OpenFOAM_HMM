@@ -51,7 +51,7 @@ void Foam::motionSmoother::checkConstraints
 
     forAll(bm, patchi)
     {
-        if(!isA<emptyPolyPatch>(bm[patchi]))
+        if (!isA<emptyPolyPatch>(bm[patchi]))
         {
             nPatchPatchPoints += bm[patchi].boundaryPoints().size();
         }
@@ -81,7 +81,7 @@ void Foam::motionSmoother::checkConstraints
 
     forAll(bm, patchi)
     {
-        if(!isA<emptyPolyPatch>(bm[patchi]))
+        if (!isA<emptyPolyPatch>(bm[patchi]))
         {
             const labelList& bp = bm[patchi].boundaryPoints();
             const labelList& meshPoints = bm[patchi].meshPoints();
@@ -93,7 +93,7 @@ void Foam::motionSmoother::checkConstraints
             }
         }
     }
-    
+
 
     // Forward evaluation
 
@@ -106,7 +106,7 @@ void Foam::motionSmoother::checkConstraints
 
     forAll(bm, patchi)
     {
-        if(!isA<emptyPolyPatch>(bm[patchi]))
+        if (!isA<emptyPolyPatch>(bm[patchi]))
         {
             const labelList& bp = bm[patchi].boundaryPoints();
             const labelList& meshPoints = bm[patchi].meshPoints();
@@ -246,7 +246,7 @@ Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh> >
         else
         {
             res[pointI] /= sumWeight[pointI];
-        }        
+        }
     }
 
     res.correctBoundaryConditions();

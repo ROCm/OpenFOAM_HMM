@@ -698,7 +698,7 @@ Foam::label Foam::Particle<ParticleType>::track
     facei_ = -1;
 
     // Tracks to endPosition or stop on boundary
-    while(!onBoundary() && stepFraction_ < 1.0 - SMALL)
+    while (!onBoundary() && stepFraction_ < 1.0 - SMALL)
     {
         stepFraction_ += trackToFace(endPosition, td)*(1.0 - stepFraction_);
     }

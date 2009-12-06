@@ -84,11 +84,11 @@ int main(int argc, char *argv[])
 
     // test List operations
 
-    List<double> flatList = UIndirectList<double>(completeList, addresses);
-    Info<< "List assigned from UIndirectList: " << flatList << endl;
+    List<double> flatList(UIndirectList<double>(completeList, addresses));
+    Info<< "List constructed from UIndirectList: " << flatList << endl;
 
-    List<double> flatList2(UIndirectList<double>(completeList, addresses));
-    Info<< "List constructed from UIndirectList: " << flatList2 << endl;
+    flatList = UIndirectList<double>(completeList, addresses);
+    Info<< "List assigned from UIndirectList: " << flatList << endl;
 
     flatList.append(UIndirectList<double>(completeList, addresses));
     Info<< "List::append(UIndirectList): " << flatList << endl;
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     dynList.append(UIndirectList<double>(completeList, addresses));
     Info<< "DynamicList::append(UIndirectList): " << dynList << endl;
 
-    Info << "\nEnd\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     Info<< nl << "ClockTime = " << runTime.elapsedClockTime() << " s"
         << nl << endl;
 
-    Info << nl << "End\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

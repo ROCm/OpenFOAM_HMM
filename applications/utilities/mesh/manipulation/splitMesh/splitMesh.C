@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
             mesh.faceZones()
         );
 
-    Info << "Adding point and face zones" << endl;
+    Info<< "Adding point and face zones" << endl;
     mesh.addZones(pz, fz, cz);
 
     attachPolyTopoChanger splitter(mesh);

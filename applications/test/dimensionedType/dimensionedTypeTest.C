@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 
     Info<< ds*dt << " " << dt*ds << endl;
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

@@ -164,7 +164,7 @@ void Foam::linearValveLayersFvMesh::addZonesAndModifiers()
     );
 
 
-    Info << "Adding point and face zones" << endl;
+    Info<< "Adding point and face zones" << endl;
     addZones(pz, fz, cz);
 
     // Add a topology modifier
@@ -204,7 +204,7 @@ void Foam::linearValveLayersFvMesh::addZonesAndModifiers()
         );
 
 
-    Info << "Adding topology modifiers" << endl;
+    Info<< "Adding topology modifiers" << endl;
     addTopologyModifiers(tm);
 
     // Write mesh
@@ -375,7 +375,7 @@ void Foam::linearValveLayersFvMesh::update()
     // Detaching the interface
     if (attached())
     {
-        Info << "Decoupling sliding interfaces" << endl;
+        Info<< "Decoupling sliding interfaces" << endl;
         makeSlidersLive();
 
         // Changing topology
@@ -385,7 +385,7 @@ void Foam::linearValveLayersFvMesh::update()
     }
     else
     {
-        Info << "Sliding interfaces decoupled" << endl;
+        Info<< "Sliding interfaces decoupled" << endl;
     }
 
     // Perform layer action and mesh motion
@@ -400,7 +400,7 @@ void Foam::linearValveLayersFvMesh::update()
     {
         if (topoChangeMap().hasMotionPoints())
         {
-            Info << "Topology change; executing pre-motion" << endl;
+            Info<< "Topology change; executing pre-motion" << endl;
             movePoints(topoChangeMap().preMotionPoints());
         }
     }
@@ -409,7 +409,7 @@ void Foam::linearValveLayersFvMesh::update()
     movePoints(newPoints());
 
     // Attach the interface
-    Info << "Coupling sliding interfaces" << endl;
+    Info<< "Coupling sliding interfaces" << endl;
     makeSlidersLive();
 
     // Changing topology
@@ -417,11 +417,11 @@ void Foam::linearValveLayersFvMesh::update()
     setMorphTimeIndex(3*time().timeIndex() + 2);
     updateMesh();
 
-    Info << "Moving points post slider attach" << endl;
+    Info<< "Moving points post slider attach" << endl;
 //     const pointField p = allPoints();
 //     movePoints(p);
 
-    Info << "Sliding interfaces coupled: " << attached() << endl;
+    Info<< "Sliding interfaces coupled: " << attached() << endl;
 }
 
 

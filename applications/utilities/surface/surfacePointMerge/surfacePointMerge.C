@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
     triSurface cleanSurf(surf1);
 
-    while(true)
+    while (true)
     {
         label nOldVert = cleanSurf.nPoints();
 
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 
     cleanSurf.write(outFileName);
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }
