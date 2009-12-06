@@ -468,7 +468,7 @@ private:
         (
             const pointField& pts,
             Map<label>& dualPtIndexMap
-        );
+        ) const;
 
         //- Smooth the dual vertices of the dual faces on the boundary
         //  so that they conform to the surface and remove any
@@ -477,7 +477,7 @@ private:
         (
             pointField& pts,
             Map<label>& dualPtIndexMap
-        );
+        ) const;
 
         //- Collapse a face to a point or an edge, modifying and
         //  mapping the points, returns the true if the face was
@@ -486,7 +486,15 @@ private:
         (
             pointField& pts,
             Map<label>& dualPtIndexMap
-        );
+        ) const;
+
+        //- Collapse a face to an edge, updating the point and point map
+        void collapseFaceToEdge
+        (
+            const face& f,
+            pointField& pts,
+            Map<label>& dualPtIndexMap
+        ) const;
 
         //- Re-index all of the the Delaunay cells
         void reindexDualVertices(const Map<label>& dualPtIndexMap);

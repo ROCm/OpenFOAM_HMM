@@ -2063,21 +2063,23 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     // Assess close points to be merged
 
-    Info<< nl << "    Merging close points" << endl;
-
-    label nPtsMerged = 0;
-
-    do
     {
-        Map<label> dualPtIndexMap;
+        Info<< nl << "    Merging close points" << endl;
 
-        nPtsMerged = mergeCloseDualVertices(points, dualPtIndexMap);
+        label nPtsMerged = 0;
 
-        Info<< "        Merged " << nPtsMerged << " points" << endl;
+        do
+        {
+            Map<label> dualPtIndexMap;
 
-        reindexDualVertices(dualPtIndexMap);
+            nPtsMerged = mergeCloseDualVertices(points, dualPtIndexMap);
 
-    } while (nPtsMerged > 0);
+            Info<< "        Merged " << nPtsMerged << " points" << endl;
+
+            reindexDualVertices(dualPtIndexMap);
+
+        } while (nPtsMerged > 0);
+    }
 
     // Smooth the surface of the mesh
 
@@ -2091,12 +2093,31 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
         nSmoothedVertices = smoothSurfaceDualFaces(points, dualPtIndexMap);
 
-        Info<< "        Smoothed " << nPtsMerged << " points (0 HARD CODED)"
+        Info<< "        Smoothed " << nSmoothedVertices
+            << " points (0 HARD CODED)"
             << endl;
 
         reindexDualVertices(dualPtIndexMap);
 
     } while (nSmoothedVertices > 0);
+
+    {
+        Info<< nl << "    Merging close points" << endl;
+
+        label nPtsMerged = 0;
+
+        do
+        {
+            Map<label> dualPtIndexMap;
+
+            nPtsMerged = mergeCloseDualVertices(points, dualPtIndexMap);
+
+            Info<< "        Merged " << nPtsMerged << " points" << endl;
+
+            reindexDualVertices(dualPtIndexMap);
+
+        } while (nPtsMerged > 0);
+    }
 
     // Assess faces for collapse
 
@@ -2387,7 +2408,7 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
 (
     const pointField& pts,
     Map<label>& dualPtIndexMap
-)
+) const
 {
     label nPtsMerged = 0;
 
@@ -2438,9 +2459,11 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
 (
     pointField& pts,
     Map<label>& dualPtIndexMap
-)
+) const
 {
     label nSmoothedVertices = 0;
+
+    const scalar cosPerpendicularToleranceAngle = cos(degToRad(80));
 
     for
     (
@@ -2477,29 +2500,59 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
                 continue;
             }
 
-            forAll(dualFace, fPtI)
+            pointIndexHit surfHit;
+            label hitSurface;
+
+            geometryToConformTo_.findSurfaceNearest
+            (
+                dualFace.centre(pts),
+                cvMeshControls().spanSqr(),
+                surfHit,
+                hitSurface
+            );
+
+            vectorField norm(1);
+
+            allGeometry_[hitSurface].getNormal
+            (
+                List<pointIndexHit>(1, surfHit),
+                norm
+            );
+
+            const vector& surfaceNormal = norm[0];
+
+            vector faceNormal = dualFace.normal(pts);
+
+            faceNormal /= mag(faceNormal);
+
+            if ((faceNormal & surfaceNormal) < cosPerpendicularToleranceAngle)
             {
-                label ptI = dualFace[fPtI];
+                collapseFaceToEdge(dualFace, pts, dualPtIndexMap);
 
-                point& pt = pts[ptI];
+                // forAll(dualFace, fPtI)
+                // {
+                //     label ptI = dualFace[fPtI];
 
-                pointIndexHit surfHit;
-                label hitSurface;
+                //     point& pt = pts[ptI];
 
-                geometryToConformTo_.findSurfaceNearest
-                (
-                    pt,
-                    cvMeshControls().spanSqr(),
-                    surfHit,
-                    hitSurface
-                );
+                //     pointIndexHit surfHit;
+                //     label hitSurface;
 
-                if (surfHit.hit())
-                {
-                    pt = surfHit.hitPoint();
+                //     geometryToConformTo_.findSurfaceNearest
+                //     (
+                //         pt,
+                //         cvMeshControls().spanSqr(),
+                //         surfHit,
+                //         hitSurface
+                //     );
 
-                    // dualPtIndexMap.insert(ptI, ptI);
-                }
+                //     if (surfHit.hit())
+                //     {
+                //         pt = surfHit.hitPoint();
+
+                //         // dualPtIndexMap.insert(ptI, ptI);
+                //     }
+                // }
             }
         }
     }
@@ -2512,7 +2565,7 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
 (
     pointField& pts,
     Map<label>& dualPtIndexMap
-)
+) const
 {
     label nCollapsedFaces = 0;
 
@@ -2747,6 +2800,115 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
     }
 
     return nCollapsedFaces;
+}
+
+
+void Foam::conformalVoronoiMesh::collapseFaceToEdge
+(
+    const face& f,
+    pointField& pts,
+    Map<label>& dualPtIndexMap
+) const
+{
+    const vector fC = f.centre(pts);
+
+    const edgeList& faceEds = f.edges();
+
+    const scalar fArea = f.mag(pts);
+
+    scalar averageQuality = 0.0;
+
+    vector faceCollapseDirection = vector::zero;
+
+    forAll(faceEds, edI)
+    {
+        const edge e = faceEds[edI];
+
+        triPointRef tri(pts[e.start()], pts[e.end()], fC);
+
+        scalar triArea = tri.mag();
+
+        if (triArea < SMALL)
+        {
+            // Sliver triangle, do not consider
+
+            continue;
+        }
+
+        // 0.7697997 converts from a quality being 1 for an area ratio
+        // of an equilateral triangle (4*pi/(3*sqrt(3))) to the
+        // quality being 1 for an area ratio of a quarter of a square
+        // (pi), i.e.  (4*pi/(3*sqrt(3)))/pi = 0.7697997
+
+        scalar triQuality = tri.quality()*0.7697997;
+
+        // Weight the quality by the tri area
+        averageQuality += triQuality*triArea;
+
+        // find the longest edge vector, and one of the other edges
+        // that isn't the longest
+        vector longestEdge = tri.b() - tri.a();
+        vector otherEdge = tri.c() - tri.a();
+        scalar longestEdgeMagSqr = magSqr(longestEdge);
+
+        if (magSqr(tri.c() - tri.b()) > longestEdgeMagSqr)
+        {
+            longestEdge = tri.c() - tri.b();
+            otherEdge = tri.a() - tri.b();
+            longestEdgeMagSqr = magSqr(longestEdgeMagSqr);
+        }
+
+        if (magSqr(tri.a() - tri.c()) > longestEdgeMagSqr)
+        {
+            longestEdge = tri.a() - tri.c();
+            otherEdge = tri.b() - tri.c();
+            longestEdgeMagSqr = magSqr(longestEdgeMagSqr);
+        }
+
+        vector triCollapseDirection =
+            (otherEdge & longestEdge)*longestEdge/longestEdgeMagSqr
+          - otherEdge;
+
+        triCollapseDirection /= mag(triCollapseDirection);
+
+        // Add the triCollapseDirection so that it is constructive
+
+        if
+        (
+            magSqr(faceCollapseDirection + triCollapseDirection)
+          > magSqr(faceCollapseDirection)
+        )
+        {
+            faceCollapseDirection += triCollapseDirection;
+            // faceCollapseDirection += triCollapseDirection/triQuality;
+        }
+        else
+        {
+            faceCollapseDirection -= triCollapseDirection;
+            // faceCollapseDirection -= triCollapseDirection/triQuality;
+        }
+    }
+
+    faceCollapseDirection /= mag(faceCollapseDirection);
+
+    averageQuality /= fArea;
+
+    vector collapseAxis = (faceCollapseDirection ^ (f.normal(pts)/fArea));
+
+    Info<< nl << "# averageQuality " << averageQuality << endl;
+
+    forAll(f, fPtI)
+    {
+        meshTools::writeOBJ(Info, pts[f[fPtI]]);
+    }
+
+    collapseAxis *= 3.0*mag(pts[f[0]] - fC);
+    faceCollapseDirection *= 3.0*mag(pts[f[0]] - fC);
+
+    meshTools::writeOBJ(Info, fC + faceCollapseDirection);
+    meshTools::writeOBJ(Info, fC - faceCollapseDirection);
+    meshTools::writeOBJ(Info, fC + collapseAxis);
+    meshTools::writeOBJ(Info, fC - collapseAxis);
 }
 
 
