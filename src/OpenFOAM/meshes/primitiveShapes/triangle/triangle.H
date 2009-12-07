@@ -38,6 +38,7 @@ SourceFiles
 
 #include "intersection.H"
 #include "vector.H"
+#include "tensor.H"
 #include "pointHit.H"
 
 
@@ -151,6 +152,14 @@ public:
 
             //- Return swept-volume
             inline scalar sweptVol(const triangle& t) const;
+
+            //- Return the inertia tensor, with optional reference
+            //  point and density specification
+            inline tensor inertia
+            (
+                PointRef refPt = vector::zero,
+                scalar density = 1.0
+            ) const;
 
             //- Return point intersection with a ray.
             //  For a hit, the distance is signed. Positive number
