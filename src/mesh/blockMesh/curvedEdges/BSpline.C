@@ -25,24 +25,23 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-#include "BSpline2.H"
+#include "BSpline.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::BSpline2::BSpline2
+Foam::BSpline::BSpline
 (
-    const pointField& Knots,
-    const vector&,
-    const vector&
+    const pointField& knots,
+    const bool closed
 )
 :
-    polyLine(Knots)
+    polyLine(knots, closed)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::point Foam::BSpline2::position(const scalar mu) const
+Foam::point Foam::BSpline::position(const scalar mu) const
 {
     // endpoints
     if (mu < SMALL)
@@ -60,24 +59,35 @@ Foam::point Foam::BSpline2::position(const scalar mu) const
 }
 
 
-Foam::point Foam::BSpline2::position
+Foam::point Foam::BSpline::position
 (
     const label segment,
     const scalar mu
 ) const
 {
+    // out-of-bounds
+    if (segment < 0)
+    {
+        return points().first();
+    }
+    else if (segment > nSegments())
+    {
+        return points().last();
+    }
+
     const point& p0 = points()[segment];
     const point& p1 = points()[segment+1];
 
     // special cases - no calculation needed
-    if (segment < 0 || mu < 0.0)
+    if (mu <= 0.0)
     {
         return p0;
     }
-    else if (segment > nSegments() || mu >= 1.0)
+    else if (mu >= 1.0)
     {
         return p1;
     }
+
 
     // determine the end points
     point e0;
@@ -86,7 +96,7 @@ Foam::point Foam::BSpline2::position
     if (segment == 0)
     {
         // end: simple reflection
-        e0 = 2.0 * p0 - p1;
+        e0 = 2*p0 - p1;
     }
     else
     {
@@ -96,7 +106,7 @@ Foam::point Foam::BSpline2::position
     if (segment+1 == nSegments())
     {
         // end: simple reflection
-        e1 = 2.0 * p1 - p0;
+        e1 = 2*p1 - p0;
     }
     else
     {
@@ -121,9 +131,9 @@ Foam::point Foam::BSpline2::position
 }
 
 
-Foam::scalar Foam::BSpline2::length() const
+Foam::scalar Foam::BSpline::length() const
 {
-    notImplemented("BSpline2::length() const");
+    notImplemented("BSpline::length() const");
     return 1.0;
 }
 

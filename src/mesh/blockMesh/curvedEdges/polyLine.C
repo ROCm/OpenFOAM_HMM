@@ -60,7 +60,7 @@ void Foam::polyLine::calcParam()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::polyLine::polyLine(const pointField& ps)
+Foam::polyLine::polyLine(const pointField& ps, const bool)
 :
     points_(ps),
     lineLength_(0.0),
@@ -86,15 +86,6 @@ Foam::label Foam::polyLine::nSegments() const
 
 Foam::label Foam::polyLine::localParameter(scalar& lambda) const
 {
-    // check range of lambda
-    if (lambda < 0 || lambda > 1)
-    {
-        FatalErrorIn("polyLine::localParameter(scalar&)")
-            << "Parameter out-of-range, "
-            << "lambda = " << lambda
-            << abort(FatalError);
-    }
-
     // check endpoints
     if (lambda < SMALL)
     {
@@ -128,47 +119,58 @@ Foam::label Foam::polyLine::localParameter(scalar& lambda) const
 }
 
 
-Foam::point Foam::polyLine::position(const scalar lambda) const
+Foam::point Foam::polyLine::position(const scalar mu) const
 {
-    // check range of lambda
-    if (lambda < 0 || lambda > 1)
-    {
-        FatalErrorIn("polyLine::position(const scalar)")
-            << "Parameter out of range, "
-            << "lambda = " << lambda
-            << abort(FatalError);
-    }
-
     // check endpoints
-    if (lambda < SMALL)
+    if (mu < SMALL)
     {
-        return points_[0];
+        return points_.first();
     }
-    else if (lambda > 1 - SMALL)
+    else if (mu > 1 - SMALL)
     {
         return points_.last();
     }
 
 
-    // search table of cumulative distances to find which line-segment
-    // we are on. Check the upper bound.
+    scalar lambda = mu;
+    label segment = localParameter(lambda);
+    return position(segment, lambda);
+}
 
-    label segmentI = 1;
-    while (param_[segmentI] < lambda)
+
+Foam::point Foam::polyLine::position
+(
+    const label segment,
+    const scalar mu
+) const
+{
+    // out-of-bounds
+    if (segment < 0)
     {
-        ++segmentI;
+        return points_.first();
     }
-    --segmentI;   // we now want the lower bound
+    else if (segment > nSegments())
+    {
+        return points_.last();
+    }
 
+    const point& p0 = points()[segment];
+    const point& p1 = points()[segment+1];
 
-    // linear interpolation
-    return
-    (
-        points_[segmentI]
-      + ( points_[segmentI+1] - points_[segmentI] )
-      * ( lambda - param_[segmentI] )
-      / ( param_[segmentI+1] - param_[segmentI] )
-    );
+    // special cases - no calculation needed
+    if (mu <= 0.0)
+    {
+        return p0;
+    }
+    else if (mu >= 1.0)
+    {
+        return p1;
+    }
+    else
+    {
+        // linear interpolation
+        return points_[segment] + mu * (p1 - p0);
+    }
 }
 
 

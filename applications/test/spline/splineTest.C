@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,10 +29,16 @@ License
 #include "IFstream.H"
 
 #include "BSpline.H"
-#include "BSpline2.H"
 #include "CatmullRomSpline.H"
 
 using namespace Foam;
+
+inline Ostream& printPoint(Ostream& os, const point& p)
+{
+    os  << p.x() << ' ' << p.y() << ' ' << p.z() << nl;
+    return os;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
@@ -41,8 +47,7 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.insert("file .. fileN");
-    argList::addBoolOption("Bold", "B-Spline implementation OLD");
-    argList::addBoolOption("Bnew", "B-Spline implementation NEW");
+    argList::addBoolOption("B", "B-Spline implementation");
     argList::addBoolOption("CMR", "catmull-rom spline (default)");
     argList::addOption
     (
@@ -58,12 +63,11 @@ int main(int argc, char *argv[])
         args.printUsage();
     }
 
-    bool useBSplineOld = args.optionFound("Bold");
-    bool useBSplineNew = args.optionFound("Bnew");
+    bool useBSpline = args.optionFound("B");
     bool useCatmullRom = args.optionFound("CMR");
     label nSeg = args.optionLookupOrDefault<label>("n", 20);
 
-    if (!useCatmullRom && !useBSplineOld && !useBSplineNew)
+    if (!useCatmullRom && !useBSpline)
     {
         Info<<"defaulting to Catmull-Rom spline" << endl;
         useCatmullRom = true;
@@ -77,55 +81,50 @@ int main(int argc, char *argv[])
 
         List<pointField> pointFields(ifs);
 
+
         forAll(pointFields, splineI)
         {
-            Info<<"\noriginal points: " << pointFields[splineI] << nl;
+            Info<<"\n# points:" << endl;
+            forAll(pointFields[splineI], ptI)
+            {
+                printPoint(Info, pointFields[splineI][ptI]);
+            }
 
-            if (useBSplineOld)
+            if (useBSpline)
             {
                 BSpline spl(pointFields[splineI]);
 
-                Info<< nl
-                    << "B-Spline interpolation: OLD" << nl
-                    << "----------------------" << endl;
+                Info<< nl << "# B-Spline" << endl;
 
                 for (label segI = 0; segI <= nSeg; ++segI)
                 {
                     scalar lambda = scalar(segI)/scalar(nSeg);
-                    Info<< spl.position(lambda) << "    // " << lambda << endl;
-                }
-            }
-
-            if (useBSplineNew)
-            {
-                BSpline2 spl(pointFields[splineI]);
-
-                Info<< nl
-                    << "B-Spline interpolation: NEW" << nl
-                    << "----------------------" << endl;
-
-                for (label segI = 0; segI <= nSeg; ++segI)
-                {
-                    scalar lambda = scalar(segI)/scalar(nSeg);
-                    Info<< spl.position(lambda) << "    // " << lambda << endl;
+                    printPoint(Info, spl.position(lambda));
                 }
             }
 
             if (useCatmullRom)
             {
-                CatmullRomSpline spl
-                (
-                    pointFields[splineI]
-                );
+                CatmullRomSpline spl(pointFields[splineI]);
 
-                Info<< nl
-                    <<"Catmull-Rom interpolation:" << nl
-                    << "-------------------------" << endl;
+                Info<< nl <<"# Catmull-Rom" << endl;
 
                 for (label segI = 0; segI <= nSeg; ++segI)
                 {
                     scalar lambda = scalar(segI)/scalar(nSeg);
-                    Info<< spl.position(lambda) << "    // " << lambda << endl;
+                    printPoint(Info, spl.position(lambda));
+                }
+            }
+
+            {
+                polyLine pl(pointFields[splineI]);
+
+                Info<< nl <<"# polyList" << endl;
+
+                for (label segI = 0; segI <= nSeg; ++segI)
+                {
+                    scalar lambda = scalar(segI)/scalar(nSeg);
+                    printPoint(Info, pl.position(lambda));
                 }
             }
         }

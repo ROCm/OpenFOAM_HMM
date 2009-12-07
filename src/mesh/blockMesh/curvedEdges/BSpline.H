@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,23 +23,46 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::spline
+    Foam::BSpline
 
 Description
-    Define a basic spline on nKnots knots.
+    An implementation of B-splines.
 
-    The spline does not go anywhere near these knots
-    (will act as a base type for various splines that will have real uses)
+    In this implementation, the end tangents are created automatically
+    by reflection.
+
+    In matrix form, the @e local interpolation on the interval t=[0..1] is
+    described as follows:
+    @verbatim
+    P(t) = 1/6 * [ t^3 t^2 t 1 ] * [ -1  3 -3  1 ] * [ P-1 ]
+                                   [  3 -6  3  0 ]   [ P0 ]
+                                   [ -3  0  3  0 ]   [ P1 ]
+                                   [  1  4  1  0 ]   [ P2 ]
+    @endverbatim
+
+    Where P-1 and P2 represent the neighbouring points or the extrapolated
+    end points. Simple reflection is used to automatically create the end
+    points.
+
+    The spline is discretized based on the chord length of the individual
+    segments. In rare cases (sections with very high curvatures), the
+    resulting distribution may be sub-optimal.
+
+SeeAlso
+    CatmullRomSpline
+
+ToDo
+    A future implementation could also handle closed splines.
 
 SourceFiles
-    spline.C
+    BSpline.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef spline_H
-#define spline_H
+#ifndef BSpline_H
+#define BSpline_H
 
-#include "pointField.H"
+#include "polyLine.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,26 +70,20 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class spline Declaration
+                           Class BSpline Declaration
 \*---------------------------------------------------------------------------*/
 
-class spline
+class BSpline
+:
+    public polyLine
 {
-    // Private data
-
-        //- The knots defining the spline
-        pointField knots_;
-
     // Private Member Functions
 
-        //- Blending function for constructing spline
-        static scalar B(const scalar);
-
         //- Disallow default bitwise copy construct
-        spline(const spline&);
+        BSpline(const BSpline&);
 
         //- Disallow default bitwise assignment
-        void operator=(const spline&);
+        void operator=(const BSpline&);
 
 
 public:
@@ -74,32 +91,24 @@ public:
     // Constructors
 
         //- Construct from components
-        spline(const pointField&);
+        BSpline
+        (
+            const pointField& knots,
+            const bool notImplementedClosed = false
+        );
 
 
     // Member Functions
 
-        // Access
-
-            //- Return the knot points in the spline
-            const pointField& knotPoints() const
-            {
-                return knots_;
-            }
-
-
-            //- Return the number of knots in the spline
-            label nKnots() const
-            {
-                return knots_.size();
-            }
-
-
         //- Return the point position corresponding to the curve parameter
         //  0 <= lambda <= 1
-        point position(const scalar) const;
+        point position(const scalar lambda) const;
 
-        //- Return the length of the spline curve
+        //- Return the point position corresponding to the local parameter
+        //  0 <= lambda <= 1 on the given segment
+        point position(const label segment, const scalar lambda) const;
+
+        //- Return the length of the curve
         scalar length() const;
 };
 
