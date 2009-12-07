@@ -332,6 +332,42 @@ inline scalar triangle<Point, PointRef>::sweptVol(const triangle& t) const
 
 
 template<class Point, class PointRef>
+inline tensor triangle<Point, PointRef>::inertia
+(
+    PointRef refPt,
+    scalar density
+) const
+{
+    Point aRel = a_ - refPt;
+    Point bRel = b_ - refPt;
+    Point cRel = c_ - refPt;
+
+    tensor V
+    (
+        aRel.x(), aRel.y(), aRel.z(),
+        bRel.x(), bRel.y(), bRel.z(),
+        cRel.x(), cRel.y(), cRel.z()
+    );
+
+    scalar a = Foam::mag((b_ - a_)^(c_ - a_));
+
+    tensor S = 1/24.0*(tensor::one + I);
+
+    return
+    (
+        a*I/24.0*
+        (
+            (aRel & aRel)
+          + (bRel & bRel)
+          + (cRel & cRel)
+          + ((aRel + bRel + cRel) & (aRel + bRel + cRel))
+        )
+      - a*(V.T() & S & V)
+    )
+   *density;
+}
+
+template<class Point, class PointRef>
 inline pointHit triangle<Point, PointRef>::ray
 (
     const point& p,
