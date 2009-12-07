@@ -85,6 +85,18 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 
     fileName baseName = filename.lessExt();
 
+    // read cellTable names (if possible)
+    Map<word> cellTableLookup;
+
+    {
+        IFstream is(baseName + ".inp");
+        if (is.good())
+        {
+            cellTableLookup = readInpCellTable(is);
+        }
+    }
+
+
     // STAR-CD index of points
     List<label> pointId;
 
@@ -171,7 +183,22 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
             {
                 zoneI = dynSizes.size();
                 lookup.insert(cellTableId, zoneI);
-                dynNames.append(word("cellTable_") + ::Foam::name(zoneI));
+
+                Map<word>::const_iterator tableNameIter =
+                    cellTableLookup.find(cellTableId);
+
+                if (tableNameIter == cellTableLookup.end())
+                {
+                    dynNames.append
+                    (
+                        word("cellTable_") + ::Foam::name(cellTableId)
+                    );
+                }
+                else
+                {
+                    dynNames.append(tableNameIter());
+                }
+
                 dynSizes.append(0);
             }
 
