@@ -37,7 +37,12 @@ License
 using namespace Foam;
 
 // Does face use valid vertices?
-bool validTri(const bool verbose, const triSurface& surf, const label faceI)
+bool validTri
+(
+    const bool verbose,
+    const triSurface& surf,
+    const label faceI
+)
 {
     // Simple check on indices ok.
 
@@ -175,6 +180,11 @@ int main(int argc, char *argv[])
 
     argList::addBoolOption("checkSelfIntersection");
     argList::addBoolOption("verbose");
+    argList::addBoolOption
+    (
+        "blockMesh",
+        "write vertices/blocks for blockMeshDict"
+    );
 
     argList args(argc, argv);
 
@@ -182,7 +192,7 @@ int main(int argc, char *argv[])
     bool verbose = args.optionFound("verbose");
 
     fileName surfFileName(args.additionalArgs()[0]);
-    Pout<< "Reading surface from " << surfFileName << " ..." << nl << endl;
+    Info<< "Reading surface from " << surfFileName << " ..." << nl << endl;
 
 
     // Read
@@ -191,9 +201,33 @@ int main(int argc, char *argv[])
     triSurface surf(surfFileName);
 
 
-    Pout<< "Statistics:" << endl;
-    surf.writeStats(Pout);
-    Pout<< endl;
+    Info<< "Statistics:" << endl;
+    surf.writeStats(Info);
+    Info<< endl;
+
+    // write bounding box corners
+    if (args.optionFound("blockMesh"))
+    {
+        pointField cornerPts = boundBox(surf.points()).corners();
+
+        Info<<"// blockMeshDict info" << nl;
+
+        Info<<"vertices\n(" << nl;
+        forAll(cornerPts, ptI)
+        {
+            Info << "    " << cornerPts[ptI] << nl;
+        }
+
+        // number of divisions needs adjustment later
+        Info<<");\n" << nl
+            <<"blocks\n"
+            <<"(\n"
+            <<"    hex (0 1 2 3 4 5 6 7) (10 10 10) simpleGrading (1 1 1)\n"
+            <<");\n" << nl;
+
+        Info<<"edges();" << nl
+            <<"patches();" << endl;
+    }
 
 
     // Region sizes
@@ -220,14 +254,14 @@ int main(int argc, char *argv[])
             }
         }
 
-        Pout<< "Region\tSize" << nl
+        Info<< "Region\tSize" << nl
             << "------\t----" << nl;
         forAll(surf.patches(), patchI)
         {
-            Pout<< surf.patches()[patchI].name() << '\t'
+            Info<< surf.patches()[patchI].name() << '\t'
                 << regionSize[patchI] << nl;
         }
-        Pout<< nl << endl;
+        Info<< nl << endl;
     }
 
 
@@ -247,19 +281,19 @@ int main(int argc, char *argv[])
 
         if (illegalFaces.size())
         {
-            Pout<< "Surface has " << illegalFaces.size()
+            Info<< "Surface has " << illegalFaces.size()
                 << " illegal triangles." << endl;
 
             OFstream str("illegalFaces");
-            Pout<< "Dumping conflicting face labels to " << str.name() << endl
+            Info<< "Dumping conflicting face labels to " << str.name() << endl
                 << "Paste this into the input for surfaceSubset" << endl;
             str << illegalFaces;
         }
         else
         {
-            Pout<< "Surface has no illegal triangles." << endl;
+            Info<< "Surface has no illegal triangles." << endl;
         }
-        Pout<< endl;
+        Info<< endl;
     }
 
 
@@ -312,28 +346,28 @@ int main(int argc, char *argv[])
 
         labelList binCount = countBins(0, 1, 20, triQ);
 
-        Pout<< "Triangle quality (equilateral=1, collapsed=0):"
+        Info<< "Triangle quality (equilateral=1, collapsed=0):"
             << endl;
 
 
-        OSstream& os = Pout;
+        OSstream& os = Info;
         os.width(4);
 
         scalar dist = (1.0 - 0.0)/20.0;
         scalar min = 0;
         forAll(binCount, binI)
         {
-            Pout<< "    " << min << " .. " << min+dist << "  : "
+            Info<< "    " << min << " .. " << min+dist << "  : "
                 << 1.0/surf.size() * binCount[binI]
                 << endl;
             min += dist;
         }
-        Pout<< endl;
+        Info<< endl;
 
         label minIndex = findMin(triQ);
         label maxIndex = findMax(triQ);
 
-        Pout<< "    min " << triQ[minIndex] << " for triangle " << minIndex
+        Info<< "    min " << triQ[minIndex] << " for triangle " << minIndex
             << nl
             << "    max " << triQ[maxIndex] << " for triangle " << maxIndex
             << nl
@@ -360,7 +394,7 @@ int main(int argc, char *argv[])
             }
             OFstream str("badFaces");
 
-            Pout<< "Dumping bad quality faces to " << str.name() << endl
+            Info<< "Dumping bad quality faces to " << str.name() << endl
                 << "Paste this into the input for surfaceSubset" << nl
                 << nl << endl;
 
@@ -390,7 +424,7 @@ int main(int argc, char *argv[])
         const edge& maxE = edges[maxEdgeI];
 
 
-        Pout<< "Edges:" << nl
+        Info<< "Edges:" << nl
             << "    min " << edgeMag[minEdgeI] << " for edge " << minEdgeI
             << " points " << localPoints[minE[0]] << localPoints[minE[1]]
             << nl
@@ -411,7 +445,7 @@ int main(int argc, char *argv[])
         const boundBox bb(localPoints);
         scalar smallDim = 1E-6 * bb.mag();
 
-        Pout<< "Checking for points less than 1E-6 of bounding box ("
+        Info<< "Checking for points less than 1E-6 of bounding box ("
             << bb.span() << " meter) apart."
             << endl;
 
@@ -450,7 +484,7 @@ int main(int argc, char *argv[])
 
                 if (edgeI == -1)
                 {
-                    Pout<< "    close unconnected points "
+                    Info<< "    close unconnected points "
                         << ptI << ' ' << localPoints[ptI]
                         << " and " << prevPtI << ' '
                         << localPoints[prevPtI]
@@ -460,7 +494,7 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
-                    Pout<< "    small edge between points "
+                    Info<< "    small edge between points "
                         << ptI << ' ' << localPoints[ptI]
                         << " and " << prevPtI << ' '
                         << localPoints[prevPtI]
@@ -471,7 +505,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        Pout<< "Found " << nClose << " nearby points." << nl
+        Info<< "Found " << nClose << " nearby points." << nl
             << endl;
     }
 
@@ -516,25 +550,25 @@ int main(int argc, char *argv[])
 
     if ((nSingleEdges != 0) || (nMultEdges != 0))
     {
-        Pout<< "Surface is not closed since not all edges connected to "
+        Info<< "Surface is not closed since not all edges connected to "
             << "two faces:" << endl
             << "    connected to one face : " << nSingleEdges << endl
             << "    connected to >2 faces : " << nMultEdges << endl;
 
-        Pout<< "Conflicting face labels:" << problemFaces.size() << endl;
+        Info<< "Conflicting face labels:" << problemFaces.size() << endl;
 
         OFstream str("problemFaces");
 
-        Pout<< "Dumping conflicting face labels to " << str.name() << endl
+        Info<< "Dumping conflicting face labels to " << str.name() << endl
             << "Paste this into the input for surfaceSubset" << endl;
 
         str << problemFaces;
     }
     else
     {
-        Pout<< "Surface is closed. All edges connected to two faces." << endl;
+        Info<< "Surface is closed. All edges connected to two faces." << endl;
     }
-    Pout<< endl;
+    Info<< endl;
 
 
 
@@ -544,11 +578,11 @@ int main(int argc, char *argv[])
     labelList faceZone;
     label numZones = surf.markZones(boolList(surf.nEdges(), false), faceZone);
 
-    Pout<< "Number of unconnected parts : " << numZones << endl;
+    Info<< "Number of unconnected parts : " << numZones << endl;
 
     if (numZones > 1)
     {
-        Pout<< "Splitting surface into parts ..." << endl << endl;
+        Info<< "Splitting surface into parts ..." << endl << endl;
 
         fileName surfFileNameBase(surfFileName.name());
 
@@ -585,7 +619,7 @@ int main(int argc, char *argv[])
               + ".ftr"
             );
 
-            Pout<< "writing part " << zone << " size " << subSurf.size()
+            Info<< "writing part " << zone << " size " << subSurf.size()
                 << " to " << subFileName << endl;
 
             subSurf.write(subFileName);
@@ -608,15 +642,15 @@ int main(int argc, char *argv[])
     labelList normalZone;
     label numNormalZones = PatchTools::markZones(surf, borderEdge, normalZone);
 
-    Pout<< endl
+    Info<< endl
         << "Number of zones (connected area with consistent normal) : "
         << numNormalZones << endl;
 
     if (numNormalZones > 1)
     {
-        Pout<< "More than one normal orientation." << endl;
+        Info<< "More than one normal orientation." << endl;
     }
-    Pout<< endl;
+    Info<< endl;
 
 
 
@@ -625,19 +659,19 @@ int main(int argc, char *argv[])
 
     if (checkSelfIntersection)
     {
-        Pout<< "Checking self-intersection." << endl;
+        Info<< "Checking self-intersection." << endl;
 
         triSurfaceSearch querySurf(surf);
         surfaceIntersection inter(querySurf);
 
         if (inter.cutEdges().empty() && inter.cutPoints().empty())
         {
-            Pout<< "Surface is not self-intersecting" << endl;
+            Info<< "Surface is not self-intersecting" << endl;
         }
         else
         {
-            Pout<< "Surface is self-intersecting" << endl;
-            Pout<< "Writing edges of intersection to selfInter.obj" << endl;
+            Info<< "Surface is self-intersecting" << endl;
+            Info<< "Writing edges of intersection to selfInter.obj" << endl;
 
             OFstream intStream("selfInter.obj");
             forAll(inter.cutPoints(), cutPointI)
@@ -654,11 +688,11 @@ int main(int argc, char *argv[])
                 intStream << "l " << e.start()+1 << ' ' << e.end()+1 << endl;
             }
         }
-        Pout<< endl;
+        Info<< endl;
     }
 
 
-    Pout<< "End\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

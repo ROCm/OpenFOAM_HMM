@@ -110,6 +110,26 @@ Foam::boundBox::boundBox(Istream& is)
 }
 
 
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+Foam::tmp<Foam::pointField> Foam::boundBox::corners() const
+{
+    tmp<pointField> tPts = tmp<pointField>(new pointField(8));
+    pointField& pt = tPts();
+
+    pt[0] = min_;                                   // min-x, min-y, min-z
+    pt[1] = point(max_.x(), min_.y(), min_.z());    // max-x, min-y, min-z
+    pt[2] = point(max_.x(), max_.y(), min_.z());    // max-x, max-y, min-z
+    pt[3] = point(min_.x(), max_.y(), min_.z());    // min-x, max-y, min-z
+    pt[4] = point(min_.x(), min_.y(), max_.z());    // min-x, min-y, max-z
+    pt[5] = point(max_.x(), min_.y(), max_.z());    // max-x, min-y, max-z
+    pt[6] = max_;                                   // max-x, max-y, max-z
+    pt[7] = point(min_.x(), max_.y(), max_.z());    // min-x, max-y, max-z
+
+    return tPts;
+}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const boundBox& bb)
