@@ -40,25 +40,6 @@ namespace Foam
         splineEdge,
         Istream
     );
-
-    // compatibility with old names
-    addNamedToRunTimeSelectionTable
-    (
-        curvedEdge,
-        splineEdge,
-        Istream,
-        simpleSpline
-    );
-
-    // compatibility with old names
-    addNamedToRunTimeSelectionTable
-    (
-        curvedEdge,
-        splineEdge,
-        Istream,
-        polySpline
-    );
-
 }
 
 
@@ -85,7 +66,7 @@ Foam::splineEdge::splineEdge(const pointField& points, Istream& is)
     token t(is);
     is.putBack(t);
 
-    // compatibility - might also have start/end tangents - discard them
+    // discard unused start/end tangents
     if (t == token::BEGIN_LIST)
     {
         vector tangent0Ignored(is);

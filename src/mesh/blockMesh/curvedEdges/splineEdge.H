@@ -28,10 +28,6 @@ Class
 Description
     A curvedEdge interface for Catmull-Rom splines.
 
-Note
-    For compatibility, also accepts the type names 'polySpline' and
-    'simpleSpline'.
-
 SourceFiles
     splineEdge.C
 
