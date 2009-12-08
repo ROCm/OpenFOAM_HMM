@@ -330,7 +330,7 @@ Foam::PackedBoolList Foam::syncTools::getMasterFaces(const polyMesh& mesh)
                 {
                     forAll(pp, i)
                     {
-                        isMasterFace.set(pp.start()+i, 0);
+                        isMasterFace.unset(pp.start()+i);
                     }
                 }
             }
@@ -341,7 +341,7 @@ Foam::PackedBoolList Foam::syncTools::getMasterFaces(const polyMesh& mesh)
 
                 for (label i = pp.size()/2; i < pp.size(); i++)
                 {
-                    isMasterFace.set(pp.start()+i, 0);
+                    isMasterFace.unset(pp.start()+i);
                 }
             }
             else

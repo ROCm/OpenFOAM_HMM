@@ -97,9 +97,9 @@ void Foam::dynamicRefineFvMesh::calculateProtectedCells
         forAll(faceNeighbour(), faceI)
         {
             label own = faceOwner()[faceI];
-            bool ownProtected = (unrefineableCell.get(own) == 1);
+            bool ownProtected = unrefineableCell.get(own);
             label nei = faceNeighbour()[faceI];
-            bool neiProtected = (unrefineableCell.get(nei) == 1);
+            bool neiProtected = unrefineableCell.get(nei);
 
             if (ownProtected && (cellLevel[nei] > cellLevel[own]))
             {
@@ -113,7 +113,7 @@ void Foam::dynamicRefineFvMesh::calculateProtectedCells
         for (label faceI = nInternalFaces(); faceI < nFaces(); faceI++)
         {
             label own = faceOwner()[faceI];
-            bool ownProtected = (unrefineableCell.get(own) == 1);
+            bool ownProtected = unrefineableCell.get(own);
             if
             (
                 ownProtected
@@ -710,10 +710,10 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectRefineCells
             if
             (
                 cellLevel[cellI] < maxRefinement
-             && candidateCell.get(cellI) == 1
+             && candidateCell.get(cellI)
              && (
                     unrefineableCell.empty()
-                 || unrefineableCell.get(cellI) == 0
+                 || !unrefineableCell.get(cellI)
                 )
             )
             {
@@ -731,10 +731,10 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectRefineCells
                 if
                 (
                     cellLevel[cellI] == level
-                 && candidateCell.get(cellI) == 1
+                 && candidateCell.get(cellI)
                  && (
                         unrefineableCell.empty()
-                     || unrefineableCell.get(cellI) == 0
+                     || !unrefineableCell.get(cellI)
                     )
                 )
                 {
@@ -792,7 +792,7 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectUnrefinePoints
 
             forAll(pCells, pCellI)
             {
-                if (markedCell.get(pCells[pCellI]) == 1)
+                if (markedCell.get(pCells[pCellI]))
                 {
                     hasMarked = true;
                     break;
@@ -837,7 +837,7 @@ void Foam::dynamicRefineFvMesh::extendMarkedCells
 
     forAll(markedCell, cellI)
     {
-        if (markedCell.get(cellI) == 1)
+        if (markedCell.get(cellI))
         {
             const cell& cFaces = cells()[cellI];
 
@@ -902,7 +902,7 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
         {
             label cellI = pCells[i];
 
-            if (protectedCell_.get(cellI) == 0)
+            if (!protectedCell_.get(cellI))
             {
                 if (pointLevel[pointI] <= cellLevel[cellI])
                 {
