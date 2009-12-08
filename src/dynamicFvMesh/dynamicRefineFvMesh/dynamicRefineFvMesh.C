@@ -26,7 +26,7 @@ License
 
 #include "dynamicRefineFvMesh.H"
 #include "addToRunTimeSelectionTable.H"
-#include "fvc.H"
+#include "surfaceInterpolate.H"
 #include "volFields.H"
 #include "polyTopoChange.H"
 #include "surfaceFields.H"
@@ -39,8 +39,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(dynamicRefineFvMesh, 0);
     addToRunTimeSelectionTable(dynamicFvMesh, dynamicRefineFvMesh, IOobject);
-
-} // End namespace Foam
+}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
