@@ -289,7 +289,7 @@ void Foam::fvMeshDistribute::initPatchFields
 //  }
 
 // volVectorField {U {internalField ..; boundaryField ..;}}
-// 
+//
 template<class GeoField>
 void Foam::fvMeshDistribute::sendFields
 (

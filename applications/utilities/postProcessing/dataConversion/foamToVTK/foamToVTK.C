@@ -241,20 +241,20 @@ int main(int argc, char *argv[])
 
 #   include "addRegionOption.H"
 
-    argList::validOptions.insert("fields", "fields");
-    argList::validOptions.insert("cellSet", "cellSet name");
-    argList::validOptions.insert("faceSet", "faceSet name");
-    argList::validOptions.insert("pointSet", "pointSet name");
-    argList::validOptions.insert("ascii","");
-    argList::validOptions.insert("surfaceFields","");
-    argList::validOptions.insert("nearCellValue","");
-    argList::validOptions.insert("noInternal","");
-    argList::validOptions.insert("noPointValues","");
-    argList::validOptions.insert("allPatches","");
-    argList::validOptions.insert("excludePatches","patches to exclude");
-    argList::validOptions.insert("noFaceZones","");
-    argList::validOptions.insert("noLinks","");
-    argList::validOptions.insert("useTimeName","");
+    argList::addOption("fields", "fields");
+    argList::addOption("cellSet", "cellSet name");
+    argList::addOption("faceSet", "faceSet name");
+    argList::addOption("pointSet", "pointSet name");
+    argList::addBoolOption("ascii");
+    argList::addBoolOption("surfaceFields");
+    argList::addBoolOption("nearCellValue");
+    argList::addBoolOption("noInternal");
+    argList::addBoolOption("noPointValues");
+    argList::addBoolOption("allPatches");
+    argList::addOption("excludePatches","patches to exclude");
+    argList::addBoolOption("noFaceZones");
+    argList::addBoolOption("noLinks");
+    argList::addBoolOption("useTimeName");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
     }
 
     word cellSetName;
-    string vtkName;
+    string vtkName = runTime.caseName();
 
     if (args.optionFound("cellSet"))
     {
@@ -311,18 +311,12 @@ int main(int argc, char *argv[])
     else if (Pstream::parRun())
     {
         // Strip off leading casename, leaving just processor_DDD ending.
-        vtkName = runTime.caseName();
-
         string::size_type i = vtkName.rfind("processor");
 
         if (i != string::npos)
         {
             vtkName = vtkName.substr(i);
         }
-    }
-    else
-    {
-        vtkName = runTime.caseName();
     }
 
 

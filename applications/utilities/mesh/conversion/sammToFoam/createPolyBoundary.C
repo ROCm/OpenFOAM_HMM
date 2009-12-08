@@ -42,13 +42,13 @@ void sammMesh::createPolyBoundary()
 
     const labelListList& PointCells = pointCells();
 
-    forAll (boundary_, patchI)
+    forAll(boundary_, patchI)
     {
         const faceList& curShapePatch = boundary_[patchI];
 
         polyBoundaryPatchStartIndices_[patchI] = nCreatedFaces;
 
-        forAll (curShapePatch, faceI)
+        forAll(curShapePatch, faceI)
         {
             bool found = false;
 
@@ -120,7 +120,7 @@ List<polyPatch* > sammMesh::polyBoundaryPatches(const polyMesh& pMesh)
 {
     List<polyPatch* > p(boundary_.size());
 
-    forAll (boundary_, patchI)
+    forAll(boundary_, patchI)
     {
         const faceList& curShapePatch = boundary_[patchI];
 

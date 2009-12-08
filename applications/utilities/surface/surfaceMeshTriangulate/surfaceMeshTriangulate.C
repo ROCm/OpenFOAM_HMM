@@ -51,8 +51,8 @@ int main(int argc, char *argv[])
 {
     argList::validArgs.append("output file");
 #   include "addRegionOption.H"
-    argList::validOptions.insert("excludeProcPatches", "");
-    argList::validOptions.insert("patches", "(patch0 .. patchN)");
+    argList::addBoolOption("excludeProcPatches");
+    argList::addOption("patches", "(patch0 .. patchN)");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

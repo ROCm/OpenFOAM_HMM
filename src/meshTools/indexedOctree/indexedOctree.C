@@ -705,7 +705,7 @@ Foam::treeBoundBox Foam::indexedOctree<Type>::subBbox
 
 
 // Takes a bb and a point on/close to the edge of the bb and pushes the point
-// inside by a small fraction. 
+// inside by a small fraction.
 template <class Type>
 Foam::point Foam::indexedOctree<Type>::pushPoint
 (
@@ -776,7 +776,7 @@ Foam::point Foam::indexedOctree<Type>::pushPoint
 
 
 // Takes a bb and a point on the edge of the bb and pushes the point
-// outside by a small fraction. 
+// outside by a small fraction.
 template <class Type>
 Foam::point Foam::indexedOctree<Type>::pushPoint
 (
@@ -1042,7 +1042,7 @@ Foam::point Foam::indexedOctree<Type>::pushPointIntoFace
     }
 
 
-    return facePoint;   
+    return facePoint;
 }
 
 
@@ -1150,7 +1150,7 @@ Foam::point Foam::indexedOctree<Type>::pushPointIntoFace
 //    //     |    |
 //    //     +----+
 //    // Shift point down (away from top):
-//    //     
+//    //
 //    //    a+----+
 //    // ----|    |
 //    //     |    |
@@ -1364,7 +1364,7 @@ bool Foam::indexedOctree<Type>::walkToNeighbour
     // |  a+-+-+
     // |   |\| |
     // +---+-+-+
-    //        \ 
+    //        \
     //
     // e.g. ray is at (a) in octant 0(or 4) with faceIDs : LEFTBIT+TOPBIT.
     // If we would be in octant 1(or 5) we could go to the correct octant

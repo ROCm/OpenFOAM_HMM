@@ -82,13 +82,13 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     labelList mirrorPointLookup(oldPoints.size(), -1);
 
     // Grab the old points
-    forAll (oldPoints, pointI)
+    forAll(oldPoints, pointI)
     {
         newPoints[nNewPoints] = oldPoints[pointI];
         nNewPoints++;
     }
 
-    forAll (oldPoints, pointI)
+    forAll(oldPoints, pointI)
     {
         scalar alpha =
             mirrorPlane.normalIntersect
@@ -145,7 +145,7 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
 
     const unallocLabelList& oldOwnerStart = lduAddr().ownerStartAddr();
 
-    forAll (newCellFaces, cellI)
+    forAll(newCellFaces, cellI)
     {
         labelList& curFaces = newCellFaces[cellI];
 
@@ -154,7 +154,7 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
 
         curFaces.setSize(e - s);
 
-        forAll (curFaces, i)
+        forAll(curFaces, i)
         {
             curFaces[i] = s + i;
         }
@@ -164,7 +164,7 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     // as internal
     boolListList insertedBouFace(oldPatches.size());
 
-    forAll (oldPatches, patchI)
+    forAll(oldPatches, patchI)
     {
         const polyPatch& curPatch = oldPatches[patchI];
 
@@ -186,7 +186,7 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
         const unallocLabelList& curFaceCells = curPatch.faceCells();
         const label curStart = curPatch.start();
 
-        forAll (curPatch, faceI)
+        forAll(curPatch, faceI)
         {
             // Find out if the mirrored face is identical to the
             // original.  If so, the face needs to become internal and
@@ -194,7 +194,7 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
             const face& origFace = curPatch[faceI];
 
             face mirrorFace(origFace.size());
-            forAll (mirrorFace, pointI)
+            forAll(mirrorFace, pointI)
             {
                 mirrorFace[pointI] = mirrorPointLookup[origFace[pointI]];
             }
@@ -225,11 +225,11 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     label nNewFaces = 0;
 
     // Insert original (internal) faces
-    forAll (newCellFaces, cellI)
+    forAll(newCellFaces, cellI)
     {
         const labelList& curCellFaces = newCellFaces[cellI];
 
-        forAll (curCellFaces, cfI)
+        forAll(curCellFaces, cfI)
         {
             newFaces[nNewFaces] = oldFaces[curCellFaces[cfI]];
             masterFaceLookup[curCellFaces[cfI]] = nNewFaces;
@@ -264,7 +264,7 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     labelList newPatchStarts(boundary().size(), -1);
     label nNewPatches = 0;
 
-    forAll (boundaryMesh(), patchI)
+    forAll(boundaryMesh(), patchI)
     {
         const label curPatchSize = boundaryMesh()[patchI].size();
         const label curPatchStart = boundaryMesh()[patchI].start();
@@ -346,14 +346,14 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     label nNewCells = 0;
 
     // Grab the original cells.  Take care of face renumbering.
-    forAll (oldCells, cellI)
+    forAll(oldCells, cellI)
     {
         const cell& oc = oldCells[cellI];
 
         cell& nc = newCells[nNewCells];
         nc.setSize(oc.size());
 
-        forAll (oc, i)
+        forAll(oc, i)
         {
             nc[i] = masterFaceLookup[oc[i]];
         }
@@ -362,14 +362,14 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     }
 
     // Mirror the cells
-    forAll (oldCells, cellI)
+    forAll(oldCells, cellI)
     {
         const cell& oc = oldCells[cellI];
 
         cell& nc = newCells[nNewCells];
         nc.setSize(oc.size());
 
-        forAll (oc, i)
+        forAll(oc, i)
         {
             nc[i] = mirrorFaceLookup[oc[i]];
         }
@@ -394,7 +394,7 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     // Add the boundary patches
     List<polyPatch*> p(newPatchTypes.size());
 
-    forAll (p, patchI)
+    forAll(p, patchI)
     {
         p[patchI] = polyPatch::New
         (

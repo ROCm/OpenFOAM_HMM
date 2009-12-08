@@ -53,7 +53,7 @@ labelList procNeighbours(const polyMesh& mesh)
 
     label nNeighbours = 0;
 
-    forAll (mesh.boundaryMesh(), patchI)
+    forAll(mesh.boundaryMesh(), patchI)
     {
         if (isA<processorPolyPatch>(mesh.boundaryMesh()[patchI]))
         {
@@ -65,7 +65,7 @@ labelList procNeighbours(const polyMesh& mesh)
 
     nNeighbours = 0;
 
-    forAll (mesh.boundaryMesh(), patchI)
+    forAll(mesh.boundaryMesh(), patchI)
     {
         if (isA<processorPolyPatch>(mesh.boundaryMesh()[patchI]))
         {

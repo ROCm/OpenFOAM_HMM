@@ -47,12 +47,7 @@ Description
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-defineTypeNameAndDebug(autoSnapDriver, 0);
-
-} // End namespace Foam
+defineTypeNameAndDebug(Foam::autoSnapDriver, 0);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -233,14 +228,14 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
             label f0 = baffles[i].first();
             label f1 = baffles[i].second();
 
-            if (isMasterFace.get(f0) == 1)
+            if (isMasterFace.get(f0))
             {
                 // Make f1 a slave
-                isMasterFace.set(f1, 0);
+                isMasterFace.unset(f1);
             }
-            else if (isMasterFace.get(f1) == 1)
+            else if (isMasterFace.get(f1))
             {
-                isMasterFace.set(f0, 0);
+                isMasterFace.unset(f0);
             }
             else
             {
@@ -267,7 +262,7 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
         {
             label faceI = pFaces[pfI];
 
-            if (isMasterFace.get(pp.addressing()[faceI]) == 1)
+            if (isMasterFace.get(pp.addressing()[faceI]))
             {
                 avgBoundary[patchPointI] += pp[faceI].centre(points);
                 nBoundary[patchPointI]++;
@@ -456,7 +451,7 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
 
         point newPos;
 
-        if (nonManifoldPoint.get(i) == 0u)
+        if (!nonManifoldPoint.get(i))
         {
             // Points that are manifold. Weight the internal and boundary
             // by their number of faces and blend with
@@ -1308,7 +1303,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::repatchToSurface
 
 
     // Faces that do not move
-    PackedBoolList isZonedFace(mesh.nFaces(), 0);
+    PackedBoolList isZonedFace(mesh.nFaces());
     {
         // 1. All faces on zoned surfaces
         const wordList& faceZoneNames = surfaces.faceZoneNames();
@@ -1378,7 +1373,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::repatchToSurface
         {
             label faceI = pp.addressing()[i];
 
-            if (hitSurface[i] != -1 && (isZonedFace.get(faceI) == 0))
+            if (hitSurface[i] != -1 && !isZonedFace.get(faceI))
             {
                 closestPatch[i] = globalToPatch_
                 [

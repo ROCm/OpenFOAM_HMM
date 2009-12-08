@@ -184,7 +184,7 @@ public:
             //- Return a list of the patch types
             wordList types() const;
 
-            //- Return BoundaryField of the cell values neighbouring 
+            //- Return BoundaryField of the cell values neighbouring
             //  the boundary
             GeometricBoundaryField boundaryInternalField() const;
 
@@ -194,7 +194,7 @@ public:
 
             //- Write boundary field as dictionary entry
             void writeEntry(const word& keyword, Ostream& os) const;
- 
+
 
         // Member operators
 
@@ -208,7 +208,7 @@ public:
             void operator=(const Type&);
 
 
-            //- Forced assignment to 
+            //- Forced assignment to
             //  BoundaryField<Type, PatchField, BoundaryMesh>
             void operator==(const GeometricBoundaryField&);
 
@@ -224,7 +224,7 @@ private:
 
     // Private data
 
-        //- Current time index.  
+        //- Current time index.
         //  Used to trigger the storing of the old-time value
         mutable label timeIndex_;
 

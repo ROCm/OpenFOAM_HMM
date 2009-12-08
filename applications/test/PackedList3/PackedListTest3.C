@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,41 +22,53 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Application
+
+Description
+
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "boolList.H"
+#include "HashSet.H"
+#include "StaticHashTable.H"
+#include "cpuTime.H"
+#include <vector>
+#include "PackedList.H"
+#include "PackedBoolList.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+using namespace Foam;
 
-template<class T>
-T Foam::argList::optionRead(const word& opt) const
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+// Main program:
+
+int main(int argc, char *argv[])
 {
-    T val;
+    const label n = 100000000;
+    const label nReport = 1000000;
 
-    optionLookup(opt)() >> val;
-    return val;
-}
+    cpuTime timer;
 
-
-template<class T>
-bool Foam::argList::optionReadIfPresent(const word& opt, T& val) const
-{
-    if (optionFound(opt))
+    // test inserts
+    // PackedBoolList
+    PackedBoolList packed;
+    for (label i = 0; i < n; i++)
     {
-        val = optionRead<T>(opt);
-        return true;
+        if ((i % nReport) == 0 && i)
+        {
+            Info<< "i:" << i << " in " << timer.cpuTimeIncrement() << " s" 
+                <<endl;
+        }
+        packed[i] = 1;
     }
-    else
-    {
-        return false;
-    }
-}
+    Info<< "insert test: " << n << " elements in "
+        << timer.cpuTimeIncrement() << " s\n\n";
 
+    Info << "\nEnd\n" << endl;
 
-template<class T>
-Foam::List<T> Foam::argList::optionReadList(const word& opt) const
-{
-    return readList<T>(optionLookup(opt)());
+    return 0;
 }
 
 

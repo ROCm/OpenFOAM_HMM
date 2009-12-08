@@ -48,7 +48,7 @@ Foam::pointFieldDecomposer::decomposeField
     );
 
     // Create and map the patch field values
-    forAll (boundaryAddressing_, patchi)
+    forAll(boundaryAddressing_, patchi)
     {
         if (patchFieldDecomposerPtrs_[patchi])
         {
@@ -117,7 +117,7 @@ void Foam::pointFieldDecomposer::decomposeFields
     const PtrList<GeoField>& fields
 ) const
 {
-    forAll (fields, fieldI)
+    forAll(fields, fieldI)
     {
         decomposeField(fields[fieldI])().write();
     }

@@ -506,7 +506,7 @@ void compareFields
 
 int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("mergeTol", "relative merge distance");
+    argList::addOption("mergeTol", "relative merge distance");
 #   include "setRootCase.H"
 
     // Create processor directory if non-existing

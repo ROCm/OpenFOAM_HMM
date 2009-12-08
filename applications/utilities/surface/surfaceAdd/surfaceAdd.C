@@ -51,8 +51,10 @@ int main(int argc, char *argv[])
     argList::validArgs.append("Foam surface file");
     argList::validArgs.append("Foam surface file");
     argList::validArgs.append("Foam output file");
-    argList::validOptions.insert("points", "pointsFile");
-    argList::validOptions.insert("mergeRegions", "");
+
+    argList::addOption("points", "pointsFile");
+    argList::addBoolOption("mergeRegions");
+
     argList args(argc, argv);
 
     fileName inFileName1(args.additionalArgs()[0]);

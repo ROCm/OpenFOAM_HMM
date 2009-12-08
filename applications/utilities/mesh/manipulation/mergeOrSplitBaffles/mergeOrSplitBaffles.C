@@ -223,9 +223,9 @@ labelList findBaffles(const polyMesh& mesh, const labelList& boundaryFaces)
 int main(int argc, char *argv[])
 {
 #   include "addRegionOption.H"
-    argList::validOptions.insert("split", "");
-    argList::validOptions.insert("overwrite", "");
-    argList::validOptions.insert("detectOnly", "");
+    argList::addBoolOption("split");
+    argList::addBoolOption("overwrite");
+    argList::addBoolOption("detectOnly");
 #   include "setRootCase.H"
 #   include "createTime.H"
     runTime.functionObjects().off();

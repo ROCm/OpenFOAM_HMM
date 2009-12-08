@@ -26,6 +26,7 @@ License
 
 #include "STARCDsurfaceFormatCore.H"
 #include "clock.H"
+#include "regExp.H"
 #include "IStringStream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -84,6 +85,50 @@ void Foam::fileFormats::STARCDsurfaceFormatCore::writeHeader
         << " " << 0
         << " " << 0
         << endl;
+}
+
+
+// parse things like this:
+//     CTNAME  1  someName
+// don't bother with the older comma-delimited format
+
+Foam::Map<Foam::word>
+Foam::fileFormats::STARCDsurfaceFormatCore::readInpCellTable
+(
+    IFstream& is
+)
+{
+    Map<word> lookup;
+
+    regExp ctnameRE
+    (
+        " *CTNA[^ ]*"       // keyword - min 4 chars
+        "[[:space:]]+"      // space delimited
+        "([0-9]+)"          // 1: <digits>
+        "[[:space:]]+"      // space delimited
+        "([^,[:space:]].*)", // 2: <name>
+        true                // ignore case
+    );
+
+    string line;
+    List<string> groups;
+    while (is.good() && is.getLine(line).good())
+    {
+        if (ctnameRE.match(line, groups))
+        {
+            const label tableId = atoi(groups[0].c_str());
+
+            // strip bad chars
+            string::stripInvalid<word>(groups[1]);
+
+            if (!groups[1].empty())
+            {
+                lookup.insert(tableId, groups[1]);
+            }
+        }
+    }
+
+    return lookup;
 }
 
 

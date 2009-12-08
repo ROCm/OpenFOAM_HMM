@@ -454,7 +454,7 @@ label simplifyFaces
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validOptions.insert("overwrite", "");
+    argList::addBoolOption("overwrite");
     argList::validArgs.append("edge length [m]");
     argList::validArgs.append("merge angle (degrees)");
 

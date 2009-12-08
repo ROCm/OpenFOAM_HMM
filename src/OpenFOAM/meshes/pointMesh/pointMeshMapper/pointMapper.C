@@ -319,7 +319,7 @@ const Foam::labelList& Foam::pointMapper::insertedObjectLabels() const
 
     return *insertedPointLabelsPtr_;
 }
-        
+
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 

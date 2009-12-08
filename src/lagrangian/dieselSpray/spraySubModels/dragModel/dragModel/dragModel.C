@@ -29,21 +29,18 @@ License
 #include "dragModel.H"
 #include "parcel.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(dragModel, 0);
+    defineRunTimeSelectionTable(dragModel, dictionary);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(dragModel, 0);
-
-defineRunTimeSelectionTable(dragModel, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-dragModel::dragModel(const dictionary& dict)
+Foam::dragModel::dragModel(const dictionary& dict)
 :
     dict_(dict)
 {}
@@ -51,12 +48,8 @@ dragModel::dragModel(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-dragModel::~dragModel()
+Foam::dragModel::~dragModel()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

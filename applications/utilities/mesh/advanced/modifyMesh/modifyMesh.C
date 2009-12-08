@@ -328,7 +328,7 @@ label findCell(const primitiveMesh& mesh, const point& nearPoint)
 
 int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("overwrite", "");
+    argList::addBoolOption("overwrite");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

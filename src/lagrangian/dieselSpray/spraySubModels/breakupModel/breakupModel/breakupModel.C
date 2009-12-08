@@ -27,21 +27,18 @@ License
 #include "error.H"
 #include "breakupModel.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(breakupModel, 0);
+    defineRunTimeSelectionTable(breakupModel, dictionary);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(breakupModel, 0);
-
-defineRunTimeSelectionTable(breakupModel, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-breakupModel::breakupModel
+Foam::breakupModel::breakupModel
 (
     const dictionary& dict,
     spray& sm
@@ -71,13 +68,13 @@ breakupModel::breakupModel
 
 // * * * * * * * * * * * * * * * * Destructor    * * * * * * * * * * * * * * //
 
-breakupModel::~breakupModel()
+Foam::breakupModel::~breakupModel()
 {}
 
 
 // * * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * //
 
-void breakupModel::updateParcelProperties
+void Foam::breakupModel::updateParcelProperties
 (
     parcel& p,
     const scalar deltaT,
@@ -141,9 +138,5 @@ void breakupModel::updateParcelProperties
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

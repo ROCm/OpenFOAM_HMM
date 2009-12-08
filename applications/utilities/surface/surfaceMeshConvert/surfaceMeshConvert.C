@@ -26,7 +26,6 @@ Application
     surfaceMeshConvert
 
 Description
-
     Convert between surface formats with optional scaling or
     transformations (rotate/translate) on a coordinateSystem.
 
@@ -73,12 +72,14 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::validArgs.append("inputFile");
     argList::validArgs.append("outputFile");
-    argList::validOptions.insert("clean", "");
-    argList::validOptions.insert("scaleIn",  "scale");
-    argList::validOptions.insert("scaleOut", "scale");
-    argList::validOptions.insert("dict", "coordinateSystemsDict");
-    argList::validOptions.insert("from", "sourceCoordinateSystem");
-    argList::validOptions.insert("to",   "targetCoordinateSystem");
+
+    argList::addBoolOption("clean");
+
+    argList::addOption("scaleIn",  "scale");
+    argList::addOption("scaleOut", "scale");
+    argList::addOption("dict", "coordinateSystemsDict");
+    argList::addOption("from", "sourceCoordinateSystem");
+    argList::addOption("to",   "targetCoordinateSystem");
 
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());

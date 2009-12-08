@@ -29,6 +29,9 @@ Description
     A series of straight line segments, which can also be interpreted as
     a series of control points for splines, etc.
 
+ToDo
+    A future implementation could also handle a closed polyLine.
+
 SourceFiles
     polyLine.C
 
@@ -89,7 +92,11 @@ public:
     // Constructors
 
         //- Construct from components
-        polyLine(const pointField&);
+        polyLine
+        (
+            const pointField&,
+            const bool notImplementedClosed = false
+        );
 
 
     // Member Functions
@@ -103,6 +110,10 @@ public:
         //- Return the point position corresponding to the curve parameter
         //  0 <= lambda <= 1
         point position(const scalar) const;
+
+        //- Return the point position corresponding to the local parameter
+        //  0 <= lambda <= 1 on the given segment
+        point position(const label segment, const scalar) const;
 
         //- Return the length of the curve
         scalar length() const;

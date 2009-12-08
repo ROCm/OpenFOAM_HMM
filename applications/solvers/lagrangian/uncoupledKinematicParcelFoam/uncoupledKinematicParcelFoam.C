@@ -42,7 +42,7 @@ Description
 
 int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("cloudName", "cloud name");
+    argList::addOption("cloudName", "cloud name");
 
     #include "setRootCase.H"
     #include "createTime.H"

@@ -235,9 +235,9 @@ void Foam::layerAdditionRemoval::removeCellLayer
                     mesh.faceZones()[modifiedFaceZone].whichFace(curFaceID)
                 ];
         }
-        
+
         label newNei;
-        
+
         if (curFaceID < mesh.nInternalFaces())
         {
             newNei = nei[curFaceID];
@@ -301,7 +301,7 @@ void Foam::layerAdditionRemoval::removeCellLayer
 
         // Is any of the faces a boundary face?  If so, grab the patch
         // A boundary-to-boundary collapse is checked for in validCollapse()
-        // and cannot happen here.  
+        // and cannot happen here.
 
         if (!mesh.isInternalFace(mf[faceI]))
         {

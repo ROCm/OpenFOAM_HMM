@@ -42,7 +42,7 @@ bool Foam::layerAdditionRemoval::setLayerPairing() const
     // This is also the most complex part of the topological change.
     // Therefore it will be calculated here and stored as temporary
     // data until the actual topological change, after which it will
-    // be cleared.  
+    // be cleared.
 
     // Algorithm for point collapse
     // 1)  Go through the master cell layer and for every face of
@@ -212,7 +212,7 @@ void Foam::layerAdditionRemoval::modifyMotionPoints
 {
     if (debug)
     {
-        Pout<< "void layerAdditionRemoval::modifyMotionPoints(" 
+        Pout<< "void layerAdditionRemoval::modifyMotionPoints("
             << "pointField& motionPoints) const for object "
             << name() << " : ";
     }

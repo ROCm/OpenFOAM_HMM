@@ -96,7 +96,7 @@ void Foam::globalMeshData::initProcAddr()
         forAll(processorPatches_, i)
         {
             label patchi = processorPatches_[i];
-            
+
             IPstream fromNeighbour
             (
                 Pstream::blocking,
@@ -105,7 +105,7 @@ void Foam::globalMeshData::initProcAddr()
                     mesh_.boundaryMesh()[patchi]
                 ).neighbProcNo()
             );
-            
+
             fromNeighbour >> processorPatchNeighbours_[patchi];
         }
     }
@@ -628,7 +628,7 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
             OPstream toMaster(Pstream::blocking, Pstream::masterNo());
 
             toMaster
-                << sharedPointAddr_ 
+                << sharedPointAddr_
                 << UIndirectList<point>(mesh_.points(), sharedPointLabels_)();
         }
 

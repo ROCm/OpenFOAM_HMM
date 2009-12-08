@@ -28,27 +28,24 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(reitzKHRT, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(reitzKHRT, 0);
-
-addToRunTimeSelectionTable
-(
-    breakupModel,
-    reitzKHRT,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        breakupModel,
+        reitzKHRT,
+        dictionary
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-reitzKHRT::reitzKHRT
+Foam::reitzKHRT::reitzKHRT
 (
     const dictionary& dict,
     spray& sm
@@ -68,13 +65,13 @@ reitzKHRT::reitzKHRT
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-reitzKHRT::~reitzKHRT()
+Foam::reitzKHRT::~reitzKHRT()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void reitzKHRT::breakupParcel
+void Foam::reitzKHRT::breakupParcel
 (
     parcel& p,
     const scalar deltaT,
@@ -227,9 +224,5 @@ void reitzKHRT::breakupParcel
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

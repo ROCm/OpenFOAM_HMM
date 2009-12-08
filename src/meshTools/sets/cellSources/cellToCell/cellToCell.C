@@ -70,7 +70,7 @@ Foam::cellToCell::cellToCell
 Foam::cellToCell::cellToCell
 (
     const polyMesh& mesh,
-    const dictionary& dict          
+    const dictionary& dict
 )
 :
     topoSetSource(mesh),

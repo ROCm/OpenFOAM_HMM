@@ -40,10 +40,10 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validOptions.insert("times", "");
-    argList::validOptions.insert("dictionary", "dictionary name");
-    argList::validOptions.insert("keywords", "");
-    argList::validOptions.insert("entry", "entry name");
+    argList::addBoolOption("times");
+    argList::addOption("dictionary", "dictionary name");
+    argList::addBoolOption("keywords");
+    argList::addOption("entry", "entry name");
 
 #   include "setRootCase.H"
 
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
             Foam::Time::findTimes(args.rootPath()/args.caseName())
         );
 
-        forAll (times, i)
+        forAll(times, i)
         {
             Info<< times[i].name() << endl;
         }

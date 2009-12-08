@@ -35,7 +35,7 @@ void sammMesh::fixCollapsedEdges()
 {
     cellFaces_.setSize(cellShapes_.size());
 
-    forAll (cellShapes_, cellI)
+    forAll(cellShapes_, cellI)
     {
         cellFaces_[cellI] = cellShapes_[cellI].faces();
     }
@@ -43,23 +43,23 @@ void sammMesh::fixCollapsedEdges()
     // go through the faces and find if there exist faces with duplicate
     // vertices. If so, purge the duplicates and mark the mesh as a polyMesh
 
-    forAll (cellFaces_, cellI)
+    forAll(cellFaces_, cellI)
     {
         faceList& curFaces = cellFaces_[cellI];
 
-        forAll (curFaces, faceI)
+        forAll(curFaces, faceI)
         {
             face& vertexLabels = curFaces[faceI];
 
             bool duplicatesFound = false;
 
-            forAll (vertexLabels, vI)
+            forAll(vertexLabels, vI)
             {
                 label curLabel = vertexLabels[vI];
 
                 label nFound = 0;
 
-                forAll (vertexLabels, searchI)
+                forAll(vertexLabels, searchI)
                 {
                     if (vertexLabels[searchI] == curLabel)
                     {
@@ -84,14 +84,14 @@ void sammMesh::fixCollapsedEdges()
                 // here as the shape is still needed to determine which face
                 // of the shape is used in potential couple matches.  This
                 // will be done in the end using the purgeShapes()
-                // 
+                //
 
                 // create a new face without duplicates and replace original
                 face newFace(vertexLabels.size());
 
                 label nNewVertices = 0;
 
-                forAll (vertexLabels, vI)
+                forAll(vertexLabels, vI)
                 {
                     // In order for a face to be a valid entity, duplicate
                     // vertices can only be consecutive (othervise, the

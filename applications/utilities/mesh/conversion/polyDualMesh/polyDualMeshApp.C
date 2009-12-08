@@ -357,10 +357,10 @@ int main(int argc, char *argv[])
     timeSelector::addOptions(true, false);
 
     argList::validArgs.append("feature angle[0-180]");
-    argList::validOptions.insert("splitAllFaces", "");
-    argList::validOptions.insert("concaveMultiCells", "");
-    argList::validOptions.insert("doNotPreserveFaceZones", "");
-    argList::validOptions.insert("overwrite", "");
+    argList::addBoolOption("splitAllFaces");
+    argList::addBoolOption("concaveMultiCells");
+    argList::addBoolOption("doNotPreserveFaceZones");
+    argList::addBoolOption("overwrite");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

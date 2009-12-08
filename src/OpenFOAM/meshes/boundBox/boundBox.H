@@ -171,6 +171,8 @@ public:
                 return cmptAv(span());
             }
 
+            //- Return corner points in an order corresponding to a 'hex' cell
+            tmp<pointField> corners() const;
 
         // Query
 

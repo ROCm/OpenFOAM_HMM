@@ -28,7 +28,7 @@ Class
 Description
     Accumulates point constraints through successive applications of the
     applyConstraint function.
- 
+
     After all the constraints have been entered the resulting
     transformation tensor is returned by the constraintTransformation
     function.
@@ -74,7 +74,7 @@ public:
 
     // Member Functions
 
-        //- Apply and accumulate the effect of the given constraint direction 
+        //- Apply and accumulate the effect of the given constraint direction
         inline void applyConstraint(const vector& cd);
 
         //- Return the accumulated constraint transformation tensor

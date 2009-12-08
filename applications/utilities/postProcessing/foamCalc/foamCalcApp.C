@@ -26,8 +26,9 @@ Application
     foamCalc
 
 Description
-    Generic wrapper for calculating a quantity at each time. Split into four
-    phases:
+    Generic wrapper for calculating a quantity at each time.
+
+    Split into four phases:
         1. Intialise
         2. Pre-time calculation loop
         3. Calculation loop
@@ -43,8 +44,16 @@ Description
 int main(int argc, char *argv[])
 {
     Foam::timeSelector::addOptions();
-    Foam::argList::validOptions.insert("noWrite", "");
-    Foam::argList::validOptions.insert("dict", "dictionary name");
+    Foam::argList::addBoolOption
+    (
+        "noWrite",
+        "suppress writing results"
+    );
+    Foam::argList::addOption
+    (
+        "dict",
+        "dictionary name"
+    );
 
     if (argc < 2)
     {

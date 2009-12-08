@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("feature angle[0-180]");
-    argList::validOptions.insert("overwrite", "");
+    argList::addBoolOption("overwrite");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

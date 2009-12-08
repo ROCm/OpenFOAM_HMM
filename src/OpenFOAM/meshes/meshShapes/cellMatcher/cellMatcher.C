@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "cellMatcher.H"
@@ -32,24 +30,11 @@ Description
 #include "Map.H"
 #include "faceList.H"
 #include "labelList.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-Foam::labelList Foam::cellMatcher::makeIdentity(const label nElems)
-{
-    labelList result(nElems);
-
-    forAll(result, elemI)
-    {
-        result[elemI] = elemI;
-    }
-    return result;
-}
+#include "ListOps.H"
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::cellMatcher::cellMatcher
 (
     const label vertPerCell,
@@ -177,7 +162,7 @@ void Foam::cellMatcher::calcEdgeAddressing(const label numVert)
         {
             label start = f[prevVertI];
             label end = f[fp];
-            
+
             label key1 = edgeKey(numVert, start, end);
             label key2 = edgeKey(numVert, end, start);
 

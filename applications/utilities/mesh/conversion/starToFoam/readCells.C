@@ -108,7 +108,7 @@ void starMesh::addRegularCell
     // get reference to the addressing list
     const label* addressing = regularAddressingTable[regularTypeFlag];
 
-    forAll (regularCellLabels, labelI)
+    forAll(regularCellLabels, labelI)
     {
         regularCellLabels[labelI] = labels[addressing[labelI]];
     }
@@ -125,7 +125,7 @@ void starMesh::addSAMMcell
 {
     // get type, reg and permutation flag
     label typeFlag = labels[21];
-//     label regularityFlag = labels[22];  // Not used. 
+//     label regularityFlag = labels[22];  // Not used.
     label permutationFlag = labels[23];
 
     // grab the shape from the table
@@ -194,7 +194,7 @@ void starMesh::addSAMMcell
     // get reference to the addressing list
     const label* addressing = sammAddressingTable[sammTypeFlag];
 
-    forAll (sammCellLabels, labelI)
+    forAll(sammCellLabels, labelI)
     {
         sammCellLabels[labelI] = labels[addressing[labelI]];
     }
@@ -239,7 +239,7 @@ void starMesh::readCells()
                 }
 
                 // backward compatibility: number of trailing rubbish in
-                // STAR is unknown. 
+                // STAR is unknown.
                 // Fixed to cope with missing \n on last line.
                 readToNl(cellsFile);
             }
@@ -259,15 +259,15 @@ void starMesh::readCells()
     starCellPermutation_.setSize(nCells);
 
     // reset permutation to invalid value
-    forAll (starCellPermutation_, i)
+    forAll(starCellPermutation_, i)
     {
         starCellPermutation_[i] = -1;
     }
 
     starCellLabelLookup_.setSize(maxLabel+1);
-    
+
     // reset point labels to invalid value
-    forAll (starCellLabelLookup_, i)
+    forAll(starCellLabelLookup_, i)
     {
         starCellLabelLookup_[i] = -1;
     }
@@ -285,8 +285,8 @@ void starMesh::readCells()
 
             label addOnToCell = 0;
 
-            // reset the labels to -1. Debugging. 
-            forAll (labels, i)
+            // reset the labels to -1. Debugging.
+            forAll(labels, i)
             {
                 labels[i] = -1;
             }
@@ -342,7 +342,7 @@ void starMesh::readCells()
                 }
 
                 // backward compatibility: number of trailing rubbish in
-                // STAR is unknown. 
+                // STAR is unknown.
                 readToNl(cellsFile);
 
                 addOnToCell--;
@@ -367,13 +367,13 @@ void starMesh::readCells()
             // check cell labels
             const labelList& curShapeLabels = cellShapes_[cellI];
 
-            forAll (curShapeLabels, i)
+            forAll(curShapeLabels, i)
             {
                 if (curShapeLabels[i] < 0)
                 {
                     FatalErrorIn("starMesh::readCells()")
                         << "Invalid vertex found in cell " << cellI
-                        << ". STAR cell no: " << lineLabel 
+                        << ". STAR cell no: " << lineLabel
                         << " labels: " << curShapeLabels
                         << abort(FatalError);
                 }

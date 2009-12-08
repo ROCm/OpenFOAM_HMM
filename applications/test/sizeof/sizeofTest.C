@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,73 +22,83 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Description
+    Test the sizeof various classes.
+
 \*---------------------------------------------------------------------------*/
 
-#include "spline.H"
+#include "bool.H"
+#include "Switch.H"
+#include "string.H"
+#include "dictionary.H"
+#include "nil.H"
+#include "IOstreams.H"
+#include "IStringStream.H"
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-Foam::scalar Foam::spline::B(const scalar tau)
+namespace Foam
 {
-    if (tau <= -2.0 || tau >= 2.0)
-    {
-        return 0.0;
-    }
-    else if (tau <= -1.0)
-    {
-        return pow((2.0 + tau), 3.0)/6.0;
-    }
-    else if (tau <= 0.0)
-    {
-        return (4.0 - 6.0*tau*tau - 3.0*tau*tau*tau)/6.0;
-    }
-    else if (tau <= 1.0)
-    {
-        return (4.0 - 6.0*tau*tau + 3.0*tau*tau*tau)/6.0;
-    }
-    else if (tau <= 2.0)
-    {
-        return pow((2.0 - tau), 3.0)/6.0;
-    }
-    else
-    {
-        FatalErrorIn("spline::B(const scalar)")
-            << "Programming error???, "
-            << "tau = " << tau
-            << abort(FatalError);
-    }
+   class hasBoolClass
+   {
+   public:
+      bool b_;
 
-    return 0.0;
+      hasBoolClass(const bool val=false)
+      :
+          b_(false)
+      {}
+   };
+
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+using namespace Foam;
 
-Foam::spline::spline(const pointField& knotPoints)
-:
-    knots_(knotPoints)
-{}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Main program:
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::point Foam::spline::position(const scalar mu) const
+int main(int argc, char *argv[])
 {
-    point loc(point::zero);
-
-    for (register label i=0; i < knots_.size(); i++)
+    cout<<"sizeof\n------\n";
     {
-        loc += B((knots_.size() - 1)*mu - i)*knots_[i];
+        nil x;
+        cout<<"nil:" << sizeof(x) << nl;
+    }
+    {
+        bool x(0);
+        cout<<"bool:" << sizeof(x) << nl;
+    }
+    {
+        hasBoolClass x(true);
+        cout<<"hasBoolClass:" << sizeof(x) << nl;
     }
 
-    return loc;
-}
+    {
+        Switch x("n");
+        cout<<"Switch:" << sizeof(x) << nl;
+        cout<<"Switch::switchType=" << sizeof(Switch::switchType) << nl;
+    }
+
+    {
+        scalar x(0);
+        cout<<"scalar:" << sizeof(x) << nl;
+    }
+
+    {
+        label x(0);
+        cout<<"label:" << sizeof(x) << nl;
+    }
+
+    {
+        cout<<"int:" << sizeof(int) << nl;
+        cout<<"long:" << sizeof(long) << nl;
+        cout<<"float:" << sizeof(float) << nl;
+        cout<<"double:" << sizeof(double) << nl;
+    }
 
 
-Foam::scalar Foam::spline::length() const
-{
-    notImplemented("spline::length() const");
-    return 1.0;
+    Info << "---\nEnd\n" << endl;
+
+    return 0;
 }
 
 

@@ -378,13 +378,13 @@ void writePointCells
 int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
-    argList::validOptions.insert("patchFaces", "");
-    argList::validOptions.insert("patchEdges", "");
-    argList::validOptions.insert("cell", "cellI");
-    argList::validOptions.insert("face", "faceI");
-    argList::validOptions.insert("point", "pointI");
-    argList::validOptions.insert("cellSet", "setName");
-    argList::validOptions.insert("faceSet", "setName");
+    argList::addBoolOption("patchFaces");
+    argList::addBoolOption("patchEdges");
+    argList::addOption("cell", "cellI");
+    argList::addOption("face", "faceI");
+    argList::addOption("point", "pointI");
+    argList::addOption("cellSet", "setName");
+    argList::addOption("faceSet", "setName");
 #   include "addRegionOption.H"
 
 #   include "setRootCase.H"
