@@ -92,7 +92,6 @@ inline Foam::IStringStream Foam::argList::optionLookup(const word& opt) const
 
 namespace Foam
 {
-
     // Template specialization for string
     template<>
     inline Foam::string
@@ -116,9 +115,7 @@ namespace Foam
     {
         return option(opt);
     }
-
-
-} // End namespace Foam
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
