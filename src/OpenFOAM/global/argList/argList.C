@@ -43,7 +43,7 @@ Foam::SLList<Foam::string>    Foam::argList::validArgs;
 Foam::HashTable<Foam::string> Foam::argList::validOptions;
 Foam::HashTable<Foam::string> Foam::argList::validParOptions;
 Foam::HashTable<Foam::string> Foam::argList::optionUsage;
-Foam::string::size_type Foam::argList::usageMin = 16;
+Foam::string::size_type Foam::argList::usageMin = 20;
 Foam::string::size_type Foam::argList::usageMax = 80;
 
 
@@ -51,7 +51,7 @@ Foam::argList::initValidTables::initValidTables()
 {
     argList::addOption
     (
-        "case", "DIR",
+        "case", "dir",
         "specify alternate case directory, default is the cwd"
     );
     argList::addBoolOption("parallel", "run in parallel");
@@ -769,8 +769,9 @@ void Foam::argList::printUsage() const
 
         if (iter().size())
         {
-            len += iter().size() + 1; // include space between option and param
-            Info<< ' ' << iter().c_str();
+            // length includes space and between option/param and '<>'
+            len += iter().size() + 3;
+            Info<< " <" << iter().c_str() << '>';
         }
 
         HashTable<string>::const_iterator usageIter =
@@ -827,12 +828,12 @@ void Foam::argList::displayDoc(bool source) const
     List<fileName> docDirs(docDict.lookup("doxyDocDirs"));
     List<fileName> docExts(docDict.lookup("doxySourceFileExts"));
 
-    // for source code: change foo_8C.html to foo_8C-source.html
+    // for source code: change foo_8C.html to foo_8C_source.html
     if (source)
     {
         forAll(docExts, extI)
         {
-            docExts[extI].replace(".", "-source.");
+            docExts[extI].replace(".", "_source.");
         }
     }
 
