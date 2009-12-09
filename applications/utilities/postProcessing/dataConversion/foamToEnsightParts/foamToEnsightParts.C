@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "noMesh",
-        "Suppress writing the geometry. "
+        "suppress writing the geometry. "
         "Can be useful for converting partial results for a static geometry"
     );
 
