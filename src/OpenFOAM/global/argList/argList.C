@@ -43,6 +43,7 @@ Foam::SLList<Foam::string>    Foam::argList::validArgs;
 Foam::HashTable<Foam::string> Foam::argList::validOptions;
 Foam::HashTable<Foam::string> Foam::argList::validParOptions;
 Foam::HashTable<Foam::string> Foam::argList::optionUsage;
+Foam::SLList<Foam::string>    Foam::argList::notes;
 Foam::string::size_type Foam::argList::usageMin = 20;
 Foam::string::size_type Foam::argList::usageMax = 80;
 
@@ -104,6 +105,15 @@ void Foam::argList::addUsage
     else
     {
         optionUsage.set(opt, usage);
+    }
+}
+
+
+void Foam::argList::addNote(const string& note)
+{
+    if (!note.empty())
+    {
+        notes.append(note);
     }
 }
 
@@ -765,7 +775,7 @@ void Foam::argList::printUsage() const
 
         HashTable<string>::const_iterator iter = validOptions.find(optionName);
         Info<< "  -" << optionName;
-        label len = optionName.size() + 3;  // include leading "  -"
+        label len = optionName.size() + 3;  // length includes leading '  -'
 
         if (iter().size())
         {
@@ -814,6 +824,22 @@ void Foam::argList::printUsage() const
         7,
         "print the usage"
     );
+
+
+    // output notes directly - no automatic text wrapping
+    if (!notes.empty())
+    {
+        Info<< nl;
+        for
+        (
+            SLList<string>::const_iterator iter = notes.begin();
+            iter != notes.end();
+            ++iter
+        )
+        {
+            Info<< iter().c_str() << nl;
+        }
+    }
 
     Info<< nl
         <<"Using OpenFOAM-" << Foam::FOAMversion
