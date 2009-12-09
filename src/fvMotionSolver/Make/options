@@ -10,4 +10,4 @@ LIB_LIBS = \
     -lmeshTools \
     -ldynamicMesh \
     -lfiniteVolume \
-    -lforces
+    /*-lforces include in controlDict if needed */

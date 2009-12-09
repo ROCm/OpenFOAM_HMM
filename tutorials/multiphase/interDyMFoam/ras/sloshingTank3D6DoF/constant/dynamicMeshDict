@@ -19,10 +19,10 @@ dynamicFvMesh   solidBodyMotionFvMesh;
 
 solidBodyMotionFvMeshCoeffs
 {
-    solidBodyMotionFunction SKA;
-    SKACoeffs
+    solidBodyMotionFunction tabulated6DoFMotion;
+    tabulated6DoFMotionCoeffs
     {
-        CofG            ( 0 0 0 );
+        CofG            (0 0 0);
         timeDataFileName "constant/6DoF.dat";
     }
 }

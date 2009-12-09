@@ -5,7 +5,7 @@ set -x
 if [ -d "$ParaView_DIR" -a -r "$ParaView_DIR" ]
 then
     case "$ParaView_VERSION" in
-    3*)
+    3* | git)
         wmake libso vtkPV3Foam
         (
             cd PV3FoamReader
