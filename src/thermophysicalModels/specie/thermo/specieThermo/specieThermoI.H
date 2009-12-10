@@ -303,6 +303,7 @@ inline void Foam::specieThermo<thermo>::operator+=
     thermo::operator+=(st);
 }
 
+
 template<class thermo>
 inline void Foam::specieThermo<thermo>::operator-=
 (
@@ -311,6 +312,7 @@ inline void Foam::specieThermo<thermo>::operator-=
 {
     thermo::operator-=(st);
 }
+
 
 template<class thermo>
 inline void Foam::specieThermo<thermo>::operator*=(const scalar s)
