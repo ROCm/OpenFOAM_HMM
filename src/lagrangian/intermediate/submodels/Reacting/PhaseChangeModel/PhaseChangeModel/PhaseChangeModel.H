@@ -53,6 +53,21 @@ namespace Foam
 template<class CloudType>
 class PhaseChangeModel
 {
+public:
+
+    // Public enumerations
+
+        //- Enthalpy transfer type
+        enum enthalpyTransferType
+        {
+            etLatentHeat,
+            etEnthalpyDifference
+        };
+
+        //- Name representations of enthalpy transfer types
+        static const Foam::wordList enthalpyTransferTypeNames;
+
+
 protected:
 
     // Protected data
@@ -66,8 +81,14 @@ protected:
         //- The coefficient dictionary
         const dictionary coeffDict_;
 
+        //- Enthalpy transfer type enumeration
+        enthalpyTransferType enthalpyTransfer_;
+
 
     // Protected member functions
+
+        //- Convert word to enthalpy transfer type
+        enthalpyTransferType wordToEnthalpyTransfer(const word& etName) const;
 
         //- Sherwood number
         scalar Sh() const;
@@ -128,6 +149,9 @@ public:
 
         //- Return the coefficient dictionary
         const dictionary& coeffDict() const;
+
+        //- Return the enthalpy transfer type enumeration
+        const enthalpyTransferType& enthalpyTransfer() const;
 
 
     // Member Functions
