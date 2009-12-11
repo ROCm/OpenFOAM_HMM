@@ -1461,7 +1461,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     getNeighbourData(distribution, sourceFace, sourceProc, sourceNewProc);
 
 
-    // Remove meshPhi. Since this would otherwise dissappear anyway
+    // Remove meshPhi. Since this would otherwise disappear anyway
     // during topo changes and we have to guarantee that all the fields
     // can be sent.
     mesh_.clearOut();
