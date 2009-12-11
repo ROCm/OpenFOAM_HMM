@@ -67,9 +67,15 @@ int main(int argc, char *argv[])
             while (is.good())
             {
                 token tok(is);
+                // char ch;
+                // is.get(ch);
+                // is.putback(ch);
+                int lookahead = is.peek();
+
                 if (count == 0)
                 {
-                    Info<< "token: " << tok.info() << endl;
+                    Info<< "token: " << tok.info();
+                    Info<< "  lookahead: '" << char(lookahead) << "'" << endl;
                 }
             }
 
