@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,50 +24,38 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "OBJedgeFormat.H"
 
-inline Foam::edgeMesh::edgeMesh(const edgeMesh& em)
-:
-    points_(em.points_),
-    edges_(em.edges_),
-    pointEdgesPtr_(NULL)
-{}
+#include "addToRunTimeSelectionTable.H"
+#include "addToMemberFunctionSelectionTable.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline const Foam::pointField& Foam::edgeMesh::points() const
+namespace Foam
 {
-    return points_;
-}
-
-
-inline const Foam::edgeList& Foam::edgeMesh::edges() const
+namespace fileFormats
 {
-    return edges_;
+
+// read edgeMesh
+addNamedToRunTimeSelectionTable
+(
+    edgeMesh,
+    OBJedgeFormat,
+    fileExtension,
+    obj
+);
+
+// write edgeMesh
+addNamedToMemberFunctionSelectionTable
+(
+    edgeMesh,
+    OBJedgeFormat,
+    write,
+    fileExtension,
+    obj
+);
+
 }
-
-
-inline const Foam::labelListList& Foam::edgeMesh::pointEdges() const
-{
-    if (pointEdgesPtr_.empty())
-    {
-        calcPointEdges();
-    }
-    return pointEdgesPtr_();
 }
-
-
-inline Foam::pointField& Foam::edgeMesh::storedPoints()
-{
-    return points_;
-}
-
-
-inline Foam::edgeList& Foam::edgeMesh::storedEdges()
-{
-    return edges_;
-}
-
 
 // ************************************************************************* //

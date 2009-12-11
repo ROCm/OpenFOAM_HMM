@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,50 +24,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-inline Foam::edgeMesh::edgeMesh(const edgeMesh& em)
-:
-    points_(em.points_),
-    edges_(em.edges_),
-    pointEdgesPtr_(NULL)
-{}
-
+#include "edgeMesh.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::pointField& Foam::edgeMesh::points() const
+
+Foam::autoPtr< Foam::edgeMesh >
+Foam::edgeMesh::New(const fileName& name, const word& ext)
 {
-    return points_;
-}
+    fileExtensionConstructorTable::iterator cstrIter =
+        fileExtensionConstructorTablePtr_->find(ext);
 
-
-inline const Foam::edgeList& Foam::edgeMesh::edges() const
-{
-    return edges_;
-}
-
-
-inline const Foam::labelListList& Foam::edgeMesh::pointEdges() const
-{
-    if (pointEdgesPtr_.empty())
+    if (cstrIter == fileExtensionConstructorTablePtr_->end())
     {
-        calcPointEdges();
+        FatalErrorIn
+        (
+            "edgeMesh<Face>::New(const fileName&, const word&) : "
+            "constructing edgeMesh"
+        )   << "Unknown file extension " << ext << nl << nl
+            << "Valid types are :" << nl
+            << fileExtensionConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
-    return pointEdgesPtr_();
+
+    return autoPtr< edgeMesh >(cstrIter()(name));
 }
 
 
-inline Foam::pointField& Foam::edgeMesh::storedPoints()
+Foam::autoPtr< Foam::edgeMesh >
+Foam::edgeMesh::New(const fileName& name)
 {
-    return points_;
+    word ext = name.ext();
+    if (ext == "gz")
+    {
+        ext = name.lessExt().ext();
+    }
+    return New(name, ext);
 }
-
-
-inline Foam::edgeList& Foam::edgeMesh::storedEdges()
-{
-    return edges_;
-}
-
 
 // ************************************************************************* //

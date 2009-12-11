@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,69 +23,87 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::featureEdgeMesh
+    Foam::fileFormats::NASedgeFormat
 
 Description
-    features (lines), readable from file
+    Nastran edge reader.
 
 SourceFiles
-    featureEdgeMesh.C
+    NASedgeFormat.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef featureEdgeMesh_H
-#define featureEdgeMesh_H
+#ifndef NASedgeFormat_H
+#define NASedgeFormat_H
 
 #include "edgeMesh.H"
-#include "regIOobject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace fileFormats
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class featureEdgeMesh Declaration
+                      Class NASedgeFormat Declaration
 \*---------------------------------------------------------------------------*/
 
-class featureEdgeMesh
+class NASedgeFormat
 :
-    public regIOobject,
     public edgeMesh
 {
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        NASedgeFormat(const NASedgeFormat&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const NASedgeFormat&);
+
+protected:
+
+    // Protected Member Functions
+
+        //- Do weird things to extract number
+        static scalar parseNASCoord(const string&);
 
 public:
 
-    TypeName("featureEdgeMesh");
-
-
     // Constructors
 
-        //- Construct (read) given an IOobject
-        featureEdgeMesh(const IOobject&);
-
-        //- Construct from featureEdgeMesh data
-        featureEdgeMesh
-        (
-            const IOobject&,
-            const pointField&,
-            const edgeList&
-        );
-
-        //- Construct as copy
-        featureEdgeMesh(const IOobject&, const featureEdgeMesh&);
+        //- Construct from file name
+        NASedgeFormat(const fileName&);
 
 
-        //- ReadData function required for regIOobject read operation
-        virtual bool readData(Istream&);
+    // Selectors
 
-        //- WriteData function required for regIOobject write operation
-        virtual bool writeData(Ostream&) const;
+        //- Read file and return edge mesh
+        static autoPtr<edgeMesh> New(const fileName& name)
+        {
+            return autoPtr<edgeMesh>
+            (
+                new NASedgeFormat(name)
+            );
+        }
+
+
+    // Destructor
+
+        virtual ~NASedgeFormat()
+        {}
+
+
+    // Member Functions
+
+        //- Read from a file
+        virtual bool read(const fileName&);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fileFormats
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
