@@ -449,7 +449,7 @@ template<class CompType, class ThermoType>
 Foam::tmp<Foam::volScalarField>
 Foam::ODEChemistryModel<CompType, ThermoType>::tc() const
 {
-    scalar pf,cf,pr,cr;
+    scalar pf, cf, pr, cr;
     label lRef, rRef;
 
     const volScalarField rho
