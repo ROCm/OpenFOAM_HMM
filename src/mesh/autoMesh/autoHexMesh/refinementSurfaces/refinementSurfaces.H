@@ -291,7 +291,7 @@ public:
             (
                 const labelList& surfacesToTest,
                 const pointField& samples,
-                const  scalarField& nearestDistSqr,
+                const scalarField& nearestDistSqr,
                 labelList& hitSurface,
                 labelList& hitRegion
             ) const;
