@@ -120,6 +120,8 @@ SinglePhaseMixtureCoeffs
 
 LiquidEvaporationCoeffs
 {
+    enthalpyTransfer enthalpyDifference;
+
     activeLiquids
     (
         H2O

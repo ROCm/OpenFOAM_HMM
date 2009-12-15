@@ -136,6 +136,9 @@ public:
 
     public:
 
+        typedef ReactingCloud<ParcelType> cloudType;
+
+
         // Constructors
 
             //- Construct from components

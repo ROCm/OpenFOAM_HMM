@@ -93,9 +93,9 @@ void readAndRotateFields
 }
 
 
-void rotateFields(const Time& runTime, const tensor& T)
+void rotateFields(const argList& args, const Time& runTime, const tensor& T)
 {
-#   include "createMesh.H"
+#   include "createNamedMesh.H"
 
     // Read objects in time directory
     IOobjectList objects(mesh, runTime.timeName());
@@ -167,7 +167,11 @@ int main(int argc, char *argv[])
         "vector",
         "transform in terms of '( yaw pitch roll )' in degrees"
     );
-    argList::addBoolOption("rotateFields");
+    argList::addBoolOption
+    (
+        "rotateFields",
+        "read and transform vector and tensor fields too"
+    );
     argList::addOption
     (
         "scale",
@@ -176,16 +180,29 @@ int main(int argc, char *argv[])
         "uniform [mm] to [m] scaling"
     );
 
+#   include "addRegionOption.H"
 #   include "setRootCase.H"
 #   include "createTime.H"
+
+    word regionName = polyMesh::defaultRegion;
+    fileName meshDir;
+
+    if (args.optionReadIfPresent("region", regionName))
+    {
+        meshDir = regionName/polyMesh::meshSubDir;
+    }
+    else
+    {
+        meshDir = polyMesh::meshSubDir;
+    }
 
     pointIOField points
     (
         IOobject
         (
             "points",
-            runTime.findInstance(polyMesh::meshSubDir, "points"),
-            polyMesh::meshSubDir,
+            runTime.findInstance(meshDir, "points"),
+            meshDir,
             runTime,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
@@ -224,7 +241,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("rotateFields"))
         {
-            rotateFields(runTime, T);
+            rotateFields(args, runTime, T);
         }
     }
     else if (args.optionFound("rollPitchYaw"))
@@ -247,7 +264,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("rotateFields"))
         {
-            rotateFields(runTime, R.R());
+            rotateFields(args, runTime, R.R());
         }
     }
     else if (args.optionFound("yawPitchRoll"))
@@ -276,7 +293,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("rotateFields"))
         {
-            rotateFields(runTime, R.R());
+            rotateFields(args, runTime, R.R());
         }
     }
 
