@@ -704,7 +704,11 @@ public:
             //- Put faces/cells into zones according to surface specification.
             //  Returns null if no zone surfaces present. Region containing
             //  the keepPoint will not be put into a cellZone.
-            autoPtr<mapPolyMesh> zonify(const point& keepPoint);
+            autoPtr<mapPolyMesh> zonify
+            (
+                const point& keepPoint,
+                const bool allowFreeStandingZoneFaces
+            );
 
 
         // Other topo changes

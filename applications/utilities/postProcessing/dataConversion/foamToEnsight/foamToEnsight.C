@@ -101,13 +101,13 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "noPatches",
-        "Suppress writing any patches"
+        "suppress writing any patches"
     );
     argList::addOption
     (
         "patches",
-        "patchList",
-        "Specify particular patches to write. "
+        "wordList",
+        "specify particular patches to write - eg '(inlet outlet)'. "
         "An empty list suppresses writing the internalMesh."
     );
 

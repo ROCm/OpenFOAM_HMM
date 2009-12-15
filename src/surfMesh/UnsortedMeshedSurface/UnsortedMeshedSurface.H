@@ -110,9 +110,6 @@ private:
         //- Disable setSize with value
         void setSize(const label, const Face&);
 
-        //- Read OpenFOAM Surface format
-        bool read(Istream&);
-
 
 protected:
 
@@ -197,9 +194,6 @@ public:
 
         //- Construct from file name (uses extension to determine type)
         UnsortedMeshedSurface(const fileName&, const word&);
-
-        //- Construct from Istream
-        UnsortedMeshedSurface(Istream&);
 
         //- Construct from objectRegistry and a named surface
         UnsortedMeshedSurface(const Time&, const word& surfName="");

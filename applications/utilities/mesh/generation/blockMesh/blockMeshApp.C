@@ -42,7 +42,7 @@ Usage
     @param -region \<name\> \n
     Specify an alternative mesh region.
 
-    @param -dict \<dictionary\> \n
+    @param -dict \<filename\> \n
     Specify an alternative dictionary for the block mesh description.
 
 \*---------------------------------------------------------------------------*/
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     argList::addOption
     (
         "dict",
-        "NAME",
+        "file",
         "specify an alternative dictionary for the blockMesh description"
     );
 

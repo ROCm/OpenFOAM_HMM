@@ -153,7 +153,10 @@ public:
         //- Short usage information for validOptions
         static HashTable<string> optionUsage;
 
-        //- Min offset for displaying usage (default: 16)
+        //- Additional notes for usage
+        static SLList<string> notes;
+
+        //- Min offset for displaying usage (default: 20)
         static string::size_type usageMin;
 
         //- Max screen width for displaying usage (default: 80)
@@ -286,6 +289,10 @@ public:
                 const word& opt,
                 const string& usage
             );
+
+            //- Add extra notes for the usage information
+            //  This string is used "as-is" without additional formatting
+            static void addNote(const string&);
 
             //- Remove option from validOptions and from optionUsage
             static void removeOption(const word& opt);
