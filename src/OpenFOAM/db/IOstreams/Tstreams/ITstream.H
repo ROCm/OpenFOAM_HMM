@@ -70,7 +70,26 @@ public:
         ITstream
         (
             const string& name,
-            const tokenList& tokens,
+            const UList<token>& tokens,
+            streamFormat format=ASCII,
+            versionNumber version=currentVersion
+        )
+        :
+            Istream(format, version),
+            tokenList(tokens),
+            name_(name),
+            tokenIndex_(0)
+        {
+            setOpened();
+            setGood();
+        }
+
+
+        //- Construct from components, transferring the tokens
+        ITstream
+        (
+            const string& name,
+            const Xfer< List<token> >& tokens,
             streamFormat format=ASCII,
             versionNumber version=currentVersion
         )
@@ -98,8 +117,7 @@ public:
         }
 
 
-    // Destructor
-
+        //- Destructor
         virtual ~ITstream()
         {}
 
