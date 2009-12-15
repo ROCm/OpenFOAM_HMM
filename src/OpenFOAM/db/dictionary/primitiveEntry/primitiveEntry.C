@@ -26,33 +26,92 @@ License
 
 #include "primitiveEntry.H"
 #include "dictionary.H"
+#include "OSspecific.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::primitiveEntry::append(const UList<token>& varTokens)
+{
+    forAll(varTokens, i)
+    {
+        newElmt(tokenIndex()++) = varTokens[i];
+    }
+}
+
+
+bool Foam::primitiveEntry::expandVariable
+(
+    const word& w,
+    const dictionary& dict
+)
+{
+    word varName = w(1, w.size()-1);
+
+    // lookup the variable name in the given dictionary....
+    // Note: allow wildcards to match? For now disabled since following
+    // would expand internalField to wildcard match and not expected
+    // internalField:
+    //      internalField XXX;
+    //      boundaryField { ".*" {YYY;} movingWall {value $internalField;}
+    const entry* ePtr = dict.lookupEntryPtr(varName, true, false);
+
+    // ...if defined append its tokens into this
+    if (ePtr)
+    {
+        append(ePtr->stream());
+    }
+    else
+    {
+        // not in the dictionary - try an environment variable
+        string envStr = getEnv(varName);
+
+        if (envStr.empty())
+        {
+            return false;
+        }
+        append(tokenList(IStringStream('(' + envStr + ')')()));
+    }
+    return true;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::primitiveEntry::primitiveEntry(const keyType& key, const ITstream& tokens)
+Foam::primitiveEntry::primitiveEntry(const keyType& key, const ITstream& is)
 :
     entry(key),
-    ITstream(tokens)
+    ITstream(is)
 {
     name() += "::" + keyword();
 }
 
 
-Foam::primitiveEntry::primitiveEntry(const keyType& keyword, const token& t)
+Foam::primitiveEntry::primitiveEntry(const keyType& key, const token& t)
 :
-    entry(keyword),
-    ITstream(keyword, tokenList(1, t))
+    entry(key),
+    ITstream(key, tokenList(1, t))
 {}
 
 
 Foam::primitiveEntry::primitiveEntry
 (
-    const keyType& keyword,
-    const tokenList& tokens
+    const keyType& key,
+    const UList<token>& tokens
 )
 :
-    entry(keyword),
-    ITstream(keyword, tokens)
+    entry(key),
+    ITstream(key, tokens)
+{}
+
+
+Foam::primitiveEntry::primitiveEntry
+(
+    const keyType& key,
+    const Xfer< List<token> >& tokens
+)
+:
+    entry(key),
+    ITstream(key, tokens)
 {}
 
 
@@ -115,45 +174,6 @@ Foam::dictionary& Foam::primitiveEntry::dict()
         << abort(FatalError);
 
     return const_cast<dictionary&>(dictionary::null);
-}
-
-
-void Foam::primitiveEntry::insert
-(
-    const tokenList& varTokens,
-    const label posI
-)
-{
-    tokenList& tokens = *this;
-
-    if (varTokens.empty())
-    {
-        label end = tokens.size() - 1;
-
-        for (label j = posI; j < end; j++)
-        {
-            tokens[j] = tokens[j+1];
-        }
-
-        tokens.setSize(tokens.size() - 1);
-    }
-    else if (varTokens.size() > 1)
-    {
-        tokens.setSize(tokens.size() + varTokens.size() - 1);
-
-        label end = tokens.size() - 1;
-        label offset = varTokens.size() - 1;
-
-        for (label j = end; j > posI; j--)
-        {
-            tokens[j] = tokens[j-offset];
-        }
-    }
-
-    forAll(varTokens, j)
-    {
-        tokens[posI + j] = varTokens[j];
-    }
 }
 
 
