@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
     }
 
     // Trim away small groups of features
-    if (minLen > 0 || minLen > 0)
+    if (minElem > 0 || minLen > 0)
     {
         set.trimFeatures(minLen, minElem);
         Pout<< endl << "Removed small features" << endl;

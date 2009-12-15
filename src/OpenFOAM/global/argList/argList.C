@@ -43,7 +43,8 @@ Foam::SLList<Foam::string>    Foam::argList::validArgs;
 Foam::HashTable<Foam::string> Foam::argList::validOptions;
 Foam::HashTable<Foam::string> Foam::argList::validParOptions;
 Foam::HashTable<Foam::string> Foam::argList::optionUsage;
-Foam::string::size_type Foam::argList::usageMin = 16;
+Foam::SLList<Foam::string>    Foam::argList::notes;
+Foam::string::size_type Foam::argList::usageMin = 20;
 Foam::string::size_type Foam::argList::usageMax = 80;
 
 
@@ -51,7 +52,7 @@ Foam::argList::initValidTables::initValidTables()
 {
     argList::addOption
     (
-        "case", "DIR",
+        "case", "dir",
         "specify alternate case directory, default is the cwd"
     );
     argList::addBoolOption("parallel", "run in parallel");
@@ -104,6 +105,15 @@ void Foam::argList::addUsage
     else
     {
         optionUsage.set(opt, usage);
+    }
+}
+
+
+void Foam::argList::addNote(const string& note)
+{
+    if (!note.empty())
+    {
+        notes.append(note);
     }
 }
 
@@ -765,12 +775,13 @@ void Foam::argList::printUsage() const
 
         HashTable<string>::const_iterator iter = validOptions.find(optionName);
         Info<< "  -" << optionName;
-        label len = optionName.size() + 3;  // include leading "  -"
+        label len = optionName.size() + 3;  // length includes leading '  -'
 
         if (iter().size())
         {
-            len += iter().size() + 1; // include space between option and param
-            Info<< ' ' << iter().c_str();
+            // length includes space and between option/param and '<>'
+            len += iter().size() + 3;
+            Info<< " <" << iter().c_str() << '>';
         }
 
         HashTable<string>::const_iterator usageIter =
@@ -813,6 +824,22 @@ void Foam::argList::printUsage() const
         7,
         "print the usage"
     );
+
+
+    // output notes directly - no automatic text wrapping
+    if (!notes.empty())
+    {
+        Info<< nl;
+        for
+        (
+            SLList<string>::const_iterator iter = notes.begin();
+            iter != notes.end();
+            ++iter
+        )
+        {
+            Info<< iter().c_str() << nl;
+        }
+    }
 
     Info<< nl
         <<"Using OpenFOAM-" << Foam::FOAMversion

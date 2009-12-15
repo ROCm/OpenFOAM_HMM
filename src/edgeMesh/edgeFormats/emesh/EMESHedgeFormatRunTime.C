@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,83 +24,38 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ISstream.H"
+#include "EMESHedgeFormat.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "addToRunTimeSelectionTable.H"
+#include "addToMemberFunctionSelectionTable.H"
 
-inline Foam::ISstream::ISstream
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace fileFormats
+{
+
+// read edgeMesh
+addNamedToRunTimeSelectionTable
 (
-    istream& is,
-    const string& name,
-    streamFormat format,
-    versionNumber version,
-    compressionType compression
-)
-:
-    Istream(format, version, compression),
-    name_(name),
-    is_(is)
-{
-    if (is_.good())
-    {
-        setOpened();
-        setGood();
-    }
-    else
-    {
-        setState(is_.rdstate());
-    }
+    edgeMesh,
+    EMESHedgeFormat,
+    fileExtension,
+    eMesh
+);
+
+// write edgeMesh
+addNamedToMemberFunctionSelectionTable
+(
+    edgeMesh,
+    EMESHedgeFormat,
+    write,
+    fileExtension,
+    eMesh
+);
+
 }
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-inline Foam::ISstream& Foam::ISstream::get(char& c)
-{
-    is_.get(c);
-    setState(is_.rdstate());
-
-    if (c == '\n')
-    {
-        lineNumber_++;
-    }
-
-    return *this;
 }
-
-
-inline int Foam::ISstream::peek()
-{
-    return is_.peek();
-}
-
-
-inline Foam::ISstream& Foam::ISstream::getLine(string& s)
-{
-    getline(is_, s);
-    setState(is_.rdstate());
-    lineNumber_++;
-
-    return *this;
-}
-
-
-inline Foam::ISstream& Foam::ISstream::putback(const char& c)
-{
-    if (c == '\n')
-    {
-        lineNumber_--;
-    }
-
-    if (!is_.putback(c))
-    {
-        setBad();
-    }
-
-    setState(is_.rdstate());
-
-    return *this;
-}
-
 
 // ************************************************************************* //

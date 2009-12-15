@@ -28,21 +28,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-defineTypeNameAndDebug(featureEdgeMesh, 0);
-
-}
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+defineTypeNameAndDebug(Foam::featureEdgeMesh, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -73,20 +59,6 @@ Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
 }
 
 
-//- Construct from components
-Foam::featureEdgeMesh::featureEdgeMesh
-(
-    const IOobject& io,
-    const pointField& points,
-    const edgeList& edges
-)
-:
-    regIOobject(io),
-    edgeMesh(points, edges)
-{}
-
-
-// Construct as copy
 Foam::featureEdgeMesh::featureEdgeMesh
 (
     const IOobject& io,
@@ -98,24 +70,43 @@ Foam::featureEdgeMesh::featureEdgeMesh
 {}
 
 
+Foam::featureEdgeMesh::featureEdgeMesh
+(
+    const IOobject& io,
+    const Xfer< pointField >& pointLst,
+    const Xfer< edgeList >& edgeLst
+)
+:
+    regIOobject(io),
+    edgeMesh(pointLst, edgeLst)
+{
+    if
+    (
+        io.readOpt() == IOobject::MUST_READ
+     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        readStream(typeName) >> *this;
+        close();
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::featureEdgeMesh::readData(Istream& is)
 {
-    is >> *this;
+    is  >> *this;
     return !is.bad();
 }
 
 
 bool Foam::featureEdgeMesh::writeData(Ostream& os) const
 {
-    os << *this;
+    os  << *this;
 
     return os.good();
 }
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

@@ -241,20 +241,46 @@ int main(int argc, char *argv[])
 
 #   include "addRegionOption.H"
 
-    argList::addOption("fields", "fields");
-    argList::addOption("cellSet", "cellSet name");
-    argList::addOption("faceSet", "faceSet name");
-    argList::addOption("pointSet", "pointSet name");
-    argList::addBoolOption("ascii");
+    argList::addOption
+    (
+        "fields", "wordList",
+        "only convert the specified fields - eg '(p T U)'"
+    );
+    argList::addOption
+    (
+        "cellSet",
+        "name",
+        "convert a mesh subset corresponding to the specified cellSet"
+    );
+    argList::addOption("faceSet", "name");
+    argList::addOption("pointSet", "name");
+    argList::addBoolOption
+    (
+        "ascii",
+        "write in ASCII format instead of binary"
+    );
     argList::addBoolOption("surfaceFields");
     argList::addBoolOption("nearCellValue");
     argList::addBoolOption("noInternal");
     argList::addBoolOption("noPointValues");
     argList::addBoolOption("allPatches");
-    argList::addOption("excludePatches","patches to exclude");
+    argList::addOption
+    (
+        "excludePatches",
+        "wordReList",
+        "a list of patches to exclude - eg '( inlet \".*Wall\" )' "
+    );
     argList::addBoolOption("noFaceZones");
-    argList::addBoolOption("noLinks");
-    argList::addBoolOption("useTimeName");
+    argList::addBoolOption
+    (
+        "noLinks",
+        "don't link processor VTK files - parallel only"
+    );
+    argList::addBoolOption
+    (
+        "useTimeName",
+        "use the time name instead of the time index when naming the files"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
