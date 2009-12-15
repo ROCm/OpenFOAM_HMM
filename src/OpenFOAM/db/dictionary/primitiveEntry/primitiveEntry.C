@@ -60,34 +60,39 @@ Foam::primitiveEntry::primitiveEntry
 
 Foam::label Foam::primitiveEntry::startLineNumber() const
 {
-    if (size())
+    const tokenList& tokens = *this;
+
+    if (tokens.empty())
     {
-        return operator[](0).lineNumber();
+        return -1;
     }
     else
     {
-        return -1;
+        return tokens.first().lineNumber();
     }
 }
 
+
 Foam::label Foam::primitiveEntry::endLineNumber() const
 {
-    if (size())
+    const tokenList& tokens = *this;
+
+    if (tokens.empty())
     {
-        return operator[](size()-1).lineNumber();
+        return -1;
     }
     else
     {
-        return -1;
+        return tokens.last().lineNumber();
     }
 }
 
 
 Foam::ITstream& Foam::primitiveEntry::stream() const
 {
-    ITstream& dataStream = const_cast<primitiveEntry&>(*this);
-    dataStream.rewind();
-    return dataStream;
+    ITstream& is = const_cast<primitiveEntry&>(*this);
+    is.rewind();
+    return is;
 }
 
 
@@ -125,7 +130,7 @@ void Foam::primitiveEntry::insert
     {
         label end = tokens.size() - 1;
 
-        for (label j=posI; j<end; j++)
+        for (label j = posI; j < end; j++)
         {
             tokens[j] = tokens[j+1];
         }
@@ -139,7 +144,7 @@ void Foam::primitiveEntry::insert
         label end = tokens.size() - 1;
         label offset = varTokens.size() - 1;
 
-        for (label j=end; j>posI; j--)
+        for (label j = end; j > posI; j--)
         {
             tokens[j] = tokens[j-offset];
         }
