@@ -132,9 +132,9 @@ public:
 
         enum
         {
-            dim = 3,         // Dimensionality of space
-            rank = 0,        // Rank of uLabel is 0
-            nComponents = 1  // Number of components in uLabel is 1
+            dim = 3,         //!< Dimensionality of space
+            rank = 0,        //!< Rank of uLabel is 0
+            nComponents = 1  //!< Number of components in uLabel is 1
         };
 
     // Static data members
@@ -154,6 +154,7 @@ public:
 
     // Member Functions
 
+        //- Conversion to a uLabel
         operator uLabel() const
         {
             return p_;
