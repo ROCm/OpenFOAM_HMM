@@ -22,68 +22,41 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::functionEntries::calcEntry
+Primitive
+    wchar_t
 
 Description
-    This dictionary function entry may or may not do anything particularly
-    useful - depending upon what is currently being used to test.
+    A wide-character and a pointer to a wide-character string.
 
 SourceFiles
-    calcEntry.C
+    wcharIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef calcEntry_H
-#define calcEntry_H
+#ifndef wchar_H
+#define wchar_H
 
-#include "functionEntry.H"
+#include <cwchar>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace functionEntries
-{
 
-/*---------------------------------------------------------------------------*\
-                          Class calcEntry Declaration
-\*---------------------------------------------------------------------------*/
+class Istream;
+class Ostream;
 
-class calcEntry
-:
-    public functionEntry
-{
-    // Private Member Functions
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-        //- Disallow default bitwise copy construct
-        calcEntry(const calcEntry&);
+//- Output via a normal char
+Ostream& operator<<(Ostream&, const wchar_t);
 
-        //- Disallow default bitwise assignment
-        void operator=(const calcEntry&);
-
-
-public:
-
-    //- Runtime type information
-    ClassName("calc");
-
-
-    // Member Functions
-
-        static bool execute
-        (
-            const dictionary& parentDict,
-            primitiveEntry& entry,
-            Istream& is
-        );
-
-};
+//- Output string via normal char
+Ostream& operator<<(Ostream&, const wchar_t*);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace functionEntries
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

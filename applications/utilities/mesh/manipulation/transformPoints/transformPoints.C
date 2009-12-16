@@ -142,7 +142,6 @@ void rotateFields(const argList& args, const Time& runTime, const tensor& T)
 
 int main(int argc, char *argv[])
 {
-    #include "addRegionOption.H"
     argList::addOption
     (
         "translate",
@@ -168,7 +167,11 @@ int main(int argc, char *argv[])
         "vector",
         "transform in terms of '( yaw pitch roll )' in degrees"
     );
-    argList::addBoolOption("rotateFields");
+    argList::addBoolOption
+    (
+        "rotateFields",
+        "read and transform vector and tensor fields too"
+    );
     argList::addOption
     (
         "scale",
@@ -177,8 +180,9 @@ int main(int argc, char *argv[])
         "uniform [mm] to [m] scaling"
     );
 
-    #include "setRootCase.H"
-    #include "createTime.H"
+#   include "addRegionOption.H"
+#   include "setRootCase.H"
+#   include "createTime.H"
 
     word regionName = polyMesh::defaultRegion;
     fileName meshDir;

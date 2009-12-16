@@ -79,7 +79,7 @@ void Foam::dictionaryEntry::write(Ostream& os) const
 }
 
 
-// * * * * * * * * * * * * * Ostream operator  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Ostream operator  * * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const dictionaryEntry& de)
 {

@@ -86,8 +86,8 @@ public:
 
         enum
         {
-            dim = 3,            // Dimensionality of space
-            nComponents = nCmpt // Number of components in this vector space
+            dim = 3,            //!< Dimensionality of space
+            nComponents = nCmpt //!< Number of components in this vector space
         };
 
 

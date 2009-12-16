@@ -50,9 +50,9 @@ public:
 
         enum
         {
-            dim = 3,         // Dimensionality of space
-            rank = 0,        // Rank of Scalar is 0
-            nComponents = 1  // Number of components in Scalar is 1
+            dim = 3,         //!< Dimensionality of space
+            rank = 0,        //!< Rank of Scalar is 0
+            nComponents = 1  //!< Number of components in Scalar is 1
         };
 
     // Static data members
@@ -72,6 +72,7 @@ public:
 
     // Member Functions
 
+        //- Conversion to a Scalar
         operator Scalar() const
         {
             return p_;

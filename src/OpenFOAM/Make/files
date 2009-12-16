@@ -10,7 +10,9 @@ $(bools)/bool/boolIO.C
 $(bools)/Switch/Switch.C
 $(bools)/Switch/SwitchIO.C
 
-primitives/char/charIO.C
+chars = primitives/chars
+$(chars)/char/charIO.C
+$(chars)/wchar/wcharIO.C
 
 ints = primitives/ints
 $(ints)/int/intIO.C
