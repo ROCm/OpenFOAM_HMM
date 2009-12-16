@@ -66,7 +66,7 @@ class calcEntry
 public:
 
     //- Runtime type information
-    ClassName("test");
+    ClassName("calc");
 
 
     // Member Functions

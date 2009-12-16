@@ -36,10 +36,6 @@ Description
 #include "error.H"
 #include "wchar.H"
 
-// avoid confusion about which Warning is meant
-#undef  WarningIn
-#define WarningIn(fn) Foam::Warning(fn, __FILE__, __LINE__)
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
