@@ -42,7 +42,7 @@ int Foam::chemkinReader::yyBufSize = YY_BUF_SIZE;
 //! @cond dummy
 int yyFlexLexer::yylex()
 {
-    Foam::FatalErrorIn("yyFlexLexer::yylex()")
+    FatalErrorIn("yyFlexLexer::yylex()")
         << "should not have called this function"
         << abort(Foam::FatalError);
 
