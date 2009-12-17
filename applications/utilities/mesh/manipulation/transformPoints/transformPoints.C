@@ -142,14 +142,45 @@ void rotateFields(const argList& args, const Time& runTime, const tensor& T)
 
 int main(int argc, char *argv[])
 {
-#   include "addRegionOption.H"
-    argList::addOption("translate", "vector");
-    argList::addOption("rotate", "(vector vector)");
-    argList::addOption("rollPitchYaw", "(roll pitch yaw)");
-    argList::addOption("yawPitchRoll", "(yaw pitch roll)");
-    argList::addBoolOption("rotateFields");
-    argList::addOption("scale", "vector");
+    argList::addOption
+    (
+        "translate",
+        "vector",
+        "translate by the specified <vector> - eg, '(1 0 0)'"
+    );
+    argList::addOption
+    (
+        "rotate",
+        "(vectorA vectorB)",
+        "transform in terms of a rotation between <vectorA> and <vectorB> "
+        "- eg, '( (1 0 0) (0 0 1) )'"
+    );
+    argList::addOption
+    (
+        "rollPitchYaw",
+        "vector",
+        "transform in terms of '( roll pitch yaw )' in degrees"
+    );
+    argList::addOption
+    (
+        "yawPitchRoll",
+        "vector",
+        "transform in terms of '( yaw pitch roll )' in degrees"
+    );
+    argList::addBoolOption
+    (
+        "rotateFields",
+        "read and transform vector and tensor fields too"
+    );
+    argList::addOption
+    (
+        "scale",
+        "vector",
+        "scale by the specified amount - eg, '(0.001 0.001 0.001)' for a "
+        "uniform [mm] to [m] scaling"
+    );
 
+#   include "addRegionOption.H"
 #   include "setRootCase.H"
 #   include "createTime.H"
 
