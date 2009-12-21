@@ -55,11 +55,12 @@ private:
 		_variable=3,
 		_number=4,
 	};
-	int maxT;
+	static const int maxT = 13;
+
+	static const int minErrDist = 2; //!< min. distance before reporting errors
 
 	Token *dummyToken;
 	bool deleteErrorsDestruct_; //!< delete the 'errors' member in destructor
-	int  minErrDist;
 	int  errDist;
 
 	void SynErr(int n);         //!< Handle syntax error 'n'

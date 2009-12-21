@@ -5,7 +5,5 @@ cd ${0%/*} || exit 1    # run from this directory
 
 Coco \
     -frames $WM_THIRD_PARTY_DIR/coco-r \
-    -prefix calcEntry \
-    -namespace Foam::functionEntries::calcEntryInternal \
     SimpleCalc.atg
 

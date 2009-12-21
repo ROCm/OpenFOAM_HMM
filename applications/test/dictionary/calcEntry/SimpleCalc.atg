@@ -14,6 +14,9 @@
 
 
 COMPILER SimpleCalc
+$prefix=calcEntry
+$namespace=Foam::functionEntries::calcEntryInternal
+
     // Simple four function calculator for OpenFOAM dictionaries
 
     //! with debug

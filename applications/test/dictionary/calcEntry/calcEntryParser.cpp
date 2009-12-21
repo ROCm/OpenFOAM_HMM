@@ -199,14 +199,12 @@ Parser::Parser(Scanner* scan, Errors* err)
 :
 	dummyToken(NULL),
 	deleteErrorsDestruct_(!err),
-	minErrDist(2),
 	errDist(minErrDist),
 	scanner(scan),
 	errors(err),
 	t(NULL),
 	la(NULL)
 {
-	maxT = 13;
 
 	if (!errors) {   // add in default error handling
 		errors = new Errors();
@@ -317,8 +315,12 @@ void Errors::Exception(const wchar_t* msg) {
 	::exit(1);
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // namespace
 } // namespace
 } // namespace
 
 
+// ************************************************************************* //
