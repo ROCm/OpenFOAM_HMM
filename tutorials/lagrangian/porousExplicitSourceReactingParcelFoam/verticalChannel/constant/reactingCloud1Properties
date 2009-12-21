@@ -15,6 +15,8 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+active          true;
+
 InjectionModel  PatchInjection;
 
 DragModel       SphereDrag;
