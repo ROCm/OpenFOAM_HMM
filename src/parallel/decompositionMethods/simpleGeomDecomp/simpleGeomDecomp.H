@@ -54,7 +54,7 @@ class simpleGeomDecomp
 
         void assignToProcessorGroup
         (
-            labelList& processorGroup, 
+            labelList& processorGroup,
             const label nProcGroup,
             const labelList& indices,
             const scalarField& weights,

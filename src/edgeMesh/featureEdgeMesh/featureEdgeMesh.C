@@ -37,13 +37,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-defineTypeNameAndDebug(featureEdgeMesh, 0);
-
-}
-
+defineTypeNameAndDebug(Foam::featureEdgeMesh, 0);
 
 Foam::scalar Foam::featureEdgeMesh::cosNormalAngleTol_ =
     Foam::cos(degToRad(0.1));
@@ -66,7 +60,7 @@ Foam::label Foam::featureEdgeMesh::nEdgeTypes = 5;
 Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
 :
     regIOobject(io),
-    primitiveEdgeMesh(pointField(0), edgeList(0)),
+    edgeMesh(pointField(0), edgeList(0)),
     concaveStart_(0),
     mixedStart_(0),
     nonFeatureStart_(0),
@@ -90,12 +84,12 @@ Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
     {
         dictionary edgeMeshDict(readStream(typeName));
 
-        primitiveEdgeMesh::operator=
+        edgeMesh::operator=
         (
-            primitiveEdgeMesh
+            edgeMesh
             (
-                edgeMeshDict.lookup("points"),
-                edgeMeshDict.lookup("edges")
+                pointField(edgeMeshDict.lookup("points")),
+                edgeList(edgeMeshDict.lookup("edges"))
             )
         );
 
@@ -128,7 +122,67 @@ Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
 
         close();
     }
+
+    if (debug)
+    {
+        Pout<< "featureEdgeMesh::featureEdgeMesh :"
+            << " constructed from IOobject :"
+            << " points:" << points().size()
+            << " edges:" << edges().size()
+            << endl;
+    }
 }
+
+
+Foam::featureEdgeMesh::featureEdgeMesh
+(
+    const IOobject& io,
+    const featureEdgeMesh& em
+)
+:
+    regIOobject(io),
+    edgeMesh(em),
+    concaveStart_(0),
+    mixedStart_(0),
+    nonFeatureStart_(0),
+    internalStart_(0),
+    flatStart_(0),
+    openStart_(0),
+    multipleStart_(0),
+    normals_(0),
+    edgeDirections_(0),
+    edgeNormals_(0),
+    featurePointNormals_(0),
+    regionEdges_(0),
+    edgeTree_(),
+    edgeTreesByType_()
+{}
+
+
+Foam::featureEdgeMesh::featureEdgeMesh
+(
+    const IOobject& io,
+    const Xfer< pointField >& pointLst,
+    const Xfer< edgeList >& edgeLst
+)
+:
+    regIOobject(io),
+    edgeMesh(pointLst, edgeLst),
+    concaveStart_(0),
+    mixedStart_(0),
+    nonFeatureStart_(0),
+    internalStart_(0),
+    flatStart_(0),
+    openStart_(0),
+    multipleStart_(0),
+    normals_(0),
+    edgeDirections_(0),
+    edgeNormals_(0),
+    featurePointNormals_(0),
+    regionEdges_(0),
+    edgeTree_(),
+    edgeTreesByType_()
+{}
 
 
 Foam::featureEdgeMesh::featureEdgeMesh
@@ -151,7 +205,7 @@ Foam::featureEdgeMesh::featureEdgeMesh
             IOobject::NO_WRITE
         )
     ),
-    primitiveEdgeMesh(pointField(0), edgeList(0)),
+    edgeMesh(pointField(0), edgeList(0)),
     concaveStart_(-1),
     mixedStart_(-1),
     nonFeatureStart_(-1),
@@ -318,7 +372,7 @@ Foam::featureEdgeMesh::featureEdgeMesh
                 "    bool write"
                 ")"
             )
-            << nl << "classifyEdge returned NONE on edge "
+                << nl << "classifyEdge returned NONE on edge "
                 << eds[i]
                 << ". There is a problem with definition of this edge."
                 << nl << abort(FatalError);
@@ -349,8 +403,8 @@ Foam::featureEdgeMesh::featureEdgeMesh
 
     pointField pts(tmpPts);
 
-    // Initialise the primitiveEdgeMesh
-    primitiveEdgeMesh::operator=(primitiveEdgeMesh(pts, eds));
+    // Initialise the edgeMesh
+    edgeMesh::operator=(edgeMesh(pts, eds));
 
     // Initialise sorted edge related data
     edgeDirections_ = edgeDirections/mag(edgeDirections);
@@ -434,9 +488,9 @@ Foam::featureEdgeMesh::featureEdgeMesh
         inplaceRenumber(ptMap, eds[i]);
     }
 
-    // Reinitialise the primitiveEdgeMesh with sorted feature points and
+    // Reinitialise the edgeMesh with sorted feature points and
     // renumbered edges
-    primitiveEdgeMesh::operator=(primitiveEdgeMesh(pts, eds));
+    edgeMesh::operator=(edgeMesh(pts, eds));
 
     // Generate the featurePointNormals
 
@@ -487,7 +541,7 @@ Foam::featureEdgeMesh::featureEdgeMesh
 
     featurePointNormals_ = featurePointNormals;
 
-    // Optionally write the primitiveEdgeMesh to file
+    // Optionally write the edgeMesh to file
     if (write)
     {
         writeObj(sFeatFileName.lessExt());
@@ -515,7 +569,7 @@ Foam::featureEdgeMesh::featureEdgeMesh
 )
 :
     regIOobject(io),
-    primitiveEdgeMesh(pts, eds),
+    edgeMesh(pts, eds),
     concaveStart_(concaveStart),
     mixedStart_(mixedStart),
     nonFeatureStart_(nonFeatureStart),
@@ -528,32 +582,6 @@ Foam::featureEdgeMesh::featureEdgeMesh
     edgeNormals_(edgeNormals),
     featurePointNormals_(featurePointNormals),
     regionEdges_(regionEdges),
-    edgeTree_(),
-    edgeTreesByType_()
-{}
-
-
-Foam::featureEdgeMesh::featureEdgeMesh
-(
-    const IOobject& io,
-    const pointField& pts,
-    const edgeList& eds
-)
-:
-    regIOobject(io),
-    primitiveEdgeMesh(pts, eds),
-    concaveStart_(0),
-    mixedStart_(0),
-    nonFeatureStart_(0),
-    internalStart_(0),
-    flatStart_(0),
-    openStart_(0),
-    multipleStart_(0),
-    normals_(0),
-    edgeDirections_(0),
-    edgeNormals_(0),
-    featurePointNormals_(0),
-    regionEdges_(0),
     edgeTree_(),
     edgeTreesByType_()
 {}
@@ -846,7 +874,7 @@ void Foam::featureEdgeMesh::writeObj
 
     label verti = 0;
 
-    primitiveEdgeMesh::writeObj(prefix + "_edgeMesh.obj");
+    edgeMesh::write(prefix + "_edgeMesh.obj");
 
     OFstream convexFtPtStr(prefix + "_convexFeaturePts.obj");
     Pout<< "Writing convex feature points to " << convexFtPtStr.name() << endl;

@@ -152,8 +152,8 @@ void subsetPointFields
 int main(int argc, char *argv[])
 {
     argList::validArgs.append("set");
-    argList::validOptions.insert("patch", "patch name");
-    argList::validOptions.insert("overwrite", "");
+    argList::addOption("patch", "patch name");
+    argList::addBoolOption("overwrite");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

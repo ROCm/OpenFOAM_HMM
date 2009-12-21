@@ -76,17 +76,15 @@ public:
             const pointField&,
             const label start,
             const label end,
-            const pointField& otherKnots
+            const pointField& internalPoints
         );
 
-        //- Construct from Istream setting pointsList
+        //- Construct from Istream, setting pointsList
         splineEdge(const pointField&, Istream&);
 
 
-    // Destructor
-
-        virtual ~splineEdge()
-        {}
+    //- Destructor
+    virtual ~splineEdge();
 
 
     // Member Functions
@@ -95,7 +93,7 @@ public:
         //  0 <= lambda <= 1
         virtual point position(const scalar) const;
 
-        //- Return the length of the simple spline curve
+        //- Return the length of the spline curve (not implemented)
         virtual scalar length() const;
 };
 

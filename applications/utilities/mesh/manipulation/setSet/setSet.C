@@ -843,8 +843,8 @@ int main(int argc, char *argv[])
 #   include "addRegionOption.H"
 #   include "addTimeOptions.H"
 
-    argList::validOptions.insert("noVTK", "");
-    argList::validOptions.insert("batch", "file");
+    argList::addBoolOption("noVTK");
+    argList::addOption("batch", "file");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

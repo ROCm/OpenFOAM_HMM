@@ -48,8 +48,8 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    Foam::argList::validOptions.insert("overwrite", "");
-    Foam::argList::validArgs.append("faceSet");
+    argList::addBoolOption("overwrite");
+    argList::validArgs.append("faceSet");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

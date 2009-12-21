@@ -33,18 +33,18 @@ Description
 
 void starMesh::purgeCellShapes()
 {
-    forAll (cellFaces_, cellI)
+    forAll(cellFaces_, cellI)
     {
         const faceList& curFaces = cellFaces_[cellI];
 
         // Get model faces
         faceList shapeFaces = cellShapes_[cellI].faces();
 
-        forAll (shapeFaces, faceI)
+        forAll(shapeFaces, faceI)
         {
             bool found = false;
 
-            forAll (curFaces, i)
+            forAll(curFaces, i)
             {
                 if (shapeFaces[faceI] == curFaces[i])
                 {

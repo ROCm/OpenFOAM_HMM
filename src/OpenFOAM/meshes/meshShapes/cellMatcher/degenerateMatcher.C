@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "degenerateMatcher.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -83,11 +84,10 @@ Foam::cellShape Foam::degenerateMatcher::match(const faceList& faces)
 
     return match
     (
-        faces, 
-        labelList(faces.size(), 0),     // Cell 0 is owner of all faces
-        0,                              // cell 0
-        labelList(cellMatcher::makeIdentity(faces.size()))  // cell 0 consists
-                                                            // of all faces
+        faces,
+        labelList(faces.size(), 0),    // cell 0 is owner of all faces
+        0,                             // cell 0
+        identity(faces.size())         // cell 0 consists of all faces
     );
 }
 
@@ -106,7 +106,7 @@ Foam::cellShape Foam::degenerateMatcher::match
 {
     return match
     (
-        mesh.faces(), 
+        mesh.faces(),
         mesh.faceOwner(),
         cellI,
         mesh.cells()[cellI]

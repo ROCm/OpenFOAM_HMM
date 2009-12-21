@@ -128,13 +128,13 @@ void sammMesh::readCouples()
         }
 
         // Once all couples are read, remove zero size faces from all cells
-        forAll (cellFaces_, cellI)
+        forAll(cellFaces_, cellI)
         {
             faceList& curFaces = cellFaces_[cellI];
 
             label zeroSizeFound = 0;
 
-            forAll (curFaces, faceI)
+            forAll(curFaces, faceI)
             {
                 if (curFaces[faceI].empty())
                 {
@@ -151,7 +151,7 @@ void sammMesh::readCouples()
 
                 label nFaces = 0;
 
-                forAll (oldFaces, faceI)
+                forAll(oldFaces, faceI)
                 {
                     if (oldFaces[faceI].size())
                     {

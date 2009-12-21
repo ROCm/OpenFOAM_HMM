@@ -190,10 +190,10 @@ private:
         bool checkCellSubset() const;
 
         //- Mark points in Map
-        static void markPoints(const labelList&, Map<label>&); 
+        static void markPoints(const labelList&, Map<label>&);
 
         //- Mark points (with 0) in labelList
-        static void markPoints(const labelList&, labelList&); 
+        static void markPoints(const labelList&, labelList&);
 
         //- Adapt nCellsUsingFace for coupled faces becoming 'uncoupled'.
         void doCoupledPatches

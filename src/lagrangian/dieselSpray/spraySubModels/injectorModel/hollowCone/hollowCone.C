@@ -28,27 +28,24 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(hollowConeInjector, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(hollowConeInjector, 0);
-
-addToRunTimeSelectionTable
-(
-    injectorModel,
-    hollowConeInjector,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        injectorModel,
+        hollowConeInjector,
+        dictionary
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-hollowConeInjector::hollowConeInjector
+Foam::hollowConeInjector::hollowConeInjector
 (
     const dictionary& dict,
     spray& sm
@@ -104,13 +101,13 @@ hollowConeInjector::hollowConeInjector
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-hollowConeInjector::~hollowConeInjector()
+Foam::hollowConeInjector::~hollowConeInjector()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar hollowConeInjector::d0
+Foam::scalar Foam::hollowConeInjector::d0
 (
     const label,
     const scalar
@@ -120,7 +117,7 @@ scalar hollowConeInjector::d0
 }
 
 
-vector hollowConeInjector::direction
+Foam::vector Foam::hollowConeInjector::direction
 (
     const label n,
     const label hole,
@@ -171,7 +168,7 @@ vector hollowConeInjector::direction
 }
 
 
-scalar hollowConeInjector::velocity
+Foam::scalar Foam::hollowConeInjector::velocity
 (
     const label i,
     const scalar time
@@ -193,16 +190,12 @@ scalar hollowConeInjector::velocity
 }
 
 
-scalar hollowConeInjector::averageVelocity(const label i) const
+Foam::scalar Foam::hollowConeInjector::averageVelocity(const label i) const
 {
     const injectorType& it = sm_.injectors()[i].properties();
     scalar dt = it.teoi() - it.tsoi();
     return it.integrateTable(it.velocityProfile())/dt;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

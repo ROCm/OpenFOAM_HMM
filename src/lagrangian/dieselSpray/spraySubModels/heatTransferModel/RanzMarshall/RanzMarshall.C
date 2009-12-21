@@ -29,26 +29,24 @@ License
 #include "RanzMarshall.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(RanzMarshall, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+    addToRunTimeSelectionTable
+    (
+        heatTransferModel,
+        RanzMarshall,
+        dictionary
+    );
+}
 
-defineTypeNameAndDebug(RanzMarshall, 0);
-
-addToRunTimeSelectionTable
-(
-    heatTransferModel,
-    RanzMarshall,
-    dictionary
-);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-RanzMarshall::RanzMarshall(const dictionary& dict)
+Foam::RanzMarshall::RanzMarshall(const dictionary& dict)
 :
     heatTransferModel(dict),
     heatDict_(dict.subDict(typeName + "Coeffs")),
@@ -60,19 +58,19 @@ RanzMarshall::RanzMarshall(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-RanzMarshall::~RanzMarshall()
+Foam::RanzMarshall::~RanzMarshall()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool RanzMarshall::heatTransfer() const
+bool Foam::RanzMarshall::heatTransfer() const
 {
     return true;
 }
 
 
-scalar RanzMarshall::Nu
+Foam::scalar Foam::RanzMarshall::Nu
 (
     const scalar ReynoldsNumber,
     const scalar PrandtlNumber
@@ -86,7 +84,7 @@ scalar RanzMarshall::Nu
 }
 
 
-scalar RanzMarshall::relaxationTime
+Foam::scalar Foam::RanzMarshall::relaxationTime
 (
     const scalar liquidDensity,
     const scalar diameter,
@@ -108,7 +106,7 @@ scalar RanzMarshall::relaxationTime
 }
 
 
-scalar RanzMarshall::fCorrection(const scalar z) const
+Foam::scalar Foam::RanzMarshall::fCorrection(const scalar z) const
 {
     scalar correct;
     if (z > 0.01)
@@ -131,9 +129,5 @@ scalar RanzMarshall::fCorrection(const scalar z) const
     return correct;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

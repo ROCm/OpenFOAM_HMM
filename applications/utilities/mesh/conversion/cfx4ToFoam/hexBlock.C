@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "hexBlock.H"
@@ -58,7 +56,7 @@ hexBlock::hexBlock(const label nx, const label ny, const label nz)
 
 void hexBlock::readPoints(Istream& is)
 {
-    forAll (points_, i)
+    forAll(points_, i)
     {
         is >> points_[i].x() >> points_[i].y() >> points_[i].z();
     }
@@ -376,7 +374,7 @@ faceList hexBlock::patchFaces(const label direc, const labelList& range) const
     else if (blockHandedness_ == left)
     {
         // turn all faces inside out
-        forAll (result, faceI)
+        forAll(result, faceI)
         {
             result[faceI] = result[faceI].reverseFace();
         }

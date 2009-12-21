@@ -338,7 +338,7 @@ Foam::refinementSurfaces::refinementSurfaces
                 {
                     if (regionsDict.found(regionNames[regionI]))
                     {
-                        // Get the dictionary for region 
+                        // Get the dictionary for region
                         const dictionary& regionDict = regionsDict.subDict
                         (
                             regionNames[regionI]

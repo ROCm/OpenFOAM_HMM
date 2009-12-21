@@ -118,7 +118,7 @@ bool Foam::domainDecomposition::writeDecomposition()
     // Make a lookup map for globally shared points
     Map<label> sharedPointLookup(2*globallySharedPoints_.size());
 
-    forAll (globallySharedPoints_, pointi)
+    forAll(globallySharedPoints_, pointi)
     {
         sharedPointLookup.insert(globallySharedPoints_[pointi], pointi);
     }
@@ -174,7 +174,7 @@ bool Foam::domainDecomposition::writeDecomposition()
 
         pointField procPoints(curPointLabels.size());
 
-        forAll (curPointLabels, pointi)
+        forAll(curPointLabels, pointi)
         {
             procPoints[pointi] = meshPoints[curPointLabels[pointi]];
 
@@ -190,7 +190,7 @@ bool Foam::domainDecomposition::writeDecomposition()
 
         faceList procFaces(curFaceLabels.size());
 
-        forAll (curFaceLabels, facei)
+        forAll(curFaceLabels, facei)
         {
             // Mark the original face as used
             // Remember to decrement the index by one (turning index)
@@ -217,7 +217,7 @@ bool Foam::domainDecomposition::writeDecomposition()
 
             procFaceLabels.setSize(origFaceLabels.size());
 
-            forAll (origFaceLabels, pointi)
+            forAll(origFaceLabels, pointi)
             {
                 procFaceLabels[pointi] = pointLookup[origFaceLabels[pointi]];
             }
@@ -230,7 +230,7 @@ bool Foam::domainDecomposition::writeDecomposition()
 
         cellList procCells(curCellLabels.size());
 
-        forAll (curCellLabels, celli)
+        forAll(curCellLabels, celli)
         {
             const labelList& origCellLabels = meshCells[curCellLabels[celli]];
 
@@ -238,7 +238,7 @@ bool Foam::domainDecomposition::writeDecomposition()
 
             curCell.setSize(origCellLabels.size());
 
-            forAll (origCellLabels, cellFaceI)
+            forAll(origCellLabels, cellFaceI)
             {
                 curCell[cellFaceI] = faceLookup[origCellLabels[cellFaceI]];
             }
@@ -305,7 +305,7 @@ bool Foam::domainDecomposition::writeDecomposition()
 
         label nPatches = 0;
 
-        forAll (curPatchSizes, patchi)
+        forAll(curPatchSizes, patchi)
         {
             // Get the face labels consistent with the field mapping
             // (reuse the patch field mappers)
@@ -336,7 +336,7 @@ bool Foam::domainDecomposition::writeDecomposition()
             nPatches++;
         }
 
-        forAll (curProcessorPatchSizes, procPatchI)
+        forAll(curProcessorPatchSizes, procPatchI)
         {
             procPatches[nPatches] =
                 new processorPolyPatch
@@ -377,7 +377,7 @@ bool Foam::domainDecomposition::writeDecomposition()
 
             // Use the pointToZone map to find out the single zone (if any),
             // use slow search only for shared points.
-            forAll (curPointLabels, pointi)
+            forAll(curPointLabels, pointi)
             {
                 label curPoint = curPointLabels[pointi];
 
@@ -448,7 +448,7 @@ bool Foam::domainDecomposition::writeDecomposition()
             // Go through all the zoned faces and find out if they
             // belong to a zone.  If so, add it to the zone as
             // necessary
-            forAll (curFaceLabels, facei)
+            forAll(curFaceLabels, facei)
             {
                 // Remember to decrement the index by one (turning index)
                 //
@@ -535,7 +535,7 @@ bool Foam::domainDecomposition::writeDecomposition()
                 zoneCells[zoneI].setCapacity(cz[zoneI].size() / nProcs_);
             }
 
-            forAll (curCellLabels, celli)
+            forAll(curCellLabels, celli)
             {
                 label curCellI = curCellLabels[celli];
 
@@ -598,7 +598,7 @@ bool Foam::domainDecomposition::writeDecomposition()
         label nProcPatches = 0;
         label nProcFaces = 0;
 
-        forAll (procMesh.boundaryMesh(), patchi)
+        forAll(procMesh.boundaryMesh(), patchi)
         {
             if
             (

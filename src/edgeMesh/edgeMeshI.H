@@ -24,21 +24,31 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+inline Foam::edgeMesh::edgeMesh(const edgeMesh& em)
+:
+    points_(em.points_),
+    edges_(em.edges_),
+    pointEdgesPtr_(NULL)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::pointField& Foam::primitiveEdgeMesh::points() const
+inline const Foam::pointField& Foam::edgeMesh::points() const
 {
     return points_;
 }
 
 
-inline const Foam::edgeList& Foam::primitiveEdgeMesh::edges() const
+inline const Foam::edgeList& Foam::edgeMesh::edges() const
 {
     return edges_;
 }
 
 
-inline const Foam::labelListList& Foam::primitiveEdgeMesh::pointEdges() const
+inline const Foam::labelListList& Foam::edgeMesh::pointEdges() const
 {
     if (pointEdgesPtr_.empty())
     {
@@ -48,13 +58,25 @@ inline const Foam::labelListList& Foam::primitiveEdgeMesh::pointEdges() const
 }
 
 
+inline Foam::pointField& Foam::edgeMesh::storedPoints()
+{
+    return points_;
+}
+
+
+inline Foam::edgeList& Foam::edgeMesh::storedEdges()
+{
+    return edges_;
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void Foam::primitiveEdgeMesh::operator=(const primitiveEdgeMesh& rhs)
+void Foam::edgeMesh::operator=(const edgeMesh& rhs)
 {
     points_ = rhs.points_;
     edges_ = rhs.edges_;
-    pointEdgesPtr_.reset(NULL);
+    pointEdgesPtr_.clear();
 }
 
 

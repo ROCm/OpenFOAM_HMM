@@ -153,7 +153,7 @@ void faceSet::sync(const polyMesh& mesh)
             }
         }
 
-        // Receive 
+        // Receive
         forAll(patches, patchI)
         {
             const polyPatch& pp = patches[patchI];

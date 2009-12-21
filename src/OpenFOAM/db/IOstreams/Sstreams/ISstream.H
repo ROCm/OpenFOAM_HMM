@@ -137,6 +137,12 @@ public:
             //- Raw, low-level get character function.
             inline ISstream& get(char&);
 
+            //- Raw, low-level peek function.
+            //  Does not remove the character from the stream.
+            //  Returns the next character in the stream or EOF if the
+            //  end of file is read.
+            inline int peek();
+
             //- Raw, low-level getline into a string function.
             inline ISstream& getLine(string&);
 

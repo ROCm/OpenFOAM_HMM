@@ -125,7 +125,7 @@ labelList regionFaceOrder
 
     label prevRegion = -1;
 
-    forAll (cellOrder, newCellI)
+    forAll(cellOrder, newCellI)
     {
         label oldCellI = cellOrder[newCellI];
 
@@ -364,10 +364,10 @@ autoPtr<mapPolyMesh> reorderMesh
 
 int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("blockOrder", "");
-    argList::validOptions.insert("orderPoints", "");
-    argList::validOptions.insert("writeMaps", "");
-    argList::validOptions.insert("overwrite", "");
+    argList::addBoolOption("blockOrder");
+    argList::addBoolOption("orderPoints");
+    argList::addBoolOption("writeMaps");
+    argList::addBoolOption("overwrite");
 
 #   include "addTimeOptions.H"
 

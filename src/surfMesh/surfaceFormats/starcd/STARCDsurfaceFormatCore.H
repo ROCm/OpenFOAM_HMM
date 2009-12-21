@@ -62,6 +62,8 @@ protected:
 
     static void writeHeader(Ostream&, const char* filetype);
 
+    static Map<word> readInpCellTable(IFstream&);
+
     static bool readPoints(IFstream&, pointField&, labelList& ids);
 
     static void writePoints(Ostream&, const pointField&);

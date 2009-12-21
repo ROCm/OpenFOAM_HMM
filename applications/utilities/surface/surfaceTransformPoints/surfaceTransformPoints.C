@@ -23,8 +23,8 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Transform (scale/rotate) a surface. Like transformPoints but then for
-    surfaces.
+    Transform (scale/rotate) a surface.
+    Like transformPoints but for surfaces.
 
     The rollPitchYaw option takes three angles (degrees):
     - roll (rotation about x) followed by
@@ -54,16 +54,47 @@ using namespace Foam::constant::mathematical;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transform (scale/rotate) a surface. "
+        "Like transformPoints but for surfaces."
+    );
     argList::noParallel();
     argList::validArgs.clear();
-
     argList::validArgs.append("surface file");
     argList::validArgs.append("output surface file");
-    argList::validOptions.insert("translate", "vector");
-    argList::validOptions.insert("rotate", "(vector vector)");
-    argList::validOptions.insert("scale", "vector");
-    argList::validOptions.insert("rollPitchYaw", "(roll pitch yaw)");
-    argList::validOptions.insert("yawPitchRoll", "(yaw pitch roll)");
+    argList::addOption
+    (
+        "translate",
+        "vector",
+        "translate by the specified <vector> - eg, '(1 0 0)'"
+    );
+    argList::addOption
+    (
+        "rotate",
+        "(vectorA vectorB)",
+        "transform in terms of a rotation between <vectorA> and <vectorB> "
+        "- eg, '( (1 0 0) (0 0 1) )'"
+    );
+    argList::addOption
+    (
+        "scale",
+        "vector",
+        "scale by the specified amount - eg, '(0.001 0.001 0.001)' for a "
+        "uniform [mm] to [m] scaling"
+    );
+    argList::addOption
+    (
+        "rollPitchYaw",
+        "vector",
+        "transform in terms of '( roll pitch yaw )' in degrees"
+    );
+    argList::addOption
+    (
+        "yawPitchRoll",
+        "vector",
+        "transform in terms of '( yaw pitch roll )' in degrees"
+    );
     argList args(argc, argv);
 
     fileName surfFileName(args.additionalArgs()[0]);

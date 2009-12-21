@@ -44,7 +44,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::commonRailInjector::commonRailInjector
 (
     const Foam::Time& t,

@@ -59,9 +59,10 @@ Description
 
 Note
     - Adjustment of the valid (mandatory) arguments
-      by directly manipulating the static member argList::validArgs.
+      by directly manipulating the argList::validArgs static member.
     - Adjustment of the valid options
-      by directly manipulating the static member argList::validOptions.
+      via the addOption/removeOption static methods or by directly
+      manipulating the argList::validOptions static member.
 
 SourceFiles
     argList.C
@@ -114,8 +115,21 @@ class argList
         sigSegv sigSegv_;
 
 
-    // Private member functions
+    // Private Member Functions
 
+        //- Helper function for printUsage
+        static void printOptionUsage
+        (
+            const label location,
+            const string& str
+        );
+
+        //- get rootPath_ / globalCase_ from one of the following forms
+        //   * [-case dir]
+        //   * cwd
+        //
+        // Also export FOAM_CASE and FOAM_CASENAME environment variables
+        // so they can be used immediately (eg, in decomposeParDict)
         void getRootCase();
 
         //- Transcribe argv into internal args_
@@ -135,6 +149,18 @@ public:
 
         //- A list of valid parallel options
         static HashTable<string> validParOptions;
+
+        //- Short usage information for validOptions
+        static HashTable<string> optionUsage;
+
+        //- Additional notes for usage
+        static SLList<string> notes;
+
+        //- Min offset for displaying usage (default: 20)
+        static string::size_type usageMin;
+
+        //- Max screen width for displaying usage (default: 80)
+        static string::size_type usageMax;
 
         //! @cond ignoreDocumentation
         class initValidTables
@@ -159,8 +185,7 @@ public:
         );
 
 
-    // Destructor
-
+        //- Destructor
         virtual ~argList();
 
 
@@ -169,84 +194,108 @@ public:
         // Access
 
             //- Name of executable
-            const word& executable() const
-            {
-                return executable_;
-            }
+            inline const word& executable() const;
 
             //- Return root path
-            const fileName& rootPath() const
-            {
-                return rootPath_;
-            }
-
-            //- Return case name
-            const fileName& globalCaseName() const
-            {
-                return globalCase_;
-            }
+            inline const fileName& rootPath() const;
 
             //- Return case name (parallel run) or global case (serial run)
-            const fileName& caseName() const
-            {
-                return case_;
-            }
+            inline const fileName& caseName() const;
 
-            //- Return the path
-            fileName path() const
-            {
-                return rootPath()/caseName();
-            }
+            //- Return case name
+            inline const fileName& globalCaseName() const;
+
+            //- Return the path to the caseName
+            inline fileName path() const;
 
             //- Return arguments
-            const stringList& args() const
-            {
-                return args_;
-            }
+            inline const stringList& args() const;
 
-            //- Return additionl arguments,
+            //- Return additional arguments,
             //  i.e. those additional to the executable itself
             stringList::subList additionalArgs() const;
 
             //- Return options
-            const Foam::HashTable<string>& options() const
-            {
-                return options_;
-            }
+            inline const Foam::HashTable<string>& options() const;
 
             //- Return the argument string associated with the named option
-            const string& option(const word& opt) const
-            {
-                return options_.operator[](opt);
-            }
+            inline const string& option(const word& opt) const;
 
             //- Return true if the named option is found
-            bool optionFound(const word& opt) const
-            {
-                return options_.found(opt);
-            }
+            inline bool optionFound(const word& opt) const;
 
-            //- Return an IStringStream to the named option
-            IStringStream optionLookup(const word& opt) const
-            {
-                return IStringStream(option(opt));
-            }
+            //- Return an IStringStream from the named option
+            inline IStringStream optionLookup(const word& opt) const;
 
             //- Read a value from the named option
             template<class T>
-            T optionRead(const word& opt) const;
+            inline T optionRead(const word& opt) const;
 
             //- Read a value from the named option if present.
             //  Return true if the named option was found.
             template<class T>
-            bool optionReadIfPresent(const word& opt, T& val) const;
+            inline bool optionReadIfPresent(const word& opt, T&) const;
+
+            //- Read a value from the named option if present.
+            //  Return true if the named option was found, otherwise
+            //  use the supplied default and return false.
+            template<class T>
+            inline bool optionReadIfPresent
+            (
+                const word& opt,
+                T&,
+                const T& deflt
+            ) const;
+
+            //- Read a value from the named option if present.
+            //  Return true if the named option was found.
+            template<class T>
+            inline T optionLookupOrDefault
+            (
+                const word& opt,
+                const T& deflt
+            ) const;
 
             //- Read a List of values from the named option
             template<class T>
-            List<T> optionReadList(const word& opt) const;
+            List<T> optionReadList(const word& opt) const
+            {
+                return readList<T>(optionLookup(opt)());
+            }
+
 
 
         // Edit
+
+            //- Add to a bool option to validOptions with usage information
+            static void addBoolOption
+            (
+                const word& opt,
+                const string& usage = ""
+            );
+
+            //- Add to an option to validOptions with usage information
+            //  An option with an empty param is a bool option
+            static void addOption
+            (
+                const word& opt,
+                const string& param = "",
+                const string& usage = ""
+            );
+
+            //- Add option usage information to optionUsage
+            static void addUsage
+            (
+                const word& opt,
+                const string& usage
+            );
+
+            //- Add extra notes for the usage information
+            //  This string is used "as-is" without additional formatting
+            static void addNote(const string&);
+
+            //- Remove option from validOptions and from optionUsage
+            static void removeOption(const word& opt);
 
             //- Disable emitting the banner information
             static void noBanner();
@@ -281,9 +330,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifdef NoRepository
-#   include "argListTemplates.C"
-#endif
+#include "argListI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

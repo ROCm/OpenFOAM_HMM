@@ -82,8 +82,8 @@ bool Foam::rawTopoChangerFvMesh::update()
         // - internal faces inflated out of nothing
         // - patch faces created out of previously internal faces
 
-        // Is face mapped in any way
-        PackedList<1> mappedFace(nFaces());
+        // Is face mapped in any way?
+        PackedBoolList mappedFace(nFaces());
 
         const label nOldInternal = topoChangeMap().oldPatchStarts()[0];
 

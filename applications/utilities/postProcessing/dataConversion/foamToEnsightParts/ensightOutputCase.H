@@ -144,7 +144,7 @@ if (fieldTimesUsed.size())
         << "filename numbers:" << nl;
 
     label count = 0;
-    forAll (fieldTimesUsed, i)
+    forAll(fieldTimesUsed, i)
     {
         caseFile
             << " " << setw(12) << fieldTimesUsed[i];
@@ -159,7 +159,7 @@ if (fieldTimesUsed.size())
         << nl << "time values:" << nl;
 
     count = 0;
-    forAll (fieldTimesUsed, i)
+    forAll(fieldTimesUsed, i)
     {
         caseFile
             << " " << setw(12)
@@ -188,7 +188,7 @@ forAllConstIter(HashTable<DynamicList<label> >, cloudTimesUsed, cloudIter)
             << "filename numbers:" << nl;
 
         label count = 0;
-        forAll (timesUsed, i)
+        forAll(timesUsed, i)
         {
             caseFile
                 << " " << setw(12) << timesUsed[i];
@@ -203,7 +203,7 @@ forAllConstIter(HashTable<DynamicList<label> >, cloudTimesUsed, cloudIter)
             << nl << "time values:" << nl;
 
         count = 0;
-        forAll (timesUsed, i)
+        forAll(timesUsed, i)
         {
             caseFile
                 << " " << setw(12)

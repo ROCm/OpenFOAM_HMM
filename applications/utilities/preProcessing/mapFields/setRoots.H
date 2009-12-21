@@ -2,10 +2,10 @@
     argList::validArgs.clear();
     argList::validArgs.append("source dir");
 
-    argList::validOptions.insert("sourceTime", "scalar");
-    argList::validOptions.insert("parallelSource", "");
-    argList::validOptions.insert("parallelTarget", "");
-    argList::validOptions.insert("consistent", "");
+    argList::addOption("sourceTime", "scalar");
+    argList::addBoolOption("parallelSource");
+    argList::addBoolOption("parallelTarget");
+    argList::addBoolOption("consistent");
 
     argList args(argc, argv);
 

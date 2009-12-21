@@ -205,7 +205,7 @@ void Foam::slidingInterface::calcAttachedAddressing() const
 
 
         // Retired point addressing does not exist at this stage.
-        // It will be filled when the interface is coupled.  
+        // It will be filled when the interface is coupled.
         retiredPointMapPtr_ =
             new Map<label>
             (
@@ -213,7 +213,7 @@ void Foam::slidingInterface::calcAttachedAddressing() const
             );
 
         // Ditto for cut point edge map.  This is a rough guess of its size
-        // 
+        //
         cutPointEdgePairMapPtr_ =
             new Map<Pair<edge> >
             (
@@ -262,7 +262,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
     // The renumbering map is needed the other way around, i.e. giving
     // the new cell number for every old cell next to the interface.
     const labelList& reverseCellMap = m.reverseCellMap();
-    
+
     const labelList& mfc = masterFaceCells();
     const labelList& sfc = slaveFaceCells();
 
@@ -319,7 +319,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
     // Renumber stick-out faces
 
     const labelList& reverseFaceMap = m.reverseFaceMap();
-    
+
     // Master side
     const labelList& msof = masterStickOutFaces();
 
@@ -480,7 +480,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
     clearAttachedAddressing();
 
     deleteDemandDrivenData(projectedSlavePointsPtr_);
-    
+
     masterFaceCellsPtr_ = newMfcPtr;
     slaveFaceCellsPtr_ = newSfcPtr;
 

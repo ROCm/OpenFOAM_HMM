@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 
     // Count walls
     label nWalls = 0;
-    forAll (mesh.boundary(), patchI)
+    forAll(mesh.boundary(), patchI)
     {
         const fvPatch& patch = mesh.boundary()[patchI];
 
@@ -87,13 +87,13 @@ int main(int argc, char *argv[])
     labelList changedFaces(nWalls);
 
     label nChangedFaces = 0;
-    forAll (mesh.boundary(), patchI)
+    forAll(mesh.boundary(), patchI)
     {
         const fvPatch& patch = mesh.boundary()[patchI];
 
         if (isA<wallFvPatch>(patch))
         {
-            forAll (patch.Cf(), patchFaceI)
+            forAll(patch.Cf(), patchFaceI)
             {
                 const polyPatch& polyPatch = mesh.boundaryMesh()[patchI];
 
@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
         }
 
         // Copy boundary values
-        forAll (wallDistUncorrected.boundaryField(), patchI)
+        forAll(wallDistUncorrected.boundaryField(), patchI)
         {
             fvPatchScalarField& patchField =
                 wallDistUncorrected.boundaryField()[patchI];

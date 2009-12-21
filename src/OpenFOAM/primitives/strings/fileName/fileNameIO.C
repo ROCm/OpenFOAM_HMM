@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Istream constructor and IOstream operators for fileName.
-
 \*---------------------------------------------------------------------------*/
 
 #include "fileName.H"
@@ -34,20 +31,40 @@ Description
 
 Foam::fileName::fileName(Istream& is)
 :
-    string(is)
+    string()
 {
-    stripInvalid();
+    is >> *this;
 }
 
 
 Foam::Istream& Foam::operator>>(Istream& is, fileName& fn)
 {
-    fileName fName(is);
+    token t(is);
+
+    if (!t.good())
+    {
+        is.setBad();
+        return is;
+    }
+
+    if (t.isString())
+    {
+        fn = t.stringToken();
+    }
+    else
+    {
+        is.setBad();
+        FatalIOErrorIn("operator>>(Istream&, fileName&)", is)
+            << "wrong token type - expected string, found " << t.info()
+            << exit(FatalIOError);
+
+        return is;
+    }
+
+    fn.stripInvalid();
 
     // Check state of Istream
     is.check("Istream& operator>>(Istream&, fileName&)");
-
-    fn = fName;
 
     return is;
 }

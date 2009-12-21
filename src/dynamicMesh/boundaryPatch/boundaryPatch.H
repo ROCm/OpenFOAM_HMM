@@ -85,7 +85,7 @@ public:
 
         //- Construct as copy, resetting the index
         boundaryPatch(const boundaryPatch&, const label index);
-   
+
         //- Clone
         autoPtr<boundaryPatch> clone() const;
 

@@ -68,14 +68,14 @@
         quadFace[3] = pointMap[quadFace[3]];
 
         label ti = 0;
-        forAll (quadFace, i)
+        forAll(quadFace, i)
         {
             if (quadFace[i] != quadFace[(i+1)%4])
             {
                 triFace[(ti++)%3] = quadFace[i];
             }
         }
-        
+
         if (ti == 4)
         {
             pFaces[bcIndex][regionIndex].append(quadFace);

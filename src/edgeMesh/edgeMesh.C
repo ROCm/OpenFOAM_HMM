@@ -24,20 +24,86 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "primitiveEdgeMesh.H"
+#include "edgeMesh.H"
 #include "mergePoints.H"
-#include "StaticHashTable.H"
-#include "demandDrivenData.H"
-#include "meshTools.H"
-#include "OFstream.H"
+#include "addToRunTimeSelectionTable.H"
+#include "addToMemberFunctionSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(edgeMesh, 0);
+    defineRunTimeSelectionTable(edgeMesh, fileExtension);
+    defineMemberFunctionSelectionTable(edgeMesh,write,fileExtension);
+}
+
+Foam::wordHashSet Foam::edgeMesh::readTypes()
+{
+    return wordHashSet(*fileExtensionConstructorTablePtr_);
+}
+
+Foam::wordHashSet Foam::edgeMesh::writeTypes()
+{
+    return wordHashSet(*writefileExtensionMemberFunctionTablePtr_);
+}
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+bool Foam::edgeMesh::canReadType
+(
+    const word& ext,
+    const bool verbose
+)
+{
+    return checkSupport
+    (
+        readTypes(),
+        ext,
+        verbose,
+        "reading"
+   );
+}
+
+bool Foam::edgeMesh::canWriteType
+(
+    const word& ext,
+    const bool verbose
+)
+{
+    return checkSupport
+    (
+        writeTypes(),
+        ext,
+        verbose,
+        "writing"
+    );
+}
+
+
+bool Foam::edgeMesh::canRead
+(
+    const fileName& name,
+    const bool verbose
+)
+{
+    word ext = name.ext();
+    if (ext == "gz")
+    {
+        ext = name.lessExt().ext();
+    }
+    return canReadType(ext, verbose);
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::primitiveEdgeMesh::calcPointEdges() const
+void Foam::edgeMesh::calcPointEdges() const
 {
     if (pointEdgesPtr_.valid())
     {
-        FatalErrorIn("primitiveEdgeMesh::calcPointEdges() const")
+        FatalErrorIn("edgeMesh::calcPointEdges() const")
             << "pointEdges already calculated." << abort(FatalError);
     }
 
@@ -67,10 +133,10 @@ void Foam::primitiveEdgeMesh::calcPointEdges() const
     forAll(edges_, edgeI)
     {
         const edge& e = edges_[edgeI];
+        const label p0 = e[0];
+        const label p1 = e[1];
 
-        label p0 = e[0];
         pointEdges[p0][nEdgesPerPoint[p0]++] = edgeI;
-        label p1 = e[1];
         pointEdges[p1][nEdgesPerPoint[p1]++] = edgeI;
     }
 }
@@ -78,42 +144,102 @@ void Foam::primitiveEdgeMesh::calcPointEdges() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// construct from components
-Foam::primitiveEdgeMesh::primitiveEdgeMesh
+Foam::edgeMesh::edgeMesh()
+:
+    points_(0),
+    edges_(0),
+    pointEdgesPtr_(NULL)
+{}
+
+
+Foam::edgeMesh::edgeMesh
 (
     const pointField& points,
     const edgeList& edges
 )
 :
     points_(points),
-    edges_(edges)
-{}
-
-
-// construct as copy
-Foam::primitiveEdgeMesh::primitiveEdgeMesh(const primitiveEdgeMesh& em)
-:
-    points_(em.points_),
-    edges_(em.edges_),
+    edges_(edges),
     pointEdgesPtr_(NULL)
 {}
 
 
+Foam::edgeMesh::edgeMesh
+(
+    const Xfer<pointField>& pointLst,
+    const Xfer<edgeList>& edgeLst
+)
+:
+    points_(0),
+    edges_(0),
+    pointEdgesPtr_(NULL)
+{
+    points_.transfer(pointLst());
+    edges_.transfer(edgeLst());
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::primitiveEdgeMesh::~primitiveEdgeMesh()
+Foam::edgeMesh::~edgeMesh()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::primitiveEdgeMesh::regions(labelList& edgeRegion) const
+void Foam::edgeMesh::clear()
+{
+    points_.clear();
+    edges_.clear();
+    pointEdgesPtr_.clear();
+}
+
+
+void Foam::edgeMesh::reset
+(
+    const Xfer< pointField >& pointLst,
+    const Xfer< edgeList >& edgeLst
+)
+{
+    // Take over new primitive data.
+    // Optimized to avoid overwriting data at all
+    if (&pointLst)
+    {
+        points_.transfer(pointLst());
+    }
+
+    if (&edgeLst)
+    {
+        edges_.transfer(edgeLst());
+
+        // connectivity likely changed
+        pointEdgesPtr_.clear();
+    }
+
+}
+
+
+void Foam::edgeMesh::transfer(edgeMesh& mesh)
+{
+    points_.transfer(mesh.points_);
+    edges_.transfer(mesh.edges_);
+    pointEdgesPtr_ = mesh.pointEdgesPtr_;
+}
+
+
+Foam::Xfer< Foam::edgeMesh >
+Foam::edgeMesh::xfer()
+{
+    return xferMove(*this);
+}
+
+
+Foam::label Foam::edgeMesh::regions(labelList& edgeRegion) const
 {
     edgeRegion.setSize(edges_.size());
     edgeRegion = -1;
 
     label startEdgeI = 0;
-
     label currentRegion = 0;
 
     while (true)
@@ -173,7 +299,17 @@ Foam::label Foam::primitiveEdgeMesh::regions(labelList& edgeRegion) const
 }
 
 
-void Foam::primitiveEdgeMesh::mergePoints(const scalar mergeDist)
+void Foam::edgeMesh::scalePoints(const scalar scaleFactor)
+{
+    // avoid bad scaling
+    if (scaleFactor > 0 && scaleFactor != 1.0)
+    {
+        points_ *= scaleFactor;
+    }
+}
+
+
+void Foam::edgeMesh::mergePoints(const scalar mergeDist)
 {
     pointField newPoints;
     labelList pointMap;
@@ -194,7 +330,7 @@ void Foam::primitiveEdgeMesh::mergePoints(const scalar mergeDist)
 
         points_.transfer(newPoints);
 
-        // Renumber and make sure e[0] < e[1] (not really nessecary)
+        // Renumber and make sure e[0] < e[1] (not really necessary)
         forAll(edges_, edgeI)
         {
             edge& e = edges_[edgeI];
@@ -247,31 +383,6 @@ void Foam::primitiveEdgeMesh::mergePoints(const scalar mergeDist)
         {
             edges_[iter()] = iter.key();
         }
-    }
-}
-
-
-void Foam::primitiveEdgeMesh::writeObj
-(
-    const fileName& fName
-) const
-{
-    Pout<< nl << "Writing points and edges to " << fName << endl;
-
-    OFstream str(fName);
-
-    forAll(points_, p)
-    {
-        meshTools::writeOBJ(str, points_[p]);
-    }
-
-    forAll (edges_, e)
-    {
-        const edge& ed = edges_[e];
-
-        str<< "l " << ed.start() + 1 << ' ' << ed.end() + 1;
-
-        str<< nl;
     }
 }
 

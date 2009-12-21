@@ -473,7 +473,7 @@ endOfSection               {space}")"{space}
         // set size of label list
         curFaceLabels.setSize(strtol(YYText(), &endPtr, 16));
 
-        forAll (curFaceLabels, i)
+        forAll(curFaceLabels, i)
         {
             curFaceLabels[i] = strtol(endPtr, &endPtr, 16) - 1;
         }
@@ -762,10 +762,10 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("Fluent mesh file");
-    argList::validOptions.insert("scale", "scale factor");
-    argList::validOptions.insert("ignoreCellGroups", "cell group names");
-    argList::validOptions.insert("ignoreFaceGroups", "face group names");
-    argList::validOptions.insert("cubit", "");
+    argList::addOption("scale", "scale factor");
+    argList::addOption("ignoreCellGroups", "cell group names");
+    argList::addOption("ignoreFaceGroups", "face group names");
+    argList::addBoolOption("cubit");
 
     argList args(argc, argv);
 
@@ -776,17 +776,11 @@ int main(int argc, char *argv[])
 
     args.optionReadIfPresent("scale", scaleFactor);
 
-    HashSet<word> ignoreCellGroups;
-    if (args.optionFound("ignoreCellGroups"))
-    {
-        args.optionLookup("ignoreCellGroups")() >> ignoreCellGroups;
-    }
+    wordHashSet ignoreCellGroups;
+    wordHashSet ignoreFaceGroups;
 
-    HashSet<word> ignoreFaceGroups;
-    if (args.optionFound("ignoreFaceGroups"))
-    {
-        args.optionLookup("ignoreFaceGroups")() >> ignoreFaceGroups;
-    }
+    args.optionReadIfPresent("ignoreCellGroups", ignoreCellGroups);
+    args.optionReadIfPresent("ignoreFaceGroups", ignoreFaceGroups);
 
     cubitFile = args.options().found("cubit");
 
@@ -843,7 +837,7 @@ int main(int argc, char *argv[])
     // faces and move to neighbour
 
     boolList fm(faces.size(), false);
-    forAll (faces, facei)
+    forAll(faces, facei)
     {
         if
         (

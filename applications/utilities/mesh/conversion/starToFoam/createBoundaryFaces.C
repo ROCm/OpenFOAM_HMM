@@ -47,11 +47,11 @@ bool starMesh::starEqualFace
 
     label nEqual = 0;
 
-    forAll (cellFace, cellFaceLabelI)
+    forAll(cellFace, cellFaceLabelI)
     {
         const label curCellFaceLabel = cellFace[cellFaceLabelI];
 
-        forAll (boundaryFace, bouFaceLabelI)
+        forAll(boundaryFace, bouFaceLabelI)
         {
             if (boundaryFace[bouFaceLabelI] == curCellFaceLabel)
             {
@@ -70,13 +70,13 @@ bool starMesh::starEqualFace
     // Boundary face is happy if all of its vertices are recognised
     bool boundaryFaceHappy = true;
 
-    forAll (boundaryFace, bouFaceLabelI)
+    forAll(boundaryFace, bouFaceLabelI)
     {
         const label curBouFaceLabel = boundaryFace[bouFaceLabelI];
 
         bool found = false;
 
-        forAll (cellFace, cellFaceLabelI)
+        forAll(cellFace, cellFaceLabelI)
         {
             if (curBouFaceLabel == cellFace[cellFaceLabelI])
             {
@@ -155,7 +155,7 @@ void starMesh::markBoundaryFaces()
                     << " Face : " << endl << curFace << endl
                     << "PROSTAR Command: vset,news,vlis";
 
-                forAll (curFace, spI)
+                forAll(curFace, spI)
                 {
                     if (curFace[spI] > -1 && curFace[spI] < starPointID_.size())
                     {
@@ -185,7 +185,7 @@ void starMesh::collectBoundaryFaces()
         const labelList& curBoundaryCellIDs = boundaryCellIDs_[patchI];
         const labelList& curBoundaryCellFaceIDs = boundaryCellFaceIDs_[patchI];
 
-        forAll (curBoundaryCellIDs, faceI)
+        forAll(curBoundaryCellIDs, faceI)
         {
             patchFaces[faceI] =
                 cellFaces_[curBoundaryCellIDs[faceI]]

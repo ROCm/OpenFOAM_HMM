@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "boundaryCutter.H"
@@ -39,12 +37,7 @@ Description
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-defineTypeNameAndDebug(boundaryCutter, 0);
-
-}
+defineTypeNameAndDebug(Foam::boundaryCutter, 0);
 
 
 // * * * * * * * * * * * * * Private Static Functions  * * * * * * * * * * * //
@@ -159,7 +152,7 @@ void Foam::boundaryCutter::addFace
     getFaceInfo(faceI, patchID, zoneID, zoneFlip);
     label own = mesh_.faceOwner()[faceI];
     label masterPoint = mesh_.faces()[faceI][0];
-    
+
     if (!modifiedFace)
     {
         meshMod.setAction
@@ -203,7 +196,7 @@ void Foam::boundaryCutter::addFace
 
 
 
-// Splits a face using the cut edges and modified points 
+// Splits a face using the cut edges and modified points
 bool Foam::boundaryCutter::splitFace
 (
     const label faceI,
@@ -755,7 +748,7 @@ void Foam::boundaryCutter::setRefinement
 
         const labelList& eFaces = mesh_.edgeFaces()[edgeI];
 
-        forAll(eFaces, i)    
+        forAll(eFaces, i)
         {
             label faceI = eFaces[i];
 
@@ -781,7 +774,7 @@ void Foam::boundaryCutter::setRefinement
 
         const labelList& eFaces = mesh_.edgeFaces()[edgeI];
 
-        forAll(eFaces, i)    
+        forAll(eFaces, i)
         {
             label faceI = eFaces[i];
 

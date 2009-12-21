@@ -73,11 +73,11 @@ class processorPointPatch
         //- Calculate the patch geometry
         virtual void calcGeometry(PstreamBuffers&);
 
-        //- Initialise the points on this patch which are should also be 
+        //- Initialise the points on this patch which are should also be
         //  on a neighbouring patch but are not part of faces of that patch
         void initPatchPatchPoints(PstreamBuffers&);
 
-        //- Calculate the points on this patch which are should also be 
+        //- Calculate the points on this patch which are should also be
         //  on a neighbouring patch but are not part of faces of that patch
         void calcPatchPatchPoints(PstreamBuffers&);
 

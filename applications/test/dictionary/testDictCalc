@@ -1,0 +1,33 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  Any                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      testDictTest;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+x       10 /* what ever */ 20;
+y       20;
+// z       #test{ // this
+//     123 - 456
+//         // comments // are
+//         /* stripped
+//         * 10
+//          * {}
+//          */
+//         + 1 /*100 */  10
+// };
+
+p       #test{ 1 + 2 + 10 * 15 + $x - $y };
+
+foo     30;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

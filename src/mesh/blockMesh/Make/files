@@ -1,3 +1,4 @@
+curvedEdges/BSpline.C
 curvedEdges/CatmullRomSpline.C
 curvedEdges/polyLine.C
 
@@ -7,11 +8,6 @@ curvedEdges/lineEdge.C
 curvedEdges/polyLineEdge.C
 curvedEdges/lineDivide.C
 curvedEdges/splineEdge.C
-
-curvedEdges/legacy/spline.C
-curvedEdges/legacy/BSpline.C
-curvedEdges/legacy/simpleSplineEdge.C
-curvedEdges/legacy/polySplineEdge.C
 
 blockDescriptor/blockDescriptor.C
 blockDescriptor/blockDescriptorEdges.C

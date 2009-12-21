@@ -76,7 +76,7 @@ public:
 
     // Constructors
 
-        //- Construct from mesh and Istream. 
+        //- Construct from mesh and Istream.
         //  The name of the flux field is read from the Istream and looked-up
         //  from the mesh objectRegistry
         localBlended
@@ -141,10 +141,10 @@ public:
         tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
         interpolate(const GeometricField<Type, fvPatchField, volMesh>& vf) const
         {
-            const surfaceScalarField& blendingFactor = 
+            const surfaceScalarField& blendingFactor =
             (
                 this->mesh().objectRegistry::
-                lookupObject<const surfaceScalarField> 
+                lookupObject<const surfaceScalarField>
                 (
                     word(vf.name() + "BlendingFactor")
                 )

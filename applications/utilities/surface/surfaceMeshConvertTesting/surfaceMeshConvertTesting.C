@@ -75,13 +75,16 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::validArgs.append("inputFile");
     argList::validArgs.append("outputFile");
-    argList::validOptions.insert("clean", "");
-    argList::validOptions.insert("orient", "");
-    argList::validOptions.insert("surfMesh", "");
-    argList::validOptions.insert("scale", "scale");
-    argList::validOptions.insert("triSurface", "");
-    argList::validOptions.insert("unsorted", "");
-    argList::validOptions.insert("triFace", "");
+
+    argList::addBoolOption("clean");
+    argList::addBoolOption("orient");
+    argList::addBoolOption("surfMesh");
+    argList::addBoolOption("triSurface");
+    argList::addBoolOption("unsorted");
+    argList::addBoolOption("triFace");
+
+    argList::addOption("scale", "scale");
+
 #   include "setRootCase.H"
     const stringList& params = args.additionalArgs();
 

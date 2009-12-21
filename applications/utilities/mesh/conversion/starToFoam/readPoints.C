@@ -95,7 +95,7 @@ void starMesh::readPoints(const scalar scaleFactor)
                 pointLabel = readVtxLabel(pointsFile);
 
                 if (!pointsFile) break;
-                
+
                 maxLabel = max(maxLabel, pointLabel);
 
                 x = readVtxCmpt(pointsFile);

@@ -1118,7 +1118,7 @@ void Foam::motionSmoother::updateMesh()
 
     forAll(meshPoints, i)
     {
-        isInternalPoint_.set(meshPoints[i], 0);
+        isInternalPoint_.unset(meshPoints[i]);
     }
 
     // Calculate master edge addressing

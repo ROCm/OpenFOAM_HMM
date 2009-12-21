@@ -579,7 +579,7 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append(".unv file");
-    argList::validOptions.insert("dump", "");
+    argList::addBoolOption("dump");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

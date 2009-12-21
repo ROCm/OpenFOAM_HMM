@@ -717,7 +717,7 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append(".msh file");
-    argList::validOptions.insert("keepOrientation", "");
+    argList::addBoolOption("keepOrientation");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

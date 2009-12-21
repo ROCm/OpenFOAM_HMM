@@ -79,9 +79,24 @@ int main(int argc, char *argv[])
     // afterwards anyhow
     timeSelector::addOptions(true, false);
     argList::noParallel();
-    argList::validOptions.insert("ascii", "");
-    argList::validOptions.insert("index",  "start");
-    argList::validOptions.insert("noMesh", "");
+    argList::addBoolOption
+    (
+        "ascii",
+        "write in ASCII format instead of 'C Binary'"
+    );
+    argList::addOption
+    (
+        "index",
+        "start",
+        "ignore the time index contained in the uniform/time file "
+        "and use simple indexing when creating the files"
+    );
+    argList::addBoolOption
+    (
+        "noMesh",
+        "suppress writing the geometry. "
+        "Can be useful for converting partial results for a static geometry"
+    );
 
     // the volume field types that we handle
     wordHashSet volFieldTypes;

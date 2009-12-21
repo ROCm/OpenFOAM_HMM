@@ -54,7 +54,7 @@ SourceFiles
 #ifndef featureEdgeMesh_H
 #define featureEdgeMesh_H
 
-#include "primitiveEdgeMesh.H"
+#include "edgeMesh.H"
 #include "surfaceFeatures.H"
 #include "objectRegistry.H"
 #include "IOdictionary.H"
@@ -74,11 +74,12 @@ namespace Foam
 class featureEdgeMesh
 :
     public regIOobject,
-    public primitiveEdgeMesh
+    public edgeMesh
 {
 
 public:
 
+    //- Runtime type information
     TypeName("featureEdgeMesh");
 
     enum pointStatus
@@ -175,12 +176,6 @@ private:
             const vector& fC0tofC1
         ) const;
 
-        //- Disallow default bitwise copy construct
-        featureEdgeMesh(const featureEdgeMesh&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const featureEdgeMesh&);
-
 
 public:
 
@@ -197,9 +192,20 @@ public:
         //- Construct (read) given an IOobject
         featureEdgeMesh(const IOobject&);
 
-         //- Construct (read) given surfaceFeatures, an objectRegistry and a
-         //  fileName to write to.  Extracts, classifies and reorders the data
-         //  from surfaceFeatures.
+        //- Construct as copy
+        explicit featureEdgeMesh(const IOobject&, const featureEdgeMesh&);
+
+        //- Construct by transferring components (points, edges)
+        featureEdgeMesh
+        (
+            const IOobject&,
+            const Xfer<pointField>&,
+            const Xfer<edgeList>&
+        );
+
+        //- Construct (read) given surfaceFeatures, an objectRegistry and a
+        //  fileName to write to.  Extracts, classifies and reorders the data
+        //  from surfaceFeatures.
         featureEdgeMesh
         (
             const surfaceFeatures& sFeat,
@@ -228,13 +234,6 @@ public:
             const labelList& regionEdges
         );
 
-        //- Construct from minimal primitiveEdgeMesh components
-        featureEdgeMesh
-        (
-            const IOobject& io,
-            const pointField& pts,
-            const edgeList& eds
-        );
 
     //- Destructor
     ~featureEdgeMesh();
@@ -346,14 +345,13 @@ public:
             edgeTreesByType() const;
 
 
-        // Check
-
-        // Edit
-
         // Write
 
             //- Write all components of the featureEdgeMesh as obj files
             void writeObj(const fileName& prefix) const;
+
+            //- Give precedence to the regIOobject write
+            using regIOobject::write;
 
             // //- ReadData function required for regIOobject read operation
             // virtual bool readData(Istream&);

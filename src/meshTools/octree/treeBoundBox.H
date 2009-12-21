@@ -254,7 +254,7 @@ public:
             //  second the octant with boundary nearest to the point etc.
             inline void searchOrder
             (
-	         const point& pt,
+                 const point& pt,
                  FixedList<direction, 8>& octantOrder
             ) const;
 

@@ -75,13 +75,15 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("inputFile");
-    argList::validOptions.insert("name",  "name");
-    argList::validOptions.insert("clean", "");
-    argList::validOptions.insert("scaleIn",  "scale");
-    argList::validOptions.insert("scaleOut", "scale");
-    argList::validOptions.insert("dict", "coordinateSystemsDict");
-    argList::validOptions.insert("from", "sourceCoordinateSystem");
-    argList::validOptions.insert("to",   "targetCoordinateSystem");
+
+    argList::addBoolOption("clean");
+
+    argList::addOption("name",  "name");
+    argList::addOption("scaleIn",  "scale");
+    argList::addOption("scaleOut", "scale");
+    argList::addOption("dict", "coordinateSystemsDict");
+    argList::addOption("from", "sourceCoordinateSystem");
+    argList::addOption("to",   "targetCoordinateSystem");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

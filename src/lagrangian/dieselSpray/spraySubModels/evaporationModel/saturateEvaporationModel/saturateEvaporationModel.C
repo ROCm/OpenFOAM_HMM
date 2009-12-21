@@ -29,27 +29,24 @@ License
 #include "saturateEvaporationModel.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(saturateEvaporationModel, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(saturateEvaporationModel, 0);
-
-addToRunTimeSelectionTable
-(
-    evaporationModel,
-    saturateEvaporationModel,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        evaporationModel,
+        saturateEvaporationModel,
+        dictionary
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from dictionary
-saturateEvaporationModel::saturateEvaporationModel
+Foam::saturateEvaporationModel::saturateEvaporationModel
 (
     const dictionary& dict
 )
@@ -60,20 +57,20 @@ saturateEvaporationModel::saturateEvaporationModel
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-saturateEvaporationModel::~saturateEvaporationModel()
+Foam::saturateEvaporationModel::~saturateEvaporationModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool saturateEvaporationModel::evaporation() const
+bool Foam::saturateEvaporationModel::evaporation() const
 {
     return true;
 }
 
 
 // Correlation for the Sherwood Number
-scalar saturateEvaporationModel::Sh
+Foam::scalar Foam::saturateEvaporationModel::Sh
 (
     const scalar ReynoldsNumber,
     const scalar SchmidtNumber
@@ -83,7 +80,7 @@ scalar saturateEvaporationModel::Sh
 }
 
 
-scalar saturateEvaporationModel::relaxationTime
+Foam::scalar Foam::saturateEvaporationModel::relaxationTime
 (
     const scalar diameter,
     const scalar liquidDensity,
@@ -102,7 +99,7 @@ scalar saturateEvaporationModel::relaxationTime
 }
 
 
-scalar saturateEvaporationModel::boilingTime
+Foam::scalar Foam::saturateEvaporationModel::boilingTime
 (
     const scalar liquidDensity,
     const scalar cpFuel,
@@ -141,15 +138,5 @@ scalar saturateEvaporationModel::boilingTime
     return time;
 }
 
-
-inline label saturateEvaporationModel::nEvapIter() const
-{
-    return 1;
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
