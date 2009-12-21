@@ -800,7 +800,7 @@ void Scanner::AppendVal(Token* tok) {
 
 Token* Scanner::NextToken() {
 	while (ch == ' ' ||
-			ch <= 31 || (ch >= 127 && ch <= 65535)
+			(ch >= 9 && ch <= 10) || ch == 13
 	) NextCh();
 	if ((ch == L'/' && Comment0()) || (ch == L'/' && Comment1())) return NextToken();
 	t = CreateToken();

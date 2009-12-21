@@ -82,8 +82,12 @@ static const int debug = 0;
     //! The parent dictionary
     mutable dictionary* dict_;
 
+    //! Track that parent dictionary was set
+    bool hasDict_;
+
     //! The calculation result
     scalar val;
+
 
     //! token -> scalar
     scalar getScalar() const
@@ -100,11 +104,11 @@ static const int debug = 0;
         return s;
     }
 
-
     //! attach a dictionary
-    void dict(const dictionary& dict) const
+    void dict(const dictionary& dict)
     {
         dict_ = const_cast<dictionary*>(&dict);
+        hasDict_ = true;
     }
 
 
@@ -113,11 +117,11 @@ static const int debug = 0;
     {
         scalar dictValue = 0;
 
-        if (!dict_)
+        if (!hasDict_)
         {
             FatalErrorIn
             (
-                "SimpleCalc::getDictEntry() const"
+                "calcEntry::getDictEntry() const"
             )   << "No dictionary attached!"
                 << exit(FatalError);
 
@@ -141,13 +145,22 @@ static const int debug = 0;
         entry* entryPtr = dict_->lookupEntryPtr(keyword, true, false);
         if (entryPtr && !entryPtr->isDict())
         {
+            if (entryPtr->stream().size() != 1)
+            {
+                FatalErrorIn
+                (
+                    "calcEntry::getDictEntry() const"
+                )   << "keyword " << keyword << " has "
+                    << entryPtr->stream().size() << " values in dictionary "
+                    << exit(FatalError);
+            }
             entryPtr->stream() >> dictValue;
         }
         else
         {
             FatalErrorIn
             (
-                "SimpleCalc::getDictEntry() const"
+                "calcEntry::getDictEntry() const"
             )   << "keyword " << keyword << " is undefined in dictionary "
                 << exit(FatalError);
         }
@@ -162,7 +175,7 @@ static const int debug = 0;
     }
 
 
-// * * * * * * * * * * * * * * *  CHARACTERS * * * * * * * * * * * * * * * * //
+/*---------------------------------------------------------------------------*/
 
 
 
@@ -175,7 +188,7 @@ static const int debug = 0;
 	~Parser();      //!< Destructor - cleanup errors and dummyToken
 	void SemErr(const wchar_t* msg);    //!< Handle semantic error
 
-	void SimpleCalc();
+	void calcEntry();
 	void Expr(scalar& val);
 	void Term(scalar& val);
 	void Factor(scalar& val);

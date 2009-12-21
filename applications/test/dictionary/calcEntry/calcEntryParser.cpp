@@ -90,39 +90,51 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol) {
 }
 
 
-void Parser::SimpleCalc() {
+void Parser::calcEntry() {
 		val = 0;
-		if (debug){Info<<"start val"<< nl;}
+		if (debug){Info<<"start val pos:"<< t->pos << nl;}
 		
 		if (la->kind == 5) {
 			Get();
 			Expr(val);
 			Expect(6);
+			if (debug){
+			   Info<<"end {} at pos:"<< t->pos
+			       <<" val:"<< t->val
+			       <<" len:"<< coco_string_length(t->val)
+			       <<" la pos:"<< la->pos << nl;
+			}
+			// reposition to immediately after the closing '}'
+			scanner->buffer->SetPos
+			(
+			    t->pos + coco_string_length(t->val)
+			);
+			
 		} else if (StartOf(1)) {
 			Expr(val);
+			Expect(0);
 		} else SynErr(14);
-		Expect(0);
 }
 
 void Parser::Expr(scalar& val) {
 		scalar val2 = 0;
-		if (debug) {Info<<"Expr:"<< val<< nl;}
+		if (debug) {Info<<"Expr:"<< val<< " pos:"<< t->pos << nl;}
 		
 		Term(val);
 		while (la->kind == 7 || la->kind == 8) {
 			if (la->kind == 7) {
 				Get();
 				Term(val2);
-				if (debug) {Info<<"+Term:"<<val2 <<nl;}
+				if (debug) {Info<<"+Term:"<<val2 << " pos:"<< t->pos << nl;}
 				val += val2;
-				if (debug) {Info<<"="<< val << nl;}
+				if (debug) {Info<<"="<< val<< " pos:"<< t->pos << nl;}
 				
 			} else {
 				Get();
 				Term(val2);
-				if (debug) {Info<<"-Term:"<<val2 <<nl;}
+				if (debug) {Info<<"-Term:"<<val2<< " pos:"<< t->pos << nl;}
 				val -= val2;
-				if (debug) {Info<<"="<< val << nl;}
+				if (debug) {Info<<"="<< val<< " pos:"<< t->pos << nl;}
 				
 			}
 		}
@@ -130,23 +142,23 @@ void Parser::Expr(scalar& val) {
 
 void Parser::Term(scalar& val) {
 		scalar val2 = 0;
-		if (debug) {Info<<"Term:"<< val<< nl;}
+		if (debug) {Info<<"Term:"<< val<< " pos:"<< t->pos << nl;}
 		
 		Factor(val);
 		while (la->kind == 9 || la->kind == 10) {
 			if (la->kind == 9) {
 				Get();
 				Factor(val2);
-				if (debug) {Info<<"*Factor:"<<val2 << nl;}
+				if (debug) {Info<<"*Factor:"<<val2<< " pos:"<< t->pos << nl;}
 				val *= val2;
-				if (debug) {Info<<"="<< val << nl; }
+				if (debug) {Info<<"="<< val<< " pos:"<< t->pos << nl;}
 				
 			} else {
 				Get();
 				Factor(val2);
-				if (debug) {Info<<"/Factor:"<<val2 << nl;}
+				if (debug) {Info<<"/Factor:"<<val2<< " pos:"<< t->pos << nl;}
 				val /= val2;
-				if (debug) {Info<<"="<< val << nl; }
+				if (debug) {Info<<"="<< val<< " pos:"<< t->pos << nl;}
 				
 			}
 		}
@@ -156,12 +168,12 @@ void Parser::Factor(scalar& val) {
 		if (la->kind == 3) {
 			Get();
 			val = getDictLookup();
-			if (debug) {Info<<"lookup:"<<val<<nl;}
+			if (debug) {Info<<"lookup:"<<val<< " pos:"<< t->pos << nl;}
 			
 		} else if (la->kind == 4) {
 			Get();
 			val = getScalar();
-			if (debug) {Info<<"got num:"<<val<<nl;}
+			if (debug) {Info<<"got num:"<<val<< " pos:"<< t->pos << nl;}
 			
 		} else if (la->kind == 8) {
 			Get();
@@ -169,13 +181,14 @@ void Parser::Factor(scalar& val) {
 			Expr(val);
 			Expect(12);
 			val = -val;
-			if (debug) {Info<<"inv:"<<val<<nl;}
+			if (debug) {Info<<"inv:"<<val<< " pos:"<< t->pos << nl;}
 			
 		} else if (la->kind == 11) {
 			Get();
 			Expr(val);
 			Expect(12);
-			if (debug){Info<<"got Expr:"<<val<<nl;} 
+			if (debug){Info<<"got Expr:"<<val<< " pos:"<< t->pos << nl;}
+			
 		} else SynErr(15);
 }
 
@@ -189,9 +202,9 @@ void Parser::Parse() {
 	la = dummyToken = new Token();
 	la->val = coco_string_create(L"Dummy Token");
 	Get();
-	SimpleCalc();
+	calcEntry();
+	// let grammar deal with end-of-file expectations
 
-	Expect(0);
 }
 
 
@@ -272,7 +285,7 @@ wchar_t* Errors::strerror(int n)
 			case 11: s = coco_string_create(L"\"(\" expected"); break;
 			case 12: s = coco_string_create(L"\")\" expected"); break;
 			case 13: s = coco_string_create(L"??? expected"); break;
-			case 14: s = coco_string_create(L"invalid SimpleCalc"); break;
+			case 14: s = coco_string_create(L"invalid calcEntry"); break;
 			case 15: s = coco_string_create(L"invalid Factor"); break;
 
 		default:
