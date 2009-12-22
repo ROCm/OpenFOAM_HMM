@@ -343,6 +343,12 @@ private:
         //- Set the size and alignment data for each vertex
         void setVertexSizeAndAlignment();
 
+        //- Builds a dual face by circulating around the supplied edge.
+        face buildDualFace
+        (
+            const Triangulation::Finite_edges_iterator& eit
+        ) const;
+
         //- Insert the necessary point pairs to conform to the surface, either
         //  from stored results, or trigger a re-conformation
         void conformToSurface();
@@ -449,12 +455,6 @@ private:
             labelList& patchSizes,
             labelList& patchStarts
         );
-
-        //- Builds a dual face by circulating around the supplied edge
-        face buildDualFace
-        (
-            const Triangulation::Finite_edges_iterator& eit
-        ) const;
 
         //- Determines if the dual face constructed by the Delaunay
         //  edge is a boundary face

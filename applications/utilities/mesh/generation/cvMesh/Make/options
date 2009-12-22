@@ -26,5 +26,3 @@ EXE_LIBS = \
     -ldynamicMesh \
     -lmpfr \
     -lboost_thread
-
-

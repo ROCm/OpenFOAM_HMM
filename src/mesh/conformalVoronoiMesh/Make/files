@@ -1,6 +1,8 @@
 #include CGAL_FILES
 
 conformalVoronoiMesh/conformalVoronoiMesh.C
+conformalVoronoiMesh/conformalVoronoiMeshCalcDualMesh.C
+conformalVoronoiMesh/conformalVoronoiMeshConformToSurface.C
 conformalVoronoiMesh/conformalVoronoiMeshIO.C
 
 cvControls/cvControls.C
