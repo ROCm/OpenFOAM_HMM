@@ -170,7 +170,7 @@ public:
 
         ~OSHA1stream()
         {
-            delete &dynamic_cast<osha1stream&>(stream());
+            delete &dynamic_cast<osha1stream&>(stdStream());
         }
 
 
@@ -181,7 +181,7 @@ public:
         //- Full access to the sha1
         Foam::SHA1& sha1()
         {
-            return dynamic_cast<osha1stream&>(stream()).sha1();
+            return dynamic_cast<osha1stream&>(stdStream()).sha1();
         }
 
         //- Return SHA1::Digest for the data processed until now

@@ -2,9 +2,7 @@
  compile with:
  Coco \
     -frames $WM_THIRD_PARTY_DIR/coco-r \
-    -prefix calcEntry \
-    -namespace Foam::functionEntries::calcEntryInternal \
-    SimpleCalc.atg
+    calcEntry.atg
 -------------------------------------------------------------------------*/
 
 #include "dictionary.H"
@@ -13,7 +11,11 @@
 #include "wchar.H"
 
 
-COMPILER SimpleCalc
+COMPILER calcEntry
+$prefix=calcEntry
+$namespace=Foam::functionEntries::calcEntryInternal
+$eof=true     // grammar handles eof itself
+
     // Simple four function calculator for OpenFOAM dictionaries
 
     //! with debug
@@ -22,8 +24,12 @@ COMPILER SimpleCalc
     //! The parent dictionary
     mutable dictionary* dict_;
 
+    //! Track that parent dictionary was set
+    bool hasDict_;
+
     //! The calculation result
     scalar val;
+
 
     //! token -> scalar
     scalar getScalar() const
@@ -40,11 +46,11 @@ COMPILER SimpleCalc
         return s;
     }
 
-
     //! attach a dictionary
-    void dict(const dictionary& dict) const
+    void dict(const dictionary& dict)
     {
         dict_ = const_cast<dictionary*>(&dict);
+        hasDict_ = true;
     }
 
 
@@ -53,11 +59,11 @@ COMPILER SimpleCalc
     {
         scalar dictValue = 0;
 
-        if (!dict_)
+        if (!hasDict_)
         {
             FatalErrorIn
             (
-                "SimpleCalc::getDictEntry() const"
+                "calcEntry::getDictEntry() const"
             )   << "No dictionary attached!"
                 << exit(FatalError);
 
@@ -81,13 +87,22 @@ COMPILER SimpleCalc
         entry* entryPtr = dict_->lookupEntryPtr(keyword, true, false);
         if (entryPtr && !entryPtr->isDict())
         {
+            if (entryPtr->stream().size() != 1)
+            {
+                FatalErrorIn
+                (
+                    "calcEntry::getDictEntry() const"
+                )   << "keyword " << keyword << " has "
+                    << entryPtr->stream().size() << " values in dictionary "
+                    << exit(FatalError);
+            }
             entryPtr->stream() >> dictValue;
         }
         else
         {
             FatalErrorIn
             (
-                "SimpleCalc::getDictEntry() const"
+                "calcEntry::getDictEntry() const"
             )   << "keyword " << keyword << " is undefined in dictionary "
                 << exit(FatalError);
         }
@@ -102,7 +117,7 @@ COMPILER SimpleCalc
     }
 
 
-// * * * * * * * * * * * * * * *  CHARACTERS * * * * * * * * * * * * * * * * //
+/*---------------------------------------------------------------------------*/
 
 CHARACTERS
     letter    = 'A'..'Z' + 'a'..'z'.
@@ -145,38 +160,49 @@ number  =
 COMMENTS FROM "/*" TO "*/" NESTED
 COMMENTS FROM "//" TO lf
 
-// ignore unprintables
-IGNORE  ANY - printable
+IGNORE cr + lf + tab
 
 
 // * * * * * * * * * * * * * * *  PRODUCTIONS  * * * * * * * * * * * * * * * //
 
 PRODUCTIONS
 
-SimpleCalc                      (. val = 0;
-                                   if (debug){Info<<"start val"<< nl;}
+calcEntry                       (. val = 0;
+                                 if (debug){Info<<"start val pos:"<< t->pos << nl;}
                                  .)
 =
-  ( '{' Expr<val> '}' | Expr<val> )
-  EOF
+  '{' Expr<val> '}'             (.
+                                   if (debug){
+                                       Info<<"end {} at pos:"<< t->pos
+                                           <<" val:"<< t->val
+                                           <<" len:"<< coco_string_length(t->val)
+                                           <<" la pos:"<< la->pos << nl;
+                                   }
+                                   // reposition to immediately after the closing '}'
+                                   scanner->buffer->SetPos
+                                   (
+                                       t->pos + coco_string_length(t->val)
+                                   );
+                                 .)
+    | ( Expr<val> EOF )
 .
 
 
 /*---------------------------------------------------------------------------*/
 
 Expr<scalar& val>               (. scalar val2 = 0;
-                                   if (debug) {Info<<"Expr:"<< val<< nl;}
+                                   if (debug) {Info<<"Expr:"<< val<< " pos:"<< t->pos << nl;}
                                  .)
 =
   Term<val>
   {
-      "+" Term<val2>            (. if (debug) {Info<<"+Term:"<<val2 <<nl;}
+      "+" Term<val2>            (. if (debug) {Info<<"+Term:"<<val2 << " pos:"<< t->pos << nl;}
                                    val += val2;
-                                   if (debug) {Info<<"="<< val << nl;}
+                                   if (debug) {Info<<"="<< val<< " pos:"<< t->pos << nl;}
                                  .)
-    | "-" Term<val2>            (. if (debug) {Info<<"-Term:"<<val2 <<nl;}
+    | "-" Term<val2>            (. if (debug) {Info<<"-Term:"<<val2<< " pos:"<< t->pos << nl;}
                                    val -= val2;
-                                   if (debug) {Info<<"="<< val << nl;}
+                                   if (debug) {Info<<"="<< val<< " pos:"<< t->pos << nl;}
                                  .)
   }
 .
@@ -185,18 +211,18 @@ Expr<scalar& val>               (. scalar val2 = 0;
 /*---------------------------------------------------------------------------*/
 
 Term<scalar& val>               (. scalar val2 = 0;
-                                   if (debug) {Info<<"Term:"<< val<< nl;}
+                                   if (debug) {Info<<"Term:"<< val<< " pos:"<< t->pos << nl;}
                                  .)
 =
   Factor<val>
   {
-     "*" Factor<val2>           (. if (debug) {Info<<"*Factor:"<<val2 << nl;}
+     "*" Factor<val2>           (. if (debug) {Info<<"*Factor:"<<val2<< " pos:"<< t->pos << nl;}
                                    val *= val2;
-                                   if (debug) {Info<<"="<< val << nl; }
+                                   if (debug) {Info<<"="<< val<< " pos:"<< t->pos << nl;}
                                  .)
-  |  "/" Factor<val2>           (. if (debug) {Info<<"/Factor:"<<val2 << nl;}
+  |  "/" Factor<val2>           (. if (debug) {Info<<"/Factor:"<<val2<< " pos:"<< t->pos << nl;}
                                    val /= val2;
-                                   if (debug) {Info<<"="<< val << nl; }
+                                   if (debug) {Info<<"="<< val<< " pos:"<< t->pos << nl;}
                                  .)
   }
 .
@@ -206,20 +232,21 @@ Term<scalar& val>               (. scalar val2 = 0;
 Factor<scalar& val>
 =
     variable                    (. val = getDictLookup();
-                                   if (debug) {Info<<"lookup:"<<val<<nl;}
+                                   if (debug) {Info<<"lookup:"<<val<< " pos:"<< t->pos << nl;}
                                  .)
   | number                      (. val = getScalar();
-                                   if (debug) {Info<<"got num:"<<val<<nl;}
+                                   if (debug) {Info<<"got num:"<<val<< " pos:"<< t->pos << nl;}
                                  .)
   | '-' '(' Expr<val> ')'       (. val = -val;
-                                   if (debug) {Info<<"inv:"<<val<<nl;}
+                                   if (debug) {Info<<"inv:"<<val<< " pos:"<< t->pos << nl;}
                                  .)
-  | '(' Expr<val> ')'           (. if (debug){Info<<"got Expr:"<<val<<nl;} .)
+  | '(' Expr<val> ')'           (. if (debug){Info<<"got Expr:"<<val<< " pos:"<< t->pos << nl;}
+                                 .)
 .
 
 
 /*---------------------------------------------------------------------------*/
 
-END SimpleCalc.
+END calcEntry.
 
 // ************************************************************************* //

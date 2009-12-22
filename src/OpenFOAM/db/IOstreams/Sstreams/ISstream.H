@@ -72,23 +72,6 @@ class ISstream
         void operator=(const ISstream&);
 
 
-protected:
-
-    // Protected member functions
-
-        //- Return the stream reference
-        istream& stream()
-        {
-            return is_;
-        }
-
-        //- Return the const stream reference
-        const istream& stream() const
-        {
-            return is_;
-        }
-
-
 public:
 
     // Constructors
@@ -183,6 +166,21 @@ public:
 
             //- Set flags of output stream
             virtual ios_base::fmtflags flags(const ios_base::fmtflags flags);
+
+
+        // STL stream
+
+            //- Access to underlying std::istream
+            virtual istream& stdStream()
+            {
+                return is_;
+            }
+
+            //- Const access to underlying std::istream
+            virtual const istream& stdStream() const
+            {
+                return is_;
+            }
 
 
         // Print

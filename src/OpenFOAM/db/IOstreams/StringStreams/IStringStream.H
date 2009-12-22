@@ -97,7 +97,7 @@ public:
 
         ~IStringStream()
         {
-            delete &dynamic_cast<std::istringstream&>(stream());
+            delete &dynamic_cast<std::istringstream&>(stdStream());
         }
 
 
@@ -108,7 +108,10 @@ public:
             //- Return the string
             string str() const
             {
-                return dynamic_cast<const std::istringstream&>(stream()).str();
+                return dynamic_cast<const std::istringstream&>
+                (
+                    stdStream()
+                ).str();
             }
 
 

@@ -14,8 +14,11 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-x       10 /* what ever */ 20;
+flowRatePerHour 720;
+
+x       10;
 y       20;
+z       t s v;
 // z       #test{ // this
 //     123 - 456
 //         // comments // are
@@ -26,8 +29,18 @@ y       20;
 //         + 1 /*100 */  10
 // };
 
-p       #test{ 1 + 2 + 10 * 15 + $x - $y };
+p     this calculation #calc{
+          1 + 2 + 10 * 15 +
+          $x - $y
+        // $x + $y
+}
+is done inplace;
 
-foo     30;
+
+flowRate    #calc{ $flowRatePerHour / 3600};
+
+xxx         yyy;
+foo         30;
+bar         15;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

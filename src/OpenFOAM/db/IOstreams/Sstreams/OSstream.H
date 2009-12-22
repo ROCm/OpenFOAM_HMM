@@ -67,21 +67,6 @@ class OSstream
         void operator=(const OSstream&);
 
 
-protected:
-
-        //- Return the stream reference
-        ostream& stream()
-        {
-            return os_;
-        }
-
-        //- Return the const stream reference
-        const ostream& stream() const
-        {
-            return os_;
-        }
-
-
 public:
 
     // Constructors
@@ -185,6 +170,21 @@ public:
 
             //- Set precision of output field (and return old precision)
             virtual int precision(const int);
+
+
+        // STL stream
+
+            //- Access to underlying std::ostream
+            virtual ostream& stdStream()
+            {
+                return os_;
+            }
+
+            //- Const access to underlying std::ostream
+            virtual const ostream& stdStream() const
+            {
+                return os_;
+            }
 
 
         // Print
