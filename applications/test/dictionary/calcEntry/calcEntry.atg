@@ -39,10 +39,7 @@ SourceFiles
 \*---------------------------------------------------------------------------*/
 
 #include "dictionary.H"
-#include "scalar.H"
-#include "error.H"
 #include "wchar.H"
-#include "DynamicList.H"
 #include "calcEntryInternal.H"
 
 
@@ -56,7 +53,7 @@ COMPILER calcEntry
 
 private:
     //- The parent dictionary
-    mutable dictionary* dict_;
+    dictionary* dict_;
 
     //- The calculation result
     scalar val;
@@ -196,8 +193,8 @@ Expr<scalar& val>               (. scalar val2 = 0; .)
 =
   Term<val>
   {
-      "+" Term<val2>            (. val += val2; .)
-    | "-" Term<val2>            (. val -= val2; .)
+      '+' Term<val2>            (. val += val2; .)
+    | '-' Term<val2>            (. val -= val2; .)
   }
 .
 
@@ -208,20 +205,26 @@ Term<scalar& val>               (. scalar val2 = 0; .)
 =
   Factor<val>
   {
-     "*" Factor<val2>           (. val *= val2; .)
-  |  "/" Factor<val2>           (. val /= val2; .)
+      '*' Factor<val2>          (. val *= val2; .)
+    | '/' Factor<val2>          (. val /= val2; .)
   }
 .
 
 
 /*---------------------------------------------------------------------------*/
-Factor<scalar& val>
+
+// Note the treatment of the leading signs is fairly generous
+// eg, "10 + - 10" is treated like "10 + -10"
+//
+Factor<scalar& val>             (. bool negative = false; .)
 =
-    Func<val>
-  | variable                    (. val = getDictLookup(); .)
-  | number                      (. val = coco_string_toDouble(t->val); .)
-  | '-' '(' Expr<val> ')'       (. val = -val; .)
-  | '(' Expr<val> ')'
+  ['+' | '-'                    (. negative = true; .)
+  ]
+  (
+      Func<val> | '(' Expr<val> ')'
+    | variable                  (. val = getDictLookup(); .)
+    | number                    (. val = coco_string_toDouble(t->val); .)
+  )                             (. if (negative) { val = -val; } .)
 .
 
 
@@ -242,7 +245,7 @@ Func<scalar& val>
       { ',' Expr<x>             (. param.append(x); .)
       }
     ]
-  ')'                           (. val = scalarFunctions::dispatch(funcName, param); .)
+  ')'                           (. val = dispatch(funcName, param); .)
 .
 
 

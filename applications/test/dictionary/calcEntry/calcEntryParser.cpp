@@ -137,25 +137,29 @@ void Parser::Term(scalar& val) {
 }
 
 void Parser::Factor(scalar& val) {
+		bool negative = false; 
+		if (la->kind == 7 || la->kind == 8) {
+			if (la->kind == 7) {
+				Get();
+			} else {
+				Get();
+				negative = true; 
+			}
+		}
 		if (la->kind == 1) {
 			Func(val);
+		} else if (la->kind == 11) {
+			Get();
+			Expr(val);
+			Expect(12);
 		} else if (la->kind == 3) {
 			Get();
 			val = getDictLookup(); 
 		} else if (la->kind == 4) {
 			Get();
 			val = coco_string_toDouble(t->val); 
-		} else if (la->kind == 8) {
-			Get();
-			Expect(11);
-			Expr(val);
-			Expect(12);
-			val = -val; 
-		} else if (la->kind == 11) {
-			Get();
-			Expr(val);
-			Expect(12);
 		} else SynErr(16);
+		if (negative) { val = -val; } 
 }
 
 void Parser::Func(scalar& val) {
@@ -177,7 +181,7 @@ void Parser::Func(scalar& val) {
 			}
 		}
 		Expect(12);
-		val = scalarFunctions::dispatch(funcName, param); 
+		val = dispatch(funcName, param); 
 }
 
 
@@ -225,7 +229,7 @@ bool Parser::StartOf(int s) {
 
 	static const bool set[2][16] = {
 		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
-		{x,T,x,T, T,x,x,x, T,x,x,T, x,x,x,x}
+		{x,T,x,T, T,x,x,T, T,x,x,T, x,x,x,x}
 	};
 
 

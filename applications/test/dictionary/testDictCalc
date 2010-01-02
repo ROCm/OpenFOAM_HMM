@@ -39,8 +39,11 @@ is done inplace;
 
 flowRate    #calc{ $flowRatePerHour / 3600 };
 
-sin45       #calc{ sin( 45*pi() / 180 ) };
-cos45       #calc{ cos( degToRad(45) ) };
+// inplace redefine
+flowRate    #calc{ $flowRate * 0.1 };
+
+sin45       #calc{ sin( 45.0 * pi() / 180 ) };
+cos45       #calc{ cos( degToRad(15- -15+ +15) ) };
 pow         #calc{ pow( $x, $y ) };
 log10       #calc{ log( 1e6 ) };
 // list #calc{ list() };

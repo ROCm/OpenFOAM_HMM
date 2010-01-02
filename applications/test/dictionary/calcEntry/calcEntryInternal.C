@@ -25,8 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "calcEntryInternal.H"
-#include "addToMemberFunctionSelectionTable.H"
-#include "addToStaticMemberFunctionSelectionTable.H"
+#include "addToGlobalFunctionSelectionTable.H"
 #include "unitConversion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -38,14 +37,66 @@ namespace functionEntries
 namespace calcEntryInternal
 {
 
-defineStaticMemberFunctionSelectionTable(scalarFunctions,dispatch,ParamList);
+defineGlobalFunctionSelectionTable(dispatch,ParamList);
 
 
-scalar scalarFunctions::dispatch
-(
-    const word& name,
-    const UList<scalar>& param
-)
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#define globalConstant0(Name, Constant)\
+scalar Name##_0(const UList<scalar>& param)                                   \
+{                                                                             \
+    return Constant;                                                          \
+}                                                                             \
+addNamedToGlobalFunctionSelectionTable(dispatch,ParamList,Name##_0,&Name##_0)
+
+
+#define globalFunction0(Name, Function)\
+scalar Name##_0(const UList<scalar>& param)                                   \
+{                                                                             \
+    return Function();                                                        \
+}                                                                             \
+addNamedToGlobalFunctionSelectionTable(dispatch,ParamList,Name##_0,&Name##_0)
+
+
+#define globalFunction1(Name, Function)\
+scalar Name##_1(const UList<scalar>& param)                                   \
+{                                                                             \
+    return Function(param[0]);                                                \
+}                                                                             \
+addNamedToGlobalFunctionSelectionTable(dispatch,ParamList,Name##_1,&Name##_1)
+
+
+#define globalFunction2(Name, Function)\
+scalar Name##_2(const UList<scalar>& param)                                   \
+{                                                                             \
+    return Function(param[0], param[1]);                                      \
+}                                                                             \
+addNamedToGlobalFunctionSelectionTable(dispatch,ParamList,Name##_2,&Name##_2)
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+globalConstant0(pi, constant::mathematical::pi);
+
+globalFunction1(degToRad, degToRad);
+globalFunction1(radToDeg, radToDeg);
+globalFunction1(asin, Foam::asin);
+globalFunction1(acos, Foam::acos);
+globalFunction1(atan, Foam::atan);
+globalFunction1(sin, Foam::sin);
+globalFunction1(cos, Foam::cos);
+globalFunction1(tan, Foam::tan);
+globalFunction1(log, Foam::log);
+globalFunction1(log10, Foam::log10);
+globalFunction1(mag, Foam::mag);
+
+globalFunction2(atan2, Foam::atan2);
+globalFunction2(pow, Foam::pow);
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+scalar dispatch(const word& name, const UList<scalar>& param)
 {
     // create lookup name with parameter count
     const word lookupName = name + '_' + Foam::name(param.size());
@@ -69,114 +120,10 @@ scalar scalarFunctions::dispatch
 }
 
 
-scalar scalarFunctions::pi_0(const UList<scalar>& param)
-{
-    return constant::mathematical::pi;
-}
-
-scalar scalarFunctions::degToRad_1(const UList<scalar>& param)
-{
-    return degToRad(param[0]);
-}
-
-scalar scalarFunctions::radToDeg_1(const UList<scalar>& param)
-{
-    return radToDeg(param[0]);
-}
-
-scalar scalarFunctions::sin_1(const UList<scalar>& param)
-{
-    return Foam::sin(param[0]);
-}
-
-scalar scalarFunctions::cos_1(const UList<scalar>& param)
-{
-    return Foam::cos(param[0]);
-}
-
-scalar scalarFunctions::pow_2(const UList<scalar>& param)
-{
-    return Foam::pow(param[0], param[1]);
-}
-
-scalar scalarFunctions::log_1(const UList<scalar>& param)
-{
-    return Foam::log(param[0]);
-}
-
-scalar scalarFunctions::log10_1(const UList<scalar>& param)
-{
-    return Foam::log10(param[0]);
-}
-
-
-
-addNamedToStaticMemberFunctionSelectionTable
-(
-    scalarFunctions,scalarFunctions,dispatch,ParamList,
-    pi_0,
-    &scalarFunctions::pi_0
-);
-
-addNamedToStaticMemberFunctionSelectionTable
-(
-    scalarFunctions,scalarFunctions,dispatch,ParamList,
-    degToRad_1,
-    &scalarFunctions::degToRad_1
-);
-
-addNamedToStaticMemberFunctionSelectionTable
-(
-    scalarFunctions,scalarFunctions,dispatch,ParamList,
-    radToDeg_1,
-    &scalarFunctions::radToDeg_1
-);
-
-addNamedToStaticMemberFunctionSelectionTable
-(
-    scalarFunctions,scalarFunctions,dispatch,ParamList,
-    sin_1,
-    &scalarFunctions::sin_1
-);
-
-addNamedToStaticMemberFunctionSelectionTable
-(
-    scalarFunctions,scalarFunctions,dispatch,ParamList,
-    cos_1,
-    &scalarFunctions::cos_1
-);
-
-addNamedToStaticMemberFunctionSelectionTable
-(
-    scalarFunctions,scalarFunctions,dispatch,ParamList,
-    pow_2,
-    &scalarFunctions::pow_2
-);
-
-addNamedToStaticMemberFunctionSelectionTable
-(
-    scalarFunctions,scalarFunctions,dispatch,ParamList,
-    log_1,
-    &scalarFunctions::log_1
-);
-
-
-
-addNamedToStaticMemberFunctionSelectionTable
-(
-    scalarFunctions,scalarFunctions,dispatch,ParamList,
-    log10_1,
-    &scalarFunctions::log10_1
-);
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace calcEntryInternal
 } // End namespace functionEntries
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 // ************************************************************************* //

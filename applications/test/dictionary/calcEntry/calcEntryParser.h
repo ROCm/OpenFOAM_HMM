@@ -4,10 +4,7 @@
 #define COCO_calcEntryPARSER_H__
 
 #include "dictionary.H"
-#include "scalar.H"
-#include "error.H"
 #include "wchar.H"
-#include "DynamicList.H"
 #include "calcEntryInternal.H"
 
 
@@ -81,7 +78,7 @@ public:
 
 private:
     //- The parent dictionary
-    mutable dictionary* dict_;
+    dictionary* dict_;
 
     //- The calculation result
     scalar val;

@@ -22,59 +22,31 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Namespace
-    Foam::functionEntries::calcEntryInternal
+@file Foam::addToGlobalFunctionSelectionTable
 
 Description
-    Contains global functions and classes for the calcEntry.
-
-SourceFiles
-    calcEntryInternal.C
+    Macros for easy insertion into global function selection tables
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef calcEntryInternal_H
-#define calcEntryInternal_H
-
-#include "error.H"
-#include "scalar.H"
-#include "DynamicList.H"
-#include "globalFunctionSelectionTables.H"
+#ifndef addToGlobalFunctionSelectionTable_H
+#define addToGlobalFunctionSelectionTable_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-namespace functionEntries
-{
-namespace calcEntryInternal
-{
 
-    // Global Function Selectors
-
-    declareGlobalFunctionSelectionTable
-    (
-        scalar,
-        dispatch,
-        ParamList,
-        (
-            const UList<scalar>& param
-        ),
-        (param)
-    );
-
-
-    //- Dispatch calculation to the named function
-    scalar dispatch(const word&, const UList<scalar>&);
+// add to hash-table of functions with 'lookup' as the key
+#define addNamedToGlobalFunctionSelectionTable\
+(memberFunction,argNames,lookup,functionPtr)                                  \
+                                                                              \
+    /* Add to the table, find by lookup name */                               \
+    add##memberFunction##argNames##GlobalMemberFunctionToTable                \
+    add_##lookup##_##memberFunction##argNames##GlobalMemberFunctionTo##Table_\
+    (#lookup, functionPtr)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace calcEntryInternal
-} // End namespace functionEntries
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 
