@@ -1,6 +1,7 @@
 dictionaryTest.C
 
 calcEntry/calcEntry.C
+calcEntry/calcEntryInternal.C
 calcEntry/calcEntryParser.cpp
 calcEntry/calcEntryScanner.cpp
 

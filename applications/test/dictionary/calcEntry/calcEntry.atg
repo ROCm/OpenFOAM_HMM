@@ -1,65 +1,72 @@
-/*-------------------------------------------------------------------------
+/*---------------------------------*- C++ -*---------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+@file calcEntry.atg
+
+Description
+    An attributed Coco/R grammar to parse simple arithmetic expressions
+
+SourceFiles
+    generated
+
+\*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*\
  compile with:
  Coco \
     -frames $WM_THIRD_PARTY_DIR/coco-r \
     calcEntry.atg
--------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
 #include "dictionary.H"
 #include "scalar.H"
 #include "error.H"
 #include "wchar.H"
+#include "DynamicList.H"
+#include "calcEntryInternal.H"
 
 
 COMPILER calcEntry
-$prefix=calcEntry
-$namespace=Foam::functionEntries::calcEntryInternal
-$eof=true     // grammar handles eof itself
+    // grammar pragmas:
+    $prefix=calcEntry
+    $namespace=Foam::functionEntries::calcEntryInternal
+    $eof=true     // grammar handles eof itself
 
     // Simple four function calculator for OpenFOAM dictionaries
 
-    //! with debug
-    static const int debug = 0;
-
-    //! The parent dictionary
+private:
+    //- The parent dictionary
     mutable dictionary* dict_;
 
-    //! Track that parent dictionary was set
-    bool hasDict_;
-
-    //! The calculation result
+    //- The calculation result
     scalar val;
 
-
-    //! token -> scalar
-    scalar getScalar() const
-    {
-        return coco_string_toDouble(t->val);
-    }
-
-    //! token -> string
-    std::string getString() const
-    {
-        char* str = coco_string_create_char(t->val);
-        std::string s(str);
-        coco_string_delete(str);
-        return s;
-    }
-
-    //! attach a dictionary
-    void dict(const dictionary& dict)
-    {
-        dict_ = const_cast<dictionary*>(&dict);
-        hasDict_ = true;
-    }
-
-
-    //! lookup dictionary entry
+    //- lookup dictionary entry
     scalar getDictLookup() const
     {
         scalar dictValue = 0;
 
-        if (!hasDict_)
+        if (!dict_)
         {
             FatalErrorIn
             (
@@ -70,19 +77,14 @@ $eof=true     // grammar handles eof itself
             return 0;
         }
 
-        char* chars = coco_string_create_char
+        char* str = coco_string_create_char
         (
             t->val,
             1,
             (coco_string_length(t->val) - 1)
         );
-        word keyword(chars);
-        coco_string_delete(chars);
-
-        if (debug)
-        {
-            Info<<"lookup: " << keyword << nl;
-        }
+        word keyword(str);
+        coco_string_delete(str);
 
         entry* entryPtr = dict_->lookupEntryPtr(keyword, true, false);
         if (entryPtr && !entryPtr->isDict())
@@ -107,23 +109,35 @@ $eof=true     // grammar handles eof itself
                 << exit(FatalError);
         }
 
-
         return dictValue;
     }
 
+
+public:
+
+    //- attach a dictionary
+    void dict(const dictionary& dict)
+    {
+        dict_ = const_cast<dictionary*>(&dict);
+    }
+
+    //- Return the calculated result
     scalar Result() const
     {
         return val;
     }
 
 
+INITIALIZE
+    dict_ = 0;
+    val = 0;
+
 /*---------------------------------------------------------------------------*/
 
 CHARACTERS
-    letter    = 'A'..'Z' + 'a'..'z'.
-    qualifier = '_' + ':'.
-    dollar    = '$'.
+    letter    = 'A'..'Z' + 'a'..'z' + '_'.
     digit     = "0123456789".
+    alphanum  = letter + digit.
     sign      = '+' + '-'.
     cr        = '\r'.
     lf        = '\n'.
@@ -138,16 +152,16 @@ TOKENS
 
 // identifier
 ident  =
-    letter { letter | digit | qualifier }.
+    letter { alphanum }.
 
 // string
 string =
     '"' { stringCh | '\\' printable } '"'.
 
 // dictionary lookup identifier
-// starts with '$' and otherwise limited to a normal indentifier
+// starts with '$' and otherwise limited to a normal identifier
 variable  =
-    dollar letter { letter | digit | qualifier }.
+    '$' letter { alphanum }.
 
 // floating point and integer numbers
 number  =
@@ -167,63 +181,35 @@ IGNORE cr + lf + tab
 
 PRODUCTIONS
 
-calcEntry                       (. val = 0;
-                                 if (debug){Info<<"start val pos:"<< t->pos << nl;}
-                                 .)
+calcEntry                       (. val = 0; .)
 =
-  '{' Expr<val> '}'             (.
-                                   if (debug){
-                                       Info<<"end {} at pos:"<< t->pos
-                                           <<" val:"<< t->val
-                                           <<" len:"<< coco_string_length(t->val)
-                                           <<" la pos:"<< la->pos << nl;
-                                   }
-                                   // reposition to immediately after the closing '}'
-                                   scanner->buffer->SetPos
-                                   (
-                                       t->pos + coco_string_length(t->val)
-                                   );
+  '{' Expr<val> '}'             (. // reposition to immediately after the closing '}'
+                                   scanner->buffer->SetPos(t->pos + 1);
                                  .)
-    | ( Expr<val> EOF )
+  | ( Expr<val> EOF )
 .
 
 
 /*---------------------------------------------------------------------------*/
 
-Expr<scalar& val>               (. scalar val2 = 0;
-                                   if (debug) {Info<<"Expr:"<< val<< " pos:"<< t->pos << nl;}
-                                 .)
+Expr<scalar& val>               (. scalar val2 = 0; .)
 =
   Term<val>
   {
-      "+" Term<val2>            (. if (debug) {Info<<"+Term:"<<val2 << " pos:"<< t->pos << nl;}
-                                   val += val2;
-                                   if (debug) {Info<<"="<< val<< " pos:"<< t->pos << nl;}
-                                 .)
-    | "-" Term<val2>            (. if (debug) {Info<<"-Term:"<<val2<< " pos:"<< t->pos << nl;}
-                                   val -= val2;
-                                   if (debug) {Info<<"="<< val<< " pos:"<< t->pos << nl;}
-                                 .)
+      "+" Term<val2>            (. val += val2; .)
+    | "-" Term<val2>            (. val -= val2; .)
   }
 .
 
 
 /*---------------------------------------------------------------------------*/
 
-Term<scalar& val>               (. scalar val2 = 0;
-                                   if (debug) {Info<<"Term:"<< val<< " pos:"<< t->pos << nl;}
-                                 .)
+Term<scalar& val>               (. scalar val2 = 0; .)
 =
   Factor<val>
   {
-     "*" Factor<val2>           (. if (debug) {Info<<"*Factor:"<<val2<< " pos:"<< t->pos << nl;}
-                                   val *= val2;
-                                   if (debug) {Info<<"="<< val<< " pos:"<< t->pos << nl;}
-                                 .)
-  |  "/" Factor<val2>           (. if (debug) {Info<<"/Factor:"<<val2<< " pos:"<< t->pos << nl;}
-                                   val /= val2;
-                                   if (debug) {Info<<"="<< val<< " pos:"<< t->pos << nl;}
-                                 .)
+     "*" Factor<val2>           (. val *= val2; .)
+  |  "/" Factor<val2>           (. val /= val2; .)
   }
 .
 
@@ -231,17 +217,32 @@ Term<scalar& val>               (. scalar val2 = 0;
 /*---------------------------------------------------------------------------*/
 Factor<scalar& val>
 =
-    variable                    (. val = getDictLookup();
-                                   if (debug) {Info<<"lookup:"<<val<< " pos:"<< t->pos << nl;}
+    Func<val>
+  | variable                    (. val = getDictLookup(); .)
+  | number                      (. val = coco_string_toDouble(t->val); .)
+  | '-' '(' Expr<val> ')'       (. val = -val; .)
+  | '(' Expr<val> ')'
+.
+
+
+/*---------------------------------------------------------------------------*/
+
+// functions like sin(x) or pow(x, y) etc.
+Func<scalar& val>
+=
+  ident                         (.
+                                  char* str = coco_string_create_char(t->val);
+                                  word funcName(str);
+                                  coco_string_delete(str);
+                                  DynamicList<scalar> param(4);  // hold parameter values
                                  .)
-  | number                      (. val = getScalar();
-                                   if (debug) {Info<<"got num:"<<val<< " pos:"<< t->pos << nl;}
-                                 .)
-  | '-' '(' Expr<val> ')'       (. val = -val;
-                                   if (debug) {Info<<"inv:"<<val<< " pos:"<< t->pos << nl;}
-                                 .)
-  | '(' Expr<val> ')'           (. if (debug){Info<<"got Expr:"<<val<< " pos:"<< t->pos << nl;}
-                                 .)
+  '('
+    [                           (. scalar x; .)
+      Expr<x>                   (. param.append(x); .)
+      { ',' Expr<x>             (. param.append(x); .)
+      }
+    ]
+  ')'                           (. val = scalarFunctions::dispatch(funcName, param); .)
 .
 
 

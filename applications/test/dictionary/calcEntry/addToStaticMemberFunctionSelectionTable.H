@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,71 +22,31 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::functionEntries::calcEntry
+@file Foam::addToStaticMemberFunctionSelectionTable
 
 Description
-    This dictionary function entry may or may not do anything particularly
-    useful - depending upon what is currently being used to test.
-
-SourceFiles
-    calcEntry.C
+    Macros for easy insertion into member function selection tables
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef calcEntry_H
-#define calcEntry_H
-
-#include "functionEntry.H"
+#ifndef addToStaticMemberFunctionSelectionTable_H
+#define addToStaticMemberFunctionSelectionTable_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-namespace functionEntries
-{
 
-/*---------------------------------------------------------------------------*\
-                          Class calcEntry Declaration
-\*---------------------------------------------------------------------------*/
-
-class calcEntry
-:
-    public functionEntry
-{
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        calcEntry(const calcEntry&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const calcEntry&);
-
-
-public:
-
-    //- Runtime type information
-    ClassName("calc");
-
-
-    // Member Functions
-
-        static bool execute
-        (
-            const dictionary& parentDict,
-            primitiveEntry& entry,
-            Istream& is
-        );
-
-};
+// add to hash-table of functions with 'lookup' as the key
+#define addNamedToStaticMemberFunctionSelectionTable\
+(baseType,thisType,memberFunction,argNames,lookup,functionPtr)                \
+                                                                              \
+    /* Add the thisType memberFunction to the table, find by lookup name */   \
+    baseType::add##memberFunction##argNames##StaticMemberFunctionToTable<thisType>  \
+    add_##lookup##_##thisType##memberFunction##argNames##StaticMemberFunctionTo##baseType##Table_\
+    (#lookup, functionPtr)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace functionEntries
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

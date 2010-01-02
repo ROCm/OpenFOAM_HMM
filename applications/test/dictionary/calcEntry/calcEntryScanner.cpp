@@ -21,7 +21,7 @@ namespace calcEntryInternal {
 // string handling, wide character
 
 wchar_t* coco_string_create(const wchar_t* str) {
-	int len = coco_string_length(str);
+	const int len = coco_string_length(str);
 	wchar_t* dest = new wchar_t[len + 1];
 	if (len) {
 		wcsncpy(dest, str, len);
@@ -31,10 +31,7 @@ wchar_t* coco_string_create(const wchar_t* str) {
 }
 
 wchar_t* coco_string_create(const wchar_t* str, int index, int length) {
-	int len = coco_string_length(str);
-	if (len) {
-		len = length;
-	}
+	const int len = (str && *str) ? length : 0;
 	wchar_t* dest = new wchar_t[len + 1];
 	if (len) {
 		wcsncpy(dest, &(str[index]), len);
@@ -69,8 +66,8 @@ wchar_t* coco_string_create_lower(const wchar_t* str, int index, int len) {
 
 
 wchar_t* coco_string_create_append(const wchar_t* str1, const wchar_t* str2) {
-	int str1Len = coco_string_length(str1);
-	int str2Len = coco_string_length(str2);
+	const int str1Len = coco_string_length(str1);
+	const int str2Len = coco_string_length(str2);
 
 	wchar_t* dest = new wchar_t[str1Len + str2Len + 1];
 
@@ -82,7 +79,7 @@ wchar_t* coco_string_create_append(const wchar_t* str1, const wchar_t* str2) {
 }
 
 wchar_t* coco_string_create_append(const wchar_t* str1, const wchar_t ch) {
-	int len = coco_string_length(str1);
+	const int len = coco_string_length(str1);
 	wchar_t* dest = new wchar_t[len + 2];
 	wcsncpy(dest, str1, len);   // or use if (len) { wcscpy(dest, str1); }
 	dest[len] = ch;
@@ -100,8 +97,8 @@ int coco_string_length(const wchar_t* str) {
 }
 
 bool coco_string_endswith(const wchar_t* str, const wchar_t* endstr) {
-	int strLen = wcslen(str);
-	int endLen = wcslen(endstr);
+	const int strLen = wcslen(str);
+	const int endLen = wcslen(endstr);
 	return (endLen <= strLen) && (wcscmp(str + strLen - endLen, endstr) == 0);
 }
 
@@ -159,7 +156,7 @@ float coco_string_toFloat(const wchar_t* str)
 //
 
 wchar_t* coco_string_create(const char* str) {
-	int len = str ? strlen(str) : 0;
+	const int len = str ? strlen(str) : 0;
 	wchar_t* dest = new wchar_t[len + 1];
 	for (int i = 0; i < len; ++i) {
 		dest[i] = wchar_t(str[i]);
@@ -169,7 +166,7 @@ wchar_t* coco_string_create(const char* str) {
 }
 
 wchar_t* coco_string_create(const char* str, int index, int length) {
-	int len = str ? length : 0;
+	const int len = str ? length : 0;
 	wchar_t* dest = new wchar_t[len + 1];
 	for (int i = 0; i < len; ++i) {
 		dest[i] = wchar_t(str[index + i]);
@@ -180,8 +177,8 @@ wchar_t* coco_string_create(const char* str, int index, int length) {
 
 
 char* coco_string_create_char(const wchar_t* str) {
-	int len = coco_string_length(str);
-	char *dest = new char[len + 1];
+	const int len = coco_string_length(str);
+	char* dest = new char[len + 1];
 	for (int i = 0; i < len; ++i)
 	{
 		dest[i] = char(str[i]);
@@ -191,11 +188,8 @@ char* coco_string_create_char(const wchar_t* str) {
 }
 
 char* coco_string_create_char(const wchar_t* str, int index, int length) {
-	int len = coco_string_length(str);
-	if (len) {
-		len = length;
-	}
-	char *dest = new char[len + 1];
+	const int len = (str && *str) ? length : 0;
+	char* dest = new char[len + 1];
 	for (int i = 0; i < len; ++i) {
 		dest[i] = char(str[index + i]);
 	}
@@ -589,25 +583,29 @@ Scanner::~Scanner() {
 
 void Scanner::Init() {
 	for (int i = 65; i <= 90; ++i) start.set(i, 1);
+	for (int i = 95; i <= 95; ++i) start.set(i, 1);
 	for (int i = 97; i <= 122; ++i) start.set(i, 1);
-	for (int i = 36; i <= 36; ++i) start.set(i, 5);
-	start.set(45, 20);
+	start.set(45, 21);
 	for (int i = 48; i <= 57; ++i) start.set(i, 9);
 	start.set(34, 2);
+	start.set(36, 5);
 	start.set(46, 7);
 	start.set(123, 14);
 	start.set(125, 15);
-	start.set(43, 21);
+	start.set(43, 22);
 	start.set(42, 16);
 	start.set(47, 17);
 	start.set(40, 18);
 	start.set(41, 19);
+	start.set(44, 20);
 	start.set(Buffer::EoF, -1);
 
 
 
 	tvalLength = 128;
 	tval = new wchar_t[tvalLength]; // text of current token
+	tlen = 0;
+	tval[tlen] = 0;
 
 	// HEAP_BLOCK_SIZE byte heap + pointer to next heap block
 	heap = malloc(HEAP_BLOCK_SIZE + sizeof(void*));
@@ -813,7 +811,7 @@ Token* Scanner::NextToken() {
 		case 0: { t->kind = noSym; break; }   // NextCh already done
 		case 1:
 			case_1:
-			if ((ch >= L'0' && ch <= L':') || (ch >= L'A' && ch <= L'Z') || ch == L'_' || (ch >= L'a' && ch <= L'z')) {AddCh(); goto case_1;}
+			if ((ch >= L'0' && ch <= L'9') || (ch >= L'A' && ch <= L'Z') || ch == L'_' || (ch >= L'a' && ch <= L'z')) {AddCh(); goto case_1;}
 			else {t->kind = 1; break;}
 		case 2:
 			case_2:
@@ -829,11 +827,11 @@ Token* Scanner::NextToken() {
 			case_4:
 			{t->kind = 2; break;}
 		case 5:
-			if ((ch >= L'A' && ch <= L'Z') || (ch >= L'a' && ch <= L'z')) {AddCh(); goto case_6;}
+			if ((ch >= L'A' && ch <= L'Z') || ch == L'_' || (ch >= L'a' && ch <= L'z')) {AddCh(); goto case_6;}
 			else {t->kind = noSym; break;}
 		case 6:
 			case_6:
-			if ((ch >= L'0' && ch <= L':') || (ch >= L'A' && ch <= L'Z') || ch == L'_' || (ch >= L'a' && ch <= L'z')) {AddCh(); goto case_6;}
+			if ((ch >= L'0' && ch <= L'9') || (ch >= L'A' && ch <= L'Z') || ch == L'_' || (ch >= L'a' && ch <= L'z')) {AddCh(); goto case_6;}
 			else {t->kind = 3; break;}
 		case 7:
 			case_7:
@@ -880,9 +878,11 @@ Token* Scanner::NextToken() {
 		case 19:
 			{t->kind = 12; break;}
 		case 20:
+			{t->kind = 13; break;}
+		case 21:
 			if (ch == L'.') {AddCh(); goto case_7;}
 			else {t->kind = 8; break;}
-		case 21:
+		case 22:
 			if (ch == L'.') {AddCh(); goto case_7;}
 			else {t->kind = 7; break;}
 

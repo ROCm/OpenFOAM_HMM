@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,22 +22,24 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::functionEntries::calcEntry
+Namespace
+    Foam::functionEntries::calcEntryInternal
 
 Description
     This dictionary function entry may or may not do anything particularly
     useful - depending upon what is currently being used to test.
 
 SourceFiles
-    calcEntry.C
+    calcEntryInternal.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef calcEntry_H
-#define calcEntry_H
+#ifndef calcEntryInternal_H
+#define calcEntryInternal_H
 
 #include "functionEntry.H"
+#include "memberFunctionSelectionTables.H"
+#include "staticMemberFunctionSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,44 +47,50 @@ namespace Foam
 {
 namespace functionEntries
 {
+namespace calcEntryInternal
+{
 
 /*---------------------------------------------------------------------------*\
-                          Class calcEntry Declaration
+                     Class calcEntryFunctions Declaration
 \*---------------------------------------------------------------------------*/
 
-class calcEntry
-:
-    public functionEntry
+class scalarFunctions
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        calcEntry(const calcEntry&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const calcEntry&);
-
-
 public:
 
-    //- Runtime type information
-    ClassName("calc");
+    // Member Function Selectors
 
-
-    // Member Functions
-
-        static bool execute
+        declareStaticMemberFunctionSelectionTable
         (
-            const dictionary& parentDict,
-            primitiveEntry& entry,
-            Istream& is
+            scalar,
+            scalarFunctions,
+            dispatch,
+            ParamList,
+            (
+                const UList<scalar>& param
+            ),
+            (param)
         );
+
+        //- Calculate
+        static scalar dispatch(const word&, const UList<scalar>&);
+
+
+    static scalar pi_0(const UList<scalar>&);
+    static scalar degToRad_1(const UList<scalar>&);
+    static scalar radToDeg_1(const UList<scalar>&);
+    static scalar cos_1(const UList<scalar>&);
+    static scalar sin_1(const UList<scalar>&);
+    static scalar pow_2(const UList<scalar>&);
+    static scalar log_1(const UList<scalar>&);
+    static scalar log10_1(const UList<scalar>&);
 
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace calcEntryInternal
 } // End namespace functionEntries
 } // End namespace Foam
 

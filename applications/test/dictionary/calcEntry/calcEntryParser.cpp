@@ -91,105 +91,93 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol) {
 
 
 void Parser::calcEntry() {
-		val = 0;
-		if (debug){Info<<"start val pos:"<< t->pos << nl;}
-		
+		val = 0; 
 		if (la->kind == 5) {
 			Get();
 			Expr(val);
 			Expect(6);
-			if (debug){
-			   Info<<"end {} at pos:"<< t->pos
-			       <<" val:"<< t->val
-			       <<" len:"<< coco_string_length(t->val)
-			       <<" la pos:"<< la->pos << nl;
-			}
-			// reposition to immediately after the closing '}'
-			scanner->buffer->SetPos
-			(
-			    t->pos + coco_string_length(t->val)
-			);
+			scanner->buffer->SetPos(t->pos + 1);
 			
 		} else if (StartOf(1)) {
 			Expr(val);
 			Expect(0);
-		} else SynErr(14);
+		} else SynErr(15);
 }
 
 void Parser::Expr(scalar& val) {
-		scalar val2 = 0;
-		if (debug) {Info<<"Expr:"<< val<< " pos:"<< t->pos << nl;}
-		
+		scalar val2 = 0; 
 		Term(val);
 		while (la->kind == 7 || la->kind == 8) {
 			if (la->kind == 7) {
 				Get();
 				Term(val2);
-				if (debug) {Info<<"+Term:"<<val2 << " pos:"<< t->pos << nl;}
-				val += val2;
-				if (debug) {Info<<"="<< val<< " pos:"<< t->pos << nl;}
-				
+				val += val2; 
 			} else {
 				Get();
 				Term(val2);
-				if (debug) {Info<<"-Term:"<<val2<< " pos:"<< t->pos << nl;}
-				val -= val2;
-				if (debug) {Info<<"="<< val<< " pos:"<< t->pos << nl;}
-				
+				val -= val2; 
 			}
 		}
 }
 
 void Parser::Term(scalar& val) {
-		scalar val2 = 0;
-		if (debug) {Info<<"Term:"<< val<< " pos:"<< t->pos << nl;}
-		
+		scalar val2 = 0; 
 		Factor(val);
 		while (la->kind == 9 || la->kind == 10) {
 			if (la->kind == 9) {
 				Get();
 				Factor(val2);
-				if (debug) {Info<<"*Factor:"<<val2<< " pos:"<< t->pos << nl;}
-				val *= val2;
-				if (debug) {Info<<"="<< val<< " pos:"<< t->pos << nl;}
-				
+				val *= val2; 
 			} else {
 				Get();
 				Factor(val2);
-				if (debug) {Info<<"/Factor:"<<val2<< " pos:"<< t->pos << nl;}
-				val /= val2;
-				if (debug) {Info<<"="<< val<< " pos:"<< t->pos << nl;}
-				
+				val /= val2; 
 			}
 		}
 }
 
 void Parser::Factor(scalar& val) {
-		if (la->kind == 3) {
+		if (la->kind == 1) {
+			Func(val);
+		} else if (la->kind == 3) {
 			Get();
-			val = getDictLookup();
-			if (debug) {Info<<"lookup:"<<val<< " pos:"<< t->pos << nl;}
-			
+			val = getDictLookup(); 
 		} else if (la->kind == 4) {
 			Get();
-			val = getScalar();
-			if (debug) {Info<<"got num:"<<val<< " pos:"<< t->pos << nl;}
-			
+			val = coco_string_toDouble(t->val); 
 		} else if (la->kind == 8) {
 			Get();
 			Expect(11);
 			Expr(val);
 			Expect(12);
-			val = -val;
-			if (debug) {Info<<"inv:"<<val<< " pos:"<< t->pos << nl;}
-			
+			val = -val; 
 		} else if (la->kind == 11) {
 			Get();
 			Expr(val);
 			Expect(12);
-			if (debug){Info<<"got Expr:"<<val<< " pos:"<< t->pos << nl;}
-			
-		} else SynErr(15);
+		} else SynErr(16);
+}
+
+void Parser::Func(scalar& val) {
+		Expect(1);
+		char* str = coco_string_create_char(t->val);
+		word funcName(str);
+		coco_string_delete(str);
+		DynamicList<scalar> param(4);  // hold parameter values
+		
+		Expect(11);
+		if (StartOf(1)) {
+			scalar x; 
+			Expr(x);
+			param.append(x); 
+			while (la->kind == 13) {
+				Get();
+				Expr(x);
+				param.append(x); 
+			}
+		}
+		Expect(12);
+		val = scalarFunctions::dispatch(funcName, param); 
 }
 
 
@@ -218,10 +206,16 @@ Parser::Parser(Scanner* scan, Errors* err)
 	t(NULL),
 	la(NULL)
 {
-
 	if (!errors) {   // add in default error handling
 		errors = new Errors();
 	}
+	// user-defined initialization:
+dict_ = 0;
+    val = 0;
+
+/*---------------------------------------------------------------------------*/
+
+
 }
 
 
@@ -229,9 +223,9 @@ bool Parser::StartOf(int s) {
 	const bool T = true;
 	const bool x = false;
 
-	static bool set[2][15] = {
-		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,T, T,x,x,x, T,x,x,T, x,x,x}
+	static const bool set[2][16] = {
+		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,T,x,T, T,x,x,x, T,x,x,T, x,x,x,x}
 	};
 
 
@@ -245,6 +239,8 @@ Parser::~Parser() {
 		delete errors;
 	}
 	delete dummyToken;
+	// user-defined destruction:
+
 }
 
 
@@ -284,9 +280,10 @@ wchar_t* Errors::strerror(int n)
 			case 10: s = coco_string_create(L"\"/\" expected"); break;
 			case 11: s = coco_string_create(L"\"(\" expected"); break;
 			case 12: s = coco_string_create(L"\")\" expected"); break;
-			case 13: s = coco_string_create(L"??? expected"); break;
-			case 14: s = coco_string_create(L"invalid calcEntry"); break;
-			case 15: s = coco_string_create(L"invalid Factor"); break;
+			case 13: s = coco_string_create(L"\",\" expected"); break;
+			case 14: s = coco_string_create(L"??? expected"); break;
+			case 15: s = coco_string_create(L"invalid calcEntry"); break;
+			case 16: s = coco_string_create(L"invalid Factor"); break;
 
 		default:
 		{

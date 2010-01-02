@@ -7,6 +7,8 @@
 #include "scalar.H"
 #include "error.H"
 #include "wchar.H"
+#include "DynamicList.H"
+#include "calcEntryInternal.H"
 
 
 #include "calcEntryScanner.h"
@@ -55,7 +57,7 @@ private:
 		_variable=3,
 		_number=4,
 	};
-	static const int maxT = 13;
+	static const int maxT = 14;
 
 	static const int minErrDist = 2; //!< min. distance before reporting errors
 
@@ -77,47 +79,19 @@ public:
 	Token *t;                   //!< last recognized token
 	Token *la;                  //!< lookahead token
 
-static const int debug = 0;
-
-    //! The parent dictionary
+private:
+    //- The parent dictionary
     mutable dictionary* dict_;
 
-    //! Track that parent dictionary was set
-    bool hasDict_;
-
-    //! The calculation result
+    //- The calculation result
     scalar val;
 
-
-    //! token -> scalar
-    scalar getScalar() const
-    {
-        return coco_string_toDouble(t->val);
-    }
-
-    //! token -> string
-    std::string getString() const
-    {
-        char* str = coco_string_create_char(t->val);
-        std::string s(str);
-        coco_string_delete(str);
-        return s;
-    }
-
-    //! attach a dictionary
-    void dict(const dictionary& dict)
-    {
-        dict_ = const_cast<dictionary*>(&dict);
-        hasDict_ = true;
-    }
-
-
-    //! lookup dictionary entry
+    //- lookup dictionary entry
     scalar getDictLookup() const
     {
         scalar dictValue = 0;
 
-        if (!hasDict_)
+        if (!dict_)
         {
             FatalErrorIn
             (
@@ -128,19 +102,14 @@ static const int debug = 0;
             return 0;
         }
 
-        char* chars = coco_string_create_char
+        char* str = coco_string_create_char
         (
             t->val,
             1,
             (coco_string_length(t->val) - 1)
         );
-        word keyword(chars);
-        coco_string_delete(chars);
-
-        if (debug)
-        {
-            Info<<"lookup: " << keyword << nl;
-        }
+        word keyword(str);
+        coco_string_delete(str);
 
         entry* entryPtr = dict_->lookupEntryPtr(keyword, true, false);
         if (entryPtr && !entryPtr->isDict())
@@ -165,17 +134,24 @@ static const int debug = 0;
                 << exit(FatalError);
         }
 
-
         return dictValue;
     }
 
+
+public:
+
+    //- attach a dictionary
+    void dict(const dictionary& dict)
+    {
+        dict_ = const_cast<dictionary*>(&dict);
+    }
+
+    //- Return the calculated result
     scalar Result() const
     {
         return val;
     }
 
-
-/*---------------------------------------------------------------------------*/
 
 
 
@@ -185,13 +161,14 @@ static const int debug = 0;
 	 *  handler, which will not be deleted upon destruction.
 	 */
 	Parser(Scanner* scan, Errors* err = 0);
-	~Parser();      //!< Destructor - cleanup errors and dummyToken
+	~Parser();
 	void SemErr(const wchar_t* msg);    //!< Handle semantic error
 
 	void calcEntry();
 	void Expr(scalar& val);
 	void Term(scalar& val);
 	void Factor(scalar& val);
+	void Func(scalar& val);
 
 	void Parse();                       //!< Execute the parse operation
 
