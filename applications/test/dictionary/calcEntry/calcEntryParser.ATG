@@ -22,7 +22,7 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-@file calcEntry.atg
+@file calcEntryParser.ATG
 
 Description
     An attributed Coco/R grammar to parse simple arithmetic expressions
@@ -34,8 +34,8 @@ SourceFiles
 /*---------------------------------------------------------------------------*\
  compile with:
  Coco \
-    -frames $WM_THIRD_PARTY_DIR/coco-r \
-    calcEntry.atg
+    [-single] -frames $WM_THIRD_PARTY_DIR/coco-r \
+    calcEntryParser.ATG
 \*---------------------------------------------------------------------------*/
 
 #include "dictionary.H"
@@ -61,8 +61,6 @@ private:
     //- lookup dictionary entry
     scalar getDictLookup() const
     {
-        scalar dictValue = 0;
-
         if (!dict_)
         {
             FatalErrorIn
@@ -82,6 +80,8 @@ private:
         );
         word keyword(str);
         coco_string_delete(str);
+
+        scalar dictValue = 0;
 
         entry* entryPtr = dict_->lookupEntryPtr(keyword, true, false);
         if (entryPtr && !entryPtr->isDict())
@@ -237,15 +237,15 @@ Func<scalar& val>
                                   char* str = coco_string_create_char(t->val);
                                   word funcName(str);
                                   coco_string_delete(str);
-                                  DynamicList<scalar> param(4);  // hold parameter values
+                                  DynamicList<scalar> stack(4);
                                  .)
   '('
     [                           (. scalar x; .)
-      Expr<x>                   (. param.append(x); .)
-      { ',' Expr<x>             (. param.append(x); .)
+      Expr<x>                   (. stack.append(x); .)
+      { ',' Expr<x>             (. stack.append(x); .)
       }
     ]
-  ')'                           (. val = dispatch(funcName, param); .)
+  ')'                           (. val = dispatch(funcName, stack); .)
 .
 
 

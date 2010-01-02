@@ -1,0 +1,2 @@
+EXE_INC = -IcalcEntry -I$(OBJECTS_DIR)
+

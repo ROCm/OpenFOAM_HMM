@@ -3,13 +3,8 @@ cd ${0%/*} || exit 1    # run from this directory
 
 # this will have to do until we have a makefile rule
 
-if type Coco > /dev/null 2>&1
-then
-    Coco \
-        -frames $WM_THIRD_PARTY_DIR/coco-r \
-        calcEntry/calcEntry.atg
-else
-    echo "Coco not installed"
-fi
+type Coco > /dev/null 2>&1 || {
+    echo "Coco not installed -- cannot make this test"
+}
 
 wmake

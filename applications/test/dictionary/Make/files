@@ -1,8 +1,7 @@
 dictionaryTest.C
 
-calcEntry/calcEntry.C
+calcEntry/calcEntryParser.ATG
 calcEntry/calcEntryInternal.C
-calcEntry/calcEntryParser.cpp
-calcEntry/calcEntryScanner.cpp
+calcEntry/calcEntry.C
 
 EXE = $(FOAM_USER_APPBIN)/dictionaryTest

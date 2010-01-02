@@ -1,0 +1,6 @@
+.SUFFIXES: .ATG
+
+ATGtoo = Coco -single -frames $(WM_THIRD_PARTY_DIR)/coco-r/src $$SOURCE -o $(OBJECTS_DIR) ; $(CC) $(c++FLAGS) -c $*.cpp -o $@
+
+.ATG.dep:
+	$(MAKE_DEP)
