@@ -1,6 +1,6 @@
 dictionaryTest.C
 
-calcEntry/calcEntryParser.ATG
+calcEntry/calcEntryParser.atg
 calcEntry/calcEntryInternal.C
 calcEntry/calcEntry.C
 

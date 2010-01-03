@@ -68,17 +68,23 @@ bool Foam::functionEntries::calcEntry::execute
         myErrorHandler("calcEntryInternal::Parser");
 
     calcEntryInternal::Scanner scanner(iss);
+
+    // set the starting line
+    scanner.Line(is.lineNumber());
+
     calcEntryInternal::Parser  parser(&scanner, &myErrorHandler);
 
     // Attach dictionary context
     parser.dict(parentDict);
 
-    // Attach scalar functions
-    // parser.functions(parentDict);
-
     parser.Parse();
 
-    // make a small input list to contain the answer
+    // mostly have an extra newline in the lookahead token
+    // so subtract 1 to keep things vaguely in sync
+    // (this is still far from perfect)
+    is.lineNumber() = scanner.Line() - 1;
+
+    // a small input list to contain the answer
     tokenList tokens(2);
     tokens[0] = parser.Result();
     tokens[1] = token::END_STATEMENT;

@@ -1,6 +1,8 @@
-.SUFFIXES: .ATG
+# handie Coco/R attributed grammars
 
-ATGtoo = Coco -single -frames $(WM_THIRD_PARTY_DIR)/coco-r/src $$SOURCE -o $(OBJECTS_DIR) ; $(CC) $(c++FLAGS) -c $*.cpp -o $@
+.SUFFIXES: .atg
 
-.ATG.dep:
+atgtoo = Coco -single -frames $(WM_THIRD_PARTY_DIR)/coco-cpp/src $$SOURCE -o $(OBJECTS_DIR) ; $(CC) $(c++FLAGS) -c $*.cpp -o $@
+
+.atg.dep:
 	$(MAKE_DEP)
