@@ -3,11 +3,14 @@
 #ifndef COCO_calcEntrySCANNER_H__
 #define COCO_calcEntrySCANNER_H__
 
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <wchar.h>
+#include <climits>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cwchar>
+#include <string>
+#include <fstream>
+#include <iostream>
 
 // io.h and fcntl are used to ensure binary read from streams on windows
 #if _MSC_VER >= 1300
@@ -24,10 +27,8 @@
 #define coco_swprintf swprintf
 #endif
 
+
 #define COCO_WCHAR_MAX    65535
-#define MIN_BUFFER_LENGTH 1024
-#define MAX_BUFFER_LENGTH (64*MIN_BUFFER_LENGTH)
-#define HEAP_BLOCK_SIZE   (64*1024)
 
 
 namespace Foam {
@@ -47,12 +48,6 @@ wchar_t* coco_string_create(const wchar_t* str);
 
 //! Create a substring of str starting at index and length characters long
 wchar_t* coco_string_create(const wchar_t* str, int index, int length);
-
-//! Create an uppercase string from str
-wchar_t* coco_string_create_upper(const wchar_t* str);
-
-//! Create an uppercase substring from str starting at index and length characters long
-wchar_t* coco_string_create_upper(const wchar_t* str, int index, int length);
 
 //! Create a lowercase string from str
 wchar_t* coco_string_create_lower(const wchar_t* str);
@@ -138,7 +133,6 @@ float coco_string_toFloat(const char* str);
 // * * * * * * * * * End of Wide Character String Routines * * * * * * * * * //
 
 
-
 //! Scanner Token
 class Token
 {
@@ -151,7 +145,7 @@ public:
 	Token *next;    //!< Peek tokens are kept in linked list
 
 	Token();        //!< Construct null
-	~Token();       //!< Destructor - cleanup allocated val
+	~Token();       //!< Destructor - cleanup allocated val??
 };
 
 
@@ -166,30 +160,48 @@ class Buffer {
 private:
 	unsigned char *buf; //!< input buffer
 	int bufCapacity;    //!< capacity of buf
-	int bufStart;       //!< position of first byte in buffer relative to input stream
 	int bufLen;         //!< length of buffer
-	int fileLen;        //!< length of input stream (may change if the stream is no file)
 	int bufPos;         //!< current position in buffer
-	FILE* stream;       //!< input stream (seekable)
-	bool isUserStream;  //!< was the stream opened by the user?
+	int bufStart;       //!< position of first byte in buffer relative to input stream
+	int fileLen;        //!< length of input stream (may change if the stream is no file)
+	FILE* cStream;      //!< input stdio stream (normally seekable)
+	std::istream* stdStream;  //!< STL std stream (seekable)
+	bool isUserStream_;  //!< was the stream opened by the user?
 
 	int ReadNextStreamChunk();
-	bool CanSeek();     //!< true if stream can be seeked otherwise false
+	bool CanSeek() const; //!< true if stream can be seeked otherwise false
+
+protected:
+	Buffer(Buffer*);    //!< for the UTF8Buffer
 
 public:
 	static const int EoF = COCO_WCHAR_MAX + 1;
 
-	Buffer(FILE*, bool isUserStream);
-	Buffer(const unsigned char* buf, int len);
-	Buffer(const char* buf, int len);
-	Buffer(Buffer*);
+	//! Attach buffer to a stdio stream.
+	//! User streams are not closed in the destructor
+	Buffer(FILE*, bool isUserStream = true);
+
+	//! Attach buffer to an STL std stream
+	//! User streams are not closed in the destructor
+	explicit Buffer(std::istream*, bool isUserStream = true);
+
+	//! Copy buffer contents from constant string
+	//! Handled internally as an istringstream
+	explicit Buffer(std::string&);
+
+	//! Copy buffer contents from constant character string
+	Buffer(const unsigned char* chars, int len);
+	//! Copy buffer contents from constant character string
+	Buffer(const char* chars, int len);
+
+	//! Close stream (but not user streams) and free buf (if any)
 	virtual ~Buffer();
 
-	virtual void Close();
-	virtual int Read();
-	virtual int Peek();
-	virtual wchar_t* GetString(int beg, int end);
-	virtual int GetPos();
+	virtual void Close();   //!< Close stream (but not user streams)
+	virtual int Read();     //!< Get character from stream or buffer
+	virtual int Peek();     //!< Peek character from stream or buffer
+
+	virtual int GetPos() const;
 	virtual void SetPos(int value);
 };
 
@@ -205,31 +217,31 @@ public:
 //------------------------------------------------------------------------------
 // StartStates
 //------------------------------------------------------------------------------
-//! maps characters to start states of tokens
+//! maps characters (integers) to start states of tokens
 class StartStates {
 private:
 	class Elem {
 	public:
 		int key, val;
 		Elem *next;
-		Elem(int key, int val) {
-			this->key = key;
-			this->val = val;
-			next = NULL;
-		}
+		Elem(int k, int v) :
+			key(k), val(v), next(0)
+		{}
 	};
 
 	Elem **tab;
 
 public:
-	StartStates() {
-		tab = new Elem*[128];
+	StartStates() :
+		tab(new Elem*[128])
+	{
 		memset(tab, 0, 128 * sizeof(Elem*));
 	}
+
 	virtual ~StartStates() {
 		for (int i = 0; i < 128; ++i) {
 			Elem *e = tab[i];
-			while (e != NULL) {
+			while (e) {
 				Elem *next = e->next;
 				delete e;
 				e = next;
@@ -240,15 +252,15 @@ public:
 
 	void set(int key, int val) {
 		Elem *e = new Elem(key, val);
-		int k = ((unsigned int) key) % 128;
+		int k = unsigned(key) % 128;
 		e->next = tab[k];
 		tab[k] = e;
 	}
 
 	int state(int key) {
-		Elem *e = tab[((unsigned int) key) % 128];
-		while (e != NULL && e->key != key) e = e->next;
-		return e == NULL ? 0 : e->val;
+		Elem *e = tab[unsigned(key) % 128];
+		while (e && e->key != key) e = e->next;
+		return e ? e->val : 0;
 	}
 };
 
@@ -264,11 +276,9 @@ private:
 		wchar_t *key;
 		int val;
 		Elem *next;
-		Elem(const wchar_t *key, int val) {
-			this->key = coco_string_create(key);
-			this->val = val;
-			next = NULL;
-		}
+		Elem(const wchar_t *k, int v) :
+			key(coco_string_create(k)), val(v), next(0)
+		{}
 		virtual ~Elem() {
 			coco_string_delete(key);
 		}
@@ -277,14 +287,16 @@ private:
 	Elem **tab;
 
 public:
-	KeywordMap() {
-		tab = new Elem*[128];
+	KeywordMap() :
+		tab(new Elem*[128])
+	{
 		memset(tab, 0, 128 * sizeof(Elem*));
 	}
+
 	virtual ~KeywordMap() {
 		for (int i = 0; i < 128; ++i) {
 			Elem *e = tab[i];
-			while (e != NULL) {
+			while (e) {
 				Elem *next = e->next;
 				delete e;
 				e = next;
@@ -295,14 +307,15 @@ public:
 
 	void set(const wchar_t *key, int val) {
 		Elem *e = new Elem(key, val);
-		int k = coco_string_hash(key) % 128;
-		e->next = tab[k]; tab[k] = e;
+		const int k = coco_string_hash(key) % 128;
+		e->next = tab[k];
+		tab[k] = e;
 	}
 
 	int get(const wchar_t *key, int defaultVal) {
 		Elem *e = tab[coco_string_hash(key) % 128];
-		while (e != NULL && !coco_string_equal(e->key, key)) e = e->next;
-		return e == NULL ? defaultVal : e->val;
+		while (e && !coco_string_equal(e->key, key)) e = e->next;
+		return e ? e->val : defaultVal;
 	}
 };
 
@@ -310,24 +323,24 @@ public:
 //! A Coco/R Scanner
 class Scanner {
 private:
-	static const unsigned char EOL = '\n';   // end-of-line character
-	static const int eofSym = 0;             // end-of-file token id
+	static const int maxT = 13;
+	static const int noSym = 13;
 
-	void *firstHeap;
-	void *heap;
-	void *heapTop;
-	void **heapEnd;
+	static const int eofSym = 0;    //!< end-of-file token id
+	static const char EOL = '\n';   //!< end-of-line character
 
-	int noSym;        //!< noSym gets highest number, set in Parser
-	int maxT;
-	int charSetSize;  //!< unused?
-	StartStates start;
-	KeywordMap keywords;
+	void *firstHeap;  //!< the start of the heap management
+	void *heap;       //!< the currently active block
+	void *heapTop;    //!< the top of the heap
+	void **heapEnd;   //!< the end of the last heap block
+
+	StartStates start;   //!< A map of start states for particular characters
+	KeywordMap keywords; //!< A hash of keyword literals to token kind
 
 	Token *t;         //!< current token
 	wchar_t *tval;    //!< text of current token
-	int tvalLength;   //!< length of text of current token
-	int tlen;         //!< length of current token
+	int tvalLength;   //!< maximum capacity (length) for tval
+	int tlen;         //!< length of tval
 
 	Token *tokens;    //!< list of tokens already peeked (first token is a dummy)
 	Token *pt;        //!< current peek token
@@ -337,36 +350,42 @@ private:
 	int pos;          //!< byte position of current character
 	int line;         //!< line number of current character
 	int col;          //!< column number of current character
-	int oldEols;      //!< EOLs that appeared in a comment;
+	int oldEols;      //!< the number of EOLs that appeared in a comment
 
-	void CreateHeapBlock();
-	Token* CreateToken();
-	void AppendVal(Token*);
+	void CreateHeapBlock();       //!< add a heap block, freeing unused ones
+	Token* CreateToken();         //!< fit token on the heap
+	void AppendVal(Token* tok);   //!< adjust tok->val to point to the heap and copy tval into it
 
-	void Init();
-	void NextCh();
-	void AddCh();
+	void Init();      //!< complete the initialization for the constructors
+	void NextCh();    //!< get the next input character into ch
+	void AddCh();     //!< append the character ch to tval
 	bool Comment0();
 	bool Comment1();
 
-	Token* NextToken();
+	Token* NextToken();  //!< get the next token
 
 public:
-	//! scanner buffer
+	//! The scanner buffer
 	Buffer *buffer;
 
-	//! Attach scanner to an existing character buffer
-	Scanner(const unsigned char* buf, int len);
-	//! Attach scanner to an existing character buffer
-	Scanner(const char* buf, int len);
-	//! Open a file for reading and attach scanner
-	Scanner(const wchar_t* fileName);
 	//! Using an existing open file handle for the scanner
-	Scanner(FILE* s);
-	~Scanner();
-	Token* Scan();
-	Token* Peek();
-	void ResetPeek();
+	Scanner(FILE*);
+
+	//! Using an existing open STL std stream
+	explicit Scanner(std::istream&);
+
+	//! Open a file for reading and attach scanner
+	explicit Scanner(const wchar_t* fileName);
+
+	//! Attach scanner to an existing character buffer
+	Scanner(const unsigned char* chars, int len);
+	//! Attach scanner to an existing character buffer
+	Scanner(const char* chars, int len);
+
+	~Scanner();        //!< free heap and allocated memory
+	Token* Scan();     //!< get the next token (possibly a token already seen during peeking)
+	Token* Peek();     //!< peek for the next token, ignore pragmas
+	void ResetPeek();  //!< ensure that peeking starts at the current scan position
 
 }; // end Scanner
 
