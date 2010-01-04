@@ -463,7 +463,16 @@ private:
             const Triangulation::Finite_edges_iterator& eit
         ) const;
 
+        //- Determines if the dual vertex constructed by the Delaunay
+        //  cell is a boundary vertex
+        inline bool isBoundaryDualVertex
+        (
+            const Triangulation::Finite_cells_iterator& cit
+        ) const;
+
         //- Merge vertices that are very close together
+        void mergeCloseDualVertices(const pointField& pts);
+
         label mergeCloseDualVertices
         (
             const pointField& pts,
@@ -473,6 +482,8 @@ private:
         //- Smooth the dual vertices of the dual faces on the boundary
         //  so that they conform to the surface and remove any
         //  small, normal oriented faces
+        void smoothSurface(pointField& pts);
+
         label smoothSurfaceDualFaces
         (
             pointField& pts,
@@ -482,14 +493,17 @@ private:
         //- Collapse a face to a point or an edge, modifying and
         //  mapping the points, returns the true if the face was
         //  collapsed in this operation
+        void collapseFaces(pointField& pts);
+
         label collapseFaces
         (
             pointField& pts,
             Map<label>& dualPtIndexMap
         ) const;
 
-        //- Collapse a face to an edge, updating the point and point map
-        void collapseFaceToEdge
+        //- Collapse a face to an edge, updating the point and point
+        //- map.  Returns a bool of success or failure.
+        bool collapseFaceToEdge
         (
             const face& f,
             pointField& pts,

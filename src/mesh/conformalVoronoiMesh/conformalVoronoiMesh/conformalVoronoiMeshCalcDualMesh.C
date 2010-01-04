@@ -303,7 +303,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     // Dual face filtering
 
-    // Indexing Delaunay cells, which are Dual vertices
+    // Indexing Delaunay cells, which are the dual vertices
 
     label dualVertI = 0;
 
@@ -336,81 +336,13 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     points.setSize(dualVertI);
 
-    // Assess close points to be merged
+    mergeCloseDualVertices(points);
 
-    {
-        Info<< nl << "    Merging close points" << endl;
+    smoothSurface(points);
 
-        label nPtsMerged = 0;
+    mergeCloseDualVertices(points);
 
-        do
-        {
-            Map<label> dualPtIndexMap;
-
-            nPtsMerged = mergeCloseDualVertices(points, dualPtIndexMap);
-
-            Info<< "        Merged " << nPtsMerged << " points" << endl;
-
-            reindexDualVertices(dualPtIndexMap);
-
-        } while (nPtsMerged > 0);
-    }
-
-    // Smooth the surface of the mesh
-
-    Info<< nl << "    Smoothing surface" << endl;
-
-    label nSmoothedVertices = 0;
-
-    do
-    {
-        Map<label> dualPtIndexMap;
-
-        nSmoothedVertices = smoothSurfaceDualFaces(points, dualPtIndexMap);
-
-        Info<< "        Smoothed " << nSmoothedVertices
-            << " points (0 HARD CODED)"
-            << endl;
-
-        reindexDualVertices(dualPtIndexMap);
-
-    } while (nSmoothedVertices > 0);
-
-    {
-        Info<< nl << "    Merging close points" << endl;
-
-        label nPtsMerged = 0;
-
-        do
-        {
-            Map<label> dualPtIndexMap;
-
-            nPtsMerged = mergeCloseDualVertices(points, dualPtIndexMap);
-
-            Info<< "        Merged " << nPtsMerged << " points" << endl;
-
-            reindexDualVertices(dualPtIndexMap);
-
-        } while (nPtsMerged > 0);
-    }
-
-    // Assess faces for collapse
-
-    Info<< nl << "    Collapsing unnecessary faces" << endl;
-
-    label nCollapsedFaces = 0;
-
-    do
-    {
-        Map<label> dualPtIndexMap;
-
-        nCollapsedFaces = collapseFaces(points, dualPtIndexMap);
-
-        reindexDualVertices(dualPtIndexMap);
-
-        Info<< "        Collapsed " << nCollapsedFaces << " faces" << endl;
-
-    } while (nCollapsedFaces > 0);
+    collapseFaces(points);
 
     // Final dual face and owner neighbour construction
 
@@ -628,6 +560,28 @@ void Foam::conformalVoronoiMesh::calcTetMesh
 }
 
 
+void Foam::conformalVoronoiMesh::mergeCloseDualVertices(const pointField& pts)
+{
+    // Assess close points to be merged
+
+    Info<< nl << "    Merging close points" << endl;
+
+    label nPtsMerged = 0;
+
+    do
+    {
+        Map<label> dualPtIndexMap;
+
+        nPtsMerged = mergeCloseDualVertices(pts, dualPtIndexMap);
+
+        Info<< "        Merged " << nPtsMerged << " points" << endl;
+
+        reindexDualVertices(dualPtIndexMap);
+
+    } while (nPtsMerged > 0);
+}
+
+
 Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
 (
     const pointField& pts,
@@ -636,7 +590,9 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
 {
     label nPtsMerged = 0;
 
-    scalar closenessTolerance = 1e-4;
+    scalar closenessTolerance = 1e-3;
+
+    Info<< "MERGE closenessTolerance HARDCODED " << closenessTolerance << endl;
 
     for
     (
@@ -679,13 +635,70 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
     return nPtsMerged;
 }
 
+
+void Foam::conformalVoronoiMesh::smoothSurface(pointField& pts)
+{
+    // Smooth the surface of the mesh
+
+    Info<< nl << "    Smoothing surface" << endl;
+
+    label nCollapsedFaces = 0;
+
+    do
+    {
+        Map<label> dualPtIndexMap;
+
+        nCollapsedFaces = smoothSurfaceDualFaces(pts, dualPtIndexMap);
+
+        Info<< "        Collapsed " << nCollapsedFaces
+            << " boundary faces"
+            << endl;
+
+        reindexDualVertices(dualPtIndexMap);
+
+    } while (nCollapsedFaces > 0);
+
+    // TODO Put inside a loop to smooth surface points.  Could be
+    // better done by looping over all Delaunay cells whose
+    // circumcentres are boundary dual vertices and snap these.
+
+    // Force all points of the face to be on the surface
+
+    // forAll(dualFace, fPtI)
+    // {
+    //     label ptI = dualFace[fPtI];
+
+    //     point& pt = pts[ptI];
+
+    //     pointIndexHit surfHit;
+    //     label hitSurface;
+
+    //     geometryToConformTo_.findSurfaceNearest
+    //     (
+    //         pt,
+    //         cvMeshControls().spanSqr(),
+    //         surfHit,
+    //         hitSurface
+    //     );
+
+    //     if (surfHit.hit())
+    //     {
+    //         pt = surfHit.hitPoint();
+
+    //         // dualPtIndexMap.insert(ptI, ptI);
+    //     }
+    // }
+
+}
+
+
 Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
 (
     pointField& pts,
     Map<label>& dualPtIndexMap
 ) const
 {
-    label nSmoothedVertices = 0;
+    label nCollapsedFaces = 0;
 
     const scalar cosPerpendicularToleranceAngle = cos(degToRad(80));
 
@@ -742,9 +755,10 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
             const vector& surfaceNormal = norm[0];
 
             // Orient the face correctly before calculating the normal
+
             Cell_handle c = eit->first;
             Vertex_handle vA = c->vertex(eit->second);
-            // Vertex_handle vB = c->vertex(eit->third);
+         // Vertex_handle vB = c->vertex(eit->third);
 
             if (!vA->internalOrBoundaryPoint())
             {
@@ -757,39 +771,37 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
 
             if ((faceNormal & surfaceNormal) < cosPerpendicularToleranceAngle)
             {
-                collapseFaceToEdge(dualFace, pts, dualPtIndexMap);
-
-                // Force all points of the face to be on the surface
-
-                // forAll(dualFace, fPtI)
-                // {
-                //     label ptI = dualFace[fPtI];
-
-                //     point& pt = pts[ptI];
-
-                //     pointIndexHit surfHit;
-                //     label hitSurface;
-
-                //     geometryToConformTo_.findSurfaceNearest
-                //     (
-                //         pt,
-                //         cvMeshControls().spanSqr(),
-                //         surfHit,
-                //         hitSurface
-                //     );
-
-                //     if (surfHit.hit())
-                //     {
-                //         pt = surfHit.hitPoint();
-
-                //         // dualPtIndexMap.insert(ptI, ptI);
-                //     }
-                // }
+                if (collapseFaceToEdge(dualFace, pts, dualPtIndexMap))
+                {
+                    nCollapsedFaces++;
+                }
             }
         }
     }
 
-    return nSmoothedVertices;
+    return nCollapsedFaces;
+}
+
+
+void Foam::conformalVoronoiMesh::collapseFaces(pointField& pts)
+{
+    // Assess faces for collapse
+
+    Info<< nl << "    Collapsing unnecessary faces" << endl;
+
+    label nCollapsedFaces = 0;
+
+    do
+    {
+        Map<label> dualPtIndexMap;
+
+        nCollapsedFaces = collapseFaces(pts, dualPtIndexMap);
+
+        reindexDualVertices(dualPtIndexMap);
+
+        Info<< "        Collapsed " << nCollapsedFaces << " faces" << endl;
+
+    } while (nCollapsedFaces > 0);
 }
 
 
@@ -1035,7 +1047,7 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
 }
 
 
-void Foam::conformalVoronoiMesh::collapseFaceToEdge
+bool Foam::conformalVoronoiMesh::collapseFaceToEdge
 (
     const face& f,
     pointField& pts,
@@ -1060,7 +1072,8 @@ void Foam::conformalVoronoiMesh::collapseFaceToEdge
 
     // Normalise inertia tensor to remove problems with small values
 
-    J /= cmptMax(J);
+    J /= mag(J);
+    // J /= cmptMax(J);
     // J /= max(eigenValues(J).x(), SMALL);
 
     vector eVals = eigenValues(J);
@@ -1142,14 +1155,33 @@ void Foam::conformalVoronoiMesh::collapseFaceToEdge
     // function of distance squared to the axis, so the square root of
     // the ratio of face-plane moments gives a good indication of the
     // aspect ratio.
-    scalar aspectRatio = sqrt(eVals.y()/max(eVals.x(), SMALL));
+
+    // scalar aspectRatio = sqrt(eVals.y()/max(eVals.x(), SMALL));
 
     vector collapseAxis = eigenVector(J, eVals.x());
+
+    if (magSqr(collapseAxis) < VSMALL)
+    {
+        WarningIn
+        (
+            "Foam::conformalVoronoiMesh::collapseFaceToEdge"
+            "("
+                "const face& f,"
+                "pointField& pts,"
+                "Map<label>& dualPtIndexMap"
+            ") const"
+        )
+            << "No collapse axis found for face, not collapsing."
+            << endl;
+
+        return false;
+    }
 
     // The signed distance along the collapse axis passing through the
     // face centre that each vertex projects to.
 
     List<scalar> d(f.size());
+
     forAll(f, fPtI)
     {
         const point& pt = pts[f[fPtI]];
@@ -1157,39 +1189,133 @@ void Foam::conformalVoronoiMesh::collapseFaceToEdge
         d[fPtI] = (collapseAxis & (pt - fC));
     }
 
-    sort(d);
+    // Sort the projected distances and the corresponding vertex
+    // indices along the collapse axis
 
-    Info<< nl << "# Aspect ratio = " << aspectRatio << endl;
+    labelList facePts(f);
 
-    Info<< nl << "# eigenvalues = " << eVals << endl;
+    labelList oldToNew;
 
-    scalar scale = 2.0*mag(fC - pts[f[0]]);
+    sortedOrder(d, oldToNew);
 
-    meshTools::writeOBJ(Info, fC);
-    meshTools::writeOBJ(Info, fC + scale*collapseAxis);
+    oldToNew = invert(oldToNew.size(), oldToNew);
 
-    Info<< "f 1 2" << endl;
+    inplaceReorder(oldToNew, d);
 
-    forAll(f, fPtI)
-    {
-        meshTools::writeOBJ(Info, pts[f[fPtI]]);
-    }
+    inplaceReorder(oldToNew, facePts);
 
-    Info<< "f";
+    // Output face and collapse axis for visualisation
 
-    forAll(f, fPtI)
-    {
-        Info << " " << fPtI + 3;
-    }
+    // Info<< nl << "# Aspect ratio = " << aspectRatio << nl
+    //     << "# collapseAxis = " << collapseAxis << nl
+    //     << "# eigenvalues = " << eVals << endl;
 
-    Info<< nl << "# " << d << endl;
+    // scalar scale = 2.0*mag(fC - pts[f[0]]);
 
-    Info<< "# " << d.first() << " " << d.last() << endl;
+    // meshTools::writeOBJ(Info, fC);
+    // meshTools::writeOBJ(Info, fC + scale*collapseAxis);
+
+    // Info<< "f 1 2" << endl;
+
+    // forAll(f, fPtI)
+    // {
+    //     meshTools::writeOBJ(Info, pts[f[fPtI]]);
+    // }
+
+    // Info<< "f";
+
+    // forAll(f, fPtI)
+    // {
+    //     Info << " " << fPtI + 3;
+    // }
+
+    // Info<< nl << "# " << d << endl;
+
+    // Info<< "# " << d.first() << " " << d.last() << endl;
+
+    // forAll(d, dI)
+    // {
+    //     meshTools::writeOBJ(Info, fC + d[dI]*collapseAxis);
+    // }
+
+
+    // Form two lists, one for each half of the set of points
+    // projected along the collapse axis.
+
+    // Middle value, index of first entry in the second half
+    label middle = -1;
 
     forAll(d, dI)
     {
-        meshTools::writeOBJ(Info, fC + d[dI]*collapseAxis);
+        if (d[dI] > 0)
+        {
+            middle = dI;
+
+            break;
+        }
     }
+
+    // Negative Half
+    SubList<scalar> dNeg(d, middle, 0);
+    SubList<label> facePtsNeg(facePts, middle, 0);
+
+    // Positive Half
+    SubList<scalar> dPos(d, d.size() - middle, middle);
+    SubList<label> facePtsPos(facePts, d.size() - middle, middle);
+
+    // Defining how close to the face centre (C) a projected vertex
+    // (X) can be before making this an invalid edge collapse
+    //
+    // X---X-g----------C----X-----------g----X--X
+    //
+    // Only allow a collapse if all projected vertices are outwith
+    // guardFraction (g) of the distance form the face centre to the
+    // furthest vertex in the considered direction
+
+    scalar guardFraction = 0.8;
+
+    bool validCollapse = false;
+
+    if
+    (
+        (dNeg.last() < guardFraction*dNeg.first())
+     && (dPos.first() > guardFraction*dPos.last())
+    )
+    {
+        validCollapse = true;
+    }
+
+    if (validCollapse)
+    {
+
+        // Arbitrarily choosing the most distant point as the index to
+        // collapse to.
+
+        label collapseToPtI = facePtsNeg.first();
+
+        forAll(facePtsNeg, fPtI)
+        {
+            dualPtIndexMap.insert(facePtsNeg[fPtI], collapseToPtI);
+        }
+
+        pts[collapseToPtI] = collapseAxis*sum(dNeg)/dNeg.size() + fC;
+
+        collapseToPtI = facePtsPos.last();
+
+        forAll(facePtsPos, fPtI)
+        {
+            dualPtIndexMap.insert(facePtsPos[fPtI], collapseToPtI);
+        }
+
+        pts[collapseToPtI] = collapseAxis*sum(dPos)/dPos.size() + fC;
+    }
+    else
+    {
+        // If the face can't be collapsed to a line, and it is small
+        // enough, collapse it to a point
+    }
+
+    return validCollapse;
 }
 
 

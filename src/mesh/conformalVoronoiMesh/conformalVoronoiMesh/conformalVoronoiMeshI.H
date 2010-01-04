@@ -362,6 +362,32 @@ inline bool Foam::conformalVoronoiMesh::isBoundaryDualFace
 }
 
 
+inline bool Foam::conformalVoronoiMesh::isBoundaryDualVertex
+(
+    const Triangulation::Finite_cells_iterator& cit
+) const
+{
+    // A dual vertex on the boundary will result from a Delaunay cell
+    // with least one Delaunay vertex outside and at least one inside
+
+    return
+    (
+        (
+            cit->vertex(0)->internalOrBoundaryPoint()
+         || cit->vertex(1)->internalOrBoundaryPoint()
+         || cit->vertex(2)->internalOrBoundaryPoint()
+         || cit->vertex(3)->internalOrBoundaryPoint()
+        )
+     && (
+            !cit->vertex(0)->internalOrBoundaryPoint()
+         || !cit->vertex(1)->internalOrBoundaryPoint()
+         || !cit->vertex(2)->internalOrBoundaryPoint()
+         || !cit->vertex(3)->internalOrBoundaryPoint()
+        )
+    );
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 #ifdef CGAL_INEXACT
