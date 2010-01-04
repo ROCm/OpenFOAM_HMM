@@ -336,13 +336,20 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     points.setSize(dualVertI);
 
+    // Merge close points
+
+    Info<< nl << "    Merging close points" << endl;
+
     mergeCloseDualVertices(points);
+
+    // Smooth the surface of the mesh
+
+    Info<< nl << "    Smoothing surface" << endl;
 
     smoothSurface(points);
 
-    mergeCloseDualVertices(points);
-
-    collapseFaces(points);
+    // Collapse faces throughout the mesh
+    // collapseFaces(points);
 
     // Final dual face and owner neighbour construction
 
@@ -564,8 +571,6 @@ void Foam::conformalVoronoiMesh::mergeCloseDualVertices(const pointField& pts)
 {
     // Assess close points to be merged
 
-    Info<< nl << "    Merging close points" << endl;
-
     label nPtsMerged = 0;
 
     do
@@ -574,7 +579,11 @@ void Foam::conformalVoronoiMesh::mergeCloseDualVertices(const pointField& pts)
 
         nPtsMerged = mergeCloseDualVertices(pts, dualPtIndexMap);
 
-        Info<< "        Merged " << nPtsMerged << " points" << endl;
+        if (nPtsMerged > 0)
+        {
+            Info<< "        Merged " << nPtsMerged << " points "
+                << "closenessTolerance HARDCODED " << endl;
+        }
 
         reindexDualVertices(dualPtIndexMap);
 
@@ -591,8 +600,6 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
     label nPtsMerged = 0;
 
     scalar closenessTolerance = 1e-3;
-
-    Info<< "MERGE closenessTolerance HARDCODED " << closenessTolerance << endl;
 
     for
     (
@@ -638,10 +645,6 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
 
 void Foam::conformalVoronoiMesh::smoothSurface(pointField& pts)
 {
-    // Smooth the surface of the mesh
-
-    Info<< nl << "    Smoothing surface" << endl;
-
     label nCollapsedFaces = 0;
 
     do
@@ -650,45 +653,67 @@ void Foam::conformalVoronoiMesh::smoothSurface(pointField& pts)
 
         nCollapsedFaces = smoothSurfaceDualFaces(pts, dualPtIndexMap);
 
-        Info<< "        Collapsed " << nCollapsedFaces
-            << " boundary faces"
-            << endl;
+        if (nCollapsedFaces > 0)
+        {
+            Info<< "        Collapsed " << nCollapsedFaces << " boundary faces"
+                << endl;
+        }
 
         reindexDualVertices(dualPtIndexMap);
 
-    } while (nCollapsedFaces > 0);
+        mergeCloseDualVertices(pts);
 
-    // TODO Put inside a loop to smooth surface points.  Could be
-    // better done by looping over all Delaunay cells whose
-    // circumcentres are boundary dual vertices and snap these.
+    } while (nCollapsedFaces > 0);
 
     // Force all points of the face to be on the surface
 
-    // forAll(dualFace, fPtI)
-    // {
-    //     label ptI = dualFace[fPtI];
+    for
+    (
+        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+        cit != finite_cells_end();
+        ++cit
+    )
+    {
+        label ptI = cit->cellIndex();
 
-    //     point& pt = pts[ptI];
+        // Only cells with indices > -1 are valid
+        if (ptI > -1)
+        {
+            // Test if this is a boundary dual vertex - if it is, at
+            // least one of the Delaunay vertices of the Delaunay cell
+            // will be outside
 
-    //     pointIndexHit surfHit;
-    //     label hitSurface;
+            if
+            (
+                !cit->vertex(0)->internalOrBoundaryPoint()
+             || !cit->vertex(1)->internalOrBoundaryPoint()
+             || !cit->vertex(2)->internalOrBoundaryPoint()
+             || !cit->vertex(3)->internalOrBoundaryPoint()
+            )
+            {
+                point& pt = pts[ptI];
 
-    //     geometryToConformTo_.findSurfaceNearest
-    //     (
-    //         pt,
-    //         cvMeshControls().spanSqr(),
-    //         surfHit,
-    //         hitSurface
-    //     );
+                pointIndexHit surfHit;
+                label hitSurface;
 
-    //     if (surfHit.hit())
-    //     {
-    //         pt = surfHit.hitPoint();
+                geometryToConformTo_.findSurfaceNearest
+                (
+                    pt,
+                    cvMeshControls().spanSqr(),
+                    surfHit,
+                    hitSurface
+                );
 
-    //         // dualPtIndexMap.insert(ptI, ptI);
-    //     }
-    // }
+                if (surfHit.hit())
+                {
+                    pt = surfHit.hitPoint();
+                }
+            }
+        }
 
+    }
+
+    mergeCloseDualVertices(pts);
 }
 
 
@@ -700,7 +725,7 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
 {
     label nCollapsedFaces = 0;
 
-    const scalar cosPerpendicularToleranceAngle = cos(degToRad(80));
+    const scalar cosPerpendicularToleranceAngle = cos(degToRad(75));
 
     for
     (
@@ -1156,7 +1181,7 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
     // the ratio of face-plane moments gives a good indication of the
     // aspect ratio.
 
-    // scalar aspectRatio = sqrt(eVals.y()/max(eVals.x(), SMALL));
+    scalar aspectRatio = sqrt(eVals.y()/max(eVals.x(), SMALL));
 
     vector collapseAxis = eigenVector(J, eVals.x());
 
@@ -1173,6 +1198,33 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
         )
             << "No collapse axis found for face, not collapsing."
             << endl;
+
+        // Output face and collapse axis for visualisation
+
+        Info<< nl << "# Aspect ratio = " << aspectRatio << nl
+            << "# collapseAxis = " << collapseAxis << nl
+            << "# eigenvalues = " << eVals << endl;
+
+        scalar scale = 2.0*mag(fC - pts[f[0]]);
+
+        meshTools::writeOBJ(Info, fC);
+        meshTools::writeOBJ(Info, fC + scale*collapseAxis);
+
+        Info<< "f 1 2" << endl;
+
+        forAll(f, fPtI)
+        {
+            meshTools::writeOBJ(Info, pts[f[fPtI]]);
+        }
+
+        Info<< "f";
+
+        forAll(f, fPtI)
+        {
+            Info << " " << fPtI + 3;
+        }
+
+        Info<< nl << endl;
 
         return false;
     }
@@ -1312,7 +1364,30 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
     else
     {
         // If the face can't be collapsed to a line, and it is small
-        // enough, collapse it to a point
+        // and low aspect ratio enough, collapse it to a point.
+
+        // if (aspectRatio < 2.0)
+        // {
+        //     // Arbitrarily choosing the first point as the index to
+        //     // collapse to.  Collapse to the face center.
+
+        //     label collapseToPtI = facePts.first();
+
+        //     forAll(facePts, fPtI)
+        //     {
+        //         dualPtIndexMap.insert(facePts[fPtI], collapseToPtI);
+        //     }
+
+        //     pts[collapseToPtI] = fC;
+        // }
+
+        // Alternatively, do not topologically collapse face, but push
+        // all points onto a line, so that the face area is zero and
+        // either:
+        //   + do not create it when dualising.  This may damage the edge
+        //     addressing of the mesh;
+        //   + split the face into two (or more?) edges later, sacrificing
+        //     topological consistency with the Delaunay.
     }
 
     return validCollapse;
