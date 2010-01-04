@@ -67,7 +67,6 @@ boundaryField
         // error           #remove self;
         x               5;
         y               6;
-        another         #calc{x $x; y $y;};
     }
 
     // this should have no effect

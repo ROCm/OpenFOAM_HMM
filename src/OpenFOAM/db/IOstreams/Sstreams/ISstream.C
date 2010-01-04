@@ -551,7 +551,7 @@ Foam::Istream& Foam::ISstream::read(char* buf, std::streamsize count)
 
 Foam::Istream& Foam::ISstream::rewind()
 {
-    stream().rdbuf()->pubseekpos(0);
+    stdStream().rdbuf()->pubseekpos(0);
 
     return *this;
 }
