@@ -28,6 +28,7 @@ wmake libso triSurface
 
 # Decomposition methods needed by meshTools
 wmake libso parallel/decompositionMethods
+wmake libso parallel/metisDecomp
 
 wmake libso meshTools
 wmake libso finiteVolume

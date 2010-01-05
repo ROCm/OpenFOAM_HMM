@@ -276,6 +276,49 @@ public:
                 }
             }
 
+            //- Reverse distribute data using default commsType.
+            template<class T>
+            void reverseDistribute(const label constructSize, List<T>& fld)
+            const
+            {
+                if (Pstream::defaultCommsType == Pstream::nonBlocking)
+                {
+                    distribute
+                    (
+                        Pstream::nonBlocking,
+                        List<labelPair>(),
+                        constructSize,
+                        constructMap_,
+                        subMap_,
+                        fld
+                    );
+                }
+                else if (Pstream::defaultCommsType == Pstream::scheduled)
+                {
+                    distribute
+                    (
+                        Pstream::scheduled,
+                        schedule(),
+                        constructSize,
+                        constructMap_,
+                        subMap_,
+                        fld
+                    );
+                }
+                else
+                {
+                    distribute
+                    (
+                        Pstream::blocking,
+                        List<labelPair>(),
+                        constructSize,
+                        constructMap_,
+                        subMap_,
+                        fld
+                    );
+                }
+            }
+
             //- Correct for topo change.
             void updateMesh(const mapPolyMesh&)
             {

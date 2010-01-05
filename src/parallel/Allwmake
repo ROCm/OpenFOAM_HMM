@@ -3,6 +3,7 @@ cd ${0%/*} || exit 1    # run from this directory
 set -x
 
 wmake libso decompositionMethods
+wmake libso metisDecomp
 wmake libso reconstruct
 
 if [ -d "$FOAM_MPI_LIBBIN" ]
