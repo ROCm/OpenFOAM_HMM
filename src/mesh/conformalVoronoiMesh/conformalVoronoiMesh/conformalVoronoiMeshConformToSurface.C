@@ -486,9 +486,18 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
 void Foam::conformalVoronoiMesh::limitDisplacement
 (
     const Triangulation::Finite_vertices_iterator& vit,
-    vector& displacement
+    vector& displacement,
+    label callCount
 ) const
 {
+    callCount++;
+
+    // Do not allow infinite recursion
+    if (callCount > 7)
+    {
+        return;
+    }
+
     point pt = topoint(vit->point());
     point dispPt = pt + displacement;
 
@@ -556,7 +565,7 @@ void Foam::conformalVoronoiMesh::limitDisplacement
 
         // Info<< "    Limiting displacement of point " << pt << endl;
 
-        limitDisplacement(vit, displacement);
+        limitDisplacement(vit, displacement, callCount);
     }
 }
 

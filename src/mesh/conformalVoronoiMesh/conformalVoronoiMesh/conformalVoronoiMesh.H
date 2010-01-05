@@ -382,7 +382,8 @@ private:
         void limitDisplacement
         (
             const Triangulation::Finite_vertices_iterator& vit,
-            vector& displacement
+            vector& displacement,
+            label callCount = 0
         ) const;
 
         //- Check if a location is in the exclusion range of an existing feature
