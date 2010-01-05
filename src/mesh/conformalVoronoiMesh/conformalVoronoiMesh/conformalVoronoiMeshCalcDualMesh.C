@@ -349,7 +349,10 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     smoothSurface(points);
 
     // Collapse faces throughout the mesh
-    // collapseFaces(points);
+
+    Info<< nl << "    Collapsing unnecessary faces" << endl;
+
+    collapseFaces(points);
 
     // Final dual face and owner neighbour construction
 
@@ -783,7 +786,7 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
 
             Cell_handle c = eit->first;
             Vertex_handle vA = c->vertex(eit->second);
-         // Vertex_handle vB = c->vertex(eit->third);
+            Vertex_handle vB = c->vertex(eit->third);
 
             if (!vA->internalOrBoundaryPoint())
             {
@@ -796,7 +799,23 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
 
             if ((faceNormal & surfaceNormal) < cosPerpendicularToleranceAngle)
             {
-                if (collapseFaceToEdge(dualFace, pts, dualPtIndexMap))
+                scalar targetFaceSize = averageAnyCellSize(vA, vB);
+
+                // Selecting faces to collapse based on angle to
+                // surface, so set collapseSizeLimitCoeff to GREAT to
+                // allow collapse of all faces
+
+                if
+                (
+                    collapseFaceToEdge
+                    (
+                        dualFace,
+                        pts,
+                        dualPtIndexMap,
+                        targetFaceSize,
+                        GREAT
+                    )
+                )
                 {
                     nCollapsedFaces++;
                 }
@@ -810,10 +829,6 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
 
 void Foam::conformalVoronoiMesh::collapseFaces(pointField& pts)
 {
-    // Assess faces for collapse
-
-    Info<< nl << "    Collapsing unnecessary faces" << endl;
-
     label nCollapsedFaces = 0;
 
     do
@@ -824,7 +839,12 @@ void Foam::conformalVoronoiMesh::collapseFaces(pointField& pts)
 
         reindexDualVertices(dualPtIndexMap);
 
-        Info<< "        Collapsed " << nCollapsedFaces << " faces" << endl;
+        mergeCloseDualVertices(pts);
+
+        if (nCollapsedFaces > 0)
+        {
+            Info<< "        Collapsed " << nCollapsedFaces << " faces" << endl;
+        }
 
     } while (nCollapsedFaces > 0);
 }
@@ -838,10 +858,7 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
 {
     label nCollapsedFaces = 0;
 
-    scalar smallEdgeLengthCoeff = 1e-3;
-    scalar smallFaceAreaCoeff = sqr(smallEdgeLengthCoeff);
-    scalar collapseToEdgeCoeff = 0.02;
-    scalar longestEdgeLengthRatio = 0.35;
+    scalar collapseSizeLimitCoeff = 0.2;
 
     for
     (
@@ -882,191 +899,258 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
                 continue;
             }
 
-            scalar area = dualFace.mag(pts);
-
             scalar targetFaceSize = averageAnyCellSize(vA, vB);
-            scalar targetArea = sqr(targetFaceSize);
 
-            if (area < smallFaceAreaCoeff*targetArea)
+            if
+            (
+                collapseFaceToEdge
+                (
+                    dualFace,
+                    pts,
+                    dualPtIndexMap,
+                    targetFaceSize,
+                    collapseSizeLimitCoeff
+                )
+            )
             {
-                // Collapse the dual face
-
-                // Determine if the face should be collapsed to a line or a
-                // point
-
-                const edgeList& eds = dualFace.edges();
-
-                label longestEdgeI = -1;
-
-                scalar longestEdgeLength = -SMALL;
-
-                scalar perimeter = 0.0;
-
-                forAll(eds, edI)
-                {
-                    scalar edgeLength = eds[edI].mag(pts);
-
-                    perimeter += edgeLength;
-
-                    if (edgeLength > longestEdgeLength)
-                    {
-                        longestEdgeI = edI;
-
-                        longestEdgeLength = edgeLength;
-                    }
-                }
-
-                if
-                (
-                    longestEdgeLength > collapseToEdgeCoeff*targetFaceSize
-                 && longestEdgeLength/perimeter > longestEdgeLengthRatio
-                )
-                {
-                    // Collapse to edge
-
-                    // Start at either end of the longest edge and consume the
-                    // rest of the points of the face
-
-                    const edge& longestEd = eds[longestEdgeI];
-
-                    label longestEdStartPtI = longestEd.start();
-                    label longestEdEndPtI = longestEd.end();
-
-                    label revEdI = longestEdgeI;
-                    label fwdEdI = longestEdgeI;
-
-                    point revPt = pts[longestEdStartPtI];
-                    point fwdPt = pts[longestEdEndPtI];
-
-                    dualPtIndexMap.insert(longestEdStartPtI, longestEdStartPtI);
-                    dualPtIndexMap.insert(longestEdEndPtI, longestEdEndPtI);
-
-                    for (label fcI = 1; fcI <= label(eds.size()/2); fcI++)
-                    {
-                        revEdI = eds.rcIndex(revEdI);
-                        fwdEdI = eds.fcIndex(fwdEdI);
-
-                        const edge& revEd = eds[revEdI];
-                        const edge& fwdEd = eds[fwdEdI];
-
-                        if (fcI < label(eds.size()/2))
-                        {
-                            revPt += pts[revEd.start()];
-                            fwdPt += pts[fwdEd.end()];
-
-                            dualPtIndexMap.insert
-                            (
-                                revEd.start(),
-                                longestEdStartPtI
-                            );
-
-                            dualPtIndexMap.insert
-                            (
-                                fwdEd.end(),
-                                longestEdEndPtI
-                            );
-                        }
-                        else
-                        {
-                            // Final circulation
-
-                            if
-                            (
-                                eds.size() % 2 == 1
-                                && revEd.start() == fwdEd.end()
-                            )
-                            {
-                                // Odd number of edges, give final point to
-                                // the edge direction that has the shorter
-                                // final edge
-
-                                if (fwdEd.mag(pts) < revEd.mag(pts))
-                                {
-                                    fwdPt += pts[fwdEd.end()];
-
-                                    dualPtIndexMap.insert
-                                    (
-                                        fwdEd.end(),
-                                        longestEdEndPtI
-                                    );
-
-                                    revPt /= fcI;
-                                    fwdPt /= (fcI + 1);
-                                }
-                                else
-                                {
-                                    revPt += pts[revEd.start()];
-
-                                    dualPtIndexMap.insert
-                                    (
-                                        revEd.start(),
-                                        longestEdStartPtI
-                                    );
-
-                                    revPt /= (fcI + 1);
-                                    fwdPt /= fcI;
-                                }
-                            }
-                            else if
-                            (
-                                eds.size() % 2 == 0
-                             && revEd.start() == fwdEd.start()
-                             && revEd.end() == fwdEd.end()
-                            )
-                            {
-                                // Even number of edges
-
-                                revPt /= fcI;
-                                fwdPt /= fcI;
-                            }
-                            else
-                            {
-                                FatalErrorIn
-                                (
-                                    "Foam::conformalVoronoiMesh::collapseFace"
-                                )
-                                    << "Face circulation failed for face "
-                                    << dualFace << nl
-                                    << exit(FatalError);
-                            }
-                        }
-                    }
-
-                    // Move the position of the accumulated points
-                    pts[longestEdStartPtI] = revPt;
-                    pts[longestEdEndPtI] = fwdPt;
-
-                    nCollapsedFaces++;
-                }
-                else if
-                (
-                    longestEdgeLength <= collapseToEdgeCoeff*targetFaceSize
-                )
-                {
-                    // Collapse to point
-
-                    point resultantPt = vector::zero;
-
-                    label collapseToPtI = dualFace[0];
-
-                    forAll(dualFace, fPtI)
-                    {
-                        label ptI = dualFace[fPtI];
-
-                        resultantPt += pts[ptI];
-
-                        dualPtIndexMap.insert(ptI, collapseToPtI);
-                    }
-
-                    resultantPt /= dualFace.size();
-
-                    pts[collapseToPtI] = resultantPt;
-
-                    nCollapsedFaces++;
-                }
+                nCollapsedFaces++;
             }
         }
     }
+
+    // ------>  OLD, FOR REFERENCE
+
+    // scalar smallEdgeLengthCoeff = 1e-3;
+    // scalar smallFaceAreaCoeff = sqr(smallEdgeLengthCoeff);
+    // scalar collapseToEdgeCoeff = 0.02;
+    // scalar longestEdgeLengthRatio = 0.35;
+
+    // for
+    // (
+    //     Triangulation::Finite_edges_iterator eit = finite_edges_begin();
+    //     eit != finite_edges_end();
+    //     ++eit
+    // )
+    // {
+    //     Cell_circulator ccStart = incident_cells(*eit);
+    //     Cell_circulator cc = ccStart;
+
+    //     do
+    //     {
+    //         if (dualPtIndexMap.found(cc->cellIndex()))
+    //         {
+    //             // One of the points of this face has already been
+    //             // collapsed this sweep, leave for next sweep
+    //             continue;
+    //         }
+
+    //     } while (++cc != ccStart);
+
+    //     Cell_handle c = eit->first;
+    //     Vertex_handle vA = c->vertex(eit->second);
+    //     Vertex_handle vB = c->vertex(eit->third);
+
+    //     if
+    //     (
+    //         vA->internalOrBoundaryPoint()
+    //      || vB->internalOrBoundaryPoint()
+    //     )
+    //     {
+    //         face dualFace = buildDualFace(eit);
+
+    //         if (dualFace.size() < 3)
+    //         {
+    //             // This face has been collapsed already
+    //             continue;
+    //         }
+
+    //         scalar area = dualFace.mag(pts);
+
+    //         scalar targetFaceSize = averageAnyCellSize(vA, vB);
+    //         scalar targetArea = sqr(targetFaceSize);
+
+    //         if (area < smallFaceAreaCoeff*targetArea)
+    //         {
+    //             // Collapse the dual face
+
+    //             // Determine if the face should be collapsed to a line or a
+    //             // point
+
+    //             const edgeList& eds = dualFace.edges();
+
+    //             label longestEdgeI = -1;
+
+    //             scalar longestEdgeLength = -SMALL;
+
+    //             scalar perimeter = 0.0;
+
+    //             forAll(eds, edI)
+    //             {
+    //                 scalar edgeLength = eds[edI].mag(pts);
+
+    //                 perimeter += edgeLength;
+
+    //                 if (edgeLength > longestEdgeLength)
+    //                 {
+    //                     longestEdgeI = edI;
+
+    //                     longestEdgeLength = edgeLength;
+    //                 }
+    //             }
+
+    //             if
+    //             (
+    //                 longestEdgeLength > collapseToEdgeCoeff*targetFaceSize
+    //              && longestEdgeLength/perimeter > longestEdgeLengthRatio
+    //             )
+    //             {
+    //                 // Collapse to edge
+
+    //                 // Start at either end of the longest edge and consume the
+    //                 // rest of the points of the face
+
+    //                 const edge& longestEd = eds[longestEdgeI];
+
+    //                 label longestEdStartPtI = longestEd.start();
+    //                 label longestEdEndPtI = longestEd.end();
+
+    //                 label revEdI = longestEdgeI;
+    //                 label fwdEdI = longestEdgeI;
+
+    //                 point revPt = pts[longestEdStartPtI];
+    //                 point fwdPt = pts[longestEdEndPtI];
+
+    //                 dualPtIndexMap.insert(longestEdStartPtI, longestEdStartPtI);
+    //                 dualPtIndexMap.insert(longestEdEndPtI, longestEdEndPtI);
+
+    //                 for (label fcI = 1; fcI <= label(eds.size()/2); fcI++)
+    //                 {
+    //                     revEdI = eds.rcIndex(revEdI);
+    //                     fwdEdI = eds.fcIndex(fwdEdI);
+
+    //                     const edge& revEd = eds[revEdI];
+    //                     const edge& fwdEd = eds[fwdEdI];
+
+    //                     if (fcI < label(eds.size()/2))
+    //                     {
+    //                         revPt += pts[revEd.start()];
+    //                         fwdPt += pts[fwdEd.end()];
+
+    //                         dualPtIndexMap.insert
+    //                         (
+    //                             revEd.start(),
+    //                             longestEdStartPtI
+    //                         );
+
+    //                         dualPtIndexMap.insert
+    //                         (
+    //                             fwdEd.end(),
+    //                             longestEdEndPtI
+    //                         );
+    //                     }
+    //                     else
+    //                     {
+    //                         // Final circulation
+
+    //                         if
+    //                         (
+    //                             eds.size() % 2 == 1
+    //                             && revEd.start() == fwdEd.end()
+    //                         )
+    //                         {
+    //                             // Odd number of edges, give final point to
+    //                             // the edge direction that has the shorter
+    //                             // final edge
+
+    //                             if (fwdEd.mag(pts) < revEd.mag(pts))
+    //                             {
+    //                                 fwdPt += pts[fwdEd.end()];
+
+    //                                 dualPtIndexMap.insert
+    //                                 (
+    //                                     fwdEd.end(),
+    //                                     longestEdEndPtI
+    //                                 );
+
+    //                                 revPt /= fcI;
+    //                                 fwdPt /= (fcI + 1);
+    //                             }
+    //                             else
+    //                             {
+    //                                 revPt += pts[revEd.start()];
+
+    //                                 dualPtIndexMap.insert
+    //                                 (
+    //                                     revEd.start(),
+    //                                     longestEdStartPtI
+    //                                 );
+
+    //                                 revPt /= (fcI + 1);
+    //                                 fwdPt /= fcI;
+    //                             }
+    //                         }
+    //                         else if
+    //                         (
+    //                             eds.size() % 2 == 0
+    //                          && revEd.start() == fwdEd.start()
+    //                          && revEd.end() == fwdEd.end()
+    //                         )
+    //                         {
+    //                             // Even number of edges
+
+    //                             revPt /= fcI;
+    //                             fwdPt /= fcI;
+    //                         }
+    //                         else
+    //                         {
+    //                             FatalErrorIn
+    //                             (
+    //                                 "Foam::conformalVoronoiMesh::collapseFace"
+    //                             )
+    //                                 << "Face circulation failed for face "
+    //                                 << dualFace << nl
+    //                                 << exit(FatalError);
+    //                         }
+    //                     }
+    //                 }
+
+    //                 // Move the position of the accumulated points
+    //                 pts[longestEdStartPtI] = revPt;
+    //                 pts[longestEdEndPtI] = fwdPt;
+
+    //                 nCollapsedFaces++;
+    //             }
+    //             else if
+    //             (
+    //                 longestEdgeLength <= collapseToEdgeCoeff*targetFaceSize
+    //             )
+    //             {
+    //                 // Collapse to point
+
+    //                 point resultantPt = vector::zero;
+
+    //                 label collapseToPtI = dualFace[0];
+
+    //                 forAll(dualFace, fPtI)
+    //                 {
+    //                     label ptI = dualFace[fPtI];
+
+    //                     resultantPt += pts[ptI];
+
+    //                     dualPtIndexMap.insert(ptI, collapseToPtI);
+    //                 }
+
+    //                 resultantPt /= dualFace.size();
+
+    //                 pts[collapseToPtI] = resultantPt;
+
+    //                 nCollapsedFaces++;
+    //             }
+    //         }
+    //     }
+    // }
+
+    // <------ OLD, FOR REFERENCE
 
     return nCollapsedFaces;
 }
@@ -1076,17 +1160,18 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
 (
     const face& f,
     pointField& pts,
-    Map<label>& dualPtIndexMap
+    Map<label>& dualPtIndexMap,
+    scalar targetFaceSize,
+    scalar collapseSizeLimitCoeff
 ) const
 {
+    scalar guardFraction = 0.3;
+
     const vector fC = f.centre(pts);
 
     vector fN = f.normal(pts);
 
     const scalar fA = mag(fN);
-
-    // Face normal is now a unit vector
-    fN /= fA;
 
     tensor J = f.inertia(pts, fC);
 
@@ -1097,9 +1182,47 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
 
     // Normalise inertia tensor to remove problems with small values
 
-    J /= mag(J);
-    // J /= cmptMax(J);
-    // J /= max(eigenValues(J).x(), SMALL);
+    scalar magJ = mag(J);
+
+    if (magJ > VSMALL)
+    {
+        J /= mag(J);
+        // J /= cmptMax(J);
+        // J /= max(eigenValues(J).x(), SMALL);
+    }
+    else
+    {
+        WarningIn
+        (
+            "Foam::conformalVoronoiMesh::collapseFaceToEdge"
+            "("
+            "const face& f,"
+            "pointField& pts,"
+            "Map<label>& dualPtIndexMap"
+            ") const"
+        )
+            << "Inertia tensor magnitude too small, not collapsing." << nl
+            << J << nl << "mag = " << magJ
+            << endl;
+
+        // Output face for visualisation
+
+        forAll(f, fPtI)
+        {
+            meshTools::writeOBJ(Info, pts[f[fPtI]]);
+        }
+
+        Info<< "f";
+
+        forAll(f, fPtI)
+        {
+            Info << " " << fPtI + 1;
+        }
+
+        Info<< nl << endl;
+
+        return false;
+    }
 
     vector eVals = eigenValues(J);
 
@@ -1109,6 +1232,9 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
     // is the dominant collapse axis for high aspect ratio faces.
     // These assumption can be tested with the code below; they are
     // only likely to be invalid for very warped faces.
+
+    // // Face normal is now a unit vector
+    // fN /= fA;
 
     // direction normalMatchEigenValueCmpt = -1;
 
@@ -1324,7 +1450,56 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
     // guardFraction (g) of the distance form the face centre to the
     // furthest vertex in the considered direction
 
-    scalar guardFraction = 0.8;
+    if (dNeg.size() == 0 || dPos.size() == 0)
+    {
+        WarningIn
+        (
+            "Foam::conformalVoronoiMesh::collapseFaceToEdge"
+            "("
+                "const face& f,"
+                "pointField& pts,"
+                "Map<label>& dualPtIndexMap"
+            ") const"
+        )
+            << "All points on one side of face centre, not collapsing."
+            << endl;
+
+        // Output face and collapse axis for visualisation
+
+        Info<< nl << "# Aspect ratio = " << aspectRatio << nl
+            << "# collapseAxis = " << collapseAxis << nl
+            << "# eigenvalues = " << eVals << endl;
+
+        scalar scale = 2.0*mag(fC - pts[f[0]]);
+
+        meshTools::writeOBJ(Info, fC);
+        meshTools::writeOBJ(Info, fC + scale*collapseAxis);
+
+        Info<< "f 1 2" << endl;
+
+        forAll(f, fPtI)
+        {
+            meshTools::writeOBJ(Info, pts[f[fPtI]]);
+        }
+
+        Info<< "f";
+
+        forAll(f, fPtI)
+        {
+            Info << " " << fPtI + 3;
+        }
+
+        Info<< nl << "# " << d << endl;
+
+        Info<< "# " << d.first() << " " << d.last() << endl;
+
+        forAll(d, dI)
+        {
+            meshTools::writeOBJ(Info, fC + d[dI]*collapseAxis);
+        }
+
+        return false;
+    }
 
     bool validCollapse = false;
 
@@ -1332,6 +1507,8 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
     (
         (dNeg.last() < guardFraction*dNeg.first())
      && (dPos.first() > guardFraction*dPos.last())
+     && (fA < aspectRatio*sqr(targetFaceSize*collapseSizeLimitCoeff))
+     && f.size() <= 4
     )
     {
         validCollapse = true;
@@ -1339,7 +1516,6 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
 
     if (validCollapse)
     {
-
         // Arbitrarily choosing the most distant point as the index to
         // collapse to.
 
@@ -1366,20 +1542,27 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
         // If the face can't be collapsed to a line, and it is small
         // and low aspect ratio enough, collapse it to a point.
 
-        // if (aspectRatio < 2.0)
-        // {
-        //     // Arbitrarily choosing the first point as the index to
-        //     // collapse to.  Collapse to the face center.
+        if
+        (
+            (d.last() - d.first()) < targetFaceSize*0.35
+         && fA < aspectRatio*sqr(targetFaceSize*collapseSizeLimitCoeff)
+         && f.size() <= 4
+        )
+        {
+            // Arbitrarily choosing the first point as the index to
+            // collapse to.  Collapse to the face center.
 
-        //     label collapseToPtI = facePts.first();
+            label collapseToPtI = facePts.first();
 
-        //     forAll(facePts, fPtI)
-        //     {
-        //         dualPtIndexMap.insert(facePts[fPtI], collapseToPtI);
-        //     }
+            forAll(facePts, fPtI)
+            {
+                dualPtIndexMap.insert(facePts[fPtI], collapseToPtI);
+            }
 
-        //     pts[collapseToPtI] = fC;
-        // }
+            pts[collapseToPtI] = fC;
+
+            validCollapse = true;
+        }
 
         // Alternatively, do not topologically collapse face, but push
         // all points onto a line, so that the face area is zero and

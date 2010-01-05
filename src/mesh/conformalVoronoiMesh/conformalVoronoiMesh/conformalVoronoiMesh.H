@@ -508,7 +508,9 @@ private:
         (
             const face& f,
             pointField& pts,
-            Map<label>& dualPtIndexMap
+            Map<label>& dualPtIndexMap,
+            scalar targetFaceSize,
+            scalar collapseSizeLimitCoeff
         ) const;
 
         //- Re-index all of the the Delaunay cells

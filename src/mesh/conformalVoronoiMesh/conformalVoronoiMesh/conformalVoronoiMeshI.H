@@ -85,7 +85,7 @@ inline Foam::scalar Foam::conformalVoronoiMesh::averageAnyCellSize
                 "const Vertex_handle& vB"
             ") const"
         )
-            << "Requested averageCellSize for to external points"
+            << "Requested averageCellSize for two external points"
             << nl
             << exit(FatalError);
     }
