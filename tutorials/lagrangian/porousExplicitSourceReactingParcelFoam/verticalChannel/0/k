@@ -17,7 +17,7 @@ FoamFile
 
 dimensions      [0 2 -2 0 0 0 0];
 
-internalField   uniform 3.75e-11;
+internalField   uniform 3.75e-9;
 
 boundaryField
 {
@@ -33,22 +33,23 @@ boundaryField
     {
         type            turbulentIntensityKineticEnergyInlet;
         intensity       0.15;
-        value           uniform 3.75e-11;
+        value           uniform 3.75e-9;
     }
     inletSides
     {
         type            turbulentIntensityKineticEnergyInlet;
         intensity       0.16;
-        value           uniform 3.75e-11;
+        value           uniform 3.75e-9;
     }
     outlet
     {
-        type            zeroGradient;
+        type            inletOutlet;
+        inletValue      uniform 3.75e-9;
     }
     walls
     {
         type            compressible::kqRWallFunction;
-        value           uniform 3.75e-11;
+        value           uniform 0;
     }
 }
 

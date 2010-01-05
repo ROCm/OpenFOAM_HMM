@@ -33,17 +33,18 @@ boundaryField
     {
         type            flowRateInletVelocity;
         flowRate        0.00379;
-        value           uniform (-0 10.82857143 -0);
+        value           uniform (0 14.68 0);
     }
     inletSides
     {
         type            flowRateInletVelocity;
         flowRate        0.00832;
-        value           uniform (-0 11.88571429 -0);
+        value           uniform (0 17.79 0);
     }
     outlet
     {
-        type            zeroGradient;
+        type            inletOutlet;
+        inletValue      uniform (0 0 0);
     }
     walls
     {
