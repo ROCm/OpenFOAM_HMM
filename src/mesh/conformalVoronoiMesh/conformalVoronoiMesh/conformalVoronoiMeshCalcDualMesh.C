@@ -356,6 +356,8 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     // Final dual face and owner neighbour construction
 
+    timeCheck();
+
     createFacesOwnerNeighbourAndPatches
     (
         points,
@@ -602,7 +604,7 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
 {
     label nPtsMerged = 0;
 
-    scalar closenessTolerance = 1e-3;
+    scalar closenessTolerance = 1e-6;
 
     for
     (
@@ -858,7 +860,7 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
 {
     label nCollapsedFaces = 0;
 
-    scalar collapseSizeLimitCoeff = 0.2;
+    scalar collapseSizeLimitCoeff = cvMeshControls().minimumEdgeLengthCoeff();
 
     for
     (
@@ -1165,7 +1167,7 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
     scalar collapseSizeLimitCoeff
 ) const
 {
-    scalar guardFraction = 0.3;
+    scalar guardFraction = 0.5;
 
     const vector fC = f.centre(pts);
 
@@ -1204,27 +1206,7 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
             << "Inertia tensor magnitude too small, not collapsing." << nl
             << J << nl << "mag = " << magJ
             << endl;
-
-        // Output face for visualisation
-
-        forAll(f, fPtI)
-        {
-            meshTools::writeOBJ(Info, pts[f[fPtI]]);
-        }
-
-        Info<< "f";
-
-        forAll(f, fPtI)
-        {
-            Info << " " << fPtI + 1;
-        }
-
-        Info<< nl << endl;
-
-        return false;
     }
-
-    vector eVals = eigenValues(J);
 
     // ***************************************************************
     // The maximum eigenvalue (z()) must be the direction of the
@@ -1302,14 +1284,65 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
 
     // ***************************************************************
 
-    // The inertia calculation describes the mass distribution as a
-    // function of distance squared to the axis, so the square root of
-    // the ratio of face-plane moments gives a good indication of the
-    // aspect ratio.
+    vector collapseAxis = vector::zero;
 
-    scalar aspectRatio = sqrt(eVals.y()/max(eVals.x(), SMALL));
+    scalar aspectRatio = 1;
 
-    vector collapseAxis = eigenVector(J, eVals.x());
+    scalar detJ = det(J);
+
+    if (detJ < 1e-5)
+    {
+        const edgeList& eds = f.edges();
+
+        label longestEdgeI = -1;
+
+        scalar longestEdgeLength = -SMALL;
+
+        forAll(eds, edI)
+        {
+            scalar edgeLength = eds[edI].mag(pts);
+
+            if (edgeLength > longestEdgeLength)
+            {
+                longestEdgeI = edI;
+
+                longestEdgeLength = edgeLength;
+            }
+        }
+
+        collapseAxis = eds[longestEdgeI].vec(pts);
+
+        if (mag(collapseAxis) < VSMALL)
+        {
+            Info<< "if (mag(collapseAxis) < VSMALL) " << collapseAxis << endl;
+        }
+
+        collapseAxis /= mag(collapseAxis);
+
+        // Empirical correlation for high aspect ratio faces
+
+        if (detJ < VSMALL)
+        {
+            Info<< "if (detJ < VSMALL) " << detJ << endl;
+        }
+
+        aspectRatio = sqrt(0.35/detJ);
+
+        // Info<< "# Longest edge determined collapseAxis" << endl;
+    }
+    else
+    {
+        vector eVals = eigenValues(J);
+
+        // The inertia calculation describes the mass distribution as a
+        // function of distance squared to the axis, so the square root of
+        // the ratio of face-plane moments gives a good indication of the
+        // aspect ratio.
+
+        aspectRatio = sqrt(eVals.y()/max(eVals.x(), SMALL));
+
+        collapseAxis = eigenVector(J, eVals.x());
+    }
 
     if (magSqr(collapseAxis) < VSMALL)
     {
@@ -1325,32 +1358,32 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
             << "No collapse axis found for face, not collapsing."
             << endl;
 
-        // Output face and collapse axis for visualisation
+        // // Output face and collapse axis for visualisation
 
-        Info<< nl << "# Aspect ratio = " << aspectRatio << nl
-            << "# collapseAxis = " << collapseAxis << nl
-            << "# eigenvalues = " << eVals << endl;
+        // Info<< nl << "# Aspect ratio = " << aspectRatio << nl
+        //     << "# collapseAxis = " << collapseAxis << nl
+        //     << "# eigenvalues = " << eVals << endl;
 
-        scalar scale = 2.0*mag(fC - pts[f[0]]);
+        // scalar scale = 2.0*mag(fC - pts[f[0]]);
 
-        meshTools::writeOBJ(Info, fC);
-        meshTools::writeOBJ(Info, fC + scale*collapseAxis);
+        // meshTools::writeOBJ(Info, fC);
+        // meshTools::writeOBJ(Info, fC + scale*collapseAxis);
 
-        Info<< "f 1 2" << endl;
+        // Info<< "f 1 2" << endl;
 
-        forAll(f, fPtI)
-        {
-            meshTools::writeOBJ(Info, pts[f[fPtI]]);
-        }
+        // forAll(f, fPtI)
+        // {
+        //     meshTools::writeOBJ(Info, pts[f[fPtI]]);
+        // }
 
-        Info<< "f";
+        // Info<< "f";
 
-        forAll(f, fPtI)
-        {
-            Info << " " << fPtI + 3;
-        }
+        // forAll(f, fPtI)
+        // {
+        //     Info << " " << fPtI + 3;
+        // }
 
-        Info<< nl << endl;
+        // Info<< nl << endl;
 
         return false;
     }
@@ -1358,7 +1391,7 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
     // The signed distance along the collapse axis passing through the
     // face centre that each vertex projects to.
 
-    List<scalar> d(f.size());
+    Field<scalar> d(f.size());
 
     forAll(f, fPtI)
     {
@@ -1382,40 +1415,50 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
 
     inplaceReorder(oldToNew, facePts);
 
-    // Output face and collapse axis for visualisation
+    // Shift the points so that they are relative to the centre of the
+    // collapse line.
 
-    // Info<< nl << "# Aspect ratio = " << aspectRatio << nl
-    //     << "# collapseAxis = " << collapseAxis << nl
-    //     << "# eigenvalues = " << eVals << endl;
+    scalar dShift = -0.5*(d.first() + d.last());
 
-    // scalar scale = 2.0*mag(fC - pts[f[0]]);
+    d += dShift;
 
-    // meshTools::writeOBJ(Info, fC);
-    // meshTools::writeOBJ(Info, fC + scale*collapseAxis);
+//     // Output face and collapse axis for visualisation
 
-    // Info<< "f 1 2" << endl;
+//     Info<< "# Aspect ratio = " << aspectRatio << nl
+//         << "# determinant = " << detJ << nl
+//         << "# collapseAxis = " << collapseAxis << nl
+// //        << "# eigenvalues = " << eVals
+//         << endl;
 
-    // forAll(f, fPtI)
-    // {
-    //     meshTools::writeOBJ(Info, pts[f[fPtI]]);
-    // }
+//     scalar scale = 2.0*mag(fC - pts[f[0]]);
 
-    // Info<< "f";
+//     meshTools::writeOBJ(Info, fC);
+//     meshTools::writeOBJ(Info, fC + scale*collapseAxis);
 
-    // forAll(f, fPtI)
-    // {
-    //     Info << " " << fPtI + 3;
-    // }
+//     Info<< "f 1 2" << endl;
 
-    // Info<< nl << "# " << d << endl;
+//     forAll(f, fPtI)
+//     {
+//         meshTools::writeOBJ(Info, pts[f[fPtI]]);
+//     }
 
-    // Info<< "# " << d.first() << " " << d.last() << endl;
+//     Info<< "f";
 
-    // forAll(d, dI)
-    // {
-    //     meshTools::writeOBJ(Info, fC + d[dI]*collapseAxis);
-    // }
+//     forAll(f, fPtI)
+//     {
+//         Info << " " << fPtI + 3;
+//     }
 
+//     Info<< nl << "# " << d << endl;
+
+//     Info<< "# " << d.first() << " " << d.last() << endl;
+
+//     forAll(d, dI)
+//     {
+//         meshTools::writeOBJ(Info, fC + (d[dI] - dShift)*collapseAxis);
+//     }
+
+//     Info<< endl;
 
     // Form two lists, one for each half of the set of points
     // projected along the collapse axis.
@@ -1441,10 +1484,11 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
     SubList<scalar> dPos(d, d.size() - middle, middle);
     SubList<label> facePtsPos(facePts, d.size() - middle, middle);
 
-    // Defining how close to the face centre (C) a projected vertex
-    // (X) can be before making this an invalid edge collapse
+    // Defining how close to the midpoint (M) of the projected
+    // vertices line a projected vertex (X) can be before making this
+    // an invalid edge collapse
     //
-    // X---X-g----------C----X-----------g----X--X
+    // X---X-g----------------M----X-----------g----X--X
     //
     // Only allow a collapse if all projected vertices are outwith
     // guardFraction (g) of the distance form the face centre to the
@@ -1463,42 +1507,6 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
         )
             << "All points on one side of face centre, not collapsing."
             << endl;
-
-        // Output face and collapse axis for visualisation
-
-        Info<< nl << "# Aspect ratio = " << aspectRatio << nl
-            << "# collapseAxis = " << collapseAxis << nl
-            << "# eigenvalues = " << eVals << endl;
-
-        scalar scale = 2.0*mag(fC - pts[f[0]]);
-
-        meshTools::writeOBJ(Info, fC);
-        meshTools::writeOBJ(Info, fC + scale*collapseAxis);
-
-        Info<< "f 1 2" << endl;
-
-        forAll(f, fPtI)
-        {
-            meshTools::writeOBJ(Info, pts[f[fPtI]]);
-        }
-
-        Info<< "f";
-
-        forAll(f, fPtI)
-        {
-            Info << " " << fPtI + 3;
-        }
-
-        Info<< nl << "# " << d << endl;
-
-        Info<< "# " << d.first() << " " << d.last() << endl;
-
-        forAll(d, dI)
-        {
-            meshTools::writeOBJ(Info, fC + d[dI]*collapseAxis);
-        }
-
-        return false;
     }
 
     bool validCollapse = false;
@@ -1526,7 +1534,7 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
             dualPtIndexMap.insert(facePtsNeg[fPtI], collapseToPtI);
         }
 
-        pts[collapseToPtI] = collapseAxis*sum(dNeg)/dNeg.size() + fC;
+        pts[collapseToPtI] = collapseAxis*(sum(dNeg)/dNeg.size() - dShift) + fC;
 
         collapseToPtI = facePtsPos.last();
 
@@ -1535,7 +1543,7 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
             dualPtIndexMap.insert(facePtsPos[fPtI], collapseToPtI);
         }
 
-        pts[collapseToPtI] = collapseAxis*sum(dPos)/dPos.size() + fC;
+        pts[collapseToPtI] = collapseAxis*(sum(dPos)/dPos.size() - dShift) + fC;
     }
     else
     {
