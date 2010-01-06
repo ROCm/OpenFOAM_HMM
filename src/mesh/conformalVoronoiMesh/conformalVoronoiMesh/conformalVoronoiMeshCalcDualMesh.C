@@ -1167,7 +1167,7 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
     scalar collapseSizeLimitCoeff
 ) const
 {
-    scalar guardFraction = 0.5;
+    scalar guardFraction = 0.3;
 
     const vector fC = f.centre(pts);
 
