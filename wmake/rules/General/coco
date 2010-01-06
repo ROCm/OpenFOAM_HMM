@@ -2,7 +2,12 @@
 
 .SUFFIXES: .atg
 
-atgtoo = Coco -single -frames $(WM_THIRD_PARTY_DIR)/coco-cpp/src $$SOURCE -o $(OBJECTS_DIR) ; $(CC) $(c++FLAGS) -c $*.cpp -o $@
+atgtoo =  \
+    $(WM_THIRD_PARTY_DIR)/coco-cpp/platforms/$(WM_ARCH)/bin/coco-cpp \
+    -single \
+    -frames $(WM_THIRD_PARTY_DIR)/coco-cpp/platforms/share/coco-cpp \
+    $$SOURCE -o $(OBJECTS_DIR) ; \
+    $(CC) $(c++FLAGS) -c $*.cpp -o $@
 
 .atg.dep:
 	$(MAKE_DEP)

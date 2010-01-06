@@ -1,8 +1,9 @@
+[copy]
 /*---------------------------------*- C++ -*---------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,15 +28,19 @@ License
 Description
     An attributed Coco/R grammar to parse simple arithmetic expressions
 
+    Includes support for dictionary $variables and some scalar functions
+    (eg, sin, pow, ...)
+
 SourceFiles
     generated
 
 \*---------------------------------------------------------------------------*/
+[/copy]
 /*---------------------------------------------------------------------------*\
  compile with:
  Coco \
     [-single] -frames $WM_THIRD_PARTY_DIR/coco-r \
-    calcEntryParser.ATG
+    calcEntryParser.atg
 \*---------------------------------------------------------------------------*/
 
 #include "dictionary.H"
@@ -48,8 +53,6 @@ COMPILER calcEntry
     $prefix=calcEntry
     $namespace=Foam::functionEntries::calcEntryInternal
     $eof=true     // grammar handles eof itself
-
-    // Simple four function calculator for OpenFOAM dictionaries
 
 private:
     //- The parent dictionary
@@ -125,9 +128,10 @@ public:
     }
 
 
-INITIALIZE
+[initialize]
     dict_ = 0;
     val = 0;
+[/initialize]
 
 /*---------------------------------------------------------------------------*/
 
