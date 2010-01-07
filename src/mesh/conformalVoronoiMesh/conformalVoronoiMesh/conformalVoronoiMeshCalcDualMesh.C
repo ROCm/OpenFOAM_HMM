@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "conformalVoronoiMesh.H"
+#include "motionSmoother.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -354,13 +355,16 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     collapseFaces(points);
 
+    label nBadQualityFaces = checkPolyMeshQuality(points);
+
+    Info<< "Found " << nBadQualityFaces << " bad quality faces" << endl;
+
     // Final dual face and owner neighbour construction
 
     timeCheck();
 
     createFacesOwnerNeighbourAndPatches
     (
-        points,
         faces,
         owner,
         neighbour,
@@ -369,6 +373,10 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         patchStarts,
         false
     );
+
+    removeUnusedPoints(faces, points);
+
+    timeCheck();
 }
 
 
@@ -730,7 +738,7 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
 {
     label nCollapsedFaces = 0;
 
-    const scalar cosPerpendicularToleranceAngle = cos(degToRad(75));
+    const scalar cosPerpendicularToleranceAngle = cos(degToRad(80));
 
     for
     (
@@ -1288,7 +1296,9 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
 
     scalar aspectRatio = 1;
 
-    scalar detJ = det(J);
+    // Calculating determinant, including stabilisation for zero or
+    // small negative values
+    scalar detJ = max(det(J), SMALL);
 
     if (detJ < 1e-5)
     {
@@ -1320,11 +1330,6 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
         collapseAxis /= mag(collapseAxis);
 
         // Empirical correlation for high aspect ratio faces
-
-        if (detJ < VSMALL)
-        {
-            Info<< "if (detJ < VSMALL) " << detJ << endl;
-        }
 
         aspectRatio = sqrt(0.35/detJ);
 
@@ -1585,6 +1590,97 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
 }
 
 
+Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
+(
+    const pointField& pts
+) const
+{
+    faceList faces;
+    labelList owner;
+    labelList neighbour;
+    wordList patchNames;
+    labelList patchSizes;
+    labelList patchStarts;
+
+    timeCheck();
+
+    Info<< "    Creating polyMesh to assess quality" << endl;
+
+    createFacesOwnerNeighbourAndPatches
+    (
+        faces,
+        owner,
+        neighbour,
+        patchNames,
+        patchSizes,
+        patchStarts,
+        false
+    );
+
+    IOobject io
+    (
+        "cvMesh_temporary",
+        runTime_.constant(),
+        runTime_,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    );
+
+    polyMesh pMesh
+    (
+        io,
+        xferCopy(pts),
+        xferMove(faces),
+        xferMove(owner),
+        xferMove(neighbour)
+    );
+
+    List<polyPatch*> patches(patchStarts.size());
+
+    forAll (patches, p)
+    {
+        patches[p] = new polyPatch
+        (
+            patchNames[p],
+            patchSizes[p],
+            patchStarts[p],
+            p,
+            pMesh.boundaryMesh()
+        );
+    }
+
+    pMesh.addPatches(patches);
+
+    timeCheck();
+
+    labelHashSet wrongFaces(pMesh.nFaces()/100);
+
+    motionSmoother::checkMesh
+    (
+        false,
+        pMesh,
+        cvMeshControls().cvMeshDict().subDict("meshQualityControls"),
+        wrongFaces
+    );
+
+    forAllConstIter(labelHashSet, wrongFaces, iter)
+    {
+        label faceI = iter.key();
+
+        Info<< faceI << " " << pMesh.faces()[faceI] << endl;
+    }
+
+    return wrongFaces.size();
+
+    // For parallel running:
+    // return returnReduce
+    // (
+    //     wrongFaces.size(),
+    //     sumOp<label>()
+    // );
+}
+
+
 void Foam::conformalVoronoiMesh::reindexDualVertices
 (
     const Map<label>& dualPtIndexMap
@@ -1607,7 +1703,6 @@ void Foam::conformalVoronoiMesh::reindexDualVertices
 
 void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 (
-    pointField& points,
     faceList& faces,
     labelList& owner,
     labelList& neighbour,
@@ -1779,10 +1874,6 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
         patchOwners,
         false
     );
-
-    removeUnusedPoints(faces, points);
-
-    timeCheck();
 }
 
 

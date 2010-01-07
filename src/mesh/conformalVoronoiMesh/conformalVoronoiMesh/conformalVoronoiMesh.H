@@ -513,13 +513,16 @@ private:
             scalar collapseSizeLimitCoeff
         ) const;
 
+        //- Create a polyMesh and check its quality, reports which
+        //  elements damage the mesh quality, allowing backtracking.
+        label checkPolyMeshQuality(const pointField& pts) const;
+
         //- Re-index all of the the Delaunay cells
         void reindexDualVertices(const Map<label>& dualPtIndexMap);
 
         //- Create all of the internal and boundary faces
         void createFacesOwnerNeighbourAndPatches
         (
-            pointField& points,
             faceList& faces,
             labelList& owner,
             labelList& neighbour,
