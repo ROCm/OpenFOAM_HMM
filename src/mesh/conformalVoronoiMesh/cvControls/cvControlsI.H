@@ -115,30 +115,59 @@ inline Foam::scalar Foam::cvControls::cosAlignmentAcceptanceAngle() const
     return cosAlignmentAcceptanceAngle_;
 }
 
+
 inline Foam::scalar Foam::cvControls::insertionDistCoeff() const
 {
     return insertionDistCoeff_;
 }
+
 
 inline Foam::scalar Foam::cvControls::faceAreaRatioCoeff() const
 {
     return faceAreaRatioCoeff_;
 }
 
+
 inline Foam::scalar Foam::cvControls::cosInsertionAcceptanceAngle() const
 {
     return cosInsertionAcceptanceAngle_;
 }
+
 
 inline Foam::scalar Foam::cvControls::removalDistCoeff() const
 {
     return removalDistCoeff_;
 }
 
-inline Foam::scalar Foam::cvControls::minimumEdgeLengthCoeff() const
+
+inline Foam::scalar Foam::cvControls::filterSizeCoeff() const
 {
-    return minimumEdgeLengthCoeff_;
+    return filterSizeCoeff_;
 }
 
+
+inline Foam::scalar Foam::cvControls::mergeClosenessCoeff() const
+{
+    return mergeClosenessCoeff_;
+}
+
+
+inline Foam::scalar Foam::cvControls::surfaceStepFaceAngle() const
+{
+    return surfaceStepFaceAngle_;
+}
+
+
+inline Foam::scalar Foam::cvControls::edgeCollapseGuardFraction() const
+{
+    return edgeCollapseGuardFraction_;
+}
+
+
+inline Foam::scalar
+Foam::cvControls::maxCollapseFaceToPointSideLengthCoeff() const
+{
+    return maxCollapseFaceToPointSideLengthCoeff_;
+}
 
 // ************************************************************************* //

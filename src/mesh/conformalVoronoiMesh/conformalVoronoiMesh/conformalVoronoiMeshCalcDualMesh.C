@@ -76,8 +76,6 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         }
     }
 
-    // Dual face filtering
-
     // Indexing Delaunay cells, which are the dual vertices
 
     label dualVertI = 0;
@@ -386,7 +384,7 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
 {
     label nPtsMerged = 0;
 
-    scalar closenessTolerance = 1e-6;
+    scalar closenessTolerance = cvMeshControls().mergeClosenessCoeff();
 
     for
     (
@@ -512,7 +510,10 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
 {
     label nCollapsedFaces = 0;
 
-    const scalar cosPerpendicularToleranceAngle = cos(degToRad(80));
+    const scalar cosPerpendicularToleranceAngle = cos
+    (
+        degToRad(cvMeshControls().surfaceStepFaceAngle())
+    );
 
     for
     (
@@ -579,7 +580,16 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
 
             vector faceNormal = dualFace.normal(pts);
 
-            faceNormal /= mag(faceNormal);
+            if (mag(faceNormal) < VSMALL)
+            {
+                // If the face is essentially zero area, then force it
+                // to be collapsed by making the dot product result -1
+                faceNormal = -surfaceNormal;
+            }
+            else
+            {
+                faceNormal /= mag(faceNormal);
+            }
 
             if ((faceNormal & surfaceNormal) < cosPerpendicularToleranceAngle)
             {
@@ -591,7 +601,7 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
 
                 if
                 (
-                    collapseFaceToEdge
+                    collapseFace
                     (
                         dualFace,
                         pts,
@@ -642,7 +652,7 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
 {
     label nCollapsedFaces = 0;
 
-    scalar collapseSizeLimitCoeff = cvMeshControls().minimumEdgeLengthCoeff();
+    scalar collapseSizeLimitCoeff = cvMeshControls().filterSizeCoeff();
 
     for
     (
@@ -687,7 +697,7 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
 
             if
             (
-                collapseFaceToEdge
+                collapseFace
                 (
                     dualFace,
                     pts,
@@ -706,7 +716,7 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
 }
 
 
-bool Foam::conformalVoronoiMesh::collapseFaceToEdge
+bool Foam::conformalVoronoiMesh::collapseFace
 (
     const face& f,
     pointField& pts,
@@ -715,7 +725,7 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
     scalar collapseSizeLimitCoeff
 ) const
 {
-    scalar guardFraction = 0.3;
+    bool limitToQuadsOrTris = true;
 
     const vector fC = f.centre(pts);
 
@@ -730,57 +740,27 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
     // eigenvector corresponding to the smaller of the two remaining
     // eigenvalues is the dominant axis in a high aspect ratio face.
 
-    // Normalise inertia tensor to remove problems with small values
-
     scalar magJ = mag(J);
+
+    scalar detJ = SMALL;
 
     if (magJ > VSMALL)
     {
+        // Normalise inertia tensor to remove problems with small values
+
         J /= mag(J);
         // J /= cmptMax(J);
         // J /= max(eigenValues(J).x(), SMALL);
-    }
-    else
-    {
-        WarningIn
-        (
-            "Foam::conformalVoronoiMesh::collapseFaceToEdge"
-            "("
-            "const face& f,"
-            "pointField& pts,"
-            "Map<label>& dualPtIndexMap"
-            ") const"
-        )
-            << "Inertia tensor magnitude too small, not collapsing." << nl
-            << J << nl << "mag = " << magJ
-            << endl;
 
-        // Output face and collapse axis for visualisation
+        // Calculating determinant, including stabilisation for zero or
+        // small negative values
 
-        forAll(f, fPtI)
-        {
-            meshTools::writeOBJ(Info, pts[f[fPtI]]);
-        }
-
-        Info<< "f";
-
-        forAll(f, fPtI)
-        {
-            Info << " " << fPtI + 1;
-        }
-
-        Info<< nl << endl;
-
-        return false;
+        detJ = max(det(J), SMALL);
     }
 
     vector collapseAxis = vector::zero;
 
     scalar aspectRatio = 1;
-
-    // Calculating determinant, including stabilisation for zero or
-    // small negative values
-    scalar detJ = max(det(J), SMALL);
 
     if (detJ < 1e-5)
     {
@@ -839,7 +819,7 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
     {
         WarningIn
         (
-            "Foam::conformalVoronoiMesh::collapseFaceToEdge"
+            "Foam::conformalVoronoiMesh::collapseFace"
             "("
                 "const face& f,"
                 "pointField& pts,"
@@ -848,33 +828,6 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
         )
             << "No collapse axis found for face, not collapsing."
             << endl;
-
-        // // Output face and collapse axis for visualisation
-
-        // Info<< nl << "# Aspect ratio = " << aspectRatio << nl
-        //     << "# collapseAxis = " << collapseAxis << nl
-        //     << "# eigenvalues = " << eVals << endl;
-
-        // scalar scale = 2.0*mag(fC - pts[f[0]]);
-
-        // meshTools::writeOBJ(Info, fC);
-        // meshTools::writeOBJ(Info, fC + scale*collapseAxis);
-
-        // Info<< "f 1 2" << endl;
-
-        // forAll(f, fPtI)
-        // {
-        //     meshTools::writeOBJ(Info, pts[f[fPtI]]);
-        // }
-
-        // Info<< "f";
-
-        // forAll(f, fPtI)
-        // {
-        //     Info << " " << fPtI + 3;
-        // }
-
-        // Info<< nl << endl;
 
         return false;
     }
@@ -912,44 +865,6 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
     scalar dShift = -0.5*(d.first() + d.last());
 
     d += dShift;
-
-//     // Output face and collapse axis for visualisation
-
-//     Info<< "# Aspect ratio = " << aspectRatio << nl
-//         << "# determinant = " << detJ << nl
-//         << "# collapseAxis = " << collapseAxis << nl
-// //        << "# eigenvalues = " << eVals
-//         << endl;
-
-//     scalar scale = 2.0*mag(fC - pts[f[0]]);
-
-//     meshTools::writeOBJ(Info, fC);
-//     meshTools::writeOBJ(Info, fC + scale*collapseAxis);
-
-//     Info<< "f 1 2" << endl;
-
-//     forAll(f, fPtI)
-//     {
-//         meshTools::writeOBJ(Info, pts[f[fPtI]]);
-//     }
-
-//     Info<< "f";
-
-//     forAll(f, fPtI)
-//     {
-//         Info << " " << fPtI + 3;
-//     }
-
-//     Info<< nl << "# " << d << endl;
-
-//     Info<< "# " << d.first() << " " << d.last() << endl;
-
-//     forAll(d, dI)
-//     {
-//         meshTools::writeOBJ(Info, fC + (d[dI] - dShift)*collapseAxis);
-//     }
-
-//     Info<< endl;
 
     // Form two lists, one for each half of the set of points
     // projected along the collapse axis.
@@ -989,7 +904,7 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
     {
         WarningIn
         (
-            "Foam::conformalVoronoiMesh::collapseFaceToEdge"
+            "Foam::conformalVoronoiMesh::collapseFace"
             "("
                 "const face& f,"
                 "pointField& pts,"
@@ -1000,20 +915,58 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
             << endl;
     }
 
-    bool validCollapse = false;
+    faceCollapseMode mode = fcmNone;
 
     if
     (
-        (dNeg.last() < guardFraction*dNeg.first())
-     && (dPos.first() > guardFraction*dPos.last())
-     && (fA < aspectRatio*sqr(targetFaceSize*collapseSizeLimitCoeff))
-     && f.size() <= 4
+        (fA < aspectRatio*sqr(targetFaceSize*collapseSizeLimitCoeff))
+     && (limitToQuadsOrTris && f.size() <= 4)
     )
     {
-        validCollapse = true;
+        scalar guardFraction = cvMeshControls().edgeCollapseGuardFraction();
+
+        cvMeshControls().maxCollapseFaceToPointSideLengthCoeff();
+
+        if
+        (
+            (dNeg.last() < guardFraction*dNeg.first())
+         && (dPos.first() > guardFraction*dPos.last())
+        )
+        {
+            mode = fcmEdge;
+        }
+        else if
+        (
+            (d.last() - d.first())
+          < targetFaceSize
+           *cvMeshControls().maxCollapseFaceToPointSideLengthCoeff()
+        )
+        {
+            // If the face can't be collapsed to an edge, and it has a
+            // small enough span, collapse it to a point.
+
+            mode = fcmPoint;
+        }
+        // else (what to check? anything?)
+        // {
+        //     // Alternatively, do not topologically collapse face, but push
+        //     // all points onto a line, so that the face area is zero and
+        //     // either:
+        //     //   + do not create it when dualising.  This may damage the edge
+        //     //     addressing of the mesh;
+        //     //   + split the face into two (or more?) edges later,
+        //     //     sacrificing topological consistency with the Delaunay.
+
+        //     // Note: The fcmDeferredMultiEdge collapse must be performed at
+        //     // the polyMesh stage as this type of collapse can't be performed
+        //     // and still maintain topological dual consistency with the
+        //     // Delaunay structure
+
+        //     mode = fcmDeferredMultiEdge;
+        // }
     }
 
-    if (validCollapse)
+    if (mode == fcmEdge)
     {
         // Arbitrarily choosing the most distant point as the index to
         // collapse to.
@@ -1036,43 +989,60 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
 
         pts[collapseToPtI] = collapseAxis*(sum(dPos)/dPos.size() - dShift) + fC;
     }
-    else
+    else if (mode == fcmPoint)
     {
-        // If the face can't be collapsed to a line, and it is small
-        // and low aspect ratio enough, collapse it to a point.
+        // Arbitrarily choosing the first point as the index to
+        // collapse to.  Collapse to the face centre.
 
-        if
-        (
-            (d.last() - d.first()) < targetFaceSize*0.35
-         && fA < aspectRatio*sqr(targetFaceSize*collapseSizeLimitCoeff)
-         && f.size() <= 4
-        )
+        label collapseToPtI = facePts.first();
+
+        forAll(facePts, fPtI)
         {
-            // Arbitrarily choosing the first point as the index to
-            // collapse to.  Collapse to the face center.
-
-            label collapseToPtI = facePts.first();
-
-            forAll(facePts, fPtI)
-            {
-                dualPtIndexMap.insert(facePts[fPtI], collapseToPtI);
-            }
-
-            pts[collapseToPtI] = fC;
-
-            validCollapse = true;
+            dualPtIndexMap.insert(facePts[fPtI], collapseToPtI);
         }
 
-        // Alternatively, do not topologically collapse face, but push
-        // all points onto a line, so that the face area is zero and
-        // either:
-        //   + do not create it when dualising.  This may damage the edge
-        //     addressing of the mesh;
-        //   + split the face into two (or more?) edges later, sacrificing
-        //     topological consistency with the Delaunay.
+        pts[collapseToPtI] = fC;
     }
 
-    return validCollapse;
+    // // Output face and collapse axis for visualisation
+
+    // Info<< "# Aspect ratio = " << aspectRatio << nl
+    //     << "# determinant = " << detJ << nl
+    //     << "# collapseAxis = " << collapseAxis << nl
+    // //        << "# eigenvalues = " << eVals
+    //     << endl;
+
+    // scalar scale = 2.0*mag(fC - pts[f[0]]);
+
+    // meshTools::writeOBJ(Info, fC);
+    // meshTools::writeOBJ(Info, fC + scale*collapseAxis);
+
+    // Info<< "f 1 2" << endl;
+
+    // forAll(f, fPtI)
+    // {
+    //     meshTools::writeOBJ(Info, pts[f[fPtI]]);
+    // }
+
+    // Info<< "f";
+
+    // forAll(f, fPtI)
+    // {
+    //     Info << " " << fPtI + 3;
+    // }
+
+    // Info<< nl << "# " << d << endl;
+
+    // Info<< "# " << d.first() << " " << d.last() << endl;
+
+    // forAll(d, dI)
+    // {
+    //     meshTools::writeOBJ(Info, fC + (d[dI] - dShift)*collapseAxis);
+    // }
+
+    // Info<< endl;
+
+    return (mode != fcmNone);
 }
 
 
@@ -1149,12 +1119,12 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
         wrongFaces
     );
 
-    forAllConstIter(labelHashSet, wrongFaces, iter)
-    {
-        label faceI = iter.key();
+    // forAllConstIter(labelHashSet, wrongFaces, iter)
+    // {
+    //     label faceI = iter.key();
 
-        Info<< faceI << " " << pMesh.faces()[faceI] << endl;
-    }
+    //     Info<< faceI << " " << pMesh.faces()[faceI] << endl;
+    // }
 
     return wrongFaces.size();
 

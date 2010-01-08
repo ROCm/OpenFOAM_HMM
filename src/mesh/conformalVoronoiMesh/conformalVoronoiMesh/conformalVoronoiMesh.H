@@ -93,6 +93,15 @@ public:
         rmFine    // Rebuild the conformation with fine tolerances (slower)
     };
 
+    enum faceCollapseMode
+    {
+        fcmNone,             // Do not collapse face
+        fcmEdge,             // Collapse face to a single edge
+        fcmPoint,            // Collapse face to a point
+        fcmDeferredMultiEdge // Collapse face to several edges
+    };
+
+
 private:
 
     // Private data
@@ -213,9 +222,6 @@ private:
 
         //- Return the local maximum surface protrusion distance
         inline scalar maxSurfaceProtrusion(const point& pt) const;
-
-        //- Return the local minimum allowed dual edge length
-        inline scalar minimumEdgeLength(const point& pt) const;
 
         //- Return the required alignment directions at the given location
         tensor requiredAlignment(const point& pt) const;
@@ -504,7 +510,7 @@ private:
 
         //- Collapse a face to an edge, updating the point and point
         //- map.  Returns a bool of success or failure.
-        bool collapseFaceToEdge
+        bool collapseFace
         (
             const face& f,
             pointField& pts,

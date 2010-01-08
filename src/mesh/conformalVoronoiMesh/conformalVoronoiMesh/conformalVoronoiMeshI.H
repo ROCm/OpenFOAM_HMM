@@ -223,15 +223,6 @@ inline Foam::scalar Foam::conformalVoronoiMesh::maxSurfaceProtrusion
 }
 
 
-inline Foam::scalar Foam::conformalVoronoiMesh::minimumEdgeLength
-(
-    const point& pt
-) const
-{
-    return targetCellSize(pt)*cvMeshControls().minimumEdgeLengthCoeff();
-}
-
-
 inline Foam::label Foam::conformalVoronoiMesh::insertPoint
 (
     const point& p,

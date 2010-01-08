@@ -147,9 +147,35 @@ class cvControls
 
     // polyMesh filtering controls
 
-        //- Minimum edge length allowed in the polyMesh, anything shorter will
-        //  be filtered - fraction of the local target cell size
-        scalar minimumEdgeLengthCoeff_;
+        //- Upper limit on how close two dual vertices can be before
+        //  being merged, fraction of the local target cell size
+        scalar mergeClosenessCoeff_;
+
+        //- The maximum allowed angle between a boundary face normal
+        //  and the local surface normal before face will be
+        //  aggressively collapsed
+        scalar surfaceStepFaceAngle_;
+
+        //- Defining how close to the midpoint (M) of the projected
+        //  vertices line a projected vertex (X) can be before making
+        //  an edge collapse invalid
+        //
+        //  X---X-g----------------M----X-----------g----X--X
+        //
+        //  Only allow a collapse if all projected vertices are
+        //  outwith edgeCollapseGuardFraction (g) of the distance form
+        //  the face centre to the furthest vertex in the considered
+        //  direction
+        scalar edgeCollapseGuardFraction_;
+
+        //- The maximum allowed length of the longest edge of a face
+        //  to enable a face to be collapsed to a point, fraction of
+        //  the local target cell size
+        scalar maxCollapseFaceToPointSideLengthCoeff_;
+
+        //- Upper limit on the size of faces to be filtered from,
+        //  fraction of the local target cell size
+        scalar filterSizeCoeff_;
 
 
     // Private Member Functions
@@ -238,8 +264,20 @@ public:
             //- Return removalDistCoeff
             inline scalar removalDistCoeff() const;
 
-            //- Return the minimumEdgeLengthCoeff
-            inline scalar minimumEdgeLengthCoeff() const;
+            //- Return the filterSizeCoeff
+            inline scalar filterSizeCoeff() const;
+
+            //- Return the mergeClosenessCoeff
+            inline scalar mergeClosenessCoeff() const;
+
+            //- Return the surfaceStepFaceAngle
+            inline scalar surfaceStepFaceAngle() const;
+
+            //- Return the edgeCollapseGuardFraction
+            inline scalar edgeCollapseGuardFraction() const;
+
+            //- Return the maxCollapseFaceToPointSideLengthCoeff
+            inline scalar maxCollapseFaceToPointSideLengthCoeff() const;
 };
 
 

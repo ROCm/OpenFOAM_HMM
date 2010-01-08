@@ -44,6 +44,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
     }
 }
 
+
 Foam::conformalVoronoiMesh::reconformationMode
 Foam::conformalVoronoiMesh::reconformationControl() const
 {
@@ -68,6 +69,7 @@ Foam::conformalVoronoiMesh::reconformationControl() const
 
     return rmNone;
 }
+
 
 void Foam::conformalVoronoiMesh::buildSurfaceConformation
 (

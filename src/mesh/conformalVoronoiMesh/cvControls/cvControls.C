@@ -147,11 +147,30 @@ Foam::cvControls::cvControls
 
     const dictionary& filteringDict(cvMeshDict_.subDict("polyMeshFiltering"));
 
-    minimumEdgeLengthCoeff_ = readScalar
+    filterSizeCoeff_ = readScalar
     (
-        filteringDict.lookup("minimumEdgeLengthCoeff")
+        filteringDict.lookup("filterSizeCoeff")
     );
 
+    mergeClosenessCoeff_ = readScalar
+    (
+        filteringDict.lookup("mergeClosenessCoeff")
+    );
+
+    surfaceStepFaceAngle_ = readScalar
+    (
+        filteringDict.lookup("surfaceStepFaceAngle")
+    );
+
+    edgeCollapseGuardFraction_ = readScalar
+    (
+        filteringDict.lookup("edgeCollapseGuardFraction")
+    );
+
+    maxCollapseFaceToPointSideLengthCoeff_ = readScalar
+    (
+        filteringDict.lookup("maxCollapseFaceToPointSideLengthCoeff")
+    );
 }
 
 
