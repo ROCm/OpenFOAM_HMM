@@ -821,14 +821,18 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
     {
         vector eVals = eigenValues(J);
 
+        // The maximum eigenvalue (z()) must be the direction of the
+        // normal, as it has the greatest value.  The minimum eigenvalue
+        // is the dominant collapse axis for high aspect ratio faces.
+
+        collapseAxis = eigenVector(J, eVals.x());
+
         // The inertia calculation describes the mass distribution as a
         // function of distance squared to the axis, so the square root of
         // the ratio of face-plane moments gives a good indication of the
         // aspect ratio.
 
         aspectRatio = sqrt(eVals.y()/max(eVals.x(), SMALL));
-
-        collapseAxis = eigenVector(J, eVals.x());
     }
 
     if (magSqr(collapseAxis) < VSMALL)
