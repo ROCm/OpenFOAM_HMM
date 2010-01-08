@@ -278,7 +278,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     // index used for owner neighbour assignment.
 
     // The indices of the points are reset *which **destroys** the point-pair
-    // matching*, so the type of each vertex are reset to avoid any ambiguity.
+    // matching*, so the type of each vertex is reset to avoid any ambiguity.
 
     label dualCelli = 0;
 
@@ -1214,6 +1214,24 @@ bool Foam::conformalVoronoiMesh::collapseFaceToEdge
             << "Inertia tensor magnitude too small, not collapsing." << nl
             << J << nl << "mag = " << magJ
             << endl;
+
+        // Output face and collapse axis for visualisation
+
+        forAll(f, fPtI)
+        {
+            meshTools::writeOBJ(Info, pts[f[fPtI]]);
+        }
+
+        Info<< "f";
+
+        forAll(f, fPtI)
+        {
+            Info << " " << fPtI + 1;
+        }
+
+        Info<< nl << endl;
+
+        return false;
     }
 
     // ***************************************************************
