@@ -525,16 +525,26 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
         Cell_circulator ccStart = incident_cells(*eit);
         Cell_circulator cc = ccStart;
 
+        bool skipFace = false;
+
         do
         {
             if (dualPtIndexMap.found(cc->cellIndex()))
             {
                 // One of the points of this face has already been
                 // collapsed this sweep, leave for next sweep
-                continue;
+
+                skipFace = true;
+
+                break;
             }
 
         } while (++cc != ccStart);
+
+        if (skipFace)
+        {
+            continue;
+        }
 
         if (isBoundaryDualFace(eit))
         {
@@ -664,16 +674,26 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
         Cell_circulator ccStart = incident_cells(*eit);
         Cell_circulator cc = ccStart;
 
+        bool skipFace = false;
+
         do
         {
             if (dualPtIndexMap.found(cc->cellIndex()))
             {
                 // One of the points of this face has already been
                 // collapsed this sweep, leave for next sweep
-                continue;
+
+                skipFace = true;
+
+                break;
             }
 
         } while (++cc != ccStart);
+
+        if (skipFace)
+        {
+            continue;
+        }
 
         Cell_handle c = eit->first;
         Vertex_handle vA = c->vertex(eit->second);
@@ -725,7 +745,7 @@ bool Foam::conformalVoronoiMesh::collapseFace
     scalar collapseSizeLimitCoeff
 ) const
 {
-    bool limitToQuadsOrTris = true;
+    bool limitToQuadsOrTris = false;
 
     const vector fC = f.centre(pts);
 
@@ -920,7 +940,7 @@ bool Foam::conformalVoronoiMesh::collapseFace
     if
     (
         (fA < aspectRatio*sqr(targetFaceSize*collapseSizeLimitCoeff))
-     && (limitToQuadsOrTris && f.size() <= 4)
+     && (!limitToQuadsOrTris || f.size() <= 4)
     )
     {
         scalar guardFraction = cvMeshControls().edgeCollapseGuardFraction();
