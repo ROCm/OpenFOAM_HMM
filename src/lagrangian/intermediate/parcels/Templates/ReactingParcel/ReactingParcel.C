@@ -122,7 +122,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
     }
 
     // Far field carrier  molar fractions
-    scalarField Xinf(Y_.size());
+    scalarField Xinf(td.cloud().mcCarrierThermo().speciesData().size());
 
     forAll(Xinf, i)
     {
