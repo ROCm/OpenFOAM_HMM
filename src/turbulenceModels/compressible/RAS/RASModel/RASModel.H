@@ -265,9 +265,6 @@ public:
             }
 
 
-        //- Return the turbulence viscosity
-        virtual tmp<volScalarField> mut() const = 0;
-
         //- Return the effective viscosity
         virtual tmp<volScalarField> muEff() const
         {
@@ -278,22 +275,21 @@ public:
         }
 
         //- Return the effective turbulent thermal diffusivity
-        virtual tmp<volScalarField> alphaEff() const = 0;
+        virtual tmp<volScalarField> alphaEff() const
+        {
+            return tmp<volScalarField>
+            (
+                new volScalarField("alphaEff", alphat() + alpha())
+            );
+        }
 
-        //- Return the turbulence kinetic energy
-        virtual tmp<volScalarField> k() const = 0;
-
-        //- Return the turbulence kinetic energy dissipation rate
-        virtual tmp<volScalarField> epsilon() const = 0;
-
-        //- Return the Reynolds stress tensor
-        virtual tmp<volSymmTensorField> R() const = 0;
-
-        //- Return the effective stress tensor including the laminar stress
-        virtual tmp<volSymmTensorField> devRhoReff() const = 0;
-
-        //- Return the source term for the momentum equation
-        virtual tmp<fvVectorMatrix> divDevRhoReff(volVectorField& U) const = 0;
+        //- Return the effective turbulent thermal diffusivity for a patch
+        virtual tmp<scalarField> alphaEff(const label patchI) const
+        {
+            return
+                alphat()().boundaryField()[patchI]
+              + alpha().boundaryField()[patchI];
+        }
 
         //- Return yPlus for the given patch
         virtual tmp<scalarField> yPlus
@@ -303,10 +299,10 @@ public:
         ) const;
 
         //- Solve the turbulence equations and correct the turbulence viscosity
-        virtual void correct() = 0;
+        virtual void correct();
 
         //- Read RASProperties dictionary
-        virtual bool read() = 0;
+        virtual bool read();
 };
 
 
