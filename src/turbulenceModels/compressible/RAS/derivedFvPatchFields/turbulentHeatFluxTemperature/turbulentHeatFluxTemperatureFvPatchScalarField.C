@@ -210,6 +210,8 @@ void turbulentHeatFluxTemperatureFvPatchScalarField::write
 ) const
 {
     fvPatchScalarField::write(os);
+    os.writeKeyword("heatSource") << heatSourceTypeNames_[heatSource_]
+        << token::END_STATEMENT << nl;
     q_.writeEntry("q", os);
     gradient().writeEntry("gradient", os);
     writeEntry("value", os);

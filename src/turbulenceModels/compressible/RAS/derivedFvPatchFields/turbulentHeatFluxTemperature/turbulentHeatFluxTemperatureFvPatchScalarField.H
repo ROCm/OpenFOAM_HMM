@@ -26,7 +26,20 @@ Class
     Foam::turbulentHeatFluxTemperatureFvPatchScalarField
 
 Description
-    Fixed heat flux boundary condition for temperature.
+    Fixed heat boundary condition to specify temperature gradient. Input
+    heat source either specified in terms of an absolute power [W], or as a
+    flux [W/m2].
+
+    Example usage:
+
+        hotWall
+        {
+            type            compressible::turbulentHeatFluxTemperature;
+            heatSource      flux;        // power [W]; flux [W/m2]
+            q               uniform 10;  // heat power or flux
+            value           uniform 300; // initial temperature value
+        }
+
 
 SourceFiles
     turbulentHeatFluxTemperatureFvPatchScalarField.C
@@ -67,18 +80,18 @@ public:
         };
 
 
-    private:
+private:
 
-        // Private data
+    // Private data
 
-            //- Heat source type names
-            static const NamedEnum<heatSourceType, 2> heatSourceTypeNames_;
+        //- Heat source type names
+        static const NamedEnum<heatSourceType, 2> heatSourceTypeNames_;
 
-            //- Heat source type
-            heatSourceType heatSource_;
+        //- Heat source type
+        heatSourceType heatSource_;
 
-            //- Heat flux [W/m2]
-            scalarField q_;
+        //- Heat power [W] or flux [W/m2]
+        scalarField q_;
 
 
 public:
