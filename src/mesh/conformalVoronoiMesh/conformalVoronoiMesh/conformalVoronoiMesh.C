@@ -969,6 +969,8 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
 
     DynamicList<label> verticesOnFace;
 
+    label nUniqueVertices = 0;
+
     do
     {
         label cc1I = cc1->cellIndex();
@@ -992,6 +994,11 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
 
         if (cc1I != cc2I)
         {
+            if (findIndex(verticesOnFace, cc1I) == -1)
+            {
+                nUniqueVertices++;
+            }
+
             verticesOnFace.append(cc1I);
         }
 
@@ -1001,7 +1008,107 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
 
     } while (cc1 != ccStart);
 
+    if (verticesOnFace.size() >= 3 && nUniqueVertices < 3)
+    {
+        // There are not enough unique vertices on this face to
+        // justify its size, it may have a form like:
+
+        // Vertices:
+        // A                                  B
+        // A                                  B
+
+        // Face:
+        // ABAB
+
+        // Setting the size to be below 3, so that it will not be
+        // created
+
+        verticesOnFace.setSize(nUniqueVertices);
+    }
+
     return face(verticesOnFace);
+}
+
+
+bool Foam::conformalVoronoiMesh::ownerAndNeighbour
+(
+    Vertex_handle vA,
+    Vertex_handle vB,
+    label& owner,
+    label& neighbour
+) const
+{
+    bool reverse = false;
+
+    owner = -1;
+
+    neighbour = -1;
+
+    label dualCellIndexA = vA->index();
+
+    if (!vA->internalOrBoundaryPoint())
+    {
+        dualCellIndexA = -1;
+    }
+
+    label dualCellIndexB = vB->index();
+
+    if (!vB->internalOrBoundaryPoint())
+    {
+        dualCellIndexB = -1;
+    }
+
+    if (dualCellIndexA == -1 && dualCellIndexB == -1)
+    {
+        FatalErrorIn
+        (
+            "bool Foam::conformalVoronoiMesh::ownerAndNeighbour"
+            "("
+                "Vertex_handle vA,"
+                "Vertex_handle vB,"
+                "label& owner,"
+                "label& neighbour"
+            ") const"
+        )
+            << "Attempting to create a face joining "
+            << "two unindexed dual cells "
+            << exit(FatalError);
+    }
+    else if (dualCellIndexA == -1 || dualCellIndexB == -1)
+    {
+        // boundary face, find which is the owner
+
+        if (dualCellIndexA == -1)
+        {
+            owner = dualCellIndexB;
+
+            reverse = true;
+        }
+        else
+        {
+            owner = dualCellIndexA;
+        }
+    }
+    else
+    {
+        // internal face, find the lower cell to be the owner
+
+        if (dualCellIndexB > dualCellIndexA)
+        {
+            owner = dualCellIndexA;
+            neighbour = dualCellIndexB;
+        }
+        else
+        {
+            owner = dualCellIndexB;
+            neighbour = dualCellIndexA;
+
+            // reverse face order to correctly orientate normal
+            reverse = true;
+        }
+    }
+
+    return reverse;
 }
 
 

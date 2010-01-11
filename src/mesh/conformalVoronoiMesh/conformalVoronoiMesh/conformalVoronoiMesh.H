@@ -62,6 +62,8 @@ SourceFiles
 #include "volFields.H"
 #include "fvMesh.H"
 #include "Histogram.H"
+#include "labelPair.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -355,6 +357,20 @@ private:
             const Triangulation::Finite_edges_iterator& eit
         ) const;
 
+        //- Determines the owner and neighbour labels for dual cells
+        //  corresponding to the dual face formed by the supplied
+        //  Delaunay vertices.  If the dual face is a boundary face
+        //  then neighbour = -1.  Returns true if the dual face
+        //  created by vA -> vB needs to be reversed to be correctly
+        //  orientated.
+        bool ownerAndNeighbour
+        (
+            Vertex_handle vA,
+            Vertex_handle vB,
+            label& owner,
+            label& neighbour
+        ) const;
+
         //- Insert the necessary point pairs to conform to the surface, either
         //  from stored results, or trigger a re-conformation
         void conformToSurface();
@@ -500,17 +516,22 @@ private:
         //- Collapse a face to a point or an edge, modifying and
         //  mapping the points, returns the true if the face was
         //  collapsed in this operation
-        void collapseFaces(pointField& pts);
+        void collapseFaces
+        (
+            pointField& pts,
+            HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
+        );
 
         label collapseFaces
         (
             pointField& pts,
-            Map<label>& dualPtIndexMap
+            Map<label>& dualPtIndexMap,
+            HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
         ) const;
 
         //- Collapse a face to an edge, updating the point and point
-        //- map.  Returns a bool of success or failure.
-        bool collapseFace
+        //- map.  Returns the collapse mode that was applied.
+        faceCollapseMode collapseFace
         (
             const face& f,
             pointField& pts,
@@ -519,9 +540,21 @@ private:
             scalar collapseSizeLimitCoeff
         ) const;
 
+        //- Identify the face labels of the deferred collapse faces
+        void deferredCollapseFaceSet
+        (
+            labelList& owner,
+            labelList& neighbour,
+            const HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
+        ) const;
+
         //- Create a polyMesh and check its quality, reports which
         //  elements damage the mesh quality, allowing backtracking.
-        label checkPolyMeshQuality(const pointField& pts) const;
+        label checkPolyMeshQuality
+        (
+            const pointField& pts,
+            const HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
+        ) const;
 
         //- Re-index all of the the Delaunay cells
         void reindexDualVertices(const Map<label>& dualPtIndexMap);
@@ -535,6 +568,7 @@ private:
             wordList& patchNames,
             labelList& patchSizes,
             labelList& patchStarts,
+            const HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces,
             bool includeEmptyPatches = false
         ) const;
 
@@ -569,6 +603,15 @@ private:
             faceList& faces,
             pointField& pts
         ) const;
+
+
+        //- Remove dual cells that are not used by any faces
+        void removeUnusedCells
+        (
+            labelList& owner,
+            labelList& neighbour
+        ) const;
+
 
         //- Disallow default bitwise copy construct
         conformalVoronoiMesh(const conformalVoronoiMesh&);

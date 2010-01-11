@@ -125,9 +125,15 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     Info<< nl << "    Collapsing unnecessary faces" << endl;
 
-    collapseFaces(points);
+    HashSet<labelPair, labelPair::Hash<> > deferredCollapseFaces;
 
-    label nBadQualityFaces = checkPolyMeshQuality(points);
+    collapseFaces(points, deferredCollapseFaces);
+
+    label nBadQualityFaces = checkPolyMeshQuality
+    (
+        points,
+        deferredCollapseFaces
+    );
 
     Info<< "Found " << nBadQualityFaces << " bad quality faces" << endl;
 
@@ -143,8 +149,13 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         patchNames,
         patchSizes,
         patchStarts,
+        deferredCollapseFaces,
         false
     );
+
+    //deferredCollapseFaceSet(owner, neighbour, deferredCollapseFaces);
+
+    removeUnusedCells(owner, neighbour);
 
     removeUnusedPoints(faces, points);
 
@@ -618,7 +629,7 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
                         dualPtIndexMap,
                         targetFaceSize,
                         GREAT
-                    )
+                    ) != fcmNone
                 )
                 {
                     nCollapsedFaces++;
@@ -631,7 +642,11 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
 }
 
 
-void Foam::conformalVoronoiMesh::collapseFaces(pointField& pts)
+void Foam::conformalVoronoiMesh::collapseFaces
+(
+    pointField& pts,
+    HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
+)
 {
     label nCollapsedFaces = 0;
 
@@ -639,7 +654,14 @@ void Foam::conformalVoronoiMesh::collapseFaces(pointField& pts)
     {
         Map<label> dualPtIndexMap;
 
-        nCollapsedFaces = collapseFaces(pts, dualPtIndexMap);
+        deferredCollapseFaces.clear();
+
+        nCollapsedFaces = collapseFaces
+        (
+            pts,
+            dualPtIndexMap,
+            deferredCollapseFaces
+        );
 
         reindexDualVertices(dualPtIndexMap);
 
@@ -648,6 +670,7 @@ void Foam::conformalVoronoiMesh::collapseFaces(pointField& pts)
         if (nCollapsedFaces > 0)
         {
             Info<< "        Collapsed " << nCollapsedFaces << " faces" << endl;
+            // Info<< "dualPtIndexMap" << nl << dualPtIndexMap << endl;
         }
 
     } while (nCollapsedFaces > 0);
@@ -657,7 +680,8 @@ void Foam::conformalVoronoiMesh::collapseFaces(pointField& pts)
 Foam::label Foam::conformalVoronoiMesh::collapseFaces
 (
     pointField& pts,
-    Map<label>& dualPtIndexMap
+    Map<label>& dualPtIndexMap,
+    HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
 ) const
 {
     label nCollapsedFaces = 0;
@@ -715,19 +739,40 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
 
             scalar targetFaceSize = averageAnyCellSize(vA, vB);
 
-            if
+            faceCollapseMode mode = collapseFace
             (
-                collapseFace
-                (
-                    dualFace,
-                    pts,
-                    dualPtIndexMap,
-                    targetFaceSize,
-                    collapseSizeLimitCoeff
-                )
-            )
+                dualFace,
+                pts,
+                dualPtIndexMap,
+                targetFaceSize,
+                collapseSizeLimitCoeff
+            );
+
+            if (mode != fcmNone)
             {
-                nCollapsedFaces++;
+                if (mode == fcmDeferredMultiEdge)
+                {
+                    // Determine the owner and neighbour labels
+
+                    Pair<label> ownAndNei(-1, -1);
+
+                    ownerAndNeighbour
+                    (
+                        vA,
+                        vB,
+                        ownAndNei.first(),
+                        ownAndNei.second()
+                    );
+
+                    // Record the owner and neighbour of this face for a
+                    // deferredMultiEdge collapse
+
+                    deferredCollapseFaces.insert(ownAndNei);
+                }
+                else
+                {
+                    nCollapsedFaces++;
+                }
             }
         }
     }
@@ -736,7 +781,8 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
 }
 
 
-bool Foam::conformalVoronoiMesh::collapseFace
+Foam::conformalVoronoiMesh::faceCollapseMode
+Foam::conformalVoronoiMesh::collapseFace
 (
     const face& f,
     pointField& pts,
@@ -745,7 +791,8 @@ bool Foam::conformalVoronoiMesh::collapseFace
     scalar collapseSizeLimitCoeff
 ) const
 {
-    bool limitToQuadsOrTris = false;
+    bool limitToQuadsOrTris = true;
+    bool allowEarlyCollapseToPoint = true;
 
     const vector fC = f.centre(pts);
 
@@ -849,7 +896,7 @@ bool Foam::conformalVoronoiMesh::collapseFace
             << "No collapse axis found for face, not collapsing."
             << endl;
 
-        return false;
+        return fcmNone;
     }
 
     // The signed distance along the collapse axis passing through the
@@ -949,6 +996,16 @@ bool Foam::conformalVoronoiMesh::collapseFace
 
         if
         (
+            allowEarlyCollapseToPoint
+         && (d.last() - d.first())
+          < targetFaceSize
+           *0.2*cvMeshControls().maxCollapseFaceToPointSideLengthCoeff()
+        )
+        {
+            mode = fcmPoint;
+        }
+        else if
+        (
             (dNeg.last() < guardFraction*dNeg.first())
          && (dPos.first() > guardFraction*dPos.last())
         )
@@ -967,108 +1024,156 @@ bool Foam::conformalVoronoiMesh::collapseFace
 
             mode = fcmPoint;
         }
-        // else (what to check? anything?)
-        // {
-        //     // Alternatively, do not topologically collapse face, but push
-        //     // all points onto a line, so that the face area is zero and
-        //     // either:
-        //     //   + do not create it when dualising.  This may damage the edge
-        //     //     addressing of the mesh;
-        //     //   + split the face into two (or more?) edges later,
-        //     //     sacrificing topological consistency with the Delaunay.
+        else
+        {
+            // Alternatively, do not topologically collapse face here,
+            // but push all points onto a line, so that the face area
+            // is zero and then collapse to a string of edges later.
+            // The fcmDeferredMultiEdge collapse must be performed at
+            // the polyMesh stage as this type of collapse can't be
+            // performed and still maintain topological dual
+            // consistency with the Delaunay structure
 
-        //     // Note: The fcmDeferredMultiEdge collapse must be performed at
-        //     // the polyMesh stage as this type of collapse can't be performed
-        //     // and still maintain topological dual consistency with the
-        //     // Delaunay structure
-
-        //     mode = fcmDeferredMultiEdge;
-        // }
+            mode = fcmDeferredMultiEdge;
+        }
     }
 
-    if (mode == fcmEdge)
+    switch (mode)
     {
-        // Arbitrarily choosing the most distant point as the index to
-        // collapse to.
-
-        label collapseToPtI = facePtsNeg.first();
-
-        forAll(facePtsNeg, fPtI)
+        case fcmEdge:
         {
-            dualPtIndexMap.insert(facePtsNeg[fPtI], collapseToPtI);
+            // Arbitrarily choosing the most distant point as the index to
+            // collapse to.
+
+            label collapseToPtI = facePtsNeg.first();
+
+            forAll(facePtsNeg, fPtI)
+            {
+                dualPtIndexMap.insert(facePtsNeg[fPtI], collapseToPtI);
+            }
+
+            pts[collapseToPtI] =
+                 collapseAxis*(sum(dNeg)/dNeg.size() - dShift) + fC;
+
+            collapseToPtI = facePtsPos.last();
+
+            forAll(facePtsPos, fPtI)
+            {
+                dualPtIndexMap.insert(facePtsPos[fPtI], collapseToPtI);
+            }
+
+            pts[collapseToPtI] =
+                collapseAxis*(sum(dPos)/dPos.size() - dShift) + fC;
+
+            break;
         }
 
-        pts[collapseToPtI] = collapseAxis*(sum(dNeg)/dNeg.size() - dShift) + fC;
-
-        collapseToPtI = facePtsPos.last();
-
-        forAll(facePtsPos, fPtI)
+        case fcmPoint:
         {
-            dualPtIndexMap.insert(facePtsPos[fPtI], collapseToPtI);
+            // Arbitrarily choosing the first point as the index to
+            // collapse to.  Collapse to the face centre.
+
+            label collapseToPtI = facePts.first();
+
+            forAll(facePts, fPtI)
+            {
+                dualPtIndexMap.insert(facePts[fPtI], collapseToPtI);
+            }
+
+            pts[collapseToPtI] = fC;
+
+            break;
         }
 
-        pts[collapseToPtI] = collapseAxis*(sum(dPos)/dPos.size() - dShift) + fC;
+        case fcmDeferredMultiEdge:
+        {
+            forAll(facePts, fPtI)
+            {
+                pts[facePts[fPtI]] = collapseAxis*(d[fPtI] - dShift) + fC;
+            }
+
+            break;
+        }
+
+        case fcmNone:
+        {
+            break;
+        }
     }
-    else if (mode == fcmPoint)
+
+    // if (mode == fcmDeferredMultiEdge)
+    // // if (mode != fcmNone)
+    // {
+    //     // Output face and collapse axis for visualisation
+
+    //     Info<< "# Aspect ratio = " << aspectRatio << nl
+    //         << "# determinant = " << detJ << nl
+    //         << "# collapseAxis = " << collapseAxis << nl
+    //         << "# mode = " << mode << nl
+    //         << "# facePts = " << facePts << nl
+    //     //        << "# eigenvalues = " << eVals
+    //         << endl;
+
+    //     scalar scale = 2.0*mag(fC - pts[f[0]]);
+
+    //     meshTools::writeOBJ(Info, fC);
+    //     meshTools::writeOBJ(Info, fC + scale*collapseAxis);
+
+    //     Info<< "f 1 2" << endl;
+
+    //     forAll(f, fPtI)
+    //     {
+    //         meshTools::writeOBJ(Info, pts[f[fPtI]]);
+    //     }
+
+    //     Info<< "f";
+
+    //     forAll(f, fPtI)
+    //     {
+    //         Info << " " << fPtI + 3;
+    //     }
+
+    //     Info<< nl << "# " << d << endl;
+
+    //     Info<< "# " << d.first() << " " << d.last() << endl;
+
+    //     forAll(d, dI)
+    //     {
+    //         meshTools::writeOBJ(Info, fC + (d[dI] - dShift)*collapseAxis);
+    //     }
+
+    //     Info<< endl;
+    // }
+
+    return mode;
+}
+
+
+void Foam::conformalVoronoiMesh::deferredCollapseFaceSet
+(
+    labelList& owner,
+    labelList& neighbour,
+    const HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
+) const
+{
+    DynamicList<label> faceLabels;
+
+    forAll (neighbour, nI)
     {
-        // Arbitrarily choosing the first point as the index to
-        // collapse to.  Collapse to the face centre.
-
-        label collapseToPtI = facePts.first();
-
-        forAll(facePts, fPtI)
+        if (deferredCollapseFaces.found(Pair<label>(owner[nI], neighbour[nI])))
         {
-            dualPtIndexMap.insert(facePts[fPtI], collapseToPtI);
+            faceLabels.append(nI);
         }
-
-        pts[collapseToPtI] = fC;
     }
 
-    // // Output face and collapse axis for visualisation
-
-    // Info<< "# Aspect ratio = " << aspectRatio << nl
-    //     << "# determinant = " << detJ << nl
-    //     << "# collapseAxis = " << collapseAxis << nl
-    // //        << "# eigenvalues = " << eVals
-    //     << endl;
-
-    // scalar scale = 2.0*mag(fC - pts[f[0]]);
-
-    // meshTools::writeOBJ(Info, fC);
-    // meshTools::writeOBJ(Info, fC + scale*collapseAxis);
-
-    // Info<< "f 1 2" << endl;
-
-    // forAll(f, fPtI)
-    // {
-    //     meshTools::writeOBJ(Info, pts[f[fPtI]]);
-    // }
-
-    // Info<< "f";
-
-    // forAll(f, fPtI)
-    // {
-    //     Info << " " << fPtI + 3;
-    // }
-
-    // Info<< nl << "# " << d << endl;
-
-    // Info<< "# " << d.first() << " " << d.last() << endl;
-
-    // forAll(d, dI)
-    // {
-    //     meshTools::writeOBJ(Info, fC + (d[dI] - dShift)*collapseAxis);
-    // }
-
-    // Info<< endl;
-
-    return (mode != fcmNone);
+    Info<< "facesToCollapse" << nl << faceLabels << endl;
 }
 
 
 Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
 (
-    const pointField& pts
+    const pointField& pts,
+    const HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
 ) const
 {
     faceList faces;
@@ -1090,13 +1195,16 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
         patchNames,
         patchSizes,
         patchStarts,
+        deferredCollapseFaces,
         false
     );
+
+    removeUnusedCells(owner, neighbour);
 
     IOobject io
     (
         "cvMesh_temporary",
-        runTime_.constant(),
+        runTime_.timeName(),
         runTime_,
         IOobject::NO_READ,
         IOobject::NO_WRITE
@@ -1138,6 +1246,18 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
         cvMeshControls().cvMeshDict().subDict("meshQualityControls"),
         wrongFaces
     );
+
+    const cellList& cells = pMesh.cells();
+
+    forAll(cells, cI)
+    {
+        if (cells[cI].size() < 4)
+        {
+            Info<< "cell " << cI
+                << " has " << cells[cI].size() << " faces."
+                << endl;
+        }
+    }
 
     // forAllConstIter(labelHashSet, wrongFaces, iter)
     // {
@@ -1185,6 +1305,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     wordList& patchNames,
     labelList& patchSizes,
     labelList& patchStarts,
+    const HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces,
     bool includeEmptyPatches
 ) const
 {
@@ -1229,53 +1350,26 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
             if (newDualFace.size() >= 3)
             {
-                label dcA = vA->index();
+                label own = -1;
+                label nei = -1;
 
-                if (!vA->internalOrBoundaryPoint())
+                if (ownerAndNeighbour(vA, vB, own, nei))
                 {
-                    dcA = -1;
+                    reverse(newDualFace);
                 }
 
-                label dcB = vB->index();
-
-                if (!vB->internalOrBoundaryPoint())
+                if (deferredCollapseFaces.found(Pair<label>(own, nei)))
                 {
-                    dcB = -1;
+                    // Deferred collapse face, skip
+
+                    continue;
                 }
 
-                label dcOwn = -1;
-                label dcNei = -1;
-
-                if (dcA == -1 && dcB == -1)
+                if (nei == -1)
                 {
-                    FatalErrorIn("calcDualMesh")
-                        << "Attempting to create a face joining "
-                        << "two unindexed dual cells "
-                        << exit(FatalError);
-                }
-                else if (dcA == -1 || dcB == -1)
-                {
-                    // boundary face, find which is the owner
-
-                    if (dcA == -1)
-                    {
-                        dcOwn = dcB;
-
-                        // reverse face order to correctly orientate normal
-                        reverse(newDualFace);
-                    }
-                    else
-                    {
-                        dcOwn = dcA;
-                    }
-
-                    // Find which patch this face is on by finding the
-                    // intersection with the surface of the Delaunay edge
-                    // generating the face and identify the region of the
-                    // intersection.
+                    // boundary face
 
                     point ptA = topoint(vA->point());
-
                     point ptB = topoint(vB->point());
 
                     label patchIndex = geometryToConformTo_.findPatch(ptA, ptB);
@@ -1284,44 +1378,137 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                     {
                         patchIndex = patchNames.size() - 1;
 
-                        WarningIn("Foam::conformalVoronoiMesh::calcDualMesh")
-                            << "Dual face found between Dv pair " << nl
-                            << "    " << ptA << nl
-                            << "    " << ptB << nl
-                            << "    that is not on a surface patch. Adding to "
-                            << patchNames[patchIndex]
-                            << endl;
+                        // WarningIn("Foam::conformalVoronoiMesh::calcDualMesh")
+                        //     << "Dual face found between Dv pair " << nl
+                        //     << "    " << ptA << nl
+                        //     << "    " << ptB << nl
+                        //     << "    that is not on a surface patch. Adding to "
+                        //     << patchNames[patchIndex]
+                        //     << endl;
                     }
 
                     patchFaces[patchIndex].append(newDualFace);
-                    patchOwners[patchIndex].append(dcOwn);
+                    patchOwners[patchIndex].append(own);
                 }
                 else
                 {
-                    // internal face, find the lower cell to be the owner
-
-                    if (dcB > dcA)
-                    {
-                        dcOwn = dcA;
-                        dcNei = dcB;
-                    }
-                    else
-                    {
-                        dcOwn = dcB;
-                        dcNei = dcA;
-
-                        // reverse face order to correctly orientate normal
-                        reverse(newDualFace);
-                    }
+                    // internal face
 
                     faces[dualFaceI] = newDualFace;
-
-                    owner[dualFaceI] = dcOwn;
-
-                    neighbour[dualFaceI] = dcNei;
+                    owner[dualFaceI] = own;
+                    neighbour[dualFaceI] = nei;
 
                     dualFaceI++;
                 }
+
+                // --> OLD, FOR REFERENCE
+                // label dualCellIndexA = vA->index();
+
+                // if (!vA->internalOrBoundaryPoint())
+                // {
+                //     dualCellIndexA = -1;
+                // }
+
+                // label dualCellIndexB = vB->index();
+
+                // if (!vB->internalOrBoundaryPoint())
+                // {
+                //     dualCellIndexB = -1;
+                // }
+
+                // label own = -1;
+                // label nei = -1;
+
+                // if (dualCellIndexA == -1 && dualCellIndexB == -1)
+                // {
+                //     FatalErrorIn
+                //     (
+                //         "void Foam::conformalVoronoiMesh::"
+                //         "createFacesOwnerNeighbourAndPatches"
+                //         "("
+                //             "faceList& faces,"
+                //             "labelList& owner,"
+                //             "labelList& neighbour,"
+                //             "wordList& patchNames,"
+                //             "labelList& patchSizes,"
+                //             "labelList& patchStarts,"
+                //             "bool includeEmptyPatches"
+                //         ") const"
+                //     )
+                //         << "Attempting to create a face joining "
+                //         << "two unindexed dual cells "
+                //         << exit(FatalError);
+                // }
+                // else if (dualCellIndexA == -1 || dualCellIndexB == -1)
+                // {
+                //     // boundary face, find which is the owner
+
+                //     if (dualCellIndexA == -1)
+                //     {
+                //         own = dualCellIndexB;
+
+                //         // reverse face order to correctly orientate normal
+                //         reverse(newDualFace);
+                //     }
+                //     else
+                //     {
+                //         own = dualCellIndexA;
+                //     }
+
+                //     // Find which patch this face is on by finding the
+                //     // intersection with the surface of the Delaunay edge
+                //     // generating the face and identify the region of the
+                //     // intersection.
+
+                //     point ptA = topoint(vA->point());
+
+                //     point ptB = topoint(vB->point());
+
+                //     label patchIndex = geometryToConformTo_.findPatch(ptA, ptB);
+
+                //     if (patchIndex == -1)
+                //     {
+                //         patchIndex = patchNames.size() - 1;
+
+                //         // WarningIn("Foam::conformalVoronoiMesh::calcDualMesh")
+                //         //     << "Dual face found between Dv pair " << nl
+                //         //     << "    " << ptA << nl
+                //         //     << "    " << ptB << nl
+                //         //     << "    that is not on a surface patch. Adding to "
+                //         //     << patchNames[patchIndex]
+                //         //     << endl;
+                //     }
+
+                //     patchFaces[patchIndex].append(newDualFace);
+                //     patchOwners[patchIndex].append(own);
+                // }
+                // else
+                // {
+                //     // internal face, find the lower cell to be the owner
+
+                //     if (dualCellIndexB > dualCellIndexA)
+                //     {
+                //         own = dualCellIndexA;
+                //         nei = dualCellIndexB;
+                //     }
+                //     else
+                //     {
+                //         own = dualCellIndexB;
+                //         nei = dualCellIndexA;
+
+                //         // reverse face order to correctly orientate normal
+                //         reverse(newDualFace);
+                //     }
+
+                //     faces[dualFaceI] = newDualFace;
+
+                //     owner[dualFaceI] = own;
+
+                //     neighbour[dualFaceI] = nei;
+
+                //     dualFaceI++;
+                // }
+                // <-- OLD, FOR REFERENCE
             }
         }
     }
@@ -1577,9 +1764,8 @@ void Foam::conformalVoronoiMesh::removeUnusedPoints
 
     inplaceReorder(oldToNew, pts);
 
-    Info<< "        Removing "
-        << pts.size() - pointI
-        << " unused points" << endl;
+    Info<< "        Removing " << pts.size() - pointI << " unused points"
+        << endl;
 
     pts.setSize(pointI);
 
@@ -1588,6 +1774,64 @@ void Foam::conformalVoronoiMesh::removeUnusedPoints
     forAll(faces, fI)
     {
         inplaceRenumber(oldToNew, faces[fI]);
+    }
+}
+
+
+void Foam::conformalVoronoiMesh::removeUnusedCells
+(
+    labelList& owner,
+    labelList& neighbour
+) const
+{
+    Info<< nl << "    Removing unused cells after filtering" << endl;
+
+    PackedBoolList cellUsed(max(max(owner), max(neighbour)), false);
+
+    // Scan all faces to find all of the cells that are used
+
+    forAll(owner, oI)
+    {
+        cellUsed[owner[oI]] = true;
+    }
+
+    forAll(neighbour, nI)
+    {
+        cellUsed[neighbour[nI]] = true;
+    }
+
+    // Find all of the unused cells, create a list of them, then
+    // subtract one from each owner and neighbour entry for each of
+    // the unused cell indices that it is above.
+
+    DynamicList<label> unusedCells;
+
+    forAll(cellUsed, cUI)
+    {
+        if (cellUsed[cUI] == false)
+        {
+            unusedCells.append(cUI);
+        }
+    }
+
+    if (unusedCells.size() > 0)
+    {
+        Info<< "        Removing " << unusedCells.size() <<  " unused cells "
+            << endl;
+
+        forAll(owner, oI)
+        {
+            label& o = owner[oI];
+
+            o -= findLower(unusedCells, o) + 1;
+        }
+
+        forAll(neighbour, nI)
+        {
+            label& n = neighbour[nI];
+
+            n -= findLower(unusedCells, n) + 1;
+        }
     }
 }
 
