@@ -109,29 +109,48 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     points.setSize(dualVertI);
 
-    // Merge close points
+    // No-risk face filtering to get rid of zero area faces and
+    // establish if the mesh can be produced at all to the
+    // specified criteria
 
     Info<< nl << "    Merging close points" << endl;
 
     mergeCloseDualVertices(points);
 
-    // Smooth the surface of the mesh
+    label nInitialBadQualityFaces = checkPolyMeshQuality(points);
 
-    Info<< nl << "    Smoothing surface" << endl;
-
-    smoothSurface(points);
-
-    // Collapse faces throughout the mesh
-
-    Info<< nl << "    Collapsing unnecessary faces" << endl;
+    Info<< "Initial check before face collapse, found "
+        << nInitialBadQualityFaces << " bad quality faces"
+        << endl;
 
     HashSet<labelPair, labelPair::Hash<> > deferredCollapseFaces;
 
-    collapseFaces(points, deferredCollapseFaces);
+    if (nInitialBadQualityFaces == 0)
+    {
+        // Risky and undo-able face filtering to reduce the face count
+        // as much as possible staying within the specified criteria
 
-    label nBadQualityFaces = checkPolyMeshQuality(points);
+        Info<< nl << "    Smoothing surface" << endl;
 
-    Info<< "Found " << nBadQualityFaces << " bad quality faces" << endl;
+        smoothSurface(points);
+
+        Info<< nl << "    Collapsing unnecessary faces" << endl;
+
+        collapseFaces(points, deferredCollapseFaces);
+
+        label nBadQualityFaces = checkPolyMeshQuality(points);
+
+        Info<< "Found " << nBadQualityFaces << " bad quality faces" << endl;
+    }
+    else
+    {
+        Info<< "A mesh could not be produced to satisfy the specified quality "
+            << "criteria.  The quality and the surface conformation controls "
+            << "can be altered and the internalDelaunayVertices read in to try "
+            << "again, or more cell size resolution and motion iterations can "
+            << "be applied in areas where problems are occurring."
+            << endl;
+    }
 
     // Final dual face and owner neighbour construction
 
@@ -148,7 +167,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         false
     );
 
-    deferredCollapseFaceSet(owner, neighbour, deferredCollapseFaces);
+    // deferredCollapseFaceSet(owner, neighbour, deferredCollapseFaces);
 
     removeUnusedCells(owner, neighbour);
 
@@ -372,8 +391,7 @@ void Foam::conformalVoronoiMesh::mergeCloseDualVertices(const pointField& pts)
 
         if (nPtsMerged > 0)
         {
-            Info<< "        Merged " << nPtsMerged << " points "
-                << "closenessTolerance HARDCODED " << endl;
+            Info<< "        Merged " << nPtsMerged << " points " << endl;
         }
 
         reindexDualVertices(dualPtIndexMap);
