@@ -550,11 +550,7 @@ private:
 
         //- Create a polyMesh and check its quality, reports which
         //  elements damage the mesh quality, allowing backtracking.
-        label checkPolyMeshQuality
-        (
-            const pointField& pts,
-            const HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
-        ) const;
+        label checkPolyMeshQuality(const pointField& pts) const;
 
         //- Re-index all of the the Delaunay cells
         void reindexDualVertices(const Map<label>& dualPtIndexMap);
@@ -568,7 +564,6 @@ private:
             wordList& patchNames,
             labelList& patchSizes,
             labelList& patchStarts,
-            const HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces,
             bool includeEmptyPatches = false
         ) const;
 

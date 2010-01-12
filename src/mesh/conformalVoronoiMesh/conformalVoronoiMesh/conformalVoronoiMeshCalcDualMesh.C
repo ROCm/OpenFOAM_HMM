@@ -129,11 +129,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     collapseFaces(points, deferredCollapseFaces);
 
-    label nBadQualityFaces = checkPolyMeshQuality
-    (
-        points,
-        deferredCollapseFaces
-    );
+    label nBadQualityFaces = checkPolyMeshQuality(points);
 
     Info<< "Found " << nBadQualityFaces << " bad quality faces" << endl;
 
@@ -149,11 +145,10 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         patchNames,
         patchSizes,
         patchStarts,
-        deferredCollapseFaces,
         false
     );
 
-    //deferredCollapseFaceSet(owner, neighbour, deferredCollapseFaces);
+    deferredCollapseFaceSet(owner, neighbour, deferredCollapseFaces);
 
     removeUnusedCells(owner, neighbour);
 
@@ -620,17 +615,16 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
                 // surface, so set collapseSizeLimitCoeff to GREAT to
                 // allow collapse of all faces
 
-                if
+                faceCollapseMode mode = collapseFace
                 (
-                    collapseFace
-                    (
-                        dualFace,
-                        pts,
-                        dualPtIndexMap,
-                        targetFaceSize,
-                        GREAT
-                    ) != fcmNone
-                )
+                    dualFace,
+                    pts,
+                    dualPtIndexMap,
+                    targetFaceSize,
+                    GREAT
+                );
+
+                if (mode == fcmPoint || mode == fcmEdge)
                 {
                     nCollapsedFaces++;
                 }
@@ -792,6 +786,7 @@ Foam::conformalVoronoiMesh::collapseFace
 ) const
 {
     bool limitToQuadsOrTris = true;
+
     bool allowEarlyCollapseToPoint = true;
 
     const vector fC = f.centre(pts);
@@ -1087,10 +1082,14 @@ Foam::conformalVoronoiMesh::collapseFace
 
         case fcmDeferredMultiEdge:
         {
-            forAll(facePts, fPtI)
-            {
-                pts[facePts[fPtI]] = collapseAxis*(d[fPtI] - dShift) + fC;
-            }
+            // forAll(facePts, fPtI)
+            // {
+            //     label ptI = facePts[fPtI];
+
+            //     pts[ptI] = collapseAxis*(d[fPtI] - dShift) + fC;
+
+            //     dualPtIndexMap.insert(ptI, ptI);
+            // }
 
             break;
         }
@@ -1102,7 +1101,7 @@ Foam::conformalVoronoiMesh::collapseFace
     }
 
     // if (mode == fcmDeferredMultiEdge)
-    // // if (mode != fcmNone)
+    // if (mode != fcmNone)
     // {
     //     // Output face and collapse axis for visualisation
 
@@ -1172,8 +1171,7 @@ void Foam::conformalVoronoiMesh::deferredCollapseFaceSet
 
 Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
 (
-    const pointField& pts,
-    const HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
+    const pointField& pts
 ) const
 {
     faceList faces;
@@ -1195,7 +1193,6 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
         patchNames,
         patchSizes,
         patchStarts,
-        deferredCollapseFaces,
         false
     );
 
@@ -1305,7 +1302,6 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     wordList& patchNames,
     labelList& patchSizes,
     labelList& patchStarts,
-    const HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces,
     bool includeEmptyPatches
 ) const
 {
@@ -1356,13 +1352,6 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                 if (ownerAndNeighbour(vA, vB, own, nei))
                 {
                     reverse(newDualFace);
-                }
-
-                if (deferredCollapseFaces.found(Pair<label>(own, nei)))
-                {
-                    // Deferred collapse face, skip
-
-                    continue;
                 }
 
                 if (nei == -1)
