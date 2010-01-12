@@ -123,9 +123,18 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         << nInitialBadQualityFaces << " bad quality faces"
         << endl;
 
+    if (nInitialBadQualityFaces > 0)
+    {
+        Info<< "A mesh could not be produced to satisfy the specified quality "
+            << "criteria.  The quality and the surface conformation controls "
+            << "can be altered and the internalDelaunayVertices read in to try "
+            << "again, or more cell size resolution and motion iterations can "
+            << "be applied in areas where problems are occurring."
+            << endl;
+    }
+
     HashSet<labelPair, labelPair::Hash<> > deferredCollapseFaces;
 
-    if (nInitialBadQualityFaces == 0)
     {
         // Risky and undo-able face filtering to reduce the face count
         // as much as possible staying within the specified criteria
@@ -141,15 +150,6 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         label nBadQualityFaces = checkPolyMeshQuality(points);
 
         Info<< "Found " << nBadQualityFaces << " bad quality faces" << endl;
-    }
-    else
-    {
-        Info<< "A mesh could not be produced to satisfy the specified quality "
-            << "criteria.  The quality and the surface conformation controls "
-            << "can be altered and the internalDelaunayVertices read in to try "
-            << "again, or more cell size resolution and motion iterations can "
-            << "be applied in areas where problems are occurring."
-            << endl;
     }
 
     // Final dual face and owner neighbour construction

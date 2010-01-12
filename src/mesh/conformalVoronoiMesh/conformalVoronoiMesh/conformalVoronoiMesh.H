@@ -599,14 +599,12 @@ private:
             pointField& pts
         ) const;
 
-
         //- Remove dual cells that are not used by any faces
         void removeUnusedCells
         (
             labelList& owner,
             labelList& neighbour
         ) const;
-
 
         //- Disallow default bitwise copy construct
         conformalVoronoiMesh(const conformalVoronoiMesh&);
