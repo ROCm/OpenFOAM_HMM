@@ -36,6 +36,7 @@ Description
 
 #include <CGAL/Triangulation_3.h>
 #include "indexedVertex.H"
+#include "scalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,7 +44,7 @@ namespace CGAL
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class indexedCell Declaration
+                          Class indexedCell Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Gt, class Cb=CGAL::Triangulation_cell_base_3<Gt> >
@@ -54,19 +55,14 @@ class indexedCell
     // Private data
 
         //- The index for this tetrahedral cell
-        //  -1: tetrahedral and changed and associated data needs updating
-        // >=0: index of cells, set by external update algorithm
         int index_;
+
+        //- The applicable fraction of the face filtering mechanism
+        //  controls
+        Foam::scalar filterLimit_;
 
 
 public:
-
-    enum cellTypes
-    {
-        ctUnchanged           = 0,
-        ctChanged             = -1,
-        ctSaveChanged         = -2
-    };
 
     typedef typename Cb::Vertex_handle                   Vertex_handle;
     typedef typename Cb::Cell_handle                     Cell_handle;
@@ -82,8 +78,10 @@ public:
     indexedCell()
     :
         Cb(),
-        index_(ctChanged)
+        index_(-1),
+        filterLimit_(1.0)
     {}
+
 
     indexedCell
     (
@@ -91,8 +89,10 @@ public:
     )
     :
         Cb(v0, v1, v2, v3),
-        index_(ctChanged)
+        index_(-1),
+        filterLimit_(1.0)
     {}
+
 
     indexedCell
     (
@@ -107,38 +107,32 @@ public:
     )
     :
         Cb(v0, v1, v2, v3, n0, n1, n2, n3),
-        index_(ctChanged)
+        index_(-1),
+        filterLimit_(1.0)
     {}
 
-    void set_vertex(int i, Vertex_handle v)
-    {
-        index_ = ctChanged;
-        Cb::set_vertex(i, v);
-    }
-
-    void set_vertices()
-    {
-        index_ = ctChanged;
-        Cb::set_vertices();
-    }
-
-    void set_vertices
-    (
-        Vertex_handle v0, Vertex_handle v1, Vertex_handle v2, Vertex_handle v3
-    )
-    {
-        index_ = ctChanged;
-        Cb::set_vertices(v0, v1, v2, v3);
-    }
 
     int& cellIndex()
     {
         return index_;
     }
 
+
     int cellIndex() const
     {
         return index_;
+    }
+
+
+    inline Foam::scalar& filterLimit()
+    {
+        return filterLimit_;
+    }
+
+
+    inline Foam::scalar filterLimit() const
+    {
+        return filterLimit_;
     }
 };
 

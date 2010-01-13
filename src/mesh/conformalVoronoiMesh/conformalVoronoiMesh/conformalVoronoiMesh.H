@@ -357,6 +357,14 @@ private:
             const Triangulation::Finite_edges_iterator& eit
         ) const;
 
+        //- Finds the minimum filterLimit of the dual vertices
+        //  (Delaunay cells) that form the dual face produced by the
+        //  supplied edge
+        scalar minFilterLimit
+        (
+            const Triangulation::Finite_edges_iterator& eit
+        ) const;
+
         //- Determines the owner and neighbour labels for dual cells
         //  corresponding to the dual face formed by the supplied
         //  Delaunay vertices.  If the dual face is a boundary face
@@ -551,6 +559,10 @@ private:
         //- Create a polyMesh and check its quality, reports which
         //  elements damage the mesh quality, allowing backtracking.
         label checkPolyMeshQuality(const pointField& pts) const;
+
+        //- Index all of the the Delaunay cells and calculate their
+        //- dual points
+        void indexDualVertices(pointField& pts);
 
         //- Re-index all of the the Delaunay cells
         void reindexDualVertices(const Map<label>& dualPtIndexMap);

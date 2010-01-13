@@ -1030,6 +1030,46 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
 }
 
 
+Foam::scalar Foam::conformalVoronoiMesh::minFilterLimit
+(
+    const Triangulation::Finite_edges_iterator& eit
+) const
+{
+    Cell_circulator ccStart = incident_cells(*eit);
+    Cell_circulator cc = ccStart;
+
+    scalar minFilterLimit = GREAT;
+
+    do
+    {
+        if (cc->cellIndex() < 0)
+        {
+            Cell_handle c = eit->first;
+            Vertex_handle vA = c->vertex(eit->second);
+            Vertex_handle vB = c->vertex(eit->third);
+
+            FatalErrorIn("Foam::conformalVoronoiMesh::buildDualFace")
+                << "Dual face uses circumcenter defined by a "
+                << "Delaunay tetrahedron with no internal "
+                << "or boundary points.  Defining Delaunay edge ends: "
+                << topoint(vA->point()) << " "
+                << topoint(vB->point()) << nl
+                << exit(FatalError);
+        }
+
+        if (cc->filterLimit() < minFilterLimit)
+        {
+            minFilterLimit = cc->filterLimit();
+        }
+
+        cc++;
+
+    } while (cc != ccStart);
+
+    return minFilterLimit;
+}
+
+
 bool Foam::conformalVoronoiMesh::ownerAndNeighbour
 (
     Vertex_handle vA,

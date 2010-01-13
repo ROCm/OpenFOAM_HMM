@@ -76,52 +76,27 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         }
     }
 
-    // Indexing Delaunay cells, which are the dual vertices
+    indexDualVertices(points);
 
-    label dualVertI = 0;
-
-    points.setSize(number_of_cells());
-
-    for
-    (
-        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
-        cit != finite_cells_end();
-        ++cit
-    )
     {
-        if
-        (
-            cit->vertex(0)->internalOrBoundaryPoint()
-         || cit->vertex(1)->internalOrBoundaryPoint()
-         || cit->vertex(2)->internalOrBoundaryPoint()
-         || cit->vertex(3)->internalOrBoundaryPoint()
-        )
-        {
-            cit->cellIndex() = dualVertI;
-            points[dualVertI] = topoint(dual(cit));
-            dualVertI++;
-        }
-        else
-        {
-            cit->cellIndex() = -1;
-        }
+        // No-risk face filtering to get rid of zero area faces and
+        // establish if the mesh can be produced at all to the
+        // specified criteria
+
+        Info<< nl << "    Merging close points" << endl;
+
+        // There is no guarantee that a merge of close points is
+        // no-risk, but it seems to work using 1e-4 as the mergeClosenessCoeff
+        mergeCloseDualVertices(points);
     }
-
-    points.setSize(dualVertI);
-
-    // No-risk face filtering to get rid of zero area faces and
-    // establish if the mesh can be produced at all to the
-    // specified criteria
-
-    Info<< nl << "    Merging close points" << endl;
-
-    mergeCloseDualVertices(points);
 
     label nInitialBadQualityFaces = checkPolyMeshQuality(points);
 
     Info<< "Initial check before face collapse, found "
         << nInitialBadQualityFaces << " bad quality faces"
         << endl;
+
+    HashSet<labelPair, labelPair::Hash<> > deferredCollapseFaces;
 
     if (nInitialBadQualityFaces > 0)
     {
@@ -132,24 +107,41 @@ void Foam::conformalVoronoiMesh::calcDualMesh
             << "be applied in areas where problems are occurring."
             << endl;
     }
-
-    HashSet<labelPair, labelPair::Hash<> > deferredCollapseFaces;
-
+    else
     {
-        // Risky and undo-able face filtering to reduce the face count
-        // as much as possible staying within the specified criteria
+        label nBadQualityFaces = 0;
 
-        Info<< nl << "    Smoothing surface" << endl;
+        do
+        {
+            // Reindexing the Delaunay cells and regenerating the
+            // points resets the mesh to the starting condition.
 
-        smoothSurface(points);
+            indexDualVertices(points);
 
-        Info<< nl << "    Collapsing unnecessary faces" << endl;
+            {
+                Info<< nl << "    Merging close points" << endl;
 
-        collapseFaces(points, deferredCollapseFaces);
+                mergeCloseDualVertices(points);
+            }
 
-        label nBadQualityFaces = checkPolyMeshQuality(points);
+            {
+                // Risky and undo-able face filtering to reduce the face count
+                // as much as possible, staying within the specified criteria
 
-        Info<< "Found " << nBadQualityFaces << " bad quality faces" << endl;
+                Info<< nl << "    Smoothing surface" << endl;
+
+                smoothSurface(points);
+
+                Info<< nl << "    Collapsing unnecessary faces" << endl;
+
+                collapseFaces(points, deferredCollapseFaces);
+            }
+
+            nBadQualityFaces = checkPolyMeshQuality(points);
+
+            Info<< "Found " << nBadQualityFaces << " bad quality faces" << endl;
+
+        } while (nBadQualityFaces > 0);
     }
 
     // Final dual face and owner neighbour construction
@@ -485,6 +477,12 @@ void Foam::conformalVoronoiMesh::smoothSurface(pointField& pts)
     {
         label ptI = cit->cellIndex();
 
+        if (cit->filterLimit() < 1.0)
+        {
+            // This vertex has been limited, skip
+            continue;
+        }
+
         // Only cells with indices > -1 are valid
         if (ptI > -1)
         {
@@ -577,6 +575,14 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
             if (dualFace.size() < 3)
             {
                 // This face has been collapsed already
+                continue;
+            }
+
+            scalar minFL = minFilterLimit(eit);
+
+            if (minFL < 1.0)
+            {
+                // A vertex on this face has been limited, skip
                 continue;
             }
 
@@ -746,6 +752,14 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
             if (dualFace.size() < 3)
             {
                 // This face has been collapsed already
+                continue;
+            }
+
+            scalar minFL = minFilterLimit(eit);
+
+            if (minFL < 1.0)
+            {
+                // A vertex on this face has been limited, skip
                 continue;
             }
 
@@ -1256,30 +1270,137 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     motionSmoother::checkMesh
     (
-        false,
+        false,  // report
         pMesh,
         cvMeshControls().cvMeshDict().subDict("meshQualityControls"),
         wrongFaces
     );
 
+    label nInvalidPolyhedra = 0;
+
     const cellList& cells = pMesh.cells();
 
     forAll(cells, cI)
     {
-        if (cells[cI].size() < 4)
+        if (cells[cI].size() < 4 && cells[cI].size() > 0)
         {
-            Info<< "cell " << cI
-                << " has " << cells[cI].size() << " faces."
-                << endl;
+            // Info<< "cell " << cI << " " << cells[cI]
+            //     << " has " << cells[cI].size() << " faces."
+            //     << endl;
+
+            nInvalidPolyhedra++;
+
+            forAll(cells[cI], cFI)
+            {
+                wrongFaces.insert(cells[cI][cFI]);
+            }
         }
     }
 
+    Info<< "Cells with fewer than 4 faces                              : "
+        << nInvalidPolyhedra << endl;
+
+    PackedBoolList ptToBeLimited(pts.size(), false);
+
+    forAllConstIter(labelHashSet, wrongFaces, iter)
+    {
+        const face f = pMesh.faces()[iter.key()];
+
+        forAll(f, fPtI)
+        {
+            ptToBeLimited[f[fPtI]] = true;
+        }
+    }
+
+    // // Limit connected cells
+
+    // labelHashSet limitCells(pMesh.nCells()/100);
+
+    // const labelListList& ptCells = pMesh.pointCells();
+
     // forAllConstIter(labelHashSet, wrongFaces, iter)
     // {
-    //     label faceI = iter.key();
+    //     const face f = pMesh.faces()[iter.key()];
 
-    //     Info<< faceI << " " << pMesh.faces()[faceI] << endl;
+    //     forAll(f, fPtI)
+    //     {
+    //         label ptI = f[fPtI];
+
+    //         const labelList& pC = ptCells[ptI];
+
+    //         forAll(pC, pCI)
+    //         {
+    //             limitCells.insert(pC[pCI]);
+    //         }
+    //     }
     // }
+
+    // const labelListList& cellPts = pMesh.cellPoints();
+
+    // forAllConstIter(labelHashSet, limitCells, iter)
+    // {
+    //     label cellI = iter.key();
+
+    //     const labelList& cP = cellPts[cellI];
+
+    //     forAll(cP, cPI)
+    //     {
+    //         ptToBeLimited[cP[cPI]] = true;
+    //     }
+    // }
+
+
+    // Limit Delaunay cell filter values
+
+    for
+    (
+        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+        cit != finite_cells_end();
+        ++cit
+    )
+    {
+        label cI = cit->cellIndex();
+
+        if (cI >= 0)
+        {
+            if (ptToBeLimited[cI] == true)
+            {
+                cit->filterLimit() *= 0.75;
+            }
+        }
+    }
+
+    // Determine the minimum minFilterLimit
+
+    scalar minMinFilterLimit = GREAT;
+
+    for
+    (
+        Triangulation::Finite_edges_iterator eit = finite_edges_begin();
+        eit != finite_edges_end();
+        ++eit
+    )
+    {
+        Cell_handle c = eit->first;
+        Vertex_handle vA = c->vertex(eit->second);
+        Vertex_handle vB = c->vertex(eit->third);
+
+        if
+        (
+            vA->internalOrBoundaryPoint()
+         || vB->internalOrBoundaryPoint()
+        )
+        {
+            scalar minFL = minFilterLimit(eit);
+
+            if (minFL < minMinFilterLimit)
+            {
+                minMinFilterLimit = minFL;
+            }
+        }
+    }
+
+    Info<< "minMinFilterLimit " << minMinFilterLimit << endl;
 
     return wrongFaces.size();
 
@@ -1289,6 +1410,46 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
     //     wrongFaces.size(),
     //     sumOp<label>()
     // );
+}
+
+
+void Foam::conformalVoronoiMesh::indexDualVertices
+(
+    pointField& pts
+)
+{
+    // Indexing Delaunay cells, which are the dual vertices
+
+    label dualVertI = 0;
+
+    pts.setSize(number_of_cells());
+
+    for
+    (
+        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+        cit != finite_cells_end();
+        ++cit
+    )
+    {
+        if
+        (
+            cit->vertex(0)->internalOrBoundaryPoint()
+         || cit->vertex(1)->internalOrBoundaryPoint()
+         || cit->vertex(2)->internalOrBoundaryPoint()
+         || cit->vertex(3)->internalOrBoundaryPoint()
+        )
+        {
+            cit->cellIndex() = dualVertI;
+            pts[dualVertI] = topoint(dual(cit));
+            dualVertI++;
+        }
+        else
+        {
+            cit->cellIndex() = -1;
+        }
+    }
+
+    pts.setSize(dualVertI);
 }
 
 

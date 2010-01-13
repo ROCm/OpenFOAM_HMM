@@ -35,7 +35,6 @@ Description
 #define indexedVertex_H
 
 #include <CGAL/Triangulation_3.h>
-#include "List.H"
 #include "tensor.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -44,7 +43,7 @@ namespace CGAL
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class indexedVertex Declaration
+                         Class indexedVertex Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Gt, class Vb=CGAL::Triangulation_vertex_base_3<Gt> >
@@ -91,6 +90,7 @@ public:
         typedef indexedVertex<Gt,Vb2>                           Other;
     };
 
+
     indexedVertex()
     :
         Vb(),
@@ -99,6 +99,7 @@ public:
         alignment_(),
         targetCellSize_(0.0)
     {}
+
 
     indexedVertex(const Point& p)
     :
@@ -109,6 +110,7 @@ public:
         targetCellSize_(0.0)
     {}
 
+
     indexedVertex(const Point& p, Cell_handle f)
     :
         Vb(f, p),
@@ -117,6 +119,7 @@ public:
         alignment_(),
         targetCellSize_(0.0)
     {}
+
 
     indexedVertex(Cell_handle f)
     :
@@ -133,45 +136,54 @@ public:
         return index_;
     }
 
+
     int index() const
     {
         return index_;
     }
+
 
     int& type()
     {
         return type_;
     }
 
+
     int type() const
     {
         return type_;
     }
+
 
     inline Foam::tensor& alignment()
     {
         return alignment_;
     }
 
+
     inline const Foam::tensor& alignment() const
     {
         return alignment_;
     }
+
 
     inline Foam::scalar& targetCellSize()
     {
         return targetCellSize_;
     }
 
+
     inline Foam::scalar targetCellSize() const
     {
         return targetCellSize_;
     }
 
+
     inline bool uninitialised() const
     {
         return type_ == ptInternalPoint && index_ == ptInternalPoint;
     }
+
 
     //- Is point a far-point
     inline bool farPoint() const
@@ -179,11 +191,13 @@ public:
         return type_ == ptFarPoint;
     }
 
+
     //- Is point internal, i.e. not on boundary
     inline bool internalPoint() const
     {
         return type_ <= ptInternalPoint;
     }
+
 
     //- Set the point to be internal
     inline void setInternal()
@@ -191,11 +205,13 @@ public:
         type_ = ptInternalPoint;
     }
 
+
     //- Is point internal and near the boundary
     inline bool nearBoundary() const
     {
         return type_ == ptNearBoundaryPoint;
     }
+
 
     //- Set the point to be near the boundary
     inline void setNearBoundary()
@@ -209,11 +225,13 @@ public:
         return type_ == ptMirrorPoint;
     }
 
+
     //- Either master or slave of pointPair.
     inline bool pairPoint() const
     {
         return type_ >= 0;
     }
+
 
     //- Master of a pointPair is the lowest numbered one.
     inline bool ppMaster() const
@@ -228,6 +246,7 @@ public:
         }
     }
 
+
     //- Slave of a pointPair is the highest numbered one.
     inline bool ppSlave() const
     {
@@ -241,17 +260,20 @@ public:
         }
     }
 
+
     //- Either original internal point or master of pointPair.
     inline bool internalOrBoundaryPoint() const
     {
         return internalPoint() || ppMaster();
     }
 
+
     //- Is point near the boundary or part of the boundary definition
     inline bool nearOrOnBoundary() const
     {
         return pairPoint() || mirrorPoint() || nearBoundary();
     }
+
 
     //- Do the two given vertices consitute a boundary point-pair
     inline friend bool pointPair
@@ -262,6 +284,7 @@ public:
     {
         return v0.index_ == v1.type_ || v1.index_ == v0.type_;
     }
+
 
     //- Do the three given vertices consitute a boundary triangle
     inline friend bool boundaryTriangle
@@ -275,6 +298,7 @@ public:
             || (v1.pairPoint() && pointPair(v2, v0))
             || (v2.pairPoint() && pointPair(v0, v1));
     }
+
 
     //- Do the three given vertices consitute an outside triangle
     inline friend bool outsideTriangle
