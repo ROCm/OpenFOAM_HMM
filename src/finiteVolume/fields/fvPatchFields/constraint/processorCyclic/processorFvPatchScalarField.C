@@ -24,69 +24,61 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "simpleSplineEdge.H"
-#include "addToRunTimeSelectionTable.H"
+#include "processorFvPatchScalarField.H"
 
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(simpleSplineEdge, 0);
-    addToRunTimeSelectionTable(curvedEdge, simpleSplineEdge, Istream);
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::simpleSplineEdge::simpleSplineEdge
-(
-    const pointField& points,
-    const label start,
-    const label end,
-    const pointField& otherknots
-)
-:
-    curvedEdge(points, start, end),
-    BSpline(knotlist(points, start, end, otherknots))
-{}
-
-
-Foam::simpleSplineEdge::simpleSplineEdge
-(
-    const pointField& points,
-    const label start,
-    const label end,
-    const pointField& otherknots,
-    const vector& fstend,
-    const vector& sndend
-)
-:
-    curvedEdge(points, start, end),
-    BSpline(knotlist(points, start, end, otherknots), fstend, sndend)
-{}
-
-
-Foam::simpleSplineEdge::simpleSplineEdge(const pointField& points, Istream& is)
-:
-    curvedEdge(points, is),
-    BSpline(knotlist(points, start_, end_, pointField(is)))
-{}
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::vector Foam::simpleSplineEdge::position(const scalar mu) const
+template<>
+void processorFvPatchField<scalar>::initInterfaceMatrixUpdate
+(
+    const scalarField& psiInternal,
+    scalarField&,
+    const lduMatrix&,
+    const scalarField&,
+    const direction,
+    const Pstream::commsTypes commsType
+) const
 {
-    return BSpline::position(mu);
+    procPatch_.compressedSend
+    (
+        commsType,
+        patch().patchInternalField(psiInternal)()
+    );
 }
 
 
-Foam::scalar Foam::simpleSplineEdge::length() const
+template<>
+void processorFvPatchField<scalar>::updateInterfaceMatrix
+(
+    const scalarField&,
+    scalarField& result,
+    const lduMatrix&,
+    const scalarField& coeffs,
+    const direction,
+    const Pstream::commsTypes commsType
+) const
 {
-    notImplemented("simpleSplineEdge::length() const");
-    return 1.0;
+    scalarField pnf
+    (
+        procPatch_.compressedReceive<scalar>(commsType, this->size())()
+    );
+
+    const unallocLabelList& faceCells = patch().faceCells();
+
+    forAll(faceCells, facei)
+    {
+        result[faceCells[facei]] -= coeffs[facei]*pnf[facei];
+    }
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // ************************************************************************* //

@@ -65,13 +65,6 @@ class FECCellToFaceStencil
         void calcFaceStencil(labelListList& faceStencil) const;
 
 
-        //- Disallow default bitwise copy construct
-        FECCellToFaceStencil(const FECCellToFaceStencil&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const FECCellToFaceStencil&);
-
-
 public:
 
     // Constructors

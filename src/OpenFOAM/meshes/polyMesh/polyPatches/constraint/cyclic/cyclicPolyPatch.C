@@ -93,7 +93,7 @@ void Foam::cyclicPolyPatch::calcTransforms()
 
         const cyclicPolyPatch& half0 = *this;
 
-        pointField half0Ctrs(calcFaceCentres(half0, half0.points()));
+        const pointField& half0Ctrs = half0.faceCentres();
 
         if (debug)
         {
@@ -118,7 +118,7 @@ void Foam::cyclicPolyPatch::calcTransforms()
 
         const cyclicPolyPatch& half1 = neighbPatch();
 
-        pointField half1Ctrs(calcFaceCentres(half1, half1.points()));
+        const pointField& half1Ctrs = half1.faceCentres();
 
         // Dump halves
         if (debug)
@@ -282,9 +282,9 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
 ) const
 {
     // Get geometric data on both halves.
-    half0Ctrs = calcFaceCentres(pp0, pp0.points());
+    half0Ctrs = pp0.faceCentres();
     anchors0 = getAnchorPoints(pp0, pp0.points());
-    half1Ctrs = calcFaceCentres(pp1, pp1.points());
+    half1Ctrs = pp1.faceCentres();
 
     switch (transform_)
     {
@@ -585,13 +585,14 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 )
 :
     coupledPolyPatch(pp, bm, index, mapAddressing, newStart),
-    coupledPointsPtr_(NULL),
-    coupledEdgesPtr_(NULL),
-    featureCos_(pp.featureCos_),
+    neighbPatchName_(pp.neighbPatchName_),
+    neighbPatchID_(-1),
     transform_(pp.transform_),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
-    separationVector_(pp.separationVector_)
+    separationVector_(pp.separationVector_),
+    coupledPointsPtr_(NULL),
+    coupledEdgesPtr_(NULL)
 {}
 
 
@@ -611,11 +612,11 @@ void Foam::cyclicPolyPatch::transformPosition(pointField& l) const
 {
     if (!parallel())
     {
-        Foam::transform(reverseT_, l);
+        Foam::transform(forwardT_, l);
     }
     else if (separated())
     {
-        l += separation_;
+        l -= separation_;
     }
 }
 
@@ -647,7 +648,7 @@ void Foam::cyclicPolyPatch::calcGeometry
     const UList<point>& nbrCc
 )
 {
-    polyPatch::calcGeometry();
+    //polyPatch::calcGeometry();
 
 Pout<< "cyclicPolyPatch::calcGeometry : name:" << name()
     << " referred from:" << referPatch.size() << endl;

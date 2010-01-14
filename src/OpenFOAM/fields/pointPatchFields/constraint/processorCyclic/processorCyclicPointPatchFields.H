@@ -22,80 +22,22 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::spline
-
-Description
-    Define a basic spline on nKnots knots.
-
-    The spline does not go anywhere near these knots
-    (will act as a base type for various splines that will have real uses)
-
-SourceFiles
-    spline.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef spline_H
-#define spline_H
+#ifndef processorCyclicPointPatchFields_H
+#define processorCyclicPointPatchFields_H
 
-#include "pointField.H"
+#include "processorCyclicPointPatchField.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-/*---------------------------------------------------------------------------*\
-                           Class spline Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-class spline
-{
-    // Private data
-
-        //- The knots defining the spline
-        pointField knots_;
-
-    // Private Member Functions
-
-        //- Blending function for constructing spline
-        static scalar B(const scalar);
-
-        //- Disallow default bitwise copy construct
-        spline(const spline&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const spline&);
-
-
-public:
-
-    // Constructors
-
-        //- Construct from components
-        spline(const pointField&);
-
-
-    // Member Functions
-
-        // Access
-
-            //- Return the number of knots in the spline
-            label nKnots() const
-            {
-                return knots_.size();
-            }
-
-
-        //- Return the position of a point on the curve given by
-        //  the parameter 0 <= lambda <= 1
-        vector position(const scalar) const;
-
-        //- Return the length of the spline curve
-        scalar length() const;
-};
-
+makePointPatchFieldTypedefs(processorCyclic);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

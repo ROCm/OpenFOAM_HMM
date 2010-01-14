@@ -80,8 +80,7 @@ Foam::label Foam::meshRefinement::createBaffle
             ownPatch,                   // patch for face
             false,                      // remove from zone
             zoneID,                     // zone for face
-            zoneFlip,                   // face flip in zone
-            -1                          // sub patch
+            zoneFlip                    // face flip in zone
         )
     );
 
@@ -120,8 +119,7 @@ Foam::label Foam::meshRefinement::createBaffle
                 true,                       // face flip
                 neiPatch,                   // patch for face
                 zoneID,                     // zone for face
-                reverseFlip,                // face flip in zone
-                -1                          // sub patch
+                reverseFlip                 // face flip in zone
             )
         );
     }
@@ -786,8 +784,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
                     -1,                     // patch for face
                     false,                  // remove from zone
                     zoneID,                 // zone for face
-                    zoneFlip,               // face flip in zone
-                    -1                      // sub patch
+                    zoneFlip                // face flip in zone
                 )
             );
         }
@@ -816,8 +813,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
                     -1,                     // patch for face
                     false,                  // remove from zone
                     zoneID,                 // zone for face
-                    zoneFlip,               // face flip in zone
-                    -1                      // sub patch
+                    zoneFlip                // face flip in zone
                 )
             );
         }
@@ -2382,8 +2378,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                     -1,                             // patch for face
                     false,                          // remove from zone
                     surfaceToFaceZone[surfI],       // zone for face
-                    flip,                           // face flip in zone
-                    -1                              // sub patch
+                    flip                            // face flip in zone
                 )
             );
         }
@@ -2461,8 +2456,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                         patchI,                         // patch for face
                         false,                          // remove from zone
                         surfaceToFaceZone[surfI],       // zone for face
-                        flip,                           // face flip in zone
-                        polyTopoChange::whichSubPatch(pp, faceI)    // sub patch
+                        flip                            // face flip in zone
                     )
                 );
             }

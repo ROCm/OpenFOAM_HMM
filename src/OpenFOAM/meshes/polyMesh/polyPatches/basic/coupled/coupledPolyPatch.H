@@ -126,13 +126,6 @@ protected:
             label& vertI
         );
 
-        //- Calculate face centres
-        static pointField calcFaceCentres
-        (
-            const UList<face>&,
-            const pointField&
-        );
-
         //- Get f[0] for all faces
         static pointField getAnchorPoints
         (
@@ -242,8 +235,9 @@ public:
                 return true;
             }
 
-            //- Transform a patch-based field.
+            //- Transform a patch-based field from other side to this side.
             //!! TDB with macros?
+            virtual bool doTransform() const;
             virtual void transform(scalarField& l) const = 0;
             virtual void transform(vectorField& l) const = 0;
             virtual void transform(sphericalTensorField& l) const = 0;
@@ -251,7 +245,7 @@ public:
             virtual void transform(symmTensorField& l) const = 0;
             virtual void transform(tensorField& l) const = 0;
 
-            //- Transform a patch-based position
+            //- Transform a patch-based position from other side to this side
             virtual void transformPosition(pointField& l) const = 0;
 
             // Low level geometric information
@@ -272,14 +266,14 @@ public:
                 virtual const tensor& reverseT() const = 0;
 
 
-        //- Initialise the calculation of the patch geometry
-        virtual void initGeometry
-        (
-            const primitivePatch& referPatch,
-            UList<point>& nbrCtrs,
-            UList<point>& nbrAreas,
-            UList<point>& nbrCc
-        ) = 0;
+//        //- Initialise the calculation of the patch geometry
+//        virtual void initGeometry
+//        (
+//            const primitivePatch& referPatch,
+//            UList<point>& nbrCtrs,
+//            UList<point>& nbrAreas,
+//            UList<point>& nbrCc
+//        ) = 0;
 
         //- Calculate the patch geometry
         virtual void calcGeometry

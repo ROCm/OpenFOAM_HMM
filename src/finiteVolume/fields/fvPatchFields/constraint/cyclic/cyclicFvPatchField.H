@@ -151,64 +151,64 @@ public:
 
         // Evaluation functions
 
-        // Referred-patch functionality. Get called with a slice (size, start)
-        // of a patch that supplies fields and geometry/topology.
-
-            //- Get patch-normal gradient
-            virtual void snGrad
-            (
-                Field<Type>& exchangeBuf,
-                const Field<Type>& subFld,
-                const coupledFvPatch& referringPatch,
-                const label size,
-                const label start
-            ) const;
-
-            //- Initialise the evaluation of the patch field.
-            virtual void initEvaluate
-            (
-                Field<Type>& exchangeBuf,
-                const coupledFvPatch& referringPatch,
-                const label size,
-                const label start
-            ) const;
-
-            //- Evaluate the patch field.
-            virtual void evaluate
-            (
-                Field<Type>& exchangeBuf,
-                const coupledFvPatch& referringPatch,
-                const label size,
-                const label start
-            ) const;
-
-            //- Initialise neighbour matrix update
-            virtual void initInterfaceMatrixUpdate
-            (
-                const scalarField& psiInternal,
-                scalarField& result,
-                const lduMatrix& m,
-                const scalarField& coeffs,
-                const direction cmpt,
-                const coupledFvPatch& referringPatch,
-                const label size,
-                const label start,
-                scalarField& exchangeBuf
-            ) const;
-
-            //- Update result field based on interface functionality
-            virtual void updateInterfaceMatrix
-            (
-                const scalarField& psiInternal,
-                scalarField& result,
-                const lduMatrix&,
-                const scalarField& coeffs,
-                const direction,
-                const coupledFvPatch& referringPatch,
-                const label size,
-                const label start,
-                scalarField& exchangeBuf
-            ) const;
+//         // Referred-patch functionality. Get called with a slice (size, start)
+//         // of a patch that supplies fields and geometry/topology.
+// 
+//             //- Get patch-normal gradient
+//             virtual void snGrad
+//             (
+//                 Field<Type>& exchangeBuf,
+//                 const Field<Type>& subFld,
+//                 const coupledFvPatch& referringPatch,
+//                 const label size,
+//                 const label start
+//             ) const;
+// 
+//             //- Initialise the evaluation of the patch field.
+//             virtual void initEvaluate
+//             (
+//                 Field<Type>& exchangeBuf,
+//                 const coupledFvPatch& referringPatch,
+//                 const label size,
+//                 const label start
+//             ) const;
+// 
+//             //- Evaluate the patch field.
+//             virtual void evaluate
+//             (
+//                 Field<Type>& exchangeBuf,
+//                 const coupledFvPatch& referringPatch,
+//                 const label size,
+//                 const label start
+//             ) const;
+// 
+//             //- Initialise neighbour matrix update
+//             virtual void initInterfaceMatrixUpdate
+//             (
+//                 const scalarField& psiInternal,
+//                 scalarField& result,
+//                 const lduMatrix& m,
+//                 const scalarField& coeffs,
+//                 const direction cmpt,
+//                 const coupledFvPatch& referringPatch,
+//                 const label size,
+//                 const label start,
+//                 scalarField& exchangeBuf
+//             ) const;
+// 
+//             //- Update result field based on interface functionality
+//             virtual void updateInterfaceMatrix
+//             (
+//                 const scalarField& psiInternal,
+//                 scalarField& result,
+//                 const lduMatrix&,
+//                 const scalarField& coeffs,
+//                 const direction,
+//                 const coupledFvPatch& referringPatch,
+//                 const label size,
+//                 const label start,
+//                 scalarField& exchangeBuf
+//             ) const;
 
 
             //- Return neighbour coupled given internal cell data

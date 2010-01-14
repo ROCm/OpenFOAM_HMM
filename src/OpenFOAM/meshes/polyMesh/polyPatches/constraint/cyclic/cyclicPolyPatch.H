@@ -48,8 +48,6 @@ SourceFiles
 #define cyclicPolyPatch_H
 
 #include "coupledPolyPatch.H"
-//#include "SubField.H"
-//#include "FixedList.H"
 #include "edgeList.H"
 //#include "transform.H"
 #include "polyBoundaryMesh.H"
@@ -373,15 +371,20 @@ public:
         //  calculation!
         const edgeList& coupledEdges() const;
 
-        //- Transform a patch-based field on this side to a field on the
-        //  other side.
+        //- Transform a patch-based field from other side to this side.
         template<class T>
         void transform(Field<T>& l) const
         {
             if (!parallel())
             {
-                transform(reverseT_, l);
+                transform(forwardT_, l);
             }
+        }
+
+
+        virtual bool doTransform() const
+        {
+            return !parallel();
         }
         virtual void transform(scalarField& l) const
         {
@@ -408,8 +411,7 @@ public:
             transform(l);
         }
 
-        //- Transform a patch-based position on this side to a position
-        //  the other side.
+        //- Transform a patch-based position from other side to this side
         virtual void transformPosition(pointField& l) const;
 
 

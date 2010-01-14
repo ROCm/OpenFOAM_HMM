@@ -34,7 +34,6 @@ Description
 
 SourceFiles
     processorPolyPatch.C
-    processorPolyPatchMorph.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -63,14 +62,6 @@ class processorPolyPatch
         int myProcNo_;
         int neighbProcNo_;
 
-        // Per patch information
-
-            //- Originating patches
-            labelList patchIDs_;
-
-            //- Slice starts
-            labelList starts_;
-
         //- Processor-neighbbour patch face centres
         vectorField neighbFaceCentres_;
 
@@ -80,20 +71,13 @@ class processorPolyPatch
         //- Processor-neighbbour patch neighbour cell centres
         vectorField neighbFaceCellCentres_;
 
-        //- Corresponding mesh point per local point
-        mutable autoPtr<labelListList> subMeshPointsPtr_;
+        //- Corresponding neighbouring local point label for every local point
+        //  (so localPoints()[i] == neighb.localPoints()[neighbPoints_[i]])
+        mutable autoPtr<labelList> neighbPointsPtr_;
 
-        //- Corresponding mesh point per local point on reverse patch
-        mutable autoPtr<labelListList> reverseSubMeshPointsPtr_;
-
-//        //- Corresponding neighbouring local edge label for every local edge
-//        //  (so edges()[i] == neighb.edges()[neighbEdges_[i]])
-//        mutable labelList* neighbEdgesPtr_;
-
-
-    // Private member functions
-
-        void checkSubPatches() const;
+        //- Corresponding neighbouring local edge label for every local edge
+        //  (so edges()[i] == neighb.edges()[neighbEdges_[i]])
+        mutable autoPtr<labelList> neighbEdgesPtr_;
 
 protected:
 
@@ -102,18 +86,18 @@ protected:
         //- Initialise the calculation of the patch geometry
         void initGeometry(PstreamBuffers&);
 
-        //- Initialise the calculation of the patch geometry with externally
-        //  provided geometry
-        virtual void initGeometry
-        (
-            const primitivePatch& referPatch,
-            UList<point>&,
-            UList<point>&,
-            UList<point>&
-        )
-        {
-            notImplemented("processorPolyPatch::initGeometry(..)");
-        }
+//        //- Initialise the calculation of the patch geometry with externally
+//        //  provided geometry
+//        virtual void initGeometry
+//        (
+//            const primitivePatch& referPatch,
+//            UList<point>&,
+//            UList<point>&,
+//            UList<point>&
+//        )
+//        {
+//            notImplemented("processorPolyPatch::initGeometry(..)");
+//        }
 
         //- Calculate the patch geometry
         void calcGeometry(PstreamBuffers&);
@@ -164,9 +148,7 @@ public:
             const label index,
             const polyBoundaryMesh& bm,
             const int myProcNo,
-            const int neighbProcNo,
-            const labelList& patchIDs,
-            const labelList& starts
+            const int neighbProcNo
         );
 
         //- Construct from dictionary
@@ -179,11 +161,7 @@ public:
         );
 
         //- Construct as copy, resetting the boundary mesh
-        processorPolyPatch
-        (
-            const processorPolyPatch&,
-            const polyBoundaryMesh&
-        );
+        processorPolyPatch(const processorPolyPatch&, const polyBoundaryMesh&);
 
         //- Construct as given the original patch and resetting the
         //  face list and boundary mesh information
@@ -193,9 +171,7 @@ public:
             const polyBoundaryMesh& bm,
             const label index,
             const label newSize,
-            const label newStart,
-            const labelList& patchIDs,
-            const labelList& starts
+            const label newStart
         );
 
         //- Construct given the original patch and a map
@@ -221,9 +197,7 @@ public:
             const polyBoundaryMesh& bm,
             const label index,
             const label newSize,
-            const label newStart,
-            const labelList& patchIDs,
-            const labelList& starts
+            const label newStart
         ) const
         {
             return autoPtr<polyPatch>
@@ -234,9 +208,7 @@ public:
                     bm,
                     index,
                     newSize,
-                    newStart,
-                    patchIDs,
-                    starts
+                    newStart
                 )
             );
         }
@@ -296,16 +268,6 @@ public:
             return !owner();
         }
 
-        const labelList& patchIDs() const
-        {
-            return patchIDs_;
-        }
-
-        const labelList& starts() const
-        {
-            return starts_;
-        }
-
         //- Return processor-neighbbour patch face centres
         const vectorField& neighbFaceCentres() const
         {
@@ -324,37 +286,33 @@ public:
             return neighbFaceCellCentres_;
         }
 
-        //- Transform a patch-based field
-        template<class T>
-        void transform(Field<T>& l) const;
+        //- Return neighbour point labels. WIP.
+        const labelList& neighbPoints() const;
 
+        //- Return neighbour edge labels. WIP.
+        const labelList& neighbEdges() const;
+
+        //- Transform a patch-based field from other side to this side.
+        virtual bool doTransform() const
+        {
+            return false;
+        }
         virtual void transform(scalarField& l) const
-        {
-            transform(l);
-        }
+        {}
         virtual void transform(vectorField& l) const
-        {
-            transform(l);
-        }
+        {}
         virtual void transform(sphericalTensorField& l) const
-        {
-            transform(l);
-        }
+        {}
         virtual void transform(diagTensorField& l) const
-        {
-            transform(l);
-        }
+        {}
         virtual void transform(symmTensorField& l) const
-        {
-            transform(l);
-        }
+        {}
         virtual void transform(tensorField& l) const
-        {
-            transform(l);
-        }
+        {}
 
-        //- Transform a patch-based position
-        virtual void transformPosition(pointField& l) const;
+        //- Transform a patch-based position from other side to this side
+        virtual void transformPosition(pointField& l) const
+        {}
 
         //- Are the planes separated.
         virtual bool separated() const
@@ -373,24 +331,7 @@ public:
         //- Are the cyclic planes parallel.
         virtual bool parallel() const
         {
-            forAll(patchIDs_, i)
-            {
-                label patchI = patchIDs_[i];
-
-                if (patchI != -1)
-                {
-                    if
-                    (
-                       !refCast<const coupledPolyPatch>
-                        (
-                            boundaryMesh()[patchI]
-                        ).parallel()
-                    )
-                    {
-                        return false;
-                    }
-                }
-            }
+            notImplemented("processorPolyPatch::parallel()");
             return true;
         }
 
@@ -407,104 +348,6 @@ public:
             notImplemented("processorPolyPatch::reverseT(..)");
             return tensor::zero;
         }
-
-        //- Find sub patch for local face. -1 for internal faces or label of
-        //  cyclic patch.
-        label whichSubPatch(const label facei) const;
-
-        //- Slice patch
-        autoPtr<primitivePatch> subPatch(const label subI) const
-        {
-            const faceList& thisFaces = static_cast<const faceList&>(*this);
-
-            return autoPtr<primitivePatch>
-            (
-                new primitivePatch
-                (
-                    faceSubList
-                    (
-                        thisFaces,
-                        this->starts_[subI+1]-this->starts_[subI],
-                        this->starts_[subI]
-                    ),
-                    this->points()
-                )
-            );
-        }
-
-        //- Slice patchlist to subpatch
-        template<class T>
-        const typename List<T>::subList subSlice
-        (
-            const UList<T>& l,
-            const label subI
-        ) const
-        {
-            return typename List<T>::subList
-            (
-                l,
-                this->starts_[subI+1]-this->starts_[subI],
-                this->starts_[subI]
-            );
-        }
-
-        //- Slice patchlist to subpatch
-        template<class T>
-        typename List<T>::subList subSlice
-        (
-            UList<T>& l,
-            const label subI
-        )
-        {
-            return typename List<T>::subList
-            (
-                l,
-                this->starts_[subI+1]-this->starts_[subI],
-                this->starts_[subI]
-            );
-        }
-
-        //- Slice patchField to subpatch
-        template<class T>
-        const typename Field<T>::subField subSlice
-        (
-            const Field<T>& l,
-            const label subI
-        ) const
-        {
-            return typename Field<T>::subList
-            (
-                l,
-                this->starts_[subI+1]-this->starts_[subI],
-                this->starts_[subI]
-            );
-        }
-
-        //- Slice patchField to subpatch
-        template<class T>
-        typename Field<T>::subField subSlice
-        (
-            Field<T>& l,
-            const label subI
-        )
-        {
-            return typename Field<T>::subList
-            (
-                l,
-                this->starts_[subI+1]-this->starts_[subI],
-                this->starts_[subI]
-            );
-        }
-
-//        //- Return neighbour edge labels. This is for my local edge (-1 or) the
-//        //  corresponding local edge on the other side. See above for -1 cause.
-//        const labelList& neighbEdges() const;
-
-        //- Mesh point labels per local point per sub patch.
-        const labelListList& subMeshPoints() const;
-
-        //- Mesh point labels per local point on reversed faces per sub patch.
-        const labelListList& reverseSubMeshPoints() const;
 
         //- Initialize ordering for primitivePatch. Does not
         //  refer to *this (except for name() and type() etc.)
@@ -532,12 +375,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "processorPolyPatchTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

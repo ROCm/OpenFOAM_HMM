@@ -112,21 +112,21 @@ void Foam::coupledPolyPatch::writeOBJ
 }
 
 
-Foam::pointField Foam::coupledPolyPatch::calcFaceCentres
-(
-    const UList<face>& faces,
-    const pointField& points
-)
-{
-    pointField ctrs(faces.size());
-
-    forAll(faces, faceI)
-    {
-        ctrs[faceI] = faces[faceI].centre(points);
-    }
-
-    return ctrs;
-}
+//Foam::pointField Foam::coupledPolyPatch::calcFaceCentres
+//(
+//    const UList<face>& faces,
+//    const pointField& points
+//)
+//{
+//    pointField ctrs(faces.size());
+//
+//    forAll(faces, faceI)
+//    {
+//        ctrs[faceI] = faces[faceI].centre(points);
+//    }
+//
+//    return ctrs;
+//}
 
 
 Foam::pointField Foam::coupledPolyPatch::getAnchorPoints

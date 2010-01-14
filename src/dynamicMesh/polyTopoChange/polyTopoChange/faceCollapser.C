@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "faceCollapser.H"
@@ -156,15 +154,15 @@ void Foam::faceCollapser::filterFace
     {
         label nei = -1;
 
-        labelPair patchIDs = polyTopoChange::whichPatch
-        (
-            mesh_.boundaryMesh(),
-            faceI
-        );
+        label patchI = -1;
 
         if (mesh_.isInternalFace(faceI))
         {
             nei = mesh_.faceNeighbour()[faceI];
+        }
+        else
+        {
+            patchI = mesh_.boundaryMesh().whichPatch(faceI);
         }
 
         // Get current zone info
@@ -188,11 +186,10 @@ void Foam::faceCollapser::filterFace
                 mesh_.faceOwner()[faceI],   // owner
                 nei,                        // neighbour
                 false,                      // face flip
-                patchIDs[0],                // patch for face
+                patchI,                     // patch for face
                 false,                      // remove from zone
                 zoneID,                     // zone for face
-                zoneFlip,                   // face flip in zone
-                patchIDs[1]
+                zoneFlip                    // face flip in zone
             )
         );
     }

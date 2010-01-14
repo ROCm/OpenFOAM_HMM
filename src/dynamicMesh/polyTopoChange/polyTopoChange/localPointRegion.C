@@ -61,7 +61,6 @@ public:
 
 }
 
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Are two lists identical either in forward or in reverse order.

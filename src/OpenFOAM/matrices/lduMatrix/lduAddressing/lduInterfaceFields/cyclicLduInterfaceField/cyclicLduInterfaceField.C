@@ -51,7 +51,7 @@ void Foam::cyclicLduInterfaceField::transformCoupleField
 {
     if (doTransform())
     {
-        scalar forwardScale = 
+        scalar forwardScale =
             pow(diag(forwardT()).component(cmpt), rank());
 
         pnf *= forwardScale;

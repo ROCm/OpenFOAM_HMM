@@ -76,7 +76,7 @@ void Foam::cyclicPointPatch::calcGeometry(PstreamBuffers&)
     else
     {
         // Get reference to shared points
-        const labelList& sharedPoints = 
+        const labelList& sharedPoints =
             boundaryMesh().globalPatch().meshPoints();
 
         nonGlobalPatchPoints_.setSize(mp.size());

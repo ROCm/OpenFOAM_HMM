@@ -44,7 +44,6 @@ SourceFiles
 #include "Map.H"
 #include "boolList.H"
 #include "indirectPrimitivePatch.H"
-#include "labelPair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -132,7 +131,7 @@ class removeFaces
             void getFaceInfo
             (
                 const label faceI,
-                labelPair& patchIDs,
+                label& patchID,
                 label& zoneID,
                 label& zoneFlip
             ) const;
@@ -148,7 +147,7 @@ class removeFaces
                 const label own,
                 const label nei,
                 const bool flipFaceFlux,
-                const labelPair& newPatchIDs,
+                const label newPatchID,
                 const bool removeFromZone,
                 const label zoneID,
                 const bool zoneFlip,

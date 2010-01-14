@@ -120,8 +120,8 @@ void Foam::blockDescriptor::setEdge
                 // divide the line
                 lineDivide divEdge(cedge, dim, 1.0/(gExp+SMALL));
 
-                pointField p = divEdge.points();
-                scalarList d = divEdge.lambdaDivisions();
+                const pointField& p = divEdge.points();
+                const scalarList& d = divEdge.lambdaDivisions();
 
                 edgePoints_[edgeI].setSize(p.size());
                 edgeWeights_[edgeI].setSize(d.size());

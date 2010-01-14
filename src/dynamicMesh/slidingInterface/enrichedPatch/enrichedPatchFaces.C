@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "enrichedPatch.H"
@@ -91,7 +89,7 @@ void Foam::enrichedPatch::calcEnrichedFaces
     {
         const face oldFace = slavePatch_[faceI];
         const face oldLocalFace = slaveLocalFaces[faceI];
-//         Info << "old slave face " << faceI << ": " << oldFace << endl;
+//         Info<< "old slave face " << faceI << ": " << oldFace << endl;
         const labelList& curEdges = slaveFaceEdges[faceI];
 
         DynamicList<label> newFace(oldFace.size()*enrichedFaceRatio_);
@@ -133,7 +131,7 @@ void Foam::enrichedPatch::calcEnrichedFaces
 
             const labelList& slavePointsOnEdge =
                 pointsIntoSlaveEdges[curEdges[i]];
-//             Info << "slavePointsOnEdge for " << curEdges[i] << ": " << slavePointsOnEdge << endl;
+//             Info<< "slavePointsOnEdge for " << curEdges[i] << ": " << slavePointsOnEdge << endl;
             // If there are no points on the edge, skip everything
             // If there is only one point, no need for sorting
             if (slavePointsOnEdge.size())
@@ -246,7 +244,7 @@ void Foam::enrichedPatch::calcEnrichedFaces
     {
         const face& oldFace = masterPatch_[faceI];
         const face& oldLocalFace = masterLocalFaces[faceI];
-//         Info << "old master face: " << oldFace << endl;
+//         Info<< "old master face: " << oldFace << endl;
         const labelList& curEdges = masterFaceEdges[faceI];
 
         DynamicList<label> newFace(oldFace.size()*enrichedFaceRatio_);

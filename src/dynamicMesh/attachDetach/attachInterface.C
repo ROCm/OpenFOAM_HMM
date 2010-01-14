@@ -119,8 +119,7 @@ void Foam::attachDetach::attachInterface
                     -1,                              // patch for face
                     false,                           // remove from zone
                     faceZoneID_.index(),             // zone for face
-                    mfFlip[faceI],                   // face flip in zone
-                    -1                               // subpatch
+                    mfFlip[faceI]                    // face flip in zone
                 )
             );
         }
@@ -139,8 +138,7 @@ void Foam::attachDetach::attachInterface
                     -1,                           // patch for face
                     false,                        // remove from zone
                     faceZoneID_.index(),          // zone for face
-                    !mfFlip[faceI],               // face flip in zone
-                    -1                            // subpatch
+                    !mfFlip[faceI]                // face flip in zone
                 )
             );
         }
@@ -210,13 +208,10 @@ void Foam::attachDetach::attachInterface
                 ];
         }
 
-        labelPair patchIDs = polyTopoChange::whichPatch
-        (
-            mesh.boundaryMesh(),
-            curFaceID
-        );
+
+        label patchID = mesh.boundaryMesh().whichPatch(curFaceID);
         label neiCell;
-        if (patchIDs[0] == -1)
+        if (patchID == -1)
         {
             neiCell = nei[curFaceID];
         }
@@ -224,6 +219,7 @@ void Foam::attachDetach::attachInterface
         {
             neiCell = -1;
         }
+
 
         // Modify the face
         ref.setAction
@@ -235,11 +231,10 @@ void Foam::attachDetach::attachInterface
                 own[curFaceID],         // owner
                 neiCell,                // neighbour
                 false,                  // face flip
-                patchIDs[0],            // patch for face
+                patchID,                // patch for face
                 false,                  // remove from zone
                 modifiedFaceZone,       // zone for face
-                modifiedFaceZoneFlip,   // face flip in zone
-                patchIDs[1]
+                modifiedFaceZoneFlip    // face flip in zone
             )
         );
     }
@@ -265,7 +260,7 @@ void Foam::attachDetach::modifyMotionPoints
 
     if (debug)
     {
-        Pout<< "void attachDetach::modifyMotionPoints(" 
+        Pout<< "void attachDetach::modifyMotionPoints("
             << "pointField& motionPoints) const "
             << " for object " << name() << " : "
             << "Adjusting motion points." << endl;

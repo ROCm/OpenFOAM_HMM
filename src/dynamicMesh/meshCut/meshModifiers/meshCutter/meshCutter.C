@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "meshCutter.H"
@@ -177,12 +175,17 @@ void Foam::meshCutter::faceCells
 void Foam::meshCutter::getFaceInfo
 (
     const label faceI,
-    labelPair& patchIDs,
+    label& patchID,
     label& zoneID,
     label& zoneFlip
 ) const
 {
-    patchIDs = polyTopoChange::whichPatch(mesh().boundaryMesh(), faceI);
+    patchID = -1;
+
+    if (!mesh().isInternalFace(faceI))
+    {
+        patchID = mesh().boundaryMesh().whichPatch(faceI);
+    }
 
     zoneID = mesh().faceZones().whichZone(faceI);
 
@@ -207,9 +210,9 @@ void Foam::meshCutter::addFace
     const label nei
 )
 {
-    labelPair patchIDs;
-    label zoneID, zoneFlip;
-    getFaceInfo(faceI, patchIDs, zoneID, zoneFlip);
+    label patchID, zoneID, zoneFlip;
+
+    getFaceInfo(faceI, patchID, zoneID, zoneFlip);
 
     if ((nei == -1) || (own < nei))
     {
@@ -219,7 +222,7 @@ void Foam::meshCutter::addFace
             Pout<< "Adding face " << newFace
                 << " with new owner:" << own
                 << " with new neighbour:" << nei
-                << " patchIDs:" << patchIDs
+                << " patchID:" << patchID
                 << " zoneID:" << zoneID
                 << " zoneFlip:" << zoneFlip
                 << endl;
@@ -236,10 +239,9 @@ void Foam::meshCutter::addFace
                 -1,                         // master edge
                 faceI,                      // master face for addition
                 false,                      // flux flip
-                patchIDs[0],                // patch for face
+                patchID,                    // patch for face
                 zoneID,                     // zone for face
-                zoneFlip,                   // face zone flip
-                patchIDs[1]                 // subPatch
+                zoneFlip                    // face zone flip
             )
         );
     }
@@ -251,7 +253,7 @@ void Foam::meshCutter::addFace
             Pout<< "Adding (reversed) face " << newFace.reverseFace()
                 << " with new owner:" << nei
                 << " with new neighbour:" << own
-                << " patchIDs:" << patchIDs
+                << " patchID:" << patchID
                 << " zoneID:" << zoneID
                 << " zoneFlip:" << zoneFlip
                 << endl;
@@ -268,10 +270,9 @@ void Foam::meshCutter::addFace
                 -1,                         // master edge
                 faceI,                      // master face for addition
                 false,                      // flux flip
-                patchIDs[0],                // patch for face
+                patchID,                    // patch for face
                 zoneID,                     // zone for face
-                zoneFlip,                   // face zone flip
-                patchIDs[1]                 // subPatch
+                zoneFlip                    // face zone flip
             )
         );
     }
@@ -288,9 +289,9 @@ void Foam::meshCutter::modFace
     const label nei
 )
 {
-    labelPair patchIDs;
-    label zoneID, zoneFlip;
-    getFaceInfo(faceI, patchIDs, zoneID, zoneFlip);
+    label patchID, zoneID, zoneFlip;
+
+    getFaceInfo(faceI, patchID, zoneID, zoneFlip);
 
     if
     (
@@ -325,11 +326,10 @@ void Foam::meshCutter::modFace
                     own,                // owner
                     nei,                // neighbour
                     false,              // face flip
-                    patchIDs[0],        // patch for face
+                    patchID,            // patch for face
                     false,              // remove from zone
                     zoneID,             // zone for face
-                    zoneFlip,           // face flip in zone
-                    patchIDs[1]         // subPatch
+                    zoneFlip            // face flip in zone
                 )
             );
         }
@@ -344,11 +344,10 @@ void Foam::meshCutter::modFace
                     nei,                    // owner
                     own,                    // neighbour
                     false,                  // face flip
-                    patchIDs[0],            // patch for face
+                    patchID,                // patch for face
                     false,                  // remove from zone
                     zoneID,                 // zone for face
-                    zoneFlip,               // face flip in zone
-                    patchIDs[1]             // subPatch
+                    zoneFlip                // face flip in zone
                 )
             );
         }
@@ -694,8 +693,7 @@ void Foam::meshCutter::setRefinement
                         false,                  // flux flip
                         -1,                     // patch for face
                         -1,                     // zone for face
-                        false,                  // face zone flip
-                        -1                      // subpatch
+                        false                   // face zone flip
                     )
                 );
 

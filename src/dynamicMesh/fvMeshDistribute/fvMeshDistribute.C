@@ -448,13 +448,12 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::deleteProcPatches
 // Repatch the mesh.
 Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::repatch
 (
-    const labelList& newPatchID,    // per boundary face -1 or new patchID
-    const labelList& newSubPatchID, // ,,                -1 or new subpatchID
+    const labelList& newPatchID,         // per boundary face -1 or new patchID
     labelListList& constructFaceMap
 )
 {
     polyTopoChange meshMod(mesh_);
-    
+
     forAll(newPatchID, bFaceI)
     {
         if (newPatchID[bFaceI] != -1)
@@ -482,8 +481,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::repatch
                     newPatchID[bFaceI],         // patch for face
                     false,                      // remove from zone
                     zoneID,                     // zone for face
-                    zoneFlip,                   // face flip in zone
-                    newSubPatchID
+                    zoneFlip                    // face flip in zone
                 )
             );
         }
@@ -627,8 +625,7 @@ void Foam::fvMeshDistribute::getNeighbourData
     const labelList& distribution,
     labelList& sourceFace,
     labelList& sourceProc,
-    labelList& sourceNewProc,
-    labelList& sourceSubPatch
+    labelList& sourceNewProc
 ) const
 {
     label nBnd = mesh_.nFaces() - mesh_.nInternalFaces();
@@ -736,18 +733,15 @@ void Foam::fvMeshDistribute::subsetBoundaryData
     const labelList& sourceFace,
     const labelList& sourceProc,
     const labelList& sourceNewProc,
-    const labelList& sourceSubPatch,
 
     labelList& subFace,
     labelList& subProc,
-    labelList& subNewProc,
-    labelList& subSubPatch
+    labelList& subNewProc
 )
 {
     subFace.setSize(mesh.nFaces() - mesh.nInternalFaces());
     subProc.setSize(mesh.nFaces() - mesh.nInternalFaces());
     subNewProc.setSize(mesh.nFaces() - mesh.nInternalFaces());
-    subSubPatch.setSize(mesh.nFaces() - mesh.nInternalFaces());
 
     forAll(subFace, newBFaceI)
     {
@@ -760,7 +754,6 @@ void Foam::fvMeshDistribute::subsetBoundaryData
         {
             subFace[newBFaceI] = oldFaceI;
             subProc[newBFaceI] = Pstream::myProcNo();
-            subSubPatch[newBFaceI] = -1;
 
             label oldOwn = oldFaceOwner[oldFaceI];
             label oldNei = oldFaceNeighbour[oldFaceI];
@@ -784,7 +777,6 @@ void Foam::fvMeshDistribute::subsetBoundaryData
             subFace[newBFaceI] = sourceFace[oldBFaceI];
             subProc[newBFaceI] = sourceProc[oldBFaceI];
             subNewProc[newBFaceI] = sourceNewProc[oldBFaceI];
-            subSubPatch[newBFaceI] = sourceSubPatch[oldBFaceI];
         }
     }
 }
@@ -944,7 +936,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::doRemoveCells
 void Foam::fvMeshDistribute::addProcPatches
 (
     const labelList& neighbourNewProc,   // processor that neighbour is on
-    labelList& procPatchID              
+    labelList& procPatchID
 )
 {
     // Now use the neighbourFace/Proc to repatch the mesh. These two lists
@@ -1065,7 +1057,6 @@ void Foam::fvMeshDistribute::sendMesh
     const labelList& sourceFace,
     const labelList& sourceProc,
     const labelList& sourceNewProc,
-    const labelList& sourceSubPatch,
     UOPstream& toDomain
 )
 {
@@ -1201,8 +1192,6 @@ void Foam::fvMeshDistribute::sendMesh
 
         << sourceFace
         << sourceProc
-        << sourceNewProc
-        << sourceSubPatch
         << sourceNewProc;
 
 
@@ -1225,7 +1214,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshDistribute::receiveMesh
     labelList& domainSourceFace,
     labelList& domainSourceProc,
     labelList& domainSourceNewProc,
-    labelList& domainSourceSubPatch,
     UIPstream& fromNbr
 )
 {
@@ -1243,13 +1231,12 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshDistribute::receiveMesh
     fromNbr
         >> domainSourceFace
         >> domainSourceProc
-        >> domainSourceNewProc
-        >> domainSourceSubPatch;
+        >> domainSourceNewProc;
 
     // Construct fvMesh
     autoPtr<fvMesh> domainMeshPtr
     (
-        new fvMesh 
+        new fvMesh
         (
             IOobject
             (
@@ -1464,24 +1451,14 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     //     sourceProc = -1
     //     sourceNewProc = -1
     //     sourceFace = patchID
-    //     sourceSubPatch = -1
     // coupled boundary:
     //     sourceProc = proc
     //     sourceNewProc = distribution[cell on proc]
     //     sourceFace = face
-    //     sourceSubPatch = sub patch (only if processor face)
     labelList sourceFace;
     labelList sourceProc;
     labelList sourceNewProc;
-    labelList sourceSubPatch;
-    getNeighbourData
-    (
-        distribution,
-        sourceFace,
-        sourceProc,
-        sourceNewProc,
-        sourceSubPatch
-    );
+    getNeighbourData(distribution, sourceFace, sourceProc, sourceNewProc);
 
 
     // Remove meshPhi. Since this would otherwise disappear anyway
@@ -1554,7 +1531,6 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
         inplaceReorder(bFaceMap, sourceFace);
         inplaceReorder(bFaceMap, sourceProc);
         inplaceReorder(bFaceMap, sourceNewProc);
-        inplaceReorder(bFaceMap, sourceSubPatch);
     }
 
 
@@ -1658,7 +1634,6 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             labelList procSourceFace;
             labelList procSourceProc;
             labelList procSourceNewProc;
-            labelList procSourceSubPatch;
 
             subsetBoundaryData
             (
@@ -1674,12 +1649,10 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                 sourceFace,
                 sourceProc,
                 sourceNewProc,
-                sourceSubPatch,
 
                 procSourceFace,
                 procSourceProc,
-                procSourceNewProc,
-                procSourceSubPatch
+                procSourceNewProc
             );
 
 
@@ -1697,7 +1670,6 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                 procSourceFace,
                 procSourceProc,
                 procSourceNewProc,
-                procSourceSubPatch,
                 str
             );
             sendFields<volScalarField>(recvProc, volScalars, subsetter, str);
@@ -1733,7 +1705,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                 str
             );
             sendFields<surfaceSphericalTensorField>
-            (   
+            (
                 recvProc,
                 surfSphereTensors,
                 subsetter,
@@ -1801,7 +1773,6 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
         labelList domainSourceFace;
         labelList domainSourceProc;
         labelList domainSourceNewProc;
-        labelList domainSourceSubPatch;
 
         subsetBoundaryData
         (
@@ -1817,18 +1788,15 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             sourceFace,
             sourceProc,
             sourceNewProc,
-            sourceSubPatch,
 
             domainSourceFace,
             domainSourceProc,
-            domainSourceNewProc,
-            domainSourceSubPatch
+            domainSourceNewProc
         );
 
         sourceFace.transfer(domainSourceFace);
         sourceProc.transfer(domainSourceProc);
         sourceNewProc.transfer(domainSourceNewProc);
-        sourceSubPatch.transfer(domainSourceSubPatch);
     }
 
 
@@ -1882,8 +1850,8 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             labelList domainSourceFace;
             labelList domainSourceProc;
             labelList domainSourceNewProc;
-            labelList domainSourceSubPatch;
 
+            autoPtr<fvMesh> domainMeshPtr;
             PtrList<volScalarField> vsf;
             PtrList<volVectorField> vvf;
             PtrList<volSphericalTensorField> vsptf;
@@ -1908,7 +1876,6 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                     domainSourceFace,
                     domainSourceProc,
                     domainSourceNewProc,
-                    domainSourceSubPatch
                     str
                 );
                 fvMesh& domainMesh = domainMeshPtr();
@@ -2079,7 +2046,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             // Update mesh data: sourceFace,sourceProc for added
             // mesh.
 
-            sourceFace = 
+            sourceFace =
                 mapBoundaryData
                 (
                     mesh_,
@@ -2088,7 +2055,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                     domainMesh.nInternalFaces(),
                     domainSourceFace
                 );
-            sourceProc = 
+            sourceProc =
                 mapBoundaryData
                 (
                     mesh_,
@@ -2097,7 +2064,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                     domainMesh.nInternalFaces(),
                     domainSourceProc
                 );
-            sourceNewProc = 
+            sourceNewProc =
                 mapBoundaryData
                 (
                     mesh_,

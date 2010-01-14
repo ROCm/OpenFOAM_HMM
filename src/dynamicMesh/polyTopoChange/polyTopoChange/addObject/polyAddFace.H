@@ -86,8 +86,6 @@ class polyAddFace
         //- Face zone flip
         bool zoneFlip_;
 
-        //- Sub patch ID (for proc patches)
-        label subPatchID_;
 
 public:
 
@@ -111,8 +109,7 @@ public:
             flipFaceFlux_(false),
             patchID_(-1),
             zoneID_(-1),
-            zoneFlip_(false),
-            subPatchID_(-1)
+            zoneFlip_(false)
         {}
 
 
@@ -128,8 +125,7 @@ public:
             const bool flipFaceFlux,
             const label patchID,
             const label zoneID,
-            const bool zoneFlip,
-            const label subPatchID
+            const bool zoneFlip
         )
         :
             face_(f),
@@ -141,8 +137,7 @@ public:
             flipFaceFlux_(flipFaceFlux),
             patchID_(patchID),
             zoneID_(zoneID),
-            zoneFlip_(zoneFlip),
-            subPatchID_(subPatchID)
+            zoneFlip_(zoneFlip)
         {
             if (face_.size() < 3)
             {
@@ -159,8 +154,7 @@ public:
                     "    const bool flipFaceFlux,\n"
                     "    const label patchID,\n"
                     "    const label zoneID,\n"
-                    "    const bool zoneFlip,\n"
-                    "    const label subPatchID\n"
+                    "    const bool zoneFlip\n"
                     ")"
                 )   << "Invalid face: less than 3 points.  "
                     << "This is not allowed.\n"
@@ -189,8 +183,7 @@ public:
                     "    const bool flipFaceFlux,\n"
                     "    const label patchID,\n"
                     "    const label zoneID,\n"
-                    "    const bool zoneFlip,\n"
-                    "    const label subPatchID\n"
+                    "    const bool zoneFlip\n"
                     ")"
                 )   << "Face contains invalid vertex ID: " << face_ << ".  "
                     << "This is not allowed.\n"
@@ -219,8 +212,7 @@ public:
                     "    const bool flipFaceFlux,\n"
                     "    const label patchID,\n"
                     "    const label zoneID,\n"
-                    "    const bool zoneFlip,\n"
-                    "    const label subPatchID\n"
+                    "    const bool zoneFlip\n"
                     ")"
                 )   << "Face owner and neighbour are identical.  "
                     << "This is not allowed.\n"
@@ -249,8 +241,7 @@ public:
                     "    const bool flipFaceFlux,\n"
                     "    const label patchID,\n"
                     "    const label zoneID,\n"
-                    "    const bool zoneFlip,\n"
-                    "    const label subPatchID\n"
+                    "    const bool zoneFlip\n"
                     ")"
                 )   << "Patch face has got a neighbour.  Patch ID: " << patchID
                     << ".  This is not allowed.\n"
@@ -278,9 +269,7 @@ public:
                     "    const label masterFaceID,\n"
                     "    const bool flipFaceFlux,\n"
                     "    const label patchID,\n"
-                    "    const label zoneID,\n"
-                    "    const bool zoneFlip,\n"
-                    "    const label subPatchID\n"
+                    "    const label zoneID"
                     ")"
                 )   << "Face has no owner and is not in a zone.  "
                     << "This is not allowed.\n"
@@ -310,9 +299,7 @@ public:
                     "    const bool flipFaceFlux,\n"
                     "    const label patchID,\n"
                     "    const label zoneID,\n"
-                    "    const bool zoneFlip,\n"
-                    "    const label subPatchID\n"
-                    ")"
+                    "    const bool zoneFlip\n"
                     ")"
                 )   << "Specified zone flip for a face that does not  "
                     << "belong to zone.  This is not allowed.\n"
@@ -439,13 +426,6 @@ public:
         {
             return zoneFlip_;
         }
-
-        //- Boundary sub patch ID
-        label subPatchID() const
-        {
-            return subPatchID_;
-        }
-
 };
 
 

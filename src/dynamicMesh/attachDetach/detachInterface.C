@@ -47,7 +47,7 @@ void Foam::attachDetach::detachInterface
     //    into the slave patch
     // 3. Create a point renumbering list, giving a new point index for original
     //    points in the face patch
-    // 4. Grab all faces in cells on the master side and renumber them 
+    // 4. Grab all faces in cells on the master side and renumber them
     //    using the point renumbering list.  Exclude the ones that belong to
     //    the master face zone
     //
@@ -211,8 +211,7 @@ void Foam::attachDetach::detachInterface
                     masterPatchID_.index(),         // patch for face
                     false,                          // remove from zone
                     faceZoneID_.index(),            // zone for face
-                    !mfFlip[faceI],                 // face flip in zone
-                    -1                              // sub patch
+                    !mfFlip[faceI]                  // face flip in zone
                 )
             );
 
@@ -231,8 +230,7 @@ void Foam::attachDetach::detachInterface
                     false,                          // flip flux
                     slavePatchID_.index(),          // patch to add the face to
                     -1,                             // zone for face
-                    false,                          // zone flip
-                    -1                              // sub patch
+                    false                           // zone flip
                 )
             );
             //{
@@ -260,8 +258,7 @@ void Foam::attachDetach::detachInterface
                     masterPatchID_.index(),   // patch for face
                     false,                    // remove from zone
                     faceZoneID_.index(),      // zone for face
-                    mfFlip[faceI],            // face flip in zone
-                    -1                        // sub patch
+                    mfFlip[faceI]             // face flip in zone
                 )
             );
 
@@ -280,8 +277,7 @@ void Foam::attachDetach::detachInterface
                     true,                           // flip flux
                     slavePatchID_.index(),          // patch to add the face to
                     -1,                             // zone for face
-                    false,                          // face flip in zone
-                    -1                              // sub patch
+                    false                           // face flip in zone
                 )
             );
             //{
@@ -442,8 +438,7 @@ void Foam::attachDetach::detachInterface
                         -1,                         // patch for face
                         false,                      // remove from zone
                         -1,                         // zone for face
-                        false,                      // face zone flip
-                        -1                          // sub patch
+                        false                       // face zone flip
                     )
                 );
 // Pout << "modifying stick-out face. Internal Old face: " << oldFace << " new face: " << newFace << " own: " << own[curFaceID] << " nei: " << nei[curFaceID] << endl;
@@ -462,12 +457,11 @@ void Foam::attachDetach::detachInterface
                         mesh.boundaryMesh().whichPatch(curFaceID), // patch
                         false,                        // remove from zone
                         -1,                           // zone for face
-                        false,                        // face zone flip
-                        -1                            // sub patch
+                        false                         // face zone flip
                     )
-                );   
+                );
 // Pout << "modifying stick-out face. Boundary Old face: " << oldFace << " new face: " << newFace << " own: " << own[curFaceID] << " patch: " << mesh.boundaryMesh().whichPatch(curFaceID) << endl;
-            }                                                  
+            }
         }
     }
 

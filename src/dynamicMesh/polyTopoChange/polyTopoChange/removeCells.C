@@ -342,8 +342,7 @@ void Foam::removeCells::setRefinement
                         newPatchID[faceI],      // patch for face
                         false,                  // remove from zone
                         zoneID,                 // zone for face
-                        zoneFlip,               // face flip in zone
-                        -1
+                        zoneFlip                // face flip in zone
                     )
                 );
             }
@@ -389,8 +388,7 @@ void Foam::removeCells::setRefinement
                     newPatchID[faceI],      // patch for face
                     false,                  // remove from zone
                     zoneID,                 // zone for face
-                    zoneFlip,               // face flip in zone
-                    -1
+                    zoneFlip                // face flip in zone
                 )
             );
         }
@@ -433,8 +431,7 @@ void Foam::removeCells::setRefinement
                             newPatchID[faceI],      // patch for face
                             false,                  // remove from zone
                             zoneID,                 // zone for face
-                            zoneFlip,               // face flip in zone
-                            -1
+                            zoneFlip                // face flip in zone
                         )
                     );
                 }
@@ -484,7 +481,7 @@ void Foam::removeCells::setRefinement
                 faceI++;
             }
         }
-    }    
+    }
 
 
     // Remove points that are no longer used.

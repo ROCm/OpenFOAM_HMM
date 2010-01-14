@@ -54,14 +54,15 @@ class arcEdge
 {
     // Private data
 
-        vector p1_, p2_, p3_;
+        point p1_, p2_, p3_;
+        cylindricalCS cs_;
         scalar angle_;
         scalar radius_;
-        cylindricalCS cs_;
-
-        cylindricalCS calcAngle();
 
     // Private Member Functions
+
+        //- Calculate the coordinate system, angle and radius
+        cylindricalCS calcAngle();
 
         //- Disallow default bitwise copy construct
         arcEdge(const arcEdge&);
@@ -82,7 +83,7 @@ public:
         (
             const pointField& points,
             const label start, const label end,
-            const vector& pMid
+            const point& pMid
         );
 
         //- Construct from Istream setting pointsList
@@ -96,9 +97,9 @@ public:
 
     // Member Functions
 
-        //- Return the position of a point on the curve given by
-        //  the parameter 0 <= lambda <= 1
-        vector position(const scalar) const;
+        //- Return the point position corresponding to the curve parameter
+        //  0 <= lambda <= 1
+        point position(const scalar) const;
 
         //- Return the length of the curve
         scalar length() const;

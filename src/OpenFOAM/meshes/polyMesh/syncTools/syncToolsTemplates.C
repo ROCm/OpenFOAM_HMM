@@ -114,43 +114,23 @@ void Foam::syncTools::syncPointMap
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
-                //TBD: optimisation for single subpatch.
+                // Get data per patchPoint in neighbouring point numbers.
 
-                List<Map<T> > patchInfo(procPatch.patchIDs().size());
+                const labelList& meshPts = procPatch.meshPoints();
+                const labelList& nbrPts = procPatch.neighbPoints();
 
-                forAll(procPatch.patchIDs(), subI)
+                // Extract local values. Create map from nbrPoint to value.
+                // Note: how small initial size?
+                Map<T> patchInfo(meshPts.size() / 20);
+
+                forAll(meshPts, i)
                 {
-                    label subPatchI = procPatch.patchIDs()[subI];
+                    typename Map<T>::const_iterator iter =
+                        pointValues.find(meshPts[i]);
 
-                    const labelList& subMeshPts =
-                        procPatch.subMeshPoints()[subI];
-
-                    Map<T>& subPatchInfo = patchInfo[subI];
-                    subPatchInfo.resize(subMeshPts.size()/20);
-                    forAll(subMeshPts, patchPointI)
+                    if (iter != pointValues.end())
                     {
-                        label pointI = subMeshPts[patchPointI];
-
-                        typename Map<T>::const_iterator iter =
-                            pointValues.find(pointI);
-
-                        if (iter != pointValues.end())
-                        {
-                            subPatchInfo.insert(patchPointI, iter());
-                        }
-                    }
-
-                    if (subPatchI != -1)
-                    {
-                        // Apply transform.
-                        top
-                        (
-                            refCast<const coupledPolyPatch>
-                            (
-                                patches[subPatchI]
-                            ),
-                            subPatchInfo
-                        );
+                        patchInfo.insert(nbrPts[i], iter());
                     }
                 }
 
@@ -173,34 +153,29 @@ void Foam::syncTools::syncPointMap
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
-                List<Map<T> > nbrPatchInfo;
+                IPstream fromNb(Pstream::blocking, procPatch.neighbProcNo());
+                Map<T> nbrPatchInfo(fromNb);
+
+                // Transform
+                top(procPatch, nbrPatchInfo);
+
+                const labelList& meshPts = procPatch.meshPoints();
+
+                // Only update those values which come from neighbour
+                forAllConstIter
+                (
+                    typename Map<T>,
+                    nbrPatchInfo,
+                    nbrIter
+                )
                 {
-                    IPstream fromNbr
+                    combine
                     (
-                        Pstream::blocking,
-                        procPatch.neighbProcNo()
+                        pointValues,
+                        cop,
+                        meshPts[nbrIter.key()],
+                        nbrIter()
                     );
-                    fromNbr >> nbrPatchInfo;
-                }
-
-                forAll(procPatch.patchIDs(), subI)
-                {
-                    const labelList& subMeshPts =
-                        procPatch.reverseSubMeshPoints()[subI];
-
-                    const Map<T>& nbrSubInfo = nbrPatchInfo[subI];
-
-                    forAllConstIter(typename Map<T>, nbrSubInfo, iter)
-                    {
-                        label meshPointI = subMeshPts[iter.key()];
-                        combine
-                        (
-                            pointValues,
-                            cop,
-                            meshPointI,
-                            iter()
-                        );
-                    }
                 }
             }
         }
@@ -217,6 +192,7 @@ void Foam::syncTools::syncPointMap
             if (cycPatch.owner())
             {
                 // Owner does all.
+
                 const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
                 const edgeList& coupledPoints = cycPatch.coupledPoints();
                 const labelList& meshPtsA = cycPatch.meshPoints();
@@ -247,9 +223,9 @@ void Foam::syncTools::syncPointMap
                     }
                 }
 
-                // Transform
-                top(cycPatch, half0Values);
-                top(nbrPatch, half1Values);
+                // Transform to receiving side
+                top(cycPatch, half1Values);
+                top(nbrPatch, half0Values);
 
                 forAll(coupledPoints, i)
                 {
@@ -365,7 +341,7 @@ void Foam::syncTools::syncPointMap
             }
             else
             {
-                // Send to master
+                // Slave: send to master
                 {
                     OPstream toMaster(Pstream::blocking, Pstream::masterNo());
                     toMaster << sharedPointValues;
@@ -453,56 +429,27 @@ void Foam::syncTools::syncEdgeMap
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
-                // Data per sub patch
-                List<EdgeMap<T> > patchInfo(procPatch.patchIDs().size());
 
-                forAll(procPatch.patchIDs(), subI)
+                // Get data per patch edge in neighbouring edge.
+
+                const edgeList& edges = procPatch.edges();
+                const labelList& meshPts = procPatch.meshPoints();
+                const labelList& nbrPts = procPatch.neighbPoints();
+
+                EdgeMap<T> patchInfo(edges.size() / 20);
+
+                forAll(edges, i)
                 {
-                    label subPatchI = procPatch.patchIDs()[subI];
-                    label subStart = procPatch.starts()[subI];
-                    label subSize = procPatch.starts()[subI+1]-subStart;
+                    const edge& e = edges[i];
+                    const edge meshEdge(meshPts[e[0]], meshPts[e[1]]);
 
-                    primitivePatch subPatch
-                    (
-                        faceSubList
-                        (
-                            procPatch,
-                            subSize,
-                            subStart
-                        ),
-                        procPatch.points()
-                    );  
-                    const labelList& subMeshPts = subPatch.meshPoints();
-                    const edgeList& subEdges = subPatch.edges();
+                    typename EdgeMap<T>::const_iterator iter =
+                        edgeValues.find(meshEdge);
 
-                    EdgeMap<T>& subPatchInfo = patchInfo[subI];
-                    subPatchInfo.resize(subEdges.size());
-
-                    forAll(subEdges, i)
+                    if (iter != edgeValues.end())
                     {
-                        const edge& e = subEdges[i];
-                        const edge meshEdge(subMeshPts[e[0]], subMeshPts[e[1]]);
-
-                        typename EdgeMap<T>::const_iterator iter =
-                            edgeValues.find(meshEdge);
-
-                        if (iter != edgeValues.end())
-                        {
-                            subPatchInfo.insert(e, iter());
-                        }
-                    }
-
-                    if (subPatchI != -1)
-                    {
-                        // Apply transform.
-                        top
-                        (
-                            refCast<const coupledPolyPatch>
-                            (
-                                patches[subPatchI]
-                            ),
-                            subPatchInfo
-                        );
+                        const edge nbrEdge(nbrPts[e[0]], nbrPts[e[1]]);
+                        patchInfo.insert(nbrEdge, iter());
                     }
                 }
 
@@ -525,7 +472,7 @@ void Foam::syncTools::syncEdgeMap
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
-                List<EdgeMap<T> > nbrPatchInfo;
+                EdgeMap<T> nbrPatchInfo;
                 {
                     IPstream fromNbr
                     (
@@ -535,26 +482,30 @@ void Foam::syncTools::syncEdgeMap
                     fromNbr >> nbrPatchInfo;
                 }
 
-                forAll(procPatch.patchIDs(), subI)
+                // Apply transform to convert to this side properties.
+                top(procPatch, nbrPatchInfo);
+
+
+                // Only update those values which come from neighbour
+                const labelList& meshPts = procPatch.meshPoints();
+
+                forAllConstIter
+                (
+                    typename EdgeMap<T>,
+                    nbrPatchInfo,
+                    nbrIter
+                )
                 {
-                    const labelList& subMeshPts =
-                        procPatch.subMeshPoints()[subI];
+                    const edge& e = nbrIter.key();
+                    const edge meshEdge(meshPts[e[0]], meshPts[e[1]]);
 
-                    const EdgeMap<T>& nbrSubInfo = nbrPatchInfo[subI];
-
-                    forAllConstIter(typename EdgeMap<T>, nbrSubInfo, iter)
-                    {
-                        const edge& e = iter.key();
-                        const edge meshEdge(subMeshPts[e[0]], subMeshPts[e[1]]);
-
-                        combine
-                        (
-                            edgeValues,
-                            cop,
-                            meshEdge,   // edge
-                            iter()      // value
-                        );
-                    }
+                    combine
+                    (
+                        edgeValues,
+                        cop,
+                        meshEdge,   // edge
+                        nbrIter()   // value
+                    );
                 }
             }
         }
@@ -616,9 +567,9 @@ void Foam::syncTools::syncEdgeMap
                     }
                 }
 
-                // Transform
-                top(cycPatch, half0Values);
-                top(nbrPatch, half1Values);
+                // Transform to this side
+                top(cycPatch, half1Values);
+                top(nbrPatch, half0Values);
 
 
                 // Extract and combine information
@@ -869,38 +820,16 @@ void Foam::syncTools::syncPointList
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
-                //TBD: optimisation for single subpatch.
+                // Get data per patchPoint in neighbouring point numbers.
+                Field<T> patchInfo(procPatch.nPoints());
 
-                // Data per sub patch
-                List<List<T> > patchInfo(procPatch.patchIDs().size());
+                const labelList& meshPts = procPatch.meshPoints();
+                const labelList& nbrPts = procPatch.neighbPoints();
 
-                forAll(procPatch.patchIDs(), subI)
+                forAll(nbrPts, pointI)
                 {
-                    label subPatchI = procPatch.patchIDs()[subI];
-
-                    const labelList& subMeshPts =
-                        procPatch.subMeshPoints()[subI];
-
-                    List<T>& subPatchInfo = patchInfo[subI];
-                    subPatchInfo.setSize(subMeshPts.size());
-                    forAll(subPatchInfo, i)
-                    {
-                        subPatchInfo[i] = pointValues[subMeshPts[i]];
-                    }
-
-                    if (subPatchI != -1)
-                    {
-                        // Apply transform.
-                        SubField<T> slice(subPatchInfo, subPatchInfo.size());
-                        top
-                        (
-                            refCast<const coupledPolyPatch>
-                            (
-                                patches[subPatchI]
-                            ),
-                            reinterpret_cast<Field<T>&>(slice)
-                        );
-                    }
+                    label nbrPointI = nbrPts[pointI];
+                    patchInfo[nbrPointI] = pointValues[meshPts[pointI]];
                 }
 
                 OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
@@ -922,10 +851,8 @@ void Foam::syncTools::syncPointList
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
-                List<List<T> > nbrPatchInfo;
+                Field<T> nbrPatchInfo(procPatch.nPoints());
                 {
-                    // We do not know the number of points on the other side
-                    // so cannot use Pstream::read.
                     IPstream fromNbr
                     (
                         Pstream::blocking,
@@ -934,17 +861,15 @@ void Foam::syncTools::syncPointList
                     fromNbr >> nbrPatchInfo;
                 }
 
-                forAll(procPatch.patchIDs(), subI)
-                {
-                    const labelList& subMeshPts =
-                        procPatch.reverseSubMeshPoints()[subI];
-                    const List<T>& nbrSubInfo = nbrPatchInfo[subI];
+                // Transform to this side
+                top(procPatch, nbrPatchInfo);
 
-                    forAll(subMeshPts, i)
-                    {
-                        label meshPointI = subMeshPts[i];
-                        cop(pointValues[meshPointI], nbrSubInfo[i]);
-                    }
+                const labelList& meshPts = procPatch.meshPoints();
+
+                forAll(meshPts, pointI)
+                {
+                    label meshPointI = meshPts[pointI];
+                    cop(pointValues[meshPointI], nbrPatchInfo[pointI]);
                 }
             }
         }
@@ -979,11 +904,11 @@ void Foam::syncTools::syncPointList
 
                 //SubField<T> slice0(half0Values, half0Values.size());
                 //SubField<T> slice1(half1Values, half1Values.size());
-                //top(cycPatch, reinterpret_cast<Field<T>&>(slice0));
-                //top(nbrPatch, reinterpret_cast<Field<T>&>(slice1));
+                //top(cycPatch, reinterpret_cast<Field<T>&>(slice1));
+                //top(nbrPatch, reinterpret_cast<Field<T>&>(slice0));
 
-                top(cycPatch, half0Values);
-                top(nbrPatch, half1Values);
+                top(cycPatch, half1Values);
+                top(nbrPatch, half0Values);
 
                 forAll(coupledPoints, i)
                 {
@@ -1001,7 +926,7 @@ void Foam::syncTools::syncPointList
     if (pd.nGlobalPoints() > 0)
     {
         // Values on shared points.
-        List<T> sharedPts(pd.nGlobalPoints(), nullValue);
+        Field<T> sharedPts(pd.nGlobalPoints(), nullValue);
 
         forAll(pd.sharedPointLabels(), i)
         {
@@ -1053,7 +978,7 @@ void Foam::syncTools::syncPointList
         return;
     }
 
-    List<T> meshValues(mesh.nPoints(), nullValue);
+    Field<T> meshValues(mesh.nPoints(), nullValue);
 
     forAll(meshPoints, i)
     {
@@ -1120,56 +1045,17 @@ void Foam::syncTools::syncEdgeList
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
-                //TBD: optimisation for single subpatch.
+                const labelList& meshEdges = procPatch.meshEdges();
+                const labelList& neighbEdges = procPatch.neighbEdges();
 
-                // Data per sub patch
-                List<List<T> > patchInfo(procPatch.patchIDs().size());
+                // Get region per patch edge in neighbouring edge numbers.
+                Field<T> patchInfo(procPatch.nEdges(), nullValue);
 
-                forAll(procPatch.patchIDs(), subI)
+                forAll(neighbEdges, edgeI)
                 {
-                    label subPatchI = procPatch.patchIDs()[subI];
-                    label subStart = procPatch.starts()[subI];
-                    label subSize = procPatch.starts()[subI+1]-subStart;
+                    label nbrEdgeI = neighbEdges[edgeI];
 
-                    primitivePatch subPatch
-                    (
-                        faceSubList
-                        (
-                            procPatch,
-                            subSize,
-                            subStart
-                        ),
-                        procPatch.points()
-                    );
-                    labelList subMeshEdges
-                    (
-                        subPatch.meshEdges
-                        (
-                            mesh.edges(),
-                            mesh.pointEdges()
-                        )
-                    );
-
-                    List<T>& subPatchInfo = patchInfo[subI];
-                    subPatchInfo.setSize(subMeshEdges.size());
-                    forAll(subPatchInfo, i)
-                    {
-                        subPatchInfo[i] = edgeValues[subMeshEdges[i]];
-                    }
-
-                    if (subPatchI != -1)
-                    {
-                        // Apply transform.
-                        SubField<T> slice(subPatchInfo, subPatchInfo.size());
-                        top
-                        (
-                            refCast<const coupledPolyPatch>
-                            (
-                                patches[subPatchI]
-                            ),
-                            reinterpret_cast<Field<T>&>(slice)
-                        );
-                    }
+                    patchInfo[nbrEdgeI] = edgeValues[meshEdges[edgeI]];
                 }
 
                 OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
@@ -1190,8 +1076,11 @@ void Foam::syncTools::syncEdgeList
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
-                // Receive from neighbour. 
-                List<List<T> > nbrPatchInfo(procPatch.nEdges());
+                const labelList& meshEdges = procPatch.meshEdges();
+
+                // Receive from neighbour. Is per patch edge the region of the
+                // neighbouring patch edge.
+                Field<T> nbrPatchInfo(procPatch.nEdges());
 
                 {
                     IPstream fromNeighb
@@ -1202,41 +1091,13 @@ void Foam::syncTools::syncEdgeList
                     fromNeighb >> nbrPatchInfo;
                 }
 
-                forAll(procPatch.patchIDs(), subI)
+                // Transform to this side
+                top(procPatch, nbrPatchInfo);
+
+                forAll(meshEdges, edgeI)
                 {
-                    label subStart = procPatch.starts()[subI];
-                    label subSize = procPatch.starts()[subI+1]-subStart;
-
-                    faceList reverseFaces(subSize);
-                    forAll(reverseFaces, i)
-                    {
-                        reverseFaces[i] = procPatch[subStart+i].reverseFace();
-                    }
-                    primitivePatch subPatch
-                    (
-                        faceSubList
-                        (
-                            reverseFaces,
-                            reverseFaces.size()
-                        ),
-                        procPatch.points()
-                    );
-                    labelList subMeshEdges
-                    (
-                        subPatch.meshEdges
-                        (
-                            mesh.edges(),
-                            mesh.pointEdges()
-                        )
-                    );
-
-                    const List<T>& nbrSubInfo = nbrPatchInfo[subI];
-
-                    forAll(subMeshEdges, i)
-                    {
-                        label meshEdgeI = subMeshEdges[i];
-                        cop(edgeValues[meshEdgeI], nbrSubInfo[i]);
-                    }
+                    label meshEdgeI = meshEdges[edgeI];
+                    cop(edgeValues[meshEdgeI], nbrPatchInfo[edgeI]);
                 }
             }
         }
@@ -1270,11 +1131,11 @@ void Foam::syncTools::syncEdgeList
 
                 //SubField<T> slice0(half0Values, half0Values.size());
                 //SubField<T> slice1(half1Values, half1Values.size());
-                //top(cycPatch, reinterpret_cast<Field<T>&>(slice0));
-                //top(nbrPatch, reinterpret_cast<Field<T>&>(slice1));
+                //top(cycPatch, reinterpret_cast<Field<T>&>(slice1));
+                //top(nbrPatch, reinterpret_cast<Field<T>&>(slice0));
 
-                top(cycPatch, half0Values);
-                top(nbrPatch, half1Values);
+                top(cycPatch, half1Values);
+                top(nbrPatch, half0Values);
 
                 forAll(coupledEdges, i)
                 {
@@ -1296,7 +1157,7 @@ void Foam::syncTools::syncEdgeList
     if (pd.nGlobalEdges() > 0)
     {
         // Values on shared edges.
-        List<T> sharedPts(pd.nGlobalEdges(), nullValue);
+        Field<T> sharedPts(pd.nGlobalEdges(), nullValue);
 
         forAll(pd.sharedEdgeLabels(), i)
         {
@@ -1382,8 +1243,13 @@ void Foam::syncTools::syncBoundaryFaceList
                 else
                 {
                     OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
-                    toNbr <<
-                        SubList<T>(faceValues, procPatch.size(), patchStart);
+                    toNbr << 
+                        SubField<T>
+                        (
+                            faceValues,
+                            procPatch.size(),
+                            patchStart
+                        );
                 }
             }
         }
@@ -1399,17 +1265,17 @@ void Foam::syncTools::syncBoundaryFaceList
              && patches[patchI].size() > 0
             )
             {
-                const processorPolyPatch& ppp =
+                const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
-                List<T> nbrPatchInfo(ppp.size());
+                Field<T> nbrPatchInfo(procPatch.size());
 
                 if (contiguous<T>())
                 {
                     IPstream::read
                     (
                         Pstream::blocking,
-                        ppp.neighbProcNo(),
+                        procPatch.neighbProcNo(),
                         reinterpret_cast<char*>(nbrPatchInfo.begin()),
                         nbrPatchInfo.byteSize()
                     );
@@ -1419,33 +1285,14 @@ void Foam::syncTools::syncBoundaryFaceList
                     IPstream fromNeighb
                     (
                         Pstream::blocking,
-                        ppp.neighbProcNo()
+                        procPatch.neighbProcNo()
                     );
                     fromNeighb >> nbrPatchInfo;
                 }
 
-                // Apply any transforms
-                forAll(ppp.patchIDs(), i)
-                {
-                    label subPatchI = ppp.patchIDs()[i];
-                    label subStart = ppp.starts()[i];
-                    label subSize = ppp.starts()[i+1]-subStart;
+                top(procPatch, nbrPatchInfo);
 
-                    if (subPatchI != -1)
-                    {
-                        SubField<T> slice(nbrPatchInfo, subStart, subSize);
-                        top
-                        (
-                            refCast<const coupledPolyPatch>
-                            (
-                                patches[subPatchI]
-                            ),
-                            reinterpret_cast<Field<T>&>(slice)
-                        );
-                    }
-                }
-
-                label bFaceI = ppp.start()-mesh.nInternalFaces();
+                label bFaceI = procPatch.start()-mesh.nInternalFaces();
 
                 forAll(nbrPatchInfo, i)
                 {
@@ -1473,13 +1320,11 @@ void Foam::syncTools::syncBoundaryFaceList
                 label sz = cycPatch.size();
 
                 // Transform (copy of) data on both sides
-                Field<T> ownVals(SubList<T>(faceValues, sz, ownStart));
-                //SubField<T> ownSlice(ownVals, ownVals.size());
-                top(cycPatch, ownVals);
+                Field<T> ownVals(SubField<T>(faceValues, sz, ownStart));
+                top(nbrPatch, ownVals);
 
-                Field<T> nbrVals(SubList<T>(faceValues, sz, nbrStart));
-                //SubField<T> nbrSlice(nbrVals, nbrVals.size());
-                top(nbrPatch, nbrVals);
+                Field<T> nbrVals(SubField<T>(faceValues, sz, nbrStart));
+                top(cycPatch, nbrVals);
 
                 label i0 = ownStart;
                 forAll(nbrVals, i)
@@ -1526,10 +1371,6 @@ void Foam::syncTools::syncFaceList
         return;
     }
 
-    // Patch data (proc patches only) for ease of sending/receiving.
-    // Note:should just send slice of packedList itself.
-    List<List<unsigned int> > patchValues(patches.size());
-
     if (Pstream::parRun())
     {
         // Send
@@ -1545,14 +1386,14 @@ void Foam::syncTools::syncFaceList
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
-                patchValues[patchI].setSize(procPatch.size());
+                List<unsigned int> patchInfo(procPatch.size());
                 forAll(procPatch, i)
                 {
-                    patchValues[patchI][i] = faceValues[procPatch.start()+i];
+                    patchInfo[i] = faceValues[procPatch.start()+i];
                 }
 
                 OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
-                toNbr << patchValues[patchI];
+                toNbr << patchInfo;
             }
         }
 
@@ -1570,19 +1411,20 @@ void Foam::syncTools::syncFaceList
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
+                List<unsigned int> patchInfo(procPatch.size());
                 {
                     IPstream fromNbr
                     (
                         Pstream::blocking,
                         procPatch.neighbProcNo()
                     );
-                    fromNbr >> patchValues[patchI];
+                    fromNbr >> patchInfo;
                 }
 
                 // Combine (bitwise)
                 forAll(procPatch, i)
                 {
-                    unsigned int patchVal = patchValues[patchI][i];
+                    unsigned int patchVal = patchInfo[i];
                     label meshFaceI = procPatch.start()+i;
                     unsigned int faceVal = faceValues[meshFaceI];
                     cop(faceVal, patchVal);
@@ -1679,19 +1521,15 @@ void Foam::syncTools::syncPointList
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
-                List<List<unsigned int> > patchInfo(procPatch.patchIDs().size());
+                List<unsigned int> patchInfo(procPatch.nPoints());
 
-                forAll(procPatch.patchIDs(), subI)
+                const labelList& meshPts = procPatch.meshPoints();
+                const labelList& nbrPts = procPatch.neighbPoints();
+
+                forAll(nbrPts, pointI)
                 {
-                    const labelList& subMeshPts =
-                        procPatch.subMeshPoints()[subI];
-
-                    List<unsigned int>& subInfo = patchInfo[subI];
-                    subInfo.setSize(subMeshPts.size());
-                    forAll(subInfo, i)
-                    {
-                        subInfo[i] = pointValues[subMeshPts[i]];
-                    }
+                    label nbrPointI = nbrPts[pointI];
+                    patchInfo[nbrPointI] = pointValues[meshPts[pointI]];
                 }
 
                 OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
@@ -1713,7 +1551,7 @@ void Foam::syncTools::syncPointList
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
-                List<List<unsigned int> > nbrPatchInfo(procPatch.nPoints());
+                List<unsigned int> nbrPatchInfo(procPatch.nPoints());
                 {
                     // We do not know the number of points on the other side
                     // so cannot use Pstream::read.
@@ -1725,19 +1563,14 @@ void Foam::syncTools::syncPointList
                     fromNbr >> nbrPatchInfo;
                 }
 
-                forAll(procPatch.patchIDs(), subI)
-                {
-                    const labelList& subMeshPts =
-                        procPatch.reverseSubMeshPoints()[subI];
-                    const List<unsigned int>& nbrSubInfo = nbrPatchInfo[subI];
+                const labelList& meshPts = procPatch.meshPoints();
 
-                    forAll(subMeshPts, i)
-                    {
-                        label meshPointI = subMeshPts[i];
-                        unsigned int pointVal = pointValues[meshPointI];
-                        cop(pointVal, nbrSubInfo[i]);
-                        pointValues[meshPointI] = pointVal;
-                    }
+                forAll(meshPts, pointI)
+                {
+                    label meshPointI = meshPts[pointI];
+                    unsigned int pointVal = pointValues[meshPointI];
+                    cop(pointVal, nbrPatchInfo[pointI]);
+                    pointValues[meshPointI] = pointVal;
                 }
             }
         }
@@ -1852,38 +1685,15 @@ void Foam::syncTools::syncEdgeList
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
-                List<List<unsigned int> > patchInfo(procPatch.patchIDs().size());
+                List<unsigned int> patchInfo(procPatch.nEdges());
 
-                forAll(procPatch.patchIDs(), subI)
+                const labelList& meshEdges = procPatch.meshEdges();
+                const labelList& neighbEdges = procPatch.neighbEdges();
+
+                forAll(neighbEdges, edgeI)
                 {
-                    label subStart = procPatch.starts()[subI];
-                    label subSize = procPatch.starts()[subI+1]-subStart;
-
-                    primitivePatch subPatch
-                    (
-                        faceSubList
-                        (
-                            procPatch,
-                            subSize,
-                            subStart
-                        ),
-                        procPatch.points()
-                    );
-                    labelList subMeshEdges
-                    (
-                        subPatch.meshEdges
-                        (
-                            mesh.edges(),
-                            mesh.pointEdges()
-                        )
-                    );
-
-                    List<unsigned int>& subPatchInfo = patchInfo[subI];
-                    subPatchInfo.setSize(subMeshEdges.size());
-                    forAll(subPatchInfo, i)
-                    {
-                        subPatchInfo[i] = edgeValues[subMeshEdges[i]];
-                    }
+                    label nbrEdgeI = neighbEdges[edgeI];
+                    patchInfo[nbrEdgeI] = edgeValues[meshEdges[edgeI]];
                 }
 
                 OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
@@ -1906,7 +1716,7 @@ void Foam::syncTools::syncEdgeList
                     refCast<const processorPolyPatch>(patches[patchI]);
 
                 // Receive from neighbour. 
-                List<List<unsigned int> > nbrPatchInfo(procPatch.nEdges());
+                List<unsigned int> nbrPatchInfo(procPatch.nEdges());
 
                 {
                     IPstream fromNeighb
@@ -1917,43 +1727,15 @@ void Foam::syncTools::syncEdgeList
                     fromNeighb >> nbrPatchInfo;
                 }
 
-                forAll(procPatch.patchIDs(), subI)
+                const labelList& meshEdges = procPatch.meshEdges();
+
+                forAll(meshEdges, edgeI)
                 {
-                    label subStart = procPatch.starts()[subI];
-                    label subSize = procPatch.starts()[subI+1]-subStart;
-
-                    faceList reverseFaces(subSize);
-                    forAll(reverseFaces, i)
-                    {
-                        reverseFaces[i] = procPatch[subStart+i].reverseFace();
-                    }
-                    primitivePatch subPatch
-                    (
-                        faceSubList
-                        (
-                            reverseFaces,
-                            reverseFaces.size()
-                        ),
-                        procPatch.points()
-                    );
-                    labelList subMeshEdges
-                    (
-                        subPatch.meshEdges
-                        (
-                            mesh.edges(),
-                            mesh.pointEdges()
-                        )
-                    );
-
-                    const List<unsigned int>& nbrSubInfo = nbrPatchInfo[subI];
-
-                    forAll(subMeshEdges, i)
-                    {
-                        label meshEdgeI = subMeshEdges[i];
-                        unsigned int edgeVal = edgeValues[meshEdgeI];
-                        cop(edgeVal, nbrSubInfo[i]);
-                        edgeValues[meshEdgeI] = edgeVal;
-                    }
+                    unsigned int patchVal = nbrPatchInfo[edgeI];
+                    label meshEdgeI = meshEdges[edgeI];
+                    unsigned int edgeVal = edgeValues[meshEdgeI];
+                    cop(edgeVal, patchVal);
+                    edgeValues[meshEdgeI] = edgeVal;
                 }
             }
         }

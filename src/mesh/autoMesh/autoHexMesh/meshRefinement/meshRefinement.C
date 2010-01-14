@@ -1142,8 +1142,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
                 (
                     mesh_,
                     blockedFace,
-                    andEqOp<bool>(),    // combine operator
-                    false               // separation
+                    andEqOp<bool>()     // combine operator
                 );
             }
             reduce(nUnblocked, sumOp<label>());

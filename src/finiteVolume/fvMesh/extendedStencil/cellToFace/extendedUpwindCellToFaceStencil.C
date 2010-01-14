@@ -311,7 +311,7 @@ void Foam::extendedUpwindCellToFaceStencil::transportStencils
 
     // Swap coupled boundary stencil
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+
     labelListList neiBndStencil(nBnd);
     for (label faceI = mesh_.nInternalFaces(); faceI < mesh_.nFaces(); faceI++)
     {

@@ -34,7 +34,6 @@ License
 bool Foam::blockMesh::readPatches
 (
     const dictionary& meshDescription,
-    const pointField& tmpBlockPoints,
     faceListList& tmpBlocksPatches,
     wordList& patchNames,
     wordList& patchTypes,
@@ -128,7 +127,7 @@ bool Foam::blockMesh::readPatches
         topologyOK = topologyOK && patchLabelsOK
         (
             nPatches,
-            tmpBlockPoints,
+            blockPointField_,
             tmpBlocksPatches[nPatches]
         );
 
@@ -206,7 +205,6 @@ bool Foam::blockMesh::readPatches
 bool Foam::blockMesh::readBoundary
 (
     const dictionary& meshDescription,
-    const pointField& tmpBlockPoints,
     faceListList& tmpBlocksPatches,
     PtrList<dictionary>& patchDicts
 )
@@ -235,7 +233,7 @@ bool Foam::blockMesh::readBoundary
         topologyOK = topologyOK && patchLabelsOK
         (
             patchI,
-            tmpBlockPoints,
+            blockPointField_,
             tmpBlocksPatches[patchI]
         );
     }
@@ -246,27 +244,22 @@ bool Foam::blockMesh::readBoundary
 
 void Foam::blockMesh::createCellShapes
 (
-    const pointField& tmpBlockPoints,
-    PtrList<cellShape>& tmpBlockCells
+    cellShapeList& tmpBlockCells
 )
 {
     const blockMesh& blocks = *this;
 
     tmpBlockCells.setSize(blocks.size());
-    forAll(blocks, blockLabel)
+    forAll(blocks, blockI)
     {
-        tmpBlockCells.set
-        (
-            blockLabel,
-            new cellShape(blocks[blockLabel].blockDef().blockShape())
-        );
+        tmpBlockCells[blockI] = cellShape(blocks[blockI].blockShape());
 
-        if (tmpBlockCells[blockLabel].mag(tmpBlockPoints) < 0.0)
+        if (tmpBlockCells[blockI].mag(blockPointField_) < 0.0)
         {
             WarningIn
             (
                 "blockMesh::createTopology(IOdictionary&)"
-            )   << "negative volume block : " << blockLabel
+            )   << "negative volume block : " << blockI
                 << ", probably defined inside-out" << endl;
         }
     }
@@ -275,7 +268,7 @@ void Foam::blockMesh::createCellShapes
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& dict)
+Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
 {
     bool topologyOK = true;
 
@@ -287,30 +280,30 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& dict)
     // get names/types for the unassigned patch faces
     // this is a bit heavy handed (and ugly), but there is currently
     // no easy way to rename polyMesh patches subsequently
-    if (const dictionary* dictPtr = dict.subDictPtr("defaultPatch"))
+    if (const dictionary* dictPtr = meshDescription.subDictPtr("defaultPatch"))
     {
         dictPtr->readIfPresent("name", defaultPatchName);
         dictPtr->readIfPresent("type", defaultPatchType);
     }
 
     // optional 'convertToMeters' or 'scale'  scaling factor
-    if (!dict.readIfPresent("convertToMeters", scaleFactor_))
+    if (!meshDescription.readIfPresent("convertToMeters", scaleFactor_))
     {
-        dict.readIfPresent("scale", scaleFactor_);
+        meshDescription.readIfPresent("scale", scaleFactor_);
     }
 
 
     //
     // get the non-linear edges in mesh
     //
-    if (dict.found("edges"))
+    if (meshDescription.found("edges"))
     {
         if (verboseOutput)
         {
             Info<< "Creating curved edges" << endl;
         }
 
-        ITstream& is(dict.lookup("edges"));
+        ITstream& is(meshDescription.lookup("edges"));
 
         // read number of edges in mesh
         label nEdges = 0;
@@ -378,7 +371,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& dict)
     }
 
     {
-        ITstream& is(dict.lookup("blocks"));
+        ITstream& is(meshDescription.lookup("blocks"));
 
         // read number of blocks in mesh
         label nBlocks = 0;
@@ -467,7 +460,6 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& dict)
         topologyOK = topologyOK && readPatches
         (
             meshDescription,
-            tmpBlockPoints,
             tmpBlocksPatches,
             patchNames,
             patchTypes,
@@ -483,8 +475,8 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& dict)
 
         Info<< nl << "Creating block mesh topology" << endl;
 
-        PtrList<cellShape> tmpBlockCells(blocks.size());
-        createCellShapes(tmpBlockPoints, tmpBlockCells);
+        cellShapeList tmpBlockCells(blocks.size());
+        createCellShapes(tmpBlockCells);
 
 
         Info<< nl << "Reading physicalType from existing boundary file" << endl;
@@ -514,7 +506,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& dict)
                 IOobject::NO_WRITE,
                 false
             ),
-            xferMove(tmpBlockPoints),
+            xferCopy(blockPointField_),   // copy these points, do NOT move
             tmpBlockCells,
             tmpBlocksPatches,
             patchNames,
@@ -532,7 +524,6 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& dict)
         topologyOK = topologyOK && readBoundary
         (
             meshDescription,
-            tmpBlockPoints,
             tmpBlocksPatches,
             patchDicts
         );
@@ -547,8 +538,8 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& dict)
 
         Info<< nl << "Creating block mesh topology" << endl;
 
-        PtrList<cellShape> tmpBlockCells(blocks.size());
-        createCellShapes(tmpBlockPoints, tmpBlockCells);
+        cellShapeList tmpBlockCells(blocks.size());
+        createCellShapes(tmpBlockCells);
 
 
         blockMeshPtr = new polyMesh
@@ -562,7 +553,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& dict)
                 IOobject::NO_WRITE,
                 false
             ),
-            xferMove(tmpBlockPoints),
+            xferCopy(blockPointField_),   // copy these points, do NOT move
             tmpBlockCells,
             tmpBlocksPatches,
             patchDicts,

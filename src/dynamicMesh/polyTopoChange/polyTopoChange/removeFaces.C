@@ -330,9 +330,9 @@ void Foam::removeFaces::mergeFaces
         own = cellRegionMaster[cellRegion[own]];
     }
 
-    labelPair patchIDs;
-    label zoneID, zoneFlip;
-    getFaceInfo(faceI, patchIDs, zoneID, zoneFlip);
+    label patchID, zoneID, zoneFlip;
+
+    getFaceInfo(faceI, patchID, zoneID, zoneFlip);
 
     label nei = -1;
 
@@ -390,7 +390,7 @@ void Foam::removeFaces::mergeFaces
         own,                // owner
         nei,                // neighbour
         false,              // face flip
-        patchIDs,           // patch info for face
+        patchID,            // patch for face
         false,              // remove from zone
         zoneID,             // zone for face
         zoneFlip,           // face flip in zone
@@ -416,12 +416,18 @@ void Foam::removeFaces::mergeFaces
 void Foam::removeFaces::getFaceInfo
 (
     const label faceI,
-    labelPair& patchIDs,
+
+    label& patchID,
     label& zoneID,
     label& zoneFlip
 ) const
 {
-    patchIDs = polyTopoChange::whichPatch(mesh_.boundaryMesh(), faceI);
+    patchID = -1;
+
+    if (!mesh_.isInternalFace(faceI))
+    {
+        patchID = mesh_.boundaryMesh().whichPatch(faceI);
+    }
 
     zoneID = mesh_.faceZones().whichZone(faceI);
 
@@ -473,7 +479,7 @@ void Foam::removeFaces::modFace
     const label own,
     const label nei,
     const bool flipFaceFlux,
-    const labelPair& newPatchIDs,
+    const label newPatchID,
     const bool removeFromZone,
     const label zoneID,
     const bool zoneFlip,
@@ -491,7 +497,7 @@ void Foam::removeFaces::modFace
 //                << "  own:" << own
 //                << "  nei:" << nei
 //                << "  flipFaceFlux:" << flipFaceFlux
-//                << "  newPatchIDs:" << newPatchIDs
+//                << "  newPatchID:" << newPatchID
 //                << "  removeFromZone:" << removeFromZone
 //                << "  zoneID:" << zoneID
 //                << "  zoneFlip:" << zoneFlip
@@ -507,11 +513,10 @@ void Foam::removeFaces::modFace
                 own,            // owner
                 nei,            // neighbour
                 flipFaceFlux,   // face flip
-                newPatchIDs[0], // patch for face
+                newPatchID,     // patch for face
                 removeFromZone, // remove from zone
                 zoneID,         // zone for face
-                zoneFlip,       // face flip in zone
-                newPatchIDs[1]
+                zoneFlip        // face flip in zone
             )
         );
     }
@@ -525,7 +530,7 @@ void Foam::removeFaces::modFace
 //                << "  own:" << nei
 //                << "  nei:" << own
 //                << "  flipFaceFlux:" << flipFaceFlux
-//                << "  newPatchIDs:" << newPatchIDs
+//                << "  newPatchID:" << newPatchID
 //                << "  removeFromZone:" << removeFromZone
 //                << "  zoneID:" << zoneID
 //                << "  zoneFlip:" << zoneFlip
@@ -541,11 +546,10 @@ void Foam::removeFaces::modFace
                 nei,            // owner
                 own,            // neighbour
                 flipFaceFlux,   // face flip
-                newPatchIDs[0], // patch for face
+                newPatchID,     // patch for face
                 removeFromZone, // remove from zone
                 zoneID,         // zone for face
-                zoneFlip,       // face flip in zone
-                newPatchIDs[1]
+                zoneFlip        // face flip in zone
             )
         );
     }
@@ -1461,9 +1465,9 @@ void Foam::removeFaces::setRefinement
                 own = cellRegionMaster[cellRegion[own]];
             }
 
-            labelPair patchIDs;
-            label zoneID, zoneFlip;
-            getFaceInfo(faceI, patchIDs, zoneID, zoneFlip);
+            label patchID, zoneID, zoneFlip;
+
+            getFaceInfo(faceI, patchID, zoneID, zoneFlip);
 
             label nei = -1;
 
@@ -1494,7 +1498,7 @@ void Foam::removeFaces::setRefinement
                 own,                // owner
                 nei,                // neighbour
                 false,              // face flip
-                patchIDs,           // patchinfo for face
+                patchID,            // patch for face
                 false,              // remove from zone
                 zoneID,             // zone for face
                 zoneFlip,           // face flip in zone

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,105 +25,109 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-
 #include "BSpline.H"
-#include "simpleMatrix.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-Foam::pointField Foam::BSpline::findKnots
-(
-    const pointField& allknots,
-    const vector& fstend,
-    const vector& sndend
-)
-{
-    const label NKnots = allknots.size();
-
-    // set up 1/6 and 2/3 which are the matrix elements throughout most
-    // of the matrix
-
-    register const scalar oneSixth = 1.0/6.0;
-    register const scalar twoThird = 2.0/3.0;
-
-    simpleMatrix<vector> M(NKnots+2, 0, vector::zero);
-
-    // set up the matrix
-    M[0][0] = -0.5*scalar(NKnots - 1);
-    M[0][2] =  0.5*scalar(NKnots - 1);
-
-    for (register label i = 1; i <= NKnots; i++)
-    {
-        M[i][i-1] = oneSixth;
-        M[i][i] = twoThird;
-        M[i][i+1] = oneSixth;
-    }
-
-    M[NKnots+1][NKnots-1] = -0.5*scalar(NKnots - 1);
-    M[NKnots+1][NKnots+1] =  0.5*scalar(NKnots - 1);
-
-    // set up the vector
-    for (register label i = 1; i <= NKnots; i++)
-    {
-        M.source()[i] = allknots[i-1];
-    }
-
-    // set the gradients at the ends:
-
-    if (mag(fstend) < 1e-8)
-    {
-        // default : forward differences on the end knots
-        M.source()[0] = allknots[1] - allknots[0];
-        M.source()[0] /= mag(M.source()[0]);
-    }
-    else
-    {
-        // use the gradient vector provided
-        M.source()[0] = fstend/mag(fstend);
-    }
-
-    if (mag(sndend)<1e-8)
-    {
-        // default : forward differences on the end knots
-        M.source()[NKnots+1] = M.source()[NKnots-1] - M.source()[NKnots];
-        M.source()[NKnots+1] /= mag(M.source()[NKnots+1]);
-    }
-    else
-    {
-        // use the gradient vector provided
-        M.source()[NKnots+1] = sndend/mag(sndend);
-    }
-
-
-    // invert the equation to find the control knots
-    return M.solve();
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::BSpline::BSpline
 (
-    const pointField& Knots,
-    const vector& fstend,
-    const vector& sndend
+    const pointField& knots,
+    const bool closed
 )
 :
-    spline(findKnots(Knots, fstend, sndend))
+    polyLine(knots, closed)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::vector Foam::BSpline::realPosition(const scalar mu) const
+Foam::point Foam::BSpline::position(const scalar mu) const
 {
-    return spline::position(mu);
+    // endpoints
+    if (mu < SMALL)
+    {
+        return points().first();
+    }
+    else if (mu > 1 - SMALL)
+    {
+        return points().last();
+    }
+
+    scalar lambda = mu;
+    label segment = localParameter(lambda);
+    return position(segment, lambda);
 }
 
 
-Foam::vector Foam::BSpline::position(const scalar mu) const
+Foam::point Foam::BSpline::position
+(
+    const label segment,
+    const scalar mu
+) const
 {
-    return spline::position((1.0/(nKnots() - 1))*(1.0 + mu*(nKnots() - 3)));
+    // out-of-bounds
+    if (segment < 0)
+    {
+        return points().first();
+    }
+    else if (segment > nSegments())
+    {
+        return points().last();
+    }
+
+    const point& p0 = points()[segment];
+    const point& p1 = points()[segment+1];
+
+    // special cases - no calculation needed
+    if (mu <= 0.0)
+    {
+        return p0;
+    }
+    else if (mu >= 1.0)
+    {
+        return p1;
+    }
+
+
+    // determine the end points
+    point e0;
+    point e1;
+
+    if (segment == 0)
+    {
+        // end: simple reflection
+        e0 = 2*p0 - p1;
+    }
+    else
+    {
+        e0 = points()[segment-1];
+    }
+
+    if (segment+1 == nSegments())
+    {
+        // end: simple reflection
+        e1 = 2*p1 - p0;
+    }
+    else
+    {
+        e1 = points()[segment+2];
+    }
+
+
+    return 1.0/6.0 *
+    (
+        ( e0 + 4*p0 + p1 )
+      + mu *
+        (
+            ( -3*e0 + 3*p1 )
+          + mu *
+            (
+                ( 3*e0 - 6*p0 + 3*p1 )
+              + mu *
+                ( -e0 + 3*p0 - 3*p1 + e1 )
+            )
+        )
+    );
 }
 
 

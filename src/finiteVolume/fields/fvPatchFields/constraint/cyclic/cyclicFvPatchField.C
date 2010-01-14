@@ -143,200 +143,200 @@ cyclicFvPatchField<Type>::cyclicFvPatchField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Referred patch functionality
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-template<class Type>
-void cyclicFvPatchField<Type>::snGrad
-(
-    Field<Type>& exchangeBuf,
-    const Field<Type>& subFld,
-    const coupledFvPatch& referringPatch,
-    const label size,
-    const label start
-) const
-{
-    if (subFld.size() != size)
-    {
-        FatalErrorIn("cyclicFvPatchField<Type>::snGrad(..)")
-            << "Call with correct slice size." << abort(FatalError);
-    }
-
-    // Slice delta coeffs
-    SubField<scalar> subDc(referringPatch.deltaCoeffs(), size, start);
-
-    // Get internal field
-    tmp<Field<Type> > patchFld(new Field<Type>(size));
-    this->patchInternalField(patchFld(), referringPatch, size, start);
-
-    exchangeBuf = subDc * (subFld - patchFld);
-}
-
-
-template<class Type>
-void cyclicFvPatchField<Type>::initEvaluate
-(
-    Field<Type>& exchangeBuf,
-    const coupledFvPatch& referringPatch,
-    const label size,
-    const label start
-) const
-{
-    //? What about updateCoeffs? What if patch holds face-wise additional
-    // information? Where is it stored? Who updates it?
-//    if (!this->updated())
-//    {
-//        this->updateCoeffs();
-//    }
-
-    if (exchangeBuf.size() != size)
-    {
-        FatalErrorIn("cyclicFvPatchField<Type>::initEvaluate(..)")
-            << "Call with correct slice size." << abort(FatalError);
-    }
-
-    // Get sender side. Equivalent to (1-w)*patchNeighbourField() in non-remote
-    // version (so includes the transformation!).
-
-    //Pout<< "initEvaluate name:" << cyclicPatch_.name()
-    //    << " size:" << size << " start:" << start
-    //    << " referringPatch.weights():" << referringPatch.weights() << endl;
-
-    const SubField<scalar> subWeights
-    (
-        referringPatch.weights(),
-        size,
-        start
-    );
-
-    tmp<Field<Type> > patchFld(new Field<Type>(size));
-    this->patchInternalField(patchFld(), referringPatch, size, start);
-
-    //Pout<< "initEvaluate name:" << cyclicPatch_.name()
-    //    << " patchFld:" << patchFld()
-    //    << " subWeights:" << subWeights << endl;
-
-    if (doTransform())
-    {
-        //Pout<< "initEvaluate name:" << cyclicPatch_.name()
-        //    << " reverseT:" << reverseT() << endl;
-        tmp<Field<Type> > tfld =
-            (1.0-subWeights)
-          * transform(reverseT(), patchFld);
-
-        forAll(tfld(), i)
-        {
-            exchangeBuf[i] = tfld()[i];
-        }
-        //Pout<< "initEvaluate name:" << cyclicPatch_.name()
-        //    << " exchangeBuf:" << exchangeBuf << endl;
-    }
-    else
-    {
-        //Pout<< "initEvaluate name:" << cyclicPatch_.name()
-        //    << " no transform" << endl;
-        tmp<Field<Type> > tfld = (1.0-subWeights)*patchFld;
-
-        forAll(tfld(), i)
-        {
-            exchangeBuf[i] = tfld()[i];
-        }
-        //Pout<< "initEvaluate name:" << cyclicPatch_.name()
-        //    << " exchangeBuf:" << exchangeBuf << endl;
-    }
-}
-
-
-template<class Type>
-void cyclicFvPatchField<Type>::evaluate
-(
-    Field<Type>& exchangeBuf,
-    const coupledFvPatch& referringPatch,
-    const label size,
-    const label start
-) const
-{
-//    if (!this->updated())
-//    {
-//        this->updateCoeffs();
-//    }
-
-    if (exchangeBuf.size() != size)
-    {
-        FatalErrorIn("cyclicFvPatchField<Type>::evaluate(..)")
-            << "Call with correct slice size." << abort(FatalError);
-    }
-
-    const SubField<scalar> subWeights
-    (
-        referringPatch.weights(),
-        size,
-        start
-    );
-
-    tmp<Field<Type> > patchFld(new Field<Type>(size));
-    this->patchInternalField(patchFld(), referringPatch, size, start);
-
-    exchangeBuf += subWeights * patchFld;
-
-    //?? fvPatchField<Type>::evaluate();
-}
-
-
-template<class Type>
-void cyclicFvPatchField<Type>::initInterfaceMatrixUpdate
-(
-    const scalarField& psiInternal,
-    scalarField& result,
-    const lduMatrix&,
-    const scalarField& coeffs,
-    const direction,
-    const coupledFvPatch& referringPatch,
-    const label size,
-    const label start,
-    scalarField& exchangeBuf
-) const
-{
-    const unallocLabelList& faceCells = referringPatch.faceCells();
-
-    label facei = start;
-
-    forAll(exchangeBuf, elemI)
-    {
-        exchangeBuf[elemI] = psiInternal[faceCells[facei++]];
-    }
-}
-
-
-template<class Type>
-void cyclicFvPatchField<Type>::updateInterfaceMatrix
-(
-    const scalarField& psiInternal,
-    scalarField& result,
-    const lduMatrix&,
-    const scalarField& coeffs,
-    const direction cmpt,
-    const coupledFvPatch& referringPatch,
-    const label size,
-    const label start,
-    scalarField& exchangeBuf
-) const
-{
-    // Transform according to the transformation tensor
-    transformCoupleField(exchangeBuf, cmpt);
-
-    // Multiply the field by coefficients and add into the result
-
-    const unallocLabelList& faceCells = referringPatch.faceCells();
-
-    label facei = start;
-
-    forAll(exchangeBuf, elemI)
-    {
-        result[faceCells[facei]] -= coeffs[facei]*exchangeBuf[elemI];
-        facei++;
-    }
-}
+// // Referred patch functionality
+// // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 
+// template<class Type>
+// void cyclicFvPatchField<Type>::snGrad
+// (
+//     Field<Type>& exchangeBuf,
+//     const Field<Type>& subFld,
+//     const coupledFvPatch& referringPatch,
+//     const label size,
+//     const label start
+// ) const
+// {
+//     if (subFld.size() != size)
+//     {
+//         FatalErrorIn("cyclicFvPatchField<Type>::snGrad(..)")
+//             << "Call with correct slice size." << abort(FatalError);
+//     }
+// 
+//     // Slice delta coeffs
+//     SubField<scalar> subDc(referringPatch.deltaCoeffs(), size, start);
+// 
+//     // Get internal field
+//     tmp<Field<Type> > patchFld(new Field<Type>(size));
+//     this->patchInternalField(patchFld(), referringPatch, size, start);
+// 
+//     exchangeBuf = subDc * (subFld - patchFld);
+// }
+// 
+// 
+// template<class Type>
+// void cyclicFvPatchField<Type>::initEvaluate
+// (
+//     Field<Type>& exchangeBuf,
+//     const coupledFvPatch& referringPatch,
+//     const label size,
+//     const label start
+// ) const
+// {
+//     //? What about updateCoeffs? What if patch holds face-wise additional
+//     // information? Where is it stored? Who updates it?
+// //    if (!this->updated())
+// //    {
+// //        this->updateCoeffs();
+// //    }
+// 
+//     if (exchangeBuf.size() != size)
+//     {
+//         FatalErrorIn("cyclicFvPatchField<Type>::initEvaluate(..)")
+//             << "Call with correct slice size." << abort(FatalError);
+//     }
+// 
+//     // Get sender side. Equivalent to (1-w)*patchNeighbourField() in non-remote
+//     // version (so includes the transformation!).
+// 
+//     //Pout<< "initEvaluate name:" << cyclicPatch_.name()
+//     //    << " size:" << size << " start:" << start
+//     //    << " referringPatch.weights():" << referringPatch.weights() << endl;
+// 
+//     const SubField<scalar> subWeights
+//     (
+//         referringPatch.weights(),
+//         size,
+//         start
+//     );
+// 
+//     tmp<Field<Type> > patchFld(new Field<Type>(size));
+//     this->patchInternalField(patchFld(), referringPatch, size, start);
+// 
+//     //Pout<< "initEvaluate name:" << cyclicPatch_.name()
+//     //    << " patchFld:" << patchFld()
+//     //    << " subWeights:" << subWeights << endl;
+// 
+//     if (doTransform())
+//     {
+//         //Pout<< "initEvaluate name:" << cyclicPatch_.name()
+//         //    << " reverseT:" << reverseT() << endl;
+//         tmp<Field<Type> > tfld =
+//             (1.0-subWeights)
+//           * transform(reverseT(), patchFld);
+// 
+//         forAll(tfld(), i)
+//         {
+//             exchangeBuf[i] = tfld()[i];
+//         }
+//         //Pout<< "initEvaluate name:" << cyclicPatch_.name()
+//         //    << " exchangeBuf:" << exchangeBuf << endl;
+//     }
+//     else
+//     {
+//         //Pout<< "initEvaluate name:" << cyclicPatch_.name()
+//         //    << " no transform" << endl;
+//         tmp<Field<Type> > tfld = (1.0-subWeights)*patchFld;
+// 
+//         forAll(tfld(), i)
+//         {
+//             exchangeBuf[i] = tfld()[i];
+//         }
+//         //Pout<< "initEvaluate name:" << cyclicPatch_.name()
+//         //    << " exchangeBuf:" << exchangeBuf << endl;
+//     }
+// }
+// 
+// 
+// template<class Type>
+// void cyclicFvPatchField<Type>::evaluate
+// (
+//     Field<Type>& exchangeBuf,
+//     const coupledFvPatch& referringPatch,
+//     const label size,
+//     const label start
+// ) const
+// {
+// //    if (!this->updated())
+// //    {
+// //        this->updateCoeffs();
+// //    }
+// 
+//     if (exchangeBuf.size() != size)
+//     {
+//         FatalErrorIn("cyclicFvPatchField<Type>::evaluate(..)")
+//             << "Call with correct slice size." << abort(FatalError);
+//     }
+// 
+//     const SubField<scalar> subWeights
+//     (
+//         referringPatch.weights(),
+//         size,
+//         start
+//     );
+// 
+//     tmp<Field<Type> > patchFld(new Field<Type>(size));
+//     this->patchInternalField(patchFld(), referringPatch, size, start);
+// 
+//     exchangeBuf += subWeights * patchFld;
+// 
+//     //?? fvPatchField<Type>::evaluate();
+// }
+// 
+// 
+// template<class Type>
+// void cyclicFvPatchField<Type>::initInterfaceMatrixUpdate
+// (
+//     const scalarField& psiInternal,
+//     scalarField& result,
+//     const lduMatrix&,
+//     const scalarField& coeffs,
+//     const direction,
+//     const coupledFvPatch& referringPatch,
+//     const label size,
+//     const label start,
+//     scalarField& exchangeBuf
+// ) const
+// {
+//     const unallocLabelList& faceCells = referringPatch.faceCells();
+// 
+//     label facei = start;
+// 
+//     forAll(exchangeBuf, elemI)
+//     {
+//         exchangeBuf[elemI] = psiInternal[faceCells[facei++]];
+//     }
+// }
+// 
+// 
+// template<class Type>
+// void cyclicFvPatchField<Type>::updateInterfaceMatrix
+// (
+//     const scalarField& psiInternal,
+//     scalarField& result,
+//     const lduMatrix&,
+//     const scalarField& coeffs,
+//     const direction cmpt,
+//     const coupledFvPatch& referringPatch,
+//     const label size,
+//     const label start,
+//     scalarField& exchangeBuf
+// ) const
+// {
+//     // Transform according to the transformation tensor
+//     transformCoupleField(exchangeBuf, cmpt);
+// 
+//     // Multiply the field by coefficients and add into the result
+// 
+//     const unallocLabelList& faceCells = referringPatch.faceCells();
+// 
+//     label facei = start;
+// 
+//     forAll(exchangeBuf, elemI)
+//     {
+//         result[faceCells[facei]] -= coeffs[facei]*exchangeBuf[elemI];
+//         facei++;
+//     }
+// }
 
 
 // Local patch functionality

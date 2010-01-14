@@ -105,7 +105,7 @@ class hexRef8
         void getFaceInfo
         (
             const label faceI,
-            labelPair& patchIDs,
+            label& patchID,
             label& zoneID,
             label& zoneFlip
         ) const;

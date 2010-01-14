@@ -654,8 +654,6 @@ void Foam::polyMesh::resetPrimitives
     const Xfer<labelList>& neighbour,
     const labelList& patchSizes,
     const labelList& patchStarts,
-    const labelListList& subPatches,
-    const labelListList& subPatchStarts,
     const bool validBoundary
 )
 {
@@ -697,17 +695,6 @@ void Foam::polyMesh::resetPrimitives
             patchI,
             boundary_
         );
-
-        if (isA<processorPolyPatch>(boundary_[patchI]))
-        {
-            // Set the sub-patch information
-            processorPolyPatch& ppp = refCast<processorPolyPatch>
-            (
-                boundary_[patchI]
-            );
-            const_cast<labelList&>(ppp.patchIDs()) = subPatches[patchI];
-            const_cast<labelList&>(ppp.starts()) = subPatchStarts[patchI];
-        }
     }
 
 
@@ -731,8 +718,6 @@ void Foam::polyMesh::resetPrimitives
                 "    const Xfer<labelList>& neighbour,\n"
                 "    const labelList& patchSizes,\n"
                 "    const labelList& patchStarts\n"
-                "    const labelListList& subPatches,\n"
-                "    const labelListList& subPatchStarts,\n"
                 "    const bool validBoundary\n"
                 ")\n"
             )   << "Face " << faceI << " contains vertex labels out of range: "
@@ -772,8 +757,6 @@ void Foam::polyMesh::resetPrimitives
                 "    const Xfer<labelList>& neighbour,\n"
                 "    const labelList& patchSizes,\n"
                 "    const labelList& patchStarts\n"
-                "    const labelListList& subPatches,\n"
-                "    const labelListList& subPatchStarts,\n"
                 "    const bool validBoundary\n"
                 ")\n"
             )   << "no points or no cells in mesh" << endl;

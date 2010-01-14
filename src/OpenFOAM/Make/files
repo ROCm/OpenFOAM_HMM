@@ -335,6 +335,7 @@ $(constraintPolyPatches)/empty/emptyPolyPatch.C
 $(constraintPolyPatches)/symmetry/symmetryPolyPatch.C
 $(constraintPolyPatches)/wedge/wedgePolyPatch.C
 $(constraintPolyPatches)/cyclic/cyclicPolyPatch.C
+$(constraintPolyPatches)/processorCyclic/processorCyclicPolyPatch.C
 $(constraintPolyPatches)/processor/processorPolyPatch.C
 
 derivedPolyPatches = $(polyPatches)/derived
@@ -446,6 +447,7 @@ $(constraintPointPatches)/symmetry/symmetryPointPatch.C
 $(constraintPointPatches)/wedge/wedgePointPatch.C
 $(constraintPointPatches)/cyclic/cyclicPointPatch.C
 $(constraintPointPatches)/processor/processorPointPatch.C
+$(constraintPointPatches)/processorCyclic/processorCyclicPointPatch.C
 
 derivedPointPatches = $(pointPatches)/derived
 $(derivedPointPatches)/coupled/coupledFacePointPatch.C
@@ -501,6 +503,7 @@ $(constraintPointPatchFields)/symmetry/symmetryPointPatchFields.C
 $(constraintPointPatchFields)/wedge/wedgePointPatchFields.C
 $(constraintPointPatchFields)/cyclic/cyclicPointPatchFields.C
 $(constraintPointPatchFields)/processor/processorPointPatchFields.C
+$(constraintPointPatchFields)/processorCyclic/processorCyclicPointPatchFields.C
 
 derivedPointPatchFields = $(pointPatchFields)/derived
 $(derivedPointPatchFields)/slip/slipPointPatchFields.C

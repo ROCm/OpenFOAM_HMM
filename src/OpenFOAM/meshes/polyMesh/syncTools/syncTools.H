@@ -100,11 +100,14 @@ public:
         class transform
         {
         public:
+            //- Transform Field
             template<class T>
             void operator()(const coupledPolyPatch& cpp, Field<T>& fld) const
             {
                 cpp.transform(fld);
             }
+
+            //- Transform generic container
             template<class T, template<class> class Container>
             void operator()(const coupledPolyPatch& cpp, Container<T>& map)
             const

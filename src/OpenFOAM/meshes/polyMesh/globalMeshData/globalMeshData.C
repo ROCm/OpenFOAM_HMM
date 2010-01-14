@@ -747,20 +747,10 @@ void Foam::globalMeshData::updateMesh()
     {
         label patchI = processorPatches_[i];
 
-        const processorPolyPatch& procPatch =
-            refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchI]);
-
-        if (Pstream::myProcNo() > procPatch.neighbProcNo())
+        if (isType<processorPolyPatch>(mesh_.boundaryMesh()[patchI]))
         {
-            forAll(procPatch.patchIDs(), i)
-            {
-                if (procPatch.patchIDs()[i] == -1)
-                {
-                    // Normal, unseparated processor patch. Remove duplicates.
-                    label sz = procPatch.starts()[i+1]-procPatch.starts()[i];
-                    nTotalFaces_ -= sz;
-                }
-            }
+            // Normal, unseparated processor patch. Remove duplicates.
+            nTotalFaces_ -= mesh_.boundaryMesh()[patchI].size();
         }
     }
     reduce(nTotalFaces_, sumOp<label>());

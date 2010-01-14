@@ -50,8 +50,9 @@ Description
     To see if point is equal to above value we don't use == (which might give
     problems with roundoff error) but instead compare the individual component
     with >.
-    - coupled patches: the reorderCoupledFaces routine reorders coupled patch
-    faces and uses the cyclicPolyPatch,processorPolyPatch functionality.
+    - coupled patches: the reorderCoupledFaces routine (borrowed from
+    the couplePatches utility) reorders coupled patch faces and
+    uses the cyclicPolyPatch,processorPolyPatch functionality.
 
 SourceFiles
     polyTopoChange.C
@@ -469,6 +470,15 @@ public:
                 const labelList& pointZoneMap,
                 const labelList& faceZoneMap,
                 const labelList& cellZoneMap
+            );
+
+            //- Explicitly pre-size the dynamic storage for expected mesh
+            //  size for if construct-without-mesh
+            void setCapacity
+            (
+                const label nPoints,
+                const label nFaces,
+                const label nCells
             );
 
             //- Move all points. Incompatible with other topology changes.

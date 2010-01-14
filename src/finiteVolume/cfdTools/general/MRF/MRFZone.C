@@ -29,6 +29,7 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "fvMatrices.H"
+#include "syncTools.H"
 #include "faceSet.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

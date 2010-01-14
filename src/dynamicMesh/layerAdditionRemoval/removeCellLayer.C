@@ -235,9 +235,9 @@ void Foam::layerAdditionRemoval::removeCellLayer
                     mesh.faceZones()[modifiedFaceZone].whichFace(curFaceID)
                 ];
         }
-        
+
         label newNei;
-        
+
         if (curFaceID < mesh.nInternalFaces())
         {
             newNei = nei[curFaceID];
@@ -246,12 +246,6 @@ void Foam::layerAdditionRemoval::removeCellLayer
         {
             newNei = -1;
         }
-
-        labelPair patchIDs = polyTopoChange::whichPatch
-        (
-            mesh.boundaryMesh(),
-            curFaceID
-        );
 
         // Modify the face
         ref.setAction
@@ -263,11 +257,10 @@ void Foam::layerAdditionRemoval::removeCellLayer
                 own[curFaceID],         // owner
                 newNei,                 // neighbour
                 false,                  // face flip
-                patchIDs[0],            // patch for face
+                mesh.boundaryMesh().whichPatch(curFaceID),// patch for face
                 false,                  // remove from zone
                 modifiedFaceZone,       // zone for face
-                modifiedFaceZoneFlip,   // face flip in zone
-                patchIDs[1]             // subpatch
+                modifiedFaceZoneFlip    // face flip in zone
             )
         );
     }
@@ -303,14 +296,12 @@ void Foam::layerAdditionRemoval::removeCellLayer
         label newOwner = -1;
         label newNeighbour = -1;
         bool flipFace = false;
-        labelPair newPatchIDs(-1, -1);
-        //label newPatchID = -1;
-        //label newSubPatchID = -1;
+        label newPatchID = -1;
         label newZoneID = -1;
 
         // Is any of the faces a boundary face?  If so, grab the patch
         // A boundary-to-boundary collapse is checked for in validCollapse()
-        // and cannot happen here.  
+        // and cannot happen here.
 
         if (!mesh.isInternalFace(mf[faceI]))
         {
@@ -318,11 +309,7 @@ void Foam::layerAdditionRemoval::removeCellLayer
             newOwner = slaveSideCell;
             newNeighbour = -1;
             flipFace = false;
-            newPatchIDs = polyTopoChange::whichPatch
-            (
-                mesh.boundaryMesh(),
-                mf[faceI]
-            );
+            newPatchID = mesh.boundaryMesh().whichPatch(mf[faceI]);
             newZoneID = mesh.faceZones().whichZone(mf[faceI]);
         }
         else if (!mesh.isInternalFace(ftc[faceI]))
@@ -341,11 +328,7 @@ void Foam::layerAdditionRemoval::removeCellLayer
                 flipFace = true;
             }
 
-            newPatchIDs = polyTopoChange::whichPatch
-            (
-                mesh.boundaryMesh(),
-                ftc[faceI]
-            );
+            newPatchID = mesh.boundaryMesh().whichPatch(ftc[faceI]);
 
             // The zone of the master face is preserved
             newZoneID = mesh.faceZones().whichZone(mf[faceI]);
@@ -366,7 +349,7 @@ void Foam::layerAdditionRemoval::removeCellLayer
                 flipFace = true;
             }
 
-            newPatchIDs = labelPair(-1, -1);
+            newPatchID = -1;
 
             // The zone of the master face is preserved
             newZoneID = mesh.faceZones().whichZone(mf[faceI]);
@@ -396,16 +379,15 @@ void Foam::layerAdditionRemoval::removeCellLayer
         (
             polyModifyFace
             (
-                newFace,        // modified face
-                mf[faceI],      // label of face being modified
-                newOwner,       // owner
-                newNeighbour,   // neighbour
-                flipFace,       // flip
-                newPatchIDs[0], // patch for face
-                false,          // remove from zone
-                newZoneID,      // new zone
-                zoneFlip,       // face flip in zone
-                newPatchIDs[1]  // subpatch for face
+                newFace,       // modified face
+                mf[faceI],     // label of face being modified
+                newOwner,      // owner
+                newNeighbour,  // neighbour
+                flipFace,      // flip
+                newPatchID,    // patch for face
+                false,         // remove from zone
+                newZoneID,     // new zone
+                zoneFlip       // face flip in zone
             )
         );
     }

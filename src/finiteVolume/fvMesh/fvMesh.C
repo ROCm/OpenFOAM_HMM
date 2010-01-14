@@ -354,7 +354,7 @@ Foam::polyMesh::readUpdateState Foam::fvMesh::readUpdate()
     {
         if (debug)
         {
-            Info << "Boundary and topological update" << endl;
+            Info<< "Boundary and topological update" << endl;
         }
 
         boundary_.readUpdate(boundaryMesh());
@@ -366,7 +366,7 @@ Foam::polyMesh::readUpdateState Foam::fvMesh::readUpdate()
     {
         if (debug)
         {
-            Info << "Topological update" << endl;
+            Info<< "Topological update" << endl;
         }
 
         clearOut();
@@ -375,7 +375,7 @@ Foam::polyMesh::readUpdateState Foam::fvMesh::readUpdate()
     {
         if (debug)
         {
-            Info << "Point motion update" << endl;
+            Info<< "Point motion update" << endl;
         }
 
         clearGeom();
@@ -384,7 +384,7 @@ Foam::polyMesh::readUpdateState Foam::fvMesh::readUpdate()
     {
         if (debug)
         {
-            Info << "No update" << endl;
+            Info<< "No update" << endl;
         }
     }
 

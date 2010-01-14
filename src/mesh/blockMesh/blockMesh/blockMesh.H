@@ -113,7 +113,6 @@ class blockMesh
         bool readPatches
         (
             const dictionary& meshDescription,
-            const pointField& tmpBlockPoints,
             faceListList& tmpBlocksPatches,
             wordList& patchNames,
             wordList& patchTypes,
@@ -123,16 +122,11 @@ class blockMesh
         bool readBoundary
         (
             const dictionary& meshDescription,
-            const pointField& tmpBlockPoints,
             faceListList& tmpBlocksPatches,
             PtrList<dictionary>& patchDicts
         );
 
-        void createCellShapes
-        (
-            const pointField& tmpBlockPoints,
-            PtrList<cellShape>& tmpBlockCells
-        );
+        void createCellShapes(cellShapeList& tmpBlockCells);
 
         polyMesh* createTopology(IOdictionary&);
         void checkBlockMesh(const polyMesh&) const;

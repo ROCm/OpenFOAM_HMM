@@ -110,105 +110,105 @@ coupledFvPatchField<Type>::coupledFvPatchField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Referred patch functionality
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-template<class Type>
-void coupledFvPatchField<Type>::patchInternalField
-(
-    Field<Type>& exchangeBuf,
-    const coupledFvPatch& referringPatch,
-    const label size,
-    const label start
-) const
-{
-    if (start+size > referringPatch.size())
-    {
-        FatalErrorIn("coupledFvPatchField<Type>::patchInternalField(..)")
-            << "patch size:" << referringPatch.size()
-            << " start:" << start << " size:" << size
-            << abort(FatalError);
-    }
-
-    const unallocLabelList& faceCells = referringPatch.faceCells();
-
-    exchangeBuf.setSize(this->size());
-
-    label facei = start;
-    forAll(exchangeBuf, i)
-    {
-        exchangeBuf[i] = this->internalField()[faceCells[facei++]];
-    }
-}
-
-
-template<class Type>
-tmp<Field<Type> > coupledFvPatchField<Type>::valueInternalCoeffs
-(
-    const coupledFvPatch& referringPatch,
-    const label size,
-    const label start,
-    const tmp<scalarField>& w
-) const
-{
-    // ? check what is passed in!
-    if (w().size() != size)
-    {
-        FatalErrorIn("coupledFvPatchField<Type>::valueInternalCoeffs(..)")
-            << "Call with correct slice size." << abort(FatalError);
-    }
-    return Type(pTraits<Type>::one)*w;
-}
-
-
-template<class Type>
-tmp<Field<Type> > coupledFvPatchField<Type>::valueBoundaryCoeffs
-(
-    const coupledFvPatch& referringPatch,
-    const label size,
-    const label start,
-    const tmp<scalarField>& w
-) const
-{
-    // ? check what is passed in!
-    if (w().size() != size)
-    {
-        FatalErrorIn("coupledFvPatchField<Type>::valueBoundaryCoeffs(..)")
-            << "Call with correct slice size." << abort(FatalError);
-    }
-    return Type(pTraits<Type>::one)*(1.0 - w);
-}
-
-
-template<class Type>
-tmp<Field<Type> > coupledFvPatchField<Type>::gradientInternalCoeffs
-(
-    const coupledFvPatch& referringPatch,
-    const label size,
-    const label start
-) const
-{
-    SubField<scalar> subDc(referringPatch.deltaCoeffs(), size, start);
-
-    return -Type(pTraits<Type>::one)*subDc;
-}
-
-
-template<class Type>
-tmp<Field<Type> > coupledFvPatchField<Type>::gradientBoundaryCoeffs
-(
-    const coupledFvPatch& referringPatch,
-    const label size,
-    const label start
-) const
-{
-    return -this->gradientInternalCoeffs
-    (
-        referringPatch,
-        size,
-        start
-    );
-}
+// // Referred patch functionality
+// // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 
+// template<class Type>
+// void coupledFvPatchField<Type>::patchInternalField
+// (
+//     Field<Type>& exchangeBuf,
+//     const coupledFvPatch& referringPatch,
+//     const label size,
+//     const label start
+// ) const
+// {
+//     if (start+size > referringPatch.size())
+//     {
+//         FatalErrorIn("coupledFvPatchField<Type>::patchInternalField(..)")
+//             << "patch size:" << referringPatch.size()
+//             << " start:" << start << " size:" << size
+//             << abort(FatalError);
+//     }
+// 
+//     const unallocLabelList& faceCells = referringPatch.faceCells();
+// 
+//     exchangeBuf.setSize(this->size());
+// 
+//     label facei = start;
+//     forAll(exchangeBuf, i)
+//     {
+//         exchangeBuf[i] = this->internalField()[faceCells[facei++]];
+//     }
+// }
+// 
+// 
+// template<class Type>
+// tmp<Field<Type> > coupledFvPatchField<Type>::valueInternalCoeffs
+// (
+//     const coupledFvPatch& referringPatch,
+//     const label size,
+//     const label start,
+//     const tmp<scalarField>& w
+// ) const
+// {
+//     // ? check what is passed in!
+//     if (w().size() != size)
+//     {
+//         FatalErrorIn("coupledFvPatchField<Type>::valueInternalCoeffs(..)")
+//             << "Call with correct slice size." << abort(FatalError);
+//     }
+//     return Type(pTraits<Type>::one)*w;
+// }
+// 
+// 
+// template<class Type>
+// tmp<Field<Type> > coupledFvPatchField<Type>::valueBoundaryCoeffs
+// (
+//     const coupledFvPatch& referringPatch,
+//     const label size,
+//     const label start,
+//     const tmp<scalarField>& w
+// ) const
+// {
+//     // ? check what is passed in!
+//     if (w().size() != size)
+//     {
+//         FatalErrorIn("coupledFvPatchField<Type>::valueBoundaryCoeffs(..)")
+//             << "Call with correct slice size." << abort(FatalError);
+//     }
+//     return Type(pTraits<Type>::one)*(1.0 - w);
+// }
+// 
+// 
+// template<class Type>
+// tmp<Field<Type> > coupledFvPatchField<Type>::gradientInternalCoeffs
+// (
+//     const coupledFvPatch& referringPatch,
+//     const label size,
+//     const label start
+// ) const
+// {
+//     SubField<scalar> subDc(referringPatch.deltaCoeffs(), size, start);
+// 
+//     return -Type(pTraits<Type>::one)*subDc;
+// }
+// 
+// 
+// template<class Type>
+// tmp<Field<Type> > coupledFvPatchField<Type>::gradientBoundaryCoeffs
+// (
+//     const coupledFvPatch& referringPatch,
+//     const label size,
+//     const label start
+// ) const
+// {
+//     return -this->gradientInternalCoeffs
+//     (
+//         referringPatch,
+//         size,
+//         start
+//     );
+// }
 
 
 // Local patch functionality
@@ -218,10 +218,7 @@ template<class Type>
 tmp<Field<Type> > coupledFvPatchField<Type>::snGrad() const
 {
     return
-        (
-            this->patchNeighbourField()
-          - this->fvPatchField<Type>::patchInternalField()
-        )
+        (this->patchNeighbourField() - this->patchInternalField())
        *this->patch().deltaCoeffs();
 }
 
@@ -246,14 +243,8 @@ void coupledFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 
     Field<Type>::operator=
     (
-        (
-            this->patch().weights()
-          * this->fvPatchField<Type>::patchInternalField()
-        )
-      + (
-            (1.0 - this->patch().weights())
-          * this->patchNeighbourField()
-        )
+        this->patch().weights()*this->patchInternalField()
+      + (1.0 - this->patch().weights())*this->patchNeighbourField()
     );
 
     fvPatchField<Type>::evaluate();

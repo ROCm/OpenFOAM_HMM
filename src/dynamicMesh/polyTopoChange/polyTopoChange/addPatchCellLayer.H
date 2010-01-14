@@ -193,7 +193,7 @@ class addPatchCellLayer
         label addSideFace
         (
             const indirectPrimitivePatch&,
-            const List<labelPair>& patchIDs,
+            const labelList& patchID,
             const labelListList& addedCells,
             const face& newFace,
             const label ownFaceI,

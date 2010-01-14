@@ -149,13 +149,13 @@ public:
                 }
             }
 
-            //- Does the patch field perform the transfromation
+            //- Does the patch field perform the transformation
             virtual bool doTransform() const
             {
                 return
                    !(
                         pTraits<Type>::rank == 0
-                     || procPatch_.procPolyPatch().parallel()
+                     || procPatch_.procPolyPatch().doTransform()
                     );
             }
 

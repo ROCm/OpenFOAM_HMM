@@ -84,7 +84,7 @@ class boundaryCutter
         void getFaceInfo
         (
             const label faceI,
-            labelPair& patchID,
+            label& patchID,
             label& zoneID,
             label& zoneFlip
         ) const;

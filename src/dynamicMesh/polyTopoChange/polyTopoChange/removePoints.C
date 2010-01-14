@@ -106,17 +106,17 @@ void Foam::removePoints::modifyFace
 ) const
 {
     // Get other face data.
-    labelPair patchIDs = polyTopoChange::whichPatch
-    (
-        mesh_.boundaryMesh(),
-        faceI
-    );
+    label patchI = -1;
     label owner = mesh_.faceOwner()[faceI];
     label neighbour = -1;
 
     if (mesh_.isInternalFace(faceI))
     {
         neighbour = mesh_.faceNeighbour()[faceI];
+    }
+    else
+    {
+        patchI = mesh_.boundaryMesh().whichPatch(faceI);
     }
 
     label zoneID = mesh_.faceZones().whichZone(faceI);
@@ -139,11 +139,10 @@ void Foam::removePoints::modifyFace
             owner,          // owner
             neighbour,      // neighbour
             false,          // face flip
-            patchIDs[0],    // patch for face
+            patchI,         // patch for face
             false,          // remove from zone
             zoneID,         // zone for face
-            zoneFlip,       // face flip in zone
-            patchIDs[1]
+            zoneFlip        // face flip in zone
         )
     );
 }
@@ -304,7 +303,7 @@ void Foam::removePoints::setRefinement
         savedPoints_.setSize(nDeleted);
         pointToSaved.resize(2*nDeleted);
     }
-    
+
 
     // Remove points
     // ~~~~~~~~~~~~~
@@ -737,7 +736,7 @@ void Foam::removePoints::getUnrefimentSet
     localPoints = localPointsSet.toc();
 
 
-    // Collect all saved faces using any localPointsSet 
+    // Collect all saved faces using any localPointsSet
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     labelHashSet localFacesSet(2*undoFaces.size());

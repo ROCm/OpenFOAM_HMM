@@ -90,8 +90,8 @@ class polyPatch
 
     // Private Member Functions
 
-        //- Calculate labels of mesh edges
-        void calcMeshEdges() const;
+//        //- Calculate labels of mesh edges
+//        void calcMeshEdges() const;
 
 
 protected:

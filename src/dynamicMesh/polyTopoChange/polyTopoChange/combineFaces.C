@@ -62,7 +62,7 @@ bool Foam::combineFaces::convexFace
     n /= mag(n);
 
     // Get edge from f[0] to f[size-1];
-    vector ePrev(points[f[0]] - points[f[f.size()-1]]);
+    vector ePrev(points[f.first()] - points[f.last()]);
     scalar magEPrev = mag(ePrev);
     ePrev /= magEPrev + VSMALL;
 
@@ -658,11 +658,7 @@ void Foam::combineFaces::setRefinement
             zoneFlip = fZone.flipMap()[fZone.whichFace(masterFaceI)];
         }
 
-        labelPair patchIDs = polyTopoChange::whichPatch
-        (
-            mesh_.boundaryMesh(),
-            masterFaceI
-        );
+        label patchI = mesh_.boundaryMesh().whichPatch(masterFaceI);
 
         meshMod.setAction
         (
@@ -673,11 +669,10 @@ void Foam::combineFaces::setRefinement
                 mesh_.faceOwner()[masterFaceI], // owner
                 -1,                             // neighbour
                 false,                          // face flip
-                patchIDs[0],                    // patch for face
+                patchI,                         // patch for face
                 false,                          // remove from zone
                 zoneID,                         // zone for face
-                zoneFlip,                       // face flip in zone
-                patchIDs[1]
+                zoneFlip                        // face flip in zone
             )
         );
 
@@ -961,13 +956,9 @@ void Foam::combineFaces::setUnrefinement
             const faceZone& fZone = mesh_.faceZones()[zoneID];
             zoneFlip = fZone.flipMap()[fZone.whichFace(masterFaceI)];
         }
-        labelPair patchIDs = polyTopoChange::whichPatch
-        (
-            mesh_.boundaryMesh(),
-            masterFaceI
-        );
+        label patchI = mesh_.boundaryMesh().whichPatch(masterFaceI);
 
-        if (mesh_.boundaryMesh()[patchIDs[0]].coupled())
+        if (mesh_.boundaryMesh()[patchI].coupled())
         {
             FatalErrorIn
             (
@@ -975,7 +966,7 @@ void Foam::combineFaces::setUnrefinement
                 "(const labelList&, polyTopoChange&"
                 ", Map<label>&, Map<label>&, Map<label>&)"
             )   << "Master face " << masterFaceI << " is on coupled patch "
-                << mesh_.boundaryMesh()[patchIDs[0]].name()
+                << mesh_.boundaryMesh()[patchI].name()
                 << abort(FatalError);
         }
 
@@ -992,11 +983,10 @@ void Foam::combineFaces::setUnrefinement
                 own,                            // owner
                 -1,                             // neighbour
                 false,                          // face flip
-                patchIDs[0],                    // patch for face
+                patchI,                         // patch for face
                 false,                          // remove from zone
                 zoneID,                         // zone for face
-                zoneFlip,                       // face flip in zone
-                patchIDs[1]                     // subPatchID
+                zoneFlip                        // face flip in zone
             )
         );
 
@@ -1010,17 +1000,16 @@ void Foam::combineFaces::setUnrefinement
             (
                 polyAddFace
                 (
-                    faces[i],                   // vertices
-                    own,                        // owner,
-                    -1,                         // neighbour,
-                    -1,                         // masterPointID,
-                    -1,                         // masterEdgeID,
-                    masterFaceI,                // masterFaceID,
-                    false,                      // flipFaceFlux,
-                    patchIDs[0],                // patchID,
-                    zoneID,                     // zoneID,
-                    zoneFlip,                   // zoneFlip
-                    patchIDs[1]                 // subPatchID
+                    faces[i],        // vertices
+                    own,                    // owner,
+                    -1,                     // neighbour,
+                    -1,                     // masterPointID,
+                    -1,                     // masterEdgeID,
+                    masterFaceI,             // masterFaceID,
+                    false,                  // flipFaceFlux,
+                    patchI,                 // patchID,
+                    zoneID,                 // zoneID,
+                    zoneFlip                // zoneFlip
                 )
             );
         }

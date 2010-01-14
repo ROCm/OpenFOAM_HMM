@@ -41,7 +41,6 @@ SourceFiles
 #include "boolList.H"
 #include "HashSet.H"
 #include "indirectPrimitivePatch.H"
-#include "coupledPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,7 +70,7 @@ class cellToCellStencil
         //- Disallow default bitwise assignment
         void operator=(const cellToCellStencil&);
 
-        
+
 protected:
 
         //- Merge two lists.
@@ -140,6 +139,7 @@ public:
         }
 
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

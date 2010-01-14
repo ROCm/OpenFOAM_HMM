@@ -185,7 +185,7 @@ class meshCutter
         void getFaceInfo
         (
             const label faceI,
-            labelPair& patchIDs,
+            label& patchID,
             label& zoneID,
             label& zoneFlip
         ) const;

@@ -353,7 +353,7 @@ bool Foam::edgeCollapser::collapseEdge(const label edgeI, const label master)
             // Use the smaller region number for the whole network.
             label minRegion = min(pointRegion0, pointRegion1);
             label maxRegion = max(pointRegion0, pointRegion1);
-    
+
             // Use minRegion as region for combined net, free maxRegion.
             pointRegionMaster_[minRegion] = master;
             pointRegionMaster_[maxRegion] = -1;
@@ -456,7 +456,7 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
         {
             break;
         }
-    } while(true);
+    } while (true);
 
 
     // Keep track of faces that have been done already.
@@ -510,7 +510,7 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
         }
     }
 
-        
+
 
     // Remove points.
     forAll(pointRegion_, pointI)
@@ -526,7 +526,7 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
 
     const polyBoundaryMesh& boundaryMesh = mesh_.boundaryMesh();
     const faceZoneMesh& faceZones = mesh_.faceZones();
-      
+
 
     // Renumber faces that use points
     forAll(pointRegion_, pointI)
@@ -558,15 +558,15 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
                     // Get current connectivity
                     label own = faceOwner[faceI];
                     label nei = -1;
-                    labelPair patchIDs = polyTopoChange::whichPatch
-                    (
-                        boundaryMesh,
-                        faceI
-                    );
+                    label patchID = -1;
 
                     if (mesh_.isInternalFace(faceI))
                     {
                         nei = faceNeighbour[faceI];
+                    }
+                    else
+                    {
+                        patchID = boundaryMesh.whichPatch(faceI);
                     }
 
                     meshMod.modifyFace
@@ -576,10 +576,9 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
                         own,                        // owner
                         nei,                        // neighbour
                         false,                      // flipFaceFlux
-                        patchIDs[0],                // patch
+                        patchID,                    // patch
                         zoneID,
-                        zoneFlip,
-                        patchIDs[1]                 // subpatch for face
+                        zoneFlip
                     );
                     meshChanged = true;
                 }

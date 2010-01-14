@@ -97,12 +97,17 @@ void Foam::hexRef8::reorder
 void Foam::hexRef8::getFaceInfo
 (
     const label faceI,
-    labelPair& patchIDs,
+    label& patchID,
     label& zoneID,
     label& zoneFlip
 ) const
 {
-    patchIDs = polyTopoChange::whichPatch(mesh_.boundaryMesh(), faceI);
+    patchID = -1;
+
+    if (!mesh_.isInternalFace(faceI))
+    {
+        patchID = mesh_.boundaryMesh().whichPatch(faceI);
+    }
 
     zoneID = mesh_.faceZones().whichZone(faceI);
 
@@ -127,9 +132,9 @@ Foam::label Foam::hexRef8::addFace
     const label nei
 ) const
 {
-    labelPair patchIDs;
-    label zoneID, zoneFlip;
-    getFaceInfo(faceI, patchIDs, zoneID, zoneFlip);
+    label patchID, zoneID, zoneFlip;
+
+    getFaceInfo(faceI, patchID, zoneID, zoneFlip);
 
     label newFaceI = -1;
 
@@ -147,10 +152,9 @@ Foam::label Foam::hexRef8::addFace
                 -1,                         // master edge
                 faceI,                      // master face for addition
                 false,                      // flux flip
-                patchIDs[0],                // patch for face
+                patchID,                    // patch for face
                 zoneID,                     // zone for face
-                zoneFlip,                   // face zone flip
-                patchIDs[1]                 // subPatch
+                zoneFlip                    // face zone flip
             )
         );
     }
@@ -168,10 +172,9 @@ Foam::label Foam::hexRef8::addFace
                 -1,                         // master edge
                 faceI,                      // master face for addition
                 false,                      // flux flip
-                patchIDs[0],                // patch for face
+                patchID,                    // patch for face
                 zoneID,                     // zone for face
-                zoneFlip,                   // face zone flip
-                patchIDs[1]                 // subPatch
+                zoneFlip                    // face zone flip
             )
         );
     }
@@ -210,8 +213,7 @@ Foam::label Foam::hexRef8::addInternalFace
                 false,                      // flux flip
                 -1,                         // patch for face
                 -1,                         // zone for face
-                false,                      // face zone flip
-                -1                          // subPatch
+                false                       // face zone flip
             )
         );
     }
@@ -239,8 +241,7 @@ Foam::label Foam::hexRef8::addInternalFace
                 false,                      // flux flip
                 -1,                         // patch for face
                 -1,                         // zone for face
-                false,                      // face zone flip
-                -1                          // subPatch
+                false                       // face zone flip
             )
         );
 
@@ -275,8 +276,7 @@ Foam::label Foam::hexRef8::addInternalFace
         //        false,                      // flux flip
         //        -1,                         // patch for face
         //        -1,                         // zone for face
-        //        false,                      // face zone flip
-        //        -1                          // subPatch
+        //        false                       // face zone flip
         //    )
         //);
     }
@@ -293,9 +293,9 @@ void Foam::hexRef8::modFace
     const label nei
 ) const
 {
-    labelPair patchIDs;
-    label zoneID, zoneFlip;
-    getFaceInfo(faceI, patchIDs, zoneID, zoneFlip);
+    label patchID, zoneID, zoneFlip;
+
+    getFaceInfo(faceI, patchID, zoneID, zoneFlip);
 
     if
     (
@@ -318,11 +318,10 @@ void Foam::hexRef8::modFace
                     own,                // owner
                     nei,                // neighbour
                     false,              // face flip
-                    patchIDs[0],        // patch for face
+                    patchID,            // patch for face
                     false,              // remove from zone
                     zoneID,             // zone for face
-                    zoneFlip,           // face flip in zone
-                    patchIDs[1]         // subPatch
+                    zoneFlip            // face flip in zone
                 )
             );
         }
@@ -337,11 +336,10 @@ void Foam::hexRef8::modFace
                     nei,                    // owner
                     own,                    // neighbour
                     false,                  // face flip
-                    patchIDs[0],            // patch for face
+                    patchID,                // patch for face
                     false,                  // remove from zone
                     zoneID,                 // zone for face
-                    zoneFlip,               // face flip in zone
-                    patchIDs[1]             // subPatch
+                    zoneFlip                // face flip in zone
                 )
             );
         }
@@ -1585,11 +1583,11 @@ Foam::label Foam::hexRef8::faceConsistentRefinement
         {
             if (maxSet)
             {
-                refineCell.set(nei, 1);
+                refineCell.set(nei);
             }
             else
             {
-                refineCell.set(own, 0);
+                refineCell.unset(own);
             }
             nChanged++;
         }
@@ -1597,11 +1595,11 @@ Foam::label Foam::hexRef8::faceConsistentRefinement
         {
             if (maxSet)
             {
-                refineCell.set(own, 1);
+                refineCell.set(own);
             }
             else
             {
-                refineCell.set(nei, 0);
+                refineCell.unset(nei);
             }
             nChanged++;
         }
@@ -1632,7 +1630,7 @@ Foam::label Foam::hexRef8::faceConsistentRefinement
         {
             if (!maxSet)
             {
-                refineCell.set(own, 0);
+                refineCell.unset(own);
                 nChanged++;
             }
         }
@@ -1640,7 +1638,7 @@ Foam::label Foam::hexRef8::faceConsistentRefinement
         {
             if (maxSet)
             {
-                refineCell.set(own, 1);
+                refineCell.set(own);
                 nChanged++;
             }
         }
@@ -1659,7 +1657,7 @@ void Foam::hexRef8::checkWantedRefinementLevels
     PackedBoolList refineCell(mesh_.nCells());
     forAll(cellsToRefine, i)
     {
-        refineCell.set(cellsToRefine[i], 1);
+        refineCell.set(cellsToRefine[i]);
     }
 
     for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
@@ -2044,7 +2042,7 @@ Foam::labelList Foam::hexRef8::consistentRefinement
     PackedBoolList refineCell(mesh_.nCells());
     forAll(cellsToRefine, i)
     {
-        refineCell.set(cellsToRefine[i], 1);
+        refineCell.set(cellsToRefine[i]);
     }
 
     while (true)
@@ -2072,7 +2070,7 @@ Foam::labelList Foam::hexRef8::consistentRefinement
 
     forAll(refineCell, cellI)
     {
-        if (refineCell.get(cellI) == 1)
+        if (refineCell.get(cellI))
         {
             nRefined++;
         }
@@ -2083,7 +2081,7 @@ Foam::labelList Foam::hexRef8::consistentRefinement
 
     forAll(refineCell, cellI)
     {
-        if (refineCell.get(cellI) == 1)
+        if (refineCell.get(cellI))
         {
             newCellsToRefine[nRefined++] = cellI;
         }
@@ -2223,7 +2221,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
                     faceCount
                 )
             );
-            allFaceInfo[faceI] = seedFacesInfo[seedFacesInfo.size()-1];
+            allFaceInfo[faceI] = seedFacesInfo.last();
         }
         else
         {
@@ -2239,7 +2237,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
                     faceCount
                 )
             );
-            allFaceInfo[faceI] = seedFacesInfo[seedFacesInfo.size()-1];
+            allFaceInfo[faceI] = seedFacesInfo.last();
         }
     }
 
@@ -2320,7 +2318,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
         allCellInfo
     );
 
-    while(true)
+    while (true)
     {
         if (debug)
         {
@@ -2895,7 +2893,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
 
         if (wanted > cellLevel_[cellI]+1)
         {
-            refineCell.set(cellI, 1);
+            refineCell.set(cellI);
         }
     }
     faceConsistentRefinement(true, refineCell);
@@ -2924,7 +2922,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
 
     forAll(refineCell, cellI)
     {
-        if (refineCell.get(cellI) == 1)
+        if (refineCell.get(cellI))
         {
             nRefined++;
         }
@@ -2935,7 +2933,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
 
     forAll(refineCell, cellI)
     {
-        if (refineCell.get(cellI) == 1)
+        if (refineCell.get(cellI))
         {
             newCellsToRefine[nRefined++] = cellI;
         }
@@ -2968,7 +2966,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
         PackedBoolList refineCell(mesh_.nCells());
         forAll(newCellsToRefine, i)
         {
-            refineCell.set(newCellsToRefine[i], 1);
+            refineCell.set(newCellsToRefine[i]);
         }
         const PackedBoolList savedRefineCell(refineCell);
 
@@ -2981,7 +2979,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
             );
             forAll(refineCell, cellI)
             {
-                if (refineCell.get(cellI) == 1)
+                if (refineCell.get(cellI))
                 {
                     cellsOut2.insert(cellI);
                 }
@@ -2996,11 +2994,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
         {
             forAll(refineCell, cellI)
             {
-                if
-                (
-                    refineCell.get(cellI) == 1
-                 && savedRefineCell.get(cellI) == 0
-                )
+                if (refineCell.get(cellI) && !savedRefineCell.get(cellI))
                 {
                     dumpCell(cellI);
                     FatalErrorIn
@@ -3602,7 +3596,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
 
                 forAll(cFaces, i)
                 {
-                    affectedFace.set(cFaces[i], 1);
+                    affectedFace.set(cFaces[i]);
                 }
             }
         }
@@ -3611,7 +3605,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
         {
             if (faceMidPoint[faceI] >= 0)
             {
-                affectedFace.set(faceI, 1);
+                affectedFace.set(faceI);
             }
         }
 
@@ -3623,7 +3617,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
 
                 forAll(eFaces, i)
                 {
-                    affectedFace.set(eFaces[i], 1);
+                    affectedFace.set(eFaces[i]);
                 }
             }
         }
@@ -3640,7 +3634,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
 
     forAll(faceMidPoint, faceI)
     {
-        if (faceMidPoint[faceI] >= 0 && affectedFace.get(faceI) == 1)
+        if (faceMidPoint[faceI] >= 0 && affectedFace.get(faceI))
         {
             // Face needs to be split and hasn't yet been done in some way
             // (affectedFace - is impossible since this is first change but
@@ -3761,7 +3755,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
             }
 
             // Mark face as having been handled
-            affectedFace.set(faceI, 0);
+            affectedFace.unset(faceI);
         }
     }
 
@@ -3791,7 +3785,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
             {
                 label faceI = eFaces[i];
 
-                if (faceMidPoint[faceI] < 0 && affectedFace.get(faceI) == 1)
+                if (faceMidPoint[faceI] < 0 && affectedFace.get(faceI))
                 {
                     // Unsplit face. Add edge splits to face.
 
@@ -3872,7 +3866,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
                     modFace(meshMod, faceI, newFace, own, nei);
 
                     // Mark face as having been handled
-                    affectedFace.set(faceI, 0);
+                    affectedFace.unset(faceI);
                 }
             }
         }
@@ -3891,7 +3885,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
 
     forAll(affectedFace, faceI)
     {
-        if (affectedFace.get(faceI) == 1)
+        if (affectedFace.get(faceI))
         {
             const face& f = mesh_.faces()[faceI];
 
@@ -3914,7 +3908,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
             modFace(meshMod, faceI, f, own, nei);
 
             // Mark face as having been handled
-            affectedFace.set(faceI, 0);
+            affectedFace.unset(faceI);
         }
     }
 
@@ -5096,7 +5090,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
     {
         label pointI = pointsToUnrefine[i];
 
-        unrefinePoint.set(pointI, 1);
+        unrefinePoint.set(pointI);
     }
 
 
@@ -5109,13 +5103,13 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
 
         forAll(unrefinePoint, pointI)
         {
-            if (unrefinePoint.get(pointI) == 1)
+            if (unrefinePoint.get(pointI))
             {
                 const labelList& pCells = mesh_.pointCells(pointI);
 
                 forAll(pCells, j)
                 {
-                    unrefineCell.set(pCells[j], 1);
+                    unrefineCell.set(pCells[j]);
                 }
             }
         }
@@ -5143,17 +5137,24 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
 
                 if (maxSet)
                 {
-                    unrefineCell.set(nei, 1);
+                    unrefineCell.set(nei);
                 }
                 else
                 {
+                    // could also combine with unset:
+                    // if (!unrefineCell.unset(own))
+                    // {
+                    //     FatalErrorIn("hexRef8::consistentUnrefinement(..)")
+                    //         << "problem cell already unset"
+                    //         << abort(FatalError);
+                    // }
                     if (unrefineCell.get(own) == 0)
                     {
                         FatalErrorIn("hexRef8::consistentUnrefinement(..)")
                             << "problem" << abort(FatalError);
                     }
 
-                    unrefineCell.set(own, 0);
+                    unrefineCell.unset(own);
                 }
                 nChanged++;
             }
@@ -5161,7 +5162,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
             {
                 if (maxSet)
                 {
-                    unrefineCell.set(own, 1);
+                    unrefineCell.set(own);
                 }
                 else
                 {
@@ -5171,7 +5172,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
                             << "problem" << abort(FatalError);
                     }
 
-                    unrefineCell.set(nei, 0);
+                    unrefineCell.unset(nei);
                 }
                 nChanged++;
             }
@@ -5207,7 +5208,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
                             << "problem" << abort(FatalError);
                     }
 
-                    unrefineCell.set(own, 0);
+                    unrefineCell.unset(own);
                     nChanged++;
                 }
             }
@@ -5221,7 +5222,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
                             << "problem" << abort(FatalError);
                     }
 
-                    unrefineCell.set(own, 1);
+                    unrefineCell.set(own);
                     nChanged++;
                 }
             }
@@ -5249,15 +5250,15 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
         // Knock out any point whose cell neighbour cannot be unrefined.
         forAll(unrefinePoint, pointI)
         {
-            if (unrefinePoint.get(pointI) == 1)
+            if (unrefinePoint.get(pointI))
             {
                 const labelList& pCells = mesh_.pointCells(pointI);
 
                 forAll(pCells, j)
                 {
-                    if (unrefineCell.get(pCells[j]) == 0)
+                    if (!unrefineCell.get(pCells[j]))
                     {
-                        unrefinePoint.set(pointI, 0);
+                        unrefinePoint.unset(pointI);
                         break;
                     }
                 }
@@ -5271,7 +5272,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
 
     forAll(unrefinePoint, pointI)
     {
-        if (unrefinePoint.get(pointI) == 1)
+        if (unrefinePoint.get(pointI))
         {
             nSet++;
         }
@@ -5282,7 +5283,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
 
     forAll(unrefinePoint, pointI)
     {
-        if (unrefinePoint.get(pointI) == 1)
+        if (unrefinePoint.get(pointI))
         {
             newPointsToUnrefine[nSet++] = pointI;
         }
@@ -5320,8 +5321,7 @@ void Foam::hexRef8::setUnrefinement
             {
                 FatalErrorIn
                 (
-                    "hexRef8::setUnrefinement"
-                    "(const labelList&, polyTopoChange&)"
+                    "hexRef8::setUnrefinement(const labelList&, polyTopoChange&)"
                 )   << "Illegal cell level " << cellLevel_[cellI]
                     << " for cell " << cellI
                     << abort(FatalError);

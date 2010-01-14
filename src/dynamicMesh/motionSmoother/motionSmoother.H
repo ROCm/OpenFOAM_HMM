@@ -179,7 +179,7 @@ class motionSmoother
 
     // Private Member Functions
 
-        //- Average value (not positions!) of connected points.
+        //- Average of connected points.
         template <class Type>
         tmp<GeometricField<Type, pointPatchField, pointMesh> > avg
         (

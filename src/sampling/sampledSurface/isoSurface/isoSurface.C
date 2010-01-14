@@ -75,28 +75,11 @@ Foam::PackedBoolList Foam::isoSurface::collocatedFaces
     // Initialise to false
     PackedBoolList collocated(pp.size());
 
-    if (isA<processorPolyPatch>(pp))
+    if (isA<processorPolyPatch>(pp) && collocatedPatch(pp))
     {
-        const processorPolyPatch& ppp = refCast<const processorPolyPatch>(pp);
-
-        forAll(ppp.patchIDs(), i)
+        forAll(pp, i)
         {
-            label subPatchI = ppp.patchIDs()[i];
-            label subStart = ppp.starts()[i];
-            label subSize = ppp.starts()[i+1]-subStart;
-
-            const coupledPolyPatch& subPatch = refCast<const coupledPolyPatch>
-            (
-                ppp.boundaryMesh()[subPatchI]
-            );
-
-            if (collocatedPatch(subPatch))
-            {
-                for (label i = subStart; i < subStart+subSize; i++)
-                {
-                    collocated[i] = 1u;
-                }
-            }
+            collocated[i] = 1u;
         }
     }
     else if (isA<cyclicPolyPatch>(pp) && collocatedPatch(pp))
@@ -137,29 +120,21 @@ void Foam::isoSurface::syncUnseparatedPoints
             (
                 isA<processorPolyPatch>(patches[patchI])
              && patches[patchI].nPoints() > 0
+             && collocatedPatch(patches[patchI])
             )
             {
                 const processorPolyPatch& pp =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
-                List<pointField> patchInfo(pp.patchIDs().size());
+                const labelList& meshPts = pp.meshPoints();
+                const labelList& nbrPts = pp.neighbPoints();
 
-                forAll(pp.patchIDs(), subI)
+                pointField patchInfo(meshPts.size());
+
+                forAll(nbrPts, pointI)
                 {
-                    label subPatchI = pp.patchIDs()[subI];
-
-                    if (collocatedPatch(patches[subPatchI]))
-                    {
-                        const labelList& subMeshPts = pp.subMeshPoints()[subI];
-
-                        pointField& subPatchInfo = patchInfo[subI];
-                        subPatchInfo.setSize(subMeshPts.size());
-                        forAll(subPatchInfo, i)
-                        {
-                            label meshPointI = subMeshPts[i];
-                            subPatchInfo[i] = pointValues[meshPointI];
-                        }
-                    }
+                    label nbrPointI = nbrPts[pointI];
+                    patchInfo[nbrPointI] = pointValues[meshPts[pointI]];
                 }
 
                 OPstream toNbr(Pstream::blocking, pp.neighbProcNo());
@@ -175,12 +150,13 @@ void Foam::isoSurface::syncUnseparatedPoints
             (
                 isA<processorPolyPatch>(patches[patchI])
              && patches[patchI].nPoints() > 0
+             && collocatedPatch(patches[patchI])
             )
             {
                 const processorPolyPatch& pp =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
-                List<pointField> nbrPatchInfo;
+                pointField nbrPatchInfo(pp.nPoints());
                 {
                     // We do not know the number of points on the other side
                     // so cannot use Pstream::read.
@@ -188,26 +164,16 @@ void Foam::isoSurface::syncUnseparatedPoints
                     fromNbr >> nbrPatchInfo;
                 }
 
-                forAll(pp.patchIDs(), subI)
+                const labelList& meshPts = pp.meshPoints();
+
+                forAll(meshPts, pointI)
                 {
-                    label subPatchI = pp.patchIDs()[subI];
-
-                    if (collocatedPatch(patches[subPatchI]))
-                    {
-                        const labelList& subMeshPts =
-                            pp.reverseSubMeshPoints()[subI];
-                        const pointField& nbrSubInfo = nbrPatchInfo[subI];
-
-                        forAll(nbrSubInfo, i)
-                        {
-                            label meshPointI = subMeshPts[i];
-                            minEqOp<point>()
-                            (
-                                pointValues[meshPointI],
-                                nbrSubInfo[i]
-                            );
-                        }
-                    }
+                    label meshPointI = meshPts[pointI];
+                    minEqOp<point>()
+                    (
+                        pointValues[meshPointI],
+                        nbrPatchInfo[pointI]
+                    );
                 }
             }
         }

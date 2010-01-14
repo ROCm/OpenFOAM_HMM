@@ -89,7 +89,7 @@ void Foam::fvSurfaceMapper::calcAddressing() const
                 scalarListList::subList(faceMap_.weights(), size())
             );
         scalarListList& w = *weightsPtr_;
-        
+
         // Adjust for creation of an internal face from a boundary face
         forAll (addr, faceI)
         {

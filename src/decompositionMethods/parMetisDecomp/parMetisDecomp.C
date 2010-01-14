@@ -898,7 +898,7 @@ void Foam::parMetisDecomp::calcMetisDistributedCSR
     }
 
     // Get the cell on the other side of coupled patches
-    syncTools::swapBoundaryFaceList(mesh, globalNeighbour, false);
+    syncTools::swapBoundaryFaceList(mesh, globalNeighbour);
 
 
     // Count number of faces (internal + coupled)

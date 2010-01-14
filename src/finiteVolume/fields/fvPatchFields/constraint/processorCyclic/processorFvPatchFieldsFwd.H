@@ -22,89 +22,23 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::polySplineEdge
-
-Description
-    A spline representation via a polyLine
-
-SourceFiles
-    polySplineEdge.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef polySplineEdge_H
-#define polySplineEdge_H
+#ifndef processorFvPatchFieldsFwd_H
+#define processorFvPatchFieldsFwd_H
 
-#include "curvedEdge.H"
-#include "polyLine.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-/*---------------------------------------------------------------------------*\
-                       Class polySplineEdge Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-class polySplineEdge
-:
-    public curvedEdge,
-    public polyLine
-{
-    // Private data
+template<class Type> class processorFvPatchField;
 
-        pointField otherKnots_;
-
-
-    // Private member functions
-
-        pointField intervening
-        (
-            const pointField& otherKnots,
-            const label nBetweenKnots,
-            const vector&,
-            const vector&
-        );
-
-public:
-
-    //- Runtime type information
-    TypeName("polySpline");
-
-
-    // Constructors
-
-        //- Construct from components
-        polySplineEdge
-        (
-            const pointField&,
-            const label start,
-            const label end,
-            const pointField& otherKnots,
-            const label nInterKnots = 20
-        );
-
-        //- Construct from Istream setting pointsList
-        polySplineEdge(const pointField&, Istream&);
-
-
-    // Destructor
-
-        virtual ~polySplineEdge(){}
-
-
-    // Member Functions
-
-        //- Return the position of a point on the curve given by
-        //  the parameter 0 <= lambda <= 1
-        vector position(const scalar mu) const;
-
-        //- Return the length of the curve
-        scalar length() const;
-};
-
+makePatchTypeFieldTypedefs(processor)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

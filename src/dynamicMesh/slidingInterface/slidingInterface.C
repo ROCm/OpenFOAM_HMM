@@ -420,7 +420,7 @@ void Foam::slidingInterface::setRefinement(polyTopoChange& ref) const
         }
 
         coupleInterface(ref);
-        
+
         trigger_ = false;
     }
 }
@@ -430,7 +430,7 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
 {
     if (debug)
     {
-        Pout<< "void slidingInterface::modifyMotionPoints(" 
+        Pout<< "void slidingInterface::modifyMotionPoints("
             << "pointField& motionPoints) const for object " << name() << " : "
             << "Adjusting motion points." << endl;
     }
@@ -485,7 +485,7 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
             else
             {
                 // A cut point is not a projected slave point.  Therefore, it
-                // must be an edge-to-edge intersection.  
+                // must be an edge-to-edge intersection.
 
                 Map<Pair<edge> >::const_iterator cpepmIter =
                     cpepm.find(cutPoints[pointI]);
@@ -499,7 +499,7 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
                     // slidingInterface::coupleInterface.  This is done for
                     // efficiency reasons and avoids multiple creation of
                     // cutting planes.  Please update both simultaneously.
-                    // 
+                    //
                     const edge& globalMasterEdge = cpepmIter().first();
 
                     const label curMasterEdgeIndex =
@@ -582,7 +582,7 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
                         if (slaveCut.hit())
                         {
                             // Strict checking of slave cut to avoid capturing
-                            // end points.  
+                            // end points.
                             scalar cutOnSlave =
                                 (
                                     (
@@ -615,7 +615,7 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
                                 << cme.line(masterLocalPoints)
                                 << " slave edge: " << curSlaveLine
                                 << " point: " << masterCutPoint
-                                << " weight: " << 
+                                << " weight: " <<
                                 (
                                     (
                                         slaveCut.missPoint()
@@ -657,7 +657,7 @@ void Foam::slidingInterface::updateMesh(const mapPolyMesh& m)
 {
     if (debug)
     {
-        Pout<< "void slidingInterface::updateMesh(const mapPolyMesh& m)" 
+        Pout<< "void slidingInterface::updateMesh(const mapPolyMesh& m)"
             << " const for object " << name() << " : "
             << "Updating topology." << endl;
     }
@@ -771,7 +771,7 @@ void Foam::slidingInterface::write(Ostream& os) const
 
 // To write out all those tolerances
 #define WRITE_NON_DEFAULT(name) \
-    if( name ## _ != name ## Default_ )\
+    if ( name ## _ != name ## Default_ )\
     { \
         os << "    " #name " " <<  name ## _ << token::END_STATEMENT << nl; \
     }

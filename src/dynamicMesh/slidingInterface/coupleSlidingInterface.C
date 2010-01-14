@@ -831,8 +831,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                                 -1,                          // patch ID
                                 false,                       // remove from zone
                                 masterFaceZoneID_.index(),   // zone ID
-                                masterPatchFlip[curMaster],  // zone flip
-                                -1                           // subPatch ID
+                                masterPatchFlip[curMaster]   // zone flip
                             )
                         );
 //                         Pout << "modifying master face. Old master: " << masterPatch[curMaster] << " new face: " << curCutFace.reverseFace() << " own: " << masterFc[curMaster] << " nei: " << slaveFc[curSlave] << endl;
@@ -853,8 +852,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                                 -1,                          // patch ID
                                 false,                       // remove from zone
                                 masterFaceZoneID_.index(),   // zone ID
-                                !masterPatchFlip[curMaster], // zone flip
-                                -1                           // subPatch ID
+                                !masterPatchFlip[curMaster]  // zone flip
                             )
                         );
                     }
@@ -877,8 +875,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                             masterPatchID_.index(),      // patch ID
                             false,                       // remove from zone
                             masterFaceZoneID_.index(),   // zone ID
-                            masterPatchFlip[curMaster],  // zone flip
-                            -1                           // subPatchID - TBD
+                            masterPatchFlip[curMaster]   // zone flip
                         )
                     );
                 }
@@ -925,8 +922,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                                 -1,                          // patch ID
                                 false,                       // remove from zone
                                 slaveFaceZoneID_.index(),    // zone ID
-                                !slavePatchFlip[curMaster],  // zone flip
-                                -1                           // subPatch ID
+                                !slavePatchFlip[curMaster]   // zone flip
                             )
                         );
                     }
@@ -947,8 +943,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                                 -1,                          // patch ID
                                 false,                       // remove from zone
                                 slaveFaceZoneID_.index(),    // zone ID
-                                slavePatchFlip[curSlave],    // zone flip
-                                -1                           // subPatch ID
+                                slavePatchFlip[curSlave]     // zone flip
                             )
                         );
                     }
@@ -971,8 +966,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                             slavePatchID_.index(),       // patch ID
                             false,                       // remove from zone
                             slaveFaceZoneID_.index(),    // zone ID
-                            slavePatchFlip[curSlave],    // zone flip
-                            -1                           // subPatchID - TBD
+                            slavePatchFlip[curSlave]     // zone flip
                         )
                     );
                 }
@@ -1018,8 +1012,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                                 false,                       // flux flip
                                 -1,                          // patch ID
                                 cutFaceZoneID_.index(),      // zone ID
-                                false,                       // zone flip
-                                -1                           // subPatch ID
+                                false                        // zone flip
                             )
                         );
                     }
@@ -1039,8 +1032,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                                 true,                        // flux flip
                                 -1,                          // patch ID
                                 cutFaceZoneID_.index(),      // zone ID
-                                true,                        // zone flip
-                                -1                           // subPatch ID
+                                true                         // zone flip
                             )
                         );
                     }
@@ -1065,8 +1057,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                             false,                       // flux flip
                             masterPatchID_.index(),      // patch ID
                             cutFaceZoneID_.index(),      // zone ID
-                            false,                       // zone flip
-                            -1                           // subPatchID - TBD
+                            false                        // zone flip
                         )
                     );
                 }
@@ -1091,8 +1082,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                         false,                       // flux flip
                         slavePatchID_.index(),       // patch ID
                         cutFaceZoneID_.index(),      // zone ID
-                        false,                       // zone flip
-                        -1                           // subPatchID - TBD
+                        false                        // zone flip
                     )
                 );
 
@@ -1137,8 +1127,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
             //        -1,                                 // patch ID
             //        false,                              // remove from zone
             //        masterFaceZoneID_.index(),          // zone ID
-            //        false,                              // zone flip
-            //        -1                                  // subPatch ID
+            //        false                               // zone flip
             //    )
             //);
 
@@ -1169,8 +1158,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
             //        -1,                               // patch ID
             //        false,                            // remove from zone
             //        slaveFaceZoneID_.index(),         // zone ID
-            //        false,                            // zone flip
-            //        -1                                // subPatch ID
+            //        false                             // zone flip
             //    )
             //);
 
@@ -1428,12 +1416,6 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
             //Pout << "Modifying master stick-out face " << curFaceID
             //    << " old face: " << oldFace << " new face: " << newFace << endl;
 
-            labelPair patchIDs = polyTopoChange::whichPatch
-            (
-                mesh.boundaryMesh(),
-                curFaceID
-            );
-
             // Modify the face
             if (mesh.isInternalFace(curFaceID))
             {
@@ -1449,8 +1431,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                         -1,                     // patch for face
                         false,                  // remove from zone
                         modifiedFaceZone,       // zone for face
-                        modifiedFaceZoneFlip,   // face flip in zone
-                        patchIDs[1]             // subPatch ID
+                        modifiedFaceZoneFlip    // face flip in zone
                     )
                 );
             }
@@ -1468,8 +1449,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                         mesh.boundaryMesh().whichPatch(curFaceID), // patch for face
                         false,                  // remove from zone
                         modifiedFaceZone,       // zone for face
-                        modifiedFaceZoneFlip,   // face flip in zone
-                        patchIDs[1]             // subPatch ID
+                        modifiedFaceZoneFlip    // face flip in zone
                     )
                 );
             }
@@ -1741,11 +1721,6 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
             newFace.transfer(newFaceLabels);
 
 //             Pout << "Modifying slave stick-out face " << curFaceID << " old face: " << oldFace << " new face: " << newFace << endl;
-            labelPair patchIDs = polyTopoChange::whichPatch
-            (
-                mesh.boundaryMesh(),
-                curFaceID
-            );
 
             // Modify the face
             if (mesh.isInternalFace(curFaceID))
@@ -1762,8 +1737,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                         -1,                     // patch for face
                         false,                  // remove from zone
                         modifiedFaceZone,       // zone for face
-                        modifiedFaceZoneFlip,   // face flip in zone
-                        patchIDs[1]             // subPatch ID
+                        modifiedFaceZoneFlip    // face flip in zone
                     )
                 );
             }
@@ -1781,8 +1755,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                         mesh.boundaryMesh().whichPatch(curFaceID), // patch for face
                         false,                  // remove from zone
                         modifiedFaceZone,       // zone for face
-                        modifiedFaceZoneFlip,   // face flip in zone
-                        patchIDs[1]             // subPatch ID
+                        modifiedFaceZoneFlip    // face flip in zone
                     )
                 );
             }

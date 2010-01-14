@@ -114,27 +114,19 @@ void Foam::Particle<ParticleType>::correctAfterParallelTransfer
 
     celli_ = ppp.faceCells()[facei_];
 
-    label subPatchI = ppp.whichSubPatch(facei_);
-
-    if (subPatchI != -1)
+    if (!ppp.parallel())
     {
-        const coupledPolyPatch& cpp =
-            refCast<const coupledPolyPatch>
-            (cloud_.pMesh().boundaryMesh()[subPatchI]);
-
-        // We are on receiving end.
-        if (!cpp.parallel())
-        {
-            const tensor& T = cpp.forwardT();
-            transformPosition(T);
-            static_cast<ParticleType&>(*this).transformProperties(T);
-        }
-        else if (cpp.separated())
-        {
-            const vector d = -cpp.separation();
-            position_ += d;
-            static_cast<ParticleType&>(*this).transformProperties(d);
-        }
+        const tensor& T = ppp.forwardT();
+        transformPosition(T);
+        static_cast<ParticleType&>(*this).transformProperties(T);
+    }
+    else if (ppp.separated())
+    {
+        position_ -= ppp.separation();
+        static_cast<ParticleType&>(*this).transformProperties
+        (
+            -ppp.separation()
+        );
     }
 
     // Reset the face index for the next tracking operation
@@ -196,7 +188,7 @@ Foam::label Foam::Particle<ParticleType>::track
     facei_ = -1;
 
     // Tracks to endPosition or stop on boundary
-    while(!onBoundary() && stepFraction_ < 1.0 - SMALL)
+    while (!onBoundary() && stepFraction_ < 1.0 - SMALL)
     {
         stepFraction_ += trackToFace(endPosition, td)*(1.0 - stepFraction_);
     }
@@ -205,13 +197,13 @@ Foam::label Foam::Particle<ParticleType>::track
 }
 
 
+
 template<class ParticleType>
 Foam::label Foam::Particle<ParticleType>::track(const vector& endPosition)
 {
     int dummyTd;
     return track(endPosition, dummyTd);
 }
-
 
 template<class ParticleType>
 template<class TrackData>
@@ -463,7 +455,7 @@ void Foam::Particle<ParticleType>::hitCyclicPatch
     TrackData&
 )
 {
-    // Transform (still on sending side)
+//    label patchFacei_ = cpp.whichFace(facei_);
 
     facei_ = cpp.transformGlobalFace(facei_);
 
