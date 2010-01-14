@@ -497,9 +497,11 @@ void Foam::conformalVoronoiMesh::smoothSurface(pointField& pts)
     {
         label ptI = cit->cellIndex();
 
-        if (cit->filterCount() > 0)
+        label fC = cit->filterCount();
+
+        if (fC > cvMeshControls().filterCountSkipThreshold())
         {
-            // This vertex has been limited, skip
+            // This vertex has been limited too many times, skip
             continue;
         }
 
@@ -533,7 +535,11 @@ void Foam::conformalVoronoiMesh::smoothSurface(pointField& pts)
 
                 if (surfHit.hit())
                 {
-                    pt = surfHit.hitPoint();
+                    pt +=
+                    (surfHit.hitPoint() - pt)
+                   *pow(cvMeshControls().filterErrorReductionCoeff(), fC);
+
+                    // pt = surfHit.hitPoint();
                 }
             }
         }
@@ -600,9 +606,10 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
 
             label maxFC = maxFilterCount(eit);
 
-            if (maxFC > 0)
+            if (maxFC > cvMeshControls().filterCountSkipThreshold())
             {
-                // A vertex on this face has been limited, skip
+                // A vertex on this face has been limited too many
+                // times, skip
                 continue;
             }
 
@@ -665,7 +672,8 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
                     pts,
                     dualPtIndexMap,
                     targetFaceSize,
-                    GREAT
+                    GREAT,
+                    maxFC
                 );
 
                 if (mode == fcmPoint || mode == fcmEdge)
@@ -777,9 +785,10 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
 
             label maxFC = maxFilterCount(eit);
 
-            if (maxFC > 0)
+            if (maxFC > cvMeshControls().filterCountSkipThreshold())
             {
-                // A vertex on this face has been limited, skip
+                // A vertex on this face has been limited too many
+                // times, skip
                 continue;
             }
 
@@ -791,7 +800,8 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
                 pts,
                 dualPtIndexMap,
                 targetFaceSize,
-                collapseSizeLimitCoeff
+                collapseSizeLimitCoeff,
+                maxFC
             );
 
             if (mode != fcmNone)
@@ -834,12 +844,26 @@ Foam::conformalVoronoiMesh::collapseFace
     pointField& pts,
     Map<label>& dualPtIndexMap,
     scalar targetFaceSize,
-    scalar collapseSizeLimitCoeff
+    scalar collapseSizeLimitCoeff,
+    label maxFC
 ) const
 {
     bool limitToQuadsOrTris = false;
 
     bool allowEarlyCollapseToPoint = true;
+
+    // if (maxFC > cvMeshControls().filterCountSkipThreshold() - 3)
+    // {
+    //     limitToQuadsOrTris = true;
+
+    //     allowEarlyCollapseToPoint = false;
+    // }
+
+    collapseSizeLimitCoeff *= pow
+    (
+        cvMeshControls().filterErrorReductionCoeff(),
+        maxFC
+    );
 
     const vector fC = f.centre(pts);
 
@@ -934,11 +958,6 @@ Foam::conformalVoronoiMesh::collapseFace
         WarningIn
         (
             "Foam::conformalVoronoiMesh::collapseFace"
-            "("
-                "const face& f,"
-                "pointField& pts,"
-                "Map<label>& dualPtIndexMap"
-            ") const"
         )
             << "No collapse axis found for face, not collapsing."
             << endl;
@@ -1019,11 +1038,6 @@ Foam::conformalVoronoiMesh::collapseFace
         WarningIn
         (
             "Foam::conformalVoronoiMesh::collapseFace"
-            "("
-                "const face& f,"
-                "pointField& pts,"
-                "Map<label>& dualPtIndexMap"
-            ") const"
         )
             << "All points on one side of face centre, not collapsing."
             << endl;
@@ -1290,7 +1304,7 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     motionSmoother::checkMesh
     (
-        false,  // report
+        false,
         pMesh,
         cvMeshControls().cvMeshDict().subDict("meshQualityControls"),
         wrongFaces

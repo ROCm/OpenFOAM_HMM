@@ -545,7 +545,8 @@ private:
             pointField& pts,
             Map<label>& dualPtIndexMap,
             scalar targetFaceSize,
-            scalar collapseSizeLimitCoeff
+            scalar collapseSizeLimitCoeff,
+            label maxFC
         ) const;
 
         //- Identify the face labels of the deferred collapse faces

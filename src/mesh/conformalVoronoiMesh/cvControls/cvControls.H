@@ -159,6 +159,16 @@ class cvControls
         //  with filtering anyway?
         Switch continueFilteringOnBadInitialPolyMesh_;
 
+        //- When a face is "bad", what fraction should the
+        //- filterSizeCoeff_ be reduced by.  Recursive, so for a
+        //- filterCount value of fC, the filterSizeCoeff is reduced
+        //- by pow(filterErrorReductionCoeff_, fC)
+        scalar filterErrorReductionCoeff_;
+
+        //- Maximum number of filterCount applications before a face
+        //  is not attempted to be filtered.
+        label filterCountSkipThreshold_;
+
         //- The maximum allowed angle between a boundary face normal
         //  and the local surface normal before face will be
         //  aggressively collapsed
@@ -276,6 +286,12 @@ public:
 
             //- Return the continueFilteringOnBadInitialPolyMesh Switch
             inline Switch continueFilteringOnBadInitialPolyMesh() const;
+
+            //- Return the filterErrorReductionCoeff
+            inline scalar filterErrorReductionCoeff() const;
+
+            //- Return the filterCountSkipThreshold
+            inline label filterCountSkipThreshold() const;
 
             //- Return the surfaceStepFaceAngle
             inline scalar surfaceStepFaceAngle() const;

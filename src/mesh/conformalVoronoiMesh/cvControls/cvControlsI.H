@@ -159,6 +159,20 @@ Foam::cvControls::continueFilteringOnBadInitialPolyMesh() const
 }
 
 
+inline Foam::scalar
+Foam::cvControls::filterErrorReductionCoeff() const
+{
+    return filterErrorReductionCoeff_;
+}
+
+
+inline Foam::label
+Foam::cvControls::filterCountSkipThreshold() const
+{
+    return filterCountSkipThreshold_;
+}
+
+
 inline Foam::scalar Foam::cvControls::surfaceStepFaceAngle() const
 {
     return surfaceStepFaceAngle_;

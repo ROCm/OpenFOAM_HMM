@@ -166,6 +166,16 @@ Foam::cvControls::cvControls
         )
     );
 
+    filterErrorReductionCoeff_ = readScalar
+    (
+        filteringDict.lookup("filterErrorReductionCoeff")
+    );
+
+    filterCountSkipThreshold_ = readLabel
+    (
+        filteringDict.lookup("filterCountSkipThreshold")
+    );
+
     surfaceStepFaceAngle_ = readScalar
     (
         filteringDict.lookup("surfaceStepFaceAngle")
