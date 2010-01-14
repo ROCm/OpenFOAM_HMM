@@ -1030,7 +1030,7 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
 }
 
 
-Foam::scalar Foam::conformalVoronoiMesh::minFilterLimit
+Foam::label Foam::conformalVoronoiMesh::maxFilterCount
 (
     const Triangulation::Finite_edges_iterator& eit
 ) const
@@ -1038,7 +1038,7 @@ Foam::scalar Foam::conformalVoronoiMesh::minFilterLimit
     Cell_circulator ccStart = incident_cells(*eit);
     Cell_circulator cc = ccStart;
 
-    scalar minFilterLimit = GREAT;
+    label maxFC = 0;
 
     do
     {
@@ -1057,16 +1057,16 @@ Foam::scalar Foam::conformalVoronoiMesh::minFilterLimit
                 << exit(FatalError);
         }
 
-        if (cc->filterLimit() < minFilterLimit)
+        if (cc->filterCount() > maxFC)
         {
-            minFilterLimit = cc->filterLimit();
+            maxFC = cc->filterCount();
         }
 
         cc++;
 
     } while (cc != ccStart);
 
-    return minFilterLimit;
+    return maxFC;
 }
 
 

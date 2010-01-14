@@ -98,7 +98,7 @@ inline Foam::label Foam::cvControls::surfaceConformationRebuildFrequency() const
 }
 
 
-inline bool Foam::cvControls::objOutput() const
+inline Foam::Switch Foam::cvControls::objOutput() const
 {
     return objOutput_;
 }
@@ -149,6 +149,13 @@ inline Foam::scalar Foam::cvControls::filterSizeCoeff() const
 inline Foam::scalar Foam::cvControls::mergeClosenessCoeff() const
 {
     return mergeClosenessCoeff_;
+}
+
+
+inline Foam::Switch
+Foam::cvControls::continueFilteringOnBadInitialPolyMesh() const
+{
+    return continueFilteringOnBadInitialPolyMesh_;
 }
 
 

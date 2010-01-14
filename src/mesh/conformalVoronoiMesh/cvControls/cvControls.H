@@ -147,9 +147,17 @@ class cvControls
 
     // polyMesh filtering controls
 
+        //- Upper limit on the size of faces to be filtered from,
+        //  fraction of the local target cell size
+        scalar filterSizeCoeff_;
+
         //- Upper limit on how close two dual vertices can be before
         //  being merged, fraction of the local target cell size
         scalar mergeClosenessCoeff_;
+
+        //- If the mesh quality criteria cannot be satisfied, continue
+        //  with filtering anyway?
+        Switch continueFilteringOnBadInitialPolyMesh_;
 
         //- The maximum allowed angle between a boundary face normal
         //  and the local surface normal before face will be
@@ -172,10 +180,6 @@ class cvControls
         //  to enable a face to be collapsed to a point, fraction of
         //  the local target cell size
         scalar maxCollapseFaceToPointSideLengthCoeff_;
-
-        //- Upper limit on the size of faces to be filtered from,
-        //  fraction of the local target cell size
-        scalar filterSizeCoeff_;
 
 
     // Private Member Functions
@@ -244,7 +248,7 @@ public:
             inline label surfaceConformationRebuildFrequency() const;
 
             //- Return the objOutput Switch
-            inline bool objOutput() const;
+            inline Switch objOutput() const;
 
             //- Return the number of alignmentSearchSpokes to use
             inline label alignmentSearchSpokes() const;
@@ -269,6 +273,9 @@ public:
 
             //- Return the mergeClosenessCoeff
             inline scalar mergeClosenessCoeff() const;
+
+            //- Return the continueFilteringOnBadInitialPolyMesh Switch
+            inline Switch continueFilteringOnBadInitialPolyMesh() const;
 
             //- Return the surfaceStepFaceAngle
             inline scalar surfaceStepFaceAngle() const;

@@ -357,10 +357,10 @@ private:
             const Triangulation::Finite_edges_iterator& eit
         ) const;
 
-        //- Finds the minimum filterLimit of the dual vertices
+        //- Finds the maximum filterCount of the dual vertices
         //  (Delaunay cells) that form the dual face produced by the
         //  supplied edge
-        scalar minFilterLimit
+        label maxFilterCount
         (
             const Triangulation::Finite_edges_iterator& eit
         ) const;

@@ -36,7 +36,6 @@ Description
 
 #include <CGAL/Triangulation_3.h>
 #include "indexedVertex.H"
-#include "scalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,12 +53,12 @@ class indexedCell
 {
     // Private data
 
-        //- The index for this tetrahedral cell
+        //- The index for this Delaunay tetrahedral cell
         int index_;
 
-        //- The applicable fraction of the face filtering mechanism
-        //  controls
-        Foam::scalar filterLimit_;
+        //- The number of times that this Delaunay cell has been limited
+        //  during filtering
+        int filterCount_;
 
 
 public:
@@ -79,7 +78,7 @@ public:
     :
         Cb(),
         index_(-1),
-        filterLimit_(1.0)
+        filterCount_(0)
     {}
 
 
@@ -90,7 +89,7 @@ public:
     :
         Cb(v0, v1, v2, v3),
         index_(-1),
-        filterLimit_(1.0)
+        filterCount_(0)
     {}
 
 
@@ -108,7 +107,7 @@ public:
     :
         Cb(v0, v1, v2, v3, n0, n1, n2, n3),
         index_(-1),
-        filterLimit_(1.0)
+        filterCount_(0)
     {}
 
 
@@ -124,15 +123,15 @@ public:
     }
 
 
-    inline Foam::scalar& filterLimit()
+    inline int& filterCount()
     {
-        return filterLimit_;
+        return filterCount_;
     }
 
 
-    inline Foam::scalar filterLimit() const
+    inline int filterCount() const
     {
-        return filterLimit_;
+        return filterCount_;
     }
 };
 

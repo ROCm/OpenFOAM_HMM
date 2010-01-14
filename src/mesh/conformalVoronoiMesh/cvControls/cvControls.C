@@ -157,6 +157,15 @@ Foam::cvControls::cvControls
         filteringDict.lookup("mergeClosenessCoeff")
     );
 
+    continueFilteringOnBadInitialPolyMesh_ = Switch
+    (
+        filteringDict.lookupOrDefault<Switch>
+        (
+            "continueFilteringOnBadInitialPolyMesh",
+            false
+        )
+    );
+
     surfaceStepFaceAngle_ = readScalar
     (
         filteringDict.lookup("surfaceStepFaceAngle")

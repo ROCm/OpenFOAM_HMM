@@ -76,6 +76,18 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         }
     }
 
+    // Make all filterCount values zero
+
+    for
+    (
+        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+        cit != finite_cells_end();
+        ++cit
+    )
+    {
+        cit->filterCount() = 0;
+    }
+
     indexDualVertices(points);
 
     {
@@ -100,14 +112,22 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     if (nInitialBadQualityFaces > 0)
     {
-        Info<< "A mesh could not be produced to satisfy the specified quality "
-            << "criteria.  The quality and the surface conformation controls "
-            << "can be altered and the internalDelaunayVertices read in to try "
-            << "again, or more cell size resolution and motion iterations can "
-            << "be applied in areas where problems are occurring."
+        Info<< nl
+            << "A mesh could not be produced to satisfy the specified "
+            << "quality criteria." << nl
+            << "The quality and the surface conformation controls "
+            << "can be altered and the internalDelaunayVertices read in "
+            << "to try again, or more cell size resolution and motion "
+            << "iterations can be applied in areas where problems are "
+            << "occurring."
             << endl;
     }
-    else
+
+    if
+    (
+        nInitialBadQualityFaces == 0
+     || cvMeshControls().continueFilteringOnBadInitialPolyMesh()
+    )
     {
         label nBadQualityFaces = 0;
 
@@ -141,7 +161,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
             Info<< "Found " << nBadQualityFaces << " bad quality faces" << endl;
 
-        } while (nBadQualityFaces > 0);
+        } while (nBadQualityFaces > nInitialBadQualityFaces);
     }
 
     // Final dual face and owner neighbour construction
@@ -477,7 +497,7 @@ void Foam::conformalVoronoiMesh::smoothSurface(pointField& pts)
     {
         label ptI = cit->cellIndex();
 
-        if (cit->filterLimit() < 1.0)
+        if (cit->filterCount() > 0)
         {
             // This vertex has been limited, skip
             continue;
@@ -578,9 +598,9 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
                 continue;
             }
 
-            scalar minFL = minFilterLimit(eit);
+            label maxFC = maxFilterCount(eit);
 
-            if (minFL < 1.0)
+            if (maxFC > 0)
             {
                 // A vertex on this face has been limited, skip
                 continue;
@@ -755,9 +775,9 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
                 continue;
             }
 
-            scalar minFL = minFilterLimit(eit);
+            label maxFC = maxFilterCount(eit);
 
-            if (minFL < 1.0)
+            if (maxFC > 0)
             {
                 // A vertex on this face has been limited, skip
                 continue;
@@ -817,7 +837,7 @@ Foam::conformalVoronoiMesh::collapseFace
     scalar collapseSizeLimitCoeff
 ) const
 {
-    bool limitToQuadsOrTris = true;
+    bool limitToQuadsOrTris = false;
 
     bool allowEarlyCollapseToPoint = true;
 
@@ -1297,7 +1317,7 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
         }
     }
 
-    Info<< "Cells with fewer than 4 faces                              : "
+    Info<< "Cells with more than 1 but fewer than 4 faces              : "
         << nInvalidPolyhedra << endl;
 
     PackedBoolList ptToBeLimited(pts.size(), false);
@@ -1350,7 +1370,10 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
     // }
 
 
-    // Limit Delaunay cell filter values
+    // Apply Delaunay cell filterCounts and determine the maximum
+    // overall filterCount
+
+    label maxFilterCount = 0;
 
     for
     (
@@ -1365,42 +1388,17 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
         {
             if (ptToBeLimited[cI] == true)
             {
-                cit->filterLimit() *= 0.75;
+                cit->filterCount()++;
             }
-        }
-    }
 
-    // Determine the minimum minFilterLimit
-
-    scalar minMinFilterLimit = GREAT;
-
-    for
-    (
-        Triangulation::Finite_edges_iterator eit = finite_edges_begin();
-        eit != finite_edges_end();
-        ++eit
-    )
-    {
-        Cell_handle c = eit->first;
-        Vertex_handle vA = c->vertex(eit->second);
-        Vertex_handle vB = c->vertex(eit->third);
-
-        if
-        (
-            vA->internalOrBoundaryPoint()
-         || vB->internalOrBoundaryPoint()
-        )
-        {
-            scalar minFL = minFilterLimit(eit);
-
-            if (minFL < minMinFilterLimit)
+            if (cit->filterCount() > maxFilterCount)
             {
-                minMinFilterLimit = minFL;
+                maxFilterCount = cit->filterCount();
             }
         }
     }
 
-    Info<< "minMinFilterLimit " << minMinFilterLimit << endl;
+    Info<< "maxFilterCount " << maxFilterCount << endl;
 
     return wrongFaces.size();
 
