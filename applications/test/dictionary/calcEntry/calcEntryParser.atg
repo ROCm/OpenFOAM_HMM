@@ -23,7 +23,7 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-@file calcEntryParser.ATG
+@file calcEntryParser.atg
 
 Description
     An attributed Coco/R grammar to parse simple arithmetic expressions
@@ -52,7 +52,7 @@ COMPILER calcEntry
     // grammar pragmas:
     $prefix=calcEntry
     $namespace=Foam::functionEntries::calcEntryInternal
-    $eof=true     // grammar handles eof itself
+    $explicitEOF=true     // grammar handles eof itself
 
 private:
     //- The parent dictionary

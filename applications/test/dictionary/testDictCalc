@@ -37,16 +37,7 @@ p     this calculation #calc{
 is done inplace;
 
 
-flowRate    #calc{ $flowRatePerHour / 3600 };
-
-// inplace redefine
-flowRate    #calc{ $flowRate * 0.1 };
-
-sin45       #calc{ sin( 45.0 * pi() / 180 ) };
-cos45       #calc{ cos( degToRad(15- -15+ +15) ) };
-pow         #calc{ pow( $x, $y ) };
-log10       #calc{ log( 1e6 ) };
-// list #calc{ list() };
+flowRate    #calc{ $flowRatePerHour / 3600};
 
 xxx         yyy;
 foo         30;
