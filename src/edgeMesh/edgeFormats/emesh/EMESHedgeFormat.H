@@ -79,6 +79,7 @@ protected:
             const edgeList&
         );
 
+
 public:
 
     // Constructors

@@ -110,8 +110,8 @@ Foam::surfMesh::surfMesh(const IOobject& io, const word& surfName)
 Foam::surfMesh::surfMesh
 (
     const IOobject& io,
-    const Xfer< pointField >& pointLst,
-    const Xfer< faceList >& faceLst,
+    const Xfer<pointField>& pointLst,
+    const Xfer<faceList>& faceLst,
     const word& surfName
 )
 :
@@ -156,7 +156,7 @@ Foam::surfMesh::surfMesh
 Foam::surfMesh::surfMesh
 (
     const IOobject& io,
-    const Xfer< MeshedSurface<face> >& surf,
+    const Xfer<MeshedSurface<face> >& surf,
     const word& surfName
 )
 :
@@ -252,9 +252,9 @@ void Foam::surfMesh::updateRefs()
 
 void Foam::surfMesh::resetPrimitives
 (
-    const Xfer< pointField >& points,
-    const Xfer< faceList >& faces,
-    const Xfer< surfZoneList >& zones,
+    const Xfer<pointField>& points,
+    const Xfer<faceList>& faces,
+    const Xfer<surfZoneList>& zones,
     const bool validate
 )
 {
@@ -287,10 +287,9 @@ void Foam::surfMesh::transfer
 }
 
 
-Foam::Xfer< Foam::MeshedSurface<Foam::face> >
-Foam::surfMesh::xfer()
+Foam::Xfer<Foam::MeshedSurface<Foam::face> > Foam::surfMesh::xfer()
 {
-    Xfer< MeshedSurface<face> > xf;
+    Xfer<MeshedSurface<face> > xf;
 
     xf().storedPoints().transfer(this->storedPoints());
     xf().storedFaces().transfer(this->storedFaces());

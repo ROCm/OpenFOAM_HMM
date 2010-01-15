@@ -29,7 +29,6 @@ License
 #include "IFstream.H"
 #include "clock.H"
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fileFormats::EMESHedgeFormat::EMESHedgeFormat
@@ -119,8 +118,7 @@ bool Foam::fileFormats::EMESHedgeFormat::read
 }
 
 
-Foam::Ostream&
-Foam::fileFormats::EMESHedgeFormat::write
+Foam::Ostream& Foam::fileFormats::EMESHedgeFormat::write
 (
     Ostream& os,
     const pointField& pointLst,
