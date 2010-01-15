@@ -84,7 +84,7 @@ activeBaffleVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    pName_("p"),
+    pName_(dict.lookupOrDefault<word>("p", "p")),
     cyclicPatchName_(dict.lookup("cyclicPatch")),
     cyclicPatchLabel_(p.patch().boundaryMesh().findPatchID(cyclicPatchName_)),
     orientation_(readLabel(dict.lookup("orientation"))),
@@ -96,11 +96,6 @@ activeBaffleVelocityFvPatchVectorField
     curTimeIndex_(-1)
 {
     fvPatchVectorField::operator=(vector::zero);
-
-    if (dict.found("p"))
-    {
-        dict.lookup("p") >> pName_;
-    }
 }
 
 
@@ -219,15 +214,21 @@ void Foam::activeBaffleVelocityFvPatchVectorField::updateCoeffs()
         }
 
         openFraction_ =
-            max(min(
-                openFraction_
-              + max
+            max
+            (
+                min
                 (
-                    this->db().time().deltaTValue()/openingTime_,
-                    maxOpenFractionDelta_
-                )
-               *(orientation_*sign(forceDiff)),
-              1 - 1e-6), 1e-6);
+                    openFraction_
+                  + max
+                    (
+                        this->db().time().deltaTValue()/openingTime_,
+                        maxOpenFractionDelta_
+                    )
+                   *(orientation_*sign(forceDiff)),
+                    1 - 1e-6
+                ),
+                1e-6
+            );
 
         Info<< "openFraction = " << openFraction_ << endl;
 
@@ -264,8 +265,7 @@ void Foam::activeBaffleVelocityFvPatchVectorField::write(Ostream& os) const
         << maxOpenFractionDelta_ << token::END_STATEMENT << nl;
     os.writeKeyword("openFraction")
         << openFraction_ << token::END_STATEMENT << nl;
-    os.writeKeyword("p")
-        << pName_ << token::END_STATEMENT << nl;
+    writeEntryIfDifferent<word>(os, "p", "p", pName_);
     writeEntry("value", os);
 }
 
