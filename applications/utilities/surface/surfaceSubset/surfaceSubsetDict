@@ -36,7 +36,7 @@ zone
 surface
 {
     name "sphere.stl";
-    outside yes;
+    outside     yes;
 }
 
 // Extend selection with edge neighbours

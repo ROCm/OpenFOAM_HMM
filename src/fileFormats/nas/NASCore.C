@@ -24,13 +24,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NASsurfaceFormatCore.H"
+#include "NASCore.H"
 #include "IStringStream.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Do weird things to extract a floating point number
-Foam::scalar Foam::fileFormats::NASsurfaceFormatCore::parseNASCoord
+Foam::fileFormats::NASCore::NASCore()
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+Foam::scalar Foam::fileFormats::NASCore::parseNASCoord
 (
     const string& s
 )

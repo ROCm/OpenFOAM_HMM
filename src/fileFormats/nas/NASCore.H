@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,31 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fileFormats::NASsurfaceFormat
+    Foam::fileFormats::NASCore
 
 Description
-    Nastran surface reader.
-
-    - Uses the Ansa "$ANSA_NAME" or the Hypermesh "$HMNAME COMP" extensions
-      to obtain zone names.
-    - Handles Nastran short and long formats, but not free format.
-    - Properly handles the Nastran compact floating point notation: \n
-    @verbatim
-        GRID          28        10.20269-.030265-2.358-8
-    @endverbatim
+    Core routines used when reading/writing NASTRAN files.
 
 SourceFiles
-    NASsurfaceFormat.C
+    NASCore.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NASsurfaceFormat_H
-#define NASsurfaceFormat_H
+#ifndef NASCore_H
+#define NASCore_H
 
-#include "MeshedSurface.H"
-#include "MeshedSurfaceProxy.H"
-#include "UnsortedMeshedSurface.H"
-#include "NASCore.H"
+#include "scalar.H"
+#include "string.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,54 +47,25 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class NASsurfaceFormat Declaration
+                    Class fileFormats::NASCore Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Face>
-class NASsurfaceFormat
-:
-    public MeshedSurface<Face>,
-    public NASCore
+class NASCore
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        NASsurfaceFormat(const NASsurfaceFormat<Face>&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const NASsurfaceFormat<Face>&);
-
-
 public:
+
+    // Public Member Functions
+
+        //- Do weird things to extract number
+        static scalar parseNASCoord(const string&);
+
 
     // Constructors
 
-        //- Construct from file name
-        NASsurfaceFormat(const fileName&);
+        //- Construct null
+        NASCore();
 
 
-    // Selectors
-
-        //- Read file and return surface
-        static autoPtr<MeshedSurface<Face> > New(const fileName& name)
-        {
-            return autoPtr<MeshedSurface<Face> >
-            (
-                new NASsurfaceFormat<Face>(name)
-            );
-        }
-
-
-    // Destructor
-
-        virtual ~NASsurfaceFormat()
-        {}
-
-
-    // Member Functions
-
-        //- Read from a file
-        virtual bool read(const fileName&);
 };
 
 
@@ -112,12 +73,6 @@ public:
 
 } // End namespace fileFormats
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "NASsurfaceFormat.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
