@@ -192,8 +192,14 @@ public:
         //- Return the effective viscosity
         virtual tmp<volScalarField> muEff() const = 0;
 
-        //- Return the effective turbulent thermal diffusivity
+        //- Return the turbulence thermal diffusivity
+        virtual tmp<volScalarField> alphat() const = 0;
+
+        //- Return the effective turbulence thermal diffusivity
         virtual tmp<volScalarField> alphaEff() const = 0;
+
+        //- Return the effective turbulence thermal diffusivity for a patch
+        virtual tmp<scalarField> alphaEff(const label patchI) const = 0;
 
         //- Return the turbulence kinetic energy
         virtual tmp<volScalarField> k() const = 0;

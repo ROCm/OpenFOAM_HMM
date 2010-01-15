@@ -41,7 +41,7 @@ boundaryField
         type            compressible::turbulentMixingLengthFrequencyInlet;
         mixingLength    0.007;
         k               k;
-        value           uniform 4.5-3;
+        value           uniform 4.5e-3;
     }
     outlet
     {
