@@ -142,7 +142,7 @@ public:
 
         // Access
 
-            //- Retirn local reference cast into the cyclic patch
+            //- Return local reference cast into the cyclic patch
             const cyclicFvPatch& cyclicPatch() const
             {
                 return cyclicPatch_;
