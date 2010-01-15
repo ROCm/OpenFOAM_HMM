@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2006-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,41 +23,99 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fileFormats::NASsurfaceFormatCore
+    Foam::fileFormats::STARCDCore
 
 Description
-    Internal class used by the NASsurfaceFormat
+    Core routines used when reading/writing pro-STAR vrt/cel/bnd files.
 
 SourceFiles
-    NASsurfaceFormatCore.C
+    STARCDCore.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NASsurfaceFormatCore_H
-#define NASsurfaceFormatCore_H
+#ifndef STARCDCore_H
+#define STARCDCore_H
 
-#include "Ostream.H"
-#include "OFstream.H"
+#include "IFstream.H"
+#include "pointField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
 namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class NASsurfaceFormatCore Declaration
+                   Class fileFormats::STARCDCore Declaration
 \*---------------------------------------------------------------------------*/
 
-class NASsurfaceFormatCore
+class STARCDCore
 {
 protected:
 
     // Protected Member Functions
 
-        //- Do weird things to extract number
-        static scalar parseNASCoord(const string&);
+        //- Read header
+        static bool readHeader(IFstream&, const word& fileSignature);
+
+        //- Write header for fileType (CELL|VERTEX|BOUNDARY)
+        static void writeHeader(Ostream&, const word& fileType);
+
+
+protected:
+
+        enum cellType
+        {
+            starcdFluidType   = 1,
+            starcdSolidType   = 2,
+            starcdBaffleType  = 3,
+            starcdShellType   = 4,
+            starcdLineType    = 5,
+            starcdPointType   = 6
+        };
+
+        enum shapeType
+        {
+            starcdPoint = 1,
+            starcdLine  = 2,
+            starcdShell = 3,
+            starcdHex   = 11,
+            starcdPrism = 12,
+            starcdTet   = 13,
+            starcdPyr   = 14,
+            starcdPoly  = 255
+        };
+
+
+public:
+
+    // Public Member Functions
+
+        //- Read points from a (.vrt) file
+        // The file format is as follows:
+        // @verbatim
+        // Line 1:
+        //   PROSTAR_VERTEX  newline
+        //
+        // Line 2:
+        //   {version} 0 0 0 0 0 0 0  newline
+        //
+        // Body:
+        //   {vertexId}  {x}  {y}  {z}  newline
+        // @endverbatim
+        static bool readPoints(IFstream&, pointField&, labelList& ids);
+
+        //- Write header and points to (.vrt) file
+        static void writePoints(Ostream&, const pointField&);
+
+
+    // Constructors
+
+        //- Construct null
+        STARCDCore();
+
 };
 
 

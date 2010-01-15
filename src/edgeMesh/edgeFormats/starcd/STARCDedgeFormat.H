@@ -43,6 +43,8 @@ SourceFiles
 #define STARCDedgeFormat_H
 
 #include "edgeMesh.H"
+#include "STARCDCore.H"
+
 #include "IFstream.H"
 #include "Ostream.H"
 #include "OFstream.H"
@@ -60,7 +62,8 @@ namespace fileFormats
 
 class STARCDedgeFormat
 :
-    public edgeMesh
+    public edgeMesh,
+    public STARCDCore
 {
     // Private Data
 
@@ -89,14 +92,6 @@ class STARCDedgeFormat
 protected:
 
     // Protected Member Functions
-
-    static bool readHeader(IFstream&, const word&);
-
-    static void writeHeader(Ostream&, const char* filetype);
-
-    static bool readPoints(IFstream&, pointField&, labelList& ids);
-
-    static void writePoints(Ostream&, const pointField&);
 
     static void writeCase
     (

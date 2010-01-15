@@ -23,14 +23,15 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Example of simple laplacian smoother
+    Example of a simple laplacian smoother
 
 \*---------------------------------------------------------------------------*/
 
-#include "triSurface.H"
 #include "argList.H"
 #include "OFstream.H"
 #include "boundBox.H"
+
+#include "MeshedSurfaces.H"
 
 using namespace Foam;
 
@@ -61,22 +62,19 @@ int main(int argc, char *argv[])
     label iters(readLabel(IStringStream(args.additionalArgs()[2])()));
     fileName outFileName(args.additionalArgs()[3]);
 
-    Info<< "Relax:" << relax << endl;
-    Info<< "Iters:" << iters << endl;
+    Info<< "Relax:" << relax << nl
+        << "Iters:" << iters << nl
+        << "Reading surface from " << surfFileName << " ..." << endl;
 
+    meshedSurface surf1(surfFileName);
 
-    Info<< "Reading surface from " << surfFileName << " ..." << endl;
-
-    triSurface surf1(surfFileName);
-
-    Info<< "Triangles    : " << surf1.size() << endl;
-    Info<< "Vertices     : " << surf1.nPoints() << endl;
-    Info<< "Bounding Box : " << boundBox(surf1.localPoints()) << endl;
+    Info<< "Faces        : " << surf1.size() << nl
+        << "Vertices     : " << surf1.nPoints() << nl
+        << "Bounding Box : " << boundBox(surf1.localPoints()) << endl;
 
     pointField newPoints(surf1.localPoints());
 
     const labelListList& pointEdges = surf1.pointEdges();
-
 
     for (label iter = 0; iter < iters; iter++)
     {
@@ -100,16 +98,14 @@ int main(int argc, char *argv[])
         }
     }
 
-    triSurface surf2
-    (
-        surf1.localFaces(),
-        surf1.patches(),
-        newPoints
-    );
-
     Info<< "Writing surface to " << outFileName << " ..." << endl;
 
-    surf2.write(outFileName);
+    meshedSurface
+    (
+        xferMove(newPoints),
+        xferCopy(surf1.localFaces()),
+        xferCopy(surf1.surfZones())
+    ).write(outFileName);
 
     Info<< "End\n" << endl;
 

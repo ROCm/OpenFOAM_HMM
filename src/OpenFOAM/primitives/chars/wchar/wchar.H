@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,10 @@ Description
 SourceFiles
     wcharIO.C
 
+SeeAlso
+    http://en.wikipedia.org/wiki/UTF-8
+    http://en.wikibooks.org/wiki/Unicode/Character_reference
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef wchar_H
@@ -48,10 +52,10 @@ class Ostream;
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-//- Output via a normal char
+//- Output wide character (Unicode) as UTF-8
 Ostream& operator<<(Ostream&, const wchar_t);
 
-//- Output string via normal char
+//- Output wide character (Unicode) string as UTF-8
 Ostream& operator<<(Ostream&, const wchar_t*);
 
 

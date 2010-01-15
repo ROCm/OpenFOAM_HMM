@@ -17,7 +17,7 @@ FoamFile
 
 dimensions      [0 0 -1 0 0 0 0];
 
-internalField   uniform 0.0016;
+internalField   uniform 4.5e-3;
 
 boundaryField
 {
@@ -34,18 +34,19 @@ boundaryField
         type            compressible::turbulentMixingLengthFrequencyInlet;
         mixingLength    0.007;
         k               k;
-        value           uniform 0.0016;
+        value           uniform 4.5e-3;
     }
     inletSides
     {
         type            compressible::turbulentMixingLengthFrequencyInlet;
         mixingLength    0.007;
         k               k;
-        value           uniform 0.0016;
+        value           uniform 4.5-3;
     }
     outlet
     {
-        type            zeroGradient;
+        type            inletOutlet;
+        inletValue      uniform 4.5e-3;
     }
     walls
     {
@@ -53,7 +54,7 @@ boundaryField
         Cmu             0.09;
         kappa           0.41;
         E               9.8;
-        value           uniform 0.0016;
+        value           uniform 0;
     }
 }
 

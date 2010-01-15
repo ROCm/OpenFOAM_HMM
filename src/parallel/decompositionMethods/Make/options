@@ -1,8 +1,6 @@
 EXE_INC = \
-    -I$(WM_THIRD_PARTY_DIR)/scotch_5.1/src/libscotch/lnInclude \
-    -I$(WM_THIRD_PARTY_DIR)/metis-5.0pre2/include
+    -I$(WM_THIRD_PARTY_DIR)/scotch_5.1/include \
+    -I../metisDecomp/lnInclude
 
 LIB_LIBS = \
-    -lscotch \
-    -lmetis \
-    -lGKlib
+    -lscotch -lscotcherrexit
