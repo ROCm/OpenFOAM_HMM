@@ -453,7 +453,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::repatch
 )
 {
     polyTopoChange meshMod(mesh_);
-    
+
     forAll(newPatchID, bFaceI)
     {
         if (newPatchID[bFaceI] != -1)
@@ -936,7 +936,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::doRemoveCells
 void Foam::fvMeshDistribute::addProcPatches
 (
     const labelList& neighbourNewProc,   // processor that neighbour is on
-    labelList& procPatchID              
+    labelList& procPatchID
 )
 {
     // Now use the neighbourFace/Proc to repatch the mesh. These two lists
@@ -1236,7 +1236,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshDistribute::receiveMesh
     // Construct fvMesh
     autoPtr<fvMesh> domainMeshPtr
     (
-        new fvMesh 
+        new fvMesh
         (
             IOobject
             (
@@ -1461,7 +1461,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     getNeighbourData(distribution, sourceFace, sourceProc, sourceNewProc);
 
 
-    // Remove meshPhi. Since this would otherwise dissappear anyway
+    // Remove meshPhi. Since this would otherwise disappear anyway
     // during topo changes and we have to guarantee that all the fields
     // can be sent.
     mesh_.clearOut();
@@ -1705,7 +1705,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                 str
             );
             sendFields<surfaceSphericalTensorField>
-            (   
+            (
                 recvProc,
                 surfSphereTensors,
                 subsetter,
@@ -2046,7 +2046,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             // Update mesh data: sourceFace,sourceProc for added
             // mesh.
 
-            sourceFace = 
+            sourceFace =
                 mapBoundaryData
                 (
                     mesh_,
@@ -2055,7 +2055,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                     domainMesh.nInternalFaces(),
                     domainSourceFace
                 );
-            sourceProc = 
+            sourceProc =
                 mapBoundaryData
                 (
                     mesh_,
@@ -2064,7 +2064,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                     domainMesh.nInternalFaces(),
                     domainSourceProc
                 );
-            sourceNewProc = 
+            sourceNewProc =
                 mapBoundaryData
                 (
                     mesh_,

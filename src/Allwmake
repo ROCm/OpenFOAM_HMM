@@ -22,12 +22,13 @@ wmake libso OpenFOAM
 
 wmake libso lagrangian/basic
 
-wmake libso triSurface
 wmake libso edgeMesh
 wmake libso surfMesh
+wmake libso triSurface
 
 # Decomposition methods needed by meshTools
 wmake libso parallel/decompositionMethods
+wmake libso parallel/metisDecomp
 
 wmake libso meshTools
 wmake libso finiteVolume

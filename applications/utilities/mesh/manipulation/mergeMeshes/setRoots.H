@@ -2,11 +2,11 @@
 
     argList::validArgs.append("master root");
     argList::validArgs.append("master case");
-    argList::validOptions.insert("masterRegion", "name");
+    argList::addOption("masterRegion", "name");
 
     argList::validArgs.append("root to add");
     argList::validArgs.append("case to add");
-    argList::validOptions.insert("addRegion", "name");
+    argList::addOption("addRegion", "name");
 
     argList args(argc, argv);
 

@@ -353,7 +353,7 @@ bool Foam::edgeCollapser::collapseEdge(const label edgeI, const label master)
             // Use the smaller region number for the whole network.
             label minRegion = min(pointRegion0, pointRegion1);
             label maxRegion = max(pointRegion0, pointRegion1);
-    
+
             // Use minRegion as region for combined net, free maxRegion.
             pointRegionMaster_[minRegion] = master;
             pointRegionMaster_[maxRegion] = -1;
@@ -510,7 +510,7 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
         }
     }
 
-        
+
 
     // Remove points.
     forAll(pointRegion_, pointI)
@@ -526,7 +526,7 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
 
     const polyBoundaryMesh& boundaryMesh = mesh_.boundaryMesh();
     const faceZoneMesh& faceZones = mesh_.faceZones();
-      
+
 
     // Renumber faces that use points
     forAll(pointRegion_, pointI)

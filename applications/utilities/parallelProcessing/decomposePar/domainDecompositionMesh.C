@@ -65,7 +65,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
     {
         List<SLList<label> > procCellList(nProcs_);
 
-        forAll (cellToProc_, celli)
+        forAll(cellToProc_, celli)
         {
             if (cellToProc_[celli] >= nProcs_)
             {
@@ -81,7 +81,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
         }
 
         // Convert linked lists into normal lists
-        forAll (procCellList, procI)
+        forAll(procCellList, procI)
         {
             procCellAddressing_[procI] = procCellList[procI];
         }
@@ -98,7 +98,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
     {
         List<SLList<label> > procFaceList(nProcs_);
 
-        forAll (neighbour, facei)
+        forAll(neighbour, facei)
         {
             if (cellToProc_[owner[facei]] == cellToProc_[neighbour[facei]])
             {
@@ -117,7 +117,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
         List<SLList<label> > procPatchIndex(nProcs_);
 
-        forAll (neighbour, facei)
+        forAll(neighbour, facei)
         {
             if (cellToProc_[owner[facei]] != cellToProc_[neighbour[facei]])
             {
@@ -225,16 +225,16 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
         // for all processors, set the size of start index and patch size
         // lists to the number of patches in the mesh
-        forAll (procPatchSize_, procI)
+        forAll(procPatchSize_, procI)
         {
             procPatchSize_[procI].setSize(patches.size());
             procPatchStartIndex_[procI].setSize(patches.size());
         }
 
-        forAll (patches, patchi)
+        forAll(patches, patchi)
         {
             // Reset size and start index for all processors
-            forAll (procPatchSize_, procI)
+            forAll(procPatchSize_, procI)
             {
                 procPatchSize_[procI][patchi] = 0;
                 procPatchStartIndex_[procI][patchi] =
@@ -251,7 +251,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                 const unallocLabelList& patchFaceCells =
                     patches[patchi].faceCells();
 
-                forAll (patchFaceCells, facei)
+                forAll(patchFaceCells, facei)
                 {
                     const label curProc = cellToProc_[patchFaceCells[facei]];
 
@@ -284,7 +284,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                     cycOffset
                 );
 
-                forAll (firstFaceCells, facei)
+                forAll(firstFaceCells, facei)
                 {
                     if
                     (
@@ -439,7 +439,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                 // Ordering in cyclic boundaries is important.
                 // Add the other half of cyclic faces for cyclic boundaries
                 // that remain on the processor
-                forAll (secondFaceCells, facei)
+                forAll(secondFaceCells, facei)
                 {
                     if
                     (
@@ -463,7 +463,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
         // Convert linked lists into normal lists
         // Add inter-processor boundaries and remember start indices
-        forAll (procFaceList, procI)
+        forAll(procFaceList, procI)
         {
             // Get internal and regular boundary processor faces
             SLList<label>& curProcFaces = procFaceList[procI];
@@ -604,7 +604,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
     // are omitted. For processor patches, set index to -1.
     // At the same time, filter the procPatchSize_ and procPatchStartIndex_
     // lists to exclude zero-size patches
-    forAll (procPatchSize_, procI)
+    forAll(procPatchSize_, procI)
     {
         // Make a local copy of old lists
         const labelList oldPatchSizes = procPatchSize_[procI];
@@ -628,7 +628,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
         label nPatches = 0;
 
-        forAll (oldPatchSizes, patchi)
+        forAll(oldPatchSizes, patchi)
         {
             if (!filterEmptyPatches || oldPatchSizes[patchi] > 0)
             {
@@ -646,7 +646,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
         curPatchSizes.setSize(nPatches);
         curPatchStarts.setSize(nPatches);
 
-        forAll (curProcessorPatchSizes, procPatchI)
+        forAll(curProcessorPatchSizes, procPatchI)
         {
             curBoundaryAddressing[nPatches] = -1;
 
@@ -662,19 +662,19 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
     // used for the processor. Collect the list of used points for the
     // processor.
 
-    forAll (procPointAddressing_, procI)
+    forAll(procPointAddressing_, procI)
     {
         boolList pointLabels(nPoints(), false);
 
         // Get reference to list of used faces
         const labelList& procFaceLabels = procFaceAddressing_[procI];
 
-        forAll (procFaceLabels, facei)
+        forAll(procFaceLabels, facei)
         {
             // Because of the turning index, some labels may be negative
             const labelList& facePoints = fcs[mag(procFaceLabels[facei]) - 1];
 
-            forAll (facePoints, pointi)
+            forAll(facePoints, pointi)
             {
                 // Mark the point as used
                 pointLabels[facePoints[pointi]] = true;
@@ -688,7 +688,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
         label nUsedPoints = 0;
 
-        forAll (pointLabels, pointi)
+        forAll(pointLabels, pointi)
         {
             if (pointLabels[pointi])
             {
@@ -734,7 +734,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
             // Reset the lookup list
             pointsUsage = 0;
 
-            forAll (curProcessorPatchStarts, patchi)
+            forAll(curProcessorPatchStarts, patchi)
             {
                 const label curStart = curProcessorPatchStarts[patchi];
                 const label curEnd = curStart + curProcessorPatchSizes[patchi];
@@ -753,7 +753,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
                     const face& f = fcs[curF];
 
-                    forAll (f, pointi)
+                    forAll(f, pointi)
                     {
                         if (pointsUsage[f[pointi]] == 0)
                         {

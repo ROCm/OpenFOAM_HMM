@@ -104,7 +104,7 @@ public:
         public:
 
             // Constructors
-            
+
                 fieldScheme
                 (
                     const GeometricField<Type, fvPatchField, volMesh>& field,

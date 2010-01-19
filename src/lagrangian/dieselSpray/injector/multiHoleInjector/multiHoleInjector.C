@@ -44,7 +44,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::multiHoleInjector::multiHoleInjector
 (
     const Foam::Time& t,

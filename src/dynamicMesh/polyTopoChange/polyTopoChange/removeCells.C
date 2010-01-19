@@ -339,7 +339,7 @@ void Foam::removeCells::setRefinement
                         faceI,                  // label of face being modified
                         nei,                    // owner
                         -1,                     // neighbour
-                        false,                  // face flip
+                        true,                   // face flip
                         newPatchID[faceI],      // patch for face
                         false,                  // remove from zone
                         zoneID,                 // zone for face
@@ -482,7 +482,7 @@ void Foam::removeCells::setRefinement
                 faceI++;
             }
         }
-    }    
+    }
 
 
     // Remove points that are no longer used.

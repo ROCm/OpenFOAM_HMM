@@ -151,7 +151,7 @@ public:
             const wordList& patchFieldTypes
         ) const;
 
-        //- Interpolate volField using inverse distance weighting 
+        //- Interpolate volField using inverse distance weighting
         //  returning pointField
         template<class Type>
         tmp<GeometricField<Type, pointPatchField, pointMesh> > interpolate
@@ -159,7 +159,7 @@ public:
             const GeometricField<Type, fvPatchField, volMesh>&
         ) const;
 
-        //- Interpolate tmp<volField> using inverse distance weighting 
+        //- Interpolate tmp<volField> using inverse distance weighting
         //  returning pointField
         template<class Type>
         tmp<GeometricField<Type, pointPatchField, pointMesh> > interpolate

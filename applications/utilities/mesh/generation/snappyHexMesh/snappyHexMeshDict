@@ -40,6 +40,10 @@ geometry
     {
         type triSurfaceMesh;
 
+        //tolerance   1E-6;   // optional:non-default tolerance on intersections
+        //maxTreeDepth 10;    // optional:depth of octree. Decrease only in case
+                              // of memory limitations.
+
         // Per region the patchname. If not provided will be <name>_<region>.
         regions
         {
@@ -180,6 +184,12 @@ castellatedMeshControls
     // NOTE: This point should never be on a face, always inside a cell, even
     // after refinement.
     locationInMesh (5 0.28 0.43);
+
+
+    // Whether any faceZones (as specified in the refinementSurfaces)
+    // are only on the boundary of corresponding cellZones or also allow
+    // free-standing zone faces. Not used if there are no faceZones.
+    allowFreeStandingZoneFaces true;
 }
 
 
@@ -274,6 +284,7 @@ addLayersControls
     maxThicknessToMedialRatio 0.3;
 
     // Angle used to pick up medial axis points
+    // Note: changed(corrected) w.r.t 16x! 90 degrees corresponds to 130 in 16x.
     minMedianAxisAngle 90;
 
     // Create buffer region for new layer terminations

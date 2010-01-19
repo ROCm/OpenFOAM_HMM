@@ -52,7 +52,7 @@ using namespace Foam;
 // Main program:
 int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("overwrite", "");
+    argList::addBoolOption("overwrite");
     argList::validArgs.append("cellSet");
 #   include "setRootCase.H"
 #   include "createTime.H"

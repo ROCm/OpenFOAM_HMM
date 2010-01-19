@@ -31,7 +31,7 @@ License
 
 void Foam::surfMesh::setInstance(const fileName& inst)
 {
-    if (debug or true)
+    if (debug)
     {
         Info<< "void surfMesh::setInstance(const fileName& inst) : "
             << "Resetting file instance to " << inst << endl;

@@ -115,7 +115,7 @@ void writeMesh
 
 int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("overwrite", "");
+    argList::addBoolOption("overwrite");
 #   include "setRootCase.H"
 #   include "createTime.H"
     runTime.functionObjects().off();
@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
         autoRefineDriver::debug = debug;
         autoSnapDriver::debug = debug;
         autoLayerDriver::debug = debug;
-    }        
+    }
 
 
     // Read geometry

@@ -103,7 +103,7 @@ Foam::label Foam::meshSearch::findNearestCellTree(const point& location) const
     const indexedOctree<treeDataPoint>& tree = cellCentreTree();
 
     scalar span = tree.bb().mag();
-    
+
     pointIndexHit info = tree.findNearest(location, Foam::sqr(span));
 
     if (!info.hit())
@@ -463,7 +463,7 @@ const Foam::indexedOctree<Foam::treeDataFace>& Foam::meshSearch::boundaryTree()
 
         treeBoundBox overallBb(mesh_.points());
         Random rndGen(123456);
-        overallBb.extend(rndGen, 1E-4);
+        overallBb = overallBb.extend(rndGen, 1E-4);
         overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
@@ -497,7 +497,7 @@ const Foam::indexedOctree<Foam::treeDataCell>& Foam::meshSearch::cellTree()
 
         treeBoundBox overallBb(mesh_.points());
         Random rndGen(123456);
-        overallBb.extend(rndGen, 1E-4);
+        overallBb = overallBb.extend(rndGen, 1E-4);
         overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
@@ -516,7 +516,7 @@ const Foam::indexedOctree<Foam::treeDataCell>& Foam::meshSearch::cellTree()
     }
 
     return *cellTreePtr_;
-    
+
 }
 
 
@@ -531,7 +531,7 @@ const Foam::indexedOctree<Foam::treeDataPoint>&
 
         treeBoundBox overallBb(mesh_.cellCentres());
         Random rndGen(123456);
-        overallBb.extend(rndGen, 1E-4);
+        overallBb = overallBb.extend(rndGen, 1E-4);
         overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
@@ -787,7 +787,7 @@ Foam::label Foam::meshSearch::findCell
                 {
                     nearCellI = mesh_.faceOwner()[curHit.index()];
                     curPoint =
-                        curHit.hitPoint() 
+                        curHit.hitPoint()
                       + offset(curHit.hitPoint(), curHit.index(), edgeVec);
                 }
             }

@@ -30,6 +30,81 @@ License
 
 #include "HeatTransferModel.H"
 
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::preEvolve()
+{
+    KinematicCloud<ParcelType>::preEvolve();
+}
+
+
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::evolveCloud()
+{
+    const volScalarField& T = carrierThermo_.T();
+    const volScalarField cp = carrierThermo_.Cp();
+
+    autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
+    (
+        this->interpolationSchemes(),
+        this->rho()
+    );
+
+    autoPtr<interpolation<vector> > UInterp = interpolation<vector>::New
+    (
+        this->interpolationSchemes(),
+        this->U()
+    );
+
+    autoPtr<interpolation<scalar> > muInterp = interpolation<scalar>::New
+    (
+        this->interpolationSchemes(),
+        this->mu()
+    );
+
+    autoPtr<interpolation<scalar> > TInterp = interpolation<scalar>::New
+    (
+        this->interpolationSchemes(),
+        T
+    );
+
+    autoPtr<interpolation<scalar> > cpInterp = interpolation<scalar>::New
+    (
+        this->interpolationSchemes(),
+        cp
+    );
+
+    typename ParcelType::trackData td
+    (
+        *this,
+        constProps_,
+        rhoInterp(),
+        UInterp(),
+        muInterp(),
+        TInterp(),
+        cpInterp(),
+        this->g().value()
+    );
+
+    this->injection().inject(td);
+
+    if (this->coupled())
+    {
+        resetSourceTerms();
+    }
+
+    Cloud<ParcelType>::move(td);
+}
+
+
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::postEvolve()
+{
+    KinematicCloud<ParcelType>::postEvolve();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -150,79 +225,16 @@ void Foam::ThermoCloud<ParcelType>::resetSourceTerms()
 
 
 template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::preEvolve()
-{
-    KinematicCloud<ParcelType>::preEvolve();
-}
-
-
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::postEvolve()
-{
-    KinematicCloud<ParcelType>::postEvolve();
-}
-
-
-template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::evolve()
 {
-    preEvolve();
-
-    const volScalarField& T = carrierThermo_.T();
-    const volScalarField cp = carrierThermo_.Cp();
-
-    autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
-    (
-        this->interpolationSchemes(),
-        this->rho()
-    );
-
-    autoPtr<interpolation<vector> > UInterp = interpolation<vector>::New
-    (
-        this->interpolationSchemes(),
-        this->U()
-    );
-
-    autoPtr<interpolation<scalar> > muInterp = interpolation<scalar>::New
-    (
-        this->interpolationSchemes(),
-        this->mu()
-    );
-
-    autoPtr<interpolation<scalar> > TInterp = interpolation<scalar>::New
-    (
-        this->interpolationSchemes(),
-        T
-    );
-
-    autoPtr<interpolation<scalar> > cpInterp = interpolation<scalar>::New
-    (
-        this->interpolationSchemes(),
-        cp
-    );
-
-    typename ParcelType::trackData td
-    (
-        *this,
-        constProps_,
-        rhoInterp(),
-        UInterp(),
-        muInterp(),
-        TInterp(),
-        cpInterp(),
-        this->g().value()
-    );
-
-    this->injection().inject(td);
-
-    if (this->coupled())
+    if (this->active())
     {
-        resetSourceTerms();
+        preEvolve();
+
+        evolveCloud();
+
+        postEvolve();
     }
-
-    Cloud<ParcelType>::move(td);
-
-    postEvolve();
 }
 
 

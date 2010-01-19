@@ -28,10 +28,9 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveEntry.H"
-#include "OSspecific.H"
 #include "functionEntry.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::primitiveEntry::append
 (
@@ -59,55 +58,6 @@ void Foam::primitiveEntry::append
     else
     {
         newElmt(tokenIndex()++) = currToken;
-    }
-}
-
-
-void Foam::primitiveEntry::append(const tokenList& varTokens)
-{
-    forAll(varTokens, i)
-    {
-        newElmt(tokenIndex()++) = varTokens[i];
-    }
-}
-
-
-bool Foam::primitiveEntry::expandVariable
-(
-    const word& w,
-    const dictionary& dict
-)
-{
-    word varName = w(1, w.size()-1);
-
-    // lookup the variable name in the given dictionary....
-    // Note: allow wildcards to match? For now disabled since following
-    // would expand internalField to wildcard match and not expected
-    // internalField:
-    //      internalField XXX;
-    //      boundaryField { ".*" {YYY;} movingWall {value $internalField;}
-    const entry* ePtr = dict.lookupEntryPtr(varName, true, false);
-
-    // ...if defined insert its tokens into this
-    if (ePtr != NULL)
-    {
-        append(ePtr->stream());
-        return true;
-    }
-    else
-    {
-        // if not in the dictionary see if it is an environment
-        // variable
-
-        string enVarString = getEnv(varName);
-
-        if (enVarString.size())
-        {
-            append(tokenList(IStringStream('(' + enVarString + ')')()));
-            return true;
-        }
-
-        return false;
     }
 }
 
@@ -220,6 +170,8 @@ void Foam::primitiveEntry::readEntry(const dictionary& dict, Istream& is)
     }
 }
 
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::primitiveEntry::primitiveEntry
 (

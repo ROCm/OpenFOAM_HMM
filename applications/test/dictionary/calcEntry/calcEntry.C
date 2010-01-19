@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,9 +26,11 @@ License
 
 #include "calcEntry.H"
 #include "dictionary.H"
-#include "IStringStream.H"
-#include "OStringStream.H"
 #include "addToMemberFunctionSelectionTable.H"
+
+#include "ISstream.H"
+#include "CocoParserErrors.H"
+#include "calcEntryParser.h"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -59,11 +61,30 @@ bool Foam::functionEntries::calcEntry::execute
     Istream& is
 )
 {
-    dictionary args(parentDict, is);
-    OStringStream resultStream;
-    resultStream
-        << (args.lookup("x")[0].number() + args.lookup("y")[0].number());
-    entry.read(parentDict, IStringStream(resultStream.str())());
+    std::istream& iss = dynamicCast<ISstream>(is).stdStream();
+
+    // define parser error handler
+    CocoParserErrors<calcEntryInternal::Errors>
+        myErrorHandler("calcEntryInternal::Parser");
+
+    calcEntryInternal::Scanner scanner(iss);
+    calcEntryInternal::Parser  parser(&scanner, &myErrorHandler);
+
+    // Attach dictionary context
+    parser.dict(parentDict);
+
+    // Attach scalar functions
+    // parser.functions(parentDict);
+
+    parser.Parse();
+
+    // make a small input list to contain the answer
+    tokenList tokens(2);
+    tokens[0] = parser.Result();
+    tokens[1] = token::END_STATEMENT;
+
+    entry.read(parentDict, ITstream("ParserResult", tokens)());
+
     return true;
 }
 

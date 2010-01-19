@@ -27,29 +27,24 @@ License
 #include "removeParcel.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(removeParcel, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(removeParcel, 0);
-
-addToRunTimeSelectionTable
-(
-    wallModel,
-    removeParcel,
-    dictionary
-);
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+    addToRunTimeSelectionTable
+    (
+        wallModel,
+        removeParcel,
+        dictionary
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-removeParcel::removeParcel
+Foam::removeParcel::removeParcel
 (
     const dictionary& dict,
     const volVectorField& U,
@@ -62,13 +57,13 @@ removeParcel::removeParcel
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-removeParcel::~removeParcel()
+Foam::removeParcel::~removeParcel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool removeParcel::wallTreatment
+bool Foam::removeParcel::wallTreatment
 (
     parcel&,
     const label facei
@@ -77,9 +72,5 @@ bool removeParcel::wallTreatment
     return false;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -73,7 +73,7 @@ cellShape extrudedQuadCellShape
     // make a list of outward-pointing faces
     labelListList localFaces(4);
 
-    forAll (faceLabels, faceI)
+    forAll(faceLabels, faceI)
     {
         const label curFaceLabel = faceLabels[faceI];
 
@@ -100,7 +100,7 @@ cellShape extrudedQuadCellShape
         {
             // Reverse the face.  Note: it is necessary to reverse by
             // hand to preserve connectivity of a 2-D mesh.
-            // 
+            //
             localFaces[faceI].setSize(curFace.size());
 
             forAllReverse(curFace, i)

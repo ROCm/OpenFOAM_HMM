@@ -122,7 +122,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
     }
 
     // Far field carrier  molar fractions
-    scalarField Xinf(Y_.size());
+    scalarField Xinf(td.cloud().mcCarrierThermo().speciesData().size());
 
     forAll(Xinf, i)
     {
@@ -344,7 +344,7 @@ void Foam::ReactingParcel<ParcelType>::calc
             td.cloud().hcTrans()[cellI] +=
                 np0
                *dMassPC[i]
-               *td.cloud().mcCarrierThermo().speciesData()[gid].H(T0);
+               *td.cloud().mcCarrierThermo().speciesData()[gid].Hc();
         }
 
         // Update momentum transfer
@@ -423,6 +423,11 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     scalarField& Cs
 )
 {
+    typedef PhaseChangeModel
+    <
+        typename ReactingParcel<ParcelType>::trackData::cloudType
+    > phaseChangeModelType;
+
     if
     (
         !td.cloud().phaseChange().active()
@@ -464,17 +469,26 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
             td.cloud().composition().localToGlobalCarrierId(idPhase, i);
         const label idl = td.cloud().composition().globalIds(idPhase)[i];
 
-        const scalar hv = td.cloud().mcCarrierThermo().speciesData()[idc].H(Ts);
-        const scalar hl =
-            td.cloud().composition().liquids().properties()[idl].h(pc_, Ts);
+        if
+        (
+            td.cloud().phaseChange().enthalpyTransfer()
+         == phaseChangeModelType::etLatentHeat
+        )
+        {
+            scalar hlp =
+                td.cloud().composition().liquids().properties()[idl].hl(pc_, T);
 
-        // Enthalphy transfer to carrier phase - method 1 using enthalpy diff
-        Sh += dMassPC[i]*(hl - hv)/dt;
+            Sh -= dMassPC[i]*hlp/dt;
+        }
+        else
+        {
+            // Note: enthalpies of both phases must use the same reference
+            scalar hc = td.cloud().mcCarrierThermo().speciesData()[idc].H(T);
+            scalar hp =
+                td.cloud().composition().liquids().properties()[idl].h(pc_, T);
 
-        // Enthalphy transfer to carrier phase - method 2 using latent heat
-//        const scalar hl =
-//            td.cloud().composition().liquids().properties()[idl].hl(pc_, Ts);
-//        Sh -= dMassPC[i]*hl/dt;
+            Sh -= dMassPC[i]*(hc - hp)/dt;
+        }
 
         // Update particle surface thermo properties
         const scalar Dab =

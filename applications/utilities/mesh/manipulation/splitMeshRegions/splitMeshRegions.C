@@ -1290,15 +1290,15 @@ label findCorrespondingRegion
 
 int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("cellZones", "");
-    argList::validOptions.insert("cellZonesOnly", "");
-    argList::validOptions.insert("blockedFaces", "faceSet");
-    argList::validOptions.insert("makeCellZones", "");
-    argList::validOptions.insert("largestOnly", "");
-    argList::validOptions.insert("insidePoint", "point");
-    argList::validOptions.insert("overwrite", "");
-    argList::validOptions.insert("detectOnly", "");
-    argList::validOptions.insert("sloppyCellZones", "");
+    argList::addBoolOption("cellZones");
+    argList::addBoolOption("cellZonesOnly");
+    argList::addOption("blockedFaces", "faceSet");
+    argList::addBoolOption("makeCellZones");
+    argList::addBoolOption("largestOnly");
+    argList::addOption("insidePoint", "point");
+    argList::addBoolOption("overwrite");
+    argList::addBoolOption("detectOnly");
+    argList::addBoolOption("sloppyCellZones");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

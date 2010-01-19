@@ -59,7 +59,7 @@ void writeFluentField
         << "1 " << phiInternal.size() // Start and end of list
         << ")(" << endl;
 
-    forAll (phiInternal, cellI)
+    forAll(phiInternal, cellI)
     {
         stream << phiInternal[cellI] << endl;
     }
@@ -70,7 +70,7 @@ void writeFluentField
     label nWrittenFaces = phiInternal.size();
 
     // Writing boundary faces
-    forAll (phi.boundaryField(), patchI)
+    forAll(phi.boundaryField(), patchI)
     {
         if (isType<emptyFvPatchScalarField>(phi.boundaryField()[patchI]))
         {
@@ -95,7 +95,7 @@ void writeFluentField
 
             nWrittenFaces += emptyFaceCells.size();
 
-            forAll (emptyFaceCells, faceI)
+            forAll(emptyFaceCells, faceI)
             {
                 stream << phiInternal[emptyFaceCells[faceI]] << endl;
             }
@@ -123,7 +123,7 @@ void writeFluentField
 
             nWrittenFaces += patchPhi.size();
 
-            forAll (patchPhi, faceI)
+            forAll(patchPhi, faceI)
             {
                 stream << patchPhi[faceI] << endl;
             }

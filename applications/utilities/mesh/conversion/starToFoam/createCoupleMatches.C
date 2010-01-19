@@ -63,7 +63,7 @@ void starMesh::createCoupleMatches()
 
     const label infoJump = max(1000, couples_.size()/20);
 
-    forAll (couples_, coupleI)
+    forAll(couples_, coupleI)
     {
         if (coupleI % infoJump == 0)
         {
@@ -168,7 +168,7 @@ void starMesh::createCoupleMatches()
 
             // Loop through all edges of the master face. For every edge,
             // intersect it with all edges of the cutting face.
-            forAll (masterEdges, masterEdgeI)
+            forAll(masterEdges, masterEdgeI)
             {
                 const edge& curMasterEdge = masterEdges[masterEdgeI];
 
@@ -186,7 +186,7 @@ void starMesh::createCoupleMatches()
                 // go through all slave edges and try to get an intersection.
                 // The point is created along the original master edge rather
                 // than its corrected direction.
-                forAll (slaveEdges, slaveEdgeI)
+                forAll(slaveEdges, slaveEdgeI)
                 {
                     const edge& curSlaveEdge = slaveEdges[slaveEdgeI];
 
@@ -464,7 +464,7 @@ void starMesh::createCoupleMatches()
 
 #           ifdef DEBUG_COUPLE_INTERSECTION
             Info<< "additional slave edge points: " << endl;
-            forAll (slaveEdgePoints, edgeI)
+            forAll(slaveEdgePoints, edgeI)
             {
                 Info<< "edge: " << edgeI << ": " << slaveEdgePoints[edgeI]
                     << endl;
@@ -498,7 +498,7 @@ void starMesh::createCoupleMatches()
             // count the number of additional points for face
             label nAdditionalMasterPoints = 0;
 
-            forAll (masterEdgePoints, edgeI)
+            forAll(masterEdgePoints, edgeI)
             {
                 nAdditionalMasterPoints += masterEdgePoints[edgeI].size();
             }
@@ -516,7 +516,7 @@ void starMesh::createCoupleMatches()
                 << endl;
 #           endif
 
-            forAll (masterEdges, masterEdgeI)
+            forAll(masterEdges, masterEdgeI)
             {
                 // Insert the starting point of the edge
                 tmpMasterFace[nTmpMasterLabels] =
@@ -637,7 +637,7 @@ void starMesh::createCoupleMatches()
             scalar masterTol =
                 cpMergePointTol_*boundBox(tmpMasterFace.points(points_)).mag();
 
-            forAll (mstEdgesToCollapse, edgeI)
+            forAll(mstEdgesToCollapse, edgeI)
             {
 #               ifdef DEBUG_FACE_ORDERING
                 Info<< "edgeI: " << edgeI << " curEdge: "
@@ -693,7 +693,7 @@ void starMesh::createCoupleMatches()
             // count the number of additional points for face
             label nAdditionalSlavePoints = 0;
 
-            forAll (slaveEdgePoints, edgeI)
+            forAll(slaveEdgePoints, edgeI)
             {
                 nAdditionalSlavePoints += slaveEdgePoints[edgeI].size();
             }
@@ -710,7 +710,7 @@ void starMesh::createCoupleMatches()
                 << "nAdditionalSlavePoints: " << nAdditionalSlavePoints << endl;
 #           endif
 
-            forAll (slaveEdges, slaveEdgeI)
+            forAll(slaveEdges, slaveEdgeI)
             {
                 // Insert the starting point of the edge
                 tmpSlaveFace[nTmpSlaveLabels] =
@@ -894,7 +894,7 @@ void starMesh::createCoupleMatches()
 
             vector masterProjDir = -newMasterFace.normal(points_);
 
-            forAll (newSlaveEdges, edgeI)
+            forAll(newSlaveEdges, edgeI)
             {
                 // Take the slave edge points and project into the master.
                 // In order to create a good intersection, move the
@@ -937,7 +937,7 @@ void starMesh::createCoupleMatches()
             {
                 vector slaveProjDir = -newSlaveFace.normal(points_);
 
-                forAll (newMasterEdges, edgeI)
+                forAll(newMasterEdges, edgeI)
                 {
                     // Take the edge master points and project into the slave.
                     // In order to create a good intersection, move the
@@ -1053,7 +1053,7 @@ void starMesh::createCoupleMatches()
                     SLList<edge> edgesToConsider;
 
                     // collect master edges
-                    forAll (newMasterEdges, edgeI)
+                    forAll(newMasterEdges, edgeI)
                     {
                         const edge& cme = newMasterEdges[edgeI];
 
@@ -1072,7 +1072,7 @@ void starMesh::createCoupleMatches()
                     }
 
                     // collect slave edges
-                    forAll (newSlaveEdges, edgeI)
+                    forAll(newSlaveEdges, edgeI)
                     {
                         const edge& cse = newSlaveEdges[edgeI];
 
@@ -1260,7 +1260,7 @@ void starMesh::createCoupleMatches()
 #               endif
 
                 // check the intersection face for duplicate points
-                forAll (intersectedFace, checkI)
+                forAll(intersectedFace, checkI)
                 {
                     for
                     (
@@ -1312,7 +1312,7 @@ void starMesh::createCoupleMatches()
             // onto the master face to ensure closedness
             vector pointProjectionNormal = -masterFace.normal(points_);
 
-            forAll (intersectedFace, intPointI)
+            forAll(intersectedFace, intPointI)
             {
 #               ifdef DEBUG_COUPLE_PROJECTION
                 Info<< "Proj: old point: "
@@ -1424,7 +1424,7 @@ void starMesh::createCoupleMatches()
         // Loop through all cells and reset faces for removal to zero size
         const labelList crfToc = cellRemovedFaces.toc();
 
-        forAll (crfToc, cellI)
+        forAll(crfToc, cellI)
         {
             const label curCell = crfToc[cellI];
 
@@ -1451,7 +1451,7 @@ void starMesh::createCoupleMatches()
         const labelList cafToc = cellAddedFaces.toc();
 
         // Insert the new faces into the list
-        forAll (cafToc, cellI)
+        forAll(cafToc, cellI)
         {
             const label curCell = cafToc[cellI];
 
@@ -1465,7 +1465,7 @@ void starMesh::createCoupleMatches()
             label nNewFaces = 0;
 
             // copy original faces that have not been removed
-            forAll (oldFaces, faceI)
+            forAll(oldFaces, faceI)
             {
                 if (oldFaces[faceI].size())
                 {

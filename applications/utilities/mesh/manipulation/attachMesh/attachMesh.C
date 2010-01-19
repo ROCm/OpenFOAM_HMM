@@ -42,7 +42,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validOptions.insert("overwrite", "");
+    argList::addBoolOption("overwrite");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

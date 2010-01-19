@@ -34,6 +34,76 @@ License
 #include "PatchInteractionModel.H"
 #include "PostProcessingModel.H"
 
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::preEvolve()
+{
+    this->dispersion().cacheFields(true);
+    forces_.cacheFields(true);
+}
+
+
+template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::evolveCloud()
+{
+    autoPtr<interpolation<scalar> > rhoInterpolator =
+        interpolation<scalar>::New
+        (
+            interpolationSchemes_,
+            rho_
+        );
+
+    autoPtr<interpolation<vector> > UInterpolator =
+        interpolation<vector>::New
+        (
+            interpolationSchemes_,
+            U_
+        );
+
+    autoPtr<interpolation<scalar> > muInterpolator =
+        interpolation<scalar>::New
+        (
+            interpolationSchemes_,
+            mu_
+        );
+
+    typename ParcelType::trackData td
+    (
+        *this,
+        constProps_,
+        rhoInterpolator(),
+        UInterpolator(),
+        muInterpolator(),
+        g_.value()
+    );
+
+    this->injection().inject(td);
+
+    if (coupled_)
+    {
+        resetSourceTerms();
+    }
+
+    Cloud<ParcelType>::move(td);
+}
+
+
+template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::postEvolve()
+{
+    if (debug)
+    {
+        this->writePositions();
+    }
+
+    this->dispersion().cacheFields(false);
+    forces_.cacheFields(false);
+
+    this->postProcessing().post();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -62,6 +132,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
         )
     ),
     constProps_(particleProperties_),
+    active_(particleProperties_.lookup("active")),
     parcelTypeId_(readLabel(particleProperties_.lookup("parcelTypeId"))),
     coupled_(particleProperties_.lookup("coupled")),
     cellValueSourceCorrection_
@@ -180,74 +251,16 @@ void Foam::KinematicCloud<ParcelType>::resetSourceTerms()
 
 
 template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::preEvolve()
-{
-    this->dispersion().cacheFields(true);
-    forces_.cacheFields(true);
-}
-
-
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::postEvolve()
-{
-    if (debug)
-    {
-        this->writePositions();
-    }
-
-    this->dispersion().cacheFields(false);
-    forces_.cacheFields(false);
-
-    this->postProcessing().post();
-}
-
-
-template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::evolve()
 {
-    preEvolve();
-
-    autoPtr<interpolation<scalar> > rhoInterpolator =
-        interpolation<scalar>::New
-        (
-            interpolationSchemes_,
-            rho_
-        );
-
-    autoPtr<interpolation<vector> > UInterpolator =
-        interpolation<vector>::New
-        (
-            interpolationSchemes_,
-            U_
-        );
-
-    autoPtr<interpolation<scalar> > muInterpolator =
-        interpolation<scalar>::New
-        (
-            interpolationSchemes_,
-            mu_
-        );
-
-    typename ParcelType::trackData td
-    (
-        *this,
-        constProps_,
-        rhoInterpolator(),
-        UInterpolator(),
-        muInterpolator(),
-        g_.value()
-    );
-
-    this->injection().inject(td);
-
-    if (coupled_)
+    if (active_)
     {
-        resetSourceTerms();
+        preEvolve();
+
+        evolveCloud();
+
+        postEvolve();
     }
-
-    Cloud<ParcelType>::move(td);
-
-    postEvolve();
 }
 
 

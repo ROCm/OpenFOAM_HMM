@@ -288,6 +288,7 @@ Foam::mapDistribute::mapDistribute
 
         forAll(compactMap, procI)
         {
+            compactMap[procI].clear();
             if (procI != Pstream::myProcNo())
             {
                 compactMap[procI].resize(2*nNonLocal[procI]);
@@ -433,6 +434,7 @@ Foam::mapDistribute::mapDistribute
 
         forAll(compactMap, procI)
         {
+            compactMap[procI].clear();
             if (procI != Pstream::myProcNo())
             {
                 compactMap[procI].resize(2*nNonLocal[procI]);

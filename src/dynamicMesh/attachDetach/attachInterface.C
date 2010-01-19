@@ -260,7 +260,7 @@ void Foam::attachDetach::modifyMotionPoints
 
     if (debug)
     {
-        Pout<< "void attachDetach::modifyMotionPoints(" 
+        Pout<< "void attachDetach::modifyMotionPoints("
             << "pointField& motionPoints) const "
             << " for object " << name() << " : "
             << "Adjusting motion points." << endl;

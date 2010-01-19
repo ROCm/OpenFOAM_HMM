@@ -54,7 +54,6 @@ inline specie::specie
     const scalar molWeight
 )
 :
-    //name_(),
     nMoles_(nMoles),
     molWeight_(molWeight)
 {}
@@ -113,29 +112,29 @@ inline void specie::operator=(const specie& st)
 
 inline void specie::operator+=(const specie& st)
 {
-    scalar sumNmoles_ = max(nMoles_ + st.nMoles_, SMALL);
+    scalar sumNmoles = max(nMoles_ + st.nMoles_, SMALL);
 
     molWeight_ =
-        nMoles_/sumNmoles_*molWeight_
-      + st.nMoles_/sumNmoles_*st.molWeight_;
+        nMoles_/sumNmoles*molWeight_
+      + st.nMoles_/sumNmoles*st.molWeight_;
 
-    nMoles_ = sumNmoles_;
+    nMoles_ = sumNmoles;
 }
 
 
 inline void specie::operator-=(const specie& st)
 {
-    scalar diffnMoles_ = nMoles_ - st.nMoles_;
-    if (mag(diffnMoles_) < SMALL)
+    scalar diffnMoles = nMoles_ - st.nMoles_;
+    if (mag(diffnMoles) < SMALL)
     {
-        diffnMoles_ = SMALL;
+        diffnMoles = SMALL;
     }
 
     molWeight_ =
-        nMoles_/diffnMoles_*molWeight_
-      - st.nMoles_/diffnMoles_*st.molWeight_;
+        nMoles_/diffnMoles*molWeight_
+      - st.nMoles_/diffnMoles*st.molWeight_;
 
-    nMoles_ = diffnMoles_;
+    nMoles_ = diffnMoles;
 }
 
 
@@ -149,30 +148,30 @@ inline void specie::operator*=(const scalar s)
 
 inline specie operator+(const specie& st1, const specie& st2)
 {
-    scalar sumNmoles_ = max(st1.nMoles_ + st2.nMoles_, SMALL);
+    scalar sumNmoles = max(st1.nMoles_ + st2.nMoles_, SMALL);
 
     return specie
     (
-        sumNmoles_,
-        st1.nMoles_/sumNmoles_*st1.molWeight_
-      + st2.nMoles_/sumNmoles_*st2.molWeight_
+        sumNmoles,
+        st1.nMoles_/sumNmoles*st1.molWeight_
+      + st2.nMoles_/sumNmoles*st2.molWeight_
     );
 }
 
 
 inline specie operator-(const specie& st1, const specie& st2)
 {
-    scalar diffNmoles_ = st1.nMoles_ - st2.nMoles_;
-    if (mag(diffNmoles_) < SMALL)
+    scalar diffNmoles = st1.nMoles_ - st2.nMoles_;
+    if (mag(diffNmoles) < SMALL)
     {
-        diffNmoles_ = SMALL;
+        diffNmoles = SMALL;
     }
 
     return specie
     (
-        diffNmoles_,
-        st1.nMoles_/diffNmoles_*st1.molWeight_
-      - st2.nMoles_/diffNmoles_*st2.molWeight_
+        diffNmoles,
+        st1.nMoles_/diffNmoles*st1.molWeight_
+      - st2.nMoles_/diffNmoles*st2.molWeight_
     );
 }
 

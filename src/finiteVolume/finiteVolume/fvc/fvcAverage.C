@@ -69,7 +69,7 @@ average
 
     GeometricField<Type, fvPatchField, volMesh>& av = taverage();
 
-    av.internalField() = 
+    av.internalField() =
     (
         surfaceSum(mesh.magSf()*ssf)/surfaceSum(mesh.magSf())
     )().internalField();
@@ -112,7 +112,7 @@ average
 }
 
 
-template<class Type> 
+template<class Type>
 tmp<GeometricField<Type, fvPatchField, volMesh> >
 average
 (

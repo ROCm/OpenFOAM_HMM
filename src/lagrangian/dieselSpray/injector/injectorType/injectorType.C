@@ -37,7 +37,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::injectorType::injectorType
 (
     const Foam::Time&,

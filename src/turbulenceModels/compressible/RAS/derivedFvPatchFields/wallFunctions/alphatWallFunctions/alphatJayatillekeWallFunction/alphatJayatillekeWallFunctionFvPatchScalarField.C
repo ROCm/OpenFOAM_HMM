@@ -222,7 +222,7 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
 
     const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
     const fvPatchScalarField& hw =
-        patch().lookupPatchField<volScalarField, scalar>("h");
+        rasModel.thermo().h().boundaryField()[patchI];
 
     // Heat flux [W/m2] - lagging alphatw
     const scalarField qDot = (alphaw + alphatw)*hw.snGrad();

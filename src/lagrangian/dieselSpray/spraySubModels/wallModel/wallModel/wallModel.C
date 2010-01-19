@@ -26,21 +26,18 @@ License
 
 #include "wallModel.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(wallModel, 0);
-
-defineRunTimeSelectionTable(wallModel, dictionary);
+    defineTypeNameAndDebug(wallModel, 0);
+    defineRunTimeSelectionTable(wallModel, dictionary);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-wallModel::wallModel
+Foam::wallModel::wallModel
 (
     const dictionary& dict,
     const volVectorField& U,
@@ -55,12 +52,8 @@ wallModel::wallModel
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-wallModel::~wallModel()
+Foam::wallModel::~wallModel()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

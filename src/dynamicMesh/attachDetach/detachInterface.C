@@ -47,7 +47,7 @@ void Foam::attachDetach::detachInterface
     //    into the slave patch
     // 3. Create a point renumbering list, giving a new point index for original
     //    points in the face patch
-    // 4. Grab all faces in cells on the master side and renumber them 
+    // 4. Grab all faces in cells on the master side and renumber them
     //    using the point renumbering list.  Exclude the ones that belong to
     //    the master face zone
     //
@@ -459,9 +459,9 @@ void Foam::attachDetach::detachInterface
                         -1,                           // zone for face
                         false                         // face zone flip
                     )
-                );   
+                );
 // Pout << "modifying stick-out face. Boundary Old face: " << oldFace << " new face: " << newFace << " own: " << own[curFaceID] << " patch: " << mesh.boundaryMesh().whichPatch(curFaceID) << endl;
-            }                                                  
+            }
         }
     }
 

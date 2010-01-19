@@ -28,27 +28,24 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(ChomiakInjector, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(ChomiakInjector, 0);
-
-addToRunTimeSelectionTable
-(
-    injectorModel,
-    ChomiakInjector,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        injectorModel,
+        ChomiakInjector,
+        dictionary
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-ChomiakInjector::ChomiakInjector
+Foam::ChomiakInjector::ChomiakInjector
 (
     const dictionary& dict,
     spray& sm
@@ -88,13 +85,13 @@ ChomiakInjector::ChomiakInjector
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-ChomiakInjector::~ChomiakInjector()
+Foam::ChomiakInjector::~ChomiakInjector()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar ChomiakInjector::d0
+Foam::scalar Foam::ChomiakInjector::d0
 (
     const label,
     const scalar
@@ -104,7 +101,7 @@ scalar ChomiakInjector::d0
 }
 
 
-vector ChomiakInjector::direction
+Foam::vector Foam::ChomiakInjector::direction
 (
     const label n,
     const label hole,
@@ -162,7 +159,7 @@ vector ChomiakInjector::direction
 }
 
 
-scalar ChomiakInjector::velocity
+Foam::scalar Foam::ChomiakInjector::velocity
 (
     const label i,
     const scalar time
@@ -184,16 +181,12 @@ scalar ChomiakInjector::velocity
 }
 
 
-scalar ChomiakInjector::averageVelocity(const label i) const
+Foam::scalar Foam::ChomiakInjector::averageVelocity(const label i) const
 {
     const injectorType& it = sm_.injectors()[i].properties();
     scalar dt = it.teoi() - it.tsoi();
     return it.integrateTable(it.velocityProfile())/dt;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

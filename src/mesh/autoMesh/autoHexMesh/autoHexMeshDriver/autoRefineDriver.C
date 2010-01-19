@@ -560,7 +560,11 @@ void Foam::autoRefineDriver::zonify
             const_cast<Time&>(mesh.time())++;
         }
 
-        meshRefiner_.zonify(refineParams.keepPoints()[0]);
+        meshRefiner_.zonify
+        (
+            refineParams.keepPoints()[0],
+            refineParams.allowFreeStandingZoneFaces()
+        );
 
         if (debug)
         {

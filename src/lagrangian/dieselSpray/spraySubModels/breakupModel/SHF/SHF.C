@@ -28,27 +28,24 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(SHF, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(SHF, 0);
-
-addToRunTimeSelectionTable
-(
-    breakupModel,
-    SHF,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        breakupModel,
+        SHF,
+        dictionary
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-SHF::SHF
+Foam::SHF::SHF
 (
     const dictionary& dict,
     spray& sm
@@ -92,13 +89,13 @@ SHF::SHF
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-SHF::~SHF()
+Foam::SHF::~SHF()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void SHF::breakupParcel
+void Foam::SHF::breakupParcel
 (
     parcel& p,
     const scalar deltaT,
@@ -264,9 +261,5 @@ void SHF::breakupParcel
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

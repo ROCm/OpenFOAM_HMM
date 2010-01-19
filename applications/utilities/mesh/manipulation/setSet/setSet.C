@@ -94,7 +94,7 @@ void backup
 {
     if (fromSet.size())
     {
-        Pout<< "    Backing up " << fromName << " into " << toName << endl;
+        Info<< "    Backing up " << fromName << " into " << toName << endl;
 
         topoSet::New(setType, mesh, toName, fromSet)().write();
     }
@@ -525,7 +525,7 @@ bool doCommand
         {
             topoSet& currentSet = currentSetPtr();
 
-            Pout<< "    Set:" << currentSet.name()
+            Info<< "    Set:" << currentSet.name()
                 << "  Size:" << currentSet.size()
                 << "  Action:" << actionName
                 << endl;
@@ -622,7 +622,7 @@ bool doCommand
                       + ".vtk"
                     );
 
-                    Pout<< "    Writing " << currentSet.name()
+                    Info<< "    Writing " << currentSet.name()
                         << " (size " << currentSet.size() << ") to "
                         << currentSet.instance()/currentSet.local()
                            /currentSet.name()
@@ -634,7 +634,7 @@ bool doCommand
                 }
                 else
                 {
-                    Pout<< "    Writing " << currentSet.name()
+                    Info<< "    Writing " << currentSet.name()
                         << " (size " << currentSet.size() << ") to "
                         << currentSet.instance()/currentSet.local()
                            /currentSet.name() << endl << endl;
@@ -683,7 +683,7 @@ enum commandStatus
 
 void printMesh(const Time& runTime, const polyMesh& mesh)
 {
-    Pout<< "Time:" << runTime.timeName()
+    Info<< "Time:" << runTime.timeName()
         << "  cells:" << mesh.nCells()
         << "  faces:" << mesh.nFaces()
         << "  points:" << mesh.nPoints()
@@ -703,19 +703,19 @@ commandStatus parseType
 {
     if (setType.empty())
     {
-        Pout<< "Type 'help' for usage information" << endl;
+        Info<< "Type 'help' for usage information" << endl;
 
         return INVALID;
     }
     else if (setType == "help")
     {
-        printHelp(Pout);
+        printHelp(Info);
 
         return INVALID;
     }
     else if (setType == "list")
     {
-        printAllSets(mesh, Pout);
+        printAllSets(mesh, Info);
 
         return INVALID;
     }
@@ -726,7 +726,7 @@ commandStatus parseType
 
         label nearestIndex = Time::findClosestTimeIndex(Times, requestedTime);
 
-        Pout<< "Changing time from " << runTime.timeName()
+        Info<< "Changing time from " << runTime.timeName()
             << " to " << Times[nearestIndex].name()
             << endl;
 
@@ -737,24 +737,24 @@ commandStatus parseType
         {
             case polyMesh::UNCHANGED:
             {
-                Pout<< "    mesh not changed." << endl;
+                Info<< "    mesh not changed." << endl;
                 break;
             }
             case polyMesh::POINTS_MOVED:
             {
-                Pout<< "    points moved; topology unchanged." << endl;
+                Info<< "    points moved; topology unchanged." << endl;
                 break;
             }
             case polyMesh::TOPO_CHANGE:
             {
-                Pout<< "    topology changed; patches unchanged." << nl
+                Info<< "    topology changed; patches unchanged." << nl
                     << "    ";
                 printMesh(runTime, mesh);
                 break;
             }
             case polyMesh::TOPO_PATCH_CHANGE:
             {
-                Pout<< "    topology changed and patches changed." << nl
+                Info<< "    topology changed and patches changed." << nl
                     << "    ";
                 printMesh(runTime, mesh);
 
@@ -773,7 +773,7 @@ commandStatus parseType
     }
     else if (setType == "quit")
     {
-        Pout<< "Quitting ..." << endl;
+        Info<< "Quitting ..." << endl;
 
         return QUIT;
     }
@@ -843,8 +843,8 @@ int main(int argc, char *argv[])
 #   include "addRegionOption.H"
 #   include "addTimeOptions.H"
 
-    argList::validOptions.insert("noVTK", "");
-    argList::validOptions.insert("batch", "file");
+    argList::addBoolOption("noVTK");
+    argList::addOption("batch", "file");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -864,7 +864,7 @@ int main(int argc, char *argv[])
     printMesh(runTime, mesh);
 
     // Print current sets
-    printAllSets(mesh, Pout);
+    printAllSets(mesh, Info);
 
 
 
@@ -874,7 +874,7 @@ int main(int argc, char *argv[])
     {
         fileName batchFile(args.option("batch"));
 
-        Pout<< "Reading commands from file " << batchFile << endl;
+        Info<< "Reading commands from file " << batchFile << endl;
 
         // we cannot handle .gz files
         if (!isFile(batchFile, false))
@@ -888,11 +888,11 @@ int main(int argc, char *argv[])
 #if READLINE != 0
     else if (!read_history(historyFile))
     {
-        Pout<< "Successfully read history from " << historyFile << endl;
+        Info<< "Successfully read history from " << historyFile << endl;
     }
 #endif
 
-    Pout<< "Please type 'help', 'quit' or a set command after prompt." << endl;
+    Info<< "Please type 'help', 'quit' or a set command after prompt." << endl;
 
     bool ok = true;
 
@@ -916,7 +916,7 @@ int main(int argc, char *argv[])
         {
             if (!fileStreamPtr->good())
             {
-                Pout<< "End of batch file" << endl;
+                Info<< "End of batch file" << endl;
                 break;
             }
 
@@ -924,7 +924,7 @@ int main(int argc, char *argv[])
 
             if (rawLine.size())
             {
-                Pout<< "Doing:" << rawLine << endl;
+                Info<< "Doing:" << rawLine << endl;
             }
         }
         else
@@ -945,7 +945,7 @@ int main(int argc, char *argv[])
             }
 #           else
             {
-                Pout<< "Command>" << flush;
+                Info<< "Command>" << flush;
                 std::getline(std::cin, rawLine);
             }
 #           endif
@@ -992,7 +992,7 @@ int main(int argc, char *argv[])
         delete fileStreamPtr;
     }
 
-    Pout<< "\nEnd\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

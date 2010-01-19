@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,8 @@ Class
     Foam::functionEntries::calcEntry
 
 Description
+    This dictionary function entry may or may not do anything particularly
+    useful - depending upon what is currently being used to test.
 
 SourceFiles
     calcEntry.C
@@ -45,7 +47,7 @@ namespace functionEntries
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class calcEntry Declaration
+                          Class calcEntry Declaration
 \*---------------------------------------------------------------------------*/
 
 class calcEntry

@@ -129,7 +129,7 @@ void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
     }
 
     reduce(nHex,sumOp<label>());
-    reduce(nPrism,sumOp<label>()); 
+    reduce(nPrism,sumOp<label>());
     reduce(nWedge,sumOp<label>());
     reduce(nPyr,sumOp<label>());
     reduce(nTetWedge,sumOp<label>());

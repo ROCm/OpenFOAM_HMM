@@ -36,9 +36,9 @@ Description
     Example usage:
         myInterfacePatchName
         {
-            type                turbulentTemperatureCoupledBaffle;
+            type    compressible::turbulentTemperatureCoupledBaffle;
             neighbourFieldName  T;
-            K                   K; // or none 
+            K                   K; // or none
             value               uniform 300;
         }
 
@@ -83,7 +83,7 @@ class turbulentTemperatureCoupledBaffleFvPatchScalarField
 
         //- Name of field on the neighbour region
         const word neighbourFieldName_;
-        
+
         //- Name of thermal conductivity field
         const word KName_;
 

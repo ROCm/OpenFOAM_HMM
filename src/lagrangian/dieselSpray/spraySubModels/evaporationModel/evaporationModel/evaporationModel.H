@@ -60,9 +60,9 @@ public:
     //- Runtime type information
     TypeName("evaporationModel");
 
-    //- Evaluate the gaseous properties Tand Y (implicit/explicit)
-    //word gasPropertyEvaluation_;
-    //label nEvapIter_;
+    //- Evaluate the gaseous properties T and Y (implicit/explicit)
+    // word gasPropertyEvaluation_;
+    // label nEvapIter_;
 
 
     // Declare runtime constructor selection table
@@ -82,7 +82,7 @@ public:
     // Constructors
 
         //- Construct from components
-        evaporationModel(const dictionary& dict);
+        evaporationModel(const dictionary&);
 
 
     //- Destructor
@@ -91,7 +91,7 @@ public:
 
     // Selector
 
-        static autoPtr<evaporationModel> New(const dictionary& dict);
+        static autoPtr<evaporationModel> New(const dictionary&);
 
 
     // Member Functions

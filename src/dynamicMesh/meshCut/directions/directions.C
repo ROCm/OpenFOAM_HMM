@@ -181,7 +181,7 @@ Foam::vectorField Foam::directions::propagateDirection
             changedFacesInfo[patchFaceI] =
                 directionInfo
                 (
-                    faceIndex, 
+                    faceIndex,
                     cutDir
                 );
         }
@@ -404,7 +404,7 @@ Foam::directions::directions
 
         if (wantTan1 || wantTan2)
         {
-            tan1Dirs = 
+            tan1Dirs =
                 propagateDirection
                 (
                     mesh,
@@ -444,21 +444,6 @@ Foam::directions::directions
             << "Known types are global and patchLocal" << exit(FatalError);
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //
