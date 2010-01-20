@@ -202,6 +202,7 @@ void massPropertiesSolid
     J *= density;
 }
 
+
 void massPropertiesShell
 (
     const pointField& pts,
@@ -272,7 +273,7 @@ tensor applyParallelAxisTheorem
 
     vector d = (refPt - cM);
 
-    return (J + m*((d & d)*I - d*d));
+    return J + m*((d & d)*I - d*d);
 }
 
 
@@ -389,7 +390,7 @@ int main(int argc, char *argv[])
         << eVec.x() <<  ' ' << eVec.y() << ' ' << eVec.z()
         << endl;
 
-    if(calcAroundRefPt)
+    if (calcAroundRefPt)
     {
         Info << "Inertia tensor relative to " << refPt << " = "
             << applyParallelAxisTheorem(m, cM, J, refPt)

@@ -68,7 +68,7 @@ fi
 if [ -r $ParaView_DIR ]
 then
     export PATH=$ParaView_DIR/bin:$PATH
-    export PV_PLUGIN_PATH=$FOAM_LIBBIN
+    export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview
 fi
 
 unset cmake ParaView_PYTHON_DIR

@@ -40,6 +40,10 @@ geometry
     {
         type triSurfaceMesh;
 
+        //tolerance   1E-6;   // optional:non-default tolerance on intersections
+        //maxTreeDepth 10;    // optional:depth of octree. Decrease only in case
+                              // of memory limitations.
+
         // Per region the patchname. If not provided will be <name>_<region>.
         regions
         {

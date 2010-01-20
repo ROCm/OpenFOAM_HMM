@@ -77,6 +77,9 @@ public:
         //- Apply and accumulate the effect of the given constraint direction
         inline void applyConstraint(const vector& cd);
 
+        //- Combine constraints
+        inline void combine(const pointConstraint&);
+
         //- Return the accumulated constraint transformation tensor
         inline tensor constraintTransformation() const;
 };

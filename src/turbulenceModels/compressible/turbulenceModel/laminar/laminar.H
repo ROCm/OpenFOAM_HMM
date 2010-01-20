@@ -99,11 +99,21 @@ public:
             return tmp<volScalarField>(new volScalarField("muEff", mu()));
         }
 
+        //- Return the turbulence thermal diffusivity, i.e. 0 for laminar flow
+        virtual tmp<volScalarField> alphat() const;
+
         //- Return the effective turbulent thermal diffusivity,
         //  i.e. the laminar thermal diffusivity
         virtual tmp<volScalarField> alphaEff() const
         {
             return tmp<volScalarField>(new volScalarField("alphaEff", alpha()));
+        }
+
+        //- Return the effective turbulent thermal diffusivity for a patch,
+        //  i.e. the laminar thermal diffusivity
+        virtual tmp<scalarField> alphaEff(const label patchI) const
+        {
+            return alpha().boundaryField()[patchI];
         }
 
         //- Return the turbulence kinetic energy, i.e. 0 for laminar flow

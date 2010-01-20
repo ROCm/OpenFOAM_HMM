@@ -401,7 +401,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             td.cloud().hcTrans()[cellI] +=
                 np0
                *dMassGas[i]
-               *td.cloud().mcCarrierThermo().speciesData()[gid].H(T0);
+               *td.cloud().mcCarrierThermo().speciesData()[gid].Hc();
         }
         forAll(YLiquid_, i)
         {
@@ -410,7 +410,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             td.cloud().hcTrans()[cellI] +=
                 np0
                *dMassLiquid[i]
-               *td.cloud().mcCarrierThermo().speciesData()[gid].H(T0);
+               *td.cloud().mcCarrierThermo().speciesData()[gid].Hc();
         }
 /*
         // No mapping between solid components and carrier phase
@@ -421,7 +421,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             td.cloud().hcTrans()[cellI] +=
                 np0
                *dMassSolid[i]
-               *td.cloud().mcCarrierThermo().speciesData()[gid].H(T0);
+               *td.cloud().mcCarrierThermo().speciesData()[gid].Hc();
         }
 */
         forAll(dMassSRCarrier, i)
@@ -430,7 +430,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             td.cloud().hcTrans()[cellI] +=
                 np0
                *dMassSRCarrier[i]
-               *td.cloud().mcCarrierThermo().speciesData()[i].H(T0);
+               *td.cloud().mcCarrierThermo().speciesData()[i].Hc();
         }
 
         // Update momentum transfer

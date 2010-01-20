@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,56 +22,45 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::BasicReactingMultiphaseCloud
-
-Description
-    Reacting multiphase cloud templated on the type of carrier phase
-    thermodynamics
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef BasicReactingMultiphaseCloud_H
-#define BasicReactingMultiphaseCloud_H
+#include "fieldValue.H"
+#include "ListListOps.H"
+#include "Pstream.H"
 
-#include "ReactingMultiphaseCloud.H"
-#include "BasicReactingMultiphaseParcel.H"
-#include "thermoPhysicsTypes.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+template<class Type>
+Foam::tmp<Foam::Field<Type> > Foam::fieldValue::combineFields
+(
+    const tmp<Field<Type> >& field
+) const
 {
-    typedef ReactingMultiphaseCloud
-        <
-            BasicReactingMultiphaseParcel
-            <
-                constGasThermoPhysics
-            >
-        >
-        constThermoReactingMultiphaseCloud;
+    List<Field<Type> > allValues(Pstream::nProcs());
 
-    typedef ReactingMultiphaseCloud
-        <
-            BasicReactingMultiphaseParcel
-            <
-                gasThermoPhysics
-            >
-        >
-        thermoReactingMultiphaseCloud;
+    allValues[Pstream::myProcNo()] = field();
 
-    typedef ReactingMultiphaseCloud
-        <
-            BasicReactingMultiphaseParcel
-            <
-                icoPoly8ThermoPhysics
-            >
-        >
-        icoPoly8ThermoReactingMultiphaseCloud;
+    Pstream::gatherList(allValues);
+
+    if (Pstream::master())
+    {
+        return tmp<Field<Type> >
+        (
+            new Field<Type>
+            (
+                ListListOps::combine<Field<Type> >
+                (
+                    allValues,
+                    accessOp<Field<Type> >()
+                )
+            )
+        );
+    }
+    else
+    {
+        return field();
+    }
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

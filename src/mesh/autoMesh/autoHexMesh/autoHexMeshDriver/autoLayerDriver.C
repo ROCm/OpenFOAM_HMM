@@ -2490,13 +2490,18 @@ void Foam::autoLayerDriver::mergePatchFacesUndo
         << "---------------------------" << nl
         << "    - which are on the same patch" << nl
         << "    - which make an angle < " << layerParams.featureAngle()
+        << "- which are on the same patch" << nl
+        << "- which make an angle < " << layerParams.featureAngle()
         << " degrees"
         << nl
         << "      (cos:" << minCos << ')' << nl
         << "    - as long as the resulting face doesn't become concave"
+        << "  (cos:" << minCos << ')' << nl
+        << "- as long as the resulting face doesn't become concave"
         << " by more than "
         << layerParams.concaveAngle() << " degrees" << nl
         << "      (0=straight, 180=fully concave)" << nl
+        << "  (0=straight, 180=fully concave)" << nl
         << endl;
 
     label nChanged = mergePatchFacesUndo(minCos, concaveCos, motionDict);
@@ -2544,11 +2549,6 @@ void Foam::autoLayerDriver::addLayers
             motionDict
         )
     );
-
-
-    // Undistorted edge length
-    const scalar edge0Len = meshRefiner_.meshCutter().level0EdgeLength();
-    const labelList& cellLevel = meshRefiner_.meshCutter().cellLevel();
 
 
     // Point-wise extrusion data
@@ -2612,6 +2612,10 @@ void Foam::autoLayerDriver::addLayers
         // Disable extrusion on warped faces
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+        // Undistorted edge length
+        const scalar edge0Len = meshRefiner_.meshCutter().level0EdgeLength();
+        const labelList& cellLevel = meshRefiner_.meshCutter().cellLevel();
+
         handleWarpedFaces
         (
             pp,
@@ -2650,6 +2654,10 @@ void Foam::autoLayerDriver::addLayers
         }
     }
 
+
+    // Undistorted edge length
+    const scalar edge0Len = meshRefiner_.meshCutter().level0EdgeLength();
+    const labelList& cellLevel = meshRefiner_.meshCutter().cellLevel();
 
     // Determine (wanted) point-wise layer thickness and expansion ratio
     scalarField thickness(pp().nPoints());
