@@ -865,6 +865,8 @@ Foam::conformalVoronoiMesh::collapseFace
         maxFC
     );
 
+    labelList facePts(f);
+
     const vector fC = f.centre(pts);
 
     vector fN = f.normal(pts);
@@ -898,59 +900,50 @@ Foam::conformalVoronoiMesh::collapseFace
 
     vector collapseAxis = vector::zero;
 
-    scalar aspectRatio = 1;
+    scalar aspectRatio = 1.0;
 
     if (detJ < 1e-5)
     {
-        const edgeList& eds = f.edges();
-
-        label longestEdgeI = -1;
-
-        scalar longestEdgeLength = -SMALL;
-
-        forAll(eds, edI)
-        {
-            scalar edgeLength = eds[edI].mag(pts);
-
-            if (edgeLength > longestEdgeLength)
-            {
-                longestEdgeI = edI;
-
-                longestEdgeLength = edgeLength;
-            }
-        }
-
-        collapseAxis = eds[longestEdgeI].vec(pts);
-
-        if (mag(collapseAxis) < VSMALL)
-        {
-            Info<< "if (mag(collapseAxis) < VSMALL) " << collapseAxis << endl;
-        }
+        collapseAxis = f.edges()[longestEdge(f, pts)].vec(pts);
 
         collapseAxis /= mag(collapseAxis);
 
         // Empirical correlation for high aspect ratio faces
 
         aspectRatio = sqrt(0.35/detJ);
-
-        // Info<< "# Longest edge determined collapseAxis" << endl;
     }
     else
     {
         vector eVals = eigenValues(J);
 
-        // The maximum eigenvalue (z()) must be the direction of the
-        // normal, as it has the greatest value.  The minimum eigenvalue
-        // is the dominant collapse axis for high aspect ratio faces.
+        if (mag(eVals.y() - eVals.x()) < 100*SMALL)
+        {
+            // First two eigenvalues are the same: i.e. a square face
 
-        collapseAxis = eigenVector(J, eVals.x());
+            // Cannot necessarily determine linearly independent
+            // eigenvectors, or any at all, use longest edge direction.
 
-        // The inertia calculation describes the mass distribution as a
-        // function of distance squared to the axis, so the square root of
-        // the ratio of face-plane moments gives a good indication of the
-        // aspect ratio.
+            collapseAxis = f.edges()[longestEdge(f, pts)].vec(pts);
 
-        aspectRatio = sqrt(eVals.y()/max(eVals.x(), SMALL));
+            collapseAxis /= mag(collapseAxis);
+
+            aspectRatio = 1.0;
+        }
+        else
+        {
+            // The maximum eigenvalue (z()) must be the direction of the
+            // normal, as it has the greatest value.  The minimum eigenvalue
+            // is the dominant collapse axis for high aspect ratio faces.
+
+            collapseAxis = eigenVector(J, eVals.x());
+
+            // The inertia calculation describes the mass distribution as a
+            // function of distance squared to the axis, so the square root of
+            // the ratio of face-plane moments gives a good indication of the
+            // aspect ratio.
+
+            aspectRatio = sqrt(eVals.y()/max(eVals.x(), SMALL));
+        }
     }
 
     if (magSqr(collapseAxis) < VSMALL)
@@ -961,6 +954,30 @@ Foam::conformalVoronoiMesh::collapseFace
         )
             << "No collapse axis found for face, not collapsing."
             << endl;
+
+        // Output face and collapse axis for visualisation
+
+        Info<< "# Aspect ratio = " << aspectRatio << nl
+            << "# inertia = " << J << nl
+            << "# determinant = " << detJ << nl
+            << "# eigenvalues = " << eigenValues(J) << nl
+            << "# collapseAxis = " << collapseAxis << nl
+            << "# facePts = " << facePts << nl
+            << endl;
+
+        forAll(f, fPtI)
+        {
+            meshTools::writeOBJ(Info, pts[f[fPtI]]);
+        }
+
+        Info<< "f";
+
+        forAll(f, fPtI)
+        {
+            Info << " " << fPtI + 1;
+        }
+
+        Info<< endl;
 
         return fcmNone;
     }
@@ -979,8 +996,6 @@ Foam::conformalVoronoiMesh::collapseFace
 
     // Sort the projected distances and the corresponding vertex
     // indices along the collapse axis
-
-    labelList facePts(f);
 
     labelList oldToNew;
 
@@ -1211,6 +1226,34 @@ Foam::conformalVoronoiMesh::collapseFace
     // }
 
     return mode;
+}
+
+
+Foam::label Foam::conformalVoronoiMesh::longestEdge
+(
+    const face& f,
+    const pointField& pts
+) const
+{
+    const edgeList& eds = f.edges();
+
+    label longestEdgeI = -1;
+
+    scalar longestEdgeLength = -SMALL;
+
+    forAll(eds, edI)
+    {
+        scalar edgeLength = eds[edI].mag(pts);
+
+        if (edgeLength > longestEdgeLength)
+        {
+            longestEdgeI = edI;
+
+            longestEdgeLength = edgeLength;
+        }
+    }
+
+    return longestEdgeI;
 }
 
 

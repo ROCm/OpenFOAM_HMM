@@ -549,6 +549,9 @@ private:
             label maxFC
         ) const;
 
+        // Identify the index of the longest edge on the face
+        label longestEdge(const face& f, const pointField& pts) const;
+
         //- Identify the face labels of the deferred collapse faces
         void deferredCollapseFaceSet
         (
