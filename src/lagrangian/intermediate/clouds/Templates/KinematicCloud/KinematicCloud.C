@@ -269,11 +269,9 @@ void Foam::KinematicCloud<ParcelType>::info() const
 {
     Info<< "Cloud: " << this->name() << nl
         << "    Total number of parcels added   = "
-        << returnReduce(this->injection().parcelsAddedTotal(), sumOp<label>())
-            << nl
+        << this->injection().parcelsAddedTotal() << nl
         << "    Total mass introduced           = "
-        << returnReduce(this->injection().massInjected(), sumOp<scalar>())
-            << nl
+        << this->injection().massInjected() << nl
         << "    Current number of parcels       = "
         << returnReduce(this->size(), sumOp<label>()) << nl
         << "    Current mass in system          = "
