@@ -110,6 +110,8 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
         return;
     }
 
+    Particle<ParcelType>::readFields(c);
+
     IOField<label> typeId(c.fieldIOobject("typeId", IOobject::MUST_READ));
     c.checkFieldIOobject(c, typeId);
 
