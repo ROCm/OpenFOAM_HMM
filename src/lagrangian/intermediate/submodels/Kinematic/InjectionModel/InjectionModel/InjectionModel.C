@@ -216,10 +216,10 @@ Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
                 "Foam::scalar "
                 "Foam::InjectionModel<CloudType>::setNumberOfParticles"
                 "("
-                "    const label, "
-                "    const scalar, "
-                "    const scalar, "
-                "    const scalar"
+                    "const label, "
+                    "const scalar, "
+                    "const scalar, "
+                    "const scalar"
                 ")"
             )<< "Unknown parcelBasis type" << nl
              << exit(FatalError);
