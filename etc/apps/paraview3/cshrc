@@ -62,7 +62,7 @@ endif
 
 if ( -r $ParaView_INST_DIR ) then
     set path=($ParaView_DIR/bin $path)
-    setenv PV_PLUGIN_PATH $FOAM_LIBBIN
+    setenv PV_PLUGIN_PATH $FOAM_LIBBIN/paraview
 endif
 
 unset cmake paraviewMajor paraviewPython
