@@ -26,11 +26,29 @@ License
 
 #include "sixDoFRigidBodyMotion.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::sixDoFRigidBodyMotion::applyRestraints()
+{
+    forAll(restraints_, rI)
+    {
+        restraints_[rI].restraintForce();
+    }
+}
+
+
+void Foam::sixDoFRigidBodyMotion::applyConstraints()
+{
+
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion()
 :
     motionState_(),
+    restraints_(),
     refCentreOfMass_(vector::zero),
     momentOfInertia_(diagTensor::one*VSMALL),
     mass_(VSMALL)
@@ -59,6 +77,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
         pi,
         tau
     ),
+    restraints_(),
     refCentreOfMass_(refCentreOfMass),
     momentOfInertia_(momentOfInertia),
     mass_(mass)
@@ -68,10 +87,15 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
 Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion(const dictionary& dict)
 :
     motionState_(dict),
+    restraints_(),
     refCentreOfMass_(dict.lookupOrDefault("refCentreOfMass", centreOfMass())),
     momentOfInertia_(dict.lookup("momentOfInertia")),
     mass_(readScalar(dict.lookup("mass")))
-{}
+{
+    addRestraints(dict);
+
+    addConstraints(dict);
+}
 
 
 Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
@@ -80,6 +104,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
 )
 :
     motionState_(sDoFRBM.motionState()),
+    restraints_(sDoFRBM.restraints()),
     refCentreOfMass_(sDoFRBM.refCentreOfMass()),
     momentOfInertia_(sDoFRBM.momentOfInertia()),
     mass_(sDoFRBM.mass())
@@ -93,6 +118,49 @@ Foam::sixDoFRigidBodyMotion::~sixDoFRigidBodyMotion()
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::sixDoFRigidBodyMotion::addRestraints
+(
+    const dictionary& dict
+)
+{
+    if (dict.found("restraints"))
+    {
+        const dictionary& restraintDict = dict.subDict("restraints");
+
+        label i = 0;
+
+        restraints_.setSize(restraintDict.size());
+
+        forAllConstIter(IDLList<entry>, restraintDict, iter)
+        {
+            if (iter().isDict())
+            {
+                Info<< "Adding restraint: " << iter().keyword() << endl;
+
+                restraints_.set
+                (
+                    i,
+                    sixDoFRigidBodyMotionRestraint::New(iter().dict())
+                );
+            }
+
+            i++;
+        }
+
+        restraints_.setSize(i);
+    }
+}
+
+
+void Foam::sixDoFRigidBodyMotion::addConstraints
+(
+    const dictionary& dict
+)
+{
+
+}
+
 
 void Foam::sixDoFRigidBodyMotion::updatePosition
 (
@@ -149,13 +217,17 @@ void Foam::sixDoFRigidBodyMotion::updateForce
 )
 {
     // Second leapfrog velocity adjust part, required after motion and
-    // force calculation part
+    // force calculation
 
     if (Pstream::master())
     {
         a() = fGlobal/mass_;
 
         tau() = (Q().T() & tauGlobal);
+
+        applyRestraints();
+
+        applyConstraints();
 
         v() += 0.5*deltaT*a();
 
@@ -173,30 +245,23 @@ void Foam::sixDoFRigidBodyMotion::updateForce
     scalar deltaT
 )
 {
-    // Second leapfrog velocity adjust part, required after motion and
-    // force calculation part
+    vector a = vector::zero;
+
+    vector tau = vector::zero;
 
     if (Pstream::master())
     {
-        a() = vector::zero;
-
-        tau() = vector::zero;
-
         forAll(positions, i)
         {
             const vector& f = forces[i];
 
-            a() += f/mass_;
+            a += f/mass_;
 
-            tau() += (positions[i] ^ (Q().T() & f));
+            tau += (positions[i] ^ (Q().T() & f));
         }
-
-        v() += 0.5*deltaT*a();
-
-        pi() += 0.5*deltaT*tau();
     }
 
-    Pstream::scatter(motionState_);
+    updateForce(a, tau, deltaT);
 }
 
 

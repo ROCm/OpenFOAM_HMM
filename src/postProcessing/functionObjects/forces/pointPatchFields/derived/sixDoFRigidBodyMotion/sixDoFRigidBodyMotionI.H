@@ -24,8 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 inline Foam::tensor
@@ -68,6 +66,13 @@ inline const Foam::sixDoFRigidBodyMotionState&
 Foam::sixDoFRigidBodyMotion::motionState() const
 {
     return motionState_;
+}
+
+
+inline const Foam::PtrList<Foam::sixDoFRigidBodyMotionRestraint>&
+Foam::sixDoFRigidBodyMotion::restraints() const
+{
+    return restraints_;
 }
 
 

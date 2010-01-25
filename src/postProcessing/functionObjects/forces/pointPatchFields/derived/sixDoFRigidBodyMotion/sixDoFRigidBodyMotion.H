@@ -26,10 +26,10 @@ Class
     Foam::sixDoFRigidBodyMotion
 
 Description
-    Six degree of freedom motion for a rigid body.  Angular momentum stored in
-    body fixed reference frame.  Reference orientation of the body must align
-    with the cartesian axes such that the Inertia tensor is in principle
-    component form.
+    Six degree of freedom motion for a rigid body.  Angular momentum
+    stored in body fixed reference frame.  Reference orientation of
+    the body (where Q = I) must align with the cartesian axes such
+    that the Inertia tensor is in principle component form.
 
     Symplectic motion as per:
 
@@ -43,6 +43,9 @@ Description
     url = {http://link.aip.org/link/?JCP/107/5840/1},
     doi = {10.1063/1.474310}
 
+    Can add restraints (i.e. a spring) and constraints (i.e. motion
+    may only be on a plane).
+
 SourceFiles
     sixDoFRigidBodyMotionI.H
     sixDoFRigidBodyMotion.C
@@ -55,6 +58,8 @@ SourceFiles
 
 #include "sixDoFRigidBodyMotionState.H"
 #include "pointField.H"
+#include "sixDoFRigidBodyMotionRestraint.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -79,8 +84,14 @@ class sixDoFRigidBodyMotion
 {
     // Private data
 
-        // state data object
+        //- Motion state data object
         sixDoFRigidBodyMotionState motionState_;
+
+        //- Restraints on the motion
+        PtrList<sixDoFRigidBodyMotionRestraint> restraints_;
+
+        // //- Constaints on the motion
+        // PtrList<sixDoFRigidBodyMotionConstraint> constraints_;
 
         //- Centre of mass of reference state
         point refCentreOfMass_;
@@ -105,6 +116,12 @@ class sixDoFRigidBodyMotion
         //- Calculate the rotation tensor around the body reference
         //  frame z-axis by the given angle
         inline tensor rotationTensorZ(scalar deltaT) const;
+
+        //- Apply the restraints to the object
+        void applyRestraints();
+
+        //- Apply the constraints to the object
+        void applyConstraints();
 
 
 public:
@@ -141,11 +158,23 @@ public:
 
     // Member Functions
 
+        //- Add restraints to the motion, public to allow external
+        //  addition of restraints after construction
+        void addRestraints(const dictionary& dict);
+
+        //- Add restraints to the motion, public to allow external
+        //  addition of restraints after construction
+        void addConstraints(const dictionary& dict);
+
+        //- First leapfrog velocity adjust and motion part, required
+        // before force calculation
         void updatePosition
         (
             scalar deltaT
         );
 
+        //- Second leapfrog velocity adjust part, required after motion and
+        // force calculation
         void updateForce
         (
             const vector& fGlobal,
@@ -153,6 +182,8 @@ public:
             scalar deltaT
         );
 
+        //- Global forces supplied at locations, calculating net force
+        //  and moment
         void updateForce
         (
             const pointField& positions,
@@ -160,12 +191,17 @@ public:
             scalar deltaT
         );
 
+        //- Transform the given pointField by the current motion state
         tmp<pointField> generatePositions(const pointField& pts) const;
 
         // Access
 
             //- Return access to the motion state
             inline const sixDoFRigidBodyMotionState& motionState() const;
+
+            //- Return access to the restraints
+            inline const PtrList<sixDoFRigidBodyMotionRestraint>&
+                restraints() const;
 
             //- Return access to the centre of mass
             inline const point& centreOfMass() const;

@@ -4,10 +4,21 @@ forces/forcesFunctionObject.C
 forceCoeffs/forceCoeffs.C
 forceCoeffs/forceCoeffsFunctionObject.C
 
+sDoFRBM = pointPatchFields/derived/sixDoFRigidBodyMotion
+
+$(sDoFRBM)/sixDoFRigidBodyMotion.C
+$(sDoFRBM)/sixDoFRigidBodyMotionIO.C
+$(sDoFRBM)/sixDoFRigidBodyMotionState.C
+$(sDoFRBM)/sixDoFRigidBodyMotionStateIO.C
+
+sDoFRBMR = $(sDoFRBM)/sixDoFRigidBodyMotionRestraint
+
+$(sDoFRBMR)/sixDoFRigidBodyMotionRestraint/sixDoFRigidBodyMotionRestraint.C
+$(sDoFRBMR)/sixDoFRigidBodyMotionRestraint/newSixDoFRigidBodyMotionRestraint.C
+$(sDoFRBMR)/linearSpring/linearSpring.C
+
 pointPatchFields/derived/sixDoFRigidBodyDisplacement/sixDoFRigidBodyDisplacementPointPatchVectorField.C
-pointPatchFields/derived/sixDoFRigidBodyDisplacement/sixDoFRigidBodyMotion/sixDoFRigidBodyMotion.C
-pointPatchFields/derived/sixDoFRigidBodyDisplacement/sixDoFRigidBodyMotion/sixDoFRigidBodyMotionIO.C
-pointPatchFields/derived/sixDoFRigidBodyDisplacement/sixDoFRigidBodyMotion/sixDoFRigidBodyMotionState.C
-pointPatchFields/derived/sixDoFRigidBodyDisplacement/sixDoFRigidBodyMotion/sixDoFRigidBodyMotionStateIO.C
+pointPatchFields/derived/uncoupledSixDoFRigidBodyDisplacement/uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField.C
+pointPatchFields/derived/constrainedSixDoFRigidBodyDisplacement/constrainedSixDoFRigidBodyDisplacementPointPatchVectorField.C
 
 LIB = $(FOAM_LIBBIN)/libforces

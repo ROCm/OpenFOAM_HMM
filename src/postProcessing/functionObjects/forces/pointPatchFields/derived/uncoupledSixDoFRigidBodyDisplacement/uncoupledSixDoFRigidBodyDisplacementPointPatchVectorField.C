@@ -24,14 +24,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sixDoFRigidBodyDisplacementPointPatchVectorField.H"
+#include "uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField.H"
 #include "pointPatchFields.H"
 #include "addToRunTimeSelectionTable.H"
 #include "Time.H"
 #include "fvMesh.H"
 #include "volFields.H"
 #include "uniformDimensionedFields.H"
-#include "forces.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -40,8 +39,8 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-sixDoFRigidBodyDisplacementPointPatchVectorField::
-sixDoFRigidBodyDisplacementPointPatchVectorField
+uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField::
+uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField
 (
     const pointPatch& p,
     const DimensionedField<vector, pointMesh>& iF
@@ -54,8 +53,8 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
 {}
 
 
-sixDoFRigidBodyDisplacementPointPatchVectorField::
-sixDoFRigidBodyDisplacementPointPatchVectorField
+uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField::
+uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField
 (
     const pointPatch& p,
     const DimensionedField<vector, pointMesh>& iF,
@@ -82,10 +81,10 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
 }
 
 
-sixDoFRigidBodyDisplacementPointPatchVectorField::
-sixDoFRigidBodyDisplacementPointPatchVectorField
+uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField::
+uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField
 (
-    const sixDoFRigidBodyDisplacementPointPatchVectorField& ptf,
+    const uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField& ptf,
     const pointPatch& p,
     const DimensionedField<vector, pointMesh>& iF,
     const pointPatchFieldMapper& mapper
@@ -98,10 +97,10 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
 {}
 
 
-sixDoFRigidBodyDisplacementPointPatchVectorField::
-sixDoFRigidBodyDisplacementPointPatchVectorField
+uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField::
+uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField
 (
-    const sixDoFRigidBodyDisplacementPointPatchVectorField& ptf,
+    const uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField& ptf,
     const DimensionedField<vector, pointMesh>& iF
 )
 :
@@ -114,7 +113,7 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
+void uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
 {
     if (this->updated())
     {
@@ -123,62 +122,11 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
 
     const polyMesh& mesh = this->dimensionedInternalField().mesh()();
     const Time& t = mesh.time();
-    const pointPatch& ptPatch = this->patch();
-
-    // Patch force data is valid for the current positions, so
-    // calculate the forces on the motion object from this data, then
-    // update the positions
 
     motion_.updatePosition(t.deltaTValue());
 
-    dictionary forcesDict;
-
-    forcesDict.add("patches", wordList(1, ptPatch.name()));
-    forcesDict.add("rhoInf", rhoInf_);
-    forcesDict.add("CofR", motion_.centreOfMass());
-
-    forces f("forces", db(), forcesDict);
-
-    forces::forcesMoments fm = f.calcForcesMoment();
-
-    // Get the forces on the patch faces at the current positions
-
-    vector gravity = vector::zero;
-
-    if (db().foundObject<uniformDimensionedVectorField>("g"))
-    {
-        uniformDimensionedVectorField g =
-            db().lookupObject<uniformDimensionedVectorField>("g");
-
-        gravity = g.value();
-    }
-
-    motion_.updateForce
-    (
-        fm.first().first() + fm.first().second() + gravity*motion_.mass(),
-        fm.second().first() + fm.second().second(),
-        t.deltaTValue()
-    );
-
-    // ----------------------------------------
-    // vector rotationAxis(0, 1, 0);
-
-    // vector torque
-    // (
-    //     (
-    //         (fm.second().first() + fm.second().second())
-    //       & rotationAxis
-    //     )
-    //    *rotationAxis
-    // );
-
-    // motion_.updateForce
-    // (
-    //     vector::zero,  // Force no centre of mass motion
-    //     torque,        // Only rotation allowed around the unit rotationAxis
-    //     t.deltaTValue()
-    // );
-    // ----------------------------------------
+    // Do not modify the accelerations
+    motion_.updateForce(vector::zero, vector::zero, t.deltaTValue());
 
     Field<vector>::operator=(motion_.generatePositions(p0_) - p0_);
 
@@ -186,7 +134,10 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
 }
 
 
-void sixDoFRigidBodyDisplacementPointPatchVectorField::write(Ostream& os) const
+void uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField::write
+(
+    Ostream& os
+) const
 {
     pointPatchField<vector>::write(os);
     motion_.write(os);
@@ -202,7 +153,7 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::write(Ostream& os) const
 makePointPatchTypeField
 (
     pointPatchVectorField,
-    sixDoFRigidBodyDisplacementPointPatchVectorField
+    uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
