@@ -98,6 +98,7 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
 :
     PostProcessingModel<CloudType>(dict, owner, typeName),
     mesh_(owner.mesh()),
+    maxStoredParcels_(readLabel(this->coeffDict().lookup("maxStoredParcels"))),
     patchNames_(this->coeffDict().lookup("patches")),
     patchData_(patchNames_.size()),
     patchIds_(patchNames_.size())
