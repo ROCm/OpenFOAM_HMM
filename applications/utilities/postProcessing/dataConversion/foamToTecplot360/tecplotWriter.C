@@ -64,7 +64,7 @@ Pout<< endl
             const_cast<char*>(varNames.c_str()),   /* Variable List        */
             const_cast<char*>(fName.c_str()),      /* File Name            */
             const_cast<char*>(runTime_.path().c_str()), /* Scratch Directory */
-            &tecplotFileType,                 
+            &tecplotFileType,
             &Debug,
             &IsDouble
         )
@@ -79,7 +79,7 @@ Pout<< endl
 void Foam::tecplotWriter::writePolyhedralZone
 (
     const word& zoneName,
-    const INTEGER4 strandID,
+    INTEGER4 strandID,
     const fvMesh& mesh,
     const List<INTEGER4>& varLocArray,
     INTEGER4 nFaceNodes
@@ -95,16 +95,15 @@ void Foam::tecplotWriter::writePolyhedralZone
     INTEGER4  KCellMax   = 0;         /* Not Used, set to zero */
 
     double    SolTime    = runTime_.value();     /* solution time   */
-    INTEGER4  StrandID   = 1;         /* static zone     */
     INTEGER4  ParentZone = 0;         /* no parent zone  */
 
     INTEGER4  IsBlock    = 1;         /* block format  */
 
-    INTEGER4  NFConns    = 0;         /* not used for FEPolyhedron 
-                                       * zones 
+    INTEGER4  NFConns    = 0;         /* not used for FEPolyhedron
+                                       * zones
                                        */
-    INTEGER4  FNMode     = 0;         /* not used for FEPolyhedron 
-                                       * zones 
+    INTEGER4  FNMode     = 0;         /* not used for FEPolyhedron
+                                       * zones
                                        */
 Pout<< "zoneName:" << zoneName
     //<< " varLocArray:" << varLocArray
@@ -113,9 +112,9 @@ Pout<< "zoneName:" << zoneName
 
 
 
-    INTEGER4 *PassiveVarArray = NULL;       
-    INTEGER4 *VarShareArray   = NULL;      
-    INTEGER4  ShrConn         = 0;         
+    INTEGER4 *PassiveVarArray = NULL;
+    INTEGER4 *VarShareArray   = NULL;
+    INTEGER4  ShrConn         = 0;
 
     INTEGER4  NumBConns       = 0;   /* No Boundary Connections */
     INTEGER4  NumBItems       = 0;   /* No Boundary Items */
@@ -127,16 +126,16 @@ Pout<< "zoneName:" << zoneName
        !TECZNE112
         (
             const_cast<char*>(zoneName.c_str()),
-            &ZoneType,                  
-            &NumNodes,            
-            &NumElems,            
-            &NumFaces,            
-            &ICellMax,                    
-            &JCellMax,                    
-            &KCellMax,                    
-            &SolTime,                
-            &StrandID,                    
-            &ParentZone,                 
+            &ZoneType,
+            &NumNodes,
+            &NumElems,
+            &NumFaces,
+            &ICellMax,
+            &JCellMax,
+            &KCellMax,
+            &SolTime,
+            &strandID,
+            &ParentZone,
             &IsBlock,
             &NFConns,
             &FNMode,
@@ -178,11 +177,11 @@ void Foam::tecplotWriter::writePolygonalZone
 
     INTEGER4  IsBlock    = 1;         /* block format  */
 
-    INTEGER4  NFConns    = 0;         /* not used for FEPolyhedron 
-                                       * zones 
+    INTEGER4  NFConns    = 0;         /* not used for FEPolyhedron
+                                       * zones
                                        */
-    INTEGER4  FNMode     = 0;         /* not used for FEPolyhedron 
-                                       * zones 
+    INTEGER4  FNMode     = 0;         /* not used for FEPolyhedron
+                                       * zones
                                        */
     INTEGER4  NumFaceNodes    = 2*pp.nEdges();
 
@@ -193,9 +192,9 @@ Pout<< "zoneName:" << zoneName
     << endl;
 
 
-    INTEGER4 *PassiveVarArray = NULL;       
-    INTEGER4 *VarShareArray   = NULL;      
-    INTEGER4  ShrConn         = 0;         
+    INTEGER4 *PassiveVarArray = NULL;
+    INTEGER4 *VarShareArray   = NULL;
+    INTEGER4  ShrConn         = 0;
 
     INTEGER4  NumBConns       = 0;   /* No Boundary Connections */
     INTEGER4  NumBItems       = 0;   /* No Boundary Items */
@@ -207,16 +206,16 @@ Pout<< "zoneName:" << zoneName
        !TECZNE112
         (
             const_cast<char*>(zoneName.c_str()),
-            &ZoneType,                  
-            &NumNodes,            
-            &NumElems,            
-            &NumFaces,            
-            &ICellMax,                    
-            &JCellMax,                    
-            &KCellMax,                    
-            &SolTime,                
-            &strandID,                    
-            &ParentZone,                 
+            &ZoneType,
+            &NumNodes,
+            &NumElems,
+            &NumFaces,
+            &ICellMax,
+            &JCellMax,
+            &KCellMax,
+            &SolTime,
+            &strandID,
+            &ParentZone,
             &IsBlock,
             &NFConns,
             &FNMode,
@@ -258,11 +257,11 @@ void Foam::tecplotWriter::writeOrderedZone
 
     INTEGER4  IsBlock    = 1;         /* block format  */
 
-    INTEGER4  NFConns    = 0;         /* not used for FEPolyhedron 
-                                       * zones 
+    INTEGER4  NFConns    = 0;         /* not used for FEPolyhedron
+                                       * zones
                                        */
-    INTEGER4  FNMode     = 0;         /* not used for FEPolyhedron 
-                                       * zones 
+    INTEGER4  FNMode     = 0;         /* not used for FEPolyhedron
+                                       * zones
                                        */
     INTEGER4  NumFaceNodes    = 1;
     INTEGER4  NumBConns       = 1;   /* No Boundary Connections */
@@ -275,9 +274,9 @@ Pout<< "zoneName:" << zoneName
     << endl;
 
 
-    INTEGER4 *PassiveVarArray = NULL;       
-    INTEGER4 *VarShareArray   = NULL;      
-    INTEGER4  ShrConn         = 0;         
+    INTEGER4 *PassiveVarArray = NULL;
+    INTEGER4 *VarShareArray   = NULL;
+    INTEGER4  ShrConn         = 0;
 
 
     INTEGER4  ZoneType = ZoneType_Ordered;
@@ -287,16 +286,16 @@ Pout<< "zoneName:" << zoneName
        !TECZNE112
         (
             const_cast<char*>(zoneName.c_str()),
-            &ZoneType,                  
-            &IMax,            
-            &JMax,            
-            &KMax,            
-            &ICellMax,                    
-            &JCellMax,                    
-            &KCellMax,                    
-            &SolTime,                
-            &strandID,                    
-            &ParentZone,                 
+            &ZoneType,
+            &IMax,
+            &JMax,
+            &KMax,
+            &ICellMax,
+            &JCellMax,
+            &KCellMax,
+            &SolTime,
+            &strandID,
+            &ParentZone,
             &IsBlock,
             &NFConns,
             &FNMode,
@@ -383,7 +382,7 @@ void Foam::tecplotWriter::writeConnectivity(const fvMesh& mesh) const
     {
 //        FatalErrorIn("tecplotWriter::writeConnectivity(const fvMesh&) const")
 //            << "Error in TECPOLY112." << exit(FatalError);
-    }    
+    }
 }
 
 
@@ -393,11 +392,11 @@ void Foam::tecplotWriter::writeConnectivity
 ) const
 {
     INTEGER4  NumFaces   = pp.nEdges();         /* number of unique faces */
-    INTEGER4  NumFaceNodes    = 2*pp.nEdges(); 
+    INTEGER4  NumFaceNodes    = 2*pp.nEdges();
 
     // All faces (=edges) have 2 nodes
     List<INTEGER4> FaceNodeCounts(NumFaces, 2);
-   
+
     List<INTEGER4> FaceNodes(NumFaceNodes);
     label nodeI = 0;
     forAll(pp.edges(), edgeI)
@@ -414,21 +413,21 @@ void Foam::tecplotWriter::writeConnectivity
 
     /* Define the right and left elements of each face.
      *
-     * The last step for writing out the polyhedral data is to 
-     * define the right and left neighboring elements for each  
-     * face.  The neighboring elements can be determined using the   
-     * right-hand rule.  For each face, place your right-hand along  
-     * the face which your fingers pointing the direction of  
-     * incrementing node numbers (i.e. from node 1 to node 2). 
-     * Your right thumb will point towards the right element; the 
+     * The last step for writing out the polyhedral data is to
+     * define the right and left neighboring elements for each
+     * face.  The neighboring elements can be determined using the
+     * right-hand rule.  For each face, place your right-hand along
+     * the face which your fingers pointing the direction of
+     * incrementing node numbers (i.e. from node 1 to node 2).
+     * Your right thumb will point towards the right element; the
      * element on the other side of your hand is the left element.
-     * 
-     * The number zero is used to indicate that there isn't an 
-     * element on that side of the face.  
-     * 
-     * Because of the way we numbered the nodes and faces, the 
-     * right element for every face is the element itself  
-     * (element 1) and the left element is "no-neighboring element" 
+     *
+     * The number zero is used to indicate that there isn't an
+     * element on that side of the face.
+     *
+     * Because of the way we numbered the nodes and faces, the
+     * right element for every face is the element itself
+     * (element 1) and the left element is "no-neighboring element"
      * (element 0).
      */
 
@@ -509,7 +508,7 @@ Pout<< "writeEnd" << endl;
     {
 //        FatalErrorIn("tecplotWriter::writeEnd() const")
 //            << "Error in TECEND112." << exit(FatalError);
-    }    
+    }
 
 }
 

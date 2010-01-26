@@ -63,9 +63,10 @@ int main(int argc, char *argv[])
     argList::validArgs.clear();
     argList::validArgs.append("inputFile");
     argList::validArgs.append("outputFile");
-    argList::validOptions.insert("clean", "");
-    argList::validOptions.insert("scale", "scale");
-    argList::validOptions.insert("group", "");
+
+    argList::addBoolOption("clean");
+    argList::addBoolOption("group");
+    argList::addOption("scale", "scale");
 
     argList args(argc, argv);
     const stringList& params = args.additionalArgs();

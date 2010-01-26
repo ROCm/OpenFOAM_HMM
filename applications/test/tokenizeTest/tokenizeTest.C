@@ -44,16 +44,14 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.insert("string .. stringN");
-    argList::validOptions.insert("file", "name");
-    argList::validOptions.insert("repeat", "count");
+    argList::addOption("file", "name");
+    argList::addOption("repeat", "count");
 
     argList args(argc, argv, false, true);
 
-    label repeat = 1;
-    args.optionReadIfPresent<label>("repeat", repeat);
+    const label repeat = args.optionLookupOrDefault<label>("repeat", 1);
 
     cpuTime timer;
-
     for (label count = 0; count < repeat; ++count)
     {
         forAll(args.additionalArgs(), argI)
@@ -69,9 +67,15 @@ int main(int argc, char *argv[])
             while (is.good())
             {
                 token tok(is);
+                // char ch;
+                // is.get(ch);
+                // is.putback(ch);
+                int lookahead = is.peek();
+
                 if (count == 0)
                 {
-                    Info<< "token: " << tok.info() << endl;
+                    Info<< "token: " << tok.info();
+                    Info<< "  lookahead: '" << char(lookahead) << "'" << endl;
                 }
             }
 

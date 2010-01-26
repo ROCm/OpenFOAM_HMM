@@ -253,7 +253,7 @@ void Foam::MULES::implicitSolve
         solve
         (
             psiConvectionDiffusion + fvc::div(lambda*phiCorr),
-            MULEScontrols.lookup("solver")
+            MULEScontrols
         );
 
         scalar maxPsiM1 = gMax(psi.internalField()) - 1.0;

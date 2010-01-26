@@ -26,11 +26,11 @@ License
 
 #include "tecplotWriter.H"
 
-extern "C"
-{
+//extern "C"
+//{
     #include "MASTER.h"
     #include "GLOBAL.h"
-}
+//}
 
 #include "fvc.H"
 

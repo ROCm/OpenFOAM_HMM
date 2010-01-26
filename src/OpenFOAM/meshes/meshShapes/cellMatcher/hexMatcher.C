@@ -26,6 +26,7 @@ License
 
 #include "hexMatcher.H"
 #include "primitiveMesh.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -36,7 +37,6 @@ const Foam::label Foam::hexMatcher::maxVertPerFace = 4;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct null
 Foam::hexMatcher::hexMatcher()
 :
     cellMatcher
@@ -97,7 +97,7 @@ bool Foam::hexMatcher::matchShape
     faceLabels_.setSize(facePerCell);
 
     //
-    // Try bottom face (face 4). 
+    // Try bottom face (face 4).
     // Only need to try one orientation of this face since hex is
     // rotation symmetric
     //
@@ -298,7 +298,7 @@ bool Foam::hexMatcher::isA(const faceList& faces)
         faces,                      // all faces in mesh
         labelList(faces.size(), 0), // cell 0 is owner of all faces
         0,                          // cell label
-        makeIdentity(faces.size())  // faces of cell 0
+        identity(faces.size())      // faces of cell 0
     );
 }
 

@@ -60,9 +60,9 @@ enum kivaVersions
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validOptions.insert("file", "fileName");
-    argList::validOptions.insert("version", "[kiva3|kiva3v]");
-    argList::validOptions.insert("zHeadMin", "scalar");
+    argList::addOption("file", "fileName");
+    argList::addOption("version", "[kiva3|kiva3v]");
+    argList::addOption("zHeadMin", "scalar");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 
 #   include "readKivaGrid.H"
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

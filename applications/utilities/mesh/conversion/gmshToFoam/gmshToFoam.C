@@ -314,14 +314,14 @@ void readPhysNames(IFstream& inFile, Map<word>& physicalNames)
         IStringStream lineStr(line);
         label nSpaces = lineStr.str().count(' ');
 
-        if(nSpaces == 1)
+        if (nSpaces == 1)
         {
             lineStr >> regionI >> regionName;
 
             Info<< "    " << regionI << '\t'
                 << string::validate<word>(regionName) << endl;
         }
-        else if(nSpaces == 2)
+        else if (nSpaces == 2)
         {
             // >= Gmsh2.4 physical types has tag in front.
             label physType;
@@ -717,7 +717,7 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append(".msh file");
-    argList::validOptions.insert("keepOrientation", "");
+    argList::addBoolOption("keepOrientation");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -885,7 +885,7 @@ int main(int argc, char *argv[])
     // Now use the patchFaces to patch up the outside faces of the mesh.
 
     // Get the patch for all the outside faces (= default patch added as last)
-    const polyPatch& pp = mesh.boundaryMesh()[mesh.boundaryMesh().size()-1];
+    const polyPatch& pp = mesh.boundaryMesh().last();
 
     // Storage for faceZones.
     List<DynamicList<label> > zoneFaces(patchFaces.size());

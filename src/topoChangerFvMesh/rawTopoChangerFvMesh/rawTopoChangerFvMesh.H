@@ -40,7 +40,7 @@ SourceFiles
 #define rawTopoChangerFvMesh_H
 
 #include "topoChangerFvMesh.H"
-#include "PackedList.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,12 +64,12 @@ class rawTopoChangerFvMesh
         static void setUnmappedValues
         (
             GeometricField<Type, PatchField, GeoMesh>& fld,
-            const PackedList<1>& mappedFace,
+            const PackedBoolList& mappedFace,
             const GeometricField<Type, PatchField, GeoMesh>& baseFld
         );
 
         template<class Type, template<class> class PatchField, class GeoMesh>
-        void zeroUnmappedValues(const PackedList<1>&) const;
+        void zeroUnmappedValues(const PackedBoolList&) const;
 
         //- Disallow default bitwise copy construct
         rawTopoChangerFvMesh(const rawTopoChangerFvMesh&);

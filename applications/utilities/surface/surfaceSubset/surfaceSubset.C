@@ -117,11 +117,11 @@ int main(int argc, char *argv[])
 
     if (markedPoints.size())
     {
-        Info << "Found " << markedPoints.size() << " marked point(s)." << endl;
+        Info<< "Found " << markedPoints.size() << " marked point(s)." << endl;
 
         // pick up cells sharing the point
 
-        forAll (markedPoints, pointI)
+        forAll(markedPoints, pointI)
         {
             if
             (
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
             const labelList& curFaces =
                 surf1.pointFaces()[markedPoints[pointI]];
 
-            forAll (curFaces, i)
+            forAll(curFaces, i)
             {
                 facesToSubset[curFaces[i]] =  true;
             }
@@ -155,11 +155,11 @@ int main(int argc, char *argv[])
 
     if (markedEdges.size())
     {
-        Info << "Found " << markedEdges.size() << " marked edge(s)." << endl;
+        Info<< "Found " << markedEdges.size() << " marked edge(s)." << endl;
 
         // pick up cells sharing the edge
 
-        forAll (markedEdges, edgeI)
+        forAll(markedEdges, edgeI)
         {
             if
             (
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 
             const labelList& curFaces = surf1.edgeFaces()[markedEdges[edgeI]];
 
-            forAll (curFaces, i)
+            forAll(curFaces, i)
             {
                 facesToSubset[curFaces[i]] =  true;
             }
@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
         const point& min = markedZone[0];
         const point& max = markedZone[1];
 
-        Info << "Using zone min:" << min << " max:" << max << endl;
+        Info<< "Using zone min:" << min << " max:" << max << endl;
 
         forAll(surf1, faceI)
         {
@@ -295,10 +295,10 @@ int main(int argc, char *argv[])
 
     if (markedFaces.size())
     {
-        Info << "Found " << markedFaces.size() << " marked face(s)." << endl;
+        Info<< "Found " << markedFaces.size() << " marked face(s)." << endl;
 
         // Check and mark faces to pick up
-        forAll (markedFaces, faceI)
+        forAll(markedFaces, faceI)
         {
             if
             (
@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
                 const labelList& curFaces =
                     surf1.faceFaces()[markedFaces[faceI]];
 
-                forAll (curFaces, i)
+                forAll(curFaces, i)
                 {
                     label faceI = curFaces[i];
 
@@ -373,11 +373,11 @@ int main(int argc, char *argv[])
 
     Info<< "Subset:" << endl;
     surf2.writeStats(Info);
-    Info << endl;
+    Info<< endl;
 
     fileName outFileName(args.additionalArgs()[2]);
 
-    Info << "Writing surface to " << outFileName << endl;
+    Info<< "Writing surface to " << outFileName << endl;
 
     surf2.write(outFileName);
 

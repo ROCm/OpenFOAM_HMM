@@ -277,7 +277,7 @@ referredCell::referredCell
     // Allow sourceCell = -1 to create a dummy referredCell
     // to obtain the transformation
 
-    if(sourceCell >= 0)
+    if (sourceCell >= 0)
     {
         setConstructionData(mesh, sourceCell);
     }

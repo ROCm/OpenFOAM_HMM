@@ -137,27 +137,28 @@ tmp<labelField> cyclicFvPatch::interfaceInternalField
 }
 
 
-tmp<labelField> cyclicFvPatch::transfer
-(
-    const Pstream::commsTypes,
-    const unallocLabelList& interfaceData
-) const
-{
-    notImplemented("cyclicFvPatch::transfer(..)");
-
-    tmp<labelField> tpnf(new labelField(this->size()));
-    labelField& pnf = tpnf();
-
-    label sizeby2 = this->size()/2;
-
-    for (label facei=0; facei<sizeby2; facei++)
-    {
-        pnf[facei] = interfaceData[facei + sizeby2];
-        pnf[facei + sizeby2] = interfaceData[facei];
-    }
-
-    return tpnf;
-}
+//- Would need other side data!
+// tmp<labelField> cyclicFvPatch::transfer
+// (
+//     const Pstream::commsTypes,
+//     const unallocLabelList& interfaceData
+// ) const
+// {
+//     notImplemented("cyclicFvPatch::transfer(..)");
+// 
+//     tmp<labelField> tpnf(new labelField(this->size()));
+//     labelField& pnf = tpnf();
+// 
+//     label sizeby2 = this->size()/2;
+// 
+//     for (label facei=0; facei<sizeby2; facei++)
+//     {
+//         pnf[facei] = interfaceData[facei + sizeby2];
+//         pnf[facei + sizeby2] = interfaceData[facei];
+//     }
+// 
+//     return tpnf;
+// }
 
 
 tmp<labelField> cyclicFvPatch::internalFieldTransfer
@@ -166,23 +167,7 @@ tmp<labelField> cyclicFvPatch::internalFieldTransfer
     const unallocLabelList& iF
 ) const
 {
-    notImplemented("cyclicFvPatch::internalFieldTransfer(..)");
-
-    // ** TO BE DONE - needs neighbour patch field!
-    const unallocLabelList& faceCells = this->patch().faceCells();
-
-    tmp<labelField> tpnf(new labelField(this->size()));
-    labelField& pnf = tpnf();
-
-    label sizeby2 = this->size()/2;
-
-    for (label facei=0; facei<sizeby2; facei++)
-    {
-        pnf[facei] = iF[faceCells[facei + sizeby2]];
-        pnf[facei + sizeby2] = iF[faceCells[facei]];
-    }
-
-    return tpnf;
+    return neighbFvPatch().patchInternalField(iF);
 }
 
 

@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("ANSYS input file");
-    argList::validOptions.insert("scale", "scale factor");
+    argList::addOption("scale", "scale factor");
 
     argList args(argc, argv);
 
@@ -264,10 +264,10 @@ int main(int argc, char *argv[])
     }
 
     yyFlexLexer lexer(&ansysStream);
-    while(lexer.yylex() != 0)
+    while (lexer.yylex() != 0)
     {}
 
-    Info << "Creating points" << endl;
+    Info<< "Creating points" << endl;
 
     pointField points(slPoints.size());
 
@@ -297,7 +297,7 @@ int main(int argc, char *argv[])
         pointMap[pointMapIter()] = i++;
     }
 
-    Info << "Creating cells" << endl;
+    Info<< "Creating cells" << endl;
 
     labelList cellMap(maxCelli+1);
 
@@ -409,7 +409,7 @@ int main(int argc, char *argv[])
         { 4,  2,  1,  3,  0,  5}, // hex
     };
 
-    Info << "Creating boundary patches" << endl;
+    Info<< "Creating boundary patches" << endl;
 
     faceListList boundary(slPatchCells.size());
     wordList patchNames(slPatchCells.size());
@@ -442,11 +442,11 @@ int main(int argc, char *argv[])
 
         boundary[patchI] = patchFaces;
         patchNames[patchI] = word("patch") + name(patchI + 1);
-        Info << "Patch " << patchI << " named " << patchNames[patchI]
+        Info<< "Patch " << patchI << " named " << patchNames[patchI]
             << ": " << boundary[patchI].size() << " faces" << endl;
     }
 
-    Info << "ansysToFoam: " << endl
+    Info<< "ansysToFoam: " << endl
         << "Ansys file format does not provide information about the type of "
         << "the patch (eg. wall, symmetry plane, cyclic etc)." << endl
         << "All the patches have been created "
@@ -491,7 +491,7 @@ int main(int argc, char *argv[])
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(10);
 
-    Info << "Writing polyMesh" << endl;
+    Info<< "Writing polyMesh" << endl;
     pShapeMesh.write();
 
     Info<< nl << "end" << endl;

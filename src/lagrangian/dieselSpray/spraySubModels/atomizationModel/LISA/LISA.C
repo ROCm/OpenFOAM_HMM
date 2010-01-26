@@ -30,26 +30,24 @@ License
 #include "mathematicalConstants.H"
 #include "RosinRammler.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(LISA, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+    addToRunTimeSelectionTable
+    (
+        atomizationModel,
+        LISA,
+        dictionary
+    );
+}
 
-defineTypeNameAndDebug(LISA, 0);
-
-addToRunTimeSelectionTable
-(
-    atomizationModel,
-    LISA,
-    dictionary
-);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-LISA::LISA
+Foam::LISA::LISA
 (
     const dictionary& dict,
     spray& sm
@@ -67,13 +65,13 @@ LISA::LISA
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-LISA::~LISA()
+Foam::LISA::~LISA()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void LISA::atomizeParcel
+void Foam::LISA::atomizeParcel
 (
     parcel& p,
     const scalar deltaT,
@@ -183,7 +181,7 @@ void LISA::atomizeParcel
         scalar kOld = 0.0;
 
 
-        for(label i=0; i<40; i++)
+        for (label i=0; i<40; i++)
         {
 
             k = kPos
@@ -380,9 +378,5 @@ void LISA::atomizeParcel
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

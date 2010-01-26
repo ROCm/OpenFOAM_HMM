@@ -140,7 +140,7 @@ Foam::tmp<Foam::labelField> Foam::MGridGenGAMGAgglomeration::agglomerate
     // output: cell -> processor addressing
     List<int> finalAgglom(nFineCells);
     int nMoves = -1;
-        
+
     MGridGen
     (
         nFineCells,

@@ -57,11 +57,11 @@ Foam::Ostream& Foam::FaceCellWave<Type>::writeFaces
     {
         os << nFaces;
 
-        for(label i = 0; i < nFaces; i++)
+        for (label i = 0; i < nFaces; i++)
         {
             os << ' ' << faceLabels[i];
         }
-        for(label i = 0; i < nFaces; i++)
+        for (label i = 0; i < nFaces; i++)
         {
             os << ' ' << faceInfo[i];
         }
@@ -70,11 +70,11 @@ Foam::Ostream& Foam::FaceCellWave<Type>::writeFaces
     {
         os << nFaces;
 
-        for(label i = 0; i < nFaces; i++)
+        for (label i = 0; i < nFaces; i++)
         {
             os << faceLabels[i];
         }
-        for(label i = 0; i < nFaces; i++)
+        for (label i = 0; i < nFaces; i++)
         {
             os << faceInfo[i];
         }
@@ -95,11 +95,11 @@ Foam::Istream& Foam::FaceCellWave<Type>::readFaces
 {
     is >> nFaces;
 
-    for(label i = 0; i < nFaces; i++)
+    for (label i = 0; i < nFaces; i++)
     {
         is >> faceLabels[i];
     }
-    for(label i = 0; i < nFaces; i++)
+    for (label i = 0; i < nFaces; i++)
     {
         is >> faceInfo[i];
     }
@@ -254,7 +254,7 @@ void Foam::FaceCellWave<Type>::checkCyclic(const polyPatch& patch) const
 {
     label cycOffset = patch.size()/2;
 
-    for(label patchFaceI = 0; patchFaceI < cycOffset; patchFaceI++)
+    for (label patchFaceI = 0; patchFaceI < cycOffset; patchFaceI++)
     {
         label i1 = patch.start() + patchFaceI;
         label i2 = i1 + cycOffset;
@@ -339,7 +339,7 @@ void Foam::FaceCellWave<Type>::mergeFaceInfo
     const bool
 )
 {
-    for(label changedFaceI = 0; changedFaceI < nFaces; changedFaceI++)
+    for (label changedFaceI = 0; changedFaceI < nFaces; changedFaceI++)
     {
         const Type& neighbourWallInfo = changedFacesInfo[changedFaceI];
         label patchFaceI = changedFaces[changedFaceI];
@@ -377,7 +377,7 @@ Foam::label Foam::FaceCellWave<Type>::getChangedPatchFaces
 {
     label nChangedPatchFaces = 0;
 
-    for(label i = 0; i < nFaces; i++)
+    for (label i = 0; i < nFaces; i++)
     {
         label patchFaceI = i + startFaceI;
 
@@ -405,8 +405,8 @@ void Foam::FaceCellWave<Type>::leaveDomain
 ) const
 {
     const vectorField& fc = mesh_.faceCentres();
-    
-    for(label i = 0; i < nFaces; i++)
+
+    for (label i = 0; i < nFaces; i++)
     {
         label patchFaceI = faceLabels[i];
 
@@ -427,8 +427,8 @@ void Foam::FaceCellWave<Type>::enterDomain
 ) const
 {
     const vectorField& fc = mesh_.faceCentres();
-    
-    for(label i = 0; i < nFaces; i++)
+
+    for (label i = 0; i < nFaces; i++)
     {
         label patchFaceI = faceLabels[i];
 
@@ -498,7 +498,7 @@ void Foam::FaceCellWave<Type>::offset
     labelList& faces
 )
 {
-    for(label faceI = 0; faceI < nFaces; faceI++)
+    for (label faceI = 0; faceI < nFaces; faceI++)
     {
         faces[faceI] += cycOffset;
     }
@@ -727,7 +727,7 @@ void Foam::FaceCellWave<Type>::handleCyclicPatches()
 
             if (debug)
             {
-                Pout<< " Cyclic patch " << patchI << ' ' << patch.name() 
+                Pout<< " Cyclic patch " << patchI << ' ' << patch.name()
                     << "  Changed on first half : " << nSendFaces
                     << "  Changed on second half : " << nReceiveFaces
                     << endl;
@@ -807,7 +807,7 @@ Foam::FaceCellWave<Type>::FaceCellWave
 {}
 
 
-// Iterate, propagating changedFacesInfo across mesh, until no change (or 
+// Iterate, propagating changedFacesInfo across mesh, until no change (or
 // maxIter reached). Initial cell values specified.
 template <class Type>
 Foam::FaceCellWave<Type>::FaceCellWave
@@ -1052,7 +1052,7 @@ Foam::label Foam::FaceCellWave<Type>::iterate(const label maxIter)
         handleProcPatches();
     }
 
-    while(iter_ < maxIter)
+    while (iter_ < maxIter)
     {
         if (debug)
         {

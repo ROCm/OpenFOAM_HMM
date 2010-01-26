@@ -237,7 +237,7 @@ public:
 
             //- Transform a patch-based field from other side to this side.
             //!! TDB with macros?
-            virtual bool doTransform() const;
+            virtual bool doTransform() const = 0;
             virtual void transform(scalarField& l) const = 0;
             virtual void transform(vectorField& l) const = 0;
             virtual void transform(sphericalTensorField& l) const = 0;

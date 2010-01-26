@@ -28,16 +28,11 @@ License
 #include "processorFvPatchField.H"
 #include "processorFvsPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh> >
-fvFieldDecomposer::decomposeField
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::fvFieldDecomposer::decomposeField
 (
     const GeometricField<Type, fvPatchField, volMesh>& field
 ) const
@@ -48,7 +43,7 @@ fvFieldDecomposer::decomposeField
     // Create and map the patch field values
     PtrList<fvPatchField<Type> > patchFields(boundaryAddressing_.size());
 
-    forAll (boundaryAddressing_, patchi)
+    forAll(boundaryAddressing_, patchi)
     {
         if (boundaryAddressing_[patchi] >= 0)
         {
@@ -106,8 +101,8 @@ fvFieldDecomposer::decomposeField
 
 
 template<class Type>
-tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
-fvFieldDecomposer::decomposeField
+Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh> >
+Foam::fvFieldDecomposer::decomposeField
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& field
 ) const
@@ -120,7 +115,7 @@ fvFieldDecomposer::decomposeField
             procMesh_.nInternalFaces()
         )
     );
-    forAll (mapAddr, i)
+    forAll(mapAddr, i)
     {
         mapAddr[i] -= 1;
     }
@@ -139,18 +134,18 @@ fvFieldDecomposer::decomposeField
     // (i.e. using slices)
     Field<Type> allFaceField(field.mesh().nFaces());
 
-    forAll (field.internalField(), i)
+    forAll(field.internalField(), i)
     {
         allFaceField[i] = field.internalField()[i];
     }
 
-    forAll (field.boundaryField(), patchi)
+    forAll(field.boundaryField(), patchi)
     {
         const Field<Type> & p = field.boundaryField()[patchi];
 
         const label patchStart = field.mesh().boundaryMesh()[patchi].start();
 
-        forAll (p, i)
+        forAll(p, i)
         {
             allFaceField[patchStart + i] = p[i];
         }
@@ -159,7 +154,7 @@ fvFieldDecomposer::decomposeField
     // Create and map the patch field values
     PtrList<fvsPatchField<Type> > patchFields(boundaryAddressing_.size());
 
-    forAll (boundaryAddressing_, patchi)
+    forAll(boundaryAddressing_, patchi)
     {
         if (boundaryAddressing_[patchi] >= 0)
         {
@@ -217,20 +212,16 @@ fvFieldDecomposer::decomposeField
 
 
 template<class GeoField>
-void fvFieldDecomposer::decomposeFields
+void Foam::fvFieldDecomposer::decomposeFields
 (
     const PtrList<GeoField>& fields
 ) const
 {
-    forAll (fields, fieldI)
+    forAll(fields, fieldI)
     {
         decomposeField(fields[fieldI])().write();
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

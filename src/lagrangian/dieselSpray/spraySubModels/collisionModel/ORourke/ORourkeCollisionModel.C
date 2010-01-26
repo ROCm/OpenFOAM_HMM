@@ -28,27 +28,24 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(ORourkeCollisionModel, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(ORourkeCollisionModel, 0);
-
-addToRunTimeSelectionTable
-(
-    collisionModel,
-    ORourkeCollisionModel,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        collisionModel,
+        ORourkeCollisionModel,
+        dictionary
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-ORourkeCollisionModel::ORourkeCollisionModel
+Foam::ORourkeCollisionModel::ORourkeCollisionModel
 (
     const dictionary& dict,
     spray& sm,
@@ -64,13 +61,13 @@ ORourkeCollisionModel::ORourkeCollisionModel
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-ORourkeCollisionModel::~ORourkeCollisionModel()
+Foam::ORourkeCollisionModel::~ORourkeCollisionModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void ORourkeCollisionModel::collideParcels(const scalar dt) const
+void Foam::ORourkeCollisionModel::collideParcels(const scalar dt) const
 {
     if (spray_.size() < 2)
     {
@@ -126,9 +123,5 @@ void ORourkeCollisionModel::collideParcels(const scalar dt) const
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

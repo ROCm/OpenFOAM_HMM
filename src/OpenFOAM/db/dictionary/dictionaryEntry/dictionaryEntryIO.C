@@ -39,7 +39,7 @@ Foam::dictionaryEntry::dictionaryEntry
     Istream& is
 )
 :
-    entry(is),
+    entry(keyType(is)),
     dictionary(parentDict, is)
 {
     is.fatalCheck
@@ -58,10 +58,8 @@ Foam::dictionaryEntry::dictionaryEntry
 )
 :
     entry(key),
-    dictionary(parentDict, is)
+    dictionary(key, parentDict, is)
 {
-    name() += "::" + key;
-
     is.fatalCheck
     (
         "dictionaryEntry::dictionaryEntry"
@@ -81,7 +79,7 @@ void Foam::dictionaryEntry::write(Ostream& os) const
 }
 
 
-// * * * * * * * * * * * * * Ostream operator  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Ostream operator  * * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const dictionaryEntry& de)
 {

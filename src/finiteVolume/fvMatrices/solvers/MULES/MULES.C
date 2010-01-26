@@ -34,8 +34,7 @@ License
 #include "fvcSurfaceIntegrate.H"
 #include "slicedSurfaceFields.H"
 #include "syncTools.H"
-
-#include "fvCFD.H"
+#include "fvm.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

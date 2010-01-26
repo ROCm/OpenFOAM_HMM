@@ -688,7 +688,7 @@ int main(int argc, char *argv[])
 
     argList::validArgs.append("surface file");
     argList::validArgs.append("output surface file");
-    argList::validOptions.insert("debug", "");
+    argList::addBoolOption("debug");
 
     argList args(argc, argv);
 
@@ -973,7 +973,7 @@ int main(int argc, char *argv[])
 
     surf.write(outSurfName);
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

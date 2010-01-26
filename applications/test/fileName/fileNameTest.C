@@ -108,8 +108,7 @@ int main()
     Info<< " badName(die) => " << findEtcFile("badName", true) << nl
         << endl;
 
-    Info<< "\nEnd" << endl;
-
+    Info<< "\nEnd\n" << endl;
     return 0;
 }
 

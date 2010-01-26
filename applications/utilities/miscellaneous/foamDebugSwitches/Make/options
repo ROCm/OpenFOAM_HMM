@@ -1,43 +1,59 @@
 EXE_LIBS = \
+    -lautoMesh \
+    -lbarotropicCompressibilityModel \
     -lbasicThermophysicalModels \
+    -lblockMesh \
     -lchemistryModel \
-    -lreactionThermophysicalModels \
+    -lcoalCombustion \
     -lcompressibleLESModels \
+    -lcompressibleRASModels \
+    -lcompressibleTurbulenceModel \
+    -lconversion \
     -ldecompositionMethods \
     -ldieselSpray \
+    -ldsmc \
     -ldynamicFvMesh \
     -ldynamicMesh \
     -ledgeMesh \
     -lengine \
     -lerrorEstimation \
+    -lfieldFunctionObjects \
     -lfiniteVolume \
     -lforces \
     -lfvMotionSolvers \
+    -lgenericPatchFields \
     -lincompressibleLESModels \
-    -lincompressibleTransportModels \
-    -lcompressibleRASModels \
     -lincompressibleRASModels \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModel \
     -linterfaceProperties \
-    -llagrangianIntermediate \
+    -lIOFunctionObjects \
     -llagrangian \
+    -llagrangianIntermediate \
     -llaminarFlameSpeedModels \
     -lLESdeltas \
     -lLESfilters \
     -lliquidMixture \
     -lliquids \
     -lmeshTools \
+    -lmolecularMeasurements \
+    -lmolecule \
     -lODE \
     -lOpenFOAM \
     -lpdf \
-    -lphaseModel \
+    -lpotential \
     -lradiation \
     -lrandomProcesses \
+    -lreactionThermophysicalModels \
     -lsampling \
     -lsolidMixture \
+    -lsolidParticle \
     -lsolids \
     -lspecie \
+    -lsurfMesh \
+    -lsystemCall \
+    -lthermalPorousZone \
     -lthermophysicalFunctions \
     -ltopoChangerFvMesh \
     -ltriSurface \
-    -lautoMesh \
-    -lblockMesh
+    -lutilityFunctionObjects

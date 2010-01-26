@@ -190,7 +190,7 @@
         }
     }
 
-    Info << "dragPhase is " << dragPhase << endl;
+    Info<< "dragPhase is " << dragPhase << endl;
     kineticTheoryModel kineticTheory
     (
         phasea,

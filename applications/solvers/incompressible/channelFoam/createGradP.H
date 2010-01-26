@@ -11,7 +11,7 @@
         runTime.path()/runTime.timeName()/"uniform"/"gradP.raw"
     );
 
-    if(gradPFile.good())
+    if (gradPFile.good())
     {
         gradPFile >> gradP;
         Info<< "Reading average pressure gradient" <<endl

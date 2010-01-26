@@ -118,7 +118,7 @@ public:
 
            // Transform
 
-               //- Transform the given vector 
+               //- Transform the given vector
                inline vector transform(const vector& v) const;
 
                //- Inverse Transform the given vector

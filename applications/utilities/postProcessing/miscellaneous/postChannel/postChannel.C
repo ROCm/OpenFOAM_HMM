@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 #       include "collapse.H"
     }
 
-    Info<< "\nEnd" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

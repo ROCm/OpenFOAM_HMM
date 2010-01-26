@@ -29,27 +29,24 @@ License
 #include "gradientDispersionRAS.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(gradientDispersionRAS, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(gradientDispersionRAS, 0);
-
-addToRunTimeSelectionTable
-(
-    dispersionModel,
-    gradientDispersionRAS,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        dispersionModel,
+        gradientDispersionRAS,
+        dictionary
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-gradientDispersionRAS::gradientDispersionRAS
+Foam::gradientDispersionRAS::gradientDispersionRAS
 (
     const dictionary& dict,
     spray& sm
@@ -61,13 +58,13 @@ gradientDispersionRAS::gradientDispersionRAS
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-gradientDispersionRAS::~gradientDispersionRAS()
+Foam::gradientDispersionRAS::~gradientDispersionRAS()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void gradientDispersionRAS::disperseParcels() const
+void Foam::gradientDispersionRAS::disperseParcels() const
 {
 
     const scalar cps = 0.16432;
@@ -90,7 +87,7 @@ void gradientDispersionRAS::disperseParcels() const
 
         scalar Tturb = min
         (
-            k[celli]/epsilon[celli], 
+            k[celli]/epsilon[celli],
             cps*pow(k[celli], 1.5)/epsilon[celli]/(UrelMag + SMALL)
         );
         // parcel is perturbed by the turbulence
@@ -109,15 +106,15 @@ void gradientDispersionRAS::disperseParcels() const
                 scalar x1 = 0.0;
                 scalar x2 = 0.0;
                 scalar rsq = 10.0;
-                while((rsq > 1.0) || (rsq == 0.0))
+                while ((rsq > 1.0) || (rsq == 0.0))
                 {
                     x1 = 2.0*spray_.rndGen().scalar01() - 1.0;
                     x2 = 2.0*spray_.rndGen().scalar01() - 1.0;
                     rsq = x1*x1 + x2*x2;
                 }
-                
+
                 scalar fac = sqrt(-2.0*log(rsq)/rsq);
-                
+
                 // in 2D calculations the -grad(k) is always
                 // away from the axis of symmetry
                 // This creates a 'hole' in the spray and to
@@ -130,7 +127,7 @@ void gradientDispersionRAS::disperseParcels() const
                 {
                     fac *= mag(x1);
                 }
-                
+
                 elmnt().Uturb() = sigma*fac*dir;
             }
         }
@@ -142,9 +139,5 @@ void gradientDispersionRAS::disperseParcels() const
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

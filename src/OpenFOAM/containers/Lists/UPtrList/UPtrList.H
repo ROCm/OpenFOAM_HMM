@@ -26,8 +26,8 @@ Class
     Foam::UPtrList
 
 Description
-    A 1D array of pointers to objects of type \<T\>, where the size of the
-    array is known and used for subscript bounds checking, etc.
+    A templated 1D list of pointers to objects of type \<T\>, where the
+    size of the array is known and used for subscript bounds checking, etc.
 
     The element operator [] returns a reference to the object rather than a
     pointer.  Storage is not allocated during construction or use but is
@@ -107,11 +107,11 @@ public:
         //- Null Constructor.
         UPtrList();
 
-        //- Construct with length specified.
+        //- Construct with size specified.
         explicit UPtrList(const label);
 
         //- Construct by transferring the parameter contents
-        UPtrList(const Xfer<UPtrList<T> >&);
+        UPtrList(const Xfer< UPtrList<T> >&);
 
         //- Construct as copy or re-use as specified.
         UPtrList(UPtrList<T>&, bool reUse);
@@ -126,6 +126,18 @@ public:
 
             //- Return true if the UPtrList is empty (ie, size() is zero).
             inline bool empty() const;
+
+            //- Return reference to the first element of the list.
+            inline T& first();
+
+            //- Return reference to first element of the list.
+            inline const T& first() const;
+
+            //- Return reference to the last element of the list.
+            inline T& last();
+
+            //- Return reference to the last element of the list.
+            inline const T& last() const;
 
 
         // Edit
@@ -144,11 +156,11 @@ public:
             void clear();
 
             //- Transfer the contents of the argument UPtrList into this
-            //  UPtrList and annull the argument list.
+            //  UPtrList and annul the argument list.
             void transfer(UPtrList<T>&);
 
             //- Transfer contents to the Xfer container
-            inline Xfer<UPtrList<T> > xfer();
+            inline Xfer< UPtrList<T> > xfer();
 
             //- Is element set
             inline bool set(const label) const;

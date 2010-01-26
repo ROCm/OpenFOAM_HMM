@@ -1272,7 +1272,7 @@ Foam::labelList Foam::meshRefinement::intersectedPoints() const
     const faceList& faces = mesh_.faces();
 
     // Mark all points on faces that will become baffles
-    PackedBoolList isBoundaryPoint(mesh_.nPoints(), 0u);
+    PackedBoolList isBoundaryPoint(mesh_.nPoints());
     label nBoundaryPoints = 0;
 
     forAll(surfaceIndex_, faceI)
@@ -1706,7 +1706,7 @@ Foam::label Foam::meshRefinement::addPatch
 
 Foam::label Foam::meshRefinement::addMeshedPatch
 (
-    const word& name,   
+    const word& name,
     const word& type
 )
 {

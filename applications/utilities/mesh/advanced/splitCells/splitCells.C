@@ -525,10 +525,10 @@ void collectCuts
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validOptions.insert("set", "cellSet name");
-    argList::validOptions.insert("geometry", "");
-    argList::validOptions.insert("tol", "edge snap tolerance");
-    argList::validOptions.insert("overwrite", "");
+    argList::addOption("set", "cellSet name");
+    argList::addBoolOption("geometry");
+    argList::addOption("tol", "edge snap tolerance");
+    argList::addBoolOption("overwrite");
     argList::validArgs.append("edge angle [0..360]");
 
 #   include "setRootCase.H"
@@ -546,8 +546,7 @@ int main(int argc, char *argv[])
     bool geometry  = args.optionFound("geometry");
     bool overwrite = args.optionFound("overwrite");
 
-    scalar edgeTol = 0.2;
-    args.optionReadIfPresent("tol", edgeTol);
+    scalar edgeTol = args.optionLookupOrDefault("tol", 0.2);
 
     Info<< "Trying to split cells with internal angles > feature angle\n" << nl
         << "featureAngle      : " << featureAngle << nl
@@ -701,7 +700,7 @@ int main(int argc, char *argv[])
         mesh.write();
     }
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

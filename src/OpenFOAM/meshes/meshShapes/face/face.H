@@ -200,6 +200,15 @@ public:
             const pointField& newPoints
         ) const;
 
+        //- Return the inertia tensor, with optional reference
+        //  point and density specification
+        tensor inertia
+        (
+            const pointField&,
+            const point& refPt = vector::zero,
+            scalar density = 1.0
+        ) const;
+
         //- Return potential intersection with face with a ray starting
         //  at p, direction n (does not need to be normalized)
         //  Does face-center decomposition and returns triangle intersection

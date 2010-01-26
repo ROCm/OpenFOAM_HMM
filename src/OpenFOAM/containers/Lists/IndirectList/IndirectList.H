@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class IndirectList Declaration
+                        Class IndirectList Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T>
@@ -70,10 +70,28 @@ public:
 
         // Access
 
+            //- Return the number of elements in the list
             inline label size() const;
-            inline bool  empty() const;
 
+            //- Return true if the list is empty (ie, size() is zero).
+            inline bool empty() const;
+
+            //- Return the first element of the list.
+            inline T& first();
+
+            //- Return first element of the list.
+            inline const T& first() const;
+
+            //- Return the last element of the list.
+            inline T& last();
+
+            //- Return the last element of the list.
+            inline const T& last() const;
+
+            //- Return the complete list
             inline const UList<T>& completeList() const;
+
+            //- Return the list addressing
             inline const List<label>& addressing() const;
 
         // Edit

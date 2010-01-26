@@ -58,7 +58,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::validArgs.append("thickness");
-    argList::validOptions.insert("overwrite", "");
+    argList::addBoolOption("overwrite");
 #   include "setRootCase.H"
 #   include "createTime.H"
     runTime.functionObjects().off();
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~~~~~~~~~
 
     scalar minRange = GREAT;
-    direction extrudeDir = -1;
+    direction extrudeDir = 4;   //illegal value.
 
     for (direction dir = 0; dir < 3; dir++)
     {

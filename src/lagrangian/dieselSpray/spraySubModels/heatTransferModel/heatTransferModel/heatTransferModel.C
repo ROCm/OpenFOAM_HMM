@@ -26,32 +26,24 @@ License
 
 #include "heatTransferModel.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(heatTransferModel, 0);
-
-defineRunTimeSelectionTable(heatTransferModel, dictionary);
+    defineTypeNameAndDebug(heatTransferModel, 0);
+    defineRunTimeSelectionTable(heatTransferModel, dictionary);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from dictionary
-heatTransferModel::heatTransferModel(const dictionary& dict)
+Foam::heatTransferModel::heatTransferModel(const dictionary& dict)
 :
     dict_(dict)
 {}
 
 
-heatTransferModel::~heatTransferModel()
+Foam::heatTransferModel::~heatTransferModel()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

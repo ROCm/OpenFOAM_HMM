@@ -37,12 +37,8 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
+defineTypeNameAndDebug(Foam::cellSplitter, 0);
 
-defineTypeNameAndDebug(cellSplitter, 0);
-
-}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

@@ -38,7 +38,7 @@ int main()
 {
     Info<< pTraits<scalar>::typeName << endl;
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

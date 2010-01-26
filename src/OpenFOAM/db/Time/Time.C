@@ -129,7 +129,7 @@ void Foam::Time::setControls()
         {
             if (timeDirs.size())
             {
-                startTime_ = timeDirs[timeDirs.size()-1].value();
+                startTime_ = timeDirs.last().value();
             }
         }
         else
@@ -419,9 +419,9 @@ Foam::instant Foam::Time::findClosestTime(const scalar t) const
     {
         return timeDirs[1];
     }
-    else if (t > timeDirs[timeDirs.size()-1].value())
+    else if (t > timeDirs.last().value())
     {
-        return timeDirs[timeDirs.size()-1];
+        return timeDirs.last();
     }
 
     label nearestIndex = -1;
@@ -529,6 +529,22 @@ bool Foam::Time::loop()
 bool Foam::Time::end() const
 {
     return value() > (endTime_ + 0.5*deltaT_);
+}
+
+
+void Foam::Time::stopAt(const stopAtControls sa) const
+{
+    stopAt_ = sa;
+
+    // adjust endTime
+    if (sa == saEndTime)
+    {
+        controlDict_.lookup("endTime") >> endTime_;
+    }
+    else
+    {
+        endTime_ = GREAT;
+    }
 }
 
 
@@ -662,82 +678,88 @@ Foam::Time& Foam::Time::operator++()
     deltaTSave_ = deltaT_;
     setTime(value() + deltaT_, timeIndex_ + 1);
 
-    // If the time is very close to zero reset to zero
-    if (mag(value()) < 10*SMALL*deltaT_)
+    if (!subCycling_)
     {
-        setTime(0.0, timeIndex_);
-    }
-
-    switch (writeControl_)
-    {
-        case wcTimeStep:
-            outputTime_ = !(timeIndex_ % label(writeInterval_));
-        break;
-
-        case wcRunTime:
-        case wcAdjustableRunTime:
+        // If the time is very close to zero reset to zero
+        if (mag(value()) < 10*SMALL*deltaT_)
         {
-            label outputIndex =
-                label(((value() - startTime_) + 0.5*deltaT_)/writeInterval_);
+            setTime(0.0, timeIndex_);
+        }
 
-            if (outputIndex > outputTimeIndex_)
+        switch (writeControl_)
+        {
+            case wcTimeStep:
+                outputTime_ = !(timeIndex_ % label(writeInterval_));
+            break;
+
+            case wcRunTime:
+            case wcAdjustableRunTime:
             {
+                label outputIndex = label
+                (
+                    ((value() - startTime_) + 0.5*deltaT_)
+                  / writeInterval_
+                );
+
+                if (outputIndex > outputTimeIndex_)
+                {
+                    outputTime_ = true;
+                    outputTimeIndex_ = outputIndex;
+                }
+                else
+                {
+                    outputTime_ = false;
+                }
+            }
+            break;
+
+            case wcCpuTime:
+            {
+                label outputIndex = label(elapsedCpuTime()/writeInterval_);
+                if (outputIndex > outputTimeIndex_)
+                {
+                    outputTime_ = true;
+                    outputTimeIndex_ = outputIndex;
+                }
+                else
+                {
+                    outputTime_ = false;
+                }
+            }
+            break;
+
+            case wcClockTime:
+            {
+                label outputIndex = label(elapsedClockTime()/writeInterval_);
+                if (outputIndex > outputTimeIndex_)
+                {
+                    outputTime_ = true;
+                    outputTimeIndex_ = outputIndex;
+                }
+                else
+                {
+                    outputTime_ = false;
+                }
+            }
+            break;
+        }
+
+        // see if endTime needs adjustment to stop at the next run()/end() check
+        if (!end())
+        {
+            if (stopAt_ == saNoWriteNow)
+            {
+                endTime_ = value();
+            }
+            else if (stopAt_ == saWriteNow)
+            {
+                endTime_ = value();
                 outputTime_ = true;
-                outputTimeIndex_ = outputIndex;
             }
-            else
+            else if (stopAt_ == saNextWrite && outputTime_ == true)
             {
-                outputTime_ = false;
+                endTime_ = value();
             }
-        }
-        break;
-
-        case wcCpuTime:
-        {
-            label outputIndex = label(elapsedCpuTime()/writeInterval_);
-            if (outputIndex > outputTimeIndex_)
-            {
-                outputTime_ = true;
-                outputTimeIndex_ = outputIndex;
-            }
-            else
-            {
-                outputTime_ = false;
-            }
-        }
-        break;
-
-        case wcClockTime:
-        {
-            label outputIndex = label(elapsedClockTime()/writeInterval_);
-            if (outputIndex > outputTimeIndex_)
-            {
-                outputTime_ = true;
-                outputTimeIndex_ = outputIndex;
-            }
-            else
-            {
-                outputTime_ = false;
-            }
-        }
-        break;
-    }
-
-    // see if endTime needs adjustment to stop at the next run()/end() check
-    if (!end())
-    {
-        if (stopAt_ == saNoWriteNow)
-        {
-            endTime_ = value();
-        }
-        else if (stopAt_ == saWriteNow)
-        {
-            endTime_ = value();
-            outputTime_ = true;
-        }
-        else if (stopAt_ == saNextWrite && outputTime_ == true)
-        {
-            endTime_ = value();
         }
     }
 

@@ -151,7 +151,7 @@ public:
             void clear();
 
             //- Transfer the contents of the argument Matrix into this Matrix
-            //  and annull the argument Matrix.
+            //  and annul the argument Matrix.
             void transfer(Matrix<Form, Type>&);
 
 

@@ -28,27 +28,24 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "wallPolyPatch.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(reflectParcel, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(reflectParcel, 0);
-
-addToRunTimeSelectionTable
-(
-    wallModel,
-    reflectParcel,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        wallModel,
+        reflectParcel,
+        dictionary
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-reflectParcel::reflectParcel
+Foam::reflectParcel::reflectParcel
 (
     const dictionary& dict,
     const volVectorField& U,
@@ -64,14 +61,14 @@ reflectParcel::reflectParcel
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-reflectParcel::~reflectParcel()
+Foam::reflectParcel::~reflectParcel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Return 'keepParcel'
-bool reflectParcel::wallTreatment
+bool Foam::reflectParcel::wallTreatment
 (
     parcel& p,
     const label globalFacei
@@ -156,10 +153,10 @@ bool reflectParcel::wallTreatment
                 // translation
                 vector Ur = p.U() - Ub;
                 scalar Urn = Ur & Sf;
-                /*
+            /*
                 if (mag(Ub-v) > SMALL)
                 {
-                    Info << "reflectParcel:: v = " << v
+                    Info<< "reflectParcel:: v = " << v
                         << ", Ub = " << Ub
                         << ", facei = " << facei
                         << ", patchi = " << patchi
@@ -167,7 +164,7 @@ bool reflectParcel::wallTreatment
                         << ", name = " << mesh_.boundaryMesh()[patchi].name()
                         << endl;
                 }
-                    */
+            */
                 if (Urn > 0.0)
                 {
                     p.U() -= (1.0 + elasticity_)*Urn*Sf;
@@ -186,9 +183,5 @@ bool reflectParcel::wallTreatment
     return true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

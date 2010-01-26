@@ -54,7 +54,7 @@ public:
 
     ~Scalar()
     {
-        Info <<"delete Scalar: " << data_ << endl;
+        Info<<"delete Scalar: " << data_ << endl;
     }
 
     autoPtr<Scalar> clone() const;

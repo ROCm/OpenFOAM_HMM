@@ -41,13 +41,13 @@ void starMesh::createPolyCells()
 
     label maxFaces = 0;
 
-    forAll (cellPolys_, cellI)
+    forAll(cellPolys_, cellI)
     {
         cell& curCell = cellPolys_[cellI];
 
         curCell.setSize(cellFaces_[cellI].size());
 
-        forAll (curCell, fI)
+        forAll(curCell, fI)
         {
             curCell[fI] = -1;
         }
@@ -55,7 +55,7 @@ void starMesh::createPolyCells()
         maxFaces += cellFaces_[cellI].size();
     }
 
-    Info << "Maximum possible number of faces in mesh: " << maxFaces << endl;
+    Info<< "Maximum possible number of faces in mesh: " << maxFaces << endl;
 
     meshFaces_.setSize(maxFaces);
 
@@ -72,7 +72,7 @@ void starMesh::createPolyCells()
         // Insertion cannot be done in one go as the faces need to be
         // added into the list in the increasing order of neighbour
         // cells.  Therefore, all neighbours will be detected first
-        // and then added in the correct order.  
+        // and then added in the correct order.
 
         const faceList& curFaces = cellFaces_[cellI];
 
@@ -109,7 +109,7 @@ void starMesh::createPolyCells()
                     label curNei = curNeighbours[neiI];
 
                     // reject neighbours with the lower label. This should
-                    // also reject current cell. 
+                    // also reject current cell.
                     if (curNei > cellI)
                     {
                         // get the list of search faces
@@ -145,7 +145,7 @@ void starMesh::createPolyCells()
             label nextNei = -1;
             label minNei = cellPolys_.size();
 
-            forAll (neiCells, ncI)
+            forAll(neiCells, ncI)
             {
                 if (neiCells[ncI] > -1 && neiCells[ncI] < minNei)
                 {

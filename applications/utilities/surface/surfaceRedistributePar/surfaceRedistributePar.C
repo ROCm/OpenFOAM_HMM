@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
     argList::validArgs.append("triSurfaceMesh");
     argList::validArgs.append("distributionType");
 
-    argList::validOptions.insert("keepNonMapped", "");
+    argList::addBoolOption("keepNonMapped");
 #   include "setRootCase.H"
 #   include "createTime.H"
     runTime.functionObjects().off();
@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
         (
             IOstream::ASCII,
             IOstream::currentVersion,
-            ioDict.time().writeCompression()        
+            ioDict.time().writeCompression()
         );
     }
 

@@ -651,7 +651,7 @@ Foam::polyMesh::polyMesh
     {
         if (checkMesh())
         {
-            Info << "Mesh OK" << endl;
+            Info<< "Mesh OK" << endl;
         }
     }
 }

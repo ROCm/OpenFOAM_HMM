@@ -75,21 +75,22 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("outputFile");
-    argList::validOptions.insert("name",  "name");
-    argList::validOptions.insert("clean", "");
-    argList::validOptions.insert("scaleIn",  "scale");
-    argList::validOptions.insert("scaleOut", "scale");
-    argList::validOptions.insert("dict", "coordinateSystemsDict");
-    argList::validOptions.insert("from", "sourceCoordinateSystem");
-    argList::validOptions.insert("to",   "targetCoordinateSystem");
+
+    argList::addBoolOption("clean");
+
+    argList::addOption("name",  "name");
+    argList::addOption("scaleIn",  "scale");
+    argList::addOption("scaleOut", "scale");
+    argList::addOption("dict", "coordinateSystemsDict");
+    argList::addOption("from", "sourceCoordinateSystem");
+    argList::addOption("to",   "targetCoordinateSystem");
 
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());
     const stringList& params = args.additionalArgs();
 
     fileName exportName(params[0]);
-    word importName("default");
-    args.optionReadIfPresent("name", importName);
+    word importName = args.optionLookupOrDefault<word>("name", "default");
 
     // check that writing is supported
     if (!MeshedSurface<face>::canWriteType(exportName.ext(), true))

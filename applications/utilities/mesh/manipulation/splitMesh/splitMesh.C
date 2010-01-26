@@ -110,12 +110,12 @@ void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
 
 int main(int argc, char *argv[])
 {
-    Foam::argList::noParallel();
+    argList::noParallel();
 
-    Foam::argList::validArgs.append("faceSet");
-    Foam::argList::validArgs.append("masterPatch");
-    Foam::argList::validArgs.append("slavePatch");
-    Foam::argList::validOptions.insert("overwrite", "");
+    argList::validArgs.append("faceSet");
+    argList::validArgs.append("masterPatch");
+    argList::validArgs.append("slavePatch");
+    argList::addBoolOption("overwrite");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
             mesh.faceZones()
         );
 
-    Info << "Adding point and face zones" << endl;
+    Info<< "Adding point and face zones" << endl;
     mesh.addZones(pz, fz, cz);
 
     attachPolyTopoChanger splitter(mesh);

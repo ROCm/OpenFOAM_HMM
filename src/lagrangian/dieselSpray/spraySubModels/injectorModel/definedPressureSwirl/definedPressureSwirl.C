@@ -28,27 +28,24 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(definedPressureSwirlInjector, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(definedPressureSwirlInjector, 0);
-
-addToRunTimeSelectionTable
-(
-    injectorModel,
-    definedPressureSwirlInjector,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        injectorModel,
+        definedPressureSwirlInjector,
+        dictionary
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-definedPressureSwirlInjector::definedPressureSwirlInjector
+Foam::definedPressureSwirlInjector::definedPressureSwirlInjector
 (
     const dictionary& dict,
     spray& sm
@@ -80,13 +77,13 @@ definedPressureSwirlInjector::definedPressureSwirlInjector
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-definedPressureSwirlInjector::~definedPressureSwirlInjector()
+Foam::definedPressureSwirlInjector::~definedPressureSwirlInjector()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar definedPressureSwirlInjector::d0
+Foam::scalar Foam::definedPressureSwirlInjector::d0
 (
     const label n,
     const scalar t
@@ -206,7 +203,7 @@ scalar definedPressureSwirlInjector::d0
 }
 
 
-vector definedPressureSwirlInjector::direction
+Foam::vector Foam::definedPressureSwirlInjector::direction
 (
     const label n,
     const label hole,
@@ -255,7 +252,7 @@ vector definedPressureSwirlInjector::direction
 }
 
 
-scalar definedPressureSwirlInjector::velocity
+Foam::scalar Foam::definedPressureSwirlInjector::velocity
 (
     const label i,
     const scalar time
@@ -265,7 +262,7 @@ scalar definedPressureSwirlInjector::velocity
 }
 
 
-scalar definedPressureSwirlInjector::averageVelocity(const label i) const
+Foam::scalar Foam::definedPressureSwirlInjector::averageVelocity(const label i) const
 {
     const injectorType& it = sm_.injectors()[i].properties();
 
@@ -284,7 +281,7 @@ scalar definedPressureSwirlInjector::averageVelocity(const label i) const
 }
 
 
-scalar definedPressureSwirlInjector::kv
+Foam::scalar Foam::definedPressureSwirlInjector::kv
 (
     const label inj,
     const scalar massFlow,
@@ -316,7 +313,7 @@ scalar definedPressureSwirlInjector::kv
 }
 
 
-scalar definedPressureSwirlInjector::deltaPressureInj
+Foam::scalar Foam::definedPressureSwirlInjector::deltaPressureInj
 (
     const scalar time,
     const label inj
@@ -328,7 +325,8 @@ scalar definedPressureSwirlInjector::deltaPressureInj
 }
 
 
-scalar definedPressureSwirlInjector::averagePressure(const label inj) const
+Foam::scalar
+Foam::definedPressureSwirlInjector::averagePressure(const label inj) const
 {
     const injectorType& it = sm_.injectors()[inj].properties();
 
@@ -336,9 +334,5 @@ scalar definedPressureSwirlInjector::averagePressure(const label inj) const
     return it.integrateTable(it.injectionPressureProfile())/dt;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -111,14 +111,14 @@ public:
 //            //- If the planes are separated the separation vector.
 //            virtual const vector& separation() const = 0;
 //
-//            //- Are the cyclic planes parallel.
-//            virtual bool parallel() const = 0;
-//
-//            //- Return face transformation tensor.
-//            virtual const tensor& forwardT() const = 0;
-//
-//            //- Return neighbour-cell transformation tensor.
-//            const tensor& reverseT() const = 0;
+            //- Are the cyclic planes parallel.
+            virtual bool parallel() const = 0;
+
+            //- Return face transformation tensor.
+            virtual const tensor& forwardT() const = 0;
+
+            //- Return neighbour-cell transformation tensor.
+            virtual const tensor& reverseT() const = 0;
 
             //- Return faceCell addressing
             virtual const unallocLabelList& faceCells() const
@@ -139,26 +139,20 @@ public:
                 const unallocLabelList& internalData
             ) const = 0;
 
-//            //- Initialise interface data transfer
-//            virtual void initTransfer
-//            (
-//                const Pstream::commsTypes commsType,
-//                const unallocLabelList& interfaceData
-//            ) const
-//            {
-//                notImplemented("coupledFvPatch::initTransfer(..)");
-//            }
-//            
-//            //- Transfer and return neighbour field
-//            virtual tmp<labelField> transfer
-//            (
-//                const Pstream::commsTypes commsType,
-//                const unallocLabelList& interfaceData
-//            ) const
-//            {
-//                notImplemented("coupledFvPatch::initTransfer(..)");
-//                return tmp<labelField>();
-//            }
+//             //- Initialise interface data transfer
+//             virtual void initTransfer
+//             (
+//                 const Pstream::commsTypes commsType,
+//                 const unallocLabelList& interfaceData
+//             ) const
+//             {}
+// 
+//             //- Transfer and return neighbour field
+//             virtual tmp<labelField> transfer
+//             (
+//                 const Pstream::commsTypes commsType,
+//                 const unallocLabelList& interfaceData
+//             ) const = 0;
 
             //- Initialise neighbour field transfer
             virtual void initInternalFieldTransfer

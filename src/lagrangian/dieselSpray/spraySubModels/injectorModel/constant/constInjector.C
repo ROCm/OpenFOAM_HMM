@@ -28,27 +28,24 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(constInjector, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(constInjector, 0);
-
-addToRunTimeSelectionTable
-(
-    injectorModel,
-    constInjector,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        injectorModel,
+        constInjector,
+        dictionary
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-constInjector::constInjector
+Foam::constInjector::constInjector
 (
     const dictionary& dict,
     spray& sm
@@ -93,13 +90,13 @@ constInjector::constInjector
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-constInjector::~constInjector()
+Foam::constInjector::~constInjector()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar constInjector::d0
+Foam::scalar Foam::constInjector::d0
 (
     const label n,
     const scalar
@@ -109,7 +106,7 @@ scalar constInjector::d0
 }
 
 
-vector constInjector::direction
+Foam::vector Foam::constInjector::direction
 (
     const label n,
     const label hole,
@@ -125,12 +122,12 @@ vector constInjector::direction
         = maximum sin(sprayAngle/2)
         beta = angle in the normal plane
 
-                        o                    / (beta)
-                        |\                  /
-                        | \                /)
-                        |  \              o-----------> (x-axis)
-                        |   \
-                        v  (alpha)
+        o                  / (beta)
+        |\                /
+        | \              /)
+        |  \            o-----------> (x-axis)
+        |   \
+        v  (alpha)
     */
 
     scalar angle = rndGen_.scalar01()*sprayAngle_[n]*constant::mathematical::pi/360.0;
@@ -176,7 +173,7 @@ vector constInjector::direction
 }
 
 
-scalar constInjector::velocity
+Foam::scalar Foam::constInjector::velocity
 (
     const label i,
     const scalar time
@@ -198,7 +195,7 @@ scalar constInjector::velocity
 }
 
 
-scalar constInjector::averageVelocity(const label i) const
+Foam::scalar Foam::constInjector::averageVelocity(const label i) const
 {
     const injectorType& it = sm_.injectors()[i].properties();
     scalar dt = it.teoi() - it.tsoi();
@@ -206,9 +203,5 @@ scalar constInjector::averageVelocity(const label i) const
     return it.integrateTable(it.velocityProfile())/dt;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

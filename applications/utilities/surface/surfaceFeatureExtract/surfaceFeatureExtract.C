@@ -101,13 +101,13 @@ int main(int argc, char *argv[])
     argList::validArgs.append("surface");
     argList::validArgs.append("output set");
 
-    argList::validOptions.insert("includedAngle", "included angle [0..180]");
-    argList::validOptions.insert("set", "input feature set");
+    argList::addOption("includedAngle", "included angle [0..180]");
+    argList::addOption("set", "input feature set");
 
-    argList::validOptions.insert("minLen", "cumulative length of feature");
-    argList::validOptions.insert("minElem", "number of edges in feature");
-    argList::validOptions.insert("subsetBox", "((x0 y0 z0)(x1 y1 z1))");
-    argList::validOptions.insert("deleteBox", "((x0 y0 z0)(x1 y1 z1))");
+    argList::addOption("minLen", "cumulative length of feature");
+    argList::addOption("minElem", "number of edges in feature");
+    argList::addOption("subsetBox", "((x0 y0 z0)(x1 y1 z1))");
+    argList::addOption("deleteBox", "((x0 y0 z0)(x1 y1 z1))");
     argList args(argc, argv);
 
     Pout<< "Feature line extraction is only valid on closed manifold surfaces."
@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
     }
 
     // Trim away small groups of features
-    if (minLen > 0 || minLen > 0)
+    if (minElem > 0 || minLen > 0)
     {
         set.trimFeatures(minLen, minElem);
         Pout<< endl << "Removed small features" << endl;

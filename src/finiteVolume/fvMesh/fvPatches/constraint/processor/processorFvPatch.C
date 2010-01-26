@@ -123,24 +123,24 @@ tmp<labelField> processorFvPatch::interfaceInternalField
 }
 
 
-void processorFvPatch::initTransfer
-(
-    const Pstream::commsTypes commsType,
-    const unallocLabelList& interfaceData
-) const
-{
-    send(commsType, interfaceData);
-}
-
-
-tmp<labelField> processorFvPatch::transfer
-(
-    const Pstream::commsTypes commsType,
-    const unallocLabelList&
-) const
-{
-    return receive<label>(commsType, this->size());
-}
+// void processorFvPatch::initTransfer
+// (
+//     const Pstream::commsTypes commsType,
+//     const unallocLabelList& interfaceData
+// ) const
+// {
+//     send(commsType, interfaceData);
+// }
+// 
+// 
+// tmp<labelField> processorFvPatch::transfer
+// (
+//     const Pstream::commsTypes commsType,
+//     const unallocLabelList&
+// ) const
+// {
+//     return receive<label>(commsType, this->size());
+// }
 
 
 void processorFvPatch::initInternalFieldTransfer

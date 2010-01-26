@@ -58,7 +58,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("noFlipMap", "");
+    argList::addBoolOption("noFlipMap");
 
 #   include "addRegionOption.H"
 #   include "addTimeOptions.H"
@@ -341,7 +341,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    Info<< nl << "End" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

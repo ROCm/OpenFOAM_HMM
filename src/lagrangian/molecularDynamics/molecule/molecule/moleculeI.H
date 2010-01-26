@@ -77,7 +77,7 @@ inline Foam::molecule::constantProperties::constantProperties
 
     siteReferencePositions_ -= centreOfMass;
 
-    if(siteIds_.size() == 1)
+    if (siteIds_.size() == 1)
     {
         // Single site molecule - no rotational motion.
 
@@ -85,7 +85,7 @@ inline Foam::molecule::constantProperties::constantProperties
 
         momentOfInertia_ = diagTensor(-1, -1, -1);
     }
-    else if(linearMoleculeTest())
+    else if (linearMoleculeTest())
     {
         // Linear molecule.
 

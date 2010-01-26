@@ -48,9 +48,9 @@ void starMesh::mergeCoupleFacePoints()
     // merge set.  Once all cells (and thus points) are visited, go
     // through the renumbering list and for each merging point use the
     // label of the merge set as the new point label.
-    // This is VERY fancy. Use care if/when changing. 
+    // This is VERY fancy. Use care if/when changing.
 
-    Info << endl << "Creating merge sets" << endl;
+    Info<< endl << "Creating merge sets" << endl;
 
     // Create a renumbering list for points
     // In the first instance the renumbering list is used as a
@@ -63,7 +63,7 @@ void starMesh::mergeCoupleFacePoints()
 
     label nMergeSets = 0;
 
-    forAll (cellFaces_, cellI)
+    forAll(cellFaces_, cellI)
     {
         const faceList& curFaces = cellFaces_[cellI];
 
@@ -74,13 +74,13 @@ void starMesh::mergeCoupleFacePoints()
 
         scalar pointMergeTol = GREAT;
 
-        forAll (curFaces, faceI)
+        forAll(curFaces, faceI)
         {
             nPointsInCell += curFaces[faceI].size();
 
             edgeList curEdges = curFaces[faceI].edges();
 
-            forAll (curEdges, edgeI)
+            forAll(curEdges, edgeI)
             {
                 scalar length = curEdges[edgeI].mag(points_);
 
@@ -98,11 +98,11 @@ void starMesh::mergeCoupleFacePoints()
         labelList cellPoints(nPointsInCell);
         label nAddedPoints = 0;
 
-        forAll (curFaces, faceI)
+        forAll(curFaces, faceI)
         {
             const face& f = curFaces[faceI];
 
-            forAll (f, fI)
+            forAll(f, fI)
             {
                 cellPoints[nAddedPoints] = f[fI];
                 nAddedPoints++;
@@ -162,7 +162,7 @@ void starMesh::mergeCoupleFacePoints()
 
                             if (nMergeSets >= mergeSetID.size())
                             {
-                                Info << "Resizing mergeSetID" << endl;
+                                Info<< "Resizing mergeSetID" << endl;
 
                                 mergeSetID.setSize
                                     (mergeSetID.size() + mergeIncrement);
@@ -210,7 +210,7 @@ void starMesh::mergeCoupleFacePoints()
                                 << minMerge << " and " << maxMerge << endl;
 #                           endif
 
-                            forAll (renumberPoints, elimI)
+                            forAll(renumberPoints, elimI)
                             {
                                 if (renumberPoints[elimI] == maxMerge)
                                 {
@@ -235,7 +235,7 @@ void starMesh::mergeCoupleFacePoints()
 
     // Insert the primary point renumbering into the list
     // Take care of possibly unused points in the list
-    forAll (renumberPoints, pointI)
+    forAll(renumberPoints, pointI)
     {
         if (renumberPoints[pointI] < 0)
         {
@@ -253,17 +253,17 @@ void starMesh::mergeCoupleFacePoints()
     // renumbering of all faces.  This will only be used to see which
     // points are still used!
 
-    forAll (cellFaces_, cellI)
+    forAll(cellFaces_, cellI)
     {
         faceList& prelimFaces = cellFaces_[cellI];
 
-        forAll (prelimFaces, faceI)
+        forAll(prelimFaces, faceI)
         {
             face oldFacePoints = prelimFaces[faceI];
 
             face& prelimFacePoints = prelimFaces[faceI];
 
-            forAll (prelimFacePoints, pointI)
+            forAll(prelimFacePoints, pointI)
             {
                 if (renumberPoints[oldFacePoints[pointI]] < 0)
                 {
@@ -284,26 +284,26 @@ void starMesh::mergeCoupleFacePoints()
     // re-create the point list and renumber the whole lot
     renumberPoints = 0;
 
-    forAll (cellFaces_, cellI)
+    forAll(cellFaces_, cellI)
     {
         const faceList& curFaces = cellFaces_[cellI];
 
-        forAll (curFaces, faceI)
+        forAll(curFaces, faceI)
         {
             const face& curFacePoints = curFaces[faceI];
 
-            forAll (curFacePoints, pointI)
+            forAll(curFacePoints, pointI)
             {
                 renumberPoints[curFacePoints[pointI]]++;
             }
         }
     }
 
-    forAll (cellShapes_, cellI)
+    forAll(cellShapes_, cellI)
     {
         const labelList& curLabels = cellShapes_[cellI];
 
-        forAll (curLabels, pointI)
+        forAll(curLabels, pointI)
         {
             if (renumberPoints[curLabels[pointI]] == 0)
             {
@@ -320,14 +320,14 @@ void starMesh::mergeCoupleFacePoints()
 
     label nUsedPoints = 0;
 
-    forAll (renumberPoints, pointI)
+    forAll(renumberPoints, pointI)
     {
         if (renumberPoints[pointI] > 0)
         {
             // This should be OK as the compressed points list will always
             // have less points that the original lists.  Even if there is
             // no points removed, this will copy the list back onto itself
-            // 
+            //
             renumberPoints[pointI] = nUsedPoints;
             points_[nUsedPoints] = points_[pointI];
 
@@ -345,19 +345,19 @@ void starMesh::mergeCoupleFacePoints()
     // reset number of points which need to be sorted
     points_.setSize(nUsedPoints);
 
-    Info << "Renumbering all faces" << endl;
+    Info<< "Renumbering all faces" << endl;
 
-    forAll (cellFaces_, cellI)
+    forAll(cellFaces_, cellI)
     {
         faceList& newFaces = cellFaces_[cellI];
 
-        forAll (newFaces, faceI)
+        forAll(newFaces, faceI)
         {
             face oldFacePoints = newFaces[faceI];
 
             face& newFacePoints = newFaces[faceI];
 
-            forAll (newFacePoints, pointI)
+            forAll(newFacePoints, pointI)
             {
                 if (renumberPoints[oldFacePoints[pointI]] < 0)
                 {
@@ -374,15 +374,15 @@ void starMesh::mergeCoupleFacePoints()
         }
     }
 
-    Info << "Renumbering all cell shapes" << endl;
+    Info<< "Renumbering all cell shapes" << endl;
 
-    forAll (cellShapes_, cellI)
+    forAll(cellShapes_, cellI)
     {
         labelList oldLabels = cellShapes_[cellI];
 
         labelList& curLabels = cellShapes_[cellI];
 
-        forAll (curLabels, pointI)
+        forAll(curLabels, pointI)
         {
             if (renumberPoints[curLabels[pointI]] < 0)
             {
@@ -402,13 +402,13 @@ void starMesh::mergeCoupleFacePoints()
         }
     }
 
-    Info << "Renumbering STAR point lookup" << endl;
+    Info<< "Renumbering STAR point lookup" << endl;
 
     labelList oldStarPointID = starPointID_;
 
     starPointID_ = -1;
 
-    forAll (starPointID_, pointI)
+    forAll(starPointID_, pointI)
     {
         if (renumberPoints[pointI] > -1)
         {

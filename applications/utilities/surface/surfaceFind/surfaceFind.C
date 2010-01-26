@@ -44,9 +44,9 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.clear();
-    argList::validOptions.insert("x", "X");
-    argList::validOptions.insert("y", "Y");
-    argList::validOptions.insert("z", "Z");
+    argList::addOption("x", "X");
+    argList::addOption("y", "Y");
+    argList::addOption("z", "Z");
 
     argList::validArgs.append("surface file");
 
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
         << endl;
 
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

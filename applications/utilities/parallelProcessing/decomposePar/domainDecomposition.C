@@ -38,7 +38,7 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void domainDecomposition::mark
+void Foam::domainDecomposition::mark
 (
     const labelList& zoneElems,
     const label zoneI,
@@ -66,7 +66,7 @@ void domainDecomposition::mark
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // from components
-domainDecomposition::domainDecomposition(const IOobject& io)
+Foam::domainDecomposition::domainDecomposition(const IOobject& io)
 :
     fvMesh(io),
     decompositionDict_
@@ -105,13 +105,13 @@ domainDecomposition::domainDecomposition(const IOobject& io)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-domainDecomposition::~domainDecomposition()
+Foam::domainDecomposition::~domainDecomposition()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool domainDecomposition::writeDecomposition()
+bool Foam::domainDecomposition::writeDecomposition()
 {
     Info<< "\nConstructing processor meshes" << endl;
 
@@ -165,7 +165,7 @@ bool domainDecomposition::writeDecomposition()
 
         pointField procPoints(curPointLabels.size());
 
-        forAll (curPointLabels, pointi)
+        forAll(curPointLabels, pointi)
         {
             procPoints[pointi] = meshPoints[curPointLabels[pointi]];
 
@@ -181,7 +181,7 @@ bool domainDecomposition::writeDecomposition()
 
         faceList procFaces(curFaceLabels.size());
 
-        forAll (curFaceLabels, facei)
+        forAll(curFaceLabels, facei)
         {
             // Mark the original face as used
             // Remember to decrement the index by one (turning index)
@@ -208,7 +208,7 @@ bool domainDecomposition::writeDecomposition()
 
             procFaceLabels.setSize(origFaceLabels.size());
 
-            forAll (origFaceLabels, pointi)
+            forAll(origFaceLabels, pointi)
             {
                 procFaceLabels[pointi] = pointLookup[origFaceLabels[pointi]];
             }
@@ -221,7 +221,7 @@ bool domainDecomposition::writeDecomposition()
 
         cellList procCells(curCellLabels.size());
 
-        forAll (curCellLabels, celli)
+        forAll(curCellLabels, celli)
         {
             const labelList& origCellLabels = meshCells[curCellLabels[celli]];
 
@@ -229,7 +229,7 @@ bool domainDecomposition::writeDecomposition()
 
             curCell.setSize(origCellLabels.size());
 
-            forAll (origCellLabels, cellFaceI)
+            forAll(origCellLabels, cellFaceI)
             {
                 curCell[cellFaceI] = faceLookup[origCellLabels[cellFaceI]];
             }
@@ -302,7 +302,7 @@ bool domainDecomposition::writeDecomposition()
 
         label nPatches = 0;
 
-        forAll (curPatchSizes, patchi)
+        forAll(curPatchSizes, patchi)
         {
             // Get the face labels consistent with the field mapping
             // (reuse the patch field mappers)
@@ -333,7 +333,7 @@ bool domainDecomposition::writeDecomposition()
             nPatches++;
         }
 
-        forAll (curProcessorPatchSizes, procPatchI)
+        forAll(curProcessorPatchSizes, procPatchI)
         {
             procPatches[nPatches] =
                 new processorPolyPatch
@@ -386,7 +386,7 @@ forAll(procPatches, patchI)
 
             // Use the pointToZone map to find out the single zone (if any),
             // use slow search only for shared points.
-            forAll (curPointLabels, pointi)
+            forAll(curPointLabels, pointi)
             {
                 label curPoint = curPointLabels[pointi];
 
@@ -457,7 +457,7 @@ forAll(procPatches, patchI)
             // Go through all the zoned faces and find out if they
             // belong to a zone.  If so, add it to the zone as
             // necessary
-            forAll (curFaceLabels, facei)
+            forAll(curFaceLabels, facei)
             {
                 // Remember to decrement the index by one (turning index)
                 //
@@ -544,7 +544,7 @@ forAll(procPatches, patchI)
                 zoneCells[zoneI].setCapacity(cz[zoneI].size() / nProcs_);
             }
 
-            forAll (curCellLabels, celli)
+            forAll(curCellLabels, celli)
             {
                 label curCellI = curCellLabels[celli];
 
@@ -607,7 +607,7 @@ forAll(procPatches, patchI)
         label nProcPatches = 0;
         label nProcFaces = 0;
 
-        forAll (procMesh.boundaryMesh(), patchi)
+        forAll(procMesh.boundaryMesh(), patchi)
         {
             if
             (

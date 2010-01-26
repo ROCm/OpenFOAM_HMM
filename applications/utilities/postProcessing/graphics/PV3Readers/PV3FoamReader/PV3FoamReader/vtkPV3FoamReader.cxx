@@ -79,7 +79,9 @@ vtkPV3FoamReader::vtkPV3FoamReader()
     TimeStepRange[1] = 0;
 
     CacheMesh = 1;
+    Refresh = 0;
 
+    SkipZeroTime = 0;
     ExtrapolatePatches = 0;
     IncludeSets = 0;
     IncludeZones = 0;
@@ -336,7 +338,6 @@ int vtkPV3FoamReader::RequestData
         foamData_->setTime(nRequestTime, requestTime);
     }
 
-
     vtkMultiBlockDataSet* output = vtkMultiBlockDataSet::SafeDownCast
     (
         outputVector->GetInformationObject(0)->Get
@@ -420,7 +421,39 @@ int vtkPV3FoamReader::RequestData
 }
 
 
-void vtkPV3FoamReader::SetShowPatchNames(const int val)
+void vtkPV3FoamReader::SetRefresh(int val)
+{
+    Modified();
+}
+
+
+void vtkPV3FoamReader::SetIncludeSets(int val)
+{
+    if (IncludeSets != val)
+    {
+        IncludeSets = val;
+        if (foamData_)
+        {
+            foamData_->updateInfo();
+        }
+    }
+}
+
+
+void vtkPV3FoamReader::SetIncludeZones(int val)
+{
+    if (IncludeZones != val)
+    {
+        IncludeZones = val;
+        if (foamData_)
+        {
+            foamData_->updateInfo();
+        }
+    }
+}
+
+
+void vtkPV3FoamReader::SetShowPatchNames(int val)
 {
     if (ShowPatchNames != val)
     {
@@ -428,7 +461,6 @@ void vtkPV3FoamReader::SetShowPatchNames(const int val)
         updatePatchNamesView(ShowPatchNames);
     }
 }
-
 
 
 void vtkPV3FoamReader::updatePatchNamesView(const bool show)
@@ -452,7 +484,7 @@ void vtkPV3FoamReader::updatePatchNamesView(const bool show)
     // Get all the pqRenderView instances
     QList<pqRenderView*> renderViews = smModel->findItems<pqRenderView*>();
 
-    for (int viewI=0; viewI<renderViews.size(); viewI++)
+    for (int viewI=0; viewI < renderViews.size(); ++viewI)
     {
         foamData_->renderPatchNames
         (
@@ -521,7 +553,8 @@ int vtkPV3FoamReader::GetPartArrayStatus(const char* name)
 
 void vtkPV3FoamReader::SetPartArrayStatus(const char* name, int status)
 {
-    vtkDebugMacro(<<"SetPartArrayStatus");
+    vtkDebugMacro("Set mesh part \"" << name << "\" status to: " << status);
+
     if (status)
     {
         PartSelection->EnableArray(name);

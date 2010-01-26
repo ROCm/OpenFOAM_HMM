@@ -93,9 +93,23 @@ bool inFileNameList
 
 int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("ascii", "" );
-    argList::validOptions.insert("patches", "patchList");
-    argList::validOptions.insert("noPatches", "");
+    argList::addBoolOption
+    (
+        "ascii",
+        "write in ASCII format instead of 'C Binary'"
+    );
+    argList::addBoolOption
+    (
+        "noPatches",
+        "suppress writing any patches"
+    );
+    argList::addOption
+    (
+        "patches",
+        "wordList",
+        "specify particular patches to write - eg '(inlet outlet)'. "
+        "An empty list suppresses writing the internalMesh."
+    );
 
 #   include "addTimeOptions.H"
 #   include "setRootCase.H"
@@ -175,7 +189,7 @@ int main(int argc, char *argv[])
     ensightMesh eMesh(mesh, args, binary);
 
     // Set Time to the last time before looking for the lagrangian objects
-    runTime.setTime(Times[Times.size()-1], Times.size()-1);
+    runTime.setTime(Times.last(), Times.size()-1);
 
     IOobjectList objects(mesh, runTime.timeName());
 

@@ -6,9 +6,9 @@ int USERD_get_nfaced_conn
 )
 {
 #ifdef ENSIGHTDEBUG
-    Info << "Entering: USERD_get_nfaced_conn" 
+    Info<< "Entering: USERD_get_nfaced_conn"
         << ", part_number = " << part_number
-        << endl 
+        << endl
         << flush;
 #endif
 
@@ -36,11 +36,11 @@ int USERD_get_nfaced_conn
                 {}
                 else
                 {
-                    for(label i=0; i<nFacesInCell; i++)
+                    for (label i=0; i<nFacesInCell; i++)
                     {
                         label facei = cells[n][i];
                         label nPoints = faces[facei].size();
-                        for(label j=0; j<nPoints; j++)
+                        for (label j=0; j<nPoints; j++)
                         {
                             nfaced_conn_array[nPoint++] = faces[facei][j] + 1;
                         }
@@ -49,22 +49,22 @@ int USERD_get_nfaced_conn
             }
             else
             {
-                for(label i=0; i<nFacesInCell; i++)
+                for (label i=0; i<nFacesInCell; i++)
                 {
                     label facei = cells[n][i];
                     label nPoints = faces[facei].size();
-                    for(label j=0; j<nPoints; j++)
+                    for (label j=0; j<nPoints; j++)
                     {
                         nfaced_conn_array[nPoint++] = faces[facei][j] + 1;
                     }
                 }
             }
         }
-        
+
     }
     else if (part_number < nPatches+2)
     {
-        
+
     }
     else
     {
@@ -72,7 +72,7 @@ int USERD_get_nfaced_conn
     }
 
 #ifdef ENSIGHTDEBUG
-    Info << "Exiting: USERD_get_nfaced_conn" << endl 
+    Info<< "Exiting: USERD_get_nfaced_conn" << endl
         << flush;
 #endif
     return Z_OK;

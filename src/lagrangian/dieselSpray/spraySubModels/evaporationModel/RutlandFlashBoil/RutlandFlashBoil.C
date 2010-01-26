@@ -30,27 +30,24 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(RutlandFlashBoil, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(RutlandFlashBoil, 0);
-
-addToRunTimeSelectionTable
-(
-    evaporationModel,
-    RutlandFlashBoil,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        evaporationModel,
+        RutlandFlashBoil,
+        dictionary
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from dictionary
-RutlandFlashBoil::RutlandFlashBoil( const dictionary& dict)
+Foam::RutlandFlashBoil::RutlandFlashBoil( const dictionary& dict)
 :
     evaporationModel(dict),
     evapDict_(dict.subDict(typeName + "Coeffs")),
@@ -80,20 +77,20 @@ RutlandFlashBoil::RutlandFlashBoil( const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-RutlandFlashBoil::~RutlandFlashBoil()
+Foam::RutlandFlashBoil::~RutlandFlashBoil()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool RutlandFlashBoil::evaporation() const
+bool Foam::RutlandFlashBoil::evaporation() const
 {
     return true;
 }
 
 
 // Correlation for the Sherwood Number
-scalar RutlandFlashBoil::Sh
+Foam::scalar Foam::RutlandFlashBoil::Sh
 (
     const scalar ReynoldsNumber,
     const scalar SchmidtNumber
@@ -107,7 +104,7 @@ scalar RutlandFlashBoil::Sh
 }
 
 
-scalar RutlandFlashBoil::relaxationTime
+Foam::scalar Foam::RutlandFlashBoil::relaxationTime
 (
     const scalar diameter,
     const scalar liquidDensity,
@@ -160,7 +157,7 @@ scalar RutlandFlashBoil::relaxationTime
     scalar logXratio = log(1.0 + Xratio);
     scalar Fb = 1.0;
 
-    if(logXratio > SMALL)
+    if (logXratio > SMALL)
     {
         Fb = pow((1.0 + Xratio), FbExp)*log(1.0 + Xratio)/Xratio;
     }
@@ -181,7 +178,7 @@ scalar RutlandFlashBoil::relaxationTime
 }
 
 
-scalar RutlandFlashBoil::boilingTime
+Foam::scalar Foam::RutlandFlashBoil::boilingTime
 (
     const scalar liquidDensity,
     const scalar cpFuel,
@@ -286,7 +283,7 @@ scalar RutlandFlashBoil::boilingTime
                     Gneg = Gneg/10.0;
                     Gneg = max(Gneg, VSMALL);
                     FgNeg = Gneg + Gf - B*log(1.0 + (1.0 + Gf/Gneg)*A);
-                    if(FgNeg < 0.0)
+                    if (FgNeg < 0.0)
                     {
                         break;
                     }
@@ -303,7 +300,7 @@ scalar RutlandFlashBoil::boilingTime
 
             if (FgNeg > 0.0)
             {
-                Info << "no convergence" << endl;
+                Info<< "no convergence" << endl;
             }
 
 
@@ -333,7 +330,7 @@ scalar RutlandFlashBoil::boilingTime
 
                 if (k >= Niter - 1)
                 {
-                    Info << " No convergence for G " << endl;
+                    Info<< " No convergence for G " << endl;
                 }
             }
             else
@@ -350,15 +347,5 @@ scalar RutlandFlashBoil::boilingTime
     return time;
 }
 
-
-inline label RutlandFlashBoil::nEvapIter() const
-{
-    return nEvapIter_;
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

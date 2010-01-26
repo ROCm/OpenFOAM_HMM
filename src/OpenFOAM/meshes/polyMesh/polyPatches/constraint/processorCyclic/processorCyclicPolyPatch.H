@@ -166,6 +166,17 @@ public:
             const word& referPatchName
         );
 
+        //- Construct given the original patch and a map
+        processorCyclicPolyPatch
+        (
+            const processorCyclicPolyPatch& pp,
+            const polyBoundaryMesh& bm,
+            const label index,
+            const unallocLabelList& mapAddressing,
+            const label newStart
+        );
+
+
         //- Construct and return a clone, resetting the boundary mesh
         virtual autoPtr<polyPatch> clone(const polyBoundaryMesh& bm) const
         {
@@ -187,12 +198,35 @@ public:
             (
                 new processorCyclicPolyPatch
                 (
-                    refCast<const processorCyclicPolyPatch>(*this),
+                    *this,
                     bm,
                     index,
                     newSize,
                     newStart,
                     referPatchName
+                )
+            );
+        }
+
+        //- Construct and return a clone, resetting the face list
+        //  and boundary mesh
+        virtual autoPtr<polyPatch> clone
+        (
+            const polyBoundaryMesh& bm,
+            const label index,
+            const unallocLabelList& mapAddressing,
+            const label newStart
+        ) const
+        {
+            return autoPtr<polyPatch>
+            (
+                new processorCyclicPolyPatch
+                (
+                    *this,
+                    bm,
+                    index,
+                    mapAddressing,
+                    newStart
                 )
             );
         }

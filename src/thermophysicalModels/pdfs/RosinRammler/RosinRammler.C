@@ -118,7 +118,7 @@ Foam::scalar Foam::RosinRammler::sample() const
             scalar xx = pow(x/d_[i], n_[i]);
             p += ls_[i]*xx*exp(-xx);
         }
-    } while(y>p);
+    } while (y>p);
 
     return x;
 }

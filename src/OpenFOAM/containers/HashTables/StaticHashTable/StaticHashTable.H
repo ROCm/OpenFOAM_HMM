@@ -247,7 +247,7 @@ public:
             void clearStorage();
 
             //- Transfer the contents of the argument table into this table
-            //  and annull the argument table.
+            //  and annul the argument table.
             void transfer(StaticHashTable<T, Key, Hash>&);
 
             //- Transfer contents to the Xfer container

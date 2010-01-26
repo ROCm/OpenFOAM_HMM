@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "writeFunctions.H"
@@ -75,7 +73,7 @@ void writeBytes(char* start, int nBytes)
 
     cout<< start << " : ";
 
-    for(int i = 0; i < nBytes; i++)
+    for (int i = 0; i < nBytes; i++)
     {
         cout<< " " << start[i];
     }

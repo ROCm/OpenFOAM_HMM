@@ -95,17 +95,16 @@ void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
 
 int main(int argc, char *argv[])
 {
-    Foam::argList::noParallel();
+    argList::noParallel();
 
-    Foam::argList::validArgs.append("masterPatch");
-    Foam::argList::validArgs.append("slavePatch");
+    argList::validArgs.append("masterPatch");
+    argList::validArgs.append("slavePatch");
 
-    Foam::argList::validOptions.insert("partial", "");
-    Foam::argList::validOptions.insert("perfect", "");
+    argList::addBoolOption("partial");
+    argList::addBoolOption("perfect");
+    argList::addBoolOption("overwrite");
 
-    Foam::argList::validOptions.insert("overwrite", "");
-
-    Foam::argList::validOptions.insert("toleranceDict", "file with tolerances");
+    argList::addOption("toleranceDict", "file with tolerances");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -172,15 +171,17 @@ int main(int argc, char *argv[])
 
     // set up the tolerances for the sliding mesh
     dictionary slidingTolerances;
-    if (args.options().found("toleranceDict")) 
+    if (args.options().found("toleranceDict"))
     {
-        IOdictionary toleranceFile(
-            IOobject(
+        IOdictionary toleranceFile
+        (
+            IOobject
+            (
                 args.options()["toleranceDict"],
                 runTime.constant(),
                 mesh,
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE                 
+                IOobject::NO_WRITE
             )
         );
         slidingTolerances += toleranceFile;
@@ -202,7 +203,7 @@ int main(int argc, char *argv[])
     // Make list of masterPatch faces
     labelList isf(masterPatch.size());
 
-    forAll (isf, i)
+    forAll(isf, i)
     {
         isf[i] = masterPatch.start() + i;
     }
@@ -231,7 +232,7 @@ int main(int argc, char *argv[])
 
         // Note: make sure to add the zones BEFORE constructing polyMeshModifier
         // (since looks up various zones at construction time)
-        Info << "Adding point and face zones" << endl;
+        Info<< "Adding point and face zones" << endl;
         mesh.addZones(pz.shrink(), fz.shrink(), cz.shrink());
 
         // Add the perfect interface mesh modifier
@@ -283,7 +284,7 @@ int main(int argc, char *argv[])
 
         labelList osf(slavePatch.size());
 
-        forAll (osf, i)
+        forAll(osf, i)
         {
             osf[i] = slavePatch.start() + i;
         }
@@ -316,7 +317,7 @@ int main(int argc, char *argv[])
 
         // Note: make sure to add the zones BEFORE constructing polyMeshModifier
         // (since looks up various zones at construction time)
-        Info << "Adding point and face zones" << endl;
+        Info<< "Adding point and face zones" << endl;
         mesh.addZones(pz.shrink(), fz.shrink(), cz.shrink());
 
         // Add the sliding interface mesh modifier
@@ -393,7 +394,7 @@ int main(int argc, char *argv[])
         mesh.setInstance(oldInstance);
         stitcher.instance() = oldInstance;
     }
-    Info << nl << "Writing polyMesh to time " << runTime.timeName() << endl;
+    Info<< nl << "Writing polyMesh to time " << runTime.timeName() << endl;
 
     IOstream::defaultPrecision(10);
 

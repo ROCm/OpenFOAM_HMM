@@ -45,7 +45,7 @@ void Foam::vtkPV3Foam::convertPatchField
     const word& name,
     const Field<Type>& ptf,
     vtkMultiBlockDataSet* output,
-    const partInfo& selector,
+    const arrayRange& range,
     const label datasetNo
 )
 {
@@ -70,7 +70,7 @@ void Foam::vtkPV3Foam::convertPatchField
 
     vtkPolyData::SafeDownCast
     (
-        GetDataSetFromBlock(output, selector, datasetNo)
+        GetDataSetFromBlock(output, range, datasetNo)
     )   ->GetCellData()
         ->AddArray(cellData);
 
@@ -85,7 +85,7 @@ void Foam::vtkPV3Foam::convertPatchPointField
     const word& name,
     const Field<Type>& pptf,
     vtkMultiBlockDataSet* output,
-    const partInfo& selector,
+    const arrayRange& range,
     const label datasetNo
 )
 {
@@ -111,7 +111,7 @@ void Foam::vtkPV3Foam::convertPatchPointField
 
     vtkPolyData::SafeDownCast
     (
-        GetDataSetFromBlock(output, selector, datasetNo)
+        GetDataSetFromBlock(output, range, datasetNo)
     )   ->GetPointData()
         ->AddArray(pointData);
 

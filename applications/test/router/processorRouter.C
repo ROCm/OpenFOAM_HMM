@@ -53,7 +53,7 @@ labelList procNeighbours(const polyMesh& mesh)
 
     label nNeighbours = 0;
 
-    forAll (mesh.boundaryMesh(), patchI)
+    forAll(mesh.boundaryMesh(), patchI)
     {
         if (isA<processorPolyPatch>(mesh.boundaryMesh()[patchI]))
         {
@@ -65,13 +65,13 @@ labelList procNeighbours(const polyMesh& mesh)
 
     nNeighbours = 0;
 
-    forAll (mesh.boundaryMesh(), patchI)
+    forAll(mesh.boundaryMesh(), patchI)
     {
         if (isA<processorPolyPatch>(mesh.boundaryMesh()[patchI]))
         {
             const polyPatch& patch = mesh.boundaryMesh()[patchI];
 
-            const processorPolyPatch& procPatch = 
+            const processorPolyPatch& procPatch =
                 refCast<const processorPolyPatch>(patch);
 
             label procId = procPatch.neighbProcNo() - Pstream::firstSlave() + 1;
@@ -96,7 +96,7 @@ point meshCentre(const polyMesh& mesh)
 
 int main(int argc, char *argv[])
 {
-#   include "setRootCase.H"    
+#   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createMesh.H"
 
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
                     // Dump route as lines.
                     labelList route(cellRouter.getRoute(-(pathI + 1)));
 
-                    for(label elemI = 1; elemI < route.size(); elemI++)
+                    for (label elemI = 1; elemI < route.size(); elemI++)
                     {
                         objFile
                             << "l " << route[elemI-1]+1 << ' '

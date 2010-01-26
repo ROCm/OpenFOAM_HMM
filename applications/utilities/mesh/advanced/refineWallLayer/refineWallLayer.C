@@ -47,11 +47,12 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    Foam::argList::noParallel();
-    Foam::argList::validArgs.append("patchName");
-    Foam::argList::validArgs.append("edgeWeight");
-    Foam::argList::validOptions.insert("useSet", "cellSet");
-    Foam::argList::validOptions.insert("overwrite", "");
+    argList::noParallel();
+    argList::validArgs.append("patchName");
+    argList::validArgs.append("edgeWeight");
+
+    argList::addOption("useSet", "cellSet");
+    argList::addBoolOption("overwrite");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -234,11 +235,11 @@ int main(int argc, char *argv[])
     }
 
     // Write resulting mesh
-    Info << "Writing refined morphMesh to time " << runTime.timeName() << endl;
+    Info<< "Writing refined morphMesh to time " << runTime.timeName() << endl;
 
     mesh.write();
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

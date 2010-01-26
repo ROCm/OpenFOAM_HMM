@@ -244,24 +244,24 @@ Foam::processorGAMGInterface::~processorGAMGInterface()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::processorGAMGInterface::initTransfer
-(
-    const Pstream::commsTypes commsType,
-    const unallocLabelList& interfaceData
-) const
-{
-    send(commsType, interfaceData);
-}
-
-
-Foam::tmp<Foam::labelField> Foam::processorGAMGInterface::transfer
-(
-    const Pstream::commsTypes commsType,
-    const unallocLabelList& interfaceData
-) const
-{
-    return receive<label>(commsType, this->size());
-}
+// void Foam::processorGAMGInterface::initTransfer
+// (
+//     const Pstream::commsTypes commsType,
+//     const unallocLabelList& interfaceData
+// ) const
+// {
+//     send(commsType, interfaceData);
+// }
+// 
+// 
+// Foam::tmp<Foam::labelField> Foam::processorGAMGInterface::transfer
+// (
+//     const Pstream::commsTypes commsType,
+//     const unallocLabelList& interfaceData
+// ) const
+// {
+//     return receive<label>(commsType, this->size());
+// }
 
 
 void Foam::processorGAMGInterface::initInternalFieldTransfer

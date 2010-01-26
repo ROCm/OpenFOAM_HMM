@@ -178,7 +178,7 @@ void Foam::sampledSurfaces::sampleAndWrite
 
                 if
                 (
-                    iter != mesh_.objectRegistry::end()
+                    iter != objectRegistry::end()
                  && iter()->type()
                  == GeometricField<Type, fvPatchField, volMesh>::typeName
                 )

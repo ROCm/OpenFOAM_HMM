@@ -66,17 +66,18 @@ int main(int argc, char *argv[])
     argList::noBanner();
     argList::noParallel();
     argList::validArgs.insert("fileName .. fileNameN");
+    argList::addOption("istream", "fileName", "test Istream values");
 
     argList args(argc, argv, false, true);
 
-    if (args.additionalArgs().empty())
+    if (args.additionalArgs().empty() && args.options().empty())
     {
         args.printUsage();
     }
 
-    if (args.optionFound("case"))
+    fileName pathName;
+    if (args.optionReadIfPresent("case", pathName))
     {
-        fileName pathName = args.option("case");
         Info<< nl
             << "-case" << nl
             << "path = " << args.path() << nl
@@ -91,12 +92,27 @@ int main(int argc, char *argv[])
 
     forAll(args.additionalArgs(), argI)
     {
-        fileName pathName = args.additionalArgs()[argI];
+        pathName = args.additionalArgs()[argI];
         printCleaning(pathName);
     }
 
-    Info<< "\nEnd" << endl;
+    if (args.optionFound("istream"))
+    {
+        args.optionLookup("istream")() >> pathName;
 
+        Info<< nl
+            << "-case" << nl
+            << "path = " << args.path() << nl
+            << "root = " << args.rootPath() << nl
+            << "case = " << args.caseName() << nl
+            << "FOAM_CASE=" << getEnv("FOAM_CASE") << nl
+            << "FOAM_CASENAME=" << getEnv("FOAM_CASENAME") << nl
+            << endl;
+
+        printCleaning(pathName);
+    }
+
+    Info<< "\nEnd\n" << endl;
     return 0;
 }
 

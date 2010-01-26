@@ -41,7 +41,7 @@ Note:
 
     Constructors using compact numbering: all my own elements first
     (whether used or not) followed by used-only remote elements.
-    So e.g 4 procs and on proc 1 the compact 
+    So e.g 4 procs and on proc 1 the compact
     table will first have all globalIndex.localSize() elements from proc1
     followed by used-only elements of proc0, proc2, proc3.
     The constructed mapDistribute sends the local elements from and
@@ -271,6 +271,49 @@ public:
                         constructSize_,
                         subMap_,
                         constructMap_,
+                        fld
+                    );
+                }
+            }
+
+            //- Reverse distribute data using default commsType.
+            template<class T>
+            void reverseDistribute(const label constructSize, List<T>& fld)
+            const
+            {
+                if (Pstream::defaultCommsType == Pstream::nonBlocking)
+                {
+                    distribute
+                    (
+                        Pstream::nonBlocking,
+                        List<labelPair>(),
+                        constructSize,
+                        constructMap_,
+                        subMap_,
+                        fld
+                    );
+                }
+                else if (Pstream::defaultCommsType == Pstream::scheduled)
+                {
+                    distribute
+                    (
+                        Pstream::scheduled,
+                        schedule(),
+                        constructSize,
+                        constructMap_,
+                        subMap_,
+                        fld
+                    );
+                }
+                else
+                {
+                    distribute
+                    (
+                        Pstream::blocking,
+                        List<labelPair>(),
+                        constructSize,
+                        constructMap_,
+                        subMap_,
                         fld
                     );
                 }

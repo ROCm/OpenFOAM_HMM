@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "vtkPV3Foam.H"
@@ -49,13 +47,13 @@ void Foam::vtkPV3Foam::convertMeshVolume
     int& blockNo
 )
 {
-    partInfo& selector = partInfoVolume_;
-    selector.block(blockNo);   // set output block
+    arrayRange& range = arrayRangeVolume_;
+    range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
 
     // resize for decomposed polyhedra
-    regionPolyDecomp_.setSize(selector.size());
+    regionPolyDecomp_.setSize(range.size());
 
     if (debug)
     {
@@ -65,7 +63,7 @@ void Foam::vtkPV3Foam::convertMeshVolume
 
     // Convert the internalMesh
     // this looks like more than one part, but it isn't
-    for (int partId = selector.start(); partId < selector.end(); ++partId)
+    for (int partId = range.start(); partId < range.end(); ++partId)
     {
         const word partName = "internalMesh";
 
@@ -82,7 +80,7 @@ void Foam::vtkPV3Foam::convertMeshVolume
 
         if (vtkmesh)
         {
-            AddToBlock(output, vtkmesh, selector, datasetNo, partName);
+            AddToBlock(output, vtkmesh, range, datasetNo, partName);
             vtkmesh->Delete();
 
             partDataset_[partId] = datasetNo++;
@@ -109,8 +107,8 @@ void Foam::vtkPV3Foam::convertMeshLagrangian
     int& blockNo
 )
 {
-    partInfo& selector = partInfoLagrangian_;
-    selector.block(blockNo);   // set output block
+    arrayRange& range = arrayRangeLagrangian_;
+    range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
 
@@ -120,7 +118,7 @@ void Foam::vtkPV3Foam::convertMeshLagrangian
         printMemory();
     }
 
-    for (int partId = selector.start(); partId < selector.end(); ++partId)
+    for (int partId = range.start(); partId < range.end(); ++partId)
     {
         const word cloudName = getPartName(partId);
 
@@ -133,7 +131,7 @@ void Foam::vtkPV3Foam::convertMeshLagrangian
 
         if (vtkmesh)
         {
-            AddToBlock(output, vtkmesh, selector, datasetNo, cloudName);
+            AddToBlock(output, vtkmesh, range, datasetNo, cloudName);
             vtkmesh->Delete();
 
             partDataset_[partId] = datasetNo++;
@@ -160,8 +158,8 @@ void Foam::vtkPV3Foam::convertMeshPatches
     int& blockNo
 )
 {
-    partInfo& selector = partInfoPatches_;
-    selector.block(blockNo);   // set output block
+    arrayRange& range = arrayRangePatches_;
+    range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
@@ -172,7 +170,7 @@ void Foam::vtkPV3Foam::convertMeshPatches
         printMemory();
     }
 
-    for (int partId = selector.start(); partId < selector.end(); ++partId)
+    for (int partId = range.start(); partId < range.end(); ++partId)
     {
         const word patchName = getPartName(partId);
         const label  patchId = patches.findPatchID(patchName);
@@ -192,7 +190,7 @@ void Foam::vtkPV3Foam::convertMeshPatches
 
         if (vtkmesh)
         {
-            AddToBlock(output, vtkmesh, selector, datasetNo, patchName);
+            AddToBlock(output, vtkmesh, range, datasetNo, patchName);
             vtkmesh->Delete();
 
             partDataset_[partId] = datasetNo++;
@@ -219,15 +217,15 @@ void Foam::vtkPV3Foam::convertMeshCellZones
     int& blockNo
 )
 {
-    partInfo& selector = partInfoCellZones_;
-    selector.block(blockNo);   // set output block
+    arrayRange& range = arrayRangeCellZones_;
+    range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
 
     // resize for decomposed polyhedra
-    zonePolyDecomp_.setSize(selector.size());
+    zonePolyDecomp_.setSize(range.size());
 
-    if (!selector.size())
+    if (range.empty())
     {
         return;
     }
@@ -239,7 +237,7 @@ void Foam::vtkPV3Foam::convertMeshCellZones
     }
 
     const cellZoneMesh& zMesh = mesh.cellZones();
-    for (int partId = selector.start(); partId < selector.end(); ++partId)
+    for (int partId = range.start(); partId < range.end(); ++partId)
     {
         const word zoneName = getPartName(partId);
         const label  zoneId = zMesh.findZoneID(zoneName);
@@ -281,7 +279,7 @@ void Foam::vtkPV3Foam::convertMeshCellZones
             // copy pointMap as well, otherwise pointFields fail
             zonePolyDecomp_[datasetNo].pointMap() = subsetter.pointMap();
 
-            AddToBlock(output, vtkmesh, selector, datasetNo, zoneName);
+            AddToBlock(output, vtkmesh, range, datasetNo, zoneName);
             vtkmesh->Delete();
 
             partDataset_[partId] = datasetNo++;
@@ -308,13 +306,13 @@ void Foam::vtkPV3Foam::convertMeshCellSets
     int& blockNo
 )
 {
-    partInfo& selector = partInfoCellSets_;
-    selector.block(blockNo);   // set output block
+    arrayRange& range = arrayRangeCellSets_;
+    range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
 
     // resize for decomposed polyhedra
-    csetPolyDecomp_.setSize(selector.size());
+    csetPolyDecomp_.setSize(range.size());
 
     if (debug)
     {
@@ -322,7 +320,7 @@ void Foam::vtkPV3Foam::convertMeshCellSets
         printMemory();
     }
 
-    for (int partId = selector.start(); partId < selector.end(); ++partId)
+    for (int partId = range.start(); partId < range.end(); ++partId)
     {
         const word partName = getPartName(partId);
 
@@ -363,7 +361,7 @@ void Foam::vtkPV3Foam::convertMeshCellSets
             // copy pointMap as well, otherwise pointFields fail
             csetPolyDecomp_[datasetNo].pointMap() = subsetter.pointMap();
 
-            AddToBlock(output, vtkmesh, selector, datasetNo, partName);
+            AddToBlock(output, vtkmesh, range, datasetNo, partName);
             vtkmesh->Delete();
 
             partDataset_[partId] = datasetNo++;
@@ -390,12 +388,12 @@ void Foam::vtkPV3Foam::convertMeshFaceZones
     int& blockNo
 )
 {
-    partInfo& selector = partInfoFaceZones_;
-    selector.block(blockNo);   // set output block
+    arrayRange& range = arrayRangeFaceZones_;
+    range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
 
-    if (!selector.size())
+    if (range.empty())
     {
         return;
     }
@@ -407,7 +405,7 @@ void Foam::vtkPV3Foam::convertMeshFaceZones
     }
 
     const faceZoneMesh& zMesh = mesh.faceZones();
-    for (int partId = selector.start(); partId < selector.end(); ++partId)
+    for (int partId = range.start(); partId < range.end(); ++partId)
     {
         const word zoneName = getPartName(partId);
         const label  zoneId = zMesh.findZoneID(zoneName);
@@ -426,7 +424,7 @@ void Foam::vtkPV3Foam::convertMeshFaceZones
         vtkPolyData* vtkmesh = faceZoneVTKMesh(mesh, zMesh[zoneId]);
         if (vtkmesh)
         {
-            AddToBlock(output, vtkmesh, selector, datasetNo, zoneName);
+            AddToBlock(output, vtkmesh, range, datasetNo, zoneName);
             vtkmesh->Delete();
 
             partDataset_[partId] = datasetNo++;
@@ -453,8 +451,8 @@ void Foam::vtkPV3Foam::convertMeshFaceSets
     int& blockNo
 )
 {
-    partInfo& selector = partInfoFaceSets_;
-    selector.block(blockNo);   // set output block
+    arrayRange& range = arrayRangeFaceSets_;
+    range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
 
@@ -464,7 +462,7 @@ void Foam::vtkPV3Foam::convertMeshFaceSets
         printMemory();
     }
 
-    for (int partId = selector.start(); partId < selector.end(); ++partId)
+    for (int partId = range.start(); partId < range.end(); ++partId)
     {
         const word partName = getPartName(partId);
 
@@ -483,7 +481,7 @@ void Foam::vtkPV3Foam::convertMeshFaceSets
         vtkPolyData* vtkmesh = faceSetVTKMesh(mesh, fSet);
         if (vtkmesh)
         {
-            AddToBlock(output, vtkmesh, selector, datasetNo, partName);
+            AddToBlock(output, vtkmesh, range, datasetNo, partName);
             vtkmesh->Delete();
 
             partDataset_[partId] = datasetNo++;
@@ -510,8 +508,8 @@ void Foam::vtkPV3Foam::convertMeshPointZones
     int& blockNo
 )
 {
-    partInfo& selector = partInfoPointZones_;
-    selector.block(blockNo);   // set output block
+    arrayRange& range = arrayRangePointZones_;
+    range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
 
@@ -521,10 +519,10 @@ void Foam::vtkPV3Foam::convertMeshPointZones
         printMemory();
     }
 
-    if (selector.size())
+    if (range.size())
     {
         const pointZoneMesh& zMesh = mesh.pointZones();
-        for (int partId = selector.start(); partId < selector.end(); ++partId)
+        for (int partId = range.start(); partId < range.end(); ++partId)
         {
             word zoneName = getPartName(partId);
             label zoneId = zMesh.findZoneID(zoneName);
@@ -537,7 +535,7 @@ void Foam::vtkPV3Foam::convertMeshPointZones
             vtkPolyData* vtkmesh = pointZoneVTKMesh(mesh, zMesh[zoneId]);
             if (vtkmesh)
             {
-                AddToBlock(output, vtkmesh, selector, datasetNo, zoneName);
+                AddToBlock(output, vtkmesh, range, datasetNo, zoneName);
                 vtkmesh->Delete();
 
                 partDataset_[partId] = datasetNo++;
@@ -566,8 +564,8 @@ void Foam::vtkPV3Foam::convertMeshPointSets
     int& blockNo
 )
 {
-    partInfo& selector = partInfoPointSets_;
-    selector.block(blockNo);   // set output block
+    arrayRange& range = arrayRangePointSets_;
+    range.block(blockNo);      // set output block
     label datasetNo = 0;       // restart at dataset 0
     const fvMesh& mesh = *meshPtr_;
 
@@ -577,7 +575,7 @@ void Foam::vtkPV3Foam::convertMeshPointSets
         printMemory();
     }
 
-    for (int partId = selector.start(); partId < selector.end(); ++partId)
+    for (int partId = range.start(); partId < range.end(); ++partId)
     {
         word partName = getPartName(partId);
 
@@ -596,7 +594,7 @@ void Foam::vtkPV3Foam::convertMeshPointSets
         vtkPolyData* vtkmesh = pointSetVTKMesh(mesh, pSet);
         if (vtkmesh)
         {
-            AddToBlock(output, vtkmesh, selector, datasetNo, partName);
+            AddToBlock(output, vtkmesh, range, datasetNo, partName);
             vtkmesh->Delete();
 
             partDataset_[partId] = datasetNo++;
@@ -615,5 +613,6 @@ void Foam::vtkPV3Foam::convertMeshPointSets
         printMemory();
     }
 }
+
 
 // ************************************************************************* //

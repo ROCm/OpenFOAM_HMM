@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "maxwellSlipUFvPatchVectorField.H"
@@ -155,7 +153,7 @@ void maxwellSlipUFvPatchVectorField::updateCoeffs()
 
     refValue() = Uwall_;
 
-    if(thermalCreep_)
+    if (thermalCreep_)
     {
         const volScalarField& vsfT =
             this->db().objectRegistry::lookupObject<volScalarField>("T");
@@ -167,7 +165,7 @@ void maxwellSlipUFvPatchVectorField::updateCoeffs()
         refValue() -= 3.0*pnu/(4.0*pT)*transform(I - n*n, gradpT);
     }
 
-    if(curvature_)
+    if (curvature_)
     {
         const fvPatchTensorField& ptauMC =
             patch().lookupPatchField<volTensorField, tensor>("tauMC");

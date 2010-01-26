@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
         dataFile << timeValues << endl;
     }
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

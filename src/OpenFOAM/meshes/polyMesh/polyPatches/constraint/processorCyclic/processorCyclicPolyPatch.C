@@ -25,15 +25,16 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "processorCyclicPolyPatch.H"
+#include "addToRunTimeSelectionTable.H"
 #include "SubField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//namespace Foam
-//{
-//    defineTypeNameAndDebug(processorCyclicPolyPatch, 0);
-//    addToRunTimeSelectionTable(polyPatch, processorCyclicPolyPatch, dictionary);
-//}
+namespace Foam
+{
+    defineTypeNameAndDebug(processorCyclicPolyPatch, 0);
+    addToRunTimeSelectionTable(polyPatch, processorCyclicPolyPatch, dictionary);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -97,6 +98,21 @@ Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
 :
     processorPolyPatch(pp, bm, index, newSize, newStart),
     referPatchName_(referPatchName),
+    referPatchID_(-1)
+{}
+
+
+Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
+(
+    const processorCyclicPolyPatch& pp,
+    const polyBoundaryMesh& bm,
+    const label index,
+    const unallocLabelList& mapAddressing,
+    const label newStart
+)
+:
+    processorPolyPatch(pp, bm, index, mapAddressing, newStart),
+    referPatchName_(pp.referPatchName()),
     referPatchID_(-1)
 {}
 

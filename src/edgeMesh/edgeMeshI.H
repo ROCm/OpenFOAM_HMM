@@ -24,14 +24,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
+inline Foam::edgeMesh::edgeMesh(const edgeMesh& em)
+:
+    points_(em.points_),
+    edges_(em.edges_),
+    pointEdgesPtr_(NULL)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -58,15 +58,16 @@ inline const Foam::labelListList& Foam::edgeMesh::pointEdges() const
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+inline Foam::pointField& Foam::edgeMesh::storedPoints()
+{
+    return points_;
+}
 
 
-// * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * * //
+inline Foam::edgeList& Foam::edgeMesh::storedEdges()
+{
+    return edges_;
+}
 
-
-// * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

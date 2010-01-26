@@ -157,7 +157,7 @@ public:
             inline void clear();
 
             //- Transfer the contents of the argument into this List
-            //  and annull the argument list.
+            //  and annul the argument list.
             inline void transfer(SLListBase&);
 
     // STL iterator

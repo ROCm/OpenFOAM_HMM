@@ -44,7 +44,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::commonRailInjector::commonRailInjector
 (
     const Foam::Time& t,
@@ -104,8 +103,8 @@ Foam::commonRailInjector::commonRailInjector
 
     if
     (
-        mag(injectionPressureProfile_[injectionPressureProfile_.size()-1][0]
-      - massFlowRateProfile_[massFlowRateProfile_.size()-1][0])
+        mag(injectionPressureProfile_.last()[0]
+      - massFlowRateProfile_.last()[0])
       > SMALL
     )
     {
@@ -163,7 +162,7 @@ Foam::commonRailInjector::commonRailInjector
         }
     }
 
-    Info << "end constructor. in commonRail" << endl;
+    Info<< "end constructor. in commonRail" << endl;
 }
 
 
@@ -330,13 +329,13 @@ Foam::scalar Foam::commonRailInjector::T(const scalar time) const
 
 Foam::scalar Foam::commonRailInjector::tsoi() const
 {
-    return massFlowRateProfile_[0][0];
+    return massFlowRateProfile_.first()[0];
 }
 
 
 Foam::scalar Foam::commonRailInjector::teoi() const
 {
-    return massFlowRateProfile_[massFlowRateProfile_.size()-1][0];
+    return massFlowRateProfile_.last()[0];
 }
 
 

@@ -324,7 +324,7 @@ endOfSection               {space}")"{space}
         // point group type skipped
         strtol(endPtr, &endPtr, 16);
 
-        pointi = pointGroupStartIndex[pointGroupStartIndex.size()-1];
+        pointi = pointGroupStartIndex.last();
 
         // reset number of components to default
         pointGroupNumberOfComponents = 3;
@@ -336,11 +336,11 @@ endOfSection               {space}")"{space}
         }
 
         Info<< "PointGroup: "
-            << pointGroupZoneID[pointGroupZoneID.size()-1]
+            << pointGroupZoneID.last()
             << " start: "
-            << pointGroupStartIndex[pointGroupStartIndex.size()-1]
+            << pointGroupStartIndex.last()
             << " end: "
-            << pointGroupEndIndex[pointGroupEndIndex.size()-1] << flush;
+            << pointGroupEndIndex.last() << flush;
     }
 
 <readNumberOfPoints,readPointGroupData>{endOfSection} {
@@ -387,14 +387,14 @@ endOfSection               {space}")"{space}
         Info<< "done." << endl;
 
         // check read of points
-        if (pointi != pointGroupEndIndex[pointGroupEndIndex.size()-1]+1)
+        if (pointi != pointGroupEndIndex.last()+1)
         {
             Warning
                 << "Problem with reading points: " << nl
                 << "    start index: "
-                << pointGroupStartIndex[pointGroupStartIndex.size()-1]
+                << pointGroupStartIndex.last()
                 << " end index: "
-                << pointGroupEndIndex[pointGroupEndIndex.size()-1]
+                << pointGroupEndIndex.last()
                 << " last points read: " << pointi << nl
                 << "    on line " << lineNo << endl;
         }
@@ -440,14 +440,14 @@ endOfSection               {space}")"{space}
 
         faceGroupElementType = strtol(endPtr, &endPtr, 16);
 
-        facei = faceGroupStartIndex[faceGroupStartIndex.size()-1];
+        facei = faceGroupStartIndex.last();
 
         Info<< "FaceGroup: "
-            << faceGroupZoneID[faceGroupZoneID.size()-1]
+            << faceGroupZoneID.last()
             << " start: "
-            << faceGroupStartIndex[faceGroupStartIndex.size()-1]
+            << faceGroupStartIndex.last()
             << " end: "
-            << faceGroupEndIndex[faceGroupEndIndex.size()-1] << flush;
+            << faceGroupEndIndex.last() << flush;
     }
 
 <readNumberOfFaces,readFaceGroupData>{space}{endOfSection} {
@@ -473,7 +473,7 @@ endOfSection               {space}")"{space}
         // set size of label list
         curFaceLabels.setSize(strtol(YYText(), &endPtr, 16));
 
-        forAll (curFaceLabels, i)
+        forAll(curFaceLabels, i)
         {
             curFaceLabels[i] = strtol(endPtr, &endPtr, 16) - 1;
         }
@@ -507,14 +507,14 @@ endOfSection               {space}")"{space}
         Info<< "done." << endl;
 
         // check read of fluentFaces
-        if (facei != faceGroupEndIndex[faceGroupEndIndex.size()-1]+1)
+        if (facei != faceGroupEndIndex.last()+1)
         {
             Warning
                 << "Problem with reading fluentFaces: " << nl
                 << "    start index: "
-                << faceGroupStartIndex[faceGroupStartIndex.size()-1]
+                << faceGroupStartIndex.last()
                 << " end index: "
-                << faceGroupEndIndex[faceGroupEndIndex.size()-1]
+                << faceGroupEndIndex.last()
                 << " last fluentFaces read: " << facei << nl
                 << "    on line " << lineNo << endl;
         }
@@ -560,13 +560,13 @@ endOfSection               {space}")"{space}
         cellGroupType.append(strtol(endPtr, &endPtr, 16));
 
         Info<< "CellGroup: "
-            << cellGroupZoneID[cellGroupZoneID.size()-1]
+            << cellGroupZoneID.last()
             << " start: "
-            << cellGroupStartIndex[cellGroupStartIndex.size()-1]
+            << cellGroupStartIndex.last()
             << " end: "
-            << cellGroupEndIndex[cellGroupEndIndex.size()-1]
+            << cellGroupEndIndex.last()
             << " type: "
-            << cellGroupType[cellGroupType.size()-1]
+            << cellGroupType.last()
             << endl;
     }
 
@@ -587,13 +587,13 @@ endOfSection               {space}")"{space}
         strtol(endPtr, &endPtr, 16);
 
         Info<< "CellGroup: "
-            << cellGroupZoneID[cellGroupZoneID.size()-1]
+            << cellGroupZoneID.last()
             << " start: "
-            << cellGroupStartIndex[cellGroupStartIndex.size()-1]
+            << cellGroupStartIndex.last()
             << " end: "
-            << cellGroupEndIndex[cellGroupEndIndex.size()-1]
+            << cellGroupEndIndex.last()
             << " type: "
-            << cellGroupType[cellGroupType.size()-1]
+            << cellGroupType.last()
             << endl;
     }
 
@@ -762,10 +762,10 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("Fluent mesh file");
-    argList::validOptions.insert("scale", "scale factor");
-    argList::validOptions.insert("ignoreCellGroups", "cell group names");
-    argList::validOptions.insert("ignoreFaceGroups", "face group names");
-    argList::validOptions.insert("cubit", "");
+    argList::addOption("scale", "scale factor");
+    argList::addOption("ignoreCellGroups", "cell group names");
+    argList::addOption("ignoreFaceGroups", "face group names");
+    argList::addBoolOption("cubit");
 
     argList args(argc, argv);
 
@@ -776,17 +776,11 @@ int main(int argc, char *argv[])
 
     args.optionReadIfPresent("scale", scaleFactor);
 
-    HashSet<word> ignoreCellGroups;
-    if (args.optionFound("ignoreCellGroups"))
-    {
-        args.optionLookup("ignoreCellGroups")() >> ignoreCellGroups;
-    }
+    wordHashSet ignoreCellGroups;
+    wordHashSet ignoreFaceGroups;
 
-    HashSet<word> ignoreFaceGroups;
-    if (args.optionFound("ignoreFaceGroups"))
-    {
-        args.optionLookup("ignoreFaceGroups")() >> ignoreFaceGroups;
-    }
+    args.optionReadIfPresent("ignoreCellGroups", ignoreCellGroups);
+    args.optionReadIfPresent("ignoreFaceGroups", ignoreFaceGroups);
 
     cubitFile = args.options().found("cubit");
 
@@ -813,7 +807,7 @@ int main(int argc, char *argv[])
 
     yyFlexLexer lexer(&fluentStream.stdStream());
 
-    while(lexer.yylex() != 0)
+    while (lexer.yylex() != 0)
     {}
 
     Info<< "\nFINISHED LEXING\n\n";
@@ -843,7 +837,7 @@ int main(int argc, char *argv[])
     // faces and move to neighbour
 
     boolList fm(faces.size(), false);
-    forAll (faces, facei)
+    forAll(faces, facei)
     {
         if
         (
@@ -973,7 +967,7 @@ int main(int argc, char *argv[])
 
             // Set the owner of these faces to -1 so that they do not get
             // added to the mesh
-            for(label facei = start; facei <= end; facei++)
+            for (label facei = start; facei <= end; facei++)
             {
                 owner[facei] = -1;
             }
@@ -1360,7 +1354,7 @@ int main(int argc, char *argv[])
     mesh.write();
 
 
-    Info<< nl << "End" << endl;
+    Info<< "\nEnd\n" << endl;
     return 0;
 }
 

@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
     fileNameList fieldNames = readDir(runTime.timePath(), fileName::FILE);
     dictionary fieldNameDict;
-    forAll (fieldNames, i)
+    forAll(fieldNames, i)
     {
         fieldNameDict.add(fieldNames[i], word(fieldNames[i]));
     }
@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
 
         label cell;
         scalar value;
-        forAll (mesh.cells(), celli)
+        forAll(mesh.cells(), celli)
         {
             if (celli > 0)
             {
@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

@@ -291,8 +291,8 @@ label twoDNess(const polyMesh& mesh)
 
 int main(int argc, char *argv[])
 {
-    Foam::argList::validOptions.insert("dict", "");
-    Foam::argList::validOptions.insert("overwrite", "");
+    argList::addBoolOption("dict");
+    argList::addBoolOption("overwrite");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -320,18 +320,17 @@ int main(int argc, char *argv[])
     {
         Info<< "Refining according to refineMeshDict" << nl << endl;
 
-        refineDict =
-            IOdictionary
+        refineDict = IOdictionary
+        (
+            IOobject
             (
-                IOobject
-                (
-                    "refineMeshDict",
-                    runTime.system(),
-                    mesh,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            );
+                "refineMeshDict",
+                runTime.system(),
+                mesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
 
         word setName(refineDict.lookup("set"));
 

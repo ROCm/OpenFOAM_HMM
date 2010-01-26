@@ -27,7 +27,7 @@ Typedef
 
 Description
     FunctionObject wrapper around staticPressure to allow it to be created via
-    the functions list within controlDict.
+    the functions entry within controlDict.
 
 SourceFiles
     staticPressureFunctionObject.C

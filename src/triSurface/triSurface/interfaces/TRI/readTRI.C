@@ -28,7 +28,7 @@ Description
     Is converted into regions: regions numbered from 0 up, each colour is
     region.
     Most of reading/stitching taken from STL reader.
-    
+
 \*---------------------------------------------------------------------------*/
 
 #include "triSurface.H"
@@ -63,7 +63,7 @@ bool triSurface::readTRI(const fileName& TRIfileName)
     // Max region number so far
     label maxRegion = 0;
 
-    while(TRIfile)
+    while (TRIfile)
     {
         string line = getLineNoComment(TRIfile);
 

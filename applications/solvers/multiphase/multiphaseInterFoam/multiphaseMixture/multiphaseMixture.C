@@ -125,7 +125,7 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseMixture::rho() const
 
     tmp<volScalarField> trho = iter()*iter().rho();
 
-    for(++iter; iter != phases_.end(); ++iter)
+    for (++iter; iter != phases_.end(); ++iter)
     {
         trho() += iter()*iter().rho();
     }
@@ -140,7 +140,7 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseMixture::mu() const
 
     tmp<volScalarField> tmu = iter()*iter().rho()*iter().nu();
 
-    for(++iter; iter != phases_.end(); ++iter)
+    for (++iter; iter != phases_.end(); ++iter)
     {
         tmu() += iter()*iter().rho()*iter().nu();
     }
@@ -156,7 +156,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::multiphaseMixture::muf() const
     tmp<surfaceScalarField> tmuf =
         fvc::interpolate(iter())*iter().rho()*fvc::interpolate(iter().nu());
 
-    for(++iter; iter != phases_.end(); ++iter)
+    for (++iter; iter != phases_.end(); ++iter)
     {
         tmuf() +=
             fvc::interpolate(iter())*iter().rho()*fvc::interpolate(iter().nu());
@@ -210,7 +210,7 @@ Foam::multiphaseMixture::surfaceTensionForce() const
         PtrDictionary<phase>::const_iterator iter2 = iter1;
         ++iter2;
 
-        for(; iter2 != phases_.end(); ++iter2)
+        for (; iter2 != phases_.end(); ++iter2)
         {
             const phase& alpha2 = iter2();
 
@@ -489,7 +489,7 @@ void Foam::multiphaseMixture::solveAlphas
         if (cycleAlpha)
         {
             PtrDictionary<phase>::iterator refPhaseIter = phases_.begin();
-            for(label i=0; i<nSolves%phases_.size(); i++)
+            for (label i=0; i<nSolves%phases_.size(); i++)
             {
                 ++refPhaseIter;
             }

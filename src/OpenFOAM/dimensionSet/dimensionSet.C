@@ -26,6 +26,7 @@ License
 
 #include "dimensionSet.H"
 #include "dimensionedScalar.H"
+#include "OStringStream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -79,26 +80,105 @@ Foam::dimensionSet::dimensionSet
 
 bool Foam::dimensionSet::dimensionless() const
 {
-    bool Dimensionless = true;
-
-    for (int Dimension=0; Dimension<nDimensions; Dimension++)
+    for (int Dimension=0; Dimension<nDimensions; ++Dimension)
     {
-        Dimensionless = Dimensionless &&
+        // ie, mag(exponents_[Dimension]) > smallExponent
+        if
         (
-            exponents_[Dimension] < smallExponent
-         && exponents_[Dimension] > -smallExponent
-        );
+            exponents_[Dimension] > smallExponent
+         || exponents_[Dimension] < -smallExponent
+        )
+        {
+            return false;
+        }
     }
 
-    return Dimensionless;
+    return true;
 }
 
 
 void Foam::dimensionSet::reset(const dimensionSet& ds)
 {
-    for (int Dimension=0; Dimension<nDimensions; Dimension++)
+    for (int Dimension=0; Dimension<nDimensions; ++Dimension)
     {
         exponents_[Dimension] = ds.exponents_[Dimension];
+    }
+}
+
+
+Foam::string Foam::dimensionSet::asText() const
+{
+    OStringStream buf;
+
+    bool Dimensionless = true;
+
+    for (int Dimension=0; Dimension < dimensionSet::nDimensions-1; ++Dimension)
+    {
+        const scalar& expt = exponents_[Dimension];
+
+        if (expt < smallExponent && expt > -smallExponent)
+        {
+            continue;
+        }
+
+        if (Dimensionless)
+        {
+            Dimensionless = false;
+        }
+        else
+        {
+            buf << ' ';
+        }
+
+        // note: currently only handle SI
+        switch (Dimension)
+        {
+            case MASS:
+                buf << "kg";
+                break;
+
+            case LENGTH:
+                buf << "m";
+                break;
+
+            case TIME:
+                buf << "s";
+                break;
+
+            case TEMPERATURE:
+                buf << "K";
+                break;
+
+            case MOLES:
+                buf << "mol";
+                break;
+
+            case CURRENT:
+                buf << "A";
+                break;
+
+            case LUMINOUS_INTENSITY:
+                buf << "Cd";
+                break;
+
+            default:
+                buf << "??";  // this shouldn't be - flag as being weird
+                break;
+        }
+
+        if (expt != 1)
+        {
+            buf << '^' << expt;
+        }
+    }
+
+    if (Dimensionless)
+    {
+        return "none";
+    }
+    else
+    {
+        return buf.str();
     }
 }
 
@@ -119,16 +199,19 @@ Foam::scalar& Foam::dimensionSet::operator[](const dimensionType type)
 
 bool Foam::dimensionSet::operator==(const dimensionSet& ds) const
 {
-    bool equall = true;
-
-    for (int Dimension=0; Dimension<nDimensions; Dimension++)
+    for (int Dimension=0; Dimension < nDimensions; ++Dimension)
     {
-        equall = equall &&
-            (mag(exponents_[Dimension] - ds.exponents_[Dimension])
-          < smallExponent);
+        if
+        (
+            mag(exponents_[Dimension] - ds.exponents_[Dimension])
+          > smallExponent
+        )
+        {
+            return false;
+        }
     }
 
-    return equall;
+    return true;
 }
 
 
@@ -142,7 +225,7 @@ bool Foam::dimensionSet::operator=(const dimensionSet& ds) const
 {
     if (dimensionSet::debug && *this != ds)
     {
-        FatalErrorIn("dimensionSet::operator=(const dimensionSet& ds) const")
+        FatalErrorIn("dimensionSet::operator=(const dimensionSet&) const")
             << "Different dimensions for =" << endl
             << "     dimensions : " << *this << " = " << ds << endl
             << abort(FatalError);
@@ -156,7 +239,7 @@ bool Foam::dimensionSet::operator+=(const dimensionSet& ds) const
 {
     if (dimensionSet::debug && *this != ds)
     {
-        FatalErrorIn("dimensionSet::operator+=(const dimensionSet& ds) const")
+        FatalErrorIn("dimensionSet::operator+=(const dimensionSet&) const")
             << "Different dimensions for +=" << endl
             << "     dimensions : " << *this << " = " << ds << endl
             << abort(FatalError);
@@ -170,7 +253,7 @@ bool Foam::dimensionSet::operator-=(const dimensionSet& ds) const
 {
     if (dimensionSet::debug && *this != ds)
     {
-        FatalErrorIn("dimensionSet::operator-=(const dimensionSet& ds) const")
+        FatalErrorIn("dimensionSet::operator-=(const dimensionSet&) const")
             << "Different dimensions for -=" << endl
             << "     dimensions : " << *this << " = " << ds << endl
             << abort(FatalError);
@@ -202,7 +285,7 @@ Foam::dimensionSet Foam::max(const dimensionSet& ds1, const dimensionSet& ds2)
 {
     if (dimensionSet::debug && ds1 != ds2)
     {
-        FatalErrorIn("max(const dimensionSet& ds1, const dimensionSet& ds2)")
+        FatalErrorIn("max(const dimensionSet&, const dimensionSet&)")
             << "Arguments of max have different dimensions" << endl
             << "     dimensions : " << ds1 << " and " << ds2 << endl
             << abort(FatalError);
@@ -216,7 +299,7 @@ Foam::dimensionSet Foam::min(const dimensionSet& ds1, const dimensionSet& ds2)
 {
     if (dimensionSet::debug && ds1 != ds2)
     {
-        FatalErrorIn("min(const dimensionSet& ds1, const dimensionSet& ds2)")
+        FatalErrorIn("min(const dimensionSet&, const dimensionSet&)")
             << "Arguments of min have different dimensions" << endl
             << "     dimensions : " << ds1 << " and " << ds2 << endl
             << abort(FatalError);
@@ -271,8 +354,8 @@ Foam::dimensionSet Foam::pow
 {
     if (dimensionSet::debug && !dS.dimensions().dimensionless())
     {
-        FatalErrorIn("pow(const dimensionSet& ds, const dimensionedScalar& dS)")
-            << "Exponent of pow are not dimensionless"
+        FatalErrorIn("pow(const dimensionSet&, const dimensionedScalar&)")
+            << "Exponent of pow is not dimensionless"
             << abort(FatalError);
     }
 
@@ -301,9 +384,10 @@ Foam::dimensionSet Foam::pow
     (
         dimensionSet::debug
      && !dS.dimensions().dimensionless()
-     && !ds.dimensionless())
+     && !ds.dimensionless()
+    )
     {
-        FatalErrorIn("pow(const dimensionedScalar& dS, const dimensionSet& ds)")
+        FatalErrorIn("pow(const dimensionedScalar&, const dimensionSet&)")
             << "Argument or exponent of pow not dimensionless" << endl
             << abort(FatalError);
     }
@@ -394,7 +478,7 @@ Foam::dimensionSet Foam::trans(const dimensionSet& ds)
 {
     if (dimensionSet::debug && !ds.dimensionless())
     {
-        FatalErrorIn("trans(const dimensionSet& ds)")
+        FatalErrorIn("trans(const dimensionSet&)")
             << "Argument of trancendental function not dimensionless"
             << abort(FatalError);
     }
@@ -428,7 +512,7 @@ Foam::dimensionSet Foam::operator+
     if (dimensionSet::debug && ds1 != ds2)
     {
         FatalErrorIn
-            ("operator+(const dimensionSet& ds1, const dimensionSet& ds2)")
+            ("operator+(const dimensionSet&, const dimensionSet&)")
             << "LHS and RHS of + have different dimensions" << endl
             << "     dimensions : " << ds1 << " + " << ds2 << endl
             << abort(FatalError);
@@ -449,7 +533,7 @@ Foam::dimensionSet Foam::operator-
     if (dimensionSet::debug && ds1 != ds2)
     {
         FatalErrorIn
-            ("operator-(const dimensionSet& ds1, const dimensionSet& ds2)")
+            ("operator-(const dimensionSet&, const dimensionSet&)")
             << "LHS and RHS of - have different dimensions" << endl
             << "     dimensions : " << ds1 << " - " << ds2 << endl
             << abort(FatalError);

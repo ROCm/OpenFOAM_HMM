@@ -103,7 +103,7 @@ Foam::label Foam::meshSearch::findNearestCellTree(const point& location) const
     const indexedOctree<treeDataPoint>& tree = cellCentreTree();
 
     scalar span = tree.bb().mag();
-    
+
     pointIndexHit info = tree.findNearest(location, Foam::sqr(span));
 
     if (!info.hit())
@@ -516,7 +516,7 @@ const Foam::indexedOctree<Foam::treeDataCell>& Foam::meshSearch::cellTree()
     }
 
     return *cellTreePtr_;
-    
+
 }
 
 
@@ -787,11 +787,11 @@ Foam::label Foam::meshSearch::findCell
                 {
                     nearCellI = mesh_.faceOwner()[curHit.index()];
                     curPoint =
-                        curHit.hitPoint() 
+                        curHit.hitPoint()
                       + offset(curHit.hitPoint(), curHit.index(), edgeVec);
                 }
             }
-            while(true);
+            while (true);
         }
         else
         {
@@ -928,7 +928,7 @@ Foam::List<Foam::pointIndexHit> Foam::meshSearch::intersections
               + offset(bHit.hitPoint(), bHit.index(), edgeVec);
         }
 
-    } while(bHit.hit());
+    } while (bHit.hit());
 
 
     hits.shrink();

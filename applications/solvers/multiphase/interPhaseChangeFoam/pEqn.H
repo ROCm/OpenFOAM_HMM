@@ -23,7 +23,7 @@
     const volScalarField& vDotcP = vDotP[0]();
     const volScalarField& vDotvP = vDotP[1]();
 
-    for(int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
         fvScalarMatrix pEqn
         (

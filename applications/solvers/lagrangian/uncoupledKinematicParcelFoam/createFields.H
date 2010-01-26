@@ -47,8 +47,10 @@
         )
     );
 
-    word kinematicCloudName("kinematicCloud");
-    args.optionReadIfPresent("cloudName", kinematicCloudName);
+    const word kinematicCloudName
+    (
+        args.optionLookupOrDefault<word>("cloudName", "kinematicCloud")
+    );
 
     Info<< "Constructing kinematicCloud " << kinematicCloudName << endl;
     basicKinematicCloud kinematicCloud

@@ -44,7 +44,7 @@ void starMesh::readCouples()
 
         if (couplesFile.good())
         {
-            Info << "\nReading couples" << endl;
+            Info<< "\nReading couples" << endl;
 
             label matchLabel, nEntries, typeFlag;
             label starMasterCell, rotXMasterFace;
@@ -178,7 +178,7 @@ void starMesh::readCouples()
             }
         }
 
-        Info << "finished reading couples" << endl;
+        Info<< "finished reading couples" << endl;
     }
 }
 

@@ -98,9 +98,8 @@ bool Foam::syncTools::hasCouples(const polyBoundaryMesh& patches)
 // Determines for every point whether it is coupled and if so sets only one.
 Foam::PackedBoolList Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 {
-    PackedList<1> isMasterPoint(mesh.nPoints());
-
-    PackedList<1> donePoint(mesh.nPoints());
+    PackedBoolList isMasterPoint(mesh.nPoints());
+    PackedBoolList donePoint(mesh.nPoints());
 
 
     // Do multiple shared points. Min. proc is master
@@ -218,9 +217,8 @@ Foam::PackedBoolList Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 // Determines for every edge whether it is coupled and if so sets only one.
 Foam::PackedBoolList Foam::syncTools::getMasterEdges(const polyMesh& mesh)
 {
-    PackedList<1> isMasterEdge(mesh.nEdges());
-
-    PackedList<1> doneEdge(mesh.nEdges());
+    PackedBoolList isMasterEdge(mesh.nEdges());
+    PackedBoolList doneEdge(mesh.nEdges());
 
 
     // Do multiple shared edges. Min. proc is master
@@ -355,7 +353,7 @@ Foam::PackedBoolList Foam::syncTools::getMasterFaces(const polyMesh& mesh)
                 {
                     forAll(pp, i)
                     {
-                        isMasterFace.set(pp.start()+i, 0);
+                        isMasterFace.unset(pp.start()+i);
                     }
                 }
             }
@@ -366,7 +364,7 @@ Foam::PackedBoolList Foam::syncTools::getMasterFaces(const polyMesh& mesh)
 
                 for (label i = pp.size()/2; i < pp.size(); i++)
                 {
-                    isMasterFace.set(pp.start()+i, 0);
+                    isMasterFace.unset(pp.start()+i);
                 }
             }
             else

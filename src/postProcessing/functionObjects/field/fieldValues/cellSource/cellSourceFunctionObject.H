@@ -27,7 +27,7 @@ Typedef
 
 Description
     FunctionObject wrapper around cellSource to allow it to be
-    created via the functions list within controlDict.
+    created via the functions entry within controlDict.
 
 SourceFiles
     cellSourceFunctionObject.C

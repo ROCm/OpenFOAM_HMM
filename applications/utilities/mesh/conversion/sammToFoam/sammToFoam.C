@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("SAMM mesh file prefix");
-    argList::validOptions.insert("scale", "scale factor");
+    argList::addOption("scale", "scale factor");
 
     argList args(argc, argv);
 
@@ -50,8 +50,7 @@ int main(int argc, char *argv[])
         FatalError.exit();
     }
 
-    scalar scaleFactor = 1.0;
-    args.optionReadIfPresent("scale", scaleFactor);
+    scalar scaleFactor = args.optionLookupOrDefault("scale", 1.0);
 
 #   include "createTime.H"
 
@@ -61,10 +60,10 @@ int main(int argc, char *argv[])
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(10);
 
-    Info << "Writing mesh" << endl;
+    Info<< "Writing mesh" << endl;
     makeMesh.writeMesh();
 
-    Info<< nl << "End" << nl << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

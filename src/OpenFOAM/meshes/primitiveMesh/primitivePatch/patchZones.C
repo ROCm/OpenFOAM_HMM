@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "patchZones.H"
@@ -114,7 +112,7 @@ void Foam::patchZones::markZone(label faceI)
     // Zones on all edges.
     labelList edgeZone(pp_.nEdges(), -1);
 
-    while(1)
+    while (true)
     {
         changedEdges = faceToEdge(changedFaces, edgeZone);
 

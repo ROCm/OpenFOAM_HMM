@@ -29,7 +29,7 @@
 
     for (label i=0; i<p.boundaryField().size(); i++)
     {
-        if(p.boundaryField()[i].fixesValue())
+        if (p.boundaryField()[i].fixesValue())
         {
             pcorrTypes[i] = fixedValueFvPatchScalarField::typeName;
         }
@@ -50,7 +50,7 @@
         pcorrTypes
     );
 
-    for(int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
         fvScalarMatrix pcorrEqn
         (

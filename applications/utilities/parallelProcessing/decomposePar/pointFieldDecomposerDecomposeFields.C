@@ -28,16 +28,11 @@ License
 #include "processorPointPatchFields.H"
 #include "globalPointPatchFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, pointPatchField, pointMesh> >
-pointFieldDecomposer::decomposeField
+Foam::tmp<Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh> >
+Foam::pointFieldDecomposer::decomposeField
 (
     const GeometricField<Type, pointPatchField, pointMesh>& field
 ) const
@@ -53,7 +48,7 @@ pointFieldDecomposer::decomposeField
     );
 
     // Create and map the patch field values
-    forAll (boundaryAddressing_, patchi)
+    forAll(boundaryAddressing_, patchi)
     {
         if (patchFieldDecomposerPtrs_[patchi])
         {
@@ -117,12 +112,12 @@ pointFieldDecomposer::decomposeField
 
 
 template<class GeoField>
-void pointFieldDecomposer::decomposeFields
+void Foam::pointFieldDecomposer::decomposeFields
 (
     const PtrList<GeoField>& fields
 ) const
 {
-    forAll (fields, fieldI)
+    forAll(fields, fieldI)
     {
         decomposeField(fields[fieldI])().write();
     }
@@ -130,7 +125,5 @@ void pointFieldDecomposer::decomposeFields
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

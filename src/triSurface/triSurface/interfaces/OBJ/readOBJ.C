@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "triSurface.H"
@@ -107,7 +105,7 @@ bool triSurface::readOBJ(const fileName& OBJfileName)
             // Assume 'f' is followed by space.
             string::size_type endNum = 1;
 
-            while(true)
+            while (true)
             {
                 string::size_type startNum =
                     line.find_first_not_of(' ', endNum);

@@ -78,18 +78,18 @@ Foam::tmp<Foam::volScalarField> Foam::GidaspowErgunWenYu::K
 
     forAll(Re, celli)
     {
-        if(Re[celli] > 1000.0)
+        if (Re[celli] > 1000.0)
         {
             Cds[celli] = 0.44;
         }
     }
-    
+
     // Wen and Yu (1966)
     tmp<volScalarField> tKWenYu = 0.75*Cds*phaseb_.rho()*Ur*bp/phasea_.d();
     volScalarField& KWenYu = tKWenYu();
 
     // Ergun
-    forAll (beta, cellj)
+    forAll(beta, cellj)
     {
         if (beta[cellj] <= 0.8)
         {

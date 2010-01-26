@@ -6,7 +6,7 @@ void USERD_set_time_set_and_step
 )
 {
 #ifdef ENSIGHTDEBUG
-    Info << "Entering: USERD_set_time_set_and_step" << endl << flush;
+    Info<< "Entering: USERD_set_time_set_and_step" << endl << flush;
 #endif
     // update the global pointers and variables
     // to the current time-step

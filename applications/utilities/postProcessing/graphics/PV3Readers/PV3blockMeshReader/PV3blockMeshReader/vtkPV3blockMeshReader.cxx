@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,7 +64,7 @@ vtkPV3blockMeshReader::vtkPV3blockMeshReader()
     ShowPointNumbers = 1;
     UpdateGUI = 0;
 
-    PartSelection = vtkDataArraySelection::New();
+    BlockSelection = vtkDataArraySelection::New();
     CurvedEdgesSelection = vtkDataArraySelection::New();
 
     // Setup the selection callback to modify this object when an array
@@ -77,7 +77,7 @@ vtkPV3blockMeshReader::vtkPV3blockMeshReader()
     SelectionObserver->SetClientData(this);
 
 
-    PartSelection->AddObserver
+    BlockSelection->AddObserver
     (
         vtkCommand::ModifiedEvent,
         this->SelectionObserver
@@ -109,11 +109,11 @@ vtkPV3blockMeshReader::~vtkPV3blockMeshReader()
         delete [] FileName;
     }
 
-    PartSelection->RemoveObserver(this->SelectionObserver);
+    BlockSelection->RemoveObserver(this->SelectionObserver);
     CurvedEdgesSelection->RemoveObserver(this->SelectionObserver);
 
     SelectionObserver->Delete();
-    PartSelection->Delete();
+    BlockSelection->Delete();
 }
 
 
@@ -292,50 +292,50 @@ void vtkPV3blockMeshReader::PrintSelf(ostream& os, vtkIndent indent)
 
 
 // ----------------------------------------------------------------------
-// Parts selection list control
+// Block selection list control
 
-vtkDataArraySelection* vtkPV3blockMeshReader::GetPartSelection()
+vtkDataArraySelection* vtkPV3blockMeshReader::GetBlockSelection()
 {
-    vtkDebugMacro(<<"GetPartSelection");
-    return PartSelection;
+    vtkDebugMacro(<<"GetBlockSelection");
+    return BlockSelection;
 }
 
 
-int vtkPV3blockMeshReader::GetNumberOfPartArrays()
+int vtkPV3blockMeshReader::GetNumberOfBlockArrays()
 {
-    vtkDebugMacro(<<"GetNumberOfPartArrays");
-    return PartSelection->GetNumberOfArrays();
+    vtkDebugMacro(<<"GetNumberOfBlockArrays");
+    return BlockSelection->GetNumberOfArrays();
 }
 
 
-const char* vtkPV3blockMeshReader::GetPartArrayName(int index)
+const char* vtkPV3blockMeshReader::GetBlockArrayName(int index)
 {
-    vtkDebugMacro(<<"GetPartArrayName");
-    return PartSelection->GetArrayName(index);
+    vtkDebugMacro(<<"GetBlockArrayName");
+    return BlockSelection->GetArrayName(index);
 }
 
 
-int vtkPV3blockMeshReader::GetPartArrayStatus(const char* name)
+int vtkPV3blockMeshReader::GetBlockArrayStatus(const char* name)
 {
-    vtkDebugMacro(<<"GetPartArrayStatus");
-    return PartSelection->ArrayIsEnabled(name);
+    vtkDebugMacro(<<"GetBlockArrayStatus");
+    return BlockSelection->ArrayIsEnabled(name);
 }
 
 
-void vtkPV3blockMeshReader::SetPartArrayStatus
+void vtkPV3blockMeshReader::SetBlockArrayStatus
 (
     const char* name,
     int status
 )
 {
-    vtkDebugMacro(<<"SetPartArrayStatus");
+    vtkDebugMacro(<<"SetBlockArrayStatus");
     if (status)
     {
-        PartSelection->EnableArray(name);
+        BlockSelection->EnableArray(name);
     }
     else
     {
-        PartSelection->DisableArray(name);
+        BlockSelection->DisableArray(name);
     }
 }
 
@@ -399,14 +399,7 @@ void vtkPV3blockMeshReader::SelectionModifiedCallback
     void*
 )
 {
-    static_cast<vtkPV3blockMeshReader*>(clientdata)->SelectionModified();
-}
-
-
-void vtkPV3blockMeshReader::SelectionModified()
-{
-    vtkDebugMacro(<<"SelectionModified");
-    Modified();
+    static_cast<vtkPV3blockMeshReader*>(clientdata)->Modified();
 }
 
 

@@ -29,27 +29,24 @@ License
 #include "stochasticDispersionRAS.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(stochasticDispersionRAS, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(stochasticDispersionRAS, 0);
-
-addToRunTimeSelectionTable
-(
-    dispersionModel,
-    stochasticDispersionRAS,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        dispersionModel,
+        stochasticDispersionRAS,
+        dictionary
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-stochasticDispersionRAS::stochasticDispersionRAS
+Foam::stochasticDispersionRAS::stochasticDispersionRAS
 (
     const dictionary& dict,
     spray& sm
@@ -61,13 +58,13 @@ stochasticDispersionRAS::stochasticDispersionRAS
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-stochasticDispersionRAS::~stochasticDispersionRAS()
+Foam::stochasticDispersionRAS::~stochasticDispersionRAS()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void stochasticDispersionRAS::disperseParcels() const
+void Foam::stochasticDispersionRAS::disperseParcels() const
 {
 
     const scalar cps = 0.16432;
@@ -91,7 +88,7 @@ void stochasticDispersionRAS::disperseParcels() const
 
         scalar Tturb = min
         (
-            k[celli]/epsilon[celli], 
+            k[celli]/epsilon[celli],
             cps*pow(k[celli], 1.5)/epsilon[celli]/(UrelMag + SMALL)
         );
 
@@ -103,25 +100,25 @@ void stochasticDispersionRAS::disperseParcels() const
             if (elmnt().tTurb() > Tturb)
             {
                 elmnt().tTurb() = 0.0;
-                
+
                 scalar sigma = sqrt(2.0*k[celli]/3.0);
                 vector dir = 2.0*spray_.rndGen().vector01() - one;
                 dir /= mag(dir) + SMALL;
-                
+
                 // numerical recipes... Ch. 7. Random Numbers...
                 scalar x1,x2;
                 scalar rsq = 10.0;
-                while((rsq > 1.0) || (rsq == 0.0))
+                while (rsq > 1.0 || rsq == 0.0)
                 {
                     x1 = 2.0*spray_.rndGen().scalar01() - 1.0;
                     x2 = 2.0*spray_.rndGen().scalar01() - 1.0;
                     rsq = x1*x1 + x2*x2;
                 }
-                
+
                 scalar fac = sqrt(-2.0*log(rsq)/rsq);
-                
+
                 fac *= mag(x1);
-                
+
                 elmnt().Uturb() = sigma*fac*dir;
 
             }
@@ -134,9 +131,5 @@ void stochasticDispersionRAS::disperseParcels() const
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

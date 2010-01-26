@@ -26,7 +26,7 @@ License
 
 #include "wedgeMatcher.H"
 #include "primitiveMesh.H"
-
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -37,7 +37,6 @@ const Foam::label Foam::wedgeMatcher::maxVertPerFace = 4;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct null
 Foam::wedgeMatcher::wedgeMatcher()
 :
     cellMatcher
@@ -108,7 +107,7 @@ bool Foam::wedgeMatcher::matchShape
     const face& face0 = localFaces_[face0I];
 
     // Try all rotations of this face
-    for(label face0vert0 = 0; face0vert0 < faceSize_[face0I]; face0vert0++)
+    for (label face0vert0 = 0; face0vert0 < faceSize_[face0I]; face0vert0++)
     {
         //
         // Try to follow prespecified path on faces of cell,
@@ -340,7 +339,7 @@ bool Foam::wedgeMatcher::faceSizeMatch
 
     label nTris = 0;
     label nQuads = 0;
-    
+
     forAll(myFaces, myFaceI)
     {
         label size = faces[myFaces[myFaceI]].size();
@@ -391,7 +390,7 @@ bool Foam::wedgeMatcher::isA(const faceList& faces)
         faces,                      // all faces in mesh
         labelList(faces.size(), 0), // cell 0 is owner of all faces
         0,                          // cell label
-        makeIdentity(faces.size())  // faces of cell 0
+        identity(faces.size())      // faces of cell 0
     );
 }
 

@@ -1,4 +1,7 @@
-calcEntry/calcEntry.C
 dictionaryTest.C
+
+calcEntry/calcEntry.C
+calcEntry/calcEntryParser.cpp
+calcEntry/calcEntryScanner.cpp
 
 EXE = $(FOAM_USER_APPBIN)/dictionaryTest

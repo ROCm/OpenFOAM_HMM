@@ -142,14 +142,13 @@ public:
             return procPolyPatch_.forwardT();
         }
 
-//         //- Return neighbour-cell transformation tensor
-//         virtual const tensor& reverseT() const
-//         {
-//             notImplemented("processorFvPatch::reverseT() const");
-//             return tensor::zero;
-//         }
+        //- Return neighbour-cell transformation tensor
+        virtual const tensor& reverseT() const
+        {
+            return procPolyPatch_.reverseT();
+        }
 
-
+        
         //- Return delta (P to N) vectors across coupled patch
         virtual tmp<vectorField> delta() const;
 
@@ -163,19 +162,19 @@ public:
                 const unallocLabelList& internalData
             ) const;
 
-            //- Initialise interface data transfer
-            virtual void initTransfer
-            (
-                const Pstream::commsTypes commsType,
-                const unallocLabelList& interfaceData
-            ) const;
-
-            //- Transfer and return neighbour field
-            virtual tmp<labelField> transfer
-            (
-                const Pstream::commsTypes commsType,
-                const unallocLabelList& interfaceData
-            ) const;
+//             //- Initialise interface data transfer
+//             virtual void initTransfer
+//             (
+//                 const Pstream::commsTypes commsType,
+//                 const unallocLabelList& interfaceData
+//             ) const;
+// 
+//             //- Transfer and return neighbour field
+//             virtual tmp<labelField> transfer
+//             (
+//                 const Pstream::commsTypes commsType,
+//                 const unallocLabelList& interfaceData
+//             ) const;
 
             //- Initialise neighbour field transfer
             virtual void initInternalFieldTransfer

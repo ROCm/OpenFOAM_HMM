@@ -1,14 +1,13 @@
 EXE_INC = \
-    -I$(TEC_360_2009)/include \
-    /* -I../tecio/tecsrc/lnInclude/ */ \
+    -I$(WM_THIRD_PARTY_DIR)/tecio/tecsrc/lnInclude \
     -I$(LIB_SRC)/lagrangian/basic/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude
 
 
 EXE_LIBS = \
-    $(TEC_360_2009)/lib/tecio64.a \
-    /* -L$(FOAM_USER_LIBBIN) -ltecio */ \
+    -ltecio \
     -llagrangian \
     -lfiniteVolume \
+    -lgenericPatchFields \
     -lmeshTools

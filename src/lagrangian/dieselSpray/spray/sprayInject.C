@@ -79,12 +79,12 @@ void spray::inject()
                 )
             );
 
-            for(label j=0; j<Np; j++)
+            for (label j=0; j<Np; j++)
             {
                 // calculate the time of injection for parcel 'j'
                 scalar toi = time0 + constT + deltaT*j/scalar(Np);
 
-                for(label n=0; n<nHoles; n++)
+                for (label n=0; n<nHoles; n++)
                 {
 
                     // calculate the velocity of the injected parcel
@@ -164,8 +164,8 @@ void spray::inject()
                             delete pPtr;
                         }
                     } // if (injectorCell....
-                } // for(label n=0...
-            } // for(label j=0....
+                } // for (label n=0...
+            } // for (label j=0....
         } // if (mass>0)...
     } // forAll(injectors)...
 

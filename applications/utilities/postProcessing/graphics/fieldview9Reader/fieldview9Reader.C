@@ -314,7 +314,7 @@ static void storeScalarField
         Info<< "Storing " << nTotPoints << " of dummy values of " << fieldName
             << endl;
 
-        for(label i = 0; i < nPoints; i++)
+        for (label i = 0; i < nPoints; i++)
         {
             vars[pointI++] = 0.0;
         }
@@ -388,7 +388,7 @@ static void storeVectorField
 
         for (direction d = 0; d < vector::nComponents; d++)
         {
-            for(label i = 0; i < nPoints; i++)
+            for (label i = 0; i < nPoints; i++)
             {
                 vars[pointI++] = 0.0;
             }
@@ -1195,14 +1195,13 @@ void register_data_readers()
     /*
     ** like this for combined unstructured grids & results in a single file
     */
-    reg_single_unstruct_reader (
-	"Foam Reader",		       /* title you want for data reader */
-	user_query_file_function,      /* whatever you called this */
-	user_read_one_grid_function    /* whatever you called this */
-	);
+    reg_single_unstruct_reader
+    (
+        "Foam Reader",                 /* title you want for data reader */
+        user_query_file_function,      /* whatever you called this */
+        user_read_one_grid_function    /* whatever you called this */
+    );
 }
-
-
 
 
 }

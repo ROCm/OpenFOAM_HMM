@@ -730,7 +730,7 @@ Foam::pointIndexHit Foam::searchableSurfacesQueries::facesIntersection
         }
     }
 
-    nearest[nearest.size()-1] = sumNearest / surfacesToTest.size();
+    nearest.last() = sumNearest / surfacesToTest.size();
 
 
     // Get the sum of distances (initial evaluation)

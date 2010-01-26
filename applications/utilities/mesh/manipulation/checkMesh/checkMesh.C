@@ -49,9 +49,9 @@ int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
 #   include "addRegionOption.H"
-    argList::validOptions.insert("noTopology", "");
-    argList::validOptions.insert("allGeometry", "");
-    argList::validOptions.insert("allTopology", "");
+    argList::addBoolOption("noTopology");
+    argList::addBoolOption("allGeometry");
+    argList::addBoolOption("allTopology");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                Info << "\nMesh OK.\n" << endl;
+                Info<< "\nMesh OK.\n" << endl;
             }
         }
     }

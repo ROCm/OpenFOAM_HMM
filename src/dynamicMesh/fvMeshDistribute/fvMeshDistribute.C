@@ -664,8 +664,8 @@ void Foam::fvMeshDistribute::getNeighbourData
 
 
     // Exchange the boundary data
-    syncTools::swapBoundaryFaceList(mesh_, nbrFaces, false);
-    syncTools::swapBoundaryFaceList(mesh_, nbrNewProc, false);
+    syncTools::swapBoundaryFaceList(mesh_, nbrFaces);
+    syncTools::swapBoundaryFaceList(mesh_, nbrNewProc);
 
 
     forAll(patches, patchI)

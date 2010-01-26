@@ -42,7 +42,7 @@ Usage
     @param -region \<name\> \n
     Specify an alternative mesh region.
 
-    @param -dict \<dictionary\> \n
+    @param -dict \<filename\> \n
     Specify an alternative dictionary for the block mesh description.
 
 \*---------------------------------------------------------------------------*/
@@ -72,8 +72,18 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validOptions.insert("blockTopology", "");
-    argList::validOptions.insert("dict", "dictionary");
+    argList::addBoolOption
+    (
+        "blockTopology",
+        "write block edges and centres as .obj files"
+    );
+    argList::addOption
+    (
+        "dict",
+        "file",
+        "specify an alternative dictionary for the blockMesh description"
+    );
+
 #   include "addRegionOption.H"
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -83,10 +93,9 @@ int main(int argc, char *argv[])
     word regionName;
     fileName polyMeshDir;
 
-    if (args.optionFound("region"))
+    if (args.optionReadIfPresent("region", regionName, polyMesh::defaultRegion))
     {
         // constant/<region>/polyMesh/blockMeshDict
-        regionName  = args.option("region");
         polyMeshDir = regionName/polyMesh::meshSubDir;
 
         Info<< nl << "Generating mesh for region " << regionName << endl;
@@ -94,7 +103,6 @@ int main(int argc, char *argv[])
     else
     {
         // constant/polyMesh/blockMeshDict
-        regionName  = polyMesh::defaultRegion;
         polyMeshDir = polyMesh::meshSubDir;
     }
 
@@ -363,7 +371,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    Info<< nl << "End" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

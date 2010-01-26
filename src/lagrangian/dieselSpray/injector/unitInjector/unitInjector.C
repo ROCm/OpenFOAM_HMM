@@ -46,7 +46,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::unitInjector::unitInjector
 (
     const Foam::Time& t,
@@ -83,8 +82,8 @@ Foam::unitInjector::unitInjector
 
     if
     (
-        mag(massFlowRateProfile_[massFlowRateProfile_.size()-1][0]
-      - TProfile_[TProfile_.size()-1][0])
+        mag(massFlowRateProfile_.last()[0]
+      - TProfile_.last()[0])
       > SMALL
     )
     {
@@ -306,13 +305,13 @@ Foam::scalar Foam::unitInjector::T(const scalar time) const
 
 Foam::scalar Foam::unitInjector::tsoi() const
 {
-    return massFlowRateProfile_[0][0];
+    return massFlowRateProfile_.first()[0];
 }
 
 
 Foam::scalar Foam::unitInjector::teoi() const
 {
-    return massFlowRateProfile_[massFlowRateProfile_.size()-1][0];
+    return massFlowRateProfile_.last()[0];
 }
 
 

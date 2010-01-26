@@ -54,10 +54,10 @@ int main(int argc, char *argv[])
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(10);
 
-    Info << "Writing mirrored mesh" << endl;
+    Info<< "Writing mirrored mesh" << endl;
     mesh.mirrorMesh().write();
 
-    Info << "End" << endl;
+    Info<< "End" << endl;
 
     return 0;
 }

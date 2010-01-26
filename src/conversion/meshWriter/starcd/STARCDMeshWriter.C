@@ -394,7 +394,7 @@ void Foam::meshWriters::STARCD::writeBoundary(const fileName& prefix) const
         label regionId = patchI;
         if (regionId == defaultId)
         {
-            continue;	// skip - already written
+            continue;  // skip - already written
         }
         else if (defaultId == -1 || regionId < defaultId)
         {
@@ -554,7 +554,7 @@ bool Foam::meshWriters::STARCD::writeSurface
     OFstream celFile(baseName + ".cel");
     writeHeader(celFile, "CELL");
 
-    Info << "Writing " << celFile.name() << endl;
+    Info<< "Writing " << celFile.name() << endl;
 
     // mesh and patch info
     const pointField& points = mesh_.points();
@@ -693,7 +693,7 @@ bool Foam::meshWriters::STARCD::writeSurface
     vrtFile.precision(10);
     vrtFile.setf(std::ios::showpoint);  // force decimal point for Fortran
 
-    Info << "Writing " << vrtFile.name() << endl;
+    Info<< "Writing " << vrtFile.name() << endl;
 
     // build sorted table of contents
     SortableList<label> toc(pointHash.size());

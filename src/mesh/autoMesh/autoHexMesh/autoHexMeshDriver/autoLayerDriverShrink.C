@@ -35,9 +35,6 @@ Description
 #include "pointData.H"
 #include "PointEdgeWave.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Calculate inverse sum of edge weights (currently always 1.0)
@@ -239,7 +236,7 @@ void Foam::autoLayerDriver::smoothNormals
     const edgeList& edges = mesh.edges();
 
     // Points that do not change.
-    PackedBoolList isFixedPoint(mesh.nPoints(), 0);
+    PackedBoolList isFixedPoint(mesh.nPoints());
 
     // Internal points that are fixed
     forAll(fixedPoints, i)
@@ -467,7 +464,7 @@ void Foam::autoLayerDriver::findIsolatedRegions
     // Keep count of number of points unextruded
     label nPointCounter = 0;
 
-    while(true)
+    while (true)
     {
         // Stop layer growth where mesh wraps around edge with a
         // large feature angle
@@ -830,7 +827,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
                                 vector::zero    // passive data
                             )
                         );
-                        pointMedialDist[pointI] = maxInfo[maxInfo.size()-1];
+                        pointMedialDist[pointI] = maxInfo.last();
                     }
                 }
             }
@@ -874,7 +871,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
                                 vector::zero    // passive data
                             )
                         );
-                        pointMedialDist[pointI] = maxInfo[maxInfo.size()-1];
+                        pointMedialDist[pointI] = maxInfo.last();
                     }
                 }
             }

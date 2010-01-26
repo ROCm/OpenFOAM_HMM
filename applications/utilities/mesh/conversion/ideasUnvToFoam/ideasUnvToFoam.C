@@ -324,13 +324,13 @@ void readCells
             cellVerts.append(cellShape(tet, cVerts, true));
             cellMaterial.append(physProp);
 
-            if (cellVerts[cellVerts.size()-1].size() != cVerts.size())
+            if (cellVerts.last().size() != cVerts.size())
             {
                 Pout<< "Line:" << is.lineNumber()
                     << " element:" << cellI
                     << " type:" << feID
                     << " collapsed from " << cVerts << nl
-                    << " to:" << cellVerts[cellVerts.size()-1]
+                    << " to:" << cellVerts.last()
                     << endl;
             }
         }
@@ -347,13 +347,13 @@ void readCells
             cellVerts.append(cellShape(prism, cVerts, true));
             cellMaterial.append(physProp);
 
-            if (cellVerts[cellVerts.size()-1].size() != cVerts.size())
+            if (cellVerts.last().size() != cVerts.size())
             {
                 Pout<< "Line:" << is.lineNumber()
                     << " element:" << cellI
                     << " type:" << feID
                     << " collapsed from " << cVerts << nl
-                    << " to:" << cellVerts[cellVerts.size()-1]
+                    << " to:" << cellVerts.last()
                     << endl;
             }
         }
@@ -371,13 +371,13 @@ void readCells
             cellVerts.append(cellShape(hex, cVerts, true));
             cellMaterial.append(physProp);
 
-            if (cellVerts[cellVerts.size()-1].size() != cVerts.size())
+            if (cellVerts.last().size() != cVerts.size())
             {
                 Pout<< "Line:" << is.lineNumber()
                     << " element:" << cellI
                     << " type:" << feID
                     << " collapsed from " << cVerts << nl
-                    << " to:" << cellVerts[cellVerts.size()-1]
+                    << " to:" << cellVerts.last()
                     << endl;
             }
         }
@@ -412,7 +412,7 @@ void readPatches
     Sout<< "Starting reading patches at line " << is.lineNumber() << '.'
         << endl;
 
-    while(true)
+    while (true)
     {
         string line;
         is.getLine(line);
@@ -511,7 +511,7 @@ void readDOFS
     }
 
     Info<< "For DOF set " << group
-        << " named " << patchNames[patchNames.size()-1]
+        << " named " << patchNames.last()
         << " trying to read vertex indices."
         << endl;
 
@@ -534,7 +534,7 @@ void readDOFS
     }
 
     Info<< "For DOF set " << group
-        << " named " << patchNames[patchNames.size()-1]
+        << " named " << patchNames.last()
         << " read " << vertices.size() << " vertex indices." << endl;
 
     dofVertices.append(vertices.shrink());
@@ -579,7 +579,7 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append(".unv file");
-    argList::validOptions.insert("dump", "");
+    argList::addBoolOption("dump");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

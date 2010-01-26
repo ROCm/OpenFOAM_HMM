@@ -182,6 +182,18 @@ Pout<< "cyclicPolyPatch::calcTransforms : name:" << name() << endl
     << " min:" << min(half1Ctrs) << " max:" << max(half1Ctrs)<< endl
     << endl;
 
+    if (half0Ctrs.size() != half1Ctrs.size())
+    {
+        FatalErrorIn
+        (
+            "cyclicPolyPatch::calcTransforms()"
+        )   << "For patch " << name()
+            << " there are " << half0Ctrs.size()
+            << " face centres, for the neighbour patch " << neighbPatch().name()
+            << " there are " << half1Ctrs.size()
+            << exit(FatalError);
+    }
+
     if (half0Ctrs.size() > 0)
     {
         scalarField half0Tols
@@ -496,6 +508,14 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     forwardT_(I),
     reverseT_(I)
 {
+    if (neighbPatchName_ == name)
+    {
+        FatalErrorIn("cyclicPolyPatch::cyclicPolyPatch(..)")
+            << "Neighbour patch name " << neighbPatchName_
+            << " cannot be the same as this patch " << name
+            << exit(FatalError);
+    }
+
     if (dict.found("transform"))
     {
         transform_ = transformTypeNames.read(dict.lookup("transform"));
@@ -570,6 +590,14 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     coupledPointsPtr_(NULL),
     coupledEdgesPtr_(NULL)
 {
+    if (neighbPatchName_ == name())
+    {
+        FatalErrorIn("cyclicPolyPatch::cyclicPolyPatch(..)")
+            << "Neighbour patch name " << neighbPatchName_
+            << " cannot be the same as this patch " << name()
+            << exit(FatalError);
+    }
+
     // Neighbour patch might not be valid yet so no transformation
     // calculation possible.
 }
@@ -660,6 +688,22 @@ Pout<< "cyclicPolyPatch::calcGeometry : name:" << name()
         thisAreas,
         nbrCtrs,
         nbrAreas
+    );
+}
+
+
+void Foam::cyclicPolyPatch::calcGeometry(PstreamBuffers& pBufs)
+{
+Pout<< "cyclicPolyPatch::calcGeometry() for " << name() << endl;
+    calcGeometry
+    (
+        *this,
+        faceCentres(),
+        faceAreas(),
+        faceCellCentres(),
+        neighbPatch().faceCentres(),
+        neighbPatch().faceAreas(),
+        neighbPatch().faceCellCentres()
     );
 }
 

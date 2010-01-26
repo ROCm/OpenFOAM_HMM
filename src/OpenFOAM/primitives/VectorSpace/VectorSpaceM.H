@@ -1,5 +1,5 @@
 
-template<int N, int I> 
+template<int N, int I>
 class VectorSpaceOps
 {
 public:

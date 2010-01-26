@@ -84,6 +84,15 @@ public:
     vtkGetMacro(CacheMesh, int);
 
     // Description:
+    // FOAM refresh times/fields
+    virtual void SetRefresh(int);
+
+    // Description:
+    // FOAM Skip/include the 0/ time directory
+    vtkSetMacro(SkipZeroTime, int);
+    vtkGetMacro(SkipZeroTime, int);
+
+    // Description:
     // GUI update control
     vtkSetMacro(UpdateGUI, int);
     vtkGetMacro(UpdateGUI, int);
@@ -93,13 +102,14 @@ public:
     vtkSetMacro(ExtrapolatePatches, int);
     vtkGetMacro(ExtrapolatePatches, int);
 
+    // Description:
     // FOAM read sets control
-    vtkSetMacro(IncludeSets, int);
+    virtual void SetIncludeSets(int);
     vtkGetMacro(IncludeSets, int);
 
     // Description:
     // FOAM read zones control
-    vtkSetMacro(IncludeZones, int);
+    virtual void SetIncludeZones(int);
     vtkGetMacro(IncludeZones, int);
 
     // Description:
@@ -113,7 +123,7 @@ public:
 
     // Description:
     // Parts selection list control
-    vtkDataArraySelection* GetPartSelection();
+    virtual vtkDataArraySelection* GetPartSelection();
     int  GetNumberOfPartArrays();
     int  GetPartArrayStatus(const char* name);
     void SetPartArrayStatus(const char* name, int status);
@@ -121,7 +131,7 @@ public:
 
     // Description:
     // volField selection list control
-    vtkDataArraySelection* GetVolFieldSelection();
+    virtual vtkDataArraySelection* GetVolFieldSelection();
     int  GetNumberOfVolFieldArrays();
     int  GetVolFieldArrayStatus(const char* name);
     void SetVolFieldArrayStatus(const char* name, int status);
@@ -129,7 +139,7 @@ public:
 
     // Description:
     // pointField selection list control
-    vtkDataArraySelection* GetPointFieldSelection();
+    virtual vtkDataArraySelection* GetPointFieldSelection();
     int  GetNumberOfPointFieldArrays();
     int  GetPointFieldArrayStatus(const char* name);
     void SetPointFieldArrayStatus(const char* name, int status);
@@ -137,7 +147,7 @@ public:
 
     // Description:
     // lagrangianField selection list control
-    vtkDataArraySelection* GetLagrangianFieldSelection();
+    virtual vtkDataArraySelection* GetLagrangianFieldSelection();
     int  GetNumberOfLagrangianFieldArrays();
     int  GetLagrangianFieldArrayStatus(const char* name);
     void SetLagrangianFieldArrayStatus(const char* name, int status);
@@ -155,7 +165,6 @@ public:
     );
 
     void SelectionModified();
-
 
 protected:
 
@@ -185,9 +194,10 @@ protected:
     //- Fill in additional port information
     virtual int FillOutputPortInformation(int, vtkInformation*);
 
-    // The observer to modify this object when array selections are modified
+    //- The observer to modify this object when array selections are modified
     vtkCallbackCommand* SelectionObserver;
 
+    //- The file name for this case
     char* FileName;
 
 private:
@@ -202,14 +212,16 @@ private:
     void updatePatchNamesView(const bool show);
 
     int TimeStepRange[2];
+    int Refresh;
     int CacheMesh;
+    int SkipZeroTime;
 
     int ExtrapolatePatches;
     int IncludeSets;
     int IncludeZones;
     int ShowPatchNames;
 
-    //- Dummy variable/switch for invoke a reader update
+    //- Dummy variable/switch to invoke a reader update
     int UpdateGUI;
 
     vtkDataArraySelection* PartSelection;

@@ -58,8 +58,16 @@ namespace Foam
 int main(int argc, char *argv[])
 {
     Foam::timeSelector::addOptions();
-    Foam::argList::validOptions.insert("noWrite", "");
-    Foam::argList::validOptions.insert("dict", "dictionary name");
+    Foam::argList::addBoolOption
+    (
+        "noWrite",
+        "suppress writing results"
+    );
+    Foam::argList::addOption
+    (
+        "dict",
+        "dictionary name"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"

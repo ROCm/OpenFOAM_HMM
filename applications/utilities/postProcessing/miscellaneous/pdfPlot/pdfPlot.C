@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 
     makeGraph(x, samples, p->type(), pdfPath, runTime.graphFormat());
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

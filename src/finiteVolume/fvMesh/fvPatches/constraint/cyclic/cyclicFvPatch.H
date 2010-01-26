@@ -141,12 +141,12 @@ public:
                 const unallocLabelList& internalData
             ) const;
 
-            //- Transfer and return neighbour field
-            virtual tmp<labelField> transfer
-            (
-                const Pstream::commsTypes commsType,
-                const unallocLabelList& interfaceData
-            ) const;
+//             //- Transfer and return neighbour field
+//             virtual tmp<labelField> transfer
+//             (
+//                 const Pstream::commsTypes commsType,
+//                 const unallocLabelList& interfaceData
+//             ) const;
 
             //- Return neighbour field
             virtual tmp<labelField> internalFieldTransfer

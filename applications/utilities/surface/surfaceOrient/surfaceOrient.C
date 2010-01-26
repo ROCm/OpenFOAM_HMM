@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     argList::validArgs.append("Foam surface file");
     argList::validArgs.append("visiblePoint");
     argList::validArgs.append("output file");
-    argList::validOptions.insert("inside", "");
+    argList::addBoolOption("inside");
     argList args(argc, argv);
 
     fileName surfFileName(args.additionalArgs()[0]);
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 
     surf.write(outFileName);
 
-    Info << "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }
