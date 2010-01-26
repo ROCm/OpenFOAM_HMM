@@ -171,7 +171,7 @@ void constrainedSixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
         t.deltaTValue()
     );
 
-    Field<vector>::operator=(motion_.generatePositions(p0_) - p0_);
+    Field<vector>::operator=(motion_.currentPosition(p0_) - p0_);
 
     fixedValuePointPatchField<vector>::updateCoeffs();
 }

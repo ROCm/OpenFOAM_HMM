@@ -125,10 +125,20 @@ void uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
 
     motion_.updatePosition(t.deltaTValue());
 
-    // Do not modify the accelerations
-    motion_.updateForce(vector::zero, vector::zero, t.deltaTValue());
+    vector gravity = vector::zero;
 
-    Field<vector>::operator=(motion_.generatePositions(p0_) - p0_);
+    if (db().foundObject<uniformDimensionedVectorField>("g"))
+    {
+        uniformDimensionedVectorField g =
+        db().lookupObject<uniformDimensionedVectorField>("g");
+
+        gravity = g.value();
+    }
+
+    // Do not modify the accelerations, except with gravity, where available
+    motion_.updateForce(gravity*motion_.mass(), vector::zero, t.deltaTValue());
+
+    Field<vector>::operator=(motion_.currentPosition(p0_) - p0_);
 
     fixedValuePointPatchField<vector>::updateCoeffs();
 }

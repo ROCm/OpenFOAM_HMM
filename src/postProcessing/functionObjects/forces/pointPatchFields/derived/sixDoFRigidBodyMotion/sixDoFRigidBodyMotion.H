@@ -123,6 +123,63 @@ class sixDoFRigidBodyMotion
         //- Apply the constraints to the object
         void applyConstraints();
 
+        // Access functions retained as private because of the risk of
+        // confusion over what is a body local frame vector and what is global
+
+        // Access
+
+            //- Return access to the motion state
+            inline const sixDoFRigidBodyMotionState& motionState() const;
+
+            //- Return access to the restraints
+            inline const PtrList<sixDoFRigidBodyMotionRestraint>&
+                restraints() const;
+
+            //- Return access to the centre of mass
+            inline const point& refCentreOfMass() const;
+
+            //- Return access to the inertia tensor
+            inline const diagTensor& momentOfInertia() const;
+
+            //- Return access to the orientation
+            inline const tensor& Q() const;
+
+            //- Return access to velocity
+            inline const vector& v() const;
+
+            //- Return access to acceleration
+            inline const vector& a() const;
+
+            //- Return access to angular momentum
+            inline const vector& pi() const;
+
+            //- Return access to torque
+            inline const vector& tau() const;
+
+
+        // Edit
+
+            //- Return access to the centre of mass
+            inline point& refCentreOfMass();
+
+            //- Return non-const access to the inertia tensor
+            inline diagTensor& momentOfInertia();
+
+            //- Return non-const access to the orientation
+            inline tensor& Q();
+
+            //- Return non-const access to vector
+            inline vector& v();
+
+            //- Return non-const access to acceleration
+            inline vector& a();
+
+            //- Return non-const access to angular momentum
+            inline vector& pi();
+
+            //- Return non-const access to torque
+            inline vector& tau();
+
 
 public:
 
@@ -191,44 +248,28 @@ public:
             scalar deltaT
         );
 
-        //- Transform the given pointField by the current motion state
-        tmp<pointField> generatePositions(const pointField& pts) const;
+        //- Transform the given reference state pointField by the
+        //  current motion state
+        inline tmp<pointField> currentPosition(const pointField& pts) const;
+
+        //- Transform the given reference state point by the current
+        //  motion state
+        inline point currentPosition(const point& pt) const;
+
+        //- Return the angular velocity in the global frame
+        inline vector omega() const;
+
+        //- Return the velocity of a position given by the current
+        //  motion state
+        inline point currentVelocity(const point& pt) const;
 
         // Access
 
-            //- Return access to the motion state
-            inline const sixDoFRigidBodyMotionState& motionState() const;
-
-            //- Return access to the restraints
-            inline const PtrList<sixDoFRigidBodyMotionRestraint>&
-                restraints() const;
-
-            //- Return access to the centre of mass
+            //- Return const access to the centre of mass
             inline const point& centreOfMass() const;
 
-            //- Return access to the centre of mass
-            inline const point& refCentreOfMass() const;
-
-            //- Return access to the inertia tensor
-            inline const diagTensor& momentOfInertia() const;
-
-            //- Return access to the mass
+            //- Return const access to the mass
             inline scalar mass() const;
-
-            //- Return access to the orientation
-            inline const tensor& Q() const;
-
-            //- Return access to velocity
-            inline const vector& v() const;
-
-            //- Return access to acceleration
-            inline const vector& a() const;
-
-            //- Return access to angular momentum
-            inline const vector& pi() const;
-
-            //- Return access to torque
-            inline const vector& tau() const;
 
 
         // Edit
@@ -236,29 +277,8 @@ public:
             //- Return non-const access to the centre of mass
             inline point& centreOfMass();
 
-            //- Return access to the centre of mass
-            inline point& refCentreOfMass();
-
-            //- Return non-const access to the inertia tensor
-            inline diagTensor& momentOfInertia();
-
             //- Return non-const access to the mass
             inline scalar& mass();
-
-            //- Return non-const access to the orientation
-            inline tensor& Q();
-
-            //- Return non-const access to vector
-            inline vector& v();
-
-            //- Return non-const access to acceleration
-            inline vector& a();
-
-            //- Return non-const access to angular momentum
-            inline vector& pi();
-
-            //- Return non-const access to torque
-            inline vector& tau();
 
 
         //- Write

@@ -43,6 +43,7 @@ SourceFiles
 
 namespace Foam
 {
+
 namespace sixDoFRigidBodyMotionRestraints
 {
 
@@ -63,8 +64,11 @@ class linearSpring
         //- Reference point of attachment to the solid body
         point refAttachmentPt_;
 
-        //- Spring stiffness
+        //- Spring stiffness coefficient (N/m)
         scalar stiffness_;
+
+        //- Damping coefficient (Ns/m)
+        scalar damping_;
 
         //- Rest length - length of spring when no forces are applied to it
         scalar restLength_;
@@ -101,8 +105,15 @@ public:
 
     // Member Functions
 
-        //- Return the restraint force and point of application
-        virtual void restraintForce() const;
+        //- Calculate the restraint position, force and moment.
+        //  Global reference frame vectors.
+        virtual void restrain
+        (
+            const sixDoFRigidBodyMotion& motion,
+            vector& restraintPosition,
+            vector& restraintForce,
+            vector& restraintMoment
+        ) const;
 
         //- Update properties from given dictionary
         virtual bool read(const dictionary& sDoFRBMRCoeff);

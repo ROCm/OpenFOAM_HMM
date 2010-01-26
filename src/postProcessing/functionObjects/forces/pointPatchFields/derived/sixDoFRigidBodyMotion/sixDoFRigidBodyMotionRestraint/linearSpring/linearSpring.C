@@ -26,6 +26,7 @@ License
 
 #include "linearSpring.H"
 #include "addToRunTimeSelectionTable.H"
+#include "sixDoFRigidBodyMotion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -51,7 +52,12 @@ Foam::sixDoFRigidBodyMotionRestraints::linearSpring::linearSpring
     const dictionary& sDoFRBMRCoeffs
 )
 :
-    sixDoFRigidBodyMotionRestraint(sDoFRBMRCoeffs)
+    sixDoFRigidBodyMotionRestraint(sDoFRBMRCoeffs),
+    anchor_(),
+    refAttachmentPt_(),
+    stiffness_(),
+    damping_(),
+    restLength_()
 {
     read(sDoFRBMRCoeffs);
 }
@@ -65,10 +71,28 @@ Foam::sixDoFRigidBodyMotionRestraints::linearSpring::~linearSpring()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void
-Foam::sixDoFRigidBodyMotionRestraints::linearSpring::restraintForce() const
+void Foam::sixDoFRigidBodyMotionRestraints::linearSpring::restrain
+(
+    const sixDoFRigidBodyMotion& motion,
+    vector& restraintPosition,
+    vector& restraintForce,
+    vector& restraintMoment
+) const
 {
+    restraintPosition = motion.currentPosition(refAttachmentPt_);
 
+    vector r = restraintPosition - anchor_;
+
+    scalar magR = mag(r);
+
+    // r is now the r unit vector
+    r /= magR;
+
+    vector v = motion.currentVelocity(restraintPosition);
+
+    restraintForce = -stiffness_*(magR - restLength_)*r - damping_*(r & v)*r;
+
+    restraintMoment = vector::zero;
 }
 
 
@@ -79,7 +103,15 @@ bool Foam::sixDoFRigidBodyMotionRestraints::linearSpring::read
 {
     sixDoFRigidBodyMotionRestraint::read(sDoFRBMRCoeffs);
 
-    // sDoFRBMRCoeffs_.lookup("velocity") >> velocity_;
+    sDoFRBMRCoeffs_.lookup("anchor") >> anchor_;
+
+    sDoFRBMRCoeffs_.lookup("refAttachmentPt") >> refAttachmentPt_;
+
+    sDoFRBMRCoeffs_.lookup("stiffness") >> stiffness_;
+
+    sDoFRBMRCoeffs_.lookup("damping") >> damping_;
+
+    sDoFRBMRCoeffs_.lookup("restLength") >> restLength_;
 
     return true;
 }

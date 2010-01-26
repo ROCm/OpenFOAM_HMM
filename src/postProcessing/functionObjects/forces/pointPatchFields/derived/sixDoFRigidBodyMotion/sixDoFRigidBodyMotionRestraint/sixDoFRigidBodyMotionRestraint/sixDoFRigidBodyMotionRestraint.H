@@ -47,12 +47,17 @@ SourceFiles
 #include "Time.H"
 #include "dictionary.H"
 #include "autoPtr.H"
+#include "vector.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward declaration of classes
+class sixDoFRigidBodyMotion;
+
 
 /*---------------------------------------------------------------------------*\
                 Class sixDoFRigidBodyMotionRestraint Declaration
@@ -114,8 +119,15 @@ public:
 
     // Member Functions
 
-        //- Return the restraint force and point of application
-        virtual void restraintForce() const = 0;
+        //- Calculate the restraint position, force and moment.
+        //  Global reference frame vectors.
+        virtual void restrain
+        (
+            const sixDoFRigidBodyMotion& motion,
+            vector& restraintPosition,
+            vector& restraintForce,
+            vector& restraintMoment
+        ) const = 0;
 
         //- Update properties from given dictionary
         virtual bool read(const dictionary& sDoFRBMRCoeffs) = 0;

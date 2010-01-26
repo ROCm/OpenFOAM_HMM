@@ -30,9 +30,27 @@ License
 
 void Foam::sixDoFRigidBodyMotion::applyRestraints()
 {
-    forAll(restraints_, rI)
+    if (Pstream::master())
     {
-        restraints_[rI].restraintForce();
+        forAll(restraints_, rI)
+        {
+            // restraint position
+            point rP = vector::zero;
+
+            // restraint force
+            vector rF = vector::zero;
+
+            // restraint moment
+            vector rM = vector::zero;
+
+            restraints_[rI].restrain(*this, rP, rF, rM);
+
+            Info<< "Restraint " << rI << " force " << rF << endl;
+
+            a() += rF/mass_;
+
+            tau() += Q().T() & (rM + (rP - centreOfMass()) ^ rF);
+        }
     }
 }
 
@@ -202,7 +220,6 @@ void Foam::sixDoFRigidBodyMotion::updatePosition
         R = rotationTensorX(0.5*deltaT*pi().x()/momentOfInertia_.xx());
         pi() = pi() & R;
         Q() = Q() & R;
-
     }
 
     Pstream::scatter(motionState_);
@@ -257,19 +274,13 @@ void Foam::sixDoFRigidBodyMotion::updateForce
 
             a += f/mass_;
 
-            tau += (positions[i] ^ (Q().T() & f));
+            tau += Q().T() & ((positions[i] - centreOfMass()) ^ f);
         }
     }
 
     updateForce(a, tau, deltaT);
 }
 
-
-Foam::tmp<Foam::pointField>
-Foam::sixDoFRigidBodyMotion::generatePositions(const pointField& pts) const
-{
-    return (centreOfMass() + (Q() & (pts - refCentreOfMass_)));
-}
 
 
 // ************************************************************************* //
