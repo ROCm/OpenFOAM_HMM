@@ -49,17 +49,17 @@ namespace sixDoFRigidBodyMotionRestraints
 
 Foam::sixDoFRigidBodyMotionRestraints::linearSpring::linearSpring
 (
-    const dictionary& sDoFRBMRCoeffs
+    const dictionary& sDoFRBMRDict
 )
 :
-    sixDoFRigidBodyMotionRestraint(sDoFRBMRCoeffs),
+    sixDoFRigidBodyMotionRestraint(sDoFRBMRDict),
     anchor_(),
     refAttachmentPt_(),
     stiffness_(),
     damping_(),
     restLength_()
 {
-    read(sDoFRBMRCoeffs);
+    read(sDoFRBMRDict);
 }
 
 
@@ -98,10 +98,10 @@ void Foam::sixDoFRigidBodyMotionRestraints::linearSpring::restrain
 
 bool Foam::sixDoFRigidBodyMotionRestraints::linearSpring::read
 (
-    const dictionary& sDoFRBMRCoeffs
+    const dictionary& sDoFRBMRDict
 )
 {
-    sixDoFRigidBodyMotionRestraint::read(sDoFRBMRCoeffs);
+    sixDoFRigidBodyMotionRestraint::read(sDoFRBMRDict);
 
     sDoFRBMRCoeffs_.lookup("anchor") >> anchor_;
 

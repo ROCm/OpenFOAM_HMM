@@ -29,10 +29,10 @@ License
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::sixDoFRigidBodyMotionRestraint>
-Foam::sixDoFRigidBodyMotionRestraint::New(const dictionary& sDoFRBMRCoeffs)
+Foam::sixDoFRigidBodyMotionRestraint::New(const dictionary& sDoFRBMRDict)
 {
     word sixDoFRigidBodyMotionRestraintTypeName =
-        sDoFRBMRCoeffs.lookup("sixDoFRigidBodyMotionRestraint");
+        sDoFRBMRDict.lookup("sixDoFRigidBodyMotionRestraint");
 
     Info<< "Selecting sixDoFRigidBodyMotionRestraint function "
         << sixDoFRigidBodyMotionRestraintTypeName << endl;
@@ -49,7 +49,7 @@ Foam::sixDoFRigidBodyMotionRestraint::New(const dictionary& sDoFRBMRCoeffs)
         (
             "sixDoFRigidBodyMotionRestraint::New"
             "("
-            "    const dictionary& sDoFRBMRCoeffs"
+                "const dictionary& sDoFRBMRDict"
             ")"
         )   << "Unknown sixDoFRigidBodyMotionRestraint type "
             << sixDoFRigidBodyMotionRestraintTypeName << endl << endl
@@ -58,7 +58,7 @@ Foam::sixDoFRigidBodyMotionRestraint::New(const dictionary& sDoFRBMRCoeffs)
             << exit(FatalError);
     }
 
-    return autoPtr<sixDoFRigidBodyMotionRestraint>(cstrIter()(sDoFRBMRCoeffs));
+    return autoPtr<sixDoFRigidBodyMotionRestraint>(cstrIter()(sDoFRBMRDict));
 }
 
 

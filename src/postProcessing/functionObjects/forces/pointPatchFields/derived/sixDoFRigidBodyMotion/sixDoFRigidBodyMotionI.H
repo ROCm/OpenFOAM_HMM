@@ -76,6 +76,13 @@ Foam::sixDoFRigidBodyMotion::restraints() const
 }
 
 
+inline const Foam::PtrList<Foam::sixDoFRigidBodyMotionConstraint>&
+Foam::sixDoFRigidBodyMotion::constraints() const
+{
+    return constraints_;
+}
+
+
 inline const Foam::point& Foam::sixDoFRigidBodyMotion::refCentreOfMass() const
 {
     return refCentreOfMass_;

@@ -59,6 +59,7 @@ SourceFiles
 #include "sixDoFRigidBodyMotionState.H"
 #include "pointField.H"
 #include "sixDoFRigidBodyMotionRestraint.H"
+#include "sixDoFRigidBodyMotionConstraint.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -90,8 +91,8 @@ class sixDoFRigidBodyMotion
         //- Restraints on the motion
         PtrList<sixDoFRigidBodyMotionRestraint> restraints_;
 
-        // //- Constaints on the motion
-        // PtrList<sixDoFRigidBodyMotionConstraint> constraints_;
+        //- Constaints on the motion
+        PtrList<sixDoFRigidBodyMotionConstraint> constraints_;
 
         //- Centre of mass of reference state
         point refCentreOfMass_;
@@ -121,7 +122,7 @@ class sixDoFRigidBodyMotion
         void applyRestraints();
 
         //- Apply the constraints to the object
-        void applyConstraints();
+        void applyConstraints(scalar deltaT);
 
         // Access functions retained as private because of the risk of
         // confusion over what is a body local frame vector and what is global
@@ -134,6 +135,10 @@ class sixDoFRigidBodyMotion
             //- Return access to the restraints
             inline const PtrList<sixDoFRigidBodyMotionRestraint>&
                 restraints() const;
+
+            //- Return access to the constraints
+            inline const PtrList<sixDoFRigidBodyMotionConstraint>&
+                constraints() const;
 
             //- Return access to the centre of mass
             inline const point& refCentreOfMass() const;
@@ -255,6 +260,17 @@ public:
         //- Transform the given reference state point by the current
         //  motion state
         inline point currentPosition(const point& pt) const;
+
+        //- Predict the position of the supplied point after deltaT
+        //  given the current motion state and the additional supplied
+        //  force and moment
+        point predictedPosition
+        (
+            const point& pt,
+            const vector deltaForce,
+            const vector deltaMoment,
+            scalar deltaT
+        ) const;
 
         //- Return the angular velocity in the global frame
         inline vector omega() const;

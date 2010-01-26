@@ -85,7 +85,7 @@ public:
         //- Construct from components
         linearSpring
         (
-            const dictionary& sDoFRBMRCoeffs
+            const dictionary& sDoFRBMRDict
         );
 
         //- Construct and return a clone

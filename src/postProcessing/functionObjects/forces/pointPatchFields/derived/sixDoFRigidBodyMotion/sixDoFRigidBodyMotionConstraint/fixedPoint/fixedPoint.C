@@ -24,49 +24,86 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sixDoFRigidBodyMotionRestraint.H"
+#include "fixedPoint.H"
+#include "addToRunTimeSelectionTable.H"
+#include "sixDoFRigidBodyMotion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::sixDoFRigidBodyMotionRestraint, 0);
+namespace Foam
+{
+namespace sixDoFRigidBodyMotionConstraints
+{
+    defineTypeNameAndDebug(fixedPoint, 0);
+    addToRunTimeSelectionTable
+    (
+        sixDoFRigidBodyMotionConstraint,
+        fixedPoint,
+        dictionary
+    );
+};
+};
 
-defineRunTimeSelectionTable(Foam::sixDoFRigidBodyMotionRestraint, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionRestraint::sixDoFRigidBodyMotionRestraint
+Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::fixedPoint
 (
-    const dictionary& sDoFRBMRDict
+    const dictionary& sDoFRBMCDict
 )
 :
-    sDoFRBMRCoeffs_
-    (
-        sDoFRBMRDict.subDict
-        (
-            word(sDoFRBMRDict.lookup("sixDoFRigidBodyMotionRestraint"))
-          + "Coeffs"
-        )
-    )
-{}
+    sixDoFRigidBodyMotionConstraint(sDoFRBMCDict),
+    fixedPoint_()
+{
+    read(sDoFRBMCDict);
+}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionRestraint::~sixDoFRigidBodyMotionRestraint()
+Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::~fixedPoint()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::sixDoFRigidBodyMotionRestraint::read
+bool Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::constrain
 (
-    const dictionary& sDoFRBMRDict
-)
+    const sixDoFRigidBodyMotion& motion,
+    const vector& existingConstraintForce,
+    const vector& existingConstraintMoment,
+    scalar deltaT,
+    vector& constraintPosition,
+    vector& constraintForceIncrement,
+    vector& constraintMomentIncrement
+) const
 {
-    sDoFRBMRCoeffs_ = sDoFRBMRDict.subDict(type() + "Coeffs");
+    point predictedPosition = motion.predictedPosition
+    (
+        fixedPoint_,
+        existingConstraintForce,
+        existingConstraintMoment,
+        deltaT
+    );
+
+    vector error = predictedPosition - fixedPoint_;
+
+    Info<< error << endl;
 
     return true;
 }
 
+
+bool Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::read
+(
+    const dictionary& sDoFRBMCDict
+)
+{
+    sixDoFRigidBodyMotionConstraint::read(sDoFRBMCDict);
+
+    sDoFRBMCCoeffs_.lookup("fixedPoint") >> fixedPoint_;
+
+    return true;
+}
 
 // ************************************************************************* //

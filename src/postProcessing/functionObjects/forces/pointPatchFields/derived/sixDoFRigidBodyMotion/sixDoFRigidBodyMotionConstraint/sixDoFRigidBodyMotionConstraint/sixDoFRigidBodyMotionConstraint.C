@@ -24,46 +24,49 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sixDoFRigidBodyMotionRestraint.H"
+#include "sixDoFRigidBodyMotionConstraint.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::sixDoFRigidBodyMotionRestraint, 0);
+defineTypeNameAndDebug(Foam::sixDoFRigidBodyMotionConstraint, 0);
 
-defineRunTimeSelectionTable(Foam::sixDoFRigidBodyMotionRestraint, dictionary);
+defineRunTimeSelectionTable(Foam::sixDoFRigidBodyMotionConstraint, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionRestraint::sixDoFRigidBodyMotionRestraint
+Foam::sixDoFRigidBodyMotionConstraint::sixDoFRigidBodyMotionConstraint
 (
-    const dictionary& sDoFRBMRDict
+    const dictionary& sDoFRBMCDict
 )
 :
-    sDoFRBMRCoeffs_
+    sDoFRBMCCoeffs_
     (
-        sDoFRBMRDict.subDict
+        sDoFRBMCDict.subDict
         (
-            word(sDoFRBMRDict.lookup("sixDoFRigidBodyMotionRestraint"))
+            word(sDoFRBMCDict.lookup("sixDoFRigidBodyMotionConstraint"))
           + "Coeffs"
         )
-    )
+    ),
+    tolerance_(readScalar(sDoFRBMCDict.lookup("tolerance")))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionRestraint::~sixDoFRigidBodyMotionRestraint()
+Foam::sixDoFRigidBodyMotionConstraint::~sixDoFRigidBodyMotionConstraint()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::sixDoFRigidBodyMotionRestraint::read
+bool Foam::sixDoFRigidBodyMotionConstraint::read
 (
-    const dictionary& sDoFRBMRDict
+    const dictionary& sDoFRBMCDict
 )
 {
-    sDoFRBMRCoeffs_ = sDoFRBMRDict.subDict(type() + "Coeffs");
+    tolerance_ = (readScalar(sDoFRBMCDict.lookup("tolerance")));
+
+    sDoFRBMCCoeffs_ = sDoFRBMCDict.subDict(type() + "Coeffs");
 
     return true;
 }

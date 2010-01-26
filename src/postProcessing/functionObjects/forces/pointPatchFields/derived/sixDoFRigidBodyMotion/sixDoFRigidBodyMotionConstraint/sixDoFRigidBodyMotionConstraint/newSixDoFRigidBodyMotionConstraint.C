@@ -24,48 +24,41 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sixDoFRigidBodyMotionRestraint.H"
+#include "sixDoFRigidBodyMotionConstraint.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::sixDoFRigidBodyMotionRestraint, 0);
-
-defineRunTimeSelectionTable(Foam::sixDoFRigidBodyMotionRestraint, dictionary);
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::sixDoFRigidBodyMotionRestraint::sixDoFRigidBodyMotionRestraint
-(
-    const dictionary& sDoFRBMRDict
-)
-:
-    sDoFRBMRCoeffs_
-    (
-        sDoFRBMRDict.subDict
-        (
-            word(sDoFRBMRDict.lookup("sixDoFRigidBodyMotionRestraint"))
-          + "Coeffs"
-        )
-    )
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::sixDoFRigidBodyMotionRestraint::~sixDoFRigidBodyMotionRestraint()
-{}
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-bool Foam::sixDoFRigidBodyMotionRestraint::read
-(
-    const dictionary& sDoFRBMRDict
-)
+Foam::autoPtr<Foam::sixDoFRigidBodyMotionConstraint>
+Foam::sixDoFRigidBodyMotionConstraint::New(const dictionary& sDoFRBMCDict)
 {
-    sDoFRBMRCoeffs_ = sDoFRBMRDict.subDict(type() + "Coeffs");
+    word sixDoFRigidBodyMotionConstraintTypeName =
+        sDoFRBMCDict.lookup("sixDoFRigidBodyMotionConstraint");
 
-    return true;
+    Info<< "Selecting sixDoFRigidBodyMotionConstraint function "
+        << sixDoFRigidBodyMotionConstraintTypeName << endl;
+
+    dictionaryConstructorTable::iterator cstrIter =
+    dictionaryConstructorTablePtr_->find
+    (
+        sixDoFRigidBodyMotionConstraintTypeName
+    );
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "sixDoFRigidBodyMotionConstraint::New"
+            "("
+                "const dictionary& sDoFRBMCDict"
+            ")"
+        )   << "Unknown sixDoFRigidBodyMotionConstraint type "
+            << sixDoFRigidBodyMotionConstraintTypeName << endl << endl
+            << "Valid  sixDoFRigidBodyMotionConstraints are : " << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<sixDoFRigidBodyMotionConstraint>(cstrIter()(sDoFRBMCDict));
 }
 
 

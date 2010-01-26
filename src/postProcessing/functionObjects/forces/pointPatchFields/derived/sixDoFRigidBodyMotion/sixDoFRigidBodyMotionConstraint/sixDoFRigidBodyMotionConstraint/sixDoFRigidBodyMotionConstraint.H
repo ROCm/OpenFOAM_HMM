@@ -23,26 +23,26 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Namespace
-    Foam::sixDoFRigidBodyMotionRestraints
+    Foam::sixDoFRigidBodyMotionConstraints
 
 Description
-    Namespace for six DoF motion restraints
+    Namespace for six DoF motion constraints
 
 
 Class
-    Foam::sixDoFRigidBodyMotionRestraint
+    Foam::sixDoFRigidBodyMotionConstraint
 
 Description
-    Base class for defining restraints for sixDoF motions
+    Base class for defining constraints for sixDoF motions
 
 SourceFiles
-    sixDoFRigidBodyMotionRestraint.C
+    sixDoFRigidBodyMotionConstraint.C
     newDynamicFvMesh.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sixDoFRigidBodyMotionRestraint_H
-#define sixDoFRigidBodyMotionRestraint_H
+#ifndef sixDoFRigidBodyMotionConstraint_H
+#define sixDoFRigidBodyMotionConstraint_H
 
 #include "Time.H"
 #include "dictionary.H"
@@ -60,23 +60,28 @@ class sixDoFRigidBodyMotion;
 
 
 /*---------------------------------------------------------------------------*\
-                Class sixDoFRigidBodyMotionRestraint Declaration
+                Class sixDoFRigidBodyMotionConstraint Declaration
 \*---------------------------------------------------------------------------*/
 
-class sixDoFRigidBodyMotionRestraint
+class sixDoFRigidBodyMotionConstraint
 {
 
 protected:
 
     // Protected data
 
-        dictionary sDoFRBMRCoeffs_;
+        //- Constraint model specific coefficient dictionary
+        dictionary sDoFRBMCCoeffs_;
+
+        //- Solution tolerance.  Meaning depends on model, usually an
+        //  absolute distance or angle.
+        scalar tolerance_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("sixDoFRigidBodyMotionRestraint");
+    TypeName("sixDoFRigidBodyMotionConstraint");
 
 
     // Declare run-time constructor selection table
@@ -84,53 +89,57 @@ public:
         declareRunTimeSelectionTable
         (
             autoPtr,
-            sixDoFRigidBodyMotionRestraint,
+            sixDoFRigidBodyMotionConstraint,
             dictionary,
-            (const dictionary& sDoFRBMRDict),
-            (sDoFRBMRDict)
+            (const dictionary& sDoFRBMCDict),
+            (sDoFRBMCDict)
         );
 
 
     // Constructors
 
-        //- Construct from the sDoFRBMRDict dictionary and Time
-        sixDoFRigidBodyMotionRestraint
+        //- Construct from the sDoFRBMCDict dictionary and Time
+        sixDoFRigidBodyMotionConstraint
         (
-            const dictionary& sDoFRBMRDict
+            const dictionary& sDoFRBMCDict
         );
 
         //- Construct and return a clone
-        virtual autoPtr<sixDoFRigidBodyMotionRestraint> clone() const = 0;
+        virtual autoPtr<sixDoFRigidBodyMotionConstraint> clone() const = 0;
 
 
     // Selectors
 
-        //- Select constructed from the sDoFRBMRDict dictionary and Time
-        static autoPtr<sixDoFRigidBodyMotionRestraint> New
+        //- Select constructed from the sDoFRBMCDict dictionary and Time
+        static autoPtr<sixDoFRigidBodyMotionConstraint> New
         (
-            const dictionary& sDoFRBMRDict
+            const dictionary& sDoFRBMCDict
         );
 
 
     // Destructor
 
-        virtual ~sixDoFRigidBodyMotionRestraint();
+        virtual ~sixDoFRigidBodyMotionConstraint();
 
 
     // Member Functions
 
-        //- Calculate the restraint position, force and moment.
-        //  Global reference frame vectors.
-        virtual void restrain
+        //- Calculate the constraint position, force and moment.
+        //  Global reference frame vectors.  Returns boolean stating
+        //  whether the constraint been converged to tolerance.
+        virtual bool constrain
         (
             const sixDoFRigidBodyMotion& motion,
-            vector& restraintPosition,
-            vector& restraintForce,
-            vector& restraintMoment
+            const vector& existingConstraintForce,
+            const vector& existingConstraintMoment,
+            scalar deltaT,
+            vector& constraintPosition,
+            vector& constraintForceIncrement,
+            vector& constraintMomentIncrement
         ) const = 0;
 
         //- Update properties from given dictionary
-        virtual bool read(const dictionary& sDoFRBMRDict) = 0;
+        virtual bool read(const dictionary& sDoFRBMCDict) = 0;
 };
 
 

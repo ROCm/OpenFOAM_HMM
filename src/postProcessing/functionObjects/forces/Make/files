@@ -17,6 +17,12 @@ $(sDoFRBMR)/sixDoFRigidBodyMotionRestraint/sixDoFRigidBodyMotionRestraint.C
 $(sDoFRBMR)/sixDoFRigidBodyMotionRestraint/newSixDoFRigidBodyMotionRestraint.C
 $(sDoFRBMR)/linearSpring/linearSpring.C
 
+sDoFRBMC = $(sDoFRBM)/sixDoFRigidBodyMotionConstraint
+
+$(sDoFRBMC)/sixDoFRigidBodyMotionConstraint/sixDoFRigidBodyMotionConstraint.C
+$(sDoFRBMC)/sixDoFRigidBodyMotionConstraint/newSixDoFRigidBodyMotionConstraint.C
+$(sDoFRBMC)/fixedPoint/fixedPoint.C
+
 pointPatchFields/derived/sixDoFRigidBodyDisplacement/sixDoFRigidBodyDisplacementPointPatchVectorField.C
 pointPatchFields/derived/uncoupledSixDoFRigidBodyDisplacement/uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField.C
 pointPatchFields/derived/constrainedSixDoFRigidBodyDisplacement/constrainedSixDoFRigidBodyDisplacementPointPatchVectorField.C
