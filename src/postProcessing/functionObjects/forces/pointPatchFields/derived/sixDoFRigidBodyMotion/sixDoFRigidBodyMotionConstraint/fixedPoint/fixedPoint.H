@@ -58,7 +58,9 @@ class fixedPoint
     // Private data
 
         //- Point which is rigidly attached to the body and constrains
-        //  it so that this point remains fixed.
+        //  it so that this point remains fixed.  This serves as the
+        //  reference point for displacements as well as the target
+        //  position.
         point fixedPoint_;
 
 

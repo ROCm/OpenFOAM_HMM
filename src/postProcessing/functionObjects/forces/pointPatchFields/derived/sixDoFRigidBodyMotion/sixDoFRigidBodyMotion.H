@@ -94,6 +94,10 @@ class sixDoFRigidBodyMotion
         //- Constaints on the motion
         PtrList<sixDoFRigidBodyMotionConstraint> constraints_;
 
+        //- Maximum number of iterations allowed to attempt to obey
+        //  constraints
+        label maxConstraintIters_;
+
         //- Centre of mass of reference state
         point refCentreOfMass_;
 
@@ -118,6 +122,9 @@ class sixDoFRigidBodyMotion
         //  frame z-axis by the given angle
         inline tensor rotationTensorZ(scalar deltaT) const;
 
+        //- Apply rotation tensors to Q for the given torque (pi) and deltaT
+        inline void rotate(tensor& Q, vector& pi, scalar deltaT) const;
+
         //- Apply the restraints to the object
         void applyRestraints();
 
@@ -139,6 +146,10 @@ class sixDoFRigidBodyMotion
             //- Return access to the constraints
             inline const PtrList<sixDoFRigidBodyMotionConstraint>&
                 constraints() const;
+
+            //- Return access to the maximum allowed number of
+            //  constraint iterations
+            inline label maxConstraintIters() const;
 
             //- Return access to the centre of mass
             inline const point& refCentreOfMass() const;
@@ -255,11 +266,11 @@ public:
 
         //- Transform the given reference state pointField by the
         //  current motion state
-        inline tmp<pointField> currentPosition(const pointField& pts) const;
+        inline tmp<pointField> currentPosition(const pointField& refPts) const;
 
         //- Transform the given reference state point by the current
         //  motion state
-        inline point currentPosition(const point& pt) const;
+        inline point currentPosition(const point& refPt) const;
 
         //- Predict the position of the supplied point after deltaT
         //  given the current motion state and the additional supplied

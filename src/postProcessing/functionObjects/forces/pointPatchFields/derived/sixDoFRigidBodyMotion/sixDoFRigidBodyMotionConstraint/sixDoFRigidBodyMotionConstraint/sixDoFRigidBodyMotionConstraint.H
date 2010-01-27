@@ -77,6 +77,9 @@ protected:
         //  absolute distance or angle.
         scalar tolerance_;
 
+        //- Relaxation factor for solution, default to one
+        scalar relaxationFactor_;
+
 
 public:
 

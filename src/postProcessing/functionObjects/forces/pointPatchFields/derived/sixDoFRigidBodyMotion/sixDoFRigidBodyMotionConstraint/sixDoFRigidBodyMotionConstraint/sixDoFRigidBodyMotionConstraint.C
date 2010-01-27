@@ -47,7 +47,11 @@ Foam::sixDoFRigidBodyMotionConstraint::sixDoFRigidBodyMotionConstraint
           + "Coeffs"
         )
     ),
-    tolerance_(readScalar(sDoFRBMCDict.lookup("tolerance")))
+    tolerance_(readScalar(sDoFRBMCDict.lookup("tolerance"))),
+    relaxationFactor_
+    (
+        sDoFRBMCDict.lookupOrDefault<scalar>("relaxationFactor", 1)
+    )
 {}
 
 

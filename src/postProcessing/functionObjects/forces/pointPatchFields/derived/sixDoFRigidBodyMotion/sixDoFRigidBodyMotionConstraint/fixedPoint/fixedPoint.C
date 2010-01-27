@@ -86,11 +86,35 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::constrain
         deltaT
     );
 
+    constraintPosition = motion.currentPosition(fixedPoint_);
+
+    // Info<< "current position " << constraintPosition << nl
+    //     << "next predictedPosition " << predictedPosition
+    //     << endl;
+
     vector error = predictedPosition - fixedPoint_;
 
-    Info<< error << endl;
+    // Info<< "error " << error << endl;
 
-    return true;
+    // Correction force derived from Lagrange multiplier:
+    //     G = -lambda*grad(sigma)
+    // where
+    //     sigma = mag(error) = 0
+    // so
+    //     grad(sigma) = error/mag(error)
+    // Solving for lambda using the SHAKE methodology gives
+    //     lambda = mass*mag(error)/sqr(deltaT)
+    // This is only strictly applicable (i.e. will converge in one
+    // iteration) to constraints at the centre of mass.  Everything
+    // else will need to iterate, and may need under-relaxed to be
+    // stable.
+
+    constraintForceIncrement =
+        -relaxationFactor_*error*motion.mass()/sqr(deltaT);
+
+    constraintMomentIncrement = vector::zero;
+
+    return (mag(error) < tolerance_);
 }
 
 

@@ -62,6 +62,37 @@ Foam::sixDoFRigidBodyMotion::rotationTensorZ(scalar phi) const
 }
 
 
+inline void Foam::sixDoFRigidBodyMotion::rotate
+(
+    tensor& Q,
+    vector& pi,
+    scalar deltaT
+) const
+{
+    tensor R;
+
+    R = rotationTensorX(0.5*deltaT*pi.x()/momentOfInertia_.xx());
+    pi = pi & R;
+    Q = Q & R;
+
+    R = rotationTensorY(0.5*deltaT*pi.y()/momentOfInertia_.yy());
+    pi = pi & R;
+    Q = Q & R;
+
+    R = rotationTensorZ(deltaT*pi.z()/momentOfInertia_.zz());
+    pi = pi & R;
+    Q = Q & R;
+
+    R = rotationTensorY(0.5*deltaT*pi.y()/momentOfInertia_.yy());
+    pi = pi & R;
+    Q = Q & R;
+
+    R = rotationTensorX(0.5*deltaT*pi.x()/momentOfInertia_.xx());
+    pi = pi & R;
+    Q = Q & R;
+}
+
+
 inline const Foam::sixDoFRigidBodyMotionState&
 Foam::sixDoFRigidBodyMotion::motionState() const
 {
@@ -80,6 +111,12 @@ inline const Foam::PtrList<Foam::sixDoFRigidBodyMotionConstraint>&
 Foam::sixDoFRigidBodyMotion::constraints() const
 {
     return constraints_;
+}
+
+
+inline Foam::label Foam::sixDoFRigidBodyMotion::maxConstraintIters() const
+{
+    return maxConstraintIters_;
 }
 
 
@@ -171,18 +208,18 @@ inline Foam::vector& Foam::sixDoFRigidBodyMotion::tau()
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 inline Foam::tmp<Foam::pointField>
-Foam::sixDoFRigidBodyMotion::currentPosition(const pointField& pts) const
+Foam::sixDoFRigidBodyMotion::currentPosition(const pointField& refPts) const
 {
-    return (centreOfMass() + (Q() & (pts - refCentreOfMass_)));
+    return (centreOfMass() + (Q() & (refPts - refCentreOfMass_)));
 }
 
 
 inline Foam::point Foam::sixDoFRigidBodyMotion::currentPosition
 (
-    const point& pt
+    const point& refPt
 ) const
 {
-    return (centreOfMass() + (Q() & (pt - refCentreOfMass_)));
+    return (centreOfMass() + (Q() & (refPt - refCentreOfMass_)));
 }
 
 

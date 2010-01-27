@@ -71,13 +71,26 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
 
         do
         {
-            converged = true;
+            iter++;
 
-            Info<< "Iteration " << iter << endl;
+            if (iter > maxConstraintIters_)
+            {
+                FatalErrorIn
+                (
+                    "Foam::sixDoFRigidBodyMotion::applyConstraints"
+                    "(scalar deltaT)"
+                )
+                    << nl << "Maximum number of constraint iterations ("
+                    << maxConstraintIters_ << ") exceeded." << nl
+                    << exit(FatalError);
+
+            }
+
+            converged = true;
 
             forAll(constraints_, cI)
             {
-                Info<< "Constraint " << cI << endl;
+                // Info<< "Constraint " << cI << endl;
 
                 // constraint position
                 point cP = vector::zero;
@@ -98,11 +111,27 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
                     cF,
                     cM
                 );
+
+                // Accumulate constraint force
+                cFA += cF;
+
+                // Accumulate constraint moment
+                cMA += cM + ((cP - centreOfMass()) ^ cF);
             }
 
-            iter++;
-
         } while(!converged);
+
+        Info<< "Constraints converged in " << iter << " iterations" << nl
+            << "Constraint force: " << cFA << nl
+            << "Constraint moment: " << cMA
+            << endl;
+
+        // Add the constrain forces and moments to the motion state variables
+        a() += cFA/mass_;
+
+        // The moment of constraint forces has already been added
+        // during accumulation
+        tau() += Q().T() & cMA;
     }
 }
 
@@ -114,6 +143,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion()
     motionState_(),
     restraints_(),
     constraints_(),
+    maxConstraintIters_(0),
     refCentreOfMass_(vector::zero),
     momentOfInertia_(diagTensor::one*VSMALL),
     mass_(VSMALL)
@@ -144,6 +174,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     ),
     restraints_(),
     constraints_(),
+    maxConstraintIters_(0),
     refCentreOfMass_(refCentreOfMass),
     momentOfInertia_(momentOfInertia),
     mass_(mass)
@@ -155,6 +186,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion(const dictionary& dict)
     motionState_(dict),
     restraints_(),
     constraints_(),
+    maxConstraintIters_(0),
     refCentreOfMass_(dict.lookupOrDefault("refCentreOfMass", centreOfMass())),
     momentOfInertia_(dict.lookup("momentOfInertia")),
     mass_(readScalar(dict.lookup("mass")))
@@ -173,6 +205,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     motionState_(sDoFRBM.motionState()),
     restraints_(sDoFRBM.restraints()),
     constraints_(sDoFRBM.constraints()),
+    maxConstraintIters_(sDoFRBM.maxConstraintIters()),
     refCentreOfMass_(sDoFRBM.refCentreOfMass()),
     momentOfInertia_(sDoFRBM.momentOfInertia()),
     mass_(sDoFRBM.mass())
@@ -242,15 +275,21 @@ void Foam::sixDoFRigidBodyMotion::addConstraints
 
                 constraints_.set
                 (
-                    i,
+                    i++,
                     sixDoFRigidBodyMotionConstraint::New(iter().dict())
                 );
             }
-
-            i++;
         }
 
         constraints_.setSize(i);
+
+        if (constraints_.size())
+        {
+            maxConstraintIters_ = readLabel
+            (
+                constraintDict.lookup("maxIterations")
+            );
+        }
     }
 }
 
@@ -274,27 +313,7 @@ void Foam::sixDoFRigidBodyMotion::updatePosition
 
         // Leapfrog orientation adjustment
 
-        tensor R;
-
-        R = rotationTensorX(0.5*deltaT*pi().x()/momentOfInertia_.xx());
-        pi() = pi() & R;
-        Q() = Q() & R;
-
-        R = rotationTensorY(0.5*deltaT*pi().y()/momentOfInertia_.yy());
-        pi() = pi() & R;
-        Q() = Q() & R;
-
-        R = rotationTensorZ(deltaT*pi().z()/momentOfInertia_.zz());
-        pi() = pi() & R;
-        Q() = Q() & R;
-
-        R = rotationTensorY(0.5*deltaT*pi().y()/momentOfInertia_.yy());
-        pi() = pi() & R;
-        Q() = Q() & R;
-
-        R = rotationTensorX(0.5*deltaT*pi().x()/momentOfInertia_.xx());
-        pi() = pi() & R;
-        Q() = Q() & R;
+        rotate(Q(), pi(), deltaT);
     }
 
     Pstream::scatter(motionState_);
@@ -365,8 +384,17 @@ Foam::point Foam::sixDoFRigidBodyMotion::predictedPosition
     scalar deltaT
 ) const
 {
-    Info<< "predictedPosition NOT IMPLEMENTED" << endl;
-    return pt;
+    vector vTemp = v() + deltaT*(a() + deltaForce/mass_);
+
+    vector piTemp = pi() + deltaT*(tau() + (Q().T() & deltaMoment));
+
+    point centreOfMassTemp = centreOfMass() + deltaT*vTemp;
+
+    tensor QTemp = Q();
+
+    rotate(QTemp, piTemp, deltaT);
+
+    return (centreOfMassTemp + (QTemp & (pt - refCentreOfMass_)));
 }
 
 
