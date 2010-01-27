@@ -22,42 +22,28 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Description
+    Calculates and outputs the mean and maximum Diffusion Numbers for the solid
+    regions
+
 \*---------------------------------------------------------------------------*/
 
-#include "compressibleCourantNo.H"
-#include "fvc.H"
+#ifndef solidRegionDiff_H
+#define solidRegionDiff_H
 
-Foam::scalar Foam::compressibleCourantNo
-(
-    const fvMesh& mesh,
-    const Time& runTime,
-    const volScalarField& rho,
-    const surfaceScalarField& phi
-)
+#include "fvMesh.H"
+
+namespace Foam
 {
-    scalar CoNum = 0.0;
-    scalar meanCoNum = 0.0;
-
-    //- Can have fluid domains with 0 cells so do not test.
-    //if (mesh.nInternalFaces())
-    {
-        surfaceScalarField SfUfbyDelta =
-            mesh.surfaceInterpolation::deltaCoeffs()
-          * mag(phi)
-          / fvc::interpolate(rho);
-
-        CoNum = max(SfUfbyDelta/mesh.magSf())
-            .value()*runTime.deltaT().value();
-
-        meanCoNum = (sum(SfUfbyDelta)/sum(mesh.magSf()))
-            .value()*runTime.deltaT().value();
-    }
-
-    Info<< "Region: " << mesh.name() << " Courant Number mean: " << meanCoNum
-        << " max: " << CoNum << endl;
-
-    return CoNum;
+    scalar solidRegionDiffNo
+    (
+        const fvMesh& mesh,
+        const Time& runTime,
+        const volScalarField& Cprho,
+        const volScalarField& K
+    );
 }
 
+#endif
 
 // ************************************************************************* //

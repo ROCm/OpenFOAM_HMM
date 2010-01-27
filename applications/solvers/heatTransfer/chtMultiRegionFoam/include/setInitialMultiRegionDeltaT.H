@@ -22,42 +22,39 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Global
+    setInitialDeltaT
+
+Description
+    Set the initial timestep for the CHT MultiRegion solver.
+
 \*---------------------------------------------------------------------------*/
 
-#include "compressibleCourantNo.H"
-#include "fvc.H"
-
-Foam::scalar Foam::compressibleCourantNo
-(
-    const fvMesh& mesh,
-    const Time& runTime,
-    const volScalarField& rho,
-    const surfaceScalarField& phi
-)
+if (adjustTimeStep)
 {
-    scalar CoNum = 0.0;
-    scalar meanCoNum = 0.0;
-
-    //- Can have fluid domains with 0 cells so do not test.
-    //if (mesh.nInternalFaces())
+    if ((runTime.timeIndex() == 0) && ((CoNum > SMALL) || (DiNum > SMALL)))
     {
-        surfaceScalarField SfUfbyDelta =
-            mesh.surfaceInterpolation::deltaCoeffs()
-          * mag(phi)
-          / fvc::interpolate(rho);
 
-        CoNum = max(SfUfbyDelta/mesh.magSf())
-            .value()*runTime.deltaT().value();
+        if (CoNum == -GREAT)
+        {
+            CoNum = SMALL;
+        }
 
-        meanCoNum = (sum(SfUfbyDelta)/sum(mesh.magSf()))
-            .value()*runTime.deltaT().value();
+        if (DiNum == -GREAT)
+        {
+            DiNum = SMALL;
+        }
+
+        runTime.setDeltaT
+        (
+            min
+            (
+                min(maxCo/CoNum, maxDi/DiNum)*runTime.deltaT().value(),
+                maxDeltaT
+            )
+        );
+        Info<< "deltaT = " <<  runTime.deltaT().value() << endl;
     }
-
-    Info<< "Region: " << mesh.name() << " Courant Number mean: " << meanCoNum
-        << " max: " << CoNum << endl;
-
-    return CoNum;
 }
-
 
 // ************************************************************************* //

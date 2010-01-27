@@ -22,42 +22,48 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Global
+    setMultiRegionDeltaT
+
+Description
+    Reset the timestep to maintain a constant maximum courant and diffusion
+    Number. Reduction of time-step is immediate, but increase is damped to avoid
+    unstable oscillations.
+
 \*---------------------------------------------------------------------------*/
 
-#include "compressibleCourantNo.H"
-#include "fvc.H"
-
-Foam::scalar Foam::compressibleCourantNo
-(
-    const fvMesh& mesh,
-    const Time& runTime,
-    const volScalarField& rho,
-    const surfaceScalarField& phi
-)
+if (adjustTimeStep)
 {
-    scalar CoNum = 0.0;
-    scalar meanCoNum = 0.0;
-
-    //- Can have fluid domains with 0 cells so do not test.
-    //if (mesh.nInternalFaces())
+    if (CoNum == -GREAT)
     {
-        surfaceScalarField SfUfbyDelta =
-            mesh.surfaceInterpolation::deltaCoeffs()
-          * mag(phi)
-          / fvc::interpolate(rho);
-
-        CoNum = max(SfUfbyDelta/mesh.magSf())
-            .value()*runTime.deltaT().value();
-
-        meanCoNum = (sum(SfUfbyDelta)/sum(mesh.magSf()))
-            .value()*runTime.deltaT().value();
+        CoNum = SMALL;
     }
 
-    Info<< "Region: " << mesh.name() << " Courant Number mean: " << meanCoNum
-        << " max: " << CoNum << endl;
+    if (DiNum == -GREAT)
+    {
+        DiNum = SMALL;
+    }
 
-    return CoNum;
+    scalar maxDeltaTFluid = maxCo/(CoNum + SMALL);
+    scalar maxDeltaTSolid = maxDi/(DiNum + SMALL);
+
+    scalar deltaTFluid =
+        min
+        (
+            min(maxDeltaTFluid, 1.0 + 0.1*maxDeltaTFluid),
+            1.2
+        );
+
+    runTime.setDeltaT
+    (
+        min
+        (
+            min(deltaTFluid, maxDeltaTSolid)*runTime.deltaT().value(),
+            maxDeltaT
+        )
+    );
+
+    Info<< "deltaT = " <<  runTime.deltaT().value() << endl;
 }
-
 
 // ************************************************************************* //

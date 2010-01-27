@@ -24,39 +24,45 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "compressibleCourantNo.H"
-#include "fvc.H"
+#include "regionProperties.H"
 
-Foam::scalar Foam::compressibleCourantNo
-(
-    const fvMesh& mesh,
-    const Time& runTime,
-    const volScalarField& rho,
-    const surfaceScalarField& phi
-)
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::regionProperties::regionProperties(const Time& runTime)
+:
+    IOdictionary
+    (
+        IOobject
+        (
+            "regionProperties",
+            runTime.time().constant(),
+            runTime.db(),
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    ),
+    fluidRegionNames_(lookup("fluidRegionNames")),
+    solidRegionNames_(lookup("solidRegionNames"))
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::regionProperties::~regionProperties()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+const Foam::List<Foam::word>& Foam::regionProperties::fluidRegionNames() const
 {
-    scalar CoNum = 0.0;
-    scalar meanCoNum = 0.0;
+    return fluidRegionNames_;
+}
 
-    //- Can have fluid domains with 0 cells so do not test.
-    //if (mesh.nInternalFaces())
-    {
-        surfaceScalarField SfUfbyDelta =
-            mesh.surfaceInterpolation::deltaCoeffs()
-          * mag(phi)
-          / fvc::interpolate(rho);
 
-        CoNum = max(SfUfbyDelta/mesh.magSf())
-            .value()*runTime.deltaT().value();
-
-        meanCoNum = (sum(SfUfbyDelta)/sum(mesh.magSf()))
-            .value()*runTime.deltaT().value();
-    }
-
-    Info<< "Region: " << mesh.name() << " Courant Number mean: " << meanCoNum
-        << " max: " << CoNum << endl;
-
-    return CoNum;
+const Foam::List<Foam::word>& Foam::regionProperties::solidRegionNames() const
+{
+    return solidRegionNames_;
 }
 
 
