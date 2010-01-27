@@ -40,7 +40,7 @@ Foam::string Foam::KinematicParcel<ParcelType>::propHeader =
   + " (Ux Uy Uz)"
   + " rho"
   + " tTurb"
-  + " UTurb";
+  + " (UTurbx UTurby UTurbz)";
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
