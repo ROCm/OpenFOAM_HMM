@@ -171,9 +171,9 @@ Foam::MeshedSurface<Face>::MeshedSurface()
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
-    const Xfer< pointField >& pointLst,
-    const Xfer< List<Face> >& faceLst,
-    const Xfer< surfZoneList >& zoneLst
+    const Xfer<pointField>& pointLst,
+    const Xfer<List<Face> >& faceLst,
+    const Xfer<surfZoneList>& zoneLst
 )
 :
     ParentType(List<Face>(), pointField()),
@@ -186,8 +186,8 @@ Foam::MeshedSurface<Face>::MeshedSurface
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
-    const Xfer< pointField >& pointLst,
-    const Xfer< List<Face> >& faceLst,
+    const Xfer<pointField>& pointLst,
+    const Xfer<List<Face> >& faceLst,
     const UList<label>& zoneSizes,
     const UList<word>& zoneNames
 )
@@ -397,7 +397,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
-    const Xfer< UnsortedMeshedSurface<Face> >& surf
+    const Xfer<UnsortedMeshedSurface<Face> >& surf
 )
 :
     ParentType(List<Face>(), pointField())
@@ -409,7 +409,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
-    const Xfer< MeshedSurface<Face> >& surf
+    const Xfer<MeshedSurface<Face> >& surf
 )
 :
     ParentType(List<Face>(), pointField())
@@ -424,9 +424,6 @@ Foam::MeshedSurface<Face>::MeshedSurface
 template<class Face>
 Foam::MeshedSurface<Face>::~MeshedSurface()
 {}
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -526,9 +523,9 @@ void Foam::MeshedSurface<Face>::scalePoints(const scalar scaleFactor)
 template<class Face>
 void Foam::MeshedSurface<Face>::reset
 (
-    const Xfer< pointField >& pointLst,
-    const Xfer< List<Face> >& faceLst,
-    const Xfer< surfZoneList >& zoneLst
+    const Xfer<pointField>& pointLst,
+    const Xfer<List<Face> >& faceLst,
+    const Xfer<surfZoneList>& zoneLst
 )
 {
     ParentType::clearOut();
@@ -555,9 +552,9 @@ void Foam::MeshedSurface<Face>::reset
 template<class Face>
 void Foam::MeshedSurface<Face>::reset
 (
-    const Xfer< List<point> >& pointLst,
-    const Xfer< List<Face> >& faceLst,
-    const Xfer< surfZoneList >& zoneLst
+    const Xfer<List<point> >& pointLst,
+    const Xfer<List<Face> >& faceLst,
+    const Xfer<surfZoneList>& zoneLst
 )
 {
     ParentType::clearOut();
@@ -1038,8 +1035,7 @@ Foam::MeshedSurface<Face> Foam::MeshedSurface<Face>::subsetMesh
 
 
 template<class Face>
-Foam::MeshedSurface<Face>
-Foam::MeshedSurface<Face>::subsetMesh
+Foam::MeshedSurface<Face> Foam::MeshedSurface<Face>::subsetMesh
 (
     const labelHashSet& include
 ) const
@@ -1109,8 +1105,7 @@ void Foam::MeshedSurface<Face>::transfer
 
 
 template<class Face>
-Foam::Xfer< Foam::MeshedSurface<Face> >
-Foam::MeshedSurface<Face>::xfer()
+Foam::Xfer<Foam::MeshedSurface<Face> > Foam::MeshedSurface<Face>::xfer()
 {
     return xferMove(*this);
 }
@@ -1159,6 +1154,7 @@ void Foam::MeshedSurface<Face>::write
     MeshedSurfaceProxy<Face>(*this).write(t, surfName);
 }
 
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Face>
@@ -1173,8 +1169,7 @@ void Foam::MeshedSurface<Face>::operator=(const MeshedSurface& surf)
 
 
 template<class Face>
-Foam::MeshedSurface<Face>::operator
-Foam::MeshedSurfaceProxy<Face>() const
+Foam::MeshedSurface<Face>::operator Foam::MeshedSurfaceProxy<Face>() const
 {
     return MeshedSurfaceProxy<Face>
     (
@@ -1184,9 +1179,6 @@ Foam::MeshedSurfaceProxy<Face>() const
     );
 }
 
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -105,6 +105,8 @@ void Foam::molecule::readFields(Cloud<molecule>& mC)
         return;
     }
 
+    Particle<molecule>::readFields(mC);
+
     IOField<tensor> Q(mC.fieldIOobject("Q", IOobject::MUST_READ));
     mC.checkFieldIOobject(mC, Q);
 

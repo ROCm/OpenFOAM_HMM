@@ -170,11 +170,13 @@ inline Foam::PtrList<T>::iterator::iterator(T** ptr)
     ptr_(ptr)
 {}
 
+
 template<class T>
 inline bool Foam::PtrList<T>::iterator::operator==(const iterator& iter) const
 {
     return ptr_ == iter.ptr_;
 }
+
 
 template<class T>
 inline bool Foam::PtrList<T>::iterator::operator!=(const iterator& iter) const
@@ -182,17 +184,20 @@ inline bool Foam::PtrList<T>::iterator::operator!=(const iterator& iter) const
     return ptr_ != iter.ptr_;
 }
 
+
 template<class T>
 inline T& Foam::PtrList<T>::iterator::operator*()
 {
     return **ptr_;
 }
 
+
 template<class T>
 inline T& Foam::PtrList<T>::iterator::operator()()
 {
     return operator*();
 }
+
 
 template<class T>
 inline typename Foam::PtrList<T>::iterator
@@ -201,6 +206,7 @@ Foam::PtrList<T>::iterator::operator++()
     ++ptr_;
     return *this;
 }
+
 
 template<class T>
 inline typename Foam::PtrList<T>::iterator
@@ -211,6 +217,7 @@ Foam::PtrList<T>::iterator::operator++(int)
     return tmp;
 }
 
+
 template<class T>
 inline typename Foam::PtrList<T>::iterator
 Foam::PtrList<T>::iterator::operator--()
@@ -218,6 +225,7 @@ Foam::PtrList<T>::iterator::operator--()
     --ptr_;
     return *this;
 }
+
 
 template<class T>
 inline typename Foam::PtrList<T>::iterator
@@ -228,6 +236,7 @@ Foam::PtrList<T>::iterator::operator--(int)
     return tmp;
 }
 
+
 template<class T>
 inline typename Foam::PtrList<T>::iterator
 Foam::PtrList<T>::iterator::operator+=(label n)
@@ -235,6 +244,7 @@ Foam::PtrList<T>::iterator::operator+=(label n)
     ptr_ += n;
     return *this;
 }
+
 
 template<class T>
 inline typename Foam::PtrList<T>::iterator
@@ -244,6 +254,7 @@ Foam::operator+(const typename PtrList<T>::iterator& iter, label n)
     return tmp += n;
 }
 
+
 template<class T>
 inline typename Foam::PtrList<T>::iterator
 Foam::operator+(label n, const typename PtrList<T>::iterator& iter)
@@ -251,6 +262,7 @@ Foam::operator+(label n, const typename PtrList<T>::iterator& iter)
     typename PtrList<T>::iterator tmp = iter;
     return tmp += n;
 }
+
 
 template<class T>
 inline typename Foam::PtrList<T>::iterator
@@ -260,6 +272,7 @@ Foam::PtrList<T>::iterator::operator-=(label n)
     return *this;
 }
 
+
 template<class T>
 inline typename Foam::PtrList<T>::iterator
 Foam::operator-(const typename PtrList<T>::iterator& iter, label n)
@@ -267,6 +280,7 @@ Foam::operator-(const typename PtrList<T>::iterator& iter, label n)
     typename PtrList<T>::iterator tmp = iter;
     return tmp -= n;
 }
+
 
 template<class T>
 inline Foam::label Foam::operator-
@@ -278,11 +292,13 @@ inline Foam::label Foam::operator-
     return (iter1.ptr_ - iter2.ptr_)/sizeof(T*);
 }
 
+
 template<class T>
 inline T& Foam::PtrList<T>::iterator::operator[](label n)
 {
     return *(*this + n);
 }
+
 
 template<class T>
 inline bool Foam::PtrList<T>::iterator::operator<(const iterator& iter) const
@@ -290,11 +306,13 @@ inline bool Foam::PtrList<T>::iterator::operator<(const iterator& iter) const
     return ptr_ < iter.ptr_;
 }
 
+
 template<class T>
 inline bool Foam::PtrList<T>::iterator::operator>(const iterator& iter) const
 {
     return ptr_ > iter.ptr_;
 }
+
 
 template<class T>
 inline bool Foam::PtrList<T>::iterator::operator<=(const iterator& iter) const
@@ -302,22 +320,23 @@ inline bool Foam::PtrList<T>::iterator::operator<=(const iterator& iter) const
     return ptr_ <= iter.ptr_;
 }
 
+
 template<class T>
 inline bool Foam::PtrList<T>::iterator::operator>=(const iterator& iter) const
 {
     return ptr_ >= iter.ptr_;
 }
 
+
 template<class T>
-inline typename Foam::PtrList<T>::iterator
-Foam::PtrList<T>::begin()
+inline typename Foam::PtrList<T>::iterator Foam::PtrList<T>::begin()
 {
     return ptrs_.begin();
 }
 
+
 template<class T>
-inline typename Foam::PtrList<T>::iterator
-Foam::PtrList<T>::end()
+inline typename Foam::PtrList<T>::iterator Foam::PtrList<T>::end()
 {
     return ptrs_.end();
 }
