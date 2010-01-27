@@ -670,7 +670,6 @@ void Foam::refinementSurfaces::findHigherIntersection
             haveLevelField = true;
         }
 
-
         if (haveLevelField)
         {
             forAll(intersectionInfo, i)
@@ -741,8 +740,8 @@ void Foam::refinementSurfaces::findHigherIntersection
             }
             else
             {
-                p0[missI] = p0[pointI];
-                p1[missI] = p1[pointI];
+                p0[missI] = start[pointI];
+                p1[missI] = end[pointI];
                 intersectionToPoint[missI] = pointI;
                 missI++;
             }
