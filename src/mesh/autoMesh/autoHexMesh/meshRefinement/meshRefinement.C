@@ -54,6 +54,7 @@ License
 #include "Random.H"
 #include "searchableSurfaces.H"
 #include "treeBoundBox.H"
+#include "zeroGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -2128,7 +2129,8 @@ void Foam::meshRefinement::dumpRefinementLevel() const
             false
         ),
         mesh_,
-        dimensionedScalar("zero", dimless, 0)
+        dimensionedScalar("zero", dimless, 0),
+        zeroGradientFvPatchScalarField::typeName
     );
 
     const labelList& cellLevel = meshCutter_.cellLevel();

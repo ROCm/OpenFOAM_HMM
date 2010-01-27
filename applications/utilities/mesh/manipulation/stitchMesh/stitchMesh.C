@@ -96,6 +96,7 @@ void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
+#   include "addRegionOption.H"
 
     argList::validArgs.append("masterPatch");
     argList::validArgs.append("slavePatch");
@@ -109,7 +110,7 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
     runTime.functionObjects().off();
-#   include "createMesh.H"
+#   include "createNamedMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
 

@@ -95,7 +95,7 @@ protected:
         class unionEqOp
         {
             public:
-            void operator()( labelList& x, const labelList& y ) const;
+            void operator()(labelList& x, const labelList& y) const;
         };
 
         //- Collect cell neighbours of faces in global numbering
