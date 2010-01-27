@@ -84,7 +84,7 @@ class pressureGradientExplicitSource
         //- Name of cell source
         word cellSource_;
 
-        //- The method by which the cells will be selecetd
+        //- The method by which the cells will be selected
         autoPtr<topoSetSource> cellSelector_;
 
         //- The set of selected cells
