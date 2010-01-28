@@ -61,7 +61,7 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
     {
         label iter = 0;
 
-        bool converged = true;
+        bool allConverged = true;
 
         // constraint force accumulator
         vector cFA = vector::zero;
@@ -86,7 +86,7 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
 
             }
 
-            converged = true;
+            allConverged = true;
 
             forAll(constraints_, cI)
             {
@@ -101,7 +101,7 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
                 // constraint moment
                 vector cM = vector::zero;
 
-                converged = converged && constraints_[cI].constrain
+                bool constraintConverged = constraints_[cI].constrain
                 (
                     *this,
                     cFA,
@@ -112,6 +112,8 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
                     cM
                 );
 
+                allConverged = allConverged && constraintConverged;
+
                 // Accumulate constraint force
                 cFA += cF;
 
@@ -119,7 +121,7 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
                 cMA += cM + ((cP - centreOfMass()) ^ cF);
             }
 
-        } while(!converged);
+        } while(!allConverged);
 
         Info<< "Constraints converged in " << iter << " iterations" << nl
             << "Constraint force: " << cFA << nl
