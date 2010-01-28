@@ -90,7 +90,7 @@ protected:
         //- Chemistry solver
         autoPtr<chemistrySolver<CompType, ThermoType> > solver_;
 
-        //- Chemical source term
+        //- Chemical source term [kg/m3/s]
         PtrList<scalarField> RR_;
 
 
@@ -180,7 +180,7 @@ public:
             //- Return the chemical time scale
             virtual tmp<volScalarField> tc() const;
 
-            //- Return the heat release
+            //- Return the heat release, i.e. enthalpy/sec [m2/s3]
             virtual tmp<volScalarField> dQ() const;
 
 
