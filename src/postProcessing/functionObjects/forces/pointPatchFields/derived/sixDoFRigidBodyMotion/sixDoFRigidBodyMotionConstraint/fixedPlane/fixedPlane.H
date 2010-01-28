@@ -23,21 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::sixDoFRigidBodyMotionConstraints::fixedPoint
+    Foam::sixDoFRigidBodyMotionConstraints::fixedPlane
 
 Description
-    sixDoFRigidBodyMotionConstraint.  Point fixed in space.
+    sixDoFRigidBodyMotionConstraint.  Reference point may only move
+    along a plane.
 
 SourceFiles
-    fixedPoint.C
+    fixedPlane.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedPoint_H
-#define fixedPoint_H
+#ifndef fixedPlane_H
+#define fixedPlane_H
 
 #include "sixDoFRigidBodyMotionConstraint.H"
-#include "point.H"
+#include "plane.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,32 +49,30 @@ namespace sixDoFRigidBodyMotionConstraints
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class fixedPoint Declaration
+                          Class fixedPlane Declaration
 \*---------------------------------------------------------------------------*/
 
-class fixedPoint
+class fixedPlane
 :
     public sixDoFRigidBodyMotionConstraint
 {
     // Private data
 
-        //- Point which is rigidly attached to the body and constrains
-        //  it so that this point remains fixed.  This serves as the
-        //  reference point for displacements as well as the target
-        //  position.
-        point fixedPoint_;
+        //- Plane which the transformed reference point is constrained
+        //  to move along
+        plane fixedPlane_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("fixedPoint");
+    TypeName("fixedPlane");
 
 
     // Constructors
 
         //- Construct from components
-        fixedPoint
+        fixedPlane
         (
             const dictionary& sDoFRBMCDict
         );
@@ -83,14 +82,14 @@ public:
         {
             return autoPtr<sixDoFRigidBodyMotionConstraint>
             (
-                new fixedPoint(*this)
+                new fixedPlane(*this)
             );
         }
 
 
     // Destructor
 
-        virtual ~fixedPoint();
+        virtual ~fixedPlane();
 
 
     // Member Functions

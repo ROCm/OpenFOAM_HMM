@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fixedPoint.H"
+#include "fixedLine.H"
 #include "addToRunTimeSelectionTable.H"
 #include "sixDoFRigidBodyMotion.H"
 
@@ -34,11 +34,11 @@ namespace Foam
 {
 namespace sixDoFRigidBodyMotionConstraints
 {
-    defineTypeNameAndDebug(fixedPoint, 0);
+    defineTypeNameAndDebug(fixedLine, 0);
     addToRunTimeSelectionTable
     (
         sixDoFRigidBodyMotionConstraint,
-        fixedPoint,
+        fixedLine,
         dictionary
     );
 };
@@ -47,13 +47,14 @@ namespace sixDoFRigidBodyMotionConstraints
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::fixedPoint
+Foam::sixDoFRigidBodyMotionConstraints::fixedLine::fixedLine
 (
     const dictionary& sDoFRBMCDict
 )
 :
     sixDoFRigidBodyMotionConstraint(sDoFRBMCDict),
-    fixedPoint_(sDoFRBMCCoeffs_.lookup("fixedPoint"))
+    refPt_(),
+    dir_()
 {
     read(sDoFRBMCDict);
 }
@@ -61,13 +62,13 @@ Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::fixedPoint
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::~fixedPoint()
+Foam::sixDoFRigidBodyMotionConstraints::fixedLine::~fixedLine()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::constrain
+bool Foam::sixDoFRigidBodyMotionConstraints::fixedLine::constrain
 (
     const sixDoFRigidBodyMotion& motion,
     const vector& existingConstraintForce,
@@ -80,34 +81,24 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::constrain
 {
     point predictedPosition = motion.predictedPosition
     (
-        fixedPoint_,
+        refPt_,
         existingConstraintForce,
         existingConstraintMoment,
         deltaT
     );
 
-    constraintPosition = motion.currentPosition(fixedPoint_);
+    constraintPosition = motion.currentPosition(refPt_);
 
-    // Info<< "current position " << constraintPosition << nl
-    //     << "next predictedPosition " << predictedPosition
-    //     << endl;
+    Info<< "current position " << constraintPosition << nl
+        << "next predictedPosition " << predictedPosition
+        << endl;
 
-    vector error = predictedPosition - fixedPoint_;
+    // Vector from reference point to predicted point
+    vector rC = predictedPosition - refPt_;
 
-    // Info<< "error " << error << endl;
+    vector error = rC - ((rC) & dir_)*dir_;
 
-    // Correction force derived from Lagrange multiplier:
-    //     G = -lambda*grad(sigma)
-    // where
-    //     sigma = mag(error) = 0
-    // so
-    //     grad(sigma) = error/mag(error)
-    // Solving for lambda using the SHAKE methodology gives
-    //     lambda = mass*mag(error)/sqr(deltaT)
-    // This is only strictly applicable (i.e. will converge in one
-    // iteration) to constraints at the centre of mass.  Everything
-    // else will need to iterate, and may need under-relaxed to be
-    // stable.
+    Info<< "error " << error << endl;
 
     constraintForceIncrement =
         -relaxationFactor_*error*motion.mass()/sqr(deltaT);
@@ -118,14 +109,35 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::constrain
 }
 
 
-bool Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::read
+bool Foam::sixDoFRigidBodyMotionConstraints::fixedLine::read
 (
     const dictionary& sDoFRBMCDict
 )
 {
     sixDoFRigidBodyMotionConstraint::read(sDoFRBMCDict);
 
-    sDoFRBMCCoeffs_.lookup("fixedPoint") >> fixedPoint_;
+    sDoFRBMCCoeffs_.lookup("refPoint") >> refPt_;
+
+    sDoFRBMCCoeffs_.lookup("direction") >> dir_;
+
+    scalar magDir(mag(dir_));
+
+    if (magDir > VSMALL)
+    {
+        dir_ /= magDir;
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "Foam::sixDoFRigidBodyMotionConstraints::fixedLine::read"
+            "("
+                "const dictionary& sDoFRBMCDict"
+            ")"
+        )
+            << "line direction has zero length"
+            << abort(FatalError);
+    }
 
     return true;
 }

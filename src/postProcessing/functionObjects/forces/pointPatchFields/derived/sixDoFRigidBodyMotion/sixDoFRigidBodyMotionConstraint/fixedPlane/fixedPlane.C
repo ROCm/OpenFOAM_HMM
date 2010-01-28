@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fixedPoint.H"
+#include "fixedPlane.H"
 #include "addToRunTimeSelectionTable.H"
 #include "sixDoFRigidBodyMotion.H"
 
@@ -34,11 +34,11 @@ namespace Foam
 {
 namespace sixDoFRigidBodyMotionConstraints
 {
-    defineTypeNameAndDebug(fixedPoint, 0);
+    defineTypeNameAndDebug(fixedPlane, 0);
     addToRunTimeSelectionTable
     (
         sixDoFRigidBodyMotionConstraint,
-        fixedPoint,
+        fixedPlane,
         dictionary
     );
 };
@@ -47,13 +47,13 @@ namespace sixDoFRigidBodyMotionConstraints
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::fixedPoint
+Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::fixedPlane
 (
     const dictionary& sDoFRBMCDict
 )
 :
     sixDoFRigidBodyMotionConstraint(sDoFRBMCDict),
-    fixedPoint_(sDoFRBMCCoeffs_.lookup("fixedPoint"))
+    fixedPlane_(vector::one)
 {
     read(sDoFRBMCDict);
 }
@@ -61,13 +61,13 @@ Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::fixedPoint
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::~fixedPoint()
+Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::~fixedPlane()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::constrain
+bool Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::constrain
 (
     const sixDoFRigidBodyMotion& motion,
     const vector& existingConstraintForce,
@@ -78,36 +78,27 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::constrain
     vector& constraintMomentIncrement
 ) const
 {
+    const point& refPt = fixedPlane_.refPoint();
+
+    const vector& n = fixedPlane_.normal();
+
     point predictedPosition = motion.predictedPosition
     (
-        fixedPoint_,
+        refPt,
         existingConstraintForce,
         existingConstraintMoment,
         deltaT
     );
 
-    constraintPosition = motion.currentPosition(fixedPoint_);
+    constraintPosition = motion.currentPosition(refPt);
 
-    // Info<< "current position " << constraintPosition << nl
-    //     << "next predictedPosition " << predictedPosition
-    //     << endl;
+    Info<< "current position " << constraintPosition << nl
+        << "next predictedPosition " << predictedPosition
+        << endl;
 
-    vector error = predictedPosition - fixedPoint_;
+    vector error = ((predictedPosition - refPt) & n)*n;
 
-    // Info<< "error " << error << endl;
-
-    // Correction force derived from Lagrange multiplier:
-    //     G = -lambda*grad(sigma)
-    // where
-    //     sigma = mag(error) = 0
-    // so
-    //     grad(sigma) = error/mag(error)
-    // Solving for lambda using the SHAKE methodology gives
-    //     lambda = mass*mag(error)/sqr(deltaT)
-    // This is only strictly applicable (i.e. will converge in one
-    // iteration) to constraints at the centre of mass.  Everything
-    // else will need to iterate, and may need under-relaxed to be
-    // stable.
+    Info<< "error " << error << endl;
 
     constraintForceIncrement =
         -relaxationFactor_*error*motion.mass()/sqr(deltaT);
@@ -118,14 +109,18 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::constrain
 }
 
 
-bool Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::read
+bool Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::read
 (
     const dictionary& sDoFRBMCDict
 )
 {
     sixDoFRigidBodyMotionConstraint::read(sDoFRBMCDict);
 
-    sDoFRBMCCoeffs_.lookup("fixedPoint") >> fixedPoint_;
+    point refPt = sDoFRBMCCoeffs_.lookup("refPoint");
+
+    vector normal = sDoFRBMCCoeffs_.lookup("normal");
+
+    fixedPlane_ = plane(refPt, normal);
 
     return true;
 }

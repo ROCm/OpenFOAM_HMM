@@ -23,18 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::sixDoFRigidBodyMotionConstraints::fixedPoint
+    Foam::sixDoFRigidBodyMotionConstraints::fixedLine
 
 Description
-    sixDoFRigidBodyMotionConstraint.  Point fixed in space.
+    sixDoFRigidBodyMotionConstraint.  Reference point may only move
+    along a line.
 
 SourceFiles
-    fixedPoint.C
+    fixedLine.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedPoint_H
-#define fixedPoint_H
+#ifndef fixedLine_H
+#define fixedLine_H
 
 #include "sixDoFRigidBodyMotionConstraint.H"
 #include "point.H"
@@ -48,32 +49,32 @@ namespace sixDoFRigidBodyMotionConstraints
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class fixedPoint Declaration
+                          Class fixedLine Declaration
 \*---------------------------------------------------------------------------*/
 
-class fixedPoint
+class fixedLine
 :
     public sixDoFRigidBodyMotionConstraint
 {
     // Private data
 
-        //- Point which is rigidly attached to the body and constrains
-        //  it so that this point remains fixed.  This serves as the
-        //  reference point for displacements as well as the target
-        //  position.
-        point fixedPoint_;
+        //- Reference point for the constraining line
+        point refPt_;
+
+        //- Direction of the constraining line
+        vector dir_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("fixedPoint");
+    TypeName("fixedLine");
 
 
     // Constructors
 
         //- Construct from components
-        fixedPoint
+        fixedLine
         (
             const dictionary& sDoFRBMCDict
         );
@@ -83,14 +84,14 @@ public:
         {
             return autoPtr<sixDoFRigidBodyMotionConstraint>
             (
-                new fixedPoint(*this)
+                new fixedLine(*this)
             );
         }
 
 
     // Destructor
 
-        virtual ~fixedPoint();
+        virtual ~fixedLine();
 
 
     // Member Functions

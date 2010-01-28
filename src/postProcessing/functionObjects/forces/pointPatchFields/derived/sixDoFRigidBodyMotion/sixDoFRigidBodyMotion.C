@@ -90,7 +90,7 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
 
             forAll(constraints_, cI)
             {
-                // Info<< "Constraint " << cI << endl;
+                Info<< nl << "Constraint " << cI << endl;
 
                 // constraint position
                 point cP = vector::zero;
