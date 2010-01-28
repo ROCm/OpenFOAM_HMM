@@ -34,6 +34,7 @@ Description
         inlet
         {
             type        turbulentIntensityKineticEnergyInlet;
+            U           U;              // Name of U field (optional)
             intensity   0.05;           // 5% turbulence
             value       uniform 1;      // placeholder
         }
@@ -63,6 +64,9 @@ class turbulentIntensityKineticEnergyInletFvPatchScalarField
     public fixedValueFvPatchScalarField
 {
     // Private data
+
+        //- Name of belocity field
+        word UName_;
 
         //- Turbulent intensity as fraction of mean velocity
         scalar intensity_;

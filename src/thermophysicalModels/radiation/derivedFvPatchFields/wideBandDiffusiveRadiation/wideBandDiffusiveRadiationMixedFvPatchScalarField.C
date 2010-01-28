@@ -82,22 +82,25 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
     TName_(dict.lookup("T")),
     emissivity_(readScalar(dict.lookup("emissivity")))
 {
-    const scalarField& Tp =
-        patch().lookupPatchField<volScalarField, scalar>(TName_);
-
-    refValue() =
-        emissivity_*4.0*physicoChemical::sigma.value()*pow4(Tp)/pi;
-    refGrad() = 0.0;
-
     if (dict.found("value"))
     {
         fvPatchScalarField::operator=
         (
             scalarField("value", dict, p.size())
         );
+        refValue() = scalarField("refValue", dict, p.size());
+        refGrad() = scalarField("refGradient", dict, p.size());
+        valueFraction() = scalarField("valueFraction", dict, p.size());
     }
     else
     {
+        const scalarField& Tp =
+            patch().lookupPatchField<volScalarField, scalar>(TName_);
+
+        refValue() =
+            emissivity_*4.0*physicoChemical::sigma.value()*pow4(Tp)/pi;
+        refGrad() = 0.0;
+
         fvPatchScalarField::operator=(refValue());
     }
 }
@@ -218,10 +221,9 @@ void Foam::radiation::wideBandDiffusiveRadiationMixedFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchScalarField::write(os);
+    mixedFvPatchScalarField::write(os);
     os.writeKeyword("T") << TName_ << token::END_STATEMENT << nl;
     os.writeKeyword("emissivity") << emissivity_ << token::END_STATEMENT << nl;
-    writeEntry("value", os);
 }
 
 

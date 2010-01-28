@@ -141,7 +141,7 @@ Foam::fileName topoSet::topoSet::localPath
     const word& name
 )
 {
-    return mesh.pointsInstance()/polyMesh::meshSubDir/"sets"/name;
+    return mesh.facesInstance()/polyMesh::meshSubDir/"sets"/name;
 }
 
 
@@ -362,7 +362,7 @@ topoSet::topoSet
         IOobject
         (
             name,
-            mesh.pointsInstance(),
+            mesh.facesInstance(),
             polyMesh::meshSubDir/"sets",
             mesh,
             r,
@@ -402,7 +402,7 @@ topoSet::topoSet
         IOobject
         (
             name,
-            mesh.pointsInstance(),
+            mesh.facesInstance(),
             polyMesh::meshSubDir/"sets",
             mesh,
             NO_READ,
@@ -426,7 +426,7 @@ topoSet::topoSet
         IOobject
         (
             name,
-            mesh.pointsInstance(),
+            mesh.facesInstance(),
             polyMesh::meshSubDir/"sets",
             mesh,
             NO_READ,

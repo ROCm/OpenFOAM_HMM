@@ -28,7 +28,7 @@ Class
 Description
     Base class for field sources. Provides:
     - name
-    - references to mesh and time
+    - references to mesh and time databases
     - dimensions
     - volume type
     - startTime
