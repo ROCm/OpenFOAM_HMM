@@ -64,7 +64,7 @@ bool Foam::fileFormats::OBJedgeFormat::read
     }
 
     DynamicList<point> dynPoints;
-    DynamicList<edge>  dynEdges;
+    DynamicList<edge> dynEdges;
     DynamicList<label> dynUsedPoints;
 
     while (is.good())
@@ -195,7 +195,7 @@ void Foam::fileFormats::OBJedgeFormat::write
 )
 {
     const pointField& pointLst = mesh.points();
-    const edgeList&   edgeLst  = mesh.edges();
+    const edgeList& edgeLst = mesh.edges();
 
     OFstream os(filename);
     if (!os.good())

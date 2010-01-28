@@ -87,6 +87,7 @@ protected:
     //  Use with care.
     inline void size(const label);
 
+
 public:
 
     // Static Member Functions
@@ -109,7 +110,7 @@ public:
         List(const List<T>&);
 
         //- Construct by transferring the parameter contents
-        List(const Xfer< List<T> >&);
+        List(const Xfer<List<T> >&);
 
         //- Construct as copy or re-use as specified.
         List(List<T>&, bool reUse);
@@ -147,9 +148,8 @@ public:
         inline autoPtr<List<T> > clone() const;
 
 
-    // Destructor
-
-        ~List();
+    //- Destructor
+    ~List();
 
 
     // Related types
@@ -201,7 +201,7 @@ public:
             void transfer(SortableList<T>&);
 
             //- Transfer contents to the Xfer container
-            inline Xfer< List<T> > xfer();
+            inline Xfer<List<T> > xfer();
 
             //- Return subscript-checked element of UList.
             inline T& newElmt(const label);

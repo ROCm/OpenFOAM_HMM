@@ -67,11 +67,11 @@ void Foam::vtkPV3Foam::convertLagrangianField
 {
     const label nComp = pTraits<Type>::nComponents;
 
-    vtkFloatArray *pointData = vtkFloatArray::New();
-    pointData->SetNumberOfTuples( tf.size() );
-    pointData->SetNumberOfComponents( nComp );
-    pointData->Allocate( nComp*tf.size() );
-    pointData->SetName( tf.name().c_str() );
+    vtkFloatArray* pointData = vtkFloatArray::New();
+    pointData->SetNumberOfTuples(tf.size());
+    pointData->SetNumberOfComponents(nComp);
+    pointData->Allocate(nComp*tf.size());
+    pointData->SetName(tf.name().c_str());
 
     if (debug)
     {

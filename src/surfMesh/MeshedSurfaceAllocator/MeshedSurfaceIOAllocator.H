@@ -49,16 +49,15 @@ namespace Foam
                   Class MeshedSurfaceIOAllocator Declaration
 \*---------------------------------------------------------------------------*/
 
-//- A helper class for storing points, faces and zones
 class MeshedSurfaceIOAllocator
 {
     // Private data
 
         //- Points
-        pointIOField   points_;
+        pointIOField points_;
 
         //- Faces
-        faceIOList     faces_;
+        faceIOList faces_;
 
         //- Surface zones
         surfZoneIOList zones_;
@@ -100,14 +99,12 @@ public:
         MeshedSurfaceIOAllocator
         (
             const IOobject& ioPoints,
-            const Xfer< pointField >& points,
+            const Xfer<pointField>& points,
             const IOobject& ioFaces,
-            const Xfer< faceList >& faces,
+            const Xfer<faceList>& faces,
             const IOobject& ioZones,
-            const Xfer< surfZoneList >& zones
+            const Xfer<surfZoneList>& zones
         );
-
-    // Destructor
 
 
     // Member Functions
@@ -160,26 +157,26 @@ public:
             //  Note, optimized to avoid overwriting data (with Xfer::null)
             void resetFaces
             (
-                const Xfer< faceList >& faces,
-                const Xfer< surfZoneList >& zones
+                const Xfer<faceList>& faces,
+                const Xfer<surfZoneList>& zones
             );
 
             //- Reset primitive data (points, faces and zones)
             //  Note, optimized to avoid overwriting data (with Xfer::null)
             void reset
             (
-                const Xfer< pointField >& points,
-                const Xfer< faceList >& faces,
-                const Xfer< surfZoneList >& zones
+                const Xfer<pointField>& points,
+                const Xfer<faceList>& faces,
+                const Xfer<surfZoneList>& zones
             );
 
             //- Reset primitive data (points, faces and zones)
             //  Note, optimized to avoid overwriting data (with Xfer::null)
             void reset
             (
-                const Xfer< List<point> >& points,
-                const Xfer< faceList >& faces,
-                const Xfer< surfZoneList >& zones
+                const Xfer<List<point> >& points,
+                const Xfer<faceList>& faces,
+                const Xfer<surfZoneList>& zones
             );
 };
 

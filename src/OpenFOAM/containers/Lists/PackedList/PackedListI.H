@@ -334,7 +334,6 @@ inline bool Foam::PackedList<nBits>::iterator::operator!=
 }
 
 
-
 template<unsigned nBits>
 inline bool Foam::PackedList<nBits>::const_iterator::operator==
 (
@@ -353,7 +352,6 @@ inline bool Foam::PackedList<nBits>::const_iterator::operator!=
 {
     return this->index_ != iter.index_;
 }
-
 
 
 template<unsigned nBits>
@@ -712,16 +710,14 @@ inline void Foam::PackedList<nBits>::shrink()
 }
 
 template<unsigned nBits>
-inline Foam::List<unsigned int>&
-Foam::PackedList<nBits>::storage()
+inline Foam::List<unsigned int>& Foam::PackedList<nBits>::storage()
 {
     return static_cast<StorageList&>(*this);
 }
 
 
 template<unsigned nBits>
-inline const Foam::List<unsigned int>&
-Foam::PackedList<nBits>::storage() const
+inline const Foam::List<unsigned int>& Foam::PackedList<nBits>::storage() const
 {
     return static_cast<const StorageList&>(*this);
 }
@@ -738,8 +734,7 @@ inline void Foam::PackedList<nBits>::transfer(PackedList<nBits>& lst)
 
 
 template<unsigned nBits>
-inline Foam::Xfer< Foam::PackedList<nBits> >
-Foam::PackedList<nBits>::xfer()
+inline Foam::Xfer<Foam::PackedList<nBits> > Foam::PackedList<nBits>::xfer()
 {
     return xferMove(*this);
 }

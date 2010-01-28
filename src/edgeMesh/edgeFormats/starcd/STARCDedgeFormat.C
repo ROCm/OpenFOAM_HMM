@@ -160,7 +160,6 @@ bool Foam::fileFormats::STARCDedgeFormat::readPoints
 }
 
 
-
 void Foam::fileFormats::STARCDedgeFormat::writePoints
 (
     Ostream& os,
@@ -177,8 +176,7 @@ void Foam::fileFormats::STARCDedgeFormat::writePoints
 
     forAll(pointLst, ptI)
     {
-        os
-            << ptI + 1 << " "
+        os  << ptI + 1 << " "
             << pointLst[ptI].x() << " "
             << pointLst[ptI].y() << " "
             << pointLst[ptI].z() << nl;
@@ -367,7 +365,7 @@ void Foam::fileFormats::STARCDedgeFormat::write
 )
 {
     const pointField& pointLst = mesh.points();
-    const edgeList&   edgeLst  = mesh.edges();
+    const edgeList& edgeLst = mesh.edges();
 
     fileName baseName = filename.lessExt();
 

@@ -90,20 +90,21 @@ protected:
 
     // Protected Member Functions
 
-    static bool readHeader(IFstream&, const word&);
+        static bool readHeader(IFstream&, const word&);
 
-    static void writeHeader(Ostream&, const char* filetype);
+        static void writeHeader(Ostream&, const char* filetype);
 
-    static bool readPoints(IFstream&, pointField&, labelList& ids);
+        static bool readPoints(IFstream&, pointField&, labelList& ids);
 
-    static void writePoints(Ostream&, const pointField&);
+        static void writePoints(Ostream&, const pointField&);
 
-    static void writeCase
-    (
-        Ostream&,
-        const pointField&,
-        const label nEdges
-    );
+        static void writeCase
+        (
+            Ostream&,
+            const pointField&,
+            const label nEdges
+        );
+
 
 public:
 

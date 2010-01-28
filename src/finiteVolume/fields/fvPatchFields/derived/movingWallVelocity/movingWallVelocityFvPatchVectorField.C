@@ -43,7 +43,8 @@ movingWallVelocityFvPatchVectorField::movingWallVelocityFvPatchVectorField
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    fixedValueFvPatchVectorField(p, iF)
+    fixedValueFvPatchVectorField(p, iF),
+    UName_("U")
 {}
 
 
@@ -55,7 +56,8 @@ movingWallVelocityFvPatchVectorField::movingWallVelocityFvPatchVectorField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchVectorField(ptf, p, iF, mapper)
+    fixedValueFvPatchVectorField(ptf, p, iF, mapper),
+    UName_(ptf.UName_)
 {}
 
 
@@ -66,7 +68,8 @@ movingWallVelocityFvPatchVectorField::movingWallVelocityFvPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchVectorField(p, iF)
+    fixedValueFvPatchVectorField(p, iF),
+    UName_(dict.lookupOrDefault<word>("U", "U"))
 {
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
 }
@@ -74,20 +77,22 @@ movingWallVelocityFvPatchVectorField::movingWallVelocityFvPatchVectorField
 
 movingWallVelocityFvPatchVectorField::movingWallVelocityFvPatchVectorField
 (
-    const movingWallVelocityFvPatchVectorField& pivpvf
+    const movingWallVelocityFvPatchVectorField& mwvpvf
 )
 :
-    fixedValueFvPatchVectorField(pivpvf)
+    fixedValueFvPatchVectorField(mwvpvf),
+    UName_(mwvpvf.UName_)
 {}
 
 
 movingWallVelocityFvPatchVectorField::movingWallVelocityFvPatchVectorField
 (
-    const movingWallVelocityFvPatchVectorField& pivpvf,
+    const movingWallVelocityFvPatchVectorField& mwvpvf,
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    fixedValueFvPatchVectorField(pivpvf, iF)
+    fixedValueFvPatchVectorField(mwvpvf, iF),
+    UName_(mwvpvf.UName_)
 {}
 
 
@@ -114,7 +119,7 @@ void movingWallVelocityFvPatchVectorField::updateCoeffs()
 
     vectorField Up = (pp.faceCentres() - oldFc)/mesh.time().deltaTValue();
 
-    const volVectorField& U = db().lookupObject<volVectorField>("U");
+    const volVectorField& U = db().lookupObject<volVectorField>(UName_);
     scalarField phip =
         p.patchField<surfaceScalarField, scalar>(fvc::meshPhi(U));
 
@@ -132,6 +137,7 @@ void movingWallVelocityFvPatchVectorField::updateCoeffs()
 void movingWallVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
+    writeEntryIfDifferent<word>(os, "U", "U", UName_);
     writeEntry("value", os);
 }
 

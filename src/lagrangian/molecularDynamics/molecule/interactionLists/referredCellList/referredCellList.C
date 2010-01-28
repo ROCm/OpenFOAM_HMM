@@ -121,8 +121,10 @@ void Foam::referredCellList::buildReferredCellList
         }
         else
         {
-            FatalErrorIn ("referredCellList.C")
-                << nl << "unable to read undecomposed boundary file from "
+            FatalErrorIn
+            (
+                "referredCellList::buildReferredCellList(bool)"
+            )   << "unable to read undecomposed boundary file from "
                 << "constant/polyMesh" << nl
                 << abort(FatalError);
         }
@@ -333,9 +335,10 @@ void Foam::referredCellList::buildReferredCellList
                             > interactionLists::transTol
                     )
                     {
-                        FatalErrorIn ("referredCellList.C")
-                            << nl << "Face pairs on patch "
-                            << patch.name()
+                        FatalErrorIn
+                        (
+                            "referredCellList::buildReferredCellList(bool)"
+                        )   << "Face pairs on patch " << patch.name()
                             << ", segment " << patchNames[nUP]
                             << " do not give the same referring "
                             << " transformations to within tolerance of "
@@ -423,9 +426,10 @@ void Foam::referredCellList::buildReferredCellList
                                 > interactionLists::transTol
                         )
                         {
-                            FatalErrorIn ("referredCellList.C")
-                                << nl << "Face pairs on patch "
-                                << patch.name()
+                            FatalErrorIn
+                            (
+                                "referredCellList::buildReferredCellList(bool)"
+                            )   << "Face pairs on patch " << patch.name()
                                 << " do not give the same referring "
                                 << " transformations to within tolerance of "
                                 << interactionLists::transTol << nl
@@ -1022,8 +1026,10 @@ void Foam::referredCellList::buildReferredCellList
                     {
                         if (faceT == -1)
                         {
-                            FatalErrorIn ("referredCellList.C")
-                                << nl << "faceT == -1 encountered but "
+                            FatalErrorIn
+                            (
+                                "referredCellList::buildReferredCellList(bool)"
+                            )   << "faceT == -1 encountered but "
                                 << meshFacesOnThisSegment.size()
                                 << " faces found on patch segment."
                                 << abort(FatalError);
