@@ -412,7 +412,12 @@ void Foam::vtkPV3Foam::updateInfoSets
     {
         Info<< "     Foam::vtkPV3Foam::updateInfoSets read "
             << objects.names() << " from "
-            << dbPtr_().findInstance(meshDir_, "faces", IOobject::READ_IF_PRESENT)
+            <<  dbPtr_().findInstance
+                (
+                    meshDir_,
+                    "faces",
+                    IOobject::READ_IF_PRESENT
+                )
             << endl;
     }
 
