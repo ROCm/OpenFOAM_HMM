@@ -130,7 +130,7 @@ void Foam::vtkPV3Foam::updateInfoInternalMesh
 
     // Determine mesh parts (internalMesh, patches...)
     //- Add internal mesh as first entry
-    arrayRangeVolume_.reset( arraySelection->GetNumberOfArrays() );
+    arrayRangeVolume_.reset(arraySelection->GetNumberOfArrays());
     arraySelection->AddArray
     (
         "internalMesh"
@@ -173,7 +173,7 @@ void Foam::vtkPV3Foam::updateInfoLagrangian
         readDir(dbPtr_->timePath()/lagrangianPrefix, fileName::DIRECTORY)
     );
 
-    arrayRangeLagrangian_.reset( arraySelection->GetNumberOfArrays() );
+    arrayRangeLagrangian_.reset(arraySelection->GetNumberOfArrays());
 
     int nClouds = 0;
     forAll(cloudDirs, cloudI)
@@ -209,7 +209,7 @@ void Foam::vtkPV3Foam::updateInfoPatches
             << " [meshPtr=" << (meshPtr_ ? "set" : "NULL") << "]" << endl;
     }
 
-    arrayRangePatches_.reset( arraySelection->GetNumberOfArrays() );
+    arrayRangePatches_.reset(arraySelection->GetNumberOfArrays());
 
     int nPatches = 0;
     if (meshPtr_)
@@ -319,7 +319,7 @@ void Foam::vtkPV3Foam::updateInfoZones
         namesLst = readZoneNames("cellZones");
     }
 
-    arrayRangeCellZones_.reset( arraySelection->GetNumberOfArrays() );
+    arrayRangeCellZones_.reset(arraySelection->GetNumberOfArrays());
     forAll(namesLst, elemI)
     {
         arraySelection->AddArray
@@ -342,7 +342,7 @@ void Foam::vtkPV3Foam::updateInfoZones
         namesLst = readZoneNames("faceZones");
     }
 
-    arrayRangeFaceZones_.reset( arraySelection->GetNumberOfArrays() );
+    arrayRangeFaceZones_.reset(arraySelection->GetNumberOfArrays());
     forAll(namesLst, elemI)
     {
         arraySelection->AddArray
@@ -365,7 +365,7 @@ void Foam::vtkPV3Foam::updateInfoZones
         namesLst = readZoneNames("pointZones");
     }
 
-    arrayRangePointZones_.reset( arraySelection->GetNumberOfArrays() );
+    arrayRangePointZones_.reset(arraySelection->GetNumberOfArrays());
     forAll(namesLst, elemI)
     {
         arraySelection->AddArray
@@ -409,7 +409,7 @@ void Foam::vtkPV3Foam::updateInfoSets
     );
 
 
-    arrayRangeCellSets_.reset( arraySelection->GetNumberOfArrays() );
+    arrayRangeCellSets_.reset(arraySelection->GetNumberOfArrays());
     arrayRangeCellSets_ += addToSelection<cellSet>
     (
         arraySelection,
@@ -417,7 +417,7 @@ void Foam::vtkPV3Foam::updateInfoSets
         " - cellSet"
     );
 
-    arrayRangeFaceSets_.reset( arraySelection->GetNumberOfArrays() );
+    arrayRangeFaceSets_.reset(arraySelection->GetNumberOfArrays());
     arrayRangeFaceSets_ += addToSelection<faceSet>
     (
         arraySelection,
@@ -425,7 +425,7 @@ void Foam::vtkPV3Foam::updateInfoSets
         " - faceSet"
     );
 
-    arrayRangePointSets_.reset( arraySelection->GetNumberOfArrays() );
+    arrayRangePointSets_.reset(arraySelection->GetNumberOfArrays());
     arrayRangePointSets_ += addToSelection<pointSet>
     (
         arraySelection,
