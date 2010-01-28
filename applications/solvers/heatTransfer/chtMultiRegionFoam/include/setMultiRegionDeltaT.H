@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,7 @@ Global
 
 Description
     Reset the timestep to maintain a constant maximum courant and diffusion
-    Number. Reduction of time-step is immediate, but increase is damped to avoid
+    Numbers. Reduction of time-step is immediate, but increase is damped to avoid
     unstable oscillations.
 
 \*---------------------------------------------------------------------------*/
