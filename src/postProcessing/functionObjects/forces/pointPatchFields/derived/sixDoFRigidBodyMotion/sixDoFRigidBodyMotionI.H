@@ -223,6 +223,15 @@ inline Foam::point Foam::sixDoFRigidBodyMotion::currentPosition
 }
 
 
+inline Foam::point Foam::sixDoFRigidBodyMotion::currentOrientation
+(
+    const vector& refDir
+) const
+{
+    return (Q() & refDir);
+}
+
+
 inline Foam::vector Foam::sixDoFRigidBodyMotion::omega() const
 {
     return  Q() & (inv(momentOfInertia_) & pi());

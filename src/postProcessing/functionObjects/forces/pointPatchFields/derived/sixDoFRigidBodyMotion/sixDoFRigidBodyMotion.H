@@ -272,6 +272,10 @@ public:
         //  motion state
         inline point currentPosition(const point& refPt) const;
 
+        //- Transform the given reference state direction by the current
+        //  motion state
+        inline point currentOrientation(const vector& refDir) const;
+
         //- Predict the position of the supplied point after deltaT
         //  given the current motion state and the additional supplied
         //  force and moment

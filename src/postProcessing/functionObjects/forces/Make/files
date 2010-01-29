@@ -16,6 +16,7 @@ sDoFRBMR = $(sDoFRBM)/sixDoFRigidBodyMotionRestraint
 $(sDoFRBMR)/sixDoFRigidBodyMotionRestraint/sixDoFRigidBodyMotionRestraint.C
 $(sDoFRBMR)/sixDoFRigidBodyMotionRestraint/newSixDoFRigidBodyMotionRestraint.C
 $(sDoFRBMR)/linearSpring/linearSpring.C
+$(sDoFRBMR)/linearSphericalAngularSpring/linearSphericalAngularSpring.C
 
 sDoFRBMC = $(sDoFRBM)/sixDoFRigidBodyMotionConstraint
 

@@ -45,7 +45,7 @@ void Foam::sixDoFRigidBodyMotion::applyRestraints()
 
             restraints_[rI].restrain(*this, rP, rF, rM);
 
-            Info<< "Restraint " << rI << " force " << rF << endl;
+            // Info<< "Restraint " << rI << " force " << rF << endl;
 
             a() += rF/mass_;
 
@@ -71,26 +71,11 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
 
         do
         {
-            iter++;
-
-            if (iter > maxConstraintIters_)
-            {
-                FatalErrorIn
-                (
-                    "Foam::sixDoFRigidBodyMotion::applyConstraints"
-                    "(scalar deltaT)"
-                )
-                    << nl << "Maximum number of constraint iterations ("
-                    << maxConstraintIters_ << ") exceeded." << nl
-                    << exit(FatalError);
-
-            }
-
             allConverged = true;
 
             forAll(constraints_, cI)
             {
-                Info<< nl << "Constraint " << cI << endl;
+                // Info<< nl << "Constraint " << cI << endl;
 
                 // constraint position
                 point cP = vector::zero;
@@ -121,12 +106,27 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
                 cMA += cM + ((cP - centreOfMass()) ^ cF);
             }
 
-        } while(!allConverged);
+        } while(!allConverged && ++iter < maxConstraintIters_);
 
-        Info<< "Constraints converged in " << iter << " iterations" << nl
-            << "Constraint force: " << cFA << nl
-            << "Constraint moment: " << cMA
-            << endl;
+        if (iter >= maxConstraintIters_)
+        {
+            FatalErrorIn
+            (
+                "Foam::sixDoFRigidBodyMotion::applyConstraints"
+                "(scalar deltaT)"
+            )
+                << nl << "Maximum number of sixDoFRigidBodyMotion constraint "
+                << "iterations (" << maxConstraintIters_ << ") exceeded." << nl
+                << exit(FatalError);
+        }
+        else
+        {
+            Info<< "sixDoFRigidBodyMotion constraints converged in "
+                << iter << " iterations" << nl
+            // << "Constraint force: " << cFA << nl
+            // << "Constraint moment: " << cMA
+                << endl;
+        }
 
         // Add the constrain forces and moments to the motion state variables
         a() += cFA/mass_;

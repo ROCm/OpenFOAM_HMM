@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fixedPlane.H"
+#include "linearSphericalAngularSpring.H"
 #include "addToRunTimeSelectionTable.H"
 #include "sixDoFRigidBodyMotion.H"
 
@@ -32,13 +32,13 @@ License
 
 namespace Foam
 {
-namespace sixDoFRigidBodyMotionConstraints
+namespace sixDoFRigidBodyMotionRestraints
 {
-    defineTypeNameAndDebug(fixedPlane, 0);
+    defineTypeNameAndDebug(linearSphericalAngularSpring, 0);
     addToRunTimeSelectionTable
     (
-        sixDoFRigidBodyMotionConstraint,
-        fixedPlane,
+        sixDoFRigidBodyMotionRestraint,
+        linearSphericalAngularSpring,
         dictionary
     );
 };
@@ -47,80 +47,80 @@ namespace sixDoFRigidBodyMotionConstraints
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::fixedPlane
+Foam::sixDoFRigidBodyMotionRestraints::linearSphericalAngularSpring::
+linearSphericalAngularSpring
 (
-    const dictionary& sDoFRBMCDict
+    const dictionary& sDoFRBMRDict
 )
 :
-    sixDoFRigidBodyMotionConstraint(sDoFRBMCDict),
-    fixedPlane_(vector::one)
+    sixDoFRigidBodyMotionRestraint(sDoFRBMRDict),
+    refDir_(),
+    stiffness_(),
+    damping_()
 {
-    read(sDoFRBMCDict);
+    read(sDoFRBMRDict);
 }
 
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::~fixedPlane()
+Foam::sixDoFRigidBodyMotionRestraints::linearSphericalAngularSpring::
+~linearSphericalAngularSpring()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::constrain
+void
+Foam::sixDoFRigidBodyMotionRestraints::linearSphericalAngularSpring::restrain
 (
     const sixDoFRigidBodyMotion& motion,
-    const vector& existingConstraintForce,
-    const vector& existingConstraintMoment,
-    scalar deltaT,
-    vector& constraintPosition,
-    vector& constraintForceIncrement,
-    vector& constraintMomentIncrement
+    vector& restraintPosition,
+    vector& restraintForce,
+    vector& restraintMoment
 ) const
 {
-    const point& refPt = fixedPlane_.refPoint();
+    vector curDir = motion.currentOrientation(refDir_);
 
-    const vector& n = fixedPlane_.normal();
+    vector a = refDir_ ^ curDir;
 
-    point predictedPosition = motion.predictedPosition
-    (
-        refPt,
-        existingConstraintForce,
-        existingConstraintMoment,
-        deltaT
-    );
+    scalar magA = mag(a);
 
-    constraintPosition = motion.currentPosition(refPt);
+    scalar theta = 0;
 
-    // Info<< "current position " << constraintPosition << nl
-    //     << "next predictedPosition " << predictedPosition
-    //     << endl;
+    if (magA > VSMALL)
+    {
+        a /= magA;
 
-    vector error = ((predictedPosition - refPt) & n)*n;
+        theta = acos(curDir & refDir_);
+    }
+    else
+    {
+        a = vector::zero;
+    }
 
-    // Info<< "error " << error << endl;
+    restraintMoment = -stiffness_*theta*a - damping_*motion.omega();
 
-    constraintForceIncrement =
-        -relaxationFactor_*error*motion.mass()/sqr(deltaT);
+    restraintForce = vector::zero;
 
-    constraintMomentIncrement = vector::zero;
-
-    return (mag(error) < tolerance_);
+    // Not needed to be altered as restraintForce is zero, but set to
+    // centre of mass to be sure of no spurious moment
+    restraintPosition = motion.centreOfMass();
 }
 
 
-bool Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::read
+bool Foam::sixDoFRigidBodyMotionRestraints::linearSphericalAngularSpring ::read
 (
-    const dictionary& sDoFRBMCDict
+    const dictionary& sDoFRBMRDict
 )
 {
-    sixDoFRigidBodyMotionConstraint::read(sDoFRBMCDict);
+    sixDoFRigidBodyMotionRestraint::read(sDoFRBMRDict);
 
-    point refPt = sDoFRBMCCoeffs_.lookup("refPoint");
+    sDoFRBMRCoeffs_.lookup("referenceDirection") >> refDir_;
 
-    vector normal = sDoFRBMCCoeffs_.lookup("normal");
+    sDoFRBMRCoeffs_.lookup("stiffness") >> stiffness_;
 
-    fixedPlane_ = plane(refPt, normal);
+    sDoFRBMRCoeffs_.lookup("damping") >> damping_;
 
     return true;
 }

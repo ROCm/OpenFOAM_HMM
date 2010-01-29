@@ -89,16 +89,16 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedLine::constrain
 
     constraintPosition = motion.currentPosition(refPt_);
 
-    Info<< "current position " << constraintPosition << nl
-        << "next predictedPosition " << predictedPosition
-        << endl;
+    // Info<< "current position " << constraintPosition << nl
+    //     << "next predictedPosition " << predictedPosition
+    //     << endl;
 
     // Vector from reference point to predicted point
     vector rC = predictedPosition - refPt_;
 
     vector error = rC - ((rC) & dir_)*dir_;
 
-    Info<< "error " << error << endl;
+    // Info<< "error " << error << endl;
 
     constraintForceIncrement =
         -relaxationFactor_*error*motion.mass()/sqr(deltaT);
