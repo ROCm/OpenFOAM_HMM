@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,57 +23,27 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
+    Calculates and outputs the mean and maximum Diffusion Numbers for the solid
+    regions
 
 \*---------------------------------------------------------------------------*/
 
-#include "AverageIOField.H"
-#include "fieldTypes.H"
+#ifndef solidRegionDiff_H
+#define solidRegionDiff_H
+
+#include "fvMesh.H"
 
 namespace Foam
 {
+    scalar solidRegionDiffNo
+    (
+        const fvMesh& mesh,
+        const Time& runTime,
+        const volScalarField& Cprho,
+        const volScalarField& K
+    );
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-typedef AverageIOField<scalar> scalarAverageIOField;
-typedef AverageIOField<vector> vectorAverageIOField;
-typedef AverageIOField<sphericalTensor> sphericalTensorAverageIOField;
-typedef AverageIOField<symmTensor> symmTensorAverageIOField;
-typedef AverageIOField<tensor> tensorAverageIOField;
-
-defineTemplateTypeNameAndDebugWithName
-(
-    scalarAverageIOField,
-    "scalarAverageField",
-    0
-);
-defineTemplateTypeNameAndDebugWithName
-(
-    vectorAverageIOField,
-    "vectorAverageField",
-    0
-);
-defineTemplateTypeNameAndDebugWithName
-(
-    sphericalTensorAverageIOField,
-    "sphericalTensorAverageField",
-    0
-);
-defineTemplateTypeNameAndDebugWithName
-(
-    symmTensorAverageIOField,
-    "symmTensorAverageField",
-    0
-);
-defineTemplateTypeNameAndDebugWithName
-(
-    tensorAverageIOField,
-    "tensorAverageField",
-    0
-);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+#endif
 
 // ************************************************************************* //

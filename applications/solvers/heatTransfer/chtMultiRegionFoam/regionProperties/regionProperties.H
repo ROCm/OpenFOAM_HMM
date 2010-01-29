@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,61 +23,75 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::pTraits
+    regionProperties
 
 Description
-    Traits class for primitives.
+    Simple class to hold region information for coupled region simulations
 
-    All primitives need a specialised version of this class
+SourceFiles
+    regionProperties.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pTraits_H
-#define pTraits_H
+#ifndef regionProperties_H
+#define regionProperties_H
+
+#include "IOdictionary.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class Istream;
-
 /*---------------------------------------------------------------------------*\
-                           Class pTraits Declaration
+                       Class regionProperties Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class PrimitiveType>
-class pTraits
+class regionProperties
 :
-    public PrimitiveType
+    public IOdictionary
 {
+    // Private data
+
+        //- List of the fluid region names
+        List<word> fluidRegionNames_;
+
+        //- List of the solid region names
+        List<word> solidRegionNames_;
+
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        regionProperties(const regionProperties&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const regionProperties&);
+
 
 public:
 
     // Constructors
 
-        pTraits(const PrimitiveType& p)
-        :
-            PrimitiveType(p)
-        {}
-
-        pTraits(Istream& is)
-        :
-            PrimitiveType(is)
-        {}
+        //- Construct from components
+        regionProperties(const Time& runTime);
 
 
-    // Member operators
+    // Destructor
 
-        operator PrimitiveType() const
-        {
-            return *this;
-        }
+        ~regionProperties();
 
-        operator PrimitiveType&()
-        {
-            return *this;
-        }
+
+    // Member Functions
+
+        // Access
+
+            //- Return const reference to the list of fluid region names
+            const List<word>& fluidRegionNames() const;
+
+            //- Return const reference to the list of solid region names
+            const List<word>& solidRegionNames() const;
 };
 
 

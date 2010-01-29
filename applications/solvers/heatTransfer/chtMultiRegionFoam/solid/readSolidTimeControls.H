@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,58 +22,14 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Global
+    readSolidTimeControls
+
 Description
+    Read the control parameters used in the solid
 
 \*---------------------------------------------------------------------------*/
 
-#include "AverageIOField.H"
-#include "fieldTypes.H"
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-typedef AverageIOField<scalar> scalarAverageIOField;
-typedef AverageIOField<vector> vectorAverageIOField;
-typedef AverageIOField<sphericalTensor> sphericalTensorAverageIOField;
-typedef AverageIOField<symmTensor> symmTensorAverageIOField;
-typedef AverageIOField<tensor> tensorAverageIOField;
-
-defineTemplateTypeNameAndDebugWithName
-(
-    scalarAverageIOField,
-    "scalarAverageField",
-    0
-);
-defineTemplateTypeNameAndDebugWithName
-(
-    vectorAverageIOField,
-    "vectorAverageField",
-    0
-);
-defineTemplateTypeNameAndDebugWithName
-(
-    sphericalTensorAverageIOField,
-    "sphericalTensorAverageField",
-    0
-);
-defineTemplateTypeNameAndDebugWithName
-(
-    symmTensorAverageIOField,
-    "symmTensorAverageField",
-    0
-);
-defineTemplateTypeNameAndDebugWithName
-(
-    tensorAverageIOField,
-    "tensorAverageField",
-    0
-);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+scalar maxDi = runTime.controlDict().lookupOrDefault<scalar>("maxDi", 10.0);
 
 // ************************************************************************* //

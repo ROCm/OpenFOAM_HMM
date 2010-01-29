@@ -22,58 +22,48 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
-#include "AverageIOField.H"
-#include "fieldTypes.H"
+#include "regionProperties.H"
 
-namespace Foam
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::regionProperties::regionProperties(const Time& runTime)
+:
+    IOdictionary
+    (
+        IOobject
+        (
+            "regionProperties",
+            runTime.time().constant(),
+            runTime.db(),
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    ),
+    fluidRegionNames_(lookup("fluidRegionNames")),
+    solidRegionNames_(lookup("solidRegionNames"))
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::regionProperties::~regionProperties()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+const Foam::List<Foam::word>& Foam::regionProperties::fluidRegionNames() const
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-typedef AverageIOField<scalar> scalarAverageIOField;
-typedef AverageIOField<vector> vectorAverageIOField;
-typedef AverageIOField<sphericalTensor> sphericalTensorAverageIOField;
-typedef AverageIOField<symmTensor> symmTensorAverageIOField;
-typedef AverageIOField<tensor> tensorAverageIOField;
-
-defineTemplateTypeNameAndDebugWithName
-(
-    scalarAverageIOField,
-    "scalarAverageField",
-    0
-);
-defineTemplateTypeNameAndDebugWithName
-(
-    vectorAverageIOField,
-    "vectorAverageField",
-    0
-);
-defineTemplateTypeNameAndDebugWithName
-(
-    sphericalTensorAverageIOField,
-    "sphericalTensorAverageField",
-    0
-);
-defineTemplateTypeNameAndDebugWithName
-(
-    symmTensorAverageIOField,
-    "symmTensorAverageField",
-    0
-);
-defineTemplateTypeNameAndDebugWithName
-(
-    tensorAverageIOField,
-    "tensorAverageField",
-    0
-);
+    return fluidRegionNames_;
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+const Foam::List<Foam::word>& Foam::regionProperties::solidRegionNames() const
+{
+    return solidRegionNames_;
+}
 
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -67,6 +67,7 @@ dictionaryReplacement
             ".*"
             {
                 type            calculated;
+                value           uniform 8000;
             }
         }
     }
@@ -80,6 +81,7 @@ dictionaryReplacement
             ".*"
             {
                 type            zeroGradient;
+                value           uniform 80;
             }
         }
     }
@@ -93,6 +95,7 @@ dictionaryReplacement
             ".*"
             {
                 type            zeroGradient;
+                value           uniform 450;
             }
         }
     }

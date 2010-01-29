@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,58 +22,48 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Global
+    setMultiRegionDeltaT
+
 Description
+    Reset the timestep to maintain a constant maximum courant and diffusion
+    Numbers. Reduction of time-step is immediate, but increase is damped to avoid
+    unstable oscillations.
 
 \*---------------------------------------------------------------------------*/
 
-#include "AverageIOField.H"
-#include "fieldTypes.H"
-
-namespace Foam
+if (adjustTimeStep)
 {
+    if (CoNum == -GREAT)
+    {
+        CoNum = SMALL;
+    }
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+    if (DiNum == -GREAT)
+    {
+        DiNum = SMALL;
+    }
 
-typedef AverageIOField<scalar> scalarAverageIOField;
-typedef AverageIOField<vector> vectorAverageIOField;
-typedef AverageIOField<sphericalTensor> sphericalTensorAverageIOField;
-typedef AverageIOField<symmTensor> symmTensorAverageIOField;
-typedef AverageIOField<tensor> tensorAverageIOField;
+    scalar maxDeltaTFluid = maxCo/(CoNum + SMALL);
+    scalar maxDeltaTSolid = maxDi/(DiNum + SMALL);
 
-defineTemplateTypeNameAndDebugWithName
-(
-    scalarAverageIOField,
-    "scalarAverageField",
-    0
-);
-defineTemplateTypeNameAndDebugWithName
-(
-    vectorAverageIOField,
-    "vectorAverageField",
-    0
-);
-defineTemplateTypeNameAndDebugWithName
-(
-    sphericalTensorAverageIOField,
-    "sphericalTensorAverageField",
-    0
-);
-defineTemplateTypeNameAndDebugWithName
-(
-    symmTensorAverageIOField,
-    "symmTensorAverageField",
-    0
-);
-defineTemplateTypeNameAndDebugWithName
-(
-    tensorAverageIOField,
-    "tensorAverageField",
-    0
-);
+    scalar deltaTFluid =
+        min
+        (
+            min(maxDeltaTFluid, 1.0 + 0.1*maxDeltaTFluid),
+            1.2
+        );
 
+    runTime.setDeltaT
+    (
+        min
+        (
+            min(deltaTFluid, maxDeltaTSolid)*runTime.deltaT().value(),
+            maxDeltaT
+        )
+    );
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    Info<< "deltaT = " <<  runTime.deltaT().value() << endl;
+}
 
 // ************************************************************************* //
