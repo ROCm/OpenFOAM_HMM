@@ -39,6 +39,70 @@ void Foam::sixDoFRigidBodyMotion::write(Ostream& os) const
         << momentOfInertia_ << token::END_STATEMENT << nl;
     os.writeKeyword("mass")
         << mass_ << token::END_STATEMENT << nl;
+
+    if (restraints_.size())
+    {
+        dictionary restraintsDict;
+
+        forAll(restraints_, rI)
+        {
+            word restraintType = restraints_[rI].type();
+
+            dictionary restraintDict;
+
+            restraintDict.add("sixDoFRigidBodyMotionRestraint", restraintType);
+
+            restraintDict.add
+            (
+                word(restraintType + "Coeffs"), restraints_[rI].coeffDict()
+            );
+
+            restraintsDict.add(restraints_[rI].name(), restraintDict);
+        }
+
+        os.writeKeyword("restraints") << restraintsDict;
+    }
+
+    if (constraints_.size())
+    {
+        dictionary constraintsDict;
+
+        constraintsDict.add("maxIterations", maxConstraintIters_);
+
+        forAll(constraints_, rI)
+        {
+            word constraintType = constraints_[rI].type();
+
+            dictionary constraintDict;
+
+            constraintDict.add
+            (
+                "sixDoFRigidBodyMotionConstraint",
+                constraintType
+            );
+
+            constraintDict.add
+            (
+                "tolerance",
+                constraints_[rI].tolerance()
+            );
+
+            constraintDict.add
+            (
+                "relaxationFactor",
+                constraints_[rI].relaxationFactor()
+            );
+
+            constraintDict.add
+            (
+                word(constraintType + "Coeffs"), constraints_[rI].coeffDict()
+            );
+
+            constraintsDict.add(constraints_[rI].name(), constraintDict);
+        }
+
+        os.writeKeyword("constraints") << constraintsDict;
+    }
 }
 
 
@@ -71,7 +135,7 @@ Foam::Ostream& Foam::operator<<
     os  << sDoFRBM.motionState()
         << token::SPACE << sDoFRBM.refCentreOfMass()
         << token::SPACE << sDoFRBM.momentOfInertia()
-        << token::SPACE << sDoFRBM.mass() ;
+        << token::SPACE << sDoFRBM.mass();
 
     // Check state of Ostream
     os.check

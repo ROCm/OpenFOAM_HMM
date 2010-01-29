@@ -118,6 +118,26 @@ bool Foam::sixDoFRigidBodyMotionRestraints::linearSphericalAngularSpring ::read
 
     sDoFRBMRCoeffs_.lookup("referenceDirection") >> refDir_;
 
+    scalar magRefDir(mag(refDir_));
+
+    if (magRefDir > VSMALL)
+    {
+        refDir_ /= magRefDir;
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "bool Foam::sixDoFRigidBodyMotionRestraints::"
+            "linearSphericalAngularSpring ::read"
+            "("
+                "const dictionary& sDoFRBMRDict"
+            ")"
+        )
+            << "referenceDirection has zero length"
+            << abort(FatalError);
+    }
+
     sDoFRBMRCoeffs_.lookup("stiffness") >> stiffness_;
 
     sDoFRBMRCoeffs_.lookup("damping") >> damping_;

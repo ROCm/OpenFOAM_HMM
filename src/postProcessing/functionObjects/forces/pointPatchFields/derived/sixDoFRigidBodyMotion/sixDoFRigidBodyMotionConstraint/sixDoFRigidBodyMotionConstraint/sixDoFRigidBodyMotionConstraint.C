@@ -39,6 +39,7 @@ Foam::sixDoFRigidBodyMotionConstraint::sixDoFRigidBodyMotionConstraint
     const dictionary& sDoFRBMCDict
 )
 :
+    name_(fileName(sDoFRBMCDict.name().name()).components(token::COLON).last()),
     sDoFRBMCCoeffs_
     (
         sDoFRBMCDict.subDict
@@ -69,6 +70,12 @@ bool Foam::sixDoFRigidBodyMotionConstraint::read
 )
 {
     tolerance_ = (readScalar(sDoFRBMCDict.lookup("tolerance")));
+
+    relaxationFactor_ = sDoFRBMCDict.lookupOrDefault<scalar>
+    (
+        "relaxationFactor",
+        1
+    );
 
     sDoFRBMCCoeffs_ = sDoFRBMCDict.subDict(type() + "Coeffs");
 

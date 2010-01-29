@@ -70,6 +70,9 @@ protected:
 
     // Protected data
 
+        //- Name of the constraint in dictionary
+        word name_;
+
         //- Constraint model specific coefficient dictionary
         dictionary sDoFRBMCCoeffs_;
 
@@ -143,6 +146,32 @@ public:
 
         //- Update properties from given dictionary
         virtual bool read(const dictionary& sDoFRBMCDict) = 0;
+
+        // Access
+
+            //- Return access to the name of the restraint
+            inline const word& name() const
+            {
+                return name_;
+            }
+
+            // Return access to sDoFRBMCCoeffs
+            inline const dictionary& coeffDict() const
+            {
+                return sDoFRBMCCoeffs_;
+            }
+
+            //- Return access to the tolerance
+            inline scalar tolerance() const
+            {
+                return tolerance_;
+            }
+
+            //- Return access to the relaxationFactor
+            inline scalar relaxationFactor() const
+            {
+                return relaxationFactor_;
+            }
 };
 
 

@@ -45,7 +45,9 @@ void Foam::sixDoFRigidBodyMotion::applyRestraints()
 
             restraints_[rI].restrain(*this, rP, rF, rM);
 
-            // Info<< "Restraint " << rI << " force " << rF << endl;
+            // Info<< "Restraint " << rI << " force " << rF << nl
+            //     << "Restraint " << rI << " moment " << rM
+            //     << endl;
 
             a() += rF/mass_;
 
@@ -122,9 +124,9 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
         else
         {
             Info<< "sixDoFRigidBodyMotion constraints converged in "
-                << iter << " iterations" << nl
-            // << "Constraint force: " << cFA << nl
-            // << "Constraint moment: " << cMA
+                << iter << " iterations"
+                // << nl << "Constraint force: " << cFA << nl
+                // << "Constraint moment: " << cMA
                 << endl;
         }
 
