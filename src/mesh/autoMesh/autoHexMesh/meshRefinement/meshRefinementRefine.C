@@ -219,6 +219,7 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
             << endl;
 
         faceSet changedFacesSet(mesh, "changedFaces", changedFaces);
+        changedFacesSet.instance() = mesh.time().timeName();
         Pout<< "getChangedFaces : Writing " << changedFaces.size()
             << " changed faces to faceSet " << changedFacesSet.name()
             << endl;

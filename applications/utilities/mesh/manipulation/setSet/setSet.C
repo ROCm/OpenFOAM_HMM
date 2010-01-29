@@ -304,7 +304,13 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
     IOobjectList objects
     (
         mesh,
-        mesh.pointsInstance(),
+        mesh.time().findInstance
+        (
+            polyMesh::meshSubDir/"sets",
+            word::null,
+            IOobject::READ_IF_PRESENT,
+            mesh.facesInstance()
+        ),
         polyMesh::meshSubDir/"sets"
     );
     IOobjectList cellSets(objects.lookupClass(cellSet::typeName));
@@ -417,7 +423,13 @@ void removeSet
     IOobjectList objects
     (
         mesh,
-        mesh.pointsInstance(),
+        mesh.time().findInstance
+        (
+            polyMesh::meshSubDir/"sets",
+            word::null,
+            IOobject::READ_IF_PRESENT,
+            mesh.facesInstance()
+        ),
         polyMesh::meshSubDir/"sets"
     );
 

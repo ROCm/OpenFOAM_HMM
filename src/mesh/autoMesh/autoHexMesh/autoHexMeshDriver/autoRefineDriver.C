@@ -415,7 +415,9 @@ Foam::label Foam::autoRefineDriver::shellRefine
             Pout<< "Dumping " << candidateCells.size()
                 << " cells to cellSet candidateCellsFromShells." << endl;
 
-            cellSet(mesh, "candidateCellsFromShells", candidateCells).write();
+            cellSet c(mesh, "candidateCellsFromShells", candidateCells);
+            c.instance() = mesh.time().timeName();
+            c.write();
         }
 
         // Problem choosing starting faces for bufferlayers (bFaces)
