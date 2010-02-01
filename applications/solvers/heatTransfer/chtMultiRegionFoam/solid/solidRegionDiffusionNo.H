@@ -1,5 +1,5 @@
     scalar DiNum = -GREAT;
-    if (solidRegions.size())//
+    if (solidRegions.size())
     {
         forAll(solidRegions, regionI)
         {

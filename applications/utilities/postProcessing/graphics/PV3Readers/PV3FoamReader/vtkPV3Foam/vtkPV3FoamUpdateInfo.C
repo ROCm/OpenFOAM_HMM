@@ -400,25 +400,30 @@ void Foam::vtkPV3Foam::updateInfoSets
         Info<< "<beg> Foam::vtkPV3Foam::updateInfoSets" << endl;
     }
 
-    // Add names of sets
-    IOobjectList objects
+    // Add names of sets. Search for last time directory with a sets
+    // subdirectory. Take care not to search beyond the last mesh.
+
+    word facesInstance = dbPtr_().findInstance
     (
-        dbPtr_(),
-        dbPtr_().findInstance(meshDir_, "faces", IOobject::READ_IF_PRESENT),
-        meshDir_/"sets"
+        meshDir_,
+        "faces",
+        IOobject::READ_IF_PRESENT
     );
+
+    word setsInstance = dbPtr_().findInstance
+    (
+        meshDir_/"sets",
+        word::null,
+        IOobject::READ_IF_PRESENT,
+        facesInstance
+    );
+
+    IOobjectList objects(dbPtr_(), setsInstance, meshDir_/"sets");
 
     if (debug)
     {
         Info<< "     Foam::vtkPV3Foam::updateInfoSets read "
-            << objects.names() << " from "
-            <<  dbPtr_().findInstance
-                (
-                    meshDir_,
-                    "faces",
-                    IOobject::READ_IF_PRESENT
-                )
-            << endl;
+            << objects.names() << " from " << setsInstance << endl;
     }
 
 

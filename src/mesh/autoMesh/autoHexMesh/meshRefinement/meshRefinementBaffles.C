@@ -598,6 +598,7 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::getDuplicateFaces
         }
         Pout<< "Writing duplicate faces (baffles) to faceSet "
             << duplicateFaceSet.name() << nl << endl;
+        duplicateFaceSet.instance() = mesh_.time().timeName();
         duplicateFaceSet.write();
     }
 
@@ -1559,6 +1560,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
                     problemTopo.insert(faceI);
                 }
             }
+            problemTopo.instance() = mesh_.time().timeName();
             Pout<< "Dumping " << problemTopo.size()
                 << " problem faces to " << problemTopo.objectPath() << endl;
             problemTopo.write();

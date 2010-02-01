@@ -28,6 +28,7 @@ License
 #include "mapPolyMesh.H"
 #include "polyMesh.H"
 #include "boundBox.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -362,7 +363,13 @@ topoSet::topoSet
         IOobject
         (
             name,
-            mesh.facesInstance(),
+            mesh.time().findInstance
+            (
+                polyMesh::meshSubDir/"sets",
+                word::null,
+                IOobject::MUST_READ,
+                mesh.facesInstance()
+            ),
             polyMesh::meshSubDir/"sets",
             mesh,
             r,
@@ -402,10 +409,16 @@ topoSet::topoSet
         IOobject
         (
             name,
-            mesh.facesInstance(),
+            mesh.time().findInstance
+            (
+                polyMesh::meshSubDir/"sets",
+                word::null,
+                IOobject::NO_READ,
+                mesh.facesInstance()
+            ),
             polyMesh::meshSubDir/"sets",
             mesh,
-            NO_READ,
+            IOobject::NO_READ,
             w
         )
     ),
@@ -426,10 +439,16 @@ topoSet::topoSet
         IOobject
         (
             name,
-            mesh.facesInstance(),
+            mesh.time().findInstance
+            (
+                polyMesh::meshSubDir/"sets",
+                word::null,
+                IOobject::NO_READ,
+                mesh.facesInstance()
+            ),
             polyMesh::meshSubDir/"sets",
             mesh,
-            NO_READ,
+            IOobject::NO_READ,
             w
         )
     ),

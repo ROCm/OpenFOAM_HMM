@@ -124,6 +124,7 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
             }
             Pout<< "Writing all faces to be merged to set "
                 << allSets.objectPath() << endl;
+            allSets.instance() = mesh.time().timeName();
             allSets.write();
         }
 
@@ -221,6 +222,7 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
 
             if (debug)
             {
+                errorFaces.instance() = mesh.time().timeName();
                 Pout<< "Writing all faces in error to faceSet "
                     << errorFaces.objectPath() << nl << endl;
                 errorFaces.write();
@@ -266,6 +268,7 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
             if (debug)
             {
                 faceSet restoreSet(mesh, "mastersToRestore", mastersToRestore);
+                restoreSet.instance() = mesh.time().timeName();
                 Pout<< "Writing all " << mastersToRestore.size()
                     << " masterfaces to be restored to set "
                     << restoreSet.objectPath() << endl;
@@ -624,6 +627,7 @@ Foam::label Foam::autoLayerDriver::mergeEdgesUndo
 
             if (debug)
             {
+                errorFaces.instance() = mesh.time().timeName();
                 Pout<< "**Writing all faces in error to faceSet "
                     << errorFaces.objectPath() << nl << endl;
                 errorFaces.write();
@@ -806,6 +810,7 @@ void Foam::autoLayerDriver::checkMeshManifold() const
             << " points where this happens to pointSet "
             << nonManifoldPoints.name() << endl;
 
+        nonManifoldPoints.instance() = mesh.time().timeName();
         nonManifoldPoints.write();
     }
     Info<< endl;
@@ -945,6 +950,7 @@ void Foam::autoLayerDriver::handleNonManifolds
             << "and setting layer thickness to zero on these points."
             << endl;
 
+        nonManifoldPoints.instance() = mesh.time().timeName();
         nonManifoldPoints.write();
 
         forAll(meshPoints, patchPointI)
@@ -1207,6 +1213,7 @@ void Foam::autoLayerDriver::handleWarpedFaces
 //
 //    if (nMultiPatchCells > 0)
 //    {
+//        multiPatchCells.instance() = mesh.time().timeName();
 //        Info<< "Writing " << nMultiPatchCells
 //            << " cells with multiple (connected) patch faces to cellSet "
 //            << multiPatchCells.objectPath() << endl;
