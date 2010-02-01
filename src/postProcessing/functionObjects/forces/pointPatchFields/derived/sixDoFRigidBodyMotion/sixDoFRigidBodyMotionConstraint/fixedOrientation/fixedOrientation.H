@@ -23,93 +23,94 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::sixDoFRigidBodyMotionRestraints::linearSphericalAngularSpring
+    Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation
 
 Description
-    sixDoFRigidBodyMotionRestraints model.  Linear spherical angular spring.
+    sixDoFRigidBodyMotionConstraint.  Orientation of body fixed global
+    space. Only valid where the predicted deviation from alignment is
+    < 90 degrees.
 
 SourceFiles
-    linearSphericalAngularSpring.C
+    fixedOrientation.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef linearSphericalAngularSpring_H
-#define linearSphericalAngularSpring_H
+#ifndef fixedOrientation_H
+#define fixedOrientation_H
 
-#include "sixDoFRigidBodyMotionRestraint.H"
+#include "sixDoFRigidBodyMotionConstraint.H"
 #include "point.H"
+#include "tensor.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-namespace sixDoFRigidBodyMotionRestraints
+namespace sixDoFRigidBodyMotionConstraints
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class linearSphericalAngularSpring Declaration
+                       Class fixedOrientation Declaration
 \*---------------------------------------------------------------------------*/
 
-class linearSphericalAngularSpring
+class fixedOrientation
 :
-    public sixDoFRigidBodyMotionRestraint
+    public sixDoFRigidBodyMotionConstraint
 {
+
     // Private data
 
-        // Reference direction there is no spring reaction torque
-        vector refDir_;
-
-        //- Spring stiffness coefficient (Nm/rad)
-        scalar stiffness_;
-
-        //- Damping coefficient (Nms/rad)
-        scalar damping_;
-
+        //- Reference orientation where there is no moment
+        tensor fixedOrientation_;
 
 public:
 
     //- Runtime type information
-    TypeName("linearSphericalAngularSpring");
+    TypeName("fixedOrientation");
 
 
     // Constructors
 
         //- Construct from components
-        linearSphericalAngularSpring
+        fixedOrientation
         (
-            const dictionary& sDoFRBMRDict
+            const dictionary& sDoFRBMCDict
         );
 
         //- Construct and return a clone
-        virtual autoPtr<sixDoFRigidBodyMotionRestraint> clone() const
+        virtual autoPtr<sixDoFRigidBodyMotionConstraint> clone() const
         {
-            return autoPtr<sixDoFRigidBodyMotionRestraint>
+            return autoPtr<sixDoFRigidBodyMotionConstraint>
             (
-                new linearSphericalAngularSpring(*this)
+                new fixedOrientation(*this)
             );
         }
 
 
     // Destructor
 
-        virtual ~linearSphericalAngularSpring();
+        virtual ~fixedOrientation();
 
 
     // Member Functions
 
-        //- Calculate the restraint position, force and moment.
-        //  Global reference frame vectors.
-        virtual void restrain
+        //- Calculate the constraint position, force and moment.
+        //  Global reference frame vectors.  Returns boolean stating
+        //  whether the constraint been converged to tolerance.
+        virtual bool constrain
         (
             const sixDoFRigidBodyMotion& motion,
-            vector& restraintPosition,
-            vector& restraintForce,
-            vector& restraintMoment
+            const vector& existingConstraintForce,
+            const vector& existingConstraintMoment,
+            scalar deltaT,
+            vector& constraintPosition,
+            vector& constraintForceIncrement,
+            vector& constraintMomentIncrement
         ) const;
 
         //- Update properties from given dictionary
-        virtual bool read(const dictionary& sDoFRBMRCoeff);
+        virtual bool read(const dictionary& sDoFRBMCCoeff);
 };
 
 

@@ -53,7 +53,7 @@ Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::fixedPoint
 )
 :
     sixDoFRigidBodyMotionConstraint(sDoFRBMCDict),
-    fixedPoint_(sDoFRBMCCoeffs_.lookup("fixedPoint"))
+    fixedPoint_()
 {
     read(sDoFRBMCDict);
 }

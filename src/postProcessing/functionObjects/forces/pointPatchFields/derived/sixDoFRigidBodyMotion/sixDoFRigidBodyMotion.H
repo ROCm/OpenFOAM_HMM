@@ -107,6 +107,9 @@ class sixDoFRigidBodyMotion
         //- Mass of the body
         scalar mass_;
 
+        //- Switch to turn reporting of motion data on and off
+        Switch report_;
+
 
     // Private Member Functions
 
@@ -154,9 +157,6 @@ class sixDoFRigidBodyMotion
             //- Return access to the centre of mass
             inline const point& refCentreOfMass() const;
 
-            //- Return access to the inertia tensor
-            inline const diagTensor& momentOfInertia() const;
-
             //- Return access to the orientation
             inline const tensor& Q() const;
 
@@ -177,9 +177,6 @@ class sixDoFRigidBodyMotion
 
             //- Return access to the centre of mass
             inline point& refCentreOfMass();
-
-            //- Return non-const access to the inertia tensor
-            inline diagTensor& momentOfInertia();
 
             //- Return non-const access to the orientation
             inline tensor& Q();
@@ -215,7 +212,8 @@ public:
             const vector& tau,
             scalar mass,
             const point& refCentreOfMass,
-            const diagTensor& momentOfInertia
+            const diagTensor& momentOfInertia,
+            bool report = false
         );
 
         //- Construct from dictionary
@@ -282,8 +280,18 @@ public:
         point predictedPosition
         (
             const point& pt,
-            const vector deltaForce,
-            const vector deltaMoment,
+            const vector& deltaForce,
+            const vector& deltaMoment,
+            scalar deltaT
+        ) const;
+
+        //- Predict the orientation of the supplied vector after deltaT
+        //  given the current motion state and the additional supplied
+        //  moment
+        vector predictedOrientation
+        (
+            const vector& v,
+            const vector& deltaMoment,
             scalar deltaT
         ) const;
 
@@ -294,19 +302,32 @@ public:
         //  motion state
         inline point currentVelocity(const point& pt) const;
 
+        //- Report the status of the motion
+        void status() const;
+
+
         // Access
 
             //- Return const access to the centre of mass
             inline const point& centreOfMass() const;
 
+            //- Return access to the inertia tensor
+            inline const diagTensor& momentOfInertia() const;
+
             //- Return const access to the mass
             inline scalar mass() const;
+
+            //- Return the report Switch
+            inline bool report() const;
 
 
         // Edit
 
             //- Return non-const access to the centre of mass
             inline point& centreOfMass();
+
+            //- Return non-const access to the inertia tensor
+            inline diagTensor& momentOfInertia();
 
             //- Return non-const access to the mass
             inline scalar& mass();

@@ -45,9 +45,12 @@ void Foam::sixDoFRigidBodyMotion::applyRestraints()
 
             restraints_[rI].restrain(*this, rP, rF, rM);
 
-            // Info<< "Restraint " << rI << " force " << rF << nl
-            //     << "Restraint " << rI << " moment " << rM
-            //     << endl;
+            if (report_)
+            {
+                Info<< "Restraint " << restraints_[rI].name() << ": "
+                    << "force " << rF << " moment " << rM
+                    << endl;
+            }
 
             a() += rF/mass_;
 
@@ -121,16 +124,16 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
                 << "iterations (" << maxConstraintIters_ << ") exceeded." << nl
                 << exit(FatalError);
         }
-        else
+        else if (report_)
         {
             Info<< "sixDoFRigidBodyMotion constraints converged in "
                 << iter << " iterations"
-                // << nl << "Constraint force: " << cFA << nl
-                // << "Constraint moment: " << cMA
+                << nl << "Constraint force: " << cFA << nl
+                << "Constraint moment: " << cMA
                 << endl;
         }
 
-        // Add the constrain forces and moments to the motion state variables
+        // Add the constraint forces and moments to the motion state variables
         a() += cFA/mass_;
 
         // The moment of constraint forces has already been added
@@ -150,7 +153,8 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion()
     maxConstraintIters_(0),
     refCentreOfMass_(vector::zero),
     momentOfInertia_(diagTensor::one*VSMALL),
-    mass_(VSMALL)
+    mass_(VSMALL),
+    report_(false)
 {}
 
 
@@ -164,7 +168,8 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     const vector& tau,
     scalar mass,
     const point& refCentreOfMass,
-    const diagTensor& momentOfInertia
+    const diagTensor& momentOfInertia,
+    bool report
 )
 :
     motionState_
@@ -181,7 +186,8 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     maxConstraintIters_(0),
     refCentreOfMass_(refCentreOfMass),
     momentOfInertia_(momentOfInertia),
-    mass_(mass)
+    mass_(mass),
+    report_(report)
 {}
 
 
@@ -193,7 +199,8 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion(const dictionary& dict)
     maxConstraintIters_(0),
     refCentreOfMass_(dict.lookupOrDefault("refCentreOfMass", centreOfMass())),
     momentOfInertia_(dict.lookup("momentOfInertia")),
-    mass_(readScalar(dict.lookup("mass")))
+    mass_(readScalar(dict.lookup("mass"))),
+    report_(dict.lookupOrDefault<Switch>("report", false))
 {
     addRestraints(dict);
 
@@ -212,7 +219,8 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     maxConstraintIters_(sDoFRBM.maxConstraintIters()),
     refCentreOfMass_(sDoFRBM.refCentreOfMass()),
     momentOfInertia_(sDoFRBM.momentOfInertia()),
-    mass_(sDoFRBM.mass())
+    mass_(sDoFRBM.mass()),
+    report_(sDoFRBM.report())
 {}
 
 
@@ -347,6 +355,11 @@ void Foam::sixDoFRigidBodyMotion::updateForce
         v() += 0.5*deltaT*a();
 
         pi() += 0.5*deltaT*tau();
+
+        if(report_)
+        {
+            status();
+        }
     }
 
     Pstream::scatter(motionState_);
@@ -383,8 +396,8 @@ void Foam::sixDoFRigidBodyMotion::updateForce
 Foam::point Foam::sixDoFRigidBodyMotion::predictedPosition
 (
     const point& pt,
-    const vector deltaForce,
-    const vector deltaMoment,
+    const vector& deltaForce,
+    const vector& deltaMoment,
     scalar deltaT
 ) const
 {
@@ -399,6 +412,32 @@ Foam::point Foam::sixDoFRigidBodyMotion::predictedPosition
     rotate(QTemp, piTemp, deltaT);
 
     return (centreOfMassTemp + (QTemp & (pt - refCentreOfMass_)));
+}
+
+
+Foam::vector Foam::sixDoFRigidBodyMotion::predictedOrientation
+(
+    const vector& v,
+    const vector& deltaMoment,
+    scalar deltaT
+) const
+{
+    vector piTemp = pi() + deltaT*(tau() + (Q().T() & deltaMoment));
+
+    tensor QTemp = Q();
+
+    rotate(QTemp, piTemp, deltaT);
+
+    return (QTemp & v);
+}
+
+
+void Foam::sixDoFRigidBodyMotion::status() const
+{
+    Info<< "Centre of mass: " << centreOfMass() << nl
+        << "Linear velocity: " << v() << nl
+        << "Angular velocity: " << omega()
+        << endl;
 }
 
 

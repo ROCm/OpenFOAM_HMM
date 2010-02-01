@@ -39,6 +39,8 @@ void Foam::sixDoFRigidBodyMotion::write(Ostream& os) const
         << momentOfInertia_ << token::END_STATEMENT << nl;
     os.writeKeyword("mass")
         << mass_ << token::END_STATEMENT << nl;
+    os.writeKeyword("report")
+        << report_ << token::END_STATEMENT << nl;
 
     if (restraints_.size())
     {

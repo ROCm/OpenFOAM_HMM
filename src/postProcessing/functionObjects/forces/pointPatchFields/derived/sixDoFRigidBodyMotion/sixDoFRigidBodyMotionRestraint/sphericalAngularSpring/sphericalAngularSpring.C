@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "linearSphericalAngularSpring.H"
+#include "sphericalAngularSpring.H"
 #include "addToRunTimeSelectionTable.H"
 #include "sixDoFRigidBodyMotion.H"
 
@@ -34,11 +34,11 @@ namespace Foam
 {
 namespace sixDoFRigidBodyMotionRestraints
 {
-    defineTypeNameAndDebug(linearSphericalAngularSpring, 0);
+    defineTypeNameAndDebug(sphericalAngularSpring, 0);
     addToRunTimeSelectionTable
     (
         sixDoFRigidBodyMotionRestraint,
-        linearSphericalAngularSpring,
+        sphericalAngularSpring,
         dictionary
     );
 };
@@ -47,14 +47,14 @@ namespace sixDoFRigidBodyMotionRestraints
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionRestraints::linearSphericalAngularSpring::
-linearSphericalAngularSpring
+Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::
+sphericalAngularSpring
 (
     const dictionary& sDoFRBMRDict
 )
 :
     sixDoFRigidBodyMotionRestraint(sDoFRBMRDict),
-    refDir_(),
+    refQ_(),
     stiffness_(),
     damping_()
 {
@@ -64,15 +64,15 @@ linearSphericalAngularSpring
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionRestraints::linearSphericalAngularSpring::
-~linearSphericalAngularSpring()
+Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::
+~sphericalAngularSpring()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void
-Foam::sixDoFRigidBodyMotionRestraints::linearSphericalAngularSpring::restrain
+Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::restrain
 (
     const sixDoFRigidBodyMotion& motion,
     vector& restraintPosition,
@@ -80,62 +80,62 @@ Foam::sixDoFRigidBodyMotionRestraints::linearSphericalAngularSpring::restrain
     vector& restraintMoment
 ) const
 {
-    vector curDir = motion.currentOrientation(refDir_);
+    restraintMoment = vector::zero;
 
-    vector a = refDir_ ^ curDir;
-
-    scalar magA = mag(a);
-
-    scalar theta = 0;
-
-    if (magA > VSMALL)
+    for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
     {
-        a /= magA;
+        vector axis = vector::zero;
 
-        theta = acos(curDir & refDir_);
-    }
-    else
-    {
-        a = vector::zero;
+        axis[cmpt] = 1;
+
+        vector refDir = vector::zero;
+
+        refDir[(cmpt + 1) % 3] = 1;
+
+        vector newDir = motion.currentOrientation(refDir);
+
+        axis = (refQ_ & axis);
+
+        refDir = (refQ_ & refDir);
+
+        newDir -= (axis & newDir)*axis;
+
+        restraintMoment += -stiffness_*(refDir ^ newDir);
     }
 
-    restraintMoment = -stiffness_*theta*a - damping_*motion.omega();
+    restraintMoment += -damping_*motion.omega();
 
     restraintForce = vector::zero;
 
     // Not needed to be altered as restraintForce is zero, but set to
-    // centre of mass to be sure of no spurious moment
+    // centreOfMass to be sure of no spurious moment
     restraintPosition = motion.centreOfMass();
 }
 
 
-bool Foam::sixDoFRigidBodyMotionRestraints::linearSphericalAngularSpring ::read
+bool Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::read
 (
     const dictionary& sDoFRBMRDict
 )
 {
     sixDoFRigidBodyMotionRestraint::read(sDoFRBMRDict);
 
-    sDoFRBMRCoeffs_.lookup("referenceDirection") >> refDir_;
+    refQ_ = sDoFRBMRCoeffs_.lookupOrDefault<tensor>("referenceOrientation", I);
 
-    scalar magRefDir(mag(refDir_));
-
-    if (magRefDir > VSMALL)
-    {
-        refDir_ /= magRefDir;
-    }
-    else
+    if (mag(mag(refQ_) - sqrt(3.0)) > 1e-9)
     {
         FatalErrorIn
         (
-            "bool Foam::sixDoFRigidBodyMotionRestraints::"
-            "linearSphericalAngularSpring ::read"
+            "Foam::sixDoFRigidBodyMotionConstraints::sphericalAngularSpring::"
+            "read"
             "("
                 "const dictionary& sDoFRBMRDict"
             ")"
         )
-            << "referenceDirection has zero length"
-            << abort(FatalError);
+            << "referenceOrientation " << refQ_ << " is not a rotation tensor. "
+            << "mag(referenceOrientation) - sqrt(3) = "
+            << mag(refQ_) - sqrt(3.0) << nl
+            << exit(FatalError);
     }
 
     sDoFRBMRCoeffs_.lookup("stiffness") >> stiffness_;

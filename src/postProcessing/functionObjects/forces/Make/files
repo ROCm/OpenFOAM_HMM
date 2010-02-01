@@ -16,7 +16,7 @@ sDoFRBMR = $(sDoFRBM)/sixDoFRigidBodyMotionRestraint
 $(sDoFRBMR)/sixDoFRigidBodyMotionRestraint/sixDoFRigidBodyMotionRestraint.C
 $(sDoFRBMR)/sixDoFRigidBodyMotionRestraint/newSixDoFRigidBodyMotionRestraint.C
 $(sDoFRBMR)/linearSpring/linearSpring.C
-$(sDoFRBMR)/linearSphericalAngularSpring/linearSphericalAngularSpring.C
+$(sDoFRBMR)/sphericalAngularSpring/sphericalAngularSpring.C
 
 sDoFRBMC = $(sDoFRBM)/sixDoFRigidBodyMotionConstraint
 
@@ -25,6 +25,7 @@ $(sDoFRBMC)/sixDoFRigidBodyMotionConstraint/newSixDoFRigidBodyMotionConstraint.C
 $(sDoFRBMC)/fixedPoint/fixedPoint.C
 $(sDoFRBMC)/fixedPlane/fixedPlane.C
 $(sDoFRBMC)/fixedLine/fixedLine.C
+$(sDoFRBMC)/fixedOrientation/fixedOrientation.C
 
 pointPatchFields/derived/sixDoFRigidBodyDisplacement/sixDoFRigidBodyDisplacementPointPatchVectorField.C
 pointPatchFields/derived/uncoupledSixDoFRigidBodyDisplacement/uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField.C

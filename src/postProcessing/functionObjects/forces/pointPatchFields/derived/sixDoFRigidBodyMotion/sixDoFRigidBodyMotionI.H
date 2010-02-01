@@ -126,13 +126,6 @@ inline const Foam::point& Foam::sixDoFRigidBodyMotion::refCentreOfMass() const
 }
 
 
-inline const Foam::diagTensor&
-Foam::sixDoFRigidBodyMotion::momentOfInertia() const
-{
-    return momentOfInertia_;
-}
-
-
 inline const Foam::tensor& Foam::sixDoFRigidBodyMotion::Q() const
 {
     return motionState_.Q();
@@ -166,12 +159,6 @@ inline const Foam::vector& Foam::sixDoFRigidBodyMotion::tau() const
 inline Foam::point& Foam::sixDoFRigidBodyMotion::refCentreOfMass()
 {
     return refCentreOfMass_;
-}
-
-
-inline Foam::diagTensor& Foam::sixDoFRigidBodyMotion::momentOfInertia()
-{
-    return momentOfInertia_;
 }
 
 
@@ -253,15 +240,34 @@ inline const Foam::point& Foam::sixDoFRigidBodyMotion::centreOfMass() const
 }
 
 
+inline const Foam::diagTensor&
+Foam::sixDoFRigidBodyMotion::momentOfInertia() const
+{
+    return momentOfInertia_;
+}
+
+
 inline Foam::scalar Foam::sixDoFRigidBodyMotion::mass() const
 {
     return mass_;
 }
 
 
+inline bool Foam::sixDoFRigidBodyMotion::report() const
+{
+    return report_;
+}
+
+
 inline Foam::point& Foam::sixDoFRigidBodyMotion::centreOfMass()
 {
     return motionState_.centreOfMass();
+}
+
+
+inline Foam::diagTensor& Foam::sixDoFRigidBodyMotion::momentOfInertia()
+{
+    return momentOfInertia_;
 }
 
 
