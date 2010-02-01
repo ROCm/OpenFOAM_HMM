@@ -24,9 +24,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sphericalAngularSpring.H"
+#include "linearAxialAngularSpring.H"
 #include "addToRunTimeSelectionTable.H"
 #include "sixDoFRigidBodyMotion.H"
+#include "transform.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -34,11 +35,11 @@ namespace Foam
 {
 namespace sixDoFRigidBodyMotionRestraints
 {
-    defineTypeNameAndDebug(sphericalAngularSpring, 0);
+    defineTypeNameAndDebug(linearAxialAngularSpring, 0);
     addToRunTimeSelectionTable
     (
         sixDoFRigidBodyMotionRestraint,
-        sphericalAngularSpring,
+        linearAxialAngularSpring,
         dictionary
     );
 };
@@ -47,14 +48,15 @@ namespace sixDoFRigidBodyMotionRestraints
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::
-sphericalAngularSpring
+Foam::sixDoFRigidBodyMotionRestraints::linearAxialAngularSpring::
+linearAxialAngularSpring
 (
     const dictionary& sDoFRBMRDict
 )
 :
     sixDoFRigidBodyMotionRestraint(sDoFRBMRDict),
     refQ_(),
+    axis_(),
     stiffness_(),
     damping_()
 {
@@ -64,15 +66,15 @@ sphericalAngularSpring
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::
-~sphericalAngularSpring()
+Foam::sixDoFRigidBodyMotionRestraints::linearAxialAngularSpring::
+~linearAxialAngularSpring()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void
-Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::restrain
+Foam::sixDoFRigidBodyMotionRestraints::linearAxialAngularSpring::restrain
 (
     const sixDoFRigidBodyMotion& motion,
     vector& restraintPosition,
@@ -80,30 +82,51 @@ Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::restrain
     vector& restraintMoment
 ) const
 {
-    restraintMoment = vector::zero;
+    vector refDir = rotationTensor(vector(1, 0 ,0), axis_) & vector(0, 1, 0);
 
-    for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
+    vector oldDir = refQ_ & refDir;
+
+    vector newDir = motion.currentOrientation(refDir);
+
+    if (mag(oldDir & axis_) > 0.95 || mag(newDir & axis_) > 0.95)
     {
-        vector axis = vector::zero;
+        // Directions getting close to the axis, change reference
 
-        axis[cmpt] = 1;
+        refDir = rotationTensor(vector(1, 0 ,0), axis_) & vector(0, 0, 1);
 
-        vector refDir = vector::zero;
-
-        refDir[(cmpt + 1) % 3] = 1;
+        vector oldDir = refQ_ & refDir;
 
         vector newDir = motion.currentOrientation(refDir);
-
-        axis = (refQ_ & axis);
-
-        refDir = (refQ_ & refDir);
-
-        newDir -= (axis & newDir)*axis;
-
-        restraintMoment += -stiffness_*(refDir ^ newDir);
     }
 
-    restraintMoment += -damping_*motion.omega();
+    // Removing any axis component from oldDir and newDir and normalising
+    oldDir -= (axis_ & oldDir)*axis_;
+    oldDir /= mag(oldDir);
+
+    newDir -= (axis_ & newDir)*axis_;
+    newDir /= mag(newDir);
+
+    scalar theta = mag(acos(oldDir & newDir));
+
+    // Temporary axis with sign information.
+    vector a = (oldDir ^ newDir);
+
+    // Remove any component that is not along axis that may creep in
+    a = (a & axis_)*axis_;
+
+    scalar magA = mag(a);
+
+    if (magA > VSMALL)
+    {
+        a /= magA;
+    }
+    else
+    {
+        a = vector::zero;
+    }
+
+    // Damping of along axis angular velocity only
+    restraintMoment = -stiffness_*theta*a - damping_*(motion.omega() & a)*a;
 
     restraintForce = vector::zero;
 
@@ -113,7 +136,7 @@ Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::restrain
 }
 
 
-bool Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::read
+bool Foam::sixDoFRigidBodyMotionRestraints::linearAxialAngularSpring::read
 (
     const dictionary& sDoFRBMRDict
 )
@@ -126,7 +149,7 @@ bool Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::read
     {
         FatalErrorIn
         (
-            "Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::"
+            "Foam::sixDoFRigidBodyMotionRestraints::linearAxialAngularSpring::"
             "read"
             "("
                 "const dictionary& sDoFRBMRDict"
@@ -136,6 +159,28 @@ bool Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::read
             << "mag(referenceOrientation) - sqrt(3) = "
             << mag(refQ_) - sqrt(3.0) << nl
             << exit(FatalError);
+    }
+
+    axis_ = sDoFRBMRCoeffs_.lookup("axis");
+
+    scalar magAxis(mag(axis_));
+
+    if (magAxis > VSMALL)
+    {
+        axis_ /= magAxis;
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "Foam::sixDoFRigidBodyMotionRestraints::linearAxialAngularSpring::"
+            "read"
+            "("
+                "const dictionary& sDoFRBMCDict"
+            ")"
+        )
+            << "axis has zero length"
+            << abort(FatalError);
     }
 
     sDoFRBMRCoeffs_.lookup("stiffness") >> stiffness_;

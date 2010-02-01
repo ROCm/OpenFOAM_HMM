@@ -139,7 +139,7 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::constrain
         constraintMomentIncrement +=
            -relaxationFactor_
            *theta*axis
-            *motion.momentOfInertia()[cmpt]/sqr(deltaT);
+           *motion.momentOfInertia()[cmpt]/sqr(deltaT);
     }
 
     constraintPosition = motion.centreOfMass();

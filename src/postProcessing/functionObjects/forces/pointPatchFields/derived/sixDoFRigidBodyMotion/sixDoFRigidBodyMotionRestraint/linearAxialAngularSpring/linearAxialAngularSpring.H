@@ -23,22 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation
+    Foam::sixDoFRigidBodyMotionRestraints::linearAxialAngularSpring
 
 Description
-    sixDoFRigidBodyMotionConstraint.  Orientation of body fixed global
-    space. Only valid where the predicted deviation from alignment is
-    < 90 degrees.
+    sixDoFRigidBodyMotionRestraints model.  Linear axial angular spring.
 
 SourceFiles
-    fixedOrientation.C
+    linearAxialAngularSpring.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedOrientation_H
-#define fixedOrientation_H
+#ifndef linearAxialAngularSpring_H
+#define linearAxialAngularSpring_H
 
-#include "sixDoFRigidBodyMotionConstraint.H"
+#include "sixDoFRigidBodyMotionRestraint.H"
 #include "point.H"
 #include "tensor.H"
 
@@ -47,71 +45,75 @@ SourceFiles
 namespace Foam
 {
 
-namespace sixDoFRigidBodyMotionConstraints
+namespace sixDoFRigidBodyMotionRestraints
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class fixedOrientation Declaration
+                   Class linearAxialAngularSpring Declaration
 \*---------------------------------------------------------------------------*/
 
-class fixedOrientation
+class linearAxialAngularSpring
 :
-    public sixDoFRigidBodyMotionConstraint
+    public sixDoFRigidBodyMotionRestraint
 {
-
     // Private data
 
         //- Reference orientation where there is no moment
-        tensor fixedOrientation_;
+        tensor refQ_;
+
+        //- Global unit axis around which the motion is sprung
+        vector axis_;
+
+        //- Spring stiffness coefficient (Nm/rad)
+        scalar stiffness_;
+
+        //- Damping coefficient (Nms/rad)
+        scalar damping_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("fixedOrientation");
+    TypeName("linearAxialAngularSpring");
 
 
     // Constructors
 
         //- Construct from components
-        fixedOrientation
+        linearAxialAngularSpring
         (
-            const dictionary& sDoFRBMCDict
+            const dictionary& sDoFRBMRDict
         );
 
         //- Construct and return a clone
-        virtual autoPtr<sixDoFRigidBodyMotionConstraint> clone() const
+        virtual autoPtr<sixDoFRigidBodyMotionRestraint> clone() const
         {
-            return autoPtr<sixDoFRigidBodyMotionConstraint>
+            return autoPtr<sixDoFRigidBodyMotionRestraint>
             (
-                new fixedOrientation(*this)
+                new linearAxialAngularSpring(*this)
             );
         }
 
 
     // Destructor
 
-        virtual ~fixedOrientation();
+        virtual ~linearAxialAngularSpring();
 
 
     // Member Functions
 
-        //- Calculate the constraint position, force and moment.
-        //  Global reference frame vectors.  Returns boolean stating
-        //  whether the constraint been converged to tolerance.
-        virtual bool constrain
+        //- Calculate the restraint position, force and moment.
+        //  Global reference frame vectors.
+        virtual void restrain
         (
             const sixDoFRigidBodyMotion& motion,
-            const vector& existingConstraintForce,
-            const vector& existingConstraintMoment,
-            scalar deltaT,
-            vector& constraintPosition,
-            vector& constraintForceIncrement,
-            vector& constraintMomentIncrement
+            vector& restraintPosition,
+            vector& restraintForce,
+            vector& restraintMoment
         ) const;
 
         //- Update properties from given dictionary
-        virtual bool read(const dictionary& sDoFRBMCCoeff);
+        virtual bool read(const dictionary& sDoFRBMRCoeff);
 };
 
 
