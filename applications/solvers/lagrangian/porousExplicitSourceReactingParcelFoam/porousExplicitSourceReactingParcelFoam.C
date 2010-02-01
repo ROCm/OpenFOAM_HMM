@@ -43,7 +43,7 @@ Description
 #include "fvCFD.H"
 #include "hReactionThermo.H"
 #include "turbulenceModel.H"
-#include "BasicReactingCloud.H"
+#include "BasicReactingMultiphaseCloud.H"
 #include "rhoChemistryModel.H"
 #include "chemistrySolver.H"
 #include "radiationModel.H"
