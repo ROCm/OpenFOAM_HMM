@@ -58,7 +58,7 @@ tabulatedAxialAngularSpring
     sixDoFRigidBodyMotionRestraint(sDoFRBMRDict),
     refQ_(),
     axis_(),
-    stiffness_(),
+    moment_(),
     convertToDegrees_(),
     damping_()
 {
@@ -110,36 +110,23 @@ Foam::sixDoFRigidBodyMotionRestraints::tabulatedAxialAngularSpring::restrain
 
     scalar theta = mag(acos(min(oldDir & newDir, 1.0)));
 
-    // Temporary axis with sign information.
-    vector a = (oldDir ^ newDir);
+    // Determining the sign of theta by comparing the cross product of
+    // the direction vectors with the axis
+    theta *= sign((oldDir ^ newDir) & axis_);
 
-    // Remove any component that is not along axis that may creep in
-    a = (a & axis_)*axis_;
-
-    scalar magA = mag(a);
-
-    if (magA > VSMALL)
-    {
-        a /= magA;
-    }
-    else
-    {
-        a = vector::zero;
-    }
-
-    scalar stiffness;
+    scalar moment;
 
     if (convertToDegrees_)
     {
-        stiffness = stiffness_(radToDeg(theta));
+        moment = moment_(radToDeg(theta));
     }
     else
     {
-        stiffness = stiffness_(theta);
+        moment = moment_(theta);
     }
 
     // Damping of along axis angular velocity only
-    restraintMoment = -stiffness*theta*a - damping_*(motion.omega() & a)*a;
+    restraintMoment = moment*axis_ - damping_*(motion.omega() & axis_)*axis_;
 
     restraintForce = vector::zero;
 
@@ -196,7 +183,7 @@ bool Foam::sixDoFRigidBodyMotionRestraints::tabulatedAxialAngularSpring::read
             << abort(FatalError);
     }
 
-    stiffness_ = interpolationTable<scalar>(sDoFRBMRCoeffs_);
+    moment_ = interpolationTable<scalar>(sDoFRBMRCoeffs_);
 
     word angleFormat = sDoFRBMRCoeffs_.lookup("angleFormat");
 

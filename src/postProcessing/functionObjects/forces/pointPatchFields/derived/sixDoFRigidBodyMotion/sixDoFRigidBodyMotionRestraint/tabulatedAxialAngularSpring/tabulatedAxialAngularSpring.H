@@ -26,7 +26,7 @@ Class
     Foam::sixDoFRigidBodyMotionRestraints::tabulatedAxialAngularSpring
 
 Description
-    sixDoFRigidBodyMotionRestraints model.  Axial angular spring with stiffness
+    sixDoFRigidBodyMotionRestraints model.  Axial angular spring with moment
     values drawn from an interpolation table.  Linear damping.
 
 SourceFiles
@@ -66,13 +66,12 @@ class tabulatedAxialAngularSpring
         //- Global unit axis around which the motion is sprung
         vector axis_;
 
-        //- Spring stiffness coefficient interpolation table (Nm/rad
-        //  or Nm/deg, depending on angleFormat)
-        interpolationTable<scalar> stiffness_;
+        //- Spring moment interpolation table, depending on angleFormat
+        interpolationTable<scalar> moment_;
 
         //- Boolean stating whether the angle around the axis needs to
         //  be converted to degrees before asking the
-        //  interpolationTable for a value
+        //  interpolationTable for a moment value
         bool convertToDegrees_;
 
         //- Damping coefficient (Nms/rad)
