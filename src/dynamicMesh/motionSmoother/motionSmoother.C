@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,14 +34,9 @@ License
 #include "meshTools.H"
 #include "OFstream.H"
 
-namespace Foam
-{
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(motionSmoother, 0);
-
-}
+defineTypeNameAndDebug(Foam::motionSmoother, 0);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -738,7 +733,7 @@ Foam::tmp<Foam::scalarField> Foam::motionSmoother::movePoints
     // Correct for 2-D motion
     if (twoDCorrector_.required())
     {
-        Info<< "Correct-ing 2-D mesh motion";
+        Info<< "Correcting 2-D mesh motion";
 
         if (mesh_.globalData().parallel())
         {
