@@ -296,7 +296,7 @@ int main(int argc, char *argv[])
     (
         "density",
         "scalar",
-        "Specify density,"
+        "Specify density, "
         "kg/m3 for solid properties, kg/m2 for shell properties"
     );
 

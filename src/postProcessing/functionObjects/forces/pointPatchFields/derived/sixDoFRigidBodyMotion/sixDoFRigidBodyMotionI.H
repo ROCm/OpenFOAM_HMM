@@ -24,8 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 inline Foam::tensor
@@ -64,6 +62,37 @@ Foam::sixDoFRigidBodyMotion::rotationTensorZ(scalar phi) const
 }
 
 
+inline void Foam::sixDoFRigidBodyMotion::rotate
+(
+    tensor& Q,
+    vector& pi,
+    scalar deltaT
+) const
+{
+    tensor R;
+
+    R = rotationTensorX(0.5*deltaT*pi.x()/momentOfInertia_.xx());
+    pi = pi & R;
+    Q = Q & R;
+
+    R = rotationTensorY(0.5*deltaT*pi.y()/momentOfInertia_.yy());
+    pi = pi & R;
+    Q = Q & R;
+
+    R = rotationTensorZ(deltaT*pi.z()/momentOfInertia_.zz());
+    pi = pi & R;
+    Q = Q & R;
+
+    R = rotationTensorY(0.5*deltaT*pi.y()/momentOfInertia_.yy());
+    pi = pi & R;
+    Q = Q & R;
+
+    R = rotationTensorX(0.5*deltaT*pi.x()/momentOfInertia_.xx());
+    pi = pi & R;
+    Q = Q & R;
+}
+
+
 inline const Foam::sixDoFRigidBodyMotionState&
 Foam::sixDoFRigidBodyMotion::motionState() const
 {
@@ -71,28 +100,29 @@ Foam::sixDoFRigidBodyMotion::motionState() const
 }
 
 
-inline const Foam::point& Foam::sixDoFRigidBodyMotion::centreOfMass() const
+inline const Foam::PtrList<Foam::sixDoFRigidBodyMotionRestraint>&
+Foam::sixDoFRigidBodyMotion::restraints() const
 {
-    return motionState_.centreOfMass();
+    return restraints_;
+}
+
+
+inline const Foam::PtrList<Foam::sixDoFRigidBodyMotionConstraint>&
+Foam::sixDoFRigidBodyMotion::constraints() const
+{
+    return constraints_;
+}
+
+
+inline Foam::label Foam::sixDoFRigidBodyMotion::maxConstraintIters() const
+{
+    return maxConstraintIters_;
 }
 
 
 inline const Foam::point& Foam::sixDoFRigidBodyMotion::refCentreOfMass() const
 {
     return refCentreOfMass_;
-}
-
-
-inline const Foam::diagTensor&
-Foam::sixDoFRigidBodyMotion::momentOfInertia() const
-{
-    return momentOfInertia_;
-}
-
-
-inline Foam::scalar Foam::sixDoFRigidBodyMotion::mass() const
-{
-    return mass_;
 }
 
 
@@ -126,27 +156,9 @@ inline const Foam::vector& Foam::sixDoFRigidBodyMotion::tau() const
 }
 
 
-inline Foam::point& Foam::sixDoFRigidBodyMotion::centreOfMass()
-{
-    return motionState_.centreOfMass();
-}
-
-
 inline Foam::point& Foam::sixDoFRigidBodyMotion::refCentreOfMass()
 {
     return refCentreOfMass_;
-}
-
-
-inline Foam::diagTensor& Foam::sixDoFRigidBodyMotion::momentOfInertia()
-{
-    return momentOfInertia_;
-}
-
-
-inline Foam::scalar& Foam::sixDoFRigidBodyMotion::mass()
-{
-    return mass_;
 }
 
 
@@ -179,5 +191,96 @@ inline Foam::vector& Foam::sixDoFRigidBodyMotion::tau()
     return motionState_.tau();
 }
 
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+inline Foam::tmp<Foam::pointField>
+Foam::sixDoFRigidBodyMotion::currentPosition(const pointField& refPts) const
+{
+    return (centreOfMass() + (Q() & (refPts - refCentreOfMass_)));
+}
+
+
+inline Foam::point Foam::sixDoFRigidBodyMotion::currentPosition
+(
+    const point& refPt
+) const
+{
+    return (centreOfMass() + (Q() & (refPt - refCentreOfMass_)));
+}
+
+
+inline Foam::vector Foam::sixDoFRigidBodyMotion::currentOrientation
+(
+    const vector& refDir
+) const
+{
+    return (Q() & refDir);
+}
+
+
+inline const Foam::tensor&
+Foam::sixDoFRigidBodyMotion::currentOrientation() const
+{
+    return Q();
+}
+
+
+inline Foam::vector Foam::sixDoFRigidBodyMotion::omega() const
+{
+    return  Q() & (inv(momentOfInertia_) & pi());
+}
+
+
+inline Foam::point Foam::sixDoFRigidBodyMotion::currentVelocity
+(
+    const point& pt
+) const
+{
+    return (omega() ^ (pt - centreOfMass())) + v();
+}
+
+
+inline const Foam::point& Foam::sixDoFRigidBodyMotion::centreOfMass() const
+{
+    return motionState_.centreOfMass();
+}
+
+
+inline const Foam::diagTensor&
+Foam::sixDoFRigidBodyMotion::momentOfInertia() const
+{
+    return momentOfInertia_;
+}
+
+
+inline Foam::scalar Foam::sixDoFRigidBodyMotion::mass() const
+{
+    return mass_;
+}
+
+
+inline bool Foam::sixDoFRigidBodyMotion::report() const
+{
+    return report_;
+}
+
+
+inline Foam::point& Foam::sixDoFRigidBodyMotion::centreOfMass()
+{
+    return motionState_.centreOfMass();
+}
+
+
+inline Foam::diagTensor& Foam::sixDoFRigidBodyMotion::momentOfInertia()
+{
+    return momentOfInertia_;
+}
+
+
+inline Foam::scalar& Foam::sixDoFRigidBodyMotion::mass()
+{
+    return mass_;
+}
 
 // ************************************************************************* //

@@ -24,28 +24,50 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef expDirectionMixedFvPatchFieldsFwd_H
-#define expDirectionMixedFvPatchFieldsFwd_H
+#include "sixDoFRigidBodyMotionRestraint.H"
 
-#include "fieldTypes.H"
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+defineTypeNameAndDebug(Foam::sixDoFRigidBodyMotionRestraint, 0);
 
-namespace Foam
+defineRunTimeSelectionTable(Foam::sixDoFRigidBodyMotionRestraint, dictionary);
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::sixDoFRigidBodyMotionRestraint::sixDoFRigidBodyMotionRestraint
+(
+    const dictionary& sDoFRBMRDict
+)
+:
+    name_(fileName(sDoFRBMRDict.name().name()).components(token::COLON).last()),
+    sDoFRBMRCoeffs_
+    (
+        sDoFRBMRDict.subDict
+        (
+            word(sDoFRBMRDict.lookup("sixDoFRigidBodyMotionRestraint"))
+          + "Coeffs"
+        )
+    )
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::sixDoFRigidBodyMotionRestraint::~sixDoFRigidBodyMotionRestraint()
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+bool Foam::sixDoFRigidBodyMotionRestraint::read
+(
+    const dictionary& sDoFRBMRDict
+)
 {
+    sDoFRBMRCoeffs_ = sDoFRBMRDict.subDict(type() + "Coeffs");
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    return true;
+}
 
-template<class Type> class expDirectionMixedFvPatchField;
-
-makePatchTypeFieldTypedefs(expDirectionMixed)
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //
