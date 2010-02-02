@@ -82,8 +82,6 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
 
             forAll(constraints_, cI)
             {
-                // Info<< nl << "Constraint " << cI << endl;
-
                 // constraint position
                 point cP = vector::zero;
 
@@ -106,6 +104,23 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
 
                 allConverged = allConverged && constraintConverged;
 
+                if (report_)
+                {
+                    Info<< "Constraint " << constraints_[cI].name()
+                        << ": force " << cF << " moment " << cM;
+
+                    if (constraintConverged)
+                    {
+                        Info<< " - converged";
+                    }
+                    else
+                    {
+                        Info<< " - not converged";
+                    }
+
+                    Info<< endl;
+                }
+
                 // Accumulate constraint force
                 cFA += cF;
 
@@ -113,7 +128,7 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
                 cMA += cM + ((cP - centreOfMass()) ^ cF);
             }
 
-        } while(!allConverged && ++iter < maxConstraintIters_);
+        } while(++iter < maxConstraintIters_ && !allConverged);
 
         if (iter >= maxConstraintIters_)
         {

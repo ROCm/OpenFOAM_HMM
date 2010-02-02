@@ -87,7 +87,7 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedAxis::constrain
         deltaT
     );
 
-    scalar theta = acos(predictedDir & fixedAxis_);
+    scalar theta = acos(min(predictedDir & fixedAxis_, 1.0));
 
     vector rotationAxis = fixedAxis_ ^ predictedDir;
 

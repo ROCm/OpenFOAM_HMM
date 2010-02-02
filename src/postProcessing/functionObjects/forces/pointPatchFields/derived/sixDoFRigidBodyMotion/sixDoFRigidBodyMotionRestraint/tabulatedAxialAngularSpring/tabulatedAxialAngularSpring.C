@@ -108,7 +108,7 @@ Foam::sixDoFRigidBodyMotionRestraints::tabulatedAxialAngularSpring::restrain
     newDir -= (axis_ & newDir)*axis_;
     newDir /= mag(newDir);
 
-    scalar theta = mag(acos(oldDir & newDir));
+    scalar theta = mag(acos(min(oldDir & newDir, 1.0)));
 
     // Temporary axis with sign information.
     vector a = (oldDir ^ newDir);

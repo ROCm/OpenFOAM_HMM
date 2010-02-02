@@ -114,7 +114,7 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::constrain
         {
             predictedDir /= magPredictedDir;
 
-            theta = acos(predictedDir & refDir);
+            theta = acos(min(predictedDir & refDir, 1.0));
 
             // Recalculating axis to give correct sign to angle
             axis = (refDir ^ predictedDir);
