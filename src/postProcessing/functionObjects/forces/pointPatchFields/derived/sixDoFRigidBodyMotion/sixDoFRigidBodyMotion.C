@@ -54,6 +54,8 @@ void Foam::sixDoFRigidBodyMotion::applyRestraints()
 
             a() += rF/mass_;
 
+            // Moments are returned in global axes, transforming to
+            // body local to add to torque.
             tau() += Q().T() & (rM + ((rP - centreOfMass()) ^ rF));
         }
     }
@@ -137,7 +139,8 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
         a() += cFA/mass_;
 
         // The moment of constraint forces has already been added
-        // during accumulation
+        // during accumulation.  Moments are returned in global axes,
+        // transforming to body local
         tau() += Q().T() & cMA;
     }
 }

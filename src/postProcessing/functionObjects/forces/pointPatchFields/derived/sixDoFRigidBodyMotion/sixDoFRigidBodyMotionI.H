@@ -210,12 +210,19 @@ inline Foam::point Foam::sixDoFRigidBodyMotion::currentPosition
 }
 
 
-inline Foam::point Foam::sixDoFRigidBodyMotion::currentOrientation
+inline Foam::vector Foam::sixDoFRigidBodyMotion::currentOrientation
 (
     const vector& refDir
 ) const
 {
     return (Q() & refDir);
+}
+
+
+inline const Foam::tensor&
+Foam::sixDoFRigidBodyMotion::currentOrientation() const
+{
+    return Q();
 }
 
 

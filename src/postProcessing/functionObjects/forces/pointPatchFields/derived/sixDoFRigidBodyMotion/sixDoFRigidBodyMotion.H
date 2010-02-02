@@ -272,7 +272,12 @@ public:
 
         //- Transform the given reference state direction by the current
         //  motion state
-        inline point currentOrientation(const vector& refDir) const;
+        inline vector currentOrientation(const vector& refDir) const;
+
+        //- Access the orientation tensor, Q.
+        //  globalVector = Q & bodyLocalVector
+        //  bodyLocalVector = Q.T() & globalVector
+        inline const tensor& currentOrientation() const;
 
         //- Predict the position of the supplied point after deltaT
         //  given the current motion state and the additional supplied
