@@ -32,6 +32,5 @@ $(sDoFRBMC)/fixedPoint/fixedPoint.C
 
 pointPatchFields/derived/sixDoFRigidBodyDisplacement/sixDoFRigidBodyDisplacementPointPatchVectorField.C
 pointPatchFields/derived/uncoupledSixDoFRigidBodyDisplacement/uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField.C
-pointPatchFields/derived/constrainedSixDoFRigidBodyDisplacement/constrainedSixDoFRigidBodyDisplacementPointPatchVectorField.C
 
 LIB = $(FOAM_LIBBIN)/libforces
