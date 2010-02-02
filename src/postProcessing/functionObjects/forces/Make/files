@@ -18,6 +18,7 @@ $(sDoFRBMR)/sixDoFRigidBodyMotionRestraint/newSixDoFRigidBodyMotionRestraint.C
 $(sDoFRBMR)/linearAxialAngularSpring/linearAxialAngularSpring.C
 $(sDoFRBMR)/linearSpring/linearSpring.C
 $(sDoFRBMR)/sphericalAngularSpring/sphericalAngularSpring.C
+$(sDoFRBMR)/tabulatedAxialAngularSpring/tabulatedAxialAngularSpring.C
 
 sDoFRBMC = $(sDoFRBM)/sixDoFRigidBodyMotionConstraint
 
