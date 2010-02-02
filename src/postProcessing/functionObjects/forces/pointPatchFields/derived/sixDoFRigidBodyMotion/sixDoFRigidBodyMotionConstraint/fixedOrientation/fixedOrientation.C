@@ -1,0 +1,180 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+\*---------------------------------------------------------------------------*/
+
+#include "fixedOrientation.H"
+#include "addToRunTimeSelectionTable.H"
+#include "sixDoFRigidBodyMotion.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace sixDoFRigidBodyMotionConstraints
+{
+    defineTypeNameAndDebug(fixedOrientation, 0);
+    addToRunTimeSelectionTable
+    (
+        sixDoFRigidBodyMotionConstraint,
+        fixedOrientation,
+        dictionary
+    );
+};
+};
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::fixedOrientation
+(
+    const dictionary& sDoFRBMCDict
+)
+:
+    sixDoFRigidBodyMotionConstraint(sDoFRBMCDict),
+    fixedOrientation_()
+{
+    read(sDoFRBMCDict);
+}
+
+
+// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
+
+Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::~fixedOrientation()
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+bool Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::constrain
+(
+    const sixDoFRigidBodyMotion& motion,
+    const vector& existingConstraintForce,
+    const vector& existingConstraintMoment,
+    scalar deltaT,
+    vector& constraintPosition,
+    vector& constraintForceIncrement,
+    vector& constraintMomentIncrement
+) const
+{
+    constraintMomentIncrement = vector::zero;
+
+    scalar maxTheta = -SMALL;
+
+    for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
+    {
+        vector axis = vector::zero;
+
+        axis[cmpt] = 1;
+
+        vector refDir = vector::zero;
+
+        refDir[(cmpt + 1) % 3] = 1;
+
+        vector predictedDir = motion.predictedOrientation
+        (
+            refDir,
+            existingConstraintMoment,
+            deltaT
+        );
+
+        axis = (fixedOrientation_ & axis);
+
+        refDir = (fixedOrientation_ & refDir);
+
+        // Removing any axis component from predictedDir
+        predictedDir -= (axis & predictedDir)*axis;
+
+        scalar theta = GREAT;
+
+        scalar magPredictedDir = mag(predictedDir);
+
+        if (magPredictedDir > VSMALL)
+        {
+            predictedDir /= magPredictedDir;
+
+            theta = acos(predictedDir & refDir);
+
+            // Recalculating axis to give correct sign to angle
+            axis = (refDir ^ predictedDir);
+
+            scalar magAxis = mag(axis);
+
+            if (magAxis > VSMALL)
+            {
+                axis /= magAxis;
+            }
+            else
+            {
+                axis = vector::zero;
+            }
+        }
+
+        if (theta > maxTheta)
+        {
+            maxTheta = theta;
+        }
+
+        constraintMomentIncrement +=
+           -relaxationFactor_
+           *theta*axis
+           *motion.momentOfInertia()[cmpt]/sqr(deltaT);
+    }
+
+    constraintPosition = motion.centreOfMass();
+
+    constraintForceIncrement = vector::zero;
+
+    return (mag(maxTheta) < tolerance_);
+}
+
+
+bool Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::read
+(
+    const dictionary& sDoFRBMCDict
+)
+{
+    sixDoFRigidBodyMotionConstraint::read(sDoFRBMCDict);
+
+    fixedOrientation_ =
+        sDoFRBMCCoeffs_.lookupOrDefault<tensor>("fixedOrientation", I);
+
+    if (mag(mag(fixedOrientation_) - sqrt(3.0)) > 1e-9)
+    {
+        FatalErrorIn
+        (
+            "Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::read"
+            "("
+                "const dictionary& sDoFRBMCDict"
+            ")"
+        )
+            << "fixedOrientation " << fixedOrientation_
+            << " is not a rotation tensor."
+            << exit(FatalError);
+    }
+
+    return true;
+}
+
+// ************************************************************************* //

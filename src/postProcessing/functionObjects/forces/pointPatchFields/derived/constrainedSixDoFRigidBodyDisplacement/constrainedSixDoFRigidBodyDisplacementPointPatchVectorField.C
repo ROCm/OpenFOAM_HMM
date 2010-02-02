@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sixDoFRigidBodyDisplacementPointPatchVectorField.H"
+#include "constrainedSixDoFRigidBodyDisplacementPointPatchVectorField.H"
 #include "pointPatchFields.H"
 #include "addToRunTimeSelectionTable.H"
 #include "Time.H"
@@ -40,8 +40,8 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-sixDoFRigidBodyDisplacementPointPatchVectorField::
-sixDoFRigidBodyDisplacementPointPatchVectorField
+constrainedSixDoFRigidBodyDisplacementPointPatchVectorField::
+constrainedSixDoFRigidBodyDisplacementPointPatchVectorField
 (
     const pointPatch& p,
     const DimensionedField<vector, pointMesh>& iF
@@ -54,8 +54,8 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
 {}
 
 
-sixDoFRigidBodyDisplacementPointPatchVectorField::
-sixDoFRigidBodyDisplacementPointPatchVectorField
+constrainedSixDoFRigidBodyDisplacementPointPatchVectorField::
+constrainedSixDoFRigidBodyDisplacementPointPatchVectorField
 (
     const pointPatch& p,
     const DimensionedField<vector, pointMesh>& iF,
@@ -82,10 +82,10 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
 }
 
 
-sixDoFRigidBodyDisplacementPointPatchVectorField::
-sixDoFRigidBodyDisplacementPointPatchVectorField
+constrainedSixDoFRigidBodyDisplacementPointPatchVectorField::
+constrainedSixDoFRigidBodyDisplacementPointPatchVectorField
 (
-    const sixDoFRigidBodyDisplacementPointPatchVectorField& ptf,
+    const constrainedSixDoFRigidBodyDisplacementPointPatchVectorField& ptf,
     const pointPatch& p,
     const DimensionedField<vector, pointMesh>& iF,
     const pointPatchFieldMapper& mapper
@@ -98,10 +98,10 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
 {}
 
 
-sixDoFRigidBodyDisplacementPointPatchVectorField::
-sixDoFRigidBodyDisplacementPointPatchVectorField
+constrainedSixDoFRigidBodyDisplacementPointPatchVectorField::
+constrainedSixDoFRigidBodyDisplacementPointPatchVectorField
 (
-    const sixDoFRigidBodyDisplacementPointPatchVectorField& ptf,
+    const constrainedSixDoFRigidBodyDisplacementPointPatchVectorField& ptf,
     const DimensionedField<vector, pointMesh>& iF
 )
 :
@@ -114,7 +114,7 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
+void constrainedSixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
 {
     if (this->updated())
     {
@@ -153,32 +153,23 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
         gravity = g.value();
     }
 
-    motion_.updateForce
+    vector rotationAxis(0, 1, 0);
+
+    vector torque
     (
-        fm.first().first() + fm.first().second() + gravity*motion_.mass(),
-        fm.second().first() + fm.second().second(),
-        t.deltaTValue()
+        (
+            (fm.second().first() + fm.second().second())
+          & rotationAxis
+        )
+       *rotationAxis
     );
 
-    // ----------------------------------------
-    // vector rotationAxis(0, 1, 0);
-
-    // vector torque
-    // (
-    //     (
-    //         (fm.second().first() + fm.second().second())
-    //       & rotationAxis
-    //     )
-    //    *rotationAxis
-    // );
-
-    // motion_.updateForce
-    // (
-    //     vector::zero,  // Force no centre of mass motion
-    //     torque,        // Only rotation allowed around the unit rotationAxis
-    //     t.deltaTValue()
-    // );
-    // ----------------------------------------
+    motion_.updateForce
+    (
+        vector::zero,  // Force no centre of mass motion
+        torque,        // Only rotation allowed around the unit rotationAxis
+        t.deltaTValue()
+    );
 
     Field<vector>::operator=(motion_.currentPosition(p0_) - p0_);
 
@@ -186,7 +177,10 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
 }
 
 
-void sixDoFRigidBodyDisplacementPointPatchVectorField::write(Ostream& os) const
+void constrainedSixDoFRigidBodyDisplacementPointPatchVectorField::write
+(
+    Ostream& os
+) const
 {
     pointPatchField<vector>::write(os);
     motion_.write(os);
@@ -202,7 +196,7 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::write(Ostream& os) const
 makePointPatchTypeField
 (
     pointPatchVectorField,
-    sixDoFRigidBodyDisplacementPointPatchVectorField
+    constrainedSixDoFRigidBodyDisplacementPointPatchVectorField
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
