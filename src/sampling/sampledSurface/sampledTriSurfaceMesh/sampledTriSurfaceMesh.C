@@ -160,7 +160,6 @@ bool Foam::sampledTriSurfaceMesh::update()
             -1,                 // seed
             true                // use tree
         );
-
     }
 
 
