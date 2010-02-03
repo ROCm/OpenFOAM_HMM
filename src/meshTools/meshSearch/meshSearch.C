@@ -813,7 +813,7 @@ Foam::label Foam::meshSearch::findNearestBoundaryFace
     {
         if (useTreeSearch)
         {
-            const indexedOctree<treeDataFace>& tree =  boundaryTree();
+            const indexedOctree<treeDataFace>& tree = boundaryTree();
 
             scalar span = tree.bb().mag();
 

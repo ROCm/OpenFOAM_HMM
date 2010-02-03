@@ -283,12 +283,14 @@ public:
 
             //- Return the location of "dir" containing the file "name".
             //  (eg, used in reading mesh data)
-            //  If name is null, search for the directory "dir" only
+            //  If name is null, search for the directory "dir" only.
+            //  Does not search beyond stopInstance (if set) or constant.
             word findInstance
             (
                 const fileName& dir,
                 const word& name = word::null,
-                const IOobject::readOption rOpt = IOobject::MUST_READ
+                const IOobject::readOption rOpt = IOobject::MUST_READ,
+                const word& stopInstance = word::null
             ) const;
 
             //- Search the case for valid time directories

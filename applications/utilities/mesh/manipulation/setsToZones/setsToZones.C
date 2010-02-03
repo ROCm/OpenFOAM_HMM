@@ -81,14 +81,17 @@ int main(int argc, char *argv[])
 #   include "createNamedPolyMesh.H"
 
     // Search for list of objects for the time of the mesh
-    IOobjectList objects
+    word setsInstance = runTime.findInstance
     (
-        mesh,
-        mesh.pointsInstance(),
-        polyMesh::meshSubDir/"sets"
+        polyMesh::meshSubDir/"sets",
+        word::null,
+        IOobject::MUST_READ,
+        mesh.facesInstance()
     );
 
-    Info<< "Searched : " << mesh.pointsInstance()/polyMesh::meshSubDir/"sets"
+    IOobjectList objects(mesh, setsInstance, polyMesh::meshSubDir/"sets");
+
+    Info<< "Searched : " << setsInstance/polyMesh::meshSubDir/"sets"
         << nl
         << "Found    : " << objects.names() << nl
         << endl;

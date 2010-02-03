@@ -83,9 +83,9 @@ sets
         type        uniform;
         axis        distance;
 
-        //- cavity
-        start       (0.02 0.051 0.005);
-        end         (0.06 0.051 0.005);
+        //- cavity. Slightly perturbed so not to align with face or edge.
+        start       (0.0201 0.05101 0.00501);
+        end         (0.0601 0.05101 0.00501);
         nPoints     10;
     }
 
@@ -103,8 +103,8 @@ sets
         //end         ( 1 0.05 0.005);
 
         //- cavity
-        start       (0.0 0.51  0.005);
-        end         (2 0.51  0.005);
+        start       (0.001 0.5101  0.00501);
+        end         (2.01 0.5101  0.00501);
         nPoints     10;
     }
 
@@ -112,15 +112,13 @@ sets
     {
         type    cloud;
         axis    xyz;
-        points  ((0.049 0.049 0.005)(0.051 0.049 0.005));
+        points  ((0.049 0.049 0.00501)(0.051 0.049 0.00501));
     }
 
 );
 
 
-// Surface sampling definition: choice of
-//      plane : values on plane defined by point, normal.
-//      patch : values on patch.
+// Surface sampling definition
 //
 // 1] patches are not triangulated by default
 // 2] planes are always triangulated
@@ -209,6 +207,28 @@ surfaces
         // regularise      false;    // Optional: do not simplify
     }
 
+    distance
+    {
+        // Isosurface from signed/unsigned distance to surface
+        type            distanceSurface;
+        signed          true;
+
+        // Definition of surface
+        surfaceType     triSurfaceMesh;
+        surfaceName     integrationPlane.stl;
+        // Distance to surface
+        distance        0.0;
+
+        interpolate     false;
+    }
+
+    triSurfaceSampling
+    {
+        // Sampling on triSurface
+        type        sampledTriSurfaceMesh;
+        surface     integrationPlane.stl;
+        interpolate true;
+    }
 );
 
 

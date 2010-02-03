@@ -85,7 +85,7 @@ class UnsortedMeshedSurface
 
 private:
 
-    //- Private typedefs for convenience
+    // Private typedefs for convenience
 
         typedef MeshedSurface<Face>       ParentType;
         typedef MeshedSurface<Face>       FriendType;
@@ -161,10 +161,10 @@ public:
         //  (points, faces, zone ids, zone info).
         UnsortedMeshedSurface
         (
-            const Xfer< pointField >&,
-            const Xfer< List<Face> >&,
-            const Xfer< List<label> >& zoneIds,
-            const Xfer< surfZoneIdentifierList >&
+            const Xfer<pointField>&,
+            const Xfer<List<Face> >&,
+            const Xfer<List<label> >& zoneIds,
+            const Xfer<surfZoneIdentifierList>&
         );
 
         //- Construct by transferring points, faces.
@@ -226,9 +226,8 @@ public:
         static autoPtr<UnsortedMeshedSurface> New(const fileName&);
 
 
-    // Destructor
-
-        virtual ~UnsortedMeshedSurface();
+    //- Destructor
+    virtual ~UnsortedMeshedSurface();
 
 
     // Member Function Selectors
@@ -315,17 +314,17 @@ public:
             //- Transfer components (points, faces, zone ids).
             virtual void reset
             (
-                const Xfer< pointField >&,
-                const Xfer< List<Face> >&,
-                const Xfer< List<label> >& zoneIds
+                const Xfer<pointField>&,
+                const Xfer<List<Face> >&,
+                const Xfer<List<label> >& zoneIds
             );
 
             //- Transfer components (points, faces, zone ids).
             virtual void reset
             (
-                const Xfer< List<point> >&,
-                const Xfer< List<Face> >&,
-                const Xfer< List<label> >& zoneIds
+                const Xfer<List<point> >&,
+                const Xfer<List<Face> >&,
+                const Xfer<List<label> >& zoneIds
             );
 
             //- Transfer the contents of the argument and annul the argument
@@ -335,7 +334,7 @@ public:
             void transfer(MeshedSurface<Face>&);
 
             //- Transfer contents to the Xfer container
-            Xfer< UnsortedMeshedSurface<Face> > xfer();
+            Xfer<UnsortedMeshedSurface<Face> > xfer();
 
 
         // Read

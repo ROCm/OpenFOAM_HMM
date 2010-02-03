@@ -160,7 +160,27 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
         t.deltaTValue()
     );
 
-    Field<vector>::operator=(motion_.generatePositions(p0_) - p0_);
+    // ----------------------------------------
+    // vector rotationAxis(0, 1, 0);
+
+    // vector torque
+    // (
+    //     (
+    //         (fm.second().first() + fm.second().second())
+    //       & rotationAxis
+    //     )
+    //    *rotationAxis
+    // );
+
+    // motion_.updateForce
+    // (
+    //     vector::zero,  // Force no centre of mass motion
+    //     torque,        // Only rotation allowed around the unit rotationAxis
+    //     t.deltaTValue()
+    // );
+    // ----------------------------------------
+
+    Field<vector>::operator=(motion_.currentPosition(p0_) - p0_);
 
     fixedValuePointPatchField<vector>::updateCoeffs();
 }

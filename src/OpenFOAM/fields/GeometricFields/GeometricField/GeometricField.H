@@ -345,12 +345,12 @@ public:
         );
 
         //- Construct as copy of tmp<GeometricField> deleting argument
-#       ifdef ConstructFromTmp
+        #ifdef ConstructFromTmp
         GeometricField
         (
             const tmp<GeometricField<Type, PatchField, GeoMesh> >&
         );
-#       endif
+        #endif
 
         //- Construct as copy resetting IO parameters
         GeometricField
@@ -367,13 +367,13 @@ public:
         );
 
         //- Construct as copy resetting name
-#       ifdef ConstructFromTmp
+        #ifdef ConstructFromTmp
         GeometricField
         (
             const word& newName,
             const tmp<GeometricField<Type, PatchField, GeoMesh> >&
         );
-#       endif
+        #endif
 
         //- Construct as copy resetting IO parameters and patch type
         GeometricField
@@ -392,9 +392,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~GeometricField();
+    //- Destructor
+    virtual ~GeometricField();
 
 
     // Member Functions

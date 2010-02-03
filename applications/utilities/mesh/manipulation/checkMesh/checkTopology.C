@@ -89,6 +89,7 @@ Foam::label Foam::checkTopology
 
             Info<< "  <<Writing " << nPoints
                 << " unused points to set " << points.name() << endl;
+            points.instance() = mesh.pointsInstance();
             points.write();
         }
     }
@@ -106,6 +107,7 @@ Foam::label Foam::checkTopology
         {
             Info<< "  <<Writing " << nFaces
                 << " unordered faces to set " << faces.name() << endl;
+            faces.instance() = mesh.pointsInstance();
             faces.write();
         }
     }
@@ -122,6 +124,7 @@ Foam::label Foam::checkTopology
             Info<< "  <<Writing " << nCells
                 << " cells with over used edges to set " << cells.name()
                 << endl;
+            cells.instance() = mesh.pointsInstance();
             cells.write();
         }
     }
@@ -137,6 +140,7 @@ Foam::label Foam::checkTopology
             Info<< "  <<Writing " << nFaces
                 << " faces with out-of-range or duplicate vertices to set "
                 << faces.name() << endl;
+            faces.instance() = mesh.pointsInstance();
             faces.write();
         }
     }
@@ -153,6 +157,7 @@ Foam::label Foam::checkTopology
             Info<< "  <<Writing " << nFaces
                 << " faces with incorrect edges to set " << faces.name()
                 << endl;
+            faces.instance() = mesh.pointsInstance();
             faces.write();
         }
     }
@@ -203,6 +208,7 @@ Foam::label Foam::checkTopology
                 << " cells with with single non-boundary face to set "
                 << oneCells.name()
                 << endl;
+            oneCells.instance() = mesh.pointsInstance();
             oneCells.write();
         }
 
@@ -214,6 +220,7 @@ Foam::label Foam::checkTopology
                 << " cells with with single non-boundary face to set "
                 << twoCells.name()
                 << endl;
+            twoCells.instance() = mesh.pointsInstance();
             twoCells.write();
         }
     }
@@ -354,6 +361,7 @@ Foam::label Foam::checkTopology
                 << " conflicting points to set "
                 << points.name() << endl;
 
+            points.instance() = mesh.pointsInstance();
             points.write();
         }
 

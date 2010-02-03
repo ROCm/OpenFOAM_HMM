@@ -77,11 +77,7 @@ void setUpdater::updateSets(const mapPolyMesh& morphMap) const
     IOobjectList Objects
     (
         morphMap.mesh().time(),
-        morphMap.mesh().time().findInstance
-        (
-            morphMap.mesh().meshDir(),
-            "faces"
-        ),
+        morphMap.mesh().facesInstance(),
         "polyMesh/sets"
     );
 
