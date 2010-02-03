@@ -89,9 +89,19 @@ Foam::label Foam::metisDecomp::decompose
 
 
     // Check for externally provided cellweights and if so initialise weights
-    scalar maxWeights = gMax(cWeights);
+    scalar minWeights = gMin(cWeights);
     if (cWeights.size() > 0)
     {
+        if (minWeights <= 0)
+        {
+            WarningIn
+            (
+                "metisDecomp::decompose"
+                "(const pointField&, const scalarField&)"
+            )   << "Illegal minimum weight " << minWeights
+                << endl;
+        }
+
         if (cWeights.size() != numCells)
         {
             FatalErrorIn
@@ -106,7 +116,7 @@ Foam::label Foam::metisDecomp::decompose
         cellWeights.setSize(cWeights.size());
         forAll(cellWeights, i)
         {
-            cellWeights[i] = int(1000000*cWeights[i]/maxWeights);
+            cellWeights[i] = int(cWeights[i]/minWeights);
         }
     }
 

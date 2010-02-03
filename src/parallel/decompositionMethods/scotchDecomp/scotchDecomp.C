@@ -253,9 +253,19 @@ Foam::label Foam::scotchDecomp::decompose
 
 
     // Check for externally provided cellweights and if so initialise weights
-    scalar maxWeights = gMax(cWeights);
+    scalar minWeights = gMin(cWeights);
     if (cWeights.size() > 0)
     {
+        if (minWeights <= 0)
+        {
+            WarningIn
+            (
+                "scotchDecomp::decompose"
+                "(const pointField&, const scalarField&)"
+            )   << "Illegal minimum weight " << minWeights
+                << endl;
+        }
+
         if (cWeights.size() != xadj.size()-1)
         {
             FatalErrorIn
@@ -266,11 +276,12 @@ Foam::label Foam::scotchDecomp::decompose
                 << " does not equal number of cells " << xadj.size()-1
                 << exit(FatalError);
         }
+
         // Convert to integers.
         velotab.setSize(cWeights.size());
         forAll(velotab, i)
         {
-            velotab[i] = int(1000000*cWeights[i]/maxWeights);
+            velotab[i] = int(cWeights[i]/minWeights);
         }
     }
 
