@@ -2497,18 +2497,13 @@ void Foam::autoLayerDriver::mergePatchFacesUndo
         << "---------------------------" << nl
         << "    - which are on the same patch" << nl
         << "    - which make an angle < " << layerParams.featureAngle()
-        << "- which are on the same patch" << nl
-        << "- which make an angle < " << layerParams.featureAngle()
         << " degrees"
         << nl
         << "      (cos:" << minCos << ')' << nl
         << "    - as long as the resulting face doesn't become concave"
-        << "  (cos:" << minCos << ')' << nl
-        << "- as long as the resulting face doesn't become concave"
         << " by more than "
         << layerParams.concaveAngle() << " degrees" << nl
         << "      (0=straight, 180=fully concave)" << nl
-        << "  (0=straight, 180=fully concave)" << nl
         << endl;
 
     label nChanged = mergePatchFacesUndo(minCos, concaveCos, motionDict);
@@ -3241,6 +3236,7 @@ void Foam::autoLayerDriver::doLayers
     const dictionary& shrinkDict,
     const dictionary& motionDict,
     const layerParameters& layerParams,
+    const bool preBalance,
     decompositionMethod& decomposer,
     fvMeshDistribute& distributor
 )
@@ -3299,6 +3295,7 @@ void Foam::autoLayerDriver::doLayers
 
         // Balance
         if (Pstream::parRun())
+        if (Pstream::parRun() && preBalance)
         {
             Info<< nl
                 << "Doing initial balancing" << nl

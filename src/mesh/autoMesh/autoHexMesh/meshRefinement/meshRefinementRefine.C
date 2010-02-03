@@ -219,7 +219,6 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
             << endl;
 
         faceSet changedFacesSet(mesh, "changedFaces", changedFaces);
-        changedFacesSet.instance() = mesh.time().timeName();
         Pout<< "getChangedFaces : Writing " << changedFaces.size()
             << " changed faces to faceSet " << changedFacesSet.name()
             << endl;
@@ -1246,90 +1245,110 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::refine
 }
 
 
-//// Do refinement of consistent set of cells followed by truncation and
-//// load balancing.
-//Foam::autoPtr<Foam::mapDistributePolyMesh>
-//Foam::meshRefinement::refineAndBalance
-//(
-//    const string& msg,
-//    decompositionMethod& decomposer,
-//    fvMeshDistribute& distributor,
-//    const labelList& cellsToRefine
-//)
-//{
-//    // Do all refinement
-//    refine(cellsToRefine);
-//
-//    if (debug)
-//    {
-//        Pout<< "Writing refined but unbalanced " << msg
-//            << " mesh to time " << timeName() << endl;
-//        write
-//        (
-//            debug,
-//            mesh_.time().path()
-//           /timeName()
-//        );
-//        Pout<< "Dumped debug data in = "
-//            << mesh_.time().cpuTimeIncrement() << " s" << endl;
-//
-//        // test all is still synced across proc patches
-//        checkData();
-//    }
-//
-//    Info<< "Refined mesh in = "
-//        << mesh_.time().cpuTimeIncrement() << " s" << endl;
-//    printMeshInfo(debug, "After refinement " + msg);
-//
-//
-//    // Load balancing
-//    // ~~~~~~~~~~~~~~
-//
-//    autoPtr<mapDistributePolyMesh> distMap;
-//
-//    if (Pstream::nProcs() > 1)
-//    {
-//        scalarField cellWeights(mesh_.nCells(), 1);
-//
-//        distMap = balance
-//        (
-//            false,  //keepZoneFaces
-//            false,  //keepBaffles
-//            cellWeights,
-//            decomposer,
-//            distributor
-//        );
-//
-//        Info<< "Balanced mesh in = "
-//            << mesh_.time().cpuTimeIncrement() << " s" << endl;
-//
-//        printMeshInfo(debug, "After balancing " + msg);
-//
-//
-//        if (debug)
-//        {
-//            Pout<< "Writing balanced " << msg
-//                << " mesh to time " << timeName() << endl;
-//            write
-//            (
-//                debug,
-//                mesh_.time().path()/timeName()
-//            );
-//            Pout<< "Dumped debug data in = "
-//                << mesh_.time().cpuTimeIncrement() << " s" << endl;
-//
-//            // test all is still synced across proc patches
-//            checkData();
-//        }
-//    }
-//
-//    return distMap;
-//}
+// Do refinement of consistent set of cells followed by truncation and
+// load balancing.
+Foam::autoPtr<Foam::mapDistributePolyMesh>
+Foam::meshRefinement::refineAndBalance
+(
+    const string& msg,
+    decompositionMethod& decomposer,
+    fvMeshDistribute& distributor,
+    const labelList& cellsToRefine,
+    const scalar maxLoadUnbalance
+)
+{
+    // Do all refinement
+    refine(cellsToRefine);
+
+    if (debug)
+    {
+        Pout<< "Writing refined but unbalanced " << msg
+            << " mesh to time " << timeName() << endl;
+        write
+        (
+            debug,
+            mesh_.time().path()
+           /timeName()
+        );
+        Pout<< "Dumped debug data in = "
+            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+
+        // test all is still synced across proc patches
+        checkData();
+    }
+
+    Info<< "Refined mesh in = "
+        << mesh_.time().cpuTimeIncrement() << " s" << endl;
+    printMeshInfo(debug, "After refinement " + msg);
+
+
+    // Load balancing
+    // ~~~~~~~~~~~~~~
+
+    autoPtr<mapDistributePolyMesh> distMap;
+
+    if (Pstream::nProcs() > 1)
+    {
+        scalar nIdealCells =
+            mesh_.globalData().nTotalCells()
+          / Pstream::nProcs();
+
+        scalar unbalance = returnReduce
+        (
+            mag(1.0-mesh_.nCells()/nIdealCells),
+            maxOp<scalar>()
+        );
+
+        if (unbalance <= maxLoadUnbalance)
+        {
+            Info<< "Skipping balancing since max unbalance " << unbalance
+                << " is less than allowable " << maxLoadUnbalance
+                << endl;
+        }
+        else
+        {
+            scalarField cellWeights(mesh_.nCells(), 1);
+
+            distMap = balance
+            (
+                false,  //keepZoneFaces
+                false,  //keepBaffles
+                cellWeights,
+                decomposer,
+                distributor
+            );
+
+            Info<< "Balanced mesh in = "
+                << mesh_.time().cpuTimeIncrement() << " s" << endl;
+
+            printMeshInfo(debug, "After balancing " + msg);
+
+
+            if (debug)
+            {
+                Pout<< "Writing balanced " << msg
+                    << " mesh to time " << timeName() << endl;
+                write
+                (
+                    debug,
+                    mesh_.time().path()/timeName()
+                );
+                Pout<< "Dumped debug data in = "
+                    << mesh_.time().cpuTimeIncrement() << " s" << endl;
+
+                // test all is still synced across proc patches
+                checkData();
+            }
+        }
+    }
+
+    return distMap;
+}
 
 
 // Do load balancing followed by refinement of consistent set of cells.
 Foam::autoPtr<Foam::mapDistributePolyMesh>
-Foam::meshRefinement::refineAndBalance
+Foam::meshRefinement::balanceAndRefine
 (
     const string& msg,
     decompositionMethod& decomposer,
@@ -1386,8 +1405,8 @@ Foam::meshRefinement::refineAndBalance
         if (unbalance <= maxLoadUnbalance)
         {
             Info<< "Skipping balancing since max unbalance " << unbalance
-                << " in = "
-                << mesh_.time().cpuTimeIncrement() << " s" << endl;
+                << " is less than allowable " << maxLoadUnbalance
+                << endl;
         }
         else
         {
