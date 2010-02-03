@@ -26,7 +26,31 @@ Class
     Foam::TimeActivatedExplicitSource
 
 Description
-    Helper class to describe source properties
+    Time activated explicit source.
+
+    Sources described by:
+
+    {
+        active          true;      // on/off switch
+        timeStart       0.2;       // start time
+        duration        2.0;       // duration
+        selectionMode   points;    // cellSet
+        volumeMode      absolute;  // specific
+
+        fieldData                  // field data - usage for multiple fields
+        (
+            (H2O 0.005)
+        );
+
+        fieldData       0.005;     // field data - usage for single field
+
+        points                     // list of points when selectionMode = points
+        (
+            (2.75 0.5 0)
+        );
+
+        cellSet         c0;        // cellSet name when selectionMode = cekllSet
+    }
 
 SourceFiles
     TimeActivatedExplicitSource.C

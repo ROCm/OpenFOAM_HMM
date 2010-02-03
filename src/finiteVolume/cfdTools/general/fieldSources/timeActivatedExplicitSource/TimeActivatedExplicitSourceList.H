@@ -26,7 +26,7 @@ Class
     Foam::TimeActivatedExplicitSourceList
 
 Description
-    List of source properties
+    List of time activeted explict sources
 
 SourceFiles
     TimeActivatedExplicitSourceList.C
