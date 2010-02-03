@@ -146,7 +146,28 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::constrain
 
     constraintForceIncrement = vector::zero;
 
-    return (mag(maxTheta) < tolerance_);
+    bool converged(mag(maxTheta) < tolerance_);
+
+    if (motion.report())
+    {
+        Info<< "Constraint " << this->name()
+            << " max angle " << maxTheta
+            << " force " << constraintForceIncrement
+            << " moment " << constraintMomentIncrement;
+
+        if (converged)
+        {
+            Info<< " converged";
+        }
+        else
+        {
+            Info<< " not converged";
+        }
+
+        Info<< endl;
+    }
+
+    return converged;
 }
 
 
