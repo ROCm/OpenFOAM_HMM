@@ -27,10 +27,11 @@ Application
 
 Description
     Transient PISO solver for compressible, laminar or turbulent flow with
-    reacting Lagrangian parcels for porous media, including explicit sources
+    reacting multiphase Lagrangian parcels for porous media, including explicit
+    sources for mass, momentum and energy
 
     The solver includes:
-    - reacting parcel cloud
+    - reacting multiphase parcel cloud
     - porous media
     - point mass sources
     - polynomial based, incompressible thermodynamics (f(T))
@@ -48,7 +49,7 @@ Description
 #include "chemistrySolver.H"
 #include "radiationModel.H"
 #include "porousZones.H"
-#include "timeActivatedExplicitMulticomponentPointSource.H"
+#include "timeActivatedExplicitSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,7 +64,7 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "createRadiationModel.H"
     #include "createClouds.H"
-    #include "createMulticomponentPointSources.H"
+    #include "createExplicitSources.H"
     #include "createPorousZones.H"
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
