@@ -84,6 +84,7 @@ private:
         //- Dimensions of source properties
         dimensionSet dimensions_;
 
+        //- List of field names the source is working on
         wordList fieldNames_;
 
 
