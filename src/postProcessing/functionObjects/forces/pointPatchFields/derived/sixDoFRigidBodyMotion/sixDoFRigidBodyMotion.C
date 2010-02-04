@@ -30,6 +30,11 @@ License
 
 void Foam::sixDoFRigidBodyMotion::applyRestraints()
 {
+    if (restraints_.size() == 0)
+    {
+        return;
+    }
+
     if (Pstream::master())
     {
         forAll(restraints_, rI)
@@ -57,6 +62,11 @@ void Foam::sixDoFRigidBodyMotion::applyRestraints()
 
 void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
 {
+    if (constraints_.size() == 0)
+    {
+        return;
+    }
+
     if (Pstream::master())
     {
         label iter = 0;
