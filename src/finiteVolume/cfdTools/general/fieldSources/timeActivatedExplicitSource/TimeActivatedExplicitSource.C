@@ -215,6 +215,7 @@ void Foam::TimeActivatedExplicitSource<Type>::setFieldData
 template<class Type>
 void Foam::TimeActivatedExplicitSource<Type>::setCellSet()
 {
+    Info<< incrIndent << indent << "Source: " << name_ << endl;
     switch (selectionMode_)
     {
         case smPoints:
@@ -234,6 +235,8 @@ void Foam::TimeActivatedExplicitSource<Type>::setCellSet()
         }
         case smCellSet:
         {
+            Info<< indent << "- selecting cells using cellSet "
+                << cellSetName_ << endl;
             cellsPtr_.reset(new cellSet(mesh_, cellSetName_));
 
             break;
@@ -261,8 +264,7 @@ void Foam::TimeActivatedExplicitSource<Type>::setCellSet()
         }
     }
 
-    Info<< incrIndent << indent << name_ << ": selected "
-        << returnReduce(cSet.size(), sumOp<label>())
+    Info<< indent << "- selected " << returnReduce(cSet.size(), sumOp<label>())
         << " cell(s)" << nl << decrIndent << endl;
 }
 
