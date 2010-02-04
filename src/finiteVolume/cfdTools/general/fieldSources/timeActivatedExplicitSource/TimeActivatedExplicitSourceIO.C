@@ -70,7 +70,7 @@ void Foam::TimeActivatedExplicitSource<Type>::writeData(Ostream& os) const
         {
             FatalErrorIn
             (
-                "TimeActivatedExplicitSource<Type>::writeDict"
+                "TimeActivatedExplicitSource<Type>::writeData"
                 "("
                     "Ostream&, "
                     "bool"
@@ -91,10 +91,10 @@ template<class Type>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const TimeActivatedExplicitSource<Type>& sp
+    const TimeActivatedExplicitSource<Type>& source
 )
 {
-    sp.writeData(os);
+    source.writeData(os);
     return os;
 }
 

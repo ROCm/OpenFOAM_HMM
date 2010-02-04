@@ -212,10 +212,10 @@ template<class Type>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const TimeActivatedExplicitSourceList<Type>& spl
+    const TimeActivatedExplicitSourceList<Type>& sources
 )
 {
-    spl.writeData(os);
+    sources.writeData(os);
     return os;
 }
 

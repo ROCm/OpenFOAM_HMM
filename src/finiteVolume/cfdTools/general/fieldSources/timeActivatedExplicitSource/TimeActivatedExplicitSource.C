@@ -220,6 +220,8 @@ void Foam::TimeActivatedExplicitSource<Type>::setCellSet()
     {
         case smPoints:
         {
+            Info<< indent << "- selecting cells using points" << endl;
+
             labelHashSet cellOwners;
             forAll(points_, i)
             {
@@ -228,7 +230,16 @@ void Foam::TimeActivatedExplicitSource<Type>::setCellSet()
                 {
                     cellOwners.insert(cellI);
                 }
+
+                label globalCellI = returnReduce(cellI, maxOp<label>());
+                if (globalCellI < 0)
+                {
+                    WarningIn("TimeActivatedExplicitSource<Type>::setCellIds()")
+                        << "Unable to find owner cell for point " << points_[i]
+                        << endl;
+                }
             }
+
             cellsPtr_.reset(new cellSet(mesh_, "points", cellOwners));
 
             break;
@@ -243,7 +254,7 @@ void Foam::TimeActivatedExplicitSource<Type>::setCellSet()
         }
         default:
         {
-            FatalErrorIn("TimeActivatedExplicitSource::setCellIds()")
+            FatalErrorIn("TimeActivatedExplicitSource<Type>::setCellIds()")
                 << "Unknown selectionMode "
                 << selectionModeTypeNames_[selectionMode_]
                 << ". Valid selectionMode types are" << selectionModeTypeNames_

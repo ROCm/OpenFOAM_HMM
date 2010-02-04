@@ -365,7 +365,7 @@ public:
             friend Ostream& operator<< <Type>
             (
                 Ostream& os,
-                const TimeActivatedExplicitSource& sp
+                const TimeActivatedExplicitSource& source
             );
 };
 

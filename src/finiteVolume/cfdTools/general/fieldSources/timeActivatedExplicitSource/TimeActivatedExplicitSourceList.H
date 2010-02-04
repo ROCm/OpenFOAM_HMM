@@ -150,7 +150,7 @@ public:
             friend Ostream& operator<< <Type>
             (
                 Ostream& os,
-                const TimeActivatedExplicitSourceList& sp
+                const TimeActivatedExplicitSourceList& sources
             );
 };
 
