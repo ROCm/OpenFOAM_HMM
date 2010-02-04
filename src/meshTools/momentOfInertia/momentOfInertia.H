@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2007-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,22 +22,47 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Class
+    momentOfInertia
+
+Description
+
+SourceFiles
+    momentOfInertia.H
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef expDirectionMixedFvPatchFields_H
-#define expDirectionMixedFvPatchFields_H
+#ifndef momentOfInertia_H
+#define momentOfInertia_H
 
-#include "expDirectionMixedFvPatchField.H"
-#include "fieldTypes.H"
+#include "tensor.H"
+#include "primitiveMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+////- Moment of inertia around cell centre for single cell.
+//tensor momentOfInertia
+//(
+//    const pointField&,
+//    const faceList&,
+//    const cell&,
+//    const point& cc
+//);
 
-makePatchTypeFieldTypedefs(expDirectionMixed)
+// Calculate
+// - centre of mass
+// - inertia tensor around (0,0,0)
+void momentOfIntertia
+(
+    const pointField&,
+    const faceList&,
+    const cell&,
+    point& r,
+    tensor& Jorigin
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

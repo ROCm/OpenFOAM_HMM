@@ -118,9 +118,7 @@ sets
 );
 
 
-// Surface sampling definition: choice of
-//      plane : values on plane defined by point, normal.
-//      patch : values on patch.
+// Surface sampling definition
 //
 // 1] patches are not triangulated by default
 // 2] planes are always triangulated
@@ -209,6 +207,28 @@ surfaces
         // regularise      false;    // Optional: do not simplify
     }
 
+    distance
+    {
+        // Isosurface from signed/unsigned distance to surface
+        type            distanceSurface;
+        signed          true;
+
+        // Definition of surface
+        surfaceType     triSurfaceMesh;
+        surfaceName     integrationPlane.stl;
+        // Distance to surface
+        distance        0.0;
+
+        interpolate     false;
+    }
+
+    triSurfaceSampling
+    {
+        // Sampling on triSurface
+        type        sampledTriSurfaceMesh;
+        surface     integrationPlane.stl;
+        interpolate true;
+    }
 );
 
 

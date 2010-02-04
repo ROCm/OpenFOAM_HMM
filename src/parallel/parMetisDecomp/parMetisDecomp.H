@@ -112,6 +112,9 @@ public:
 
         //- Return for every coordinate the wanted processor number. Use the
         //  mesh connectivity (if needed)
+        //  Weights get normalised so the minimum value is 1 before truncation
+        //  to an integer so the weights should be multiples of the minimum
+        //  value. The overall sum of weights might otherwise overflow.
         virtual labelList decompose
         (
             const pointField& points,
@@ -122,6 +125,7 @@ public:
         //  passed agglomeration map (from fine to coarse cells) and coarse cell
         //  location. Can be overridden by decomposers that provide this
         //  functionality natively.
+        //  See note on weights above.
         virtual labelList decompose
         (
             const labelList& cellToRegion,
@@ -136,6 +140,7 @@ public:
         //    from 0 at processor0 and then incrementing all through the
         //    processors)
         //  - the connections are across coupled patches
+        //  See note on weights above.
         virtual labelList decompose
         (
             const labelListList& globalCellCells,

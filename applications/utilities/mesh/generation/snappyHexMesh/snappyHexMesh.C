@@ -434,6 +434,19 @@ int main(int argc, char *argv[])
         // Layer addition parameters
         layerParameters layerParams(layerDict, mesh.boundaryMesh());
 
+        //!!! Temporary hack to get access to maxLocalCells
+        bool preBalance;
+        {
+            refinementParameters refineParams(refineDict);
+
+            preBalance = returnReduce
+            (
+                (mesh.nCells() >= refineParams.maxLocalCells()),
+                orOp<bool>()
+            );
+        }
+
+
         if (!overwrite)
         {
             const_cast<Time&>(mesh.time())++;
@@ -444,6 +457,7 @@ int main(int argc, char *argv[])
             layerDict,
             motionDict,
             layerParams,
+            preBalance,
             decomposer,
             distributor
         );

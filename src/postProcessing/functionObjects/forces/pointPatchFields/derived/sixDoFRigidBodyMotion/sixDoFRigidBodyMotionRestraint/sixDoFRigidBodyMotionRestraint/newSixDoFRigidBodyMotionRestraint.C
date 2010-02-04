@@ -24,25 +24,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "expDirectionMixedFvPatchFields.H"
-#include "addToRunTimeSelectionTable.H"
-#include "volFields.H"
+#include "sixDoFRigidBodyMotionRestraint.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-namespace Foam
+Foam::autoPtr<Foam::sixDoFRigidBodyMotionRestraint>
+Foam::sixDoFRigidBodyMotionRestraint::New(const dictionary& sDoFRBMRDict)
 {
+    word sixDoFRigidBodyMotionRestraintTypeName =
+        sDoFRBMRDict.lookup("sixDoFRigidBodyMotionRestraint");
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+    Info<< "Selecting sixDoFRigidBodyMotionRestraint function "
+        << sixDoFRigidBodyMotionRestraintTypeName << endl;
 
-template<>
-makePatchTypeField(fvPatchVectorField, expDirectionMixedFvPatchVectorField);
+    dictionaryConstructorTable::iterator cstrIter =
+    dictionaryConstructorTablePtr_->find
+    (
+        sixDoFRigidBodyMotionRestraintTypeName
+    );
 
-template<>
-makePatchTypeField(fvPatchTensorField, expDirectionMixedFvPatchTensorField);
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "sixDoFRigidBodyMotionRestraint::New"
+            "("
+                "const dictionary& sDoFRBMRDict"
+            ")"
+        )   << "Unknown sixDoFRigidBodyMotionRestraint type "
+            << sixDoFRigidBodyMotionRestraintTypeName << endl << endl
+            << "Valid  sixDoFRigidBodyMotionRestraints are : " << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    return autoPtr<sixDoFRigidBodyMotionRestraint>(cstrIter()(sDoFRBMRDict));
+}
 
-} // End namespace Foam
 
 // ************************************************************************* //
