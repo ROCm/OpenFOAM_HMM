@@ -96,7 +96,7 @@ class sixDoFRigidBodyMotion
 
         //- Maximum number of iterations allowed to attempt to obey
         //  constraints
-        label maxConstraintIters_;
+        label maxConstraintIterations_;
 
         //- Centre of mass of reference state
         point refCentreOfMass_;
@@ -152,7 +152,7 @@ class sixDoFRigidBodyMotion
 
             //- Return access to the maximum allowed number of
             //  constraint iterations
-            inline label maxConstraintIters() const;
+            inline label maxConstraintIterations() const;
 
             //- Return access to the centre of mass
             inline const point& refCentreOfMass() const;

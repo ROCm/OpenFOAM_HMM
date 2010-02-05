@@ -30,7 +30,7 @@ License
 
 void Foam::sixDoFRigidBodyMotion::applyRestraints()
 {
-    if (restraints_.size() == 0)
+    if (restraints_.empty())
     {
         return;
     }
@@ -62,14 +62,14 @@ void Foam::sixDoFRigidBodyMotion::applyRestraints()
 
 void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
 {
-    if (constraints_.size() == 0)
+    if (constraints_.empty())
     {
         return;
     }
 
     if (Pstream::master())
     {
-        label iter = 0;
+        label iteration = 0;
 
         bool allConverged = true;
 
@@ -114,9 +114,9 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
                 cMA += cM + ((cP - centreOfMass()) ^ cF);
             }
 
-        } while(++iter < maxConstraintIters_ && !allConverged);
+        } while(++iteration < maxConstraintIterations_ && !allConverged);
 
-        if (iter >= maxConstraintIters_)
+        if (iteration >= maxConstraintIterations_)
         {
             FatalErrorIn
             (
@@ -124,13 +124,15 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
                 "(scalar deltaT)"
             )
                 << nl << "Maximum number of sixDoFRigidBodyMotion constraint "
-                << "iterations (" << maxConstraintIters_ << ") exceeded." << nl
+                << "iterations ("
+                << maxConstraintIterations_
+                << ") exceeded." << nl
                 << exit(FatalError);
         }
         else if (report_)
         {
             Info<< "sixDoFRigidBodyMotion constraints converged in "
-                << iter << " iterations"
+                << iteration << " iterations"
                 << nl << "Constraint force: " << cFA << nl
                 << "Constraint moment: " << cMA
                 << endl;
@@ -154,7 +156,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion()
     motionState_(),
     restraints_(),
     constraints_(),
-    maxConstraintIters_(0),
+    maxConstraintIterations_(0),
     refCentreOfMass_(vector::zero),
     momentOfInertia_(diagTensor::one*VSMALL),
     mass_(VSMALL),
@@ -187,7 +189,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     ),
     restraints_(),
     constraints_(),
-    maxConstraintIters_(0),
+    maxConstraintIterations_(0),
     refCentreOfMass_(refCentreOfMass),
     momentOfInertia_(momentOfInertia),
     mass_(mass),
@@ -200,7 +202,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion(const dictionary& dict)
     motionState_(dict),
     restraints_(),
     constraints_(),
-    maxConstraintIters_(0),
+    maxConstraintIterations_(0),
     refCentreOfMass_(dict.lookupOrDefault("refCentreOfMass", centreOfMass())),
     momentOfInertia_(dict.lookup("momentOfInertia")),
     mass_(readScalar(dict.lookup("mass"))),
@@ -220,7 +222,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     motionState_(sDoFRBM.motionState()),
     restraints_(sDoFRBM.restraints()),
     constraints_(sDoFRBM.constraints()),
-    maxConstraintIters_(sDoFRBM.maxConstraintIters()),
+    maxConstraintIterations_(sDoFRBM.maxConstraintIterations()),
     refCentreOfMass_(sDoFRBM.refCentreOfMass()),
     momentOfInertia_(sDoFRBM.momentOfInertia()),
     mass_(sDoFRBM.mass()),

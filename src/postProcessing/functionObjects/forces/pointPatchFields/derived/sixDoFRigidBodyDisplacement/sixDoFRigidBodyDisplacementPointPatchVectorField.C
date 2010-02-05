@@ -114,6 +114,32 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void sixDoFRigidBodyDisplacementPointPatchVectorField::autoMap
+(
+    const pointPatchFieldMapper& m
+)
+{
+    fixedValuePointPatchField<vector>::autoMap(m);
+
+    p0_.autoMap(m);
+}
+
+
+void sixDoFRigidBodyDisplacementPointPatchVectorField::rmap
+(
+    const pointPatchField<vector>& ptf,
+    const labelList& addr
+)
+{
+    const sixDoFRigidBodyDisplacementPointPatchVectorField& sDoFptf =
+        refCast<const sixDoFRigidBodyDisplacementPointPatchVectorField>(ptf);
+
+    fixedValuePointPatchField<vector>::rmap(sDoFptf, addr);
+
+    p0_.rmap(sDoFptf.p0_, addr);
+}
+
+
 void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
 {
     if (this->updated())
@@ -159,26 +185,6 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
         fm.second().first() + fm.second().second(),
         t.deltaTValue()
     );
-
-    // ----------------------------------------
-    // vector rotationAxis(0, 1, 0);
-
-    // vector torque
-    // (
-    //     (
-    //         (fm.second().first() + fm.second().second())
-    //       & rotationAxis
-    //     )
-    //    *rotationAxis
-    // );
-
-    // motion_.updateForce
-    // (
-    //     vector::zero,  // Force no centre of mass motion
-    //     torque,        // Only rotation allowed around the unit rotationAxis
-    //     t.deltaTValue()
-    // );
-    // ----------------------------------------
 
     Field<vector>::operator=(motion_.currentPosition(p0_) - p0_);
 
