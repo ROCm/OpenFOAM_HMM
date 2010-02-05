@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -39,7 +39,7 @@
 usage() {
     cat<<USAGE
 
-usage: ${0##*/} <turbulenceProperties>
+Usage: ${0##*/} <turbulenceProperties>
 
   Where <turbulenceProperties> is the full path to the
   turbulenceProperties dictionary
