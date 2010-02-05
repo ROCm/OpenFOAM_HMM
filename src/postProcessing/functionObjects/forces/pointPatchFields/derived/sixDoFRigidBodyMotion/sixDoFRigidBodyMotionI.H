@@ -114,9 +114,9 @@ Foam::sixDoFRigidBodyMotion::constraints() const
 }
 
 
-inline Foam::label Foam::sixDoFRigidBodyMotion::maxConstraintIters() const
+inline Foam::label Foam::sixDoFRigidBodyMotion::maxConstraintIterations() const
 {
-    return maxConstraintIters_;
+    return maxConstraintIterations_;
 }
 
 
