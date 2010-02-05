@@ -83,9 +83,6 @@ class domainDecomposition
         //- Labels of cells for each processor
         labelListList procCellAddressing_;
 
-        //- Original patch index for every processor patch
-        labelListList procBoundaryAddressing_;
-
         //- Sizes for processor mesh patches
         // Excludes inter-processor boundaries
         labelListList procPatchSize_;
@@ -149,8 +146,8 @@ public:
             return distributed_;
         }
 
-        //- Decompose mesh. Optionally remove zero-sized patches.
-        void decomposeMesh(const bool filterEmptyPatches);
+        //- Decompose mesh.
+        void decomposeMesh();
 
         //- Write decomposition
         bool writeDecomposition();

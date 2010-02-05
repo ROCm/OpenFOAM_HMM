@@ -86,7 +86,6 @@ Foam::domainDecomposition::domainDecomposition(const IOobject& io)
     procPointAddressing_(nProcs_),
     procFaceAddressing_(nProcs_),
     procCellAddressing_(nProcs_),
-    procBoundaryAddressing_(nProcs_),
     procPatchSize_(nProcs_),
     procPatchStartIndex_(nProcs_),
     procNeighbourProcessors_(nProcs_),
@@ -279,8 +278,6 @@ bool Foam::domainDecomposition::writeDecomposition()
         );
 
         // Create processor boundary patches
-        const labelList& curBoundaryAddressing = procBoundaryAddressing_[procI];
-
         const labelList& curPatchSizes = procPatchSize_[procI];
 
         const labelList& curPatchStarts = procPatchStartIndex_[procI];
@@ -309,8 +306,7 @@ bool Foam::domainDecomposition::writeDecomposition()
         {
             // Get the face labels consistent with the field mapping
             // (reuse the patch field mappers)
-            const polyPatch& meshPatch =
-                meshPatches[curBoundaryAddressing[patchi]];
+            const polyPatch& meshPatch = meshPatches[patchi];
 
             fvFieldDecomposer::patchFieldDecomposer patchMapper
             (
@@ -324,14 +320,13 @@ bool Foam::domainDecomposition::writeDecomposition()
             );
 
             // Map existing patches
-            procPatches[nPatches] =
-                meshPatches[curBoundaryAddressing[patchi]].clone
-                (
-                    procMesh.boundaryMesh(),
-                    nPatches,
-                    patchMapper.directAddressing(),
-                    curPatchStarts[patchi]
-                ).ptr();
+            procPatches[nPatches] = meshPatch.clone
+            (
+                procMesh.boundaryMesh(),
+                nPatches,
+                patchMapper.directAddressing(),
+                curPatchStarts[patchi]
+            ).ptr();
 
             nPatches++;
         }
@@ -678,6 +673,16 @@ bool Foam::domainDecomposition::writeDecomposition()
         );
         cellProcAddressing.write();
 
+        // Write patch map for backwards compatibility.
+        // (= identity map for original patches, -1 for processor patches)
+        label nMeshPatches = curPatchSizes.size();
+        labelList procBoundaryAddressing(identity(nMeshPatches));
+        procBoundaryAddressing.setSize
+        (
+            nMeshPatches+curProcessorPatchSizes.size(),
+            -1
+        );
+
         labelIOList boundaryProcAddressing
         (
             IOobject
@@ -689,7 +694,7 @@ bool Foam::domainDecomposition::writeDecomposition()
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            procBoundaryAddressing_[procI]
+            procBoundaryAddressing
         );
         boundaryProcAddressing.write();
     }
