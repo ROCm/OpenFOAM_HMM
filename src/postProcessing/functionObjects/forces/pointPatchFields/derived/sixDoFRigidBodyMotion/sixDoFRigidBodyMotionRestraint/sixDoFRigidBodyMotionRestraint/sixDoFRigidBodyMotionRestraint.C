@@ -64,6 +64,9 @@ bool Foam::sixDoFRigidBodyMotionRestraint::read
     const dictionary& sDoFRBMRDict
 )
 {
+    name_ =
+        fileName(sDoFRBMRDict.name().name()).components(token::COLON).last();
+
     sDoFRBMRCoeffs_ = sDoFRBMRDict.subDict(type() + "Coeffs");
 
     return true;
