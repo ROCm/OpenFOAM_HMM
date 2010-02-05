@@ -39,6 +39,11 @@ void Foam::sixDoFRigidBodyMotion::applyRestraints()
     {
         forAll(restraints_, rI)
         {
+            if (report_)
+            {
+                Info<< "Restraint " << restraintNames_[rI];
+            }
+
             // restraint position
             point rP = vector::zero;
 
@@ -85,6 +90,11 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
 
             forAll(constraints_, cI)
             {
+                if (report_)
+                {
+                    Info<< "Constraint " << constraintNames_[cI];
+                }
+
                 // constraint position
                 point cP = vector::zero;
 

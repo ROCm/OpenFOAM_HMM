@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+/*---------------------------------------------------------------------------* \
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -39,7 +39,6 @@ Foam::sixDoFRigidBodyMotionRestraint::sixDoFRigidBodyMotionRestraint
     const dictionary& sDoFRBMRDict
 )
 :
-    name_(fileName(sDoFRBMRDict.name().name()).components(token::COLON).last()),
     sDoFRBMRCoeffs_
     (
         sDoFRBMRDict.subDict
@@ -64,9 +63,6 @@ bool Foam::sixDoFRigidBodyMotionRestraint::read
     const dictionary& sDoFRBMRDict
 )
 {
-    name_ =
-        fileName(sDoFRBMRDict.name().name()).components(token::COLON).last();
-
     sDoFRBMRCoeffs_ = sDoFRBMRDict.subDict(type() + "Coeffs");
 
     return true;

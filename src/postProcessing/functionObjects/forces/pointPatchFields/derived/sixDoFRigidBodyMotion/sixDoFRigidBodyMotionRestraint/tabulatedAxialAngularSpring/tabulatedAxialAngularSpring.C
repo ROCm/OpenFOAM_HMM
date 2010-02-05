@@ -136,8 +136,7 @@ Foam::sixDoFRigidBodyMotionRestraints::tabulatedAxialAngularSpring::restrain
 
     if (motion.report())
     {
-        Info<< "Restraint " << this->name()
-            << " angle " << theta
+        Info<< " angle " << theta
             << " force " << restraintForce
             << " moment " << restraintMoment
             << endl;
@@ -222,5 +221,35 @@ bool Foam::sixDoFRigidBodyMotionRestraints::tabulatedAxialAngularSpring::read
 
     return true;
 }
+
+
+void Foam::sixDoFRigidBodyMotionRestraints::tabulatedAxialAngularSpring::write
+(
+    Ostream& os
+) const
+{
+    os.writeKeyword("referenceOrientation")
+        << refQ_ << token::END_STATEMENT << nl;
+
+    os.writeKeyword("axis")
+        << axis_ << token::END_STATEMENT << nl;
+
+    moment_.write(os);
+
+    os.writeKeyword("angleFormat");
+
+    if (convertToDegrees_)
+    {
+        os  << "degrees" << token::END_STATEMENT << nl;
+    }
+    else
+    {
+        os  << "radians" << token::END_STATEMENT << nl;
+    }
+
+    os.writeKeyword("damping")
+        << damping_ << token::END_STATEMENT << nl;
+}
+
 
 // ************************************************************************* //

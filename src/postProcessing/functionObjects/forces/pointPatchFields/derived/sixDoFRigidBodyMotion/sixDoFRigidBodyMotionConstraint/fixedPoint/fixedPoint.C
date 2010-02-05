@@ -118,8 +118,7 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::constrain
 
     if (motion.report())
     {
-        Info<< "Constraint " << this->name()
-            << " error " << error
+        Info<< " error " << error
             << " force " << constraintForceIncrement
             << " moment " << constraintMomentIncrement;
 
@@ -149,6 +148,16 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::read
     sDoFRBMCCoeffs_.lookup("fixedPoint") >> fixedPoint_;
 
     return true;
+}
+
+
+void Foam::sixDoFRigidBodyMotionConstraints::fixedPoint::write
+(
+    Ostream& os
+) const
+{
+    os.writeKeyword("fixedPoint")
+        << fixedPoint_ << token::END_STATEMENT << nl;
 }
 
 // ************************************************************************* //

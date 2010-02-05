@@ -70,9 +70,6 @@ protected:
 
     // Protected data
 
-        //- Name of the constraint in dictionary
-        word name_;
-
         //- Restraint model specific coefficient dictionary
         dictionary sDoFRBMRCoeffs_;
 
@@ -134,21 +131,18 @@ public:
         ) const = 0;
 
         //- Update properties from given dictionary
-        virtual bool read(const dictionary& sDoFRBMRDict) = 0;
+        virtual bool read(const dictionary& sDoFRBMRDict);
 
         // Access
-
-            //- Return access to the name of the restraint
-            inline const word& name() const
-            {
-                return name_;
-            }
 
             // Return access to sDoFRBMRCoeffs
             inline const dictionary& coeffDict() const
             {
                 return sDoFRBMRCoeffs_;
             }
+
+        //- Write
+        virtual void write(Ostream&) const = 0;
 };
 
 
