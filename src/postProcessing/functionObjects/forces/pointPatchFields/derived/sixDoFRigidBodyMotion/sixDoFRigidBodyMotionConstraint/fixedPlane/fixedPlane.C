@@ -105,7 +105,28 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::constrain
 
     constraintMomentIncrement = vector::zero;
 
-    return (mag(error) < tolerance_);
+    bool converged(mag(error) < tolerance_);
+
+    if (motion.report())
+    {
+        Info<< "Constraint " << this->name()
+            << " error " << error
+            << " force " << constraintForceIncrement
+            << " moment " << constraintMomentIncrement;
+
+        if (converged)
+        {
+            Info<< " converged";
+        }
+        else
+        {
+            Info<< " not converged";
+        }
+
+        Info<< endl;
+    }
+
+    return converged;
 }
 
 

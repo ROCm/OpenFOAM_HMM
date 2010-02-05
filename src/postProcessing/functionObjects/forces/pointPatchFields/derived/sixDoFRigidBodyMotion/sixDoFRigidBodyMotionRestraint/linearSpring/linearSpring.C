@@ -93,6 +93,15 @@ void Foam::sixDoFRigidBodyMotionRestraints::linearSpring::restrain
     restraintForce = -stiffness_*(magR - restLength_)*r - damping_*(r & v)*r;
 
     restraintMoment = vector::zero;
+
+    if (motion.report())
+    {
+        Info<< "Restraint " << this->name()
+            << " spring length " << magR
+            << " force " << restraintForce
+            << " moment " << restraintMoment
+            << endl;
+    }
 }
 
 
