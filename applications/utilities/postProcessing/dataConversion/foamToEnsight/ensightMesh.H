@@ -42,6 +42,7 @@ SourceFiles
 #include "fvMesh.H"
 #include "OFstream.H"
 #include <fstream>
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -110,6 +111,16 @@ private:
         //- Disallow default bitwise assignment
         void operator=(const ensightMesh&);
 
+
+        //- Construct map from mesh points to merged points.
+        //  pointToGlobal : from mesh point to global point
+        //  uniquePoints  : my set of unique points
+        globalIndex mergeMeshPoints
+        (
+            labelList& pointToGlobal,
+            pointField& uniquePoints
+        ) const;
+
         void writePoints
         (
             const scalarField& pointsComponent,
@@ -119,20 +130,21 @@ private:
         cellShapeList map
         (
             const cellShapeList& cellShapes,
-            const labelList& prims
+            const labelList& prims,
+            const labelList& pointToGlobal
         ) const;
 
         cellShapeList map
         (
             const cellShapeList& cellShapes,
             const labelList& hexes,
-            const labelList& wedges
+            const labelList& wedges,
+            const labelList& pointToGlobal
         ) const;
 
         void writePrims
         (
             const cellShapeList& cellShapes,
-            const label pointOffset,
             OFstream& ensightGeometryFile
         ) const;
 
@@ -156,13 +168,12 @@ private:
             const labelList& polys,
             const cellList& cellFaces,
             const faceList& faces,
-            const label pointOffset,
             OFstream& ensightGeometryFile
         ) const;
 
         void writeAllPolys
         (
-            const labelList& pointOffsets,
+            const labelList& pointToGlobal,
             OFstream& ensightGeometryFile
         ) const;
 
@@ -171,7 +182,6 @@ private:
             const char* key,
             const label nPrims,
             const cellShapeList& cellShapes,
-            const labelList& pointOffsets,
             OFstream& ensightGeometryFile
         ) const;
 
@@ -180,12 +190,6 @@ private:
             const faceList& patchFaces,
             const label pointOffset,
             OFstream& ensightGeometryFile
-        ) const;
-
-        faceList map
-        (
-            const faceList& patchFaces,
-            const labelList& prims
         ) const;
 
         void writeAllFacePrims
@@ -241,7 +245,6 @@ private:
         void writePrimsBinary
         (
             const cellShapeList& cellShapes,
-            const label pointOffset,
             std::ofstream& ensightGeometryFile
         ) const;
 
@@ -250,7 +253,6 @@ private:
             const char* key,
             const label nPrims,
             const cellShapeList& cellShapes,
-            const labelList& pointOffsets,
             std::ofstream& ensightGeometryFile
         ) const;
 
@@ -274,13 +276,12 @@ private:
             const labelList& polys,
             const cellList& cellFaces,
             const faceList& faces,
-            const label pointOffset,
             std::ofstream& ensightGeometryFile
         ) const;
 
         void writeAllPolysBinary
         (
-            const labelList& pointOffsets,
+            const labelList& pointToGlobal,
             std::ofstream& ensightGeometryFile
         ) const;
 
