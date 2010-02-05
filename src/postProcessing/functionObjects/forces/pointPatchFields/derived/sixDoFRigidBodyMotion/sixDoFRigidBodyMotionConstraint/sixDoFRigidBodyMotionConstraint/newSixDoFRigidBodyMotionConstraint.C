@@ -34,8 +34,8 @@ Foam::sixDoFRigidBodyMotionConstraint::New(const dictionary& sDoFRBMCDict)
     word sixDoFRigidBodyMotionConstraintTypeName =
         sDoFRBMCDict.lookup("sixDoFRigidBodyMotionConstraint");
 
-    Info<< "Selecting sixDoFRigidBodyMotionConstraint function "
-        << sixDoFRigidBodyMotionConstraintTypeName << endl;
+    // Info<< "Selecting sixDoFRigidBodyMotionConstraint function "
+    //     << sixDoFRigidBodyMotionConstraintTypeName << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
     dictionaryConstructorTablePtr_->find

@@ -69,7 +69,7 @@ void Foam::sixDoFRigidBodyMotion::write(Ostream& os) const
     {
         dictionary constraintsDict;
 
-        constraintsDict.add("maxIterations", maxConstraintIters_);
+        constraintsDict.add("maxIterations", maxConstraintIterations_);
 
         forAll(constraints_, rI)
         {
