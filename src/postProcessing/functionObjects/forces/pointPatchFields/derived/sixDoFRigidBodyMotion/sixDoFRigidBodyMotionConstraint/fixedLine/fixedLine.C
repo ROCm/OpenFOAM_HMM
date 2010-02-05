@@ -109,8 +109,7 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedLine::constrain
 
     if (motion.report())
     {
-        Info<< "Constraint " << this->name()
-            << " error << " << error
+        Info<< " error " << error
             << " force " << constraintForceIncrement
             << " moment " << constraintMomentIncrement;
 
@@ -161,6 +160,19 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedLine::read
     }
 
     return true;
+}
+
+
+void Foam::sixDoFRigidBodyMotionConstraints::fixedLine::write
+(
+    Ostream& os
+) const
+{
+    os.writeKeyword("refPoint")
+        << refPt_ << token::END_STATEMENT << nl;
+
+    os.writeKeyword("direction")
+        << dir_ << token::END_STATEMENT << nl;
 }
 
 // ************************************************************************* //

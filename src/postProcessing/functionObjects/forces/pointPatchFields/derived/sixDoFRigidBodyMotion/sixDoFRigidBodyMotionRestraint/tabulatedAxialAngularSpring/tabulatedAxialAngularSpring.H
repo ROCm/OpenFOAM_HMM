@@ -121,6 +121,9 @@ public:
 
         //- Update properties from given dictionary
         virtual bool read(const dictionary& sDoFRBMRCoeff);
+
+        //- Write
+        virtual void write(Ostream&) const;
 };
 
 

@@ -123,8 +123,7 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedAxis::constrain
 
     if (motion.report())
     {
-        Info<< "Constraint " << this->name()
-            << " angle " << theta
+        Info<< " angle " << theta
             << " force " << constraintForceIncrement
             << " moment " << constraintMomentIncrement;
 
@@ -173,6 +172,16 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedAxis::read
     }
 
     return true;
+}
+
+
+void Foam::sixDoFRigidBodyMotionConstraints::fixedAxis::write
+(
+    Ostream& os
+) const
+{
+    os.writeKeyword("axis")
+        << fixedAxis_ << token::END_STATEMENT << nl;
 }
 
 // ************************************************************************* //
