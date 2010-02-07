@@ -1,7 +1,3 @@
 dictionaryTest.C
 
-calcEntry/calcEntryParser.atg
-calcEntry/calcEntryInternal.C
-calcEntry/calcEntry.C
-
 EXE = $(FOAM_USER_APPBIN)/dictionaryTest

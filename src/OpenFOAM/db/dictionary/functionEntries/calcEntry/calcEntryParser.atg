@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------*\
+    Attributed Grammar for Coco/R  (-*- C++ -*- version)
+    compile with:
+    coco-cpp  calcEntryParser.atg
+\*---------------------------------------------------------------------------*/
 [copy]
 /*---------------------------------*- C++ -*---------------------------------*\
   =========                 |
@@ -36,13 +41,6 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 [/copy]
-/*---------------------------------------------------------------------------*\
- compile with:
- Coco \
-    [-single] -frames $WM_THIRD_PARTY_DIR/coco-r \
-    calcEntryParser.atg
-\*---------------------------------------------------------------------------*/
-
 #include "dictionary.H"
 #include "wchar.H"
 #include "calcEntryInternal.H"
@@ -52,7 +50,9 @@ COMPILER calcEntry
     // grammar pragmas:
     $prefix=calcEntry
     $namespace=Foam::functionEntries::calcEntryInternal
-    $explicitEOF=true     // grammar handles eof itself
+    $define=EXPLICIT_EOF     // grammar handles eof itself
+    $define=STREAMS_ONLY     // only use STL streams
+    $define=NO_UTF8          // disable UTF8 on input
 
 private:
     //- The parent dictionary
@@ -62,56 +62,7 @@ private:
     scalar val;
 
     //- lookup dictionary entry
-    scalar getDictLookup() const
-    {
-        if (!dict_)
-        {
-            FatalErrorIn
-            (
-                "calcEntry::getDictEntry() const"
-            )   << "No dictionary attached!"
-                << exit(FatalError);
-
-            return 0;
-        }
-
-        char* str = coco_string_create_char
-        (
-            t->val,
-            1,
-            (coco_string_length(t->val) - 1)
-        );
-        word keyword(str);
-        coco_string_delete(str);
-
-        scalar dictValue = 0;
-
-        entry* entryPtr = dict_->lookupEntryPtr(keyword, true, false);
-        if (entryPtr && !entryPtr->isDict())
-        {
-            if (entryPtr->stream().size() != 1)
-            {
-                FatalErrorIn
-                (
-                    "calcEntry::getDictEntry() const"
-                )   << "keyword " << keyword << " has "
-                    << entryPtr->stream().size() << " values in dictionary "
-                    << exit(FatalError);
-            }
-            entryPtr->stream() >> dictValue;
-        }
-        else
-        {
-            FatalErrorIn
-            (
-                "calcEntry::getDictEntry() const"
-            )   << "keyword " << keyword << " is undefined in dictionary "
-                << exit(FatalError);
-        }
-
-        return dictValue;
-    }
-
+    scalar getDictLookup(const word&) const;
 
 public:
 
@@ -128,10 +79,56 @@ public:
     }
 
 
-[initialize]
+/*---------------------------------------------------------------------------*/
+
+[initialize]        // add to Parser constructor
     dict_ = 0;
     val = 0;
 [/initialize]
+
+/*---------------------------------------------------------------------------*/
+[code]
+Foam::scalar Parser::getDictLookup(const word& keyword) const
+{
+    if (!dict_)
+    {
+        FatalErrorIn
+        (
+            "calcEntry::getDictEntry(const word&) const"
+        )   << "No dictionary attached!"
+            << exit(FatalError);
+
+        return 0;
+    }
+
+    scalar dictValue = 0;
+
+    entry* entryPtr = dict_->lookupEntryPtr(keyword, true, false);
+    if (entryPtr && !entryPtr->isDict())
+    {
+        if (entryPtr->stream().size() != 1)
+        {
+            FatalErrorIn
+            (
+                "calcEntry::getDictEntry(const word&) const"
+            )   << "keyword " << keyword << " has "
+                << entryPtr->stream().size() << " values in dictionary "
+                << exit(FatalError);
+        }
+        entryPtr->stream() >> dictValue;
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "calcEntry::getDictEntry(const word&) const"
+        )   << "keyword " << keyword << " is undefined in dictionary "
+            << exit(FatalError);
+    }
+
+    return dictValue;
+}
+[/code]
 
 /*---------------------------------------------------------------------------*/
 
@@ -226,7 +223,10 @@ Factor<scalar& val>             (. bool negative = false; .)
   ]
   (
       Func<val> | '(' Expr<val> ')'
-    | variable                  (. val = getDictLookup(); .)
+    | variable                  (.
+                                   // skip leading '$' for the keyword
+                                   val = getDictLookup(t->toString(1, t->length()-1));
+                                 .)
     | number                    (. val = coco_string_toDouble(t->val); .)
   )                             (. if (negative) { val = -val; } .)
 .
@@ -238,9 +238,7 @@ Factor<scalar& val>             (. bool negative = false; .)
 Func<scalar& val>
 =
   ident                         (.
-                                  char* str = coco_string_create_char(t->val);
-                                  word funcName(str);
-                                  coco_string_delete(str);
+                                  word funcName(t->toString());
                                   DynamicList<scalar> stack(4);
                                  .)
   '('

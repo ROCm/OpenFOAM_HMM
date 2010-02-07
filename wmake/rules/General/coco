@@ -3,7 +3,7 @@
 .SUFFIXES: .atg
 
 atgtoo =  \
-    $(WM_THIRD_PARTY_DIR)/coco-cpp/platforms/$(WM_ARCH)/bin/coco-cpp \
+    $(WM_THIRD_PARTY_DIR)/coco-cpp/platforms/$(WM_ARCH)$(WM_COMPILER)/bin/coco-cpp \
     -single \
     -frames $(WM_THIRD_PARTY_DIR)/coco-cpp/platforms/share/coco-cpp \
     $$SOURCE -o $(OBJECTS_DIR) && \

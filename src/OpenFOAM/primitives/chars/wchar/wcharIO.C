@@ -101,14 +101,30 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const wchar_t wc)
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const wchar_t* ws)
+Foam::Ostream& Foam::operator<<(Ostream& os, const wchar_t* wstr)
 {
-    if (ws)
+    if (wstr)
     {
-        for (const wchar_t* p = ws; *p; ++p)
+        for (const wchar_t* iter = wstr; *iter; ++iter)
         {
-            os  << *p;
+            os  << *iter;
         }
+    }
+
+    return os;
+}
+
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const std::wstring& wstr)
+{
+    for
+    (
+        std::wstring::const_iterator iter = wstr.begin();
+        iter != wstr.end();
+        ++iter
+    )
+    {
+        os  << *iter;
     }
 
     return os;

@@ -142,6 +142,12 @@ $(functionEntries)/includeIfPresentEntry/includeIfPresentEntry.C
 $(functionEntries)/inputModeEntry/inputModeEntry.C
 $(functionEntries)/removeEntry/removeEntry.C
 
+calcEntry = $(functionEntries)/calcEntry
+$(calcEntry)/calcEntryParser.atg
+$(calcEntry)/calcEntryInternal.C
+$(calcEntry)/calcEntry.C
+
+
 IOdictionary = db/IOobjects/IOdictionary
 $(IOdictionary)/IOdictionary.C
 $(IOdictionary)/IOdictionaryIO.C

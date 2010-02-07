@@ -41,6 +41,7 @@ SeeAlso
 #define wchar_H
 
 #include <cwchar>
+#include <string>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,6 +58,9 @@ Ostream& operator<<(Ostream&, const wchar_t);
 
 //- Output wide character (Unicode) string as UTF-8
 Ostream& operator<<(Ostream&, const wchar_t*);
+
+//- Output wide character (Unicode) string as UTF-8
+Ostream& operator<<(Ostream&, const std::wstring&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

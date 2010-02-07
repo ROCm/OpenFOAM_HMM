@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ namespace Foam
                       Class CocoParserErrors Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class BaseClass, class CharClass=wchar_t>
+template<class BaseClass, class StringClass=std::wstring>
 class CocoParserErrors
 :
     public BaseClass
@@ -90,14 +90,14 @@ public:
     // Error Handling
 
         //- Handle a general warning 'msg'
-        virtual void Warning(const CharClass* msg)
+        virtual void Warning(const StringClass& msg)
         {
             WarningIn(name_)
                 << msg << endl;
         }
 
         //- Handle a general warning 'msg'
-        virtual void Warning(int line, int col, const CharClass* msg)
+        virtual void Warning(int line, int col, const StringClass& msg)
         {
             WarningIn(name_)
                 <<"line " << line << " col " << col << ": "
@@ -105,7 +105,7 @@ public:
         }
 
         //- Handle general error 'msg' (eg, a semantic error)
-        virtual void Error(int line, int col, const CharClass* msg)
+        virtual void Error(int line, int col, const StringClass& msg)
         {
             FatalErrorIn(name_)
                 << "line " << line << " col " << col <<": " << msg << endl
@@ -113,7 +113,7 @@ public:
         }
 
         //- Handle general error 'msg' (eg, a semantic error)
-        virtual void Error(const CharClass* msg)
+        virtual void Error(const StringClass& msg)
         {
             FatalErrorIn(name_)
                 << msg << endl
@@ -121,7 +121,7 @@ public:
         }
 
         //- Handle a general exception 'msg'
-        virtual void Exception(const CharClass* msg)
+        virtual void Exception(const StringClass& msg)
         {
             this->Error(msg);
         }
