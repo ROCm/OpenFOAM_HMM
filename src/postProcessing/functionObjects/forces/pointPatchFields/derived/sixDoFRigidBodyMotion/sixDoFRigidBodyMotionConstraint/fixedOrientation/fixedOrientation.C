@@ -150,8 +150,7 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::constrain
 
     if (motion.report())
     {
-        Info<< "Constraint " << this->name()
-            << " max angle " << maxTheta
+        Info<< " max angle " << maxTheta
             << " force " << constraintForceIncrement
             << " moment " << constraintMomentIncrement;
 
@@ -196,6 +195,16 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::read
     }
 
     return true;
+}
+
+
+void Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::write
+(
+    Ostream& os
+) const
+{
+    os.writeKeyword("fixedOrientation")
+        << fixedOrientation_ << token::END_STATEMENT << nl;
 }
 
 // ************************************************************************* //

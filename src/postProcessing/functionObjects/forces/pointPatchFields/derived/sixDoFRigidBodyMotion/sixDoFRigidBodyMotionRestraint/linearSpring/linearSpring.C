@@ -96,8 +96,7 @@ void Foam::sixDoFRigidBodyMotionRestraints::linearSpring::restrain
 
     if (motion.report())
     {
-        Info<< "Restraint " << this->name()
-            << " spring length " << magR
+        Info<< " spring length " << magR
             << " force " << restraintForce
             << " moment " << restraintMoment
             << endl;
@@ -123,6 +122,28 @@ bool Foam::sixDoFRigidBodyMotionRestraints::linearSpring::read
     sDoFRBMRCoeffs_.lookup("restLength") >> restLength_;
 
     return true;
+}
+
+
+void Foam::sixDoFRigidBodyMotionRestraints::linearSpring::write
+(
+    Ostream& os
+) const
+{
+    os.writeKeyword("anchor")
+        << anchor_ << token::END_STATEMENT << nl;
+
+    os.writeKeyword("refAttachmentPt")
+        << refAttachmentPt_ << token::END_STATEMENT << nl;
+
+    os.writeKeyword("stiffness")
+        << stiffness_ << token::END_STATEMENT << nl;
+
+    os.writeKeyword("damping")
+        << damping_ << token::END_STATEMENT << nl;
+
+    os.writeKeyword("restLength")
+        << restLength_ << token::END_STATEMENT << nl;
 }
 
 // ************************************************************************* //
