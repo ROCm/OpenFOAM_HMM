@@ -67,8 +67,8 @@ Description
     At this point one will have complete point-point connectivity for all
     points on processor patches. Now
 
-        - remove point equivalences of size 2. These are just normal points
-          shared between two neighbouring procPatches.
+        - (optional)remove point equivalences of size 2. These are
+          just normal points shared between two neighbouring procPatches.
         - collect on each processor points for which it is the master
         - request number of sharedPointLabels from the Pstream::master.
 
@@ -98,10 +98,10 @@ SourceFiles
 #include "DynamicList.H"
 #include "Map.H"
 #include "primitivePatch.H"
-#include "className.H"
 #include "edgeList.H"
 #include "globalIndex.H"
 #include "indirectPrimitivePatch.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -112,6 +112,8 @@ namespace Foam
 class polyMesh;
 class polyBoundaryMesh;
 class cyclicPolyPatch;
+class polyPatch;
+class coupledPolyPatch;
 
 /*---------------------------------------------------------------------------*\
                            Class globalPoints Declaration
@@ -119,7 +121,15 @@ class cyclicPolyPatch;
 
 class globalPoints
 {
-    // Private classes
+    // Static data members
+
+        //- Offset to add to points (in globalIndices) originating from
+        //  collocated coupled points.
+        static const label fromCollocated;
+
+        //- Distance to check whether points/faces are collocated.
+        static const scalar mergeDist;
+
 
     // Private data
 
@@ -152,12 +162,52 @@ class globalPoints
 
     // Private Member Functions
 
+        //- Is identity transform?
+        static bool noTransform(const tensor&, const scalar mergeDist);
+
+        //- Return per face collocated status
+        static PackedBoolList collocatedFaces
+        (
+            const coupledPolyPatch&,
+            const scalar mergeDist
+        );
+
+        //- Return per point collocated status
+        static PackedBoolList collocatedPoints
+        (
+            const coupledPolyPatch&,
+            const scalar mergeDist
+        );
+
+        // Wrappers around global point numbering to add collocated bit
+
+            //- Convert into globalIndices and add collocated bit
+            label toGlobal(const label, const bool isCollocated) const;
+
+            //- Is collocated bit set
+            bool isCollocated(const label globalI) const;
+
+            //- Remove collocated bit
+            label removeCollocated(const label globalI) const;
+
+            //- (remove collocated bit and) check if originates from local proc
+            bool isLocal(const label globalI) const;
+
+            //- (remove collocated bit and) get originating processor
+            label whichProcID(const label globalI) const;
+
+            //- (remove collocated bit and) convert to local number on processor
+            label toLocal(const label procI, const label globalI) const;
+
+            //- (remove collocated bit and) convert to local number on
+            //  Pstream::myProcNo
+            label toLocal(const label globalI) const;
+
+
+
         //- Count all points on processorPatches. Is all points for which
         //  information is collected.
         static label countPatchPoints(const polyBoundaryMesh&);
-
-        ////- Get all faces on coupled patches
-        //static labelListl coupledFaces(const polyBoundaryMesh&);
 
         //- Add information about patchPointI in relative indices to send
         //  buffers (patchFaces, indexInFace etc.)
@@ -197,8 +247,16 @@ class globalPoints
         bool storeInfo
         (
             const labelList& nbrInfo,
-            const label localPointI
+            const label localPointI,
+            const bool isCollocated
         );
+
+        void printProcPoints
+        (
+            const labelList& patchToMeshPoint,
+            const labelList& pointInfo,
+            Ostream& os
+        ) const;
 
         //- Initialize procPoints_ to my patch points. allPoints = true:
         //  seed with all patch points, = false: only boundaryPoints().
@@ -212,6 +270,7 @@ class globalPoints
         //- Send subset of procPoints to neighbours
         void sendPatchPoints
         (
+            const bool mergeSeparated,
             const Map<label>&,
             PstreamBuffers&,
             const labelHashSet&
@@ -220,6 +279,7 @@ class globalPoints
         //- Receive neighbour points and merge into my procPoints.
         void receivePatchPoints
         (
+            const bool mergeSeparated,
             const Map<label>&,
             PstreamBuffers&,
             labelHashSet&
@@ -230,20 +290,31 @@ class globalPoints
         void remove(const labelList& patchToMeshPoint, const Map<label>&);
 
         //- Compact out unused elements of procPoints.
-        void compact();
+        void compact(const labelList& patchToMeshPoint);
 
         //- Get indices of point for which I am master (lowest numbered proc)
         labelList getMasterPoints(const labelList& patchToMeshPoint) const;
 
+
         //- Send subset of shared points to neighbours
-        void sendSharedPoints(PstreamBuffers&, const labelList&) const;
+        void sendSharedPoints
+        (
+            const bool mergeSeparated,
+            PstreamBuffers&,
+            const DynamicList<label>&
+        ) const;
+
+        //- Take over any local shared points
+        void extendSharedPoints(const Map<label>&, DynamicList<label>&);
 
         //- Receive shared points and update subset.
         void receiveSharedPoints
         (
-            const Map<label>&,
+            const bool mergeSeparated,
+            const Map<label>& meshToPatchPoint,
+            const Map<label>& meshToShared,
             PstreamBuffers&,
-            labelList&
+            DynamicList<label>&
         );
 
         //- Should move into cyclicPolyPatch ordering problem
@@ -255,7 +326,8 @@ class globalPoints
         (
             const Map<label>&,
             const labelList&,
-            const bool keepAllPoints
+            const bool keepAllPoints,
+            const bool mergeSeparated
         );
 
         //- Disallow default bitwise copy construct
@@ -276,7 +348,15 @@ public:
         //- Construct from mesh.
         //  keepAllPoints = false : filter out points that are on two
         //  neighbouring coupled patches (so can be swapped)
-        globalPoints(const polyMesh& mesh, const bool keepAllPoints);
+        //  mergeSeparated:
+        //      true  : merge coupled points across separated patches.
+        //      false : do not merge across coupled separated patches.
+        globalPoints
+        (
+            const polyMesh& mesh,
+            const bool keepAllPoints,
+            const bool mergeSeparated
+        );
 
         //- Construct from mesh and patch of coupled faces. Difference with
         //  construct from mesh only is that this stores the meshToProcPoint,
@@ -286,7 +366,8 @@ public:
         (
             const polyMesh& mesh,
             const indirectPrimitivePatch& coupledPatch,
-            const bool keepAllPoints
+            const bool keepAllPoints,
+            const bool mergeSeparated
         );
 
 
