@@ -77,7 +77,6 @@ public:
             primitiveEntry& entry,
             Istream& is
         );
-
 };
 
 

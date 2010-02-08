@@ -64,8 +64,6 @@ public:
 
         //- Construct null
         NASCore();
-
-
 };
 
 
