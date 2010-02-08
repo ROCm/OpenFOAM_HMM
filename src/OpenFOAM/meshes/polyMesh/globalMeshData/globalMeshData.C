@@ -703,6 +703,7 @@ void Foam::globalMeshData::calcPointBoundaryFaces
     }
 }
 
+
 void Foam::globalMeshData::calcGlobalPointBoundaryFaces() const
 {
     if (debug)
@@ -1741,14 +1742,14 @@ Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
         }
     }
 
-    label myUniquePoints = meshPoints.size() + nCoupledMaster - nCoupledSlave;
+    label myUniquePoints = meshPoints.size() - nCoupledSlave;
 
-Pout<< "Points :" << nl
-    << "    patch            : " << meshPoints.size() << nl
-    << "    of which coupled : " << nCoupledMaster+nCoupledSlave << nl
-    << "    of which master  : " << nCoupledMaster << nl
-    << "    of which slave   : " << nCoupledSlave << nl
-    << endl;
+    Pout<< "Points :" << nl
+        << "    patch            : " << meshPoints.size() << nl
+        << "    of which coupled : " << nCoupledMaster+nCoupledSlave << nl
+        << "    of which master  : " << nCoupledMaster << nl
+        << "    of which slave   : " << nCoupledSlave << nl
+        << endl;
 
 
     // 2. Create global indexing for unique points.
@@ -1795,10 +1796,10 @@ Pout<< "Points :" << nl
                 if (slaves.size() > 0)
                 {
                     // Duplicate master globalpoint into slave slots
-                    masterToGlobal[coupledPointI] = pointToGlobal[meshPointI];
+                    masterToGlobal[coupledPointI] = pointToGlobal[localPointI];
                     forAll(slaves, i)
                     {
-                        masterToGlobal[slaves[i]] = pointToGlobal[meshPointI];
+                        masterToGlobal[slaves[i]] = pointToGlobal[localPointI];
                     }
                 }
             }
@@ -1825,7 +1826,7 @@ Pout<< "Points :" << nl
 
                 if (slaves.size() == 0)
                 {
-                    pointToGlobal[meshPointI] = masterToGlobal[coupledPointI];
+                    pointToGlobal[localPointI] = masterToGlobal[coupledPointI];
                 }
             }
         }

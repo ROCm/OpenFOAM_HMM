@@ -22,6 +22,7 @@ wmake libso OpenFOAM
 
 wmake libso lagrangian/basic
 
+wmake libso fileFormats
 wmake libso edgeMesh
 wmake libso surfMesh
 wmake libso triSurface

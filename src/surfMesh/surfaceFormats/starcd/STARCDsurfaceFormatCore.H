@@ -40,6 +40,7 @@ SourceFiles
 #include "Ostream.H"
 #include "OFstream.H"
 #include "MeshedSurface.H"
+#include "STARCDCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,20 +54,14 @@ namespace fileFormats
 \*---------------------------------------------------------------------------*/
 
 class STARCDsurfaceFormatCore
+:
+    public STARCDCore
 {
 protected:
 
     // Protected Member Functions
 
-    static bool readHeader(IFstream&, const word&);
-
-    static void writeHeader(Ostream&, const char* filetype);
-
     static Map<word> readInpCellTable(IFstream&);
-
-    static bool readPoints(IFstream&, pointField&, labelList& ids);
-
-    static void writePoints(Ostream&, const pointField&);
 
     static void writeCase
     (

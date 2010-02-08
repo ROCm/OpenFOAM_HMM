@@ -63,14 +63,12 @@ public:
         {
         public:
 
-            label nPoints;
             label nTris;
             label nQuads;
             label nPolys;
 
             nFacePrimitives()
             :
-                nPoints(0),
                 nTris(0),
                 nQuads(0),
                 nPolys(0)
@@ -96,8 +94,6 @@ private:
 
         wordList allPatchNames_;
 
-        List<labelList> allPatchProcs_;
-
         wordHashSet patchNames_;
 
         HashTable<nFacePrimitives> nPatchPrims_;
@@ -110,16 +106,6 @@ private:
 
         //- Disallow default bitwise assignment
         void operator=(const ensightMesh&);
-
-
-        //- Construct map from mesh points to merged points.
-        //  pointToGlobal : from mesh point to global point
-        //  uniquePoints  : my set of unique points
-        globalIndex mergeMeshPoints
-        (
-            labelList& pointToGlobal,
-            pointField& uniquePoints
-        ) const;
 
         void writePoints
         (
@@ -188,7 +174,6 @@ private:
         void writeFacePrims
         (
             const faceList& patchFaces,
-            const label pointOffset,
             OFstream& ensightGeometryFile
         ) const;
 
@@ -198,8 +183,6 @@ private:
             const labelList& prims,
             const label nPrims,
             const faceList& patchFaces,
-            const labelList& pointOffsets,
-            const labelList& patchProcessors,
             OFstream& ensightGeometryFile
         ) const;
 
@@ -212,7 +195,6 @@ private:
         void writeNSidedPoints
         (
             const faceList& patchFaces,
-            const label pointOffset,
             OFstream& ensightGeometryFile
         ) const;
 
@@ -221,8 +203,6 @@ private:
             const labelList& prims,
             const label nPrims,
             const faceList& patchFaces,
-            const labelList& pointOffsets,
-            const labelList& patchProcessors,
             OFstream& ensightGeometryFile
         ) const;
 
@@ -231,7 +211,10 @@ private:
             const fileName& postProcPath,
             const word& prepend,
             const label timeIndex,
-            Ostream& ensightCaseFile
+            Ostream& ensightCaseFile,
+            const labelList& pointToGlobal,
+            const pointField& uniquePoints,
+            const globalIndex& globalPoints
         ) const;
 
         void writeBinary
@@ -239,7 +222,10 @@ private:
             const fileName& postProcPath,
             const word& prepend,
             const label timeIndex,
-            Ostream& ensightCaseFile
+            Ostream& ensightCaseFile,
+            const labelList& pointToGlobal,
+            const pointField& uniquePoints,
+            const globalIndex& globalPoints
         ) const;
 
         void writePrimsBinary
@@ -291,22 +277,18 @@ private:
             const labelList& prims,
             const label nPrims,
             const faceList& patchFaces,
-            const labelList& pointOffsets,
-            const labelList& patchProcessors,
             std::ofstream& ensightGeometryFile
         ) const;
 
         void writeFacePrimsBinary
         (
             const faceList& patchFaces,
-            const label pointOffset,
             std::ofstream& ensightGeometryFile
         ) const;
 
         void writeNSidedPointsBinary
         (
             const faceList& patchFaces,
-            const label pointOffset,
             std::ofstream& ensightGeometryFile
         ) const;
 
@@ -321,8 +303,6 @@ private:
             const labelList& prims,
             const label nPrims,
             const faceList& patchFaces,
-            const labelList& pointOffsets,
-            const labelList& patchProcessors,
             std::ofstream& ensightGeometryFile
         ) const;
 
@@ -360,11 +340,6 @@ public:
             const wordList& allPatchNames() const
             {
                 return allPatchNames_;
-            }
-
-            const List<labelList>& allPatchProcs() const
-            {
-                return allPatchProcs_;
             }
 
             const wordHashSet& patchNames() const

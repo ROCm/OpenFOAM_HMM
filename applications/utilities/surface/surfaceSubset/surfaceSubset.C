@@ -100,10 +100,8 @@ int main(int argc, char *argv[])
         meshSubsetDict.lookup("addFaceNeighbours")
     );
 
-    Switch invertSelection
-    (
-        meshSubsetDict.lookup("invertSelection")
-    );
+    const bool invertSelection =
+        meshSubsetDict.lookupOrDefault<bool>("invertSelection", false);
 
     // Mark the cells for the subset
 
@@ -246,7 +244,7 @@ int main(int argc, char *argv[])
         // bb of surface
         treeBoundBox bb(selectSurf.localPoints());
 
-        // Radnom number generator
+        // Random number generator
         Random rndGen(354543);
 
         // search engine
@@ -269,14 +267,11 @@ int main(int argc, char *argv[])
                 indexedOctree<treeDataTriSurface>::volumeType t =
                     selectTree.getVolumeType(fc);
 
-                if (t == indexedOctree<treeDataTriSurface>::INSIDE && !outside)
-                {
-                    facesToSubset[faceI] = true;
-                }
-                else if
+                if
                 (
-                    t == indexedOctree<treeDataTriSurface>::OUTSIDE
-                 && outside
+                    outside
+                  ? (t == indexedOctree<treeDataTriSurface>::OUTSIDE)
+                  : (t == indexedOctree<treeDataTriSurface>::INSIDE)
                 )
                 {
                     facesToSubset[faceI] = true;
@@ -346,20 +341,11 @@ int main(int argc, char *argv[])
     if (invertSelection)
     {
         Info<< "Inverting selection." << endl;
-        boolList newFacesToSubset(facesToSubset.size());
 
         forAll(facesToSubset, i)
         {
-            if (facesToSubset[i])
-            {
-                newFacesToSubset[i] = false;
-            }
-            else
-            {
-                newFacesToSubset[i] = true;
-            }
+            facesToSubset[i] = facesToSubset[i] ? false : true;
         }
-        facesToSubset.transfer(newFacesToSubset);
     }
 
 

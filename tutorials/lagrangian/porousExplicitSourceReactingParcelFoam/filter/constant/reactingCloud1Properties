@@ -17,7 +17,8 @@ FoamFile
 
 active          true;
 
-InjectionModel  ReactingLookupTableInjection;
+InjectionModel  ReactingMultiphaseLookupTableInjection;
+//InjectionModel  ManualInjection;
 
 DragModel       SphereDrag;
 
@@ -27,11 +28,15 @@ PatchInteractionModel LocalInteraction;
 
 HeatTransferModel RanzMarshall;
 
-CompositionModel SinglePhaseMixture;
+CompositionModel SingleMixtureFraction;
 
 PhaseChangeModel LiquidEvaporation;
 
 PostProcessingModel PatchPostProcessing;
+
+DevolatilisationModel none;
+
+SurfaceReactionModel none;
 
 radiation       off;
 
@@ -55,6 +60,8 @@ constantProperties
     Pr              Pr [ 0 0 0 0 0 ] 0.7;
     Tvap            Tvap [ 0 0 0 1 0 ] 273;
     Tbp             Tvap [ 0 0 0 1 0 ] 373;
+    LDevol          LDevol [ 0 0 0 0 0 ] 0;
+    hRetentionCoeff hRetentionCoeff [ 0 0 0 0 0 ] 1;
     constantVolume  false;
 }
 
@@ -83,9 +90,9 @@ particleForces
 
 ManualInjectionCoeffs
 {
-    massTotal       massTotal [ 1 0 0 0 0 ] 1e-2;
+    massTotal       massTotal [ 1 0 0 0 0 ] 1e-3;
     parcelBasisType mass;
-    SOI             0;
+    SOI             0.5;
     positionsFile   "reactingCloud1Positions";
     U0              ( 0 0 0 );
     parcelPDF
@@ -99,7 +106,7 @@ ManualInjectionCoeffs
     }
 }
 
-ReactingLookupTableInjectionCoeffs
+ReactingMultiphaseLookupTableInjectionCoeffs
 {
     massTotal       massTotal [ 1 0 0 0 0 ] 1e-2;
     parcelBasisType mass;
@@ -108,7 +115,6 @@ ReactingLookupTableInjectionCoeffs
     duration        1.0;
     parcelsPerSecond 250;
 }
-
 
 StandardWallInteractionCoeffs
 {
@@ -135,15 +141,24 @@ RanzMarshallCoeffs
     BirdCorrection  true;
 }
 
-SinglePhaseMixtureCoeffs
+SingleMixtureFractionCoeffs
 {
     phases
     (
+        gas
+        {
+        }
         liquid
         {
-            H2O     1;
+            H2O 1;
+        }
+        solid
+        {
         }
     );
+    YGasTot0        0;
+    YLiquidTot0     1;
+    YSolidTot0      0;
 }
 
 LiquidEvaporationCoeffs
