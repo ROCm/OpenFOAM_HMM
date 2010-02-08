@@ -113,8 +113,7 @@ Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::restrain
 
     if (motion.report())
     {
-        Info<< "Restraint " << this->name()
-            << " force " << restraintForce
+        Info<< " force " << restraintForce
             << " moment " << restraintMoment
             << endl;
     }
@@ -152,5 +151,20 @@ bool Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::read
 
     return true;
 }
+
+
+void Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::write
+(
+    Ostream& os
+) const
+{
+    os.writeKeyword("referenceOrientation")
+        << refQ_ << token::END_STATEMENT << nl;
+
+    os.writeKeyword("stiffness") << stiffness_ << token::END_STATEMENT << nl;
+
+    os.writeKeyword("damping") << damping_ << token::END_STATEMENT << nl;
+}
+
 
 // ************************************************************************* //

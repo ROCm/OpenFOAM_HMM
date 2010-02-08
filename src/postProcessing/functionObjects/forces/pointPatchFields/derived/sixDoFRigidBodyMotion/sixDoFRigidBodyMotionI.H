@@ -107,6 +107,12 @@ Foam::sixDoFRigidBodyMotion::restraints() const
 }
 
 
+inline const Foam::wordList& Foam::sixDoFRigidBodyMotion::restraintNames() const
+{
+    return restraintNames_;
+}
+
+
 inline const Foam::PtrList<Foam::sixDoFRigidBodyMotionConstraint>&
 Foam::sixDoFRigidBodyMotion::constraints() const
 {
@@ -114,9 +120,16 @@ Foam::sixDoFRigidBodyMotion::constraints() const
 }
 
 
-inline Foam::label Foam::sixDoFRigidBodyMotion::maxConstraintIters() const
+inline const Foam::wordList&
+Foam::sixDoFRigidBodyMotion::constraintNames() const
 {
-    return maxConstraintIters_;
+    return constraintNames_;
+}
+
+
+inline Foam::label Foam::sixDoFRigidBodyMotion::maxConstraintIterations() const
+{
+    return maxConstraintIterations_;
 }
 
 

@@ -109,8 +109,7 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::constrain
 
     if (motion.report())
     {
-        Info<< "Constraint " << this->name()
-            << " error " << error
+        Info<< " error " << error
             << " force " << constraintForceIncrement
             << " moment " << constraintMomentIncrement;
 
@@ -144,6 +143,19 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::read
     fixedPlane_ = plane(refPt, normal);
 
     return true;
+}
+
+
+void Foam::sixDoFRigidBodyMotionConstraints::fixedPlane::write
+(
+    Ostream& os
+) const
+{
+    os.writeKeyword("refPoint")
+        << fixedPlane_.refPoint() << token::END_STATEMENT << nl;
+
+    os.writeKeyword("normal")
+        << fixedPlane_.normal() << token::END_STATEMENT << nl;
 }
 
 // ************************************************************************* //

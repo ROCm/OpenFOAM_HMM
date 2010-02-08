@@ -31,7 +31,7 @@ Description
 
     Requires:
     - all processor patches to have correct ordering.
-    - all processorPatches to have their transforms set ('makeTransforms')
+    - all processorPatches to have their transforms set.
 
     The shared point addressing is quite interesting. It gives on each processor
     the vertices that cannot be set using a normal swap on processor patches.
@@ -67,14 +67,12 @@ Description
 
 SourceFiles
     globalMeshData.C
-    globalMeshDataMorph.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef globalMeshData_H
 #define globalMeshData_H
 
-//#include "polyMesh.H"
 #include "Switch.H"
 #include "processorTopology.H"
 #include "labelPair.H"
@@ -95,6 +93,7 @@ class globalIndex;
 class polyMesh;
 class mapDistribute;
 template<class T> class EdgeMap;
+class globalPoints;
 
 /*---------------------------------------------------------------------------*\
                            Class globalMeshData Declaration
@@ -201,36 +200,56 @@ class globalMeshData
 
 
         // Coupled point addressing
-        // This is addressing from coupled point to coupled points,faces,cells
+        // This is addressing from coupled point to coupled points/faces/cells.
+        // Two variants:
+        //  - collocated (so not physically separated)
+        //  - also separated
         // This is a full schedule so includes points only used by two
         // coupled patches.
 
             mutable autoPtr<indirectPrimitivePatch> coupledPatchPtr_;
 
-            // Coupled point to coupled points
+            // Collocated
+
+                // Coupled point to collocated coupled points
 
                 mutable autoPtr<globalIndex> globalPointNumberingPtr_;
                 mutable autoPtr<labelListList> globalPointSlavesPtr_;
                 mutable autoPtr<mapDistribute> globalPointSlavesMapPtr_;
 
-            // Coupled edge to coupled edges
+                // Coupled edge to collocated coupled edges
 
                 mutable autoPtr<globalIndex> globalEdgeNumberingPtr_;
                 mutable autoPtr<labelListList> globalEdgeSlavesPtr_;
                 mutable autoPtr<mapDistribute> globalEdgeSlavesMapPtr_;
 
-            // Coupled point to boundary faces
+                // Coupled point to collocated boundary faces
 
                 mutable autoPtr<globalIndex> globalBoundaryFaceNumberingPtr_;
                 mutable autoPtr<labelListList> globalPointBoundaryFacesPtr_;
                 mutable autoPtr<mapDistribute> globalPointBoundaryFacesMapPtr_;
 
-            // Coupled point to boundary cells
+                // Coupled point to collocated boundary cells
 
                 mutable autoPtr<labelList> boundaryCellsPtr_;
                 mutable autoPtr<globalIndex> globalBoundaryCellNumberingPtr_;
                 mutable autoPtr<labelListList> globalPointBoundaryCellsPtr_;
                 mutable autoPtr<mapDistribute> globalPointBoundaryCellsMapPtr_;
+
+
+            // Non-collocated as well
+
+                // Coupled point to all coupled points
+
+                mutable autoPtr<globalIndex> globalPointAllNumberingPtr_;
+                mutable autoPtr<labelListList> globalPointAllSlavesPtr_;
+                mutable autoPtr<mapDistribute> globalPointAllSlavesMapPtr_;
+
+                // Coupled edge to all coupled edges (same numbering as
+                // collocated coupled edges)
+
+                mutable autoPtr<labelListList> globalEdgeAllSlavesPtr_;
+                mutable autoPtr<mapDistribute> globalEdgeAllSlavesMapPtr_;
 
 
     // Private Member Functions
@@ -257,7 +276,26 @@ class globalMeshData
         );
 
         //- Calculate global point addressing.
+        void calcGlobalPointSlaves
+        (
+            const globalPoints&,
+            autoPtr<globalIndex>&,
+            autoPtr<labelListList>&,
+            autoPtr<mapDistribute>&
+        ) const;
+
+        //- Calculate global point addressing.
         void calcGlobalPointSlaves() const;
+
+        //- Calculate global edge addressing.
+        void calcGlobalEdgeSlaves
+        (
+            const labelListList&,
+            const mapDistribute&,
+            const globalIndex&,
+            autoPtr<labelListList>&,
+            autoPtr<mapDistribute>&
+        ) const;
 
         //- Calculate global edge addressing.
         void calcGlobalEdgeSlaves() const;
@@ -270,6 +308,15 @@ class globalMeshData
 
         //- Calculate global point to global boundary cell addressing.
         void calcGlobalPointBoundaryCells() const;
+
+
+        // Non-collocated
+
+            //- Calculate global point addressing.
+            void calcGlobalPointAllSlaves() const;
+
+            //- Calculate global edge addressing.
+            void calcGlobalEdgeAllSlaves() const;
 
 
         //- Disallow default bitwise copy construct
@@ -449,8 +496,8 @@ public:
             //- Return patch of all coupled faces
             const indirectPrimitivePatch& coupledPatch() const;
 
-            // Coupled point to coupled points. Coupled points are points on
-            // any coupled patch.
+            // Coupled point to collocated coupled points. Coupled points are
+            // points on any coupled patch.
 
                 //- Numbering of coupled points is according to coupledPatch.
                 const globalIndex& globalPointNumbering() const;
@@ -482,6 +529,45 @@ public:
                 const globalIndex& globalBoundaryCellNumbering() const;
                 const labelListList& globalPointBoundaryCells() const;
                 const mapDistribute& globalPointBoundaryCellsMap() const;
+
+
+            // Collocated & non-collocated
+
+                // Coupled point to all coupled points (collocated and
+                // non-collocated).
+
+                    const globalIndex& globalPointAllNumbering()const;
+                    const labelListList& globalPointAllSlaves() const;
+                    const mapDistribute& globalPointAllSlavesMap() const;
+
+                // Coupled edge to all coupled edges (same numbering as
+                // collocated)
+
+                    const labelListList& globalEdgeAllSlaves() const;
+                    const mapDistribute& globalEdgeAllSlavesMap() const;
+
+            // Other
+
+                //- Helper for merging mesh point data. Determines
+                //  - my unique indices
+                //  - global numbering over all unique indices
+                //  - the global number for all local points (so this will
+                //    be local for my unique points)
+                autoPtr<globalIndex> mergePoints
+                (
+                    labelList& pointToGlobal,
+                    labelList& uniquePoints
+                ) const;
+
+                //- Helper for merging patch point data. Takes maps from
+                //  local points to/from mesh
+                autoPtr<globalIndex> mergePoints
+                (
+                    const labelList& meshPoints,
+                    const Map<label>& meshPointMap,
+                    labelList& pointToGlobal,
+                    labelList& uniquePoints
+                ) const;
 
 
         // Edit
