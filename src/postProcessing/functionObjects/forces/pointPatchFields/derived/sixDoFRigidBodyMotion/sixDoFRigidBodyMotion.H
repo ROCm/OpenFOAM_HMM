@@ -104,10 +104,14 @@ class sixDoFRigidBodyMotion
         //  constraints
         label maxConstraintIterations_;
 
-        //- Centre of mass of reference state
-        point refCentreOfMass_;
+        //- Centre of mass of initial state
+        point initialCentreOfMass_;
+
+        //- Orientation of initial state
+        tensor initialQ_;
 
         //- Moment of inertia of the body in reference configuration
+        //  (Q = I)
         diagTensor momentOfInertia_;
 
         //- Mass of the body
@@ -166,8 +170,11 @@ class sixDoFRigidBodyMotion
             //  constraint iterations
             inline label maxConstraintIterations() const;
 
-            //- Return access to the centre of mass
-            inline const point& refCentreOfMass() const;
+            //- Return access to the initial centre of mass
+            inline const point& initialCentreOfMass() const;
+
+            //- Return access to the initial orientation
+            inline const tensor& initialQ() const;
 
             //- Return access to the orientation
             inline const tensor& Q() const;
@@ -188,7 +195,10 @@ class sixDoFRigidBodyMotion
         // Edit
 
             //- Return access to the centre of mass
-            inline point& refCentreOfMass();
+            inline point& initialCentreOfMass();
+
+            //- Return access to the centre of mass
+            inline tensor& initialQ();
 
             //- Return non-const access to the orientation
             inline tensor& Q();
@@ -223,7 +233,8 @@ public:
             const vector& pi,
             const vector& tau,
             scalar mass,
-            const point& refCentreOfMass,
+            const point& initialCentreOfMass,
+            const tensor& initialQ,
             const diagTensor& momentOfInertia,
             bool report = false
         );
@@ -274,40 +285,40 @@ public:
             scalar deltaT
         );
 
-        //- Transform the given reference state pointField by the
-        //  current motion state
-        inline tmp<pointField> currentPosition(const pointField& refPts) const;
-
-        //- Transform the given reference state point by the current
+        //- Transform the given initial state pointField by the current
         //  motion state
-        inline point currentPosition(const point& refPt) const;
+        inline tmp<pointField> currentPosition(const pointField& p0) const;
 
-        //- Transform the given reference state direction by the current
+        //- Transform the given initial state point by the current motion
+        //  state
+        inline point currentPosition(const point& p0) const;
+
+        //- Transform the given initial state direction by the current
         //  motion state
-        inline vector currentOrientation(const vector& refDir) const;
+        inline vector currentOrientation(const vector& dir0) const;
 
         //- Access the orientation tensor, Q.
         //  globalVector = Q & bodyLocalVector
         //  bodyLocalVector = Q.T() & globalVector
         inline const tensor& currentOrientation() const;
 
-        //- Predict the position of the supplied point after deltaT
-        //  given the current motion state and the additional supplied
-        //  force and moment
+        //- Predict the position of the supplied initial state point
+        //  after deltaT given the current motion state and the
+        //  additional supplied force and moment
         point predictedPosition
         (
-            const point& pt,
+            const point& p0,
             const vector& deltaForce,
             const vector& deltaMoment,
             scalar deltaT
         ) const;
 
-        //- Predict the orientation of the supplied vector after deltaT
-        //  given the current motion state and the additional supplied
-        //  moment
+        //- Predict the orientation of the supplied initial state
+        //  vector after deltaT given the current motion state and the
+        //  additional supplied moment
         vector predictedOrientation
         (
-            const vector& v,
+            const vector& v0,
             const vector& deltaMoment,
             scalar deltaT
         ) const;

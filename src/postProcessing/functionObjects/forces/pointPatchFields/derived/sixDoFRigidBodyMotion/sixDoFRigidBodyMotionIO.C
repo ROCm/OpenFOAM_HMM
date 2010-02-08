@@ -33,8 +33,10 @@ void Foam::sixDoFRigidBodyMotion::write(Ostream& os) const
 {
     motionState_.write(os);
 
-    os.writeKeyword("refCentreOfMass")
-        << refCentreOfMass_ << token::END_STATEMENT << nl;
+    os.writeKeyword("initialCentreOfMass")
+        << initialCentreOfMass_ << token::END_STATEMENT << nl;
+    os.writeKeyword("initialOrientation")
+        << initialQ_ << token::END_STATEMENT << nl;
     os.writeKeyword("momentOfInertia")
         << momentOfInertia_ << token::END_STATEMENT << nl;
     os.writeKeyword("mass")
@@ -112,7 +114,8 @@ void Foam::sixDoFRigidBodyMotion::write(Ostream& os) const
 Foam::Istream& Foam::operator>>(Istream& is, sixDoFRigidBodyMotion& sDoFRBM)
 {
     is  >> sDoFRBM.motionState_
-        >> sDoFRBM.refCentreOfMass_
+        >> sDoFRBM.initialCentreOfMass_
+        >> sDoFRBM.initialQ_
         >> sDoFRBM.momentOfInertia_
         >> sDoFRBM.mass_;
 
@@ -134,7 +137,8 @@ Foam::Ostream& Foam::operator<<
 )
 {
     os  << sDoFRBM.motionState()
-        << token::SPACE << sDoFRBM.refCentreOfMass()
+        << token::SPACE << sDoFRBM.initialCentreOfMass()
+        << token::SPACE << sDoFRBM.initialQ()
         << token::SPACE << sDoFRBM.momentOfInertia()
         << token::SPACE << sDoFRBM.mass();
 
