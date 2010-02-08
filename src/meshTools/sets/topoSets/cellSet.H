@@ -51,12 +51,11 @@ class cellSet
 :
     public topoSet
 {
-
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
         cellSet(const cellSet&);
+
 
 public:
 
@@ -65,7 +64,6 @@ public:
 
 
     // Constructors
-
 
         //- Construct from IOobject. No checking.
         cellSet(const IOobject& obj);
@@ -161,7 +159,6 @@ public:
             const primitiveMesh&,
             const label maxLen
         ) const;
-
 };
 
 

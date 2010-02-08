@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,75 +24,46 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "pointSourceProperties.H"
+#include "reactingMultiphaseParcelInjectionData.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline const Foam::word& Foam::pointSourceProperties::name() const
+inline const Foam::scalarList&
+Foam::reactingMultiphaseParcelInjectionData::YGas() const
 {
-    return name_;
+    return YGas_;
 }
 
 
-inline Foam::scalar Foam::pointSourceProperties::timeStart() const
+inline const Foam::scalarList&
+Foam::reactingMultiphaseParcelInjectionData::YLiquid() const
 {
-    return timeStart_;
+    return YLiquid_;
 }
 
 
-inline Foam::scalar Foam::pointSourceProperties::timeEnd() const
+inline const Foam::scalarList&
+Foam::reactingMultiphaseParcelInjectionData::YSolid() const
 {
-    return timeStart_ + duration_;
+    return YSolid_;
 }
 
 
-inline Foam::scalar Foam::pointSourceProperties::duration() const
+inline Foam::scalarList& Foam::reactingMultiphaseParcelInjectionData::YGas()
 {
-    return duration_;
+    return YGas_;
 }
 
 
-inline const Foam::point& Foam::pointSourceProperties::location() const
+inline Foam::scalarList& Foam::reactingMultiphaseParcelInjectionData::YLiquid()
 {
-    return location_;
+    return YLiquid_;
 }
 
 
-inline const Foam::List<Foam::pointSourceProperties::fieldNameValuePair>&
-Foam::pointSourceProperties::fieldData() const
+inline Foam::scalarList& Foam::reactingMultiphaseParcelInjectionData::YSolid()
 {
-    return fieldData_;
-}
-
-
-inline Foam::word& Foam::pointSourceProperties::name()
-{
-    return name_;
-}
-
-
-inline Foam::scalar& Foam::pointSourceProperties::timeStart()
-{
-    return timeStart_;
-}
-
-
-inline Foam::scalar& Foam::pointSourceProperties::duration()
-{
-    return duration_;
-}
-
-
-inline Foam::point& Foam::pointSourceProperties::location()
-{
-    return location_;
-}
-
-
-inline Foam::List<Foam::pointSourceProperties::fieldNameValuePair>&
-Foam::pointSourceProperties::fieldData()
-{
-    return fieldData_;
+    return YSolid_;
 }
 
 
