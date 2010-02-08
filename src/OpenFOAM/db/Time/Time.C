@@ -676,6 +676,10 @@ Foam::Time& Foam::Time::operator++()
 
     deltaT0_ = deltaTSave_;
     deltaTSave_ = deltaT_;
+
+    // Save old time name
+    const word oldTimeName = dimensionedScalar::name();
+
     setTime(value() + deltaT_, timeIndex_ + 1);
 
     if (!subCycling_)
@@ -685,7 +689,30 @@ Foam::Time& Foam::Time::operator++()
         {
             setTime(0.0, timeIndex_);
         }
+    }
 
+
+    // Check that new time representation differs from old one
+    if (dimensionedScalar::name() == oldTimeName)
+    {
+        int oldPrecision = precision_;
+        do
+        {
+            precision_++;
+            setTime(value(), timeIndex());
+        }
+        while (precision_ < 100 && dimensionedScalar::name() == oldTimeName);
+
+        WarningIn("Time::operator++()")
+            << "Increased the timePrecision from " << oldPrecision
+            << " to " << precision_
+            << " to distinguish between timeNames at time " << value()
+            << endl;
+    }
+
+
+    if (!subCycling_)
+    {
         switch (writeControl_)
         {
             case wcTimeStep:

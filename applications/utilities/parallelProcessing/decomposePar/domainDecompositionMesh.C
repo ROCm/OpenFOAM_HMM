@@ -40,7 +40,7 @@ Description
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
+void Foam::domainDecomposition::decomposeMesh()
 {
     // Decide which cell goes to which processor
     distributeCells();
@@ -596,64 +596,6 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                 nProcPatches++;
             }
         }
-    }
-
-    Info<< "\nCalculating processor boundary addressing" << endl;
-    // For every patch of processor boundary, find the index of the original
-    // patch. Mis-alignment is caused by the fact that patches with zero size
-    // are omitted. For processor patches, set index to -1.
-    // At the same time, filter the procPatchSize_ and procPatchStartIndex_
-    // lists to exclude zero-size patches
-    forAll(procPatchSize_, procI)
-    {
-        // Make a local copy of old lists
-        const labelList oldPatchSizes = procPatchSize_[procI];
-
-        const labelList oldPatchStarts = procPatchStartIndex_[procI];
-
-        labelList& curPatchSizes = procPatchSize_[procI];
-
-        labelList& curPatchStarts = procPatchStartIndex_[procI];
-
-        const labelList& curProcessorPatchSizes =
-            procProcessorPatchSize_[procI];
-
-        labelList& curBoundaryAddressing = procBoundaryAddressing_[procI];
-
-        curBoundaryAddressing.setSize
-        (
-            oldPatchSizes.size()
-          + curProcessorPatchSizes.size()
-        );
-
-        label nPatches = 0;
-
-        forAll(oldPatchSizes, patchi)
-        {
-            if (!filterEmptyPatches || oldPatchSizes[patchi] > 0)
-            {
-                curBoundaryAddressing[nPatches] = patchi;
-
-                curPatchSizes[nPatches] = oldPatchSizes[patchi];
-
-                curPatchStarts[nPatches] = oldPatchStarts[patchi];
-
-                nPatches++;
-            }
-        }
-
-        // reset to the size of live patches
-        curPatchSizes.setSize(nPatches);
-        curPatchStarts.setSize(nPatches);
-
-        forAll(curProcessorPatchSizes, procPatchI)
-        {
-            curBoundaryAddressing[nPatches] = -1;
-
-            nPatches++;
-        }
-
-        curBoundaryAddressing.setSize(nPatches);
     }
 
     Info<< "\nDistributing points to processors" << endl;

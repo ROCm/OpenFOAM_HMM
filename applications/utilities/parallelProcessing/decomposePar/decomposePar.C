@@ -46,9 +46,6 @@ Usage
     @param -fields \n
     Use existing geometry decomposition and convert fields only.
 
-    @param -filterPatches \n
-    Remove empty patches when decomposing the geometry.
-
     @param -force \n
     Remove any existing @a processor subdirectories before decomposing the
     geometry.
@@ -100,11 +97,6 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
-        "filterPatches",
-        "remove empty patches when decomposing the geometry"
-    );
-    argList::addBoolOption
-    (
         "force",
         "remove existing processor*/ subdirs before decomposing the geometry"
     );
@@ -128,7 +120,6 @@ int main(int argc, char *argv[])
     bool writeCellDist           = args.optionFound("cellDist");
     bool copyUniform             = args.optionFound("copyUniform");
     bool decomposeFieldsOnly     = args.optionFound("fields");
-    bool filterPatches           = args.optionFound("filterPatches");
     bool forceOverwrite          = args.optionFound("force");
     bool ifRequiredDecomposition = args.optionFound("ifRequired");
 
@@ -249,7 +240,7 @@ int main(int argc, char *argv[])
     // Decompose the mesh
     if (!decomposeFieldsOnly)
     {
-        mesh.decomposeMesh(filterPatches);
+        mesh.decomposeMesh();
 
         mesh.writeDecomposition();
 
