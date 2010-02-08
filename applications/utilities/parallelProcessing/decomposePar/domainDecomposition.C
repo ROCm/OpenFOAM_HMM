@@ -69,6 +69,24 @@ void Foam::domainDecomposition::mark
 Foam::domainDecomposition::domainDecomposition(const IOobject& io)
 :
     fvMesh(io),
+    facesInstancePointsPtr_
+    (
+        pointsInstance() != facesInstance()
+      ? new pointIOField
+        (
+            IOobject
+            (
+                "points",
+                facesInstance(),
+                polyMesh::meshSubDir,
+                *this,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            )
+        )
+      : NULL
+    ),
     decompositionDict_
     (
         IOobject
@@ -262,20 +280,65 @@ bool Foam::domainDecomposition::writeDecomposition()
             "system",
             "constant"
         );
+        processorDb.setTime(time());
 
-        // create the mesh
-        polyMesh procMesh
-        (
-            IOobject
+        // create the mesh. Two situations:
+        // - points and faces come from the same time ('instance'). The mesh
+        //   will get constructed in the same instance.
+        // - points come from a different time (moving mesh cases).
+        //   It will read the points belonging to the faces instance and
+        //   construct the procMesh with it which then gets handled as above.
+        //   (so with 'old' geometry).
+        //   Only at writing time will it additionally write the current
+        //   points.
+
+        autoPtr<polyMesh> procMeshPtr;
+
+        if (facesInstancePointsPtr_.valid())
+        {
+            // Construct mesh from facesInstance.
+            pointField facesInstancePoints
             (
-                this->polyMesh::name(),  // region name of undecomposed mesh
-                pointsInstance(),
-                processorDb
-            ),
-            xferMove(procPoints),
-            xferMove(procFaces),
-            xferMove(procCells)
-        );
+                facesInstancePointsPtr_(),
+                curPointLabels
+            );
+
+            procMeshPtr.reset
+            (
+                new polyMesh
+                (
+                    IOobject
+                    (
+                        this->polyMesh::name(), // region of undecomposed mesh
+                        facesInstance(),
+                        processorDb
+                    ),
+                    xferMove(facesInstancePoints),
+                    xferMove(procFaces),
+                    xferMove(procCells)
+                )
+            );
+        }
+        else
+        {
+            procMeshPtr.reset
+            (
+                new polyMesh
+                (
+                    IOobject
+                    (
+                        this->polyMesh::name(), // region of undecomposed mesh
+                        facesInstance(),
+                        processorDb
+                    ),
+                    xferMove(procPoints),
+                    xferMove(procFaces),
+                    xferMove(procCells)
+                )
+            );
+        }
+        polyMesh& procMesh = procMeshPtr();
+
 
         // Create processor boundary patches
         const labelList& curPatchSizes = procPatchSize_[procI];
@@ -583,6 +646,26 @@ bool Foam::domainDecomposition::writeDecomposition()
         IOstream::defaultPrecision(10);
 
         procMesh.write();
+
+        // Write points if pointsInstance differing from facesInstance
+        if (facesInstancePointsPtr_.valid())
+        {
+            pointIOField pointsInstancePoints
+            (
+                IOobject
+                (
+                    "points",
+                    pointsInstance(),
+                    polyMesh::meshSubDir,
+                    procMesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                xferMove(procPoints)
+            );
+            pointsInstancePoints.write();
+        }
 
         Info<< endl
             << "Processor " << procI << nl

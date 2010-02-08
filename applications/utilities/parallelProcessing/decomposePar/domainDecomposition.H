@@ -55,6 +55,9 @@ class domainDecomposition
 {
     // Private data
 
+        //- Optional: points at the facesInstance
+        autoPtr<pointIOField> facesInstancePointsPtr_;
+
         //- Mesh decomposition control dictionary
         IOdictionary decompositionDict_;
 
