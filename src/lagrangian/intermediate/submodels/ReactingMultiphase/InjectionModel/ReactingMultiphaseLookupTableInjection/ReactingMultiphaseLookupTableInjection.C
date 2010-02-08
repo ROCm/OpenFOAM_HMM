@@ -24,13 +24,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "KinematicLookupTableInjection.H"
-#include "scalarIOList.H"
+#include "ReactingMultiphaseLookupTableInjection.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::label Foam::KinematicLookupTableInjection<CloudType>::parcelsToInject
+Foam::label
+Foam::ReactingMultiphaseLookupTableInjection<CloudType>::parcelsToInject
 (
     const scalar time0,
     const scalar time1
@@ -48,7 +48,8 @@ Foam::label Foam::KinematicLookupTableInjection<CloudType>::parcelsToInject
 
 
 template<class CloudType>
-Foam::scalar Foam::KinematicLookupTableInjection<CloudType>::volumeToInject
+Foam::scalar
+Foam::ReactingMultiphaseLookupTableInjection<CloudType>::volumeToInject
 (
     const scalar time0,
     const scalar time1
@@ -70,7 +71,8 @@ Foam::scalar Foam::KinematicLookupTableInjection<CloudType>::volumeToInject
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::KinematicLookupTableInjection<CloudType>::KinematicLookupTableInjection
+Foam::ReactingMultiphaseLookupTableInjection<CloudType>::
+ReactingMultiphaseLookupTableInjection
 (
     const dictionary& dict,
     CloudType& owner
@@ -116,28 +118,30 @@ Foam::KinematicLookupTableInjection<CloudType>::KinematicLookupTableInjection
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::KinematicLookupTableInjection<CloudType>::~KinematicLookupTableInjection()
+Foam::ReactingMultiphaseLookupTableInjection<CloudType>::
+~ReactingMultiphaseLookupTableInjection()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::KinematicLookupTableInjection<CloudType>::active() const
+bool Foam::ReactingMultiphaseLookupTableInjection<CloudType>::active() const
 {
     return true;
 }
 
 
 template<class CloudType>
-Foam::scalar Foam::KinematicLookupTableInjection<CloudType>::timeEnd() const
+Foam::scalar
+Foam::ReactingMultiphaseLookupTableInjection<CloudType>::timeEnd() const
 {
     return this->SOI_ + duration_;
 }
 
 
 template<class CloudType>
-void Foam::KinematicLookupTableInjection<CloudType>::setPositionAndCell
+void Foam::ReactingMultiphaseLookupTableInjection<CloudType>::setPositionAndCell
 (
     const label parcelI,
     const label nParcels,
@@ -154,7 +158,7 @@ void Foam::KinematicLookupTableInjection<CloudType>::setPositionAndCell
 
 
 template<class CloudType>
-void Foam::KinematicLookupTableInjection<CloudType>::setProperties
+void Foam::ReactingMultiphaseLookupTableInjection<CloudType>::setProperties
 (
     const label parcelI,
     const label nParcels,
@@ -172,18 +176,37 @@ void Foam::KinematicLookupTableInjection<CloudType>::setProperties
 
     // set particle density
     parcel.rho() = injectors_[injectorI].rho();
+
+    // set particle temperature
+    parcel.T() = injectors_[injectorI].T();
+
+    // set particle specific heat capacity
+    parcel.cp() = injectors_[injectorI].cp();
+
+    // set particle component mass fractions
+    parcel.Y() = injectors_[injectorI].Y();
+
+    // set particle gaseous component mass fractions
+    parcel.YGas() = injectors_[injectorI].YGas();
+
+    // set particle liquid component mass fractions
+    parcel.YLiquid() = injectors_[injectorI].YLiquid();
+
+    // set particle solid component mass fractions
+    parcel.YSolid() = injectors_[injectorI].YSolid();
 }
 
 
 template<class CloudType>
-bool Foam::KinematicLookupTableInjection<CloudType>::fullyDescribed() const
+bool
+Foam::ReactingMultiphaseLookupTableInjection<CloudType>::fullyDescribed() const
 {
     return true;
 }
 
 
 template<class CloudType>
-bool Foam::KinematicLookupTableInjection<CloudType>::validInjection
+bool Foam::ReactingMultiphaseLookupTableInjection<CloudType>::validInjection
 (
     const label
 )

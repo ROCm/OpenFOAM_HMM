@@ -23,38 +23,42 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::ThermoLookupTableInjection
+    Foam::ReactingMultiphaseLookupTableInjection
 
 Description
     Particle injection sources read from look-up table. Each row corresponds to
     an injection site.
 
     (
-        (x y z) (u v w) d rho mDot T cp  // injector 1
-        (x y z) (u v w) d rho mDot T cp  // injector 2
-        ...
-        (x y z) (u v w) d rho mDot T cp  // injector N
+       (x y z) (u v w) d rho mDot T cp (Y0..Y2) (Yg0..YgN) (Yl0..YlN) (Ys0..YsN)
+       (x y z) (u v w) d rho mDot T cp (Y0..Y2) (Yg0..YgN) (Yl0..YlN) (Ys0..YsN)
+       ...
+       (x y z) (u v w) d rho mDot T cp (Y0..Y2) (Yg0..YgN) (Yl0..YlN) (Ys0..YsN)
     );
 
     where:
-        x, y, z = global cartesian co-ordinates [m]
-        u, v, w = global cartesian velocity components [m/s]
-        d       = diameter [m]
-        rho     = density [kg/m3]
-        mDot    = mass flow rate [kg/m3]
-        T       = temperature [K]
-        cp      = specific heat capacity [J/kg/K]
+        x, y, z  = global cartesian co-ordinates [m]
+        u, v, w  = global cartesian velocity components [m/s]
+        d        = diameter [m]
+        rho      = density [kg/m3]
+        mDot     = mass flow rate [kg/m3]
+        T        = temperature [K]
+        cp       = specific heat capacity [J/kg/K]
+        Y(3)     = total mass fraction of gas (Y0), liquid (Y1), solid (Y3)
+        Yg(Ngas) = mass fractions of gaseous components
+        Yl(Nliq) = mass fractions of liquid components
+        Ys(Nsld) = mass fractions of solid components
 
 SourceFiles
-    ThermoLookupTableInjection.C
+    ReactingMultiphaseLookupTableInjection.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ThermoLookupTableInjection_H
-#define ThermoLookupTableInjection_H
+#ifndef ReactingMultiphaseLookupTableInjection_H
+#define ReactingMultiphaseLookupTableInjection_H
 
 #include "InjectionModel.H"
-#include "kinematicParcelInjectionDataIOList.H"
+#include "reactingMultiphaseParcelInjectionDataIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,11 +66,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                Class ThermoLookupTableInjection Declaration
+           Class ReactingMultiphaseLookupTableInjection Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class ThermoLookupTableInjection
+class ReactingMultiphaseLookupTableInjection
 :
     public InjectionModel<CloudType>
 {
@@ -82,7 +86,7 @@ class ThermoLookupTableInjection
         const label nParcelsPerSecond_;
 
         //- List of injectors
-        kinematicParcelInjectionDataIOList injectors_;
+        reactingMultiphaseParcelInjectionDataIOList injectors_;
 
         //- List of injector cells per injector
         List<label> injectorCells_;
@@ -110,13 +114,13 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("ThermoLookupTableInjection");
+    TypeName("ReactingMultiphaseLookupTableInjection");
 
 
     // Constructors
 
         //- Construct from dictionary
-        ThermoLookupTableInjection
+        ReactingMultiphaseLookupTableInjection
         (
             const dictionary& dict,
             CloudType& owner
@@ -124,7 +128,7 @@ public:
 
 
     //- Destructor
-    virtual ~ThermoLookupTableInjection();
+    virtual ~ReactingMultiphaseLookupTableInjection();
 
 
     // Member Functions
@@ -158,10 +162,7 @@ public:
             );
 
             //- Flag to identify whether model fully describes the parcel
-            virtual bool fullyDescribed() const
-            {
-                return true;
-            }
+            virtual bool fullyDescribed() const;
 
             //- Return flag to identify whether or not injection of parcelI is
             //  permitted
@@ -176,7 +177,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ThermoLookupTableInjection.C"
+#   include "ReactingMultiphaseLookupTableInjection.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
