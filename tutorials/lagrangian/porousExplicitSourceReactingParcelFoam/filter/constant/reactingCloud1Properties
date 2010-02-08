@@ -17,8 +17,8 @@ FoamFile
 
 active          true;
 
-//InjectionModel  ReactingLookupTableInjection;
-InjectionModel  ManualInjection;
+InjectionModel  ReactingMultiphaseLookupTableInjection;
+//InjectionModel  ManualInjection;
 
 DragModel       SphereDrag;
 
@@ -106,7 +106,7 @@ ManualInjectionCoeffs
     }
 }
 
-ReactingLookupTableInjectionCoeffs
+ReactingMultiphaseLookupTableInjectionCoeffs
 {
     massTotal       massTotal [ 1 0 0 0 0 ] 1e-2;
     parcelBasisType mass;

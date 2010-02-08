@@ -25,7 +25,7 @@ FoamFile
         volumeMode      absolute;
         fieldData
         (
-            (H2O 0.005)
+            (H2O 1e-4) // kg/s
         );
         points
         (
