@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,52 +22,31 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Primitive
-    wchar_t
+@file Foam::addToStaticMemberFunctionSelectionTable
 
 Description
-    A wide-character and a pointer to a wide-character string.
-
-SourceFiles
-    wcharIO.C
-
-SeeAlso
-    http://en.wikipedia.org/wiki/UTF-8
-    http://en.wikibooks.org/wiki/Unicode/Character_reference
+    Macros for easy insertion into member function selection tables
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wchar_H
-#define wchar_H
-
-#include <cwchar>
-#include <string>
+#ifndef addToStaticMemberFunctionSelectionTable_H
+#define addToStaticMemberFunctionSelectionTable_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
 
-class Istream;
-class Ostream;
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-//- Output wide character (Unicode) as UTF-8
-Ostream& operator<<(Ostream&, const wchar_t);
-
-//- Output wide character (Unicode) string as UTF-8
-Ostream& operator<<(Ostream&, const wchar_t*);
-
-//- Output wide character (Unicode) string as UTF-8
-Ostream& operator<<(Ostream&, const std::wstring&);
+// add to hash-table of functions with 'lookup' as the key
+#define addNamedToStaticMemberFunctionSelectionTable\
+(baseType,thisType,memberFunction,argNames,lookup,functionPtr)                \
+                                                                              \
+    /* Add the thisType memberFunction to the table, find by lookup name */   \
+    baseType::add##memberFunction##argNames##StaticMemberFunctionToTable<thisType>  \
+    add_##lookup##_##thisType##memberFunction##argNames##StaticMemberFunctionTo##baseType##Table_\
+    (#lookup, functionPtr)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

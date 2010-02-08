@@ -22,49 +22,68 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Primitive
-    wchar_t
+Class
+    Foam::functionEntries::calcEntry
 
 Description
-    A wide-character and a pointer to a wide-character string.
+    This dictionary function entry may or may not do anything particularly
+    useful - depending upon what is currently being used to test.
 
 SourceFiles
-    wcharIO.C
-
-SeeAlso
-    http://en.wikipedia.org/wiki/UTF-8
-    http://en.wikibooks.org/wiki/Unicode/Character_reference
+    calcEntry.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wchar_H
-#define wchar_H
+#ifndef calcEntry_H
+#define calcEntry_H
 
-#include <cwchar>
-#include <string>
+#include "functionEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace functionEntries
+{
 
-class Istream;
-class Ostream;
+/*---------------------------------------------------------------------------*\
+                          Class calcEntry Declaration
+\*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+class calcEntry
+:
+    public functionEntry
+{
+    // Private Member Functions
 
-//- Output wide character (Unicode) as UTF-8
-Ostream& operator<<(Ostream&, const wchar_t);
+        //- Disallow default bitwise copy construct
+        calcEntry(const calcEntry&);
 
-//- Output wide character (Unicode) string as UTF-8
-Ostream& operator<<(Ostream&, const wchar_t*);
+        //- Disallow default bitwise assignment
+        void operator=(const calcEntry&);
 
-//- Output wide character (Unicode) string as UTF-8
-Ostream& operator<<(Ostream&, const std::wstring&);
+
+public:
+
+    //- Runtime type information
+    ClassName("calc");
+
+
+    // Member Functions
+
+        static bool execute
+        (
+            const dictionary& parentDict,
+            primitiveEntry& entry,
+            Istream& is
+        );
+
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace functionEntries
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,22 +22,24 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::functionEntries::calcEntry
+Namespace
+    Foam::functionEntries::calcEntryInternal
 
 Description
-    This dictionary function entry may or may not do anything particularly
-    useful - depending upon what is currently being used to test.
+    Contains global functions and classes for the calcEntry.
 
 SourceFiles
-    calcEntry.C
+    calcEntryInternal.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef calcEntry_H
-#define calcEntry_H
+#ifndef calcEntryInternal_H
+#define calcEntryInternal_H
 
-#include "functionEntry.H"
+#include "error.H"
+#include "scalar.H"
+#include "DynamicList.H"
+#include "globalFunctionSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,44 +47,30 @@ namespace Foam
 {
 namespace functionEntries
 {
-
-/*---------------------------------------------------------------------------*\
-                          Class calcEntry Declaration
-\*---------------------------------------------------------------------------*/
-
-class calcEntry
-:
-    public functionEntry
+namespace calcEntryInternal
 {
-    // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        calcEntry(const calcEntry&);
+    // Global Function Selectors
 
-        //- Disallow default bitwise assignment
-        void operator=(const calcEntry&);
-
-
-public:
-
-    //- Runtime type information
-    ClassName("calc");
-
-
-    // Member Functions
-
-        static bool execute
+    declareGlobalFunctionSelectionTable
+    (
+        scalar,
+        dispatch,
+        ParamList,
         (
-            const dictionary& parentDict,
-            primitiveEntry& entry,
-            Istream& is
-        );
+            const UList<scalar>& param
+        ),
+        (param)
+    );
 
-};
+
+    //- Dispatch calculation to the named function
+    scalar dispatch(const word&, const UList<scalar>&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace calcEntryInternal
 } // End namespace functionEntries
 } // End namespace Foam
 
