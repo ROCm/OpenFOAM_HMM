@@ -1741,7 +1741,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
         }
     }
 
-    label myUniquePoints = meshPoints.size() + nCoupledMaster - nCoupledSlave;
+    label myUniquePoints = meshPoints.size() - nCoupledSlave;
 
 Pout<< "Points :" << nl
     << "    patch            : " << meshPoints.size() << nl
@@ -1795,10 +1795,10 @@ Pout<< "Points :" << nl
                 if (slaves.size() > 0)
                 {
                     // Duplicate master globalpoint into slave slots
-                    masterToGlobal[coupledPointI] = pointToGlobal[meshPointI];
+                    masterToGlobal[coupledPointI] = pointToGlobal[localPointI];
                     forAll(slaves, i)
                     {
-                        masterToGlobal[slaves[i]] = pointToGlobal[meshPointI];
+                        masterToGlobal[slaves[i]] = pointToGlobal[localPointI];
                     }
                 }
             }
@@ -1825,7 +1825,7 @@ Pout<< "Points :" << nl
 
                 if (slaves.size() == 0)
                 {
-                    pointToGlobal[meshPointI] = masterToGlobal[coupledPointI];
+                    pointToGlobal[localPointI] = masterToGlobal[coupledPointI];
                 }
             }
         }
