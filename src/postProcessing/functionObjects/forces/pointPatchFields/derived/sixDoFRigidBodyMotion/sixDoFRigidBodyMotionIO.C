@@ -42,68 +42,67 @@ void Foam::sixDoFRigidBodyMotion::write(Ostream& os) const
     os.writeKeyword("report")
         << report_ << token::END_STATEMENT << nl;
 
-    if (restraints_.size())
+    if (!restraints_.empty())
     {
-        dictionary restraintsDict;
+        os  << indent << "restraints" << nl
+            << indent << token::BEGIN_BLOCK << incrIndent << nl;
 
         forAll(restraints_, rI)
         {
             word restraintType = restraints_[rI].type();
 
-            dictionary restraintDict;
+            os  << indent << restraintNames_[rI] << nl
+                << indent << token::BEGIN_BLOCK << incrIndent << endl;
 
-            restraintDict.add("sixDoFRigidBodyMotionRestraint", restraintType);
+            os.writeKeyword("sixDoFRigidBodyMotionRestraint")
+                << restraintType << token::END_STATEMENT << nl;
 
-            restraintDict.add
-            (
-                word(restraintType + "Coeffs"), restraints_[rI].coeffDict()
-            );
+            os.writeKeyword(word(restraintType + "Coeffs")) << nl;
 
-            restraintsDict.add(restraints_[rI].name(), restraintDict);
+            os  << indent << token::BEGIN_BLOCK << nl << incrIndent;
+
+            restraints_[rI].write(os);
+
+            os << decrIndent << indent << token::END_BLOCK << nl;
+
+            os  << decrIndent << indent << token::END_BLOCK << endl;
         }
 
-        os.writeKeyword("restraints") << restraintsDict;
+        os  << decrIndent << indent << token::END_BLOCK << nl;
     }
 
-    if (constraints_.size())
+    if (!constraints_.empty())
     {
-        dictionary constraintsDict;
+        os  << indent << "constraints" << nl
+            << indent << token::BEGIN_BLOCK << incrIndent << nl;
 
-        constraintsDict.add("maxIterations", maxConstraintIters_);
+        os.writeKeyword("maxIterations")
+            << maxConstraintIterations_ << token::END_STATEMENT << nl;
 
         forAll(constraints_, rI)
         {
             word constraintType = constraints_[rI].type();
 
-            dictionary constraintDict;
+            os  << indent << constraintNames_[rI] << nl
+                << indent << token::BEGIN_BLOCK << incrIndent << endl;
 
-            constraintDict.add
-            (
-                "sixDoFRigidBodyMotionConstraint",
-                constraintType
-            );
+            os.writeKeyword("sixDoFRigidBodyMotionConstraint")
+                << constraintType << token::END_STATEMENT << nl;
 
-            constraintDict.add
-            (
-                "tolerance",
-                constraints_[rI].tolerance()
-            );
+            constraints_[rI].sixDoFRigidBodyMotionConstraint::write(os);
 
-            constraintDict.add
-            (
-                "relaxationFactor",
-                constraints_[rI].relaxationFactor()
-            );
+            os.writeKeyword(word(constraintType + "Coeffs")) << nl;
 
-            constraintDict.add
-            (
-                word(constraintType + "Coeffs"), constraints_[rI].coeffDict()
-            );
+            os  << indent << token::BEGIN_BLOCK << nl << incrIndent;
 
-            constraintsDict.add(constraints_[rI].name(), constraintDict);
+            constraints_[rI].write(os);
+
+            os << decrIndent << indent << token::END_BLOCK << nl;
+
+            os  << decrIndent << indent << token::END_BLOCK << endl;
         }
 
-        os.writeKeyword("constraints") << constraintsDict;
+        os  << decrIndent << indent << token::END_BLOCK << nl;
     }
 }
 

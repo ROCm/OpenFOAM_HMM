@@ -91,12 +91,18 @@ class sixDoFRigidBodyMotion
         //- Restraints on the motion
         PtrList<sixDoFRigidBodyMotionRestraint> restraints_;
 
+        //- Names of the restraints
+        wordList restraintNames_;
+
         //- Constaints on the motion
         PtrList<sixDoFRigidBodyMotionConstraint> constraints_;
 
+        //- Names of the constraints
+        wordList constraintNames_;
+
         //- Maximum number of iterations allowed to attempt to obey
         //  constraints
-        label maxConstraintIters_;
+        label maxConstraintIterations_;
 
         //- Centre of mass of reference state
         point refCentreOfMass_;
@@ -146,13 +152,19 @@ class sixDoFRigidBodyMotion
             inline const PtrList<sixDoFRigidBodyMotionRestraint>&
                 restraints() const;
 
+            //- Return access to the restraintNames
+            inline const wordList& restraintNames() const;
+
             //- Return access to the constraints
             inline const PtrList<sixDoFRigidBodyMotionConstraint>&
                 constraints() const;
 
+            //- Return access to the constraintNames
+            inline const wordList& constraintNames() const;
+
             //- Return access to the maximum allowed number of
             //  constraint iterations
-            inline label maxConstraintIters() const;
+            inline label maxConstraintIterations() const;
 
             //- Return access to the centre of mass
             inline const point& refCentreOfMass() const;

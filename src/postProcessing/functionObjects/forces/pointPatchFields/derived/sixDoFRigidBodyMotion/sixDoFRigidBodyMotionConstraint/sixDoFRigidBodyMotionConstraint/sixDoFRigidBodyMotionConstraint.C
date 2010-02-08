@@ -39,7 +39,6 @@ Foam::sixDoFRigidBodyMotionConstraint::sixDoFRigidBodyMotionConstraint
     const dictionary& sDoFRBMCDict
 )
 :
-    name_(fileName(sDoFRBMCDict.name().name()).components(token::COLON).last()),
     sDoFRBMCCoeffs_
     (
         sDoFRBMCDict.subDict
@@ -82,5 +81,14 @@ bool Foam::sixDoFRigidBodyMotionConstraint::read
     return true;
 }
 
+
+void Foam::sixDoFRigidBodyMotionConstraint::write(Ostream& os) const
+{
+    os.writeKeyword("tolerance")
+        << tolerance_ << token::END_STATEMENT << nl;
+
+    os.writeKeyword("relaxationFactor")
+        << relaxationFactor_ << token::END_STATEMENT << nl;
+}
 
 // ************************************************************************* //
