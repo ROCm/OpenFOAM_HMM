@@ -139,11 +139,13 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
                 << ") exceeded." << nl
                 << exit(FatalError);
         }
-        else if (report_)
+
+        Info<< "sixDoFRigidBodyMotion constraints converged in "
+            << iteration << " iterations" << endl;
+
+        if (report_)
         {
-            Info<< "sixDoFRigidBodyMotion constraints converged in "
-                << iteration << " iterations"
-                << nl << "Constraint force: " << cFA << nl
+            Info<< "Constraint force: " << cFA << nl
                 << "Constraint moment: " << cMA
                 << endl;
         }
@@ -444,7 +446,7 @@ void Foam::sixDoFRigidBodyMotion::updateForce
 
 Foam::point Foam::sixDoFRigidBodyMotion::predictedPosition
 (
-    const point& p0,
+    const point& pInitial,
     const vector& deltaForce,
     const vector& deltaMoment,
     scalar deltaT
@@ -463,14 +465,14 @@ Foam::point Foam::sixDoFRigidBodyMotion::predictedPosition
     return
     (
         centreOfMassTemp
-      + (QTemp & initialQ_.T() & (p0 - initialCentreOfMass_))
+      + (QTemp & initialQ_.T() & (pInitial - initialCentreOfMass_))
     );
 }
 
 
 Foam::vector Foam::sixDoFRigidBodyMotion::predictedOrientation
 (
-    const vector& v0,
+    const vector& vInitial,
     const vector& deltaMoment,
     scalar deltaT
 ) const
@@ -481,7 +483,7 @@ Foam::vector Foam::sixDoFRigidBodyMotion::predictedOrientation
 
     rotate(QTemp, piTemp, deltaT);
 
-    return (QTemp & initialQ_.T() & v0);
+    return (QTemp & initialQ_.T() & vInitial);
 }
 
 

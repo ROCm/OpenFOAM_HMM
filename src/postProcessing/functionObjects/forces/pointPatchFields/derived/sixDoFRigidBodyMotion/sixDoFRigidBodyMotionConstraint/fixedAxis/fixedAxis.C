@@ -97,7 +97,7 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedAxis::constrain
     {
         rotationAxis /= magRotationAxis;
 
-        const tensor& Q = motion.currentOrientation();
+        const tensor& Q = motion.orientation();
 
         // Transform rotationAxis to body local system
         rotationAxis = Q.T() & rotationAxis;

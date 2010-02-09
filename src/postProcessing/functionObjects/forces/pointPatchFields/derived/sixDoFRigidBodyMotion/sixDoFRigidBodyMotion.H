@@ -287,27 +287,30 @@ public:
 
         //- Transform the given initial state pointField by the current
         //  motion state
-        inline tmp<pointField> currentPosition(const pointField& p0) const;
+        inline tmp<pointField> currentPosition
+        (
+            const pointField& pInitial
+        ) const;
 
         //- Transform the given initial state point by the current motion
         //  state
-        inline point currentPosition(const point& p0) const;
+        inline point currentPosition(const point& pInitial) const;
 
         //- Transform the given initial state direction by the current
         //  motion state
-        inline vector currentOrientation(const vector& dir0) const;
+        inline vector currentOrientation(const vector& vInitial) const;
 
         //- Access the orientation tensor, Q.
         //  globalVector = Q & bodyLocalVector
         //  bodyLocalVector = Q.T() & globalVector
-        inline const tensor& currentOrientation() const;
+        inline const tensor& orientation() const;
 
         //- Predict the position of the supplied initial state point
         //  after deltaT given the current motion state and the
         //  additional supplied force and moment
         point predictedPosition
         (
-            const point& p0,
+            const point& pInitial,
             const vector& deltaForce,
             const vector& deltaMoment,
             scalar deltaT
@@ -318,7 +321,7 @@ public:
         //  additional supplied moment
         vector predictedOrientation
         (
-            const vector& v0,
+            const vector& vInitial,
             const vector& deltaMoment,
             scalar deltaT
         ) const;

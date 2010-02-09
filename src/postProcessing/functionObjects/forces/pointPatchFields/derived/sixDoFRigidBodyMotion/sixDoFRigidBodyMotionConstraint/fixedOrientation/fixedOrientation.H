@@ -59,12 +59,6 @@ class fixedOrientation
     public sixDoFRigidBodyMotionConstraint
 {
 
-    // Private data
-
-        //- Reference orientation where there is no moment
-        tensor fixedOrientation_;
-
-
 public:
 
     //- Runtime type information
