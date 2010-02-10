@@ -200,7 +200,7 @@ public:
                            Class Buffer Declaration
 \*---------------------------------------------------------------------------*/
 /*!
- * @brief Scanner Buffer Token
+ * @brief Scanner Buffer
  *
  * This Buffer supports the following cases:
  * -# seekable stream (file)
