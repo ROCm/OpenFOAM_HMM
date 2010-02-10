@@ -205,14 +205,36 @@ Foam::label Foam::autoRefineDriver::featureEdgeRefine
                 const_cast<Time&>(mesh.time())++;
             }
 
-            meshRefiner_.refineAndBalance
+
+            if
             (
-                "feature refinement iteration " + name(iter),
-                decomposer_,
-                distributor_,
-                cellsToRefine,
-                refineParams.maxLoadUnbalance()
-            );
+                returnReduce
+                (
+                    (mesh.nCells() >= refineParams.maxLocalCells()),
+                    orOp<bool>()
+                )
+            )
+            {
+                meshRefiner_.balanceAndRefine
+                (
+                    "feature refinement iteration " + name(iter),
+                    decomposer_,
+                    distributor_,
+                    cellsToRefine,
+                    refineParams.maxLoadUnbalance()
+                );
+            }
+            else
+            {
+                meshRefiner_.refineAndBalance
+                (
+                    "feature refinement iteration " + name(iter),
+                    decomposer_,
+                    distributor_,
+                    cellsToRefine,
+                    refineParams.maxLoadUnbalance()
+                );
+            }
         }
     }
     return iter;
@@ -306,14 +328,36 @@ Foam::label Foam::autoRefineDriver::surfaceOnlyRefine
             const_cast<Time&>(mesh.time())++;
         }
 
-        meshRefiner_.refineAndBalance
+
+        if
         (
-            "surface refinement iteration " + name(iter),
-            decomposer_,
-            distributor_,
-            cellsToRefine,
-            refineParams.maxLoadUnbalance()
-        );
+            returnReduce
+            (
+                (mesh.nCells() >= refineParams.maxLocalCells()),
+                orOp<bool>()
+            )
+        )
+        {
+            meshRefiner_.balanceAndRefine
+            (
+                "surface refinement iteration " + name(iter),
+                decomposer_,
+                distributor_,
+                cellsToRefine,
+                refineParams.maxLoadUnbalance()
+            );
+        }
+        else
+        {
+            meshRefiner_.refineAndBalance
+            (
+                "surface refinement iteration " + name(iter),
+                decomposer_,
+                distributor_,
+                cellsToRefine,
+                refineParams.maxLoadUnbalance()
+            );
+        }
     }
     return iter;
 }
@@ -415,7 +459,9 @@ Foam::label Foam::autoRefineDriver::shellRefine
             Pout<< "Dumping " << candidateCells.size()
                 << " cells to cellSet candidateCellsFromShells." << endl;
 
-            cellSet(mesh, "candidateCellsFromShells", candidateCells).write();
+            cellSet c(mesh, "candidateCellsFromShells", candidateCells);
+            c.instance() = mesh.time().timeName();
+            c.write();
         }
 
         // Problem choosing starting faces for bufferlayers (bFaces)
@@ -489,14 +535,35 @@ Foam::label Foam::autoRefineDriver::shellRefine
             const_cast<Time&>(mesh.time())++;
         }
 
-        meshRefiner_.refineAndBalance
+        if
         (
-            "shell refinement iteration " + name(iter),
-            decomposer_,
-            distributor_,
-            cellsToRefine,
-            refineParams.maxLoadUnbalance()
-        );
+            returnReduce
+            (
+                (mesh.nCells() >= refineParams.maxLocalCells()),
+                orOp<bool>()
+            )
+        )
+        {
+            meshRefiner_.balanceAndRefine
+            (
+                "shell refinement iteration " + name(iter),
+                decomposer_,
+                distributor_,
+                cellsToRefine,
+                refineParams.maxLoadUnbalance()
+            );
+        }
+        else
+        {
+            meshRefiner_.refineAndBalance
+            (
+                "shell refinement iteration " + name(iter),
+                decomposer_,
+                distributor_,
+                cellsToRefine,
+                refineParams.maxLoadUnbalance()
+            );
+        }
     }
     meshRefiner_.userFaceData().clear();
 

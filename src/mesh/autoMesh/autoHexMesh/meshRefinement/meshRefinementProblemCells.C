@@ -203,6 +203,7 @@ Foam::Map<Foam::label> Foam::meshRefinement::findEdgeConnectedProblemCells
     if (debug)
     {
         faceSet fSet(mesh_, "edgeConnectedFaces", candidateFaces);
+        fSet.instance() = mesh_.time().timeName();
         Pout<< "Writing " << fSet.size()
             << " with problematic topology to faceSet "
             << fSet.objectPath() << endl;
@@ -265,6 +266,7 @@ Foam::Map<Foam::label> Foam::meshRefinement::findEdgeConnectedProblemCells
 
     if (debug)
     {
+        perpFaces.instance() = mesh_.time().timeName();
         Pout<< "Writing " << perpFaces.size()
             << " faces that are perpendicular to the surface to set "
             << perpFaces.objectPath() << endl;
@@ -482,6 +484,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
         if (debug)
         {
             cellSet problemCellSet(mesh_, "problemCells", problemCells.toc());
+            problemCellSet.instance() = mesh_.time().timeName();
             Pout<< "Writing " << problemCellSet.size()
                 << " cells that are edge connected to coarser cell to set "
                 << problemCellSet.objectPath() << endl;

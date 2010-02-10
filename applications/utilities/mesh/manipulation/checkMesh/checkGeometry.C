@@ -47,6 +47,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                 Info<< "  <<Writing " << nNonAligned
                     << " points on non-aligned edges to set "
                     << nonAlignedPoints.name() << endl;
+                nonAlignedPoints.instance() = mesh.pointsInstance();
                 nonAlignedPoints.write();
             }
         }
@@ -67,6 +68,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
             {
                 Info<< "  <<Writing " << nNonClosed
                     << " non closed cells to set " << cells.name() << endl;
+                cells.instance() = mesh.pointsInstance();
                 cells.write();
             }
         }
@@ -78,6 +80,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
             Info<< "  <<Writing " << nHighAspect
                 << " cells with high aspect ratio to set "
                 << aspectCells.name() << endl;
+            aspectCells.instance() = mesh.pointsInstance();
             aspectCells.write();
         }
     }
@@ -94,6 +97,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
             {
                 Info<< "  <<Writing " << nFaces
                     << " zero area faces to set " << faces.name() << endl;
+                faces.instance() = mesh.pointsInstance();
                 faces.write();
             }
         }
@@ -111,6 +115,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
             {
                 Info<< "  <<Writing " << nCells
                     << " zero volume cells to set " << cells.name() << endl;
+                cells.instance() = mesh.pointsInstance();
                 cells.write();
             }
         }
@@ -129,6 +134,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
         {
             Info<< "  <<Writing " << nFaces
                 << " non-orthogonal faces to set " << faces.name() << endl;
+            faces.instance() = mesh.pointsInstance();
             faces.write();
         }
     }
@@ -147,6 +153,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                 Info<< "  <<Writing " << nFaces
                     << " faces with incorrect orientation to set "
                     << faces.name() << endl;
+                faces.instance() = mesh.pointsInstance();
                 faces.write();
             }
         }
@@ -164,6 +171,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
             {
                 Info<< "  <<Writing " << nFaces
                     << " skew faces to set " << faces.name() << endl;
+                faces.instance() = mesh.pointsInstance();
                 faces.write();
             }
         }
@@ -184,6 +192,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                 Info<< "  <<Writing " << nPoints
                     << " points on short edges to set " << points.name()
                     << endl;
+                points.instance() = mesh.pointsInstance();
                 points.write();
             }
         }
@@ -202,6 +211,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                 Info<< "  <<Writing " << nPoints
                     << " near (closer than " << Foam::sqrt(minDistSqr)
                     << " apart) points to set " << nearPoints.name() << endl;
+                nearPoints.instance() = mesh.pointsInstance();
                 nearPoints.write();
             }
         }
@@ -221,6 +231,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
                 Info<< "  <<Writing " << nFaces
                     << " faces with concave angles to set " << faces.name()
                     << endl;
+                faces.instance() = mesh.pointsInstance();
                 faces.write();
             }
         }
@@ -239,6 +250,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
             {
                 Info<< "  <<Writing " << nFaces
                     << " warped faces to set " << faces.name() << endl;
+                faces.instance() = mesh.pointsInstance();
                 faces.write();
             }
         }
@@ -255,6 +267,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
 
             Info<< "  <<Writing " << nCells
                 << " under-determined cells to set " << cells.name() << endl;
+            cells.instance() = mesh.pointsInstance();
             cells.write();
         }
     }

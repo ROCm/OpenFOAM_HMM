@@ -41,6 +41,9 @@ Description
 #include "OFstream.H"
 #include "meshTools.H"
 #include "Random.H"
+#include "transform.H"
+#include "IOmanip.H"
+#include "Pair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -296,7 +299,7 @@ int main(int argc, char *argv[])
     (
         "density",
         "scalar",
-        "Specify density,"
+        "Specify density, "
         "kg/m3 for solid properties, kg/m2 for shell properties"
     );
 
@@ -355,6 +358,12 @@ int main(int argc, char *argv[])
         );
     }
 
+    if (m < 0)
+    {
+        WarningIn(args.executable() + "::main")
+            << "Negative mass detected" << endl;
+    }
+
     vector eVal = eigenValues(J);
 
     tensor eVec = eigenVectors(J);
@@ -380,19 +389,221 @@ int main(int argc, char *argv[])
         pertI++;
     }
 
-    Info<< nl
-        << "Density = " << density << nl
-        << "Mass = " << m << nl
-        << "Centre of mass = " << cM << nl
-        << "Inertia tensor around centre of mass = " << J << nl
-        << "eigenValues (principal moments) = " << eVal << nl
-        << "eigenVectors (principal axes) = "
-        << eVec.x() <<  ' ' << eVec.y() << ' ' << eVec.z()
-        << endl;
+    bool showTransform = true;
+
+    if
+    (
+        (mag(eVec.x() ^ eVec.y()) > (1.0 - SMALL))
+     && (mag(eVec.y() ^ eVec.z()) > (1.0 - SMALL))
+     && (mag(eVec.z() ^ eVec.x()) > (1.0 - SMALL))
+    )
+    {
+        // Make the eigenvectors a right handed orthogonal triplet
+        eVec.z() *= sign((eVec.x() ^ eVec.y()) & eVec.z());
+
+        // Finding the most natural transformation.  Using Lists
+        // rather than tensors to allow indexed permutation.
+
+        // Cartesian basis vectors - right handed orthogonal triplet
+        List<vector> cartesian(3);
+
+        cartesian[0] = vector(1, 0, 0);
+        cartesian[1] = vector(0, 1, 0);
+        cartesian[2] = vector(0, 0, 1);
+
+        // Principal axis basis vectors - right handed orthogonal
+        // triplet
+        List<vector> principal(3);
+
+        principal[0] = eVec.x();
+        principal[1] = eVec.y();
+        principal[2] = eVec.z();
+
+        scalar maxMagDotProduct = -GREAT;
+
+        // Matching axis indices, first: cartesian, second:principal
+
+        Pair<label> match(-1, -1);
+
+        forAll(cartesian, cI)
+        {
+            forAll(principal, pI)
+            {
+                scalar magDotProduct = mag(cartesian[cI] & principal[pI]);
+
+                if (magDotProduct > maxMagDotProduct)
+                {
+                    maxMagDotProduct = magDotProduct;
+
+                    match.first() = cI;
+
+                    match.second() = pI;
+                }
+            }
+        }
+
+        scalar sense = sign
+        (
+            cartesian[match.first()] & principal[match.second()]
+        );
+
+        if (sense < 0)
+        {
+            // Invert the best match direction and swap the order of
+            // the other two vectors
+
+            List<vector> tPrincipal = principal;
+
+            tPrincipal[match.second()] *= -1;
+
+            tPrincipal[(match.second() + 1) % 3] =
+                principal[(match.second() + 2) % 3];
+
+            tPrincipal[(match.second() + 2) % 3] =
+                principal[(match.second() + 1) % 3];
+
+            principal = tPrincipal;
+
+            vector tEVal = eVal;
+
+            tEVal[(match.second() + 1) % 3] = eVal[(match.second() + 2) % 3];
+
+            tEVal[(match.second() + 2) % 3] = eVal[(match.second() + 1) % 3];
+
+            eVal = tEVal;
+        }
+
+        label permutationDelta = match.second() - match.first();
+
+        if (permutationDelta != 0)
+        {
+            // Add 3 to the permutationDelta to avoid negative indices
+
+            permutationDelta += 3;
+
+            List<vector> tPrincipal = principal;
+
+            vector tEVal = eVal;
+
+            for (label i = 0; i < 3; i++)
+            {
+                tPrincipal[i] = principal[(i + permutationDelta) % 3];
+
+                tEVal[i] = eVal[(i + permutationDelta) % 3];
+            }
+
+            principal = tPrincipal;
+
+            eVal = tEVal;
+        }
+
+        label matchedAlready = match.first();
+
+        match =Pair<label>(-1, -1);
+
+        maxMagDotProduct = -GREAT;
+
+        forAll(cartesian, cI)
+        {
+            if (cI == matchedAlready)
+            {
+                continue;
+            }
+
+            forAll(principal, pI)
+            {
+                if (pI == matchedAlready)
+                {
+                    continue;
+                }
+
+                scalar magDotProduct = mag(cartesian[cI] & principal[pI]);
+
+                if (magDotProduct > maxMagDotProduct)
+                {
+                    maxMagDotProduct = magDotProduct;
+
+                    match.first() = cI;
+
+                    match.second() = pI;
+                }
+            }
+        }
+
+        sense = sign
+        (
+            cartesian[match.first()] & principal[match.second()]
+        );
+
+        if (sense < 0 || (match.second() - match.first()) != 0)
+        {
+            principal[match.second()] *= -1;
+
+            List<vector> tPrincipal = principal;
+
+            tPrincipal[(matchedAlready + 1) % 3] =
+                principal[(matchedAlready + 2) % 3]*-sense;
+
+            tPrincipal[(matchedAlready + 2) % 3] =
+                principal[(matchedAlready + 1) % 3]*-sense;
+
+            principal = tPrincipal;
+
+            vector tEVal = eVal;
+
+            tEVal[(matchedAlready + 1) % 3] = eVal[(matchedAlready + 2) % 3];
+
+            tEVal[(matchedAlready + 2) % 3] = eVal[(matchedAlready + 1) % 3];
+
+            eVal = tEVal;
+        }
+
+        eVec.x() = principal[0];
+        eVec.y() = principal[1];
+        eVec.z() = principal[2];
+
+        // {
+        //     tensor R = rotationTensor(vector(1, 0, 0), eVec.x());
+
+        //     R = rotationTensor(R & vector(0, 1, 0), eVec.y()) & R;
+
+        //     Info<< "R = " << nl << R << endl;
+
+        //     Info<< "R - eVec.T() " << R - eVec.T() << endl;
+        // }
+    }
+    else
+    {
+        WarningIn(args.executable() + "::main")
+            << "Non-unique eigenvectors, cannot compute transformation "
+            << "from Cartesian axes" << endl;
+
+        showTransform = false;
+    }
+
+    Info<< nl << setprecision(10)
+        << "Density: " << density << nl
+        << "Mass: " << m << nl
+        << "Centre of mass: " << cM << nl
+        << "Inertia tensor around centre of mass: " << nl << J << nl
+        << "eigenValues (principal moments): " << eVal << nl
+        << "eigenVectors (principal axes): " << nl
+        << eVec.x() << nl << eVec.y() << nl << eVec.z() << endl;
+
+    if (showTransform)
+    {
+        Info<< "Transform tensor from reference state (Q). " << nl
+            << "Rotation tensor required to transform "
+               "from the body reference frame to the global "
+               "reference frame, i.e.:" << nl
+            << "globalVector = Q & bodyLocalVector"
+            << nl << eVec.T()
+            << endl;
+    }
 
     if (calcAroundRefPt)
     {
-        Info << "Inertia tensor relative to " << refPt << " = "
+        Info << "Inertia tensor relative to " << refPt << ": "
             << applyParallelAxisTheorem(m, cM, J, refPt)
             << endl;
     }

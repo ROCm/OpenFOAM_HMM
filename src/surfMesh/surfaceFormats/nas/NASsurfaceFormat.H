@@ -47,7 +47,7 @@ SourceFiles
 #include "MeshedSurface.H"
 #include "MeshedSurfaceProxy.H"
 #include "UnsortedMeshedSurface.H"
-#include "NASsurfaceFormatCore.H"
+#include "NASCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,7 +64,7 @@ template<class Face>
 class NASsurfaceFormat
 :
     public MeshedSurface<Face>,
-    public NASsurfaceFormatCore
+    public NASCore
 {
     // Private Member Functions
 

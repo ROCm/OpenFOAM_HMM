@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -35,10 +35,14 @@ usage() {
     while [ "$#" -ge 1 ]; do echo "$1" 1>&2; shift; done
     cat <<USAGE 1>&2
 
-usage: ${0##*/} [-case dir] [-region name]
+Usage: ${0##*/} [OPTION]
+options:
+  -case <dir>       specify alternative case directory, default is the cwd
+  -region <name>    specify alternative mesh region
+  -help             print the usage
 
-    Remove the contents of the constant/polyMesh directory
-    as per the Foam::polyMesh::removeFiles() method.
+Remove the contents of the constant/polyMesh directory as per the
+Foam::polyMesh::removeFiles() method.
 
 USAGE
    exit 1

@@ -60,8 +60,7 @@ void Foam::fileFormats::VTKedgeFormat::writeEdges
     const UList<edge>& edgeLst
 )
 {
-    os  << "LINES " << edgeLst.size() << ' '
-        << 3*edgeLst.size() << nl;
+    os  << "LINES " << edgeLst.size() << ' ' << 3*edgeLst.size() << nl;
 
     forAll(edgeLst, edgeI)
     {
@@ -70,8 +69,6 @@ void Foam::fileFormats::VTKedgeFormat::writeEdges
         os  << "2 " << e[0] << ' ' << e[1] << nl;
     }
 }
-
-
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -103,5 +100,6 @@ void Foam::fileFormats::VTKedgeFormat::write
     writeHeader(os, eMesh.points());
     writeEdges(os, eMesh.edges());
 }
+
 
 // ************************************************************************* //

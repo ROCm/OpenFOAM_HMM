@@ -298,7 +298,7 @@ Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::transfer
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-inline Foam::Xfer< Foam::List<T> >
+inline Foam::Xfer<Foam::List<T> >
 Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::xfer()
 {
     return xferMoveTo< List<T> >(*this);

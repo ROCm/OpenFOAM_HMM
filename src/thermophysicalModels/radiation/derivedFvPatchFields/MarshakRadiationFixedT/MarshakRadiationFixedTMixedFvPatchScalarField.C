@@ -79,18 +79,22 @@ MarshakRadiationFixedTMixedFvPatchScalarField
     Trad_("Trad", dict, p.size()),
     emissivity_(readScalar(dict.lookup("emissivity")))
 {
-    refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Trad_);
-    refGrad() = 0.0;
-
     if (dict.found("value"))
     {
         fvPatchScalarField::operator=
         (
             scalarField("value", dict, p.size())
         );
+        refValue() = scalarField("refValue", dict, p.size());
+        refGrad() = scalarField("refGradient", dict, p.size());
+        valueFraction() = scalarField("valueFraction", dict, p.size());
     }
     else
     {
+        refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Trad_);
+        refGrad() = 0.0;
+        valueFraction() = 1.0;
+
         fvPatchScalarField::operator=(refValue());
     }
 }
@@ -128,7 +132,7 @@ void Foam::MarshakRadiationFixedTMixedFvPatchScalarField::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    scalarField::autoMap(m);
+    mixedFvPatchScalarField::autoMap(m);
     Trad_.autoMap(m);
 }
 
@@ -173,10 +177,9 @@ void Foam::MarshakRadiationFixedTMixedFvPatchScalarField::updateCoeffs()
 
 void Foam::MarshakRadiationFixedTMixedFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    mixedFvPatchScalarField::write(os);
     Trad_.writeEntry("Trad", os);
     os.writeKeyword("emissivity") << emissivity_ << token::END_STATEMENT << nl;
-    writeEntry("value", os);
 }
 
 

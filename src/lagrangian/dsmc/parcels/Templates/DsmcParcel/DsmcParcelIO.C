@@ -81,6 +81,8 @@ void Foam::DsmcParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
         return;
     }
 
+    Particle<ParcelType>::readFields(c);
+
     IOField<vector> U(c.fieldIOobject("U", IOobject::MUST_READ));
     c.checkFieldIOobject(c, U);
 

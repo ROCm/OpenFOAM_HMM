@@ -101,6 +101,7 @@ public:
         //- Runtime type information
         TypeName("edgeMesh");
 
+
     // Static
 
         //- Can we read this file format?
@@ -115,6 +116,7 @@ public:
         static wordHashSet readTypes();
         static wordHashSet writeTypes();
 
+
     // Constructors
 
         //- Construct null
@@ -126,8 +128,8 @@ public:
         //- Construct by transferring components (points, edges).
         edgeMesh
         (
-            const Xfer< pointField >&,
-            const Xfer< edgeList >&
+            const Xfer<pointField>&,
+            const Xfer<edgeList>&
         );
 
         //- Construct as copy
@@ -142,6 +144,7 @@ public:
         //- Construct from Istream
         edgeMesh(Istream&);
 
+
     // Declare run-time constructor selection table
 
         declareRunTimeSelectionTable
@@ -154,6 +157,7 @@ public:
             ),
             (name)
         );
+
 
     // Selectors
 
@@ -197,7 +201,7 @@ public:
         void transfer(edgeMesh&);
 
         //- Transfer contents to the Xfer container
-        Xfer< edgeMesh > xfer();
+        Xfer<edgeMesh > xfer();
 
     // Read
 
@@ -233,8 +237,8 @@ public:
         //  Note, optimized to avoid overwriting data (with Xfer::null)
         virtual void reset
         (
-            const Xfer< pointField >& points,
-            const Xfer< edgeList >& edges
+            const Xfer<pointField>& points,
+            const Xfer<edgeList>& edges
         );
 
         //- Scale points. A non-positive factor is ignored
@@ -248,8 +252,6 @@ public:
 
         void writeStats(Ostream&) const;
 
-    // Write
-
         //- Generic write routine. Chooses writer based on extension.
         virtual void write(const fileName& name) const
         {
@@ -261,10 +263,10 @@ public:
 
         inline void operator=(const edgeMesh&);
 
-    // Ostream Operator
+        // Ostream Operator
 
-        friend Ostream& operator<<(Ostream&, const edgeMesh&);
-        friend Istream& operator>>(Istream&, edgeMesh&);
+            friend Ostream& operator<<(Ostream&, const edgeMesh&);
+            friend Istream& operator>>(Istream&, edgeMesh&);
 
 };
 

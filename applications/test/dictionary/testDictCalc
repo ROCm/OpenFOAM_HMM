@@ -10,7 +10,7 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      testDictTest;
+    object      testDictCalc;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -19,28 +19,13 @@ flowRatePerHour 720;
 x       10;
 y       20;
 z       t s v;
-// z       #test{ // this
-//     123 - 456
-//         // comments // are
-//         /* stripped
-//         * 10
-//          * {}
-//          */
-//         + 1 /*100 */  10
-// };
+p       #calc{ 1 + 2 + 10 * 15 + $x - $y };
 
-p     this calculation #calc{
-          1 + 2 + 10 * 15 +
-          $x - $y
-        // $x + $y
-}
-is done inplace;
+// this calculation is in-place, but does not work inside a string:
+flowRate    "The flow rate " #calc{ $flowRatePerHour / 3600 } "kg/s";
 
+// this is also okay
+x   #calc{ $x * 1E-3 };
 
-flowRate    #calc{ $flowRatePerHour / 3600};
-
-xxx         yyy;
-foo         30;
-bar         15;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

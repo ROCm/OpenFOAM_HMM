@@ -85,8 +85,7 @@ public:
         };
 
 
-    // Tree node. Has up pointer and down pointers.
-
+        //- Tree node. Has up pointer and down pointers.
         class node
         {
         public:

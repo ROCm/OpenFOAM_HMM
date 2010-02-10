@@ -127,10 +127,11 @@
         fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p)
     );
 
-    Info<< "\nConstructing explicit enthalpy cell source" << endl;
-    timeActivatedExplicitCellSource enthalpySource
+    Info<< "\nConstructing explicit enthalpy source" << endl;
+    scalarTimeActivatedExplicitSourceList enthalpySource
     (
-        "enthalpySource",
+        "energy",
         mesh,
-        h.dimensions()*phi.dimensions()/mesh.V().dimensions()
+        dimEnergy/dimTime/dimVolume,
+        "h"
     );

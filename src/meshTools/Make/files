@@ -9,16 +9,17 @@ cellDist/wallPoint/wallPoint.C
 
 cellFeatures/cellFeatures.C
 
-coordinateSystems/coordinateSystem.C
-coordinateSystems/coordinateSystemNew.C
-coordinateSystems/coordinateSystems.C
-coordinateSystems/cylindricalCS.C
-coordinateSystems/sphericalCS.C
-coordinateSystems/parabolicCylindricalCS.C
-coordinateSystems/toroidalCS.C
-coordinateSystems/coordinateRotation/coordinateRotation.C
-coordinateSystems/coordinateRotation/EulerCoordinateRotation.C
-coordinateSystems/coordinateRotation/STARCDCoordinateRotation.C
+csys = coordinateSystems
+$(csys)/coordinateSystem.C
+$(csys)/coordinateSystemNew.C
+$(csys)/coordinateSystems.C
+$(csys)/cylindricalCS.C
+$(csys)/sphericalCS.C
+$(csys)/parabolicCylindricalCS.C
+$(csys)/toroidalCS.C
+$(csys)/coordinateRotation/coordinateRotation.C
+$(csys)/coordinateRotation/EulerCoordinateRotation.C
+$(csys)/coordinateRotation/STARCDCoordinateRotation.C
 
 edgeFaceCirculator/edgeFaceCirculator.C
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,134 +58,6 @@ inline void Foam::fileFormats::STARCDedgeFormat::writeLines
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-bool Foam::fileFormats::STARCDedgeFormat::readHeader
-(
-    IFstream& is,
-    const word& signature
-)
-{
-    if (!is.good())
-    {
-        FatalErrorIn
-        (
-            "fileFormats::STARCDedgeFormat::readHeader(...)"
-        )
-            << "cannot read " << signature  << "  " << is.name()
-            << abort(FatalError);
-    }
-
-    word header;
-    label majorVersion;
-
-    string line;
-
-    is.getLine(line);
-    IStringStream(line)() >> header;
-
-    is.getLine(line);
-    IStringStream(line)() >> majorVersion;
-
-    // add other checks ...
-    if (header != signature)
-    {
-        Info<< "header mismatch " << signature << "  " << is.name()
-            << endl;
-    }
-
-    return true;
-}
-
-
-void Foam::fileFormats::STARCDedgeFormat::writeHeader
-(
-    Ostream& os,
-    const char* filetype
-)
-{
-    os  << "PROSTAR_" << filetype << nl
-        << 4000
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << endl;
-}
-
-
-bool Foam::fileFormats::STARCDedgeFormat::readPoints
-(
-    IFstream& is,
-    pointField& points,
-    labelList& ids
-)
-{
-    //
-    // read .vrt file
-    // ~~~~~~~~~~~~~~
-
-    if (!is.good())
-    {
-        FatalErrorIn
-        (
-            "fileFormats::STARCDedgeFormat::readPoints(...)"
-        )
-            << "Cannot read file " << is.name()
-            << exit(FatalError);
-    }
-
-    readHeader(is, "PROSTAR_VERTEX");
-
-    DynamicList<point> dynPoints;
-    DynamicList<label> dynPointId;    // STAR-CD index of points
-
-    label lineLabel;
-    while ((is >> lineLabel).good())
-    {
-        scalar x, y, z;
-
-        is >> x >> y >> z;
-
-        dynPoints.append(point(x, y, z));
-        dynPointId.append(lineLabel);
-    }
-
-    points.transfer(dynPoints);
-    ids.transfer(dynPointId);
-
-    return true;
-}
-
-
-
-void Foam::fileFormats::STARCDedgeFormat::writePoints
-(
-    Ostream& os,
-    const pointField& pointLst
-)
-{
-    writeHeader(os, "VERTEX");
-
-    // Set the precision of the points data to 10
-    os.precision(10);
-
-    // force decimal point for Fortran input
-    os.setf(std::ios::showpoint);
-
-    forAll(pointLst, ptI)
-    {
-        os
-            << ptI + 1 << " "
-            << pointLst[ptI].x() << " "
-            << pointLst[ptI].y() << " "
-            << pointLst[ptI].z() << nl;
-    }
-    os.flush();
-}
-
 
 void Foam::fileFormats::STARCDedgeFormat::writeCase
 (
@@ -367,7 +239,7 @@ void Foam::fileFormats::STARCDedgeFormat::write
 )
 {
     const pointField& pointLst = mesh.points();
-    const edgeList&   edgeLst  = mesh.edges();
+    const edgeList& edgeLst = mesh.edges();
 
     fileName baseName = filename.lessExt();
 

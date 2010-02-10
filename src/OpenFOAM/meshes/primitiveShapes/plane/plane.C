@@ -138,7 +138,7 @@ Foam::plane::plane(const vector& normalVector)
     else
     {
         FatalErrorIn("plane::plane(const vector&)")
-        << "plane normal has got zero length"
+            << "plane normal has zero length"
             << abort(FatalError);
     }
 }
@@ -159,8 +159,8 @@ Foam::plane::plane(const point& basePoint, const vector& normalVector)
     else
     {
         FatalErrorIn("plane::plane(const point&, const vector&)")
-        << "plane normal has got zero length"
-        << abort(FatalError);
+            << "plane normal has zero length"
+            << abort(FatalError);
     }
 }
 
@@ -230,8 +230,8 @@ Foam::plane::plane(const dictionary& dict)
             "plane::plane(const dictionary&)",
             dict
         )
-        << "Invalid plane type: " << planeType
-        << abort(FatalIOError);
+            << "Invalid plane type: " << planeType
+            << abort(FatalIOError);
     }
 }
 
@@ -251,7 +251,7 @@ Foam::plane::plane(Istream& is)
     else
     {
         FatalErrorIn("plane::plane(Istream& is)")
-            << "plane normal has got zero length"
+            << "plane normal has zero length"
             << abort(FatalError);
     }
 }

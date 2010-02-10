@@ -551,7 +551,7 @@ Foam::ODEChemistryModel<CompType, ThermoType>::dQ() const
             dimensionedScalar
             (
                 "zero",
-                dimensionSet(1, -3, -1 , 0, 0, 0, 0),
+                dimensionSet(0, 2, -3 , 0, 0, 0, 0),
                 0.0
             )
         )
@@ -561,20 +561,21 @@ Foam::ODEChemistryModel<CompType, ThermoType>::dQ() const
     {
         scalarField& dQ = tdQ();
 
-        scalarField cp(dQ.size(), 0.0);
+        scalarField rhoEff(dQ.size(), 0.0);
 
         forAll(Y_, i)
         {
             forAll(dQ, cellI)
             {
                 scalar Ti = this->thermo().T()[cellI];
-                cp[cellI] += Y_[i][cellI]*specieThermo_[i].Cp(Ti);
-                scalar hi = specieThermo_[i].h(Ti);
+                scalar pi = this->thermo().p()[cellI];
+                rhoEff[cellI] += Y_[i][cellI]*specieThermo_[i].rho(pi, Ti);
+                scalar hi = specieThermo_[i].H(Ti);
                 dQ[cellI] -= hi*RR_[i][cellI];
             }
         }
 
-        dQ /= cp;
+        dQ /= rhoEff;
     }
 
     return tdQ;
