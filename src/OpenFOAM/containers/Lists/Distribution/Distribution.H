@@ -39,7 +39,7 @@ SourceFiles
 #ifndef Distribution_H
 #define Distribution_H
 
-#include "Map.H"
+#include "List.H"
 #include "Pair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -60,11 +60,24 @@ Ostream& operator<<(Ostream&, const Distribution<Type>&);
 template<class Type>
 class Distribution
 :
-    public List< Map<scalar> >
+    public List< List<scalar> >
 {
     // Private data
 
+        //- Width of the bin for each component
         Type binWidth_;
+
+        //- The start bin index of each component
+        List<label> listStarts_;
+
+    // Private Member Functions
+
+        //- Return the appropriate List index for the given bin index.
+        //  Resizes the List if required
+        label index(direction cmpt, label n);
+
+        //- Returns the indices of the first and last non-zero entries
+        Pair<label> validLimits(direction cmpt) const;
 
 
 public:
@@ -94,6 +107,8 @@ public:
         //  argument
         scalar totalWeight(direction cmpt) const;
 
+        List<label> keys(direction cmpt) const;
+
         Type mean() const;
 
         // From http://mathworld.wolfram.com/StatisticalMedian.html
@@ -108,19 +123,24 @@ public:
             const Type& weight = pTraits<Type>::one
         );
 
-        //- Add the missing keys to the Maps to fill any gaps
-        void insertMissingKeys();
-
         //- Return the normalised distribution and bins
         List< List<Pair<scalar> > > normalised();
 
         //- Return the distribution of the total bin weights
         List< List < Pair<scalar> > > raw();
 
+        //- Resets the Distribution by clearing the stored lists.
+        //  Leaves the same number of them and the same binWidth.
+        void clear();
+
+
     // Access
 
         //- Return the bin width
         inline const Type& binWidth() const;
+
+        //- Return the List start bin indices
+        inline const List<label>& listStarts() const;
 
     // Write
 

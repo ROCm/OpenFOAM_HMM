@@ -26,30 +26,134 @@ License
 
 #include "Distribution.H"
 #include "OFstream.H"
+#include "ListOps.H"
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+template<class Type>
+Foam::label Foam::Distribution<Type>::index
+(
+    direction cmpt,
+    label n
+)
+{
+    List<scalar>& cmptDistribution = (*this)[cmpt];
+
+    if (cmptDistribution.empty())
+    {
+        // Initialise this list with this value
+
+        cmptDistribution.setSize(2, 0.0);
+
+        listStarts_[cmpt] = n;
+
+        return 0;
+    }
+
+    label listIndex = -1;
+
+    label& listStart  = listStarts_[cmpt];
+
+    label testIndex = n - listStart;
+
+    if (testIndex < 0)
+    {
+        // Underflow of this List, storage increase and remapping
+        // required
+
+        List<scalar> newCmptDistribution(2*cmptDistribution.size(), 0.0);
+
+        label sOld = cmptDistribution.size();
+
+        forAll(cmptDistribution, i)
+        {
+            newCmptDistribution[i + sOld] = cmptDistribution[i];
+        }
+
+        cmptDistribution = newCmptDistribution;
+
+        listStart -= sOld;
+
+        // Recursively call this function in case another remap is required.
+        listIndex = index(cmpt, n);
+    }
+    else if (testIndex > cmptDistribution.size() - 1)
+    {
+        // Overflow of this List, storage increase required
+
+        cmptDistribution.setSize(2*cmptDistribution.size(), 0.0);
+
+        // Recursively call this function in case another storage
+        // alteration is required.
+        listIndex = index(cmpt, n);
+    }
+    else
+    {
+        listIndex = n - listStart;
+    }
+
+    return listIndex;
+}
+
+
+template<class Type>
+Foam::Pair<Foam::label> Foam::Distribution<Type>::validLimits
+(
+    direction cmpt
+) const
+{
+    const List<scalar>& cmptDistribution = (*this)[cmpt];
+
+    // limits.first(): lower bound, i.e. the first non-zero entry
+    // limits.second(): upper bound, i.e. the last non-zero entry
+    Pair<label> limits(-1, -1);
+
+    forAll(cmptDistribution, i)
+    {
+        if (cmptDistribution[i] > 0.0)
+        {
+            if (limits.first() == -1)
+            {
+                limits.first() = i;
+                limits.second() = i;
+            }
+            else
+            {
+                limits.second() = i;
+            }
+        }
+    }
+
+    return limits;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::Distribution<Type>::Distribution()
 :
-    List< Map<scalar> >(pTraits<Type>::nComponents),
-    binWidth_(pTraits<Type>::one)
+    List< List<scalar> >(pTraits<Type>::nComponents),
+    binWidth_(pTraits<Type>::one),
+    listStarts_(pTraits<Type>::nComponents, 0)
 {}
 
 
 template<class Type>
 Foam::Distribution<Type>::Distribution(const Type& binWidth)
 :
-    List< Map<scalar> >(pTraits<Type>::nComponents),
-    binWidth_(binWidth)
+    List< List<scalar> >(pTraits<Type>::nComponents),
+    binWidth_(binWidth),
+    listStarts_(pTraits<Type>::nComponents, 0)
 {}
 
 
 template<class Type>
 Foam::Distribution<Type>::Distribution(const Distribution<Type>& d)
 :
-    List< Map<scalar> >(static_cast< const List< Map<scalar> >& >(d)),
-    binWidth_(d.binWidth())
+    List< List<scalar> >(static_cast< const List< List<scalar> >& >(d)),
+    binWidth_(d.binWidth()),
+    listStarts_(d.listStarts())
 {}
 
 
@@ -65,40 +169,53 @@ Foam::Distribution<Type>::~Distribution()
 template<class Type>
 Foam::scalar Foam::Distribution<Type>::totalWeight(direction cmpt) const
 {
-    const Map<scalar>& cmptDistribution = (*this)[cmpt];
+    const List<scalar>& cmptDistribution = (*this)[cmpt];
 
     scalar sumOfWeights = 0.0;
 
-    forAllConstIter(Map<scalar>, cmptDistribution, iter)
+    forAll(cmptDistribution, i)
     {
-        sumOfWeights += iter();
+        sumOfWeights += cmptDistribution[i];
     }
 
     return sumOfWeights;
 }
 
+template<class Type>
+Foam::List<Foam::label> Foam::Distribution<Type>::keys(direction cmpt) const
+{
+    List<label> keys = identity((*this)[cmpt].size());
+
+    forAll(keys, k)
+    {
+        keys[k] += listStarts_[cmpt];
+    }
+
+    return keys;
+}
+
 
 template<class Type>
-inline Type Foam::Distribution<Type>::mean() const
+Type Foam::Distribution<Type>::mean() const
 {
     Type meanValue(pTraits<Type>::zero);
 
     for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
     {
-        const Map<scalar>& cmptDistribution = (*this)[cmpt];
+        const List<scalar>& cmptDistribution = (*this)[cmpt];
 
         scalar totalCmptWeight = totalWeight(cmpt);
 
-        List<label> keys = cmptDistribution.sortedToc();
+        List<label> theKeys = keys(cmpt);
 
-        forAll(keys,k)
+        forAll(theKeys, k)
         {
-            label key = keys[k];
+            label key = theKeys[k];
 
             setComponent(meanValue, cmpt) +=
                 (0.5 + scalar(key))
                *component(binWidth_, cmpt)
-               *cmptDistribution[key]
+               *cmptDistribution[k]
                /totalCmptWeight;
         }
     }
@@ -108,7 +225,7 @@ inline Type Foam::Distribution<Type>::mean() const
 
 
 template<class Type>
-inline Type Foam::Distribution<Type>::median()
+Type Foam::Distribution<Type>::median()
 {
     Type medianValue(pTraits<Type>::zero);
 
@@ -145,7 +262,7 @@ inline Type Foam::Distribution<Type>::median()
             }
             else
             {
-                label lastNonZeroIndex = 0;
+                label previousNonZeroIndex = 0;
 
                 scalar cumulative = 0.0;
 
@@ -160,7 +277,7 @@ inline Type Foam::Distribution<Type>::median()
                     {
                         scalar xk = normDist[nD].first();
 
-                        scalar xkm1 = normDist[lastNonZeroIndex].first();
+                        scalar xkm1 = normDist[previousNonZeroIndex].first();
 
                         scalar Sk =
                             cumulative
@@ -178,7 +295,7 @@ inline Type Foam::Distribution<Type>::median()
                         cumulative +=
                             normDist[nD].second()*component(binWidth_, cmpt);
 
-                        lastNonZeroIndex = nD;
+                        previousNonZeroIndex = nD;
                     }
                 }
             }
@@ -197,53 +314,18 @@ void Foam::Distribution<Type>::add
     const Type& weight
 )
 {
+
     for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
     {
-        Map<scalar>& cmptDistribution = (*this)[cmpt];
-
-        Map<scalar>::iterator iter(cmptDistribution.begin());
+        List<scalar>& cmptDistribution = (*this)[cmpt];
 
         label n =
             label(component(valueToAdd, cmpt)/component(binWidth_, cmpt))
           - label(neg(component(valueToAdd, cmpt)/component(binWidth_, cmpt)));
 
-        iter = cmptDistribution.find(n);
+        label listIndex = index(cmpt, n);
 
-        if (iter == cmptDistribution.end())
-        {
-            cmptDistribution.insert(n, component(weight, cmpt));
-        }
-        else
-        {
-            cmptDistribution[n] += component(weight, cmpt);
-        }
-    }
-}
-
-
-template<class Type>
-void Foam::Distribution<Type>::insertMissingKeys()
-{
-    for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
-    {
-        Map<scalar>& cmptDistribution = (*this)[cmpt];
-
-        Map<scalar>::iterator iter(cmptDistribution.begin());
-
-        List<label> keys = cmptDistribution.sortedToc();
-
-        if (keys.size())
-        {
-            for (label k = keys[0]; k < keys[keys.size()-1]; k++)
-            {
-                iter = cmptDistribution.find(k);
-
-                if (iter == cmptDistribution.end())
-                {
-                    cmptDistribution.insert(k,0);
-                }
-            }
-        }
+        cmptDistribution[listIndex] += component(weight, cmpt);
     }
 }
 
@@ -254,29 +336,39 @@ Distribution<Type>::normalised()
 {
     List< List < Pair<scalar> > > normDistribution(pTraits<Type>::nComponents);
 
-    insertMissingKeys();
-
     for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
     {
-        Map<scalar>& cmptDistribution = (*this)[cmpt];
+        List<scalar>& cmptDistribution = (*this)[cmpt];
+
+        if (cmptDistribution.empty())
+        {
+            continue;
+        }
 
         scalar totalCmptWeight = totalWeight(cmpt);
 
-        List<label> keys = cmptDistribution.sortedToc();
+        List<label> cmptKeys = keys(cmpt);
 
         List< Pair<scalar> >& normDist = normDistribution[cmpt];
 
-        normDist.setSize(keys.size());
+        Pair<label> limits = validLimits(cmpt);
 
-        forAll(keys,k)
+        normDist.setSize(limits.second() - limits.first() + 1);
+
+        for
+        (
+            label k = limits.first(), i = 0;
+            k <= limits.second();
+            k++, i++
+        )
         {
-            label key = keys[k];
+            label key = cmptKeys[k];
 
-            normDist[k].first() =
+            normDist[i].first() =
                 (0.5 + scalar(key))*component(binWidth_, cmpt);
 
-            normDist[k].second() =
-                cmptDistribution[key]
+            normDist[i].second() =
+                cmptDistribution[k]
                /totalCmptWeight
                /component(binWidth_, cmpt);
         }
@@ -292,29 +384,51 @@ Distribution<Type>::raw()
 {
     List< List < Pair<scalar> > > rawDistribution(pTraits<Type>::nComponents);
 
-    insertMissingKeys();
-
     for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
     {
-        Map<scalar>& cmptDistribution = (*this)[cmpt];
+        List<scalar>& cmptDistribution = (*this)[cmpt];
 
-        List<label> keys = cmptDistribution.sortedToc();
+        if (cmptDistribution.empty())
+        {
+            continue;
+        }
+
+        List<label> cmptKeys = keys(cmpt);
 
         List< Pair<scalar> >& rawDist = rawDistribution[cmpt];
 
-        rawDist.setSize(keys.size());
+        Pair<label> limits = validLimits(cmpt);
 
-        forAll(keys,k)
+        rawDist.setSize(limits.second() - limits.first() + 1);
+
+        for
+        (
+            label k = limits.first(), i = 0;
+            k <= limits.second();
+            k++, i++
+        )
         {
-            label key = keys[k];
+            label key = cmptKeys[k];
 
-            rawDist[k].first() = (0.5 + scalar(key))*component(binWidth_, cmpt);
+            rawDist[i].first() = (0.5 + scalar(key))*component(binWidth_, cmpt);
 
-            rawDist[k].second() = cmptDistribution[key];
+            rawDist[i].second() = cmptDistribution[k];
         }
     }
 
     return rawDistribution;
+}
+
+
+template<class Type>
+void Foam::Distribution<Type>::clear()
+{
+    for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
+    {
+        (*this)[cmpt].clear();
+
+        listStarts_[cmpt] = 0;
+    }
 }
 
 
@@ -374,7 +488,7 @@ void Foam::Distribution<Type>::operator=
             << abort(FatalError);
     }
 
-    List< Map<scalar> >::operator=(rhs);
+    List< List<scalar> >::operator=(rhs);
 
     binWidth_ = rhs.binWidth();
 }
@@ -390,7 +504,7 @@ Foam::Ostream& Foam::operator<<
 )
 {
     os  << d.binWidth_
-        << static_cast<const List< Map<scalar> >& >(d);
+        << static_cast<const List< List<scalar> >& >(d);
 
     // Check state of Ostream
     os.check

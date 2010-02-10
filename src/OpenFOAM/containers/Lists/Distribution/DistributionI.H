@@ -34,6 +34,13 @@ inline const Type& Foam::Distribution<Type>::binWidth() const
 }
 
 
+template<class Type>
+inline const
+Foam::List<Foam::label>& Foam::Distribution<Type>::listStarts() const
+{
+    return listStarts_;
+}
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
