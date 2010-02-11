@@ -45,7 +45,8 @@ Description
 #include "Distribution.H"
 #include "Random.H"
 #include "dimensionedTypes.H"
-
+#include "argList.H"
+#include "PstreamReduceOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,6 +54,8 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    #   include "setRootCase.H"
+
     Random R(918273);
 
     {
@@ -76,7 +79,67 @@ int main(int argc, char *argv[])
             << "Median " << dS.median()
             << endl;
 
-        dS.write("Distribution_scalar_test", dS.normalised());
+        dS.write("Distribution_scalar_test_1");
+
+        Distribution<scalar> dS2(scalar(1e-2));
+
+        Info<< nl << "Distribution<scalar>" << nl
+            << "Sampling "
+            << randomDistributionTestSize
+            << " times from GaussNormal distribution."
+            << endl;
+
+        for (label i = 0; i < randomDistributionTestSize; i++)
+        {
+            dS2.add(1.5*R.GaussNormal() -6.0);
+        }
+
+        Info<< "Mean " << dS2.mean() << nl
+            << "Median " << dS2.median()
+            << endl;
+
+        dS2.write("Distribution_scalar_test_2");
+
+        Info<< nl << "Adding previous two Distribution<scalar>" << endl;
+
+        dS = dS + dS2;
+
+        dS.write("Distribution_scalar_test_1+2");
+    }
+
+    if (Pstream::parRun())
+    {
+        // scalar in parallel
+        label randomDistributionTestSize = 100000000;
+
+        Distribution<scalar> dS(scalar(1e-1));
+
+        Pout<< "Distribution<scalar>" << nl
+            << "Sampling "
+            << randomDistributionTestSize
+            << " times from uniform distribution."
+            << endl;
+
+        for (label i = 0; i < randomDistributionTestSize; i++)
+        {
+            dS.add(R.scalar01() + 10*Pstream::myProcNo());
+        }
+
+        Pout<< "Mean " << dS.mean() << nl
+            << "Median " << dS.median()
+            << endl;
+
+        reduce(dS, sumOp< Distribution<scalar> >());
+
+        if (Pstream::master())
+        {
+            Info<< "Reducing parallel Distribution<scalar>" << nl
+                << "Mean " << dS.mean() << nl
+                << "Median " << dS.median()
+                << endl;
+
+            dS.write("Distribution_scalar_test_parallel_reduced");
+        }
     }
 
     {
@@ -114,40 +177,40 @@ int main(int argc, char *argv[])
             << "Median " << dV.median()
             << endl;
 
-        dV.write("Distribution_vector_test", dV.normalised());
+        dV.write("Distribution_vector_test");
     }
 
-    {
-        // labelVector
-        Distribution<labelVector> dLV(labelVector::one*10);
+    // {
+    //     // labelVector
+    //     Distribution<labelVector> dLV(labelVector::one*10);
 
-        label randomDistributionTestSize = 2000000;
+    //     label randomDistributionTestSize = 2000000;
 
-        Info<< nl << "Distribution<labelVector>" << nl
-            << "Sampling "
-            << randomDistributionTestSize
-            << " times from uniform distribution."
-            << endl;
+    //     Info<< nl << "Distribution<labelVector>" << nl
+    //         << "Sampling "
+    //         << randomDistributionTestSize
+    //         << " times from uniform distribution."
+    //         << endl;
 
-        for (label i = 0; i < randomDistributionTestSize; i++)
-        {
-            dLV.add
-            (
-                labelVector
-                (
-                    R.integer(-1000, 1000),
-                    R.integer(-5000, 5000),
-                    R.integer(-2000, 7000)
-                )
-            );
-        }
+    //     for (label i = 0; i < randomDistributionTestSize; i++)
+    //     {
+    //         dLV.add
+    //         (
+    //             labelVector
+    //             (
+    //                 R.integer(-1000, 1000),
+    //                 R.integer(-5000, 5000),
+    //                 R.integer(-2000, 7000)
+    //             )
+    //         );
+    //     }
 
-        Info<< "Mean " << dLV.mean() << nl
-            << "Median " << dLV.median()
-            << endl;
+    //     Info<< "Mean " << dLV.mean() << nl
+    //         << "Median " << dLV.median()
+    //         << endl;
 
-        dLV.write("Distribution_labelVector_test", dLV.normalised());
-    }
+    //     dLV.write("Distribution_labelVector_test");
+    // }
 
     {
         // tensor
@@ -170,7 +233,7 @@ int main(int argc, char *argv[])
             << "Median " << dT.median()
             << endl;
 
-        dT.write("Distribution_tensor_test", dT.normalised());
+        dT.write("Distribution_tensor_test");
     }
 
     {
@@ -194,7 +257,7 @@ int main(int argc, char *argv[])
             << "Median " << dSyT.median()
             << endl;
 
-        dSyT.write("Distribution_symmTensor_test", dSyT.normalised());
+        dSyT.write("Distribution_symmTensor_test");
     }
 
     {
@@ -218,7 +281,7 @@ int main(int argc, char *argv[])
             << "Median " << dSpT.median()
             << endl;
 
-        dSpT.write("Distribution_sphericalTensor_test", dSpT.normalised());
+        dSpT.write("Distribution_sphericalTensor_test");
     }
 
     Info<< nl << "End" << nl << endl;
