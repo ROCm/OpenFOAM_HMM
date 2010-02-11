@@ -1111,14 +1111,11 @@ void Foam::ensightMesh::writeAllFacePrimsBinary
             writeEnsDataBinary(key,ensightGeometryFile);
             writeEnsDataBinary(nPrims,ensightGeometryFile);
 
-            if (&prims != NULL)
-            {
-                writeFacePrimsBinary
-                (
-                    UIndirectList<face>(patchFaces, prims)(),
-                    ensightGeometryFile
-                );
-            }
+            writeFacePrimsBinary
+            (
+                UIndirectList<face>(patchFaces, prims)(),
+                ensightGeometryFile
+            );
 
             for (int slave=1; slave<Pstream::nProcs(); slave++)
             {
