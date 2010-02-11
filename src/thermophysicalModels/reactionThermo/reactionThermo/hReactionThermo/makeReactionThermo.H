@@ -25,8 +25,6 @@ License
 InClass
     Foam::hReactionThermo
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef makeReactionThermo_H

@@ -25,15 +25,13 @@ License
 InClass
     Foam::hsCombustionThermo
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef makeHsCombustionThermo_H
 #define makeHsCombustionThermo_H
 
 #include "addToRunTimeSelectionTable.H"
-#include "basicSensiblePsiThermo.H"
+#include "basicPsiThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,7 +51,7 @@ defineTemplateTypeNameAndDebugWithName                                        \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \
-    basicSensiblePsiThermo,                                                   \
+    basicPsiThermo,                                                           \
     MixtureThermo##Mixture##Transport##Thermo##EqnOfState,                    \
     fvMesh                                                                    \
 );                                                                            \
@@ -80,7 +78,7 @@ defineTemplateTypeNameAndDebugWithName                                        \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \
-    basicSensiblePsiThermo,                                                   \
+    basicPsiThermo,                                                           \
     MixtureThermo##Mixture##ThermoPhys,                                       \
     fvMesh                                                                    \
 );                                                                            \

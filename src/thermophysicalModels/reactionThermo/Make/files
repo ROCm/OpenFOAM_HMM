@@ -8,6 +8,10 @@ combustionThermo/hCombustionThermo/hCombustionThermo.C
 combustionThermo/hCombustionThermo/newhCombustionThermo.C
 combustionThermo/hCombustionThermo/hCombustionThermos.C
 
+combustionThermo/hsCombustionThermo/hsCombustionThermo.C
+combustionThermo/hsCombustionThermo/newhsCombustionThermo.C
+combustionThermo/hsCombustionThermo/hsCombustionThermos.C
+
 combustionThermo/hhuCombustionThermo/hhuCombustionThermo.C
 combustionThermo/hhuCombustionThermo/newhhuCombustionThermo.C
 combustionThermo/hhuCombustionThermo/hhuCombustionThermos.C
