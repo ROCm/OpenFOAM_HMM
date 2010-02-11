@@ -39,9 +39,9 @@ SourceFiles
 #ifndef ODEChemistryModel_H
 #define ODEChemistryModel_H
 
-#include "hCombustionThermo.H"
 #include "Reaction.H"
 #include "ODE.H"
+#include "volFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,6 +49,8 @@ namespace Foam
 {
 
 // Forward declaration of classes
+class fvMesh;
+
 template<class CompType, class ThermoType>
 class chemistrySolver;
 
