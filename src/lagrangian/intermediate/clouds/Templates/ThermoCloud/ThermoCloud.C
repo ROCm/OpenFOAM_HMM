@@ -160,20 +160,6 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
         ),
         this->mesh(),
         dimensionedScalar("zero", dimEnergy, 0.0)
-    ),
-    hcTrans_
-    (
-        IOobject
-        (
-            this->name() + "hcTrans",
-            this->db().time().timeName(),
-            this->db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        this->mesh(),
-        dimensionedScalar("zero", dimEnergy, 0.0)
     )
 {
     if (readFields)
@@ -220,7 +206,6 @@ void Foam::ThermoCloud<ParcelType>::resetSourceTerms()
 {
     KinematicCloud<ParcelType>::resetSourceTerms();
     hsTrans_.field() = 0.0;
-    hcTrans_.field() = 0.0;
 }
 
 
