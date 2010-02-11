@@ -703,6 +703,7 @@ void Foam::globalMeshData::calcPointBoundaryFaces
     }
 }
 
+
 void Foam::globalMeshData::calcGlobalPointBoundaryFaces() const
 {
     if (debug)
@@ -1742,14 +1743,6 @@ Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
     }
 
     label myUniquePoints = meshPoints.size() - nCoupledSlave;
-
-    //Pout<< "Points :" << nl
-    //    << "    patch            : " << meshPoints.size() << nl
-    //    << "    of which coupled : " << nCoupledMaster+nCoupledSlave << nl
-    //    << "    of which master  : " << nCoupledMaster << nl
-    //    << "    of which slave   : " << nCoupledSlave << nl
-    //    << endl;
-
 
     // 2. Create global indexing for unique points.
     autoPtr<globalIndex> globalPointsPtr(new globalIndex(myUniquePoints));

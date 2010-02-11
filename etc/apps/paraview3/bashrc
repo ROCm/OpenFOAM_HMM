@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -46,9 +46,12 @@ do
     fi
 done
 
-# set MAJOR and VERSION variables if not already set
-[ -z "$ParaView_MAJOR" ] && export ParaView_MAJOR=paraview-3.6
+
+# set VERSION and MAJOR (version) variables if not already set
+# the major version is "<digits>.<digits>"
 [ -z "$ParaView_VERSION" ] && export ParaView_VERSION=3.6.1
+[ -z "$ParaView_MAJOR" ]   && export ParaView_MAJOR=3.6
+
 
 export ParaView_INST_DIR=$WM_THIRD_PARTY_DIR/paraview-$ParaView_VERSION
 export ParaView_DIR=$ParaView_INST_DIR/platforms/$WM_ARCH$WM_COMPILER
@@ -59,9 +62,9 @@ if [ -r $ParaView_PYTHON_DIR ]
 then
     if [ "$PYTHONPATH" ]
     then
-        export PYTHONPATH=$PYTHONPATH:$ParaView_PYTHON_DIR:$ParaView_DIR/lib/$ParaView_MAJOR
+        export PYTHONPATH=$PYTHONPATH:$ParaView_PYTHON_DIR:$ParaView_DIR/lib/paraview-$ParaView_MAJOR
     else
-        export PYTHONPATH=$ParaView_PYTHON_DIR:$ParaView_DIR/lib/$ParaView_MAJOR
+        export PYTHONPATH=$ParaView_PYTHON_DIR:$ParaView_DIR/lib/paraview-$ParaView_MAJOR
     fi
 fi
 

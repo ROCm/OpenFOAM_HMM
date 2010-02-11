@@ -137,7 +137,7 @@ Foam::plane::plane(const vector& normalVector)
     }
     else
     {
-        FatalErrorIn("plane::plane(const point&, const vector&)")
+        FatalErrorIn("plane::plane(const vector&)")
             << "plane normal has zero length"
             << abort(FatalError);
     }

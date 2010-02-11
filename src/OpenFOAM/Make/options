@@ -1,4 +1,4 @@
-EXE_INC =
+EXE_INC = -I$(OBJECTS_DIR)
 
 LIB_LIBS = \
     $(FOAM_LIBBIN)/libOSspecific.o \

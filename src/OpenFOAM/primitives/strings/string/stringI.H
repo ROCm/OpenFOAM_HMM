@@ -64,7 +64,7 @@ inline Foam::string::string(const char c)
 template<class String>
 inline bool Foam::string::valid(const string& str)
 {
-    for (const_iterator iter = str.begin(); iter != str.end(); iter++)
+    for (const_iterator iter = str.begin(); iter != str.end(); ++iter)
     {
         if (!String::valid(*iter))
         {
@@ -113,7 +113,7 @@ template<class String>
 inline bool Foam::string::meta(const string& str, const char quote)
 {
     int escaped = 0;
-    for (const_iterator iter = str.begin(); iter != str.end(); iter++)
+    for (const_iterator iter = str.begin(); iter != str.end(); ++iter)
     {
         if (quote && *iter == quote)
         {
@@ -145,7 +145,7 @@ Foam::string::quotemeta(const string& str, const char quote)
     sQuoted.reserve(2*str.length());
 
     int escaped = 0;
-    for (const_iterator iter = str.begin(); iter != str.end(); iter++)
+    for (const_iterator iter = str.begin(); iter != str.end(); ++iter)
     {
         if (*iter == quote)
         {

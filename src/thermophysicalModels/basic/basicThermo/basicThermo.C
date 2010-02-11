@@ -143,7 +143,6 @@ void Foam::basicThermo::eBoundaryCorrection(volScalarField& e)
     }
 }
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::basicThermo::basicThermo(const fvMesh& mesh)
@@ -294,6 +293,50 @@ Foam::tmp<Foam::scalarField> Foam::basicThermo::h
     notImplemented
     (
         "basicThermo::h"
+        "(const scalarField& T, const label patchi) const"
+    );
+    return tmp<scalarField>(NULL);
+}
+
+
+Foam::volScalarField& Foam::basicThermo::hs()
+{
+    notImplemented("basicThermo::hs()");
+    return const_cast<volScalarField&>(volScalarField::null());
+}
+
+
+const Foam::volScalarField& Foam::basicThermo::hs() const
+{
+    notImplemented("basicThermo::hs() const");
+    return volScalarField::null();
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::basicThermo::hs
+(
+    const scalarField& T,
+    const labelList& cells
+) const
+{
+    notImplemented
+    (
+        "basicThermo::hs"
+        "(const scalarField& T, const labelList& cells) const"
+    );
+    return tmp<scalarField>(NULL);
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::basicThermo::hs
+(
+    const scalarField& T,
+    const label patchi
+) const
+{
+    notImplemented
+    (
+        "basicThermo::hs"
         "(const scalarField& T, const label patchi) const"
     );
     return tmp<scalarField>(NULL);

@@ -57,8 +57,8 @@ class sixDoFRigidBodyDisplacementPointPatchVectorField
         //- Six dof motion object
         sixDoFRigidBodyMotion motion_;
 
-        //- Reference positions of points on the patch
-        pointField p0_;
+        //- Initial positions of points on the patch
+        pointField initialPoints_;
 
         //- Reference density required by the forces object for
         //  incompressible calculations

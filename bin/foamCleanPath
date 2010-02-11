@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -41,7 +41,7 @@
 #------------------------------------------------------------------------------
 usage() {
     cat <<USAGE 1>&2
-usage: ${0##*/} [-strip] path [wildcard] .. [wildcard]
+Usage: ${0##*/} [-strip] path [wildcard] .. [wildcard]
 
   Prints its argument (which should be a ':' separated list) cleansed from
     - duplicate elements

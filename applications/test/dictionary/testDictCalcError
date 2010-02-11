@@ -1,0 +1,46 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  Any                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      testDictCalcError;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+flowRatePerHour 720;
+
+x       10;
+y       20;
+z       t s v;
+// z       #test{ // this
+//     123 - 456
+//         // comments // are
+//         /* stripped
+//         * 10
+//          * {}
+//          */
+//         + 1 /*100 */  10
+// };
+
+p     this calculation #calc{
+          1xxx1 + 2 + 10 * 15 +
+          $x - $y
+        // $x + $y
+}
+is done inplace;
+
+
+flowRate    #calc{ $flowRatePerHour / 3600};
+
+xxx         yyy;
+foo         30;
+bar         15;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

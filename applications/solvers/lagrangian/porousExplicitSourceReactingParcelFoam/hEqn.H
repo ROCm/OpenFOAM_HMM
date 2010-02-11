@@ -39,6 +39,7 @@
             pWork()
           + parcels.Sh()
           + radiation->Sh(thermo)
+          + energySource.Su()
         );
 
         thermo.correct();

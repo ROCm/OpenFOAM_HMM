@@ -92,7 +92,7 @@ Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::restrain
 
         refDir[(cmpt + 1) % 3] = 1;
 
-        vector newDir = motion.currentOrientation(refDir);
+        vector newDir = motion.orientation() & refDir;
 
         axis = (refQ_ & axis);
 

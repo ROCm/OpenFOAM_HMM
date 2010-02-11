@@ -52,8 +52,7 @@ Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::fixedOrientation
     const dictionary& sDoFRBMCDict
 )
 :
-    sixDoFRigidBodyMotionConstraint(sDoFRBMCDict),
-    fixedOrientation_()
+    sixDoFRigidBodyMotionConstraint(sDoFRBMCDict)
 {
     read(sDoFRBMCDict);
 }
@@ -98,10 +97,6 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::constrain
             existingConstraintMoment,
             deltaT
         );
-
-        axis = (fixedOrientation_ & axis);
-
-        refDir = (fixedOrientation_ & refDir);
 
         // Removing any axis component from predictedDir
         predictedDir -= (axis & predictedDir)*axis;
@@ -177,23 +172,6 @@ bool Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::read
 {
     sixDoFRigidBodyMotionConstraint::read(sDoFRBMCDict);
 
-    fixedOrientation_ =
-        sDoFRBMCCoeffs_.lookupOrDefault<tensor>("fixedOrientation", I);
-
-    if (mag(mag(fixedOrientation_) - sqrt(3.0)) > 1e-9)
-    {
-        FatalErrorIn
-        (
-            "Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::read"
-            "("
-                "const dictionary& sDoFRBMCDict"
-            ")"
-        )
-            << "fixedOrientation " << fixedOrientation_
-            << " is not a rotation tensor."
-            << exit(FatalError);
-    }
-
     return true;
 }
 
@@ -203,8 +181,6 @@ void Foam::sixDoFRigidBodyMotionConstraints::fixedOrientation::write
     Ostream& os
 ) const
 {
-    os.writeKeyword("fixedOrientation")
-        << fixedOrientation_ << token::END_STATEMENT << nl;
 }
 
 // ************************************************************************* //

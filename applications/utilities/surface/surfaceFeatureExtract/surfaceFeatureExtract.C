@@ -79,11 +79,7 @@ void deleteBox
     {
         const point eMid = surf.edges()[edgeI].centre(surf.localPoints());
 
-        if
-        (
-            (removeInside && bb.contains(eMid))
-         || (!removeInside && !bb.contains(eMid))
-        )
+        if (removeInside ? bb.contains(eMid) : !bb.contains(eMid))
         {
             edgeStat[edgeI] = surfaceFeatures::NONE;
         }
@@ -130,7 +126,6 @@ int main(int argc, char *argv[])
     Pout<< "Statistics:" << endl;
     surf.writeStats(Pout);
     Pout<< endl;
-
 
 
 

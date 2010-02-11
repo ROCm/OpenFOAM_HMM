@@ -41,7 +41,8 @@ Description
 #include "cellSet.H"
 #include "faceSet.H"
 #include "DynamicList.H"
-#include "triSurface.H"
+
+#include "MeshedSurfaces.H"
 
 using namespace Foam;
 
@@ -268,9 +269,11 @@ void readCells
             break;
         }
 
-        IStringStream lineStr(line);
         label cellI, feID, physProp, matProp, colour, nNodes;
-        lineStr >> cellI >> feID >> physProp >> matProp >> colour >> nNodes;
+
+        IStringStream lineStr(line);
+        lineStr
+            >> cellI >> feID >> physProp >> matProp >> colour >> nNodes;
 
         if (foundFeType.insert(feID))
         {
@@ -297,7 +300,8 @@ void readCells
 
             face cVerts(3);
             IStringStream lineStr(line);
-            lineStr >> cVerts[0] >> cVerts[1] >> cVerts[2];
+            lineStr
+                >> cVerts[0] >> cVerts[1] >> cVerts[2];
             boundaryFaces.append(cVerts);
             boundaryFaceIndices.append(cellI);
         }
@@ -308,7 +312,8 @@ void readCells
 
             face cVerts(4);
             IStringStream lineStr(line);
-            lineStr >> cVerts[0] >> cVerts[1] >> cVerts[2] >> cVerts[3];
+            lineStr
+                >> cVerts[0] >> cVerts[1] >> cVerts[2] >> cVerts[3];
             boundaryFaces.append(cVerts);
             boundaryFaceIndices.append(cellI);
         }
@@ -319,14 +324,15 @@ void readCells
 
             labelList cVerts(4);
             IStringStream lineStr(line);
-            lineStr >> cVerts[0] >> cVerts[1] >> cVerts[2] >> cVerts[3];
+            lineStr
+                >> cVerts[0] >> cVerts[1] >> cVerts[2] >> cVerts[3];
 
             cellVerts.append(cellShape(tet, cVerts, true));
             cellMaterial.append(physProp);
 
             if (cellVerts.last().size() != cVerts.size())
             {
-                Pout<< "Line:" << is.lineNumber()
+                Info<< "Line:" << is.lineNumber()
                     << " element:" << cellI
                     << " type:" << feID
                     << " collapsed from " << cVerts << nl
@@ -341,15 +347,16 @@ void readCells
 
             labelList cVerts(6);
             IStringStream lineStr(line);
-            lineStr >> cVerts[0] >> cVerts[1] >> cVerts[2] >> cVerts[3]
-                    >> cVerts[4] >> cVerts[5];
+            lineStr
+                >> cVerts[0] >> cVerts[1] >> cVerts[2]
+                >> cVerts[3] >> cVerts[4] >> cVerts[5];
 
             cellVerts.append(cellShape(prism, cVerts, true));
             cellMaterial.append(physProp);
 
             if (cellVerts.last().size() != cVerts.size())
             {
-                Pout<< "Line:" << is.lineNumber()
+                Info<< "Line:" << is.lineNumber()
                     << " element:" << cellI
                     << " type:" << feID
                     << " collapsed from " << cVerts << nl
@@ -373,7 +380,7 @@ void readCells
 
             if (cellVerts.last().size() != cVerts.size())
             {
-                Pout<< "Line:" << is.lineNumber()
+                Info<< "Line:" << is.lineNumber()
                     << " element:" << cellI
                     << " type:" << feID
                     << " collapsed from " << cVerts << nl
@@ -388,7 +395,7 @@ void readCells
                 IOWarningIn("readCells(IFstream&, label&)", is)
                     << "Cell type " << feID << " not supported" << endl;
             }
-            is.getLine(line);  //Do nothing
+            is.getLine(line);  // Do nothing
         }
     }
 
@@ -579,7 +586,11 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append(".unv file");
-    argList::addBoolOption("dump");
+    argList::addBoolOption
+    (
+        "dump",
+        "dump boundary faces as boundaryFaces.obj (for debugging)"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -858,40 +869,25 @@ int main(int argc, char *argv[])
     polyPoints /= lengthScale;
 
 
-    // For debugging: dump boundary faces as triSurface
+    // For debugging: dump boundary faces as OBJ surface mesh
     if (args.optionFound("dump"))
     {
-        DynamicList<labelledTri> triangles(boundaryFaces.size());
-
-        forAll(boundaryFaces, i)
-        {
-            const face& f = boundaryFaces[i];
-
-            faceList triFaces(f.nTriangles(polyPoints));
-            label nTri = 0;
-            f.triangles(polyPoints, nTri, triFaces);
-
-            forAll(triFaces, triFaceI)
-            {
-                const face& f = triFaces[triFaceI];
-                triangles.append(labelledTri(f[0], f[1], f[2], 0));
-            }
-        }
-
-        // Create globally numbered tri surface
-        triSurface rawSurface(triangles.shrink(), polyPoints);
-
-        // Create locally numbered tri surface
-        triSurface surface
-        (
-            rawSurface.localFaces(),
-            rawSurface.localPoints()
-        );
-
-        Info<< "Writing boundary faces to STL file boundaryFaces.stl"
+        Info<< "Writing boundary faces to OBJ file boundaryFaces.obj"
             << nl << endl;
 
-        surface.write(runTime.path()/"boundaryFaces.stl");
+        // Create globally numbered surface
+        meshedSurface rawSurface
+        (
+            xferCopy(polyPoints),
+            xferCopyTo< faceList >(boundaryFaces)
+        );
+
+        // Write locally numbered surface
+        meshedSurface
+        (
+            xferCopy(rawSurface.localPoints()),
+            xferCopy(rawSurface.localFaces())
+        ).write(runTime.path()/"boundaryFaces.obj");
     }
 
 

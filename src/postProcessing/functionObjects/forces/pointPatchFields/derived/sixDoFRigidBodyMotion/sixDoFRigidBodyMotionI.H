@@ -133,9 +133,17 @@ inline Foam::label Foam::sixDoFRigidBodyMotion::maxConstraintIterations() const
 }
 
 
-inline const Foam::point& Foam::sixDoFRigidBodyMotion::refCentreOfMass() const
+inline const Foam::point&
+Foam::sixDoFRigidBodyMotion::initialCentreOfMass() const
 {
-    return refCentreOfMass_;
+    return initialCentreOfMass_;
+}
+
+
+inline const Foam::tensor&
+Foam::sixDoFRigidBodyMotion::initialQ() const
+{
+    return initialQ_;
 }
 
 
@@ -169,9 +177,15 @@ inline const Foam::vector& Foam::sixDoFRigidBodyMotion::tau() const
 }
 
 
-inline Foam::point& Foam::sixDoFRigidBodyMotion::refCentreOfMass()
+inline Foam::point& Foam::sixDoFRigidBodyMotion::initialCentreOfMass()
 {
-    return refCentreOfMass_;
+    return initialCentreOfMass_;
+}
+
+
+inline Foam::tensor& Foam::sixDoFRigidBodyMotion::initialQ()
+{
+    return initialQ_;
 }
 
 
@@ -208,32 +222,40 @@ inline Foam::vector& Foam::sixDoFRigidBodyMotion::tau()
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 inline Foam::tmp<Foam::pointField>
-Foam::sixDoFRigidBodyMotion::currentPosition(const pointField& refPts) const
+Foam::sixDoFRigidBodyMotion::currentPosition(const pointField& pInitial) const
 {
-    return (centreOfMass() + (Q() & (refPts - refCentreOfMass_)));
+    return
+    (
+        centreOfMass()
+      + (Q() & initialQ_.T() & (pInitial - initialCentreOfMass_)))
+    ;
 }
 
 
 inline Foam::point Foam::sixDoFRigidBodyMotion::currentPosition
 (
-    const point& refPt
+    const point& pInitial
 ) const
 {
-    return (centreOfMass() + (Q() & (refPt - refCentreOfMass_)));
+    return
+    (
+        centreOfMass()
+      + (Q() & initialQ_.T() & (pInitial - initialCentreOfMass_))
+    );
 }
 
 
 inline Foam::vector Foam::sixDoFRigidBodyMotion::currentOrientation
 (
-    const vector& refDir
+    const vector& vInitial
 ) const
 {
-    return (Q() & refDir);
+    return (Q() & initialQ_.T() & vInitial);
 }
 
 
 inline const Foam::tensor&
-Foam::sixDoFRigidBodyMotion::currentOrientation() const
+Foam::sixDoFRigidBodyMotion::orientation() const
 {
     return Q();
 }

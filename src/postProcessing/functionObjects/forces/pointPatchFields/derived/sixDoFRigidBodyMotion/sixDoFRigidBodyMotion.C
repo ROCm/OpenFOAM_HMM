@@ -15,7 +15,7 @@ License
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    FITNESS FOR A PARTICLUAR PURPOSE.  See the GNU General Public License
     for more details.
 
     You should have received a copy of the GNU General Public License
@@ -139,11 +139,13 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
                 << ") exceeded." << nl
                 << exit(FatalError);
         }
-        else if (report_)
+
+        Info<< "sixDoFRigidBodyMotion constraints converged in "
+            << iteration << " iterations" << endl;
+
+        if (report_)
         {
-            Info<< "sixDoFRigidBodyMotion constraints converged in "
-                << iteration << " iterations"
-                << nl << "Constraint force: " << cFA << nl
+            Info<< "Constraint force: " << cFA << nl
                 << "Constraint moment: " << cMA
                 << endl;
         }
@@ -169,7 +171,8 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion()
     constraints_(),
     constraintNames_(),
     maxConstraintIterations_(0),
-    refCentreOfMass_(vector::zero),
+    initialCentreOfMass_(vector::zero),
+    initialQ_(I),
     momentOfInertia_(diagTensor::one*VSMALL),
     mass_(VSMALL),
     report_(false)
@@ -185,7 +188,8 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     const vector& pi,
     const vector& tau,
     scalar mass,
-    const point& refCentreOfMass,
+    const point& initialCentreOfMass,
+    const tensor& initialQ,
     const diagTensor& momentOfInertia,
     bool report
 )
@@ -204,7 +208,8 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     constraints_(),
     constraintNames_(),
     maxConstraintIterations_(0),
-    refCentreOfMass_(refCentreOfMass),
+    initialCentreOfMass_(initialCentreOfMass),
+    initialQ_(initialQ),
     momentOfInertia_(momentOfInertia),
     mass_(mass),
     report_(report)
@@ -219,7 +224,14 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion(const dictionary& dict)
     constraints_(),
     constraintNames_(),
     maxConstraintIterations_(0),
-    refCentreOfMass_(dict.lookupOrDefault("refCentreOfMass", centreOfMass())),
+    initialCentreOfMass_
+    (
+        dict.lookupOrDefault("initialCentreOfMass", centreOfMass())
+    ),
+    initialQ_
+    (
+        dict.lookupOrDefault("initialOrientation", Q())
+    ),
     momentOfInertia_(dict.lookup("momentOfInertia")),
     mass_(readScalar(dict.lookup("mass"))),
     report_(dict.lookupOrDefault<Switch>("report", false))
@@ -241,7 +253,8 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     constraints_(sDoFRBM.constraints()),
     constraintNames_(sDoFRBM.constraintNames()),
     maxConstraintIterations_(sDoFRBM.maxConstraintIterations()),
-    refCentreOfMass_(sDoFRBM.refCentreOfMass()),
+    initialCentreOfMass_(sDoFRBM.initialCentreOfMass()),
+    initialQ_(sDoFRBM.initialQ()),
     momentOfInertia_(sDoFRBM.momentOfInertia()),
     mass_(sDoFRBM.mass()),
     report_(sDoFRBM.report())
@@ -433,7 +446,7 @@ void Foam::sixDoFRigidBodyMotion::updateForce
 
 Foam::point Foam::sixDoFRigidBodyMotion::predictedPosition
 (
-    const point& pt,
+    const point& pInitial,
     const vector& deltaForce,
     const vector& deltaMoment,
     scalar deltaT
@@ -449,13 +462,17 @@ Foam::point Foam::sixDoFRigidBodyMotion::predictedPosition
 
     rotate(QTemp, piTemp, deltaT);
 
-    return (centreOfMassTemp + (QTemp & (pt - refCentreOfMass_)));
+    return
+    (
+        centreOfMassTemp
+      + (QTemp & initialQ_.T() & (pInitial - initialCentreOfMass_))
+    );
 }
 
 
 Foam::vector Foam::sixDoFRigidBodyMotion::predictedOrientation
 (
-    const vector& v,
+    const vector& vInitial,
     const vector& deltaMoment,
     scalar deltaT
 ) const
@@ -466,7 +483,7 @@ Foam::vector Foam::sixDoFRigidBodyMotion::predictedOrientation
 
     rotate(QTemp, piTemp, deltaT);
 
-    return (QTemp & v);
+    return (QTemp & initialQ_.T() & vInitial);
 }
 
 

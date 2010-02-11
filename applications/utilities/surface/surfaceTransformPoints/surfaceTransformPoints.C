@@ -35,7 +35,6 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "triSurface.H"
 #include "argList.H"
 #include "OFstream.H"
 #include "IFstream.H"
@@ -44,6 +43,8 @@ Description
 #include "Pair.H"
 #include "quaternion.H"
 #include "mathematicalConstants.H"
+
+#include "MeshedSurfaces.H"
 
 using namespace Foam;
 using namespace Foam::constant::mathematical;
@@ -114,7 +115,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    triSurface surf1(surfFileName);
+    meshedSurface surf1(surfFileName);
 
     pointField points(surf1.points());
 
@@ -193,9 +194,8 @@ int main(int argc, char *argv[])
         points.replace(vector::Z, scaleVector.z()*points.component(vector::Z));
     }
 
-    triSurface surf2(surf1, surf1.patches(), points);
-
-    surf2.write(outFileName);
+    surf1.movePoints(points);
+    surf1.write(outFileName);
 
     Info<< "End\n" << endl;
 

@@ -86,7 +86,7 @@ Foam::sixDoFRigidBodyMotionRestraints::linearAxialAngularSpring::restrain
 
     vector oldDir = refQ_ & refDir;
 
-    vector newDir = motion.currentOrientation(refDir);
+    vector newDir = motion.orientation() & refDir;
 
     if (mag(oldDir & axis_) > 0.95 || mag(newDir & axis_) > 0.95)
     {
@@ -96,7 +96,7 @@ Foam::sixDoFRigidBodyMotionRestraints::linearAxialAngularSpring::restrain
 
         vector oldDir = refQ_ & refDir;
 
-        vector newDir = motion.currentOrientation(refDir);
+        vector newDir = motion.orientation() & refDir;
     }
 
     // Removing any axis component from oldDir and newDir and normalising
