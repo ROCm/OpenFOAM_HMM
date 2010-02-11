@@ -16,6 +16,9 @@ reactionThermo/hReactionThermo/hReactionThermo.C
 reactionThermo/hReactionThermo/newhReactionThermo.C
 reactionThermo/hReactionThermo/hReactionThermos.C
 
+reactionThermo/hsReactionThermo/hsReactionThermo.C
+reactionThermo/hsReactionThermo/newhsReactionThermo.C
+reactionThermo/hsReactionThermo/hsReactionThermos.C
 
 derivedFvPatchFields/fixedUnburntEnthalpy/fixedUnburntEnthalpyFvPatchScalarField.C
 derivedFvPatchFields/gradientUnburntEnthalpy/gradientUnburntEnthalpyFvPatchScalarField.C
