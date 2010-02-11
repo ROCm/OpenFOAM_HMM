@@ -163,7 +163,7 @@ public:
             virtual void calculate() = 0;
 
             //- Read radiationProperties dictionary
-            virtual bool read();
+            virtual bool read() = 0;
 
 
         // Access
@@ -176,6 +176,9 @@ public:
 
             //- Enthalpy source term
             virtual tmp<fvScalarMatrix> Sh(basicThermo& thermo) const;
+
+            //- Sensible enthalpy source term
+            virtual tmp<fvScalarMatrix> Shs(basicThermo& thermo) const;
 };
 
 
@@ -189,4 +192,3 @@ public:
 #endif
 
 // ************************************************************************* //
-
