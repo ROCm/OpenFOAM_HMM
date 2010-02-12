@@ -562,8 +562,7 @@ Foam::ODEChemistryModel<CompType, ThermoType>::Sh() const
         {
             forAll(rhodQ, cellI)
             {
-                scalar Ti = this->thermo().T()[cellI];
-                scalar hi = specieThermo_[i].H(Ti);
+                scalar hi = specieThermo_[i].Hc();
                 rhodQ[cellI] -= hi*RR_[i][cellI];
             }
         }
