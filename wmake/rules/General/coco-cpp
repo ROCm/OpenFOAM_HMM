@@ -1,4 +1,7 @@
-# handie Coco/R attributed grammars
+# handle Coco/R attributed grammars written for the C++ version
+#     http://www.ssw.uni-linz.ac.at/Coco/
+#     http://github.com/olesenm/coco-cpp/
+#
 
 .SUFFIXES: .atg
 
