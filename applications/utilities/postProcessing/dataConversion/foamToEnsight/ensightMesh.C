@@ -30,13 +30,10 @@ License
 #include "fvMesh.H"
 #include "globalMeshData.H"
 #include "PstreamCombineReduceOps.H"
-#include "processorPolyPatch.H"
 #include "cellModeller.H"
 #include "IOmanip.H"
 #include "itoa.H"
 #include "ensightWriteBinary.H"
-#include "globalIndex.H"
-#include "PackedBoolList.H"
 #include "mapDistribute.H"
 
 #include <fstream>
@@ -1345,17 +1342,18 @@ void Foam::ensightMesh::writeAscii
 
                 // Renumber the patch points/faces into unique points
                 labelList pointToGlobal;
-                labelList uniquePointLabels;
+                labelList uniqueMeshPointLabels;
                 autoPtr<globalIndex> globalPointsPtr =
                 mesh_.globalData().mergePoints
                 (
                     p.meshPoints(),
                     p.meshPointMap(),
                     pointToGlobal,
-                    uniquePointLabels
+                    uniqueMeshPointLabels
                 );
 
-                pointField uniquePoints(p.localPoints(), uniquePointLabels);
+
+                pointField uniquePoints(mesh_.points(), uniqueMeshPointLabels);
                 // Renumber the patch faces
                 faceList patchFaces(p.localFaces());
                 forAll(patchFaces, i)
@@ -1598,16 +1596,17 @@ void Foam::ensightMesh::writeBinary
 
                 // Renumber the patch points/faces into unique points
                 labelList pointToGlobal;
-                labelList uniquePointLabels;
+                labelList uniqueMeshPointLabels;
                 autoPtr<globalIndex> globalPointsPtr =
                 mesh_.globalData().mergePoints
                 (
                     p.meshPoints(),
                     p.meshPointMap(),
                     pointToGlobal,
-                    uniquePointLabels
+                    uniqueMeshPointLabels
                 );
-                pointField uniquePoints(p.localPoints(), uniquePointLabels);
+
+                pointField uniquePoints(mesh_.points(), uniqueMeshPointLabels);
                 // Renumber the patch faces
                 faceList patchFaces(p.localFaces());
                 forAll(patchFaces, i)

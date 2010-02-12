@@ -560,13 +560,17 @@ public:
                 ) const;
 
                 //- Helper for merging patch point data. Takes maps from
-                //  local points to/from mesh
+                //  local points to/from mesh. Determines
+                //  - my unique points. These are mesh points, not patch points
+                //    since the master might not be on the patch.
+                //  - global numbering over all unique indices.
+                //  - the global number for all local points.
                 autoPtr<globalIndex> mergePoints
                 (
                     const labelList& meshPoints,
                     const Map<label>& meshPointMap,
                     labelList& pointToGlobal,
-                    labelList& uniquePoints
+                    labelList& uniqueMeshPoints
                 ) const;
 
 
