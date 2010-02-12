@@ -1,7 +1,11 @@
 /*---------------------------------------------------------------------------*\
     Attributed Grammar for Coco/R  (-*- C++ -*- version)
     compile with:
-    coco-cpp wmkdependParser.atg
+        coco-cpp wmkdependParser.atg
+    For example,
+    $WM_THIRD_PARTY_DIR/coco-cpp/platforms/$WM_ARCH$WM_COMPILER/bin/coco-cpp \
+        -frames $WM_THIRD_PARTY_DIR/coco-cpp/platforms/share/coco-cpp \
+        wmkdependParser.atg
 \*---------------------------------------------------------------------------*/
 [copy]
 /*---------------------------------*- C++ -*---------------------------------*\
@@ -42,140 +46,7 @@ SourceFiles
 #include <iostream>
 #include <string>
 #include <list>
-
-//! @brief A simple HashTable implementation
-/**
- * @note This hash table is only vaguely STL-like. In accordance with
- * its present purpose, this hash table only supports a constIterator
- * and no deletions. For simplicity, the constIterator increment is
- * simply via a next() method. Instead of comparing to an end value,
- * the constIterator valid() method is used.
- * For example,
- * @code
- *    for
- *    (
- *         HashTable<foo>::constIterator iter = myHash.begin();
- *         iter.valid();
- *         iter.next()
- *    )
- *    {
- *        std::cerr<< "key: " << iter.key() << "\n";
- *    }
- * @endcode
- *
- */
-class StringHashSet
-{
-    //! An entry within the HashTable
-    struct hashedEntry
-    {
-        const std::string key_;   //<! The lookup key
-        hashedEntry *next_;       //<! Pointer to next hashedEntry in sub-list
-
-        hashedEntry(const std::string& key, hashedEntry *next=0)
-        :
-            key_(key), next_(next)
-        {}
-    };
-
-    const int size_;   //<! fixed HashTable size
-    hashedEntry** table_;
-
-public:
-
-    //! Construct with a default size
-    StringHashSet(int size = 500)
-    :
-        size_(size),
-        table_(new hashedEntry*[size_])
-    {
-        memset(table_, 0, size_ * sizeof(hashedEntry*));
-    }
-
-    //! Destructor
-    ~StringHashSet()
-    {
-        for (int hashIdx = 0; hashIdx < size_; ++hashIdx)
-        {
-            hashedEntry* ep = table_[hashIdx];
-            while (ep)
-            {
-                hashedEntry* del = ep;
-                ep = ep->next_;
-                delete del;
-            }
-        }
-        delete[] table_;
-        table_ = 0;
-    }
-
-    //! Return hash index for lookup name in hash table
-    bool hashKeyIndex(const std::string& name) const
-    {
-        int hashIdx = 0;
-
-        // calculate hash index
-        for
-        (
-            std::string::const_iterator iter = name.begin();
-            iter != name.end();
-            ++iter
-        )
-        {
-            hashIdx = hashIdx << 1 ^ *iter;
-        }
-
-        if (hashIdx < 0)
-        {
-            hashIdx = -hashIdx;
-        }
-
-        return hashIdx % size_;
-    }
-
-
-    //! Return true if name is found in hash table
-    bool found(const std::string& name) const
-    {
-        const int hashIdx = hashKeyIndex(name);
-
-        for (hashedEntry* ep = table_[hashIdx]; ep; ep = ep->next_)
-        {
-            if (name == ep->key_)
-            {
-                // found
-                return true;
-            }
-        }
-
-        // entry not found
-        return false;
-    }
-
-
-    //! Return true if name is found in hash table, insert if not found
-    bool foundOrInsert(const std::string& name)
-    {
-        const int hashIdx = hashKeyIndex(name);
-
-        for (hashedEntry* ep = table_[hashIdx]; ep; ep = ep->next_)
-        {
-            if (name == ep->key_)
-            {
-                // found - return true
-                return true;
-            }
-        }
-
-        // not found - insert it
-        table_[hashIdx] = new hashedEntry(name, table_[hashIdx]);
-
-        // entry not found (but was added) - return false
-        return false;
-    }
-
-};
-
+#include <set>
 
 /*---------------------------------------------------------------------------*/
 
@@ -188,11 +59,11 @@ COMPILER wmkdepend
 /*---------------------------------------------------------------------------*/
 private:
 
-    //! Hash of files already visited
-    static StringHashSet visitedFiles_;
+    //! Set of files already visited
+    static std::set<std::string> visitedFiles_;
 
-    //! Hash of (java) directories already visited
-    static StringHashSet visitedDirs_;
+    //! Set of (java) directories already visited
+    static std::set<std::string> visitedDirs_;
 
     //! Replace all '.' with '/'
     static void dotToSlash(std::string& name);
@@ -224,8 +95,8 @@ public:
 #include <sys/types.h>
 #include <dirent.h>
 
-StringHashSet Parser::visitedFiles_;
-StringHashSet Parser::visitedDirs_;
+std::set<std::string> Parser::visitedFiles_;
+std::set<std::string> Parser::visitedDirs_;
 
 std::list<std::string> Parser::includeDirs;
 std::string Parser::sourceFile;
@@ -246,15 +117,15 @@ void Parser::dotToSlash(std::string& name)
 
 void Parser::ignoreDir(const std::string& name)
 {
-    visitedDirs_.foundOrInsert(name);
+    visitedDirs_.insert(name);
 }
 
 
 void Parser::includeFile(const std::string& name)
 {
-    if (visitedFiles_.foundOrInsert(name))
+    if (!visitedFiles_.insert(name).second)
     {
-        return;
+        return;   // already existed (did not insert)
     }
 
     // use stdio and buffering within Coco/R -- (faster)
@@ -312,7 +183,7 @@ void Parser::importFile(const std::string& name)
         std::string dirGlob = name.substr(0, dotPos);
         dirGlob += ".*";
 
-        if (visitedDirs_.found(dirGlob))
+        if (visitedDirs_.find(dirGlob) != visitedDirs_.end())
         {
             return;
         }
@@ -329,9 +200,9 @@ void Parser::importFile(const std::string& name)
 
 void Parser::importDir(const std::string& name)
 {
-    if (visitedDirs_.foundOrInsert(name))
+    if (!visitedDirs_.insert(name).second)
     {
-        return;
+        return;   // already existed (did not insert)
     }
 
     std::string dirName = name;
@@ -427,16 +298,16 @@ wmkdepend
     [
         "include"
         [
-            string          (.
-                               if (isUTF8())
-                               {
-                                   includeFile(t->toStringUTF8(1, t->length()-2));
-                               }
-                               else
-                               {
-                                   includeFile(t->toString(1, t->length()-2));
-                               }
-                             .)
+            string      (.
+                           if (isUTF8())
+                           {
+                               includeFile(t->toStringUTF8(1, t->length()-2));
+                           }
+                           else
+                           {
+                               includeFile(t->toString(1, t->length()-2));
+                           }
+                         .)
         ]
     ]
     [ ANY { ANY } ] '\n'    // skip trailing junk
@@ -444,42 +315,42 @@ wmkdepend
     // Fortran-style includes
   | "include"
     [
-        sqstring            (.
-                               if (isUTF8())
-                               {
-                                   includeFile(t->toStringUTF8(1, t->length()-2));
-                               }
-                               else
-                               {
-                                   includeFile(t->toString(1, t->length()-2));
-                               }
-                             .)
+        sqstring        (.
+                           if (isUTF8())
+                           {
+                               includeFile(t->toStringUTF8(1, t->length()-2));
+                           }
+                           else
+                           {
+                               includeFile(t->toString(1, t->length()-2));
+                           }
+                         .)
     ]
     [ ANY { ANY } ] '\n'    // skip trailing junk
 
         // Java imports
   | "import"
     (
-        package_dir         (.
-                               if (isUTF8())
-                               {
-                                   importDir(t->toStringUTF8());
-                               }
-                               else
-                               {
-                                   importDir(t->toString());
-                               }
-                             .)
-      | package_name        (.
-                               if (isUTF8())
-                               {
-                                   importFile(t->toStringUTF8());
-                               }
-                               else
-                               {
-                                   importFile(t->toString());
-                               }
-                             .)
+        package_dir     (.
+                           if (isUTF8())
+                           {
+                               importDir(t->toStringUTF8());
+                           }
+                           else
+                           {
+                               importDir(t->toString());
+                           }
+                         .)
+      | package_name    (.
+                           if (isUTF8())
+                           {
+                               importFile(t->toStringUTF8());
+                           }
+                           else
+                           {
+                               importFile(t->toString());
+                           }
+                         .)
     )
     ';'
     [ ANY { ANY } ] '\n'    // skip trailing junk

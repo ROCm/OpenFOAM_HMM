@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,6 +50,9 @@ Usage
     @param -to \<coordinateSystem\> \n
     Specify a coordinate System when writing files.
 
+    @param -tri \n
+    Triangulate surface.
+
 Note
     The filename extensions are used to determine the file format type.
 
@@ -73,13 +76,47 @@ int main(int argc, char *argv[])
     argList::validArgs.append("inputFile");
     argList::validArgs.append("outputFile");
 
-    argList::addBoolOption("clean");
+    argList::addBoolOption
+    (
+        "clean",
+        "perform some surface checking/cleanup on the input surface"
+    );
+    argList::addOption
+    (
+        "scaleIn",
+        "scale",
+        "specify input geometry scaling factor"
+    );
+    argList::addOption
+    (
+        "scaleOut",
+        "scale",
+        "specify output geometry scaling factor"
+    );
+    argList::addOption
+    (
+        "dict",
+        "file",
+        "specify alternative dictionary for the coordinateSystems descriptions"
+    );
+    argList::addOption
+    (
+        "from",
+        "system",
+        "specify the source coordinate system, applied after '-scaleIn'"
+    );
+    argList::addOption
+    (
+        "to",
+        "system",
+        "specify the target coordinate system, applied before '-scaleOut'"
+    );
+    argList::addBoolOption
+    (
+        "tri",
+        "triangulate surface"
+    );
 
-    argList::addOption("scaleIn",  "scale");
-    argList::addOption("scaleOut", "scale");
-    argList::addOption("dict", "coordinateSystemsDict");
-    argList::addOption("from", "sourceCoordinateSystem");
-    argList::addOption("to",   "targetCoordinateSystem");
 
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());
@@ -240,6 +277,12 @@ int main(int argc, char *argv[])
         {
             Info<< " -scaleOut " << scaleOut << endl;
             surf.scalePoints(scaleOut);
+        }
+
+        if (args.optionFound("tri"))
+        {
+            Info<< "triangulate" << endl;
+            surf.triangulate();
         }
 
         Info<< "writing " << exportName;
