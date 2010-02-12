@@ -97,7 +97,7 @@ Foam::ODEChemistryModel<CompType, ThermoType>::RR
                 IOobject::NO_WRITE
             ),
             this->mesh(),
-            dimensionedScalar("zero", dimensionSet(1, -3, -1, 0, 0), 0.0),
+            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0),
             zeroGradientFvPatchScalarField::typeName
         )
     );

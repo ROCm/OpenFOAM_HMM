@@ -95,10 +95,10 @@ public:
         virtual void correct();
 
 
-        //- Chemical enthalpy [J/kg]
-        virtual tmp<volScalarField> hc() const;
-
         // Fields derived from thermodynamic state variables
+
+            //- Chemical enthalpy [J/kg]
+            virtual tmp<volScalarField> hc() const;
 
             //- Sensible enthalpy for cell-set [J/kg]
             virtual tmp<scalarField> hs

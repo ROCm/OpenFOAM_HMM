@@ -183,6 +183,9 @@ public:
                 const label patchi
             ) const;
 
+            //- Chemical enthalpy [J/kg]
+            virtual tmp<volScalarField> hc() const;
+
             //- Internal energy [J/kg]
             //  Non-const access allowed for transport equations
             virtual volScalarField& e();

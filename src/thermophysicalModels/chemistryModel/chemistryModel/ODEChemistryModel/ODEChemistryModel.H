@@ -182,6 +182,9 @@ public:
             //- Return the chemical time scale
             virtual tmp<volScalarField> tc() const;
 
+            //- Return source for enthalpy equation [kg/m/s3]
+            virtual tmp<volScalarField> Sh() const;
+
             //- Return the heat release, i.e. enthalpy/sec [m2/s3]
             virtual tmp<volScalarField> dQ() const;
 
