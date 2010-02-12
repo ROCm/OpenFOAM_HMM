@@ -38,12 +38,6 @@ boundaryField
         momentOfInertia (0.08622222 0.08622222 0.144);
         mass            9.6;
         rhoInf          1;                      // for forces calculation
-        // See sixDoFRigidBodyMotionState
-        Q               (1 0 0 0 1 0 0 0 1);
-        v               (0 0 0);
-        a               (0 0 0);
-        pi              (0 0 0);
-        tau             (0 0 0);
         value           uniform (0 0 0);
     }
 }
