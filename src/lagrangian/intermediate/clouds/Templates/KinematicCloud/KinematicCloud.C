@@ -260,6 +260,9 @@ void Foam::KinematicCloud<ParcelType>::evolve()
         evolveCloud();
 
         postEvolve();
+
+        info();
+        Info<< endl;
     }
 }
 

@@ -219,6 +219,9 @@ void Foam::ThermoCloud<ParcelType>::evolve()
         evolveCloud();
 
         postEvolve();
+
+        info();
+        Info<< endl;
     }
 }
 
