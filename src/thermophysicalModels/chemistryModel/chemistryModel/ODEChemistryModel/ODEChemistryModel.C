@@ -535,7 +535,7 @@ template<class CompType, class ThermoType>
 Foam::tmp<Foam::volScalarField>
 Foam::ODEChemistryModel<CompType, ThermoType>::Sh() const
 {
-    tmp<volScalarField> trhodQ
+    tmp<volScalarField> tSh
     (
         new volScalarField
         (
@@ -556,19 +556,19 @@ Foam::ODEChemistryModel<CompType, ThermoType>::Sh() const
 
     if (this->chemistry_)
     {
-        scalarField& rhodQ = trhodQ();
+        scalarField& Sh = tSh();
 
         forAll(Y_, i)
         {
-            forAll(rhodQ, cellI)
+            forAll(Sh, cellI)
             {
                 scalar hi = specieThermo_[i].Hc();
-                rhodQ[cellI] -= hi*RR_[i][cellI];
+                Sh[cellI] -= hi*RR_[i][cellI];
             }
         }
     }
 
-    return trhodQ;
+    return tSh;
 }
 
 
