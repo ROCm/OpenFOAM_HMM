@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
         for (label ocorr=1; ocorr <= nOuterCorr; ocorr++)
         {
             #include "YEqn.H"
-            #include "hEqn.H"
+            #include "hsEqn.H"
 
             // --- PISO loop
             for (int corr=1; corr<=nCorr; corr++)

@@ -33,7 +33,7 @@ Description
     The solver includes:
     - reacting multiphase parcel cloud
     - porous media
-    - point mass sources
+    - mass, momentum and energy sources
     - polynomial based, incompressible thermodynamics (f(T))
 
     Note: ddtPhiCorr not used here when porous zones are active
@@ -89,13 +89,11 @@ int main(int argc, char *argv[])
 
         parcels.evolve();
 
-        parcels.info();
-
         #include "chemistry.H"
         #include "rhoEqn.H"
         #include "UEqn.H"
         #include "YEqn.H"
-        #include "hEqn.H"
+        #include "hsEqn.H"
 
         // --- PISO loop
         for (int corr=0; corr<nCorr; corr++)
