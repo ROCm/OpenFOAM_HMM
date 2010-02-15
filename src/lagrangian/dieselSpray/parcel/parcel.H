@@ -185,7 +185,8 @@ public:
             //- Return the names of the liquid components
             inline const List<word>& liquidNames() const;
 
-            //- Return the names of the liquid fuel components - identical with liquidNames
+            //- Return the names of the liquid fuel components
+            //  - identical with liquidNames
             inline const List<word>& fuelNames() const;
 
             //- Return diameter of droplets in parcel
