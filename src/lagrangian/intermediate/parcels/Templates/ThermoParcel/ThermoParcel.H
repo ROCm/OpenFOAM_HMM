@@ -40,11 +40,6 @@ SourceFiles
 #ifndef ThermoParcel_H
 #define ThermoParcel_H
 
-#include "IOstream.H"
-#include "autoPtr.H"
-#include "interpolationCellPoint.H"
-#include "contiguous.H"
-
 #include "KinematicParcel.H"
 #include "ThermoCloud.H"
 
