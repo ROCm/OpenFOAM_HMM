@@ -11,15 +11,13 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      pointMassSourcesProperties;
+    object      massSourcesProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-active          false;
-
-pointSources
 (
-    //none
+    // none
 );
+
 
 // ************************************************************************* //
