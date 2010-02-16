@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,6 +64,12 @@ inline const Foam::stringList& Foam::argList::args() const
 }
 
 
+inline Foam::label Foam::argList::size() const
+{
+    return args_.size();
+}
+
+
 inline const Foam::HashTable<Foam::string>& Foam::argList::options() const
 {
     return options_;
@@ -95,6 +101,30 @@ namespace Foam
     // Template specialization for string
     template<>
     inline Foam::string
+    Foam::argList::argRead<Foam::string>(const label index) const
+    {
+        return args_[index];
+    }
+
+    // Template specialization for word
+    template<>
+    inline Foam::word
+    Foam::argList::argRead<Foam::word>(const label index) const
+    {
+        return args_[index];
+    }
+
+    // Template specialization for fileName
+    template<>
+    inline Foam::fileName
+    Foam::argList::argRead<Foam::fileName>(const label index) const
+    {
+        return args_[index];
+    }
+
+    // Template specialization for string
+    template<>
+    inline Foam::string
     Foam::argList::optionRead<Foam::string>(const word& opt) const
     {
         return option(opt);
@@ -119,6 +149,16 @@ namespace Foam
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class T>
+inline T Foam::argList::argRead(const label index) const
+{
+    T val;
+
+    IStringStream(args_[index])() >> val;
+    return val;
+}
+
 
 template<class T>
 inline T Foam::argList::optionRead(const word& opt) const
@@ -184,6 +224,14 @@ inline T Foam::argList::optionLookupOrDefault
     {
         return deflt;
     }
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline const Foam::string& Foam::argList::operator[](const label index) const
+{
+    return args_[index];
 }
 
 

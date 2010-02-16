@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -211,9 +211,19 @@ public:
             //- Return arguments
             inline const stringList& args() const;
 
-            //- Return additional arguments,
-            //  i.e. those additional to the executable itself
-            stringList::subList additionalArgs() const;
+            //- Return the number of arguments
+            inline label size() const;
+
+            //- Return the argument corresponding to index.
+            //  Index 0 corresponds to the name of the executable.
+            //  Index 1 corresponds to the first argument.
+            inline const string& operator[](const label index) const;
+
+            //- Read a value from the argument at index.
+            //  Index 0 corresponds to the name of the executable.
+            //  Index 1 corresponds to the first argument.
+            template<class T>
+            inline T argRead(const label index) const;
 
             //- Return options
             inline const Foam::HashTable<string>& options() const;
@@ -262,7 +272,6 @@ public:
             {
                 return readList<T>(optionLookup(opt)());
             }
-
 
 
         // Edit
