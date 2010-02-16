@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,8 +50,18 @@ int main(int argc, char *argv[])
     timeSelector::addOptions(true, true);
     argList::noParallel();
 #   include "addRegionOption.H"
-    argList::addOption("fields", "\"(list of fields)\"");
-    argList::addBoolOption("noLagrangian");
+    argList::addOption
+    (
+        "fields",
+        "list",
+        "specify a list of fields to be reconstructed. Eg, '(U T p)' - "
+        "regular expressions not currently supported"
+    );
+    argList::addBoolOption
+    (
+        "noLagrangian",
+        "skip reconstructing lagrangian positions and fields"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -62,7 +72,7 @@ int main(int argc, char *argv[])
         args.optionLookup("fields")() >> selectedFields;
     }
 
-    bool noLagrangian = args.optionFound("noLagrangian");
+    const bool noLagrangian = args.optionFound("noLagrangian");
 
     // determine the processor count directly
     label nProcs = 0;
@@ -111,10 +121,10 @@ int main(int argc, char *argv[])
     }
 
 #   include "createNamedMesh.H"
-    fileName regionPrefix = "";
+    word regionDir = word::null;
     if (regionName != fvMesh::defaultRegion)
     {
-        regionPrefix = regionName;
+        regionDir = regionName;
     }
 
     // Set all times on processor meshes equal to reconstructed mesh
@@ -289,7 +299,7 @@ int main(int argc, char *argv[])
                 (
                     readDir
                     (
-                        databases[procI].timePath()/regionPrefix/cloud::prefix,
+                        databases[procI].timePath() / regionDir / cloud::prefix,
                         fileName::DIRECTORY
                     )
                 );

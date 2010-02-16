@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -151,9 +151,9 @@ void subsetPointFields
 
 int main(int argc, char *argv[])
 {
+#   include "addOverwriteOption.H"
     argList::validArgs.append("set");
     argList::addOption("patch", "patch name");
-    argList::addBoolOption("overwrite");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
     const word oldInstance = mesh.pointsInstance();
 
     word setName(args.additionalArgs()[0]);
-    bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.optionFound("overwrite");
 
 
     Info<< "Reading cell set from " << setName << endl << endl;

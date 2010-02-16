@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1309,13 +1309,13 @@ label findCorrespondingRegion
 
 int main(int argc, char *argv[])
 {
+#   include "addOverwriteOption.H"
     argList::addBoolOption("cellZones");
     argList::addBoolOption("cellZonesOnly");
     argList::addOption("blockedFaces", "faceSet");
     argList::addBoolOption("makeCellZones");
     argList::addBoolOption("largestOnly");
     argList::addOption("insidePoint", "point");
-    argList::addBoolOption("overwrite");
     argList::addBoolOption("detectOnly");
     argList::addBoolOption("sloppyCellZones");
 
@@ -1333,14 +1333,14 @@ int main(int argc, char *argv[])
             << blockedFacesName << nl << endl;
     }
 
-    bool makeCellZones    = args.optionFound("makeCellZones");
-    bool largestOnly      = args.optionFound("largestOnly");
-    bool insidePoint      = args.optionFound("insidePoint");
-    bool useCellZones     = args.optionFound("cellZones");
-    bool useCellZonesOnly = args.optionFound("cellZonesOnly");
-    bool overwrite        = args.optionFound("overwrite");
-    bool detectOnly       = args.optionFound("detectOnly");
-    bool sloppyCellZones  = args.optionFound("sloppyCellZones");
+    const bool makeCellZones    = args.optionFound("makeCellZones");
+    const bool largestOnly      = args.optionFound("largestOnly");
+    const bool insidePoint      = args.optionFound("insidePoint");
+    const bool useCellZones     = args.optionFound("cellZones");
+    const bool useCellZonesOnly = args.optionFound("cellZonesOnly");
+    const bool overwrite        = args.optionFound("overwrite");
+    const bool detectOnly       = args.optionFound("detectOnly");
+    const bool sloppyCellZones  = args.optionFound("sloppyCellZones");
 
     if (insidePoint && largestOnly)
     {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -353,6 +353,7 @@ void dumpFeatures
 
 int main(int argc, char *argv[])
 {
+#   include "addOverwriteOption.H"
     argList::noParallel();
     timeSelector::addOptions(true, false);
 
@@ -360,7 +361,6 @@ int main(int argc, char *argv[])
     argList::addBoolOption("splitAllFaces");
     argList::addBoolOption("concaveMultiCells");
     argList::addBoolOption("doNotPreserveFaceZones");
-    argList::addBoolOption("overwrite");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

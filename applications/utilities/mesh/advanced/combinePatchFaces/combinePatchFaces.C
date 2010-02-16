@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -428,10 +428,17 @@ label mergeEdges(const scalar minCos, polyMesh& mesh)
 
 int main(int argc, char *argv[])
 {
+#   include "addOverwriteOption.H"
+
     argList::validArgs.append("feature angle [0..180]");
-    argList::addOption("concaveAngle", "[0..180]");
+    argList::addOption
+    (
+        "concaveAngle",
+        "[0..180]",
+        "specify concave angle [0..180] degrees (default: 30.0 degrees)"
+    );
+
     argList::addBoolOption("snapMesh");
-    argList::addBoolOption("overwrite");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -449,8 +456,8 @@ int main(int argc, char *argv[])
 
     scalar concaveSin = Foam::sin(degToRad(concaveAngle));
 
-    bool snapMeshDict = args.optionFound("snapMesh");
-    bool overwrite = args.optionFound("overwrite");
+    const bool snapMeshDict = args.optionFound("snapMesh");
+    const bool overwrite = args.optionFound("overwrite");
 
     Info<< "Merging all faces of a cell" << nl
         << "    - which are on the same patch" << nl

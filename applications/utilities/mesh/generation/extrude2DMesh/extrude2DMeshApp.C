@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,6 @@ Usage
 
 Note
     Not sure about the walking of the faces to create the front and back faces.
-    Tested on one .ccm file.
 
 \*---------------------------------------------------------------------------*/
 
@@ -57,8 +56,9 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+#   include "addOverwriteOption.H"
     argList::validArgs.append("thickness");
-    argList::addBoolOption("overwrite");
+
 #   include "setRootCase.H"
 #   include "createTime.H"
     runTime.functionObjects().off();
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     const word oldInstance = mesh.pointsInstance();
 
     scalar thickness(readScalar(IStringStream(args.additionalArgs()[0])()));
-    bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.optionFound("overwrite");
 
 
     // Check that mesh is 2D

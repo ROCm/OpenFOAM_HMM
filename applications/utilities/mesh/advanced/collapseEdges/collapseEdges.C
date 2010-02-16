@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -453,8 +453,8 @@ label simplifyFaces
 
 int main(int argc, char *argv[])
 {
+#   include "addOverwriteOption.H"
     argList::noParallel();
-    argList::addBoolOption("overwrite");
     argList::validArgs.append("edge length [m]");
     argList::validArgs.append("merge angle (degrees)");
 
@@ -466,7 +466,7 @@ int main(int argc, char *argv[])
 
     scalar minLen(readScalar(IStringStream(args.additionalArgs()[0])()));
     scalar angle(readScalar(IStringStream(args.additionalArgs()[1])()));
-    bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.optionFound("overwrite");
 
     scalar maxCos = Foam::cos(degToRad(angle));
 

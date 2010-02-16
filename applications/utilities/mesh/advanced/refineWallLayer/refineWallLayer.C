@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,12 +47,12 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+#   include "addOverwriteOption.H"
     argList::noParallel();
     argList::validArgs.append("patchName");
     argList::validArgs.append("edgeWeight");
 
     argList::addOption("useSet", "cellSet");
-    argList::addBoolOption("overwrite");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     word patchName(args.additionalArgs()[0]);
 
     scalar weight(readScalar(IStringStream(args.additionalArgs()[1])()));
-    bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.optionFound("overwrite");
 
 
     label patchID = mesh.boundaryMesh().findPatchID(patchName);
