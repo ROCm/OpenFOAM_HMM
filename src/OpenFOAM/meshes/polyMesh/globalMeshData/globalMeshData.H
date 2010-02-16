@@ -319,6 +319,17 @@ class globalMeshData
             void calcGlobalEdgeAllSlaves() const;
 
 
+        //- Synchronise pointwise data
+        template<class Type, class CombineOp>
+        void syncPointData
+        (
+            List<Type>& pointData,
+            const labelListList& slaves,
+            const mapDistribute& slavesMap,
+            const CombineOp& cop
+        ) const;
+
+
         //- Disallow default bitwise copy construct
         globalMeshData(const globalMeshData&);
 
@@ -505,6 +516,13 @@ public:
                 //  distributed by below map.
                 const labelListList& globalPointSlaves() const;
                 const mapDistribute& globalPointSlavesMap() const;
+                //- Helper to synchronise mesh data
+                template<class Type, class CombineOp>
+                void syncPointData
+                (
+                    List<Type>& pointData,
+                    const CombineOp& cop
+                ) const;
 
             // Coupled edge to coupled edges.
 
@@ -539,6 +557,13 @@ public:
                     const globalIndex& globalPointAllNumbering()const;
                     const labelListList& globalPointAllSlaves() const;
                     const mapDistribute& globalPointAllSlavesMap() const;
+                    //- Helper to synchronise mesh data
+                    template<class Type, class CombineOp>
+                    void syncPointAllData
+                    (
+                        List<Type>& pointData,
+                        const CombineOp& cop
+                    ) const;
 
                 // Coupled edge to all coupled edges (same numbering as
                 // collocated)
@@ -595,6 +620,13 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "globalMeshDataTemplates.C"
+#endif
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
