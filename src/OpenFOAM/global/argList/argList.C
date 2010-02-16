@@ -751,12 +751,6 @@ Foam::argList::~argList()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::stringList::subList Foam::argList::additionalArgs() const
-{
-    return stringList::subList(args_, args_.size() - 1, 1);
-}
-
-
 void Foam::argList::printUsage() const
 {
     Info<< "\nUsage: " << executable_ << " [OPTIONS]";

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Application
     starToFoam
 
 Description
-    Converts a STAR-CD PROSTAR mesh into FOAM format.
+    Converts a Star-CD (v3) pro-STAR mesh into OpenFOAM format.
 
 \*---------------------------------------------------------------------------*/
 
@@ -54,8 +54,7 @@ int main(int argc, char *argv[])
 
 #   include "createTime.H"
 
-    fileName starMeshFile(args.additionalArgs()[0]);
-    starMesh makeMesh(starMeshFile, runTime, scaleFactor);
+    starMesh makeMesh(args[1], runTime, scaleFactor);
 
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(10);

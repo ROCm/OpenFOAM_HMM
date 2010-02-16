@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,8 @@ Application
     ansysToFoam
 
 Description
-    Converts an ANSYS input mesh file, exported from I-DEAS, to FOAM format.
+    Converts an ANSYS input mesh file, exported from I-DEAS,
+    to OpenFOAM format.
 
 \*---------------------------------------------------------------------------*/
 
@@ -252,7 +253,7 @@ int main(int argc, char *argv[])
 
 #   include "createTime.H"
 
-    fileName ansysFile(args.additionalArgs()[0]);
+    const fileName ansysFile = args[1];
     ifstream ansysStream(ansysFile.c_str());
 
     if (!ansysStream)

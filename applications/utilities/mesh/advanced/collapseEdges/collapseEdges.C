@@ -464,8 +464,8 @@ int main(int argc, char *argv[])
 #   include "createPolyMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    scalar minLen(readScalar(IStringStream(args.additionalArgs()[0])()));
-    scalar angle(readScalar(IStringStream(args.additionalArgs()[1])()));
+    const scalar minLen  = args.argRead<scalar>(1);
+    const scalar angle   = args.argRead<scalar>(2);
     const bool overwrite = args.optionFound("overwrite");
 
     scalar maxCos = Foam::cos(degToRad(angle));

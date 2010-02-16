@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
 #   include "createMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    word setName(args.additionalArgs()[0]);
+    const word setName = args[1];
     const bool overwrite = args.optionFound("overwrite");
 
 

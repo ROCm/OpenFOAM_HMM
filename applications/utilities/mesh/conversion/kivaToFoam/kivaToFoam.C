@@ -26,7 +26,7 @@ Application
     kivaToFoam
 
 Description
-    Converts a KIVA3v grid to FOAM format
+    Converts a KIVA3v grid to OpenFOAM format
 
 \*---------------------------------------------------------------------------*/
 

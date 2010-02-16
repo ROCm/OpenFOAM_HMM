@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -692,9 +692,9 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
 
-    fileName inSurfName(args.additionalArgs()[0]);
-    fileName outSurfName(args.additionalArgs()[1]);
-    bool debug = args.optionFound("debug");
+    const fileName inSurfName  = args[1];
+    const fileName outSurfName = args[2];
+    const bool debug = args.optionFound("debug");
 
 
     Info<< "Reading surface from " << inSurfName << endl;

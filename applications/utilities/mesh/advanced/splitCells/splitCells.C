@@ -537,10 +537,9 @@ int main(int argc, char *argv[])
 #   include "createPolyMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
-
-    scalar minCos = Foam::cos(degToRad(featureAngle));
-    scalar minSin = Foam::sin(degToRad(featureAngle));
+    const scalar featureAngle = args.argRead<scalar>(1);
+    const scalar minCos = Foam::cos(degToRad(featureAngle));
+    const scalar minSin = Foam::sin(degToRad(featureAngle));
 
     const bool readSet   = args.optionFound("set");
     const bool geometry  = args.optionFound("geometry");

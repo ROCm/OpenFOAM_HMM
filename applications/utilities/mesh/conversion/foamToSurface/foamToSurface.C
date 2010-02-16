@@ -73,13 +73,11 @@ int main(int argc, char *argv[])
 
 #   include "setRootCase.H"
 
-    const stringList& params = args.additionalArgs();
+    fileName exportName = args[1];
 
     scalar scaleFactor = 0;
     args.optionReadIfPresent<scalar>("scale", scaleFactor);
     const bool doTriangulate = args.optionFound("tri");
-
-    fileName exportName(params[0]);
 
     fileName exportBase = exportName.lessExt();
     word exportExt = exportName.ext();

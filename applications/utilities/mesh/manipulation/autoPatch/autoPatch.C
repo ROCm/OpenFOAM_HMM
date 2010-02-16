@@ -84,21 +84,20 @@ int main(int argc, char *argv[])
         << " s\n" << endl << endl;
 
 
-    //
-    // Use boundaryMesh to reuse all the featureEdge stuff in there.
-    //
+    const scalar featureAngle = args.argRead<scalar>(1);
+    const bool overwrite      = args.optionFound("overwrite");
 
-    boundaryMesh bMesh;
-
-    scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
-    const bool overwrite = args.optionFound("overwrite");
-
-    scalar minCos = Foam::cos(degToRad(featureAngle));
+    const scalar minCos = Foam::cos(degToRad(featureAngle));
 
     Info<< "Feature:" << featureAngle << endl
         << "minCos :" << minCos << endl
         << endl;
 
+    //
+    // Use boundaryMesh to reuse all the featureEdge stuff in there.
+    //
+
+    boundaryMesh bMesh;
     bMesh.read(mesh);
 
     // Set feature angle (calculate feature edges)

@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
     const faceZoneMesh& faceZones = mesh.faceZones();
 
     // Faces to baffle
-    faceZoneID zoneID(args.additionalArgs()[0], faceZones);
+    faceZoneID zoneID(args[1], faceZones);
 
     Info<< "Converting faces on zone " << zoneID.name()
         << " into baffles." << nl << endl;
@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
     // Patches to put baffles into
     DynamicList<label> newPatches(1);
 
-    word patchName(args.additionalArgs()[1]);
+    const word patchName = args[2];
     newPatches.append(findPatchID(mesh, patchName));
     Info<< "Using patch " << patchName
         << " at index " << newPatches[0] << endl;

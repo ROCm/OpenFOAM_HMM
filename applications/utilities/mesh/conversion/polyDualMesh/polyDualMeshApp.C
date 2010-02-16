@@ -385,9 +385,8 @@ int main(int argc, char *argv[])
         }
     }
 
-    scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
-
-    scalar minCos = Foam::cos(degToRad(featureAngle));
+    const scalar featureAngle = args.argRead<scalar>(1);
+    const scalar minCos = Foam::cos(degToRad(featureAngle));
 
     Info<< "Feature:" << featureAngle << endl
         << "minCos :" << minCos << endl

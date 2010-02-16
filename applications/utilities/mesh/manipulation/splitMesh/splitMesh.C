@@ -123,10 +123,9 @@ int main(int argc, char *argv[])
 #   include "createPolyMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    word setName(args.additionalArgs()[0]);
-    word masterPatch(args.additionalArgs()[1]);
-    word slavePatch(args.additionalArgs()[2]);
-
+    const word setName = args[1];
+    const word masterPatch = args[2];
+    const word slavePatch = args[3];
     const bool overwrite = args.optionFound("overwrite");
 
     // List of faces to split

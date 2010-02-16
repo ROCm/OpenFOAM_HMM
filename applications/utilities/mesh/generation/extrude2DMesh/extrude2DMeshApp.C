@@ -65,8 +65,8 @@ int main(int argc, char *argv[])
 #   include "createPolyMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    scalar thickness(readScalar(IStringStream(args.additionalArgs()[0])()));
-    const bool overwrite = args.optionFound("overwrite");
+    const scalar thickness = args.argRead<scalar>(1);
+    const bool overwrite   = args.optionFound("overwrite");
 
 
     // Check that mesh is 2D

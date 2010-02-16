@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -87,10 +87,9 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());
-    const stringList& params = args.additionalArgs();
 
-    fileName exportName(params[0]);
-    word importName = args.optionLookupOrDefault<word>("name", "default");
+    const fileName exportName = args[1];
+    const word importName = args.optionLookupOrDefault<word>("name", "default");
 
     // check that writing is supported
     if (!MeshedSurface<face>::canWriteType(exportName.ext(), true))

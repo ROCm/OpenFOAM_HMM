@@ -446,14 +446,12 @@ int main(int argc, char *argv[])
 #   include "createPolyMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
-
-    scalar minCos = Foam::cos(degToRad(featureAngle));
+    const scalar featureAngle = args.argRead<scalar>(1);
+    const scalar minCos = Foam::cos(degToRad(featureAngle));
 
     // Sin of angle between two consecutive edges on a face.
     // If sin(angle) larger than this the face will be considered concave.
     scalar concaveAngle = args.optionLookupOrDefault("concaveAngle", 30.0);
-
     scalar concaveSin = Foam::sin(degToRad(concaveAngle));
 
     const bool snapMeshDict = args.optionFound("snapMesh");

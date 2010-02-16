@@ -60,11 +60,9 @@ int main(int argc, char *argv[])
 #   include "createPolyMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    word patchName(args.additionalArgs()[0]);
-
-    scalar weight(readScalar(IStringStream(args.additionalArgs()[1])()));
+    const word patchName = args[1];
+    const scalar weight  = args.argRead<scalar>(2);
     const bool overwrite = args.optionFound("overwrite");
-
 
     label patchID = mesh.boundaryMesh().findPatchID(patchName);
 

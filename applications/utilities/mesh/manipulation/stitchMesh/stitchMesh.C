@@ -113,9 +113,8 @@ int main(int argc, char *argv[])
 #   include "createNamedMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-
-    word masterPatchName(args.additionalArgs()[0]);
-    word slavePatchName(args.additionalArgs()[1]);
+    const word masterPatchName = args[1];
+    const word slavePatchName  = args[2];
 
     const bool partialCover = args.optionFound("partial");
     const bool perfectCover = args.optionFound("perfect");

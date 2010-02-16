@@ -2,7 +2,7 @@
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 2009-2009 OpenCFD Ltd.
+   \\  /     A nd            | Copyright (C) 2009-2010 OpenCFD Ltd.
     \\/      M anipulation   |
 -------------------------------------------------------------------------------
 License
@@ -285,14 +285,12 @@ int main(int argc, char *argv[])
     argList::addNote
     (
         "Calculates the inertia tensor and principal axes and moments "
-        "of a command line specified triSurface.  Inertia can either "
-        "be of the solid body or of a thin shell."
+        "of the specified surface.\n"
+        "Inertia can either be of the solid body or of a thin shell."
     );
 
     argList::noParallel();
-
     argList::validArgs.append("surface file");
-
     argList::addBoolOption("shellProperties");
 
     argList::addOption
@@ -312,15 +310,13 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
 
-    fileName surfFileName(args.additionalArgs()[0]);
-
-    triSurface surf(surfFileName);
-
-    scalar density = args.optionLookupOrDefault("density", 1.0);
+    const fileName surfFileName = args[1];
+    const scalar density = args.optionLookupOrDefault("density", 1.0);
 
     vector refPt = vector::zero;
-
     bool calcAroundRefPt = args.optionReadIfPresent("referencePoint", refPt);
+
+    triSurface surf(surfFileName);
 
     triFaceList faces(surf.size());
 

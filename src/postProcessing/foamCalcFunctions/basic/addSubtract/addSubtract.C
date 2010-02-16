@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -213,8 +213,8 @@ void Foam::calcTypes::addSubtract::preCalc
     const fvMesh& mesh
 )
 {
-    baseFieldName_ = args.additionalArgs()[1];
-    word calcModeName = args.additionalArgs()[2];
+    baseFieldName_ = args[2];
+    const word calcModeName = args[3];
 
     if (calcModeName == "add")
     {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,9 +49,9 @@ int main(int argc, char *argv[])
     argList::validArgs.append("output file");
     argList args(argc, argv);
 
-    fileName surfFileName(args.additionalArgs()[0]);
-    scalar mergeTol(readScalar(IStringStream(args.additionalArgs()[1])()));
-    fileName outFileName(args.additionalArgs()[2]);
+    const fileName surfFileName = args[1];
+    const scalar   mergeTol = args.argRead<scalar>(2);
+    const fileName outFileName = args[3];
 
     Info<< "Reading surface from " << surfFileName << " ..." << endl;
     Info<< "Merging points within " << mergeTol << " meter." << endl;
