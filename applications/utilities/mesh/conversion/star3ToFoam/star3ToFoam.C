@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    starToFoam
+    star3ToFoam
 
 Description
     Converts a Star-CD (v3) pro-STAR mesh into OpenFOAM format.

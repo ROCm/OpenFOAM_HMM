@@ -7,11 +7,12 @@ application=`getApplication`
 
 runStarToFoam ()
 {
-    if [ -f log.starToFoam ] ; then
-        echo "starToFoam already run on $PWD: remove log file to run"
+    if [ -f log.star3ToFoam -o -f log.starToFoam ]
+    then
+        echo "star3ToFoam already run on $PWD: remove log file to run"
     else
-        echo "starToFoam: converting mesh $1"
-        starToFoam $1 > log.starToFoam 2>&1
+        echo "star3ToFoam: converting mesh $1"
+        star3ToFoam $1 > log.star3ToFoam 2>&1
     fi
 }
 
@@ -21,3 +22,5 @@ sed -e s/"\([\t ]*type[\t ]*\)symmetryPlane"/"\1empty"/g \
     temp > constant/polyMesh/boundary
 rm temp
 runApplication $application
+
+# end-of-file
