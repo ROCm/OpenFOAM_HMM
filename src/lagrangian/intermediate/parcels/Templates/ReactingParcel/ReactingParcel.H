@@ -209,7 +209,6 @@ protected:
             const scalarField& YComponents, // component mass fractions
             scalarField& dMassPC,      // mass transfer - local to particle
             scalar& Sh,                // explicit particle enthalpy source
-            scalar& dhsTrans,          // sensible enthalpy transfer to carrier
             scalar& N,                 // flux of species emitted from particle
             scalar& NCpW,              // sum of N*Cp*W of emission species
             scalarField& Cs            // carrier conc. of emission species

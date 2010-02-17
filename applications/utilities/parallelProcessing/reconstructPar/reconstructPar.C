@@ -270,11 +270,31 @@ int main(int argc, char *argv[])
                 procMeshes.boundaryProcAddressing()
             );
 
-            pointReconstructor.reconstructFields<scalar>(objects);
-            pointReconstructor.reconstructFields<vector>(objects);
-            pointReconstructor.reconstructFields<sphericalTensor>(objects);
-            pointReconstructor.reconstructFields<symmTensor>(objects);
-            pointReconstructor.reconstructFields<tensor>(objects);
+            pointReconstructor.reconstructFields<scalar>
+            (
+                objects,
+                selectedFields
+            );
+            pointReconstructor.reconstructFields<vector>
+            (
+                objects,
+                selectedFields
+            );
+            pointReconstructor.reconstructFields<sphericalTensor>
+            (
+                objects,
+                selectedFields
+            );
+            pointReconstructor.reconstructFields<symmTensor>
+            (
+                objects,
+                selectedFields
+            );
+            pointReconstructor.reconstructFields<tensor>
+            (
+                objects,
+                selectedFields
+            );
         }
         else
         {

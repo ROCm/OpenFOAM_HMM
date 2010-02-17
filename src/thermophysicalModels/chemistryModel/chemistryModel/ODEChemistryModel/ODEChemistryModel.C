@@ -466,7 +466,7 @@ Foam::ODEChemistryModel<CompType, ThermoType>::tc() const
         this->thermo().rho()
     );
 
-    tmp<volScalarField> tsource
+    tmp<volScalarField> ttc
     (
         new volScalarField
         (
@@ -484,7 +484,7 @@ Foam::ODEChemistryModel<CompType, ThermoType>::tc() const
         )
     );
 
-    scalarField& t = tsource();
+    scalarField& tc = ttc();
 
     label nReaction = reactions_.size();
 
@@ -517,17 +517,58 @@ Foam::ODEChemistryModel<CompType, ThermoType>::tc() const
                 forAll(R.rhs(), s)
                 {
                     scalar sr = R.rhs()[s].stoichCoeff;
-                    t[celli] += sr*pf*cf;
+                    tc[celli] += sr*pf*cf;
                 }
             }
-            t[celli] = nReaction*cSum/t[celli];
+            tc[celli] = nReaction*cSum/tc[celli];
         }
     }
 
 
-    tsource().correctBoundaryConditions();
+    ttc().correctBoundaryConditions();
 
-    return tsource;
+    return ttc;
+}
+
+
+template<class CompType, class ThermoType>
+Foam::tmp<Foam::volScalarField>
+Foam::ODEChemistryModel<CompType, ThermoType>::Sh() const
+{
+    tmp<volScalarField> tSh
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "Sh",
+                this->mesh_.time().timeName(),
+                this->mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            this->mesh_,
+            dimensionedScalar("zero", dimEnergy/dimTime/dimVolume, 0.0),
+            zeroGradientFvPatchScalarField::typeName
+        )
+    );
+
+    if (this->chemistry_)
+    {
+        scalarField& Sh = tSh();
+
+        forAll(Y_, i)
+        {
+            forAll(Sh, cellI)
+            {
+                scalar hi = specieThermo_[i].Hc();
+                Sh[cellI] -= hi*RR_[i][cellI];
+            }
+        }
+    }
+
+    return tSh;
 }
 
 
@@ -545,37 +586,19 @@ Foam::ODEChemistryModel<CompType, ThermoType>::dQ() const
                 this->mesh_.time().timeName(),
                 this->mesh_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                false
             ),
             this->mesh_,
-            dimensionedScalar
-            (
-                "zero",
-                dimensionSet(0, 2, -3 , 0, 0, 0, 0),
-                0.0
-            )
+            dimensionedScalar("dQ", dimEnergy/dimTime, 0.0),
+            zeroGradientFvPatchScalarField::typeName
         )
     );
 
     if (this->chemistry_)
     {
-        scalarField& dQ = tdQ();
-
-        scalarField rhoEff(dQ.size(), 0.0);
-
-        forAll(Y_, i)
-        {
-            forAll(dQ, cellI)
-            {
-                scalar Ti = this->thermo().T()[cellI];
-                scalar pi = this->thermo().p()[cellI];
-                rhoEff[cellI] += Y_[i][cellI]*specieThermo_[i].rho(pi, Ti);
-                scalar hi = specieThermo_[i].H(Ti);
-                dQ[cellI] -= hi*RR_[i][cellI];
-            }
-        }
-
-        dQ /= rhoEff;
+        volScalarField& dQ = tdQ();
+        dQ.dimensionedInternalField() = this->mesh_.V()*Sh()();
     }
 
     return tdQ;
@@ -678,6 +701,9 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
 
     scalar deltaTMin = GREAT;
 
+    tmp<volScalarField> thc = this->thermo().hc();
+    const scalarField& hc = thc();
+
     forAll(rho, celli)
     {
         for (label i=0; i<nSpecie_; i++)
@@ -687,7 +713,7 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
 
         scalar rhoi = rho[celli];
         scalar Ti = this->thermo().T()[celli];
-        scalar hi = this->thermo().h()[celli];
+        scalar hi = this->thermo().hs()[celli] + hc[celli];
         scalar pi = this->thermo().p()[celli];
 
         scalarField c(nSpecie_);
