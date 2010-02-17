@@ -26,7 +26,6 @@ License
 
 #include "pointMesh.H"
 #include "globalMeshData.H"
-#include "globalPointPatch.H"
 #include "pointMeshMapper.H"
 #include "pointFields.H"
 #include "MapGeometricFields.H"
@@ -56,36 +55,12 @@ void Foam::pointMesh::mapFields(const mapPolyMesh& mpm)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pointMesh::pointMesh
-(
-    const polyMesh& pMesh,
-    bool alwaysConstructGlobalPatch
-)
+Foam::pointMesh::pointMesh(const polyMesh& pMesh)
 :
     MeshObject<polyMesh, pointMesh>(pMesh),
     GeoMesh<polyMesh>(pMesh),
     boundary_(*this, pMesh.boundaryMesh())
 {
-    // Add the globalPointPatch if there are global points
-    if
-    (
-        alwaysConstructGlobalPatch
-     || GeoMesh<polyMesh>::mesh_.globalData().nGlobalPoints()
-    )
-    {
-        boundary_.setSize(boundary_.size() + 1);
-
-        boundary_.set
-        (
-            boundary_.size() - 1,
-            new globalPointPatch
-            (
-                boundary_,
-                boundary_.size() - 1
-            )
-        );
-    }
-
     // Calculate the geometry for the patches (transformation tensors etc.)
     boundary_.calcGeometry();
 }

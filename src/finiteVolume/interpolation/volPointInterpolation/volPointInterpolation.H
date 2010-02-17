@@ -38,7 +38,9 @@ SourceFiles
 #define volPointInterpolation_H
 
 #include "MeshObject.H"
-#include "pointPatchInterpolation.H"
+#include "scalarList.H"
+#include "volFields.H"
+#include "pointFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,17 +60,79 @@ class volPointInterpolation
 {
     // Private data
 
-        //- Boundary interpolation engine.
-        pointPatchInterpolation boundaryInterpolator_;
-
         //- Interpolation scheme weighting factor array.
         scalarListList pointWeights_;
 
 
+        // Boundary handling
+
+            //- Boundary addressing
+            autoPtr<primitivePatch> boundaryPtr_;
+
+            //- Per boundary face whether is on non-coupled patch
+            boolList boundaryIsPatchFace_;
+
+            //- Per mesh(!) point whether is on non-coupled patch (on any
+            //  processor)
+            boolList isPatchPoint_;
+
+            //- Per boundary point the weights per pointFaces.
+            scalarListList boundaryPointWeights_;
+
+        // Patch-patch constraints
+
+            //- Mesh points on which to apply special constraints
+            labelList patchPatchPointConstraintPoints_;
+            //- Special constraints
+            tensorField patchPatchPointConstraintTensors_;
+
+
+
     // Private member functions
 
-        //- Construct point weighting factors
+        //- Construct addressing over all boundary faces
+        void calcBoundaryAddressing();
+
+        //- Make weights for internal and coupled-only boundarypoints
+        void makeInternalWeights(scalarField& sumWeights);
+
+        //- Make weights for points on uncoupled patches
+        void makeBoundaryWeights(scalarField& sumWeights);
+
+        //- Construct all point weighting factors
         void makeWeights();
+
+        //- Make patch-patch constraints
+        void makePatchPatchAddressing();
+
+        //- Get boundary field in same order as boundary faces. Field is
+        //  zero on all coupled and empty patches
+        template<class Type>
+        tmp<Field<Type> > flatBoundaryField
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& vf
+        ) const;
+
+        template<class Type>
+        void interpolateBoundaryField
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& vf,
+            GeometricField<Type, pointPatchField, pointMesh>& pf,
+            const bool overrideFixedValue
+        ) const;
+
+        template<class Type>
+        void applyCornerConstraints
+        (
+            GeometricField<Type, pointPatchField, pointMesh>& pf
+        ) const;
+
+        //- Add separated contributions
+        template<class Type>
+        void addSeparated
+        (
+            GeometricField<Type, pointPatchField, pointMesh>&
+        ) const;
 
         //- Disallow default bitwise copy construct
         volPointInterpolation(const volPointInterpolation&);
@@ -95,14 +159,6 @@ public:
 
 
     // Member functions
-
-        // Access
-
-            const fvMesh& mesh() const
-            {
-                return boundaryInterpolator_.mesh();
-            }
-
 
         // Edit
 
@@ -167,6 +223,13 @@ public:
             const tmp<GeometricField<Type, fvPatchField, volMesh> >&
         ) const;
 };
+
+
+template<>
+void volPointInterpolation::applyCornerConstraints<scalar>
+(
+    GeometricField<scalar, pointPatchField, pointMesh>& pf
+) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

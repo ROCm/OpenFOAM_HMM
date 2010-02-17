@@ -44,13 +44,112 @@ defineTypeNameAndDebug(volPointInterpolation, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void volPointInterpolation::makeWeights()
+void volPointInterpolation::calcBoundaryAddressing()
 {
     if (debug)
     {
-        Info<< "volPointInterpolation::makeWeights() : "
-            << "constructing weighting factors"
+        Pout<< "volPointInterpolation::calcBoundaryAddressing() : "
+            << "constructing boundary addressing"
             << endl;
+    }
+
+    boundaryPtr_.reset
+    (
+        new primitivePatch
+        (
+            SubList<face>
+            (
+                mesh().faces(),
+                mesh().nFaces()-mesh().nInternalFaces(),
+                mesh().nInternalFaces()
+            ),
+            mesh().points()
+        )
+    );
+    const primitivePatch& boundary = boundaryPtr_();
+
+    boundaryIsPatchFace_.setSize(boundary.size());
+    boundaryIsPatchFace_ = false;
+
+    isPatchPoint_.setSize(mesh().nPoints());
+    isPatchPoint_ = false;
+
+    const polyBoundaryMesh& pbm = mesh().boundaryMesh();
+
+    forAll(pbm, patchI)
+    {
+        const polyPatch& pp = pbm[patchI];
+
+        if (!isA<emptyPolyPatch>(pp) && !pp.coupled())
+        {
+            label bFaceI = pp.start()-mesh().nInternalFaces();
+
+            forAll(pp, i)
+            {
+                boundaryIsPatchFace_[bFaceI] = true;
+
+                const face& f = boundary[bFaceI++];
+
+                forAll(f, fp)
+                {
+                    isPatchPoint_[f[fp]] = true;
+                }
+            }
+        }
+    }
+
+    // Make sure point status is synchronised so even processor that holds
+    // no face of a certain patch still can have boundary points marked.
+    if (debug)
+    {
+
+        boolList oldData(isPatchPoint_);
+
+        mesh().globalData().syncPointData(isPatchPoint_, orEqOp<bool>());
+
+        forAll(isPatchPoint_, pointI)
+        {
+            if (isPatchPoint_[pointI] != oldData[pointI])
+            {
+                Pout<< "volPointInterpolation::calcBoundaryAddressing():"
+                    << " added dangling mesh point:" << pointI
+                    << " at:" << mesh().points()[pointI]
+                    << endl;
+            }
+        }
+
+        label nPatchFace = 0;
+        forAll(boundaryIsPatchFace_, i)
+        {
+            if (boundaryIsPatchFace_[i])
+            {
+                nPatchFace++;
+            }
+        }
+        label nPatchPoint = 0;
+        forAll(isPatchPoint_, i)
+        {
+            if (isPatchPoint_[i])
+            {
+                nPatchPoint++;
+            }
+        }
+        Pout<< "boundary:" << nl
+            << "    faces :" << boundary.size() << nl
+            << "    of which on proper patch:" << nPatchFace << nl
+            << "    points:" << boundary.nPoints() << nl
+            << "    of which on proper patch:" << nPatchPoint << endl;
+    }
+}
+
+
+void volPointInterpolation::makeInternalWeights(scalarField& sumWeights)
+{
+    if (debug)
+    {
+        Pout<< "volPointInterpolation::makeInternalWeights() : "
+            << "constructing weighting factors for internal and non-coupled"
+            << " points." << endl;
     }
 
     const pointField& points = mesh().points();
@@ -61,11 +160,91 @@ void volPointInterpolation::makeWeights()
     pointWeights_.clear();
     pointWeights_.setSize(points.size());
 
-    forAll(pointWeights_, pointi)
+    // Calculate inverse distances between cell centres and points
+    // and store in weighting factor array
+    forAll(points, pointi)
     {
-        pointWeights_[pointi].setSize(pointCells[pointi].size());
+        if (!isPatchPoint_[pointi])
+        {
+            const labelList& pcp = pointCells[pointi];
+
+            scalarList& pw = pointWeights_[pointi];
+            pw.setSize(pcp.size());
+
+            forAll(pcp, pointCelli)
+            {
+                pw[pointCelli] =
+                    1.0/mag(points[pointi] - cellCentres[pcp[pointCelli]]);
+
+                sumWeights[pointi] += pw[pointCelli];
+            }
+        }
+    }
+}
+
+
+void volPointInterpolation::makeBoundaryWeights(scalarField& sumWeights)
+{
+    if (debug)
+    {
+        Pout<< "volPointInterpolation::makeBoundaryWeights() : "
+            << "constructing weighting factors for boundary points." << endl;
     }
 
+    const pointField& points = mesh().points();
+    const pointField& faceCentres = mesh().faceCentres();
+
+    const primitivePatch& boundary = boundaryPtr_();
+
+    boundaryPointWeights_.clear();
+    boundaryPointWeights_.setSize(boundary.meshPoints().size());
+
+    forAll(boundary.meshPoints(), i)
+    {
+        label pointI = boundary.meshPoints()[i];
+
+        if (isPatchPoint_[pointI])
+        {
+            const labelList& pFaces = boundary.pointFaces()[i];
+
+            scalarList& pw = boundaryPointWeights_[i];
+            pw.setSize(pFaces.size());
+
+            sumWeights[pointI] = 0.0;
+
+            forAll(pFaces, i)
+            {
+                if (boundaryIsPatchFace_[pFaces[i]])
+                {
+                    label faceI = mesh().nInternalFaces() + pFaces[i];
+
+                    pw[i] = 1.0/mag(points[pointI] - faceCentres[faceI]);
+                    sumWeights[pointI] += pw[i];
+                }
+                else
+                {
+                    pw[i] = 0.0;
+                }
+            }
+        }
+    }
+}
+
+
+void volPointInterpolation::makeWeights()
+{
+    if (debug)
+    {
+        Pout<< "volPointInterpolation::makeWeights() : "
+            << "constructing weighting factors"
+            << endl;
+    }
+
+    // Update addressing over all boundary faces
+    calcBoundaryAddressing();
+
+    
+    // Running sum of weights
     pointScalarField sumWeights
     (
         IOobject
@@ -78,60 +257,344 @@ void volPointInterpolation::makeWeights()
         dimensionedScalar("zero", dimless, 0)
     );
 
-    // Calculate inverse distances between cell centres and points
-    // and store in weighting factor array
-    forAll(points, pointi)
+
+    // Create internal weights; add to sumWeights
+    makeInternalWeights(sumWeights);
+
+
+    // Create boundary weights; add to sumWeights
+    makeBoundaryWeights(sumWeights);
+
+
+    //forAll(boundary.meshPoints(), i)
+    //{
+    //    label pointI = boundary.meshPoints()[i];
+    //
+    //    if (isPatchPoint_[pointI])
+    //    {
+    //        Pout<< "Calculated Weight at boundary point:" << i
+    //            << " at:" << mesh().points()[pointI]
+    //            << " sumWeight:" << sumWeights[pointI]
+    //            << " from:" << boundaryPointWeights_[i]
+    //            << endl;
+    //    }
+    //}
+
+
+    // Sum collocated contributions
+    mesh().globalData().syncPointData(sumWeights, plusEqOp<scalar>());
+
+    // And add separated contributions
+    addSeparated(sumWeights);
+
+    // Push master data to slaves. It is possible (not sure how often) for
+    // a coupled point to have its master on a different patch so
+    // to make sure just push master data to slaves. Reuse the syncPointData
+    // structure.
+    mesh().globalData().syncPointData(sumWeights, nopEqOp<scalar>());
+
+
+    // Normalise internal weights
+    forAll(pointWeights_, pointI)
     {
-        scalarList& pw = pointWeights_[pointi];
-        const labelList& pcp = pointCells[pointi];
-
-        forAll(pcp, pointCelli)
+        scalarList& pw = pointWeights_[pointI];    
+        // Note:pw only sized for !isPatchPoint
+        forAll(pw, i)
         {
-            pw[pointCelli] =
-                1.0/mag(points[pointi] - cellCentres[pcp[pointCelli]]);
-
-            sumWeights[pointi] += pw[pointCelli];
+            pw[i] /= sumWeights[pointI];
         }
     }
 
-    forAll(sumWeights.boundaryField(), patchi)
+    // Normalise boundary weights
+    const primitivePatch& boundary = boundaryPtr_();
+
+    forAll(boundary.meshPoints(), i)
     {
-        if (sumWeights.boundaryField()[patchi].coupled())
+        label pointI = boundary.meshPoints()[i];
+
+        scalarList& pw = boundaryPointWeights_[i];
+        // Note:pw only sized for isPatchPoint
+        forAll(pw, i)
         {
-            refCast<coupledPointPatchScalarField>
-                (sumWeights.boundaryField()[patchi]).initSwapAdd
-                (
-                    sumWeights.internalField()
-                );
+            pw[i] /= sumWeights[pointI];
         }
     }
 
-    forAll(sumWeights.boundaryField(), patchi)
+
+    if (debug)
     {
-        if (sumWeights.boundaryField()[patchi].coupled())
-        {
-            refCast<coupledPointPatchScalarField>
-            (sumWeights.boundaryField()[patchi]).swapAdd
-            (
-                sumWeights.internalField()
-            );
-        }
+        Pout<< "volPointInterpolation::makeWeights() : "
+            << "finished constructing weighting factors"
+            << endl;
+    }
+}
+
+
+void volPointInterpolation::makePatchPatchAddressing()
+{
+    if (debug)
+    {
+        Pout<< "volPointInterpolation::makePatchPatchAddressing() : "
+            << "constructing boundary addressing"
+            << endl;
     }
 
-    forAll(points, pointi)
-    {
-        scalarList& pw = pointWeights_[pointi];
+    const fvBoundaryMesh& bm = mesh().boundary();
+    const pointBoundaryMesh& pbm = pointMesh::New(mesh()).boundary();
 
-        forAll(pw, pointCelli)
+
+    // first count the total number of patch-patch points
+
+    label nPatchPatchPoints = 0;
+
+    forAll(bm, patchi)
+    {
+        if (!isA<emptyFvPatch>(bm[patchi]) && !bm[patchi].coupled())
         {
-            pw[pointCelli] /= sumWeights[pointi];
+            nPatchPatchPoints += bm[patchi].patch().boundaryPoints().size();
+
+            if (debug)
+            {
+                Pout<< "On patch:" << bm[patchi].patch()
+                    << " nBoundaryPoints:"
+                    << bm[patchi].patch().boundaryPoints().size() << endl;
+            }
         }
     }
 
     if (debug)
     {
-        Info<< "volPointInterpolation::makeWeights() : "
-            << "finished constructing weighting factors"
+        Pout<< "Found nPatchPatchPoints:" << nPatchPatchPoints << endl;
+    }
+
+
+    // Go through all patches and mark up the external edge points
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // From meshpoint to index in patchPatchPointConstraints.
+    Map<label> patchPatchPointSet(2*nPatchPatchPoints);
+
+    // Constraints (initialised to unconstrained)
+    List<pointConstraint> patchPatchPointConstraints(nPatchPatchPoints);
+
+    // From constraint index to mesh point
+    labelList patchPatchPoints(nPatchPatchPoints);
+
+    label pppi = 0;
+
+    forAll(bm, patchi)
+    {
+        if (!isA<emptyFvPatch>(bm[patchi]) && !bm[patchi].coupled())
+        {
+            const labelList& bp = bm[patchi].patch().boundaryPoints();
+            const labelList& meshPoints = bm[patchi].patch().meshPoints();
+
+            forAll(bp, pointi)
+            {
+                label ppp = meshPoints[bp[pointi]];
+
+                Map<label>::iterator iter = patchPatchPointSet.find(ppp);
+
+                label constraintI = -1;
+
+                if (iter == patchPatchPointSet.end())
+                {
+                    patchPatchPointSet.insert(ppp, pppi);
+                    patchPatchPoints[pppi] = ppp;
+                    constraintI = pppi++;
+                }
+                else
+                {
+                    constraintI = iter();
+                }
+
+                // Apply to patch constraints
+                pbm[patchi].applyConstraint
+                (
+                    bp[pointi],
+                    patchPatchPointConstraints[constraintI]
+                );
+            }
+        }
+    }
+
+    if (debug)
+    {
+        Pout<< "Have (local) constrained points:"
+            << nPatchPatchPoints << endl;
+    }
+
+
+    // Extend set with constraints across coupled points
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    {
+        const globalMeshData& gd = mesh().globalData();
+        const labelListList& globalPointSlaves = gd.globalPointSlaves();
+        const mapDistribute& globalPointSlavesMap = gd.globalPointSlavesMap();
+        const Map<label>& cpPointMap = gd.coupledPatch().meshPointMap();
+        const labelList& cpMeshPoints = gd.coupledPatch().meshPoints();
+
+        // Constraints on coupled points
+        List<pointConstraint> constraints
+        (
+            globalPointSlavesMap.constructSize()
+        );
+
+        // Copy from patchPatch constraints into coupledConstraints.
+        forAll(bm, patchi)
+        {
+            if (!isA<emptyFvPatch>(bm[patchi]) && !bm[patchi].coupled())
+            {
+                const labelList& bp = bm[patchi].patch().boundaryPoints();
+                const labelList& meshPoints = bm[patchi].patch().meshPoints();
+
+                forAll(bp, pointi)
+                {
+                    label ppp = meshPoints[bp[pointi]];
+
+                    Map<label>::const_iterator fnd = cpPointMap.find(ppp);
+                    if (fnd != cpPointMap.end())
+                    {
+                        // Can just copy (instead of apply) constraint
+                        // will already be consistent across multiple patches.
+                        constraints[fnd()] = patchPatchPointConstraints
+                        [
+                            patchPatchPointSet[ppp]
+                        ];
+                    }
+                }
+            }
+        }
+
+        // Exchange data
+        globalPointSlavesMap.distribute(constraints);
+
+        // Combine master with slave constraints
+        forAll(globalPointSlaves, pointI)
+        {
+            const labelList& slaves = globalPointSlaves[pointI];
+
+            // Combine master constraint with slave constraints
+            forAll(slaves, i)
+            {
+                constraints[pointI].combine(constraints[slaves[i]]);
+            }
+            // Duplicate master constraint into slave slots
+            forAll(slaves, i)
+            {
+                constraints[slaves[i]] = constraints[pointI];
+            }
+        }
+
+        // Send back
+        globalPointSlavesMap.reverseDistribute
+        (
+            cpMeshPoints.size(),
+            constraints
+        );
+
+        // Add back into patchPatch constraints
+        forAll(constraints, coupledPointI)
+        {
+            if (constraints[coupledPointI].first() != 0)
+            {
+                label meshPointI = cpMeshPoints[coupledPointI];
+
+                Map<label>::iterator iter = patchPatchPointSet.find(meshPointI);
+
+                label constraintI = -1;
+
+                if (iter == patchPatchPointSet.end())
+                {
+                    //Pout<< "on meshpoint:" << meshPointI
+                    //    << " coupled:" << coupledPointI
+                    //    << " at:" << mesh().points()[meshPointI]
+                    //    << " have new constraint:"
+                    //    << constraints[coupledPointI]
+                    //    << endl;
+
+                    // Allocate new constraint
+                    if (patchPatchPoints.size() <= pppi)
+                    {
+                        patchPatchPoints.setSize(pppi+100);
+                    }
+                    patchPatchPointSet.insert(meshPointI, pppi);
+                    patchPatchPoints[pppi] = meshPointI;
+                    constraintI = pppi++;
+                }
+                else
+                {
+                    //Pout<< "on meshpoint:" << meshPointI
+                    //    << " coupled:" << coupledPointI
+                    //    << " at:" << mesh().points()[meshPointI]
+                    //    << " have possibly extended constraint:"
+                    //    << constraints[coupledPointI]
+                    //    << endl;
+
+                    constraintI = iter();
+                }
+
+                // Combine (new or existing) constraint with one
+                // on coupled.
+                patchPatchPointConstraints[constraintI].combine
+                (
+                    constraints[coupledPointI]
+                );
+            }
+        }
+    }
+
+
+
+    nPatchPatchPoints = pppi;
+    patchPatchPoints.setSize(nPatchPatchPoints);
+    patchPatchPointConstraints.setSize(nPatchPatchPoints);
+
+
+    if (debug)
+    {
+        Pout<< "Have (global) constrained points:"
+            << nPatchPatchPoints << endl;
+    }
+
+
+    // Copy out all non-trivial constraints
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    patchPatchPointConstraintPoints_.setSize(nPatchPatchPoints);
+    patchPatchPointConstraintTensors_.setSize(nPatchPatchPoints);
+
+    label nConstraints = 0;
+
+    forAll(patchPatchPointConstraints, i)
+    {
+        if (patchPatchPointConstraints[i].first() != 0)
+        {
+            patchPatchPointConstraintPoints_[nConstraints] =
+                patchPatchPoints[i];
+
+            patchPatchPointConstraintTensors_[nConstraints] =
+                patchPatchPointConstraints[i].constraintTransformation();
+
+            nConstraints++;
+        }
+    }
+
+    if (debug)
+    {
+        Pout<< "Have non-trivial constrained points:"
+            << nConstraints << endl;
+    }
+
+    patchPatchPointConstraintPoints_.setSize(nConstraints);
+    patchPatchPointConstraintTensors_.setSize(nConstraints);
+
+
+    if (debug)
+    {
+        Pout<< "volPointInterpolation::makePatchPatchAddressing() : "
+            << "finished constructing boundary addressing"
             << endl;
     }
 }
@@ -141,8 +604,7 @@ void volPointInterpolation::makeWeights()
 
 volPointInterpolation::volPointInterpolation(const fvMesh& vm)
 :
-    MeshObject<fvMesh, volPointInterpolation>(vm),
-    boundaryInterpolator_(vm)
+    MeshObject<fvMesh, volPointInterpolation>(vm)
 {
     updateMesh();
 }
@@ -159,17 +621,25 @@ volPointInterpolation::~volPointInterpolation()
 void volPointInterpolation::updateMesh()
 {
     makeWeights();
-    boundaryInterpolator_.updateMesh();
 }
 
 
 bool volPointInterpolation::movePoints()
 {
     makeWeights();
-    boundaryInterpolator_.movePoints();
 
     return true;
 }
+
+
+// Specialisaion of applyCornerConstraints for scalars because
+// no constraint need be applied
+template<>
+void volPointInterpolation::applyCornerConstraints<scalar>
+(
+    GeometricField<scalar, pointPatchField, pointMesh>& pf
+) const
+{}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

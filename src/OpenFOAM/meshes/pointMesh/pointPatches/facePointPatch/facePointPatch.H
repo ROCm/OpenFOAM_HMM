@@ -30,7 +30,6 @@ Description
 
 SourceFiles
     facePointPatch.C
-    facePointPatchM.C
     newPointPatch.C
 
 \*---------------------------------------------------------------------------*/
@@ -64,13 +63,6 @@ protected:
 
         //- Reference to the underlying polyPatch
         const polyPatch& polyPatch_;
-
-        // Optional data used if the pointPatch has points not associated
-        // with faces, i.e. not accessible via polyPatch
-
-            mutable labelList meshPoints_;
-            mutable pointField localPoints_;
-            mutable vectorField pointNormals_;
 
 
     // Protected Member Functions
@@ -182,13 +174,24 @@ public:
         }
 
         //- Return mesh points
-        virtual const labelList& meshPoints() const;
+        virtual const labelList& meshPoints() const
+        {
+            return polyPatch_.meshPoints();
+        }
+
 
         //- Return pointField of points in patch
-        virtual const pointField& localPoints() const;
+        virtual const pointField& localPoints() const
+        {
+            return polyPatch_.localPoints();
+        }
+
 
         //- Return point unit normals
-        virtual const vectorField& pointNormals() const;
+        virtual const vectorField& pointNormals() const
+        {
+            return polyPatch_.pointNormals();
+        }
 };
 
 
