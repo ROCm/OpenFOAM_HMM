@@ -239,7 +239,7 @@ void volPointInterpolation::interpolateBoundaryField
     pf.correctBoundaryConditions();
 
     // Sync any dangling points
-    vf.mesh().globalData().syncPointData(pfi, nopEqOp<Type>());
+    mesh().globalData().syncPointData(pfi, nopEqOp<Type>());
 
     // Apply multiple constraints on edge/corner points
     applyCornerConstraints(pf);
