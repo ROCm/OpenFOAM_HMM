@@ -36,6 +36,9 @@ Usage
     Specify an alternative geometry scaling factor.
     Eg, use @b 1000 to scale @em [m] to @em [mm].
 
+    @param -tri \n
+    Triangulate surface.
+
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
@@ -62,6 +65,11 @@ int main(int argc, char *argv[])
         "scale",
         "specify geometry scaling factor"
     );
+    argList::addBoolOption
+    (
+        "tri",
+        "triangulate surface"
+    );
 
 #   include "setRootCase.H"
 
@@ -69,6 +77,7 @@ int main(int argc, char *argv[])
 
     scalar scaleFactor = 0;
     args.optionReadIfPresent<scalar>("scale", scaleFactor);
+    const bool doTriangulate = args.optionFound("tri");
 
     fileName exportName(params[0]);
 
@@ -107,6 +116,12 @@ int main(int argc, char *argv[])
             surf.scalePoints(scaleFactor);
 
             Info<< "writing " << exportName;
+            if (doTriangulate)
+            {
+                Info<< " triangulated";
+                surf.triangulate();
+            }
+
             if (scaleFactor <= 0)
             {
                 Info<< " without scaling" << endl;

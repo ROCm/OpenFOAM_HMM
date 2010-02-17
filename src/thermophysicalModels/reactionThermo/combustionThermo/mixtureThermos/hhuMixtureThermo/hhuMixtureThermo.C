@@ -296,7 +296,7 @@ Foam::hhuMixtureThermo<MixtureType>::Cp() const
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensionSet(0, 2, -2, -1, 0)
+            dimEnergy/dimMass/dimTemperature
         )
     );
 

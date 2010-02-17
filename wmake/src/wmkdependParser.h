@@ -44,140 +44,7 @@ SourceFiles
 #include <iostream>
 #include <string>
 #include <list>
-
-//! @brief A simple HashTable implementation
-/**
- * @note This hash table is only vaguely STL-like. In accordance with
- * its present purpose, this hash table only supports a constIterator
- * and no deletions. For simplicity, the constIterator increment is
- * simply via a next() method. Instead of comparing to an end value,
- * the constIterator valid() method is used.
- * For example,
- * @code
- *    for
- *    (
- *         HashTable<foo>::constIterator iter = myHash.begin();
- *         iter.valid();
- *         iter.next()
- *    )
- *    {
- *        std::cerr<< "key: " << iter.key() << "\n";
- *    }
- * @endcode
- *
- */
-class StringHashSet
-{
-    //! An entry within the HashTable
-    struct hashedEntry
-    {
-        const std::string key_;   //<! The lookup key
-        hashedEntry *next_;       //<! Pointer to next hashedEntry in sub-list
-
-        hashedEntry(const std::string& key, hashedEntry *next=0)
-        :
-            key_(key), next_(next)
-        {}
-    };
-
-    const int size_;   //<! fixed HashTable size
-    hashedEntry** table_;
-
-public:
-
-    //! Construct with a default size
-    StringHashSet(int size = 500)
-    :
-        size_(size),
-        table_(new hashedEntry*[size_])
-    {
-        memset(table_, 0, size_ * sizeof(hashedEntry*));
-    }
-
-    //! Destructor
-    ~StringHashSet()
-    {
-        for (int hashIdx = 0; hashIdx < size_; ++hashIdx)
-        {
-            hashedEntry* ep = table_[hashIdx];
-            while (ep)
-            {
-                hashedEntry* del = ep;
-                ep = ep->next_;
-                delete del;
-            }
-        }
-        delete[] table_;
-        table_ = 0;
-    }
-
-    //! Return hash index for lookup name in hash table
-    bool hashKeyIndex(const std::string& name) const
-    {
-        int hashIdx = 0;
-
-        // calculate hash index
-        for
-        (
-            std::string::const_iterator iter = name.begin();
-            iter != name.end();
-            ++iter
-        )
-        {
-            hashIdx = hashIdx << 1 ^ *iter;
-        }
-
-        if (hashIdx < 0)
-        {
-            hashIdx = -hashIdx;
-        }
-
-        return hashIdx % size_;
-    }
-
-
-    //! Return true if name is found in hash table
-    bool found(const std::string& name) const
-    {
-        const int hashIdx = hashKeyIndex(name);
-
-        for (hashedEntry* ep = table_[hashIdx]; ep; ep = ep->next_)
-        {
-            if (name == ep->key_)
-            {
-                // found
-                return true;
-            }
-        }
-
-        // entry not found
-        return false;
-    }
-
-
-    //! Return true if name is found in hash table, insert if not found
-    bool foundOrInsert(const std::string& name)
-    {
-        const int hashIdx = hashKeyIndex(name);
-
-        for (hashedEntry* ep = table_[hashIdx]; ep; ep = ep->next_)
-        {
-            if (name == ep->key_)
-            {
-                // found - return true
-                return true;
-            }
-        }
-
-        // not found - insert it
-        table_[hashIdx] = new hashedEntry(name, table_[hashIdx]);
-
-        // entry not found (but was added) - return false
-        return false;
-    }
-
-};
-
+#include <set>
 
 /*---------------------------------------------------------------------------*/
 
@@ -191,7 +58,7 @@ namespace wmake {
 /*---------------------------------------------------------------------------*\
                            Class Errors Declaration
 \*---------------------------------------------------------------------------*/
-//! Parser error handing
+//! Parser error handling
 class Errors
 {
 public:
@@ -255,11 +122,11 @@ public:
 
 private:
 
-    //! Hash of files already visited
-    static StringHashSet visitedFiles_;
+    //! Set of files already visited
+    static std::set<std::string> visitedFiles_;
 
-    //! Hash of (java) directories already visited
-    static StringHashSet visitedDirs_;
+    //! Set of (java) directories already visited
+    static std::set<std::string> visitedDirs_;
 
     //! Replace all '.' with '/'
     static void dotToSlash(std::string& name);

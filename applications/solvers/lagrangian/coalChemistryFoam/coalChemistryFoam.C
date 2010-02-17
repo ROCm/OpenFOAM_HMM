@@ -84,15 +84,7 @@ int main(int argc, char *argv[])
 
         coalParcels.evolve();
 
-        coalParcels.info();
-
-        Info<< endl;
-
         limestoneParcels.evolve();
-
-        limestoneParcels.info();
-
-        Info<< endl;
 
         #include "chemistry.H"
         #include "rhoEqn.H"
@@ -102,16 +94,13 @@ int main(int argc, char *argv[])
         {
             #include "UEqn.H"
             #include "YEqn.H"
-            #include "hEqn.H"
+            #include "hsEqn.H"
 
             // --- PISO loop
             for (int corr=1; corr<=nCorr; corr++)
             {
                 #include "pEqn.H"
             }
-
-            Info<< "T gas min/max   = " << min(T).value() << ", "
-                << max(T).value() << endl;
         }
 
         turbulence->correct();

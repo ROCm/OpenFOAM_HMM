@@ -267,7 +267,6 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         YLiquid_,
         dMassPC,
         Sh,
-        dhsTrans,
         Ne,
         NCpW,
         Cs
@@ -296,7 +295,6 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         canCombust_,
         dMassDV,
         Sh,
-        dhsTrans,
         Ne,
         NCpW,
         Cs
@@ -398,19 +396,11 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         {
             label gid = td.cloud().composition().localToGlobalCarrierId(GAS, i);
             td.cloud().rhoTrans(gid)[cellI] += np0*dMassGas[i];
-            td.cloud().hcTrans()[cellI] +=
-                np0
-               *dMassGas[i]
-               *td.cloud().mcCarrierThermo().speciesData()[gid].Hc();
         }
         forAll(YLiquid_, i)
         {
             label gid = td.cloud().composition().localToGlobalCarrierId(LIQ, i);
             td.cloud().rhoTrans(gid)[cellI] += np0*dMassLiquid[i];
-            td.cloud().hcTrans()[cellI] +=
-                np0
-               *dMassLiquid[i]
-               *td.cloud().mcCarrierThermo().speciesData()[gid].Hc();
         }
 /*
         // No mapping between solid components and carrier phase
@@ -418,19 +408,11 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         {
             label gid = td.cloud().composition().localToGlobalCarrierId(SLD, i);
             td.cloud().rhoTrans(gid)[cellI] += np0*dMassSolid[i];
-            td.cloud().hcTrans()[cellI] +=
-                np0
-               *dMassSolid[i]
-               *td.cloud().mcCarrierThermo().speciesData()[gid].Hc();
         }
 */
         forAll(dMassSRCarrier, i)
         {
             td.cloud().rhoTrans(i)[cellI] += np0*dMassSRCarrier[i];
-            td.cloud().hcTrans()[cellI] +=
-                np0
-               *dMassSRCarrier[i]
-               *td.cloud().mcCarrierThermo().speciesData()[i].Hc();
         }
 
         // Update momentum transfer
@@ -476,7 +458,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
 */
             td.cloud().UTrans()[cellI] += np0*mass1*U1;
             td.cloud().hsTrans()[cellI] +=
-                np0*mass1*HEff(td, pc, T1, idG, idL, idS);
+                np0*mass1*HEff(td, pc, T1, idG, idL, idS); // using total h
         }
     }
 
@@ -520,7 +502,6 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
     bool& canCombust,
     scalarField& dMassDV,
     scalar& Sh,
-    scalar& dhsTrans,
     scalar& N,
     scalar& NCpW,
     scalarField& Cs
