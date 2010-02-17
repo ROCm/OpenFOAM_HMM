@@ -616,7 +616,7 @@ int main(int argc, char *argv[])
                 surfFileNameBase.lessExt()
               + "_"
               + name(zone)
-              + ".ftr"
+              + ".obj"
             );
 
             Info<< "writing part " << zone << " size " << subSurf.size()

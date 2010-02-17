@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
     else
     {
         // Write local surface
-        fileName localPath = runTime.path()/runTime.caseName() + ".ftr";
+        fileName localPath = runTime.path()/runTime.caseName() + ".obj";
 
         Pout<< "Writing local surface to " << localPath << endl;
 

@@ -545,9 +545,9 @@ void calcPointVecs
 
             if (face0I == -1 && face1I == -1)
             {
-                Info<< "Writing surface to errorSurf.ftr" << endl;
+                Info<< "Writing surface to errorSurf.obj" << endl;
 
-                surf.write("errorSurf.ftr");
+                surf.write("errorSurf.obj");
 
                 FatalErrorIn("calcPointVecs(..)")
                     << "Cannot find two faces using border edge " << edgeI
@@ -557,7 +557,7 @@ void calcPointVecs
                     << " face1I:" << face1I << nl
                     << "faceToEdge:" << faceToEdge << nl
                     << "faceToPoint:" << faceToPoint
-                    << "Written surface to errorSurf.ftr"
+                    << "Written surface to errorSurf.obj"
                     << abort(FatalError);
             }
 
