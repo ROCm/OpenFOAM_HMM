@@ -44,7 +44,6 @@ License
 #include "pointFields.H"
 #include "slipPointPatchFields.H"
 #include "fixedValuePointPatchFields.H"
-#include "globalPointPatchFields.H"
 #include "calculatedPointPatchFields.H"
 #include "processorPointPatch.H"
 #include "globalIndex.H"
@@ -1409,11 +1408,7 @@ Foam::tmp<Foam::pointVectorField> Foam::meshRefinement::makeDisplacementField
 
     forAll(pointPatches, patchI)
     {
-        if (isA<globalPointPatch>(pointPatches[patchI]))
-        {
-            patchFieldTypes[patchI] = globalPointPatchVectorField::typeName;
-        }
-        else if (isA<processorPointPatch>(pointPatches[patchI]))
+        if (isA<processorPointPatch>(pointPatches[patchI]))
         {
             patchFieldTypes[patchI] = calculatedPointPatchVectorField::typeName;
         }

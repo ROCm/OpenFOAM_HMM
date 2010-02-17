@@ -27,7 +27,7 @@ License
 #include "pointBoundaryMesh.H"
 #include "polyBoundaryMesh.H"
 #include "facePointPatch.H"
-#include "globalPointPatch.H"
+#include "pointMesh.H"
 #include "PstreamBuffers.H"
 #include "lduSchedule.H"
 #include "globalMeshData.H"
@@ -102,31 +102,6 @@ void Foam::pointBoundaryMesh::calcGeometry()
             }
         }
     }
-}
-
-
-const Foam::globalPointPatch&
-Foam::pointBoundaryMesh::globalPatch() const
-{
-    const pointPatchList& patches = *this;
-
-    forAll (patches, patchI)
-    {
-        if (isType<globalPointPatch>(patches[patchI]))
-        {
-            return refCast<const globalPointPatch>(patches[patchI]);
-        }
-    }
-
-    FatalErrorIn
-    (
-        "const pointBoundaryMesh::"
-        "globalPointPatch& globalPatch() const"
-    )   << "patch not found."
-        << abort(FatalError);
-
-    // Dummy return
-    return refCast<const globalPointPatch>(patches[0]);
 }
 
 

@@ -103,9 +103,6 @@ class domainDecomposition
         //- Start indices for inter-processor patches
         labelListList procProcessorPatchStartIndex_;
 
-        //- List of globally shared point labels
-        labelList globallySharedPoints_;
-
         //- Are there cyclic-parallel faces
         bool cyclicParallel_;
 
