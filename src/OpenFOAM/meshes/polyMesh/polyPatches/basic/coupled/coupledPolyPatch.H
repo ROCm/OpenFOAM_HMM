@@ -64,6 +64,9 @@ class coupledPolyPatch
         //- Neighbour-cell transformation tensor
         mutable tensorField reverseT_;
 
+        //- Are faces collocated. Either size 0,1 or length of patch.
+        mutable boolList collocated_;
+
 public:
 
     // Static data members
@@ -261,7 +264,6 @@ public:
                 return separation_;
             }
 
-
             //- Are the cyclic planes parallel
             bool parallel() const
             {
@@ -278,6 +280,12 @@ public:
             const tensorField& reverseT() const
             {
                 return reverseT_;
+            }
+
+            //- Are faces collocated. Either size 0,1 or length of patch
+            const boolList& collocated() const
+            {
+                return collocated_;
             }
 
 
