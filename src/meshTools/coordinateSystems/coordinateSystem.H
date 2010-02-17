@@ -365,14 +365,14 @@ public:
             }
 
             //- Return axis (e3: local Cartesian z-axis)
-            // @deprecated method e3 is preferred
+            // @deprecated method e3 is preferred (deprecated Apr 2008)
             const vector& axis() const
             {
                 return Rtr_.z();
             }
 
             //- Return direction (e1: local Cartesian x-axis)
-            // @deprecated method e1 is preferred
+            // @deprecated method e1 is preferred (deprecated Apr 2008)
             const vector& direction() const
             {
                 return Rtr_.x();

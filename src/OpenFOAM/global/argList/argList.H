@@ -224,7 +224,7 @@ public:
             inline T argRead(const label index) const;
 
             //- Return arguments that are additional to the executable
-            //  @deprecated use operator[] directly (Feb 2010)
+            //  @deprecated use operator[] directly (deprecated Feb 2010)
             stringList::subList additionalArgs() const
             {
                 return stringList::subList(args_, args_.size()-1, 1);
