@@ -94,11 +94,11 @@ int main(int argc, char *argv[])
     {
         for (label count = 0; count < repeat; ++count)
         {
-            IFstream is(args.option("file"));
+            IFstream is(args["file"]);
 
             if (count == 0)
             {
-                Info<< "tokenizing file: " << args.option("file") << nl;
+                Info<< "tokenizing file: " << args["file"] << nl;
             }
 
             while (is.good())

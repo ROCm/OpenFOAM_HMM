@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
 
     if (args.optionFound("set"))
     {
-        fileName setName(args.option("set"));
+        const fileName setName = args["set"];
 
         Info<< "Reading existing feature set from file " << setName << endl;
 
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 
         set = surfaceFeatures(surf, includedAngle);
 
-        Info<< endl << "Writing initial features" << endl;
+        Info<< nl << "Writing initial features" << endl;
         set.write("initial.fSet");
         set.writeObj("initial");
     }
@@ -210,7 +210,10 @@ int main(int argc, char *argv[])
 
     if (args.optionFound("subsetBox"))
     {
-        treeBoundBox bb(args.optionLookup("subsetBox")());
+        treeBoundBox bb
+        (
+            args.optionLookup("subsetBox")()
+        );
 
         Info<< "Removing all edges outside bb " << bb << endl;
         dumpBox(bb, "subsetBox.obj");
@@ -225,7 +228,10 @@ int main(int argc, char *argv[])
     }
     else if (args.optionFound("deleteBox"))
     {
-        treeBoundBox bb(args.optionLookup("deleteBox")());
+        treeBoundBox bb
+        (
+            args.optionLookup("deleteBox")()
+        );
 
         Info<< "Removing all edges inside bb " << bb << endl;
         dumpBox(bb, "deleteBox.obj");

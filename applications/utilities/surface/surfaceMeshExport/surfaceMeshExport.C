@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("dict"))
         {
-            fileName dictPath(args.option("dict"));
+            const fileName dictPath = args["dict"];
 
             ioPtr.set
             (
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("from"))
         {
-            const word csName(args.option("from"));
+            const word csName = args["from"];
 
             label csId = csLst.find(csName);
             if (csId < 0)
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("to"))
         {
-            const word csName(args.option("to"));
+            const word csName = args["to"];
 
             label csId = csLst.find(csName);
             if (csId < 0)

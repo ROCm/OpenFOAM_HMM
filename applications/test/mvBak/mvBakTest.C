@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("ext"))
         {
-            if (mvBak(srcFile, args.option("ext")))
+            if (mvBak(srcFile, args["ext"]))
             {
                 ok++;
             }

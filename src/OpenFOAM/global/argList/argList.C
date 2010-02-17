@@ -251,7 +251,7 @@ bool Foam::argList::regroupArgv(int& argc, char**& argv)
 
     // note: we also re-write directly into args_
     // and use a second pass to sort out args/options
-    for (int argI = 0; argI < argc; argI++)
+    for (int argI = 0; argI < argc; ++argI)
     {
         if (strcmp(argv[argI], "(") == 0)
         {
@@ -369,7 +369,7 @@ Foam::argList::argList
 {
     // Check if this run is a parallel run by searching for any parallel option
     // If found call runPar which might filter argv
-    for (int argI = 0; argI < argc; argI++)
+    for (int argI = 0; argI < argc; ++argI)
     {
         if (argv[argI][0] == '-')
         {
@@ -395,7 +395,7 @@ Foam::argList::argList
     int nArgs = 1;
     string argListString = args_[0];
 
-    for (int argI = 1; argI < args_.size(); argI++)
+    for (int argI = 1; argI < args_.size(); ++argI)
     {
         argListString += ' ';
         argListString += args_[argI];

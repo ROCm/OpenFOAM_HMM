@@ -552,7 +552,7 @@ int main(int argc, char *argv[])
         << "edge snapping tol : " << edgeTol << nl;
     if (readSet)
     {
-        Info<< "candidate cells   : cellSet " << args.option("set") << nl;
+        Info<< "candidate cells   : cellSet " << args["set"] << nl;
     }
     else
     {
@@ -580,7 +580,7 @@ int main(int argc, char *argv[])
     if (readSet)
     {
         // Read cells to cut from cellSet
-        cellSet cells(mesh, args.option("set"));
+        cellSet cells(mesh, args["set"]);
 
         cellsToCut = cells;
     }

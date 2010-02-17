@@ -116,18 +116,20 @@ int main(int argc, char *argv[])
 
     pointField points(surf1.points());
 
-    if (args.optionFound("translate"))
+    vector v;
+    if (args.optionReadIfPresent("translate", v))
     {
-        vector transVector(args.optionLookup("translate")());
+        Info<< "Translating points by " << v << endl;
 
-        Info<< "Translating points by " << transVector << endl;
-
-        points += transVector;
+        points += v;
     }
 
     if (args.optionFound("rotate"))
     {
-        Pair<vector> n1n2(args.optionLookup("rotate")());
+        Pair<vector> n1n2
+        (
+            args.optionLookup("rotate")()
+        );
         n1n2[0] /= mag(n1n2[0]);
         n1n2[1] /= mag(n1n2[1]);
 
@@ -137,15 +139,12 @@ int main(int argc, char *argv[])
 
         points = transform(T, points);
     }
-    else if (args.optionFound("rollPitchYaw"))
+    else if (args.optionReadIfPresent("rollPitchYaw", v))
     {
-        vector v(args.optionLookup("rollPitchYaw")());
-
         Info<< "Rotating points by" << nl
             << "    roll  " << v.x() << nl
             << "    pitch " << v.y() << nl
-            << "    yaw   " << v.z() << endl;
-
+            << "    yaw   " << v.z() << nl;
 
         // Convert to radians
         v *= pi/180.0;
@@ -155,14 +154,12 @@ int main(int argc, char *argv[])
         Info<< "Rotating points by quaternion " << R << endl;
         points = transform(R, points);
     }
-    else if (args.optionFound("yawPitchRoll"))
+    else if (args.optionReadIfPresent("yawPitchRoll", v))
     {
-        vector v(args.optionLookup("yawPitchRoll")());
-
         Info<< "Rotating points by" << nl
             << "    yaw   " << v.x() << nl
             << "    pitch " << v.y() << nl
-            << "    roll  " << v.z() << endl;
+            << "    roll  " << v.z() << nl;
 
 
         // Convert to radians
@@ -180,15 +177,13 @@ int main(int argc, char *argv[])
         points = transform(R, points);
     }
 
-    if (args.optionFound("scale"))
+    if (args.optionReadIfPresent("scale", v))
     {
-        vector scaleVector(args.optionLookup("scale")());
+        Info<< "Scaling points by " << v << endl;
 
-        Info<< "Scaling points by " << scaleVector << endl;
-
-        points.replace(vector::X, scaleVector.x()*points.component(vector::X));
-        points.replace(vector::Y, scaleVector.y()*points.component(vector::Y));
-        points.replace(vector::Z, scaleVector.z()*points.component(vector::Z));
+        points.replace(vector::X, v.x()*points.component(vector::X));
+        points.replace(vector::Y, v.y()*points.component(vector::Y));
+        points.replace(vector::Z, v.z()*points.component(vector::Z));
     }
 
     surf1.movePoints(points);

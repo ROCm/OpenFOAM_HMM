@@ -64,6 +64,12 @@ inline const Foam::stringList& Foam::argList::args() const
 }
 
 
+inline const Foam::string& Foam::argList::arg(const label index) const
+{
+    return args_[index];
+}
+
+
 inline Foam::label Foam::argList::size() const
 {
     return args_.size();
@@ -78,7 +84,7 @@ inline const Foam::HashTable<Foam::string>& Foam::argList::options() const
 
 inline const Foam::string& Foam::argList::option(const word& opt) const
 {
-    return options_.operator[](opt);
+    return options_[opt];
 }
 
 
@@ -90,7 +96,7 @@ inline bool Foam::argList::optionFound(const word& opt) const
 
 inline Foam::IStringStream Foam::argList::optionLookup(const word& opt) const
 {
-    return IStringStream(option(opt));
+    return IStringStream(options_[opt]);
 }
 
 
@@ -127,7 +133,7 @@ namespace Foam
     inline Foam::string
     Foam::argList::optionRead<Foam::string>(const word& opt) const
     {
-        return option(opt);
+        return options_[opt];
     }
 
     // Template specialization for word
@@ -135,7 +141,7 @@ namespace Foam
     inline Foam::word
     Foam::argList::optionRead<Foam::word>(const word& opt) const
     {
-        return option(opt);
+        return options_[opt];
     }
 
     // Template specialization for fileName
@@ -143,7 +149,7 @@ namespace Foam
     inline Foam::fileName
     Foam::argList::optionRead<Foam::fileName>(const word& opt) const
     {
-        return option(opt);
+        return options_[opt];
     }
 }
 
@@ -232,6 +238,12 @@ inline T Foam::argList::optionLookupOrDefault
 inline const Foam::string& Foam::argList::operator[](const label index) const
 {
     return args_[index];
+}
+
+
+inline const Foam::string& Foam::argList::operator[](const word& opt) const
+{
+    return options_[opt];
 }
 
 

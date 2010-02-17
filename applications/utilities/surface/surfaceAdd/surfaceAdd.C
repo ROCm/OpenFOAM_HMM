@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
             << nl << endl;
 
         Info<< "Surface  : " << inFileName1<< nl
-            << "Points   : " << args.option("points") << nl
+            << "Points   : " << args["points"] << nl
             << "Writing  : " << outFileName << nl << endl;
     }
     else
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
 
     if (addPoint)
     {
-        IFstream pointsFile(args.option("points"));
+        IFstream pointsFile(args["points"]);
         pointField extraPoints(pointsFile);
 
         Info<< "Additional Points:" << extraPoints.size() << endl;

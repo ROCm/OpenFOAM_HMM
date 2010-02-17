@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
 
     if (args.optionFound("patch"))
     {
-        word patchName(args.option("patch"));
+        const word patchName = args["patch"];
 
         patchI = mesh.boundaryMesh().findPatchID(patchName);
 

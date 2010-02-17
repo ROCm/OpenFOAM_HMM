@@ -1326,9 +1326,8 @@ int main(int argc, char *argv[])
     const word oldInstance = mesh.pointsInstance();
 
     word blockedFacesName;
-    if (args.optionFound("blockedFaces"))
+    if (args.optionReadIfPresent("blockedFaces", blockedFacesName))
     {
-        blockedFacesName = args.option("blockedFaces");
         Info<< "Reading blocked internal faces from faceSet "
             << blockedFacesName << nl << endl;
     }
@@ -1882,7 +1881,7 @@ int main(int argc, char *argv[])
 
         if (insidePoint)
         {
-            point insidePoint(args.optionLookup("insidePoint")());
+            const point insidePoint = args.optionRead<point>("insidePoint");
 
             label regionI = -1;
 

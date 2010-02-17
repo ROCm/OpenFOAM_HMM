@@ -193,7 +193,7 @@ public:
 
         // Access
 
-            //- Name of executable
+            //- Name of executable without the path
             inline const word& executable() const;
 
             //- Return root path
@@ -211,13 +211,11 @@ public:
             //- Return arguments
             inline const stringList& args() const;
 
+            //- Return the argument corresponding to index.
+            inline const string& arg(const label index) const;
+
             //- Return the number of arguments
             inline label size() const;
-
-            //- Return the argument corresponding to index.
-            //  Index 0 corresponds to the name of the executable.
-            //  Index 1 corresponds to the first argument.
-            inline const string& operator[](const label index) const;
 
             //- Read a value from the argument at index.
             //  Index 0 corresponds to the name of the executable.
@@ -281,6 +279,15 @@ public:
                 return readList<T>(optionLookup(opt)());
             }
 
+
+            //- Return the argument corresponding to index.
+            //  Index 0 corresponds to the name of the executable.
+            //  Index 1 corresponds to the first argument.
+            inline const string& operator[](const label index) const;
+
+            //- Return the argument string associated with the named option
+            //  @sa option()
+            inline const string& operator[](const word& opt) const;
 
         // Edit
 

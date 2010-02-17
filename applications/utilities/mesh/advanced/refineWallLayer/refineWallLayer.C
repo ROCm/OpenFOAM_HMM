@@ -101,20 +101,17 @@ int main(int argc, char *argv[])
     // List of cells to refine
     //
 
-    bool useSet = args.optionFound("useSet");
-
-    if (useSet)
+    word setName;
+    if (args.optionReadIfPresent("useSet", setName))
     {
-        word setName(args.option("useSet"));
-
-        Info<< "Subsetting cells to cut based on cellSet" << setName << endl
-            << endl;
+        Info<< "Subsetting cells to cut based on cellSet"
+            << setName << nl << endl;
 
         cellSet cells(mesh, setName);
 
         Info<< "Read " << cells.size() << " cells from cellSet "
             << cells.instance()/cells.local()/cells.name()
-            << endl << endl;
+            << nl << endl;
 
         for
         (
@@ -125,8 +122,8 @@ int main(int argc, char *argv[])
         {
             cutCells.erase(iter.key());
         }
-        Info<< "Removed from cells to cut all the ones not in set " << setName
-            << endl << endl;
+        Info<< "Removed from cells to cut all the ones not in set "
+            << setName << nl << endl;
     }
 
     // Mark all meshpoints on patch
@@ -180,9 +177,9 @@ int main(int argc, char *argv[])
     allCutEdges.shrink();
     allCutEdgeWeights.shrink();
 
-    Info<< "Cutting:" << endl
-        << "    cells:" << cutCells.size() << endl
-        << "    edges:" << allCutEdges.size() << endl
+    Info<< "Cutting:" << nl
+        << "    cells:" << cutCells.size() << nl
+        << "    edges:" << allCutEdges.size() << nl
         << endl;
 
     // Transfer DynamicLists to straight ones.

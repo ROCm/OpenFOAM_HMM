@@ -85,12 +85,14 @@ int main(int argc, char *argv[])
 
     if (args.optionFound("patches"))
     {
-        wordList patchNames(args.optionLookup("patches")());
+        const wordList patchNames
+        (
+            args.optionLookup("patches")()
+        );
 
         forAll(patchNames, patchNameI)
         {
             const word& patchName = patchNames[patchNameI];
-
             label patchI = bMesh.findPatchID(patchName);
 
             if (patchI == -1)
