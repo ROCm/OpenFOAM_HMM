@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ void dumpBox(const treeBoundBox& bb, const fileName& fName)
 {
     OFstream str(fName);
 
-    Pout<< "Dumping bounding box " << bb << " as lines to obj file "
+    Info<< "Dumping bounding box " << bb << " as lines to obj file "
         << str.name() << endl;
 
 
@@ -106,14 +106,14 @@ int main(int argc, char *argv[])
     argList::addOption("deleteBox", "((x0 y0 z0)(x1 y1 z1))");
     argList args(argc, argv);
 
-    Pout<< "Feature line extraction is only valid on closed manifold surfaces."
+    Info<< "Feature line extraction is only valid on closed manifold surfaces."
         << endl;
 
 
-    fileName surfFileName(args.additionalArgs()[0]);
-    fileName outFileName(args.additionalArgs()[1]);
+    const fileName surfFileName = args[1];
+    const fileName outFileName  = args[2];
 
-    Pout<< "Surface            : " << surfFileName << nl
+    Info<< "Surface            : " << surfFileName << nl
         << "Output feature set : " << outFileName << nl
         << endl;
 
@@ -123,9 +123,9 @@ int main(int argc, char *argv[])
 
     triSurface surf(surfFileName);
 
-    Pout<< "Statistics:" << endl;
-    surf.writeStats(Pout);
-    Pout<< endl;
+    Info<< "Statistics:" << endl;
+    surf.writeStats(Info);
+    Info<< endl;
 
 
 
@@ -136,9 +136,9 @@ int main(int argc, char *argv[])
 
     if (args.optionFound("set"))
     {
-        fileName setName(args.option("set"));
+        const fileName setName = args["set"];
 
-        Pout<< "Reading existing feature set from file " << setName << endl;
+        Info<< "Reading existing feature set from file " << setName << endl;
 
         set = surfaceFeatures(surf, setName);
     }
@@ -146,12 +146,12 @@ int main(int argc, char *argv[])
     {
         scalar includedAngle = args.optionRead<scalar>("includedAngle");
 
-        Pout<< "Constructing feature set from included angle " << includedAngle
+        Info<< "Constructing feature set from included angle " << includedAngle
             << endl;
 
         set = surfaceFeatures(surf, includedAngle);
 
-        Pout<< endl << "Writing initial features" << endl;
+        Info<< nl << "Writing initial features" << endl;
         set.write("initial.fSet");
         set.writeObj("initial");
     }
@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
     }
 
 
-    Pout<< nl
+    Info<< nl
         << "Initial feature set:" << nl
         << "    feature points : " << set.featurePoints().size() << nl
         << "    feature edges  : " << set.featureEdges().size() << nl
@@ -184,20 +184,20 @@ int main(int argc, char *argv[])
     scalar minLen = -GREAT;
     if (args.optionReadIfPresent("minLen", minLen))
     {
-        Pout<< "Removing features of length < " << minLen << endl;
+        Info<< "Removing features of length < " << minLen << endl;
     }
 
     label minElem = 0;
     if (args.optionReadIfPresent("minElem", minElem))
     {
-        Pout<< "Removing features with number of edges < " << minElem << endl;
+        Info<< "Removing features with number of edges < " << minElem << endl;
     }
 
     // Trim away small groups of features
     if (minElem > 0 || minLen > 0)
     {
         set.trimFeatures(minLen, minElem);
-        Pout<< endl << "Removed small features" << endl;
+        Info<< endl << "Removed small features" << endl;
     }
 
 
@@ -210,9 +210,12 @@ int main(int argc, char *argv[])
 
     if (args.optionFound("subsetBox"))
     {
-        treeBoundBox bb(args.optionLookup("subsetBox")());
+        treeBoundBox bb
+        (
+            args.optionLookup("subsetBox")()
+        );
 
-        Pout<< "Removing all edges outside bb " << bb << endl;
+        Info<< "Removing all edges outside bb " << bb << endl;
         dumpBox(bb, "subsetBox.obj");
 
         deleteBox
@@ -225,9 +228,12 @@ int main(int argc, char *argv[])
     }
     else if (args.optionFound("deleteBox"))
     {
-        treeBoundBox bb(args.optionLookup("deleteBox")());
+        treeBoundBox bb
+        (
+            args.optionLookup("deleteBox")()
+        );
 
-        Pout<< "Removing all edges inside bb " << bb << endl;
+        Info<< "Removing all edges inside bb " << bb << endl;
         dumpBox(bb, "deleteBox.obj");
 
         deleteBox
@@ -242,14 +248,14 @@ int main(int argc, char *argv[])
     surfaceFeatures newSet(surf);
     newSet.setFromStatus(edgeStat);
 
-    Pout<< endl << "Writing trimmed features to " << outFileName << endl;
+    Info<< endl << "Writing trimmed features to " << outFileName << endl;
     newSet.write(outFileName);
 
-    Pout<< endl << "Writing edge objs." << endl;
+    Info<< endl << "Writing edge objs." << endl;
     newSet.writeObj("final");
 
 
-    Pout<< nl
+    Info<< nl
         << "Final feature set:" << nl
         << "    feature points : " << newSet.featurePoints().size() << nl
         << "    feature edges  : " << newSet.featureEdges().size() << nl
@@ -259,7 +265,7 @@ int main(int argc, char *argv[])
         << "        internal edges : " << newSet.nInternalEdges() << nl
         << endl;
 
-    Pout<< "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

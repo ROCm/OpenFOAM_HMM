@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,8 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Converts CHEMKINIII thermodynamics and reaction data files into FOAM format
+    Converts CHEMKINIII thermodynamics and reaction data files into
+    OpenFOAM format.
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,19 +46,14 @@ int main(int argc, char *argv[])
     argList::validArgs.append("FOAMThermodynamicsFile");
     argList args(argc, argv);
 
-    fileName CHEMKINFileName(args.additionalArgs()[0]);
-    fileName thermoFileName(args.additionalArgs()[1]);
-    fileName FOAMChemistryFileName(args.additionalArgs()[2]);
-    fileName FOAMThermodynamicsFileName(args.additionalArgs()[3]);
+    chemkinReader cr(args[1], args[2]);
 
-    chemkinReader cr(CHEMKINFileName, thermoFileName);
-
-    OFstream reactionsFile(FOAMChemistryFileName);
+    OFstream reactionsFile(args[3]);
     reactionsFile
         << "species" << cr.species() << token::END_STATEMENT << nl << nl
         << "reactions" << cr.reactions() << token::END_STATEMENT << endl;
 
-    OFstream thermoFile(FOAMThermodynamicsFileName);
+    OFstream thermoFile(args[4]);
     thermoFile<< cr.speciesThermo() << endl;
 
     Info<< "End\n" << endl;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,10 +62,8 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    bool readHex = args.optionFound("hex");
-
-    fileName mshFile(args.additionalArgs()[0]);
-    IFstream mshStream(mshFile);
+    const bool readHex = args.optionFound("hex");
+    IFstream mshStream(args[1]);
 
     label nCells;
     mshStream >> nCells;

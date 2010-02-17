@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -210,7 +210,9 @@ int main(int argc, char *argv[])
         )
     );
 
+    const bool doRotateFields = args.optionFound("rotateFields");
 
+    // this is not actually stringent enough:
     if (args.options().empty())
     {
         FatalErrorIn(args.executable())
@@ -219,18 +221,20 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    if (args.optionFound("translate"))
+    vector v;
+    if (args.optionReadIfPresent("translate", v))
     {
-        vector transVector(args.optionLookup("translate")());
+        Info<< "Translating points by " << v << endl;
 
-        Info<< "Translating points by " << transVector << endl;
-
-        points += transVector;
+        points += v;
     }
 
     if (args.optionFound("rotate"))
     {
-        Pair<vector> n1n2(args.optionLookup("rotate")());
+        Pair<vector> n1n2
+        (
+            args.optionLookup("rotate")()
+        );
         n1n2[0] /= mag(n1n2[0]);
         n1n2[1] /= mag(n1n2[1]);
         tensor T = rotationTensor(n1n2[0], n1n2[1]);
@@ -239,20 +243,17 @@ int main(int argc, char *argv[])
 
         points = transform(T, points);
 
-        if (args.optionFound("rotateFields"))
+        if (doRotateFields)
         {
             rotateFields(args, runTime, T);
         }
     }
-    else if (args.optionFound("rollPitchYaw"))
+    else if (args.optionReadIfPresent("rollPitchYaw", v))
     {
-        vector v(args.optionLookup("rollPitchYaw")());
-
         Info<< "Rotating points by" << nl
             << "    roll  " << v.x() << nl
             << "    pitch " << v.y() << nl
-            << "    yaw   " << v.z() << endl;
-
+            << "    yaw   " << v.z() << nl;
 
         // Convert to radians
         v *= pi/180.0;
@@ -262,20 +263,17 @@ int main(int argc, char *argv[])
         Info<< "Rotating points by quaternion " << R << endl;
         points = transform(R, points);
 
-        if (args.optionFound("rotateFields"))
+        if (doRotateFields)
         {
             rotateFields(args, runTime, R.R());
         }
     }
-    else if (args.optionFound("yawPitchRoll"))
+    else if (args.optionReadIfPresent("yawPitchRoll", v))
     {
-        vector v(args.optionLookup("yawPitchRoll")());
-
         Info<< "Rotating points by" << nl
             << "    yaw   " << v.x() << nl
             << "    pitch " << v.y() << nl
-            << "    roll  " << v.z() << endl;
-
+            << "    roll  " << v.z() << nl;
 
         // Convert to radians
         v *= pi/180.0;
@@ -291,21 +289,19 @@ int main(int argc, char *argv[])
         Info<< "Rotating points by quaternion " << R << endl;
         points = transform(R, points);
 
-        if (args.optionFound("rotateFields"))
+        if (doRotateFields)
         {
             rotateFields(args, runTime, R.R());
         }
     }
 
-    if (args.optionFound("scale"))
+    if (args.optionReadIfPresent("scale", v))
     {
-        vector scaleVector(args.optionLookup("scale")());
+        Info<< "Scaling points by " << v << endl;
 
-        Info<< "Scaling points by " << scaleVector << endl;
-
-        points.replace(vector::X, scaleVector.x()*points.component(vector::X));
-        points.replace(vector::Y, scaleVector.y()*points.component(vector::Y));
-        points.replace(vector::Z, scaleVector.z()*points.component(vector::Z));
+        points.replace(vector::X, v.x()*points.component(vector::X));
+        points.replace(vector::Y, v.y()*points.component(vector::Y));
+        points.replace(vector::Z, v.z()*points.component(vector::Z));
     }
 
     // Set the precision of the points data to 10

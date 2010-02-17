@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
-     \\/     M anispulation  |
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,10 +75,10 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    vector n1(IStringStream(args.additionalArgs()[0])());
+    vector n1 = args.argRead<vector>(1);
     n1 /= mag(n1);
 
-    vector n2(IStringStream(args.additionalArgs()[1])());
+    vector n2 = args.argRead<vector>(2);
     n2 /= mag(n2);
 
     tensor T = rotationTensor(n1, n2);

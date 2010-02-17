@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,6 +64,18 @@ inline const Foam::stringList& Foam::argList::args() const
 }
 
 
+inline const Foam::string& Foam::argList::arg(const label index) const
+{
+    return args_[index];
+}
+
+
+inline Foam::label Foam::argList::size() const
+{
+    return args_.size();
+}
+
+
 inline const Foam::HashTable<Foam::string>& Foam::argList::options() const
 {
     return options_;
@@ -72,7 +84,7 @@ inline const Foam::HashTable<Foam::string>& Foam::argList::options() const
 
 inline const Foam::string& Foam::argList::option(const word& opt) const
 {
-    return options_.operator[](opt);
+    return options_[opt];
 }
 
 
@@ -84,7 +96,7 @@ inline bool Foam::argList::optionFound(const word& opt) const
 
 inline Foam::IStringStream Foam::argList::optionLookup(const word& opt) const
 {
-    return IStringStream(option(opt));
+    return IStringStream(options_[opt]);
 }
 
 
@@ -95,9 +107,33 @@ namespace Foam
     // Template specialization for string
     template<>
     inline Foam::string
+    Foam::argList::argRead<Foam::string>(const label index) const
+    {
+        return args_[index];
+    }
+
+    // Template specialization for word
+    template<>
+    inline Foam::word
+    Foam::argList::argRead<Foam::word>(const label index) const
+    {
+        return args_[index];
+    }
+
+    // Template specialization for fileName
+    template<>
+    inline Foam::fileName
+    Foam::argList::argRead<Foam::fileName>(const label index) const
+    {
+        return args_[index];
+    }
+
+    // Template specialization for string
+    template<>
+    inline Foam::string
     Foam::argList::optionRead<Foam::string>(const word& opt) const
     {
-        return option(opt);
+        return options_[opt];
     }
 
     // Template specialization for word
@@ -105,7 +141,7 @@ namespace Foam
     inline Foam::word
     Foam::argList::optionRead<Foam::word>(const word& opt) const
     {
-        return option(opt);
+        return options_[opt];
     }
 
     // Template specialization for fileName
@@ -113,12 +149,22 @@ namespace Foam
     inline Foam::fileName
     Foam::argList::optionRead<Foam::fileName>(const word& opt) const
     {
-        return option(opt);
+        return options_[opt];
     }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class T>
+inline T Foam::argList::argRead(const label index) const
+{
+    T val;
+
+    IStringStream(args_[index])() >> val;
+    return val;
+}
+
 
 template<class T>
 inline T Foam::argList::optionRead(const word& opt) const
@@ -184,6 +230,20 @@ inline T Foam::argList::optionLookupOrDefault
     {
         return deflt;
     }
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline const Foam::string& Foam::argList::operator[](const label index) const
+{
+    return args_[index];
+}
+
+
+inline const Foam::string& Foam::argList::operator[](const word& opt) const
+{
+    return options_[opt];
 }
 
 

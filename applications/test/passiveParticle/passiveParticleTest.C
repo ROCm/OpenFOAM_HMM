@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     #include "createMesh.H"
     runTime.functionObjects().off();
 
-    const word cloudName(args.additionalArgs()[0]);
+    const word cloudName = args[1];
 
     {
         // Start with empty cloud

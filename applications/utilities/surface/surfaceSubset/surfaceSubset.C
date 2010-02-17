@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,12 +54,15 @@ int main(int argc, char *argv[])
     argList::validArgs.append("output file");
     argList args(argc, argv);
 
-    Info<< "Reading dictionary " << args.additionalArgs()[0] << " ..." << endl;
-    IFstream dictFile(args.additionalArgs()[0]);
+    Info<< "Reading dictionary " << args[1] << " ..." << endl;
+    IFstream dictFile(args[1]);
     dictionary meshSubsetDict(dictFile);
 
-    Info<< "Reading surface " << args.additionalArgs()[1] << " ..." << endl;
-    triSurface surf1(args.additionalArgs()[1]);
+    Info<< "Reading surface " << args[2] << " ..." << endl;
+    triSurface surf1(args[2]);
+
+    const fileName outFileName(args[3]);
+
 
     Info<< "Original:" << endl;
     surf1.writeStats(Info);
@@ -360,8 +363,6 @@ int main(int argc, char *argv[])
     Info<< "Subset:" << endl;
     surf2.writeStats(Info);
     Info<< endl;
-
-    fileName outFileName(args.additionalArgs()[2]);
 
     Info<< "Writing surface to " << outFileName << endl;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -188,10 +188,10 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
 
-    bool checkSelfIntersection = args.optionFound("checkSelfIntersection");
-    bool verbose = args.optionFound("verbose");
+    const fileName surfFileName = args[1];
+    const bool checkSelfIntersect = args.optionFound("checkSelfIntersection");
+    const bool verbose = args.optionFound("verbose");
 
-    fileName surfFileName(args.additionalArgs()[0]);
     Info<< "Reading surface from " << surfFileName << " ..." << nl << endl;
 
 
@@ -616,7 +616,7 @@ int main(int argc, char *argv[])
                 surfFileNameBase.lessExt()
               + "_"
               + name(zone)
-              + ".ftr"
+              + ".obj"
             );
 
             Info<< "writing part " << zone << " size " << subSurf.size()
@@ -657,7 +657,7 @@ int main(int argc, char *argv[])
     // Check self-intersection
     // ~~~~~~~~~~~~~~~~~~~~~~~
 
-    if (checkSelfIntersection)
+    if (checkSelfIntersect)
     {
         Info<< "Checking self-intersection." << endl;
 

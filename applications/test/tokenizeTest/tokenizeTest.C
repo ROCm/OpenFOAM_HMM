@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,9 +54,9 @@ int main(int argc, char *argv[])
     cpuTime timer;
     for (label count = 0; count < repeat; ++count)
     {
-        forAll(args.additionalArgs(), argI)
+        for (label argI=1; argI < args.size(); ++argI)
         {
-            const string& rawArg = args.additionalArgs()[argI];
+            const string& rawArg = args[argI];
             if (count == 0)
             {
                 Info<< "input string: " << rawArg << nl;
@@ -94,11 +94,11 @@ int main(int argc, char *argv[])
     {
         for (label count = 0; count < repeat; ++count)
         {
-            IFstream is(args.option("file"));
+            IFstream is(args["file"]);
 
             if (count == 0)
             {
-                Info<< "tokenizing file: " << args.option("file") << nl;
+                Info<< "tokenizing file: " << args["file"] << nl;
             }
 
             while (is.good())

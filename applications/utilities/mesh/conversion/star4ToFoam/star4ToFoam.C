@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -81,7 +81,6 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());
-    const stringList& params = args.additionalArgs();
 
     // default rescale from [mm] to [m]
     scalar scaleFactor = args.optionLookupOrDefault("scale", 0.001);
@@ -103,7 +102,7 @@ int main(int argc, char *argv[])
     IOstream::defaultPrecision(10);
 
     // remove extensions and/or trailing '.'
-    fileName prefix = fileName(params[0]).lessExt();
+    const fileName prefix = fileName(args[1]).lessExt();
 
     meshReaders::STARCD reader(prefix, runTime, scaleFactor);
 
