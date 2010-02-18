@@ -21,7 +21,7 @@ FoamFile
 useSurface      false;
 
 // Surface to keep to
-surface         "plexi.ftr";
+surface         "plexi.obj";
 
 // What is outside
 outsidePoints   ((-1 -1 -1));

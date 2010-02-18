@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -125,12 +125,13 @@ label findPatchID(const polyMesh& mesh, const word& name)
 
 int main(int argc, char *argv[])
 {
+#   include "addOverwriteOption.H"
 #   include "addRegionOption.H"
+
     argList::validArgs.append("faceZone");
     argList::validArgs.append("patch");
     argList::addOption("additionalPatches", "(patch2 .. patchN)");
     argList::addBoolOption("internalFacesOnly");
-    argList::addBoolOption("overwrite");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -142,7 +143,7 @@ int main(int argc, char *argv[])
     const faceZoneMesh& faceZones = mesh.faceZones();
 
     // Faces to baffle
-    faceZoneID zoneID(args.additionalArgs()[0], faceZones);
+    faceZoneID zoneID(args[1], faceZones);
 
     Info<< "Converting faces on zone " << zoneID.name()
         << " into baffles." << nl << endl;
@@ -167,7 +168,7 @@ int main(int argc, char *argv[])
     // Patches to put baffles into
     DynamicList<label> newPatches(1);
 
-    word patchName(args.additionalArgs()[1]);
+    const word patchName = args[2];
     newPatches.append(findPatchID(mesh, patchName));
     Info<< "Using patch " << patchName
         << " at index " << newPatches[0] << endl;
@@ -191,9 +192,8 @@ int main(int argc, char *argv[])
     }
 
 
-    bool overwrite = args.optionFound("overwrite");
-
-    bool internalFacesOnly = args.optionFound("internalFacesOnly");
+    const bool overwrite = args.optionFound("overwrite");
+    const bool internalFacesOnly = args.optionFound("internalFacesOnly");
 
     if (internalFacesOnly)
     {

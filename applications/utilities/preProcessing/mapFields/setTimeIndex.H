@@ -2,7 +2,7 @@
     label sourceTimeIndex = runTimeSource.timeIndex();
     if (args.optionFound("sourceTime"))
     {
-        if (args.option("sourceTime") == "latestTime")
+        if (args["sourceTime"] == "latestTime")
         {
             sourceTimeIndex = sourceTimes.size() - 1;
         }

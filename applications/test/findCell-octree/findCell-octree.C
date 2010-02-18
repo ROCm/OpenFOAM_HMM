@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createMesh.H"
 
-    point sample(IStringStream(args.additionalArgs()[0])());
+    const point sample = args.argRead<point>(1);
 
     treeBoundBox meshBb(mesh.points());
 
@@ -82,8 +82,8 @@ int main(int argc, char *argv[])
     );
 
     Info<< "Point:" << sample << " is in shape "
-        << oc.find(sample) << endl;
-    Info<< "Point:" << sample << " is in cell  "
+        << oc.find(sample) << nl
+        << "Point:" << sample << " is in cell  "
         << mesh.findCell(sample) << endl;
 
 

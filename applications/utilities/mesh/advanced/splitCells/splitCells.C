@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -524,11 +524,11 @@ void collectCuts
 
 int main(int argc, char *argv[])
 {
+#   include "addOverwriteOption.H"
     argList::noParallel();
     argList::addOption("set", "cellSet name");
     argList::addBoolOption("geometry");
     argList::addOption("tol", "edge snap tolerance");
-    argList::addBoolOption("overwrite");
     argList::validArgs.append("edge angle [0..360]");
 
 #   include "setRootCase.H"
@@ -537,14 +537,13 @@ int main(int argc, char *argv[])
 #   include "createPolyMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
+    const scalar featureAngle = args.argRead<scalar>(1);
+    const scalar minCos = Foam::cos(degToRad(featureAngle));
+    const scalar minSin = Foam::sin(degToRad(featureAngle));
 
-    scalar minCos = Foam::cos(degToRad(featureAngle));
-    scalar minSin = Foam::sin(degToRad(featureAngle));
-
-    bool readSet   = args.optionFound("set");
-    bool geometry  = args.optionFound("geometry");
-    bool overwrite = args.optionFound("overwrite");
+    const bool readSet   = args.optionFound("set");
+    const bool geometry  = args.optionFound("geometry");
+    const bool overwrite = args.optionFound("overwrite");
 
     scalar edgeTol = args.optionLookupOrDefault("tol", 0.2);
 
@@ -553,7 +552,7 @@ int main(int argc, char *argv[])
         << "edge snapping tol : " << edgeTol << nl;
     if (readSet)
     {
-        Info<< "candidate cells   : cellSet " << args.option("set") << nl;
+        Info<< "candidate cells   : cellSet " << args["set"] << nl;
     }
     else
     {
@@ -581,7 +580,7 @@ int main(int argc, char *argv[])
     if (readSet)
     {
         // Read cells to cut from cellSet
-        cellSet cells(mesh, args.option("set"));
+        cellSet cells(mesh, args["set"]);
 
         cellsToCut = cells;
     }

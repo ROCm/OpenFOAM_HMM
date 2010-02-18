@@ -15,13 +15,13 @@
          FatalError.exit();
     }
 
-    fileName rootDirMaster(args.additionalArgs()[0]);
-    fileName caseDirMaster(args.additionalArgs()[1]);
+    fileName rootDirMaster = args[1];
+    fileName caseDirMaster = args[2];
     word masterRegion = polyMesh::defaultRegion;
     args.optionReadIfPresent("masterRegion", masterRegion);
 
-    fileName rootDirToAdd(args.additionalArgs()[2]);
-    fileName caseDirToAdd(args.additionalArgs()[3]);
+    fileName rootDirToAdd = args[3];
+    fileName caseDirToAdd = args[4];
     word addRegion = polyMesh::defaultRegion;
     args.optionReadIfPresent("addRegion", addRegion);
 
@@ -29,3 +29,4 @@
         << "  region " << masterRegion << nl
         << "mesh to add: " << rootDirToAdd << " " << caseDirToAdd
         << "  region " << addRegion << endl;
+

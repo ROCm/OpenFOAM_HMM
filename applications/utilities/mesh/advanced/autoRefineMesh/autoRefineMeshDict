@@ -17,7 +17,7 @@ FoamFile
 
 
 // Surface to keep to
-surface         "plexi.ftr";
+surface         "plexi.obj";
 
 // What is outside. These points have to be inside a cell (so not on a face!)
 outsidePoints   ((-0.99001 -0.99001 -0.99001));

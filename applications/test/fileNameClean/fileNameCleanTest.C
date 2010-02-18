@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv, false, true);
 
-    if (args.additionalArgs().empty() && args.options().empty())
+    if (args.size() <= 1 && args.options().empty())
     {
         args.printUsage();
     }
@@ -90,9 +90,9 @@ int main(int argc, char *argv[])
         printCleaning(pathName);
     }
 
-    forAll(args.additionalArgs(), argI)
+    for (label argI=1; argI < args.size(); ++argI)
     {
-        pathName = args.additionalArgs()[argI];
+        pathName = args[argI];
         printCleaning(pathName);
     }
 

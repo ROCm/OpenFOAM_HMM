@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anispulation  |
 -------------------------------------------------------------------------------
 License
@@ -367,8 +367,8 @@ int main(int argc, char *argv[])
     argList::addBoolOption("blockOrder");
     argList::addBoolOption("orderPoints");
     argList::addBoolOption("writeMaps");
-    argList::addBoolOption("overwrite");
 
+#   include "addOverwriteOption.H"
 #   include "addTimeOptions.H"
 
 #   include "setRootCase.H"
@@ -409,7 +409,7 @@ int main(int argc, char *argv[])
             << endl;
     }
 
-    bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.optionFound("overwrite");
 
     label band = getBand(mesh.faceOwner(), mesh.faceNeighbour());
 
