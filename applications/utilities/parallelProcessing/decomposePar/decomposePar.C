@@ -676,7 +676,7 @@ int main(int argc, char *argv[])
                 )
             );
 
-            pointMesh procPMesh(procMesh, true);
+            pointMesh procPMesh(procMesh);
 
             pointFieldDecomposer fieldDecomposer
             (

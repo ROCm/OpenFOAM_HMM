@@ -27,7 +27,6 @@ License
 #include "motionSmoother.H"
 #include "meshTools.H"
 #include "processorPointPatchFields.H"
-#include "globalPointPatchFields.H"
 #include "pointConstraint.H"
 #include "syncTools.H"
 
