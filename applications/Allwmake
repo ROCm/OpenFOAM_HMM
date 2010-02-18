@@ -10,7 +10,7 @@ wmakeCheckPwd "$WM_PROJECT_DIR/applications" || {
 
 set -x
 
-wmake all solvers
 wmake all utilities
+wmake all solvers
 
 # ----------------------------------------------------------------- end-of-file
