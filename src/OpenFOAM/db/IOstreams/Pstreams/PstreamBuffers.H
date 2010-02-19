@@ -106,6 +106,9 @@ class PstreamBuffers
         //- receive buffer
         List<DynamicList<char> > recvBuf_;
 
+        //- read position in recvBuf_
+        labelList recvBufPos_;
+
         bool finishedSendsCalled_;
 
     // Private member functions
@@ -128,6 +131,10 @@ public:
             IOstream::streamFormat format=IOstream::BINARY,
             IOstream::versionNumber version=IOstream::currentVersion
         );
+
+    // Destructor
+
+        ~PstreamBuffers();
 
 
     // Member functions

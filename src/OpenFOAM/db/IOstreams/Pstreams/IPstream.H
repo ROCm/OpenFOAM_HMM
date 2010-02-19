@@ -55,6 +55,9 @@ class IPstream
     public UIPstream
 {
 
+    //- Receive index
+    label externalBufPosition_;
+
 public:
 
     // Constructors
