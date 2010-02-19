@@ -57,7 +57,6 @@ void Foam::cyclicPointPatch::calcGeometry(PstreamBuffers&)
 {
     const edgeList& cp = cyclicPolyPatch_.coupledPoints();
     const labelList& mp = cyclicPolyPatch_.meshPoints();
-    const pointField& points = cyclicPolyPatch_.points();
 
     DynamicList<label> separated;
     forAll(cp, i)
