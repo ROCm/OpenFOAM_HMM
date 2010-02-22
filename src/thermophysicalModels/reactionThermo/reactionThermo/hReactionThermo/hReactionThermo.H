@@ -128,12 +128,6 @@ public:
             }
 
 
-        //- Sensible enthalpy [J/kg]
-        virtual tmp<volScalarField> hs() const = 0;
-
-        //- Chemical enthalpy [J/kg]
-        virtual tmp<volScalarField> hc() const = 0;
-
         //- Update properties
         virtual void correct() = 0;
 };

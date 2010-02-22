@@ -110,9 +110,28 @@ void writeAllData
 {
     if (nPrims)
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
+        if (!Pstream::master())
+        {
+            UOPstream toMaster(Pstream::masterNo(), pBufs);
+            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+            {
+                toMaster<< map(vf, prims, cmpt);
+            }
+        }
+
+        pBufs.finishedSends();
+
         if (Pstream::master())
         {
             ensightFile << key << nl;
+
+            PtrList<UIPstream> fromSlaves(Pstream::nProcs());
+            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            {
+                fromSlaves.set(slave, new UIPstream(slave, pBufs));
+            }
 
             for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
             {
@@ -120,18 +139,9 @@ void writeAllData
 
                 for (int slave=1; slave<Pstream::nProcs(); slave++)
                 {
-                    IPstream fromSlave(Pstream::scheduled, slave);
-                    scalarField data(fromSlave);
+                    scalarField data(fromSlaves[slave]);
                     writeData(data, ensightFile);
                 }
-            }
-        }
-        else
-        {
-            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
-            {
-                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-                toMaster<< map(vf, prims, cmpt);
             }
         }
     }
@@ -150,9 +160,28 @@ void writeAllDataBinary
 {
     if (nPrims)
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
+        if (!Pstream::master())
+        {
+            UOPstream toMaster(Pstream::masterNo(), pBufs);
+            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+            {
+                toMaster<< map(vf, prims, cmpt);
+            }
+        }
+
+        pBufs.finishedSends();
+
         if (Pstream::master())
         {
             writeEnsDataBinary(key,ensightFile);
+
+            PtrList<UIPstream> fromSlaves(Pstream::nProcs());
+            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            {
+                fromSlaves.set(slave, new UIPstream(slave, pBufs));
+            }
 
             for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
             {
@@ -160,18 +189,9 @@ void writeAllDataBinary
 
                 for (int slave=1; slave<Pstream::nProcs(); slave++)
                 {
-                    IPstream fromSlave(Pstream::scheduled, slave);
-                    scalarField data(fromSlave);
+                    scalarField data(fromSlaves[slave]);
                     writeEnsDataBinary(data, ensightFile);
                 }
-            }
-        }
-        else
-        {
-            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
-            {
-                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-                toMaster<< map(vf, prims, cmpt);
             }
         }
     }
@@ -190,9 +210,28 @@ void writeAllFaceData
 {
     if (nPrims)
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
+        if (!Pstream::master())
+        {
+            UOPstream toMaster(Pstream::masterNo(), pBufs);
+            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+            {
+                toMaster<< map(pf, prims, cmpt);
+            }
+        }
+
+        pBufs.finishedSends();
+
         if (Pstream::master())
         {
             ensightFile << key << nl;
+
+            PtrList<UIPstream> fromSlaves(Pstream::nProcs());
+            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            {
+                fromSlaves.set(slave, new UIPstream(slave, pBufs));
+            }
 
             for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
             {
@@ -200,19 +239,9 @@ void writeAllFaceData
 
                 for (int slave=1; slave<Pstream::nProcs(); slave++)
                 {
-                    IPstream fromSlave(Pstream::scheduled, slave);
-                    scalarField pf(fromSlave);
-
+                    scalarField pf(fromSlaves[slave]);
                     writeData(pf, ensightFile);
                 }
-            }
-        }
-        else
-        {
-            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
-            {
-                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-                toMaster<< map(pf, prims, cmpt);
             }
         }
     }
@@ -231,9 +260,28 @@ void writeAllFaceDataBinary
 {
     if (nPrims)
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
+        if (!Pstream::master())
+        {
+            UOPstream toMaster(Pstream::masterNo(), pBufs);
+            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+            {
+                toMaster<< map(pf, prims, cmpt);
+            }
+        }
+
+        pBufs.finishedSends();
+
         if (Pstream::master())
         {
             writeEnsDataBinary(key,ensightFile);
+
+            PtrList<UIPstream> fromSlaves(Pstream::nProcs());
+            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            {
+                fromSlaves.set(slave, new UIPstream(slave, pBufs));
+            }
 
             for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
             {
@@ -241,19 +289,9 @@ void writeAllFaceDataBinary
 
                 for (int slave=1; slave<Pstream::nProcs(); slave++)
                 {
-                    IPstream fromSlave(Pstream::scheduled, slave);
-                    scalarField pf(fromSlave);
-
+                    scalarField pf(fromSlaves[slave]);
                     writeEnsDataBinary(pf, ensightFile);
                 }
-            }
-        }
-        else
-        {
-            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
-            {
-                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-                toMaster<< map(pf, prims, cmpt);
             }
         }
     }
@@ -554,9 +592,28 @@ void ensightFieldAscii
 
         if (meshCellSets.nHexesWedges)
         {
+            PstreamBuffers pBufs(Pstream::nonBlocking);
+
+            if (!Pstream::master())
+            {
+                UOPstream toMaster(Pstream::masterNo(), pBufs);
+                for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+                {
+                    toMaster<< map(vf, hexes, wedges, cmpt);
+                }
+            }
+
+            pBufs.finishedSends();
+
             if (Pstream::master())
             {
                 ensightFile << "hexa8" << nl;
+
+                PtrList<UIPstream> fromSlaves(Pstream::nProcs());
+                for (int slave=1; slave<Pstream::nProcs(); slave++)
+                {
+                    fromSlaves.set(slave, new UIPstream(slave, pBufs));
+                }
 
                 for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
                 {
@@ -568,18 +625,9 @@ void ensightFieldAscii
 
                     for (int slave=1; slave<Pstream::nProcs(); slave++)
                     {
-                        IPstream fromSlave(Pstream::scheduled, slave);
-                        scalarField data(fromSlave);
+                        scalarField data(fromSlaves[slave]);
                         writeData(data, ensightFile);
                     }
-                }
-            }
-            else
-            {
-                for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
-                {
-                    OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-                    toMaster<< map(vf, hexes, wedges, cmpt);
                 }
             }
         }
@@ -695,9 +743,28 @@ void ensightFieldBinary
 
         if (meshCellSets.nHexesWedges)
         {
+            PstreamBuffers pBufs(Pstream::nonBlocking);
+
+            if (!Pstream::master())
+            {
+                UOPstream toMaster(Pstream::masterNo(), pBufs);
+                for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+                {
+                    toMaster<< map(vf, hexes, wedges, cmpt);
+                }
+            }
+
+            pBufs.finishedSends();
+
             if (Pstream::master())
             {
                 writeEnsDataBinary("hexa8",ensightFile);
+
+                PtrList<UIPstream> fromSlaves(Pstream::nProcs());
+                for (int slave=1; slave<Pstream::nProcs(); slave++)
+                {
+                    fromSlaves.set(slave, new UIPstream(slave, pBufs));
+                }
 
                 for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
                 {
@@ -709,18 +776,9 @@ void ensightFieldBinary
 
                     for (int slave=1; slave<Pstream::nProcs(); slave++)
                     {
-                        IPstream fromSlave(Pstream::scheduled, slave);
-                        scalarField data(fromSlave);
+                        scalarField data(fromSlaves[slave]);
                         writeEnsDataBinary(data, ensightFile);
                     }
-                }
-            }
-            else
-            {
-                for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
-                {
-                    OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-                    toMaster<< map(vf, hexes, wedges, cmpt);
                 }
             }
         }

@@ -47,7 +47,7 @@ const cellModel* sammMesh::sammTrim4Ptr_ = cellModeller::lookup("sammTrim4");
 const cellModel* sammMesh::sammTrim5Ptr_ = cellModeller::lookup("sammTrim5");
 const cellModel* sammMesh::sammTrim8Ptr_ = cellModeller::lookup("hexagonalPrism");
 
-// lookup table giving FOAM face number when looked up with shape index
+// lookup table giving OpenFOAM face number when looked up with shape index
 // (first index) and STAR face number
 // - first column is always -1
 // - last column is -1 for all but hexagonal prism

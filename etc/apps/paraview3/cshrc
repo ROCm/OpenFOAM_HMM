@@ -35,7 +35,7 @@
 
 # determine the cmake to be used
 unsetenv CMAKE_HOME
-foreach cmake ( cmake-2.6.4 cmake-2.6.2 cmake-2.4.6 )
+foreach cmake ( cmake-2.8.0 cmake-2.6.4 cmake-2.6.2 cmake-2.4.6 )
     set cmake=$WM_THIRD_PARTY_DIR/$cmake/platforms/$WM_ARCH
     if ( -r $cmake ) then
         setenv CMAKE_HOME $cmake

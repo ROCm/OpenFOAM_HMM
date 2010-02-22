@@ -39,9 +39,9 @@ SourceFiles
 #ifndef ODEChemistryModel_H
 #define ODEChemistryModel_H
 
-#include "hCombustionThermo.H"
 #include "Reaction.H"
 #include "ODE.H"
+#include "volFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,6 +49,8 @@ namespace Foam
 {
 
 // Forward declaration of classes
+class fvMesh;
+
 template<class CompType, class ThermoType>
 class chemistrySolver;
 
@@ -179,6 +181,9 @@ public:
 
             //- Return the chemical time scale
             virtual tmp<volScalarField> tc() const;
+
+            //- Return source for enthalpy equation [kg/m/s3]
+            virtual tmp<volScalarField> Sh() const;
 
             //- Return the heat release, i.e. enthalpy/sec [m2/s3]
             virtual tmp<volScalarField> dQ() const;

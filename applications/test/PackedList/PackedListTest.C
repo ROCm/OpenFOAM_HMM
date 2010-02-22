@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -130,15 +130,15 @@ int main(int argc, char *argv[])
 
         return 0;
     }
-    else if (args.additionalArgs().empty())
+    else if (args.size() <= 1)
     {
         args.printUsage();
     }
 
 
-    forAll(args.additionalArgs(), argI)
+    for (label argI=1; argI < args.size(); ++argI)
     {
-        const string& srcFile = args.additionalArgs()[argI];
+        const string& srcFile = args[argI];
         Info<< nl << "reading " << srcFile << nl;
 
         IFstream ifs(srcFile);

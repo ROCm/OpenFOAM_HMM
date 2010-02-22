@@ -52,8 +52,8 @@ namespace wmake {
 #include <sys/types.h>
 #include <dirent.h>
 
-StringHashSet Parser::visitedFiles_;
-StringHashSet Parser::visitedDirs_;
+std::set<std::string> Parser::visitedFiles_;
+std::set<std::string> Parser::visitedDirs_;
 
 std::list<std::string> Parser::includeDirs;
 std::string Parser::sourceFile;
@@ -74,15 +74,15 @@ void Parser::dotToSlash(std::string& name)
 
 void Parser::ignoreDir(const std::string& name)
 {
-    visitedDirs_.foundOrInsert(name);
+    visitedDirs_.insert(name);
 }
 
 
 void Parser::includeFile(const std::string& name)
 {
-    if (visitedFiles_.foundOrInsert(name))
+    if (!visitedFiles_.insert(name).second)
     {
-        return;
+        return;   // already existed (did not insert)
     }
 
     // use stdio and buffering within Coco/R -- (faster)
@@ -140,7 +140,7 @@ void Parser::importFile(const std::string& name)
         std::string dirGlob = name.substr(0, dotPos);
         dirGlob += ".*";
 
-        if (visitedDirs_.found(dirGlob))
+        if (visitedDirs_.find(dirGlob) != visitedDirs_.end())
         {
             return;
         }
@@ -157,9 +157,9 @@ void Parser::importFile(const std::string& name)
 
 void Parser::importDir(const std::string& name)
 {
-    if (visitedDirs_.foundOrInsert(name))
+    if (!visitedDirs_.insert(name).second)
     {
-        return;
+        return;   // already existed (did not insert)
     }
 
     std::string dirName = name;

@@ -61,7 +61,6 @@ int main(int argc, char *argv[])
 
         Info<< "Evolving " << kinematicCloud.name() << endl;
         kinematicCloud.evolve();
-        kinematicCloud.info();
 
         runTime.write();
 

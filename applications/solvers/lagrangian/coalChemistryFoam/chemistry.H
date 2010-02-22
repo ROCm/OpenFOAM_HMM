@@ -22,4 +22,6 @@
     {
         kappa = 1.0;
     }
+
+    chemistrySh = kappa*chemistry.Sh()();
 }

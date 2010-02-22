@@ -38,7 +38,8 @@ Foam::IPstream::IPstream
 )
 :
     Pstream(commsType, bufSize),
-    UIPstream(commsType, fromProcNo, buf_)
+    UIPstream(commsType, fromProcNo, buf_, externalBufPosition_),
+    externalBufPosition_(0)
 {}
 
 

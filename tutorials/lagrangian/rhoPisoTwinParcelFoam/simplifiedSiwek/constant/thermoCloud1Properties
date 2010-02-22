@@ -99,6 +99,7 @@ StandardWallInteractionCoeffs
 
 RanzMarshallCoeffs
 {
+    // thermal shielding
     BirdCorrection  false;
 }
 

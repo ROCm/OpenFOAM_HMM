@@ -45,7 +45,7 @@ bool Foam::UOPstream::write
 {
     if (debug)
     {
-        Pout<< "UIPstream::write : starting write to:" << toProcNo
+        Pout<< "UOPstream::write : starting write to:" << toProcNo
             << " tag:" << tag << " size:" << label(bufSize)
             << " commsType:" << UPstream::commsTypeNames[commsType]
             << Foam::endl;
@@ -67,7 +67,7 @@ bool Foam::UOPstream::write
 
         if (debug)
         {
-            Pout<< "UIPstream::write : finished write to:" << toProcNo
+            Pout<< "UOPstream::write : finished write to:" << toProcNo
                 << " tag:" << tag << " size:" << label(bufSize)
                 << " commsType:" << UPstream::commsTypeNames[commsType]
                 << Foam::endl;
@@ -87,7 +87,7 @@ bool Foam::UOPstream::write
 
         if (debug)
         {
-            Pout<< "UIPstream::write : finished write to:" << toProcNo
+            Pout<< "UOPstream::write : finished write to:" << toProcNo
                 << " tag:" << tag << " size:" << label(bufSize)
                 << " commsType:" << UPstream::commsTypeNames[commsType]
                 << Foam::endl;
@@ -110,7 +110,7 @@ bool Foam::UOPstream::write
 
         if (debug)
         {
-            Pout<< "UIPstream::write : started write to:" << toProcNo
+            Pout<< "UOPstream::write : started write to:" << toProcNo
                 << " tag:" << tag << " size:" << label(bufSize)
                 << " commsType:" << UPstream::commsTypeNames[commsType]
                 << " request:" << PstreamGlobals::outstandingRequests_.size()

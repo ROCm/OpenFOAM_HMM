@@ -1705,7 +1705,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
     const labelList& meshPoints,
     const Map<label>& meshPointMap,
     labelList& pointToGlobal,
-    labelList& uniquePoints
+    labelList& uniqueMeshPoints
 ) const
 {
     const indirectPrimitivePatch& cpp = coupledPatch();
@@ -1713,124 +1713,174 @@ Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
     const mapDistribute& pointSlavesMap = globalPointSlavesMap();
 
 
-    // 1. Count number of masters on my processor.
-    label nCoupledMaster = 0;
-    label nCoupledSlave = 0;
-    PackedBoolList isMaster(meshPoints.size(), 1);
+    // The patch points come in two variants:
+    // - not on a coupled patch so guaranteed unique
+    // - on a coupled patch
+    // If the point is on a coupled patch the problem is that the
+    // master-slave structure (globalPointSlaves etc.) assigns one of the
+    // coupled points to be the master but this master point is not
+    // necessarily on the patch itself! (it might just be connected to the
+    // patch point via coupled patches).
+    // So this means that all master point loops should be over the
+    // master-slave structure, not over the patch points and that the unique
+    // point returned is a mesh point.
+    // (unless we want to do the whole master-slave analysis again for the
+    //  current patch only).
 
-    forAll(meshPoints, localPointI)
+
+    // Determine mapping from coupled point to patch point and vice versa
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    labelList patchToCoupled(meshPoints.size(), -1);
+    label nCoupled = 0;
+    labelList coupledToPatch(pointSlavesMap.constructSize(), -1);
+
+    // Note: loop over patch since usually smaller
+    forAll(meshPoints, patchPointI)
     {
-        label meshPointI = meshPoints[localPointI];
+        label meshPointI = meshPoints[patchPointI];
 
         Map<label>::const_iterator iter = cpp.meshPointMap().find(meshPointI);
 
         if (iter != cpp.meshPointMap().end())
         {
-            // My localPointI is a coupled point.
+            patchToCoupled[patchPointI] = iter();
+            coupledToPatch[iter()] = patchPointI;
+            nCoupled++;
+        }
+    }
 
-            label coupledPointI = iter();
+    //Pout<< "Patch:" << nl
+    //    << "    points:" << meshPoints.size() << nl
+    //    << "    of which on coupled patch:" << nCoupled << endl;
 
-            if (pointSlaves[coupledPointI].size() > 0)
+
+    // Pull coupled-to-patch information to master
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    pointSlavesMap.distribute(coupledToPatch);
+
+
+    // Check on master whether point is anywhere on patch
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // List of master points that are on the patch
+    DynamicList<label> masterPoints(pointSlaves.size());
+
+    forAll(pointSlaves, coupledPointI)
+    {
+        const labelList& slaves = pointSlaves[coupledPointI];
+
+        if (slaves.size() > 0)
+        {
+            // I am master. Is this point on the patch on myself or on any
+            // any slave?
+            if (coupledToPatch[coupledPointI] != -1)
             {
-                nCoupledMaster++;
+                masterPoints.append(coupledPointI);
             }
             else
             {
-                isMaster[localPointI] = 0;
-                nCoupledSlave++;
-            }
-        }
-    }
-
-    label myUniquePoints = meshPoints.size() - nCoupledSlave;
-
-    Pout<< "Points :" << nl
-        << "    patch            : " << meshPoints.size() << nl
-        << "    of which coupled : " << nCoupledMaster+nCoupledSlave << nl
-        << "    of which master  : " << nCoupledMaster << nl
-        << "    of which slave   : " << nCoupledSlave << nl
-        << endl;
-
-
-    // 2. Create global indexing for unique points.
-    autoPtr<globalIndex> globalPointsPtr(new globalIndex(myUniquePoints));
-
-
-    // 3. Assign global point numbers. Keep slaves unset.
-    pointToGlobal.setSize(meshPoints.size());
-    pointToGlobal = -1;
-    uniquePoints.setSize(myUniquePoints);
-    label nMaster = 0;
-
-    forAll(isMaster, localPointI)
-    {
-        if (isMaster[localPointI])
-        {
-            pointToGlobal[localPointI] = globalPointsPtr().toGlobal(nMaster);
-            uniquePoints[nMaster] = localPointI;
-            nMaster++;
-        }
-    }
-
-
-    // 4. Push global index for coupled points to slaves.
-    {
-        labelList masterToGlobal(pointSlavesMap.constructSize(), -1);
-
-        forAll(meshPoints, localPointI)
-        {
-            label meshPointI = meshPoints[localPointI];
-
-            Map<label>::const_iterator iter = cpp.meshPointMap().find
-            (
-                meshPointI
-            );
-
-            if (iter != cpp.meshPointMap().end())
-            {
-                // My localPointI is a coupled point.
-                label coupledPointI = iter();
-
-                const labelList& slaves = pointSlaves[coupledPointI];
-
-                if (slaves.size() > 0)
+                forAll(slaves, i)
                 {
-                    // Duplicate master globalpoint into slave slots
-                    masterToGlobal[coupledPointI] = pointToGlobal[localPointI];
-                    forAll(slaves, i)
+                    if (coupledToPatch[slaves[i]] != -1)
                     {
-                        masterToGlobal[slaves[i]] = pointToGlobal[localPointI];
+                        masterPoints.append(coupledPointI);
+                        break;
                     }
                 }
             }
         }
+    }
 
-        // Send back
-        pointSlavesMap.reverseDistribute(cpp.nPoints(), masterToGlobal);
 
-        // On slave copy master index into overal map.
-        forAll(meshPoints, localPointI)
+    // Create global indexing
+    // ~~~~~~~~~~~~~~~~~~~~~~
+    // 1. patch points that are not on coupled patch:
+    //      meshPoints.size()-nCoupled
+    // 2. master points that are on patch:
+    //      masterPoints.size()
+    label myUniquePoints = meshPoints.size()-nCoupled+masterPoints.size();
+    autoPtr<globalIndex> globalPointsPtr(new globalIndex(myUniquePoints));
+
+    //Pout<< "CoupledPatch:" << nl
+    //    << "    points:" << cpp.nPoints() << nl
+    //    << "    of which on patch:" << masterPoints.size() << endl;
+
+
+    // Allocate unique points
+    // ~~~~~~~~~~~~~~~~~~~~~~
+
+    pointToGlobal.setSize(meshPoints.size());
+    pointToGlobal = -1;
+    uniqueMeshPoints.setSize(myUniquePoints);
+
+    // Allocate globals for uncoupled patch points
+    label nMaster = 0;
+    forAll(patchToCoupled, patchPointI)
+    {
+        if (patchToCoupled[patchPointI] == -1)
         {
-            label meshPointI = meshPoints[localPointI];
+            // Allocate global point
+            label globalI = globalPointsPtr().toGlobal(nMaster);
+            pointToGlobal[patchPointI] = globalI;
+            uniqueMeshPoints[nMaster] = meshPoints[patchPointI];
+            nMaster++;
+        }
+    }
 
-            Map<label>::const_iterator iter = cpp.meshPointMap().find
-            (
-                meshPointI
-            );
+    // Allocate globals for master 
+    labelList masterToGlobal(pointSlavesMap.constructSize(), -456);
 
-            if (iter != cpp.meshPointMap().end())
+    forAll(masterPoints, i)
+    {
+        label coupledPointI = masterPoints[i];
+
+        // Allocate global point
+        label globalI = globalPointsPtr().toGlobal(nMaster);
+        if (coupledToPatch[coupledPointI] != -1)
+        {
+            pointToGlobal[coupledToPatch[coupledPointI]] = globalI;
+        }
+        uniqueMeshPoints[nMaster] = cpp.meshPoints()[coupledPointI];
+        nMaster++;
+
+        // Put global into slave slots
+        const labelList& slaves = pointSlaves[coupledPointI];
+        masterToGlobal[coupledPointI] = globalI;    // not really necessary
+        forAll(slaves, i)
+        {
+            masterToGlobal[slaves[i]] = globalI;
+        }
+    }
+
+
+    if (nMaster != myUniquePoints)
+    {
+        FatalErrorIn("globalMeshData::mergePoints(..)")
+            << "problem." << abort(FatalError);
+    }
+
+
+    // Send back (from slave slots) to originating processor
+    pointSlavesMap.reverseDistribute(cpp.nPoints(), masterToGlobal);
+
+    // On slaves take over global number
+    forAll(patchToCoupled, patchPointI)
+    {
+        label coupledPointI = patchToCoupled[patchPointI];
+
+        if (coupledPointI != -1)
+        {
+            const labelList& slaves = pointSlaves[coupledPointI];
+
+            if (slaves.size() == 0)
             {
-                // My localPointI is a coupled point.
-                label coupledPointI = iter();
-                const labelList& slaves = pointSlaves[coupledPointI];
-
-                if (slaves.size() == 0)
-                {
-                    pointToGlobal[localPointI] = masterToGlobal[coupledPointI];
-                }
+                pointToGlobal[patchPointI] = masterToGlobal[coupledPointI];
             }
         }
     }
+
 
     return globalPointsPtr;
 }

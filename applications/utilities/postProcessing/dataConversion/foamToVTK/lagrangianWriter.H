@@ -37,7 +37,6 @@ SourceFiles
 #ifndef lagrangianWriter_H
 #define lagrangianWriter_H
 
-#include "globalPointPatch.H"
 #include "OFstream.H"
 #include "Cloud.H"
 #include "volFields.H"

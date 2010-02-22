@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     {
         fileName dictFileName
         (
-            args.rootPath()/args.caseName()/args.option("dictionary")
+            args.rootPath()/args.caseName()/args["dictionary"]
         );
 
         IFstream dictFile(dictFileName);
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
                         true            // wildcards
                     );
 
-                    for (int i=1; i<entryNames.size(); i++)
+                    for (int i=1; i<entryNames.size(); ++i)
                     {
                         if (entPtr->dict().found(entryNames[i]))
                         {
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
                         {
                             FatalErrorIn(args.executable())
                                 << "Cannot find sub-entry " << entryNames[i]
-                                << " in entry " << args.option("entry")
+                                << " in entry " << args["entry"]
                                 << " in dictionary " << dictFileName;
                             FatalError.exit(3);
                         }
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
                         {
                             FatalErrorIn(args.executable())
                                 << "Cannot find entry "
-                                << args.option("entry")
+                                << args["entry"]
                                 << " in dictionary " << dictFileName
                                 << " is not a sub-dictionary";
                             FatalError.exit(4);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,6 +50,9 @@ Usage
     @param -to \<coordinateSystem\> \n
     Specify a coordinate System when writing files.
 
+    @param -tri \n
+    Triangulate surface.
+
 Note
     The filename extensions are used to determine the file format type.
 
@@ -73,20 +76,53 @@ int main(int argc, char *argv[])
     argList::validArgs.append("inputFile");
     argList::validArgs.append("outputFile");
 
-    argList::addBoolOption("clean");
+    argList::addBoolOption
+    (
+        "clean",
+        "perform some surface checking/cleanup on the input surface"
+    );
+    argList::addOption
+    (
+        "scaleIn",
+        "scale",
+        "specify input geometry scaling factor"
+    );
+    argList::addOption
+    (
+        "scaleOut",
+        "scale",
+        "specify output geometry scaling factor"
+    );
+    argList::addOption
+    (
+        "dict",
+        "file",
+        "specify alternative dictionary for the coordinateSystems descriptions"
+    );
+    argList::addOption
+    (
+        "from",
+        "system",
+        "specify the source coordinate system, applied after '-scaleIn'"
+    );
+    argList::addOption
+    (
+        "to",
+        "system",
+        "specify the target coordinate system, applied before '-scaleOut'"
+    );
+    argList::addBoolOption
+    (
+        "tri",
+        "triangulate surface"
+    );
 
-    argList::addOption("scaleIn",  "scale");
-    argList::addOption("scaleOut", "scale");
-    argList::addOption("dict", "coordinateSystemsDict");
-    argList::addOption("from", "sourceCoordinateSystem");
-    argList::addOption("to",   "targetCoordinateSystem");
 
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());
-    const stringList& params = args.additionalArgs();
 
-    fileName importName(params[0]);
-    fileName exportName(params[1]);
+    const fileName importName = args[1];
+    const fileName exportName = args[2];
 
     // disable inplace editing
     if (importName == exportName)
@@ -117,7 +153,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("dict"))
         {
-            fileName dictPath(args.option("dict"));
+            const fileName dictPath = args["dict"];
 
             csDictIoPtr.set
             (
@@ -164,7 +200,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("from"))
         {
-            const word csName(args.option("from"));
+            const word csName = args["from"];
 
             label csId = csLst.find(csName);
             if (csId < 0)
@@ -180,7 +216,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("to"))
         {
-            const word csName(args.option("to"));
+            const word csName = args["to"];
 
             label csId = csLst.find(csName);
             if (csId < 0)
@@ -240,6 +276,12 @@ int main(int argc, char *argv[])
         {
             Info<< " -scaleOut " << scaleOut << endl;
             surf.scalePoints(scaleOut);
+        }
+
+        if (args.optionFound("tri"))
+        {
+            Info<< "triangulate" << endl;
+            surf.triangulate();
         }
 
         Info<< "writing " << exportName;

@@ -34,8 +34,8 @@ Usage
     - decomposePar [OPTION]
 
     @param -cellDist \n
-    Write the cell distribution as a labelList for use with 'manual'
-    decomposition method and as a volScalarField for post-processing.
+    Write the cell distribution as a labelList, for use with 'manual'
+    decomposition method or as a volScalarField for post-processing.
 
     @param -region regionName \n
     Decompose named region. Does not check for existence of processor*.
@@ -84,7 +84,12 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
 #   include "addRegionOption.H"
-    argList::addBoolOption("cellDist");
+    argList::addBoolOption
+    (
+        "cellDist",
+        "write cell distribution as a labelList - for use with 'manual' "
+        "decomposition method or as a volScalarField for post-processing."
+    );
     argList::addBoolOption
     (
         "copyUniform",
@@ -104,6 +109,11 @@ int main(int argc, char *argv[])
     (
         "ifRequired",
         "only decompose geometry if the number of domains has changed"
+    );
+
+    argList::addNote
+    (
+        "decompose a mesh and fields of a case for parallel execution"
     );
 
 #   include "setRootCase.H"
@@ -666,7 +676,7 @@ int main(int argc, char *argv[])
                 )
             );
 
-            pointMesh procPMesh(procMesh, true);
+            pointMesh procPMesh(procMesh);
 
             pointFieldDecomposer fieldDecomposer
             (

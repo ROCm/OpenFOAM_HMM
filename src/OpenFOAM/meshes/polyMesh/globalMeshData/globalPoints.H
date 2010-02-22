@@ -127,9 +127,6 @@ class globalPoints
         //  collocated coupled points.
         static const label fromCollocated;
 
-        //- Distance to check whether points/faces are collocated.
-        static const scalar mergeDist;
-
 
     // Private data
 
@@ -162,22 +159,9 @@ class globalPoints
 
     // Private Member Functions
 
-        //- Is identity transform?
-        static bool noTransform(const tensor&, const scalar mergeDist);
-
-        //- Return per face collocated status
-        static PackedBoolList collocatedFaces
-        (
-            const coupledPolyPatch&,
-            const scalar mergeDist
-        );
-
         //- Return per point collocated status
-        static PackedBoolList collocatedPoints
-        (
-            const coupledPolyPatch&,
-            const scalar mergeDist
-        );
+        static PackedBoolList collocatedPoints(const coupledPolyPatch&);
+
 
         // Wrappers around global point numbering to add collocated bit
 

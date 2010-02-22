@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Application
     gambitToFoam
 
 Description
-    Converts a GAMBIT mesh to FOAM format.
+    Converts a GAMBIT mesh to OpenFOAM format.
 
 \*---------------------------------------------------------------------------*/
 
@@ -653,7 +653,7 @@ int main(int argc, char *argv[])
 
 #   include "createTime.H"
 
-    fileName gambitFile(args.additionalArgs()[0]);
+    const fileName gambitFile = args[1];
     ifstream gambitStream(gambitFile.c_str());
 
     if (!gambitStream)

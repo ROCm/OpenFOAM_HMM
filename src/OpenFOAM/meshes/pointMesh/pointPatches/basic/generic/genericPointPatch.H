@@ -26,7 +26,8 @@ Class
     Foam::genericPointPatch
 
 Description
-    DirectMapped patch.
+    Substitute for unknown patches. Used for postprocessing when only
+    basic polyPatch info is needed.
 
 SourceFiles
     genericPointPatch.C

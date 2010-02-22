@@ -51,8 +51,29 @@ Foam::PstreamBuffers::PstreamBuffers
     version_(version),
     sendBuf_(UPstream::nProcs()),
     recvBuf_(UPstream::nProcs()),
+    recvBufPos_(UPstream::nProcs(),  0),
     finishedSendsCalled_(false)
 {}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::PstreamBuffers::~PstreamBuffers()
+{
+    // Check that all data has been consumed.
+    forAll(recvBufPos_, procI)
+    {
+        if (recvBufPos_[procI] < recvBuf_[procI].size())
+        {
+            FatalErrorIn("PstreamBuffers::~PstreamBuffers()")
+                << "Message from processor " << procI
+                << " not fully consumed. messageSize:" << recvBuf_[procI].size()
+                << " bytes of which only " << recvBufPos_[procI]
+                << " consumed."
+                << Foam::abort(FatalError);
+        }
+    }
+}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

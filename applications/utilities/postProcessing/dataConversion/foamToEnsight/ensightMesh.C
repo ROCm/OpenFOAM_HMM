@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,13 +30,10 @@ License
 #include "fvMesh.H"
 #include "globalMeshData.H"
 #include "PstreamCombineReduceOps.H"
-#include "processorPolyPatch.H"
 #include "cellModeller.H"
 #include "IOmanip.H"
 #include "itoa.H"
 #include "ensightWriteBinary.H"
-#include "globalIndex.H"
-#include "PackedBoolList.H"
 #include "mapDistribute.H"
 
 #include <fstream>
@@ -83,7 +80,10 @@ Foam::ensightMesh::ensightMesh
 
         if (args.optionFound("patches"))
         {
-            wordList patchNameList(args.optionLookup("patches")());
+            wordList patchNameList
+            (
+                args.optionLookup("patches")()
+            );
 
             if (patchNameList.empty())
             {
@@ -470,103 +470,124 @@ void Foam::ensightMesh::writeAllPolys
         }
 
         // Number of faces for each poly cell
-        if (Pstream::master())
         {
-            // Master
-            writePolysNFaces
-            (
-                meshCellSets_.polys,
-                cellFaces,
-                ensightGeometryFile
-            );
-            // Slaves
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                labelList polys(fromSlave);
-                cellList cellFaces(fromSlave);
+            PstreamBuffers pBufs(Pstream::nonBlocking);
 
+            if (!Pstream::master())
+            {
+                UOPstream toMaster(Pstream::masterNo(), pBufs);
+                toMaster<< meshCellSets_.polys << cellFaces;
+            }
+
+            pBufs.finishedSends();
+
+            if (Pstream::master())
+            {
+                // Master
                 writePolysNFaces
                 (
-                    polys,
+                    meshCellSets_.polys,
                     cellFaces,
                     ensightGeometryFile
                 );
+                // Slaves
+                for (int slave=1; slave<Pstream::nProcs(); slave++)
+                {
+                    UIPstream fromSlave(slave, pBufs);
+                    labelList polys(fromSlave);
+                    cellList cellFaces(fromSlave);
+
+                    writePolysNFaces
+                    (
+                        polys,
+                        cellFaces,
+                        ensightGeometryFile
+                    );
+                }
             }
-        }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< meshCellSets_.polys << cellFaces;
         }
 
 
         // Number of points for each face of the above list
-        if (Pstream::master())
         {
-            // Master
-            writePolysNPointsPerFace
-            (
-                meshCellSets_.polys,
-                cellFaces,
-                faces,
-                ensightGeometryFile
-            );
-            // Slaves
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                labelList polys(fromSlave);
-                cellList cellFaces(fromSlave);
-                faceList faces(fromSlave);
+            PstreamBuffers pBufs(Pstream::nonBlocking);
 
+            if (!Pstream::master())
+            {
+                UOPstream toMaster(Pstream::masterNo(), pBufs);
+                toMaster<< meshCellSets_.polys << cellFaces << faces;
+            }
+            pBufs.finishedSends();
+
+            if (Pstream::master())
+            {
+                // Master
                 writePolysNPointsPerFace
                 (
-                    polys,
+                    meshCellSets_.polys,
                     cellFaces,
                     faces,
                     ensightGeometryFile
                 );
+                // Slaves
+                for (int slave=1; slave<Pstream::nProcs(); slave++)
+                {
+                    UIPstream fromSlave(slave, pBufs);
+                    labelList polys(fromSlave);
+                    cellList cellFaces(fromSlave);
+                    faceList faces(fromSlave);
+
+                    writePolysNPointsPerFace
+                    (
+                        polys,
+                        cellFaces,
+                        faces,
+                        ensightGeometryFile
+                    );
+                }
             }
         }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< meshCellSets_.polys << cellFaces << faces;
-        }
+
 
         // List of points id for each face of the above list
-        if (Pstream::master())
         {
-            // Master
-            writePolysPoints
-            (
-                meshCellSets_.polys,
-                cellFaces,
-                faces,
-                ensightGeometryFile
-            );
-            // Slaves
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                labelList polys(fromSlave);
-                cellList cellFaces(fromSlave);
-                faceList faces(fromSlave);
+            PstreamBuffers pBufs(Pstream::nonBlocking);
 
+            if (!Pstream::master())
+            {
+                UOPstream toMaster(Pstream::masterNo(), pBufs);
+                toMaster<< meshCellSets_.polys << cellFaces << faces;
+            }
+
+            pBufs.finishedSends();
+
+            if (Pstream::master())
+            {
+                // Master
                 writePolysPoints
                 (
-                    polys,
+                    meshCellSets_.polys,
                     cellFaces,
                     faces,
                     ensightGeometryFile
                 );
+                // Slaves
+                for (int slave=1; slave<Pstream::nProcs(); slave++)
+                {
+                    UIPstream fromSlave(slave, pBufs);
+                    labelList polys(fromSlave);
+                    cellList cellFaces(fromSlave);
+                    faceList faces(fromSlave);
+
+                    writePolysPoints
+                    (
+                        polys,
+                        cellFaces,
+                        faces,
+                        ensightGeometryFile
+                    );
+                }
             }
-        }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< meshCellSets_.polys << cellFaces << faces;
         }
     }
 }
@@ -662,102 +683,123 @@ void Foam::ensightMesh::writeAllPolysBinary
         }
 
         // Number of faces for each poly cell
-        if (Pstream::master())
         {
-            // Master
-            writePolysNFacesBinary
-            (
-                meshCellSets_.polys,
-                cellFaces,
-                ensightGeometryFile
-            );
-            // Slaves
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                labelList polys(fromSlave);
-                cellList cellFaces(fromSlave);
+            PstreamBuffers pBufs(Pstream::nonBlocking);
 
+            if (!Pstream::master())
+            {
+                UOPstream toMaster(Pstream::masterNo(), pBufs);
+                toMaster<< meshCellSets_.polys << cellFaces;
+            }
+
+            pBufs.finishedSends();
+
+            if (Pstream::master())
+            {
+                // Master
                 writePolysNFacesBinary
                 (
-                    polys,
+                    meshCellSets_.polys,
                     cellFaces,
                     ensightGeometryFile
                 );
+                // Slaves
+                for (int slave=1; slave<Pstream::nProcs(); slave++)
+                {
+                    UIPstream fromSlave(slave, pBufs);
+                    labelList polys(fromSlave);
+                    cellList cellFaces(fromSlave);
+
+                    writePolysNFacesBinary
+                    (
+                        polys,
+                        cellFaces,
+                        ensightGeometryFile
+                    );
+                }
             }
-        }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< meshCellSets_.polys << cellFaces;
         }
 
         // Number of points for each face of the above list
-        if (Pstream::master())
         {
-            // Master
-            writePolysNPointsPerFaceBinary
-            (
-                meshCellSets_.polys,
-                cellFaces,
-                faces,
-                ensightGeometryFile
-            );
-            // Slaves
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                labelList polys(fromSlave);
-                cellList cellFaces(fromSlave);
-                faceList faces(fromSlave);
+            PstreamBuffers pBufs(Pstream::nonBlocking);
 
+            if (!Pstream::master())
+            {
+                UOPstream toMaster(Pstream::masterNo(), pBufs);
+                toMaster<< meshCellSets_.polys << cellFaces << faces;
+            }
+
+            pBufs.finishedSends();
+
+            if (Pstream::master())
+            {
+                // Master
                 writePolysNPointsPerFaceBinary
                 (
-                    polys,
+                    meshCellSets_.polys,
                     cellFaces,
                     faces,
                     ensightGeometryFile
                 );
+                // Slaves
+                for (int slave=1; slave<Pstream::nProcs(); slave++)
+                {
+                    UIPstream fromSlave(slave, pBufs);
+                    labelList polys(fromSlave);
+                    cellList cellFaces(fromSlave);
+                    faceList faces(fromSlave);
+
+                    writePolysNPointsPerFaceBinary
+                    (
+                        polys,
+                        cellFaces,
+                        faces,
+                        ensightGeometryFile
+                    );
+                }
             }
-        }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< meshCellSets_.polys << cellFaces << faces;
         }
 
         // List of points id for each face of the above list
-        if (Pstream::master())
         {
-            // Master
-            writePolysPointsBinary
-            (
-                meshCellSets_.polys,
-                cellFaces,
-                faces,
-                ensightGeometryFile
-            );
-            // Slaves
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                labelList polys(fromSlave);
-                cellList cellFaces(fromSlave);
-                faceList faces(fromSlave);
+            PstreamBuffers pBufs(Pstream::nonBlocking);
 
+            if (!Pstream::master())
+            {
+                UOPstream toMaster(Pstream::masterNo(), pBufs);
+                toMaster<< meshCellSets_.polys << cellFaces << faces;
+            }
+
+            pBufs.finishedSends();
+
+            if (Pstream::master())
+            {
+                // Master
                 writePolysPointsBinary
                 (
-                    polys,
+                    meshCellSets_.polys,
                     cellFaces,
                     faces,
                     ensightGeometryFile
                 );
+                // Slaves
+                for (int slave=1; slave<Pstream::nProcs(); slave++)
+                {
+                    UIPstream fromSlave(slave, pBufs);
+                    labelList polys(fromSlave);
+                    cellList cellFaces(fromSlave);
+                    faceList faces(fromSlave);
+
+                    writePolysPointsBinary
+                    (
+                        polys,
+                        cellFaces,
+                        faces,
+                        ensightGeometryFile
+                    );
+                }
             }
-        }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< meshCellSets_.polys << cellFaces << faces;
         }
     }
 }
@@ -773,6 +815,16 @@ void Foam::ensightMesh::writeAllPrims
 {
     if (nPrims)
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
+        if (!Pstream::master())
+        {
+            UOPstream toMaster(Pstream::masterNo(), pBufs);
+            toMaster<< cellShapes;
+        }
+
+        pBufs.finishedSends();
+
         if (Pstream::master())
         {
             ensightGeometryFile << key << nl << setw(10) << nPrims << nl;
@@ -781,16 +833,11 @@ void Foam::ensightMesh::writeAllPrims
 
             for (int slave=1; slave<Pstream::nProcs(); slave++)
             {
-                IPstream fromSlave(Pstream::scheduled, slave);
+                UIPstream fromSlave(slave, pBufs);
                 cellShapeList cellShapes(fromSlave);
 
                 writePrims(cellShapes, ensightGeometryFile);
             }
-        }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< cellShapes;
         }
     }
 }
@@ -806,6 +853,16 @@ void Foam::ensightMesh::writeAllPrimsBinary
 {
     if (nPrims)
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
+        if (!Pstream::master())
+        {
+            UOPstream toMaster(Pstream::masterNo(), pBufs);
+            toMaster<< cellShapes;
+        }
+
+        pBufs.finishedSends();
+
         if (Pstream::master())
         {
             writeEnsDataBinary(key,ensightGeometryFile);
@@ -815,16 +872,11 @@ void Foam::ensightMesh::writeAllPrimsBinary
 
             for (int slave=1; slave<Pstream::nProcs(); slave++)
             {
-                IPstream fromSlave(Pstream::scheduled, slave);
+                UIPstream fromSlave(slave, pBufs);
                 cellShapeList cellShapes(fromSlave);
 
                 writePrimsBinary(cellShapes, ensightGeometryFile);
             }
-        }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< cellShapes;
         }
     }
 }
@@ -836,18 +888,15 @@ void Foam::ensightMesh::writeFacePrims
     OFstream& ensightGeometryFile
 ) const
 {
-    if (patchFaces.size())
+    forAll(patchFaces, i)
     {
-        forAll(patchFaces, i)
-        {
-            const face& patchFace = patchFaces[i];
+        const face& patchFace = patchFaces[i];
 
-            forAll(patchFace, pointI)
-            {
-                ensightGeometryFile << setw(10) << patchFace[pointI] + 1;
-            }
-            ensightGeometryFile << nl;
+        forAll(patchFace, pointI)
+        {
+            ensightGeometryFile << setw(10) << patchFace[pointI] + 1;
         }
+        ensightGeometryFile << nl;
     }
 }
 
@@ -858,16 +907,13 @@ void Foam::ensightMesh::writeFacePrimsBinary
     std::ofstream& ensightGeometryFile
 ) const
 {
-    if (patchFaces.size())
+    forAll(patchFaces, i)
     {
-        forAll(patchFaces, i)
-        {
-            const face& patchFace = patchFaces[i];
+        const face& patchFace = patchFaces[i];
 
-            forAll(patchFace, pointI)
-            {
-                writeEnsDataBinary(patchFace[pointI] + 1, ensightGeometryFile);
-            }
+        forAll(patchFace, pointI)
+        {
+            writeEnsDataBinary(patchFace[pointI] + 1, ensightGeometryFile);
         }
     }
 }
@@ -884,6 +930,16 @@ void Foam::ensightMesh::writeAllFacePrims
 {
     if (nPrims)
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
+        if (!Pstream::master())
+        {
+            UOPstream toMaster(Pstream::masterNo(), pBufs);
+            toMaster<< UIndirectList<face>(patchFaces, prims);
+        }
+
+        pBufs.finishedSends();
+
         if (Pstream::master())
         {
             ensightGeometryFile << key << nl << setw(10) << nPrims << nl;
@@ -896,16 +952,11 @@ void Foam::ensightMesh::writeAllFacePrims
 
             for (int slave=1; slave<Pstream::nProcs(); slave++)
             {
-                IPstream fromSlave(Pstream::scheduled, slave);
+                UIPstream fromSlave(slave, pBufs);
                 faceList patchFaces(fromSlave);
 
                 writeFacePrims(patchFaces, ensightGeometryFile);
             }
-        }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< UIndirectList<face>(patchFaces, prims);
         }
     }
 }
@@ -951,53 +1002,67 @@ void Foam::ensightMesh::writeAllNSided
         }
 
         // Number of points for each face
-        if (Pstream::master())
         {
-            writeNSidedNPointsPerFace
-            (
-                UIndirectList<face>(patchFaces, prims)(),
-                ensightGeometryFile
-            );
+            PstreamBuffers pBufs(Pstream::nonBlocking);
 
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            if (!Pstream::master())
             {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                faceList patchFaces(fromSlave);
+                UOPstream toMaster(Pstream::masterNo(), pBufs);
+                toMaster<< UIndirectList<face>(patchFaces, prims);
+            }
 
+            pBufs.finishedSends();
+
+            if (Pstream::master())
+            {
                 writeNSidedNPointsPerFace
                 (
-                    patchFaces,
+                    UIndirectList<face>(patchFaces, prims)(),
                     ensightGeometryFile
                 );
+
+                for (int slave=1; slave<Pstream::nProcs(); slave++)
+                {
+                    UIPstream fromSlave(slave, pBufs);
+                    faceList patchFaces(fromSlave);
+
+                    writeNSidedNPointsPerFace
+                    (
+                        patchFaces,
+                        ensightGeometryFile
+                    );
+                }
             }
-        }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< UIndirectList<face>(patchFaces, prims);
         }
 
         // List of points id for each face
-        if (Pstream::master())
         {
-            writeNSidedPoints
-            (
-                UIndirectList<face>(patchFaces, prims)(),
-                ensightGeometryFile
-            );
+            PstreamBuffers pBufs(Pstream::nonBlocking);
 
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            if (!Pstream::master())
             {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                faceList patchFaces(fromSlave);
-
-                writeNSidedPoints(patchFaces, ensightGeometryFile);
+                UOPstream toMaster(Pstream::masterNo(), pBufs);
+                toMaster<< UIndirectList<face>(patchFaces, prims);
             }
-        }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< UIndirectList<face>(patchFaces, prims);
+
+            pBufs.finishedSends();
+
+            if (Pstream::master())
+            {
+                writeNSidedPoints
+                (
+                    UIndirectList<face>(patchFaces, prims)(),
+                    ensightGeometryFile
+                );
+
+                for (int slave=1; slave<Pstream::nProcs(); slave++)
+                {
+                    UIPstream fromSlave(slave, pBufs);
+                    faceList patchFaces(fromSlave);
+
+                    writeNSidedPoints(patchFaces, ensightGeometryFile);
+                }
+            }
         }
     }
 }
@@ -1043,53 +1108,71 @@ void Foam::ensightMesh::writeAllNSidedBinary
         }
 
         // Number of points for each face
-        if (Pstream::master())
         {
-            writeNSidedNPointsPerFaceBinary
-            (
-                UIndirectList<face>(patchFaces, prims)(),
-                ensightGeometryFile
-            );
+            PstreamBuffers pBufs(Pstream::nonBlocking);
 
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            if (!Pstream::master())
             {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                faceList patchFaces(fromSlave);
+                UOPstream toMaster(Pstream::masterNo(), pBufs);
+                toMaster<< UIndirectList<face>(patchFaces, prims);
+            }
 
+            pBufs.finishedSends();
+
+            if (Pstream::master())
+            {
                 writeNSidedNPointsPerFaceBinary
                 (
-                    patchFaces,
+                    UIndirectList<face>(patchFaces, prims)(),
                     ensightGeometryFile
                 );
+
+                for (int slave=1; slave<Pstream::nProcs(); slave++)
+                {
+                    UIPstream fromSlave(slave, pBufs);
+                    faceList patchFaces(fromSlave);
+
+                    writeNSidedNPointsPerFaceBinary
+                    (
+                        patchFaces,
+                        ensightGeometryFile
+                    );
+                }
             }
-        }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< UIndirectList<face>(patchFaces, prims);
         }
 
         // List of points id for each face
-        if (Pstream::master())
         {
-            writeNSidedPointsBinary
-            (
-                UIndirectList<face>(patchFaces, prims)(),
-                ensightGeometryFile
-            );
+            PstreamBuffers pBufs(Pstream::nonBlocking);
 
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
+            if (!Pstream::master())
             {
-                IPstream fromSlave(Pstream::scheduled, slave);
-                faceList patchFaces(fromSlave);
-
-                writeNSidedPointsBinary(patchFaces, ensightGeometryFile);
+                UOPstream toMaster(Pstream::masterNo(), pBufs);
+                toMaster<< UIndirectList<face>(patchFaces, prims);
             }
-        }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< UIndirectList<face>(patchFaces, prims);
+
+            pBufs.finishedSends();
+
+            if (Pstream::master())
+            {
+                writeNSidedPointsBinary
+                (
+                    UIndirectList<face>(patchFaces, prims)(),
+                    ensightGeometryFile
+                );
+
+                for (int slave=1; slave<Pstream::nProcs(); slave++)
+                {
+                    UIPstream fromSlave(slave, pBufs);
+                    faceList patchFaces(fromSlave);
+
+                    writeNSidedPointsBinary
+                    (
+                        patchFaces,
+                        ensightGeometryFile
+                    );
+                }
+            }
         }
     }
 }
@@ -1106,32 +1189,34 @@ void Foam::ensightMesh::writeAllFacePrimsBinary
 {
     if (nPrims)
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
+        if (!Pstream::master())
+        {
+            UOPstream toMaster(Pstream::masterNo(), pBufs);
+            toMaster<< UIndirectList<face>(patchFaces, prims);
+        }
+
+        pBufs.finishedSends();
+
         if (Pstream::master())
         {
             writeEnsDataBinary(key,ensightGeometryFile);
             writeEnsDataBinary(nPrims,ensightGeometryFile);
 
-            if (&prims != NULL)
-            {
-                writeFacePrimsBinary
-                (
-                    UIndirectList<face>(patchFaces, prims)(),
-                    ensightGeometryFile
-                );
-            }
+            writeFacePrimsBinary
+            (
+                UIndirectList<face>(patchFaces, prims)(),
+                ensightGeometryFile
+            );
 
             for (int slave=1; slave<Pstream::nProcs(); slave++)
             {
-                IPstream fromSlave(Pstream::scheduled, slave);
+                UIPstream fromSlave(slave, pBufs);
                 faceList patchFaces(fromSlave);
 
                 writeFacePrimsBinary(patchFaces, ensightGeometryFile);
             }
-        }
-        else
-        {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-            toMaster<< UIndirectList<face>(patchFaces, prims);
         }
     }
 }
@@ -1251,34 +1336,47 @@ void Foam::ensightMesh::writeAscii
     {
         label nPoints = globalPoints.size();
 
-        if (Pstream::master())
         {
-            ensightGeometryFile
-                << "part" << nl
-                << setw(10) << 1 << nl
-                << "internalMesh" << nl
-                << "coordinates" << nl
-                << setw(10) << nPoints
-                << endl;
+            PstreamBuffers pBufs(Pstream::nonBlocking);
 
-            for (direction d=0; d<vector::nComponents; d++)
+            if (!Pstream::master())
             {
-                writePoints(uniquePoints.component(d), ensightGeometryFile);
-
-                for (int slave=1; slave<Pstream::nProcs(); slave++)
+                UOPstream toMaster(Pstream::masterNo(), pBufs);
+                for (direction d=0; d<vector::nComponents; d++)
                 {
-                    IPstream fromSlave(Pstream::scheduled, slave);
-                    scalarField pointsComponent(fromSlave);
-                    writePoints(pointsComponent, ensightGeometryFile);
+                    toMaster<< uniquePoints.component(d);
                 }
             }
-        }
-        else
-        {
-            for (direction d=0; d<vector::nComponents; d++)
+
+            pBufs.finishedSends();
+
+            if (Pstream::master())
             {
-                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-                toMaster<< uniquePoints.component(d);
+                ensightGeometryFile
+                    << "part" << nl
+                    << setw(10) << 1 << nl
+                    << "internalMesh" << nl
+                    << "coordinates" << nl
+                    << setw(10) << nPoints
+                    << endl;
+
+
+                PtrList<UIPstream> fromSlaves(Pstream::nProcs());
+                for (int slave=1; slave<Pstream::nProcs(); slave++)
+                {
+                    fromSlaves.set(slave, new UIPstream(slave, pBufs));
+                }
+
+                for (direction d=0; d<vector::nComponents; d++)
+                {
+                    writePoints(uniquePoints.component(d), ensightGeometryFile);
+
+                    for (int slave=1; slave<Pstream::nProcs(); slave++)
+                    {
+                        scalarField pointsComponent(fromSlaves[slave]);
+                        writePoints(pointsComponent, ensightGeometryFile);
+                    }
+                }
             }
         }
 
@@ -1348,17 +1446,17 @@ void Foam::ensightMesh::writeAscii
 
                 // Renumber the patch points/faces into unique points
                 labelList pointToGlobal;
-                labelList uniquePointLabels;
+                labelList uniqueMeshPointLabels;
                 autoPtr<globalIndex> globalPointsPtr =
                 mesh_.globalData().mergePoints
                 (
                     p.meshPoints(),
                     p.meshPointMap(),
                     pointToGlobal,
-                    uniquePointLabels
+                    uniqueMeshPointLabels
                 );
 
-                pointField uniquePoints(p.localPoints(), uniquePointLabels);
+                pointField uniquePoints(mesh_.points(), uniqueMeshPointLabels);
                 // Renumber the patch faces
                 faceList patchFaces(p.localFaces());
                 forAll(patchFaces, i)
@@ -1367,47 +1465,58 @@ void Foam::ensightMesh::writeAscii
                 }
 
 
-                if (Pstream::master())
                 {
-                    ensightGeometryFile
-                        << "part" << nl
-                        << setw(10) << ensightPatchI++ << nl
-                        << patchName << nl
-                        << "coordinates" << nl
-                        << setw(10) << globalPointsPtr().size()
-                        << endl;
+                    PstreamBuffers pBufs(Pstream::nonBlocking);
 
-                    for (direction d=0; d<vector::nComponents; d++)
+                    if (!Pstream::master())
                     {
-                        writePoints
-                        (
-                            uniquePoints.component(d),
-                            ensightGeometryFile
-                        );
-
-                        for (int slave=1; slave<Pstream::nProcs(); slave++)
+                        UOPstream toMaster(Pstream::masterNo(), pBufs);
+                        for (direction d=0; d<vector::nComponents; d++)
                         {
-                            IPstream fromSlave(Pstream::scheduled, slave);
-                            scalarField patchPointsComponent(fromSlave);
-
-                            writePoints
-                            (
-                                patchPointsComponent,
-                                ensightGeometryFile
-                            );
+                            toMaster<< uniquePoints.component(d);
                         }
                     }
-                }
-                else
-                {
-                    for (direction d=0; d<vector::nComponents; d++)
+
+                    pBufs.finishedSends();
+
+                    if (Pstream::master())
                     {
-                        OPstream toMaster
-                        (
-                            Pstream::scheduled,
-                            Pstream::masterNo()
-                        );
-                        toMaster<< uniquePoints.component(d);
+                        ensightGeometryFile
+                            << "part" << nl
+                            << setw(10) << ensightPatchI++ << nl
+                            << patchName << nl
+                            << "coordinates" << nl
+                            << setw(10) << globalPointsPtr().size()
+                            << endl;
+
+                        PtrList<UIPstream> fromSlaves(Pstream::nProcs());
+                        for (int slave=1; slave<Pstream::nProcs(); slave++)
+                        {
+                            fromSlaves.set(slave, new UIPstream(slave, pBufs));
+                        }
+
+                        for (direction d=0; d<vector::nComponents; d++)
+                        {
+                            writePoints
+                            (
+                                uniquePoints.component(d),
+                                ensightGeometryFile
+                            );
+
+                            for (int slave=1; slave<Pstream::nProcs(); slave++)
+                            {
+                                scalarField patchPointsComponent
+                                (
+                                    fromSlaves[slave]
+                                );
+
+                                writePoints
+                                (
+                                    patchPointsComponent,
+                                    ensightGeometryFile
+                                );
+                            }
+                        }
                     }
                 }
 
@@ -1502,36 +1611,52 @@ void Foam::ensightMesh::writeBinary
     {
         label nPoints = globalPoints.size();
 
-        if (Pstream::master())
         {
-            writeEnsDataBinary("part",ensightGeometryFile);
-            writeEnsDataBinary(1,ensightGeometryFile);
-            writeEnsDataBinary("internalMesh",ensightGeometryFile);
-            writeEnsDataBinary("coordinates",ensightGeometryFile);
-            writeEnsDataBinary(nPoints,ensightGeometryFile);
+            PstreamBuffers pBufs(Pstream::nonBlocking);
 
-            for (direction d=0; d<vector::nComponents; d++)
+            if (!Pstream::master())
             {
-                writeEnsDataBinary
-                (
-                    uniquePoints.component(d),
-                    ensightGeometryFile
-                );
-
-                for (int slave=1; slave<Pstream::nProcs(); slave++)
+                UOPstream toMaster(Pstream::masterNo(), pBufs);
+                for (direction d=0; d<vector::nComponents; d++)
                 {
-                    IPstream fromSlave(Pstream::scheduled, slave);
-                    scalarField pointsComponent(fromSlave);
-                    writeEnsDataBinary(pointsComponent, ensightGeometryFile);
+                    toMaster<< uniquePoints.component(d);
                 }
             }
-        }
-        else
-        {
-            for (direction d=0; d<vector::nComponents; d++)
+
+            pBufs.finishedSends();
+
+            if (Pstream::master())
             {
-                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-                toMaster<< uniquePoints.component(d);
+                writeEnsDataBinary("part",ensightGeometryFile);
+                writeEnsDataBinary(1,ensightGeometryFile);
+                writeEnsDataBinary("internalMesh",ensightGeometryFile);
+                writeEnsDataBinary("coordinates",ensightGeometryFile);
+                writeEnsDataBinary(nPoints,ensightGeometryFile);
+
+                PtrList<UIPstream> fromSlaves(Pstream::nProcs());
+                for (int slave=1; slave<Pstream::nProcs(); slave++)
+                {
+                    fromSlaves.set(slave, new UIPstream(slave, pBufs));
+                }
+
+                for (direction d=0; d<vector::nComponents; d++)
+                {
+                    writeEnsDataBinary
+                    (
+                        uniquePoints.component(d),
+                        ensightGeometryFile
+                    );
+
+                    for (int slave=1; slave<Pstream::nProcs(); slave++)
+                    {
+                        scalarField pointsComponent(fromSlaves[slave]);
+                        writeEnsDataBinary
+                        (
+                            pointsComponent,
+                            ensightGeometryFile
+                        );
+                    }
+                }
             }
         }
 
@@ -1601,16 +1726,16 @@ void Foam::ensightMesh::writeBinary
 
                 // Renumber the patch points/faces into unique points
                 labelList pointToGlobal;
-                labelList uniquePointLabels;
+                labelList uniqueMeshPointLabels;
                 autoPtr<globalIndex> globalPointsPtr =
                 mesh_.globalData().mergePoints
                 (
                     p.meshPoints(),
                     p.meshPointMap(),
                     pointToGlobal,
-                    uniquePointLabels
+                    uniqueMeshPointLabels
                 );
-                pointField uniquePoints(p.localPoints(), uniquePointLabels);
+                pointField uniquePoints(mesh_.points(), uniqueMeshPointLabels);
                 // Renumber the patch faces
                 faceList patchFaces(p.localFaces());
                 forAll(patchFaces, i)
@@ -1619,52 +1744,68 @@ void Foam::ensightMesh::writeBinary
                 }
 
 
-                if (Pstream::master())
                 {
-                    writeEnsDataBinary("part",ensightGeometryFile);
-                    writeEnsDataBinary(ensightPatchI++,ensightGeometryFile);
-                    //writeEnsDataBinary(patchName.c_str(),ensightGeometryFile);
-                    writeEnsDataBinary(patchName.c_str(),ensightGeometryFile);
-                    writeEnsDataBinary("coordinates",ensightGeometryFile);
-                    writeEnsDataBinary
-                    (
-                        globalPointsPtr().size(),
-                        ensightGeometryFile
-                    );
+                    PstreamBuffers pBufs(Pstream::nonBlocking);
 
-                    for (direction d=0; d<vector::nComponents; d++)
+                    if (!Pstream::master())
                     {
-                        //writePointsBinary
+                        UOPstream toMaster(Pstream::masterNo(), pBufs);
+                        for (direction d=0; d<vector::nComponents; d++)
+                        {
+                            toMaster<< uniquePoints.component(d);
+                        }
+                    }
+
+                    pBufs.finishedSends();
+
+                    if (Pstream::master())
+                    {
+                        writeEnsDataBinary("part",ensightGeometryFile);
+                        writeEnsDataBinary(ensightPatchI++,ensightGeometryFile);
+                        //writeEnsDataBinary
+                        //(patchName.c_str(),ensightGeometryFile);
+                        writeEnsDataBinary
+                        (   
+                            patchName.c_str(),
+                            ensightGeometryFile
+                        );
+                        writeEnsDataBinary("coordinates",ensightGeometryFile);
                         writeEnsDataBinary
                         (
-                            uniquePoints.component(d),
+                            globalPointsPtr().size(),
                             ensightGeometryFile
                         );
 
+                        PtrList<UIPstream> fromSlaves(Pstream::nProcs());
                         for (int slave=1; slave<Pstream::nProcs(); slave++)
                         {
-                            IPstream fromSlave(Pstream::scheduled, slave);
-                            scalarField patchPointsComponent(fromSlave);
+                            fromSlaves.set(slave, new UIPstream(slave, pBufs));
+                        }
 
+                        for (direction d=0; d<vector::nComponents; d++)
+                        {
                             //writePointsBinary
                             writeEnsDataBinary
                             (
-                                patchPointsComponent,
+                                uniquePoints.component(d),
                                 ensightGeometryFile
                             );
+
+                            for (int slave=1; slave<Pstream::nProcs(); slave++)
+                            {
+                                scalarField patchPointsComponent
+                                (
+                                    fromSlaves[slave]
+                                );
+
+                                //writePointsBinary
+                                writeEnsDataBinary
+                                (
+                                    patchPointsComponent,
+                                    ensightGeometryFile
+                                );
+                            }
                         }
-                    }
-                }
-                else
-                {
-                    for (direction d=0; d<vector::nComponents; d++)
-                    {
-                        OPstream toMaster
-                        (
-                            Pstream::scheduled,
-                            Pstream::masterNo()
-                        );
-                        toMaster<< uniquePoints.component(d);
                     }
                 }
 

@@ -643,7 +643,6 @@ DebugSwitches
     perfectInterface    0;
     pointIndexHitList   0;
     pointPatchField     0;
-    pointPatchInterpolation 0;
     pointScalarField    0;
     pointScalarField::DimensionedInternalField 0;
     pointSet            0;

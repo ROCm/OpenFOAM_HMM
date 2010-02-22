@@ -31,7 +31,7 @@ solvers
         tolerance       1e-06;
     }
 
-    "(U|Yi|h|k|epsilon)"
+    "(U|Yi|hs|k|epsilon)"
     {
         solver          PBiCG;
         preconditioner  DILU;

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    dieselFoam
+    dieselEngineFoam
 
 Description
     Solver for diesel engine spray and combustion.
@@ -103,13 +103,15 @@ int main(int argc, char *argv[])
             kappa = (runTime.deltaT() + tc)/(runTime.deltaT() + tc + tk);
         }
 
+        chemistrySh = kappa*chemistry.Sh()();
+
         #include "rhoEqn.H"
         #include "UEqn.H"
 
         for (label ocorr=1; ocorr <= nOuterCorr; ocorr++)
         {
             #include "YEqn.H"
-            #include "hEqn.H"
+            #include "hsEqn.H"
 
             // --- PISO loop
             for (int corr=1; corr<=nCorr; corr++)

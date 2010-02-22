@@ -291,6 +291,15 @@ public:
                 const Field<Type1>& iF
             ) const;
 
+            //- Return field created from selected internal field values
+            //  given internal field reference
+            template<class Type1>
+            tmp<Field<Type1> > patchInternalField
+            (
+                const Field<Type1>& iF,
+                const labelList& meshPoints
+            ) const;
+
             //- Given the internal field and a patch field,
             //  add the patch field to the internal field
             template<class Type1>
@@ -298,6 +307,16 @@ public:
             (
                 Field<Type1>& iF,
                 const Field<Type1>& pF
+            ) const;
+
+            //- Given the internal field and a patch field,
+            //  add selected elements of the patch field to the internal field
+            template<class Type1>
+            void addToInternalField
+            (
+                Field<Type1>& iF,
+                const Field<Type1>& pF,
+                const labelList& points
             ) const;
 
             //- Given the internal field and a patch field,
