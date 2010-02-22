@@ -112,22 +112,30 @@ OpenFOAM)
     case "$WM_COMPILER" in
     Gcc)
         export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/gcc-4.4.3/platforms/$WM_ARCH$WM_COMPILER_ARCH
-        _foamAddLib $WM_THIRD_PARTY_DIR/mpfr-2.4.2/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
+        export MPFR_HOME=$WM_THIRD_PARTY_DIR/mpfr-2.4.2
+        export MPFR_ARCH_PATH=$MPFR_HOME/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        _foamAddLib $MPFR_ARCH_PATH/lib
         _foamAddLib $WM_THIRD_PARTY_DIR/gmp-5.0.1/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
         ;;
     Gcc442)
         export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/gcc-4.4.2/platforms/$WM_ARCH$WM_COMPILER_ARCH
-        _foamAddLib $WM_THIRD_PARTY_DIR/mpfr-2.4.1/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
+        export MPFR_HOME=$WM_THIRD_PARTY_DIR/mpfr-2.4.1
+        export MPFR_ARCH_PATH=$MPFR_HOME/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        _foamAddLib $MPFR_ARCH_PATH/lib
         _foamAddLib $WM_THIRD_PARTY_DIR/gmp-4.2.4/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
         ;;
     Gcc44)
         export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/gcc-4.4.2/platforms/$WM_ARCH$WM_COMPILER_ARCH
-        _foamAddLib $WM_THIRD_PARTY_DIR/mpfr-2.4.1/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
+        export MPFR_HOME=$WM_THIRD_PARTY_DIR/mpfr-2.4.1
+        export MPFR_ARCH_PATH=$MPFR_HOME/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        _foamAddLib $MPFR_ARCH_PATH/lib
         _foamAddLib $WM_THIRD_PARTY_DIR/gmp-4.2.4/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
         ;;
     Gcc43)
         export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/gcc-4.3.3/platforms/$WM_ARCH$WM_COMPILER_ARCH
-        _foamAddLib $WM_THIRD_PARTY_DIR/mpfr-2.4.1/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
+        export MPFR_HOME=$WM_THIRD_PARTY_DIR/mpfr-2.4.1
+        export MPFR_ARCH_PATH=$MPFR_HOME/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        _foamAddLib $MPFR_ARCH_PATH/lib
         _foamAddLib $WM_THIRD_PARTY_DIR/gmp-4.2.4/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
         ;;
     Gcc42)
@@ -281,10 +289,18 @@ fi
 export MPI_BUFFER_SIZE
 
 
-# CGAL library if available
-# ~~~~~~~~~~~~~~~~~~~~~~~~~
-[ -d "$CGAL_LIB_DIR" ] && _foamAddLib $CGAL_LIB_DIR
+# CGAL and boost
+# ~~~~~~~~~~~~~~
+cgal_version=3.5.1
+export CGAL_SRC=$WM_THIRD_PARTY_DIR/CGAL-$cgal_version
 
+boost_version=1_42_0
+export BOOST_ROOT=$WM_THIRD_PARTY_DIR/boost_$boost_version
+
+_foamAddLib $BOOST_ROOT/platforms/$WM_OPTIONS/lib
+_foamAddLib $CGAL_SRC/lib
+
+unset cgal_version boost_version
 
 # Switch on the hoard memory allocator if available
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

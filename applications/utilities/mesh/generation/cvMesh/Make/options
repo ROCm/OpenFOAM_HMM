@@ -8,7 +8,6 @@ EXE_INC = \
     ${EXE_FROUNDING_MATH} \
     ${EXE_NDEBUG} \
     ${CGAL_INC} \
-    -I$(WM_THIRD_PARTY_DIR)/mpfr-2.4.1 \
     -I$(LIB_SRC)/mesh/conformalVoronoiMesh/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
@@ -17,8 +16,7 @@ EXE_INC = \
     -I$(LIB_SRC)/triSurface/lnInclude
 
 EXE_LIBS = \
-    -L$(WM_THIRD_PARTY_DIR)/mpfr-2.4.1/platforms/$(WM_ARCH)$(WM_COMPILER_ARCH)/lib \
-    -L$(BOOST_ROOT)/platforms/$(WM_OPTIONS)/lib \
+    $(CGAL_LIBS) \
     -lconformalVoronoiMesh \
     -lmeshTools \
     -ledgeMesh \
