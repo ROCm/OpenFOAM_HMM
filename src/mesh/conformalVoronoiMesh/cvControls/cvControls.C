@@ -49,8 +49,6 @@ Foam::cvControls::cvControls
 
     spanSqr_ = sqr(span_);
 
-    timeChecks_ = true;
-
     // Surface conformation controls
 
     const dictionary& surfDict(cvMeshDict_.subDict("surfaceConformation"));
@@ -98,6 +96,11 @@ Foam::cvControls::cvControls
     const dictionary& motionDict(cvMeshDict_.subDict("motionControl"));
 
     objOutput_ = Switch(motionDict.lookupOrDefault<Switch>("objOutput", false));
+
+    timeChecks_ = Switch
+    (
+        motionDict.lookupOrDefault<Switch>("timeChecks", false)
+    );
 
     alignmentSearchSpokes_ = readLabel
     (

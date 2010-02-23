@@ -69,8 +69,6 @@ class cvControls
             //- Square of span_
             scalar spanSqr_;
 
-            //- Activate/deactivate detailed timeChecks during meshing
-            bool timeChecks_;
 
         // Surface conformation controls
 
@@ -113,6 +111,9 @@ class cvControls
 
         //- Switch to control the output of obj files for debug
         Switch objOutput_;
+
+        //- Switch to control the reporting of detailed timeChecks
+        Switch timeChecks_;
 
         //- Number of "spokes" to use to search for secondary alignment
         //  direction
@@ -230,9 +231,6 @@ public:
             //- Return spanSqr
             inline scalar spanSqr() const;
 
-            //- Return timeChecks
-            inline bool timeChecks() const;
-
             //- Return the pointPairDistanceCoeff
             inline scalar pointPairDistanceCoeff() const;
 
@@ -259,6 +257,9 @@ public:
 
             //- Return the objOutput Switch
             inline Switch objOutput() const;
+
+            //- Return the timeChecks Switch
+            inline Switch timeChecks() const;
 
             //- Return the number of alignmentSearchSpokes to use
             inline label alignmentSearchSpokes() const;

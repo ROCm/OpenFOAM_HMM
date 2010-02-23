@@ -44,12 +44,6 @@ inline Foam::scalar Foam::cvControls::spanSqr() const
 }
 
 
-inline bool Foam::cvControls::timeChecks() const
-{
-    return timeChecks_;
-}
-
-
 inline Foam::scalar Foam::cvControls::pointPairDistanceCoeff() const
 {
     return pointPairDistanceCoeff_;
@@ -101,6 +95,12 @@ inline Foam::label Foam::cvControls::surfaceConformationRebuildFrequency() const
 inline Foam::Switch Foam::cvControls::objOutput() const
 {
     return objOutput_;
+}
+
+
+inline Foam::Switch Foam::cvControls::timeChecks() const
+{
+    return timeChecks_;
 }
 
 
