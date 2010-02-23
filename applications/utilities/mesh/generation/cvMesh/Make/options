@@ -21,6 +21,4 @@ EXE_LIBS = \
     -lmeshTools \
     -ledgeMesh \
     -ltriSurface \
-    -ldynamicMesh \
-    -lmpfr \
-    -lboost_thread
+    -ldynamicMesh
