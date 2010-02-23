@@ -109,7 +109,22 @@ Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
 
         normals_ = vectorField(edgeMeshDict.lookup("normals"));
 
-        edgeDirections_ = vectorField(edgeMeshDict.lookup("edgeDirections"));
+        {
+            // Calculate edgeDirections
+
+            const edgeList& eds(edges());
+
+            const pointField& pts(points());
+
+            edgeDirections_.setSize(eds.size());
+
+            forAll(eds, eI)
+            {
+                edgeDirections_[eI] = eds[eI].vec(pts);
+            }
+
+            edgeDirections_ /= mag(edgeDirections_);
+        }
 
         edgeNormals_ = labelListList(edgeMeshDict.lookup("edgeNormals"));
 
@@ -137,23 +152,23 @@ Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
 Foam::featureEdgeMesh::featureEdgeMesh
 (
     const IOobject& io,
-    const featureEdgeMesh& em
+    const featureEdgeMesh& fem
 )
 :
     regIOobject(io),
-    edgeMesh(em),
-    concaveStart_(0),
-    mixedStart_(0),
-    nonFeatureStart_(0),
-    internalStart_(0),
-    flatStart_(0),
-    openStart_(0),
-    multipleStart_(0),
-    normals_(0),
-    edgeDirections_(0),
-    edgeNormals_(0),
-    featurePointNormals_(0),
-    regionEdges_(0),
+    edgeMesh(fem),
+    concaveStart_(fem.concaveStart()),
+    mixedStart_(fem.mixedStart()),
+    nonFeatureStart_(fem.nonFeatureStart()),
+    internalStart_(fem.internalStart()),
+    flatStart_(fem.flatStart()),
+    openStart_(fem.openStart()),
+    multipleStart_(fem.multipleStart()),
+    normals_(fem.normals()),
+    edgeDirections_(fem.edgeDirections()),
+    edgeNormals_(fem.edgeNormals()),
+    featurePointNormals_(fem.featurePointNormals()),
+    regionEdges_(fem.regionEdges()),
     edgeTree_(),
     edgeTreesByType_()
 {}
@@ -189,8 +204,7 @@ Foam::featureEdgeMesh::featureEdgeMesh
 (
     const surfaceFeatures& sFeat,
     const objectRegistry& obr,
-    const fileName& sFeatFileName,
-    bool write
+    const fileName& sFeatFileName
 )
 :
     regIOobject
@@ -368,8 +382,7 @@ Foam::featureEdgeMesh::featureEdgeMesh
                 "("
                 "    const surfaceFeatures& sFeat,"
                 "    const objectRegistry& obr,"
-                "    const fileName& sFeatFileName,"
-                "    bool write"
+                "    const fileName& sFeatFileName"
                 ")"
             )
                 << nl << "classifyEdge returned NONE on edge "
@@ -446,8 +459,7 @@ Foam::featureEdgeMesh::featureEdgeMesh
                 "("
                 "    const surfaceFeatures& sFeat,"
                 "    const objectRegistry& obr,"
-                "    const fileName& sFeatFileName,"
-                "    bool write"
+                "    const fileName& sFeatFileName"
                 ")"
             )
                 << nl << "classifyFeaturePoint returned NONFEATURE on point at "
@@ -540,12 +552,6 @@ Foam::featureEdgeMesh::featureEdgeMesh
     }
 
     featurePointNormals_ = featurePointNormals;
-
-    // Optionally write the edgeMesh to file
-    if (write)
-    {
-        writeObj(sFeatFileName.lessExt());
-    }
 }
 
 
@@ -1030,9 +1036,6 @@ bool Foam::featureEdgeMesh::writeData(Ostream& os) const
         << nl << nl;
 
     os.writeKeyword("normals") << normals_ << token::END_STATEMENT
-        << nl << nl;
-
-    os.writeKeyword("edgeDirections") << edgeDirections_ << token::END_STATEMENT
         << nl << nl;
 
     os.writeKeyword("edgeNormals") << edgeNormals_ << token::END_STATEMENT

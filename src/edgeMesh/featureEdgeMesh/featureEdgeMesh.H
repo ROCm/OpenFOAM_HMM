@@ -210,8 +210,7 @@ public:
         (
             const surfaceFeatures& sFeat,
             const objectRegistry& obr,
-            const fileName& sFeatFileName,
-            bool write = false
+            const fileName& sFeatFileName
         );
 
         //- Construct from all components
@@ -352,9 +351,6 @@ public:
 
             //- Give precedence to the regIOobject write
             using regIOobject::write;
-
-            // //- ReadData function required for regIOobject read operation
-            // virtual bool readData(Istream&);
 
             //- WriteData function required for regIOobject write operation
             virtual bool writeData(Ostream&) const;
