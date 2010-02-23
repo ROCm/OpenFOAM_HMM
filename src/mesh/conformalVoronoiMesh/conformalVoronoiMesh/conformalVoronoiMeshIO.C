@@ -124,7 +124,7 @@ void Foam::conformalVoronoiMesh::writeInternalDelaunayVertices
         );
     }
 
-    Info<< nl << "    Writing " << io.name() << " to " << io.instance() << endl;
+    Info<< nl << "Writing " << io.name() << " to " << io.instance() << endl;
 
     pointIOField internalDVs(io, internalDelaunayVertices);
 
@@ -234,7 +234,7 @@ void Foam::conformalVoronoiMesh::writeMesh
 
     if (writeToConstant)
     {
-        Info<< nl << "    Writing mesh to constant." << endl;
+        Info<< nl << "Writing mesh to constant." << endl;
 
         io = IOobject
         (
@@ -247,7 +247,7 @@ void Foam::conformalVoronoiMesh::writeMesh
     }
     else
     {
-        Info<< nl << "    Writing mesh to time directory "
+        Info<< nl << "Writing mesh to time directory "
             << runTime_.timeName() << endl;
     }
 
@@ -292,7 +292,7 @@ void Foam::conformalVoronoiMesh::writeObjMesh
     const fileName& fName
 ) const
 {
-    Info<< nl << "    Writing points and faces to " << fName << endl;
+    Info<< nl << "Writing points and faces to " << fName << endl;
 
     OFstream str(fName);
 

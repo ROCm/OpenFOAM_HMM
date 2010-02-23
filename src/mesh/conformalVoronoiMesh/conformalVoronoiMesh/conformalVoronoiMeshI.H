@@ -253,7 +253,7 @@ inline void Foam::conformalVoronoiMesh::insertPoints
     const std::vector<Point>& points
 )
 {
-    Info<< nl << "    " << points.size() << " points to insert..." << endl;
+    Info<< "    " << points.size() << " points to insert..." << endl;
 
     label nVert = number_of_vertices();
 

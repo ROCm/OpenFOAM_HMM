@@ -95,7 +95,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         // establish if the mesh can be produced at all to the
         // specified criteria
 
-        Info<< nl << "    Merging close points" << endl;
+        Info<< nl << "Merging close points" << endl;
 
         // There is no guarantee that a merge of close points is
         // no-risk, but it seems to work using 1e-4 as the mergeClosenessCoeff
@@ -104,7 +104,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     label nInitialBadQualityFaces = checkPolyMeshQuality(points);
 
-    Info<< "Initial check before face collapse, found "
+    Info<< nl << "Initial check before face collapse, found "
         << nInitialBadQualityFaces << " bad quality faces"
         << endl;
 
@@ -139,7 +139,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
             indexDualVertices(points);
 
             {
-                Info<< nl << "    Merging close points" << endl;
+                Info<< nl << "Merging close points" << endl;
 
                 mergeCloseDualVertices(points);
             }
@@ -148,18 +148,19 @@ void Foam::conformalVoronoiMesh::calcDualMesh
                 // Risky and undo-able face filtering to reduce the face count
                 // as much as possible, staying within the specified criteria
 
-                Info<< nl << "    Smoothing surface" << endl;
+                Info<< nl << "Smoothing surface" << endl;
 
                 smoothSurface(points);
 
-                Info<< nl << "    Collapsing unnecessary faces" << endl;
+                Info<< nl << "Collapsing unnecessary faces" << endl;
 
                 collapseFaces(points, deferredCollapseFaces);
             }
 
             nBadQualityFaces = checkPolyMeshQuality(points);
 
-            Info<< "Found " << nBadQualityFaces << " bad quality faces" << endl;
+            Info<< nl << "Found " << nBadQualityFaces
+                << " bad quality faces" << endl;
 
         } while (nBadQualityFaces > nInitialBadQualityFaces);
     }
@@ -332,8 +333,8 @@ void Foam::conformalVoronoiMesh::calcTetMesh
 
                 WarningIn("Foam::conformalVoronoiMesh::calcTetMesh")
                     << "Tet face centre at  " << nl
-                    << "    " << newFace.centre(points) << nl
-                    << "    did not find a surface patch. Adding to "
+                    << newFace.centre(points) << nl
+                    << "did not find a surface patch. Adding to "
                     << patchNames[patchIndex]
                     << endl;
             }
@@ -403,7 +404,7 @@ void Foam::conformalVoronoiMesh::mergeCloseDualVertices(const pointField& pts)
 
         if (nPtsMerged > 0)
         {
-            Info<< "        Merged " << nPtsMerged << " points " << endl;
+            Info<< "    Merged " << nPtsMerged << " points " << endl;
         }
 
         reindexDualVertices(dualPtIndexMap);
@@ -476,7 +477,7 @@ void Foam::conformalVoronoiMesh::smoothSurface(pointField& pts)
 
         if (nCollapsedFaces > 0)
         {
-            Info<< "        Collapsed " << nCollapsedFaces << " boundary faces"
+            Info<< "    Collapsed " << nCollapsedFaces << " boundary faces"
                 << endl;
         }
 
@@ -715,7 +716,7 @@ void Foam::conformalVoronoiMesh::collapseFaces
 
         if (nCollapsedFaces > 0)
         {
-            Info<< "        Collapsed " << nCollapsedFaces << " faces" << endl;
+            Info<< "    Collapsed " << nCollapsedFaces << " faces" << endl;
             // Info<< "dualPtIndexMap" << nl << dualPtIndexMap << endl;
         }
 
@@ -1292,7 +1293,7 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     timeCheck();
 
-    Info<< "    Creating polyMesh to assess quality" << endl;
+    Info<< nl << "Creating polyMesh to assess quality" << endl;
 
     createFacesOwnerNeighbourAndPatches
     (
@@ -1344,6 +1345,8 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
     timeCheck();
 
     labelHashSet wrongFaces(pMesh.nFaces()/100);
+
+    Info << endl;
 
     motionSmoother::checkMesh
     (
@@ -1455,7 +1458,8 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
         }
     }
 
-    Info<< "maxFilterCount " << maxFilterCount << endl;
+    Info<< nl << "Maximum number of filter limits applied: "
+        << maxFilterCount << endl;
 
     return wrongFaces.size();
 
@@ -1603,9 +1607,9 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
                         // WarningIn("Foam::conformalVoronoiMesh::calcDualMesh")
                         //     << "Dual face found between Dv pair " << nl
-                        //     << "    " << ptA << nl
-                        //     << "    " << ptB << nl
-                        //     << "    that is not on a surface patch. Adding to "
+                        //     << ptA << nl
+                        //     << ptB << nl
+                        //     << "that is not on a surface patch. Adding to "
                         //     << patchNames[patchIndex]
                         //     << endl;
                     }
@@ -1679,7 +1683,7 @@ void Foam::conformalVoronoiMesh::sortFaces
     // 1) sort by owner
 
     Info<< nl
-        << "    Sorting faces, owner and neighbour into upper triangular order"
+        << "Sorting faces, owner and neighbour into upper triangular order"
         << endl;
 
     labelList oldToNew;
@@ -1846,7 +1850,7 @@ void Foam::conformalVoronoiMesh::removeUnusedPoints
     pointField& pts
 ) const
 {
-    Info<< nl << "    Removing unused points after filtering" << endl;
+    Info<< nl << "Removing unused points after filtering" << endl;
 
     PackedBoolList ptUsed(pts.size(), false);
 
@@ -1878,7 +1882,7 @@ void Foam::conformalVoronoiMesh::removeUnusedPoints
 
     inplaceReorder(oldToNew, pts);
 
-    Info<< "        Removing " << pts.size() - pointI << " unused points"
+    Info<< "    Removing " << pts.size() - pointI << " unused points"
         << endl;
 
     pts.setSize(pointI);
@@ -1898,7 +1902,7 @@ void Foam::conformalVoronoiMesh::removeUnusedCells
     labelList& neighbour
 ) const
 {
-    Info<< nl << "    Removing unused cells after filtering" << endl;
+    Info<< nl << "Removing unused cells after filtering" << endl;
 
     PackedBoolList cellUsed(max(max(owner), max(neighbour)), false);
 
@@ -1930,7 +1934,7 @@ void Foam::conformalVoronoiMesh::removeUnusedCells
 
     if (unusedCells.size() > 0)
     {
-        Info<< "        Removing " << unusedCells.size() <<  " unused cells "
+        Info<< "Removing " << unusedCells.size() <<  " unused cells "
             << endl;
 
         forAll(owner, oI)

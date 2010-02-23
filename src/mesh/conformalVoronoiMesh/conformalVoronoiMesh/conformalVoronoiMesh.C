@@ -520,7 +520,7 @@ void Foam::conformalVoronoiMesh::insertFlatEdgePointGroup
     const pointIndexHit& edHit
 )
 {
-    Info<< "    NOT INSERTING FLAT EDGE POINT GROUP, NOT IMPLEMENTED" << endl;
+    Info<< "NOT INSERTING FLAT EDGE POINT GROUP, NOT IMPLEMENTED" << endl;
 }
 
 
@@ -530,7 +530,7 @@ void Foam::conformalVoronoiMesh::insertOpenEdgePointGroup
     const pointIndexHit& edHit
 )
 {
-    Info<< "    NOT INSERTING OPEN EDGE POINT GROUP, NOT IMPLEMENTED" << endl;
+    Info<< "NOT INSERTING OPEN EDGE POINT GROUP, NOT IMPLEMENTED" << endl;
 }
 
 
@@ -540,7 +540,7 @@ void Foam::conformalVoronoiMesh::insertMultipleEdgePointGroup
     const pointIndexHit& edHit
 )
 {
-    Info<< "    NOT INSERTING MULTIPLE EDGE POINT GROUP, NOT IMPLEMENTED"
+    Info<< "NOT INSERTING MULTIPLE EDGE POINT GROUP, NOT IMPLEMENTED"
         << endl;
 }
 
@@ -723,7 +723,7 @@ void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
                  || edStatus == featureEdgeMesh::MULTIPLE
                 )
                 {
-                    Info<< "    Edge type " << edStatus
+                    Info<< "Edge type " << edStatus
                         << " found for mixed feature point " << ptI
                         << ". Not supported."
                         << endl;
@@ -735,7 +735,7 @@ void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
 
             if(skipEdge)
             {
-                Info<< "    Skipping point " << ptI << nl << endl;
+                Info<< "Skipping point " << ptI << nl << endl;
 
                 continue;
             }
@@ -789,7 +789,7 @@ void Foam::conformalVoronoiMesh::constructFeaturePointLocations()
 
 void Foam::conformalVoronoiMesh::reinsertFeaturePoints()
 {
-    Info<< nl << "    Reinserting stored feature points" << endl;
+    Info<< nl << "Reinserting stored feature points" << endl;
 
     forAll(featureVertices_, f)
     {
@@ -868,7 +868,7 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
 {
     timeCheck();
 
-    Info << nl << "    Initialise stored size and alignment data" << endl;
+    Info << nl << "Initialise stored size and alignment data" << endl;
 
     sizeAndAlignmentLocations_.setSize(initPts.size());
 
@@ -910,7 +910,7 @@ Foam::conformalVoronoiMesh::sizeAndAlignmentTree() const
 
 void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
 {
-    Info<< nl << "    Looking up target cell alignment and size" << endl;
+    Info<< nl << "Looking up target cell alignment and size" << endl;
 
     scalar spanSqr = cvMeshControls().spanSqr();
 
@@ -935,7 +935,7 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
         }
     }
 
-    // Info<< nl << "    Calculating target cell alignment and size" << endl;
+    // Info<< nl << "Calculating target cell alignment and size" << endl;
 
     // for
     // (
@@ -1162,7 +1162,7 @@ void Foam::conformalVoronoiMesh::move()
 
     scalar relaxation = relaxationModel_->relaxation();
 
-    Info<< nl << "    Relaxation = " << relaxation << endl;
+    Info<< nl << "Relaxation = " << relaxation << endl;
 
     pointField dualVertices(number_of_cells());
 
@@ -1202,7 +1202,7 @@ void Foam::conformalVoronoiMesh::move()
 
     timeCheck();
 
-    Info<< nl << "    Determining vertex displacements" << endl;
+    Info<< nl << "Determining vertex displacements" << endl;
 
     vectorField cartesianDirections(3);
 
@@ -1458,7 +1458,7 @@ void Foam::conformalVoronoiMesh::move()
 
     timeCheck();
 
-    Info<< nl << "    Inserting displaced tessellation" << endl;
+    Info<< nl << "Inserting displaced tessellation" << endl;
 
     insertPoints(pointsToInsert);
 
@@ -1476,10 +1476,10 @@ void Foam::conformalVoronoiMesh::move()
     timeCheck();
 
     Info<< nl
-        << "    Total displacement = " << totalDisp << nl
-        << "    Total distance = " << totalDist << nl
-        << "    Points added = " << pointsAdded << nl
-        << "    Points removed = " << pointsRemoved
+        << "Total displacement = " << totalDisp << nl
+        << "Total distance = " << totalDist << nl
+        << "Points added = " << pointsAdded << nl
+        << "Points removed = " << pointsRemoved
         << endl;
 }
 

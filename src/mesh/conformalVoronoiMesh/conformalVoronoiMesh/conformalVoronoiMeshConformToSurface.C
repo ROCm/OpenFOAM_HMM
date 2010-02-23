@@ -50,7 +50,7 @@ Foam::conformalVoronoiMesh::reconformationControl() const
 {
     if (!runTime_.run())
     {
-        Info<< nl << "    Rebuilding surface conformation for final output"
+        Info<< nl << "Rebuilding surface conformation for final output"
             << endl;
 
         return rmFine;
@@ -61,7 +61,7 @@ Foam::conformalVoronoiMesh::reconformationControl() const
       % cvMeshControls().surfaceConformationRebuildFrequency() == 0
     )
     {
-        Info<< nl << "    Rebuilding surface conformation for more iterations"
+        Info<< nl << "Rebuilding surface conformation for more iterations"
             << endl;
 
         return rmCoarse;
@@ -78,11 +78,11 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 {
     if (reconfMode == rmCoarse)
     {
-        Info<< nl << "    Build coarse surface conformation" << endl;
+        Info<< nl << "Build coarse surface conformation" << endl;
     }
     else if (reconfMode == rmFine)
     {
-        Info<< nl << "    Build fine surface conformation" << endl;
+        Info<< nl << "Build fine surface conformation" << endl;
     }
     else if (reconfMode == rmNone)
     {
@@ -118,7 +118,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
     // Initial surface protrusion conformation - nearest surface point
     {
-        Info<< "    EDGE DISTANCE COEFFS HARD-CODED." << endl;
+        Info<< "EDGE DISTANCE COEFFS HARD-CODED." << endl;
         scalar edgeSearchDistCoeffSqr = sqr(1.1);
         scalar surfacePtReplaceDistCoeffSqr = sqr(0.5);
 
@@ -178,10 +178,10 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
             }
         }
 
-        Info<< nl <<"    Initial conformation" << nl
-            << "        Number of vertices " << number_of_vertices() << nl
-            << "        Number of surface hits " << surfaceHits.size() << nl
-            << "        Number of edge hits " << featureEdgeHits.size()
+        Info<< nl << "Initial conformation" << nl
+            << "    Number of vertices " << number_of_vertices() << nl
+            << "    Number of surface hits " << surfaceHits.size() << nl
+            << "    Number of edge hits " << featureEdgeHits.size()
             << endl;
 
         insertSurfacePointPairs
@@ -205,13 +205,13 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
     label maxIterations = 10;
 
-    Info<< nl << "    MAX ITERATIONS HARD CODED TO "<< maxIterations << endl;
+    Info<< nl << "MAX ITERATIONS HARD CODED TO "<< maxIterations << endl;
 
     scalar iterationToIntialHitRatioLimit = 0.01;
 
     label hitLimit = label(iterationToIntialHitRatioLimit*initialTotalHits);
 
-    Info<< "    STOPPING ITERATIONS WHEN TOTAL NUMBER OF HITS DROPS BELOW "
+    Info<< "STOPPING ITERATIONS WHEN TOTAL NUMBER OF HITS DROPS BELOW "
         << iterationToIntialHitRatioLimit << " (HARD CODED) OF INITIAL HITS ("
         << hitLimit << ")"
         << endl;
@@ -227,7 +227,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
      && iterationNo < maxIterations
     )
     {
-        Info<< "    EDGE DISTANCE COEFFS HARD-CODED." << endl;
+        Info<< "EDGE DISTANCE COEFFS HARD-CODED." << endl;
         scalar edgeSearchDistCoeffSqr = sqr(1.25);
         scalar surfacePtReplaceDistCoeffSqr = sqr(0.7);
 
@@ -279,10 +279,10 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
             }
         }
 
-        Info<< nl <<"    Conformation iteration " << iterationNo << nl
-            << "        Number of vertices " << number_of_vertices() << nl
-            << "        Number of surface hits " << surfaceHits.size() << nl
-            << "        Number of edge hits " << featureEdgeHits.size()
+        Info<< nl << "Conformation iteration " << iterationNo << nl
+            << "    Number of vertices " << number_of_vertices() << nl
+            << "    Number of surface hits " << surfaceHits.size() << nl
+            << "    Number of edge hits " << featureEdgeHits.size()
             << endl;
 
         totalHits = surfaceHits.size() + featureEdgeHits.size();
@@ -318,13 +318,13 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
         if (totalHits < hitLimit)
         {
-            Info<< nl << "    Total hits (" << totalHits
+            Info<< nl << "Total hits (" << totalHits
                 << ") less than limit (" << hitLimit
                 << "), stopping iterations" << endl;
         }
     }
 
-    // Info<< nl << "    After iterations, check penetrations" << endl;
+    // Info<< nl << "After iterations, check penetrations" << endl;
 
     // for
     // (
@@ -513,14 +513,14 @@ void Foam::conformalVoronoiMesh::limitDisplacement
         // If dispPt is outside bounding box then displacement cuts boundary
         limit = true;
 
-        // Info<< "    bb limit" << endl;
+        // Info<< "bb limit" << endl;
     }
     else if (geometryToConformTo_.findSurfaceAnyIntersection(pt, dispPt))
     {
         // Full surface penetration test
         limit = true;
 
-        // Info<< "    intersection limit" << endl;
+        // Info<< "intersection limit" << endl;
     }
     else
     {
@@ -544,13 +544,13 @@ void Foam::conformalVoronoiMesh::limitDisplacement
 
         if (surfHit.hit())
         {
-            // Info<< "    proximity limit" << endl;
+            // Info<< "proximity limit" << endl;
 
             limit = true;
 
             if (magSqr(pt - surfHit.hitPoint()) <= searchDistanceSqr)
             {
-                // Info<< "    Cannot limit displacement, point " << pt
+                // Info<< "Cannot limit displacement, point " << pt
                 //     << " closer than tolerance" << endl;
 
                 return;
@@ -565,7 +565,7 @@ void Foam::conformalVoronoiMesh::limitDisplacement
 
         displacement *= 0.5;
 
-        // Info<< "    Limiting displacement of point " << pt << endl;
+        // Info<< "Limiting displacement of point " << pt << endl;
 
         limitDisplacement(vit, displacement, callCount);
     }
@@ -784,7 +784,7 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
 
 void Foam::conformalVoronoiMesh::storeSurfaceConformation()
 {
-    Info<< nl << "    Storing surface conformation" << endl;
+    Info<< nl << "Storing surface conformation" << endl;
 
     surfaceConformationVertices_.setSize
     (
@@ -828,7 +828,7 @@ void Foam::conformalVoronoiMesh::storeSurfaceConformation()
 
 void Foam::conformalVoronoiMesh::reinsertSurfaceConformation()
 {
-    Info<< nl << "    Reinserting stored surface conformation" << endl;
+    Info<< nl << "Reinserting stored surface conformation" << endl;
 
     startOfSurfacePointPairs_ = number_of_vertices();
 
