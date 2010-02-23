@@ -2220,33 +2220,39 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
 
     if (nearType == triPointRef::NONE)
     {
+        vector sampleNearestVec = (sample - nearestPoint);
+
+        scalar magSampleNearestVec = mag(sampleNearestVec);
+
         // Nearest to face interior. Use faceNormal to determine side
-        scalar c = (sample - nearestPoint) & surf.faceNormals()[nearestFaceI];
+        scalar c = sampleNearestVec & surf.faceNormals()[nearestFaceI];
 
-        c /= max
-        (
-            VSMALL,
-            mag(sample - nearestPoint)*mag(surf.faceNormals()[nearestFaceI])
-        );
+        // If the sample is essentially on the face, do not check for
+        // it being perpendicular.
 
-        if (mag(c) < 0.9)
+        if (magSampleNearestVec > SMALL)
         {
-            FatalErrorIn("triSurfaceTools::surfaceSide")
+            c /= magSampleNearestVec*mag(surf.faceNormals()[nearestFaceI]);
+
+            if (mag(c) < 0.9)
+            {
+                FatalErrorIn("triSurfaceTools::surfaceSide")
                 << "nearestPoint identified as being on triangle face "
-                << "but vector from nearestPoint to sample is not "
-                << "perpendicular to the normal." << nl
-                << "sample: " << sample << nl
-                << "nearestPoint: " << nearestPoint << nl
-                << "sample - nearestPoint: " << sample - nearestPoint << nl
-                << "normal: " << surf.faceNormals()[nearestFaceI] << nl
-                << "mag(sample - nearestPoint): "
-                << mag(sample - nearestPoint) << nl
-                << "normalised dot product: " << c << nl
-                << "triangle vertices: " << nl
-                << "    " << points[f[0]] << nl
-                << "    " << points[f[1]] << nl
-                << "    " << points[f[2]] << nl
-                << abort(FatalError);
+                    << "but vector from nearestPoint to sample is not "
+                    << "perpendicular to the normal." << nl
+                    << "sample: " << sample << nl
+                    << "nearestPoint: " << nearestPoint << nl
+                    << "sample - nearestPoint: " << sample - nearestPoint << nl
+                    << "normal: " << surf.faceNormals()[nearestFaceI] << nl
+                    << "mag(sample - nearestPoint): "
+                    << mag(sample - nearestPoint) << nl
+                    << "normalised dot product: " << c << nl
+                    << "triangle vertices: " << nl
+                    << "    " << points[f[0]] << nl
+                    << "    " << points[f[1]] << nl
+                    << "    " << points[f[2]] << nl
+                    << abort(FatalError);
+            }
         }
 
         if (c > 0)
