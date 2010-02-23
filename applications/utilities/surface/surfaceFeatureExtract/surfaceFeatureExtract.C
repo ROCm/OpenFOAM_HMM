@@ -278,9 +278,10 @@ int main(int argc, char *argv[])
     (
         newSet,
         runTime,
-        surfFileName.lessExt().name() + ".feMesh",
-        true
+        surfFileName.lessExt().name() + ".featureEdgeMesh"
     );
+
+    feMesh.writeObj(surfFileName.lessExt().name());
 
     feMesh.write();
 

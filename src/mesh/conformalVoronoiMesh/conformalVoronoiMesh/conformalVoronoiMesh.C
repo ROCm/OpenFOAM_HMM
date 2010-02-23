@@ -803,11 +803,13 @@ Foam::conformalVoronoiMesh::featurePointTree() const
 {
     if (featurePointTree_.empty())
     {
-        treeBoundBox overallBb(geometryToConformTo_.bounds());
-
         Random rndGen(92561);
 
-        overallBb.extend(rndGen, 1E-4);
+        treeBoundBox overallBb
+        (
+            treeBoundBox(geometryToConformTo_.bounds()).extend(rndGen, 1E-4)
+        );
+
         overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 

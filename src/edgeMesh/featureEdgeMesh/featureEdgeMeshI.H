@@ -248,24 +248,3 @@ inline Foam::featureEdgeMesh::edgeStatus Foam::featureEdgeMesh::getEdgeStatus
 
 
 // ************************************************************************* //
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

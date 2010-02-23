@@ -624,11 +624,13 @@ void Foam::conformalVoronoiMesh::buildEdgeLocationTree
     const pointField& existingEdgeLocations
 ) const
 {
-    treeBoundBox overallBb(geometryToConformTo_.bounds());
-
     Random rndGen(72953);
 
-    overallBb.extend(rndGen, 1E-4);
+    treeBoundBox overallBb
+    (
+        treeBoundBox(geometryToConformTo_.bounds()).extend(rndGen, 1E-4)
+    );
+
     overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
     overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
@@ -648,11 +650,13 @@ void Foam::conformalVoronoiMesh::buildEdgeLocationTree
 
 void Foam::conformalVoronoiMesh::buildSizeAndAlignmentTree() const
 {
-    treeBoundBox overallBb(geometryToConformTo_.bounds());
-
     Random rndGen(627391);
 
-    overallBb.extend(rndGen, 1E-4);
+    treeBoundBox overallBb
+    (
+        treeBoundBox(geometryToConformTo_.bounds()).extend(rndGen, 1E-4)
+    );
+
     overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
     overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
