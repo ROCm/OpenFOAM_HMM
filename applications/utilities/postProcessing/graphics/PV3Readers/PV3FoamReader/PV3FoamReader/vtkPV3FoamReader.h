@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -101,6 +101,11 @@ public:
     // FOAM extrapolate internal values onto the patches
     vtkSetMacro(ExtrapolatePatches, int);
     vtkGetMacro(ExtrapolatePatches, int);
+
+    // Description:
+    // FOAM use vtkPolyhedron instead of decomposing polyhedra
+    vtkSetMacro(UseVTKPolyhedron, int);
+    vtkGetMacro(UseVTKPolyhedron, int);
 
     // Description:
     // FOAM read sets control
@@ -217,6 +222,7 @@ private:
     int SkipZeroTime;
 
     int ExtrapolatePatches;
+    int UseVTKPolyhedron;
     int IncludeSets;
     int IncludeZones;
     int ShowPatchNames;

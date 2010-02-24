@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "vtkPV3Foam.H"
+#include "vtkPV3FoamReader.h"
 
 // Foam includes
 #include "fvMesh.H"
@@ -33,6 +34,7 @@ License
 
 // VTK includes
 #include "vtkCellArray.h"
+#include "vtkIdTypeArray.h"
 #include "vtkUnstructuredGrid.h"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -79,35 +81,40 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
     {
         Info<< "... scanning" << endl;
     }
-    forAll(cellShapes, cellI)
+
+    // count number of cells to decompose
+    if (!reader_->GetUseVTKPolyhedron())
     {
-        const cellModel& model = cellShapes[cellI].model();
-
-        if
-        (
-            model != hex
-         && model != wedge
-         && model != prism
-         && model != pyr
-         && model != tet
-         && model != tetWedge
-        )
+        forAll(cellShapes, cellI)
         {
-            const cell& cFaces = mesh.cells()[cellI];
+            const cellModel& model = cellShapes[cellI].model();
 
-            forAll(cFaces, cFaceI)
+            if
+            (
+                model != hex
+             && model != wedge
+             && model != prism
+             && model != pyr
+             && model != tet
+             && model != tetWedge
+            )
             {
-                const face& f = mesh.faces()[cFaces[cFaceI]];
+                const cell& cFaces = mesh.cells()[cellI];
 
-                label nFacePoints = f.size();
+                forAll(cFaces, cFaceI)
+                {
+                    const face& f = mesh.faces()[cFaces[cFaceI]];
 
-                label nQuads = (nFacePoints - 2)/2;
-                label nTris = (nFacePoints - 2)%2;
-                nAddCells += nQuads + nTris;
+                    label nFacePoints = f.size();
+
+                    label nQuads = (nFacePoints - 2)/2;
+                    label nTris = (nFacePoints - 2)%2;
+                    nAddCells += nQuads + nTris;
+                }
+
+                nAddCells--;
+                nAddPoints++;
             }
-
-            nAddCells--;
-            nAddPoints++;
         }
     }
 
@@ -155,7 +162,7 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
     // Set counters for additional points and additional cells
     label addPointI = 0, addCellI = 0;
 
-    // Create storage for points - needed for mapping from Foam to VTK
+    // Create storage for points - needed for mapping from OpenFOAM to VTK
     // data types - max 'order' = hex = 8 points
     vtkIdType nodeIds[8];
 
@@ -255,6 +262,80 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
                 8,
                 nodeIds
             );
+        }
+        else if (reader_->GetUseVTKPolyhedron())
+        {
+            // Polyhedral cell - use VTK_POLYHEDRON
+            const labelList& cFaces = mesh.cells()[cellI];
+
+            vtkIdType nFaces = cFaces.size();
+            vtkIdType nodeCount = 0;
+            vtkIdType nLabels = nFaces;
+
+            // count size for face stream
+            forAll(cFaces, cFaceI)
+            {
+                const face& f = mesh.faces()[cFaces[cFaceI]];
+                nLabels += f.size();
+            }
+
+            // unique node ids - approximately equal to the number of point ids
+            DynamicList<vtkIdType> uniqueNodeIds(nLabels-nFaces);
+
+            // zero-based index into uniqueNodeIds
+            DynamicList<vtkIdType> faceLabels(nLabels);
+
+            // localized point id within the cell
+            Map<label> mapLocalId(2*nLabels);
+
+            // establish the unique point ids,
+            // record the local mapping ids,
+            // create new face list
+            forAll(cFaces, cFaceI)
+            {
+                const face& f = mesh.faces()[cFaces[cFaceI]];
+                const label nFacePoints = f.size();
+
+                // number of labels for this face
+                faceLabels.append(nFacePoints);
+
+                forAll(f, fp)
+                {
+                    const label nodeId = f[fp];
+
+                    if (mapLocalId.insert(nodeId, nodeCount))
+                    {
+                        // insertion was successful (node Id was unique)
+                        uniqueNodeIds.append(nodeId);
+                        // map orig vertex id -> localized point label
+                        faceLabels.append(nodeCount);
+                        ++nodeCount;
+                    }
+                    else
+                    {
+                        // map orig vertex id -> localized point label
+                        faceLabels.append(mapLocalId[nodeId]);
+                    }
+                }
+            }
+
+#ifdef HAS_VTK_POLYHEDRON
+            vtkmesh->InsertNextCell
+            (
+                VTK_POLYHEDRON,
+                nodeCount,
+                uniqueNodeIds.data(),
+                faceCount,
+                faceLabels.data()
+            );
+#else
+            vtkmesh->InsertNextCell
+            (
+                VTK_CONVEX_POINT_SET,
+                nodeCount,
+                uniqueNodeIds.data()
+            );
+#endif
         }
         else
         {

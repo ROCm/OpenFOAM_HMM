@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -345,7 +345,7 @@ Foam::ensightPart::localPoints Foam::ensightPartCells::calcLocalPoints() const
 void Foam::ensightPartCells::writeConnectivity
 (
     ensightGeoFile& os,
-    const string& key,
+    const word& key,
     const labelList& idList,
     const labelList& pointMap
 ) const
@@ -357,7 +357,7 @@ void Foam::ensightPartCells::writeConnectivity
     const polyMesh& mesh = *meshPtr_;
 
     // write polyhedral
-    if (word(key) == "nfaced")
+    if (key == "nfaced")
     {
         const faceList& meshFaces = mesh.faces();
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -206,7 +206,7 @@ Foam::ensightPart::localPoints Foam::ensightPartFaces::calcLocalPoints() const
 void Foam::ensightPartFaces::writeConnectivity
 (
     ensightGeoFile& os,
-    const string& key,
+    const word& key,
     const labelList& idList,
     const labelList& pointMap
 ) const
@@ -218,7 +218,7 @@ void Foam::ensightPartFaces::writeConnectivity
     const faceList& meshFaces = meshPtr_->faces();
 
     // write (polygon) face sizes
-    if (word(key) == "nsided")
+    if (key == "nsided")
     {
         // write the number of points per face
         forAll(idList, i)
