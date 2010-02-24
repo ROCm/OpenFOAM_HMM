@@ -95,7 +95,8 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
     else
     {
         WarningIn("buildSurfaceConformation(reconformationMode reconfMode)")
-            << "Unknown reconformationMode " << reconfMode << endl;
+            << "Unknown reconformationMode " << reconfMode
+            << " not building conformation" << endl;
 
         return;
     }
@@ -118,9 +119,11 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
     // Initial surface protrusion conformation - nearest surface point
     {
-        Info<< "EDGE DISTANCE COEFFS HARD-CODED." << endl;
-        scalar edgeSearchDistCoeffSqr = sqr(1.1);
-        scalar surfacePtReplaceDistCoeffSqr = sqr(0.5);
+        scalar edgeSearchDistCoeffSqr =
+            cvMeshControls().edgeSearchDistCoeffSqrInitial(reconfMode);
+
+        scalar surfacePtReplaceDistCoeffSqr =
+            cvMeshControls().surfacePtReplaceDistCoeffSqrInitial(reconfMode);
 
         DynamicList<pointIndexHit> surfaceHits;
         DynamicList<label> hitSurfaces;
@@ -203,17 +206,21 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
     label iterationNo = 0;
 
-    label maxIterations = 10;
+    label maxIterations =
+        cvMeshControls().maxConformationIterations(reconfMode);
 
-    Info<< nl << "MAX ITERATIONS HARD CODED TO "<< maxIterations << endl;
-
-    scalar iterationToIntialHitRatioLimit = 0.01;
+    scalar iterationToIntialHitRatioLimit =
+        cvMeshControls().iterationToIntialHitRatioLimit(reconfMode);
 
     label hitLimit = label(iterationToIntialHitRatioLimit*initialTotalHits);
 
-    Info<< "STOPPING ITERATIONS WHEN TOTAL NUMBER OF HITS DROPS BELOW "
-        << iterationToIntialHitRatioLimit << " (HARD CODED) OF INITIAL HITS ("
-        << hitLimit << ")"
+    Info<< nl << "Stopping iterations when: " << nl
+        <<"    total number of hits drops below "
+        << iterationToIntialHitRatioLimit << " of initial hits ("
+        << hitLimit << ")" << nl
+        << " or " << nl
+        << "    maximum number of iterations ("
+        << maxIterations << ") is reached"
         << endl;
 
     // Set totalHits to a large enough positive value to enter the while loop on
@@ -227,9 +234,11 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
      && iterationNo < maxIterations
     )
     {
-        Info<< "EDGE DISTANCE COEFFS HARD-CODED." << endl;
-        scalar edgeSearchDistCoeffSqr = sqr(1.25);
-        scalar surfacePtReplaceDistCoeffSqr = sqr(0.7);
+        scalar edgeSearchDistCoeffSqr =
+            cvMeshControls().edgeSearchDistCoeffSqrIteration(reconfMode);
+
+        scalar surfacePtReplaceDistCoeffSqr =
+            cvMeshControls().surfacePtReplaceDistCoeffSqrIteration(reconfMode);
 
         DynamicList<pointIndexHit> surfaceHits;
         DynamicList<label> hitSurfaces;

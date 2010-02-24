@@ -107,6 +107,80 @@ class cvControls
             label surfaceConformationRebuildFrequency_;
 
 
+            // Controls for coarse surface conformation
+
+                //- Distance to search for feature edges near to
+                //  surface protrusions - fraction of the local target
+                //  cell size. Coarse conformation, initial protrusion
+                //  tests.
+                scalar edgeSearchDistCoeffSqr_coarse_initial_;
+
+                //- Distance to search for feature edges near to
+                //  surface protrusions - fraction of the local target
+                //  cell size. Coarse conformation, iteration
+                //  protrusion tests.
+                scalar edgeSearchDistCoeffSqr_coarse_iteration_;
+
+                //- Proximity to a feature edge where a surface hit is
+                //  not created, only the edge conformation is created
+                //  - fraction of the local target cell size. Coarse
+                //  conformation, initial protrusion tests.
+                scalar surfacePtReplaceDistCoeffSqr_coarse_initial_;
+
+                //- Proximity to a feature edge where a surface hit is
+                //  not created, only the edge conformation is created
+                //  - fraction of the local target cell size. Coarse
+                //  conformation, iteration protrusion tests.
+                scalar surfacePtReplaceDistCoeffSqr_coarse_iteration_;
+
+                //- Maximum allowed number coarse surface conformation
+                //  iterations.
+                label maxConformationIterations_coarse_;
+
+                //- Termination criterion for coarse surface
+                //  conformation iterations.  When the number of
+                //  surface protrusions drops below this ratio of the
+                //  initial number of protrusions.
+                scalar iterationToIntialHitRatioLimit_coarse_;
+
+
+            // Controls for fine surface conformation
+
+                //- Distance to search for feature edges near to
+                //  surface protrusions - fraction of the local target
+                //  cell size. Fine conformation, initial protrusion
+                //  tests.
+                scalar edgeSearchDistCoeffSqr_fine_initial_;
+
+                //- Distance to search for feature edges near to
+                //  surface protrusions - fraction of the local target
+                //  cell size. Fine conformation, iteration protrusion
+                //  tests.
+                scalar edgeSearchDistCoeffSqr_fine_iteration_;
+
+                //- Proximity to a feature edge where a surface hit is
+                //  not created, only the edge conformation is created
+                //  - fraction of the local target cell size. Fine
+                //  conformation, initial protrusion tests.
+                scalar surfacePtReplaceDistCoeffSqr_fine_initial_;
+
+                //- Proximity to a feature edge where a surface hit is
+                //  not created, only the edge conformation is created
+                //  - fraction of the local target cell size. Fine
+                //  conformation, iteration protrusion tests.
+                scalar surfacePtReplaceDistCoeffSqr_fine_iteration_;
+
+                //- Maximum allowed number fine surface conformation
+                //  iterations.
+                label maxConformationIterations_fine_;
+
+                //- Termination criterion for fine surface conformation
+                //  iterations.  When the number of surface protrusions
+                //  drops below this ratio of the initial number of
+                //  protrusions.
+                scalar iterationToIntialHitRatioLimit_fine_;
+
+
     // Motion control controls
 
         //- Switch to control the output of obj files for debug
@@ -254,6 +328,31 @@ public:
 
             //- Return the surfaceConformationRebuildFrequency
             inline label surfaceConformationRebuildFrequency() const;
+
+            //- Return the edgeSearchDistCoeffSqr for initial
+            //  conformation for the given reconformationMode.
+            scalar edgeSearchDistCoeffSqrInitial(int reconfMode) const;
+
+            //- Return the edgeSearchDistCoeffSqr for conformation
+            //  iterations for the given reconformationMode.
+            scalar edgeSearchDistCoeffSqrIteration(int reconfMode) const;
+
+            //- Return the surfacePtReplaceDistCoeffSqr for initial
+            //  conformation for the given reconformationMode.
+            scalar surfacePtReplaceDistCoeffSqrInitial(int reconfMode) const;
+
+            //- Return the surfacePtReplaceDistCoeffSqr for
+            //  conformation iterations for the given
+            //  reconformationMode.
+            scalar surfacePtReplaceDistCoeffSqrIteration(int reconfMode) const;
+
+            //- Return the maxConformationIterations for the given
+            //  reconformationMode.
+            label maxConformationIterations(int reconfMode) const;
+
+            //- Return the iterationToIntialHitRatioLimit for the
+            //  given reconformationMode.
+            scalar iterationToIntialHitRatioLimit(int reconfMode) const;
 
             //- Return the objOutput Switch
             inline Switch objOutput() const;
