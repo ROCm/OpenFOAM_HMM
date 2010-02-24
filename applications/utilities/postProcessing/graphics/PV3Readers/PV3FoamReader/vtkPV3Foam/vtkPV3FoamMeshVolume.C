@@ -201,10 +201,15 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
         }
         else if (cellModel == prism)
         {
-            for (int j = 0; j < 6; j++)
-            {
-                nodeIds[j] = cellShape[j];
-            }
+            // VTK has a different node order - their triangles point outwards!
+
+            nodeIds[0] = cellShape[0];
+            nodeIds[1] = cellShape[2];
+            nodeIds[2] = cellShape[1];
+            nodeIds[3] = cellShape[3];
+            nodeIds[4] = cellShape[5];
+            nodeIds[5] = cellShape[4];
+
             vtkmesh->InsertNextCell
             (
                 VTK_WEDGE,
