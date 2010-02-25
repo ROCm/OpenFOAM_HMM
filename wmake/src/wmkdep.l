@@ -1,9 +1,9 @@
 %{
-/*---------------------------------------------------------------------------*\
+/*---------------------------------*- C -*-----------------------------------*\
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 1991-2009 OpenCFD Ltd.
+   \\  /     A nd            | Copyright (C) 1991-2010 OpenCFD Ltd.
     \\/      M anipulation   |
 ------------------------------------------------------------------------------
 License
@@ -52,7 +52,7 @@ void nextFile(const char* fileName);
 void importFile(const char* fileName);
 void importDirectory(const char* dirName);
 
-#   undef yywrap	/* sometimes a macro by default */
+#   undef yywrap        /* sometimes a macro by default */
 
 %}
 
@@ -164,9 +164,11 @@ int main(int argc, char* argv[])
         (&sourceFile[strlen(sourceFile) - 1] - dotPtr)/sizeof(char)
     );
 
-    /* initialise depFile to zero and use strncat rather than strncpy
-       because there is a bug in the SGI strncat that if 0 preceeds the .
-       it inserts a space */
+    /*
+     * initialise depFile to zero and use strncat rather than strncpy
+     * because there is a bug in the SGI strncat that if 0 preceeds the '.'
+     * it inserts a space
+     */
     depFile = (char*)malloc(strlen(sourceFile) + 3);
     depFile[0] = 0;
     strncat(depFile, sourceFile, (dotPtr - sourceFile)/sizeof(char));
@@ -432,7 +434,7 @@ void importDirectory(const char* dirName)
 int yywrap()
 {
     /* Close the file for the buffer which has just reached EOF */
-    /* This causes strange problems
+    /* This causes strange problems on some systems
     fclose(yyin);
     yyin = 0;
     */

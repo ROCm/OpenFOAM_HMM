@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -153,19 +153,12 @@ STLLexer::STLLexer(istream* is, const label approxNpoints)
 one_space             [ \t\f\r]
 space                 {one_space}*
 some_space            {one_space}+
-cspace                ","{space}
 
 alpha                 [_A-Za-z]
 digit                 [0-9]
-dec_digit             [0-9]
-octal_digit           [0-7]
-hex_digit             [0-9a-fA-F]
 
-identifier            {alpha}({alpha}|{digit})*
-integer               {dec_digit}+
-label                 [1-9]{dec_digit}*
-zeroLabel             {digit}*
-signedInteger         [-+]?{integer}
+integer               {digit}+
+signedInteger         [-+]?{digit}+
 
 word                  ([[:alnum:]]|[[:punct:]])*
 string                {word}({some_space}{word})*
@@ -173,15 +166,14 @@ string                {word}({some_space}{word})*
 exponent_part         [eE][-+]?{digit}+
 fractional_constant   [-+]?(({digit}*"."{digit}+)|({digit}+"."?))
 
-double                (({fractional_constant}{exponent_part}?)|({digit}+{exponent_part}))
-float                 {double}
+floatNum              (({fractional_constant}{exponent_part}?)|({digit}+{exponent_part}))
 
-x                     {float}
-y                     {float}
-z                     {float}
+x                     {floatNum}
+y                     {floatNum}
+z                     {floatNum}
 
 solid                 {space}("solid"|"SOLID"){space}
-color                 {space}("color"|"COLOR"){some_space}{float}{some_space}{float}{some_space}{float}{space}
+color                 {space}("color"|"COLOR"){some_space}{floatNum}{some_space}{floatNum}{some_space}{floatNum}{space}
 facet                 {space}("facet"|"FACET"){space}
 normal                {space}("normal"|"NORMAL"){space}
 point                 {space}{x}{some_space}{y}{some_space}{z}{space}
@@ -320,7 +312,7 @@ endsolid              {space}("endsolid"|"ENDSOLID")({some_space}{word})*
         }
     }
 
-<readVertex>{space}{float}{space} {
+<readVertex>{space}{floatNum}{space} {
         vertex[cmpt++] = atof(YYText());
 
         if (cmpt == 3)

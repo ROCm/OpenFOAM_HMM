@@ -1,8 +1,8 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -103,26 +103,14 @@ Foam::word foamName(const Foam::string& s)
 one_space             [ \t\f\r]
 space                 {one_space}*
 some_space            {one_space}+
-cspace                ","{space}
 
 alpha                 [_A-Za-z]
 digit                 [0-9]
-dec_digit             [0-9]
-octal_digit           [0-7]
-hex_digit             [0-9a-fA-F]
-
-identifier            {alpha}({alpha}|{digit})*
-integer               {dec_digit}+
-label                 [1-9]{dec_digit}*
-zeroLabel             {digit}*
-
-word                  ([[:alnum:]]|[[:punct:]])+
-string                {word}({some_space}{word})*
 
 exponent_part         [eEdD][-+]?{digit}+
 fractional_constant   [-+]?(({digit}*"."{digit}+)|({digit}+"."?))
 
-double                (({fractional_constant}{exponent_part}?)|({digit}+{exponent_part}))
+floatNum              (({fractional_constant}{exponent_part}?)|({digit}+{exponent_part}))
 
 
 elements              {space}("ELEMENTS"|"ELEM"){space}
@@ -134,10 +122,10 @@ end                   {space}"END"{space}
 
 elementName           {space}([A-Z]|([A-Z][A-Z])){space}
 startIsotopeMolW      {space}"/"{space}
-isotopeMolW           {space}{double}{space}"/"{space}
+isotopeMolW           {space}{floatNum}{space}"/"{space}
 
 specieName            {space}[A-Za-z](([A-Za-z0-9)*+-])|("("[^+]))*{space}
-nMoles                {space}{double}{space}
+nMoles                {space}{floatNum}{space}
 
 thermoTemp            .{10}
 
@@ -160,13 +148,13 @@ reversibleReactionDelimiter {space}("="|"<=>"){space}
 irreversibleReactionDelimiter {space}"=>"{space}
 startPDependentSpecie {space}"("{space}"+"{space}
 pDependentSpecie      {specieName}")"{space}
-reactionCoeffs        {space}{double}{some_space}{double}{some_space}{double}{space}
+reactionCoeffs        {space}{floatNum}{some_space}{floatNum}{some_space}{floatNum}{space}
 reactionKeyword       {space}[A-Za-z](([A-Za-z0-9)*-])|("("[^+]))*{space}
 reactionKeywordSlash  {reactionKeyword}"/"{space}
-thirdBodyEfficiency   {space}{double}{space}"/"{space}
+thirdBodyEfficiency   {space}{floatNum}{space}"/"{space}
 startReactionCoeffs   {space}"/"{space}
 endReactionCoeffs     {space}"/"{space}
-reactionCoeff         {space}{double}{space}
+reactionCoeff         {space}{floatNum}{space}
 
 calPerMol             {space}"CAL/MOLE"{space}
 kcalPerMol            {space}"KCAL/MOLE"{space}
