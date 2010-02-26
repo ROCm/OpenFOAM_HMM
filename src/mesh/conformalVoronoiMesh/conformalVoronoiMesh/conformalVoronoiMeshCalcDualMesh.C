@@ -897,7 +897,7 @@ Foam::conformalVoronoiMesh::collapseFace
 
     labelList facePts(f);
 
-    const vector fC = f.centre(pts);
+    const point fC = f.centre(pts);
 
     vector fN = f.normal(pts);
 
@@ -1060,11 +1060,11 @@ Foam::conformalVoronoiMesh::collapseFace
         }
     }
 
-    // Negative Half
+    // Negative half
     SubList<scalar> dNeg(d, middle, 0);
     SubList<label> facePtsNeg(facePts, middle, 0);
 
-    // Positive Half
+    // Positive half
     SubList<scalar> dPos(d, d.size() - middle, middle);
     SubList<label> facePtsPos(facePts, d.size() - middle, middle);
 
@@ -1148,45 +1148,108 @@ Foam::conformalVoronoiMesh::collapseFace
     {
         case fcmEdge:
         {
-            // Arbitrarily choosing the most distant point as the index to
-            // collapse to.
+            // Negative half
 
             label collapseToPtI = facePtsNeg.first();
+
+            point collapseToPt =
+                collapseAxis*(sum(dNeg)/dNeg.size() - dShift) + fC;
+
+            forAll(facePtsNeg, fPtI)
+            {
+                if (boundaryPts[facePtsNeg[fPtI]] == true)
+                {
+                    // If there is a point which is on the boundary,
+                    // use it as the point to collapse others to, will
+                    // use the first boundary point encountered if
+                    // there are multiple boundary points.
+
+                    collapseToPtI = facePtsNeg[fPtI];
+
+                    collapseToPt = pts[collapseToPtI];
+
+                    break;
+                }
+            }
+
+            // ...otherwise arbitrarily choosing the most distant
+            // point as the index to collapse to.
 
             forAll(facePtsNeg, fPtI)
             {
                 dualPtIndexMap.insert(facePtsNeg[fPtI], collapseToPtI);
             }
 
-            pts[collapseToPtI] =
-                 collapseAxis*(sum(dNeg)/dNeg.size() - dShift) + fC;
+            pts[collapseToPtI] = collapseToPt;
+
+            // Positive half
 
             collapseToPtI = facePtsPos.last();
+
+            collapseToPt = collapseAxis*(sum(dPos)/dPos.size() - dShift) + fC;
+
+            forAll(facePtsPos, fPtI)
+            {
+                if (boundaryPts[facePtsPos[fPtI]] == true)
+                {
+                    // If there is a point which is on the boundary,
+                    // use it as the point to collapse others to, will
+                    // use the first boundary point encountered if
+                    // there are multiple boundary points.
+
+                    collapseToPtI = facePtsPos[fPtI];
+
+                    collapseToPt = pts[collapseToPtI];
+
+                    break;
+                }
+            }
+
+            // ...otherwise arbitrarily choosing the most distant
+            // point as the index to collapse to.
 
             forAll(facePtsPos, fPtI)
             {
                 dualPtIndexMap.insert(facePtsPos[fPtI], collapseToPtI);
             }
 
-            pts[collapseToPtI] =
-                collapseAxis*(sum(dPos)/dPos.size() - dShift) + fC;
+            pts[collapseToPtI] = collapseToPt;
 
             break;
         }
 
         case fcmPoint:
         {
-            // Arbitrarily choosing the first point as the index to
-            // collapse to.  Collapse to the face centre.
-
             label collapseToPtI = facePts.first();
+
+            point collapseToPt = fC;
+
+            forAll(facePts, fPtI)
+            {
+                if (boundaryPts[facePts[fPtI]] == true)
+                {
+                    // If there is a point which is on the boundary,
+                    // use it as the point to collapse others to, will
+                    // use the first boundary point encountered if
+                    // there are multiple boundary points.
+
+                    collapseToPtI = facePts[fPtI];
+
+                    collapseToPt = pts[collapseToPtI];
+
+                    break;
+                }
+            }
+
+            // ...otherwise arbitrarily choosing the first point as
+            // the index to collapse to.  Collapse to the face centre.
 
             forAll(facePts, fPtI)
             {
                 dualPtIndexMap.insert(facePts[fPtI], collapseToPtI);
             }
 
-            pts[collapseToPtI] = fC;
+            pts[collapseToPtI] = collapseToPt;
 
             break;
         }
