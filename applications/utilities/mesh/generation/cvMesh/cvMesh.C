@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
             << nl << endl;
     }
 
-    mesh.writeMesh();
+    mesh.writeMesh(runTime.constant());
 
     Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
         << "  ClockTime = " << runTime.elapsedClockTime() << " s"

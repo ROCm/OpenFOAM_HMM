@@ -76,16 +76,19 @@ cellSizeFunction::cellSizeFunction
         else
         {
             FatalErrorIn("cellSizeFunction::cellSizeFunction")
-            << "Unknown mode, expected: inside, outside or bothSides" << nl
+                << "Unknown mode, expected: inside, outside or bothSides" << nl
                 << exit(FatalError);
         }
     }
-    else if (mode != rmBothsides)
+    else
     {
-        WarningIn("cellSizeFunction::cellSizeFunction")
-            << "surface does not support volumeType, defaulting mode to "
-            << "bothSides."
-            << endl;
+        if (mode != "bothSides")
+        {
+            WarningIn("cellSizeFunction::cellSizeFunction")
+                << "surface does not support volumeType, defaulting mode to "
+                << "bothSides."
+                << endl;
+        }
 
         sideMode_ = rmBothsides;
     }

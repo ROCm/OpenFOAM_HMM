@@ -230,7 +230,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
     while
     (
         totalHits > 0
-     && totalHits > hitLimit
+     && totalHits >= hitLimit
      && iterationNo < maxIterations
     )
     {
