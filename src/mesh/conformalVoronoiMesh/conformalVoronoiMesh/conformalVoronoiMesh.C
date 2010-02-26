@@ -1278,6 +1278,45 @@ void Foam::conformalVoronoiMesh::move()
 
             scalar rABMag = mag(rAB);
 
+            if (rABMag < SMALL)
+            {
+                // Removal of close points
+
+                if (vA->internalPoint() && vB->internalPoint())
+                {
+                    // Only insert a point at the midpoint of
+                    // the short edge if neither attached
+                    // point has already been identified to be
+                    // removed.
+
+                    if
+                    (
+                        pointToBeRetained[vA->index()] == true
+                     && pointToBeRetained[vB->index()] == true
+                    )
+                    {
+                        pointsToInsert.push_back
+                        (
+                            toPoint(0.5*(dVA + dVB))
+                        );
+                    }
+                }
+
+                if (vA->internalPoint())
+                {
+                    pointToBeRetained[vA->index()] = false;
+                }
+
+                if (vB->internalPoint())
+                {
+                    pointToBeRetained[vB->index()] = false;
+                }
+
+                // Do not consider this Delaunay edge any further
+
+                continue;
+            }
+
             forAll(alignmentDirs, aD)
             {
                 vector& alignmentDir = alignmentDirs[aD];
@@ -1317,11 +1356,11 @@ void Foam::conformalVoronoiMesh::move()
                         vA->internalPoint()
                      && vB->internalPoint()
                      && rABMag
-                          > cvMeshControls().insertionDistCoeff()*targetCellSize
+                      > cvMeshControls().insertionDistCoeff()*targetCellSize
                      && faceArea
-                          > cvMeshControls().faceAreaRatioCoeff()*targetFaceArea
+                      > cvMeshControls().faceAreaRatioCoeff()*targetFaceArea
                      && alignmentDotProd
-                          > cvMeshControls().cosInsertionAcceptanceAngle()
+                      > cvMeshControls().cosInsertionAcceptanceAngle()
                     )
                     {
                         // Point insertion
@@ -1349,24 +1388,29 @@ void Foam::conformalVoronoiMesh::move()
                     (
                         (vA->internalPoint() || vB->internalPoint())
                      && rABMag
-                          < cvMeshControls().removalDistCoeff()*targetCellSize
+                      < cvMeshControls().removalDistCoeff()*targetCellSize
                     )
                     {
                         // Point removal
 
-                        // Only insert a point at the midpoint of the short edge
-                        // if neither attached point has already been identified
-                        // to be removed.
-                        if
-                        (
-                            pointToBeRetained[vA->index()] == true
-                         && pointToBeRetained[vB->index()] == true
-                        )
+                        if (vA->internalPoint() && vB->internalPoint())
                         {
-                            pointsToInsert.push_back
+                            // Only insert a point at the midpoint of
+                            // the short edge if neither attached
+                            // point has already been identified to be
+                            // removed.
+
+                            if
                             (
-                                toPoint(0.5*(dVA + dVB))
-                            );
+                                pointToBeRetained[vA->index()] == true
+                             && pointToBeRetained[vB->index()] == true
+                            )
+                            {
+                                pointsToInsert.push_back
+                                (
+                                    toPoint(0.5*(dVA + dVB))
+                                );
+                            }
                         }
 
                         if (vA->internalPoint())
