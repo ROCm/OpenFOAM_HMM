@@ -472,7 +472,8 @@ private:
             labelList& neighbour,
             wordList& patchNames,
             labelList& patchSizes,
-            labelList& patchStarts
+            labelList& patchStarts,
+            bool filterFaces
         );
 
         //- Tet mesh calculation
@@ -502,22 +503,32 @@ private:
         ) const;
 
         //- Merge vertices that are very close together
-        void mergeCloseDualVertices(const pointField& pts);
+        void mergeCloseDualVertices
+        (
+            const pointField& pts,
+            const PackedBoolList& boundaryPts
+        );
 
         label mergeCloseDualVertices
         (
             const pointField& pts,
+            const PackedBoolList& boundaryPts,
             Map<label>& dualPtIndexMap
         ) const;
 
         //- Smooth the dual vertices of the dual faces on the boundary
         //  so that they conform to the surface and remove any
         //  small, normal oriented faces
-        void smoothSurface(pointField& pts);
+        void smoothSurface
+        (
+            pointField& pts,
+            const PackedBoolList& boundaryPts
+        );
 
         label smoothSurfaceDualFaces
         (
             pointField& pts,
+            const PackedBoolList& boundaryPts,
             Map<label>& dualPtIndexMap
         ) const;
 
@@ -527,12 +538,14 @@ private:
         void collapseFaces
         (
             pointField& pts,
+            const PackedBoolList& boundaryPts,
             HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
         );
 
         label collapseFaces
         (
             pointField& pts,
+            const PackedBoolList& boundaryPts,
             Map<label>& dualPtIndexMap,
             HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
         ) const;
@@ -543,6 +556,7 @@ private:
         (
             const face& f,
             pointField& pts,
+            const PackedBoolList& boundaryPts,
             Map<label>& dualPtIndexMap,
             scalar targetFaceSize,
             scalar collapseSizeLimitCoeff,
@@ -566,7 +580,11 @@ private:
 
         //- Index all of the the Delaunay cells and calculate their
         //- dual points
-        void indexDualVertices(pointField& pts);
+        void indexDualVertices
+        (
+            pointField& pts,
+            PackedBoolList& boundaryPts
+        );
 
         //- Re-index all of the the Delaunay cells
         void reindexDualVertices(const Map<label>& dualPtIndexMap);
@@ -697,17 +715,21 @@ public:
 
             //- Write the internal Delaunay vertices of the tessellation as a
             //  pointField that may be used to restart the meshing process
-            void writeInternalDelaunayVertices(bool writeToConstant) const;
+            void writeInternalDelaunayVertices(const fileName& instance) const;
 
             //- Prepare data and call writeMesh for polyMesh and
             //  tetDualMesh
-            void writeMesh(bool writeToConstant = true);
+            void writeMesh
+            (
+                const fileName& instance,
+                bool filterFaces = true
+            );
 
             //- Write mesh to disk
             void writeMesh
             (
                 const word& meshName,
-                bool writeToConstant,
+                const fileName& instance,
                 pointField& points,
                 faceList& faces,
                 labelList& owner,

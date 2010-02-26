@@ -81,7 +81,7 @@ void Foam::conformalVoronoiMesh::writePoints
 
 void Foam::conformalVoronoiMesh::writeInternalDelaunayVertices
 (
-    bool writeToConstant
+    const fileName& instance
 ) const
 {
     pointField internalDelaunayVertices(number_of_vertices());
@@ -106,23 +106,11 @@ void Foam::conformalVoronoiMesh::writeInternalDelaunayVertices
     IOobject io
     (
         "internalDelaunayVertices",
-        runTime_.timeName(),
+        instance,
         runTime_,
         IOobject::NO_READ,
         IOobject::AUTO_WRITE
     );
-
-    if (writeToConstant)
-    {
-        io = IOobject
-        (
-            "internalDelaunayVertices",
-            runTime_.constant(),
-            runTime_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        );
-    }
 
     Info<< nl << "Writing " << io.name() << " to " << io.instance() << endl;
 
@@ -132,9 +120,13 @@ void Foam::conformalVoronoiMesh::writeInternalDelaunayVertices
 }
 
 
-void Foam::conformalVoronoiMesh::writeMesh(bool writeToConstant)
+void Foam::conformalVoronoiMesh::writeMesh
+(
+    const fileName& instance,
+    bool filterFaces
+)
 {
-    writeInternalDelaunayVertices(writeToConstant);
+    writeInternalDelaunayVertices(instance);
 
     // {
     //     pointField points;
@@ -156,10 +148,12 @@ void Foam::conformalVoronoiMesh::writeMesh(bool writeToConstant)
     //         patchStarts
     //     );
 
+    //     Info<< nl << "Writing tetDualMesh to " << instance << endl;
+
     //     writeMesh
     //     (
     //         "tetDualMesh",
-    //         writeToConstant,
+    //         instance,
     //         points,
     //         faces,
     //         owner,
@@ -187,13 +181,16 @@ void Foam::conformalVoronoiMesh::writeMesh(bool writeToConstant)
             neighbour,
             patchNames,
             patchSizes,
-            patchStarts
+            patchStarts,
+            filterFaces
         );
+
+        Info<< nl << "Writing polyMesh to " << instance << endl;
 
         writeMesh
         (
             Foam::polyMesh::defaultRegion,
-            writeToConstant,
+            instance,
             points,
             faces,
             owner,
@@ -208,7 +205,7 @@ void Foam::conformalVoronoiMesh::writeMesh(bool writeToConstant)
 void Foam::conformalVoronoiMesh::writeMesh
 (
     const word& meshName,
-    bool writeToConstant,
+    const fileName& instance,
     pointField& points,
     faceList& faces,
     labelList& owner,
@@ -226,30 +223,11 @@ void Foam::conformalVoronoiMesh::writeMesh
     IOobject io
     (
         meshName,
-        runTime_.timeName(),
+        instance,
         runTime_,
         IOobject::NO_READ,
         IOobject::AUTO_WRITE
     );
-
-    if (writeToConstant)
-    {
-        Info<< nl << "Writing mesh to constant." << endl;
-
-        io = IOobject
-        (
-            meshName,
-            runTime_.constant(),
-            runTime_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        );
-    }
-    else
-    {
-        Info<< nl << "Writing mesh to time directory "
-            << runTime_.timeName() << endl;
-    }
 
     polyMesh pMesh
     (

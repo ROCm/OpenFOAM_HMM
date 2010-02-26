@@ -1441,10 +1441,10 @@ void Foam::conformalVoronoiMesh::move()
     }
 
     // Write the mesh before clearing it.  Beware that writeMesh destroys the
-    // indexing of the tessellation.
+    // indexing of the tessellation.  Do not filter the dual faces.
     if (runTime_.outputTime())
     {
-        writeMesh(false);
+        writeMesh(runTime_.timeName(), false);
 
         writeTargetCellSize();
     }

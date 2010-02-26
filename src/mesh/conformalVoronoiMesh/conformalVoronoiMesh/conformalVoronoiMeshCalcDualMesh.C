@@ -37,7 +37,8 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     labelList& neighbour,
     wordList& patchNames,
     labelList& patchSizes,
-    labelList& patchStarts
+    labelList& patchStarts,
+    bool filterFaces
 )
 {
     timeCheck();
@@ -88,7 +89,11 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         cit->filterCount() = 0;
     }
 
-    indexDualVertices(points);
+    PackedBoolList boundaryPts;
+
+    boundaryPts.reserve(number_of_cells());
+
+    indexDualVertices(points, boundaryPts);
 
     {
         // No-risk face filtering to get rid of zero area faces and
@@ -99,70 +104,74 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
         // There is no guarantee that a merge of close points is
         // no-risk, but it seems to work using 1e-4 as the mergeClosenessCoeff
-        mergeCloseDualVertices(points);
+        mergeCloseDualVertices(points, boundaryPts);
     }
 
-    label nInitialBadQualityFaces = checkPolyMeshQuality(points);
-
-    Info<< nl << "Initial check before face collapse, found "
-        << nInitialBadQualityFaces << " bad quality faces"
-        << endl;
-
-    HashSet<labelPair, labelPair::Hash<> > deferredCollapseFaces;
-
-    if (nInitialBadQualityFaces > 0)
+    if (filterFaces)
     {
-        Info<< nl
-            << "A mesh could not be produced to satisfy the specified "
-            << "quality criteria." << nl
-            << "The quality and the surface conformation controls "
-            << "can be altered and the internalDelaunayVertices read in "
-            << "to try again, or more cell size resolution and motion "
-            << "iterations can be applied in areas where problems are "
-            << "occurring."
+        label nInitialBadQualityFaces = checkPolyMeshQuality(points);
+
+        Info<< nl << "Initial check before face collapse, found "
+            << nInitialBadQualityFaces << " bad quality faces"
             << endl;
-    }
 
-    if
-    (
-        nInitialBadQualityFaces == 0
-     || cvMeshControls().continueFilteringOnBadInitialPolyMesh()
-    )
-    {
-        label nBadQualityFaces = 0;
+        HashSet<labelPair, labelPair::Hash<> > deferredCollapseFaces;
 
-        do
+        if (nInitialBadQualityFaces > 0)
         {
-            // Reindexing the Delaunay cells and regenerating the
-            // points resets the mesh to the starting condition.
+            Info<< nl
+                << "A mesh could not be produced to satisfy the specified "
+                << "quality criteria." << nl
+                << "The quality and the surface conformation controls "
+                << "can be altered and the internalDelaunayVertices read in "
+                << "to try again, or more cell size resolution and motion "
+                << "iterations can be applied in areas where problems are "
+                << "occurring."
+                << endl;
+        }
 
-            indexDualVertices(points);
+        if
+        (
+            nInitialBadQualityFaces == 0
+         || cvMeshControls().continueFilteringOnBadInitialPolyMesh()
+        )
+        {
+            label nBadQualityFaces = 0;
 
+            do
             {
-                Info<< nl << "Merging close points" << endl;
+                // Reindexing the Delaunay cells and regenerating the
+                // points resets the mesh to the starting condition.
 
-                mergeCloseDualVertices(points);
-            }
+                indexDualVertices(points, boundaryPts);
 
-            {
-                // Risky and undo-able face filtering to reduce the face count
-                // as much as possible, staying within the specified criteria
+                {
+                    Info<< nl << "Merging close points" << endl;
 
-                Info<< nl << "Smoothing surface" << endl;
+                    mergeCloseDualVertices(points, boundaryPts);
+                }
 
-                smoothSurface(points);
+                {
+                    // Risky and undo-able face filtering to reduce
+                    // the face count as much as possible, staying
+                    // within the specified criteria
 
-                Info<< nl << "Collapsing unnecessary faces" << endl;
+                    Info<< nl << "Smoothing surface" << endl;
 
-                collapseFaces(points, deferredCollapseFaces);
-            }
+                    smoothSurface(points, boundaryPts);
 
-            nBadQualityFaces = checkPolyMeshQuality(points);
+                    Info<< nl << "Collapsing unnecessary faces" << endl;
 
-            Info<< nl << "Found " << nBadQualityFaces
-                << " bad quality faces" << endl;
+                    collapseFaces(points, boundaryPts, deferredCollapseFaces);
+                }
 
-        } while (nBadQualityFaces > nInitialBadQualityFaces);
+                nBadQualityFaces = checkPolyMeshQuality(points);
+
+                Info<< nl << "Found " << nBadQualityFaces
+                    << " bad quality faces" << endl;
+
+            } while (nBadQualityFaces > nInitialBadQualityFaces);
+        }
     }
 
     // Final dual face and owner neighbour construction
@@ -217,7 +226,7 @@ void Foam::conformalVoronoiMesh::calcTetMesh
         if (vit->internalPoint() || vit->pairPoint())
         {
             vertexMap[vit->index()] = vertI;
-            points[vertI] =  topoint(vit->point());
+            points[vertI] = topoint(vit->point());
             vertI++;
         }
     }
@@ -390,7 +399,11 @@ void Foam::conformalVoronoiMesh::calcTetMesh
 }
 
 
-void Foam::conformalVoronoiMesh::mergeCloseDualVertices(const pointField& pts)
+void Foam::conformalVoronoiMesh::mergeCloseDualVertices
+(
+    const pointField& pts,
+    const PackedBoolList& boundaryPts
+)
 {
     // Assess close points to be merged
 
@@ -400,7 +413,7 @@ void Foam::conformalVoronoiMesh::mergeCloseDualVertices(const pointField& pts)
     {
         Map<label> dualPtIndexMap;
 
-        nPtsMerged = mergeCloseDualVertices(pts, dualPtIndexMap);
+        nPtsMerged = mergeCloseDualVertices(pts, boundaryPts, dualPtIndexMap);
 
         if (nPtsMerged > 0)
         {
@@ -416,6 +429,7 @@ void Foam::conformalVoronoiMesh::mergeCloseDualVertices(const pointField& pts)
 Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
 (
     const pointField& pts,
+    const PackedBoolList& boundaryPts,
     Map<label>& dualPtIndexMap
 ) const
 {
@@ -453,8 +467,20 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
               < sqr(averageAnyCellSize(fit)*closenessTolerance)
             )
             {
-                dualPtIndexMap.insert(c1I, c1I);
-                dualPtIndexMap.insert(c2I, c1I);
+                if (boundaryPts[c2I] == true)
+                {
+                    // If c2I is a boundary point, then it is kept.
+                    // If both are boundary points then c2I is chosen
+                    // arbitrarily to be kept.
+
+                    dualPtIndexMap.insert(c1I, c2I);
+                    dualPtIndexMap.insert(c2I, c2I);
+                }
+                else
+                {
+                    dualPtIndexMap.insert(c1I, c1I);
+                    dualPtIndexMap.insert(c2I, c1I);
+                }
 
                 nPtsMerged++;
             }
@@ -465,7 +491,11 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
 }
 
 
-void Foam::conformalVoronoiMesh::smoothSurface(pointField& pts)
+void Foam::conformalVoronoiMesh::smoothSurface
+(
+    pointField& pts,
+    const PackedBoolList& boundaryPts
+)
 {
     label nCollapsedFaces = 0;
 
@@ -473,7 +503,12 @@ void Foam::conformalVoronoiMesh::smoothSurface(pointField& pts)
     {
         Map<label> dualPtIndexMap;
 
-        nCollapsedFaces = smoothSurfaceDualFaces(pts, dualPtIndexMap);
+        nCollapsedFaces = smoothSurfaceDualFaces
+        (
+            pts,
+            boundaryPts,
+            dualPtIndexMap
+        );
 
         if (nCollapsedFaces > 0)
         {
@@ -483,11 +518,11 @@ void Foam::conformalVoronoiMesh::smoothSurface(pointField& pts)
 
         reindexDualVertices(dualPtIndexMap);
 
-        mergeCloseDualVertices(pts);
+        mergeCloseDualVertices(pts, boundaryPts);
 
     } while (nCollapsedFaces > 0);
 
-    // Force all points of the face to be on the surface
+    // Force all points of boundary faces to be on the surface
 
     for
     (
@@ -509,17 +544,7 @@ void Foam::conformalVoronoiMesh::smoothSurface(pointField& pts)
         // Only cells with indices > -1 are valid
         if (ptI > -1)
         {
-            // Test if this is a boundary dual vertex - if it is, at
-            // least one of the Delaunay vertices of the Delaunay cell
-            // will be outside
-
-            if
-            (
-                !cit->vertex(0)->internalOrBoundaryPoint()
-             || !cit->vertex(1)->internalOrBoundaryPoint()
-             || !cit->vertex(2)->internalOrBoundaryPoint()
-             || !cit->vertex(3)->internalOrBoundaryPoint()
-            )
+            if (boundaryPts[ptI] == true)
             {
                 point& pt = pts[ptI];
 
@@ -537,23 +562,21 @@ void Foam::conformalVoronoiMesh::smoothSurface(pointField& pts)
                 if (surfHit.hit())
                 {
                     pt +=
-                    (surfHit.hitPoint() - pt)
-                   *pow(cvMeshControls().filterErrorReductionCoeff(), fC);
-
-                    // pt = surfHit.hitPoint();
+                        (surfHit.hitPoint() - pt)
+                       *pow(cvMeshControls().filterErrorReductionCoeff(), fC);
                 }
             }
         }
-
     }
 
-    mergeCloseDualVertices(pts);
+    mergeCloseDualVertices(pts, boundaryPts);
 }
 
 
 Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
 (
     pointField& pts,
+    const PackedBoolList& boundaryPts,
     Map<label>& dualPtIndexMap
 ) const
 {
@@ -671,6 +694,7 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
                 (
                     dualFace,
                     pts,
+                    boundaryPts,
                     dualPtIndexMap,
                     targetFaceSize,
                     GREAT,
@@ -692,6 +716,7 @@ Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
 void Foam::conformalVoronoiMesh::collapseFaces
 (
     pointField& pts,
+    const PackedBoolList& boundaryPts,
     HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
 )
 {
@@ -706,13 +731,14 @@ void Foam::conformalVoronoiMesh::collapseFaces
         nCollapsedFaces = collapseFaces
         (
             pts,
+            boundaryPts,
             dualPtIndexMap,
             deferredCollapseFaces
         );
 
         reindexDualVertices(dualPtIndexMap);
 
-        mergeCloseDualVertices(pts);
+        mergeCloseDualVertices(pts, boundaryPts);
 
         if (nCollapsedFaces > 0)
         {
@@ -727,6 +753,7 @@ void Foam::conformalVoronoiMesh::collapseFaces
 Foam::label Foam::conformalVoronoiMesh::collapseFaces
 (
     pointField& pts,
+    const PackedBoolList& boundaryPts,
     Map<label>& dualPtIndexMap,
     HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
 ) const
@@ -799,6 +826,7 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
             (
                 dualFace,
                 pts,
+                boundaryPts,
                 dualPtIndexMap,
                 targetFaceSize,
                 collapseSizeLimitCoeff,
@@ -843,6 +871,7 @@ Foam::conformalVoronoiMesh::collapseFace
 (
     const face& f,
     pointField& pts,
+    const PackedBoolList& boundaryPts,
     Map<label>& dualPtIndexMap,
     scalar targetFaceSize,
     scalar collapseSizeLimitCoeff,
@@ -1474,7 +1503,8 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
 void Foam::conformalVoronoiMesh::indexDualVertices
 (
-    pointField& pts
+    pointField& pts,
+    PackedBoolList& boundaryPts
 )
 {
     // Indexing Delaunay cells, which are the dual vertices
@@ -1482,6 +1512,10 @@ void Foam::conformalVoronoiMesh::indexDualVertices
     label dualVertI = 0;
 
     pts.setSize(number_of_cells());
+
+    boundaryPts.clear();
+
+    boundaryPts.setSize(number_of_cells(), false);
 
     for
     (
@@ -1499,7 +1533,22 @@ void Foam::conformalVoronoiMesh::indexDualVertices
         )
         {
             cit->cellIndex() = dualVertI;
+
             pts[dualVertI] = topoint(dual(cit));
+
+            if
+            (
+                !cit->vertex(0)->internalOrBoundaryPoint()
+             || !cit->vertex(1)->internalOrBoundaryPoint()
+             || !cit->vertex(2)->internalOrBoundaryPoint()
+             || !cit->vertex(3)->internalOrBoundaryPoint()
+            )
+            {
+                // This is a boundary dual vertex
+
+                boundaryPts[dualVertI] = true;
+            }
+
             dualVertI++;
         }
         else
@@ -1509,6 +1558,8 @@ void Foam::conformalVoronoiMesh::indexDualVertices
     }
 
     pts.setSize(dualVertI);
+
+    boundaryPts.setSize(dualVertI);
 }
 
 
@@ -1547,7 +1598,9 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
     patchNames.setSize(patchNames.size() + 1);
 
-    patchNames[patchNames.size() - 1] = "cvMesh_defaultPatch";
+    label defaultPatchIndex = patchNames.size() - 1;
+
+    patchNames[defaultPatchIndex] = "cvMesh_defaultPatch";
 
     label nPatches = patchNames.size();
 
@@ -1603,15 +1656,11 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
                     if (patchIndex == -1)
                     {
-                        patchIndex = patchNames.size() - 1;
+                        // Did not find a surface patch between
+                        // between Dv pair, adding face to default
+                        // patch
 
-                        // WarningIn("Foam::conformalVoronoiMesh::calcDualMesh")
-                        //     << "Dual face found between Dv pair " << nl
-                        //     << ptA << nl
-                        //     << ptB << nl
-                        //     << "that is not on a surface patch. Adding to "
-                        //     << patchNames[patchIndex]
-                        //     << endl;
+                        patchIndex = defaultPatchIndex;
                     }
 
                     patchFaces[patchIndex].append(newDualFace);
@@ -1629,6 +1678,15 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                 }
             }
         }
+    }
+
+    if (!patchFaces[defaultPatchIndex].empty())
+    {
+        Info<< nl << patchFaces[defaultPatchIndex].size()
+            << " faces were not able to have their patch determined from "
+            << "the surface. "
+            << nl <<  "Adding to patch " << patchNames[defaultPatchIndex]
+            << endl;
     }
 
     label nInternalFaces = dualFaceI;
@@ -1850,7 +1908,7 @@ void Foam::conformalVoronoiMesh::removeUnusedPoints
     pointField& pts
 ) const
 {
-    Info<< nl << "Removing unused points after filtering" << endl;
+    Info<< nl << "Removing unused points" << endl;
 
     PackedBoolList ptUsed(pts.size(), false);
 
@@ -1867,9 +1925,10 @@ void Foam::conformalVoronoiMesh::removeUnusedPoints
     }
 
     label pointI = 0;
+
     labelList oldToNew(pts.size(), -1);
 
-    // Move all of the used faces to the start of the pointField and
+    // Move all of the used points to the start of the pointField and
     // truncate it
 
     forAll(ptUsed, ptUI)
@@ -1902,7 +1961,7 @@ void Foam::conformalVoronoiMesh::removeUnusedCells
     labelList& neighbour
 ) const
 {
-    Info<< nl << "Removing unused cells after filtering" << endl;
+    Info<< nl << "Removing unused cells" << endl;
 
     PackedBoolList cellUsed(max(max(owner), max(neighbour)), false);
 
