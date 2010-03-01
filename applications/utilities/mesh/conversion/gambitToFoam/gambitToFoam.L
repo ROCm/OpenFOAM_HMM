@@ -95,24 +95,14 @@ int yyFlexLexer::yywrap()
 one_space             [ \t\f\r]
 space                 {one_space}*
 some_space            {one_space}+
-cspace                ","{space}
 spaceNl               ({space}|\n)*
 
 alpha                 [_[:alpha:]]
 digit                 [[:digit:]]
-dec_digit             [[:digit:]]
-octal_digit           [0-7]
-hex_digit             [[:xdigit:]]
 
-lbrac                      "("
-rbrac                      ")"
-quote                      \"
-dash                       "-"
-dotColonDash               [.:-]
+dotColonDash          [.:-]
 
-identifier            {alpha}({alpha}|{digit})*
-integer               {dec_digit}+
-label                 [0-9]{dec_digit}*
+label                 [0-9]{digit}*
 zeroLabel             {digit}*
 
 word                  ({alpha}|{digit}|{dotColonDash})*
@@ -120,14 +110,14 @@ word                  ({alpha}|{digit}|{dotColonDash})*
 exponent_part         [eE][-+]?{digit}+
 fractional_constant   [-+]?(({digit}*"."{digit}+)|({digit}+"."?))
 
-double                ((({fractional_constant}{exponent_part}?)|({digit}+{exponent_part}))|0)
+floatNum              ((({fractional_constant}{exponent_part}?)|({digit}+{exponent_part}))|0)
 
-x                     {double}
-y                     {double}
-z                     {double}
-scalar                {double}
+x                     {floatNum}
+y                     {floatNum}
+z                     {floatNum}
+
 labelListElement      {space}{zeroLabel}
-scalarListElement     {space}{double}
+scalarListElement     {space}{floatNum}
 labelList             ({labelListElement}+{space})
 scalarList            ({scalarListElement}+{space})
 
