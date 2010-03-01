@@ -147,6 +147,30 @@ case OPENMPI:
     unset mpi_version
     breaksw
 
+case SYSTEMOPENMPI:
+
+    # This uses the installed openmpi. It needs mpicc installed!
+
+    set mpi_version=openmpi-system
+
+    # Set compilation flags here instead of in wmake/rules/../mplibSYSTEMOPENMPI
+    setenv PINC `mpicc --showme:compile` 
+    setenv PLIBS `mpicc --showme:link`
+    set libDir=`echo "$PLIBS" | sed -e 's/.*-L\([^ ]*\).*/\1/'`
+
+    if ($?FOAM_VERBOSE && $?prompt) then
+        echo "Using system installed MPI:"
+        echo "    compile flags : $PINC"
+        echo "    link flags    : $PLIBS"
+        echo "    libmpi dir    : $libDir"
+    endif
+
+    _foamAddLib $libDir
+
+    setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
+    unset mpi_version libDir
+    breaksw
+
 case MPICH:
     set mpi_version=mpich2-1.1.1p1
     setenv MPI_HOME $WM_THIRD_PARTY_DIR/$mpi_version
