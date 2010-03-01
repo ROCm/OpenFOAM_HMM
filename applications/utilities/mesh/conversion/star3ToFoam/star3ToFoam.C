@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,30 +22,50 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Application
+    star3ToFoam
+
+Description
+    Converts a Star-CD (v3) pro-STAR mesh into OpenFOAM format.
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef globalPointPatchFields_H
-#define globalPointPatchFields_H
-
-#include "globalPointPatchField.H"
-
-#include "fieldTypes.H"
+#include "argList.H"
+#include "Time.H"
+#include "starMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+//  Main program:
 
-namespace Foam
+int main(int argc, char *argv[])
 {
+    argList::noParallel();
+    argList::validArgs.append("STAR mesh file prefix");
+    argList::addOption("scale", "scale factor");
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    argList args(argc, argv);
 
-makePointPatchFieldTypedefs(global);
+    if (!args.check())
+    {
+        FatalError.exit();
+    }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    scalar scaleFactor = args.optionLookupOrDefault("scale", 1.0);
 
-} // End namespace Foam
+#   include "createTime.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    starMesh makeMesh(args[1], runTime, scaleFactor);
 
-#endif
+    // Set the precision of the points data to 10
+    IOstream::defaultPrecision(10);
+
+    Info<< "Writing mesh" << endl;
+    makeMesh.writeMesh();
+
+    Info<< "\nEnd\n" << endl;
+
+    return 0;
+}
+
 
 // ************************************************************************* //

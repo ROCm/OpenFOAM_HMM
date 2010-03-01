@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Application
     gambitToFoam
 
 Description
-    Converts a GAMBIT mesh to FOAM format.
+    Converts a GAMBIT mesh to OpenFOAM format.
 
 \*---------------------------------------------------------------------------*/
 
@@ -95,24 +95,14 @@ int yyFlexLexer::yywrap()
 one_space             [ \t\f\r]
 space                 {one_space}*
 some_space            {one_space}+
-cspace                ","{space}
 spaceNl               ({space}|\n)*
 
 alpha                 [_[:alpha:]]
 digit                 [[:digit:]]
-dec_digit             [[:digit:]]
-octal_digit           [0-7]
-hex_digit             [[:xdigit:]]
 
-lbrac                      "("
-rbrac                      ")"
-quote                      \"
-dash                       "-"
-dotColonDash               [.:-]
+dotColonDash          [.:-]
 
-identifier            {alpha}({alpha}|{digit})*
-integer               {dec_digit}+
-label                 [0-9]{dec_digit}*
+label                 [0-9]{digit}*
 zeroLabel             {digit}*
 
 word                  ({alpha}|{digit}|{dotColonDash})*
@@ -120,14 +110,14 @@ word                  ({alpha}|{digit}|{dotColonDash})*
 exponent_part         [eE][-+]?{digit}+
 fractional_constant   [-+]?(({digit}*"."{digit}+)|({digit}+"."?))
 
-double                ((({fractional_constant}{exponent_part}?)|({digit}+{exponent_part}))|0)
+floatNum              ((({fractional_constant}{exponent_part}?)|({digit}+{exponent_part}))|0)
 
-x                     {double}
-y                     {double}
-z                     {double}
-scalar                {double}
+x                     {floatNum}
+y                     {floatNum}
+z                     {floatNum}
+
 labelListElement      {space}{zeroLabel}
-scalarListElement     {space}{double}
+scalarListElement     {space}{floatNum}
 labelList             ({labelListElement}+{space})
 scalarList            ({scalarListElement}+{space})
 
@@ -653,7 +643,7 @@ int main(int argc, char *argv[])
 
 #   include "createTime.H"
 
-    fileName gambitFile(args.additionalArgs()[0]);
+    const fileName gambitFile = args[1];
     ifstream gambitStream(gambitFile.c_str());
 
     if (!gambitStream)

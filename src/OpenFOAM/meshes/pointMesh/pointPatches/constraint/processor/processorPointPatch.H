@@ -64,6 +64,9 @@ class processorPointPatch
 
         const processorPolyPatch& procPolyPatch_;
 
+        mutable labelList reverseMeshPoints_;
+
+        mutable labelList separatedPoints_;
 
     // Private Member Functions
 
@@ -72,14 +75,6 @@ class processorPointPatch
 
         //- Calculate the patch geometry
         virtual void calcGeometry(PstreamBuffers&);
-
-        //- Initialise the points on this patch which are should also be
-        //  on a neighbouring patch but are not part of faces of that patch
-        void initPatchPatchPoints(PstreamBuffers&);
-
-        //- Calculate the points on this patch which are should also be
-        //  on a neighbouring patch but are not part of faces of that patch
-        void calcPatchPatchPoints(PstreamBuffers&);
 
         //- Initialise the patches for moving points
         virtual void initMovePoints(PstreamBuffers&, const pointField&);
@@ -165,6 +160,13 @@ public:
         {
             return procPolyPatch_;
         }
+
+        //- Return mesh points in the correct order for the receiving side
+        const labelList& reverseMeshPoints() const;
+
+        //- List of separated coupled points
+        virtual const labelList& separatedPoints() const;
+
 };
 
 

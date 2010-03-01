@@ -183,6 +183,28 @@ OPENMPI)
     unset mpi_version
     ;;
 
+SYSTEMOPENMPI)
+    mpi_version=openmpi-system
+
+    # Set compilation flags here instead of in wmake/rules/../mplibSYSTEMOPENMPI
+    export PINC=`mpicc --showme:compile` 
+    export PLIBS=`mpicc --showme:link`
+    libDir=`echo "$PLIBS" | sed -e 's/.*-L\([^ ]*\).*/\1/'`
+
+    if [ "$FOAM_VERBOSE" -a "$PS1" ]
+    then
+        echo "Using system installed MPI:"
+        echo "    compile flags : $PINC"
+        echo "    link flags    : $PLIBS"
+        echo "    libmpi dir    : $libDir"
+    fi
+
+    _foamAddLib $libDir
+
+    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
+    unset mpi_version libDir
+    ;;
+
 MPICH)
     mpi_version=mpich2-1.1.1p1
     export MPI_HOME=$WM_THIRD_PARTY_DIR/$mpi_version

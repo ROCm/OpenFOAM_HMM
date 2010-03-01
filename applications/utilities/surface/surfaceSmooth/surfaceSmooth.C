@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,17 +50,18 @@ int main(int argc, char *argv[])
     argList::validArgs.append("output file");
     argList args(argc, argv);
 
-    fileName surfFileName(args.additionalArgs()[0]);
-    scalar relax(readScalar(IStringStream(args.additionalArgs()[1])()));
-    if ((relax <= 0) || (relax > 1))
+    const fileName surfFileName = args[1];
+    const scalar relax = args.argRead<scalar>(2);
+    const label  iters = args.argRead<label>(3);
+    const fileName outFileName = args[4];
+
+    if (relax <= 0 || relax > 1)
     {
         FatalErrorIn(args.executable()) << "Illegal relaxation factor "
             << relax << endl
             << "0: no change   1: move vertices to average of neighbours"
             << exit(FatalError);
     }
-    label iters(readLabel(IStringStream(args.additionalArgs()[2])()));
-    fileName outFileName(args.additionalArgs()[3]);
 
     Info<< "Relax:" << relax << nl
         << "Iters:" << iters << nl

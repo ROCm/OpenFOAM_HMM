@@ -120,11 +120,8 @@ void writeMesh
 
 int main(int argc, char *argv[])
 {
-    argList::addBoolOption
-    (
-        "overwrite",
-        "overwrite existing mesh files"
-    );
+#   include "addOverwriteOption.H"
+
 #   include "setRootCase.H"
 #   include "createTime.H"
     runTime.functionObjects().off();

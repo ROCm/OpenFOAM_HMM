@@ -35,141 +35,50 @@ defineTypeNameAndDebug(Foam::globalPoints, 0);
 
 const Foam::label Foam::globalPoints::fromCollocated = labelMax/2;
 
-const Foam::scalar Foam::globalPoints::mergeDist = ROOTVSMALL;
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Routines to handle global indices
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-bool Foam::globalPoints::noTransform(const tensor& tt, const scalar mergeDist)
-{
-    return
-        (mag(tt.xx()-1) < mergeDist)
-     && (mag(tt.yy()-1) < mergeDist)
-     && (mag(tt.zz()-1) < mergeDist)
-     && (mag(tt.xy()) < mergeDist)
-     && (mag(tt.xz()) < mergeDist)
-     && (mag(tt.yx()) < mergeDist)
-     && (mag(tt.yz()) < mergeDist)
-     && (mag(tt.zx()) < mergeDist)
-     && (mag(tt.zy()) < mergeDist);
-}
-
-
-// Calculates per face whether couple is collocated.
-Foam::PackedBoolList Foam::globalPoints::collocatedFaces
-(
-    const coupledPolyPatch& pp,
-    const scalar mergeDist
-)
-{
-    // Initialise to false
-    PackedBoolList collocated(pp.size());
-
-    const vectorField& separation = pp.separation();
-    const tensorField& forwardT = pp.forwardT();
-
-    if (forwardT.size() == 0)
-    {
-        // Parallel.
-        if (separation.size() == 0)
-        {
-            collocated = 1u;
-        }
-        else if (separation.size() == 1)
-        {
-            // Fully separate. Do not synchronise.
-        }
-        else
-        {
-            // Per face separation.
-            forAll(pp, faceI)
-            {
-                if (mag(separation[faceI]) < mergeDist)
-                {
-                    collocated[faceI] = 1u;
-                }
-            }
-        }
-    }
-    else if (forwardT.size() == 1)
-    {
-        // Fully transformed.
-    }
-    else
-    {
-        // Per face transformation.
-        forAll(pp, faceI)
-        {
-            if (noTransform(forwardT[faceI], mergeDist))
-            {
-                collocated[faceI] = 1u;
-            }
-        }
-    }
-    return collocated;
-}
-
-
 Foam::PackedBoolList Foam::globalPoints::collocatedPoints
 (
-    const coupledPolyPatch& pp,
-    const scalar mergeDist
+    const coupledPolyPatch& pp
 )
 {
     // Initialise to false
-    PackedBoolList collocated(pp.nPoints());
+    PackedBoolList isCollocated(pp.nPoints());
 
-    const vectorField& separation = pp.separation();
-    const tensorField& forwardT = pp.forwardT();
+    const boolList& collocated = pp.collocated();
 
-    if (forwardT.size() == 0)
+    if (collocated.size() == 0)
     {
-        // Parallel.
-        if (separation.size() == 0)
-        {
-            collocated = 1u;
-        }
-        else if (separation.size() == 1)
-        {
-            // Fully separate.
-        }
-        else
-        {
-            // Per face separation.
-            for (label pointI = 0; pointI < pp.nPoints(); pointI++)
-            {
-                label faceI = pp.pointFaces()[pointI][0];
-
-                if (mag(separation[faceI]) < mergeDist)
-                {
-                    collocated[pointI] = 1u;
-                }
-            }
-        }
+        isCollocated = 1;
     }
-    else if (forwardT.size() == 1)
+    else if (collocated.size() == 1)
     {
-        // Fully transformed.
+        // Uniform.
+        if (collocated[0])
+        {
+            isCollocated = 1;
+        }
     }
     else
     {
-        // Per face transformation.
-        for (label pointI = 0; pointI < pp.nPoints(); pointI++)
-        {
-            label faceI = pp.pointFaces()[pointI][0];
+        // Per face collocated or not.
+        const labelListList& pointFaces = pp.pointFaces();
 
-            if (noTransform(forwardT[faceI], mergeDist))
+        forAll(pointFaces, pfi)
+        {
+            if (collocated[pointFaces[pfi][0]])
             {
-                collocated[pointI] = 1u;
+                isCollocated[pfi] = 1;
             }
         }
     }
-    return collocated;
+    return isCollocated;
 }
-
+    
 
 Foam::label Foam::globalPoints::toGlobal
 (
@@ -467,8 +376,7 @@ void Foam::globalPoints::initOwnPoints
             (
                 collocatedPoints
                 (
-                    refCast<const coupledPolyPatch>(pp),
-                    mergeDist
+                    refCast<const coupledPolyPatch>(pp)
                 )
             );
 
@@ -563,8 +471,7 @@ void Foam::globalPoints::sendPatchPoints
             (
                 collocatedPoints
                 (
-                    procPatch,
-                    mergeDist
+                    procPatch
                 )
             );
 
@@ -663,8 +570,7 @@ void Foam::globalPoints::receivePatchPoints
             (
                 collocatedPoints
                 (
-                    procPatch,
-                    mergeDist
+                    procPatch
                 )
             );
 
@@ -726,8 +632,7 @@ void Foam::globalPoints::receivePatchPoints
             (
                 collocatedPoints
                 (
-                    cycPatch,
-                    mergeDist
+                    cycPatch
                 )
             );
 
@@ -1233,8 +1138,7 @@ void Foam::globalPoints::receiveSharedPoints
             (
                 collocatedPoints
                 (
-                    cycPatch,
-                    mergeDist
+                    cycPatch
                 )
             );
 

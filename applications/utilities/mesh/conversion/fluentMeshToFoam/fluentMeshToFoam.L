@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Application
     fluentMeshToFoam
 
 Description
-    Converts a Fluent mesh to FOAM format
+    Converts a Fluent mesh to OpenFOAM format
     including multiple region and region boundary handling.
 
 \*---------------------------------------------------------------------------*/
@@ -881,12 +881,12 @@ int main(int argc, char *argv[])
     scalar scaleFactor = 1.0;
     args.optionReadIfPresent("scale", scaleFactor);
 
-    bool writeSets  = args.optionFound("writeSets");
-    bool writeZones = args.optionFound("writeZones");
+    const bool writeSets  = args.optionFound("writeSets");
+    const bool writeZones = args.optionFound("writeZones");
 
 #   include "createTime.H"
 
-    fileName fluentFile(args.additionalArgs()[0]);
+    const fileName fluentFile = args[1];
     std::ifstream fluentStream(fluentFile.c_str());
 
     if (!fluentStream)

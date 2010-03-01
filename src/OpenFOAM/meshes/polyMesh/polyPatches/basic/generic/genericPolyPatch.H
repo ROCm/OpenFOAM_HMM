@@ -26,8 +26,8 @@ Class
     Foam::genericPolyPatch
 
 Description
-    Determines a mapping between patch face centres and mesh cell centres and
-    processors they're on.
+    Substitute for unknown patches. Used for postprocessing when only
+    basic polyPatch info is needed.
 
 Note
     Storage is not optimal. It stores all face centres and cells on all

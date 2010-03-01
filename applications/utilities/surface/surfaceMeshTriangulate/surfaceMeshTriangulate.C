@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    fileName outFileName(runTime.path()/args.additionalArgs()[0]);
+    const fileName outFileName(runTime.path()/args[1]);
 
     Info<< "Extracting triSurface from boundaryMesh ..."
         << endl << endl;
@@ -85,12 +85,14 @@ int main(int argc, char *argv[])
 
     if (args.optionFound("patches"))
     {
-        wordList patchNames(args.optionLookup("patches")());
+        const wordList patchNames
+        (
+            args.optionLookup("patches")()
+        );
 
         forAll(patchNames, patchNameI)
         {
             const word& patchName = patchNames[patchNameI];
-
             label patchI = bMesh.findPatchID(patchName);
 
             if (patchI == -1)
@@ -140,7 +142,7 @@ int main(int argc, char *argv[])
     else
     {
         // Write local surface
-        fileName localPath = runTime.path()/runTime.caseName() + ".ftr";
+        fileName localPath = runTime.path()/runTime.caseName() + ".obj";
 
         Pout<< "Writing local surface to " << localPath << endl;
 
@@ -313,7 +315,7 @@ int main(int argc, char *argv[])
             (
                 runTime.rootPath()
               / globalCasePath
-              / args.additionalArgs()[0]
+              / args[1]
             );
 
             allSurf.write(globalPath);

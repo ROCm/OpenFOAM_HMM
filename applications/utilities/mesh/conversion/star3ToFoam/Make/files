@@ -14,6 +14,6 @@ createBoundaryFaces.C
 createPolyBoundary.C
 purgeCellShapes.C
 writeMesh.C
-starToFoam.C
+star3ToFoam.C
 
-EXE = $(FOAM_APPBIN)/starToFoam
+EXE = $(FOAM_APPBIN)/star3ToFoam

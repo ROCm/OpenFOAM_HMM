@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::addBoolOption("overwrite");
+#   include "addOverwriteOption.H"
     argList::validArgs.append("faceSet");
 
 #   include "setRootCase.H"
@@ -57,9 +57,8 @@ int main(int argc, char *argv[])
 #   include "createMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    bool overwrite = args.optionFound("overwrite");
-
-    word setName(args.additionalArgs()[0]);
+    const word setName = args[1];
+    const bool overwrite = args.optionFound("overwrite");
 
     // Read faces
     faceSet candidateSet(mesh, setName);

@@ -46,7 +46,6 @@ namespace Foam
 // Forward declaration of classes
 class pointMesh;
 class polyBoundaryMesh;
-class globalPointPatch;
 
 /*---------------------------------------------------------------------------*\
                        Class pointBoundaryMesh Declaration
@@ -97,9 +96,6 @@ public:
         {
             return mesh_;
         }
-
-        //- Return reference to globalPointPatch
-        const globalPointPatch& globalPatch() const;
 
         //- Correct polyBoundaryMesh after moving points
         void movePoints(const pointField&);

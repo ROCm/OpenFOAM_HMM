@@ -79,11 +79,7 @@ public:
     // Constructors
 
         //- Construct from polyMesh
-        explicit pointMesh
-        (
-            const polyMesh& pMesh,
-            bool alwaysConstructGlobalPatch = false
-        );
+        explicit pointMesh(const polyMesh& pMesh);
 
 
     // Member Functions

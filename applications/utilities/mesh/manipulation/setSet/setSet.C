@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -835,15 +835,14 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-    bool writeVTK = !args.optionFound("noVTK");
-    bool loop = args.optionFound("loop");
-    bool batch = args.optionFound("batch");
-
+    const bool writeVTK = !args.optionFound("noVTK");
+    const bool loop = args.optionFound("loop");
+    const bool batch = args.optionFound("batch");
 
     if (loop && !batch)
     {
         FatalErrorIn(args.executable())
-            << "Can only loop when in batch mode."
+            << "Can only loop in batch mode."
             << exit(FatalError);
     }
 
@@ -885,7 +884,7 @@ int main(int argc, char *argv[])
 
         if (batch)
         {
-            fileName batchFile(args.option("batch"));
+            const fileName batchFile = args["batch"];
 
             Info<< "Reading commands from file " << batchFile << endl;
 

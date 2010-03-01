@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 
 #   include "createTime.H"
 
-    IFstream plot3dFile(args.additionalArgs()[0]);
+    IFstream plot3dFile(args[1]);
 
     // Read the plot3d information using a fixed format reader.
     // Comments in the file are in C++ style, so the stream parser will remove

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Translates FOAM data to EnSight format.
+    Translates OpenFOAM data to EnSight format.
 
     An Ensight part is created for the internalMesh and for each patch.
 

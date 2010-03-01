@@ -83,7 +83,7 @@ const label starMesh::sammAddressingTable[9][12] =
 };
 
 
-// lookup table giving FOAM face number when looked up with shape index
+// lookup table giving OpenFOAM face number when looked up with shape index
 // (first index) and STAR face number
 // - first column is always -1
 // - last column is -1 for all but hexagonal prism

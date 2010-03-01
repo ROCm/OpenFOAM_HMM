@@ -109,7 +109,6 @@ Foam::domainDecomposition::domainDecomposition(const IOobject& io)
     procNeighbourProcessors_(nProcs_),
     procProcessorPatchSize_(nProcs_),
     procProcessorPatchStartIndex_(nProcs_),
-    globallySharedPoints_(0),
     cyclicParallel_(false)
 {
     if (decompositionDict_.found("distributed"))
@@ -131,15 +130,6 @@ Foam::domainDecomposition::~domainDecomposition()
 bool Foam::domainDecomposition::writeDecomposition()
 {
     Info<< "\nConstructing processor meshes" << endl;
-
-    // Make a lookup map for globally shared points
-    Map<label> sharedPointLookup(2*globallySharedPoints_.size());
-
-    forAll(globallySharedPoints_, pointi)
-    {
-        sharedPointLookup.insert(globallySharedPoints_[pointi], pointi);
-    }
-
 
     // Mark point/faces/cells that are in zones.
     // -1   : not in zone

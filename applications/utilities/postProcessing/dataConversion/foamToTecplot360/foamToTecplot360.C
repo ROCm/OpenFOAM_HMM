@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -215,9 +215,8 @@ int main(int argc, char *argv[])
     word cellSetName;
     string vtkName;
 
-    if (args.optionFound("cellSet"))
+    if (args.optionReadIfPresent("cellSet", cellSetName))
     {
-        cellSetName = args.option("cellSet");
         vtkName = cellSetName;
     }
     else if (Pstream::parRun())
@@ -738,7 +737,7 @@ int main(int argc, char *argv[])
         if (args.optionFound("faceSet"))
         {
             // Load the faceSet
-            word setName(args.option("faceSet"));
+            const word setName = args["faceSet"];
             labelList faceLabels(faceSet(mesh, setName).toc());
 
             // Filename as if patch with same name.

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
         << "FOAM_CASENAME=" << getEnv("FOAM_CASENAME") << nl
         << endl;
 
-    if (args.additionalArgs().empty())
+    if (args.size() <= 1)
     {
         {
             dictionary dict1(IFstream("testDict")());
@@ -114,9 +114,9 @@ int main(int argc, char *argv[])
     else
     {
         IOobject::writeDivider(Info);
-        forAll(args.additionalArgs(), argI)
+        for (label argI=1; argI < args.size(); ++argI)
         {
-            const string& dictFile = args.additionalArgs()[argI];
+            const string& dictFile = args[argI];
             IFstream is(dictFile);
 
             dictionary dict(is);

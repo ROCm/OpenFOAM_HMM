@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -222,19 +222,20 @@ labelList findBaffles(const polyMesh& mesh, const labelList& boundaryFaces)
 
 int main(int argc, char *argv[])
 {
+#   include "addOverwriteOption.H"
 #   include "addRegionOption.H"
     argList::addBoolOption("split");
-    argList::addBoolOption("overwrite");
     argList::addBoolOption("detectOnly");
+
 #   include "setRootCase.H"
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createNamedMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    bool split      = args.optionFound("split");
-    bool overwrite  = args.optionFound("overwrite");
-    bool detectOnly = args.optionFound("detectOnly");
+    const bool split      = args.optionFound("split");
+    const bool overwrite  = args.optionFound("overwrite");
+    const bool detectOnly = args.optionFound("detectOnly");
 
     // Collect all boundary faces
     labelList boundaryFaces(mesh.nFaces() - mesh.nInternalFaces());

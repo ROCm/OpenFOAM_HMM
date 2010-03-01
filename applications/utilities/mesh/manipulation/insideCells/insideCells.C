@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,9 +51,8 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createPolyMesh.H"
 
-    fileName surfName(args.additionalArgs()[0]);
-    fileName setName(args.additionalArgs()[1]);
-
+    const fileName surfName = args[1];
+    const fileName setName  = args[2];
 
     // Read surface
     Info<< "Reading surface from " << surfName << endl;

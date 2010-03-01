@@ -17,14 +17,14 @@
     fileName rootDirTarget(args.rootPath());
     fileName caseDirTarget(args.globalCaseName());
 
-    fileName casePath(args.additionalArgs()[0]);
-    fileName rootDirSource = casePath.path();
-    fileName caseDirSource = casePath.name();
+    const fileName casePath = args[1];
+    const fileName rootDirSource = casePath.path();
+    const fileName caseDirSource = casePath.name();
 
     Info<< "Source: " << rootDirSource << " " << caseDirSource << nl
         << "Target: " << rootDirTarget << " " << caseDirTarget << endl;
 
-    bool parallelSource = args.optionFound("parallelSource");
-    bool parallelTarget = args.optionFound("parallelTarget");
-    bool consistent     = args.optionFound("consistent");
+    const bool parallelSource = args.optionFound("parallelSource");
+    const bool parallelTarget = args.optionFound("parallelTarget");
+    const bool consistent     = args.optionFound("consistent");
 

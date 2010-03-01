@@ -30,6 +30,6 @@ Description
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #define starMesh sammMesh
-#include "../starToFoam/readPoints.C"
+#include "../star3ToFoam/readPoints.C"
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,13 +48,14 @@ int main(int argc, char *argv[])
     argList::addBoolOption("inside");
     argList args(argc, argv);
 
-    fileName surfFileName(args.additionalArgs()[0]);
+    const fileName surfFileName = args[1];
+    const point visiblePoint    = args.argRead<point>(2);
+    const fileName outFileName  = args[3];
+
+    const bool orientInside = args.optionFound("inside");
+
     Info<< "Reading surface from " << surfFileName << endl;
-
-    point visiblePoint(IStringStream(args.additionalArgs()[1])());
     Info<< "Visible point " << visiblePoint << endl;
-
-    bool orientInside = args.optionFound("inside");
 
     if (orientInside)
     {
@@ -67,7 +68,6 @@ int main(int argc, char *argv[])
             << " is outside" << endl;
     }
 
-    fileName outFileName(args.additionalArgs()[2]);
     Info<< "Writing surface to " << outFileName << endl;
 
 

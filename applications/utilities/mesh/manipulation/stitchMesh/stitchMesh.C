@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -96,6 +96,7 @@ void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
+#   include "addOverwriteOption.H"
 #   include "addRegionOption.H"
 
     argList::validArgs.append("masterPatch");
@@ -103,7 +104,6 @@ int main(int argc, char *argv[])
 
     argList::addBoolOption("partial");
     argList::addBoolOption("perfect");
-    argList::addBoolOption("overwrite");
 
     argList::addOption("toleranceDict", "file with tolerances");
 
@@ -113,13 +113,12 @@ int main(int argc, char *argv[])
 #   include "createNamedMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
+    const word masterPatchName = args[1];
+    const word slavePatchName  = args[2];
 
-    word masterPatchName(args.additionalArgs()[0]);
-    word slavePatchName(args.additionalArgs()[1]);
-
-    bool partialCover = args.optionFound("partial");
-    bool perfectCover = args.optionFound("perfect");
-    bool overwrite    = args.optionFound("overwrite");
+    const bool partialCover = args.optionFound("partial");
+    const bool perfectCover = args.optionFound("perfect");
+    const bool overwrite    = args.optionFound("overwrite");
 
     if (partialCover && perfectCover)
     {
