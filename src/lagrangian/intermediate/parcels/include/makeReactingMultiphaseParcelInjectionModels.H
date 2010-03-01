@@ -112,7 +112,7 @@ License
     makeInjectionModelThermoType                                              \
     (                                                                         \
         ReactingMultiphaseLookupTableInjection,                               \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                            \
         ParcelType,                                                           \
         ThermoType                                                            \
     );

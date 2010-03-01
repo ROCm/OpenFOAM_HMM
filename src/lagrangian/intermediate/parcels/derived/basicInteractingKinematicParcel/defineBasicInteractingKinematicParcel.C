@@ -26,7 +26,6 @@ License
 
 #include "basicInteractingKinematicParcel.H"
 #include "InteractingKinematicCloud.H"
-#include "makeParcelIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -38,8 +37,6 @@ namespace Foam
     (
         InteractingKinematicCloud<basicInteractingKinematicParcel>, 0
     );
-
-    makeParcelIOList(basicInteractingKinematicParcel);
 };
 
 
