@@ -104,7 +104,7 @@ public:
 
 
     // Member Functions
-        
+
         //- Return reference to mesh
         const polyMesh& mesh() const
         {

@@ -50,9 +50,9 @@ static const scalar kappa(0.41);
 
 int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("ybl", "scalar");
-    argList::validOptions.insert("Cbl", "scalar");
-    argList::validOptions.insert("writenut", "");
+    argList::addOption("ybl", "scalar");
+    argList::addOption("Cbl", "scalar");
+    argList::addBoolOption("writenut");
 
     #include "setRootCase.H"
     #include "createTime.H"

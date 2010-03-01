@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Translates FOAM data to Fluent format.
+    Translates OpenFOAM data to Fluent format.
 
 \*---------------------------------------------------------------------------*/
 
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
         // Writing number of faces
         label nFaces = mesh.nFaces();
 
-        forAll (mesh.boundary(), patchI)
+        forAll(mesh.boundary(), patchI)
         {
             nFaces += mesh.boundary()[patchI].size();
         }

@@ -45,11 +45,11 @@ bool sammMesh::sammEqualFace
     // considered equal if three of the vertices are the same.
     label nEqual = 0;
 
-    forAll (cellFace, cellFaceLabelI)
+    forAll(cellFace, cellFaceLabelI)
     {
         const label curCellFaceLabel = cellFace[cellFaceLabelI];
 
-        forAll (boundaryFace, bouFaceLabelI)
+        forAll(boundaryFace, bouFaceLabelI)
         {
             if (boundaryFace[bouFaceLabelI] == curCellFaceLabel)
             {

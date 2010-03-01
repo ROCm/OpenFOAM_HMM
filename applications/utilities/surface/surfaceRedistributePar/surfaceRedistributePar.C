@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -103,21 +103,21 @@ int main(int argc, char *argv[])
     argList::validArgs.append("triSurfaceMesh");
     argList::validArgs.append("distributionType");
 
-    argList::validOptions.insert("keepNonMapped", "");
+    argList::addBoolOption("keepNonMapped");
 #   include "setRootCase.H"
 #   include "createTime.H"
     runTime.functionObjects().off();
 
-    fileName surfFileName(args.additionalArgs()[0]);
-    Info<< "Reading surface from " << surfFileName << nl << endl;
+    const fileName surfFileName = args[1];
+    const word distType = args[2];
 
-    const word distType(args.additionalArgs()[1]);
-
-    Info<< "Using distribution method "
+    Info<< "Reading surface from " << surfFileName << nl
+        << nl
+        << "Using distribution method "
         << distributedTriSurfaceMesh::distributionTypeNames_[distType]
         << " " << distType << nl << endl;
 
-    bool keepNonMapped = args.options().found("keepNonMapped");
+    const bool keepNonMapped = args.options().found("keepNonMapped");
 
     if (keepNonMapped)
     {
@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
         (
             IOstream::ASCII,
             IOstream::currentVersion,
-            ioDict.time().writeCompression()        
+            ioDict.time().writeCompression()
         );
     }
 

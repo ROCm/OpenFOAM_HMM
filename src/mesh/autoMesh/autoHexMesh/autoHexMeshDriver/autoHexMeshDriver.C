@@ -459,16 +459,16 @@ void Foam::autoHexMeshDriver::writeMesh(const string& msg) const
             mesh_.time().path()/meshRefiner.timeName()
         );
     }
-    Info<< "Written mesh in = "
+    Info<< "Wrote mesh in = "
         << mesh_.time().cpuTimeIncrement() << " s." << endl;
 }
 
 
 void Foam::autoHexMeshDriver::doMesh()
 {
-    Switch wantRefine(dict_.lookup("doRefine"));
-    Switch wantSnap(dict_.lookup("doSnap"));
-    Switch wantLayers(dict_.lookup("doLayers"));
+    const Switch wantRefine(dict_.lookup("doRefine"));
+    const Switch wantSnap(dict_.lookup("doSnap"));
+    const Switch wantLayers(dict_.lookup("doLayers"));
 
     Info<< "Do refinement : " << wantRefine << nl
         << "Do snapping   : " << wantSnap << nl
@@ -539,6 +539,7 @@ void Foam::autoHexMeshDriver::doMesh()
             shrinkDict,
             motionDict,
             layerParams,
+            true,                   // pre-balance
             decomposerPtr_(),
             distributorPtr_()
         );

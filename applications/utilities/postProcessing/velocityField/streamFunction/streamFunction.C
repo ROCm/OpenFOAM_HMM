@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
             );
 
             labelList visitedPoint(mesh.nPoints());
-            forAll (visitedPoint, pointI)
+            forAll(visitedPoint, pointI)
             {
                 visitedPoint[pointI] = 0;
             }
@@ -128,13 +128,13 @@ int main(int argc, char *argv[])
             {
                 found = false;
 
-                forAll (patches, patchI)
+                forAll(patches, patchI)
                 {
                     const primitivePatch& bouFaces = patches[patchI];
 
                     if (!isType<emptyPolyPatch>(patches[patchI]))
                     {
-                        forAll (bouFaces, faceI)
+                        forAll(bouFaces, faceI)
                         {
                             if
                             (
@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
                                 // Zero flux face found
                                 found = true;
 
-                                forAll (zeroPoints, pointI)
+                                forAll(zeroPoints, pointI)
                                 {
                                     if (visitedPoint[zeroPoints[pointI]] == 1)
                                     {
@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
                                     Info<< "Zero face: patch: " << patchI
                                         << "    face: " << faceI << endl;
 
-                                    forAll (zeroPoints, pointI)
+                                    forAll(zeroPoints, pointI)
                                     {
                                         streamFunction[zeroPoints[pointI]] = 0;
                                         visitedPoint[zeroPoints[pointI]] = 1;
@@ -185,13 +185,13 @@ int main(int argc, char *argv[])
 
                     const cellList& c = mesh.cells();
 
-                    forAll (c, cI)
+                    forAll(c, cI)
                     {
                         labelList zeroPoints = c[cI].labels(mesh.faces());
 
                         bool found = true;
 
-                        forAll (zeroPoints, pointI)
+                        forAll(zeroPoints, pointI)
                         {
                             if (visitedPoint[zeroPoints[pointI]] == 1)
                             {
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
 
                         if (found)
                         {
-                            forAll (zeroPoints, pointI)
+                            forAll(zeroPoints, pointI)
                             {
                                 streamFunction[zeroPoints[pointI]] = 0.0;
                                 visitedPoint[zeroPoints[pointI]] = 1;
@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
                          scalar currentBStream = 0.0;
                          vector currentBStreamPoint(0, 0, 0);
 
-                         forAll (curBPoints, pointI)
+                         forAll(curBPoints, pointI)
                          {
                              // Check if the point has been visited
                              if (visitedPoint[curBPoints[pointI]] == 1)
@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
                          if (bPointFound)
                          {
                              // Sort out other points on the face
-                             forAll (curBPoints, pointI)
+                             forAll(curBPoints, pointI)
                              {
                                  // Check if the point has been visited
                                  if (visitedPoint[curBPoints[pointI]] == 0)
@@ -367,7 +367,7 @@ int main(int argc, char *argv[])
                          scalar currentStream = 0.0;
                          point currentStreamPoint(0, 0, 0);
 
-                         forAll (curPoints, pointI)
+                         forAll(curPoints, pointI)
                          {
                              // Check if the point has been visited
                              if (visitedPoint[curPoints[pointI]] == 1)
@@ -386,7 +386,7 @@ int main(int argc, char *argv[])
                          if (pointFound)
                          {
                              // Sort out other points on the face
-                             forAll (curPoints, pointI)
+                             forAll(curPoints, pointI)
                              {
                                  // Check if the point has been visited
                                  if (visitedPoint[curPoints[pointI]] == 0)

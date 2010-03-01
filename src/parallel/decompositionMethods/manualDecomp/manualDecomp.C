@@ -66,7 +66,7 @@ Foam::manualDecomp::manualDecomp(const dictionary& decompositionDict)
 
 Foam::manualDecomp::manualDecomp
 (
-    const dictionary& decompositionDict, 
+    const dictionary& decompositionDict,
     const polyMesh& mesh
 )
 :

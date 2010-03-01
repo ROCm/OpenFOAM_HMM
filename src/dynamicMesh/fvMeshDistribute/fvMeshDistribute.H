@@ -54,7 +54,6 @@ SourceFiles
 #define fvMeshDistribute_H
 
 #include "Field.H"
-#include "uLabel.H"
 #include "fvMeshSubset.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

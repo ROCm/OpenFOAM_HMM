@@ -50,7 +50,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validOptions.insert("test", "");
+    argList::addBoolOption("test");
 
 #   include "setRootCase.H"
 #   include "createTime.H"

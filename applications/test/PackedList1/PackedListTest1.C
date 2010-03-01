@@ -58,7 +58,13 @@ int main(int argc, char *argv[])
     list1.print(Info);
 
     Info<< "\ntest set() with default argument (max_value)\n";
+    list1.set(1);
     list1.set(3);
+    list1.print(Info);
+
+    Info<< "\ntest unset() with in-range and out-of-range\n";
+    list1.unset(3);
+    list1.unset(100000);
     list1.print(Info);
 
     Info<< "\ntest assign between references\n";

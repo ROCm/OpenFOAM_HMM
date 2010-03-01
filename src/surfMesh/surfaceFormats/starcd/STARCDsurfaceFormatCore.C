@@ -26,136 +26,52 @@ License
 
 #include "STARCDsurfaceFormatCore.H"
 #include "clock.H"
+#include "regExp.H"
 #include "IStringStream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::fileFormats::STARCDsurfaceFormatCore::readHeader
+// parse things like this:
+//     CTNAME  1  someName
+// don't bother with the older comma-delimited format
+
+Foam::Map<Foam::word>
+Foam::fileFormats::STARCDsurfaceFormatCore::readInpCellTable
 (
-    IFstream& is,
-    const word& signature
+    IFstream& is
 )
 {
-    if (!is.good())
-    {
-        FatalErrorIn
-        (
-            "fileFormats::STARCDsurfaceFormatCore::readHeader(...)"
-        )
-            << "cannot read " << signature  << "  " << is.name()
-            << abort(FatalError);
-    }
+    Map<word> lookup;
 
-    word header;
-    label majorVersion;
+    regExp ctnameRE
+    (
+        " *CTNA[^ ]*"        // keyword - min 4 chars
+        "[[:space:]]+"       // space delimited
+        "([0-9]+)"           // 1: <digits>
+        "[[:space:]]+"       // space delimited
+        "([^,[:space:]].*)", // 2: <name>
+        true                 // ignore case
+    );
 
     string line;
-
-    is.getLine(line);
-    IStringStream(line)() >> header;
-
-    is.getLine(line);
-    IStringStream(line)() >> majorVersion;
-
-    // add other checks ...
-    if (header != signature)
+    List<string> groups;
+    while (is.good() && is.getLine(line).good())
     {
-        Info<< "header mismatch " << signature << "  " << is.name()
-            << endl;
+        if (ctnameRE.match(line, groups))
+        {
+            const label tableId = atoi(groups[0].c_str());
+
+            // strip bad chars
+            string::stripInvalid<word>(groups[1]);
+
+            if (!groups[1].empty())
+            {
+                lookup.insert(tableId, groups[1]);
+            }
+        }
     }
 
-    return true;
-}
-
-
-void Foam::fileFormats::STARCDsurfaceFormatCore::writeHeader
-(
-    Ostream& os,
-    const char* filetype
-)
-{
-    os  << "PROSTAR_" << filetype << nl
-        << 4000
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << " " << 0
-        << endl;
-}
-
-
-bool Foam::fileFormats::STARCDsurfaceFormatCore::readPoints
-(
-    IFstream& is,
-    pointField& points,
-    labelList& ids
-)
-{
-    //
-    // read .vrt file
-    // ~~~~~~~~~~~~~~
-
-    if (!is.good())
-    {
-        FatalErrorIn
-        (
-            "fileFormats::STARCDsurfaceFormatCore::readPoints(...)"
-        )
-            << "Cannot read file " << is.name()
-            << exit(FatalError);
-    }
-
-    readHeader(is, "PROSTAR_VERTEX");
-
-    DynamicList<point> dynPoints;
-    // STAR-CD index of points
-    DynamicList<label> dynPointId;
-
-    label lineLabel;
-    while ((is >> lineLabel).good())
-    {
-        scalar x, y, z;
-
-        is >> x >> y >> z;
-
-        dynPoints.append(point(x, y, z));
-        dynPointId.append(lineLabel);
-    }
-
-    points.transfer(dynPoints);
-    ids.transfer(dynPointId);
-
-    return true;
-}
-
-
-
-void Foam::fileFormats::STARCDsurfaceFormatCore::writePoints
-(
-    Ostream& os,
-    const pointField& pointLst
-)
-{
-    writeHeader(os, "VERTEX");
-
-    // Set the precision of the points data to 10
-    os.precision(10);
-
-    // force decimal point for Fortran input
-    os.setf(std::ios::showpoint);
-
-    forAll(pointLst, ptI)
-    {
-        os
-            << ptI + 1 << " "
-            << pointLst[ptI].x() << " "
-            << pointLst[ptI].y() << " "
-            << pointLst[ptI].z() << nl;
-    }
-    os.flush();
+    return lookup;
 }
 
 
@@ -193,4 +109,3 @@ void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
 
 
 // ************************************************************************* //
-

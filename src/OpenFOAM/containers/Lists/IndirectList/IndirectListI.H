@@ -42,7 +42,7 @@ template<class T>
 inline Foam::IndirectList<T>::IndirectList
 (
     const UList<T>& completeList,
-    const Xfer< List<label> >& addr
+    const Xfer<List<label> >& addr
 )
 :
     completeList_(const_cast<UList<T>&>(completeList)),
@@ -121,7 +121,7 @@ inline void Foam::IndirectList<T>::resetAddressing
 template<class T>
 inline void Foam::IndirectList<T>::resetAddressing
 (
-    const Xfer< List<label> >& addr
+    const Xfer<List<label> >& addr
 )
 {
     addressing_.transfer(addr());

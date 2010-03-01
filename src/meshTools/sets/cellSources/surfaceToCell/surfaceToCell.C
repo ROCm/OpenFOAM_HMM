@@ -107,7 +107,7 @@ bool Foam::surfaceToCell::differingPointNormals
 
     const vector& span,         // current search span
     const label cellI,
-    const label cellTriI,       // nearest (to cell centre) surface triangle 
+    const label cellTriI,       // nearest (to cell centre) surface triangle
 
     Map<label>& pointToNearest  // cache for nearest triangle to point
 ) const
@@ -394,7 +394,7 @@ Foam::surfaceToCell::surfaceToCell
 Foam::surfaceToCell::surfaceToCell
 (
     const polyMesh& mesh,
-    const dictionary& dict          
+    const dictionary& dict
 )
 :
     topoSetSource(mesh),

@@ -29,27 +29,24 @@ License
 #include "noDispersion.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(noDispersion, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(noDispersion, 0);
-
-addToRunTimeSelectionTable
-(
-    dispersionModel,
-    noDispersion,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        dispersionModel,
+        noDispersion,
+        dictionary
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-noDispersion::noDispersion(const dictionary& dict, spray& sm)
+Foam::noDispersion::noDispersion(const dictionary& dict, spray& sm)
 :
     dispersionModel(dict, sm)
 {}
@@ -57,20 +54,16 @@ noDispersion::noDispersion(const dictionary& dict, spray& sm)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-noDispersion::~noDispersion()
+Foam::noDispersion::~noDispersion()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void noDispersion::disperseParcels() const
+void Foam::noDispersion::disperseParcels() const
 {
     // Do nothing
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

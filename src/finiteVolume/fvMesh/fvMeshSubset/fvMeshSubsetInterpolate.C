@@ -56,7 +56,7 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > fvMeshSubset::interpolate
     {
         // Set the first one by hand as it corresponds to the
         // exposed internal faces.  Additional interpolation can be put here
-        // as necessary.  
+        // as necessary.
         if (patchMap[patchI] == -1)
         {
             patchFields.set
@@ -180,7 +180,7 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > fvMeshSubset::interpolate
     {
         // Set the first one by hand as it corresponds to the
         // exposed internal faces.  Additional interpolation can be put here
-        // as necessary.  
+        // as necessary.
         if (patchMap[patchI] == -1)
         {
             patchFields.set
@@ -313,7 +313,7 @@ fvMeshSubset::interpolate
     {
         // Set the first one by hand as it corresponds to the
         // exposed internal faces.  Additional interpolation can be put here
-        // as necessary.  
+        // as necessary.
         if (patchMap[patchI] == -1)
         {
             patchFields.set

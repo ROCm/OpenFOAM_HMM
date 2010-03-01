@@ -45,7 +45,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::definedInjector::definedInjector
 (
     const Time& t,

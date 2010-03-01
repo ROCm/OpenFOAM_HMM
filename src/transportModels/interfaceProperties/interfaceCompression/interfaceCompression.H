@@ -70,7 +70,7 @@ public:
         //return min(max(4*min(phiP*(1 - phiP), phiN*(1 - phiN)), 0), 1);
 
         // Quartic compression scheme
-        return 
+        return
             min(max(
             1 - max(sqr(1 - 4*phiP*(1 - phiP)), sqr(1 - 4*phiN*(1 - phiN))),
             0), 1);

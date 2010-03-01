@@ -109,7 +109,7 @@ label activeCells = 0;
 // Create and set the collocated point collapse map
 labelList pointMap(nPoints);
 
-forAll (pointMap, i)
+forAll(pointMap, i)
 {
     pointMap[i] = i;
 }
@@ -132,7 +132,7 @@ for (label i=0; i<nPoints; i++)
 
         edgeList edges = cellShapes[activeCells].edges();
 
-        forAll (edges, ei)
+        forAll(edges, ei)
         {
             if (edges[ei].mag(points) < SMALL)
             {
@@ -167,11 +167,11 @@ cellZoning.setSize(activeCells);
 
 // Map collocated points to refer to the same point and collapse cell shape
 // to the corresponding hex-degenerate.
-forAll (cellShapes, celli)
+forAll(cellShapes, celli)
 {
     cellShape& cs = cellShapes[celli];
 
-    forAll (cs, i)
+    forAll(cs, i)
     {
         cs[i] = pointMap[cs[i]];
     }
@@ -336,7 +336,7 @@ if
     {
         const face& pf = iter();
 
-        forAll (pf, pfi)
+        forAll(pf, pfi)
         {
             minz = min(minz, points[pf[pfi]].z());
         }
@@ -356,7 +356,7 @@ if
         const face& pf = iter();
 
         scalar minfz = GREAT;
-        forAll (pf, pfi)
+        forAll(pf, pfi)
         {
             minfz = min(minfz, points[pf[pfi]].z());
         }
@@ -390,7 +390,7 @@ if
         const face& pf = iter();
 
         scalar minfz = GREAT;
-        forAll (pf, pfi)
+        forAll(pf, pfi)
         {
             minfz = min(minfz, points[pf[pfi]].z());
         }
@@ -417,7 +417,7 @@ if
 label nPatches = 0;
 for (int bci=0; bci<nBCs; bci++)
 {
-    forAll (pFaces[bci], rgi)
+    forAll(pFaces[bci], rgi)
     {
         if (pFaces[bci][rgi].size())
         {
@@ -485,7 +485,7 @@ label nAddedPatches = 0;
 
 for (int bci=0; bci<nBCs; bci++)
 {
-    forAll (pFaces[bci], rgi)
+    forAll(pFaces[bci], rgi)
     {
         if (pFaces[bci][rgi].size())
         {
@@ -510,9 +510,9 @@ for (int bci=0; bci<nBCs; bci++)
 labelList pointLabels(nPoints, -1);
 
 // Scan cells for used points
-forAll (cellShapes, celli)
+forAll(cellShapes, celli)
 {
-    forAll (cellShapes[celli], i)
+    forAll(cellShapes[celli], i)
     {
         pointLabels[cellShapes[celli][i]] = 1;
     }
@@ -520,7 +520,7 @@ forAll (cellShapes, celli)
 
 // Create addressing for used points and pack points array
 label newPointi = 0;
-forAll (pointLabels, pointi)
+forAll(pointLabels, pointi)
 {
     if (pointLabels[pointi] != -1)
     {
@@ -531,24 +531,24 @@ forAll (pointLabels, pointi)
 points.setSize(newPointi);
 
 // Reset cell point labels
-forAll (cellShapes, celli)
+forAll(cellShapes, celli)
 {
     cellShape& cs = cellShapes[celli];
 
-    forAll (cs, i)
+    forAll(cs, i)
     {
         cs[i] = pointLabels[cs[i]];
     }
 }
 
 // Reset boundary-face point labels
-forAll (boundary, patchi)
+forAll(boundary, patchi)
 {
-    forAll (boundary[patchi], facei)
+    forAll(boundary[patchi], facei)
     {
         face& f = boundary[patchi][facei];
 
-        forAll (f, i)
+        forAll(f, i)
         {
             f[i] = pointLabels[f[i]];
         }

@@ -185,12 +185,6 @@ private:
 
 public:
 
-    // Static functions
-
-        //- Create list with incrementing labels
-        static labelList makeIdentity(const label nElems);
-
-
     // Constructors
 
         //- Construct given mesh and shape factors

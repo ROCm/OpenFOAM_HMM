@@ -24,36 +24,29 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "evaporationModel.H"
-#include "fvCFD.H"
+#include "runTimeSelectionTables.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(evaporationModel, 0);
-
-defineRunTimeSelectionTable(evaporationModel, dictionary);
+    defineTypeNameAndDebug(evaporationModel, 0);
+    defineRunTimeSelectionTable(evaporationModel, dictionary);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from dictionary
-evaporationModel::evaporationModel(const dictionary& dict)
+Foam::evaporationModel::evaporationModel(const dictionary& dict)
 :
     dict_(dict)
 {}
 
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-evaporationModel::~evaporationModel()
+Foam::evaporationModel::~evaporationModel()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

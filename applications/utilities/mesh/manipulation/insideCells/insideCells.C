@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,18 +43,16 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    Foam::argList::noParallel();
-    Foam::argList::validArgs.append("surface file");
-    Foam::argList::validArgs.append("destination cellSet");
+    argList::noParallel();
+    argList::validArgs.append("surface file");
+    argList::validArgs.append("destination cellSet");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createPolyMesh.H"
 
-    fileName surfName(args.additionalArgs()[0]);
-
-    fileName setName(args.additionalArgs()[1]);
-
+    const fileName surfName = args[1];
+    const fileName setName  = args[2];
 
     // Read surface
     Info<< "Reading surface from " << surfName << endl;

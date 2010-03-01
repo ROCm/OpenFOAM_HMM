@@ -83,7 +83,7 @@ void Foam::surfaceToPoint::combine(topoSet& set, const bool add) const
             if ((isInside && includeInside_) || (!isInside && includeOutside_))
             {
                 addOrDelete(set, pointI, add);
-            }   
+            }
         }
     }
 
@@ -149,7 +149,7 @@ Foam::surfaceToPoint::surfaceToPoint
 Foam::surfaceToPoint::surfaceToPoint
 (
     const polyMesh& mesh,
-    const dictionary& dict          
+    const dictionary& dict
 )
 :
     topoSetSource(mesh),

@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -33,14 +33,13 @@ usage() {
    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
    cat<<USAGE
 
-usage: ${0##*/} [OPTION] <application> ...
-
+Usage: ${0##*/} [OPTION] <application> ...
 options:
-  -case dir     specify case directory
-  -s            also sends output to screen
-  -p            parallel run of processors
-  -v ver        specify OpenFOAM version
-  -help         this usage
+  -case <dir>       specify alternative case directory, default is the cwd
+  -s                also sends output to screen
+  -p                parallel run of processors
+  -v <ver>          specify OpenFOAM version
+  -help             print the usage
 
 * run an OpenFOAM job in background.
   Redirects the output to 'log' in the case directory

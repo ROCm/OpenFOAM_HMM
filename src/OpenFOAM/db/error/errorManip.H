@@ -49,7 +49,6 @@ namespace Foam
 {
 
 // Forward declaration of friend functions and operators
-
 template<class Err> class errorManip;
 template<class Err> Ostream& operator<<(Ostream&, errorManip<Err>);
 
@@ -59,7 +58,7 @@ Ostream& operator<<(Ostream&, errorManipArg<Err, T>);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class errorManip Declaration
+                         Class errorManip Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Err>
@@ -89,7 +88,7 @@ inline Ostream& operator<<(Ostream& os, errorManip<Err> m)
 
 
 /*---------------------------------------------------------------------------*\
-                           Class errorManipArg Declaration
+                        Class errorManipArg Declaration
 \*---------------------------------------------------------------------------*/
 
 //- errorManipArg
@@ -123,23 +122,29 @@ inline Ostream& operator<<(Ostream& os, errorManipArg<Err, T> m)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline errorManipArg<error, int> exit(error& err, const int errNo = 1)
+inline errorManipArg<error, int>
+exit(error& err, const int errNo = 1)
 {
     return errorManipArg<error, int>(&error::exit, err, errNo);
 }
 
-inline errorManip<error> abort(error& err)
+
+inline errorManip<error>
+abort(error& err)
 {
     return errorManip<error>(&error::abort, err);
 }
 
 
-inline errorManipArg<IOerror, int> exit(IOerror& err, const int errNo = 1)
+inline errorManipArg<IOerror, int>
+exit(IOerror& err, const int errNo = 1)
 {
     return errorManipArg<IOerror, int>(&IOerror::exit, err, errNo);
 }
 
-inline errorManip<IOerror> abort(IOerror& err)
+
+inline errorManip<IOerror>
+abort(IOerror& err)
 {
     return errorManip<IOerror>(&IOerror::abort, err);
 }

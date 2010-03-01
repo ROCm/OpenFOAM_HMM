@@ -29,6 +29,9 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+Foam::string Foam::meshWriter::defaultMeshName = "meshExport";
+
+
 const Foam::cellModel* Foam::meshWriter::unknownModel = Foam::cellModeller::
 lookup
 (
@@ -62,10 +65,6 @@ lookup
 (
     "hex"
 );
-
-
-Foam::string Foam::meshWriter::defaultMeshName = "meshExport";
-Foam::string Foam::meshWriter::defaultSurfaceName = "surfExport";
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

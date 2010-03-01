@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "refineCell.H"
@@ -31,7 +29,6 @@ Description
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Null
 Foam::refineCell::refineCell()
 :
     cellNo_(-1),
@@ -39,7 +36,6 @@ Foam::refineCell::refineCell()
 {}
 
 
-// from components
 Foam::refineCell::refineCell(const label cellI, const vector& direction)
 :
     cellNo_(cellI),
@@ -61,7 +57,6 @@ Foam::refineCell::refineCell(const label cellI, const vector& direction)
 }
 
 
-// from Istream
 Foam::refineCell::refineCell(Istream& is)
 :
     cellNo_(readLabel(is)),

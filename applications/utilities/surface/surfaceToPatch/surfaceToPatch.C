@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -166,24 +166,22 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("surface file");
-    argList::validOptions.insert("faceSet", "faceSet name");
-    argList::validOptions.insert("tol", "fraction of mesh size");
+    argList::addOption("faceSet", "faceSet name");
+    argList::addOption("tol", "fraction of mesh size");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createPolyMesh.H"
 
-    fileName surfName(args.additionalArgs()[0]);
+    const fileName surfName = args[1];
 
     Info<< "Reading surface from " << surfName << " ..." << endl;
 
-    bool readSet = args.optionFound("faceSet");
     word setName;
+    const bool readSet = args.optionReadIfPresent("faceSet", setName);
 
     if (readSet)
     {
-        setName = args.option("faceSet");
-
         Info<< "Repatching only the faces in faceSet " << setName
             << " according to nearest surface triangle ..." << endl;
     }
@@ -193,8 +191,7 @@ int main(int argc, char *argv[])
             << " triangle ..." << endl;
     }
 
-    scalar searchTol = 1E-3;
-    args.optionReadIfPresent("tol", searchTol);
+    scalar searchTol = args.optionLookupOrDefault("tol", 1e-3);
 
     // Get search box. Anything not within this box will not be considered.
     const boundBox& meshBb = mesh.globalData().bb();
@@ -211,7 +208,7 @@ int main(int argc, char *argv[])
     forAll(mesh.boundaryMesh(), patchI)
     {
         Info<< "    " << mesh.boundaryMesh()[patchI].name() << '\t'
-            << mesh.boundaryMesh()[patchI].size() << endl;
+            << mesh.boundaryMesh()[patchI].size() << nl;
     }
     Info<< endl;
 

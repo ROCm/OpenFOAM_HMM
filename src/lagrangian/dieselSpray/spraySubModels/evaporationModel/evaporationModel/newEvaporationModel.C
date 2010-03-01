@@ -29,29 +29,23 @@ License
 #include "evaporationModel.H"
 #include "noEvaporation.H"
 #include "standardEvaporationModel.H"
-#include "fvCFD.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+Foam::autoPtr<Foam::evaporationModel>
+Foam::evaporationModel::New(const dictionary& dict)
 {
+    word modelType(dict.lookup("evaporationModel"));
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-autoPtr<evaporationModel> evaporationModel::New(const dictionary& dict)
-{
-    word evaporationModelType(dict.lookup("evaporationModel"));
-
-    Info<< "Selecting evaporationModel "
-        << evaporationModelType << endl;
+    Info<< "Selecting evaporationModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(evaporationModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn("evaporationModel::New(const dictionary&)")
-            << "Unknown evaporationModelType type " << evaporationModelType
+            << "Unknown evaporationModelType type " << modelType
             << ", constructor not in hash table" << nl << nl
             << "    Valid evaporationModel types are: " << nl
             << dictionaryConstructorTablePtr_->sortedToc()
@@ -61,9 +55,5 @@ autoPtr<evaporationModel> evaporationModel::New(const dictionary& dict)
     return autoPtr<evaporationModel>(cstrIter()(dict));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

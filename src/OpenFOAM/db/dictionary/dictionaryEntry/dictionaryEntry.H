@@ -92,7 +92,7 @@ public:
             const dictionary& dict
         );
 
-        //- Construct as copy for the given parentDict
+        //- Construct as copy for the given parent dictionary
         dictionaryEntry
         (
             const dictionary& parentDict,

@@ -245,8 +245,8 @@ bool merge
 
 int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("instance", "instance");
-    argList::validOptions.insert("literalRE", "");
+    argList::addOption("instance", "instance");
+    argList::addBoolOption("literalRE");
     #include "addRegionOption.H"
 
     #include "setRootCase.H"

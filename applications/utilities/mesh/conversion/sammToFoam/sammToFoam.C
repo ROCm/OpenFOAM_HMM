@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Application
     sammToFoam
 
 Description
-    Converts a STAR-CD SAMM mesh to FOAM format
+    Converts a Star-CD (v3) SAMM mesh to OpenFOAM format.
 
 \*---------------------------------------------------------------------------*/
 
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("SAMM mesh file prefix");
-    argList::validOptions.insert("scale", "scale factor");
+    argList::addOption("scale", "scale factor");
 
     argList args(argc, argv);
 
@@ -50,13 +50,11 @@ int main(int argc, char *argv[])
         FatalError.exit();
     }
 
-    scalar scaleFactor = 1.0;
-    args.optionReadIfPresent("scale", scaleFactor);
+    scalar scaleFactor = args.optionLookupOrDefault("scale", 1.0);
 
 #   include "createTime.H"
 
-    fileName sammFile(args.additionalArgs()[0]);
-    sammMesh makeMesh(sammFile, runTime, scaleFactor);
+    sammMesh makeMesh(args[1], runTime, scaleFactor);
 
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(10);

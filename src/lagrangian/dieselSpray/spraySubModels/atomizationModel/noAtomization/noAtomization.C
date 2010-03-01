@@ -30,26 +30,24 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "basicMultiComponentMixture.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(noAtomization, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+    addToRunTimeSelectionTable
+    (
+        atomizationModel,
+        noAtomization,
+        dictionary
+    );
+}
 
-defineTypeNameAndDebug(noAtomization, 0);
-
-addToRunTimeSelectionTable
-(
-    atomizationModel,
-    noAtomization,
-    dictionary
-);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-noAtomization::noAtomization
+Foam::noAtomization::noAtomization
 (
     const dictionary& dict,
     spray& sm
@@ -61,13 +59,13 @@ noAtomization::noAtomization
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-noAtomization::~noAtomization()
+Foam::noAtomization::~noAtomization()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void noAtomization::atomizeParcel
+void Foam::noAtomization::atomizeParcel
 (
     parcel& p,
     const scalar deltaT,
@@ -78,9 +76,5 @@ void noAtomization::atomizeParcel
     p.liquidCore() = 0.0;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

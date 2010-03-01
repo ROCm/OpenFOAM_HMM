@@ -656,6 +656,16 @@ public:
                 const scalar maxLoadUnbalance
             );
 
+            //- Balance before refining some cells
+            autoPtr<mapDistributePolyMesh> balanceAndRefine
+            (
+                const string& msg,
+                decompositionMethod& decomposer,
+                fvMeshDistribute& distributor,
+                const labelList& cellsToRefine,
+                const scalar maxLoadUnbalance
+            );
+
 
         // Baffle handling
 
@@ -704,7 +714,11 @@ public:
             //- Put faces/cells into zones according to surface specification.
             //  Returns null if no zone surfaces present. Region containing
             //  the keepPoint will not be put into a cellZone.
-            autoPtr<mapPolyMesh> zonify(const point& keepPoint);
+            autoPtr<mapPolyMesh> zonify
+            (
+                const point& keepPoint,
+                const bool allowFreeStandingZoneFaces
+            );
 
 
         // Other topo changes

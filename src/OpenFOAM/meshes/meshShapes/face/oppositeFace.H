@@ -76,7 +76,7 @@ public:
             face(f),
             masterIndex_(masterIndex),
             oppositeIndex_(oppositeIndex)
-            
+
         {}
 
 

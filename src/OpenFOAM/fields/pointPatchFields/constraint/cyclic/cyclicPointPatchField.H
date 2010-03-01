@@ -159,7 +159,11 @@ public:
             {}
 
             //- Complete swap of patch point values and add to local values
-            virtual void swapAdd(Field<Type>&) const;
+            virtual void swapAddSeparated
+            (
+                const Pstream::commsTypes commsType,
+                Field<Type>&
+            ) const;
 };
 
 

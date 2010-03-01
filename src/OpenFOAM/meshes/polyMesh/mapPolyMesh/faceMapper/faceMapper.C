@@ -220,7 +220,7 @@ Foam::faceMapper::faceMapper(const mapPolyMesh& mpm)
     // Check for possibility of direct mapping
     if
     (
-        mpm_.facesFromPointsMap().empty() 
+        mpm_.facesFromPointsMap().empty()
      && mpm_.facesFromEdgesMap().empty()
      && mpm_.facesFromFacesMap().empty()
     )

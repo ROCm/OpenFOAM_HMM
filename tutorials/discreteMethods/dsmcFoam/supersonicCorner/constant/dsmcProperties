@@ -80,7 +80,6 @@ moleculeProperties
         mass                            66.3e-27;
         diameter                        4.17e-10;
         internalDegreesOfFreedom        0;
-        viscosityCoefficient            2.117e-5;
         omega                           0.81;
     }
 }

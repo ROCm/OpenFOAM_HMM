@@ -25,8 +25,6 @@ License
 InClass
     Foam::hCombustionThermo
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef makeCombustionThermo_H

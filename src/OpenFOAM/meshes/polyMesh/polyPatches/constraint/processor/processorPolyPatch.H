@@ -30,7 +30,7 @@ Description
 
     Note: morph patch face ordering tries to do a geometric ordering.
     (assumes faces coincident) Hence will have problems when cyclics
-    are present. 
+    are present.
 
 SourceFiles
     processorPolyPatch.C

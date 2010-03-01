@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,21 +75,21 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("outputFile");
-    argList::validOptions.insert("name",  "name");
-    argList::validOptions.insert("clean", "");
-    argList::validOptions.insert("scaleIn",  "scale");
-    argList::validOptions.insert("scaleOut", "scale");
-    argList::validOptions.insert("dict", "coordinateSystemsDict");
-    argList::validOptions.insert("from", "sourceCoordinateSystem");
-    argList::validOptions.insert("to",   "targetCoordinateSystem");
+
+    argList::addBoolOption("clean");
+
+    argList::addOption("name",  "name");
+    argList::addOption("scaleIn",  "scale");
+    argList::addOption("scaleOut", "scale");
+    argList::addOption("dict", "coordinateSystemsDict");
+    argList::addOption("from", "sourceCoordinateSystem");
+    argList::addOption("to",   "targetCoordinateSystem");
 
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());
-    const stringList& params = args.additionalArgs();
 
-    fileName exportName(params[0]);
-    word importName("default");
-    args.optionReadIfPresent("name", importName);
+    const fileName exportName = args[1];
+    const word importName = args.optionLookupOrDefault<word>("name", "default");
 
     // check that writing is supported
     if (!MeshedSurface<face>::canWriteType(exportName.ext(), true))
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("dict"))
         {
-            fileName dictPath(args.option("dict"));
+            const fileName dictPath = args["dict"];
 
             ioPtr.set
             (
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("from"))
         {
-            const word csName(args.option("from"));
+            const word csName = args["from"];
 
             label csId = csLst.find(csName);
             if (csId < 0)
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("to"))
         {
-            const word csName(args.option("to"));
+            const word csName = args["to"];
 
             label csId = csLst.find(csName);
             if (csId < 0)

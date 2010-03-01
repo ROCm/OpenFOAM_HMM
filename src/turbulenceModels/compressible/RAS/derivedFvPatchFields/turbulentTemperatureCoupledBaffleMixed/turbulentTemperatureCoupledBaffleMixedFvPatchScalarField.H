@@ -32,14 +32,14 @@ Description
     If my temperature is T1, neighbour is T2:
 
     T1 > T2: my side becomes fixedValue T2 bc, other side becomes fixedGradient.
-    
+
 
     Example usage:
         myInterfacePatchName
         {
-            type                turbulentTemperatureCoupledBaffleMixed;
+            type        compressible::turbulentTemperatureCoupledBaffleMixed;
             neighbourFieldName  T;
-            K                   K; // or none 
+            K                   K; // or none
             value               uniform 300;
         }
 
@@ -88,7 +88,7 @@ class turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 
         //- Name of field on the neighbour region
         const word neighbourFieldName_;
-        
+
         //- Name of thermal conductivity field
         const word KName_;
 

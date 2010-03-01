@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,15 +63,15 @@ int main(int argc, char *argv[])
     argList::validArgs.clear();
     argList::validArgs.append("inputFile");
     argList::validArgs.append("outputFile");
-    argList::validOptions.insert("clean", "");
-    argList::validOptions.insert("scale", "scale");
-    argList::validOptions.insert("group", "");
+
+    argList::addBoolOption("clean");
+    argList::addBoolOption("group");
+    argList::addOption("scale", "scale");
 
     argList args(argc, argv);
-    const stringList& params = args.additionalArgs();
 
-    fileName importName(params[0]);
-    fileName exportName(params[1]);
+    const fileName importName = args[1];
+    const fileName exportName = args[2];
 
     if (importName == exportName)
     {

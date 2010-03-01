@@ -29,12 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-graph kShellIntegration
+Foam::graph Foam::kShellIntegration
 (
     const complexVectorField& Ek,
     const Kmesh& K
@@ -55,8 +50,8 @@ graph kShellIntegration
 
     // now scale this to get the energy in a box of side l0
 
-    scalar l0(K.sizeOfBox()[0]*(scalar(K.nn()[0])/(scalar(K.nn()[0]) - 1.0)));
-    scalar factor = pow3(l0/constant::mathematical::twoPi);
+    scalar l0(K.sizeOfBox()[0]*(scalar(K.nn()[0])/(scalar(K.nn()[0])-1.0)));
+    scalar factor = pow((l0/(2.0*constant::mathematical::pi)),3.0);
 
     y *= factor;
 
@@ -72,7 +67,7 @@ graph kShellIntegration
 // kShellMean : average over the points in a k-shell to evaluate the
 // radial part of the energy spectrum.
 
-graph kShellMean
+Foam::graph Foam::kShellMean
 (
     const complexVectorField& Ek,
     const Kmesh& K
@@ -136,13 +131,8 @@ graph kShellMean
         }
     }
 
-    return graph("E(k)", "k", "E(k)", Ek1D, k1D);
+    return graph("E(k)", "k", "E(k)", k1D, Ek1D);
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
 // ************************************************************************* //
-

@@ -26,19 +26,16 @@ License
 
 #include "dispersionRASModel.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(dispersionRASModel, 0);
+    defineTypeNameAndDebug(dispersionRASModel, 0);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-dispersionRASModel::dispersionRASModel
+Foam::dispersionRASModel::dispersionRASModel
 (
     const dictionary& dict,
     spray& sm
@@ -57,12 +54,8 @@ dispersionRASModel::dispersionRASModel
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-dispersionRASModel::~dispersionRASModel()
+Foam::dispersionRASModel::~dispersionRASModel()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -104,7 +104,7 @@ void Foam::lagrangianFieldDecomposer::decomposeFields
 {
     if (particleIndices_.size())
     {
-        forAll (fields, fieldI)
+        forAll(fields, fieldI)
         {
             decomposeField(cloudName, fields[fieldI])().write();
         }

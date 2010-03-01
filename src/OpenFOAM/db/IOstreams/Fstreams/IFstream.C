@@ -78,17 +78,6 @@ Foam::IFstreamAllocator::~IFstreamAllocator()
 }
 
 
-std::istream& Foam::IFstreamAllocator::stdStream()
-{
-    if (!ifPtr_)
-    {
-        FatalErrorIn("IFstreamAllocator::stdStream()")
-            << "No stream allocated" << abort(FatalError);
-    }
-    return *ifPtr_;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::IFstream::IFstream
@@ -142,6 +131,28 @@ Foam::IFstream::~IFstream()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+std::istream& Foam::IFstream::stdStream()
+{
+    if (!ifPtr_)
+    {
+        FatalErrorIn("IFstream::stdStream()")
+            << "No stream allocated" << abort(FatalError);
+    }
+    return *ifPtr_;
+}
+
+
+const std::istream& Foam::IFstream::stdStream() const
+{
+    if (!ifPtr_)
+    {
+        FatalErrorIn("IFstream::stdStream() const")
+            << "No stream allocated" << abort(FatalError);
+    }
+    return *ifPtr_;
+}
+
 
 void Foam::IFstream::print(Ostream& os) const
 {

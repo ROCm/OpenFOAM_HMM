@@ -6,7 +6,7 @@
     );
     psiChemistryModel& chemistry = pChemistry();
 
-    hCombustionThermo& thermo = chemistry.thermo();
+    hsCombustionThermo& thermo = chemistry.thermo();
 
     basicMultiComponentMixture& composition = thermo.composition();
     PtrList<volScalarField>& Y = composition.Y();
@@ -22,7 +22,7 @@
     }
 
     volScalarField& p = thermo.p();
-    volScalarField& h = thermo.h();
+    volScalarField& hs = thermo.hs();
     const volScalarField& T = thermo.T();
     const volScalarField& psi = thermo.psi();
 
@@ -90,8 +90,22 @@
 
     multivariateSurfaceInterpolationScheme<scalar>::fieldTable fields;
 
-    forAll (Y, i)
+    forAll(Y, i)
     {
         fields.add(Y[i]);
     }
-    fields.add(h);
+    fields.add(hs);
+
+    DimensionedField<scalar, volMesh> chemistrySh
+    (
+        IOobject
+        (
+            "chemistry::Sh",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedScalar("chemistry::Sh", dimEnergy/dimTime/dimVolume, 0.0)
+    );

@@ -27,21 +27,18 @@ License
 #include "error.H"
 #include "collisionModel.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(collisionModel, 0);
+    defineRunTimeSelectionTable(collisionModel, dictionary);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(collisionModel, 0);
-
-defineRunTimeSelectionTable(collisionModel, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-collisionModel::collisionModel
+Foam::collisionModel::collisionModel
 (
     const dictionary& dict,
     spray& sm,
@@ -51,18 +48,14 @@ collisionModel::collisionModel
     dict_(dict),
     spray_(sm),
     rndGen_(rndGen)
-    //coeffsDict_(dict.subDict(typeName + "Coeffs"))
+    // coeffsDict_(dict.subDict(typeName + "Coeffs"))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-collisionModel::~collisionModel()
+Foam::collisionModel::~collisionModel()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

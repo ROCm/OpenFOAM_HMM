@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -411,9 +411,8 @@ Foam::booleanSurface::booleanSurface
         Pout<< "booleanSurface : Generated cutSurf1: " << endl;
         cutSurf1.writeStats(Pout);
 
-        Pout<< "Writing to file cutSurf1.ftr" << endl;
-        OFstream cutSurf1Stream("cutSurf1.ftr");
-        cutSurf1.write(cutSurf1Stream);
+        Pout<< "Writing to file cutSurf1.obj" << endl;
+        cutSurf1.write("cutSurf1.obj");
     }
 
     if (debug)
@@ -430,9 +429,8 @@ Foam::booleanSurface::booleanSurface
         Pout<< "booleanSurface : Generated cutSurf2: " << endl;
         cutSurf2.writeStats(Pout);
 
-        Pout<< "Writing to file cutSurf2.ftr" << endl;
-        OFstream cutSurf2Stream("cutSurf2.ftr");
-        cutSurf2.write(cutSurf2Stream);
+        Pout<< "Writing to file cutSurf2.obj" << endl;
+        cutSurf2.write("cutSurf2.obj");
     }
 
 
@@ -768,9 +766,8 @@ Foam::booleanSurface::booleanSurface
         Pout<< "booleanSurface : Generated cutSurf1: " << endl;
         cutSurf1.writeStats(Pout);
 
-        Pout<< "Writing to file cutSurf1.ftr" << endl;
-        OFstream cutSurf1Stream("cutSurf1.ftr");
-        cutSurf1.write(cutSurf1Stream);
+        Pout<< "Writing to file cutSurf1.obj" << endl;
+        cutSurf1.write("cutSurf1.obj");
     }
 
 
@@ -792,9 +789,8 @@ Foam::booleanSurface::booleanSurface
         Pout<< "booleanSurface : Generated cutSurf2: " << endl;
         cutSurf2.writeStats(Pout);
 
-        Pout<< "Writing to file cutSurf2.ftr" << endl;
-        OFstream cutSurf2Stream("cutSurf2.ftr");
-        cutSurf2.write(cutSurf2Stream);
+        Pout<< "Writing to file cutSurf2.obj" << endl;
+        cutSurf2.write("cutSurf2.obj");
     }
 
 
@@ -920,9 +916,8 @@ Foam::booleanSurface::booleanSurface
         Pout<< "booleanSurface : Generated combinedSurf: " << endl;
         combinedSurf.writeStats(Pout);
 
-        Pout<< "Writing to file combinedSurf.ftr" << endl;
-        OFstream combinedSurfStream("combinedSurf.ftr");
-        combinedSurf.write(combinedSurfStream);
+        Pout<< "Writing to file combinedSurf.obj" << endl;
+        combinedSurf.write("combinedSurf.obj");
     }
 
 

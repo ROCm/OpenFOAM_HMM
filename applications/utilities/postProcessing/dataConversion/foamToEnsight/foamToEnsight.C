@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Translates FOAM data to EnSight format.
+    Translates OpenFOAM data to EnSight format.
 
     An Ensight part is created for the internalMesh and for each patch.
 
@@ -93,11 +93,27 @@ bool inFileNameList
 
 int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("ascii", "" );
-    argList::validOptions.insert("patches", "patchList");
-    argList::validOptions.insert("noPatches", "");
+    timeSelector::addOptions();
+#   include "addRegionOption.H"
 
-#   include "addTimeOptions.H"
+    argList::addBoolOption
+    (
+        "ascii",
+        "write in ASCII format instead of 'C Binary'"
+    );
+    argList::addBoolOption
+    (
+        "noPatches",
+        "suppress writing any patches"
+    );
+    argList::addOption
+    (
+        "patches",
+        "wordList",
+        "specify particular patches to write - eg '(inlet outlet)'. "
+        "An empty list suppresses writing the internalMesh."
+    );
+
 #   include "setRootCase.H"
 
     // Check options
@@ -105,12 +121,7 @@ int main(int argc, char *argv[])
 
 #   include "createTime.H"
 
-    // get the available time-steps
-    instantList Times = runTime.times();
-
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
+    instantList Times = timeSelector::select0(runTime, args);
 
 #   include "createNamedMesh.H"
 
@@ -200,9 +211,9 @@ int main(int argc, char *argv[])
 
     // Identify if lagrangian data exists at each time, and add clouds
     // to the 'allCloudNames' hash set
-    for (label n=startTime; n<endTime; n++)
+    forAll(Times, timeI)
     {
-        runTime.setTime(Times[n], n);
+        runTime.setTime(Times[timeI], timeI);
 
         fileNameList cloudDirs = readDir
         (
@@ -253,9 +264,9 @@ int main(int argc, char *argv[])
 
         // Loop over all times to build list of fields and field types
         // for each cloud
-        for (label n=startTime; n<endTime; n++)
+        forAll(Times, timeI)
         {
-            runTime.setTime(Times[n], n);
+            runTime.setTime(Times[timeI], timeI);
 
             IOobjectList cloudObjs
             (
@@ -282,20 +293,19 @@ int main(int argc, char *argv[])
     }
 
     label nTimeSteps = 0;
-    for (label n=startTime; n<endTime; n++)
+    forAll(Times, timeIndex)
     {
         nTimeSteps++;
-        runTime.setTime(Times[n], n);
-        label timeIndex = n - startTime;
+        runTime.setTime(Times[timeIndex], timeIndex);
 
         word timeName = itoa(timeIndex);
         word timeFile = prepend + timeName;
 
         Info<< "Translating time = " << runTime.timeName() << nl;
 
-#       include "moveMesh.H"
+        polyMesh::readUpdateState meshState = mesh.readUpdate();
 
-        if (timeIndex == 0 || mesh.moving())
+        if (timeIndex == 0 || (meshState != polyMesh::UNCHANGED))
         {
             eMesh.write
             (

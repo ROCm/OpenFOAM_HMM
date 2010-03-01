@@ -77,20 +77,6 @@ inline void Foam::UIPstream::readFromBuffer
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::UIPstream::~UIPstream()
-{
-    if (externalBufPosition_ < messageSize_)
-    {
-        FatalErrorIn("UIPstream::~UIPstream()")
-            << "Message not fully consumed. messageSize:" << messageSize_
-            << " bytes of which only " << externalBufPosition_
-            << " consumed." << Foam::abort(FatalError);
-    }
-}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::Istream& Foam::UIPstream::read(token& t)

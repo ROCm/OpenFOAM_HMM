@@ -151,6 +151,34 @@ displacementComponentLaplacianFvMotionSolver
       : -1
     )
 {
+    if (points0_.size() != mesh.nPoints())
+    {
+        FatalErrorIn
+        (
+            "displacementComponentLaplacianFvMotionSolver::"
+            "displacementComponentLaplacianFvMotionSolver\n"
+            "(\n"
+            "    const polyMesh&,\n"
+            "    Istream&\n"
+            ")"
+        )   << "Number of points in mesh " << mesh.nPoints()
+            << " differs from number of points " << points0_.size()
+            << " read from file "
+            <<
+                IOobject
+                (
+                    "points",
+                    mesh.time().constant(),
+                    polyMesh::meshSubDir,
+                    mesh,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ).filePath()
+            << exit(FatalError);
+    }
+
+
     IOobject io
     (
         "pointLocation",
@@ -328,7 +356,7 @@ void Foam::displacementComponentLaplacianFvMotionSolver::updateMesh
     forAll(newPoints0, pointI)
     {
         label oldPointI = mpm.pointMap()[pointI];
-    
+
         if (oldPointI >= 0)
         {
             label masterPointI = mpm.reversePointMap()[oldPointI];

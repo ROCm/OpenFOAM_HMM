@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,21 +75,22 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::validArgs.append("inputFile");
     argList::validArgs.append("outputFile");
-    argList::validOptions.insert("clean", "");
-    argList::validOptions.insert("orient", "");
-    argList::validOptions.insert("surfMesh", "");
-    argList::validOptions.insert("scale", "scale");
-    argList::validOptions.insert("triSurface", "");
-    argList::validOptions.insert("unsorted", "");
-    argList::validOptions.insert("triFace", "");
+
+    argList::addBoolOption("clean");
+    argList::addBoolOption("orient");
+    argList::addBoolOption("surfMesh");
+    argList::addBoolOption("triSurface");
+    argList::addBoolOption("unsorted");
+    argList::addBoolOption("triFace");
+
+    argList::addOption("scale", "scale");
+
 #   include "setRootCase.H"
-    const stringList& params = args.additionalArgs();
 
-    scalar scaleFactor = 0;
-    args.optionReadIfPresent("scale", scaleFactor);
+    const scalar scaleFactor = args.optionLookupOrDefault("scale", 0.0);
 
-    fileName importName(params[0]);
-    fileName exportName(params[1]);
+    const fileName importName = args[1];
+    const fileName exportName = args[2];
 
     if (importName == exportName)
     {

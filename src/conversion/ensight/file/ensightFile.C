@@ -91,7 +91,7 @@ Foam::Ostream& Foam::ensightFile::write
     std::streamsize count
 )
 {
-    stream().write(buf, count);
+    stdStream().write(buf, count);
     return *this;
 }
 
@@ -126,7 +126,7 @@ Foam::Ostream& Foam::ensightFile::write(const string& value)
     }
     else
     {
-        stream() << buf;
+        stdStream() << buf;
     }
 
     return *this;
@@ -147,8 +147,8 @@ Foam::Ostream& Foam::ensightFile::write(const label value)
     }
     else
     {
-        stream().width(10);
-        stream() << value;
+        stdStream().width(10);
+        stdStream() << value;
     }
 
     return *this;
@@ -173,8 +173,8 @@ Foam::Ostream& Foam::ensightFile::write
     }
     else
     {
-        stream().width(fieldWidth);
-        stream() << value;
+        stdStream().width(fieldWidth);
+        stdStream() << value;
     }
 
     return *this;
@@ -195,8 +195,8 @@ Foam::Ostream& Foam::ensightFile::write(const scalar value)
     }
     else
     {
-        stream().width(12);
-        stream() << value;
+        stdStream().width(12);
+        stdStream() << value;
     }
 
     return *this;
@@ -207,7 +207,7 @@ void Foam::ensightFile::newline()
 {
     if (format() == IOstream::ASCII)
     {
-        stream() << nl;
+        stdStream() << nl;
     }
 }
 

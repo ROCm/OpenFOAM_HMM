@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,6 +84,18 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     this->clear();
 
     fileName baseName = filename.lessExt();
+
+    // read cellTable names (if possible)
+    Map<word> cellTableLookup;
+
+    {
+        IFstream is(baseName + ".inp");
+        if (is.good())
+        {
+            cellTableLookup = readInpCellTable(is);
+        }
+    }
+
 
     // STAR-CD index of points
     List<label> pointId;
@@ -171,7 +183,22 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
             {
                 zoneI = dynSizes.size();
                 lookup.insert(cellTableId, zoneI);
-                dynNames.append(word("cellTable_") + ::Foam::name(zoneI));
+
+                Map<word>::const_iterator tableNameIter =
+                    cellTableLookup.find(cellTableId);
+
+                if (tableNameIter == cellTableLookup.end())
+                {
+                    dynNames.append
+                    (
+                        word("cellTable_") + ::Foam::name(cellTableId)
+                    );
+                }
+                else
+                {
+                    dynNames.append(tableNameIter());
+                }
+
                 dynSizes.append(0);
             }
 
@@ -229,9 +256,9 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
 
     const List<surfZone>& zones =
     (
-        surf.surfZones().size() > 1
-      ? surf.surfZones()
-      : oneZone(faceLst)
+        surf.surfZones().empty()
+      ? oneZone(faceLst)
+      : surf.surfZones()
     );
 
     const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);

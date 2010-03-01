@@ -7,7 +7,7 @@
             List<faceZone*> fz(3*mergePatchPairs.size());
             List<cellZone*> cz(0);
 
-            forAll (mergePatchPairs, pairI)
+            forAll(mergePatchPairs, pairI)
             {
                 const word mergeName
                 (
@@ -34,7 +34,7 @@
 
                 labelList isf(masterPatch.size());
 
-                forAll (isf, i)
+                forAll(isf, i)
                 {
                     isf[i] = masterPatch.start() + i;
                 }
@@ -58,7 +58,7 @@
 
                 labelList osf(slavePatch.size());
 
-                forAll (osf, i)
+                forAll(osf, i)
                 {
                     osf[i] = slavePatch.start() + i;
                 }
@@ -91,7 +91,7 @@
             attachPolyTopoChanger polyMeshAttacher(mesh);
             polyMeshAttacher.setSize(mergePatchPairs.size());
 
-            forAll (mergePatchPairs, pairI)
+            forAll(mergePatchPairs, pairI)
             {
                 const word mergeName
                 (

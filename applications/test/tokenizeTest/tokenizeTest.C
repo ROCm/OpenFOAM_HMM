@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,21 +44,19 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.insert("string .. stringN");
-    argList::validOptions.insert("file", "name");
-    argList::validOptions.insert("repeat", "count");
+    argList::addOption("file", "name");
+    argList::addOption("repeat", "count");
 
     argList args(argc, argv, false, true);
 
-    label repeat = 1;
-    args.optionReadIfPresent<label>("repeat", repeat);
+    const label repeat = args.optionLookupOrDefault<label>("repeat", 1);
 
     cpuTime timer;
-
     for (label count = 0; count < repeat; ++count)
     {
-        forAll(args.additionalArgs(), argI)
+        for (label argI=1; argI < args.size(); ++argI)
         {
-            const string& rawArg = args.additionalArgs()[argI];
+            const string& rawArg = args[argI];
             if (count == 0)
             {
                 Info<< "input string: " << rawArg << nl;
@@ -69,9 +67,15 @@ int main(int argc, char *argv[])
             while (is.good())
             {
                 token tok(is);
+                // char ch;
+                // is.get(ch);
+                // is.putback(ch);
+                int lookahead = is.peek();
+
                 if (count == 0)
                 {
-                    Info<< "token: " << tok.info() << endl;
+                    Info<< "token: " << tok.info();
+                    Info<< "  lookahead: '" << char(lookahead) << "'" << endl;
                 }
             }
 
@@ -90,11 +94,11 @@ int main(int argc, char *argv[])
     {
         for (label count = 0; count < repeat; ++count)
         {
-            IFstream is(args.option("file"));
+            IFstream is(args["file"]);
 
             if (count == 0)
             {
-                Info<< "tokenizing file: " << args.option("file") << nl;
+                Info<< "tokenizing file: " << args["file"] << nl;
             }
 
             while (is.good())

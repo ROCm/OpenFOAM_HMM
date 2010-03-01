@@ -206,6 +206,15 @@ void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
             }
             else if (mag(magSf - nbrMagSf)/avSf > coupledPolyPatch::matchTol)
             {
+                fileName nm
+                (
+                    boundaryMesh().mesh().time().path()
+                   /name()+"_faces.obj"
+                );
+                Pout<< "processorPolyPatch::order : Writing my " << size()
+                    << " faces to OBJ file " << nm << endl;
+                writeOBJ(nm, *this, points());
+
                 FatalErrorIn
                 (
                     "processorPolyPatch::calcGeometry()"

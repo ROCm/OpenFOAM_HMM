@@ -176,7 +176,8 @@ public:
         //  Can't use typeName info here since subclasses not yet instantiated
         topoSet(const IOobject&, const word& wantedType);
 
-        //- Construct from polyMesh and name
+        //- Construct from polyMesh and name. Searches for a polyMesh/sets
+        //  directory but not beyond mesh.facesInstance.
         topoSet
         (
             const polyMesh& mesh,
@@ -186,7 +187,9 @@ public:
             writeOption w=NO_WRITE
         );
 
-        //- Construct empty from additional size of labelHashSet
+        //- Construct empty from additional size of labelHashSet.
+        //  Searches for a polyMesh/sets
+        //  directory but not beyond mesh.facesInstance.
         topoSet
         (
             const polyMesh& mesh,
@@ -196,6 +199,8 @@ public:
         );
 
         //- Construct empty from additional labelHashSet
+        //  Searches for a polyMesh/sets
+        //  directory but not beyond mesh.facesInstance.
         topoSet
         (
             const polyMesh& mesh,
@@ -204,10 +209,10 @@ public:
             writeOption w=NO_WRITE
         );
 
-        //- Construct empty from IOobject and size
+        //- Construct empty from IOobject and size.
         topoSet(const IOobject&, const label size);
 
-        //- Construct from IOobject and labelHashSet
+        //- Construct from IOobject and labelHashSet.
         topoSet(const IOobject&, const labelHashSet&);
 
 

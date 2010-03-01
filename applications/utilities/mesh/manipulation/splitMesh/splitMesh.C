@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -110,12 +110,12 @@ void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
 
 int main(int argc, char *argv[])
 {
-    Foam::argList::noParallel();
+    argList::noParallel();
+#   include "addOverwriteOption.H"
 
-    Foam::argList::validArgs.append("faceSet");
-    Foam::argList::validArgs.append("masterPatch");
-    Foam::argList::validArgs.append("slavePatch");
-    Foam::argList::validOptions.insert("overwrite", "");
+    argList::validArgs.append("faceSet");
+    argList::validArgs.append("masterPatch");
+    argList::validArgs.append("slavePatch");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -123,10 +123,10 @@ int main(int argc, char *argv[])
 #   include "createPolyMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    word setName(args.additionalArgs()[0]);
-    word masterPatch(args.additionalArgs()[1]);
-    word slavePatch(args.additionalArgs()[2]);
-    bool overwrite = args.optionFound("overwrite");
+    const word setName = args[1];
+    const word masterPatch = args[2];
+    const word slavePatch = args[3];
+    const bool overwrite = args.optionFound("overwrite");
 
     // List of faces to split
     faceSet facesSet(mesh, setName);

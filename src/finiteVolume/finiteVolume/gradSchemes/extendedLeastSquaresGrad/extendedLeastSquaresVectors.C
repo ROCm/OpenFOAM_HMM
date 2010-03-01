@@ -135,7 +135,7 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
     }
 
     // Visit the boundaries. Coupled boundaries are taken into account
-    // in the construction of d vectors.  
+    // in the construction of d vectors.
     forAll(d.boundaryField(), patchI)
     {
         const fvsPatchVectorField& pd = d.boundaryField()[patchI];
@@ -194,8 +194,8 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
                         if (cellj != -1)
                         {
                             vector dCij = (mesh.C()[cellj] - mesh.C()[i]);
-                            
-                            symmTensor ddij = 
+
+                            symmTensor ddij =
                                 dd[i] + (1.0/magSqr(dCij))*sqr(dCij);
 
                             scalar detddij = det(ddij);
@@ -265,7 +265,7 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
 
     forAll(additionalCells_, i)
     {
-        vector dCij = 
+        vector dCij =
             mesh.C()[additionalCells_[i][1]] - mesh.C()[additionalCells_[i][0]];
 
         additionalVectors_[i] =

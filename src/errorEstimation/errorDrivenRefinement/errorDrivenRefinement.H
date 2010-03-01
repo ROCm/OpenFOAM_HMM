@@ -119,7 +119,7 @@ public:
 
     // Access
 
-        //- Underlying mesh modifier        
+        //- Underlying mesh modifier
         const undoableMeshCutter& refinementEngine() const
         {
             return refinementEngine_;

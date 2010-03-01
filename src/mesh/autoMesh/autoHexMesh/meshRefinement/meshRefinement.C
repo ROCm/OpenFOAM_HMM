@@ -44,7 +44,6 @@ License
 #include "pointFields.H"
 #include "slipPointPatchFields.H"
 #include "fixedValuePointPatchFields.H"
-#include "globalPointPatchFields.H"
 #include "calculatedPointPatchFields.H"
 #include "processorPointPatch.H"
 #include "globalIndex.H"
@@ -54,6 +53,7 @@ License
 #include "Random.H"
 #include "searchableSurfaces.H"
 #include "treeBoundBox.H"
+#include "zeroGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1274,7 +1274,7 @@ Foam::labelList Foam::meshRefinement::intersectedPoints() const
     const faceList& faces = mesh_.faces();
 
     // Mark all points on faces that will become baffles
-    PackedBoolList isBoundaryPoint(mesh_.nPoints(), 0u);
+    PackedBoolList isBoundaryPoint(mesh_.nPoints());
     label nBoundaryPoints = 0;
 
     forAll(surfaceIndex_, faceI)
@@ -1408,11 +1408,7 @@ Foam::tmp<Foam::pointVectorField> Foam::meshRefinement::makeDisplacementField
 
     forAll(pointPatches, patchI)
     {
-        if (isA<globalPointPatch>(pointPatches[patchI]))
-        {
-            patchFieldTypes[patchI] = globalPointPatchVectorField::typeName;
-        }
-        else if (isA<processorPointPatch>(pointPatches[patchI]))
+        if (isA<processorPointPatch>(pointPatches[patchI]))
         {
             patchFieldTypes[patchI] = calculatedPointPatchVectorField::typeName;
         }
@@ -1708,7 +1704,7 @@ Foam::label Foam::meshRefinement::addPatch
 
 Foam::label Foam::meshRefinement::addMeshedPatch
 (
-    const word& name,   
+    const word& name,
     const word& type
 )
 {
@@ -2128,7 +2124,8 @@ void Foam::meshRefinement::dumpRefinementLevel() const
             false
         ),
         mesh_,
-        dimensionedScalar("zero", dimless, 0)
+        dimensionedScalar("zero", dimless, 0),
+        zeroGradientFvPatchScalarField::typeName
     );
 
     const labelList& cellLevel = meshCutter_.cellLevel();

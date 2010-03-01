@@ -255,7 +255,7 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
                     )
                 ).ptr()
             );
-            
+
             coarseInterfaceAddr[inti] = coarseInterfaces[inti].faceCells();
         }
     }

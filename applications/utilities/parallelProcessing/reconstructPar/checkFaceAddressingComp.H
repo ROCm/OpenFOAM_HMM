@@ -8,11 +8,11 @@
 
     PtrList<labelIOList>& faceProcAddressing = procMeshes.faceProcAddressing();
 
-    forAll (faceProcAddressing, procI)
+    forAll(faceProcAddressing, procI)
     {
         const labelList& curFaceAddr = faceProcAddressing[procI];
 
-        forAll (curFaceAddr, faceI)
+        forAll(curFaceAddr, faceI)
         {
             if (mag(curFaceAddr[faceI]) < minFaceIndex)
             {
@@ -33,11 +33,11 @@
             << "the current version fo decomposePar"
             << endl;
 
-        forAll (faceProcAddressing, procI)
+        forAll(faceProcAddressing, procI)
         {
             labelList& curFaceAddr = faceProcAddressing[procI];
 
-            forAll (curFaceAddr, faceI)
+            forAll(curFaceAddr, faceI)
             {
                 curFaceAddr[faceI] += sign(curFaceAddr[faceI]);
             }

@@ -120,7 +120,7 @@ public:
 
             // Fields
 
-                //- Return const access to chemical source terms
+                //- Return const access to chemical source terms [kg/m3/s]
                 virtual tmp<volScalarField> RR(const label i) const = 0;
 
 
@@ -133,7 +133,10 @@ public:
                 //- Return the chemical time scale
                 virtual tmp<volScalarField> tc() const = 0;
 
-                //- Return the heat release
+                //- Return source for enthalpy equation [kg/m/s3]
+                virtual tmp<volScalarField> Sh() const = 0;
+
+                //- Return the heat release, i.e. enthalpy/sec [m2/s3]
                 virtual tmp<volScalarField> dQ() const = 0;
 };
 

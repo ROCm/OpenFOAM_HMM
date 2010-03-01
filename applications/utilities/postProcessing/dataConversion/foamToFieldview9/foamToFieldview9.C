@@ -177,7 +177,7 @@ static void writeFaceData
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validOptions.insert("noWall", "");
+    argList::addBoolOption("noWall");
     timeSelector::addOptions(true, false);
 
 #   include "setRootCase.H"
@@ -379,7 +379,7 @@ int main(int argc, char *argv[])
         // num patches
         writeInt(fvFile, mesh.boundary().size());
 
-        forAll (mesh.boundary(), patchI)
+        forAll(mesh.boundary(), patchI)
         {
             const fvPatch& currPatch = mesh.boundary()[patchI];
 
@@ -694,7 +694,7 @@ int main(int argc, char *argv[])
             {
                 const volScalarField& vsf = *volFieldPtrs[fieldI];
 
-                forAll (mesh.boundary(), patchI)
+                forAll(mesh.boundary(), patchI)
                 {
                     writeFaceData
                     (
@@ -709,7 +709,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                forAll (mesh.boundaryMesh(), patchI)
+                forAll(mesh.boundaryMesh(), patchI)
                 {
                     // Dummy value.
                     floatField fField
@@ -735,7 +735,7 @@ int main(int argc, char *argv[])
             {
                 const surfaceScalarField& ssf = *surfFieldPtrs[fieldI];
 
-                forAll (mesh.boundary(), patchI)
+                forAll(mesh.boundary(), patchI)
                 {
                     writeFaceData
                     (
@@ -750,7 +750,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                forAll (mesh.boundaryMesh(), patchI)
+                forAll(mesh.boundaryMesh(), patchI)
                 {
                     // Dummy value.
                     floatField fField
@@ -784,7 +784,7 @@ int main(int argc, char *argv[])
                 const volScalarField& vsf = *volFieldPtrs[fieldI];
 
                 // All non-empty patches
-                forAll (mesh.boundary(), patchI)
+                forAll(mesh.boundary(), patchI)
                 {
                     writeFaceData
                     (
@@ -799,7 +799,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                forAll (mesh.boundary(), patchI)
+                forAll(mesh.boundary(), patchI)
                 {
                     // Dummy value.
                     floatField fField(topo.nPolyFaces()[patchI], 0.0);
@@ -836,7 +836,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                forAll (mesh.boundaryMesh(), patchI)
+                forAll(mesh.boundaryMesh(), patchI)
                 {
                     // Dummy value.
                     floatField fField

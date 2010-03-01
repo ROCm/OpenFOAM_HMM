@@ -27,33 +27,7 @@ boundaryField
     }
     farFieldMoving
     {
-        //type            slip;
-        type            surfaceSlipDisplacement;
-        geometry
-        {
-            top
-            {
-                type        searchablePlane;
-                planeType   pointAndNormal;
-                basePoint   (0 0.0025 0);
-               normalVector (0 1 0); 
-            }
-        };
-
-        // Find projection with surface:
-        //     fixedNormal : intersections along prespecified direction
-        //     pointNormal : intersections along current pointNormal of patch
-        //     nearest     : nearest point on surface
-        followMode fixedNormal;
-
-        // if fixedNormal : normal
-        projectDirection (0 1 0);
-
-        //- -1 or component to knock out before doing projection
-        //wedgePlane      -1;
-
-        //- Points that should remain fixed
-        //frozenPointsZone fixedPointsZone;
+        type            slip;
     }
     fixedWall
     {
@@ -71,28 +45,7 @@ boundaryField
     }
     farField
     {
-        //type            slip;
-        type            surfaceSlipDisplacement;
-        geometry
-        {
-            top
-            {
-                type        searchablePlane;
-                planeType   pointAndNormal;
-                basePoint   (0 0.0025 0);
-               normalVector (0 1 0); 
-            }
-        };
-
-        followMode fixedNormal;
-
-        projectDirection (0 1 0);
-
-        //- -1 or component to knock out before doing projection
-        wedgePlane      -1;
-
-        //- Points that should remain fixed
-        //frozenPointsZone fixedPointsZone;
+        type            slip;
     }
     back
     {

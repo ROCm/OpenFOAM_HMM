@@ -17,9 +17,6 @@ FoamFile
 
 application     pimpleDyMFoam;
 
-// For surfaceSlip boundary conditions
-libs            ("libfvMotionSolvers.so");
-
 startFrom       startTime;
 
 startTime       0;

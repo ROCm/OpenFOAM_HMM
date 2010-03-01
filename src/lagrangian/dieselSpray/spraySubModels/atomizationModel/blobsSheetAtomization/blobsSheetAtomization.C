@@ -30,26 +30,25 @@ License
 #include "mathematicalConstants.H"
 #include "RosinRammler.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(blobsSheetAtomization, 0);
+namespace Foam
+{
+    defineTypeNameAndDebug(blobsSheetAtomization, 0);
 
-addToRunTimeSelectionTable
-(
-    atomizationModel,
-    blobsSheetAtomization,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        atomizationModel,
+        blobsSheetAtomization,
+        dictionary
+    );
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-blobsSheetAtomization::blobsSheetAtomization
+Foam::blobsSheetAtomization::blobsSheetAtomization
 (
     const dictionary& dict,
     spray& sm
@@ -65,13 +64,13 @@ blobsSheetAtomization::blobsSheetAtomization
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-blobsSheetAtomization::~blobsSheetAtomization()
+Foam::blobsSheetAtomization::~blobsSheetAtomization()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void blobsSheetAtomization::atomizeParcel
+void Foam::blobsSheetAtomization::atomizeParcel
 (
     parcel& p,
     const scalar deltaT,
@@ -139,9 +138,5 @@ void blobsSheetAtomization::atomizeParcel
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

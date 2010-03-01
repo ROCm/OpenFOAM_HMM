@@ -28,27 +28,24 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "unitConversion.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(blobsSwirlInjector, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(blobsSwirlInjector, 0);
-
-addToRunTimeSelectionTable
-(
-    injectorModel,
-    blobsSwirlInjector,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        injectorModel,
+        blobsSwirlInjector,
+        dictionary
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-blobsSwirlInjector::blobsSwirlInjector
+Foam::blobsSwirlInjector::blobsSwirlInjector
 (
     const dictionary& dict,
     spray& sm
@@ -94,13 +91,13 @@ blobsSwirlInjector::blobsSwirlInjector
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-blobsSwirlInjector::~blobsSwirlInjector()
+Foam::blobsSwirlInjector::~blobsSwirlInjector()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar blobsSwirlInjector::d0
+Foam::scalar Foam::blobsSwirlInjector::d0
 (
     const label n,
     const scalar t
@@ -132,7 +129,7 @@ scalar blobsSwirlInjector::d0
 }
 
 
-vector blobsSwirlInjector::direction
+Foam::vector Foam::blobsSwirlInjector::direction
 (
     const label n,
     const label hole,
@@ -182,7 +179,7 @@ vector blobsSwirlInjector::direction
 }
 
 
-scalar blobsSwirlInjector::velocity
+Foam::scalar Foam::blobsSwirlInjector::velocity
 (
     const label i,
     const scalar time
@@ -192,7 +189,7 @@ scalar blobsSwirlInjector::velocity
 }
 
 
-scalar blobsSwirlInjector::averageVelocity(const label i) const
+Foam::scalar Foam::blobsSwirlInjector::averageVelocity(const label i) const
 {
     const injectorType& it = sm_.injectors()[i].properties();
 
@@ -210,13 +207,13 @@ scalar blobsSwirlInjector::averageVelocity(const label i) const
 }
 
 
-scalar blobsSwirlInjector::kv(const label inj) const
+Foam::scalar Foam::blobsSwirlInjector::kv(const label inj) const
 {
     return cD_[inj]/cos(angle_) * sqrt((1.0 - x_)/(1.0 + x_));
 }
 
 
-void blobsSwirlInjector::calculateHX
+void Foam::blobsSwirlInjector::calculateHX
 (
     const label inj,
     const scalar massFlow,
@@ -277,7 +274,7 @@ void blobsSwirlInjector::calculateHX
 }
 
 
-scalar blobsSwirlInjector::deltaPressureInj
+Foam::scalar Foam::blobsSwirlInjector::deltaPressureInj
 (
     const scalar time,
     const label inj
@@ -289,7 +286,7 @@ scalar blobsSwirlInjector::deltaPressureInj
 }
 
 
-scalar blobsSwirlInjector::averagePressure(const label inj) const
+Foam::scalar Foam::blobsSwirlInjector::averagePressure(const label inj) const
 {
     const injectorType& it = sm_.injectors()[inj].properties();
 
@@ -297,9 +294,5 @@ scalar blobsSwirlInjector::averagePressure(const label inj) const
     return it.integrateTable(it.injectionPressureProfile())/dt;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

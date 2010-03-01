@@ -83,7 +83,7 @@ public:
         (
             const pointField& points,
             const label start, const label end,
-            const vector& pMid
+            const point& pMid
         );
 
         //- Construct from Istream setting pointsList

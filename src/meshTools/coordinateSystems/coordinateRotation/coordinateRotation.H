@@ -65,6 +65,7 @@ Deprecated
     Specifying the local vectors as an @c axis (corresponding to e3) and a
     @c direction (corresponding to e1), is allowed for backwards
     compatibility, but this terminology is generally a bit confusing.
+    (deprecated Apr 2008)
 
 \*---------------------------------------------------------------------------*/
 

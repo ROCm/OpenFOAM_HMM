@@ -189,12 +189,6 @@ public:
             }
 
 
-        //- Return the SGS turbulent kinetic energy.
-        virtual tmp<volScalarField> k() const = 0;
-
-        //- Return the SGS turbulent dissipation.
-        virtual tmp<volScalarField> epsilon() const = 0;
-
         //- Return the SGS turbulent viscosity
         virtual tmp<volScalarField> muSgs() const = 0;
 
@@ -210,8 +204,22 @@ public:
         //- Return the SGS turbulent thermal diffusivity
         virtual tmp<volScalarField> alphaSgs() const = 0;
 
-        //- Return the SGS thermal conductivity.
-        virtual tmp<volScalarField> alphaEff() const = 0;
+        //- Return the effective thermal diffusivity
+        virtual tmp<volScalarField> alphaEff() const
+        {
+            return tmp<volScalarField>
+            (
+                new volScalarField("alphaEff", alphaSgs() + alpha())
+            );
+        }
+
+        //- Return the effective turbulence thermal diffusivity for a patch
+        virtual tmp<scalarField> alphaEff(const label patchI) const
+        {
+            return
+                alphaSgs()().boundaryField()[patchI]
+              + alpha().boundaryField()[patchI];
+        }
 
         //- Return the sub-grid stress tensor.
         virtual tmp<volSymmTensorField> B() const = 0;
@@ -261,13 +269,13 @@ public:
         //- Correct Eddy-Viscosity and related properties.
         //  This calls correct(const tmp<volTensorField>& gradU) by supplying
         //  gradU calculated locally.
-        void correct();
+        virtual void correct();
 
         //- Correct Eddy-Viscosity and related properties
         virtual void correct(const tmp<volTensorField>& gradU);
 
         //- Read LESProperties dictionary
-        virtual bool read() = 0;
+        virtual bool read();
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,10 +58,10 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("PLOT3D geom file");
-    argList::validOptions.insert("scale", "scale factor");
-    argList::validOptions.insert("noBlank", "");
-    argList::validOptions.insert("singleBlock", "");
-    argList::validOptions.insert("2D", "thickness");
+    argList::addOption("scale", "scale factor");
+    argList::addBoolOption("noBlank");
+    argList::addBoolOption("singleBlock");
+    argList::addOption("2D", "thickness");
 
     argList args(argc, argv);
 
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 
 #   include "createTime.H"
 
-    IFstream plot3dFile(args.additionalArgs()[0]);
+    IFstream plot3dFile(args[1]);
 
     // Read the plot3d information using a fixed format reader.
     // Comments in the file are in C++ style, so the stream parser will remove
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     {
         label nx, ny, nz;
 
-        forAll (blocks, blockI)
+        forAll(blocks, blockI)
         {
             if (twoDThickness > 0)
             {
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
     label sumPoints(0);
     label nMeshCells(0);
 
-    forAll (blocks, blockI)
+    forAll(blocks, blockI)
     {
         Info<< "block " << blockI << ":" << nl;
         blocks[blockI].readPoints(readBlank, twoDThickness, plot3dFile);
@@ -144,11 +144,11 @@ int main(int argc, char *argv[])
     pointField points(sumPoints);
     labelList blockOffsets(blocks.size());
     sumPoints = 0;
-    forAll (blocks, blockI)
+    forAll(blocks, blockI)
     {
         const pointField& blockPoints = blocks[blockI].points();
         blockOffsets[blockI] = sumPoints;
-        forAll (blockPoints, i)
+        forAll(blockPoints, i)
         {
             points[sumPoints++] = blockPoints[i];
         }
@@ -186,15 +186,15 @@ int main(int argc, char *argv[])
 
     label nCreatedCells = 0;
 
-    forAll (blocks, blockI)
+    forAll(blocks, blockI)
     {
         labelListList curBlockCells = blocks[blockI].blockCells();
 
-        forAll (curBlockCells, blockCellI)
+        forAll(curBlockCells, blockCellI)
         {
             labelList cellPoints(curBlockCells[blockCellI].size());
 
-            forAll (cellPoints, pointI)
+            forAll(cellPoints, pointI)
             {
                 cellPoints[pointI] =
                     oldToNew

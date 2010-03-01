@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,12 +54,15 @@ int main(int argc, char *argv[])
     argList::validArgs.append("output file");
     argList args(argc, argv);
 
-    Info<< "Reading dictionary " << args.additionalArgs()[0] << " ..." << endl;
-    IFstream dictFile(args.additionalArgs()[0]);
+    Info<< "Reading dictionary " << args[1] << " ..." << endl;
+    IFstream dictFile(args[1]);
     dictionary meshSubsetDict(dictFile);
 
-    Info<< "Reading surface " << args.additionalArgs()[1] << " ..." << endl;
-    triSurface surf1(args.additionalArgs()[1]);
+    Info<< "Reading surface " << args[2] << " ..." << endl;
+    triSurface surf1(args[2]);
+
+    const fileName outFileName(args[3]);
+
 
     Info<< "Original:" << endl;
     surf1.writeStats(Info);
@@ -100,10 +103,8 @@ int main(int argc, char *argv[])
         meshSubsetDict.lookup("addFaceNeighbours")
     );
 
-    Switch invertSelection
-    (
-        meshSubsetDict.lookup("invertSelection")
-    );
+    const bool invertSelection =
+        meshSubsetDict.lookupOrDefault<bool>("invertSelection", false);
 
     // Mark the cells for the subset
 
@@ -121,7 +122,7 @@ int main(int argc, char *argv[])
 
         // pick up cells sharing the point
 
-        forAll (markedPoints, pointI)
+        forAll(markedPoints, pointI)
         {
             if
             (
@@ -140,7 +141,7 @@ int main(int argc, char *argv[])
             const labelList& curFaces =
                 surf1.pointFaces()[markedPoints[pointI]];
 
-            forAll (curFaces, i)
+            forAll(curFaces, i)
             {
                 facesToSubset[curFaces[i]] =  true;
             }
@@ -159,7 +160,7 @@ int main(int argc, char *argv[])
 
         // pick up cells sharing the edge
 
-        forAll (markedEdges, edgeI)
+        forAll(markedEdges, edgeI)
         {
             if
             (
@@ -177,7 +178,7 @@ int main(int argc, char *argv[])
 
             const labelList& curFaces = surf1.edgeFaces()[markedEdges[edgeI]];
 
-            forAll (curFaces, i)
+            forAll(curFaces, i)
             {
                 facesToSubset[curFaces[i]] =  true;
             }
@@ -246,7 +247,7 @@ int main(int argc, char *argv[])
         // bb of surface
         treeBoundBox bb(selectSurf.localPoints());
 
-        // Radnom number generator
+        // Random number generator
         Random rndGen(354543);
 
         // search engine
@@ -269,14 +270,11 @@ int main(int argc, char *argv[])
                 indexedOctree<treeDataTriSurface>::volumeType t =
                     selectTree.getVolumeType(fc);
 
-                if (t == indexedOctree<treeDataTriSurface>::INSIDE && !outside)
-                {
-                    facesToSubset[faceI] = true;
-                }
-                else if
+                if
                 (
-                    t == indexedOctree<treeDataTriSurface>::OUTSIDE
-                 && outside
+                    outside
+                  ? (t == indexedOctree<treeDataTriSurface>::OUTSIDE)
+                  : (t == indexedOctree<treeDataTriSurface>::INSIDE)
                 )
                 {
                     facesToSubset[faceI] = true;
@@ -298,7 +296,7 @@ int main(int argc, char *argv[])
         Info<< "Found " << markedFaces.size() << " marked face(s)." << endl;
 
         // Check and mark faces to pick up
-        forAll (markedFaces, faceI)
+        forAll(markedFaces, faceI)
         {
             if
             (
@@ -322,7 +320,7 @@ int main(int argc, char *argv[])
                 const labelList& curFaces =
                     surf1.faceFaces()[markedFaces[faceI]];
 
-                forAll (curFaces, i)
+                forAll(curFaces, i)
                 {
                     label faceI = curFaces[i];
 
@@ -346,20 +344,11 @@ int main(int argc, char *argv[])
     if (invertSelection)
     {
         Info<< "Inverting selection." << endl;
-        boolList newFacesToSubset(facesToSubset.size());
 
         forAll(facesToSubset, i)
         {
-            if (facesToSubset[i])
-            {
-                newFacesToSubset[i] = false;
-            }
-            else
-            {
-                newFacesToSubset[i] = true;
-            }
+            facesToSubset[i] = facesToSubset[i] ? false : true;
         }
-        facesToSubset.transfer(newFacesToSubset);
     }
 
 
@@ -374,8 +363,6 @@ int main(int argc, char *argv[])
     Info<< "Subset:" << endl;
     surf2.writeStats(Info);
     Info<< endl;
-
-    fileName outFileName(args.additionalArgs()[2]);
 
     Info<< "Writing surface to " << outFileName << endl;
 

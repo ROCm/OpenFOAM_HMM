@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anispulation  |
 -------------------------------------------------------------------------------
 License
@@ -125,7 +125,7 @@ labelList regionFaceOrder
 
     label prevRegion = -1;
 
-    forAll (cellOrder, newCellI)
+    forAll(cellOrder, newCellI)
     {
         label oldCellI = cellOrder[newCellI];
 
@@ -364,11 +364,11 @@ autoPtr<mapPolyMesh> reorderMesh
 
 int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("blockOrder", "");
-    argList::validOptions.insert("orderPoints", "");
-    argList::validOptions.insert("writeMaps", "");
-    argList::validOptions.insert("overwrite", "");
+    argList::addBoolOption("blockOrder");
+    argList::addBoolOption("orderPoints");
+    argList::addBoolOption("writeMaps");
 
+#   include "addOverwriteOption.H"
 #   include "addTimeOptions.H"
 
 #   include "setRootCase.H"
@@ -409,7 +409,7 @@ int main(int argc, char *argv[])
             << endl;
     }
 
-    bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.optionFound("overwrite");
 
     label band = getBand(mesh.faceOwner(), mesh.faceNeighbour());
 

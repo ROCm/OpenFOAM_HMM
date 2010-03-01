@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,11 +93,7 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    fileName neuFile(args.additionalArgs()[0]);
-
-
-    IFstream str(neuFile);
-
+    IFstream str(args[1]);
 
     //
     // Read nodes.
@@ -105,7 +101,6 @@ int main(int argc, char *argv[])
     label nNodes(readLabel(str));
 
     Info<< "nNodes:" << nNodes << endl;
-
 
     pointField points(nNodes);
 

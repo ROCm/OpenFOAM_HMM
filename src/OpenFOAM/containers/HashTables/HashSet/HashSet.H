@@ -136,6 +136,12 @@ public:
             return insert(lst);
         }
 
+        //- Unset the specified key - same as erase
+        bool unset(const Key& key)
+        {
+            return HashTable<nil, Key, Hash>::erase(key);
+        }
+
 
     // Member Operators
 

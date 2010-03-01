@@ -137,7 +137,7 @@ void Foam::errorDrivenRefinement::setRefinement(polyTopoChange& ref) const
     scalar max = Foam::max(magResError).value();
     scalar avg = Foam::average(magResError).value();
 
-    if (debug) 
+    if (debug)
     {
         Info<< "Writing magResError" << endl;
         magResError.write();
@@ -183,7 +183,7 @@ void Foam::errorDrivenRefinement::setRefinement(polyTopoChange& ref) const
             markedCell[mesh.faceNeighbour()[faceI]] = true;
         }
     }
-    
+
     // Repack list of cells to refine.
     List<refineCell> refCells = refPattern.refCells();
 

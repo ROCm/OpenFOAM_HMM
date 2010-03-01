@@ -34,8 +34,8 @@ Usage
     - decomposePar [OPTION]
 
     @param -cellDist \n
-    Write the cell distribution as a labelList for use with 'manual'
-    decomposition method and as a volScalarField for post-processing.
+    Write the cell distribution as a labelList, for use with 'manual'
+    decomposition method or as a volScalarField for post-processing.
 
     @param -region regionName \n
     Decompose named region. Does not check for existence of processor*.
@@ -45,9 +45,6 @@ Usage
 
     @param -fields \n
     Use existing geometry decomposition and convert fields only.
-
-    @param -filterPatches \n
-    Remove empty patches when decomposing the geometry.
 
     @param -force \n
     Remove any existing @a processor subdirectories before decomposing the
@@ -87,21 +84,45 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
 #   include "addRegionOption.H"
-    argList::validOptions.insert("cellDist", "");
-    argList::validOptions.insert("copyUniform", "");
-    argList::validOptions.insert("fields", "");
-    argList::validOptions.insert("filterPatches", "");
-    argList::validOptions.insert("force", "");
-    argList::validOptions.insert("ifRequired", "");
+    argList::addBoolOption
+    (
+        "cellDist",
+        "write cell distribution as a labelList - for use with 'manual' "
+        "decomposition method or as a volScalarField for post-processing."
+    );
+    argList::addBoolOption
+    (
+        "copyUniform",
+        "copy any uniform/ directories too"
+    );
+    argList::addBoolOption
+    (
+        "fields",
+        "use existing geometry decomposition and convert fields only"
+    );
+    argList::addBoolOption
+    (
+        "force",
+        "remove existing processor*/ subdirs before decomposing the geometry"
+    );
+    argList::addBoolOption
+    (
+        "ifRequired",
+        "only decompose geometry if the number of domains has changed"
+    );
+
+    argList::addNote
+    (
+        "decompose a mesh and fields of a case for parallel execution"
+    );
 
 #   include "setRootCase.H"
 
     word regionName = fvMesh::defaultRegion;
     word regionDir = word::null;
 
-    if (args.optionFound("region"))
+    if (args.optionReadIfPresent("region", regionName))
     {
-        regionName = args.option("region");
         regionDir = regionName;
         Info<< "Decomposing mesh " << regionName << nl << endl;
     }
@@ -109,7 +130,6 @@ int main(int argc, char *argv[])
     bool writeCellDist           = args.optionFound("cellDist");
     bool copyUniform             = args.optionFound("copyUniform");
     bool decomposeFieldsOnly     = args.optionFound("fields");
-    bool filterPatches           = args.optionFound("filterPatches");
     bool forceOverwrite          = args.optionFound("force");
     bool ifRequiredDecomposition = args.optionFound("ifRequired");
 
@@ -124,10 +144,10 @@ int main(int argc, char *argv[])
         isDir
         (
             runTime.path()
-           /(word("processor") + name(nProcs))
-           /runTime.constant()
-           /regionDir
-           /polyMesh::meshSubDir
+          / (word("processor") + name(nProcs))
+          / runTime.constant()
+          / regionDir
+          / polyMesh::meshSubDir
         )
     )
     {
@@ -230,7 +250,7 @@ int main(int argc, char *argv[])
     // Decompose the mesh
     if (!decomposeFieldsOnly)
     {
-        mesh.decomposeMesh(filterPatches);
+        mesh.decomposeMesh();
 
         mesh.writeDecomposition();
 
@@ -656,7 +676,7 @@ int main(int argc, char *argv[])
                 )
             );
 
-            pointMesh procPMesh(procMesh, true);
+            pointMesh procPMesh(procMesh);
 
             pointFieldDecomposer fieldDecomposer
             (

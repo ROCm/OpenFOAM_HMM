@@ -42,13 +42,31 @@ Description
 
 namespace Foam
 {
-    typedef ReactingMultiphaseCloud<BasicReactingParcel<constGasThermoPhysics> >
+    typedef ReactingMultiphaseCloud
+        <
+            BasicReactingMultiphaseParcel
+            <
+                constGasThermoPhysics
+            >
+        >
         constThermoReactingMultiphaseCloud;
 
-    typedef ReactingMultiphaseCloud<BasicReactingParcel<gasThermoPhysics> >
+    typedef ReactingMultiphaseCloud
+        <
+            BasicReactingMultiphaseParcel
+            <
+                gasThermoPhysics
+            >
+        >
         thermoReactingMultiphaseCloud;
 
-    typedef ReactingMultiphaseCloud<BasicReactingParcel<icoPoly8ThermoPhysics> >
+    typedef ReactingMultiphaseCloud
+        <
+            BasicReactingMultiphaseParcel
+            <
+                icoPoly8ThermoPhysics
+            >
+        >
         icoPoly8ThermoReactingMultiphaseCloud;
 }
 

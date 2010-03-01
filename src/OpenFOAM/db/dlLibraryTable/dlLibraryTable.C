@@ -68,7 +68,7 @@ bool Foam::dlLibraryTable::open(const fileName& functionLibName)
 {
     if (functionLibName.size())
     {
-        void* functionLibPtr = 
+        void* functionLibPtr =
             dlopen(functionLibName.c_str(), RTLD_LAZY|RTLD_GLOBAL);
 
         if (!functionLibPtr)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -95,31 +95,30 @@ void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
 
 int main(int argc, char *argv[])
 {
-    Foam::argList::noParallel();
+    argList::noParallel();
+#   include "addOverwriteOption.H"
+#   include "addRegionOption.H"
 
-    Foam::argList::validArgs.append("masterPatch");
-    Foam::argList::validArgs.append("slavePatch");
+    argList::validArgs.append("masterPatch");
+    argList::validArgs.append("slavePatch");
 
-    Foam::argList::validOptions.insert("partial", "");
-    Foam::argList::validOptions.insert("perfect", "");
+    argList::addBoolOption("partial");
+    argList::addBoolOption("perfect");
 
-    Foam::argList::validOptions.insert("overwrite", "");
-
-    Foam::argList::validOptions.insert("toleranceDict", "file with tolerances");
+    argList::addOption("toleranceDict", "file with tolerances");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
     runTime.functionObjects().off();
-#   include "createMesh.H"
+#   include "createNamedMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
+    const word masterPatchName = args[1];
+    const word slavePatchName  = args[2];
 
-    word masterPatchName(args.additionalArgs()[0]);
-    word slavePatchName(args.additionalArgs()[1]);
-
-    bool partialCover = args.optionFound("partial");
-    bool perfectCover = args.optionFound("perfect");
-    bool overwrite    = args.optionFound("overwrite");
+    const bool partialCover = args.optionFound("partial");
+    const bool perfectCover = args.optionFound("perfect");
+    const bool overwrite    = args.optionFound("overwrite");
 
     if (partialCover && perfectCover)
     {
@@ -174,8 +173,10 @@ int main(int argc, char *argv[])
     dictionary slidingTolerances;
     if (args.options().found("toleranceDict"))
     {
-        IOdictionary toleranceFile(
-            IOobject(
+        IOdictionary toleranceFile
+        (
+            IOobject
+            (
                 args.options()["toleranceDict"],
                 runTime.constant(),
                 mesh,
@@ -202,7 +203,7 @@ int main(int argc, char *argv[])
     // Make list of masterPatch faces
     labelList isf(masterPatch.size());
 
-    forAll (isf, i)
+    forAll(isf, i)
     {
         isf[i] = masterPatch.start() + i;
     }
@@ -283,7 +284,7 @@ int main(int argc, char *argv[])
 
         labelList osf(slavePatch.size());
 
-        forAll (osf, i)
+        forAll(osf, i)
         {
             osf[i] = slavePatch.start() + i;
         }

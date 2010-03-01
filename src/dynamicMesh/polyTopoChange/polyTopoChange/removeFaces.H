@@ -137,8 +137,7 @@ class removeFaces
             ) const;
 
             //- Return face with all pointsToRemove removed.
-            face filterFace(const labelHashSet& pointsToRemove, const label)
-             const;
+            face filterFace(const labelHashSet&, const label) const;
 
             //- Wrapper for meshMod.modifyFace. Reverses face if own>nei.
             void modFace

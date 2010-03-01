@@ -1,0 +1,31 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  Any                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      testDictCalc;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+flowRatePerHour 720;
+
+x       10;
+y       20;
+z       t s v;
+p       #calc{ 1 + 2 + 10 * 15 + $x - $y };
+
+// this calculation is in-place, but does not work inside a string:
+flowRate    "The flow rate " #calc{ $flowRatePerHour / 3600 } "kg/s";
+
+// this is also okay
+x   #calc{ $x * 1E-3 };
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

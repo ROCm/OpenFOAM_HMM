@@ -155,7 +155,7 @@ cellShape create3DCellShape
 
     bool found = false;
 
-    forAll (localFaces, meshFaceI)
+    forAll(localFaces, meshFaceI)
     {
         if (localFaces[meshFaceI].size() == firstModelFace.size())
         {
@@ -166,7 +166,7 @@ cellShape create3DCellShape
 
             meshFaceUsed[meshFaceI] = true;
 
-            forAll (curMeshFace, pointI)
+            forAll(curMeshFace, pointI)
             {
                 pointLabels[firstModelFace[pointI]] = curMeshFace[pointI];
             }
@@ -199,7 +199,7 @@ cellShape create3DCellShape
         found = false;
 
         // Loop through mesh faces until a match is found
-        forAll (localFaces, meshFaceI)
+        forAll(localFaces, meshFaceI)
         {
             if
             (
@@ -220,7 +220,7 @@ cellShape create3DCellShape
                     // try matching the face
                     label nMatchedLabels = 0;
 
-                    forAll (meshFaceLabels, pointI)
+                    forAll(meshFaceLabels, pointI)
                     {
                         if
                         (
@@ -241,7 +241,7 @@ cellShape create3DCellShape
                     if (found)
                     {
                         // match found. Insert mesh face
-                        forAll (meshFaceLabels, pointI)
+                        forAll(meshFaceLabels, pointI)
                         {
                             pointLabels[curModelFace[pointI]] =
                                 meshFaceLabels[pointI];

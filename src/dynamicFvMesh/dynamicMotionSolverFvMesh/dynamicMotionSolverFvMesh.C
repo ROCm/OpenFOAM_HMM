@@ -63,7 +63,7 @@ bool dynamicMotionSolverFvMesh::update()
 
     if (foundObject<volVectorField>("U"))
     {
-        volVectorField& U = 
+        volVectorField& U =
             const_cast<volVectorField&>(lookupObject<volVectorField>("U"));
         U.correctBoundaryConditions();
     }

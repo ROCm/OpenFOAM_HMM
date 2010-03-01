@@ -28,22 +28,18 @@ License
 
 #include "dispersionModel.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(dispersionModel, 0);
-
-defineRunTimeSelectionTable(dispersionModel, dictionary);
+    defineTypeNameAndDebug(dispersionModel, 0);
+    defineRunTimeSelectionTable(dispersionModel, dictionary);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-dispersionModel::dispersionModel
+Foam::dispersionModel::dispersionModel
 (
     const dictionary& dict,
     spray& sm
@@ -56,12 +52,8 @@ dispersionModel::dispersionModel
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-dispersionModel::~dispersionModel()
+Foam::dispersionModel::~dispersionModel()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

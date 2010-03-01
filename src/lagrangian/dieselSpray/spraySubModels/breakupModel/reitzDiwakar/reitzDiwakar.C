@@ -30,26 +30,23 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "basicMultiComponentMixture.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(reitzDiwakar, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(reitzDiwakar, 0);
-
-addToRunTimeSelectionTable
-(
-    breakupModel,
-    reitzDiwakar,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        breakupModel,
+        reitzDiwakar,
+        dictionary
+    );
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-reitzDiwakar::reitzDiwakar
+Foam::reitzDiwakar::reitzDiwakar
 (
     const dictionary& dict,
     spray& sm
@@ -66,13 +63,13 @@ reitzDiwakar::reitzDiwakar
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-reitzDiwakar::~reitzDiwakar()
+Foam::reitzDiwakar::~reitzDiwakar()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void reitzDiwakar::breakupParcel
+void Foam::reitzDiwakar::breakupParcel
 (
     parcel& p,
     const scalar deltaT,
@@ -146,9 +143,5 @@ void reitzDiwakar::breakupParcel
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

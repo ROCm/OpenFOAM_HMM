@@ -124,15 +124,37 @@ void Foam::timeSelector::addOptions
 {
     if (constant)
     {
-        argList::validOptions.insert("constant", "");
+        argList::addBoolOption
+        (
+            "constant",
+            "include the 'constant/' dir in the times list"
+        );
     }
     if (zeroTime)
     {
-        argList::validOptions.insert("zeroTime", "");
+        argList::addBoolOption
+        (
+            "zeroTime",
+            "include the '0/' dir in the times list"
+        );
     }
-    argList::validOptions.insert("noZero", "");
-    argList::validOptions.insert("time", "ranges");
-    argList::validOptions.insert("latestTime", "");
+    argList::addBoolOption
+    (
+        "noZero",
+        "exclude the '0/' dir from the times list, "
+        "has precedence over the -zeroTime option"
+    );
+    argList::addBoolOption
+    (
+        "latestTime",
+        "select the latest time"
+    );
+    argList::addOption
+    (
+        "time",
+        "ranges",
+        "comma-separated time ranges - eg, ':10,20,40-70,1000:'"
+    );
 }
 
 

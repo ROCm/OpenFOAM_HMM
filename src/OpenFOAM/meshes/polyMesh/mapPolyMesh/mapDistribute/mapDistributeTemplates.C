@@ -552,7 +552,6 @@ void Foam::mapDistribute::distribute
     {
         if (!contiguous<T>())
         {
-//XXXXXX
             PstreamBuffers pBuffs(Pstream::nonBlocking);
 
             // Stream data into buffer

@@ -40,7 +40,7 @@ Description
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
+void Foam::domainDecomposition::decomposeMesh()
 {
     // Decide which cell goes to which processor
     distributeCells();
@@ -65,7 +65,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
     {
         List<SLList<label> > procCellList(nProcs_);
 
-        forAll (cellToProc_, celli)
+        forAll(cellToProc_, celli)
         {
             if (cellToProc_[celli] >= nProcs_)
             {
@@ -81,7 +81,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
         }
 
         // Convert linked lists into normal lists
-        forAll (procCellList, procI)
+        forAll(procCellList, procI)
         {
             procCellAddressing_[procI] = procCellList[procI];
         }
@@ -98,7 +98,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
     {
         List<SLList<label> > procFaceList(nProcs_);
 
-        forAll (neighbour, facei)
+        forAll(neighbour, facei)
         {
             if (cellToProc_[owner[facei]] == cellToProc_[neighbour[facei]])
             {
@@ -117,7 +117,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
         List<SLList<label> > procPatchIndex(nProcs_);
 
-        forAll (neighbour, facei)
+        forAll(neighbour, facei)
         {
             if (cellToProc_[owner[facei]] != cellToProc_[neighbour[facei]])
             {
@@ -225,16 +225,16 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
         // for all processors, set the size of start index and patch size
         // lists to the number of patches in the mesh
-        forAll (procPatchSize_, procI)
+        forAll(procPatchSize_, procI)
         {
             procPatchSize_[procI].setSize(patches.size());
             procPatchStartIndex_[procI].setSize(patches.size());
         }
 
-        forAll (patches, patchi)
+        forAll(patches, patchi)
         {
             // Reset size and start index for all processors
-            forAll (procPatchSize_, procI)
+            forAll(procPatchSize_, procI)
             {
                 procPatchSize_[procI][patchi] = 0;
                 procPatchStartIndex_[procI][patchi] =
@@ -251,7 +251,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                 const unallocLabelList& patchFaceCells =
                     patches[patchi].faceCells();
 
-                forAll (patchFaceCells, facei)
+                forAll(patchFaceCells, facei)
                 {
                     const label curProc = cellToProc_[patchFaceCells[facei]];
 
@@ -284,7 +284,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                     cycOffset
                 );
 
-                forAll (firstFaceCells, facei)
+                forAll(firstFaceCells, facei)
                 {
                     if
                     (
@@ -439,7 +439,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                 // Ordering in cyclic boundaries is important.
                 // Add the other half of cyclic faces for cyclic boundaries
                 // that remain on the processor
-                forAll (secondFaceCells, facei)
+                forAll(secondFaceCells, facei)
                 {
                     if
                     (
@@ -463,7 +463,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
         // Convert linked lists into normal lists
         // Add inter-processor boundaries and remember start indices
-        forAll (procFaceList, procI)
+        forAll(procFaceList, procI)
         {
             // Get internal and regular boundary processor faces
             SLList<label>& curProcFaces = procFaceList[procI];
@@ -598,83 +598,25 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
         }
     }
 
-    Info<< "\nCalculating processor boundary addressing" << endl;
-    // For every patch of processor boundary, find the index of the original
-    // patch. Mis-alignment is caused by the fact that patches with zero size
-    // are omitted. For processor patches, set index to -1.
-    // At the same time, filter the procPatchSize_ and procPatchStartIndex_
-    // lists to exclude zero-size patches
-    forAll (procPatchSize_, procI)
-    {
-        // Make a local copy of old lists
-        const labelList oldPatchSizes = procPatchSize_[procI];
-
-        const labelList oldPatchStarts = procPatchStartIndex_[procI];
-
-        labelList& curPatchSizes = procPatchSize_[procI];
-
-        labelList& curPatchStarts = procPatchStartIndex_[procI];
-
-        const labelList& curProcessorPatchSizes =
-            procProcessorPatchSize_[procI];
-
-        labelList& curBoundaryAddressing = procBoundaryAddressing_[procI];
-
-        curBoundaryAddressing.setSize
-        (
-            oldPatchSizes.size()
-          + curProcessorPatchSizes.size()
-        );
-
-        label nPatches = 0;
-
-        forAll (oldPatchSizes, patchi)
-        {
-            if (!filterEmptyPatches || oldPatchSizes[patchi] > 0)
-            {
-                curBoundaryAddressing[nPatches] = patchi;
-
-                curPatchSizes[nPatches] = oldPatchSizes[patchi];
-
-                curPatchStarts[nPatches] = oldPatchStarts[patchi];
-
-                nPatches++;
-            }
-        }
-
-        // reset to the size of live patches
-        curPatchSizes.setSize(nPatches);
-        curPatchStarts.setSize(nPatches);
-
-        forAll (curProcessorPatchSizes, procPatchI)
-        {
-            curBoundaryAddressing[nPatches] = -1;
-
-            nPatches++;
-        }
-
-        curBoundaryAddressing.setSize(nPatches);
-    }
-
     Info<< "\nDistributing points to processors" << endl;
     // For every processor, loop through the list of faces for the processor.
     // For every face, loop through the list of points and mark the point as
     // used for the processor. Collect the list of used points for the
     // processor.
 
-    forAll (procPointAddressing_, procI)
+    forAll(procPointAddressing_, procI)
     {
         boolList pointLabels(nPoints(), false);
 
         // Get reference to list of used faces
         const labelList& procFaceLabels = procFaceAddressing_[procI];
 
-        forAll (procFaceLabels, facei)
+        forAll(procFaceLabels, facei)
         {
             // Because of the turning index, some labels may be negative
             const labelList& facePoints = fcs[mag(procFaceLabels[facei]) - 1];
 
-            forAll (facePoints, pointi)
+            forAll(facePoints, pointi)
             {
                 // Mark the point as used
                 pointLabels[facePoints[pointi]] = true;
@@ -688,7 +630,7 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
         label nUsedPoints = 0;
 
-        forAll (pointLabels, pointi)
+        forAll(pointLabels, pointi)
         {
             if (pointLabels[pointi])
             {
@@ -700,79 +642,6 @@ void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 
         // Reset the size of used points
         procPointLabels.setSize(nUsedPoints);
-    }
-
-    // Gather data about globally shared points
-
-    // Memory management
-    {
-        labelList pointsUsage(nPoints(), 0);
-
-        // Globally shared points are the ones used by more than 2 processors
-        // Size the list approximately and gather the points
-        labelHashSet gSharedPoints
-        (
-            min(100, nPoints()/1000)
-        );
-
-        // Loop through all the processors and mark up points used by
-        // processor boundaries.  When a point is used twice, it is a
-        // globally shared point
-
-        for (label procI = 0; procI < nProcs_; procI++)
-        {
-            // Get list of face labels
-            const labelList& curFaceLabels = procFaceAddressing_[procI];
-
-            // Get start of processor faces
-            const labelList& curProcessorPatchStarts =
-                procProcessorPatchStartIndex_[procI];
-
-            const labelList& curProcessorPatchSizes =
-                procProcessorPatchSize_[procI];
-
-            // Reset the lookup list
-            pointsUsage = 0;
-
-            forAll (curProcessorPatchStarts, patchi)
-            {
-                const label curStart = curProcessorPatchStarts[patchi];
-                const label curEnd = curStart + curProcessorPatchSizes[patchi];
-
-                for
-                (
-                    label facei = curStart;
-                    facei < curEnd;
-                    facei++
-                )
-                {
-                    // Mark the original face as used
-                    // Remember to decrement the index by one (turning index)
-                    //
-                    const label curF = mag(curFaceLabels[facei]) - 1;
-
-                    const face& f = fcs[curF];
-
-                    forAll (f, pointi)
-                    {
-                        if (pointsUsage[f[pointi]] == 0)
-                        {
-                            // Point not previously used
-                            pointsUsage[f[pointi]] = patchi + 1;
-                        }
-                        else if (pointsUsage[f[pointi]] != patchi + 1)
-                        {
-                            // Point used by some other patch = global point!
-                            gSharedPoints.insert(f[pointi]);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Grab the result from the hash list
-        globallySharedPoints_ = gSharedPoints.toc();
-        sort(globallySharedPoints_);
     }
 }
 

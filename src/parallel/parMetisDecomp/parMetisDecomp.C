@@ -26,6 +26,7 @@ License
 
 #include "parMetisDecomp.H"
 #include "metisDecomp.H"
+#include "scotchDecomp.H"
 #include "syncTools.H"
 #include "addToRunTimeSelectionTable.H"
 #include "floatScalar.H"
@@ -427,24 +428,35 @@ Foam::labelList Foam::parMetisDecomp::decompose
 
 
     // Check for externally provided cellweights and if so initialise weights
-    scalar maxWeights = gMax(cWeights);
+    scalar minWeights = gMin(cWeights);
     if (cWeights.size() > 0)
     {
+        if (minWeights <= 0)
+        {
+            WarningIn
+            (
+                "metisDecomp::decompose"
+                "(const pointField&, const scalarField&)"
+            )   << "Illegal minimum weight " << minWeights
+                << endl;
+        }
+
         if (cWeights.size() != mesh_.nCells())
         {
             FatalErrorIn
             (
-                "metisDecomp::decompose"
+                "parMetisDecomp::decompose"
                 "(const pointField&, const scalarField&)"
             )   << "Number of cell weights " << cWeights.size()
                 << " does not equal number of cells " << mesh_.nCells()
                 << exit(FatalError);
         }
+
         // Convert to integers.
         cellWeights.setSize(cWeights.size());
         forAll(cellWeights, i)
         {
-            cellWeights[i] = int(1000000*cWeights[i]/maxWeights);
+            cellWeights[i] = int(cWeights[i]/minWeights);
         }
     }
 
@@ -762,7 +774,7 @@ Foam::labelList Foam::parMetisDecomp::decompose
     Field<int> adjncy;
     // Offsets into adjncy
     Field<int> xadj;
-    metisDecomp::calcMetisCSR(globalCellCells, adjncy, xadj);
+    scotchDecomp::calcCSR(globalCellCells, adjncy, xadj);
 
     // decomposition options. 0 = use defaults
     List<int> options(3, 0);
@@ -778,9 +790,19 @@ Foam::labelList Foam::parMetisDecomp::decompose
 
 
     // Check for externally provided cellweights and if so initialise weights
-    scalar maxWeights = gMax(cWeights);
+    scalar minWeights = gMin(cWeights);
     if (cWeights.size() > 0)
     {
+        if (minWeights <= 0)
+        {
+            WarningIn
+            (
+                "parMetisDecomp::decompose(const labelListList&"
+                ", const pointField&, const scalarField&)"
+            )   << "Illegal minimum weight " << minWeights
+                << endl;
+        }
+
         if (cWeights.size() != globalCellCells.size())
         {
             FatalErrorIn
@@ -791,11 +813,12 @@ Foam::labelList Foam::parMetisDecomp::decompose
                 << " does not equal number of cells " << globalCellCells.size()
                 << exit(FatalError);
         }
+
         // Convert to integers.
         cellWeights.setSize(cWeights.size());
         forAll(cellWeights, i)
         {
-            cellWeights[i] = int(1000000*cWeights[i]/maxWeights);
+            cellWeights[i] = int(cWeights[i]/minWeights);
         }
     }
 

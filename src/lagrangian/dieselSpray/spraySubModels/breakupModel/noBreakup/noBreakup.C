@@ -31,24 +31,23 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(noBreakup, 0);
+namespace Foam
+{
+    defineTypeNameAndDebug(noBreakup, 0);
 
-addToRunTimeSelectionTable
-(
-    breakupModel,
-    noBreakup,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        breakupModel,
+        noBreakup,
+        dictionary
+    );
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-noBreakup::noBreakup
+Foam::noBreakup::noBreakup
 (
     const dictionary& dict,
     spray& sm
@@ -60,13 +59,13 @@ noBreakup::noBreakup
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-noBreakup::~noBreakup()
+Foam::noBreakup::~noBreakup()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void noBreakup::breakupParcel
+void Foam::noBreakup::breakupParcel
 (
     parcel&,
     const scalar,
@@ -77,8 +76,5 @@ void noBreakup::breakupParcel
     // Do nothing
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

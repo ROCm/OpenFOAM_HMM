@@ -46,12 +46,14 @@ SourceFiles
 #include "scalarField.H"
 #include "HashTable.H"
 #include "IOdictionary.H"
-#include "fvCFD.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward declaration of classes
+class fvMesh;
 
 /*---------------------------------------------------------------------------*\
                   Class interpolationLookUpTable Declaration
@@ -103,7 +105,7 @@ private:
     // Private Member Functions
 
         //- Read the table of data from file
-        void readTable(const word& instance, const fvMesh& mesh);
+        void readTable(const word& instance, const fvMesh&);
 
         //- Dimension table from dictionaries input and output
         void dimensionTable();
@@ -144,16 +146,16 @@ public:
         //- Construct given the name of the file containing the table of data
         interpolationLookUpTable
         (
-            const fileName& fn,
+            const fileName&,
             const word& instance,
-            const fvMesh& mesh
+            const fvMesh&
         );
 
          //- Construct from dictionary
-        interpolationLookUpTable(const dictionary& dict);
+        interpolationLookUpTable(const dictionary&);
 
         //- Construct copy
-        interpolationLookUpTable(const interpolationLookUpTable& interpTable);
+        interpolationLookUpTable(const interpolationLookUpTable&);
 
 
     // Member Functions
@@ -167,10 +169,10 @@ public:
         //- Write Look Up Table to filename.
         void write
         (
-            Ostream& os,
-            const fileName& fn,
+            Ostream&,
+            const fileName&,
             const word& instance,
-            const fvMesh& mesh
+            const fvMesh&
         ) const;
 
 
@@ -211,17 +213,13 @@ public:
 
 };
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "interpolationLookUpTableI.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "interpolationLookUpTableI.H"
 
 #ifdef NoRepository
 #   include "interpolationLookUpTable.C"

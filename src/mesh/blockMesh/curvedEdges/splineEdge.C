@@ -33,7 +33,13 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(splineEdge, 0);
-    addToRunTimeSelectionTable(curvedEdge, splineEdge, Istream);
+
+    addToRunTimeSelectionTable
+    (
+        curvedEdge,
+        splineEdge,
+        Istream
+    );
 }
 
 
@@ -44,11 +50,11 @@ Foam::splineEdge::splineEdge
     const pointField& points,
     const label start,
     const label end,
-    const pointField& otherknots
+    const pointField& internalPoints
 )
 :
     curvedEdge(points, start, end),
-    CatmullRomSpline(appendEndPoints(points, start, end, otherknots))
+    CatmullRomSpline(appendEndPoints(points, start, end, internalPoints))
 {}
 
 
@@ -60,13 +66,19 @@ Foam::splineEdge::splineEdge(const pointField& points, Istream& is)
     token t(is);
     is.putBack(t);
 
-    // might have start/end tangents that we currently ignore
+    // discard unused start/end tangents
     if (t == token::BEGIN_LIST)
     {
-        vector fstend(is);
-        vector sndend(is);
+        vector tangent0Ignored(is);
+        vector tangent1Ignored(is);
     }
 }
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::splineEdge::~splineEdge()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

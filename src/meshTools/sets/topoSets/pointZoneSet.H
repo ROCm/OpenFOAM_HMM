@@ -134,7 +134,7 @@ public:
         //- Sync pointZoneSet across coupled patches.
         virtual void sync(const polyMesh& mesh);
 
-        //- Write maxLen items with label and coordinates. 
+        //- Write maxLen items with label and coordinates.
         virtual void writeDebug
         (
             Ostream& os,

@@ -148,13 +148,13 @@ public:
         //- Return flux flip map
         virtual const labelHashSet& flipFaceFlux() const;
 
-	//- Return number of old internalFaces
+        //- Return number of old internalFaces
         virtual label nOldInternalFaces() const;
 
-	//- Return old patch starts
+        //- Return old patch starts
         virtual const labelList& oldPatchStarts() const;
 
-	//- Return old patch sizes
+        //- Return old patch sizes
         virtual const labelList& oldPatchSizes() const;
 
         //- Are there any inserted faces

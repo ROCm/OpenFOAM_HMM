@@ -192,7 +192,7 @@ SunOS)
     export WM_MPLIB=FJMPI
     ;;
 
-*)    	# an unsupported operating system
+*)    # an unsupported operating system
     cat <<USAGE
 
     Your "$WM_ARCH" operating system is not supported by this release

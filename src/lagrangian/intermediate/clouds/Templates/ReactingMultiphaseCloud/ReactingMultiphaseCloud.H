@@ -119,6 +119,9 @@ protected:
             //- Pre-evolve
             void preEvolve();
 
+            //- Evolve the cloud
+            void evolveCloud();
+
             //- Post-evolve
             void postEvolve();
 

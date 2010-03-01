@@ -26,7 +26,6 @@ License
 
 #include "basicThermoParcel.H"
 #include "ThermoCloud.H"
-#include "makeParcelIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,8 +46,6 @@ namespace Foam
     );
 
     defineParcelTypeNameAndDebug(ThermoCloud<basicThermoParcel>, 0);
-
-    makeParcelIOList(basicThermoParcel);
 };
 
 

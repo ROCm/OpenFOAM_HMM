@@ -252,14 +252,14 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
         pointIndices,
         UList<scalar>::less(rotatedPoints.component(vector::X))
     );
-    
+
     const scalar summedWeights = sum(weights);
     assignToProcessorGroup
     (
-        processorGroups, 
-        n_.x(), 
-        pointIndices, 
-        weights, 
+        processorGroups,
+        n_.x(),
+        pointIndices,
+        weights,
         summedWeights
     );
 
@@ -280,9 +280,9 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
     assignToProcessorGroup
     (
         processorGroups,
-        n_.y(), 
-        pointIndices, 
-        weights, 
+        n_.y(),
+        pointIndices,
+        weights,
         summedWeights
     );
 
@@ -302,10 +302,10 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
 
     assignToProcessorGroup
     (
-        processorGroups, 
-        n_.z(), 
-        pointIndices, 
-        weights, 
+        processorGroups,
+        n_.z(),
+        pointIndices,
+        weights,
         summedWeights
     );
 
@@ -315,5 +315,5 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
     }
 
     return finalDecomp;
-} 
+}
 // ************************************************************************* //

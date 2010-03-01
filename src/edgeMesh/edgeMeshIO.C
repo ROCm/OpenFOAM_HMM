@@ -25,42 +25,107 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "edgeMesh.H"
-#include "IFstream.H"
-
+#include "boundBox.H"
+#include "EMESHedgeFormat.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// construct from file
-Foam::edgeMesh::edgeMesh(const fileName& fname)
+Foam::edgeMesh::edgeMesh
+(
+    const fileName& name,
+    const word& ext
+)
 :
     points_(0),
     edges_(0),
     pointEdgesPtr_(NULL)
 {
-    IFstream is(fname);
+    read(name, ext);
+}
 
-    if (is.good())
+
+Foam::edgeMesh::edgeMesh(const fileName& name)
+:
+    points_(0),
+    edges_(0),
+    pointEdgesPtr_(NULL)
+{
+    read(name);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::edgeMesh::read(const fileName& name)
+{
+    word ext = name.ext();
+    if (ext == "gz")
     {
-        is >> points_ >> edges_;
+        fileName unzipName = name.lessExt();
+        return read(unzipName, unzipName.ext());
     }
     else
     {
-        FatalErrorIn("edgeMesh::edgeMesh(const fileName&)")
-            << "cannot open file " << fname
-            << abort(FatalError);
+        return read(name, ext);
     }
 }
 
 
-// construct from Istream
-Foam::edgeMesh::edgeMesh(Istream& is)
-:
-    points_(is),
-    edges_(is),
-    pointEdgesPtr_(NULL)
+// Read from file in given format
+bool Foam::edgeMesh::read
+(
+    const fileName& name,
+    const word& ext
+)
 {
-    // Check state of Istream
-    is.check("edgeMesh::edgeMesh(Istream&)");
+    // read via selector mechanism
+    transfer(New(name, ext)());
+    return true;
+}
+
+
+void Foam::edgeMesh::write
+(
+    const fileName& name,
+    const edgeMesh& mesh
+)
+{
+    if (debug)
+    {
+        Info<< "edgeMesh::write"
+            "(const fileName&, const edgeMesh&) : "
+            "writing to " << name
+            << endl;
+    }
+
+    const word ext = name.ext();
+
+    writefileExtensionMemberFunctionTable::iterator mfIter =
+        writefileExtensionMemberFunctionTablePtr_->find(ext);
+
+    if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "MeshedSurface::write"
+            "(const fileName&, const MeshedSurface&)"
+        )   << "Unknown file extension " << ext << nl << nl
+            << "Valid types are :" << endl
+            << writefileExtensionMemberFunctionTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+    else
+    {
+        mfIter()(name, mesh);
+    }
+}
+
+
+void Foam::edgeMesh::writeStats(Ostream& os) const
+{
+    os  << "points      : " << points().size() << nl;
+    os  << "edges       : " << edges().size() << nl;
+    os  << "boundingBox : " << boundBox(this->points()) << endl;
 }
 
 
@@ -68,7 +133,7 @@ Foam::edgeMesh::edgeMesh(Istream& is)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const edgeMesh& em)
 {
-    os  << em.points_ << nl << em.edges_ << endl;
+    fileFormats::EMESHedgeFormat::write(os, em.points_, em.edges_);
 
     // Check state of Ostream
     os.check("Ostream& operator<<(Ostream&, const edgeMesh&)");
@@ -79,7 +144,9 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const edgeMesh& em)
 
 Foam::Istream& Foam::operator>>(Istream& is, edgeMesh& em)
 {
-    is >> em.points_ >> em.edges_;
+    fileFormats::EMESHedgeFormat::read(is, em.points_, em.edges_);
+
+    em.pointEdgesPtr_.clear();
 
     // Check state of Istream
     is.check("Istream& operator>>(Istream&, edgeMesh&)");

@@ -26,7 +26,7 @@ Class
     Foam::syncTools
 
 Description
-    Various tools to aid synchronizing lists across coupled patches.
+    Various tools to aid synchronizing lists across coupled patches. WIP.
 
     Require
     - combineOperator (e.g. sumEqOp - not sumOp!) that is defined for the
@@ -34,8 +34,11 @@ Description
     - null value which gets overridden by any valid value.
     - transform function
 
-    Can apply coordinate rotation/separation on cyclics but only for faces
+    note:Can apply coordinate rotation/separation on cyclics but only for faces
     or if there is a single rotation/separation tensor.
+    note:syncPointList or syncEdgeList will visit shared points/edges
+    multiple times (once through patch exchange, once through shared
+    points reduce). Should be replaced by pointMesh functionality.
 
 SourceFiles
     syncTools.C

@@ -36,7 +36,7 @@ scalar acousticCoNum = 0.0;
 
 if (mesh.nInternalFaces())
 {
-    surfaceScalarField SfUfbyDelta = 
+    surfaceScalarField SfUfbyDelta =
         mesh.surfaceInterpolation::deltaCoeffs()*mag(phiv);
 
     CoNum = max(SfUfbyDelta/mesh.magSf())

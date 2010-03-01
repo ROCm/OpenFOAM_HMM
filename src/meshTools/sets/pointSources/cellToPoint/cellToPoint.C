@@ -126,7 +126,7 @@ Foam::cellToPoint::cellToPoint
 Foam::cellToPoint::cellToPoint
 (
     const polyMesh& mesh,
-    Istream& is        
+    Istream& is
 )
 :
     topoSetSource(mesh),

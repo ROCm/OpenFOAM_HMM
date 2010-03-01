@@ -21,7 +21,7 @@ surfaceFind
 - Finds nearest vertex and face to given point.
 
 surfaceMeshTriangulate
-- Triangulate external facses of mesh and write as surface.
+- Triangulate external faces of mesh and write as surface.
 
 surfacePointMerge
 - Explicit point merge of surface.

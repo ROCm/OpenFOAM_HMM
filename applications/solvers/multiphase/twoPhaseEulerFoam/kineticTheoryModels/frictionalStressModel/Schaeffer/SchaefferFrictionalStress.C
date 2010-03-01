@@ -125,7 +125,7 @@ Foam::tmp<Foam::volScalarField> Foam::SchaefferFrictionalStress::muf
 
     volScalarField& muff = tmuf();
 
-    forAll (D, celli)
+    forAll(D, celli)
     {
         if (alpha[celli] > alphaMax.value()-5e-2)
         {

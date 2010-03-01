@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -291,8 +291,8 @@ label twoDNess(const polyMesh& mesh)
 
 int main(int argc, char *argv[])
 {
-    Foam::argList::validOptions.insert("dict", "");
-    Foam::argList::validOptions.insert("overwrite", "");
+#   include "addOverwriteOption.H"
+    argList::addBoolOption("dict");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -307,8 +307,8 @@ int main(int argc, char *argv[])
     // Read/construct control dictionary
     //
 
-    bool readDict = args.optionFound("dict");
-    bool overwrite = args.optionFound("overwrite");
+    const bool readDict = args.optionFound("dict");
+    const bool overwrite = args.optionFound("overwrite");
 
     // List of cells to refine
     labelList refCells;
@@ -320,18 +320,17 @@ int main(int argc, char *argv[])
     {
         Info<< "Refining according to refineMeshDict" << nl << endl;
 
-        refineDict =
-            IOdictionary
+        refineDict = IOdictionary
+        (
+            IOobject
             (
-                IOobject
-                (
-                    "refineMeshDict",
-                    runTime.system(),
-                    mesh,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            );
+                "refineMeshDict",
+                runTime.system(),
+                mesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
 
         word setName(refineDict.lookup("set"));
 

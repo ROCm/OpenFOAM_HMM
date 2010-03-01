@@ -33,7 +33,7 @@ template<class Type, template<class> class PatchField, class GeoMesh>
 void Foam::rawTopoChangerFvMesh::setUnmappedValues
 (
     GeometricField<Type, PatchField, GeoMesh>& fld,
-    const PackedList<1>& mappedFace,
+    const PackedBoolList& mappedFace,
     const GeometricField<Type, PatchField, GeoMesh>& baseFld
 )
 {
@@ -65,7 +65,7 @@ void Foam::rawTopoChangerFvMesh::setUnmappedValues
 template<class Type, template<class> class PatchField, class GeoMesh>
 void Foam::rawTopoChangerFvMesh::zeroUnmappedValues
 (
-    const PackedList<1>& mappedFace
+    const PackedBoolList& mappedFace
 ) const
 {
     typedef GeometricField<Type, PatchField, GeoMesh> FieldType;

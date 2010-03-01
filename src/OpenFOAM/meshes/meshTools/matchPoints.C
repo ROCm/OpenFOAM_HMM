@@ -78,7 +78,7 @@ bool Foam::matchPoints
         // Go through range of equal mag and find nearest vector.
         scalar minDistSqr = VGREAT;
         label minFaceI = -1;
-    
+
         for
         (
             label j = startI;

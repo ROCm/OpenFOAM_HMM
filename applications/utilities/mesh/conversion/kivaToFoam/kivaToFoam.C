@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Application
     kivaToFoam
 
 Description
-    Converts a KIVA3v grid to FOAM format
+    Converts a KIVA3v grid to OpenFOAM format
 
 \*---------------------------------------------------------------------------*/
 
@@ -60,23 +60,20 @@ enum kivaVersions
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validOptions.insert("file", "fileName");
-    argList::validOptions.insert("version", "[kiva3|kiva3v]");
-    argList::validOptions.insert("zHeadMin", "scalar");
+    argList::addOption("file", "fileName");
+    argList::addOption("version", "[kiva3|kiva3v]");
+    argList::addOption("zHeadMin", "scalar");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 
     fileName kivaFileName("otape17");
-    if (args.optionFound("file"))
-    {
-        kivaFileName = args.option("file");
-    }
+    args.optionReadIfPresent("file", kivaFileName);
 
     kivaVersions kivaVersion = kiva3v;
     if (args.optionFound("version"))
     {
-        word kivaVersionName = args.option("version");
+        const word kivaVersionName = args["version"];
 
         if (kivaVersionName == "kiva3")
         {

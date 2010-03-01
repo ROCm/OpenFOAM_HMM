@@ -51,12 +51,11 @@ class cellSet
 :
     public topoSet
 {
-
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
         cellSet(const cellSet&);
+
 
 public:
 
@@ -65,7 +64,6 @@ public:
 
 
     // Constructors
-
 
         //- Construct from IOobject. No checking.
         cellSet(const IOobject& obj);
@@ -154,14 +152,13 @@ public:
         //- Update any stored data for new labels
         virtual void updateMesh(const mapPolyMesh& morphMap);
 
-        //- Write maxLen items with label and coordinates. 
+        //- Write maxLen items with label and coordinates.
         virtual void writeDebug
         (
             Ostream& os,
             const primitiveMesh&,
             const label maxLen
         ) const;
-
 };
 
 

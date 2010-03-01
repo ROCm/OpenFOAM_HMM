@@ -28,27 +28,24 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(definedHollowConeInjector, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(definedHollowConeInjector, 0);
-
-addToRunTimeSelectionTable
-(
-    injectorModel,
-    definedHollowConeInjector,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        injectorModel,
+        definedHollowConeInjector,
+        dictionary
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-definedHollowConeInjector::definedHollowConeInjector
+Foam::definedHollowConeInjector::definedHollowConeInjector
 (
     const dictionary& dict,
     spray& sm
@@ -128,13 +125,13 @@ definedHollowConeInjector::definedHollowConeInjector
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-definedHollowConeInjector::~definedHollowConeInjector()
+Foam::definedHollowConeInjector::~definedHollowConeInjector()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar definedHollowConeInjector::d0
+Foam::scalar Foam::definedHollowConeInjector::d0
 (
     const label n,
     const scalar t
@@ -146,7 +143,7 @@ scalar definedHollowConeInjector::d0
 }
 
 
-vector definedHollowConeInjector::direction
+Foam::vector Foam::definedHollowConeInjector::direction
 (
     const label n,
     const label hole,
@@ -204,7 +201,7 @@ vector definedHollowConeInjector::direction
 }
 
 
-scalar definedHollowConeInjector::velocity
+Foam::scalar Foam::definedHollowConeInjector::velocity
 (
     const label i,
     const scalar time
@@ -226,16 +223,13 @@ scalar definedHollowConeInjector::velocity
 }
 
 
-scalar definedHollowConeInjector::averageVelocity(const label i) const
+Foam::scalar
+Foam::definedHollowConeInjector::averageVelocity(const label i) const
 {
     const injectorType& it = sm_.injectors()[i].properties();
     scalar dt = it.teoi() - it.tsoi();
     return it.integrateTable(it.velocityProfile())/dt;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

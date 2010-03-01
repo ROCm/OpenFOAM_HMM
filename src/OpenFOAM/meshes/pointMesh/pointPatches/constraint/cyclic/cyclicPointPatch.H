@@ -57,6 +57,8 @@ class cyclicPointPatch
         //- Local reference cast into the cyclic patch
         const cyclicPolyPatch& cyclicPolyPatch_;
 
+        //- List of local points that are not collocated
+        mutable labelList separatedPoints_;
 
     // Private Member Functions
 
@@ -68,10 +70,6 @@ class cyclicPointPatch
 
 
     // Demand driven private data
-
-        //- The set of pairs of points that require transformation
-        //  and/or mapping
-        edgeList transformPairs_;
 
         //- Initialise the calculation of the patch geometry
         virtual void initGeometry(PstreamBuffers&);
@@ -147,6 +145,9 @@ public:
             //- Return the set of pairs of points that require transformation
             //  and/or mapping
             virtual const edgeList& transformPairs() const;
+
+            //- List of separated coupled points
+            virtual const labelList& separatedPoints() const;
 };
 
 

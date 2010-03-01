@@ -64,7 +64,7 @@ public:
     // Constructors
 
         //- Constructor from Istream
-        injector(const Time& t, Istream& is);
+        injector(const Time&, Istream&);
 
         //- Return clone
         inline autoPtr<injector> clone() const;

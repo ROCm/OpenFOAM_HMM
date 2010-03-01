@@ -28,11 +28,6 @@ Class
 Description
     Writes polyMesh in pro-STAR (v4) bnd/cel/vrt format
 
-    Alternatively, extracts the surface of the FOAM mesh into
-    pro-STAR (v4) .cel/.vrt/ format.
-    This can be useful, for example, for surface morphing in an external
-    package.
-
     The cellTableId and cellTable information are used (if available).
     Otherwise the cellZones are used (if available).
 
@@ -131,12 +126,6 @@ public:
                 const fileName& meshName = fileName::null
             ) const;
 
-            //- Write surface mesh with optional triangulation
-            virtual bool writeSurface
-            (
-                const fileName& meshName = fileName::null,
-                const bool triangulate = false
-            ) const;
 };
 
 

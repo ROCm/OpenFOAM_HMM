@@ -73,7 +73,7 @@ Foam::tmp<Foam::volScalarField> Foam::SyamlalOBrien::K
     volScalarField A = pow(beta, 4.14);
     volScalarField B = 0.8*pow(beta, 1.28);
 
-    forAll (beta, celli)
+    forAll(beta, celli)
     {
         if (beta[celli] > 0.85)
         {

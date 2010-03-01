@@ -26,7 +26,23 @@ Class
     Foam::compressible::RASModels::omegaWallFunctionFvPatchScalarField
 
 Description
-    Replaces functionality in wallFunctionsI.H
+    Provides a wall function boundary condition/constraint on omega
+
+    Computed value is:
+
+        omega = sqrt(omega_vis^2 + omega_log^2)
+
+    where
+        omega_vis = omega in viscous region
+        omega_log = omega in logarithmic region
+
+    Model described by Eq.(15) of:
+    @verbatim
+        Menter, F., Esch, T.
+        "Elements of Industrial Heat Transfer Prediction"
+        16th Brazilian Congress of Mechanical Engineering (COBEM),
+        Nov. 2001
+    @endverbatim
 
 SourceFiles
     omegaWallFunctionFvPatchScalarField.C
@@ -70,6 +86,9 @@ protected:
 
         //- E coefficient
         scalar E_;
+
+        //- beta1 coefficient
+        scalar beta1_;
 
         //- Y+ at the edge of the laminar sublayer
         scalar yPlusLam_;

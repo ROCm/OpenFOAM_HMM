@@ -126,15 +126,6 @@ public:
             return alphaSgs_;
         }
 
-        //- Return thermal diffusivity
-        virtual tmp<volScalarField> alphaEff() const
-        {
-            return tmp<volScalarField>
-            (
-                new volScalarField("alphaEff", alphaSgs_ + alpha())
-            );
-        }
-
         //- Return the sub-grid stress tensor.
         virtual tmp<volSymmTensorField> B() const;
 

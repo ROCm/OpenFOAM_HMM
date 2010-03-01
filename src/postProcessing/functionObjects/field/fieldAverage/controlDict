@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     oodles;
+application     XXX;
 
 startFrom       latestTime;
 
@@ -53,6 +53,12 @@ functions
 
         // Where to load it from (if not already in solver)
         functionObjectLibs ("libfieldAverage.so");
+
+        // Function object enabled flag
+        enabled         true;                             
+
+        // When to output the average fields
+        outputControl   outputTime;                       
 
         // Fields to be averaged - runTime modifiable
         fields

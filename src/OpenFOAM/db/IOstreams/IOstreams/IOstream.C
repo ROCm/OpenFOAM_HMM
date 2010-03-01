@@ -22,12 +22,11 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "IOstream.H"
 #include "error.H"
+#include "Switch.H"
 #include <sstream>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -62,7 +61,14 @@ Foam::IOstream::formatEnum(const word& format)
 Foam::IOstream::compressionType
 Foam::IOstream::compressionEnum(const word& compression)
 {
-    if (compression == "uncompressed")
+    // get Switch (bool) value, but allow it to fail
+    Switch::switchType sw = Switch::asEnum(compression, true);
+
+    if (sw != Switch::INVALID)
+    {
+        return sw ? IOstream::COMPRESSED : IOstream::UNCOMPRESSED;
+    }
+    else if (compression == "uncompressed")
     {
         return IOstream::UNCOMPRESSED;
     }
@@ -117,7 +123,7 @@ Foam::string Foam::IOstream::versionNumber::str() const
     std::ostringstream os;
     os.precision(1);
     os.setf(ios_base::fixed, ios_base::floatfield);
-    os << versionNumber_;
+    os  << versionNumber_;
     return os.str();
 }
 
@@ -204,11 +210,11 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const IOstream::streamFormat& sf)
 {
     if (sf == IOstream::ASCII)
     {
-        os << "ascii";
+        os  << "ascii";
     }
     else
     {
-        os << "binary";
+        os  << "binary";
     }
 
     return os;
@@ -217,7 +223,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const IOstream::streamFormat& sf)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const IOstream::versionNumber& vn)
 {
-    os << vn.str().c_str();
+    os  << vn.str().c_str();
     return os;
 }
 

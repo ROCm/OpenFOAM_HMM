@@ -96,7 +96,7 @@ void Foam::GAMGSolver::agglomerateMatrix(const label fineLevelIndex)
     {
         if (fineInterfaces.set(inti))
         {
-            const GAMGInterface& coarseInterface = 
+            const GAMGInterface& coarseInterface =
                 refCast<const GAMGInterface>
                 (
                     agglomeration_.interfaceLevel(fineLevelIndex + 1)[inti]
@@ -182,7 +182,7 @@ void Foam::GAMGSolver::agglomerateMatrix(const label fineLevelIndex)
             }
         }
     }
-    else // ... Otherwise it is symmetric so agglomerate just the upper 
+    else // ... Otherwise it is symmetric so agglomerate just the upper
     {
         // Get off-diagonal matrix coefficients
         const scalarField& fineUpper = fineMatrix.upper();

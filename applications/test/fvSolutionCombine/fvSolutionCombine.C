@@ -98,8 +98,9 @@ bool checkDictionaryContent(const dictionary& dict1, const dictionary& dict2)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validOptions.insert("rewrite", "");
-    argList::validOptions.insert("show", "");
+    argList::addBoolOption("rewrite");
+    argList::addBoolOption("show");
+
     argList args(argc, argv);
 
     Time runTime(args.rootPath(), args.caseName());

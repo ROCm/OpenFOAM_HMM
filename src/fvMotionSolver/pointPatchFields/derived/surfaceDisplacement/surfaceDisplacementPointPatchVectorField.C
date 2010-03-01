@@ -198,7 +198,7 @@ void surfaceDisplacementPointPatchVectorField::calcProjection
                 rightHit
             );
         }
-        
+
         List<pointIndexHit> leftHit;
         {
             labelList leftSurf;

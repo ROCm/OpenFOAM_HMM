@@ -60,7 +60,7 @@ word name(const Scalar val)
 Scalar readScalar(Istream& is)
 {
     Scalar rs;
-    is >> rs;
+    is  >> rs;
 
     return rs;
 }

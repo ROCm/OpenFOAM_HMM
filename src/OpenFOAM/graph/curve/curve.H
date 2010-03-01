@@ -77,7 +77,7 @@ public:
             SYMBOL_WITH_ERROR_BARS,
             SYMBOL_WITH_VARIABLE_SIZE
         };
-        
+
 
     private:
 

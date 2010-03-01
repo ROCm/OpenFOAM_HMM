@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,18 +75,18 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("inputFile");
-    argList::validOptions.insert("name",  "name");
-    argList::validOptions.insert("clean", "");
-    argList::validOptions.insert("scaleIn",  "scale");
-    argList::validOptions.insert("scaleOut", "scale");
-    argList::validOptions.insert("dict", "coordinateSystemsDict");
-    argList::validOptions.insert("from", "sourceCoordinateSystem");
-    argList::validOptions.insert("to",   "targetCoordinateSystem");
+
+    argList::addBoolOption("clean");
+
+    argList::addOption("name",  "name");
+    argList::addOption("scaleIn",  "scale");
+    argList::addOption("scaleOut", "scale");
+    argList::addOption("dict", "coordinateSystemsDict");
+    argList::addOption("from", "sourceCoordinateSystem");
+    argList::addOption("to",   "targetCoordinateSystem");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
-
-    const stringList& params = args.additionalArgs();
 
     // try for the latestTime, but create "constant" as needed
     instantList Times = runTime.times();
@@ -101,9 +101,8 @@ int main(int argc, char *argv[])
     }
 
 
-    fileName importName(params[0]);
-    word exportName("default");
-    args.optionReadIfPresent("name", exportName);
+    const fileName importName = args[1];
+    const word exportName = args.optionLookupOrDefault<word>("name", "default");
 
     // check that reading is supported
     if (!MeshedSurface<face>::canRead(importName, true))
@@ -122,7 +121,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("dict"))
         {
-            fileName dictPath(args.option("dict"));
+            const fileName dictPath = args["dict"];
 
             ioPtr.set
             (
@@ -169,7 +168,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("from"))
         {
-            const word csName(args.option("from"));
+            const word csName = args["from"];
 
             label csId = csLst.find(csName);
             if (csId < 0)
@@ -185,7 +184,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("to"))
         {
-            const word csName(args.option("to"));
+            const word csName = args["to"];
 
             label csId = csLst.find(csName);
             if (csId < 0)

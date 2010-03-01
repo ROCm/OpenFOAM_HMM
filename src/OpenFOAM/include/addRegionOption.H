@@ -2,4 +2,10 @@
 // addRegionOption.H
 // ~~~~~~~~~~~~~~~~~
 
-    Foam::argList::validOptions.insert("region", "name");
+    Foam::argList::addOption
+    (
+        "region",
+        "name",
+        "specify alternative mesh region"
+    );
+

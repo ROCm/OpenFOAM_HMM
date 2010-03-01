@@ -126,7 +126,11 @@ public:
             const scalar
         ) const;
 
-        inline label nEvapIter() const;
+        inline label nEvapIter() const
+        {
+            return nEvapIter_;
+        }
+
 };
 
 

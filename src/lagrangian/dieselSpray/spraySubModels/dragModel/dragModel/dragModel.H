@@ -34,7 +34,8 @@ Description
 #define dragModel_H
 
 #include "IOdictionary.H"
-#include "fvCFD.H"
+#include "volFields.H"
+#include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

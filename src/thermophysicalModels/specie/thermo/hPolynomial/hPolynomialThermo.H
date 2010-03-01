@@ -100,20 +100,22 @@ class hPolynomialThermo
 {
     // Private data
 
-        //- Heat of formation [J/kg]
+        //- Heat of formation
+        //  Note: input in [J/kg], but internally uses [J/kmol]
         scalar Hf_;
 
-        //- Standard entropy [J/(kg.K)]
+        //- Standard entropy
+        //  Note: input in [J/kg/K], but internally uses [J/kmol/K]
         scalar Sf_;
 
         //- Specific heat at constant pressure [J/(kg.K)]
         Polynomial<PolySize> cpPolynomial_;
 
         //- Enthalpy - derived from cp [J/kg] - relative to Tstd
-        typename Polynomial<PolySize>::intPolyType dhPolynomial_;
+        typename Polynomial<PolySize>::intPolyType hPolynomial_;
 
-        //- Entropy - derived from cp [J/(kg.K)]
-        Polynomial<PolySize> dsPolynomial_;
+        //- Entropy - derived from cp [J/(kg.K)] - relative to Tstd
+        Polynomial<PolySize> sPolynomial_;
 
 
     // Private member functions
@@ -125,8 +127,8 @@ class hPolynomialThermo
             const scalar Hf,
             const scalar Sf,
             const Polynomial<PolySize>& cpPoly,
-            const typename Polynomial<PolySize>::intPolyType& dhPoly,
-            const Polynomial<PolySize>& dsPoly
+            const typename Polynomial<PolySize>::intPolyType& hPoly,
+            const Polynomial<PolySize>& sPoly
         );
 
 
@@ -136,6 +138,9 @@ public:
 
         //- Construct from dictionary
         hPolynomialThermo(Istream& is);
+
+        //- Construct as copy
+        inline hPolynomialThermo(const hPolynomialThermo&);
 
         //- Construct as a named copy
         inline hPolynomialThermo(const word&, const hPolynomialThermo&);
@@ -161,8 +166,10 @@ public:
 
     // Member operators
 
+        inline hPolynomialThermo& operator=(const hPolynomialThermo&);
         inline void operator+=(const hPolynomialThermo&);
         inline void operator-=(const hPolynomialThermo&);
+        inline void operator*=(const scalar);
 
 
     // Friend operators

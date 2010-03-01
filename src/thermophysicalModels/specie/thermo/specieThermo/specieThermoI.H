@@ -282,6 +282,17 @@ inline Foam::scalar Foam::specieThermo<thermo>::TH
 
 
 template<class thermo>
+inline Foam::scalar Foam::specieThermo<thermo>::THs
+(
+    const scalar hs,
+    const scalar T0
+) const
+{
+    return T(hs, T0, &specieThermo<thermo>::Hs, &specieThermo<thermo>::Cp);
+}
+
+
+template<class thermo>
 inline Foam::scalar Foam::specieThermo<thermo>::TE
 (
     const scalar e,
@@ -303,6 +314,7 @@ inline void Foam::specieThermo<thermo>::operator+=
     thermo::operator+=(st);
 }
 
+
 template<class thermo>
 inline void Foam::specieThermo<thermo>::operator-=
 (
@@ -311,6 +323,7 @@ inline void Foam::specieThermo<thermo>::operator-=
 {
     thermo::operator-=(st);
 }
+
 
 template<class thermo>
 inline void Foam::specieThermo<thermo>::operator*=(const scalar s)

@@ -82,6 +82,8 @@ EqOp(orEq, x  = (x || y))
 
 EqOp(eqMinus, x = -y)
 
+EqOp(nopEq, (void)x)
+
 #undef EqOp
 
 

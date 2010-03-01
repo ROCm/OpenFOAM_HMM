@@ -66,8 +66,9 @@ void interpolateFields
 
 int main(int argc, char *argv[])
 {
-    Foam::argList::validOptions.insert("overwrite", "");
+#   include "addOverwriteOption.H"
 #   include "addTimeOptions.H"
+
 #   include "setRootCase.H"
 #   include "createTime.H"
     // Get times list
@@ -77,7 +78,7 @@ int main(int argc, char *argv[])
 #   include "createMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.optionFound("overwrite");
 
 
     // Read objects in time directory

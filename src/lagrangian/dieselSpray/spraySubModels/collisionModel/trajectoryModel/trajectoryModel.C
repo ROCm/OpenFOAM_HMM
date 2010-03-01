@@ -28,27 +28,24 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(trajectoryCollisionModel, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(trajectoryCollisionModel, 0);
-
-addToRunTimeSelectionTable
-(
-    collisionModel,
-    trajectoryCollisionModel,
-    dictionary
-);
+    addToRunTimeSelectionTable
+    (
+        collisionModel,
+        trajectoryCollisionModel,
+        dictionary
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-trajectoryCollisionModel::trajectoryCollisionModel
+Foam::trajectoryCollisionModel::trajectoryCollisionModel
 (
     const dictionary& dict,
     spray& sm,
@@ -66,13 +63,13 @@ trajectoryCollisionModel::trajectoryCollisionModel
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-trajectoryCollisionModel::~trajectoryCollisionModel()
+Foam::trajectoryCollisionModel::~trajectoryCollisionModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void trajectoryCollisionModel::collideParcels(const scalar dt) const
+void Foam::trajectoryCollisionModel::collideParcels(const scalar dt) const
 {
     if (spray_.size() < 2)
     {
@@ -120,9 +117,5 @@ void trajectoryCollisionModel::collideParcels(const scalar dt) const
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

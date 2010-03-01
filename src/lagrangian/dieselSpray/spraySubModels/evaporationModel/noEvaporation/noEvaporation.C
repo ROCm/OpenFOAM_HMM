@@ -29,26 +29,24 @@ License
 #include "noEvaporation.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(noEvaporation, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+    addToRunTimeSelectionTable
+    (
+        evaporationModel,
+        noEvaporation,
+        dictionary
+    );
+}
 
-defineTypeNameAndDebug(noEvaporation, 0);
-
-addToRunTimeSelectionTable
-(
-    evaporationModel,
-    noEvaporation,
-    dictionary
-);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from dictionary
-noEvaporation::noEvaporation( const dictionary& dict)
+Foam::noEvaporation::noEvaporation( const dictionary& dict)
 :
     evaporationModel(dict)
 {}
@@ -56,19 +54,19 @@ noEvaporation::noEvaporation( const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-noEvaporation::~noEvaporation()
+Foam::noEvaporation::~noEvaporation()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool noEvaporation::evaporation() const
+bool Foam::noEvaporation::evaporation() const
 {
     return false;
 }
 
 
-scalar noEvaporation::Sh
+Foam::scalar Foam::noEvaporation::Sh
 (
     const scalar,
     const scalar
@@ -78,7 +76,7 @@ scalar noEvaporation::Sh
 }
 
 
-scalar noEvaporation::relaxationTime
+Foam::scalar Foam::noEvaporation::relaxationTime
 (
     const scalar,
     const scalar,
@@ -97,7 +95,7 @@ scalar noEvaporation::relaxationTime
 }
 
 
-scalar noEvaporation::boilingTime
+Foam::scalar Foam::noEvaporation::boilingTime
 (
     const scalar,
     const scalar,
@@ -120,15 +118,5 @@ scalar noEvaporation::boilingTime
     return GREAT;
 }
 
-
-inline label noEvaporation::nEvapIter() const
-{
-    return 0;
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

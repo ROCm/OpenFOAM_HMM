@@ -598,6 +598,7 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::getDuplicateFaces
         }
         Pout<< "Writing duplicate faces (baffles) to faceSet "
             << duplicateFaceSet.name() << nl << endl;
+        duplicateFaceSet.instance() = mesh_.time().timeName();
         duplicateFaceSet.write();
     }
 
@@ -1559,6 +1560,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
                     problemTopo.insert(faceI);
                 }
             }
+            problemTopo.instance() = mesh_.time().timeName();
             Pout<< "Dumping " << problemTopo.size()
                 << " problem faces to " << problemTopo.objectPath() << endl;
             problemTopo.write();
@@ -2032,7 +2034,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::dupNonManifoldPoints()
 // Zoning
 Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 (
-    const point& keepPoint
+    const point& keepPoint,
+    const bool allowFreeStandingZoneFaces
 )
 {
     const wordList& cellZoneNames = surfaces_.cellZoneNames();
@@ -2344,9 +2347,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     }
 
 
-    //// Make sure namedSurfaceIndex is unset inbetween same cell cell zones.
-    //makeConsistentFaceIndex(cellToZone, namedSurfaceIndex);
-
+    // Make sure namedSurfaceIndex is unset inbetween same cell cell zones.
+    if (!allowFreeStandingZoneFaces)
+    {
+        makeConsistentFaceIndex(cellToZone, namedSurfaceIndex);
+    }
 
     // Topochange container
     polyTopoChange meshMod(mesh_);
@@ -2440,7 +2445,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                 }
                 else if (ownZone == neiZone)
                 {
-                    // Can only happen for coupled boundaries. Keep master
+                    // Free-standing zone face or coupled boundary. Keep master
                     // face unflipped.
                     flip = !isMasterFace[faceI];
                 }

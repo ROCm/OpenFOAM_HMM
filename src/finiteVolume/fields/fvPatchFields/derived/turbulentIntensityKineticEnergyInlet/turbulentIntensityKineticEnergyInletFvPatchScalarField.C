@@ -40,6 +40,7 @@ turbulentIntensityKineticEnergyInletFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF),
+    UName_("U"),
     intensity_(0.05)
 {}
 
@@ -53,6 +54,7 @@ turbulentIntensityKineticEnergyInletFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ptf, p, iF, mapper),
+    UName_(ptf.UName_),
     intensity_(ptf.intensity_)
 {}
 
@@ -65,6 +67,7 @@ turbulentIntensityKineticEnergyInletFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF, dict),
+    UName_(dict.lookupOrDefault<word>("U", "U")),
     intensity_(readScalar(dict.lookup("intensity")))
 {
     if (intensity_ < 0 || intensity_ > 1)
@@ -92,6 +95,7 @@ turbulentIntensityKineticEnergyInletFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ptf),
+    UName_(ptf.UName_),
     intensity_(ptf.intensity_)
 {}
 
@@ -104,6 +108,7 @@ turbulentIntensityKineticEnergyInletFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(ptf, iF),
+    UName_(ptf.UName_),
     intensity_(ptf.intensity_)
 {}
 
@@ -119,7 +124,7 @@ updateCoeffs()
     }
 
     const fvPatchField<vector>& Up =
-        patch().lookupPatchField<volVectorField, vector>("U");
+        patch().lookupPatchField<volVectorField, vector>(UName_);
 
     operator==(1.5*sqr(intensity_)*magSqr(Up));
 
@@ -133,6 +138,7 @@ void Foam::turbulentIntensityKineticEnergyInletFvPatchScalarField::write
 ) const
 {
     fvPatchField<scalar>::write(os);
+    writeEntryIfDifferent<word>(os, "U", "U", UName_);
     os.writeKeyword("intensity") << intensity_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }

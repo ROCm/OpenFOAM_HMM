@@ -99,6 +99,12 @@ class Cloud
         //- Initialise cloud on IO constructor
         void initCloud(const bool checkClass);
 
+        //- Read cloud properties dictionary
+        void readCloudUniformProperties();
+
+        //- Write cloud properties dictionary
+        void writeCloudUniformProperties() const;
+
 
 public:
 
@@ -116,7 +122,7 @@ public:
     TypeName("Cloud");
 
 
-    // Static data members
+    // Static data
 
         //- The smallest allowable trackFraction in trackToFace before
         //  an intervention is required
@@ -131,6 +137,9 @@ public:
 
         //- cosine of angle for faces to be planar.
         static const scalar planarCosAngle;
+
+        //- Name of cloud properties dictionary
+        static word cloudPropertiesName;
 
 
     // Constructors

@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     timeSelector::addOptions();  // -constant enabled
     argList::noBanner();
     argList::noParallel();
-    argList::validOptions.insert("processor", "");
+    argList::addBoolOption("processor");
 
 #   include "setRootCase.H"
 

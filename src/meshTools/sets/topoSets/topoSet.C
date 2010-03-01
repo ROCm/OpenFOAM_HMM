@@ -28,6 +28,7 @@ License
 #include "mapPolyMesh.H"
 #include "polyMesh.H"
 #include "boundBox.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -141,7 +142,7 @@ Foam::fileName topoSet::topoSet::localPath
     const word& name
 )
 {
-    return mesh.pointsInstance()/polyMesh::meshSubDir/"sets"/name;
+    return mesh.facesInstance()/polyMesh::meshSubDir/"sets"/name;
 }
 
 
@@ -236,7 +237,7 @@ void topoSet::writeDebug
     topoSet::const_iterator& iter,
     label& elemI
 ) const
-{    
+{
     label n = 0;
 
     for (; (iter != end()) && (n < maxElem); ++iter)
@@ -262,7 +263,7 @@ void topoSet::writeDebug
     topoSet::const_iterator& iter,
     label& elemI
 ) const
-{    
+{
     label n = 0;
 
     for (; (iter != end()) && (n < maxElem); ++iter)
@@ -329,7 +330,7 @@ topoSet::topoSet(const IOobject& obj, const word& wantedType)
 :
     regIOobject(obj)
 {
-    if 
+    if
     (
         readOpt() == IOobject::MUST_READ
      || (
@@ -362,7 +363,13 @@ topoSet::topoSet
         IOobject
         (
             name,
-            mesh.pointsInstance(),
+            mesh.time().findInstance
+            (
+                polyMesh::meshSubDir/"sets",
+                word::null,
+                IOobject::MUST_READ,
+                mesh.facesInstance()
+            ),
             polyMesh::meshSubDir/"sets",
             mesh,
             r,
@@ -370,7 +377,7 @@ topoSet::topoSet
         )
     )
 {
-    if 
+    if
     (
         readOpt() == IOobject::MUST_READ
      || (
@@ -402,10 +409,16 @@ topoSet::topoSet
         IOobject
         (
             name,
-            mesh.pointsInstance(),
+            mesh.time().findInstance
+            (
+                polyMesh::meshSubDir/"sets",
+                word::null,
+                IOobject::NO_READ,
+                mesh.facesInstance()
+            ),
             polyMesh::meshSubDir/"sets",
             mesh,
-            NO_READ,
+            IOobject::NO_READ,
             w
         )
     ),
@@ -426,10 +439,16 @@ topoSet::topoSet
         IOobject
         (
             name,
-            mesh.pointsInstance(),
+            mesh.time().findInstance
+            (
+                polyMesh::meshSubDir/"sets",
+                word::null,
+                IOobject::NO_READ,
+                mesh.facesInstance()
+            ),
             polyMesh::meshSubDir/"sets",
             mesh,
-            NO_READ,
+            IOobject::NO_READ,
             w
         )
     ),
@@ -475,7 +494,7 @@ void topoSet::invert(const label maxLen)
             insert(cellI);
         }
     }
-    
+
 }
 
 

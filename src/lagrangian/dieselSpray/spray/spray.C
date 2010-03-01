@@ -45,7 +45,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTemplateTypeNameAndDebug(IOPtrList<injector>, 0);
+namespace Foam
+{
+    defineTemplateTypeNameAndDebug(IOPtrList<injector>, 0);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

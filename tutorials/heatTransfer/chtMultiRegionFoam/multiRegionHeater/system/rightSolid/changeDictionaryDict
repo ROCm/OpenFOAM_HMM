@@ -18,26 +18,13 @@ dictionaryReplacement
 {
     boundary
     {
-        rightSolid_to_heater
+        minZ
         {
-            offset          ( 0 0 0 );
-            sampleMode      nearestPatchFace;
-            sampleRegion    heater;
-            samplePatch     heater_to_rightSolid;
+            type            patch;
         }
-        rightSolid_to_bottomAir
+        maxZ
         {
-            offset          ( 0 0 0 );
-            sampleMode      nearestPatchFace;
-            sampleRegion    bottomAir;
-            samplePatch     bottomAir_to_rightSolid;
-        }
-        rightSolid_to_topAir
-        {
-            offset          ( 0 0 0 );
-            sampleMode      nearestPatchFace;
-            sampleRegion    topAir;
-            samplePatch     topAir_to_rightSolid;
+            type            patch;
         }
     }
 
@@ -47,33 +34,12 @@ dictionaryReplacement
 
         boundaryField
         {
-            maxX
+            ".*"
             {
                 type            zeroGradient;
-            }
-            minZ
-            {
-                type            zeroGradient;
-            }
-            maxZ
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_heater
-            {
-                type            compressible::turbulentTemperatureCoupledBaffle;
-                neighbourFieldName T;
-                K               K;
                 value           uniform 300;
             }
-            rightSolid_to_bottomAir
-            {
-                type            compressible::turbulentTemperatureCoupledBaffle;
-                neighbourFieldName T;
-                K               K;
-                value           uniform 300;
-            }
-            rightSolid_to_topAir
+            "rightSolid_to_.*"
             {
                 type            compressible::turbulentTemperatureCoupledBaffle;
                 neighbourFieldName T;
@@ -89,29 +55,10 @@ dictionaryReplacement
 
         boundaryField
         {
-            maxX
+            ".*"
             {
-                type            zeroGradient;
-            }
-            minZ
-            {
-                type            zeroGradient;
-            }
-            maxZ
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_bottomAir
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_heater
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_topAir
-            {
-                type            zeroGradient;
+                type            calculated;
+                value           uniform 8000;
             }
         }
     }
@@ -122,29 +69,10 @@ dictionaryReplacement
 
         boundaryField
         {
-            maxX
+            ".*"
             {
                 type            zeroGradient;
-            }
-            minZ
-            {
-                type            zeroGradient;
-            }
-            maxZ
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_bottomAir
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_heater
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_topAir
-            {
-                type            zeroGradient;
+                value           uniform 80;
             }
         }
     }
@@ -155,29 +83,10 @@ dictionaryReplacement
 
         boundaryField
         {
-            maxX
+            ".*"
             {
                 type            zeroGradient;
-            }
-            minZ
-            {
-                type            zeroGradient;
-            }
-            maxZ
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_bottomAir
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_heater
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_topAir
-            {
-                type            zeroGradient;
+                value           uniform 450;
             }
         }
     }

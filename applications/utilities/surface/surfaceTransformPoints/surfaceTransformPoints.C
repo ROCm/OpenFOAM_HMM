@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,8 +23,8 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Transform (scale/rotate) a surface. Like transformPoints but then for
-    surfaces.
+    Transform (scale/rotate) a surface.
+    Like transformPoints but for surfaces.
 
     The rollPitchYaw option takes three angles (degrees):
     - roll (rotation about x) followed by
@@ -35,7 +35,6 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "triSurface.H"
 #include "argList.H"
 #include "OFstream.H"
 #include "IFstream.H"
@@ -44,6 +43,8 @@ Description
 #include "Pair.H"
 #include "quaternion.H"
 #include "mathematicalConstants.H"
+
+#include "MeshedSurfaces.H"
 
 using namespace Foam;
 using namespace Foam::constant::mathematical;
@@ -54,26 +55,54 @@ using namespace Foam::constant::mathematical;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transform (scale/rotate) a surface. "
+        "Like transformPoints but for surfaces."
+    );
     argList::noParallel();
     argList::validArgs.clear();
-
     argList::validArgs.append("surface file");
     argList::validArgs.append("output surface file");
-    argList::validOptions.insert("translate", "vector");
-    argList::validOptions.insert("rotate", "(vector vector)");
-    argList::validOptions.insert("scale", "vector");
-    argList::validOptions.insert("rollPitchYaw", "(roll pitch yaw)");
-    argList::validOptions.insert("yawPitchRoll", "(yaw pitch roll)");
+    argList::addOption
+    (
+        "translate",
+        "vector",
+        "translate by the specified <vector> - eg, '(1 0 0)'"
+    );
+    argList::addOption
+    (
+        "rotate",
+        "(vectorA vectorB)",
+        "transform in terms of a rotation between <vectorA> and <vectorB> "
+        "- eg, '( (1 0 0) (0 0 1) )'"
+    );
+    argList::addOption
+    (
+        "scale",
+        "vector",
+        "scale by the specified amount - eg, '(0.001 0.001 0.001)' for a "
+        "uniform [mm] to [m] scaling"
+    );
+    argList::addOption
+    (
+        "rollPitchYaw",
+        "vector",
+        "transform in terms of '( roll pitch yaw )' in degrees"
+    );
+    argList::addOption
+    (
+        "yawPitchRoll",
+        "vector",
+        "transform in terms of '( yaw pitch roll )' in degrees"
+    );
     argList args(argc, argv);
 
-    fileName surfFileName(args.additionalArgs()[0]);
+    const fileName surfFileName = args[1];
+    const fileName outFileName  = args[2];
 
-    Info<< "Reading surf from " << surfFileName << " ..." << endl;
-
-    fileName outFileName(args.additionalArgs()[1]);
-
-    Info<< "Writing surf to " << outFileName << " ..." << endl;
-
+    Info<< "Reading surf from " << surfFileName << " ..." << nl
+        << "Writing surf to " << outFileName << " ..." << endl;
 
     if (args.options().empty())
     {
@@ -83,22 +112,24 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    triSurface surf1(surfFileName);
+    meshedSurface surf1(surfFileName);
 
     pointField points(surf1.points());
 
-    if (args.optionFound("translate"))
+    vector v;
+    if (args.optionReadIfPresent("translate", v))
     {
-        vector transVector(args.optionLookup("translate")());
+        Info<< "Translating points by " << v << endl;
 
-        Info<< "Translating points by " << transVector << endl;
-
-        points += transVector;
+        points += v;
     }
 
     if (args.optionFound("rotate"))
     {
-        Pair<vector> n1n2(args.optionLookup("rotate")());
+        Pair<vector> n1n2
+        (
+            args.optionLookup("rotate")()
+        );
         n1n2[0] /= mag(n1n2[0]);
         n1n2[1] /= mag(n1n2[1]);
 
@@ -108,15 +139,12 @@ int main(int argc, char *argv[])
 
         points = transform(T, points);
     }
-    else if (args.optionFound("rollPitchYaw"))
+    else if (args.optionReadIfPresent("rollPitchYaw", v))
     {
-        vector v(args.optionLookup("rollPitchYaw")());
-
         Info<< "Rotating points by" << nl
             << "    roll  " << v.x() << nl
             << "    pitch " << v.y() << nl
-            << "    yaw   " << v.z() << endl;
-
+            << "    yaw   " << v.z() << nl;
 
         // Convert to radians
         v *= pi/180.0;
@@ -126,14 +154,12 @@ int main(int argc, char *argv[])
         Info<< "Rotating points by quaternion " << R << endl;
         points = transform(R, points);
     }
-    else if (args.optionFound("yawPitchRoll"))
+    else if (args.optionReadIfPresent("yawPitchRoll", v))
     {
-        vector v(args.optionLookup("yawPitchRoll")());
-
         Info<< "Rotating points by" << nl
             << "    yaw   " << v.x() << nl
             << "    pitch " << v.y() << nl
-            << "    roll  " << v.z() << endl;
+            << "    roll  " << v.z() << nl;
 
 
         // Convert to radians
@@ -151,20 +177,17 @@ int main(int argc, char *argv[])
         points = transform(R, points);
     }
 
-    if (args.optionFound("scale"))
+    if (args.optionReadIfPresent("scale", v))
     {
-        vector scaleVector(args.optionLookup("scale")());
+        Info<< "Scaling points by " << v << endl;
 
-        Info<< "Scaling points by " << scaleVector << endl;
-
-        points.replace(vector::X, scaleVector.x()*points.component(vector::X));
-        points.replace(vector::Y, scaleVector.y()*points.component(vector::Y));
-        points.replace(vector::Z, scaleVector.z()*points.component(vector::Z));
+        points.replace(vector::X, v.x()*points.component(vector::X));
+        points.replace(vector::Y, v.y()*points.component(vector::Y));
+        points.replace(vector::Z, v.z()*points.component(vector::Z));
     }
 
-    triSurface surf2(surf1, surf1.patches(), points);
-
-    surf2.write(outFileName);
+    surf1.movePoints(points);
+    surf1.write(outFileName);
 
     Info<< "End\n" << endl;
 

@@ -40,9 +40,11 @@ SourceFiles
 
 #include "spray.H"
 #include "IOdictionary.H"
-#include "fvCFD.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+
+#include "volFields.H"
+#include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -91,9 +93,9 @@ public:
         //- Construct from components
         wallModel
         (
-            const dictionary& dict,
+            const dictionary&,
             const volVectorField& U,
-            spray& sm
+            spray&
         );
 
 
@@ -105,7 +107,7 @@ public:
 
         static autoPtr<wallModel> New
         (
-            const dictionary& dict,
+            const dictionary&,
             const volVectorField& U,
             spray& sm
         );
@@ -116,7 +118,7 @@ public:
         //- Return true if parcel is to be kept, false if it is to be removed
         virtual bool wallTreatment
         (
-            parcel& parcel,
+            parcel&,
             const label facei
         ) const = 0;
 };

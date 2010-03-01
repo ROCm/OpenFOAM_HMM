@@ -450,8 +450,17 @@ bool Foam::interactionLists::testPointFaceDistance
     // if the algorithm hasn't returned anything by now then something has
     // gone wrong.
 
-    FatalErrorIn("interactionLists.C") << nl
-        << "point " << p << " to face " << faceToTest
+    FatalErrorIn
+    (
+        "interactionLists::testPointFaceDistance"
+        "("
+            "const vector&, "
+            "const labelList&, "
+            "const vectorList&, "
+            "const vector&, "
+            "const vector&"
+        ") const"
+    )   << "point " << p << " to face " << faceToTest
         << " comparison did not find a nearest point"
         << " to be inside or outside face."
         << abort(FatalError);

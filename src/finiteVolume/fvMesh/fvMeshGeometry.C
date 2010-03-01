@@ -94,7 +94,7 @@ void fvMesh::makeMagSf() const
 
     // Note: Added stabilisation for faces with exactly zero area.
     // These should be caught on mesh checking but at least this stops
-    // the code from producing Nans.  
+    // the code from producing Nans.
     magSfPtr_ = new surfaceScalarField
     (
         IOobject
@@ -338,7 +338,7 @@ const surfaceScalarField& fvMesh::phi() const
             << exit(FatalError);
     }
 
-    // Set zero current time 
+    // Set zero current time
     // mesh motion fluxes if the time has been incremented
     if (phiPtr_->timeIndex() != time().timeIndex())
     {

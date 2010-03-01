@@ -41,13 +41,13 @@ void sammMesh::createPolyCells()
 
     label maxFaces = 0;
 
-    forAll (cellPolys_, cellI)
+    forAll(cellPolys_, cellI)
     {
         cell& curCell = cellPolys_[cellI];
 
         curCell.setSize(cellFaces_[cellI].size());
 
-        forAll (curCell, fI)
+        forAll(curCell, fI)
         {
             curCell[fI] = -1;
         }
@@ -145,7 +145,7 @@ void sammMesh::createPolyCells()
             label nextNei = -1;
             label minNei = cellPolys_.size();
 
-            forAll (neiCells, ncI)
+            forAll(neiCells, ncI)
             {
                 if (neiCells[ncI] > -1 && neiCells[ncI] < minNei)
                 {

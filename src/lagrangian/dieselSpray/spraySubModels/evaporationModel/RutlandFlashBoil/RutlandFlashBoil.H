@@ -135,7 +135,11 @@ public:
             const scalar kLiquid
         ) const;
 
-        inline label nEvapIter() const;
+        inline label nEvapIter() const
+        {
+            return nEvapIter_;
+        }
+
 };
 
 

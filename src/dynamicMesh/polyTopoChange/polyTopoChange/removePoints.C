@@ -254,7 +254,7 @@ void Foam::removePoints::setRefinement
         savedPoints_.setSize(nDeleted);
         pointToSaved.resize(2*nDeleted);
     }
-    
+
 
     // Remove points
     // ~~~~~~~~~~~~~
@@ -687,7 +687,7 @@ void Foam::removePoints::getUnrefimentSet
     localPoints = localPointsSet.toc();
 
 
-    // Collect all saved faces using any localPointsSet 
+    // Collect all saved faces using any localPointsSet
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     labelHashSet localFacesSet(2*undoFaces.size());

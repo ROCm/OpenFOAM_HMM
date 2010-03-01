@@ -74,6 +74,17 @@ public:
 
         //- The various text representations for a switch value.
         //  These also correspond to the entries in names.
+#       undef FALSE
+#       undef TRUE
+#       undef OFF
+#       undef ON
+#       undef NO
+#       undef YES
+#       undef NO_1
+#       undef YES_1
+#       undef NONE
+#       undef PLACEHOLDER
+#       undef INVALID
         enum switchType
         {
             FALSE = 0,  TRUE  = 1,

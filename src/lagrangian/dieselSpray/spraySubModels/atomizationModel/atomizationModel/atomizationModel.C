@@ -27,21 +27,18 @@ License
 #include "error.H"
 #include "atomizationModel.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(atomizationModel, 0);
+    defineRunTimeSelectionTable(atomizationModel, dictionary);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(atomizationModel, 0);
-
-defineRunTimeSelectionTable(atomizationModel, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-atomizationModel::atomizationModel
+Foam::atomizationModel::atomizationModel
 (
     const dictionary& dict,
     spray& sm
@@ -55,11 +52,8 @@ atomizationModel::atomizationModel
 
 // * * * * * * * * * * * * * * * * Destructor    * * * * * * * * * * * * * * //
 
-atomizationModel::~atomizationModel()
+Foam::atomizationModel::~atomizationModel()
 {}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,10 +76,11 @@ public:
 
         enum
         {
-            dim = 3,         // Dimensionality of space
-            rank = 0,        // Rank of bool is 0
-            nComponents = 1  // Number of components in bool is 1
+            dim = 3,         //!< Dimensionality of space
+            rank = 0,        //!< Rank of bool is 0
+            nComponents = 1  //!< Number of components in bool is 1
         };
+
 
     // Static data members
 
@@ -88,14 +89,23 @@ public:
         static const bool zero;
         static const bool one;
 
+
     // Constructors
 
         //- Construct from Istream
         pTraits(Istream&);
 
+
     // Member Functions
 
+        //- Access to the bool value
         operator bool() const
+        {
+            return p_;
+        }
+
+        //- Access to the bool value
+        operator bool&()
         {
             return p_;
         }

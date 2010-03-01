@@ -53,7 +53,7 @@ void Foam::PointEdgeWave<Type>::offset(const label val, labelList& elems)
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Gets point-point correspondence. Is 
+// Gets point-point correspondence. Is
 // - list of halfA points (in cyclic patch points)
 // - list of halfB points (can overlap with A!)
 // - for every patchPoint its corresponding point
@@ -111,7 +111,7 @@ void Foam::PointEdgeWave<Type>::leaveDomain
 ) const
 {
     const labelList& meshPoints = patch.meshPoints();
-    
+
     forAll(patchPointLabels, i)
     {
         label patchPointI = patchPointLabels[i];
@@ -134,7 +134,7 @@ void Foam::PointEdgeWave<Type>::enterDomain
 ) const
 {
     const labelList& meshPoints = patch.meshPoints();
-    
+
     forAll(patchPointLabels, i)
     {
         label patchPointI = patchPointLabels[i];
@@ -169,7 +169,7 @@ void Foam::PointEdgeWave<Type>::transform
         (
             "PointEdgeWave<Type>::transform(const tensorField&, List<Type>&)"
         )   << "Parallel cyclics not supported" << abort(FatalError);
-    
+
         forAll(pointInfo, i)
         {
             pointInfo[i].transform(rotTensor[i]);
@@ -470,7 +470,7 @@ void Foam::PointEdgeWave<Type>::handleProcPatches()
 
             {
                 OPstream toNeighbour
-                (   
+                (
                     Pstream::blocking,
                     procPatch.neighbProcNo()
                 );
@@ -505,7 +505,7 @@ void Foam::PointEdgeWave<Type>::handleProcPatches()
                 );
 
                 fromNeighbour >> owner >> ownerIndex >> patchInfo;
-            }    
+            }
 
             if (debug)
             {
@@ -642,7 +642,7 @@ void Foam::PointEdgeWave<Type>::handleCyclicPatches()
 
             if (debug)
             {
-                Pout<< "Cyclic patch " << patchI << ' ' << patch.name() 
+                Pout<< "Cyclic patch " << patchI << ' ' << patch.name()
                     << "  Changed on first half : " << halfAInfo.size()
                     << "  Changed on second half : " << halfBInfo.size()
                     << endl;
@@ -679,7 +679,7 @@ void Foam::PointEdgeWave<Type>::handleCyclicPatches()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Iterate, propagating changedPointsInfo across mesh, until no change (or 
+// Iterate, propagating changedPointsInfo across mesh, until no change (or
 // maxIter reached). Initial point values specified.
 template <class Type>
 Foam::PointEdgeWave<Type>::PointEdgeWave

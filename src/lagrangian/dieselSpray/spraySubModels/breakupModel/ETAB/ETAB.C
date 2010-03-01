@@ -28,26 +28,25 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+    defineTypeNameAndDebug(ETAB, 0);
 
-defineTypeNameAndDebug(ETAB, 0);
+    addToRunTimeSelectionTable
+    (
+        breakupModel,
+        ETAB,
+        dictionary
+    );
+}
 
-addToRunTimeSelectionTable
-(
-    breakupModel,
-    ETAB,
-    dictionary
-);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-ETAB::ETAB
+Foam::ETAB::ETAB
 (
     const dictionary& dict,
     spray& sm
@@ -70,13 +69,13 @@ ETAB::ETAB
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-ETAB::~ETAB()
+Foam::ETAB::~ETAB()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void ETAB::breakupParcel
+void Foam::ETAB::breakupParcel
 (
     parcel& p,
     const scalar deltaT,
@@ -84,7 +83,6 @@ void ETAB::breakupParcel
     const liquidMixture& fuels
 ) const
 {
-
     scalar T = p.T();
     scalar pc = spray_.p()[p.cell()];
     scalar r = 0.5*p.d();
@@ -190,9 +188,5 @@ void ETAB::breakupParcel
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

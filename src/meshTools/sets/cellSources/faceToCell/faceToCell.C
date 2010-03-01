@@ -187,7 +187,7 @@ Foam::faceToCell::faceToCell
 Foam::faceToCell::faceToCell
 (
     const polyMesh& mesh,
-    const dictionary& dict          
+    const dictionary& dict
 )
 :
     topoSetSource(mesh),

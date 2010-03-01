@@ -111,7 +111,7 @@ Foam::evaluateError::evaluateError
     unsplitFaces_.setSize(unsplitFaceI);
 
     // Now we have:
-    // -unsplitFaces_: all the faces that will be removed 
+    // -unsplitFaces_: all the faces that will be removed
     // -markedFace   : all the faces affected by this removal.
     // From markedFace protect the cells using them.
 

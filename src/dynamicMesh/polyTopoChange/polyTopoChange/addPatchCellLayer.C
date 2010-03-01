@@ -1308,7 +1308,7 @@ void Foam::addPatchCellLayer::setRefinement
                         // faces with more layers.
                         if (addedPoints_[vEnd].size())
                         {
-                            newFp += 
+                            newFp +=
                                 addedPoints_[vEnd].size() - numEdgeSideFaces;
                         }
                         if (addedPoints_[vStart].size())

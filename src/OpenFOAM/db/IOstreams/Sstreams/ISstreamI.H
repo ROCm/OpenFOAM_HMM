@@ -69,6 +69,12 @@ inline Foam::ISstream& Foam::ISstream::get(char& c)
 }
 
 
+inline int Foam::ISstream::peek()
+{
+    return is_.peek();
+}
+
+
 inline Foam::ISstream& Foam::ISstream::getLine(string& s)
 {
     getline(is_, s);

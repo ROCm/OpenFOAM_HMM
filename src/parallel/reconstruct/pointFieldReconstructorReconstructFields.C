@@ -143,7 +143,8 @@ Foam::pointFieldReconstructor::reconstructField(const IOobject& fieldIoObject)
 template<class Type>
 void Foam::pointFieldReconstructor::reconstructFields
 (
-    const IOobjectList& objects
+    const IOobjectList& objects,
+    const HashSet<word>& selectedFields
 )
 {
     word fieldClassName
@@ -157,16 +158,18 @@ void Foam::pointFieldReconstructor::reconstructFields
     {
         Info<< "    Reconstructing " << fieldClassName << "s\n" << endl;
 
-        for
-        (
-            IOobjectList::iterator fieldIter = fields.begin();
-            fieldIter != fields.end();
-            ++fieldIter
-        )
+        forAllConstIter(IOobjectList, fields, fieldIter)
         {
-            Info<< "        " << fieldIter()->name() << endl;
+            if
+            (
+                !selectedFields.size()
+             || selectedFields.found(fieldIter()->name())
+            )
+            {
+                Info<< "        " << fieldIter()->name() << endl;
 
-            reconstructField<Type>(*fieldIter())().write();
+                reconstructField<Type>(*fieldIter())().write();
+            }
         }
 
         Info<< endl;

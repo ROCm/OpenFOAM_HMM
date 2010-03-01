@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -717,14 +717,13 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append(".msh file");
-    argList::validOptions.insert("keepOrientation", "");
+    argList::addBoolOption("keepOrientation");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    fileName mshName(args.additionalArgs()[0]);
-
-    bool keepOrientation = args.optionFound("keepOrientation");
+    const bool keepOrientation = args.optionFound("keepOrientation");
+    IFstream inFile(args[1]);
 
     // Storage for points
     pointField points;
@@ -748,9 +747,6 @@ int main(int argc, char *argv[])
 
     // Version 1 or 2 format
     bool version2Format = false;
-
-
-    IFstream inFile(mshName);
 
     while (inFile.good())
     {
