@@ -36,6 +36,8 @@ InClass
 #include "vtkMultiBlockDataSet.h"
 #include "vtkPolyData.h"
 
+#include "vtkOpenFOAMTupleRemap.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -80,7 +82,7 @@ void Foam::vtkPV3Foam::convertFaceField
         {
             Type t = 0.5*(tf[faceOwner[faceNo]] + tf[faceNeigh[faceNo]]);
 
-            for (direction d=0; d<nComp; d++)
+            for (direction d=0; d<nComp; ++d)
             {
                 vec[d] = component(t, d);
             }
@@ -88,11 +90,12 @@ void Foam::vtkPV3Foam::convertFaceField
         else
         {
             const Type& t = tf[faceOwner[faceNo]];
-            for (direction d=0; d<nComp; d++)
+            for (direction d=0; d<nComp; ++d)
             {
                 vec[d] = component(t, d);
             }
         }
+        vtkOpenFOAMTupleRemap<Type>(vec);
 
         cellData->InsertTuple(faceI, vec);
     }
@@ -152,7 +155,7 @@ void Foam::vtkPV3Foam::convertFaceField
         {
             Type t = 0.5*(tf[faceOwner[faceNo]] + tf[faceNeigh[faceNo]]);
 
-            for (direction d=0; d<nComp; d++)
+            for (direction d=0; d<nComp; ++d)
             {
                 vec[d] = component(t, d);
             }
@@ -160,11 +163,12 @@ void Foam::vtkPV3Foam::convertFaceField
         else
         {
             const Type& t = tf[faceOwner[faceNo]];
-            for (direction d=0; d<nComp; d++)
+            for (direction d=0; d<nComp; ++d)
             {
                 vec[d] = component(t, d);
             }
         }
+        vtkOpenFOAMTupleRemap<Type>(vec);
 
         cellData->InsertTuple(faceI, vec);
         ++faceI;

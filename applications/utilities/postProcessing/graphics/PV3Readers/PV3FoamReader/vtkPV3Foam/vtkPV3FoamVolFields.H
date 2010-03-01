@@ -39,6 +39,8 @@ InClass
 #include "vtkPV3FoamFaceField.H"
 #include "vtkPV3FoamPatchField.H"
 
+#include "vtkOpenFOAMTupleRemap.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -350,10 +352,12 @@ void Foam::vtkPV3Foam::convertVolField
     forAll(superCells, i)
     {
         const Type& t = tf[superCells[i]];
-        for (direction d=0; d<nComp; d++)
+        for (direction d=0; d<nComp; ++d)
         {
             vec[d] = component(t, d);
         }
+        vtkOpenFOAMTupleRemap<Type>(vec);
+
         celldata->InsertTuple(i, vec);
     }
 

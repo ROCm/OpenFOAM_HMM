@@ -37,6 +37,8 @@ InClass
 #include "vtkPointData.h"
 #include "vtkPolyData.h"
 
+#include "vtkOpenFOAMTupleRemap.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -61,10 +63,12 @@ void Foam::vtkPV3Foam::convertPatchField
     forAll(ptf, i)
     {
         const Type& t = ptf[i];
-        for (direction d=0; d<nComp; d++)
+        for (direction d=0; d<nComp; ++d)
         {
             vec[d] = component(t, d);
         }
+        vtkOpenFOAMTupleRemap<Type>(vec);
+
         cellData->InsertTuple(i, vec);
     }
 
@@ -101,10 +105,11 @@ void Foam::vtkPV3Foam::convertPatchPointField
     forAll(pptf, i)
     {
         const Type& t = pptf[i];
-        for (direction d=0; d<nComp; d++)
+        for (direction d=0; d<nComp; ++d)
         {
             vec[d] = component(t, d);
         }
+        vtkOpenFOAMTupleRemap<Type>(vec);
 
         pointData->InsertTuple(i, vec);
     }

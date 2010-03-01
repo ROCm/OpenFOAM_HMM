@@ -32,6 +32,8 @@ InClass
 
 #include "Cloud.H"
 
+#include "vtkOpenFOAMTupleRemap.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -86,10 +88,11 @@ void Foam::vtkPV3Foam::convertLagrangianField
     forAll(tf, i)
     {
         const Type& t = tf[i];
-        for (direction d=0; d<nComp; d++)
+        for (direction d=0; d<nComp; ++d)
         {
             vec[d] = component(t, d);
         }
+        vtkOpenFOAMTupleRemap<Type>(vec);
 
         pointData->InsertTuple(i, vec);
     }
