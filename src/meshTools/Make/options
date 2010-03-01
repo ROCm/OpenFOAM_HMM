@@ -6,5 +6,4 @@ EXE_INC = \
 LIB_LIBS = \
     -ltriSurface \
     -ldecompositionMethods \
-    -lmetisDecompositionMethod \
     -llagrangian
