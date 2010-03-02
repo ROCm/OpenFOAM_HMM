@@ -27,15 +27,17 @@ wmake libso edgeMesh
 wmake libso surfMesh
 wmake libso triSurface
 
-# Decomposition methods needed by meshTools
+# Decomposition methods needed by dummyThirdParty
 parallel/AllwmakeLnInclude
+# dummyThirdParty (dummy metisDecomp, scotchDecomp etc) needed by e.g. meshTools
 dummyThirdParty/Allwmake
-wmake libso parallel/decompositionMethods
-wmake libso parallel/metisDecomp
 
 wmake libso meshTools
 wmake libso finiteVolume
 wmake libso genericPatchFields
+
+# Build the proper scotchDecomp, metisDecomp etc.
+parallel/Allwmake
 
 wmake libso sampling
 
