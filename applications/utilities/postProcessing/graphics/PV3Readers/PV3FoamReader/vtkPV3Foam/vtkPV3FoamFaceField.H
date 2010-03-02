@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,6 +35,8 @@ InClass
 #include "vtkFloatArray.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkPolyData.h"
+
+#include "vtkOpenFOAMTupleRemap.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,7 +82,7 @@ void Foam::vtkPV3Foam::convertFaceField
         {
             Type t = 0.5*(tf[faceOwner[faceNo]] + tf[faceNeigh[faceNo]]);
 
-            for (direction d=0; d<nComp; d++)
+            for (direction d=0; d<nComp; ++d)
             {
                 vec[d] = component(t, d);
             }
@@ -88,11 +90,12 @@ void Foam::vtkPV3Foam::convertFaceField
         else
         {
             const Type& t = tf[faceOwner[faceNo]];
-            for (direction d=0; d<nComp; d++)
+            for (direction d=0; d<nComp; ++d)
             {
                 vec[d] = component(t, d);
             }
         }
+        vtkOpenFOAMTupleRemap<Type>(vec);
 
         cellData->InsertTuple(faceI, vec);
     }
@@ -152,7 +155,7 @@ void Foam::vtkPV3Foam::convertFaceField
         {
             Type t = 0.5*(tf[faceOwner[faceNo]] + tf[faceNeigh[faceNo]]);
 
-            for (direction d=0; d<nComp; d++)
+            for (direction d=0; d<nComp; ++d)
             {
                 vec[d] = component(t, d);
             }
@@ -160,11 +163,12 @@ void Foam::vtkPV3Foam::convertFaceField
         else
         {
             const Type& t = tf[faceOwner[faceNo]];
-            for (direction d=0; d<nComp; d++)
+            for (direction d=0; d<nComp; ++d)
             {
                 vec[d] = component(t, d);
             }
         }
+        vtkOpenFOAMTupleRemap<Type>(vec);
 
         cellData->InsertTuple(faceI, vec);
         ++faceI;

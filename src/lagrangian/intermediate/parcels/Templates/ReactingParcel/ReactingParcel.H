@@ -39,11 +39,6 @@ SourceFiles
 #ifndef ReactingParcel_H
 #define ReactingParcel_H
 
-#include "IOstream.H"
-#include "autoPtr.H"
-#include "interpolationCellPoint.H"
-#include "contiguous.H"
-
 #include "ThermoParcel.H"
 #include "ReactingCloud.H"
 #include "reactingParcel.H"

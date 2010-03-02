@@ -4,6 +4,4 @@ simpleGeomDecomp/simpleGeomDecomp.C
 hierarchGeomDecomp/hierarchGeomDecomp.C
 manualDecomp/manualDecomp.C
 
-scotchDecomp/scotchDecomp.C
-
 LIB = $(FOAM_LIBBIN)/libdecompositionMethods
