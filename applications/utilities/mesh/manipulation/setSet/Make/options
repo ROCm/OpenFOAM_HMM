@@ -1,5 +1,7 @@
+/* NB: trailing zero after define improves robustness */
+
 EXE_INC = \
-    -DREADLINE=$(READLINE) \
+    -DREADLINE=$(READLINE)0 \
     -I$(LIB_SRC)/meshTools/lnInclude
 
 EXE_LIBS = \

@@ -28,6 +28,8 @@ wmake libso surfMesh
 wmake libso triSurface
 
 # Decomposition methods needed by meshTools
+parallel/AllwmakeLnInclude
+dummyThirdParty/Allwmake
 wmake libso parallel/decompositionMethods
 wmake libso parallel/metisDecomp
 
