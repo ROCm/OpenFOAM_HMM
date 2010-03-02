@@ -12,12 +12,12 @@
         )
     );
 
-    dimensionedScalar rhoValue
+    dimensionedScalar rhoInfValue
     (
-        transportProperties.lookup("rho")
+        transportProperties.lookup("rhoInf")
     );
 
-    volScalarField rho
+    volScalarField rhoInf
     (
         IOobject
         (
@@ -28,7 +28,7 @@
             IOobject::AUTO_WRITE
         ),
         mesh,
-        rhoValue
+        rhoInfValue
     );
 
     Info<< "\nReading field U\n" << endl;
@@ -51,6 +51,8 @@
 
     singlePhaseTransportModel laminarTransport(U, phi);
 
+    const volScalarField nu = laminarTransport.nu();
+
     autoPtr<incompressible::turbulenceModel> turbulence
     (
         incompressible::turbulenceModel::New(U, phi, laminarTransport)
@@ -66,7 +68,7 @@
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        laminarTransport.nu()*rhoValue
+        nu*rhoInfValue
     );
 
     word kinematicCloudName("kinematicCloud");
@@ -76,7 +78,7 @@
     basicKinematicCloud kinematicCloud
     (
         kinematicCloudName,
-        rho,
+        rhoInf,
         U,
         mu,
         g

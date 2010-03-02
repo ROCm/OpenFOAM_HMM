@@ -29,7 +29,7 @@ Description
     Transient solver for the passive transport of a single kinematic
     particle could.
 
-    Uses a pre- calculated velocity field to evolve the cloud.
+    Uses a pre-calculated velocity field to evolve the cloud.
 
 \*---------------------------------------------------------------------------*/
 
@@ -42,14 +42,13 @@ Description
 
 int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("cloudName", "cloud name");
+    argList::addOption("cloudName", "cloud name");
 
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
-    #include "compressibleCourantNo.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,8 +59,12 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
         Info<< "Evolving " << kinematicCloud.name() << endl;
+
+        laminarTransport.correct();
+
+        mu = nu*rhoInfValue;
+
         kinematicCloud.evolve();
-        kinematicCloud.info();
 
         runTime.write();
 
