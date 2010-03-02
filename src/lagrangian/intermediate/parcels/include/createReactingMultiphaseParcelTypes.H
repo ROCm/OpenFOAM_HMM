@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,14 +58,10 @@ License
     defineTemplateTypeNameAndDebug(Particle<ParcelType##ThermoType>, 0);      \
     defineTemplateTypeNameAndDebug(Cloud<ParcelType##ThermoType>, 0);         \
                                                                               \
-    defineParcelTypeNameAndDebug                                              \
-    (                                                                         \
-        InteractingKinematicParcel<ParcelType##ThermoType>,                   \
-        0                                                                     \
-    );                                                                        \
+    defineParcelTypeNameAndDebug(KinematicParcel<ParcelType##ThermoType>, 0); \
     defineTemplateTypeNameAndDebug                                            \
     (                                                                         \
-        InteractingKinematicParcel<ParcelType##ThermoType>,                   \
+        KinematicParcel<ParcelType##ThermoType>,                              \
         0                                                                     \
     );                                                                        \
     defineParcelTypeNameAndDebug(ThermoParcel<ParcelType##ThermoType>, 0);    \
@@ -83,11 +79,7 @@ License
         0                                                                     \
     );                                                                        \
                                                                               \
-    defineParcelTypeNameAndDebug                                              \
-    (                                                                         \
-        InteractingKinematicCloud<ParcelType##ThermoType>,                    \
-        0                                                                     \
-    );                                                                        \
+    defineParcelTypeNameAndDebug(KinematicCloud<ParcelType##ThermoType>, 0);  \
     defineParcelTypeNameAndDebug(ThermoCloud<ParcelType##ThermoType>, 0);     \
     defineParcelTypeNameAndDebug(ReactingCloud<ParcelType##ThermoType>, 0);   \
     defineParcelTypeNameAndDebug                                              \

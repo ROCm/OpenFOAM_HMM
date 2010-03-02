@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "InteractingKinematicCloud.H"
+#include "KinematicCloud.H"
 
 #include "NoPostProcessing.H"
 #include "PatchPostProcessing.H"
@@ -38,18 +38,18 @@ License
 
 #define makeParcelPostProcessingModels(ParcelType)                            \
                                                                               \
-    makePostProcessingModel(InteractingKinematicCloud<ParcelType>);           \
+    makePostProcessingModel(KinematicCloud<ParcelType>);                      \
                                                                               \
     makePostProcessingModelType                                               \
     (                                                                         \
         NoPostProcessing,                                                     \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType                                                            \
     );                                                                        \
     makePostProcessingModelType                                               \
     (                                                                         \
         PatchPostProcessing,                                                  \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType                                                            \
     );
 

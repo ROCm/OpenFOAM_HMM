@@ -36,7 +36,7 @@ Description
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
 #include "turbulenceModel.H"
-#include "basicInteractingKinematicCloud.H"
+#include "basicKinematicCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,9 +58,9 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        Info<< "Evolving " << interactingKinematicCloud.name() << endl;
-        interactingKinematicCloud.evolve();
-        interactingKinematicCloud.info();
+        Info<< "Evolving " << kinematicCloud.name() << endl;
+        kinematicCloud.evolve();
+        kinematicCloud.info();
 
         runTime.write();
 

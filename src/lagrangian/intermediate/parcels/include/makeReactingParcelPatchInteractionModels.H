@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "thermoPhysicsTypes.H"
-#include "InteractingKinematicCloud.H"
+#include "KinematicCloud.H"
 
 #include "LocalInteraction.H"
 #include "Rebound.H"
@@ -61,29 +61,26 @@ License
 
 #define makeReactingPatchInteractionModelThermoType(ParcelType, ThermoType)   \
                                                                               \
-    makePatchInteractionModel                                                 \
-    (                                                                         \
-        InteractingKinematicCloud<ParcelType<ThermoType> >                    \
-    );                                                                        \
+    makePatchInteractionModel(KinematicCloud<ParcelType<ThermoType> >);       \
                                                                               \
     makePatchInteractionModelThermoType                                       \
     (                                                                         \
         LocalInteraction,                                                     \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makePatchInteractionModelThermoType                                       \
     (                                                                         \
-        Rebound,                                                              \
-        InteractingKinematicCloud,                                            \
+        Rebound,                                                     \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makePatchInteractionModelThermoType                                       \
     (                                                                         \
         StandardWallInteraction,                                              \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );

@@ -96,6 +96,9 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
     const scalar nParticle0,
     const scalar d0,
     const vector& U0,
+    const vector& f0,
+    const vector& pi0,
+    const vector& tau0,
     const scalarField& Y0,
     const constantProperties& constProps
 )
@@ -109,6 +112,9 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
         nParticle0,
         d0,
         U0,
+        f0,
+        pi0,
+        tau0,
         constProps
     ),
     mass0_(0.0),

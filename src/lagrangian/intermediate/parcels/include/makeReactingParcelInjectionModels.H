@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "thermoPhysicsTypes.H"
-#include "InteractingKinematicCloud.H"
+#include "KinematicCloud.H"
 
 #include "ConeInjection.H"
 #include "ConeInjectionMP.H"
@@ -65,54 +65,54 @@ License
 
 #define makeReactingInjectionModelThermoType(ParcelType, ThermoType)          \
                                                                               \
-    makeInjectionModel(InteractingKinematicCloud<ParcelType<ThermoType> >);   \
+    makeInjectionModel(KinematicCloud<ParcelType<ThermoType> >);              \
                                                                               \
     makeInjectionModelThermoType                                              \
     (                                                                         \
         ConeInjection,                                                        \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makeInjectionModelThermoType                                              \
     (                                                                         \
         ConeInjectionMP,                                                      \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makeInjectionModelThermoType                                              \
     (                                                                         \
         FieldActivatedInjection,                                              \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makeInjectionModelThermoType                                              \
     (                                                                         \
         ManualInjection,                                                      \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makeInjectionModelThermoType                                              \
     (                                                                         \
         NoInjection,                                                          \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makeInjectionModelThermoType                                              \
     (                                                                         \
         PatchInjection,                                                       \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makeInjectionModelThermoType                                              \
     (                                                                         \
         ReactingLookupTableInjection,                                         \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );

@@ -26,13 +26,15 @@ Class
     Foam::KinematicParcel
 
 Description
-    Kinematic parcel class with one/two-way coupling with the continuous
+    Kinematic parcel class with rotational motion (as spherical
+    particles only) and one/two-way coupling with the continuous
     phase.
 
     Sub-models include:
     - drag
     - turbulent dispersion
     - wall interactions
+    - many-body collisions
 
 SourceFiles
     KinematicParcelI.H
@@ -51,6 +53,7 @@ SourceFiles
 #include "contiguous.H"
 
 #include "KinematicCloud.H"
+#include "CollisionRecordList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -97,6 +100,12 @@ public:
             //- Minimum particle mass [kg]
             const scalar minParticleMass_;
 
+            //- Young's modulus [N/m2]
+            const scalar youngsModulus_;
+
+            //- Poisson's ratio
+            const scalar poissonsRatio_;
+
 
     public:
 
@@ -116,6 +125,12 @@ public:
 
             //- Return const access to the minimum particle mass
             inline scalar minParticleMass() const;
+
+            //- Return const access to Young's Modulus
+            inline scalar youngsModulus() const;
+
+            //- Return const access to Poisson's ratio
+            inline scalar poissonsRatio() const;
     };
 
 
@@ -124,6 +139,18 @@ public:
     :
         public Particle<ParcelType>::trackData
     {
+    public:
+
+        enum trackPart
+        {
+            tpVelocityHalfStep,
+            tpLinearTrack,
+            tpRotationalTrack
+        };
+
+
+    private:
+
         // Private data
 
             //- Reference to the cloud containing this particle
@@ -147,6 +174,10 @@ public:
             //- Local gravitational or other body-force acceleration
             const vector& g_;
 
+            // label specifying which part of the integration
+            // algorithm is taking place
+            trackPart part_;
+
 
    public:
 
@@ -160,7 +191,8 @@ public:
                 const interpolation<scalar>& rhoInterp,
                 const interpolation<vector>& UInterp,
                 const interpolation<scalar>& muInterp,
-                const vector& g
+                const vector& g,
+                trackPart part = tpLinearTrack
             );
 
 
@@ -186,6 +218,12 @@ public:
 
             // Return const access to the gravitational acceleration vector
             inline const vector& g() const;
+
+            //- Return the part of the tracking operation taking place
+            inline trackPart part() const;
+
+            //- Return access to the part of the tracking operation taking place
+            inline trackPart& part();
     };
 
 
@@ -207,6 +245,17 @@ protected:
             //- Velocity of Parcel [m/s]
             vector U_;
 
+            //- Force on particle due to collisions [N]
+            vector f_;
+
+            //- Angular momentum of Parcel in global reference frame
+            // [kg m2/s]
+            vector pi_;
+
+            //- Torque on particle due to collisions in global
+            //  reference frame [Nm]
+            vector tau_;
+
             //- Density [kg/m3]
             scalar rho_;
 
@@ -215,6 +264,9 @@ protected:
 
             //- Turbulent velocity fluctuation [m/s]
             vector UTurb_;
+
+            //- Particle collision records
+            CollisionRecordList<vector> collisionRecords_;
 
 
         // Cell-based quantities
@@ -284,6 +336,9 @@ public:
             const scalar nParticle0,
             const scalar d0,
             const vector& U0,
+            const vector& f0,
+            const vector& pi0,
+            const vector& tau0,
             const constantProperties& constProps
         );
 
@@ -321,6 +376,15 @@ public:
             //- Return const access to velocity
             inline const vector& U() const;
 
+            //- Return const access to force
+            inline const vector& f() const;
+
+            //- Return const access to angular momentum
+            inline const vector& pi() const;
+
+            //- Return const access to torque
+            inline const vector& tau() const;
+
             //- Return const access to density
             inline scalar rho() const;
 
@@ -329,6 +393,9 @@ public:
 
             //- Return const access to turbulent velocity fluctuation
             inline const vector& UTurb() const;
+
+            //- Return const access to the collision records
+            inline const CollisionRecordList<vector>& collisionRecords() const;
 
 
         // Edit
@@ -345,6 +412,15 @@ public:
             //- Return access to velocity
             inline vector& U();
 
+            //- Return access to force
+            inline vector& f();
+
+            //- Return access to angular momentum
+            inline vector& pi();
+
+            //- Return access to torque
+            inline vector& tau();
+
             //- Return access to density
             inline scalar& rho();
 
@@ -353,6 +429,9 @@ public:
 
             //- Return access to turbulent velocity fluctuation
             inline vector& UTurb();
+
+            //- Return access to collision records
+            inline CollisionRecordList<vector>& collisionRecords();
 
 
         // Helper functions
@@ -370,6 +449,12 @@ public:
 
             //- Particle mass
             inline scalar mass() const;
+
+            //- Particle moment of inertia around diameter axis
+            inline scalar momentOfInertia() const;
+
+            //- Particle angular velocity
+            inline vector omega() const;
 
             //- Particle volume
             inline scalar volume() const;
@@ -566,4 +651,3 @@ public:
 #endif
 
 // ************************************************************************* //
-

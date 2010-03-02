@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "InteractingKinematicCloud.H"
+#include "KinematicCloud.H"
 
 #include "NoDrag.H"
 #include "SphereDrag.H"
@@ -38,10 +38,10 @@ License
 
 #define makeParcelDragModels(ParcelType)                                     \
                                                                              \
-    makeDragModel(InteractingKinematicCloud<ParcelType>);                    \
+    makeDragModel(KinematicCloud<ParcelType>);                               \
                                                                              \
-    makeDragModelType(NoDrag, InteractingKinematicCloud, ParcelType);        \
-    makeDragModelType(SphereDrag, InteractingKinematicCloud, ParcelType);
+    makeDragModelType(NoDrag, KinematicCloud, ParcelType);                   \
+    makeDragModelType(SphereDrag, KinematicCloud, ParcelType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

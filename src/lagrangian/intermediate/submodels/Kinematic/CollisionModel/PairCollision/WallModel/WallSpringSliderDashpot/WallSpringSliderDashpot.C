@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ void Foam::WallSpringSliderDashpot<CloudType>::findMinMaxProperties
 
         UMagMax = max
         (
-            mag(p.U()) + mag(p.omega())*p.r(),
+            mag(p.U()) + mag(p.omega())*p.d()/2,
             UMagMax
         );
     }
@@ -148,13 +148,13 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 
     scalar Estar = 1/((1 - sqr(pNu))/pE + (1 - sqr(nu_))/E_);
 
-    scalar kN = (4.0/3.0)*sqrt(p.r())*Estar;
+    scalar kN = (4.0/3.0)*sqrt(p.d()/2)*Estar;
 
     forAll(flatSites, siteI)
     {
         vector r_PW = p.position() - flatSites[siteI];
 
-        scalar normalOverlapMag = p.r() - mag(r_PW);
+        scalar normalOverlapMag = p.d()/2 - mag(r_PW);
 
         vector rHat_PW = r_PW/(mag(r_PW) + VSMALL);
 
@@ -173,7 +173,7 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
     {
         vector r_PW = p.position() - sharpSites[siteI];
 
-        scalar normalOverlapMag = p.r() - mag(r_PW);
+        scalar normalOverlapMag = p.d()/2 - mag(r_PW);
 
         vector rHat_PW = r_PW/(mag(r_PW) + VSMALL);
 

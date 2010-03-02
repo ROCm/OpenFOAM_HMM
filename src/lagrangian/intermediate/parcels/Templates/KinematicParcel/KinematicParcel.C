@@ -203,9 +203,13 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     nParticle_(p.nParticle_),
     d_(p.d_),
     U_(p.U_),
+    f_(p.f_),
+    pi_(p.pi_),
+    tau_(p.tau_),
     rho_(p.rho_),
     tTurb_(p.tTurb_),
     UTurb_(p.UTurb_),
+    collisionRecords_(p.collisionRecords_),
     rhoc_(p.rhoc_),
     Uc_(p.Uc_),
     muc_(p.muc_)
@@ -227,46 +231,84 @@ bool Foam::KinematicParcel<ParcelType>::move(TrackData& td)
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
 
     const scalar deltaT = mesh.time().deltaTValue();
-    scalar tEnd = (1.0 - p.stepFraction())*deltaT;
-    const scalar dtMax = tEnd;
 
-    while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
+    switch (td.part())
     {
-        // Apply correction to position for reduced-D cases
-        meshTools::constrainToMeshCentre(mesh, p.position());
-
-        // Set the Lagrangian time-step
-        scalar dt = min(dtMax, tEnd);
-
-        // Remember which cell the Parcel is in since this will change if a
-        // face is hit
-        label cellI = p.cell();
-
-        dt *= p.trackToFace(p.position() + dt*U_, td);
-
-        tEnd -= dt;
-        p.stepFraction() = 1.0 - tEnd/deltaT;
-
-        // Avoid problems with extremely small timesteps
-        if (dt > ROOTVSMALL)
+        case TrackData::tpVelocityHalfStep:
         {
-            // Update cell based properties
-            p.setCellValues(td, dt, cellI);
+            // First and last leapfrog velocity adjust part, required
+            // before and after tracking and force calculation
 
-            if (td.cloud().cellValueSourceCorrection())
-            {
-                p.cellValueSourceCorrection(td, dt, cellI);
-            }
+            p.U() += 0.5*deltaT*p.f()/p.mass();
 
-            p.calc(td, dt, cellI);
+            pi_ += 0.5*deltaT*tau_;
+
+            break;
         }
 
-        if (p.onBoundary() && td.keepParticle)
+        case TrackData::tpLinearTrack:
         {
-            if (isA<processorPolyPatch>(pbMesh[p.patch(p.face())]))
+            scalar tEnd = (1.0 - p.stepFraction())*deltaT;
+            const scalar dtMax = tEnd;
+
+            while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
             {
-                td.switchProcessor = true;
+                // Apply correction to position for reduced-D cases
+                meshTools::constrainToMeshCentre(mesh, p.position());
+
+                // Set the Lagrangian time-step
+                scalar dt = min(dtMax, tEnd);
+
+                // Remember which cell the Parcel is in since this
+                // will change if a face is hit
+                label cellI = p.cell();
+
+                dt *= p.trackToFace(p.position() + dt*U_, td);
+
+                tEnd -= dt;
+                p.stepFraction() = 1.0 - tEnd/deltaT;
+
+                // Avoid problems with extremely small timesteps
+                if (dt > ROOTVSMALL)
+                {
+                    // Update cell based properties
+                    p.setCellValues(td, dt, cellI);
+
+                    if (td.cloud().cellValueSourceCorrection())
+                    {
+                        p.cellValueSourceCorrection(td, dt, cellI);
+                    }
+
+                    p.calc(td, dt, cellI);
+                }
+
+                if (p.onBoundary() && td.keepParticle)
+                {
+                    if (isA<processorPolyPatch>(pbMesh[p.patch(p.face())]))
+                    {
+                        td.switchProcessor = true;
+                    }
+                }
             }
+
+            break;
+        }
+
+        case TrackData::tpRotationalTrack:
+        {
+            Info<< "No rotational tracking implementation" << endl;
+
+            break;
+        }
+
+        default:
+        {
+            FatalErrorIn
+            (
+                "KinematicParcel<ParcelType>::move(TrackData& td)"
+            )   << td.part()
+                << " is an invalid part of the tracking method."
+                << abort(FatalError);
         }
     }
 

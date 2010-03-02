@@ -69,15 +69,15 @@
         laminarTransport.nu()*rhoValue
     );
 
-    word interactingKinematicCloudName("interactingKinematicCloud");
-    args.optionReadIfPresent("cloudName", interactingKinematicCloudName);
+    word kinematicCloudName("kinematicCloud");
+    args.optionReadIfPresent("cloudName", kinematicCloudName);
 
-    Info<< "Constructing interactingKinematicCloud "
-        << interactingKinematicCloudName << endl;
+    Info<< "Constructing kinematicCloud "
+        << kinematicCloudName << endl;
 
-    basicInteractingKinematicCloud interactingKinematicCloud
+    basicKinematicCloud kinematicCloud
     (
-        interactingKinematicCloudName,
+        kinematicCloudName,
         rho,
         U,
         mu,

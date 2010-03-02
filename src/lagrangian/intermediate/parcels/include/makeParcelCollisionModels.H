@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "InteractingKinematicCloud.H"
+#include "KinematicCloud.H"
 
 #include "NoCollision.H"
 #include "PairCollision.H"
@@ -42,40 +42,39 @@ License
 
 #define makeParcelCollisionModels(ParcelType)                                 \
                                                                               \
-    makeCollisionModel(InteractingKinematicCloud<ParcelType>);                \
+    makeCollisionModel(KinematicCloud<ParcelType>);                           \
                                                                               \
     makeCollisionModelType                                                    \
     (                                                                         \
         NoCollision,                                                          \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType                                                            \
     );                                                                        \
                                                                               \
     makeCollisionModelType                                                    \
     (                                                                         \
         PairCollision,                                                        \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType                                                            \
     );                                                                        \
                                                                               \
-    makePairModel(InteractingKinematicCloud<ParcelType>);                     \
+    makePairModel(KinematicCloud<ParcelType>);                                \
                                                                               \
     makePairModelType                                                         \
     (                                                                         \
         PairSpringSliderDashpot,                                              \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType                                                            \
     );                                                                        \
                                                                               \
-    makeWallModel(InteractingKinematicCloud<ParcelType>);                     \
+    makeWallModel(KinematicCloud<ParcelType>);                                \
                                                                               \
     makeWallModelType                                                         \
     (                                                                         \
         WallSpringSliderDashpot,                                              \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType                                                            \
     );
-
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

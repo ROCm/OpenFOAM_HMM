@@ -175,6 +175,22 @@ Foam::KinematicCloud<ParcelType>::injection()
 
 
 template<class ParcelType>
+inline const Foam::CollisionModel<Foam::KinematicCloud<ParcelType> >&
+Foam::KinematicCloud<ParcelType>::collision() const
+{
+    return collisionModel_();
+}
+
+
+template<class ParcelType>
+inline Foam::CollisionModel<Foam::KinematicCloud<ParcelType> >&
+Foam::KinematicCloud<ParcelType>::collision()
+{
+    return collisionModel_();
+}
+
+
+template<class ParcelType>
 inline Foam::PostProcessingModel<Foam::KinematicCloud<ParcelType> >&
 Foam::KinematicCloud<ParcelType>::postProcessing()
 {
@@ -201,6 +217,59 @@ inline Foam::scalar Foam::KinematicCloud<ParcelType>::massInSystem() const
     }
 
     return sysMass;
+}
+
+
+template<class ParcelType>
+inline Foam::vector
+Foam::KinematicCloud<ParcelType>::linearMomentumOfSystem() const
+{
+    vector linearMomentum(vector::zero);
+
+    forAllConstIter(typename KinematicCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
+
+        linearMomentum += p.mass()*p.U();
+    }
+
+    return linearMomentum;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::KinematicCloud<ParcelType>::linearKineticEnergyOfSystem() const
+{
+    scalar linearKineticEnergy = 0.0;
+
+    forAllConstIter(typename KinematicCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
+
+        linearKineticEnergy += 0.5*p.mass()*(p.U() & p.U());
+    }
+
+    return linearKineticEnergy;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::KinematicCloud<ParcelType>::
+rotationalKineticEnergyOfSystem() const
+{
+    scalar rotationalKineticEnergy = 0.0;
+
+    forAllConstIter(typename KinematicCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
+
+        rotationalKineticEnergy +=
+            0.5*p.momentOfInertia()*(p.omega() & p.omega());
+    }
+
+    return rotationalKineticEnergy;
 }
 
 

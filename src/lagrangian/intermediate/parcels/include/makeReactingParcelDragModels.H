@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "thermoPhysicsTypes.H"
-#include "InteractingKinematicCloud.H"
+#include "KinematicCloud.H"
 
 #include "NoDrag.H"
 #include "SphereDrag.H"
@@ -58,19 +58,19 @@ License
 
 #define makeReactingDragModelThermoType(ParcelType, ThermoType)               \
                                                                               \
-    makeDragModel(InteractingKinematicCloud<ParcelType<ThermoType> >);        \
+    makeDragModel(KinematicCloud<ParcelType<ThermoType> >);                   \
                                                                               \
     makeDragModelThermoType                                                   \
     (                                                                         \
         NoDrag,                                                               \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makeDragModelThermoType                                                   \
     (                                                                         \
         SphereDrag,                                                           \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );

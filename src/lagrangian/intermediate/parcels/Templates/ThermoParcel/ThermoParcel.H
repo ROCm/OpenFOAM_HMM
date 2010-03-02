@@ -27,7 +27,7 @@ Class
 
 Description
     Thermodynamic parcel class with one/two-way coupling with the continuous
-    phase. Includes InteractingKinematic parcel sub-models, plus:
+    phase. Includes Kinematic parcel sub-models, plus:
     - heat transfer
 
 SourceFiles
@@ -45,7 +45,7 @@ SourceFiles
 #include "interpolationCellPoint.H"
 #include "contiguous.H"
 
-#include "InteractingKinematicParcel.H"
+#include "KinematicParcel.H"
 #include "ThermoCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -70,14 +70,14 @@ Ostream& operator<<
 template<class ParcelType>
 class ThermoParcel
 :
-    public InteractingKinematicParcel<ParcelType>
+    public KinematicParcel<ParcelType>
 {
 public:
 
     //- Class to hold thermo particle constant properties
     class constantProperties
     :
-        public InteractingKinematicParcel<ParcelType>::constantProperties
+        public KinematicParcel<ParcelType>::constantProperties
     {
 
         // Private data
@@ -136,7 +136,7 @@ public:
     //- Class used to pass thermo tracking data to the trackToFace function
     class trackData
     :
-        public InteractingKinematicParcel<ParcelType>::trackData
+        public KinematicParcel<ParcelType>::trackData
     {
 
         // Private data

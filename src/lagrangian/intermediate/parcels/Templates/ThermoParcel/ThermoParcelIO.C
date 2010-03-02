@@ -31,7 +31,7 @@ License
 
 template <class ParcelType>
 Foam::string Foam::ThermoParcel<ParcelType>::propHeader =
-    InteractingKinematicParcel<ParcelType>::propHeader
+    KinematicParcel<ParcelType>::propHeader
   + " T"
   + " cp";
 
@@ -46,7 +46,7 @@ Foam::ThermoParcel<ParcelType>::ThermoParcel
     bool readFields
 )
 :
-    InteractingKinematicParcel<ParcelType>(cloud, is, readFields),
+    KinematicParcel<ParcelType>(cloud, is, readFields),
     T_(0.0),
     cp_(0.0),
     Tc_(0.0),
@@ -86,7 +86,7 @@ void Foam::ThermoParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
         return;
     }
 
-    InteractingKinematicParcel<ParcelType>::readFields(c);
+    KinematicParcel<ParcelType>::readFields(c);
 
     IOField<scalar> T(c.fieldIOobject("T", IOobject::MUST_READ));
     c.checkFieldIOobject(c, T);
@@ -110,7 +110,7 @@ void Foam::ThermoParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
 template<class ParcelType>
 void Foam::ThermoParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
 {
-    InteractingKinematicParcel<ParcelType>::writeFields(c);
+    KinematicParcel<ParcelType>::writeFields(c);
 
     label np =  c.size();
 
@@ -143,13 +143,13 @@ Foam::Ostream& Foam::operator<<
 {
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const InteractingKinematicParcel<ParcelType>&>(p)
+        os  << static_cast<const KinematicParcel<ParcelType>&>(p)
             << token::SPACE << p.T()
             << token::SPACE << p.cp();
     }
     else
     {
-        os  << static_cast<const InteractingKinematicParcel<ParcelType>&>(p);
+        os  << static_cast<const KinematicParcel<ParcelType>&>(p);
         os.write
         (
             reinterpret_cast<const char*>(&p.T_),

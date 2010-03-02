@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,7 +52,7 @@ void Foam::PairSpringSliderDashpot<CloudType>::findMinMaxProperties
 
         UMagMax = max
         (
-            mag(p.U()) + mag(p.omega())*p.r(),
+            mag(p.U()) + mag(p.omega())*p.d()/2,
             UMagMax
         );
     }
@@ -186,8 +186,8 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
 
         vector USlip_AB =
             U_AB - (U_AB & rHat_AB)*rHat_AB
-          + (pA.omega() ^ (pA.r()*-rHat_AB))
-          - (pB.omega() ^ (pB.r()*rHat_AB));
+          + (pA.omega() ^ (pA.d()/2*-rHat_AB))
+          - (pB.omega() ^ (pB.d()/2*rHat_AB));
 
         scalar deltaT = this->owner().mesh().time().deltaTValue();
 
@@ -242,8 +242,8 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
             pA.f() += fT_AB;
             pB.f() += -fT_AB;
 
-            pA.tau() += (pA.r()*-rHat_AB) ^ fT_AB;
-            pB.tau() += (pB.r()*rHat_AB) ^ -fT_AB;
+            pA.tau() += (pA.d()/2*-rHat_AB) ^ fT_AB;
+            pB.tau() += (pB.d()/2*rHat_AB) ^ -fT_AB;
         }
     }
 }

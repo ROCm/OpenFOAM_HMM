@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -189,6 +189,8 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
             const point& pos = p.position();
 
+            scalar r = p.d()/2;
+
             // real wallFace interactions
 
             forAll(realWallFaces, realWallFaceI)
@@ -201,7 +203,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
                     mesh.points()
                 );
 
-                if (nearest.distance() < p.r())
+                if (nearest.distance() < r)
                 {
                     vector normal = mesh.faceAreas()[realFaceI];
 
@@ -225,7 +227,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
                             (
                                 flatSites,
                                 nearPt,
-                                sqr(p.r()*flatWallDuplicateExclusion)
+                                sqr(r*flatWallDuplicateExclusion)
                             )
                         )
                         {
@@ -233,7 +235,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
                             flatSiteExclusionDistancesSqr.append
                             (
-                                sqr(p.r()) - sqr(nearest.distance())
+                                sqr(r) - sqr(nearest.distance())
                             );
                         }
                     }
@@ -265,7 +267,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
                         refCell.points()
                     );
 
-                    if (nearest.distance() < p.r())
+                    if (nearest.distance() < r)
                     {
                         vector normal = refCell.faceAreas()[refFaceI];
 
@@ -289,7 +291,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
                                 (
                                     flatSites,
                                     nearPt,
-                                    sqr(p.r()*flatWallDuplicateExclusion)
+                                    sqr(r*flatWallDuplicateExclusion)
                                 )
                             )
                             {
@@ -297,7 +299,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
                                 flatSiteExclusionDistancesSqr.append
                                 (
-                                    sqr(p.r()) - sqr(nearest.distance())
+                                    sqr(r) - sqr(nearest.distance())
                                 );
                             }
                         }
@@ -357,7 +359,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
                         sharpSiteExclusionDistancesSqr.append
                         (
-                            sqr(p.r()) - sqr(otherSiteDistances[orderedIndex])
+                            sqr(r) - sqr(otherSiteDistances[orderedIndex])
                         );
                     }
                 }

@@ -27,10 +27,12 @@ License
 #include "KinematicCloud.H"
 #include "IntegrationScheme.H"
 #include "interpolation.H"
+#include "subCycleTime.H"
 
 #include "DispersionModel.H"
 #include "DragModel.H"
 #include "InjectionModel.H"
+#include "CollisionModel.H"
 #include "PatchInteractionModel.H"
 #include "PostProcessingModel.H"
 
@@ -85,6 +87,56 @@ void Foam::KinematicCloud<ParcelType>::evolveCloud()
         resetSourceTerms();
     }
 
+    // Sympletic leapfrog integration of particle forces:
+    // + apply half deltaV with stored force
+    // + move positions with new velocity
+    // + calculate forces in new position
+    // + apply half deltaV with new force
+
+    label nSubCycles = collision().nSubCycles();
+
+    if (nSubCycles > 1)
+    {
+        subCycleTime moveCollideSubCycle
+        (
+            const_cast<Time&>(this->db().time()),
+            nSubCycles
+        );
+
+        while(!(++moveCollideSubCycle).end())
+        {
+            Info<< "subCycle time = " << this->db().time().timeName() << endl;
+
+            moveCollide(td);
+        }
+
+        moveCollideSubCycle.endSubCycle();
+    }
+    else
+    {
+        moveCollide(td);
+    }
+}
+
+
+template<class ParcelType>
+void  Foam::KinematicCloud<ParcelType>::moveCollide
+(
+    typename ParcelType::trackData& td
+)
+{
+    td.part() = ParcelType::trackData::tpVelocityHalfStep;
+    Cloud<ParcelType>::move(td);
+
+    td.part() = ParcelType::trackData::tpLinearTrack;
+    Cloud<ParcelType>::move(td);
+
+    // td.part() = ParcelType::trackData::tpRotationalTrack;
+    // Cloud<ParcelType>::move(td);
+
+    this->collision().collide();
+
+    td.part() = ParcelType::trackData::tpVelocityHalfStep;
     Cloud<ParcelType>::move(td);
 }
 
@@ -165,6 +217,14 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     injectionModel_
     (
         InjectionModel<KinematicCloud<ParcelType> >::New
+        (
+            particleProperties_,
+            *this
+        )
+    ),
+    collisionModel_
+    (
+        CollisionModel<KinematicCloud<ParcelType> >::New
         (
             particleProperties_,
             *this
@@ -270,15 +330,34 @@ void Foam::KinematicCloud<ParcelType>::evolve()
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::info() const
 {
+    vector linearMomentum = linearMomentumOfSystem();
+    reduce(linearMomentum, sumOp<vector>());
+
+    scalar linearKineticEnergy = linearKineticEnergyOfSystem();
+    reduce(linearKineticEnergy, sumOp<scalar>());
+
+    scalar rotationalKineticEnergy = rotationalKineticEnergyOfSystem();
+    reduce(rotationalKineticEnergy, sumOp<scalar>());
+
     Info<< "Cloud: " << this->name() << nl
         << "    Total number of parcels added   = "
-        << this->injection().parcelsAddedTotal() << nl
+        << returnReduce(this->injection().parcelsAddedTotal(), sumOp<label>())
+            << nl
         << "    Total mass introduced           = "
-        << this->injection().massInjected() << nl
+        << returnReduce(this->injection().massInjected(), sumOp<scalar>())
+            << nl
         << "    Current number of parcels       = "
         << returnReduce(this->size(), sumOp<label>()) << nl
         << "    Current mass in system          = "
-        << returnReduce(massInSystem(), sumOp<scalar>()) << nl;
+        << returnReduce(massInSystem(), sumOp<scalar>()) << nl
+        << "    Linear momentum                 = "
+        << linearMomentum << nl
+        << "   |Linear momentum|                = "
+        << mag(linearMomentum) << nl
+        << "    Linear kinetic energy           = "
+        << linearKineticEnergy << nl
+        << "    Rotational kinetic energy       = "
+        << rotationalKineticEnergy << nl;
 }
 
 

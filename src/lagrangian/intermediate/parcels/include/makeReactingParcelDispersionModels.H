@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "thermoPhysicsTypes.H"
-#include "InteractingKinematicCloud.H"
+#include "KinematicCloud.H"
 
 #include "NoDispersion.H"
 #include "GradientDispersionRAS.H"
@@ -61,35 +61,32 @@ License
 
 #define makeReactingDispersionModelThermoType(ParcelType, ThermoType)         \
                                                                               \
-    makeDispersionModel(InteractingKinematicCloud<ParcelType<ThermoType> >);  \
+    makeDispersionModel(KinematicCloud<ParcelType<ThermoType> >);             \
                                                                               \
     defineNamedTemplateTypeNameAndDebug                                       \
     (                                                                         \
-        DispersionRASModel                                                    \
-        <                                                                     \
-            InteractingKinematicCloud<ParcelType<ThermoType> >                \
-        >,                                                                    \
+        DispersionRASModel<KinematicCloud<ParcelType<ThermoType> > >,         \
         0                                                                     \
     );                                                                        \
                                                                               \
     makeDispersionModelThermoType                                             \
     (                                                                         \
         NoDispersion,                                                         \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makeDispersionModelThermoType                                             \
     (                                                                         \
         GradientDispersionRAS,                                                \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makeDispersionModelThermoType                                             \
     (                                                                         \
         StochasticDispersionRAS,                                              \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );

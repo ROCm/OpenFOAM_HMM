@@ -40,7 +40,7 @@ SourceFiles
 #ifndef ThermoCloud_H
 #define ThermoCloud_H
 
-#include "InteractingKinematicCloud.H"
+#include "KinematicCloud.H"
 #include "thermoCloud.H"
 #include "basicThermo.H"
 
@@ -61,7 +61,7 @@ class HeatTransferModel;
 template<class ParcelType>
 class ThermoCloud
 :
-    public InteractingKinematicCloud<ParcelType>,
+    public KinematicCloud<ParcelType>,
     public thermoCloud
 {
     // Private Member Functions

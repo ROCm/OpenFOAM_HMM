@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "thermoPhysicsTypes.H"
-#include "InteractingKinematicCloud.H"
+#include "KinematicCloud.H"
 
 #include "NoCollision.H"
 #include "PairCollision.H"
@@ -64,12 +64,12 @@ License
 
 #define makeReactingCollisionModelThermoType(ParcelType, ThermoType)          \
                                                                               \
-    makeCollisionModel(InteractingKinematicCloud<ParcelType<ThermoType> >);   \
+    makeCollisionModel(KinematicCloud<ParcelType<ThermoType> >);              \
                                                                               \
     makeCollisionModelThermoType                                              \
     (                                                                         \
         NoCollision,                                                          \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
@@ -77,31 +77,30 @@ License
     makeCollisionModelThermoType                                              \
     (                                                                         \
         PairCollision,                                                        \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
                                                                               \
-    makePairModel(InteractingKinematicCloud<ParcelType<ThermoType> >);        \
+    makePairModel(KinematicCloud<ParcelType<ThermoType> >);                   \
                                                                               \
     makePairModelThermoType                                                   \
     (                                                                         \
         PairSpringSliderDashpot,                                              \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
                                                                               \
-    makeWallModel(InteractingKinematicCloud<ParcelType<ThermoType> >);        \
+    makeWallModel(KinematicCloud<ParcelType<ThermoType> >);                   \
                                                                               \
     makeWallModelThermoType                                                   \
     (                                                                         \
         WallSpringSliderDashpot,                                              \
-        InteractingKinematicCloud,                                            \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );
-
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

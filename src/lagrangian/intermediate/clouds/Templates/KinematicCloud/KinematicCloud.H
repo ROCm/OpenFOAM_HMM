@@ -33,6 +33,7 @@ Description
       - Drag model
       - Injection model
       - Wall interaction model
+      - Collision model
 
 SourceFiles
     KinematicCloudI.H
@@ -70,6 +71,9 @@ class DragModel;
 
 template<class CloudType>
 class InjectionModel;
+
+template<class CloudType>
+class CollisionModel;
 
 template<class CloudType>
 class PostProcessingModel;
@@ -166,6 +170,10 @@ protected:
             autoPtr<InjectionModel<KinematicCloud<ParcelType> > >
                 injectionModel_;
 
+            //- Collision model
+            autoPtr<CollisionModel<KinematicCloud<ParcelType> > >
+                collisionModel_;
+
             //- Patch interaction model
             autoPtr<PatchInteractionModel<KinematicCloud<ParcelType> > >
                 patchInteractionModel_;
@@ -194,6 +202,9 @@ protected:
 
             //- Evolve the cloud
             void evolveCloud();
+
+            //- Move-collide
+            void moveCollide(typename ParcelType::trackData& td);
 
             //- Post-evolve
             void postEvolve();
@@ -308,6 +319,15 @@ public:
                 inline InjectionModel<KinematicCloud<ParcelType> >&
                     injection();
 
+                //- Return const access to the collision model
+                inline
+                const CollisionModel<KinematicCloud<ParcelType> >&
+                    collision() const;
+
+                //- Return reference to the collision model
+                inline CollisionModel<KinematicCloud<ParcelType> >&
+                    collision();
+
                 //- Return const-access to the patch interaction model
                 inline const PatchInteractionModel<KinematicCloud<ParcelType> >&
                     patchInteraction() const;
@@ -341,6 +361,15 @@ public:
 
             //- Total mass in system
             inline scalar massInSystem() const;
+
+            //- Total linear momentum of the system
+            inline vector linearMomentumOfSystem() const;
+
+            //- Total linear kinetic energy in the system
+            inline scalar linearKineticEnergyOfSystem() const;
+
+            //- Total rotational kinetic energy in the system
+            inline scalar rotationalKineticEnergyOfSystem() const;
 
             //- Print cloud information
             void info() const;
