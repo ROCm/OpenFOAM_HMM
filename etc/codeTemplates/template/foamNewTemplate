@@ -31,15 +31,15 @@
 #
 #------------------------------------------------------------------------------
 Script=${0##*/}
-Template="$WM_PROJECT_DIR/bin/templates/sourceTemplate/_TemplateTemplate"
+Template="$WM_PROJECT_DIR/etc/codeTemplates/template/_TemplateTemplate"
 
 usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
-Usage: $Script <type> <Class name> <Template arguments...>
+Usage: $Script <type> <ClassName> <Template arguments...>
 
-* create a new standard OpenFOAM source file
+* create a new standard OpenFOAM source file for templated classes
 
 type: (C|H|I|IO)
 

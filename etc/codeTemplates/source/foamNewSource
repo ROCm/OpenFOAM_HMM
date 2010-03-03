@@ -31,12 +31,12 @@
 #
 #------------------------------------------------------------------------------
 Script=${0##*/}
-Template="$WM_PROJECT_DIR/bin/templates/source/_Template"
+Template="$WM_PROJECT_DIR/etc/codeTemplates/source/_Template"
 
 usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
-Usage: $Script <type> <class name>
+Usage: $Script <type> <ClassName>
 
 * create a new standard OpenFOAM source file
 
