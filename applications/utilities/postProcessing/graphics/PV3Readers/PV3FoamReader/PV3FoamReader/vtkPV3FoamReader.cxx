@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,6 +83,7 @@ vtkPV3FoamReader::vtkPV3FoamReader()
 
     SkipZeroTime = 0;
     ExtrapolatePatches = 0;
+    UseVTKPolyhedron = 0;
     IncludeSets = 0;
     IncludeZones = 0;
     ShowPatchNames = 0;

@@ -466,40 +466,6 @@ void Foam::FaceCellWave<Type>::transform
 }
 
 
-// Send face info to neighbour.
-template <class Type>
-void Foam::FaceCellWave<Type>::sendPatchInfo
-(
-    const label neighbour,
-    const label nFaces,
-    const labelList& faceLabels,
-    const List<Type>& faceInfo
-) const
-{
-    OPstream toNeighbour(Pstream::blocking, neighbour);
-
-    writeFaces(nFaces, faceLabels, faceInfo, toNeighbour);
-}
-
-
-// Receive face info from neighbour
-template <class Type>
-Foam::label Foam::FaceCellWave<Type>::receivePatchInfo
-(
-    const label neighbour,
-    labelList& faceLabels,
-    List<Type>& faceInfo
-) const
-{
-    IPstream fromNeighbour(Pstream::blocking, neighbour);
-
-    label nFaces = 0;
-    readFaces(nFaces, faceLabels, faceInfo, fromNeighbour);
-
-    return nFaces;
-}
-
-
 // Offset mesh face. Used for transferring from one cyclic half to the other.
 template <class Type>
 void Foam::FaceCellWave<Type>::offset
@@ -522,6 +488,8 @@ template <class Type>
 void Foam::FaceCellWave<Type>::handleProcPatches()
 {
     // Send all
+
+    PstreamBuffers pBufs(Pstream::nonBlocking);
 
     forAll(mesh_.boundaryMesh(), patchI)
     {
@@ -564,15 +532,12 @@ void Foam::FaceCellWave<Type>::handleProcPatches()
                     << endl;
             }
 
-            sendPatchInfo
-            (
-                procPatch.neighbProcNo(),
-                nSendFaces,
-                sendFaces,
-                sendFacesInfo
-            );
+            UOPstream toNeighbour(procPatch.neighbProcNo(), pBufs);
+            writeFaces(nSendFaces, sendFaces, sendFacesInfo, toNeighbour);
         }
     }
+
+    pBufs.finishedSends();
 
     // Receive all
 
@@ -586,16 +551,20 @@ void Foam::FaceCellWave<Type>::handleProcPatches()
                 refCast<const processorPolyPatch>(patch);
 
             // Allocate buffers
-            label nReceiveFaces;
+            label nReceiveFaces = 0;
             labelList receiveFaces(patch.size());
             List<Type> receiveFacesInfo(patch.size());
 
-            nReceiveFaces = receivePatchInfo
-            (
-                procPatch.neighbProcNo(),
-                receiveFaces,
-                receiveFacesInfo
-            );
+            {
+                UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs);
+                readFaces
+                (
+                    nReceiveFaces,
+                    receiveFaces,
+                    receiveFacesInfo,
+                    fromNeighbour
+                );
+            }
 
             if (debug)
             {

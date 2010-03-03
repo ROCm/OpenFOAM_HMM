@@ -114,6 +114,7 @@ fi
 
 #
 # remove files (mesh itself, modifiers, snappyHexMesh ones) and subdirectories
+# also remove .gz versions of the same files
 #
 echo "Clearing ${caseDir:-.}/$meshDir" 1>&2
 
@@ -134,25 +135,9 @@ for i in \
     pointLevel \
     refinementHistory \
     surfaceIndex \
-    points.gz \
-    faces.gz \
-    owner.gz \
-    neighbour.gz \
-    cells.gz \
-    boundary.gz \
-    pointZones.gz \
-    faceZones.gz \
-    cellZones.gz \
-    meshModifiers.gz \
-    parallelData.gz \
-    sets.gz \
-    cellLevel.gz \
-    pointLevel.gz \
-    refinementHistory.gz \
-    surfaceIndex.gz \
 ;
 do
-    rm -rf $meshDir/$i
+    rm -rf $meshDir/$i $meshDir/$i.gz
 done
 
 #------------------------------------------------------------------------------

@@ -11,7 +11,7 @@ forAll(patches, patchi)
 {
     const fvPatch& currPatch = patches[patchi];
 
-    if (isType<wallFvPatch>(currPatch))
+    if (isA<wallFvPatch>(currPatch))
     {
         const vectorField nf = currPatch.nf();
 
