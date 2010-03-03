@@ -265,7 +265,8 @@ void Foam::coupledPolyPatch::calcTransformTensors
         Pout<< "coupledPolyPatch::calcTransformTensors : " << name() << endl
             << "    (half)size:" << Cf.size() << nl
             << "    absTol:" << absTol << nl
-            //<< "    smallDist:" << smallDist << nl
+            << "    smallDist min:" << min(smallDist) << nl
+            << "    smallDist max:" << max(smallDist) << nl
             << "    sum(mag(nf & nr)):" << sum(mag(nf & nr)) << endl;
     }
 
@@ -277,7 +278,7 @@ void Foam::coupledPolyPatch::calcTransformTensors
     // Then the overall error of summing the normals is sqrt(size())*absTol
     // - separation calculation: pass in from the outside an allowable error.
 
-    if (size() == 0)
+    if (Cf.size() == 0)
     {
         // Dummy geometry.
         separated = false;
@@ -308,7 +309,7 @@ void Foam::coupledPolyPatch::calcTransformTensors
 
 
             // Check 
-            forAll (forwardT, facei)
+            forAll(forwardT, facei)
             {
                 tensor T = rotationTensor(-nr[facei], nf[facei]);
 

@@ -292,6 +292,12 @@ public:
         //- Return neighbour edge labels. WIP.
         const labelList& neighbEdges() const;
 
+        //- Return message tag to use for communication
+        virtual int tag() const
+        {
+            return Pstream::msgType();
+        }
+
         //- Transform a patch-based field from other side to this side.
         virtual bool doTransform() const
         {
@@ -317,21 +323,21 @@ public:
         //- Are the planes separated.
         virtual bool separated() const
         {
-            notImplemented("processorPolyPatch::separated(..)");
+            //notImplemented("processorPolyPatch::separated(..)");
             return false;
         }
 
         //- If the planes are separated the separation vector.
         virtual const vector& separation() const
         {
-            notImplemented("processorPolyPatch::separation(..)");
+            //notImplemented("processorPolyPatch::separation(..)");
             return vector::zero;
         }
 
         //- Are the cyclic planes parallel.
         virtual bool parallel() const
         {
-            notImplemented("processorPolyPatch::parallel()");
+            //notImplemented("processorPolyPatch::parallel()");
             return true;
         }
 

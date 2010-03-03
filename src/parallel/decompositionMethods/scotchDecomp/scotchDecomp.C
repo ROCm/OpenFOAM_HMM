@@ -576,16 +576,25 @@ void Foam::scotchDecomp::calcCSR
     // Coupled faces. Only cyclics done.
     forAll(pbm, patchi)
     {
-        if (isA<cyclicPolyPatch>(pbm[patchi]))
+        if
+        (
+            isA<cyclicPolyPatch>(pbm[patchi])
+         && refCast<const cyclicPolyPatch>(pbm[patchi]).owner()
+        )
         {
-            const unallocLabelList& faceCells = pbm[patchi].faceCells();
+            const cyclicPolyPatch& cycPatch = refCast<const cyclicPolyPatch>
+            (
+                pbm[patchi]
+            );
 
-            label sizeby2 = faceCells.size()/2;
+            const unallocLabelList& faceCells = cycPatch.faceCells();
+            const unallocLabelList& nbrCells =
+                cycPatch.neighbPatch().faceCells();
 
-            for (label facei=0; facei<sizeby2; facei++)
+            forAll(faceCells, facei)
             {
                 label own = faceCells[facei];
-                label nei = faceCells[facei + sizeby2];
+                label nei = nbrCells[facei];
 
                 adjncy[xadj[own] + nFacesPerCell[own]++] = nei;
                 adjncy[xadj[nei] + nFacesPerCell[nei]++] = own;

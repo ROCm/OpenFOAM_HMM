@@ -137,62 +137,24 @@ Foam::PackedBoolList Foam::syncTools::getMasterPoints(const polyMesh& mesh)
     {
         if (patches[patchI].coupled())
         {
-            if
-            (
-                Pstream::parRun()
-             && isA<processorPolyPatch>(patches[patchI])
-            )
+            const coupledPolyPatch& pp =
+                refCast<const coupledPolyPatch>(patches[patchI]);
+
+            const labelList& meshPoints = pp.meshPoints();
+
+            forAll(meshPoints, i)
             {
-                const processorPolyPatch& pp =
-                    refCast<const processorPolyPatch>(patches[patchI]);
+                label pointI = meshPoints[i];
 
-                const labelList& meshPoints = pp.meshPoints();
-
-                forAll(meshPoints, i)
+                if (donePoint.get(pointI) == 0u)
                 {
-                    label pointI = meshPoints[i];
+                    donePoint.set(pointI, 1u);
 
-                    if (donePoint.get(pointI) == 0u)
+                    if (pp.owner())
                     {
-                        donePoint.set(pointI, 1u);
-
-                        if (pp.owner())
-                        {
-                            isMasterPoint.set(pointI, 1u);
-                        }
+                        isMasterPoint.set(pointI, 1u);
                     }
                 }
-            }
-            else if (isA<cyclicPolyPatch>(patches[patchI]))
-            {
-                const cyclicPolyPatch& pp =
-                    refCast<const cyclicPolyPatch>(patches[patchI]);
-
-                const edgeList& coupledPoints = pp.coupledPoints();
-                const labelList& meshPoints = pp.meshPoints();
-
-                forAll(coupledPoints, i)
-                {
-                    // First one of couple points is master
-
-                    const edge& pointPair = coupledPoints[i];
-                    label p0 = meshPoints[pointPair[0]];
-                    label p1 = meshPoints[pointPair[1]];
-
-                    if (donePoint.get(p0) == 0u)
-                    {
-                        donePoint.set(p0, 1u);
-                        isMasterPoint.set(p0, 1u);
-                        donePoint.set(p1, 1u);
-                    }
-                }
-            }
-            else
-            {
-                FatalErrorIn("syncTools::getMasterPoints(const polyMesh&)")
-                    << "Cannot handle coupled patch " << patches[patchI].name()
-                    << " of type " <<  patches[patchI].type()
-                    << abort(FatalError);
             }
         }
     }
@@ -256,62 +218,24 @@ Foam::PackedBoolList Foam::syncTools::getMasterEdges(const polyMesh& mesh)
     {
         if (patches[patchI].coupled())
         {
-            if
-            (
-                Pstream::parRun()
-             && isA<processorPolyPatch>(patches[patchI])
-            )
+            const coupledPolyPatch& pp =
+                refCast<const coupledPolyPatch>(patches[patchI]);
+
+            const labelList& meshEdges = pp.meshEdges();
+
+            forAll(meshEdges, i)
             {
-                const processorPolyPatch& pp =
-                    refCast<const processorPolyPatch>(patches[patchI]);
+                label edgeI = meshEdges[i];
 
-                const labelList& meshEdges = pp.meshEdges();
-
-                forAll(meshEdges, i)
+                if (doneEdge.get(edgeI) == 0u)
                 {
-                    label edgeI = meshEdges[i];
+                    doneEdge.set(edgeI, 1u);
 
-                    if (doneEdge.get(edgeI) == 0u)
+                    if (pp.owner())
                     {
-                        doneEdge.set(edgeI, 1u);
-
-                        if (pp.owner())
-                        {
-                            isMasterEdge.set(edgeI, 1u);
-                        }
+                        isMasterEdge.set(edgeI, 1u);
                     }
                 }
-            }
-            else if (isA<cyclicPolyPatch>(patches[patchI]))
-            {
-                const cyclicPolyPatch& pp =
-                    refCast<const cyclicPolyPatch>(patches[patchI]);
-
-                const edgeList& coupledEdges = pp.coupledEdges();
-                const labelList& meshEdges = pp.meshEdges();
-
-                forAll(coupledEdges, i)
-                {
-                    // First one of couple edges is master
-
-                    const edge& edgePair = coupledEdges[i];
-                    label e0 = meshEdges[edgePair[0]];
-                    label e1 = meshEdges[edgePair[1]];
-
-                    if (doneEdge.get(e0) == 0u)
-                    {
-                        doneEdge.set(e0, 1u);
-                        isMasterEdge.set(e0, 1u);
-                        doneEdge.set(e1, 1u);
-                    }
-                }
-            }
-            else
-            {
-                FatalErrorIn("syncTools::getMasterEdges(const polyMesh&)")
-                    << "Cannot handle coupled patch " << patches[patchI].name()
-                    << " of type " <<  patches[patchI].type()
-                    << abort(FatalError);
             }
         }
     }
@@ -344,35 +268,15 @@ Foam::PackedBoolList Foam::syncTools::getMasterFaces(const polyMesh& mesh)
     {
         if (patches[patchI].coupled())
         {
-            if (Pstream::parRun() && isA<processorPolyPatch>(patches[patchI]))
-            {
-                const processorPolyPatch& pp =
-                    refCast<const processorPolyPatch>(patches[patchI]);
+            const coupledPolyPatch& pp =
+                refCast<const coupledPolyPatch>(patches[patchI]);
 
-                if (!pp.owner())
-                {
-                    forAll(pp, i)
-                    {
-                        isMasterFace.unset(pp.start()+i);
-                    }
-                }
-            }
-            else if (isA<cyclicPolyPatch>(patches[patchI]))
+            if (!pp.owner())
             {
-                const cyclicPolyPatch& pp =
-                    refCast<const cyclicPolyPatch>(patches[patchI]);
-
-                for (label i = pp.size()/2; i < pp.size(); i++)
+                forAll(pp, i)
                 {
                     isMasterFace.unset(pp.start()+i);
                 }
-            }
-            else
-            {
-                FatalErrorIn("syncTools::getMasterFaces(const polyMesh&)")
-                    << "Cannot handle coupled patch " << patches[patchI].name()
-                    << " of type " <<  patches[patchI].type()
-                    << abort(FatalError);
             }
         }
     }

@@ -79,7 +79,7 @@ inline bool Foam::StaticHashTable<T, Key, Hash>::set
 
 
 template<class T, class Key, class Hash>
-inline Foam::Xfer< Foam::StaticHashTable<T, Key, Hash> >
+inline Foam::Xfer<Foam::StaticHashTable<T, Key, Hash> >
 Foam::StaticHashTable<T, Key, Hash>::xfer()
 {
     return xferMove(*this);
@@ -416,7 +416,5 @@ Foam::StaticHashTable<T, Key, Hash>::end() const
     return StaticHashTable<T, Key, Hash>::endConstIter_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

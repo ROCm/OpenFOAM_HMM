@@ -24,10 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorFvPatchScalarField_H
-#define processorFvPatchScalarField_H
-
-#include "processorFvPatchField.H"
+#include "processorCyclicFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -36,37 +33,52 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<>
-void processorFvPatchField<scalar>::initInterfaceMatrixUpdate
-(
-    const scalarField&,
-    scalarField&,
-    const lduMatrix&,
-    const scalarField&,
-    const direction,
-    const Pstream::commsTypes commsType
-) const;
-
-
-template<>
-void processorFvPatchField<scalar>::updateInterfaceMatrix
-(
-    const scalarField&,
-    scalarField& result,
-    const lduMatrix&,
-    const scalarField& coeffs,
-    const direction,
-    const Pstream::commsTypes commsType
-) const;
+//template<>
+//void processorCyclicFvPatchField<scalar>::initInterfaceMatrixUpdate
+//(
+//    const scalarField& psiInternal,
+//    scalarField&,
+//    const lduMatrix&,
+//    const scalarField&,
+//    const direction,
+//    const Pstream::commsTypes commsType
+//) const
+//{
+//    procPatch_.compressedSend
+//    (
+//        commsType,
+//        patch().patchInternalField(psiInternal)()
+//    );
+//}
+//
+//
+//template<>
+//void processorCyclicFvPatchField<scalar>::updateInterfaceMatrix
+//(
+//    const scalarField&,
+//    scalarField& result,
+//    const lduMatrix&,
+//    const scalarField& coeffs,
+//    const direction,
+//    const Pstream::commsTypes commsType
+//) const
+//{
+//    scalarField pnf
+//    (
+//        procPatch_.compressedReceive<scalar>(commsType, this->size())()
+//    );
+//
+//    const unallocLabelList& faceCells = patch().faceCells();
+//
+//    forAll(faceCells, facei)
+//    {
+//        result[faceCells[facei]] -= coeffs[facei]*pnf[facei];
+//    }
+//}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

@@ -1,0 +1,45 @@
+- allocate/free tags.
+Not tested.
+
+OK - test blockMesh with cyclics
+unitTestCases/singleCyclic/
+
+OK - test cyclics sequential running.
+unitTestCases/singleCyclic/
+
+OK - test decomposePar
+
+OK - FaceCellWave
+    unitTestCases/twoCavityCyclicForWallDistance/
+
+OK - non-parallel finite volume : channelFoam
+    unitTestCases/channel395-splitCyclic vs. channel395-dev
+
+OK - parallel finite volume with processorCyclic: channelFoam
+    unitTestCases/channel395-splitCyclic vs. channel395-dev
+
+- amg
+- test createPatch pointSync
+- pointFields on cyclics. volPointInterpolation.
+- jumpCyclics
+- fanFvPatchField
+- activeBaffleVelocity
+- work out overlapping communication for PstreamBuffers.
+  Different tag?
+- fvMeshDistribute to split processor patches into ones with different
+separation.
+- fvMeshSubset
+- kivaToFoam/readKivaGrid.H sorts cyclics (but in incorrect order?)
+- grep for size()/2
+- pointEdgeWave (maybe through inversePointDistanceDiffusivity?)
+- regionSplit
+- scotchDecomp
+- isoSurface.C
+- preProcessing/foamUpgradeCyclics
+- referredCellList.C
+- renumberMesh
+- work out scheduled communication?
+
+compile:
+
+

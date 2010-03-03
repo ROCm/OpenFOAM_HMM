@@ -73,10 +73,6 @@ template<class T, class Key, class Hash> Ostream& operator<<
 
 
 /*---------------------------------------------------------------------------*\
-                     Class StaticHashTableName Declaration
-\*---------------------------------------------------------------------------*/
-
-/*---------------------------------------------------------------------------*\
                      Class StaticHashTableCore Declaration
 \*---------------------------------------------------------------------------*/
 
@@ -100,7 +96,6 @@ struct StaticHashTableCore
         iteratorEnd()
         {}
     };
-
 };
 
 
@@ -134,6 +129,7 @@ class StaticHashTable
 
         //- Assign a new hashed entry to a possibly already existing key
         bool set(const Key&, const T& newElmt, bool protect);
+
 
 public:
 
@@ -183,11 +179,11 @@ public:
         StaticHashTable(const StaticHashTable<T, Key, Hash>&);
 
         //- Construct by transferring the parameter contents
-        StaticHashTable(const Xfer< StaticHashTable<T, Key, Hash> >&);
+        StaticHashTable(const Xfer<StaticHashTable<T, Key, Hash> >&);
 
-    // Destructor
 
-        ~StaticHashTable();
+    //- Destructor
+    ~StaticHashTable();
 
 
     // Member Functions
@@ -251,7 +247,7 @@ public:
             void transfer(StaticHashTable<T, Key, Hash>&);
 
             //- Transfer contents to the Xfer container
-            inline Xfer< StaticHashTable<T, Key, Hash> > xfer();
+            inline Xfer<StaticHashTable<T, Key, Hash> > xfer();
 
 
     // Member Operators
@@ -274,6 +270,7 @@ public:
 
         //- The opposite of the equality operation.
         bool operator!=(const StaticHashTable<T, Key, Hash>&) const;
+
 
     // STL type definitions
 
@@ -316,6 +313,7 @@ public:
 
                 //- Index of current element at hashIndex
                 label elemIndex_;
+
 
         public:
 

@@ -40,6 +40,7 @@ Foam::UIPstream::UIPstream
     const commsTypes commsType,
     const int fromProcNo,
     DynamicList<char>& externalBuf,
+    label& externalBufPosition,
     const int tag,
     streamFormat format,
     versionNumber version
@@ -49,7 +50,7 @@ Foam::UIPstream::UIPstream
     Istream(format, version),
     fromProcNo_(fromProcNo),
     externalBuf_(externalBuf),
-    externalBufPosition_(0),
+    externalBufPosition_(externalBufPosition),
     tag_(tag),
     messageSize_(0)
 {
@@ -122,7 +123,7 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
     Istream(buffers.format_, buffers.version_),
     fromProcNo_(fromProcNo),
     externalBuf_(buffers.recvBuf_[fromProcNo]),
-    externalBufPosition_(0),
+    externalBufPosition_(buffers.recvBufPos_[fromProcNo]),
     tag_(buffers.tag_),
     messageSize_(0)
 {

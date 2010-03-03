@@ -136,8 +136,7 @@ void Foam::extrude2DMesh::setRefinement
             false,                          // flipFaceFlux
             -1,                             // patchID
             zoneID,                         // zoneID
-            zoneFlip,                       // zoneFlip
-            -1                              // subPatchID
+            zoneFlip                        // zoneFlip
         );
     }
 
@@ -174,8 +173,7 @@ void Foam::extrude2DMesh::setRefinement
                 false,                          // flipFaceFlux
                 patchI,                         // patchID
                 zoneID,                         // zoneID
-                zoneFlip,                       // zoneFlip
-                -1                              //?TBD subPatchID
+                zoneFlip                        // zoneFlip
             );
         }
     }
@@ -238,8 +236,7 @@ void Foam::extrude2DMesh::setRefinement
             false,                          // flipFaceFlux
             frontPatchI,                    // patchID
             -1,                             // zoneID
-            false,                          // zoneFlip
-            -1                              //?TDB subPatchID
+            false                           // zoneFlip
         );
 
         // Offset to create front face.
@@ -258,8 +255,7 @@ void Foam::extrude2DMesh::setRefinement
             false,                          // flipFaceFlux
             frontPatchI,                    // patchID
             -1,                             // zoneID
-            false,                          // zoneFlip
-            -1                              //?TDB subPatchID
+            false                           // zoneFlip
         );
     }
 }

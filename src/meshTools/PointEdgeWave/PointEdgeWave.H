@@ -231,9 +231,6 @@ class PointEdgeWave
             //- Merge data from across processor boundaries
             void handleProcPatches();
 
-            //- Calculate cyclic halves addressing.
-            void calcCyclicAddressing();
-
             //- Merge data from across cyclic boundaries
             void handleCyclicPatches();
 

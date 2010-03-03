@@ -95,6 +95,9 @@ public:
             //- Return face transformation tensor
             virtual const tensor& forwardT() const = 0;
 
+            //- Return message tag used for sending
+            virtual int tag() const = 0;
+
 //             //- Set send buffer to sufficient size to hold List<Type>(nElems).
 //             //  Returns reference to buffer (note:buffer.size() is number
 //             //  of characters, not nElems)

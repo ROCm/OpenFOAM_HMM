@@ -306,8 +306,6 @@ autoPtr<mapPolyMesh> reorderMesh
     labelList patchStarts(patches.size());
     labelList oldPatchNMeshPoints(patches.size());
     labelListList patchPointMap(patches.size());
-    labelListList subPatches(patches.size());
-    labelListList subPatchStarts(patches.size());
 
     forAll(patches, patchI)
     {
@@ -315,16 +313,6 @@ autoPtr<mapPolyMesh> reorderMesh
         patchStarts[patchI] = patches[patchI].start();
         oldPatchNMeshPoints[patchI] = patches[patchI].nPoints();
         patchPointMap[patchI] = identity(patches[patchI].nPoints());
-
-        if (isA<processorPolyPatch>(patches[patchI]))
-        {
-            const processorPolyPatch& ppp = refCast<const processorPolyPatch>
-            (
-                patches[patchI]
-            );
-            subPatches[patchI] = ppp.patchIDs();
-            subPatchStarts[patchI] = ppp.starts();
-        }
     }
 
     mesh.resetPrimitives
@@ -335,8 +323,7 @@ autoPtr<mapPolyMesh> reorderMesh
         xferMove(newNeighbour),
         patchSizes,
         patchStarts,
-        subPatches,
-        subPatchStarts
+        true
     );
 
     return autoPtr<mapPolyMesh>

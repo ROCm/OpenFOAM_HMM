@@ -97,11 +97,10 @@ Foam::StaticHashTable<T, Key, Hash>::StaticHashTable
 {}
 
 
-
 template<class T, class Key, class Hash>
 Foam::StaticHashTable<T, Key, Hash>::StaticHashTable
 (
-    const Xfer< StaticHashTable<T, Key, Hash> >& ht
+    const Xfer<StaticHashTable<T, Key, Hash> >& ht
 )
 :
     StaticHashTableCore(),
@@ -450,7 +449,6 @@ void Foam::StaticHashTable<T, Key, Hash>::clearStorage()
     clear();
     resize(1);
 }
-
 
 
 template<class T, class Key, class Hash>

@@ -100,6 +100,12 @@ public:
             return procPolyPatch_.neighbProcNo();
         }
 
+        //- Return message tag used for sending
+        virtual int tag() const
+        {
+            return UPstream::msgType();
+        }
+
         //- Return true if running parallel
         virtual bool coupled() const
         {

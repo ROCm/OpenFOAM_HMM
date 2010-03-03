@@ -136,6 +136,12 @@ public:
             }
         }
 
+        //- Return message tag to use for communication
+        virtual int tag() const
+        {
+            return procPolyPatch_.tag();
+        }
+
         //- Return processor number
         int myProcNo() const
         {

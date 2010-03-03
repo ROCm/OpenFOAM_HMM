@@ -1200,8 +1200,7 @@ int main(int argc, char *argv[])
                     false,              // flipFaceFlux
                     -1,                 // patchID
                     faceZonei,          // zoneID
-                    fm[facei],          // zoneFlip
-                    -1                  // subPatchID
+                    fm[facei]           // zoneFlip
                 );
             }
 
@@ -1252,8 +1251,7 @@ int main(int argc, char *argv[])
                     false,              // flipFaceFlux
                     patchi,             // patchID
                     -1,                 // zoneID
-                    false,              // zoneFlip
-                    -1                  // subPatchID
+                    false               // zoneFlip
                 );
 
                 // For baffles create the opposite face
@@ -1270,8 +1268,7 @@ int main(int argc, char *argv[])
                         false,              // flipFaceFlux
                         patchi,             // patchID
                         -1,                 // zoneID
-                        false,              // zoneFlip
-                        -1
+                        false               // zoneFlip
                     );
                 }
             }
@@ -1320,8 +1317,7 @@ int main(int argc, char *argv[])
                     false,              //flipFaceFlux
                     -1,                 //patchID
                     -1,                 //zoneID
-                    false,              //zoneFlip
-                    -1                  //subPatchID
+                    false               //zoneFlip
                 );
             }
         }

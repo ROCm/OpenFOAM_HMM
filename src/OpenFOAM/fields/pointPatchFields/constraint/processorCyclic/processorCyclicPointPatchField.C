@@ -109,7 +109,8 @@ const
             Pstream::blocking,
             procPatch_.neighbProcNo(),
             reinterpret_cast<const char*>(pf.begin()),
-            pf.byteSize()
+            pf.byteSize(),
+            procPatch_.tag()
         );
     }
 }
@@ -127,7 +128,8 @@ void processorCyclicPointPatchField<Type>::swapAdd(Field<Type>& pField) const
             Pstream::blocking,
             procPatch_.neighbProcNo(),
             reinterpret_cast<char*>(pnf.begin()),
-            pnf.byteSize()
+            pnf.byteSize(),
+            procPatch_.tag()
         );
 
         if (doTransform())

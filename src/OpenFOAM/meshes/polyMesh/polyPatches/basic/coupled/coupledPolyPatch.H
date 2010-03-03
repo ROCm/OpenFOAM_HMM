@@ -235,6 +235,15 @@ public:
                 return true;
             }
 
+            //- Does this side own the patch ?
+            virtual bool owner() const = 0;
+
+            //- Does the coupled side own the patch ?
+            virtual bool neighbour() const
+            {
+                return !owner();
+            }
+
             //- Transform a patch-based field from other side to this side.
             //!! TDB with macros?
             virtual bool doTransform() const = 0;

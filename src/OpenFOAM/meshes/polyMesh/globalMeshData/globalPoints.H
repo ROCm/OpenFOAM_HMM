@@ -156,9 +156,6 @@ class globalPoints
         //  information is collected.
         static label countPatchPoints(const polyBoundaryMesh&);
 
-        ////- Get all faces on coupled patches
-        //static labelListl coupledFaces(const polyBoundaryMesh&);
-
         //- Add information about patchPointI in relative indices to send
         //  buffers (patchFaces, indexInFace etc.)
         static void addToSend
@@ -246,9 +243,8 @@ class globalPoints
             labelList&
         );
 
-        //- Should move into cyclicPolyPatch ordering problem
-        //  keeps on giving problems.
-        static edgeList coupledPoints(const cyclicPolyPatch&);
+        //- Return mesh points of other side in same order as my meshPoints.
+        static labelList reverseMeshPoints(const cyclicPolyPatch&);
 
         //- Do all calculations.
         void calculateSharedPoints

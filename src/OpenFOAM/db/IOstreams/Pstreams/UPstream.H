@@ -46,6 +46,7 @@ SourceFiles
 #include "HashTable.H"
 #include "string.H"
 #include "NamedEnum.H"
+#include "LIFOStack.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -189,6 +190,14 @@ private:
 
         static List<commsStruct> linearCommunication_;
         static List<commsStruct> treeCommunication_;
+
+
+        //- Current free tag
+        static int freeTag_;
+
+        //- Freed tags
+        static LIFOStack<int> freedTags_;
+
 
 
     // Private member functions
@@ -340,6 +349,11 @@ public:
         {
             return msgType_;
         }
+        //- Allocate new tag
+        static int allocateTag();
+
+        //- Release allocated tag
+        static void freeTag(const int tag);
 
 
             //- Get the communications type of the stream

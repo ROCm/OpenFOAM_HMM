@@ -28,7 +28,7 @@ License
 #include "fvMesh.H"
 #include "cyclicPolyPatch.H"
 #include "emptyPolyPatch.H"
-#include "processorPolyPatch.H"
+#include "coupledPolyPatch.H"
 #include "surfaceFields.H"
 #include "volFields.H"
 #include "IOList.H"
@@ -100,23 +100,11 @@ void Foam::fieldValues::faceSource::setFaceZoneFaces()
         {
             facePatchId = mesh().boundaryMesh().whichPatch(faceI);
             const polyPatch& pp = mesh().boundaryMesh()[facePatchId];
-            if (isA<processorPolyPatch>(pp))
+            if (isA<coupledPolyPatch>(pp))
             {
-                if (refCast<const processorPolyPatch>(pp).owner())
+                if (refCast<const coupledPolyPatch>(pp).owner())
                 {
                     faceId = pp.whichFace(faceI);
-                }
-                else
-                {
-                    faceId = -1;
-                }
-            }
-            else if (isA<cyclicPolyPatch>(pp))
-            {
-                label patchFaceI = faceI - pp.start();
-                if (patchFaceI < pp.size()/2)
-                {
-                    faceId = patchFaceI;
                 }
                 else
                 {

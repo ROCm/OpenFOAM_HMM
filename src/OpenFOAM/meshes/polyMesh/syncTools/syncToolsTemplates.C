@@ -101,6 +101,8 @@ void Foam::syncTools::syncPointMap
 
     if (Pstream::parRun())
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
         // Send
 
         forAll(patches, patchI)
@@ -134,11 +136,12 @@ void Foam::syncTools::syncPointMap
                     }
                 }
 
-                OPstream toNeighb(Pstream::blocking, procPatch.neighbProcNo());
+                UOPstream toNeighb(procPatch.neighbProcNo(), pBufs);
                 toNeighb << patchInfo;
             }
         }
 
+        pBufs.finishedSends();
 
         // Receive and combine.
 
@@ -153,7 +156,7 @@ void Foam::syncTools::syncPointMap
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
-                IPstream fromNb(Pstream::blocking, procPatch.neighbProcNo());
+                UIPstream fromNb(procPatch.neighbProcNo(), pBufs);
                 Map<T> nbrPatchInfo(fromNb);
 
                 // Transform
@@ -198,7 +201,7 @@ void Foam::syncTools::syncPointMap
                 const labelList& meshPtsA = cycPatch.meshPoints();
                 const labelList& meshPtsB = nbrPatch.meshPoints();
 
-                // Extract local values. Create map from nbrPoint to value.
+                // Extract local values. Create map from coupled-edge to value.
                 Map<T> half0Values(meshPtsA.size() / 20);
                 Map<T> half1Values(half0Values.size());
 
@@ -311,7 +314,7 @@ void Foam::syncTools::syncPointMap
                     slave++
                 )
                 {
-                    IPstream fromSlave(Pstream::blocking, slave);
+                    IPstream fromSlave(Pstream::scheduled, slave);
                     Map<T> nbrValues(fromSlave);
 
                     // Merge neighbouring values with my values
@@ -335,7 +338,7 @@ void Foam::syncTools::syncPointMap
                     slave++
                 )
                 {
-                    OPstream toSlave(Pstream::blocking, slave);
+                    OPstream toSlave(Pstream::scheduled, slave);
                     toSlave << sharedPointValues;
                 }
             }
@@ -343,14 +346,14 @@ void Foam::syncTools::syncPointMap
             {
                 // Slave: send to master
                 {
-                    OPstream toMaster(Pstream::blocking, Pstream::masterNo());
+                    OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
                     toMaster << sharedPointValues;
                 }
                 // Receive merged values
                 {
                     IPstream fromMaster
                     (
-                        Pstream::blocking,
+                        Pstream::scheduled,
                         Pstream::masterNo()
                     );
                     fromMaster >> sharedPointValues;
@@ -416,6 +419,8 @@ void Foam::syncTools::syncEdgeMap
 
     if (Pstream::parRun())
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
         // Send
 
         forAll(patches, patchI)
@@ -453,11 +458,12 @@ void Foam::syncTools::syncEdgeMap
                     }
                 }
 
-                OPstream toNeighb(Pstream::blocking, procPatch.neighbProcNo());
+                UOPstream toNeighb(procPatch.neighbProcNo(), pBufs);
                 toNeighb << patchInfo;
             }
         }
 
+        pBufs.finishedSends();
 
         // Receive and combine.
 
@@ -474,11 +480,7 @@ void Foam::syncTools::syncEdgeMap
 
                 EdgeMap<T> nbrPatchInfo;
                 {
-                    IPstream fromNbr
-                    (
-                        Pstream::blocking,
-                        procPatch.neighbProcNo()
-                    );
+                    UIPstream fromNbr(procPatch.neighbProcNo(), pBufs);
                     fromNbr >> nbrPatchInfo;
                 }
 
@@ -704,7 +706,7 @@ void Foam::syncTools::syncEdgeMap
                 slave++
             )
             {
-                IPstream fromSlave(Pstream::blocking, slave);
+                IPstream fromSlave(Pstream::scheduled, slave);
                 EdgeMap<T> nbrValues(fromSlave);
 
                 // Merge neighbouring values with my values
@@ -729,7 +731,7 @@ void Foam::syncTools::syncEdgeMap
             )
             {
 
-                OPstream toSlave(Pstream::blocking, slave);
+                OPstream toSlave(Pstream::scheduled, slave);
                 toSlave << sharedEdgeValues;
             }
         }
@@ -737,12 +739,12 @@ void Foam::syncTools::syncEdgeMap
         {
             // Send to master
             {
-                OPstream toMaster(Pstream::blocking, Pstream::masterNo());
+                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
                 toMaster << sharedEdgeValues;
             }
             // Receive merged values
             {
-                IPstream fromMaster(Pstream::blocking, Pstream::masterNo());
+                IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
                 fromMaster >> sharedEdgeValues;
             }
         }
@@ -807,6 +809,8 @@ void Foam::syncTools::syncPointList
 
     if (Pstream::parRun())
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
         // Send
 
         forAll(patches, patchI)
@@ -832,11 +836,12 @@ void Foam::syncTools::syncPointList
                     patchInfo[nbrPointI] = pointValues[meshPts[pointI]];
                 }
 
-                OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
+                UOPstream toNbr(procPatch.neighbProcNo(), pBufs);
                 toNbr << patchInfo;
             }
         }
 
+        pBufs.finishedSends();
 
         // Receive and combine.
 
@@ -853,11 +858,7 @@ void Foam::syncTools::syncPointList
 
                 Field<T> nbrPatchInfo(procPatch.nPoints());
                 {
-                    IPstream fromNbr
-                    (
-                        Pstream::blocking,
-                        procPatch.neighbProcNo()
-                    );
+                    UIPstream fromNbr(procPatch.neighbProcNo(), pBufs);
                     fromNbr >> nbrPatchInfo;
                 }
 
@@ -1032,6 +1033,8 @@ void Foam::syncTools::syncEdgeList
 
     if (Pstream::parRun())
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
         // Send
 
         forAll(patches, patchI)
@@ -1058,10 +1061,12 @@ void Foam::syncTools::syncEdgeList
                     patchInfo[nbrEdgeI] = edgeValues[meshEdges[edgeI]];
                 }
 
-                OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
+                UOPstream toNbr(procPatch.neighbProcNo(), pBufs);
                 toNbr << patchInfo;
            }
         }
+
+        pBufs.finishedSends();
 
         // Receive and combine.
 
@@ -1083,11 +1088,7 @@ void Foam::syncTools::syncEdgeList
                 Field<T> nbrPatchInfo(procPatch.nEdges());
 
                 {
-                    IPstream fromNeighb
-                    (
-                        Pstream::blocking,
-                        procPatch.neighbProcNo()
-                    );
+                    UIPstream fromNeighb(procPatch.neighbProcNo(), pBufs);
                     fromNeighb >> nbrPatchInfo;
                 }
 
@@ -1215,6 +1216,8 @@ void Foam::syncTools::syncBoundaryFaceList
 
     if (Pstream::parRun())
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
         // Send
 
         forAll(patches, patchI)
@@ -1230,29 +1233,19 @@ void Foam::syncTools::syncBoundaryFaceList
 
                 label patchStart = procPatch.start()-mesh.nInternalFaces();
 
-                if (contiguous<T>())
-                {
-                    OPstream::write
+                UOPstream toNbr(procPatch.neighbProcNo(), pBufs);
+                toNbr << 
+                    SubField<T>
                     (
-                        Pstream::blocking,
-                        procPatch.neighbProcNo(),
-                        reinterpret_cast<const char*>(&faceValues[patchStart]),
-                        procPatch.size()*sizeof(T)
+                        faceValues,
+                        procPatch.size(),
+                        patchStart
                     );
-                }
-                else
-                {
-                    OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
-                    toNbr << 
-                        SubField<T>
-                        (
-                            faceValues,
-                            procPatch.size(),
-                            patchStart
-                        );
-                }
             }
         }
+
+
+        pBufs.finishedSends();
 
 
         // Receive and combine.
@@ -1270,25 +1263,8 @@ void Foam::syncTools::syncBoundaryFaceList
 
                 Field<T> nbrPatchInfo(procPatch.size());
 
-                if (contiguous<T>())
-                {
-                    IPstream::read
-                    (
-                        Pstream::blocking,
-                        procPatch.neighbProcNo(),
-                        reinterpret_cast<char*>(nbrPatchInfo.begin()),
-                        nbrPatchInfo.byteSize()
-                    );
-                }
-                else
-                {
-                    IPstream fromNeighb
-                    (
-                        Pstream::blocking,
-                        procPatch.neighbProcNo()
-                    );
-                    fromNeighb >> nbrPatchInfo;
-                }
+                UIPstream fromNeighb(procPatch.neighbProcNo(), pBufs);
+                fromNeighb >> nbrPatchInfo;
 
                 top(procPatch, nbrPatchInfo);
 
@@ -1373,6 +1349,8 @@ void Foam::syncTools::syncFaceList
 
     if (Pstream::parRun())
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
         // Send
 
         forAll(patches, patchI)
@@ -1392,11 +1370,13 @@ void Foam::syncTools::syncFaceList
                     patchInfo[i] = faceValues[procPatch.start()+i];
                 }
 
-                OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
+                UOPstream toNbr(procPatch.neighbProcNo(), pBufs);
                 toNbr << patchInfo;
             }
         }
 
+
+        pBufs.finishedSends();
 
         // Receive and combine.
 
@@ -1413,11 +1393,7 @@ void Foam::syncTools::syncFaceList
 
                 List<unsigned int> patchInfo(procPatch.size());
                 {
-                    IPstream fromNbr
-                    (
-                        Pstream::blocking,
-                        procPatch.neighbProcNo()
-                    );
+                    UIPstream fromNbr(procPatch.neighbProcNo(), pBufs);
                     fromNbr >> patchInfo;
                 }
 
@@ -1508,6 +1484,8 @@ void Foam::syncTools::syncPointList
 
     if (Pstream::parRun())
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
         // Send
 
         forAll(patches, patchI)
@@ -1532,11 +1510,13 @@ void Foam::syncTools::syncPointList
                     patchInfo[nbrPointI] = pointValues[meshPts[pointI]];
                 }
 
-                OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
+                UOPstream toNbr(procPatch.neighbProcNo(), pBufs);
                 toNbr << patchInfo;
             }
         }
 
+
+        pBufs.finishedSends();
 
         // Receive and combine.
 
@@ -1555,11 +1535,7 @@ void Foam::syncTools::syncPointList
                 {
                     // We do not know the number of points on the other side
                     // so cannot use Pstream::read.
-                    IPstream fromNbr
-                    (
-                        Pstream::blocking,
-                        procPatch.neighbProcNo()
-                    );
+                    UIPstream fromNbr(procPatch.neighbProcNo(), pBufs);
                     fromNbr >> nbrPatchInfo;
                 }
 
@@ -1672,6 +1648,8 @@ void Foam::syncTools::syncEdgeList
 
     if (Pstream::parRun())
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
         // Send
 
         forAll(patches, patchI)
@@ -1696,11 +1674,12 @@ void Foam::syncTools::syncEdgeList
                     patchInfo[nbrEdgeI] = edgeValues[meshEdges[edgeI]];
                 }
 
-                OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
+                UOPstream toNbr(procPatch.neighbProcNo(), pBufs);
                 toNbr << patchInfo;
             }
         }
 
+        pBufs.finishedSends();
 
         // Receive and combine.
 
@@ -1719,11 +1698,7 @@ void Foam::syncTools::syncEdgeList
                 List<unsigned int> nbrPatchInfo(procPatch.nEdges());
 
                 {
-                    IPstream fromNeighb
-                    (
-                        Pstream::blocking,
-                        procPatch.neighbProcNo()
-                    );
+                    UIPstream fromNeighb(procPatch.neighbProcNo(), pBufs);
                     fromNeighb >> nbrPatchInfo;
                 }
 

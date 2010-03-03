@@ -78,34 +78,38 @@ void Foam::globalMeshData::initProcAddr()
 
     if (Pstream::parRun())
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
         // Send indices of my processor patches to my neighbours
         forAll (processorPatches_, i)
         {
             label patchi = processorPatches_[i];
 
-            OPstream toNeighbour
+            UOPstream toNeighbour
             (
-                Pstream::blocking,
                 refCast<const processorPolyPatch>
                 (
                     mesh_.boundaryMesh()[patchi]
-                ).neighbProcNo()
+                ).neighbProcNo(),
+                pBufs
             );
 
             toNeighbour << processorPatchIndices_[patchi];
         }
 
+        pBufs.finishedSends();
+
         forAll(processorPatches_, i)
         {
             label patchi = processorPatches_[i];
 
-            IPstream fromNeighbour
+            UIPstream fromNeighbour
             (
-                Pstream::blocking,
                 refCast<const processorPolyPatch>
                 (
                     mesh_.boundaryMesh()[patchi]
-                ).neighbProcNo()
+                ).neighbProcNo(),
+                pBufs
             );
 
             fromNeighbour >> processorPatchNeighbours_[patchi];
@@ -1560,6 +1564,8 @@ void Foam::globalMeshData::updateMesh()
             pointStatus.set(meshPointI, SHARED);
         }
 
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
         // Send patch local points
         forAll(processorPatches_, i)
         {
@@ -1568,10 +1574,12 @@ void Foam::globalMeshData::updateMesh()
             const processorPolyPatch& procPatch =
                 refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchI]);
 
-            OPstream toNeighbour(Pstream::blocking, procPatch.neighbProcNo());
+            UOPstream toNeighbour(procPatch.neighbProcNo(), pBufs);
 
             toNeighbour << procPatch.localPoints();
         }
+
+        pBufs.finishedSends();
 
         // Receive patch local points and uncount if coincident (and not shared)
         forAll(processorPatches_, i)
@@ -1581,7 +1589,7 @@ void Foam::globalMeshData::updateMesh()
             const processorPolyPatch& procPatch =
                 refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchI]);
 
-            IPstream fromNeighbour(Pstream::blocking, procPatch.neighbProcNo());
+            UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs);
 
             pointField nbrPoints(fromNeighbour);
 

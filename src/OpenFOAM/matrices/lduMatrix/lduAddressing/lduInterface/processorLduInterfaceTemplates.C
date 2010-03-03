@@ -87,7 +87,8 @@ void Foam::processorLduInterface::send
             commsType,
             neighbProcNo(),
             reinterpret_cast<const char*>(f.begin()),
-            f.byteSize()
+            f.byteSize(),
+            tag()
         );
     }
     else if (commsType == Pstream::nonBlocking)
@@ -100,7 +101,8 @@ void Foam::processorLduInterface::send
             commsType,
             neighbProcNo(),
             receiveBuf_.begin(),
-            receiveBuf_.size()
+            receiveBuf_.size(),
+            tag()
         );
 
         //setSendBuf<Type>(f.size());
@@ -112,7 +114,8 @@ void Foam::processorLduInterface::send
             commsType,
             neighbProcNo(),
             sendBuf_.begin(),
-            f.byteSize()
+            f.byteSize(),
+            tag()
         );
     }
     else
@@ -138,7 +141,8 @@ void Foam::processorLduInterface::receive
             commsType,
             neighbProcNo(),
             reinterpret_cast<char*>(f.begin()),
-            f.byteSize()
+            f.byteSize(),
+            tag()
         );
     }
     else if (commsType == Pstream::nonBlocking)
@@ -202,7 +206,8 @@ void Foam::processorLduInterface::compressedSend
                 commsType,
                 neighbProcNo(),
                 sendBuf_.begin(),
-                nBytes
+                nBytes,
+                tag()
             );
         }
         else if (commsType == Pstream::nonBlocking)
@@ -215,7 +220,8 @@ void Foam::processorLduInterface::compressedSend
                 commsType,
                 neighbProcNo(),
                 receiveBuf_.begin(),
-                receiveBuf_.size()
+                receiveBuf_.size(),
+                tag()
             );
 
             OPstream::write
@@ -223,7 +229,8 @@ void Foam::processorLduInterface::compressedSend
                 commsType,
                 neighbProcNo(),
                 sendBuf_.begin(),
-                nBytes
+                nBytes,
+                tag()
             );
         }
         else
@@ -264,7 +271,8 @@ void Foam::processorLduInterface::compressedReceive
                 commsType,
                 neighbProcNo(),
                 receiveBuf_.begin(),
-                nBytes
+                nBytes,
+                tag()
             );
         }
         else if (commsType != Pstream::nonBlocking)
@@ -350,7 +358,8 @@ Foam::tmp<Foam::Field<Type> > Foam::processorLduInterface::compressedReceive
 //             commsType,
 //             neighbProcNo(),
 //             sendBuf_.begin(),
-//             sendBuf_.size()
+//             sendBuf_.size(),
+//             tag()
 //         );
 //     }
 //     else if (commsType == Pstream::nonBlocking)
@@ -362,7 +371,8 @@ Foam::tmp<Foam::Field<Type> > Foam::processorLduInterface::compressedReceive
 //             commsType,
 //             neighbProcNo(),
 //             receiveBuf_.begin(),
-//             receiveBuf_.size()
+//             receiveBuf_.size(),
+//             tag()
 //         );
 // 
 //         OPstream::write
@@ -370,7 +380,8 @@ Foam::tmp<Foam::Field<Type> > Foam::processorLduInterface::compressedReceive
 //             commsType,
 //             neighbProcNo(),
 //             sendBuf_.begin(),
-//             sendBuf_.size()
+//             sendBuf_.size(),
+//             tag()
 //         );
 //     }
 //     else
@@ -405,7 +416,8 @@ Foam::tmp<Foam::Field<Type> > Foam::processorLduInterface::compressedReceive
 //                 commsType,
 //                 neighbProcNo(),
 //                 receiveBuf_.begin(),
-//                 receiveBuf_.size()
+//                 receiveBuf_.size(),
+//                 tag()
 //             );
 //         }
 //         else if (commsType != Pstream::nonBlocking)
@@ -441,7 +453,8 @@ Foam::tmp<Foam::Field<Type> > Foam::processorLduInterface::compressedReceive
 //                 commsType,
 //                 neighbProcNo(),
 //                 receiveBuf_.begin(),
-//                 receiveBuf_.size()
+//                 receiveBuf_.size(),
+//                 tag()
 //             );
 //         }
 //         else if (commsType != Pstream::nonBlocking)

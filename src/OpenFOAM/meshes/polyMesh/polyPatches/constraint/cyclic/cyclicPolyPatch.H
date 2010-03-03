@@ -417,34 +417,34 @@ public:
 
         // Low level geometric information
 
-            //- Are the coupled planes separated
-            virtual bool separated() const
-            {
-                return separated_;
-            }
+        //- Are the coupled planes separated
+        virtual bool separated() const
+        {
+            return separated_;
+        }
 
-            virtual const vector& separation() const
-            {
-                return separation_;
-            }
+        virtual const vector& separation() const
+        {
+            return separation_;
+        }
 
-            //- Are the cyclic planes parallel
-            virtual bool parallel() const
-            {
-                return parallel_;
-            }
+        //- Are the cyclic planes parallel
+        virtual bool parallel() const
+        {
+            return parallel_;
+        }
 
-            //- Return face transformation tensor
-            virtual const tensor& forwardT() const
-            {
-                return forwardT_;
-            }
+        //- Return face transformation tensor
+        virtual const tensor& forwardT() const
+        {
+            return forwardT_;
+        }
 
-            //- Return neighbour-cell transformation tensor
-            virtual const tensor& reverseT() const
-            {
-                return reverseT_;
-            }
+        //- Return neighbour-cell transformation tensor
+        virtual const tensor& reverseT() const
+        {
+            return reverseT_;
+        }
 
         label transformGlobalFace(const label facei) const
         {
@@ -465,6 +465,31 @@ public:
                 return -1;
             }
         }
+
+        //- Type of transform
+        transformType transform() const
+        {
+            return transform_;
+        }
+
+        //- Axis of rotation for rotational cyclics
+        const vector& rotationAxis() const
+        {
+            return rotationAxis_;
+        }
+
+        //- point on axis of rotation for rotational cyclics
+        const point& rotationCentre() const
+        {
+            return rotationCentre_;
+        }
+
+        //- Translation vector for translational cyclics
+        const vector& separationVector() const
+        {
+            return separationVector_;
+        }
+
 
         //- Initialize ordering for primitivePatch. Does not
         //  refer to *this (except for name() and type() etc.)

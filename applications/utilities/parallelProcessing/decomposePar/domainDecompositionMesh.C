@@ -40,7 +40,7 @@ Description
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void domainDecomposition::append(labelList& lst, const label elem)
+void Foam::domainDecomposition::append(labelList& lst, const label elem)
 {
     label sz = lst.size();
     lst.setSize(sz+1);
@@ -48,7 +48,7 @@ void domainDecomposition::append(labelList& lst, const label elem)
 }
 
 
-void domainDecomposition::addInterProcFace
+void Foam::domainDecomposition::addInterProcFace
 (
     const label facei,
     const label ownerProc,
@@ -97,7 +97,7 @@ void domainDecomposition::addInterProcFace
 }
 
 
-void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
+void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
 {
     // Decide which cell goes to which processor
     distributeCells();
@@ -230,14 +230,15 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
                 facei,
                 ownerProc,
                 nbrProc,
+
                 procNbrToInterPatch,
                 interPatchFaces
             );
         }
     }
 
-    // Add the proper processor faces to the sub information. Since faces
-    // originate from internal faces this is always -1.
+    // Add the proper processor faces to the sub information. For faces
+    // originating from internal faces this is always -1.
     List<labelListList> subPatchIDs(nProcs_);
     List<labelListList> subPatchStarts(nProcs_);
     forAll(interPatchFaces, procI)
@@ -415,7 +416,16 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
     forAll(procBoundaryAddressing_, procI)
     {
         label nNormal = procPatchSize_[procI].size();
-        label nInterProc = procProcessorPatchSize_[procI].size();
+
+        const labelListList& curSubPatchIDs = 
+            procProcessorPatchSubPatchIDs_[procI];
+
+//        label nInterProc = procProcessorPatchSize_[procI].size();
+        label nInterProc = 0;
+        forAll(curSubPatchIDs, procPatchI)
+        {
+            nInterProc += curSubPatchIDs[procPatchI].size();
+        }
 
         procBoundaryAddressing_[procI].setSize(nNormal + nInterProc);
 
@@ -423,9 +433,14 @@ void domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
         {
             procBoundaryAddressing_[procI][patchI] = patchI;
         }
-        for (label patchI = nNormal; patchI < nNormal+nInterProc; patchI++)
+        label patchI = nNormal;
+        forAll(curSubPatchIDs, procPatchI)
         {
-            procBoundaryAddressing_[procI][patchI] = -1;
+            forAll(curSubPatchIDs[procPatchI], i)
+            {
+                procBoundaryAddressing_[procI][patchI++] =
+                    curSubPatchIDs[procPatchI][i];
+            }
         }
     }
 

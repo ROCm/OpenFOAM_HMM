@@ -24,28 +24,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorFvPatchFieldsFwd_H
-#define processorFvPatchFieldsFwd_H
-
-#include "fieldTypes.H"
+#include "processorCyclicFvPatchFields.H"
+#include "addToRunTimeSelectionTable.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<class Type> class processorFvPatchField;
-
-makePatchTypeFieldTypedefs(processor)
+makePatchFields(processorCyclic);
+//makePatchTypeField(fvPatchScalarField, processorCyclicFvPatchScalarField);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

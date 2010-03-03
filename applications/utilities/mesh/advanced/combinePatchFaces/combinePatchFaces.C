@@ -296,12 +296,7 @@ label mergePatchFaces
                     const faceZone& fZone = mesh.faceZones()[zoneID];
                     zoneFlip = fZone.flipMap()[fZone.whichFace(newMasterI)];
                 }
-                labelPair patchIDs = polyTopoChange::whichPatch
-                (
-                    mesh.boundaryMesh(),
-                    newMasterI
-                );
-
+                label patchID = mesh.boundaryMesh().whichPatch(newMasterI);
 
                 Pout<< "Restoring new master face " << newMasterI
                     << " to vertices " << setFaceVerts[0] << endl;
@@ -316,11 +311,10 @@ label mergePatchFaces
                         own,                            // owner
                         -1,                             // neighbour
                         false,                          // face flip
-                        patchIDs[0],                    // patch for face
+                        patchID,                        // patch for face
                         false,                          // remove from zone
                         zoneID,                         // zone for face
-                        zoneFlip,                       // face flip in zone
-                        patchIDs[1]                     // subPatch
+                        zoneFlip                        // face flip in zone
                     )
                 );
 
@@ -342,10 +336,9 @@ label mergePatchFaces
                             -1,                     // masterEdgeID,
                             newMasterI,             // masterFaceID,
                             false,                  // flipFaceFlux,
-                            patchIDs[0],            // patchID,
+                            patchID,                // patchID,
                             zoneID,                 // zoneID,
-                            zoneFlip,               // zoneFlip
-                            patchIDs[1]             // subPatch
+                            zoneFlip                // zoneFlip
                         )
                     );
                 }

@@ -91,20 +91,6 @@ bool Foam::blockMesh::readPatches
             >> patchTypes[nPatches]
             >> patchNames[nPatches];
 
-        // Read optional neighbour patch name
-        if (patchTypes[nPatches] == cyclicPolyPatch::typeName)
-        {
-            patchStream >> lastToken;
-            if (lastToken.isWord())
-            {
-                nbrPatchNames[nPatches] = lastToken.wordToken();
-            }
-            else
-            {
-                patchStream.putBack(lastToken);
-            }
-        }
-
         // Read patch faces
         patchStream >> tmpBlocksPatches[nPatches];
 
@@ -138,57 +124,56 @@ bool Foam::blockMesh::readPatches
 
         if (patchTypes[nPatches-1] == cyclicPolyPatch::typeName)
         {
-            if (nbrPatchNames[nPatches] == word::null)
+            word halfA = patchNames[nPatches-1] + "_half0";
+            word halfB = patchNames[nPatches-1] + "_half1";
+
+            WarningIn("blockMesh::createTopology(IOdictionary&)")
+                << "Old-style cyclic definition."
+                << " Splitting patch "
+                << patchNames[nPatches-1] << " into two halves "
+                << halfA << " and " << halfB << endl
+                << "    Alternatively use new 'boundary' dictionary syntax."
+                << endl;
+
+            // Add extra patch
+            if (tmpBlocksPatches.size() <= nPatches)
             {
-                word halfA = patchNames[nPatches-1] + "_half0";
-                word halfB = patchNames[nPatches-1] + "_half1";
-
-                WarningIn("blockMesh::createTopology(IOdictionary&)")
-                    << "Old-style cyclic definition."
-                    << " Splitting patch "
-                    << patchNames[nPatches-1] << " into two halves "
-                    << halfA << " and " << halfB << endl
-                    << "    Alternatively use new syntax "
-                    << " cyclic <name> <neighbourname> <faces>" << endl;
-
-                // Add extra patch
-                if (tmpBlocksPatches.size() <= nPatches)
-                {
-                    tmpBlocksPatches.setSize(nPatches + 1);
-                    patchNames.setSize(nPatches + 1);
-                    patchTypes.setSize(nPatches + 1);
-                    nbrPatchNames.setSize(nPatches + 1);
-                }
-
-                patchNames[nPatches-1] = halfA;
-                nbrPatchNames[nPatches-1] = halfB;
-                patchTypes[nPatches] = patchTypes[nPatches-1];
-                patchNames[nPatches] = halfB;
-                nbrPatchNames[nPatches] = halfA;
-
-                // Split faces
-                if ((tmpBlocksPatches[nPatches-1].size() % 2) != 0)
-                {
-                    FatalErrorIn
-                    (
-                        "blockMesh::createTopology(IOdictionary&)"
-                    )   << "Size of cyclic faces is not a multiple of 2 :"
-                        << tmpBlocksPatches[nPatches-1]
-                        << exit(FatalError);
-                }
-                label sz = tmpBlocksPatches[nPatches-1].size()/2;
-                faceList unsplitFaces(tmpBlocksPatches[nPatches-1], true);
-                tmpBlocksPatches[nPatches-1] = faceList
-                (
-                    SubList<face>(unsplitFaces, sz)
-                );
-                tmpBlocksPatches[nPatches] = faceList
-                (
-                    SubList<face>(unsplitFaces, sz, sz)
-                );
-
-                nPatches++;
+                tmpBlocksPatches.setSize(nPatches + 1);
+                patchNames.setSize(nPatches + 1);
+                patchTypes.setSize(nPatches + 1);
+                nbrPatchNames.setSize(nPatches + 1);
             }
+
+            // Update halfA info
+            patchNames[nPatches-1] = halfA;
+            nbrPatchNames[nPatches-1] = halfB;
+            // Update halfB info
+            patchTypes[nPatches] = patchTypes[nPatches-1];
+            patchNames[nPatches] = halfB;
+            nbrPatchNames[nPatches] = halfA;
+
+            // Split faces
+            if ((tmpBlocksPatches[nPatches-1].size() % 2) != 0)
+            {
+                FatalErrorIn
+                (
+                    "blockMesh::createTopology(IOdictionary&)"
+                )   << "Size of cyclic faces is not a multiple of 2 :"
+                    << tmpBlocksPatches[nPatches-1]
+                    << exit(FatalError);
+            }
+            label sz = tmpBlocksPatches[nPatches-1].size()/2;
+            faceList unsplitFaces(tmpBlocksPatches[nPatches-1], true);
+            tmpBlocksPatches[nPatches-1] = faceList
+            (
+                SubList<face>(unsplitFaces, sz)
+            );
+            tmpBlocksPatches[nPatches] = faceList
+            (
+                SubList<face>(unsplitFaces, sz, sz)
+            );
+
+            nPatches++;
         }
 
         patchStream >> lastToken;
@@ -495,6 +480,29 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
             patchPhysicalTypes
         );
 
+
+        // Convert into dictionary
+        PtrList<dictionary> patchDicts(patchNames.size());
+        forAll(patchDicts, patchI)
+        {
+            patchDicts.set(patchI, new dictionary());
+            patchDicts[patchI].set("name", patchNames[patchI]);
+            patchDicts[patchI].set("type", patchTypes[patchI]);
+            if (nbrPatchNames[patchI] != word::null)
+            {
+                patchDicts[patchI].set("neighbourPatch", nbrPatchNames[patchI]);
+            }
+            if (patchPhysicalTypes[patchI] != word::null)
+            {
+                patchDicts[patchI].set
+                (
+                    "physicalType",
+                    patchPhysicalTypes[patchI]
+                );
+            }
+        }
+
+
         blockMeshPtr = new polyMesh
         (
             IOobject
@@ -509,11 +517,9 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
             xferCopy(blockPointField_),   // copy these points, do NOT move
             tmpBlockCells,
             tmpBlocksPatches,
-            patchNames,
-            patchTypes,
+            patchDicts,
             defaultPatchName,
-            defaultPatchType,
-            patchPhysicalTypes
+            defaultPatchType
         );
     }
     else if (meshDescription.found("boundary"))

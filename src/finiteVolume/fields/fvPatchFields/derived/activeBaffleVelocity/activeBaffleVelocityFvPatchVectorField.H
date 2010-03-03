@@ -72,8 +72,11 @@ class activeBaffleVelocityFvPatchVectorField
         //- Initial wall patch areas
         vectorField initWallSf_;
 
-        //- Initial cyclic patch areas
+        //- Initial this-side cyclic patch areas
         vectorField initCyclicSf_;
+
+        //- Initial neighbour-side cyclic patch areas
+        vectorField nbrCyclicSf_;
 
         //- Current fraction of the active baffle which is open
         scalar openFraction_;

@@ -198,69 +198,55 @@ void dumpCyclicMatch(const fileName& prefix, const polyMesh& mesh)
 
     forAll(patches, patchI)
     {
-        if (isA<cyclicPolyPatch>(patches[patchI]))
+        if
+        (
+            isA<cyclicPolyPatch>(patches[patchI])
+         && refCast<const cyclicPolyPatch>(patches[patchI]).owner()
+        )
         {
             const cyclicPolyPatch& cycPatch =
                 refCast<const cyclicPolyPatch>(patches[patchI]);
 
-            label halfSize = cycPatch.size()/2;
-
-            // Dump halves
+            // Dump patches
             {
-                OFstream str(prefix+cycPatch.name()+"_half0.obj");
+                OFstream str(prefix+cycPatch.name()+".obj");
                 Pout<< "Dumping " << cycPatch.name()
-                    << " half0 faces to " << str.name() << endl;
+                    << " faces to " << str.name() << endl;
                 meshTools::writeOBJ
                 (
                     str,
-                    static_cast<faceList>
-                    (
-                        SubList<face>
-                        (
-                            cycPatch,
-                            halfSize
-                        )
-                    ),
+                    cycPatch,
                     cycPatch.points()
                 );
             }
+
+            const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
             {
-                OFstream str(prefix+cycPatch.name()+"_half1.obj");
-                Pout<< "Dumping " << cycPatch.name()
-                    << " half1 faces to " << str.name() << endl;
+                OFstream str(prefix+nbrPatch.name()+".obj");
+                Pout<< "Dumping " << nbrPatch.name()
+                    << " faces to " << str.name() << endl;
                 meshTools::writeOBJ
                 (
                     str,
-                    static_cast<faceList>
-                    (
-                        SubList<face>
-                        (
-                            cycPatch,
-                            halfSize,
-                            halfSize
-                        )
-                    ),
-                    cycPatch.points()
+                    nbrPatch,
+                    nbrPatch.points()
                 );
             }
 
 
             // Lines between corresponding face centres
-            OFstream str(prefix+cycPatch.name()+"_match.obj");
+            OFstream str(prefix+cycPatch.name()+nbrPatch.name()+"_match.obj");
             label vertI = 0;
 
             Pout<< "Dumping cyclic match as lines between face centres to "
                 << str.name() << endl;
 
-            for (label faceI = 0; faceI < halfSize; faceI++)
+            forAll(cycPatch, faceI)
             {
                 const point& fc0 = mesh.faceCentres()[cycPatch.start()+faceI];
                 meshTools::writeOBJ(str, fc0);
                 vertI++;
-
-                label nbrFaceI = halfSize + faceI;
-                const point& fc1 =
-                    mesh.faceCentres()[cycPatch.start()+nbrFaceI];
+                const point& fc1 = mesh.faceCentres()[nbrPatch.start()+faceI];
                 meshTools::writeOBJ(str, fc1);
                 vertI++;
 
@@ -273,34 +259,13 @@ void dumpCyclicMatch(const fileName& prefix, const polyMesh& mesh)
 
 void separateList
 (
-    const vectorField& separation,
+    const vector& separation,
     UList<vector>& field
 )
 {
-    if (separation.size() == 1)
+    forAll(field, i)
     {
-        // Single value for all.
-
-        forAll(field, i)
-        {
-            field[i] += separation[0];
-        }
-    }
-    else if (separation.size() == field.size())
-    {
-        forAll(field, i)
-        {
-            field[i] += separation[i];
-        }
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "separateList(const vectorField&, UList<vector>&)"
-        )   << "Sizes of field and transformation not equal. field:"
-            << field.size() << " transformation:" << separation.size()
-            << abort(FatalError);
+        field[i] += separation;
     }
 }
 
@@ -427,13 +392,19 @@ void syncPoints
     {
         const polyPatch& pp = patches[patchI];
 
-        if (isA<cyclicPolyPatch>(pp))
+        if
+        (
+            isA<cyclicPolyPatch>(pp)
+         && refCast<const cyclicPolyPatch>(pp).owner()
+        )
         {
             const cyclicPolyPatch& cycPatch =
                 refCast<const cyclicPolyPatch>(pp);
 
             const edgeList& coupledPoints = cycPatch.coupledPoints();
             const labelList& meshPts = cycPatch.meshPoints();
+            const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
+            const labelList& nbrMeshPts = nbrPatch.meshPoints();
 
             pointField half0Values(coupledPoints.size());
 
@@ -452,14 +423,14 @@ void syncPoints
             else if (cycPatch.separated())
             {
                 hasTransformation = true;
-                const vectorField& v = cycPatch.coupledPolyPatch::separation();
+                const vector& v = cycPatch.separation();
                 separateList(v, half0Values);
             }
 
             forAll(coupledPoints, i)
             {
                 const edge& e = coupledPoints[i];
-                label point1 = meshPts[e[1]];
+                label point1 = nbrMeshPts[e[1]];
                 points[point1] = half0Values[i];
             }
         }
@@ -783,13 +754,8 @@ int main(int argc, char *argv[])
         // current separation also includes the normal
         // ( separation_ = (nf&(Cr - Cf))*nf ).
 
-        // For processor patches:
-        // - disallow multiple separation/transformation. This basically
-        //   excludes decomposed cyclics. Use the (probably 0) separation
-        //   to align the points.
         // For cyclic patches:
-        // - for separated ones use our own recalculated offset vector
-        // - for rotational ones use current one.
+        // - for separated ones use user specified offset vector
 
         forAll(mesh.boundaryMesh(), patchI)
         {
@@ -813,50 +779,17 @@ int main(int argc, char *argv[])
 
                         if (cycpp.transform() == cyclicPolyPatch::TRANSLATIONAL)
                         {
+                            // Force to wanted separation
                             Info<< "On cyclic translation patch " << pp.name()
                                 << " forcing uniform separation of "
                                 << cycpp.separationVector() << endl;
-                            const_cast<vectorField&>(cpp.separation()) =
-                                pointField(1, cycpp.separationVector());
+                            const_cast<vector&>(cpp.separation()) =
+                                cycpp.separationVector();
                         }
-                        else
-                        {
-                            const_cast<vectorField&>(cpp.separation()) =
-                                pointField
-                                (
-                                    1,
-                                    pp[pp.size()/2].centre(mesh.points())
-                                  - pp[0].centre(mesh.points())
-                                );
-                        }
-                    }
-                    else
-                    {
-                        const_cast<vectorField&>(cpp.separation())
-                        .setSize(1);
                     }
                     Info<< "On coupled patch " << pp.name()
                         << " forcing uniform separation of "
                         << cpp.separation() << endl;
-                }
-                else if (!cpp.parallel())
-                {
-                    Info<< "On coupled patch " << pp.name()
-                        << " forcing uniform rotation of "
-                        << cpp.forwardT()[0] << endl;
-
-                    const_cast<tensorField&>
-                    (
-                        cpp.forwardT()
-                    ).setSize(1);
-                    const_cast<tensorField&>
-                    (
-                        cpp.reverseT()
-                    ).setSize(1);
-
-                    Info<< "On coupled patch " << pp.name()
-                        << " forcing uniform rotation of "
-                        << cpp.forwardT() << endl;
                 }
             }
         }

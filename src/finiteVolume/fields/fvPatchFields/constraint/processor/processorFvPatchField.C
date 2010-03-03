@@ -74,7 +74,7 @@ processorFvPatchField<Type>::processorFvPatchField
     coupledFvPatchField<Type>(ptf, p, iF, mapper),
     procPatch_(refCast<const processorFvPatch>(p))
 {
-    if (!isType<processorFvPatch>(this->patch()))
+    if (!isA<processorFvPatch>(this->patch()))
     {
         FatalErrorIn
         (
@@ -106,7 +106,7 @@ processorFvPatchField<Type>::processorFvPatchField
     coupledFvPatchField<Type>(p, iF, dict),
     procPatch_(refCast<const processorFvPatch>(p))
 {
-    if (!isType<processorFvPatch>(p))
+    if (!isA<processorFvPatch>(p))
     {
         FatalIOErrorIn
         (

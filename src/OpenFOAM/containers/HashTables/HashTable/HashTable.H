@@ -109,7 +109,6 @@ struct HashTableCore
     {
         return iteratorEnd();
     }
-
 };
 
 
@@ -138,6 +137,7 @@ class HashTable
 
             //- Construct from key, next pointer and object
             inline hashedEntry(const Key&, hashedEntry* next, const T&);
+
 
         private:
             //- Disallow default bitwise copy construct
@@ -209,9 +209,8 @@ public:
         HashTable(const Xfer<HashTable<T, Key, Hash> >&);
 
 
-    // Destructor
-
-        ~HashTable();
+    //- Destructor
+    ~HashTable();
 
 
     // Member Functions
@@ -246,6 +245,7 @@ public:
 
             //- Print information
             Ostream& printInfo(Ostream&) const;
+
 
         // Edit
 
@@ -291,7 +291,7 @@ public:
             void transfer(HashTable<T, Key, Hash>&);
 
             //- Transfer contents to the Xfer container
-            inline Xfer< HashTable<T, Key, Hash> > xfer();
+            inline Xfer<HashTable<T, Key, Hash> > xfer();
 
 
     // Member Operators
@@ -356,9 +356,8 @@ public:
                 //- Current hash index
                 label hashIndex_;
 
-        protected:
 
-            // Protected Member Functions
+        protected:
 
             // Constructors
 
@@ -380,6 +379,8 @@ public:
                 );
 
 
+            // Protected Member Functions
+
                 //- Increment to the next position
                 inline void increment();
 
@@ -391,6 +392,7 @@ public:
 
                 //- Return const access to referenced object
                 inline const T& cobject() const;
+
 
         public:
 
@@ -434,6 +436,7 @@ public:
                     const label hashIndex
                 );
 
+
         public:
 
             // Constructors
@@ -444,12 +447,11 @@ public:
                 //- Construct end iterator
                 inline iterator(const iteratorEnd& unused);
 
+
             // Member operators
 
                 //- Conversion to a const_iterator
                 inline operator const_iterator() const;
-
-                // Access
 
                 //- Return referenced hash value
                 inline T& operator*();
@@ -492,6 +494,7 @@ public:
                     const label hashIndex
                 );
 
+
         public:
 
             // Constructors
@@ -502,9 +505,8 @@ public:
                 //- Construct end iterator
                 inline const_iterator(const iteratorEnd& unused);
 
-            // Member operators
 
-                // Access
+            // Member operators
 
                 //- Return referenced hash value
                 inline const T& operator*() const;
@@ -536,7 +538,6 @@ public:
             Ostream&,
             const HashTable<T, Key, Hash>&
         );
-
 };
 
 

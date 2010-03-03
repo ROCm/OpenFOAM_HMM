@@ -24,61 +24,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "processorFvPatchScalarField.H"
+#ifndef processorCyclicFvPatchFieldsFwd_H
+#define processorCyclicFvPatchFieldsFwd_H
+
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<>
-void processorFvPatchField<scalar>::initInterfaceMatrixUpdate
-(
-    const scalarField& psiInternal,
-    scalarField&,
-    const lduMatrix&,
-    const scalarField&,
-    const direction,
-    const Pstream::commsTypes commsType
-) const
-{
-    procPatch_.compressedSend
-    (
-        commsType,
-        patch().patchInternalField(psiInternal)()
-    );
-}
+template<class Type> class processorCyclicFvPatchField;
 
-
-template<>
-void processorFvPatchField<scalar>::updateInterfaceMatrix
-(
-    const scalarField&,
-    scalarField& result,
-    const lduMatrix&,
-    const scalarField& coeffs,
-    const direction,
-    const Pstream::commsTypes commsType
-) const
-{
-    scalarField pnf
-    (
-        procPatch_.compressedReceive<scalar>(commsType, this->size())()
-    );
-
-    const unallocLabelList& faceCells = patch().faceCells();
-
-    forAll(faceCells, facei)
-    {
-        result[faceCells[facei]] -= coeffs[facei]*pnf[facei];
-    }
-}
-
+makePatchTypeFieldTypedefs(processor)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

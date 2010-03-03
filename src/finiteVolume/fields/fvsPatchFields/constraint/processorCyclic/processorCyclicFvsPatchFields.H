@@ -24,10 +24,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorFvPatchFields_H
-#define processorFvPatchFields_H
+#ifndef processorCyclicFvsPatchFields_H
+#define processorCyclicFvsPatchFields_H
 
-#include "processorFvPatchScalarField.H"
+#include "processorCyclicFvsPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -37,7 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeFieldTypedefs(processor)
+makeFvsPatchTypeFieldTypedefs(processorCyclic)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

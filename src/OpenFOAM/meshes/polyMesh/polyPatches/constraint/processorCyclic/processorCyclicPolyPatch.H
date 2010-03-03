@@ -55,12 +55,14 @@ class processorCyclicPolyPatch
 {
     // Private data
 
+        //- Message tag to use for communication
+        const int tag_;
+
         //- Name of originating patch
         const word referPatchName_;
 
         //- Index of originating patch
         mutable label referPatchID_;
-
 
     // Private member functions
 
@@ -270,7 +272,19 @@ public:
         const coupledPolyPatch& referPatch() const
         {
             const polyPatch& pp = this->boundaryMesh()[referPatchID()];
-            return refCast<const processorCyclicPolyPatch>(pp);
+            return refCast<const coupledPolyPatch>(pp);
+        }
+
+        //- Return message tag to use for communication
+        virtual int tag() const
+        {
+            return tag_;
+        }
+
+        //- Does this side own the patch ?
+        virtual bool owner() const
+        {
+            return referPatch().owner();
         }
 
         //- Transform a patch-based field from other side to this side.

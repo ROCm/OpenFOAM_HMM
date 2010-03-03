@@ -382,7 +382,8 @@ processorCyclicPointPatch::processorCyclicPointPatch
     const pointBoundaryMesh& bm
 )
 :
-    processorPointPatch(patch, bm)
+    processorPointPatch(patch, bm),
+    procCycPolyPatch_(refCast<const processorCyclicPolyPatch>(patch))
 {}
 
 

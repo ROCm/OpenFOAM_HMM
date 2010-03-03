@@ -298,7 +298,11 @@ evaluate()
         }
 
         // Block for any outstanding requests
-        if (Pstream::defaultCommsType == Pstream::nonBlocking)
+        if
+        (
+            Pstream::parRun()
+         && Pstream::defaultCommsType == Pstream::nonBlocking
+        )
         {
             Pstream::waitRequests();
         }

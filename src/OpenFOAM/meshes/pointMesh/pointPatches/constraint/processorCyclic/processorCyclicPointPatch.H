@@ -60,6 +60,9 @@ class processorCyclicPointPatch
 :
     public processorPointPatch
 {
+    // Private data
+
+        const processorCyclicPolyPatch& procCycPolyPatch_;
 
         //- Disallow default construct as copy
         processorCyclicPointPatch(const processorCyclicPointPatch&);
@@ -89,6 +92,13 @@ public:
 
 
     // Member functions
+
+
+        //- Return message tag to use for communication
+        virtual int tag() const
+        {
+            return procCycPolyPatch_.tag();
+        }
 
 //        //- Return true if running parallel
 //        virtual bool coupled() const

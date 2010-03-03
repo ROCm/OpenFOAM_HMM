@@ -556,7 +556,7 @@ void getInterfaceSizes
         label cellI = mesh.faceOwner()[i+mesh.nInternalFaces()];
         coupledRegion[i] = cellRegion[cellI];
     }
-    syncTools::swapBoundaryFaceList(mesh, coupledRegion, false);
+    syncTools::swapBoundaryFaceList(mesh, coupledRegion);
 
     forAll(coupledRegion, i)
     {
@@ -726,7 +726,7 @@ autoPtr<mapPolyMesh> createRegionMesh
         label cellI = mesh.faceOwner()[i+mesh.nInternalFaces()];
         coupledRegion[i] = cellRegion[cellI];
     }
-    syncTools::swapBoundaryFaceList(mesh, coupledRegion, false);
+    syncTools::swapBoundaryFaceList(mesh, coupledRegion);
 
 
     // Topology change container. Start off from existing mesh.
@@ -1375,7 +1375,7 @@ int main(int argc, char *argv[])
     {
         neiZoneID[i] = zoneID[mesh.faceOwner()[i+mesh.nInternalFaces()]];
     }
-    syncTools::swapBoundaryFaceList(mesh, neiZoneID, false);
+    syncTools::swapBoundaryFaceList(mesh, neiZoneID);
 
 
     // Determine connected regions

@@ -63,7 +63,7 @@ class UIPstream
 
         DynamicList<char>& externalBuf_;
 
-        label externalBufPosition_;
+        label& externalBufPosition_;
 
         const int tag_;
 
@@ -94,6 +94,7 @@ public:
             const commsTypes commsType,
             const int fromProcNo,
             DynamicList<char>& externalBuf,
+            label& externalBufPosition,
             const int tag = UPstream::msgType(),
             streamFormat format=BINARY,
             versionNumber version=currentVersion
@@ -101,11 +102,6 @@ public:
 
         //- Construct given buffers
         UIPstream(const int fromProcNo, PstreamBuffers&);
-
-
-    // Destructor
-
-        ~UIPstream();
 
 
     // Member functions

@@ -175,13 +175,6 @@ void Foam::cyclicPolyPatch::calcTransforms
     const UList<point>& half1Areas
 )
 {
-Pout<< "cyclicPolyPatch::calcTransforms : name:" << name() << endl
-    << "    half0Ctrs:"
-    << " min:" << min(half0Ctrs) << " max:" << max(half0Ctrs)<< endl
-    << "    half1Ctrs:"
-    << " min:" << min(half1Ctrs) << " max:" << max(half1Ctrs)<< endl
-    << endl;
-
     if (half0Ctrs.size() != half1Ctrs.size())
     {
         FatalErrorIn
@@ -265,16 +258,6 @@ Pout<< "cyclicPolyPatch::calcTransforms : name:" << name() << endl
             half1Normals,
             half0Tols
         );
-
-Pout<< "cyclicPolyPatch::calcTransforms : calculated transforms for:"
-    << name() << endl
-    << "    separated_:" << separated_ << endl
-    << "    separation_:" << separation_ << endl
-    << "    parallel_:" << parallel_ << endl
-    << "    forwardT_:" << forwardT_ << endl
-    << "    reverseT_:" << reverseT_ << endl
-    << endl;
-
     }
 }
 
@@ -445,7 +428,7 @@ Foam::label Foam::cyclicPolyPatch::getConsistentRotationFace
 
     if (debug)
     {
-        Info<< "getConsistentRotationFace(const pointField&)" << nl
+        Pout<< "getConsistentRotationFace(const pointField&)" << nl
             << "    rotFace = " << rotFace << nl
             << "    point =  " << faceCentres[rotFace] << endl;
     }
@@ -679,7 +662,7 @@ void Foam::cyclicPolyPatch::calcGeometry
     //polyPatch::calcGeometry();
 
 Pout<< "cyclicPolyPatch::calcGeometry : name:" << name()
-    << " referred from:" << referPatch.size() << endl;
+    << " referred from a patch with nFaces:" << referPatch.size() << endl;
 
     calcTransforms
     (
@@ -694,7 +677,6 @@ Pout<< "cyclicPolyPatch::calcGeometry : name:" << name()
 
 void Foam::cyclicPolyPatch::calcGeometry(PstreamBuffers& pBufs)
 {
-Pout<< "cyclicPolyPatch::calcGeometry() for " << name() << endl;
     calcGeometry
     (
         *this,

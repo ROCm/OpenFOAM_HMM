@@ -55,6 +55,7 @@ Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
 )
 :
     processorPolyPatch(name, size, start, index, bm, myProcNo, neighbProcNo),
+    tag_(UPstream::allocateTag()),
     referPatchName_(referPatchName),
     referPatchID_(-1)
 {}
@@ -69,6 +70,7 @@ Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
 )
 :
     processorPolyPatch(name, dict, index, bm),
+    tag_(UPstream::allocateTag()),
     referPatchName_(dict.lookup("referPatch")),
     referPatchID_(-1)
 {}
@@ -81,6 +83,7 @@ Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
 )
 :
     processorPolyPatch(pp, bm),
+    tag_(pp.tag_),
     referPatchName_(pp.referPatchName()),
     referPatchID_(-1)
 {}
@@ -97,6 +100,7 @@ Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
 )
 :
     processorPolyPatch(pp, bm, index, newSize, newStart),
+    tag_(pp.tag_),
     referPatchName_(referPatchName),
     referPatchID_(-1)
 {}
@@ -112,6 +116,7 @@ Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
 )
 :
     processorPolyPatch(pp, bm, index, mapAddressing, newStart),
+    tag_(pp.tag_),
     referPatchName_(pp.referPatchName()),
     referPatchID_(-1)
 {}
@@ -120,7 +125,9 @@ Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::processorCyclicPolyPatch::~processorCyclicPolyPatch()
-{}
+{
+    UPstream::freeTag(tag_);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -128,8 +135,6 @@ Foam::processorCyclicPolyPatch::~processorCyclicPolyPatch()
 
 void Foam::processorCyclicPolyPatch::initGeometry(PstreamBuffers& pBufs)
 {
-Pout<< "**processorCyclicPolyPatch::initGeometry()" << endl;
-
     // Send over processorPolyPatch data
     processorPolyPatch::initGeometry(pBufs);
 }
@@ -137,8 +142,6 @@ Pout<< "**processorCyclicPolyPatch::initGeometry()" << endl;
 
 void Foam::processorCyclicPolyPatch::calcGeometry(PstreamBuffers& pBufs)
 {
-Pout<< "processorCyclicPolyPatch::calcGeometry() for " << name() << endl;
-
     // Receive and initialise processorPolyPatch data
     processorPolyPatch::calcGeometry(pBufs);
 
@@ -158,7 +161,7 @@ Pout<< "processorCyclicPolyPatch::calcGeometry() for " << name() << endl;
 
         pp.calcGeometry
         (
-            pp,
+            *this,
             faceCentres(),
             faceAreas(),
             faceCellCentres(),

@@ -337,22 +337,22 @@ int main(int argc, char *argv[])
 
     // Construct the point fields
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    pointMesh pMesh(mesh);
+//    pointMesh pMesh(mesh);
 
     PtrList<pointScalarField> pointScalarFields;
-    readFields(pMesh, objects, pointScalarFields);
+//    readFields(pMesh, objects, pointScalarFields);
 
     PtrList<pointVectorField> pointVectorFields;
-    readFields(pMesh, objects, pointVectorFields);
+//    readFields(pMesh, objects, pointVectorFields);
 
     PtrList<pointSphericalTensorField> pointSphericalTensorFields;
-    readFields(pMesh, objects, pointSphericalTensorFields);
+//    readFields(pMesh, objects, pointSphericalTensorFields);
 
     PtrList<pointSymmTensorField> pointSymmTensorFields;
-    readFields(pMesh, objects, pointSymmTensorFields);
+//    readFields(pMesh, objects, pointSymmTensorFields);
 
     PtrList<pointTensorField> pointTensorFields;
-    readFields(pMesh, objects, pointTensorFields);
+//    readFields(pMesh, objects, pointTensorFields);
 
 
     // Construct the Lagrangian fields
@@ -652,45 +652,45 @@ int main(int argc, char *argv[])
         }
 
 
-        // Point fields
-        if
-        (
-            pointScalarFields.size()
-         || pointVectorFields.size()
-         || pointSphericalTensorFields.size()
-         || pointSymmTensorFields.size()
-         || pointTensorFields.size()
-        )
-        {
-            labelIOList pointProcAddressing
-            (
-                IOobject
-                (
-                    "pointProcAddressing",
-                    procMesh.facesInstance(),
-                    procMesh.meshSubDir,
-                    procMesh,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            );
-
-            pointMesh procPMesh(procMesh, true);
-
-            pointFieldDecomposer fieldDecomposer
-            (
-                pMesh,
-                procPMesh,
-                pointProcAddressing,
-                boundaryProcAddressing
-            );
-
-            fieldDecomposer.decomposeFields(pointScalarFields);
-            fieldDecomposer.decomposeFields(pointVectorFields);
-            fieldDecomposer.decomposeFields(pointSphericalTensorFields);
-            fieldDecomposer.decomposeFields(pointSymmTensorFields);
-            fieldDecomposer.decomposeFields(pointTensorFields);
-        }
+//        // Point fields
+//        if
+//        (
+//            pointScalarFields.size()
+//         || pointVectorFields.size()
+//         || pointSphericalTensorFields.size()
+//         || pointSymmTensorFields.size()
+//         || pointTensorFields.size()
+//        )
+//        {
+//            labelIOList pointProcAddressing
+//            (
+//                IOobject
+//                (
+//                    "pointProcAddressing",
+//                    procMesh.facesInstance(),
+//                    procMesh.meshSubDir,
+//                    procMesh,
+//                    IOobject::MUST_READ,
+//                    IOobject::NO_WRITE
+//                )
+//            );
+//
+//            pointMesh procPMesh(procMesh, true);
+//
+//            pointFieldDecomposer fieldDecomposer
+//            (
+//                pMesh,
+//                procPMesh,
+//                pointProcAddressing,
+//                boundaryProcAddressing
+//            );
+//
+//            fieldDecomposer.decomposeFields(pointScalarFields);
+//            fieldDecomposer.decomposeFields(pointVectorFields);
+//            fieldDecomposer.decomposeFields(pointSphericalTensorFields);
+//            fieldDecomposer.decomposeFields(pointSymmTensorFields);
+//            fieldDecomposer.decomposeFields(pointTensorFields);
+//        }
 
 
         // If there is lagrangian data write it out

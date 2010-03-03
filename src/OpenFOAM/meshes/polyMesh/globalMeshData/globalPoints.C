@@ -431,17 +431,16 @@ void Foam::globalPoints::receivePatchPoints
             const cyclicPolyPatch& cycPatch =
                 refCast<const cyclicPolyPatch>(pp);
 
-            const labelList& meshPoints = pp.meshPoints();
+            const labelList& meshPoints = cycPatch.meshPoints();
+            const labelList coupledMeshPoints(reverseMeshPoints(cycPatch));
 
             //const edgeList& connections = cycPatch.coupledPoints();
-            const edgeList connections(coupledPoints(cycPatch));
+            //const edgeList connections(coupledPoints(cycPatch));
 
-            forAll(connections, i)
+            forAll(meshPoints, i)
             {
-                const edge& e = connections[i];
-
-                label meshPointA = meshPoints[e[0]];
-                label meshPointB = meshPoints[e[1]];
+                label meshPointA = meshPoints[i];
+                label meshPointB = coupledMeshPoints[i];
 
                 label localA = meshToLocalPoint
                 (
@@ -823,13 +822,15 @@ void Foam::globalPoints::receiveSharedPoints
 
             // Sync all info.
             //const edgeList& connections = cycPatch.coupledPoints();
-            const edgeList connections(coupledPoints(cycPatch));
+            //const edgeList connections(coupledPoints(cycPatch));
 
-            forAll(connections, i)
+            const labelList& meshPoints = cycPatch.meshPoints();
+            const labelList coupledMeshPoints(reverseMeshPoints(cycPatch));
+
+            forAll(meshPoints, i)
             {
-                const edge& e = connections[i];
-                label meshPointA = pp.meshPoints()[e[0]];
-                label meshPointB = pp.meshPoints()[e[1]];
+                label meshPointA = meshPoints[i];
+                label meshPointB = coupledMeshPoints[i];
 
                 label localA = meshToLocalPoint
                 (
@@ -902,51 +903,25 @@ void Foam::globalPoints::receiveSharedPoints
 }
 
 
-Foam::edgeList Foam::globalPoints::coupledPoints(const cyclicPolyPatch& pp)
+Foam::labelList Foam::globalPoints::reverseMeshPoints
+(
+    const cyclicPolyPatch& pp
+)
 {
-    // Look at cyclic patch as two halves, A and B.
-    // Now all we know is that relative face index in halfA is same
-    // as coupled face in halfB and also that the 0th vertex
-    // corresponds.
+    const cyclicPolyPatch& nbrPatch = pp.neighbPatch();
 
-    // From halfA point to halfB or -1.
-    labelList coupledPoint(pp.nPoints(), -1);
+    faceList masterFaces(nbrPatch.size());
 
-    for (label patchFaceA = 0; patchFaceA < pp.size()/2; patchFaceA++)
+    forAll (nbrPatch, faceI)
     {
-        const face& fA = pp.localFaces()[patchFaceA];
-
-        forAll(fA, indexA)
-        {
-            label patchPointA = fA[indexA];
-
-            if (coupledPoint[patchPointA] == -1)
-            {
-                const face& fB = pp.localFaces()[patchFaceA + pp.size()/2];
-
-                label indexB = (fB.size() - indexA) % fB.size();
-
-                coupledPoint[patchPointA] = fB[indexB];
-            }
-        }
+        masterFaces[faceI] = nbrPatch[faceI].reverseFace();
     }
 
-    edgeList connected(pp.nPoints());
-
-    // Extract coupled points.
-    label connectedI = 0;
-
-    forAll(coupledPoint, i)
-    {
-        if (coupledPoint[i] != -1)
-        {
-            connected[connectedI++] = edge(i, coupledPoint[i]);
-        }
-    }
-
-    connected.setSize(connectedI);
-
-    return connected;
+    return primitiveFacePatch
+    (
+        masterFaces,
+        nbrPatch.points()
+    ).meshPoints();
 }
 
 

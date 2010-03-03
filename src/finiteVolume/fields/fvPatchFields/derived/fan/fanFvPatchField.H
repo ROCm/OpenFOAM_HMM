@@ -132,7 +132,13 @@ public:
 
         // Access
 
-            //- Return the "jump" across the patch as a "half" field
+            //- Return the polynomial coefficients
+            const List<scalar>& f() const
+            {
+                return f_;
+            }
+
+            //- Return the "jump" across the patch.
             virtual tmp<Field<Type> > jump() const
             {
                 return jump_;
