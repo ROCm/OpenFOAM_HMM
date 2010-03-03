@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,6 +50,9 @@ Foam::CoalParcel<ThermoType>::CoalParcel
     const scalar nParticle0,
     const scalar d0,
     const vector& U0,
+    const vector& f0,
+    const vector& pi0,
+    const vector& tau0,
     const scalarField& YMixture0,
     const scalarField& YGas0,
     const scalarField& YLiquid0,
@@ -68,6 +71,9 @@ Foam::CoalParcel<ThermoType>::CoalParcel
         nParticle0,
         d0,
         U0,
+        f0,
+        pi0,
+        tau0,
         YMixture0,
         YGas0,
         YLiquid0,

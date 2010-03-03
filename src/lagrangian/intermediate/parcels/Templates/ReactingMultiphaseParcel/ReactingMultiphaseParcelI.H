@@ -131,7 +131,8 @@ inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
         d0,
         U0,
         f0,
-        U0,
+        pi0,
+        tau0,
         Y0,
         constProps
     ),
