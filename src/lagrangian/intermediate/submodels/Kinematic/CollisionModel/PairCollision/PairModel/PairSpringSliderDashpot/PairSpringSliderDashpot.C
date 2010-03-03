@@ -242,8 +242,8 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
             pA.f() += fT_AB;
             pB.f() += -fT_AB;
 
-            pA.tau() += (pA.d()/2*-rHat_AB) ^ fT_AB;
-            pB.tau() += (pB.d()/2*rHat_AB) ^ -fT_AB;
+            pA.torque() += (pA.d()/2*-rHat_AB) ^ fT_AB;
+            pB.torque() += (pB.d()/2*rHat_AB) ^ -fT_AB;
         }
     }
 }

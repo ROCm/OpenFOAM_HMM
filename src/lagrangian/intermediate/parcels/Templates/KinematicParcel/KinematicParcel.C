@@ -204,8 +204,8 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     d_(p.d_),
     U_(p.U_),
     f_(p.f_),
-    pi_(p.pi_),
-    tau_(p.tau_),
+    angularMomentum_(p.angularMomentum_),
+    torque_(p.torque_),
     rho_(p.rho_),
     tTurb_(p.tTurb_),
     UTurb_(p.UTurb_),
@@ -241,7 +241,7 @@ bool Foam::KinematicParcel<ParcelType>::move(TrackData& td)
 
             p.U() += 0.5*deltaT*p.f()/p.mass();
 
-            pi_ += 0.5*deltaT*tau_;
+            angularMomentum_ += 0.5*deltaT*torque_;
 
             break;
         }

@@ -50,7 +50,7 @@ void Foam::PairCollision<CloudType>::preInteraction()
 
         p.f() = vector::zero;
 
-        p.tau() = vector::zero;
+        p.torque() = vector::zero;
     }
 
     buildCellOccupancy();

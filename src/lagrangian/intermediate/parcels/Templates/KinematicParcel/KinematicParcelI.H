@@ -26,7 +26,7 @@ License
 
 #include "mathematicalConstants.H"
 
-using namespace Foam::constant;
+using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -91,8 +91,8 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     d_(0.0),
     U_(vector::zero),
     f_(vector::zero),
-    pi_(vector::zero),
-    tau_(vector::zero),
+    angularMomentum_(vector::zero),
+    torque_(vector::zero),
     rho_(0.0),
     tTurb_(0.0),
     UTurb_(vector::zero),
@@ -114,8 +114,8 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     const scalar d0,
     const vector& U0,
     const vector& f0,
-    const vector& pi0,
-    const vector& tau0,
+    const vector& angularMomentum0,
+    const vector& torque0,
     const constantProperties& constProps
 )
 :
@@ -125,8 +125,8 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     d_(d0),
     U_(U0),
     f_(f0),
-    pi_(pi0),
-    tau_(tau0),
+    angularMomentum_(angularMomentum0),
+    torque_(torque0),
     rho_(constProps.rho0()),
     tTurb_(0.0),
     UTurb_(vector::zero),
@@ -297,17 +297,17 @@ Foam::KinematicParcel<ParcelType>::f() const
 
 template <class ParcelType>
 inline const Foam::vector&
-Foam::KinematicParcel<ParcelType>::pi() const
+Foam::KinematicParcel<ParcelType>::angularMomentum() const
 {
-    return pi_;
+    return angularMomentum_;
 }
 
 
 template <class ParcelType>
 inline const Foam::vector&
-Foam::KinematicParcel<ParcelType>::tau() const
+Foam::KinematicParcel<ParcelType>::torque() const
 {
-    return tau_;
+    return torque_;
 }
 
 
@@ -376,16 +376,16 @@ inline Foam::vector& Foam::KinematicParcel<ParcelType>::f()
 
 
 template <class ParcelType>
-inline Foam::vector& Foam::KinematicParcel<ParcelType>::pi()
+inline Foam::vector& Foam::KinematicParcel<ParcelType>::angularMomentum()
 {
-    return pi_;
+    return angularMomentum_;
 }
 
 
 template <class ParcelType>
-inline Foam::vector& Foam::KinematicParcel<ParcelType>::tau()
+inline Foam::vector& Foam::KinematicParcel<ParcelType>::torque()
 {
-    return tau_;
+    return torque_;
 }
 
 
@@ -479,7 +479,7 @@ template <class ParcelType>
 inline Foam::vector
 Foam::KinematicParcel<ParcelType>::omega() const
 {
-    return pi_/momentOfInertia();
+    return angularMomentum_/momentOfInertia();
 }
 
 
@@ -494,7 +494,7 @@ template <class ParcelType>
 inline Foam::scalar
 Foam::KinematicParcel<ParcelType>::volume(const scalar d) const
 {
-    return mathematical::pi/6.0*pow3(d);
+    return pi/6.0*pow3(d);
 }
 
 
@@ -524,7 +524,7 @@ template <class ParcelType>
 inline Foam::scalar
 Foam::KinematicParcel<ParcelType>::areaS(const scalar d) const
 {
-    return mathematical::pi*d*d;
+    return pi*d*d;
 }
 
 

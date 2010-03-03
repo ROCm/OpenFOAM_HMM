@@ -267,8 +267,8 @@ public:
             const scalar d0,
             const vector& U0,
             const vector& f0,
-            const vector& pi0,
-            const vector& tau0,
+            const vector& angularMomentum0,
+            const vector& torque0,
             const constantProperties& constProps
         );
 
