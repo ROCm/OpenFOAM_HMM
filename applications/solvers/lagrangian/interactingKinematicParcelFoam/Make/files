@@ -1,3 +1,0 @@
-interactingKinematicParcelFoam.C
-
-EXE = $(FOAM_APPBIN)/interactingKinematicParcelFoam
