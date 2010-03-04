@@ -142,13 +142,13 @@ bool Foam::Particle<ParticleType>::insideCellExact
         }
     }
 
-    if (nFaceCrossings > 1)
-    {
-        Pout<< "In cell " << celli_ << " there were " << nFaceCrossings
-            << " face crossings detected tracking from concave cell centre to "
-            << " endPosition"
-            << endl;
-    }
+    // if (nFaceCrossings > 1)
+    // {
+    //     Pout<< "In cell " << celli_ << " there were " << nFaceCrossings
+    //         << " face crossings detected tracking from concave cell "
+    //         << " centre to endPosition"
+    //         << endl;
+    // }
 
     if (nFaceCrossings % 2 == 0)
     {
@@ -210,9 +210,6 @@ void Foam::Particle<ParticleType>::trackToFaceExact
     // planes of faces.
 
     const vector deltaPosition = endPosition - position_;
-    vector deltaTrack =
-        mag(mesh.cellCentres()[celli_] - position_)
-       *deltaPosition/(mag(deltaPosition) + VSMALL);
 
     if (insideCellExact(position_, celli_, false))
     {
