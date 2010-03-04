@@ -67,7 +67,15 @@ Foam::sampledCuttingPlane::interpolateField
             volPointInterpolation::New(volSubFld.mesh()).interpolate(volSubFld);
 
         // Sample.
-        return surface().interpolate(volSubFld, tpointSubFld());
+        return surface().interpolate
+        (
+            (
+                average_
+              ? pointAverage(tpointSubFld())()
+              : volSubFld
+            ),
+            tpointSubFld()
+        );
     }
     else
     {
@@ -77,7 +85,15 @@ Foam::sampledCuttingPlane::interpolateField
         );
 
         // Sample.
-        return surface().interpolate(volFld, tpointFld());
+        return surface().interpolate
+        (
+            (
+                average_
+              ? pointAverage(tpointFld())()
+              : volFld
+            ),
+            tpointFld()
+        );
     }
 }
 

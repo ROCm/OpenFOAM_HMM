@@ -62,7 +62,15 @@ Foam::distanceSurface::interpolateField
     );
 
     // Sample.
-    return surface().interpolate(volFld, pointFld());
+    return surface().interpolate
+    (
+        (
+            average_
+          ? pointAverage(pointFld())()
+          : volFld
+        ),
+        pointFld()
+    );
 }
 
 

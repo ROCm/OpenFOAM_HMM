@@ -164,7 +164,10 @@ void Foam::sampledIsoSurface::getIsoFields() const
         // point field.
         if (average_)
         {
-            storedVolFieldPtr_.reset(average(fvm, *pointFieldPtr_).ptr());
+            storedVolFieldPtr_.reset
+            (
+                pointAverage(*pointFieldPtr_).ptr()
+            );
             volFieldPtr_ = storedVolFieldPtr_.operator->();
         }
 
@@ -265,7 +268,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
         {
             storedVolSubFieldPtr_.reset
             (
-                average(subFvm, *pointSubFieldPtr_).ptr()
+                pointAverage(*pointSubFieldPtr_).ptr()
             );
             volSubFieldPtr_ = storedVolSubFieldPtr_.operator->();
         }
@@ -283,99 +286,6 @@ void Foam::sampledIsoSurface::getIsoFields() const
                 << " max:" << gMax(pointSubFieldPtr_->internalField()) << endl;
         }
     }
-}
-
-
-Foam::tmp<Foam::volScalarField> Foam::sampledIsoSurface::average
-(
-    const fvMesh& mesh,
-    const pointScalarField& pfld
-) const
-{
-    tmp<volScalarField> tcellAvg
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "cellAvg",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh,
-            dimensionedScalar("zero", dimless, scalar(0.0))
-        )
-    );
-    volScalarField& cellAvg = tcellAvg();
-
-    labelField nPointCells(mesh.nCells(), 0);
-    {
-        for (label pointI = 0; pointI < mesh.nPoints(); pointI++)
-        {
-            const labelList& pCells = mesh.pointCells(pointI);
-
-            forAll(pCells, i)
-            {
-                label cellI = pCells[i];
-
-                cellAvg[cellI] += pfld[pointI];
-                nPointCells[cellI]++;
-            }
-        }
-    }
-    forAll(cellAvg, cellI)
-    {
-        cellAvg[cellI] /= nPointCells[cellI];
-    }
-    // Give value to calculatedFvPatchFields
-    cellAvg.correctBoundaryConditions();
-
-    return tcellAvg;
-}
-
-
-Foam::tmp<Foam::pointScalarField> Foam::sampledIsoSurface::average
-(
-    const pointMesh& pMesh,
-    const volScalarField& fld
-) const
-{
-    tmp<pointScalarField> tpointAvg
-    (
-        new pointScalarField
-        (
-            IOobject
-            (
-                "pointAvg",
-                fld.time().timeName(),
-                fld.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            pMesh,
-            dimensionedScalar("zero", dimless, scalar(0.0))
-        )
-    );
-    pointScalarField& pointAvg = tpointAvg();
-
-    for (label pointI = 0; pointI < fld.mesh().nPoints(); pointI++)
-    {
-        const labelList& pCells = fld.mesh().pointCells(pointI);
-
-        forAll(pCells, i)
-        {
-            pointAvg[pointI] += fld[pCells[i]];
-        }
-        pointAvg[pointI] /= pCells.size();
-    }
-    // Give value to calculatedFvPatchFields
-    pointAvg.correctBoundaryConditions();
-
-    return tpointAvg;
 }
 
 

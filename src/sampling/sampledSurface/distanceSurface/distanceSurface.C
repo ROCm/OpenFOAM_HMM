@@ -284,6 +284,7 @@ Foam::distanceSurface::distanceSurface
     distance_(readScalar(dict.lookup("distance"))),
     signed_(readBool(dict.lookup("signed"))),
     regularise_(dict.lookupOrDefault("regularise", true)),
+    average_(dict.lookupOrDefault("average", false)),
     zoneName_(word::null),
     needsUpdate_(true),
     isoSurfPtr_(NULL),
