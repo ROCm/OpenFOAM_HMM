@@ -27,13 +27,14 @@
 #
 # Description
 #     Setup file for paraview-3.x
-#     Sourced from OpenFOAM-*/etc/bashrc
+#     Sourced from OpenFOAM-*/etc/bashrc or from foamPV alias
 #
 # Note
-#     The env. variable 'ParaView_DIR' is required for building plugins
+#     The env. variables 'ParaView_DIR' and 'ParaView_MAJOR'
+#     are required for building plugins
 #------------------------------------------------------------------------------
 
-#- Clean PATH
+# clean the PATH
 cleanedEnv=`$WM_PROJECT_DIR/bin/foamCleanPath "$PATH" "$WM_THIRD_PARTY_DIR/cmake- $WM_THIRD_PARTY_DIR/paraview-"` && PATH="$cleanedEnv"
 
 # determine the cmake to be used
@@ -61,8 +62,7 @@ case "$ParaView_VERSION" in
     ;;
 
 *)
-    ParaView_MAJOR=$(echo $ParaView_VERSION | \
-        sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/')
+    ParaView_MAJOR=`echo $ParaView_VERSION | sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/'`
     ;;
 esac
 export ParaView_MAJOR

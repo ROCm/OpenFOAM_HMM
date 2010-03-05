@@ -211,11 +211,8 @@ if (! $?MANPATH) then
 endif
 
 #- Clean path/PATH
-set colonPath=`echo "$path" | sed -e 's/ /:/g'`
-set cleanedEnv=`$cleanProg "$colonPath" "$foamOldDirs"`
-if ( $status == 0 ) then
-    set path=`echo "$cleanedEnv" | sed -e 's/:/ /g'`
-endif
+set cleanedEnv=`$cleanProg -space "$path" "$foamOldDirs"`
+if ( $status == 0 ) set path=($cleanedEnv)
 
 #- Clean LD_LIBRARY_PATH
 setenv LD_LIBRARY_PATH `$cleanProg "$LD_LIBRARY_PATH" "$foamOldDirs"`
@@ -233,7 +230,6 @@ _foamSource $WM_PROJECT_DIR/etc/aliases.csh
 
 # Source user setup files for optional packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# _foamSource $WM_PROJECT_DIR/etc/apps/paraview/cshrc
 _foamSource $WM_PROJECT_DIR/etc/apps/paraview3/cshrc
 # _foamSource $WM_PROJECT_DIR/etc/apps/ensight/cshrc
 
@@ -241,11 +237,8 @@ _foamSource $WM_PROJECT_DIR/etc/apps/paraview3/cshrc
 # Clean environment paths again. Only remove duplicates
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #- Clean path/PATH
-set colonPath=`echo "$path" | sed -e 's/ /:/g'`
-set cleanedEnv=`$cleanProg "$colonPath"`
-if ( $status == 0 ) then
-    set path=`echo "$cleanedEnv" | sed -e 's/:/ /g'`
-endif
+set cleanedEnv=`$cleanProg -space "$colonPath"`
+if ( $status == 0 ) set path=($cleanedEnv)
 
 #- Clean LD_LIBRARY_PATH
 setenv LD_LIBRARY_PATH `$cleanProg "$LD_LIBRARY_PATH"`

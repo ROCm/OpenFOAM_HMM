@@ -27,19 +27,16 @@
 #
 # Description
 #     Setup file for paraview-3.x
-#     Sourced from OpenFOAM-*/etc/cshrc
+#     Sourced from OpenFOAM-*/etc/cshrc or from foamPV alias
 #
 # Note
-#     The env. variable 'ParaView_DIR' is required for building plugins
+#     The env. variables 'ParaView_DIR' and 'ParaView_MAJOR'
+#     are required for building plugins
 #------------------------------------------------------------------------------
 
-#- Clean PATH
-set colonPath=`echo "$path" | sed -e 's/ /:/g'`
-set cleanedEnv=`$WM_PROJECT_DIR/bin/foamCleanPath "$colonPath" "$WM_THIRD_PARTY_DIR/cmake- $WM_THIRD_PARTY_DIR/paraview-"`
-if ( $status == 0 ) then
-    set path=`echo "$cleanedEnv" | sed -e 's/:/ /g'`
-endif
-
+# clean the PATH
+set cleanedEnv=`$WM_PROJECT_DIR/bin/foamCleanPath -space "$path" "$WM_THIRD_PARTY_DIR/cmake- $WM_THIRD_PARTY_DIR/paraview-"`
+if ( $status == 0 ) set path=($cleanedEnv)
 
 # determine the cmake to be used
 unsetenv CMAKE_HOME
@@ -91,5 +88,5 @@ else
 endif
 
 
-unset cleanedEnv colonPath cmake paraviewInstDir paraviewPython
+unset cleanedEnv cmake paraviewInstDir paraviewPython
 # -----------------------------------------------------------------------------
