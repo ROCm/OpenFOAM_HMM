@@ -44,6 +44,19 @@ alias wmDP='export WM_PRECISION_OPTION=DP; . $WM_PROJECT_DIR/etc/bashrc'
 alias wmSchedON='export WM_SCHEDULER=$WM_PROJECT_DIR/wmake/wmakeScheduler'
 alias wmSchedOFF='unset WM_SCHEDULER'
 
+# Change paraview version
+# ~~~~~~~~~~~~~~~~~~~~~~~
+unset foamPV
+foamPV()
+{
+    export ParaView_VERSION=$1
+    . $WM_PROJECT_DIR/etc/apps/paraview3/bashrc
+    echo "paraview-$ParaView_VERSION  (major: $ParaView_MAJOR)"
+    echo "dir: $ParaView_DIR"
+    [ -d "$ParaView_DIR" ] || echo "WARNING: directory does not exist"
+}
+
+
 # Change directory aliases
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 alias src='cd $FOAM_SRC'

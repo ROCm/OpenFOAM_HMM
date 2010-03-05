@@ -64,27 +64,29 @@ case "$ParaView_VERSION" in
 esac
 export ParaView_MAJOR
 
+paraviewInstDir=$WM_THIRD_PARTY_DIR/paraview-$ParaView_VERSION
+export ParaView_DIR=$paraviewInstDir/platforms/$WM_ARCH$WM_COMPILER
 
-export ParaView_DIR=$WM_THIRD_PARTY_DIR/paraview-$ParaView_VERSION/platforms/$WM_ARCH$WM_COMPILER
-
-
-# add in python libraries if required
-paraviewPython=$ParaView_DIR/Utilities/VTKPythonWrapping
-if [ -r $paraviewPython ]
-then
-    if [ "$PYTHONPATH" ]
-    then
-        export PYTHONPATH=$PYTHONPATH:$paraviewPython:$ParaView_DIR/lib/paraview-$ParaView_MAJOR
-    else
-        export PYTHONPATH=$paraviewPython:$ParaView_DIR/lib/paraview-$ParaView_MAJOR
-    fi
-fi
-
-if [ -r $ParaView_DIR ]
+if [ -r $paraviewInstDir ]
 then
     export PATH=$ParaView_DIR/bin:$PATH
     export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview-$ParaView_MAJOR
+
+    # add in python libraries if required
+    paraviewPython=$ParaView_DIR/Utilities/VTKPythonWrapping
+    if [ -r $paraviewPython ]
+    then
+        if [ "$PYTHONPATH" ]
+        then
+            export PYTHONPATH=$PYTHONPATH:$paraviewPython:$ParaView_DIR/lib/paraview-$ParaView_MAJOR
+        else
+            export PYTHONPATH=$paraviewPython:$ParaView_DIR/lib/paraview-$ParaView_MAJOR
+        fi
+    fi
+else
+    unset PV_PLUGIN_PATH
 fi
 
-unset cmake paraviewPython
+
+unset cmake paraviewInstDir paraviewPython
 # -----------------------------------------------------------------------------
