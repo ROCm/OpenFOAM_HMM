@@ -48,31 +48,44 @@ done
 
 
 # set VERSION and MAJOR (version) variables if not already set
-# the major version is "<digits>.<digits>"
 [ -z "$ParaView_VERSION" ] && export ParaView_VERSION=3.6.1
-[ -z "$ParaView_MAJOR" ]   && export ParaView_MAJOR=3.6
+
+# if needed, set MAJOR version to correspond to VERSION
+# ParaView_MAJOR is "<digits>.<digits>" from ParaView_VERSION
+case "$ParaView_VERSION" in
+"${ParaView_MAJOR}.*" )
+    # version and major appear to correspond
+    ;;
+
+*)
+    ParaView_MAJOR=$(echo $ParaView_VERSION | \
+        sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/')
+    ;;
+esac
+export ParaView_MAJOR
 
 
 export ParaView_INST_DIR=$WM_THIRD_PARTY_DIR/paraview-$ParaView_VERSION
 export ParaView_DIR=$ParaView_INST_DIR/platforms/$WM_ARCH$WM_COMPILER
 
+
 # add in python libraries if required
-ParaView_PYTHON_DIR=$ParaView_DIR/Utilities/VTKPythonWrapping
-if [ -r $ParaView_PYTHON_DIR ]
+paraviewPython=$ParaView_DIR/Utilities/VTKPythonWrapping
+if [ -r $paraviewPython ]
 then
     if [ "$PYTHONPATH" ]
     then
-        export PYTHONPATH=$PYTHONPATH:$ParaView_PYTHON_DIR:$ParaView_DIR/lib/paraview-$ParaView_MAJOR
+        export PYTHONPATH=$PYTHONPATH:$paraviewPython:$ParaView_DIR/lib/paraview-$ParaView_MAJOR
     else
-        export PYTHONPATH=$ParaView_PYTHON_DIR:$ParaView_DIR/lib/paraview-$ParaView_MAJOR
+        export PYTHONPATH=$paraviewPython:$ParaView_DIR/lib/paraview-$ParaView_MAJOR
     fi
 fi
 
 if [ -r $ParaView_DIR ]
 then
     export PATH=$ParaView_DIR/bin:$PATH
-    export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview
+    export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview-$ParaView_MAJOR
 fi
 
-unset cmake ParaView_PYTHON_DIR
+unset cmake paraviewPython
 # -----------------------------------------------------------------------------

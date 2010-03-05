@@ -45,12 +45,26 @@ foreach cmake ( cmake-2.8.0 cmake-2.6.4 cmake-2.6.2 cmake-2.4.6 )
 end
 
 # set VERSION and MAJOR (version) variables if not already set
-# the major version is "<digits>.<digits>"
 if ( ! $?ParaView_VERSION ) setenv ParaView_VERSION 3.6.1
-if ( ! $?ParaView_MAJOR )   setenv ParaView_MAJOR 3.6
+if ( ! $?ParaView_MAJOR )   setenv ParaView_MAJOR unknown
+
+# if needed, set MAJOR version to correspond to VERSION
+# ParaView_MAJOR is "<digits>.<digits>" from ParaView_VERSION
+switch ("$ParaView_VERSION")
+case "${ParaView_MAJOR}.*":
+    # version and major appear to correspond
+    breaksw
+
+default:
+    setenv ParaView_MAJOR `echo ${ParaView_VERSION} | \
+        sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/'`
+    breaksw
+endsw
+
 
 setenv ParaView_INST_DIR $WM_THIRD_PARTY_DIR/paraview-$ParaView_VERSION
 setenv ParaView_DIR $ParaView_INST_DIR/platforms/$WM_ARCH$WM_COMPILER
+
 
 # add in python libraries if required
 set paraviewPython=$ParaView_DIR/Utilities/VTKPythonWrapping
@@ -64,7 +78,7 @@ endif
 
 if ( -r $ParaView_INST_DIR ) then
     set path=($ParaView_DIR/bin $path)
-    setenv PV_PLUGIN_PATH $FOAM_LIBBIN/paraview
+    setenv PV_PLUGIN_PATH $FOAM_LIBBIN/paraview-${ParaView_MAJOR}
 endif
 
 unset cmake paraviewPython
