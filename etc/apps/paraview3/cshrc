@@ -62,8 +62,7 @@ default:
 endsw
 
 
-setenv ParaView_INST_DIR $WM_THIRD_PARTY_DIR/paraview-$ParaView_VERSION
-setenv ParaView_DIR $ParaView_INST_DIR/platforms/$WM_ARCH$WM_COMPILER
+setenv ParaView_DIR $WM_THIRD_PARTY_DIR/paraview-${ParaView_VERSION}/platforms/$WM_ARCH$WM_COMPILER
 
 
 # add in python libraries if required
@@ -76,7 +75,7 @@ if ( -r $paraviewPython ) then
     endif
 endif
 
-if ( -r $ParaView_INST_DIR ) then
+if ( -r $ParaView_DIR ) then
     set path=($ParaView_DIR/bin $path)
     setenv PV_PLUGIN_PATH $FOAM_LIBBIN/paraview-${ParaView_MAJOR}
 endif

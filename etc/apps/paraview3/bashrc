@@ -65,8 +65,7 @@ esac
 export ParaView_MAJOR
 
 
-export ParaView_INST_DIR=$WM_THIRD_PARTY_DIR/paraview-$ParaView_VERSION
-export ParaView_DIR=$ParaView_INST_DIR/platforms/$WM_ARCH$WM_COMPILER
+export ParaView_DIR=$WM_THIRD_PARTY_DIR/paraview-$ParaView_VERSION/platforms/$WM_ARCH$WM_COMPILER
 
 
 # add in python libraries if required
