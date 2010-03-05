@@ -41,7 +41,11 @@
 #------------------------------------------------------------------------------
 usage() {
     cat <<USAGE 1>&2
-Usage: ${0##*/} [-strip] path [wildcard] .. [wildcard]
+Usage: ${0##*/} [OPTION] path [wildcard1] .. [wildcardN]
+options:
+  -space            treat 'path' as space-delimited (eg, from C-Shell)
+  -strip            remove inaccessible directories
+  -help             print the usage
 
   Prints its argument (which should be a ':' separated list) cleansed from
     - duplicate elements
@@ -53,13 +57,17 @@ USAGE
 }
 
 
-unset strip
+unset space strip
 # parse options
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     -h | -help)
         usage
+        ;;
+    -space)
+        space=true
+        shift
         ;;
     -strip)
         strip=true
@@ -74,7 +82,12 @@ done
 
 [ "$#" -ge 1 ] || usage
 
-dirList="$1"
+if [ "$space" = true ]
+then
+    dirList=$(echo "$1" | sed -e 's/ /:/g')
+else
+    dirList="$1"
+fi
 shift
 
 ##DEBUG echo "input>$dirList<" 1>&2
@@ -123,12 +136,15 @@ do
     fi
 done
 
-# parse on whitespace
+# split on whitespace
 IFS=' '
 set -- $dirList
 
-# join on ':'
-IFS=':'
+# join on ':', unless -space option was specified
+if [ "$space" != true ]
+then
+    IFS=':'
+fi
 dirList="$*"
 
 # restore IFS
