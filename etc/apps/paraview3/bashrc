@@ -33,6 +33,9 @@
 #     The env. variable 'ParaView_DIR' is required for building plugins
 #------------------------------------------------------------------------------
 
+#- Clean PATH
+cleanedEnv=`$WM_PROJECT_DIR/bin/foamCleanPath "$PATH" "$WM_THIRD_PARTY_DIR/cmake- $WM_THIRD_PARTY_DIR/paraview-"` && PATH="$cleanedEnv"
+
 # determine the cmake to be used
 unset CMAKE_HOME
 for cmake in cmake-2.8.0 cmake-2.6.4 cmake-2.6.2 cmake-2.4.6
@@ -88,5 +91,5 @@ else
 fi
 
 
-unset cmake paraviewInstDir paraviewPython
+unset cleanedEnv cmake paraviewInstDir paraviewPython
 # -----------------------------------------------------------------------------

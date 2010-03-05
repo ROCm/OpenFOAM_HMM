@@ -33,6 +33,14 @@
 #     The env. variable 'ParaView_DIR' is required for building plugins
 #------------------------------------------------------------------------------
 
+#- Clean PATH
+set colonPath=`echo "$path" | sed -e 's/ /:/g'`
+set cleanedEnv=`$WM_PROJECT_DIR/bin/foamCleanPath "$colonPath" "$WM_THIRD_PARTY_DIR/cmake- $WM_THIRD_PARTY_DIR/paraview-"`
+if ( $status == 0 ) then
+    set path=`echo "$cleanedEnv" | sed -e 's/:/ /g'`
+endif
+
+
 # determine the cmake to be used
 unsetenv CMAKE_HOME
 foreach cmake ( cmake-2.8.0 cmake-2.6.4 cmake-2.6.2 cmake-2.4.6 )
@@ -45,7 +53,7 @@ foreach cmake ( cmake-2.8.0 cmake-2.6.4 cmake-2.6.2 cmake-2.4.6 )
 end
 
 # set VERSION and MAJOR (version) variables if not already set
-if ( ! $?ParaView_VERSION ) setenv ParaView_VERSION 3.6.1
+if ( ! $?ParaView_VERSION || "x$ParaView_VERSION" == "x" ) setenv ParaView_VERSION 3.6.1
 if ( ! $?ParaView_MAJOR )   setenv ParaView_MAJOR unknown
 
 # if needed, set MAJOR version to correspond to VERSION
@@ -83,5 +91,5 @@ else
 endif
 
 
-unset cmake paraviewInstDir paraviewPython
+unset cleanedEnv colonPath cmake paraviewInstDir paraviewPython
 # -----------------------------------------------------------------------------

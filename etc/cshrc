@@ -212,9 +212,9 @@ endif
 
 #- Clean path/PATH
 set colonPath=`echo "$path" | sed -e 's/ /:/g'`
-set cleanEnv=`$cleanProg "$colonPath" "$foamOldDirs"`
+set cleanedEnv=`$cleanProg "$colonPath" "$foamOldDirs"`
 if ( $status == 0 ) then
-    set path=`echo "$cleanEnv" | sed -e 's/:/ /g'`
+    set path=`echo "$cleanedEnv" | sed -e 's/:/ /g'`
 endif
 
 #- Clean LD_LIBRARY_PATH
@@ -242,9 +242,9 @@ _foamSource $WM_PROJECT_DIR/etc/apps/paraview3/cshrc
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #- Clean path/PATH
 set colonPath=`echo "$path" | sed -e 's/ /:/g'`
-set cleanEnv=`$cleanProg "$colonPath"`
+set cleanedEnv=`$cleanProg "$colonPath"`
 if ( $status == 0 ) then
-    set path=`echo "$cleanEnv" | sed -e 's/:/ /g'`
+    set path=`echo "$cleanedEnv" | sed -e 's/:/ /g'`
 endif
 
 #- Clean LD_LIBRARY_PATH
@@ -260,7 +260,7 @@ endif
 
 # cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
-unset cleanEnv cleanProg colonPath foamInstall foamOldDirs
+unset cleanedEnv cleanProg colonPath foamInstall foamOldDirs
 unalias _foamSource
 
 # -----------------------------------------------------------------------------

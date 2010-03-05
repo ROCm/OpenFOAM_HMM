@@ -208,13 +208,13 @@ esac
 cleanProg=$WM_PROJECT_DIR/bin/foamCleanPath
 
 #- Clean PATH
-cleanEnv=`$cleanProg "$PATH" "$foamOldDirs"` && PATH="$cleanEnv"
+cleanedEnv=`$cleanProg "$PATH" "$foamOldDirs"` && PATH="$cleanedEnv"
 
 #- Clean LD_LIBRARY_PATH
-cleanEnv=`$cleanProg "$LD_LIBRARY_PATH" "$foamOldDirs"` && LD_LIBRARY_PATH="$cleanEnv"
+cleanedEnv=`$cleanProg "$LD_LIBRARY_PATH" "$foamOldDirs"` && LD_LIBRARY_PATH="$cleanedEnv"
 
 #- Clean MANPATH
-cleanEnv=`$cleanProg "$MANPATH" "$foamCleanDirs"` && MANPATH="$cleanEnv"
+cleanedEnv=`$cleanProg "$MANPATH" "$foamCleanDirs"` && MANPATH="$cleanedEnv"
 
 export PATH LD_LIBRARY_PATH MANPATH
 
@@ -245,27 +245,27 @@ _foamSource $WM_PROJECT_DIR/etc/apps/ensight/bashrc
 # Clean environment paths again. Only remove duplicates
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #- Clean PATH
-cleanEnv=`$cleanProg "$PATH"` && PATH="$cleanEnv"
+cleanedEnv=`$cleanProg "$PATH"` && PATH="$cleanedEnv"
 
 #- Clean LD_LIBRARY_PATH
-cleanEnv=`$cleanProg "$LD_LIBRARY_PATH"` && LD_LIBRARY_PATH="$cleanEnv"
+cleanedEnv=`$cleanProg "$LD_LIBRARY_PATH"` && LD_LIBRARY_PATH="$cleanedEnv"
 
 #- Clean MANPATH
-cleanEnv=`$cleanProg "$MANPATH"` && MANPATH="$cleanEnv:"
+cleanedEnv=`$cleanProg "$MANPATH"` && MANPATH="$cleanedEnv:"
 
 export PATH LD_LIBRARY_PATH MANPATH
 
 #- Clean LD_PRELOAD
 if [ "$LD_PRELOAD" != "" ]
 then
-    cleanEnv=`$cleanProg "$LD_PRELOAD"` && LD_PRELOAD="$cleanEnv"
+    cleanedEnv=`$cleanProg "$LD_PRELOAD"` && LD_PRELOAD="$cleanedEnv"
     export LD_PRELOAD
 fi
 
 
 # cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
-unset cleanEnv cleanProg foamInstall foamOldDirs
+unset cleanedEnv cleanProg foamInstall foamOldDirs
 unset _foamSource
 
 # -----------------------------------------------------------------------------
