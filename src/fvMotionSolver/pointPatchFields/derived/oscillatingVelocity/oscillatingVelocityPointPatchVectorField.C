@@ -111,6 +111,32 @@ oscillatingVelocityPointPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void oscillatingVelocityPointPatchVectorField::autoMap
+(
+    const pointPatchFieldMapper& m
+)
+{
+    fixedValuePointPatchField<vector>::autoMap(m);
+
+    p0_.autoMap(m);
+}
+
+
+void oscillatingVelocityPointPatchVectorField::rmap
+(
+    const pointPatchField<vector>& ptf,
+    const labelList& addr
+)
+{
+    const oscillatingVelocityPointPatchVectorField& oVptf =
+        refCast<const oscillatingVelocityPointPatchVectorField>(ptf);
+
+    fixedValuePointPatchField<vector>::rmap(oVptf, addr);
+
+    p0_.rmap(oVptf.p0_, addr);
+}
+
+
 void oscillatingVelocityPointPatchVectorField::updateCoeffs()
 {
     if (this->updated())

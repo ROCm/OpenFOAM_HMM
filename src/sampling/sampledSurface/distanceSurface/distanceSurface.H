@@ -68,6 +68,9 @@ class distanceSurface
         //- Whether to coarsen
         const Switch regularise_;
 
+        //- Whether to recalculate cell values as average of point values
+        const Switch average_;
+
         //- zone name (if restricted to zones)
         word zoneName_;
 
