@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -38,7 +38,7 @@ Usage: ${0##*/} [OPTION]
 options:
   -help
 
-* start engrid using the paraview-$ParaView_VERSION libraries
+* start engrid using the paraview-$ParaView_MAJOR libraries
   passes through engrid options unmodified
 
 USAGE
@@ -48,13 +48,8 @@ USAGE
 # report usage
 [ "$1" = "-h" -o "$1" = "-help" ] && usage
 
-# set the major version "<digits>.<digits>"
-ParaView_MAJOR_VERSION=$(echo $ParaView_VERSION | \
-    sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/')
-
-
-bindir=$WM_THIRD_PARTY_DIR/engrid/platforms/$WM_ARCH
-libdir="$ParaView_DIR/lib/paraview-$ParaView_MAJOR_VERSION"
+bindir=$WM_THIRD_PARTY_DIR/engrid/platforms/$WM_ARCH$WM_COMPILER
+libdir="$ParaView_DIR/lib/paraview-${ParaView_MAJOR:-unknown}"
 
 [ -x $bindir/engrid ] || usage "engrid executable not found in $bindir"
 [ -d $libdir ] || usage "paraview libraries not found"
