@@ -3,8 +3,8 @@
     compile with:
         coco-cpp wmkdependParser.atg
     For example,
-    $WM_THIRD_PARTY_DIR/coco-cpp/platforms/$WM_ARCH$WM_COMPILER/bin/coco-cpp \
-        -frames $WM_THIRD_PARTY_DIR/coco-cpp/platforms/share/coco-cpp \
+    $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/coco-cpp/bin/coco-cpp \
+        -frames $WM_THIRD_PARTY_DIR/platforms/share/coco-cpp \
         wmkdependParser.atg
 \*---------------------------------------------------------------------------*/
 [copy]
