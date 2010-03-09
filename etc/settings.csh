@@ -22,7 +22,7 @@
 #     along with OpenFOAM; if not, write to the Free Software Foundation,
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
-# Script
+# File
 #     etc/settings.csh
 #
 # Description
@@ -36,7 +36,7 @@ alias _foamAddPath 'set path=(\!* $path)'
 # prefix to LD_LIBRARY_PATH
 alias _foamAddLib 'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH}'
 # prefix to MANPATH
-alias _foamAddManPath 'setenv MANPATH \!*\:${MANPATH}'
+alias _foamAddMan 'setenv MANPATH \!*\:${MANPATH}'
 
 # location of the jobControl directory
 setenv FOAM_JOB_DIR $WM_PROJECT_INST_DIR/jobControl
@@ -80,7 +80,7 @@ _foamAddLib  $FOAM_USER_LIBBIN
 
 # Select compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# compilerInstall = OpenFOAM | System
+# compilerInstall = OpenFOAM | system
 set compilerInstall=OpenFOAM
 
 switch ("$compilerInstall")
@@ -112,14 +112,14 @@ case OpenFOAM:
         echo "Warning in $WM_PROJECT_DIR/etc/settings.csh:"
         echo "    Cannot find $WM_COMPILER_DIR installation."
         echo "    Please install this compiler version or if you wish to use the system compiler,"
-        echo "    change the 'compilerInstall' setting to 'System' in this file"
+        echo "    change the 'compilerInstall' setting to 'system' in this file"
         echo
     endif
 
     _foamAddPath    ${WM_COMPILER_DIR}/bin
     _foamAddLib     ${WM_COMPILER_DIR}/lib${WM_COMPILER_LIB_ARCH}
     _foamAddLib     ${WM_COMPILER_DIR}/lib
-    _foamAddManPath ${WM_COMPILER_DIR}/man
+    _foamAddMan     ${WM_COMPILER_DIR}/man
 
     breaksw
 endsw
@@ -141,7 +141,7 @@ case OPENMPI:
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
-    _foamAddManPath $MPI_ARCH_PATH/man
+    _foamAddMan     $MPI_ARCH_PATH/man
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -154,7 +154,7 @@ case SYSTEMOPENMPI:
     set mpi_version=openmpi-system
 
     # Set compilation flags here instead of in wmake/rules/../mplibSYSTEMOPENMPI
-    setenv PINC `mpicc --showme:compile` 
+    setenv PINC `mpicc --showme:compile`
     setenv PLIBS `mpicc --showme:link`
     set libDir=`echo "$PLIBS" | sed -e 's/.*-L\([^ ]*\).*/\1/'`
 
@@ -178,7 +178,7 @@ case MPICH:
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
-    _foamAddManPath $MPI_ARCH_PATH/share/man
+    _foamAddMan     $MPI_ARCH_PATH/share/man
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -287,6 +287,7 @@ endif
 # ~~~~~~~~~~~~~~~~~~~~
 unalias _foamAddPath
 unalias _foamAddLib
+unalias _foamAddMan
 unset minBufferSize
 
 # -----------------------------------------------------------------------------

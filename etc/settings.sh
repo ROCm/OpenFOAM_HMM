@@ -22,7 +22,7 @@
 #     along with OpenFOAM; if not, write to the Free Software Foundation,
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
-# Script
+# File
 #     etc/settings.sh
 #
 # Description
@@ -52,7 +52,7 @@ _foamAddLib()
 }
 
 # prefix to MANPATH
-_foamAddManPath()
+_foamAddMan()
 {
     while [ $# -ge 1 ]
     do
@@ -104,7 +104,7 @@ unset compilerBin compilerLib compilerMan
 
 # Select compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# compilerInstall = OpenFOAM | System
+# compilerInstall = OpenFOAM | system
 compilerInstall=OpenFOAM
 
 case "${compilerInstall:-OpenFOAM}" in
@@ -142,7 +142,7 @@ OpenFOAM)
         echo "Warning in $WM_PROJECT_DIR/etc/settings.sh:"
         echo "    Cannot find $WM_COMPILER_DIR installation."
         echo "    Please install this compiler version or if you wish to use the system compiler,"
-        echo "    change the 'compilerInstall' setting to 'System' in this file"
+        echo "    change the 'compilerInstall' setting to 'system' in this file"
         echo
     fi
 
@@ -156,7 +156,7 @@ if [ -d "$compilerBin" ]
 then
     _foamAddPath    $compilerBin
     _foamAddLib     $compilerLib
-    _foamAddManPath $compilerMan
+    _foamAddMan     $compilerMan
 fi
 
 unset compilerBin compilerLib compilerMan compilerInstall
@@ -177,7 +177,7 @@ OPENMPI)
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
-    _foamAddManPath $MPI_ARCH_PATH/man
+    _foamAddMan     $MPI_ARCH_PATH/man
 
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -187,7 +187,7 @@ SYSTEMOPENMPI)
     mpi_version=openmpi-system
 
     # Set compilation flags here instead of in wmake/rules/../mplibSYSTEMOPENMPI
-    export PINC=`mpicc --showme:compile` 
+    export PINC=`mpicc --showme:compile`
     export PLIBS=`mpicc --showme:link`
     libDir=`echo "$PLIBS" | sed -e 's/.*-L\([^ ]*\).*/\1/'`
 
@@ -212,7 +212,7 @@ MPICH)
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
-    _foamAddManPath $MPI_ARCH_PATH/share/man
+    _foamAddMan     $MPI_ARCH_PATH/share/man
 
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -318,6 +318,6 @@ export MPI_BUFFER_SIZE
 
 # cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
-unset _foamAddPath _foamAddLib minBufferSize
+unset _foamAddPath _foamAddLib _foamAddMan minBufferSize
 
 # -----------------------------------------------------------------------------
