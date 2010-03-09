@@ -132,6 +132,7 @@ class PackedList
         //- Calculate the list length when packed
         inline static label packedLength(const label);
 
+
 public:
 
     // Public data
@@ -150,11 +151,13 @@ public:
         //- Masking for all bits below the offset
         inline static unsigned int maskLower(unsigned offset);
 
+
     // Forward declaration of iterators
 
         class iteratorBase;
         class iterator;
         class const_iterator;
+
 
     // Constructors
 
@@ -171,7 +174,7 @@ public:
         inline PackedList(const PackedList<nBits>&);
 
         //- Construct by transferring the parameter contents
-        inline PackedList(const Xfer< PackedList<nBits> >&);
+        inline PackedList(const Xfer<PackedList<nBits> >&);
 
         //- Construct from a list of labels
         explicit PackedList(const UList<label>&);
@@ -179,123 +182,126 @@ public:
         //- Clone
         inline autoPtr< PackedList<nBits> > clone() const;
 
+
     // Member Functions
 
         // Access
 
-        //- The number of elements that can be stored before reallocating
-        inline label capacity() const;
+            //- The number of elements that can be stored before reallocating
+            inline label capacity() const;
 
-        //- Number of entries.
-        inline label size() const;
+            //- Number of entries.
+            inline label size() const;
 
-        //- Return true if the list is empty (ie, size() is zero).
-        inline bool empty() const;
+            //- Return true if the list is empty (ie, size() is zero).
+            inline bool empty() const;
 
-        //- Get value at index I.
-        //  Never auto-vivify entries.
-        inline unsigned int get(const label) const;
+            //- Get value at index I.
+            //  Never auto-vivify entries.
+            inline unsigned int get(const label) const;
 
-        //- Set value at index I. Return true if value changed.
-        //  Does auto-vivify for non-existent entries.
-        //  Default value set is the max_value.
-        inline bool set(const label, const unsigned int val = ~0u);
+            //- Set value at index I. Return true if value changed.
+            //  Does auto-vivify for non-existent entries.
+            //  Default value set is the max_value.
+            inline bool set(const label, const unsigned int val = ~0u);
 
-        //- Unset the entry at index I. Return true if value changed.
-        //  Never auto-vivify entries.
-        inline bool unset(const label);
+            //- Unset the entry at index I. Return true if value changed.
+            //  Never auto-vivify entries.
+            inline bool unset(const label);
 
-        //- Return the underlying packed storage
-        inline List<unsigned int>& storage();
+            //- Return the underlying packed storage
+            inline List<unsigned int>& storage();
 
-        //- Return the underlying packed storage
-        inline const List<unsigned int>& storage() const;
+            //- Return the underlying packed storage
+            inline const List<unsigned int>& storage() const;
 
-        //- Count number of bits set, O(log(n))
-        //  Uses the Hamming weight (population count) method
-        //  http://en.wikipedia.org/wiki/Hamming_weight
-        unsigned int count() const;
+            //- Count number of bits set, O(log(n))
+            //  Uses the Hamming weight (population count) method
+            //  http://en.wikipedia.org/wiki/Hamming_weight
+            unsigned int count() const;
 
-        //- Return the values as a labelList
-        labelList values() const;
+            //- Return the values as a labelList
+            labelList values() const;
 
-        //- Print values and information
-        Ostream& print(Ostream&) const;
+            //- Print values and information
+            Ostream& print(Ostream&) const;
 
         // Edit
 
-        //- Trim any trailing zero elements
-        bool trim();
+            //- Trim any trailing zero elements
+            bool trim();
 
-        //- Invert the bits in the addressable region.
-        void flip();
+            //- Invert the bits in the addressable region.
+            void flip();
 
-        //- Alter the size of the underlying storage.
-        //  The addressed size will be truncated if needed to fit, but will
-        //  remain otherwise untouched.
-        inline void setCapacity(const label);
+            //- Alter the size of the underlying storage.
+            //  The addressed size will be truncated if needed to fit, but will
+            //  remain otherwise untouched.
+            inline void setCapacity(const label);
 
-        //- Reset addressable list size, does not shrink the allocated size.
-        //  Optionally specify a value for new elements.
-        inline void resize(const label, const unsigned int& val = 0);
+            //- Reset addressable list size, does not shrink the allocated size.
+            //  Optionally specify a value for new elements.
+            inline void resize(const label, const unsigned int& val = 0);
 
-        //- Alias for resize()
-        inline void setSize(const label, const unsigned int& val = 0);
+            //- Alias for resize()
+            inline void setSize(const label, const unsigned int& val = 0);
 
-        //- Reserve allocation space for at least this size.
-        //  Never shrinks the allocated size.
-        //  The list size is adjusted as per DynamicList with
-        //  SizeInc=0, SizeMult=2, SizeDiv=1
-        inline void reserve(const label);
+            //- Reserve allocation space for at least this size.
+            //  Never shrinks the allocated size.
+            //  The list size is adjusted as per DynamicList with
+            //  SizeInc=0, SizeMult=2, SizeDiv=1
+            inline void reserve(const label);
 
-        //- Clear the list, i.e. set addressable size to zero.
-        //  Does not adjust the underlying storage
-        inline void clear();
+            //- Clear the list, i.e. set addressable size to zero.
+            //  Does not adjust the underlying storage
+            inline void clear();
 
-        //- Clear the list and delete storage.
-        inline void clearStorage();
+            //- Clear the list and delete storage.
+            inline void clearStorage();
 
-        //- Shrink the allocated space to what is actually used.
-        inline void shrink();
+            //- Shrink the allocated space to what is actually used.
+            inline void shrink();
 
-        //- Transfer the contents of the argument list into this list
-        //  and annul the argument list.
-        inline void transfer(PackedList<nBits>&);
+            //- Transfer the contents of the argument list into this list
+            //  and annul the argument list.
+            inline void transfer(PackedList<nBits>&);
 
-        //- Transfer contents to the Xfer container
-        inline Xfer< PackedList<nBits> > xfer();
+            //- Transfer contents to the Xfer container
+            inline Xfer<PackedList<nBits> > xfer();
 
 
     // Member operators
 
-        //- Append a value at the end of the list
-        inline void append(const unsigned int val);
+            //- Append a value at the end of the list
+            inline void append(const unsigned int val);
 
-        //- Remove and return the last element
-        inline unsigned int remove();
+            //- Remove and return the last element
+            inline unsigned int remove();
 
-        //- Get value at index I
-        //  Never auto-vivify entries.
-        inline unsigned int operator[](const label) const;
+            //- Get value at index I
+            //  Never auto-vivify entries.
+            inline unsigned int operator[](const label) const;
 
-        //- Set value at index I.
-        //  Returns iterator to perform the actual operation.
-        //  Does not auto-vivify entries, but will when assigned to.
-        inline iteratorBase operator[](const label);
+            //- Set value at index I.
+            //  Returns iterator to perform the actual operation.
+            //  Does not auto-vivify entries, but will when assigned to.
+            inline iteratorBase operator[](const label);
 
-        //- Assignment of all entries to the given value. Takes linear time.
-        inline void operator=(const unsigned int val);
+            //- Assignment of all entries to the given value. Takes linear time.
+            inline void operator=(const unsigned int val);
 
-        //- Assignment operator. Takes linear time.
-        void operator=(const PackedList<nBits>&);
+            //- Assignment operator. Takes linear time.
+            void operator=(const PackedList<nBits>&);
 
-        //- Assignment operator. Takes linear time.
-        void operator=(const UList<label>&);
+            //- Assignment operator. Takes linear time.
+            void operator=(const UList<label>&);
 
-    // Ostream operator
 
-//      // Write PackedList to Ostream.
-//      friend Ostream& operator<< <nBits> (Ostream&, const PackedList<nBits>&);
+        // Ostream operator
+
+//          // Write PackedList to Ostream.
+//          friend Ostream& operator<< <nBits> (Ostream&, const PackedList<nBits>&);
+
 
     // Iterators and helpers
 
@@ -317,6 +323,7 @@ public:
                 //- Element index
                 label index_;
 
+
             // Protected Member Functions
 
                 //- Get value as unsigned, no range-checking
@@ -325,6 +332,7 @@ public:
                 //- Set value, returning true if changed, no range-checking
                 inline bool set(unsigned int);
 
+
             // Constructors
 
                 //- Construct null
@@ -332,6 +340,7 @@ public:
 
                 //- Construct from base list and position index
                 inline iteratorBase(const PackedList*, const label);
+
 
         public:
 
@@ -370,6 +379,7 @@ public:
             //- Disallow assignment from const_iterator - violates const-ness!
             void operator=(const const_iterator&);
 
+
         public:
 
             // Constructors
@@ -384,6 +394,7 @@ public:
 
                 //- Construct from base list and position index
                 inline iterator(const PackedList*, const label);
+
 
             // Member Operators
 
@@ -445,6 +456,7 @@ public:
                 //- Construct from iterator
                 inline const_iterator(const iterator&);
 
+
             // Member operators
 
                 //- Compare positions (not values)
@@ -466,7 +478,6 @@ public:
 
                 inline const_iterator& operator--();
                 inline const_iterator operator--(int);
-
         };
 
 

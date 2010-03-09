@@ -76,6 +76,7 @@ protected:
         //- Write edges
         static void writeEdges(Ostream&, const UList<edge>&);
 
+
 public:
 
     // Constructors

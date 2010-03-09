@@ -33,7 +33,7 @@ solvers
         relTol          0;
     }
 
-    "(U|h|R|k|epsilon)"
+    "(U|hs|R|k|epsilon)"
     {
         solver          PBiCG;
         preconditioner  DILU;

@@ -57,7 +57,7 @@ void Foam::fieldValue::movePoints(const Field<point>&)
 
 void Foam::fieldValue::makeFile()
 {
-    // Create the forces file if not already created
+    // Create the output file if not already created
     if (outputFilePtr_.empty())
     {
         if (debug)

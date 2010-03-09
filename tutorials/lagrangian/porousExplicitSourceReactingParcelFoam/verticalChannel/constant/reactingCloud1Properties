@@ -27,9 +27,13 @@ PatchInteractionModel StandardWallInteraction;
 
 HeatTransferModel RanzMarshall;
 
-CompositionModel SinglePhaseMixture;
+CompositionModel SingleMixtureFraction;
 
 PhaseChangeModel LiquidEvaporation;
+
+DevolatilisationModel none;
+
+SurfaceReactionModel none;
 
 PostProcessingModel PatchPostProcessing;
 
@@ -55,6 +59,8 @@ constantProperties
     Tvap            Tvap [ 0 0 0 1 0 ] 273;
     Tbp             Tbp [ 0 0 0 1 0 ] 373;
     Pr              Pr [ 0 0 0 0 0 ] 0.7;
+    LDevol          LDevol [ 0 0 0 0 0 ] 0;
+    hRetentionCoeff hRetentionCoeff [ 0 0 0 0 0 ] 1;
     constantVolume  false;
 }
 
@@ -132,15 +138,24 @@ RanzMarshallCoeffs
     BirdCorrection  off;
 }
 
-SinglePhaseMixtureCoeffs
+SingleMixtureFractionCoeffs
 {
     phases
     (
+        gas
+        {
+        }
         liquid
         {
-            H2O     1;
+            H2O 1;
+        }
+        solid
+        {
         }
     );
+    YGasTot0        0;
+    YLiquidTot0     1;
+    YSolidTot0      0;
 }
 
 LiquidEvaporationCoeffs

@@ -138,7 +138,11 @@ public:
 
         //- Reconstruct and write all fields
         template<class Type>
-        void reconstructFields(const IOobjectList& objects);
+        void reconstructFields
+        (
+            const IOobjectList& objects,
+            const HashSet<word>& selectedFields
+        );
 };
 
 

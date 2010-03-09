@@ -1,5 +1,5 @@
 Info<< "\nConstructing reacting cloud" << endl;
-icoPoly8ThermoReactingCloud parcels
+icoPoly8ThermoReactingMultiphaseCloud parcels
 (
     "reactingCloud1",
     rho,

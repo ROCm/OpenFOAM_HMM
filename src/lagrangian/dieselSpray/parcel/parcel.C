@@ -247,7 +247,7 @@ bool Foam::parcel::move(spray& sDB)
         {
             oMass[i] = m()*oYf[i];
             label j = sDB.liquidToGasIndex()[i];
-            oHg += oYf[i]*sDB.gasProperties()[j].H(T());
+            oHg += oYf[i]*sDB.gasProperties()[j].Hs(T());
         }
 
         vector oMom = m()*U();
@@ -273,7 +273,7 @@ bool Foam::parcel::move(spray& sDB)
         {
             nMass[i] = m()*nYf[i];
             label j = sDB.liquidToGasIndex()[i];
-            nHg += nYf[i]*sDB.gasProperties()[j].H(T());
+            nHg += nYf[i]*sDB.gasProperties()[j].Hs(T());
         }
 
         vector nMom = m()*U();
@@ -286,11 +286,9 @@ bool Foam::parcel::move(spray& sDB)
         {
             sDB.srhos()[i][celli] += oMass[i] - nMass[i];
         }
-        sDB.sms()[celli]   += oMom - nMom;
+        sDB.sms()[celli] += oMom - nMom;
 
-        sDB.shs()[celli]   +=
-            oTotMass*(oH + oPE)
-          - m()*(nH + nPE);
+        sDB.shs()[celli] += oTotMass*(oH + oPE) - m()*(nH + nPE);
 
         // Remove evaporated mass from stripped mass
         ms() -= ms()*(oTotMass-m())/oTotMass;
@@ -446,7 +444,7 @@ void Foam::parcel::updateParcelProperties
     for (label i=0; i<Nf; i++)
     {
         label j = sDB.liquidToGasIndex()[i];
-        oldhg += Yf0[i]*sDB.gasProperties()[j].H(T());
+        oldhg += Yf0[i]*sDB.gasProperties()[j].Hs(T());
     }
 
     scalar oldhv = fuels.hl(pg, T(), X());
@@ -478,7 +476,7 @@ void Foam::parcel::updateParcelProperties
             for (label i=0; i<Nf; i++)
             {
                 label j = sDB.liquidToGasIndex()[i];
-                newhg += Ynew[i]*sDB.gasProperties()[j].H(Tnew);
+                newhg += Ynew[i]*sDB.gasProperties()[j].Hs(Tnew);
             }
 
             newhv = fuels.hl(pg, Tnew, X());
@@ -616,7 +614,8 @@ void Foam::parcel::updateParcelProperties
                     {
                         if (n>100)
                         {
-                            Info<< "n = " << n << ", T = " << Td << ", pv = " << pAtSurface << endl;
+                            Info<< "n = " << n << ", T = " << Td << ", pv = "
+                                << pAtSurface << endl;
                         }
                     }
                 }

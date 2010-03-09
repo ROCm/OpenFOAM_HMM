@@ -216,11 +216,10 @@ Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
                 "Foam::scalar "
                 "Foam::InjectionModel<CloudType>::setNumberOfParticles"
                 "("
-                "    const label, "
-                "    const scalar, "
-                "    const scalar, "
-                "    const scalar, "
-                "    const scalar"
+                    "const label, "
+                    "const scalar, "
+                    "const scalar, "
+                    "const scalar"
                 ")"
             )<< "Unknown parcelBasis type" << nl
              << exit(FatalError);
@@ -232,18 +231,26 @@ Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
 
 
 template<class CloudType>
-void Foam::InjectionModel<CloudType>::postInjectCheck(const label parcelsAdded)
+void Foam::InjectionModel<CloudType>::postInjectCheck
+(
+    const label parcelsAdded,
+    const scalar massAdded
+)
 {
-    if (parcelsAdded > 0)
+    const label allParcelsAdded = returnReduce(parcelsAdded, sumOp<label>());
+
+    if (allParcelsAdded > 0)
     {
-        Pout<< nl
+        Info<< nl
             << "--> Cloud: " << owner_.name() << nl
-            << "    Added " << parcelsAdded
-            << " new parcels" << nl << endl;
+            << "    Added " << allParcelsAdded << " new parcels" << nl << endl;
     }
 
     // Increment total number of parcels added
-    parcelsAddedTotal_ += parcelsAdded;
+    parcelsAddedTotal_ += allParcelsAdded;
+
+    // Increment total mass injected
+    massInjected_ += returnReduce(massAdded, sumOp<scalar>());
 
     // Update time for start of next injection
     time0_ = owner_.db().time().value();
@@ -355,16 +362,12 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     const polyMesh& mesh = owner_.mesh();
 
     // Prepare for next time step
+    label parcelsAdded = 0;
+    scalar massAdded = 0.0;
     label newParcels = 0;
     scalar newVolume = 0.0;
-    prepareForNextTimeStep(time, newParcels, newVolume);
 
-    // Return if no parcels are required
-    if (newParcels == 0)
-    {
-        postInjectCheck(0);
-        return;
-    }
+    prepareForNextTimeStep(time, newParcels, newVolume);
 
     // Duration of injection period during this timestep
     const scalar deltaT =
@@ -374,7 +377,6 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     const scalar padTime = max(0.0, SOI_ - time0_);
 
     // Introduce new parcels linearly across carrier phase timestep
-    label parcelsAdded = 0;
     for (label parcelI=0; parcelI<newParcels; parcelI++)
     {
         if (validInjection(parcelI))
@@ -425,13 +427,13 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                 // Add the new parcel
                 td.cloud().addParticle(pPtr);
 
-                massInjected_ += pPtr->nParticle()*pPtr->mass();
+                massAdded += pPtr->nParticle()*pPtr->mass();
                 parcelsAdded++;
             }
         }
     }
 
-    postInjectCheck(parcelsAdded);
+    postInjectCheck(parcelsAdded, massAdded);
 }
 
 

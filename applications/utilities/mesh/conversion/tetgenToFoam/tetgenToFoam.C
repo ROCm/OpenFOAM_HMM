@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -103,14 +103,12 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
+    const fileName prefix = args[1];
+    const bool readFaceFile = !args.optionFound("noFaceFile");
 
-    bool readFaceFile = !args.optionFound("noFaceFile");
-
-    fileName prefix(args.additionalArgs()[0]);
-
-    fileName nodeFile(prefix + ".node");
-    fileName eleFile(prefix + ".ele");
-    fileName faceFile(prefix + ".face");
+    const fileName nodeFile(prefix + ".node");
+    const fileName eleFile(prefix + ".ele");
+    const fileName faceFile(prefix + ".face");
 
     if (!readFaceFile)
     {

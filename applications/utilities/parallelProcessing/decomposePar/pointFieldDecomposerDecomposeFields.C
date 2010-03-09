@@ -26,7 +26,6 @@ License
 
 #include "pointFieldDecomposer.H"
 #include "processorPointPatchFields.H"
-#include "globalPointPatchFields.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -40,12 +39,8 @@ Foam::pointFieldDecomposer::decomposeField
     // Create and map the internal field values
     Field<Type> internalField(field.internalField(), pointAddressing_);
 
-    // Create a list of pointers for the patchFields including one extra
-    // for the global patch
-    PtrList<pointPatchField<Type> > patchFields
-    (
-        boundaryAddressing_.size() + 1
-    );
+    // Create a list of pointers for the patchFields
+    PtrList<pointPatchField<Type> > patchFields(boundaryAddressing_.size());
 
     // Create and map the patch field values
     forAll(boundaryAddressing_, patchi)
@@ -77,17 +72,6 @@ Foam::pointFieldDecomposer::decomposeField
             );
         }
     }
-
-    // Add the global patch
-    patchFields.set
-    (
-        boundaryAddressing_.size(),
-        new globalPointPatchField<Type>
-        (
-            procMesh_.boundary().globalPatch(),
-            DimensionedField<Type, pointMesh>::null()
-        )
-    );
 
     // Create the field for the processor
     return tmp<GeometricField<Type, pointPatchField, pointMesh> >

@@ -124,7 +124,8 @@ template<class Type>
 template<class Type1>
 tmp<Field<Type1> > pointPatchField<Type>::patchInternalField
 (
-    const Field<Type1>& iF
+    const Field<Type1>& iF,
+    const labelList& meshPoints
 ) const
 {
     // Check size
@@ -141,10 +142,18 @@ tmp<Field<Type1> > pointPatchField<Type>::patchInternalField
             << abort(FatalError);
     }
 
-    // get addressing
-    const labelList& meshPoints = patch().meshPoints();
-
     return tmp<Field<Type1> >(new Field<Type1>(iF, meshPoints));
+}
+
+
+template<class Type>
+template<class Type1>
+tmp<Field<Type1> > pointPatchField<Type>::patchInternalField
+(
+    const Field<Type1>& iF
+) const
+{
+    return patchInternalField(iF, patch().meshPoints());
 }
 
 
@@ -188,6 +197,53 @@ void pointPatchField<Type>::addToInternalField
 
     forAll (mp, pointI)
     {
+        iF[mp[pointI]] += pF[pointI];
+    }
+}
+
+
+template<class Type>
+template<class Type1>
+void pointPatchField<Type>::addToInternalField
+(
+    Field<Type1>& iF,
+    const Field<Type1>& pF,
+    const labelList& points
+) const
+{
+    // Check size
+    if (iF.size() != internalField().size())
+    {
+        FatalErrorIn
+        (
+            "void pointPatchField<Type>::"
+            "addToInternalField("
+            "Field<Type1>& iF, const Field<Type1>& iF, const labelList&) const"
+        )   << "given internal field does not correspond to the mesh. "
+            << "Field size: " << iF.size()
+            << " mesh size: " << internalField().size()
+            << abort(FatalError);
+    }
+
+    if (pF.size() != size())
+    {
+        FatalErrorIn
+        (
+            "void pointPatchField<Type>::"
+            "addToInternalField("
+            "Field<Type1>& iF, const Field<Type1>& iF, const labelList&) const"
+        )   << "given patch field does not correspond to the mesh. "
+            << "Field size: " << pF.size()
+            << " mesh size: " << size()
+            << abort(FatalError);
+    }
+
+    // Get the addressing
+    const labelList& mp = patch().meshPoints();
+
+    forAll(points, i)
+    {
+        label pointI = points[i];
         iF[mp[pointI]] += pF[pointI];
     }
 }

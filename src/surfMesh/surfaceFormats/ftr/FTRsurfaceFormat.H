@@ -29,6 +29,9 @@ Description
     Reading of the (now deprecated and infrequently used)
     Foam Trisurface Format.
 
+Deprecated
+    Other formats are better. (deprecated Mar 2009)
+
 SourceFiles
     FTRsurfaceFormat.C
 

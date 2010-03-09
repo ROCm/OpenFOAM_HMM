@@ -19,7 +19,7 @@ if (Pstream::master())
         Info<< "Correcting time values. Adding " << Tcorr << endl;
     }
 
-    for (int n=startTime; n<endTime; n++)
+    forAll(Times, n)
     {
         ensightCaseFile << setw(12) << Times[n].value() + Tcorr << " ";
 

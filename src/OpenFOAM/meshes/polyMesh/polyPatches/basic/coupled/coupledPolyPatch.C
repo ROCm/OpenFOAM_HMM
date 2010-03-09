@@ -146,43 +146,6 @@ Foam::pointField Foam::coupledPolyPatch::getAnchorPoints
 }
 
 
-bool Foam::coupledPolyPatch::inPatch
-(
-    const labelList& oldToNew,
-    const label oldFaceI
-) const
-{
-    label faceI = oldToNew[oldFaceI];
-
-    return faceI >= start() && faceI < start()+size();
-}
-
-
-Foam::label Foam::coupledPolyPatch::whichPatch
-(
-    const labelList& patchStarts,
-    const label faceI
-)
-{
-    forAll(patchStarts, patchI)
-    {
-        if (patchStarts[patchI] <= faceI)
-        {
-            if (patchI == patchStarts.size()-1)
-            {
-                return patchI;
-            }
-            else if (patchStarts[patchI+1] > faceI)
-            {
-                return patchI;
-            }
-        }
-    }
-
-    return -1;
-}
-
-
 Foam::scalarField Foam::coupledPolyPatch::calcFaceTol
 (
     const UList<face>& faces,
@@ -199,13 +162,20 @@ Foam::scalarField Foam::coupledPolyPatch::calcFaceTol
 
         const face& f = faces[faceI];
 
+        // 1. calculate a typical size of the face. Use maximum distance
+        //    to face centre
         scalar maxLenSqr = -GREAT;
+        // 2. as measure of truncation error when comparing two coordinates
+        //    use SMALL * maximum component
+        scalar maxCmpt = -GREAT;
 
         forAll(f, fp)
         {
-            maxLenSqr = max(maxLenSqr, magSqr(points[f[fp]] - cc));
+            const point& pt = points[f[fp]];
+            maxLenSqr = max(maxLenSqr, magSqr(pt - cc));
+            maxCmpt = max(maxCmpt, cmptMax(cmptMag(pt)));
         }
-        tols[faceI] = matchTol * Foam::sqrt(maxLenSqr);
+        tols[faceI] = max(SMALL*maxCmpt, matchTol*Foam::sqrt(maxLenSqr));
     }
     return tols;
 }
@@ -306,7 +276,6 @@ void Foam::coupledPolyPatch::calcTransformTensors
             parallel = false;
             forwardT = rotationTensor(-nr[0], nf[0]);
             reverseT = rotationTensor(nf[0], -nr[0]);
-
 
             // Check 
             forAll(forwardT, facei)

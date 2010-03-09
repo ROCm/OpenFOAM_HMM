@@ -428,9 +428,19 @@ Foam::labelList Foam::parMetisDecomp::decompose
 
 
     // Check for externally provided cellweights and if so initialise weights
-    scalar maxWeights = gMax(cWeights);
+    scalar minWeights = gMin(cWeights);
     if (cWeights.size() > 0)
     {
+        if (minWeights <= 0)
+        {
+            WarningIn
+            (
+                "metisDecomp::decompose"
+                "(const pointField&, const scalarField&)"
+            )   << "Illegal minimum weight " << minWeights
+                << endl;
+        }
+
         if (cWeights.size() != mesh_.nCells())
         {
             FatalErrorIn
@@ -441,11 +451,12 @@ Foam::labelList Foam::parMetisDecomp::decompose
                 << " does not equal number of cells " << mesh_.nCells()
                 << exit(FatalError);
         }
+
         // Convert to integers.
         cellWeights.setSize(cWeights.size());
         forAll(cellWeights, i)
         {
-            cellWeights[i] = int(1000000*cWeights[i]/maxWeights);
+            cellWeights[i] = int(cWeights[i]/minWeights);
         }
     }
 
@@ -779,9 +790,19 @@ Foam::labelList Foam::parMetisDecomp::decompose
 
 
     // Check for externally provided cellweights and if so initialise weights
-    scalar maxWeights = gMax(cWeights);
+    scalar minWeights = gMin(cWeights);
     if (cWeights.size() > 0)
     {
+        if (minWeights <= 0)
+        {
+            WarningIn
+            (
+                "parMetisDecomp::decompose(const labelListList&"
+                ", const pointField&, const scalarField&)"
+            )   << "Illegal minimum weight " << minWeights
+                << endl;
+        }
+
         if (cWeights.size() != globalCellCells.size())
         {
             FatalErrorIn
@@ -792,11 +813,12 @@ Foam::labelList Foam::parMetisDecomp::decompose
                 << " does not equal number of cells " << globalCellCells.size()
                 << exit(FatalError);
         }
+
         // Convert to integers.
         cellWeights.setSize(cWeights.size());
         forAll(cellWeights, i)
         {
-            cellWeights[i] = int(1000000*cWeights[i]/maxWeights);
+            cellWeights[i] = int(cWeights[i]/minWeights);
         }
     }
 

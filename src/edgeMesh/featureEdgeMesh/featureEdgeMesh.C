@@ -73,8 +73,8 @@ Foam::featureEdgeMesh::featureEdgeMesh
 Foam::featureEdgeMesh::featureEdgeMesh
 (
     const IOobject& io,
-    const Xfer< pointField >& pointLst,
-    const Xfer< edgeList >& edgeLst
+    const Xfer<pointField>& pointLst,
+    const Xfer<edgeList>& edgeLst
 )
 :
     regIOobject(io),

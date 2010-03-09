@@ -37,6 +37,7 @@ SourceFiles
 #define NASedgeFormat_H
 
 #include "edgeMesh.H"
+#include "NASCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,7 +52,8 @@ namespace fileFormats
 
 class NASedgeFormat
 :
-    public edgeMesh
+    public edgeMesh,
+    public NASCore
 {
     // Private Member Functions
 
@@ -60,13 +62,6 @@ class NASedgeFormat
 
         //- Disallow default bitwise assignment
         void operator=(const NASedgeFormat&);
-
-protected:
-
-    // Protected Member Functions
-
-        //- Do weird things to extract number
-        static scalar parseNASCoord(const string&);
 
 public:
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Application
     cfx4ToFoam
 
 Description
-    Converts a CFX 4 mesh to FOAM format
+    Converts a CFX 4 mesh to OpenFOAM format
 
 \*---------------------------------------------------------------------------*/
 
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 
 #   include "createTime.H"
 
-    IFstream cfxFile(args.additionalArgs()[0]);
+    IFstream cfxFile(args[1]);
 
     // Read the cfx information using a fixed format reader.
     // Comments in the file are in C++ style, so the stream parser will remove
@@ -603,7 +603,7 @@ int main(int argc, char *argv[])
                 Info<< "CFX patch " << patchI
                     << ", of type " << cfxPatchTypes[patchI]
                     << ", name " << cfxPatchNames[patchI]
-                    << " already exists as FOAM patch " << existingPatch
+                    << " already exists as OpenFOAM patch " << existingPatch
                     << ".  Adding faces." << endl;
 
                 faceList& renumberedPatch = boundary[existingPatch];
@@ -655,7 +655,7 @@ int main(int argc, char *argv[])
                 Info<< "CFX patch " << patchI
                     << ", of type " << cfxPatchTypes[patchI]
                     << ", name " << cfxPatchNames[patchI]
-                    << " converted into FOAM patch " << nCreatedPatches
+                    << " converted into OpenFOAM patch " << nCreatedPatches
                     << " type ";
 
                 if (cfxPatchTypes[patchI] == "WALL")

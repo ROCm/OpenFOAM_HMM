@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -193,7 +193,7 @@ public:
 
         // Access
 
-            //- Name of executable
+            //- Name of executable without the path
             inline const word& executable() const;
 
             //- Return root path
@@ -211,9 +211,25 @@ public:
             //- Return arguments
             inline const stringList& args() const;
 
-            //- Return additional arguments,
-            //  i.e. those additional to the executable itself
-            stringList::subList additionalArgs() const;
+            //- Return the argument corresponding to index.
+            inline const string& arg(const label index) const;
+
+            //- Return the number of arguments
+            inline label size() const;
+
+            //- Read a value from the argument at index.
+            //  Index 0 corresponds to the name of the executable.
+            //  Index 1 corresponds to the first argument.
+            template<class T>
+            inline T argRead(const label index) const;
+
+            //- Return arguments that are additional to the executable
+            //  @deprecated use operator[] directly (deprecated Feb 2010)
+            stringList::subList additionalArgs() const
+            {
+                return stringList::subList(args_, args_.size()-1, 1);
+            }
+
 
             //- Return options
             inline const Foam::HashTable<string>& options() const;
@@ -264,6 +280,14 @@ public:
             }
 
 
+            //- Return the argument corresponding to index.
+            //  Index 0 corresponds to the name of the executable.
+            //  Index 1 corresponds to the first argument.
+            inline const string& operator[](const label index) const;
+
+            //- Return the argument string associated with the named option
+            //  @sa option()
+            inline const string& operator[](const word& opt) const;
 
         // Edit
 

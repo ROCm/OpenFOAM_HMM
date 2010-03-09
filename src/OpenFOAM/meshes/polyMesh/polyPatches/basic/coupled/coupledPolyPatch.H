@@ -133,21 +133,6 @@ protected:
             const pointField&
         );
 
-        //- Is face (in old face labels) in current patch?
-        bool inPatch
-        (
-            const labelList& oldToNew,
-            const label oldFaceI
-        ) const;
-
-        //- Given list of starts of patches and a face label determine
-        //  the patch.
-        static label whichPatch
-        (
-            const labelList& patchStarts,
-            const label faceI
-        );
-
         //- Calculate typical tolerance per face. Is currently max distance
         //  from face centre to any of the face vertices.
         static scalarField calcFaceTol

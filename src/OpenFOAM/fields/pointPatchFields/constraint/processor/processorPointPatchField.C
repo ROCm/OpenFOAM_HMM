@@ -96,16 +96,28 @@ processorPointPatchField<Type>::~processorPointPatchField()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void processorPointPatchField<Type>::initSwapAdd(Field<Type>& pField) const
+void processorPointPatchField<Type>::initSwapAddSeparated
+(
+    const Pstream::commsTypes commsType,
+    Field<Type>& pField
+)
+const
 {
     if (Pstream::parRun())
     {
-        // Get internal field into my point order
-        Field<Type> pf(this->patchInternalField(pField));
+        // Get internal field into correct order for opposite side
+        Field<Type> pf
+        (
+            this->patchInternalField
+            (
+                pField,
+                procPatch_.reverseMeshPoints()
+            )
+        );
 
         OPstream::write
         (
-            Pstream::blocking,
+            commsType,
             procPatch_.neighbProcNo(),
             reinterpret_cast<const char*>(pf.begin()),
             pf.byteSize(),
@@ -116,7 +128,11 @@ void processorPointPatchField<Type>::initSwapAdd(Field<Type>& pField) const
 
 
 template<class Type>
-void processorPointPatchField<Type>::swapAdd(Field<Type>& pField) const
+void processorPointPatchField<Type>::swapAddSeparated
+(
+    const Pstream::commsTypes commsType,
+    Field<Type>& pField
+) const
 {
     if (Pstream::parRun())
     {
@@ -124,7 +140,7 @@ void processorPointPatchField<Type>::swapAdd(Field<Type>& pField) const
 
         IPstream::read
         (
-            Pstream::blocking,
+            commsType,
             procPatch_.neighbProcNo(),
             reinterpret_cast<char*>(pnf.begin()),
             pnf.byteSize(),
@@ -133,10 +149,13 @@ void processorPointPatchField<Type>::swapAdd(Field<Type>& pField) const
 
         if (doTransform())
         {
-            procPatch_.procPolyPatch().transform(pnf);
+            const processorPolyPatch& ppp = procPatch_.procPolyPatch();
+            const tensor& forwardT = ppp.forwardT();
+
+            transform(pnf, forwardT, pnf);
         }
 
-        addToInternalField(pField, pnf);
+        addToInternalField(pField, pnf, procPatch_.separatedPoints());
     }
 }
 

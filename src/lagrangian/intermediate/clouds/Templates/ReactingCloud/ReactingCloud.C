@@ -272,6 +272,9 @@ void Foam::ReactingCloud<ParcelType>::evolve()
         evolveCloud();
 
         postEvolve();
+
+        info();
+        Info<< endl;
     }
 }
 

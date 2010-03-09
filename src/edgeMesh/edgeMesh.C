@@ -38,10 +38,12 @@ namespace Foam
     defineMemberFunctionSelectionTable(edgeMesh,write,fileExtension);
 }
 
+
 Foam::wordHashSet Foam::edgeMesh::readTypes()
 {
     return wordHashSet(*fileExtensionConstructorTablePtr_);
 }
+
 
 Foam::wordHashSet Foam::edgeMesh::writeTypes()
 {
@@ -65,6 +67,7 @@ bool Foam::edgeMesh::canReadType
         "reading"
    );
 }
+
 
 bool Foam::edgeMesh::canWriteType
 (
@@ -197,8 +200,8 @@ void Foam::edgeMesh::clear()
 
 void Foam::edgeMesh::reset
 (
-    const Xfer< pointField >& pointLst,
-    const Xfer< edgeList >& edgeLst
+    const Xfer<pointField>& pointLst,
+    const Xfer<edgeList>& edgeLst
 )
 {
     // Take over new primitive data.
@@ -215,7 +218,6 @@ void Foam::edgeMesh::reset
         // connectivity likely changed
         pointEdgesPtr_.clear();
     }
-
 }
 
 
@@ -227,8 +229,7 @@ void Foam::edgeMesh::transfer(edgeMesh& mesh)
 }
 
 
-Foam::Xfer< Foam::edgeMesh >
-Foam::edgeMesh::xfer()
+Foam::Xfer<Foam::edgeMesh> Foam::edgeMesh::xfer()
 {
     return xferMove(*this);
 }

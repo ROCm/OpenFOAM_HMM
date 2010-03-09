@@ -656,6 +656,16 @@ public:
                 const scalar maxLoadUnbalance
             );
 
+            //- Balance before refining some cells
+            autoPtr<mapDistributePolyMesh> balanceAndRefine
+            (
+                const string& msg,
+                decompositionMethod& decomposer,
+                fvMeshDistribute& distributor,
+                const labelList& cellsToRefine,
+                const scalar maxLoadUnbalance
+            );
+
 
         // Baffle handling
 

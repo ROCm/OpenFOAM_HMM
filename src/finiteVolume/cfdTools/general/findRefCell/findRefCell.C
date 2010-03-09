@@ -77,7 +77,7 @@ void Foam::setRefCell
             point refPointi(dict.lookup(refPointName));
             refCelli = field.mesh().findCell(refPointi);
             label hasRef = (refCelli >= 0 ? 1 : 0);
-            label sumHasRef = returnReduce<label>(hasRef, sumOp<label>());
+            label sumHasRef = returnReduce(hasRef, sumOp<label>());
             if (sumHasRef != 1)
             {
                 FatalIOErrorIn
@@ -127,7 +127,7 @@ Foam::scalar Foam::getRefCellValue
 )
 {
     scalar refCellValue = (refCelli >= 0 ? field[refCelli] : 0.0);
-    return returnReduce<label>(refCellValue, sumOp<scalar>());
+    return returnReduce(refCellValue, sumOp<scalar>());
 }
 
 

@@ -47,10 +47,10 @@ Foam::scalar Foam::compressibleCourantNo
           / fvc::interpolate(rho);
 
         CoNum = max(SfUfbyDelta/mesh.magSf())
-            .value()*runTime.deltaTValue();
+            .value()*runTime.deltaT().value();
 
         meanCoNum = (sum(SfUfbyDelta)/sum(mesh.magSf()))
-            .value()*runTime.deltaTValue();
+            .value()*runTime.deltaT().value();
     }
 
     Info<< "Region: " << mesh.name() << " Courant Number mean: " << meanCoNum

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,20 +45,20 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv, false, true);
 
-    if (args.additionalArgs().empty())
+    if (args.size() <= 1)
     {
         args.printUsage();
     }
 
     label ok = 0;
 
-    forAll(args.additionalArgs(), argI)
+    for (label argI=1; argI < args.size(); ++argI)
     {
-        const string& srcFile = args.additionalArgs()[argI];
+        const string& srcFile = args[argI];
 
         if (args.optionFound("ext"))
         {
-            if (mvBak(srcFile, args.option("ext")))
+            if (mvBak(srcFile, args["ext"]))
             {
                 ok++;
             }
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    Info<< "mvBak called for " << args.additionalArgs().size()
+    Info<< "mvBak called for " << args.size()-1
         << " files (moved " << ok << ")\n" << endl;
 
     return 0;

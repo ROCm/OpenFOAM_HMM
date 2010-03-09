@@ -56,6 +56,9 @@ class domainDecomposition
 {
     // Private data
 
+        //- Optional: points at the facesInstance
+        autoPtr<pointIOField> facesInstancePointsPtr_;
+
         //- Mesh decomposition control dictionary
         IOdictionary decompositionDict_;
 
@@ -83,9 +86,6 @@ class domainDecomposition
 
         //- Labels of cells for each processor
         labelListList procCellAddressing_;
-
-        //- Original patch index for every processor patch
-        labelListList procBoundaryAddressing_;
 
         //- Sizes for processor mesh patches
         // Excludes inter-processor boundaries
@@ -167,8 +167,8 @@ public:
             return distributed_;
         }
 
-        //- Decompose mesh. Optionally remove zero-sized patches.
-        void decomposeMesh(const bool filterEmptyPatches);
+        //- Decompose mesh.
+        void decomposeMesh();
 
         //- Write decomposition
         bool writeDecomposition();

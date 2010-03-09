@@ -414,33 +414,30 @@ Foam::label Foam::globalMeshData::countCoincidentFaces
 }
 
 
-void Foam::globalMeshData::calcGlobalPointSlaves() const
+void Foam::globalMeshData::calcGlobalPointSlaves
+(
+    const globalPoints& globalData,
+    autoPtr<globalIndex>& globalIndicesPtr,
+    autoPtr<labelListList>& globalPointSlavesPtr,
+    autoPtr<mapDistribute>& globalPointSlavesMapPtr
+) const
 {
-    if (debug)
-    {
-        Pout<< "globalMeshData::calcGlobalPointSlaves() :"
-            << " calculating coupled master to slave point addressing."
-            << endl;
-    }
-
-    // Calculate connected points for master points
-    globalPoints globalData(mesh_, coupledPatch(), true);
-
-    const Map<label>& meshToProcPoint = globalData.meshToProcPoint();
-
     // Create global numbering for coupled points
-    globalPointNumberingPtr_.reset
+    globalIndicesPtr.reset
     (
         new globalIndex(globalData.globalIndices())
     );
-    const globalIndex& globalIndices = globalPointNumberingPtr_();
+    const globalIndex& globalIndices = globalIndicesPtr();
 
     // Create master to slave addressing. Empty for slave points.
-    globalPointSlavesPtr_.reset
+    globalPointSlavesPtr.reset
     (
         new labelListList(coupledPatch().nPoints())
     );
-    labelListList& globalPointSlaves = globalPointSlavesPtr_();
+    labelListList& globalPointSlaves = globalPointSlavesPtr();
+
+
+    const Map<label>& meshToProcPoint = globalData.meshToProcPoint();
 
     forAllConstIter(Map<label>, meshToProcPoint, iter)
     {
@@ -469,7 +466,7 @@ void Foam::globalMeshData::calcGlobalPointSlaves() const
     // Changes globalPointSlaves to be indices into compact data
 
     List<Map<label> > compactMap(Pstream::nProcs());
-    globalPointSlavesMapPtr_.reset
+    globalPointSlavesMapPtr.reset
     (
         new mapDistribute
         (
@@ -481,41 +478,50 @@ void Foam::globalMeshData::calcGlobalPointSlaves() const
 
     if (debug)
     {
-        Pout<< "globalMeshData::calcGlobalPointSlaves() :"
+        Pout<< "globalMeshData::calcGlobalPointSlaves(..) :"
             << " coupled points:" << coupledPatch().nPoints()
             << " additional remote points:"
-            <<  globalPointSlavesMapPtr_().constructSize()
+            <<  globalPointSlavesMapPtr().constructSize()
               - coupledPatch().nPoints()
             << endl;
     }
 }
 
 
-void Foam::globalMeshData::calcGlobalEdgeSlaves() const
+void Foam::globalMeshData::calcGlobalPointSlaves() const
 {
     if (debug)
     {
-        Pout<< "globalMeshData::calcGlobalEdgeSlaves() :"
-            << " calculating coupled master to slave edge addressing."
+        Pout<< "globalMeshData::calcGlobalPointSlaves() :"
+            << " calculating coupled master to collocated"
+            << " slave point addressing."
             << endl;
     }
 
-    const labelListList& globalPointSlaves = this->globalPointSlaves();
-    const mapDistribute& globalPointSlavesMap = this->globalPointSlavesMap();
+    // Calculate collocated connected points for master points.
+    globalPoints collocatedGlobalData(mesh_, coupledPatch(), true, false);
 
-    // - Send across connected edges (in global edge addressing)
-    // - Check on receiving side whether edge has same slave edge
-    //   on both endpoints.
-
-    // Create global numbering for coupled edges
-    globalEdgeNumberingPtr_.reset
+    calcGlobalPointSlaves
     (
-        new globalIndex(coupledPatch().nEdges())
+        collocatedGlobalData,
+        globalPointNumberingPtr_,
+        globalPointSlavesPtr_,
+        globalPointSlavesMapPtr_
     );
-    const globalIndex& globalIndices = globalEdgeNumberingPtr_();
+}
 
+
+void Foam::globalMeshData::calcGlobalEdgeSlaves
+(
+    const labelListList& pointSlaves,
+    const mapDistribute& pointSlavesMap,
+    const globalIndex& globalEdgeIndices,
+    autoPtr<labelListList>& globalEdgeSlavesPtr,
+    autoPtr<mapDistribute>& globalEdgeSlavesMapPtr
+) const
+{
     // Coupled point to global coupled edges.
-    labelListList globalPointEdges(globalPointSlavesMap.constructSize());
+    labelListList globalPointEdges(pointSlavesMap.constructSize());
 
     // Create local version
     const labelListList& pointEdges = coupledPatch().pointEdges();
@@ -526,12 +532,12 @@ void Foam::globalMeshData::calcGlobalEdgeSlaves() const
         globalPEdges.setSize(pEdges.size());
         forAll(pEdges, i)
         {
-            globalPEdges[i] = globalIndices.toGlobal(pEdges[i]);
+            globalPEdges[i] = globalEdgeIndices.toGlobal(pEdges[i]);
         }
     }
 
     // Pull slave data to master
-    globalPointSlavesMap.distribute(globalPointEdges);
+    pointSlavesMap.distribute(globalPointEdges);
 
     // Now check on master if any of my edges are also on slave.
     // This assumes that if slaves have a coupled edge it is also on
@@ -542,14 +548,14 @@ void Foam::globalMeshData::calcGlobalEdgeSlaves() const
     const edgeList& edges = coupledPatch().edges();
 
     // Create master to slave addressing. Empty for slave edges.
-    globalEdgeSlavesPtr_.reset(new labelListList(edges.size()));
-    labelListList& globalEdgeSlaves = globalEdgeSlavesPtr_();
+    globalEdgeSlavesPtr.reset(new labelListList(edges.size()));
+    labelListList& globalEdgeSlaves = globalEdgeSlavesPtr();
 
     forAll(edges, edgeI)
     {
         const edge& e = edges[edgeI];
-        const labelList& slaves0 = globalPointSlaves[e[0]];
-        const labelList& slaves1 = globalPointSlaves[e[1]];
+        const labelList& slaves0 = pointSlaves[e[0]];
+        const labelList& slaves1 = pointSlaves[e[1]];
 
         // Check for edges that are in both slaves0 and slaves1.
         pointEdgeSet.clear();
@@ -580,11 +586,11 @@ void Foam::globalMeshData::calcGlobalEdgeSlaves() const
 
     // Construct map
     List<Map<label> > compactMap(Pstream::nProcs());
-    globalEdgeSlavesMapPtr_.reset
+    globalEdgeSlavesMapPtr.reset
     (
         new mapDistribute
         (
-            globalIndices,
+            globalEdgeIndices,
             globalEdgeSlaves,
             compactMap
         )
@@ -595,9 +601,36 @@ void Foam::globalMeshData::calcGlobalEdgeSlaves() const
         Pout<< "globalMeshData::calcGlobalEdgeSlaves() :"
             << " coupled edge:" << edges.size()
             << " additional remote edges:"
-            << globalEdgeSlavesMapPtr_().constructSize() - edges.size()
+            << globalEdgeSlavesMapPtr().constructSize() - edges.size()
             << endl;
     }
+}
+
+
+void Foam::globalMeshData::calcGlobalEdgeSlaves() const
+{
+    if (debug)
+    {
+        Pout<< "globalMeshData::calcGlobalEdgeSlaves() :"
+            << " calculating coupled master to collocated slave"
+            << " edge addressing." << endl;
+    }
+
+    // - Send across connected edges (in global edge addressing)
+    // - Check on receiving side whether edge has same slave edge
+    //   on both endpoints.
+
+    // Create global numbering for coupled edges
+    const globalIndex& globalIndices = globalEdgeNumbering();
+
+    calcGlobalEdgeSlaves
+    (
+        globalPointSlaves(),
+        globalPointSlavesMap(),
+        globalIndices,
+        globalEdgeSlavesPtr_,
+        globalEdgeSlavesMapPtr_
+    );
 }
 
 
@@ -673,6 +706,7 @@ void Foam::globalMeshData::calcPointBoundaryFaces
         }
     }
 }
+
 
 void Foam::globalMeshData::calcGlobalPointBoundaryFaces() const
 {
@@ -965,6 +999,55 @@ void Foam::globalMeshData::calcGlobalPointBoundaryCells() const
 }
 
 
+void Foam::globalMeshData::calcGlobalPointAllSlaves() const
+{
+    if (debug)
+    {
+        Pout<< "globalMeshData::calcGlobalPointAllSlaves() :"
+            << " calculating coupled master to slave point addressing."
+            << endl;
+    }
+
+    // Calculate collocated&non-collocated connected points for master points.
+    globalPoints allGlobalData(mesh_, coupledPatch(), true, true);
+
+    calcGlobalPointSlaves
+    (
+        allGlobalData,
+        globalPointAllNumberingPtr_,
+        globalPointAllSlavesPtr_,
+        globalPointAllSlavesMapPtr_
+    );
+}
+
+
+void Foam::globalMeshData::calcGlobalEdgeAllSlaves() const
+{
+    if (debug)
+    {
+        Pout<< "globalMeshData::calcGlobalEdgeAllSlaves() :"
+            << " calculating coupled master to slave edge addressing."
+            << endl;
+    }
+
+    // - Send across connected edges (in global edge addressing)
+    // - Check on receiving side whether edge has same slave edge
+    //   on both endpoints.
+
+    // Create global numbering for coupled edges
+    const globalIndex& globalIndices = globalEdgeNumbering();
+
+    calcGlobalEdgeSlaves
+    (
+        globalPointAllSlaves(),
+        globalPointAllSlavesMap(),
+        globalIndices,
+        globalEdgeAllSlavesPtr_,
+        globalEdgeAllSlavesMapPtr_
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from polyMesh
@@ -1061,6 +1144,17 @@ void Foam::globalMeshData::clearOut()
     globalBoundaryCellNumberingPtr_.clear();
     globalPointBoundaryCellsPtr_.clear();
     globalPointBoundaryCellsMapPtr_.clear();
+
+    //- Non-collocated
+
+    // Point
+    globalPointAllNumberingPtr_.clear();
+    globalPointAllSlavesPtr_.clear();
+    globalPointAllSlavesMapPtr_.clear();
+    // Edge
+    globalEdgeAllSlavesPtr_.clear();
+    globalEdgeAllSlavesMapPtr_.clear();
+
 }
 
 
@@ -1216,7 +1310,7 @@ Foam::pointField Foam::globalMeshData::geometricSharedPoints() const
     labelList pMap;
     pointField mergedPoints;
 
-    mergePoints
+    Foam::mergePoints
     (
         sharedPoints,   // coordinates to merge
         tolDim,         // tolerance
@@ -1354,7 +1448,10 @@ const Foam::globalIndex& Foam::globalMeshData::globalEdgeNumbering() const
 {
     if (!globalEdgeNumberingPtr_.valid())
     {
-        calcGlobalEdgeSlaves();
+        globalEdgeNumberingPtr_.reset
+        (
+            new globalIndex(coupledPatch().nEdges())
+        );
     }
     return globalEdgeNumberingPtr_();
 }
@@ -1456,6 +1553,343 @@ const
 }
 
 
+
+// Non-collocated coupled point/edge addressing
+
+const Foam::globalIndex& Foam::globalMeshData::globalPointAllNumbering() const
+{
+    if (!globalPointAllNumberingPtr_.valid())
+    {
+        calcGlobalPointAllSlaves();
+    }
+    return globalPointAllNumberingPtr_();
+}
+
+
+const Foam::labelListList& Foam::globalMeshData::globalPointAllSlaves() const
+{
+    if (!globalPointAllSlavesPtr_.valid())
+    {
+        calcGlobalPointAllSlaves();
+    }
+    return globalPointAllSlavesPtr_();
+}
+
+
+const Foam::mapDistribute& Foam::globalMeshData::globalPointAllSlavesMap() const
+{
+    if (!globalPointAllSlavesMapPtr_.valid())
+    {
+        calcGlobalPointAllSlaves();
+    }
+    return globalPointAllSlavesMapPtr_();
+}
+
+
+const Foam::labelListList& Foam::globalMeshData::globalEdgeAllSlaves() const
+{
+    if (!globalEdgeAllSlavesPtr_.valid())
+    {
+        calcGlobalEdgeAllSlaves();
+    }
+    return globalEdgeAllSlavesPtr_();
+}
+
+
+const Foam::mapDistribute& Foam::globalMeshData::globalEdgeAllSlavesMap() const
+{
+    if (!globalEdgeAllSlavesMapPtr_.valid())
+    {
+        calcGlobalEdgeAllSlaves();
+    }
+    return globalEdgeAllSlavesMapPtr_();
+}
+
+
+Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
+(
+    labelList& pointToGlobal,
+    labelList& uniquePoints
+) const
+{
+    const indirectPrimitivePatch& cpp = coupledPatch();
+    const labelListList& pointSlaves = globalPointSlaves();
+    const mapDistribute& pointSlavesMap = globalPointSlavesMap();
+
+
+    // 1. Count number of masters on my processor.
+    label nCoupledMaster = 0;
+    PackedBoolList isMaster(mesh_.nPoints(), 1);
+    forAll(pointSlaves, pointI)
+    {
+        const labelList& slavePoints = pointSlaves[pointI];
+
+        if (slavePoints.size() > 0)
+        {
+            nCoupledMaster++;
+        }
+        else
+        {
+            isMaster[cpp.meshPoints()[pointI]] = 0;
+        }
+    }
+
+    label myUniquePoints = mesh_.nPoints() - cpp.nPoints() + nCoupledMaster;
+
+    //Pout<< "Points :" << nl
+    //    << "    mesh             : " << mesh_.nPoints() << nl
+    //    << "    of which coupled : " << cpp.nPoints() << nl
+    //    << "    of which master  : " << nCoupledMaster << nl
+    //    << endl;
+
+
+    // 2. Create global indexing for unique points.
+    autoPtr<globalIndex> globalPointsPtr(new globalIndex(myUniquePoints));
+
+
+    // 3. Assign global point numbers. Keep slaves unset.
+    pointToGlobal.setSize(mesh_.nPoints());
+    pointToGlobal = -1;
+    uniquePoints.setSize(myUniquePoints);
+    label nMaster = 0;
+
+    forAll(isMaster, meshPointI)
+    {
+        if (isMaster[meshPointI])
+        {
+            pointToGlobal[meshPointI] = globalPointsPtr().toGlobal(nMaster);
+            uniquePoints[nMaster] = meshPointI;
+            nMaster++;
+        }
+    }
+
+
+    // 4. Push global index for coupled points to slaves.
+    {
+        labelList masterToGlobal(pointSlavesMap.constructSize(), -1);
+
+        forAll(pointSlaves, pointI)
+        {
+            const labelList& slaves = pointSlaves[pointI];
+
+            if (slaves.size() > 0)
+            {
+                // Duplicate master globalpoint into slave slots
+                label meshPointI = cpp.meshPoints()[pointI];
+                masterToGlobal[pointI] = pointToGlobal[meshPointI];
+                forAll(slaves, i)
+                {
+                    masterToGlobal[slaves[i]] = masterToGlobal[pointI];
+                }
+            }
+        }
+
+        // Send back
+        pointSlavesMap.reverseDistribute(cpp.nPoints(), masterToGlobal);
+
+        // On slave copy master index into overal map.
+        forAll(pointSlaves, pointI)
+        {
+            const labelList& slaves = pointSlaves[pointI];
+
+            if (slaves.size() == 0)
+            {
+                label meshPointI = cpp.meshPoints()[pointI];
+                pointToGlobal[meshPointI] = masterToGlobal[pointI];
+            }
+        }
+    }
+
+    return globalPointsPtr;
+}
+
+
+Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
+(
+    const labelList& meshPoints,
+    const Map<label>& meshPointMap,
+    labelList& pointToGlobal,
+    labelList& uniqueMeshPoints
+) const
+{
+    const indirectPrimitivePatch& cpp = coupledPatch();
+    const labelListList& pointSlaves = globalPointSlaves();
+    const mapDistribute& pointSlavesMap = globalPointSlavesMap();
+
+
+    // The patch points come in two variants:
+    // - not on a coupled patch so guaranteed unique
+    // - on a coupled patch
+    // If the point is on a coupled patch the problem is that the
+    // master-slave structure (globalPointSlaves etc.) assigns one of the
+    // coupled points to be the master but this master point is not
+    // necessarily on the patch itself! (it might just be connected to the
+    // patch point via coupled patches).
+    // So this means that all master point loops should be over the
+    // master-slave structure, not over the patch points and that the unique
+    // point returned is a mesh point.
+    // (unless we want to do the whole master-slave analysis again for the
+    //  current patch only).
+
+
+    // Determine mapping from coupled point to patch point and vice versa
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    labelList patchToCoupled(meshPoints.size(), -1);
+    label nCoupled = 0;
+    labelList coupledToPatch(pointSlavesMap.constructSize(), -1);
+
+    // Note: loop over patch since usually smaller
+    forAll(meshPoints, patchPointI)
+    {
+        label meshPointI = meshPoints[patchPointI];
+
+        Map<label>::const_iterator iter = cpp.meshPointMap().find(meshPointI);
+
+        if (iter != cpp.meshPointMap().end())
+        {
+            patchToCoupled[patchPointI] = iter();
+            coupledToPatch[iter()] = patchPointI;
+            nCoupled++;
+        }
+    }
+
+    //Pout<< "Patch:" << nl
+    //    << "    points:" << meshPoints.size() << nl
+    //    << "    of which on coupled patch:" << nCoupled << endl;
+
+
+    // Pull coupled-to-patch information to master
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    pointSlavesMap.distribute(coupledToPatch);
+
+
+    // Check on master whether point is anywhere on patch
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // List of master points that are on the patch
+    DynamicList<label> masterPoints(pointSlaves.size());
+
+    forAll(pointSlaves, coupledPointI)
+    {
+        const labelList& slaves = pointSlaves[coupledPointI];
+
+        if (slaves.size() > 0)
+        {
+            // I am master. Is this point on the patch on myself or on any
+            // any slave?
+            if (coupledToPatch[coupledPointI] != -1)
+            {
+                masterPoints.append(coupledPointI);
+            }
+            else
+            {
+                forAll(slaves, i)
+                {
+                    if (coupledToPatch[slaves[i]] != -1)
+                    {
+                        masterPoints.append(coupledPointI);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+
+    // Create global indexing
+    // ~~~~~~~~~~~~~~~~~~~~~~
+    // 1. patch points that are not on coupled patch:
+    //      meshPoints.size()-nCoupled
+    // 2. master points that are on patch:
+    //      masterPoints.size()
+    label myUniquePoints = meshPoints.size()-nCoupled+masterPoints.size();
+    autoPtr<globalIndex> globalPointsPtr(new globalIndex(myUniquePoints));
+
+    //Pout<< "CoupledPatch:" << nl
+    //    << "    points:" << cpp.nPoints() << nl
+    //    << "    of which on patch:" << masterPoints.size() << endl;
+
+
+    // Allocate unique points
+    // ~~~~~~~~~~~~~~~~~~~~~~
+
+    pointToGlobal.setSize(meshPoints.size());
+    pointToGlobal = -1;
+    uniqueMeshPoints.setSize(myUniquePoints);
+
+    // Allocate globals for uncoupled patch points
+    label nMaster = 0;
+    forAll(patchToCoupled, patchPointI)
+    {
+        if (patchToCoupled[patchPointI] == -1)
+        {
+            // Allocate global point
+            label globalI = globalPointsPtr().toGlobal(nMaster);
+            pointToGlobal[patchPointI] = globalI;
+            uniqueMeshPoints[nMaster] = meshPoints[patchPointI];
+            nMaster++;
+        }
+    }
+
+    // Allocate globals for master 
+    labelList masterToGlobal(pointSlavesMap.constructSize(), -456);
+
+    forAll(masterPoints, i)
+    {
+        label coupledPointI = masterPoints[i];
+
+        // Allocate global point
+        label globalI = globalPointsPtr().toGlobal(nMaster);
+        if (coupledToPatch[coupledPointI] != -1)
+        {
+            pointToGlobal[coupledToPatch[coupledPointI]] = globalI;
+        }
+        uniqueMeshPoints[nMaster] = cpp.meshPoints()[coupledPointI];
+        nMaster++;
+
+        // Put global into slave slots
+        const labelList& slaves = pointSlaves[coupledPointI];
+        masterToGlobal[coupledPointI] = globalI;    // not really necessary
+        forAll(slaves, i)
+        {
+            masterToGlobal[slaves[i]] = globalI;
+        }
+    }
+
+
+    if (nMaster != myUniquePoints)
+    {
+        FatalErrorIn("globalMeshData::mergePoints(..)")
+            << "problem." << abort(FatalError);
+    }
+
+
+    // Send back (from slave slots) to originating processor
+    pointSlavesMap.reverseDistribute(cpp.nPoints(), masterToGlobal);
+
+    // On slaves take over global number
+    forAll(patchToCoupled, patchPointI)
+    {
+        label coupledPointI = patchToCoupled[patchPointI];
+
+        if (coupledPointI != -1)
+        {
+            const labelList& slaves = pointSlaves[coupledPointI];
+
+            if (slaves.size() == 0)
+            {
+                pointToGlobal[patchPointI] = masterToGlobal[coupledPointI];
+            }
+        }
+    }
+
+
+    return globalPointsPtr;
+}
+
+
 void Foam::globalMeshData::movePoints(const pointField& newPoints)
 {
     // Topology does not change and we don't store any geometry so nothing
@@ -1486,8 +1920,9 @@ void Foam::globalMeshData::updateMesh()
 
     // Option 1. Topological
     {
-        // Calculate all shared points. This does all the hard work.
-        globalPoints parallelPoints(mesh_, false);
+        // Calculate all shared points (excluded points that are only
+        // on two coupled patches). This does all the hard work.
+        globalPoints parallelPoints(mesh_, false, true);
 
         // Copy data out.
         nGlobalPoints_ = parallelPoints.nGlobalPoints();
@@ -1508,6 +1943,16 @@ void Foam::globalMeshData::updateMesh()
     //    sharedEdgeLabels_ = parallelPoints.sharedEdgeLabels();
     //    sharedEdgeAddr_ = parallelPoints.sharedEdgeAddr();
     //}
+
+    if (debug)
+    {
+        Pout<< "globalMeshData : nGlobalPoints_:" << nGlobalPoints_ << nl
+            << "globalMeshData : sharedPointLabels_:"
+            << sharedPointLabels_.size() << nl
+            << "globalMeshData : sharedPointAddr_:"
+            << sharedPointAddr_.size() << endl;
+    }
+
 
     // Total number of faces. Start off from all faces. Remove coincident
     // processor faces (on highest numbered processor) before summing.

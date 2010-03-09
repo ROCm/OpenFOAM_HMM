@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -60,15 +60,16 @@ include $(RULES)/$(WM_LINK_LANGUAGE)
 # targets
 #------------------------------------------------------------------------------
 
-all:  $(BIN)/dirToString $(BIN)/wmkdep
+all:  $(BIN)/dirToString $(BIN)/wmkdep $(BIN)/wmkdepend
 
 clean:
-	rm -f $(BIN)/dirToString $(BIN)/wmkdep 2>/dev/null
+	rm -f $(BIN)/dirToString $(BIN)/wmkdep $(BIN)/wmkdepend 2>/dev/null
 
 
 $(BIN)/dirToString: dirToString.c
 	@mkdir -p $(BIN)
 	$(cc) $(cFLAGS) dirToString.c -o $(BIN)/dirToString
+
 
 $(BIN)/wmkdep: wmkdep.l
 	@mkdir -p $(BIN)
@@ -76,5 +77,14 @@ $(BIN)/wmkdep: wmkdep.l
 	$(cc) $(cFLAGS) lex.yy.c -o $(BIN)/wmkdep
 	@rm -f lex.yy.c 2>/dev/null
 
+
+# for bootstrapping - use generated files directly (instead of from .atg file)
+$(BIN)/wmkdepend: wmkdepend.cpp \
+    wmkdependParser.cpp wmkdependScanner.cpp \
+    wmkdependParser.h   wmkdependScanner.h
+	@mkdir -p $(BIN)
+	$(CC) $(c++FLAGS) \
+	     wmkdepend.cpp wmkdependParser.cpp wmkdependScanner.cpp \
+	    -o $(BIN)/wmkdepend
 
 #------------------------------------------------------------------------------

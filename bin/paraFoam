@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -30,18 +30,22 @@
 #     start paraview with the OpenFOAM libraries
 #
 # Note
-#     combining -block and -region options yields undefined behaviour
+#     combining -block or -builtin options with the -region option yields
+#     undefined behaviour
 #------------------------------------------------------------------------------
 usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
-usage: ${0##*/} [OPTION]
+Usage: ${0##*/} [OPTION]
 options:
-  -case   dir    specify alternative case directory
-  -region name   specify mesh region name
-  -block         use blockMesh reader (and .blockMesh file)
-  -touch         only create the .OpenFOAM file
+  -block            use blockMesh reader  (uses .blockMesh extension)
+  -builtin          use VTK builtin OpenFOAM reader  (uses .foam extension)
+  -case <dir>       specify alternative case directory, default is the cwd
+  -region <name>    specify alternative mesh region
+  -touch            only create the file  (eg, .blockMesh, .OpenFOAM, etc)
+  -touchAll         create .blockMesh, .OpenFOAM files (and for all regions)
+  -help             print the usage
 
 * start paraview $ParaView_VERSION with the OpenFOAM libraries
 
@@ -49,10 +53,10 @@ USAGE
     exit 1
 }
 
-unset regionName touchOnly
+unset regionName touchOpt
 
 # reader extension
-reader=OpenFOAM
+extension=OpenFOAM
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -62,7 +66,11 @@ do
         usage
         ;;
     -block | -blockMesh)
-        reader=blockMesh
+        extension=blockMesh
+        shift
+        ;;
+    -builtin)
+        extension=foam
         shift
         ;;
     -case)
@@ -76,7 +84,11 @@ do
         shift 2
         ;;
     -touch)
-        touchOnly=true
+        touchOpt=true
+        shift
+        ;;
+    -touchAll)
+        touchOpt=all
         shift
         ;;
     *)
@@ -87,21 +99,44 @@ done
 
 # get a sensible caseName from the directory name
 caseName=${PWD##*/}
-caseFile="$caseName.$reader"
+caseFile="$caseName.$extension"
 fvControls="system"
 
 if [ -n "$regionName" ]
 then
-    caseFile="$caseName{$regionName}.$reader"
+    caseFile="$caseName{$regionName}.$extension"
     fvControls="$fvControls/$regionName"
 fi
 
-if [ -n "$touchOnly" ]
-then
+case "${touchOpt:-false}" in
+all)
+    extension=OpenFOAM
+    if [ -f constant/polyMesh/blockMeshDict ]
+    then
+        touch "$caseName.blockMesh"
+        echo "created '$caseName.blockMesh'"
+    fi
+    touch "$caseName.$extension"
+    echo "created '$caseName.$extension'"
+    # discover probable regions
+    for region in constant/*
+    do
+        if [ -d $region -a -d $region/polyMesh ]
+        then
+            regionName=${region##*/}
+            touch "$caseName{$regionName}.$extension"
+            echo "created '$caseName{$regionName}.$extension'"
+        fi
+    done
+    exit 0
+    ;;
+true)
     touch "$caseFile"
     echo "created '$caseFile'"
     exit 0
-fi
+    ;;
+esac
+
 
 # parent directory for normal or parallel results
 case "$caseName" in
@@ -113,7 +148,7 @@ esac
 #
 # check existence of essential files
 #
-case $reader in
+case $extension in
 blockMesh)
     for check in system/controlDict constant/polyMesh/blockMeshDict
     do
@@ -121,7 +156,7 @@ blockMesh)
     done
     ;;
 
-OpenFOAM)
+builtin | OpenFOAM)
     for check in system/controlDict $fvControls/fvSchemes $fvControls/fvSolution
     do
         [ -s "$parentDir/$check" ] || usage "file does not exist:  '$parentDir/$check'"

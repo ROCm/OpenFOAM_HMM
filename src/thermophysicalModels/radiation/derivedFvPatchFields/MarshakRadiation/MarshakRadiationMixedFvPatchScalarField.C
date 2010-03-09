@@ -76,21 +76,24 @@ Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
     TName_(dict.lookup("T")),
     emissivity_(readScalar(dict.lookup("emissivity")))
 {
-    const scalarField& Tp =
-        patch().lookupPatchField<volScalarField, scalar>(TName_);
-
-    refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Tp);
-    refGrad() = 0.0;
-
     if (dict.found("value"))
     {
         fvPatchScalarField::operator=
         (
             scalarField("value", dict, p.size())
         );
+        refValue() = scalarField("refValue", dict, p.size());
+        refGrad() = scalarField("refGradient", dict, p.size());
+        valueFraction() = scalarField("valueFraction", dict, p.size());
     }
     else
     {
+        const scalarField& Tp =
+            patch().lookupPatchField<volScalarField, scalar>(TName_);
+
+        refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Tp);
+        refGrad() = 0.0;
+
         fvPatchScalarField::operator=(refValue());
     }
 }
@@ -169,10 +172,9 @@ void Foam::MarshakRadiationFvPatchScalarField::updateCoeffs()
 
 void Foam::MarshakRadiationFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    mixedFvPatchScalarField::write(os);
     os.writeKeyword("T") << TName_ << token::END_STATEMENT << nl;
     os.writeKeyword("emissivity") << emissivity_ << token::END_STATEMENT << nl;
-    writeEntry("value", os);
 }
 
 

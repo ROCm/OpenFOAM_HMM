@@ -28,7 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 Foam::autoPtr< Foam::edgeMesh >
 Foam::edgeMesh::New(const fileName& name, const word& ext)
 {
@@ -61,5 +60,6 @@ Foam::edgeMesh::New(const fileName& name)
     }
     return New(name, ext);
 }
+
 
 // ************************************************************************* //

@@ -45,7 +45,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declaration of classes
 
 class IFstream;
 class Time;
@@ -61,10 +61,13 @@ class edgeFormatsCore
 {
 protected:
 
+    // Protected Member Functions
+
         //- Read non-comment line
         static string getLineNoComment(IFstream&);
 
 public:
+
     // Static Data
 
         //- The file extension corresponding to 'native' edge format

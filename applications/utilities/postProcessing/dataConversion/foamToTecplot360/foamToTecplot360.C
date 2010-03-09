@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -215,9 +215,8 @@ int main(int argc, char *argv[])
     word cellSetName;
     string vtkName;
 
-    if (args.optionFound("cellSet"))
+    if (args.optionReadIfPresent("cellSet", cellSetName))
     {
-        cellSetName = args.option("cellSet");
         vtkName = cellSetName;
     }
     else if (Pstream::parRun())
@@ -738,7 +737,7 @@ int main(int argc, char *argv[])
         if (args.optionFound("faceSet"))
         {
             // Load the faceSet
-            word setName(args.option("faceSet"));
+            const word setName = args["faceSet"];
             labelList faceLabels(faceSet(mesh, setName).toc());
 
             // Filename as if patch with same name.
@@ -1077,83 +1076,92 @@ int main(int argc, char *argv[])
             {
                 const faceZone& pp = zones[zoneI];
 
-                const indirectPrimitivePatch ipp
-                (
-                    IndirectList<face>(mesh.faces(), pp),
-                    mesh.points()
-                );
+                if (pp.size() > 0)
+                {
+                    const indirectPrimitivePatch ipp
+                    (
+                        IndirectList<face>(mesh.faces(), pp),
+                        mesh.points()
+                    );
 
-                writer.writePolygonalZone
-                (
-                    pp.name(),
-                    strandID++, //1+patchIDs.size()+zoneI,    //strandID,
-                    ipp,
-                    allVarLocation
-                );
+                    writer.writePolygonalZone
+                    (
+                        pp.name(),
+                        strandID++, //1+patchIDs.size()+zoneI,    //strandID,
+                        ipp,
+                        allVarLocation
+                    );
 
-                // Write coordinates
-                writer.writeField(ipp.localPoints().component(0)());
-                writer.writeField(ipp.localPoints().component(1)());
-                writer.writeField(ipp.localPoints().component(2)());
+                    // Write coordinates
+                    writer.writeField(ipp.localPoints().component(0)());
+                    writer.writeField(ipp.localPoints().component(1)());
+                    writer.writeField(ipp.localPoints().component(2)());
 
-                // Write all volfields
-                forAll(vsf, i)
-                {
-                    writer.writeField
-                    (
-                        writer.getFaceField
+                    // Write all volfields
+                    forAll(vsf, i)
+                    {
+                        writer.writeField
                         (
-                            linearInterpolate(vsf[i])(),
-                            pp
-                        )()
-                    );
-                }
-                forAll(vvf, i)
-                {
-                    writer.writeField
-                    (
-                        writer.getFaceField
+                            writer.getFaceField
+                            (
+                                linearInterpolate(vsf[i])(),
+                                pp
+                            )()
+                        );
+                    }
+                    forAll(vvf, i)
+                    {
+                        writer.writeField
                         (
-                            linearInterpolate(vvf[i])(),
-                            pp
-                        )()
-                    );
-                }
-                forAll(vSpheretf, i)
-                {
-                    writer.writeField
-                    (
-                        writer.getFaceField
+                            writer.getFaceField
+                            (
+                                linearInterpolate(vvf[i])(),
+                                pp
+                            )()
+                        );
+                    }
+                    forAll(vSpheretf, i)
+                    {
+                        writer.writeField
                         (
-                            linearInterpolate(vSpheretf[i])(),
-                            pp
-                        )()
-                    );
-                }
-                forAll(vSymmtf, i)
-                {
-                    writer.writeField
-                    (
-                        writer.getFaceField
+                            writer.getFaceField
+                            (
+                                linearInterpolate(vSpheretf[i])(),
+                                pp
+                            )()
+                        );
+                    }
+                    forAll(vSymmtf, i)
+                    {
+                        writer.writeField
                         (
-                            linearInterpolate(vSymmtf[i])(),
-                            pp
-                        )()
-                    );
-                }
-                forAll(vtf, i)
-                {
-                    writer.writeField
-                    (
-                        writer.getFaceField
+                            writer.getFaceField
+                            (
+                                linearInterpolate(vSymmtf[i])(),
+                                pp
+                            )()
+                        );
+                    }
+                    forAll(vtf, i)
+                    {
+                        writer.writeField
                         (
-                            linearInterpolate(vtf[i])(),
-                            pp
-                        )()
-                    );
-                }
+                            writer.getFaceField
+                            (
+                                linearInterpolate(vtf[i])(),
+                                pp
+                            )()
+                        );
+                    }
 
-                writer.writeConnectivity(ipp);
+                    writer.writeConnectivity(ipp);
+                }
+                else
+                {
+                    Info<< "    Skipping zero sized faceZone " << zoneI
+                        << "\t" << pp.name()
+                        << nl << endl;
+                }
             }
         }
 

@@ -199,7 +199,8 @@ void Foam::fluentFvMesh::writeFluentMesh() const
             fluentMeshFile << l.size() << " ";
 
             // Note: In Fluent, all boundary faces point inwards, which is
-            // opposite from the FOAM convention. Turn them round on printout
+            // opposite from the OpenFOAM convention.
+            // Turn them around on printout
             forAllReverse (l, lI)
             {
                 fluentMeshFile << l[lI] + 1 << " ";

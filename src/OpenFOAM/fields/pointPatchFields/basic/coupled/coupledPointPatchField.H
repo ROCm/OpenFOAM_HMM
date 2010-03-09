@@ -121,11 +121,19 @@ public:
             ) = 0;
 
             //- Initialise swap of patch point values
-            virtual void initSwapAdd(Field<Type>&) const
+            virtual void initSwapAddSeparated
+            (
+                const Pstream::commsTypes,
+                Field<Type>&
+            ) const
             {}
 
             //- Complete swap of patch point values and add to local values
-            virtual void swapAdd(Field<Type>&) const = 0;
+            virtual void swapAddSeparated
+            (
+                const Pstream::commsTypes,
+                Field<Type>&
+            ) const = 0;
 };
 
 

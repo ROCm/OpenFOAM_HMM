@@ -287,7 +287,6 @@ void Foam::ReactingParcel<ParcelType>::calc
         Y_,
         dMassPC,
         Sh,
-        dhsTrans,
         Ne,
         NCpW,
         Cs
@@ -341,10 +340,6 @@ void Foam::ReactingParcel<ParcelType>::calc
         {
             label gid = td.cloud().composition().localToGlobalCarrierId(0, i);
             td.cloud().rhoTrans(gid)[cellI] += np0*dMassPC[i];
-            td.cloud().hcTrans()[cellI] +=
-                np0
-               *dMassPC[i]
-               *td.cloud().mcCarrierThermo().speciesData()[gid].Hc();
         }
 
         // Update momentum transfer
@@ -371,7 +366,7 @@ void Foam::ReactingParcel<ParcelType>::calc
                 td.cloud().rhoTrans(gid)[cellI] += np0*mass1*Y_[i];
             }
             td.cloud().UTrans()[cellI] += np0*mass1*U1;
-            td.cloud().hcTrans()[cellI] +=
+            td.cloud().hsTrans()[cellI] +=
                 np0*mass1*td.cloud().composition().H(0, Y_, pc_, T1);
         }
     }
@@ -417,7 +412,6 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     const scalarField& YComponents,
     scalarField& dMassPC,
     scalar& Sh,
-    scalar& dhsTrans,               // TODO: not used
     scalar& N,
     scalar& NCpW,
     scalarField& Cs
@@ -469,6 +463,7 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
             td.cloud().composition().localToGlobalCarrierId(idPhase, i);
         const label idl = td.cloud().composition().globalIds(idPhase)[i];
 
+        // Calculate enthalpy transfer
         if
         (
             td.cloud().phaseChange().enthalpyTransfer()

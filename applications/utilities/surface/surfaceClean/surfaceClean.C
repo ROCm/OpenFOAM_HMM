@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,21 +54,21 @@ int main(int argc, char *argv[])
     argList::validArgs.append("output surface file");
     argList::argList args(argc, argv);
 
-    fileName inFileName(args.additionalArgs()[0]);
-    scalar minLen(readScalar(IStringStream(args.additionalArgs()[1])()));
-    fileName outFileName(args.additionalArgs()[2]);
+    const fileName inFileName = args[1];
+    const scalar minLen = args.argRead<scalar>(2);
+    const fileName outFileName = args[3];
 
-    Pout<< "Reading surface " << inFileName << nl
+    Info<< "Reading surface " << inFileName << nl
         << "Collapsing all triangles with edges or heights < " << minLen << nl
         << "Writing result to " << outFileName << nl << endl;
 
 
-    Pout<< "Reading surface from " << inFileName << " ..." << nl << endl;
+    Info<< "Reading surface from " << inFileName << " ..." << nl << endl;
     triSurface surf(inFileName);
-    surf.writeStats(Pout);
+    surf.writeStats(Info);
 
 
-    Pout<< "Collapsing triangles to edges ..." << nl << endl;
+    Info<< "Collapsing triangles to edges ..." << nl << endl;
 
     while (true)
     {
@@ -89,15 +89,15 @@ int main(int argc, char *argv[])
         }
     }
 
-    Pout<< nl << "Resulting surface:" << endl;
-    surf.writeStats(Pout);
-    Pout<< nl;
+    Info<< nl
+        << "Resulting surface:" << endl;
+    surf.writeStats(Info);
 
-    Pout<< "Writing refined surface to " << outFileName << " ..." << endl;
+    Info<< nl
+        << "Writing refined surface to " << outFileName << " ..." << endl;
     surf.write(outFileName);
-    Pout<< nl;
 
-    Pout<< "End\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

@@ -70,6 +70,24 @@ void Foam::domainDecomposition::mark
 Foam::domainDecomposition::domainDecomposition(const IOobject& io)
 :
     fvMesh(io),
+    facesInstancePointsPtr_
+    (
+        pointsInstance() != facesInstance()
+      ? new pointIOField
+        (
+            IOobject
+            (
+                "points",
+                facesInstance(),
+                polyMesh::meshSubDir,
+                *this,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            )
+        )
+      : NULL
+    ),
     decompositionDict_
     (
         IOobject
@@ -87,7 +105,6 @@ Foam::domainDecomposition::domainDecomposition(const IOobject& io)
     procPointAddressing_(nProcs_),
     procFaceAddressing_(nProcs_),
     procCellAddressing_(nProcs_),
-    procBoundaryAddressing_(nProcs_),
     procPatchSize_(nProcs_),
     procPatchStartIndex_(nProcs_),
     procNeighbourProcessors_(nProcs_),
@@ -255,24 +272,67 @@ bool Foam::domainDecomposition::writeDecomposition()
             "system",
             "constant"
         );
+        processorDb.setTime(time());
 
-        // create the mesh
-        polyMesh procMesh
-        (
-            IOobject
+        // create the mesh. Two situations:
+        // - points and faces come from the same time ('instance'). The mesh
+        //   will get constructed in the same instance.
+        // - points come from a different time (moving mesh cases).
+        //   It will read the points belonging to the faces instance and
+        //   construct the procMesh with it which then gets handled as above.
+        //   (so with 'old' geometry).
+        //   Only at writing time will it additionally write the current
+        //   points.
+
+        autoPtr<polyMesh> procMeshPtr;
+
+        if (facesInstancePointsPtr_.valid())
+        {
+            // Construct mesh from facesInstance.
+            pointField facesInstancePoints
             (
-                this->polyMesh::name(),  // region name of undecomposed mesh
-                pointsInstance(),
-                processorDb
-            ),
-            xferMove(procPoints),
-            xferMove(procFaces),
-            xferMove(procCells)
-        );
+                facesInstancePointsPtr_(),
+                curPointLabels
+            );
+
+            procMeshPtr.reset
+            (
+                new polyMesh
+                (
+                    IOobject
+                    (
+                        this->polyMesh::name(), // region of undecomposed mesh
+                        facesInstance(),
+                        processorDb
+                    ),
+                    xferMove(facesInstancePoints),
+                    xferMove(procFaces),
+                    xferMove(procCells)
+                )
+            );
+        }
+        else
+        {
+            procMeshPtr.reset
+            (
+                new polyMesh
+                (
+                    IOobject
+                    (
+                        this->polyMesh::name(), // region of undecomposed mesh
+                        facesInstance(),
+                        processorDb
+                    ),
+                    xferMove(procPoints),
+                    xferMove(procFaces),
+                    xferMove(procCells)
+                )
+            );
+        }
+        polyMesh& procMesh = procMeshPtr();
+
 
         // Create processor boundary patches
-        const labelList& curBoundaryAddressing = procBoundaryAddressing_[procI];
-
         const labelList& curPatchSizes = procPatchSize_[procI];
 
         const labelList& curPatchStarts = procPatchStartIndex_[procI];
@@ -331,8 +391,7 @@ bool Foam::domainDecomposition::writeDecomposition()
         {
             // Get the face labels consistent with the field mapping
             // (reuse the patch field mappers)
-            const polyPatch& meshPatch =
-                meshPatches[curBoundaryAddressing[patchi]];
+            const polyPatch& meshPatch = meshPatches[patchi];
 
             fvFieldDecomposer::patchFieldDecomposer patchMapper
             (
@@ -346,14 +405,13 @@ bool Foam::domainDecomposition::writeDecomposition()
             );
 
             // Map existing patches
-            procPatches[nPatches] =
-                meshPatches[curBoundaryAddressing[patchi]].clone
-                (
-                    procMesh.boundaryMesh(),
-                    nPatches,
-                    patchMapper.directAddressing(),
-                    curPatchStarts[patchi]
-                ).ptr();
+            procPatches[nPatches] = meshPatch.clone
+            (
+                procMesh.boundaryMesh(),
+                nPatches,
+                patchMapper.directAddressing(),
+                curPatchStarts[patchi]
+            ).ptr();
 
             nPatches++;
         }
@@ -672,6 +730,26 @@ forAll(procPatches, patchI)
 
         procMesh.write();
 
+        // Write points if pointsInstance differing from facesInstance
+        if (facesInstancePointsPtr_.valid())
+        {
+            pointIOField pointsInstancePoints
+            (
+                IOobject
+                (
+                    "points",
+                    pointsInstance(),
+                    polyMesh::meshSubDir,
+                    procMesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                xferMove(procPoints)
+            );
+            pointsInstancePoints.write();
+        }
+
         Info<< endl
             << "Processor " << procI << nl
             << "    Number of cells = " << procMesh.nCells()
@@ -761,6 +839,16 @@ forAll(procPatches, patchI)
         );
         cellProcAddressing.write();
 
+        // Write patch map for backwards compatibility.
+        // (= identity map for original patches, -1 for processor patches)
+        label nMeshPatches = curPatchSizes.size();
+        labelList procBoundaryAddressing(identity(nMeshPatches));
+        procBoundaryAddressing.setSize
+        (
+            nMeshPatches+curProcessorPatchSizes.size(),
+            -1
+        );
+
         labelIOList boundaryProcAddressing
         (
             IOobject
@@ -772,7 +860,7 @@ forAll(procPatches, patchI)
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            procBoundaryAddressing_[procI]
+            procBoundaryAddressing
         );
         boundaryProcAddressing.write();
     }

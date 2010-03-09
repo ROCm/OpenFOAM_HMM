@@ -34,8 +34,8 @@ Usage
     - decomposePar [OPTION]
 
     @param -cellDist \n
-    Write the cell distribution as a labelList for use with 'manual'
-    decomposition method and as a volScalarField for post-processing.
+    Write the cell distribution as a labelList, for use with 'manual'
+    decomposition method or as a volScalarField for post-processing.
 
     @param -region regionName \n
     Decompose named region. Does not check for existence of processor*.
@@ -45,9 +45,6 @@ Usage
 
     @param -fields \n
     Use existing geometry decomposition and convert fields only.
-
-    @param -filterPatches \n
-    Remove empty patches when decomposing the geometry.
 
     @param -force \n
     Remove any existing @a processor subdirectories before decomposing the
@@ -66,7 +63,6 @@ Usage
 #include "OSspecific.H"
 #include "fvCFD.H"
 #include "IOobjectList.H"
-//#include "processorFvPatchFields.H"
 #include "domainDecomposition.H"
 #include "labelIOField.H"
 #include "scalarIOField.H"
@@ -87,7 +83,12 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
 #   include "addRegionOption.H"
-    argList::addBoolOption("cellDist");
+    argList::addBoolOption
+    (
+        "cellDist",
+        "write cell distribution as a labelList - for use with 'manual' "
+        "decomposition method or as a volScalarField for post-processing."
+    );
     argList::addBoolOption
     (
         "copyUniform",
@@ -100,11 +101,6 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
-        "filterPatches",
-        "remove empty patches when decomposing the geometry"
-    );
-    argList::addBoolOption
-    (
         "force",
         "remove existing processor*/ subdirs before decomposing the geometry"
     );
@@ -112,6 +108,11 @@ int main(int argc, char *argv[])
     (
         "ifRequired",
         "only decompose geometry if the number of domains has changed"
+    );
+
+    argList::addNote
+    (
+        "decompose a mesh and fields of a case for parallel execution"
     );
 
 #   include "setRootCase.H"
@@ -128,7 +129,6 @@ int main(int argc, char *argv[])
     bool writeCellDist           = args.optionFound("cellDist");
     bool copyUniform             = args.optionFound("copyUniform");
     bool decomposeFieldsOnly     = args.optionFound("fields");
-    bool filterPatches           = args.optionFound("filterPatches");
     bool forceOverwrite          = args.optionFound("force");
     bool ifRequiredDecomposition = args.optionFound("ifRequired");
 
@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
     // Decompose the mesh
     if (!decomposeFieldsOnly)
     {
-        mesh.decomposeMesh(filterPatches);
+        mesh.decomposeMesh();
 
         mesh.writeDecomposition();
 
@@ -337,22 +337,22 @@ int main(int argc, char *argv[])
 
     // Construct the point fields
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-//    pointMesh pMesh(mesh);
+    pointMesh pMesh(mesh);
 
     PtrList<pointScalarField> pointScalarFields;
-//    readFields(pMesh, objects, pointScalarFields);
+    readFields(pMesh, objects, pointScalarFields);
 
     PtrList<pointVectorField> pointVectorFields;
-//    readFields(pMesh, objects, pointVectorFields);
+    readFields(pMesh, objects, pointVectorFields);
 
     PtrList<pointSphericalTensorField> pointSphericalTensorFields;
-//    readFields(pMesh, objects, pointSphericalTensorFields);
+    readFields(pMesh, objects, pointSphericalTensorFields);
 
     PtrList<pointSymmTensorField> pointSymmTensorFields;
-//    readFields(pMesh, objects, pointSymmTensorFields);
+    readFields(pMesh, objects, pointSymmTensorFields);
 
     PtrList<pointTensorField> pointTensorFields;
-//    readFields(pMesh, objects, pointTensorFields);
+    readFields(pMesh, objects, pointTensorFields);
 
 
     // Construct the Lagrangian fields
@@ -652,45 +652,45 @@ int main(int argc, char *argv[])
         }
 
 
-//        // Point fields
-//        if
-//        (
-//            pointScalarFields.size()
-//         || pointVectorFields.size()
-//         || pointSphericalTensorFields.size()
-//         || pointSymmTensorFields.size()
-//         || pointTensorFields.size()
-//        )
-//        {
-//            labelIOList pointProcAddressing
-//            (
-//                IOobject
-//                (
-//                    "pointProcAddressing",
-//                    procMesh.facesInstance(),
-//                    procMesh.meshSubDir,
-//                    procMesh,
-//                    IOobject::MUST_READ,
-//                    IOobject::NO_WRITE
-//                )
-//            );
-//
-//            pointMesh procPMesh(procMesh, true);
-//
-//            pointFieldDecomposer fieldDecomposer
-//            (
-//                pMesh,
-//                procPMesh,
-//                pointProcAddressing,
-//                boundaryProcAddressing
-//            );
-//
-//            fieldDecomposer.decomposeFields(pointScalarFields);
-//            fieldDecomposer.decomposeFields(pointVectorFields);
-//            fieldDecomposer.decomposeFields(pointSphericalTensorFields);
-//            fieldDecomposer.decomposeFields(pointSymmTensorFields);
-//            fieldDecomposer.decomposeFields(pointTensorFields);
-//        }
+        // Point fields
+        if
+        (
+            pointScalarFields.size()
+         || pointVectorFields.size()
+         || pointSphericalTensorFields.size()
+         || pointSymmTensorFields.size()
+         || pointTensorFields.size()
+        )
+        {
+            labelIOList pointProcAddressing
+            (
+                IOobject
+                (
+                    "pointProcAddressing",
+                    procMesh.facesInstance(),
+                    procMesh.meshSubDir,
+                    procMesh,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                )
+            );
+
+            pointMesh procPMesh(procMesh);
+
+            pointFieldDecomposer fieldDecomposer
+            (
+                pMesh,
+                procPMesh,
+                pointProcAddressing,
+                boundaryProcAddressing
+            );
+
+            fieldDecomposer.decomposeFields(pointScalarFields);
+            fieldDecomposer.decomposeFields(pointVectorFields);
+            fieldDecomposer.decomposeFields(pointSphericalTensorFields);
+            fieldDecomposer.decomposeFields(pointSymmTensorFields);
+            fieldDecomposer.decomposeFields(pointTensorFields);
+        }
 
 
         // If there is lagrangian data write it out

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,8 @@ Application
     ansysToFoam
 
 Description
-    Converts an ANSYS input mesh file, exported from I-DEAS, to FOAM format.
+    Converts an ANSYS input mesh file, exported from I-DEAS,
+    to OpenFOAM format.
 
 \*---------------------------------------------------------------------------*/
 
@@ -90,23 +91,20 @@ cspace                ","{space}
 
 alpha                 [_A-Za-z]
 digit                 [0-9]
-dec_digit             [0-9]
-octal_digit           [0-7]
-hex_digit             [0-9a-fA-F]
 
 identifier            {alpha}({alpha}|{digit})*
-integer               {dec_digit}+
-label                 [1-9]{dec_digit}*
+integer               {digit}+
+label                 [1-9]{digit}*
 
 exponent_part         [eE][-+]?{digit}+
 fractional_constant   [-+]?(({digit}*"."{digit}+)|({digit}+"."?))
 
-double                (({fractional_constant}{exponent_part}?)|({digit}+{exponent_part}))
+floatNum              (({fractional_constant}{exponent_part}?)|({digit}+{exponent_part}))
 
-x                     {double}
-y                     {double}
-z                     {double}
-value                 {double}
+x                     {floatNum}
+y                     {floatNum}
+z                     {floatNum}
+value                 {floatNum}
 
 node                  ^{space}"N"{cspace}
 element               ^{space}"EN"{cspace}
@@ -252,7 +250,7 @@ int main(int argc, char *argv[])
 
 #   include "createTime.H"
 
-    fileName ansysFile(args.additionalArgs()[0]);
+    const fileName ansysFile = args[1];
     ifstream ansysStream(ansysFile.c_str());
 
     if (!ansysStream)

@@ -39,11 +39,6 @@ SourceFiles
 #ifndef ReactingParcel_H
 #define ReactingParcel_H
 
-#include "IOstream.H"
-#include "autoPtr.H"
-#include "interpolationCellPoint.H"
-#include "contiguous.H"
-
 #include "ThermoParcel.H"
 #include "ReactingCloud.H"
 #include "reactingParcel.H"
@@ -209,7 +204,6 @@ protected:
             const scalarField& YComponents, // component mass fractions
             scalarField& dMassPC,      // mass transfer - local to particle
             scalar& Sh,                // explicit particle enthalpy source
-            scalar& dhsTrans,          // sensible enthalpy transfer to carrier
             scalar& N,                 // flux of species emitted from particle
             scalar& NCpW,              // sum of N*Cp*W of emission species
             scalarField& Cs            // carrier conc. of emission species

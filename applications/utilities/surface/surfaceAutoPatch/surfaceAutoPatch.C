@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,11 +53,11 @@ int main(int argc, char *argv[])
     argList::validArgs.append("included angle [0..180]");
     argList args(argc, argv);
 
-    fileName inFileName(args.additionalArgs()[0]);
-    fileName outFileName(args.additionalArgs()[1]);
-    scalar includedAngle(readScalar(IStringStream(args.additionalArgs()[2])()));
+    const fileName inFileName  = args[1];
+    const fileName outFileName = args[2];
+    const scalar includedAngle = args.argRead<scalar>(3);
 
-    Pout<< "Surface        : " << inFileName << nl
+    Info<< "Surface        : " << inFileName << nl
         << endl;
 
 
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
     surfaceFeatures set(surf, includedAngle);
 
-    Pout<< nl
+    Info<< nl
         << "Feature set:" << nl
         << "    feature points : " << set.featurePoints().size() << nl
         << "    feature edges  : " << set.featureEdges().size() << nl

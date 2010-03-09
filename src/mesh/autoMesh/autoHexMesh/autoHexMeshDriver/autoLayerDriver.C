@@ -124,6 +124,7 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
             }
             Pout<< "Writing all faces to be merged to set "
                 << allSets.objectPath() << endl;
+            allSets.instance() = mesh.time().timeName();
             allSets.write();
         }
 
@@ -221,6 +222,7 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
 
             if (debug)
             {
+                errorFaces.instance() = mesh.time().timeName();
                 Pout<< "Writing all faces in error to faceSet "
                     << errorFaces.objectPath() << nl << endl;
                 errorFaces.write();
@@ -266,6 +268,7 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
             if (debug)
             {
                 faceSet restoreSet(mesh, "mastersToRestore", mastersToRestore);
+                restoreSet.instance() = mesh.time().timeName();
                 Pout<< "Writing all " << mastersToRestore.size()
                     << " masterfaces to be restored to set "
                     << restoreSet.objectPath() << endl;
@@ -622,6 +625,7 @@ Foam::label Foam::autoLayerDriver::mergeEdgesUndo
 
             if (debug)
             {
+                errorFaces.instance() = mesh.time().timeName();
                 Pout<< "**Writing all faces in error to faceSet "
                     << errorFaces.objectPath() << nl << endl;
                 errorFaces.write();
@@ -804,6 +808,7 @@ void Foam::autoLayerDriver::checkMeshManifold() const
             << " points where this happens to pointSet "
             << nonManifoldPoints.name() << endl;
 
+        nonManifoldPoints.instance() = mesh.time().timeName();
         nonManifoldPoints.write();
     }
     Info<< endl;
@@ -943,6 +948,7 @@ void Foam::autoLayerDriver::handleNonManifolds
             << "and setting layer thickness to zero on these points."
             << endl;
 
+        nonManifoldPoints.instance() = mesh.time().timeName();
         nonManifoldPoints.write();
 
         forAll(meshPoints, patchPointI)
@@ -1204,6 +1210,7 @@ void Foam::autoLayerDriver::handleWarpedFaces
 //
 //    if (nMultiPatchCells > 0)
 //    {
+//        multiPatchCells.instance() = mesh.time().timeName();
 //        Info<< "Writing " << nMultiPatchCells
 //            << " cells with multiple (connected) patch faces to cellSet "
 //            << multiPatchCells.objectPath() << endl;
@@ -2530,11 +2537,6 @@ void Foam::autoLayerDriver::addLayers
     );
 
 
-    // Undistorted edge length
-    const scalar edge0Len = meshRefiner_.meshCutter().level0EdgeLength();
-    const labelList& cellLevel = meshRefiner_.meshCutter().cellLevel();
-
-
     // Point-wise extrusion data
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2596,6 +2598,10 @@ void Foam::autoLayerDriver::addLayers
         // Disable extrusion on warped faces
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+        // Undistorted edge length
+        const scalar edge0Len = meshRefiner_.meshCutter().level0EdgeLength();
+        const labelList& cellLevel = meshRefiner_.meshCutter().cellLevel();
+
         handleWarpedFaces
         (
             pp,
@@ -2634,6 +2640,10 @@ void Foam::autoLayerDriver::addLayers
         }
     }
 
+
+    // Undistorted edge length
+    const scalar edge0Len = meshRefiner_.meshCutter().level0EdgeLength();
+    const labelList& cellLevel = meshRefiner_.meshCutter().cellLevel();
 
     // Determine (wanted) point-wise layer thickness and expansion ratio
     scalarField thickness(pp().nPoints());
@@ -3210,6 +3220,7 @@ void Foam::autoLayerDriver::doLayers
     const dictionary& shrinkDict,
     const dictionary& motionDict,
     const layerParameters& layerParams,
+    const bool preBalance,
     decompositionMethod& decomposer,
     fvMeshDistribute& distributor
 )
@@ -3268,6 +3279,7 @@ void Foam::autoLayerDriver::doLayers
 
         // Balance
         if (Pstream::parRun())
+        if (Pstream::parRun() && preBalance)
         {
             Info<< nl
                 << "Doing initial balancing" << nl

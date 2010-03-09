@@ -52,6 +52,11 @@ class movingWallVelocityFvPatchVectorField
 :
     public fixedValueFvPatchVectorField
 {
+    // Private data
+
+       //- Name of velocity field
+       word UName_;
+
 
 public:
 

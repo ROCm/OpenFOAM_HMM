@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     const indirectPrimitivePatch& coupledPatch = globalData.coupledPatch();
 
 
-    // Test:print shared points
+    // Test:print (collocated) shared points
     {
         const labelListList& globalPointSlaves =
             globalData.globalPointSlaves();
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 
 
 
-    // Test: point to faces addressing
+    // Test: (collocated) point to faces addressing
     {
         const labelListList& globalPointBoundaryFaces =
             globalData.globalPointBoundaryFaces();
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 
 
 
-    // Test:point to cells addressing
+    // Test:(collocated) point to cells addressing
     {
         const labelList& boundaryCells = globalData.boundaryCells();
         const labelListList& globalPointBoundaryCells =
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
 
 
 
-    // Test:print shared edges
+    // Test:print (collocated) shared edges
     {
         const labelListList& globalEdgeSlaves =
             globalData.globalEdgeSlaves();

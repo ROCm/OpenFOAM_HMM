@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,8 @@ InClass
 #define vtkPV3FoamLagrangianFields_H
 
 #include "Cloud.H"
+
+#include "vtkOpenFOAMTupleRemap.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,11 +69,11 @@ void Foam::vtkPV3Foam::convertLagrangianField
 {
     const label nComp = pTraits<Type>::nComponents;
 
-    vtkFloatArray *pointData = vtkFloatArray::New();
-    pointData->SetNumberOfTuples( tf.size() );
-    pointData->SetNumberOfComponents( nComp );
-    pointData->Allocate( nComp*tf.size() );
-    pointData->SetName( tf.name().c_str() );
+    vtkFloatArray* pointData = vtkFloatArray::New();
+    pointData->SetNumberOfTuples(tf.size());
+    pointData->SetNumberOfComponents(nComp);
+    pointData->Allocate(nComp*tf.size());
+    pointData->SetName(tf.name().c_str());
 
     if (debug)
     {
@@ -86,10 +88,11 @@ void Foam::vtkPV3Foam::convertLagrangianField
     forAll(tf, i)
     {
         const Type& t = tf[i];
-        for (direction d=0; d<nComp; d++)
+        for (direction d=0; d<nComp; ++d)
         {
             vec[d] = component(t, d);
         }
+        vtkOpenFOAMTupleRemap<Type>(vec);
 
         pointData->InsertTuple(i, vec);
     }

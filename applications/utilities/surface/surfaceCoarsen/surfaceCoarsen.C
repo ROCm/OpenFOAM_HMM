@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,6 @@ Description
         By Stan Melax (c) 1998
         mailto:melax@cs.ualberta.ca
         http://www.cs.ualberta.ca/~melax
-
 
 \*---------------------------------------------------------------------------*/
 
@@ -72,9 +71,9 @@ int main(int argc, char *argv[])
     argList::validArgs.append("Foam output file");
     argList args(argc, argv);
 
-    fileName inFileName(args.additionalArgs()[0]);
-
-    scalar reduction(readScalar(IStringStream(args.additionalArgs()[1])()));
+    const fileName inFileName = args[1];
+    const scalar reduction = args.argRead<scalar>(2);
+    const fileName outFileName = args[3];
 
     if (reduction <= 0 || reduction > 1)
     {
@@ -84,8 +83,6 @@ int main(int argc, char *argv[])
             << "(it is the reduction in number of vertices)"
             << exit(FatalError);
     }
-
-    fileName outFileName(args.additionalArgs()[2]);
 
     Info<< "Input surface   :" << inFileName << endl
         << "Reduction factor:" << reduction << endl

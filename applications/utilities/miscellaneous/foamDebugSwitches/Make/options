@@ -18,6 +18,7 @@ EXE_LIBS = \
     -lengine \
     -lerrorEstimation \
     -lfieldFunctionObjects \
+    -lfileFormats \
     -lfiniteVolume \
     -lforces \
     -lfvMotionSolvers \

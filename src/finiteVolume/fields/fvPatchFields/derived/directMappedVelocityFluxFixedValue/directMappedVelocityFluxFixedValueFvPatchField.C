@@ -46,7 +46,7 @@ directMappedVelocityFluxFixedValueFvPatchField
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    phiName_("undefinedPhi")
+    phiName_("phi")
 {}
 
 
@@ -93,22 +93,22 @@ directMappedVelocityFluxFixedValueFvPatchField
 )
 :
     fixedValueFvPatchVectorField(p, iF, dict),
-    phiName_(dict.lookup("phi"))
+    phiName_(dict.lookupOrDefault<word>("phi", "phi"))
 {
     if (!isA<directMappedPatchBase>(this->patch().patch()))
     {
         FatalErrorIn
         (
             "directMappedVelocityFluxFixedValueFvPatchField::"
-            "directMappedVelocityFluxFixedValueFvPatchField\n"
-            "(\n"
-            "    const fvPatch& p,\n"
-            "    const DimensionedField<vector, volMesh>& iF,\n"
-            "    const dictionary& dict\n"
-            ")\n"
-        )   << "\n    patch type '" << p.type()
+            "directMappedVelocityFluxFixedValueFvPatchField"
+            "("
+                "const fvPatch&, "
+                "const DimensionedField<vector, volMesh>& iF, "
+                "const dictionary&"
+            ")"
+        )   << "patch type '" << p.type()
             << "' not type '" << directMappedPatchBase::typeName << "'"
-            << "\n    for patch " << p.name()
+            << " for patch " << p.name()
             << " of field " << dimensionedInternalField().name()
             << " in file " << dimensionedInternalField().objectPath()
             << exit(FatalError);
@@ -274,7 +274,7 @@ void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
 void directMappedVelocityFluxFixedValueFvPatchField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
+    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
     this->writeEntry("value", os);
 }
 

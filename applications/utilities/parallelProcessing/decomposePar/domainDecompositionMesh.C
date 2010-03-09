@@ -40,6 +40,7 @@ Description
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+<<<<<<< HEAD
 void Foam::domainDecomposition::append(labelList& lst, const label elem)
 {
     label sz = lst.size();
@@ -97,7 +98,7 @@ void Foam::domainDecomposition::addInterProcFace
 }
 
 
-void Foam::domainDecomposition::decomposeMesh(const bool filterEmptyPatches)
+void Foam::domainDecomposition::decomposeMesh()
 {
     // Decide which cell goes to which processor
     distributeCells();

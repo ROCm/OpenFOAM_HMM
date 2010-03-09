@@ -123,7 +123,11 @@ cyclicPointPatchField<Type>::cyclicPointPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void cyclicPointPatchField<Type>::swapAdd(Field<Type>& pField) const
+void cyclicPointPatchField<Type>::swapAddSeparated
+(
+    const Pstream::commsTypes,
+    Field<Type>& pField
+) const
 {
     // Get neighbouring pointPatch
     const cyclicPointPatch& nbrPatch = cyclicPatch_.neighbPatch();
@@ -151,7 +155,7 @@ void cyclicPointPatchField<Type>::swapAdd(Field<Type>& pField) const
         }
     }
 
-    addToInternalField(pField, pf);
+    addToInternalField(pField, pf, cyclicPatch_.separatedPoints());
 }
 
 

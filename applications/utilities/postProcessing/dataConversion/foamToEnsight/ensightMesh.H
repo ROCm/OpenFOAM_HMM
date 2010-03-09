@@ -42,6 +42,7 @@ SourceFiles
 #include "fvMesh.H"
 #include "OFstream.H"
 #include <fstream>
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,14 +63,12 @@ public:
         {
         public:
 
-            label nPoints;
             label nTris;
             label nQuads;
             label nPolys;
 
             nFacePrimitives()
             :
-                nPoints(0),
                 nTris(0),
                 nQuads(0),
                 nPolys(0)
@@ -95,8 +94,6 @@ private:
 
         wordList allPatchNames_;
 
-        List<labelList> allPatchProcs_;
-
         wordHashSet patchNames_;
 
         HashTable<nFacePrimitives> nPatchPrims_;
@@ -119,20 +116,21 @@ private:
         cellShapeList map
         (
             const cellShapeList& cellShapes,
-            const labelList& prims
+            const labelList& prims,
+            const labelList& pointToGlobal
         ) const;
 
         cellShapeList map
         (
             const cellShapeList& cellShapes,
             const labelList& hexes,
-            const labelList& wedges
+            const labelList& wedges,
+            const labelList& pointToGlobal
         ) const;
 
         void writePrims
         (
             const cellShapeList& cellShapes,
-            const label pointOffset,
             OFstream& ensightGeometryFile
         ) const;
 
@@ -156,13 +154,12 @@ private:
             const labelList& polys,
             const cellList& cellFaces,
             const faceList& faces,
-            const label pointOffset,
             OFstream& ensightGeometryFile
         ) const;
 
         void writeAllPolys
         (
-            const labelList& pointOffsets,
+            const labelList& pointToGlobal,
             OFstream& ensightGeometryFile
         ) const;
 
@@ -171,21 +168,13 @@ private:
             const char* key,
             const label nPrims,
             const cellShapeList& cellShapes,
-            const labelList& pointOffsets,
             OFstream& ensightGeometryFile
         ) const;
 
         void writeFacePrims
         (
             const faceList& patchFaces,
-            const label pointOffset,
             OFstream& ensightGeometryFile
-        ) const;
-
-        faceList map
-        (
-            const faceList& patchFaces,
-            const labelList& prims
         ) const;
 
         void writeAllFacePrims
@@ -194,8 +183,6 @@ private:
             const labelList& prims,
             const label nPrims,
             const faceList& patchFaces,
-            const labelList& pointOffsets,
-            const labelList& patchProcessors,
             OFstream& ensightGeometryFile
         ) const;
 
@@ -208,7 +195,6 @@ private:
         void writeNSidedPoints
         (
             const faceList& patchFaces,
-            const label pointOffset,
             OFstream& ensightGeometryFile
         ) const;
 
@@ -217,8 +203,6 @@ private:
             const labelList& prims,
             const label nPrims,
             const faceList& patchFaces,
-            const labelList& pointOffsets,
-            const labelList& patchProcessors,
             OFstream& ensightGeometryFile
         ) const;
 
@@ -227,7 +211,10 @@ private:
             const fileName& postProcPath,
             const word& prepend,
             const label timeIndex,
-            Ostream& ensightCaseFile
+            Ostream& ensightCaseFile,
+            const labelList& pointToGlobal,
+            const pointField& uniquePoints,
+            const globalIndex& globalPoints
         ) const;
 
         void writeBinary
@@ -235,13 +222,15 @@ private:
             const fileName& postProcPath,
             const word& prepend,
             const label timeIndex,
-            Ostream& ensightCaseFile
+            Ostream& ensightCaseFile,
+            const labelList& pointToGlobal,
+            const pointField& uniquePoints,
+            const globalIndex& globalPoints
         ) const;
 
         void writePrimsBinary
         (
             const cellShapeList& cellShapes,
-            const label pointOffset,
             std::ofstream& ensightGeometryFile
         ) const;
 
@@ -250,7 +239,6 @@ private:
             const char* key,
             const label nPrims,
             const cellShapeList& cellShapes,
-            const labelList& pointOffsets,
             std::ofstream& ensightGeometryFile
         ) const;
 
@@ -274,13 +262,12 @@ private:
             const labelList& polys,
             const cellList& cellFaces,
             const faceList& faces,
-            const label pointOffset,
             std::ofstream& ensightGeometryFile
         ) const;
 
         void writeAllPolysBinary
         (
-            const labelList& pointOffsets,
+            const labelList& pointToGlobal,
             std::ofstream& ensightGeometryFile
         ) const;
 
@@ -290,22 +277,18 @@ private:
             const labelList& prims,
             const label nPrims,
             const faceList& patchFaces,
-            const labelList& pointOffsets,
-            const labelList& patchProcessors,
             std::ofstream& ensightGeometryFile
         ) const;
 
         void writeFacePrimsBinary
         (
             const faceList& patchFaces,
-            const label pointOffset,
             std::ofstream& ensightGeometryFile
         ) const;
 
         void writeNSidedPointsBinary
         (
             const faceList& patchFaces,
-            const label pointOffset,
             std::ofstream& ensightGeometryFile
         ) const;
 
@@ -320,8 +303,6 @@ private:
             const labelList& prims,
             const label nPrims,
             const faceList& patchFaces,
-            const labelList& pointOffsets,
-            const labelList& patchProcessors,
             std::ofstream& ensightGeometryFile
         ) const;
 
@@ -359,11 +340,6 @@ public:
             const wordList& allPatchNames() const
             {
                 return allPatchNames_;
-            }
-
-            const List<labelList>& allPatchProcs() const
-            {
-                return allPatchProcs_;
             }
 
             const wordHashSet& patchNames() const

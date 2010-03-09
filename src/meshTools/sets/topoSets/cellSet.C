@@ -117,7 +117,18 @@ cellSet::cellSet
         IOobject
         (
             name,
-            runTime.findInstance(polyMesh::meshSubDir, "faces"),
+            runTime.findInstance
+            (
+                polyMesh::meshSubDir/"sets",    //polyMesh::meshSubDir,
+                word::null,                     //"faces"
+                IOobject::MUST_READ,
+                runTime.findInstance
+                (
+                    polyMesh::meshSubDir,
+                    "faces",
+                    IOobject::READ_IF_PRESENT
+                )
+            ),
             polyMesh::meshSubDir/"sets",
             runTime,
             r,
@@ -141,10 +152,21 @@ cellSet::cellSet
         IOobject
         (
             name,
-            runTime.findInstance(polyMesh::meshSubDir, "faces"),
+            runTime.findInstance
+            (
+                polyMesh::meshSubDir/"sets",    //polyMesh::meshSubDir,
+                word::null,                     //"faces"
+                IOobject::NO_READ,
+                runTime.findInstance
+                (
+                    polyMesh::meshSubDir,
+                    "faces",
+                    IOobject::READ_IF_PRESENT
+                )
+            ),
             polyMesh::meshSubDir/"sets",
             runTime,
-            NO_READ,
+            IOobject::NO_READ,
             w
         ),
         size
@@ -165,10 +187,21 @@ cellSet::cellSet
         IOobject
         (
             name,
-            runTime.findInstance(polyMesh::meshSubDir, "faces"),
+            runTime.findInstance
+            (
+                polyMesh::meshSubDir/"sets",    //polyMesh::meshSubDir,
+                word::null,                     //"faces"
+                IOobject::NO_READ,
+                runTime.findInstance
+                (
+                    polyMesh::meshSubDir,
+                    "faces",
+                    IOobject::READ_IF_PRESENT
+                )
+            ),
             polyMesh::meshSubDir/"sets",
             runTime,
-            NO_READ,
+            IOobject::NO_READ,
             w
         ),
         set

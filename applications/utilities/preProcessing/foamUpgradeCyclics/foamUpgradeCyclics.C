@@ -26,7 +26,7 @@ Application
     foamUpgradeCyclics
 
 Description
-    Simple tool to upgrade mesh and fields for split cyclics
+    Tool to upgrade mesh and fields for split cyclics
 
 Usage
 
@@ -39,11 +39,17 @@ Usage
 
 #include "argList.H"
 #include "Time.H"
+#include "timeSelector.H"
 #include "IOdictionary.H"
 #include "polyMesh.H"
 #include "entry.H"
 #include "IOPtrList.H"
 #include "cyclicPolyPatch.H"
+#include "dictionaryEntry.H"
+#include "IOobjectList.H"
+#include "volFields.H"
+#include "pointFields.H"
+#include "surfaceFields.H"
 
 using namespace Foam;
 
@@ -54,15 +60,309 @@ namespace Foam
     defineTemplateTypeNameAndDebug(IOPtrList<entry>, 0);
 }
 
+
+// Read boundary file without reading mesh
+void rewriteBoundary
+(
+    const bool isTestRun,
+    const IOobject& io,
+    const fileName& regionPrefix,
+    HashTable<word>& thisNames,
+    HashTable<word>& nbrNames
+)
+{
+    Info<< "Reading boundary from " << io.filePath() << endl;
+
+    // Read PtrList of dictionary.
+    const word oldTypeName = IOPtrList<entry>::typeName;
+    const_cast<word&>(IOPtrList<entry>::typeName) = word::null;
+    IOPtrList<entry> patches(io);
+    const_cast<word&>(IOPtrList<entry>::typeName) = oldTypeName;
+    // Fake type back to what was in field
+    const_cast<word&>(patches.type()) = patches.headerClassName();
+
+
+    // Replace any 'cyclic'
+    label nOldCyclics = 0;
+    forAll(patches, patchI)
+    {
+        const dictionary& patchDict = patches[patchI].dict();
+
+        if (word(patchDict["type"]) == cyclicPolyPatch::typeName)
+        {
+            if (patchDict.found("neighbourPatch"))
+            {
+                Info<< "Patch " << patches[patchI].keyword()
+                    << " already has 'neighbourPatch' entry; assuming it"
+                    << " is already converted." << endl;
+            }
+            else
+            {
+                Info<< "Patch " << patches[patchI].keyword()
+                    << " does not have 'neighbourPatch' entry; assuming it"
+                    << " is of the old type." << endl;
+                nOldCyclics++;
+            }
+        }
+    }
+
+    Info<< "Detected " << nOldCyclics << " old cyclics." << nl << endl;
+
+
+    // Save old patches.
+    PtrList<entry> oldPatches(patches);
+
+    // Extend
+    label nOldPatches = patches.size();
+    patches.setSize(nOldPatches+nOldCyclics);
+
+    // Create reordering map
+    labelList oldToNew(patches.size());
+
+
+    // Add new entries
+    label addedPatchI = nOldPatches;
+    label newPatchI = 0;
+    forAll(oldPatches, patchI)
+    {
+        const dictionary& patchDict = oldPatches[patchI].dict();
+
+        if
+        (
+            word(patchDict["type"]) == cyclicPolyPatch::typeName
+        && !patchDict.found("neighbourPatch")
+        )
+        {
+            const word& name = oldPatches[patchI].keyword();
+            label nFaces = readLabel(patchDict["nFaces"]);
+            label startFace = readLabel(patchDict["startFace"]);
+
+            Info<< "Detected old style " << word(patchDict["type"])
+                << " patch " << name << " with" << nl
+                << "    nFaces    : " << nFaces << nl
+                << "    startFace : " << startFace << endl;
+
+            word thisName = name + "_half0";
+            word nbrName = name + "_half1";
+
+            thisNames.insert(name, thisName);
+            nbrNames.insert(name, nbrName);
+
+            // Save current dictionary
+            const dictionary patchDict(patches[patchI].dict());
+
+            // Change entry on this side
+            patches.set(patchI, oldPatches.set(patchI, NULL));
+            oldToNew[patchI] = newPatchI++;
+            dictionary& thisPatchDict = patches[patchI].dict();
+            thisPatchDict.add("neighbourPatch", nbrName);
+            thisPatchDict.set("nFaces", nFaces/2);
+            patches[patchI].keyword() = thisName;
+
+            // Add entry on other side
+            patches.set
+            (
+                addedPatchI,
+                new dictionaryEntry
+                (
+                    nbrName,
+                    dictionary::null,
+                    patchDict
+                )
+            );      
+            oldToNew[addedPatchI] = newPatchI++;
+            dictionary& nbrPatchDict = patches[addedPatchI].dict();
+            nbrPatchDict.set("neighbourPatch", thisName);
+            nbrPatchDict.set("nFaces", nFaces/2);
+            nbrPatchDict.set("startFace", startFace+nFaces/2);
+            patches[addedPatchI].keyword() = nbrName;
+
+            Info<< "Replaced with patches" << nl
+                << patches[patchI].keyword() << " with" << nl
+                << "    nFaces    : "
+                << readLabel(thisPatchDict.lookup("nFaces"))
+                << nl
+                << "    startFace : "
+                << readLabel(thisPatchDict.lookup("startFace")) << nl
+                << patches[addedPatchI].keyword() << " with" << nl
+                << "    nFaces    : "
+                << readLabel(nbrPatchDict.lookup("nFaces"))
+                << nl
+                << "    startFace : "
+                << readLabel(nbrPatchDict.lookup("startFace"))
+                << nl << endl;
+
+            addedPatchI++;
+        }
+        else
+        {
+            patches.set(patchI, oldPatches.set(patchI, NULL));
+            oldToNew[patchI] = newPatchI++;
+        }
+    }
+
+    patches.reorder(oldToNew);
+
+    if (returnReduce(nOldCyclics, sumOp<label>()) > 0)
+    {
+        if (isTestRun)
+        {
+            //Info<< "-test option: no changes made" << nl << endl;
+        }
+        else
+        {
+            if (mvBak(patches.objectPath(), "old"))
+            {
+                Info<< "Backup to    "
+                    << (patches.objectPath() + ".old") << nl;
+            }
+
+            Info<< "Write  to    "
+                << patches.objectPath() << nl << endl;
+            patches.write();
+        }
+    }
+    else
+    {
+        Info<< "No changes made to boundary file." << nl << endl;
+    }
+}
+
+
+void rewriteField
+(
+    const bool isTestRun,
+    const Time& runTime,
+    const word& fieldName,
+    const HashTable<word>& thisNames,
+    const HashTable<word>& nbrNames
+)
+{
+    // Read dictionary. (disable class type checking so we can load
+    // field)
+    Info<< "Loading field " << fieldName << endl;
+    const word oldTypeName = IOdictionary::typeName;
+    const_cast<word&>(IOdictionary::typeName) = word::null;
+
+    IOdictionary fieldDict
+    (
+        IOobject
+        (
+            fieldName,
+            runTime.timeName(),
+            runTime,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+    const_cast<word&>(IOdictionary::typeName) = oldTypeName;
+    // Fake type back to what was in field
+    const_cast<word&>(fieldDict.type()) = fieldDict.headerClassName();
+
+
+
+    dictionary& boundaryField = fieldDict.subDict("boundaryField");
+
+    label nChanged = 0;
+    forAllConstIter(HashTable<word>, thisNames, iter)
+    {
+        const word& patchName = iter.key();
+        const word& newName = iter();
+
+        Info<< "Looking for entry for patch " << patchName << endl;
+
+        if (boundaryField.found(patchName) && !boundaryField.found(newName))
+        {
+            Info<< "    Changing entry " << patchName << " to " << newName
+                << endl;
+
+            dictionary patchDict(boundaryField.subDict(patchName));
+
+            boundaryField.changeKeyword(patchName, newName);
+            boundaryField.add
+            (
+                nbrNames[patchName],
+                patchDict
+            );
+            Info<< "    Adding entry " << nbrNames[patchName] << endl;
+
+            nChanged++;
+        }
+    }
+
+    //Info<< "New boundaryField:" << boundaryField << endl;
+
+    if (returnReduce(nChanged, sumOp<label>()) > 0)
+    {
+        if (isTestRun)
+        {
+            //Info<< "-test option: no changes made" << endl;
+        }
+        else
+        {
+            if (mvBak(fieldDict.objectPath(), "old"))
+            {
+                Info<< "Backup to    "
+                    << (fieldDict.objectPath() + ".old") << nl;
+            }
+
+            Info<< "Write  to    "
+                << fieldDict.objectPath() << endl;
+            fieldDict.regIOobject::write();
+        }
+    }
+    else
+    {
+        Info<< "No changes made to field " << fieldName << endl;
+    }
+    Info<< endl;
+}
+
+
+void rewriteFields
+(
+    const bool isTestRun,
+    const Time& runTime,
+    const wordList& fieldNames,
+    const HashTable<word>& thisNames,
+    const HashTable<word>& nbrNames
+)
+{
+    forAll(fieldNames, i)
+    {
+        rewriteField
+        (
+            isTestRun,
+            runTime,
+            fieldNames[i],
+            thisNames,
+            nbrNames
+        );
+    }
+}
+
+
 // Main program:
 
 int main(int argc, char *argv[])
 {
+    timeSelector::addOptions();
+
     argList::addBoolOption("test");
-    #include "addRegionOption.H"
+#   include "addRegionOption.H"
 
 #   include "setRootCase.H"
 #   include "createTime.H"
+
+    instantList timeDirs = timeSelector::select0(runTime, args);
+
+    const bool isTestRun = args.optionFound("test");
+    if (isTestRun)
+    {
+        Info<< "-test option: no changes made" << nl << endl;
+    }
+
 
     Foam::word regionName = polyMesh::defaultRegion;
     args.optionReadIfPresent("region", regionName);
@@ -78,201 +378,202 @@ int main(int argc, char *argv[])
     HashTable<word> thisNames;
     HashTable<word> nbrNames;
 
-    // Read boundary file without reading mesh
+    // Rewrite constant boundary file. Return any patches that have been split.
+    IOobject io
+    (
+        "boundary",
+        runTime.constant(),
+        polyMesh::meshSubDir,
+        runTime,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false
+    );
+
+    if (io.headerOk())
     {
+        rewriteBoundary
+        (
+            isTestRun,
+            io,
+            regionPrefix,
+            thisNames,
+            nbrNames
+        );
+    }
+
+
+
+    // Convert any fields
+
+    forAll(timeDirs, timeI)
+    {
+        runTime.setTime(timeDirs[timeI], timeI);
+
+        Info<< "Time: " << runTime.timeName() << endl;
+
+        // See if mesh in time directory
         IOobject io
         (
             "boundary",
-            runTime.findInstance
-            (
-                regionPrefix/polyMesh::meshSubDir,
-                "boundary"
-            ),
+            runTime.timeName(),
             polyMesh::meshSubDir,
             runTime,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
             false
         );
-        
 
-        Info<< "Reading boundary from " << io.filePath() << endl;
-
-
-        // Read PtrList of dictionary.
-        const word oldTypeName = IOPtrList<entry>::typeName;
-        const_cast<word&>(IOPtrList<entry>::typeName) = word::null;
-        IOPtrList<entry> patches(io);
-        const_cast<word&>(IOPtrList<entry>::typeName) = oldTypeName;
-        // Fake type back to what was in field
-        const_cast<word&>(patches.type()) = patches.headerClassName();
-
-        // Temporary convert to dictionary
-        dictionary patchDict;
-        forAll(patches, i)
+        if (io.headerOk())
         {
-            patchDict.add(patches[i].keyword(), patches[i].dict());
-        }
-
-        // Replace any 'cyclic'
-        label nOldCyclics = 0;
-        forAll(patches, patchI)
-        {
-            const dictionary& patchDict = patches[patchI].dict();
-
-            if (word(patchDict["type"]) == cyclicPolyPatch::typeName)
-            {
-                if (patchDict.found("neighbourPatch"))
-                {
-                    Info<< "Patch " << patches[patchI].keyword()
-                        << " already has 'neighbourPatch' entry; assuming it"
-                        << " is already converted." << endl;
-                }
-                else
-                {
-                    Info<< "Patch " << patches[patchI].keyword()
-                        << " does not have 'neighbourPatch' entry; assuming it"
-                        << " is of the old type." << endl;
-                    nOldCyclics++;
-                }
-            }
-        }
-
-        Info<< "Detected " << nOldCyclics << " old cyclics." << nl << endl;
-
-
-        // edo the 
-
-
-
-        PtrList<entry> oldPatches(patches);
-
-Pout<< "oldPatches:" << oldPatches << endl;
-
-        // Extend
-        label nOldPatches = patches.size();
-        patches.setSize(nOldPatches+nOldCyclics);
-
-
-        // Add new entries
-        label newPatchI = 0;
-        forAll(oldPatches, patchI)
-        {
-            const dictionary& patchDict = oldPatches[patchI].dict();
-
-            if
+            rewriteBoundary
             (
-                word(patchDict["type"]) == cyclicPolyPatch::typeName
-            && !patchDict.found("neighbourPatch")
-            )
-            {
-                const word& name = oldPatches[patchI].keyword();
-                label nFaces = readLabel(patchDict["nFaces"]);
-                label startFace = readLabel(patchDict["startFace"]);
-
-                word thisName = name + "_half0";
-                word nbrName = name + "_half1";
-
-                thisNames.insert(name, thisName);
-                nbrNames.insert(name, nbrName);
-
-                // Change entry on this side
-                patches.set(newPatchI, oldPatches(patchI));
-                dictionary& thisPatchDict = patches[newPatchI].dict();
-                thisPatchDict.add("neighbourPatch", nbrName);
-                thisPatchDict.set("nFaces", nFaces/2);
-                patches[newPatchI].keyword() = thisName;
-                newPatchI++;
-
-                // Add entry on other side
-                patches.set(newPatchI, oldPatches(patchI));
-                dictionary& nbrPatchDict = patches[newPatchI].dict();
-                nbrPatchDict.add("neighbourPatch", nbrName);
-                nbrPatchDict.set("nFaces", nFaces/2);
-                nbrPatchDict.set("startFace", startFace+nFaces/2);
-                patches[newPatchI].keyword() = nbrName;
-                newPatchI++;
-            }
-            else
-            {
-                patches.set(newPatchI++, oldPatches(patchI));
-            }
+                isTestRun,
+                io,
+                regionPrefix,
+                thisNames,
+                nbrNames
+            );
         }
 
-        Info<< "boundary:" << patches << endl;
 
-        if (returnReduce(nOldCyclics, sumOp<label>()) >= 0)
-        {
-            if (args.optionFound("test"))
-            {
-                Info<< "-test option: no changes made" << nl << endl;
-            }
-            else
-            {
-                if (mvBak(patches.objectPath(), "old"))
-                {
-                    Info<< "Backup to    "
-                        << (patches.objectPath() + ".old") << nl;
-                }
+        IOobjectList objects(runTime, runTime.timeName());
 
-                Info<< "Write  to    "
-                    << patches.objectPath() << nl << endl;
-                patches.write();
-            }
-        }
+
+        // volFields
+        // ~~~~~~~~~
+
+        rewriteFields
+        (
+            isTestRun,
+            runTime,
+            objects.names(volScalarField::typeName),
+            thisNames,
+            nbrNames
+        );
+        rewriteFields
+        (
+            isTestRun,
+            runTime,
+            objects.names(volVectorField::typeName),
+            thisNames,
+            nbrNames
+        );
+        rewriteFields
+        (
+            isTestRun,
+            runTime,
+            objects.names(volSphericalTensorField::typeName),
+            thisNames,
+            nbrNames
+        );
+        rewriteFields
+        (
+            isTestRun,
+            runTime,
+            objects.names(volSymmTensorField::typeName),
+            thisNames,
+            nbrNames
+        );
+        rewriteFields
+        (
+            isTestRun,
+            runTime,
+            objects.names(volTensorField::typeName),
+            thisNames,
+            nbrNames
+        );
+
+
+        // pointFields
+        // ~~~~~~~~~~~
+
+        rewriteFields
+        (
+            isTestRun,
+            runTime,
+            objects.names(pointScalarField::typeName),
+            thisNames,
+            nbrNames
+        );
+        rewriteFields
+        (
+            isTestRun,
+            runTime,
+            objects.names(pointVectorField::typeName),
+            thisNames,
+            nbrNames
+        );
+        rewriteFields
+        (
+            isTestRun,
+            runTime,
+            objects.names(pointSphericalTensorField::typeName),
+            thisNames,
+            nbrNames
+        );
+        rewriteFields
+        (
+            isTestRun,
+            runTime,
+            objects.names(pointSymmTensorField::typeName),
+            thisNames,
+            nbrNames
+        );
+        rewriteFields
+        (
+            isTestRun,
+            runTime,
+            objects.names(pointTensorField::typeName),
+            thisNames,
+            nbrNames
+        );
+
+
+        // surfaceFields
+        // ~~~~~~~~~~~
+
+        rewriteFields
+        (
+            isTestRun,
+            runTime,
+            objects.names(surfaceScalarField::typeName),
+            thisNames,
+            nbrNames
+        );
+        rewriteFields
+        (
+            isTestRun,
+            runTime,
+            objects.names(surfaceVectorField::typeName),
+            thisNames,
+            nbrNames
+        );
+        rewriteFields
+        (
+            isTestRun,
+            runTime,
+            objects.names(surfaceSphericalTensorField::typeName),
+            thisNames,
+            nbrNames
+        );
+        rewriteFields
+        (
+            isTestRun,
+            runTime,
+            objects.names(surfaceSymmTensorField::typeName),
+            thisNames,
+            nbrNames
+        );
+        rewriteFields
+        (
+            isTestRun,
+            runTime,
+            objects.names(surfaceTensorField::typeName),
+            thisNames,
+            nbrNames
+        );
     }
-
-
-//    {
-//        // Read dictionary. (disable class type checking so we can load
-//        // field)
-//        Info<< "Loading dictionary " << fieldName << endl;
-//        const word oldTypeName = IOdictionary::typeName;
-//        const_cast<word&>(IOdictionary::typeName) = word::null;
-//
-//        IOdictionary fieldDict
-//        (
-//            IOobject
-//            (
-//                "p",
-//                instance,
-//                mesh,
-//                IOobject::MUST_READ,
-//                IOobject::NO_WRITE,
-//                false
-//            )
-//        );
-//        const_cast<word&>(IOdictionary::typeName) = oldTypeName;
-//        // Fake type back to what was in field
-//        const_cast<word&>(fieldDict.type()) = fieldDict.headerClassName();
-//
-//        Info<< "Loaded dictionary " << fieldName
-//            << " with entries " << fieldDict.toc() << endl;
-//
-//        dictionary& boundaryField = fieldDict.subDict("boundaryField");
-//
-//        forAllConstIter(HashTable<word>, thisNames, iter)
-//        {
-//            const word& patchName = iter.key();
-//            const word& newName = iter();
-//
-//            Info<< "Looking for entry for patch " << patchName << endl;
-//
-//            if (boundaryField.found(patchName) && !boundaryField.found(iter()))
-//            {
-//                const dictionary& patchDict = boundaryField[patchName];
-//
-//                Field<scalar> fld(patchDict.lookup("value"));
-//
-//                
-//            }
-//
-//
-//        forAllIter(IDLList<entry>, boundaryField, patchIter)
-//        {
-//            
-//        }
-
 
     return 0;
 }

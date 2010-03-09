@@ -173,7 +173,7 @@ void Foam::processorPolyPatch::initGeometry(PstreamBuffers& pBufs)
 
 void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
 {
-Pout<< "processorPolyPatch::calcGeometry() for " << name() << endl;
+//Pout<< "processorPolyPatch::calcGeometry() for " << name() << endl;
     if (Pstream::parRun())
     {
         {
@@ -185,95 +185,22 @@ Pout<< "processorPolyPatch::calcGeometry() for " << name() << endl;
                 >> neighbFaceCellCentres_;
         }
 
-Pout<< "processorPolyPatch::calcGeometry() : received data for "
-    << neighbFaceCentres_.size() << " faces." << endl;
+//Pout<< "processorPolyPatch::calcGeometry() : received data for "
+//    << neighbFaceCentres_.size() << " faces." << endl;
+
+        calcGeometry
+        (
+            *this,
+            faceCentres(),
+            faceAreas(),
+            faceCellCentres()(),
+            neighbFaceCentres_,
+            neighbFaceAreas_,
+            neighbFaceCellCentres_
+        );
 //Pout<< "**neighbFaceCentres_:" << neighbFaceCentres_ << endl;
 //Pout<< "**neighbFaceAreas_:" << neighbFaceAreas_ << endl;
 //Pout<< "**neighbFaceCellCentres_:" << neighbFaceCellCentres_ << endl;
-
-
-
-//        // My normals
-//        vectorField faceNormals(size());
-//
-//        // Neighbour normals
-//        vectorField nbrFaceNormals(neighbFaceAreas_.size());
-//
-//        // Calculate normals from areas and check
-//        forAll(faceNormals, facei)
-//        {
-//            scalar magSf = mag(faceAreas()[facei]);
-//            scalar nbrMagSf = mag(neighbFaceAreas_[facei]);
-//            scalar avSf = (magSf + nbrMagSf)/2.0;
-//
-//            if (magSf < ROOTVSMALL && nbrMagSf < ROOTVSMALL)
-//            {
-//                // Undetermined normal. Use dummy normal to force separation
-//                // check. (note use of sqrt(VSMALL) since that is how mag
-//                // scales)
-//                faceNormals[facei] = point(1, 0, 0);
-//                nbrFaceNormals[facei] = faceNormals[facei];
-//            }
-//            else if (mag(magSf - nbrMagSf)/avSf > coupledPolyPatch::matchTol)
-//            {
-//                fileName nm
-//                (
-//                    boundaryMesh().mesh().time().path()
-//                   /name()+"_faces.obj"
-//                );
-//                Pout<< "processorPolyPatch::order : Writing my " << size()
-//                    << " faces to OBJ file " << nm << endl;
-//                writeOBJ(nm, *this, points());
-//
-//                FatalErrorIn
-//                (
-//                    "processorPolyPatch::calcGeometry()"
-//                )   << "face " << facei << " area does not match neighbour by "
-//                    << 100*mag(magSf - nbrMagSf)/avSf
-//                    << "% -- possible face ordering problem." << endl
-//                    << "patch:" << name()
-//                    << " my area:" << magSf
-//                    << " neighbour area:" << nbrMagSf
-//                    << " matching tolerance:" << coupledPolyPatch::matchTol
-//                    << endl
-//                    << "Mesh face:" << start()+facei
-//                    << " vertices:"
-//                    << UIndirectList<point>(points(), operator[](facei))()
-//                    << endl
-//                    << "Rerun with processor debug flag set for"
-//                    << " more information." << exit(FatalError);
-//            }
-//            else
-//            {
-//                faceNormals[facei] = faceAreas()[facei]/magSf;
-//                nbrFaceNormals[facei] = neighbFaceAreas_[facei]/nbrMagSf;
-//            }
-//        }
-//
-//
-//        // Calculate transformation tensors
-//        calcTransformTensors
-//        (
-//            separated_,
-//            separation_,
-//            parallel_,
-//            forwardT_,
-//            reverseT_,
-//            faceCentres(),
-//            neighbFaceCentres_,
-//            faceNormals,
-//            nbrFaceNormals,
-//            calcFaceTol(*this, points(), faceCentres())
-//        );
-//
-//Pout<< "cyclicPolyPatch::calcTransforms : calculated transforms for:"
-//    << name() << endl
-//    << "    separated_:" << separated_ << endl
-//    << "    separation_:" << separation_ << endl
-//    << "    parallel_:" << parallel_ << endl
-//    << "    forwardT_:" << forwardT_ << endl
-//    << "    reverseT_:" << reverseT_ << endl
-//    << endl;
     }
 }
 

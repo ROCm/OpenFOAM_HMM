@@ -81,7 +81,7 @@ void Foam::moleculeCloud::buildConstProps()
 
             if (siteIds[sI] == -1)
             {
-                FatalErrorIn("moleculeCloud.C") << nl
+                FatalErrorIn("moleculeCloud::buildConstProps()")
                     << siteId << " site not found."
                     << nl << abort(FatalError);
             }

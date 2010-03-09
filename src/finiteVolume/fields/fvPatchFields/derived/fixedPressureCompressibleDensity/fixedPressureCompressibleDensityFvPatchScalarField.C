@@ -45,7 +45,7 @@ fixedPressureCompressibleDensityFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF),
-    pName_("pNameIsUndefined")
+    pName_("p")
 {}
 
 
@@ -72,7 +72,7 @@ fixedPressureCompressibleDensityFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF, dict),
-    pName_(dict.lookup("p"))
+    pName_(dict.lookupOrDefault<word>("p", "p"))
 {}
 
 
@@ -134,7 +134,7 @@ void fixedPressureCompressibleDensityFvPatchScalarField::write
 ) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeKeyword("p") << pName_ << token::END_STATEMENT << nl;
+    writeEntryIfDifferent<word>(os, "p", "p", pName_);
     writeEntry("value", os);
 }
 

@@ -1138,7 +1138,7 @@ void Foam::fvMeshDistribute::sendMesh
     {
         const cellZoneMesh& cellZones = mesh.cellZones();
 
-        labelList rowSizes(pointZoneNames.size(), 0);
+        labelList rowSizes(cellZoneNames.size(), 0);
 
         forAll(cellZoneNames, nameI)
         {

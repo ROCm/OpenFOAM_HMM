@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,6 +64,7 @@ Description
 #include "syncTools.H"
 #include "ReadFields.H"
 #include "directMappedWallPolyPatch.H"
+#include "zeroGradientFvPatchFields.H"
 
 using namespace Foam;
 
@@ -164,25 +165,24 @@ void reorderPatchFields(fvMesh& mesh, const labelList& oldToNew)
 
 
 // Adds patch if not yet there. Returns patchID.
-template<class PatchType>
-label addPatch(fvMesh& mesh, const word& patchName)
+label addPatch(fvMesh& mesh, const polyPatch& patch)
 {
     polyBoundaryMesh& polyPatches =
         const_cast<polyBoundaryMesh&>(mesh.boundaryMesh());
 
-    label patchI = polyPatches.findPatchID(patchName);
+    label patchI = polyPatches.findPatchID(patch.name());
     if (patchI != -1)
     {
-        if (isA<PatchType>(polyPatches[patchI]))
+        if (polyPatches[patchI].type() == patch.type())
         {
             // Already there
             return patchI;
         }
         else
         {
-            FatalErrorIn("addPatch<PatchType>(fvMesh&, const word&)")
-                << "Already have patch " << patchName
-                << " but of type " << PatchType::typeName
+            FatalErrorIn("addPatch(fvMesh&, const polyPatch*)")
+                << "Already have patch " << patch.name()
+                << " but of type " << patch.type()
                 << exit(FatalError);
         }
     }
@@ -219,14 +219,12 @@ label addPatch(fvMesh& mesh, const word& patchName)
     polyPatches.set
     (
         sz,
-        polyPatch::New
+        patch.clone
         (
-            PatchType::typeName,
-            patchName,
-            0,              // size
-            startFaceI,
-            insertPatchI,
-            polyPatches
+            polyPatches,
+            insertPatchI,   //index
+            0,              //size
+            startFaceI      //start
         )
     );
     fvPatches.setSize(sz+1);
@@ -1086,16 +1084,37 @@ EdgeMap<label> addRegionPatches
 
         if (interfaceSizes[e] > 0)
         {
-            label patchI = addPatch<directMappedWallPolyPatch>
+            const word inter1 = regionNames[e[0]] + "_to_" + regionNames[e[1]];
+            const word inter2 = regionNames[e[1]] + "_to_" + regionNames[e[0]];
+
+            directMappedWallPolyPatch patch1
             (
-                mesh,
-                regionNames[e[0]] + "_to_" + regionNames[e[1]]
+                inter1,
+                0,                  // overridden
+                0,                  // overridden
+                0,                  // overridden
+                regionNames[e[1]],  // sampleRegion
+                directMappedPatchBase::NEARESTPATCHFACE,
+                inter2,             // samplePatch
+                point::zero,        // offset
+                mesh.boundaryMesh()
             );
-            addPatch<directMappedWallPolyPatch>
+
+            label patchI = addPatch(mesh, patch1);
+
+            directMappedWallPolyPatch patch2
             (
-                mesh,
-                regionNames[e[1]] + "_to_" + regionNames[e[0]]
+                inter2,
+                0,
+                0,
+                0,
+                regionNames[e[0]],  // sampleRegion
+                directMappedPatchBase::NEARESTPATCHFACE,
+                inter1,
+                point::zero,        // offset
+                mesh.boundaryMesh()
             );
+            addPatch(mesh, patch2);
 
             Info<< "For interface between region " << e[0]
                 << " and " << e[1] << " added patch " << patchI
@@ -1290,13 +1309,13 @@ label findCorrespondingRegion
 
 int main(int argc, char *argv[])
 {
+#   include "addOverwriteOption.H"
     argList::addBoolOption("cellZones");
     argList::addBoolOption("cellZonesOnly");
     argList::addOption("blockedFaces", "faceSet");
     argList::addBoolOption("makeCellZones");
     argList::addBoolOption("largestOnly");
     argList::addOption("insidePoint", "point");
-    argList::addBoolOption("overwrite");
     argList::addBoolOption("detectOnly");
     argList::addBoolOption("sloppyCellZones");
 
@@ -1307,21 +1326,20 @@ int main(int argc, char *argv[])
     const word oldInstance = mesh.pointsInstance();
 
     word blockedFacesName;
-    if (args.optionFound("blockedFaces"))
+    if (args.optionReadIfPresent("blockedFaces", blockedFacesName))
     {
-        blockedFacesName = args.option("blockedFaces");
         Info<< "Reading blocked internal faces from faceSet "
             << blockedFacesName << nl << endl;
     }
 
-    bool makeCellZones    = args.optionFound("makeCellZones");
-    bool largestOnly      = args.optionFound("largestOnly");
-    bool insidePoint      = args.optionFound("insidePoint");
-    bool useCellZones     = args.optionFound("cellZones");
-    bool useCellZonesOnly = args.optionFound("cellZonesOnly");
-    bool overwrite        = args.optionFound("overwrite");
-    bool detectOnly       = args.optionFound("detectOnly");
-    bool sloppyCellZones  = args.optionFound("sloppyCellZones");
+    const bool makeCellZones    = args.optionFound("makeCellZones");
+    const bool largestOnly      = args.optionFound("largestOnly");
+    const bool insidePoint      = args.optionFound("insidePoint");
+    const bool useCellZones     = args.optionFound("cellZones");
+    const bool useCellZonesOnly = args.optionFound("cellZonesOnly");
+    const bool overwrite        = args.optionFound("overwrite");
+    const bool detectOnly       = args.optionFound("detectOnly");
+    const bool sloppyCellZones  = args.optionFound("sloppyCellZones");
 
     if (insidePoint && largestOnly)
     {
@@ -1495,7 +1513,8 @@ int main(int argc, char *argv[])
                 false
             ),
             mesh,
-            dimensionedScalar("zero", dimless, 0)
+            dimensionedScalar("zero", dimless, 0),
+            zeroGradientFvPatchScalarField::typeName
         );
         forAll(cellRegion, cellI)
         {
@@ -1862,7 +1881,7 @@ int main(int argc, char *argv[])
 
         if (insidePoint)
         {
-            point insidePoint(args.optionLookup("insidePoint")());
+            const point insidePoint = args.optionRead<point>("insidePoint");
 
             label regionI = -1;
 

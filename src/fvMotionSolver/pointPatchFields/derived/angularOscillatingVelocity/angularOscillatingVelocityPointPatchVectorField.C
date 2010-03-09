@@ -123,6 +123,32 @@ angularOscillatingVelocityPointPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void angularOscillatingVelocityPointPatchVectorField::autoMap
+(
+    const pointPatchFieldMapper& m
+)
+{
+    fixedValuePointPatchField<vector>::autoMap(m);
+
+    p0_.autoMap(m);
+}
+
+
+void angularOscillatingVelocityPointPatchVectorField::rmap
+(
+    const pointPatchField<vector>& ptf,
+    const labelList& addr
+)
+{
+    const angularOscillatingVelocityPointPatchVectorField& aOVptf =
+        refCast<const angularOscillatingVelocityPointPatchVectorField>(ptf);
+
+    fixedValuePointPatchField<vector>::rmap(aOVptf, addr);
+
+    p0_.rmap(aOVptf.p0_, addr);
+}
+
+
 void angularOscillatingVelocityPointPatchVectorField::updateCoeffs()
 {
     if (this->updated())

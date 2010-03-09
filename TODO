@@ -18,6 +18,8 @@ OK - non-parallel finite volume : channelFoam
 OK - parallel finite volume with processorCyclic: channelFoam
     unitTestCases/channel395-splitCyclic vs. channel395-dev
 
+OK - preProcessing/foamUpgradeCyclics
+
 - amg
 - test createPatch pointSync
 - pointFields on cyclics. volPointInterpolation.
@@ -35,7 +37,6 @@ separation.
 - regionSplit
 - scotchDecomp
 - isoSurface.C
-- preProcessing/foamUpgradeCyclics
 - referredCellList.C
 - renumberMesh
 - work out scheduled communication?

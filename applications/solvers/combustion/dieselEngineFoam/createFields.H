@@ -6,7 +6,7 @@ autoPtr<psiChemistryModel> pChemistry
 );
 psiChemistryModel& chemistry = pChemistry();
 
-hCombustionThermo& thermo = chemistry.thermo();
+hsCombustionThermo& thermo = chemistry.thermo();
 
 basicMultiComponentMixture& composition = thermo.composition();
 PtrList<volScalarField>& Y = composition.Y();
@@ -50,7 +50,7 @@ volVectorField U
 volScalarField& p = thermo.p();
 const volScalarField& psi = thermo.psi();
 const volScalarField& T = thermo.T();
-volScalarField& h = thermo.h();
+volScalarField& hs = thermo.hs();
 
 
 #include "compressibleCreatePhi.H"
@@ -92,4 +92,18 @@ forAll(Y, i)
 {
     fields.add(Y[i]);
 }
-fields.add(h);
+fields.add(hs);
+
+DimensionedField<scalar, volMesh> chemistrySh
+(
+    IOobject
+    (
+        "chemistry::Sh",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedScalar("chemistrySh", dimEnergy/dimTime/dimVolume, 0.0)
+);

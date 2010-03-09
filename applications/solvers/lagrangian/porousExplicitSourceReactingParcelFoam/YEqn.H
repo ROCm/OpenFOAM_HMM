@@ -28,7 +28,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
               ==
                 parcels.Srho(i)
               + kappa*chemistry.RR(i)().dimensionedInternalField()
-              + pointMassSources.Su(i),
+              + massSource.Su(i),
                 mesh.solver("Yi")
             );
 

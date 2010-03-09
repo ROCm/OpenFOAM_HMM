@@ -32,7 +32,12 @@ Class
     Foam::viscosityModel
 
 Description
-    An abstract base class for incompressible viscosityModels
+    An abstract base class for incompressible viscosityModels.
+
+    The strain rate is defined by:
+
+        mag(symm(grad(U)))
+
 
 SourceFiles
     viscosityModel.C
@@ -131,10 +136,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~viscosityModel()
-        {}
+    //- Destructor
+    virtual ~viscosityModel()
+    {}
 
 
     // Member Functions
@@ -145,7 +149,7 @@ public:
             return viscosityProperties_;
         }
 
-        //- Return the strain rate mag(grad(U))
+        //- Return the strain rate
         tmp<volScalarField> strainRate() const;
 
         //- Return the laminar viscosity

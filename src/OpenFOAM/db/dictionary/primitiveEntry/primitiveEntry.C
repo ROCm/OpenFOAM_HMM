@@ -107,7 +107,7 @@ Foam::primitiveEntry::primitiveEntry
 Foam::primitiveEntry::primitiveEntry
 (
     const keyType& key,
-    const Xfer< List<token> >& tokens
+    const Xfer<List<token> >& tokens
 )
 :
     entry(key),
