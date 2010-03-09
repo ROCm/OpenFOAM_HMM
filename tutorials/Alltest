@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -30,7 +30,6 @@
 #     quickly tests the tutorials and writes out the scheme/solver information
 #
 #------------------------------------------------------------------------------
-
 cd ${0%/*} || exit 1    # run from this directory
 
 usage() {
@@ -224,6 +223,5 @@ do
     cat $SOLVERS_TEMP | tr " " "\n" | sort -u | tr "\n" " " >> $SOLVERS_FILE
     echo "" >> $SOLVERS_FILE
 done
-
 
 # ----------------------------------------------------------------- end-of-file
