@@ -127,6 +127,9 @@ void Parser::includeFile(const std::string& name)
             L"could not open file %s for source file %s\n",
             name.c_str(), sourceFile.c_str()
         );
+
+        // only report the first occurance
+        visitedFiles_.insert(name);
     }
 }
 

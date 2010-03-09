@@ -27,9 +27,9 @@ Application
     wmkdep
 
 Description
-    A fast dependency list generator that emulates the behaviour and
-    output of cpp -M. However, the output contains no duplications and
-    is ~40% faster than cpp.
+    A fast dependency list generator that emulates the behaviour and the
+    output of cpp -M. However, the output contains no duplicates and
+    is approx. 40% faster than cpp.
 
     The algorithm uses flex to scan for includes and searches the files
     found.  Each file is entered into a hash table so that files are scanned
@@ -224,12 +224,17 @@ struct FileName
     struct FileName* next;
 };
 
-struct FileName* fileHashTable[HASH_TABLE_SIZE];   /* File hash table */
-struct FileName* dirHashTable[HASH_TABLE_SIZE];    /* Directory hash table */
+
+/* Set of files already visited */
+struct FileName* visitedFiles[HASH_TABLE_SIZE];
+
+/* Set of (java) directories already visited */
+struct FileName* visitedDirs[HASH_TABLE_SIZE];
 
 
-/* lookup name in hash table, if not found insert in table */
-
+/*
+ * lookup name in hash table, if not found insert in table
+ */
 int lookUp(struct FileName** hashTable, const char* p)
 {
     int ii = 0;
@@ -264,9 +269,9 @@ int lookUp(struct FileName** hashTable, const char* p)
 }
 
 
-
-/* Add a directory name to the file name */
-
+/*
+ * Add a directory name to the file name
+ */
 char* addDirectoryName(const char* directoryName, const char* fileName)
 {
     char* pathName;
@@ -285,14 +290,15 @@ char* addDirectoryName(const char* directoryName, const char* fileName)
 }
 
 
-/* open a file and create buffer and put on stack stack */
-
+/*
+ * open a file and create buffer and put on stack
+ */
 void nextFile(const char* fileName)
 {
     int d;
     char* pathName;
 
-    if (lookUp(fileHashTable, fileName)) return;
+    if (lookUp(visitedFiles, fileName)) return;
 
     if (currentBuffer >= FILE_STACK_SIZE)
     {
@@ -337,6 +343,10 @@ void nextFile(const char* fileName)
         );
 
         fflush(stdout);
+        fflush(stderr);
+
+        /* only report the first occurance */
+        lookUp(visitedFiles, fileName);
     }
     else
     {
@@ -349,6 +359,9 @@ void nextFile(const char* fileName)
 }
 
 
+/*
+ * Replace all '.' with '/'
+ */
 void dotToSlash(char* fileName)
 {
     int i, len;
@@ -362,6 +375,9 @@ void dotToSlash(char* fileName)
 }
 
 
+/*
+ * Import (java) file
+ */
 void importFile(const char* fileName)
 {
     char* javaFileName;
@@ -380,6 +396,9 @@ void importFile(const char* fileName)
 }
 
 
+/*
+ * Import (java) directories
+ */
 void importDirectory(const char* dirName)
 {
     int dirNameLen;
@@ -387,7 +406,7 @@ void importDirectory(const char* dirName)
     DIR *source;
     struct dirent *list;
 
-    if (lookUp(dirHashTable, dirName)) return;
+    if (lookUp(visitedDirs, dirName)) return;
 
     dirNameLen = strlen(dirName);
     uDirName = strdup(dirName);
@@ -429,8 +448,9 @@ void importDirectory(const char* dirName)
 }
 
 
-/* The lexer calls yywrap to handle EOF conditions */
-
+/*
+ * The lexer calls yywrap to handle EOF conditions
+ */
 int yywrap()
 {
     /* Close the file for the buffer which has just reached EOF */
