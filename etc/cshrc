@@ -53,6 +53,15 @@ set foamInstall = $HOME/$WM_PROJECT
 # note the location for later use (eg, in job scripts)
 if ( ! $?FOAM_INST_DIR ) setenv FOAM_INST_DIR $foamInstall
 
+# Source files, possibly with some verbosity
+alias _foamSource 'if ($?FOAM_VERBOSE && $?prompt) echo "Sourcing: \!*"; source \!*'
+
+# Add in user or site preset preferences.
+set foamPrefs=`$WM_PROJECT_DIR/bin/foamEtcFile prefs.csh`
+if ( $status == 0 ) _foamSource $foamPrefs
+unset foamPrefs
+
+
 # The old dirs to be cleaned from the various environment variables
 # - remove anything under top-level directory.
 # NB: the WM_PROJECT_INST_DIR might not be identical between versions
@@ -223,7 +232,6 @@ setenv MANPATH `$cleanProg "$MANPATH" "$foamOldDirs"`
 
 # Source project setup files
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-alias _foamSource 'if ($?FOAM_VERBOSE && $?prompt) echo "Executing: \!*"; source \!*'
 
 _foamSource $WM_PROJECT_DIR/etc/settings.csh
 _foamSource $WM_PROJECT_DIR/etc/aliases.csh

@@ -54,6 +54,26 @@ foamInstall=$HOME/$WM_PROJECT
 # note the location for later use (eg, in job scripts)
 : ${FOAM_INST_DIR:=$foamInstall}; export FOAM_INST_DIR
 
+# Source files, possibly with some verbosity
+_foamSource()
+{
+   while [ $# -ge 1 ]
+   do
+      [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "Sourcing: $1"
+      . $1
+      shift
+   done
+}
+
+# Add in user or site preset preferences.
+foamPrefs=`$WM_PROJECT_DIR/bin/foamEtcFile prefs.sh`
+if [ $? -eq 0 ]
+then
+    _foamSource $foamPrefs
+fi
+unset foamPrefs
+
+
 # The old dirs to be cleaned from the various environment variables
 # - remove anything under top-level directory.
 # NB: the WM_PROJECT_INST_DIR might not be identical between versions
