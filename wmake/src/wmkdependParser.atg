@@ -59,9 +59,6 @@ COMPILER wmkdepend
 /*---------------------------------------------------------------------------*/
 private:
 
-    //! Set of files already visited
-    static std::set<std::string> visitedFiles_;
-
     //! Set of (java) directories already visited
     static std::set<std::string> visitedDirs_;
 
@@ -75,6 +72,9 @@ private:
     static void importFile(const std::string& name);
 
 public:
+    //! Set of files already visited
+    static std::set<std::string> visitedFiles;
+
     //! Include directories to search
     static std::list<std::string> includeDirs;
 
@@ -95,9 +95,9 @@ public:
 #include <sys/types.h>
 #include <dirent.h>
 
-std::set<std::string> Parser::visitedFiles_;
 std::set<std::string> Parser::visitedDirs_;
 
+std::set<std::string> Parser::visitedFiles;
 std::list<std::string> Parser::includeDirs;
 std::string Parser::sourceFile;
 std::string Parser::depFile;
@@ -123,7 +123,7 @@ void Parser::ignoreDir(const std::string& name)
 
 void Parser::includeFile(const std::string& name)
 {
-    if (!visitedFiles_.insert(name).second)
+    if (!visitedFiles.insert(name).second)
     {
         return;   // already existed (did not insert)
     }
@@ -172,7 +172,7 @@ void Parser::includeFile(const std::string& name)
         );
 
         // only report the first occurance
-        visitedFiles_.insert(name);
+        visitedFiles.insert(name);
     }
 }
 

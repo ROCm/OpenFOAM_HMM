@@ -36,7 +36,7 @@ Description
     only once.  This is why this program is faster than cpp.
 
 Usage
-    wmkdep [ -Idirectory ... -Idirectory ] filename
+    wmkdep [ -Idir ... -Idir ] [ -iheader .. -iheader ] filename
 
 \*---------------------------------------------------------------------------*/
 
@@ -50,7 +50,7 @@ Usage
 
 void nextFile(const char* fileName);
 void importFile(const char* fileName);
-void importDirectory(const char* dirName);
+void importDir(const char* dirName);
 
 #   undef yywrap        /* sometimes a macro by default */
 
@@ -76,7 +76,7 @@ void importDirectory(const char* dirName);
 <JFNAME>sun.*;            BEGIN(INITIAL);
 <JFNAME>launcher.*;       BEGIN(INITIAL);
 <JFNAME>[^"\n*]*;       { BEGIN(INITIAL); importFile(yytext); } /*"*/
-<JFNAME>[^"\n]*\*;      { BEGIN(INITIAL); importDirectory(yytext); } /*"*/
+<JFNAME>[^"\n]*\*;      { BEGIN(INITIAL); importDir(yytext); } /*"*/
 
 "      "include[ \t]+\'   BEGIN(FFNAME);  /* FORTRAN-file name */
 <FFNAME>[^']*           { BEGIN(INITIAL); nextFile(yytext); } /*'*/
@@ -86,160 +86,24 @@ void importDirectory(const char* dirName);
 %%
 
 
-int nDirectories;
-char** directories;
-char* sourceFile = NULL;
-char* sourceExt = NULL;
-char* objectFile = NULL;
-char* classFile = NULL;
-char* depFile = NULL;
-
-int main(int argc, char* argv[])
-{
-    char *dotPtr, *slashPtr;
-    int i;
-
-    if (argc == 1)
-    {
-        fprintf(stderr,"input file not supplied\n");
-        exit(1);
-    }
-
-    sourceFile = (char*)malloc(strlen(argv[argc-1]) + 1);
-    strcpy(sourceFile, argv[argc-1]);
-    fprintf(stderr, "Making dependency list for source file %s\n", sourceFile);
-
-
-    /* Get list of -I directories. */
-    nDirectories = 0;
-
-    for (i = 1; i < argc; i++)
-    {
-        if (strncmp(argv[i], "-I", 2) == 0)
-        {
-            nDirectories++;
-        }
-    }
-
-    directories = (char**)malloc(sizeof(char*)*nDirectories);
-
-    nDirectories = 0;
-
-    for (i = 1; i < argc; i++)
-    {
-        if (strncmp(argv[i], "-I", 2) == 0)
-        {
-            directories[nDirectories++] = strdup(argv[i] + 2);
-        }
-    }
-
-
-
-    if ((dotPtr = strrchr(sourceFile, '.')) == NULL)
-    {
-        fprintf
-        (
-            stderr,
-            "Cannot find extension in source file name %s\n",
-            sourceFile
-        );
-        exit(1);
-    }
-
-    if ((slashPtr = strrchr(sourceFile, '/')) == NULL)
-    {
-        slashPtr = sourceFile;
-    }
-    else
-    {
-        slashPtr++;
-    }
-
-    sourceExt = (char*)malloc(strlen(sourceFile));
-    sourceExt[0] = 0;
-    strncat
-    (
-        sourceExt,
-        dotPtr+1,
-        (&sourceFile[strlen(sourceFile) - 1] - dotPtr)/sizeof(char)
-    );
-
-    /*
-     * initialise depFile to zero and use strncat rather than strncpy
-     * because there is a bug in the SGI strncat that if 0 preceeds the '.'
-     * it inserts a space
-     */
-    depFile = (char*)malloc(strlen(sourceFile) + 3);
-    depFile[0] = 0;
-    strncat(depFile, sourceFile, (dotPtr - sourceFile)/sizeof(char));
-    strcat(depFile, ".dep");
-
-    if (strcmp(sourceExt, "java") == 0)
-    {
-        classFile = (char*)malloc(strlen(sourceFile) + 17);
-        strcpy(classFile, "$(CLASSES_DIR)/");
-        strncat(classFile, sourceFile, (dotPtr - sourceFile)/sizeof(char));
-        strcat(classFile, ".class");
-
-        printf("%s: %s\n", classFile, depFile);
-    }
-    else
-    {
-        objectFile = (char*)malloc(strlen(sourceFile) + 16);
-        strcpy(objectFile, "$(OBJECTS_DIR)/");
-        strncat(objectFile, slashPtr, (dotPtr - slashPtr)/sizeof(char));
-        strcat(objectFile, ".o");
-
-        printf("%s: %s\n", objectFile, depFile);
-    }
-
-    nextFile(sourceFile);
-    yylex();
-
-
-    for (i = 0; i < nDirectories; i++)
-    {
-        free(directories[i]);
-    }
-    free(directories);
-
-    free(sourceFile);
-    free(sourceExt);
-    free(objectFile);
-    free(classFile);
-    free(depFile);
-
-    return 0;
-}
-
-
-int currentBuffer = 0;                     /* Buffer pointer stack counter */
-YY_BUFFER_STATE buffers[FILE_STACK_SIZE];  /* Buffer pointer stack */
-
-/* file name entry in hash table */
-
-struct FileName
+/* char* entry in hash table */
+struct HashEntry
 {
     char* name;
-    struct FileName* next;
+    struct HashEntry* next;
 };
 
 
-/* Set of files already visited */
-struct FileName* visitedFiles[HASH_TABLE_SIZE];
-
-/* Set of (java) directories already visited */
-struct FileName* visitedDirs[HASH_TABLE_SIZE];
-
-
 /*
- * lookup name in hash table, if not found insert in table
+ * lookup name in hash table.
+ * if found - return 1
+ * if not found - insert in table and return 0
  */
-int lookUp(struct FileName** hashTable, const char* p)
+int lookUp(struct HashEntry** hashTable, const char* p)
 {
     int ii = 0;
-    struct FileName* n;
-    struct FileName* nn;
+    struct HashEntry* n;
+    struct HashEntry* nn;
 
     /* hash */
     const char* pp = p;
@@ -258,9 +122,8 @@ int lookUp(struct FileName** hashTable, const char* p)
     }
 
     /* insert */
-    nn = (struct FileName*)malloc(sizeof(struct FileName));
-    nn->name = (char*)malloc(strlen(p)+1);
-    strcpy(nn->name, p);
+    nn = (struct HashEntry*)malloc(sizeof(struct HashEntry));
+    nn->name = strdup(p);
     nn->next = hashTable[ii];
     hashTable[ii] = nn;
 
@@ -269,17 +132,152 @@ int lookUp(struct FileName** hashTable, const char* p)
 }
 
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+int nDirectories = 0;
+char** directories;
+char* sourceFile = NULL;
+char* depFile = NULL;
+
+/* Set of files already visited */
+struct HashEntry* visitedFiles[HASH_TABLE_SIZE];
+
+/* Set of (java) directories already visited */
+struct HashEntry* visitedDirs[HASH_TABLE_SIZE];
+
+
+int main(int argc, char* argv[])
+{
+    char *basePos, *dotPos;
+    int i;
+
+    if (argc == 1)
+    {
+        fprintf(stderr, "input file not supplied\n");
+        exit(1);
+    }
+
+    sourceFile = strdup(argv[argc-1]);
+    fprintf(stderr, "Making dependency list for source file %s\n", sourceFile);
+
+
+    if ((basePos = strrchr(sourceFile, '/')) == NULL)
+    {
+        basePos = sourceFile;
+    }
+    else
+    {
+        basePos++;
+    }
+
+    if
+    (
+        (dotPos = strrchr(sourceFile, '.')) == NULL
+     || (dotPos < basePos)
+    )
+    {
+        fprintf
+        (
+            stderr,
+            "cannot find extension in source file name %s\n",
+            sourceFile
+        );
+        exit(1);
+    }
+
+    /* count number of -I directories */
+    nDirectories = 0;
+    for (i = 1; i < argc; i++)
+    {
+        if (strncmp(argv[i], "-I", 2) == 0)
+        {
+            if (strlen(argv[i]) > 2)
+            {
+                nDirectories++;
+            }
+        }
+    }
+
+    directories = (char**)malloc(sizeof(char*)*nDirectories);
+
+    /* build list of -I directories and add -i ignores */
+    nDirectories = 0;
+    for (i = 1; i < argc; i++)
+    {
+        if (strncmp(argv[i], "-I", 2) == 0)
+        {
+            if (strlen(argv[i]) > 2)
+            {
+                directories[nDirectories++] = strdup(argv[i] + 2);
+            }
+        }
+        else if (strncmp(argv[i], "-i", 2) == 0)
+        {
+            if (strlen(argv[i]) > 2)
+            {
+                lookUp(visitedFiles, (argv[i] + 2));
+            }
+        }
+    }
+
+    /*
+     * initialise depFile to zero and use strncat rather than strncpy
+     * because there is a bug in the SGI strncat that if 0 preceeds the '.'
+     * it inserts a space
+     */
+    depFile = (char*)malloc(strlen(sourceFile) + 3);
+    depFile[0] = 0;
+    strncat(depFile, sourceFile, (dotPos - sourceFile)/sizeof(char));
+    strcat(depFile, ".dep");
+
+    if (strcmp(dotPos, ".java") == 0)
+    {
+        char *classFile = strdup(sourceFile);
+        classFile[(dotPos - sourceFile)/sizeof(char)] = 0;
+
+        printf("$(CLASSES_DIR)/%s.class: %s\n", classFile, depFile);
+        free(classFile);
+    }
+    else
+    {
+        char *objectFile = strdup(basePos);
+        objectFile[(dotPos - basePos)/sizeof(char)] = 0;
+
+        printf("$(OBJECTS_DIR)/%s.o: %s\n", objectFile, depFile);
+        free(objectFile);
+    }
+
+    nextFile(sourceFile);
+    yylex();
+
+
+    for (i = 0; i < nDirectories; i++)
+    {
+        free(directories[i]);
+    }
+    free(directories);
+
+    free(sourceFile);
+    free(depFile);
+
+    return 0;
+}
+
+
+int currentBuffer = 0;                     /* Buffer pointer stack counter */
+YY_BUFFER_STATE buffers[FILE_STACK_SIZE];  /* Buffer pointer stack */
+
+
 /*
  * Add a directory name to the file name
  */
-char* addDirectoryName(const char* directoryName, const char* fileName)
+char* addDirectoryName(const char* dirName, const char* fileName)
 {
-    char* pathName;
-    pathName = (char*)malloc(strlen(directoryName) + strlen(fileName) + 2);
+    char* pathName = (char*)malloc(strlen(dirName) + strlen(fileName) + 2);
+    strcpy(pathName, dirName);
 
-    strcpy(pathName, directoryName);
-
-    if (directoryName[strlen(directoryName)-1] != '/')
+    if (dirName[strlen(dirName)-1] != '/')
     {
         strcat(pathName, "/");
     }
@@ -295,10 +293,10 @@ char* addDirectoryName(const char* directoryName, const char* fileName)
  */
 void nextFile(const char* fileName)
 {
-    int d;
-    char* pathName;
-
-    if (lookUp(visitedFiles, fileName)) return;
+    if (lookUp(visitedFiles, fileName))
+    {
+        return;   /* already existed (did not insert) */
+    }
 
     if (currentBuffer >= FILE_STACK_SIZE)
     {
@@ -317,9 +315,10 @@ void nextFile(const char* fileName)
 
     if (!(newyyin = fopen(fileName, "r")))
     {
+        int d;
         for (d=0; d<nDirectories; d++)
         {
-            pathName = addDirectoryName(directories[d], fileName);
+            char* pathName = addDirectoryName(directories[d], fileName);
 
             if ((newyyin = fopen(pathName, "r")))
             {
@@ -365,7 +364,6 @@ void nextFile(const char* fileName)
 void dotToSlash(char* fileName)
 {
     int i, len;
-
     len = strlen(fileName);
 
     for (i=0; i<len; i++)
@@ -399,19 +397,20 @@ void importFile(const char* fileName)
 /*
  * Import (java) directories
  */
-void importDirectory(const char* dirName)
+void importDir(const char* dirName)
 {
-    int dirNameLen;
-    char *uDirName, *path;
+    char *uDirName;
     DIR *source;
-    struct dirent *list;
 
-    if (lookUp(visitedDirs, dirName)) return;
+    if (lookUp(visitedDirs, dirName))
+    {
+        return;   /* already existed (did not insert) */
+    }
 
-    dirNameLen = strlen(dirName);
     uDirName = strdup(dirName);
     dotToSlash(uDirName);
-    uDirName[dirNameLen-2] = 0;
+
+    uDirName[strlen(dirName)-2] = 0;
 
     if ((source = opendir(uDirName)) == NULL)
     {
@@ -421,30 +420,27 @@ void importDirectory(const char* dirName)
             "could not open directory %s\n",
             uDirName
         );
-        free(uDirName);
-
-        return;
     }
     else
     {
         /* Read and parse all the entries in the directory */
+        struct dirent *list;
+
         while ((list = readdir(source)) != NULL)
         {
-            if
-            (
-                strstr(list->d_name, ".java")
-             && !strstr(list->d_name, ".java~")
-            )
+            char* dotPos = strrchr(list->d_name, '.');
+
+            if (dotPos != NULL && strcmp(dotPos, ".java") == 0)
             {
-                path = addDirectoryName(uDirName, list->d_name);
-                nextFile(path);
-                free(path);
+                char* pathName = addDirectoryName(uDirName, list->d_name);
+                nextFile(pathName);
+                free(pathName);
             }
         }
 
         closedir(source);
-        free(uDirName);
     }
+    free(uDirName);
 }
 
 

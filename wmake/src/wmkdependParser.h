@@ -122,9 +122,6 @@ public:
 
 private:
 
-    //! Set of files already visited
-    static std::set<std::string> visitedFiles_;
-
     //! Set of (java) directories already visited
     static std::set<std::string> visitedDirs_;
 
@@ -138,6 +135,9 @@ private:
     static void importFile(const std::string& name);
 
 public:
+    //! Set of files already visited
+    static std::set<std::string> visitedFiles;
+
     //! Include directories to search
     static std::list<std::string> includeDirs;
 
