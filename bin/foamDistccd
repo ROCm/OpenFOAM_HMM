@@ -34,31 +34,31 @@
 #
 #------------------------------------------------------------------------------
 
-printUsage()
+usage()
 {
-    echo "Usage : `basename $0` start|stop|list"
+    echo "Usage : ${0##*/} start|stop|list"
     echo ""
+    exit 1
 }
 
 RSH='ssh'
 
-if [ ! "$DISTCC_HOSTS" ]; then
-    echo "`basename $0`: variable DISTCC_HOSTS not set."
-    echo "`basename $0`: please set DISTCC_HOSTS to the list of hosts to use."
-    echo "`basename $0`: the format is host1:port host2:port host3:port etc."
-    echo ""
+if [ ! "$DISTCC_HOSTS" ]
+then
+    echo "${0##*/} Warnings"
+    echo "    variable DISTCC_HOSTS not set."
+    echo "    please set DISTCC_HOSTS to the list of hosts to use."
+    echo "    the format is host1:port host2:port host3:port etc."
+    echo
 
     exit 1
 fi
 
-if [ $# -ne 1 ]; then
-    printUsage
-    exit 1
-fi
+[ $# -eq 1 ] || usage
 
 
-if [ "$1" = 'start' ]; then
-
+case "$1" in
+start)
     grep -v '^#' /etc/hosts | awk '{print $1, $2 " "}' > ~/filteredHosts.txt
 
     allowIPS=''
@@ -66,7 +66,8 @@ if [ "$1" = 'start' ]; then
     do
         machine=`echo "$host" | awk -F: '{print $1}'`
         iptest=`echo "$machine" | sed -e 's/[0-9.]//g'`
-        if [ ! "$iptest" ]; then
+        if [ ! "$iptest" ]
+        then
             # address only contained 0-9 and '.'. Probably ip address.
             ip=$machine
         else
@@ -74,7 +75,8 @@ if [ "$1" = 'start' ]; then
             ip=`egrep " $machine " ~/filteredHosts.txt | awk '{print $1}'`
         fi
 
-        if [ ! "$ip" ]; then
+        if [ ! "$ip" ]
+        then
             echo "$0 : host specifier $host either is not an ip address or cannot be found in /etc/hosts."
             echo "$0 : Exiting."
             exit 1
@@ -92,7 +94,8 @@ if [ "$1" = 'start' ]; then
         machine=`echo "$host" | awk -F: '{print $1}'`
         port=`echo "$host" | awk -F: '{print $2}'`
 
-        if [ "$machine" -a "$port" ]; then
+        if [ "$machine" -a "$port" ]
+        then
             #echo "Machine:$machine  port:$port"
             echo "distccd --daemon $allowIPS --port $port"' --jobs `egrep "^processor" /proc/cpuinfo | wc -l`'
             $RSH $machine "distccd --verbose --daemon $allowIPS --port $port"' --jobs `egrep "^processor" /proc/cpuinfo | wc -l`'
@@ -102,9 +105,9 @@ if [ "$1" = 'start' ]; then
             exit 1
         fi
     done
+    ;;
 
-elif [ "$1" = 'stop' ]; then
-
+stop)
     for host in $DISTCC_HOSTS
     do
         echo ""
@@ -114,10 +117,9 @@ elif [ "$1" = 'stop' ]; then
 
         $RSH $machine killall distccd
     done
+    ;;
 
-
-elif [ "$1" = 'list' ]; then
-
+list)
     for host in $DISTCC_HOSTS
     do
         echo ""
@@ -127,12 +129,11 @@ elif [ "$1" = 'list' ]; then
 
         $RSH $machine "ps -ef | grep distccd | grep -v grep"
     done
+    ;;
 
-else
-
-    printUsage
-    exit 1
-
-fi
+*)
+    usage
+    ;;
+esac
 
 #------------------------------------------------------------------------------

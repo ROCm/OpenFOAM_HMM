@@ -36,7 +36,8 @@ cd ${0%/*} || exit 1    # run from this directory
 
 # logReport <logfile>
 # Extracts useful info from log file.
-logReport () {
+logReport()
+{
     caseName=`dirname $1 | sed s/"\(.*\)\.\/"/""/g`
     app=`echo $1 | sed s/"\(.*\)\."/""/g`
     appAndCase="Application $app - case $caseName"
@@ -74,19 +75,18 @@ foamRunTutorials cases
 # Analyse all log files
 rm testLoopReport > /dev/null 2>&1 &
 touch testLoopReport
+
 for appDir in *
 do
-    if [ -d $appDir ]
-    then
-    (
-        cd $appDir
-        for log in `find . -name "log.*" | xargs ls -rt`
-        do
-            logReport $log >> ../testLoopReport
-        done
-        echo "" >> ../testLoopReport
-    )
-    fi
+(
+    [ -d $appDir ] && cd $appDir || exit
+
+    for log in `find . -name "log.*" | xargs ls -rt`
+    do
+        logReport $log >> ../testLoopReport
+    done
+    echo "" >> ../testLoopReport
+)
 done
 
 find . -name "log.*" -exec cat {} \; >> logs
