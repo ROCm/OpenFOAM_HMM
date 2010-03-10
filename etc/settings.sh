@@ -170,7 +170,7 @@ case "$WM_MPLIB" in
 OPENMPI)
     mpi_version=openmpi-1.4.1
     export MPI_HOME=$WM_THIRD_PARTY_DIR/$mpi_version
-    export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_OPTIONS/$mpi_version
+    export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mpi_version
 
     # Tell OpenMPI where to find its install directory
     export OPAL_PREFIX=$MPI_ARCH_PATH
@@ -184,6 +184,7 @@ OPENMPI)
     ;;
 
 SYSTEMOPENMPI)
+    # This uses the installed openmpi. It needs mpicc installed!
     mpi_version=openmpi-system
 
     # Set compilation flags here instead of in wmake/rules/../mplibSYSTEMOPENMPI
@@ -208,7 +209,7 @@ SYSTEMOPENMPI)
 MPICH)
     mpi_version=mpich2-1.1.1p1
     export MPI_HOME=$WM_THIRD_PARTY_DIR/$mpi_version
-    export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_OPTIONS/$mpi_version
+    export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mpi_version
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
