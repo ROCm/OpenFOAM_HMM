@@ -25,7 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "distanceSurface.H"
-#include "isoSurface.H"
 #include "volFieldsFwd.H"
 #include "pointFields.H"
 #include "volPointInterpolation.H"

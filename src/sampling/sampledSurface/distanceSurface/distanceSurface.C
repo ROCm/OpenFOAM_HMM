@@ -30,8 +30,6 @@ License
 #include "volPointInterpolation.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
-#include "isoSurface.H"
-// #include "isoSurfaceCell.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -244,6 +242,14 @@ void Foam::distanceSurface::createGeometry()
             distance_,
             regularise_
         )
+        //new isoSurfaceCell
+        //(
+        //    fvm,
+        //    cellDistance,
+        //    pointDistance_,
+        //    distance_,
+        //    regularise_
+        //)
     );
 
     if (debug)

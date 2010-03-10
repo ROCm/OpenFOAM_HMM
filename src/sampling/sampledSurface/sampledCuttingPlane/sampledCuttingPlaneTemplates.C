@@ -26,7 +26,6 @@ License
 
 #include "volPointInterpolation.H"
 #include "sampledCuttingPlane.H"
-#include "isoSurface.H"
 #include "volFieldsFwd.H"
 #include "pointFields.H"
 #include "volPointInterpolation.H"
