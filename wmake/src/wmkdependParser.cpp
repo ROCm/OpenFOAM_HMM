@@ -32,7 +32,7 @@ SourceFiles
     generated
 
 \*---------------------------------------------------------------------------*/
-// This file was generated with Coco/R C++ (7 Feb 2010)
+// This file was generated with Coco/R C++ (10 Mar 2010)
 // http://www.ssw.uni-linz.ac.at/coco/
 // with these defines:
 //     - FORCE_UTF8

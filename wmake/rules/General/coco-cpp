@@ -8,7 +8,6 @@
 atgtoo =  \
     $(WM_THIRD_PARTY_DIR)/platforms/$(WM_ARCH)$(WM_COMPILER)/coco-cpp/bin/coco-cpp \
     -single \
-    -frames $(WM_THIRD_PARTY_DIR)/platforms/share/coco-cpp \
     $$SOURCE -o $(OBJECTS_DIR) && \
     $(CC) $(c++FLAGS) -c $*.cpp -o $@
 

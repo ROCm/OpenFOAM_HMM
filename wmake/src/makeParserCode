@@ -34,7 +34,7 @@ cd ${0%/*} || exit 1    # run from this directory
 
 
 bindir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/coco-cpp/bin
-frames=$WM_THIRD_PARTY_DIR/platforms/share/coco-cpp
+frames=$bindir/../share/coco-cpp
 
 [ -d "$bindir" -a -x "$bindir/coco-cpp" ] || {
     echo "no coco-cpp binary found"
@@ -47,8 +47,7 @@ frames=$WM_THIRD_PARTY_DIR/platforms/share/coco-cpp
 }
 
 # run coco-cpp:
-
-$bindir/coco-cpp -frames $frames wmkdependParser.atg
+$bindir/coco-cpp wmkdependParser.atg
 
 echo
 echo Done

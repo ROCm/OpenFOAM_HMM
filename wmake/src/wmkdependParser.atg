@@ -2,10 +2,6 @@
     Attributed Grammar for Coco/R  (-*- C++ -*- version)
     compile with:
         coco-cpp wmkdependParser.atg
-    For example,
-    $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/coco-cpp/bin/coco-cpp \
-        -frames $WM_THIRD_PARTY_DIR/platforms/share/coco-cpp \
-        wmkdependParser.atg
 \*---------------------------------------------------------------------------*/
 [copy]
 /*---------------------------------*- C++ -*---------------------------------*\
