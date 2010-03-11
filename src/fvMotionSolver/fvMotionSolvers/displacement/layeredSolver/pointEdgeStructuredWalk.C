@@ -24,33 +24,31 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IPstream.H"
+#include "pointEdgeStructuredWalk.H"
 
-// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-Foam::IPstream::IPstream
+Foam::Ostream& Foam::operator<<
 (
-    const commsTypes commsType,
-    const int fromProcNo,
-    const label bufSize,
-    streamFormat format,
-    versionNumber version
+    Foam::Ostream& os,
+    const Foam::pointEdgeStructuredWalk& wDist
 )
-:
-    Pstream(commsType, bufSize),
-    UIPstream
-    (
-        commsType,
-        fromProcNo,
-        buf_,
-        externalBufPosition_,
-        UPstream::msgType(),        // tag
-        false,                      // do not clear buf_ if at end
-        format,
-        version
-    ),
-    externalBufPosition_(0)
-{}
+{
+    return os
+        << wDist.inZone_ << wDist.previousPoint_
+        << wDist.dist_ << wDist.data_;
+}
+
+Foam::Istream& Foam::operator>>
+(
+    Foam::Istream& is,
+    Foam::pointEdgeStructuredWalk& wDist
+)
+{
+    return is
+        >> wDist.inZone_ >> wDist.previousPoint_
+        >> wDist.dist_ >> wDist.data_;
+}
 
 
 // ************************************************************************* //

@@ -38,6 +38,7 @@ Foam::UIPstream::UIPstream
     DynamicList<char>& externalBuf,
     label& externalBufPosition,
     const int tag,
+    const bool clearAtEnd,
     streamFormat format,
     versionNumber version
 )
@@ -48,6 +49,7 @@ Foam::UIPstream::UIPstream
     externalBuf_(externalBuf),
     externalBufPosition_(externalBufPosition),
     tag_(tag),
+    clearAtEnd_(clearAtEnd),
     messageSize_(0)
 {
     notImplemented
@@ -59,6 +61,7 @@ Foam::UIPstream::UIPstream
             "DynamicList<char>&,"
             "label&,"
             "const int tag,"
+            "const bool,"
             "streamFormat, versionNumber"
         ")"
     );

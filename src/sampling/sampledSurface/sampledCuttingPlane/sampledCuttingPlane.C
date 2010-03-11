@@ -30,7 +30,6 @@ License
 #include "volPointInterpolation.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
-#include "isoSurface.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -173,7 +172,7 @@ void Foam::sampledCuttingPlane::createGeometry()
 
                 forAll(fld, i)
                 {
-                    fld[i] =  (cc[i] - plane_.refPoint()) & plane_.normal();
+                    fld[i] = (cc[i] - plane_.refPoint()) & plane_.normal();
                 }
             }
         }
@@ -231,6 +230,14 @@ void Foam::sampledCuttingPlane::createGeometry()
             0.0,
             regularise_
         )
+        //new isoSurfaceCell
+        //(
+        //    fvm,
+        //    cellDistance,
+        //    pointDistance_,
+        //    0.0,
+        //    regularise_
+        //)
     );
 
     if (debug)
