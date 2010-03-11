@@ -270,7 +270,7 @@ void PDRkEpsilon::correct()
     }
 
     tmp<volTensorField> tgradU = fvc::grad(U_);
-    volScalarField G = 2*mut_*(tgradU() && dev(symm(tgradU())));
+    volScalarField G("RASModel::G", mut_*(tgradU() && dev(twoSymm(tgradU()))));
     tgradU.clear();
 
     // Update espsilon and G at the wall
