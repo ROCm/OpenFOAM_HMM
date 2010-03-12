@@ -569,7 +569,7 @@ int main(int argc, char *argv[])
     dumpCyclicMatch("initial_", mesh);
 
     // Read patch construct info from dictionary
-    PtrList<dictionary> patchSources(dict.lookup("patchInfo"));
+    PtrList<dictionary> patchSources(dict.lookup("patches"));
 
 
 
@@ -614,7 +614,7 @@ int main(int argc, char *argv[])
 
             if (destPatchI == -1)
             {
-                dictionary patchDict(dict.subDict("dictionary"));
+                dictionary patchDict(dict.subDict("patchInfo"));
 
                 destPatchI = allPatches.size();
 
