@@ -35,8 +35,8 @@
 #------------------------------------------------------------------------------
 
 # clean the PATH
-set cleanedEnv=`$WM_PROJECT_DIR/bin/foamCleanPath -space "$path" "$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/cmake- $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-"`
-if ( $status == 0 ) set path=($cleanedEnv)
+set cleaned=`$WM_PROJECT_DIR/bin/foamCleanPath -space "$path" "$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/cmake- $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-"`
+if ( $status == 0 ) set path=($cleaned)
 
 # determine the cmake to be used
 unsetenv CMAKE_HOME
@@ -89,5 +89,5 @@ else
 endif
 
 
-unset cleanedEnv cmake paraviewInstDir paraviewPython
+unset cleaned cmake paraviewInstDir paraviewPython
 # -----------------------------------------------------------------------------
