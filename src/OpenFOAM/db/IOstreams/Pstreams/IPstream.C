@@ -38,7 +38,17 @@ Foam::IPstream::IPstream
 )
 :
     Pstream(commsType, bufSize),
-    UIPstream(commsType, fromProcNo, buf_, externalBufPosition_),
+    UIPstream
+    (
+        commsType,
+        fromProcNo,
+        buf_,
+        externalBufPosition_,
+        UPstream::msgType(),        // tag
+        false,                      // do not clear buf_ if at end
+        format,
+        version
+    ),
     externalBufPosition_(0)
 {}
 

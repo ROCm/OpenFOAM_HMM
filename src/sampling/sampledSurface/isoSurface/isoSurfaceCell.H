@@ -85,6 +85,10 @@ class isoSurfaceCell
         //- Reference to mesh
         const polyMesh& mesh_;
 
+        const scalarField& cVals_;
+
+        const scalarField& pVals_;
+
         //- isoSurfaceCell value
         const scalar iso_;
 
@@ -349,6 +353,14 @@ public:
         (
             const scalarField& cVals,
             const scalarField& pVals,
+            const Field<Type>& cCoords,
+            const Field<Type>& pCoords
+        ) const;
+
+        //- Interpolates cCoords,pCoords.
+        template <class Type>
+        tmp<Field<Type> > interpolate
+        (
             const Field<Type>& cCoords,
             const Field<Type>& pCoords
         ) const;

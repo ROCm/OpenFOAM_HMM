@@ -68,6 +68,9 @@ class distanceSurface
         //- Whether to coarsen
         const Switch regularise_;
 
+        //- Whether to recalculate cell values as average of point values
+        const Switch average_;
+
         //- zone name (if restricted to zones)
         word zoneName_;
 
@@ -82,6 +85,7 @@ class distanceSurface
         scalarField pointDistance_;
 
         //- Constructed iso surface
+        //autoPtr<isoSurfaceCell> isoSurfPtr_;
         autoPtr<isoSurface> isoSurfPtr_;
 
         //- triangles converted to faceList
@@ -166,6 +170,7 @@ public:
         }
 
 
+        //const isoSurfaceCell& surface() const
         const isoSurface& surface() const
         {
             return isoSurfPtr_();
