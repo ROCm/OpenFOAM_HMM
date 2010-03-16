@@ -261,9 +261,6 @@ void Foam::Particle<ParticleType>::trackToFaceExact
         {
             if (cloud_.boundaryFace(facei_))
             {
-                // For a patch face, allow a small value of lambda to
-                // ensure patch interactions occur.
-
                 label patchi = patch(facei_);
                 const polyPatch& patch = mesh.boundaryMesh()[patchi];
 
@@ -291,10 +288,10 @@ void Foam::Particle<ParticleType>::trackToFaceExact
             {
                 if (correctLambda < Cloud<ParticleType>::minValidTrackFraction)
                 {
-                    // The particle is not far enough away from the face
-                    // to decide if it is valid crossing. Let it move a
-                    // little without crossing the face to resolve the
-                    // ambiguity.
+                    // The particle is not far enough away from the
+                    // face to decide if it is a valid crossing. Let
+                    // it move a little without crossing the face to
+                    // resolve the ambiguity.
 
                     facei_ = -1;
                 }
