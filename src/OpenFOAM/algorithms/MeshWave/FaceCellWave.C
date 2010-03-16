@@ -40,7 +40,7 @@ template <class Type>
 const Foam::scalar Foam::FaceCellWave<Type>::geomTol_ = 1e-6;
 
 template <class Type>
-const Foam::scalar Foam::FaceCellWave<Type>::propagationTol_ = 0.01;
+Foam::scalar Foam::FaceCellWave<Type>::propagationTol_ = 0.01;
 
 // Write to ostream
 template <class Type>

@@ -110,28 +110,9 @@ void writeAllData
 {
     if (nPrims)
     {
-        PstreamBuffers pBufs(Pstream::nonBlocking);
-
-        if (!Pstream::master())
-        {
-            UOPstream toMaster(Pstream::masterNo(), pBufs);
-            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
-            {
-                toMaster<< map(vf, prims, cmpt);
-            }
-        }
-
-        pBufs.finishedSends();
-
         if (Pstream::master())
         {
             ensightFile << key << nl;
-
-            PtrList<UIPstream> fromSlaves(Pstream::nProcs());
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                fromSlaves.set(slave, new UIPstream(slave, pBufs));
-            }
 
             for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
             {
@@ -139,9 +120,18 @@ void writeAllData
 
                 for (int slave=1; slave<Pstream::nProcs(); slave++)
                 {
-                    scalarField data(fromSlaves[slave]);
+                    IPstream fromSlave(Pstream::scheduled, slave);
+                    scalarField data(fromSlave);
                     writeData(data, ensightFile);
                 }
+            }
+        }
+        else
+        {
+            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+            {
+                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
+                toMaster<< map(vf, prims, cmpt);
             }
         }
     }
@@ -160,28 +150,9 @@ void writeAllDataBinary
 {
     if (nPrims)
     {
-        PstreamBuffers pBufs(Pstream::nonBlocking);
-
-        if (!Pstream::master())
-        {
-            UOPstream toMaster(Pstream::masterNo(), pBufs);
-            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
-            {
-                toMaster<< map(vf, prims, cmpt);
-            }
-        }
-
-        pBufs.finishedSends();
-
         if (Pstream::master())
         {
             writeEnsDataBinary(key,ensightFile);
-
-            PtrList<UIPstream> fromSlaves(Pstream::nProcs());
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                fromSlaves.set(slave, new UIPstream(slave, pBufs));
-            }
 
             for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
             {
@@ -189,9 +160,18 @@ void writeAllDataBinary
 
                 for (int slave=1; slave<Pstream::nProcs(); slave++)
                 {
-                    scalarField data(fromSlaves[slave]);
+                    IPstream fromSlave(Pstream::scheduled, slave);
+                    scalarField data(fromSlave);
                     writeEnsDataBinary(data, ensightFile);
                 }
+            }
+        }
+        else
+        {
+            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+            {
+                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
+                toMaster<< map(vf, prims, cmpt);
             }
         }
     }
@@ -210,28 +190,9 @@ void writeAllFaceData
 {
     if (nPrims)
     {
-        PstreamBuffers pBufs(Pstream::nonBlocking);
-
-        if (!Pstream::master())
-        {
-            UOPstream toMaster(Pstream::masterNo(), pBufs);
-            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
-            {
-                toMaster<< map(pf, prims, cmpt);
-            }
-        }
-
-        pBufs.finishedSends();
-
         if (Pstream::master())
         {
             ensightFile << key << nl;
-
-            PtrList<UIPstream> fromSlaves(Pstream::nProcs());
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                fromSlaves.set(slave, new UIPstream(slave, pBufs));
-            }
 
             for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
             {
@@ -239,9 +200,19 @@ void writeAllFaceData
 
                 for (int slave=1; slave<Pstream::nProcs(); slave++)
                 {
-                    scalarField pf(fromSlaves[slave]);
+                    IPstream fromSlave(Pstream::scheduled, slave);
+                    scalarField pf(fromSlave);
+
                     writeData(pf, ensightFile);
                 }
+            }
+        }
+        else
+        {
+            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+            {
+                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
+                toMaster<< map(pf, prims, cmpt);
             }
         }
     }
@@ -260,28 +231,9 @@ void writeAllFaceDataBinary
 {
     if (nPrims)
     {
-        PstreamBuffers pBufs(Pstream::nonBlocking);
-
-        if (!Pstream::master())
-        {
-            UOPstream toMaster(Pstream::masterNo(), pBufs);
-            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
-            {
-                toMaster<< map(pf, prims, cmpt);
-            }
-        }
-
-        pBufs.finishedSends();
-
         if (Pstream::master())
         {
             writeEnsDataBinary(key,ensightFile);
-
-            PtrList<UIPstream> fromSlaves(Pstream::nProcs());
-            for (int slave=1; slave<Pstream::nProcs(); slave++)
-            {
-                fromSlaves.set(slave, new UIPstream(slave, pBufs));
-            }
 
             for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
             {
@@ -289,9 +241,19 @@ void writeAllFaceDataBinary
 
                 for (int slave=1; slave<Pstream::nProcs(); slave++)
                 {
-                    scalarField pf(fromSlaves[slave]);
+                    IPstream fromSlave(Pstream::scheduled, slave);
+                    scalarField pf(fromSlave);
+
                     writeEnsDataBinary(pf, ensightFile);
                 }
+            }
+        }
+        else
+        {
+            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+            {
+                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
+                toMaster<< map(pf, prims, cmpt);
             }
         }
     }
@@ -539,6 +501,10 @@ void ensightFieldAscii
     const wordHashSet& patchNames = eMesh.patchNames();
     const HashTable<ensightMesh::nFacePrimitives>&
         nPatchPrims = eMesh.nPatchPrims();
+    const List<faceSets>& faceZoneFaceSets = eMesh.faceZoneFaceSets();
+    const wordHashSet& faceZoneNames = eMesh.faceZoneNames();
+    const HashTable<ensightMesh::nFacePrimitives>&
+        nFaceZonePrims = eMesh.nFaceZonePrims();
 
     const labelList& tets = meshCellSets.tets;
     const labelList& pyrs = meshCellSets.pyrs;
@@ -557,7 +523,7 @@ void ensightFieldAscii
             postProcPath/ensightFileName,
             runTime.writeFormat(),
             runTime.writeVersion(),
-            runTime.writeCompression()
+            IOstream::UNCOMPRESSED
         );
     }
 
@@ -567,6 +533,8 @@ void ensightFieldAscii
 
     if (patchNames.empty())
     {
+        eMesh.barrier();
+
         if (Pstream::master())
         {
             if (timeIndex == 0)
@@ -592,28 +560,9 @@ void ensightFieldAscii
 
         if (meshCellSets.nHexesWedges)
         {
-            PstreamBuffers pBufs(Pstream::nonBlocking);
-
-            if (!Pstream::master())
-            {
-                UOPstream toMaster(Pstream::masterNo(), pBufs);
-                for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
-                {
-                    toMaster<< map(vf, hexes, wedges, cmpt);
-                }
-            }
-
-            pBufs.finishedSends();
-
             if (Pstream::master())
             {
                 ensightFile << "hexa8" << nl;
-
-                PtrList<UIPstream> fromSlaves(Pstream::nProcs());
-                for (int slave=1; slave<Pstream::nProcs(); slave++)
-                {
-                    fromSlaves.set(slave, new UIPstream(slave, pBufs));
-                }
 
                 for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
                 {
@@ -625,17 +574,57 @@ void ensightFieldAscii
 
                     for (int slave=1; slave<Pstream::nProcs(); slave++)
                     {
-                        scalarField data(fromSlaves[slave]);
+                        IPstream fromSlave(Pstream::scheduled, slave);
+                        scalarField data(fromSlave);
                         writeData(data, ensightFile);
                     }
                 }
             }
+            else
+            {
+                for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+                {
+                    OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
+                    toMaster<< map(vf, hexes, wedges, cmpt);
+                }
+            }
         }
 
-        writeAllData("penta6", vf, prisms, meshCellSets.nPrisms, ensightFile);
-        writeAllData("pyramid5", vf, pyrs, meshCellSets.nPyrs, ensightFile);
-        writeAllData("tetra4", vf, tets, meshCellSets.nTets, ensightFile);
-        writeAllData("nfaced", vf, polys, meshCellSets.nPolys, ensightFile);
+        writeAllData
+        (
+            "penta6",
+            vf,
+            prisms,
+            meshCellSets.nPrisms,
+            ensightFile
+        );
+
+        writeAllData
+        (
+            "pyramid5",
+            vf,
+            pyrs,
+            meshCellSets.nPyrs,
+            ensightFile
+        );
+
+        writeAllData
+        (
+            "tetra4",
+            vf,
+            tets,
+            meshCellSets.nTets,
+            ensightFile
+        );
+
+        writeAllData
+        (
+            "nfaced",
+            vf,
+            polys,
+            meshCellSets.nPolys,
+            ensightFile
+        );
     }
 
     label ensightPatchI = eMesh.patchPartOffset();
@@ -643,6 +632,8 @@ void ensightFieldAscii
     forAll(allPatchNames, patchi)
     {
         const word& patchName = allPatchNames[patchi];
+
+        eMesh.barrier();
 
         if (patchNames.empty() || patchNames.found(patchName))
         {
@@ -655,6 +646,80 @@ void ensightFieldAscii
                     ensightPatchI,
                     boundaryFaceSets[patchi],
                     nPatchPrims.find(patchName)(),
+                    ensightFile
+                )
+            )
+            {
+                ensightPatchI++;
+            }
+        }
+    }
+
+    // write faceZones, if requested
+    if (faceZoneNames.size())
+    {
+        // Interpolates cell values to faces - needed only when exporting
+        // faceZones...
+        GeometricField<Type, fvsPatchField, surfaceMesh> sf
+        (
+            linearInterpolate(vf)
+        );
+
+        forAllConstIter(wordHashSet, faceZoneNames, iter)
+        {
+            const word& faceZoneName = iter.key();
+
+            eMesh.barrier();
+
+            label zoneID = mesh.faceZones().findZoneID(faceZoneName);
+
+            const faceZone& fz = mesh.faceZones()[zoneID];
+
+            // Prepare data to write
+            label nIncluded = 0;
+            forAll(fz, i)
+            {
+                if (eMesh.faceToBeIncluded(fz[i]))
+                {
+                    ++nIncluded;
+                }
+            }
+
+            Field<Type> values(nIncluded);
+
+            // Loop on the faceZone and store the needed field values
+            label j = 0;
+            forAll(fz, i)
+            {
+                label faceI = fz[i];
+                if (mesh.isInternalFace(faceI))
+                {
+                    values[j] = sf[faceI];
+                    ++j;
+                }
+                else
+                {
+                    if (eMesh.faceToBeIncluded(faceI))
+                    {
+                        label patchI = mesh.boundaryMesh().whichPatch(faceI);
+                        const polyPatch& pp = mesh.boundaryMesh()[patchI];
+                        label patchFaceI = pp.whichFace(faceI);
+                        Type value = sf.boundaryField()[patchI][patchFaceI];
+                        values[j] = value;
+                        ++j;
+                    }
+                }
+            }
+
+            if
+            (
+                writePatchField
+                (
+                    values,
+                    zoneID,
+                    ensightPatchI,
+                    faceZoneFaceSets[zoneID],
+                    nFaceZonePrims.find(faceZoneName)(),
                     ensightFile
                 )
             )
@@ -695,6 +760,10 @@ void ensightFieldBinary
     const wordHashSet& patchNames = eMesh.patchNames();
     const HashTable<ensightMesh::nFacePrimitives>&
         nPatchPrims = eMesh.nPatchPrims();
+    const List<faceSets>& faceZoneFaceSets = eMesh.faceZoneFaceSets();
+    const wordHashSet& faceZoneNames = eMesh.faceZoneNames();
+    const HashTable<ensightMesh::nFacePrimitives>&
+        nFaceZonePrims = eMesh.nFaceZonePrims();
 
     const labelList& tets = meshCellSets.tets;
     const labelList& pyrs = meshCellSets.pyrs;
@@ -722,6 +791,8 @@ void ensightFieldBinary
 
     if (patchNames.empty())
     {
+        eMesh.barrier();
+
         if (Pstream::master())
         {
             if (timeIndex == 0)
@@ -743,28 +814,9 @@ void ensightFieldBinary
 
         if (meshCellSets.nHexesWedges)
         {
-            PstreamBuffers pBufs(Pstream::nonBlocking);
-
-            if (!Pstream::master())
-            {
-                UOPstream toMaster(Pstream::masterNo(), pBufs);
-                for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
-                {
-                    toMaster<< map(vf, hexes, wedges, cmpt);
-                }
-            }
-
-            pBufs.finishedSends();
-
             if (Pstream::master())
             {
                 writeEnsDataBinary("hexa8",ensightFile);
-
-                PtrList<UIPstream> fromSlaves(Pstream::nProcs());
-                for (int slave=1; slave<Pstream::nProcs(); slave++)
-                {
-                    fromSlaves.set(slave, new UIPstream(slave, pBufs));
-                }
 
                 for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
                 {
@@ -776,9 +828,18 @@ void ensightFieldBinary
 
                     for (int slave=1; slave<Pstream::nProcs(); slave++)
                     {
-                        scalarField data(fromSlaves[slave]);
+                        IPstream fromSlave(Pstream::scheduled, slave);
+                        scalarField data(fromSlave);
                         writeEnsDataBinary(data, ensightFile);
                     }
+                }
+            }
+            else
+            {
+                for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+                {
+                    OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
+                    toMaster<< map(vf, hexes, wedges, cmpt);
                 }
             }
         }
@@ -826,6 +887,8 @@ void ensightFieldBinary
     {
         const word& patchName = allPatchNames[patchi];
 
+        eMesh.barrier();
+
         if (patchNames.empty() || patchNames.found(patchName))
         {
             if
@@ -837,6 +900,81 @@ void ensightFieldBinary
                     ensightPatchI,
                     boundaryFaceSets[patchi],
                     nPatchPrims.find(patchName)(),
+                    ensightFile
+                )
+            )
+            {
+                ensightPatchI++;
+            }
+        }
+
+    }
+
+    // write faceZones, if requested
+    if (faceZoneNames.size())
+    {
+        // Interpolates cell values to faces - needed only when exporting
+        // faceZones...
+        GeometricField<Type, fvsPatchField, surfaceMesh> sf
+        (
+            linearInterpolate(vf)
+        );
+
+        forAllConstIter(wordHashSet, faceZoneNames, iter)
+        {
+            const word& faceZoneName = iter.key();
+
+            eMesh.barrier();
+
+            label zoneID = mesh.faceZones().findZoneID(faceZoneName);
+
+            const faceZone& fz = mesh.faceZones()[zoneID];
+
+            // Prepare data to write
+            label nIncluded = 0;
+            forAll(fz, i)
+            {
+                if (eMesh.faceToBeIncluded(fz[i]))
+                {
+                    ++nIncluded;
+                }
+            }
+
+            Field<Type> values(nIncluded);
+
+            // Loop on the faceZone and store the needed field values
+            label j = 0;
+            forAll(fz, i)
+            {
+                label faceI = fz[i];
+                if (mesh.isInternalFace(faceI))
+                {
+                    values[j] = sf[faceI];
+                    ++j;
+                }
+                else
+                {
+                    if (eMesh.faceToBeIncluded(faceI))
+                    {
+                        label patchI = mesh.boundaryMesh().whichPatch(faceI);
+                        const polyPatch& pp = mesh.boundaryMesh()[patchI];
+                        label patchFaceI = pp.whichFace(faceI);
+                        Type value = sf.boundaryField()[patchI][patchFaceI];
+                        values[j] = value;
+                        ++j;
+                    }
+                }
+            }
+
+            if
+            (
+                writePatchFieldBinary
+                (
+                    values,
+                    zoneID,
+                    ensightPatchI,
+                    faceZoneFaceSets[zoneID],
+                    nFaceZonePrims.find(faceZoneName)(),
                     ensightFile
                 )
             )

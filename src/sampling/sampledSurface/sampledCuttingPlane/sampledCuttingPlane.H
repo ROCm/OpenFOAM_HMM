@@ -38,6 +38,7 @@ SourceFiles
 
 #include "sampledSurface.H"
 #include "isoSurface.H"
+//#include "isoSurfaceCell.H"
 #include "plane.H"
 #include "ZoneIDs.H"
 #include "fvMeshSubset.H"
@@ -66,6 +67,9 @@ class sampledCuttingPlane
         //- Whether to coarsen
         const Switch regularise_;
 
+        //- Whether to recalculate cell values as average of point values
+        const Switch average_;
+
         //- zone name/index (if restricted to zones)
         mutable cellZoneID zoneID_;
 
@@ -86,6 +90,7 @@ class sampledCuttingPlane
         scalarField pointDistance_;
 
         //- Constructed iso surface
+        //autoPtr<isoSurfaceCell> isoSurfPtr_;
         autoPtr<isoSurface> isoSurfPtr_;
 
         //- triangles converted to faceList
@@ -170,6 +175,7 @@ public:
         }
 
 
+        //const isoSurfaceCell& surface() const
         const isoSurface& surface() const
         {
             return isoSurfPtr_();

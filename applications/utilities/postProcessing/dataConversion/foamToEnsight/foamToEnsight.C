@@ -41,6 +41,9 @@ Usage
     @param -noPatches \n
     Suppress writing any patches.
 
+    @param -faceZones zoneList \n
+    Specify faceZones to write, with wildcards
+
 Note
     Parallel support for cloud data is not supported
     - writes to @a EnSight directory to avoid collisions with foamToEnsightParts
@@ -112,6 +115,12 @@ int main(int argc, char *argv[])
         "wordList",
         "specify particular patches to write - eg '(inlet outlet)'. "
         "An empty list suppresses writing the internalMesh."
+    );
+    argList::addOption
+    (
+        "faceZones",
+        "wordList",
+        "specify faceZones to write, with wildcards - eg '(mfp-.*)'. "
     );
 
 #   include "setRootCase.H"

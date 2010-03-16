@@ -71,7 +71,15 @@ Foam::sampledIsoSurface::interpolateField
             volPointInterpolation::New(volSubFld.mesh()).interpolate(volSubFld);
 
         // Sample.
-        return surface().interpolate(volSubFld, tpointSubFld());
+        return surface().interpolate
+        (
+            (
+                average_
+              ? pointAverage(tpointSubFld())()
+              : volSubFld
+            ),
+            tpointSubFld()
+        );
     }
     else
     {
@@ -79,7 +87,15 @@ Foam::sampledIsoSurface::interpolateField
             volPointInterpolation::New(volFld.mesh()).interpolate(volFld);
 
         // Sample.
-        return surface().interpolate(volFld, tpointFld());
+        return surface().interpolate
+        (
+            (
+                average_
+              ? pointAverage(tpointFld())()
+              : volFld
+            ),
+            tpointFld()
+        );
     }
 }
 

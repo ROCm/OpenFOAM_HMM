@@ -25,7 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "distanceSurface.H"
-#include "isoSurface.H"
 #include "volFieldsFwd.H"
 #include "pointFields.H"
 #include "volPointInterpolation.H"
@@ -62,7 +61,15 @@ Foam::distanceSurface::interpolateField
     );
 
     // Sample.
-    return surface().interpolate(volFld, pointFld());
+    return surface().interpolate
+    (
+        (
+            average_
+          ? pointAverage(pointFld())()
+          : volFld
+        ),
+        pointFld()
+    );
 }
 
 

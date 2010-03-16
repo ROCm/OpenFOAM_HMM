@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,70 +22,33 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::MCLimiter
+Global
+    createPhia
 
 Description
-    Class with limiter function which returns the limiter for the
-    monotonised centred differencing scheme based on r obtained from
-    the LimiterFunc class.
-
-    Used in conjunction with the template class LimitedScheme.
-
-SourceFiles
-    MC.C
+    Creates and initialises the face-flux field phia.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MC_H
-#define MC_H
-
-#include "vector.H"
+#ifndef createPhia_H
+#define createPhia_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
+Info<< "Reading/calculating face flux field phia\n" << endl;
 
-/*---------------------------------------------------------------------------*\
-                       Class MCLimiter Declaration
-\*---------------------------------------------------------------------------*/
-
-template<class LimiterFunc>
-class MCLimiter
-:
-    public LimiterFunc
-{
-
-public:
-
-    MCLimiter(Istream&)
-    {}
-
-    scalar limiter
+surfaceScalarField phia
+(
+    IOobject
     (
-        const scalar cdWeight,
-        const scalar faceFlux,
-        const typename LimiterFunc::phiType& phiP,
-        const typename LimiterFunc::phiType& phiN,
-        const typename LimiterFunc::gradPhiType& gradcP,
-        const typename LimiterFunc::gradPhiType& gradcN,
-        const vector& d
-    ) const
-    {
-        scalar r = LimiterFunc::r
-        (
-            faceFlux, phiP, phiN, gradcP, gradcN, d
-        );
-
-        return max(min(min(2*r, 0.5*(1 + r)), 2), 0);
-    }
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+        "phia",
+        runTime.timeName(),
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    linearInterpolate(Ua) & mesh.Sf()
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
