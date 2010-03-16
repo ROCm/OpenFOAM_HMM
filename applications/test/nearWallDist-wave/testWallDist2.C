@@ -109,13 +109,17 @@ int main(int argc, char *argv[])
         }
     }
 
+    List<wallPoint> allFaceInfo(mesh.nFaces());
+    List<wallPoint> allCellInfo(mesh.nCells());
 
-    MeshWave<wallPoint> wallDistCalc
+    FaceCellWave<wallPoint> wallDistCalc
     (
         mesh,
         changedFaces,
         faceDist,
-        0           // max iterations
+        allFaceInfo,
+        allCellInfo,
+        0             // max iterations
     );
 
     Info<< "\nStarting time loop\n" << endl;
@@ -149,16 +153,13 @@ int main(int argc, char *argv[])
         // Copy face and cell values into field
         //
 
-        const List<wallPoint>& cellInfo = wallDistCalc.allCellInfo();
-        const List<wallPoint>& faceInfo = wallDistCalc.allFaceInfo();
-
         label nIllegal = 0;
 
         // Copy cell values
-        forAll(cellInfo, cellI)
+        forAll(allCellInfo, cellI)
         {
-            scalar dist = cellInfo[cellI].distSqr();
-            if (cellInfo[cellI].valid())
+            scalar dist = allCellInfo[cellI].distSqr();
+            if (allCellInfo[cellI].valid())
             {
                 wallDistUncorrected[cellI] = Foam::sqrt(dist);
             }
@@ -180,8 +181,8 @@ int main(int argc, char *argv[])
                 label meshFaceI =
                     patchField.patch().patch().start() + patchFaceI;
 
-                scalar dist = faceInfo[meshFaceI].distSqr();
-                if (faceInfo[meshFaceI].valid())
+                scalar dist = allFaceInfo[meshFaceI].distSqr();
+                if (allFaceInfo[meshFaceI].valid())
                 {
                     patchField[patchFaceI] = Foam::sqrt(dist);
                 }
