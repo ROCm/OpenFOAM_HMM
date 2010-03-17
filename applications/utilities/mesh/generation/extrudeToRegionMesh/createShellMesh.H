@@ -31,6 +31,10 @@ Description
 SourceFiles
     createShellMesh.C
 
+    Extrudes into thickness direction.
+    - bottom faces originate from reversed original faces (have turning index)
+    - top faces originate from original faces (no turning index)
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef createShellMesh_H
@@ -58,9 +62,6 @@ class createShellMesh
 
         //- Reference to patch to extrude
         const primitiveFacePatch& patch_;
-
-//        //- Non-manifold edges on patch
-//        const PackedBoolList& nonManifoldEdge_;
 
         //- Per point on face the region
         const faceList& pointRegions_;
@@ -99,7 +100,6 @@ public:
         createShellMesh
         (
             const primitiveFacePatch& patch,
-//            const PackedBoolList& nonManifoldEdge,
             const faceList& pointRegions,
             const labelList& regionPoints
         );
@@ -117,10 +117,10 @@ public:
             }
 
             //- From region face to patch face. Contains turning index:
-            //      > 0 : face originating from master side
-            //            (owner side for unflipped face)
-            //      < 0 : (bottom) face originating from slave side
-            //            (neighbour side for unflipped face)
+            //      > 0 : face in same orientation as patch face. face will
+            //            be in top patch
+            //      < 0 : face in opposite orientation as patch face. face will
+            //            be in bottom patch
             //      = 0 : for all side faces
             const labelList& faceToFaceMap() const
             {
@@ -155,8 +155,8 @@ public:
             void setRefinement
             (
                 const pointField& thickness,
-                const labelList& extrudeMasterPatchID,
-                const labelList& extrudeSlavePatchID,
+                const labelList& topPatchID,
+                const labelList& bottomPatchID,
                 const labelListList& extrudeEdgePatches,
                 polyTopoChange& meshMod
             );

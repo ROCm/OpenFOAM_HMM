@@ -37,6 +37,65 @@ Description
       if flipMap is false)
     - not parallel
 
+
+Boundary face extrusion
+-----------------------
+
+    +--AAAAAAA--+
+    |           |
+    |           |
+    +-----------+
+
+    AAA=faceZone to extrude. E.g. slave side is owner side (no flipmap)
+
+becomes
+
+      +CCCCCCC+
+      |       |         <= extruded mesh
+      +BBBBBBB+
+
+    +--BBBBBBB--+
+    |           |       <= original mesh
+    |           |
+    +-----------+
+
+    BBB=directMapped between original mesh and new extrusion
+    CCC=polypatch
+
+
+Internal face extrusion
+-----------------------
+
+    +-------------+
+    |             |
+    |(master side)|
+    +---AAAAAAA---+
+    |(slave side) |
+    |             |
+    +-------------+
+
+    AAA=faceZone to extrude. E.g. slave side is owner side (no flipmap)
+
+
+becomes
+
+      +CCCCCCC+
+      |       |         <= extruded mesh
+      +BBBBBBB+
+
+    +-------------+
+    |             |
+    |(master side)|
+    |___CCCCCCC___|       <= original mesh (with 'baffles' added)
+    |   BBBBBBB   |
+    |(slave side) |
+    |             |
+    +-------------+
+
+    BBB=directMapped 'slave' between original mesh and new extrusion
+    CCC=directMapped 'master' between original mesh and new extrusion
+
+
 Usage
 
     - extrudeToRegionMesh <regionName> <faceZones> <thickness>
@@ -467,6 +526,30 @@ void reorderPatches
 }
 
 
+// Remove zero-sized patches
+void deleteEmptyPatches(fvMesh& mesh)
+{
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    labelList oldToNew(patches.size());
+    label usedI = 0;
+    label notUsedI = patches.size();
+    forAll(patches, patchI)
+    {
+        if (returnReduce(patches[patchI].size(), sumOp<label>()) == 0)
+        {
+            oldToNew[patchI] = --notUsedI;
+        }
+        else
+        {
+            oldToNew[patchI] = usedI++;
+        }
+    }
+
+    reorderPatches(mesh, oldToNew, usedI);
+}
+
+
 void createDummyFvMeshFiles(const polyMesh& mesh, const word& regionName)
 {
     // Create dummy system/fv*
@@ -585,23 +668,6 @@ int main(int argc, char *argv[])
     }
 
 
-    // Add interface patches
-    // Note: should be one per faceZone?
-    word masterPatchName = regionName + "_to_" + shellRegionName + "_master";
-    label masterPatchID = addPatch<directMappedWallPolyPatch>
-    (
-        mesh,
-        masterPatchName
-    );
-    word slavePatchName = regionName + "_to_" + shellRegionName + "_slave";
-    label slavePatchID = addPatch<directMappedWallPolyPatch>
-    (
-        mesh,
-        slavePatchName
-    );
-
-
-
 
     // Create dummy fv* files
     createDummyFvMeshFiles(mesh, shellRegionName);
@@ -620,39 +686,49 @@ int main(int argc, char *argv[])
     Info<< "Writing meshes to " << meshInstance << nl << endl;
 
 
-
-    // Collect faces to extrude
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
     const faceZoneMesh& faceZones = mesh.faceZones();
 
-    label nExtrudeFaces = 0;
+
+    // Check zones
+    // ~~~~~~~~~~~
+
+    labelList zoneIDs(zoneNames.size());
     forAll(zoneNames, i)
     {
-        label zoneI = faceZones.findZoneID(zoneNames[i]);
-        if (zoneI == -1)
+        zoneIDs[i] = faceZones.findZoneID(zoneNames[i]);
+        if (zoneIDs[i] == -1)
         {
             FatalErrorIn(args.executable())
                 << "Cannot find zone " << zoneNames[i] << endl
                 << "Valid zones are " << faceZones.names()
                 << exit(FatalError);
         }
-        nExtrudeFaces += faceZones[zoneI].size();
+    }
+
+
+    // Collect faces to extrude and per-face information
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    label nExtrudeFaces = 0;
+    forAll(zoneIDs, i)
+    {
+        nExtrudeFaces += faceZones[zoneIDs[i]].size();
     }
     labelList extrudeMeshFaces(nExtrudeFaces);
     faceList zoneFaces(nExtrudeFaces);
     labelList zoneID(nExtrudeFaces);
     boolList zoneFlipMap(nExtrudeFaces);
     nExtrudeFaces = 0;
-    forAll(zoneNames, i)
+    forAll(zoneIDs, i)
     {
-        label zoneI = faceZones.findZoneID(zoneNames[i]);
-        const faceZone& fz = faceZones[zoneI];
+        const faceZone& fz = faceZones[zoneIDs[i]];
         const primitiveFacePatch& fzp = fz();
         forAll(fz, j)
         {
             extrudeMeshFaces[nExtrudeFaces] = fz[j];
             zoneFaces[nExtrudeFaces] = fzp[j];
-            zoneID[nExtrudeFaces] = zoneI;
+            zoneID[nExtrudeFaces] = zoneIDs[i];
             zoneFlipMap[nExtrudeFaces] = fz.flipMap()[j];
             nExtrudeFaces++;
         }
@@ -662,13 +738,6 @@ int main(int argc, char *argv[])
     const faceList& extrudeFaces = extrudePatch.localFaces();
     const labelListList& edgeFaces = extrudePatch.edgeFaces();
 
-    labelList extrudeSlavePatchID(extrudePatch.size());
-    labelList extrudeMasterPatchID(extrudePatch.size());
-    forAll(extrudeMeshFaces, i)
-    {
-        extrudeSlavePatchID[i] = slavePatchID;
-        extrudeMasterPatchID[i] = masterPatchID;
-    }
 
     Info<< "extrudePatch :"
         << " faces:" << extrudePatch.size()
@@ -676,6 +745,128 @@ int main(int argc, char *argv[])
         << " edges:" << extrudePatch.nEdges()
         << nl
         << endl;
+
+
+
+
+    // Check whether the zone is internal or external faces to determine
+    // what patch type to insert. Cannot be mixed
+    // since then how to couple? - directMapped only valid for a whole patch.
+    boolList isInternal(zoneIDs.size(), false);
+    forAll(zoneIDs, i)
+    {
+        const faceZone& fz = faceZones[zoneIDs[i]];
+        forAll(fz, j)
+        {
+            if (mesh.isInternalFace(fz[j]))
+            {
+                isInternal[i] = true;
+                break;
+            }
+        }
+    }
+    Pstream::listCombineGather(isInternal, orEqOp<bool>());
+    Pstream::listCombineScatter(isInternal);
+
+    forAll(zoneIDs, i)
+    {
+        const faceZone& fz = faceZones[zoneIDs[i]];
+        if (isInternal[i])
+        {
+            Info<< "FaceZone " << fz.name() << " has internal faces" << endl;
+        }
+        else
+        {
+            Info<< "FaceZone " << fz.name() << " has boundary faces" << endl;
+        }
+    }
+
+
+
+
+    // Add interface patches
+    // ~~~~~~~~~~~~~~~~~~~~~
+
+    Info<< "Adding coupling patches:" << nl << nl
+        << "patchID\tpatch\ttype" << nl
+        << "-------\t-----\t----"
+        << endl;
+    labelList interRegionTopPatch(zoneNames.size());
+    labelList interRegionBottomPatch(zoneNames.size());
+    label nCoupled = 0;
+    forAll(zoneIDs, i)
+    {
+        word interName(regionName+"_to_"+shellRegionName+'_'+zoneNames[i]);
+
+        if (isInternal[i])
+        {
+            interRegionTopPatch[i] = addPatch<directMappedWallPolyPatch>
+            (
+                mesh,
+                interName + "_top"
+            );
+            nCoupled++;
+            Info<< interRegionTopPatch[i]
+                << '\t' << patches[interRegionTopPatch[i]].name()
+                << '\t' << patches[interRegionTopPatch[i]].type()
+                << nl;
+
+            interRegionBottomPatch[i] = addPatch<directMappedWallPolyPatch>
+            (
+                mesh,
+                interName + "_bottom"
+            );
+            nCoupled++;
+            Info<< interRegionBottomPatch[i]
+                << '\t' << patches[interRegionBottomPatch[i]].name()
+                << '\t' << patches[interRegionBottomPatch[i]].type()
+                << nl;
+        }
+        else
+        {
+            interRegionTopPatch[i] = addPatch<polyPatch>
+            (
+                mesh,
+                zoneNames[i] + "_top"
+            );
+            nCoupled++;
+            Info<< interRegionTopPatch[i]
+                << '\t' << patches[interRegionTopPatch[i]].name()
+                << '\t' << patches[interRegionTopPatch[i]].type()
+                << nl;
+
+            interRegionBottomPatch[i] = addPatch<directMappedWallPolyPatch>
+            (
+                mesh,
+                interName
+            );
+            nCoupled++;
+            Info<< interRegionBottomPatch[i]
+                << '\t' << patches[interRegionBottomPatch[i]].name()
+                << '\t' << patches[interRegionBottomPatch[i]].type()
+                << nl;
+        }
+    }
+    Info<< "Added " << nCoupled << " inter-region patches." << nl
+        << endl;
+
+
+    labelList extrudeTopPatchID(extrudePatch.size());
+    labelList extrudeBottomPatchID(extrudePatch.size());
+
+    nExtrudeFaces = 0;
+    forAll(zoneNames, i)
+    {
+        label zoneI = faceZones.findZoneID(zoneNames[i]);
+        const faceZone& fz = faceZones[zoneI];
+        forAll(fz, j)
+        {
+            extrudeTopPatchID[nExtrudeFaces] = interRegionTopPatch[i];
+            extrudeBottomPatchID[nExtrudeFaces] = interRegionBottomPatch[i];
+            nExtrudeFaces++;
+        }
+    }
+
 
 
     // Count how many patches on special edges of extrudePatch are necessary
@@ -716,9 +907,9 @@ int main(int argc, char *argv[])
     Pstream::listCombineScatter(zoneZonePatch);
 
     // Now check which patches to add.
-    Info<< "Adding patches for edges on zones:" << nl
-        << "\tpatchID\tpatch" << nl
-        << "\t-------\t-----"
+    Info<< "Adding patches for edges on zones:" << nl << nl
+        << "patchID\tpatch" << nl
+        << "-------\t-----"
         << endl;
 
     label nSide = 0;
@@ -726,15 +917,14 @@ int main(int argc, char *argv[])
     {
         if (zoneSidePatch[zoneI] > 0)
         {
-            word patchName = faceZones[zoneI].name() + "_" + "sidePatch";
+            word patchName = faceZones[zoneI].name() + "_" + "side";
             zoneSidePatch[zoneI] = addPatch<polyPatch>
             (
                 mesh,
                 patchName
             );
 
-            Info<< '\t' << zoneSidePatch[zoneI]
-                << '\t' << patchName << nl;
+            Info<< zoneSidePatch[zoneI] << '\t' << patchName << nl;
 
             nSide++;
         }
@@ -744,9 +934,9 @@ int main(int argc, char *argv[])
 
 
 
-    Info<< "Adding inter-zone patches:" << nl
-        << "\tpatchID\tpatch" << nl
-        << "\t-------\t-----"
+    Info<< "Adding inter-zone patches:" << nl << nl
+        << "patchID\tpatch" << nl
+        << "-------\t-----"
         << endl;
 
     dictionary transformDict;
@@ -777,7 +967,7 @@ int main(int argc, char *argv[])
                     transformDict
                 );
 
-                Info<< '\t' << zoneZonePatch[index]
+                Info<< zoneZonePatch[index]
                     << '\t' << patchName << nl;
 
                 nInter++;
@@ -943,12 +1133,7 @@ int main(int argc, char *argv[])
     // Create a new mesh
     // ~~~~~~~~~~~~~~~~~
 
-    createShellMesh extruder
-    (
-        extrudePatch,
-        pointRegions,
-        regionPoints
-    );
+    createShellMesh extruder(extrudePatch, pointRegions, regionPoints);
 
 
     autoPtr<fvMesh> regionMeshPtr;
@@ -959,8 +1144,8 @@ int main(int argc, char *argv[])
         extruder.setRefinement
         (
             thickness*regionNormals,
-            extrudeMasterPatchID,
-            extrudeSlavePatchID,
+            extrudeTopPatchID,
+            extrudeBottomPatchID,
             extrudeEdgePatches,
             meshMod
         );
@@ -990,11 +1175,11 @@ int main(int argc, char *argv[])
     extruder.updateMesh(shellMap);
 
 
-    // Change master and slave boundary conditions on regionMesh
+    // Change top and bottom boundary conditions on regionMesh
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Save offsets from shell mesh back to original mesh
-    pointField masterOffsets, slaveOffsets;
+    pointField topOffsets, bottomOffsets;
 
     {
         const polyBoundaryMesh& regionPatches = regionMesh.boundaryMesh();
@@ -1002,9 +1187,14 @@ int main(int argc, char *argv[])
         forAll(regionPatches, patchI)
         {
             const polyPatch& pp = regionPatches[patchI];
-            if (pp.name() == masterPatchName)
+
+            if
+            (
+                isA<directMappedWallPolyPatch>(pp)
+             && (findIndex(interRegionTopPatch, patchI) != -1)
+            )
             {
-                masterOffsets = calcOffset(extrudePatch, extruder, pp);
+                topOffsets = calcOffset(extrudePatch, extruder, pp);
 
                 newPatches[patchI] = new directMappedWallPolyPatch
                 (
@@ -1012,16 +1202,20 @@ int main(int argc, char *argv[])
                     pp.size(),
                     pp.start(),
                     patchI,
-                    regionName,                                 // sampleRegion
-                    directMappedPatchBase::NEARESTPATCHFACE,    // sampleMode
-                    pp.name(),                                  // samplePatch
-                    masterOffsets,                              // offset
+                    regionName,                             // sampleRegion
+                    directMappedPatchBase::NEARESTPATCHFACE,// sampleMode
+                    pp.name(),                              // samplePatch
+                    topOffsets,                             // offset
                     patches
                 );
             }
-            else if (pp.name() == slavePatchName)
+            else if
+            (
+                isA<directMappedWallPolyPatch>(pp)
+             && (findIndex(interRegionBottomPatch, patchI) != -1)
+            )
             {
-                slaveOffsets = calcOffset(extrudePatch, extruder, pp);
+                bottomOffsets = calcOffset(extrudePatch, extruder, pp);
 
                 newPatches[patchI] = new directMappedWallPolyPatch
                 (
@@ -1029,10 +1223,10 @@ int main(int argc, char *argv[])
                     pp.size(),
                     pp.start(),
                     patchI,
-                    regionName,                                 // sampleRegion
-                    directMappedPatchBase::NEARESTPATCHFACE,    // sampleMode
-                    pp.name(),                                  // samplePatch
-                    slaveOffsets,                               // offset
+                    regionName,                             // sampleRegion
+                    directMappedPatchBase::NEARESTPATCHFACE,// sampleMode
+                    pp.name(),                              // samplePatch
+                    bottomOffsets,                          // offset
                     patches
                 );
             }
@@ -1049,6 +1243,7 @@ int main(int argc, char *argv[])
         }
         regionMesh.removeFvBoundary();
         regionMesh.addFvPatches(newPatches, true);
+        deleteEmptyPatches(regionMesh);
     }
 
 
@@ -1153,7 +1348,7 @@ int main(int argc, char *argv[])
     {
         polyTopoChange meshMod(mesh);
 
-        // Modify faces to be in master patch
+        // Modify faces to be in bottom (= always coupled) patch
         forAll(extrudeMeshFaces, zoneFaceI)
         {
             label meshFaceI = extrudeMeshFaces[zoneFaceI];
@@ -1170,7 +1365,7 @@ int main(int argc, char *argv[])
                     mesh.faceOwner()[meshFaceI],// owner
                     -1,                         // neighbour
                     false,                      // face flip
-                    masterPatchID,              // patch for face
+                    extrudeBottomPatchID[zoneFaceI],// patch for face
                     zoneI,                      // zone for face
                     flip                        // face flip in zone
                 );
@@ -1184,14 +1379,14 @@ int main(int argc, char *argv[])
                     mesh.faceNeighbour()[meshFaceI],// owner
                     -1,                             // neighbour
                     true,                           // face flip
-                    masterPatchID,                  // patch for face
+                    extrudeBottomPatchID[zoneFaceI],// patch for face
                     zoneI,                          // zone for face
                     !flip                           // face flip in zone
                 );
             }
         }
 
-        // Add faces (using same points) to be in slave patch
+        // Add faces (using same points) to be in top patch
         forAll(extrudeMeshFaces, zoneFaceI)
         {
             label meshFaceI = extrudeMeshFaces[zoneFaceI];
@@ -1211,7 +1406,7 @@ int main(int argc, char *argv[])
                         -1,                             // master edge
                         meshFaceI,                      // master face
                         true,                           // flip flux
-                        slavePatchID,                   // patch for face
+                        extrudeTopPatchID[zoneFaceI],   // patch for face
                         -1,                             // zone for face
                         false                           // face flip in zone
                     );
@@ -1228,7 +1423,7 @@ int main(int argc, char *argv[])
                     -1,                             // master edge
                     meshFaceI,                      // master face
                     false,                          // flip flux
-                    slavePatchID,                   // patch for face
+                    extrudeTopPatchID[zoneFaceI],   // patch for face
                     -1,                             // zone for face
                     false                           // zone flip
                 );
@@ -1266,7 +1461,12 @@ int main(int argc, char *argv[])
         forAll(patches, patchI)
         {
             const polyPatch& pp = patches[patchI];
-            if (pp.name() == masterPatchName)
+
+            if
+            (
+                isA<directMappedWallPolyPatch>(pp)
+             && (findIndex(interRegionTopPatch, patchI) != -1)
+            )
             {
                 newPatches[patchI] = new directMappedWallPolyPatch
                 (
@@ -1274,14 +1474,18 @@ int main(int argc, char *argv[])
                     pp.size(),
                     pp.start(),
                     patchI,
-                    shellRegionName,                            // sampleRegion
-                    directMappedPatchBase::NEARESTPATCHFACE,    // sampleMode
-                    pp.name(),                                  // samplePatch
-                    -masterOffsets,                             // offset
+                    shellRegionName,                        // sampleRegion
+                    directMappedPatchBase::NEARESTPATCHFACE,// sampleMode
+                    pp.name(),                              // samplePatch
+                    -topOffsets,                            // offset
                     patches
                 );
             }
-            else if (pp.name() == slavePatchName)
+            else if
+            (
+                isA<directMappedWallPolyPatch>(pp)
+             && (findIndex(interRegionBottomPatch, patchI) != -1)
+            )
             {
                 newPatches[patchI] = new directMappedWallPolyPatch
                 (
@@ -1289,10 +1493,10 @@ int main(int argc, char *argv[])
                     pp.size(),
                     pp.start(),
                     patchI,
-                    shellRegionName,                            // sampleRegion
-                    directMappedPatchBase::NEARESTPATCHFACE,    // sampleMode
-                    pp.name(),                                  // samplePatch
-                    -slaveOffsets,                              // offset
+                    shellRegionName,                        // sampleRegion
+                    directMappedPatchBase::NEARESTPATCHFACE,// sampleMode
+                    pp.name(),                              // samplePatch
+                    -bottomOffsets,                         // offset
                     patches
                 );
             }
@@ -1309,6 +1513,7 @@ int main(int argc, char *argv[])
         }
         mesh.removeFvBoundary();
         mesh.addFvPatches(newPatches, true);
+        deleteEmptyPatches(mesh);
     }
 
 
