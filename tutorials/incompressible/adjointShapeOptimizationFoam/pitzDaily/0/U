@@ -9,32 +9,46 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       polyBoundaryMesh;
-    location    "constant/polyMesh";
-    object      boundary;
+    class       volVectorField;
+    object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-3
-(
-    stationaryWalls
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+    inlet           
     {
-        type            wall;
-        nFaces          11200;
-        startFace       277808;
+        type            fixedValue;
+        value           uniform (10 0 0);
     }
-    atmosphere
+
+    outlet          
     {
-        type            patch;
-        nFaces          1600;
-        startFace       289008;
+        //type            zeroGradient;
+        type            inletOutlet;
+        inletValue      uniform (0 0 0);
     }
-    floatingObject
+
+    upperWall       
     {
-        type            wall;
-        nFaces          672;
-        startFace       290608;
+        type            fixedValue;
+        value           uniform (0 0 0);
     }
-)
+
+    lowerWall       
+    {
+        type            fixedValue;
+        value           uniform (0 0 0);
+    }
+
+    frontAndBack    
+    {
+        type            empty;
+    }
+}
 
 // ************************************************************************* //

@@ -15,25 +15,42 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-3
+5
 (
-    stationaryWalls
-    {
-        type            wall;
-        nFaces          11200;
-        startFace       277808;
-    }
-    atmosphere
+    inlet
     {
         type            patch;
-        nFaces          1600;
-        startFace       289008;
+        physicalType    inlet;
+        nFaces          30;
+        startFace       24170;
     }
-    floatingObject
+    outlet
+    {
+        type            patch;
+        physicalType    outlet;
+        nFaces          57;
+        startFace       24200;
+    }
+    upperWall
     {
         type            wall;
-        nFaces          672;
-        startFace       290608;
+        physicalType    wallFunctions;
+        nFaces          223;
+        startFace       24257;
+    }
+    lowerWall
+    {
+        type            wall;
+        physicalType    wallFunctions;
+        nFaces          250;
+        startFace       24480;
+    }
+    frontAndBack
+    {
+        type            empty;
+        physicalType    empty;
+        nFaces          24450;
+        startFace       24730;
     }
 )
 
