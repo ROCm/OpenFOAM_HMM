@@ -1,4 +1,5 @@
 #!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
 
 # Source tutorial clean functions
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions
@@ -12,19 +13,25 @@ LadenburgJet60psi \
 biconic25-55Run35 \
 "
 
-for case in $cases
+for caseName in $cases
 do
-    if [ "$case" = "shockTube" ]
+(
+    cd $caseName || exit
+
+    if [ "$caseName" = shockTube ]
     then
-        rm -rf $case/0
-        cp -r $case/0.org $case/0
+        rm -rf 0
+        cp -r 0.org 0
     fi
 
-    (cd $case && foamCleanTutorials && cleanSamples)
+    foamCleanTutorials && cleanSamples
 
-    if [ "$case" = "biconic25-55Run35" ]
+    if [ "$caseName" = "biconic25-55Run35" ]
     then
-        rm -rf $case/constant/polyMesh/boundary
-        wclean $case/datToFoam
+        rm -rf constant/polyMesh/boundary
+        wclean datToFoam
     fi
+)
 done
+
+# ----------------------------------------------------------------- end-of-file
