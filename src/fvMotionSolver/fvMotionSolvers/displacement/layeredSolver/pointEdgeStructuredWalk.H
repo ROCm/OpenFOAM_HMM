@@ -61,10 +61,10 @@ class pointEdgeStructuredWalk
 {
     // Private data
 
-        //- Is this point/edge inside the walk zone
-        bool inZone_;
+        //- Starting location
+        point point0_;
 
-        //- Previuos point
+        //- Previous point
         point previousPoint_;
 
         //- Sum of distance
@@ -76,15 +76,6 @@ class pointEdgeStructuredWalk
     // Private Member Functions
 
         //- Evaluate distance to point.
-        inline bool update
-        (
-            const point&,
-            const pointEdgeStructuredWalk& w2,
-            const scalar tol
-        );
-
-        //- Combine current with w2. Update distSqr, origin if w2 has smaller
-        //  quantities and returns true.
         inline bool update
         (
             const pointEdgeStructuredWalk& w2,
@@ -101,7 +92,7 @@ public:
         //- Construct from components
         inline pointEdgeStructuredWalk
         (
-            const bool,
+            const point&,
             const point&,
             const scalar,
             const vector&
@@ -113,10 +104,6 @@ public:
         // Access
 
             inline bool inZone() const;
-
-            inline bool& inZone();
-
-            inline const point& previousPoint() const;
 
             inline scalar dist() const;
 

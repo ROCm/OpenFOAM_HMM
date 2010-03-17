@@ -88,7 +88,7 @@ class displacementLayeredMotionFvMotionSolver
 
         void calcZoneMask
         (
-            const label cellZoneI, 
+            const label cellZoneI,
             PackedBoolList& isZonePoint,
             PackedBoolList& isZoneEdge
         ) const;
