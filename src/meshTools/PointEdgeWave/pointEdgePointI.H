@@ -117,7 +117,7 @@ inline bool Foam::pointEdgePoint::update
 // Null constructor
 inline Foam::pointEdgePoint::pointEdgePoint()
 :
-    origin_(greatPoint),
+    origin_(point::max),
     distSqr_(GREAT)
 {}
 
@@ -158,7 +158,7 @@ inline Foam::scalar Foam::pointEdgePoint::distSqr() const
 
 inline bool Foam::pointEdgePoint::valid() const
 {
-    return origin_ != greatPoint;
+    return origin_ != point::max;
 }
 
 

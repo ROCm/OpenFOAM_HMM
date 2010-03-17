@@ -37,7 +37,6 @@ SourceFiles
 #define autoLayerDriver_H
 
 #include "meshRefinement.H"
-#include "wallPoint.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,7 +49,6 @@ class pointSet;
 class motionSmoother;
 class addPatchCellLayer;
 class pointData;
-class wallPoint;
 class faceSet;
 class layerParameters;
 
@@ -81,9 +79,9 @@ class autoLayerDriver
 
             void operator()(vector& x, const vector& y) const
             {
-                if (y != wallPoint::greatPoint)
+                if (y != point::max)
                 {
-                    if (x == wallPoint::greatPoint)
+                    if (x == point::max)
                     {
                         x = y;
                     }

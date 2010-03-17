@@ -106,7 +106,7 @@ Foam::label Foam::patchDataWave<TransferType>::getValues
 
             distance_[cellI] = dist;
 
-            //cellData_[cellI] = wallPoint::greatPoint;
+            //cellData_[cellI] = point::max;
             cellData_[cellI] = cellInfo[cellI].data();
 
             nIllegal++;
@@ -153,7 +153,7 @@ Foam::label Foam::patchDataWave<TransferType>::getValues
 
                 patchField[patchFaceI] = dist;
 
-                //patchDataField[patchFaceI] = wallPoint::greatPoint;
+                //patchDataField[patchFaceI] = point::max;
                 patchDataField[patchFaceI] = faceInfo[meshFaceI].data();
 
                 nIllegal++;

@@ -35,7 +35,7 @@ Foam::Ostream& Foam::operator<<
 )
 {
     return os
-        << wDist.inZone_ << wDist.previousPoint_
+        << wDist.point0_ << wDist.previousPoint_
         << wDist.dist_ << wDist.data_;
 }
 
@@ -46,7 +46,7 @@ Foam::Istream& Foam::operator>>
 )
 {
     return is
-        >> wDist.inZone_ >> wDist.previousPoint_
+        >> wDist.point0_ >> wDist.previousPoint_
         >> wDist.dist_ >> wDist.data_;
 }
 

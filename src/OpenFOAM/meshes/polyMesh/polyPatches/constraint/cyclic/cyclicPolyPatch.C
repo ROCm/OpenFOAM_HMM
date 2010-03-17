@@ -47,14 +47,15 @@ namespace Foam
 
 
 template<>
-const char* NamedEnum<cyclicPolyPatch::transformType, 3>::names[] =
+const char* NamedEnum<cyclicPolyPatch::transformType, 4>::names[] =
 {
     "unknown",
     "rotational",
-    "translational"
+    "translational",
+    "noOrdering"
 };
 
-const NamedEnum<cyclicPolyPatch::transformType, 3>
+const NamedEnum<cyclicPolyPatch::transformType, 4>
     cyclicPolyPatch::transformTypeNames;
 }
 
@@ -1153,6 +1154,16 @@ bool Foam::cyclicPolyPatch::order
             << ". It is " << pp.size() << abort(FatalError);
     }
 
+    if (transform_ == NOORDERING)
+    {
+        if (debug)
+        {
+            Pout<< "cyclicPolyPatch::order : noOrdering mode." << endl;
+        }
+        return false;
+    }
+
+
     label halfSize = pp.size()/2;
 
     // Supplied primitivePatch already with new points.
@@ -1630,7 +1641,7 @@ void Foam::cyclicPolyPatch::write(Ostream& os) const
     {
         case ROTATIONAL:
         {
-            os.writeKeyword("transform") << transformTypeNames[ROTATIONAL]
+            os.writeKeyword("transform") << transformTypeNames[transform_]
                 << token::END_STATEMENT << nl;
             os.writeKeyword("rotationAxis") << rotationAxis_
                 << token::END_STATEMENT << nl;
@@ -1640,9 +1651,15 @@ void Foam::cyclicPolyPatch::write(Ostream& os) const
         }
         case TRANSLATIONAL:
         {
-            os.writeKeyword("transform") << transformTypeNames[TRANSLATIONAL]
+            os.writeKeyword("transform") << transformTypeNames[transform_]
                 << token::END_STATEMENT << nl;
             os.writeKeyword("separationVector") << separationVector_
+                << token::END_STATEMENT << nl;
+            break;
+        }
+        case NOORDERING:
+        {
+            os.writeKeyword("transform") << transformTypeNames[transform_]
                 << token::END_STATEMENT << nl;
             break;
         }

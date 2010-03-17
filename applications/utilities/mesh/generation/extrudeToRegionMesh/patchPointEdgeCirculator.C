@@ -24,18 +24,45 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "wallPoint.H"
+#include "patchPointEdgeCirculator.H"
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::wallPoint& wDist)
+const Foam::patchPointEdgeCirculator
+Foam::patchPointEdgeCirculator::endConstIter
+(
+    *reinterpret_cast<primitiveFacePatch*>(0),  // primitiveFacePatch
+    *reinterpret_cast<PackedBoolList*>(0),      // PackedBoolList
+    -1,                                         // edgeID
+    -1,                                         // index
+    -1                                          // pointID
+);
+
+
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy<patchPointEdgeCirculator>& ip
+)
 {
-    return os << wDist.origin() << wDist.distSqr();
+    const patchPointEdgeCirculator& c = ip.t_;
+
+    const pointField& pts = c.patch_.localPoints();
+    const edge& e = c.patch_.edges()[c.edgeID_];
+    label faceI = c.faceID();
+
+    os  << "around point:" << c.pointID_
+        << " coord:" << pts[c.pointID_]
+        << " at edge:" << c.edgeID_
+        << " coord:" << pts[e.otherVertex(c.pointID_)]
+        << " in direction of face:" << faceI;
+
+    if (faceI != -1)
+    {
+        os<< " fc:" << c.patch_.localFaces()[faceI].centre(pts);
+    }
+    return os;
 }
 
-Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::wallPoint& wDist)
-{
-    return is >> wDist.origin() >> wDist.distSqr();
-}
 
 // ************************************************************************* //
