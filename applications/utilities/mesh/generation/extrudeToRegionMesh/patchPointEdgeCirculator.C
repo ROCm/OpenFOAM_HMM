@@ -24,15 +24,45 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "LimitedScheme.H"
-#include "MC.H"
+#include "patchPointEdgeCirculator.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
+const Foam::patchPointEdgeCirculator
+Foam::patchPointEdgeCirculator::endConstIter
+(
+    *reinterpret_cast<primitiveFacePatch*>(0),  // primitiveFacePatch
+    *reinterpret_cast<PackedBoolList*>(0),      // PackedBoolList
+    -1,                                         // edgeID
+    -1,                                         // index
+    -1                                          // pointID
+);
+
+
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy<patchPointEdgeCirculator>& ip
+)
 {
-    makeLimitedSurfaceInterpolationScheme(MC, MCLimiter)
-    makeLimitedVSurfaceInterpolationScheme(MCV, MCLimiter)
+    const patchPointEdgeCirculator& c = ip.t_;
+
+    const pointField& pts = c.patch_.localPoints();
+    const edge& e = c.patch_.edges()[c.edgeID_];
+    label faceI = c.faceID();
+
+    os  << "around point:" << c.pointID_
+        << " coord:" << pts[c.pointID_]
+        << " at edge:" << c.edgeID_
+        << " coord:" << pts[e.otherVertex(c.pointID_)]
+        << " in direction of face:" << faceI;
+
+    if (faceI != -1)
+    {
+        os<< " fc:" << c.patch_.localFaces()[faceI].centre(pts);
+    }
+    return os;
 }
+
 
 // ************************************************************************* //

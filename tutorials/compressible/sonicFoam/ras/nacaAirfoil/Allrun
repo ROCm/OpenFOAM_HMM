@@ -1,11 +1,13 @@
 #!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 # Get application name
 application=`getApplication`
 
-runStarToFoam ()
+runStarToFoam()
 {
     if [ -f log.star3ToFoam -o -f log.starToFoam ]
     then
@@ -24,3 +26,5 @@ rm temp
 runApplication $application
 
 # end-of-file
+
+# ----------------------------------------------------------------- end-of-file

@@ -49,14 +49,6 @@ namespace Foam
 }
 
 
-const Foam::point Foam::polyTopoChange::greatPoint
-(
-    GREAT,
-    GREAT,
-    GREAT
-);
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Renumber with special handling for merged items (marked with <-1)
@@ -2695,7 +2687,7 @@ void Foam::polyTopoChange::removePoint
             << abort(FatalError);
     }
 
-    points_[pointI] = greatPoint;
+    points_[pointI] = point::max;
     pointMap_[pointI] = -1;
     if (mergePointI >= 0)
     {

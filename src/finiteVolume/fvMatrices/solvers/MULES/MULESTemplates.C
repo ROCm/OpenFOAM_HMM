@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,7 @@ License
 #include "fvcSurfaceIntegrate.H"
 #include "slicedSurfaceFields.H"
 #include "syncTools.H"
+
 #include "fvm.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -107,7 +108,7 @@ void Foam::MULES::explicitSolve
     {
         psiIf =
         (
-            mesh.V0()*rho.oldTime()*psi0/(deltaT*mesh.V())
+            mesh.Vsc0()*rho.oldTime()*psi0/(deltaT*mesh.Vsc())
           + Su.field()
           - psiIf
         )/(rho/deltaT - Sp.field());
@@ -325,7 +326,8 @@ void Foam::MULES::limiter
 
     const unallocLabelList& owner = mesh.owner();
     const unallocLabelList& neighb = mesh.neighbour();
-    const scalarField& V = mesh.V();
+    tmp<volScalarField::DimensionedInternalField> tVsc = mesh.Vsc();
+    const scalarField& V = tVsc();
     const scalar deltaT = mesh.time().deltaTValue();
 
     const scalarField& phiBDIf = phiBD;
@@ -452,14 +454,16 @@ void Foam::MULES::limiter
 
     if (mesh.moving())
     {
+        tmp<volScalarField::DimensionedInternalField> V0 = mesh.Vsc0();
+
         psiMaxn =
             V*((rho/deltaT - Sp)*psiMaxn - Su)
-          - (mesh.V0()/deltaT)*rho.oldTime()*psi0
+          - (V0()/deltaT)*rho.oldTime()*psi0
           + sumPhiBD;
 
         psiMinn =
             V*(Su - (rho/deltaT - Sp)*psiMinn)
-          + (mesh.V0()/deltaT)*rho.oldTime()*psi0
+          + (V0/deltaT)*rho.oldTime()*psi0
           - sumPhiBD;
     }
     else

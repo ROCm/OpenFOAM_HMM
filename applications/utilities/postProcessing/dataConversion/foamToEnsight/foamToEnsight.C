@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -112,21 +112,21 @@ int main(int argc, char *argv[])
     argList::addOption
     (
         "patches",
-        "wordList",
-        "specify particular patches to write - eg '(inlet outlet)'. "
+        "wordReList",
+        "specify particular patches to write - eg '(outlet \"inlet.*\")'. "
         "An empty list suppresses writing the internalMesh."
     );
     argList::addOption
     (
         "faceZones",
-        "wordList",
-        "specify faceZones to write, with wildcards - eg '(mfp-.*)'. "
+        "wordReList",
+        "specify faceZones to write - eg '( slice \"mfp-.*\" )'."
     );
 
 #   include "setRootCase.H"
 
     // Check options
-    bool binary = !args.optionFound("ascii");
+    const bool binary = !args.optionFound("ascii");
 
 #   include "createTime.H"
 

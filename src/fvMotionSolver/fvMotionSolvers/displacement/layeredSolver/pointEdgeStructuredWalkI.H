@@ -32,16 +32,15 @@ License
 // Update this with w2.
 inline bool Foam::pointEdgeStructuredWalk::update
 (
-    const point& pt,
     const pointEdgeStructuredWalk& w2,
     const scalar tol
 )
 {
     if (!valid())
     {
-        // current not yet set. Walked from w2 to here (=pt)
-        dist_ = w2.dist_ + mag(pt-w2.previousPoint_);
-        previousPoint_ = pt;
+        // current not yet set. Walked from w2 to here (=point0)
+        dist_ = w2.dist_ + mag(point0_-w2.previousPoint_);
+        previousPoint_ = point0_;
         data_ = w2.data_;
 
         return true;
@@ -52,36 +51,13 @@ inline bool Foam::pointEdgeStructuredWalk::update
     }
 }
 
-    
-// Update this with w2 (information on same point)
-inline bool Foam::pointEdgeStructuredWalk::update
-(
-    const pointEdgeStructuredWalk& w2,
-    const scalar tol
-)
-{
-    if (!valid())
-    {
-        // current not yet set so use neighbour
-        dist_ = w2.dist_;
-        previousPoint_ = w2.previousPoint_;
-        data_ = w2.data_;
-
-        return true;
-    }
-    else
-    {
-        // already nearer to pt
-        return false;
-    }
-}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Null constructor
 inline Foam::pointEdgeStructuredWalk::pointEdgeStructuredWalk()
 :
-    inZone_(false),
+    point0_(vector::max),
     previousPoint_(vector::max),
     dist_(0),
     data_(vector::zero)
@@ -91,13 +67,13 @@ inline Foam::pointEdgeStructuredWalk::pointEdgeStructuredWalk()
 // Construct from origin, distance
 inline Foam::pointEdgeStructuredWalk::pointEdgeStructuredWalk
 (
-    const bool inZone,
-    const point& previousPoint, 
+    const point& point0,
+    const point& previousPoint,
     const scalar dist,
     const vector& data
 )
 :
-    inZone_(inZone),
+    point0_(point0),
     previousPoint_(previousPoint),
     dist_(dist),
     data_(data)
@@ -108,20 +84,14 @@ inline Foam::pointEdgeStructuredWalk::pointEdgeStructuredWalk
 
 inline bool Foam::pointEdgeStructuredWalk::inZone() const
 {
-    return inZone_;
+    return point0_ != vector::max;
 }
 
 
-inline bool& Foam::pointEdgeStructuredWalk::inZone()
-{
-    return inZone_;
-}
-
-
-inline const Foam::point& Foam::pointEdgeStructuredWalk::previousPoint() const
-{
-    return previousPoint_;
-}
+//inline const Foam::point& Foam::pointEdgeStructuredWalk::previousPoint() const
+//{
+//    return previousPoint_;
+//}
 
 
 inline Foam::scalar Foam::pointEdgeStructuredWalk::dist() const
@@ -210,15 +180,15 @@ inline bool Foam::pointEdgeStructuredWalk::updatePoint
     const scalar tol
 )
 {
-    if (inZone_)
+    if (inZone())
     {
-        return update(mesh.points()[pointI], edgeInfo, tol);
+        return update(edgeInfo, tol);
     }
     else
     {
         return false;
     }
-}    
+}
 
 
 // Update this with new information on same point
@@ -230,9 +200,9 @@ inline bool Foam::pointEdgeStructuredWalk::updatePoint
     const scalar tol
 )
 {
-    if (inZone_)
+    if (inZone())
     {
-        return update(mesh.points()[pointI], newPointInfo, tol);
+        return update(newPointInfo, tol);
     }
     else
     {
@@ -249,7 +219,7 @@ inline bool Foam::pointEdgeStructuredWalk::updatePoint
 )
 {
     return update(newPointInfo, tol);
-}    
+}
 
 
 // Update this with information from connected point
@@ -262,21 +232,15 @@ inline bool Foam::pointEdgeStructuredWalk::updateEdge
     const scalar tol
 )
 {
-    if (inZone_)
+    if (inZone())
     {
-        const pointField& points = mesh.points();
-
-        const edge& e = mesh.edges()[edgeI];
-
-        const point edgeMid(0.5*(points[e[0]] + points[e[1]]));
-
-        return update(edgeMid, pointInfo, tol);
+        return update(pointInfo, tol);
     }
     else
     {
         return false;
     }
-}    
+}
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
@@ -286,7 +250,7 @@ inline bool Foam::pointEdgeStructuredWalk::operator==
     const Foam::pointEdgeStructuredWalk& rhs
 ) const
 {
-    return previousPoint() == rhs.previousPoint();
+    return previousPoint_ == rhs.previousPoint_;
 }
 
 

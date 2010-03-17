@@ -22,7 +22,7 @@
 #     along with OpenFOAM; if not, write to the Free Software Foundation,
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
-# Script
+# File
 #     aliases.csh
 #
 # Description
@@ -43,6 +43,11 @@ alias wmDP 'setenv WM_PRECISION_OPTION DP; source $WM_PROJECT_DIR/etc/cshrc'
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 alias wmSchedON 'setenv WM_SCHEDULER $WM_PROJECT_DIR/wmake/wmakeScheduler'
 alias wmSchedOFF 'unsetenv WM_SCHEDULER'
+
+# Change paraview version
+# ~~~~~~~~~~~~~~~~~~~~~~~
+alias foamPV 'setenv ParaView_VERSION \!*; source $WM_PROJECT_DIR/etc/apps/paraview3/cshrc; echo paraview-$ParaView_VERSION'
+
 
 # Change directory aliases
 # ~~~~~~~~~~~~~~~~~~~~~~~~
