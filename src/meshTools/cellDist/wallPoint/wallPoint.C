@@ -26,11 +26,6 @@ License
 
 #include "wallPoint.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-Foam::point Foam::wallPoint::greatPoint(GREAT, GREAT, GREAT);
-
-
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::wallPoint& wDist)

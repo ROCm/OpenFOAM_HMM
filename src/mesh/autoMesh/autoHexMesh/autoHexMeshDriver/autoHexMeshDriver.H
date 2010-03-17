@@ -38,7 +38,6 @@ SourceFiles
 
 #include "autoPtr.H"
 #include "dictionary.H"
-#include "wallPoint.H"
 #include "searchableSurfaces.H"
 #include "refinementSurfaces.H"
 #include "shellSurfaces.H"
@@ -95,9 +94,9 @@ class autoHexMeshDriver
 
             void operator()(vector& x, const vector& y) const
             {
-                if (y != wallPoint::greatPoint)
+                if (y != point::max)
                 {
-                    if (x == wallPoint::greatPoint)
+                    if (x == point::max)
                     {
                         x = y;
                     }
