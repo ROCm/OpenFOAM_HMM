@@ -6,3 +6,5 @@ wmakeLnInclude decompositionMethods
 wmakeLnInclude metisDecomp
 wmakeLnInclude parMetisDecomp
 wmakeLnInclude scotchDecomp
+
+# ----------------------------------------------------------------- end-of-file

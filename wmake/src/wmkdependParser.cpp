@@ -32,7 +32,7 @@ SourceFiles
     generated
 
 \*---------------------------------------------------------------------------*/
-// This file was generated with Coco/R C++ (7 Feb 2010)
+// This file was generated with Coco/R C++ (10 Mar 2010)
 // http://www.ssw.uni-linz.ac.at/coco/
 // with these defines:
 //     - FORCE_UTF8
@@ -52,9 +52,9 @@ namespace wmake {
 #include <sys/types.h>
 #include <dirent.h>
 
-std::set<std::string> Parser::visitedFiles_;
 std::set<std::string> Parser::visitedDirs_;
 
+std::set<std::string> Parser::visitedFiles;
 std::list<std::string> Parser::includeDirs;
 std::string Parser::sourceFile;
 std::string Parser::depFile;
@@ -80,7 +80,7 @@ void Parser::ignoreDir(const std::string& name)
 
 void Parser::includeFile(const std::string& name)
 {
-    if (!visitedFiles_.insert(name).second)
+    if (!visitedFiles.insert(name).second)
     {
         return;   // already existed (did not insert)
     }
@@ -127,6 +127,9 @@ void Parser::includeFile(const std::string& name)
             L"could not open file %s for source file %s\n",
             name.c_str(), sourceFile.c_str()
         );
+
+        // only report the first occurance
+        visitedFiles.insert(name);
     }
 }
 

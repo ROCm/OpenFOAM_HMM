@@ -87,16 +87,26 @@ Foam::ensightMesh::ensightMesh
 
         if (args.optionFound("patches"))
         {
-            wordList patchNameList(args.optionLookup("patches")());
+            wordReList patterns(args.optionLookup("patches")());
 
-            if (patchNameList.empty())
+            if (patterns.empty())
             {
-                patchNameList = allPatchNames_;
+                forAll(allPatchNames_, nameI)
+                {
+                    patchNames_.insert(allPatchNames_[nameI]);
+                }
             }
-
-            forAll(patchNameList, i)
+            else
             {
-                patchNames_.insert(patchNameList[i]);
+                // Find patch names which match that requested at command-line
+                forAll(allPatchNames_, nameI)
+                {
+                    const word& patchName = allPatchNames_[nameI];
+                    if (findStrings(patterns, patchName))
+                    {
+                        patchNames_.insert(patchName);
+                    }
+                }
             }
         }
     }
@@ -247,19 +257,17 @@ Foam::ensightMesh::ensightMesh
     // faceZones
     if (args.optionFound("faceZones"))
     {
-        wordList patchNameList(args.optionLookup("faceZones")());
+        wordReList patterns(args.optionLookup("faceZones")());
 
         const wordList faceZoneNamesAll = mesh_.faceZones().names();
 
-        // Find out faceZone names that match with what requested at command
-        // line
-        forAll(patchNameList, i)
+        // Find faceZone names which match that requested at command-line
+        forAll(faceZoneNamesAll, nameI)
         {
-            labelList matches = findStrings(patchNameList[i], faceZoneNamesAll);
-
-            forAll(matches, matchI)
+            const word& zoneName = faceZoneNamesAll[nameI];
+            if (findStrings(patterns, zoneName))
             {
-                faceZoneNames_.insert(faceZoneNamesAll[matches[matchI]]);
+                faceZoneNames_.insert(zoneName);
             }
         }
 
@@ -353,8 +361,8 @@ Foam::ensightMesh::ensightMesh
                 if
                 (
                     faceZoneFaceSets_[zoneI].tris.size()
-                 || faceZoneFaceSets_[zoneI].quads.size() ||
-                    faceZoneFaceSets_[zoneI].polys.size()
+                 || faceZoneFaceSets_[zoneI].quads.size()
+                 || faceZoneFaceSets_[zoneI].polys.size()
                 )
                 {
                     nfp.nTris   = faceZoneFaceSets_[zoneI].tris.size();

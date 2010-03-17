@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -29,17 +29,19 @@
 #
 #------------------------------------------------------------------------------
 
-getApplication ()
+getApplication()
 {
     grep application system/controlDict | sed "s/application *\([a-zA-Z]*\);/\1/"
 }
 
-runApplication ()
+runApplication()
 {
-    APP_RUN=$1; shift
+    APP_RUN=$1
+    shift
     APP_NAME=${APP_RUN##*/}
 
-    if [ -f log.$APP_NAME ] ; then
+    if [ -f log.$APP_NAME ]
+    then
         echo "$APP_NAME already run on $PWD: remove log file to run"
     else
         echo "Running $APP_RUN on $PWD"
@@ -47,11 +49,13 @@ runApplication ()
     fi
 }
 
-runParallel ()
+runParallel()
 {
-    APP_RUN=$1; shift
+    APP_RUN=$1
+    shift
 
-    if [ -f $log.$APP_RUN ] ; then
+    if [ -f $log.$APP_RUN ]
+    then
         echo "$APP_RUN already run on $PWD: remove log file to run"
     else
         echo "Running $APP_RUN in parallel on $PWD using $1 processes"
@@ -59,15 +63,16 @@ runParallel ()
     fi
 }
 
-compileApplication ()
+compileApplication()
 {
     echo "Compiling $1 application"
     wmake $1
 }
 
-cloneCase ()
+cloneCase()
 {
-    if [ -d $2 ] ; then
+    if [ -d $2 ]
+    then
         echo "Case already cloned: remove case directory $2 to clone"
     else
         echo "Cloning $2 case from $1"
