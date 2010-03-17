@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -625,21 +625,25 @@ void Foam::Time::setDeltaT(const scalar deltaT)
 Foam::TimeState Foam::Time::subCycle(const label nSubCycles)
 {
     subCycling_ = true;
+    prevTimeState_.set(new TimeState(*this));
 
-    TimeState ts = *this;
     setTime(*this - deltaT(), (timeIndex() - 1)*nSubCycles);
     deltaT_ /= nSubCycles;
     deltaT0_ /= nSubCycles;
     deltaTSave_ = deltaT0_;
 
-    return ts;
+    return prevTimeState();
 }
 
 
-void Foam::Time::endSubCycle(const TimeState& ts)
+void Foam::Time::endSubCycle()
 {
-    subCycling_ = false;
-    TimeState::operator=(ts);
+    if (subCycling_)
+    {
+        subCycling_ = false;
+        TimeState::operator=(prevTimeState());
+        prevTimeState_.clear();
+    }
 }
 
 

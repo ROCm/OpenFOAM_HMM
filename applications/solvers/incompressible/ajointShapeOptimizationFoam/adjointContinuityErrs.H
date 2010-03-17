@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,17 +22,26 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Global
+    continuityErrs
+
+Description
+    Calculates and prints the continuity errors.
+
 \*---------------------------------------------------------------------------*/
 
-#include "LimitedScheme.H"
-#include "MC.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
 {
-    makeLimitedSurfaceInterpolationScheme(MC, MCLimiter)
-    makeLimitedVSurfaceInterpolationScheme(MCV, MCLimiter)
+    scalar sumLocalContErr = runTime.deltaT().value()*
+        mag(fvc::div(phia))().weightedAverage(mesh.V()).value();
+
+    scalar globalContErr = runTime.deltaT().value()*
+        fvc::div(phia)().weightedAverage(mesh.V()).value();
+    cumulativeContErr += globalContErr;
+
+    Info<< "Adjoint continuity errors : sum local = " << sumLocalContErr
+        << ", global = " << globalContErr
+        << ", cumulative = " << cumulativeContErr
+        << endl;
 }
 
 // ************************************************************************* //
