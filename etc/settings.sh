@@ -105,7 +105,7 @@ unset compilerBin compilerLib compilerMan
 # Select compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # compilerInstall = OpenFOAM | system
-compilerInstall=OpenFOAM
+: ${compilerInstall:=OpenFOAM}
 
 case "${compilerInstall:-OpenFOAM}" in
 OpenFOAM)

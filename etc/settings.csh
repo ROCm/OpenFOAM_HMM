@@ -81,7 +81,7 @@ _foamAddLib  $FOAM_USER_LIBBIN
 # Select compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # compilerInstall = OpenFOAM | system
-set compilerInstall=OpenFOAM
+if ( ! $?compilerInstall ) set compilerInstall=OpenFOAM
 
 switch ("$compilerInstall")
 case OpenFOAM:

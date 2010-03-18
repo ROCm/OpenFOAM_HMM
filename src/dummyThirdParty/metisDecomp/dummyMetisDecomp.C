@@ -34,8 +34,8 @@ static const char* notImplementedMessage =
 "\n"
 "Please install metis and make sure that libmetis.so is in your "
 "LD_LIBRARY_PATH.\n"
-"The metisDecomp library can then be built in $FOAM_SRC/decompositionMethods/"
-"metisDecomp\n";
+"The metisDecomp library can then be built in "
+"$FOAM_SRC/parallel/decompose/decompositionMethods/metisDecomp\n";
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
