@@ -960,7 +960,14 @@ int main(int argc, char *argv[])
 #               endif
             }
 
-            if (rawLine.empty() || rawLine[0] == '#')
+            // Strip off anything after #
+            string::size_type i = rawLine.find_first_of("#");
+            if (i != string::npos)
+            {
+                rawLine = rawLine(0, i);
+            }
+
+            if (rawLine.empty())
             {
                 continue;
             }
