@@ -38,6 +38,45 @@ Description
     - not parallel
 
 
+Internal face extrusion
+-----------------------
+
+    +-------------+
+    |             |
+    |             |
+    +---AAAAAAA---+
+    |             |
+    |             |
+    +-------------+
+
+    AAA=faceZone to extrude.
+
+
+For the case of no flipMap the extrusion starts at owner and extrudes
+into the space of the neighbour:
+
+      +CCCCCCC+
+      |       |         <= extruded mesh
+      +BBBBBBB+
+
+    +-------------+
+    |             |
+    | (neighbour) |
+    |___CCCCCCC___|       <= original mesh (with 'baffles' added)
+    |   BBBBBBB   |
+    |(owner side) |
+    |             |
+    +-------------+
+
+    BBB=directMapped between owner on original mesh and new extrusion.
+        (zero offset)
+    CCC=directMapped between neighbour on original mesh and new extrusion
+        (offset due to the thickness of the extruded mesh)
+
+For the case of flipMap the extrusion is the other way around: from the
+neighbour side into the owner side.
+
+
 Boundary face extrusion
 -----------------------
 
@@ -63,37 +102,6 @@ becomes
     CCC=polypatch
 
 
-Internal face extrusion
------------------------
-
-    +-------------+
-    |             |
-    |(master side)|
-    +---AAAAAAA---+
-    |(slave side) |
-    |             |
-    +-------------+
-
-    AAA=faceZone to extrude. E.g. slave side is owner side (no flipmap)
-
-
-becomes
-
-      +CCCCCCC+
-      |       |         <= extruded mesh
-      +BBBBBBB+
-
-    +-------------+
-    |             |
-    |(master side)|
-    |___CCCCCCC___|       <= original mesh (with 'baffles' added)
-    |   BBBBBBB   |
-    |(slave side) |
-    |             |
-    +-------------+
-
-    BBB=directMapped 'slave' between original mesh and new extrusion
-    CCC=directMapped 'master' between original mesh and new extrusion
 
 
 Usage
@@ -1179,7 +1187,8 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Save offsets from shell mesh back to original mesh
-    pointField topOffsets, bottomOffsets;
+    List<pointField> topOffsets(zoneIDs.size());
+    List<pointField> bottomOffsets(zoneIDs.size());
 
     {
         const polyBoundaryMesh& regionPatches = regionMesh.boundaryMesh();
@@ -1194,7 +1203,9 @@ int main(int argc, char *argv[])
              && (findIndex(interRegionTopPatch, patchI) != -1)
             )
             {
-                topOffsets = calcOffset(extrudePatch, extruder, pp);
+                label index = findIndex(interRegionTopPatch, patchI);
+
+                topOffsets[index] = calcOffset(extrudePatch, extruder, pp);
 
                 newPatches[patchI] = new directMappedWallPolyPatch
                 (
@@ -1205,7 +1216,7 @@ int main(int argc, char *argv[])
                     regionName,                             // sampleRegion
                     directMappedPatchBase::NEARESTPATCHFACE,// sampleMode
                     pp.name(),                              // samplePatch
-                    topOffsets,                             // offset
+                    topOffsets[index],                      // offset
                     patches
                 );
             }
@@ -1215,7 +1226,9 @@ int main(int argc, char *argv[])
              && (findIndex(interRegionBottomPatch, patchI) != -1)
             )
             {
-                bottomOffsets = calcOffset(extrudePatch, extruder, pp);
+                label index = findIndex(interRegionBottomPatch, patchI);
+
+                bottomOffsets[index] = calcOffset(extrudePatch, extruder, pp);
 
                 newPatches[patchI] = new directMappedWallPolyPatch
                 (
@@ -1226,7 +1239,7 @@ int main(int argc, char *argv[])
                     regionName,                             // sampleRegion
                     directMappedPatchBase::NEARESTPATCHFACE,// sampleMode
                     pp.name(),                              // samplePatch
-                    bottomOffsets,                          // offset
+                    bottomOffsets[index],                   // offset
                     patches
                 );
             }
@@ -1468,6 +1481,7 @@ int main(int argc, char *argv[])
              && (findIndex(interRegionTopPatch, patchI) != -1)
             )
             {
+                label index = findIndex(interRegionTopPatch, patchI);
                 newPatches[patchI] = new directMappedWallPolyPatch
                 (
                     pp.name(),
@@ -1477,7 +1491,7 @@ int main(int argc, char *argv[])
                     shellRegionName,                        // sampleRegion
                     directMappedPatchBase::NEARESTPATCHFACE,// sampleMode
                     pp.name(),                              // samplePatch
-                    -topOffsets,                            // offset
+                    -topOffsets[index],                     // offset
                     patches
                 );
             }
@@ -1487,6 +1501,8 @@ int main(int argc, char *argv[])
              && (findIndex(interRegionBottomPatch, patchI) != -1)
             )
             {
+                label index = findIndex(interRegionBottomPatch, patchI);
+
                 newPatches[patchI] = new directMappedWallPolyPatch
                 (
                     pp.name(),
@@ -1496,7 +1512,7 @@ int main(int argc, char *argv[])
                     shellRegionName,                        // sampleRegion
                     directMappedPatchBase::NEARESTPATCHFACE,// sampleMode
                     pp.name(),                              // samplePatch
-                    -bottomOffsets,                         // offset
+                    -bottomOffsets[index],                  // offset
                     patches
                 );
             }
