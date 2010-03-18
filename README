@@ -112,7 +112,7 @@
   which may be obtained from http://gcc.gnu.org/.
 
   Install the compiler in
-  $WM_THIRD_PARTY_DIR/platform/$WM_ARCH$WM_COMPILER_ARCH/gcc-<GCC_VERSION>
+  $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gcc-<GCC_VERSION>
   and change the gcc version number in $WM_PROJECT_DIR/etc/settings.sh and
   $WM_PROJECT_DIR/etc/settings.csh appropriately and finally update the
   environment variables as in section 3.

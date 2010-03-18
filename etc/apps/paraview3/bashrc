@@ -39,7 +39,7 @@ cleaned=`$WM_PROJECT_DIR/bin/foamCleanPath "$PATH" "$WM_THIRD_PARTY_DIR/platform
 
 # determine the cmake to be used
 unset CMAKE_HOME
-for cmake in cmake-2.8.1 cmake-2.8.0 cmake-2.6.4 cmake-2.6.2 cmake-2.4.6
+for cmake in cmake-2.8.1 cmake-2.8.0 cmake-2.6.4
 do
     cmake=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cmake
     if [ -r $cmake ]
@@ -52,20 +52,22 @@ done
 
 
 # set VERSION and MAJOR (version) variables if not already set
-[ -z "$ParaView_VERSION" ] && export ParaView_VERSION=3.6.1
+[ -n "$ParaView_VERSION" ] || ParaView_VERSION=3.6.1
+[ -n "$ParaView_MAJOR" ]   || ParaView_MAJOR=unknown
 
 # if needed, set MAJOR version to correspond to VERSION
 # ParaView_MAJOR is "<digits>.<digits>" from ParaView_VERSION
 case "$ParaView_VERSION" in
-"${ParaView_MAJOR}.*" )
+"$ParaView_MAJOR".* )
     # version and major appear to correspond
     ;;
 
-*)
-    [ -z ${ParaView_MAJOR} ] && ParaView_MAJOR=`echo $ParaView_VERSION | sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/'`
+[0-9]*)
+    # extract major from the version
+    ParaView_MAJOR=`echo $ParaView_VERSION | sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/'`
     ;;
 esac
-export ParaView_MAJOR
+export ParaView_VERSION ParaView_MAJOR
 
 paraviewInstDir=$WM_THIRD_PARTY_DIR/paraview-$ParaView_VERSION
 export ParaView_DIR=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-$ParaView_VERSION
