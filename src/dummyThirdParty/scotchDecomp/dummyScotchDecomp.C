@@ -115,8 +115,8 @@ static const char* notImplementedMessage =
 "\n"
 "Please install scotch and make sure that libscotch.so is in your "
 "LD_LIBRARY_PATH.\n"
-"The scotchDecomp library can then be built in $FOAM_SRC/decompositionMethods/"
-"scotchDecomp\n";
+"The scotchDecomp library can then be built in "
+"$FOAM_SRC/parallel/decompose/decompositionMethods/scotchDecomp\n";
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

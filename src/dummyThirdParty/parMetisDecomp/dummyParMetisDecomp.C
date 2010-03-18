@@ -50,8 +50,8 @@ static const char* notImplementedMessage =
 "\n"
 "Please install parMetis and make sure that libparMetis.so is in your "
 "LD_LIBRARY_PATH.\n"
-"The parMetisDecomp library can then be built in $FOAM_SRC/decompositionMethods/"
-"parMetisDecomp\n";
+"The parMetisDecomp library can then be built in "
+"$FOAM_SRC/parallel/decompose/decompositionMethods/parMetisDecomp\n";
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

@@ -28,16 +28,18 @@ wmake libso surfMesh
 wmake libso triSurface
 
 # Decomposition methods needed by dummyThirdParty
-parallel/AllwmakeLnInclude
+parallel/decompose/AllwmakeLnInclude
 # dummyThirdParty (dummy metisDecomp, scotchDecomp etc) needed by e.g. meshTools
 dummyThirdParty/Allwmake
+
+# Build the proper scotchDecomp, metisDecomp etc.
+parallel/decompose/Allwmake
 
 wmake libso meshTools
 wmake libso finiteVolume
 wmake libso genericPatchFields
 
-# Build the proper scotchDecomp, metisDecomp etc.
-parallel/Allwmake
+parallel/reconstruct/Allwmake
 
 wmake libso sampling
 
@@ -52,7 +54,6 @@ thermophysicalModels/Allwmake
 transportModels/Allwmake
 turbulenceModels/Allwmake
 lagrangian/Allwmake
-parallel/Allwmake
 postProcessing/Allwmake
 conversion/Allwmake
 mesh/Allwmake
