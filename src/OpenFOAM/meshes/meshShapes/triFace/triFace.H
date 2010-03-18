@@ -181,7 +181,6 @@ inline unsigned Hash<triFace>::operator()(const triFace& t, unsigned seed) const
 
 
 //- Hash specialization for hashing triFace - a commutative hash value.
-//  Hash incrementally.
 template<>
 inline unsigned Hash<triFace>::operator()(const triFace& t) const
 {

@@ -189,8 +189,8 @@ Foam::createShellMesh::createShellMesh
 void Foam::createShellMesh::setRefinement
 (
     const pointField& thickness,
-    const labelList& extrudeMasterPatchID,
-    const labelList& extrudeSlavePatchID,
+    const labelList& topPatchID,
+    const labelList& bottomPatchID,
     const labelListList& extrudeEdgePatches,
     polyTopoChange& meshMod
 )
@@ -205,14 +205,14 @@ void Foam::createShellMesh::setRefinement
 
     if
     (
-        extrudeMasterPatchID.size() != patch_.size()
-     && extrudeSlavePatchID.size() != patch_.size()
+        topPatchID.size() != patch_.size()
+     && bottomPatchID.size() != patch_.size()
     )
     {
         FatalErrorIn("createShellMesh::setRefinement(..)")
             << "nFaces:" << patch_.size()
-            << " extrudeMasterPatchID:" << extrudeMasterPatchID.size()
-            << " extrudeSlavePatchID:" << extrudeSlavePatchID.size()
+            << " topPatchID:" << topPatchID.size()
+            << " bottomPatchID:" << bottomPatchID.size()
             << exit(FatalError);
     }
 
@@ -302,11 +302,9 @@ void Foam::createShellMesh::setRefinement
     }
 
 
-    // Add face on patch' master side
-    //labelList masterFaces(patch_.localFaces().size());
+    // Add face on bottom side
     forAll(patch_.localFaces(), faceI)
     {
-        //masterFaces[faceI] =
         meshMod.addFace
         (
             patch_.localFaces()[faceI].reverseFace(),// vertices
@@ -316,14 +314,14 @@ void Foam::createShellMesh::setRefinement
             -1,                         // masterEdgeID
             faceToFaceMap.size(),       // masterFaceID : current faceI
             true,                       // flipFaceFlux
-            extrudeMasterPatchID[faceI],// patchID
+            bottomPatchID[faceI],// patchID
             -1,                         // zoneID
             false                       // zoneFlip
         );
-        faceToFaceMap.append(faceI+1);  // points to unflipped original face
+        faceToFaceMap.append(-faceI-1); // points to flipped original face
         faceToEdgeMap.append(-1);
 
-        //Pout<< "Added master face "
+        //Pout<< "Added bottom face "
         //    << patch_.localFaces()[faceI].reverseFace()
         //    << " own " << addedCells[faceI]
         //    << "  at " << patch_.faceCentres()[faceI]
@@ -331,8 +329,7 @@ void Foam::createShellMesh::setRefinement
 
     }
 
-    // Add face on patch' slave side
-    //labelList slaveFaces(patch_.localFaces().size());
+    // Add face on top
     forAll(patch_.localFaces(), faceI)
     {
         // Get face in original ordering
@@ -346,7 +343,6 @@ void Foam::createShellMesh::setRefinement
             newF[fp] = addedPoints[region];
         }
 
-        //slaveFaces[faceI] =
         meshMod.addFace
         (
             newF,                       // vertices
@@ -356,14 +352,14 @@ void Foam::createShellMesh::setRefinement
             -1,                         // masterEdgeID
             faceToFaceMap.size(),       // masterFaceID : current faceI
             false,                      // flipFaceFlux
-            extrudeSlavePatchID[faceI], // patchID
+            topPatchID[faceI],          // patchID
             -1,                         // zoneID
             false                       // zoneFlip
         );
-        faceToFaceMap.append(-faceI-1);
+        faceToFaceMap.append(faceI+1);  // unflipped
         faceToEdgeMap.append(-1);
 
-        //Pout<< "Added slave face " << newF
+        //Pout<< "Added top face " << newF
         //    << " own " << addedCells[faceI]
         //    << "  at " << patch_.faceCentres()[faceI]
         //    << endl;

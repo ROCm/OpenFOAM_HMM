@@ -148,11 +148,10 @@ void Foam::displacementLayeredMotionFvMotionSolver::walkStructured
 
     // Current info on points
     List<pointEdgeStructuredWalk> allPointInfo(mesh().nPoints());
-    // Mark points inside cellZone.
 
+    // Mark points inside cellZone.
     // Note that we use points0, not mesh.points()
     // so as not to accumulate errors.
-
     forAll(isZonePoint, pointI)
     {
         if (isZonePoint[pointI])
@@ -169,6 +168,7 @@ void Foam::displacementLayeredMotionFvMotionSolver::walkStructured
 
     // Current info on edges
     List<pointEdgeStructuredWalk> allEdgeInfo(mesh().nEdges());
+
     // Mark edges inside cellZone
     forAll(isZoneEdge, edgeI)
     {
