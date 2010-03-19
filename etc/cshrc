@@ -209,16 +209,16 @@ default:
 endsw
 
 
-# Clean standard environment variables (path/PATH, LD_LIBRARY_PATH, MANPATH)
+# Clean standard environment variables (PATH, LD_LIBRARY_PATH, MANPATH)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 set foamClean=$WM_PROJECT_DIR/bin/foamCleanPath
 
 if (! $?LD_LIBRARY_PATH ) setenv LD_LIBRARY_PATH ''
 if (! $?MANPATH) setenv MANPATH ''
 
-#- Clean path/PATH
-set cleaned=`$foamClean -space "$path" "$foamOldDirs"`
-if ( $status == 0 ) set path=($cleaned)
+#- Clean PATH (path)
+set cleaned=`$foamClean "$PATH" "$foamOldDirs"`
+if ( $status == 0 ) setenv PATH $cleaned
 
 #- Clean LD_LIBRARY_PATH
 set cleaned=`$foamClean "$LD_LIBRARY_PATH" "$foamOldDirs"`
@@ -242,9 +242,9 @@ _foamSource $WM_PROJECT_DIR/etc/apps/paraview3/cshrc
 
 # Clean environment paths again. Only remove duplicates
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#- Clean path/PATH
-set cleaned=`$foamClean -space "$path"`
-if ( $status == 0 ) set path=($cleaned)
+#- Clean PATH (path)
+set cleaned=`$foamClean "$PATH"`
+if ( $status == 0 ) setenv PATH $cleaned
 
 #- Clean LD_LIBRARY_PATH
 set cleaned=`$foamClean "$LD_LIBRARY_PATH"`

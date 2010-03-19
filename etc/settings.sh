@@ -94,8 +94,8 @@ export FOAM_RUN=$WM_PROJECT_USER_DIR/run
 # add OpenFOAM scripts and wmake to the path
 export PATH=$WM_DIR:$WM_PROJECT_DIR/bin:$PATH
 
-_foamAddPath $FOAM_APPBIN $FOAM_SITE_APPBIN $FOAM_USER_APPBIN
-_foamAddLib  $FOAM_LIBBIN $FOAM_SITE_LIBBIN $FOAM_USER_LIBBIN
+_foamAddPath $FOAM_USER_APPBIN:$FOAM_SITE_APPBIN:$FOAM_APPBIN
+_foamAddLib  $FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN
 
 
 # Compiler settings
@@ -200,7 +200,7 @@ SYSTEMOPENMPI)
         echo "    libmpi dir    : $libDir"
     fi
 
-    _foamAddLib $libDir
+    _foamAddLib     $libDir
 
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
     unset mpi_version libDir
@@ -224,9 +224,9 @@ MPICH-GM)
     export MPICH_PATH=$MPI_ARCH_PATH
     export GM_LIB_PATH=/opt/gm/lib64
 
-    _foamAddPath $MPI_ARCH_PATH/bin
-    _foamAddLib  $MPI_ARCH_PATH/lib
-    _foamAddLib  $GM_LIB_PATH
+    _foamAddPath    $MPI_ARCH_PATH/bin
+    _foamAddLib     $MPI_ARCH_PATH/lib
+    _foamAddLib     $GM_LIB_PATH
 
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/mpich-gm
     ;;
@@ -270,18 +270,18 @@ FJMPI)
     export MPI_ARCH_PATH=/opt/FJSVmpi2
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/mpi
 
-    _foamAddPath $MPI_ARCH_PATH/bin
-    _foamAddLib  $MPI_ARCH_PATH/lib/sparcv9
-    _foamAddLib  /opt/FSUNf90/lib/sparcv9
-    _foamAddLib  /opt/FJSVpnidt/lib
+    _foamAddPath    $MPI_ARCH_PATH/bin
+    _foamAddLib     $MPI_ARCH_PATH/lib/sparcv9
+    _foamAddLib     /opt/FSUNf90/lib/sparcv9
+    _foamAddLib     /opt/FJSVpnidt/lib
     ;;
 
 QSMPI)
     export MPI_ARCH_PATH=/usr/lib/mpi
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/qsmpi
 
-    _foamAddPath $MPI_ARCH_PATH/bin
-    _foamAddLib $MPI_ARCH_PATH/lib
+    _foamAddPath    $MPI_ARCH_PATH/bin
+    _foamAddLib     $MPI_ARCH_PATH/lib
 
     ;;
 
@@ -309,8 +309,8 @@ export MPI_BUFFER_SIZE
 [ -d "$CGAL_LIB_DIR" ] && _foamAddLib $CGAL_LIB_DIR
 
 
-# Switch on the hoard memory allocator if available
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Enable the hoard memory allocator if available
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #if [ -f $FOAM_LIBBIN/libhoard.so ]
 #then
 #    export LD_PRELOAD=$FOAM_LIBBIN/libhoard.so:$LD_PRELOAD

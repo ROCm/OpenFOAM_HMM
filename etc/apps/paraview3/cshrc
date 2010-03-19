@@ -35,8 +35,8 @@
 #------------------------------------------------------------------------------
 
 # clean the PATH
-set cleaned=`$WM_PROJECT_DIR/bin/foamCleanPath -space "$path" "$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/cmake- $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-"`
-if ( $status == 0 ) set path=($cleaned)
+set cleaned=`$WM_PROJECT_DIR/bin/foamCleanPath "$PATH" "$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/cmake- $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-"`
+if ( $status == 0 ) setenv PATH $cleaned
 
 # determine the cmake to be used
 unsetenv CMAKE_HOME
@@ -44,7 +44,7 @@ foreach cmake ( cmake-2.8.1 cmake-2.8.0 cmake-2.6.4 )
     set cmake=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cmake
     if ( -r $cmake ) then
         setenv CMAKE_HOME $cmake
-        set path=($CMAKE_HOME/bin $path)
+        setenv PATH ${CMAKE_HOME}/bin:${PATH}
         break
     endif
 end
@@ -73,7 +73,7 @@ setenv ParaView_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-
 
 # set paths if binaries or source are present
 if ( -r $ParaView_DIR || -r $paraviewInstDir ) then
-    set path=($ParaView_DIR/bin $path)
+    setenv PATH ${ParaView_DIR}/bin:${PATH}
     setenv PV_PLUGIN_PATH $FOAM_LIBBIN/paraview-${ParaView_MAJOR}
 
     # add in python libraries if required
