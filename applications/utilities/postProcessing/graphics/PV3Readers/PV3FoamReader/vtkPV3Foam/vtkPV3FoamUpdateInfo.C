@@ -82,9 +82,31 @@ public:
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::wordList Foam::vtkPV3Foam::readZoneNames(const word& zoneType)
+template<class ZoneType>
+Foam::wordList Foam::vtkPV3Foam::getZoneNames
+(
+    const ZoneMesh<ZoneType, polyMesh>& zmesh
+) const
 {
-    wordList zoneNames;
+    wordList names(zmesh.size());
+    label nZone = 0;
+
+    forAll(zmesh, zoneI)
+    {
+        if (zmesh[zoneI].size())
+        {
+            names[nZone++] = zmesh[zoneI].name();
+        }
+    }
+    names.setSize(nZone);
+
+    return names;
+}
+
+
+Foam::wordList Foam::vtkPV3Foam::getZoneNames(const word& zoneType) const
+{
+    wordList names;
 
     // mesh not loaded - read from file
     IOobject ioObj
@@ -107,14 +129,14 @@ Foam::wordList Foam::vtkPV3Foam::readZoneNames(const word& zoneType)
     {
         zonesEntries zones(ioObj);
 
-        zoneNames.setSize(zones.size());
+        names.setSize(zones.size());
         forAll(zones, zoneI)
         {
-            zoneNames[zoneI] = zones[zoneI].keyword();
+            names[zoneI] = zones[zoneI].keyword();
         }
     }
 
-    return zoneNames;
+    return names;
 }
 
 
@@ -312,11 +334,11 @@ void Foam::vtkPV3Foam::updateInfoZones
     // ~~~~~~~~~~~~~~~~~~~~~
     if (meshPtr_)
     {
-        namesLst = meshPtr_->cellZones().names();
+        namesLst = getZoneNames(meshPtr_->cellZones());
     }
     else
     {
-        namesLst = readZoneNames("cellZones");
+        namesLst = getZoneNames("cellZones");
     }
 
     arrayRangeCellZones_.reset(arraySelection->GetNumberOfArrays());
@@ -335,11 +357,11 @@ void Foam::vtkPV3Foam::updateInfoZones
     // ~~~~~~~~~~~~~~~~~~~~~
     if (meshPtr_)
     {
-        namesLst = meshPtr_->faceZones().names();
+        namesLst = getZoneNames(meshPtr_->faceZones());
     }
     else
     {
-        namesLst = readZoneNames("faceZones");
+        namesLst = getZoneNames("faceZones");
     }
 
     arrayRangeFaceZones_.reset(arraySelection->GetNumberOfArrays());
@@ -358,11 +380,11 @@ void Foam::vtkPV3Foam::updateInfoZones
     // ~~~~~~~~~~~~~~~~~~~~~~
     if (meshPtr_)
     {
-        namesLst = meshPtr_->pointZones().names();
+        namesLst = getZoneNames(meshPtr_->pointZones());
     }
     else
     {
-        namesLst = readZoneNames("pointZones");
+        namesLst = getZoneNames("pointZones");
     }
 
     arrayRangePointZones_.reset(arraySelection->GetNumberOfArrays());
