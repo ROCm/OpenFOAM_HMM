@@ -3,9 +3,9 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -24,78 +24,32 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     foamNewSource
+#     makeParserCode
 #
 # Description
-#     Create a new standard OpenFOAM source file
+#     Use coco-cpp to create parser code
 #
 #------------------------------------------------------------------------------
-Script=${0##*/}
-Template="$WM_PROJECT_DIR/bin/templates/source/_Template"
+cd ${0%/*} || exit 1    # run from this directory
 
-usage() {
-    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
-    cat<<USAGE
-Usage: $Script <type> <class name>
 
-* create a new standard OpenFOAM source file
+bindir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/coco-cpp/bin
+frames=$bindir/../share/coco-cpp
 
-type: (C|H|I|IO|App)
-
-USAGE
+[ -d "$bindir" -a -x "$bindir/coco-cpp" ] || {
+    echo "no coco-cpp binary found"
     exit 1
 }
 
-
-# this implicitly covers a lone -help
-[ "$#" -gt 1 ] || usage
-
-className="$2"
-unset subType Type
-
-case "$1" in
--h | -help)
-    usage
-    ;;
-C|H)
-    Type=".$1"
-    ;;
-I)
-    Type="$1.H"
-    ;;
-IO)
-    Type="$1.C"
-    ;;
-app|App)
-    subType=App
-    Type=".C"
-    ;;
-*)
-    usage "unknown type"
-    ;;
-esac
-[ "$#" -eq 2 ] || usage "wrong number of arguments"
-shift 2
-
-
-fileName="$className$Type"
-
-
-echo "$Script: Creating new interface file $fileName"
-if [ -e "$fileName" ]
-then
-    echo "   Error: file exists"
+[ -d "$frames" -a -f "$frames/Parser.frame" -a -f "$frames/Scanner.frame" ] || {
+    echo "no coco-cpp frames found"
     exit 1
-fi
+}
 
+# run coco-cpp:
+$bindir/coco-cpp wmkdependParser.atg
 
-# process class name
-sed "s/CLASSNAME/$className/g" $Template$subType$Type > $fileName
-
-
-if [ "$subType" = App -a ! -d Make ]
-then
-    wmakeFilesAndOptions
-fi
+echo
+echo Done
 
 #------------------------------------------------------------------------------

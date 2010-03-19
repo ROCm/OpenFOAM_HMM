@@ -630,8 +630,7 @@ void Foam::isoSurfaceCell::calcSnappedPoint
     labelList& snappedPoint
 ) const
 {
-    const point greatPoint(VGREAT, VGREAT, VGREAT);
-    pointField collapsedPoint(mesh_.nPoints(), greatPoint);
+    pointField collapsedPoint(mesh_.nPoints(), point::max);
 
 
     // Work arrays
@@ -764,7 +763,7 @@ void Foam::isoSurfaceCell::calcSnappedPoint
         mesh_,
         collapsedPoint,
         minEqOp<point>(),
-        greatPoint,
+        point::max,
         true                // are coordinates so separate
     );
 
@@ -773,7 +772,7 @@ void Foam::isoSurfaceCell::calcSnappedPoint
 
     forAll(collapsedPoint, pointI)
     {
-        if (collapsedPoint[pointI] != greatPoint)
+        if (collapsedPoint[pointI] != point::max)
         {
             snappedPoint[pointI] = snappedPoints.size();
             snappedPoints.append(collapsedPoint[pointI]);

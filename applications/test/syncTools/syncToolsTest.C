@@ -187,8 +187,6 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
     );
     const pointField& localPoints = allBoundary.localPoints();
 
-    const point greatPoint(GREAT, GREAT, GREAT);
-
 
     // Point data
     // ~~~~~~~~~~
@@ -196,7 +194,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
     {
         // Create some data. Use slightly perturbed positions.
         Map<vector> sparseData;
-        pointField fullData(mesh.nPoints(), greatPoint);
+        pointField fullData(mesh.nPoints(), point::max);
 
         forAll(localPoints, i)
         {
@@ -222,7 +220,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
             mesh,
             fullData,
             minEqOp<vector>(),
-            greatPoint,
+            point::max,
             true                    // apply separation
         );
 
@@ -232,7 +230,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
         {
             const point& fullPt = fullData[meshPointI];
 
-            if (fullPt != greatPoint)
+            if (fullPt != point::max)
             {
                 const point& sparsePt = sparseData[meshPointI];
 
@@ -272,7 +270,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
     {
         // Create some data. Use slightly perturbed positions.
         EdgeMap<vector> sparseData;
-        pointField fullData(mesh.nEdges(), greatPoint);
+        pointField fullData(mesh.nEdges(), point::max);
 
         const edgeList& edges = allBoundary.edges();
         const labelList meshEdges = allBoundary.meshEdges
@@ -307,7 +305,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
             mesh,
             fullData,
             minEqOp<vector>(),
-            greatPoint,
+            point::max,
             true
         );
 
@@ -317,7 +315,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
         {
             const point& fullPt = fullData[meshEdgeI];
 
-            if (fullPt != greatPoint)
+            if (fullPt != point::max)
             {
                 const point& sparsePt = sparseData[mesh.edges()[meshEdgeI]];
 
@@ -364,8 +362,6 @@ void testPointSync(const polyMesh& mesh, Random& rndGen)
 {
     Info<< nl << "Testing point-wise data synchronisation." << endl;
 
-    const point greatPoint(GREAT, GREAT, GREAT);
-
     // Test position.
 
     {
@@ -379,7 +375,7 @@ void testPointSync(const polyMesh& mesh, Random& rndGen)
             mesh,
             syncedPoints,
             minEqOp<point>(),
-            greatPoint,
+            point::max,
             true
         );
 
@@ -444,8 +440,6 @@ void testEdgeSync(const polyMesh& mesh, Random& rndGen)
 
     const edgeList& edges = mesh.edges();
 
-    const point greatPoint(GREAT, GREAT, GREAT);
-
     // Test position.
 
     {
@@ -463,7 +457,7 @@ void testEdgeSync(const polyMesh& mesh, Random& rndGen)
             mesh,
             syncedMids,
             minEqOp<point>(),
-            greatPoint,
+            point::max,
             true
         );
 

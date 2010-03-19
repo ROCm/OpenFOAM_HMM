@@ -1,8 +1,9 @@
 #!/usr/xpg4/bin/sh
 
 # Replace all shell script headers with 
-if [ $# -ne 1 -o ! -d "$1" ]; then
-    echo "Usage: `basename $0` <dir>"
+if [ $# -ne 1 -o ! -d "$1" ]
+then
+    echo "Usage: ${0##*/} <dir>"
     echo ""
     echo "Replaces all occurrences of #!/bin/sh with #!/usr/xpg4/bin/sh inside a directory tree."
     exit 1
@@ -13,3 +14,4 @@ fi
 
 find $1 -exec $WM_PROJECT_DIR/bin/tools/inlineReplace '^#\!/bin/sh' '#\!/usr/xpg4/bin/sh' {} \; -print
 
+# ----------------------------------------------------------------- end-of-file

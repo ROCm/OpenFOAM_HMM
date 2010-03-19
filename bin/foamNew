@@ -27,7 +27,7 @@
 #     foamNew
 #
 # Description
-#     Create a new standard OpenFOAM source file
+#     Create a new standard OpenFOAM source or template file
 #
 #------------------------------------------------------------------------------
 usage() {
@@ -50,11 +50,11 @@ USAGE
 case "$1" in
 source)
     shift
-    $WM_PROJECT_DIR/bin/templates/source/foamNewSource $*
+    $WM_PROJECT_DIR/etc/codeTemplates/source/foamNewSource $*
     ;;
 template)
     shift
-    $WM_PROJECT_DIR/bin/templates/sourceTemplate/foamNewTemplate $*
+    $WM_PROJECT_DIR/etc/codeTemplates/template/foamNewTemplate $*
     ;;
 *)
     usage "unknown type"

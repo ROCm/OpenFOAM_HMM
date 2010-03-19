@@ -91,7 +91,8 @@
       animateable="0">
       <BooleanDomain name="bool"/>
       <Documentation>
-        Use vtkPolyhedron instead of decomposing polyhedra
+        Use vtkPolyhedron instead of decomposing polyhedra.
+        !!Actually uses vtkConvexPointSet until this is properly supported in VTK!!
       </Documentation>
     </IntVectorProperty>
 

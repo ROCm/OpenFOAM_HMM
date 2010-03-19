@@ -2,8 +2,9 @@
 
 # $0 string1 string2 file1 .. filen
 #
-if [ $# -lt 3 ]; then
-    echo "Usage: `basename $0` [-f] <string1> <string2> <file1> .. <filen>"
+if [ $# -lt 3 ]
+then
+    echo "Usage: ${0##*/} [-f] <string1> <string2> <file1> .. <filen>"
     echo ""
     echo "Replaces all occurrences of string1 by string2 in files."
     echo "(replacement of sed -i on those systems that don't support it)"
@@ -26,3 +27,5 @@ do
     #    echo "String $FROMSTRING not present in $f"
     #fi
 done
+
+# ----------------------------------------------------------------- end-of-file

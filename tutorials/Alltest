@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -30,10 +30,10 @@
 #     quickly tests the tutorials and writes out the scheme/solver information
 #
 #------------------------------------------------------------------------------
-
 cd ${0%/*} || exit 1    # run from this directory
 
-usage() {
+usage()
+{
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
@@ -50,7 +50,8 @@ USAGE
 }
 
 
-setDefaultFvSchemes() {
+setDefaultFvSchemes()
+{
 cat<<EOF
 gradSchemes { default Gauss linear; }
 divSchemes
@@ -127,8 +128,12 @@ eval set -- "$OPTS"
 while [ $1 != -- ]
 do
     case $1 in
-        -d) DEFAULT_SCHEMES=1;;
-        -h) usage;;
+    -d)
+        DEFAULT_SCHEMES=1
+        ;;
+    -h)
+        usage
+        ;;
     esac
     shift
 done
@@ -224,6 +229,5 @@ do
     cat $SOLVERS_TEMP | tr " " "\n" | sort -u | tr "\n" " " >> $SOLVERS_FILE
     echo "" >> $SOLVERS_FILE
 done
-
 
 # ----------------------------------------------------------------- end-of-file

@@ -84,7 +84,7 @@ inline bool Foam::wallPoint::update
 // Null constructor
 inline Foam::wallPoint::wallPoint()
 :
-    origin_(greatPoint),
+    origin_(point::max),
     distSqr_(GREAT)
 {}
 
@@ -131,7 +131,7 @@ inline Foam::scalar& Foam::wallPoint::distSqr()
 
 inline bool Foam::wallPoint::valid() const
 {
-    return origin_ != greatPoint;
+    return origin_ != point::max;
 }
 
 

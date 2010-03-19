@@ -112,7 +112,7 @@
   which may be obtained from http://gcc.gnu.org/.
 
   Install the compiler in
-  $WM_THIRD_PARTY_DIR/gcc-<GCC_VERSION>/platforms/$WM_ARCH$WM_COMPILER_ARCH/
+  $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gcc-<GCC_VERSION>
   and change the gcc version number in $WM_PROJECT_DIR/etc/settings.sh and
   $WM_PROJECT_DIR/etc/settings.csh appropriately and finally update the
   environment variables as in section 3.
@@ -166,6 +166,7 @@
   gcc-4.3.3.  Execute the following:
   + cd $WM_THIRD_PARTY_DIR
   + rm -rf paraview-3.6.1/platforms
+  + rm -rf platforms/*/paraview-3.6.1
   + ./makeParaView
 
   The PV3blockMeshReader and the PV3FoamReader ParaView plugins are compiled

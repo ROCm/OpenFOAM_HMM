@@ -159,13 +159,6 @@ Note
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-static const label VTK_TETRA      = 10;
-static const label VTK_PYRAMID    = 14;
-static const label VTK_WEDGE      = 13;
-static const label VTK_HEXAHEDRON = 12;
-
-
 template<class GeoField>
 void print(const char* msg, Ostream& os, const PtrList<GeoField>& flds)
 {
@@ -229,10 +222,7 @@ labelList getSelectedPatches
 }
 
 
-
-
-
-
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
 int main(int argc, char *argv[])
@@ -285,11 +275,11 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    bool doWriteInternal = !args.optionFound("noInternal");
-    bool doFaceZones     = !args.optionFound("noFaceZones");
-    bool doLinks         = !args.optionFound("noLinks");
-    bool binary          = !args.optionFound("ascii");
-    bool useTimeName     = args.optionFound("useTimeName");
+    const bool doWriteInternal = !args.optionFound("noInternal");
+    const bool doFaceZones     = !args.optionFound("noFaceZones");
+    const bool doLinks         = !args.optionFound("noLinks");
+    const bool binary          = !args.optionFound("ascii");
+    const bool useTimeName     = args.optionFound("useTimeName");
 
     if (binary && (sizeof(floatScalar) != 4 || sizeof(label) != 4))
     {
@@ -299,7 +289,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    bool nearCellValue = args.optionFound("nearCellValue");
+    const bool nearCellValue = args.optionFound("nearCellValue");
 
     if (nearCellValue)
     {
@@ -308,7 +298,7 @@ int main(int argc, char *argv[])
             << nl << endl;
     }
 
-    bool noPointValues = args.optionFound("noPointValues");
+    const bool noPointValues = args.optionFound("noPointValues");
 
     if (noPointValues)
     {
@@ -316,7 +306,7 @@ int main(int argc, char *argv[])
             << "Outputting cell values only" << nl << endl;
     }
 
-    bool allPatches = args.optionFound("allPatches");
+    const bool allPatches = args.optionFound("allPatches");
 
     List<wordRe> excludePatches;
     if (args.optionFound("excludePatches"))
@@ -392,15 +382,8 @@ int main(int argc, char *argv[])
 
         Info<< "Time: " << runTime.timeName() << endl;
 
-        word timeDesc = "";
-        if (useTimeName)
-        {
-            timeDesc = runTime.timeName();
-        }
-        else
-        {
-            timeDesc = name(runTime.timeIndex());
-        }
+        word timeDesc =
+            useTimeName ? runTime.timeName() : Foam::name(runTime.timeIndex());
 
         // Check for new polyMesh/ and update mesh, fvMeshSubset and cell
         // decomposition.
@@ -470,10 +453,7 @@ int main(int argc, char *argv[])
         IOobjectList objects(mesh, runTime.timeName());
 
         HashSet<word> selectedFields;
-        if (args.optionFound("fields"))
-        {
-            args.optionLookup("fields")() >> selectedFields;
-        }
+        args.optionReadIfPresent("fields", selectedFields);
 
         // Construct the vol fields (on the original mesh if subsetted)
 

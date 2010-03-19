@@ -1,7 +1,11 @@
 #!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions
 
 cleanCase
 rm -rf sets
-(cd validation && rm -f *.eps)
+rm -f validation/*.eps
+
+# ----------------------------------------------------------------- end-of-file

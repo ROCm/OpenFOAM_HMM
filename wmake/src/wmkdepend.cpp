@@ -35,12 +35,12 @@ Description
     only once.  This is why this program is faster than cpp.
 
 Usage
-    wmkdep [ -Idirectory ... -Idirectory ] filename
+    wmkdepend [ -Idir ... -Idir ] [ -iheader .. -iheader ] filename
 
 \*---------------------------------------------------------------------------*/
 
 #include <cstdio>
-#include <stdlib.h>
+#include <cstdlib>
 #include <cstring>
 
 #include "wmkdependParser.h"
@@ -58,7 +58,10 @@ void printUsage(const char* message = NULL)
     fwprintf
     (
         stderr,
-        L"Usage: wmkdepend [ -Idirectory ... -Idirectory ] filename\n"
+        L"Usage: wmkdepend %s filename\nOptions:\n%s\n",
+        "[ -Idir ... -Idir ] [ -iheader .. -iheader ]",
+        "  -Idir        specify include directory\n"
+        "  -iheader     specify header name to ignore\n"
     );
 }
 
@@ -67,23 +70,33 @@ int main(int argc, char* argv[])
 {
     if (argc == 1)
     {
-        printUsage("Error: input file not supplied");
+        printUsage("input file not supplied");
         ::exit(1);
     }
 
     for (int i=1; i < argc; i++)
     {
-        if (strncmp(argv[i], "-I", 2) == 0 && strlen(argv[i]) > 2)
+        if (strncmp(argv[i], "-I", 2) == 0)
         {
-            std::string dirName(argv[i] + 2);
-
-            // add trailing slash if required
-            if (dirName.rfind('/') != dirName.size()-1)
+            if (strlen(argv[i]) > 2)
             {
-                dirName += '/';
-            }
+                std::string dirName(argv[i] + 2);
 
-            wmake::Parser::includeDirs.push_back(dirName);
+                // add trailing slash if required
+                if (dirName.rfind('/') != dirName.size()-1)
+                {
+                    dirName += '/';
+                }
+
+                wmake::Parser::includeDirs.push_back(dirName);
+            }
+        }
+        else if (strncmp(argv[i], "-i", 2) == 0)
+        {
+            if (strlen(argv[i]) > 2)
+            {
+                wmake::Parser::visitedFiles.insert(argv[i] + 2);
+            }
         }
     }
 
@@ -117,7 +130,7 @@ int main(int argc, char* argv[])
         fwprintf
         (
             stderr,
-            L"Cannot find extension in source file name %s\n",
+            L"cannot find extension in source file name %s\n",
             sourceFile.c_str()
         );
         ::exit(1);

@@ -1,4 +1,6 @@
 #!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
@@ -20,3 +22,5 @@ runAnsysToFoam flange.ans 0.001
 runApplication $application
 runApplication foamToFieldview9
 runApplication foamToEnsight
+
+# ----------------------------------------------------------------- end-of-file

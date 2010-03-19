@@ -42,7 +42,6 @@ Description
 
 SourceFiles
     cyclicPolyPatch.C
-    cyclicPolyPatchMorph.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -72,11 +71,12 @@ public:
 
     enum transformType
     {
-        UNKNOWN,
-        ROTATIONAL,
-        TRANSLATIONAL
+        UNKNOWN,            // unspecified; automatic ordering
+        ROTATIONAL,         // rotation along coordinate axis
+        TRANSLATIONAL,      // translation
+        NOORDERING          // unspecified, no automatic ordering
     };
-    static const NamedEnum<transformType, 3> transformTypeNames;
+    static const NamedEnum<transformType, 4> transformTypeNames;
 
 
 private:
@@ -117,8 +117,6 @@ private:
 
         //- Find amongst selected faces the one with the largest area
         static label findMaxArea(const pointField&, const faceList&);
-
-        void calcTransforms();
 
 
         // Face ordering
@@ -174,6 +172,9 @@ private:
 protected:
 
     // Protected Member functions
+
+        //- Recalculate the transformation tensors
+        virtual void calcTransforms();
 
         //- Initialise the calculation of the patch geometry
         virtual void initGeometry(PstreamBuffers&);

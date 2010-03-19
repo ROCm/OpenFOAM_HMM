@@ -300,7 +300,7 @@ void Foam::coupledPolyPatch::calcTransformTensors
         {
             // Rotation, no separation
 
-            // Assume per-face differening transformation, correct later
+            // Assume per-face differing transformation, correct later
 
             separation_.setSize(0);
 

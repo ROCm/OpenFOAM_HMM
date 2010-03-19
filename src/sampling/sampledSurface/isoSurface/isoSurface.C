@@ -800,9 +800,7 @@ void Foam::isoSurface::calcSnappedPoint
     const pointField& pts = mesh_.points();
     const pointField& cc = mesh_.cellCentres();
 
-
-    const point greatPoint(VGREAT, VGREAT, VGREAT);
-    pointField collapsedPoint(mesh_.nPoints(), greatPoint);
+    pointField collapsedPoint(mesh_.nPoints(), point::max);
 
 
     // Work arrays
@@ -966,7 +964,7 @@ void Foam::isoSurface::calcSnappedPoint
 
 
     // Synchronise snap location
-    syncUnseparatedPoints(collapsedPoint, greatPoint);
+    syncUnseparatedPoints(collapsedPoint, point::max);
 
 
     snappedPoint.setSize(mesh_.nPoints());
@@ -974,7 +972,7 @@ void Foam::isoSurface::calcSnappedPoint
 
     forAll(collapsedPoint, pointI)
     {
-        if (collapsedPoint[pointI] != greatPoint)
+        if (collapsedPoint[pointI] != point::max)
         {
             snappedPoint[pointI] = snappedPoints.size();
             snappedPoints.append(collapsedPoint[pointI]);

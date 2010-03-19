@@ -26,7 +26,6 @@ License
 
 #include "nearWallDistNoSearch.H"
 #include "fvMesh.H"
-#include "wallPoint.H"
 #include "wallFvPatch.H"
 #include "surfaceFields.H"
 

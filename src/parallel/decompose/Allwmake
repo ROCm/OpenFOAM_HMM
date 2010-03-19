@@ -6,7 +6,6 @@ wmakeLnInclude decompositionMethods
 
 wmake libso scotchDecomp
 wmake libso metisDecomp
-wmake libso reconstruct
 
 if [ -d "$FOAM_MPI_LIBBIN" ]
 then

@@ -51,7 +51,7 @@ namespace Foam
 
 void Foam::displacementLayeredMotionFvMotionSolver::calcZoneMask
 (
-    const label cellZoneI, 
+    const label cellZoneI,
     PackedBoolList& isZonePoint,
     PackedBoolList& isZoneEdge
 ) const
@@ -133,16 +133,14 @@ void Foam::displacementLayeredMotionFvMotionSolver::walkStructured
     vectorField& data
 ) const
 {
-    const pointField& points = mesh().points();
-
     List<pointEdgeStructuredWalk> seedInfo(seedPoints.size());
 
     forAll(seedPoints, i)
     {
         seedInfo[i] = pointEdgeStructuredWalk
         (
-            true,
-            points[seedPoints[i]],
+            points0()[seedPoints[i]],  // location of data
+            points0()[seedPoints[i]],  // previous location
             0.0,
             seedData[i]
         );
@@ -150,23 +148,39 @@ void Foam::displacementLayeredMotionFvMotionSolver::walkStructured
 
     // Current info on points
     List<pointEdgeStructuredWalk> allPointInfo(mesh().nPoints());
-    // Mark points inside cellZone
+
+    // Mark points inside cellZone.
+    // Note that we use points0, not mesh.points()
+    // so as not to accumulate errors.
     forAll(isZonePoint, pointI)
     {
         if (isZonePoint[pointI])
         {
-            allPointInfo[pointI].inZone() = true;
+            allPointInfo[pointI] = pointEdgeStructuredWalk
+            (
+                points0()[pointI],  // location of data
+                vector::max,        // not valid
+                0.0,
+                vector::zero        // passive data
+            );
         }
     }
 
     // Current info on edges
     List<pointEdgeStructuredWalk> allEdgeInfo(mesh().nEdges());
+
     // Mark edges inside cellZone
     forAll(isZoneEdge, edgeI)
     {
         if (isZoneEdge[edgeI])
         {
-            allEdgeInfo[edgeI].inZone() = true;
+            allEdgeInfo[edgeI] = pointEdgeStructuredWalk
+            (
+                mesh().edges()[edgeI].centre(points0()),    // location of data
+                vector::max,                                // not valid
+                0.0,
+                vector::zero
+            );
         }
     }
 
