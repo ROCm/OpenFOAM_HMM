@@ -37,16 +37,17 @@
 #
 #------------------------------------------------------------------------------
 
-# Specify system compiler
-# ~~~~~~~~~~~~~~~~~~~~~~~
-set compilerInstall=system
+## Specify system compiler
+## ~~~~~~~~~~~~~~~~~~~~~~~
+#set compilerInstall=system
 
-# Specify system openmpi
-# ~~~~~~~~~~~~~~~~~~~~~~
-setenv WM_MPLIB SYSTEMOPENMPI
+## Specify system openmpi
+## ~~~~~~~~~~~~~~~~~~~~~~
+#setenv WM_MPLIB SYSTEMOPENMPI
 
 # Specify ParaView version
 # ~~~~~~~~~~~~~~~~~~~~~~~~
-setenv ParaView_VERSION 3.7.0        # eg, cvs/git version
+setenv ParaView_VERSION git        # eg, cvs/git version
+setenv ParaView_MAJOR 3.7
 
 # -----------------------------------------------------------------------------
