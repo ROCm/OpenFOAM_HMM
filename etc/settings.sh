@@ -295,7 +295,7 @@ _foamAddLib $FOAM_MPI_LIBBIN
 
 # Set the minimum MPI buffer size (used by all platforms except SGI MPI)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-minBufferSize=20000000
+: ${minBufferSize:=20000000}
 
 if [ "${MPI_BUFFER_SIZE:=$minBufferSize}" -lt $minBufferSize ]
 then
@@ -321,4 +321,4 @@ export MPI_BUFFER_SIZE
 # ~~~~~~~~~~~~~~~~~~~~
 unset _foamAddPath _foamAddLib _foamAddMan minBufferSize
 
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------- end-of-file

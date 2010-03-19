@@ -117,8 +117,8 @@ case OpenFOAM:
     endif
 
     _foamAddPath    ${WM_COMPILER_DIR}/bin
-    _foamAddLib     ${WM_COMPILER_DIR}/lib${WM_COMPILER_LIB_ARCH}
     _foamAddLib     ${WM_COMPILER_DIR}/lib
+    _foamAddLib     ${WM_COMPILER_DIR}/lib${WM_COMPILER_LIB_ARCH}
     _foamAddMan     ${WM_COMPILER_DIR}/man
 
     breaksw
@@ -128,7 +128,7 @@ endsw
 # Communications library
 # ~~~~~~~~~~~~~~~~~~~~~~
 
-unset MPI_ARCH_PATH
+unsetenv MPI_ARCH_PATH
 
 switch ("$WM_MPLIB")
 case OPENMPI:
@@ -256,7 +256,7 @@ _foamAddLib $FOAM_MPI_LIBBIN
 
 # Set the minimum MPI buffer size (used by all platforms except SGI MPI)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-set minBufferSize=20000000
+if ( ! $?minBufferSize ) set minBufferSize=20000000
 
 if ( $?MPI_BUFFER_SIZE ) then
     if ( $MPI_BUFFER_SIZE < $minBufferSize ) then
@@ -283,9 +283,7 @@ endif
 
 # cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
-unalias _foamAddPath
-unalias _foamAddLib
-unalias _foamAddMan
-unset minBufferSize
+unalias _foamAddPath _foamAddLib _foamAddMan
+unset compilerInstall minBufferSize
 
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------- end-of-file
