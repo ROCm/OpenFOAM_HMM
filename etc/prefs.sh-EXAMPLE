@@ -47,6 +47,6 @@ export WM_MPLIB=SYSTEMOPENMPI
 
 # Specify ParaView version
 # ~~~~~~~~~~~~~~~~~~~~~~~~
-export ParaView_VERSION=3.7.0        # eg, cvs/git version
-
+export ParaView_VERSION=git        # eg, cvs/git version
+export ParaView_MAJOR=3.7
 # -----------------------------------------------------------------------------
