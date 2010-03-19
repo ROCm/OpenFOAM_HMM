@@ -97,9 +97,6 @@ case OpenFOAM:
         _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/mpfr-2.4.1/lib
         _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gmp-4.2.4/lib
     breaksw
-    case Gcc42:
-        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gcc-4.2.4
-    breaksw
     endsw
 
     # Check that the compiler directory can be found
@@ -123,12 +120,11 @@ endsw
 # Communications library
 # ~~~~~~~~~~~~~~~~~~~~~~
 
-unsetenv MPI_ARCH_PATH
+unsetenv MPI_ARCH_PATH MPI_HOME
 
 switch ("$WM_MPLIB")
 case OPENMPI:
     set mpi_version=openmpi-1.4.1
-    setenv MPI_HOME $WM_THIRD_PARTY_DIR/$mpi_version
     setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mpi_version
 
     # Tell OpenMPI where to find its install directory
