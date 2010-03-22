@@ -94,15 +94,9 @@ export FOAM_RUN=$WM_PROJECT_USER_DIR/run
 # add OpenFOAM scripts and wmake to the path
 export PATH=$WM_DIR:$WM_PROJECT_DIR/bin:$PATH
 
-<<<<<<< HEAD
-_foamAddPath $FOAM_APPBIN $FOAM_SITE_APPBIN $FOAM_USER_APPBIN
- # Make sure to pick up dummy versions of external libraries last
-_foamAddLib  $FOAM_LIBBIN/dummy
-_foamAddLib  $FOAM_LIBBIN $FOAM_SITE_LIBBIN $FOAM_USER_LIBBIN
-=======
 _foamAddPath $FOAM_USER_APPBIN:$FOAM_SITE_APPBIN:$FOAM_APPBIN
-_foamAddLib  $FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN
->>>>>>> 00e72ccabdc9912f14f889531e88f60a79c68dcb
+ # Make sure to pick up dummy versions of external libraries last
+_foamAddLib  $FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN:$FOAM_LIBBIN/dummy
 
 
 # Compiler settings
