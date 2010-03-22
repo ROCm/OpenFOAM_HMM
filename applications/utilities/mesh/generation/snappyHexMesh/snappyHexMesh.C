@@ -347,7 +347,7 @@ int main(int argc, char *argv[])
             << "You have selected decomposition method "
             << decomposer.typeName
             << " which is not parallel aware." << endl
-            << "Please select one that is (hierarchical, ptscotch, parMetis)"
+            << "Please select one that is (hierarchical, ptscotch)"
             << exit(FatalError);
     }
 

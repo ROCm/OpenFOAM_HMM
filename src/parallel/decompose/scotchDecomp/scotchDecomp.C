@@ -474,7 +474,7 @@ Foam::labelList Foam::scotchDecomp::decompose
     {
         FatalErrorIn
         (
-            "parMetisDecomp::decompose(const labelList&, const pointField&)"
+            "scotchDecomp::decompose(const labelList&, const pointField&)"
         )   << "Size of cell-to-coarse map " << agglom.size()
             << " differs from number of cells in mesh " << mesh_.nCells()
             << exit(FatalError);

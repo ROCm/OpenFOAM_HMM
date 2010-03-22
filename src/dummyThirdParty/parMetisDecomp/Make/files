@@ -1,3 +1,0 @@
-dummyParMetisDecomp.C
-
-LIB = $(FOAM_LIBBIN)/dummy/libparMetisDecomp

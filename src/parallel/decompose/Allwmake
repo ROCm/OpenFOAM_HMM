@@ -9,7 +9,7 @@ wmake libso metisDecomp
 
 if [ -d "$FOAM_MPI_LIBBIN" ]
 then
-    ( WM_OPTIONS=${WM_OPTIONS}$WM_MPLIB; wmake libso ptscotchDecomp && wmake libso parMetisDecomp )
+    ( WM_OPTIONS=${WM_OPTIONS}$WM_MPLIB; wmake libso ptscotchDecomp )
 fi
 
 wmake libso decompositionMethods
