@@ -119,27 +119,27 @@ nArgs=$#
 fileName="$1"
 
 # Define the various places to be searched:
-set -- $(
-    case "$mode" in
-    *u*)  # user
-        echo $HOME/.${WM_PROJECT:-OpenFOAM}/$WM_PROJECT_VERSION
-        echo $HOME/.${WM_PROJECT:-OpenFOAM}
-        ;;
-    esac
+files=""
+case "$mode" in
+*u*)  # user
+    files="$files $HOME/.${WM_PROJECT:-OpenFOAM}/$WM_PROJECT_VERSION"
+    files="$files $HOME/.${WM_PROJECT:-OpenFOAM}"
+    ;;
+esac
 
-    case "$mode" in
-    *g*)  # group
-        echo $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION
-        echo $WM_PROJECT_INST_DIR/site
-        ;;
-    esac
+case "$mode" in
+*g*)  # group
+    files="$files $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION"
+    files="$files $WM_PROJECT_INST_DIR/site"
+    ;;
+esac
 
-    case "$mode" in
-    *o*)  # other
-        echo $WM_PROJECT_DIR/etc
-        ;;
-    esac
-)
+case "$mode" in
+*o*)  # other
+    files="$files $WM_PROJECT_DIR/etc"
+    ;;
+esac
+set -- $files
 
 
 #
