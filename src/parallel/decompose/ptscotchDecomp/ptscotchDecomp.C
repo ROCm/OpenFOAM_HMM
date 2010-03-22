@@ -105,16 +105,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "scotchDecomp.H"
+#include "ptscotchDecomp.H"
 #include "addToRunTimeSelectionTable.H"
-#include "floatScalar.H"
 #include "Time.H"
-#include "cyclicPolyPatch.H"
 #include "OFstream.H"
 
 extern "C"
 {
-#include "scotch.h"
+#include <stdio.h>
+#include "mpi.h"
+#include "ptscotch.h"
 }
 
 
@@ -140,23 +140,23 @@ extern "C"
 
 namespace Foam
 {
-    defineTypeNameAndDebug(scotchDecomp, 0);
+    defineTypeNameAndDebug(ptscotchDecomp, 0);
 
     addToRunTimeSelectionTable
     (
         decompositionMethod,
-        scotchDecomp,
+        ptscotchDecomp,
         dictionaryMesh
     );
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::scotchDecomp::check(const int retVal, const char* str)
+void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 {
     if (retVal)
     {
-        FatalErrorIn("scotchDecomp::decompose(..)")
+        FatalErrorIn("ptscotchDecomp::decompose(..)")
             << "Call to scotch routine " << str << " failed."
             << exit(FatalError);
     }
@@ -164,58 +164,58 @@ void Foam::scotchDecomp::check(const int retVal, const char* str)
 
 
 // Call scotch with options from dictionary.
-Foam::label Foam::scotchDecomp::decompose
+Foam::label Foam::ptscotchDecomp::decompose
 (
-    const List<int>& adjncy,
-    const List<int>& xadj,
+    List<int>& adjncy,
+    List<int>& xadj,
     const scalarField& cWeights,
 
     List<int>& finalDecomp
 )
 {
-    // Dump graph
-    if (decompositionDict_.found("scotchCoeffs"))
-    {
-        const dictionary& scotchCoeffs =
-            decompositionDict_.subDict("scotchCoeffs");
-
-        if (scotchCoeffs.found("writeGraph"))
-        {
-            Switch writeGraph(scotchCoeffs.lookup("writeGraph"));
-
-            if (writeGraph)
-            {
-                OFstream str(mesh_.time().path() / mesh_.name() + ".grf");
-
-                Info<< "Dumping Scotch graph file to " << str.name() << endl
-                    << "Use this in combination with gpart." << endl;
-
-                label version = 0;
-                str << version << nl;
-                // Numer of vertices
-                str << xadj.size()-1 << ' ' << adjncy.size() << nl;
-                // Numbering starts from 0
-                label baseval = 0;
-                // Has weights?
-                label hasEdgeWeights = 0;
-                label hasVertexWeights = 0;
-                label numericflag = 10*hasEdgeWeights+hasVertexWeights;
-                str << baseval << ' ' << numericflag << nl;
-                for (label cellI = 0; cellI < xadj.size()-1; cellI++)
-                {
-                    label start = xadj[cellI];
-                    label end = xadj[cellI+1];
-                    str << end-start;
-
-                    for (label i = start; i < end; i++)
-                    {
-                        str << ' ' << adjncy[i];
-                    }
-                    str << nl;
-                }
-            }
-        }
-    }
+//    // Dump graph
+//    if (decompositionDict_.found("ptscotchCoeffs"))
+//    {
+//        const dictionary& scotchCoeffs =
+//            decompositionDict_.subDict("ptscotchCoeffs");
+//
+//        if (scotchCoeffs.found("writeGraph"))
+//        {
+//            Switch writeGraph(scotchCoeffs.lookup("writeGraph"));
+//
+//            if (writeGraph)
+//            {
+//                OFstream str(mesh_.time().path() / mesh_.name() + ".grf");
+//
+//                Info<< "Dumping Scotch graph file to " << str.name() << endl
+//                    << "Use this in combination with gpart." << endl;
+//
+//                label version = 0;
+//                str << version << nl;
+//                // Numer of vertices
+//                str << xadj.size()-1 << ' ' << adjncy.size() << nl;
+//                // Numbering starts from 0
+//                label baseval = 0;
+//                // Has weights?
+//                label hasEdgeWeights = 0;
+//                label hasVertexWeights = 0;
+//                label numericflag = 10*hasEdgeWeights+hasVertexWeights;
+//                str << baseval << ' ' << numericflag << nl;
+//                for (label cellI = 0; cellI < xadj.size()-1; cellI++)
+//                {
+//                    label start = xadj[cellI];
+//                    label end = xadj[cellI+1];
+//                    str << end-start;
+//
+//                    for (label i = start; i < end; i++)
+//                    {
+//                        str << ' ' << adjncy[i];
+//                    }
+//                    str << nl;
+//                }
+//            }
+//        }
+//    }
 
 
     // Strategy
@@ -236,9 +236,9 @@ Foam::label Foam::scotchDecomp::decompose
         {
             if (debug)
             {
-                Info<< "scotchDecomp : Using strategy " << strategy << endl;
+                Info<< "ptscotchDecomp : Using strategy " << strategy << endl;
             }
-            SCOTCH_stratGraphMap(&stradat, strategy.c_str());
+            SCOTCH_stratDgraphMap(&stradat, strategy.c_str());
             //fprintf(stdout, "S\tStrat=");
             //SCOTCH_stratSave(&stradat, stdout);
             //fprintf(stdout, "\n");
@@ -260,7 +260,7 @@ Foam::label Foam::scotchDecomp::decompose
         {
             WarningIn
             (
-                "scotchDecomp::decompose"
+                "ptscotchDecomp::decompose"
                 "(const pointField&, const scalarField&)"
             )   << "Illegal minimum weight " << minWeights
                 << endl;
@@ -270,7 +270,7 @@ Foam::label Foam::scotchDecomp::decompose
         {
             FatalErrorIn
             (
-                "scotchDecomp::decompose"
+                "ptscotchDecomp::decompose"
                 "(const pointField&, const scalarField&)"
             )   << "Number of cell weights " << cWeights.size()
                 << " does not equal number of cells " << xadj.size()-1
@@ -287,26 +287,32 @@ Foam::label Foam::scotchDecomp::decompose
 
 
 
-    SCOTCH_Graph grafdat;
-    check(SCOTCH_graphInit(&grafdat), "SCOTCH_graphInit");
+    SCOTCH_Dgraph grafdat;
+    check(SCOTCH_dgraphInit(&grafdat, MPI_COMM_WORLD), "SCOTCH_dgraphInit");
     check
     (
-        SCOTCH_graphBuild
+        SCOTCH_dgraphBuild
         (
-            &grafdat,
+            &grafdat,               // grafdat
             0,                      // baseval, c-style numbering
-            xadj.size()-1,          // vertnbr, nCells
-            xadj.begin(),           // verttab, start index per cell into adjncy
-            &xadj[1],               // vendtab, end index  ,,
-            velotab.begin(),        // velotab, vertex weights
-            NULL,                   // vlbltab
-            adjncy.size(),          // edgenbr, number of arcs
-            adjncy.begin(),         // edgetab
+            xadj.size()-1,          // vertlocnbr, nCells
+            xadj.size()-1,          // vertlocmax
+            const_cast<SCOTCH_Num*>(xadj.begin()),  // vertloctab, start index per cell into
+                                    // adjncy
+            &xadj[1],               // vendloctab, end index  ,,
+
+            velotab.begin(),        // veloloctab, vertex weights
+            NULL,                   // vlblloctab
+
+            adjncy.size(),          // edgelocnbr, number of arcs
+            adjncy.size(),          // edgelocsiz
+            adjncy.begin(),         // edgeloctab
+            NULL,                   // edgegsttab
             NULL                    // edlotab, edge weights
         ),
-        "SCOTCH_graphBuild"
+        "SCOTCH_dgraphBuild"
     );
-    check(SCOTCH_graphCheck(&grafdat), "SCOTCH_graphCheck");
+    check(SCOTCH_dgraphCheck(&grafdat), "SCOTCH_dgraphCheck");
 
 
     // Architecture
@@ -328,7 +334,7 @@ Foam::label Foam::scotchDecomp::decompose
     {
         if (debug)
         {
-            Info<< "scotchDecomp : Using procesor weights " << processorWeights
+            Info<< "ptscotchDecomp : Using procesor weights " << processorWeights
                 << endl;
         }
         check
@@ -348,9 +354,9 @@ Foam::label Foam::scotchDecomp::decompose
 
 
     //SCOTCH_Mapping mapdat;
-    //SCOTCH_graphMapInit(&grafdat, &mapdat, &archdat, NULL);
-    //SCOTCH_graphMapCompute(&grafdat, &mapdat, &stradat); /* Perform mapping */
-    //SCOTCH_graphMapExit(&grafdat, &mapdat);
+    //SCOTCH_dgraphMapInit(&grafdat, &mapdat, &archdat, NULL);
+    //SCOTCH_dgraphMapCompute(&grafdat, &mapdat, &stradat); /*Perform mapping*/
+    //SCOTCHdgraphMapExit(&grafdat, &mapdat);
 
 
     // Hack:switch off fpu error trapping
@@ -367,7 +373,7 @@ Foam::label Foam::scotchDecomp::decompose
     finalDecomp = 0;
     check
     (
-        SCOTCH_graphMap
+        SCOTCH_dgraphMap
         (
             &grafdat,
             &archdat,
@@ -386,7 +392,7 @@ Foam::label Foam::scotchDecomp::decompose
     //finalDecomp.setSize(xadj.size()-1);
     //check
     //(
-    //    SCOTCH_graphPart
+    //    SCOTCH_dgraphPart
     //    (
     //        &grafdat,
     //        nProcessors_,       // partnbr
@@ -397,7 +403,7 @@ Foam::label Foam::scotchDecomp::decompose
     //);
 
     // Release storage for graph
-    SCOTCH_graphExit(&grafdat);
+    SCOTCH_dgraphExit(&grafdat);
     // Release storage for strategy
     SCOTCH_stratExit(&stradat);
     // Release storage for network topology
@@ -409,7 +415,7 @@ Foam::label Foam::scotchDecomp::decompose
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::scotchDecomp::scotchDecomp
+Foam::ptscotchDecomp::ptscotchDecomp
 (
     const dictionary& decompositionDict,
     const polyMesh& mesh
@@ -422,7 +428,7 @@ Foam::scotchDecomp::scotchDecomp
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::labelList Foam::scotchDecomp::decompose
+Foam::labelList Foam::ptscotchDecomp::decompose
 (
     const pointField& points,
     const scalarField& pointWeights
@@ -432,7 +438,7 @@ Foam::labelList Foam::scotchDecomp::decompose
     {
         FatalErrorIn
         (
-            "scotchDecomp::decompose(const pointField&, const scalarField&)"
+            "ptscotchDecomp::decompose(const pointField&, const scalarField&)"
         )
             << "Can use this decomposition method only for the whole mesh"
             << endl
@@ -442,12 +448,26 @@ Foam::labelList Foam::scotchDecomp::decompose
             << exit(FatalError);
     }
 
+//    // For running sequential ...
+//    if (Pstream::nProcs() <= 1)
+//    {
+//        return scotchDecomp(decompositionDict_, mesh_)
+//            .decompose(points, pointWeights);
+//    }
+
     // Make Metis CSR (Compressed Storage Format) storage
     //   adjncy      : contains neighbours (= edges in graph)
     //   xadj(celli) : start of information in adjncy for celli
-    List<int> adjncy;
-    List<int> xadj;
-    calcCSR(mesh_, adjncy, xadj);
+    // Connections
+    Field<int> adjncy;
+    // Offsets into adjncy
+    Field<int> xadj;
+    calcDistributedCSR
+    (
+        mesh_,
+        adjncy,
+        xadj
+    );
 
     // Decompose using default weights
     List<int> finalDecomp;
@@ -463,7 +483,7 @@ Foam::labelList Foam::scotchDecomp::decompose
 }
 
 
-Foam::labelList Foam::scotchDecomp::decompose
+Foam::labelList Foam::ptscotchDecomp::decompose
 (
     const labelList& agglom,
     const pointField& agglomPoints,
@@ -474,11 +494,18 @@ Foam::labelList Foam::scotchDecomp::decompose
     {
         FatalErrorIn
         (
-            "parMetisDecomp::decompose(const labelList&, const pointField&)"
+            "ptscotchDecomp::decompose(const labelList&, const pointField&)"
         )   << "Size of cell-to-coarse map " << agglom.size()
             << " differs from number of cells in mesh " << mesh_.nCells()
             << exit(FatalError);
     }
+
+//    // For running sequential ...
+//    if (Pstream::nProcs() <= 1)
+//    {
+//        return scotchDecomp(decompositionDict_, mesh_)
+//            .decompose(agglom, agglomPoints, pointWeights);
+//    }
 
     // Make Metis CSR (Compressed Storage Format) storage
     //   adjncy      : contains neighbours (= edges in graph)
@@ -515,7 +542,7 @@ Foam::labelList Foam::scotchDecomp::decompose
 }
 
 
-Foam::labelList Foam::scotchDecomp::decompose
+Foam::labelList Foam::ptscotchDecomp::decompose
 (
     const labelListList& globalCellCells,
     const pointField& cellCentres,
@@ -526,12 +553,18 @@ Foam::labelList Foam::scotchDecomp::decompose
     {
         FatalErrorIn
         (
-            "scotchDecomp::decompose"
-            "(const labelListList&, const pointField&, const scalarField&)"
+            "ptscotchDecomp::decompose(const pointField&, const labelListList&)"
         )   << "Inconsistent number of cells (" << globalCellCells.size()
             << ") and number of cell centres (" << cellCentres.size()
             << ")." << exit(FatalError);
     }
+
+//    // For running sequential ...
+//    if (Pstream::nProcs() <= 1)
+//    {
+//        return scotchDecomp(decompositionDict_, mesh_)
+//            .decompose(globalCellCells, cellCentres, cWeights);
+//    }
 
 
     // Make Metis CSR (Compressed Storage Format) storage

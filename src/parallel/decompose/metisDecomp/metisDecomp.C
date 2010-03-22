@@ -28,7 +28,6 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "floatScalar.H"
 #include "Time.H"
-#include "scotchDecomp.H"
 
 extern "C"
 {
@@ -340,7 +339,7 @@ Foam::labelList Foam::metisDecomp::decompose
 
     List<int> adjncy;
     List<int> xadj;
-    scotchDecomp::calcCSR(mesh_, adjncy, xadj);
+    calcCSR(mesh_, adjncy, xadj);
 
     // Decompose using default weights
     List<int> finalDecomp;
@@ -390,7 +389,7 @@ Foam::labelList Foam::metisDecomp::decompose
             cellCells
         );
 
-        scotchDecomp::calcCSR(cellCells, adjncy, xadj);
+        calcCSR(cellCells, adjncy, xadj);
     }
 
     // Decompose using default weights
@@ -435,7 +434,7 @@ Foam::labelList Foam::metisDecomp::decompose
 
     List<int> adjncy;
     List<int> xadj;
-    scotchDecomp::calcCSR(globalCellCells, adjncy, xadj);
+    calcCSR(globalCellCells, adjncy, xadj);
 
 
     // Decompose using default weights

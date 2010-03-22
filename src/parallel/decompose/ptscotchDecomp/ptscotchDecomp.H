@@ -23,18 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::scotchDecomp
+    Foam::ptscotchDecomp
 
 Description
-    Scotch domain decomposition
+    PTScotch domain decomposition
 
 SourceFiles
-    scotchDecomp.C
+    ptscotchDecomp.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef scotchDecomp_H
-#define scotchDecomp_H
+#ifndef ptscotchDecomp_H
+#define ptscotchDecomp_H
 
 #include "decompositionMethod.H"
 
@@ -42,10 +42,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class scotchDecomp Declaration
+                           Class ptscotchDecomp Declaration
 \*---------------------------------------------------------------------------*/
 
-class scotchDecomp
+class ptscotchDecomp
 :
     public decompositionMethod
 {
@@ -61,27 +61,27 @@ class scotchDecomp
 
         label decompose
         (
-            const List<int>& adjncy,
-            const List<int>& xadj,
+            List<int>& adjncy,
+            List<int>& xadj,
             const scalarField& cWeights,
             List<int>& finalDecomp
         );
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const scotchDecomp&);
-        scotchDecomp(const scotchDecomp&);
+        void operator=(const ptscotchDecomp&);
+        ptscotchDecomp(const ptscotchDecomp&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("scotch");
+    TypeName("ptscotch");
 
 
     // Constructors
 
         //- Construct given the decomposition dictionary and mesh
-        scotchDecomp
+        ptscotchDecomp
         (
             const dictionary& decompositionDict,
             const polyMesh& mesh
@@ -90,7 +90,7 @@ public:
 
     // Destructor
 
-        virtual ~scotchDecomp()
+        virtual ~ptscotchDecomp()
         {}
 
 
@@ -98,15 +98,12 @@ public:
 
         virtual bool parallelAware() const
         {
-            // Metis does not know about proc boundaries
-            return false;
+            // ptscotch does not know about proc boundaries
+            return true;
         }
 
         //- Return for every coordinate the wanted processor number. Use the
         //  mesh connectivity (if needed)
-        //  Weights get truncated to convert into integer
-        //  so e.g. 3.5 is seen as 3. The overall sum of weights
-        //  might otherwise overflow.
         virtual labelList decompose
         (
             const pointField& points,
@@ -117,7 +114,6 @@ public:
         //  passed agglomeration map (from fine to coarse cells) and coarse cell
         //  location. Can be overridden by decomposers that provide this
         //  functionality natively.
-        //  See note on weights above.
         virtual labelList decompose
         (
             const labelList& agglom,
@@ -132,13 +128,13 @@ public:
         //    from 0 at processor0 and then incrementing all through the
         //    processors)
         //  - the connections are across coupled patches
-        //  See note on weights above.
         virtual labelList decompose
         (
             const labelListList& globalCellCells,
             const pointField& cc,
             const scalarField& cWeights
         );
+
 };
 
 

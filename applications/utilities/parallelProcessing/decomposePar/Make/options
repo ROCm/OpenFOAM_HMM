@@ -7,6 +7,6 @@ EXE_INC = \
 EXE_LIBS = \
     -lfiniteVolume \
     -lgenericPatchFields \
-    -ldecompositionMethods \
+    -ldecompositionMethods -lmetisDecomp -lscotchDecomp \
     -llagrangian \
     -lmeshTools

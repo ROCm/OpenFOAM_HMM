@@ -24,64 +24,59 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "parMetisDecomp.H"
+#include "ptscotchDecomp.H"
 #include "addToRunTimeSelectionTable.H"
-#include "polyMesh.H"
 #include "Time.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+static const char* notImplementedMessage =
+"You are trying to use ptscotch but do not have the "
+"ptscotchDecomp library loaded."
+"\nThis message is from the dummy ptscotchDecomp stub library instead.\n"
+"\n"
+"Please install ptscotch and make sure that libptscotch.so is in your "
+"LD_LIBRARY_PATH.\n"
+"The ptscotchDecomp library can then be built in "
+"$FOAM_SRC/parallel/decompose/ptscotchDecomp\n";
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(parMetisDecomp, 0);
+    defineTypeNameAndDebug(ptscotchDecomp, 0);
 
     addToRunTimeSelectionTable
     (
         decompositionMethod,
-        parMetisDecomp,
+        ptscotchDecomp,
         dictionaryMesh
     );
 }
 
-static const char* notImplementedMessage =
-"You are trying to use parMetis but do not have the parMetisDecomp library "
-"loaded.\n"
-"This message is from the dummy parMetisDecomp stub library instead.\n"
-"\n"
-"Please install parMetis and make sure that libparMetis.so is in your "
-"LD_LIBRARY_PATH.\n"
-"The parMetisDecomp library can then be built in "
-"$FOAM_SRC/parallel/decompose/decompositionMethods/parMetisDecomp\n";
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-//- Does prevention of 0 cell domains and calls parmetis.
-Foam::label Foam::parMetisDecomp::decompose
-(
-    Field<int>& xadj,
-    Field<int>& adjncy,
-    const pointField& cellCentres,
-    Field<int>& cellWeights,
-    Field<int>& faceWeights,
-    const List<int>& options,
+void Foam::ptscotchDecomp::check(const int retVal, const char* str)
+{}
 
+
+Foam::label Foam::ptscotchDecomp::decompose
+(
+    List<int>& adjncy,
+    List<int>& xadj,
+    const scalarField& cWeights,
     List<int>& finalDecomp
 )
 {
     FatalErrorIn
     (
-        "label parMetisDecomp::decompose"
+        "label ptscotchDecomp::decompose"
         "("
-            "Field<int>&, "
-            "Field<int>&, "
-            "const pointField&, "
-            "Field<int>&, "
-            "Field<int>&, "
             "const List<int>&, "
+            "const List<int>&, "
+            "const scalarField&, "
             "List<int>&"
         ")"
-    )<< notImplementedMessage << exit(FatalError);
+    )   << notImplementedMessage << exit(FatalError);
 
     return -1;
 }
@@ -89,7 +84,7 @@ Foam::label Foam::parMetisDecomp::decompose
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::parMetisDecomp::parMetisDecomp
+Foam::ptscotchDecomp::ptscotchDecomp
 (
     const dictionary& decompositionDict,
     const polyMesh& mesh
@@ -102,35 +97,35 @@ Foam::parMetisDecomp::parMetisDecomp
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::labelList Foam::parMetisDecomp::decompose
+Foam::labelList Foam::ptscotchDecomp::decompose
 (
-    const pointField& cc,
-    const scalarField& cWeights
+    const pointField& points,
+    const scalarField& pointWeights
 )
 {
     FatalErrorIn
     (
-        "labelList parMetisDecomp::decompose"
+        "labelList ptscotchDecomp::decompose"
         "("
             "const pointField&, "
             "const scalarField&"
         ")"
     )   << notImplementedMessage << exit(FatalError);
 
-    return labelList();
+    return labelList::null();
 }
 
 
-Foam::labelList Foam::parMetisDecomp::decompose
+Foam::labelList Foam::ptscotchDecomp::decompose
 (
-    const labelList& cellToRegion,
-    const pointField& regionPoints,
-    const scalarField& regionWeights
+    const labelList& agglom,
+    const pointField& agglomPoints,
+    const scalarField& pointWeights
 )
 {
     FatalErrorIn
     (
-        "labelList parMetisDecomp::decompose"
+        "labelList ptscotchDecomp::decompose"
         "("
             "const labelList&, "
             "const pointField&, "
@@ -138,11 +133,11 @@ Foam::labelList Foam::parMetisDecomp::decompose
         ")"
     )   << notImplementedMessage << exit(FatalError);
 
-    return labelList();
+    return labelList::null();
 }
 
 
-Foam::labelList Foam::parMetisDecomp::decompose
+Foam::labelList Foam::ptscotchDecomp::decompose
 (
     const labelListList& globalCellCells,
     const pointField& cellCentres,
@@ -151,7 +146,7 @@ Foam::labelList Foam::parMetisDecomp::decompose
 {
     FatalErrorIn
     (
-        "labelList parMetisDecomp::decompose"
+        "labelList ptscotchDecomp::decompose"
         "("
             "const labelListList&, "
             "const pointField&, "
@@ -159,7 +154,7 @@ Foam::labelList Foam::parMetisDecomp::decompose
         ")"
     )   << notImplementedMessage << exit(FatalError);
 
-    return labelList();
+    return labelList::null();
 }
 
 
