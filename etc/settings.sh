@@ -95,6 +95,8 @@ export FOAM_RUN=$WM_PROJECT_USER_DIR/run
 export PATH=$WM_DIR:$WM_PROJECT_DIR/bin:$PATH
 
 _foamAddPath $FOAM_APPBIN $FOAM_SITE_APPBIN $FOAM_USER_APPBIN
+ # Make sure to pick up dummy versions of external libraries last
+_foamAddLib  $FOAM_LIBBIN/dummy
 _foamAddLib  $FOAM_LIBBIN $FOAM_SITE_LIBBIN $FOAM_USER_LIBBIN
 
 

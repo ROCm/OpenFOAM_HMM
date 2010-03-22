@@ -73,6 +73,8 @@ set path=($WM_DIR $WM_PROJECT_DIR/bin $path)
 _foamAddPath $FOAM_APPBIN
 _foamAddPath $FOAM_SITE_APPBIN
 _foamAddPath $FOAM_USER_APPBIN
+ # Make sure to pick up dummy versions of external libraries last
+_foamAddLib  $FOAM_LIBBIN/dummy
 _foamAddLib  $FOAM_LIBBIN
 _foamAddLib  $FOAM_SITE_LIBBIN
 _foamAddLib  $FOAM_USER_LIBBIN
