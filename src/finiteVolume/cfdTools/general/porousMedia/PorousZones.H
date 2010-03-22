@@ -44,7 +44,7 @@ SourceFiles
 #include "volFieldsFwd.H"
 #include "fvMatricesFwd.H"
 #include "dimensionedScalarFwd.H"
-#include "oneField.H"
+#include "geometricOneField.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -105,7 +105,7 @@ public:
         template<class Type>
         tmp<fvMatrix<Type> > ddt
         (
-            const oneField&,
+            const geometricOneField&,
             GeometricField<Type, fvPatchField, volMesh>&
         );
 

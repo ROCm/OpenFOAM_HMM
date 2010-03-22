@@ -44,7 +44,7 @@ SourceFiles
 #include "tmp.H"
 #include "autoPtr.H"
 #include "dimensionedTypes.H"
-#include "zeroField.H"
+#include "zero.H"
 #include "className.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -435,8 +435,8 @@ public:
         void operator+=(const dimensioned<Type>&);
         void operator-=(const dimensioned<Type>&);
 
-        void operator+=(const zeroField&);
-        void operator-=(const zeroField&);
+        void operator+=(const zero&);
+        void operator-=(const zero&);
 
         void operator*=(const DimensionedField<scalar, volMesh>&);
         void operator*=(const tmp<DimensionedField<scalar, volMesh> >&);
@@ -647,14 +647,14 @@ template<class Type>
 tmp<fvMatrix<Type> > operator==
 (
     const fvMatrix<Type>&,
-    const zeroField&
+    const zero&
 );
 
 template<class Type>
 tmp<fvMatrix<Type> > operator==
 (
     const tmp<fvMatrix<Type> >&,
-    const zeroField&
+    const zero&
 );
 
 

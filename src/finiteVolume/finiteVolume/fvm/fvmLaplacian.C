@@ -99,7 +99,7 @@ template<class Type>
 tmp<fvMatrix<Type> >
 laplacian
 (
-    const zeroField&,
+    const zero&,
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     const word& name
 )
@@ -115,7 +115,7 @@ template<class Type>
 tmp<fvMatrix<Type> >
 laplacian
 (
-    const zeroField&,
+    const zero&,
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
@@ -130,7 +130,7 @@ template<class Type>
 tmp<fvMatrix<Type> >
 laplacian
 (
-    const oneField&,
+    const one&,
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     const word& name
 )
@@ -143,7 +143,7 @@ template<class Type>
 tmp<fvMatrix<Type> >
 laplacian
 (
-    const oneField&,
+    const one&,
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
