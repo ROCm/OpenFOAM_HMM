@@ -22,7 +22,7 @@
 #     along with OpenFOAM; if not, write to the Free Software Foundation,
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
-# Script
+# File
 #     etc/prefs.sh
 #
 # Description
@@ -49,4 +49,5 @@ export WM_MPLIB=SYSTEMOPENMPI
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 export ParaView_VERSION=git        # eg, cvs/git version
 export ParaView_MAJOR=3.7
-# -----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------- end-of-file
