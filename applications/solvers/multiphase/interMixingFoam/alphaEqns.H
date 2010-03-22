@@ -70,12 +70,12 @@
         MULES::limiter
         (
             allLambda,
-            oneField(),
+            geometricOneField(),
             alpha1,
             phiAlpha1BD,
             phiAlpha1,
-            zeroField(),
-            zeroField(),
+            zero(),
+            zero(),
             1,
             0,
             3
@@ -107,12 +107,12 @@
         MULES::limiter
         (
             allLambda,
-            oneField(),
+            geometricOneField(),
             alpha2,
             phiAlpha2BD,
             phiAlpha2,
-            zeroField(),
-            zeroField(),
+            zero(),
+            zero(),
             1,
             0,
             3

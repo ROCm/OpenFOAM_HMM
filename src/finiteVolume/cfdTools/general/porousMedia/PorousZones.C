@@ -87,7 +87,7 @@ template<class Type>
 Foam::tmp<Foam::fvMatrix<Type> >
 Foam::PorousZones<ZoneType>::ddt
 (
-    const oneField&,
+    const geometricOneField&,
     GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {

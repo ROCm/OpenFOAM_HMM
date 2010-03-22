@@ -88,8 +88,8 @@ void Foam::MULES::explicitSolve
         psi,
         phiBD,
         phiCorr,
-        Sp.field(),
-        Su.field(),
+        Sp,
+        Su,
         psiMax,
         psiMin,
         3
@@ -109,18 +109,18 @@ void Foam::MULES::explicitSolve
         psiIf =
         (
             mesh.Vsc0()*rho.oldTime()*psi0/(deltaT*mesh.Vsc())
-          + Su.field()
+          + Su
           - psiIf
-        )/(rho/deltaT - Sp.field());
+        )/(rho/deltaT - Sp);
     }
     else
     {
         psiIf =
         (
             rho.oldTime()*psi0/deltaT
-          + Su.field()
+          + Su
           - psiIf
-        )/(rho/deltaT - Sp.field());
+        )/(rho/deltaT - Sp);
     }
 
     psi.correctBoundaryConditions();
@@ -244,8 +244,8 @@ void Foam::MULES::implicitSolve
             psi,
             phiBD,
             phiCorr,
-            Sp.field(),
-            Su.field(),
+            Sp,
+            Su,
             psiMax,
             psiMin,
             nLimiterIter

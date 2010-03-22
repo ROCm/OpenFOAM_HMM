@@ -27,7 +27,7 @@ License
 #include "porousZone.H"
 #include "fvMesh.H"
 #include "fvMatrices.H"
-#include "oneField.H"
+#include "geometricOneField.H"
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
@@ -236,7 +236,7 @@ void Foam::porousZone::addResistance(fvVectorMatrix& UEqn) const
                 Udiag,
                 cells,
                 V,
-                oneField(),
+                geometricOneField(),
                 U
             );
         }
@@ -268,7 +268,7 @@ void Foam::porousZone::addResistance(fvVectorMatrix& UEqn) const
                 Usource,
                 cells,
                 V,
-                oneField(),
+                geometricOneField(),
                 mesh_.lookupObject<volScalarField>("nu"),
                 U
             );
@@ -316,7 +316,7 @@ void Foam::porousZone::addResistance
             (
                 AU,
                 cells,
-                oneField(),
+                geometricOneField(),
                 U
             );
         }
@@ -344,7 +344,7 @@ void Foam::porousZone::addResistance
             (
                 AU,
                 cells,
-                oneField(),
+                geometricOneField(),
                 mesh_.lookupObject<volScalarField>("nu"),
                 U
             );
