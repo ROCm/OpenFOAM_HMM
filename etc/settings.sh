@@ -311,7 +311,7 @@ export MPI_BUFFER_SIZE
 
 # CGAL and boost
 # ~~~~~~~~~~~~~~
-cgal_version=3.5.1
+cgal_version=3.6
 export CGAL_SRC=$WM_THIRD_PARTY_DIR/CGAL-$cgal_version
 
 boost_version=1_42_0

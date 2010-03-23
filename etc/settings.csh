@@ -267,7 +267,7 @@ endif
 
 # CGAL and boost
 # ~~~~~~~~~~~~~~
-set cgal_version=3.5.1
+set cgal_version=3.6
 setenv CGAL_SRC $WM_THIRD_PARTY_DIR/CGAL-$cgal_version
 
 set boost_version=1_42_0
