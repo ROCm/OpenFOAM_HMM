@@ -218,7 +218,10 @@ if (! $?MANPATH) setenv MANPATH ''
 
 #- Clean PATH (path)
 set cleaned=`$foamClean "$PATH" "$foamOldDirs"`
-if ( $status == 0 ) setenv PATH $cleaned
+if ( $status == 0 ) then
+    unset PATH
+    setenv PATH $cleaned
+endif
 
 #- Clean LD_LIBRARY_PATH
 set cleaned=`$foamClean "$LD_LIBRARY_PATH" "$foamOldDirs"`
