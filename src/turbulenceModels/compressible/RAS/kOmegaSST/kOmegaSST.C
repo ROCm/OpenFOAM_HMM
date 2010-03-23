@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -258,7 +258,15 @@ kOmegaSST::kOmegaSST
         autoCreateAlphat("alphat", mesh_)
     )
 {
-    mut_ = a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(magSqr(symm(fvc::grad(U_)))));
+    mut_ =
+    (
+        a1_*rho_*k_
+      / max
+        (
+            a1_*(omega_ + omegaSmall_),
+            F2()*sqrt(magSqr(symm(fvc::grad(U_))))
+        )
+    );
     mut_.correctBoundaryConditions();
 
     alphat_ = mut_/Prt_;

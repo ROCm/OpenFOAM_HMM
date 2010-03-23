@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -185,35 +185,33 @@ public:
 
         // Access
 
-            //- Return the value of k0 which k is not allowed to be less than
+            //- Return the lower allowable limit for k
             const dimensionedScalar& k0() const
             {
                 return k0_;
             }
 
-            //- Return the value of epsilon0 which epsilon is not allowed to be
-            //  less than
+            //- Return the lower allowable limit for epsilon
             const dimensionedScalar& epsilon0() const
             {
                 return epsilon0_;
             }
 
             //- Return the value of epsilonSmall which is added to epsilon when
-            //  calculating nut
+            //  calculating mut
             const dimensionedScalar& epsilonSmall() const
             {
                 return epsilonSmall_;
             }
 
-            //- Return the value of omega0 which epsilon is not allowed to be
-            //  less than
+            //- Return the lower allowable limit for omega
             const dimensionedScalar& omega0() const
             {
                 return omega0_;
             }
 
-            //- Return the value of omegaSmall which is added to epsilon when
-            //  calculating nut
+            //- Return the value of omegaSmall which is added to omega when
+            //  calculating mut
             const dimensionedScalar& omegaSmall() const
             {
                 return omegaSmall_;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -237,12 +237,14 @@ kOmegaSST::kOmegaSST
     )
 {
     nut_ =
+    (
         a1_*k_
-       /max
+      / max
         (
             a1_*(omega_ + omegaSmall_),
             F2()*mag(symm(fvc::grad(U_)))
-        );
+        )
+    );
     nut_.correctBoundaryConditions();
 
     printCoeffs();

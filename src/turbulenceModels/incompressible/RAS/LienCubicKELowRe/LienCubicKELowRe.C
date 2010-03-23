@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -281,11 +281,9 @@ LienCubicKELowRe::LienCubicKELowRe
     )
 {
     nut_ = Cmu_
-       *(
-            scalar(1) - exp(-Am_*yStar_))
-           /(scalar(1) - exp(-Aepsilon_*yStar_) + SMALL
-        )
-       *sqr(k_)/(epsilon_ + epsilonSmall_)
+      * (scalar(1) - exp(-Am_*yStar_))
+      / (scalar(1) - exp(-Aepsilon_*yStar_) + SMALL)
+      * sqr(k_)/(epsilon_ + epsilonSmall_)
         // cubic term C5, implicit part
       + max
         (

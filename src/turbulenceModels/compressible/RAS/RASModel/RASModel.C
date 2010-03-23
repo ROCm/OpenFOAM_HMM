@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,9 +82,9 @@ RASModel::RASModel
     coeffDict_(subOrEmptyDict(type + "Coeffs")),
 
     k0_("k0", dimVelocity*dimVelocity, SMALL),
-    epsilon0_("epsilon", k0_.dimensions()/dimTime, SMALL),
+    epsilon0_("epsilon0", k0_.dimensions()/dimTime, SMALL),
     epsilonSmall_("epsilonSmall", epsilon0_.dimensions(), SMALL),
-    omega0_("omega", dimless/dimTime, SMALL),
+    omega0_("omega0", dimless/dimTime, SMALL),
     omegaSmall_("omegaSmall", omega0_.dimensions(), SMALL),
 
     y_(mesh_)
