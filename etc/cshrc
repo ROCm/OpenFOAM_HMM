@@ -213,13 +213,15 @@ endsw
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 set foamClean=$WM_PROJECT_DIR/bin/foamCleanPath
 
+#- prevent local variables from shadowing setenv variables
+unset PATH MANPATH LD_LIBRARY_PATH LD_PRELOAD
+
 if (! $?LD_LIBRARY_PATH ) setenv LD_LIBRARY_PATH ''
 if (! $?MANPATH) setenv MANPATH ''
 
 #- Clean PATH (path)
 set cleaned=`$foamClean "$PATH" "$foamOldDirs"`
 if ( $status == 0 ) then
-    unset PATH
     setenv PATH $cleaned
 endif
 
