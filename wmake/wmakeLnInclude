@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -58,12 +58,13 @@ USAGE
 
 #------------------------------------------------------------------------------
 
-# simple option parsing
-unset forceUpdate
+# default 'find' option
 unset findOpt
 
-# default ln option
+# default 'ln' option
 lnOpt="-s"
+
+unset forceUpdate
 
 # simple parse options
 while [ "$#" -gt 0 ]
@@ -74,7 +75,7 @@ do
         ;;
     -f)
         shift
-        forceUpdate=1
+        forceUpdate=true
         lnOpt="-sf"
         ;;
     -*)
@@ -110,28 +111,25 @@ done
 incDir=$baseDir/lnInclude
 
 
-if [ ! -d $baseDir ]
-then
+[ -d $baseDir ] || {
     echo "$Script error: base directory $baseDir does not exist" 1>&2
     exit 2
-fi
+}
 
 if [ -d $incDir ]
 then
-    if [ ! "$forceUpdate" ]
-    then
-       # echo "$Script error: include directory $incDir already exists" 1>&2
-       exit 0
-    fi
+    [ "$forceUpdate" = true ] || {
+        # echo "$Script error: include directory $incDir already exists" 1>&2
+        exit 0
+    }
 else
     mkdir $incDir
 fi
 
-if [ ! -d $incDir ]
-then
+[ -d $incDir ] || {
     echo "$Script error: failed to create include directory $incDir" 1>&2
     exit 0
-fi
+}
 
 cd $incDir || exit 1
 

@@ -45,12 +45,12 @@ for cmd in etags ectags
 do
     type $cmd >/dev/null 2>&1 || {
         echo "${0##*/} cannot build tag files: '$cmd' command not found"
-        exit
+        exit 1
     }
 done
 
 
-cd $WM_PROJECT_DIR || exit
+cd $WM_PROJECT_DIR || exit 1
 mkdir .tags 2>/dev/null
 
 
