@@ -246,6 +246,8 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
                 inti,
                 GAMGInterface::New
                 (
+                    inti,
+                    coarseInterfaces,
                     fineInterfaces[inti],
                     fineInterfaces[inti].interfaceInternalField(restrictMap),
                     fineInterfaces[inti].internalFieldTransfer

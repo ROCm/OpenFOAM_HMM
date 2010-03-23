@@ -155,7 +155,7 @@ void cyclicPointPatchField<Type>::swapAddSeparated
         }
     }
 
-    addToInternalField(pField, pf, cyclicPatch_.separatedPoints());
+    addToInternalField(pField, pf);
 }
 
 

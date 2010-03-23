@@ -20,7 +20,10 @@ OK - parallel finite volume with processorCyclic: channelFoam
 
 OK - preProcessing/foamUpgradeCyclics
 
-- amg
+OK - amg.
+Tested on unitTestCases/singleCyclic/
+
+- initTransfer in GAMGprocessorInterfaces using nonblocking+tags
 - test createPatch pointSync
 - pointFields on cyclics. volPointInterpolation.
 - jumpCyclics

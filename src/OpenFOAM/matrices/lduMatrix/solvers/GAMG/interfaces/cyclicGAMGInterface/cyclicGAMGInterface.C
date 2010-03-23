@@ -46,23 +46,37 @@ namespace Foam
 
 Foam::cyclicGAMGInterface::cyclicGAMGInterface
 (
+    const label index,
+    const lduInterfacePtrsList& coarseInterfaces,
     const lduInterface& fineInterface,
     const labelField& localRestrictAddressing,
     const labelField& neighbourRestrictAddressing
 )
 :
-    cyclicLduInterface
-    (
-        refCast<const cyclicLduInterface>(fineInterface).neighbPatchID()
-    ),
     GAMGInterface
     (
+        index,
+        coarseInterfaces,
         fineInterface,
         localRestrictAddressing,
         neighbourRestrictAddressing
     ),
     fineCyclicInterface_(refCast<const cyclicLduInterface>(fineInterface))
 {
+//    //if (debug)
+//    {
+//        Pout<< "On fineInterface " << index << " with faceCells:"
+//            << fineInterface.faceCells() << endl;
+//        forAll(localRestrictAddressing, ffi)
+//        {
+//            Pout<< "    local face " << ffi
+//                << " is on agglom cell " << localRestrictAddressing[ffi]
+//                << "        nbr face on agglom cell "
+//                << neighbourRestrictAddressing[ffi]
+//                << endl;
+//        }
+//    }
+
     // Make a lookup table of entries for owner/neighbour
     Map<SLList<label> > neighboursTable
     (
@@ -77,20 +91,32 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
 
     label nCoarseFaces = 0;
 
-    label sizeBy2 = localRestrictAddressing.size()/2;
-
-    for (label ffi=0; ffi<sizeBy2; ffi++)
+    forAll (localRestrictAddressing, ffi)
     {
-        label curMaster = localRestrictAddressing[ffi];
-        label curSlave = localRestrictAddressing[ffi + sizeBy2];
+        label curMaster = -1;
+        label curSlave = -1;
+
+        // Do switching on master/slave indexes based on the owner/neighbour of
+        // the processor index such that both sides get the same answer.
+        if (owner())
+        {
+            // Master side
+            curMaster = localRestrictAddressing[ffi];
+            curSlave = neighbourRestrictAddressing[ffi];
+        }
+        else
+        {
+            // Slave side
+            curMaster = neighbourRestrictAddressing[ffi];
+            curSlave = localRestrictAddressing[ffi];
+        }
 
         // Look for the master cell.  If it has already got a face,
-        // add the coefficient to the face.  If not, create a new
-        // face.
+        // add the coefficient to the face.  If not, create a new face.
         if (neighboursTable.found(curMaster))
         {
-            // Check all current neighbours to see if the current
-            // slave already exists.  If so, add the coefficient.
+            // Check all current neighbours to see if the current slave already
+            // exists and if so, add the fine face to the agglomeration.
 
             SLList<label>& curNbrs = neighboursTable.find(curMaster)();
 
@@ -141,81 +167,110 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
     } // end for all fine faces
 
 
-    faceCells_.setSize(2*nCoarseFaces, -1);
-    faceRestrictAddressing_.setSize(localRestrictAddressing.size(), -1);
+
+    //faceCells_.setSize(nCoarseFaces, -1);
+    faceCells_.setSize(2*nCoarseFaces);
+    faceRestrictAddressing_.setSize(localRestrictAddressing.size());
 
     labelList contents = neighboursTable.toc();
 
     // Reset face counter for re-use
     nCoarseFaces = 0;
 
-    // On master side, the owner addressing is stored in table of contents
-    forAll (contents, masterI)
+//    if (owner())
     {
-        SLList<label>& curNbrs = neighboursTable.find(contents[masterI])();
-
-        SLList<SLList<label> >& curFaceFaces =
-            faceFaceTable.find(contents[masterI])();
-
-        SLList<label>::iterator nbrsIter = curNbrs.begin();
-        SLList<SLList<label> >::iterator faceFacesIter = curFaceFaces.begin();
-
-        for
-        (
-            ;
-            nbrsIter != curNbrs.end(), faceFacesIter != curFaceFaces.end();
-            ++nbrsIter, ++faceFacesIter
-        )
+        // On master side, the owner addressing is stored in table of contents
+        forAll (contents, masterI)
         {
-            faceCells_[nCoarseFaces] = contents[masterI];
+            SLList<label>& curNbrs = neighboursTable.find(contents[masterI])();
+
+            SLList<SLList<label> >& curFaceFaces =
+                faceFaceTable.find(contents[masterI])();
+
+            SLList<label>::iterator nbrsIter = curNbrs.begin();
+
+            SLList<SLList<label> >::iterator faceFacesIter =
+                curFaceFaces.begin();
 
             for
             (
-                SLList<label>::iterator facesIter = faceFacesIter().begin();
-                facesIter != faceFacesIter().end();
-                ++facesIter
+                ;
+                nbrsIter != curNbrs.end(), faceFacesIter != curFaceFaces.end();
+                ++nbrsIter, ++faceFacesIter
             )
             {
-                faceRestrictAddressing_[facesIter()] = nCoarseFaces;
-            }
+                faceCells_[nCoarseFaces] = contents[masterI];
 
-            nCoarseFaces++;
+                for
+                (
+                    SLList<label>::iterator facesIter = faceFacesIter().begin();
+                    facesIter != faceFacesIter().end();
+                    ++facesIter
+                )
+                {
+                    faceRestrictAddressing_[facesIter()] = nCoarseFaces;
+                }
+
+                nCoarseFaces++;
+            }
         }
     }
-
-    // On slave side, the owner addressing is stored in linked lists
-    forAll (contents, masterI)
+//    else
     {
-        SLList<label>& curNbrs = neighboursTable.find(contents[masterI])();
-
-        SLList<SLList<label> >& curFaceFaces =
-            faceFaceTable.find(contents[masterI])();
-
-        SLList<label>::iterator nbrsIter = curNbrs.begin();
-        SLList<SLList<label> >::iterator faceFacesIter = curFaceFaces.begin();
-
-        for
-        (
-            ;
-            nbrsIter != curNbrs.end(), faceFacesIter != curFaceFaces.end();
-            ++nbrsIter, ++faceFacesIter
-        )
+        // On slave side, the owner addressing is stored in linked lists
+        forAll (contents, masterI)
         {
-            faceCells_[nCoarseFaces] = nbrsIter();
+            SLList<label>& curNbrs = neighboursTable.find(contents[masterI])();
+
+            SLList<SLList<label> >& curFaceFaces =
+                faceFaceTable.find(contents[masterI])();
+
+            SLList<label>::iterator nbrsIter = curNbrs.begin();
+
+            SLList<SLList<label> >::iterator faceFacesIter =
+                curFaceFaces.begin();
 
             for
             (
-                SLList<label>::iterator facesIter = faceFacesIter().begin();
-                facesIter != faceFacesIter().end();
-                ++facesIter
+                ;
+                nbrsIter != curNbrs.end(), faceFacesIter != curFaceFaces.end();
+                ++nbrsIter, ++faceFacesIter
             )
             {
-                faceRestrictAddressing_[facesIter() + sizeBy2] = nCoarseFaces;
-            }
+                faceCells_[nCoarseFaces] = nbrsIter();
 
-            nCoarseFaces++;
+                for
+                (
+                    SLList<label>::iterator facesIter = faceFacesIter().begin();
+                    facesIter != faceFacesIter().end();
+                    ++facesIter
+                )
+                {
+                    faceRestrictAddressing_[facesIter()] = nCoarseFaces;
+                }
+
+                nCoarseFaces++;
+            }
         }
     }
+
+
+//    //if (debug)
+//    {
+//        Pout<< "On fineInterface " << index << " with faceCells:"
+//            << fineInterface.faceCells() << endl;
+//        forAll(faceRestrictAddressing_, ffi)
+//        {
+//            Pout<< "    local face " << ffi
+//                << " gets agglomerated into coarse local face "
+//                << faceRestrictAddressing_[ffi]
+//                << " with coarse cells:" << endl;
+//            forAll(faceCells_, i)
+//            {
+//                Pout<< "        " << faceCells_[i] << endl;
+//            }
+//        }
+//    }
 }
 
 
@@ -227,28 +282,28 @@ Foam::cyclicGAMGInterface::~cyclicGAMGInterface()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::labelField> Foam::cyclicGAMGInterface::transfer
-(
-    const Pstream::commsTypes,
-    const unallocLabelList& interfaceData
-) const
-{
-    notImplemented("cyclicGAMGInterface::transfer(..)");
-
-//XXXXX to be done
-    tmp<labelField> tpnf(new labelField(size()));
-    labelField& pnf = tpnf();
-
-    label sizeby2 = size()/2;
-
-    for (label facei=0; facei<sizeby2; facei++)
-    {
-        pnf[facei] = interfaceData[facei + sizeby2];
-        pnf[facei + sizeby2] = interfaceData[facei];
-    }
-
-    return tpnf;
-}
+//Foam::tmp<Foam::labelField> Foam::cyclicGAMGInterface::transfer
+//(
+//    const Pstream::commsTypes,
+//    const unallocLabelList& interfaceData
+//) const
+//{
+//    notImplemented("cyclicGAMGInterface::transfer(..)");
+//
+////XXXXX to be done
+//    tmp<labelField> tpnf(new labelField(size()));
+//    labelField& pnf = tpnf();
+//
+//    label sizeby2 = size()/2;
+//
+//    for (label facei=0; facei<sizeby2; facei++)
+//    {
+//        pnf[facei] = interfaceData[facei + sizeby2];
+//        pnf[facei + sizeby2] = interfaceData[facei];
+//    }
+//
+//    return tpnf;
+//}
 
 
 Foam::tmp<Foam::labelField> Foam::cyclicGAMGInterface::internalFieldTransfer
@@ -257,16 +312,18 @@ Foam::tmp<Foam::labelField> Foam::cyclicGAMGInterface::internalFieldTransfer
     const unallocLabelList& iF
 ) const
 {
-    notImplemented("cyclicGAMGInterface::internalFieldTransfer(..)");
+    const cyclicGAMGInterface& nbr = dynamic_cast<const cyclicGAMGInterface&>
+    (
+        neighbPatch()
+    );
+    const unallocLabelList& nbrFaceCells = nbr.faceCells();
 
-//XXXXX to be done
     tmp<labelField> tpnf(new labelField(size()));
     labelField& pnf = tpnf();
 
     forAll(pnf, facei)
     {
-        pnf[facei] = iF[faceCells_[facei + sizeby2]];
-        pnf[facei + sizeby2] = iF[faceCells_[facei]];
+        pnf[facei] = iF[nbrFaceCells[facei]];
     }
 
     return tpnf;

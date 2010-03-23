@@ -26,6 +26,7 @@ License
 
 #include "globalPoints.H"
 #include "processorPolyPatch.H"
+#include "processorCyclicPolyPatch.H"
 #include "cyclicPolyPatch.H"
 #include "polyMesh.H"
 

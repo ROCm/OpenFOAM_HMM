@@ -96,17 +96,27 @@ processorCyclicPointPatchField<Type>::~processorCyclicPointPatchField()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void processorCyclicPointPatchField<Type>::initSwapAdd(Field<Type>& pField)
-const
+void processorCyclicPointPatchField<Type>::initSwapAddSeparated
+(
+    const Pstream::commsTypes commsType,
+    Field<Type>& pField
+) const
 {
     if (Pstream::parRun())
     {
-        // Get internal field into my point order
-        Field<Type> pf(this->patchInternalField(pField));
+        // Get internal field into correct order for opposite side
+        Field<Type> pf
+        (
+            this->patchInternalField
+            (
+                pField,
+                procPatch_.reverseMeshPoints()
+            )
+        );
 
         OPstream::write
         (
-            Pstream::blocking,
+            commsType,
             procPatch_.neighbProcNo(),
             reinterpret_cast<const char*>(pf.begin()),
             pf.byteSize(),
@@ -117,7 +127,11 @@ const
 
 
 template<class Type>
-void processorCyclicPointPatchField<Type>::swapAdd(Field<Type>& pField) const
+void processorCyclicPointPatchField<Type>::swapAddSeparated
+(
+    const Pstream::commsTypes commsType,
+    Field<Type>& pField
+) const
 {
     if (Pstream::parRun())
     {
@@ -125,7 +139,7 @@ void processorCyclicPointPatchField<Type>::swapAdd(Field<Type>& pField) const
 
         IPstream::read
         (
-            Pstream::blocking,
+            commsType,
             procPatch_.neighbProcNo(),
             reinterpret_cast<char*>(pnf.begin()),
             pnf.byteSize(),
@@ -134,129 +148,14 @@ void processorCyclicPointPatchField<Type>::swapAdd(Field<Type>& pField) const
 
         if (doTransform())
         {
-            procPatch_.procPolyPatch().transform(pnf);
+            const processorCyclicPolyPatch& ppp =
+                procPatch_.procCyclicPolyPatch();
+            const tensor& forwardT = ppp.forwardT();
 
-            //const processorPolyPatch& ppp = procPatch_.procPolyPatch();
-            //const labelList& nonGlobalPatchPoints =
-            //    procPatch_.nonGlobalPatchPoints();
-            //
-            //// Mark patch that transformed point:
-            //// -3  : global patch point so handled in different patch
-            //// -2  : nonGlobalPatchPoints, initial value
-            //// -1  : originating from internal face, no transform necessary
-            //// >=0 : originating from coupled patch
-            //labelList hasTransformed(ppp.nPoints(), -3);
-            //forAll(nonGlobalPatchPoints, i)
-            //{
-            //    hasTransformed[nonGlobalPatchPoints[i]] = -2;
-            //}
-            //
-            //forAll(ppp.patchIDs(), subI)
-            //{
-            //    label patchI = ppp.patchIDs()[subI];
-            //
-            //    if (patchI == -1)
-            //    {
-            //        for
-            //        (
-            //            label faceI = ppp.starts()[subI];
-            //            faceI < ppp.starts()[subI+1];
-            //            faceI++
-            //        )
-            //        {
-            //            const face& f = ppp.localFaces()[faceI];
-            //
-            //            forAll(f, fp)
-            //            {
-            //                label pointI = f[fp];
-            //
-            //                if (hasTransformed[pointI] == -3)
-            //                {
-            //                    // special point, handled elsewhere
-            //                }
-            //                else if (hasTransformed[pointI] == -2)
-            //                {
-            //                    // first visit. Just mark.
-            //                    hasTransformed[pointI] = patchI;
-            //                }
-            //                else if (hasTransformed[pointI] == patchI)
-            //                {
-            //                    // already done
-            //                }
-            //                else
-            //                {
-            //                    FatalErrorIn
-            //                    (
-            //                        "processorCyclicPointPatchField<Type>::"
-            //                        "swapAdd(Field<Type>& pField) const"
-            //                    )   << "Point " << pointI
-            //                        << " on patch " << ppp.name()
-            //                        << " already transformed by patch "
-            //                        << hasTransformed[pointI]
-            //                        << abort(FatalError);
-            //                }
-            //            }
-            //        }
-            //    }
-            //    else if 
-            //    (
-            //       !refCast<const coupledPolyPatch>
-            //        (
-            //            ppp.boundaryMesh()[patchI]
-            //        ).parallel()
-            //    )
-            //    {
-            //        const tensor& T = refCast<const coupledPolyPatch>
-            //        (
-            //            ppp.boundaryMesh()[patchI]
-            //        ).forwardT();
-            //
-            //        for
-            //        (
-            //            label faceI = ppp.starts()[subI];
-            //            faceI < ppp.starts()[subI+1];
-            //            faceI++
-            //        )
-            //        {
-            //            const face& f = ppp.localFaces()[faceI];
-            //
-            //            forAll(f, fp)
-            //            {
-            //                label pointI = f[fp];
-            //
-            //                if (hasTransformed[pointI] == -3)
-            //                {
-            //                    // special point, handled elsewhere
-            //                }
-            //                else if (hasTransformed[pointI] == -2)
-            //                {
-            //                    pnf[pointI] = transform(T, pnf[pointI]);
-            //
-            //                    hasTransformed[pointI] = patchI;
-            //                }
-            //                else if (hasTransformed[pointI] == patchI)
-            //                {
-            //                    // already done
-            //                }
-            //                else
-            //                {
-            //                    FatalErrorIn
-            //                    (
-            //                        "processorCyclicPointPatchField<Type>::"
-            //                        "swapAdd(Field<Type>& pField) const"
-            //                    )   << "Point " << pointI
-            //                        << " on patch " << ppp.name()
-            //                        << " subPatch " << patchI
-            //                        << " already transformed by patch "
-            //                        << hasTransformed[pointI]
-            //                        << abort(FatalError);
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
+            transform(pnf, forwardT, pnf);
         }
 
+        // All points are separated
         addToInternalField(pField, pnf);
     }
 }

@@ -37,9 +37,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::cyclicLduInterface::cyclicLduInterface(const label neighbPatchID)
-:
-    neighbPatchID_(neighbPatchID)
+//Foam::cyclicLduInterface::cyclicLduInterface(const label neighbPatchID)
+//:
+//    neighbPatchID_(neighbPatchID)
+//{}
+Foam::cyclicLduInterface::cyclicLduInterface()
 {}
 
 

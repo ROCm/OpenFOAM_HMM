@@ -81,6 +81,8 @@ public:
         //  local and neighbour restrict addressing
         cyclicGAMGInterface
         (
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
             const lduInterface& fineInterface,
             const labelField& restrictAddressing,
             const labelField& neighbourRestrictAddressing
@@ -96,12 +98,12 @@ public:
 
         // Interface transfer functions
 
-            //- Transfer and return neighbour field
-            virtual tmp<labelField> transfer
-            (
-                const Pstream::commsTypes commsType,
-                const unallocLabelList& interfaceData
-            ) const;
+//            //- Transfer and return neighbour field
+//            virtual tmp<labelField> transfer
+//            (
+//                const Pstream::commsTypes commsType,
+//                const unallocLabelList& interfaceData
+//            ) const;
 
             //- Transfer and return internal field adjacent to the interface
             virtual tmp<labelField> internalFieldTransfer
@@ -112,6 +114,31 @@ public:
 
 
         //- Cyclic interface functions
+
+//            //- Return my index
+//            virtual label patchID() const
+//            {
+//                return fineCyclicInterface_.patchID();
+//            }
+
+            //- Return neigbour processor number
+            virtual label neighbPatchID() const
+            {
+                return fineCyclicInterface_.neighbPatchID();
+            }
+
+            virtual bool owner() const
+            {
+                return fineCyclicInterface_.owner();
+            }
+
+            virtual const cyclicLduInterface& neighbPatch() const
+            {
+                return dynamic_cast<const cyclicLduInterface&>
+                (
+                    coarseInterfaces_[neighbPatchID()]
+                );
+            }
 
             //- Return face transformation tensor
             virtual const tensor& forwardT() const

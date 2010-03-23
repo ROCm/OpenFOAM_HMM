@@ -325,7 +325,7 @@ public:
         }
 
         //- Neighbour patchID.
-        label neighbPatchID() const
+        virtual label neighbPatchID() const
         {
             if (neighbPatchID_ == -1)
             {
@@ -345,12 +345,12 @@ public:
             return neighbPatchID_;
         }
 
-        bool owner() const
+        virtual bool owner() const
         {
             return index() < neighbPatchID();
         }
 
-        bool neighbour() const
+        virtual bool neighbour() const
         {
             return !owner();
         }

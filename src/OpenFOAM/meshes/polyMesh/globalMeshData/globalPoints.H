@@ -159,10 +159,6 @@ class globalPoints
 
     // Private Member Functions
 
-        //- Return per point collocated status
-        static PackedBoolList collocatedPoints(const coupledPolyPatch&);
-
-
         // Wrappers around global point numbering to add collocated bit
 
             //- Convert into globalIndices and add collocated bit

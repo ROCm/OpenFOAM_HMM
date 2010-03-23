@@ -252,19 +252,18 @@ $(lduInterfaceFields)/lduInterfaceField/lduInterfaceField.C
 $(lduInterfaceFields)/processorLduInterfaceField/processorLduInterfaceField.C
 $(lduInterfaceFields)/cyclicLduInterfaceField/cyclicLduInterfaceField.C
 
-/*
 GAMG = $(lduMatrix)/solvers/GAMG
+/*
+*/
 $(GAMG)/GAMGSolver.C
 $(GAMG)/GAMGSolverAgglomerateMatrix.C
 $(GAMG)/GAMGSolverScalingFactor.C
 $(GAMG)/GAMGSolverSolve.C
-
 GAMGInterfaces = $(GAMG)/interfaces
 $(GAMGInterfaces)/GAMGInterface/GAMGInterface.C
 $(GAMGInterfaces)/GAMGInterface/newGAMGInterface.C
 $(GAMGInterfaces)/processorGAMGInterface/processorGAMGInterface.C
 $(GAMGInterfaces)/cyclicGAMGInterface/cyclicGAMGInterface.C
-
 GAMGInterfaceFields = $(GAMG)/interfaceFields
 $(GAMGInterfaceFields)/GAMGInterfaceField/GAMGInterfaceField.C
 $(GAMGInterfaceFields)/GAMGInterfaceField/newGAMGInterfaceField.C
@@ -284,7 +283,6 @@ $(pairGAMGAgglomeration)/pairGAMGAgglomerationCombineLevels.C
 
 algebraicPairGAMGAgglomeration = $(GAMGAgglomerations)/algebraicPairGAMGAgglomeration
 $(algebraicPairGAMGAgglomeration)/algebraicPairGAMGAgglomeration.C
-*/
 
 meshes/lduMesh/lduMesh.C
 

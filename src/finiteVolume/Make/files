@@ -178,10 +178,8 @@ fields/surfaceFields/surfaceFields.C
 
 fvMatrices/fvMatrices.C
 fvMatrices/fvScalarMatrix/fvScalarMatrix.C
-/*
 fvMatrices/solvers/MULES/MULES.C
 fvMatrices/solvers/GAMGSymSolver/GAMGAgglomerations/faceAreaPairGAMGAgglomeration/faceAreaPairGAMGAgglomeration.C
-*/
 
 interpolation = interpolation/interpolation
 $(interpolation)/interpolation/interpolations.C
@@ -218,7 +216,6 @@ $(schemes)/localBlended/localBlended.C
 $(schemes)/localMax/localMax.C
 $(schemes)/localMin/localMin.C
 
-/*
 $(schemes)/linearFit/linearFit.C
 $(schemes)/biLinearFit/biLinearFit.C
 $(schemes)/quadraticLinearFit/quadraticLinearFit.C
@@ -227,9 +224,10 @@ $(schemes)/quadraticFit/quadraticFit.C
 $(schemes)/quadraticLinearUpwindFit/quadraticLinearUpwindFit.C
 $(schemes)/quadraticUpwindFit/quadraticUpwindFit.C
 $(schemes)/cubicUpwindFit/cubicUpwindFit.C
+/*
 $(schemes)/quadraticLinearPureUpwindFit/quadraticLinearPureUpwindFit.C
-$(schemes)/linearPureUpwindFit/linearPureUpwindFit.C
 */
+$(schemes)/linearPureUpwindFit/linearPureUpwindFit.C
 
 limitedSchemes = $(surfaceInterpolation)/limitedSchemes
 $(limitedSchemes)/limitedSurfaceInterpolationScheme/limitedSurfaceInterpolationSchemes.C
@@ -260,7 +258,6 @@ multivariateSchemes = $(surfaceInterpolation)/multivariateSchemes
 $(multivariateSchemes)/multivariateSurfaceInterpolationScheme/multivariateSurfaceInterpolationSchemes.C
 $(multivariateSchemes)/multivariateSelectionScheme/multivariateSelectionSchemes.C
 $(multivariateSchemes)/upwind/multivariateUpwind.C
-/*
 $(multivariateSchemes)/Gamma/multivariateGamma.C
 $(multivariateSchemes)/vanLeer/multivariateVanLeer.C
 $(multivariateSchemes)/Minmod/multivariateMinmod.C
@@ -268,7 +265,6 @@ $(multivariateSchemes)/SuperBee/multivariateSuperBee.C
 $(multivariateSchemes)/MUSCL/multivariateMUSCL.C
 $(multivariateSchemes)/limitedLinear/multivariateLimitedLinear.C
 $(multivariateSchemes)/limitedCubic/multivariateLimitedCubic.C
-*/
 
 finiteVolume/fv/fv.C
 finiteVolume/fvSchemes/fvSchemes.C
@@ -297,21 +293,17 @@ gradSchemes = finiteVolume/gradSchemes
 $(gradSchemes)/gradScheme/gradSchemes.C
 $(gradSchemes)/gaussGrad/gaussGrads.C
 
-/*
 $(gradSchemes)/leastSquaresGrad/leastSquaresVectors.C
 $(gradSchemes)/leastSquaresGrad/leastSquaresGrads.C
 $(gradSchemes)/extendedLeastSquaresGrad/extendedLeastSquaresVectors.C
 $(gradSchemes)/extendedLeastSquaresGrad/extendedLeastSquaresGrads.C
 $(gradSchemes)/fourthGrad/fourthGrads.C
-*/
 
 limitedGradSchemes = $(gradSchemes)/limitedGradSchemes
-/*
 $(limitedGradSchemes)/faceLimitedGrad/faceLimitedGrads.C
 $(limitedGradSchemes)/cellLimitedGrad/cellLimitedGrads.C
 $(limitedGradSchemes)/faceMDLimitedGrad/faceMDLimitedGrads.C
 $(limitedGradSchemes)/cellMDLimitedGrad/cellMDLimitedGrads.C
-*/
 
 snGradSchemes = finiteVolume/snGradSchemes
 $(snGradSchemes)/snGradScheme/snGradSchemes.C

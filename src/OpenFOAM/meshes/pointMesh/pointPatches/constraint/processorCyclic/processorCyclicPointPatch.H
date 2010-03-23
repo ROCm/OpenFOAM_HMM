@@ -137,11 +137,11 @@ public:
 //            return !isMaster();
 //        }
 //
-//        //- Return the underlying processorPolyPatch
-//        const processorPolyPatch& procPolyPatch() const
-//        {
-//            return procPolyPatch_;
-//        }
+        //- Return the underlying processorCyclicPolyPatch
+        const processorCyclicPolyPatch& procCyclicPolyPatch() const
+        {
+            return procCycPolyPatch_;
+        }
 };
 
 

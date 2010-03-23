@@ -81,6 +81,8 @@ public:
         //  local and neighbour restrict addressing
         processorGAMGInterface
         (
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
             const lduInterface& fineInterface,
             const labelField& restrictAddressing,
             const labelField& neighbourRestrictAddressing
@@ -140,10 +142,16 @@ public:
             }
 
             //- Return face transformation tensor
-            virtual const tensorField& forwardT() const
+            virtual const tensor& forwardT() const
             {
                 return fineProcInterface_.forwardT();
             }
+
+            //- Return message tag used for sending
+            virtual int tag() const
+            {
+                return fineProcInterface_.tag();
+            }   
 };
 
 

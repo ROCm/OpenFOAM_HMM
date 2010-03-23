@@ -32,6 +32,8 @@ License
 
 Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
 (
+    const label index,
+    const lduInterfacePtrsList& coarseInterfaces,
     const lduInterface& fineInterface,
     const labelField& localRestrictAddressing,
     const labelField& neighbourRestrictAddressing
@@ -60,6 +62,8 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
     (
         cstrIter()
         (
+            index,
+            coarseInterfaces,
             fineInterface,
             localRestrictAddressing,
             neighbourRestrictAddressing

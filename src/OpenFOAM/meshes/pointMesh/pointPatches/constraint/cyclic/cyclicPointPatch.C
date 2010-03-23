@@ -54,28 +54,7 @@ void Foam::cyclicPointPatch::initGeometry(PstreamBuffers&)
 
 
 void Foam::cyclicPointPatch::calcGeometry(PstreamBuffers&)
-{
-    const edgeList& cp = cyclicPolyPatch_.coupledPoints();
-    const labelList& mp = cyclicPolyPatch_.meshPoints();
-
-    DynamicList<label> separated;
-    forAll(cp, i)
-    {
-        const edge& coupledSet = cp[i];
-
-        // Assume all points are separated.
-        separated.append(coupledSet[0]);
-        separated.append(coupledSet[1]);
-    }
-    separatedPoints_.transfer(separated);
-
-    if (debug)
-    {
-        Pout<< "cyclic:" << cyclicPolyPatch_.name()
-            << " separated:" << separatedPoints_.size()
-            << " out of points:" << mp.size() << endl;
-    }
-}
+{}
 
 
 void cyclicPointPatch::initMovePoints(PstreamBuffers&, const pointField&)
@@ -127,10 +106,10 @@ const edgeList& cyclicPointPatch::transformPairs() const
 }
 
 
-const labelList& cyclicPointPatch::separatedPoints() const
-{
-    return separatedPoints_;
-}
+//const labelList& cyclicPointPatch::separatedPoints() const
+//{
+//    return separatedPoints_;
+//}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

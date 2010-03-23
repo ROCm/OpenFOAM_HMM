@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -22,7 +22,7 @@
 #     along with OpenFOAM; if not, write to the Free Software Foundation,
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
-# Script
+# File
 #     etc/settings.csh
 #
 # Description
@@ -32,11 +32,11 @@
 #------------------------------------------------------------------------------
 
 # prefix to PATH
-alias _foamAddPath 'set path=(\!* $path)'
+alias _foamAddPath 'setenv PATH \!*\:${PATH}'
 # prefix to LD_LIBRARY_PATH
 alias _foamAddLib 'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH}'
 # prefix to MANPATH
-alias _foamAddManPath 'setenv MANPATH \!*\:${MANPATH}'
+alias _foamAddMan 'setenv MANPATH \!*\:${MANPATH}'
 
 # location of the jobControl directory
 setenv FOAM_JOB_DIR $WM_PROJECT_INST_DIR/jobControl
@@ -68,41 +68,35 @@ setenv FOAM_SOLVERS $FOAM_APP/solvers
 setenv FOAM_RUN $WM_PROJECT_USER_DIR/run
 
 # add OpenFOAM scripts and wmake to the path
-set path=($WM_DIR $WM_PROJECT_DIR/bin $path)
+setenv PATH ${WM_DIR}:${WM_PROJECT_DIR}/bin:${PATH}
 
-_foamAddPath $FOAM_APPBIN
-_foamAddPath $FOAM_SITE_APPBIN
-_foamAddPath $FOAM_USER_APPBIN
-_foamAddLib  $FOAM_LIBBIN
-_foamAddLib  $FOAM_SITE_LIBBIN
-_foamAddLib  $FOAM_USER_LIBBIN
+_foamAddPath ${FOAM_USER_APPBIN}:${FOAM_SITE_APPBIN}:${FOAM_APPBIN}
+ # Make sure to pick up dummy versions of external libraries last
+_foamAddLib  ${FOAM_USER_LIBBIN}:${FOAM_SITE_LIBBIN}:${FOAM_LIBBIN}:${FOAM_LIBBIN}/dummy
 
 
 # Select compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# compilerInstall = OpenFOAM | System
-set compilerInstall=OpenFOAM
+# compilerInstall = OpenFOAM | system
+if ( ! $?compilerInstall ) set compilerInstall=OpenFOAM
 
 switch ("$compilerInstall")
 case OpenFOAM:
     switch ("$WM_COMPILER")
     case Gcc:
-        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.4.3/platforms/$WM_ARCH$WM_COMPILER_ARCH
-        _foamAddLib $WM_THIRD_PARTY_DIR/mpfr-2.4.2/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
-        _foamAddLib $WM_THIRD_PARTY_DIR/gmp-5.0.1/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
+        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gcc-4.4.3
+        _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/mpfr-2.4.2/lib
+        _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gmp-5.0.1/lib
     breaksw
     case Gcc442:
-        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.4.2/platforms/$WM_ARCH$WM_COMPILER_ARCH
-        _foamAddLib $WM_THIRD_PARTY_DIR/mpfr-2.4.1/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
-        _foamAddLib $WM_THIRD_PARTY_DIR/gmp-4.2.4/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
+        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gcc-4.4.2
+        _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/mpfr-2.4.1/lib
+        _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gmp-4.2.4/lib
     breaksw
     case Gcc43:
-        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.3.3/platforms/$WM_ARCH$WM_COMPILER_ARCH
-        _foamAddLib $WM_THIRD_PARTY_DIR/mpfr-2.4.1/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
-        _foamAddLib $WM_THIRD_PARTY_DIR/gmp-4.2.4/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
-    breaksw
-    case Gcc42:
-        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.2.4/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gcc-4.3.3
+        _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/mpfr-2.4.1/lib
+        _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gmp-4.2.4/lib
     breaksw
     endsw
 
@@ -112,14 +106,13 @@ case OpenFOAM:
         echo "Warning in $WM_PROJECT_DIR/etc/settings.csh:"
         echo "    Cannot find $WM_COMPILER_DIR installation."
         echo "    Please install this compiler version or if you wish to use the system compiler,"
-        echo "    change the 'compilerInstall' setting to 'System' in this file"
+        echo "    change the 'compilerInstall' setting to 'system' in this file"
         echo
     endif
 
     _foamAddPath    ${WM_COMPILER_DIR}/bin
-    _foamAddLib     ${WM_COMPILER_DIR}/lib${WM_COMPILER_LIB_ARCH}
-    _foamAddLib     ${WM_COMPILER_DIR}/lib
-    _foamAddManPath ${WM_COMPILER_DIR}/man
+    _foamAddLib     ${WM_COMPILER_DIR}/lib${WM_COMPILER_LIB_ARCH}:${WM_COMPILER_DIR}/lib
+    _foamAddMan     ${WM_COMPILER_DIR}/man
 
     breaksw
 endsw
@@ -128,33 +121,30 @@ endsw
 # Communications library
 # ~~~~~~~~~~~~~~~~~~~~~~
 
-unset MPI_ARCH_PATH
+unsetenv MPI_ARCH_PATH MPI_HOME
 
 switch ("$WM_MPLIB")
 case OPENMPI:
     set mpi_version=openmpi-1.4.1
-    setenv MPI_HOME $WM_THIRD_PARTY_DIR/$mpi_version
-    setenv MPI_ARCH_PATH $MPI_HOME/platforms/$WM_OPTIONS
+    setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mpi_version
 
     # Tell OpenMPI where to find its install directory
     setenv OPAL_PREFIX $MPI_ARCH_PATH
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
-    _foamAddManPath $MPI_ARCH_PATH/man
+    _foamAddMan     $MPI_ARCH_PATH/man
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
     unset mpi_version
     breaksw
 
 case SYSTEMOPENMPI:
-
     # This uses the installed openmpi. It needs mpicc installed!
-
     set mpi_version=openmpi-system
 
     # Set compilation flags here instead of in wmake/rules/../mplibSYSTEMOPENMPI
-    setenv PINC `mpicc --showme:compile` 
+    setenv PINC `mpicc --showme:compile`
     setenv PLIBS `mpicc --showme:link`
     set libDir=`echo "$PLIBS" | sed -e 's/.*-L\([^ ]*\).*/\1/'`
 
@@ -165,7 +155,7 @@ case SYSTEMOPENMPI:
         echo "    libmpi dir    : $libDir"
     endif
 
-    _foamAddLib $libDir
+    _foamAddLib     $libDir
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
     unset mpi_version libDir
@@ -174,11 +164,11 @@ case SYSTEMOPENMPI:
 case MPICH:
     set mpi_version=mpich2-1.1.1p1
     setenv MPI_HOME $WM_THIRD_PARTY_DIR/$mpi_version
-    setenv MPI_ARCH_PATH $MPI_HOME/platforms/$WM_OPTIONS
+    setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mpi_version
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
-    _foamAddManPath $MPI_ARCH_PATH/share/man
+    _foamAddMan     $MPI_ARCH_PATH/share/man
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -189,9 +179,9 @@ case MPICH-GM:
     setenv MPICH_PATH $MPI_ARCH_PATH
     setenv GM_LIB_PATH /opt/gm/lib64
 
-    _foamAddPath $MPI_ARCH_PATH/bin
-    _foamAddLib  $MPI_ARCH_PATH/lib
-    _foamAddLib  $GM_LIB_PATH
+    _foamAddPath    $MPI_ARCH_PATH/bin
+    _foamAddLib     $MPI_ARCH_PATH/lib
+    _foamAddLib     $GM_LIB_PATH
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/mpich-gm
     breaksw
@@ -233,18 +223,18 @@ case MPI:
 case FJMPI:
     setenv MPI_ARCH_PATH /opt/FJSVmpi2
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/mpi
-    _foamAddPath $MPI_ARCH_PATH/bin
-    _foamAddLib  $MPI_ARCH_PATH/lib/sparcv9
-    _foamAddLib  /opt/FSUNf90/lib/sparcv9
-    _foamAddLib  /opt/FJSVpnidt/lib
+    _foamAddPath    $MPI_ARCH_PATH/bin
+    _foamAddLib     $MPI_ARCH_PATH/lib/sparcv9
+    _foamAddLib     /opt/FSUNf90/lib/sparcv9
+    _foamAddLib     /opt/FJSVpnidt/lib
     breaksw
 
 case QSMPI:
     setenv MPI_ARCH_PATH /usr/lib/mpi
     setenv FOAM_MPI_LIBBIN FOAM_LIBBIN/qsmpi
 
-    _foamAddPath $MPI_ARCH_PATH/bin
-    _foamAddLib $MPI_ARCH_PATH/lib
+    _foamAddPath    $MPI_ARCH_PATH/bin
+    _foamAddLib     $MPI_ARCH_PATH/lib
 
     breaksw
 
@@ -258,7 +248,7 @@ _foamAddLib $FOAM_MPI_LIBBIN
 
 # Set the minimum MPI buffer size (used by all platforms except SGI MPI)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-set minBufferSize=20000000
+if ( ! $?minBufferSize ) set minBufferSize=20000000
 
 if ( $?MPI_BUFFER_SIZE ) then
     if ( $MPI_BUFFER_SIZE < $minBufferSize ) then
@@ -276,8 +266,8 @@ if ( $?CGAL_LIB_DIR ) then
 endif
 
 
-# Switch on the hoard memory allocator if available
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Enable the hoard memory allocator if available
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #if ( -f $FOAM_LIBBIN/libhoard.so ) then
 #    setenv LD_PRELOAD $FOAM_LIBBIN/libhoard.so:${LD_PRELOAD}
 #endif
@@ -285,8 +275,7 @@ endif
 
 # cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
-unalias _foamAddPath
-unalias _foamAddLib
-unset minBufferSize
+unalias _foamAddPath _foamAddLib _foamAddMan
+unset compilerInstall minBufferSize
 
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------- end-of-file

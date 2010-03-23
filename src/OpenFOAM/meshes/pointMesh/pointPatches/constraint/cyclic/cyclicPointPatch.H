@@ -58,8 +58,8 @@ class cyclicPointPatch
         //- Local reference cast into the cyclic patch
         const cyclicPolyPatch& cyclicPolyPatch_;
 
-        //- List of local points that are not collocated
-        mutable labelList separatedPoints_;
+//        //- List of local points that are not collocated
+//        mutable labelList separatedPoints_;
 
     // Private Member Functions
 
@@ -156,8 +156,8 @@ public:
             //  neighbour patch.
             virtual const edgeList& transformPairs() const;
 
-            //- List of separated coupled points
-            virtual const labelList& separatedPoints() const;
+//            //- List of separated coupled points
+//            virtual const labelList& separatedPoints() const;
 };
 
 

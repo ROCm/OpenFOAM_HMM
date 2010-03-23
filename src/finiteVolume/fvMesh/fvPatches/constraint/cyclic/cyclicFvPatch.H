@@ -83,10 +83,6 @@ public:
         cyclicFvPatch(const polyPatch& patch, const fvBoundaryMesh& bm)
         :
             coupledFvPatch(patch, bm),
-            cyclicLduInterface
-            (
-                refCast<const cyclicPolyPatch>(patch).neighbPatchID()
-            ),
             cyclicPolyPatch_(refCast<const cyclicPolyPatch>(patch))
         {}
 
@@ -99,6 +95,26 @@ public:
             const cyclicPolyPatch& cyclicPatch() const
             {
                 return cyclicPolyPatch_;
+            }
+
+            //- Return neighbour
+            virtual label neighbPatchID() const
+            {
+                return cyclicPolyPatch_.neighbPatchID();
+            }
+
+            virtual bool owner() const
+            {
+                return cyclicPolyPatch_.owner();
+            }
+
+            //- Return processor number
+            virtual const cyclicLduInterface& neighbPatch() const
+            {
+                return refCast<const cyclicFvPatch>
+                (
+                    this->boundaryMesh()[cyclicPolyPatch_.neighbPatchID()]
+                );
             }
 
             //- Are the cyclic planes parallel

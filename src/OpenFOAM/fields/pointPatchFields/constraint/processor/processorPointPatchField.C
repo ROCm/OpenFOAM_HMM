@@ -103,27 +103,27 @@ void processorPointPatchField<Type>::initSwapAddSeparated
 )
 const
 {
-    if (Pstream::parRun())
-    {
-        // Get internal field into correct order for opposite side
-        Field<Type> pf
-        (
-            this->patchInternalField
-            (
-                pField,
-                procPatch_.reverseMeshPoints()
-            )
-        );
-
-        OPstream::write
-        (
-            commsType,
-            procPatch_.neighbProcNo(),
-            reinterpret_cast<const char*>(pf.begin()),
-            pf.byteSize(),
-            procPatch_.tag()
-        );
-    }
+//    if (Pstream::parRun())
+//    {
+//        // Get internal field into correct order for opposite side
+//        Field<Type> pf
+//        (
+//            this->patchInternalField
+//            (
+//                pField,
+//                procPatch_.reverseMeshPoints()
+//            )
+//        );
+//
+//        OPstream::write
+//        (
+//            commsType,
+//            procPatch_.neighbProcNo(),
+//            reinterpret_cast<const char*>(pf.begin()),
+//            pf.byteSize(),
+//            procPatch_.tag()
+//        );
+//    }
 }
 
 
@@ -134,29 +134,29 @@ void processorPointPatchField<Type>::swapAddSeparated
     Field<Type>& pField
 ) const
 {
-    if (Pstream::parRun())
-    {
-        Field<Type> pnf(this->size());
-
-        IPstream::read
-        (
-            commsType,
-            procPatch_.neighbProcNo(),
-            reinterpret_cast<char*>(pnf.begin()),
-            pnf.byteSize(),
-            procPatch_.tag()
-        );
-
-        if (doTransform())
-        {
-            const processorPolyPatch& ppp = procPatch_.procPolyPatch();
-            const tensor& forwardT = ppp.forwardT();
-
-            transform(pnf, forwardT, pnf);
-        }
-
-        addToInternalField(pField, pnf, procPatch_.separatedPoints());
-    }
+//    if (Pstream::parRun())
+//    {
+//        Field<Type> pnf(this->size());
+//
+//        IPstream::read
+//        (
+//            commsType,
+//            procPatch_.neighbProcNo(),
+//            reinterpret_cast<char*>(pnf.begin()),
+//            pnf.byteSize(),
+//            procPatch_.tag()
+//        );
+//
+//        if (doTransform())
+//        {
+//            const processorPolyPatch& ppp = procPatch_.procPolyPatch();
+//            const tensor& forwardT = ppp.forwardT();
+//
+//            transform(pnf, forwardT, pnf);
+//        }
+//
+//        addToInternalField(pField, pnf, procPatch_.separatedPoints());
+//    }
 }
 
 

@@ -52,8 +52,8 @@ class cyclicLduInterface
 {
     // Private data
 
-        //- Coupled patch
-        const label neighbPatchID_;
+//        //- Coupled patch
+//        const label neighbPatchID_;
 
 //        const cyclicLduInterface* neighbPatch_;
 
@@ -64,8 +64,11 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        cyclicLduInterface(const label neighbPatchID);
+//        //- Construct from components
+//        cyclicLduInterface(const label neighbPatchID);
+
+        //- Construct null
+        cyclicLduInterface();
 
     // Destructor
 
@@ -76,22 +79,13 @@ public:
 
         // Access
 
-            //- Return processor number
-            label neighbPatchID() const
-            {
-                return neighbPatchID_;
-            }
+            //- Return neighbour
+            virtual label neighbPatchID() const = 0;
 
-//            //- Return processor number
-//            const cyclicLduInterface& neighbPatch() const
-//            {
-//                if (!neighbPatch_)
-//                {
-//                    FatalErrorIn("cyclicLduInterface::neighbPatch() const")
-//                        << "Not owner." << abort(FatalError);
-//                }
-//                return neighbPatchID_;
-//            }
+            virtual bool owner() const = 0;
+
+            //- Return processor number
+            virtual const cyclicLduInterface& neighbPatch() const = 0;
 
             //- Return face transformation tensor
             virtual const tensor& forwardT() const = 0;

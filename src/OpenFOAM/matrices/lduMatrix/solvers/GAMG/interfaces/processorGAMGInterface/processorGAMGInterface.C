@@ -26,6 +26,7 @@ License
 
 #include "processorGAMGInterface.H"
 #include "addToRunTimeSelectionTable.H"
+#include "Map.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -45,6 +46,8 @@ namespace Foam
 
 Foam::processorGAMGInterface::processorGAMGInterface
 (
+    const label index,
+    const lduInterfacePtrsList& coarseInterfaces,
     const lduInterface& fineInterface,
     const labelField& localRestrictAddressing,
     const labelField& neighbourRestrictAddressing
@@ -52,6 +55,8 @@ Foam::processorGAMGInterface::processorGAMGInterface
 :
     GAMGInterface
     (
+        index,
+        coarseInterfaces,
         fineInterface,
         localRestrictAddressing,
         neighbourRestrictAddressing
@@ -59,13 +64,13 @@ Foam::processorGAMGInterface::processorGAMGInterface
     fineProcInterface_(refCast<const processorLduInterface>(fineInterface))
 {
     // Make a lookup table of entries for owner/neighbour
-    HashTable<SLList<label>, label, Hash<label> > neighboursTable
+    Map<SLList<label> > neighboursTable
     (
         localRestrictAddressing.size()
     );
 
     // Table of face-sets to be agglomerated
-    HashTable<SLList<SLList<label> >, label, Hash<label> > faceFaceTable
+    Map<SLList<SLList<label> > > faceFaceTable
     (
         localRestrictAddressing.size()
     );
