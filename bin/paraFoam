@@ -44,6 +44,7 @@ options:
   -case <dir>       specify alternative case directory, default is the cwd
   -region <name>    specify alternative mesh region
   -touch            only create the file  (eg, .blockMesh, .OpenFOAM, etc)
+  -touchAll         create .blockMesh, .OpenFOAM files (and for all regions)
   -help             print the usage
 
 * start paraview $ParaView_VERSION with the OpenFOAM libraries
@@ -52,7 +53,7 @@ USAGE
     exit 1
 }
 
-unset regionName touchOnly
+unset regionName touchOpt
 
 # reader extension
 extension=OpenFOAM
@@ -83,7 +84,11 @@ do
         shift 2
         ;;
     -touch)
-        touchOnly=true
+        touchOpt=true
+        shift
+        ;;
+    -touchAll)
+        touchOpt=all
         shift
         ;;
     *)
@@ -103,12 +108,35 @@ then
     fvControls="$fvControls/$regionName"
 fi
 
-if [ -n "$touchOnly" ]
-then
+case "${touchOpt:-false}" in
+all)
+    extension=OpenFOAM
+    if [ -f constant/polyMesh/blockMeshDict ]
+    then
+        touch "$caseName.blockMesh"
+        echo "created '$caseName.blockMesh'"
+    fi
+    touch "$caseName.$extension"
+    echo "created '$caseName.$extension'"
+    # discover probable regions
+    for region in constant/*
+    do
+        if [ -d $region -a -d $region/polyMesh ]
+        then
+            regionName=${region##*/}
+            touch "$caseName{$regionName}.$extension"
+            echo "created '$caseName{$regionName}.$extension'"
+        fi
+    done
+    exit 0
+    ;;
+true)
     touch "$caseFile"
     echo "created '$caseFile'"
     exit 0
-fi
+    ;;
+esac
+
 
 # parent directory for normal or parallel results
 case "$caseName" in

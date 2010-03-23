@@ -85,7 +85,7 @@ template<class Type>
 Foam::zeroField
 Foam::fvm::Su
 (
-    const zeroField&,
+    const zero&,
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
@@ -174,7 +174,7 @@ template<class Type>
 Foam::zeroField
 Foam::fvm::Sp
 (
-    const zeroField&,
+    const zero&,
     const GeometricField<Type, fvPatchField, volMesh>&
 )
 {
@@ -240,7 +240,7 @@ template<class Type>
 Foam::zeroField
 Foam::fvm::SuSp
 (
-    const zeroField&,
+    const zero&,
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {

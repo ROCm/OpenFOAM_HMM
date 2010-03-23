@@ -1088,7 +1088,7 @@ void Foam::fvMatrix<Type>::operator-=
 template<class Type>
 void Foam::fvMatrix<Type>::operator+=
 (
-    const zeroField&
+    const zero&
 )
 {}
 
@@ -1096,7 +1096,7 @@ void Foam::fvMatrix<Type>::operator+=
 template<class Type>
 void Foam::fvMatrix<Type>::operator-=
 (
-    const zeroField&
+    const zero&
 )
 {}
 
@@ -1507,7 +1507,7 @@ template<class Type>
 Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
 (
     const fvMatrix<Type>& A,
-    const zeroField&
+    const zero&
 )
 {
     return A;
@@ -1518,7 +1518,7 @@ template<class Type>
 Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
 (
     const tmp<fvMatrix<Type> >& tA,
-    const zeroField&
+    const zero&
 )
 {
     return tA;

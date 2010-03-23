@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,6 +49,13 @@ template<class Type>
 inline Type operator/(const one&, const Type& t)
 {
     return scalar(1)/t;
+}
+
+
+template<class Type>
+inline const Type& operator/(const Type& t, const one&)
+{
+    return t;
 }
 
 

@@ -1,0 +1,161 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+\*---------------------------------------------------------------------------*/
+
+#include "ptscotchDecomp.H"
+#include "addToRunTimeSelectionTable.H"
+#include "Time.H"
+
+static const char* notImplementedMessage =
+"You are trying to use ptscotch but do not have the "
+"ptscotchDecomp library loaded."
+"\nThis message is from the dummy ptscotchDecomp stub library instead.\n"
+"\n"
+"Please install ptscotch and make sure that libptscotch.so is in your "
+"LD_LIBRARY_PATH.\n"
+"The ptscotchDecomp library can then be built in "
+"$FOAM_SRC/parallel/decompose/ptscotchDecomp\n";
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(ptscotchDecomp, 0);
+
+    addToRunTimeSelectionTable
+    (
+        decompositionMethod,
+        ptscotchDecomp,
+        dictionaryMesh
+    );
+}
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::ptscotchDecomp::check(const int retVal, const char* str)
+{}
+
+
+Foam::label Foam::ptscotchDecomp::decompose
+(
+    List<int>& adjncy,
+    List<int>& xadj,
+    const scalarField& cWeights,
+    List<int>& finalDecomp
+)
+{
+    FatalErrorIn
+    (
+        "label ptscotchDecomp::decompose"
+        "("
+            "const List<int>&, "
+            "const List<int>&, "
+            "const scalarField&, "
+            "List<int>&"
+        ")"
+    )   << notImplementedMessage << exit(FatalError);
+
+    return -1;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::ptscotchDecomp::ptscotchDecomp
+(
+    const dictionary& decompositionDict,
+    const polyMesh& mesh
+)
+:
+    decompositionMethod(decompositionDict),
+    mesh_(mesh)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::labelList Foam::ptscotchDecomp::decompose
+(
+    const pointField& points,
+    const scalarField& pointWeights
+)
+{
+    FatalErrorIn
+    (
+        "labelList ptscotchDecomp::decompose"
+        "("
+            "const pointField&, "
+            "const scalarField&"
+        ")"
+    )   << notImplementedMessage << exit(FatalError);
+
+    return labelList::null();
+}
+
+
+Foam::labelList Foam::ptscotchDecomp::decompose
+(
+    const labelList& agglom,
+    const pointField& agglomPoints,
+    const scalarField& pointWeights
+)
+{
+    FatalErrorIn
+    (
+        "labelList ptscotchDecomp::decompose"
+        "("
+            "const labelList&, "
+            "const pointField&, "
+            "const scalarField&"
+        ")"
+    )   << notImplementedMessage << exit(FatalError);
+
+    return labelList::null();
+}
+
+
+Foam::labelList Foam::ptscotchDecomp::decompose
+(
+    const labelListList& globalCellCells,
+    const pointField& cellCentres,
+    const scalarField& cWeights
+)
+{
+    FatalErrorIn
+    (
+        "labelList ptscotchDecomp::decompose"
+        "("
+            "const labelListList&, "
+            "const pointField&, "
+            "const scalarField&"
+        ")"
+    )   << notImplementedMessage << exit(FatalError);
+
+    return labelList::null();
+}
+
+
+// ************************************************************************* //

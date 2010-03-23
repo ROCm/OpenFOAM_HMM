@@ -1,10 +1,5 @@
 EXE_INC = \
-    -I$(ParaView_DIR)/VTK \
-    -I$(ParaView_INST_DIR) \
-    -I$(ParaView_INST_DIR)/VTK \
-    -I$(ParaView_INST_DIR)/VTK/Common \
-    -I$(ParaView_INST_DIR)/VTK/Filtering \
-    -I$(ParaView_INST_DIR)/VTK/Rendering
+    -I$(ParaView_DIR)/include/paraview-$(ParaView_MAJOR)
 
 LIB_LIBS = \
     $(GLIBS)

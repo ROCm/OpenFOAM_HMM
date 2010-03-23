@@ -92,12 +92,6 @@ class pointEdgePoint
 
 public:
 
-    // Static data members
-
-        //- initial point far away.
-        static point greatPoint;
-
-
     // Constructors
 
         //- Construct null

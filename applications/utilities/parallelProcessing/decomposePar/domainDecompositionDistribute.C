@@ -162,15 +162,13 @@ void Foam::domainDecomposition::distributeCells()
         // somewhere in the middle of the domain which might not be anywhere
         // near any of the cells.
 
-        const point greatPoint(GREAT, GREAT, GREAT);
-
-        pointField regionCentres(globalRegion.nRegions(), greatPoint);
+        pointField regionCentres(globalRegion.nRegions(), point::max);
 
         forAll(globalRegion, cellI)
         {
             label regionI = globalRegion[cellI];
 
-            if (regionCentres[regionI] == greatPoint)
+            if (regionCentres[regionI] == point::max)
             {
                 regionCentres[regionI] = cellCentres()[cellI];
             }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -356,8 +356,15 @@ class vtkPV3Foam
             //- Zone info
             void updateInfoZones(vtkDataArraySelection*);
 
-            //- Read zone names for zoneType from file
-            wordList readZoneNames(const word& zoneType);
+            //- Get non-empty zone names for zoneType from file
+            wordList getZoneNames(const word& zoneType) const;
+
+            //- Get non-empty zone names from mesh info
+            template<class ZoneType>
+            wordList getZoneNames
+            (
+                const ZoneMesh<ZoneType, polyMesh>&
+            ) const;
 
             //- Add objects of Type to paraview array selection
             template<class Type>

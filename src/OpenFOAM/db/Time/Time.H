@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -126,6 +126,9 @@ protected:
 
         //- Is the time currently being sub-cycled?
         bool subCycling_;
+
+        //- If time is being sub-cycled this is the previous TimeState
+        autoPtr<TimeState> prevTimeState_;
 
         //- Time directory name format
         static fmtflags format_;
@@ -347,6 +350,18 @@ public:
                 return functionObjects_;
             }
 
+            //- Return true if time currently being sub-cycled, otherwise false
+            bool subCycling() const
+            {
+                return subCycling_;
+            }
+
+            //- Return previous TimeState if time is being sub-cycled
+            const TimeState& prevTimeState() const
+            {
+                return prevTimeState_();
+            }
+
 
         // Check
 
@@ -427,8 +442,8 @@ public:
             //- Set time to sub-cycle for the given number of steps
             virtual TimeState subCycle(const label nSubCycles);
 
-            //- Reset time after sub-cycling back to given TimeState
-            virtual void endSubCycle(const TimeState&);
+            //- Reset time after sub-cycling back to previous TimeState
+            virtual void endSubCycle();
 
             //- Return non-const access to the list of function objects
             functionObjectList& functionObjects()

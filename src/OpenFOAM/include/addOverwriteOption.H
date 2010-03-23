@@ -2,7 +2,7 @@
 // addOverwriteOption.H
 // ~~~~~~~~~~~~~~~~~~~~
 
-    Foam::argList::addOption
+    Foam::argList::addBoolOption
     (
         "overwrite",
         "overwrite existing mesh/results files"

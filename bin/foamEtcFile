@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -27,8 +27,17 @@
 #     foamEtcFile
 #
 # Description
-#     Locate user/site/shipped file with the semantics used in the
-#     ~OpenFOAM/fileName expansion
+#     Locate user/group/shipped file with semantics similar to the
+#     ~OpenFOAM/fileName expansion.
+#
+#     The -mode option can be used to allow chaining from 
+#     personal settings to site-wide settings.
+#
+#     For example, within the user ~/.OpenFOAM/<VER>/prefs.sh:
+#     @verbatim
+#        foamPrefs=`$WM_PROJECT_DIR/bin/foamEtcFile -m go prefs.sh` \
+#            && _foamSource $foamPrefs
+#     @endverbatim
 #
 #-------------------------------------------------------------------------------
 unset listOpt quietOpt
@@ -41,23 +50,31 @@ usage() {
     cat<<USAGE
 
 Usage: ${0##*/} [OPTION] fileName
-       ${0##*/} -list
-
+       ${0##*/} [OPTION] -list
 options:
-  -l | -list    list the directories to be searched
-  -q | -quiet   suppress all normal output
+  -list             list the directories to be searched
+  -mode <mode>      any combination of u(user), g(group), o(other)
+  -quiet            suppress all normal output
+  -help             print the usage
 
-  Locate user/site/shipped file with the semantics used in the
-  ~OpenFOAM/fileName expansion
+  Locate user/group/shipped file with semantics similar to the
+  ~OpenFOAM/fileName expansion.
 
-  Exit status 0 when the file is found and output resolved path to stdout.
-  Exit status 1 for miscellaneous errors.
-  Exit status 2 when the file is not found.
+  The options can also be specified as a single character
+  (eg, '-q' instead of '-quiet'), but must not be grouped.
+
+  Exit status
+      0  when the file is found. Print resolved path to stdout.
+      1  for miscellaneous errors.
+      2  when the file is not found.
 
 USAGE
     exit 1
 }
 
+
+# default mode is 'ugo'
+mode=ugo
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -69,6 +86,20 @@ do
     -l | -list)
         listOpt=true
         shift
+        ;;
+    -m | -mode)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        mode="$2"
+
+        # sanity check:
+        case "$mode" in
+        *u* | *g* | *o* )
+           ;;
+        *)
+           usage "'$1' option with invalid mode '$mode'"
+           ;;
+        esac
+        shift 2
         ;;
     -q | -quiet)
         quietOpt=true
@@ -83,18 +114,32 @@ do
     esac
 done
 
-
 # Save the essential bits of information:
 nArgs=$#
 fileName="$1"
 
-# The various places to be searched:
-set -- \
-    $HOME/.${WM_PROJECT:-OpenFOAM}/$WM_PROJECT_VERSION \
-    $HOME/.${WM_PROJECT:-OpenFOAM} \
-    $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION \
-    $WM_PROJECT_INST_DIR/site \
-    $WM_PROJECT_DIR/etc
+# Define the various places to be searched:
+files=""
+case "$mode" in
+*u*)  # user
+    files="$files $HOME/.${WM_PROJECT:-OpenFOAM}/$WM_PROJECT_VERSION"
+    files="$files $HOME/.${WM_PROJECT:-OpenFOAM}"
+    ;;
+esac
+
+case "$mode" in
+*g*)  # group
+    files="$files $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION"
+    files="$files $WM_PROJECT_INST_DIR/site"
+    ;;
+esac
+
+case "$mode" in
+*o*)  # other
+    files="$files $WM_PROJECT_DIR/etc"
+    ;;
+esac
+set -- $files
 
 
 #

@@ -41,7 +41,10 @@
 #------------------------------------------------------------------------------
 usage() {
     cat <<USAGE 1>&2
-Usage: ${0##*/} [-strip] path [wildcard] .. [wildcard]
+Usage: ${0##*/} [OPTION] path [wildcard1] .. [wildcardN]
+options:
+  -strip            remove inaccessible directories
+  -help             print the usage
 
   Prints its argument (which should be a ':' separated list) cleansed from
     - duplicate elements
@@ -123,11 +126,11 @@ do
     fi
 done
 
-# parse on whitespace
+# split on whitespace
 IFS=' '
 set -- $dirList
 
-# join on ':'
+# rejoin on ':'
 IFS=':'
 dirList="$*"
 

@@ -1,4 +1,6 @@
 #!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
@@ -7,34 +9,34 @@ application="icoFoam"
 
 cavityCases="cavity cavityFine cavityGrade cavityHighRe cavityClipped"
 
-runMapFields ()
+runMapFields()
 {
     echo "Running mapFields from $1 to $2"
     mapFields $1 -case $2 -sourceTime latestTime > $2/log.mapFields 2>&1
 }
 
-runMapFieldsConsistent ()
+runMapFieldsConsistent()
 {
     echo "Running mapFields from $1 to $2"
     mapFields $1 -case $2 -sourceTime latestTime -consistent > $2/log.mapFields 2>&1
 }
 
-runFluentMeshToFoam ()
+runFluentMeshToFoam()
 {
     echo "fluentMeshToFoam: converting mesh $2"
     fluentMeshToFoam $2 -case $1 > $1/log.fluentMeshToFoam 2>&1
 }
 
-copySolutionDirs ()
+copySolutionDirs()
 {
     echo "Copying $2/0* directory to $1"
     cp -r $2/0* $1
 }
 
-setCavityFine ()
+setCavityFine()
 {
-    blockMeshDict="$case/constant/polyMesh/blockMeshDict"
-    controlDict="$case/system/controlDict"
+    blockMeshDict="$caseName/constant/polyMesh/blockMeshDict"
+    controlDict="$caseName/system/controlDict"
     sed s/"20 20 1"/"41 41 1"/g $blockMeshDict > temp.$$
     mv temp.$$ $blockMeshDict
     sed \
@@ -47,11 +49,11 @@ setCavityFine ()
     mv temp.$$ $controlDict
 }
 
-setCavityHighRe ()
+setCavityHighRe()
 {
     echo "Setting cavityHighRe to generate a secondary vortex"
-    controlDict="$case/system/controlDict"
-    transportProperties="$case/constant/transportProperties"
+    controlDict="$caseName/system/controlDict"
+    transportProperties="$caseName/constant/transportProperties"
     sed \
     -e s/"\(startFrom[ \t]*\) startTime;"/"\1 latestTime;"/g \
     -e s/"\(endTime[ \t]*\) 0.5;"/"\1 2.0;"/g \
@@ -61,47 +63,53 @@ setCavityHighRe ()
     mv temp.$$ $transportProperties
 }
 
-for case in $cavityCases
+
+for caseName in $cavityCases
 do
-    if [ "$case" = "cavityFine" ]
+    if [ "$caseName" = cavityFine ]
     then
-        cloneCase cavity $case
+        cloneCase cavity $caseName
         setCavityFine
     fi
 
-    if [ "$case" = "cavityHighRe" ]
+    if [ "$caseName" = cavityHighRe ]
     then
-        cloneCase cavity $case
+        cloneCase cavity $caseName
         setCavityHighRe
-        copySolutionDirs $case cavity
+        copySolutionDirs $caseName cavity
     fi
 
-    (cd $case && runApplication blockMesh)
-#
-    if [ "$case" = "cavityFine" -o "$case" = "cavityGrade" ]
-    then
-        runMapFieldsConsistent $previousCase $case
-    fi
+    ( cd $caseName && runApplication blockMesh )
 
-    if [ "$case" = "cavityClipped" ]
-    then
-        cp -r $case/0 $case/0.5
-        runMapFields cavity $case
-        if [ ".`grep nonuniform $case/0.5/U`" != "." ]
+    case "$caseName" in
+    cavityFine | cavityGrade)
+        runMapFieldsConsistent $previousCase $caseName
+        ;;
+    cavityClipped)
+        cp -r $caseName/0 $caseName/0.5
+        runMapFields cavity $caseName
+        if [ ".`grep nonuniform $caseName/0.5/U`" != "." ]
         then
-            sed -f resetFixedWallsScr $case/0.5/U > $case/0.5/U.temp
-            mv $case/0.5/U.temp $case/0.5/U
+            sed -f resetFixedWallsScr $caseName/0.5/U > $caseName/0.5/U.temp
+            mv $caseName/0.5/U.temp $caseName/0.5/U
         fi
-    fi
-#
-    previousCase="$case"
-#
-    (cd $case && runApplication $application)
+        ;;
+    esac
+
+    previousCase="$caseName"
+    ( cd $caseName && runApplication $application )
 done
 
 # elbow case for testing Fluent-FOAM conversion tools
 
 runFluentMeshToFoam elbow elbow/elbow.msh
-(cd elbow && runApplication $application)
-(cd elbow && runApplication foamMeshToFluent)
-(cd elbow && runApplication foamDataToFluent)
+
+(
+    cd elbow || exit
+
+    runApplication $application
+    runApplication foamMeshToFluent
+    runApplication foamDataToFluent
+)
+
+# ----------------------------------------------------------------- end-of-file

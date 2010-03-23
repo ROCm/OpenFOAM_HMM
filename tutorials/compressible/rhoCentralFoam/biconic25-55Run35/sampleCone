@@ -1,43 +1,54 @@
 #!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
 
 #
 # FUNCTIONS
 #
-printUsage () {
-cat <<EOF
-Usage: $0 [options]
-Runs a set of samples across the cone face and concatenates output files
+usage()
+{
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
 
-Options are:
--l         -latestTime option for sample
--h         help
-EOF
+    cat<<USAGE
+Usage: ${0##*/} [OPTION]
+
+options:
+  -l         -latestTime option for sample
+  -h         help
+
+Runs a set of samples across the cone face and concatenates output files
+USAGE
+    exit 1
 }
 
-LATEST_TIME=""
+
+unset timeOpt
 
 OPTS=`getopt hl $*`
-if [ $? -ne 0 ] ; then
-    echo "Aborting due to invalid option"
-    printUsage
-    exit 1
-fi
+[ $? -eq 0 ] || usage "Aborting due to invalid option"
+
 eval set -- "$OPTS"
-while [ $1 != -- ]; do
+while [ $1 != -- ]
+do
     case $1 in
-        -l) LATEST_TIME="-latestTime";;
-        -h) printUsage; exit 1;;
+    -l)
+        timeOpt="-latestTime"
+        ;;
+    -h)
+        usage
+        ;;
     esac
     shift
 done
 shift
 
-sample ${LATEST_TIME}
+sample $timeOpt
 SDIR="sets"
 LSDIR=`ls $SDIR | head -1`
 EXAMPLE_FILE=`ls -1 $SDIR/${LSDIR}/* | head -1`
 FS=`basename $EXAMPLE_FILE | cut -d_ -f2-`
 for d in $SDIR/*
 do
-   cat ${d}/cone25_${FS} ${d}/cone55_${FS} ${d}/base_${FS} > ${d}/biconic_${FS}
+    cat ${d}/cone25_${FS} ${d}/cone55_${FS} ${d}/base_${FS} > ${d}/biconic_${FS}
 done
+
+# ----------------------------------------------------------------- end-of-file

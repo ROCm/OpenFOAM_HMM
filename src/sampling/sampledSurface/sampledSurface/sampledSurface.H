@@ -312,6 +312,13 @@ public:
         //- Project field onto surface
         tmp<Field<vector> > project(const Field<tensor>&) const;
 
+        //- Interpolate from points to cell centre
+        template<class Type>
+        tmp<GeometricField<Type, fvPatchField, volMesh> > pointAverage
+        (
+            const GeometricField<Type, pointPatchField, pointMesh>& pfld
+        ) const;
+
         //- Sample field on surface
         virtual tmp<scalarField> sample
         (

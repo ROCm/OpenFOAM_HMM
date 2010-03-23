@@ -38,6 +38,7 @@ SourceFiles
 
 #include "volFieldsFwd.H"
 #include "fvMatrix.H"
+#include "zeroField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -76,7 +77,7 @@ namespace fvm
         template<class Type>
         zeroField Su
         (
-            const zeroField&,
+            const zero&,
             const GeometricField<Type, fvPatchField, volMesh>&
         );
 
@@ -116,7 +117,7 @@ namespace fvm
         template<class Type>
         zeroField Sp
         (
-            const zeroField&,
+            const zero&,
             const GeometricField<Type, fvPatchField, volMesh>&
         );
 
@@ -147,7 +148,7 @@ namespace fvm
         template<class Type>
         zeroField SuSp
         (
-            const zeroField&,
+            const zero&,
             const GeometricField<Type, fvPatchField, volMesh>&
         );
 }

@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -27,8 +27,8 @@
 #     foamCleanTutorials
 #
 # Description
-#       Run either Allclean or default cleanCase in current directory
-#       and all its subdirectories.
+#     Run either Allwclean, Allclean or default cleanCase in current directory
+#     and all its subdirectories.
 #
 #------------------------------------------------------------------------------
 
@@ -41,24 +41,29 @@ then
     thisScript="$PWD/$thisScript"
 fi
 
-# If an argument is supplied do not execute ./Allclean to avoid recursion
-if [ $# = 0 -a -f Allclean ]
+# If an argument is supplied do not execute ./Allwclean or ./Allclean
+# (to avoid recursion)
+if [ $# -eq 0 -a -f Allwclean ]
 then
-    # Specialised script.
+    # Specialized script
+    ./Allwclean
+elif [ $# -eq 0 -a -f Allclean ]
+then
+    # Specialized script
     ./Allclean
 elif [ -d system ]
 then
-    # Normal case.
+    # Normal case
     cleanCase
 elif [ -d Make ]
 then
-    # Normal application.
+    # Normal application
     cleanApplication
 else
-    # Recurse to subdirectories
-    for caseDir in *
+    # Recurse into subdirectories
+    for caseName in *
     do
-        ( cd $caseDir 2>/dev/null && $thisScript )
+        ( cd $caseName 2>/dev/null && $thisScript )
     done
 fi
 

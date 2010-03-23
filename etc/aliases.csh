@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -22,7 +22,7 @@
 #     along with OpenFOAM; if not, write to the Free Software Foundation,
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
-# Script
+# File
 #     aliases.csh
 #
 # Description
@@ -44,6 +44,11 @@ alias wmDP 'setenv WM_PRECISION_OPTION DP; source $WM_PROJECT_DIR/etc/cshrc'
 alias wmSchedON 'setenv WM_SCHEDULER $WM_PROJECT_DIR/wmake/wmakeScheduler'
 alias wmSchedOFF 'unsetenv WM_SCHEDULER'
 
+# Change paraview version
+# ~~~~~~~~~~~~~~~~~~~~~~~
+alias foamPV 'setenv ParaView_VERSION \!*; source $WM_PROJECT_DIR/etc/apps/paraview3/cshrc; echo paraview-$ParaView_VERSION'
+
+
 # Change directory aliases
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 alias src 'cd $FOAM_SRC'
@@ -56,6 +61,11 @@ alias app 'cd $FOAM_APP'
 alias util 'cd $FOAM_UTILITIES'
 alias sol 'cd $FOAM_SOLVERS'
 alias tut 'cd $FOAM_TUTORIALS'
+
+alias foamApps 'cd $FOAM_APP'
+alias foamSol 'cd $FOAM_SOLVERS'
+alias foamTuts 'cd $FOAM_TUTORIALS'
+alias foamUtils 'cd $FOAM_UTILITIES'
 alias foam3rdParty 'cd $WM_THIRD_PARTY_DIR'
 
 # -----------------------------------------------------------------------------

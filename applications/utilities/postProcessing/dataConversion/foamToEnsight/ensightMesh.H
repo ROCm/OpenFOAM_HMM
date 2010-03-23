@@ -42,7 +42,7 @@ SourceFiles
 #include "fvMesh.H"
 #include "OFstream.H"
 #include <fstream>
-#include "globalIndex.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,6 +51,7 @@ namespace Foam
 
 class fvMesh;
 class argList;
+class globalIndex;
 
 /*---------------------------------------------------------------------------*\
                            Class ensightMesh Declaration
@@ -97,6 +98,16 @@ private:
         wordHashSet patchNames_;
 
         HashTable<nFacePrimitives> nPatchPrims_;
+
+        // faceZone - related variables
+        List<faceSets> faceZoneFaceSets_;
+
+        wordHashSet faceZoneNames_;
+
+        HashTable<nFacePrimitives> nFaceZonePrims_;
+
+        //- Per boundary face whether to include or not
+        PackedBoolList boundaryFaceToBeIncluded_;
 
 
     // Private Member Functions
@@ -206,6 +217,38 @@ private:
             OFstream& ensightGeometryFile
         ) const;
 
+        void writeAllInternalPoints
+        (
+            const pointField& uniquePoints,
+            const label nPoints,
+            OFstream& ensightGeometryFile
+        ) const;
+
+        void writeAllPatchPoints
+        (
+            label ensightPatchI,
+            const word& patchName,
+            const pointField& uniquePoints,
+            const label nPoints,
+            OFstream& ensightGeometryFile
+        ) const;
+
+        void writeAllInternalPointsBinary
+        (
+            const pointField& uniquePoints,
+            const label nPoints,
+            std::ofstream& ensightGeometryFile
+        ) const;
+
+        void writeAllPatchPointsBinary
+        (
+            label ensightPatchI,
+            const word& patchName,
+            const pointField& uniquePoints,
+            const label nPoints,
+            std::ofstream& ensightGeometryFile
+        ) const;
+
         void writeAscii
         (
             const fileName& postProcPath,
@@ -311,7 +354,12 @@ public:
     // Constructors
 
         //- Construct from fvMesh
-        ensightMesh(const fvMesh&, const argList& args, const bool binary);
+        ensightMesh
+        (
+            const fvMesh&,
+            const argList& args,
+            const bool binary
+        );
 
 
     //- Destructor
@@ -352,11 +400,35 @@ public:
                 return nPatchPrims_;
             }
 
+            const List<faceSets>& faceZoneFaceSets() const
+            {
+                return faceZoneFaceSets_;
+            }
+
+            const wordHashSet& faceZoneNames() const
+            {
+                return faceZoneNames_;
+            }
+
+            const HashTable<nFacePrimitives>& nFaceZonePrims() const
+            {
+                return nFaceZonePrims_;
+            }
+
             //- The ensight part id for the first patch
             label patchPartOffset() const
             {
                 return patchPartOffset_;
             }
+
+    // Other
+
+        //- When exporting faceZones, check if a given face has to be included
+        //  or not (i.e. faces on processor boundaries)
+        bool faceToBeIncluded(const label faceI) const;
+
+        //- Helper to cause barrier. Necessary on Quadrics.
+        static void barrier();
 
 
     // I-O
@@ -368,6 +440,7 @@ public:
             const label timeIndex,
             Ostream& ensightCaseFile
         ) const;
+
 };
 
 

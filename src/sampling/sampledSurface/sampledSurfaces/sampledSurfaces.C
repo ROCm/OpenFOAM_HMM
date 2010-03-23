@@ -357,7 +357,7 @@ bool Foam::sampledSurfaces::update()
     if (Pstream::master() && debug)
     {
         Pout<< nl << "Merging all points within "
-            << mergeDim << " meter" << endl;
+            << mergeDim << " metre" << endl;
     }
 
     forAll(*this, surfI)

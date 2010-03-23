@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
             mesh
         ),
         mesh,
-        dimensionedVector("n", dimLength, wallPoint::greatPoint)
+        dimensionedVector("n", dimLength, point::max)
     );
 
     // Fill wall patches with unit normal

@@ -59,8 +59,8 @@ printHeader() {
 | =========                 |                                                 |
 | \\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\\\    /   O peration     | Version:  ${foamVersion}  |
-|   \\\\  /    A nd           |                                                 |
-|    \\\\/     M anipulation  |                                www.OpenFOAM.org |
+|   \\\\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\\\/     M anipulation  |                                                 |
 \\*---------------------------------------------------------------------------*/
 FoamFile
 {

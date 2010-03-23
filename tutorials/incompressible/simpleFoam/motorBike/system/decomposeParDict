@@ -19,7 +19,7 @@ numberOfSubdomains 6;
 
 method          hierarchical;
 // method          metis;
-// method          parMetis;
+// method          ptscotch;
 
 simpleCoeffs
 {

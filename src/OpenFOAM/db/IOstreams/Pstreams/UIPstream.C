@@ -77,6 +77,21 @@ inline void Foam::UIPstream::readFromBuffer
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::UIPstream::~UIPstream()
+{
+    if (clearAtEnd_ && eof())
+    {
+        if (debug)
+        {
+            Pout<< "UIPstream::~UIPstream() : clearing externalBuf_ of size "
+                << externalBuf_.size() << endl;
+        }
+        externalBuf_.clearStorage();
+    }
+}
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::Istream& Foam::UIPstream::read(token& t)

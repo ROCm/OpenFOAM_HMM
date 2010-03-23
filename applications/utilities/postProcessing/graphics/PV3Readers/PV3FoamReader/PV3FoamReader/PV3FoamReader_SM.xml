@@ -82,6 +82,20 @@
       </Documentation>
     </IntVectorProperty>
 
+    <!-- Use VTK Polyhedron check-box -->
+    <IntVectorProperty
+      name="UseVTKPolyhedron"
+      command="SetUseVTKPolyhedron"
+      number_of_elements="1"
+      default_values="0"
+      animateable="0">
+      <BooleanDomain name="bool"/>
+      <Documentation>
+        Use vtkPolyhedron instead of decomposing polyhedra.
+        !!Actually uses vtkConvexPointSet until this is properly supported in VTK!!
+      </Documentation>
+    </IntVectorProperty>
+
     <!-- Include Sets check-box -->
     <IntVectorProperty
       name="UiIncludeSets"

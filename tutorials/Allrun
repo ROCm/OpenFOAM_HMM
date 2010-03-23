@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -29,7 +29,6 @@
 # Description
 #
 #------------------------------------------------------------------------------
-
 cd ${0%/*} || exit 1    # run from this directory
 
 # Source tutorial run functions
@@ -37,10 +36,11 @@ cd ${0%/*} || exit 1    # run from this directory
 
 # logReport <logfile>
 # Extracts useful info from log file.
-logReport () {
-    case=`dirname $1 | sed s/"\(.*\)\.\/"/""/g`
+logReport()
+{
+    caseName=`dirname $1 | sed s/"\(.*\)\.\/"/""/g`
     app=`echo $1 | sed s/"\(.*\)\."/""/g`
-    appAndCase="Application $app - case $case"
+    appAndCase="Application $app - case $caseName"
 
     fatalError=`grep "FOAM FATAL" $1`
     UxSS=`grep -E "Ux[:| ]*solution singularity" $1`
@@ -51,11 +51,9 @@ logReport () {
     if [ "$fatalError" ]
     then
         echo "$appAndCase: ** FOAM FATAL ERROR **"
-        return
     elif [ "$UxSS" -a "$UySS" -a "$UzSS" ]
     then
         echo "$appAndCase: ** Solution singularity **"
-        return
     elif [ "$completed" ]
     then
         completionTime=`tail -10 $log | grep Execution | cut -d= -f2 | sed 's/^[ \t]*//'`
@@ -64,7 +62,6 @@ logReport () {
             completionTime="in $completionTime"
         fi
         echo "$appAndCase: completed $completionTime"
-        return
     else
         echo "$appAndCase: unconfirmed completion"
     fi
@@ -78,18 +75,18 @@ foamRunTutorials cases
 # Analyse all log files
 rm testLoopReport > /dev/null 2>&1 &
 touch testLoopReport
-for application in *
+
+for appDir in *
 do
-    if [ -d $application ]
-    then
-        cd $application
-        for log in `find . -name "log.*" | xargs ls -rt`
-        do
-            logReport $log >> ../testLoopReport
-        done
-        echo "" >> ../testLoopReport
-        cd ..
-    fi
+(
+    [ -d $appDir ] && cd $appDir || exit
+
+    for log in `find . -name "log.*" | xargs ls -rt`
+    do
+        logReport $log >> ../testLoopReport
+    done
+    echo "" >> ../testLoopReport
+)
 done
 
 find . -name "log.*" -exec cat {} \; >> logs

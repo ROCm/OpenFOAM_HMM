@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -22,7 +22,7 @@
 #     along with OpenFOAM; if not, write to the Free Software Foundation,
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
-# Script
+# File
 #     aliases.sh
 #
 # Description
@@ -44,6 +44,19 @@ alias wmDP='export WM_PRECISION_OPTION=DP; . $WM_PROJECT_DIR/etc/bashrc'
 alias wmSchedON='export WM_SCHEDULER=$WM_PROJECT_DIR/wmake/wmakeScheduler'
 alias wmSchedOFF='unset WM_SCHEDULER'
 
+# Change paraview version
+# ~~~~~~~~~~~~~~~~~~~~~~~
+unset foamPV
+foamPV()
+{
+    export ParaView_VERSION=$1
+    . $WM_PROJECT_DIR/etc/apps/paraview3/bashrc
+    echo "paraview-$ParaView_VERSION  (major: $ParaView_MAJOR)"
+    echo "dir: $ParaView_DIR"
+    [ -d "$ParaView_DIR" ] || echo "WARNING: directory does not exist"
+}
+
+
 # Change directory aliases
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 alias src='cd $FOAM_SRC'
@@ -56,6 +69,11 @@ alias app='cd $FOAM_APP'
 alias util='cd $FOAM_UTILITIES'
 alias sol='cd $FOAM_SOLVERS'
 alias tut='cd $FOAM_TUTORIALS'
+
+alias foamApps='cd $FOAM_APP'
+alias foamSol='cd $FOAM_SOLVERS'
+alias foamTuts='cd $FOAM_TUTORIALS'
+alias foamUtils='cd $FOAM_UTILITIES'
 alias foam3rdParty='cd $WM_THIRD_PARTY_DIR'
 
 # -----------------------------------------------------------------------------

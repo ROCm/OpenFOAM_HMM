@@ -30,8 +30,6 @@ License
 #include "volPointInterpolation.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
-#include "isoSurface.H"
-// #include "isoSurfaceCell.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -244,6 +242,14 @@ void Foam::distanceSurface::createGeometry()
             distance_,
             regularise_
         )
+        //new isoSurfaceCell
+        //(
+        //    fvm,
+        //    cellDistance,
+        //    pointDistance_,
+        //    distance_,
+        //    regularise_
+        //)
     );
 
     if (debug)
@@ -284,6 +290,7 @@ Foam::distanceSurface::distanceSurface
     distance_(readScalar(dict.lookup("distance"))),
     signed_(readBool(dict.lookup("signed"))),
     regularise_(dict.lookupOrDefault("regularise", true)),
+    average_(dict.lookupOrDefault("average", false)),
     zoneName_(word::null),
     needsUpdate_(true),
     isoSurfPtr_(NULL),

@@ -225,23 +225,6 @@ class FaceCellWave
                 List<Type>& faceInfo
             ) const;
 
-            //- Send info to neighbour
-            void sendPatchInfo
-            (
-                const label neighbour,
-                const label nFaces,
-                const labelList&,
-                const List<Type>&
-            ) const;
-
-            //- Receive info from neighbour. Returns number of faces received.
-            label receivePatchInfo
-            (
-                const label neighbour,
-                labelList&,
-                List<Type>&
-            ) const;
-
             //- Offset face labels by constant value
             static void offset
             (

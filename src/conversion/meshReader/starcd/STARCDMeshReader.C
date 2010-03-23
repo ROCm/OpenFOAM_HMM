@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -237,7 +237,7 @@ Body:
 
 For primitive cell shapes, the number of vertices will never exceed 8 (hexa)
 and corresponds to <nLabels>.
-For polyhedral, <nLabels> includess an index table comprising beg/end pairs
+For polyhedral, <nLabels> includes an index table comprising beg/end pairs
 for each cell face.
 
 Strictly speaking, we only need the cellModeller for adding boundaries.
