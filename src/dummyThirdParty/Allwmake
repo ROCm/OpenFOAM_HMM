@@ -3,8 +3,8 @@ cd ${0%/*} || exit 1    # run from this directory
 set -x
 
 wmake libso scotchDecomp
+wmake libso ptscotchDecomp
 wmake libso metisDecomp
-wmake libso parMetisDecomp
 wmake libso MGridGen
 
 

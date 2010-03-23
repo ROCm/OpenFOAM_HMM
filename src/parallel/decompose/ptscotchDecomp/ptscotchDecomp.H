@@ -23,17 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::parMetisDecomp
+    Foam::ptscotchDecomp
 
 Description
+    PTScotch domain decomposition
 
 SourceFiles
-    parMetisDecomp.C
+    ptscotchDecomp.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef parMetisDecomp_H
-#define parMetisDecomp_H
+#ifndef ptscotchDecomp_H
+#define ptscotchDecomp_H
 
 #include "decompositionMethod.H"
 
@@ -41,10 +42,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class parMetisDecomp Declaration
+                           Class ptscotchDecomp Declaration
 \*---------------------------------------------------------------------------*/
 
-class parMetisDecomp
+class ptscotchDecomp
 :
     public decompositionMethod
 {
@@ -55,41 +56,32 @@ class parMetisDecomp
 
     // Private Member Functions
 
-        //- Insert list in front of list.
-        template<class Type>
-        static void prepend(const UList<Type>&, List<Type>&);
-        //- Insert list at end of list.
-        template<class Type>
-        static void append(const UList<Type>&, List<Type>&);
+        //- Check and print error message
+        static void check(const int, const char*);
 
         label decompose
         (
-            Field<int>& xadj,
-            Field<int>& adjncy,
-            const pointField& cellCentres,
-            Field<int>& cellWeights,
-            Field<int>& faceWeights,
-            const List<int>& options,
-
+            List<int>& adjncy,
+            List<int>& xadj,
+            const scalarField& cWeights,
             List<int>& finalDecomp
         );
 
-
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const parMetisDecomp&);
-        parMetisDecomp(const parMetisDecomp&);
+        void operator=(const ptscotchDecomp&);
+        ptscotchDecomp(const ptscotchDecomp&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("parMetis");
+    TypeName("ptscotch");
 
 
     // Constructors
 
         //- Construct given the decomposition dictionary and mesh
-        parMetisDecomp
+        ptscotchDecomp
         (
             const dictionary& decompositionDict,
             const polyMesh& mesh
@@ -98,23 +90,20 @@ public:
 
     // Destructor
 
-        ~parMetisDecomp()
+        virtual ~ptscotchDecomp()
         {}
 
 
     // Member Functions
 
-        //- parMetis handles Foam processor boundaries
         virtual bool parallelAware() const
         {
+            // ptscotch does not know about proc boundaries
             return true;
         }
 
         //- Return for every coordinate the wanted processor number. Use the
         //  mesh connectivity (if needed)
-        //  Weights get normalised so the minimum value is 1 before truncation
-        //  to an integer so the weights should be multiples of the minimum
-        //  value. The overall sum of weights might otherwise overflow.
         virtual labelList decompose
         (
             const pointField& points,
@@ -125,10 +114,9 @@ public:
         //  passed agglomeration map (from fine to coarse cells) and coarse cell
         //  location. Can be overridden by decomposers that provide this
         //  functionality natively.
-        //  See note on weights above.
         virtual labelList decompose
         (
-            const labelList& cellToRegion,
+            const labelList& agglom,
             const pointField& regionPoints,
             const scalarField& regionWeights
         );
@@ -140,7 +128,6 @@ public:
         //    from 0 at processor0 and then incrementing all through the
         //    processors)
         //  - the connections are across coupled patches
-        //  See note on weights above.
         virtual labelList decompose
         (
             const labelListList& globalCellCells,
@@ -148,25 +135,12 @@ public:
             const scalarField& cWeights
         );
 
-        //- Helper to convert mesh connectivity into distributed CSR
-        static void calcMetisDistributedCSR
-        (
-            const polyMesh&,
-            List<int>& adjncy,
-            List<int>& xadj
-        );
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "parMetisDecompTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

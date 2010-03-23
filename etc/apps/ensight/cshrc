@@ -40,11 +40,11 @@ if ( -r $CEI_HOME ) then
 
     # special treatment for 32bit OpenFOAM and 64bit Ensight
     if ($WM_ARCH == linux && `uname -m` == x86_64) then
-       setenv CEI_ARCH linux_2.6_32
+        setenv CEI_ARCH linux_2.6_32
     endif
 
     # add to path
-    set path=($CEI_HOME/bin $path)
+    setenv PATH ${CEI_HOME}/bin:${PATH}
 
     setenv ENSIGHT9_INPUT dummy
     setenv ENSIGHT9_READER $FOAM_LIBBIN

@@ -24,52 +24,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "parMetisDecomp.H"
+#include "geometricZeroField.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Insert at front of list
-template<class Type>
-void Foam::parMetisDecomp::prepend
-(
-    const UList<Type>& extraLst,
-    List<Type>& lst
-)
+inline Foam::scalar Foam::geometricZeroField::operator[](const label) const
 {
-    label nExtra = extraLst.size();
-
-    // Make space for initial elements
-    lst.setSize(lst.size() + nExtra);
-    for (label i = lst.size()-1; i >= nExtra; i--)
-    {
-        lst[i] = lst[i-nExtra];
-    }
-
-    // Insert at front
-    forAll(extraLst, i)
-    {
-        lst[i] = extraLst[i];
-    }
+    return scalar(0);
 }
 
-// Insert at back of list
-template<class Type>
-void Foam::parMetisDecomp::append
-(
-    const UList<Type>& extraLst,
-    List<Type>& lst
-)
+inline Foam::zeroField Foam::geometricZeroField::field() const
 {
-    label sz = lst.size();
+    return zeroField();
+}
 
-    // Make space for initial elements
-    lst.setSize(sz + extraLst.size());
+inline Foam::zeroField Foam::geometricZeroField::oldTime() const
+{
+    return zeroField();
+}
 
-    // Insert at back
-    forAll(extraLst, i)
-    {
-        lst[sz++] = extraLst[i];
-    }
+inline Foam::zeroFieldField Foam::geometricZeroField::boundaryField() const
+{
+    return zeroFieldField();
 }
 
 
