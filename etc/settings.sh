@@ -113,28 +113,24 @@ OpenFOAM)
     case "$WM_COMPILER" in
     Gcc)
         export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gcc-4.4.3
-        export MPFR_HOME=$WM_THIRD_PARTY_DIR/mpfr-2.4.2
         export MPFR_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/mpfr-2.4.2
         _foamAddLib $MPFR_ARCH_PATH/lib
         _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gmp-5.0.1/lib
         ;;
     Gcc442)
         export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gcc-4.4.2
-        export MPFR_HOME=$WM_THIRD_PARTY_DIR/mpfr-2.4.1
         export MPFR_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/mpfr-2.4.1
         _foamAddLib $MPFR_ARCH_PATH/lib
         _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gmp-4.2.4/lib
         ;;
     Gcc44)
         export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gcc-4.4.2
-        export MPFR_HOME=$WM_THIRD_PARTY_DIR/mpfr-2.4.1
         export MPFR_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/mpfr-2.4.1
         _foamAddLib $MPFR_ARCH_PATH/lib
         _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gmp-4.2.4/lib
         ;;
     Gcc43)
         export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gcc-4.3.3
-        export MPFR_HOME=$WM_THIRD_PARTY_DIR/mpfr-2.4.1
         export MPFR_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/mpfr-2.4.1
         _foamAddLib $MPFR_ARCH_PATH/lib
         _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gmp-4.2.4/lib
@@ -311,14 +307,14 @@ export MPI_BUFFER_SIZE
 
 # CGAL and boost
 # ~~~~~~~~~~~~~~
-cgal_version=3.6
-export CGAL_SRC=$WM_THIRD_PARTY_DIR/CGAL-$cgal_version
+cgal_version=3.5.1
+export CGAL_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/CGAL-$cgal_version
 
 boost_version=1_42_0
-export BOOST_ROOT=$WM_THIRD_PARTY_DIR/boost_$boost_version
+export BOOST_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/boost_$boost_version
 
-_foamAddLib $BOOST_ROOT/platforms/$WM_OPTIONS/lib
-_foamAddLib $CGAL_SRC/lib
+_foamAddLib $BOOST_ARCH_PATH/lib
+_foamAddLib $CGAL_ARCH_PATH/lib
 
 unset cgal_version boost_version
 

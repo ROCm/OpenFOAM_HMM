@@ -85,21 +85,18 @@ case OpenFOAM:
     switch ("$WM_COMPILER")
     case Gcc:
         setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gcc-4.4.3
-        setenv MPFR_HOME $WM_THIRD_PARTY_DIR/mpfr-2.4.2
         setenv MPFR_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/mpfr-2.4.2
         _foamAddLib $MPFR_ARCH_PATH/lib
         _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gmp-5.0.1/lib
     breaksw
     case Gcc442:
         setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gcc-4.4.2
-        setenv MPFR_HOME $WM_THIRD_PARTY_DIR/mpfr-2.4.1
         setenv MPFR_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/mpfr-2.4.1
         _foamAddLib $MPFR_ARCH_PATH/lib
         _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gmp-4.2.4/lib
     breaksw
     case Gcc43:
         setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gcc-4.3.3
-        setenv MPFR_HOME $WM_THIRD_PARTY_DIR/mpfr-2.4.1
         setenv MPFR_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/mpfr-2.4.1
         _foamAddLib $MPFR_ARCH_PATH/lib
         _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gmp-4.2.4/lib
@@ -267,14 +264,14 @@ endif
 
 # CGAL and boost
 # ~~~~~~~~~~~~~~
-set cgal_version=3.6
-setenv CGAL_SRC $WM_THIRD_PARTY_DIR/CGAL-$cgal_version
+set cgal_version=3.5.1
+setenv CGAL_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/CGAL-$cgal_version
 
 set boost_version=1_42_0
-setenv BOOST_ROOT $WM_THIRD_PARTY_DIR/boost_$boost_version
+setenv BOOST_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/boost_$boost_version
 
-_foamAddLib $BOOST_ROOT/platforms/$WM_OPTIONS/lib
-_foamAddLib $CGAL_SRC/lib
+_foamAddLib $BOOST_ARCH_PATH/lib
+_foamAddLib $CGAL_ARCH_PATH/lib
 
 unset cgal_version boost_version
 
