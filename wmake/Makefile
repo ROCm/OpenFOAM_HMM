@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -31,7 +31,7 @@
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
-# The Makefile use a POSIX shell
+# The Makefile uses a POSIX shell
 #------------------------------------------------------------------------------
 
 SHELL      = /bin/sh
@@ -120,7 +120,7 @@ MAKE_DEP   = @$(MKDEP) $< | $(WM_SCRIPTS)/addCompile $<
 #------------------------------------------------------------------------------
 # Include PROJECT directory tree file and
 # source, object and dependency list files.
-# These are constructed by wmakeDerivedFiles
+# These are constructed by scripts/makeDerivedFiles
 #------------------------------------------------------------------------------
 
 include $(OBJECTS_DIR)/options
@@ -148,7 +148,7 @@ LIB_HEADER_DIRS = \
 #------------------------------------------------------------------------------
 
 $(EXE):  $(OBJECTS)
-	     @$(WM_SCRIPTS)/mkObjectDir $(EXE)
+	     @$(WM_SCRIPTS)/makeTargetDir $(EXE)
 	     $(LINKEXE) $(OBJECTS) -L$(LIB_WM_OPTIONS_DIR) \
 	     $(EXE_LIBS) $(PROJECT_LIBS) $(SYS_LIBS) $(LINK_LIBS) $(GLIBS) -o $(EXE)
 
@@ -156,7 +156,7 @@ exe:     $(SEXE)
 	     @echo \'$(SEXE)\' is up to date.
 
 $(SEXE): $(OBJECTS)
-	     @$(WM_SCRIPTS)/mkObjectDir $(SEXE)
+	     @$(WM_SCRIPTS)/makeTargetDir $(SEXE)
 	     $(LINKEXE) $(OBJECTS) $(EXE_LIBS) \
          $(SYS_LIBS) $(LINK_LIBS) $(GLIBS) -o $(SEXE)
 
@@ -169,7 +169,7 @@ libso:   $(LIB).$(SO)
 	     @echo \'$(LIB).$(SO)\' is up to date.
 
 $(LIB).$(SO): $(OBJECTS)
-	     @$(WM_SCRIPTS)/mkObjectDir $(LIB)
+	     @$(WM_SCRIPTS)/makeTargetDir $(LIB)
 	     @rm -f so_locations
 	     @cd $(OBJECTS_DIR) ; \
 	     $(LINKLIBSO) $(LOCAL_OBJECTS) -L$(LIB_WM_OPTIONS_DIR) $(LIB_LIBS) $(GLIB_LIBS) -o $(LIB).$(SO)
@@ -178,7 +178,7 @@ lib:     $(LIB).a
 	     @echo \'$(LIB).a\' is up to date.
 
 $(LIB).a: $(OBJECTS)
-	     @$(WM_SCRIPTS)/mkObjectDir $(LIB)
+	     @$(WM_SCRIPTS)/makeTargetDir $(LIB)
 	     @rm -f $(LIB).a
 	     $(AR) $(ARFLAGS) $(LIB).a $(OBJECTS)
 	     $(RANLIB) $(LIB).a
@@ -187,7 +187,7 @@ libo:    $(LIB).o
 	     @echo \'$(LIB).o\' is up to date.
 
 $(LIB).o: $(OBJECTS)
-	     @$(WM_SCRIPTS)/mkObjectDir $(LIB)
+	     @$(WM_SCRIPTS)/makeTargetDir $(LIB)
 	     @rm -f $(LIB).o
 	     $(LD) -r -o $(LIB).o $(OBJECTS)
 
@@ -195,7 +195,7 @@ jar:     $(LIB).jar
 	     @echo \'$(LIB).jar\' is up to date.
 
 $(LIB).jar: $(OBJECTS)
-	     @$(WM_SCRIPTS)/mkObjectDir $(LIB)
+	     @$(WM_SCRIPTS)/makeTargetDir $(LIB)
 	     jar cfm $(LIB).jar $(LIB_LIBS) -C $(CLASSES_DIR) .
 
 #------------------------------------------------------------------------------

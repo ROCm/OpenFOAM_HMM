@@ -3,9 +3,9 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -24,21 +24,18 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     mkObjectDir
+#     makeDir
 #
 # Description
-#     Makes a directory hierarchy for the given object file
-#
-#     Usage: mkObjectDir <directory>
+#     Script to make directories that do not already exist
+#     Usage : makeDir <dir> [.. <dirN>]
 #
 #------------------------------------------------------------------------------
 
-if [ $# -eq 1 ]
-then
-    if [ ! -d ${1%/*} -a $1 != ${1%/*} ]
-    then
-        mkdir -p ${1%/*}
-    fi
-fi
+for dir
+do
+    [ -d "$dir" ] || mkdir -p "$dir"
+done
+
 
 #------------------------------------------------------------------------------
