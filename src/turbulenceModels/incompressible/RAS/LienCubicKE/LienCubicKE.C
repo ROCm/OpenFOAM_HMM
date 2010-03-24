@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -170,6 +170,8 @@ LienCubicKE::LienCubicKE
         autoCreateEpsilon("epsilon", mesh_)
     ),
 
+    //FIXME - epsilon is not bounded
+
     gradU_(fvc::grad(U)),
     eta_(k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU_ + gradU_.T())))),
     ksi_(k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU_ - gradU_.T())))),
@@ -226,7 +228,9 @@ LienCubicKE::LienCubicKE
         )
     )
 {
-    nut_ = Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_) + C5viscosity_;
+    bound(epsilon_, epsilonMin_);
+
+    nut_ = Cmu_*sqr(k_)/epsilon_ + C5viscosity_;
     nut_.correctBoundaryConditions();
 
     printCoeffs();
@@ -350,7 +354,7 @@ void LienCubicKE::correct()
     epsEqn().boundaryManipulate(epsilon_.boundaryField());
 
     solve(epsEqn);
-    bound(epsilon_, epsilon0_);
+    bound(epsilon_, epsilonMin_);
 
 
     // Turbulent kinetic energy equation
@@ -367,7 +371,7 @@ void LienCubicKE::correct()
 
     kEqn().relax();
     solve(kEqn);
-    bound(k_, k0_);
+    bound(k_, kMin_);
 
 
     // Re-calculate viscosity

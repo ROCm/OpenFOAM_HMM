@@ -87,19 +87,13 @@ protected:
         dictionary coeffDict_;
 
         //- Lower limit of k
-        dimensionedScalar k0_;
+        dimensionedScalar kMin_;
 
         //- Lower limit of epsilon
-        dimensionedScalar epsilon0_;
-
-        //- Small epsilon value used to avoid divide by zero
-        dimensionedScalar epsilonSmall_;
+        dimensionedScalar epsilonMin_;
 
         //- Lower limit for omega
-        dimensionedScalar omega0_;
-
-        //- Small omega value used to avoid divide by zero
-        dimensionedScalar omegaSmall_;
+        dimensionedScalar omegaMin_;
 
         //- Near wall distance boundary field
         nearWallDist y_;
@@ -176,66 +170,40 @@ public:
 
         // Access
 
-            //- Return lower allowable limit for k
-            const dimensionedScalar& k0() const
+            //- Return lower allowable limit for k (default: SMALL)
+            const dimensionedScalar& kMin() const
             {
-                return k0_;
+                return kMin_;
             }
 
-            //- Return the lower allowable limit for epsilon
-            const dimensionedScalar& epsilon0() const
+            //- Return the lower allowable limit for epsilon (default: SMALL)
+            const dimensionedScalar& epsilonMin() const
             {
-                return epsilon0_;
+                return epsilonMin_;
             }
 
-            //- Return the value of epsilonSmall which is added to epsilon when
-            //  calculating nut
-            const dimensionedScalar& epsilonSmall() const
+            //- Return the lower allowable limit for omega (default: SMALL)
+            const dimensionedScalar& omegaMin() const
             {
-                return epsilonSmall_;
+                return omegaMin_;
             }
 
-            //- Return the lower allowable limit for omega0
-            const dimensionedScalar& omega0() const
+            //- Allow kMin to be changed
+            dimensionedScalar& kMin()
             {
-                return omega0_;
+                return kMin_;
             }
 
-            //- Return the value of omegaSmall which is added to omega when
-            //  calculating nut
-            const dimensionedScalar& omegaSmall() const
+            //- Allow epsilonMin to be changed
+            dimensionedScalar& epsilonMin()
             {
-                return omegaSmall_;
+                return epsilonMin_;
             }
 
-            //- Allow k0 to be changed
-            dimensionedScalar& k0()
+            //- Allow omegaMin to be changed
+            dimensionedScalar& omegaMin()
             {
-                return k0_;
-            }
-
-            //- Allow epsilon0 to be changed
-            dimensionedScalar& epsilon0()
-            {
-                return epsilon0_;
-            }
-
-            //- Allow epsilonSmall to be changed
-            dimensionedScalar& epsilonSmall()
-            {
-                return epsilonSmall_;
-            }
-
-            //- Allow omega0 to be changed
-            dimensionedScalar& omega0()
-            {
-                return omega0_;
-            }
-
-            //- Allow omegaSmall to be changed
-            dimensionedScalar& omegaSmall()
-            {
-                return omegaSmall_;
+                return omegaMin_;
             }
 
             //- Return the near wall distances

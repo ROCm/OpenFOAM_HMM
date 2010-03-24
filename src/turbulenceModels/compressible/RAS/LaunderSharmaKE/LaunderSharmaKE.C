@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -187,7 +187,9 @@ LaunderSharmaKE::LaunderSharmaKE
         autoCreateAlphat("alphat", mesh_)
     )
 {
-    mut_ = rho_*Cmu_*fMu()*sqr(k_)/(epsilon_ + epsilonSmall_);
+    bound(epsilon_, epsilonMin_);
+
+    mut_ = rho_*Cmu_*fMu()*sqr(k_)/epsilon_;
     mut_.correctBoundaryConditions();
 
     alphat_ = mut_/Prt_;
@@ -275,7 +277,7 @@ void LaunderSharmaKE::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ == rho_*Cmu_*fMu()*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_ == rho_*Cmu_*fMu()*sqr(k_)/epsilon_;
 
         // Re-calculate thermal diffusivity
         alphat_ = mut_/Prt_;
@@ -320,7 +322,7 @@ void LaunderSharmaKE::correct()
 
     epsEqn().relax();
     solve(epsEqn);
-    bound(epsilon_, epsilon0_);
+    bound(epsilon_, epsilonMin_);
 
 
     // Turbulent kinetic energy equation
@@ -338,11 +340,11 @@ void LaunderSharmaKE::correct()
 
     kEqn().relax();
     solve(kEqn);
-    bound(k_, k0_);
+    bound(k_, kMin_);
 
 
     // Re-calculate viscosity
-    mut_ == Cmu_*fMu()*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    mut_ == Cmu_*fMu()*rho_*sqr(k_)/epsilon_;
 
 
     // Re-calculate thermal diffusivity

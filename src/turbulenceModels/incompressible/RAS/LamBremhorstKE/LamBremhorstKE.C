@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -140,7 +140,9 @@ LamBremhorstKE::LamBremhorstKE
         autoCreateLowReNut("nut", mesh_)
     )
 {
-    nut_ = Cmu_*fMu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    bound(epsilon_, epsilonMin_);
+
+    nut_ = Cmu_*fMu_*sqr(k_)/epsilon_;
     nut_.correctBoundaryConditions();
 
     printCoeffs();
@@ -260,7 +262,7 @@ void LamBremhorstKE::correct()
 
     epsEqn().relax();
     solve(epsEqn);
-    bound(epsilon_, epsilon0_);
+    bound(epsilon_, epsilonMin_);
 
 
     // Turbulent kinetic energy equation
@@ -276,7 +278,7 @@ void LamBremhorstKE::correct()
 
     kEqn().relax();
     solve(kEqn);
-    bound(k_, k0_);
+    bound(k_, kMin_);
 
 
     // Re-calculate viscosity

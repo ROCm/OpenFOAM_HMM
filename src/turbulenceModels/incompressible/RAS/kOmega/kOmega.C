@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -137,7 +137,9 @@ kOmega::kOmega
         autoCreateNut("nut", mesh_)
     )
 {
-    nut_ = k_/(omega_ + omegaSmall_);
+    bound(omega_, omegaMin_);
+
+    nut_ = k_/omega_;
     nut_.correctBoundaryConditions();
 
     printCoeffs();
@@ -246,7 +248,7 @@ void kOmega::correct()
     omegaEqn().boundaryManipulate(omega_.boundaryField());
 
     solve(omegaEqn);
-    bound(omega_, omega0_);
+    bound(omega_, omegaMin_);
 
 
     // Turbulent kinetic energy equation
@@ -263,11 +265,11 @@ void kOmega::correct()
 
     kEqn().relax();
     solve(kEqn);
-    bound(k_, k0_);
+    bound(k_, kMin_);
 
 
     // Re-calculate viscosity
-    nut_ = k_/(omega_ + omegaSmall_);
+    nut_ = k_/omega_;
     nut_.correctBoundaryConditions();
 }
 

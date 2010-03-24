@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -122,15 +122,15 @@ void DeardorffDiffStress::correct(const tmp<volTensorField>& tgradU)
     forAll(B_, celli)
     {
         B_[celli].component(symmTensor::XX) =
-            max(B_[celli].component(symmTensor::XX), k0().value());
+            max(B_[celli].component(symmTensor::XX), kMin_.value());
         B_[celli].component(symmTensor::YY) =
-            max(B_[celli].component(symmTensor::YY), k0().value());
+            max(B_[celli].component(symmTensor::YY), kMin_.value());
         B_[celli].component(symmTensor::ZZ) =
-            max(B_[celli].component(symmTensor::ZZ), k0().value());
+            max(B_[celli].component(symmTensor::ZZ), kMin_.value());
     }
 
     K = 0.5*tr(B_);
-    bound(K, k0());
+    bound(K, kMin_);
 
     updateSubGridScaleFields(K);
 }

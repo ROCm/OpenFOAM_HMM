@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,7 +83,7 @@ protected:
         Switch printCoeffs_;
         dictionary coeffDict_;
 
-        dimensionedScalar k0_;
+        dimensionedScalar kMin_;
 
         autoPtr<LESdelta> delta_;
 
@@ -170,16 +170,16 @@ public:
                 return coeffDict_;
             }
 
-            //- Return the value of k0 which k is not allowed to be less than
-            const dimensionedScalar& k0() const
+            //- Return the lower allowable limit for k (default: SMALL)
+            const dimensionedScalar& kMin() const
             {
-                return k0_;
+                return kMin_;
             }
 
-            //- Allow k0 to be changed
-            dimensionedScalar& k0()
+            //- Allow kMin to be changed
+            dimensionedScalar& kMin()
             {
-                return k0_;
+                return kMin_;
             }
 
             //- Access function to filter width

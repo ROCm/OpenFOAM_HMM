@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,10 +74,10 @@ dimensionedScalar dynOneEqEddy::ce_(const volSymmTensorField& D) const
         pow(KK + filter_(k_), 1.5)/(2*delta()) - filter_(pow(k_, 1.5))/delta();
 
     volScalarField ee =
-        2*delta()*ck_(D)*
-        (
+        2*delta()*ck_(D)
+       *(
             filter_(sqrt(k_)*magSqr(D))
-            - 2*sqrt(KK + filter_(k_))*magSqr(filter_(D))
+          - 2*sqrt(KK + filter_(k_))*magSqr(filter_(D))
         );
 
     return average(ee*mm)/average(mm*mm);
@@ -129,7 +129,11 @@ void dynOneEqEddy::correct(const tmp<volTensorField>& tgradU)
       - fvm::Sp(ce_(D)*rho()*sqrt(k_)/delta(), k_)
     );
 
-    bound(k_, dimensionedScalar("0", k_.dimensions(), 1.0e-10));
+    //FIXME: why not this?
+    // kEqn.relax();
+    // kEqn.solve();
+
+    bound(k_, kMin_);
 
     updateSubGridScaleFields(D);
 }

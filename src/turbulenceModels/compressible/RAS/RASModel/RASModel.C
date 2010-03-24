@@ -81,11 +81,9 @@ RASModel::RASModel
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(subOrEmptyDict(type + "Coeffs")),
 
-    k0_("k0", dimVelocity*dimVelocity, SMALL),
-    epsilon0_("epsilon0", k0_.dimensions()/dimTime, SMALL),
-    epsilonSmall_("epsilonSmall", epsilon0_.dimensions(), SMALL),
-    omega0_("omega0", dimless/dimTime, SMALL),
-    omegaSmall_("omegaSmall", omega0_.dimensions(), SMALL),
+    kMin_("kMin", dimVelocity*dimVelocity, SMALL),
+    epsilonMin_("epsilonMin", kMin_.dimensions()/dimTime, SMALL),
+    omegaMin_("omegaMin", dimless/dimTime, SMALL),
 
     y_(mesh_)
 {
@@ -219,11 +217,9 @@ bool RASModel::read()
             coeffDict_ <<= *dictPtr;
         }
 
-        k0_.readIfPresent(*this);
-        epsilon0_.readIfPresent(*this);
-        epsilonSmall_.readIfPresent(*this);
-        omega0_.readIfPresent(*this);
-        omegaSmall_.readIfPresent(*this);
+        kMin_.readIfPresent(*this);
+        epsilonMin_.readIfPresent(*this);
+        omegaMin_.readIfPresent(*this);
 
         return true;
     }

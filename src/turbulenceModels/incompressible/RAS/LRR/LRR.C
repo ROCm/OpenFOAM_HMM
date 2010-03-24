@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -186,9 +186,6 @@ LRR::LRR
         autoCreateNut("nut", mesh_)
     )
 {
-    nut_ = Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
-    nut_.correctBoundaryConditions();
-
     if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
     {
         FatalErrorIn
@@ -200,6 +197,11 @@ LRR::LRR
             << " is not in range 0 - 1" << nl
             << exit(FatalError);
     }
+
+    bound(epsilon_, epsilonMin_);
+
+    nut_ = Cmu_*sqr(k_)/epsilon_;
+    nut_.correctBoundaryConditions();
 
     printCoeffs();
 }
@@ -320,7 +322,7 @@ void LRR::correct()
     epsEqn().boundaryManipulate(epsilon_.boundaryField());
 
     solve(epsEqn);
-    bound(epsilon_, epsilon0_);
+    bound(epsilon_, epsilonMin_);
 
 
     // Reynolds stress equation
@@ -368,15 +370,15 @@ void LRR::correct()
             R_.dimensions(),
             symmTensor
             (
-                k0_.value(), -GREAT, -GREAT,
-                k0_.value(), -GREAT,
-                k0_.value()
+                kMin_.value(), -GREAT, -GREAT,
+                kMin_.value(), -GREAT,
+                kMin_.value()
             )
         )
     );
 
     k_ = 0.5*tr(R_);
-    bound(k_, k0_);
+    bound(k_, kMin_);
 
 
     // Re-calculate viscosity

@@ -258,12 +258,14 @@ kOmegaSST::kOmegaSST
         autoCreateAlphat("alphat", mesh_)
     )
 {
+    bound(omega_, omegaMin_);
+
     mut_ =
     (
         a1_*rho_*k_
       / max
         (
-            a1_*(omega_ + omegaSmall_),
+            a1_*omega_,
             F2()*sqrt(magSqr(symm(fvc::grad(U_))))
         )
     );
@@ -422,7 +424,7 @@ void kOmegaSST::correct()
     omegaEqn().boundaryManipulate(omega_.boundaryField());
 
     solve(omegaEqn);
-    bound(omega_, omega0_);
+    bound(omega_, omegaMin_);
 
     // Turbulent kinetic energy equation
     tmp<fvScalarMatrix> kEqn
@@ -438,7 +440,7 @@ void kOmegaSST::correct()
 
     kEqn().relax();
     solve(kEqn);
-    bound(k_, k0_);
+    bound(k_, kMin_);
 
 
     // Re-calculate viscosity

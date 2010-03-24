@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -79,11 +79,11 @@ LESModel::LESModel
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(subOrEmptyDict(type + "Coeffs")),
 
-    k0_("k0", dimVelocity*dimVelocity, SMALL),
+    kMin_("kMin", dimVelocity*dimVelocity, SMALL),
 
     delta_(LESdelta::New("delta", U.mesh(), *this))
 {
-    readIfPresent("k0", k0_);
+    readIfPresent("kMin", kMin_);
 
     // Force the construction of the mesh deltaCoeffs which may be needed
     // for the construction of the derived models and BCs
@@ -167,7 +167,7 @@ bool LESModel::read()
             coeffDict_ <<= *dictPtr;
         }
 
-        readIfPresent("k0", k0_);
+        readIfPresent("kMin", kMin_);
 
         delta_().read(*this);
 
