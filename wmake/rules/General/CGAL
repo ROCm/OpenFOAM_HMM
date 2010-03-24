@@ -1,4 +1,11 @@
 CGAL_INC = \
     -Wno-old-style-cast \
-    -I${CGAL_SRC}/include \
-    -I${BOOST_ROOT}/include/boost-${BOOST_LIB_VERSION}
+    -I$(CGAL_ARCH_PATH)/include \
+    -I$(MPFR_ARCH_PATH)/include \
+    -I$(BOOST_ARCH_PATH)/include/boost
+
+CGAL_LIBS = \
+    -L$(MPFR_ARCH_PATH)/lib \
+    -L$(BOOST_ARCH_PATH)/lib \
+    -lmpfr \
+    -lboost_thread
