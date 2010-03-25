@@ -75,4 +75,8 @@ doc/[Dd]oxygen/man
 # ignore .tags in the main directory
 /.tags
 
+# ignore eclipse project files in the main directory
+/.cproject
+/.project
+
 # end-of-file
