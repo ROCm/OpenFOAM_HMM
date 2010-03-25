@@ -34,7 +34,6 @@ License
 #include "polyAddFace.H"
 #include "polyModifyFace.H"
 #include "polyAddCell.H"
-#include "wallPoint.H"
 #include "globalIndex.H"
 #include "dummyTransform.H"
 
@@ -713,14 +712,14 @@ void Foam::addPatchCellLayer::setRefinement
         }
 
         {
-            pointField d(mesh_.nPoints(), wallPoint::greatPoint);
+            pointField d(mesh_.nPoints(), vector::max);
             UIndirectList<point>(d, meshPoints) = firstLayerDisp;
             syncTools::syncPointList
             (
                 mesh_,
                 d,
                 minEqOp<vector>(),
-                wallPoint::greatPoint
+                vector::max
             );
 
             forAll(meshPoints, i)

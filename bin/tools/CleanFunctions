@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -29,13 +29,14 @@
 #
 #------------------------------------------------------------------------------
 
-#cleanTimeDirectories ()
+#cleanTimeDirectories()
 #{
 #    echo "Cleaning $case case of $application application"
 #    TIME_DIRS=`foamInfoExec . $1 -times | sed '1,/constant/d'`
 #    for T in $TIME_DIRS
 #    do
-#        if [ $T != "0" ] ; then
+#        if [ $T != "0" ]
+#        then
 #            echo "Deleting directory $T"
 #            rm -rf ${T} > /dev/null 2>&1
 #        fi
@@ -43,12 +44,13 @@
 #    rm -rf {log,log.*,log-*,logSummary.*,.fxLock,*.xml,ParaView*,paraFoam*,*.OpenFOAM} > /dev/null 2>&1
 #}
 
-cleanTimeDirectories ()
+cleanTimeDirectories()
 {
     echo "Cleaning $PWD case"
     nZeros=0
     zeros=""
-    while [ $nZeros -lt 8 ] ; do
+    while [ $nZeros -lt 8 ]
+    do
         timeDir="0.${zeros}[1-9]*"
         rm -rf ${timeDir} > /dev/null 2>&1
         rm -rf ./-${timeDir} > /dev/null 2>&1
@@ -58,7 +60,7 @@ cleanTimeDirectories ()
     rm -rf ./{[1-9]*,-[1-9]*,log,log.*,log-*,logSummary.*,.fxLock,*.xml,ParaView*,paraFoam*,*.OpenFOAM} > /dev/null 2>&1
 }
 
-cleanCase ()
+cleanCase()
 {
     cleanTimeDirectories
     rm -rf processor* > /dev/null 2>&1
@@ -82,23 +84,23 @@ cleanCase ()
     done
 }
 
-removeCase ()
+removeCase()
 {
     echo "Removing $case case"
     rm -rf $1
 }
 
-cleanSamples ()
+cleanSamples()
 {
     rm -rf {sets,samples,sampleSurfaces} > /dev/null 2>&1
 }
 
-cleanUcomponents ()
+cleanUcomponents()
 {
     rm -rf 0/{Ux,Uy,Uz} > /dev/null 2>&1
 }
 
-cleanApplication ()
+cleanApplication()
 {
     echo "Cleaning $PWD application"
     wclean

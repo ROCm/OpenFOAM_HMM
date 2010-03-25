@@ -36,7 +36,6 @@ namespace Foam
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 makePatchFields(processor);
-//makePatchTypeField(fvPatchScalarField, processorFvPatchScalarField);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

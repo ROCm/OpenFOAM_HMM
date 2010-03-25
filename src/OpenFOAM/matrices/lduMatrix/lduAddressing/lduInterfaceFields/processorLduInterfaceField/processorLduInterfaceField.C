@@ -51,7 +51,14 @@ void Foam::processorLduInterfaceField::transformCoupleField
 {
     if (doTransform())
     {
-        f *= pow(diag(forwardT()).component(cmpt), rank());
+        if (forwardT().size() == 1)
+        {
+            f *= pow(diag(forwardT()[0]).component(cmpt), rank());
+        }
+        else
+        {
+            f *= pow(diag(forwardT())().component(cmpt), rank());
+        }
     }
 }
 

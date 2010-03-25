@@ -49,13 +49,32 @@ Foam::List<T> Foam::transform
 template <class T>
 void Foam::transformList
 (
-    const tensor& rotTensor,
+    const tensorField& rotTensor,
     UList<T>& field
 )
 {
-    forAll(field, i)
+    if (rotTensor.size() == 1)
     {
-        field[i] = transform(rotTensor, field[i]);
+        forAll(field, i)
+        {
+            field[i] = transform(rotTensor[0], field[i]);
+        }
+    }
+    else if (rotTensor.size() == field.size())
+    {
+        forAll(field, i)
+        {
+            field[i] = transform(rotTensor[i], field[i]);
+        }
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "transformList(const tensorField&, UList<T>&)"
+        )   << "Sizes of field and transformation not equal. field:"
+            << field.size() << " transformation:" << rotTensor.size()
+            << abort(FatalError);
     }
 }
 
@@ -63,13 +82,25 @@ void Foam::transformList
 template <class T>
 void Foam::transformList
 (
-    const tensor& rotTensor,
+    const tensorField& rotTensor,
     Map<T>& field
 )
 {
-    forAllIter(typename Map<T>, field, iter)
+    if (rotTensor.size() == 1)
     {
-        iter() = transform(rotTensor, iter());
+        forAllIter(typename Map<T>, field, iter)
+        {
+            iter() = transform(rotTensor[0], iter());
+        }
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "transformList(const tensorField&, Map<T>&)"
+        )   << "Multiple transformation tensors not supported. field:"
+            << field.size() << " transformation:" << rotTensor.size()
+            << abort(FatalError);
     }
 }
 
@@ -77,13 +108,25 @@ void Foam::transformList
 template <class T>
 void Foam::transformList
 (
-    const tensor& rotTensor,
+    const tensorField& rotTensor,
     EdgeMap<T>& field
 )
 {
-    forAllIter(typename EdgeMap<T>, field, iter)
+    if (rotTensor.size() == 1)
     {
-        iter() = transform(rotTensor, iter());
+        forAllIter(typename EdgeMap<T>, field, iter)
+        {
+            iter() = transform(rotTensor[0], iter());
+        }
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "transformList(const tensorField&, EdgeMap<T>&)"
+        )   << "Multiple transformation tensors not supported. field:"
+            << field.size() << " transformation:" << rotTensor.size()
+            << abort(FatalError);
     }
 }
 

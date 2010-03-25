@@ -107,13 +107,30 @@ void Foam::PointEdgeWave<Type>::enterDomain
 template <class Type>
 void Foam::PointEdgeWave<Type>::transform
 (
-    const tensor& T,
+    const tensorField& rotTensor,
     List<Type>& pointInfo
 ) const
 {
-    forAll(pointInfo, i)
+    if (rotTensor.size() == 1)
     {
-        pointInfo[i].transform(T);
+        const tensor& T = rotTensor[0];
+
+        forAll(pointInfo, i)
+        {
+            pointInfo[i].transform(T);
+        }
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "PointEdgeWave<Type>::transform(const tensorField&, List<Type>&)"
+        )   << "Parallel cyclics not supported" << abort(FatalError);
+
+        forAll(pointInfo, i)
+        {
+            pointInfo[i].transform(rotTensor[i]);
+        }
     }
 }
 

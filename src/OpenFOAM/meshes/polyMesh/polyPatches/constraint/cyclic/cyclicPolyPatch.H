@@ -70,11 +70,12 @@ public:
 
     enum transformType
     {
-        UNKNOWN,
-        ROTATIONAL,
-        TRANSLATIONAL
+        UNKNOWN,            // unspecified; automatic ordering
+        ROTATIONAL,         // rotation along coordinate axis
+        TRANSLATIONAL,      // translation
+        NOORDERING          // unspecified, no automatic ordering
     };
-    static const NamedEnum<transformType, 3> transformTypeNames;
+    static const NamedEnum<transformType, 4> transformTypeNames;
 
 
 private:
@@ -116,30 +117,11 @@ private:
         //- Temporary storage of owner side patch during ordering.
         mutable autoPtr<primitivePatch> ownerPatchPtr_;
 
-        // Transformation
-
-            //- Has non-zero separation
-            mutable bool separated_;
-
-            //- Offset (distance) vector from one side of the couple to the other
-            mutable vector separation_;
-
-            //- No rotation
-            mutable bool parallel_;
-
-            //- Face transformation tensor
-            mutable tensor forwardT_;
-
-            //- Neighbour-cell transformation tensor
-            mutable tensor reverseT_;
-
 
     // Private member functions
 
         //- Find amongst selected faces the one with the largest area
         static label findMaxArea(const pointField&, const faceList&);
-
-        void calcTransforms();
 
         void calcTransforms
         (
@@ -149,7 +131,6 @@ private:
             const UList<point>& half1Ctrs,
             const UList<point>& half1Areas
         );
-
 
         // Face ordering
 
@@ -173,6 +154,9 @@ private:
 protected:
 
     // Protected Member functions
+
+        //- Recalculate the transformation tensors
+        virtual void calcTransforms();
 
         //- Initialise the calculation of the patch geometry
         virtual void initGeometry(PstreamBuffers&);
@@ -371,80 +355,80 @@ public:
         //  calculation!
         const edgeList& coupledEdges() const;
 
-        //- Transform a patch-based field from other side to this side.
-        template<class T>
-        void transform(Field<T>& l) const
-        {
-            if (!parallel())
-            {
-                transform(forwardT_, l);
-            }
-        }
-
-
-        virtual bool doTransform() const
-        {
-            return !parallel();
-        }
-        virtual void transform(scalarField& l) const
-        {
-            transform(l);
-        }
-        virtual void transform(vectorField& l) const
-        {
-            transform(l);
-        }
-        virtual void transform(sphericalTensorField& l) const
-        {
-            transform(l);
-        }
-        virtual void transform(diagTensorField& l) const
-        {
-            transform(l);
-        }
-        virtual void transform(symmTensorField& l) const
-        {
-            transform(l);
-        }
-        virtual void transform(tensorField& l) const
-        {
-            transform(l);
-        }
+//        //- Transform a patch-based field from other side to this side.
+//        template<class T>
+//        void transform(Field<T>& l) const
+//        {
+//            if (!parallel())
+//            {
+//                transform(forwardT_, l);
+//            }
+//        }
+//
+//
+//        virtual bool doTransform() const
+//        {
+//            return !parallel();
+//        }
+//        virtual void transform(scalarField& l) const
+//        {
+//            transform(l);
+//        }
+//        virtual void transform(vectorField& l) const
+//        {
+//            transform(l);
+//        }
+//        virtual void transform(sphericalTensorField& l) const
+//        {
+//            transform(l);
+//        }
+//        virtual void transform(diagTensorField& l) const
+//        {
+//            transform(l);
+//        }
+//        virtual void transform(symmTensorField& l) const
+//        {
+//            transform(l);
+//        }
+//        virtual void transform(tensorField& l) const
+//        {
+//            transform(l);
+//        }
 
         //- Transform a patch-based position from other side to this side
         virtual void transformPosition(pointField& l) const;
 
 
-        // Low level geometric information
+        // Transformation
 
-        //- Are the coupled planes separated
-        virtual bool separated() const
-        {
-            return separated_;
-        }
-
-        virtual const vector& separation() const
-        {
-            return separation_;
-        }
-
-        //- Are the cyclic planes parallel
-        virtual bool parallel() const
-        {
-            return parallel_;
-        }
-
-        //- Return face transformation tensor
-        virtual const tensor& forwardT() const
-        {
-            return forwardT_;
-        }
-
-        //- Return neighbour-cell transformation tensor
-        virtual const tensor& reverseT() const
-        {
-            return reverseT_;
-        }
+//        //- Are the coupled planes separated
+//        virtual bool separated() const
+//        {
+//            return separated_;
+//        }
+//
+//        virtual const vector& separation() const
+//        {
+//            return separation_;
+//        }
+//
+//        //- Are the cyclic planes parallel
+//        virtual bool parallel() const
+//        {
+//            return parallel_;
+//        }
+//
+//        //- Return face transformation tensor
+//        virtual const tensor& forwardT() const
+//        {
+//            return forwardT_;
+//        }
+//
+//        //- Return neighbour-cell transformation tensor
+//        virtual const tensor& reverseT() const
+//        {
+//            return reverseT_;
+//        }
 
         label transformGlobalFace(const label facei) const
         {

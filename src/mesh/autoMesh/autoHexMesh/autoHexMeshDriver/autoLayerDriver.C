@@ -989,7 +989,7 @@ void Foam::autoLayerDriver::handleFeatureAngle
     if (minCos < 1-SMALL)
     {
         // Normal component of normals of connected faces.
-        vectorField edgeNormal(mesh.nEdges(), wallPoint::greatPoint);
+        vectorField edgeNormal(mesh.nEdges(), point::max);
 
         const labelListList& edgeFaces = pp.edgeFaces();
 
@@ -1014,7 +1014,7 @@ void Foam::autoLayerDriver::handleFeatureAngle
             mesh,
             edgeNormal,
             nomalsCombine(),
-            wallPoint::greatPoint   // null value
+            point::max          // null value
         );
 
         label vertI = 0;
@@ -1037,7 +1037,7 @@ void Foam::autoLayerDriver::handleFeatureAngle
 
             const vector& n = edgeNormal[meshEdgeI];
 
-            if (n != wallPoint::greatPoint)
+            if (n != point::max)
             {
                 scalar cos = n & pp.faceNormals()[eFaces[0]];
 
@@ -1631,7 +1631,7 @@ void Foam::autoLayerDriver::syncPatchDisplacement
             meshPoints,
             patchDisp,
             minEqOp<vector>(),
-            wallPoint::greatPoint           // null value
+            point::max           // null value
         );
 
         // Unmark if displacement too small

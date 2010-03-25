@@ -34,17 +34,6 @@ namespace Foam
     defineTypeNameAndDebug(cyclicLduInterface, 0);
 }
 
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-//Foam::cyclicLduInterface::cyclicLduInterface(const label neighbPatchID)
-//:
-//    neighbPatchID_(neighbPatchID)
-//{}
-Foam::cyclicLduInterface::cyclicLduInterface()
-{}
-
-
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::cyclicLduInterface::~cyclicLduInterface()

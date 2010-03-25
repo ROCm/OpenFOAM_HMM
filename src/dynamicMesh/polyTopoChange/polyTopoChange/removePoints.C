@@ -33,7 +33,6 @@ License
 #include "polyAddPoint.H"
 #include "polyModifyFace.H"
 #include "syncTools.H"
-#include "wallPoint.H"  // only to use 'greatPoint'
 #include "faceSet.H"
 #include "dummyTransform.H"
 
@@ -619,7 +618,7 @@ void Foam::removePoints::getUnrefimentSet
                     {
                         label savedPointI = -savedFace[fp]-1;
 
-                        if (savedPoints_[savedPointI] == wallPoint::greatPoint)
+                        if (savedPoints_[savedPointI] == vector::max)
                         {
                             FatalErrorIn
                             (
@@ -794,7 +793,7 @@ void Foam::removePoints::setUnrefinement
     {
         label localI = localPoints[i];
 
-        if (savedPoints_[localI] == wallPoint::greatPoint)
+        if (savedPoints_[localI] == vector::max)
         {
             FatalErrorIn
             (
@@ -816,7 +815,7 @@ void Foam::removePoints::setUnrefinement
         );
 
         // Mark the restored points so they are not restored again.
-        savedPoints_[localI] = wallPoint::greatPoint;
+        savedPoints_[localI] = vector::max;
     }
 
     forAll(localFaces, i)

@@ -115,7 +115,7 @@ tmp<Field<Type> > jumpCyclicFvPatchField<Type>::patchNeighbourField() const
         {
             pnf[facei] = transform
             (
-                this->forwardT(), iField[nbrFaceCells[facei]]
+                this->forwardT()[0], iField[nbrFaceCells[facei]]
             ) - jf[facei];
         }
     }

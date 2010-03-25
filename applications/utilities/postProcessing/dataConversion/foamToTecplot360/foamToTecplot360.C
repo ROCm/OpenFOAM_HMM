@@ -1019,6 +1019,7 @@ int main(int argc, char *argv[])
             }
         }
         writer.writeEnd();
+        Info<< endl;
 
 
 
@@ -1067,7 +1068,7 @@ int main(int argc, char *argv[])
             writer.writeInit
             (
                 runTime.caseName(),
-                cellVarNames,
+                allVarNames,
                 patchFileName,
                 DataFileType_Full
             );
@@ -1163,6 +1164,8 @@ int main(int argc, char *argv[])
                         << nl << endl;
                 }
             }
+            writer.writeEnd();
+            Info<< endl;
         }
 
 

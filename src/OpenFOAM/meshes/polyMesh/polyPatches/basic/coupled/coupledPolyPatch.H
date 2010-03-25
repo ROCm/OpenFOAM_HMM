@@ -54,6 +54,20 @@ class coupledPolyPatch
 :
     public polyPatch
 {
+    // Private data
+
+        //- offset (distance) vector from one side of the couple to the other
+        mutable vectorField separation_;
+
+        //- Face transformation tensor
+        mutable tensorField forwardT_;
+
+        //- Neighbour-cell transformation tensor
+        mutable tensorField reverseT_;
+
+        //- Are faces collocated. Either size 0,1 or length of patch.
+        mutable boolList collocated_;
+
 public:
 
     // Static data members
@@ -71,11 +85,11 @@ protected:
         //  absTol    : absolute error in normal
         void calcTransformTensors
         (
-            bool& separated,
-            vector& separation,
-            bool& parallel,
-            tensor& forwardT,
-            tensor& reverseT,
+//            bool& separated,
+//            vector& separation,
+//            bool& parallel,
+//            tensor& forwardT,
+//            tensor& reverseT,
             const vectorField& Cf,
             const vectorField& Cr,
             const vectorField& nf,
@@ -229,35 +243,54 @@ public:
                 return !owner();
             }
 
-            //- Transform a patch-based field from other side to this side.
-            //!! TDB with macros?
-            virtual bool doTransform() const = 0;
-            virtual void transform(scalarField& l) const = 0;
-            virtual void transform(vectorField& l) const = 0;
-            virtual void transform(sphericalTensorField& l) const = 0;
-            virtual void transform(diagTensorField& l) const = 0;
-            virtual void transform(symmTensorField& l) const = 0;
-            virtual void transform(tensorField& l) const = 0;
+//            //- Transform a patch-based field from other side to this side.
+//            //!! TDB with macros?
+//            virtual bool doTransform() const = 0;
+//            virtual void transform(scalarField& l) const = 0;
+//            virtual void transform(vectorField& l) const = 0;
+//            virtual void transform(sphericalTensorField& l) const = 0;
+//            virtual void transform(diagTensorField& l) const = 0;
+//            virtual void transform(symmTensorField& l) const = 0;
+//            virtual void transform(tensorField& l) const = 0;
 
             //- Transform a patch-based position from other side to this side
             virtual void transformPosition(pointField& l) const = 0;
 
-            // Low level geometric information
+            //- Are the planes separated.
+            virtual bool separated() const
+            {
+                return separation_.size();
+            }
 
-                //- Are the planes separated.
-                virtual bool separated() const = 0;
+            //- If the planes are separated the separation vector.
+            virtual const vectorField& separation() const
+            {
+                return separation_;
+            }
 
-                //- If the planes are separated the separation vector.
-                virtual const vector& separation() const = 0;
+            //- Are the cyclic planes parallel.
+            virtual bool parallel() const
+            {
+                return forwardT_.empty();
+            }
 
-                //- Are the cyclic planes parallel.
-                virtual bool parallel() const = 0;
+            //- Return face transformation tensor.
+            virtual const tensorField& forwardT() const
+            {
+                return forwardT_;
+            }
 
-                //- Return face transformation tensor.
-                virtual const tensor& forwardT() const = 0;
+            //- Return neighbour-cell transformation tensor.
+            virtual const tensorField& reverseT() const
+            {
+                return reverseT_;
+            }
 
-                //- Return neighbour-cell transformation tensor.
-                virtual const tensor& reverseT() const = 0;
+            //- Are faces collocated. Either size 0,1 or length of patch
+            virtual const boolList& collocated() const
+            {
+                return collocated_;
+            }
 
 
 //        //- Initialise the calculation of the patch geometry

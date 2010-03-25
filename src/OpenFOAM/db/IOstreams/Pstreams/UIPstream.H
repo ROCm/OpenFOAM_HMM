@@ -67,6 +67,8 @@ class UIPstream
 
         const int tag_;
 
+        const bool clearAtEnd_;
+
         label messageSize_;
 
 
@@ -96,12 +98,18 @@ public:
             DynamicList<char>& externalBuf,
             label& externalBufPosition,
             const int tag = UPstream::msgType(),
+            const bool clearAtEnd = false,   // destroy externalBuf if at end
             streamFormat format=BINARY,
             versionNumber version=currentVersion
         );
 
         //- Construct given buffers
         UIPstream(const int fromProcNo, PstreamBuffers&);
+
+
+    // Destructor
+
+        ~UIPstream();
 
 
     // Member functions

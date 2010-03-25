@@ -56,6 +56,7 @@ SourceFiles
 #include "PackedBoolList.H"
 #include "polyMesh.H"
 #include "coupledPolyPatch.H"
+#include "transformList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -103,29 +104,24 @@ public:
         class transform
         {
         public:
-            //- Transform Field
+            //- Transform patch-based field
             template<class T>
             void operator()(const coupledPolyPatch& cpp, Field<T>& fld) const
             {
-                cpp.transform(fld);
+                if (!cpp.parallel())
+                {
+                    transformList(cpp.forwardT(), fld);
+                }
             }
 
-            //- Transform generic container
+            //- Transform sparse field
             template<class T, template<class> class Container>
             void operator()(const coupledPolyPatch& cpp, Container<T>& map)
             const
             {
-                Field<T> fld(map.size());
-                label i = 0;
-                forAllConstIter(typename Container<T>, map, iter)
+                if (!cpp.parallel())
                 {
-                    fld[i++] = iter();
-                }
-                cpp.transform(fld);
-                i = 0;
-                forAllIter(typename Container<T>, map, iter)
-                {
-                    iter() = fld[i++];
+                    transformList(cpp.forwardT(), map);
                 }
             }
         };
@@ -147,7 +143,7 @@ public:
                 {
                     fld[i++] = iter();
                 }
-                cpp.transform(fld);
+                cpp.transformPosition(fld);
                 i = 0;
                 forAllIter(typename Container<point>, map, iter)
                 {
@@ -547,6 +543,26 @@ void syncTools::transform::operator()
 (
     const coupledPolyPatch&,
     EdgeMap<label>&
+) const;
+
+
+template<>
+void syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    Field<scalar>&
+) const;
+template<>
+void syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    Map<scalar>&
+) const;
+template<>
+void syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    EdgeMap<scalar>&
 ) const;
 
 template<>

@@ -42,6 +42,7 @@ Foam::UIPstream::UIPstream
     DynamicList<char>& externalBuf,
     label& externalBufPosition,
     const int tag,
+    const bool clearAtEnd,
     streamFormat format,
     versionNumber version
 )
@@ -52,6 +53,7 @@ Foam::UIPstream::UIPstream
     externalBuf_(externalBuf),
     externalBufPosition_(externalBufPosition),
     tag_(tag),
+    clearAtEnd_(clearAtEnd),
     messageSize_(0)
 {
     setOpened();
@@ -125,6 +127,7 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
     externalBuf_(buffers.recvBuf_[fromProcNo]),
     externalBufPosition_(buffers.recvBufPos_[fromProcNo]),
     tag_(buffers.tag_),
+    clearAtEnd_(true),
     messageSize_(0)
 {
     if (commsType() != UPstream::scheduled && !buffers.finishedSendsCalled_)

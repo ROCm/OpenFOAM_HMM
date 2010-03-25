@@ -148,17 +148,17 @@ public:
         }
 
         //- Return face transformation tensor
-        virtual const tensor& forwardT() const
+        virtual const tensorField& forwardT() const
         {
             return procPolyPatch_.forwardT();
         }
 
         //- Return neighbour-cell transformation tensor
-        virtual const tensor& reverseT() const
+        virtual const tensorField& reverseT() const
         {
             return procPolyPatch_.reverseT();
         }
-//
+
 //        
 //        //- Return delta (P to N) vectors across coupled patch
 //        virtual tmp<vectorField> delta() const;

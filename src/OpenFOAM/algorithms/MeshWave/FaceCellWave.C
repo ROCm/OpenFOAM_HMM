@@ -442,14 +442,26 @@ void Foam::FaceCellWave<Type>::enterDomain
 template <class Type>
 void Foam::FaceCellWave<Type>::transform
 (
-    const tensor& rotTensor,
+    const tensorField& rotTensor,
     const label nFaces,
     List<Type>& faceInfo
 )
 {
-    for(label faceI = 0; faceI < nFaces; faceI++)
+    if (rotTensor.size() == 1)
     {
-        faceInfo[faceI].transform(mesh_, rotTensor);
+        const tensor& T = rotTensor[0];
+
+        for (label faceI = 0; faceI < nFaces; faceI++)
+        {
+            faceInfo[faceI].transform(mesh_, T);
+        }
+    }
+    else
+    {
+        for (label faceI = 0; faceI < nFaces; faceI++)
+        {
+            faceInfo[faceI].transform(mesh_, rotTensor[faceI]);
+        }
     }
 }
 

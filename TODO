@@ -24,6 +24,8 @@ OK - amg.
 Tested on unitTestCases/singleCyclic/
 
 - initTransfer in GAMGprocessorInterfaces using nonblocking+tags
+untested.
+
 - test createPatch pointSync
 - pointFields on cyclics. volPointInterpolation.
 - jumpCyclics

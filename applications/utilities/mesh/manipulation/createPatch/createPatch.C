@@ -259,13 +259,34 @@ void dumpCyclicMatch(const fileName& prefix, const polyMesh& mesh)
 
 void separateList
 (
-    const vector& separation,
+    const vectorField& separation,
     UList<vector>& field
 )
 {
-    forAll(field, i)
+    if (separation.size() == 1)
     {
-        field[i] += separation;
+        // Single value for all.
+
+        forAll(field, i)
+        {
+            field[i] += separation[0];
+        }
+    }
+    else if (separation.size() == field.size())
+    {
+        forAll(field, i)
+        {
+            field[i] += separation[i];
+        }
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "separateList(const vectorField&, UList<vector>&)"
+        )   << "Sizes of field and transformation not equal. field:"
+            << field.size() << " transformation:" << separation.size()
+            << abort(FatalError);
     }
 }
 
@@ -423,8 +444,7 @@ void syncPoints
             else if (cycPatch.separated())
             {
                 hasTransformation = true;
-                const vector& v = cycPatch.separation();
-                separateList(v, half0Values);
+                separateList(cycPatch.separation(), half0Values);
             }
 
             forAll(coupledPoints, i)
@@ -540,7 +560,7 @@ int main(int argc, char *argv[])
     dumpCyclicMatch("initial_", mesh);
 
     // Read patch construct info from dictionary
-    PtrList<dictionary> patchSources(dict.lookup("patchInfo"));
+    PtrList<dictionary> patchSources(dict.lookup("patches"));
 
 
 
@@ -585,7 +605,7 @@ int main(int argc, char *argv[])
 
             if (destPatchI == -1)
             {
-                dictionary patchDict(dict.subDict("dictionary"));
+                dictionary patchDict(dict.subDict("patchInfo"));
 
                 destPatchI = allPatches.size();
 
@@ -772,7 +792,7 @@ int main(int argc, char *argv[])
                         << " separation[0] was "
                         << cpp.separation()[0] << endl;
 
-                    if (isA<cyclicPolyPatch>(pp))
+                    if (isA<cyclicPolyPatch>(pp) && pp.size())
                     {
                         const cyclicPolyPatch& cycpp =
                             refCast<const cyclicPolyPatch>(pp);
@@ -783,13 +803,43 @@ int main(int argc, char *argv[])
                             Info<< "On cyclic translation patch " << pp.name()
                                 << " forcing uniform separation of "
                                 << cycpp.separationVector() << endl;
-                            const_cast<vector&>(cpp.separation()) =
-                                cycpp.separationVector();
+                            const_cast<vectorField&>(cpp.separation()) =
+                                pointField(1, cycpp.separationVector());
+                        }
+                        else
+                        {
+                            const cyclicPolyPatch& nbr = cycpp.neighbPatch();
+                            const_cast<vectorField&>(cpp.separation()) =
+                                pointField
+                                (
+                                    1,
+                                    nbr[0].centre(mesh.points())
+                                  - cycpp[0].centre(mesh.points())
+                                );
                         }
                     }
                     Info<< "On coupled patch " << pp.name()
                         << " forcing uniform separation of "
                         << cpp.separation() << endl;
+                }
+                else if (!cpp.parallel())
+                {
+                    Info<< "On coupled patch " << pp.name()
+                        << " forcing uniform rotation of "
+                        << cpp.forwardT()[0] << endl;
+
+                    const_cast<tensorField&>
+                    (
+                        cpp.forwardT()
+                    ).setSize(1);
+                    const_cast<tensorField&>
+                    (
+                        cpp.reverseT()
+                    ).setSize(1);
+
+                    Info<< "On coupled patch " << pp.name()
+                        << " forcing uniform rotation of "
+                        << cpp.forwardT() << endl;
                 }
             }
         }

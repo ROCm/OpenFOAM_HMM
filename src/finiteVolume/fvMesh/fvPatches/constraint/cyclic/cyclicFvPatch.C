@@ -120,7 +120,7 @@ tmp<vectorField> cyclicFvPatch::delta() const
             vector ddi = patchD[facei];
             vector dni = nbrPatchD[facei];
 
-            pdv[facei] = ddi - transform(forwardT(), dni);
+            pdv[facei] = ddi - transform(forwardT()[0], dni);
         }
     }
 

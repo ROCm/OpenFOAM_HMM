@@ -48,14 +48,15 @@ namespace Foam
 
 
 template<>
-const char* NamedEnum<cyclicPolyPatch::transformType, 3>::names[] =
+const char* NamedEnum<cyclicPolyPatch::transformType, 4>::names[] =
 {
     "unknown",
     "rotational",
-    "translational"
+    "translational",
+    "noOrdering"
 };
 
-const NamedEnum<cyclicPolyPatch::transformType, 3>
+const NamedEnum<cyclicPolyPatch::transformType, 4>
     cyclicPolyPatch::transformTypeNames;
 }
 
@@ -247,11 +248,6 @@ void Foam::cyclicPolyPatch::calcTransforms
         // Calculate transformation tensors
         calcTransformTensors
         (
-            separated_,
-            separation_,
-            parallel_,
-            forwardT_,
-            reverseT_,
             static_cast<const pointField&>(half0Ctrs),
             static_cast<const pointField&>(half1Ctrs),
             half0Normals,
@@ -456,12 +452,7 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     rotationCentre_(point::zero),
     separationVector_(vector::zero),
     coupledPointsPtr_(NULL),
-    coupledEdgesPtr_(NULL),
-    separated_(false),
-    separation_(vector::zero),
-    parallel_(true),
-    forwardT_(I),
-    reverseT_(I)
+    coupledEdgesPtr_(NULL)
 {
     // Neighbour patch might not be valid yet so no transformation
     // calculation possible.
@@ -484,12 +475,7 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     rotationCentre_(point::zero),
     separationVector_(vector::zero),
     coupledPointsPtr_(NULL),
-    coupledEdgesPtr_(NULL),
-    separated_(false),
-    separation_(vector::zero),
-    parallel_(true),
-    forwardT_(I),
-    reverseT_(I)
+    coupledEdgesPtr_(NULL)
 {
     if (neighbPatchName_ == name)
     {
@@ -541,12 +527,7 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     rotationCentre_(pp.rotationCentre_),
     separationVector_(pp.separationVector_),
     coupledPointsPtr_(NULL),
-    coupledEdgesPtr_(NULL),
-    separated_(false),
-    separation_(vector::zero),
-    parallel_(true),
-    forwardT_(I),
-    reverseT_(I)
+    coupledEdgesPtr_(NULL)
 {
     // Neighbour patch might not be valid yet so no transformation
     // calculation possible.
@@ -623,11 +604,11 @@ void Foam::cyclicPolyPatch::transformPosition(pointField& l) const
 {
     if (!parallel())
     {
-        Foam::transform(forwardT_, l);
+        Foam::transform(forwardT(), l);
     }
     else if (separated())
     {
-        l -= separation_;
+        l -= separation();
     }
 }
 
@@ -1006,7 +987,7 @@ bool Foam::cyclicPolyPatch::order
     rotation.setSize(pp.size());
     rotation = 0;
 
-    if (pp.empty())
+    if (pp.empty() || transform_ == NOORDERING)
     {
         // No faces, nothing to change.
         return false;
@@ -1183,7 +1164,7 @@ void Foam::cyclicPolyPatch::write(Ostream& os) const
     {
         case ROTATIONAL:
         {
-            os.writeKeyword("transform") << transformTypeNames[ROTATIONAL]
+            os.writeKeyword("transform") << transformTypeNames[transform_]
                 << token::END_STATEMENT << nl;
             os.writeKeyword("rotationAxis") << rotationAxis_
                 << token::END_STATEMENT << nl;
@@ -1193,9 +1174,15 @@ void Foam::cyclicPolyPatch::write(Ostream& os) const
         }
         case TRANSLATIONAL:
         {
-            os.writeKeyword("transform") << transformTypeNames[TRANSLATIONAL]
+            os.writeKeyword("transform") << transformTypeNames[transform_]
                 << token::END_STATEMENT << nl;
             os.writeKeyword("separationVector") << separationVector_
+                << token::END_STATEMENT << nl;
+            break;
+        }
+        case NOORDERING:
+        {
+            os.writeKeyword("transform") << transformTypeNames[transform_]
                 << token::END_STATEMENT << nl;
             break;
         }

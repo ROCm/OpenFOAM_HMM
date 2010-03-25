@@ -116,17 +116,37 @@ void Foam::Particle<ParticleType>::correctAfterParallelTransfer
 
     if (!ppp.parallel())
     {
-        const tensor& T = ppp.forwardT();
-        transformPosition(T);
-        static_cast<ParticleType&>(*this).transformProperties(T);
+        if (ppp.forwardT().size() == 1)
+        {
+            const tensor& T = ppp.forwardT()[0];
+            transformPosition(T);
+            static_cast<ParticleType&>(*this).transformProperties(T);
+        }
+        else
+        {
+            const tensor& T = ppp.forwardT()[facei_];
+            transformPosition(T);
+            static_cast<ParticleType&>(*this).transformProperties(T);
+        }
     }
     else if (ppp.separated())
     {
-        position_ -= ppp.separation();
-        static_cast<ParticleType&>(*this).transformProperties
-        (
-            -ppp.separation()
-        );
+        if (ppp.separation().size() == 1)
+        {
+            position_ -= ppp.separation()[0];
+            static_cast<ParticleType&>(*this).transformProperties
+            (
+                -ppp.separation()[0]
+            );
+        }
+        else
+        {
+            position_ -= ppp.separation()[facei_];
+            static_cast<ParticleType&>(*this).transformProperties
+            (
+                -ppp.separation()[facei_]
+            );
+        }
     }
 
     // Reset the face index for the next tracking operation
@@ -465,15 +485,18 @@ void Foam::Particle<ParticleType>::hitCyclicPatch
 
     if (!cpp.parallel())
     {
-        const tensor& T = cpp.reverseT();
+        const tensor& T = cpp.reverseT()[0];
 
         transformPosition(T);
         static_cast<ParticleType&>(*this).transformProperties(T);
     }
     else if (cpp.separated())
     {
-        position_ += cpp.separation();
-        static_cast<ParticleType&>(*this).transformProperties(cpp.separation());
+        position_ += cpp.separation()[0];
+        static_cast<ParticleType&>(*this).transformProperties
+        (
+            cpp.separation()[0]
+        );
     }
 }
 

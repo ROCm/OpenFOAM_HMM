@@ -6,6 +6,7 @@ cellQuality/cellQuality.C
 cellDist/cellDistFuncs.C
 cellDist/patchWave/patchWave.C
 cellDist/wallPoint/wallPoint.C
+
 cellFeatures/cellFeatures.C
 
 csys = coordinateSystems
@@ -20,17 +21,18 @@ $(csys)/coordinateRotation/coordinateRotation.C
 $(csys)/coordinateRotation/EulerCoordinateRotation.C
 $(csys)/coordinateRotation/STARCDCoordinateRotation.C
 
-/*
 edgeFaceCirculator/edgeFaceCirculator.C
-*/
 
 polyMeshZipUpCells/polyMeshZipUpCells.C
 primitiveMeshGeometry/primitiveMeshGeometry.C
+
 meshSearch/meshSearch.C
+
 meshTools/meshTools.C
 
 PointEdgeWave/PointEdgeWaveName.C
 PointEdgeWave/pointEdgePoint.C
+
 regionSplit/regionSplit.C
 
 octree/octreeName.C
@@ -116,7 +118,6 @@ $(pointSources)/surfaceToPoint/surfaceToPoint.C
 $(pointSources)/zoneToPoint/zoneToPoint.C
 $(pointSources)/nearestToPoint/nearestToPoint.C
 
-/*
 faceZoneSources = sets/faceZoneSources
 $(faceZoneSources)/faceZoneToFaceZone/faceZoneToFaceZone.C
 $(faceZoneSources)/setsToFaceZone/setsToFaceZone.C
@@ -127,6 +128,7 @@ $(cellZoneSources)/setToCellZone/setToCellZone.C
 
 pointZoneSources = sets/pointZoneSources
 $(pointZoneSources)/setToPointZone/setToPointZone.C
+
 
 surfaceSets/surfaceSets.C
 
@@ -146,8 +148,6 @@ $(booleanSurface)/booleanSurface.C
 intersectedSurface = $(booleanOps)/intersectedSurface
 $(intersectedSurface)/intersectedSurface.C
 $(intersectedSurface)/edgeSurface.C
-
-*/
 
 triSurface/triSurfaceSearch/triSurfaceSearch.C
 triSurface/octreeData/octreeDataTriSurface.C

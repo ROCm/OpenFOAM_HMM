@@ -144,7 +144,7 @@ void cyclicPointPatchField<Type>::swapAddSeparated
     {
         forAll(pairs, pairi)
         {
-            pf[pairs[pairi][0]] = transform(forwardT(), nbrPf[pairs[pairi][1]]);
+            pf[pairs[pairi][0]] = transform(forwardT()[0], nbrPf[pairs[pairi][1]]);
         }
     }
     else

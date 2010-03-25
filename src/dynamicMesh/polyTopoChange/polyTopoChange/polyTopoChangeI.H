@@ -33,9 +33,9 @@ inline bool Foam::polyTopoChange::pointRemoved(const label pointI) const
     const point& pt = points_[pointI];
 
     return
-        pt.x() > 0.5*greatPoint.x()
-     && pt.y() > 0.5*greatPoint.y()
-     && pt.z() > 0.5*greatPoint.z();
+        pt.x() > 0.5*vector::max.x()
+     && pt.y() > 0.5*vector::max.y()
+     && pt.z() > 0.5*vector::max.z();
 }
 
 

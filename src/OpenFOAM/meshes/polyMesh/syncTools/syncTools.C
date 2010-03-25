@@ -56,6 +56,29 @@ template<>
 void Foam::syncTools::transform::operator()
 (
     const coupledPolyPatch&,
+    Field<scalar>&
+) const
+{}
+template<>
+void Foam::syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    Map<scalar>&
+) const
+{}
+template<>
+void Foam::syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    EdgeMap<scalar>&
+) const
+{}
+
+
+template<>
+void Foam::syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
     Field<bool>&
 ) const
 {}

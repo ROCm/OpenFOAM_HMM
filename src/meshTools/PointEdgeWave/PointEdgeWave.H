@@ -166,7 +166,7 @@ class PointEdgeWave
         //- Transform. Implementation referred to Type
         void transform
         (
-            const tensor& T,
+            const tensorField& rotTensor,
             List<Type>& pointInfo
         ) const;
 

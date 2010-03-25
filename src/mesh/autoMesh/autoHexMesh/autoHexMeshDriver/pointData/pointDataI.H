@@ -26,7 +26,6 @@ License
 
 #include "polyMesh.H"
 #include "transform.H"
-#include "wallPoint.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -138,10 +137,10 @@ inline bool Foam::pointData::update
 // Null constructor
 inline Foam::pointData::pointData()
 :
-    origin_(wallPoint::greatPoint),
+    origin_(point::max),
     distSqr_(GREAT),
     s_(GREAT),
-    v_(wallPoint::greatPoint)
+    v_(point::max)
 {}
 
 
@@ -199,7 +198,7 @@ inline const Foam::vector& Foam::pointData::v() const
 
 inline bool Foam::pointData::valid() const
 {
-    return origin_ != wallPoint::greatPoint;
+    return origin_ != point::max;
 }
 
 

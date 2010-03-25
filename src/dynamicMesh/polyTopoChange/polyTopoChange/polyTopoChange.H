@@ -45,7 +45,7 @@ Description
         - no item can be removed more than once.
     - removed cell: cell set to 0 faces.
     - removed face: face set to 0 vertices.
-    - removed point: coordinate set to greatPoint (GREAT,GREAT,GREAT).
+    - removed point: coordinate set to vector::max (VGREAT,VGREAT,VGREAT).
     Note that this might give problems if this value is used already.
     To see if point is equal to above value we don't use == (which might give
     problems with roundoff error) but instead compare the individual component
@@ -98,12 +98,6 @@ template<class T, class Container> class CompactListList;
 
 class polyTopoChange
 {
-    // Static data members
-
-        //- Value of deleted point
-        static const point greatPoint;
-
-
     // Private data
 
         //- Whether to allow referencing illegal points/cells/faces

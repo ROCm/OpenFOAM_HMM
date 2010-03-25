@@ -150,7 +150,7 @@ void processorCyclicPointPatchField<Type>::swapAddSeparated
         {
             const processorCyclicPolyPatch& ppp =
                 procPatch_.procCyclicPolyPatch();
-            const tensor& forwardT = ppp.forwardT();
+            const tensor& forwardT = ppp.forwardT()[0];
 
             transform(pnf, forwardT, pnf);
         }

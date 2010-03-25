@@ -287,40 +287,40 @@ public:
             return referPatch().owner();
         }
 
-        //- Transform a patch-based field from other side to this side.
-        virtual bool doTransform() const
-        {
-            return referPatch().doTransform();
-        }
-        virtual void transform(scalarField& l) const
-        {
-            referPatch().transform(l);
-        }
-        virtual void transform(vectorField& l) const
-        {
-            referPatch().transform(l);
-        }
-        virtual void transform(sphericalTensorField& l) const
-        {
-            referPatch().transform(l);
-        }
-        virtual void transform(diagTensorField& l) const
-        {
-            referPatch().transform(l);
-        }
-        virtual void transform(symmTensorField& l) const
-        {
-            referPatch().transform(l);
-        }
-        virtual void transform(tensorField& l) const
-        {
-            referPatch().transform(l);
-        }
+//        //- Transform a patch-based field from other side to this side.
+//        virtual bool doTransform() const
+//        {
+//            return referPatch().doTransform();
+//        }
+//        virtual void transform(scalarField& l) const
+//        {
+//            referPatch().transform(l);
+//        }
+//        virtual void transform(vectorField& l) const
+//        {
+//            referPatch().transform(l);
+//        }
+//        virtual void transform(sphericalTensorField& l) const
+//        {
+//            referPatch().transform(l);
+//        }
+//        virtual void transform(diagTensorField& l) const
+//        {
+//            referPatch().transform(l);
+//        }
+//        virtual void transform(symmTensorField& l) const
+//        {
+//            referPatch().transform(l);
+//        }
+//        virtual void transform(tensorField& l) const
+//        {
+//            referPatch().transform(l);
+//        }
 
         //- Transform a patch-based position from other side to this side
         virtual void transformPosition(pointField& l) const
         {
-            referPatch().transform(l);
+            referPatch().transformPosition(l);
         }
 
         //- Are the planes separated.
@@ -330,7 +330,7 @@ public:
         }
 
         //- If the planes are separated the separation vector.
-        virtual const vector& separation() const
+        virtual const vectorField& separation() const
         {
             return referPatch().separation();
         }
@@ -342,16 +342,23 @@ public:
         }
 
         //- Return face transformation tensor.
-        virtual const tensor& forwardT() const
+        virtual const tensorField& forwardT() const
         {
             return referPatch().forwardT();
         }
 
         //- Return neighbour-cell transformation tensor.
-        virtual const tensor& reverseT() const
+        virtual const tensorField& reverseT() const
         {
             return referPatch().reverseT();
         }
+
+        //- Are faces collocated. Either size 0,1 or length of patch
+        virtual const boolList& collocated() const
+        {
+            return referPatch().collocated();
+        }
+
 
         //- Initialize ordering for primitivePatch. Does not
         //  refer to *this (except for name() and type() etc.)

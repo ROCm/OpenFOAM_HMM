@@ -142,7 +142,7 @@ public:
             }
 
             //- Return face transformation tensor
-            virtual const tensor& forwardT() const
+            virtual const tensorField& forwardT() const
             {
                 return fineProcInterface_.forwardT();
             }

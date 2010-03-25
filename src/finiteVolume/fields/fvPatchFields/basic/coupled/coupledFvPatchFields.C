@@ -36,8 +36,6 @@ namespace Foam
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 makePatchFieldsTypeName(coupled);
-//makePatchTypeFieldTypeName(coupledFvPatchScalarField);
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

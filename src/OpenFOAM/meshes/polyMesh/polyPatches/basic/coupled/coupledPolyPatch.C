@@ -217,11 +217,6 @@ Foam::label Foam::coupledPolyPatch::getRotation
 
 void Foam::coupledPolyPatch::calcTransformTensors
 (
-    bool& separated,
-    vector& separation,
-    bool& parallel,
-    tensor& forwardT,
-    tensor& reverseT,
     const vectorField& Cf,
     const vectorField& Cr,
     const vectorField& nf,
@@ -251,11 +246,10 @@ void Foam::coupledPolyPatch::calcTransformTensors
     if (Cf.size() == 0)
     {
         // Dummy geometry.
-        separated = false;
-        separation = vector::zero;
-        parallel = true;
-        forwardT = I;
-        reverseT = I;
+        separation_.setSize(0);
+        forwardT_ = I;
+        reverseT_ = I;
+        collocated_.setSize(0);
     }
     else
     {
@@ -270,69 +264,113 @@ void Foam::coupledPolyPatch::calcTransformTensors
         {
             // Rotation, no separation
 
-            separated = false;
-            separation = vector::zero;
+            // Assume per-face differing transformation, correct later
 
-            parallel = false;
-            forwardT = rotationTensor(-nr[0], nf[0]);
-            reverseT = rotationTensor(nf[0], -nr[0]);
+            separation_.setSize(0);
 
-            // Check 
-            forAll(forwardT, facei)
+            forwardT_.setSize(Cf.size());
+            reverseT_.setSize(Cf.size());
+            collocated_.setSize(Cf.size());
+            collocated_ = false;
+
+            forAll (forwardT_, facei)
             {
-                tensor T = rotationTensor(-nr[facei], nf[facei]);
+                forwardT_[facei] = rotationTensor(-nr[facei], nf[facei]);
+                reverseT_[facei] = rotationTensor(nf[facei], -nr[facei]);
+            }
 
-                if (mag(T - forwardT) > smallDist[facei])
+            if (debug)
+            {
+                Pout<< "    sum(mag(forwardT_ - forwardT_[0])):"
+                    << sum(mag(forwardT_ - forwardT_[0]))
+                    << endl;
+            }
+
+            if (sum(mag(forwardT_ - forwardT_[0])) < error)
+            {
+                forwardT_.setSize(1);
+                reverseT_.setSize(1);
+                collocated_.setSize(1);
+
+                if (debug)
                 {
-                    FatalErrorIn
-                    (   
-                        "coupledPolyPatch::calcTransformTensors(..)"
-                    )   << "Non-uniform rotation. Difference between face 0"
-                        << " (at " << Cf[0] << ") and face " << facei
-                        << " (at " << Cf[facei] << ") is " << mag(T - forwardT)
-                        << " which is larger than geometric tolerance "
-                        << smallDist[facei] << endl
-                        << exit(FatalError);
+                    Pout<< "    difference in rotation less than"
+                        << " local tolerance "
+                        << error << ". Assuming uniform rotation." << endl;
                 }
             }
         }
         else
         {
-            // No rotation, possibly separation
-            parallel = true;
-            forwardT = I;
-            reverseT = I;
+            // No rotation, possible separation
 
-            vectorField separationField = (nf&(Cr - Cf))*nf;
+            forwardT_.setSize(0);
+            reverseT_.setSize(0);
 
-            if (mag(separationField[0]) < smallDist[0])
-            {
-                separated = false;
-                separation = vector::zero;
-            }
-            else
-            {
-                separated = true;
-                separation = separationField[0];
-            }
+            separation_ = (nf&(Cr - Cf))*nf;
+
+            collocated_.setSize(separation_.size());
+
+            // Three situations:
+            // - separation is zero. No separation.
+            // - separation is same. Single separation vector.
+            // - separation differs per face. Separation vectorField.
 
             // Check for different separation per face
-            forAll(separationField, facei)
+            bool sameSeparation = true;
+            bool doneWarning = false;
+
+            forAll(separation_, facei)
             {
                 scalar smallSqr = sqr(smallDist[facei]);
 
-                if (magSqr(separationField[facei] - separation) > smallSqr)
+                collocated_[facei] = (magSqr(separation_[facei]) < smallSqr);
+
+                // Check if separation differing w.r.t. face 0.
+                if (magSqr(separation_[facei] - separation_[0]) > smallSqr)
                 {
-                    FatalErrorIn
-                    (   
-                        "coupledPolyPatch::calcTransformTensors(..)"
-                    )   << "Non-uniform separation. Difference between face 0"
-                        << " (at " << Cf[0] << ") and face " << facei
-                        << " (at " << Cf[facei] << ") is "
-                        << mag(separationField[facei] - separation)
-                        << " which is larger than geometric tolerance "
-                        << smallDist[facei] << endl
-                        << exit(FatalError);
+                    sameSeparation = false;
+
+                    if (!doneWarning && debug)
+                    {
+                        doneWarning = true;
+
+                        Pout<< "    separation " << separation_[facei]
+                            << " at " << facei
+                            << " differs from separation[0] " << separation_[0]
+                            << " by more than local tolerance "
+                            << smallDist[facei]
+                            << ". Assuming non-uniform separation." << endl;
+                    }
+                }
+            }
+
+            if (sameSeparation)
+            {
+                // Check for zero separation (at 0 so everywhere)
+                if (collocated_[0])
+                {
+                    if (debug)
+                    {
+                        Pout<< "    separation " << mag(separation_[0])
+                            << " less than local tolerance " << smallDist[0]
+                            << ". Assuming zero separation." << endl;
+                    }
+
+                    separation_.setSize(0);
+                    collocated_ = boolList(1, true);
+                }
+                else
+                {
+                    if (debug)
+                    {
+                        Pout<< "    separation " << mag(separation_[0])
+                            << " more than local tolerance " << smallDist[0]
+                            << ". Assuming uniform separation." << endl;
+                    }
+
+                    separation_.setSize(1);
+                    collocated_ = boolList(1, false);
                 }
             }
         }
@@ -340,10 +378,8 @@ void Foam::coupledPolyPatch::calcTransformTensors
 
     if (debug)
     {
-        Pout<< "    separated:" << separated << nl
-            << "    separation   :" << separation << nl
-            << "    parallel     :" << parallel << nl
-            << "    forwardT     :" << forwardT << endl;
+        Pout<< "    separation_:" << separation_.size() << nl
+            << "    forwardT size:" << forwardT_.size() << endl;
     }
 }
 

@@ -40,7 +40,6 @@ Description
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-<<<<<<< HEAD
 void Foam::domainDecomposition::append(labelList& lst, const label elem)
 {
     label sz = lst.size();
@@ -413,38 +412,6 @@ void Foam::domainDecomposition::decomposeMesh()
     }
 
 
-    // Set the patch map. No filterPatches allowed.
-    forAll(procBoundaryAddressing_, procI)
-    {
-        label nNormal = procPatchSize_[procI].size();
-
-        const labelListList& curSubPatchIDs = 
-            procProcessorPatchSubPatchIDs_[procI];
-
-//        label nInterProc = procProcessorPatchSize_[procI].size();
-        label nInterProc = 0;
-        forAll(curSubPatchIDs, procPatchI)
-        {
-            nInterProc += curSubPatchIDs[procPatchI].size();
-        }
-
-        procBoundaryAddressing_[procI].setSize(nNormal + nInterProc);
-
-        for (label patchI = 0; patchI < nNormal; patchI++)
-        {
-            procBoundaryAddressing_[procI][patchI] = patchI;
-        }
-        label patchI = nNormal;
-        forAll(curSubPatchIDs, procPatchI)
-        {
-            forAll(curSubPatchIDs[procPatchI], i)
-            {
-                procBoundaryAddressing_[procI][patchI++] =
-                    curSubPatchIDs[procPatchI][i];
-            }
-        }
-    }
-
 //XXXXXXX
 // Print a bit
     forAll(procPatchStartIndex_, procI)
@@ -462,13 +429,6 @@ void Foam::domainDecomposition::decomposeMesh()
                 << "\tsize:" << procPatchSize_[procI][patchI]
                 << endl;
         }
-    }
-    Info<< endl;
-
-    forAll(procBoundaryAddressing_, procI)
-    {
-        Info<< "Processor:" << procI << endl;
-        Info<< "    patchMap:" << procBoundaryAddressing_[procI] << endl;
     }
     Info<< endl;
 

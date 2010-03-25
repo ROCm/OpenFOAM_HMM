@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -27,8 +27,8 @@
 #     wclean
 #
 # Description
-#     Clean up the wmake control directory Make and remove the include
-#     directories generated for libraries.
+#     Clean up the wmake control directory Make/\$WM_OPTIONS and remove the
+#     lnInclude directories generated for libraries.
 #
 #------------------------------------------------------------------------------
 Script=${0##*/}
@@ -36,18 +36,23 @@ Script=${0##*/}
 usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
-usage: $Script [dir]
-       $Script target [dir [MakeDir]]
 
-Clean up the wmake control directory Make and remove the include
-directories generated for libraries.
+Usage: $Script [OPTION] [dir]
+       $Script [OPTION] target [dir [MakeDir]]
+
+options:
+  -help             print the usage
+
+Clean up the wmake control directory Make/\$WM_OPTIONS and remove the
+lnInclude directories generated for libraries.
 
 The targets correspond to a subset of the 'wmake' special targets:
     all       all subdirectories
-    exe       cleans dir/Make
-    lib       cleans dir/Make and dir/lnInclude
-    libso     cleans dir/Make and dir/lnInclude
-    libo      cleans dir/Make and dir/lnInclude
+              (NB: any Allwclean or Allclean files will be used if they exist)
+    exe       clean dir/Make
+    lib       clean dir/Make and dir/lnInclude
+    libo      clean dir/Make and dir/lnInclude
+    libso     clean dir/Make and dir/lnInclude
 
 USAGE
    exit 1
@@ -77,16 +82,11 @@ then
         makeOption=$1
     fi
 
-    if [ $# -ge 2 ]
-    then
-        dir=$2
-    fi
+    # specified directory name:
+    [ $# -ge 2 ] && dir=$2
 
-    # alternative name for the Make sub-directory
-    if [ $# -ge 3 ]
-    then
-        MakeDir=$3
-    fi
+    # specified alternative name for the Make sub-directory:
+    [ $# -ge 3 ] && MakeDir=$3
 
     if [ "$dir" ]
     then
@@ -106,7 +106,11 @@ fi
 
 if [ "$makeOption" = all ]
 then
-    if [ -e Allclean ]
+    if [ -e Allwclean ]       # consistent with Allwmake
+    then
+        ./Allwclean
+        exit $?
+    elif [ -e Allclean ]      # often used for tutorial cases
     then
         ./Allclean
         exit $?
@@ -141,7 +145,7 @@ rm -rf $MakeDir/$WM_OPTIONS $MakeDir/classes 2>/dev/null
 find . -name "*.dep" -exec rm {} \;
 
 case "$makeOption" in
-lib | libso | libo )
+lib | libo | libso )
     rm -rf lnInclude 2>/dev/null
     ;;
 esac

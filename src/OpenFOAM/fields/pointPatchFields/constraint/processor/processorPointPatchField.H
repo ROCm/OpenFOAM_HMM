@@ -154,8 +154,8 @@ public:
             {
                 return
                    !(
-                        pTraits<Type>::rank == 0
-                     || procPatch_.procPolyPatch().doTransform()
+                        procPatch_.procPolyPatch().parallel()
+                     || pTraits<Type>::rank == 0
                     );
             }
 

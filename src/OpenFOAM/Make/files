@@ -237,9 +237,7 @@ $(lduMatrix)/preconditioners/diagonalPreconditioner/diagonalPreconditioner.C
 $(lduMatrix)/preconditioners/DICPreconditioner/DICPreconditioner.C
 $(lduMatrix)/preconditioners/FDICPreconditioner/FDICPreconditioner.C
 $(lduMatrix)/preconditioners/DILUPreconditioner/DILUPreconditioner.C
-/*
 $(lduMatrix)/preconditioners/GAMGPreconditioner/GAMGPreconditioner.C
-*/
 
 lduAddressing = $(lduMatrix)/lduAddressing
 $(lduAddressing)/lduAddressing.C
@@ -253,17 +251,17 @@ $(lduInterfaceFields)/processorLduInterfaceField/processorLduInterfaceField.C
 $(lduInterfaceFields)/cyclicLduInterfaceField/cyclicLduInterfaceField.C
 
 GAMG = $(lduMatrix)/solvers/GAMG
-/*
-*/
 $(GAMG)/GAMGSolver.C
 $(GAMG)/GAMGSolverAgglomerateMatrix.C
 $(GAMG)/GAMGSolverScalingFactor.C
 $(GAMG)/GAMGSolverSolve.C
+
 GAMGInterfaces = $(GAMG)/interfaces
 $(GAMGInterfaces)/GAMGInterface/GAMGInterface.C
 $(GAMGInterfaces)/GAMGInterface/newGAMGInterface.C
 $(GAMGInterfaces)/processorGAMGInterface/processorGAMGInterface.C
 $(GAMGInterfaces)/cyclicGAMGInterface/cyclicGAMGInterface.C
+
 GAMGInterfaceFields = $(GAMG)/interfaceFields
 $(GAMGInterfaceFields)/GAMGInterfaceField/GAMGInterfaceField.C
 $(GAMGInterfaceFields)/GAMGInterfaceField/newGAMGInterfaceField.C

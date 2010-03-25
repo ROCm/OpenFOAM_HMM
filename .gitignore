@@ -55,6 +55,10 @@ doc/[Dd]oxygen/man
 /*.html
 /doc/*.html
 
+# untracked configuration files
+/etc/prefs.csh
+/etc/prefs.sh
+
 # source packages - anywhere
 *.tar.bz2
 *.tar.gz

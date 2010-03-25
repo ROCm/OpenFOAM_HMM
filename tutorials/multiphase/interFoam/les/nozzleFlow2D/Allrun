@@ -1,24 +1,31 @@
 #!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 # Get application name
 application=`getApplication`
 
-runRefineMesh ()
+runRefineMesh()
 {
     echo "Running refineMesh on $PWD"
     refineMesh -dict > log.refineMesh 2>&1
 }
 
+
 runApplication blockMesh
 
 i=1
-if [ -f log.cellSet ] ; then
-   i=3
+if [ -f log.cellSet ]
+then
+    i=3
 fi
-while [ "$i" -lt 3 ] ; do
-    if [ -f log.cellSet ] ; then
+
+while [ "$i" -lt 3 ]
+do
+    if [ -f log.cellSet ]
+    then
         mv log.cellSet log.cellSet.1
     fi
     cp system/cellSetDict.${i} system/cellSetDict
@@ -31,3 +38,5 @@ done
 cp constant/polyMesh/boundary.org constant/polyMesh/boundary
 
 runApplication $application
+
+# ----------------------------------------------------------------- end-of-file

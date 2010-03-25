@@ -50,8 +50,8 @@ namespace Foam
 
 class cyclicGAMGInterface
 :
-    virtual public cyclicLduInterface,
-    public GAMGInterface
+    public GAMGInterface,
+    virtual public cyclicLduInterface
 {
     // Private data
 
@@ -141,13 +141,13 @@ public:
             }
 
             //- Return face transformation tensor
-            virtual const tensor& forwardT() const
+            virtual const tensorField& forwardT() const
             {
                 return fineCyclicInterface_.forwardT();
             }
 
             //- Return neighbour-cell transformation tensor
-            virtual const tensor& reverseT() const
+            virtual const tensorField& reverseT() const
             {
                 return fineCyclicInterface_.reverseT();
             }

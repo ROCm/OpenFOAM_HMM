@@ -50,12 +50,6 @@ namespace Foam
 
 class cyclicLduInterface
 {
-    // Private data
-
-//        //- Coupled patch
-//        const label neighbPatchID_;
-
-//        const cyclicLduInterface* neighbPatch_;
 
 public:
 
@@ -63,12 +57,6 @@ public:
     TypeName("cyclicLduInterface");
 
     // Constructors
-
-//        //- Construct from components
-//        cyclicLduInterface(const label neighbPatchID);
-
-        //- Construct null
-        cyclicLduInterface();
 
     // Destructor
 
@@ -88,10 +76,10 @@ public:
             virtual const cyclicLduInterface& neighbPatch() const = 0;
 
             //- Return face transformation tensor
-            virtual const tensor& forwardT() const = 0;
+            virtual const tensorField& forwardT() const = 0;
 
             //- Return face reverse transformation tensor
-            virtual const tensor& reverseT() const = 0;
+            virtual const tensorField& reverseT() const = 0;
 };
 
 

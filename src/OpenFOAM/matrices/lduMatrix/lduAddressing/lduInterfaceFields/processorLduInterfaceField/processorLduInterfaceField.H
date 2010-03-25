@@ -83,7 +83,7 @@ public:
             virtual bool doTransform() const = 0;
 
             //- Return face transformation tensor
-            virtual const tensor& forwardT() const = 0;
+            virtual const tensorField& forwardT() const = 0;
 
             //- Return rank of component for transform
             virtual int rank() const = 0;

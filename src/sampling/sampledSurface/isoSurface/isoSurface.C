@@ -768,9 +768,7 @@ void Foam::isoSurface::calcSnappedPoint
     const pointField& pts = mesh_.points();
     const pointField& cc = mesh_.cellCentres();
 
-
-    const point greatPoint(VGREAT, VGREAT, VGREAT);
-    pointField collapsedPoint(mesh_.nPoints(), greatPoint);
+    pointField collapsedPoint(mesh_.nPoints(), point::max);
 
 
     // Work arrays
@@ -934,7 +932,7 @@ void Foam::isoSurface::calcSnappedPoint
 
 
     // Synchronise snap location
-    syncUnseparatedPoints(collapsedPoint, greatPoint);
+    syncUnseparatedPoints(collapsedPoint, point::max);
 
 
     snappedPoint.setSize(mesh_.nPoints());
@@ -942,7 +940,7 @@ void Foam::isoSurface::calcSnappedPoint
 
     forAll(collapsedPoint, pointI)
     {
-        if (collapsedPoint[pointI] != greatPoint)
+        if (collapsedPoint[pointI] != point::max)
         {
             snappedPoint[pointI] = snappedPoints.size();
             snappedPoints.append(collapsedPoint[pointI]);
@@ -2019,61 +2017,68 @@ Foam::isoSurface::isoSurface
     }
 
 
-    //if (false)
-    //{
-    List<FixedList<label, 3> > faceEdges;
-    labelList edgeFace0, edgeFace1;
-    Map<labelList> edgeFacesRest;
-
-
-    while (true)
+    if (false)
     {
-        // Calculate addressing
-        calcAddressing(*this, faceEdges, edgeFace0, edgeFace1, edgeFacesRest);
+        List<FixedList<label, 3> > faceEdges;
+        labelList edgeFace0, edgeFace1;
+        Map<labelList> edgeFacesRest;
 
-        // See if any dangling triangles
-        boolList keepTriangles;
-        label nDangling = markDanglingTriangles
-        (
-            faceEdges,
-            edgeFace0,
-            edgeFace1,
-            edgeFacesRest,
-            keepTriangles
-        );
 
-        if (debug)
+        while (true)
         {
-            Pout<< "isoSurface : detected " << nDangling
-                << " dangling triangles." << endl;
-        }
-
-        if (nDangling == 0)
-        {
-            break;
-        }
-
-        // Create face map (new to old)
-        labelList subsetTriMap(findIndices(keepTriangles, true));
-
-        labelList subsetPointMap;
-        labelList reversePointMap;
-        triSurface::operator=
-        (
-            subsetMesh
+            // Calculate addressing
+            calcAddressing
             (
                 *this,
-                subsetTriMap,
-                reversePointMap,
-                subsetPointMap
-            )
-        );
-        meshCells_ = labelField(meshCells_, subsetTriMap);
-        inplaceRenumber(reversePointMap, triPointMergeMap_);
-    }
+                faceEdges,
+                edgeFace0,
+                edgeFace1,
+                edgeFacesRest
+            );
 
-    orientSurface(*this, faceEdges, edgeFace0, edgeFace1, edgeFacesRest);
-    //}
+            // See if any dangling triangles
+            boolList keepTriangles;
+            label nDangling = markDanglingTriangles
+            (
+                faceEdges,
+                edgeFace0,
+                edgeFace1,
+                edgeFacesRest,
+                keepTriangles
+            );
+
+            if (debug)
+            {
+                Pout<< "isoSurface : detected " << nDangling
+                    << " dangling triangles." << endl;
+            }
+
+            if (nDangling == 0)
+            {
+                break;
+            }
+
+            // Create face map (new to old)
+            labelList subsetTriMap(findIndices(keepTriangles, true));
+
+            labelList subsetPointMap;
+            labelList reversePointMap;
+            triSurface::operator=
+            (
+                subsetMesh
+                (
+                    *this,
+                    subsetTriMap,
+                    reversePointMap,
+                    subsetPointMap
+                )
+            );
+            meshCells_ = labelField(meshCells_, subsetTriMap);
+            inplaceRenumber(reversePointMap, triPointMergeMap_);
+        }
+
+        orientSurface(*this, faceEdges, edgeFace0, edgeFace1, edgeFacesRest);
+    }
 
 
     if (debug)
