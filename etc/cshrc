@@ -149,7 +149,7 @@ case Linux:
             breaksw
 
         default:
-            echo Unknown WM_ARCH_OPTION $WM_ARCH_OPTION, should be 32 or 64
+            echo "Unknown WM_ARCH_OPTION '$WM_ARCH_OPTION', should be 32 or 64"
             breaksw
 
         endsw
