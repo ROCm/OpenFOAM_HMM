@@ -109,6 +109,19 @@ class polyMeshGeometry
             const point& fc
         );
 
+        //- Detect&report incorrect face-triangle orientation
+        static bool checkFaceTet
+        (
+            const polyMesh&,
+            const bool report,
+            const scalar minTetVol,
+            const pointField& p,
+            const label faceI,
+            const point& fc,    // face centre
+            const point& cc,    // cell centre
+            labelHashSet* setPtr
+        );
+
 public:
 
     ClassName("polyMeshGeometry");
@@ -189,6 +202,20 @@ public:
                 const scalar minPyrVol,
                 const polyMesh&,
                 const vectorField& cellCentres,
+                const pointField& p,
+                const labelList& checkFaces,
+                const List<labelPair>& baffles,
+                labelHashSet*
+            );
+
+            //- See primitiveMesh
+            static bool checkFaceTets
+            (
+                const bool report,
+                const scalar minPyrVol,
+                const polyMesh&,
+                const vectorField& cellCentres,
+                const vectorField& faceCentres,
                 const pointField& p,
                 const labelList& checkFaces,
                 const List<labelPair>& baffles,
@@ -315,6 +342,16 @@ public:
             (
                 const bool report,
                 const scalar minPyrVol,
+                const pointField& p,
+                const labelList& checkFaces,
+                const List<labelPair>& baffles,
+                labelHashSet* setPtr
+            ) const;
+
+            bool checkFaceTets
+            (
+                const bool report,
+                const scalar minTetVol,
                 const pointField& p,
                 const labelList& checkFaces,
                 const List<labelPair>& baffles,

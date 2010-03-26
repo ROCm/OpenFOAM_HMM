@@ -61,8 +61,7 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
 :
     polyPatchList(),
     regIOobject(io),
-    mesh_(mesh),
-    neighbourEdgesPtr_(NULL)
+    mesh_(mesh)
 {
     if (readOpt() == IOobject::MUST_READ)
     {
@@ -110,17 +109,14 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
 :
     polyPatchList(size),
     regIOobject(io),
-    mesh_(pm),
-    neighbourEdgesPtr_(NULL)
+    mesh_(pm)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::polyBoundaryMesh::~polyBoundaryMesh()
-{
-    deleteDemandDrivenData(neighbourEdgesPtr_);
-}
+{}
 
 
 void Foam::polyBoundaryMesh::clearGeom()
@@ -134,7 +130,8 @@ void Foam::polyBoundaryMesh::clearGeom()
 
 void Foam::polyBoundaryMesh::clearAddressing()
 {
-    deleteDemandDrivenData(neighbourEdgesPtr_);
+    neighbourEdgesPtr_.clear();
+    patchIDPtr_.clear();
 
     forAll (*this, patchi)
     {
@@ -201,10 +198,10 @@ Foam::polyBoundaryMesh::neighbourEdges() const
             << " boundaries." << endl;
     }
 
-    if (!neighbourEdgesPtr_)
+    if (!neighbourEdgesPtr_.valid())
     {
-        neighbourEdgesPtr_ = new List<labelPairList>(size());
-        List<labelPairList>& neighbourEdges = *neighbourEdgesPtr_;
+        neighbourEdgesPtr_.reset(new List<labelPairList>(size()));
+        List<labelPairList>& neighbourEdges = neighbourEdgesPtr_();
 
         // Initialize.
         label nEdgePairs = 0;
@@ -320,7 +317,36 @@ Foam::polyBoundaryMesh::neighbourEdges() const
         }
     }
 
-    return *neighbourEdgesPtr_;
+    return neighbourEdgesPtr_();
+}
+
+
+const Foam::labelList& Foam::polyBoundaryMesh::patchID() const
+{
+    if (!patchIDPtr_.valid())
+    {
+        patchIDPtr_.reset
+        (
+            new labelList
+            (
+                mesh_.nFaces()
+              - mesh_.nInternalFaces()
+            )
+        );
+        labelList& patchID = patchIDPtr_();
+
+        const polyBoundaryMesh& bm = *this;
+
+        forAll(bm, patchI)
+        {
+            label bFaceI = bm[patchI].start() - mesh_.nInternalFaces();
+            forAll(bm[patchI], i)
+            {
+                patchID[bFaceI++] = patchI;
+            }
+        }
+    }
+    return patchIDPtr_();
 }
 
 
@@ -654,7 +680,8 @@ void Foam::polyBoundaryMesh::movePoints(const pointField& p)
 
 void Foam::polyBoundaryMesh::updateMesh()
 {
-    deleteDemandDrivenData(neighbourEdgesPtr_);
+    neighbourEdgesPtr_.clear();
+    patchIDPtr_.clear();
 
     PstreamBuffers pBufs(Pstream::defaultCommsType);
 
