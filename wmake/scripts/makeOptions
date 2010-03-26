@@ -27,7 +27,7 @@
 #     makeOptions
 #
 # Description
-#     Scan the current directory for options and construct Make/options
+#     Construct Make/options
 #
 #     Usage : makeOptions
 #
@@ -35,8 +35,8 @@
 
 if [ -r Make/options ]
 then
-   echo "makeOptions: Make/options already exists, exiting"
-   exit 1
+    echo "Error: Make/options already exists - exiting"
+    exit 1
 fi
 
 [ -d Make ] || mkdir Make
