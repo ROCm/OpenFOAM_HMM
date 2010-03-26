@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -180,9 +180,12 @@ LienLeschzinerLowRe::LienLeschzinerLowRe
         autoCreateLowReNut("nut", mesh_)
     )
 {
+    bound(k_, kMin_);
+    bound(epsilon_, epsilonMin_);
+
     nut_ = Cmu_*(scalar(1) - exp(-Am_*yStar_))
        /(scalar(1) - exp(-Aepsilon_*yStar_) + SMALL)*sqr(k_)
-       /(epsilon_ + epsilonSmall_);
+       /(epsilon_);
     nut_.correctBoundaryConditions();
 
     printCoeffs();
@@ -322,7 +325,7 @@ void LienLeschzinerLowRe::correct()
     #include "wallDissipationI.H"
 
     solve(epsEqn);
-    bound(epsilon_, epsilon0_);
+    bound(epsilon_, epsilonMin_);
 
 
     // Turbulent kinetic energy equation
@@ -339,7 +342,7 @@ void LienLeschzinerLowRe::correct()
 
     kEqn().relax();
     solve(kEqn);
-    bound(k_, k0_);
+    bound(k_, kMin_);
 
 
     // Re-calculate viscosity

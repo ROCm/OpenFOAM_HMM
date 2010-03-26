@@ -49,7 +49,7 @@ do
         echo "removing all *~ files: $i"
         find $i \( -name '*~' -o -name '.*~' \) -print | xargs -t rm 2>/dev/null
     else
-       echo "no directory: $i" 1>&2
+        echo "no directory: $i" 1>&2
     fi
 done
 

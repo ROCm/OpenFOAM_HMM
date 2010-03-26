@@ -26,6 +26,7 @@ License
 
 #include "primitiveMesh.H"
 #include "pyramidPointFaceRef.H"
+#include "tetPointRef.H"
 #include "ListOps.H"
 #include "unitConversion.H"
 #include "SortableList.H"
@@ -401,7 +402,7 @@ bool Foam::primitiveMesh::checkFaceOrthogonality
             << "checking mesh non-orthogonality" << endl;
     }
 
-    // for all internal faces check theat the d dot S product is positive
+    // for all internal faces check that the d dot S product is positive
     const vectorField& centres = cellCentres();
     const vectorField& areas = faceAreas();
 
@@ -584,6 +585,114 @@ bool Foam::primitiveMesh::checkFacePyramids
         if (debug || report)
         {
             Info<< "    Face pyramids OK." << endl;
+        }
+
+        return false;
+    }
+}
+
+
+bool Foam::primitiveMesh::checkFaceTets
+(
+    const bool report,
+    const scalar minTetVol,
+    labelHashSet* setPtr
+) const
+{
+    if (debug)
+    {
+        Info<< "bool primitiveMesh::checkFaceTets("
+            << "const bool, const scalar, labelHashSet*) const: "
+            << "checking face orientation" << endl;
+    }
+
+    // check whether face area vector points to the cell with higher label
+    const vectorField& cc = cellCentres();
+    const vectorField& fc = faceCentres();
+
+    const labelList& own = faceOwner();
+    const labelList& nei = faceNeighbour();
+
+    const faceList& fcs = faces();
+
+    const pointField& p = points();
+
+    label nErrorPyrs = 0;
+
+    forAll (fcs, faceI)
+    {
+        // Create the owner tets - they will have negative volume
+        const face& f = fcs[faceI];
+
+        forAll(f, fp)
+        {
+            scalar tetVol = tetPointRef
+            (
+                p[f[fp]],
+                p[f.nextLabel(fp)],
+                fc[faceI],
+                cc[own[faceI]]
+            ).mag();
+
+            if (tetVol > -minTetVol)
+            {
+                if (setPtr)
+                {
+                    setPtr->insert(faceI);
+                }
+
+                nErrorPyrs++;
+                break;              // no need to check other tets
+            }
+        }
+
+        if (isInternalFace(faceI))
+        {
+            // Create the neighbour tet - it will have positive volume
+            const face& f = fcs[faceI];
+
+            forAll(f, fp)
+            {
+                scalar tetVol = tetPointRef
+                (
+                    p[f[fp]],
+                    p[f.nextLabel(fp)],
+                    fc[faceI],
+                    cc[nei[faceI]]
+                ).mag();
+
+                if (tetVol < minTetVol)
+                {
+                    if (setPtr)
+                    {
+                        setPtr->insert(faceI);
+                    }
+
+                    nErrorPyrs++;
+                    break;
+                }
+            }
+        }
+    }
+
+    reduce(nErrorPyrs, sumOp<label>());
+
+    if (nErrorPyrs > 0)
+    {
+        if (debug || report)
+        {
+            Info<< " ***Error in face tets: "
+                << nErrorPyrs << " faces have incorrectly oriented face"
+                << " decomposition triangles." << endl;
+        }
+
+        return true;
+    }
+    else
+    {
+        if (debug || report)
+        {
+            Info<< "    Face tets OK." << endl;
         }
 
         return false;

@@ -334,6 +334,14 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     PtrList<surfaceScalarField> surfaceScalarFields;
     readFields(mesh, objects, surfaceScalarFields);
+    PtrList<surfaceVectorField> surfaceVectorFields;
+    readFields(mesh, objects, surfaceVectorFields);
+    PtrList<surfaceSphericalTensorField> surfaceSphericalTensorFields;
+    readFields(mesh, objects, surfaceSphericalTensorFields);
+    PtrList<surfaceSymmTensorField> surfaceSymmTensorFields;
+    readFields(mesh, objects, surfaceSymmTensorFields);
+    PtrList<surfaceTensorField> surfaceTensorFields;
+    readFields(mesh, objects, surfaceTensorFields);
 
 
     // Construct the point fields
@@ -619,6 +627,10 @@ int main(int argc, char *argv[])
          || volSymmTensorFields.size()
          || volTensorFields.size()
          || surfaceScalarFields.size()
+         || surfaceVectorFields.size()
+         || surfaceSphericalTensorFields.size()
+         || surfaceSymmTensorFields.size()
+         || surfaceTensorFields.size()
         )
         {
             labelIOList faceProcAddressing
@@ -650,6 +662,10 @@ int main(int argc, char *argv[])
             fieldDecomposer.decomposeFields(volTensorFields);
 
             fieldDecomposer.decomposeFields(surfaceScalarFields);
+            fieldDecomposer.decomposeFields(surfaceVectorFields);
+            fieldDecomposer.decomposeFields(surfaceSphericalTensorFields);
+            fieldDecomposer.decomposeFields(surfaceSymmTensorFields);
+            fieldDecomposer.decomposeFields(surfaceTensorFields);
         }
 
 

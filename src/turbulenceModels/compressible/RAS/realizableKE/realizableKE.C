@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,7 +69,7 @@ tmp<volScalarField> realizableKE::rCmu
     volScalarField As = sqrt(6.0)*cos(phis);
     volScalarField Us = sqrt(S2/2.0 + magSqr(skew(gradU)));
 
-    return 1.0/(A0_ + As*Us*k_/(epsilon_ + epsilonSmall_));
+    return 1.0/(A0_ + As*Us*k_/epsilon_);
 }
 
 
@@ -200,10 +200,10 @@ realizableKE::realizableKE
         autoCreateAlphat("alphat", mesh_)
     )
 {
-    bound(k_, k0_);
-    bound(epsilon_, epsilon0_);
+    bound(k_, kMin_);
+    bound(epsilon_, epsilonMin_);
 
-    mut_ = rCmu(fvc::grad(U_))*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    mut_ = rCmu(fvc::grad(U_))*rho_*sqr(k_)/epsilon_;
     mut_.correctBoundaryConditions();
 
     alphat_ = mut_/Prt_;
@@ -341,7 +341,7 @@ void realizableKE::correct()
     epsEqn().boundaryManipulate(epsilon_.boundaryField());
 
     solve(epsEqn);
-    bound(epsilon_, epsilon0_);
+    bound(epsilon_, epsilonMin_);
 
 
     // Turbulent kinetic energy equation
@@ -353,12 +353,12 @@ void realizableKE::correct()
       - fvm::laplacian(DkEff(), k_)
      ==
         G - fvm::SuSp(2.0/3.0*rho_*divU, k_)
-      - fvm::Sp(rho_*(epsilon_)/k_, k_)
+      - fvm::Sp(rho_*epsilon_/k_, k_)
     );
 
     kEqn().relax();
     solve(kEqn);
-    bound(k_, k0_);
+    bound(k_, kMin_);
 
     // Re-calculate viscosity
     mut_ = rCmu(gradU, S2, magS)*rho_*sqr(k_)/epsilon_;

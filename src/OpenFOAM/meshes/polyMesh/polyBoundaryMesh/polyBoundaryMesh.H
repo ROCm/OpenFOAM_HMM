@@ -67,8 +67,10 @@ class polyBoundaryMesh
         //- Reference to mesh
         const polyMesh& mesh_;
 
+        mutable autoPtr<labelList> patchIDPtr_;
+
         //- Edges of neighbouring patches
-        mutable List<labelPairList>* neighbourEdgesPtr_;
+        mutable autoPtr<List<labelPairList> > neighbourEdgesPtr_;
 
 
     // Private Member Functions
@@ -156,6 +158,9 @@ public:
 
         //- Return patch index for a given face label
         label whichPatch(const label faceIndex) const;
+
+        //- Per boundary face label the patch index
+        const labelList& patchID() const;
 
         //- Return the set of patch IDs corresponding to the given list of names
         //  Wild cards are expanded.

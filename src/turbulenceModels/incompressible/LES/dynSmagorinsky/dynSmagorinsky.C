@@ -118,6 +118,8 @@ dynSmagorinsky::dynSmagorinsky
     filterPtr_(LESfilter::New(U.mesh(), coeffDict())),
     filter_(filterPtr_())
 {
+    bound(k_,  kMin_);
+
     updateSubGridScaleFields(dev(symm(fvc::grad(U))));
 
     printCoeffs();
@@ -133,6 +135,7 @@ void dynSmagorinsky::correct(const tmp<volTensorField>& gradU)
     volSymmTensorField D = dev(symm(gradU));
 
     k_ = cI(D)*sqr(delta())*magSqr(D);
+    bound(k_,  kMin_);
 
     updateSubGridScaleFields(D);
 }

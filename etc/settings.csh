@@ -74,6 +74,11 @@ _foamAddPath ${FOAM_USER_APPBIN}:${FOAM_SITE_APPBIN}:${FOAM_APPBIN}
  # Make sure to pick up dummy versions of external libraries last
 _foamAddLib  ${FOAM_USER_LIBBIN}:${FOAM_SITE_LIBBIN}:${FOAM_LIBBIN}:${FOAM_LIBBIN}/dummy
 
+# Compiler settings
+# ~~~~~~~~~~~~~~~~~
+unset gcc_version gmp_version mpfr_version
+unsetenv MPFR_ARCH_PATH
+
 
 # Select compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -84,38 +89,93 @@ switch ("$compilerInstall")
 case OpenFOAM:
     switch ("$WM_COMPILER")
     case Gcc:
-        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gcc-4.4.3
-        _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/mpfr-2.4.2/lib
-        _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gmp-5.0.1/lib
-    breaksw
-    case Gcc442:
-        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gcc-4.4.2
-        _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/mpfr-2.4.1/lib
-        _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gmp-4.2.4/lib
-    breaksw
-    case Gcc43:
-        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gcc-4.3.3
-        _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/mpfr-2.4.1/lib
-        _foamAddLib $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/gmp-4.2.4/lib
-    breaksw
-    endsw
+        set gcc_version=gcc-4.4.3
+        set gmp_version=gmp-5.0.1
+        set mpfr_version=mpfr-2.4.2
+        breaksw
 
-    # Check that the compiler directory can be found
-    if ( ! -d "$WM_COMPILER_DIR" ) then
+    case Gcc442:
+        set gcc_version=gcc-4.4.2
+        set gmp_version=gmp-4.2.4
+        set mpfr_version=mpfr-2.4.1
+        breaksw
+
+    case Gcc44:
+        set gcc_version=gcc-4.4.2
+        set gmp_version=gmp-4.2.4
+        set mpfr_version=mpfr-2.4.1
+        breaksw
+
+    case Gcc43:
+        set gcc_version=gcc-4.3.3
+        set gmp_version=gmp-4.2.4
+        set mpfr_version=mpfr-2.4.1
+        breaksw
+
+    default:
         echo
         echo "Warning in $WM_PROJECT_DIR/etc/settings.csh:"
-        echo "    Cannot find $WM_COMPILER_DIR installation."
-        echo "    Please install this compiler version or if you wish to use the system compiler,"
-        echo "    change the 'compilerInstall' setting to 'system' in this file"
+        echo "    Unknown OpenFOAM compiler type '$WM_COMPILER'"
+        echo "    Please check your settings"
         echo
-    endif
+        breaksw
 
-    _foamAddPath    ${WM_COMPILER_DIR}/bin
-    _foamAddLib     ${WM_COMPILER_DIR}/lib${WM_COMPILER_LIB_ARCH}:${WM_COMPILER_DIR}/lib
-    _foamAddMan     ${WM_COMPILER_DIR}/man
+    endsw
+
+    if ( $?gcc_version ) then
+        set gccDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$gcc_version
+        set gmpDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$gmp_version
+        set mpfrDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$mpfr_version
+
+        # Check that the compiler directory can be found
+        if ( ! -d "$gccDir" ) then
+            echo
+            echo "Warning in $WM_PROJECT_DIR/etc/settings.csh:"
+            echo "    Cannot find $gccDir installation."
+            echo "    Please install this compiler version or if you wish to use the system compiler,"
+            echo "    change the 'compilerInstall' setting to 'system' in this file"
+            echo
+        endif
+
+        _foamAddMan     $gccDir/man
+        _foamAddPath    $gccDir/bin
+        _foamAddLib     $gccDir/lib${WM_COMPILER_LIB_ARCH}:$gccDir/lib
+
+        # add in gmp/mpfr libraries
+        _foamAddLib     $gmpDir/lib
+        _foamAddLib     $mpfrDir/lib
+
+        # used by boost/CGAL:
+        setenv MPFR_ARCH_PATH $mpfrDir
+    endif
+    unset gcc_version gccDir  gmp_version gmpDir  mpfr_version mpfrDir
 
     breaksw
 endsw
+
+
+# boost and CGAL
+# ~~~~~~~~~~~~~~
+
+set boost_version=boost_1_42_0
+set cgal_version=CGAL-3.5.1
+
+setenv BOOST_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$boost_version
+setenv CGAL_ARCH_PATH  $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cgal_version
+
+# enabled if CGAL is available
+if ( -d "$CGAL_ARCH_PATH" ) then
+    if ( -d "$BOOST_ARCH_PATH" ) then
+        _foamAddLib $BOOST_ARCH_PATH/lib
+    else
+        unsetenv BOOST_ARCH_PATH
+    endif
+    _foamAddLib $CGAL_ARCH_PATH/lib
+else
+    unsetenv BOOST_ARCH_PATH CGAL_ARCH_PATH MPFR_ARCH_PATH
+endif
+
+unset boost_version cgal_version
 
 
 # Communications library
@@ -259,17 +319,10 @@ else
 endif
 
 
-# CGAL library if available
-# ~~~~~~~~~~~~~~~~~~~~~~~~~
-if ( $?CGAL_LIB_DIR ) then
-    _foamAddLib $CGAL_LIB_DIR
-endif
-
-
 # Enable the hoard memory allocator if available
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #if ( -f $FOAM_LIBBIN/libhoard.so ) then
-#    setenv LD_PRELOAD $FOAM_LIBBIN/libhoard.so:${LD_PRELOAD}
+#    setenv LD_PRELOAD $FOAM_LIBBIN/libhoard.so:$LD_PRELOAD
 #endif
 
 

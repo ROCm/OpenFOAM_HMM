@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -32,6 +32,7 @@
 
 GENERAL_RULES = $(WM_DIR)/rules/General
 RULES         = $(WM_DIR)/rules/$(WM_ARCH)$(WM_COMPILER)
+WM_SCRIPTS    = $(WM_DIR)/scripts
 OBJECTS_DIR   = $(WM_OPTIONS)
 FFLAGS        =
 
@@ -61,16 +62,16 @@ $(FILES) : files
 	@$(CPP) $(GFLAGS) $(FFLAGS) files > $(FILES)
 
 $(SFILES): files
-	@wmakeDerivedFiles
+	@$(WM_SCRIPTS)/makeDerivedFiles
 
 $(OFILES): files
-	@wmakeDerivedFiles
+	@$(WM_SCRIPTS)/makeDerivedFiles
 
 $(DFILES): files
-	@wmakeDerivedFiles
+	@$(WM_SCRIPTS)/makeDerivedFiles
 
 $(IFILES): files
-	@wmakeDerivedFiles
+	@$(WM_SCRIPTS)/makeDerivedFiles
 
 
 #------------------------------------------------------------------------------

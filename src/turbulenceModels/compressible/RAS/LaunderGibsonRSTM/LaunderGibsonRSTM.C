@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -258,7 +258,10 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
             << exit(FatalError);
     }
 
-    mut_ = Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    bound(k_, kMin_);
+    bound(epsilon_, epsilonMin_);
+
+    mut_ = Cmu_*rho_*sqr(k_)/epsilon_;
     mut_.correctBoundaryConditions();
 
     alphat_ = mut_/Prt_;
@@ -357,7 +360,7 @@ void LaunderGibsonRSTM::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ = rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_ = rho_*Cmu_*sqr(k_)/epsilon_;
         mut_.correctBoundaryConditions();
 
         // Re-calculate thermal diffusivity
@@ -397,7 +400,7 @@ void LaunderGibsonRSTM::correct()
     epsEqn().boundaryManipulate(epsilon_.boundaryField());
 
     solve(epsEqn);
-    bound(epsilon_, epsilon0_);
+    bound(epsilon_, epsilonMin_);
 
 
     // Reynolds stress equation
@@ -453,15 +456,15 @@ void LaunderGibsonRSTM::correct()
             R_.dimensions(),
             symmTensor
             (
-                k0_.value(), -GREAT, -GREAT,
-                k0_.value(), -GREAT,
-                k0_.value()
+                kMin_.value(), -GREAT, -GREAT,
+                kMin_.value(), -GREAT,
+                kMin_.value()
             )
         )
     );
 
     k_ == 0.5*tr(R_);
-    bound(k_, k0_);
+    bound(k_, kMin_);
 
 
     // Re-calculate turbulent viscosity

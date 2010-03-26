@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,7 +93,7 @@ void oneEqEddy::correct(const tmp<volTensorField>& tgradU)
     volScalarField divU = fvc::div(phi()/fvc::interpolate(rho()));
     volScalarField G = 2*muSgs_*(gradU && dev(symm(gradU)));
 
-    fvScalarMatrix kEqn
+    tmp<fvScalarMatrix> kEqn
     (
         fvm::ddt(rho(), k_)
       + fvm::div(phi(), k_)
@@ -104,10 +104,10 @@ void oneEqEddy::correct(const tmp<volTensorField>& tgradU)
       - fvm::Sp(ce_*rho()*sqrt(k_)/delta(), k_)
     );
 
-    kEqn.relax();
-    kEqn.solve();
+    kEqn().relax();
+    kEqn().solve();
 
-    bound(k_, k0());
+    bound(k_, kMin_);
 
     updateSubGridScaleFields();
 }

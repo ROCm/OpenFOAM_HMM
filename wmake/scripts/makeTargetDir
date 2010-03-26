@@ -3,9 +3,9 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -24,28 +24,19 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     wmkdir
+#     makeTargetDir
 #
 # Description
-#     Script to make directories that do not already exist
-#     Usage : wmkdir <dir> [.. <dirN>]
+#     Makes a directory hierarchy for the given target file
+#
+#     Usage: makeTargetDir <directory>
 #
 #------------------------------------------------------------------------------
 
-if [ $# -ge 1 ]
-then
-    # provide help
-    if [ "$1" = "-h" -o "$1" = "-help" ]
-    then
-        echo "usage: ${0##*/} <dir> [.. <dirN>]"
-        echo "       mkdir if directories do not already exist"
-        echo
-    else
-        for dir
-        do
-            [ -d "$dir" ] || mkdir -p "$dir"
-        done
-    fi
-fi
+for target
+do
+    dir=${target%/*}
+    [ -d "$dir" ] || [ "$dir" = "$target" ] || mkdir -p "$dir"
+done
 
 #------------------------------------------------------------------------------
