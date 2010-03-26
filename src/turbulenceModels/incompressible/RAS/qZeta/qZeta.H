@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,6 +66,11 @@ class qZeta
             dimensionedScalar sigmaZeta_;
             Switch anisotropic_;
 
+        //- Lower limit of q
+        dimensionedScalar qMin_;
+
+        //- Lower limit of zeta
+        dimensionedScalar zetaMin_;
 
         // Fields
 
@@ -106,6 +111,33 @@ public:
 
 
     // Member Functions
+
+       // Access
+
+            //- Return lower allowable limit for q (default: SMALL)
+            const dimensionedScalar& qMin() const
+            {
+                return qMin_;
+            }
+
+            //- Return the lower allowable limit for zeta (default: SMALL)
+            const dimensionedScalar& zetaMin() const
+            {
+                return zetaMin_;
+            }
+
+            //- Allow qMin to be changed
+            dimensionedScalar& qMin()
+            {
+                return qMin_;
+            }
+
+            //- Allow zetaMin to be changed
+            dimensionedScalar& zetaMin()
+            {
+                return zetaMin_;
+            }
+
 
         //- Return the turbulence viscosity
         virtual tmp<volScalarField> nut() const

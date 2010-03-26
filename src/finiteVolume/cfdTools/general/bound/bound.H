@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,11 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 InNamespace
-    Foam::bound
+    Foam
 
 Description
-    Bound the given scalar field if it has gone unbounded.  Used extensively
-    in RAS and LES turbulence models.
+    Bound the given scalar field if it has gone unbounded.
+
+    Used extensively in RAS and LES turbulence models, but also of use
+    within solvers.
 
 SourceFiles
     bound.C
@@ -49,7 +51,7 @@ namespace Foam
 
 //- Bound the given scalar field if it has gone unbounded.
 //  Used extensively in RAS and LES turbulence models.
-void bound(volScalarField& vsf, const dimensionedScalar& vsf0);
+void bound(volScalarField&, const dimensionedScalar& lowerBound);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -258,7 +258,18 @@ kOmegaSST::kOmegaSST
         autoCreateAlphat("alphat", mesh_)
     )
 {
-    mut_ = a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(magSqr(symm(fvc::grad(U_)))));
+    bound(k_, kMin_);
+    bound(omega_, omegaMin_);
+
+    mut_ =
+    (
+        a1_*rho_*k_
+      / max
+        (
+            a1_*omega_,
+            F2()*sqrt(magSqr(symm(fvc::grad(U_))))
+        )
+    );
     mut_.correctBoundaryConditions();
 
     alphat_ = mut_/Prt_;
@@ -414,7 +425,7 @@ void kOmegaSST::correct()
     omegaEqn().boundaryManipulate(omega_.boundaryField());
 
     solve(omegaEqn);
-    bound(omega_, omega0_);
+    bound(omega_, omegaMin_);
 
     // Turbulent kinetic energy equation
     tmp<fvScalarMatrix> kEqn
@@ -430,7 +441,7 @@ void kOmegaSST::correct()
 
     kEqn().relax();
     solve(kEqn);
-    bound(k_, k0_);
+    bound(k_, kMin_);
 
 
     // Re-calculate viscosity

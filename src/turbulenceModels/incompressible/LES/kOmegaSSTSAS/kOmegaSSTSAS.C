@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -263,8 +263,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
         )
     ),
 
-    omega0_("omega0", dimless/dimTime, SMALL),
-    omegaSmall_("omegaSmall", dimless/dimTime, SMALL),
+    omegaMin_("omegaMin", dimless/dimTime, SMALL),
     y_(mesh_),
     Cmu_
     (
@@ -324,6 +323,9 @@ kOmegaSSTSAS::kOmegaSSTSAS
         mesh_
     )
 {
+    bound(k_, kMin_);
+    bound(omega_, omegaMin_);
+
     updateSubGridScaleFields(magSqr(symm(fvc::grad(U))));
 
     printCoeffs();
@@ -346,9 +348,8 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
 
     volVectorField gradK = fvc::grad(k_);
     volVectorField gradOmega = fvc::grad(omega_);
-    volScalarField L = sqrt(k_)/(pow025(Cmu_)*(omega_ + omegaSmall_));
-    volScalarField CDkOmega =
-        (2.0*alphaOmega2_)*(gradK & gradOmega)/(omega_ + omegaSmall_);
+    volScalarField L = sqrt(k_)/(pow025(Cmu_)*omega_);
+    volScalarField CDkOmega = (2.0*alphaOmega2_)*(gradK & gradOmega)/omega_;
     volScalarField F1 = this->F1(CDkOmega);
     volScalarField G = nuSgs_*2.0*S2;
 
@@ -368,14 +369,12 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
         kEqn.relax();
         kEqn.solve();
     }
-    bound(k_, k0());
+    bound(k_, kMin_);
 
     volScalarField grad_omega_k = max
     (
-        magSqr(gradOmega)/
-        sqr(omega_ + omegaSmall_),
-        magSqr(gradK)/
-        sqr(k_ + k0())
+        magSqr(gradOmega)/sqr(omega_),
+        magSqr(gradK)/sqr(k_)
     );
 
     // Turbulent frequency equation
@@ -397,7 +396,7 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
           + FSAS_
            *max
             (
-                dimensionedScalar("zero",dimensionSet(0, 0 , -2, 0, 0),0. ),
+                dimensionedScalar("zero",dimensionSet(0, 0, -2, 0, 0), 0.0),
                 zetaTilda2_*kappa_*S2*(L/Lvk2(S2))
               - 2.0/alphaPhi_*k_*grad_omega_k
             )
@@ -406,7 +405,7 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
         omegaEqn.relax();
         omegaEqn.solve();
     }
-    bound(omega_, omega0_);
+    bound(omega_, omegaMin_);
 
     updateSubGridScaleFields(S2);
 }

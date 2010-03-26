@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -121,9 +121,8 @@ PDRkEpsilon::PDRkEpsilon
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_
+        autoCreateK("k", mesh_)
     ),
-
     epsilon_
     (
         IOobject
@@ -134,9 +133,8 @@ PDRkEpsilon::PDRkEpsilon
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_
+        autoCreateEpsilon("epsilon", mesh_)
     ),
-
     mut_
     (
         IOobject
@@ -147,9 +145,8 @@ PDRkEpsilon::PDRkEpsilon
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_)
+        autoCreateMut("mut", mesh_)
     ),
-
     alphat_
     (
         IOobject
@@ -163,7 +160,9 @@ PDRkEpsilon::PDRkEpsilon
         autoCreateAlphat("alphat", mesh_)
     )
 {
-    mut_ = Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    bound(epsilon_, epsilonMin_);
+
+    mut_ = Cmu_*rho_*sqr(k_)/epsilon_;
     mut_.correctBoundaryConditions();
 
     alphat_ = mut_/Prt_;
@@ -250,7 +249,7 @@ void PDRkEpsilon::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ = rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_ = rho_*Cmu_*sqr(k_)/epsilon_;
         mut_.correctBoundaryConditions();
 
         // Re-calculate thermal diffusivity
@@ -302,7 +301,7 @@ void PDRkEpsilon::correct()
     epsEqn().boundaryManipulate(epsilon_.boundaryField());
 
     solve(epsEqn);
-    bound(epsilon_, epsilon0_);
+    bound(epsilon_, epsilonMin_);
 
 
     // Turbulent kinetic energy equation
@@ -320,7 +319,7 @@ void PDRkEpsilon::correct()
 
     kEqn().relax();
     solve(kEqn);
-    bound(k_, k0_);
+    bound(k_, kMin_);
 
     // Re-calculate viscosity
     mut_ = rho_*Cmu_*sqr(k_)/epsilon_;

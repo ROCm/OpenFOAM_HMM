@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -119,6 +119,8 @@ locDynOneEqEddy::locDynOneEqEddy
     filterPtr_(LESfilter::New(U.mesh(), coeffDict())),
     filter_(filterPtr_())
 {
+    bound(k_, kMin_);
+
     volScalarField KK = 0.5*(filter_(magSqr(U)) - magSqr(filter_(U)));
     updateSubGridScaleFields(symm(fvc::grad(U)), KK);
 
@@ -139,7 +141,7 @@ void locDynOneEqEddy::correct(const tmp<volTensorField>& gradU)
 
     volScalarField P = 2.0*nuSgs_*magSqr(D);
 
-    fvScalarMatrix kEqn
+    tmp<fvScalarMatrix> kEqn
     (
        fvm::ddt(k_)
      + fvm::div(phi(), k_)
@@ -149,10 +151,10 @@ void locDynOneEqEddy::correct(const tmp<volTensorField>& gradU)
      - fvm::Sp(ce(D, KK)*sqrt(k_)/delta(), k_)
     );
 
-    kEqn.relax();
-    kEqn.solve();
+    kEqn().relax();
+    kEqn().solve();
 
-    bound(k_, k0());
+    bound(k_, kMin_);
 
     updateSubGridScaleFields(D, KK);
 }

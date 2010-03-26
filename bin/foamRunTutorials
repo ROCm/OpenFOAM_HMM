@@ -46,7 +46,7 @@ if [ $# = 0 -a -f "./Allrun" ]
 then
     # Specialised script.
     ./Allrun
-elif [ -d "./system" ]
+elif [ -d system ]
 then
     # Normal case.
     parentDir=`dirname $PWD`
@@ -55,19 +55,19 @@ then
     runApplication $application
 else
     # Loop over sub-directories and compile any applications
-    for case in *
+    for caseName in *
     do
-        if [ -d $case -a -d "$case/Make" ]
+        if [ -d $caseName -a -d "$caseName/Make" ]
         then
-            (compileApplication $case)
+            ( compileApplication $caseName )
         fi
     done
     # Recurse to subdirectories
-    for case in *
+    for caseName in *
     do
-        if [ -d $case ]
+        if [ -d $caseName ]
         then
-            (cd $case && $thisScript)
+            ( cd $caseName && $thisScript )
         fi
     done
 fi

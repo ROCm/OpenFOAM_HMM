@@ -30,7 +30,7 @@
 #     Locate user/group/shipped file with semantics similar to the
 #     ~OpenFOAM/fileName expansion.
 #
-#     The -mode option can be used to allow chaining from 
+#     The -mode option can be used to allow chaining from
 #     personal settings to site-wide settings.
 #
 #     For example, within the user ~/.OpenFOAM/<VER>/prefs.sh:
@@ -119,27 +119,27 @@ nArgs=$#
 fileName="$1"
 
 # Define the various places to be searched:
-files=""
+unset dirList
 case "$mode" in
 *u*)  # user
-    files="$files $HOME/.${WM_PROJECT:-OpenFOAM}/$WM_PROJECT_VERSION"
-    files="$files $HOME/.${WM_PROJECT:-OpenFOAM}"
+    dirList="$dirList $HOME/.${WM_PROJECT:-OpenFOAM}/$WM_PROJECT_VERSION"
+    dirList="$dirList $HOME/.${WM_PROJECT:-OpenFOAM}"
     ;;
 esac
 
 case "$mode" in
 *g*)  # group
-    files="$files $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION"
-    files="$files $WM_PROJECT_INST_DIR/site"
+    dirList="$dirList $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION"
+    dirList="$dirList $WM_PROJECT_INST_DIR/site"
     ;;
 esac
 
 case "$mode" in
 *o*)  # other
-    files="$files $WM_PROJECT_DIR/etc"
+    dirList="$dirList $WM_PROJECT_DIR/etc"
     ;;
 esac
-set -- $files
+set -- $dirList
 
 
 #

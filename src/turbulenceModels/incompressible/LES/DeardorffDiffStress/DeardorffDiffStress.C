@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,7 +102,7 @@ void DeardorffDiffStress::correct(const tmp<volTensorField>& tgradU)
     volScalarField K = 0.5*tr(B_);
     volScalarField Epsilon = 2*nuEff()*magSqr(D);
 
-    fvSymmTensorMatrix BEqn
+    tmp<fvSymmTensorMatrix> BEqn
     (
         fvm::ddt(B_)
       + fvm::div(phi(), B_)
@@ -114,23 +114,23 @@ void DeardorffDiffStress::correct(const tmp<volTensorField>& tgradU)
       - (2*ce_ - 0.667*cm_)*I*Epsilon
     );
 
-    BEqn.relax();
-    BEqn.solve();
+    BEqn().relax();
+    BEqn().solve();
 
     // Bounding the component kinetic energies
 
     forAll(B_, celli)
     {
         B_[celli].component(symmTensor::XX) =
-            max(B_[celli].component(symmTensor::XX), k0().value());
+            max(B_[celli].component(symmTensor::XX), kMin_.value());
         B_[celli].component(symmTensor::YY) =
-            max(B_[celli].component(symmTensor::YY), k0().value());
+            max(B_[celli].component(symmTensor::YY), kMin_.value());
         B_[celli].component(symmTensor::ZZ) =
-            max(B_[celli].component(symmTensor::ZZ), k0().value());
+            max(B_[celli].component(symmTensor::ZZ), kMin_.value());
     }
 
     K = 0.5*tr(B_);
-    bound(K, k0());
+    bound(K, kMin_);
 
     updateSubGridScaleFields(K);
 }

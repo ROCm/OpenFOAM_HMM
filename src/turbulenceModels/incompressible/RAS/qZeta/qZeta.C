@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -126,6 +126,9 @@ qZeta::qZeta
         )
     ),
 
+    qMin_("qMin", dimVelocity, SMALL),
+    zetaMin_("zetaMin", dimVelocity/dimTime, SMALL),
+
     k_
     (
         IOobject
@@ -193,7 +196,12 @@ qZeta::qZeta
         autoCreateNut("nut", mesh_)
     )
 {
-    nut_ = Cmu_*fMu()*sqr(k_)/(epsilon_ + epsilonSmall_);
+    bound(k_, kMin_);
+    bound(epsilon_, epsilonMin_);
+    bound(q_, qMin_);
+    bound(zeta_, zetaMin_);
+
+    nut_ = Cmu_*fMu()*sqr(k_)/epsilon_;
     nut_.correctBoundaryConditions();
 
     printCoeffs();
@@ -263,6 +271,9 @@ bool qZeta::read()
         sigmaZeta_.readIfPresent(coeffDict());
         anisotropic_.readIfPresent("anisotropic", coeffDict());
 
+        qMin_.readIfPresent(*this);
+        zetaMin_.readIfPresent(*this);
+
         return true;
     }
     else
@@ -302,7 +313,7 @@ void qZeta::correct()
 
     zetaEqn().relax();
     solve(zetaEqn);
-    bound(zeta_, epsilon0_/(2*sqrt(k0_)));
+    bound(zeta_, zetaMin_);
 
 
     // q equation
@@ -318,7 +329,7 @@ void qZeta::correct()
 
     qEqn().relax();
     solve(qEqn);
-    bound(q_, sqrt(k0_));
+    bound(q_, qMin_);
 
 
     // Re-calculate k and epsilon

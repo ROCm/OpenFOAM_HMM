@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -24,22 +24,21 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     wmakeDerivedFiles
+#     makeDerivedFiles
 #
 # Description
-#     Constructs all the file list for make given the source file list
-#     (which written by hand or using makeFilesAndDirectories.)
+#     Constructs all the file list for make given the source file list,
+#     written was by hand or using makeFilesAndOptions.
 #
 #------------------------------------------------------------------------------
 
-if [ ! -d "$WM_OPTIONS" ]
-then
-    echo "The $WM_OPTIONS directory does not exist, exiting" 1>&2
+[ -d "$WM_OPTIONS" ] || {
+    echo "The '$WM_OPTIONS' directory does not exist, exiting" 1>&2
     exit 1
-fi
+}
 
 # change to the $WM_OPTIONS directory
-cd $WM_OPTIONS 2>/dev/null || {
+cd "$WM_OPTIONS" 2>/dev/null || {
     echo "Could not change to directory '$WM_OPTIONS'" 1>&2
     exit 1
 }
@@ -50,15 +49,15 @@ grep "=" files > filesMacros
 # Remove all macro definitions from the files list
 grep -v "=" files > filesPlusBlank
 
-# Add a newline to files to make sure the last line is followed by a newline
+# Add a newline to files to ensure the last line is followed by a newline
 echo "" >> filesPlusBlank
 
 
-# Remove commented lines blank lines, and trailing blanks from files
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sed -e '/^#/ d'              \
-    -e '/^[ \t]*$/ d'        \
-    -e 's/[ \t]*$//'         \
+# Remove commented lines, blank lines, and trailing blanks from files
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sed -e '/^#/ d'         \
+    -e '/^[ \t]*$/ d'   \
+    -e 's/[ \t]*$//'    \
     filesPlusBlank > files.$$
 
 rm filesPlusBlank
@@ -80,7 +79,7 @@ rm tmpSourceFile
 # ~~~~~~~~~~~~~~~~
 sed -e 's%.*/%%'               \
     -e 's%^%$(OBJECTS_DIR)/%'  \
-    -e 's%\.[a-zA-Z]*$%\.o%'    \
+    -e 's%\.[a-zA-Z]*$%\.o%'   \
     files.$$ > tmpObjectFiles
 
 echo "OBJECTS = " > tmpObjectFiles2
@@ -96,7 +95,7 @@ rm tmpObjectFiles tmpObjectFiles2
 # make localObjectFiles
 # ~~~~~~~~~~~~~~~~~~~~~
 sed -e 's%.*/%%'               \
-    -e 's%\.[a-zA-Z]*$%\.o%'    \
+    -e 's%\.[a-zA-Z]*$%\.o%'   \
     files.$$ > tmpLocalObjectFiles
 
 echo "LOCAL_OBJECTS = " > tmpLocalObjectFiles2
@@ -131,7 +130,5 @@ sed -e 's/\.[a-zA-Z]*$/.dep/'   \
     files.$$ > includeDeps
 
 rm files.$$
-
-cd ..
 
 #------------------------------------------------------------------------------
