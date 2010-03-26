@@ -196,6 +196,7 @@ qZeta::qZeta
         autoCreateNut("nut", mesh_)
     )
 {
+    bound(k_, kMin_);
     bound(epsilon_, epsilonMin_);
     bound(q_, qMin_);
     bound(zeta_, zetaMin_);

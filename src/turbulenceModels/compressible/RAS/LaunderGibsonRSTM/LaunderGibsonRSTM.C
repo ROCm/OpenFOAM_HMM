@@ -258,6 +258,7 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
             << exit(FatalError);
     }
 
+    bound(k_, kMin_);
     bound(epsilon_, epsilonMin_);
 
     mut_ = Cmu_*rho_*sqr(k_)/epsilon_;

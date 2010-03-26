@@ -180,6 +180,7 @@ LienLeschzinerLowRe::LienLeschzinerLowRe
         autoCreateLowReNut("nut", mesh_)
     )
 {
+    bound(k_, kMin_);
     bound(epsilon_, epsilonMin_);
 
     nut_ = Cmu_*(scalar(1) - exp(-Am_*yStar_))

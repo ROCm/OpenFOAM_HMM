@@ -80,7 +80,7 @@ RASModel::RASModel
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(subOrEmptyDict(type + "Coeffs")),
 
-    kMin_("kMin", dimVelocity*dimVelocity, SMALL),
+    kMin_("kMin", sqr(dimVelocity), SMALL),
     epsilonMin_("epsilonMin", kMin_.dimensions()/dimTime, SMALL),
     omegaMin_("omegaMin", dimless/dimTime, SMALL),
 
@@ -131,8 +131,12 @@ autoPtr<RASModel> RASModel::New
     {
         FatalErrorIn
         (
-            "RASModel::New(const volVectorField&, "
-            "const surfaceScalarField&, transportModel&)"
+            "RASModel::New"
+            "("
+                "const volVectorField&, "
+                "const surfaceScalarField&, "
+                "transportModel&"
+            ")"
         )   << "Unknown RASModel type " << modelName
             << endl << endl
             << "Valid RASModel types are :" << endl

@@ -323,6 +323,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
         mesh_
     )
 {
+    bound(k_, kMin_);
     bound(omega_, omegaMin_);
 
     updateSubGridScaleFields(magSqr(symm(fvc::grad(U))));

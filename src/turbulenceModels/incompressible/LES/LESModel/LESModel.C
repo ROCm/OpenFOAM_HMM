@@ -78,7 +78,7 @@ LESModel::LESModel
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(subOrEmptyDict(type + "Coeffs")),
 
-    kMin_("kMin", dimVelocity*dimVelocity, SMALL),
+    kMin_("kMin", sqr(dimVelocity), SMALL),
     delta_(LESdelta::New("delta", U.mesh(), *this))
 {
     readIfPresent("kMin", kMin_);
@@ -128,8 +128,12 @@ autoPtr<LESModel> LESModel::New
     {
         FatalErrorIn
         (
-            "LESModel::New(const volVectorField& U, const "
-            "surfaceScalarField& phi, transportModel&)"
+            "LESModel::New"
+            "("
+                "const volVectorField&, "
+                "const surfaceScalarField& ,"
+                "transportModel&"
+            ")"
         )   << "Unknown LESModel type " << modelName
             << endl << endl
             << "Valid LESModel types are :" << endl
@@ -167,7 +171,7 @@ bool LESModel::read()
 
         delta_().read(*this);
 
-        readIfPresent("kMin", kMin_);
+        kMin_.readIfPresent(*this);
 
         return true;
     }

@@ -90,7 +90,10 @@ LRRDiffStress::LRRDiffStress
         )
     )
 {
-    updateSubGridScaleFields(0.5*tr(B_));
+    volScalarField K = 0.5*tr(B_);
+    bound(K, kMin_);
+
+    updateSubGridScaleFields(K);
 
     printCoeffs();
 }
@@ -111,7 +114,7 @@ void LRRDiffStress::correct(const tmp<volTensorField>& tgradU)
     volScalarField K = 0.5*tr(B_);
     volScalarField Epsilon = 2*nuEff()*magSqr(D);
 
-    fvSymmTensorMatrix BEqn
+    tmp<fvSymmTensorMatrix> BEqn
     (
         fvm::ddt(B_)
       + fvm::div(phi(), B_)
@@ -124,8 +127,8 @@ void LRRDiffStress::correct(const tmp<volTensorField>& tgradU)
       - (0.667 - 2*c1_)*I*pow(K, 1.5)/delta()
     );
 
-    BEqn.relax();
-    BEqn.solve();
+    BEqn().relax();
+    BEqn().solve();
 
     // Bounding the component kinetic energies
 

@@ -170,11 +170,17 @@ LienCubicKE::LienCubicKE
         autoCreateEpsilon("epsilon", mesh_)
     ),
 
-    //FIXME - epsilon is not bounded
-
     gradU_(fvc::grad(U)),
-    eta_(k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU_ + gradU_.T())))),
-    ksi_(k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU_ - gradU_.T())))),
+    eta_
+    (
+        k_/(epsilon_ + epsilonMin_)
+       *sqrt(2.0*magSqr(0.5*(gradU_ + gradU_.T())))
+    ),
+    ksi_
+    (
+        k_/(epsilon_ + epsilonMin_)
+       *sqrt(2.0*magSqr(0.5*(gradU_ - gradU_.T())))
+    ),
     Cmu_(2.0/(3.0*(A1_ + eta_ + alphaKsi_*ksi_))),
     fEta_(A2_ + pow(eta_, 3.0)),
 
@@ -228,6 +234,7 @@ LienCubicKE::LienCubicKE
         )
     )
 {
+    bound(k_, kMin_);
     bound(epsilon_, epsilonMin_);
 
     nut_ = Cmu_*sqr(k_)/epsilon_ + C5viscosity_;

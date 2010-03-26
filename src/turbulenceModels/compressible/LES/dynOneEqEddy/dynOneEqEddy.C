@@ -118,7 +118,7 @@ void dynOneEqEddy::correct(const tmp<volTensorField>& tgradU)
     volScalarField divU = fvc::div(phi()/fvc::interpolate(rho()));
     volScalarField G = 2*muSgs_*(gradU && D);
 
-    solve
+    tmp<fvScalarMatrix> kEqn
     (
         fvm::ddt(rho(), k_)
       + fvm::div(phi(), k_)
@@ -129,9 +129,8 @@ void dynOneEqEddy::correct(const tmp<volTensorField>& tgradU)
       - fvm::Sp(ce_(D)*rho()*sqrt(k_)/delta(), k_)
     );
 
-    //FIXME: why not this?
-    // kEqn.relax();
-    // kEqn.solve();
+    kEqn().relax();
+    kEqn().solve();
 
     bound(k_, kMin_);
 

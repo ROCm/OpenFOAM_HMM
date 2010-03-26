@@ -106,7 +106,7 @@ void lowReOneEqEddy::correct(const tmp<volTensorField>& tgradU)
     volScalarField divU = fvc::div(phi()/fvc::interpolate(rho()));
     volScalarField G = 2*muSgs_*(gradU && dev(symm(gradU)));
 
-    solve
+    tmp<fvScalarMatrix> kEqn
     (
         fvm::ddt(rho(), k_)
       + fvm::div(phi(), k_)
@@ -116,6 +116,9 @@ void lowReOneEqEddy::correct(const tmp<volTensorField>& tgradU)
       - fvm::SuSp(2.0/3.0*rho()*divU, k_)
       - fvm::Sp(ce_*rho()*sqrt(k_)/delta(), k_)
     );
+
+    kEqn().relax();
+    kEqn().solve();
 
     bound(k_, kMin_);
 

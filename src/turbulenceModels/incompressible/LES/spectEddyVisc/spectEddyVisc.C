@@ -72,7 +72,6 @@ spectEddyVisc::spectEddyVisc
     LESModel(typeName, U, phi, transport),
     GenEddyVisc(U, phi, transport),
 
-
     cB_
     (
         dimensioned<scalar>::lookupOrAddToDict

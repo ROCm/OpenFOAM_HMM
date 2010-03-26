@@ -220,14 +220,22 @@ LienCubicKELowRe::LienCubicKELowRe
     y_(mesh_),
 
     gradU_(fvc::grad(U)),
-    eta_(k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU_ + gradU_.T())))),
-    ksi_(k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU_ - gradU_.T())))),
+    eta_
+    (
+        k_/(epsilon_ + epsilonMin_)
+       *sqrt(2.0*magSqr(0.5*(gradU_ + gradU_.T())))
+    ),
+    ksi_
+    (
+        k_/(epsilon_ + epsilonMin_)
+       *sqrt(2.0*magSqr(0.5*(gradU_ - gradU_.T())))
+    ),
     Cmu_(2.0/(3.0*(A1_ + eta_ + alphaKsi_*ksi_))),
-    fEta_(A2_ + pow(eta_, 3.0)),
+    fEta_(A2_ + pow3(eta_)),
 
     C5viscosity_
     (
-        -2.0*pow(Cmu_, 3.0)*pow(k_, 4.0)/pow(epsilon_, 3.0)
+        -2.0*pow3(Cmu_)*pow4(k_)/pow3(epsilon_ + epsilonMin_)
        *(magSqr(gradU_ + gradU_.T()) - magSqr(gradU_ - gradU_.T()))
     ),
 
@@ -252,7 +260,7 @@ LienCubicKELowRe::LienCubicKELowRe
         symm
         (
             // quadratic terms
-            pow(k_, 3.0)/sqr(epsilon_)
+            pow3(k_)/sqr(epsilon_ + epsilonMin_)
            *(
                 Ctau1_/fEta_
                *(
@@ -263,8 +271,8 @@ LienCubicKELowRe::LienCubicKELowRe
               + Ctau3_/fEta_*(gradU_.T() & gradU_)
             )
             // cubic term C4
-          - 20.0*pow(k_, 4.0)/pow(epsilon_, 3.0)
-           *pow(Cmu_, 3.0)
+          - 20.0*pow4(k_)/pow3(epsilon_ + epsilonMin_)
+           *pow3(Cmu_)
            *(
                 ((gradU_ & gradU_) & gradU_.T())
               + ((gradU_ & gradU_.T()) & gradU_.T())
@@ -280,6 +288,7 @@ LienCubicKELowRe::LienCubicKELowRe
         )
     )
 {
+    bound(k_, kMin_);
     bound(epsilon_, epsilonMin_);
 
     nut_ = Cmu_
@@ -430,8 +439,8 @@ void LienCubicKELowRe::correct()
 
     epsEqn().relax();
 
-#   include "LienCubicKELowReSetWallDissipation.H"
-#   include "wallDissipationI.H"
+    #include "LienCubicKELowReSetWallDissipation.H"
+    #include "wallDissipationI.H"
 
     solve(epsEqn);
     bound(epsilon_, epsilonMin_);

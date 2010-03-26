@@ -137,6 +137,7 @@ kOmega::kOmega
         autoCreateNut("nut", mesh_)
     )
 {
+    bound(k_, kMin_);
     bound(omega_, omegaMin_);
 
     nut_ = k_/omega_;
