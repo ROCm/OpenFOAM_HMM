@@ -69,6 +69,10 @@ bool Foam::motionSmoother::checkMesh
     (
         readScalar(dict.lookup("minVol", true))
     );
+    const scalar minTetVol
+    (
+        readScalar(dict.lookup("minTetVol", true))
+    );
     const scalar maxConcave
     (
         readScalar(dict.lookup("maxConcave", true))
@@ -105,7 +109,6 @@ bool Foam::motionSmoother::checkMesh
     (
         readScalar(dict.lookup("minDeterminant", true))
     );
-
     label nWrongFaces = 0;
 
     Info<< "Checking faces in error :" << endl;
@@ -153,6 +156,30 @@ bool Foam::motionSmoother::checkMesh
 
         Info<< "    faces with face pyramid volume < "
             << setw(5) << minVol << "                 : "
+            << nNewWrongFaces-nWrongFaces << endl;
+
+        nWrongFaces = nNewWrongFaces;
+    }
+
+    if (minTetVol > -GREAT)
+    {
+        polyMeshGeometry::checkFaceTets
+        (
+            report,
+            minTetVol,
+            mesh,
+            mesh.cellCentres(),
+            mesh.faceCentres(),
+            mesh.points(),
+            checkFaces,
+            baffles,
+            &wrongFaces
+        );
+
+        label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
+
+        Info<< "    faces with face-decomposition tet volume < "
+            << setw(5) << minTetVol << "        : "
             << nNewWrongFaces-nWrongFaces << endl;
 
         nWrongFaces = nNewWrongFaces;
@@ -417,6 +444,10 @@ bool Foam::motionSmoother::checkMesh
     (
         readScalar(dict.lookup("minVol", true))
     );
+    const scalar minTetVol
+    (
+        readScalar(dict.lookup("minTetVol", true))
+    );
     const scalar maxConcave
     (
         readScalar(dict.lookup("maxConcave", true))
@@ -496,6 +527,27 @@ bool Foam::motionSmoother::checkMesh
 
         Info<< "    faces with face pyramid volume < "
             << setw(5) << minVol << "                 : "
+            << nNewWrongFaces-nWrongFaces << endl;
+
+        nWrongFaces = nNewWrongFaces;
+    }
+
+    if (minTetVol > -GREAT)
+    {
+        meshGeom.checkFaceTets
+        (
+            report,
+            minTetVol,
+            meshGeom.mesh().points(),
+            checkFaces,
+            baffles,
+            &wrongFaces
+        );
+
+        label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
+
+        Info<< "    faces with face-decomposition tet volume < "
+            << setw(5) << minTetVol << "                 : "
             << nNewWrongFaces-nWrongFaces << endl;
 
         nWrongFaces = nNewWrongFaces;

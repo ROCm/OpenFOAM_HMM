@@ -160,6 +160,25 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
     }
 
     {
+        faceSet faces(mesh, "wrongOrientedTriangleFaces", mesh.nFaces()/100 + 1);
+        if (mesh.checkFaceTets(true, 0, &faces))
+        {
+            noFailedChecks++;
+
+            label nFaces = returnReduce(faces.size(), sumOp<label>());
+
+            if (nFaces > 0)
+            {
+                Info<< "  <<Writing " << nFaces
+                    << " faces with incorrectly orientated triangles to set "
+                    << faces.name() << endl;
+                faces.instance() = mesh.pointsInstance();
+                faces.write();
+            }
+        }
+    }
+
+    {
         faceSet faces(mesh, "skewFaces", mesh.nFaces()/100 + 1);
         if (mesh.checkFaceSkewness(true, &faces))
         {
