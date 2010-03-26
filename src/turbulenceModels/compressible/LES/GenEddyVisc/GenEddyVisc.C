@@ -108,7 +108,9 @@ GenEddyVisc::GenEddyVisc
         ),
         mesh_
     )
-{}
+{
+    bound(k_, kMin_);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

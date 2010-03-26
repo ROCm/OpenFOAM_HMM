@@ -187,6 +187,7 @@ LaunderSharmaKE::LaunderSharmaKE
         autoCreateAlphat("alphat", mesh_)
     )
 {
+    bound(k_, kMin_);
     bound(epsilon_, epsilonMin_);
 
     mut_ = rho_*Cmu_*fMu()*sqr(k_)/epsilon_;

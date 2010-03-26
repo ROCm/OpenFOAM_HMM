@@ -295,7 +295,7 @@ void SpalartAllmaras::correct(const tmp<volTensorField>& gradU)
     const volScalarField dTilda = this->dTilda(S);
     const volScalarField STilda = this->STilda(S, dTilda);
 
-    fvScalarMatrix nuTildaEqn
+    tmp<fvScalarMatrix> nuTildaEqn
     (
         fvm::ddt(nuTilda_)
       + fvm::div(phi(), nuTilda_)
@@ -311,8 +311,8 @@ void SpalartAllmaras::correct(const tmp<volTensorField>& gradU)
       - fvm::Sp(Cw1_*fw(STilda, dTilda)*nuTilda_/sqr(dTilda), nuTilda_)
     );
 
-    nuTildaEqn.relax();
-    nuTildaEqn.solve();
+    nuTildaEqn().relax();
+    nuTildaEqn().solve();
 
     bound(nuTilda_, dimensionedScalar("zero", nuTilda_.dimensions(), 0.0));
     nuTilda_.correctBoundaryConditions();

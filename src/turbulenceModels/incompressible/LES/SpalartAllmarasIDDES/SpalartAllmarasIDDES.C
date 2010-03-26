@@ -176,7 +176,6 @@ SpalartAllmarasIDDES::SpalartAllmarasIDDES
             1.63
         )
     )
-
 {}
 
 

@@ -224,6 +224,7 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         autoCreateNut("nut", mesh_)
     )
 {
+    bound(k_, kMin_);
     bound(epsilon_, epsilonMin_);
 
     nut_ = Cmu_*sqr(k_)/epsilon_;

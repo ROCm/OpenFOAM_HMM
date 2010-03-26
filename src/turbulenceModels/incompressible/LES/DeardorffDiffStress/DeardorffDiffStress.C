@@ -102,7 +102,7 @@ void DeardorffDiffStress::correct(const tmp<volTensorField>& tgradU)
     volScalarField K = 0.5*tr(B_);
     volScalarField Epsilon = 2*nuEff()*magSqr(D);
 
-    fvSymmTensorMatrix BEqn
+    tmp<fvSymmTensorMatrix> BEqn
     (
         fvm::ddt(B_)
       + fvm::div(phi(), B_)
@@ -114,8 +114,8 @@ void DeardorffDiffStress::correct(const tmp<volTensorField>& tgradU)
       - (2*ce_ - 0.667*cm_)*I*Epsilon
     );
 
-    BEqn.relax();
-    BEqn.solve();
+    BEqn().relax();
+    BEqn().solve();
 
     // Bounding the component kinetic energies
 

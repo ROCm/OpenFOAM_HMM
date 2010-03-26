@@ -127,6 +127,8 @@ dynOneEqEddy::dynOneEqEddy
     filterPtr_(LESfilter::New(U.mesh(), coeffDict())),
     filter_(filterPtr_())
 {
+    bound(k_, kMin_);
+
     updateSubGridScaleFields(symm(fvc::grad(U)));
 
     printCoeffs();
@@ -145,7 +147,7 @@ void dynOneEqEddy::correct(const tmp<volTensorField>& tgradU)
 
     volScalarField P = 2.0*nuSgs_*magSqr(D);
 
-    fvScalarMatrix kEqn
+    tmp<fvScalarMatrix> kEqn
     (
        fvm::ddt(k_)
      + fvm::div(phi(), k_)
@@ -155,8 +157,8 @@ void dynOneEqEddy::correct(const tmp<volTensorField>& tgradU)
      - fvm::Sp(ce(D)*sqrt(k_)/delta(), k_)
     );
 
-    kEqn.relax();
-    kEqn.solve();
+    kEqn().relax();
+    kEqn().solve();
 
     bound(k_, kMin_);
 

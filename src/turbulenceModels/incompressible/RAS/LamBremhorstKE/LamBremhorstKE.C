@@ -140,6 +140,7 @@ LamBremhorstKE::LamBremhorstKE
         autoCreateLowReNut("nut", mesh_)
     )
 {
+    bound(k_, kMin_);
     bound(epsilon_, epsilonMin_);
 
     nut_ = Cmu_*fMu_*sqr(k_)/epsilon_;

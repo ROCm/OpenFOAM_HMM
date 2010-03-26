@@ -258,6 +258,7 @@ kOmegaSST::kOmegaSST
         autoCreateAlphat("alphat", mesh_)
     )
 {
+    bound(k_, kMin_);
     bound(omega_, omegaMin_);
 
     mut_ =

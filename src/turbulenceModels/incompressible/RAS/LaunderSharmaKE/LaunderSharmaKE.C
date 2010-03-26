@@ -146,6 +146,7 @@ LaunderSharmaKE::LaunderSharmaKE
         autoCreateLowReNut("nut", mesh_)
     )
 {
+    bound(k_, kMin_);
     bound(epsilonTilda_, epsilonMin_);
 
     nut_ = Cmu_*fMu()*sqr(k_)/epsilonTilda_;

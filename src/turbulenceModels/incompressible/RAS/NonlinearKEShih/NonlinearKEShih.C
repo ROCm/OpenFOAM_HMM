@@ -144,7 +144,6 @@ NonlinearKEShih::NonlinearKEShih
         )
     ),
 
-    //FIXME: should be named 'kappa_' or 'kappa'?
     kappa_
     (
         dimensioned<scalar>::lookupOrAddToDict
@@ -175,7 +174,6 @@ NonlinearKEShih::NonlinearKEShih
             IOobject::AUTO_WRITE
         ),
         mesh_
-        //FIXME: what about autoCreateK("k", mesh_)
     ),
 
     epsilon_
@@ -189,39 +187,30 @@ NonlinearKEShih::NonlinearKEShih
             IOobject::AUTO_WRITE
         ),
         mesh_
-        //FIXME: what about autoCreateK("epsilon", mesh_)
     ),
 
-    //FIXME: epsilon is not bounded
-
     gradU_(fvc::grad(U)),
-    eta_(k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU_ + gradU_.T())))),
-    ksi_(k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU_ - gradU_.T())))),
+    eta_
+    (
+        k_/(epsilon_ + epsilonMin_)
+       *sqrt(2.0*magSqr(0.5*(gradU_ + gradU_.T())))
+    ),
+    ksi_
+    (
+        k_/(epsilon_+ epsilonMin_)
+       *sqrt(2.0*magSqr(0.5*(gradU_ - gradU_.T())))
+    ),
     Cmu_(2.0/(3.0*(A1_ + eta_ + alphaKsi_*ksi_))),
     fEta_(A2_ + pow(eta_, 3.0)),
 
-    // FIXME: epsilon is not bounded
     nut_("nut", Cmu_*sqr(k_)/(epsilon_ + epsilonMin_)),
-    // FIXME: why not use the following?
-    // nut_
-    // (
-    //     IOobject
-    //     (
-    //         "nut",
-    //         runTime_.timeName(),
-    //         mesh_,
-    //         IOobject::NO_READ,
-    //         IOobject::AUTO_WRITE
-    //     ),
-    //     autoCreateNut("nut", mesh_)
-    // ),
 
     nonlinearStress_
     (
         "nonlinearStress",
         symm
         (
-            pow(k_, 3.0)/sqr(epsilon_)
+            pow3(k_)/sqr(epsilon_ + epsilonMin_)
            *(
                 Ctau1_/fEta_
                *(
@@ -234,10 +223,8 @@ NonlinearKEShih::NonlinearKEShih
         )
     )
 {
+    bound(k_, kMin_);
     bound(epsilon_, epsilonMin_);
-
-    //FIXME: could use this
-    // nut_ = Cmu_*sqr(k_)/epsilon_;
 
     #include "wallNonlinearViscosityI.H"
 

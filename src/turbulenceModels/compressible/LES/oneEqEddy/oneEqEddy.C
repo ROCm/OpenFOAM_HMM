@@ -93,7 +93,7 @@ void oneEqEddy::correct(const tmp<volTensorField>& tgradU)
     volScalarField divU = fvc::div(phi()/fvc::interpolate(rho()));
     volScalarField G = 2*muSgs_*(gradU && dev(symm(gradU)));
 
-    fvScalarMatrix kEqn
+    tmp<fvScalarMatrix> kEqn
     (
         fvm::ddt(rho(), k_)
       + fvm::div(phi(), k_)
@@ -104,8 +104,8 @@ void oneEqEddy::correct(const tmp<volTensorField>& tgradU)
       - fvm::Sp(ce_*rho()*sqrt(k_)/delta(), k_)
     );
 
-    kEqn.relax();
-    kEqn.solve();
+    kEqn().relax();
+    kEqn().solve();
 
     bound(k_, kMin_);
 
