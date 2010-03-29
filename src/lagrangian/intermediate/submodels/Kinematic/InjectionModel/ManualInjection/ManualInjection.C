@@ -94,7 +94,7 @@ Foam::ManualInjection<CloudType>::ManualInjection
     U0_(this->coeffDict().lookup("U0")),
     parcelPDF_
     (
-        pdf::New
+        pdfs::pdf::New
         (
             this->coeffDict().subDict("parcelPDF"),
             owner.rndGen()
