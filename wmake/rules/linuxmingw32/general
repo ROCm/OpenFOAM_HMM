@@ -1,4 +1,3 @@
-CPP        = /lib/cpp $(GFLAGS)
 LD         = mingw32-ld
 
 PROJECT_LIBS = -l$(WM_PROJECT)
