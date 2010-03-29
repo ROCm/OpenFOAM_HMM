@@ -323,6 +323,8 @@ kOmegaSSTSAS::kOmegaSSTSAS
         mesh_
     )
 {
+    omegaMin_.readIfPresent(*this);
+
     bound(k_, kMin_);
     bound(omega_, omegaMin_);
 
@@ -457,6 +459,8 @@ bool kOmegaSSTSAS::read()
         alphaPhi_.readIfPresent(coeffDict());
         zetaTilda2_.readIfPresent(coeffDict());
         FSAS_.readIfPresent(coeffDict());
+
+        omegaMin_.readIfPresent(*this);
 
         return true;
     }

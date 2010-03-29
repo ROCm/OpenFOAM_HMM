@@ -222,12 +222,12 @@ LienCubicKELowRe::LienCubicKELowRe
     gradU_(fvc::grad(U)),
     eta_
     (
-        k_/(epsilon_ + epsilonMin_)
+        k_/bound(epsilon_, epsilonMin_)
        *sqrt(2.0*magSqr(0.5*(gradU_ + gradU_.T())))
     ),
     ksi_
     (
-        k_/(epsilon_ + epsilonMin_)
+        k_/epsilon_
        *sqrt(2.0*magSqr(0.5*(gradU_ - gradU_.T())))
     ),
     Cmu_(2.0/(3.0*(A1_ + eta_ + alphaKsi_*ksi_))),
@@ -235,7 +235,7 @@ LienCubicKELowRe::LienCubicKELowRe
 
     C5viscosity_
     (
-        -2.0*pow3(Cmu_)*pow4(k_)/pow3(epsilon_ + epsilonMin_)
+        -2.0*pow3(Cmu_)*pow4(k_)/pow3(epsilon_)
        *(magSqr(gradU_ + gradU_.T()) - magSqr(gradU_ - gradU_.T()))
     ),
 
@@ -260,7 +260,7 @@ LienCubicKELowRe::LienCubicKELowRe
         symm
         (
             // quadratic terms
-            pow3(k_)/sqr(epsilon_ + epsilonMin_)
+            pow3(k_)/sqr(epsilon_)
            *(
                 Ctau1_/fEta_
                *(
@@ -271,7 +271,7 @@ LienCubicKELowRe::LienCubicKELowRe
               + Ctau3_/fEta_*(gradU_.T() & gradU_)
             )
             // cubic term C4
-          - 20.0*pow4(k_)/pow3(epsilon_ + epsilonMin_)
+          - 20.0*pow4(k_)/pow3(epsilon_)
            *pow3(Cmu_)
            *(
                 ((gradU_ & gradU_) & gradU_.T())
@@ -289,7 +289,7 @@ LienCubicKELowRe::LienCubicKELowRe
     )
 {
     bound(k_, kMin_);
-    bound(epsilon_, epsilonMin_);
+    // already bounded: bound(epsilon_, epsilonMin_);
 
     nut_ = Cmu_
       * (scalar(1) - exp(-Am_*yStar_))

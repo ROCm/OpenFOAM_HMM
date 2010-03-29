@@ -30,7 +30,8 @@ License
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-void Foam::bound(volScalarField& vsf, const dimensionedScalar& lowerBound)
+Foam::volScalarField&
+Foam::bound(volScalarField& vsf, const dimensionedScalar& lowerBound)
 {
     const scalar minVsf = min(vsf).value();
 
@@ -55,6 +56,8 @@ void Foam::bound(volScalarField& vsf, const dimensionedScalar& lowerBound)
 
         vsf.boundaryField() = max(vsf.boundaryField(), lowerBound.value());
     }
+
+    return vsf;
 }
 
 

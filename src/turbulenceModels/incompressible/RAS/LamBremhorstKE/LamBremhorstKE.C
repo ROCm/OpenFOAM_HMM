@@ -119,7 +119,7 @@ LamBremhorstKE::LamBremhorstKE
 
     y_(mesh_),
 
-    Rt_(sqr(k_)/(nu()*epsilon_)),
+    Rt_(sqr(k_)/(nu()*bound(epsilon_, epsilonMin_))),
 
     fMu_
     (
@@ -141,7 +141,7 @@ LamBremhorstKE::LamBremhorstKE
     )
 {
     bound(k_, kMin_);
-    bound(epsilon_, epsilonMin_);
+    // already bounded: bound(epsilon_, epsilonMin_);
 
     nut_ = Cmu_*fMu_*sqr(k_)/epsilon_;
     nut_.correctBoundaryConditions();
