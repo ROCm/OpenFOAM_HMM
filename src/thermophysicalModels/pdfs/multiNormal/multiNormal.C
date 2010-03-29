@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "exponential.H"
+#include "multiNormal.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -33,47 +33,98 @@ namespace Foam
 {
     namespace pdfs
     {
-        defineTypeNameAndDebug(exponential, 0);
-        addToRunTimeSelectionTable(pdf, exponential, dictionary);
+        defineTypeNameAndDebug(multiNormal, 0);
+        addToRunTimeSelectionTable(pdf, multiNormal, dictionary);
     }
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pdfs::exponential::exponential(const dictionary& dict, Random& rndGen)
+Foam::pdfs::multiNormal::multiNormal(const dictionary& dict, Random& rndGen)
 :
     pdf(typeName, dict, rndGen),
     minValue_(readScalar(pdfDict_.lookup("minValue"))),
     maxValue_(readScalar(pdfDict_.lookup("maxValue"))),
-    lambda_(readScalar(pdfDict_.lookup("lambda")))
+    range_(maxValue_ - minValue_),
+    expectation_(pdfDict_.lookup("expectation")),
+    variance_(pdfDict_.lookup("variance")),
+    strength_(pdfDict_.lookup("strength"))
 {
     check();
+
+    scalar sMax = 0;
+    label n = strength_.size();
+    for (label i=0; i<n; i++)
+    {
+        scalar x = expectation_[i];
+        scalar s = strength_[i];
+        for (label j=0; j<n; j++)
+        {
+            if (i!=j)
+            {
+                scalar x2 = (x - expectation_[j])/variance_[j];
+                scalar y = exp(-0.5*x2*x2);
+                s += strength_[j]*y;
+            }
+        }
+
+        sMax = max(sMax, s);
+    }
+
+    for (label i=0; i<n; i++)
+    {
+        strength_[i] /= sMax;
+    }
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::pdfs::exponential::~exponential()
+Foam::pdfs::multiNormal::~multiNormal()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::pdfs::exponential::sample() const
+Foam::scalar Foam::pdfs::multiNormal::sample() const
 {
-    scalar y = rndGen_.scalar01();
-    scalar K = exp(-lambda_*maxValue_) - exp(-lambda_*minValue_);
-    return -(1.0/lambda_)*log(exp(-lambda_*minValue_) + y*K);
+    scalar y = 0;
+    scalar x = 0;
+    label n = expectation_.size();
+    bool success = false;
+
+    while (!success)
+    {
+        x = minValue_ + range_*rndGen_.scalar01();
+        y = rndGen_.scalar01();
+        scalar p = 0.0;
+
+        for (label i=0; i<n; i++)
+        {
+            scalar nu = expectation_[i];
+            scalar sigma = variance_[i];
+            scalar s = strength_[i];
+            scalar v = (x - nu)/sigma;
+            p += s*exp(-0.5*v*v);
+        }
+
+        if (y<p)
+        {
+            success = true;
+        }
+    }
+
+    return x;
 }
 
 
-Foam::scalar Foam::pdfs::exponential::minValue() const
+Foam::scalar Foam::pdfs::multiNormal::minValue() const
 {
     return minValue_;
 }
 
 
-Foam::scalar Foam::pdfs::exponential::maxValue() const
+Foam::scalar Foam::pdfs::multiNormal::maxValue() const
 {
     return maxValue_;
 }

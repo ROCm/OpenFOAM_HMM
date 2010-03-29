@@ -23,23 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::RosinRammler
+    Foam::multiNormal
 
 Description
-    Rosin-Rammler pdf
+    A multiNormal pdf
 
-   @f[
-       cumulative pdf = (1.0 - exp( -((x - d0)/d)^n ) / (1.0 - exp( -((d1 - d0)/d)^n )
-   @f]
+    @verbatim
+        pdf = sum_i strength_i * exp(-0.5*((x - expectation_i)/variance_i)^2 )
+    @endverbatim
 
 
 SourceFiles
-    RosinRammler.C
+    multiNormal.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef RosinRammler_H
-#define RosinRammler_H
+#ifndef multiNormal_H
+#define multiNormal_H
 
 #include "pdf.H"
 
@@ -51,10 +51,10 @@ namespace pdfs
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class RosinRammler Declaration
+                        Class multiNormal Declaration
 \*---------------------------------------------------------------------------*/
 
-class RosinRammler
+class multiNormal
 :
     public pdf
 {
@@ -66,22 +66,27 @@ class RosinRammler
         //- Distribution maximum
         scalar maxValue_;
 
+        //- Distribution range
+        scalar range_;
+
+
         // Model coefficients
 
-            scalar d_;
-            scalar n_;
+            List<scalar> expectation_;
+            List<scalar> variance_;
+            List<scalar> strength_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("RosinRammler");
+    TypeName("multiNormal");
 
 
     // Constructors
 
         //- Construct from components
-        RosinRammler
+        multiNormal
         (
             const dictionary& dict,
             Random& rndGen
@@ -89,12 +94,12 @@ public:
 
 
     //- Destructor
-    virtual ~RosinRammler();
+    virtual ~multiNormal();
 
 
     // Member Functions
 
-         //- Sample the pdf
+        //- Sample the pdf
         virtual scalar sample() const;
 
         //- Return the minimum value

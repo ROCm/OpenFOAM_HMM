@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,43 +31,47 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(uniform, 0);
-    addToRunTimeSelectionTable(pdf, uniform, dictionary);
+    namespace pdfs
+    {
+        defineTypeNameAndDebug(uniform, 0);
+        addToRunTimeSelectionTable(pdf, uniform, dictionary);
+    }
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::uniform::uniform(const dictionary& dict, Random& rndGen)
+Foam::pdfs::uniform::uniform(const dictionary& dict, Random& rndGen)
 :
-    pdf(dict, rndGen),
-    pdfDict_(dict.subDict(typeName + "PDF")),
+    pdf(typeName, dict, rndGen),
     minValue_(readScalar(pdfDict_.lookup("minValue"))),
     maxValue_(readScalar(pdfDict_.lookup("maxValue"))),
     range_(maxValue_ - minValue_)
-{}
+{
+    check();
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::uniform::~uniform()
+Foam::pdfs::uniform::~uniform()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::uniform::sample() const
+Foam::scalar Foam::pdfs::uniform::sample() const
 {
     return (minValue_ + rndGen_.scalar01()*range_);
 }
 
 
-Foam::scalar Foam::uniform::minValue() const
+Foam::scalar Foam::pdfs::uniform::minValue() const
 {
     return minValue_;
 }
 
 
-Foam::scalar Foam::uniform::maxValue() const
+Foam::scalar Foam::pdfs::uniform::maxValue() const
 {
     return maxValue_;
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,23 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::RosinRammler
+    Foam::fixedValue
 
 Description
-    Rosin-Rammler pdf
-
-   @f[
-       cumulative pdf = (1.0 - exp( -((x - d0)/d)^n ) / (1.0 - exp( -((d1 - d0)/d)^n )
-   @f]
-
+    Returns a fixed value
 
 SourceFiles
-    RosinRammler.C
+    fixedValue.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef RosinRammler_H
-#define RosinRammler_H
+#ifndef pdfFixedValue_H
+#define pdfFixedValue_H
 
 #include "pdf.H"
 
@@ -49,39 +44,30 @@ namespace Foam
 {
 namespace pdfs
 {
-
 /*---------------------------------------------------------------------------*\
-                       Class RosinRammler Declaration
+                       Class fixedValue Declaration
 \*---------------------------------------------------------------------------*/
 
-class RosinRammler
+class fixedValue
 :
     public pdf
 {
     // Private data
 
-        //- Distribution minimum
-        scalar minValue_;
-
-        //- Distribution maximum
-        scalar maxValue_;
-
-        // Model coefficients
-
-            scalar d_;
-            scalar n_;
+        //- Fixed value
+        scalar value_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("RosinRammler");
+    TypeName("fixedValue");
 
 
     // Constructors
 
         //- Construct from components
-        RosinRammler
+        fixedValue
         (
             const dictionary& dict,
             Random& rndGen
@@ -89,7 +75,7 @@ public:
 
 
     //- Destructor
-    virtual ~RosinRammler();
+    virtual ~fixedValue();
 
 
     // Member Functions

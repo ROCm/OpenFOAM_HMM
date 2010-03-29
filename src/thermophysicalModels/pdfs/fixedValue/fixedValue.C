@@ -24,7 +24,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "pdf.H"
+#include "fixedValue.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -32,47 +33,44 @@ namespace Foam
 {
     namespace pdfs
     {
-        defineTypeNameAndDebug(pdf, 0);
-        defineRunTimeSelectionTable(pdf, dictionary);
+        defineTypeNameAndDebug(fixedValue, 0);
+        addToRunTimeSelectionTable(pdf, fixedValue, dictionary);
     }
 }
-
-// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
-
-void Foam::pdfs::pdf::check() const
-{
-    if (minValue() < 0)
-    {
-        FatalErrorIn("pdfs::pdf::check() const")
-            << type() << "PDF: Minimum value must be greater than zero." << nl
-            << "Supplied minValue = " << minValue()
-            << abort(FatalError);
-    }
-
-    if (maxValue() < minValue())
-    {
-        FatalErrorIn("pdfs::pdf::check() const")
-            << type() << "PDF: Maximum value is smaller than the minimum value:"
-            << nl << "    maxValue = " << maxValue()
-            << ", minValue = " << minValue()
-            << abort(FatalError);
-    }
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pdfs::pdf::pdf(const word& name, const dictionary& dict, Random& rndGen)
+Foam::pdfs::fixedValue::fixedValue(const dictionary& dict, Random& rndGen)
 :
-    pdfDict_(dict.subDict(name + "PDF")),
-    rndGen_(rndGen)
+    pdf(typeName, dict, rndGen),
+    value_(readScalar(pdfDict_.lookup("value")))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::pdfs::pdf::~pdf()
+Foam::pdfs::fixedValue::~fixedValue()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::scalar Foam::pdfs::fixedValue::fixedValue::sample() const
+{
+    return value_;
+}
+
+
+Foam::scalar Foam::pdfs::fixedValue::fixedValue::minValue() const
+{
+    return -VGREAT;
+}
+
+
+Foam::scalar Foam::pdfs::fixedValue::fixedValue::maxValue() const
+{
+    return VGREAT;
+}
 
 
 // ************************************************************************* //

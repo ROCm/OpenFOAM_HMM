@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,9 +29,7 @@ Description
     uniform pdf
 
 SourceFiles
-    uniformI.H
     uniform.C
-    uniformIO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,6 +42,8 @@ SourceFiles
 
 namespace Foam
 {
+namespace pdfs
+{
 
 /*---------------------------------------------------------------------------*\
                            Class uniform Declaration
@@ -55,13 +55,13 @@ class uniform
 {
     // Private data
 
-        dictionary pdfDict_;
-
-        //- min and max values of the distribution
+        //- Distribution minimum
         scalar minValue_;
+
+        //- Distribution maximum
         scalar maxValue_;
 
-        // help-variable to avoid always having to calculate max-min
+        //- Distribution range
         scalar range_;
 
 
@@ -100,6 +100,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace pdfs
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
