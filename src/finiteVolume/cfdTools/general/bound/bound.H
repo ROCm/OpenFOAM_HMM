@@ -50,8 +50,9 @@ namespace Foam
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 //- Bound the given scalar field if it has gone unbounded.
+//  Return the bounded field.
 //  Used extensively in RAS and LES turbulence models.
-void bound(volScalarField&, const dimensionedScalar& lowerBound);
+volScalarField& bound(volScalarField&, const dimensionedScalar& lowerBound);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

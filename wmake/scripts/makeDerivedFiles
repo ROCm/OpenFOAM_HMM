@@ -28,7 +28,7 @@
 #
 # Description
 #     Constructs all the file list for make given the source file list,
-#     written was by hand or using makeFilesAndOptions.
+#     written by hand or using makeFilesAndOptions.
 #
 #------------------------------------------------------------------------------
 

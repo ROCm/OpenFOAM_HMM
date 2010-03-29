@@ -192,25 +192,25 @@ NonlinearKEShih::NonlinearKEShih
     gradU_(fvc::grad(U)),
     eta_
     (
-        k_/(epsilon_ + epsilonMin_)
+        k_/bound(epsilon_, epsilonMin_)
        *sqrt(2.0*magSqr(0.5*(gradU_ + gradU_.T())))
     ),
     ksi_
     (
-        k_/(epsilon_+ epsilonMin_)
+        k_/epsilon_
        *sqrt(2.0*magSqr(0.5*(gradU_ - gradU_.T())))
     ),
     Cmu_(2.0/(3.0*(A1_ + eta_ + alphaKsi_*ksi_))),
     fEta_(A2_ + pow(eta_, 3.0)),
 
-    nut_("nut", Cmu_*sqr(k_)/(epsilon_ + epsilonMin_)),
+    nut_("nut", Cmu_*sqr(k_)/epsilon_),
 
     nonlinearStress_
     (
         "nonlinearStress",
         symm
         (
-            pow3(k_)/sqr(epsilon_ + epsilonMin_)
+            pow3(k_)/sqr(epsilon_)
            *(
                 Ctau1_/fEta_
                *(
@@ -224,7 +224,7 @@ NonlinearKEShih::NonlinearKEShih
     )
 {
     bound(k_, kMin_);
-    bound(epsilon_, epsilonMin_);
+    // already bounded: bound(epsilon_, epsilonMin_);
 
     #include "wallNonlinearViscosityI.H"
 

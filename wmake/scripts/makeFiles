@@ -35,41 +35,38 @@
 
 if [ -r Make/files ]
 then
-    echo "makeFiles: Make/files already exists, exiting"
+    echo "Error: Make/files already exists - exiting"
     exit 1
 fi
 
-bin=$WM_DIR/bin/$WM_ARCH$WM_COMPILER
+dirToString=$WM_DIR/bin/$WM_ARCH$WM_COMPILER/dirToString
 
 [ -d Make ] || mkdir Make
 rm -f Make/files
 
-dirs=`find . -name "*" -type d -print`
-
-for dir in $dirs
+for dir in `find . -type d -print`
 do
-    if [ $dir != . ]
-    then
+    case "$dir" in
+    . | ./Make | ./lnInclude )
+        # skip special directories
+        ;;
+    *)
         baseDir=`echo $dir | sed 's%^\./%%'`
-        baseDirName=`echo $baseDir | $bin/dirToString`
+        baseDirName=`echo $baseDir | $dirToString`
 
-        if [ $baseDirName != Make ]
-        then
-            echo $baseDirName " = " $baseDir >> Make/files
-        fi
-    fi
+        echo $baseDirName " = " $baseDir >> Make/files
+        ;;
+    esac
 done
 
 echo >> Make/files
 
-files=`find . -name "*.[cCylfF]" -type f  -print`
-
-for file in $files
+for file in `find . -name "*.[cCylLfF]" -type f -print`
 do
-    pathName=`echo ${file%/*} | sed 's%^\.%%' | sed 's%^/%%' | $bin/dirToString`
     fileName=`echo ${file##*/}`
+    pathName=`echo ${file%/*} | sed 's%^\.%%' | sed 's%^/%%' | $dirToString`
 
-    if [ "$pathName" != "" ]
+    if [ -n "$pathName" ]
     then
         echo '$('$pathName')/'$fileName >> Make/files
     else

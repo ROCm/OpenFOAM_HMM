@@ -179,7 +179,7 @@ qZeta::qZeta
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        epsilon_/(2.0*q_),
+        epsilon_/(2.0*bound(q_, qMin_)),
         epsilon_.boundaryField().types()
     ),
 
@@ -198,7 +198,7 @@ qZeta::qZeta
 {
     bound(k_, kMin_);
     bound(epsilon_, epsilonMin_);
-    bound(q_, qMin_);
+    // already bounded: bound(q_, qMin_);
     bound(zeta_, zetaMin_);
 
     nut_ = Cmu_*fMu()*sqr(k_)/epsilon_;
