@@ -55,7 +55,7 @@ Foam::hollowConeInjector::hollowConeInjector
     hollowConeDict_(dict.subDict(typeName + "Coeffs")),
     dropletPDF_
     (
-        pdf::New
+        pdfs::pdf::New
         (
             hollowConeDict_.subDict("dropletPDF"),
             sm.rndGen()

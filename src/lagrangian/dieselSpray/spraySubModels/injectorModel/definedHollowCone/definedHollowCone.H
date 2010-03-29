@@ -61,7 +61,7 @@ private:
         typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
 
         dictionary definedHollowConeDict_;
-        autoPtr<pdf> dropletPDF_;
+        autoPtr<pdfs::pdf> dropletPDF_;
 
         // inner and outer cone angle time histories
         // 2 column vectors = (time, coneAngle)

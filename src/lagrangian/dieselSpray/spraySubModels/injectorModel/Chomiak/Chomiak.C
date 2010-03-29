@@ -55,7 +55,7 @@ Foam::ChomiakInjector::ChomiakInjector
     ChomiakDict_(dict.subDict(typeName + "Coeffs")),
     dropletPDF_
     (
-        pdf::New
+        pdfs::pdf::New
         (
             ChomiakDict_.subDict("dropletPDF"),
             sm.rndGen()
