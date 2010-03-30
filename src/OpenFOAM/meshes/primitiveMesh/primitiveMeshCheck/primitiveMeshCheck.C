@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -38,6 +37,7 @@ Foam::scalar Foam::primitiveMesh::closedThreshold_  = 1.0e-6;
 Foam::scalar Foam::primitiveMesh::aspectThreshold_  = 1000;
 Foam::scalar Foam::primitiveMesh::nonOrthThreshold_ = 70;    // deg
 Foam::scalar Foam::primitiveMesh::skewThreshold_    = 4;
+Foam::scalar Foam::primitiveMesh::planarCosAngle_   = 1.0e-6;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -2085,6 +2085,129 @@ bool Foam::primitiveMesh::checkCellDeterminant
         if (debug || report)
         {
             Info<< "    Cell determinant check OK." << endl;
+        }
+
+        return false;
+    }
+
+    return false;
+}
+
+
+bool Foam::primitiveMesh::checkConcaveCells
+(
+    const bool report,
+    labelHashSet* setPtr
+) const
+{
+    if (debug)
+    {
+        Info<< "bool primitiveMesh::checkConcaveCells(const bool"
+            << ", labelHashSet*) const: "
+            << "checking for concave cells" << endl;
+    }
+
+    const cellList& c = cells();
+    const labelList& fOwner = faceOwner();
+    const vectorField& fAreas = faceAreas();
+    const pointField& fCentres = faceCentres();
+    const pointField& pts = points();
+
+    label nConcaveCells = 0;
+
+    forAll (c, cellI)
+    {
+        const cell& cFaces = c[cellI];
+
+        const labelList& cPoints = cellPoints()[cellI];
+
+        bool concave = false;
+
+        forAll(cFaces, i)
+        {
+            if (concave)
+            {
+                break;
+            }
+
+            label fI = cFaces[i];
+
+            const point& fC = fCentres[fI];
+
+            const face& f = faces()[fI];
+
+            vector fN = fAreas[fI];
+
+            fN /= max(mag(fN), VSMALL);
+
+            // Flip normal if required so that it is always pointing out of
+            // the cell
+            if (fOwner[fI] != cellI)
+            {
+                fN *= -1;
+            }
+
+            // Is any vertex of the cell on the wrong side of the
+            // plane of this face?
+
+            forAll(cPoints, cPtI)
+            {
+                label ptI = cPoints[cPtI];
+
+                // Skip points that are on this face
+                if (findIndex(f, ptI) > -1)
+                {
+                    continue;
+                }
+
+                const point& pt = pts[ptI];
+
+                // If the cell is concave, the point will be on the
+                // positive normal side of the plane of f, defined by
+                // its centre and normal, and the angle between (pt -
+                // fC) and fN will be less than 90 degrees, so the dot
+                // product will be positive.
+
+                vector pC = (pt - fC);
+
+                pC /= max(mag(pC), VSMALL);
+
+                if ((pC & fN) > -planarCosAngle_)
+                {
+                    // Concave or planar face
+
+                    concave = true;
+
+                    if (setPtr)
+                    {
+                        setPtr->insert(cellI);
+                    }
+
+                    nConcaveCells++;
+
+                    break;
+                }
+            }
+        }
+    }
+
+    reduce(nConcaveCells, sumOp<label>());
+
+    if (nConcaveCells > 0)
+    {
+        if (debug || report)
+        {
+            Info<< " ***Concave cells found, number of cells: "
+                << nConcaveCells << endl;
+        }
+
+        return true;
+    }
+    else
+    {
+        if (debug || report)
+        {
+            Info<< "    Concave cell check OK." << endl;
         }
 
         return false;
