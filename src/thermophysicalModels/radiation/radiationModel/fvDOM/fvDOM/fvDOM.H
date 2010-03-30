@@ -120,7 +120,7 @@ class fvDOM
         scalar maxIter_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Disallow default bitwise copy construct
         fvDOM(const fvDOM&);

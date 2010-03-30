@@ -60,7 +60,7 @@ protected:
         volScalarField hu_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         wordList huBoundaryTypes();
         void huBoundaryCorrection(volScalarField& hu);

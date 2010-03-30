@@ -67,7 +67,7 @@ class oscillatingFixedValueFvPatchField
         label curTimeIndex_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Return current scale
         scalar currentScale() const;

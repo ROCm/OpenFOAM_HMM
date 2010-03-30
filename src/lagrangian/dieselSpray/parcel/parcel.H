@@ -108,7 +108,7 @@ class parcel
             scalar tMom_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Set the relaxation times
         void setRelaxationTimes

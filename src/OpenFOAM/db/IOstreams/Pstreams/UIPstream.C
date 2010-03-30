@@ -30,7 +30,7 @@ License
 #include <cctype>
 
 
-// * * * * * * * * * * * * * Private member functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 inline void Foam::UIPstream::checkEof()
 {

@@ -56,7 +56,7 @@ class mutUSpaldingWallFunctionFvPatchScalarField
 {
 protected:
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Calculate the turbulence viscosity
         virtual tmp<scalarField> calcMut() const;

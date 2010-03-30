@@ -60,7 +60,7 @@ class rpm
         scalar rpm_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Disallow default bitwise copy construct
         rpm(const rpm&);

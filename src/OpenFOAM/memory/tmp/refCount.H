@@ -49,7 +49,7 @@ class refCount
 
         int count_;
 
-    // Private member functions
+    // Private Member Functions
 
         //- Dissallow copy
         refCount(const refCount&);

@@ -91,7 +91,7 @@ private:
         const dictionary coeffDict_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Read injector properties from previous run (if applicable)
         void readProps();
@@ -144,7 +144,7 @@ protected:
             scalar timeStep0_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Number of parcels to introduce over the time step relative to SOI
         virtual label parcelsToInject

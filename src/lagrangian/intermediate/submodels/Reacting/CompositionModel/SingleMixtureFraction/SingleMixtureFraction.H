@@ -71,7 +71,7 @@ class SingleMixtureFraction
             scalarField YMixture0_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Construct the indices and check correct specification of
         //  1 gas, 1 liquid and 1 solid

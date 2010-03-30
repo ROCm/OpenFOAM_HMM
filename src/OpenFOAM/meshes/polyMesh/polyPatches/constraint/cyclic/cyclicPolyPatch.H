@@ -112,7 +112,7 @@ private:
             vector separationVector_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Find amongst selected faces the one with the largest area
         static label findMaxArea(const pointField&, const faceList&);

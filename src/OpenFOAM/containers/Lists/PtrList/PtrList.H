@@ -104,7 +104,7 @@ class PtrList
 
 protected:
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Read from Istream using given Istream constructor class
         template<class INew>

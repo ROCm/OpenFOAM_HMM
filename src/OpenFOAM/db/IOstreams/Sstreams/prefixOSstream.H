@@ -59,7 +59,7 @@ class prefixOSstream
         string prefix_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         inline void checkWritePrefix();
 

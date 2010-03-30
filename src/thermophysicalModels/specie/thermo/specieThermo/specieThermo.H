@@ -101,7 +101,7 @@ class specieThermo
         static const int maxIter_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- return the temperature corresponding to the value of the
         //  thermodynamic property f, given the function f = F(T) and dF(T)/dT

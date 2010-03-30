@@ -75,7 +75,7 @@ protected:
         //- The rational (0-1) cumulative parameter value for each point
         scalarList param_;
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Precalculate the rational cumulative parameter value
         //  and the line-length

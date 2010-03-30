@@ -60,7 +60,7 @@ class rotatingPressureInletOutletVelocityFvPatchVectorField
         vector omega_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Calculate the tangentialVelocity from omega
         void calcTangentialVelocity();

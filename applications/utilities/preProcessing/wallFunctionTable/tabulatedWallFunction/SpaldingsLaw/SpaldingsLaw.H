@@ -90,7 +90,7 @@ protected:
             static const scalar tolerance_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Invert the function
         virtual void invertFunction();

@@ -102,7 +102,7 @@ class graph
         };
 
 
-    // private member functions
+    // Private Member Functions
 
         void readCurves(Istream&);
 

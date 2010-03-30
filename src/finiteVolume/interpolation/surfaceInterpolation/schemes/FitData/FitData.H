@@ -80,7 +80,7 @@ class FitData
         const label minSize_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Find the normal direction (i) and j and k directions for face faci
         void findFaceDirs

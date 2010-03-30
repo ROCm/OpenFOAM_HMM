@@ -71,7 +71,7 @@ class fileName
 :
     public string
 {
-    // Private member functions
+    // Private Member Functions
 
         //- Strip invalid characters
         inline void stripInvalid();

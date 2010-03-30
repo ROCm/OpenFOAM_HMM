@@ -95,7 +95,7 @@ private:
         MeshReference;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Disallow construct as copy
         surfMesh(const surfMesh&);

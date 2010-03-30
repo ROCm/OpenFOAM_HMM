@@ -57,7 +57,7 @@ class nutUSpaldingWallFunctionFvPatchScalarField
 {
 protected:
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Calculate the turbulence viscosity
         virtual tmp<scalarField> calcNut() const;

@@ -115,7 +115,7 @@ public:
 
 private:
 
-    // Private member functions
+    // Private Member Functions
 
         //- Set faces to evaluate based on a face zone
         void setFaceZoneFaces();
@@ -147,7 +147,7 @@ protected:
         word weightFieldName_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Initialise, e.g. face addressing
         void initialise(const dictionary& dict);
@@ -193,7 +193,7 @@ public:
     virtual ~faceSource();
 
 
-    // Public member functions
+    // Public Member Functions
 
         // Access
 

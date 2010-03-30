@@ -50,7 +50,7 @@ class hhuMixtureThermo
     public hhuCombustionThermo,
     public MixtureType
 {
-    // Private member functions
+    // Private Member Functions
 
         void calculate();
 

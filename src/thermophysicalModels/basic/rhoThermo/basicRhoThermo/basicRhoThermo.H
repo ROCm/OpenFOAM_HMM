@@ -62,7 +62,7 @@ protected:
         volScalarField rho_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Construct as copy (not implemented)
         basicRhoThermo(const basicRhoThermo&);

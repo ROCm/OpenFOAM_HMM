@@ -47,7 +47,7 @@ class ensightGeoFile
 :
     public ensightFile
 {
-    // Private member functions
+    // Private Member Functions
 
         //- Disallow default bitwise assignment
         void operator=(const ensightGeoFile&);

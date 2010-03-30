@@ -99,7 +99,7 @@ class eConstThermo
         scalar Hf_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Construct from components
         inline eConstThermo

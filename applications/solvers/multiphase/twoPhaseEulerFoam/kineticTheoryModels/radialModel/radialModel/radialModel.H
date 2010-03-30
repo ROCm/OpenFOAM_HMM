@@ -48,7 +48,7 @@ namespace Foam
 
 class radialModel
 {
-    // Private member functions
+    // Private Member Functions
 
         //- Disallow default bitwise copy construct
         radialModel(const radialModel&);

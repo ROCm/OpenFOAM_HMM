@@ -78,7 +78,7 @@ public:
     ~phasePropertiesList();
 
 
-    // Public member functions
+    // Public Member Functions
 
         //- Return the list of phase properties
         const List<phaseProperties>& props() const;

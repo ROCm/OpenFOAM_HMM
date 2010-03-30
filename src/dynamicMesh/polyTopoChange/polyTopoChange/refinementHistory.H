@@ -188,7 +188,7 @@ private:
         labelList visibleCells_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Debug write
         static void writeEntry

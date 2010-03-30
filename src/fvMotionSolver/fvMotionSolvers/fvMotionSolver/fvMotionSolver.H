@@ -66,7 +66,7 @@ protected:
         const fvMesh& fvMesh_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Create the corresponding patch types for cellMotion from those
         //  of the given pointMotion

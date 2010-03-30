@@ -134,7 +134,7 @@ class SCOPE
         polynomial MaPolyU_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Polynomial evaluated from the given equivalence ratio
         //  and polynomial coefficients

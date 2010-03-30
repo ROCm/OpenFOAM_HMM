@@ -81,7 +81,7 @@ protected:
         Random& rndGen_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Check that the PDF is valid
         virtual void check() const;

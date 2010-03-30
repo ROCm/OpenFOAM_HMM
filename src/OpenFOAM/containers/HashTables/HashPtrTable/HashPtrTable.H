@@ -66,7 +66,7 @@ class HashPtrTable
 :
     public HashTable<T*, Key, Hash>
 {
-    // Private member functions
+    // Private Member Functions
 
         //- Read from Istream using given Istream constructor class
         template<class INew>

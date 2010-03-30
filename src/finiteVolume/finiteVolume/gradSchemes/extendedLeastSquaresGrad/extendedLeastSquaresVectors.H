@@ -66,7 +66,7 @@ class extendedLeastSquaresVectors
         mutable vectorField* additionalVectorsPtr_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Construct Least-squares gradient vectors
         void makeLeastSquaresVectors() const;

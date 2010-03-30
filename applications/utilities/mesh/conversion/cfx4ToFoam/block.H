@@ -73,7 +73,7 @@ class block
         labelListListList BoundaryPatches;
 
 
-    // private member functions
+    // Private Member Functions
 
         label vtxLabel(label i, label j, label k);
 

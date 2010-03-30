@@ -53,7 +53,7 @@ namespace Foam
 
 class writeFuns
 {
-    // Private member functions
+    // Private Member Functions
 
         // Swap halves of word.
 

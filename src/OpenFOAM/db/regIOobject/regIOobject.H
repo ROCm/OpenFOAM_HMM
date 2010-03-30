@@ -77,7 +77,7 @@ private:
         Istream* isPtr_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Return Istream
         Istream& readStream();

@@ -77,7 +77,7 @@ class surfaceInterpolation
             mutable surfaceVectorField* correctionVectors_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Construct central-differencing weighting factors
         void makeWeights() const;
@@ -91,7 +91,7 @@ class surfaceInterpolation
 
 protected:
 
-    // Protected member functions
+    // Protected Member Functions
 
         // Storage management
 

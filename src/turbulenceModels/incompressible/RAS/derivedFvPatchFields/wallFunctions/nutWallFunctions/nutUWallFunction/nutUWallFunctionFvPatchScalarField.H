@@ -56,7 +56,7 @@ class nutUWallFunctionFvPatchScalarField
 {
 protected:
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Calculate yPLus
         virtual tmp<scalarField> calcYPlus(const scalarField& magUp) const;

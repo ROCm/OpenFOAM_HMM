@@ -80,7 +80,7 @@ protected:
         scalarField deltaTChem_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Return non-const access to the latest estimation of integration
         //  step, e.g. for multi-chemistry model

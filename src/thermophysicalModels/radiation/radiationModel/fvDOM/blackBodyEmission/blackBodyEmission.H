@@ -82,7 +82,7 @@ private:
         const volScalarField& T_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         scalar fLambdaT(const scalar lambdaT) const;
 

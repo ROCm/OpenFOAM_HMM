@@ -62,7 +62,7 @@ class mixedPointPatchField
         scalarField valueFraction_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         void checkFieldSize() const;
 

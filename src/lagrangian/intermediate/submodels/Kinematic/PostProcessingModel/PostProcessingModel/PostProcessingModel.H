@@ -66,7 +66,7 @@ class PostProcessingModel
 
 protected:
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Write post-processing info
         virtual void write() = 0;

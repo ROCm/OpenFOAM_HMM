@@ -103,7 +103,7 @@ class polynomialTransport
         Polynomial<PolySize> kappaPolynomial_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Construct from components
         inline polynomialTransport

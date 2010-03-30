@@ -122,7 +122,7 @@ private:
         List<specieCoeffs> rhs_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         void setLRhs(Istream&);
         void setThermo(const HashPtrTable<ReactionThermo>& thermoDatabase);

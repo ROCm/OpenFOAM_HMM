@@ -110,7 +110,7 @@ private:
         coeffArray lowCpCoeffs_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Check given temperature is within the range of the fitted coeffs
         inline void checkT(const scalar T) const;

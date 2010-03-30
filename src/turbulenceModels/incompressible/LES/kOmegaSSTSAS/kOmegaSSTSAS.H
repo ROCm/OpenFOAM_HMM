@@ -116,7 +116,7 @@ protected:
             volScalarField nuSgs_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         tmp<volScalarField> Lvk2
         (

@@ -78,7 +78,7 @@ private:
        //- Number of elements in in list
        label nElmts_;
 
-    // Private member functions
+    // Private Member Functions
 
         //- Disallow default bitwise copy construct
         SLListBase(const SLListBase&);

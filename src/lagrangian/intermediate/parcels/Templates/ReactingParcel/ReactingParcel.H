@@ -183,7 +183,7 @@ protected:
             scalar pc_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Calculate Phase change
         template<class TrackData>

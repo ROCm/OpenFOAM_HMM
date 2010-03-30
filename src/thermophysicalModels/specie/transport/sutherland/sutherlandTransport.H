@@ -104,7 +104,7 @@ class sutherlandTransport
         scalar As, Ts;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Calculate the Sutherland coefficients
         //  given two viscosities and temperatures

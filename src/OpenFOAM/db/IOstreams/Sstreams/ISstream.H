@@ -60,7 +60,7 @@ class ISstream
         istream& is_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         char nextValid();
 

@@ -120,7 +120,7 @@ class ConeInjectionMP
 
 protected:
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Number of parcels to introduce over the time step
         label parcelsToInject

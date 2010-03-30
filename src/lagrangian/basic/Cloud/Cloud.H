@@ -81,7 +81,7 @@ class Cloud
         mutable DynamicList<label> labels_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Initialise cloud on IO constructor
         void initCloud(const bool checkClass);

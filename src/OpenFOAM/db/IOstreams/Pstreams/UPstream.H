@@ -190,7 +190,7 @@ private:
         static List<commsStruct> treeCommunication_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Set data for parallel running
         static void setParRun();

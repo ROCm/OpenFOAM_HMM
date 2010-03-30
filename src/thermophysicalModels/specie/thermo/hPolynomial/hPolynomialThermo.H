@@ -117,7 +117,7 @@ class hPolynomialThermo
         Polynomial<PolySize> sPolynomial_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Construct from components
         inline hPolynomialThermo

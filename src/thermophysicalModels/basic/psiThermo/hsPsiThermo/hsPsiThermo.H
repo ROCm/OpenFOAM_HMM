@@ -59,7 +59,7 @@ class hsPsiThermo
         volScalarField hs_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Calculate the thermo variables
         void calculate();

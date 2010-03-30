@@ -65,7 +65,7 @@ class SinglePhaseMixture
             label idSolid_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Construct the indices and check correct specification of
         //  1 gas or 1 liquid or 1 solid

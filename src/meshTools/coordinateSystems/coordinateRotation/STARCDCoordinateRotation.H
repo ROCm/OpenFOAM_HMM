@@ -62,7 +62,7 @@ class STARCDCoordinateRotation
 :
     public coordinateRotation
 {
-    // Private member functions
+    // Private Member Functions
 
         //- Calculate transformation tensor
         void calcTransform

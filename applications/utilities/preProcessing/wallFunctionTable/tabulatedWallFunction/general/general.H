@@ -114,7 +114,7 @@ protected:
         Switch log10UPlus_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Invert the table
         virtual void invertTable();

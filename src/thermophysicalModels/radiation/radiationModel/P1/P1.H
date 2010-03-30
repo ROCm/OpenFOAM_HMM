@@ -73,7 +73,7 @@ class P1
         volScalarField E_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Disallow default bitwise copy construct
         P1(const P1&);

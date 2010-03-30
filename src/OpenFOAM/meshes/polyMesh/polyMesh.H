@@ -159,7 +159,7 @@ private:
             mutable pointField* oldPointsPtr_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Disallow construct as copy
         polyMesh(const polyMesh&);

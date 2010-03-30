@@ -73,7 +73,7 @@ protected:
         scalar yPlusLam_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Check the type of the patch
         virtual void checkType();

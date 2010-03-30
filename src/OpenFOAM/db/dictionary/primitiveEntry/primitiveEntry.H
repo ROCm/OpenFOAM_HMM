@@ -65,7 +65,7 @@ class primitiveEntry
     public entry,
     public ITstream
 {
-    // Private member functions
+    // Private Member Functions
 
         //- Append the given tokens starting at the current tokenIndex
         void append(const UList<token>&);

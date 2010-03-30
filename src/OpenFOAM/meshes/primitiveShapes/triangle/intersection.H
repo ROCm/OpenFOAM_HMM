@@ -74,7 +74,7 @@ public:
         VISIBLE          // Intersecting with the visible side
     };
 
-    // Static member functions
+    // Static Member Functions
 
         //- Direction names
         static const NamedEnum<direction, 2> directionNames_;

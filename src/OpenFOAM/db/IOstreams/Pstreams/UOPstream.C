@@ -34,7 +34,7 @@ Description
 
 #include <cctype>
 
-// * * * * * * * * * * * * * Private member functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class T>
 inline void Foam::UOPstream::writeToBuffer(const T& t)

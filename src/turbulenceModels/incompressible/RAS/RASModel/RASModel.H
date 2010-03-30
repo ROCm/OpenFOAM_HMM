@@ -98,7 +98,7 @@ protected:
         nearWallDist y_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Print model coefficients
         virtual void printCoeffs();

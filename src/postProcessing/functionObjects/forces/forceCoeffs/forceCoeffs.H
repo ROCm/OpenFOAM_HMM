@@ -81,7 +81,7 @@ class forceCoeffs
             scalar Aref_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Disallow default bitwise copy construct
         forceCoeffs(const forceCoeffs&);

@@ -81,7 +81,7 @@ class GeometricField
 :
     public DimensionedField<Type, GeoMesh>
 {
-    // Private member functions
+    // Private Member Functions
 
         //- Read from file if it is present
         bool readIfPresent();
@@ -237,7 +237,7 @@ private:
         GeometricBoundaryField boundaryField_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Read the field from the dictionary
         tmp<GeometricBoundaryField> readField(const dictionary&);

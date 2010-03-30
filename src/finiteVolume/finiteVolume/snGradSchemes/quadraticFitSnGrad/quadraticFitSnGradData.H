@@ -68,7 +68,7 @@ class quadraticFitSnGradData
         List<scalarList> fit_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Find the normal direction and i, j and k directions for face faci
         static void findFaceDirs

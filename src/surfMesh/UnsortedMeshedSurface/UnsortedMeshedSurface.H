@@ -101,7 +101,7 @@ private:
         List<surfZoneIdentifier> zoneToc_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Disable resize with value
         void resize(const label, const Face&);

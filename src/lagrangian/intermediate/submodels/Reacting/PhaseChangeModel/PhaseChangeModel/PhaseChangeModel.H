@@ -84,7 +84,7 @@ protected:
         enthalpyTransferType enthalpyTransfer_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Convert word to enthalpy transfer type
         enthalpyTransferType wordToEnthalpyTransfer(const word& etName) const;

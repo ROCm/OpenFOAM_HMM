@@ -61,7 +61,7 @@ class JobInfo
         fileName finishedJobPath_;
         cpuTime  cpuTime_;
 
-    // Private member functions
+    // Private Member Functions
 
         bool write(Ostream&) const;
         void end(const word& terminationType);

@@ -150,7 +150,7 @@ public:
 
 private:
 
-    // Private member functions
+    // Private Member Functions
 
         //- Return the mixture effective specific heat capacity
         template<class TrackData>
@@ -218,7 +218,7 @@ protected:
             bool canCombust_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Calculate Devolatilisation
         template<class TrackData>

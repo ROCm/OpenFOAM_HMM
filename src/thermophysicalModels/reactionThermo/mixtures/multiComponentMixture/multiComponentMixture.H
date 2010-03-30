@@ -61,7 +61,7 @@ class multiComponentMixture
         mutable ThermoType mixture_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Construct the species data from the given dictionary and return the
         //  data for the first specie to initialise the mixture thermo data

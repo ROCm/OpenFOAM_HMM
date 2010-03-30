@@ -79,7 +79,7 @@ class triangle
 
         PointRef a_, b_, c_;
 
-    // Private member functions
+    // Private Member Functions
 
         //- Fast distance to triangle calculation. From
         //  "Distance Between Point and Trangle in 3D"

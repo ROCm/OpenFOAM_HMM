@@ -68,7 +68,7 @@ class UOPstream
         const bool sendAtDestruct_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Write a T to the transfer buffer
         template<class T>

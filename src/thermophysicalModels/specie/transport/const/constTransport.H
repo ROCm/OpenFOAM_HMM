@@ -98,7 +98,7 @@ class constTransport
         scalar Mu, rPr;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Construct from components
         inline constTransport

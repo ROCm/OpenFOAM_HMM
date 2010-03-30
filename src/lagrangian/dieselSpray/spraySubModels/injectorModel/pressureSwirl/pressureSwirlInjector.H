@@ -68,7 +68,7 @@ private:
         mutable scalar u_;
 
 
-    // private member functions
+    // Private Member Functions
 
         scalar kv
         (

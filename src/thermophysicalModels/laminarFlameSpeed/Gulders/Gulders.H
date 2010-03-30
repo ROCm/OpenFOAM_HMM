@@ -64,7 +64,7 @@ class Gulders
         scalar beta_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         inline scalar SuRef
         (

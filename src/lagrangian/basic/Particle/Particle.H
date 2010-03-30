@@ -133,7 +133,7 @@ protected:
         label origId_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Return the 'lambda' value for the position, p, on the face,
         // where, p = from + lamda*(to - from)

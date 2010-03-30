@@ -87,7 +87,7 @@ class KinematicLookupTableInjection
 
 protected:
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Number of parcels to introduce over the time step relative to SOI
         label parcelsToInject

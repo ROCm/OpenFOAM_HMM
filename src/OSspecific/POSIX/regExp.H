@@ -62,7 +62,7 @@ class regExp
         //- Precompiled regular expression
         mutable regex_t* preg_;
 
-    // Private member functions
+    // Private Member Functions
 
         //- Disallow default bitwise copy construct
         regExp(const regExp&);

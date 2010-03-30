@@ -148,7 +148,7 @@ private:
 
 protected:
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Construct and return an IFstream for the object.
         //  The results is NULL if the stream construction failed

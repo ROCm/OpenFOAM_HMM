@@ -74,7 +74,7 @@ protected:
 
 private:
 
-    // Private member functions
+    // Private Member Functions
 
         //- Construct as copy (not implemented)
         laminarFlameSpeed(const laminarFlameSpeed&);

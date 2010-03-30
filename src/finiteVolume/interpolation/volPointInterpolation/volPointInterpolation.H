@@ -87,7 +87,7 @@ class volPointInterpolation
 
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Construct addressing over all boundary faces
         void calcBoundaryAddressing();

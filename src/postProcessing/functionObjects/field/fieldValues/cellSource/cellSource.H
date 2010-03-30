@@ -112,7 +112,7 @@ public:
 
 private:
 
-    // Private member functions
+    // Private Member Functions
 
         //- Set cells to evaluate based on a cell zone
         void setCellZoneCells();
@@ -138,7 +138,7 @@ protected:
         word weightFieldName_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Initialise, e.g. cell addressing
         void initialise(const dictionary& dict);
@@ -187,7 +187,7 @@ public:
     virtual ~cellSource();
 
 
-    // Public member functions
+    // Public Member Functions
 
         // Access
 

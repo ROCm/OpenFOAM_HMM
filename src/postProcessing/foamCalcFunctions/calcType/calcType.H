@@ -69,7 +69,7 @@ class calcType
 
 protected:
 
-    // Protected member functions
+    // Protected Member Functions
 
         // Calculation routines
 

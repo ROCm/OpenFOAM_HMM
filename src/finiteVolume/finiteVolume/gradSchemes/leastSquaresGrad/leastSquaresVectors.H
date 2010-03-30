@@ -60,7 +60,7 @@ class leastSquaresVectors
         mutable surfaceVectorField* nVectorsPtr_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Construct Least-squares gradient vectors
         void makeLeastSquaresVectors() const;

@@ -71,7 +71,7 @@ class LPtrList
 :
     public LList<LListBase, T*>
 {
-    // Private member functions
+    // Private Member Functions
 
         //- Read from Istream using given Istream constructor class
         template<class INew>

@@ -76,7 +76,7 @@ class SpalartAllmarasDDES
 
 protected:
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Length scale
         virtual tmp<volScalarField> dTilda(const volScalarField& S) const;

@@ -54,7 +54,7 @@ class reactingMixture
     public multiComponentMixture<ThermoType>,
     public PtrList<Reaction<ThermoType> >
 {
-    // Private member functions
+    // Private Member Functions
 
         //- Disallow default bitwise copy construct
         reactingMixture(const reactingMixture&);

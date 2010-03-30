@@ -77,7 +77,7 @@ protected:
             volScalarField alpha_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         // Enthalpy
 

@@ -53,7 +53,7 @@ class NoPostProcessing
 {
 protected:
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Write post-processing info
         void write();

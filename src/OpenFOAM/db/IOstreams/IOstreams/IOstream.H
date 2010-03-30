@@ -236,7 +236,7 @@ protected:
         label lineNumber_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         // Access
 

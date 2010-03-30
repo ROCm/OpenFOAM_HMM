@@ -65,7 +65,7 @@ class specie
         scalar molWeight_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Construct from components without name
         inline specie

@@ -61,7 +61,7 @@ class word
 :
     public string
 {
-    // Private member functions
+    // Private Member Functions
 
         //- Strip invalid characters from this word
         inline void stripInvalid();

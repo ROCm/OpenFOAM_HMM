@@ -60,7 +60,7 @@ class dictionaryEntry
     public entry,
     public dictionary
 {
-    // Private member functions
+    // Private Member Functions
 
         void readData(Istream&);
 

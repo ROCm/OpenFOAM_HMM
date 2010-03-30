@@ -57,7 +57,7 @@ class speciesTable
         HashTable<label> specieIndices_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         void setIndices();
 

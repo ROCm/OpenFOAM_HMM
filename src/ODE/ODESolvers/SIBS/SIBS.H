@@ -74,7 +74,7 @@ class SIBS
         mutable scalar epsOld_, xNew_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         void SIMPR
         (

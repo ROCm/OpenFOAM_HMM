@@ -89,7 +89,7 @@ private:
         mutable scalar h_;
 
 
-    // private member functions
+    // Private Member Functions
 
         scalar kv(const label inj) const;
 

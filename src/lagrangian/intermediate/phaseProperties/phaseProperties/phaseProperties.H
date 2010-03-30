@@ -92,7 +92,7 @@ private:
         labelList globalCarrierIds_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Set global ids
         void setGlobalIds(const wordList& globalNames);
@@ -126,7 +126,7 @@ public:
     ~phaseProperties();
 
 
-    // Public member functions
+    // Public Member Functions
 
         //- Initialise the global ids
         void initialiseGlobalIds

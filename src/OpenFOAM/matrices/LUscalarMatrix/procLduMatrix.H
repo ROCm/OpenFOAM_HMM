@@ -71,7 +71,7 @@ class procLduMatrix
         PtrList<procLduInterface> interfaces_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Dissallow construction as copy
         procLduMatrix(const procLduMatrix&);

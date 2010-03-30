@@ -164,7 +164,7 @@ private:
         multivariateSurfaceInterpolationScheme<scalar>::fieldTable alphaTable_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         void calcAlphas();
 

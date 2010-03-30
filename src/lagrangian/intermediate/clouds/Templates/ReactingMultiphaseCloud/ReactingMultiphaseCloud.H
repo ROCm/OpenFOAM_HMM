@@ -67,7 +67,7 @@ class ReactingMultiphaseCloud
     public ReactingCloud<ParcelType>,
     public reactingMultiphaseCloud
 {
-    // Private member functions
+    // Private Member Functions
 
         //- Disallow default bitwise copy construct
         ReactingMultiphaseCloud(const ReactingMultiphaseCloud&);
@@ -111,7 +111,7 @@ protected:
             scalar dMassSurfaceReaction_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         // Cloud evolution functions
 

@@ -93,7 +93,7 @@ class triSurface
         mutable labelList* edgeOwnerPtr_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Calculate sorted edgeFaces
         void calcSortedEdgeFaces() const;

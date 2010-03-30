@@ -110,7 +110,7 @@ class PstreamBuffers
 
         bool finishedSendsCalled_;
 
-    // Private member functions
+    // Private Member Functions
 
 public:
 

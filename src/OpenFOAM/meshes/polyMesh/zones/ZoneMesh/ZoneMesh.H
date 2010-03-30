@@ -73,7 +73,7 @@ class ZoneMesh
         mutable Map<label>* zoneMapPtr_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Disallow construct as copy
         ZoneMesh(const ZoneMesh&);

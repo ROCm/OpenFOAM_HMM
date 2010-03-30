@@ -48,7 +48,7 @@ namespace Foam
 
 class frictionalStressModel
 {
-    // Private member functions
+    // Private Member Functions
 
         //- Disallow default bitwise copy construct
         frictionalStressModel(const frictionalStressModel&);

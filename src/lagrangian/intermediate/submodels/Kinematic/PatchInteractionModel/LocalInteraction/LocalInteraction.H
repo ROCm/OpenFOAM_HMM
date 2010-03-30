@@ -57,7 +57,7 @@ class LocalInteraction
         List<label> patchIds_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Returns local patchI if patch is in patchIds_ list
         label applyToPatch(const label globalPatchI) const;

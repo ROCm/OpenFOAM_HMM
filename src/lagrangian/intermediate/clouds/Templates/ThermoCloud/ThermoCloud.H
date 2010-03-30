@@ -111,7 +111,7 @@ protected:
             DimensionedField<scalar, volMesh> hsTrans_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         // Cloud evolution functions
 

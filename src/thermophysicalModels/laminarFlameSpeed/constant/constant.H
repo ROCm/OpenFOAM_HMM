@@ -60,7 +60,7 @@ private:
         dimensionedScalar Su_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Construct as copy (not implemented)
         constant(const constant&);

@@ -59,7 +59,7 @@ class procLduInterface
         label neighbProcNo_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Dissallow construction as copy
         procLduInterface(const procLduInterface&);

@@ -58,7 +58,7 @@ class ensightFile
         static scalar undefValue_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Disallow default bitwise assignment
         void operator=(const ensightFile&);

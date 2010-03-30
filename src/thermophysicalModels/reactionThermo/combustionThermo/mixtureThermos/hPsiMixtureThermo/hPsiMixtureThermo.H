@@ -52,7 +52,7 @@ class hPsiMixtureThermo
     public hCombustionThermo,
     public MixtureType
 {
-    // Private member functions
+    // Private Member Functions
 
         void calculate();
 

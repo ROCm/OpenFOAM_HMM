@@ -71,7 +71,7 @@ class PatchPostProcessing
         labelList patchIds_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Returns local patchI if patch is in patchIds_ list
         label applyToPatch(const label globalPatchI) const;
@@ -79,7 +79,7 @@ class PatchPostProcessing
 
 protected:
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Write post-processing info
         void write();

@@ -121,7 +121,7 @@ public:
     virtual ~fieldValue();
 
 
-    // Public member functions
+    // Public Member Functions
 
         // Access
 

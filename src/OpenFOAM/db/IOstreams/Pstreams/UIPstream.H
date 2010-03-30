@@ -71,7 +71,7 @@ class UIPstream
         label messageSize_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Check the bufferPosition against messageSize_ for EOF
         inline void checkEof();

@@ -140,7 +140,7 @@ public:
             *faceFluxCorrectionPtr_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Add patch contribution to internal field
         template<class Type2>

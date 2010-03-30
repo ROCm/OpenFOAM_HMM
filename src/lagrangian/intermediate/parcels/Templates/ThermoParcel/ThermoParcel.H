@@ -208,7 +208,7 @@ protected:
             scalar cpc_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Calculate new particle temperature
         template<class TrackData>

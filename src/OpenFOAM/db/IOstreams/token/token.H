@@ -263,7 +263,7 @@ private:
         label lineNumber_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Clear any allocated storage (word or string)
         inline void clear();

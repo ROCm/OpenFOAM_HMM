@@ -55,7 +55,7 @@ class basicPsiThermo
 
 protected:
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Construct as copy (not implemented)
         basicPsiThermo(const basicPsiThermo&);

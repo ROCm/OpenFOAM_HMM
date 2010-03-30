@@ -228,7 +228,7 @@ protected:
             scalar muc_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Calculate new particle velocity
         template<class TrackData>

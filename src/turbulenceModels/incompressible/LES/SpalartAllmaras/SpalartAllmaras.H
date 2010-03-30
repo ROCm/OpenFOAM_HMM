@@ -94,7 +94,7 @@ protected:
             volScalarField nuSgs_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         virtual tmp<volScalarField> fv1() const;
         virtual tmp<volScalarField> fv2() const;

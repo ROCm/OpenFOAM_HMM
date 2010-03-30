@@ -60,7 +60,7 @@ class cyclicFvPatchField
         const cyclicFvPatch& cyclicPatch_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Return neighbour side field given internal fields
         template<class Type2>
