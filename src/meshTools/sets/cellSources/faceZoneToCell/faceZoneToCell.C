@@ -120,7 +120,7 @@ Foam::faceZoneToCell::faceZoneToCell
 :
     topoSetSource(mesh),
     zoneName_(zoneName),
-    option_((at your option)
+    option_(option)
 {}
 
 

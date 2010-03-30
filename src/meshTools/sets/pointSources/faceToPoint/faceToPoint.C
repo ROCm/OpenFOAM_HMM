@@ -97,7 +97,7 @@ Foam::faceToPoint::faceToPoint
 :
     topoSetSource(mesh),
     setName_(setName),
-    option_((at your option)
+    option_(option)
 {}
 
 

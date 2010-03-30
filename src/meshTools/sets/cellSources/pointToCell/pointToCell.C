@@ -104,7 +104,7 @@ Foam::pointToCell::pointToCell
 :
     topoSetSource(mesh),
     setName_(setName),
-    option_((at your option)
+    option_(option)
 {}
 
 
