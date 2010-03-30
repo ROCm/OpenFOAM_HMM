@@ -50,7 +50,6 @@ Description
 
 SourceFiles
     LaunderGibsonRSTM.C
-    LaunderGibsonRSTMcorrect.C
 
 \*---------------------------------------------------------------------------*/
 

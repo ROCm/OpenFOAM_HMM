@@ -95,7 +95,7 @@ class realizableKE
             volScalarField nut_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         tmp<volScalarField> rCmu
         (

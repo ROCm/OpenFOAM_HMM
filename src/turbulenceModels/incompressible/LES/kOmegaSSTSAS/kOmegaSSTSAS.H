@@ -64,7 +64,7 @@ class kOmegaSSTSAS
 :
     public LESModel
 {
-    // Private member functions
+    // Private Member Functions
 
         //- Update sub-grid scale fields
         void updateSubGridScaleFields(const volScalarField& D);

@@ -91,7 +91,7 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class kOmega Declaration
+                          Class kOmegaSST Declaration
 \*---------------------------------------------------------------------------*/
 
 class kOmegaSST
@@ -129,7 +129,7 @@ class kOmegaSST
             volScalarField nut_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         tmp<volScalarField> F1(const volScalarField& CDkOmega) const;
         tmp<volScalarField> F2() const;
@@ -144,34 +144,22 @@ class kOmegaSST
             return F1*(psi1 - psi2) + psi2;
         }
 
-        tmp<volScalarField> alphaK
-        (
-            const volScalarField& F1
-        ) const
+        tmp<volScalarField> alphaK(const volScalarField& F1) const
         {
             return blend(F1, alphaK1_, alphaK2_);
         }
 
-        tmp<volScalarField> alphaOmega
-        (
-            const volScalarField& F1
-        ) const
+        tmp<volScalarField> alphaOmega(const volScalarField& F1) const
         {
             return blend(F1, alphaOmega1_, alphaOmega2_);
         }
 
-        tmp<volScalarField> beta
-        (
-            const volScalarField& F1
-        ) const
+        tmp<volScalarField> beta(const volScalarField& F1) const
         {
             return blend(F1, beta1_, beta2_);
         }
 
-        tmp<volScalarField> gamma
-        (
-            const volScalarField& F1
-        ) const
+        tmp<volScalarField> gamma(const volScalarField& F1) const
         {
             return blend(F1, gamma1_, gamma2_);
         }

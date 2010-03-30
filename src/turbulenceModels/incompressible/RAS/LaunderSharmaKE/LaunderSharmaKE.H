@@ -84,7 +84,7 @@ class LaunderSharmaKE
             volScalarField nut_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         tmp<volScalarField> fMu() const;
         tmp<volScalarField> f2() const;

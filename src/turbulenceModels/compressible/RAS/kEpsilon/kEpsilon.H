@@ -43,7 +43,6 @@ Description
 
 SourceFiles
     kEpsilon.C
-    kEpsilonCorrect.C
 
 \*---------------------------------------------------------------------------*/
 

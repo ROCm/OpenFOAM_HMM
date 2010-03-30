@@ -72,7 +72,7 @@ protected:
         scalarField Cs_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Compute the roughness function
         virtual scalar fnRough(const scalar KsPlus, const scalar Cs) const;

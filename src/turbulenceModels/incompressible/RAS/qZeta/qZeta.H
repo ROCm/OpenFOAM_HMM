@@ -82,7 +82,7 @@ class qZeta
             volScalarField nut_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         tmp<volScalarField> fMu() const;
         tmp<volScalarField> f2() const;
@@ -113,7 +113,7 @@ public:
 
        // Access
 
-            //- Return lower allowable limit for q (default: SMALL)
+            //- Return the lower allowable limit for q (default: SMALL)
             const dimensionedScalar& qMin() const
             {
                 return qMin_;

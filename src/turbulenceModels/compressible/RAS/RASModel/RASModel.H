@@ -37,7 +37,6 @@ Description
 
 SourceFiles
     RASModel.C
-    newTurbulenceModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -87,9 +86,6 @@ protected:
 
         //- Model coefficients dictionary
         dictionary coeffDict_;
-
-        //- Value of y+ at the edge of the laminar sublayer
-        scalar yPlusLam_;
 
         //- Lower limit of k
         dimensionedScalar kMin_;
@@ -159,7 +155,7 @@ public:
 
     // Selectors
 
-        //- Return a reference to the selected turbulence model
+        //- Return a reference to the selected RAS model
         static autoPtr<RASModel> New
         (
             const volScalarField& rho,

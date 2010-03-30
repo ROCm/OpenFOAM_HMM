@@ -61,7 +61,6 @@ Description
 
 SourceFiles
     SpalartAllmaras.C
-    SpalartAllmarasCorrect.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -116,7 +115,7 @@ class SpalartAllmaras
         wallDist d_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         tmp<volScalarField> chi() const;
         tmp<volScalarField> fv1(const volScalarField& chi) const;

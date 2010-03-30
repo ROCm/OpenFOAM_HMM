@@ -215,15 +215,15 @@ tmp<fvVectorMatrix> laminar::divDevRhoReff(volVectorField& U) const
 }
 
 
-bool laminar::read()
-{
-    return true;
-}
-
-
 void laminar::correct()
 {
     turbulenceModel::correct();
+}
+
+
+bool laminar::read()
+{
+    return true;
 }
 
 

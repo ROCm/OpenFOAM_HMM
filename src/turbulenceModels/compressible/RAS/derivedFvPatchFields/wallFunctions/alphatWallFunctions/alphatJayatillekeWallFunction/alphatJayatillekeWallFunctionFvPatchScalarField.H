@@ -77,7 +77,7 @@ class alphatJayatillekeWallFunctionFvPatchScalarField
             static label maxIters_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Check the type of the patch
         void checkType();

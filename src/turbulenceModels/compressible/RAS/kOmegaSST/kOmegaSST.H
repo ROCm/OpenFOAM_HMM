@@ -72,9 +72,6 @@ Description
 
 SourceFiles
     kOmegaSST.C
-    kOmegaWallFunctionsI.H
-    kOmegaWallViscosityI.H
-    wallOmegaI.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -137,7 +134,7 @@ class kOmegaSST
             volScalarField alphat_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         tmp<volScalarField> F1(const volScalarField& CDkOmega) const;
         tmp<volScalarField> F2() const;

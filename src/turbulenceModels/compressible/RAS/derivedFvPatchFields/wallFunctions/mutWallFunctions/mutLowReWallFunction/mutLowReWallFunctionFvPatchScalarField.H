@@ -59,7 +59,7 @@ class mutLowReWallFunctionFvPatchScalarField
 {
 protected:
 
-    // Private member functions
+    // Private Member Functions
 
         //- Calculate the turbulence viscosity
         virtual tmp<scalarField> calcMut() const;

@@ -110,7 +110,7 @@ class SpalartAllmaras
             wallDist d_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         tmp<volScalarField> chi() const;
 

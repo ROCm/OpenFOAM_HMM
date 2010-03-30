@@ -45,7 +45,6 @@ Description
 
 SourceFiles
     RNGkEpsilon.C
-    RNGkEpsilonCorrect.C
 
 \*---------------------------------------------------------------------------*/
 

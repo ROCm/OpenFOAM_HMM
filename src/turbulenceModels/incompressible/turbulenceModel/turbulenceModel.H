@@ -192,7 +192,7 @@ public:
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct() = 0;
 
-        //- Read turbulenceProperties dictionary
+        //- Read LESProperties or RASProperties dictionary
         virtual bool read() = 0;
 };
 

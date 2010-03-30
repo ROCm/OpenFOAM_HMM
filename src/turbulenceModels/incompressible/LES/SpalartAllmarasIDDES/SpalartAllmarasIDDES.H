@@ -63,7 +63,7 @@ class SpalartAllmarasIDDES
             dimensionedScalar ct_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         tmp<volScalarField> alpha() const;
         tmp<volScalarField> ft(const volScalarField& S) const;

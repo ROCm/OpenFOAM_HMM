@@ -82,7 +82,7 @@ class SpalartAllmaras
         volScalarField alphaSgs_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Update sub-grid scale fields
         void updateSubGridScaleFields();

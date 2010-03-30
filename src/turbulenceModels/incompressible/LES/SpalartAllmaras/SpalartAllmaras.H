@@ -56,7 +56,7 @@ class SpalartAllmaras
 :
     public LESModel
 {
-    // Private member functions
+    // Private Member Functions
 
         //- Update sub-grid scale fields
         void updateSubGridScaleFields();

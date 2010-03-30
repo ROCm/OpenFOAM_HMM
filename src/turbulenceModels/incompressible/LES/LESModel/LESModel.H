@@ -87,7 +87,7 @@ protected:
         autoPtr<LESdelta> delta_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Print model coefficients
         virtual void printCoeffs();
@@ -156,38 +156,34 @@ public:
 
     // Member Functions
 
-        //- Const access to the coefficients dictionary,
-        //  which provides info. about choice of models,
-        //  and all related data (particularly model coefficients).
-        inline const dictionary& coeffDict() const
-        {
-            return coeffDict_;
-        }
+        // Access
 
-        //- Access function to filter width
-        inline const volScalarField& delta() const
-        {
-            return delta_();
-        }
+            //- Const access to the coefficients dictionary,
+            //  which provides info. about choice of models,
+            //  and all related data (particularly model coefficients).
+            inline const dictionary& coeffDict() const
+            {
+                return coeffDict_;
+            }
 
-        //- Return the lower allowable limit for k (default: SMALL)
-        const dimensionedScalar& kMin() const
-        {
-            return kMin_;
-        }
+            //- Return the lower allowable limit for k (default: SMALL)
+            const dimensionedScalar& kMin() const
+            {
+                return kMin_;
+            }
 
-        //- Allow kMin to be changed
-        dimensionedScalar& kMin()
-        {
-            return kMin_;
-        }
+            //- Allow kMin to be changed
+            dimensionedScalar& kMin()
+            {
+                return kMin_;
+            }
 
+            //- Access function to filter width
+            inline const volScalarField& delta() const
+            {
+                return delta_();
+            }
 
-        //- Return the SGS turbulent kinetic energy.
-        virtual tmp<volScalarField> k() const = 0;
-
-        //- Return the SGS turbulent dissipation.
-        virtual tmp<volScalarField> epsilon() const = 0;
 
         //- Return the SGS viscosity.
         virtual tmp<volScalarField> nuSgs() const = 0;
@@ -243,13 +239,13 @@ public:
         //- Correct Eddy-Viscosity and related properties.
         //  This calls correct(const tmp<volTensorField>& gradU) by supplying
         //  gradU calculated locally.
-        void correct();
+        virtual void correct();
 
         //- Correct Eddy-Viscosity and related properties
         virtual void correct(const tmp<volTensorField>& gradU);
 
         //- Read LESProperties dictionary
-        virtual bool read() = 0;
+        virtual bool read();
 };
 
 

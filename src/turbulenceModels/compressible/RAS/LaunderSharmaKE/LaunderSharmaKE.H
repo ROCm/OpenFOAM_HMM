@@ -44,7 +44,6 @@ Description
 
 SourceFiles
     LaunderSharmaKE.C
-    LaunderSharmaKECorrect.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -91,7 +90,7 @@ class LaunderSharmaKE
             volScalarField alphat_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         tmp<volScalarField> fMu() const;
         tmp<volScalarField> f2() const;

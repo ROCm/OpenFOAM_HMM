@@ -56,7 +56,7 @@ class laminar
 :
     public LESModel
 {
-    // Private member functions
+    // Private Member Functions
 
         // Disallow default bitwise copy construct and assignment
         laminar(const laminar&);

@@ -59,7 +59,7 @@ class SpalartAllmarasDDES
 :
     public SpalartAllmaras
 {
-    // Private member functions
+    // Private Member Functions
 
         tmp<volScalarField> fd(const volScalarField& S) const;
 
