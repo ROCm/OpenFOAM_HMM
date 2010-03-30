@@ -49,10 +49,10 @@ LRR::LRR
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& lamTransportModel
+    transportModel& transport
 )
 :
-    RASModel(typeName, U, phi, lamTransportModel),
+    RASModel(typeName, U, phi, transport),
 
     Cmu_
     (
@@ -191,7 +191,7 @@ LRR::LRR
         (
             "LRR::LRR"
             "(const volVectorField& U, const surfaceScalarField& phi,"
-            "transportModel& lamTransportModel)"
+            "transportModel& transport)"
         )   << "couplingFactor = " << couplingFactor_
             << " is not in range 0 - 1" << nl
             << exit(FatalError);

@@ -45,7 +45,7 @@ turbulenceModel::turbulenceModel
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& lamTransportModel
+    transportModel& transport
 )
 :
     runTime_(U.time()),
@@ -53,7 +53,7 @@ turbulenceModel::turbulenceModel
 
     U_(U),
     phi_(phi),
-    transportModel_(lamTransportModel)
+    transportModel_(transport)
 {}
 
 

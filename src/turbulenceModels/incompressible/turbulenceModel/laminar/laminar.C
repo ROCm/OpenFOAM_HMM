@@ -50,10 +50,10 @@ laminar::laminar
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& lamTransportModel
+    transportModel& transport
 )
 :
-    turbulenceModel(U, phi, lamTransportModel)
+    turbulenceModel(U, phi, transport)
 {}
 
 
@@ -63,10 +63,10 @@ autoPtr<laminar> laminar::New
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& lamTransportModel
+    transportModel& transport
 )
 {
-    return autoPtr<laminar>(new laminar(U, phi, lamTransportModel));
+    return autoPtr<laminar>(new laminar(U, phi, transport));
 }
 
 

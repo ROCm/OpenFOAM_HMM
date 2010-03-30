@@ -109,9 +109,9 @@ public:
             (
                 const volVectorField& U,
                 const surfaceScalarField& phi,
-                transportModel& lamTransportModel
+                transportModel& transport
             ),
-            (U, phi, lamTransportModel)
+            (U, phi, transport)
         );
 
 
@@ -122,7 +122,7 @@ public:
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
-            transportModel& lamTransportModel
+            transportModel& transport
         );
 
 
@@ -133,7 +133,7 @@ public:
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
-            transportModel& lamTransportModel
+            transportModel& transport
         );
 
 

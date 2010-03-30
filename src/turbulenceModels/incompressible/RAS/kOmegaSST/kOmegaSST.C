@@ -91,10 +91,10 @@ kOmegaSST::kOmegaSST
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& lamTransportModel
+    transportModel& transport
 )
 :
-    RASModel(typeName, U, phi, lamTransportModel),
+    RASModel(typeName, U, phi, transport),
 
     alphaK1_
     (

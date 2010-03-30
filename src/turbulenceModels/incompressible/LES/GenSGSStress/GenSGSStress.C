@@ -98,7 +98,7 @@ GenSGSStress::GenSGSStress
         (
             "GenSGSStress::GenSGSStress"
             "(const volVectorField& U, const surfaceScalarField& phi,"
-            "transportModel& lamTransportModel)"
+            "transportModel& transport)"
         )   << "couplingFactor = " << couplingFactor_
             << " is not in range 0 - 1" << nl
             << exit(FatalError);

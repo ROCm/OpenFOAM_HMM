@@ -57,10 +57,10 @@ LESModel::LESModel
     const word& type,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& lamTransportModel
+    transportModel& transport
 )
 :
-    turbulenceModel(U, phi, lamTransportModel),
+    turbulenceModel(U, phi, transport),
 
     IOdictionary
     (
