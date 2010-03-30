@@ -58,7 +58,7 @@ private:
 
         dictionary hollowConeDict_;
 
-        autoPtr<pdf> dropletPDF_;
+        autoPtr<pdfs::pdf> dropletPDF_;
         scalarList innerAngle_;
         scalarList outerAngle_;
 

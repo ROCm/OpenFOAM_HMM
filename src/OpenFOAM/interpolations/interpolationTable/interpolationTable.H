@@ -25,8 +25,8 @@ Class
     Foam::interpolationTable
 
 Description
-    A list of times and values.
-    The time values must be positive and monotonically increasing.
+    An interpolation/look-up table of scalar vs <Type> values.
+    The reference scalar values must be positive and monotonically increasing.
 
     The handling of out-of-bounds values depends on the current setting
     of @a outOfBounds.

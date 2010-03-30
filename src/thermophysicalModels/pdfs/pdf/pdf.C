@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,22 +29,48 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(pdf, 0);
-    defineRunTimeSelectionTable(pdf, dictionary);
+    namespace pdfs
+    {
+        defineTypeNameAndDebug(pdf, 0);
+        defineRunTimeSelectionTable(pdf, dictionary);
+    }
 }
+
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+void Foam::pdfs::pdf::check() const
+{
+    if (minValue() < 0)
+    {
+        FatalErrorIn("pdfs::pdf::check() const")
+            << type() << "PDF: Minimum value must be greater than zero." << nl
+            << "Supplied minValue = " << minValue()
+            << abort(FatalError);
+    }
+
+    if (maxValue() < minValue())
+    {
+        FatalErrorIn("pdfs::pdf::check() const")
+            << type() << "PDF: Maximum value is smaller than the minimum value:"
+            << nl << "    maxValue = " << maxValue()
+            << ", minValue = " << minValue()
+            << abort(FatalError);
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pdf::pdf(const dictionary& dict, Random& rndGen)
+Foam::pdfs::pdf::pdf(const word& name, const dictionary& dict, Random& rndGen)
 :
-    dict_(dict),
+    pdfDict_(dict.subDict(name + "PDF")),
     rndGen_(rndGen)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::pdf::~pdf()
+Foam::pdfs::pdf::~pdf()
 {}
 
 

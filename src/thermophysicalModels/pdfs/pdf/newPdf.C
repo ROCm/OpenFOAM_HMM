@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::pdf> Foam::pdf::New
+Foam::autoPtr<Foam::pdfs::pdf> Foam::pdfs::pdf::New
 (
     const dictionary& dict,
     Random& rndGen
@@ -42,7 +42,7 @@ Foam::autoPtr<Foam::pdf> Foam::pdf::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalErrorIn("pdf::New(const dictionary&, Random&)")
+        FatalErrorIn("pdfs::pdf::New(const dictionary&, Random&)")
             << "unknown pdf type " << pdfType << nl << nl
             << "Valid pdf types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()

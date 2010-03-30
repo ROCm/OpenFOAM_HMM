@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,6 +29,7 @@ Description
 #include "fvCFD.H"
 #include "pdf.H"
 #include "makeGraph.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
@@ -39,22 +40,17 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createFields.H"
 
-    fileName pdfPath = runTime.path()/"pdf";
-    mkDir(pdfPath);
-
-    Random rndGen(label(0));
-
-    autoPtr<pdf> p(pdf::New(pdfDictionary, rndGen));
-
-    scalar xMin = p->minValue();
-    scalar xMax = p->maxValue();
-
     label iCheck = 100;
     for (label i=1; i<=nSamples; i++)
     {
         scalar ps = p->sample();
         label n = label((ps - xMin)*nIntervals/(xMax - xMin));
         samples[n]++;
+
+        if (writeData)
+        {
+            filePtr() << ps << nl;
+        }
 
         if (i % iCheck == 0)
         {
