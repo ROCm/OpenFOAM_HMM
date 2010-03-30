@@ -233,13 +233,13 @@ class autoLayerDriver
                 ) const;
 
                 //- Grow no-extrusion layer.
-                static void growNoExtrusion
+                void growNoExtrusion
                 (
                     const indirectPrimitivePatch& pp,
                     pointField& patchDisp,
                     labelList& patchNLayers,
                     List<extrudeMode>& extrudeStatus
-                );
+                ) const;
 
                 //- Calculate pointwise wanted and minimum thickness.
                 //  thickness: wanted thickness
