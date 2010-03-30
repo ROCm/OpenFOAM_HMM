@@ -78,8 +78,18 @@ Foam::refinementSurfaces::refinementSurfaces
         if (dict.found("faceZone"))
         {
             dict.lookup("faceZone") >> faceZoneNames_[surfI];
-            dict.lookup("cellZone") >> cellZoneNames_[surfI];
-            dict.lookup("zoneInside") >> zoneInside_[surfI];
+            if (dict.readIfPresent("cellZone", cellZoneNames_[surfI]))
+            {
+                dict.lookup("zoneInside") >> zoneInside_[surfI];
+            }
+            else if (dict.found("zoneInside"))
+            {
+                IOWarningIn("refinementSurfaces::refinementSurfaces(..)", dict)
+                    << "Unused entry zoneInside for faceZone "
+                    << faceZoneNames_[surfI]
+                    << " since no cellZone specified."
+                    << endl;
+            }
         }
 
         // Global perpendicular angle
@@ -315,8 +325,21 @@ Foam::refinementSurfaces::refinementSurfaces
             if (dict.found("faceZone"))
             {
                 dict.lookup("faceZone") >> faceZoneNames_[surfI];
-                dict.lookup("cellZone") >> cellZoneNames_[surfI];
-                dict.lookup("zoneInside") >> zoneInside_[surfI];
+                if (dict.readIfPresent("cellZone", cellZoneNames_[surfI]))
+                {
+                    dict.lookup("zoneInside") >> zoneInside_[surfI];
+                }
+                else if (dict.found("zoneInside"))
+                {
+                    IOWarningIn
+                    (
+                        "refinementSurfaces::refinementSurfaces(..)",
+                        dict
+                    )   << "Unused entry zoneInside for faceZone "
+                        << faceZoneNames_[surfI]
+                        << " since no cellZone specified."
+                        << endl;
+                }
             }
 
             // Global perpendicular angle
@@ -476,18 +499,17 @@ Foam::labelList Foam::refinementSurfaces::getNamedSurfaces() const
 // Get indices of closed named surfaces
 Foam::labelList Foam::refinementSurfaces::getClosedNamedSurfaces() const
 {
-    labelList named(getNamedSurfaces());
+    labelList closed(cellZoneNames_.size());
 
-    labelList closed(named.size());
     label closedI = 0;
-
-    forAll(named, i)
+    forAll(cellZoneNames_, surfI)
     {
-        label surfI = named[i];
-
-        if (allGeometry_[surfaces_[surfI]].hasVolumeType())
+        if (cellZoneNames_[surfI].size())
         {
-            closed[closedI++] = surfI;
+            if (allGeometry_[surfaces_[surfI]].hasVolumeType())
+            {
+                closed[closedI++] = surfI;
+            }
         }
     }
     closed.setSize(closedI);
