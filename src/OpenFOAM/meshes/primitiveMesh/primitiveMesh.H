@@ -179,7 +179,7 @@ class primitiveMesh
             mutable vectorField* faceAreasPtr_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Disallow construct as copy
         primitiveMesh(const primitiveMesh&);

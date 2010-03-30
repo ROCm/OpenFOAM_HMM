@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,10 +50,10 @@ laminar::laminar
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& lamTransportModel
+    transportModel& transport
 )
 :
-    turbulenceModel(U, phi, lamTransportModel)
+    turbulenceModel(U, phi, transport)
 {}
 
 
@@ -64,10 +63,10 @@ autoPtr<laminar> laminar::New
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& lamTransportModel
+    transportModel& transport
 )
 {
-    return autoPtr<laminar>(new laminar(U, phi, lamTransportModel));
+    return autoPtr<laminar>(new laminar(U, phi, transport));
 }
 
 
@@ -199,15 +198,15 @@ tmp<fvVectorMatrix> laminar::divDevReff(volVectorField& U) const
 }
 
 
-bool laminar::read()
-{
-    return true;
-}
-
-
 void laminar::correct()
 {
     turbulenceModel::correct();
+}
+
+
+bool laminar::read()
+{
+    return true;
 }
 
 

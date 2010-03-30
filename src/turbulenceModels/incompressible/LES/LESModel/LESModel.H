@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Namespace
     Foam::incompressible::LESModels
@@ -88,7 +87,7 @@ protected:
         autoPtr<LESdelta> delta_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Print model coefficients
         virtual void printCoeffs();
@@ -121,9 +120,9 @@ public:
             (
                 const volVectorField& U,
                 const surfaceScalarField& phi,
-                transportModel& lamTransportModel
+                transportModel& transport
             ),
-            (U, phi, lamTransportModel)
+            (U, phi, transport)
         );
 
 
@@ -135,7 +134,7 @@ public:
             const word& type,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            transportModel& lamTransportModel
+            transportModel& transport
         );
 
 
@@ -146,7 +145,7 @@ public:
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
-            transportModel& lamTransportModel
+            transportModel& transport
         );
 
 
@@ -157,38 +156,34 @@ public:
 
     // Member Functions
 
-        //- Const access to the coefficients dictionary,
-        //  which provides info. about choice of models,
-        //  and all related data (particularly model coefficients).
-        inline const dictionary& coeffDict() const
-        {
-            return coeffDict_;
-        }
+        // Access
 
-        //- Access function to filter width
-        inline const volScalarField& delta() const
-        {
-            return delta_();
-        }
+            //- Const access to the coefficients dictionary,
+            //  which provides info. about choice of models,
+            //  and all related data (particularly model coefficients).
+            inline const dictionary& coeffDict() const
+            {
+                return coeffDict_;
+            }
 
-        //- Return the lower allowable limit for k (default: SMALL)
-        const dimensionedScalar& kMin() const
-        {
-            return kMin_;
-        }
+            //- Return the lower allowable limit for k (default: SMALL)
+            const dimensionedScalar& kMin() const
+            {
+                return kMin_;
+            }
 
-        //- Allow kMin to be changed
-        dimensionedScalar& kMin()
-        {
-            return kMin_;
-        }
+            //- Allow kMin to be changed
+            dimensionedScalar& kMin()
+            {
+                return kMin_;
+            }
 
+            //- Access function to filter width
+            inline const volScalarField& delta() const
+            {
+                return delta_();
+            }
 
-        //- Return the SGS turbulent kinetic energy.
-        virtual tmp<volScalarField> k() const = 0;
-
-        //- Return the SGS turbulent dissipation.
-        virtual tmp<volScalarField> epsilon() const = 0;
 
         //- Return the SGS viscosity.
         virtual tmp<volScalarField> nuSgs() const = 0;
@@ -244,13 +239,13 @@ public:
         //- Correct Eddy-Viscosity and related properties.
         //  This calls correct(const tmp<volTensorField>& gradU) by supplying
         //  gradU calculated locally.
-        void correct();
+        virtual void correct();
 
         //- Correct Eddy-Viscosity and related properties
         virtual void correct(const tmp<volTensorField>& gradU);
 
         //- Read LESProperties dictionary
-        virtual bool read() = 0;
+        virtual bool read();
 };
 
 

@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
     Foam::incompressible::RASModels::kOmegaSST
@@ -92,7 +91,7 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class kOmega Declaration
+                          Class kOmegaSST Declaration
 \*---------------------------------------------------------------------------*/
 
 class kOmegaSST
@@ -130,7 +129,7 @@ class kOmegaSST
             volScalarField nut_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         tmp<volScalarField> F1(const volScalarField& CDkOmega) const;
         tmp<volScalarField> F2() const;
@@ -145,34 +144,22 @@ class kOmegaSST
             return F1*(psi1 - psi2) + psi2;
         }
 
-        tmp<volScalarField> alphaK
-        (
-            const volScalarField& F1
-        ) const
+        tmp<volScalarField> alphaK(const volScalarField& F1) const
         {
             return blend(F1, alphaK1_, alphaK2_);
         }
 
-        tmp<volScalarField> alphaOmega
-        (
-            const volScalarField& F1
-        ) const
+        tmp<volScalarField> alphaOmega(const volScalarField& F1) const
         {
             return blend(F1, alphaOmega1_, alphaOmega2_);
         }
 
-        tmp<volScalarField> beta
-        (
-            const volScalarField& F1
-        ) const
+        tmp<volScalarField> beta(const volScalarField& F1) const
         {
             return blend(F1, beta1_, beta2_);
         }
 
-        tmp<volScalarField> gamma
-        (
-            const volScalarField& F1
-        ) const
+        tmp<volScalarField> gamma(const volScalarField& F1) const
         {
             return blend(F1, gamma1_, gamma2_);
         }

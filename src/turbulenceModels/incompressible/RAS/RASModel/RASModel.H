@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Namespace
     Foam::incompressible::RASModels
@@ -99,7 +98,7 @@ protected:
         nearWallDist y_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Print model coefficients
         virtual void printCoeffs();
@@ -132,9 +131,9 @@ public:
             (
                 const volVectorField& U,
                 const surfaceScalarField& phi,
-                transportModel& lamTransportModel
+                transportModel& transport
             ),
-            (U, phi, lamTransportModel)
+            (U, phi, transport)
         );
 
 
@@ -146,7 +145,7 @@ public:
             const word& type,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            transportModel& lamTransportModel
+            transportModel& transport
         );
 
 
@@ -157,7 +156,7 @@ public:
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
-            transportModel& lamTransportModel
+            transportModel& transport
         );
 
 
@@ -170,7 +169,7 @@ public:
 
         // Access
 
-            //- Return lower allowable limit for k (default: SMALL)
+            //- Return the lower allowable limit for k (default: SMALL)
             const dimensionedScalar& kMin() const
             {
                 return kMin_;
@@ -222,9 +221,6 @@ public:
             }
 
 
-        //- Return the turbulence viscosity
-        virtual tmp<volScalarField> nut() const = 0;
-
         //- Return the effective viscosity
         virtual tmp<volScalarField> nuEff() const
         {
@@ -234,21 +230,6 @@ public:
             );
         }
 
-        //- Return the turbulence kinetic energy
-        virtual tmp<volScalarField> k() const = 0;
-
-        //- Return the turbulence kinetic energy dissipation rate
-        virtual tmp<volScalarField> epsilon() const = 0;
-
-        //- Return the Reynolds stress tensor
-        virtual tmp<volSymmTensorField> R() const = 0;
-
-        //- Return the effective stress tensor including the laminar stress
-        virtual tmp<volSymmTensorField> devReff() const = 0;
-
-        //- Return the source term for the momentum equation
-        virtual tmp<fvVectorMatrix> divDevReff(volVectorField& U) const = 0;
-
         //- Return yPlus for the given patch
         virtual tmp<scalarField> yPlus
         (
@@ -257,10 +238,10 @@ public:
         ) const;
 
         //- Solve the turbulence equations and correct the turbulence viscosity
-        virtual void correct() = 0;
+        virtual void correct();
 
         //- Read RASProperties dictionary
-        virtual bool read() = 0;
+        virtual bool read();
 };
 
 
