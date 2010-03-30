@@ -1,8 +1,4 @@
-CPP        = /lib/cpp $(GFLAGS) -DICC_IA64_PREFETCH
-AR         = ar
-ARFLAGS    = cr
-RANLIB     = ranlib
-LD         = ld
+CPP        = cpp -DICC_IA64_PREFETCH
 
 GLIBS      = -liberty
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,9 +35,7 @@ Description
     strength only has meaning if there's more than one pdf
 
 SourceFiles
-    normalI.H
     normal.C
-    normalIO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -50,6 +48,8 @@ SourceFiles
 
 namespace Foam
 {
+namespace pdfs
+{
 
 /*---------------------------------------------------------------------------*\
                            Class normal Declaration
@@ -61,17 +61,20 @@ class normal
 {
     // Private data
 
-        dictionary pdfDict_;
 
-        //- min and max values of the distribution
+        //- Distribution minimum
         scalar minValue_;
+
+        //- Distribution maximum
         scalar maxValue_;
 
-        List<scalar> expectation_;
-        List<scalar> variance_;
-        List<scalar> strength_;
 
-        scalar range_;
+        // Model coefficients
+
+            scalar expectation_;
+            scalar variance_;
+
+            scalar a_;
 
 
 public:
@@ -104,11 +107,14 @@ public:
 
         //- Return the maximum value
         virtual scalar maxValue() const;
+
+        scalar erfInv(const scalar y) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace pdfs
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

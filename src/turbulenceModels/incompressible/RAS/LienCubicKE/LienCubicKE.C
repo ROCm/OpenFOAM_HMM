@@ -173,12 +173,12 @@ LienCubicKE::LienCubicKE
     gradU_(fvc::grad(U)),
     eta_
     (
-        k_/(epsilon_ + epsilonMin_)
+        k_/bound(epsilon_, epsilonMin_)
        *sqrt(2.0*magSqr(0.5*(gradU_ + gradU_.T())))
     ),
     ksi_
     (
-        k_/(epsilon_ + epsilonMin_)
+        k_/epsilon_
        *sqrt(2.0*magSqr(0.5*(gradU_ - gradU_.T())))
     ),
     Cmu_(2.0/(3.0*(A1_ + eta_ + alphaKsi_*ksi_))),
@@ -235,7 +235,7 @@ LienCubicKE::LienCubicKE
     )
 {
     bound(k_, kMin_);
-    bound(epsilon_, epsilonMin_);
+    // already bounded: bound(epsilon_, epsilonMin_);
 
     nut_ = Cmu_*sqr(k_)/epsilon_ + C5viscosity_;
     nut_.correctBoundaryConditions();

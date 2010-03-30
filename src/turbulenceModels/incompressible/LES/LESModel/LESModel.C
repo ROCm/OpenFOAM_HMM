@@ -81,7 +81,7 @@ LESModel::LESModel
     kMin_("kMin", sqr(dimVelocity), SMALL),
     delta_(LESdelta::New("delta", U.mesh(), *this))
 {
-    readIfPresent("kMin", kMin_);
+    kMin_.readIfPresent(*this);
 
     // Force the construction of the mesh deltaCoeffs which may be needed
     // for the construction of the derived models and BCs

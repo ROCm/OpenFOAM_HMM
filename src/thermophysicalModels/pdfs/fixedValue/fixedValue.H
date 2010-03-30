@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,40 +22,78 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-InNamespace
-    Foam
+Class
+    Foam::fixedValue
 
 Description
-    Bound the given scalar field if it has gone unbounded.
-
-    Used extensively in RAS and LES turbulence models, but also of use
-    within solvers.
+    Returns a fixed value
 
 SourceFiles
-    bound.C
+    fixedValue.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef bound_H
-#define bound_H
+#ifndef pdfFixedValue_H
+#define pdfFixedValue_H
 
-#include "dimensionedScalar.H"
-#include "volFieldsFwd.H"
+#include "pdf.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace pdfs
+{
+/*---------------------------------------------------------------------------*\
+                       Class fixedValue Declaration
+\*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+class fixedValue
+:
+    public pdf
+{
+    // Private data
 
-//- Bound the given scalar field if it has gone unbounded.
-//  Return the bounded field.
-//  Used extensively in RAS and LES turbulence models.
-volScalarField& bound(volScalarField&, const dimensionedScalar& lowerBound);
+        //- Fixed value
+        scalar value_;
+
+
+public:
+
+    //- Runtime type information
+    TypeName("fixedValue");
+
+
+    // Constructors
+
+        //- Construct from components
+        fixedValue
+        (
+            const dictionary& dict,
+            Random& rndGen
+        );
+
+
+    //- Destructor
+    virtual ~fixedValue();
+
+
+    // Member Functions
+
+         //- Sample the pdf
+        virtual scalar sample() const;
+
+        //- Return the minimum value
+        virtual scalar minValue() const;
+
+        //- Return the maximum value
+        virtual scalar maxValue() const;
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace pdfs
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

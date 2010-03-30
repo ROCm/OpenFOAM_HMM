@@ -64,7 +64,7 @@ private:
 
         dictionary ChomiakDict_;
 
-        autoPtr<pdf> dropletPDF_;
+        autoPtr<pdfs::pdf> dropletPDF_;
         scalarList maxSprayAngle_;
 
 

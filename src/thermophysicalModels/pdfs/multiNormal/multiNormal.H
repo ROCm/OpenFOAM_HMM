@@ -22,40 +22,97 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-InNamespace
-    Foam
+Class
+    Foam::multiNormal
 
 Description
-    Bound the given scalar field if it has gone unbounded.
+    A multiNormal pdf
 
-    Used extensively in RAS and LES turbulence models, but also of use
-    within solvers.
+    @verbatim
+        pdf = sum_i strength_i * exp(-0.5*((x - expectation_i)/variance_i)^2 )
+    @endverbatim
+
 
 SourceFiles
-    bound.C
+    multiNormal.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef bound_H
-#define bound_H
+#ifndef multiNormal_H
+#define multiNormal_H
 
-#include "dimensionedScalar.H"
-#include "volFieldsFwd.H"
+#include "pdf.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace pdfs
+{
 
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+/*---------------------------------------------------------------------------*\
+                        Class multiNormal Declaration
+\*---------------------------------------------------------------------------*/
 
-//- Bound the given scalar field if it has gone unbounded.
-//  Return the bounded field.
-//  Used extensively in RAS and LES turbulence models.
-volScalarField& bound(volScalarField&, const dimensionedScalar& lowerBound);
+class multiNormal
+:
+    public pdf
+{
+    // Private data
+
+        //- Distribution minimum
+        scalar minValue_;
+
+        //- Distribution maximum
+        scalar maxValue_;
+
+        //- Distribution range
+        scalar range_;
+
+
+        // Model coefficients
+
+            List<scalar> expectation_;
+            List<scalar> variance_;
+            List<scalar> strength_;
+
+
+public:
+
+    //- Runtime type information
+    TypeName("multiNormal");
+
+
+    // Constructors
+
+        //- Construct from components
+        multiNormal
+        (
+            const dictionary& dict,
+            Random& rndGen
+        );
+
+
+    //- Destructor
+    virtual ~multiNormal();
+
+
+    // Member Functions
+
+        //- Sample the pdf
+        virtual scalar sample() const;
+
+        //- Return the minimum value
+        virtual scalar minValue() const;
+
+        //- Return the maximum value
+        virtual scalar maxValue() const;
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace pdfs
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
