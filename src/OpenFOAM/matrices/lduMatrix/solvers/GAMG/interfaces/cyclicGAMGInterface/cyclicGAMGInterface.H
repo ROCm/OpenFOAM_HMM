@@ -132,9 +132,9 @@ public:
                 return fineCyclicInterface_.owner();
             }
 
-            virtual const cyclicLduInterface& neighbPatch() const
+            virtual const cyclicGAMGInterface& neighbPatch() const
             {
-                return dynamic_cast<const cyclicLduInterface&>
+                return dynamic_cast<const cyclicGAMGInterface&>
                 (
                     coarseInterfaces_[neighbPatchID()]
                 );

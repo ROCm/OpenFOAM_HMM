@@ -81,8 +81,11 @@ void Foam::cyclicGAMGInterfaceField::updateInterfaceMatrix
     const Pstream::commsTypes
 ) const
 {
-    // 'send' neighbouring field
-    scalarField pnf(cyclicInterface_.interfaceInternalField(psiInternal)());
+    // Get neighbouring field
+    scalarField pnf
+    (
+        cyclicInterface_.neighbPatch().interfaceInternalField(psiInternal)
+    );
 
     transformCoupleField(pnf, cmpt);
 

@@ -63,20 +63,6 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
     ),
     fineCyclicInterface_(refCast<const cyclicLduInterface>(fineInterface))
 {
-//    //if (debug)
-//    {
-//        Pout<< "On fineInterface " << index << " with faceCells:"
-//            << fineInterface.faceCells() << endl;
-//        forAll(localRestrictAddressing, ffi)
-//        {
-//            Pout<< "    local face " << ffi
-//                << " is on agglom cell " << localRestrictAddressing[ffi]
-//                << "        nbr face on agglom cell "
-//                << neighbourRestrictAddressing[ffi]
-//                << endl;
-//        }
-//    }
-
     // Make a lookup table of entries for owner/neighbour
     Map<SLList<label> > neighboursTable
     (
@@ -168,8 +154,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
 
 
 
-    //faceCells_.setSize(nCoarseFaces, -1);
-    faceCells_.setSize(2*nCoarseFaces);
+    faceCells_.setSize(nCoarseFaces, -1);
     faceRestrictAddressing_.setSize(localRestrictAddressing.size());
 
     labelList contents = neighboursTable.toc();
@@ -177,7 +162,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
     // Reset face counter for re-use
     nCoarseFaces = 0;
 
-//    if (owner())
+    if (owner())
     {
         // On master side, the owner addressing is stored in table of contents
         forAll (contents, masterI)
@@ -188,9 +173,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
                 faceFaceTable.find(contents[masterI])();
 
             SLList<label>::iterator nbrsIter = curNbrs.begin();
-
-            SLList<SLList<label> >::iterator faceFacesIter =
-                curFaceFaces.begin();
+            SLList<SLList<label> >::iterator faceFacesIter = curFaceFaces.begin();
 
             for
             (
@@ -215,7 +198,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
             }
         }
     }
-//    else
+    else
     {
         // On slave side, the owner addressing is stored in linked lists
         forAll (contents, masterI)
@@ -227,8 +210,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
 
             SLList<label>::iterator nbrsIter = curNbrs.begin();
 
-            SLList<SLList<label> >::iterator faceFacesIter =
-                curFaceFaces.begin();
+            SLList<SLList<label> >::iterator faceFacesIter = curFaceFaces.begin();
 
             for
             (
@@ -253,24 +235,6 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
             }
         }
     }
-
-
-//    //if (debug)
-//    {
-//        Pout<< "On fineInterface " << index << " with faceCells:"
-//            << fineInterface.faceCells() << endl;
-//        forAll(faceRestrictAddressing_, ffi)
-//        {
-//            Pout<< "    local face " << ffi
-//                << " gets agglomerated into coarse local face "
-//                << faceRestrictAddressing_[ffi]
-//                << " with coarse cells:" << endl;
-//            forAll(faceCells_, i)
-//            {
-//                Pout<< "        " << faceCells_[i] << endl;
-//            }
-//        }
-//    }
 }
 
 
