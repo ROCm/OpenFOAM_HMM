@@ -81,7 +81,8 @@ public:
             const vtkMesh&,
             const bool binary,
             const fileName&,
-            const word&
+            const word&,
+            const bool dummyCloud
         );
 
 
