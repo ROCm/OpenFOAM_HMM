@@ -7,7 +7,8 @@ unitTestCases/singleCyclic/
 OK - test cyclics sequential running.
 unitTestCases/singleCyclic/
 
-OK - test decomposePar
+- test decomposePar
+fails on channel395-splitCyclic
 
 OK - FaceCellWave
     unitTestCases/twoCavityCyclicForWallDistance/
@@ -20,11 +21,14 @@ OK - parallel finite volume with processorCyclic: channelFoam
 
 OK - preProcessing/foamUpgradeCyclics
 
-OK - amg.
-Tested on unitTestCases/singleCyclic/
+OK - gamg - sequential.
+Tested on channel-395 with GAMG.
 
 - initTransfer in GAMGprocessorInterfaces using nonblocking+tags
 untested.
+
+- gamg parallel.
+
 
 - test createPatch pointSync
 - pointFields on cyclics. volPointInterpolation.
