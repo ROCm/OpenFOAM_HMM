@@ -166,11 +166,6 @@ void Foam::vtkPV3blockMesh::convertMeshEdges
             continue;
         }
 
-        OStringStream ostr;
-
-        ostr<< edges[edgeI].start() << ":" << edges[edgeI].end() << " - "
-            << edges[edgeI].type();
-
         // search each block
         forAll(blkMesh, blockI)
         {
