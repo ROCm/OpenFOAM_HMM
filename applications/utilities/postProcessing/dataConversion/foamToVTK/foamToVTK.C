@@ -375,6 +375,44 @@ int main(int argc, char *argv[])
     // mesh wrapper; does subsetting and decomposition
     vtkMesh vMesh(mesh, cellSetName);
 
+
+    // Scan for all possible lagrangian clouds
+    HashSet<fileName> allCloudDirs;
+    forAll(timeDirs, timeI)
+    {
+        runTime.setTime(timeDirs[timeI], timeI);
+        fileNameList cloudDirs
+        (
+            readDir
+            (
+                runTime.timePath()/regionPrefix/cloud::prefix,
+                fileName::DIRECTORY
+            )
+        );
+        forAll(cloudDirs, i)
+        {
+            IOobjectList sprayObjs
+            (
+                mesh,
+                runTime.timeName(),
+                cloud::prefix/cloudDirs[i]
+            );
+
+            IOobject* positionsPtr = sprayObjs.lookup("positions");
+
+            if (positionsPtr)
+            {
+                if (allCloudDirs.insert(cloudDirs[i]))
+                {
+                    Info<< "At time: " << runTime.timeName()
+                        << " detected cloud directory : " << cloudDirs[i]
+                        << endl;
+                }
+            }
+        }
+    }
+
+
     forAll(timeDirs, timeI)
     {
         runTime.setTime(timeDirs[timeI], timeI);
@@ -926,38 +964,33 @@ int main(int argc, char *argv[])
         //
         //---------------------------------------------------------------------
 
-        fileNameList cloudDirs
-        (
-            readDir
-            (
-                runTime.timePath()/regionPrefix/cloud::prefix,
-                fileName::DIRECTORY
-            )
-        );
-
-        forAll(cloudDirs, i)
+        forAllConstIter(HashSet<fileName>, allCloudDirs, iter)
         {
+            const fileName& cloudName = iter.key();
+
+            // Always create the cloud directory.
+            mkDir(fvPath/cloud::prefix/cloudName);
+
+            fileName lagrFileName
+            (
+                fvPath/cloud::prefix/cloudName/cloudName
+              + "_" + timeDesc + ".vtk"
+            );
+
+            Info<< "    Lagrangian: " << lagrFileName << endl;
+
+
             IOobjectList sprayObjs
             (
                 mesh,
                 runTime.timeName(),
-                cloud::prefix/cloudDirs[i]
+                cloud::prefix/cloudName
             );
 
             IOobject* positionsPtr = sprayObjs.lookup("positions");
 
             if (positionsPtr)
             {
-                mkDir(fvPath/cloud::prefix/cloudDirs[i]);
-
-                fileName lagrFileName
-                (
-                    fvPath/cloud::prefix/cloudDirs[i]/cloudDirs[i]
-                  + "_" + timeDesc + ".vtk"
-                );
-
-                Info<< "    Lagrangian: " << lagrFileName << endl;
-
                 wordList labelNames(sprayObjs.names(labelIOField::typeName));
                 Info<< "        labels            :";
                 print(Info, labelNames);
@@ -999,18 +1032,19 @@ int main(int argc, char *argv[])
                     vMesh,
                     binary,
                     lagrFileName,
-                    cloudDirs[i]
+                    cloudName,
+                    false
                 );
 
                 // Write number of fields
                 writer.writeParcelHeader
                 (
                     labelNames.size()
-                + scalarNames.size()
-                + vectorNames.size()
-                + sphereNames.size()
-                + symmNames.size()
-                + tensorNames.size()
+                  + scalarNames.size()
+                  + vectorNames.size()
+                  + sphereNames.size()
+                  + symmNames.size()
+                  + tensorNames.size()
                 );
 
                 // Fields
@@ -1020,6 +1054,20 @@ int main(int argc, char *argv[])
                 writer.writeIOField<sphericalTensor>(sphereNames);
                 writer.writeIOField<symmTensor>(symmNames);
                 writer.writeIOField<tensor>(tensorNames);
+            }
+            else
+            {
+                lagrangianWriter writer
+                (
+                    vMesh,
+                    binary,
+                    lagrFileName,
+                    cloudName,
+                    true
+                );
+
+                // Write number of fields
+                writer.writeParcelHeader(0);
             }
         }
     }
