@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,10 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Application
+    splitMeshRegions
 
 Description
     Splits mesh into multiple regions.
@@ -32,6 +34,7 @@ Description
     - any face inbetween differing cellZones (-cellZones)
 
     Output is:
+    - volScalarField with regions as different scalars (-detectOnly) or
     - mesh with multiple regions or
     - mesh with cells put into cellZones (-makeCellZones)
 
@@ -47,7 +50,13 @@ Description
     - useCellZonesOnly does not do a walk and uses the cellZones only. Use
     this if you don't mind having disconnected domains in a single region.
     This option requires all cells to be in one (and one only) cellZone.
-
+    - writes maps like decomposePar back to original mesh:
+        - pointRegionAddressing : for every point in this region the point in
+        the original mesh
+        - cellRegionAddressing  :   ,,      cell                ,,  cell    ,,
+        - faceRegionAddressing  :   ,,      face                ,,  face in
+        the original mesh + 'turning index'. For a face in the same orientation
+        this is the original facelabel+1, for a turned face this is -facelabel-1
 \*---------------------------------------------------------------------------*/
 
 #include "SortableList.H"

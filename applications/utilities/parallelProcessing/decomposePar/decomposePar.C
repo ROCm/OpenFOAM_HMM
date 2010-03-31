@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
     decomposePar
@@ -334,6 +333,14 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     PtrList<surfaceScalarField> surfaceScalarFields;
     readFields(mesh, objects, surfaceScalarFields);
+    PtrList<surfaceVectorField> surfaceVectorFields;
+    readFields(mesh, objects, surfaceVectorFields);
+    PtrList<surfaceSphericalTensorField> surfaceSphericalTensorFields;
+    readFields(mesh, objects, surfaceSphericalTensorFields);
+    PtrList<surfaceSymmTensorField> surfaceSymmTensorFields;
+    readFields(mesh, objects, surfaceSymmTensorFields);
+    PtrList<surfaceTensorField> surfaceTensorFields;
+    readFields(mesh, objects, surfaceTensorFields);
 
 
     // Construct the point fields
@@ -619,6 +626,10 @@ int main(int argc, char *argv[])
          || volSymmTensorFields.size()
          || volTensorFields.size()
          || surfaceScalarFields.size()
+         || surfaceVectorFields.size()
+         || surfaceSphericalTensorFields.size()
+         || surfaceSymmTensorFields.size()
+         || surfaceTensorFields.size()
         )
         {
             labelIOList faceProcAddressing
@@ -650,6 +661,10 @@ int main(int argc, char *argv[])
             fieldDecomposer.decomposeFields(volTensorFields);
 
             fieldDecomposer.decomposeFields(surfaceScalarFields);
+            fieldDecomposer.decomposeFields(surfaceVectorFields);
+            fieldDecomposer.decomposeFields(surfaceSphericalTensorFields);
+            fieldDecomposer.decomposeFields(surfaceSymmTensorFields);
+            fieldDecomposer.decomposeFields(surfaceTensorFields);
         }
 
 

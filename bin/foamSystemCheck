@@ -9,10 +9,10 @@
 # License
 #     This file is part of OpenFOAM.
 #
-#     OpenFOAM is free software; you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by the
-#     Free Software Foundation; either version 2 of the License, or (at your
-#     option) any later version.
+#     OpenFOAM is free software: you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
 #
 #     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
 #     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -20,8 +20,7 @@
 #     for more details.
 #
 #     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM; if not, write to the Free Software Foundation,
-#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
 #     foamSystemCheck
@@ -38,31 +37,32 @@ FOAM_VERSION=1.6
 
 HLINE="-----------------------------------------------------------------------"
 WIDTH=16
-unset FATALERROR
+unset fatalError
 
 # FUNCTIONS
 # ~~~~~~~~~
-heading () {
-    echo ""
+heading()
+{
+    echo
     echo "$1"
     echo "$HLINE"
 }
 
-lenBase () {
+lenBase()
+{
     echo $1 | tr -d " " | wc -m | tr -d " "
 }
 
-length () {
+length()
+{
     NOCHAR=$(lenBase $1)
     NOCHAR=$(expr $NOCHAR - 1)
-    if [ $NOCHAR -eq -1 ]
-    then
-        NOCHAR=0
-    fi
+    [ $NOCHAR -ge 0 ] || NOCHAR=0
     echo $NOCHAR
 }
 
-fixlen () {
+fixlen()
+{
     WORD=$1
     ONELEN=$(length "$1")
     LDIFF=$(expr $ONELEN - $2)
@@ -86,48 +86,43 @@ fixlen () {
 heading "Checking basic system..."
 
 # check shell
-echo "$(fixlen "Shell:" $WIDTH) $SHELL"
+echo "$(fixlen Shell: $WIDTH) $SHELL"
 case "$SHELL" in
-*/csh | */tcsh)
-    USER_CONFIG_TYPE=cshrc
-    ;;
-*/bash | */ksh)
-    USER_CONFIG_TYPE=bashrc
+*/csh | */tcsh | */bash | */ksh)
     ;;
 *)
-    USER_CONFIG_TYPE=""
-    echo "FATALERROR: Cannot identify the current shell."
-    echo "            OpenFOAM ${FOAM_VERSION} is compatible"
-    echo "            with csh, tcsh, ksh and bash."
+    echo "ERROR: Cannot identify the current shell."
+    echo "       OpenFOAM $FOAM_VERSION is compatible"
+    echo "       with csh, tcsh, ksh and bash."
     echo
-    FATALERROR=yes
+    fatalError=true
     ;;
 esac
 
 # check hostname
 HOST=$(uname -n)
-echo "$(fixlen "Host:" $WIDTH) $HOST"
+echo "$(fixlen Host: $WIDTH) $HOST"
 if [ $(length $HOST) -eq 0 ]
 then
-    echo "FATALERROR: Cannot stat hostname."
-    echo "            OpenFOAM ${FOAM_VERSION} needs a valid hostname to function."
-    echo "            Contact your system administrator. "
+    echo "ERROR: Cannot stat hostname."
+    echo "       OpenFOAM $FOAM_VERSION needs a valid hostname to function."
+    echo "       Contact your system administrator. "
     echo
-    FATALERROR=yes
+    fatalError=true
 fi
 
 # check os
-OS=$(uname -s)
-case "$OS" in
+OSTYPE=$(uname -s)
+case "$OSTYPE" in
 Linux | LinuxAMD64 | SunOS )
-    echo "$(fixlen "OS:" $WIDTH) ${OS} version $(uname -r)"
+    echo "$(fixlen OS: $WIDTH) $OSTYPE version $(uname -r)"
     ;;
 *)
-    echo "FATALERROR: Incompatible operating system \"$OS\"."
-    echo "            OpenFOAM ${FOAM_VERSION} is currently available for "
-    echo "            Linux, LinuxAMD64 and SunOS only."
+    echo "ERROR: Incompatible operating system \"$OSTYPE\"."
+    echo "       OpenFOAM $FOAM_VERSION is currently available for "
+    echo "       Linux, LinuxAMD64 and SunOS only."
     echo
-    FATALERROR=yes
+    fatalError=true
     ;;
 esac
 
@@ -139,20 +134,20 @@ then
     USER_NAME=$USER
 fi
 
-echo "$(fixlen "User:" $WIDTH) ${USER_NAME}"
+echo "$(fixlen User: $WIDTH) ${USER_NAME}"
 if [ $(length $USER_NAME) -eq 0 ]
 then
-    echo "FATALERROR: Cannot stat user name ${USER_NAME}."
-    echo "            OpenFOAM ${FOAM_VERSION} needs a valid user name."
-    echo "            Contact your system administrator. "
-    echo ""
-    FATALERROR=yes
+    echo "ERROR: Cannot stat user name $USER_NAME."
+    echo "       OpenFOAM $FOAM_VERSION needs a valid user name."
+    echo "       Contact your system administrator. "
+    echo
+    fatalError=true
 fi
 
 
-echo ""
-echo ""
-if [ -n "$FATALERROR" ]
+echo
+echo
+if [ "$fatalError" = true ]
 then
     echo "System check: FAIL"
     echo "=================="

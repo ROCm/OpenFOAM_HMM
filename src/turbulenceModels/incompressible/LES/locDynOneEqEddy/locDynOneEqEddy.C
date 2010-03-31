@@ -2,16 +2,16 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -119,6 +118,8 @@ locDynOneEqEddy::locDynOneEqEddy
     filterPtr_(LESfilter::New(U.mesh(), coeffDict())),
     filter_(filterPtr_())
 {
+    bound(k_, kMin_);
+
     volScalarField KK = 0.5*(filter_(magSqr(U)) - magSqr(filter_(U)));
     updateSubGridScaleFields(symm(fvc::grad(U)), KK);
 
@@ -139,7 +140,7 @@ void locDynOneEqEddy::correct(const tmp<volTensorField>& gradU)
 
     volScalarField P = 2.0*nuSgs_*magSqr(D);
 
-    fvScalarMatrix kEqn
+    tmp<fvScalarMatrix> kEqn
     (
        fvm::ddt(k_)
      + fvm::div(phi(), k_)
@@ -149,10 +150,10 @@ void locDynOneEqEddy::correct(const tmp<volTensorField>& gradU)
      - fvm::Sp(ce(D, KK)*sqrt(k_)/delta(), k_)
     );
 
-    kEqn.relax();
-    kEqn.solve();
+    kEqn().relax();
+    kEqn().solve();
 
-    bound(k_, k0());
+    bound(k_, kMin_);
 
     updateSubGridScaleFields(D, KK);
 }

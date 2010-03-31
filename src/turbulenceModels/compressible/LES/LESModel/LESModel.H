@@ -2,16 +2,16 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Namespace
     Foam::compressible::LESModels
@@ -83,7 +82,7 @@ protected:
         Switch printCoeffs_;
         dictionary coeffDict_;
 
-        dimensionedScalar k0_;
+        dimensionedScalar kMin_;
 
         autoPtr<LESdelta> delta_;
 
@@ -170,16 +169,16 @@ public:
                 return coeffDict_;
             }
 
-            //- Return the value of k0 which k is not allowed to be less than
-            const dimensionedScalar& k0() const
+            //- Return the lower allowable limit for k (default: SMALL)
+            const dimensionedScalar& kMin() const
             {
-                return k0_;
+                return kMin_;
             }
 
-            //- Allow k0 to be changed
-            dimensionedScalar& k0()
+            //- Allow kMin to be changed
+            dimensionedScalar& kMin()
             {
-                return k0_;
+                return kMin_;
             }
 
             //- Access function to filter width

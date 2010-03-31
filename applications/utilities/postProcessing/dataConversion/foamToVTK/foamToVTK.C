@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
     foamToVTK
@@ -376,6 +375,44 @@ int main(int argc, char *argv[])
     // mesh wrapper; does subsetting and decomposition
     vtkMesh vMesh(mesh, cellSetName);
 
+
+    // Scan for all possible lagrangian clouds
+    HashSet<fileName> allCloudDirs;
+    forAll(timeDirs, timeI)
+    {
+        runTime.setTime(timeDirs[timeI], timeI);
+        fileNameList cloudDirs
+        (
+            readDir
+            (
+                runTime.timePath()/regionPrefix/cloud::prefix,
+                fileName::DIRECTORY
+            )
+        );
+        forAll(cloudDirs, i)
+        {
+            IOobjectList sprayObjs
+            (
+                mesh,
+                runTime.timeName(),
+                cloud::prefix/cloudDirs[i]
+            );
+
+            IOobject* positionsPtr = sprayObjs.lookup("positions");
+
+            if (positionsPtr)
+            {
+                if (allCloudDirs.insert(cloudDirs[i]))
+                {
+                    Info<< "At time: " << runTime.timeName()
+                        << " detected cloud directory : " << cloudDirs[i]
+                        << endl;
+                }
+            }
+        }
+    }
+
+
     forAll(timeDirs, timeI)
     {
         runTime.setTime(timeDirs[timeI], timeI);
@@ -490,9 +527,9 @@ int main(int argc, char *argv[])
         if (noPointValues)
         {
             Info<< "    pointScalarFields : switched off"
-                << " (\"-noPointValues\" option)\n";
+                << " (\"-noPointValues\" (at your option)\n";
             Info<< "    pointVectorFields : switched off"
-                << " (\"-noPointValues\" option)\n";
+                << " (\"-noPointValues\" (at your option)\n";
         }
 
         PtrList<pointScalarField> psf;
@@ -927,38 +964,33 @@ int main(int argc, char *argv[])
         //
         //---------------------------------------------------------------------
 
-        fileNameList cloudDirs
-        (
-            readDir
-            (
-                runTime.timePath()/regionPrefix/cloud::prefix,
-                fileName::DIRECTORY
-            )
-        );
-
-        forAll(cloudDirs, i)
+        forAllConstIter(HashSet<fileName>, allCloudDirs, iter)
         {
+            const fileName& cloudName = iter.key();
+
+            // Always create the cloud directory.
+            mkDir(fvPath/cloud::prefix/cloudName);
+
+            fileName lagrFileName
+            (
+                fvPath/cloud::prefix/cloudName/cloudName
+              + "_" + timeDesc + ".vtk"
+            );
+
+            Info<< "    Lagrangian: " << lagrFileName << endl;
+
+
             IOobjectList sprayObjs
             (
                 mesh,
                 runTime.timeName(),
-                cloud::prefix/cloudDirs[i]
+                cloud::prefix/cloudName
             );
 
             IOobject* positionsPtr = sprayObjs.lookup("positions");
 
             if (positionsPtr)
             {
-                mkDir(fvPath/cloud::prefix/cloudDirs[i]);
-
-                fileName lagrFileName
-                (
-                    fvPath/cloud::prefix/cloudDirs[i]/cloudDirs[i]
-                  + "_" + timeDesc + ".vtk"
-                );
-
-                Info<< "    Lagrangian: " << lagrFileName << endl;
-
                 wordList labelNames(sprayObjs.names(labelIOField::typeName));
                 Info<< "        labels            :";
                 print(Info, labelNames);
@@ -1000,18 +1032,19 @@ int main(int argc, char *argv[])
                     vMesh,
                     binary,
                     lagrFileName,
-                    cloudDirs[i]
+                    cloudName,
+                    false
                 );
 
                 // Write number of fields
                 writer.writeParcelHeader
                 (
                     labelNames.size()
-                + scalarNames.size()
-                + vectorNames.size()
-                + sphereNames.size()
-                + symmNames.size()
-                + tensorNames.size()
+                  + scalarNames.size()
+                  + vectorNames.size()
+                  + sphereNames.size()
+                  + symmNames.size()
+                  + tensorNames.size()
                 );
 
                 // Fields
@@ -1021,6 +1054,20 @@ int main(int argc, char *argv[])
                 writer.writeIOField<sphericalTensor>(sphereNames);
                 writer.writeIOField<symmTensor>(symmNames);
                 writer.writeIOField<tensor>(tensorNames);
+            }
+            else
+            {
+                lagrangianWriter writer
+                (
+                    vMesh,
+                    binary,
+                    lagrFileName,
+                    cloudName,
+                    true
+                );
+
+                // Write number of fields
+                writer.writeParcelHeader(0);
             }
         }
     }
