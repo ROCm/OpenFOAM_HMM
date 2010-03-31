@@ -649,7 +649,7 @@ public:
                     labelHashSet* setPtr = NULL
                 ) const;
 
-                //- Check for concave cells
+                //- Check for concave cells by the planes of faces
                 bool checkConcaveCells
                 (
                     const bool report = false,
