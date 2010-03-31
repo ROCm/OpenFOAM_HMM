@@ -2111,15 +2111,12 @@ bool Foam::primitiveMesh::checkConcaveCells
     const labelList& fOwner = faceOwner();
     const vectorField& fAreas = faceAreas();
     const pointField& fCentres = faceCentres();
-    const pointField& pts = points();
 
     label nConcaveCells = 0;
 
     forAll (c, cellI)
     {
         const cell& cFaces = c[cellI];
-
-        const labelList& cPoints = cellPoints()[cellI];
 
         bool concave = false;
 
@@ -2134,8 +2131,6 @@ bool Foam::primitiveMesh::checkConcaveCells
 
             const point& fC = fCentres[fI];
 
-            const face& f = faces()[fI];
-
             vector fN = fAreas[fI];
 
             fN /= max(mag(fN), VSMALL);
@@ -2147,45 +2142,42 @@ bool Foam::primitiveMesh::checkConcaveCells
                 fN *= -1;
             }
 
-            // Is any vertex of the cell on the wrong side of the
-            // plane of this face?
+            // Is the centre of any other face of the cell on the
+            // wrong side of the plane of this face?
 
-            forAll(cPoints, cPtI)
+            forAll(cFaces, j)
             {
-                label ptI = cPoints[cPtI];
-
-                // Skip points that are on this face
-                if (findIndex(f, ptI) > -1)
+                if (j != i)
                 {
-                    continue;
-                }
+                    label fJ = cFaces[j];
 
-                const point& pt = pts[ptI];
+                    const point& pt = fCentres[fJ];
 
-                // If the cell is concave, the point will be on the
-                // positive normal side of the plane of f, defined by
-                // its centre and normal, and the angle between (pt -
-                // fC) and fN will be less than 90 degrees, so the dot
-                // product will be positive.
+                    // If the cell is concave, the point will be on the
+                    // positive normal side of the plane of f, defined by
+                    // its centre and normal, and the angle between (pt -
+                    // fC) and fN will be less than 90 degrees, so the dot
+                    // product will be positive.
 
-                vector pC = (pt - fC);
+                    vector pC = (pt - fC);
 
-                pC /= max(mag(pC), VSMALL);
+                    pC /= max(mag(pC), VSMALL);
 
-                if ((pC & fN) > -planarCosAngle_)
-                {
-                    // Concave or planar face
-
-                    concave = true;
-
-                    if (setPtr)
+                    if ((pC & fN) > -planarCosAngle_)
                     {
-                        setPtr->insert(cellI);
+                        // Concave or planar face
+
+                        concave = true;
+
+                        if (setPtr)
+                        {
+                            setPtr->insert(cellI);
+                        }
+
+                        nConcaveCells++;
+
+                        break;
                     }
-
-                    nConcaveCells++;
-
-                    break;
                 }
             }
         }
@@ -2197,8 +2189,8 @@ bool Foam::primitiveMesh::checkConcaveCells
     {
         if (debug || report)
         {
-            Info<< " ***Concave cells found, number of cells: "
-                << nConcaveCells << endl;
+            Info<< " ***Concave cells (using face planes) found,"
+                << " number of cells: " << nConcaveCells << endl;
         }
 
         return true;
