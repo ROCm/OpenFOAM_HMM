@@ -291,6 +291,9 @@ class primitiveMesh
             //- Skewness warning threshold
             static scalar skewThreshold_;
 
+            //- Threshold where faces are considered coplanar
+            static scalar planarCosAngle_;
+
 
 protected:
 
@@ -641,6 +644,13 @@ public:
 
                 //- Check cell determinant
                 bool checkCellDeterminant
+                (
+                    const bool report = false,
+                    labelHashSet* setPtr = NULL
+                ) const;
+
+                //- Check for concave cells
+                bool checkConcaveCells
                 (
                     const bool report = false,
                     labelHashSet* setPtr = NULL
