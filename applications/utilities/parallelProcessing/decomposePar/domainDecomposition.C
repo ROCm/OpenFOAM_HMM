@@ -761,11 +761,7 @@ forAll(procPatches, patchI)
 
         forAll(procMesh.boundaryMesh(), patchi)
         {
-            if
-            (
-                procMesh.boundaryMesh()[patchi].type()
-             == processorPolyPatch::typeName
-            )
+            if (isA<processorPolyPatch>(procMesh.boundaryMesh()[patchi]))
             {
                 const processorPolyPatch& ppp =
                 refCast<const processorPolyPatch>
@@ -843,11 +839,7 @@ forAll(procPatches, patchI)
         // (= identity map for original patches, -1 for processor patches)
         label nMeshPatches = curPatchSizes.size();
         labelList procBoundaryAddressing(identity(nMeshPatches));
-        procBoundaryAddressing.setSize
-        (
-            nMeshPatches+curProcessorPatchSizes.size(),
-            -1
-        );
+        procBoundaryAddressing.setSize(nMeshPatches+nProcPatches, -1);
 
         labelIOList boundaryProcAddressing
         (
