@@ -56,7 +56,7 @@ Foam::scalar Foam::PatchInjection<CloudType>::volumeToInject
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
-        return fraction_*volumeFlowRate_().integrate(time0, time1);
+        return fraction_*flowRateProfile_().integrate(time0, time1);
     }
     else
     {
@@ -82,11 +82,11 @@ Foam::PatchInjection<CloudType>::PatchInjection
         readScalar(this->coeffDict().lookup("parcelsPerSecond"))
     ),
     U0_(this->coeffDict().lookup("U0")),
-    volumeFlowRate_
+    flowRateProfile_
     (
         DataEntry<scalar>::New
         (
-            "volumeFlowRate",
+            "flowRateProfile",
             this->coeffDict()
         )
     ),
@@ -127,7 +127,7 @@ Foam::PatchInjection<CloudType>::PatchInjection
     fraction_ = scalar(patchSize)/totalPatchSize;
 
     // Set total volume/mass to inject
-    this->volumeTotal_ = fraction_*volumeFlowRate_().integrate(0.0, duration_);
+    this->volumeTotal_ = fraction_*flowRateProfile_().integrate(0.0, duration_);
     this->massTotal_ *= fraction_;
 }
 
