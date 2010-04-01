@@ -45,7 +45,7 @@ SourceFiles
 #ifndef solidWallHeatFluxTemperatureFvPatchScalarField_H
 #define solidWallHeatFluxTemperatureFvPatchScalarField_H
 
-#include "fixedValueFvPatchFields.H"
+#include "fixedGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +58,7 @@ namespace Foam
 
 class solidWallHeatFluxTemperatureFvPatchScalarField
 :
-    public fixedValueFvPatchScalarField
+    public fixedGradientFvPatchScalarField
 {
     // Private data
 
