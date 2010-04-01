@@ -77,11 +77,22 @@ Foam::refinementSurfaces::refinementSurfaces
         if (dict.found("faceZone"))
         {
             dict.lookup("faceZone") >> faceZoneNames_[surfI];
+            bool hasSide = dict.readIfPresent("zoneInside", zoneInside_[surfI]);
             if (dict.readIfPresent("cellZone", cellZoneNames_[surfI]))
             {
-                dict.lookup("zoneInside") >> zoneInside_[surfI];
+                if (hasSide && !allGeometry_[surfaces_[surfI]].hasVolumeType())
+                {
+                    IOWarningIn
+                    (
+                        "refinementSurfaces::refinementSurfaces(..)",
+                        dict
+                    )   << "Unused entry zoneInside for faceZone "
+                        << faceZoneNames_[surfI]
+                        << " since surface " << names_[surfI]
+                        << " is not closed." << endl;
+                }
             }
-            else if (dict.found("zoneInside"))
+            else if (hasSide)
             {
                 IOWarningIn("refinementSurfaces::refinementSurfaces(..)", dict)
                     << "Unused entry zoneInside for faceZone "
@@ -324,11 +335,30 @@ Foam::refinementSurfaces::refinementSurfaces
             if (dict.found("faceZone"))
             {
                 dict.lookup("faceZone") >> faceZoneNames_[surfI];
+                bool hasSide = dict.readIfPresent
+                (
+                    "zoneInside",
+                    zoneInside_[surfI]
+                );
                 if (dict.readIfPresent("cellZone", cellZoneNames_[surfI]))
                 {
-                    dict.lookup("zoneInside") >> zoneInside_[surfI];
+                    if
+                    (
+                        hasSide
+                    && !allGeometry_[surfaces_[surfI]].hasVolumeType()
+                    )
+                    {
+                        IOWarningIn
+                        (
+                            "refinementSurfaces::refinementSurfaces(..)",
+                            dict
+                        )   << "Unused entry zoneInside for faceZone "
+                            << faceZoneNames_[surfI]
+                            << " since surface " << names_[surfI]
+                            << " is not closed." << endl;
+                    }
                 }
-                else if (dict.found("zoneInside"))
+                else if (hasSide)
                 {
                     IOWarningIn
                     (

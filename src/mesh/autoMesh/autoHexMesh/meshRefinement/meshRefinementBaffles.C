@@ -2327,9 +2327,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     // Set using walking
     // ~~~~~~~~~~~~~~~~~
 
-    if (!allowFreeStandingZoneFaces)
+    //if (!allowFreeStandingZoneFaces)
     {
-        Info<< "Walking to assign cellZones." << nl << endl;
+        Info<< "Walking from location-in-mesh " << keepPoint
+            << " to assign cellZones "
+            << "- crossing a faceZone face changes cellZone" << nl << endl;
 
         // Topological walk
         findCellZoneTopo
