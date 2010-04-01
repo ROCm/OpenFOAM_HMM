@@ -73,7 +73,7 @@ class polyLineSet
             DynamicList<point>& samplingPts,
             DynamicList<label>& samplingCells,
             DynamicList<label>& samplingFaces,
-            DynamicList<scalar>& samplingPolyLineDist
+            DynamicList<scalar>& samplingCurveDist
         ) const;
 
         //- Samples all point in sampleCoords_
@@ -84,7 +84,7 @@ class polyLineSet
             DynamicList<label>& samplingCells,
             DynamicList<label>& samplingFaces,
             DynamicList<label>& samplingSegments,
-            DynamicList<scalar>& samplingPolyLineDist
+            DynamicList<scalar>& samplingCurveDist
         ) const;
 
         //- Uses calcSamples to obtain samples. Copies them into *this.

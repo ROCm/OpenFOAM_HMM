@@ -53,7 +53,7 @@ bool Foam::polyLineSet::trackToBoundary
     DynamicList<point>& samplingPts,
     DynamicList<label>& samplingCells,
     DynamicList<label>& samplingFaces,
-    DynamicList<scalar>& samplingPolyLineDist
+    DynamicList<scalar>& samplingCurveDist
 ) const
 {
     // Alias
@@ -97,7 +97,7 @@ bool Foam::polyLineSet::trackToBoundary
                 samplingFaces.append(facei);
 
                 // trackPt is at sampleI+1
-                samplingPolyLineDist.append(1.0*(sampleI+1));
+                samplingCurveDist.append(1.0*(sampleI+1));
             }
             return true;
         }
@@ -111,7 +111,7 @@ bool Foam::polyLineSet::trackToBoundary
         scalar dist =
             mag(trackPt - sampleCoords_[sampleI])
           / mag(sampleCoords_[sampleI+1] - sampleCoords_[sampleI]);
-        samplingPolyLineDist.append(sampleI + dist);
+        samplingCurveDist.append(sampleI + dist);
 
         // go to next samplePt
         sampleI++;
@@ -133,7 +133,7 @@ void Foam::polyLineSet::calcSamples
     DynamicList<label>& samplingCells,
     DynamicList<label>& samplingFaces,
     DynamicList<label>& samplingSegments,
-    DynamicList<scalar>& samplingPolyLineDist
+    DynamicList<scalar>& samplingCurveDist
 ) const
 {
     // Check sampling points
@@ -227,12 +227,12 @@ void Foam::polyLineSet::calcSamples
                 samplingCells.append(trackCellI);
                 samplingFaces.append(trackFaceI);
 
-                // Convert sampling position to unique poly line parameter. Get
+                // Convert sampling position to unique curve parameter. Get
                 // fraction of distance between sampleI and sampleI+1.
                 scalar dist =
                     mag(trackPt - sampleCoords_[sampleI])
                   / mag(sampleCoords_[sampleI+1] - sampleCoords_[sampleI]);
-                samplingPolyLineDist.append(sampleI + dist);
+                samplingCurveDist.append(sampleI + dist);
 
                 lastSample = trackPt;
             }
@@ -273,7 +273,7 @@ void Foam::polyLineSet::calcSamples
             samplingPts,
             samplingCells,
             samplingFaces,
-            samplingPolyLineDist
+            samplingCurveDist
         );
 
         // fill sampleSegments
@@ -317,7 +317,7 @@ void Foam::polyLineSet::genSamples()
     DynamicList<label> samplingCells;
     DynamicList<label> samplingFaces;
     DynamicList<label> samplingSegments;
-    DynamicList<scalar> samplingPolyLineDist;
+    DynamicList<scalar> samplingCurveDist;
 
     calcSamples
     (
@@ -325,14 +325,14 @@ void Foam::polyLineSet::genSamples()
         samplingCells,
         samplingFaces,
         samplingSegments,
-        samplingPolyLineDist
+        samplingCurveDist
     );
 
     samplingPts.shrink();
     samplingCells.shrink();
     samplingFaces.shrink();
     samplingSegments.shrink();
-    samplingPolyLineDist.shrink();
+    samplingCurveDist.shrink();
 
     setSamples
     (
@@ -340,7 +340,7 @@ void Foam::polyLineSet::genSamples()
         samplingCells,
         samplingFaces,
         samplingSegments,
-        samplingPolyLineDist
+        samplingCurveDist
     );
 }
 
