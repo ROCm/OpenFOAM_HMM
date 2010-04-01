@@ -260,12 +260,14 @@ GAMGInterfaces = $(GAMG)/interfaces
 $(GAMGInterfaces)/GAMGInterface/GAMGInterface.C
 $(GAMGInterfaces)/GAMGInterface/newGAMGInterface.C
 $(GAMGInterfaces)/processorGAMGInterface/processorGAMGInterface.C
+$(GAMGInterfaces)/processorCyclicGAMGInterface/processorCyclicGAMGInterface.C
 $(GAMGInterfaces)/cyclicGAMGInterface/cyclicGAMGInterface.C
 
 GAMGInterfaceFields = $(GAMG)/interfaceFields
 $(GAMGInterfaceFields)/GAMGInterfaceField/GAMGInterfaceField.C
 $(GAMGInterfaceFields)/GAMGInterfaceField/newGAMGInterfaceField.C
 $(GAMGInterfaceFields)/processorGAMGInterfaceField/processorGAMGInterfaceField.C
+$(GAMGInterfaceFields)/processorCyclicGAMGInterfaceField/processorCyclicGAMGInterfaceField.C
 $(GAMGInterfaceFields)/cyclicGAMGInterfaceField/cyclicGAMGInterfaceField.C
 
 GAMGAgglomerations = $(GAMG)/GAMGAgglomerations
