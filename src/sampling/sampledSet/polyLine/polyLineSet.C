@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "curveSet.H"
+#include "polyLineSet.H"
 #include "meshSearch.H"
 #include "DynamicList.H"
 #include "polyMesh.H"
@@ -38,22 +38,22 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(curveSet, 0);
-    addToRunTimeSelectionTable(sampledSet, curveSet, word);
+    defineTypeNameAndDebug(polyLineSet, 0);
+    addToRunTimeSelectionTable(sampledSet, polyLineSet, word);
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Sample till hits boundary.
-bool Foam::curveSet::trackToBoundary
+bool Foam::polyLineSet::trackToBoundary
 (
     Particle<passiveParticle>& singleParticle,
     label& sampleI,
     DynamicList<point>& samplingPts,
     DynamicList<label>& samplingCells,
     DynamicList<label>& samplingFaces,
-    DynamicList<scalar>& samplingCurveDist
+    DynamicList<scalar>& samplingPolyLineDist
 ) const
 {
     // Alias
@@ -97,7 +97,7 @@ bool Foam::curveSet::trackToBoundary
                 samplingFaces.append(facei);
 
                 // trackPt is at sampleI+1
-                samplingCurveDist.append(1.0*(sampleI+1));
+                samplingPolyLineDist.append(1.0*(sampleI+1));
             }
             return true;
         }
@@ -111,7 +111,7 @@ bool Foam::curveSet::trackToBoundary
         scalar dist =
             mag(trackPt - sampleCoords_[sampleI])
           / mag(sampleCoords_[sampleI+1] - sampleCoords_[sampleI]);
-        samplingCurveDist.append(sampleI + dist);
+        samplingPolyLineDist.append(sampleI + dist);
 
         // go to next samplePt
         sampleI++;
@@ -127,19 +127,19 @@ bool Foam::curveSet::trackToBoundary
 }
 
 
-void Foam::curveSet::calcSamples
+void Foam::polyLineSet::calcSamples
 (
     DynamicList<point>& samplingPts,
     DynamicList<label>& samplingCells,
     DynamicList<label>& samplingFaces,
     DynamicList<label>& samplingSegments,
-    DynamicList<scalar>& samplingCurveDist
+    DynamicList<scalar>& samplingPolyLineDist
 ) const
 {
     // Check sampling points
     if (sampleCoords_.size() < 2)
     {
-        FatalErrorIn("curveSet::calcSamples()")
+        FatalErrorIn("polyLineSet::calcSamples()")
             << "Incorrect sample specification. Too few points:"
             << sampleCoords_ << exit(FatalError);
     }
@@ -148,7 +148,7 @@ void Foam::curveSet::calcSamples
     {
         if (mag(sampleCoords_[sampleI] - oldPoint) < SMALL)
         {
-            FatalErrorIn("curveSet::calcSamples()")
+            FatalErrorIn("polyLineSet::calcSamples()")
                 << "Incorrect sample specification."
                 << " Point " << sampleCoords_[sampleI-1]
                 << " at position " << sampleI-1
@@ -227,12 +227,12 @@ void Foam::curveSet::calcSamples
                 samplingCells.append(trackCellI);
                 samplingFaces.append(trackFaceI);
 
-                // Convert sampling position to unique curve parameter. Get
+                // Convert sampling position to unique poly line parameter. Get
                 // fraction of distance between sampleI and sampleI+1.
                 scalar dist =
                     mag(trackPt - sampleCoords_[sampleI])
                   / mag(sampleCoords_[sampleI+1] - sampleCoords_[sampleI]);
-                samplingCurveDist.append(sampleI + dist);
+                samplingPolyLineDist.append(sampleI + dist);
 
                 lastSample = trackPt;
             }
@@ -273,7 +273,7 @@ void Foam::curveSet::calcSamples
             samplingPts,
             samplingCells,
             samplingFaces,
-            samplingCurveDist
+            samplingPolyLineDist
         );
 
         // fill sampleSegments
@@ -310,14 +310,14 @@ void Foam::curveSet::calcSamples
 }
 
 
-void Foam::curveSet::genSamples()
+void Foam::polyLineSet::genSamples()
 {
     // Storage for sample points
     DynamicList<point> samplingPts;
     DynamicList<label> samplingCells;
     DynamicList<label> samplingFaces;
     DynamicList<label> samplingSegments;
-    DynamicList<scalar> samplingCurveDist;
+    DynamicList<scalar> samplingPolyLineDist;
 
     calcSamples
     (
@@ -325,14 +325,14 @@ void Foam::curveSet::genSamples()
         samplingCells,
         samplingFaces,
         samplingSegments,
-        samplingCurveDist
+        samplingPolyLineDist
     );
 
     samplingPts.shrink();
     samplingCells.shrink();
     samplingFaces.shrink();
     samplingSegments.shrink();
-    samplingCurveDist.shrink();
+    samplingPolyLineDist.shrink();
 
     setSamples
     (
@@ -340,14 +340,14 @@ void Foam::curveSet::genSamples()
         samplingCells,
         samplingFaces,
         samplingSegments,
-        samplingCurveDist
+        samplingPolyLineDist
     );
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::curveSet::curveSet
+Foam::polyLineSet::polyLineSet
 (
     const word& name,
     const polyMesh& mesh,
@@ -368,7 +368,7 @@ Foam::curveSet::curveSet
 }
 
 
-Foam::curveSet::curveSet
+Foam::polyLineSet::polyLineSet
 (
     const word& name,
     const polyMesh& mesh,
@@ -390,13 +390,13 @@ Foam::curveSet::curveSet
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::curveSet::~curveSet()
+Foam::polyLineSet::~polyLineSet()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::point Foam::curveSet::getRefPoint(const List<point>& pts) const
+Foam::point Foam::polyLineSet::getRefPoint(const List<point>& pts) const
 {
     if (pts.size())
     {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,17 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::curveSet
+    Foam::polyLineSet
 
 Description
+    Sample along poly line defined by a list of points (knots)
 
 SourceFiles
-    curveSet.C
+    polyLineSet.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef curveSet_H
-#define curveSet_H
+#ifndef polyLineSet_H
+#define polyLineSet_H
 
 #include "sampledSet.H"
 #include "DynamicList.H"
@@ -47,10 +48,10 @@ class passiveParticle;
 template<class Type> class Particle;
 
 /*---------------------------------------------------------------------------*\
-                           Class curveSet Declaration
+                        Class polyLineSet Declaration
 \*---------------------------------------------------------------------------*/
 
-class curveSet
+class polyLineSet
 :
     public sampledSet
 {
@@ -72,7 +73,7 @@ class curveSet
             DynamicList<point>& samplingPts,
             DynamicList<label>& samplingCells,
             DynamicList<label>& samplingFaces,
-            DynamicList<scalar>& samplingCurveDist
+            DynamicList<scalar>& samplingPolyLineDist
         ) const;
 
         //- Samples all point in sampleCoords_
@@ -83,7 +84,7 @@ class curveSet
             DynamicList<label>& samplingCells,
             DynamicList<label>& samplingFaces,
             DynamicList<label>& samplingSegments,
-            DynamicList<scalar>& samplingCurveDist
+            DynamicList<scalar>& samplingPolyLineDist
         ) const;
 
         //- Uses calcSamples to obtain samples. Copies them into *this.
@@ -93,13 +94,13 @@ class curveSet
 public:
 
     //- Runtime type information
-    TypeName("curve");
+    TypeName("polyLine");
 
 
     // Constructors
 
         //- Construct from components
-        curveSet
+        polyLineSet
         (
             const word& name,
             const polyMesh& mesh,
@@ -109,7 +110,7 @@ public:
         );
 
         //- Construct from dictionary
-        curveSet
+        polyLineSet
         (
             const word& name,
             const polyMesh& mesh,
@@ -119,8 +120,7 @@ public:
 
 
     // Destructor
-
-        virtual ~curveSet();
+    virtual ~polyLineSet();
 
 
     // Member Functions
