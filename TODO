@@ -27,7 +27,8 @@ Tested on channel-395 with GAMG.
 - initTransfer in GAMGprocessorInterfaces using nonblocking+tags
 untested.
 
-- gamg parallel.
+OK - gamg parallel.
+Tested on channel-395 with GAMG.
 
 
 - test createPatch pointSync
@@ -42,7 +43,7 @@ separation.
 - fvMeshSubset
 - kivaToFoam/readKivaGrid.H sorts cyclics (but in incorrect order?)
 - grep for size()/2
-- pointEdgeWave (maybe through inversePointDistanceDiffusivity?)
+- pointEdgeWave (maybe test through inversePointDistanceDiffusivity?)
 - regionSplit
 - scotchDecomp
 - isoSurface.C
