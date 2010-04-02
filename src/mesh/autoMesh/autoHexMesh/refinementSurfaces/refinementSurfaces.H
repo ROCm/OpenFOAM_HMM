@@ -146,7 +146,8 @@ public:
                 return faceZoneNames_;
             }
 
-            //- Per 'interface' surface : name of cellZone to put cells into
+            //- Per 'interface' surface : empty or name of cellZone to put
+            //  cells into
             const wordList& cellZoneNames() const
             {
                 return cellZoneNames_;
@@ -158,7 +159,7 @@ public:
             //- Get indices of named surfaces (surfaces with faceZoneName)
             labelList getNamedSurfaces() const;
 
-            //- Get indices of closed named surfaces
+            //- Get indices of closed surfaces with a cellZone
             labelList getClosedNamedSurfaces() const;
 
             //- From local region number to global region number

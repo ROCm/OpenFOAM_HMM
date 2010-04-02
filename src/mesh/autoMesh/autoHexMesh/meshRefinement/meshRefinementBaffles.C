@@ -245,27 +245,8 @@ void Foam::meshRefinement::getBafflePatches
 
     const pointField& cellCentres = mesh_.cellCentres();
 
-    // Build list of surfaces that are not to be baffled.
-    const wordList& cellZoneNames = surfaces_.cellZoneNames();
-
-    labelList surfacesToBaffle(cellZoneNames.size());
-    label baffleI = 0;
-    forAll(cellZoneNames, surfI)
-    {
-        if (cellZoneNames[surfI].size())
-        {
-            if (debug)
-            {
-                Pout<< "getBafflePatches : Not baffling surface "
-                    << surfaces_.names()[surfI] << endl;
-            }
-        }
-        else
-        {
-            surfacesToBaffle[baffleI++] = surfI;
-        }
-    }
-    surfacesToBaffle.setSize(baffleI);
+    // Surfaces that need to be baffled
+    const labelList surfacesToBaffle(surfaces_.getUnnamedSurfaces());
 
     ownPatch.setSize(mesh_.nFaces());
     ownPatch = -1;
@@ -1253,7 +1234,7 @@ void Foam::meshRefinement::findCellZoneTopo
         {
             label surfI = namedSurfaceIndex[faceI];
 
-            if (surfI != -1)
+            if (surfI != -1 && surfaceToCellZone[surfI] != -1)
             {
                 // Calculate region to zone from cellRegions on either side
                 // of internal face.
@@ -1305,7 +1286,7 @@ void Foam::meshRefinement::findCellZoneTopo
 
                     label surfI = namedSurfaceIndex[faceI];
 
-                    if (surfI != -1)
+                    if (surfI != -1 && surfaceToCellZone[surfI] != -1)
                     {
                         bool changedCell = calcRegionToZone
                         (
@@ -1437,6 +1418,15 @@ void Foam::meshRefinement::makeConsistentFaceIndex
                         << " but face not marked with a surface."
                         << abort(FatalError);
                 }
+            }
+        }
+        else
+        {
+            // Unzonify boundary faces
+            forAll(pp, i)
+            {
+                label faceI = pp.start()+i;
+                namedSurfaceIndex[faceI] = -1;
             }
         }
     }
@@ -2042,13 +2032,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
     labelList namedSurfaces(surfaces_.getNamedSurfaces());
 
-    boolList isNamedSurface(cellZoneNames.size(), false);
-
     forAll(namedSurfaces, i)
     {
         label surfI = namedSurfaces[i];
-
-        isNamedSurface[surfI] = true;
 
         Info<< "Surface : " << surfaces_.names()[surfI] << nl
             << "    faceZone : " << faceZoneNames[surfI] << nl
@@ -2125,31 +2111,34 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
         {
             label surfI = namedSurfaces[i];
 
-            label zoneI = cellZones.findZoneID(cellZoneNames[surfI]);
-
-            if (zoneI == -1)
+            if (cellZoneNames[surfI] != word::null)
             {
-                zoneI = cellZones.size();
-                cellZones.setSize(zoneI+1);
-                cellZones.set
-                (
-                    zoneI,
-                    new cellZone
+                label zoneI = cellZones.findZoneID(cellZoneNames[surfI]);
+
+                if (zoneI == -1)
+                {
+                    zoneI = cellZones.size();
+                    cellZones.setSize(zoneI+1);
+                    cellZones.set
                     (
-                        cellZoneNames[surfI],   //name
-                        labelList(0),           //addressing
-                        zoneI,                  //index
-                        cellZones               //cellZoneMesh
-                    )
-                );
-            }
+                        zoneI,
+                        new cellZone
+                        (
+                            cellZoneNames[surfI],   //name
+                            labelList(0),           //addressing
+                            zoneI,                  //index
+                            cellZones               //cellZoneMesh
+                        )
+                    );
+                }
 
-            if (debug)
-            {
-                Pout<< "Cells inside " << surfaces_.names()[surfI]
-                    << " will go into cellZone " << zoneI << endl;
+                if (debug)
+                {
+                    Pout<< "Cells inside " << surfaces_.names()[surfI]
+                        << " will go into cellZone " << zoneI << endl;
+                }
+                surfaceToCellZone[surfI] = zoneI;
             }
-            surfaceToCellZone[surfI] = zoneI;
         }
 
         // Check they are synced
@@ -2321,6 +2310,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
     if (closedNamedSurfaces.size())
     {
+        Info<< "Found " << closedNamedSurfaces.size()
+            << " closed, named surfaces. Assigning cells in/outside"
+            << " these surfaces to the corresponding cellZone."
+            << nl << endl;
+
         findCellZoneGeometric
         (
             closedNamedSurfaces,   // indices of closed surfaces
@@ -2333,8 +2327,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     // Set using walking
     // ~~~~~~~~~~~~~~~~~
 
-    //if (returnReduce(nSet, sumOp<label>()) < mesh_.globalData().nTotalCells())
+    if (!allowFreeStandingZoneFaces)
     {
+        Info<< "Walking to assign cellZones." << nl << endl;
+
         // Topological walk
         findCellZoneTopo
         (
@@ -2349,6 +2345,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     // Make sure namedSurfaceIndex is unset inbetween same cell cell zones.
     if (!allowFreeStandingZoneFaces)
     {
+        Info<< "Only keeping zone faces inbetween different cellZones."
+            << nl << endl;
+
         makeConsistentFaceIndex(cellToZone, namedSurfaceIndex);
     }
 

@@ -1375,7 +1375,7 @@ void Foam::autoLayerDriver::growNoExtrusion
     pointField& patchDisp,
     labelList& patchNLayers,
     List<extrudeMode>& extrudeStatus
-)
+) const
 {
     Info<< nl << "Growing non-extrusion points by one layer ..." << endl;
 
@@ -1406,7 +1406,7 @@ void Foam::autoLayerDriver::growNoExtrusion
             {
                 if
                 (
-                    extrudeStatus[f[fp]] == NOEXTRUDE
+                    extrudeStatus[f[fp]] == EXTRUDE
                  && grownExtrudeStatus[f[fp]] != NOEXTRUDE
                 )
                 {
@@ -1418,6 +1418,31 @@ void Foam::autoLayerDriver::growNoExtrusion
     }
 
     extrudeStatus.transfer(grownExtrudeStatus);
+
+
+    // Synchronise since might get called multiple times.
+    // Use the fact that NOEXTRUDE is the minimum value.
+    {
+        labelList status(extrudeStatus.size());
+        forAll(status, i)
+        {
+            status[i] = extrudeStatus[i];
+        }
+        syncTools::syncPointList
+        (
+            meshRefiner_.mesh(),
+            pp.meshPoints(),
+            status,
+            minEqOp<label>(),
+            labelMax,           // null value
+            false               // no separation
+        );
+        forAll(status, i)
+        {
+            extrudeStatus[i] = extrudeMode(status[i]);
+        }
+    }
+
 
     forAll(extrudeStatus, patchPointI)
     {
@@ -2711,8 +2736,6 @@ void Foam::autoLayerDriver::addLayers
 
             const labelList& meshPoints = patches[patchI].meshPoints();
 
-            //scalar maxThickness = -VGREAT;
-            //scalar minThickness = VGREAT;
             scalar sumThickness = 0;
             scalar sumNearWallThickness = 0;
 
@@ -2720,8 +2743,6 @@ void Foam::autoLayerDriver::addLayers
             {
                 label ppPointI = pp().meshPointMap()[meshPoints[patchPointI]];
 
-                //maxThickness = max(maxThickness, thickness[ppPointI]);
-                //minThickness = min(minThickness, thickness[ppPointI]);
                 sumThickness += thickness[ppPointI];
 
                 label nLay = patchNLayers[ppPointI];
@@ -2749,8 +2770,6 @@ void Foam::autoLayerDriver::addLayers
 
             if (totNPoints > 0)
             {
-                //reduce(maxThickness, maxOp<scalar>());
-                //reduce(minThickness, minOp<scalar>());
                 avgThickness =
                     returnReduce(sumThickness, sumOp<scalar>())
                   / totNPoints;
@@ -2766,8 +2785,6 @@ void Foam::autoLayerDriver::addLayers
                 << " " << setw(6) << layerParams.numLayers()[patchI]
                 << " " << setw(8) << avgNearWallThickness
                 << "  " << setw(8) << avgThickness
-                //<< " " << setw(8) << minThickness
-                //<< " " << setw(8) << maxThickness
                 << endl;
         }
         Info<< endl;
@@ -3147,6 +3164,19 @@ void Foam::autoLayerDriver::addLayers
         meshMover().movePoints(oldPoints);
         meshMover().correct();
 
+
+        // Grow out region of non-extrusion
+        for (label i = 0; i < layerParams.nGrow(); i++)
+        {
+            growNoExtrusion
+            (
+                pp,
+                patchDisp,
+                patchNLayers,
+                extrudeStatus
+            );
+        }
+
         Info<< endl;
     }
 
@@ -3293,7 +3323,6 @@ void Foam::autoLayerDriver::doLayers
 
 
         // Balance
-        if (Pstream::parRun())
         if (Pstream::parRun() && preBalance)
         {
             Info<< nl
