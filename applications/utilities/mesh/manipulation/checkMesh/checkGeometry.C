@@ -291,6 +291,22 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
         }
     }
 
+    if (allGeometry)
+    {
+        cellSet cells(mesh, "concaveCells", mesh.nCells()/100);
+        if (mesh.checkConcaveCells(true, &cells))
+        {
+            noFailedChecks++;
+
+            label nCells = returnReduce(cells.size(), sumOp<label>());
+
+            Info<< "  <<Writing " << nCells
+                << " concave cells to set " << cells.name() << endl;
+            cells.instance() = mesh.pointsInstance();
+            cells.write();
+        }
+    }
+
 
     return noFailedChecks;
 }
