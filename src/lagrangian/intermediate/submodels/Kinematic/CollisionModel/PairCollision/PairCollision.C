@@ -499,8 +499,7 @@ Foam::PairCollision<CloudType>::PairCollision
     il_
     (
         owner.mesh(),
-        sqr(readScalar(this->coeffDict().lookup("maxInteractionDistance"))),
-        false
+        readScalar(this->coeffDict().lookup("maxInteractionDistance"))
     )
 {}
 
