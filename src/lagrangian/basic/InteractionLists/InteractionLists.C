@@ -26,10 +26,302 @@ License
 
 #include "InteractionLists.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class ParticleType>
-Foam::scalar Foam::InteractionLists<ParticleType>::transTol = 1e-12;
+void Foam::InteractionLists<ParticleType>::findExtendedProcBbsInRange
+(
+    const treeBoundBox& procBb,
+    const List<treeBoundBox>& allExtendedProcBbs,
+    const globalIndexAndTransform& globalTransforms,
+    List<treeBoundBox>& extendedProcBbsInRange,
+    List<label>& extendedProcBbsTransformIndex,
+    List<label>& extendedProcBbsOrigProc
+)
+{
+    extendedProcBbsInRange.setSize(0);
+    extendedProcBbsTransformIndex.setSize(0);
+    extendedProcBbsOrigProc.setSize(0);
+
+    DynamicList<treeBoundBox> tmpExtendedProcBbsInRange;
+    DynamicList<label> tmpExtendedProcBbsTransformIndex;
+    DynamicList<label> tmpExtendedProcBbsOrigProc;
+
+    label nTrans = globalTransforms.nIndependentTransforms();
+
+    forAll(allExtendedProcBbs, procI)
+    {
+        List<label> permutationIndices(nTrans, 0);
+
+        vector s = vector::zero;
+
+        if (nTrans == 0 && procI != Pstream::myProcNo())
+        {
+            treeBoundBox extendedReferredProcBb = allExtendedProcBbs[procI];
+
+            if (procBb.overlaps(extendedReferredProcBb))
+            {
+                tmpExtendedProcBbsInRange.append
+                (
+                    extendedReferredProcBb
+                );
+
+                // Dummy index, there are no transforms, so there will
+                // be no resultant transform when this is decoded.
+                tmpExtendedProcBbsTransformIndex.append(0);
+
+                tmpExtendedProcBbsOrigProc.append(procI);
+            }
+        }
+        else if (nTrans == 3)
+        {
+            label& i = permutationIndices[0];
+            label& j = permutationIndices[1];
+            label& k = permutationIndices[2];
+
+            for (i = -1; i <= 1; i++)
+            {
+                for (j = -1; j <= 1; j++)
+                {
+                    for (k = -1; k <= 1; k++)
+                    {
+                        if
+                        (
+                            i == 0
+                         && j == 0
+                         && k == 0
+                         && procI == Pstream::myProcNo()
+                        )
+                        {
+                            // Skip this processor's extended boundBox
+                            // when it has no transformation
+                            continue;
+                        }
+
+                        label transI = globalTransforms.encodeTransformIndex
+                        (
+                            permutationIndices
+                        );
+
+                        const vector& transform = globalTransforms.transform
+                        (
+                            transI
+                        );
+
+                        treeBoundBox extendedReferredProcBb
+                        (
+                            allExtendedProcBbs[procI].min() + transform,
+                            allExtendedProcBbs[procI].max() + transform
+                        );
+
+                        if (procBb.overlaps(extendedReferredProcBb))
+                        {
+                            tmpExtendedProcBbsInRange.append
+                            (
+                                extendedReferredProcBb
+                            );
+
+                            tmpExtendedProcBbsTransformIndex.append(transI);
+
+                            tmpExtendedProcBbsOrigProc.append(procI);
+                        }
+                    }
+                }
+            }
+        }
+        else if (nTrans == 2)
+        {
+            label& i = permutationIndices[0];
+            label& j = permutationIndices[1];
+
+            for (i = -1; i <= 1; i++)
+            {
+                for (j = -1; j <= 1; j++)
+                {
+                    if (i == 0 && j == 0 && procI == Pstream::myProcNo())
+                    {
+                        // Skip this processor's extended boundBox
+                        // when it has no transformation
+                        continue;
+                    }
+
+                    label transI = globalTransforms.encodeTransformIndex
+                    (
+                        permutationIndices
+                    );
+
+                    const vector& transform = globalTransforms.transform
+                    (
+                        transI
+                    );
+
+                    treeBoundBox extendedReferredProcBb
+                    (
+                        allExtendedProcBbs[procI].min() + transform,
+                        allExtendedProcBbs[procI].max() + transform
+                    );
+
+                    if (procBb.overlaps(extendedReferredProcBb))
+                    {
+                        tmpExtendedProcBbsInRange.append
+                        (
+                            extendedReferredProcBb
+                        );
+
+                        tmpExtendedProcBbsTransformIndex.append(transI);
+
+                        tmpExtendedProcBbsOrigProc.append(procI);
+                    }
+                }
+            }
+        }
+        else if (nTrans == 1)
+        {
+            label& i = permutationIndices[0];
+
+            for (i = -1; i <= 1; i++)
+            {
+                if (i == 0 && procI == Pstream::myProcNo())
+                {
+                    // Skip this processor's extended boundBox when it
+                    // has no transformation
+                    continue;
+                }
+
+                label transI = globalTransforms.encodeTransformIndex
+                (
+                    permutationIndices
+                );
+
+                const vector& transform = globalTransforms.transform(transI);
+
+                treeBoundBox extendedReferredProcBb
+                (
+                    allExtendedProcBbs[procI].min() + transform,
+                    allExtendedProcBbs[procI].max() + transform
+                );
+
+                if (procBb.overlaps(extendedReferredProcBb))
+                {
+                    tmpExtendedProcBbsInRange.append
+                    (
+                        extendedReferredProcBb
+                    );
+
+                    tmpExtendedProcBbsTransformIndex.append(transI);
+
+                    tmpExtendedProcBbsOrigProc.append(procI);
+                }
+            }
+        }
+    }
+
+    extendedProcBbsInRange = tmpExtendedProcBbsInRange.xfer();
+    extendedProcBbsTransformIndex = tmpExtendedProcBbsTransformIndex.xfer();
+    extendedProcBbsOrigProc = tmpExtendedProcBbsOrigProc.xfer();
+}
+
+
+template<class ParticleType>
+void Foam::InteractionLists<ParticleType>::buildMap
+(
+    const List<label>& toProc
+)
+{
+    // Determine send map
+    // ~~~~~~~~~~~~~~~~~~
+
+    // 1. Count
+    labelList nSend(Pstream::nProcs(), 0);
+
+    forAll(toProc, i)
+    {
+        label procI = toProc[i];
+
+        nSend[procI]++;
+    }
+
+    // Send over how many I need to receive
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    labelListList sendSizes(Pstream::nProcs());
+
+    sendSizes[Pstream::myProcNo()] = nSend;
+
+    combineReduce(sendSizes, UPstream::listEq());
+
+    // 2. Size sendMap
+    labelListList sendMap(Pstream::nProcs());
+
+    forAll(nSend, procI)
+    {
+        sendMap[procI].setSize(nSend[procI]);
+
+        nSend[procI] = 0;
+    }
+
+    // 3. Fill sendMap
+    forAll(toProc, i)
+    {
+        label procI = toProc[i];
+
+        sendMap[procI][nSend[procI]++] = i;
+    }
+
+    // Determine receive map
+    // ~~~~~~~~~~~~~~~~~~~~~
+
+    labelListList constructMap(Pstream::nProcs());
+
+    // Local transfers first
+    constructMap[Pstream::myProcNo()] = identity
+    (
+        sendMap[Pstream::myProcNo()].size()
+    );
+
+    label constructSize = constructMap[Pstream::myProcNo()].size();
+
+    forAll(constructMap, procI)
+    {
+        if (procI != Pstream::myProcNo())
+        {
+            label nRecv = sendSizes[procI][Pstream::myProcNo()];
+
+            constructMap[procI].setSize(nRecv);
+
+            for (label i = 0; i < nRecv; i++)
+            {
+                constructMap[procI][i] = constructSize++;
+            }
+        }
+    }
+
+    mapPtr_.reset
+    (
+        new mapDistribute
+        (
+
+            constructSize,
+            sendMap.xfer(),
+            constructMap.xfer()
+        )
+    );
+}
+
+template<class ParticleType>
+void InteractionLists<ParticleType>::prepareParticleToBeReferred
+(
+    ParticleType* particle,
+    labelPair giat
+)
+{
+    const vector& transform = globalTransforms_.transform
+    (
+        globalTransforms_.transformIndex(giat)
+    );
+
+    particle->position() -= transform;
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -38,26 +330,364 @@ template<class ParticleType>
 Foam::InteractionLists<ParticleType>::InteractionLists
 (
     const polyMesh& mesh,
-    scalar maxDistanceSqr,
-    bool pointPointListBuild
+    scalar maxDistance
 )
 :
     mesh_(mesh),
-    maxDistanceSqr_(maxDistanceSqr),
-    dil_(*this, pointPointListBuild),
-    ril_(*this, pointPointListBuild)
+    cloud_(mesh_, "referredParticleCloud", IDLList<ParticleType>()),
+    mapPtr_(),
+    globalTransforms_(mesh_),
+    maxDistance_(maxDistance),
+    dil_(),
+    ril_(),
+    rilInverse_(),
+    cellIndexAndTransformToDistribute_(),
+    referredParticles_()
 {
-    dil_.buildInverseAddressing();
+    Random rndGen(419715);
+
+    const vector interactionVec = maxDistance_*vector::one;
+
+    treeBoundBox procBb(treeBoundBox(mesh.points()));
+
+    treeBoundBox extendedProcBb
+    (
+        procBb.min() - interactionVec,
+        procBb.max() + interactionVec
+    );
+
+    treeBoundBoxList allExtendedProcBbs(Pstream::nProcs());
+
+    allExtendedProcBbs[Pstream::myProcNo()] = extendedProcBb;
+
+    Pstream::gatherList(allExtendedProcBbs);
+
+    Pstream::scatterList(allExtendedProcBbs);
+
+    List<treeBoundBox> extendedProcBbsInRange;
+    List<label> extendedProcBbsTransformIndex;
+    List<label> extendedProcBbsOrigProc;
+
+    findExtendedProcBbsInRange
+    (
+        procBb,
+        allExtendedProcBbs,
+        globalTransforms_,
+        extendedProcBbsInRange,
+        extendedProcBbsTransformIndex,
+        extendedProcBbsOrigProc
+    );
+
+    treeBoundBoxList cellBbs(mesh.nCells());
+
+    forAll(cellBbs, cellI)
+    {
+        cellBbs[cellI] = treeBoundBox
+        (
+            mesh.cells()[cellI].points
+            (
+                mesh.faces(),
+                mesh.points()
+            )
+        );
+    }
+
+    // Recording which cells are in range of an extended boundBox, as
+    // only these cells will need to be tested to determine which
+    // referred cells that they interact with.
+    PackedBoolList cellInRangeOfCoupledPatch(mesh.nCells(), false);
+
+    // IAndT: index and transform
+    DynamicList<labelPair> globalIAndTToExchange;
+
+    DynamicList<treeBoundBox> bbsToExchange;
+
+    DynamicList<label> procToDistributeTo;
+
+    forAll(extendedProcBbsInRange, ePBIRI)
+    {
+        const treeBoundBox& otherExtendedProcBb =
+        extendedProcBbsInRange[ePBIRI];
+
+        label transformIndex = extendedProcBbsTransformIndex[ePBIRI];
+
+        label origProc = extendedProcBbsOrigProc[ePBIRI];
+
+        forAll(cellBbs, cellI)
+        {
+            const treeBoundBox& cellBb = cellBbs[cellI];
+
+            if (cellBb.overlaps(otherExtendedProcBb))
+            {
+                // This cell is in range of the Bb of the other
+                // processor Bb, and so needs to be referred to it
+
+                cellInRangeOfCoupledPatch[cellI] = true;
+
+                globalIAndTToExchange.append
+                (
+                    globalTransforms_.encode(cellI, transformIndex)
+                );
+
+                bbsToExchange.append(cellBb);
+
+                procToDistributeTo.append(origProc);
+            }
+        }
+    }
+
+    buildMap(procToDistributeTo);
+
+    // Needed for reverseDistribute
+    label preDistributionSize = procToDistributeTo.size();
+
+    map().distribute(bbsToExchange);
+
+    map().distribute(globalIAndTToExchange);
+
+    // Determine labelList specifying only cells that are in range of
+    // a coupled boundary to build an octree limited to these cells.
+    DynamicList<label> coupledPatchRangeCells;
+
+    forAll(cellInRangeOfCoupledPatch, cellI)
+    {
+        if (cellInRangeOfCoupledPatch[cellI])
+        {
+            coupledPatchRangeCells.append(cellI);
+        }
+    }
+
+    treeBoundBox procBbRndExt(treeBoundBox(mesh.points()).extend(rndGen, 1e-4));
+
+    indexedOctree<treeDataCell> coupledPatchRangeTree
+    (
+        treeDataCell(true, mesh, coupledPatchRangeCells),
+        procBbRndExt,
+        8,              // maxLevel,
+        10,             // leafSize,
+        100.0
+    );
+
+    ril_.setSize(bbsToExchange.size());
+
+    // This needs to be a boolList, not PackedBoolList if
+    // reverseDistribute is called.
+    boolList bbRequiredByAnyCell(bbsToExchange.size(), false);
+
+    forAll(bbsToExchange, bbI)
+    {
+        const labelPair& giat = globalIAndTToExchange[bbI];
+
+        const vector& transform = globalTransforms_.transform
+        (
+            globalTransforms_.transformIndex(giat)
+        );
+
+        treeBoundBox extendedBb
+        (
+            bbsToExchange[bbI].min() - interactionVec - transform,
+            bbsToExchange[bbI].max() + interactionVec - transform
+        );
+
+        // Find all elements intersecting box.
+        labelList interactingElems
+        (
+            coupledPatchRangeTree.findBox(extendedBb)
+        );
+
+        if (!interactingElems.empty())
+        {
+            bbRequiredByAnyCell[bbI] = true;
+        }
+
+        ril_[bbI].setSize(interactingElems.size(), -1);
+
+        forAll(interactingElems, i)
+        {
+            label elemI = interactingElems[i];
+
+            // Here, a more detailed geometric test could be applied,
+            // i.e. a more accurate bounding volume like a OBB or
+            // convex hull or an exact geometrical test.
+
+            label c = coupledPatchRangeTree.shapes().cellLabels()[elemI];
+
+            ril_[bbI][i] = c;
+        }
+    }
+
+    {
+        // Perform reordering of ril_, to remove any referred cells
+        // that do not interact.  They will not be sent from
+        // originating processors.  This assumes that the
+        // disappearance of the cell from the sending list of the
+        // source processor, simply removes the referred cell from the
+        // ril_, all of the subsequent indices shuffle down one, but
+        // the order and structure is preserved, i.e. it, is as if the
+        // cell had never been referred in the first place.
+
+        labelList oldToNew(globalIAndTToExchange.size(), -1);
+
+        label refCellI = 0;
+
+        forAll(bbRequiredByAnyCell, bbReqI)
+        {
+            if (bbRequiredByAnyCell[bbReqI])
+            {
+                oldToNew[bbReqI] = refCellI++;
+            }
+        }
+
+        inplaceReorder(oldToNew, ril_);
+
+        ril_.setSize(refCellI);
+    }
+
+    // Send information about which cells are actually required back
+    // to originating processors.
+
+    // At this point, bbsToExchange does not need to be maintained
+    // or distributed as it is not longer needed.
+
+    bbsToExchange.setSize(0);
+
+    map().reverseDistribute
+    (
+        preDistributionSize,
+        bbRequiredByAnyCell
+    );
+
+    map().reverseDistribute
+    (
+        preDistributionSize,
+        globalIAndTToExchange
+    );
+
+    // Perform ordering of cells to send, this invalidates the
+    // previous value of preDistributionSize.
+
+    preDistributionSize = -1;
+
+    // Move all of the used cells to refer to the start of the list
+    // and truncate it
+
+    {
+        labelList oldToNew(globalIAndTToExchange.size(), -1);
+
+        label refCellI = 0;
+
+        forAll(bbRequiredByAnyCell, bbReqI)
+        {
+            if (bbRequiredByAnyCell[bbReqI])
+            {
+                oldToNew[bbReqI] = refCellI++;
+            }
+        }
+
+        inplaceReorder
+        (
+            oldToNew,
+            static_cast<List<labelPair>&>(globalIAndTToExchange)
+        );
+
+        inplaceReorder
+        (
+            oldToNew,
+            static_cast<List<label>&>(procToDistributeTo)
+        );
+
+        globalIAndTToExchange.setSize(refCellI);
+        procToDistributeTo.setSize(refCellI);
+    }
+
+    preDistributionSize = procToDistributeTo.size();
+
+    // Rebuild mapDistribute with only required referred cells
+    buildMap(procToDistributeTo);
+
+    // Store cellIndexAndTransformToDistribute
+    cellIndexAndTransformToDistribute_.transfer(globalIAndTToExchange);
+
+    // Determine inverse addressing for referred cells
+
+    rilInverse_.setSize(mesh.nCells());
+
+    // Temporary Dynamic lists for accumulation
+    List<DynamicList<label> > rilInverseTemp(rilInverse_.size());
+
+    // Loop over all referred cells
+    forAll(ril_, refCellI)
+    {
+        const labelList& realCells = ril_[refCellI];
+
+        // Loop over all real cells in that the referred cell is to
+        // supply interactions to and record the index of this
+        // referred cell in the real cells entry in rilInverse
+
+        forAll(realCells, realCellI)
+        {
+            rilInverseTemp[realCells[realCellI]].append(refCellI);
+        }
+    }
+
+    forAll(rilInverse_, cellI)
+    {
+        rilInverse_[cellI].transfer(rilInverseTemp[cellI]);
+    }
+
+    // Direct interaction list
+
+    indexedOctree<treeDataCell> allCellsTree
+    (
+        treeDataCell(true, mesh),
+        procBbRndExt,
+        8,              // maxLevel,
+        10,             // leafSize,
+        100.0
+    );
+
+    dil_.setSize(mesh.nCells());
+
+    forAll(cellBbs, cellI)
+    {
+        const treeBoundBox& cellBb = cellBbs[cellI];
+
+        treeBoundBox extendedBb
+        (
+            cellBb.min() - interactionVec,
+            cellBb.max() + interactionVec
+        );
+
+        // Find all elements intersecting box.
+        labelList interactingElems
+        (
+            allCellsTree.findBox(extendedBb)
+        );
+
+        // Reserve space to avoid multiple resizing
+        DynamicList<label> cellDIL(interactingElems.size());
+
+        forAll(interactingElems, i)
+        {
+            label elemI = interactingElems[i];
+
+            label c = allCellsTree.shapes().cellLabels()[elemI];
+
+            // Here, a more detailed geometric test could be applied,
+            // i.e. a more accurate bounding volume like a OBB or
+            // convex hull, or an exact geometrical test.
+
+            // The higher index cell is added to the lower index
+            // cell's DIL.  A cell is not added to its own DIL.
+            if (c > cellI)
+            {
+                cellDIL.append(c);
+            }
+        }
+
+        dil_[cellI].transfer(cellDIL);
+    }
 }
-
-
-template<class ParticleType>
-Foam::InteractionLists<ParticleType>::InteractionLists(const polyMesh& mesh)
-:
-    mesh_(mesh),
-    dil_(*this),
-    ril_(*this)
-{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -67,469 +697,65 @@ Foam::InteractionLists<ParticleType>::~InteractionLists()
 {}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class ParticleType>
-bool Foam::InteractionLists<ParticleType>::testPointPointDistance
+void Foam::InteractionLists<ParticleType>::prepareParticlesToRefer
 (
-    const label ptI,
-    const label ptJ
-) const
+    const List<DynamicList<ParticleType*> >& cellOccupancy
+)
 {
-    return magSqr(mesh_.points()[ptI] - mesh_.points()[ptJ]) <= maxDistanceSqr_;
-}
+    // Clear all existing referred particles
 
-
-template<class ParticleType>
-bool Foam::InteractionLists<ParticleType>::testEdgeEdgeDistance
-(
-    const edge& eI,
-    const edge& eJ
-) const
-{
-    const vector& eJs(mesh_.points()[eJ.start()]);
-    const vector& eJe(mesh_.points()[eJ.end()]);
-
-    return testEdgeEdgeDistance(eI, eJs, eJe);
-}
-
-
-template<class ParticleType>
-bool Foam::InteractionLists<ParticleType>::testPointFaceDistance
-(
-    const label p,
-    const label faceNo
-) const
-{
-    const vector& pointPosition(mesh_.points()[p]);
-
-    return testPointFaceDistance(pointPosition, faceNo);
-}
-
-
-template<class ParticleType>
-bool Foam::InteractionLists<ParticleType>::testPointFaceDistance
-(
-    const label p,
-    const ReferredCell<ParticleType>& refCell
-) const
-{
-    const vector& pointPosition(mesh_.points()[p]);
-
-    forAll (refCell.faces(), rCF)
+    forAll(referredParticles_, i)
     {
-        if
-        (
-            testPointFaceDistance
-            (
-                pointPosition,
-                refCell.faces()[rCF],
-                refCell.points(),
-                refCell.faceCentres()[rCF],
-                refCell.faceAreas()[rCF]
-            )
-        )
+        referredParticles_[i].clear();
+    }
+
+    referredParticles_.setSize(cellIndexAndTransformToDistribute_.size());
+
+    forAll(cellIndexAndTransformToDistribute_, i)
+    {
+        const labelPair giat = cellIndexAndTransformToDistribute_[i];
+
+        label cellIndex = globalTransforms_.index(giat);
+
+        List<ParticleType*> realParticles = cellOccupancy[cellIndex];
+
+        IDLList<ParticleType>& particlesToRefer = referredParticles_[i];
+
+        forAll (realParticles, rM)
         {
-            return true;
+            const ParticleType& particle = *realParticles[rM];
+
+            particlesToRefer.append(particle.clone().ptr());
+
+            prepareParticleToBeReferred(particlesToRefer.last(), giat);
         }
     }
 
-    return false;
-}
+    // map().distribute(referredParticles_);
 
+    bool writeCloud = true;
 
-template<class ParticleType>
-bool Foam::InteractionLists<ParticleType>::testPointFaceDistance
-(
-    const pointField& pointsToTest,
-    const label faceNo
-) const
-{
-    forAll(pointsToTest, pTT)
+    if (mesh_.time().outputTime() && writeCloud)
     {
-        const vector& p(pointsToTest[pTT]);
+        cloud_.clear();
 
-        // if any point in the list is in range of the face
-        // then the rest do not need to be tested and
-        // true can be returned
-
-        if (testPointFaceDistance(p, faceNo))
+        forAll(referredParticles_, refCellI)
         {
-            return true;
-        }
-    }
+            const IDLList<ParticleType>& refCell = referredParticles_[refCellI];
 
-    return false;
-}
-
-
-template<class ParticleType>
-bool Foam::InteractionLists<ParticleType>::testPointFaceDistance
-(
-    const vector& p,
-    const label faceNo
-) const
-{
-    const face& faceToTest(mesh_.faces()[faceNo]);
-
-    const vector& faceC(mesh_.faceCentres()[faceNo]);
-
-    const vector& faceA(mesh_.faceAreas()[faceNo]);
-
-    const pointField& points(mesh_.points());
-
-    return testPointFaceDistance
-    (
-        p,
-        faceToTest,
-        points,
-        faceC,
-        faceA
-    );
-}
-
-
-template<class ParticleType>
-bool Foam::InteractionLists<ParticleType>::testPointFaceDistance
-(
-    const vector& p,
-    const labelList& faceToTest,
-    const pointField& points,
-    const vector& faceC,
-    const vector& faceA
-) const
-{
-    vector faceN(faceA/mag(faceA));
-
-    scalar perpDist((p - faceC) & faceN);
-
-    if (magSqr(perpDist) > maxDistanceSqr_)
-    {
-        return false;
-    }
-
-    vector pointOnPlane = (p - faceN * perpDist);
-
-    if (magSqr(faceC - pointOnPlane) < maxDistanceSqr_*1e-8)
-    {
-        // If pointOnPlane is very close to the face centre
-        // then defining the local axes will be inaccurate
-        // and it is very likely that pointOnPlane will be
-        // inside the face, so return true if the points
-        // are in range to be safe
-
-        return (magSqr(pointOnPlane - p) <= maxDistanceSqr_);
-    }
-
-    vector xAxis = (faceC - pointOnPlane)/mag(faceC - pointOnPlane);
-
-    vector yAxis =
-        ((faceC - pointOnPlane) ^ faceN)
-       /mag((faceC - pointOnPlane) ^ faceN);
-
-    List<vector2D> local2DVertices(faceToTest.size());
-
-    forAll(faceToTest, fTT)
-    {
-        const vector& V(points[faceToTest[fTT]]);
-
-        if (magSqr(V-p) <= maxDistanceSqr_)
-        {
-            return true;
-        }
-
-        local2DVertices[fTT] = vector2D
-        (
-            ((V - pointOnPlane) & xAxis),
-            ((V - pointOnPlane) & yAxis)
-        );
-    }
-
-    scalar localFaceCx((faceC - pointOnPlane) & xAxis);
-
-    scalar la_valid = -1;
-
-    forAll(local2DVertices, fV)
-    {
-        const vector2D& va(local2DVertices[fV]);
-
-        const vector2D& vb
-        (
-            local2DVertices[(fV + 1) % local2DVertices.size()]
-        );
-
-        if (mag(vb.y()-va.y()) > SMALL)
-        {
-            scalar la =
-                (
-                    va.x() - va.y()*((vb.x() - va.x())/(vb.y() - va.y()))
-                )
-               /localFaceCx;
-
-            scalar lv = -va.y()/(vb.y() - va.y());
-
-
-            if (la >= 0 && la <= 1 && lv >= 0 && lv <= 1)
+            forAllConstIter(typename IDLList<ParticleType>, refCell, iter)
             {
-                la_valid = la;
-
-                break;
+                cloud_.addParticle(iter().clone().ptr());
             }
         }
+
+        Particle<ParticleType>::writeFields(cloud_);
+
+        cloud_.clear();
     }
-
-    if (la_valid < 0)
-    {
-        // perpendicular point inside face, nearest point is pointOnPlane;
-        return (magSqr(pointOnPlane-p) <= maxDistanceSqr_);
-    }
-    else
-    {
-        // perpendicular point outside face, nearest point is
-        // on edge that generated la_valid;
-        return
-        (
-            magSqr(pointOnPlane + la_valid*(faceC - pointOnPlane) - p)
-         <= maxDistanceSqr_
-        );
-    }
-
-    // if the algorithm hasn't returned anything by now then something has
-    // gone wrong.
-
-    FatalErrorIn("InteractionLists.C") << nl
-        << "point " << p << " to face " << faceToTest
-        << " comparison did not find a nearest point"
-        << " to be inside or outside face."
-        << abort(FatalError);
-
-    return false;
-}
-
-
-template<class ParticleType>
-bool Foam::InteractionLists<ParticleType>::testEdgeEdgeDistance
-(
-    const edge& eI,
-    const vector& eJs,
-    const vector& eJe
-) const
-{
-    vector a(eI.vec(mesh_.points()));
-    vector b(eJe - eJs);
-
-    const vector& eIs(mesh_.points()[eI.start()]);
-
-    vector c(eJs - eIs);
-
-    vector crossab = a ^ b;
-    scalar magCrossSqr = magSqr(crossab);
-
-    if (magCrossSqr > VSMALL)
-    {
-        // If the edges are parallel then a point-face
-        // search will pick them up
-
-        scalar s = ((c ^ b) & crossab)/magCrossSqr;
-        scalar t = ((c ^ a) & crossab)/magCrossSqr;
-
-        // Check for end points outside of range 0..1
-        // If the closest point is outside this range
-        // a point-face search will have found it.
-
-        return
-        (
-            s >= 0
-         && s <= 1
-         && t >= 0
-         && t <= 1
-         && magSqr(eIs + a*s - eJs - b*t) <= maxDistanceSqr_
-        );
-    }
-
-    return false;
-}
-
-
-template<class ParticleType>
-const Foam::labelList
-Foam::InteractionLists<ParticleType>::realCellsInRangeOfSegment
-(
-    const labelList& segmentFaces,
-    const labelList& segmentEdges,
-    const labelList& segmentPoints
-) const
-{
-    DynamicList<label> realCellsFoundInRange;
-
-    forAll(segmentFaces, sF)
-    {
-        const label f = segmentFaces[sF];
-
-        forAll (mesh_.points(), p)
-        {
-            if (testPointFaceDistance(p, f))
-            {
-                const labelList& pCells(mesh_.pointCells()[p]);
-
-                forAll(pCells, pC)
-                {
-                    const label cellI(pCells[pC]);
-
-                    if (findIndex(realCellsFoundInRange, cellI) == -1)
-                    {
-                        realCellsFoundInRange.append(cellI);
-                    }
-                }
-            }
-        }
-    }
-
-    forAll(segmentPoints, sP)
-    {
-        const label p = segmentPoints[sP];
-
-        forAll(mesh_.faces(), f)
-        {
-            if (testPointFaceDistance(p, f))
-            {
-                const label cellO(mesh_.faceOwner()[f]);
-
-                if (findIndex(realCellsFoundInRange, cellO) == -1)
-                {
-                    realCellsFoundInRange.append(cellO);
-                }
-
-                if (mesh_.isInternalFace(f))
-                {
-                    // boundary faces will not have neighbour information
-
-                    const label cellN(mesh_.faceNeighbour()[f]);
-
-                    if (findIndex(realCellsFoundInRange, cellN) == -1)
-                    {
-                        realCellsFoundInRange.append(cellN);
-                    }
-                }
-            }
-        }
-    }
-
-    forAll(segmentEdges, sE)
-    {
-        const edge& eJ(mesh_.edges()[segmentEdges[sE]]);
-
-        forAll (mesh_.edges(), edgeIIndex)
-        {
-            const edge& eI(mesh_.edges()[edgeIIndex]);
-
-            if (testEdgeEdgeDistance(eI, eJ))
-            {
-                const labelList& eICells(mesh_.edgeCells()[edgeIIndex]);
-
-                forAll(eICells, eIC)
-                {
-                    const label cellI(eICells[eIC]);
-
-                    if (findIndex(realCellsFoundInRange, cellI) == -1)
-                    {
-                        realCellsFoundInRange.append(cellI);
-                    }
-                }
-            }
-        }
-    }
-
-    return realCellsFoundInRange.shrink();
-}
-
-
-template<class ParticleType>
-const Foam::labelList
-Foam::InteractionLists<ParticleType>::ReferredCellsInRangeOfSegment
-(
-    const List<ReferredCell<ParticleType> >& referredInteractionList,
-    const labelList& segmentFaces,
-    const labelList& segmentEdges,
-    const labelList& segmentPoints
-) const
-{
-    DynamicList<label> ReferredCellsFoundInRange;
-
-    forAll(segmentFaces, sF)
-    {
-        const label f = segmentFaces[sF];
-
-        forAll(referredInteractionList, rIL)
-        {
-            const pointField& refCellPoints
-                = referredInteractionList[rIL].points();
-
-            if (testPointFaceDistance(refCellPoints, f))
-            {
-                if (findIndex(ReferredCellsFoundInRange, rIL) == -1)
-                {
-                    ReferredCellsFoundInRange.append(rIL);
-                }
-            }
-        }
-    }
-
-    forAll(segmentPoints, sP)
-    {
-        const label p = segmentPoints[sP];
-
-        forAll(referredInteractionList, rIL)
-        {
-            const ReferredCell<ParticleType>&
-                refCell(referredInteractionList[rIL]);
-
-            if (testPointFaceDistance(p, refCell))
-            {
-                if (findIndex(ReferredCellsFoundInRange, rIL) == -1)
-                {
-                    ReferredCellsFoundInRange.append(rIL);
-                }
-            }
-        }
-    }
-
-    forAll(segmentEdges, sE)
-    {
-        const edge& eI(mesh_.edges()[segmentEdges[sE]]);
-
-        forAll(referredInteractionList, rIL)
-        {
-            const pointField& refCellPoints
-                = referredInteractionList[rIL].points();
-
-            const edgeList& refCellEdges
-                = referredInteractionList[rIL].edges();
-
-            forAll(refCellEdges, rCE)
-            {
-                const edge& eJ(refCellEdges[rCE]);
-
-                if
-                (
-                    testEdgeEdgeDistance
-                    (
-                        eI,
-                        refCellPoints[eJ.start()],
-                        refCellPoints[eJ.end()]
-                    )
-                )
-                {
-                    if(findIndex(ReferredCellsFoundInRange, rIL) == -1)
-                    {
-                        ReferredCellsFoundInRange.append(rIL);
-                    }
-                }
-            }
-        }
-    }
-
-    return ReferredCellsFoundInRange.shrink();
 }
 
 

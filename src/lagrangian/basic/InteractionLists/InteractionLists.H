@@ -38,10 +38,11 @@ SourceFiles
 #define InteractionLists_H
 
 #include "polyMesh.H"
-#include "vector2D.H"
-#include "DirectInteractionList.H"
-#include "ReferredCell.H"
-#include "ReferredCellList.H"
+#include "globalIndexAndTransform.H"
+#include "indexedOctree.H"
+#include "treeDataCell.H"
+#include "mapDistribute.H"
+#include "Random.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,15 +58,67 @@ class InteractionLists
 {
     // Private data
 
+        //- Reference to mesh
         const polyMesh& mesh_;
 
-        scalar maxDistanceSqr_;
+        //- Dummy cloud to give to particles
+        Cloud<ParticleType> cloud_;
 
-        DirectInteractionList<ParticleType> dil_;
+        //- mapDistribute to exchange particles
+        autoPtr<mapDistribute> mapPtr_;
 
-        ReferredCellList<ParticleType> ril_;
+        //- Storage and encoding/decoding for all possible transforms
+        //  of the geometry
+        globalIndexAndTransform globalTransforms_;
+
+        //- Maximum distance over which interactions will be detected
+        scalar maxDistance_;
+
+        //- Direct interaction list
+        labelListList dil_;
+
+        //- Referred interaction list - which real cells are to be
+        //  supplied with particles from the referred particle
+        //  container with the same index.
+        labelListList ril_;
+
+        //- Inverse addressing for referred cells, specifies which
+        //  referred cells (indices of entries in the ril_ and
+        //  referredParticles_ lists) interact with the real cell
+        //  indexed in this container.
+        labelListList rilInverse_;
+
+        //- Which cells are to be sent via the map, and an index
+        //  specifying how they should be transformed.
+        List<labelPair> cellIndexAndTransformToDistribute_;
+
+        //- Referred particle container
+        List<IDLList<ParticleType> > referredParticles_;
+
 
     // Private Member Functions
+
+        //- Find the other processors which have interaction range
+        //  extended bound boxes in range
+        void findExtendedProcBbsInRange
+        (
+            const treeBoundBox& procBb,
+            const List<treeBoundBox>& allExtendedProcBbs,
+            const globalIndexAndTransform& globalTransforms,
+            List<treeBoundBox>& extendedProcBbsInRange,
+            List<label>& extendedProcBbsTransformIndex,
+            List<label>& extendedProcBbsOrigProc
+        );
+
+        //- Build the mapDistribute
+        void buildMap(const List<label>& toProc);
+
+        //- Prepare particle to be referred
+        void prepareParticleToBeReferred
+        (
+            ParticleType* particle,
+            labelPair giat
+        );
 
         //- Disallow default bitwise copy construct
         InteractionLists(const InteractionLists&);
@@ -76,25 +129,14 @@ class InteractionLists
 
 public:
 
-    // Static data members
-
-        //- Tolerance for checking that faces on a patch segment
-        static scalar transTol;
-
-
     // Constructors
 
         //- Construct and create all information from the mesh
         InteractionLists
         (
             const polyMesh& mesh,
-            scalar maxDistanceSqr,
-            bool pointPointListBuild = false
+            scalar maxDistance
         );
-
-        //- Construct from file
-        InteractionLists(const polyMesh& mesh);
-
 
     // Destructor
 
@@ -103,84 +145,43 @@ public:
 
     // Member Functions
 
-            bool testPointPointDistance
-            (
-                const label ptI,
-                const label ptJ
-            ) const;
-
-            bool testPointFaceDistance
-            (
-                const label p,
-                const label faceNo
-            ) const;
-
-            bool testPointFaceDistance
-            (
-                const label p,
-                const ReferredCell<ParticleType>& refCell
-            ) const;
-
-            bool testPointFaceDistance
-            (
-                const pointField& pointsToTest,
-                const label faceNo
-            ) const;
-
-            bool testPointFaceDistance
-            (
-                const vector& p,
-                const label faceNo
-            ) const;
-
-            bool testPointFaceDistance
-            (
-                const vector& p,
-                const labelList& faceToTest,
-                const pointField& points,
-                const vector& faceC,
-                const vector& faceA
-            ) const;
-
-            bool testEdgeEdgeDistance
-            (
-                const edge& eI,
-                const edge& eJ
-            ) const;
-
-            bool testEdgeEdgeDistance
-            (
-                const edge& eI,
-                const vector& eJs,
-                const vector& eJe
-            ) const;
-
-            const labelList realCellsInRangeOfSegment
-            (
-                const labelList& segmentFaces,
-                const labelList& segmentEdges,
-                const labelList& segmentPoints
-            ) const;
-
-            const labelList ReferredCellsInRangeOfSegment
-            (
-                const List<ReferredCell<ParticleType> >&
-                    referredInteractionList,
-                const labelList& segmentFaces,
-                const labelList& segmentEdges,
-                const labelList& segmentPoints
-            ) const;
-
+        //- Fill the referredParticles container with particles that
+        //  will be referred
+        void prepareParticlesToRefer
+        (
+            const List<DynamicList<ParticleType*> >& cellOccupancy
+        );
 
         // Access
 
+            //- Return access to the mesh
             inline const polyMesh& mesh() const;
 
-            inline const DirectInteractionList<ParticleType>& dil() const;
+            //- Return access to the mapDistribute
+            inline const mapDistribute& map() const;
 
-            inline const ReferredCellList<ParticleType>& ril() const;
+            //- Return access to the globalTransforms
+            inline const globalIndexAndTransform& globalTransforms() const;
 
-            inline ReferredCellList<ParticleType>& ril();
+            //- Return access to the direct interaction list
+            inline const labelListList& dil() const;
+
+            //- Return access to the referred interaction list
+            inline const labelListList& ril() const;
+
+            //- Return access to the inverse referred interaction list
+            inline const labelListList& rilInverse() const;
+
+            //- Return access to the cellIndexAndTransformToDistribute list
+            inline const List<labelPair>&
+            cellIndexAndTransformToDistribute() const;
+
+            //- Return access to the referred particle container
+            inline const List<IDLList<ParticleType> >&
+            referredParticles() const;
+
+            //- Return non-const access to the referred particle container
+            inline List<IDLList<ParticleType> >& referredParticles();
 };
 
 

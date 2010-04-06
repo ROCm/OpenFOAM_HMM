@@ -36,27 +36,67 @@ const Foam::polyMesh& Foam::InteractionLists<ParticleType>::mesh() const
 
 
 template<class ParticleType>
-const Foam::DirectInteractionList<ParticleType>&
-Foam::InteractionLists<ParticleType>::dil() const
+const Foam::mapDistribute&
+Foam::InteractionLists<ParticleType>::map() const
+{
+    return mapPtr_();
+}
+
+
+template<class ParticleType>
+const Foam::globalIndexAndTransform&
+Foam::InteractionLists<ParticleType>::globalTransforms() const
+{
+    return globalTransforms_;
+}
+
+
+template<class ParticleType>
+const Foam::labelListList& Foam::InteractionLists<ParticleType>::dil() const
 {
     return dil_;
 }
 
 
 template<class ParticleType>
-inline const Foam::ReferredCellList<ParticleType>&
-Foam::InteractionLists<ParticleType>::ril() const
+const Foam::labelListList& Foam::InteractionLists<ParticleType>::ril() const
 {
     return ril_;
 }
 
 
 template<class ParticleType>
-inline Foam::ReferredCellList<ParticleType>&
-Foam::InteractionLists<ParticleType>::ril()
+const Foam::List<Foam::labelPair>&
+Foam::InteractionLists<ParticleType>::cellIndexAndTransformToDistribute() const
 {
-    return ril_;
+    return cellIndexAndTransformToDistribute_;
 }
+
+
+template<class ParticleType>
+const Foam::labelListList&
+Foam::InteractionLists<ParticleType>::rilInverse() const
+{
+    return rilInverse_;
+}
+
+
+template<class ParticleType>
+const Foam::List<IDLList<ParticleType> >&
+Foam::InteractionLists<ParticleType>::referredParticles() const
+{
+    return referredParticles_;
+}
+
+
+template<class ParticleType>
+Foam::List<IDLList<ParticleType> >&
+Foam::InteractionLists<ParticleType>::referredParticles()
+{
+    return referredParticles_;
+}
+
+
 
 
 // ************************************************************************* //
