@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,7 +57,11 @@ StringListType Foam::subsetMatchingStrings
     const bool invert
 )
 {
+    // Create copy
     StringListType newLst(lst.size());
+
+    // ensure consistent addressable size (eg, DynamicList)
+    newLst.setSize(lst.size());
 
     label nElem = 0;
     forAll(lst, elemI)

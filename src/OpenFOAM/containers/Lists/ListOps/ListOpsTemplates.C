@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,9 @@ ListType Foam::renumber
 {
     // Create copy
     ListType newLst(lst.size());
+
+    // ensure consistent addressable size (eg, DynamicList)
+    newLst.setSize(lst.size());
 
     forAll(lst, elemI)
     {
@@ -76,6 +79,9 @@ ListType Foam::reorder
     // Create copy
     ListType newLst(lst.size());
 
+    // ensure consistent addressable size (eg, DynamicList)
+    newLst.setSize(lst.size());
+
     forAll(lst, elemI)
     {
         if (oldToNew[elemI] >= 0)
@@ -100,6 +106,9 @@ void Foam::inplaceReorder
 {
     // Create copy
     ListType newLst(lst.size());
+
+    // ensure consistent addressable size (eg, DynamicList)
+    newLst.setSize(lst.size());
 
     forAll(lst, elemI)
     {
@@ -258,6 +267,9 @@ ListType Foam::subset
 
     ListType newLst(lst.size());
 
+    // ensure consistent addressable size (eg, DynamicList)
+    newLst.setSize(lst.size());
+
     label nElem = 0;
     forAll(lst, elemI)
     {
@@ -317,6 +329,9 @@ ListType Foam::subset
     // eg, when it is a PackedBoolList or a labelHashSet
 
     ListType newLst(lst.size());
+
+    // ensure consistent addressable size (eg, DynamicList)
+    newLst.setSize(lst.size());
 
     label nElem = 0;
     forAll(lst, elemI)
