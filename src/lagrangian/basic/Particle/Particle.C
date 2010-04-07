@@ -873,6 +873,34 @@ void Foam::Particle<ParticleType>::hitPatch
 {}
 
 
+// * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
+
+template<class ParticleType>
+bool Foam::operator==
+(
+    const Particle<ParticleType>& pA,
+    const Particle<ParticleType>& pB
+)
+{
+    return
+    (
+        pA.origProc() == pB.origProc()
+        && pA.origId() == pB.origId()
+    );
+}
+
+
+template<class ParticleType>
+bool Foam::operator!=
+(
+    const Particle<ParticleType>& pA,
+    const Particle<ParticleType>& pB
+)
+{
+    return !(pA == pB);
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "ParticleIO.C"
