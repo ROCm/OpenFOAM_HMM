@@ -12,6 +12,9 @@ fieldValues/faceSource/faceSourceFunctionObject.C
 fieldValues/cellSource/cellSource.C
 fieldValues/cellSource/cellSourceFunctionObject.C
 
+readFields/readFields.C
+readFields/readFieldsFunctionObject.C
+
 streamLine/streamLine.C
 streamLine/streamLineParticle.C
 streamLine/streamLineParticleCloud.C

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,73 +21,29 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Application
-    postCalc
+Typedef
+    Foam::IOreadFields
 
 Description
-    Generic wrapper for calculating a quantity at each time
+    Instance of the generic IOOutputFilter for readFields.
 
 \*---------------------------------------------------------------------------*/
 
-#include "calc.H"
-#include "timeSelector.H"
+#ifndef IOreadFields_H
+#define IOreadFields_H
+
+#include "readFields.H"
+#include "IOOutputFilter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    void tryCalc(const argList& args, const Time& runTime, const fvMesh& mesh)
-    {
-        FatalIOError.throwExceptions();
-
-        try
-        {
-            calc(args, runTime, mesh);
-        }
-        catch(IOerror& err)
-        {
-            Warning<< err << endl;
-        }
-    }
+    typedef IOOutputFilter<readFields> IOreadFields;
 }
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
-{
-    Foam::timeSelector::addOptions();
-    Foam::argList::addBoolOption
-    (
-        "noWrite",
-        "suppress writing results"
-    );
-    Foam::argList::addOption
-    (
-        "dict",
-        "dictionary name"
-    );
-
-    #include "setRootCase.H"
-    #include "createTime.H"
-    Foam::instantList timeDirs = Foam::timeSelector::select0(runTime, args);
-    #include "createMesh.H"
-
-    forAll(timeDirs, timeI)
-    {
-        runTime.setTime(timeDirs[timeI], timeI);
-
-        Foam::Info<< "Time = " << runTime.timeName() << Foam::endl;
-
-        mesh.readUpdate();
-
-        Foam::tryCalc(args, runTime, mesh);
-
-        Foam::Info<< Foam::endl;
-    }
-
-    return 0;
-}
-
+#endif
 
 // ************************************************************************* //

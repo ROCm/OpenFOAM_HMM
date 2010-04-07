@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "curveSet.H"
+#include "polyLineSet.H"
 #include "meshSearch.H"
 #include "DynamicList.H"
 #include "polyMesh.H"
@@ -38,15 +38,15 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(curveSet, 0);
-    addToRunTimeSelectionTable(sampledSet, curveSet, word);
+    defineTypeNameAndDebug(polyLineSet, 0);
+    addToRunTimeSelectionTable(sampledSet, polyLineSet, word);
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Sample till hits boundary.
-bool Foam::curveSet::trackToBoundary
+bool Foam::polyLineSet::trackToBoundary
 (
     Particle<passiveParticle>& singleParticle,
     label& sampleI,
@@ -127,7 +127,7 @@ bool Foam::curveSet::trackToBoundary
 }
 
 
-void Foam::curveSet::calcSamples
+void Foam::polyLineSet::calcSamples
 (
     DynamicList<point>& samplingPts,
     DynamicList<label>& samplingCells,
@@ -139,7 +139,7 @@ void Foam::curveSet::calcSamples
     // Check sampling points
     if (sampleCoords_.size() < 2)
     {
-        FatalErrorIn("curveSet::calcSamples()")
+        FatalErrorIn("polyLineSet::calcSamples()")
             << "Incorrect sample specification. Too few points:"
             << sampleCoords_ << exit(FatalError);
     }
@@ -148,7 +148,7 @@ void Foam::curveSet::calcSamples
     {
         if (mag(sampleCoords_[sampleI] - oldPoint) < SMALL)
         {
-            FatalErrorIn("curveSet::calcSamples()")
+            FatalErrorIn("polyLineSet::calcSamples()")
                 << "Incorrect sample specification."
                 << " Point " << sampleCoords_[sampleI-1]
                 << " at position " << sampleI-1
@@ -310,7 +310,7 @@ void Foam::curveSet::calcSamples
 }
 
 
-void Foam::curveSet::genSamples()
+void Foam::polyLineSet::genSamples()
 {
     // Storage for sample points
     DynamicList<point> samplingPts;
@@ -347,7 +347,7 @@ void Foam::curveSet::genSamples()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::curveSet::curveSet
+Foam::polyLineSet::polyLineSet
 (
     const word& name,
     const polyMesh& mesh,
@@ -368,7 +368,7 @@ Foam::curveSet::curveSet
 }
 
 
-Foam::curveSet::curveSet
+Foam::polyLineSet::polyLineSet
 (
     const word& name,
     const polyMesh& mesh,
@@ -390,13 +390,13 @@ Foam::curveSet::curveSet
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::curveSet::~curveSet()
+Foam::polyLineSet::~polyLineSet()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::point Foam::curveSet::getRefPoint(const List<point>& pts) const
+Foam::point Foam::polyLineSet::getRefPoint(const List<point>& pts) const
 {
     if (pts.size())
     {
