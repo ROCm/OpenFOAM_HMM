@@ -112,12 +112,22 @@ class InteractionLists
         //- Build the mapDistribute
         void buildMap(const List<label>& toProc);
 
+        //- Fill the referredParticles container with particles that
+        //  will be referred
+        void prepareParticlesToRefer
+        (
+            const List<DynamicList<ParticleType*> >& cellOccupancy
+        );
+
         //- Prepare particle to be referred
         void prepareParticleToBeReferred
         (
             ParticleType* particle,
             labelPair giat
         );
+
+        //- Write the referredParticles out to visualise
+        void writeReferredParticleCloud();
 
         //- Disallow default bitwise copy construct
         InteractionLists(const InteractionLists&);
@@ -144,12 +154,14 @@ public:
 
     // Member Functions
 
-        //- Fill the referredParticles container with particles that
-        //  will be referred
-        void prepareParticlesToRefer
+        //- Prepare and send referred particles, nonBlocking communication
+        void sendReferredParticles
         (
             const List<DynamicList<ParticleType*> >& cellOccupancy
         );
+
+        //- Receive referred particles
+        void receiveReferredParticles();
 
         // Access
 

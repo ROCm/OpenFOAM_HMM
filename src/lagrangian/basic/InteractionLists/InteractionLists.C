@@ -307,6 +307,44 @@ void Foam::InteractionLists<ParticleType>::buildMap
     );
 }
 
+
+template<class ParticleType>
+void Foam::InteractionLists<ParticleType>::prepareParticlesToRefer
+(
+    const List<DynamicList<ParticleType*> >& cellOccupancy
+)
+{
+    // Clear all existing referred particles
+
+    forAll(referredParticles_, i)
+    {
+        referredParticles_[i].clear();
+    }
+
+    referredParticles_.setSize(cellIndexAndTransformToDistribute_.size());
+
+    forAll(cellIndexAndTransformToDistribute_, i)
+    {
+        const labelPair giat = cellIndexAndTransformToDistribute_[i];
+
+        label cellIndex = globalTransforms_.index(giat);
+
+        List<ParticleType*> realParticles = cellOccupancy[cellIndex];
+
+        IDLList<ParticleType>& particlesToRefer = referredParticles_[i];
+
+        forAll (realParticles, rM)
+        {
+            const ParticleType& particle = *realParticles[rM];
+
+            particlesToRefer.append(particle.clone().ptr());
+
+            prepareParticleToBeReferred(particlesToRefer.last(), giat);
+        }
+    }
+}
+
+
 template<class ParticleType>
 void InteractionLists<ParticleType>::prepareParticleToBeReferred
 (
@@ -320,6 +358,32 @@ void InteractionLists<ParticleType>::prepareParticleToBeReferred
     );
 
     particle->position() -= transform;
+}
+
+
+template<class ParticleType>
+void InteractionLists<ParticleType>::writeReferredParticleCloud()
+{
+    bool writeCloud = true;
+
+    if (mesh_.time().outputTime() && writeCloud)
+    {
+        cloud_.clear();
+
+        forAll(referredParticles_, refCellI)
+        {
+            const IDLList<ParticleType>& refCell = referredParticles_[refCellI];
+
+            forAllConstIter(typename IDLList<ParticleType>, refCell, iter)
+            {
+                cloud_.addParticle(iter().clone().ptr());
+            }
+        }
+
+        Particle<ParticleType>::writeFields(cloud_);
+
+        cloud_.clear();
+    }
 }
 
 
@@ -525,21 +589,23 @@ Foam::InteractionLists<ParticleType>::InteractionLists
         // the order and structure is preserved, i.e. it, is as if the
         // cell had never been referred in the first place.
 
-        labelList oldToNew(globalIAndTToExchange.size(), -1);
+        // labelList oldToNew(globalIAndTToExchange.size(), -1);
 
-        label refCellI = 0;
+        // label refCellI = 0;
 
-        forAll(bbRequiredByAnyCell, bbReqI)
-        {
-            if (bbRequiredByAnyCell[bbReqI])
-            {
-                oldToNew[bbReqI] = refCellI++;
-            }
-        }
+        // forAll(bbRequiredByAnyCell, bbReqI)
+        // {
+        //     if (bbRequiredByAnyCell[bbReqI])
+        //     {
+        //         oldToNew[bbReqI] = refCellI++;
+        //     }
+        // }
 
-        inplaceReorder(oldToNew, ril_);
+        // inplaceReorder(oldToNew, ril_);
 
-        ril_.setSize(refCellI);
+        // ril_.setSize(refCellI);
+
+        inplaceSubset(bbRequiredByAnyCell, ril_);
     }
 
     // Send information about which cells are actually required back
@@ -571,32 +637,36 @@ Foam::InteractionLists<ParticleType>::InteractionLists
     // and truncate it
 
     {
-        labelList oldToNew(globalIAndTToExchange.size(), -1);
+        // labelList oldToNew(globalIAndTToExchange.size(), -1);
 
-        label refCellI = 0;
+        // label refCellI = 0;
 
-        forAll(bbRequiredByAnyCell, bbReqI)
-        {
-            if (bbRequiredByAnyCell[bbReqI])
-            {
-                oldToNew[bbReqI] = refCellI++;
-            }
-        }
+        // forAll(bbRequiredByAnyCell, bbReqI)
+        // {
+        //     if (bbRequiredByAnyCell[bbReqI])
+        //     {
+        //         oldToNew[bbReqI] = refCellI++;
+        //     }
+        // }
 
-        inplaceReorder
-        (
-            oldToNew,
-            static_cast<List<labelPair>&>(globalIAndTToExchange)
-        );
+        // inplaceReorder
+        // (
+        //     oldToNew,
+        //     globalIAndTToExchange
+        // );
 
-        inplaceReorder
-        (
-            oldToNew,
-            static_cast<List<label>&>(procToDistributeTo)
-        );
+        // inplaceReorder
+        // (
+        //     oldToNew,
+        //     procToDistributeTo
+        // );
 
-        globalIAndTToExchange.setSize(refCellI);
-        procToDistributeTo.setSize(refCellI);
+        // globalIAndTToExchange.setSize(refCellI);
+        // procToDistributeTo.setSize(refCellI);
+
+        inplaceSubset(bbRequiredByAnyCell, globalIAndTToExchange);
+
+        inplaceSubset(bbRequiredByAnyCell, procToDistributeTo);
     }
 
     preDistributionSize = procToDistributeTo.size();
@@ -699,62 +769,73 @@ Foam::InteractionLists<ParticleType>::~InteractionLists()
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class ParticleType>
-void Foam::InteractionLists<ParticleType>::prepareParticlesToRefer
+void Foam::InteractionLists<ParticleType>::sendReferredParticles
 (
     const List<DynamicList<ParticleType*> >& cellOccupancy
 )
 {
-    // Clear all existing referred particles
+    prepareParticlesToRefer(cellOccupancy);
 
-    forAll(referredParticles_, i)
+    PstreamBuffers pBufs(Pstream::nonBlocking);
+
+    // Stream data into buffer
+    for (label domain = 0; domain < Pstream::nProcs(); domain++)
     {
-        referredParticles_[i].clear();
-    }
+        const labelList& subMap = map().subMap()[domain];
 
-    referredParticles_.setSize(cellIndexAndTransformToDistribute_.size());
-
-    forAll(cellIndexAndTransformToDistribute_, i)
-    {
-        const labelPair giat = cellIndexAndTransformToDistribute_[i];
-
-        label cellIndex = globalTransforms_.index(giat);
-
-        List<ParticleType*> realParticles = cellOccupancy[cellIndex];
-
-        IDLList<ParticleType>& particlesToRefer = referredParticles_[i];
-
-        forAll (realParticles, rM)
+        if (subMap.size())
         {
-            const ParticleType& particle = *realParticles[rM];
+            // Put data into send buffer
+            UOPstream toDomain(domain, pBufs);
 
-            particlesToRefer.append(particle.clone().ptr());
+            UIndirectList<IDLList<ParticleType> > subMappedParticles
+            (
+                referredParticles_,
+                subMap
+            );
 
-            prepareParticleToBeReferred(particlesToRefer.last(), giat);
-        }
-    }
-
-    // map().distribute(referredParticles_);
-
-    bool writeCloud = true;
-
-    if (mesh_.time().outputTime() && writeCloud)
-    {
-        cloud_.clear();
-
-        forAll(referredParticles_, refCellI)
-        {
-            const IDLList<ParticleType>& refCell = referredParticles_[refCellI];
-
-            forAllConstIter(typename IDLList<ParticleType>, refCell, iter)
+            forAll(subMappedParticles, i)
             {
-                cloud_.addParticle(iter().clone().ptr());
+                toDomain << subMappedParticles[i];
             }
         }
-
-        Particle<ParticleType>::writeFields(cloud_);
-
-        cloud_.clear();
     }
+
+    // Start sending and receiving but do not block.
+    pBufs.finishedSends(false);
+
+    // DO OTHER STUFF HERE;
+
+    Pstream::waitRequests();
+
+    referredParticles_.setSize(map().constructSize());
+
+    for (label domain = 0; domain < Pstream::nProcs(); domain++)
+    {
+        const labelList& constructMap = map().constructMap()[domain];
+
+        if (constructMap.size())
+        {
+            UIPstream str(domain, pBufs);
+
+            forAll (constructMap, i)
+            {
+                referredParticles_[constructMap[i]] = IDLList<ParticleType>
+                (
+                    str,
+                    typename ParticleType::iNew(cloud_)
+                );
+            }
+        }
+    }
+
+    writeReferredParticleCloud();
+};
+
+
+template<class ParticleType>
+void Foam::InteractionLists<ParticleType>::receiveReferredParticles()
+{
 }
 
 
