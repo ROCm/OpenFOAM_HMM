@@ -57,8 +57,6 @@ void surfaceInterpolation::clearOut()
 
 surfaceInterpolation::surfaceInterpolation(const fvMesh& fvm)
 :
-    fvSchemes(static_cast<const objectRegistry&>(fvm)),
-    fvSolution(static_cast<const objectRegistry&>(fvm)),
     mesh_(fvm),
     weightingFactors_(NULL),
     differenceFactors_(NULL),

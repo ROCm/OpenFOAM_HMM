@@ -37,8 +37,6 @@ SourceFiles
 
 #include "tmp.H"
 #include "scalar.H"
-#include "fvSchemes.H"
-#include "fvSolution.H"
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "className.H"
@@ -53,9 +51,6 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class surfaceInterpolation
-:
-    public fvSchemes,
-    public fvSolution
 {
     // Private data
 

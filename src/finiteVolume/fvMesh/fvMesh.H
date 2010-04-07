@@ -52,6 +52,9 @@ SourceFiles
 #include "primitiveMesh.H"
 #include "fvBoundaryMesh.H"
 #include "surfaceInterpolation.H"
+#include "fvSchemes.H"
+#include "fvSolution.H"
+#include "fvData.H"
 #include "DimensionedField.H"
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
@@ -77,7 +80,10 @@ class fvMesh
 :
     public polyMesh,
     public lduMesh,
-    public surfaceInterpolation
+    public surfaceInterpolation,
+    public fvSchemes,
+    public fvSolution,
+    public fvData
 {
     // Private data
 

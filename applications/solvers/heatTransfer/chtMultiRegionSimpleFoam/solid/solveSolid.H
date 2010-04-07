@@ -6,9 +6,7 @@
             -fvm::laplacian(K, T)
         );
         tEqn.relax();
-        eqnResidual = tEqn.solve().initialResidual();
-        maxResidual = max(eqnResidual, maxResidual);
-
+        tEqn.solve();
     }
 
     Info<< "Min/max T:" << min(T).value() << ' '

@@ -21,60 +21,51 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Application
-    porousSimpleFoam
-
-Description
-    Steady-state solver for incompressible, turbulent flow with
-    implicit or explicit porosity treatment
-
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "singlePhaseTransportModel.H"
-#include "RASModel.H"
-#include "porousZones.H"
+#include "fvData.H"
+#include "Time.H"
+#include "lduMatrix.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+int Foam::fvData::debug(Foam::debug::debugSwitch("fvData", false));
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::fvData::fvData(const objectRegistry& obr)
+:
+    IOdictionary
+    (
+        IOobject
+        (
+            "fvData",
+            obr.time().system(),
+            obr,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        )
+    )
 {
-    #include "setRootCase.H"
-    #include "createTime.H"
-    #include "createMesh.H"
-    #include "createFields.H"
-    #include "initContinuityErrs.H"
+    set("solverPerformance", dictionary());
+}
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    Info<< "\nStarting time loop\n" << endl;
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-    while (runTime.loop())
-    {
-        Info<< "Time = " << runTime.timeName() << nl << endl;
+const Foam::dictionary& Foam::fvData::solverPerformanceDict() const
+{
+    return subDict("solverPerformance");
+}
 
-        #include "readSIMPLEControls.H"
 
-        p.storePrevIter();
-
-        // Pressure-velocity SIMPLE corrector
-        {
-            #include "UEqn.H"
-            #include "pEqn.H"
-        }
-
-        turbulence->correct();
-
-        runTime.write();
-
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
-    }
-
-    Info<< "End\n" << endl;
-
-    return 0;
+void Foam::fvData::setSolverPerformance
+(
+    const word& name,
+    const lduMatrix::solverPerformance& sp
+) const
+{
+    const_cast<dictionary&>(solverPerformanceDict()).set(name, sp);
 }
 
 
