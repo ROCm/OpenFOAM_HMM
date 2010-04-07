@@ -100,19 +100,6 @@ void Foam::sampledSets::combineSampledSets
         SortableList<scalar> sortedDist(allCurveDist);
         indexSets[setI] = sortedDist.indices();
 
-        // Get reference point (note: only master has all points)
-        point refPt;
-
-        if (allPts.size())
-        {
-            refPt = samplePts.getRefPoint(allPts);
-        }
-        else
-        {
-            refPt = vector::zero;
-        }
-
-
         masterSampledSets.set
         (
             setI,
@@ -121,7 +108,7 @@ void Foam::sampledSets::combineSampledSets
                 samplePts.name(),
                 samplePts.axis(),
                 List<point>(UIndirectList<point>(allPts, indexSets[setI])),
-                refPt
+                allCurveDist
             )
         );
     }

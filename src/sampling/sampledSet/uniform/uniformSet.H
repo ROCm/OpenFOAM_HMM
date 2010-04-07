@@ -139,14 +139,7 @@ public:
 
 
     // Destructor
-
-        virtual ~uniformSet();
-
-
-    // Member Functions
-
-        //- Get reference point
-        virtual point getRefPoint(const List<point>&) const;
+    virtual ~uniformSet();
 };
 
 

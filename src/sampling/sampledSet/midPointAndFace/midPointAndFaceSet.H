@@ -59,6 +59,7 @@ class midPointAndFaceSet
 
         void genSamples();
 
+
 public:
 
     //- Runtime type information
@@ -89,8 +90,7 @@ public:
 
 
     // Destructor
-
-        virtual ~midPointAndFaceSet();
+    virtual ~midPointAndFaceSet();
 };
 
 

@@ -41,13 +41,10 @@ SourceFiles
 #ifndef sampledSet_H
 #define sampledSet_H
 
-#include "pointField.H"
-#include "word.H"
-#include "labelList.H"
+#include "coordSet.H"
 #include "typeInfo.H"
 #include "runTimeSelectionTables.H"
 #include "autoPtr.H"
-#include "coordSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -79,10 +76,6 @@ protected:
 
         //- Segment numbers
         labelList segments_;
-
-        //- Parameter along sample curve. Uniquely identifies position
-        //  along sampling. Used for combining parallel results.
-        scalarList curveDist_;
 
         //- Cell numbers
         labelList cells_;
@@ -245,8 +238,7 @@ public:
 
 
     // Destructor
-
-        virtual ~sampledSet();
+    virtual ~sampledSet();
 
 
     // Member Functions
@@ -266,11 +258,6 @@ public:
             return segments_;
         }
 
-        const scalarList& curveDist() const
-        {
-            return curveDist_;
-        }
-
         const labelList& cells() const
         {
             return cells_;
@@ -280,9 +267,6 @@ public:
         {
             return faces_;
         }
-
-        //- Given all sampling points (on all processors) return reference point
-        virtual point getRefPoint(const List<point>&) const = 0;
 
         //- Output for debugging
         Ostream& write(Ostream&) const;

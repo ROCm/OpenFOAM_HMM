@@ -151,20 +151,4 @@ Foam::cloudSet::~cloudSet()
 {}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::point Foam::cloudSet::getRefPoint(const List<point>& pts) const
-{
-    if (pts.size())
-    {
-        // Use first samplePt as starting point
-        return pts[0];
-    }
-    else
-    {
-        return vector::zero;
-    }
-}
-
-
 // ************************************************************************* //

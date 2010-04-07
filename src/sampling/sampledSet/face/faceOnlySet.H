@@ -47,7 +47,7 @@ class passiveParticle;
 template<class Type> class Particle;
 
 /*---------------------------------------------------------------------------*\
-                           Class faceOnlySet Declaration
+                         Class faceOnlySet Declaration
 \*---------------------------------------------------------------------------*/
 
 class faceOnlySet
@@ -92,6 +92,7 @@ class faceOnlySet
         //- Uses calcSamples to obtain samples. Copies them into *this.
         void genSamples();
 
+
 public:
 
     //- Runtime type information
@@ -121,8 +122,7 @@ public:
 
 
     // Destructor
-
-        virtual ~faceOnlySet();
+    virtual ~faceOnlySet();
 
 
     // Member Functions
@@ -136,9 +136,6 @@ public:
         {
             return end_;
         }
-
-        //- Get reference point
-        virtual point getRefPoint(const List<point>&) const;
 };
 
 

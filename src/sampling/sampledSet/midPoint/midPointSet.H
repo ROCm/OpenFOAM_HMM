@@ -58,6 +58,7 @@ class midPointSet
 
         void genSamples();
 
+
 public:
 
     //- Runtime type information
@@ -88,8 +89,7 @@ public:
 
 
     // Destructor
-
-        virtual ~midPointSet();
+    virtual ~midPointSet();
 };
 
 

@@ -268,8 +268,7 @@ public:
 
 
     // Destructor
-
-        virtual ~sampledSets();
+    virtual ~sampledSets();
 
 
     // Member Functions
