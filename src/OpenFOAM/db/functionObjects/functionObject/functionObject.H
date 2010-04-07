@@ -51,7 +51,7 @@ namespace Foam
 class Time;
 
 /*---------------------------------------------------------------------------*\
-                           Class functionObject Declaration
+                       Class functionObject Declaration
 \*---------------------------------------------------------------------------*/
 
 class functionObject

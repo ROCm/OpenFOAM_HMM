@@ -1,8 +1,8 @@
-/*---------------------------------------------------------------------------* \
+/*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,26 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::IOOutputFilter
+    Foam::readFields
 
 Description
-    IOdictionary wrapper around OutputFilter to allow them to read from
-    their associated dictionaries.
-
-Note
-    The IOobject or the objectRegistry will normally have to be
-    derived from a fvMesh for a subsequent cast (within OutputFilter)
-    to work correctly.
+    Reads fields from the time folders and adds them to the mesh database
+    for further post-processing.
 
 SourceFiles
-    IOOutputFilter.C
+    readFields.C
+    IOreadFields.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOOutputFilter_H
-#define IOOutputFilter_H
+#ifndef readFields_H
+#define readFields_H
 
-#include "IOdictionary.H"
+#include "OFstream.H"
 #include "pointFieldFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -50,82 +46,94 @@ namespace Foam
 {
 
 // Forward declaration of classes
+class objectRegistry;
+class dictionary;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                       Class IOOutputFilter Declaration
+                         Class readFields Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class OutputFilter>
-class IOOutputFilter
-:
-    public IOdictionary,
-    public OutputFilter
+class readFields
 {
-    // Private Member Functions
+protected:
 
-        // Disallow default bitwise copy construct and assignment
-        IOOutputFilter(const IOOutputFilter&);
-        void operator=(const IOOutputFilter&);
+    // Protected data
+
+        //- Name of this set of readFields object
+        word name_;
+
+        const objectRegistry& obr_;
+
+        //- on/off switch
+        bool active_;
+
+        //- Fields to assess min/max
+        wordList fieldSet_;
+
+
+    // Protected Member Functions
+
+        //- Disallow default bitwise copy construct
+        readFields(const readFields&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const readFields&);
+
+        template<class Type>
+        void setField(const word& fieldName);
 
 
 public:
 
+    //- Runtime type information
+    TypeName("readFields");
+
+
     // Constructors
 
-        //- Construct from an IOobject for IOdictionary
+        //- Construct for given objectRegistry and dictionary.
         //  Allow the possibility to load fields from files
-        IOOutputFilter
+        readFields
         (
-            const word& outputFilterName,
-            const IOobject& ioDict,
-            const bool loadFromFile = false
-        );
-
-        //- Construct for given objectRegistry and dictionary
-        //  Allow dictionary to be optional
-        //  Allow the possibility to load fields from files
-        IOOutputFilter
-        (
-            const word& outputFilterName,
+            const word& name,
             const objectRegistry&,
-            const fileName& dictName = OutputFilter::typeName() + "Dict",
-            const IOobject::readOption rOpt = IOobject::MUST_READ,
-            const bool loadFromFile = false
+            const dictionary&,
+            const bool loadFromFiles = false
         );
 
 
     //- Destructor
-    virtual ~IOOutputFilter();
+    virtual ~readFields();
 
 
     // Member Functions
 
-        //- Return name
+        //- Return name of the readFields object
         virtual const word& name() const
         {
-            return IOdictionary::name();
+            return name_;
         }
 
-        //- Read output filter properties
-        virtual bool read();
+        //- Read the field min/max data
+        virtual void read(const dictionary&);
 
-        //- Sample and write
+        //- Execute, currently does nothing
+        virtual void execute();
+
+        //- Execute at the final time-loop, currently does nothing
+        virtual void end();
+
+        //- Write
         virtual void write();
 
         //- Update for changes of mesh
-        virtual void updateMesh(const mapPolyMesh& mpm)
-        {
-            read();
-            OutputFilter::updateMesh(mpm);
-        }
+        virtual void updateMesh(const mapPolyMesh&)
+        {}
 
         //- Update for changes of mesh
-        virtual void movePoints(const pointField& points)
-        {
-            read();
-            OutputFilter::movePoints(points);
-        }
+        virtual void movePoints(const pointField&)
+        {}
 };
 
 
@@ -136,7 +144,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "IOOutputFilter.C"
+#   include "readFieldsTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

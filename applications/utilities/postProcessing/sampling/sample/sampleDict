@@ -60,7 +60,7 @@ fields
 //      midPoint            one point per cell, inbetween two face intersections
 //      midPointAndFace     combination of face and midPoint
 //
-//      curve               specified points, not nessecary on line, uses
+//      polyLine            specified points, not nessecary on line, uses
 //                          tracking
 //      cloud               specified points, uses findCell
 //      triSurfaceMeshPointSet  points of triSurface
@@ -75,7 +75,7 @@ fields
 // type specific:
 //      uniform, face, midPoint, midPointAndFace : start and end coordinate
 //      uniform: extra number of sampling points
-//      curve, cloud: list of coordinates
+//      polyLine, cloud: list of coordinates
 sets
 (
     lineX1

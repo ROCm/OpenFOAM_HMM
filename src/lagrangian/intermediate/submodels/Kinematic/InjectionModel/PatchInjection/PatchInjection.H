@@ -79,8 +79,8 @@ class PatchInjection
         //- Initial parcel velocity [m/s]
         const vector U0_;
 
-        //- Volume flow rate of parcels to introduce relative to SOI [m^3/s]
-        const autoPtr<DataEntry<scalar> > volumeFlowRate_;
+        //- Flow rate profile relative to SOI []
+        const autoPtr<DataEntry<scalar> > flowRateProfile_;
 
         //- Parcel size PDF model
         const autoPtr<pdfs::pdf> parcelPDF_;

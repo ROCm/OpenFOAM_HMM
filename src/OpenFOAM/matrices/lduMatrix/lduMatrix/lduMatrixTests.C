@@ -30,6 +30,20 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+Foam::lduMatrix::solverPerformance::solverPerformance(Istream& is)
+{
+    is.readBeginList("lduMatrix::solverPerformance");
+    is  >> solverName_
+        >> fieldName_
+        >> initialResidual_
+        >> finalResidual_
+        >> noIterations_
+        >> converged_
+        >> singular_;
+    is.readEndList("lduMatrix::solverPerformance");
+}
+
+
 bool Foam::lduMatrix::solverPerformance::checkConvergence
 (
     const scalar Tolerance,
@@ -103,5 +117,24 @@ void Foam::lduMatrix::solverPerformance::print() const
     }
 }
 
+
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const Foam::lduMatrix::solverPerformance& sp
+)
+{
+    os  << token::BEGIN_LIST
+        << sp.solverName_ << token::SPACE
+        << sp.fieldName_ << token::SPACE
+        << sp.initialResidual_ << token::SPACE
+        << sp.finalResidual_ << token::SPACE
+        << sp.noIterations_ << token::SPACE
+        << sp.converged_ << token::SPACE
+        << sp.singular_ << token::SPACE
+        << token::END_LIST;
+
+    return os;
+}
 
 // ************************************************************************* //

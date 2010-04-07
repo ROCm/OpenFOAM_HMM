@@ -58,7 +58,7 @@ Foam::scalar Foam::ConeInjection<CloudType>::volumeToInject
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
-        return volumeFlowRate_().integrate(time0, time1);
+        return flowRateProfile_().integrate(time0, time1);
     }
     else
     {
@@ -85,11 +85,11 @@ Foam::ConeInjection<CloudType>::ConeInjection
     (
         readScalar(this->coeffDict().lookup("parcelsPerSecond"))
     ),
-    volumeFlowRate_
+    flowRateProfile_
     (
         DataEntry<scalar>::New
         (
-            "volumeFlowRate",
+            "flowRateProfile",
             this->coeffDict()
         )
     ),
@@ -147,7 +147,7 @@ Foam::ConeInjection<CloudType>::ConeInjection
     tanVec2_ = direction_^tanVec1_;
 
     // Set total volume to inject
-    this->volumeTotal_ = volumeFlowRate_().integrate(0.0, duration_);
+    this->volumeTotal_ = flowRateProfile_().integrate(0.0, duration_);
 
     // Set/cache the injector cell
     this->findCellAtPosition(injectorCell_, position_);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,61 +21,34 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Application
-    porousSimpleFoam
+Typedef
+    Foam::readFieldsFunctionObject
 
 Description
-    Steady-state solver for incompressible, turbulent flow with
-    implicit or explicit porosity treatment
+    FunctionObject wrapper around readFields to allow them to be created via
+    the functions entry within controlDict.
+
+SourceFiles
+    readFieldsFunctionObject.C
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "singlePhaseTransportModel.H"
-#include "RASModel.H"
-#include "porousZones.H"
+#ifndef readFieldsFunctionObject_H
+#define readFieldsFunctionObject_H
+
+#include "readFields.H"
+#include "OutputFilterFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+namespace Foam
 {
-    #include "setRootCase.H"
-    #include "createTime.H"
-    #include "createMesh.H"
-    #include "createFields.H"
-    #include "initContinuityErrs.H"
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    Info<< "\nStarting time loop\n" << endl;
-
-    while (runTime.loop())
-    {
-        Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        #include "readSIMPLEControls.H"
-
-        p.storePrevIter();
-
-        // Pressure-velocity SIMPLE corrector
-        {
-            #include "UEqn.H"
-            #include "pEqn.H"
-        }
-
-        turbulence->correct();
-
-        runTime.write();
-
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
-    }
-
-    Info<< "End\n" << endl;
-
-    return 0;
+    typedef OutputFilterFunctionObject<readFields>
+        readFieldsFunctionObject;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

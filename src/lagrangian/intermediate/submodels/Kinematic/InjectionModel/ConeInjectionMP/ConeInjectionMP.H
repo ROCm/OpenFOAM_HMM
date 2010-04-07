@@ -90,8 +90,8 @@ class ConeInjectionMP
         //- Number of parcels to introduce per injector
         const label parcelsPerInjector_;
 
-        //- Volume flow rate of parcels to introduce relative to SOI [m^3]
-        const autoPtr<DataEntry<scalar> > volumeFlowRate_;
+        //- Flow rate profile relative to SOI []
+        const autoPtr<DataEntry<scalar> > flowRateProfile_;
 
         //- Parcel velocity magnitude relative to SOI [m/s]
         const autoPtr<DataEntry<scalar> > Umag_;

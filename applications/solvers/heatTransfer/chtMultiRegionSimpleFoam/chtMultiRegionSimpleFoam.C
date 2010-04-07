@@ -64,9 +64,7 @@ int main(int argc, char *argv[])
                 << fluidRegions[i].name() << endl;
             #include "setRegionFluidFields.H"
             #include "readFluidMultiRegionSIMPLEControls.H"
-            #include "initConvergenceCheck.H"
             #include "solveFluid.H"
-            #include "convergenceCheck.H"
         }
 
         forAll(solidRegions, i)
@@ -75,9 +73,7 @@ int main(int argc, char *argv[])
                 << solidRegions[i].name() << endl;
             #include "setRegionSolidFields.H"
             #include "readSolidMultiRegionSIMPLEControls.H"
-            #include "initConvergenceCheck.H"
             #include "solveSolid.H"
-            #include "convergenceCheck.H"
         }
 
         runTime.write();
