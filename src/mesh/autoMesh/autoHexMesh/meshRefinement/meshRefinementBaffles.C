@@ -1234,7 +1234,7 @@ void Foam::meshRefinement::findCellZoneTopo
         {
             label surfI = namedSurfaceIndex[faceI];
 
-            if (surfI != -1 && surfaceToCellZone[surfI] != -1)
+            if (surfI != -1)
             {
                 // Calculate region to zone from cellRegions on either side
                 // of internal face.
@@ -1286,7 +1286,7 @@ void Foam::meshRefinement::findCellZoneTopo
 
                     label surfI = namedSurfaceIndex[faceI];
 
-                    if (surfI != -1 && surfaceToCellZone[surfI] != -1)
+                    if (surfI != -1)
                     {
                         bool changedCell = calcRegionToZone
                         (
@@ -2327,9 +2327,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     // Set using walking
     // ~~~~~~~~~~~~~~~~~
 
-    if (!allowFreeStandingZoneFaces)
+    //if (!allowFreeStandingZoneFaces)
     {
-        Info<< "Walking to assign cellZones." << nl << endl;
+        Info<< "Walking from location-in-mesh " << keepPoint
+            << " to assign cellZones "
+            << "- crossing a faceZone face changes cellZone" << nl << endl;
 
         // Topological walk
         findCellZoneTopo
@@ -2518,6 +2520,32 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     if (overwrite())
     {
         mesh_.setInstance(oldInstance());
+    }
+
+    // Print some stats (note: zones are synchronised)
+    if (mesh_.cellZones().size() > 0)
+    {
+        Info<< "CellZones:" << endl;
+        forAll(mesh_.cellZones(), zoneI)
+        {
+            const cellZone& cz = mesh_.cellZones()[zoneI];
+            Info<< "    " << cz.name()
+                << "\tsize:" << returnReduce(cz.size(), sumOp<label>())
+                << endl;
+        }
+        Info<< endl;
+    }
+    if (mesh_.faceZones().size() > 0)
+    {
+        Info<< "FaceZones:" << endl;
+        forAll(mesh_.faceZones(), zoneI)
+        {
+            const faceZone& fz = mesh_.faceZones()[zoneI];
+            Info<< "    " << fz.name()
+                << "\tsize:" << returnReduce(fz.size(), sumOp<label>())
+                << endl;
+        }
+        Info<< endl;
     }
 
     // None of the faces has changed, only the zones. Still...

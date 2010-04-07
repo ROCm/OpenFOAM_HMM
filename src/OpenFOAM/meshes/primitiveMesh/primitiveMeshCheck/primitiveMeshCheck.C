@@ -2189,8 +2189,8 @@ bool Foam::primitiveMesh::checkConcaveCells
     {
         if (debug || report)
         {
-            Info<< " ***Concave cells found, number of cells: "
-                << nConcaveCells << endl;
+            Info<< " ***Concave cells (using face planes) found,"
+                << " number of cells: " << nConcaveCells << endl;
         }
 
         return true;
