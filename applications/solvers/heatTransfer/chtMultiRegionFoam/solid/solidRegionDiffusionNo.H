@@ -1,18 +1,16 @@
     scalar DiNum = -GREAT;
-    if (solidRegions.size())
+
+    forAll(solidRegions, regionI)
     {
-        forAll(solidRegions, regionI)
-        {
-            DiNum = max
+        DiNum = max
+        (
+            solidRegionDiffNo
             (
-                solidRegionDiffNo
-                (
-                    solidRegions[regionI],
-                    runTime,
-                    rhosCps[regionI],
-                    Ks[regionI]
-                ),
-                DiNum
-            );
-        }
+                solidRegions[regionI],
+                runTime,
+                rhosCps[regionI],
+                Ks[regionI]
+            ),
+            DiNum
+        );
     }

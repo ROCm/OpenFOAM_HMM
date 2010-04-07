@@ -185,7 +185,7 @@ void Foam::mapDistribute::distribute
     {
         if (!contiguous<T>())
         {
-            PstreamBuffers pBuffs(Pstream::nonBlocking);
+            PstreamBuffers pBufs(Pstream::nonBlocking);
 
             // Stream data into buffer
             for (label domain = 0; domain < Pstream::nProcs(); domain++)
@@ -195,13 +195,13 @@ void Foam::mapDistribute::distribute
                 if (domain != Pstream::myProcNo() && map.size())
                 {
                     // Put data into send buffer
-                    UOPstream toDomain(domain, pBuffs);
+                    UOPstream toDomain(domain, pBufs);
                     toDomain << UIndirectList<T>(field, map);
                 }
             }
 
             // Start receiving
-            pBuffs.finishedSends();
+            pBufs.finishedSends();
 
             {
                 // Set up 'send' to myself
@@ -231,7 +231,7 @@ void Foam::mapDistribute::distribute
 
                 if (domain != Pstream::myProcNo() && map.size())
                 {
-                    UIPstream str(domain, pBuffs);
+                    UIPstream str(domain, pBufs);
                     List<T> recvField(str);
 
                     if (recvField.size() != map.size())
@@ -551,7 +551,7 @@ void Foam::mapDistribute::distribute
     {
         if (!contiguous<T>())
         {
-            PstreamBuffers pBuffs(Pstream::nonBlocking);
+            PstreamBuffers pBufs(Pstream::nonBlocking);
 
             // Stream data into buffer
             for (label domain = 0; domain < Pstream::nProcs(); domain++)
@@ -561,13 +561,13 @@ void Foam::mapDistribute::distribute
                 if (domain != Pstream::myProcNo() && map.size())
                 {
                     // Put data into send buffer
-                    UOPstream toDomain(domain, pBuffs);
+                    UOPstream toDomain(domain, pBufs);
                     toDomain << UIndirectList<T>(field, map);
                 }
             }
 
             // Start receiving
-            pBuffs.finishedSends();
+            pBufs.finishedSends();
 
             {
                 // Set up 'send' to myself
@@ -597,7 +597,7 @@ void Foam::mapDistribute::distribute
 
                 if (domain != Pstream::myProcNo() && map.size())
                 {
-                    UIPstream str(domain, pBuffs);
+                    UIPstream str(domain, pBufs);
                     List<T> recvField(str);
 
                     if (recvField.size() != map.size())
@@ -753,6 +753,68 @@ void Foam::mapDistribute::distribute
         FatalErrorIn("mapDistribute::distribute(..)")
             << "Unknown communication schedule " << commsType
             << abort(FatalError);
+    }
+}
+
+
+template<class T>
+void Foam::mapDistribute::send(PstreamBuffers& pBufs, const List<T>& field)
+const
+{
+    // Stream data into buffer
+    for (label domain = 0; domain < Pstream::nProcs(); domain++)
+    {
+        const labelList& map = subMap_[domain];
+
+        if (map.size())
+        {
+            // Put data into send buffer
+            UOPstream toDomain(domain, pBufs);
+            toDomain << UIndirectList<T>(field, map);
+        }
+    }
+
+    // Start sending and receiving but do not block.
+    pBufs.finishedSends(false);
+}
+
+
+template<class T>
+void Foam::mapDistribute::receive(PstreamBuffers& pBufs, List<T>& field) const
+{
+    // Consume
+    field.setSize(constructSize_);
+
+    for (label domain = 0; domain < Pstream::nProcs(); domain++)
+    {
+        const labelList& map = constructMap_[domain];
+
+        if (map.size())
+        {
+            UIPstream str(domain, pBufs);
+            List<T> recvField(str);
+
+            if (recvField.size() != map.size())
+            {
+                FatalErrorIn
+                (
+                    "template<class T>\n"
+                    "void mapDistribute::receive\n"
+                    "(\n"
+                    "    PstreamBuffers&,\n"
+                    "    List<T>&\n"
+                    ")\n"
+                )   << "Expected from processor " << domain
+                    << " " << map.size() << " but received "
+                    << recvField.size() << " elements."
+                    << abort(FatalError);
+            }
+
+            forAll(map, i)
+            {
+                field[map[i]] = recvField[i];
+            }
+        }
     }
 }
 

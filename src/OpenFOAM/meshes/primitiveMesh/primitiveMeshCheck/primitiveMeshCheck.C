@@ -37,6 +37,7 @@ Foam::scalar Foam::primitiveMesh::closedThreshold_  = 1.0e-6;
 Foam::scalar Foam::primitiveMesh::aspectThreshold_  = 1000;
 Foam::scalar Foam::primitiveMesh::nonOrthThreshold_ = 70;    // deg
 Foam::scalar Foam::primitiveMesh::skewThreshold_    = 4;
+Foam::scalar Foam::primitiveMesh::planarCosAngle_   = 1.0e-6;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -2084,6 +2085,121 @@ bool Foam::primitiveMesh::checkCellDeterminant
         if (debug || report)
         {
             Info<< "    Cell determinant check OK." << endl;
+        }
+
+        return false;
+    }
+
+    return false;
+}
+
+
+bool Foam::primitiveMesh::checkConcaveCells
+(
+    const bool report,
+    labelHashSet* setPtr
+) const
+{
+    if (debug)
+    {
+        Info<< "bool primitiveMesh::checkConcaveCells(const bool"
+            << ", labelHashSet*) const: "
+            << "checking for concave cells" << endl;
+    }
+
+    const cellList& c = cells();
+    const labelList& fOwner = faceOwner();
+    const vectorField& fAreas = faceAreas();
+    const pointField& fCentres = faceCentres();
+
+    label nConcaveCells = 0;
+
+    forAll (c, cellI)
+    {
+        const cell& cFaces = c[cellI];
+
+        bool concave = false;
+
+        forAll(cFaces, i)
+        {
+            if (concave)
+            {
+                break;
+            }
+
+            label fI = cFaces[i];
+
+            const point& fC = fCentres[fI];
+
+            vector fN = fAreas[fI];
+
+            fN /= max(mag(fN), VSMALL);
+
+            // Flip normal if required so that it is always pointing out of
+            // the cell
+            if (fOwner[fI] != cellI)
+            {
+                fN *= -1;
+            }
+
+            // Is the centre of any other face of the cell on the
+            // wrong side of the plane of this face?
+
+            forAll(cFaces, j)
+            {
+                if (j != i)
+                {
+                    label fJ = cFaces[j];
+
+                    const point& pt = fCentres[fJ];
+
+                    // If the cell is concave, the point will be on the
+                    // positive normal side of the plane of f, defined by
+                    // its centre and normal, and the angle between (pt -
+                    // fC) and fN will be less than 90 degrees, so the dot
+                    // product will be positive.
+
+                    vector pC = (pt - fC);
+
+                    pC /= max(mag(pC), VSMALL);
+
+                    if ((pC & fN) > -planarCosAngle_)
+                    {
+                        // Concave or planar face
+
+                        concave = true;
+
+                        if (setPtr)
+                        {
+                            setPtr->insert(cellI);
+                        }
+
+                        nConcaveCells++;
+
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    reduce(nConcaveCells, sumOp<label>());
+
+    if (nConcaveCells > 0)
+    {
+        if (debug || report)
+        {
+            Info<< " ***Concave cells (using face planes) found,"
+                << " number of cells: " << nConcaveCells << endl;
+        }
+
+        return true;
+    }
+    else
+    {
+        if (debug || report)
+        {
+            Info<< "    Concave cell check OK." << endl;
         }
 
         return false;

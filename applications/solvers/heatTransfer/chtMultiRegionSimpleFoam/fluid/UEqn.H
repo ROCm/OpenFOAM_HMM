@@ -2,7 +2,6 @@
     tmp<fvVectorMatrix> UEqn
     (
         fvm::div(phi, U)
-      - fvm::Sp(fvc::div(phi), U)
       + turb.divDevRhoReff(U)
     );
 

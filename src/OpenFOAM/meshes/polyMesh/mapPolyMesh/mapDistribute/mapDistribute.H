@@ -70,6 +70,7 @@ namespace Foam
 
 class mapPolyMesh;
 class globalIndex;
+class PstreamBuffers;
 
 /*---------------------------------------------------------------------------*\
                            Class mapDistribute Declaration
@@ -317,6 +318,13 @@ public:
                     );
                 }
             }
+
+            //- Do all sends using PstreamBuffers
+            template<class T>
+            void send(PstreamBuffers&, const List<T>&) const;
+            //- Do all receives using PstreamBuffers
+            template<class T>
+            void receive(PstreamBuffers&, List<T>&) const;
 
             //- Correct for topo change.
             void updateMesh(const mapPolyMesh&)
