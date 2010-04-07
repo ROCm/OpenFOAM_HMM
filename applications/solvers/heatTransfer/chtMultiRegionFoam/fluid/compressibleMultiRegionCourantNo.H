@@ -1,18 +1,16 @@
     scalar CoNum = -GREAT;
-    if (fluidRegions.size())
+
+    forAll(fluidRegions, regionI)
     {
-        forAll(fluidRegions, regionI)
-        {
-            CoNum = max
+        CoNum = max
+        (
+            compressibleCourantNo
             (
-                compressibleCourantNo
-                (
-                    fluidRegions[regionI],
-                    runTime,
-                    rhoFluid[regionI],
-                    phiFluid[regionI]
-                ),
-                CoNum
-            );
-        }
+                fluidRegions[regionI],
+                runTime,
+                rhoFluid[regionI],
+                phiFluid[regionI]
+            ),
+            CoNum
+        );
     }
