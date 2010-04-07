@@ -107,7 +107,7 @@ public:
             return IOdictionary::name();
         }
 
-        //- Read the probes
+        //- Read output filter properties
         virtual bool read();
 
         //- Sample and write
