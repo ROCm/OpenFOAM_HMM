@@ -41,8 +41,7 @@ if (transonic)
         // Retain the residual from the first iteration
         if (nonOrth == 0)
         {
-            eqnResidual = pEqn.solve().initialResidual();
-            maxResidual = max(eqnResidual, maxResidual);
+            pEqn.solve();
         }
         else
         {
@@ -75,8 +74,7 @@ else
         // Retain the residual from the first iteration
         if (nonOrth == 0)
         {
-            eqnResidual = pEqn.solve().initialResidual();
-            maxResidual = max(eqnResidual, maxResidual);
+            pEqn.solve();
         }
         else
         {

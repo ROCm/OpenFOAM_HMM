@@ -57,7 +57,6 @@ class triSurfaceMeshPointSet
         //- Name of triSurfaceMesh
         const word surface_;
 
-
         //- Sampling points
         List<point> sampleCoords_;
 
@@ -76,6 +75,7 @@ class triSurfaceMeshPointSet
 
         //- Uses calcSamples to obtain samples. Copies them into *this.
         void genSamples();
+
 
 public:
 
@@ -96,8 +96,7 @@ public:
 
 
     // Destructor
-
-        virtual ~triSurfaceMeshPointSet();
+    virtual ~triSurfaceMeshPointSet();
 
 
     // Member Functions

@@ -164,6 +164,8 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
 
     psi.correctBoundaryConditions();
 
+    psi.mesh().setSolverPerformance(psi.name(), solverPerfVec);
+
     return solverPerfVec;
 }
 
@@ -174,6 +176,7 @@ Foam::fvMatrix<Type>::solver()
 {
     return solver(psi_.mesh().solverDict(psi_.name()));
 }
+
 
 template<class Type>
 Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::fvSolver::solve()

@@ -121,12 +121,6 @@ public:
 
     // Destructor
     virtual ~polyLineSet();
-
-
-    // Member Functions
-
-        //- Get reference point
-        virtual point getRefPoint(const List<point>&) const;
 };
 
 

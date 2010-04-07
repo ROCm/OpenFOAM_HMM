@@ -22,74 +22,73 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::midPointSet
+    Foam::fvData
 
 Description
+    Database for finite volume solution data, solver performance and
+    other reduced data.  fvMesh is derived from fvData so that all fields have
+    access to the fvData from the mesh reference they hold.
 
 SourceFiles
-    midPointSet.C
+    fvData.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef midPointSet_H
-#define midPointSet_H
+#ifndef fvData_H
+#define fvData_H
 
-#include "faceOnlySet.H"
+#include "IOdictionary.H"
+#include "lduMatrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
-class passiveParticle;
-template<class Type> class particle;
-class meshSearch;
-
 /*---------------------------------------------------------------------------*\
-                           Class midPointSet Declaration
+                           Class fvData Declaration
 \*---------------------------------------------------------------------------*/
 
-class midPointSet
+class fvData
 :
-    public faceOnlySet
+    public IOdictionary
 {
     // Private Member Functions
 
-        void genSamples();
+        //- Disallow default bitwise copy construct
+        fvData(const fvData&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const fvData&);
 
 
 public:
 
-    //- Runtime type information
-    TypeName("midPoint");
+    //- Debug switch
+    static int debug;
 
 
     // Constructors
 
-        //- Construct from components
-        midPointSet
-        (
-            const word& name,
-            const polyMesh& mesh,
-            meshSearch& searchEngine,
-            const word& axis,
-            const point& start,
-            const point& end
-        );
-
-        //- Construct from dictionary
-        midPointSet
-        (
-            const word& name,
-            const polyMesh& mesh,
-            meshSearch& searchEngine,
-            const dictionary& dict
-        );
+        //- Construct for objectRegistry
+        fvData(const objectRegistry& obr);
 
 
-    // Destructor
-    virtual ~midPointSet();
+    // Member Functions
+
+        // Access
+
+            //- Return the dictionary of solver performance data
+            //  which includes initial and final residuals for convergence
+            //  checking
+            const dictionary& solverPerformanceDict() const;
+
+            //- Add/set the solverPerformance entry for the named field
+            void setSolverPerformance
+            (
+                const word& name,
+                const lduMatrix::solverPerformance&
+            ) const;
 };
 
 

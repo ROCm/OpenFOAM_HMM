@@ -75,6 +75,7 @@ class cloudSet
         //- Uses calcSamples to obtain samples. Copies them into *this.
         void genSamples();
 
+
 public:
 
     //- Runtime type information
@@ -104,14 +105,7 @@ public:
 
 
     // Destructor
-
-        virtual ~cloudSet();
-
-
-    // Member Functions
-
-        //- Get reference point
-        virtual point getRefPoint(const List<point>&) const;
+    virtual ~cloudSet();
 };
 
 

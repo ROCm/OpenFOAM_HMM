@@ -354,10 +354,11 @@ void Foam::sampledSet::setSamples
     {
         operator[](sampleI) = samplingPts[sampleI];
     }
+    curveDist_ = samplingCurveDist;
+
     cells_ = samplingCells;
     faces_ = samplingFaces;
     segments_ = samplingSegments;
-    curveDist_ = samplingCurveDist;
 }
 
 
@@ -375,7 +376,6 @@ Foam::sampledSet::sampledSet
     mesh_(mesh),
     searchEngine_(searchEngine),
     segments_(0),
-    curveDist_(0),
     cells_(0),
     faces_(0)
 {}
@@ -393,7 +393,6 @@ Foam::sampledSet::sampledSet
     mesh_(mesh),
     searchEngine_(searchEngine),
     segments_(0),
-    curveDist_(0),
     cells_(0),
     faces_(0)
 {}
