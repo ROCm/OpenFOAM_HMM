@@ -27,6 +27,7 @@ Global
 Description
     Execute the set of functionObjects specified in the selected dictionary
     (which defaults to system/controlDict) for the selected set of times.
+    Alternative dictionaries should be placed in the system/ folder.
 
     The flow (p-U) and optionally turbulence fields are available for the
     function objects to operate on allowing forces and other related properties
@@ -144,11 +145,11 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             false
         );
 
-        singlePhaseTransportModel laminarTransport(U, phi);
-
         if (RASPropertiesHeader.headerOk())
         {
             IOdictionary RASProperties(RASPropertiesHeader);
+
+            singlePhaseTransportModel laminarTransport(U, phi);
 
             autoPtr<incompressible::RASModel> RASModel
             (
@@ -164,6 +165,8 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         else if (LESPropertiesHeader.headerOk())
         {
             IOdictionary LESProperties(LESPropertiesHeader);
+
+            singlePhaseTransportModel laminarTransport(U, phi);
 
             autoPtr<incompressible::LESModel> sgsModel
             (

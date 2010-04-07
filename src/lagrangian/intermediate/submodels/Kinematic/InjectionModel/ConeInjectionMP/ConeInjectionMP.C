@@ -40,7 +40,7 @@ Foam::label Foam::ConeInjectionMP<CloudType>::parcelsToInject
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
-        const scalar targetVolume = volumeFlowRate_().integrate(0, time1);
+        const scalar targetVolume = flowRateProfile_().integrate(0, time1);
 
         const label targetParcels =
             parcelsPerInjector_*targetVolume/this->volumeTotal_;
@@ -67,7 +67,7 @@ Foam::scalar Foam::ConeInjectionMP<CloudType>::volumeToInject
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
-        return volumeFlowRate_().integrate(time0, time1);
+        return flowRateProfile_().integrate(time0, time1);
     }
     else
     {
@@ -116,11 +116,11 @@ Foam::ConeInjectionMP<CloudType>::ConeInjectionMP
     (
         readScalar(this->coeffDict().lookup("parcelsPerInjector"))
     ),
-    volumeFlowRate_
+    flowRateProfile_
     (
         DataEntry<scalar>::New
         (
-            "volumeFlowRate",
+            "flowRateProfile",
             this->coeffDict()
         )
     ),
@@ -182,7 +182,7 @@ Foam::ConeInjectionMP<CloudType>::ConeInjectionMP
     }
 
     // Set total volume to inject
-    this->volumeTotal_ = volumeFlowRate_().integrate(0.0, duration_);
+    this->volumeTotal_ = flowRateProfile_().integrate(0.0, duration_);
 
     // Set/cache the injector cells
     forAll(positions_, i)
