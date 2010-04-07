@@ -157,11 +157,12 @@ public:
         //- Prepare and send referred particles, nonBlocking communication
         void sendReferredParticles
         (
-            const List<DynamicList<ParticleType*> >& cellOccupancy
+            const List<DynamicList<ParticleType*> >& cellOccupancy,
+            PstreamBuffers& pBufs
         );
 
         //- Receive referred particles
-        void receiveReferredParticles();
+        void receiveReferredParticles(PstreamBuffers& pBufs);
 
         // Access
 

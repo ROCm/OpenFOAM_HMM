@@ -314,14 +314,14 @@ void Foam::InteractionLists<ParticleType>::prepareParticlesToRefer
     const List<DynamicList<ParticleType*> >& cellOccupancy
 )
 {
+    referredParticles_.setSize(cellIndexAndTransformToDistribute_.size());
+
     // Clear all existing referred particles
 
     forAll(referredParticles_, i)
     {
         referredParticles_[i].clear();
     }
-
-    referredParticles_.setSize(cellIndexAndTransformToDistribute_.size());
 
     forAll(cellIndexAndTransformToDistribute_, i)
     {
@@ -771,12 +771,11 @@ Foam::InteractionLists<ParticleType>::~InteractionLists()
 template<class ParticleType>
 void Foam::InteractionLists<ParticleType>::sendReferredParticles
 (
-    const List<DynamicList<ParticleType*> >& cellOccupancy
+    const List<DynamicList<ParticleType*> >& cellOccupancy,
+    PstreamBuffers& pBufs
 )
 {
     prepareParticlesToRefer(cellOccupancy);
-
-    PstreamBuffers pBufs(Pstream::nonBlocking);
 
     // Stream data into buffer
     for (label domain = 0; domain < Pstream::nProcs(); domain++)
@@ -803,9 +802,15 @@ void Foam::InteractionLists<ParticleType>::sendReferredParticles
 
     // Start sending and receiving but do not block.
     pBufs.finishedSends(false);
+};
 
-    // DO OTHER STUFF HERE;
 
+template<class ParticleType>
+void Foam::InteractionLists<ParticleType>::receiveReferredParticles
+(
+    PstreamBuffers& pBufs
+)
+{
     Pstream::waitRequests();
 
     referredParticles_.setSize(map().constructSize());
@@ -830,12 +835,6 @@ void Foam::InteractionLists<ParticleType>::sendReferredParticles
     }
 
     writeReferredParticleCloud();
-};
-
-
-template<class ParticleType>
-void Foam::InteractionLists<ParticleType>::receiveReferredParticles()
-{
 }
 
 
