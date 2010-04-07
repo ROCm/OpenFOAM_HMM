@@ -26,8 +26,7 @@
         // retain the residual from the first iteration
         if (nonOrth == 0)
         {
-            eqnResidual = pEqn.solve().initialResidual();
-            maxResidual = max(eqnResidual, maxResidual);
+            pEqn.solve();
         }
         else
         {

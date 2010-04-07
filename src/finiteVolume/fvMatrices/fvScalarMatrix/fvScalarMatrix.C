@@ -123,6 +123,8 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
 
     psi.correctBoundaryConditions();
 
+    psi.mesh().setSolverPerformance(psi.name(), solverPerf);
+
     return solverPerf;
 }
 
@@ -165,6 +167,8 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::solve
     diag() = saveDiag;
 
     psi.correctBoundaryConditions();
+
+    psi.mesh().setSolverPerformance(psi.name(), solverPerf);
 
     return solverPerf;
 }

@@ -102,6 +102,7 @@ public:
 
         // Constructors
 
+            //- Construct null
             solverPerformance()
             :
                 initialResidual_(0),
@@ -111,7 +112,7 @@ public:
                 singular_(false)
             {}
 
-
+            //- Construct from components
             solverPerformance
             (
                 const word&  solverName,
@@ -131,6 +132,9 @@ public:
                 converged_(converged),
                 singular_(singular)
             {}
+
+            //- Construct from Istream
+            solverPerformance(Istream&);
 
 
         // Member functions
@@ -204,6 +208,11 @@ public:
 
             //- Print summary of solver performance
             void print() const;
+
+
+        // Ostream Operator
+
+            friend Ostream& operator<<(Ostream&, const solverPerformance&);
     };
 
 

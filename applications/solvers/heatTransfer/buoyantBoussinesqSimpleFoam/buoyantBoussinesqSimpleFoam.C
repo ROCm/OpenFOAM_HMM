@@ -69,7 +69,6 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
         #include "readSIMPLEControls.H"
-        #include "initConvergenceCheck.H"
 
         p.storePrevIter();
 
@@ -87,8 +86,6 @@ int main(int argc, char *argv[])
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
             << nl << endl;
-
-        #include "convergenceCheck.H"
     }
 
     Info<< "End\n" << endl;
