@@ -59,6 +59,8 @@ class polyPatch;
 template<class ParticleType>
 class Particle;
 
+// Friend Operators
+
 template<class ParticleType>
 Ostream& operator<<
 (
@@ -66,6 +68,11 @@ Ostream& operator<<
     const Particle<ParticleType>&
 );
 
+template<class ParticleType>
+bool operator==(const Particle<ParticleType>&, const Particle<ParticleType>&);
+
+template<class ParticleType>
+bool operator!=(const Particle<ParticleType>&, const Particle<ParticleType>&);
 
 /*---------------------------------------------------------------------------*\
                            Class Particle Declaration
@@ -467,12 +474,24 @@ public:
         //- Write the particle data
         void write(Ostream& os, bool writeFields) const;
 
-    // Ostream Operator
+    // Friend Operators
 
         friend Ostream& operator<< <ParticleType>
         (
             Ostream&,
             const Particle<ParticleType>&
+        );
+
+        friend bool operator== <ParticleType>
+        (
+            const Particle<ParticleType>& pA,
+            const Particle<ParticleType>& pB
+        );
+
+        friend bool operator!= <ParticleType>
+        (
+            const Particle<ParticleType>& pA,
+            const Particle<ParticleType>& pB
         );
 };
 
