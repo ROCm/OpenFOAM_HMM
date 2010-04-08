@@ -58,6 +58,14 @@ const Foam::labelListList& Foam::InteractionLists<ParticleType>::dil() const
 
 
 template<class ParticleType>
+const Foam::labelListList&
+Foam::InteractionLists<ParticleType>::directWallFaces() const
+{
+    return directWallFaces_;
+}
+
+
+template<class ParticleType>
 const Foam::labelListList& Foam::InteractionLists<ParticleType>::ril() const
 {
     return ril_;

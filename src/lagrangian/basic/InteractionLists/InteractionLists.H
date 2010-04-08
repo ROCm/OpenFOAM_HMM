@@ -99,6 +99,12 @@ class InteractionLists
         //- Direct interaction list
         labelListList dil_;
 
+        //- Wall faces on this processor that are in interaction range
+        //  of each each cell, data subordinate to dil, i.e. if a cell
+        //  B is on cell A's dil, then all of cell B's wall faces are
+        //  considered posible interactions for cell A.
+        labelListList directWallFaces_;
+
         //- Referred interaction list - which real cells are to be
         //  supplied with particles from the referred particle
         //  container with the same index.
@@ -200,6 +206,9 @@ public:
 
             //- Return access to the direct interaction list
             inline const labelListList& dil() const;
+
+            //- Return access to the direct wall faces
+            inline const labelListList& directWallFaces() const;
 
             //- Return access to the referred interaction list
             inline const labelListList& ril() const;

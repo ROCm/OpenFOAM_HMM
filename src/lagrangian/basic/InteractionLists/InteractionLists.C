@@ -398,6 +398,7 @@ Foam::InteractionLists<ParticleType>::InteractionLists
     globalTransforms_(mesh_),
     maxDistance_(maxDistance),
     dil_(),
+    directWallFaces_(),
     ril_(),
     rilInverse_(),
     cellIndexAndTransformToDistribute_(),
@@ -409,7 +410,7 @@ Foam::InteractionLists<ParticleType>::InteractionLists
 
     const vector interactionVec = maxDistance_*vector::one;
 
-    treeBoundBox procBb(treeBoundBox(mesh.points()));
+    treeBoundBox procBb(treeBoundBox(mesh_.points()));
 
     treeBoundBox extendedProcBb
     (
@@ -439,16 +440,16 @@ Foam::InteractionLists<ParticleType>::InteractionLists
         extendedProcBbsOrigProc
     );
 
-    treeBoundBoxList cellBbs(mesh.nCells());
+    treeBoundBoxList cellBbs(mesh_.nCells());
 
     forAll(cellBbs, cellI)
     {
         cellBbs[cellI] = treeBoundBox
         (
-            mesh.cells()[cellI].points
+            mesh_.cells()[cellI].points
             (
-                mesh.faces(),
-                mesh.points()
+                mesh_.faces(),
+                mesh_.points()
             )
         );
     }
@@ -456,7 +457,7 @@ Foam::InteractionLists<ParticleType>::InteractionLists
     // Recording which cells are in range of an extended boundBox, as
     // only these cells will need to be tested to determine which
     // referred cells that they interact with.
-    PackedBoolList cellInRangeOfCoupledPatch(mesh.nCells(), false);
+    PackedBoolList cellInRangeOfCoupledPatch(mesh_.nCells(), false);
 
     // IAndT: index and transform
     DynamicList<labelPair> globalIAndTToExchange;
@@ -518,11 +519,14 @@ Foam::InteractionLists<ParticleType>::InteractionLists
         }
     }
 
-    treeBoundBox procBbRndExt(treeBoundBox(mesh.points()).extend(rndGen, 1e-4));
+    treeBoundBox procBbRndExt
+    (
+        treeBoundBox(mesh_.points()).extend(rndGen, 1e-4)
+    );
 
     indexedOctree<treeDataCell> coupledPatchRangeTree
     (
-        treeDataCell(true, mesh, coupledPatchRangeCells),
+        treeDataCell(true, mesh_, coupledPatchRangeCells),
         procBbRndExt,
         8,              // maxLevel,
         10,             // leafSize,
@@ -632,7 +636,7 @@ Foam::InteractionLists<ParticleType>::InteractionLists
 
     // Determine inverse addressing for referred cells
 
-    rilInverse_.setSize(mesh.nCells());
+    rilInverse_.setSize(mesh_.nCells());
 
     // Temporary Dynamic lists for accumulation
     List<DynamicList<label> > rilInverseTemp(rilInverse_.size());
@@ -663,14 +667,14 @@ Foam::InteractionLists<ParticleType>::InteractionLists
 
     indexedOctree<treeDataCell> allCellsTree
     (
-        treeDataCell(true, mesh),
+        treeDataCell(true, mesh_),
         procBbRndExt,
         8,              // maxLevel,
         10,             // leafSize,
         100.0
     );
 
-    dil_.setSize(mesh.nCells());
+    dil_.setSize(mesh_.nCells());
 
     forAll(cellBbs, cellI)
     {
@@ -710,6 +714,95 @@ Foam::InteractionLists<ParticleType>::InteractionLists
         }
 
         dil_[cellI].transfer(cellDIL);
+    }
+
+    // Direct wall faces
+
+    // DynamicLists for data gathering
+    DynamicList<label> thisCellOnlyWallFaces;
+    DynamicList<label> otherCellOnlyWallFaces;
+    List<DynamicList<label> > wallFacesTemp(mesh_.nCells());
+
+    const labelList& patchID = mesh_.boundaryMesh().patchID();
+
+    label nInternalFaces = mesh_.nInternalFaces();
+
+    forAll(wallFacesTemp, thisCellI)
+    {
+        // Find all of the wall faces for the current cell
+        const labelList& thisCellFaces = mesh_.cells()[thisCellI];
+
+        DynamicList<label>& thisCellWallFaces = wallFacesTemp[thisCellI];
+
+        thisCellOnlyWallFaces.clear();
+
+        forAll(thisCellFaces, tCFI)
+        {
+            label faceI = thisCellFaces[tCFI];
+
+            if (!mesh_.isInternalFace(faceI))
+            {
+                label patchI = patchID[faceI - nInternalFaces];
+
+                const polyPatch& patch = mesh_.boundaryMesh()[patchI];
+
+                if (isA<wallPolyPatch>(patch))
+                {
+                    thisCellOnlyWallFaces.append(faceI);
+                }
+            }
+        }
+
+        // Add all the found wall faces to this cell's list, and
+        // retain the wall faces for this cell only to add to other
+        // cells.
+        thisCellWallFaces.append(thisCellOnlyWallFaces);
+
+        // Loop over all of the cells in the dil for this cell, adding
+        // the wallFaces for this cell to the other cell's wallFace
+        // list, and all of the wallFaces for the other cell to this
+        // cell's list
+
+        const labelList& cellDil = dil_[thisCellI];
+
+        forAll(cellDil, i)
+        {
+            label otherCellI = cellDil[i];
+
+            const labelList& otherCellFaces = mesh_.cells()[otherCellI];
+
+            DynamicList<label>& otherCellWallFaces = wallFacesTemp[otherCellI];
+
+            otherCellOnlyWallFaces.clear();
+
+            forAll(otherCellFaces, oCFI)
+            {
+                label faceI = otherCellFaces[oCFI];
+
+                if (!mesh_.isInternalFace(faceI))
+                {
+                    label patchI = patchID[faceI - nInternalFaces];
+
+                    const polyPatch& patch = mesh_.boundaryMesh()[patchI];
+
+                    if (isA<wallPolyPatch>(patch))
+                    {
+                        otherCellOnlyWallFaces.append(faceI);
+                    }
+                }
+            }
+
+            thisCellWallFaces.append(otherCellOnlyWallFaces);
+
+            otherCellWallFaces.append(thisCellOnlyWallFaces);
+        }
+    }
+
+    directWallFaces_.setSize(mesh_.nCells());
+
+    forAll(directWallFaces_, i)
+    {
+        directWallFaces_[i].transfer(wallFacesTemp[i]);
     }
 }
 
