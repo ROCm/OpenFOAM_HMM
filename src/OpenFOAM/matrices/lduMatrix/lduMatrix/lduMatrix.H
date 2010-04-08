@@ -210,6 +210,16 @@ public:
             void print() const;
 
 
+        // Friend functions
+
+            //- Return the element-wise maximum of two solverPerformances
+            friend solverPerformance max
+            (
+                const solverPerformance&,
+                const solverPerformance&
+            );
+
+
         // Ostream Operator
 
             friend Ostream& operator<<(Ostream&, const solverPerformance&);
