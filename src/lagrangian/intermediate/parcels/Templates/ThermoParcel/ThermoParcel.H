@@ -296,6 +296,9 @@ public:
             //- Return const access to specific heat capacity
             inline scalar cp() const;
 
+            //- Return the parcel sensible enthalpy
+            inline scalar hs() const;
+
 
         // Edit
 

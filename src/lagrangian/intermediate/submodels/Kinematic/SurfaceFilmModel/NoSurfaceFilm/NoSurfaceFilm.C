@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,34 +23,66 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicThermoParcel.H"
+#include "NoSurfaceFilm.H"
+#include "addToRunTimeSelectionTable.H"
 
-// Kinematic
-#include "makeParcelDispersionModels.H"
-#include "makeParcelDragModels.H"
-#include "makeParcelInjectionModels.H"
-#include "makeParcelPatchInteractionModels.H"
-#include "makeParcelPostProcessingModels.H"
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Thermodynamic
-#include "makeParcelHeatTransferModels.H"
-#include "makeThermoParcelSurfaceFilmModels.H"
+template<class CloudType>
+Foam::NoSurfaceFilm<CloudType>::NoSurfaceFilm
+(
+    const dictionary&,
+    CloudType& owner,
+    const dimensionedVector&
+)
+:
+    SurfaceFilmModel<CloudType>(owner)
+{}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::NoSurfaceFilm<CloudType>::~NoSurfaceFilm()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+bool Foam::NoSurfaceFilm<CloudType>::active() const
 {
-    // Kinematic sub-models
-    makeParcelDispersionModels(basicThermoParcel);
-    makeParcelDragModels(basicThermoParcel);
-    makeParcelInjectionModels(basicThermoParcel);
-    makeParcelPatchInteractionModels(basicThermoParcel);
-    makeParcelPostProcessingModels(basicThermoParcel);
+    return false;
+}
 
-    // Thermo sub-models
-    makeParcelHeatTransferModels(basicThermoParcel);
-    makeParcelSurfaceFilmModels(basicThermoParcel);
-};
+
+template<class CloudType>
+bool Foam::NoSurfaceFilm<CloudType>::transferParcel
+(
+    const parcelType&,
+    const label
+)
+{
+    return false;
+}
+
+
+template<class CloudType>
+void Foam::NoSurfaceFilm<CloudType>::setParcelProperties
+(
+    parcelType&,
+    const label
+)
+{
+    // do nothing
+}
+
+
+template<class CloudType>
+void Foam::NoSurfaceFilm<CloudType>::info(Ostream&) const
+{
+    // do nothing
+}
 
 
 // ************************************************************************* //

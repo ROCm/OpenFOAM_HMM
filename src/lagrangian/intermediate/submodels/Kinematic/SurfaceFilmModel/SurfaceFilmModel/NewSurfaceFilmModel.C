@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,34 +23,44 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicThermoParcel.H"
-
-// Kinematic
-#include "makeParcelDispersionModels.H"
-#include "makeParcelDragModels.H"
-#include "makeParcelInjectionModels.H"
-#include "makeParcelPatchInteractionModels.H"
-#include "makeParcelPostProcessingModels.H"
-
-// Thermodynamic
-#include "makeParcelHeatTransferModels.H"
-#include "makeThermoParcelSurfaceFilmModels.H"
+#include "SurfaceFilmModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+template<class CloudType>
+Foam::autoPtr<Foam::SurfaceFilmModel<CloudType> >
+Foam::SurfaceFilmModel<CloudType>::New
+(
+    const dictionary& dict,
+    CloudType& owner,
+    const dimensionedVector& g
+)
 {
-    // Kinematic sub-models
-    makeParcelDispersionModels(basicThermoParcel);
-    makeParcelDragModels(basicThermoParcel);
-    makeParcelInjectionModels(basicThermoParcel);
-    makeParcelPatchInteractionModels(basicThermoParcel);
-    makeParcelPostProcessingModels(basicThermoParcel);
+    word SurfaceFilmModelType(dict.lookup("SurfaceFilmModel"));
 
-    // Thermo sub-models
-    makeParcelHeatTransferModels(basicThermoParcel);
-    makeParcelSurfaceFilmModels(basicThermoParcel);
-};
+    Info<< "Selecting SurfaceFilmModel " << SurfaceFilmModelType << endl;
+
+    typename dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(SurfaceFilmModelType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "SurfaceFilmModel<CloudType>::New"
+            "("
+                "const dictionary&, "
+                "CloudType&"
+            ")"
+        )   << "Unknown SurfaceFilmModel type "
+            << SurfaceFilmModelType
+            << ", constructor not in hash table" << nl << nl
+            << "    Valid SurfaceFilmModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+    }
+
+    return autoPtr<SurfaceFilmModel<CloudType> >(cstrIter()(dict, owner, g));
+}
 
 
 // ************************************************************************* //
