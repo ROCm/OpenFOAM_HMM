@@ -94,6 +94,9 @@ class PairCollision
         //- Pre collision tasks
         void preInteraction();
 
+        //- Interactions between parcels
+        void parcelInteraction();
+
         //- Interactions between real (on-processor) particles
         void realRealInteraction();
 

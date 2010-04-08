@@ -57,10 +57,25 @@ void Foam::PairCollision<CloudType>::preInteraction()
 
 
 template<class CloudType>
+void Foam::PairCollision<CloudType>::parcelInteraction()
+{
+    PstreamBuffers pBufs(Pstream::nonBlocking);
+
+    il_.sendReferredParticles(cellOccupancy_, pBufs);
+
+    realRealInteraction();
+
+    il_.receiveReferredParticles(pBufs);
+
+    realReferredInteraction();
+}
+
+
+template<class CloudType>
 void Foam::PairCollision<CloudType>::realRealInteraction()
 {
-    const DirectInteractionList<typename CloudType::parcelType>& dil =
-        il_.dil();
+    // Direct interaction list (dil)
+    const labelListList& dil = il_.dil();
 
     typename CloudType::parcelType* pA_ptr = NULL;
     typename CloudType::parcelType* pB_ptr = NULL;
@@ -106,21 +121,26 @@ void Foam::PairCollision<CloudType>::realRealInteraction()
 template<class CloudType>
 void Foam::PairCollision<CloudType>::realReferredInteraction()
 {
-    ReferredCellList<typename CloudType::parcelType>& ril = il_.ril();
+    // Referred interaction list (ril)
+    const labelListList& ril = il_.ril();
+
+    List<IDLList<typename CloudType::parcelType> >& referredParticles =
+    il_.referredParticles();
 
     // Loop over all referred cells
     forAll(ril, refCellI)
     {
-        ReferredCell<typename CloudType::parcelType>& refCell = ril[refCellI];
+        IDLList<typename CloudType::parcelType>& refCellRefParticles =
+        referredParticles[refCellI];
 
-        const labelList& realCells = refCell.realCellsForInteraction();
+        const labelList& realCells = ril[refCellI];
 
         // Loop over all referred parcels in the referred cell
 
         forAllIter
         (
             typename IDLList<typename CloudType::parcelType>,
-            refCell,
+            refCellRefParticles,
             referredParcel
         )
         {
@@ -149,224 +169,224 @@ void Foam::PairCollision<CloudType>::realReferredInteraction()
 template<class CloudType>
 void Foam::PairCollision<CloudType>::wallInteraction()
 {
-    const polyMesh& mesh = this->owner().mesh();
+    // const polyMesh& mesh = this->owner().mesh();
 
-    const DirectInteractionList<typename CloudType::parcelType>& dil =
-        il_.dil();
+    // const DirectInteractionList<typename CloudType::parcelType>& dil =
+    //     il_.dil();
 
-    const ReferredCellList<typename CloudType::parcelType>& ril = il_.ril();
+    // const ReferredCellList<typename CloudType::parcelType>& ril = il_.ril();
 
-    // Storage for the wall interaction sites
-    DynamicList<point> flatSites;
-    DynamicList<scalar> flatSiteExclusionDistancesSqr;
-    DynamicList<point> otherSites;
-    DynamicList<scalar> otherSiteDistances;
-    DynamicList<point> sharpSites;
-    DynamicList<scalar> sharpSiteExclusionDistancesSqr;
+    // // Storage for the wall interaction sites
+    // DynamicList<point> flatSites;
+    // DynamicList<scalar> flatSiteExclusionDistancesSqr;
+    // DynamicList<point> otherSites;
+    // DynamicList<scalar> otherSiteDistances;
+    // DynamicList<point> sharpSites;
+    // DynamicList<scalar> sharpSiteExclusionDistancesSqr;
 
-    forAll(dil, realCellI)
-    {
-        // The real wall faces in range of this real cell
-        const labelList& realWallFaces = dil.wallFaces()[realCellI];
+    // forAll(dil, realCellI)
+    // {
+    //     // The real wall faces in range of this real cell
+    //     const labelList& realWallFaces = dil.wallFaces()[realCellI];
 
-        // The labels of referred cells in range of this real cell
-        const labelList& referredCellsInRange =
-        dil.referredCellsForInteraction()[realCellI];
+    //     // The labels of referred cells in range of this real cell
+    //     const labelList& referredCellsInRange =
+    //     dil.referredCellsForInteraction()[realCellI];
 
-        // Loop over all Parcels in cell
-        forAll(cellOccupancy_[realCellI], cellParticleI)
-        {
-            flatSites.clear();
-            flatSiteExclusionDistancesSqr.clear();
-            otherSites.clear();
-            otherSiteDistances.clear();
-            sharpSites.clear();
-            sharpSiteExclusionDistancesSqr.clear();
+    //     // Loop over all Parcels in cell
+    //     forAll(cellOccupancy_[realCellI], cellParticleI)
+    //     {
+    //         flatSites.clear();
+    //         flatSiteExclusionDistancesSqr.clear();
+    //         otherSites.clear();
+    //         otherSiteDistances.clear();
+    //         sharpSites.clear();
+    //         sharpSiteExclusionDistancesSqr.clear();
 
-            typename CloudType::parcelType& p =
-                *cellOccupancy_[realCellI][cellParticleI];
+    //         typename CloudType::parcelType& p =
+    //             *cellOccupancy_[realCellI][cellParticleI];
 
-            const point& pos = p.position();
+    //         const point& pos = p.position();
 
-            scalar r = p.d()/2;
+    //         scalar r = p.d()/2;
 
-            // real wallFace interactions
+    //         // real wallFace interactions
 
-            forAll(realWallFaces, realWallFaceI)
-            {
-                label realFaceI = realWallFaces[realWallFaceI];
+    //         forAll(realWallFaces, realWallFaceI)
+    //         {
+    //             label realFaceI = realWallFaces[realWallFaceI];
 
-                pointHit nearest = mesh.faces()[realFaceI].nearestPoint
-                (
-                    pos,
-                    mesh.points()
-                );
+    //             pointHit nearest = mesh.faces()[realFaceI].nearestPoint
+    //             (
+    //                 pos,
+    //                 mesh.points()
+    //             );
 
-                if (nearest.distance() < r)
-                {
-                    vector normal = mesh.faceAreas()[realFaceI];
+    //             if (nearest.distance() < r)
+    //             {
+    //                 vector normal = mesh.faceAreas()[realFaceI];
 
-                    normal /= mag(normal);
+    //                 normal /= mag(normal);
 
-                    const vector& nearPt = nearest.rawPoint();
+    //                 const vector& nearPt = nearest.rawPoint();
 
-                    vector pW = nearPt - pos;
+    //                 vector pW = nearPt - pos;
 
-                    scalar normalAlignment = normal & pW/mag(pW);
+    //                 scalar normalAlignment = normal & pW/mag(pW);
 
-                    if (normalAlignment > cosPhiMinFlatWall)
-                    {
-                        // Guard against a flat interaction being
-                        // present on the boundary of two or more
-                        // faces, which would create duplicate contact
-                        // points. Duplicates are discarded.
-                        if
-                        (
-                            !duplicatePointInList
-                            (
-                                flatSites,
-                                nearPt,
-                                sqr(r*flatWallDuplicateExclusion)
-                            )
-                        )
-                        {
-                            flatSites.append(nearPt);
+    //                 if (normalAlignment > cosPhiMinFlatWall)
+    //                 {
+    //                     // Guard against a flat interaction being
+    //                     // present on the boundary of two or more
+    //                     // faces, which would create duplicate contact
+    //                     // points. Duplicates are discarded.
+    //                     if
+    //                     (
+    //                         !duplicatePointInList
+    //                         (
+    //                             flatSites,
+    //                             nearPt,
+    //                             sqr(r*flatWallDuplicateExclusion)
+    //                         )
+    //                     )
+    //                     {
+    //                         flatSites.append(nearPt);
 
-                            flatSiteExclusionDistancesSqr.append
-                            (
-                                sqr(r) - sqr(nearest.distance())
-                            );
-                        }
-                    }
-                    else
-                    {
-                        otherSites.append(nearPt);
+    //                         flatSiteExclusionDistancesSqr.append
+    //                         (
+    //                             sqr(r) - sqr(nearest.distance())
+    //                         );
+    //                     }
+    //                 }
+    //                 else
+    //                 {
+    //                     otherSites.append(nearPt);
 
-                        otherSiteDistances.append(nearest.distance());
-                    }
-                }
-            }
+    //                     otherSiteDistances.append(nearest.distance());
+    //                 }
+    //             }
+    //         }
 
-            // referred wallFace interactions
+    //         // referred wallFace interactions
 
-            forAll(referredCellsInRange, refCellInRangeI)
-            {
-                const ReferredCell<typename CloudType::parcelType>& refCell =
-                    ril[referredCellsInRange[refCellInRangeI]];
+    //         forAll(referredCellsInRange, refCellInRangeI)
+    //         {
+    //             const ReferredCell<typename CloudType::parcelType>& refCell =
+    //                 ril[referredCellsInRange[refCellInRangeI]];
 
-                const labelList& refWallFaces = refCell.wallFaces();
+    //             const labelList& refWallFaces = refCell.wallFaces();
 
-                forAll(refWallFaces, refWallFaceI)
-                {
-                    label refFaceI = refWallFaces[refWallFaceI];
+    //             forAll(refWallFaces, refWallFaceI)
+    //             {
+    //                 label refFaceI = refWallFaces[refWallFaceI];
 
-                    pointHit nearest = refCell.faces()[refFaceI].nearestPoint
-                    (
-                        pos,
-                        refCell.points()
-                    );
+    //                 pointHit nearest = refCell.faces()[refFaceI].nearestPoint
+    //                 (
+    //                     pos,
+    //                     refCell.points()
+    //                 );
 
-                    if (nearest.distance() < r)
-                    {
-                        vector normal = refCell.faceAreas()[refFaceI];
+    //                 if (nearest.distance() < r)
+    //                 {
+    //                     vector normal = refCell.faceAreas()[refFaceI];
 
-                        normal /= mag(normal);
+    //                     normal /= mag(normal);
 
-                        const vector& nearPt = nearest.rawPoint();
+    //                     const vector& nearPt = nearest.rawPoint();
 
-                        vector pW = nearPt - pos;
+    //                     vector pW = nearPt - pos;
 
-                        scalar normalAlignment = normal & pW/mag(pW);
+    //                     scalar normalAlignment = normal & pW/mag(pW);
 
-                        if (normalAlignment > cosPhiMinFlatWall)
-                        {
-                            // Guard against a flat interaction being
-                            // present on the boundary of two or more
-                            // faces, which would create duplicate contact
-                            // points. Duplicates are discarded.
-                            if
-                            (
-                                !duplicatePointInList
-                                (
-                                    flatSites,
-                                    nearPt,
-                                    sqr(r*flatWallDuplicateExclusion)
-                                )
-                            )
-                            {
-                                flatSites.append(nearPt);
+    //                     if (normalAlignment > cosPhiMinFlatWall)
+    //                     {
+    //                         // Guard against a flat interaction being
+    //                         // present on the boundary of two or more
+    //                         // faces, which would create duplicate contact
+    //                         // points. Duplicates are discarded.
+    //                         if
+    //                         (
+    //                             !duplicatePointInList
+    //                             (
+    //                                 flatSites,
+    //                                 nearPt,
+    //                                 sqr(r*flatWallDuplicateExclusion)
+    //                             )
+    //                         )
+    //                         {
+    //                             flatSites.append(nearPt);
 
-                                flatSiteExclusionDistancesSqr.append
-                                (
-                                    sqr(r) - sqr(nearest.distance())
-                                );
-                            }
-                        }
-                        else
-                        {
-                            otherSites.append(nearPt);
+    //                             flatSiteExclusionDistancesSqr.append
+    //                             (
+    //                                 sqr(r) - sqr(nearest.distance())
+    //                             );
+    //                         }
+    //                     }
+    //                     else
+    //                     {
+    //                         otherSites.append(nearPt);
 
-                            otherSiteDistances.append(nearest.distance());
-                        }
-                    }
-                }
-            }
+    //                         otherSiteDistances.append(nearest.distance());
+    //                     }
+    //                 }
+    //             }
+    //         }
 
-            // All flat interaction sites found, now classify the
-            // other sites as being in range of a flat interaction, or
-            // a sharp interaction, being aware of not duplicating the
-            // sharp interaction sites.
+    //         // All flat interaction sites found, now classify the
+    //         // other sites as being in range of a flat interaction, or
+    //         // a sharp interaction, being aware of not duplicating the
+    //         // sharp interaction sites.
 
-            // The "other" sites need to evaluated in order of
-            // ascending distance to their nearest point so that
-            // grouping occurs around the closest in any group
+    //         // The "other" sites need to evaluated in order of
+    //         // ascending distance to their nearest point so that
+    //         // grouping occurs around the closest in any group
 
-            labelList sortedOtherSiteIndices;
+    //         labelList sortedOtherSiteIndices;
 
-            sortedOrder(otherSiteDistances, sortedOtherSiteIndices);
+    //         sortedOrder(otherSiteDistances, sortedOtherSiteIndices);
 
-            forAll(sortedOtherSiteIndices, siteI)
-            {
-                label orderedIndex = sortedOtherSiteIndices[siteI];
+    //         forAll(sortedOtherSiteIndices, siteI)
+    //         {
+    //             label orderedIndex = sortedOtherSiteIndices[siteI];
 
-                const point& otherPt = otherSites[orderedIndex];
+    //             const point& otherPt = otherSites[orderedIndex];
 
-                if
-                (
-                    !duplicatePointInList
-                    (
-                        flatSites,
-                        otherPt,
-                        flatSiteExclusionDistancesSqr
-                    )
-                )
-                {
-                    // Not in range of a flat interaction, must be a
-                    // sharp interaction.
+    //             if
+    //             (
+    //                 !duplicatePointInList
+    //                 (
+    //                     flatSites,
+    //                     otherPt,
+    //                     flatSiteExclusionDistancesSqr
+    //                 )
+    //             )
+    //             {
+    //                 // Not in range of a flat interaction, must be a
+    //                 // sharp interaction.
 
-                    if
-                    (
-                        !duplicatePointInList
-                        (
-                            sharpSites,
-                            otherPt,
-                            sharpSiteExclusionDistancesSqr
-                        )
-                    )
-                    {
-                        sharpSites.append(otherPt);
+    //                 if
+    //                 (
+    //                     !duplicatePointInList
+    //                     (
+    //                         sharpSites,
+    //                         otherPt,
+    //                         sharpSiteExclusionDistancesSqr
+    //                     )
+    //                 )
+    //                 {
+    //                     sharpSites.append(otherPt);
 
-                        sharpSiteExclusionDistancesSqr.append
-                        (
-                            sqr(r) - sqr(otherSiteDistances[orderedIndex])
-                        );
-                    }
-                }
-            }
+    //                     sharpSiteExclusionDistancesSqr.append
+    //                     (
+    //                         sqr(r) - sqr(otherSiteDistances[orderedIndex])
+    //                     );
+    //                 }
+    //             }
+    //         }
 
-            evaluateWall(p, flatSites, sharpSites);
-        }
-    }
+    //         evaluateWall(p, flatSites, sharpSites);
+    //     }
+    // }
 }
 
 
@@ -440,8 +460,6 @@ void Foam::PairCollision<CloudType>::buildCellOccupancy()
     {
         cellOccupancy_[iter().cell()].append(&iter());
     }
-
-    il_.ril().referParticles(cellOccupancy_);
 }
 
 
@@ -550,9 +568,7 @@ void Foam::PairCollision<CloudType>::collide()
 
     preInteraction();
 
-    realRealInteraction();
-
-    realReferredInteraction();
+    parcelInteraction();
 
     wallInteraction();
 
