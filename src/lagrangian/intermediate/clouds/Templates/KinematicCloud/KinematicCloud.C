@@ -32,6 +32,7 @@ License
 #include "InjectionModel.H"
 #include "PatchInteractionModel.H"
 #include "PostProcessingModel.H"
+#include "SurfaceFilmModel.H"
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
@@ -76,6 +77,8 @@ void Foam::KinematicCloud<ParcelType>::evolveCloud()
         muInterpolator(),
         g_.value()
     );
+
+    this->surfaceFilm().inject(td);
 
     this->injection().inject(td);
 
@@ -185,6 +188,15 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
             *this
         )
     ),
+    surfaceFilmModel_
+    (
+        SurfaceFilmModel<KinematicCloud<ParcelType> >::New
+        (
+            this->particleProperties_,
+            *this,
+            g
+        )
+    ),
     UIntegrator_
     (
         vectorIntegrationScheme::New
@@ -270,14 +282,12 @@ template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::info() const
 {
     Info<< "Cloud: " << this->name() << nl
-        << "    Total number of parcels added   = "
-        << this->injection().parcelsAddedTotal() << nl
-        << "    Total mass introduced           = "
-        << this->injection().massInjected() << nl
         << "    Current number of parcels       = "
         << returnReduce(this->size(), sumOp<label>()) << nl
         << "    Current mass in system          = "
         << returnReduce(massInSystem(), sumOp<scalar>()) << nl;
+    this->injection().info(Info);
+    this->surfaceFilm().info(Info);
 }
 
 

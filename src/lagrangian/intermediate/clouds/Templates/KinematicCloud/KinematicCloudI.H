@@ -182,6 +182,22 @@ Foam::KinematicCloud<ParcelType>::postProcessing()
 
 
 template<class ParcelType>
+inline const Foam::SurfaceFilmModel<Foam::KinematicCloud<ParcelType> >&
+Foam::KinematicCloud<ParcelType>::surfaceFilm() const
+{
+    return surfaceFilmModel_();
+}
+
+
+template<class ParcelType>
+inline Foam::SurfaceFilmModel<Foam::KinematicCloud<ParcelType> >&
+Foam::KinematicCloud<ParcelType>::surfaceFilm()
+{
+    return surfaceFilmModel_();
+}
+
+
+template<class ParcelType>
 inline const Foam::vectorIntegrationScheme&
 Foam::KinematicCloud<ParcelType>::UIntegrator() const
 {

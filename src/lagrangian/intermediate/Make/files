@@ -49,6 +49,9 @@ RADIATION=submodels/addOns/radiation
 $(RADIATION)/absorptionEmission/cloudAbsorptionEmission/cloudAbsorptionEmission.C
 $(RADIATION)/scatter/cloudScatter/cloudScatter.C
 
+SURFACEFILM=submodels/addOns/surfaceFilmModel
+$(SURFACEFILM)/injection/cloudInjection/cloudInjection.C
+
 submodels/Kinematic/PatchInteractionModel/LocalInteraction/patchInteractionData.C
 
 KINEMATICINJECTION=submodels/Kinematic/InjectionModel

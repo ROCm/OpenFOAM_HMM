@@ -1,0 +1,50 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.6                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    location    "0/region0_to_wallFilmRegion_masterRegion";
+    object      Uf;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+    // cyclic boundaries between film patches
+    "(cube[0-9][0-9]_side[0-9]_cube[0-9][0-9]_side[0-9])"
+    {
+        type            cyclic;
+    }
+
+    // top film surface
+    "(.*top)"
+    {
+        type            slip;
+    }
+
+    // mapped boundaries
+    "(region0_to.*)"
+    {
+        type            slip;
+    }
+
+    // floor sides
+    floor_side
+    {
+        type            fixedValue;
+        value           uniform (0 0 0);
+    }
+}
+
+// ************************************************************************* //

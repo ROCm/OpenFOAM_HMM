@@ -41,6 +41,9 @@ License
 
 // Reacting multiphase
 #include "makeReactingMultiphaseParcelDevolatilisationModels.H"
+#include "makeReactingMultiphaseParcelSurfaceFilmModels.H"
+
+// Coal specific
 #include "makeCoalParcelSurfaceReactionModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -63,6 +66,7 @@ namespace Foam
 
     // Reacting multiphase sub-models
     makeReactingMultiphaseDevolatilisationModels(CoalParcel);
+    makeReactingMultiphaseSurfaceFilmModels(CoalParcel);
     makeCoalSurfaceReactionModels(CoalParcel);
 };
 
