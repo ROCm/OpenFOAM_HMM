@@ -1,0 +1,94 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.6                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      createPatchDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Tolerance used in matching faces. Absolute tolerance is span of
+// face times this factor. To load incorrectly matches meshes set this
+// to a higher value.
+matchTolerance 1E-3;
+
+// Do a synchronisation of coupled points after creation of any patches.
+pointSync false;
+
+// Patches to create.
+patches
+(
+    {                
+        // Name of new patch
+        name side1;   
+
+        // Type of new patch
+        patchInfo
+        {
+            type        patch;
+        }
+
+        // How to construct: either from 'patches' or 'set'
+        constructFrom set;
+
+        // If constructFrom = set : name of faceSet
+        set sideFaces1;
+    }
+    {
+        // Name of new patch
+        name side2;
+
+        // Type of new patch
+        patchInfo
+        {
+            type        patch;
+        }
+
+        // How to construct: either from 'patches' or 'set'
+        constructFrom set;
+
+        // If constructFrom = set : name of faceSet
+        set sideFaces2;
+    }
+    {
+        // Name of new patch
+        name side3;
+
+        // Type of new patch
+        patchInfo
+        {
+            type        patch;
+        }
+
+        // How to construct: either from 'patches' or 'set'
+        constructFrom set;
+
+        // If constructFrom = set : name of faceSet
+        set sideFaces3;
+    }
+    {
+        // Name of new patch
+        name side4;
+
+        // Type of new patch
+        patchInfo
+        {
+            type        patch;
+        }
+
+        // How to construct: either from 'patches' or 'set'
+        constructFrom set;
+
+        // If constructFrom = set : name of faceSet
+        set sideFaces4;
+    }
+);
+
+// ************************************************************************* //
