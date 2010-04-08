@@ -346,7 +346,7 @@ void Foam::InteractionLists<ParticleType>::prepareParticlesToRefer
 
 
 template<class ParticleType>
-void InteractionLists<ParticleType>::prepareParticleToBeReferred
+void Foam::InteractionLists<ParticleType>::prepareParticleToBeReferred
 (
     ParticleType* particle,
     labelPair giat
@@ -362,11 +362,11 @@ void InteractionLists<ParticleType>::prepareParticleToBeReferred
 
 
 template<class ParticleType>
-void InteractionLists<ParticleType>::writeReferredParticleCloud()
+void Foam::InteractionLists<ParticleType>::writeReferredParticleCloud()
 {
     bool writeCloud = true;
 
-    if (mesh_.time().outputTime() && writeCloud)
+    if (writeCloud)
     {
         cloud_.clear();
 
@@ -379,10 +379,6 @@ void InteractionLists<ParticleType>::writeReferredParticleCloud()
                 cloud_.addParticle(iter().clone().ptr());
             }
         }
-
-        Particle<ParticleType>::writeFields(cloud_);
-
-        cloud_.clear();
     }
 }
 
@@ -579,34 +575,16 @@ Foam::InteractionLists<ParticleType>::InteractionLists
         }
     }
 
-    {
-        // Perform reordering of ril_, to remove any referred cells
-        // that do not interact.  They will not be sent from
-        // originating processors.  This assumes that the
-        // disappearance of the cell from the sending list of the
-        // source processor, simply removes the referred cell from the
-        // ril_, all of the subsequent indices shuffle down one, but
-        // the order and structure is preserved, i.e. it, is as if the
-        // cell had never been referred in the first place.
+    // Perform subset of ril_, to remove any referred cells that do
+    // not interact.  They will not be sent from originating
+    // processors.  This assumes that the disappearance of the cell
+    // from the sending list of the source processor, simply removes
+    // the referred cell from the ril_, all of the subsequent indices
+    // shuffle down one, but the order and structure is preserved,
+    // i.e. it, is as if the cell had never been referred in the first
+    // place.
 
-        // labelList oldToNew(globalIAndTToExchange.size(), -1);
-
-        // label refCellI = 0;
-
-        // forAll(bbRequiredByAnyCell, bbReqI)
-        // {
-        //     if (bbRequiredByAnyCell[bbReqI])
-        //     {
-        //         oldToNew[bbReqI] = refCellI++;
-        //     }
-        // }
-
-        // inplaceReorder(oldToNew, ril_);
-
-        // ril_.setSize(refCellI);
-
-        inplaceSubset(bbRequiredByAnyCell, ril_);
-    }
+    inplaceSubset(bbRequiredByAnyCell, ril_);
 
     // Send information about which cells are actually required back
     // to originating processors.
@@ -636,38 +614,9 @@ Foam::InteractionLists<ParticleType>::InteractionLists
     // Move all of the used cells to refer to the start of the list
     // and truncate it
 
-    {
-        // labelList oldToNew(globalIAndTToExchange.size(), -1);
+    inplaceSubset(bbRequiredByAnyCell, globalIAndTToExchange);
 
-        // label refCellI = 0;
-
-        // forAll(bbRequiredByAnyCell, bbReqI)
-        // {
-        //     if (bbRequiredByAnyCell[bbReqI])
-        //     {
-        //         oldToNew[bbReqI] = refCellI++;
-        //     }
-        // }
-
-        // inplaceReorder
-        // (
-        //     oldToNew,
-        //     globalIAndTToExchange
-        // );
-
-        // inplaceReorder
-        // (
-        //     oldToNew,
-        //     procToDistributeTo
-        // );
-
-        // globalIAndTToExchange.setSize(refCellI);
-        // procToDistributeTo.setSize(refCellI);
-
-        inplaceSubset(bbRequiredByAnyCell, globalIAndTToExchange);
-
-        inplaceSubset(bbRequiredByAnyCell, procToDistributeTo);
-    }
+    inplaceSubset(bbRequiredByAnyCell, procToDistributeTo);
 
     preDistributionSize = procToDistributeTo.size();
 

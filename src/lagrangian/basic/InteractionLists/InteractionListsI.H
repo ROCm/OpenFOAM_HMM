@@ -81,7 +81,7 @@ Foam::InteractionLists<ParticleType>::rilInverse() const
 
 
 template<class ParticleType>
-const Foam::List<IDLList<ParticleType> >&
+const Foam::List<Foam::IDLList<ParticleType> >&
 Foam::InteractionLists<ParticleType>::referredParticles() const
 {
     return referredParticles_;
@@ -89,7 +89,7 @@ Foam::InteractionLists<ParticleType>::referredParticles() const
 
 
 template<class ParticleType>
-Foam::List<IDLList<ParticleType> >&
+Foam::List<Foam::IDLList<ParticleType> >&
 Foam::InteractionLists<ParticleType>::referredParticles()
 {
     return referredParticles_;
