@@ -425,13 +425,6 @@ void Foam::Particle<ParticleType>::trackToFacePlanes
         }
     }
 
-    // For warped faces the particle can be 'outside' the cell.
-    // This will yield a lambda larger than 1, or smaller than 0.
-
-    // For values < 0, the particle travels away from the cell and we
-    // don't move the particle (except by a small value to move it off
-    // the face), only change cell.
-
     if (static_cast<ParticleType&>(*this).softImpact())
     {
         // Soft-sphere particles can travel outside the domain
@@ -441,9 +434,17 @@ void Foam::Particle<ParticleType>::trackToFacePlanes
         trackFraction = 1.0;
         position_ = endPosition;
     }
-    else if (lambdaMin <= 0.0)
+    else if (lambdaMin <= 0.0 && cloud_.internalFace(facei_))
     {
-        trackFraction = Cloud<ParticleType>::trackingRescueTolerance;
+        // For warped faces the particle can be 'outside' the cell.
+        // This will yield a lambda larger than 1, or smaller than 0.
+
+        // For values < 0, the particle travels away from the cell and
+        // we don't move the particle (except by a small value to move
+        // it off the face if it is an internal face), only change
+        // cell.
+
+        trackFraction = Cloud<ParticleType>::minValidTrackFraction;
         position_ += trackFraction*(endPosition - position_);
     }
     else

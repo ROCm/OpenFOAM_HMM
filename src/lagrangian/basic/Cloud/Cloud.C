@@ -35,7 +35,7 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<class ParticleType>
-const Foam::scalar Foam::Cloud<ParticleType>::minValidTrackFraction = 1e-6;
+const Foam::scalar Foam::Cloud<ParticleType>::minValidTrackFraction = SMALL;
 
 template<class ParticleType>
 const Foam::scalar Foam::Cloud<ParticleType>::trackingRescueTolerance = 1e-4;
@@ -178,39 +178,39 @@ void Foam::Cloud<ParticleType>::calcConcaveCells() const
         // }
 
         // Force all cells to be treated exactly
-        concaveCell[cellI] = 1;
+        // concaveCell[cellI] = 1;
 
         // Force all cells to be treated by planes
-        // concaveCell[cellI] = 0;
+        concaveCell[cellI] = 0;
     }
 
-    {
-        // Write cells that are concave to file
+    // {
+    //     // Write cells that are concave to file
 
-        DynamicList<label> tmpConcaveCells;
+    //     DynamicList<label> tmpConcaveCells;
 
-        forAll(cells, cellI)
-        {
-            if (concaveCell[cellI])
-            {
-                tmpConcaveCells.append(cellI);
-            }
-        }
+    //     forAll(cells, cellI)
+    //     {
+    //         if (concaveCell[cellI])
+    //         {
+    //             tmpConcaveCells.append(cellI);
+    //         }
+    //     }
 
-        Pout<< "Cloud<ParticleType>::calcConcaveCells() :"
-            << " overall cells in mesh : " << pMesh().nCells() << nl
-            << "    of these concave : " << tmpConcaveCells.size() << endl;
+    //     Pout<< "Cloud<ParticleType>::calcConcaveCells() :"
+    //         << " overall cells in mesh : " << pMesh().nCells() << nl
+    //         << "    of these concave : " << tmpConcaveCells.size() << endl;
 
-        fileName fName = pMesh().time().path()/"concaveCells";
+    //     fileName fName = pMesh().time().path()/"concaveCells";
 
-        Pout<< "    Writing " << fName.name() << endl;
+    //     Pout<< "    Writing " << fName.name() << endl;
 
-        OFstream file(fName);
+    //     OFstream file(fName);
 
-        file << tmpConcaveCells;
+    //     file << tmpConcaveCells;
 
-        file.flush();
-    }
+    //     file.flush();
+    // }
 }
 
 

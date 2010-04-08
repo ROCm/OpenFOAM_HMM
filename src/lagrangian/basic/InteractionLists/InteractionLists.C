@@ -403,6 +403,8 @@ Foam::InteractionLists<ParticleType>::InteractionLists
     cellIndexAndTransformToDistribute_(),
     referredParticles_()
 {
+    Info<< "Building InteractionLists" << endl;
+
     Random rndGen(419715);
 
     const vector interactionVec = maxDistance_*vector::one;
@@ -533,6 +535,8 @@ Foam::InteractionLists<ParticleType>::InteractionLists
     // reverseDistribute is called.
     boolList bbRequiredByAnyCell(bbsToExchange.size(), false);
 
+    Info<< "    Building referred interaction lists" << endl;
+
     forAll(bbsToExchange, bbI)
     {
         const labelPair& giat = globalIAndTToExchange[bbI];
@@ -654,6 +658,8 @@ Foam::InteractionLists<ParticleType>::InteractionLists
     }
 
     // Direct interaction list
+
+    Info<< "    Building direct interaction lists" << endl;
 
     indexedOctree<treeDataCell> allCellsTree
     (

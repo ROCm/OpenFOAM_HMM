@@ -26,6 +26,29 @@ Class
 
 Description
 
+    Builds direct interaction list, specifying which local (real)
+    cells are potentially in range of each other.
+
+    Builds referred interaction list, specifying which cells are
+    required to provideinteractions across coupled patched (cyclic or
+    processor).  Generates referred cells, and refers particles to the
+    correct processor, applying the appropriate transform.
+
+    Simultaneous communication and computation is possible using:
+
+    @verbatim
+    PstreamBuffers pBufs(Pstream::nonBlocking);
+    il_.sendReferredParticles(cellOccupancy_, pBufs);
+    // Do other things
+    il_.receiveReferredParticles(pBufs);
+    @endverbatim
+
+    Requiring data:
+
+    @verbatim
+    List<DynamicList<typename CloudType::parcelType*> > cellOccupancy_;
+    @endverbatim
+
 SourceFiles
     InteractionListsI.H
     InteractionLists.C
