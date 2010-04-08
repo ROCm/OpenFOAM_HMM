@@ -27,6 +27,8 @@ PatchInteractionModel StandardWallInteraction;
 
 PostProcessingModel none;
 
+SurfaceFilmModel none;
+
 coupled         true;
 
 cellValueSourceCorrection on;

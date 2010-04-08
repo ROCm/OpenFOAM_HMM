@@ -37,6 +37,8 @@ SurfaceReactionModel COxidationDiffusionLimitedRate;
 
 PostProcessingModel none;
 
+SurfaceFilmModel none;
+
 radiation       on;
 
 coupled         true;
