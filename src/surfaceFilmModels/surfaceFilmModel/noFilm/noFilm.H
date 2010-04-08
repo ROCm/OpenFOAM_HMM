@@ -1,0 +1,173 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Class
+    Foam::noFilm
+
+Description
+    Dummy surface film model for 'none'
+
+SourceFiles
+    noFilm.C
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef noFilm_H
+#define noFilm_H
+
+#include "surfaceFilmModel.H"
+#include "volFieldsFwd.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace surfaceFilmModels
+{
+
+/*---------------------------------------------------------------------------*\
+                          Class noFilm Declaration
+\*---------------------------------------------------------------------------*/
+
+class noFilm
+:
+    public surfaceFilmModel
+{
+private:
+
+    // Private member functions
+
+        //- Disallow default bitwise copy construct
+        noFilm(const noFilm&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const noFilm&);
+
+
+protected:
+
+    // Protected member functions
+
+        //- Read control parameters from dictionary
+        virtual bool read();
+
+
+public:
+
+    //- Runtime type information
+    TypeName("none");
+
+
+    // Constructors
+
+        //- Construct from components
+        noFilm
+        (
+            const word& modelType,
+            const fvMesh& mesh,
+            const dimensionedVector& g
+        );
+
+
+    //- Destructor
+    virtual ~noFilm();
+
+
+    // Member Functions
+
+        // Access
+
+            //- Return the film mesh database
+            virtual const fvMesh& film() const;
+
+            //- Return the list of coupled patches on the film region
+            virtual const labelList& filmBottomPatchIDs() const;
+
+            //- Return the list of patches oppositte coupled patches
+            virtual const labelList& filmTopPatchIDs() const;
+
+            //- Return the list of coupled patches on the primary region
+            virtual const labelList& primaryPatchIDs() const;
+
+            //- Return true if patchI is a coupled patch to the film region
+            virtual bool isFilmPatch(const label patchI) const;
+
+            //- External hook to add sources to the film
+            virtual void addSources
+            (
+                const label patchI,
+                const label faceI,
+                const scalar massSource,
+                const vector& momentumSource,
+                const scalar pressureSource,
+                const scalar energySource
+            );
+
+
+       // Fields
+
+           //- Return the film velocity [m/s]
+           virtual const volVectorField& U() const;
+
+           //- Return the film density [kg/m3]
+           virtual const volScalarField& rho() const;
+
+           //- Return the film temperature [K]
+           virtual const volScalarField& T() const;
+
+           //- Return the film specific heat capacity [J/kg/K]
+           virtual const volScalarField& cp() const;
+
+
+           // Transfer fields - to the primary region
+
+               //- Return the film mass available for transfer
+               virtual const volScalarField& massForPrimary() const;
+
+               //- Return the parcel diameters originating from film
+               virtual const volScalarField& diametersForPrimary() const;
+
+
+       // Evolution
+
+            //- Evolve the film equations
+            virtual void evolveFilm();
+
+
+       // I-O
+
+            //- Provide some feedback
+            virtual void info() const;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace surfaceFilmModels
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //
