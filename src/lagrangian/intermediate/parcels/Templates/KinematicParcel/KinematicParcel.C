@@ -283,15 +283,31 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
 )
 {
     ParcelType& p = static_cast<ParcelType&>(*this);
+
+    // Invoke poost-processing mdoel
     td.cloud().postProcessing().postPatch(p, patchI);
 
-    return td.cloud().patchInteraction().correct
-    (
-        pp,
-        this->face(),
-        td.keepParticle,
-        U_
-    );
+    // Invoke surface film model
+    if (td.cloud().surfaceFilm().transferParcel(p, patchI))
+    {
+        // Parcel transferred to the surface film
+        td.keepParticle = false;
+
+        // All interactions done
+        return true;
+    }
+    else
+    {
+        // Invoke patch interaction model
+        return
+            td.cloud().patchInteraction().correct
+            (
+                pp,
+                this->face(),
+                td.keepParticle,
+                U_
+            );
+    }
 }
 
 

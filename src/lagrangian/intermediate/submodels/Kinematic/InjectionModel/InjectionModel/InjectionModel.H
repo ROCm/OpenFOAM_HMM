@@ -316,6 +316,12 @@ public:
 
             //- Flag to identify whether model fully describes the parcel
             virtual bool fullyDescribed() const = 0;
+
+
+        // I-O
+
+            //- Write surface film info to stream
+            virtual void info(Ostream& os) const;
 };
 
 

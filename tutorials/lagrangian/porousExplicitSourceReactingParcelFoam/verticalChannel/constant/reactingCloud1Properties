@@ -37,6 +37,8 @@ SurfaceReactionModel none;
 
 PostProcessingModel PatchPostProcessing;
 
+SurfaceFilmModel none;
+
 radiation       off;
 
 coupled         true;

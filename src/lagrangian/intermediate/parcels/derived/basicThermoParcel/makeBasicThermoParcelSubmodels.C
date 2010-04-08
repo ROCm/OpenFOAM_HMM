@@ -34,6 +34,7 @@ License
 
 // Thermodynamic
 #include "makeParcelHeatTransferModels.H"
+#include "makeThermoParcelSurfaceFilmModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,6 +49,7 @@ namespace Foam
 
     // Thermo sub-models
     makeParcelHeatTransferModels(basicThermoParcel);
+    makeParcelSurfaceFilmModels(basicThermoParcel);
 };
 
 
