@@ -149,14 +149,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
 
         solverPerf.print();
 
-        if
-        (
-            solverPerf.initialResidual() > solverPerfVec.initialResidual()
-         && !solverPerf.singular()
-        )
-        {
-            solverPerfVec = solverPerf;
-        }
+        solverPerfVec = max(solverPerfVec, solverPerf);
 
         psi.internalField().replace(cmpt, psiCmpt);
         diag() = saveDiag;

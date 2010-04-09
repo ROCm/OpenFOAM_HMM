@@ -38,6 +38,8 @@ DevolatilisationModel none;
 
 SurfaceReactionModel none;
 
+SurfaceFilmModel none;
+
 radiation       off;
 
 coupled         true;

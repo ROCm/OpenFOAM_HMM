@@ -519,6 +519,10 @@ bool Foam::Time::loop()
     if (running)
     {
         operator++();
+
+        // Check update the "running" status following the "++" operation
+        // to take into account possible side-effects from functionObjects
+        running = run();
     }
 
     return running;

@@ -224,6 +224,13 @@ inline Foam::scalar Foam::ThermoParcel<ParcelType>::cp() const
 
 
 template<class ParcelType>
+inline Foam::scalar Foam::ThermoParcel<ParcelType>::hs() const
+{
+    return cp_*(T_ - 298.15);
+}
+
+
+template<class ParcelType>
 inline Foam::scalar& Foam::ThermoParcel<ParcelType>::T()
 {
     return T_;

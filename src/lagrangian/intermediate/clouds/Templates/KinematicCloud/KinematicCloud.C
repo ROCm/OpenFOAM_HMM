@@ -34,6 +34,7 @@ License
 #include "CollisionModel.H"
 #include "PatchInteractionModel.H"
 #include "PostProcessingModel.H"
+#include "SurfaceFilmModel.H"
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
@@ -78,6 +79,8 @@ void Foam::KinematicCloud<ParcelType>::evolveCloud()
         muInterpolator(),
         g_.value()
     );
+
+    this->surfaceFilm().inject(td);
 
     this->injection().inject(td);
 
@@ -245,6 +248,15 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
             *this
         )
     ),
+    surfaceFilmModel_
+    (
+        SurfaceFilmModel<KinematicCloud<ParcelType> >::New
+        (
+            this->particleProperties_,
+            *this,
+            g
+        )
+    ),
     UIntegrator_
     (
         vectorIntegrationScheme::New
@@ -339,12 +351,6 @@ void Foam::KinematicCloud<ParcelType>::info() const
     reduce(rotationalKineticEnergy, sumOp<scalar>());
 
     Info<< "Cloud: " << this->name() << nl
-        << "    Total number of parcels added   = "
-        << returnReduce(this->injection().parcelsAddedTotal(), sumOp<label>())
-            << nl
-        << "    Total mass introduced           = "
-        << returnReduce(this->injection().massInjected(), sumOp<scalar>())
-            << nl
         << "    Current number of parcels       = "
         << returnReduce(this->size(), sumOp<label>()) << nl
         << "    Current mass in system          = "
@@ -357,6 +363,8 @@ void Foam::KinematicCloud<ParcelType>::info() const
         << linearKineticEnergy << nl
         << "    Rotational kinetic energy       = "
         << rotationalKineticEnergy << nl;
+    this->injection().info(Info);
+    this->surfaceFilm().info(Info);
 }
 
 
