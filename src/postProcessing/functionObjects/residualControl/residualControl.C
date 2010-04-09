@@ -24,40 +24,35 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "residualControl.H"
-#include "dictionary.H"
 #include "fvMesh.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(residualControl, 0);
-}
+defineTypeNameAndDebug(Foam::residualControl, 0);
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-bool Foam::residualControl::checkCriteria(const bool output) const
+bool Foam::residualControl::checkCriteria(const bool verbose) const
 {
     bool achieved = true;
     const fvMesh& mesh = static_cast<const fvMesh&>(obr_);
     const dictionary& solverDict = mesh.solverPerformanceDict();
-    forAll(maxResiduals_, i)
+
+    forAllConstIter(dictionary, solverDict, iter)
     {
-        const word& variableName = maxResiduals_[i].first();
-        if (solverDict.found(variableName))
+        const word& variableName = iter().keyword();
+        scalar maxResidual;
+
+        if (maxResiduals_.readIfPresent(variableName, maxResidual))
         {
-            const scalar maxResidual = maxResiduals_[i].second();
-
-            const lduMatrix::solverPerformance
-                sp(solverDict.lookup(variableName));
-
-            const scalar eqnResidual = sp.initialResidual();
+            const scalar eqnResidual =
+                lduMatrix::solverPerformance(iter().stream()).initialResidual();
 
             achieved = achieved && (eqnResidual < maxResidual);
 
-            if (output)
+            if (verbose)
             {
                 Info<< "    " << variableName
                     << ": requested max residual = " << maxResidual
@@ -121,7 +116,7 @@ void Foam::residualControl::read(const dictionary& dict)
 {
     if (active_)
     {
-        dict.lookup("maxResiduals") >> maxResiduals_;
+        maxResiduals_ = dict.subDict("maxResiduals");
     }
 }
 

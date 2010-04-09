@@ -1,4 +1,4 @@
-*--------------------------------*- C++ -*----------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.6                                   |
@@ -55,10 +55,13 @@ functions
         outputInterval  1;
 
         maxResiduals
-        (
-            ( p         5e-4 )
-            ( U         1e-3 )
-        );
+        {
+            p       5e-4;
+            U       1e-3;
+
+            // possibly check turbulence fields
+            "(k|epsilon|omega)" 1e-3;
+        }
     }
 }
 
