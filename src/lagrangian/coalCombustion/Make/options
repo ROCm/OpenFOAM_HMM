@@ -16,7 +16,8 @@ EXE_INC = \
     -I$(LIB_SRC)/turbulenceModels/compressible/turbulenceModel \
     -I$(LIB_SRC)/turbulenceModels/compressible/RAS/lnInclude \
     -I$(LIB_SRC)/turbulenceModels/LES/LESdeltas/lnInclude \
-    -I$(LIB_SRC)/turbulenceModels/compressible/LES/lnInclude
+    -I$(LIB_SRC)/turbulenceModels/compressible/LES/lnInclude \
+    -I$(LIB_SRC)/surfaceFilmModels/lnInclude
 
 LIB_LIBS = \
     -lfiniteVolume \
@@ -32,4 +33,5 @@ LIB_LIBS = \
     -lsolidMixture \
     -lreactionThermophysicalModels \
     -lcompressibleRASModels \
-    -lcompressibleLESModels
+    -lcompressibleLESModels \
+    -lsurfaceFilmModels

@@ -38,6 +38,7 @@ License
 // Reacting
 #include "makeReactingParcelCompositionModels.H"
 #include "makeReactingParcelPhaseChangeModels.H"
+#include "makeReactingParcelSurfaceFilmModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,6 +57,7 @@ namespace Foam
     // Reacting sub-models
     makeReactingCompositionModels(BasicReactingParcel);
     makeReactingPhaseChangeModels(BasicReactingParcel);
+    makeReactingSurfaceFilmModels(BasicReactingParcel);
 };
 
 

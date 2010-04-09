@@ -135,38 +135,46 @@ void Foam::InjectionModel<CloudType>::findCellAtPosition
     vector& position
 )
 {
-    const vector p0 = position;
+    const volVectorField& cellCentres = owner_.mesh().C();
 
-    bool foundCell = false;
+    const vector p0 = position;
 
     cellI = owner_.mesh().findCell(position);
 
+    label procI = -1;
+
     if (cellI >= 0)
     {
-        const vector& C = owner_.mesh().C()[cellI];
-        position += SMALL*(C - position);
-
-        foundCell = owner_.mesh().pointInCell(position, cellI);
+        procI = Pstream::myProcNo();
     }
-    reduce(foundCell, orOp<bool>());
+    reduce(procI, maxOp<label>());
+    if (procI != Pstream::myProcNo())
+    {
+        cellI = -1;
+    }
 
     // Last chance - find nearest cell and try that one
     // - the point is probably on an edge
-    if (!foundCell)
+    if (procI == -1)
     {
         cellI = owner_.mesh().findNearestCell(position);
-
         if (cellI >= 0)
         {
-            const vector& C = owner_.mesh().C()[cellI];
-            position += SMALL*(C - position);
+            position += SMALL*(cellCentres[cellI] - position);
 
-            foundCell = owner_.mesh().pointInCell(position, cellI);
+            if (owner_.mesh().pointInCell(position, cellI))
+            {
+                procI = Pstream::myProcNo();
+            }
         }
-        reduce(foundCell, orOp<bool>());
+        reduce(procI, maxOp<label>());
+        if (procI != Pstream::myProcNo())
+        {
+            cellI = -1;
+        }
     }
 
-    if (!foundCell)
+    if (procI == -1)
     {
         FatalErrorIn
         (
@@ -433,6 +441,14 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     }
 
     postInjectCheck(parcelsAdded, massAdded);
+}
+
+
+template<class CloudType>
+void Foam::InjectionModel<CloudType>::info(Ostream& os) const
+{
+    os  << "    Total number of parcels added   = " << parcelsAddedTotal_ << nl
+        << "    Total mass introduced           = " << massInjected_ << nl;
 }
 
 

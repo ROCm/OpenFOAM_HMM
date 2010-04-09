@@ -31,7 +31,9 @@ Description
       - Dispersion model
       - Drag model
       - Injection model
-      - Wall interaction model
+      - Patch interaction model
+      - Post-processing model
+      - Surface film model
 
 SourceFiles
     KinematicCloudI.H
@@ -71,10 +73,14 @@ template<class CloudType>
 class InjectionModel;
 
 template<class CloudType>
+class PatchInteractionModel;
+
+template<class CloudType>
 class PostProcessingModel;
 
 template<class CloudType>
-class PatchInteractionModel;
+class SurfaceFilmModel;
+
 
 /*---------------------------------------------------------------------------*\
                        Class KinematicCloud Declaration
@@ -172,6 +178,10 @@ protected:
             //- Post-processing model
             autoPtr<PostProcessingModel<KinematicCloud<ParcelType> > >
                 postProcessingModel_;
+
+            //- Surface film model
+            autoPtr<SurfaceFilmModel<KinematicCloud<ParcelType> > >
+                surfaceFilmModel_;
 
 
         // Reference to the particle integration schemes
@@ -314,6 +324,14 @@ public:
                 //- Return reference to post-processing model
                 inline PostProcessingModel<KinematicCloud<ParcelType> >&
                     postProcessing();
+
+                //- Return const-access to the surface film model
+                inline const SurfaceFilmModel<KinematicCloud<ParcelType> >&
+                    surfaceFilm() const;
+
+                //- Return reference to the surface film model
+                inline SurfaceFilmModel<KinematicCloud<ParcelType> >&
+                    surfaceFilm();
 
 
             // Integration schemes

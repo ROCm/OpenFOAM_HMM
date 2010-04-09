@@ -27,6 +27,8 @@ PatchInteractionModel StandardWallInteraction;
 
 PostProcessingModel none;
 
+SurfaceFilmModel none;
+
 coupled         true;
 
 cellValueSourceCorrection on;
@@ -73,8 +75,8 @@ ManualInjectionCoeffs
         {
             minValue        5e-05;
             maxValue        0.0001;
-            d               ( 7.5e-05 );
-            n               ( 0.5 );
+            d               7.5e-05;
+            n               0.5;
         }
     }
 }
