@@ -18,13 +18,13 @@ libs            ("libincompressibleRASModels.so");
 
 application     simpleFoam;
 
-startFrom       latestTime;
+startFrom       startTime;
 
 startTime       0;
 
 stopAt          endTime;
 
-endTime         500;
+endTime         1000;
 
 deltaT          1;
 
