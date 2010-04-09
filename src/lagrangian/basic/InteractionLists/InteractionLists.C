@@ -662,7 +662,7 @@ Foam::InteractionLists<ParticleType>::InteractionLists
         rilInverse_[cellI].transfer(rilInverseTemp[cellI]);
     }
 
-    // Direct interaction list
+    // Direct interaction list and direct wall faces
 
     Info<< "    Building direct interaction lists" << endl;
 
@@ -675,7 +675,30 @@ Foam::InteractionLists<ParticleType>::InteractionLists
         100.0
     );
 
+    DynamicList<label> localWallFaces;
+
+    forAll(mesh.boundaryMesh(), patchI)
+    {
+        const polyPatch& patch = mesh.boundaryMesh()[patchI];
+
+        if (isA<wallPolyPatch>(patch))
+        {
+            localWallFaces.append(identity(patch.size()) + patch.start());
+        }
+    }
+
+    indexedOctree<treeDataFace> wallFacesTree
+    (
+        treeDataFace(true, mesh, localWallFaces),
+        procBbRndExt,
+        8,              // maxLevel,
+        10,             // leafSize,
+        100.0
+    );
+
     dil_.setSize(mesh_.nCells());
+
+    directWallFaces_.setSize(mesh.nCells());
 
     forAll(cellBbs, cellI)
     {
@@ -687,7 +710,7 @@ Foam::InteractionLists<ParticleType>::InteractionLists
             cellBb.max() + interactionVec
         );
 
-        // Find all elements intersecting box.
+        // Find all cells intersecting extendedBb
         labelList interactingElems
         (
             allCellsTree.findBox(extendedBb)
@@ -715,95 +738,20 @@ Foam::InteractionLists<ParticleType>::InteractionLists
         }
 
         dil_[cellI].transfer(cellDIL);
-    }
 
-    // Direct wall faces
+        // Find all wall faces intersecting extendedBb
+        interactingElems = wallFacesTree.findBox(extendedBb);
 
-    // DynamicLists for data gathering
-    DynamicList<label> thisCellOnlyWallFaces;
-    DynamicList<label> otherCellOnlyWallFaces;
-    List<DynamicList<label> > wallFacesTemp(mesh_.nCells());
+        directWallFaces_[cellI].setSize(interactingElems.size(), -1);
 
-    const labelList& patchID = mesh_.boundaryMesh().patchID();
-
-    label nInternalFaces = mesh_.nInternalFaces();
-
-    forAll(wallFacesTemp, thisCellI)
-    {
-        // Find all of the wall faces for the current cell
-        const labelList& thisCellFaces = mesh_.cells()[thisCellI];
-
-        DynamicList<label>& thisCellWallFaces = wallFacesTemp[thisCellI];
-
-        thisCellOnlyWallFaces.clear();
-
-        forAll(thisCellFaces, tCFI)
+        forAll(interactingElems, i)
         {
-            label faceI = thisCellFaces[tCFI];
+            label elemI = interactingElems[i];
 
-            if (!mesh_.isInternalFace(faceI))
-            {
-                label patchI = patchID[faceI - nInternalFaces];
+            label f = wallFacesTree.shapes().faceLabels()[elemI];
 
-                const polyPatch& patch = mesh_.boundaryMesh()[patchI];
-
-                if (isA<wallPolyPatch>(patch))
-                {
-                    thisCellOnlyWallFaces.append(faceI);
-                }
-            }
+            directWallFaces_[cellI][i] = f;
         }
-
-        // Add all the found wall faces to this cell's list, and
-        // retain the wall faces for this cell only to add to other
-        // cells.
-        thisCellWallFaces.append(thisCellOnlyWallFaces);
-
-        // Loop over all of the cells in the dil for this cell, adding
-        // the wallFaces for this cell to the other cell's wallFace
-        // list, and all of the wallFaces for the other cell to this
-        // cell's list
-
-        const labelList& cellDil = dil_[thisCellI];
-
-        forAll(cellDil, i)
-        {
-            label otherCellI = cellDil[i];
-
-            const labelList& otherCellFaces = mesh_.cells()[otherCellI];
-
-            DynamicList<label>& otherCellWallFaces = wallFacesTemp[otherCellI];
-
-            otherCellOnlyWallFaces.clear();
-
-            forAll(otherCellFaces, oCFI)
-            {
-                label faceI = otherCellFaces[oCFI];
-
-                if (!mesh_.isInternalFace(faceI))
-                {
-                    label patchI = patchID[faceI - nInternalFaces];
-
-                    const polyPatch& patch = mesh_.boundaryMesh()[patchI];
-
-                    if (isA<wallPolyPatch>(patch))
-                    {
-                        otherCellOnlyWallFaces.append(faceI);
-                    }
-                }
-            }
-
-            thisCellWallFaces.append(otherCellOnlyWallFaces);
-
-            otherCellWallFaces.append(thisCellOnlyWallFaces);
-        }
-    }
-
-    directWallFaces_.setSize(mesh_.nCells());
-
-    forAll(directWallFaces_, i)
-    {
-        directWallFaces_[i].transfer(wallFacesTemp[i]);
     }
 }
 

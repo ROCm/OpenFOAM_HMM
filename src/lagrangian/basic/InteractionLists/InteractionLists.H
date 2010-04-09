@@ -63,6 +63,7 @@ SourceFiles
 #include "globalIndexAndTransform.H"
 #include "indexedOctree.H"
 #include "treeDataCell.H"
+#include "treeDataFace.H"
 #include "mapDistribute.H"
 #include "Random.H"
 
@@ -104,9 +105,7 @@ class InteractionLists
         labelListList dil_;
 
         //- Wall faces on this processor that are in interaction range
-        //  of each each cell, data subordinate to dil, i.e. if a cell
-        //  B is on cell A's dil, then all of cell B's wall faces are
-        //  considered posible interactions for cell A.
+        //  of each each cell
         labelListList directWallFaces_;
 
         //- Referred interaction list - which real cells are to be
