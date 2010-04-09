@@ -1,4 +1,0 @@
-residualControl.C
-residualControlFunctionObject.C
-
-LIB = $(FOAM_LIBBIN)/libresidualControl

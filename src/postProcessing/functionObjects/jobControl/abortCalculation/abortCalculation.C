@@ -31,10 +31,8 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(abortCalculation, 0);
-}
+defineTypeNameAndDebug(Foam::abortCalculation, 0);
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

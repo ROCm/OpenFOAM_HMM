@@ -750,6 +750,20 @@ Foam::argList::~argList()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::argList::printNotes() const
+{
+    // output notes directly - no automatic text wrapping
+    if (!notes.empty())
+    {
+        Info<< nl;
+        forAllConstIter(SLList<string>, notes, iter)
+        {
+            Info<< iter().c_str() << nl;
+        }
+    }
+}
+
+
 void Foam::argList::printUsage() const
 {
     Info<< "\nUsage: " << executable_ << " [OPTIONS]";
@@ -819,20 +833,7 @@ void Foam::argList::printUsage() const
     );
 
 
-    // output notes directly - no automatic text wrapping
-    if (!notes.empty())
-    {
-        Info<< nl;
-        for
-        (
-            SLList<string>::const_iterator iter = notes.begin();
-            iter != notes.end();
-            ++iter
-        )
-        {
-            Info<< iter().c_str() << nl;
-        }
-    }
+    printNotes();
 
     Info<< nl
         <<"Using OpenFOAM-" << Foam::FOAMversion

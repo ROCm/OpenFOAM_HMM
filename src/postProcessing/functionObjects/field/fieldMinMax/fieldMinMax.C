@@ -31,10 +31,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(fieldMinMax, 0);
-}
+defineTypeNameAndDebug(Foam::fieldMinMax, 0);
 
 
 template<>

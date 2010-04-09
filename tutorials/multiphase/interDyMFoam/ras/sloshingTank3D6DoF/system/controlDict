@@ -37,13 +37,13 @@ writeFormat     ascii;
 
 writePrecision  6;
 
-writeCompression compressed;
+writeCompression off;
 
 timeFormat      general;
 
 timePrecision   6;
 
-runTimeModifiable yes;
+runTimeModifiable true;
 
 adjustTimeStep  yes;
 
@@ -59,17 +59,18 @@ functions
         functionObjectLibs ("libsampling.so");
         outputControl   timeStep;
         outputInterval  1;
+
+        fields
+        (
+            p
+        );
+
         probeLocations
         (
             ( 0 9.95 19.77 )
             ( 0 -9.95 19.77 )
         );
-        fields
-        (
-            p
-        );
     }
 }
-
 
 // ************************************************************************* //

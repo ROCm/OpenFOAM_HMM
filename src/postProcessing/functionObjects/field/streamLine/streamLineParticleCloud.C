@@ -30,7 +30,7 @@ License
 namespace Foam
 {
     defineTemplateTypeNameAndDebug(Cloud<streamLineParticle>, 0);
-};
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

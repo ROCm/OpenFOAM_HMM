@@ -329,6 +329,9 @@ public:
 
         // Print
 
+            //- Print notes (if any)
+            void printNotes() const;
+
             //- Print usage
             void printUsage() const;
 

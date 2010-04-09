@@ -6,7 +6,7 @@ wmake libso field
 wmake libso forces
 wmake libso IO
 wmake libso utilities
-wmake libso residualControl
+wmake libso jobControl
 wmake libso systemCall
 
 # ----------------------------------------------------------------- end-of-file
