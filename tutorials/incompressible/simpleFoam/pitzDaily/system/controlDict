@@ -47,6 +47,22 @@ runTimeModifiable yes;
 
 functions
 (
+    convergenceChecks
+    {
+        type           residualControl;
+        functionObjectLibs ( "libresidualControl.so" );
+        outputControl  timeStep;
+        outputInterval 1;
+
+        maxResiduals
+        (
+            (p          1e-2)
+            (U          1e-3)
+            (k          1e-3)
+            (epsilon    1e-3)
+        );
+    }
+
     streamLines
     {
         type streamLine;
@@ -87,24 +103,6 @@ functions
             end         (-0.0205 0.0251 0.00001);
             nPoints     10;
         }
-
-//        cloudCoeffs
-//        {
-//            type        cloud;
-//            axis        x;
-//
-//            points
-//            (
-//                (-0.0205936225239282 0.0144729199524163 0.00001)
-//            );
-//        }
-
-//        triSurfaceMeshPointSetCoeffs
-//        {
-//            type        triSurfaceMeshPointSet;
-//            axis        distance;
-//            surface     twoTri.stl;
-//        }
     }
 );
 
