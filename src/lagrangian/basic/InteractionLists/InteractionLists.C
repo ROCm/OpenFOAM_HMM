@@ -323,6 +323,8 @@ void Foam::InteractionLists<ParticleType>::prepareParticlesToRefer
         referredParticles_[i].clear();
     }
 
+    cloud_.clear();
+
     forAll(cellIndexAndTransformToDistribute_, i)
     {
         const labelPair giat = cellIndexAndTransformToDistribute_[i];
@@ -368,8 +370,6 @@ void Foam::InteractionLists<ParticleType>::writeReferredParticleCloud()
 
     if (writeCloud)
     {
-        cloud_.clear();
-
         forAll(referredParticles_, refCellI)
         {
             const IDLList<ParticleType>& refCell = referredParticles_[refCellI];
