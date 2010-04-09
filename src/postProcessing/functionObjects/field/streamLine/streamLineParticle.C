@@ -31,14 +31,17 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(streamLineParticle, 0);
+
     defineParticleTypeNameAndDebug(streamLineParticle, 0);
+
     defineTemplateTypeNameAndDebugWithName
     (
         IOField<vectorField>,
         "vectorFieldField",
         0
     );
-};
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

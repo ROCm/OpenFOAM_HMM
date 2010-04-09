@@ -29,10 +29,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(writeRegisteredObject, 0);
-}
+defineTypeNameAndDebug(Foam::writeRegisteredObject, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

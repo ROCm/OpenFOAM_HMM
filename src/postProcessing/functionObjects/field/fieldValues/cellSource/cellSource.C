@@ -30,31 +30,27 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
+defineTypeNameAndDebug(Foam::fieldValues::cellSource, 0);
+
+template<>
+const char* Foam::NamedEnum<Foam::fieldValues::cellSource::sourceType, 1>::
+names[] =
 {
-    namespace fieldValues
-    {
-        defineTypeNameAndDebug(cellSource, 0);
-    }
+    "cellZone"
+};
 
-    template<>
-    const char* NamedEnum<fieldValues::cellSource::sourceType, 1>::
-        names[] = {"cellZone"};
+const Foam::NamedEnum<Foam::fieldValues::cellSource::sourceType, 1>
+    Foam::fieldValues::cellSource::sourceTypeNames_;
 
-    const NamedEnum<fieldValues::cellSource::sourceType, 1>
-        fieldValues::cellSource::sourceTypeNames_;
+template<>
+const char* Foam::NamedEnum<Foam::fieldValues::cellSource::operationType, 5>::
+names[] =
+{
+    "none", "sum", "volAverage", "volIntegrate", "weightedAverage"
+};
 
-    template<>
-    const char* NamedEnum<fieldValues::cellSource::operationType, 5>::
-        names[] =
-        {
-            "none", "sum", "volAverage", "volIntegrate", "weightedAverage"
-        };
-
-    const NamedEnum<fieldValues::cellSource::operationType, 5>
-        fieldValues::cellSource::operationTypeNames_;
-
-}
+const Foam::NamedEnum<Foam::fieldValues::cellSource::operationType, 5>
+    Foam::fieldValues::cellSource::operationTypeNames_;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -238,4 +234,3 @@ void Foam::fieldValues::cellSource::write()
 
 
 // ************************************************************************* //
-

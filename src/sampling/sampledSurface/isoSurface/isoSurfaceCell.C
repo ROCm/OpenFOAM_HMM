@@ -34,10 +34,8 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(isoSurfaceCell, 0);
-}
+defineTypeNameAndDebug(Foam::isoSurfaceCell, 0);
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
