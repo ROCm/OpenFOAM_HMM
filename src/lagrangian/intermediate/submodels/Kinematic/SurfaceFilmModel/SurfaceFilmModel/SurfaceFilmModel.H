@@ -79,6 +79,9 @@ protected:
         //- The coefficients dictionary
         const dictionary coeffDict_;
 
+        //- Active flag
+        bool active_;
+
 
         // Cached injector fields per film patch
 

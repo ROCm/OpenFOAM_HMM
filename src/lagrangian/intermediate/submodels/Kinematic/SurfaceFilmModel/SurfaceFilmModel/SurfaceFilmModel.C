@@ -39,6 +39,7 @@ Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel(CloudType& owner)
     owner_(owner),
     g_(dimensionedVector("zero", dimAcceleration, vector::zero)),
     coeffDict_(dictionary::null),
+    active_(false),
     injectorCellsPatch_(0),
     massParcelPatch_(0),
     diameterParcelPatch_(0),
@@ -62,6 +63,7 @@ Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel
     owner_(owner),
     g_(g),
     coeffDict_(dict.subDict(type + "Coeffs")),
+    active_(true),
     injectorCellsPatch_(0),
     massParcelPatch_(0),
     diameterParcelPatch_(0),
@@ -85,6 +87,11 @@ template<class CloudType>
 template<class TrackData>
 void Foam::SurfaceFilmModel<CloudType>::inject(TrackData& td)
 {
+    if (!active_)
+    {
+        return;
+    }
+
     // Retrieve the film model from the owner database
     const surfaceFilmModels::surfaceFilmModel& filmModel =
         this->owner().db().objectRegistry::lookupObject
