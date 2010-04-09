@@ -1,6 +1,3 @@
-abortCalculation/abortCalculation.C
-abortCalculation/abortCalculationFunctionObject.C
-
 staticPressure/staticPressure.C
 staticPressure/staticPressureFunctionObject.C
 

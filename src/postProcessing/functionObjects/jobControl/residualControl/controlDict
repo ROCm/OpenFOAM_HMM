@@ -50,7 +50,7 @@ functions
     convergenceChecks
     {
         type            residualControl;
-        functionObjectLibs ( "libresidualControl.so" );
+        functionObjectLibs ( "libjobControl.so" );
         outputControl   timeStep;
         outputInterval  1;
 
