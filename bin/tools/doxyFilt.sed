@@ -8,6 +8,16 @@
 # -----------------------------------------------------------------------------
 
 /^License/,/\*\//{
+# new FSF address
+/^License/,\%http://www.gnu.org/licenses%{
+s?^License.*?\*\/\
+\/\*! @file %filePath%\
+<b>Original source file</b> <a href="%filePath%">%fileName%</a>\
+?
+/^    /d
+}
+
+# old FSF address
 /^License/,/MA 0211.-130. USA/{
 s?^License.*?\*\/\
 \/\*! @file %filePath%\

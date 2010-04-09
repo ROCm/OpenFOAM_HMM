@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,13 +19,13 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
 #include "polyMeshGeometry.H"
 #include "pyramidPointFaceRef.H"
+#include "tetPointRef.H"
 #include "syncTools.H"
 #include "unitConversion.H"
 
@@ -305,6 +305,59 @@ Foam::scalar Foam::polyMeshGeometry::calcSkewness
             mag(neiCc-ownCc)
           + VSMALL
         );
+}
+
+
+// Create the neighbour pyramid - it will have positive volume
+bool Foam::polyMeshGeometry::checkFaceTet
+(
+    const polyMesh& mesh,
+    const bool report,
+    const scalar minTetVol,
+    const pointField& p,
+    const label faceI,
+    const point& fc,    // face centre
+    const point& cc,    // cell centre
+
+    labelHashSet* setPtr
+)
+{
+    const face& f = mesh.faces()[faceI];
+
+    forAll(f, fp)
+    {
+        scalar tetVol = tetPointRef
+        (
+            p[f[fp]],
+            p[f.nextLabel(fp)],
+            fc,
+            cc
+        ).mag();
+
+        if (tetVol < minTetVol)
+        {
+            if (report)
+            {
+                Pout<< "bool polyMeshGeometry::checkFaceTets("
+                    << "const bool, const scalar, const pointField&"
+                    << ", const pointField&, const labelList&,"
+                    << " labelHashSet*): "
+                    << "face " << faceI
+                    << " has a triangle that points the wrong way."
+                     << endl
+                    << "Tet volume: " << tetVol
+                    << " Face " << faceI
+                    << endl;
+            }
+
+            if (setPtr)
+            {
+                setPtr->insert(faceI);
+            }
+            return true;
+        }
+    }
+    return false;
 }
 
 
@@ -712,6 +765,139 @@ bool Foam::polyMeshGeometry::checkFacePyramids
         if (report)
         {
             Info<< "Face pyramids OK.\n" << endl;
+        }
+
+        return false;
+    }
+}
+
+
+bool Foam::polyMeshGeometry::checkFaceTets
+(
+    const bool report,
+    const scalar minTetVol,
+    const polyMesh& mesh,
+    const vectorField& cellCentres,
+    const vectorField& faceCentres,
+    const pointField& p,
+    const labelList& checkFaces,
+    const List<labelPair>& baffles,
+    labelHashSet* setPtr
+)
+{
+    // check whether face area vector points to the cell with higher label
+    const labelList& own = mesh.faceOwner();
+    const labelList& nei = mesh.faceNeighbour();
+
+    label nErrorPyrs = 0;
+
+    forAll(checkFaces, i)
+    {
+        label faceI = checkFaces[i];
+
+        // Create the owner pyramid - note: exchange cell and face centre
+        // to get positive volume.
+        bool tetError = checkFaceTet
+        (
+            mesh,
+            report,
+            minTetVol,
+            p,
+            faceI,
+            cellCentres[own[faceI]],    // face centre
+            faceCentres[faceI],    // cell centre
+            setPtr
+        );
+
+        if (tetError)
+        {
+            nErrorPyrs++;
+        }
+
+        if (mesh.isInternalFace(faceI))
+        {
+            // Create the neighbour pyramid - it will have positive volume
+            bool tetError = checkFaceTet
+            (
+                mesh,
+                report,
+                minTetVol,
+                p,
+                faceI,
+                faceCentres[faceI],    // face centre
+                cellCentres[nei[faceI]],    // cell centre
+                setPtr
+            );
+            if (tetError)
+            {
+                nErrorPyrs++;
+            }
+        }
+    }
+
+    forAll(baffles, i)
+    {
+        label face0 = baffles[i].first();
+        label face1 = baffles[i].second();
+
+        bool tetError = checkFaceTet
+        (
+            mesh,
+            report,
+            minTetVol,
+            p,
+            face0,
+            cellCentres[own[face0]],    // face centre
+            faceCentres[face0],         // cell centre
+            setPtr
+        );
+
+        if (tetError)
+        {
+            nErrorPyrs++;
+        }
+
+        // Create the neighbour pyramid - it will have positive volume
+        tetError = checkFaceTet
+        (
+            mesh,
+            report,
+            minTetVol,
+            p,
+            face0,
+            faceCentres[face0],         // face centre
+            cellCentres[own[face1]],    // cell centre
+            setPtr
+        );
+
+        if (tetError)
+        {
+            nErrorPyrs++;
+        }
+    }
+
+    reduce(nErrorPyrs, sumOp<label>());
+
+    if (nErrorPyrs > 0)
+    {
+        if (report)
+        {
+            SeriousErrorIn
+            (
+                "polyMeshGeometry::checkFaceTets("
+                "const bool, const scalar, const pointField&, const pointField&"
+                ", const labelList&, labelHashSet*)"
+            )   << "Error in face pyramids: faces pointing the wrong way!"
+                << endl;
+        }
+
+        return true;
+    }
+    else
+    {
+        if (report)
+        {
+            Info<< "Face tets OK.\n" << endl;
         }
 
         return false;
@@ -1938,6 +2124,31 @@ bool Foam::polyMeshGeometry::checkFacePyramids
         minPyrVol,
         mesh_,
         cellCentres_,
+        p,
+        checkFaces,
+        baffles,
+        setPtr
+    );
+}
+
+
+bool Foam::polyMeshGeometry::checkFaceTets
+(
+    const bool report,
+    const scalar minTetVol,
+    const pointField& p,
+    const labelList& checkFaces,
+    const List<labelPair>& baffles,
+    labelHashSet* setPtr
+) const
+{
+    return checkFaceTets
+    (
+        report,
+        minTetVol,
+        mesh_,
+        cellCentres_,
+        faceCentres_,
         p,
         checkFaces,
         baffles,

@@ -2,16 +2,16 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -263,8 +262,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
         )
     ),
 
-    omega0_("omega0", dimless/dimTime, SMALL),
-    omegaSmall_("omegaSmall", dimless/dimTime, SMALL),
+    omegaMin_("omegaMin", dimless/dimTime, SMALL),
     y_(mesh_),
     Cmu_
     (
@@ -324,6 +322,11 @@ kOmegaSSTSAS::kOmegaSSTSAS
         mesh_
     )
 {
+    omegaMin_.readIfPresent(*this);
+
+    bound(k_, kMin_);
+    bound(omega_, omegaMin_);
+
     updateSubGridScaleFields(magSqr(symm(fvc::grad(U))));
 
     printCoeffs();
@@ -346,9 +349,8 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
 
     volVectorField gradK = fvc::grad(k_);
     volVectorField gradOmega = fvc::grad(omega_);
-    volScalarField L = sqrt(k_)/(pow025(Cmu_)*(omega_ + omegaSmall_));
-    volScalarField CDkOmega =
-        (2.0*alphaOmega2_)*(gradK & gradOmega)/(omega_ + omegaSmall_);
+    volScalarField L = sqrt(k_)/(pow025(Cmu_)*omega_);
+    volScalarField CDkOmega = (2.0*alphaOmega2_)*(gradK & gradOmega)/omega_;
     volScalarField F1 = this->F1(CDkOmega);
     volScalarField G = nuSgs_*2.0*S2;
 
@@ -368,14 +370,12 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
         kEqn.relax();
         kEqn.solve();
     }
-    bound(k_, k0());
+    bound(k_, kMin_);
 
     volScalarField grad_omega_k = max
     (
-        magSqr(gradOmega)/
-        sqr(omega_ + omegaSmall_),
-        magSqr(gradK)/
-        sqr(k_ + k0())
+        magSqr(gradOmega)/sqr(omega_),
+        magSqr(gradK)/sqr(k_)
     );
 
     // Turbulent frequency equation
@@ -397,7 +397,7 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
           + FSAS_
            *max
             (
-                dimensionedScalar("zero",dimensionSet(0, 0 , -2, 0, 0),0. ),
+                dimensionedScalar("zero",dimensionSet(0, 0, -2, 0, 0), 0.0),
                 zetaTilda2_*kappa_*S2*(L/Lvk2(S2))
               - 2.0/alphaPhi_*k_*grad_omega_k
             )
@@ -406,7 +406,7 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
         omegaEqn.relax();
         omegaEqn.solve();
     }
-    bound(omega_, omega0_);
+    bound(omega_, omegaMin_);
 
     updateSubGridScaleFields(S2);
 }
@@ -458,6 +458,8 @@ bool kOmegaSSTSAS::read()
         alphaPhi_.readIfPresent(coeffDict());
         zetaTilda2_.readIfPresent(coeffDict());
         FSAS_.readIfPresent(coeffDict());
+
+        omegaMin_.readIfPresent(*this);
 
         return true;
     }

@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,13 +19,13 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveMesh.H"
 #include "pyramidPointFaceRef.H"
+#include "tetPointRef.H"
 #include "ListOps.H"
 #include "unitConversion.H"
 #include "SortableList.H"
@@ -37,6 +37,7 @@ Foam::scalar Foam::primitiveMesh::closedThreshold_  = 1.0e-6;
 Foam::scalar Foam::primitiveMesh::aspectThreshold_  = 1000;
 Foam::scalar Foam::primitiveMesh::nonOrthThreshold_ = 70;    // deg
 Foam::scalar Foam::primitiveMesh::skewThreshold_    = 4;
+Foam::scalar Foam::primitiveMesh::planarCosAngle_   = 1.0e-6;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -401,7 +402,7 @@ bool Foam::primitiveMesh::checkFaceOrthogonality
             << "checking mesh non-orthogonality" << endl;
     }
 
-    // for all internal faces check theat the d dot S product is positive
+    // for all internal faces check that the d dot S product is positive
     const vectorField& centres = cellCentres();
     const vectorField& areas = faceAreas();
 
@@ -584,6 +585,114 @@ bool Foam::primitiveMesh::checkFacePyramids
         if (debug || report)
         {
             Info<< "    Face pyramids OK." << endl;
+        }
+
+        return false;
+    }
+}
+
+
+bool Foam::primitiveMesh::checkFaceTets
+(
+    const bool report,
+    const scalar minTetVol,
+    labelHashSet* setPtr
+) const
+{
+    if (debug)
+    {
+        Info<< "bool primitiveMesh::checkFaceTets("
+            << "const bool, const scalar, labelHashSet*) const: "
+            << "checking face orientation" << endl;
+    }
+
+    // check whether face area vector points to the cell with higher label
+    const vectorField& cc = cellCentres();
+    const vectorField& fc = faceCentres();
+
+    const labelList& own = faceOwner();
+    const labelList& nei = faceNeighbour();
+
+    const faceList& fcs = faces();
+
+    const pointField& p = points();
+
+    label nErrorPyrs = 0;
+
+    forAll (fcs, faceI)
+    {
+        // Create the owner tets - they will have negative volume
+        const face& f = fcs[faceI];
+
+        forAll(f, fp)
+        {
+            scalar tetVol = tetPointRef
+            (
+                p[f[fp]],
+                p[f.nextLabel(fp)],
+                fc[faceI],
+                cc[own[faceI]]
+            ).mag();
+
+            if (tetVol > -minTetVol)
+            {
+                if (setPtr)
+                {
+                    setPtr->insert(faceI);
+                }
+
+                nErrorPyrs++;
+                break;              // no need to check other tets
+            }
+        }
+
+        if (isInternalFace(faceI))
+        {
+            // Create the neighbour tet - it will have positive volume
+            const face& f = fcs[faceI];
+
+            forAll(f, fp)
+            {
+                scalar tetVol = tetPointRef
+                (
+                    p[f[fp]],
+                    p[f.nextLabel(fp)],
+                    fc[faceI],
+                    cc[nei[faceI]]
+                ).mag();
+
+                if (tetVol < minTetVol)
+                {
+                    if (setPtr)
+                    {
+                        setPtr->insert(faceI);
+                    }
+
+                    nErrorPyrs++;
+                    break;
+                }
+            }
+        }
+    }
+
+    reduce(nErrorPyrs, sumOp<label>());
+
+    if (nErrorPyrs > 0)
+    {
+        if (debug || report)
+        {
+            Info<< " ***Error in face tets: "
+                << nErrorPyrs << " faces have incorrectly oriented face"
+                << " decomposition triangles." << endl;
+        }
+
+        return true;
+    }
+    else
+    {
+        if (debug || report)
+        {
+            Info<< "    Face tets OK." << endl;
         }
 
         return false;
@@ -1977,6 +2086,121 @@ bool Foam::primitiveMesh::checkCellDeterminant
         if (debug || report)
         {
             Info<< "    Cell determinant check OK." << endl;
+        }
+
+        return false;
+    }
+
+    return false;
+}
+
+
+bool Foam::primitiveMesh::checkConcaveCells
+(
+    const bool report,
+    labelHashSet* setPtr
+) const
+{
+    if (debug)
+    {
+        Info<< "bool primitiveMesh::checkConcaveCells(const bool"
+            << ", labelHashSet*) const: "
+            << "checking for concave cells" << endl;
+    }
+
+    const cellList& c = cells();
+    const labelList& fOwner = faceOwner();
+    const vectorField& fAreas = faceAreas();
+    const pointField& fCentres = faceCentres();
+
+    label nConcaveCells = 0;
+
+    forAll (c, cellI)
+    {
+        const cell& cFaces = c[cellI];
+
+        bool concave = false;
+
+        forAll(cFaces, i)
+        {
+            if (concave)
+            {
+                break;
+            }
+
+            label fI = cFaces[i];
+
+            const point& fC = fCentres[fI];
+
+            vector fN = fAreas[fI];
+
+            fN /= max(mag(fN), VSMALL);
+
+            // Flip normal if required so that it is always pointing out of
+            // the cell
+            if (fOwner[fI] != cellI)
+            {
+                fN *= -1;
+            }
+
+            // Is the centre of any other face of the cell on the
+            // wrong side of the plane of this face?
+
+            forAll(cFaces, j)
+            {
+                if (j != i)
+                {
+                    label fJ = cFaces[j];
+
+                    const point& pt = fCentres[fJ];
+
+                    // If the cell is concave, the point will be on the
+                    // positive normal side of the plane of f, defined by
+                    // its centre and normal, and the angle between (pt -
+                    // fC) and fN will be less than 90 degrees, so the dot
+                    // product will be positive.
+
+                    vector pC = (pt - fC);
+
+                    pC /= max(mag(pC), VSMALL);
+
+                    if ((pC & fN) > -planarCosAngle_)
+                    {
+                        // Concave or planar face
+
+                        concave = true;
+
+                        if (setPtr)
+                        {
+                            setPtr->insert(cellI);
+                        }
+
+                        nConcaveCells++;
+
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    reduce(nConcaveCells, sumOp<label>());
+
+    if (nConcaveCells > 0)
+    {
+        if (debug || report)
+        {
+            Info<< " ***Concave cells (using face planes) found,"
+                << " number of cells: " << nConcaveCells << endl;
+        }
+
+        return true;
+    }
+    else
+    {
+        if (debug || report)
+        {
+            Info<< "    Concave cell check OK." << endl;
         }
 
         return false;

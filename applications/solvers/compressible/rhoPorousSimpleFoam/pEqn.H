@@ -29,8 +29,7 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     // retain the residual from the first iteration
     if (nonOrth == 0)
     {
-        eqnResidual = tpEqn().solve().initialResidual();
-        maxResidual = max(eqnResidual, maxResidual);
+        tpEqn().solve();
     }
     else
     {

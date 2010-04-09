@@ -2,16 +2,16 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -50,10 +49,10 @@ LienCubicKELowRe::LienCubicKELowRe
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& lamTransportModel
+    transportModel& transport
 )
 :
-    RASModel(typeName, U, phi, lamTransportModel),
+    RASModel(typeName, U, phi, transport),
 
     C1_
     (
@@ -220,14 +219,22 @@ LienCubicKELowRe::LienCubicKELowRe
     y_(mesh_),
 
     gradU_(fvc::grad(U)),
-    eta_(k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU_ + gradU_.T())))),
-    ksi_(k_/epsilon_*sqrt(2.0*magSqr(0.5*(gradU_ - gradU_.T())))),
+    eta_
+    (
+        k_/bound(epsilon_, epsilonMin_)
+       *sqrt(2.0*magSqr(0.5*(gradU_ + gradU_.T())))
+    ),
+    ksi_
+    (
+        k_/epsilon_
+       *sqrt(2.0*magSqr(0.5*(gradU_ - gradU_.T())))
+    ),
     Cmu_(2.0/(3.0*(A1_ + eta_ + alphaKsi_*ksi_))),
-    fEta_(A2_ + pow(eta_, 3.0)),
+    fEta_(A2_ + pow3(eta_)),
 
     C5viscosity_
     (
-        -2.0*pow(Cmu_, 3.0)*pow(k_, 4.0)/pow(epsilon_, 3.0)
+        -2.0*pow3(Cmu_)*pow4(k_)/pow3(epsilon_)
        *(magSqr(gradU_ + gradU_.T()) - magSqr(gradU_ - gradU_.T()))
     ),
 
@@ -252,7 +259,7 @@ LienCubicKELowRe::LienCubicKELowRe
         symm
         (
             // quadratic terms
-            pow(k_, 3.0)/sqr(epsilon_)
+            pow3(k_)/sqr(epsilon_)
            *(
                 Ctau1_/fEta_
                *(
@@ -263,8 +270,8 @@ LienCubicKELowRe::LienCubicKELowRe
               + Ctau3_/fEta_*(gradU_.T() & gradU_)
             )
             // cubic term C4
-          - 20.0*pow(k_, 4.0)/pow(epsilon_, 3.0)
-           *pow(Cmu_, 3.0)
+          - 20.0*pow4(k_)/pow3(epsilon_)
+           *pow3(Cmu_)
            *(
                 ((gradU_ & gradU_) & gradU_.T())
               + ((gradU_ & gradU_.T()) & gradU_.T())
@@ -280,12 +287,13 @@ LienCubicKELowRe::LienCubicKELowRe
         )
     )
 {
+    bound(k_, kMin_);
+    // already bounded: bound(epsilon_, epsilonMin_);
+
     nut_ = Cmu_
-       *(
-            scalar(1) - exp(-Am_*yStar_))
-           /(scalar(1) - exp(-Aepsilon_*yStar_) + SMALL
-        )
-       *sqr(k_)/(epsilon_ + epsilonSmall_)
+      * (scalar(1) - exp(-Am_*yStar_))
+      / (scalar(1) - exp(-Aepsilon_*yStar_) + SMALL)
+      * sqr(k_)/epsilon_
         // cubic term C5, implicit part
       + max
         (
@@ -430,11 +438,11 @@ void LienCubicKELowRe::correct()
 
     epsEqn().relax();
 
-#   include "LienCubicKELowReSetWallDissipation.H"
-#   include "wallDissipationI.H"
+    #include "LienCubicKELowReSetWallDissipation.H"
+    #include "wallDissipationI.H"
 
     solve(epsEqn);
-    bound(epsilon_, epsilon0_);
+    bound(epsilon_, epsilonMin_);
 
 
     // Turbulent kinetic energy equation
@@ -451,7 +459,7 @@ void LienCubicKELowRe::correct()
 
     kEqn().relax();
     solve(kEqn);
-    bound(k_, k0_);
+    bound(k_, kMin_);
 
 
     // Re-calculate viscosity

@@ -2,16 +2,16 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -59,10 +58,10 @@ RASModel::RASModel
     const word& type,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& lamTransportModel
+    transportModel& transport
 )
 :
-    turbulenceModel(U, phi, lamTransportModel),
+    turbulenceModel(U, phi, transport),
 
     IOdictionary
     (
@@ -80,14 +79,16 @@ RASModel::RASModel
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(subOrEmptyDict(type + "Coeffs")),
 
-    k0_("k0", dimVelocity*dimVelocity, SMALL),
-    epsilon0_("epsilon", k0_.dimensions()/dimTime, SMALL),
-    epsilonSmall_("epsilonSmall", epsilon0_.dimensions(), SMALL),
-    omega0_("omega0", dimless/dimTime, SMALL),
-    omegaSmall_("omegaSmall", omega0_.dimensions(), SMALL),
+    kMin_("kMin", sqr(dimVelocity), SMALL),
+    epsilonMin_("epsilonMin", kMin_.dimensions()/dimTime, SMALL),
+    omegaMin_("omegaMin", dimless/dimTime, SMALL),
 
     y_(mesh_)
 {
+    kMin_.readIfPresent(*this);
+    epsilonMin_.readIfPresent(*this);
+    omegaMin_.readIfPresent(*this);
+
     // Force the construction of the mesh deltaCoeffs which may be needed
     // for the construction of the derived models and BCs
     mesh_.deltaCoeffs();
@@ -133,8 +134,12 @@ autoPtr<RASModel> RASModel::New
     {
         FatalErrorIn
         (
-            "RASModel::New(const volVectorField&, "
-            "const surfaceScalarField&, transportModel&)"
+            "RASModel::New"
+            "("
+                "const volVectorField&, "
+                "const surfaceScalarField&, "
+                "transportModel&"
+            ")"
         )   << "Unknown RASModel type " << modelName
             << endl << endl
             << "Valid RASModel types are :" << endl
@@ -213,11 +218,9 @@ bool RASModel::read()
             coeffDict_ <<= *dictPtr;
         }
 
-        k0_.readIfPresent(*this);
-        epsilon0_.readIfPresent(*this);
-        epsilonSmall_.readIfPresent(*this);
-        omega0_.readIfPresent(*this);
-        omegaSmall_.readIfPresent(*this);
+        kMin_.readIfPresent(*this);
+        epsilonMin_.readIfPresent(*this);
+        omegaMin_.readIfPresent(*this);
 
         return true;
     }

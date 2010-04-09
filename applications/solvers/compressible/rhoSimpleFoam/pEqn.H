@@ -1,4 +1,7 @@
 rho = thermo.rho();
+rho = max(rho, rhoMin);
+rho = min(rho, rhoMax);
+rho.relax();
 
 volScalarField rUA = 1.0/UEqn().A();
 U = rUA*UEqn().H();
@@ -30,8 +33,7 @@ if (transonic)
         // Retain the residual from the first iteration
         if (nonOrth == 0)
         {
-            eqnResidual = pEqn.solve().initialResidual();
-            maxResidual = max(eqnResidual, maxResidual);
+            pEqn.solve();
         }
         else
         {
@@ -61,8 +63,7 @@ else
         // Retain the residual from the first iteration
         if (nonOrth == 0)
         {
-            eqnResidual = pEqn.solve().initialResidual();
-            maxResidual = max(eqnResidual, maxResidual);
+            pEqn.solve();
         }
         else
         {
@@ -82,14 +83,8 @@ else
 // Explicitly relax pressure for momentum corrector
 p.relax();
 
-rho = thermo.rho();
-rho.relax();
-Info<< "rho max/min : " << max(rho).value() << " " << min(rho).value() << endl;
-
 U -= rUA*fvc::grad(p);
 U.correctBoundaryConditions();
-
-bound(p, pMin);
 
 // For closed-volume cases adjust the pressure and density levels
 // to obey overall mass continuity
@@ -98,3 +93,9 @@ if (closedVolume)
     p += (initialMass - fvc::domainIntegrate(psi*p))
         /fvc::domainIntegrate(psi);
 }
+
+rho = thermo.rho();
+rho = max(rho, rhoMin);
+rho = min(rho, rhoMax);
+rho.relax();
+Info<< "rho max/min : " << max(rho).value() << " " << min(rho).value() << endl;

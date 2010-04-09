@@ -2,13 +2,12 @@
     tmp<fvVectorMatrix> UEqn
     (
         fvm::div(phi, U)
-      - fvm::Sp(fvc::div(phi), U)
       + turb.divDevRhoReff(U)
     );
 
     UEqn().relax();
 
-    eqnResidual = solve
+    solve
     (
         UEqn()
      ==
@@ -17,6 +16,4 @@
             fvc::interpolate(rho)*(g & mesh.Sf())
           - fvc::snGrad(p)*mesh.magSf()
         )
-    ).initialResidual();
-
-    maxResidual = max(eqnResidual, maxResidual);
+    );

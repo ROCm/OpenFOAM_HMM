@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -65,7 +64,7 @@ bool Foam::faceOnlySet::trackToBoundary
     // Alias
     const point& trackPt = singleParticle.position();
 
-    while (true)
+    while(true)
     {
         point oldPoint = trackPt;
 
@@ -199,7 +198,7 @@ void Foam::faceOnlySet::calcSamples
     // index in bHits; current boundary intersection
     label bHitI = 1;
 
-    while (true)
+    while(true)
     {
         if (trackFaceI != -1)
         {
@@ -230,7 +229,7 @@ void Foam::faceOnlySet::calcSamples
         );
 
         // fill sampleSegments
-        for (label i = samplingPts.size() - 1; i >= startSegmentI; --i)
+        for(label i = samplingPts.size() - 1; i >= startSegmentI; --i)
         {
             samplingSegments.append(segmentI);
         }
@@ -379,14 +378,6 @@ Foam::faceOnlySet::faceOnlySet
 
 Foam::faceOnlySet::~faceOnlySet()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::point Foam::faceOnlySet::getRefPoint(const List<point>& pts) const
-{
-    return start_;
-}
 
 
 // ************************************************************************* //
