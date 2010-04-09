@@ -107,8 +107,6 @@ void Foam::KinematicCloud<ParcelType>::evolveCloud()
 
         while(!(++moveCollideSubCycle).end())
         {
-            Info<< "subCycle time = " << this->db().time().timeName() << endl;
-
             moveCollide(td);
         }
 

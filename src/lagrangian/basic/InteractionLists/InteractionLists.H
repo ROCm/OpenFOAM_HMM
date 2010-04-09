@@ -86,6 +86,10 @@ class InteractionLists
         //- Dummy cloud to give to particles
         Cloud<ParticleType> cloud_;
 
+        //- Switch controlling whether or not the cloud gets populated
+        //  with the referred particles, hence gets written out
+        const Switch writeCloud_;
+
         //- mapDistribute to exchange particles
         autoPtr<mapDistribute> mapPtr_;
 
@@ -155,8 +159,8 @@ class InteractionLists
             labelPair giat
         );
 
-        //- Write the referredParticles out to visualise
-        void writeReferredParticleCloud();
+        //- Fill the referredParticles so that it will be written out
+        void fillReferredParticleCloud();
 
         //- Disallow default bitwise copy construct
         InteractionLists(const InteractionLists&);
@@ -173,7 +177,8 @@ public:
         InteractionLists
         (
             const polyMesh& mesh,
-            scalar maxDistance
+            scalar maxDistance,
+            Switch writeCloud = false
         );
 
     // Destructor

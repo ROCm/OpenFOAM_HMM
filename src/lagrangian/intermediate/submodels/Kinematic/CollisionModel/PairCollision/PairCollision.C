@@ -436,8 +436,6 @@ void Foam::PairCollision<CloudType>::postInteraction()
 {
     // Delete any collision records where no collision occurred this step
 
-    Info<< "    Update collision records" << endl;
-
     forAllIter(typename CloudType, this->owner(), iter)
     {
         typename CloudType::parcelType& p = iter();
@@ -450,8 +448,6 @@ void Foam::PairCollision<CloudType>::postInteraction()
 template<class CloudType>
 void Foam::PairCollision<CloudType>::buildCellOccupancy()
 {
-    Info<< "    Build cell occupancy" << endl;
-
     forAll(cellOccupancy_, cO)
     {
         cellOccupancy_[cO].clear();
@@ -517,7 +513,8 @@ Foam::PairCollision<CloudType>::PairCollision
     il_
     (
         owner.mesh(),
-        readScalar(this->coeffDict().lookup("maxInteractionDistance"))
+        readScalar(this->coeffDict().lookup("maxInteractionDistance")),
+        Switch(this->coeffDict().lookup("writeReferredParticleCloud"))
     )
 {}
 
@@ -543,7 +540,7 @@ Foam::label Foam::PairCollision<CloudType>::nSubCycles() const
 
         if(nSubCycles > 1)
         {
-            Info<< nSubCycles << " move-collide subCycles" << endl;
+            Info<< "    " << nSubCycles << " move-collide subCycles" << endl;
         }
 
         return nSubCycles;
@@ -565,8 +562,6 @@ bool Foam::PairCollision<CloudType>::active() const
 template<class CloudType>
 void Foam::PairCollision<CloudType>::collide()
 {
-    Info<< "Calculating collisions" << endl;
-
     preInteraction();
 
     parcelInteraction();

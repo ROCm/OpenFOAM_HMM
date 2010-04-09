@@ -323,6 +323,7 @@ void Foam::InteractionLists<ParticleType>::prepareParticlesToRefer
         referredParticles_[i].clear();
     }
 
+    // Clear all particles that may have been populated into the cloud
     cloud_.clear();
 
     forAll(cellIndexAndTransformToDistribute_, i)
@@ -364,11 +365,9 @@ void Foam::InteractionLists<ParticleType>::prepareParticleToBeReferred
 
 
 template<class ParticleType>
-void Foam::InteractionLists<ParticleType>::writeReferredParticleCloud()
+void Foam::InteractionLists<ParticleType>::fillReferredParticleCloud()
 {
-    bool writeCloud = true;
-
-    if (writeCloud)
+    if (writeCloud_)
     {
         forAll(referredParticles_, refCellI)
         {
@@ -389,11 +388,13 @@ template<class ParticleType>
 Foam::InteractionLists<ParticleType>::InteractionLists
 (
     const polyMesh& mesh,
-    scalar maxDistance
+    scalar maxDistance,
+    Switch writeCloud
 )
 :
     mesh_(mesh),
     cloud_(mesh_, "referredParticleCloud", IDLList<ParticleType>()),
+    writeCloud_(writeCloud),
     mapPtr_(),
     globalTransforms_(mesh_),
     maxDistance_(maxDistance),
@@ -882,7 +883,7 @@ void Foam::InteractionLists<ParticleType>::receiveReferredParticles
         }
     }
 
-    writeReferredParticleCloud();
+    fillReferredParticleCloud();
 }
 
 
