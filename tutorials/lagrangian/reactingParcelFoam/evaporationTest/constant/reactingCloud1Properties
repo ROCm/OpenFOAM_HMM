@@ -33,6 +33,8 @@ PhaseChangeModel LiquidEvaporation;
 
 PostProcessingModel none;
 
+SurfaceFilmModel none;
+
 radiation       off;
 
 coupled         true;
