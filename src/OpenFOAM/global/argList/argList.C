@@ -756,12 +756,7 @@ void Foam::argList::printNotes() const
     if (!notes.empty())
     {
         Info<< nl;
-        for
-        (
-            SLList<string>::const_iterator iter = notes.begin();
-            iter != notes.end();
-            ++iter
-        )
+        forAllConstIter(SLList<string>, notes, iter)
         {
             Info<< iter().c_str() << nl;
         }
