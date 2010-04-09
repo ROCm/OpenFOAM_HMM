@@ -20,32 +20,34 @@ USAGE
     exit 1
 }
 
+# -----------------------------------------------------------------------------
 
 unset timeOpt
 
-OPTS=`getopt hl $*`
-[ $? -eq 0 ] || usage "Aborting due to invalid option"
-
-eval set -- "$OPTS"
-while [ $1 != -- ]
+# parse options
+while [ "$#" -gt 0 ]
 do
-    case $1 in
-    -l)
-        timeOpt="-latestTime"
-        ;;
-    -h)
+    case "$1" in
+    -h | -help)
         usage
         ;;
+    -l | -latestTime)
+        timeOpt="-latestTime"
+        shift
+        ;;
+    *)
+        usage "unknown option/argument: '$*'"
+        ;;
     esac
-    shift
 done
-shift
+
 
 sample $timeOpt
-SDIR="sets"
+SDIR=sets
 LSDIR=`ls $SDIR | head -1`
 EXAMPLE_FILE=`ls -1 $SDIR/${LSDIR}/* | head -1`
 FS=`basename $EXAMPLE_FILE | cut -d_ -f2-`
+
 for d in $SDIR/*
 do
     cat ${d}/cone25_${FS} ${d}/cone55_${FS} ${d}/base_${FS} > ${d}/biconic_${FS}
