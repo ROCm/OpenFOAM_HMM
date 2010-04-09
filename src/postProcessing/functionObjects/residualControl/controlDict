@@ -45,23 +45,21 @@ timePrecision   6;
 
 runTimeModifiable yes;
 
-
 functions
-(
+{
     convergenceChecks
     {
-        type           residualControl;
+        type            residualControl;
         functionObjectLibs ( "libresidualControl.so" );
-        outputControl  timeStep;
-        outputInterval 1;
+        outputControl   timeStep;
+        outputInterval  1;
 
         maxResiduals
         (
-            (p          5e-4)
-            (U          1e-3)
+            ( p         5e-4 )
+            ( U         1e-3 )
         );
     }
-);
-
+}
 
 // ************************************************************************* //

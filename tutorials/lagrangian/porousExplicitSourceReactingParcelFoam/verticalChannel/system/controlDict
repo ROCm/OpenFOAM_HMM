@@ -63,6 +63,7 @@ functions
         sourceName      outlet;
         operation       weightedAverage;
         weightField     phi;
+
         fields
         (
             H2O
@@ -70,6 +71,5 @@ functions
         );
     }
 }
-
 
 // ************************************************************************* //

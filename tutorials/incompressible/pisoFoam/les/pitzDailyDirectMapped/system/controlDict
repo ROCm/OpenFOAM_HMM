@@ -54,6 +54,12 @@ functions
         enabled         true;
         outputControl   timeStep;
         outputInterval  1;
+
+        fields
+        (
+            p
+        );
+
         probeLocations
         (
             ( 0.0254 0.0253 0 )
@@ -64,10 +70,6 @@ functions
             ( 0.1524 0.0253 0 )
             ( 0.1778 0.0253 0 )
         );
-        fields
-        (
-            p
-        );
     }
 
     fieldAverage1
@@ -76,6 +78,7 @@ functions
         functionObjectLibs ( "libfieldFunctionObjects.so" );
         enabled         true;
         outputControl   outputTime;
+
         fields
         (
             U

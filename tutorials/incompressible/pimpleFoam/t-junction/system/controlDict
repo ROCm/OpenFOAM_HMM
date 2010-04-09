@@ -53,11 +53,22 @@ functions
 {
     probes
     {
-        type        probes;
+        type            probes;
         // Where to load it from
         functionObjectLibs ( "libsampling.so" );
         // Name of the directory for probe data
-        name        probes;
+        name            probes;
+
+        // Write at same frequency as fields
+        outputControl   outputTime;
+        outputInterval  1;
+
+        // Fields to be probed
+        fields
+        (
+            p U
+        );
+
         probeLocations
         (
             ( 1e-06 0 0.01 )        // at inlet
@@ -65,15 +76,7 @@ functions
             ( 0.21 0.20999 0.01 )   // at outlet2
             ( 0.21 0 0.01 )         // at central block
         );
-
-        // Fields to be probed
-        fields ( p U );
-
-        // Write at same frequency as fields
-        outputControl   outputTime;
-        outputInterval  1;
     }
 }
-
 
 // ************************************************************************* //

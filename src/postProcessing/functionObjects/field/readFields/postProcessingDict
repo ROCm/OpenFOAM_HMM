@@ -16,7 +16,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 functions
-(
+{
     readFields1
     {
         type            readFields;
@@ -24,11 +24,13 @@ functions
         enabled         true;
         outputControl   timeStep;
         outputInterval  1;
+
         fields
         (
             interpolateU
         );
     }
+
     faceObj2
     {
         type            faceSource;
@@ -41,12 +43,12 @@ functions
         source          faceZone;
         sourceName      f0;
         operation       areaAverage;
+
         fields
         (
             interpolateU
         );
     }
-);
-
+}
 
 // ************************************************************************* //

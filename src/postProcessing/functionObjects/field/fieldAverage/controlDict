@@ -49,16 +49,16 @@ functions
     fieldAverage1
     {
         // Type of functionObject
-        type fieldAverage;
+        type            fieldAverage;
 
         // Where to load it from (if not already in solver)
         functionObjectLibs ("libfieldAverage.so");
 
         // Function object enabled flag
-        enabled         true;                             
+        enabled         true;
 
         // When to output the average fields
-        outputControl   outputTime;                       
+        outputControl   outputTime;
 
         // Fields to be averaged - runTime modifiable
         fields

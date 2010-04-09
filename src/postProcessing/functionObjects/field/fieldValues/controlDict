@@ -46,7 +46,7 @@ timePrecision   6;
 runTimeModifiable yes;
 
 functions
-(
+{
     faceObj1
     {
         type            faceSource;
@@ -60,6 +60,7 @@ functions
 //        source          faceZone;
 //        sourceName      f0;
         operation       areaAverage;
+
         fields
         (
             p
@@ -79,6 +80,7 @@ functions
         source          faceZone;
         sourceName      f0;
         operation       sum;
+
         fields
         (
             phi
@@ -96,13 +98,13 @@ functions
         source          cellZone;
         sourceName      c0;
         operation       volAverage;
+
         fields
         (
             p
             U
         );
     }
-);
-
+}
 
 // ************************************************************************* //

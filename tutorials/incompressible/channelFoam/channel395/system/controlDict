@@ -53,6 +53,7 @@ functions
         functionObjectLibs ( "libfieldFunctionObjects.so" );
         enabled         true;
         outputControl   outputTime;
+
         fields
         (
             U
