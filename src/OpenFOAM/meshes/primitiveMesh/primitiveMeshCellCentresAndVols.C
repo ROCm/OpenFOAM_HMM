@@ -90,13 +90,13 @@ void Foam::primitiveMesh::makeCellCentresAndVols
     vectorField cEst(nCells(), vector::zero);
     labelField nCellFaces(nCells(), 0);
 
-    forAll (own, facei)
+    forAll(own, facei)
     {
         cEst[own[facei]] += fCtrs[facei];
         nCellFaces[own[facei]] += 1;
     }
 
-    forAll (nei, facei)
+    forAll(nei, facei)
     {
         cEst[nei[facei]] += fCtrs[facei];
         nCellFaces[nei[facei]] += 1;
@@ -107,7 +107,7 @@ void Foam::primitiveMesh::makeCellCentresAndVols
         cEst[celli] /= nCellFaces[celli];
     }
 
-    forAll (own, facei)
+    forAll(own, facei)
     {
         // Calculate 3*face-pyramid volume
         scalar pyr3Vol =
@@ -123,7 +123,7 @@ void Foam::primitiveMesh::makeCellCentresAndVols
         cellVols[own[facei]] += pyr3Vol;
     }
 
-    forAll (nei, facei)
+    forAll(nei, facei)
     {
         // Calculate 3*face-pyramid volume
         scalar pyr3Vol =

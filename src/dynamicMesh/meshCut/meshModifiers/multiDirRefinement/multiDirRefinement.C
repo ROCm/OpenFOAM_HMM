@@ -40,10 +40,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(multiDirRefinement, 0);
-}
+defineTypeNameAndDebug(Foam::multiDirRefinement, 0);
 
 
 // * * * * * * * * * * * * * Private Statc Functions * * * * * * * * * * * * //
@@ -93,12 +90,7 @@ void Foam::multiDirRefinement::update
 {
     field.setSize(field.size() + splitMap.size());
 
-    for
-    (
-        Map<label>::const_iterator iter = splitMap.begin();
-        iter != splitMap.end();
-        ++iter
-    )
+    forAllConstIter(Map<label>, splitMap, iter)
     {
         field[iter()] = field[iter.key()];
     }
@@ -116,12 +108,7 @@ void Foam::multiDirRefinement::addCells
 
     labels.setSize(labels.size() + splitMap.size());
 
-    for
-    (
-        Map<label>::const_iterator iter = splitMap.begin();
-        iter != splitMap.end();
-        ++iter
-    )
+    forAllConstIter(Map<label>, splitMap, iter)
     {
         labels[newCellI++] = iter();
     }
@@ -165,12 +152,7 @@ void Foam::multiDirRefinement::addCells
     }
 
 
-    for
-    (
-        Map<label>::const_iterator iter = splitMap.begin();
-        iter != splitMap.end();
-        ++iter
-    )
+    forAllConstIter(Map<label>, splitMap, iter)
     {
         label masterI = iter.key();
         label newCellI = iter();
@@ -307,7 +289,7 @@ void Foam::multiDirRefinement::refineHex8
         // Increment count
         forAll(consistentCells, i)
         {
-            label cellI = consistentCells[i];
+            const label cellI = consistentCells[i];
 
             Map<label>::iterator iter = hexCellSet.find(cellI);
 
@@ -380,7 +362,7 @@ void Foam::multiDirRefinement::refineHex8
 
     forAll(cellMap, cellI)
     {
-        label oldCellI = cellMap[cellI];
+        const label oldCellI = cellMap[cellI];
 
         if (addedCells_[oldCellI].size())
         {
@@ -439,7 +421,7 @@ void Foam::multiDirRefinement::refineAllDirs
             // Non uniform directions.
             forAll(refCells, refI)
             {
-                label cellI = cellLabels_[refI];
+                const label cellI = cellLabels_[refI];
 
                 refCells[refI] = refineCell(cellI, dirField[cellI]);
             }

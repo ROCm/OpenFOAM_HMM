@@ -1,42 +1,27 @@
 gmvFile << "tracers " << particles.size() << nl;
-for
-(
-    Cloud<passiveParticle>::iterator elmnt = particles.begin();
-    elmnt != particles.end();
-    ++elmnt
-)
+forAllConstIter(Cloud<passiveParticle>, particles, iter)
 {
-    gmvFile << elmnt().position().x() << " ";
+    gmvFile << iter().position().x() << ' ';
 }
 gmvFile << nl;
 
-for
-(
-    Cloud<passiveParticle>::iterator elmnt = particles.begin();
-    elmnt != particles.end();
-    ++elmnt
-)
+forAllConstIter(Cloud<passiveParticle>, particles, iter)
 {
-    gmvFile << elmnt().position().y() << " ";
+    gmvFile << iter().position().y() << ' ';
 }
 gmvFile << nl;
 
-for
-(
-    Cloud<passiveParticle>::iterator elmnt = particles.begin();
-    elmnt != particles.end();
-    ++elmnt
-)
+forAllConstIter(Cloud<passiveParticle>, particles, iter)
 {
-    gmvFile << elmnt().position().z() << " ";
+    gmvFile << iter().position().z() << ' ';
 }
 gmvFile << nl;
 
 forAll(lagrangianScalarNames, i)
 {
-    word name = lagrangianScalarNames[i];
+    const word name = lagrangianScalarNames[i];
 
-    IOField<scalar> s
+    IOField<scalar> fld
     (
         IOobject
         (
@@ -49,13 +34,13 @@ forAll(lagrangianScalarNames, i)
         )
     );
 
-    if (s.size())
+    if (fld.size())
     {
         gmvFile << name  << nl;
 
-        for (label n = 0; n < s.size(); n++)
+        forAll(fld, n)
         {
-            gmvFile << s[n] << token::SPACE;
+            gmvFile << fld[n] << token::SPACE;
         }
         gmvFile << nl;
     }
@@ -65,9 +50,9 @@ forAll(lagrangianScalarNames, i)
 
 forAll(lagrangianVectorNames, i)
 {
-    word name = lagrangianVectorNames[i];
+    const word name = lagrangianVectorNames[i];
 
-    IOField<vector> v
+    IOField<vector> fld
     (
         IOobject
         (
@@ -80,29 +65,29 @@ forAll(lagrangianVectorNames, i)
         )
     );
 
-    if (v.size())
+    if (fld.size())
     {
         gmvFile << name + "x" << nl;
 
-        for (label n = 0; n < v.size(); n++)
+        forAll(fld, n)
         {
-            gmvFile << v[n].x() << token::SPACE;
+            gmvFile << fld[n].x() << token::SPACE;
         }
         gmvFile << nl;
 
         gmvFile << name + "y" << nl;
 
-        for (label n = 0; n < v.size(); n++)
+        forAll(fld, n)
         {
-            gmvFile << v[n].y() << token::SPACE;
+            gmvFile << fld[n].y() << token::SPACE;
         }
         gmvFile << nl;
 
         gmvFile << name + "z" << nl;
 
-        for (label n = 0; n < v.size(); n++)
+        forAll(fld, n)
         {
-            gmvFile << v[n].z() << token::SPACE;
+            gmvFile << fld[n].z() << token::SPACE;
         }
         gmvFile << nl;
     }

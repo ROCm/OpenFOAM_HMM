@@ -56,11 +56,11 @@ void Foam::enrichedPatch::calcMasterPointFaces() const
     const faceList& ef = enrichedFaces();
 
     // Add the original face points
-    forAll (masterPatch_, faceI)
+    forAll(masterPatch_, faceI)
     {
         const face& curFace = ef[faceI + slavePatch_.size()];
 //         Pout << "Cur face in pfAddr: " << curFace << endl;
-        forAll (curFace, pointI)
+        forAll(curFace, pointI)
         {
             Map<DynamicList<label> >::iterator mpfIter =
                 mpf.find(curFace[pointI]);
@@ -87,7 +87,7 @@ void Foam::enrichedPatch::calcMasterPointFaces() const
     // Add the projected points which hit the face
     const labelList& slaveMeshPoints = slavePatch_.meshPoints();
 
-    forAll (slavePointFaceHits_, pointI)
+    forAll(slavePointFaceHits_, pointI)
     {
         if
         (
@@ -132,7 +132,7 @@ void Foam::enrichedPatch::calcMasterPointFaces() const
     masterPointFacesPtr_ = new Map<labelList>(2*mpfToc.size());
     Map<labelList>& masterPointFaceAddr = *masterPointFacesPtr_;
 
-    forAll (mpfToc, mpfTocI)
+    forAll(mpfToc, mpfTocI)
     {
         labelList l;
         l.transfer(mpf.find(mpfToc[mpfTocI])());

@@ -594,7 +594,7 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
 
     const fvPatchList& patches = boundary();
 
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         phi.boundaryField()[patchI] = patches[patchI].patchSlice(sweptVols);
         phi.boundaryField()[patchI] *= rDeltaT;

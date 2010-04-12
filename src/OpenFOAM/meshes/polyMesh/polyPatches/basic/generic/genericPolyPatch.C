@@ -123,12 +123,7 @@ void Foam::genericPolyPatch::write(Ostream& os) const
     os.writeKeyword("nFaces") << size() << token::END_STATEMENT << nl;
     os.writeKeyword("startFace") << start() << token::END_STATEMENT << nl;
 
-    for
-    (
-        dictionary::const_iterator iter = dict_.begin();
-        iter != dict_.end();
-        ++iter
-    )
+    forAllConstIter(dictionary, dict_, iter)
     {
         if
         (

@@ -140,7 +140,7 @@ laplacian
     > gradVf = fvc::grad(vf);
 
     // Internal faces
-    forAll (owner, faceI)
+    forAll(owner, faceI)
     {
         // Owner
 
@@ -160,7 +160,7 @@ laplacian
 
     }
 
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         const vectorField& patchSf = Sf.boundaryField()[patchI];
         const scalarField& patchMagSf = magSf.boundaryField()[patchI];
@@ -169,7 +169,7 @@ laplacian
 
         const labelList& fCells = patches[patchI].faceCells();
 
-        forAll (fCells, faceI)
+        forAll(fCells, faceI)
         {
             // Subtract diffusion
             res[fCells[faceI]] -=

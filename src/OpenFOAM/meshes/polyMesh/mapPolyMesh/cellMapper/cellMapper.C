@@ -63,7 +63,7 @@ void Foam::cellMapper::calcAddressing() const
 
         label nInsertedCells = 0;
 
-        forAll (directAddr, cellI)
+        forAll(directAddr, cellI)
         {
             if (directAddr[cellI] < 0)
             {
@@ -88,7 +88,7 @@ void Foam::cellMapper::calcAddressing() const
 
         const List<objectMap>& cfp = mpm_.cellsFromPointsMap();
 
-        forAll (cfp, cfpI)
+        forAll(cfp, cfpI)
         {
             // Get addressing
             const labelList& mo = cfp[cfpI].masterObjects();
@@ -110,7 +110,7 @@ void Foam::cellMapper::calcAddressing() const
 
         const List<objectMap>& cfe = mpm_.cellsFromEdgesMap();
 
-        forAll (cfe, cfeI)
+        forAll(cfe, cfeI)
         {
             // Get addressing
             const labelList& mo = cfe[cfeI].masterObjects();
@@ -132,7 +132,7 @@ void Foam::cellMapper::calcAddressing() const
 
         const List<objectMap>& cff = mpm_.cellsFromFacesMap();
 
-        forAll (cff, cffI)
+        forAll(cff, cffI)
         {
             // Get addressing
             const labelList& mo = cff[cffI].masterObjects();
@@ -154,7 +154,7 @@ void Foam::cellMapper::calcAddressing() const
 
         const List<objectMap>& cfc = mpm_.cellsFromCellsMap();
 
-        forAll (cfc, cfcI)
+        forAll(cfc, cfcI)
         {
             // Get addressing
             const labelList& mo = cfc[cfcI].masterObjects();
@@ -180,7 +180,7 @@ void Foam::cellMapper::calcAddressing() const
 
         const labelList& cm = mpm_.cellMap();
 
-        forAll (cm, cellI)
+        forAll(cm, cellI)
         {
             if (cm[cellI] > -1 && addr[cellI].empty())
             {
@@ -197,7 +197,7 @@ void Foam::cellMapper::calcAddressing() const
 
         label nInsertedCells = 0;
 
-        forAll (addr, cellI)
+        forAll(addr, cellI)
         {
             if (addr[cellI].empty())
             {
@@ -270,28 +270,28 @@ Foam::cellMapper::cellMapper(const mapPolyMesh& mpm)
 
         const List<objectMap>& cfp = mpm_.cellsFromPointsMap();
 
-        forAll (cfp, cfpI)
+        forAll(cfp, cfpI)
         {
             cm[cfp[cfpI].index()] = 0;
         }
 
         const List<objectMap>& cfe = mpm_.cellsFromEdgesMap();
 
-        forAll (cfe, cfeI)
+        forAll(cfe, cfeI)
         {
             cm[cfe[cfeI].index()] = 0;
         }
 
         const List<objectMap>& cff = mpm_.cellsFromFacesMap();
 
-        forAll (cff, cffI)
+        forAll(cff, cffI)
         {
             cm[cff[cffI].index()] = 0;
         }
 
         const List<objectMap>& cfc = mpm_.cellsFromCellsMap();
 
-        forAll (cfc, cfcI)
+        forAll(cfc, cfcI)
         {
             cm[cfc[cfcI].index()] = 0;
         }

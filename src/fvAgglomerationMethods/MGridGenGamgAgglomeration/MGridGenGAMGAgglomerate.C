@@ -56,12 +56,12 @@ makeCompactCellFaceAddressingAndFaceWeights
     // Number of neighbours for each cell
     labelList nNbrs(nFineCells, 0);
 
-    forAll (upperAddr, facei)
+    forAll(upperAddr, facei)
     {
         nNbrs[upperAddr[facei]]++;
     }
 
-    forAll (lowerAddr, facei)
+    forAll(lowerAddr, facei)
     {
         nNbrs[lowerAddr[facei]]++;
     }
@@ -73,7 +73,7 @@ makeCompactCellFaceAddressingAndFaceWeights
 
 
     cellCellOffsets[0] = 0;
-    forAll (nNbrs, celli)
+    forAll(nNbrs, celli)
     {
         cellCellOffsets[celli+1] = cellCellOffsets[celli] + nNbrs[celli];
     }
@@ -81,7 +81,7 @@ makeCompactCellFaceAddressingAndFaceWeights
     // reset the whole list to use as counter
     nNbrs = 0;
 
-    forAll (upperAddr, facei)
+    forAll(upperAddr, facei)
     {
         label own = upperAddr[facei];
         label nei = lowerAddr[facei];

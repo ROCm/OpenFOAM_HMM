@@ -182,7 +182,7 @@ void faceSet::sync(const polyMesh& mesh)
     }
 
     // Couple cyclic patches
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         const polyPatch& pp = patches[patchI];
 
@@ -191,7 +191,7 @@ void faceSet::sync(const polyMesh& mesh)
             const cyclicPolyPatch& cycPatch =
                 refCast<const cyclicPolyPatch>(pp);
 
-            forAll (cycPatch, i)
+            forAll(cycPatch, i)
             {
                 label thisFaceI = cycPatch.start() + i;
                 label otherFaceI = cycPatch.transformGlobalFace(thisFaceI);

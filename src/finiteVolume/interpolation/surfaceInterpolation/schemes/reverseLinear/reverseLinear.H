@@ -127,7 +127,7 @@ public:
             reverseLinearWeights.internalField() =
                 1.0 - cdWeights.internalField();
 
-            forAll (mesh.boundary(), patchI)
+            forAll(mesh.boundary(), patchI)
             {
                 if (mesh.boundary()[patchI].coupled())
                 {

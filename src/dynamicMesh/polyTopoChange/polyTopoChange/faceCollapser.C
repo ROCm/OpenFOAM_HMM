@@ -462,12 +462,7 @@ void Foam::faceCollapser::setRefinement
         }
     }
 
-    for
-    (
-        Map<labelList>::const_iterator iter = splitEdges.begin();
-        iter != splitEdges.end();
-        ++iter
-    )
+    forAllConstIter(Map<labelList>, splitEdges, iter)
     {
         Pout<< "Split edge:" << iter.key()
             << " verts:" << mesh_.edges()[iter.key()]
@@ -500,12 +495,7 @@ void Foam::faceCollapser::setRefinement
     // Modify faces affected (but not removed)
     //
 
-    for
-    (
-        labelHashSet::const_iterator iter = affectedFaces.begin();
-        iter != affectedFaces.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, affectedFaces, iter)
     {
         filterFace(splitEdges, iter.key(), meshMod);
     }

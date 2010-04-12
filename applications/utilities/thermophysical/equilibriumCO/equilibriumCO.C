@@ -51,7 +51,6 @@ int main(int argc, char *argv[])
 {
 
 #   include "setRootCase.H"
-
 #   include "createTime.H"
 
     Info<< nl << "Reading Burcat data IOdictionary" << endl;
@@ -119,16 +118,10 @@ int main(int argc, char *argv[])
     );
 
 
-    for
-    (
-        SLPtrList<thermo>::iterator EQreactionsIter = EQreactions.begin();
-        EQreactionsIter != EQreactions.end();
-        ++EQreactionsIter
-    )
+    forAllConstIter(SLPtrList<thermo>, EQreactions, iter)
     {
-        Info<< "Kc(EQreactions) = " << EQreactionsIter().Kc(T) << endl;
+        Info<< "Kc(EQreactions) = " << iter().Kc(T) << endl;
     }
-
 
     Info<< nl << "end" << endl;
 

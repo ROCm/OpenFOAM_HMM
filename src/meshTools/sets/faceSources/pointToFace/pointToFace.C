@@ -73,15 +73,9 @@ void Foam::pointToFace::combine(topoSet& set, const bool add) const
     if (option_ == ANY)
     {
         // Add faces with any point in loadedSet
-        for
-        (
-            pointSet::const_iterator iter = loadedSet.begin();
-            iter != loadedSet.end();
-            ++iter
-        )
+        forAllConstIter(pointSet, loadedSet, iter)
         {
-            label pointI = iter.key();
-
+            const label pointI = iter.key();
             const labelList& pFaces = mesh_.pointFaces()[pointI];
 
             forAll(pFaces, pFaceI)
@@ -99,13 +93,12 @@ void Foam::pointToFace::combine(topoSet& set, const bool add) const
 
         forAllConstIter(pointSet, loadedSet, iter)
         {
-            label pointI = iter.key();
-
+            const label pointI = iter.key();
             const labelList& pFaces = mesh_.pointFaces()[pointI];
 
             forAll(pFaces, pFaceI)
             {
-                label faceI = pFaces[pFaceI];
+                const label faceI = pFaces[pFaceI];
 
                 Map<label>::iterator fndFace = numPoints.find(faceI);
 
@@ -123,14 +116,9 @@ void Foam::pointToFace::combine(topoSet& set, const bool add) const
 
         // Include faces that are referenced as many times as there are points
         // in face -> all points of face
-        for
-        (
-            Map<label>::const_iterator iter = numPoints.begin();
-            iter != numPoints.end();
-            ++iter
-        )
+        forAllConstIter(Map<label>, numPoints, iter)
         {
-            label faceI = iter.key();
+            const label faceI = iter.key();
 
             if (iter() == mesh_.faces()[faceI].size())
             {

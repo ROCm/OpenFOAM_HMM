@@ -47,19 +47,13 @@ int USERD_get_part_coords
     }
     else if (part_number == nPatches+2)
     {
-
         label indx = 1;
 
-        for
-        (
-            Cloud<passiveParticle>::iterator elmnt = sprayPtr->begin();
-            elmnt != sprayPtr->end();
-            ++elmnt
-        )
+        forAllConstIter(Cloud<passiveParticle>, *sprayPtr, iter)
         {
-            coord_array[0][indx] = (float)elmnt().position().x();
-            coord_array[1][indx] = (float)elmnt().position().y();
-            coord_array[2][indx] = (float)elmnt().position().z();
+            coord_array[0][indx] = (float)iter().position().x();
+            coord_array[1][indx] = (float)iter().position().y();
+            coord_array[2][indx] = (float)iter().position().z();
             indx++;
         }
 

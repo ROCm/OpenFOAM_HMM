@@ -166,7 +166,7 @@ void Foam::referredCellList::buildReferredCellList
 
             procPatchSegMap.setSize(patch.size());
 
-            forAll (patch, pI)
+            forAll(patch, pI)
             {
                 label decomposedMeshFace = patch.start() + pI;
 
@@ -298,7 +298,7 @@ void Foam::referredCellList::buildReferredCellList
 
                 DynamicList<tensor> refTrans;
 
-                forAll (patch, faceI)
+                forAll(patch, faceI)
                 {
                     if (processorPatchSegmentMapping[pP][faceI] == nUP)
                     {
@@ -363,7 +363,7 @@ void Foam::referredCellList::buildReferredCellList
     {
         label refIntListStartSize = referredInteractionList.size();
 
-        forAll (mesh.boundaryMesh(), patchI)
+        forAll(mesh.boundaryMesh(), patchI)
         {
             // Treat local cyclics on each processor before processor
             // boundaries.  Separate treatment allows the serial version to run
@@ -473,7 +473,7 @@ void Foam::referredCellList::buildReferredCellList
 
                         const labelList& faceEdges = mesh.faceEdges()[segFace];
 
-                        forAll (faceEdges, fE)
+                        forAll(faceEdges, fE)
                         {
                             const label faceEdge(faceEdges[fE]);
 
@@ -492,7 +492,7 @@ void Foam::referredCellList::buildReferredCellList
 
                         const face& facePoints(mesh.faces()[segFace]);
 
-                        forAll (facePoints, fP)
+                        forAll(facePoints, fP)
                         {
                             const label facePoint(facePoints[fP]);
 
@@ -703,7 +703,7 @@ void Foam::referredCellList::buildReferredCellList
 
                         const labelList& faceEdges = mesh.faceEdges()[segFace];
 
-                        forAll (faceEdges, fE)
+                        forAll(faceEdges, fE)
                         {
                             const label faceEdge(faceEdges[fE]);
 
@@ -724,7 +724,7 @@ void Foam::referredCellList::buildReferredCellList
 
                         const face& facePoints(mesh.faces()[segFace]);
 
-                        forAll (facePoints, fP)
+                        forAll(facePoints, fP)
                         {
                             const label facePoint(facePoints[fP]);
 
@@ -948,7 +948,7 @@ void Foam::referredCellList::buildReferredCellList
 
                     DynamicList<label> meshFacesOnThisSegment;
 
-                    forAll (patch, faceI)
+                    forAll(patch, faceI)
                     {
                         if (processorPatchSegmentMapping[pP][faceI] == nUP)
                         {
@@ -976,7 +976,7 @@ void Foam::referredCellList::buildReferredCellList
 
                         const labelList& faceEdges = mesh.faceEdges()[segFace];
 
-                        forAll (faceEdges, fE)
+                        forAll(faceEdges, fE)
                         {
                             const label faceEdge(faceEdges[fE]);
 
@@ -997,7 +997,7 @@ void Foam::referredCellList::buildReferredCellList
 
                         const face& facePoints(mesh.faces()[segFace]);
 
-                        forAll (facePoints, fP)
+                        forAll(facePoints, fP)
                         {
                             const label facePoint(facePoints[fP]);
 
@@ -1398,7 +1398,7 @@ void Foam::referredCellList::buildReferredCellList
 
 //         scalar rCutMaxSqr = molCloud_.rCutMax()*molCloud_.rCutMax();
 //
-//         forAll (molCloud_.mesh().points(), pointIIndex)
+//         forAll(molCloud_.mesh().points(), pointIIndex)
 //         {
 //             const point& ptI
 //             (
@@ -1485,7 +1485,7 @@ void Foam::referredCellList::referMolecules
         {
             List<molecule*> realMols = cellOccupancy[sRL[sRLI]];
 
-            forAll (realMols, rM)
+            forAll(realMols, rM)
             {
                 molecule* mol = realMols[rM];
 

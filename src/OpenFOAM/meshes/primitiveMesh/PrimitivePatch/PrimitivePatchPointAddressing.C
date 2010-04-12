@@ -67,7 +67,7 @@ calcPointEdges() const
     // set up storage for pointEdges
     List<SLList<label> > pointEdges(meshPoints().size());
 
-    forAll (e, edgeI)
+    forAll(e, edgeI)
     {
         pointEdges[e[edgeI].start()].append(edgeI);
         pointEdges[e[edgeI].end()].append(edgeI);
@@ -78,19 +78,14 @@ calcPointEdges() const
 
     labelListList& pe = *pointEdgesPtr_;
 
-    forAll (pointEdges, pointI)
+    forAll(pointEdges, pointI)
     {
         pe[pointI].setSize(pointEdges[pointI].size());
 
         label i = 0;
-        for
-        (
-            SLList<label>::iterator curEdgesIter = pointEdges[pointI].begin();
-            curEdgesIter != pointEdges[pointI].end();
-            ++curEdgesIter, ++i
-        )
+        forAllIter(SLList<label>, pointEdges[pointI], curEdgesIter)
         {
-            pe[pointI][i] = curEdgesIter();
+            pe[pointI][i++] = curEdgesIter();
         }
     }
 
@@ -138,11 +133,11 @@ calcPointFaces() const
     // set up storage for pointFaces
     List<SLList<label> > pointFcs(meshPoints().size());
 
-    forAll (f, faceI)
+    forAll(f, faceI)
     {
         const Face& curPoints = f[faceI];
 
-        forAll (curPoints, pointI)
+        forAll(curPoints, pointI)
         {
             pointFcs[curPoints[pointI]].append(faceI);
         }
@@ -153,19 +148,14 @@ calcPointFaces() const
 
     labelListList& pf = *pointFacesPtr_;
 
-    forAll (pointFcs, pointI)
+    forAll(pointFcs, pointI)
     {
         pf[pointI].setSize(pointFcs[pointI].size());
 
         label i = 0;
-        for
-        (
-            SLList<label>::iterator curFacesIter = pointFcs[pointI].begin();
-            curFacesIter != pointFcs[pointI].end();
-            ++curFacesIter, ++i
-        )
+        forAllIter(SLList<label>, pointFcs[pointI], curFacesIter)
         {
-            pf[pointI][i] = curFacesIter();
+            pf[pointI][i++] = curFacesIter();
         }
     }
 

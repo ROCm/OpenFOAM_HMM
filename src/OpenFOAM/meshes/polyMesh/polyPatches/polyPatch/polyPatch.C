@@ -275,7 +275,7 @@ Foam::tmp<Foam::vectorField> Foam::polyPatch::faceCellCentres() const
 
     const unallocLabelList& faceCells = this->faceCells();
 
-    forAll (faceCells, facei)
+    forAll(faceCells, facei)
     {
         cc[facei] = gcc[faceCells[facei]];
     }

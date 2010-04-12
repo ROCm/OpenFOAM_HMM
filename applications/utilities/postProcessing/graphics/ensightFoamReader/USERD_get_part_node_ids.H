@@ -17,7 +17,7 @@ int USERD_get_part_node_ids
             nodeid_array[indx] = indx + 1;
         }
     }
-    else if  (part_number < nPatches+2)
+    else if (part_number < nPatches+2)
     {
 
         label patchi = part_number-2;
@@ -32,18 +32,14 @@ int USERD_get_part_node_ids
         }
 
     }
-    else if  (part_number == nPatches+2)
+    else if (part_number == nPatches+2)
     {
         label indx = 0;
-        for
-        (
-            Cloud<passiveParticle>::iterator elmnt = sprayPtr->begin();
-            elmnt != sprayPtr->end();
-            ++elmnt
-        )
+
+        forAllConstIter(Cloud<passiveParticle>, *sprayPtr, iter)
         {
-             nodeid_array[indx] = indx + 1;
-             indx++;
+            nodeid_array[indx] = indx + 1;
+            indx++;
         }
     }
     else

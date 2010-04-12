@@ -527,7 +527,7 @@ void Foam::MULES::limiter
             }
         }
 
-        forAll (sumlPhip, celli)
+        forAll(sumlPhip, celli)
         {
             sumlPhip[celli] =
                 max(min

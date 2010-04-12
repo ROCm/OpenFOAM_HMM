@@ -91,7 +91,7 @@ void Foam::GAMGSolver::agglomerateMatrix(const label fineLevelIndex)
         interfaceLevelsIntCoeffs_[fineLevelIndex];
 
     // Add the coarse level
-    forAll (fineInterfaces, inti)
+    forAll(fineInterfaces, inti)
     {
         if (fineInterfaces.set(inti))
         {

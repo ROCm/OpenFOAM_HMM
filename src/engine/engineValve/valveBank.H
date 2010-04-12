@@ -74,7 +74,7 @@ public:
 
             setSize(valveEntries.size());
 
-            forAll (valveEntries, valveI)
+            forAll(valveEntries, valveI)
             {
                 valveI,
                 set

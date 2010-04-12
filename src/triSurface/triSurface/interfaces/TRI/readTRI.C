@@ -136,12 +136,7 @@ bool triSurface::readTRI(const fileName& TRIfileName)
     pointField rawPoints(STLpoints.size());
 
     label i = 0;
-    for
-    (
-        SLList<STLpoint>::iterator iter = STLpoints.begin();
-        iter != STLpoints.end();
-        ++iter
-    )
+    forAllIter(SLList<STLpoint>, STLpoints, iter)
     {
         rawPoints[i++] = *iter;
     }
@@ -150,7 +145,7 @@ bool triSurface::readTRI(const fileName& TRIfileName)
 
     label pointI = 0;
     SLList<label>::iterator iter = STLlabels.begin();
-    forAll (*this, i)
+    forAll(*this, i)
     {
         operator[](i)[0] = pointI++;
         operator[](i)[1] = pointI++;

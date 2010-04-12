@@ -95,7 +95,7 @@ public:
             patchAddr_(mesh.boundary().size()),
             patchSchedule_(mesh.globalData().patchSchedule())
         {
-            forAll (mesh.boundary(), patchI)
+            forAll(mesh.boundary(), patchI)
             {
                 patchAddr_[patchI] = &mesh.boundary()[patchI].faceCells();
             }

@@ -82,12 +82,7 @@ void setUpdater::updateSets(const mapPolyMesh& morphMap) const
 
     IOobjectList fileSets(Objects.lookupClass(Type::typeName));
 
-    for
-    (
-        IOobjectList::const_iterator iter = fileSets.begin();
-        iter != fileSets.end();
-        ++iter
-    )
+    forAllConstIter(IOobjectList, fileSets, iter)
     {
         if (!memSets.found(iter.key()))
         {

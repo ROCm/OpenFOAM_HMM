@@ -54,11 +54,9 @@ label singleStepNMols = molecules.size();
 label singleStepDOFs = 0;
 
 {
-    IDLList<molecule>::iterator mol(molecules.begin());
-
     for
     (
-        mol = molecules.begin();
+        IDLList<molecule>::iterator mol = molecules.begin();
         mol != molecules.end();
         ++mol
     )
@@ -79,7 +77,7 @@ label singleStepDOFs = 0;
 
     for
     (
-        mol = molecules.begin();
+        IDLList<molecule>::iterator mol = molecules.begin();
         mol != molecules.end();
         ++mol
     )

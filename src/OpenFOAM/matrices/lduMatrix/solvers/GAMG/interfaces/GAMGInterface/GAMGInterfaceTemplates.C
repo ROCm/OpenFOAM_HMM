@@ -36,7 +36,7 @@ Foam::tmp<Foam::Field<Type> > Foam::GAMGInterface::interfaceInternalField
     tmp<Field<Type> > tresult(new Field<Type>(size()));
     Field<Type>& result = tresult();
 
-    forAll (result, elemI)
+    forAll(result, elemI)
     {
         result[elemI] = iF[faceCells_[elemI]];
     }

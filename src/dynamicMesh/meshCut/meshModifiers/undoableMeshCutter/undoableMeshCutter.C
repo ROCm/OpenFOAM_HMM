@@ -36,10 +36,8 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-defineTypeNameAndDebug(undoableMeshCutter, 0);
-}
+defineTypeNameAndDebug(Foam::undoableMeshCutter, 0);
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -67,12 +65,7 @@ void Foam::undoableMeshCutter::printCellRefTree
 // For debugging
 void Foam::undoableMeshCutter::printRefTree(Ostream& os) const
 {
-    for
-    (
-        Map<splitCell*>::const_iterator iter = liveSplitCells_.begin();
-        iter != liveSplitCells_.end();
-        ++iter
-    )
+    forAllConstIter(Map<splitCell*>, liveSplitCells_, iter)
     {
         const splitCell* splitPtr = iter();
 
@@ -113,7 +106,7 @@ void Foam::undoableMeshCutter::updateLabels
 
     bool changed = false;
 
-    forAllConstIter(Map<splitCell*>,liveSplitCells, iter)
+    forAllConstIter(Map<splitCell*>, liveSplitCells, iter)
     {
         const splitCell* splitPtr = iter();
 

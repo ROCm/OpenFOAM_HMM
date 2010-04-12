@@ -60,11 +60,11 @@ void Foam::primitiveMesh::calcPointPoints() const
         ppPtr_ = new labelListList(pe.size());
         labelListList& pp = *ppPtr_;
 
-        forAll (pe, pointI)
+        forAll(pe, pointI)
         {
             pp[pointI].setSize(pe[pointI].size());
 
-            forAll (pe[pointI], ppi)
+            forAll(pe[pointI], ppi)
             {
                 if (e[pe[pointI][ppi]].start() == pointI)
                 {

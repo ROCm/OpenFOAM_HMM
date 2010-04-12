@@ -25,20 +25,14 @@ License
 
 if (mesh.time().timeIndex() % vacf.sampleSteps() == 0)
 {
-    IDLList<molecule>::iterator mol(molecules.begin());
-
     Field<vector> uVals(molecules.size());
 
     label uV = 0;
 
-    for
-    (
-        mol = molecules.begin();
-        mol != molecules.end();
-        ++mol, uV++
-    )
+    // or forAllConstIter
+    forAllIter(IDLList<molecule>, molecules, mol)
     {
-        uVals[uV] = mol().U();
+        uVals[uV++] = mol().U();
     }
 
     vacf.calculateCorrelationFunction(uVals);
@@ -46,16 +40,10 @@ if (mesh.time().timeIndex() % vacf.sampleSteps() == 0)
 
 if (mesh.time().timeIndex() % pacf.sampleSteps() == 0)
 {
-    IDLList<molecule>::iterator mol(molecules.begin());
-
     vector p = vector::zero;
 
-    for
-    (
-        mol = molecules.begin();
-        mol != molecules.end();
-        ++mol
-    )
+    // or forAllConstIter
+    forAllIter(IDLList<molecule>, molecules, mol)
     {
         p.x() +=
             mol().mass() * mol().U().y() * mol().U().z()
@@ -75,17 +63,10 @@ if (mesh.time().timeIndex() % pacf.sampleSteps() == 0)
 
 if (mesh.time().timeIndex() % hfacf.sampleSteps() == 0)
 {
-
-    IDLList<molecule>::iterator mol(molecules.begin());
-
     vector s = vector::zero;
 
-    for
-    (
-        mol = molecules.begin();
-        mol != molecules.end();
-        ++mol
-    )
+    // or forAllConstIter
+    forAllIter(IDLList<molecule>, molecules, mol)
     {
         s +=
         (

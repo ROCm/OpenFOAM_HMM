@@ -185,7 +185,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             wordList oldTypes = boundary_.types();
             wordList oldNames = boundary_.names();
 
-            forAll (oldTypes, patchI)
+            forAll(oldTypes, patchI)
             {
                 if
                 (
@@ -208,14 +208,14 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             boundary_.clear();
             boundary_.setSize(newBoundary.size());
 
-            forAll (newBoundary, patchI)
+            forAll(newBoundary, patchI)
             {
                 boundary_.set(patchI, newBoundary[patchI].clone(boundary_));
             }
         }
         else
         {
-            forAll (boundary_, patchI)
+            forAll(boundary_, patchI)
             {
                 boundary_[patchI] = polyPatch
                 (
@@ -296,7 +296,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
         }
 
         // Reset existing ones
-        forAll (pointZones_, czI)
+        forAll(pointZones_, czI)
         {
             pointZones_[czI] = newPointZones[czI];
         }
@@ -333,7 +333,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
         }
 
         // Reset existing ones
-        forAll (faceZones_, fzI)
+        forAll(faceZones_, fzI)
         {
             faceZones_[fzI].resetAddressing
             (
@@ -374,7 +374,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
         }
 
         // Reset existing ones
-        forAll (cellZones_, czI)
+        forAll(cellZones_, czI)
         {
             cellZones_[czI] = newCellZones[czI];
         }

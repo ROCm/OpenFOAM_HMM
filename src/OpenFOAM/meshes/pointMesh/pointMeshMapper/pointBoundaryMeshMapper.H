@@ -73,7 +73,7 @@ public:
         {
             const pointBoundaryMesh& patches = mesh.boundary();
 
-            forAll (patches, patchI)
+            forAll(patches, patchI)
             {
                 set
                 (

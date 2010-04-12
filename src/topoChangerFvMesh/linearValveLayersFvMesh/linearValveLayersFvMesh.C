@@ -92,7 +92,7 @@ void Foam::linearValveLayersFvMesh::addZonesAndModifiers()
 
     labelList isf(innerSlider.size());
 
-    forAll (isf, i)
+    forAll(isf, i)
     {
         isf[i] = innerSlider.start() + i;
     }
@@ -113,7 +113,7 @@ void Foam::linearValveLayersFvMesh::addZonesAndModifiers()
 
     labelList osf(outerSlider.size());
 
-    forAll (osf, i)
+    forAll(osf, i)
     {
         osf[i] = outerSlider.start() + i;
     }
@@ -148,7 +148,7 @@ void Foam::linearValveLayersFvMesh::addZonesAndModifiers()
 
     labelList lpf(layerPatch.size());
 
-    forAll (lpf, i)
+    forAll(lpf, i)
     {
         lpf[i] = layerPatch.start() + i;
     }
@@ -216,7 +216,7 @@ void Foam::linearValveLayersFvMesh::makeLayersLive()
     const polyTopoChanger& topoChanges = topoChanger_;
 
     // Enable layering
-    forAll (topoChanges, modI)
+    forAll(topoChanges, modI)
     {
         if (isA<layerAdditionRemoval>(topoChanges[modI]))
         {
@@ -242,7 +242,7 @@ void Foam::linearValveLayersFvMesh::makeSlidersLive()
     const polyTopoChanger& topoChanges = topoChanger_;
 
     // Enable sliding interface
-    forAll (topoChanges, modI)
+    forAll(topoChanges, modI)
     {
         if (isA<layerAdditionRemoval>(topoChanges[modI]))
         {
@@ -269,7 +269,7 @@ bool Foam::linearValveLayersFvMesh::attached() const
 
     bool result = false;
 
-    forAll (topoChanges, modI)
+    forAll(topoChanges, modI)
     {
         if (isA<slidingInterface>(topoChanges[modI]))
         {
@@ -280,7 +280,7 @@ bool Foam::linearValveLayersFvMesh::attached() const
     }
 
     // Check thal all sliders are in sync (debug only)
-    forAll (topoChanges, modI)
+    forAll(topoChanges, modI)
     {
         if (isA<slidingInterface>(topoChanges[modI]))
         {
@@ -327,7 +327,7 @@ Foam::tmp<Foam::pointField> Foam::linearValveLayersFvMesh::newPoints() const
         motionDict_.lookup("pistonVelocity")
     );
 
-    forAll (patchPoints, ppI)
+    forAll(patchPoints, ppI)
     {
         np[patchPoints[ppI]] += vel*time().deltaTValue();
     }

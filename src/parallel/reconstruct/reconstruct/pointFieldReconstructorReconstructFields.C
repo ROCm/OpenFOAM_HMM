@@ -37,7 +37,7 @@ Foam::pointFieldReconstructor::reconstructField(const IOobject& fieldIoObject)
         procMeshes_.size()
     );
 
-    forAll (procMeshes_, proci)
+    forAll(procMeshes_, proci)
     {
         procFields.set
         (
@@ -65,7 +65,7 @@ Foam::pointFieldReconstructor::reconstructField(const IOobject& fieldIoObject)
     PtrList<pointPatchField<Type> > patchFields(mesh_.boundary().size());
 
 
-    forAll (procMeshes_, proci)
+    forAll(procMeshes_, proci)
     {
         const GeometricField<Type, pointPatchField, pointMesh>&
             procField = procFields[proci];

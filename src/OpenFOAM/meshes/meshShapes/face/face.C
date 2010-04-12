@@ -322,7 +322,7 @@ int Foam::face::compare(const face& a, const face& b)
     const label firstA = a[0];
     label Bptr = -1;
 
-    forAll (b, i)
+    forAll(b, i)
     {
         if (b[i] == firstA)
         {
@@ -621,7 +621,7 @@ Foam::label Foam::face::which(const label globalIndex) const
     label pointInFace = -1;
     const labelList& f = *this;
 
-    forAll (f, i)
+    forAll(f, i)
     {
         if (f[i] == globalIndex)
         {
@@ -750,7 +750,7 @@ Foam::edgeList Foam::face::edges() const
 
 int Foam::face::edgeDirection(const edge& e) const
 {
-    forAll (*this, i)
+    forAll(*this, i)
     {
         if (operator[](i) == e.start())
         {

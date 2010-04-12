@@ -308,7 +308,7 @@ void Foam::coupledPolyPatch::calcTransformTensors
             collocated_.setSize(Cf.size());
             collocated_ = false;
 
-            forAll (forwardT_, facei)
+            forAll(forwardT_, facei)
             {
                 forwardT_[facei] = rotationTensor(-nr[facei], nf[facei]);
                 reverseT_[facei] = rotationTensor(nf[facei], -nr[facei]);

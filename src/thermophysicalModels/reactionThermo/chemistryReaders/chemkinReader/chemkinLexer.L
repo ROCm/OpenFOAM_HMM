@@ -1428,7 +1428,7 @@ bool finishReaction = false;
 
         bool found = false;
 
-        forAll (lrhs, i)
+        forAll(lrhs, i)
         {
             if (lrhs[i].index == currentSpecieIndex)
             {

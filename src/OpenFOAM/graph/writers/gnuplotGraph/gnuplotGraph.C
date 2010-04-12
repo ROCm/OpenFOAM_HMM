@@ -51,7 +51,7 @@ void Foam::gnuplotGraph::write(const graph& g, Ostream& os) const
 
     bool firstField = true;
 
-    for (graph::const_iterator iter = g.begin(); iter != g.end(); ++iter)
+    forAllConstIter(graph, g, iter)
     {
         if (!firstField)
         {
@@ -64,9 +64,9 @@ void Foam::gnuplotGraph::write(const graph& g, Ostream& os) const
     os << "; pause -1" << endl;
 
 
-    for (graph::const_iterator iter = g.begin(); iter != g.end(); ++iter)
+    forAllConstIter(graph, g, iter)
     {
-        os << endl;
+        os  << endl;
         writeXY(g.x(), *iter(), os);
     }
 }

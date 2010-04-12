@@ -62,12 +62,7 @@ genericPointPatchField<Type>::genericPointPatchField
     actualTypeName_(dict.lookup("type")),
     dict_(dict)
 {
-    for
-    (
-        dictionary::const_iterator iter = dict_.begin();
-        iter != dict_.end();
-        ++iter
-    )
+    forAllConstIter(dictionary, dict_, iter)
     {
         if (iter().keyword() != "type")
         {
@@ -357,34 +352,21 @@ genericPointPatchField<Type>::genericPointPatchField
     actualTypeName_(ptf.actualTypeName_),
     dict_(ptf.dict_)
 {
-    for
-    (
-        HashPtrTable<scalarField>::const_iterator iter =
-            ptf.scalarFields_.begin();
-        iter != ptf.scalarFields_.end();
-        ++iter
-    )
+    forAllConstIter(HashPtrTable<scalarField>, ptf.scalarFields_, iter)
     {
         scalarFields_.insert(iter.key(), new scalarField(*iter(), mapper));
     }
 
-    for
-    (
-        HashPtrTable<vectorField>::const_iterator iter =
-            ptf.vectorFields_.begin();
-        iter != ptf.vectorFields_.end();
-        ++iter
-    )
+    forAllConstIter(HashPtrTable<vectorField>, ptf.vectorFields_, iter)
     {
         vectorFields_.insert(iter.key(), new vectorField(*iter(), mapper));
     }
 
-    for
+    forAllConstIter
     (
-        HashPtrTable<sphericalTensorField>::const_iterator iter =
-            ptf.sphericalTensorFields_.begin();
-        iter != ptf.sphericalTensorFields_.end();
-        ++iter
+        HashPtrTable<sphericalTensorField>,
+        ptf.sphericalTensorFields_,
+        iter
     )
     {
         sphericalTensorFields_.insert
@@ -394,12 +376,11 @@ genericPointPatchField<Type>::genericPointPatchField
         );
     }
 
-    for
+    forAllConstIter
     (
-        HashPtrTable<symmTensorField>::const_iterator iter =
-            ptf.symmTensorFields_.begin();
-        iter != ptf.symmTensorFields_.end();
-        ++iter
+        HashPtrTable<symmTensorField>,
+        ptf.symmTensorFields_,
+        iter
     )
     {
         symmTensorFields_.insert
@@ -409,12 +390,11 @@ genericPointPatchField<Type>::genericPointPatchField
         );
     }
 
-    for
+    forAllConstIter
     (
-        HashPtrTable<tensorField>::const_iterator iter =
-            ptf.tensorFields_.begin();
-        iter != ptf.tensorFields_.end();
-        ++iter
+        HashPtrTable<tensorField>,
+        ptf.tensorFields_,
+        iter
     )
     {
         tensorFields_.insert(iter.key(), new tensorField(*iter(), mapper));
@@ -448,53 +428,51 @@ void genericPointPatchField<Type>::autoMap
     const pointPatchFieldMapper& m
 )
 {
-    for
+    forAllIter
     (
-        HashPtrTable<scalarField>::iterator iter = scalarFields_.begin();
-        iter != scalarFields_.end();
-        ++iter
+        HashPtrTable<scalarField>,
+        scalarFields_,
+        iter
     )
     {
         iter()->autoMap(m);
     }
 
-    for
+    forAllIter
     (
-        HashPtrTable<vectorField>::iterator iter = vectorFields_.begin();
-        iter != vectorFields_.end();
-        ++iter
+        HashPtrTable<vectorField>,
+        vectorFields_,
+        iter
     )
     {
         iter()->autoMap(m);
     }
 
-    for
+    forAllIter
     (
-        HashPtrTable<sphericalTensorField>::iterator iter =
-            sphericalTensorFields_.begin();
-        iter != sphericalTensorFields_.end();
-        ++iter
+        HashPtrTable<sphericalTensorField>,
+        sphericalTensorFields_,
+        iter
     )
     {
         iter()->autoMap(m);
     }
 
-    for
+    forAllIter
     (
-        HashPtrTable<symmTensorField>::iterator iter =
-            symmTensorFields_.begin();
-        iter != symmTensorFields_.end();
-        ++iter
+        HashPtrTable<symmTensorField>,
+        symmTensorFields_,
+        iter
     )
     {
         iter()->autoMap(m);
     }
 
-    for
+    forAllIter
     (
-        HashPtrTable<tensorField>::iterator iter = tensorFields_.begin();
-        iter != tensorFields_.end();
-        ++iter
+        HashPtrTable<tensorField>,
+        tensorFields_,
+        iter
     )
     {
         iter()->autoMap(m);
@@ -512,11 +490,11 @@ void genericPointPatchField<Type>::rmap
     const genericPointPatchField<Type>& dptf =
         refCast<const genericPointPatchField<Type> >(ptf);
 
-    for
+    forAllIter
     (
-        HashPtrTable<scalarField>::iterator iter = scalarFields_.begin();
-        iter != scalarFields_.end();
-        ++iter
+        HashPtrTable<scalarField>,
+        scalarFields_,
+        iter
     )
     {
         HashPtrTable<scalarField>::const_iterator dptfIter =
@@ -528,11 +506,11 @@ void genericPointPatchField<Type>::rmap
         }
     }
 
-    for
+    forAllIter
     (
-        HashPtrTable<vectorField>::iterator iter = vectorFields_.begin();
-        iter != vectorFields_.end();
-        ++iter
+        HashPtrTable<vectorField>,
+        vectorFields_,
+        iter
     )
     {
         HashPtrTable<vectorField>::const_iterator dptfIter =
@@ -544,12 +522,11 @@ void genericPointPatchField<Type>::rmap
         }
     }
 
-    for
+    forAllIter
     (
-        HashPtrTable<sphericalTensorField>::iterator iter =
-            sphericalTensorFields_.begin();
-        iter != sphericalTensorFields_.end();
-        ++iter
+        HashPtrTable<sphericalTensorField>,
+        sphericalTensorFields_,
+        iter
     )
     {
         HashPtrTable<sphericalTensorField>::const_iterator dptfIter =
@@ -561,12 +538,11 @@ void genericPointPatchField<Type>::rmap
         }
     }
 
-    for
+    forAllIter
     (
-        HashPtrTable<symmTensorField>::iterator iter =
-            symmTensorFields_.begin();
-        iter != symmTensorFields_.end();
-        ++iter
+        HashPtrTable<symmTensorField>,
+        symmTensorFields_,
+        iter
     )
     {
         HashPtrTable<symmTensorField>::const_iterator dptfIter =
@@ -578,11 +554,11 @@ void genericPointPatchField<Type>::rmap
         }
     }
 
-    for
+    forAllIter
     (
-        HashPtrTable<tensorField>::iterator iter = tensorFields_.begin();
-        iter != tensorFields_.end();
-        ++iter
+        HashPtrTable<tensorField>,
+        tensorFields_,
+        iter
     )
     {
         HashPtrTable<tensorField>::const_iterator dptfIter =
@@ -601,12 +577,7 @@ void genericPointPatchField<Type>::write(Ostream& os) const
 {
     os.writeKeyword("type") << actualTypeName_ << token::END_STATEMENT << nl;
 
-    for
-    (
-        dictionary::const_iterator iter = dict_.begin();
-        iter != dict_.end();
-        ++iter
-    )
+    forAllConstIter(dictionary, dict_, iter)
     {
         if (iter().keyword() != "type")
         {

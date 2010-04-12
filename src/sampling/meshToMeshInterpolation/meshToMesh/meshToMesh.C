@@ -50,7 +50,7 @@ Foam::meshToMesh::meshToMesh
     boundaryAddressing_(toMesh_.boundaryMesh().size()),
     inverseDistanceWeightsPtr_(NULL)
 {
-    forAll (fromMesh_.boundaryMesh(), patchi)
+    forAll(fromMesh_.boundaryMesh(), patchi)
     {
         fromMeshPatches_.insert
         (
@@ -59,7 +59,7 @@ Foam::meshToMesh::meshToMesh
         );
     }
 
-    forAll (toMesh_.boundaryMesh(), patchi)
+    forAll(toMesh_.boundaryMesh(), patchi)
     {
         toMeshPatches_.insert
         (
@@ -68,7 +68,7 @@ Foam::meshToMesh::meshToMesh
         );
     }
 
-    forAll (cuttingPatchNames, i)
+    forAll(cuttingPatchNames, i)
     {
         if (toMeshPatches_.found(cuttingPatchNames[i]))
         {
@@ -91,7 +91,7 @@ Foam::meshToMesh::meshToMesh
         }
     }
 
-    forAll (toMesh_.boundaryMesh(), patchi)
+    forAll(toMesh_.boundaryMesh(), patchi)
     {
         // Add the processor patches in the toMesh to the cuttingPatches list
         if (isA<processorPolyPatch>(toMesh_.boundaryMesh()[patchi]))
@@ -134,7 +134,7 @@ Foam::meshToMesh::meshToMesh
             << exit(FatalError);
     }
 
-    forAll (fromMesh_.boundaryMesh(), patchi)
+    forAll(fromMesh_.boundaryMesh(), patchi)
     {
         if
         (

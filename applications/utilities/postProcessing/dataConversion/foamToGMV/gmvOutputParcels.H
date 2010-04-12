@@ -1,81 +1,48 @@
 gmvFile << "tracers " << particles.size() << nl;
-for
-(
-    discretePhase::iterator elmnt = particles.begin();
-    elmnt != particles.end();
-    ++elmnt
-)
+forAllConstIter(discretePhase, particles, iter)
 {
-    gmvFile << elmnt().position().x() << " ";
+    gmvFile << iter().position().x() << " ";
 }
 gmvFile << nl;
-for
-(
-    discretePhase::iterator elmnt = particles.begin();
-    elmnt != particles.end();
-    ++elmnt
-)
+
+forAllConstIter(discretePhase, particles, iter)
 {
-    gmvFile << elmnt().position().y() << " ";
+    gmvFile << iter().position().y() << " ";
 }
 gmvFile << nl;
-for
-(
-    discretePhase::iterator elmnt = particles.begin();
-    elmnt != particles.end();
-    ++elmnt
-)
+
+forAllConstIter(discretePhase, particles, iter)
 {
-    gmvFile << elmnt().position().z() << " ";
+    gmvFile << iter().position().z() << " ";
 }
 gmvFile << nl;
 
 gmvFile << "U" << nl;
-for
-(
-    discretePhase::iterator elmnt = particles.begin();
-    elmnt != particles.end();
-    ++elmnt
-)
+forAllConstIter(discretePhase, particles, iter)
 {
-    gmvFile << elmnt().velocity().x() << " ";
+    gmvFile << iter().velocity().x() << " ";
 }
 gmvFile << nl;
+
 gmvFile << "V" << nl;
-for
-(
-    discretePhase::iterator elmnt = particles.begin();
-    elmnt != particles.end();
-    ++elmnt
-)
+forAllConstIter(discretePhase, particles, iter)
 {
-    gmvFile << elmnt().velocity().y() << " ";
+    gmvFile << iter().velocity().y() << " ";
 }
 gmvFile << nl;
 
 gmvFile << "W" << nl;
-for
-(
-    discretePhase::iterator elmnt = particles.begin();
-    elmnt != particles.end();
-    ++elmnt
-)
+forAllConstIter(discretePhase, particles, iter)
 {
-    gmvFile << elmnt().velocity().z() << " ";
+{
+    gmvFile << iter().velocity().z() << " ";
 }
 gmvFile << nl;
 
 gmvFile << "Diam" << nl;
-
-for
-(
-    discretePhase::iterator elmnt = particles.begin();
-    elmnt != particles.end();
-    ++elmnt
-)
+forAllConstIter(discretePhase, particles, iter)
 {
-    gmvFile << elmnt().d() << " ";
+    gmvFile << iter().d() << " ";
 }
-
 
 gmvFile << "endtrace"<< nl;

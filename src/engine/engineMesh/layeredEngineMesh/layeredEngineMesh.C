@@ -28,20 +28,18 @@ License
 #include "fvcMeshPhi.H"
 #include "surfaceInterpolate.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(layeredEngineMesh, 0);
+    addToRunTimeSelectionTable(engineMesh, layeredEngineMesh, IOobject);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(layeredEngineMesh, 0);
-
-addToRunTimeSelectionTable(engineMesh, layeredEngineMesh, IOobject);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-layeredEngineMesh::layeredEngineMesh(const IOobject& io)
+Foam::layeredEngineMesh::layeredEngineMesh(const IOobject& io)
 :
     engineMesh(io),
     pistonLayers_("pistonLayers", dimLength, 0.0)
@@ -55,13 +53,13 @@ layeredEngineMesh::layeredEngineMesh(const IOobject& io)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-layeredEngineMesh::~layeredEngineMesh()
+Foam::layeredEngineMesh::~layeredEngineMesh()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void layeredEngineMesh::move()
+void Foam::layeredEngineMesh::move()
 {
     scalar deltaZ = engineDB_.pistonDisplacement().value();
     Info<< "deltaZ = " << deltaZ << endl;
@@ -71,7 +69,7 @@ void layeredEngineMesh::move()
 
     pointField newPoints = points();
 
-    forAll (newPoints, pointi)
+    forAll(newPoints, pointi)
     {
         point& p = newPoints[pointi];
 
@@ -126,9 +124,5 @@ void layeredEngineMesh::move()
         << "Piston speed = " << pistonSpeed << " m/s" << endl;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

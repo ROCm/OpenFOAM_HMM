@@ -144,7 +144,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
     nCoarseFaces = 0;
 
     // On master side, the owner addressing is stored in table of contents
-    forAll (contents, masterI)
+    forAll(contents, masterI)
     {
         SLList<label>& curNbrs = neighboursTable.find(contents[masterI])();
 
@@ -163,12 +163,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
         {
             faceCells_[nCoarseFaces] = contents[masterI];
 
-            for
-            (
-                SLList<label>::iterator facesIter = faceFacesIter().begin();
-                facesIter != faceFacesIter().end();
-                ++facesIter
-            )
+            forAllIter(SLList<label>, faceFacesIter(), facesIter)
             {
                 faceRestrictAddressing_[facesIter()] = nCoarseFaces;
             }
@@ -178,7 +173,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
     }
 
     // On slave side, the owner addressing is stored in linked lists
-    forAll (contents, masterI)
+    forAll(contents, masterI)
     {
         SLList<label>& curNbrs = neighboursTable.find(contents[masterI])();
 
@@ -197,12 +192,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
         {
             faceCells_[nCoarseFaces] = nbrsIter();
 
-            for
-            (
-                SLList<label>::iterator facesIter = faceFacesIter().begin();
-                facesIter != faceFacesIter().end();
-                ++facesIter
-            )
+            forAllIter(SLList<label>, faceFacesIter(), facesIter)
             {
                 faceRestrictAddressing_[facesIter() + sizeBy2] = nCoarseFaces;
             }
