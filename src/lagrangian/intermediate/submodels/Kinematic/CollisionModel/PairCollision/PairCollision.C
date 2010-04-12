@@ -61,11 +61,11 @@ void Foam::PairCollision<CloudType>::parcelInteraction()
 {
     PstreamBuffers pBufs(Pstream::nonBlocking);
 
-    il_.sendReferredParticles(cellOccupancy_, pBufs);
+    il_.sendReferredData(cellOccupancy_, pBufs);
 
     realRealInteraction();
 
-    il_.receiveReferredParticles(pBufs);
+    il_.receiveReferredData(pBufs);
 
     realReferredInteraction();
 }
@@ -173,7 +173,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
     const labelListList& dil = il_.dil();
 
-    const labelListList directWallFaces = il_.directWallFaces();
+    const labelListList directWallFaces = il_.dwfil();
 
     // const ReferredCellList<typename CloudType::parcelType>& ril = il_.ril();
 

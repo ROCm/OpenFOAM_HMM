@@ -224,6 +224,7 @@ void Foam::InteractionLists<ParticleType>::findExtendedProcBbsInRange
 template<class ParticleType>
 void Foam::InteractionLists<ParticleType>::buildMap
 (
+    autoPtr<mapDistribute>& mapPtr,
     const List<label>& toProc
 )
 {
@@ -295,7 +296,7 @@ void Foam::InteractionLists<ParticleType>::buildMap
         }
     }
 
-    mapPtr_.reset
+    mapPtr.reset
     (
         new mapDistribute
         (
@@ -328,9 +329,9 @@ void Foam::InteractionLists<ParticleType>::prepareParticlesToRefer
 
     forAll(cellIndexAndTransformToDistribute_, i)
     {
-        const labelPair giat = cellIndexAndTransformToDistribute_[i];
+        const labelPair ciat = cellIndexAndTransformToDistribute_[i];
 
-        label cellIndex = globalTransforms_.index(giat);
+        label cellIndex = globalTransforms_.index(ciat);
 
         List<ParticleType*> realParticles = cellOccupancy[cellIndex];
 
@@ -342,7 +343,7 @@ void Foam::InteractionLists<ParticleType>::prepareParticlesToRefer
 
             particlesToRefer.append(particle.clone().ptr());
 
-            prepareParticleToBeReferred(particlesToRefer.last(), giat);
+            prepareParticleToBeReferred(particlesToRefer.last(), ciat);
         }
     }
 }
@@ -352,12 +353,12 @@ template<class ParticleType>
 void Foam::InteractionLists<ParticleType>::prepareParticleToBeReferred
 (
     ParticleType* particle,
-    labelPair giat
+    labelPair ciat
 )
 {
     const vector& transform = globalTransforms_.transform
     (
-        globalTransforms_.transformIndex(giat)
+        globalTransforms_.transformIndex(ciat)
     );
 
     particle->position() -= transform;
@@ -382,6 +383,40 @@ void Foam::InteractionLists<ParticleType>::fillReferredParticleCloud()
 }
 
 
+template<class ParticleType>
+void Foam::InteractionLists<ParticleType>::writeReferredWallFaces() const
+{
+    OFstream str(mesh_.time().path()/"referredWallFaces.obj");
+
+    label offset = 1;
+
+    forAll(referredWallFaces_, rWFI)
+    {
+        const Tuple2<face, pointField>& rwf = referredWallFaces_[rWFI];
+
+        forAll(rwf.first(), fPtI)
+        {
+            meshTools::writeOBJ
+            (
+                str,
+                rwf.second()[rwf.first()[fPtI]]
+            );
+        }
+
+        str<< 'f';
+
+        forAll(rwf.first(), fPtI)
+        {
+            str<< ' ' << fPtI + offset;
+        }
+
+        str<< nl;
+
+        offset += rwf.first().size();
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParticleType>
@@ -395,14 +430,17 @@ Foam::InteractionLists<ParticleType>::InteractionLists
     mesh_(mesh),
     cloud_(mesh_, "referredParticleCloud", IDLList<ParticleType>()),
     writeCloud_(writeCloud),
-    mapPtr_(),
+    cellMapPtr_(),
+    wallFaceMapPtr_(),
     globalTransforms_(mesh_),
     maxDistance_(maxDistance),
     dil_(),
-    directWallFaces_(),
+    dwfil_(),
     ril_(),
     rilInverse_(),
     cellIndexAndTransformToDistribute_(),
+    wallFaceIndexAndTransformToDistribute_(),
+    referredWallFaces_(),
     referredParticles_()
 {
     Info<< "Building InteractionLists" << endl;
@@ -461,11 +499,11 @@ Foam::InteractionLists<ParticleType>::InteractionLists
     PackedBoolList cellInRangeOfCoupledPatch(mesh_.nCells(), false);
 
     // IAndT: index and transform
-    DynamicList<labelPair> globalIAndTToExchange;
+    DynamicList<labelPair> cellIAndTToExchange;
 
-    DynamicList<treeBoundBox> bbsToExchange;
+    DynamicList<treeBoundBox> cellBbsToExchange;
 
-    DynamicList<label> procToDistributeTo;
+    DynamicList<label> procToDistributeCellTo;
 
     forAll(extendedProcBbsInRange, ePBIRI)
     {
@@ -487,26 +525,26 @@ Foam::InteractionLists<ParticleType>::InteractionLists
 
                 cellInRangeOfCoupledPatch[cellI] = true;
 
-                globalIAndTToExchange.append
+                cellIAndTToExchange.append
                 (
                     globalTransforms_.encode(cellI, transformIndex)
                 );
 
-                bbsToExchange.append(cellBb);
+                cellBbsToExchange.append(cellBb);
 
-                procToDistributeTo.append(origProc);
+                procToDistributeCellTo.append(origProc);
             }
         }
     }
 
-    buildMap(procToDistributeTo);
+    buildMap(cellMapPtr_, procToDistributeCellTo);
 
     // Needed for reverseDistribute
-    label preDistributionSize = procToDistributeTo.size();
+    label preDistributionCellMapSize = procToDistributeCellTo.size();
 
-    map().distribute(bbsToExchange);
+    cellMap().distribute(cellBbsToExchange);
 
-    map().distribute(globalIAndTToExchange);
+    cellMap().distribute(cellIAndTToExchange);
 
     // Determine labelList specifying only cells that are in range of
     // a coupled boundary to build an octree limited to these cells.
@@ -534,27 +572,27 @@ Foam::InteractionLists<ParticleType>::InteractionLists
         100.0
     );
 
-    ril_.setSize(bbsToExchange.size());
+    ril_.setSize(cellBbsToExchange.size());
 
     // This needs to be a boolList, not PackedBoolList if
     // reverseDistribute is called.
-    boolList bbRequiredByAnyCell(bbsToExchange.size(), false);
+    boolList cellBbRequiredByAnyCell(cellBbsToExchange.size(), false);
 
     Info<< "    Building referred interaction lists" << endl;
 
-    forAll(bbsToExchange, bbI)
+    forAll(cellBbsToExchange, bbI)
     {
-        const labelPair& giat = globalIAndTToExchange[bbI];
+        const labelPair& ciat = cellIAndTToExchange[bbI];
 
         const vector& transform = globalTransforms_.transform
         (
-            globalTransforms_.transformIndex(giat)
+            globalTransforms_.transformIndex(ciat)
         );
 
         treeBoundBox extendedBb
         (
-            bbsToExchange[bbI].min() - interactionVec - transform,
-            bbsToExchange[bbI].max() + interactionVec - transform
+            cellBbsToExchange[bbI].min() - interactionVec - transform,
+            cellBbsToExchange[bbI].max() + interactionVec - transform
         );
 
         // Find all elements intersecting box.
@@ -565,7 +603,7 @@ Foam::InteractionLists<ParticleType>::InteractionLists
 
         if (!interactingElems.empty())
         {
-            bbRequiredByAnyCell[bbI] = true;
+            cellBbRequiredByAnyCell[bbI] = true;
         }
 
         ril_[bbI].setSize(interactingElems.size(), -1);
@@ -593,47 +631,47 @@ Foam::InteractionLists<ParticleType>::InteractionLists
     // i.e. it, is as if the cell had never been referred in the first
     // place.
 
-    inplaceSubset(bbRequiredByAnyCell, ril_);
+    inplaceSubset(cellBbRequiredByAnyCell, ril_);
 
     // Send information about which cells are actually required back
     // to originating processors.
 
-    // At this point, bbsToExchange does not need to be maintained
+    // At this point, cellBbsToExchange does not need to be maintained
     // or distributed as it is not longer needed.
 
-    bbsToExchange.setSize(0);
+    cellBbsToExchange.setSize(0);
 
-    map().reverseDistribute
+    cellMap().reverseDistribute
     (
-        preDistributionSize,
-        bbRequiredByAnyCell
+        preDistributionCellMapSize,
+        cellBbRequiredByAnyCell
     );
 
-    map().reverseDistribute
+    cellMap().reverseDistribute
     (
-        preDistributionSize,
-        globalIAndTToExchange
+        preDistributionCellMapSize,
+        cellIAndTToExchange
     );
 
     // Perform ordering of cells to send, this invalidates the
-    // previous value of preDistributionSize.
+    // previous value of preDistributionCellMapSize.
 
-    preDistributionSize = -1;
+    preDistributionCellMapSize = -1;
 
     // Move all of the used cells to refer to the start of the list
     // and truncate it
 
-    inplaceSubset(bbRequiredByAnyCell, globalIAndTToExchange);
+    inplaceSubset(cellBbRequiredByAnyCell, cellIAndTToExchange);
 
-    inplaceSubset(bbRequiredByAnyCell, procToDistributeTo);
+    inplaceSubset(cellBbRequiredByAnyCell, procToDistributeCellTo);
 
-    preDistributionSize = procToDistributeTo.size();
+    preDistributionCellMapSize = procToDistributeCellTo.size();
 
     // Rebuild mapDistribute with only required referred cells
-    buildMap(procToDistributeTo);
+    buildMap(cellMapPtr_, procToDistributeCellTo);
 
     // Store cellIndexAndTransformToDistribute
-    cellIndexAndTransformToDistribute_.transfer(globalIAndTToExchange);
+    cellIndexAndTransformToDistribute_.transfer(cellIAndTToExchange);
 
     // Determine inverse addressing for referred cells
 
@@ -662,9 +700,78 @@ Foam::InteractionLists<ParticleType>::InteractionLists
         rilInverse_[cellI].transfer(rilInverseTemp[cellI]);
     }
 
-    // Direct interaction list and direct wall faces
+    // Determine which wall faces to refer
 
-    Info<< "    Building direct interaction lists" << endl;
+    // Determine the index of all of the wall faces on this processor
+    DynamicList<label> localWallFaces;
+
+    forAll(mesh_.boundaryMesh(), patchI)
+    {
+        const polyPatch& patch = mesh_.boundaryMesh()[patchI];
+
+        if (isA<wallPolyPatch>(patch))
+        {
+            localWallFaces.append(identity(patch.size()) + patch.start());
+        }
+    }
+
+    treeBoundBoxList wallFaceBbs(localWallFaces.size());
+
+    forAll(wallFaceBbs, i)
+    {
+        wallFaceBbs[i] = treeBoundBox
+        (
+            mesh_.faces()[localWallFaces[i]].points(mesh_.points())
+        );
+    }
+
+    // IAndT: index and transform
+    DynamicList<labelPair> wallFaceIAndTToExchange;
+
+    DynamicList<treeBoundBox> wallFaceBbsToExchange;
+
+    DynamicList<label> procToDistributeWallFaceTo;
+
+    forAll(extendedProcBbsInRange, ePBIRI)
+    {
+        const treeBoundBox& otherExtendedProcBb =
+        extendedProcBbsInRange[ePBIRI];
+
+        label transformIndex = extendedProcBbsTransformIndex[ePBIRI];
+
+        label origProc = extendedProcBbsOrigProc[ePBIRI];
+
+        forAll(wallFaceBbs, i)
+        {
+            const treeBoundBox& wallFaceBb = wallFaceBbs[i];
+
+            if (wallFaceBb.overlaps(otherExtendedProcBb))
+            {
+                // This wall face is in range of the Bb of the other
+                // processor Bb, and so needs to be referred to it
+
+                label wallFaceI = localWallFaces[i];
+
+                wallFaceIAndTToExchange.append
+                (
+                    globalTransforms_.encode(wallFaceI, transformIndex)
+                );
+
+                wallFaceBbsToExchange.append(wallFaceBb);
+
+                procToDistributeWallFaceTo.append(origProc);
+            }
+        }
+    }
+
+    buildMap(wallFaceMapPtr_, procToDistributeWallFaceTo);
+
+    // Needed for reverseDistribute
+    label preDistributionWallFaceMapSize = procToDistributeWallFaceTo.size();
+
+    wallFaceMap().distribute(wallFaceBbsToExchange);
+
+    wallFaceMap().distribute(wallFaceIAndTToExchange);
 
     indexedOctree<treeDataCell> allCellsTree
     (
@@ -675,21 +782,145 @@ Foam::InteractionLists<ParticleType>::InteractionLists
         100.0
     );
 
-    DynamicList<label> localWallFaces;
+    rwfil_.setSize(wallFaceBbsToExchange.size());
 
-    forAll(mesh.boundaryMesh(), patchI)
+    // This needs to be a boolList, not PackedBoolList if
+    // reverseDistribute is called.
+    boolList wallFaceBbRequiredByAnyCell(wallFaceBbsToExchange.size(), false);
+
+    forAll(wallFaceBbsToExchange, bbI)
     {
-        const polyPatch& patch = mesh.boundaryMesh()[patchI];
+        const labelPair& wfiat = wallFaceIAndTToExchange[bbI];
 
-        if (isA<wallPolyPatch>(patch))
+        const vector& transform = globalTransforms_.transform
+        (
+            globalTransforms_.transformIndex(wfiat)
+        );
+
+        treeBoundBox extendedBb
+        (
+            wallFaceBbsToExchange[bbI].min() - interactionVec - transform,
+            wallFaceBbsToExchange[bbI].max() + interactionVec - transform
+        );
+
+        // Find all elements intersecting box.
+        labelList interactingElems
+        (
+            coupledPatchRangeTree.findBox(extendedBb)
+        );
+
+        if (!interactingElems.empty())
         {
-            localWallFaces.append(identity(patch.size()) + patch.start());
+            wallFaceBbRequiredByAnyCell[bbI] = true;
+        }
+
+        rwfil_[bbI].setSize(interactingElems.size(), -1);
+
+        forAll(interactingElems, i)
+        {
+            label elemI = interactingElems[i];
+
+            // Here, a more detailed geometric test could be applied,
+            // i.e. a more accurate bounding volume like a OBB or
+            // convex hull or an exact geometrical test.
+
+            label c = coupledPatchRangeTree.shapes().cellLabels()[elemI];
+
+            rwfil_[bbI][i] = c;
         }
     }
 
+    // Perform subset of rwfil_, to remove any referred wallFaces that do
+    // not interact.  They will not be sent from originating
+    // processors.  This assumes that the disappearance of the wallFace
+    // from the sending list of the source processor, simply removes
+    // the referred wallFace from the rwfil_, all of the subsequent indices
+    // shuffle down one, but the order and structure is preserved,
+    // i.e. it, is as if the wallFace had never been referred in the first
+    // place.
+
+    inplaceSubset(wallFaceBbRequiredByAnyCell, rwfil_);
+
+    // Send information about which wallFaces are actually required
+    // back to originating processors.
+
+    // At this point, wallFaceBbsToExchange does not need to be
+    // maintained or distributed as it is not longer needed.
+
+    wallFaceBbsToExchange.setSize(0);
+
+    wallFaceMap().reverseDistribute
+    (
+        preDistributionWallFaceMapSize,
+        wallFaceBbRequiredByAnyCell
+    );
+
+    wallFaceMap().reverseDistribute
+    (
+        preDistributionWallFaceMapSize,
+        wallFaceIAndTToExchange
+    );
+
+    // Perform ordering of wallFaces to send, this invalidates the
+    // previous value of preDistributionWallFaceMapSize.
+
+    preDistributionWallFaceMapSize = -1;
+
+    // Move all of the used wallFaces to refer to the start of the
+    // list and truncate it
+
+    inplaceSubset(wallFaceBbRequiredByAnyCell, wallFaceIAndTToExchange);
+
+    inplaceSubset(wallFaceBbRequiredByAnyCell, procToDistributeWallFaceTo);
+
+    preDistributionWallFaceMapSize = procToDistributeWallFaceTo.size();
+
+    // Rebuild mapDistribute with only required referred wallFaces
+    buildMap(wallFaceMapPtr_, procToDistributeWallFaceTo);
+
+    // Store wallFaceIndexAndTransformToDistribute
+    wallFaceIndexAndTransformToDistribute_.transfer(wallFaceIAndTToExchange);
+
+    // Refer wall faces to the appropriate processor
+    referredWallFaces_.setSize(wallFaceIndexAndTransformToDistribute_.size());
+
+    forAll(referredWallFaces_, rwfI)
+    {
+        const labelPair& wfiat = wallFaceIndexAndTransformToDistribute_[rwfI];
+
+        label wallFaceIndex = globalTransforms_.index(wfiat);
+
+        const vector& transform = globalTransforms_.transform
+        (
+            globalTransforms_.transformIndex(wfiat)
+        );
+
+        Tuple2<face, pointField>& referredWallFace = referredWallFaces_[rwfI];
+
+        const labelList& facePts = mesh_.faces()[wallFaceIndex];
+
+        referredWallFace.first() = face(identity(facePts.size()));
+
+        referredWallFace.second().setSize(facePts.size());
+
+        forAll(facePts, fPtI)
+        {
+            referredWallFace.second()[fPtI] =
+            mesh_.points()[facePts[fPtI]] - transform;
+        }
+    }
+
+    wallFaceMap().distribute(referredWallFaces_);
+
+    writeReferredWallFaces();
+
+    // Direct interaction list and direct wall faces
+
+    Info<< "    Building direct interaction lists" << endl;
+
     indexedOctree<treeDataFace> wallFacesTree
     (
-        treeDataFace(true, mesh, localWallFaces),
+        treeDataFace(true, mesh_, localWallFaces),
         procBbRndExt,
         8,              // maxLevel,
         10,             // leafSize,
@@ -698,7 +929,7 @@ Foam::InteractionLists<ParticleType>::InteractionLists
 
     dil_.setSize(mesh_.nCells());
 
-    directWallFaces_.setSize(mesh.nCells());
+    dwfil_.setSize(mesh_.nCells());
 
     forAll(cellBbs, cellI)
     {
@@ -742,7 +973,7 @@ Foam::InteractionLists<ParticleType>::InteractionLists
         // Find all wall faces intersecting extendedBb
         interactingElems = wallFacesTree.findBox(extendedBb);
 
-        directWallFaces_[cellI].setSize(interactingElems.size(), -1);
+        dwfil_[cellI].setSize(interactingElems.size(), -1);
 
         forAll(interactingElems, i)
         {
@@ -750,7 +981,7 @@ Foam::InteractionLists<ParticleType>::InteractionLists
 
             label f = wallFacesTree.shapes().faceLabels()[elemI];
 
-            directWallFaces_[cellI][i] = f;
+            dwfil_[cellI][i] = f;
         }
     }
 }
@@ -766,7 +997,7 @@ Foam::InteractionLists<ParticleType>::~InteractionLists()
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class ParticleType>
-void Foam::InteractionLists<ParticleType>::sendReferredParticles
+void Foam::InteractionLists<ParticleType>::sendReferredData
 (
     const List<DynamicList<ParticleType*> >& cellOccupancy,
     PstreamBuffers& pBufs
@@ -774,14 +1005,12 @@ void Foam::InteractionLists<ParticleType>::sendReferredParticles
 {
     prepareParticlesToRefer(cellOccupancy);
 
-    // Stream data into buffer
     for (label domain = 0; domain < Pstream::nProcs(); domain++)
     {
-        const labelList& subMap = map().subMap()[domain];
+        const labelList& subMap = cellMap().subMap()[domain];
 
         if (subMap.size())
         {
-            // Put data into send buffer
             UOPstream toDomain(domain, pBufs);
 
             UIndirectList<IDLList<ParticleType> > subMappedParticles
@@ -803,18 +1032,18 @@ void Foam::InteractionLists<ParticleType>::sendReferredParticles
 
 
 template<class ParticleType>
-void Foam::InteractionLists<ParticleType>::receiveReferredParticles
+void Foam::InteractionLists<ParticleType>::receiveReferredData
 (
     PstreamBuffers& pBufs
 )
 {
     Pstream::waitRequests();
 
-    referredParticles_.setSize(map().constructSize());
+    referredParticles_.setSize(cellMap().constructSize());
 
     for (label domain = 0; domain < Pstream::nProcs(); domain++)
     {
-        const labelList& constructMap = map().constructMap()[domain];
+        const labelList& constructMap = cellMap().constructMap()[domain];
 
         if (constructMap.size())
         {

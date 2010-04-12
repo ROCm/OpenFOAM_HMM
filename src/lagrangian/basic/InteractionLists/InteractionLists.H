@@ -38,9 +38,9 @@ Description
 
     @verbatim
     PstreamBuffers pBufs(Pstream::nonBlocking);
-    il_.sendReferredParticles(cellOccupancy_, pBufs);
+    il_.sendReferredData(cellOccupancy_, pBufs);
     // Do other things
-    il_.receiveReferredParticles(pBufs);
+    il_.receiveReferredData(pBufs);
     @endverbatim
 
     Requiring data:
@@ -62,6 +62,7 @@ SourceFiles
 #include "polyMesh.H"
 #include "globalIndexAndTransform.H"
 #include "indexedOctree.H"
+#include "Tuple2.H"
 #include "treeDataCell.H"
 #include "treeDataFace.H"
 #include "mapDistribute.H"
@@ -91,8 +92,11 @@ class InteractionLists
         //  with the referred particles, hence gets written out
         const Switch writeCloud_;
 
-        //- mapDistribute to exchange particles
-        autoPtr<mapDistribute> mapPtr_;
+        //- mapDistribute to exchange referred particles into referred cells
+        autoPtr<mapDistribute> cellMapPtr_;
+
+        //- mapDistribute to exchange wall face data
+        autoPtr<mapDistribute> wallFaceMapPtr_;
 
         //- Storage and encoding/decoding for all possible transforms
         //  of the geometry
@@ -105,12 +109,12 @@ class InteractionLists
         labelListList dil_;
 
         //- Wall faces on this processor that are in interaction range
-        //  of each each cell
-        labelListList directWallFaces_;
+        //  of each each cell (direct wall face interaction list)
+        labelListList dwfil_;
 
         //- Referred interaction list - which real cells are to be
-        //  supplied with particles from the referred particle
-        //  container with the same index.
+        //  supplied with particle interactions from the referred
+        //  particle container with the same index.
         labelListList ril_;
 
         //- Inverse addressing for referred cells, specifies which
@@ -119,9 +123,21 @@ class InteractionLists
         //  indexed in this container.
         labelListList rilInverse_;
 
-        //- Which cells are to be sent via the map, and an index
+        //- Which real cells on this on this processor are in
+        //  interaction range of each referred wall face (referred
+        //  wall face interaction list)
+        labelListList rwfil_;
+
+        //- Which cells are to be sent via the cellMap, and an index
         //  specifying how they should be transformed.
         List<labelPair> cellIndexAndTransformToDistribute_;
+
+        //- Which wallFaces are to be sent via the wallFaceMap, and an index
+        //  specifying how they should be transformed.
+        List<labelPair> wallFaceIndexAndTransformToDistribute_;
+
+        //- Referred wall faces
+        List<Tuple2<face, pointField> > referredWallFaces_;
 
         //- Referred particle container
         List<IDLList<ParticleType> > referredParticles_;
@@ -141,8 +157,13 @@ class InteractionLists
             List<label>& extendedProcBbsOrigProc
         );
 
-        //- Build the mapDistribute
-        void buildMap(const List<label>& toProc);
+        //- Build the mapDistribute from information about which entry
+        //  is to be sent to which processor
+        void buildMap
+        (
+            autoPtr<mapDistribute>& mapPtr,
+            const List<label>& toProc
+        );
 
         //- Fill the referredParticles container with particles that
         //  will be referred
@@ -155,11 +176,14 @@ class InteractionLists
         void prepareParticleToBeReferred
         (
             ParticleType* particle,
-            labelPair giat
+            labelPair iat
         );
 
         //- Fill the referredParticles so that it will be written out
         void fillReferredParticleCloud();
+
+        //- Write the referred wall faces out for debug
+        void writeReferredWallFaces() const;
 
         //- Disallow default bitwise copy construct
         InteractionLists(const InteractionLists&);
@@ -187,23 +211,28 @@ public:
 
     // Member Functions
 
-        //- Prepare and send referred particles, nonBlocking communication
-        void sendReferredParticles
+        //- Prepare and send referred particles and wall data,
+        //  nonBlocking communication
+        void sendReferredData
         (
             const List<DynamicList<ParticleType*> >& cellOccupancy,
             PstreamBuffers& pBufs
         );
 
-        //- Receive referred particles
-        void receiveReferredParticles(PstreamBuffers& pBufs);
+        //- Receive referred data
+        void receiveReferredData(PstreamBuffers& pBufs);
+
 
         // Access
 
             //- Return access to the mesh
             inline const polyMesh& mesh() const;
 
-            //- Return access to the mapDistribute
-            inline const mapDistribute& map() const;
+            //- Return access to the cellMap
+            inline const mapDistribute& cellMap() const;
+
+            //- Return access to the wallFaceMap
+            inline const mapDistribute& wallFaceMap() const;
 
             //- Return access to the globalTransforms
             inline const globalIndexAndTransform& globalTransforms() const;
@@ -211,8 +240,8 @@ public:
             //- Return access to the direct interaction list
             inline const labelListList& dil() const;
 
-            //- Return access to the direct wall faces
-            inline const labelListList& directWallFaces() const;
+            //- Return access to the direct wall face interaction list
+            inline const labelListList& dwfil() const;
 
             //- Return access to the referred interaction list
             inline const labelListList& ril() const;
@@ -220,9 +249,19 @@ public:
             //- Return access to the inverse referred interaction list
             inline const labelListList& rilInverse() const;
 
+            //- Return access to the referred wall face interaction list
+            inline const labelListList& rwfil() const;
+
             //- Return access to the cellIndexAndTransformToDistribute list
             inline const List<labelPair>&
             cellIndexAndTransformToDistribute() const;
+
+            //- Return access to the wallFaceIndexAndTransformToDistribute list
+            inline const List<labelPair>&
+            wallFaceIndexAndTransformToDistribute() const;
+
+            //- Return access to the referred wall faces
+            const List<Tuple2<face, pointField> >& referredWallFaces() const;
 
             //- Return access to the referred particle container
             inline const List<IDLList<ParticleType> >&
@@ -230,6 +269,7 @@ public:
 
             //- Return non-const access to the referred particle container
             inline List<IDLList<ParticleType> >& referredParticles();
+
 };
 
 

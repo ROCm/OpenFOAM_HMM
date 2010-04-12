@@ -36,9 +36,17 @@ const Foam::polyMesh& Foam::InteractionLists<ParticleType>::mesh() const
 
 template<class ParticleType>
 const Foam::mapDistribute&
-Foam::InteractionLists<ParticleType>::map() const
+Foam::InteractionLists<ParticleType>::cellMap() const
 {
-    return mapPtr_();
+    return cellMapPtr_();
+}
+
+
+template<class ParticleType>
+const Foam::mapDistribute&
+Foam::InteractionLists<ParticleType>::wallFaceMap() const
+{
+    return wallFaceMapPtr_();
 }
 
 
@@ -59,9 +67,9 @@ const Foam::labelListList& Foam::InteractionLists<ParticleType>::dil() const
 
 template<class ParticleType>
 const Foam::labelListList&
-Foam::InteractionLists<ParticleType>::directWallFaces() const
+Foam::InteractionLists<ParticleType>::dwfil() const
 {
-    return directWallFaces_;
+    return dwfil_;
 }
 
 
@@ -69,6 +77,13 @@ template<class ParticleType>
 const Foam::labelListList& Foam::InteractionLists<ParticleType>::ril() const
 {
     return ril_;
+}
+
+
+template<class ParticleType>
+const Foam::labelListList& Foam::InteractionLists<ParticleType>::rwfil() const
+{
+    return rwfil_;
 }
 
 
@@ -81,10 +96,27 @@ Foam::InteractionLists<ParticleType>::cellIndexAndTransformToDistribute() const
 
 
 template<class ParticleType>
+const Foam::List<Foam::labelPair>&
+Foam::InteractionLists<ParticleType>::
+wallFaceIndexAndTransformToDistribute() const
+{
+    return wallFaceIndexAndTransformToDistribute_;
+}
+
+
+template<class ParticleType>
 const Foam::labelListList&
 Foam::InteractionLists<ParticleType>::rilInverse() const
 {
     return rilInverse_;
+}
+
+
+template<class ParticleType>
+const Foam::List<Foam::Tuple2<Foam::face, Foam::pointField> >&
+Foam::InteractionLists<ParticleType>::referredWallFaces() const
+{
+    return referredWallFaces_;
 }
 
 
@@ -102,8 +134,6 @@ Foam::InteractionLists<ParticleType>::referredParticles()
 {
     return referredParticles_;
 }
-
-
 
 
 // ************************************************************************* //
