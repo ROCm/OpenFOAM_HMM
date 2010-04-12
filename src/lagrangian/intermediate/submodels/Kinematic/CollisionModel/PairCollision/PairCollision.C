@@ -175,8 +175,6 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
     const labelListList directWallFaces = il_.dwfil();
 
-    // const ReferredCellList<typename CloudType::parcelType>& ril = il_.ril();
-
     // Storage for the wall interaction sites
     DynamicList<point> flatSites;
     DynamicList<scalar> flatSiteExclusionDistancesSqr;
@@ -264,74 +262,66 @@ void Foam::PairCollision<CloudType>::wallInteraction()
                 }
             }
 
-            // // referred wallFace interactions
+            // referred wallFace interactions
 
-            // // The labels of referred cells in range of this real cell
-            // const labelList& referredCellsInRange =
-            // dil.referredCellsForInteraction()[realCellI];
+            // The labels of referred wall faces in range of this real cell
+            const labelList& cellRefWallFaces = il_.rwfilInverse()[realCellI];
 
-            // forAll(referredCellsInRange, refCellInRangeI)
-            // {
-            //     const ReferredCell<typename CloudType::parcelType>& refCell =
-            //     ril[referredCellsInRange[refCellInRangeI]];
+            forAll(cellRefWallFaces, rWFI)
+            {
+                const Tuple2<face, pointField>& rwf =
+                il_.referredWallFaces()[cellRefWallFaces[rWFI]];
 
-            //     const labelList& refWallFaces = refCell.wallFaces();
+                const face& f = rwf.first();
 
-            //     forAll(refWallFaces, refWallFaceI)
-            //     {
-            //         label refFaceI = refWallFaces[refWallFaceI];
+                const pointField& pts = rwf.second();
 
-            //         pointHit nearest = refCell.faces()[refFaceI].nearestPoint
-            //         (
-            //             pos,
-            //             refCell.points()
-            //         );
+                pointHit nearest = f.nearestPoint(pos, pts);
 
-            //         if (nearest.distance() < r)
-            //         {
-            //             vector normal = refCell.faceAreas()[refFaceI];
+                if (nearest.distance() < r)
+                {
+                    vector normal = f.normal(pts);
 
-            //             normal /= mag(normal);
+                    normal /= mag(normal);
 
-            //             const vector& nearPt = nearest.rawPoint();
+                    const vector& nearPt = nearest.rawPoint();
 
-            //             vector pW = nearPt - pos;
+                    vector pW = nearPt - pos;
 
-            //             scalar normalAlignment = normal & pW/mag(pW);
+                    scalar normalAlignment = normal & pW/mag(pW);
 
-            //             if (normalAlignment > cosPhiMinFlatWall)
-            //             {
-            //                 // Guard against a flat interaction being
-            //                 // present on the boundary of two or more
-            //                 // faces, which would create duplicate contact
-            //                 // points. Duplicates are discarded.
-            //                 if
-            //                 (
-            //                     !duplicatePointInList
-            //                     (
-            //                         flatSites,
-            //                         nearPt,
-            //                         sqr(r*flatWallDuplicateExclusion)
-            //                     )
-            //                 )
-            //                 {
-            //                     flatSites.append(nearPt);
+                    if (normalAlignment > cosPhiMinFlatWall)
+                    {
+                        // Guard against a flat interaction being
+                        // present on the boundary of two or more
+                        // faces, which would create duplicate contact
+                        // points. Duplicates are discarded.
+                        if
+                        (
+                            !duplicatePointInList
+                            (
+                                flatSites,
+                                nearPt,
+                                sqr(r*flatWallDuplicateExclusion)
+                            )
+                        )
+                        {
+                            flatSites.append(nearPt);
 
-            //                     flatSiteExclusionDistancesSqr.append
-            //                     (
-            //                         sqr(r) - sqr(nearest.distance())
-            //                     );
-            //                 }
-            //             }
-            //             else
-            //             {
-            //                 otherSites.append(nearPt);
+                            flatSiteExclusionDistancesSqr.append
+                            (
+                                sqr(r) - sqr(nearest.distance())
+                            );
+                        }
+                    }
+                    else
+                    {
+                        otherSites.append(nearPt);
 
-            //                 otherSiteDistances.append(nearest.distance());
-            //             }
-            //         }
-            //     }
-            // }
+                        otherSiteDistances.append(nearest.distance());
+                    }
+                }
+            }
 
             // All flat interaction sites found, now classify the
             // other sites as being in range of a flat interaction, or

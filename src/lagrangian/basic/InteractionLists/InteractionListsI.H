@@ -81,9 +81,25 @@ const Foam::labelListList& Foam::InteractionLists<ParticleType>::ril() const
 
 
 template<class ParticleType>
+const Foam::labelListList&
+Foam::InteractionLists<ParticleType>::rilInverse() const
+{
+    return rilInverse_;
+}
+
+
+template<class ParticleType>
 const Foam::labelListList& Foam::InteractionLists<ParticleType>::rwfil() const
 {
     return rwfil_;
+}
+
+
+template<class ParticleType>
+const Foam::labelListList&
+Foam::InteractionLists<ParticleType>::rwfilInverse() const
+{
+    return rwfilInverse_;
 }
 
 
@@ -101,14 +117,6 @@ Foam::InteractionLists<ParticleType>::
 wallFaceIndexAndTransformToDistribute() const
 {
     return wallFaceIndexAndTransformToDistribute_;
-}
-
-
-template<class ParticleType>
-const Foam::labelListList&
-Foam::InteractionLists<ParticleType>::rilInverse() const
-{
-    return rilInverse_;
 }
 
 

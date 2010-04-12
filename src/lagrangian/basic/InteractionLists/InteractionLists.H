@@ -128,6 +128,11 @@ class InteractionLists
         //  wall face interaction list)
         labelListList rwfil_;
 
+        //- Inverse addressing for referred wall faces, specifies
+        //  which referred wall faces interact with the real cells
+        //  indexed in this container.
+        labelListList rwfilInverse_;
+
         //- Which cells are to be sent via the cellMap, and an index
         //  specifying how they should be transformed.
         List<labelPair> cellIndexAndTransformToDistribute_;
@@ -251,6 +256,10 @@ public:
 
             //- Return access to the referred wall face interaction list
             inline const labelListList& rwfil() const;
+
+            //- Return access to the inverse referred wall face
+            //  interaction list
+            inline const labelListList& rwfilInverse() const;
 
             //- Return access to the cellIndexAndTransformToDistribute list
             inline const List<labelPair>&

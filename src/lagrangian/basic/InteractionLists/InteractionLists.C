@@ -881,6 +881,33 @@ Foam::InteractionLists<ParticleType>::InteractionLists
     // Store wallFaceIndexAndTransformToDistribute
     wallFaceIndexAndTransformToDistribute_.transfer(wallFaceIAndTToExchange);
 
+    // Determine inverse addressing for referred wallFaces
+
+    rwfilInverse_.setSize(mesh_.nCells());
+
+    // Temporary Dynamic lists for accumulation
+    List<DynamicList<label> > rwfilInverseTemp(rwfilInverse_.size());
+
+    // Loop over all referred wall faces
+    forAll(rwfil_, refWallFaceI)
+    {
+        const labelList& realCells = rwfil_[refWallFaceI];
+
+        // Loop over all real cells in that the referred wall face is
+        // to supply interactions to and record the index of this
+        // referred wall face in the real cells entry in rwfilInverse
+
+        forAll(realCells, realCellI)
+        {
+            rwfilInverseTemp[realCells[realCellI]].append(refWallFaceI);
+        }
+    }
+
+    forAll(rwfilInverse_, cellI)
+    {
+        rwfilInverse_[cellI].transfer(rwfilInverseTemp[cellI]);
+    }
+
     // Refer wall faces to the appropriate processor
     referredWallFaces_.setSize(wallFaceIndexAndTransformToDistribute_.size());
 
@@ -895,18 +922,17 @@ Foam::InteractionLists<ParticleType>::InteractionLists
             globalTransforms_.transformIndex(wfiat)
         );
 
-        Tuple2<face, pointField>& referredWallFace = referredWallFaces_[rwfI];
+        Tuple2<face, pointField>& rwf = referredWallFaces_[rwfI];
 
         const labelList& facePts = mesh_.faces()[wallFaceIndex];
 
-        referredWallFace.first() = face(identity(facePts.size()));
+        rwf.first() = face(identity(facePts.size()));
 
-        referredWallFace.second().setSize(facePts.size());
+        rwf.second().setSize(facePts.size());
 
         forAll(facePts, fPtI)
         {
-            referredWallFace.second()[fPtI] =
-            mesh_.points()[facePts[fPtI]] - transform;
+            rwf.second()[fPtI] = mesh_.points()[facePts[fPtI]] - transform;
         }
     }
 
