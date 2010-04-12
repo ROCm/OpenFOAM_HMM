@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,21 +23,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "writeRegisteredObject.H"
-#include "dictionary.H"
-#include "Time.H"
+#include "surfaceInterpolateFields.H"
+//#include "dictionary.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(writeRegisteredObject, 0);
+    defineTypeNameAndDebug(surfaceInterpolateFields, 0);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::writeRegisteredObject::writeRegisteredObject
+Foam::surfaceInterpolateFields::surfaceInterpolateFields
 (
     const word& name,
     const objectRegistry& obr,
@@ -48,70 +47,74 @@ Foam::writeRegisteredObject::writeRegisteredObject
     name_(name),
     obr_(obr),
     active_(true),
-    objectNames_()
+    fieldSet_()
 {
+    // Check if the available mesh is an fvMesh otherise deactivate
+    if (!isA<fvMesh>(obr_))
+    {
+        active_ = false;
+        WarningIn
+        (
+            "surfaceInterpolateFields::surfaceInterpolateFields"
+            "("
+                "const word&, "
+                "const objectRegistry&, "
+                "const dictionary&, "
+                "const bool"
+            ")"
+        )   << "No fvMesh available, deactivating."
+            << endl;
+    }
+
     read(dict);
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::writeRegisteredObject::~writeRegisteredObject()
+Foam::surfaceInterpolateFields::~surfaceInterpolateFields()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::writeRegisteredObject::read(const dictionary& dict)
+void Foam::surfaceInterpolateFields::read(const dictionary& dict)
 {
     if (active_)
     {
-        dict.lookup("objectNames") >> objectNames_;
+        dict.lookup("fields") >> fieldSet_;
     }
 }
 
 
-void Foam::writeRegisteredObject::execute()
+void Foam::surfaceInterpolateFields::execute()
 {
-    // Do nothing - only valid on write
+    //Info<< type() << " " << name_ << ":" << nl;
+
+    // Clear out any previously loaded fields 
+    ssf_.clear();
+    svf_.clear();
+    sSpheretf_.clear();
+    sSymmtf_.clear();
+    stf_.clear();
+
+    interpolateFields<scalar>(ssf_);
+    interpolateFields<vector>(svf_);
+    interpolateFields<sphericalTensor>(sSpheretf_);
+    interpolateFields<symmTensor>(sSymmtf_);
+    interpolateFields<tensor>(stf_);
 }
 
 
-void Foam::writeRegisteredObject::end()
+void Foam::surfaceInterpolateFields::end()
 {
-    // Do nothing - only valid on write
+    // Do nothing
 }
 
 
-void Foam::writeRegisteredObject::write()
+void Foam::surfaceInterpolateFields::write()
 {
-    if (active_)
-    {
-        forAll(objectNames_, i)
-        {
-            if (obr_.foundObject<regIOobject>(objectNames_[i]))
-            {
-                regIOobject& obj =
-                    const_cast<regIOobject&>
-                    (
-                        obr_.lookupObject<regIOobject>(objectNames_[i])
-                    );
-                // Switch off automatic writing to prevent double write
-                obj.writeOpt() = IOobject::NO_WRITE;
-                obj.write();
-            }
-            else
-            {
-                WarningIn
-                (
-                    "Foam::writeRegisteredObject::read(const dictionary&)"
-                )   << "Object " << objectNames_[i] << " not found in "
-                    << "database. Available objects are:" << nl << obr_.toc()
-                    << endl;
-            }
-
-        }
-    }
+    // Do nothing
 }
 
 

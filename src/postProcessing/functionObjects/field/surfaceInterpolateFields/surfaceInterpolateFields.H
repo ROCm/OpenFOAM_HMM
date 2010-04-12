@@ -22,25 +22,25 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::readFields
+    Foam::surfaceInterpolateFields
 
 Description
     Reads fields from the time folders and adds them to the mesh database
     for further post-processing.
 
 SourceFiles
-    readFields.C
-    IOreadFields.H
+    surfaceInterpolateFields.C
+    IOsurfaceInterpolateFields.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef readFields_H
-#define readFields_H
+#ifndef surfaceInterpolateFields_H
+#define surfaceInterpolateFields_H
 
 #include "OFstream.H"
-#include "pointFieldFwd.H"
-#include "volFields.H"
+//#include "pointFieldFwd.H"
 #include "surfaceFields.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,16 +53,16 @@ class dictionary;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                         Class readFields Declaration
+                         Class surfaceInterpolateFields Declaration
 \*---------------------------------------------------------------------------*/
 
-class readFields
+class surfaceInterpolateFields
 {
 protected:
 
     // Protected data
 
-        //- Name of this set of readFields object
+        //- Name of this set of surfaceInterpolateFields object
         word name_;
 
         const objectRegistry& obr_;
@@ -70,16 +70,11 @@ protected:
         //- on/off switch
         bool active_;
 
-        //- Fields to load
-        wordList fieldSet_;
+        //- Fields to process
+        //wordList fieldSet_;
+        List<Tuple2<word, word> > fieldSet_;
 
-        //- Loaded fields
-        PtrList<volScalarField> vsf_;
-        PtrList<volVectorField> vvf_;
-        PtrList<volSphericalTensorField> vSpheretf_;
-        PtrList<volSymmTensorField> vSymmtf_;
-        PtrList<volTensorField> vtf_;
-
+        //- Locally constructed fields
         PtrList<surfaceScalarField> ssf_;
         PtrList<surfaceVectorField> svf_;
         PtrList<surfaceSphericalTensorField> sSpheretf_;
@@ -90,16 +85,14 @@ protected:
     // Protected Member Functions
 
         //- Disallow default bitwise copy construct
-        readFields(const readFields&);
+        surfaceInterpolateFields(const surfaceInterpolateFields&);
 
         //- Disallow default bitwise assignment
-        void operator=(const readFields&);
+        void operator=(const surfaceInterpolateFields&);
 
         template<class Type>
-        void loadField
+        void interpolateFields
         (
-            const word&,
-            PtrList<GeometricField<Type, fvPatchField, volMesh> >&,
             PtrList<GeometricField<Type, fvsPatchField, surfaceMesh> >&
         ) const;
 
@@ -107,14 +100,14 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("readFields");
+    TypeName("surfaceInterpolateFields");
 
 
     // Constructors
 
         //- Construct for given objectRegistry and dictionary.
         //  Allow the possibility to load fields from files
-        readFields
+        surfaceInterpolateFields
         (
             const word& name,
             const objectRegistry&,
@@ -124,12 +117,12 @@ public:
 
 
     //- Destructor
-    virtual ~readFields();
+    virtual ~surfaceInterpolateFields();
 
 
     // Member Functions
 
-        //- Return name of the readFields object
+        //- Return name of the surfaceInterpolateFields object
         virtual const word& name() const
         {
             return name_;
@@ -164,7 +157,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "readFieldsTemplates.C"
+#   include "surfaceInterpolateFieldsTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
