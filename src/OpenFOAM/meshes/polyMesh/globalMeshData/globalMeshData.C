@@ -1122,6 +1122,9 @@ void Foam::globalMeshData::clearOut()
     deleteDemandDrivenData(sharedEdgeAddrPtr_);
 
     coupledPatchPtr_.clear();
+    coupledPatchMeshEdgesPtr_.clear();
+    coupledPatchMeshEdgeMapPtr_.clear();
+
     // Point
     globalPointNumberingPtr_.clear();
     globalPointSlavesPtr_.clear();
@@ -1406,6 +1409,45 @@ const Foam::indirectPrimitivePatch& Foam::globalMeshData::coupledPatch() const
         }
     }
     return coupledPatchPtr_();
+}
+
+
+const Foam::labelList& Foam::globalMeshData::coupledPatchMeshEdges() const
+{
+    if (!coupledPatchMeshEdgesPtr_.valid())
+    {
+        coupledPatchMeshEdgesPtr_.reset
+        (
+            new labelList
+            (
+                coupledPatch().meshEdges
+                (
+                    mesh_.edges(),
+                    mesh_.pointEdges()
+                )
+            )
+        );
+    }
+    return coupledPatchMeshEdgesPtr_();
+}
+
+
+const Foam::Map<Foam::label>& Foam::globalMeshData::coupledPatchMeshEdgeMap()
+const
+{
+    if (!coupledPatchMeshEdgeMapPtr_.valid())
+    {
+        const labelList& me = coupledPatchMeshEdges();
+
+        coupledPatchMeshEdgeMapPtr_.reset(new Map<label>(2*me.size()));
+        Map<label>& em = coupledPatchMeshEdgeMapPtr_();
+
+        forAll(me, i)
+        {
+            em.insert(me[i], i);
+        }
+    }
+    return coupledPatchMeshEdgeMapPtr_();
 }
 
 
