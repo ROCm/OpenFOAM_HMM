@@ -472,7 +472,7 @@ void Foam::Particle<ParticleType>::trackToFacePlanes
     // In both cases resolve the positional ambiguity by moving the particle
     // slightly towards the cell-centre.
 
-    if (trackFraction < Cloud<ParticleType>::minValidTrackFraction)
+    if (trackFraction < SMALL)
     {
         const polyMesh& mesh = cloud_.pMesh();
 
