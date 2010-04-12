@@ -178,10 +178,10 @@ void Foam::Cloud<ParticleType>::calcConcaveCells() const
         // }
 
         // Force all cells to be treated exactly
-        // concaveCell[cellI] = 1;
+        concaveCell[cellI] = 1;
 
         // Force all cells to be treated by planes
-        concaveCell[cellI] = 0;
+        // concaveCell[cellI] = 0;
     }
 
     // {

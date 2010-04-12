@@ -388,6 +388,8 @@ void Foam::InteractionLists<ParticleType>::writeReferredWallFaces() const
 {
     OFstream str(mesh_.time().path()/"referredWallFaces.obj");
 
+    Info<< "    Writing " << str.name().name() << endl;
+
     label offset = 1;
 
     forAll(referredWallFaces_, rWFI)
@@ -938,7 +940,10 @@ Foam::InteractionLists<ParticleType>::InteractionLists
 
     wallFaceMap().distribute(referredWallFaces_);
 
-    writeReferredWallFaces();
+    if (writeCloud_)
+    {
+        writeReferredWallFaces();
+    }
 
     // Direct interaction list and direct wall faces
 
