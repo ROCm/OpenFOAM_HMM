@@ -27,6 +27,7 @@ Description
 
 #include "DynamicList.H"
 #include "IOstreams.H"
+#include "ListOps.H"
 
 using namespace Foam;
 
@@ -184,6 +185,9 @@ int main(int argc, char *argv[])
 
     dlE3 = dlE2;   // assign identical
     Info<< "<dlE3>" << dlE3 << "</dlE3>" << endl;
+
+    DynamicList<label> dlE4(reorder(identity(dlE3.size()), dlE3));
+    Info<< "<dlE4>" << dlE4 << "</dlE4>" << endl;
 
 
     Info<< "\nEnd\n";
