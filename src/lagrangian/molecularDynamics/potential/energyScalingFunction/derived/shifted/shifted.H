@@ -74,10 +74,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~shifted()
-        {}
+    //- Destructor
+    ~shifted()
+    {}
 
 
     // Member Functions

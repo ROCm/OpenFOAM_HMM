@@ -108,9 +108,8 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~limitedSnGrad();
+    //- Destructor
+    virtual ~limitedSnGrad();
 
 
     // Member Functions

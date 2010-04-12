@@ -237,7 +237,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~sampledSet();
 
 

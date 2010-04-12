@@ -128,9 +128,8 @@ public:
             const dictionary& dict
         );
 
-    // Destructor
-
-        virtual ~searchableCylinder();
+    //- Destructor
+    virtual ~searchableCylinder();
 
 
     // Member Functions

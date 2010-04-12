@@ -100,9 +100,8 @@ public:
             return autoPtr<block>(NULL);
         }
 
-    // Destructor
-
-        ~block();
+    //- Destructor
+    ~block();
 
 
     // Member Functions

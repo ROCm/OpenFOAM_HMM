@@ -129,9 +129,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~XiGModel();
+    //- Destructor
+    virtual ~XiGModel();
 
 
     // Member Functions

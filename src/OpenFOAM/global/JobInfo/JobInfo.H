@@ -78,9 +78,8 @@ public:
         JobInfo();
 
 
-    // Destructor
-
-        ~JobInfo();
+    //- Destructor
+    ~JobInfo();
 
 
     // Member Functions

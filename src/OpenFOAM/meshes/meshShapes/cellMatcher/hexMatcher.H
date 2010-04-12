@@ -77,9 +77,8 @@ public:
         //- Construct null
         hexMatcher();
 
-    // Destructor
-
-        ~hexMatcher();
+    //- Destructor
+    ~hexMatcher();
 
 
     // Member Functions

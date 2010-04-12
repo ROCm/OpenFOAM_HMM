@@ -258,9 +258,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~PrimitivePatch();
+    //- Destructor
+    virtual ~PrimitivePatch();
 
         void clearOut();
 

@@ -99,9 +99,8 @@ public:
         static autoPtr<CompoundToken> New(const word& type, Istream& is);
 
 
-    // Destructor
-
-        virtual ~CompoundToken();
+    //- Destructor
+    virtual ~CompoundToken();
 
 
     // Member Functions

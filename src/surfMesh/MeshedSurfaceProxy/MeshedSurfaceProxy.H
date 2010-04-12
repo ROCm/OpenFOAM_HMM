@@ -102,9 +102,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~MeshedSurfaceProxy();
+    //- Destructor
+    virtual ~MeshedSurfaceProxy();
 
 
     // Member Function Selectors

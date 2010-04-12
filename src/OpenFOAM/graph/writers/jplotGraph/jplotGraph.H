@@ -67,10 +67,9 @@ public:
         {}
 
 
-    // Destructor
-
-        ~jplotGraph()
-        {}
+    //- Destructor
+    ~jplotGraph()
+    {}
 
 
     // Member Functions

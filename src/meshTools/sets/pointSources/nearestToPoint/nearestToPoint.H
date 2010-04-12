@@ -94,9 +94,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~nearestToPoint();
+    //- Destructor
+    virtual ~nearestToPoint();
 
 
     // Member Functions

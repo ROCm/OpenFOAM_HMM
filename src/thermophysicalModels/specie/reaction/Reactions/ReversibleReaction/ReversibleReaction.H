@@ -119,10 +119,9 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~ReversibleReaction()
-        {}
+    //- Destructor
+    virtual ~ReversibleReaction()
+    {}
 
 
     // Member Functions

@@ -107,9 +107,8 @@ public:
         //- Construct by transferring the contents
         inline Xfer(const Xfer<T>&);
 
-    // Destructor
-
-        inline ~Xfer();
+    //- Destructor
+    inline ~Xfer();
 
     // Member Functions
 

@@ -80,10 +80,9 @@ public:
         explicit repatchPolyTopoChanger(polyMesh& mesh);
 
 
-    // Destructor
-
-        virtual ~repatchPolyTopoChanger()
-        {}
+    //- Destructor
+    virtual ~repatchPolyTopoChanger()
+    {}
 
 
     // Member Functions

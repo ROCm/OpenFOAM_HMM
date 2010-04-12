@@ -280,9 +280,8 @@ public:
 
 
 
-    // Destructor
-
-        ~triSurface();
+    //- Destructor
+    ~triSurface();
 
         void clearOut();
 

@@ -138,9 +138,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~pointFieldDecomposer();
+    //- Destructor
+    ~pointFieldDecomposer();
 
 
     // Member Functions

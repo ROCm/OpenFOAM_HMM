@@ -82,9 +82,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~singlePhaseTransportModel();
+    //- Destructor
+    virtual ~singlePhaseTransportModel();
 
 
     // Member Functions

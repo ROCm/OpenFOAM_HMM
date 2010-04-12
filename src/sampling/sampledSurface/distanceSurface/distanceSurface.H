@@ -126,9 +126,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~distanceSurface();
+    //- Destructor
+    virtual ~distanceSurface();
 
 
     // Member Functions

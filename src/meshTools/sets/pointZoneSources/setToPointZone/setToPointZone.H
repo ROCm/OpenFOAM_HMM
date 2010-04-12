@@ -87,9 +87,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~setToPointZone();
+    //- Destructor
+    virtual ~setToPointZone();
 
 
     // Member Functions

@@ -93,10 +93,9 @@ public:
                 directAddressing_(directAddressing)
             {}
 
-        // Destructor
-
-            virtual ~patchFieldSubset()
-            {}
+        //- Destructor
+        virtual ~patchFieldSubset()
+        {}
 
 
         // Member Functions
@@ -135,10 +134,9 @@ public:
                 directAddressing_(directAddressing)
             {}
 
-        // Destructor
-
-            virtual ~pointPatchFieldSubset()
-            {}
+        //- Destructor
+        virtual ~pointPatchFieldSubset()
+        {}
 
 
         // Member Functions

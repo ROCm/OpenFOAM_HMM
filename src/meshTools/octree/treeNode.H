@@ -159,9 +159,8 @@ public:
         treeNode(Istream&);
 
 
-    // Destructor
-
-        ~treeNode();
+    //- Destructor
+    ~treeNode();
 
 
     // Member Functions

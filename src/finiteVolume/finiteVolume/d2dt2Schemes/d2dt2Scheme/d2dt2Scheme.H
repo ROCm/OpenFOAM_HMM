@@ -126,9 +126,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~d2dt2Scheme();
+    //- Destructor
+    virtual ~d2dt2Scheme();
 
 
     // Member Functions

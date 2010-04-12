@@ -87,9 +87,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~faceZoneToFaceZone();
+    //- Destructor
+    virtual ~faceZoneToFaceZone();
 
 
     // Member Functions

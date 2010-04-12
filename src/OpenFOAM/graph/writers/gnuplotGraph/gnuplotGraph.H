@@ -67,10 +67,9 @@ public:
         {}
 
 
-    // Destructor
-
-        ~gnuplotGraph()
-        {}
+    //- Destructor
+    ~gnuplotGraph()
+    {}
 
 
     // Member Functions

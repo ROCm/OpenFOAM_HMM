@@ -71,9 +71,8 @@ public:
         staticFvMesh(const IOobject& io);
 
 
-    // Destructor
-
-        ~staticFvMesh();
+    //- Destructor
+    ~staticFvMesh();
 
 
     // Member Functions

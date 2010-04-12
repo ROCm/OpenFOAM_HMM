@@ -91,9 +91,8 @@ public:
         motionDiffusivity(const fvMotionSolver& mSolver);
 
 
-    // Destructor
-
-        virtual ~motionDiffusivity();
+    //- Destructor
+    virtual ~motionDiffusivity();
 
 
     // Member Functions

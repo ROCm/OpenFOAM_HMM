@@ -99,9 +99,8 @@ public:
 
 
 
-    // Destructor
-
-        virtual ~faceZoneSet();
+    //- Destructor
+    virtual ~faceZoneSet();
 
 
     // Member functions

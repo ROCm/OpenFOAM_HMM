@@ -123,9 +123,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~octreeLine();
+    //- Destructor
+    ~octreeLine();
 
 
     // Member Functions

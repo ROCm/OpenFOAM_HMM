@@ -94,7 +94,7 @@ public:
         P1(const volScalarField& T);
 
 
-    // Destructor
+    //- Destructor
     virtual ~P1();
 
 

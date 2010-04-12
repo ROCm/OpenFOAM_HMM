@@ -120,9 +120,8 @@ public:
             const dictionary& dict
         );
 
-    // Destructor
-
-        virtual ~searchableSurfaceWithGaps();
+    //- Destructor
+    virtual ~searchableSurfaceWithGaps();
 
 
     // Member Functions

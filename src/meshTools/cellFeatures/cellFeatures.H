@@ -124,9 +124,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~cellFeatures();
+    //- Destructor
+    ~cellFeatures();
 
 
     // Member Functions

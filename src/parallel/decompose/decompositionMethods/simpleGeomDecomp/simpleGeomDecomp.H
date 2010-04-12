@@ -84,10 +84,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~simpleGeomDecomp()
-        {}
+    //- Destructor
+    virtual ~simpleGeomDecomp()
+    {}
 
 
     // Member Functions

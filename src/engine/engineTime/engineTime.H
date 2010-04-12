@@ -110,10 +110,9 @@ public:
             const fileName& dictName = "engineGeometry"
         );
 
-    // Destructor
-
-        virtual ~engineTime()
-        {}
+    //- Destructor
+    virtual ~engineTime()
+    {}
 
 
     // Member Functions

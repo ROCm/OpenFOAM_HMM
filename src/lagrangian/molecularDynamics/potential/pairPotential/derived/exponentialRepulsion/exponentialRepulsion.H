@@ -76,10 +76,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~exponentialRepulsion()
-        {}
+    //- Destructor
+    ~exponentialRepulsion()
+    {}
 
 
     // Member Functions

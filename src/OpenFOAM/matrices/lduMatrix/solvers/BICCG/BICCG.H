@@ -109,10 +109,9 @@ public:
             const scalar relTol = 0.0
         );
 
-    // Destructor
-
-        virtual ~BICCG()
-        {}
+    //- Destructor
+    virtual ~BICCG()
+    {}
 
 };
 

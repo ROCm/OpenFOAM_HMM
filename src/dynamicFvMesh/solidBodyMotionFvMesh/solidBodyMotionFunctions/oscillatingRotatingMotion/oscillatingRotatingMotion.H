@@ -91,9 +91,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~oscillatingRotatingMotion();
+    //- Destructor
+    virtual ~oscillatingRotatingMotion();
 
 
     // Member Functions

@@ -130,9 +130,8 @@ public:
             const dictionary& dict
         );
 
-    // Destructor
-
-        virtual ~searchableSurfaceCollection();
+    //- Destructor
+    virtual ~searchableSurfaceCollection();
 
 
     // Member Functions

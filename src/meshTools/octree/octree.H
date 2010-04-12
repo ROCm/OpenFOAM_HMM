@@ -212,9 +212,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~octree();
+    //- Destructor
+    ~octree();
 
 
     // Member Functions

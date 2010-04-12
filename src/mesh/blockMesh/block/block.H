@@ -121,8 +121,7 @@ public:
 
 
     //- Destructor
-
-        ~block();
+    ~block();
 
 
     // Member Functions

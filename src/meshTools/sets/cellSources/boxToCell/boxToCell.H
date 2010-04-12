@@ -96,9 +96,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~boxToCell();
+    //- Destructor
+    virtual ~boxToCell();
 
 
     // Member Functions

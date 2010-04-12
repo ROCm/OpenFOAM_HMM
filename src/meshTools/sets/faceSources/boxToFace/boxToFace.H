@@ -95,9 +95,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~boxToFace();
+    //- Destructor
+    virtual ~boxToFace();
 
 
     // Member Functions

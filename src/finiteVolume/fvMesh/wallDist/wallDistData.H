@@ -103,9 +103,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~wallDistData();
+    //- Destructor
+    virtual ~wallDistData();
 
 
     // Member Functions

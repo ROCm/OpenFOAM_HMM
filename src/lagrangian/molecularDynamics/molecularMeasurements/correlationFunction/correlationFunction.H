@@ -120,9 +120,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~correlationFunction();
+    //- Destructor
+    ~correlationFunction();
 
 
     // Member Functions

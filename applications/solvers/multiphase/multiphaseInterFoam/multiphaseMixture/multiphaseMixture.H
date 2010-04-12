@@ -209,10 +209,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~multiphaseMixture()
-        {}
+    //- Destructor
+    ~multiphaseMixture()
+    {}
 
 
     // Member Functions

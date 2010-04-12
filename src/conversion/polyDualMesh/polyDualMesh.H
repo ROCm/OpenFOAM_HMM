@@ -194,9 +194,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~polyDualMesh();
+    //- Destructor
+    ~polyDualMesh();
 
 
     // Member Functions

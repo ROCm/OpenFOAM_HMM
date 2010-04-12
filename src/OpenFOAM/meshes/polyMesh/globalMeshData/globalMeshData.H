@@ -358,9 +358,8 @@ public:
         globalMeshData(const IOobject& io, const polyMesh& mesh);
 
 
-    // Destructor
-
-        ~globalMeshData();
+    //- Destructor
+    ~globalMeshData();
 
         //- Remove all demand driven data
         void clearOut();

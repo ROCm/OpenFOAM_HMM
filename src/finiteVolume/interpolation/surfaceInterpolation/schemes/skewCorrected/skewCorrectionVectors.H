@@ -76,9 +76,8 @@ public:
         explicit skewCorrectionVectors(const fvMesh& mesh);
 
 
-    // Destructor
-
-        virtual ~skewCorrectionVectors();
+    //- Destructor
+    virtual ~skewCorrectionVectors();
 
 
     // Member functions

@@ -165,12 +165,11 @@ public:
         {}
 
 
-    // Destructor
-
-        ~OSHA1stream()
-        {
-            delete &dynamic_cast<osha1stream&>(stdStream());
-        }
+    //- Destructor
+    ~OSHA1stream()
+    {
+        delete &dynamic_cast<osha1stream&>(stdStream());
+    }
 
 
     // Member functions

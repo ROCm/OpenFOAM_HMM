@@ -95,9 +95,8 @@ public:
         octreeDataEdges(const octreeDataEdges&);
 
 
-    // Destructor
-
-        ~octreeDataEdges();
+    //- Destructor
+    ~octreeDataEdges();
 
 
     // Member Functions

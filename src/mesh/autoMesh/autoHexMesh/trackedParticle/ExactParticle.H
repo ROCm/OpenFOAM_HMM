@@ -123,10 +123,9 @@ public:
         };
 
 
-    // Destructor
-
-        virtual ~ExactParticle()
-        {}
+    //- Destructor
+    virtual ~ExactParticle()
+    {}
 
 
     // Member Functions

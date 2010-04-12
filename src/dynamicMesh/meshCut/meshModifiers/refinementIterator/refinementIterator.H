@@ -101,9 +101,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~refinementIterator();
+    //- Destructor
+    ~refinementIterator();
 
 
     // Member Functions

@@ -70,7 +70,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~MixedDiffuseSpecular();
 
 

@@ -113,9 +113,8 @@ public:
         interpolate();
 
 
-    // Destructor
-
-        virtual ~interpolate();
+    //- Destructor
+    virtual ~interpolate();
 };
 
 

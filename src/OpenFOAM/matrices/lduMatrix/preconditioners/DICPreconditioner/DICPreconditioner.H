@@ -74,10 +74,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~DICPreconditioner()
-        {}
+    //- Destructor
+    virtual ~DICPreconditioner()
+    {}
 
 
     // Member Functions

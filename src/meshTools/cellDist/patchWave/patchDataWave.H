@@ -133,9 +133,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~patchDataWave();
+    //- Destructor
+    virtual ~patchDataWave();
 
 
     // Member Functions

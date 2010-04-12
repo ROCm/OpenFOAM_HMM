@@ -79,9 +79,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~GAMGPreconditioner();
+    //- Destructor
+    virtual ~GAMGPreconditioner();
 
 
     // Member Functions

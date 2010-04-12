@@ -88,9 +88,8 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~fixedLine();
+    //- Destructor
+    virtual ~fixedLine();
 
 
     // Member Functions

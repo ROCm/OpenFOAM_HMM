@@ -145,9 +145,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~displacementLayeredMotionFvMotionSolver();
+    //- Destructor
+    ~displacementLayeredMotionFvMotionSolver();
 
 
     // Member Functions

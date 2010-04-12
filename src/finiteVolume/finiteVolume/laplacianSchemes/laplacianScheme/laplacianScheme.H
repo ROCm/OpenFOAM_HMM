@@ -156,9 +156,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~laplacianScheme();
+    //- Destructor
+    virtual ~laplacianScheme();
 
 
     // Member Functions

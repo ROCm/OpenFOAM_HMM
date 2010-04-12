@@ -109,9 +109,8 @@ public:
             bool correctWalls = true
         );
 
-    // Destructor
-
-        virtual ~patchWave();
+    //- Destructor
+    virtual ~patchWave();
 
 
     // Member Functions

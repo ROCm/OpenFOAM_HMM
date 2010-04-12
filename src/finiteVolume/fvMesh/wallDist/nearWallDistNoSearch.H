@@ -80,9 +80,8 @@ public:
         nearWallDistNoSearch(const fvMesh& mesh);
 
 
-    // Destructor
-
-        virtual ~nearWallDistNoSearch();
+    //- Destructor
+    virtual ~nearWallDistNoSearch();
 
 
     // Member Functions

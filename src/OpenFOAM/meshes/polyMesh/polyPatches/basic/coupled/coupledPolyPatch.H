@@ -234,9 +234,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~coupledPolyPatch();
+    //- Destructor
+    virtual ~coupledPolyPatch();
 
 
     // Member Functions

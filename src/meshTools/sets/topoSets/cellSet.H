@@ -134,9 +134,8 @@ public:
             );
 
 
-    // Destructor
-
-        virtual ~cellSet();
+    //- Destructor
+    virtual ~cellSet();
 
 
     // Member functions

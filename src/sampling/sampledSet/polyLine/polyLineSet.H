@@ -119,7 +119,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~polyLineSet();
 };
 

@@ -76,9 +76,8 @@ public:
         processorLduInterface();
 
 
-    // Destructor
-
-        virtual ~processorLduInterface();
+    //- Destructor
+    virtual ~processorLduInterface();
 
 
     // Member Functions

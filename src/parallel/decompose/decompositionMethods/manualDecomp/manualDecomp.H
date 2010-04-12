@@ -81,10 +81,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~manualDecomp()
-        {}
+    //- Destructor
+    virtual ~manualDecomp()
+    {}
 
 
     // Member Functions

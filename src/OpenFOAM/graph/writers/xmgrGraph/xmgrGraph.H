@@ -68,10 +68,9 @@ public:
         {}
 
 
-    // Destructor
-
-        ~xmgrGraph()
-        {}
+    //- Destructor
+    ~xmgrGraph()
+    {}
 
 
     // Member Functions

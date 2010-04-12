@@ -113,9 +113,8 @@ public:
         faceMapper(const mapPolyMesh& mpm);
 
 
-    // Destructor
-
-        virtual ~faceMapper();
+    //- Destructor
+    virtual ~faceMapper();
 
 
     // Member Functions

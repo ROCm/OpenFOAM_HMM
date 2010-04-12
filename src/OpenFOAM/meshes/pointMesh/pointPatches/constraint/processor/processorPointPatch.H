@@ -110,9 +110,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~processorPointPatch();
+    //- Destructor
+    virtual ~processorPointPatch();
 
 
     // Member functions

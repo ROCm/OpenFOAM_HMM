@@ -114,9 +114,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~fvPatchMapper();
+    //- Destructor
+    virtual ~fvPatchMapper();
 
 
     // Member Functions

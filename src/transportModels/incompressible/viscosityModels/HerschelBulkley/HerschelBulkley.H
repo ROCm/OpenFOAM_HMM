@@ -90,10 +90,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~HerschelBulkley()
-        {}
+    //- Destructor
+    ~HerschelBulkley()
+    {}
 
 
     // Member Functions

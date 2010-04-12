@@ -2,7 +2,7 @@
 #
 #+TITLE:                 OpenFOAM C++ style guide
 #+AUTHOR:                      OpenCFD Ltd.
-#+DATE:                       November 2009
+#+DATE:                         April 2010
 #+LINK:                  http://www.opencfd.co.uk
 #+OPTIONS: author:nil ^:{}
 

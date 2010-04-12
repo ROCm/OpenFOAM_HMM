@@ -77,9 +77,8 @@ public:
         //- Construct
         prismMatcher();
 
-    // Destructor
-
-        ~prismMatcher();
+    //- Destructor
+    ~prismMatcher();
 
 
     // Member Functions

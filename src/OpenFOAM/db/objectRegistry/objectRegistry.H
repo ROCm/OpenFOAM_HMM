@@ -101,9 +101,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~objectRegistry();
+    //- Destructor
+    virtual ~objectRegistry();
 
 
     // Member functions

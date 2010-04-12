@@ -86,10 +86,9 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~OBJedgeFormat()
-        {}
+    //- Destructor
+    virtual ~OBJedgeFormat()
+    {}
 
 
     // Member Functions

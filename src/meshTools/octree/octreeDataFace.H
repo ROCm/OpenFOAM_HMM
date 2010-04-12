@@ -130,9 +130,8 @@ public:
         octreeDataFace(const octreeDataFace&);
 
 
-    // Destructor
-
-        ~octreeDataFace();
+    //- Destructor
+    ~octreeDataFace();
 
 
     // Member Functions

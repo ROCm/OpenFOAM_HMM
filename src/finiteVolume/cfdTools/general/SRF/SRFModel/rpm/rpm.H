@@ -81,9 +81,8 @@ public:
         rpm(const volVectorField& U);
 
 
-    // Destructor
-
-        ~rpm();
+    //- Destructor
+    ~rpm();
 
     // Member functions
 

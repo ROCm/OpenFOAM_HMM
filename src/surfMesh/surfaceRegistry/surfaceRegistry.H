@@ -78,9 +78,8 @@ public:
         surfaceRegistry(const objectRegistry&, const word& surfName = "");
 
 
-    // Destructor
-
-        virtual ~surfaceRegistry();
+    //- Destructor
+    virtual ~surfaceRegistry();
 };
 
 

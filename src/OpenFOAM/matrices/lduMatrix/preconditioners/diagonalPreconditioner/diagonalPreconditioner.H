@@ -84,10 +84,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~diagonalPreconditioner()
-        {}
+    //- Destructor
+    virtual ~diagonalPreconditioner()
+    {}
 
 
     // Member Functions

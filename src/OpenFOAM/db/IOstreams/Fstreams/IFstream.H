@@ -70,9 +70,8 @@ class IFstreamAllocator
         IFstreamAllocator(const fileName& pathname);
 
 
-    // Destructor
-
-        ~IFstreamAllocator();
+    //- Destructor
+    ~IFstreamAllocator();
 };
 
 
@@ -106,9 +105,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~IFstream();
+    //- Destructor
+    ~IFstream();
 
 
     // Member functions

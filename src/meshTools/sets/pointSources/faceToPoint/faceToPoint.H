@@ -109,9 +109,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~faceToPoint();
+    //- Destructor
+    virtual ~faceToPoint();
 
 
     // Member Functions

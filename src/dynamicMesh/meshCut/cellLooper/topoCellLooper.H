@@ -168,9 +168,8 @@ public:
         topoCellLooper(const polyMesh& mesh);
 
 
-    // Destructor
-
-        virtual ~topoCellLooper();
+    //- Destructor
+    virtual ~topoCellLooper();
 
 
     // Member Functions

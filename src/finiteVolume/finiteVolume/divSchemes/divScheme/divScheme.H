@@ -129,9 +129,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~divScheme();
+    //- Destructor
+    virtual ~divScheme();
 
 
     // Member Functions

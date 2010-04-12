@@ -66,10 +66,9 @@ public:
         virtual autoPtr<topoAction> clone() const = 0;
 
 
-    // Destructor
-
-        virtual ~topoAction()
-        {}
+    //- Destructor
+    virtual ~topoAction()
+    {}
 
 };
 

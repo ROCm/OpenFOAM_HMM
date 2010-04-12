@@ -74,9 +74,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~referredMolecule();
+    //- Destructor
+    virtual ~referredMolecule();
 
 
     // Member Functions

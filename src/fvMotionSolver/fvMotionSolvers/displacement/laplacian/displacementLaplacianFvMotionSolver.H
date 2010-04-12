@@ -102,9 +102,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~displacementLaplacianFvMotionSolver();
+    //- Destructor
+    ~displacementLaplacianFvMotionSolver();
 
 
     // Member Functions

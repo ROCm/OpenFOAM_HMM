@@ -105,7 +105,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~oneEqEddy()
     {}
 

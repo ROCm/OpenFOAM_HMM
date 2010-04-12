@@ -90,10 +90,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~Merkle()
-        {}
+    //- Destructor
+    virtual ~Merkle()
+    {}
 
 
     // Member Functions

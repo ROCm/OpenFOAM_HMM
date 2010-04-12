@@ -238,9 +238,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~sammMesh();
+    //- Destructor
+    ~sammMesh();
 
 
     // Member Functions

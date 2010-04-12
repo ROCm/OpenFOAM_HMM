@@ -63,9 +63,8 @@ public:
         subCycleTime(Time&, const label nSubCycles);
 
 
-    // Destructor
-
-        ~subCycleTime();
+    //- Destructor
+    ~subCycleTime();
 
 
     // Member functions

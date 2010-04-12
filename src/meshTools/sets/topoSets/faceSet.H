@@ -101,9 +101,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~faceSet();
+    //- Destructor
+    virtual ~faceSet();
 
 
     // Member functions

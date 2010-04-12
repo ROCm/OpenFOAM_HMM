@@ -105,9 +105,8 @@ public:
             const dictionary& dict
         );
 
-    // Destructor
-
-        virtual ~searchableBox();
+    //- Destructor
+    virtual ~searchableBox();
 
 
     // Member Functions

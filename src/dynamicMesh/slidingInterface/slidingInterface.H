@@ -340,9 +340,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~slidingInterface();
+    //- Destructor
+    virtual ~slidingInterface();
 
 
     // Member Functions

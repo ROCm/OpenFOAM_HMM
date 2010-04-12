@@ -118,9 +118,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~sampledTriSurfaceMesh();
+    //- Destructor
+    virtual ~sampledTriSurfaceMesh();
 
 
     // Member Functions

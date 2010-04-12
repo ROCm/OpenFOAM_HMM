@@ -108,10 +108,9 @@ public:
             const scalar relTol = 0.0
         );
 
-    // Destructor
-
-        virtual ~ICCG()
-        {}
+    //- Destructor
+    virtual ~ICCG()
+    {}
 
 };
 

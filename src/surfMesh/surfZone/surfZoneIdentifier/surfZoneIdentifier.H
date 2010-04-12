@@ -104,9 +104,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~surfZoneIdentifier();
+    //- Destructor
+    virtual ~surfZoneIdentifier();
 
 
     // Member Functions

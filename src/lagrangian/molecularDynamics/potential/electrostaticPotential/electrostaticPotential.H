@@ -61,10 +61,9 @@ public:
         electrostaticPotential();
 
 
-    // Destructor
-
-        ~electrostaticPotential()
-        {}
+    //- Destructor
+    ~electrostaticPotential()
+    {}
 
 
     // Member Functions

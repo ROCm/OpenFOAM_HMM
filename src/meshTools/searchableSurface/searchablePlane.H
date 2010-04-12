@@ -100,9 +100,8 @@ public:
             const dictionary& dict
         );
 
-    // Destructor
-
-        virtual ~searchablePlane();
+    //- Destructor
+    virtual ~searchablePlane();
 
 
     // Member Functions

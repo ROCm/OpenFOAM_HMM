@@ -125,9 +125,8 @@ public:
         rawSurfaceWriter();
 
 
-    // Destructor
-
-        virtual ~rawSurfaceWriter();
+    //- Destructor
+    virtual ~rawSurfaceWriter();
 
 
     // Member Functions

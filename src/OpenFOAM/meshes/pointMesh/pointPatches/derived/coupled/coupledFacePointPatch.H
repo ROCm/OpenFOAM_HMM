@@ -94,9 +94,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~coupledFacePointPatch();
+    //- Destructor
+    virtual ~coupledFacePointPatch();
 
 
     // Member Functions

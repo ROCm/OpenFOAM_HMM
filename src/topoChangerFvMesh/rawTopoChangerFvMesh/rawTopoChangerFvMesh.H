@@ -87,9 +87,8 @@ public:
         //- Construct from database
         explicit rawTopoChangerFvMesh(const IOobject& io);
 
-    // Destructor
-
-        virtual ~rawTopoChangerFvMesh();
+    //- Destructor
+    virtual ~rawTopoChangerFvMesh();
 
 
     // Member Functions

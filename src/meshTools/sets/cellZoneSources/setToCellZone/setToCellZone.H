@@ -87,9 +87,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~setToCellZone();
+    //- Destructor
+    virtual ~setToCellZone();
 
 
     // Member Functions

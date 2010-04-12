@@ -82,10 +82,9 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~NASedgeFormat()
-        {}
+    //- Destructor
+    virtual ~NASedgeFormat()
+    {}
 
 
     // Member Functions

@@ -520,9 +520,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~cellCuts();
+    //- Destructor
+    ~cellCuts();
 
         //- Clear out demand driven storage
         void clearOut();

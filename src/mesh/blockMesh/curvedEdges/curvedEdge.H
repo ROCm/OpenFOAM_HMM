@@ -117,9 +117,8 @@ public:
         static autoPtr<curvedEdge> New(const pointField&, Istream&);
 
 
-    // Destructor
-
-        virtual ~curvedEdge(){}
+    //- Destructor
+    virtual ~curvedEdge(){}
 
 
     // Member Functions

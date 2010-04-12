@@ -78,10 +78,9 @@ public:
         static autoPtr<thermophysicalFunction> New(Istream& is);
 
 
-    // Destructor
-
-        virtual ~thermophysicalFunction()
-        {}
+    //- Destructor
+    virtual ~thermophysicalFunction()
+    {}
 
 
     // Member Functions

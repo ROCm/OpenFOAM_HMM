@@ -111,9 +111,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~snGradScheme();
+    //- Destructor
+    virtual ~snGradScheme();
 
 
     // Member Functions

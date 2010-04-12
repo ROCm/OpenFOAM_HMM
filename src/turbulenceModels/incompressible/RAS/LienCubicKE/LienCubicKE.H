@@ -103,7 +103,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~LienCubicKE()
     {}
 
