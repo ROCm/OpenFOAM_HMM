@@ -176,8 +176,7 @@ int main(int argc, char *argv[])
 
             forAll(patchField, patchFaceI)
             {
-                label meshFaceI =
-                    patchField.patch().patch().start() + patchFaceI;
+                const label meshFaceI = patchField.patch().start() + patchFaceI;
 
                 scalar dist = faceInfo[meshFaceI].distSqr();
                 if (faceInfo[meshFaceI].valid())
