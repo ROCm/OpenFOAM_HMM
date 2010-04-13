@@ -27,6 +27,8 @@ License
 #include "fvMesh.H"
 #include "volFields.H"
 #include "fvcGrad.H"
+#include "mathematicalConstants.H"
+#include "electromagneticConstants.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -41,15 +43,24 @@ Foam::particleForces::particleForces
     dict_(dict.subDict("particleForces")),
     g_(g),
     gradUPtr_(NULL),
+    gradHPtr_(NULL),
     gravity_(dict_.lookup("gravity")),
     virtualMass_(dict_.lookup("virtualMass")),
     Cvm_(0.0),
     pressureGradient_(dict_.lookup("pressureGradient")),
-    UName_(dict_.lookupOrDefault<word>("U", "U"))
+    paramagnetic_(dict_.lookup("paramagnetic")),
+    chi_(0.0),
+    UName_(dict_.lookupOrDefault<word>("U", "U")),
+    HName_(dict_.lookupOrDefault<word>("H", "H"))
 {
     if (virtualMass_)
     {
         dict_.lookup("Cvm") >> Cvm_;
+    }
+
+    if (paramagnetic_)
+    {
+        dict_.lookup("chi") >> chi_;
     }
 }
 
@@ -60,11 +71,15 @@ Foam::particleForces::particleForces(const particleForces& f)
     dict_(f.dict_),
     g_(f.g_),
     gradUPtr_(f.gradUPtr_),
+    gradHPtr_(f.gradHPtr_),
     gravity_(f.gravity_),
     virtualMass_(f.virtualMass_),
     Cvm_(f.Cvm_),
     pressureGradient_(f.pressureGradient_),
-    UName_(f.UName_)
+    paramagnetic_(f.paramagnetic_),
+    chi_(f.chi_),
+    UName_(f.UName_),
+    HName_(f.HName_)
 {}
 
 
@@ -102,15 +117,39 @@ Foam::Switch Foam::particleForces::virtualMass() const
 }
 
 
+Foam::scalar Foam::particleForces::Cvm() const
+{
+    return Cvm_;
+}
+
+
 Foam::Switch Foam::particleForces::pressureGradient() const
 {
     return pressureGradient_;
 }
 
 
+Foam::Switch Foam::particleForces::paramagnetic() const
+{
+    return paramagnetic_;
+}
+
+
+Foam::scalar Foam::particleForces::chi() const
+{
+    return chi_;
+}
+
+
 const Foam::word& Foam::particleForces::UName() const
 {
     return UName_;
+}
+
+
+const Foam::word& Foam::particleForces::HName() const
+{
+    return HName_;
 }
 
 
@@ -129,6 +168,20 @@ void Foam::particleForces::cacheFields(const bool store)
             gradUPtr_ = NULL;
         }
     }
+
+    if (store && paramagnetic_)
+    {
+        const volVectorField& H = mesh_.lookupObject<volVectorField>(HName_);
+        gradHPtr_ = fvc::grad(H).ptr();
+    }
+    else
+    {
+        if (gradHPtr_)
+        {
+            delete gradHPtr_;
+            gradHPtr_ = NULL;
+        }
+    }
 }
 
 
@@ -139,7 +192,8 @@ Foam::vector Foam::particleForces::calcCoupled
     const scalar rhoc,
     const scalar rho,
     const vector& Uc,
-    const vector& U
+    const vector& U,
+    const scalar d
 ) const
 {
     vector Ftot = vector::zero;
@@ -172,7 +226,8 @@ Foam::vector Foam::particleForces::calcNonCoupled
     const scalar rhoc,
     const scalar rho,
     const vector& Uc,
-    const vector& U
+    const vector& U,
+    const scalar d
 ) const
 {
     vector Ftot = vector::zero;
@@ -183,9 +238,34 @@ Foam::vector Foam::particleForces::calcNonCoupled
         Ftot += g_*(1.0 - rhoc/rho);
     }
 
+    // Magnetic field force
+
+    if (paramagnetic_)
+    {
+        const volVectorField& H = mesh_.lookupObject<volVectorField>(HName_);
+
+        const volTensorField& gradH = *gradHPtr_;
+
+        Ftot +=
+            3.0*constant::electromagnetic::mu0.value()/rho
+           *chi_/(chi_ + 3)
+           *(H[cellI] & gradH[cellI]);
+
+        // force is:
+
+        // 4.0
+        // *constant::mathematical::pi
+        // *constant::electromagnetic::mu0.value()
+        // *pow3(d/2)
+        // *chi/(chi + 3)
+        // *(H[cellI] & gradH[cellI]);
+
+        // which is divided by mass ((4/3)*pi*r^3*rho) to produce
+        // acceleration
+    }
+
     return Ftot;
 }
 
 
 // ************************************************************************* //
-
