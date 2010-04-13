@@ -32,7 +32,7 @@ Description
 
 SourceFiles
     polyPatch.C
-    newPolyPatch.C
+    polyPatchNew.C
 
 \*---------------------------------------------------------------------------*/
 

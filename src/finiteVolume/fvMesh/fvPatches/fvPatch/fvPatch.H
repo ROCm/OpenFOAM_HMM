@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     fvPatch.C
-    newFvPatch.C
+    fvPatchNew.C
 
 \*---------------------------------------------------------------------------*/
 

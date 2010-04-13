@@ -34,7 +34,7 @@ Description
 
 SourceFiles
     cellZone.C
-    newCellZone.C
+    cellZoneNew.C
 
 \*---------------------------------------------------------------------------*/
 

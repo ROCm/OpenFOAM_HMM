@@ -6,7 +6,7 @@ ODESolversRK  =  ODESolvers/RK
 ODESolversSIBS  =  ODESolvers/SIBS
 
 $(ODESolversODESolver)/ODESolver.C
-$(ODESolversODESolver)/newODESolver.C
+$(ODESolversODESolver)/ODESolverNew.C
 
 $(ODESolversRK)/RK.C
 

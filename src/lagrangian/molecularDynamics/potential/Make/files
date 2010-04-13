@@ -8,7 +8,7 @@ $(pairPotential)/pairPotentialList/pairPotentialList.C
 
 $(pairPotential)/basic/pairPotential.C
 $(pairPotential)/basic/pairPotentialIO.C
-$(pairPotential)/basic/newPairPotential.C
+$(pairPotential)/basic/pairPotentialNew.C
 
 $(pairPotential)/derived/lennardJones/lennardJones.C
 $(pairPotential)/derived/maitlandSmith/maitlandSmith.C
@@ -21,7 +21,7 @@ $(pairPotential)/derived/noInteraction/noInteraction.C
 energyScalingFunction = energyScalingFunction
 
 $(energyScalingFunction)/basic/energyScalingFunction.C
-$(energyScalingFunction)/basic/newEnergyScalingFunction.C
+$(energyScalingFunction)/basic/energyScalingFunctionNew.C
 
 $(energyScalingFunction)/derived/shifted/shifted.C
 $(energyScalingFunction)/derived/shiftedForce/shiftedForce.C
@@ -34,7 +34,7 @@ tetherPotential = tetherPotential
 $(tetherPotential)/tetherPotentialList/tetherPotentialList.C
 
 $(tetherPotential)/basic/tetherPotential.C
-$(tetherPotential)/basic/newTetherPotential.C
+$(tetherPotential)/basic/tetherPotentialNew.C
 
 $(tetherPotential)/derived/harmonicSpring/harmonicSpring.C
 $(tetherPotential)/derived/restrainedHarmonicSpring/restrainedHarmonicSpring.C

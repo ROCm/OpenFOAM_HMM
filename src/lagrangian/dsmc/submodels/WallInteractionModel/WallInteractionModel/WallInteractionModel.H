@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     WallInteractionModel.C
-    NewWallInteractionModel.C
+    WallInteractionModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
