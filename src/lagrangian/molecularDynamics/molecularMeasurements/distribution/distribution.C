@@ -340,7 +340,7 @@ Foam::List<Foam::Pair<Foam::scalar> > Foam::distribution::normalisedShifted
 
         scalar checkNormalisation = 0;
 
-        forAll (oldDist, oD)
+        forAll(oldDist, oD)
         {
             checkNormalisation += oldDist[oD].second()*binWidth_;
         }
@@ -404,7 +404,7 @@ Foam::List<Foam::Pair<Foam::scalar> > Foam::distribution::normalisedShifted
     {
         scalar checkNormalisation = 0;
 
-        forAll (newDist, nD)
+        forAll(newDist, nD)
         {
             checkNormalisation += newDist[nD].second()*binWidth_;
         }

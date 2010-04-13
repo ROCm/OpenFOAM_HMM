@@ -91,10 +91,9 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~OFSsurfaceFormat()
-        {}
+    //- Destructor
+    virtual ~OFSsurfaceFormat()
+    {}
 
 
 

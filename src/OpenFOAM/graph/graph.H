@@ -226,10 +226,9 @@ public:
                     {}
 
 
-                // Destructor
-
-                    virtual ~writer()
-                    {}
+                //- Destructor
+                virtual ~writer()
+                {}
 
 
                 // Member Functions

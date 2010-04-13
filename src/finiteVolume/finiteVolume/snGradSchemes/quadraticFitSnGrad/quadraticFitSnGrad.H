@@ -97,9 +97,8 @@ public:
         {}
 
 
-    // Destructor
-
-        virtual ~quadraticFitSnGrad() {}
+    //- Destructor
+    virtual ~quadraticFitSnGrad() {}
 
 
     // Member Functions

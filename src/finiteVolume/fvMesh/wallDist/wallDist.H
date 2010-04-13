@@ -113,9 +113,8 @@ public:
         wallDist(const fvMesh& mesh, bool correctWalls = true);
 
 
-    // Destructor
-
-        virtual ~wallDist();
+    //- Destructor
+    virtual ~wallDist();
 
 
     // Member Functions

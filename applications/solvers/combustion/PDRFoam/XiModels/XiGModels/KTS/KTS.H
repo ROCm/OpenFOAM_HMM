@@ -85,9 +85,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~KTS();
+    //- Destructor
+    virtual ~KTS();
 
 
     // Member Functions

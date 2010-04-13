@@ -95,9 +95,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~zoneToPoint();
+    //- Destructor
+    virtual ~zoneToPoint();
 
 
     // Member Functions

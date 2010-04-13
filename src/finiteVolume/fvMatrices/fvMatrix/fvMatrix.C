@@ -203,7 +203,7 @@ Foam::fvMatrix<Type>::fvMatrix
     }
 
     // Initialise coupling coefficients
-    forAll (psi.mesh().boundary(), patchI)
+    forAll(psi.mesh().boundary(), patchI)
     {
         internalCoeffs_.set
         (
@@ -348,7 +348,7 @@ Foam::fvMatrix<Type>::fvMatrix
     }
 
     // Initialise coupling coefficients
-    forAll (psi.mesh().boundary(), patchI)
+    forAll(psi.mesh().boundary(), patchI)
     {
         internalCoeffs_.set
         (

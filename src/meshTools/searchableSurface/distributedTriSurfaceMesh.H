@@ -324,9 +324,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~distributedTriSurfaceMesh();
+    //- Destructor
+    virtual ~distributedTriSurfaceMesh();
 
         //- Clear storage
         void clearOut();

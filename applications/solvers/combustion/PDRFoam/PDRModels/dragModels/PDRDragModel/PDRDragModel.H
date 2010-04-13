@@ -137,9 +137,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~PDRDragModel();
+    //- Destructor
+    virtual ~PDRDragModel();
 
 
     // Member Functions

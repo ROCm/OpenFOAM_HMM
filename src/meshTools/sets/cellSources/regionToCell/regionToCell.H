@@ -99,9 +99,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~regionToCell();
+    //- Destructor
+    virtual ~regionToCell();
 
 
     // Member Functions

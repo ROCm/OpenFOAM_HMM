@@ -68,10 +68,8 @@ public:
         inline autoPtr(const autoPtr<T>&);
 
 
-    // Destructor
-
-        //- Delete object if pointer is not NULL
-        inline ~autoPtr();
+    //- Destructor, delete object if pointer is not NULL
+    inline ~autoPtr();
 
 
     // Member Functions

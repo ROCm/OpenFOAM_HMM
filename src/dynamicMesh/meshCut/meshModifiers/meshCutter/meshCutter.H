@@ -274,9 +274,8 @@ public:
         meshCutter(const polyMesh& mesh);
 
 
-    // Destructor
-
-        ~meshCutter();
+    //- Destructor
+    ~meshCutter();
 
 
     // Member Functions

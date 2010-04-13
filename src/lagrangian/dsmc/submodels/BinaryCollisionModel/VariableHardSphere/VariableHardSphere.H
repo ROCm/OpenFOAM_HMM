@@ -68,7 +68,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~VariableHardSphere();
 
 

@@ -22,11 +22,11 @@ for (label i=0; i < nTypes; i++)
 
         if (fieldTypes[i] == "volScalarField")
         {
-            volScalarField gmvScalarField(fieldObject, mesh);
+            volScalarField fld(fieldObject, mesh);
             gmvFile << fieldName << " 0" << nl;
             for (label indx=0;indx<mesh.nCells();indx++)
             {
-                gmvFile << gmvScalarField[indx] << " ";
+                gmvFile << fld[indx] << " ";
             }
             gmvFile << nl;
         }
@@ -35,19 +35,19 @@ for (label i=0; i < nTypes; i++)
         {
             if (fieldName == vComp)
             {
-                volVectorField gmvVectorField(fieldObject, mesh);
+                volVectorField fld(fieldObject, mesh);
                 gmvFile << "velocity 0" << nl;
                 for (label indx=0;indx<mesh.nCells();indx++)
                 {
-                    gmvFile << gmvVectorField[indx].x() << " ";
+                    gmvFile << fld[indx].x() << " ";
                 }
                 for (label indx=0;indx<mesh.nCells();indx++)
                 {
-                    gmvFile << gmvVectorField[indx].y() << " ";
+                    gmvFile << fld[indx].y() << " ";
                 }
                 for (label indx=0;indx<mesh.nCells();indx++)
                 {
-                    gmvFile << gmvVectorField[indx].z() << " ";
+                    gmvFile << fld[indx].z() << " ";
                 }
                 gmvFile << nl;
             }

@@ -74,20 +74,15 @@ void Foam::gradientDispersionRAS::disperseParcels() const
     const volScalarField& epsilon = turbulence().epsilon();
     const volVectorField& U = spray_.U();
 
-    for
-    (
-        spray::iterator elmnt = spray_.begin();
-        elmnt != spray_.end();
-        ++elmnt
-    )
+    forAllIter(spray, spray_, elmnt)
     {
-        label celli = elmnt().cell();
-        scalar UrelMag = mag(elmnt().U() - U[celli] - elmnt().Uturb());
+        const label cellI = elmnt().cell();
+        scalar UrelMag = mag(elmnt().U() - U[cellI] - elmnt().Uturb());
 
         scalar Tturb = min
         (
-            k[celli]/epsilon[celli],
-            cps*pow(k[celli], 1.5)/epsilon[celli]/(UrelMag + SMALL)
+            k[cellI]/epsilon[cellI],
+            cps*pow(k[cellI], 1.5)/epsilon[cellI]/(UrelMag + SMALL)
         );
         // parcel is perturbed by the turbulence
         if (dt < Tturb)
@@ -98,8 +93,8 @@ void Foam::gradientDispersionRAS::disperseParcels() const
             {
                 elmnt().tTurb() = 0.0;
 
-                scalar sigma = sqrt(2.0*k[celli]/3.0);
-                vector dir = -gradk[celli]/(mag(gradk[celli]) + SMALL);
+                scalar sigma = sqrt(2.0*k[cellI]/3.0);
+                vector dir = -gradk[cellI]/(mag(gradk[cellI]) + SMALL);
 
                 // numerical recipes... Ch. 7. Random Numbers...
                 scalar x1 = 0.0;

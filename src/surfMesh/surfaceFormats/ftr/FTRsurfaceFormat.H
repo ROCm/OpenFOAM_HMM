@@ -114,10 +114,9 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~FTRsurfaceFormat()
-        {}
+    //- Destructor
+    virtual ~FTRsurfaceFormat()
+    {}
 
 
     // Member Functions

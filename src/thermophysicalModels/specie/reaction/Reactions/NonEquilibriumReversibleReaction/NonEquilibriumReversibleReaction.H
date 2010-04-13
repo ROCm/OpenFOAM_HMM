@@ -125,10 +125,9 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~NonEquilibriumReversibleReaction()
-        {}
+    //- Destructor
+    virtual ~NonEquilibriumReversibleReaction()
+    {}
 
 
     // Member Functions

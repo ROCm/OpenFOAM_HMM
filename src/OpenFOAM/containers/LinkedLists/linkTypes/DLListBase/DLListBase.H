@@ -110,9 +110,8 @@ public:
         inline DLListBase(link*);
 
 
-    // Destructor
-
-        ~DLListBase();
+    //- Destructor
+    ~DLListBase();
 
 
     // Member Functions

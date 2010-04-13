@@ -118,6 +118,25 @@ void Foam::lduMatrix::solverPerformance::print() const
 }
 
 
+Foam::lduMatrix::solverPerformance::solverPerformance Foam::max
+(
+    const lduMatrix::solverPerformance& sp1,
+    const lduMatrix::solverPerformance& sp2
+)
+{
+    return lduMatrix::solverPerformance
+    (
+        sp1.solverName(),
+        sp1.fieldName_,
+        max(sp1.initialResidual(), sp2.initialResidual()),
+        max(sp1.finalResidual(), sp2.finalResidual()),
+        max(sp1.nIterations(), sp2.nIterations()),
+        sp1.converged() && sp2.converged(),
+        sp1.singular() || sp2.singular()
+    );
+}
+
+
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
@@ -136,5 +155,6 @@ Foam::Ostream& Foam::operator<<
 
     return os;
 }
+
 
 // ************************************************************************* //

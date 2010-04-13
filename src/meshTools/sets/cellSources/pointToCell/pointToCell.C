@@ -72,15 +72,9 @@ void Foam::pointToCell::combine(topoSet& set, const bool add) const
     // Handle any selection
     if (option_ == ANY)
     {
-        for
-        (
-            pointSet::const_iterator iter = loadedSet.begin();
-            iter != loadedSet.end();
-            ++iter
-        )
+        forAllConstIter(pointSet, loadedSet, iter)
         {
-            label pointI = iter.key();
-
+            const label pointI = iter.key();
             const labelList& pCells = mesh_.pointCells()[pointI];
 
             forAll(pCells, pCellI)

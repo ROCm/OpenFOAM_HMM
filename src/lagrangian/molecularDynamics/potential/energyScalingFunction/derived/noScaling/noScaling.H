@@ -70,10 +70,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~noScaling()
-        {}
+    //- Destructor
+    ~noScaling()
+    {}
 
     // Member Functions
 

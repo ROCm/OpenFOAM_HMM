@@ -71,9 +71,8 @@ public:
         IOdictionary(const IOobject&, const dictionary&);
 
 
-    // Destructor
-
-        virtual ~IOdictionary();
+    //- Destructor
+    virtual ~IOdictionary();
 
 
     // Member functions

@@ -149,9 +149,8 @@ public:
         undoableMeshCutter(const polyMesh& mesh, const bool undoable = true);
 
 
-    // Destructor
-
-        ~undoableMeshCutter();
+    //- Destructor
+    ~undoableMeshCutter();
 
 
     // Member Functions

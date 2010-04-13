@@ -112,9 +112,8 @@ public:
         LPtrList(const LPtrList&);
 
 
-    // Destructor
-
-        ~LPtrList();
+    //- Destructor
+    ~LPtrList();
 
 
     // Member Functions

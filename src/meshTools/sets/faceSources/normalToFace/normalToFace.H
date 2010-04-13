@@ -92,9 +92,8 @@ public:
         normalToFace(const polyMesh& mesh, Istream&);
 
 
-    // Destructor
-
-        virtual ~normalToFace();
+    //- Destructor
+    virtual ~normalToFace();
 
 
     // Member Functions

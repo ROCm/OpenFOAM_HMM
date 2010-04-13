@@ -87,10 +87,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~ptscotchDecomp()
-        {}
+    //- Destructor
+    virtual ~ptscotchDecomp()
+    {}
 
 
     // Member Functions

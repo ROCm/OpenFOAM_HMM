@@ -94,9 +94,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~labelToCell();
+    //- Destructor
+    virtual ~labelToCell();
 
 
     // Member Functions

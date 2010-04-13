@@ -81,9 +81,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~inverseFaceDistanceDiffusivity();
+    //- Destructor
+    virtual ~inverseFaceDistanceDiffusivity();
 
 
     // Member Functions

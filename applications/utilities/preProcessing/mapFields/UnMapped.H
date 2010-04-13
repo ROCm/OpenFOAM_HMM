@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,12 +39,7 @@ void UnMapped(const IOobjectList& objects)
 {
     IOobjectList fields = objects.lookupClass(Type::typeName);
 
-    for
-    (
-        IOobjectList::iterator fieldIter = fields.begin();
-        fieldIter != fields.end();
-        ++fieldIter
-    )
+    forAllConstIter(IOobjectList, fields, fieldIter)
     {
         mvBak(fieldIter()->objectPath(), "unmapped");
     }

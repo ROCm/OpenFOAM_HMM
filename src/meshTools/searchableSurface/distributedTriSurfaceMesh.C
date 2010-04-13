@@ -859,7 +859,7 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
 
     // Do decomposition according to triangle centre
     pointField triCentres(s.size());
-    forAll (s, triI)
+    forAll(s, triI)
     {
         triCentres[triI] = s[triI].centre(s.points());
     }
@@ -879,7 +879,7 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
         bbs[procI][0].max() = point(-VGREAT, -VGREAT, -VGREAT);
     }
 
-    forAll (s, triI)
+    forAll(s, triI)
     {
         point& bbMin = bbs[distribution[triI]][0].min();
         point& bbMax = bbs[distribution[triI]][0].max();

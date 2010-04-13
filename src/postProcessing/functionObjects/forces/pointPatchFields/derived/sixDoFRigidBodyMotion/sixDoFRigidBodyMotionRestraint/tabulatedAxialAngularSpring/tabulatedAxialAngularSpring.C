@@ -36,14 +36,15 @@ namespace Foam
 namespace sixDoFRigidBodyMotionRestraints
 {
     defineTypeNameAndDebug(tabulatedAxialAngularSpring, 0);
+
     addToRunTimeSelectionTable
     (
         sixDoFRigidBodyMotionRestraint,
         tabulatedAxialAngularSpring,
         dictionary
     );
-};
-};
+}
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

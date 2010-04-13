@@ -55,7 +55,7 @@ Foam::lagrangianFieldDecomposer::lagrangianFieldDecomposer
         {
             SLList<indexedParticle*>& particlePtrs = *cellParticles[celli];
 
-            forAllIter(SLList<indexedParticle*>, particlePtrs, iter)
+            forAllConstIter(SLList<indexedParticle*>, particlePtrs, iter)
             {
                 const indexedParticle& ppi = *iter();
                 particleIndices_[pi++] = ppi.index();

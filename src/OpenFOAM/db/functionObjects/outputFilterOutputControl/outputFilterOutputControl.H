@@ -91,8 +91,8 @@ public:
         outputFilterOutputControl(const Time&, const dictionary&);
 
 
-    // Destructor
-        ~outputFilterOutputControl();
+    //- Destructor
+    ~outputFilterOutputControl();
 
 
     // Member Functions

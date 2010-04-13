@@ -78,7 +78,7 @@ void Foam::phaseProperties::setGlobalCarrierIds
 
     forAll(names_, i)
     {
-        forAll (carrierNames, j)
+        forAll(carrierNames, j)
         {
             if (carrierNames[j] == names_[i])
             {

@@ -101,9 +101,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~sampledPlane();
+    //- Destructor
+    virtual ~sampledPlane();
 
 
     // Member Functions

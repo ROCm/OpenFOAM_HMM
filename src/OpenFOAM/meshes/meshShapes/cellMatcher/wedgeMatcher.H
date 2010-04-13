@@ -77,9 +77,8 @@ public:
         //- Construct null
         wedgeMatcher();
 
-    // Destructor
-
-        ~wedgeMatcher();
+    //- Destructor
+    ~wedgeMatcher();
 
 
     // Member Functions

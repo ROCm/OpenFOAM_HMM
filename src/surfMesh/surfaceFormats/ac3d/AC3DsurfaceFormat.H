@@ -93,10 +93,9 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~AC3DsurfaceFormat()
-        {}
+    //- Destructor
+    virtual ~AC3DsurfaceFormat()
+    {}
 
 
     // Member Functions

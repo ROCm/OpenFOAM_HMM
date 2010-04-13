@@ -36,12 +36,8 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
+defineTypeNameAndDebug(Foam::combineFaces, 0);
 
-defineTypeNameAndDebug(combineFaces, 0);
-
-}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

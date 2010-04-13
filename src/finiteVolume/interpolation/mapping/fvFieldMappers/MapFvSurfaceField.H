@@ -83,7 +83,7 @@ void MapInternalField<Type, MeshMapper, surfaceMesh>::operator()
     // Flip the flux
     const labelList flipFaces = mapper.surfaceMap().flipFaceFlux().toc();
 
-    forAll (flipFaces, i)
+    forAll(flipFaces, i)
     {
         if (flipFaces[i] < field.size())
         {

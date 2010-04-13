@@ -465,7 +465,7 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
         const pointField& slaveLocalPoints = slavePatch.localPoints();
         const vectorField& slavePointNormals = slavePatch.pointNormals();
 
-        forAll (cutPoints, pointI)
+        forAll(cutPoints, pointI)
         {
             // Try to find the cut point in retired points
             Map<label>::const_iterator rpmIter = rpm.find(cutPoints[pointI]);

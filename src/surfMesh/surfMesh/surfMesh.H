@@ -176,9 +176,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~surfMesh();
+    //- Destructor
+    virtual ~surfMesh();
 
 
     // Member Functions

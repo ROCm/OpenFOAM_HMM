@@ -123,14 +123,9 @@ Foam::label Foam::cellMatcher::calcLocalFaces
     }
 
     // Create local to global vertex mapping
-    for
-    (
-        Map<label>::iterator iter = localPoint_.begin();
-        iter != localPoint_.end();
-        ++iter
-    )
+    forAllConstIter(Map<label>, localPoint_, iter)
     {
-        label fp = iter();
+        const label fp = iter();
         pointMap_[fp] = iter.key();
     }
 

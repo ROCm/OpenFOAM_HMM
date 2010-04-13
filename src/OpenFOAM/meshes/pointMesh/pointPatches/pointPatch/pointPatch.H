@@ -120,10 +120,9 @@ public:
         {}
 
 
-    // Destructor
-
-        virtual ~pointPatch()
-        {}
+    //- Destructor
+    virtual ~pointPatch()
+    {}
 
 
     // Member Functions

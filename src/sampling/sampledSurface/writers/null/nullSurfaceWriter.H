@@ -63,9 +63,8 @@ public:
         nullSurfaceWriter();
 
 
-    // Destructor
-
-        virtual ~nullSurfaceWriter();
+    //- Destructor
+    virtual ~nullSurfaceWriter();
 
 
     // Member Functions

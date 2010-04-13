@@ -113,7 +113,7 @@ bool Foam::primitiveMesh::checkClosedCells
 
     label nErrorClosed = 0;
 
-    forAll (c, cI)
+    forAll(c, cI)
     {
         const cell& curCell = c[cI];
 
@@ -149,14 +149,14 @@ bool Foam::primitiveMesh::checkClosedCells
     const labelList& nei = faceNeighbour();
     const vectorField& areas = faceAreas();
 
-    forAll (own, faceI)
+    forAll(own, faceI)
     {
         // Add to owner
         sumClosed[own[faceI]] += areas[faceI];
         sumMagClosed[own[faceI]] += cmptMag(areas[faceI]);
     }
 
-    forAll (nei, faceI)
+    forAll(nei, faceI)
     {
         // Subtract from neighbour
         sumClosed[nei[faceI]] -= areas[faceI];
@@ -172,7 +172,7 @@ bool Foam::primitiveMesh::checkClosedCells
     const scalarField& vols = cellVolumes();
 
     // Check the sums
-    forAll (sumClosed, cellI)
+    forAll(sumClosed, cellI)
     {
         scalar maxOpenness = 0;
 
@@ -281,7 +281,7 @@ bool Foam::primitiveMesh::checkFaceAreas
     scalar minArea = GREAT;
     scalar maxArea = -GREAT;
 
-    forAll (magFaceAreas, faceI)
+    forAll(magFaceAreas, faceI)
     {
         if (magFaceAreas[faceI] < VSMALL)
         {
@@ -342,7 +342,7 @@ bool Foam::primitiveMesh::checkCellVolumes
 
     label nNegVolCells = 0;
 
-    forAll (vols, cellI)
+    forAll(vols, cellI)
     {
         if (vols[cellI] < VSMALL)
         {
@@ -421,7 +421,7 @@ bool Foam::primitiveMesh::checkFaceOrthogonality
 
     label errorNonOrth = 0;
 
-    forAll (nei, faceI)
+    forAll(nei, faceI)
     {
         vector d = centres[nei[faceI]] - centres[own[faceI]];
         const vector& s = areas[faceI];
@@ -534,7 +534,7 @@ bool Foam::primitiveMesh::checkFacePyramids
 
     label nErrorPyrs = 0;
 
-    forAll (f, faceI)
+    forAll(f, faceI)
     {
         // Create the owner pyramid - it will have negative volume
         scalar pyrVol = pyramidPointFaceRef(f[faceI], ctrs[own[faceI]]).mag(p);
@@ -619,7 +619,7 @@ bool Foam::primitiveMesh::checkFaceTets
 
     label nErrorPyrs = 0;
 
-    forAll (fcs, faceI)
+    forAll(fcs, faceI)
     {
         // Create the owner tets - they will have negative volume
         const face& f = fcs[faceI];
@@ -864,7 +864,7 @@ bool Foam::primitiveMesh::checkPoints
 
     const labelListList& pf = pointFaces();
 
-    forAll (pf, pointI)
+    forAll(pf, pointI)
     {
         if (pf[pointI].empty())
         {
@@ -878,7 +878,7 @@ bool Foam::primitiveMesh::checkPoints
     }
 
 
-    forAll (pf, pointI)
+    forAll(pf, pointI)
     {
         const labelList& pc = pointCells(pointI);
 
@@ -1361,7 +1361,7 @@ bool Foam::primitiveMesh::checkUpperTriangular
     // and add it to the check list (upper triangular order).
     // Once the list is completed, check it against the faceCell list
 
-    forAll (c, cellI)
+    forAll(c, cellI)
     {
         const labelList& curFaces = c[cellI];
 
@@ -1499,7 +1499,7 @@ bool Foam::primitiveMesh::checkCellsZipUp
     const faceList& f = faces();
     const cellList& c = cells();
 
-    forAll (c, cellI)
+    forAll(c, cellI)
     {
         const labelList& curFaces = c[cellI];
 
@@ -1507,15 +1507,15 @@ bool Foam::primitiveMesh::checkCellsZipUp
 
         labelList edgeUsage(cellEdges.size(), 0);
 
-        forAll (curFaces, faceI)
+        forAll(curFaces, faceI)
         {
             edgeList curFaceEdges = f[curFaces[faceI]].edges();
 
-            forAll (curFaceEdges, faceEdgeI)
+            forAll(curFaceEdges, faceEdgeI)
             {
                 const edge& curEdge = curFaceEdges[faceEdgeI];
 
-                forAll (cellEdges, cellEdgeI)
+                forAll(cellEdges, cellEdgeI)
                 {
                     if (cellEdges[cellEdgeI] == curEdge)
                     {
@@ -1529,7 +1529,7 @@ bool Foam::primitiveMesh::checkCellsZipUp
         edgeList singleEdges(cellEdges.size());
         label nSingleEdges = 0;
 
-        forAll (edgeUsage, edgeI)
+        forAll(edgeUsage, edgeI)
         {
             if (edgeUsage[edgeI] == 1)
             {
@@ -1600,7 +1600,7 @@ bool Foam::primitiveMesh::checkFaceVertices
 
     label nErrorFaces = 0;
 
-    forAll (f, fI)
+    forAll(f, fI)
     {
         const face& curFace = f[fI];
 
@@ -1996,7 +1996,7 @@ bool Foam::primitiveMesh::checkCellDeterminant
     scalar sumDet = 0;
     label nSummed = 0;
 
-    forAll (c, cellI)
+    forAll(c, cellI)
     {
         const labelList& curFaces = c[cellI];
 
@@ -2115,7 +2115,7 @@ bool Foam::primitiveMesh::checkConcaveCells
 
     label nConcaveCells = 0;
 
-    forAll (c, cellI)
+    forAll(c, cellI)
     {
         const cell& cFaces = c[cellI];
 

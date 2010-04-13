@@ -92,12 +92,11 @@ public:
         {}
 
 
-    // Destructor
-
-        ~IStringStream()
-        {
-            delete &dynamic_cast<std::istringstream&>(stdStream());
-        }
+    //- Destructor
+    ~IStringStream()
+    {
+        delete &dynamic_cast<std::istringstream&>(stdStream());
+    }
 
 
     // Member functions

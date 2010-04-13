@@ -130,7 +130,7 @@ Foam::wordList Foam::polyTopoChanger::types() const
 
     wordList t(modifiers.size());
 
-    forAll (modifiers, modifierI)
+    forAll(modifiers, modifierI)
     {
         t[modifierI] = modifiers[modifierI].type();
     }
@@ -146,7 +146,7 @@ Foam::wordList Foam::polyTopoChanger::names() const
 
     wordList t(modifiers.size());
 
-    forAll (modifiers, modifierI)
+    forAll(modifiers, modifierI)
     {
         t[modifierI] = modifiers[modifierI].name();
     }
@@ -163,7 +163,7 @@ bool Foam::polyTopoChanger::changeTopology() const
 
     bool triggerChange = false;
 
-    forAll (topoChanges, morphI)
+    forAll(topoChanges, morphI)
     {
         if (topoChanges[morphI].active())
         {
@@ -211,7 +211,7 @@ Foam::polyTopoChanger::topoChangeRequest() const
     polyTopoChange* refPtr(new polyTopoChange(mesh()));
     polyTopoChange& ref = *refPtr;
 
-    forAll (topoChanges, morphI)
+    forAll(topoChanges, morphI)
     {
         if (topoChanges[morphI].active())
         {
@@ -228,7 +228,7 @@ void Foam::polyTopoChanger::modifyMotionPoints(pointField& p) const
 {
     const PtrList<polyMeshModifier>& topoChanges = *this;
 
-    forAll (topoChanges, morphI)
+    forAll(topoChanges, morphI)
     {
         if (topoChanges[morphI].active())
         {
@@ -244,7 +244,7 @@ void Foam::polyTopoChanger::update(const mapPolyMesh& m)
     // Go through all mesh modifiers and accumulate the morphing information
     PtrList<polyMeshModifier>& topoChanges = *this;
 
-    forAll (topoChanges, morphI)
+    forAll(topoChanges, morphI)
     {
         topoChanges[morphI].updateMesh(m);
     }
@@ -298,7 +298,7 @@ void Foam::polyTopoChanger::addTopologyModifiers
     setSize(tm.size());
 
     // Copy the patch pointers
-    forAll (tm, tmI)
+    forAll(tm, tmI)
     {
         if (tm[tmI]->topoChanger() != *this)
         {
@@ -323,7 +323,7 @@ Foam::label Foam::polyTopoChanger::findModifierID
 {
     const PtrList<polyMeshModifier>& topoChanges = *this;
 
-    forAll (topoChanges, morphI)
+    forAll(topoChanges, morphI)
     {
         if (topoChanges[morphI].name() == modName)
         {

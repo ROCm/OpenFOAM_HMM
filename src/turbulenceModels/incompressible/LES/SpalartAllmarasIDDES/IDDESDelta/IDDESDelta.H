@@ -85,10 +85,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~IDDESDelta()
-        {}
+    //- Destructor
+    ~IDDESDelta()
+    {}
 
 
     // Member Functions

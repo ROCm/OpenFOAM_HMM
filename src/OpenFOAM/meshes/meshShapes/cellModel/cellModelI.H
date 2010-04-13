@@ -107,7 +107,7 @@ inline faceList cellModel::faces(const labelList& pointLabels) const
 
          curFace.setSize(curModelLabels.size());
 
-         forAll (curModelLabels, labelI)
+         forAll(curModelLabels, labelI)
          {
              curFace[labelI] = pointLabels[curModelLabels[labelI]];
          }

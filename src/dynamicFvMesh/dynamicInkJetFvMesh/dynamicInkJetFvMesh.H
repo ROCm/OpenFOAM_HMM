@@ -89,9 +89,8 @@ public:
         dynamicInkJetFvMesh(const IOobject& io);
 
 
-    // Destructor
-
-        ~dynamicInkJetFvMesh();
+    //- Destructor
+    ~dynamicInkJetFvMesh();
 
 
     // Member Functions

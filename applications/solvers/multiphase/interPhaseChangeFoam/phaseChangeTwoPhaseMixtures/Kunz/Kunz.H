@@ -96,10 +96,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~Kunz()
-        {}
+    //- Destructor
+    virtual ~Kunz()
+    {}
 
 
     // Member Functions

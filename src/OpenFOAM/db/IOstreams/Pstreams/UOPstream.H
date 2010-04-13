@@ -102,9 +102,8 @@ public:
         UOPstream(const int toProcNo, PstreamBuffers&);
 
 
-    // Destructor
-
-        ~UOPstream();
+    //- Destructor
+    ~UOPstream();
 
 
     // Member functions

@@ -36,12 +36,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-defineTypeNameAndDebug(refinementIterator, 0);
-
-}
+defineTypeNameAndDebug(Foam::refinementIterator, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -212,12 +207,7 @@ Foam::Map<Foam::label> Foam::refinementIterator::setRefinement
         // from meshRefiner.updateMesh call) and add to global list of added
         const Map<label>& addedNow = meshRefiner_.addedCells();
 
-        for
-        (
-            Map<label>::const_iterator iter = addedNow.begin();
-            iter != addedNow.end();
-            ++iter
-        )
+        forAllConstIter(Map<label>, addedNow, iter)
         {
             if (!addedCells.insert(iter.key(), iter()))
             {

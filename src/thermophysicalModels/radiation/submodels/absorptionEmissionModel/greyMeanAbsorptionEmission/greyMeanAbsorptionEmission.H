@@ -159,7 +159,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~greyMeanAbsorptionEmission();
 
 

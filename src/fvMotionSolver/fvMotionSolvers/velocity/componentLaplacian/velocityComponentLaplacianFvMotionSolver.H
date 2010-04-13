@@ -100,9 +100,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~velocityComponentLaplacianFvMotionSolver();
+    //- Destructor
+    ~velocityComponentLaplacianFvMotionSolver();
 
 
     // Member Functions

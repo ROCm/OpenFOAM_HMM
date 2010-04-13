@@ -93,12 +93,11 @@ public:
         {}
 
 
-    // Destructor
-
-        ~OStringStream()
-        {
-            delete &dynamic_cast<std::ostringstream&>(stdStream());
-        }
+    //- Destructor
+    ~OStringStream()
+    {
+        delete &dynamic_cast<std::ostringstream&>(stdStream());
+    }
 
 
     // Member functions

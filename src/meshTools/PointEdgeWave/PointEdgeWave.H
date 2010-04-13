@@ -279,9 +279,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~PointEdgeWave();
+    //- Destructor
+    ~PointEdgeWave();
 
 
     // Member Functions

@@ -79,10 +79,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~Newtonian()
-        {}
+    //- Destructor
+    ~Newtonian()
+    {}
 
 
     // Member Functions

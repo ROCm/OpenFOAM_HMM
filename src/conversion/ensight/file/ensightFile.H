@@ -79,7 +79,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     ~ensightFile();
 
 

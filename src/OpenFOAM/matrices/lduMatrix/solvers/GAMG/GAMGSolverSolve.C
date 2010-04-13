@@ -377,7 +377,7 @@ void Foam::GAMGSolver::initVcycle
         )
     );
 
-    forAll (matrixLevels_, leveli)
+    forAll(matrixLevels_, leveli)
     {
         coarseCorrFields.set
         (

@@ -94,10 +94,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~threePhaseMixture()
-        {}
+    //- Destructor
+    ~threePhaseMixture()
+    {}
 
 
     // Member Functions

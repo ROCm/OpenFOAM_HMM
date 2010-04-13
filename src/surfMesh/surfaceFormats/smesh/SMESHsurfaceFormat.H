@@ -78,10 +78,9 @@ public:
         SMESHsurfaceFormat();
 
 
-    // Destructor
-
-        virtual ~SMESHsurfaceFormat()
-        {}
+    //- Destructor
+    virtual ~SMESHsurfaceFormat()
+    {}
 
 
     // Member Functions

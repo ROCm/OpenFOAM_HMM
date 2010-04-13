@@ -122,9 +122,8 @@ public:
             const dictionary& dict
         );
 
-    // Destructor
-
-        virtual ~searchablePlate();
+    //- Destructor
+    virtual ~searchablePlate();
 
 
     // Member Functions

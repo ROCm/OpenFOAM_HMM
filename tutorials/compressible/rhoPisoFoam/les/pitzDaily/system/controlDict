@@ -37,18 +37,17 @@ writeFormat     ascii;
 
 writePrecision  6;
 
-writeCompression uncompressed;
+writeCompression off;
 
 timeFormat      general;
 
 timePrecision   6;
 
-runTimeModifiable yes;
+runTimeModifiable true;
 
 adjustTimeStep  no;
 
 maxCo           0.5;
-
 
 functions
 {
@@ -58,6 +57,7 @@ functions
         functionObjectLibs ( "libfieldFunctionObjects.so" );
         enabled         true;
         outputControl   outputTime;
+
         fields
         (
             U
@@ -76,6 +76,5 @@ functions
         );
     }
 }
-
 
 // ************************************************************************* //

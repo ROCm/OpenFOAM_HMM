@@ -114,9 +114,8 @@ public:
         components();
 
 
-    // Destructor
-
-        virtual ~components();
+    //- Destructor
+    virtual ~components();
 };
 
 

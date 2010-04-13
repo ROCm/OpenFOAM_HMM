@@ -86,7 +86,7 @@ void Foam::LISA::atomizeParcel
     scalar Taverage = p.T() + (temperature - p.T())/3.0;
     scalar Winv = 0.0;
 
-    forAll (Y, i)
+    forAll(Y, i)
     {
         Winv += Y[i][cellI]/spray_.gasProperties()[i].W();
     }

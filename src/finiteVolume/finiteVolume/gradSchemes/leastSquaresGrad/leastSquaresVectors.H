@@ -78,9 +78,8 @@ public:
         explicit leastSquaresVectors(const fvMesh&);
 
 
-    // Destructor
-
-        virtual ~leastSquaresVectors();
+    //- Destructor
+    virtual ~leastSquaresVectors();
 
 
     // Member functions

@@ -158,10 +158,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~coordinateRotation()
-        {}
+    //- Destructor
+    virtual ~coordinateRotation()
+    {}
 
 
     // Member Functions

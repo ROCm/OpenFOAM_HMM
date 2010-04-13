@@ -85,10 +85,9 @@ public:
         {}
 
 
-    // Destructor
-
-        virtual ~Istream()
-        {}
+    //- Destructor
+    virtual ~Istream()
+    {}
 
 
     // Member functions

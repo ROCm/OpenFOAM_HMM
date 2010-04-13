@@ -114,12 +114,7 @@ int main(int argc, char *argv[])
 
     dict.swapDown(dict.first());
 
-    for
-    (
-        Dictionary<ent>::const_iterator iter = dict.begin();
-        iter != dict.end();
-        ++iter
-    )
+    forAllConstIter(Dictionary<ent>, dict, iter)
     {
         Info<< "element : " << *iter;
     }
@@ -159,12 +154,7 @@ int main(int argc, char *argv[])
     }
 
     Info<< nl << "scalarDict1: " << endl;
-    for
-    (
-        PtrDictionary<Scalar>::const_iterator iter = scalarDict.begin();
-        iter != scalarDict.end();
-        ++iter
-    )
+    forAllConstIter(PtrDictionary<Scalar>, scalarDict, iter)
     {
         Info<< " = " << iter() << endl;
     }
@@ -176,12 +166,7 @@ int main(int argc, char *argv[])
         scalarDict2.insert(key, new Scalar(1.3*i));
     }
     Info<< nl << "scalarDict2: " << endl;
-    for
-    (
-        PtrDictionary<Scalar>::const_iterator iter = scalarDict2.begin();
-        iter != scalarDict2.end();
-        ++iter
-    )
+    forAllConstIter(PtrDictionary<Scalar>, scalarDict2, iter)
     {
         Info<< "elem = " << *iter << endl;
     }

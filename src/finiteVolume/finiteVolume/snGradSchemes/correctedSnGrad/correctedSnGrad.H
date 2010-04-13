@@ -84,9 +84,8 @@ public:
         {}
 
 
-    // Destructor
-
-        virtual ~correctedSnGrad();
+    //- Destructor
+    virtual ~correctedSnGrad();
 
 
     // Member Functions

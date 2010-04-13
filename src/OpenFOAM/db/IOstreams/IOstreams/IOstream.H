@@ -288,10 +288,9 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~IOstream()
-        {}
+    //- Destructor
+    virtual ~IOstream()
+    {}
 
 
     // Member functions

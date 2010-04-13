@@ -112,12 +112,7 @@ int main(int argc, char *argv[])
             << cells.instance()/cells.local()/cells.name()
             << nl << endl;
 
-        for
-        (
-            cellSet::const_iterator iter = cells.begin();
-            iter != cells.end();
-            ++iter
-        )
+        forAllConstIter(cellSet, cells, iter)
         {
             cutCells.erase(iter.key());
         }
@@ -131,7 +126,7 @@ int main(int argc, char *argv[])
 
     forAll(meshPoints, pointI)
     {
-        label meshPointI = meshPoints[pointI];
+        const label meshPointI = meshPoints[pointI];
 
         vertOnPatch[meshPointI] = true;
     }
@@ -151,8 +146,7 @@ int main(int argc, char *argv[])
 
         forAll(pEdges, pEdgeI)
         {
-            label edgeI = pEdges[pEdgeI];
-
+            const label edgeI = pEdges[pEdgeI];
             const edge& e = mesh.edges()[edgeI];
 
             label otherPointI = e.otherVertex(meshPointI);

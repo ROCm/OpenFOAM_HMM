@@ -94,9 +94,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~labelToPoint();
+    //- Destructor
+    virtual ~labelToPoint();
 
 
     // Member Functions

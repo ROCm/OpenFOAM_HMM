@@ -224,9 +224,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~sampledSurfaces();
+    //- Destructor
+    virtual ~sampledSurfaces();
 
 
     // Member Functions

@@ -173,12 +173,7 @@ bool triSurface::readOBJ(const fileName& OBJfileName)
     }
     else
     {
-        for
-        (
-            HashTable<label>::const_iterator iter = groupToPatch.begin();
-            iter != groupToPatch.end();
-            ++iter
-        )
+        forAllConstIter(HashTable<label>, groupToPatch, iter)
         {
             patches[iter()] = geometricSurfacePatch
             (

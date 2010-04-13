@@ -134,7 +134,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     ~radiativeIntensityRay();
 
 

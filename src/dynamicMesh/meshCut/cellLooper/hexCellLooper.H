@@ -116,9 +116,8 @@ public:
         hexCellLooper(const polyMesh& mesh);
 
 
-    // Destructor
-
-        virtual ~hexCellLooper();
+    //- Destructor
+    virtual ~hexCellLooper();
 
 
     // Member Functions

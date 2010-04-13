@@ -77,10 +77,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~restrainedHarmonicSpring()
-        {}
+    //- Destructor
+    ~restrainedHarmonicSpring()
+    {}
 
 
     // Member Functions

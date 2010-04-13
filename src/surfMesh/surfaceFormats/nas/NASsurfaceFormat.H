@@ -94,10 +94,9 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~NASsurfaceFormat()
-        {}
+    //- Destructor
+    virtual ~NASsurfaceFormat()
+    {}
 
 
     // Member Functions

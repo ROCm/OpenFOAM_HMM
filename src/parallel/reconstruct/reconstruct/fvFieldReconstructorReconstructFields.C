@@ -46,7 +46,7 @@ Foam::fvFieldReconstructor::reconstructFvVolumeField
         procMeshes_.size()
     );
 
-    forAll (procMeshes_, procI)
+    forAll(procMeshes_, procI)
     {
         procFields.set
         (
@@ -74,7 +74,7 @@ Foam::fvFieldReconstructor::reconstructFvVolumeField
     PtrList<fvPatchField<Type> > patchFields(mesh_.boundary().size());
 
 
-    forAll (procMeshes_, procI)
+    forAll(procMeshes_, procI)
     {
         const GeometricField<Type, fvPatchField, volMesh>& procField =
             procFields[procI];
@@ -244,7 +244,7 @@ Foam::fvFieldReconstructor::reconstructFvSurfaceField
         procMeshes_.size()
     );
 
-    forAll (procMeshes_, procI)
+    forAll(procMeshes_, procI)
     {
         procFields.set
         (
@@ -272,7 +272,7 @@ Foam::fvFieldReconstructor::reconstructFvSurfaceField
     PtrList<fvsPatchField<Type> > patchFields(mesh_.boundary().size());
 
 
-    forAll (procMeshes_, procI)
+    forAll(procMeshes_, procI)
     {
         const GeometricField<Type, fvsPatchField, surfaceMesh>& procField =
             procFields[procI];
@@ -285,7 +285,7 @@ Foam::fvFieldReconstructor::reconstructFvSurfaceField
         {
             labelList curAddr(faceProcAddressing_[procI]);
 
-            forAll (curAddr, addrI)
+            forAll(curAddr, addrI)
             {
                 curAddr[addrI] -= 1;
             }

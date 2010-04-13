@@ -86,9 +86,8 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~fixedPlane();
+    //- Destructor
+    virtual ~fixedPlane();
 
 
     // Member Functions

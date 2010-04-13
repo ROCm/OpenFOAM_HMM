@@ -64,7 +64,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~MaxwellianThermal();
 
 

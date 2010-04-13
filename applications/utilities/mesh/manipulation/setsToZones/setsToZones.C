@@ -100,12 +100,7 @@ int main(int argc, char *argv[])
 
     //Pout<< "pointSets:" << pointObjects.names() << endl;
 
-    for
-    (
-        IOobjectList::const_iterator iter = pointObjects.begin();
-        iter != pointObjects.end();
-        ++iter
-    )
+    forAllConstIter(IOobjectList, pointObjects, iter)
     {
         // Not in memory. Load it.
         pointSet set(*iter());
@@ -149,12 +144,7 @@ int main(int argc, char *argv[])
 
     //Pout<< "faceSets:" << faceObjects.names() << endl;
 
-    for
-    (
-        IOobjectList::const_iterator iter = faceObjects.begin();
-        iter != faceObjects.end();
-        ++iter
-    )
+    forAllConstIter(IOobjectList, faceObjects, iter)
     {
         // Not in memory. Load it.
         faceSet set(*iter());
@@ -288,12 +278,7 @@ int main(int argc, char *argv[])
 
     //Pout<< "cellSets:" << cellObjects.names() << endl;
 
-    for
-    (
-        IOobjectList::const_iterator iter = cellObjects.begin();
-        iter != cellObjects.end();
-        ++iter
-    )
+    forAllConstIter(IOobjectList, cellObjects, iter)
     {
         if (!slaveCellSets.found(iter.key()))
         {

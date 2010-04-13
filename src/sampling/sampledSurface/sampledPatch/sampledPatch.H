@@ -114,9 +114,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~sampledPatch();
+    //- Destructor
+    virtual ~sampledPatch();
 
 
     // Member Functions

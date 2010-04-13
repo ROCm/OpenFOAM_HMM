@@ -86,9 +86,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~Gulder();
+    //- Destructor
+    virtual ~Gulder();
 
 
     // Member Functions

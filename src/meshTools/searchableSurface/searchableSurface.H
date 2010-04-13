@@ -169,9 +169,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~searchableSurface();
+    //- Destructor
+    virtual ~searchableSurface();
 
 
     // Member Functions

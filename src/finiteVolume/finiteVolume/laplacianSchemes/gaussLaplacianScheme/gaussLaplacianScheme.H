@@ -109,10 +109,9 @@ public:
         {}
 
 
-    // Destructor
-
-        virtual ~gaussLaplacianScheme()
-        {}
+    //- Destructor
+    virtual ~gaussLaplacianScheme()
+    {}
 
 
     // Member Functions

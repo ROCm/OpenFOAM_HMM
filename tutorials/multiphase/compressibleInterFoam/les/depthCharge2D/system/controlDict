@@ -37,13 +37,13 @@ writeFormat     ascii;
 
 writePrecision  8;
 
-writeCompression compressed;
+writeCompression off;
 
 timeFormat      general;
 
 timePrecision   10;
 
-runTimeModifiable yes;
+runTimeModifiable true;
 
 adjustTimeStep  yes;
 

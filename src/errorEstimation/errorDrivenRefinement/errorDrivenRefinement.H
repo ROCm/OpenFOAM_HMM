@@ -89,9 +89,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~errorDrivenRefinement();
+    //- Destructor
+    virtual ~errorDrivenRefinement();
 
 
     // Member Functions

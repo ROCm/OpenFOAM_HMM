@@ -276,9 +276,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~polyPatch();
+    //- Destructor
+    virtual ~polyPatch();
 
 
     // Member Functions

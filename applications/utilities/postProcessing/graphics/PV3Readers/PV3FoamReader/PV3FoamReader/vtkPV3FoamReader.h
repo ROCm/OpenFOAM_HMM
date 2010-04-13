@@ -187,7 +187,6 @@ protected:
     );
 
     //- Get the mesh/fields for a particular time
-    //- Destructor
     virtual int RequestData
     (
         vtkInformation*,

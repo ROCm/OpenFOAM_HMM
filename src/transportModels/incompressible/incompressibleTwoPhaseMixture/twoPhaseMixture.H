@@ -93,10 +93,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~twoPhaseMixture()
-        {}
+    //- Destructor
+    ~twoPhaseMixture()
+    {}
 
 
     // Member Functions

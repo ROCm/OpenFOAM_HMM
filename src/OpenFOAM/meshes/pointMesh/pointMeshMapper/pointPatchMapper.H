@@ -118,9 +118,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~pointPatchMapper();
+    //- Destructor
+    virtual ~pointPatchMapper();
 
 
     // Member Functions

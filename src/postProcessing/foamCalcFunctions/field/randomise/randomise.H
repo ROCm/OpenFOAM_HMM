@@ -116,9 +116,8 @@ public:
         randomise();
 
 
-    // Destructor
-
-        virtual ~randomise();
+    //- Destructor
+    virtual ~randomise();
 };
 
 

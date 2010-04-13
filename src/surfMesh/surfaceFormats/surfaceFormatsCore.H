@@ -116,9 +116,8 @@ public:
         surfaceFormatsCore();
 
 
-    // Destructor
-
-        virtual ~surfaceFormatsCore();
+    //- Destructor
+    virtual ~surfaceFormatsCore();
 };
 
 

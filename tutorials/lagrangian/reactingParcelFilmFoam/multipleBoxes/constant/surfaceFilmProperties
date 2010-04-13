@@ -1,0 +1,73 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.6                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      SurfaceFilmProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//surfaceFilmModel kinematicSingleLayer;
+surfaceFilmModel thermoSingleLayer;
+
+filmRegionName  wallFilmRegion;
+
+active          true;
+
+kinematicSingleLayerCoeffs
+{
+    deltaStable deltaStable [0 1 0 0 0] 0.0005;
+    Cf          0.005;
+
+    rho         rho [1 -3 0 0 0] 1000;
+    mu          mu [1 -1 -1 0 0] 1e-3;
+    sigma       sigma [1 0 -2 0 0] 0.07;
+
+    injectionModel remove; // none; // cloudInjection;
+}
+
+
+thermoSingleLayerCoeffs
+{
+    deltaStable deltaStable [0 1 0 0 0] 0;
+    Cf          0.005;
+    htcw        htcw [1 0 -3 -1 0] 1e-8; // 0.0;
+    htcs        htcs [1 0 -3 -1 0] 1e-8; // 0.0;
+
+    rho         rho [1 -3 0 0 0] 1000;
+    mu          mu [1 -1 -1 0 0] 1e-3;
+    sigma       sigma [1 0 -2 0 0] 0.07;
+    cp          cp [0 2 -2 -1 0] 4187;
+
+    injectionModel cloudInjection; // remove; // none; // cloudInjection;
+
+    phaseChangeModel none;
+
+    cloudInjectionCoeffs
+    {
+        cloudName    reactingCloud1;
+
+        particlesPerParcel 100.0;
+
+        parcelPDF
+        {        
+            pdfType         RosinRammler;
+            RosinRammlerPDF              
+            {                            
+                minValue        5e-04;   
+                maxValue        0.0012;  
+                d               7.5e-05;
+                n               0.5;    
+            }                               
+        }                                   
+    }
+}
+

@@ -89,7 +89,7 @@ void Foam::thermalPorousZone::addEnthalpySource
     scalarField hZone = thermo.h(scalarField(cells.size(), T_.value()), cells);
     scalar rate = 1e6;
 
-    forAll (cells, i)
+    forAll(cells, i)
     {
         hDiag[cells[i]] += rate*V[cells[i]]*rho[cells[i]];
         hSource[cells[i]] += rate*V[cells[i]]*rho[cells[i]]*hZone[i];

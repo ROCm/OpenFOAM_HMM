@@ -1411,7 +1411,7 @@ void Foam::globalPoints::calculateSharedPoints
 
     // Sort procPoints in incremental order. This will make the master the
     // first element.
-    forAllIter(Map<label>, meshToProcPoint_, iter)
+    forAllConstIter(Map<label>, meshToProcPoint_, iter)
     {
         sort(procPoints_[iter()]);
     }

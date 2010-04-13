@@ -84,7 +84,7 @@ void Foam::enrichedPatch::calcEnrichedFaces
 
     // Add slave faces into the enriched faces list
 
-    forAll (slavePatch_, faceI)
+    forAll(slavePatch_, faceI)
     {
         const face oldFace = slavePatch_[faceI];
         const face oldLocalFace = slaveLocalFaces[faceI];
@@ -95,7 +95,7 @@ void Foam::enrichedPatch::calcEnrichedFaces
 
         // Note: The number of points and edges in a face is always identical
         // so both can be done is the same loop
-        forAll (oldFace, i)
+        forAll(oldFace, i)
         {
             // Add the point
             Map<label>::const_iterator mpIter =
@@ -166,7 +166,7 @@ void Foam::enrichedPatch::calcEnrichedFaces
 
                 pointField slavePosOnEdge(slavePointsOnEdge.size());
 
-                forAll (slavePointsOnEdge, edgePointI)
+                forAll(slavePointsOnEdge, edgePointI)
                 {
                     slavePosOnEdge[edgePointI] =
                         pointMap().find(slavePointsOnEdge[edgePointI])();
@@ -207,7 +207,7 @@ void Foam::enrichedPatch::calcEnrichedFaces
                     label nextPoint = -1;
                     scalar dist = 2;
 
-                    forAll (edgePointWeights, wI)
+                    forAll(edgePointWeights, wI)
                     {
                         if (edgePointWeights[wI] < dist)
                         {
@@ -239,7 +239,7 @@ void Foam::enrichedPatch::calcEnrichedFaces
 
     // Add master faces into the enriched faces list
 
-    forAll (masterPatch_, faceI)
+    forAll(masterPatch_, faceI)
     {
         const face& oldFace = masterPatch_[faceI];
         const face& oldLocalFace = masterLocalFaces[faceI];
@@ -250,7 +250,7 @@ void Foam::enrichedPatch::calcEnrichedFaces
 
         // Note: The number of points and edges in a face is always identical
         // so both can be done is the same loop
-        forAll (oldFace, i)
+        forAll(oldFace, i)
         {
             // Add the point
             Map<label>::const_iterator mpIter =
@@ -317,7 +317,7 @@ void Foam::enrichedPatch::calcEnrichedFaces
 
                 pointField masterPosOnEdge(masterPointsOnEdge.size());
 
-                forAll (masterPointsOnEdge, edgePointI)
+                forAll(masterPointsOnEdge, edgePointI)
                 {
                     masterPosOnEdge[edgePointI] =
                         pointMap().find(masterPointsOnEdge[edgePointI])();
@@ -358,7 +358,7 @@ void Foam::enrichedPatch::calcEnrichedFaces
                     label nextPoint = -1;
                     scalar dist = 2;
 
-                    forAll (edgePointWeights, wI)
+                    forAll(edgePointWeights, wI)
                     {
                         if (edgePointWeights[wI] < dist)
                         {

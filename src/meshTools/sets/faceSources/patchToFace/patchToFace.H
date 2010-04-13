@@ -95,9 +95,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~patchToFace();
+    //- Destructor
+    virtual ~patchToFace();
 
 
     // Member Functions

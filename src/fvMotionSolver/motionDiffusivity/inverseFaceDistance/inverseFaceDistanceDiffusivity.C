@@ -76,7 +76,7 @@ void Foam::inverseFaceDistanceDiffusivity::correct()
 
     label nPatchFaces = 0;
 
-    forAll (patchNames_, i)
+    forAll(patchNames_, i)
     {
         label pID = bdry.findPatchID(patchNames_[i]);
 

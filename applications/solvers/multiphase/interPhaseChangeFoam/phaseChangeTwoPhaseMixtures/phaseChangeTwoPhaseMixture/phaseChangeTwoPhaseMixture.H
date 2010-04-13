@@ -121,10 +121,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~phaseChangeTwoPhaseMixture()
-        {}
+    //- Destructor
+    virtual ~phaseChangeTwoPhaseMixture()
+    {}
 
 
     // Member Functions

@@ -37,6 +37,8 @@ SurfaceReactionModel COxidationDiffusionLimitedRate;
 
 PostProcessingModel none;
 
+SurfaceFilmModel none;
+
 radiation       on;
 
 coupled         true;
@@ -101,8 +103,8 @@ ManualInjectionCoeffs
         {
             minValue        5e-06;
             maxValue        0.0005;
-            d               ( 5e-05 );
-            n               ( 0.5 );
+            d               5e-05;
+            n               0.5;
         }
     }
 }

@@ -77,9 +77,8 @@ public:
         //- Construct null
         pyrMatcher();
 
-    // Destructor
-
-        ~pyrMatcher();
+    //- Destructor
+    ~pyrMatcher();
 
 
     // Member Functions

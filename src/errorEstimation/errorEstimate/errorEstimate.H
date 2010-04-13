@@ -94,9 +94,8 @@ public:
         errorEstimate(const errorEstimate<Type>&);
 
 
-    // Destructor
-
-        ~errorEstimate();
+    //- Destructor
+    ~errorEstimate();
 
 
     // Member Functions

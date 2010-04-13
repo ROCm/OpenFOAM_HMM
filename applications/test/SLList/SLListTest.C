@@ -51,12 +51,7 @@ int main(int argc, char *argv[])
 
     Info<< nl << "And again using STL iterator: " << nl << endl;
 
-    for
-    (
-        SLList<scalar>::iterator iter = myList.begin();
-        iter != myList.end();
-        ++iter
-    )
+    forAllIter(SLList<scalar>, myList, iter)
     {
         Info<< "element:" << *iter << endl;
     }
@@ -65,37 +60,21 @@ int main(int argc, char *argv[])
 
     const SLList<scalar>& const_myList = myList;
 
-    for
-    (
-        SLList<scalar>::const_iterator iter2 = const_myList.begin();
-        iter2 != const_myList.end();
-        ++iter2
-    )
+    forAllConstIter(SLList<scalar>, const_myList, iter)
     {
-        Info<< "element:" << *iter2 << endl;
+        Info<< "element:" << *iter << endl;
     }
 
-    for
-    (
-        SLList<scalar>::iterator iter = myList.begin();
-        iter != myList.end();
-        ++iter
-    )
+    forAllIter(SLList<scalar>, myList, iter)
     {
         Info<< "Removing element:" << *iter << endl;
         myList.remove(iter);
     }
 
-    for
-    (
-        SLList<scalar>::const_iterator iter2 = const_myList.begin();
-        iter2 != const_myList.end();
-        ++iter2
-    )
+    forAllConstIter(SLList<scalar>, const_myList, iter)
     {
-        Info<< "element:" << *iter2 << endl;
+        Info<< "element:" << *iter << endl;
     }
-
 
 
     for (int i = 0; i<10; i++)

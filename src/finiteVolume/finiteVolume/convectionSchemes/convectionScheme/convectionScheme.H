@@ -147,9 +147,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~convectionScheme();
+    //- Destructor
+    virtual ~convectionScheme();
 
 
     // Member Functions

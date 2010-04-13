@@ -119,9 +119,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~SDA();
+    //- Destructor
+    virtual ~SDA();
 
 
     // Member Functions

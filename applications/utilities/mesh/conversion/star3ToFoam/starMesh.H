@@ -299,9 +299,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~starMesh();
+    //- Destructor
+    ~starMesh();
 
 
     // Member Functions

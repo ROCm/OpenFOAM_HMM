@@ -77,10 +77,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~pitchForkRing()
-        {}
+    //- Destructor
+    ~pitchForkRing()
+    {}
 
 
     // Member Functions

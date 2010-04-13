@@ -693,8 +693,7 @@ public:
 
 
     //- Destructor
-
-        ~vtkPV3Foam();
+    ~vtkPV3Foam();
 
 
     // Member Functions

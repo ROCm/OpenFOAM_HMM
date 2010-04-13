@@ -29,7 +29,7 @@ License
 
 void Foam::speciesTable::setIndices()
 {
-    forAll (*this, i)
+    forAll(*this, i)
     {
         specieIndices_.insert(wordList::operator[](i), i);
     }
@@ -52,7 +52,7 @@ Foam::speciesTable::speciesTable(const label nSpecies, const char** specieNames)
 :
     wordList(nSpecies)
 {
-    forAll (*this, i)
+    forAll(*this, i)
     {
         wordList::operator[](i) = specieNames[i];
     }

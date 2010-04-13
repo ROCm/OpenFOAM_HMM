@@ -91,9 +91,8 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~sphericalAngularSpring();
+    //- Destructor
+    virtual ~sphericalAngularSpring();
 
 
     // Member Functions

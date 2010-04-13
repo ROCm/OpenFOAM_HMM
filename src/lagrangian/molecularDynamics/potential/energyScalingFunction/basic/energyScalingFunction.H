@@ -117,10 +117,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~energyScalingFunction()
-        {}
+    //- Destructor
+    virtual ~energyScalingFunction()
+    {}
 
 
     // Member Functions

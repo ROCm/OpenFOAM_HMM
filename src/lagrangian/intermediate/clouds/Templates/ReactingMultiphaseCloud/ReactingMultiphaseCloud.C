@@ -93,6 +93,8 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::evolveCloud()
         this->g().value()
     );
 
+    this->surfaceFilm().inject(td);
+
     this->injection().inject(td);
 
     if (this->coupled())

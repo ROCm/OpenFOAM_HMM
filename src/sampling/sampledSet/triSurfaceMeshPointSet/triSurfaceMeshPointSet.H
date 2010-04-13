@@ -95,7 +95,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~triSurfaceMeshPointSet();
 
 

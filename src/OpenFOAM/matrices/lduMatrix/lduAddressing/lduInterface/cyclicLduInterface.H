@@ -57,9 +57,8 @@ public:
 
     // Constructors
 
-    // Destructor
-
-        virtual ~cyclicLduInterface();
+    //- Destructor
+    virtual ~cyclicLduInterface();
 
 
     // Member Functions

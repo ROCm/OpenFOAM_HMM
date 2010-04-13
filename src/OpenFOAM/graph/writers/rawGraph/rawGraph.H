@@ -67,10 +67,9 @@ public:
         {}
 
 
-    // Destructor
-
-        ~rawGraph()
-        {}
+    //- Destructor
+    ~rawGraph()
+    {}
 
 
     // Member Functions

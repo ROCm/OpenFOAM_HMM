@@ -85,9 +85,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~multiMotion();
+    //- Destructor
+    virtual ~multiMotion();
 
 
     // Member Functions

@@ -103,9 +103,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~cylinderToCell();
+    //- Destructor
+    virtual ~cylinderToCell();
 
 
     // Member Functions

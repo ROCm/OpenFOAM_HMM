@@ -45,7 +45,7 @@ void Foam::octreeDataFace::calcBb()
     allBb_.setSize(meshFaces_.size());
     allBb_ = treeBoundBox::invertedBox;
 
-    forAll (meshFaces_, i)
+    forAll(meshFaces_, i)
     {
         // Update bb of face
         treeBoundBox& myBb = allBb_[i];

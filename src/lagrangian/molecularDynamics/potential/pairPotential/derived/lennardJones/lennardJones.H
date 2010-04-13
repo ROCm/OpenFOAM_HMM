@@ -76,10 +76,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~lennardJones()
-        {}
+    //- Destructor
+    ~lennardJones()
+    {}
 
 
     // Member Functions

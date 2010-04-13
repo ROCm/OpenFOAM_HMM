@@ -112,9 +112,8 @@ public:
         cellMapper(const mapPolyMesh& mpm);
 
 
-    // Destructor
-
-        virtual ~cellMapper();
+    //- Destructor
+    virtual ~cellMapper();
 
 
     // Member Functions

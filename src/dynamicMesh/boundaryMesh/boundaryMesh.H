@@ -190,9 +190,8 @@ public:
         boundaryMesh();
 
 
-    // Destructor
-
-        ~boundaryMesh();
+    //- Destructor
+    ~boundaryMesh();
 
         void clearOut();
 

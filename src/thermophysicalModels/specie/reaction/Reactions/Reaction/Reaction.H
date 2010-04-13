@@ -238,10 +238,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~Reaction()
-        {}
+    //- Destructor
+    virtual ~Reaction()
+    {}
 
 
     // Member Functions

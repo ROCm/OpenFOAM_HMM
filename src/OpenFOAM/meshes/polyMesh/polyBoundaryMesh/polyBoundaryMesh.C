@@ -120,7 +120,7 @@ Foam::polyBoundaryMesh::~polyBoundaryMesh()
 
 void Foam::polyBoundaryMesh::clearGeom()
 {
-    forAll (*this, patchi)
+    forAll(*this, patchi)
     {
         operator[](patchi).clearGeom();
     }
@@ -132,7 +132,7 @@ void Foam::polyBoundaryMesh::clearAddressing()
     neighbourEdgesPtr_.clear();
     patchIDPtr_.clear();
 
-    forAll (*this, patchi)
+    forAll(*this, patchi)
     {
         operator[](patchi).clearAddressing();
     }
@@ -355,7 +355,7 @@ Foam::wordList Foam::polyBoundaryMesh::names() const
 
     wordList t(patches.size());
 
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         t[patchI] = patches[patchI].name();
     }
@@ -370,7 +370,7 @@ Foam::wordList Foam::polyBoundaryMesh::types() const
 
     wordList t(patches.size());
 
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         t[patchI] = patches[patchI].type();
     }
@@ -385,7 +385,7 @@ Foam::wordList Foam::polyBoundaryMesh::physicalTypes() const
 
     wordList t(patches.size());
 
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         t[patchI] = patches[patchI].physicalType();
     }
@@ -398,7 +398,7 @@ Foam::label Foam::polyBoundaryMesh::findPatchID(const word& patchName) const
 {
     const polyPatchList& patches = *this;
 
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         if (patches[patchI].name() == patchName)
         {
@@ -440,7 +440,7 @@ Foam::label Foam::polyBoundaryMesh::whichPatch(const label faceIndex) const
         return -1;
     }
 
-    forAll (*this, patchI)
+    forAll(*this, patchI)
     {
         const polyPatch& bp = operator[](patchI);
 
@@ -518,7 +518,7 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
 
     label nonProcI = 0;
 
-    forAll (bm, patchI)
+    forAll(bm, patchI)
     {
         if (!isA<processorPolyPatch>(bm[patchI]))
         {
@@ -594,7 +594,7 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
 
     bool hasError = false;
 
-    forAll (bm, patchI)
+    forAll(bm, patchI)
     {
         if (bm[patchI].start() != nextPatchStart && !hasError)
         {

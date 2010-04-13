@@ -112,7 +112,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~kOmega()
     {}
 

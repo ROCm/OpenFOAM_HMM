@@ -71,12 +71,12 @@ void Foam::meshToMesh::calcAddressing()
     // set reference to boundary
     const polyPatchList& patchesFrom = fromMesh_.boundaryMesh();
 
-    forAll (patchesFrom, patchI)
+    forAll(patchesFrom, patchI)
     {
         // get reference to cells next to the boundary
         const unallocLabelList& bCells = patchesFrom[patchI].faceCells();
 
-        forAll (bCells, faceI)
+        forAll(bCells, faceI)
         {
             boundaryCell[bCells[faceI]] = true;
         }
@@ -126,7 +126,7 @@ void Foam::meshToMesh::calcAddressing()
         oc
     );
 
-    forAll (toMesh_.boundaryMesh(), patchi)
+    forAll(toMesh_.boundaryMesh(), patchi)
     {
         const polyPatch& toPatch = toMesh_.boundaryMesh()[patchi];
 
@@ -243,7 +243,7 @@ void Foam::meshToMesh::cellAddresses
     const vectorField& centresFrom = fromMesh.cellCentres();
     const labelListList& cc = fromMesh.cellCells();
 
-    forAll (points, toI)
+    forAll(points, toI)
     {
         // pick up target position
         const vector& p = points[toI];
@@ -260,7 +260,7 @@ void Foam::meshToMesh::cellAddresses
             // set the current list of neighbouring cells
             const labelList& neighbours = cc[curCell];
 
-            forAll (neighbours, nI)
+            forAll(neighbours, nI)
             {
                 scalar curDistSqr =
                     magSqr(p - centresFrom[neighbours[nI]]);
@@ -300,7 +300,7 @@ void Foam::meshToMesh::cellAddresses
                 // set the current list of neighbouring cells
                 const labelList& neighbours = cc[curCell];
 
-                forAll (neighbours, nI)
+                forAll(neighbours, nI)
                 {
                     // search through all the neighbours.
                     // If point is in neighbour reset current cell
@@ -319,12 +319,12 @@ void Foam::meshToMesh::cellAddresses
                     // set the current list of neighbouring cells
                     const labelList& neighbours = cc[curCell];
 
-                    forAll (neighbours, nI)
+                    forAll(neighbours, nI)
                     {
                         // set the current list of neighbour-neighbouring cells
                         const labelList& nn = cc[neighbours[nI]];
 
-                        forAll (nn, nI)
+                        forAll(nn, nI)
                         {
                             // search through all the neighbours.
                             // If point is in neighbour reset current cell

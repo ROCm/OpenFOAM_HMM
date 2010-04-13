@@ -113,7 +113,7 @@ tmp<surfaceScalarField> ddtScheme<Type>::fvcDdtPhiCoeff
 
     surfaceScalarField& ddtCouplingCoeff = tddtCouplingCoeff();
 
-    forAll (U.boundaryField(), patchi)
+    forAll(U.boundaryField(), patchi)
     {
         if (U.boundaryField()[patchi].fixesValue())
         {
@@ -154,7 +154,7 @@ tmp<surfaceScalarField> ddtScheme<Type>::fvcDdtPhiCoeff
 
     surfaceScalarField& ddtCouplingCoeff = tddtCouplingCoeff();
 
-    forAll (U.boundaryField(), patchi)
+    forAll(U.boundaryField(), patchi)
     {
         if (U.boundaryField()[patchi].fixesValue())
         {
@@ -199,7 +199,7 @@ tmp<surfaceScalarField> ddtScheme<Type>::fvcDdtPhiCoeff
 
     surfaceScalarField& ddtCouplingCoeff = tddtCouplingCoeff();
 
-    forAll (rhoU.boundaryField(), patchi)
+    forAll(rhoU.boundaryField(), patchi)
     {
         if (rhoU.boundaryField()[patchi].fixesValue())
         {

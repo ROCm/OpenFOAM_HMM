@@ -81,12 +81,7 @@ int main(int argc, char *argv[])
 
     dict.swapDown(dict.first());
 
-    for
-    (
-        UDictionary<ent>::const_iterator iter = dict.begin();
-        iter != dict.end();
-        ++iter
-    )
+    forAllConstIter(UDictionary<ent>, dict, iter)
     {
         Info<< "element : " << *iter;
     }

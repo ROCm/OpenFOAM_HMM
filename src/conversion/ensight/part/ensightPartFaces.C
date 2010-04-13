@@ -79,7 +79,7 @@ Foam::ensightPartFaces::ensightPartFaces
     label nQuad = 0;
     label nPoly = 0;
 
-    forAll (pPatch, patchfaceI)
+    forAll(pPatch, patchfaceI)
     {
         const face& f = pMesh.faces()[patchfaceI + offset_];
 

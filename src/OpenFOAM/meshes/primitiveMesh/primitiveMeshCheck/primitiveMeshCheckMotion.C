@@ -68,7 +68,7 @@ bool Foam::primitiveMesh::checkMeshMotion
     scalar minVolume = GREAT;
     label nNegVols = 0;
 
-    forAll (cellVols, cellI)
+    forAll(cellVols, cellI)
     {
         if (cellVols[cellI] < VSMALL)
         {
@@ -108,7 +108,7 @@ bool Foam::primitiveMesh::checkMeshMotion
     label nPyrErrors = 0;
     label nDotProductErrors = 0;
 
-    forAll (f, faceI)
+    forAll(f, faceI)
     {
         const scalar a = Foam::mag(fAreas[faceI]);
 

@@ -99,9 +99,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~sphereToCell();
+    //- Destructor
+    virtual ~sphereToCell();
 
 
     // Member Functions

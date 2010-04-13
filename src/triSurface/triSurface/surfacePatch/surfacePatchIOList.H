@@ -86,9 +86,8 @@ public:
         //- Construct from IOobject
         surfacePatchIOList(const IOobject& io, const surfacePatchList&);
 
-    // Destructor
-
-        ~surfacePatchIOList();
+    //- Destructor
+    ~surfacePatchIOList();
 
 
     // Member Functions

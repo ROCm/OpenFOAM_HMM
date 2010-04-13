@@ -37,9 +37,12 @@
 #     to add any custom rsync options.
 #-------------------------------------------------------------------------------
 Script=${0##*/}
-if [ "$1" = "-h" -o "$1" = "-help" -o "$#" -ne 2 ]
-then
+
+#------------------------------------------------------------------------------
+usage() {
+    while [ "$#" -ge 1 ]; do echo "$1" 1>&2; shift; done
     cat <<USAGE 1>&2
+
 Usage: $Script srcDir dstDir
 
     Copy OpenFOAM settings from one case to another, without copying
@@ -52,7 +55,29 @@ Note
 
 USAGE
     exit 1
-fi
+}
+#------------------------------------------------------------------------------
+
+# parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)
+        usage
+        ;;
+    -*)
+        usage "unknown option: '$*'"
+        ;;
+    *)
+        break
+        ;;
+    esac
+done
+
+# need rsync
+type rsync >/dev/null 2>&1 || usage "Error: 'rsync' seems to be missing"
+
+[ "$#" -eq 2 ] || usage "Error: incorrect number of arguments"
 
 srcDir=${1%/}
 dstDir=${2%/}

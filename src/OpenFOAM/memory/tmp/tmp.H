@@ -80,10 +80,8 @@ public:
         inline tmp(const tmp<T>&);
 
 
-    // Destructor
-
-        //- Delete object when reference count == 0
-        inline ~tmp();
+    //- Destructor, delete object when reference count == 0
+    inline ~tmp();
 
 
     // Member Functions

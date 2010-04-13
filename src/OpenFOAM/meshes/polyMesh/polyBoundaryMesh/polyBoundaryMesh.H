@@ -116,9 +116,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~polyBoundaryMesh();
+    //- Destructor
+    ~polyBoundaryMesh();
 
         //- Clear geometry at this level and at patches
         void clearGeom();

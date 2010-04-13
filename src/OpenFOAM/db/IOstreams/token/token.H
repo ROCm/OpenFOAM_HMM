@@ -167,9 +167,8 @@ public:
             static autoPtr<compound> New(const word& type, Istream&);
 
 
-        // Destructor
-
-            virtual ~compound();
+        //- Destructor
+        virtual ~compound();
 
 
         // Member Functions
@@ -309,9 +308,8 @@ public:
         token(Istream&);
 
 
-    // Destructor
-
-        inline ~token();
+    //- Destructor
+    inline ~token();
 
 
     // Member functions

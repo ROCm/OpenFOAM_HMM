@@ -86,9 +86,8 @@ public:
         CallbackRegistry();
 
 
-    // Destructor
-
-        virtual ~CallbackRegistry();
+    //- Destructor
+    virtual ~CallbackRegistry();
 };
 
 

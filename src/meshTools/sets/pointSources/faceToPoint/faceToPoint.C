@@ -68,12 +68,7 @@ void Foam::faceToPoint::combine(topoSet& set, const bool add) const
     faceSet loadedSet(mesh_, setName_);
 
     // Add all points from faces in loadedSet
-    for
-    (
-        faceSet::const_iterator iter = loadedSet.begin();
-        iter != loadedSet.end();
-        ++iter
-    )
+    forAllConstIter(faceSet, loadedSet, iter)
     {
         const face& f = mesh_.faces()[iter.key()];
 

@@ -81,9 +81,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~quadraticDiffusivity();
+    //- Destructor
+    virtual ~quadraticDiffusivity();
 
 
     // Member Functions

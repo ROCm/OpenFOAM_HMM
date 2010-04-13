@@ -90,9 +90,8 @@ public:
         TRIsurfaceFormatCore(const fileName&);
 
 
-    // Destructor
-
-        ~TRIsurfaceFormatCore();
+    //- Destructor
+    ~TRIsurfaceFormatCore();
 
 
     // Member Functions

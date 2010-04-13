@@ -85,9 +85,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~linearMotion();
+    //- Destructor
+    virtual ~linearMotion();
 
 
     // Member Functions

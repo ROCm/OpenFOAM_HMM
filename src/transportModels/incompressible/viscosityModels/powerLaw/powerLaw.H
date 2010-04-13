@@ -90,10 +90,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~powerLaw()
-        {}
+    //- Destructor
+    ~powerLaw()
+    {}
 
 
     // Member Functions

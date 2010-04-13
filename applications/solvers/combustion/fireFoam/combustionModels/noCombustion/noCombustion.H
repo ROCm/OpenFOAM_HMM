@@ -83,9 +83,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~noCombustion();
+    //- Destructor
+    virtual ~noCombustion();
 
     // Member Functions
 

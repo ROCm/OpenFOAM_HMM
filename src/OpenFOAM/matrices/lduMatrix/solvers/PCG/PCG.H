@@ -80,10 +80,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~PCG()
-        {}
+    //- Destructor
+    virtual ~PCG()
+    {}
 
 
     // Member Functions

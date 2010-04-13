@@ -70,9 +70,8 @@ public:
         sigQuit();
 
 
-    // Destructor
-
-        ~sigQuit();
+    //- Destructor
+    ~sigQuit();
 
 
     // Member functions

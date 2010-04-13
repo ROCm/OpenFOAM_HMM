@@ -204,9 +204,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~enrichedPatch();
+    //- Destructor
+    ~enrichedPatch();
 
 
     // Member Functions

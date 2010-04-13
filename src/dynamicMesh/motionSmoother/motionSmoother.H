@@ -305,9 +305,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~motionSmoother();
+    //- Destructor
+    ~motionSmoother();
 
 
     // Member Functions

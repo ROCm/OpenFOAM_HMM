@@ -30,10 +30,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(timeActivatedFileUpdate, 0);
-}
+defineTypeNameAndDebug(Foam::timeActivatedFileUpdate, 0);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

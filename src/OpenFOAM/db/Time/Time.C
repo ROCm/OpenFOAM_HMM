@@ -518,7 +518,28 @@ bool Foam::Time::loop()
 
     if (running)
     {
-        operator++();
+        if (!subCycling_)
+        {
+            readModifiedObjects();
+
+            if (timeIndex_ == startTimeIndex_)
+            {
+                functionObjects_.start();
+            }
+            else
+            {
+                functionObjects_.execute();
+            }
+        }
+
+        // Check update the "running" status following the "++" operation
+        // to take into account possible side-effects from functionObjects
+        running = run();
+
+        if (running)
+        {
+            operator++();
+        }
     }
 
     return running;
@@ -663,20 +684,6 @@ Foam::Time& Foam::Time::operator+=(const scalar deltaT)
 
 Foam::Time& Foam::Time::operator++()
 {
-    if (!subCycling_)
-    {
-        readModifiedObjects();
-
-        if (timeIndex_ == startTimeIndex_)
-        {
-            functionObjects_.start();
-        }
-        else
-        {
-            functionObjects_.execute();
-        }
-    }
-
     deltaT0_ = deltaTSave_;
     deltaTSave_ = deltaT_;
 

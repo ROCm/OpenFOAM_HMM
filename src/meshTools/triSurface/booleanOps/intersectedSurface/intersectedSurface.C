@@ -329,12 +329,7 @@ Foam::intersectedSurface::calcPointEdgeAddressing
     }
 
     // Shrink it
-    for
-    (
-        Map<DynamicList<label> >::iterator iter = facePointEdges.begin();
-        iter != facePointEdges.end();
-        ++iter
-    )
+    forAllIter(Map< DynamicList<label> >, facePointEdges, iter)
     {
         iter().shrink();
 
@@ -358,17 +353,13 @@ Foam::intersectedSurface::calcPointEdgeAddressing
         {
             label edgeI = fEdges[i];
             const edge& e = edges[edgeI];
-            Pout<< "    " << edgeI << ' ' << e << points[e.start()]
+            Pout<< "    " << edgeI << ' ' << e
+                << points[e.start()]
                 << points[e.end()] << endl;
         }
 
         Pout<< "    Constructed point-edge adressing:" << endl;
-        for
-        (
-            Map<DynamicList<label> >::iterator iter = facePointEdges.begin();
-            iter != facePointEdges.end();
-            ++iter
-        )
+        forAllConstIter(Map< DynamicList<label> >, facePointEdges, iter)
         {
             Pout<< "    vertex " << iter.key() << " is connected to edges "
                 << iter() << endl;

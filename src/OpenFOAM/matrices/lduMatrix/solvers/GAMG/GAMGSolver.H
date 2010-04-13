@@ -223,9 +223,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~GAMGSolver();
+    //- Destructor
+    virtual ~GAMGSolver();
 
 
     // Member Functions

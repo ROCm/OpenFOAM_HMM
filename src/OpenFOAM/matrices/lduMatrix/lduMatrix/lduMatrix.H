@@ -210,6 +210,16 @@ public:
             void print() const;
 
 
+        // Friend functions
+
+            //- Return the element-wise maximum of two solverPerformances
+            friend solverPerformance max
+            (
+                const solverPerformance&,
+                const solverPerformance&
+            );
+
+
         // Ostream Operator
 
             friend Ostream& operator<<(Ostream&, const solverPerformance&);
@@ -330,10 +340,9 @@ public:
 
 
 
-        // Destructor
-
-            virtual ~solver()
-            {}
+        //- Destructor
+        virtual ~solver()
+        {}
 
 
         // Member functions
@@ -482,10 +491,9 @@ public:
             );
 
 
-        // Destructor
-
-            virtual ~smoother()
-            {}
+        //- Destructor
+        virtual ~smoother()
+        {}
 
 
         // Member functions
@@ -597,10 +605,9 @@ public:
             );
 
 
-        // Destructor
-
-            virtual ~preconditioner()
-            {}
+        //- Destructor
+        virtual ~preconditioner()
+        {}
 
 
         // Member functions
@@ -667,9 +674,8 @@ public:
         lduMatrix(const lduMesh&, Istream&);
 
 
-    // Destructor
-
-        ~lduMatrix();
+    //- Destructor
+    ~lduMatrix();
 
 
     // Member functions

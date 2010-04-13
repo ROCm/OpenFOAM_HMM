@@ -131,9 +131,8 @@ public:
             IOstream::versionNumber version=IOstream::currentVersion
         );
 
-    // Destructor
-
-        ~PstreamBuffers();
+    //- Destructor
+    ~PstreamBuffers();
 
 
     // Member functions

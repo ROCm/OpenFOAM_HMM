@@ -56,7 +56,7 @@ void Foam::multiComponentMixture<ThermoType>::correctMassFractions()
         Yt += Y_[n];
     }
 
-    forAll (Y_, n)
+    forAll(Y_, n)
     {
         Y_[n] /= Yt;
     }

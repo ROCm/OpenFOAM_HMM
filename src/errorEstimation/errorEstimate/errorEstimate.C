@@ -43,7 +43,7 @@ Foam::wordList Foam::errorEstimate<Type>::errorBCTypes() const
         zeroGradientFvPatchField<Type>::typeName
     );
 
-    forAll (psi_.boundaryField(), patchI)
+    forAll(psi_.boundaryField(), patchI)
     {
         if (psi_.boundaryField()[patchI].fixesValue())
         {

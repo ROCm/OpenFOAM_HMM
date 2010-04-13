@@ -42,7 +42,7 @@ bool Foam::primitiveMesh::pointInCellBB(const point& p, label celli) const
     vector bbmax = -GREAT*vector::one;
     vector bbmin = GREAT*vector::one;
 
-    forAll (cellVertices, vertexI)
+    forAll(cellVertices, vertexI)
     {
         bbmax = max(bbmax, points[cellVertices[vertexI]]);
         bbmin = min(bbmin, points[cellVertices[vertexI]]);

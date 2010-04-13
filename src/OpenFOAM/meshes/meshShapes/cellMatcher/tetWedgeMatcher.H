@@ -77,9 +77,8 @@ public:
         //- Construct null
         tetWedgeMatcher();
 
-    // Destructor
-
-        ~tetWedgeMatcher();
+    //- Destructor
+    ~tetWedgeMatcher();
 
 
     // Member Functions

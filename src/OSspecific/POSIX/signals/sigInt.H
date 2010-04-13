@@ -70,9 +70,8 @@ public:
         sigInt();
 
 
-    // Destructor
-
-        ~sigInt();
+    //- Destructor
+    ~sigInt();
 
 
     // Member functions

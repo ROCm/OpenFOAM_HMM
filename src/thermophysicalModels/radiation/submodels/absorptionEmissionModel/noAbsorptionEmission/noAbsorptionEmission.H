@@ -69,7 +69,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~noAbsorptionEmission();
 };
 

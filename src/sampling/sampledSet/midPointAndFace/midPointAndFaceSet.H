@@ -89,7 +89,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~midPointAndFaceSet();
 };
 

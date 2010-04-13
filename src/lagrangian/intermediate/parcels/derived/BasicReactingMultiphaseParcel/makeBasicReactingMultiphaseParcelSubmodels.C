@@ -41,6 +41,7 @@ License
 
 // Reacting multiphase
 #include "makeReactingMultiphaseParcelDevolatilisationModels.H"
+#include "makeReactingMultiphaseParcelSurfaceFilmModels.H"
 #include "makeReactingMultiphaseParcelSurfaceReactionModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -63,6 +64,10 @@ namespace Foam
 
     // Reacting multiphase sub-models
     makeReactingMultiphaseDevolatilisationModels
+    (
+        BasicReactingMultiphaseParcel
+    );
+    makeReactingMultiphaseSurfaceFilmModels
     (
         BasicReactingMultiphaseParcel
     );

@@ -71,9 +71,8 @@ public:
         dxSurfaceWriter();
 
 
-    // Destructor
-
-        virtual ~dxSurfaceWriter();
+    //- Destructor
+    virtual ~dxSurfaceWriter();
 
 
     // Member Functions

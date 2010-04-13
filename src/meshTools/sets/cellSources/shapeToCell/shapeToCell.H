@@ -103,9 +103,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~shapeToCell();
+    //- Destructor
+    virtual ~shapeToCell();
 
 
     // Member Functions
