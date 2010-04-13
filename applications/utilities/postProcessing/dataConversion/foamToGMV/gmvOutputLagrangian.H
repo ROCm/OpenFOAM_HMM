@@ -19,7 +19,7 @@ gmvFile << nl;
 
 forAll(lagrangianScalarNames, i)
 {
-    const word name = lagrangianScalarNames[i];
+    const word& name = lagrangianScalarNames[i];
 
     IOField<scalar> fld
     (
@@ -50,7 +50,7 @@ forAll(lagrangianScalarNames, i)
 
 forAll(lagrangianVectorNames, i)
 {
-    const word name = lagrangianVectorNames[i];
+    const word& name = lagrangianVectorNames[i];
 
     IOField<vector> fld
     (
