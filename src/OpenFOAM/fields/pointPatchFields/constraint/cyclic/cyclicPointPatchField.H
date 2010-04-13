@@ -127,6 +127,14 @@ public:
 
     // Member functions
 
+        //- Constraint handling
+
+            //- Return the constraint type this pointPatchField implements
+            virtual const word& constraintType() const
+            {
+                return cyclicPointPatch::typeName;
+            }
+
         //- Cyclic coupled interface functions
 
             //- Does the patch field perform the transfromation

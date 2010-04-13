@@ -22,21 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::basicSymmetryPointPatchField
+    Foam::cyclicSlipPointPatchField
 
 Description
-    A Symmetry boundary condition for pointField
+    Specialisation of cyclic that constrains to the patch
 
 SourceFiles
-    basicsymmetryPointPatchField.C
+    cyclicSlipPointPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef basicSymmetryPointPatchField_H
-#define basicSymmetryPointPatchField_H
+#ifndef cyclicSlipPointPatchField_H
+#define cyclicSlipPointPatchField_H
 
-#include "pointPatchField.H"
-#include "symmetryPointPatch.H"
+#include "cyclicPointPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,28 +43,32 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class basicSymmetryPointPatchField Declaration
+                    Class cyclicSlipPointPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class basicSymmetryPointPatchField
+class cyclicSlipPointPatchField
 :
-    public pointPatchField<Type>
+    public cyclicPointPatchField<Type>
 {
 
 public:
 
+    //- Runtime type information
+    TypeName("cyclicSlip");
+
+
     // Constructors
 
         //- Construct from patch and internal field
-        basicSymmetryPointPatchField
+        cyclicSlipPointPatchField
         (
             const pointPatch&,
             const DimensionedField<Type, pointMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        basicSymmetryPointPatchField
+        cyclicSlipPointPatchField
         (
             const pointPatch&,
             const DimensionedField<Type, pointMesh>&,
@@ -73,9 +76,9 @@ public:
         );
 
         //- Construct by mapping given patchField<Type> onto a new patch
-        basicSymmetryPointPatchField
+        cyclicSlipPointPatchField
         (
-            const basicSymmetryPointPatchField<Type>&,
+            const cyclicSlipPointPatchField<Type>&,
             const pointPatch&,
             const DimensionedField<Type, pointMesh>&,
             const pointPatchFieldMapper&
@@ -86,7 +89,7 @@ public:
         {
             return autoPtr<pointPatchField<Type> >
             (
-                new basicSymmetryPointPatchField<Type>
+                new cyclicSlipPointPatchField<Type>
                 (
                     *this
                 )
@@ -94,9 +97,9 @@ public:
         }
 
         //- Construct as copy setting internal field reference
-        basicSymmetryPointPatchField
+        cyclicSlipPointPatchField
         (
-            const basicSymmetryPointPatchField<Type>&,
+            const cyclicSlipPointPatchField<Type>&,
             const DimensionedField<Type, pointMesh>&
         );
 
@@ -108,10 +111,9 @@ public:
         {
             return autoPtr<pointPatchField<Type> >
             (
-                new basicSymmetryPointPatchField<Type>
+                new cyclicSlipPointPatchField<Type>
                 (
-                    *this,
-                    iF
+                    *this, iF
                 )
             );
         }
@@ -119,19 +121,19 @@ public:
 
     // Member functions
 
-        // Evaluation functions
+        //- Update the patch field
+        virtual void evaluate
+        (
+            const Pstream::commsTypes commsType=Pstream::blocking
+        );
 
-            //- Return the constraint type this pointPatchField implements
-            virtual const word& constraintType() const
-            {
-                return symmetryPointPatch::typeName;
-            }
+        //- Accumulate the effect of constraint direction of this patch
+        virtual void applyConstraint
+        (
+            const label pointi,
+            pointConstraint&
+        ) const;
 
-            //- Update the patch field
-            virtual void evaluate
-            (
-                const Pstream::commsTypes commsType=Pstream::blocking
-            );
 };
 
 
@@ -142,7 +144,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#    include "basicSymmetryPointPatchField.C"
+#    include "cyclicSlipPointPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
