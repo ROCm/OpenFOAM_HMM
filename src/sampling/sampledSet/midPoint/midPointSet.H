@@ -88,7 +88,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~midPointSet();
 };
 

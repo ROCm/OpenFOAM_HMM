@@ -114,9 +114,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~perfectInterface();
+    //- Destructor
+    virtual ~perfectInterface();
 
 
     // Member Functions

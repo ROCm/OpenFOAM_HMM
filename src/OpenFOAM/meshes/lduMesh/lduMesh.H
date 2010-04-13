@@ -59,10 +59,9 @@ public:
 
     // Constructors
 
-    // Destructor
-
-        virtual ~lduMesh()
-        {}
+    //- Destructor
+    virtual ~lduMesh()
+    {}
 
 
     // Member Functions

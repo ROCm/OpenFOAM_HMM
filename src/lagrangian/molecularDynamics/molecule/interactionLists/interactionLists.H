@@ -106,9 +106,8 @@ public:
         interactionLists(const polyMesh& mesh);
 
 
-    // Destructor
-
-        ~interactionLists();
+    //- Destructor
+    ~interactionLists();
 
 
     // Member Functions

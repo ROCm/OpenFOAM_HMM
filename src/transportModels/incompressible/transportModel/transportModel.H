@@ -74,9 +74,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~transportModel();
+    //- Destructor
+    virtual ~transportModel();
 
 
     // Member Functions

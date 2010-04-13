@@ -57,7 +57,7 @@ void Foam::porousZone::addPowerLawResistance
     const scalar C0 = C0_;
     const scalar C1m1b2 = (C1_ - 1.0)/2.0;
 
-    forAll (cells, i)
+    forAll(cells, i)
     {
         Udiag[cells[i]] +=
             V[cells[i]]*rho[cells[i]]*C0*pow(magSqr(U[cells[i]]), C1m1b2);
@@ -80,7 +80,7 @@ void Foam::porousZone::addViscousInertialResistance
     const tensor& D = D_.value();
     const tensor& F = F_.value();
 
-    forAll (cells, i)
+    forAll(cells, i)
     {
         tensor dragCoeff = mu[cells[i]]*D + (rho[cells[i]]*mag(U[cells[i]]))*F;
         scalar isoDragCoeff = tr(dragCoeff);
@@ -104,7 +104,7 @@ void Foam::porousZone::addPowerLawResistance
     const scalar C0 = C0_;
     const scalar C1m1b2 = (C1_ - 1.0)/2.0;
 
-    forAll (cells, i)
+    forAll(cells, i)
     {
         AU[cells[i]] = AU[cells[i]]
           + I*(rho[cells[i]]*C0*pow(magSqr(U[cells[i]]), C1m1b2));
@@ -125,7 +125,7 @@ void Foam::porousZone::addViscousInertialResistance
     const tensor& D = D_.value();
     const tensor& F = F_.value();
 
-    forAll (cells, i)
+    forAll(cells, i)
     {
         AU[cells[i]] += mu[cells[i]]*D + (rho[cells[i]]*mag(U[cells[i]]))*F;
     }

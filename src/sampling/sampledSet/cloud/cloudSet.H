@@ -104,7 +104,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~cloudSet();
 };
 

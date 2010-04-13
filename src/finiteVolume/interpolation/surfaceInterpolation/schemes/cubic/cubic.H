@@ -169,7 +169,7 @@ public:
                 );
             }
 
-            forAll (sfCorr.boundaryField(), pi)
+            forAll(sfCorr.boundaryField(), pi)
             {
                 if (!sfCorr.boundaryField()[pi].coupled())
                 {

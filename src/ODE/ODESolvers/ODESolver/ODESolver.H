@@ -103,10 +103,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~ODESolver()
-        {}
+    //- Destructor
+    virtual ~ODESolver()
+    {}
 
 
     // Member Functions

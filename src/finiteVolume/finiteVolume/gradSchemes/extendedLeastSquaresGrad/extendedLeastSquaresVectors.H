@@ -88,9 +88,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~extendedLeastSquaresVectors();
+    //- Destructor
+    virtual ~extendedLeastSquaresVectors();
 
 
     // Member functions

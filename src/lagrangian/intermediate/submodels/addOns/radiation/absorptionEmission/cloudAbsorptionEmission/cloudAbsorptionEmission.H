@@ -73,7 +73,7 @@ public:
         cloudAbsorptionEmission(const dictionary& dict, const fvMesh& mesh);
 
 
-    // Destructor
+    //- Destructor
     virtual ~cloudAbsorptionEmission();
 
 

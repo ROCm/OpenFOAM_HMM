@@ -45,7 +45,7 @@ void Foam::directInteractionList::buildDirectInteractionList
 
         label pointJIndex;
 
-        forAll (mesh.points(), pointIIndex)
+        forAll(mesh.points(), pointIIndex)
         {
             for
             (

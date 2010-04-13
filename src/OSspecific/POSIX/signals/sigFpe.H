@@ -99,9 +99,8 @@ public:
         sigFpe();
 
 
-    // Destructor
-
-        ~sigFpe();
+    //- Destructor
+    ~sigFpe();
 
 
     // Member functions

@@ -70,9 +70,8 @@ public:
         sigSegv();
 
 
-    // Destructor
-
-        ~sigSegv();
+    //- Destructor
+    ~sigSegv();
 
 
     // Member functions

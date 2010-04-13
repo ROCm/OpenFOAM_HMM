@@ -57,7 +57,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::nonOrthogonality() const
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
 
-    forAll (nei, faceI)
+    forAll(nei, faceI)
     {
         vector d = centres[nei[faceI]] - centres[own[faceI]];
         vector s = areas[faceI];
@@ -71,7 +71,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::nonOrthogonality() const
         result[nei[faceI]] = max(cosDDotS, result[nei[faceI]]);
     }
 
-    forAll (mesh_.boundaryMesh(), patchI)
+    forAll(mesh_.boundaryMesh(), patchI)
     {
         const unallocLabelList& faceCells =
             mesh_.boundaryMesh()[patchI].faceCells();
@@ -119,7 +119,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::skewness() const
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
 
-    forAll (nei, faceI)
+    forAll(nei, faceI)
     {
         scalar dOwn = mag
         (
@@ -144,7 +144,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::skewness() const
         result[nei[faceI]] = max(skewness, result[nei[faceI]]);
     }
 
-    forAll (mesh_.boundaryMesh(), patchI)
+    forAll(mesh_.boundaryMesh(), patchI)
     {
         const unallocLabelList& faceCells =
             mesh_.boundaryMesh()[patchI].faceCells();
@@ -196,7 +196,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceNonOrthogonality() const
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
 
-    forAll (nei, faceI)
+    forAll(nei, faceI)
     {
         vector d = centres[nei[faceI]] - centres[own[faceI]];
         vector s = areas[faceI];
@@ -210,7 +210,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceNonOrthogonality() const
 
     label globalFaceI = mesh_.nInternalFaces();
 
-    forAll (mesh_.boundaryMesh(), patchI)
+    forAll(mesh_.boundaryMesh(), patchI)
     {
         const unallocLabelList& faceCells =
             mesh_.boundaryMesh()[patchI].faceCells();
@@ -257,7 +257,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceSkewness() const
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
 
-    forAll (nei, faceI)
+    forAll(nei, faceI)
     {
         scalar dOwn = mag
         (
@@ -281,7 +281,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceSkewness() const
 
     label globalFaceI = mesh_.nInternalFaces();
 
-    forAll (mesh_.boundaryMesh(), patchI)
+    forAll(mesh_.boundaryMesh(), patchI)
     {
         const unallocLabelList& faceCells =
             mesh_.boundaryMesh()[patchI].faceCells();

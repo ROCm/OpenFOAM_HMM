@@ -122,10 +122,9 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~IrreversibleReaction()
-        {}
+    //- Destructor
+    virtual ~IrreversibleReaction()
+    {}
 
 
     // Member Functions

@@ -166,8 +166,7 @@ public:
 
 
     //- Destructor
-
-        virtual ~streamLine();
+    virtual ~streamLine();
 
 
     // Member Functions

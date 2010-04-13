@@ -84,10 +84,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~metisDecomp()
-        {}
+    //- Destructor
+    virtual ~metisDecomp()
+    {}
 
 
     // Member Functions

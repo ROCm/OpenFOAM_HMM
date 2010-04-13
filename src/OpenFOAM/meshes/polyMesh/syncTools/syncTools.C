@@ -77,100 +77,18 @@ Foam::PackedBoolList Foam::syncTools::getMasterPoints(const polyMesh& mesh)
     PackedBoolList isMasterPoint(mesh.nPoints());
     PackedBoolList donePoint(mesh.nPoints());
 
+    const globalMeshData& globalData = mesh.globalData();
+    const labelList& meshPoints = globalData.coupledPatch().meshPoints();
+    const labelListList& pointSlaves = globalData.globalPointAllSlaves();
 
-    // Do multiple shared points. Min. proc is master
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    const labelList& sharedPointAddr =
-        mesh.globalData().sharedPointAddr();
-
-    labelList minProc(mesh.globalData().nGlobalPoints(), labelMax);
-
-    UIndirectList<label>(minProc, sharedPointAddr) = Pstream::myProcNo();
-
-    Pstream::listCombineGather(minProc, minEqOp<label>());
-    Pstream::listCombineScatter(minProc);
-
-    const labelList& sharedPointLabels =
-        mesh.globalData().sharedPointLabels();
-
-    forAll(sharedPointAddr, i)
+    forAll(meshPoints, coupledPointI)
     {
-        if (minProc[sharedPointAddr[i]] == Pstream::myProcNo())
+        label meshPointI = meshPoints[coupledPointI];
+        if (pointSlaves[coupledPointI].size() > 0)
         {
-            isMasterPoint.set(sharedPointLabels[i], 1u);
+            isMasterPoint[meshPointI] = true;
         }
-        donePoint.set(sharedPointLabels[i], 1u);
-    }
-
-
-    // Do other points on coupled patches
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-    forAll(patches, patchI)
-    {
-        if (patches[patchI].coupled())
-        {
-            if
-            (
-                Pstream::parRun()
-             && isA<processorPolyPatch>(patches[patchI])
-            )
-            {
-                const processorPolyPatch& pp =
-                    refCast<const processorPolyPatch>(patches[patchI]);
-
-                const labelList& meshPoints = pp.meshPoints();
-
-                forAll(meshPoints, i)
-                {
-                    label pointI = meshPoints[i];
-
-                    if (donePoint.get(pointI) == 0u)
-                    {
-                        donePoint.set(pointI, 1u);
-
-                        if (pp.owner())
-                        {
-                            isMasterPoint.set(pointI, 1u);
-                        }
-                    }
-                }
-            }
-            else if (isA<cyclicPolyPatch>(patches[patchI]))
-            {
-                const cyclicPolyPatch& pp =
-                    refCast<const cyclicPolyPatch>(patches[patchI]);
-
-                const edgeList& coupledPoints = pp.coupledPoints();
-                const labelList& meshPoints = pp.meshPoints();
-
-                forAll(coupledPoints, i)
-                {
-                    // First one of couple points is master
-
-                    const edge& pointPair = coupledPoints[i];
-                    label p0 = meshPoints[pointPair[0]];
-                    label p1 = meshPoints[pointPair[1]];
-
-                    if (donePoint.get(p0) == 0u)
-                    {
-                        donePoint.set(p0, 1u);
-                        isMasterPoint.set(p0, 1u);
-                        donePoint.set(p1, 1u);
-                    }
-                }
-            }
-            else
-            {
-                FatalErrorIn("syncTools::getMasterPoints(const polyMesh&)")
-                    << "Cannot handle coupled patch " << patches[patchI].name()
-                    << " of type " <<  patches[patchI].type()
-                    << abort(FatalError);
-            }
-        }
+        donePoint[meshPointI] = true;
     }
 
 
@@ -179,10 +97,9 @@ Foam::PackedBoolList Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 
     forAll(donePoint, pointI)
     {
-        if (donePoint.get(pointI) == 0u)
+        if (!donePoint[pointI])
         {
-            donePoint.set(pointI, 1u);
-            isMasterPoint.set(pointI, 1u);
+            isMasterPoint[pointI] = true;
         }
     }
 
@@ -196,100 +113,18 @@ Foam::PackedBoolList Foam::syncTools::getMasterEdges(const polyMesh& mesh)
     PackedBoolList isMasterEdge(mesh.nEdges());
     PackedBoolList doneEdge(mesh.nEdges());
 
+    const globalMeshData& globalData = mesh.globalData();
+    const labelList& meshEdges = globalData.coupledPatchMeshEdges();
+    const labelListList& edgeSlaves = globalData.globalEdgeAllSlaves();
 
-    // Do multiple shared edges. Min. proc is master
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    const labelList& sharedEdgeAddr =
-        mesh.globalData().sharedEdgeAddr();
-
-    labelList minProc(mesh.globalData().nGlobalEdges(), labelMax);
-
-    UIndirectList<label>(minProc, sharedEdgeAddr) = Pstream::myProcNo();
-
-    Pstream::listCombineGather(minProc, minEqOp<label>());
-    Pstream::listCombineScatter(minProc);
-
-    const labelList& sharedEdgeLabels =
-        mesh.globalData().sharedEdgeLabels();
-
-    forAll(sharedEdgeAddr, i)
+    forAll(meshEdges, coupledEdgeI)
     {
-        if (minProc[sharedEdgeAddr[i]] == Pstream::myProcNo())
+        label meshEdgeI = meshEdges[coupledEdgeI];
+        if (edgeSlaves[coupledEdgeI].size() > 0)
         {
-            isMasterEdge.set(sharedEdgeLabels[i], 1u);
+            isMasterEdge[meshEdgeI] = true;
         }
-        doneEdge.set(sharedEdgeLabels[i], 1u);
-    }
-
-
-    // Do other edges on coupled patches
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-    forAll(patches, patchI)
-    {
-        if (patches[patchI].coupled())
-        {
-            if
-            (
-                Pstream::parRun()
-             && isA<processorPolyPatch>(patches[patchI])
-            )
-            {
-                const processorPolyPatch& pp =
-                    refCast<const processorPolyPatch>(patches[patchI]);
-
-                const labelList& meshEdges = pp.meshEdges();
-
-                forAll(meshEdges, i)
-                {
-                    label edgeI = meshEdges[i];
-
-                    if (doneEdge.get(edgeI) == 0u)
-                    {
-                        doneEdge.set(edgeI, 1u);
-
-                        if (pp.owner())
-                        {
-                            isMasterEdge.set(edgeI, 1u);
-                        }
-                    }
-                }
-            }
-            else if (isA<cyclicPolyPatch>(patches[patchI]))
-            {
-                const cyclicPolyPatch& pp =
-                    refCast<const cyclicPolyPatch>(patches[patchI]);
-
-                const edgeList& coupledEdges = pp.coupledEdges();
-                const labelList& meshEdges = pp.meshEdges();
-
-                forAll(coupledEdges, i)
-                {
-                    // First one of couple edges is master
-
-                    const edge& edgePair = coupledEdges[i];
-                    label e0 = meshEdges[edgePair[0]];
-                    label e1 = meshEdges[edgePair[1]];
-
-                    if (doneEdge.get(e0) == 0u)
-                    {
-                        doneEdge.set(e0, 1u);
-                        isMasterEdge.set(e0, 1u);
-                        doneEdge.set(e1, 1u);
-                    }
-                }
-            }
-            else
-            {
-                FatalErrorIn("syncTools::getMasterEdges(const polyMesh&)")
-                    << "Cannot handle coupled patch " << patches[patchI].name()
-                    << " of type " <<  patches[patchI].type()
-                    << abort(FatalError);
-            }
-        }
+        doneEdge[meshEdgeI] = true;
     }
 
 
@@ -298,10 +133,9 @@ Foam::PackedBoolList Foam::syncTools::getMasterEdges(const polyMesh& mesh)
 
     forAll(doneEdge, edgeI)
     {
-        if (doneEdge.get(edgeI) == 0u)
+        if (!doneEdge[edgeI])
         {
-            doneEdge.set(edgeI, 1u);
-            isMasterEdge.set(edgeI, 1u);
+            isMasterEdge[edgeI] = true;
         }
     }
 

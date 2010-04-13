@@ -97,9 +97,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~patchIdentifier();
+    //- Destructor
+    virtual ~patchIdentifier();
 
 
     // Member Functions

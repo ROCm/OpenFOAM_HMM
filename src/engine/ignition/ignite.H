@@ -1,4 +1,4 @@
-    forAll (ign.sites(), i)
+    forAll(ign.sites(), i)
     {
         const ignitionSite& ignSite = ign.sites()[i];
 

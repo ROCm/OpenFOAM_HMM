@@ -76,9 +76,8 @@ public:
         IOobjectList(const IOobjectList&);
 
 
-    // Destructor
-
-        ~IOobjectList();
+    //- Destructor
+    ~IOobjectList();
 
 
     // Member functions

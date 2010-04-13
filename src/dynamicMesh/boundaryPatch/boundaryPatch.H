@@ -89,9 +89,8 @@ public:
         autoPtr<boundaryPatch> clone() const;
 
 
-    // Destructor
-
-        ~boundaryPatch();
+    //- Destructor
+    ~boundaryPatch();
 
 
     // Member Functions

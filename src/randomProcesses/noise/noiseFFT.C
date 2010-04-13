@@ -111,7 +111,7 @@ Foam::noiseFFT::noiseFFT(const fileName& pFileName, const label skip)
 Foam::graph Foam::noiseFFT::pt() const
 {
     scalarField t(size());
-    forAll (t, i)
+    forAll(t, i)
     {
         t[i] = i*deltat_;
     }
@@ -150,7 +150,7 @@ Foam::tmp<Foam::scalarField> Foam::noiseFFT::window
 
     label offset = ni*windowOffset;
 
-    forAll (pw, i)
+    forAll(pw, i)
     {
         pw[i] = operator[](i + offset);
     }
@@ -162,7 +162,7 @@ Foam::tmp<Foam::scalarField> Foam::noiseFFT::window
 Foam::tmp<Foam::scalarField> Foam::noiseFFT::Hanning(const label N) const
 {
     scalarField t(N);
-    forAll (t, i)
+    forAll(t, i)
     {
         t[i] = i*deltat_;
     }
@@ -238,7 +238,7 @@ Foam::graph Foam::noiseFFT::meanPf
     scalarField f(MeanPf.size());
     scalar deltaf = 1.0/(N*deltat_);
 
-    forAll (f, i)
+    forAll(f, i)
     {
         f[i] = i*deltaf;
     }
@@ -284,7 +284,7 @@ Foam::graph Foam::noiseFFT::RMSmeanPf
     scalarField f(RMSMeanPf.size());
     scalar deltaf = 1.0/(N*deltat_);
 
-    forAll (f, i)
+    forAll(f, i)
     {
         f[i] = i*deltaf;
     }

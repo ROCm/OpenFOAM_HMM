@@ -392,15 +392,9 @@ void collectCuts
     boolList edgeIsCut(mesh.nEdges(), false);
     scalarField edgeWeight(mesh.nEdges(), -GREAT);
 
-    for
-    (
-        cellSet::const_iterator iter = cellsToCut.begin();
-        iter != cellsToCut.end();
-        ++iter
-    )
+    forAllConstIter(cellSet, cellsToCut, iter)
     {
-        label cellI = iter.key();
-
+        const label cellI = iter.key();
         const labelList& cEdges = cellEdges[cellI];
 
         forAll(cEdges, i)

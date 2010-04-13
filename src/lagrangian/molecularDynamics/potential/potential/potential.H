@@ -109,9 +109,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~potential();
+    //- Destructor
+    ~potential();
 
 
     // Member Functions

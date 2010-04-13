@@ -94,7 +94,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~BinaryCollisionModel();
 
 

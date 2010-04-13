@@ -87,9 +87,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~faceToFace();
+    //- Destructor
+    virtual ~faceToFace();
 
 
     // Member Functions

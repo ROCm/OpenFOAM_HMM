@@ -340,10 +340,9 @@ public:
 
 
 
-        // Destructor
-
-            virtual ~solver()
-            {}
+        //- Destructor
+        virtual ~solver()
+        {}
 
 
         // Member functions
@@ -492,10 +491,9 @@ public:
             );
 
 
-        // Destructor
-
-            virtual ~smoother()
-            {}
+        //- Destructor
+        virtual ~smoother()
+        {}
 
 
         // Member functions
@@ -607,10 +605,9 @@ public:
             );
 
 
-        // Destructor
-
-            virtual ~preconditioner()
-            {}
+        //- Destructor
+        virtual ~preconditioner()
+        {}
 
 
         // Member functions
@@ -677,9 +674,8 @@ public:
         lduMatrix(const lduMesh&, Istream&);
 
 
-    // Destructor
-
-        ~lduMatrix();
+    //- Destructor
+    ~lduMatrix();
 
 
     // Member functions

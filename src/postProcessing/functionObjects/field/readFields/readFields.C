@@ -86,14 +86,29 @@ void Foam::readFields::read(const dictionary& dict)
 
 void Foam::readFields::execute()
 {
-    Info<< type() << " " << name_ << ":" << nl;
+    //Info<< type() << " " << name_ << ":" << nl;
+
+    // Clear out any previously loaded fields 
+    vsf_.clear();
+    vvf_.clear();
+    vSpheretf_.clear();
+    vSymmtf_.clear();
+    vtf_.clear();
+
+    ssf_.clear();
+    svf_.clear();
+    sSpheretf_.clear();
+    sSymmtf_.clear();
+    stf_.clear();
+
     forAll(fieldSet_, fieldI)
     {
-        setField<scalar>(fieldSet_[fieldI]);
-        setField<vector>(fieldSet_[fieldI]);
-        setField<sphericalTensor>(fieldSet_[fieldI]);
-        setField<symmTensor>(fieldSet_[fieldI]);
-        setField<tensor>(fieldSet_[fieldI]);
+        // If necessary load field
+        loadField<scalar>(fieldSet_[fieldI], vsf_, ssf_);
+        loadField<vector>(fieldSet_[fieldI], vvf_, svf_);
+        loadField<sphericalTensor>(fieldSet_[fieldI], vSpheretf_, sSpheretf_);
+        loadField<symmTensor>(fieldSet_[fieldI], vSymmtf_, sSymmtf_);
+        loadField<tensor>(fieldSet_[fieldI], vtf_, stf_);
     }
 }
 

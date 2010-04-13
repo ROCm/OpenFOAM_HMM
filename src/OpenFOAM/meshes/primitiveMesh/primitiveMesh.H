@@ -350,9 +350,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~primitiveMesh();
+    //- Destructor
+    virtual ~primitiveMesh();
 
 
     // Member Functions

@@ -152,12 +152,7 @@ Foam::IOobjectList Foam::IOobjectList::lookupClass(const word& ClassName) const
 {
     IOobjectList objectsOfClass(size());
 
-    for
-    (
-        HashPtrTable<IOobject>::const_iterator iter = begin();
-        iter != end();
-        ++iter
-    )
+    forAllConstIter(HashPtrTable<IOobject>, *this, iter)
     {
         if (iter()->headerClassName() == ClassName)
         {
@@ -192,12 +187,7 @@ Foam::wordList Foam::IOobjectList::names(const word& ClassName) const
     wordList objectNames(size());
 
     label count = 0;
-    for
-    (
-        HashPtrTable<IOobject>::const_iterator iter = begin();
-        iter != end();
-        ++iter
-    )
+    forAllConstIter(HashPtrTable<IOobject>, *this, iter)
     {
         if (iter()->headerClassName() == ClassName)
         {

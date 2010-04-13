@@ -114,9 +114,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~cellToFace();
+    //- Destructor
+    virtual ~cellToFace();
 
 
     // Member Functions

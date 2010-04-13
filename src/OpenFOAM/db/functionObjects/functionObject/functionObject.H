@@ -135,9 +135,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~functionObject();
+    //- Destructor
+    virtual ~functionObject();
 
 
     // Member Functions

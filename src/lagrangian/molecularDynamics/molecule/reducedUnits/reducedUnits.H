@@ -120,9 +120,8 @@ public:
         reducedUnits(const IOdictionary& reducedUnitsDict);
 
 
-    // Destructor
-
-        ~reducedUnits();
+    //- Destructor
+    ~reducedUnits();
 
 
     // Member Functions

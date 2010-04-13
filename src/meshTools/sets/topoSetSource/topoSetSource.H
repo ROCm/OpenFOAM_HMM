@@ -254,9 +254,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~topoSetSource();
+    //- Destructor
+    virtual ~topoSetSource();
 
 
     // Member Functions

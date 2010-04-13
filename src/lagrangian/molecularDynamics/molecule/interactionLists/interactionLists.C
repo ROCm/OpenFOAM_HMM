@@ -271,7 +271,7 @@ bool Foam::interactionLists::testPointFaceDistance
 {
     const vector& pointPosition(mesh_.points()[p]);
 
-    forAll (refCell.faces(), rCF)
+    forAll(refCell.faces(), rCF)
     {
         if
         (
@@ -524,7 +524,7 @@ const Foam::labelList Foam::interactionLists::realCellsInRangeOfSegment
     {
         const label f = segmentFaces[sF];
 
-        forAll (mesh_.points(), p)
+        forAll(mesh_.points(), p)
         {
             if (testPointFaceDistance(p, f))
             {
@@ -577,7 +577,7 @@ const Foam::labelList Foam::interactionLists::realCellsInRangeOfSegment
     {
         const edge& eJ(mesh_.edges()[segmentEdges[sE]]);
 
-        forAll (mesh_.edges(), edgeIIndex)
+        forAll(mesh_.edges(), edgeIIndex)
         {
             const edge& eI(mesh_.edges()[edgeIIndex]);
 

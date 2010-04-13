@@ -169,9 +169,8 @@ public:
         explicit dynamicRefineFvMesh(const IOobject& io);
 
 
-    // Destructor
-
-        virtual ~dynamicRefineFvMesh();
+    //- Destructor
+    virtual ~dynamicRefineFvMesh();
 
 
     // Member Functions

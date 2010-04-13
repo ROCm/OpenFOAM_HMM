@@ -253,9 +253,8 @@ public:
         fvMatrix(const GeometricField<Type, fvPatchField, volMesh>&, Istream&);
 
 
-    // Destructor
-
-        virtual ~fvMatrix();
+    //- Destructor
+    virtual ~fvMatrix();
 
 
     // Member functions

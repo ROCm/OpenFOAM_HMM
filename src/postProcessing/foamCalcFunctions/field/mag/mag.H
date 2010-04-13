@@ -113,9 +113,8 @@ public:
         mag();
 
 
-    // Destructor
-
-        virtual ~mag();
+    //- Destructor
+    virtual ~mag();
 };
 
 

@@ -158,9 +158,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~SlicedGeometricField();
+    //- Destructor
+    ~SlicedGeometricField();
 
 
     // Member functions
@@ -202,9 +201,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~DimensionedInternalField();
+    //- Destructor
+    ~DimensionedInternalField();
 };
 
 

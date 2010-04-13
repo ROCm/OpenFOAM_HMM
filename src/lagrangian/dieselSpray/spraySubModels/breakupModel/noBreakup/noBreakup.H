@@ -64,7 +64,7 @@ public:
         noBreakup(const dictionary& dict, spray& sm);
 
 
-    // Destructor
+    //- Destructor
     virtual ~noBreakup();
 
 

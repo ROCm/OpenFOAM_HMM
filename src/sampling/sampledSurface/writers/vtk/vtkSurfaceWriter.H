@@ -69,9 +69,8 @@ public:
         vtkSurfaceWriter();
 
 
-    // Destructor
-
-        virtual ~vtkSurfaceWriter();
+    //- Destructor
+    virtual ~vtkSurfaceWriter();
 
 
     // Member Functions

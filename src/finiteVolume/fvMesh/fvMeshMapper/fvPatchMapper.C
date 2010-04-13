@@ -70,7 +70,7 @@ void Foam::fvPatchMapper::calcAddressing() const
 
         // Adjust mapping to manage hits into other patches and into
         // internal
-        forAll (addr, faceI)
+        forAll(addr, faceI)
         {
             if
             (
@@ -118,7 +118,7 @@ void Foam::fvPatchMapper::calcAddressing() const
 
         // Adjust mapping to manage hits into other patches and into
         // internal
-        forAll (addr, faceI)
+        forAll(addr, faceI)
         {
             labelList& curAddr = addr[faceI];
             scalarList& curW = w[faceI];
@@ -130,7 +130,7 @@ void Foam::fvPatchMapper::calcAddressing() const
             )
             {
                 // No adjustment of weights, just subtract patch start
-                forAll (curAddr, i)
+                forAll(curAddr, i)
                 {
                     curAddr[i] -= oldPatchStart;
                 }
@@ -142,7 +142,7 @@ void Foam::fvPatchMapper::calcAddressing() const
                 scalarField newWeights(curAddr.size());
                 label nActive = 0;
 
-                forAll (curAddr, lfI)
+                forAll(curAddr, lfI)
                 {
                     if
                     (
@@ -178,7 +178,7 @@ void Foam::fvPatchMapper::calcAddressing() const
 
         if (fvMesh::debug)
         {
-            forAll (addr, i)
+            forAll(addr, i)
             {
                 if (min(addr[i]) < 0)
                 {

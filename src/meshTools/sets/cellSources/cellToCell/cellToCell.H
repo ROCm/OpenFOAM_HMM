@@ -87,9 +87,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~cellToCell();
+    //- Destructor
+    virtual ~cellToCell();
 
 
     // Member Functions

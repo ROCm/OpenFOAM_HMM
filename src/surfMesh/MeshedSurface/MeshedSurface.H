@@ -260,9 +260,8 @@ public:
         static autoPtr<MeshedSurface> New(const fileName&);
 
 
-    // Destructor
-
-        virtual ~MeshedSurface();
+    //- Destructor
+    virtual ~MeshedSurface();
 
 
     // Member Function Selectors

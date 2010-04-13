@@ -51,7 +51,7 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > fvMeshSubset::interpolate
     // Create and map the patch field values
     PtrList<fvPatchField<Type> > patchFields(patchMap.size());
 
-    forAll (patchFields, patchI)
+    forAll(patchFields, patchI)
     {
         // Set the first one by hand as it corresponds to the
         // exposed internal faces.  Additional interpolation can be put here
@@ -175,7 +175,7 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > fvMeshSubset::interpolate
     // Create and map the patch field values
     PtrList<fvsPatchField<Type> > patchFields(patchMap.size());
 
-    forAll (patchFields, patchI)
+    forAll(patchFields, patchI)
     {
         // Set the first one by hand as it corresponds to the
         // exposed internal faces.  Additional interpolation can be put here
@@ -308,7 +308,7 @@ fvMeshSubset::interpolate
     // Create and map the patch field values
     PtrList<pointPatchField<Type> > patchFields(patchMap.size());
 
-    forAll (patchFields, patchI)
+    forAll(patchFields, patchI)
     {
         // Set the first one by hand as it corresponds to the
         // exposed internal faces.  Additional interpolation can be put here

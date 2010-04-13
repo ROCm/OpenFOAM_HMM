@@ -131,10 +131,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~pairPotential()
-        {}
+    //- Destructor
+    virtual ~pairPotential()
+    {}
 
 
     // Member Functions

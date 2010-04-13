@@ -132,9 +132,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~XiEqModel();
+    //- Destructor
+    virtual ~XiEqModel();
 
 
     // Member Functions

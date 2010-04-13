@@ -75,9 +75,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~inverseVolumeDiffusivity();
+    //- Destructor
+    virtual ~inverseVolumeDiffusivity();
 
 
     // Member Functions

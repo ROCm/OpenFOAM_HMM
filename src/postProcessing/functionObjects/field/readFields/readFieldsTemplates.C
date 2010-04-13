@@ -31,7 +31,12 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::readFields::setField(const word& fieldName)
+void Foam::readFields::loadField
+(
+    const word& fieldName,
+    PtrList<GeometricField<Type, fvPatchField, volMesh> >& vflds,
+    PtrList<GeometricField<Type, fvsPatchField, surfaceMesh> >& sflds
+) const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> vfType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> sfType;
@@ -40,53 +45,55 @@ void Foam::readFields::setField(const word& fieldName)
     {
         if (debug)
         {
-            Info<< "Field " << fieldName << " already in database" << endl;
+            Info<< "readFields : Field " << fieldName << " already in database"
+                << endl;
         }
-
-        vfType& vf =  const_cast<vfType&>(obr_.lookupObject<vfType>(fieldName));
-        vf.checkOut();
     }
-    if (obr_.foundObject<sfType>(fieldName))
+    else if (obr_.foundObject<sfType>(fieldName))
     {
         if (debug)
         {
-            Info<< "Field " << fieldName << " already in database" << endl;
+            Info<< "readFields : Field " << fieldName << " already in database"
+                << endl;
         }
-
-        sfType& sf =  const_cast<sfType&>(obr_.lookupObject<sfType>(fieldName));
-        sf.checkOut();
     }
-
-    const fvMesh& mesh = refCast<const fvMesh>(obr_);
-
-    IOobject fieldHeader
-    (
-        fieldName,
-        mesh.time().timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
-    );
-
-    if
-    (
-        fieldHeader.headerOk()
-     && fieldHeader.headerClassName() == vfType::typeName
-    )
+    else
     {
-        // store field on the mesh database
-        Info<< "    Reading " << fieldName << endl;
-        obr_.store(new vfType(fieldHeader, mesh));
-    }
-    else if
-    (
-        fieldHeader.headerOk()
-     && fieldHeader.headerClassName() == sfType::typeName
-    )
-    {
-        // store field on the mesh database
-        Info<< "    Reading " << fieldName << endl;
-        obr_.store(new sfType(fieldHeader, mesh));
+        const fvMesh& mesh = refCast<const fvMesh>(obr_);
+
+        IOobject fieldHeader
+        (
+            fieldName,
+            mesh.time().timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        );
+
+        if
+        (
+            fieldHeader.headerOk()
+         && fieldHeader.headerClassName() == vfType::typeName
+        )
+        {
+            // store field locally
+            Info<< "    Reading " << fieldName << endl;
+            label sz = vflds.size();
+            vflds.setSize(sz+1);
+            vflds.set(sz, new vfType(fieldHeader, mesh));
+        }
+        else if
+        (
+            fieldHeader.headerOk()
+         && fieldHeader.headerClassName() == sfType::typeName
+        )
+        {
+            // store field locally
+            Info<< "    Reading " << fieldName << endl;
+            label sz = sflds.size();
+            sflds.setSize(sz+1);
+            sflds.set(sz, new sfType(fieldHeader, mesh));
+        }
     }
 }
 

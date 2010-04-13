@@ -81,8 +81,7 @@ Foam::label Foam::regionSide::otherEdge
 
     forAll(fEdges, fEdgeI)
     {
-        label otherEdgeI = fEdges[fEdgeI];
-
+        const label otherEdgeI = fEdges[fEdgeI];
         const edge& otherE = mesh.edges()[otherEdgeI];
 
         if
@@ -300,15 +299,9 @@ void Foam::regionSide::walkAllPointConnectedFaces
     //
     labelHashSet regionEdges(4*regionFaces.size());
 
-    for
-    (
-        labelHashSet::const_iterator iter = regionFaces.begin();
-        iter != regionFaces.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, regionFaces, iter)
     {
-        label faceI = iter.key();
-
+        const label faceI = iter.key();
         const labelList& fEdges = mesh.faceEdges()[faceI];
 
         forAll(fEdges, fEdgeI)
@@ -326,12 +319,7 @@ void Foam::regionSide::walkAllPointConnectedFaces
     labelHashSet visitedPoint(4*regionFaces.size());
 
     // Insert fence points so we don't visit them
-    for
-    (
-        labelHashSet::const_iterator iter = fencePoints.begin();
-        iter != fencePoints.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, fencePoints, iter)
     {
         visitedPoint.insert(iter.key());
     }
@@ -344,14 +332,9 @@ void Foam::regionSide::walkAllPointConnectedFaces
         Info<< "Excluding visit of points:" << visitedPoint << endl;
     }
 
-    for
-    (
-        labelHashSet::const_iterator iter = regionFaces.begin();
-        iter != regionFaces.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, regionFaces, iter)
     {
-        label faceI = iter.key();
+        const label faceI = iter.key();
 
         // Get side of face.
         label cellI;
@@ -459,12 +442,7 @@ Foam::regionSide::regionSide
 
     labelHashSet fencePoints(fenceEdges.size());
 
-    for
-    (
-        labelHashSet::const_iterator iter = fenceEdges.begin();
-        iter != fenceEdges.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, fenceEdges, iter)
     {
         const edge& e = mesh.edges()[iter.key()];
 

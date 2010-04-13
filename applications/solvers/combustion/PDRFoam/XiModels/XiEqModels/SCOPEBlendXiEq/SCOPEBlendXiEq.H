@@ -91,9 +91,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~SCOPEBlend();
+    //- Destructor
+    virtual ~SCOPEBlend();
 
 
     // Member Functions

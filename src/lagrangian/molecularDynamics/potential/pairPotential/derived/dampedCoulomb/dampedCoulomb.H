@@ -80,10 +80,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~dampedCoulomb()
-        {}
+    //- Destructor
+    ~dampedCoulomb()
+    {}
 
 
     // Member Functions

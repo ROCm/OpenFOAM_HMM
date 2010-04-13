@@ -111,9 +111,8 @@ public:
         pointMapper(const pointMesh&, const mapPolyMesh& mpm);
 
 
-    // Destructor
-
-        virtual ~pointMapper();
+    //- Destructor
+    virtual ~pointMapper();
 
 
     // Member Functions

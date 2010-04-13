@@ -68,9 +68,8 @@ public:
         proxySurfaceWriter(const word& ext);
 
 
-    // Destructor
-
-        virtual ~proxySurfaceWriter();
+    //- Destructor
+    virtual ~proxySurfaceWriter();
 
 
     // Member Functions

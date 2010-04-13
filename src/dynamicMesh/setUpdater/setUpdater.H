@@ -83,9 +83,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~setUpdater();
+    //- Destructor
+    virtual ~setUpdater();
 
 
     // Member Functions

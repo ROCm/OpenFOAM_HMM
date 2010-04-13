@@ -87,9 +87,8 @@ public:
         solidBodyMotionFvMesh(const IOobject& io);
 
 
-    // Destructor
-
-        ~solidBodyMotionFvMesh();
+    //- Destructor
+    ~solidBodyMotionFvMesh();
 
 
     // Member Functions

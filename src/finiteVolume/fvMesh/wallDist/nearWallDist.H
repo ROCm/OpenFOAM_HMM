@@ -80,9 +80,8 @@ public:
         nearWallDist(const fvMesh& mesh);
 
 
-    // Destructor
-
-        virtual ~nearWallDist();
+    //- Destructor
+    virtual ~nearWallDist();
 
 
     // Member Functions

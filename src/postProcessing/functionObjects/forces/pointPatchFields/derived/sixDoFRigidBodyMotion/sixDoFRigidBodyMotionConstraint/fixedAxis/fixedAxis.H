@@ -87,9 +87,8 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~fixedAxis();
+    //- Destructor
+    virtual ~fixedAxis();
 
 
     // Member Functions

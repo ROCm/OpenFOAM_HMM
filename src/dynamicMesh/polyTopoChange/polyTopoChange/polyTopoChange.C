@@ -534,7 +534,7 @@ Foam::label Foam::polyTopoChange::getCellOrder
 
 
     // loop over the cells
-    forAll (visited, cellI)
+    forAll(visited, cellI)
     {
         // find the first non-removed cell that has not been visited yet
         if (!cellRemoved(cellI) && visited[cellI] == 0)

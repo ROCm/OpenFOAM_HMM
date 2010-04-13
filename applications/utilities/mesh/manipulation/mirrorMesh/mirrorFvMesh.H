@@ -76,9 +76,8 @@ public:
         mirrorFvMesh(const IOobject& io);
 
 
-    // Destructor
-
-        ~mirrorFvMesh();
+    //- Destructor
+    ~mirrorFvMesh();
 
 
     // Member Functions

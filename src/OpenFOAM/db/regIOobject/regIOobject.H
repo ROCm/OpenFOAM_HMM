@@ -110,9 +110,8 @@ public:
         regIOobject(const regIOobject&, bool registerCopy);
 
 
-    // Destructor
-
-        virtual ~regIOobject();
+    //- Destructor
+    virtual ~regIOobject();
 
 
     // Member functions

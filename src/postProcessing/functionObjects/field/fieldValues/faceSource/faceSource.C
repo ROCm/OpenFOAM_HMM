@@ -30,7 +30,6 @@ License
 #include "processorPolyPatch.H"
 #include "surfaceFields.H"
 #include "volFields.H"
-#include "IOList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -46,14 +45,16 @@ names[] =
 const Foam::NamedEnum<Foam::fieldValues::faceSource::sourceType, 2>
     Foam::fieldValues::faceSource::sourceTypeNames_;
 
+
 template<>
-const char* Foam::NamedEnum<Foam::fieldValues::faceSource::operationType, 5>::
+const char* Foam::NamedEnum<Foam::fieldValues::faceSource::operationType, 7>::
 names[] =
 {
-    "none", "sum", "areaAverage", "areaIntegrate", "weightedAverage"
+    "none", "sum", "areaAverage",
+    "areaIntegrate", "weightedAverage", "min", "max"
 };
 
-const Foam::NamedEnum<Foam::fieldValues::faceSource::operationType, 5>
+const Foam::NamedEnum<Foam::fieldValues::faceSource::operationType, 7>
     Foam::fieldValues::faceSource::operationTypeNames_;
 
 

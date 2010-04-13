@@ -325,10 +325,9 @@ public:
         chemkinReader(const dictionary& thermoDict);
 
 
-    // Destructor
-
-        virtual ~chemkinReader()
-        {}
+    //- Destructor
+    virtual ~chemkinReader()
+    {}
 
 
     // Member functions

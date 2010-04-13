@@ -219,9 +219,8 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~IOobject();
+    //- Destructor
+    virtual ~IOobject();
 
 
     // Member Functions

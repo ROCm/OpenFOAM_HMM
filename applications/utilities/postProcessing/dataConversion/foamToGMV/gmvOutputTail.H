@@ -1,2 +1,3 @@
-gmvFile << "probtime  " << runTime.timeName() << nl;
-gmvFile << "endgmv" << nl;
+gmvFile
+    << "probtime  " << runTime.timeName() << nl
+    << "endgmv" << nl;

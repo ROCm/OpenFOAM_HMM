@@ -435,12 +435,7 @@ void Foam::Cloud<ParticleType>::move(TrackingData& td)
                     typename ParticleType::iNew(*this)
                 );
 
-                forAllIter
-                (
-                    typename Cloud<ParticleType>,
-                    newParticles,
-                    newpIter
-                )
+                forAllIter(typename Cloud<ParticleType>, newParticles, newpIter)
                 {
                     ParticleType& newp = newpIter();
                     newp.correctAfterParallelTransfer(patchi, td);

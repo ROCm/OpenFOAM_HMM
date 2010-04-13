@@ -207,7 +207,7 @@ bool Foam::layerAdditionRemoval::changeTopology() const
     scalar minDelta = GREAT;
     scalar maxDelta = 0;
 
-    forAll (fz, faceI)
+    forAll(fz, faceI)
     {
         scalar curDelta = V[mc[faceI]]/mag(S[fz[faceI]]);
         avgDelta += curDelta;

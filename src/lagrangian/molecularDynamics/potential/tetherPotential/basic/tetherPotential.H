@@ -111,10 +111,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~tetherPotential()
-        {}
+    //- Destructor
+    virtual ~tetherPotential()
+    {}
 
 
     // Member Functions

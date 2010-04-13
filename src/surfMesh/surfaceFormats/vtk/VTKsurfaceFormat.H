@@ -78,10 +78,9 @@ public:
         VTKsurfaceFormat();
 
 
-    // Destructor
-
-        virtual ~VTKsurfaceFormat()
-        {}
+    //- Destructor
+    virtual ~VTKsurfaceFormat()
+    {}
 
 
     // Member Functions

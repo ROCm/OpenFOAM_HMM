@@ -86,10 +86,9 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~OBJsurfaceFormat()
-        {}
+    //- Destructor
+    virtual ~OBJsurfaceFormat()
+    {}
 
 
     // Member Functions

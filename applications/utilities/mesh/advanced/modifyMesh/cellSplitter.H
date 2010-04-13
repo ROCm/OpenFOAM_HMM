@@ -108,9 +108,8 @@ public:
         cellSplitter(const polyMesh& mesh);
 
 
-    // Destructor
-
-        ~cellSplitter();
+    //- Destructor
+    ~cellSplitter();
 
 
     // Member Functions

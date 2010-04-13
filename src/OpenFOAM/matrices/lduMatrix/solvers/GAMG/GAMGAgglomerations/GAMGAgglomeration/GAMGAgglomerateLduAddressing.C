@@ -88,7 +88,7 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
     label nCoarseFaces = 0;
 
     // Loop through all fine faces
-    forAll (upperAddr, fineFacei)
+    forAll(upperAddr, fineFacei)
     {
         label rmUpperAddr = restrictMap[upperAddr[fineFacei]];
         label rmLowerAddr = restrictMap[lowerAddr[fineFacei]];
@@ -174,7 +174,7 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
 
     label coarseFacei = 0;
 
-    forAll (cCellnFaces, cci)
+    forAll(cCellnFaces, cci)
     {
         label* cFaces = &cCellFaces[maxNnbrs*cci];
         label ccnFaces = cCellnFaces[cci];
@@ -223,7 +223,7 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
     labelListList coarseInterfaceAddr(fineInterfaces.size());
 
     // Initialise transfer of restrict addressing on the interface
-    forAll (fineInterfaces, inti)
+    forAll(fineInterfaces, inti)
     {
         if (fineInterfaces.set(inti))
         {
@@ -236,7 +236,7 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
     }
 
     // Add the coarse level
-    forAll (fineInterfaces, inti)
+    forAll(fineInterfaces, inti)
     {
         if (fineInterfaces.set(inti))
         {

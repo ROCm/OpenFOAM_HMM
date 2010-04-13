@@ -41,12 +41,12 @@ namespace Foam
 
 void Foam::jplotGraph::write(const graph& g, Ostream& os) const
 {
-    os  << "# JPlot file" << endl
+    os  << "# JPlot file" << nl
         << "# column 1: " << g.xName() << endl;
 
     label fieldI = 0;
 
-    for (graph::const_iterator iter = g.begin(); iter != g.end(); ++iter)
+    forAllConstIter(graph, g, iter)
     {
         os  << "# column " << fieldI + 2 << ": " << (*iter()).name() << endl;
         fieldI++;

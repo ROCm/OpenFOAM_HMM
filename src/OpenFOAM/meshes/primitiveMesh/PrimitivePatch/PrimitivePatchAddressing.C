@@ -78,7 +78,7 @@ calcAddressing() const
 
     // Guess the max number of edges and neighbours for a face
     label maxEdges = 0;
-    forAll (locFcs, faceI)
+    forAll(locFcs, faceI)
     {
         maxEdges += locFcs[faceI].size();
     }
@@ -103,14 +103,14 @@ calcAddressing() const
     // initialise the lists of subshapes for each face to avoid duplication
     edgeListList faceIntoEdges(locFcs.size());
 
-    forAll (locFcs, faceI)
+    forAll(locFcs, faceI)
     {
         faceIntoEdges[faceI] = locFcs[faceI].edges();
 
         labelList& curFaceEdges = faceEdges[faceI];
         curFaceEdges.setSize(faceIntoEdges[faceI].size());
 
-        forAll (curFaceEdges, faceEdgeI)
+        forAll(curFaceEdges, faceEdgeI)
         {
             curFaceEdges[faceEdgeI] = -1;
         }
@@ -128,7 +128,7 @@ calcAddressing() const
     // in face (i.e. curEdges[0] is edge between f[0] and f[1])
 
     // For all local faces ...
-    forAll (locFcs, faceI)
+    forAll(locFcs, faceI)
     {
         // Get reference to vertices of current face and corresponding edges.
         const Face& curF = locFcs[faceI];
@@ -141,7 +141,7 @@ calcAddressing() const
         label nNeighbours = 0;
 
         // For all edges ...
-        forAll (curEdges, edgeI)
+        forAll(curEdges, edgeI)
         {
             // If the edge is already detected, skip
             if (faceEdges[faceI][edgeI] >= 0) continue;
@@ -155,7 +155,7 @@ calcAddressing() const
 
             const labelList& nbrFaces = pf[e.start()];
 
-            forAll (nbrFaces, nbrFaceI)
+            forAll(nbrFaces, nbrFaceI)
             {
                 // set reference to the current neighbour
                 label curNei = nbrFaces[nbrFaceI];
@@ -166,7 +166,7 @@ calcAddressing() const
                     // get the reference to subshapes of the neighbour
                     const edgeList& searchEdges = faceIntoEdges[curNei];
 
-                    forAll (searchEdges, neiEdgeI)
+                    forAll(searchEdges, neiEdgeI)
                     {
                         if (searchEdges[neiEdgeI] == e)
                         {
@@ -204,7 +204,7 @@ calcAddressing() const
             label nextNei = -1;
             label minNei = locFcs.size();
 
-            forAll (neiFaces, nfI)
+            forAll(neiFaces, nfI)
             {
                 if (neiFaces[nfI].size() && neiFaces[nfI][0] < minNei)
                 {
@@ -229,7 +229,7 @@ calcAddressing() const
                 curEf.setSize(cnf.size() + 1);
                 curEf[0] = faceI;
 
-                forAll (cnf, cnfI)
+                forAll(cnf, cnfI)
                 {
                     faceEdges[cnf[cnfI]][eonf[cnfI]] = nEdges;
 
@@ -259,11 +259,11 @@ calcAddressing() const
 
     // Do boundary faces
 
-    forAll (faceEdges, faceI)
+    forAll(faceEdges, faceI)
     {
         labelList& curEdges = faceEdges[faceI];
 
-        forAll (curEdges, edgeI)
+        forAll(curEdges, edgeI)
         {
             if (curEdges[edgeI] < 0)
             {
@@ -291,7 +291,7 @@ calcAddressing() const
     faceFacesPtr_ = new labelListList(locFcs.size());
     labelListList& faceFaces = *faceFacesPtr_;
 
-    forAll (faceFaces, faceI)
+    forAll(faceFaces, faceI)
     {
         faceFaces[faceI].transfer(ff[faceI]);
     }

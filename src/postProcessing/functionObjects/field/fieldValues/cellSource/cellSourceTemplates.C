@@ -25,7 +25,6 @@ License
 
 #include "cellSource.H"
 #include "volFields.H"
-#include "IOList.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -91,6 +90,16 @@ Type Foam::fieldValues::cellSource::processValues
             result = sum(values*weightField)/sum(weightField);
             break;
         }
+        case opMin:
+        {
+            result = min(values);
+            break;
+        }
+        case opMax:
+        {
+            result = max(values);
+            break;
+        }
         default:
         {
             // Do nothing
@@ -123,7 +132,7 @@ bool Foam::fieldValues::cellSource::writeValues(const word& fieldName)
 
             if (valueOutput_)
             {
-                IOList<Type>
+                IOField<Type>
                 (
                     IOobject
                     (

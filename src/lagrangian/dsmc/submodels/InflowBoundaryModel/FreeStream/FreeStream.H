@@ -87,7 +87,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~FreeStream();
 
 

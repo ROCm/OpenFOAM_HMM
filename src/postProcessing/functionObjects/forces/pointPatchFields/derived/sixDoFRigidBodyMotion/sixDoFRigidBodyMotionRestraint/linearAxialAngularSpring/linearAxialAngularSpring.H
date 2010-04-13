@@ -94,9 +94,8 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~linearAxialAngularSpring();
+    //- Destructor
+    virtual ~linearAxialAngularSpring();
 
 
     // Member Functions

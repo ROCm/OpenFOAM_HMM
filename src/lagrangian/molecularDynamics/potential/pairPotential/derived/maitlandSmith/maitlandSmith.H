@@ -104,10 +104,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~maitlandSmith()
-        {}
+    //- Destructor
+    ~maitlandSmith()
+    {}
 
 
     // Member Functions

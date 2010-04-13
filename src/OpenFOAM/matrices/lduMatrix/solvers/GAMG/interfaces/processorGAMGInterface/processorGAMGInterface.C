@@ -71,7 +71,7 @@ Foam::processorGAMGInterface::processorGAMGInterface
 
     label nCoarseFaces = 0;
 
-    forAll (localRestrictAddressing, ffi)
+    forAll(localRestrictAddressing, ffi)
     {
         label curMaster = -1;
         label curSlave = -1;
@@ -159,7 +159,7 @@ Foam::processorGAMGInterface::processorGAMGInterface
     if (myProcNo() < neighbProcNo())
     {
         // On master side, the owner addressing is stored in table of contents
-        forAll (contents, masterI)
+        forAll(contents, masterI)
         {
             SLList<label>& curNbrs = neighboursTable.find(contents[masterI])();
 
@@ -180,12 +180,7 @@ Foam::processorGAMGInterface::processorGAMGInterface
             {
                 faceCells_[nCoarseFaces] = contents[masterI];
 
-                for
-                (
-                    SLList<label>::iterator facesIter = faceFacesIter().begin();
-                    facesIter != faceFacesIter().end();
-                    ++facesIter
-                )
+                forAllConstIter(SLList<label>, faceFacesIter(), facesIter)
                 {
                     faceRestrictAddressing_[facesIter()] = nCoarseFaces;
                 }
@@ -197,7 +192,7 @@ Foam::processorGAMGInterface::processorGAMGInterface
     else
     {
         // On slave side, the owner addressing is stored in linked lists
-        forAll (contents, masterI)
+        forAll(contents, masterI)
         {
             SLList<label>& curNbrs = neighboursTable.find(contents[masterI])();
 
@@ -218,12 +213,7 @@ Foam::processorGAMGInterface::processorGAMGInterface
             {
                 faceCells_[nCoarseFaces] = nbrsIter();
 
-                for
-                (
-                    SLList<label>::iterator facesIter = faceFacesIter().begin();
-                    facesIter != faceFacesIter().end();
-                    ++facesIter
-                )
+                forAllConstIter(SLList<label>, faceFacesIter(), facesIter)
                 {
                     faceRestrictAddressing_[facesIter()] = nCoarseFaces;
                 }

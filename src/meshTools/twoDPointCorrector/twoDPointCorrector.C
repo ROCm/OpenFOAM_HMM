@@ -56,7 +56,7 @@ void twoDPointCorrector::calcAddressing() const
     // Try and find a wedge patch
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         if (isA<wedgePolyPatch>(patches[patchI]))
         {
@@ -76,7 +76,7 @@ void twoDPointCorrector::calcAddressing() const
     // Try to find an empty patch with faces
     if (!isWedge)
     {
-        forAll (patches, patchI)
+        forAll(patches, patchI)
         {
             if (isA<emptyPolyPatch>(patches[patchI]) && patches[patchI].size())
             {
@@ -122,7 +122,7 @@ void twoDPointCorrector::calcAddressing() const
 
     label nNormalEdges = 0;
 
-    forAll (meshEdges, edgeI)
+    forAll(meshEdges, edgeI)
     {
         vector edgeVector =
             meshEdges[edgeI].vec(meshPoints)/
@@ -269,7 +269,7 @@ void twoDPointCorrector::correctPoints(pointField& p) const
     const labelList& neIndices = normalEdgeIndices();
     const vector& pn = planeNormal();
 
-    forAll (neIndices, edgeI)
+    forAll(neIndices, edgeI)
     {
         point& pStart = p[meshEdges[neIndices[edgeI]].start()];
 

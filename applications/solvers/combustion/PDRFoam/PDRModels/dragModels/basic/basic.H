@@ -135,9 +135,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~basic();
+    //- Destructor
+    virtual ~basic();
 
 
     // Member Functions

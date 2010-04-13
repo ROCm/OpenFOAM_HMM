@@ -53,10 +53,9 @@ public:
         {}
 
 
-    // Destructor
-
-        virtual ~FieldMapper()
-        {}
+    //- Destructor
+    virtual ~FieldMapper()
+    {}
 
 
     // Member Functions

@@ -94,9 +94,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~labelToFace();
+    //- Destructor
+    virtual ~labelToFace();
 
 
     // Member Functions

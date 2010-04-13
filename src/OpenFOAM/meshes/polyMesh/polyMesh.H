@@ -256,9 +256,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~polyMesh();
+    //- Destructor
+    virtual ~polyMesh();
 
 
     // Member Functions

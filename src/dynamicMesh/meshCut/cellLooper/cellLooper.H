@@ -160,9 +160,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~cellLooper();
+    //- Destructor
+    virtual ~cellLooper();
 
 
     // Member Functions

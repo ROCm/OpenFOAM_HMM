@@ -87,9 +87,8 @@ public:
         distribution(const distribution&);
 
 
-    // Destructor
-
-        virtual ~distribution();
+    //- Destructor
+    virtual ~distribution();
 
 
     // Member Functions

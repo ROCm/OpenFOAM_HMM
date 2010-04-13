@@ -109,9 +109,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~fieldToCell();
+    //- Destructor
+    virtual ~fieldToCell();
 
 
     // Member Functions

@@ -138,7 +138,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~uniformSet();
 };
 

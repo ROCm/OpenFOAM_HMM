@@ -438,7 +438,7 @@ Foam::polyMesh::polyMesh
     oldPointsPtr_(NULL)
 {
     // Check if the faces and cells are valid
-    forAll (faces_, faceI)
+    forAll(faces_, faceI)
     {
         const face& curFace = faces_[faceI];
 
@@ -594,7 +594,7 @@ Foam::polyMesh::polyMesh
     oldPointsPtr_(NULL)
 {
     // Check if faces are valid
-    forAll (faces_, faceI)
+    forAll(faces_, faceI)
     {
         const face& curFace = faces_[faceI];
 
@@ -619,7 +619,7 @@ Foam::polyMesh::polyMesh
     cellList cLst(cells);
 
     // Check if cells are valid
-    forAll (cLst, cellI)
+    forAll(cLst, cellI)
     {
         const cell& curCell = cLst[cellI];
 
@@ -701,7 +701,7 @@ void Foam::polyMesh::resetPrimitives
     setInstance(time().timeName());
 
     // Check if the faces and cells are valid
-    forAll (faces_, faceI)
+    forAll(faces_, faceI)
     {
         const face& curFace = faces_[faceI];
 
@@ -866,7 +866,7 @@ void Foam::polyMesh::addPatches
     boundary_.setSize(p.size());
 
     // Copy the patch pointers
-    forAll (p, pI)
+    forAll(p, pI)
     {
         boundary_.set(pI, p[pI]);
     }
@@ -918,7 +918,7 @@ void Foam::polyMesh::addZones
         pointZones_.setSize(pz.size());
 
         // Copy the zone pointers
-        forAll (pz, pI)
+        forAll(pz, pI)
         {
             pointZones_.set(pI, pz[pI]);
         }
@@ -932,7 +932,7 @@ void Foam::polyMesh::addZones
         faceZones_.setSize(fz.size());
 
         // Copy the zone pointers
-        forAll (fz, fI)
+        forAll(fz, fI)
         {
             faceZones_.set(fI, fz[fI]);
         }
@@ -946,7 +946,7 @@ void Foam::polyMesh::addZones
         cellZones_.setSize(cz.size());
 
         // Copy the zone pointers
-        forAll (cz, cI)
+        forAll(cz, cI)
         {
             cellZones_.set(cI, cz[cI]);
         }

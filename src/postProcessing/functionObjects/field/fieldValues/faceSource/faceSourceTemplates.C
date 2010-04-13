@@ -26,7 +26,6 @@ License
 #include "faceSource.H"
 #include "surfaceFields.H"
 #include "volFields.H"
-#include "IOList.H"
 #include "ListListOps.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -103,6 +102,16 @@ Type Foam::fieldValues::faceSource::processValues
             result = sum(values*weightField)/sum(weightField);
             break;
         }
+        case opMin:
+        {
+            result = min(values);
+            break;
+        }
+        case opMax:
+        {
+            result = max(values);
+            break;
+        }
         default:
         {
             // Do nothing
@@ -135,7 +144,7 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
 
             if (valueOutput_)
             {
-                IOList<Type>
+                IOField<Type>
                 (
                     IOobject
                     (

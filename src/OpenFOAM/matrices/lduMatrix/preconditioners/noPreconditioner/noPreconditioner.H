@@ -75,10 +75,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~noPreconditioner()
-        {}
+    //- Destructor
+    virtual ~noPreconditioner()
+    {}
 
 
     // Member Functions

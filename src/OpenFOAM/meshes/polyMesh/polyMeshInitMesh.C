@@ -111,7 +111,7 @@ void Foam::polyMesh::initMesh(cellList& c)
         // get reference to face labels for current cell
         const labelList& cellfaces = c[cellI];
 
-        forAll (cellfaces, faceI)
+        forAll(cellfaces, faceI)
         {
             if (!markedFaces[cellfaces[faceI]])
             {

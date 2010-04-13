@@ -84,7 +84,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~constantAbsorptionEmission();
 
 

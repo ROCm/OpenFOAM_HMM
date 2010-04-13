@@ -348,7 +348,7 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
             }
         }
 
-        forAll (molsToDelete, mTD)
+        forAll(molsToDelete, mTD)
         {
             deleteParticle(*(molsToDelete[mTD]));
         }
@@ -438,7 +438,7 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
             }
         }
 
-        forAll (molsToDelete, mTD)
+        forAll(molsToDelete, mTD)
         {
             deleteParticle(*(molsToDelete[mTD]));
         }
@@ -475,7 +475,7 @@ void Foam::moleculeCloud::initialiseMolecules
             << abort(FatalError);
     }
 
-    forAll (cellZones, z)
+    forAll(cellZones, z)
     {
         const cellZone& zone(cellZones[z]);
 
@@ -632,7 +632,7 @@ void Foam::moleculeCloud::initialiseMolecules
 
                 vector zoneMax = -VGREAT*vector::one;
 
-                forAll (zone, cell)
+                forAll(zone, cell)
                 {
                     const point cellCentre = mesh_.cellCentres()[zone[cell]];
 

@@ -71,9 +71,8 @@ public:
         staticEngineMesh(const IOobject& io);
 
 
-    // Destructor
-
-        ~staticEngineMesh();
+    //- Destructor
+    ~staticEngineMesh();
 
 
     // Member Functions

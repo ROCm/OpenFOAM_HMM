@@ -29,10 +29,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(leastSquaresVectors, 0);
-}
+defineTypeNameAndDebug(Foam::leastSquaresVectors, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
@@ -248,7 +245,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
         const surfaceVectorField& Sf = mesh.Sf();
         const surfaceScalarField& w = mesh.weights();
 
-        forAll (dd, celli)
+        forAll(dd, celli)
         {
             if (det(dd[celli]) < 3)
             {

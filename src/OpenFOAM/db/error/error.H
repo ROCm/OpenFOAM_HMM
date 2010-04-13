@@ -97,9 +97,8 @@ public:
         error(const error&);
 
 
-    // Destructor
-
-        virtual ~error() throw();
+    //- Destructor
+    virtual ~error() throw();
 
 
     // Member functions
@@ -213,9 +212,8 @@ public:
         IOerror(const dictionary&);
 
 
-    // Destructor
-
-        virtual ~IOerror() throw();
+    //- Destructor
+    virtual ~IOerror() throw();
 
 
     // Member functions

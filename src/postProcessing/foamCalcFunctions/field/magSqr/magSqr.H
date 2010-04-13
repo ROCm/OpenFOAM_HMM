@@ -113,9 +113,8 @@ public:
         magSqr();
 
 
-    // Destructor
-
-        virtual ~magSqr();
+    //- Destructor
+    virtual ~magSqr();
 };
 
 

@@ -46,7 +46,7 @@ bool Foam::adjustPhi
         scalar fixedMassOut = 0.0;
         scalar adjustableMassOut = 0.0;
 
-        forAll (phi.boundaryField(), patchi)
+        forAll(phi.boundaryField(), patchi)
         {
             const fvPatchVectorField& Up = U.boundaryField()[patchi];
             const fvsPatchScalarField& phip = phi.boundaryField()[patchi];
@@ -122,7 +122,7 @@ bool Foam::adjustPhi
                 << exit(FatalError);
         }
 
-        forAll (phi.boundaryField(), patchi)
+        forAll(phi.boundaryField(), patchi)
         {
             const fvPatchVectorField& Up = U.boundaryField()[patchi];
             fvsPatchScalarField& phip = phi.boundaryField()[patchi];

@@ -62,7 +62,7 @@ void Foam::processorPointPatch::initGeometry(PstreamBuffers& pBufs)
 
     faceList masterFaces(pp.size());
 
-    forAll (pp, faceI)
+    forAll(pp, faceI)
     {
         masterFaces[faceI] = pp[faceI].reverseFace();
     }

@@ -83,9 +83,8 @@ public:
         splitCell(const label cellI, splitCell* parent);
 
 
-    // Destructor
-
-        ~splitCell();
+    //- Destructor
+    ~splitCell();
 
 
     // Member Functions

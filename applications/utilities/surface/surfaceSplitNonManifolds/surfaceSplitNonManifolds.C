@@ -126,18 +126,13 @@ void dumpFaces
 
     OFstream os(fName);
 
-    for
-    (
-        Map<label>::const_iterator iter = connectedFaces.begin();
-        iter != connectedFaces.end();
-        ++iter
-    )
+    forAllConstIter(Map<label>, connectedFaces, iter)
     {
         const labelledTri& f = surf.localFaces()[iter.key()];
 
         point ctr(f.centre(surf.localPoints()));
 
-        os << "v " << ctr.x() << ' ' << ctr.y() << ' ' << ctr.z() << endl;
+        os  << "v " << ctr.x() << ' ' << ctr.y() << ' ' << ctr.z() << endl;
     }
 }
 
@@ -502,14 +497,9 @@ void calcPointVecs
 
     boolList edgeDone(surf.nEdges(), false);
 
-    for
-    (
-        Map<label>::const_iterator iter = faceToEdge.begin();
-        iter != faceToEdge.end();
-        ++iter
-    )
+    forAllConstIter(Map<label>, faceToEdge, iter)
     {
-        label edgeI = iter();
+        const label edgeI = iter();
 
         if (!edgeDone[edgeI])
         {
@@ -610,15 +600,9 @@ void renumberFaces
     List<labelledTri>& newTris
 )
 {
-    for
-    (
-        Map<label>::const_iterator iter = faceToEdge.begin();
-        iter != faceToEdge.end();
-        ++iter
-    )
+    forAllConstIter(Map<label>, faceToEdge, iter)
     {
-        label faceI = iter.key();
-
+        const label faceI = iter.key();
         const labelledTri& f = surf.localFaces()[faceI];
 
         forAll(f, fp)

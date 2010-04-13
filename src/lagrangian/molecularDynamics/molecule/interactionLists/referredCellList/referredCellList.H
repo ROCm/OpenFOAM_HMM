@@ -82,9 +82,8 @@ public:
         referredCellList (interactionLists& il);
 
 
-    // Destructor
-
-        ~referredCellList();
+    //- Destructor
+    ~referredCellList();
 
 
     // Member Functions

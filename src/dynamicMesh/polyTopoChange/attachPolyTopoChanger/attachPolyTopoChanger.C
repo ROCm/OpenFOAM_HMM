@@ -82,7 +82,7 @@ void Foam::attachPolyTopoChanger::attach(const bool removeEmptyPatches)
         List<polyPatch*> newPatches(oldPatches.size());
         label nNewPatches = 0;
 
-        forAll (oldPatches, patchI)
+        forAll(oldPatches, patchI)
         {
             if (oldPatches[patchI].size())
             {

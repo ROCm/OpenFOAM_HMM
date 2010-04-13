@@ -47,7 +47,7 @@ void graph::readCurves(Istream& is)
     x_.setSize(xyData.size());
     scalarField y(xyData.size());
 
-    forAll (xyData, i)
+    forAll(xyData, i)
     {
         x_[i] = xyData[i].x_;
         y[i] = xyData[i].y_;
@@ -191,18 +191,13 @@ void graph::writeTable(Ostream& os) const
 {
     forAll(x_, xi)
     {
-        os << setw(10) << x_[xi];
+        os  << setw(10) << x_[xi];
 
-        for
-        (
-            graph::const_iterator iter = begin();
-            iter != end();
-            ++iter
-        )
+        forAllConstIter(graph, *this, iter)
         {
-            os << token::SPACE << setw(10) << (*iter())[xi];
+            os  << token::SPACE << setw(10) << (*iter())[xi];
         }
-        os << endl;
+        os  << endl;
     }
 }
 

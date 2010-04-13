@@ -253,7 +253,7 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
 
     Info<< "fvDOM : Allocated " << IRay_.size()
         << " rays with average orientation:" << nl;
-    forAll (IRay_, i)
+    forAll(IRay_, i)
     {
         Info<< '\t' << IRay_[i].I().name()
             << '\t' << IRay_[i].dAve() << nl;

@@ -201,12 +201,7 @@ void Foam::syncTools::syncPointMap
 
                 // Only update those values which come from neighbour
 
-                forAllConstIter
-                (
-                    typename Map<T>,
-                    nbrPatchInfo,
-                    nbrIter
-                )
+                forAllConstIter(typename Map<T>, nbrPatchInfo, nbrIter)
                 {
                     combine
                     (
@@ -550,12 +545,7 @@ void Foam::syncTools::syncEdgeMap
 
                 // Only update those values which come from neighbour
 
-                forAllConstIter
-                (
-                    typename EdgeMap<T>,
-                    nbrPatchInfo,
-                    nbrIter
-                )
+                forAllConstIter(typename EdgeMap<T>, nbrPatchInfo, nbrIter)
                 {
                     const edge& e = nbrIter.key();
                     const edge meshEdge(meshPts[e[0]], meshPts[e[1]]);

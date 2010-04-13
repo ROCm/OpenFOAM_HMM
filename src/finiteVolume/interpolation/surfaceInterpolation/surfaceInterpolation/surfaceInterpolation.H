@@ -106,9 +106,8 @@ public:
         explicit surfaceInterpolation(const fvMesh&);
 
 
-    // Destructor
-
-        ~surfaceInterpolation();
+    //- Destructor
+    ~surfaceInterpolation();
 
 
     // Member functions

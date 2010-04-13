@@ -140,10 +140,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~facePointPatch()
-        {}
+    //- Destructor
+    virtual ~facePointPatch()
+    {}
 
 
     // Member Functions

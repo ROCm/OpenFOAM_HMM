@@ -83,7 +83,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~LarsenBorgnakkeVariableHardSphere();
 
 

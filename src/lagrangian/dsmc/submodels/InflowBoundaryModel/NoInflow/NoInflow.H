@@ -63,7 +63,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~NoInflow();
 
 

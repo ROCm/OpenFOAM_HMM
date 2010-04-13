@@ -40,7 +40,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class subCycle Declaration
+                          Class subCycle Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class GeometricField>
@@ -79,21 +79,19 @@ public:
         {}
 
 
-    // Destructor
+    //- Destructor
+    ~subCycle()
+    {
+        // End the subCycleTime, which restores the time state
+        endSubCycle();
 
-        ~subCycle()
-        {
-            // End the subCycleTime which restores the time state
-            endSubCycle();
+        // Correct the time index of the field to correspond to the global time
+        gf_.timeIndex() = gf_.time().timeIndex();
 
-            // Correct the time index of the field to correspond to the global
-            // time
-            gf_.timeIndex() = gf_.time().timeIndex();
-
-            // Reset the old-time field value
-            gf_.oldTime() = gf0_;
-            gf_.oldTime().timeIndex() = gf_.time().timeIndex();
-        }
+        // Reset the old-time field value
+        gf_.oldTime() = gf0_;
+        gf_.oldTime().timeIndex() = gf_.time().timeIndex();
+    }
 };
 
 

@@ -94,9 +94,8 @@ public:
 
 
 
-    // Destructor
-
-        virtual ~cellZoneSet();
+    //- Destructor
+    virtual ~cellZoneSet();
 
 
     // Member functions

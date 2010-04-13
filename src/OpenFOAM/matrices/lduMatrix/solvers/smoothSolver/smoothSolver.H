@@ -85,10 +85,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~smoothSolver()
-        {}
+    //- Destructor
+    virtual ~smoothSolver()
+    {}
 
     // Member Functions
 

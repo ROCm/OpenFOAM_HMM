@@ -86,10 +86,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~ISstream()
-        {}
+    //- Destructor
+    virtual ~ISstream()
+    {}
 
 
     // Member functions

@@ -68,7 +68,7 @@ void Foam::enrichedPatch::calcLocalFaces() const
 
     Map<label> mpLookup(2*mp.size());
 
-    forAll (mp, mpI)
+    forAll(mp, mpI)
     {
         mpLookup.insert(mp[mpI], mpI);
     }
@@ -78,7 +78,7 @@ void Foam::enrichedPatch::calcLocalFaces() const
     localFacesPtr_ = new faceList(faces.size());
     faceList& lf = *localFacesPtr_;
 
-    forAll (faces, faceI)
+    forAll(faces, faceI)
     {
         const face& f = faces[faceI];
 
@@ -86,7 +86,7 @@ void Foam::enrichedPatch::calcLocalFaces() const
 
         curlf.setSize(f.size());
 
-        forAll (f, pointI)
+        forAll(f, pointI)
         {
             curlf[pointI] = mpLookup.find(f[pointI])();
         }
@@ -108,7 +108,7 @@ void Foam::enrichedPatch::calcLocalPoints() const
     localPointsPtr_ = new pointField(mp.size());
     pointField& lp = *localPointsPtr_;
 
-    forAll (lp, i)
+    forAll(lp, i)
     {
         lp[i] = pointMap().find(mp[i])();
     }
@@ -225,11 +225,11 @@ bool Foam::enrichedPatch::checkSupport() const
 
     bool error = false;
 
-    forAll (faces, faceI)
+    forAll(faces, faceI)
     {
         const face& curFace = faces[faceI];
 
-        forAll (curFace, pointI)
+        forAll(curFace, pointI)
         {
             if (!pointMap().found(curFace[pointI]))
             {

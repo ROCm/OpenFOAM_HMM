@@ -72,10 +72,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~coulomb()
-        {}
+    //- Destructor
+    ~coulomb()
+    {}
 
 
     // Member Functions

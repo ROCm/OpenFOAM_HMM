@@ -119,9 +119,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~sixDoFRigidBodyMotionConstraint();
+    //- Destructor
+    virtual ~sixDoFRigidBodyMotionConstraint();
 
 
     // Member Functions

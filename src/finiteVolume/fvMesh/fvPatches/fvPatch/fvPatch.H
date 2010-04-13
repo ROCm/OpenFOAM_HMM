@@ -131,9 +131,8 @@ public:
         static autoPtr<fvPatch> New(const polyPatch&, const fvBoundaryMesh&);
 
 
-    // Destructor
-
-        virtual ~fvPatch();
+    //- Destructor
+    virtual ~fvPatch();
 
 
     // Member Functions

@@ -109,9 +109,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~fvSurfaceMapper();
+    //- Destructor
+    virtual ~fvSurfaceMapper();
 
 
     // Member Functions

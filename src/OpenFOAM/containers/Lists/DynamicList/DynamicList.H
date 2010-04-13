@@ -101,10 +101,7 @@ public:
         explicit inline DynamicList(const label);
 
         //- Construct copy.
-        inline DynamicList
-        (
-            const DynamicList<T, SizeInc, SizeMult, SizeDiv>&
-        );
+        inline DynamicList(const DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
 
         //- Construct from UList. Size set to UList size.
         //  Also constructs from DynamicList with different sizing parameters.
@@ -141,7 +138,8 @@ public:
             //  setting values (as per List usage).
             inline void setSize(const label);
 
-            //- Alter the addressed list size and fill new space with a constant.
+            //- Alter the addressed list size and fill new space with a
+            //  constant.
             inline void setSize(const label, const T&);
 
             //- Alter the addressed list size.
@@ -150,7 +148,8 @@ public:
             //  setting values (as per List usage).
             inline void resize(const label);
 
-            //- Alter the addressed list size and fill new space with a constant.
+            //- Alter the addressed list size and fill new space with a
+            //  constant.
             inline void resize(const label, const T&);
 
             //- Reserve allocation space for at least this size.
@@ -168,10 +167,10 @@ public:
             //  Returns a reference to the DynamicList.
             inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& shrink();
 
-            //- Transfer contents of the argument List into this DynamicList
+            //- Transfer contents of the argument List into this.
             inline void transfer(List<T>&);
 
-            //- Transfer contents of the argument DynamicList into this DynamicList
+            //- Transfer contents of the argument DynamicList into this.
             inline void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
 
             //- Transfer contents to the Xfer container as a plain List
@@ -192,7 +191,8 @@ public:
             //- Remove and return the top element
             inline T remove();
 
-            //- Return non-const access to an element, resizing list if necessary
+            //- Return non-const access to an element, resizing list if
+            //  necessary
             inline T& operator()(const label);
 
             //- Assignment of all addressed entries to the given value

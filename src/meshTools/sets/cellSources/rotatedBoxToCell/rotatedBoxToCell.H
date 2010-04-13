@@ -105,9 +105,8 @@ public:
         rotatedBoxToCell(const polyMesh& mesh, Istream&);
 
 
-    // Destructor
-
-        virtual ~rotatedBoxToCell();
+    //- Destructor
+    virtual ~rotatedBoxToCell();
 
 
     // Member Functions

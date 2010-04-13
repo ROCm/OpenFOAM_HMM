@@ -77,7 +77,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~cloudScatter();
 
 

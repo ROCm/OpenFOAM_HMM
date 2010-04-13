@@ -79,15 +79,9 @@ void Foam::cellToFace::combine(topoSet& set, const bool add) const
     if (option_ == ALL)
     {
         // Add all faces from cell
-        for
-        (
-            cellSet::const_iterator iter = loadedSet.begin();
-            iter != loadedSet.end();
-            ++iter
-        )
+        forAllConstIter(cellSet, loadedSet, iter)
         {
-            label cellI = iter.key();
-
+            const label cellI = iter.key();
             const labelList& cFaces = mesh_.cells()[cellI];
 
             forAll(cFaces, cFaceI)
@@ -100,7 +94,7 @@ void Foam::cellToFace::combine(topoSet& set, const bool add) const
     {
         // Add all faces whose both neighbours are in set.
 
-        label nInt = mesh_.nInternalFaces();
+        const label nInt = mesh_.nInternalFaces();
         const labelList& own = mesh_.faceOwner();
         const labelList& nei = mesh_.faceNeighbour();
         const polyBoundaryMesh& patches = mesh_.boundaryMesh();

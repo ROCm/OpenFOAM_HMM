@@ -76,12 +76,7 @@ int main(int argc, char *argv[])
 
             if (args.optionFound("keywords") && !args.optionFound("entry"))
             {
-                for
-                (
-                    IDLList<entry>::iterator iter = dict.begin();
-                    iter != dict.end();
-                    ++iter
-                )
+                forAllConstIter(dictionary, dict, iter)
                 {
                     Info<< iter().keyword() << endl;
                 }
@@ -137,13 +132,8 @@ int main(int argc, char *argv[])
                         }
                         */
 
-                        const dictionary& dict(entPtr->dict());
-                        for
-                        (
-                            IDLList<entry>::const_iterator iter = dict.begin();
-                            iter != dict.end();
-                            ++iter
-                        )
+                        const dictionary& dict = entPtr->dict();
+                        forAllConstIter(dictionary, dict, iter)
                         {
                             Info<< iter().keyword() << endl;
                         }

@@ -51,12 +51,7 @@ int main(int argc, char *argv[])
 
     Info<< nl << "And again using STL iterator: " << nl << endl;
 
-    for
-    (
-        DLList<scalar>::iterator iter = myList.begin();
-        iter != myList.end();
-        ++iter
-    )
+    forAllIter(DLList<scalar>, myList, iter)
     {
         Info<< "element:" << *iter << endl;
     }
@@ -64,12 +59,7 @@ int main(int argc, char *argv[])
 
     Info<< nl << "And again using the same STL iterator: " << nl << endl;
 
-    for
-    (
-        DLList<scalar>::iterator iter = myList.begin();
-        iter != myList.end();
-        ++iter
-    )
+    forAllIter(DLList<scalar>, myList, iter)
     {
         Info<< "Removing " << myList.remove(iter) << endl;
     }
@@ -82,12 +72,7 @@ int main(int argc, char *argv[])
 
     const DLList<scalar>& const_myList = myList;
 
-    for
-    (
-        DLList<scalar>::const_iterator iter = const_myList.begin();
-        iter != const_myList.end();
-        ++iter
-    )
+    forAllConstIter(DLList<scalar>, const_myList, iter)
     {
         Info<< "element:" << *iter << endl;
     }
@@ -95,12 +80,7 @@ int main(int argc, char *argv[])
     myList.swapUp(myList.DLListBase::first());
     myList.swapUp(myList.DLListBase::last());
 
-    for
-    (
-        DLList<scalar>::const_iterator iter = const_myList.begin();
-        iter != const_myList.end();
-        ++iter
-    )
+    forAllConstIter(DLList<scalar>, const_myList, iter)
     {
         Info<< "element:" << *iter << endl;
     }
@@ -108,19 +88,14 @@ int main(int argc, char *argv[])
     myList.swapDown(myList.DLListBase::first());
     myList.swapDown(myList.DLListBase::last());
 
-    for
-    (
-        DLList<scalar>::const_iterator iter = const_myList.begin();
-        iter != const_myList.end();
-        ++iter
-    )
+    forAllConstIter(DLList<scalar>, const_myList, iter)
     {
         Info<< "element:" << *iter << endl;
     }
 
 
-    Info<< nl << "Testing transfer: " << nl << endl;
-    Info<< "original: " << myList << endl;
+    Info<< nl << "Testing transfer: " << nl << nl
+        << "original: " << myList << endl;
 
     DLList<scalar> newList;
     newList.transfer(myList);

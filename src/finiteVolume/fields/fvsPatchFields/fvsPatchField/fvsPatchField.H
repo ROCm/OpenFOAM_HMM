@@ -244,10 +244,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~fvsPatchField<Type>()
-        {}
+    //- Destructor
+    virtual ~fvsPatchField<Type>()
+    {}
 
 
     // Member functions

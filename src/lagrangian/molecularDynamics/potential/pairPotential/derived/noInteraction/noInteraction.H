@@ -69,10 +69,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~noInteraction()
-        {}
+    //- Destructor
+    ~noInteraction()
+    {}
 
 
     // Member Functions

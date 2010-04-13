@@ -74,10 +74,9 @@ public:
         WRLsurfaceFormat();
 
 
-    // Destructor
-
-        virtual ~WRLsurfaceFormat()
-        {}
+    //- Destructor
+    virtual ~WRLsurfaceFormat()
+    {}
 
 
     // Member Functions

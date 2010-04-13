@@ -106,9 +106,8 @@ public:
         bufferedAccumulator(const bufferedAccumulator<Type>&);
 
 
-    // Destructor
-
-        ~bufferedAccumulator();
+    //- Destructor
+    ~bufferedAccumulator();
 
 
     // Member Functions

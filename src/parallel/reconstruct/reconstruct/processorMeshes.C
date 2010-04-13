@@ -31,7 +31,7 @@ License
 
 void Foam::processorMeshes::read()
 {
-    forAll (databases_, procI)
+    forAll(databases_, procI)
     {
         meshes_.set
         (
@@ -144,7 +144,7 @@ Foam::fvMesh::readUpdateState Foam::processorMeshes::readUpdate()
 {
     fvMesh::readUpdateState stat = fvMesh::UNCHANGED;
 
-    forAll (databases_, procI)
+    forAll(databases_, procI)
     {
         // Check if any new meshes need to be read.
         fvMesh::readUpdateState procStat = meshes_[procI].readUpdate();
@@ -196,7 +196,7 @@ void Foam::processorMeshes::reconstructPoints(fvMesh& mesh)
     // Read the field for all the processors
     PtrList<pointIOField> procsPoints(meshes_.size());
 
-    forAll (meshes_, procI)
+    forAll(meshes_, procI)
     {
         procsPoints.set
         (
@@ -219,7 +219,7 @@ void Foam::processorMeshes::reconstructPoints(fvMesh& mesh)
     // Create the new points
     vectorField newPoints(mesh.nPoints());
 
-    forAll (meshes_, procI)
+    forAll(meshes_, procI)
     {
         const vectorField& procPoints = procsPoints[procI];
 

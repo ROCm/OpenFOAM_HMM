@@ -111,7 +111,7 @@ Foam::scalar Foam::chemkinReader::molecularWeight
 {
     scalar molWt = 0.0;
 
-    forAll (specieComposition, i)
+    forAll(specieComposition, i)
     {
         label nAtoms = specieComposition[i].nAtoms;
         const word& elementName = specieComposition[i].elementName;
@@ -430,24 +430,24 @@ void Foam::chemkinReader::addReaction
 
     scalarList nAtoms(elementNames_.size(), 0.0);
 
-    forAll (lhs, i)
+    forAll(lhs, i)
     {
         const List<specieElement>& specieComposition =
             specieComposition_[speciesTable_[lhs[i].index]];
 
-        forAll (specieComposition, j)
+        forAll(specieComposition, j)
         {
             label elementi = elementIndices_[specieComposition[j].elementName];
             nAtoms[elementi] += lhs[i].stoichCoeff*specieComposition[j].nAtoms;
         }
     }
 
-    forAll (rhs, i)
+    forAll(rhs, i)
     {
         const List<specieElement>& specieComposition =
             specieComposition_[speciesTable_[rhs[i].index]];
 
-        forAll (specieComposition, j)
+        forAll(specieComposition, j)
         {
             label elementi = elementIndices_[specieComposition[j].elementName];
             nAtoms[elementi] -= rhs[i].stoichCoeff*specieComposition[j].nAtoms;
@@ -459,7 +459,7 @@ void Foam::chemkinReader::addReaction
     // for the change from mol/cm^3 to kmol/m^3 concentraction units
     const scalar concFactor = 0.001;
     scalar sumExp = 0.0;
-    forAll (lhs, i)
+    forAll(lhs, i)
     {
         sumExp += lhs[i].exponent;
     }
@@ -470,7 +470,7 @@ void Foam::chemkinReader::addReaction
     if (rType == nonEquilibriumReversible)
     {
         sumExp = 0.0;
-        forAll (rhs, i)
+        forAll(rhs, i)
         {
             sumExp += rhs[i].exponent;
         }
@@ -770,7 +770,7 @@ void Foam::chemkinReader::addReaction
     }
 
 
-    forAll (nAtoms, i)
+    forAll(nAtoms, i)
     {
         if (mag(nAtoms[i]) > SMALL)
         {

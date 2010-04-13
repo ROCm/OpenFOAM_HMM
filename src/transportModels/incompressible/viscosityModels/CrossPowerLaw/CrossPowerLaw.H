@@ -89,10 +89,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~CrossPowerLaw()
-        {}
+    //- Destructor
+    ~CrossPowerLaw()
+    {}
 
 
     // Member Functions

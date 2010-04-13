@@ -162,9 +162,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~referredCell();
+    //- Destructor
+    virtual ~referredCell();
 
 
     // Member Functions

@@ -50,7 +50,7 @@ slicedBoundaryField
 
     FieldField<PatchField, Type>& bf = tbf();
 
-    forAll (mesh.boundary(), patchi)
+    forAll(mesh.boundary(), patchi)
     {
         if (preserveCouples && mesh.boundary()[patchi].coupled())
         {
@@ -119,7 +119,7 @@ slicedBoundaryField
 
     FieldField<PatchField, Type>& bf = tbf();
 
-    forAll (mesh.boundary(), patchi)
+    forAll(mesh.boundary(), patchi)
     {
         if (preserveCouples && mesh.boundary()[patchi].coupled())
         {

@@ -102,9 +102,8 @@ public:
         //- Construct from std::string (or string), optionally ignoring case
         regExp(const std::string&, const bool ignoreCase=false);
 
-    // Destructor
-
-        ~regExp();
+    //- Destructor
+    ~regExp();
 
 
     // Member functions

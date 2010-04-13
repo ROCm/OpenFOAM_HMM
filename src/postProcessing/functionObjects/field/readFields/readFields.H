@@ -39,6 +39,8 @@ SourceFiles
 
 #include "OFstream.H"
 #include "pointFieldFwd.H"
+#include "volFields.H"
+#include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,8 +70,21 @@ protected:
         //- on/off switch
         bool active_;
 
-        //- Fields to assess min/max
+        //- Fields to load
         wordList fieldSet_;
+
+        //- Loaded fields
+        PtrList<volScalarField> vsf_;
+        PtrList<volVectorField> vvf_;
+        PtrList<volSphericalTensorField> vSpheretf_;
+        PtrList<volSymmTensorField> vSymmtf_;
+        PtrList<volTensorField> vtf_;
+
+        PtrList<surfaceScalarField> ssf_;
+        PtrList<surfaceVectorField> svf_;
+        PtrList<surfaceSphericalTensorField> sSpheretf_;
+        PtrList<surfaceSymmTensorField> sSymmtf_;
+        PtrList<surfaceTensorField> stf_;
 
 
     // Protected Member Functions
@@ -81,7 +96,12 @@ protected:
         void operator=(const readFields&);
 
         template<class Type>
-        void setField(const word& fieldName);
+        void loadField
+        (
+            const word&,
+            PtrList<GeometricField<Type, fvPatchField, volMesh> >&,
+            PtrList<GeometricField<Type, fvsPatchField, surfaceMesh> >&
+        ) const;
 
 
 public:

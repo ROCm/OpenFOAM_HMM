@@ -152,9 +152,8 @@ public:
         explicit volPointInterpolation(const fvMesh&);
 
 
-    // Destructor
-
-        ~volPointInterpolation();
+    //- Destructor
+    ~volPointInterpolation();
 
 
     // Member functions

@@ -116,7 +116,7 @@ inline Foam::thirdBodyEfficiencies::thirdBodyEfficiencies
 inline Foam::scalar Foam::thirdBodyEfficiencies::M(const scalarList& c) const
 {
     scalar M = 0.0;
-    forAll (*this, i)
+    forAll(*this, i)
     {
         M += operator[](i)*c[i];
     }
@@ -169,7 +169,7 @@ inline Foam::Ostream& Foam::operator<<
 
     os << token::BEGIN_LIST << valMaxCount;
 
-    forAll (tbes, i)
+    forAll(tbes, i)
     {
         if (notEqual(tbes[i], valMaxCount))
         {

@@ -255,15 +255,10 @@ Foam::edgeSurface::edgeSurface
     // Add intersection edges to faceEdges
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    for
-    (
-        labelPairLookup::const_iterator iter = inter.facePairToEdge().begin();
-        iter != inter.facePairToEdge().end();
-        ++iter
-    )
+    forAllConstIter(labelPairLookup, inter.facePairToEdge(), iter)
     {
         // Edge label in intersection
-        label edgeI = iter();
+        const label edgeI = iter();
 
         // Get the face from the correct surface
         const FixedList<label, 2>& twoFaces = iter.key();

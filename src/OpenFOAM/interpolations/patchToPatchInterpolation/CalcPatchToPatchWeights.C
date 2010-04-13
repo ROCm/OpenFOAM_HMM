@@ -73,7 +73,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcPointAddressing() const
 
     bool doWeights = false;
 
-    forAll (pointAddressing, pointI)
+    forAll(pointAddressing, pointI)
     {
         doWeights = false;
 
@@ -146,7 +146,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcPointAddressing() const
             edgeList hitFaceEdges =
                 fromPatchFaces[proj[pointI].hitObject()].edges();
 
-            forAll (hitFaceEdges, edgeI)
+            forAll(hitFaceEdges, edgeI)
             {
                 minEdgeLength =
                     min
@@ -158,7 +158,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcPointAddressing() const
 
             const labelList& curEdges = toPatchPointEdges[pointI];
 
-            forAll (curEdges, edgeI)
+            forAll(curEdges, edgeI)
             {
                 minEdgeLength =
                     min
@@ -208,7 +208,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcPointAddressing() const
 
             pointField hitFacePoints = hitFace.points(fromPatchPoints);
 
-            forAll (hitFacePoints, masterPointI)
+            forAll(hitFacePoints, masterPointI)
             {
                 pointWeights[pointI][masterPointI] =
                     1.0/
@@ -252,7 +252,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcFaceAddressing() const
 
     vectorField fromPatchFaceCentres(fromPatchFaces.size());
 
-    forAll (fromPatchFaceCentres, faceI)
+    forAll(fromPatchFaceCentres, faceI)
     {
         fromPatchFaceCentres[faceI] =
             fromPatchFaces[faceI].centre(fromPatchPoints);
@@ -275,7 +275,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcFaceAddressing() const
     faceAddressingPtr_ = new labelList(proj.size(), -1);
     labelList& faceAddressing = *faceAddressingPtr_;
 
-    forAll (faceAddressing, faceI)
+    forAll(faceAddressing, faceI)
     {
         if (proj[faceI].hit())
         {
@@ -327,7 +327,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcFaceAddressing() const
 
                 faceWeights[faceI][0] = 1.0/m;
 
-                forAll (neighbours, nI)
+                forAll(neighbours, nI)
                 {
                     faceWeights[faceI][nI + 1] =
                     1.0/

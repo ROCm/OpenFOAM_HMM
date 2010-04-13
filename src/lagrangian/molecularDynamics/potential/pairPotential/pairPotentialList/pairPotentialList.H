@@ -101,9 +101,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~pairPotentialList();
+    //- Destructor
+    ~pairPotentialList();
 
 
     // Member Functions

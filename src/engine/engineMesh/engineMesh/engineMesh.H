@@ -106,9 +106,8 @@ public:
         static autoPtr<engineMesh> New(const IOobject& io);
 
 
-    // Destructor
-
-        virtual ~engineMesh();
+    //- Destructor
+    virtual ~engineMesh();
 
 
     // Member Functions

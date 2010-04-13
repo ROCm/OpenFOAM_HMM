@@ -229,10 +229,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~pointPatchField<Type>()
-        {}
+    //- Destructor
+    virtual ~pointPatchField<Type>()
+    {}
 
 
     // Member functions

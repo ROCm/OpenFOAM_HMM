@@ -86,9 +86,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~processorGAMGInterface();
+    //- Destructor
+    virtual ~processorGAMGInterface();
 
 
     // Member Functions

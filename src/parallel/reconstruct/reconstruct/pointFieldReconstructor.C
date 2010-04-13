@@ -63,7 +63,7 @@ Foam::pointFieldReconstructor::pointFieldReconstructor
                     .meshPoints();
 
                 // Create the inverse-addressing of the patch point labels.
-                forAll (patchPointLabels, pointi)
+                forAll(patchPointLabels, pointi)
                 {
                     pointMap[patchPointLabels[pointi]] = pointi;
                 }
@@ -71,7 +71,7 @@ Foam::pointFieldReconstructor::pointFieldReconstructor
                 const labelList& procPatchPoints =
                     procMesh.boundary()[patchi].meshPoints();
 
-                forAll (procPatchPoints, pointi)
+                forAll(procPatchPoints, pointi)
                 {
                     procPatchAddr[pointi] =
                         pointMap

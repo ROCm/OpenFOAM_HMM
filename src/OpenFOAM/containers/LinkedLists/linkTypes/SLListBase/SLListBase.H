@@ -107,9 +107,8 @@ public:
         inline SLListBase(link*);
 
 
-    // Destructor
-
-        ~SLListBase();
+    //- Destructor
+    ~SLListBase();
 
 
     // Member Functions

@@ -42,17 +42,17 @@ namespace Foam
 
 void Foam::xmgrGraph::write(const graph& g, Ostream& os) const
 {
-    os  << "@title " << g.title() << endl
-        << "@xaxis label " << g.xName() << endl
+    os  << "@title " << g.title() << nl
+        << "@xaxis label " << g.xName() << nl
         << "@yaxis label " << g.yName() << endl;
 
     label fieldI = 0;
 
-    for (graph::const_iterator iter = g.begin(); iter != g.end(); ++iter)
+    forAllConstIter(graph, g, iter)
     {
         os  << "@s" << fieldI << " legend "
-            << iter()->name() << endl
-            << "@target G0.S" << fieldI << endl
+            << iter()->name() << nl
+            << "@target G0.S" << fieldI << nl
             << "@type xy" << endl;
 
         writeXY(g.x(), *iter(), os);

@@ -158,9 +158,8 @@ public:
     {}
 
 
-    // Destructor
-
-        virtual ~lduAddressing();
+    //- Destructor
+    virtual ~lduAddressing();
 
 
     // Member Functions

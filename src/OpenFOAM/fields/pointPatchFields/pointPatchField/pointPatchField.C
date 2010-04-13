@@ -144,7 +144,7 @@ tmp<Field<Type1> > pointPatchField<Type>::patchInternalField
     tmp<Field<Type1> > tvalues(new Field<Type1>(meshPoints.size()));
     Field<Type1>& values = tvalues();
 
-    forAll (meshPoints, pointI)
+    forAll(meshPoints, pointI)
     {
         values[pointI] = iF[meshPoints[pointI]];
     }
@@ -202,7 +202,7 @@ void pointPatchField<Type>::addToInternalField
     // Get the addressing
     const labelList& mp = patch().meshPoints();
 
-    forAll (mp, pointI)
+    forAll(mp, pointI)
     {
         iF[mp[pointI]] += pF[pointI];
     }
@@ -292,7 +292,7 @@ void pointPatchField<Type>::setInInternalField
             << abort(FatalError);
     }
 
-    forAll (meshPoints, pointI)
+    forAll(meshPoints, pointI)
     {
         iF[meshPoints[pointI]] = pF[pointI];
     }

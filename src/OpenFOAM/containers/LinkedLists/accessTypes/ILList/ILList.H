@@ -120,9 +120,8 @@ public:
         ILList(Istream&, const INew&);
 
 
-    // Destructor
-
-        ~ILList();
+    //- Destructor
+    ~ILList();
 
 
     // Member Functions

@@ -99,7 +99,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     ~blackBodyEmission();
 
 

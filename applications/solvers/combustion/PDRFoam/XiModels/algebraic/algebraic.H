@@ -95,9 +95,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~algebraic();
+    //- Destructor
+    virtual ~algebraic();
 
 
     // Member Functions

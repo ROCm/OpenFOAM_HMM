@@ -97,9 +97,8 @@ public:
 
 
 
-    // Destructor
-
-        virtual ~pointZoneSet();
+    //- Destructor
+    virtual ~pointZoneSet();
 
 
     // Member functions

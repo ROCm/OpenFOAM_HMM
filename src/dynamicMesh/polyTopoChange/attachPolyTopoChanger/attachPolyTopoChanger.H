@@ -83,10 +83,9 @@ public:
         explicit attachPolyTopoChanger(polyMesh&);
 
 
-    // Destructor
-
-        virtual ~attachPolyTopoChanger()
-        {}
+    //- Destructor
+    virtual ~attachPolyTopoChanger()
+    {}
 
 
     // Member Functions

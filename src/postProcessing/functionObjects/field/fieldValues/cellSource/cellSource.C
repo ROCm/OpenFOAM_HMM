@@ -26,7 +26,6 @@ License
 #include "cellSource.H"
 #include "fvMesh.H"
 #include "volFields.H"
-#include "IOList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -43,13 +42,14 @@ const Foam::NamedEnum<Foam::fieldValues::cellSource::sourceType, 1>
     Foam::fieldValues::cellSource::sourceTypeNames_;
 
 template<>
-const char* Foam::NamedEnum<Foam::fieldValues::cellSource::operationType, 5>::
+const char* Foam::NamedEnum<Foam::fieldValues::cellSource::operationType, 7>::
 names[] =
 {
-    "none", "sum", "volAverage", "volIntegrate", "weightedAverage"
+    "none", "sum", "volAverage",
+    "volIntegrate", "weightedAverage", "min", "max"
 };
 
-const Foam::NamedEnum<Foam::fieldValues::cellSource::operationType, 5>
+const Foam::NamedEnum<Foam::fieldValues::cellSource::operationType, 7>
     Foam::fieldValues::cellSource::operationTypeNames_;
 
 

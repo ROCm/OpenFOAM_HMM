@@ -131,9 +131,8 @@ public:
         static autoPtr<calcType> New(const word& calcTypeName);
 
 
-    // Destructor
-
-        virtual ~calcType();
+    //- Destructor
+    virtual ~calcType();
 
 
     // Member Functions

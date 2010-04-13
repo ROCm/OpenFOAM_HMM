@@ -27,14 +27,9 @@ License
 #include "fvBoundaryMesh.H"
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void fvBoundaryMesh::addPatches(const polyBoundaryMesh& basicBdry)
+void Foam::fvBoundaryMesh::addPatches(const polyBoundaryMesh& basicBdry)
 {
     setSize(basicBdry.size());
 
@@ -50,7 +45,7 @@ void fvBoundaryMesh::addPatches(const polyBoundaryMesh& basicBdry)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-fvBoundaryMesh::fvBoundaryMesh
+Foam::fvBoundaryMesh::fvBoundaryMesh
 (
     const fvMesh& m
 )
@@ -60,7 +55,7 @@ fvBoundaryMesh::fvBoundaryMesh
 {}
 
 
-fvBoundaryMesh::fvBoundaryMesh
+Foam::fvBoundaryMesh::fvBoundaryMesh
 (
     const fvMesh& m,
     const polyBoundaryMesh& basicBdry
@@ -75,7 +70,7 @@ fvBoundaryMesh::fvBoundaryMesh
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void fvBoundaryMesh::movePoints()
+void Foam::fvBoundaryMesh::movePoints()
 {
     forAll(*this, patchi)
     {
@@ -89,11 +84,11 @@ void fvBoundaryMesh::movePoints()
 }
 
 
-lduInterfacePtrsList fvBoundaryMesh::interfaces() const
+Foam::lduInterfacePtrsList Foam::fvBoundaryMesh::interfaces() const
 {
     lduInterfacePtrsList interfaces(size());
 
-    forAll (interfaces, patchi)
+    forAll(interfaces, patchi)
     {
         if (isA<lduInterface>(this->operator[](patchi)))
         {
@@ -109,15 +104,11 @@ lduInterfacePtrsList fvBoundaryMesh::interfaces() const
 }
 
 
-void fvBoundaryMesh::readUpdate(const polyBoundaryMesh& basicBdry)
+void Foam::fvBoundaryMesh::readUpdate(const polyBoundaryMesh& basicBdry)
 {
     clear();
     addPatches(basicBdry);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

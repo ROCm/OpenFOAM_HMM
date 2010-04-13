@@ -113,10 +113,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~interpolation()
-        {}
+    //- Destructor
+    virtual ~interpolation()
+    {}
 
 
     // Member Functions

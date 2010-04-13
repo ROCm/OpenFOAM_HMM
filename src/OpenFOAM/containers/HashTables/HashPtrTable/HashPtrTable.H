@@ -95,9 +95,8 @@ public:
         HashPtrTable(const HashPtrTable<T, Key, Hash>&);
 
 
-    // Destructor
-
-        ~HashPtrTable();
+    //- Destructor
+    ~HashPtrTable();
 
 
     // Member Functions

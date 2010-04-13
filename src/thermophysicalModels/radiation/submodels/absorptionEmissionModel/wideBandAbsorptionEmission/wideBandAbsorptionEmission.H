@@ -189,7 +189,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~wideBandAbsorptionEmission();
 
 

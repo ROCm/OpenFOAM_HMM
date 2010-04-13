@@ -106,9 +106,8 @@ public:
         UIPstream(const int fromProcNo, PstreamBuffers&);
 
 
-    // Destructor
-
-        ~UIPstream();
+    //- Destructor
+    ~UIPstream();
 
 
     // Member functions

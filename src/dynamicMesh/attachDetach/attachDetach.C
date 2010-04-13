@@ -112,7 +112,7 @@ void Foam::attachDetach::checkDefinition()
 
             DynamicList<label> bouFacesInZone(addr.size());
 
-            forAll (addr, faceI)
+            forAll(addr, faceI)
             {
                 if (!mesh.isInternalFace(addr[faceI]))
                 {
@@ -180,7 +180,7 @@ void Foam::attachDetach::checkDefinition()
 
             DynamicList<label> zoneProblemFaces(addr.size());
 
-            forAll (addr, faceI)
+            forAll(addr, faceI)
             {
                 label facePatch =
                     mesh.boundaryMesh().whichPatch(addr[faceI]);
