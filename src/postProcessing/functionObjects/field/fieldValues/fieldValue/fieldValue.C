@@ -33,10 +33,10 @@ namespace Foam
 {
     defineTypeNameAndDebug(fieldValue, 0);
 
-    defineTemplateTypeNameAndDebug(IOList<vector>, 0);
-    defineTemplateTypeNameAndDebug(IOList<sphericalTensor>, 0);
-    defineTemplateTypeNameAndDebug(IOList<symmTensor>, 0);
-    defineTemplateTypeNameAndDebug(IOList<tensor>, 0);
+    defineTemplateTypeNameAndDebug(IOField<vector>, 0);
+    defineTemplateTypeNameAndDebug(IOField<sphericalTensor>, 0);
+    defineTemplateTypeNameAndDebug(IOField<symmTensor>, 0);
+    defineTemplateTypeNameAndDebug(IOField<tensor>, 0);
 }
 
 

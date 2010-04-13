@@ -30,7 +30,6 @@ License
 #include "processorPolyPatch.H"
 #include "surfaceFields.H"
 #include "volFields.H"
-#include "IOList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

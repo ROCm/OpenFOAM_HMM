@@ -26,7 +26,6 @@ License
 #include "faceSource.H"
 #include "surfaceFields.H"
 #include "volFields.H"
-#include "IOList.H"
 #include "ListListOps.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -145,7 +144,7 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
 
             if (valueOutput_)
             {
-                IOList<Type>
+                IOField<Type>
                 (
                     IOobject
                     (

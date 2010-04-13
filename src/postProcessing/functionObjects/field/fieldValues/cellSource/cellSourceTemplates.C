@@ -25,7 +25,6 @@ License
 
 #include "cellSource.H"
 #include "volFields.H"
-#include "IOList.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -133,7 +132,7 @@ bool Foam::fieldValues::cellSource::writeValues(const word& fieldName)
 
             if (valueOutput_)
             {
-                IOList<Type>
+                IOField<Type>
                 (
                     IOobject
                     (
