@@ -160,10 +160,27 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     const scalar utc = td.cloud().drag().utc(Re, d, mu) + ROOTVSMALL;
 
     // Momentum source due to particle forces
-    const vector FCoupled =
-        mass*td.cloud().forces().calcCoupled(cellI, dt, rhoc_, rho, Uc_, U);
-    const vector FNonCoupled =
-        mass*td.cloud().forces().calcNonCoupled(cellI, dt, rhoc_, rho, Uc_, U);
+    const vector FCoupled = mass*td.cloud().forces().calcCoupled
+    (
+        cellI,
+        dt,
+        rhoc_,
+        rho,
+        Uc_,
+        U,
+        d
+    );
+
+    const vector FNonCoupled = mass*td.cloud().forces().calcNonCoupled
+    (
+        cellI,
+        dt,
+        rhoc_,
+        rho,
+        Uc_,
+        U,
+        d
+    );
 
 
     // New particle velocity

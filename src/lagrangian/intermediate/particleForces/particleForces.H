@@ -69,6 +69,9 @@ class particleForces
         //- Velocity gradient field
         const volTensorField* gradUPtr_;
 
+        //- Magnetic field strength gradient field
+        const volTensorField* gradHPtr_;
+
 
         // Forces to include in particle motion evaluation
 
@@ -84,11 +87,20 @@ class particleForces
             //- Pressure gradient
             Switch pressureGradient_;
 
+            //- Paramagnetic force
+            Switch paramagnetic_;
+
+            //- Magnetic susceptibility of particle
+            scalar chi_;
+
 
         // Additional info
 
-            //- Name of velucity field - default = "U"
+            //- Name of velocity field - default = "U"
             const word UName_;
+
+            //- Name of magnetic field strength field - default = "H"
+            const word HName_;
 
 
 public:
@@ -128,13 +140,22 @@ public:
             Switch virtualMass() const;
 
             //- Return virtual mass force coefficient
-            Switch Cvm() const;
+            scalar Cvm() const;
 
             //- Return pressure gradient force activate switch
             Switch pressureGradient() const;
 
             //- Return name of velocity field
             const word& UName() const;
+
+            //- Return paramagnetic force activate switch
+            Switch paramagnetic() const;
+
+            //- Return magnetic susceptibility
+            scalar chi() const;
+
+            //- Return name of velocity field
+            const word& HName() const;
 
 
        // Evaluation
@@ -150,7 +171,8 @@ public:
                 const scalar rhoc,
                 const scalar rho,
                 const vector& Uc,
-                const vector& U
+                const vector& U,
+                const scalar d
             ) const;
 
             //- Calculate external forces applied to the particles
@@ -161,7 +183,8 @@ public:
                 const scalar rhoc,
                 const scalar rho,
                 const vector& Uc,
-                const vector& U
+                const vector& U,
+                const scalar d
             ) const;
 };
 
