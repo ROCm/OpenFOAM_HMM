@@ -620,6 +620,7 @@ volPointInterpolation::~volPointInterpolation()
 void volPointInterpolation::updateMesh()
 {
     makeWeights();
+    makePatchPatchAddressing();
 }
 
 
