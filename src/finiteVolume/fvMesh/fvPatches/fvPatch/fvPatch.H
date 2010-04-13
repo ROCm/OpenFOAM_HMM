@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -151,6 +151,12 @@ public:
                 return polyPatch_.name();
             }
 
+            //- Return start label of this patch in the polyMesh face list
+            label start() const
+            {
+                return polyPatch_.start();
+            }
+
             //- Return size
             virtual label size() const
             {
@@ -185,7 +191,7 @@ public:
             template<class T>
             const typename List<T>::subList patchSlice(const List<T>& l) const
             {
-                return typename List<T>::subList(l, size(), polyPatch_.start());
+                return typename List<T>::subList(l, size(), start());
             }
 
             //- Return faceCells

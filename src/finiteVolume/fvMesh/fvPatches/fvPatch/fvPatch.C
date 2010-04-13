@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,21 +31,18 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(fvPatch, 0);
-defineRunTimeSelectionTable(fvPatch, polyPatch);
-addToRunTimeSelectionTable(fvPatch, fvPatch, polyPatch);
-
+    defineTypeNameAndDebug(fvPatch, 0);
+    defineRunTimeSelectionTable(fvPatch, polyPatch);
+    addToRunTimeSelectionTable(fvPatch, fvPatch, polyPatch);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-fvPatch::fvPatch(const polyPatch& p, const fvBoundaryMesh& bm)
+Foam::fvPatch::fvPatch(const polyPatch& p, const fvBoundaryMesh& bm)
 :
     polyPatch_(p),
     boundaryMesh_(bm)
@@ -54,19 +51,19 @@ fvPatch::fvPatch(const polyPatch& p, const fvBoundaryMesh& bm)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-fvPatch::~fvPatch()
+Foam::fvPatch::~fvPatch()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool fvPatch::constraintType(const word& pt)
+bool Foam::fvPatch::constraintType(const word& pt)
 {
     return fvPatchField<scalar>::patchConstructorTablePtr_->found(pt);
 }
 
 
-wordList fvPatch::constraintTypes()
+Foam::wordList Foam::fvPatch::constraintTypes()
 {
     wordList cTypes(polyPatchConstructorTablePtr_->size());
 
@@ -92,19 +89,19 @@ wordList fvPatch::constraintTypes()
 }
 
 
-const unallocLabelList& fvPatch::faceCells() const
+const Foam::unallocLabelList& Foam::fvPatch::faceCells() const
 {
     return polyPatch_.faceCells();
 }
 
 
-const vectorField& fvPatch::Cf() const
+const Foam::vectorField& Foam::fvPatch::Cf() const
 {
     return boundaryMesh().mesh().Cf().boundaryField()[index()];
 }
 
 
-tmp<vectorField> fvPatch::Cn() const
+Foam::tmp<Foam::vectorField> Foam::fvPatch::Cn() const
 {
     tmp<vectorField> tcc(new vectorField(size()));
     vectorField& cc = tcc();
@@ -123,64 +120,60 @@ tmp<vectorField> fvPatch::Cn() const
 }
 
 
-tmp<vectorField> fvPatch::nf() const
+Foam::tmp<Foam::vectorField> Foam::fvPatch::nf() const
 {
     return Sf()/magSf();
 }
 
 
-const vectorField& fvPatch::Sf() const
+const Foam::vectorField& Foam::fvPatch::Sf() const
 {
     return boundaryMesh().mesh().Sf().boundaryField()[index()];
 }
 
 
-const scalarField& fvPatch::magSf() const
+const Foam::scalarField& Foam::fvPatch::magSf() const
 {
     return boundaryMesh().mesh().magSf().boundaryField()[index()];
 }
 
 
-tmp<vectorField> fvPatch::delta() const
+Foam::tmp<Foam::vectorField> Foam::fvPatch::delta() const
 {
     return Cf() - Cn();
 }
 
 
-void fvPatch::makeWeights(scalarField& w) const
+void Foam::fvPatch::makeWeights(scalarField& w) const
 {
     w = 1.0;
 }
 
 
-void fvPatch::makeDeltaCoeffs(scalarField& dc) const
+void Foam::fvPatch::makeDeltaCoeffs(scalarField& dc) const
 {
     dc = 1.0/(nf() & delta());
 }
 
 
-void fvPatch::initMovePoints()
+void Foam::fvPatch::initMovePoints()
 {}
 
 
-void fvPatch::movePoints()
+void Foam::fvPatch::movePoints()
 {}
 
 
-const scalarField& fvPatch::deltaCoeffs() const
+const Foam::scalarField& Foam::fvPatch::deltaCoeffs() const
 {
     return boundaryMesh().mesh().deltaCoeffs().boundaryField()[index()];
 }
 
 
-const scalarField& fvPatch::weights() const
+const Foam::scalarField& Foam::fvPatch::weights() const
 {
     return boundaryMesh().mesh().weights().boundaryField()[index()];
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
