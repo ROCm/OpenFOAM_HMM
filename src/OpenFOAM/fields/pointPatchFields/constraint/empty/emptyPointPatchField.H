@@ -119,6 +119,17 @@ public:
                 )
             );
         }
+
+    // Member functions
+
+        //- Constraint handling
+
+            //- Return the constraint type this pointPatchField implements
+            virtual const word& constraintType() const
+            {
+                return type();
+            }
+
 };
 
 

@@ -130,6 +130,12 @@ public:
             }
         }
 
+        //- Return the constraint type this pointPatch implements.
+        virtual const word& constraintType() const
+        {
+            return type();
+        }
+
         //- Return processor number
         int myProcNo() const
         {

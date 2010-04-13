@@ -337,8 +337,14 @@ public:
                 const Field<Type1>& pF
             ) const;
 
-            //- Return the type of the calculated for of pointPatchField
+            //- Return the type of the calculated form of pointPatchField
             static const word& calculatedType();
+
+            //- Return the constraint type this pointPatchField implements.
+            virtual const word& constraintType() const
+            {
+                return word::null;
+            }
 
 
         // Mapping functions

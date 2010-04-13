@@ -159,6 +159,15 @@ public:
             }
 
 
+        //- Constraint handling
+
+            //- Return the constraint type this pointPatchField implements
+            virtual const word& constraintType() const
+            {
+                return type();
+            }
+
+
         // Evaluation functions
 
             //- Evaluate the patch field

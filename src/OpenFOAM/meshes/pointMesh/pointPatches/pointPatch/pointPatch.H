@@ -158,6 +158,12 @@ public:
         //- Return  point normals
         virtual const vectorField& pointNormals() const = 0;
 
+        //- Return the constraint type this pointPatch implements.
+        virtual const word& constraintType() const
+        {
+            return word::null;
+        }
+
         //- Accumulate the effect of constraint direction of this patch
         virtual void applyConstraint
         (

@@ -36,6 +36,7 @@ SourceFiles
 #define basicSymmetryPointPatchField_H
 
 #include "pointPatchField.H"
+#include "symmetryPointPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -119,6 +120,12 @@ public:
     // Member functions
 
         // Evaluation functions
+
+            //- Return the constraint type this pointPatchField implements
+            virtual const word& constraintType() const
+            {
+                return symmetryPointPatch::typeName;
+            }
 
             //- Update the patch field
             virtual void evaluate
