@@ -461,7 +461,11 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
         iter
     )
     {
-        scalarFields_.insert(iter.key(), new scalarField(*iter(), mapper));
+        scalarFields_.insert
+        (
+            iter.key(),
+            new scalarField(*iter(), mapper)
+        );
     }
 
     forAllConstIter
@@ -471,7 +475,11 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
         iter
     )
     {
-        vectorFields_.insert(iter.key(), new vectorField(*iter(), mapper));
+        vectorFields_.insert
+        (
+            iter.key(),
+            new vectorField(*iter(), mapper)
+        );
     }
 
     forAllConstIter
@@ -509,7 +517,11 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
         iter
     )
     {
-        tensorFields_.insert(iter.key(), new tensorField(*iter(), mapper));
+        tensorFields_.insert
+        (
+            iter.key(),
+            new tensorField(*iter(), mapper)
+        );
     }
 }
 

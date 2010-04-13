@@ -50,7 +50,7 @@ void readFields
     label nFields = fields.size();
     fields.setSize(nFields + fieldObjects.size());
 
-    forAllIter(IOobjectList::iterator, fieldObjects, iter)
+    forAllIter(IOobjectList, fieldObjects, iter)
     {
         if (selectedFields.empty() || selectedFields.found(iter()->name()))
         {

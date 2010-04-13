@@ -52,7 +52,7 @@ void Foam::reconstructLagrangianPositions
 
         Cloud<passiveParticle> lpi(meshes[i], cloudName, false);
 
-        forAllIter(Cloud<passiveParticle>, lpi, iter)
+        forAllConstIter(Cloud<passiveParticle>, lpi, iter)
         {
             const passiveParticle& ppi = iter();
 

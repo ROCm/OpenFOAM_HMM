@@ -96,7 +96,7 @@ void Foam::reconstructLagrangianFields
     const IOobjectList& objects
 )
 {
-    word fieldClassName(IOField<Type>::typeName);
+    const word fieldClassName(IOField<Type>::typeName);
 
     IOobjectList fields = objects.lookupClass(fieldClassName);
 
@@ -105,7 +105,7 @@ void Foam::reconstructLagrangianFields
         Info<< "    Reconstructing lagrangian "
             << fieldClassName << "s\n" << endl;
 
-        forAllIter(IOobjectList, fields, fieldIter)
+        forAllConstIter(IOobjectList, fields, fieldIter)
         {
             Info<< "        " << fieldIter()->name() << endl;
             reconstructLagrangianField<Type>

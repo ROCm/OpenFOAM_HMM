@@ -188,12 +188,7 @@ int main(int argc, char *argv[])
     sum = 0;
     for (label iter = 0; iter < nIters; ++iter)
     {
-        for
-        (
-            PackedBoolList::iterator it = packed.begin();
-            it != packed.end();
-            ++it
-        )
+        forAllIter(PackedBoolList, packed, it)
         {
             sum += it;
         }
@@ -207,12 +202,7 @@ int main(int argc, char *argv[])
     sum = 0;
     for (label iter = 0; iter < nIters; ++iter)
     {
-        for
-        (
-            PackedBoolList::const_iterator cit = packed.cbegin();
-            cit != packed.cend();
-            ++cit
-        )
+        forAllConstIter(PackedBoolList, packed, cit)
         {
             sum += cit();
         }
@@ -333,12 +323,7 @@ int main(int argc, char *argv[])
     // Write packed
     for (label iter = 0; iter < nIters; ++iter)
     {
-        for
-        (
-            PackedBoolList::iterator it = packed.begin();
-            it != packed.end();
-            ++it
-        )
+        forAllIter(PackedBoolList, packed, it)
         {
             it() = 1;
         }

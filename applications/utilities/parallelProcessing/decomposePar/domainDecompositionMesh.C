@@ -506,7 +506,7 @@ void Foam::domainDecomposition::decomposeMesh()
             // Add internal and boundary faces
             // Remember to increment the index by one such that the
             // turning index works properly.
-            forAllIter(SLList<label>, curProcFaces, curProcFacesIter)
+            forAllConstIter(SLList<label>, curProcFaces, curProcFacesIter)
             {
                 curProcFaceAddressing[nFaces] = curProcFacesIter() + 1;
                 nFaces++;
@@ -559,7 +559,7 @@ void Foam::domainDecomposition::decomposeMesh()
 
                 // add faces for this processor boundary
 
-                forAllIter
+                forAllConstIter
                 (
                     SLList<label>,
                     curInterProcBFacesIter(),

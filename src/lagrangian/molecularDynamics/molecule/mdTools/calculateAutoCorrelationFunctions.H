@@ -29,8 +29,7 @@ if (mesh.time().timeIndex() % vacf.sampleSteps() == 0)
 
     label uV = 0;
 
-    // or forAllConstIter
-    forAllIter(IDLList<molecule>, molecules, mol)
+    forAllConstIter(IDLList<molecule>, molecules, mol)
     {
         uVals[uV++] = mol().U();
     }
@@ -42,8 +41,7 @@ if (mesh.time().timeIndex() % pacf.sampleSteps() == 0)
 {
     vector p = vector::zero;
 
-    // or forAllConstIter
-    forAllIter(IDLList<molecule>, molecules, mol)
+    forAllConstIter(IDLList<molecule>, molecules, mol)
     {
         p.x() +=
             mol().mass() * mol().U().y() * mol().U().z()
@@ -65,8 +63,7 @@ if (mesh.time().timeIndex() % hfacf.sampleSteps() == 0)
 {
     vector s = vector::zero;
 
-    // or forAllConstIter
-    forAllIter(IDLList<molecule>, molecules, mol)
+    forAllConstIter(IDLList<molecule>, molecules, mol)
     {
         s +=
         (

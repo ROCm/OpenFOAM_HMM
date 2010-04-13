@@ -80,12 +80,14 @@ calcPointEdges() const
 
     forAll(pointEdges, pointI)
     {
-        pe[pointI].setSize(pointEdges[pointI].size());
+        const SLList<label>& pEdge = pointEdges[pointI];
+
+        pe[pointI].setSize(pEdge.size());
 
         label i = 0;
-        forAllIter(SLList<label>, pointEdges[pointI], curEdgesIter)
+        forAllConstIter(SLList<label>, pEdge, iter)
         {
-            pe[pointI][i++] = curEdgesIter();
+            pe[pointI][i++] = iter();
         }
     }
 

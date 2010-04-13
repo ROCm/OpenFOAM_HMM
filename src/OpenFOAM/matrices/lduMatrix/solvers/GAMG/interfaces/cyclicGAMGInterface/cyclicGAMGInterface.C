@@ -163,7 +163,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
         {
             faceCells_[nCoarseFaces] = contents[masterI];
 
-            forAllIter(SLList<label>, faceFacesIter(), facesIter)
+            forAllConstIter(SLList<label>, faceFacesIter(), facesIter)
             {
                 faceRestrictAddressing_[facesIter()] = nCoarseFaces;
             }
@@ -192,7 +192,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
         {
             faceCells_[nCoarseFaces] = nbrsIter();
 
-            forAllIter(SLList<label>, faceFacesIter(), facesIter)
+            forAllConstIter(SLList<label>, faceFacesIter(), facesIter)
             {
                 faceRestrictAddressing_[facesIter() + sizeBy2] = nCoarseFaces;
             }

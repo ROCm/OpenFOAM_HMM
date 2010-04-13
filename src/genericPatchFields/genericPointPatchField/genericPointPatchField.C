@@ -352,14 +352,32 @@ genericPointPatchField<Type>::genericPointPatchField
     actualTypeName_(ptf.actualTypeName_),
     dict_(ptf.dict_)
 {
-    forAllConstIter(HashPtrTable<scalarField>, ptf.scalarFields_, iter)
+    forAllConstIter
+    (
+        HashPtrTable<scalarField>,
+        ptf.scalarFields_,
+        iter
+    )
     {
-        scalarFields_.insert(iter.key(), new scalarField(*iter(), mapper));
+        scalarFields_.insert
+        (
+            iter.key(),
+            new scalarField(*iter(), mapper)
+        );
     }
 
-    forAllConstIter(HashPtrTable<vectorField>, ptf.vectorFields_, iter)
+    forAllConstIter
+    (
+        HashPtrTable<vectorField>,
+        ptf.vectorFields_,
+        iter
+    )
     {
-        vectorFields_.insert(iter.key(), new vectorField(*iter(), mapper));
+        vectorFields_.insert
+        (
+            iter.key(),
+            new vectorField(*iter(), mapper)
+        );
     }
 
     forAllConstIter
@@ -397,7 +415,11 @@ genericPointPatchField<Type>::genericPointPatchField
         iter
     )
     {
-        tensorFields_.insert(iter.key(), new tensorField(*iter(), mapper));
+        tensorFields_.insert
+        (
+            iter.key(),
+            new tensorField(*iter(), mapper)
+        );
     }
 }
 

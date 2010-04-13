@@ -180,7 +180,7 @@ Foam::processorGAMGInterface::processorGAMGInterface
             {
                 faceCells_[nCoarseFaces] = contents[masterI];
 
-                forAllIter(SLList<label>, faceFacesIter(), facesIter)
+                forAllConstIter(SLList<label>, faceFacesIter(), facesIter)
                 {
                     faceRestrictAddressing_[facesIter()] = nCoarseFaces;
                 }
@@ -213,7 +213,7 @@ Foam::processorGAMGInterface::processorGAMGInterface
             {
                 faceCells_[nCoarseFaces] = nbrsIter();
 
-                forAllIter(SLList<label>, faceFacesIter(), facesIter)
+                forAllConstIter(SLList<label>, faceFacesIter(), facesIter)
                 {
                     faceRestrictAddressing_[facesIter()] = nCoarseFaces;
                 }
