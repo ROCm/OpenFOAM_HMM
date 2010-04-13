@@ -78,10 +78,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~shiftedForce()
-        {}
+    //- Destructor
+    ~shiftedForce()
+    {}
 
 
     // Member Functions

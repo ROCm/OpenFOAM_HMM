@@ -299,15 +299,9 @@ void Foam::perfectInterface::setRefinement
 
 
     // 2. Renumber (non patch0/1) faces.
-    for
-    (
-        labelHashSet::const_iterator iter = affectedFaces.begin();
-        iter != affectedFaces.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, affectedFaces, iter)
     {
-        label faceI = iter.key();
-
+        const label faceI = iter.key();
         const face& f = mesh.faces()[faceI];
 
         face newFace(f.size());

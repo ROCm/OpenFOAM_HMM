@@ -89,7 +89,7 @@ void Foam::mixerFvMesh::addZonesAndModifiers()
 
     labelList isf(innerSlider.size());
 
-    forAll (isf, i)
+    forAll(isf, i)
     {
         isf[i] = innerSlider.start() + i;
     }
@@ -110,7 +110,7 @@ void Foam::mixerFvMesh::addZonesAndModifiers()
 
     labelList osf(outerSlider.size());
 
-    forAll (osf, i)
+    forAll(osf, i)
     {
         osf[i] = outerSlider.start() + i;
     }
@@ -220,16 +220,16 @@ void Foam::mixerFvMesh::calcMovingMasks() const
     const labelList& cellAddr =
         cellZones()[cellZones().findZoneID("movingCells")];
 
-    forAll (cellAddr, cellI)
+    forAll(cellAddr, cellI)
     {
         const cell& curCell = c[cellAddr[cellI]];
 
-        forAll (curCell, faceI)
+        forAll(curCell, faceI)
         {
             // Mark all the points as moving
             const face& curFace = f[curCell[faceI]];
 
-            forAll (curFace, pointI)
+            forAll(curFace, pointI)
             {
                 movingPointsMask[curFace[pointI]] = 1;
             }
@@ -245,11 +245,11 @@ void Foam::mixerFvMesh::calcMovingMasks() const
     const labelList& innerSliderAddr =
         faceZones()[faceZones().findZoneID(innerSliderZoneName)];
 
-    forAll (innerSliderAddr, faceI)
+    forAll(innerSliderAddr, faceI)
     {
         const face& curFace = f[innerSliderAddr[faceI]];
 
-        forAll (curFace, pointI)
+        forAll(curFace, pointI)
         {
             movingPointsMask[curFace[pointI]] = 1;
         }
@@ -264,11 +264,11 @@ void Foam::mixerFvMesh::calcMovingMasks() const
     const labelList& outerSliderAddr =
         faceZones()[faceZones().findZoneID(outerSliderZoneName)];
 
-    forAll (outerSliderAddr, faceI)
+    forAll(outerSliderAddr, faceI)
     {
         const face& curFace = f[outerSliderAddr[faceI]];
 
-        forAll (curFace, pointI)
+        forAll(curFace, pointI)
         {
             movingPointsMask[curFace[pointI]] = 0;
         }

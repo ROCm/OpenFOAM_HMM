@@ -77,9 +77,8 @@ public:
         layeredEngineMesh(const IOobject& io);
 
 
-    // Destructor
-
-        ~layeredEngineMesh();
+    //- Destructor
+    ~layeredEngineMesh();
 
 
     // Member Functions

@@ -75,9 +75,8 @@ public:
         {}
 
 
-    // Destructor
-
-        virtual ~lduInterface();
+    //- Destructor
+    virtual ~lduInterface();
 
 
     // Member Functions

@@ -98,7 +98,7 @@ public:
         {}
 
 
-    // Destructor
+    //- Destructor
     ~absorptionCoeffs();
 
 

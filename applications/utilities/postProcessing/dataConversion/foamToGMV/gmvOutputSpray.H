@@ -1,32 +1,19 @@
 gmvFile << "tracers " << particles.size() << nl;
-for
-(
-    Cloud<passiveParticle>::iterator elmnt = particles.begin();
-    elmnt != particles.end();
-    ++elmnt
-)
+forAllConstIter(Cloud<passiveParticle>, particles, iter)
 {
-    gmvFile << elmnt().position().x() << " ";
+    gmvFile << iter().position().x() << " ";
 }
 gmvFile << nl;
-for
-(
-    Cloud<passiveParticle>::iterator elmnt = particles.begin();
-    elmnt != particles.end();
-    ++elmnt
-)
+
+forAllConstIter(Cloud<passiveParticle>, particles, iter)
 {
-    gmvFile << elmnt().position().y() << " ";
+    gmvFile << iter().position().y() << " ";
 }
 gmvFile << nl;
-for
-(
-    Cloud<passiveParticles>::iterator elmnt = particles.begin();
-    elmnt != particles.end();
-    ++elmnt
-)
+
+forAllConstIter(Cloud<passiveParticle>, particles, iter)
 {
-    gmvFile << elmnt().position().z() << " ";
+    gmvFile << iter().position().z() << " ";
 }
 gmvFile << nl;
 
@@ -51,15 +38,13 @@ forAll(lagrangianScalarNames, i)
     {
         gmvFile << name  << nl;
 
-        for (label n = 0; n < s.size(); n++)
+        forAll(s, n)
         {
             gmvFile << s[n] << token::SPACE;
         }
         gmvFile << nl;
     }
 
-
 }
-
 
 gmvFile << "endtrace"<< nl;

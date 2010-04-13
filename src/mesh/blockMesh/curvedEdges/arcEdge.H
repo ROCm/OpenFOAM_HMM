@@ -89,9 +89,8 @@ public:
         arcEdge(const pointField& points, Istream&);
 
 
-    // Destructor
-
-        virtual ~arcEdge(){}
+    //- Destructor
+    virtual ~arcEdge(){}
 
 
     // Member Functions

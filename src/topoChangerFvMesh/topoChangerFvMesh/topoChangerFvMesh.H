@@ -80,9 +80,8 @@ public:
         explicit topoChangerFvMesh(const IOobject& io);
 
 
-    // Destructor
-
-        virtual ~topoChangerFvMesh();
+    //- Destructor
+    virtual ~topoChangerFvMesh();
 
 
     // Member Functions

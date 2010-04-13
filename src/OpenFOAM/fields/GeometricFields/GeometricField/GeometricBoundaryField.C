@@ -379,7 +379,7 @@ interfaces() const
 {
     lduInterfaceFieldPtrsList interfaces(this->size());
 
-    forAll (interfaces, patchi)
+    forAll(interfaces, patchi)
     {
         if (isA<lduInterfaceField>(this->operator[](patchi)))
         {

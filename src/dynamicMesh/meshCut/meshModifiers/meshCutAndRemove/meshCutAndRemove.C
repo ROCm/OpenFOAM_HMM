@@ -887,12 +887,7 @@ void Foam::meshCutAndRemove::setRefinement
 
     const Map<edge>& faceSplitCuts = cuts.faceSplitCut();
 
-    for
-    (
-        Map<edge>::const_iterator iter = faceSplitCuts.begin();
-        iter != faceSplitCuts.end();
-        ++iter
-    )
+    forAllConstIter(Map<edge>, faceSplitCuts, iter)
     {
         label faceI = iter.key();
 
@@ -1310,15 +1305,9 @@ void Foam::meshCutAndRemove::updateMesh(const mapPolyMesh& map)
     {
         Map<label> newAddedFaces(addedFaces_.size());
 
-        for
-        (
-            Map<label>::const_iterator iter = addedFaces_.begin();
-            iter != addedFaces_.end();
-            ++iter
-        )
+        forAllConstIter(Map<label>, addedFaces_, iter)
         {
             label cellI = iter.key();
-
             label newCellI = map.reverseCellMap()[cellI];
 
             label addedFaceI = iter();

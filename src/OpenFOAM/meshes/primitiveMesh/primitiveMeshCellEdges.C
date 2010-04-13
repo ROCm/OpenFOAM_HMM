@@ -69,13 +69,13 @@ void Foam::primitiveMesh::calcCellEdges() const
         const labelListList& fe = faceEdges();
 
         // loop through the list again and add edges; checking for duplicates
-        forAll (own, faceI)
+        forAll(own, faceI)
         {
             DynamicList<label, edgesPerCell_>& curCellEdges = ce[own[faceI]];
 
             const labelList& curEdges = fe[faceI];
 
-            forAll (curEdges, edgeI)
+            forAll(curEdges, edgeI)
             {
                 if (findIndex(curCellEdges, curEdges[edgeI]) == -1)
                 {
@@ -85,13 +85,13 @@ void Foam::primitiveMesh::calcCellEdges() const
             }
         }
 
-        forAll (nei, faceI)
+        forAll(nei, faceI)
         {
             DynamicList<label, edgesPerCell_>& curCellEdges = ce[nei[faceI]];
 
             const labelList& curEdges = fe[faceI];
 
-            forAll (curEdges, edgeI)
+            forAll(curEdges, edgeI)
             {
                 if (findIndex(curCellEdges, curEdges[edgeI]) == -1)
                 {
@@ -105,7 +105,7 @@ void Foam::primitiveMesh::calcCellEdges() const
         labelListList& cellEdgeAddr = *cePtr_;
 
         // reset the size
-        forAll (ce, cellI)
+        forAll(ce, cellI)
         {
             cellEdgeAddr[cellI].transfer(ce[cellI]);
         }

@@ -99,9 +99,8 @@ public:
         explicit mixerFvMesh(const IOobject& io);
 
 
-    // Destructor
-
-        virtual ~mixerFvMesh();
+    //- Destructor
+    virtual ~mixerFvMesh();
 
 
     // Member Functions

@@ -103,10 +103,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~dynMixedSmagorinsky()
-        {}
+    //- Destructor
+    ~dynMixedSmagorinsky()
+    {}
 
 
     // Member Functions

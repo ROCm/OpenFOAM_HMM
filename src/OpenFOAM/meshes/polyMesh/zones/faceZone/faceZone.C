@@ -77,7 +77,7 @@ void Foam::faceZone::calcFaceZonePatch() const
     const labelList& addr = *this;
     const boolList& flip = flipMap();
 
-    forAll (addr, faceI)
+    forAll(addr, faceI)
     {
         if (flip[faceI])
         {
@@ -133,7 +133,7 @@ void Foam::faceZone::calcCellLayers() const
         slaveCellsPtr_ = new labelList(mf.size());
         labelList& sc = *slaveCellsPtr_;
 
-        forAll (mf, faceI)
+        forAll(mf, faceI)
         {
             label ownCellI = own[mf[faceI]];
             label neiCellI =
@@ -346,7 +346,7 @@ const Foam::labelList& Foam::faceZone::meshEdges() const
         //
         //const labelList& faceLabels = *this;
         //
-        //forAll (faceCells, faceI)
+        //forAll(faceCells, faceI)
         //{
         //    faceCells[faceI] = own[faceLabels[faceI]];
         //}

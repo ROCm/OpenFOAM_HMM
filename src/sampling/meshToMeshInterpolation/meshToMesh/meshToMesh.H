@@ -150,9 +150,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~meshToMesh();
+    //- Destructor
+    ~meshToMesh();
 
 
     //- Patch-field interpolation class
@@ -173,10 +172,9 @@ public:
             {}
 
 
-        // Destructor
-
-            virtual ~patchFieldInterpolator()
-            {}
+        //- Destructor
+        virtual ~patchFieldInterpolator()
+        {}
 
 
         // Member Functions

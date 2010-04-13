@@ -114,9 +114,8 @@ public:
         magGrad();
 
 
-    // Destructor
-
-        virtual ~magGrad();
+    //- Destructor
+    virtual ~magGrad();
 };
 
 

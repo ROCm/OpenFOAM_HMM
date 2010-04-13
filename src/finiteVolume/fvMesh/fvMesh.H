@@ -197,9 +197,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~fvMesh();
+    //- Destructor
+    virtual ~fvMesh();
 
 
     // Member Functions

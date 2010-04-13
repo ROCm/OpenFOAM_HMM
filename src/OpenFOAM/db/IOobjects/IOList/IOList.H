@@ -75,9 +75,8 @@ public:
         IOList(const IOobject&, const Xfer<List<T> >&);
 
 
-    // Destructor
-
-        virtual ~IOList();
+    //- Destructor
+    virtual ~IOList();
 
 
     // Member functions

@@ -109,9 +109,8 @@ public:
         STLsurfaceFormatCore(const fileName&);
 
 
-    // Destructor
-
-        ~STLsurfaceFormatCore();
+    //- Destructor
+    ~STLsurfaceFormatCore();
 
 
     // Member Functions

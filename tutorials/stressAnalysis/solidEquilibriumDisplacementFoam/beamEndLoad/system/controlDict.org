@@ -33,13 +33,13 @@ purgeWrite      0;
 
 writeFormat     ascii;
 
-writeCompression uncompressed;
+writeCompression off;
 
 timeFormat      general;
 
 timePrecision   6;
 
-runTimeModifiable yes;
+runTimeModifiable true;
 
 
 // ************************************************************************* //

@@ -37,16 +37,16 @@ writeFormat     ascii;
 
 writePrecision  6;
 
-writeCompression uncompressed;
+writeCompression off;
 
 timeFormat      general;
 
 timePrecision   6;
 
-runTimeModifiable yes;
+runTimeModifiable true;
 
 functions
-(
+{
     faceObj1
     {
         type            faceSource;
@@ -69,6 +69,7 @@ functions
 
         // Operation: areaAverage/sum/weightedAverage ...
         operation       areaAverage;
+
         fields
         (
             p
@@ -88,6 +89,7 @@ functions
         source          faceZone;
         sourceName      f0;
         operation       sum;
+
         fields
         (
             phi
@@ -105,13 +107,13 @@ functions
         source          cellZone;
         sourceName      c0;
         operation       volAverage;
+
         fields
         (
             p
             U
         );
     }
-);
-
+}
 
 // ************************************************************************* //

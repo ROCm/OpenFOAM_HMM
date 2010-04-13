@@ -76,10 +76,9 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~centredCECCellToFaceStencilObject()
-        {}
+    //- Destructor
+    virtual ~centredCECCellToFaceStencilObject()
+    {}
 };
 
 

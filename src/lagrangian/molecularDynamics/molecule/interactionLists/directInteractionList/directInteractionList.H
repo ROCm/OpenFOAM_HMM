@@ -91,9 +91,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~directInteractionList();
+    //- Destructor
+    ~directInteractionList();
 
 
     // Member Functions

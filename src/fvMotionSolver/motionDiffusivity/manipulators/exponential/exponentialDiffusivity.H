@@ -82,9 +82,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~exponentialDiffusivity();
+    //- Destructor
+    virtual ~exponentialDiffusivity();
 
 
     // Member Functions

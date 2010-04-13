@@ -58,10 +58,9 @@ public:
         {}
 
 
-    // Destructor
-
-        virtual ~morphFieldMapper()
-        {}
+    //- Destructor
+    virtual ~morphFieldMapper()
+    {}
 
 
     // Member Functions

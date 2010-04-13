@@ -79,10 +79,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~Wallis()
-        {}
+    //- Destructor
+    ~Wallis()
+    {}
 
 
     // Member Functions

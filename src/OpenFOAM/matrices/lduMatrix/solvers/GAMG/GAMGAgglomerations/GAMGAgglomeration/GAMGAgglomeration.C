@@ -202,7 +202,7 @@ Foam::GAMGAgglomeration::~GAMGAgglomeration()
     {
         lduInterfacePtrsList& curLevel = interfaceLevels_[leveli];
 
-        forAll (curLevel, i)
+        forAll(curLevel, i)
         {
             if (curLevel.set(i))
             {

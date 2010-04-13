@@ -356,12 +356,7 @@ void writePointCells
 
     label vertI = 0;
 
-    for
-    (
-        labelHashSet::const_iterator iter = allEdges.begin();
-        iter != allEdges.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, allEdges, iter)
     {
         const edge& e = mesh.edges()[iter.key()];
 

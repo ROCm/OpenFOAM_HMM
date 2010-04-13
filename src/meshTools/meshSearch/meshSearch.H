@@ -168,9 +168,8 @@ public:
         meshSearch(const polyMesh& mesh, const bool faceDecomp = true);
 
 
-    // Destructor
-
-        ~meshSearch();
+    //- Destructor
+    ~meshSearch();
 
 
     // Member Functions

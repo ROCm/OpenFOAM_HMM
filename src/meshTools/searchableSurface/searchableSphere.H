@@ -111,9 +111,8 @@ public:
             const dictionary& dict
         );
 
-    // Destructor
-
-        virtual ~searchableSphere();
+    //- Destructor
+    virtual ~searchableSphere();
 
 
     // Member Functions

@@ -76,7 +76,7 @@ void Foam::attachDetach::calcPointMatchMap() const
 
     const label slavePatchStart = slavePatch.start();
 
-    forAll (reverseSlavePatch, faceI)
+    forAll(reverseSlavePatch, faceI)
     {
         reverseSlavePatch[faceI] =
             faces[slavePatchStart + faceI].reverseFace();
@@ -92,12 +92,12 @@ void Foam::attachDetach::calcPointMatchMap() const
     pointMatchMapPtr_ = new Map<label>(2*slaveMeshPoints.size());
     Map<label>& removedPointMap = *pointMatchMapPtr_;
 
-    forAll (masterLocalFaces, faceI)
+    forAll(masterLocalFaces, faceI)
     {
         const face& curMasterPoints = masterLocalFaces[faceI];
         const face& curSlavePoints = slaveLocalFaces[faceI];
 
-        forAll (curMasterPoints, pointI)
+        forAll(curMasterPoints, pointI)
         {
             // If the master and slave point labels are the same, the
             // point remains.  Otherwise, the slave point is removed and

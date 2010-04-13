@@ -101,9 +101,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~pointSet();
+    //- Destructor
+    virtual ~pointSet();
 
 
     // Member functions

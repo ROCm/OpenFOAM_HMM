@@ -826,12 +826,7 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
         OFstream objStream("nearestSamples.obj");
 
         label vertI = 0;
-        for
-        (
-            Map<label>::const_iterator iter = nearest.begin();
-            iter != nearest.end();
-            ++iter
-        )
+        forAllConstIter(Map<label>, nearest, iter)
         {
             meshTools::writeOBJ(objStream, samples[iter.key()]); vertI++;
             meshTools::writeOBJ(objStream, surfPoints[iter()]); vertI++;
@@ -957,14 +952,9 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
         OFstream objStream("nearestEdges.obj");
 
         label vertI = 0;
-        for
-        (
-            Map<label>::const_iterator iter = nearest.begin();
-            iter != nearest.end();
-            ++iter
-        )
+        forAllConstIter(Map<label>, nearest, iter)
         {
-            label sampleI = iter.key();
+            const label sampleI = iter.key();
 
             meshTools::writeOBJ(objStream, samples[sampleI]); vertI++;
 
@@ -1119,14 +1109,9 @@ Foam::Map<Foam::pointIndexHit> Foam::surfaceFeatures::nearestEdges
         OFstream objStream("nearestEdges.obj");
 
         label vertI = 0;
-        for
-        (
-            Map<pointIndexHit>::const_iterator iter = nearest.begin();
-            iter != nearest.end();
-            ++iter
-        )
+        forAllConstIter(Map<pointIndexHit>, nearest, iter)
         {
-            label sampleEdgeI = iter.key();
+            const label sampleEdgeI = iter.key();
 
             const edge& sampleEdge = sampleEdges[sampleEdgeI];
 

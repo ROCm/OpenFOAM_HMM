@@ -74,9 +74,8 @@ public:
         receivingReferralList(const receivingReferralList&);
 
 
-    // Destructor
-
-        ~receivingReferralList();
+    //- Destructor
+    ~receivingReferralList();
 
 
     // Member Functions

@@ -80,7 +80,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~binaryAbsorptionEmission();
 
 

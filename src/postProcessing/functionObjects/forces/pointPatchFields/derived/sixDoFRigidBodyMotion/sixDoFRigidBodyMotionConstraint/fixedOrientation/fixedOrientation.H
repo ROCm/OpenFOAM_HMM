@@ -82,9 +82,8 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~fixedOrientation();
+    //- Destructor
+    virtual ~fixedOrientation();
 
 
     // Member Functions

@@ -43,7 +43,7 @@ Foam::scalar Foam::face::areaInContact
 
     scalarField vertexValue(labels.size());
 
-    forAll (labels, i)
+    forAll(labels, i)
     {
         vertexValue[i] = v[labels[i]];
     }
@@ -56,7 +56,7 @@ Foam::scalar Foam::face::areaInContact
     bool allPositive = true;
     bool allNegative = true;
 
-    forAll (vertexValue, vI)
+    forAll(vertexValue, vI)
     {
         if (vertexValue[vI] > 0)
         {
@@ -147,7 +147,7 @@ Foam::scalar Foam::face::areaInContact
     // Make a labelList for the sub-face (points are ordered!)
     labelList sfl(newFacePoints.size());
 
-    forAll (sfl, sflI)
+    forAll(sfl, sflI)
     {
         sfl[sflI] = sflI;
     }

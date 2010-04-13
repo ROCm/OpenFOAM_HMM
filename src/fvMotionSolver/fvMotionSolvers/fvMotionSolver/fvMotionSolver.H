@@ -90,9 +90,8 @@ public:
         fvMotionSolver(const polyMesh& mesh);
 
 
-    // Destructor
-
-        virtual ~fvMotionSolver();
+    //- Destructor
+    virtual ~fvMotionSolver();
 
 
     // Member Functions

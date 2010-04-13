@@ -47,7 +47,7 @@ void Foam::enrichedPatch::completePointMap() const
     const labelList& masterMeshPoints = masterPatch_.meshPoints();
     const pointField& masterLocalPoints = masterPatch_.localPoints();
 
-    forAll (masterMeshPoints, pointI)
+    forAll(masterMeshPoints, pointI)
     {
         if (!pmm.found(masterMeshPoints[pointI]))
         {
@@ -63,7 +63,7 @@ void Foam::enrichedPatch::completePointMap() const
     const labelList& slaveMeshPoints = slavePatch_.meshPoints();
     const pointField& slaveLocalPoints = slavePatch_.localPoints();
 
-    forAll (slaveMeshPoints, pointI)
+    forAll(slaveMeshPoints, pointI)
     {
         if (!pmm.found(slaveMeshPoints[pointI]))
         {

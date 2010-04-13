@@ -94,9 +94,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~displacementSBRStressFvMotionSolver();
+    //- Destructor
+    ~displacementSBRStressFvMotionSolver();
 
 
     // Member Functions

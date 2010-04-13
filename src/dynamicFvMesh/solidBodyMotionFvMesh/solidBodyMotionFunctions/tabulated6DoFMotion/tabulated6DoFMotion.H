@@ -101,9 +101,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~tabulated6DoFMotion();
+    //- Destructor
+    virtual ~tabulated6DoFMotion();
 
 
     // Member Functions

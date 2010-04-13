@@ -120,9 +120,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~sampledIsoSurfaceCell();
+    //- Destructor
+    virtual ~sampledIsoSurfaceCell();
 
 
     // Member Functions

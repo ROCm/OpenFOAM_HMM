@@ -35,13 +35,13 @@ writeFormat     ascii;
 
 writePrecision  10;
 
-writeCompression uncompressed;
+writeCompression off;
 
 timeFormat      general;
 
 timePrecision   6;
 
-runTimeModifiable yes;
+runTimeModifiable true;
 
 adjustTimeStep  yes;
 
@@ -63,6 +63,7 @@ functions
         sourceName      outlet;
         operation       weightedAverage;
         weightField     phi;
+
         fields
         (
             H2O
@@ -70,6 +71,5 @@ functions
         );
     }
 }
-
 
 // ************************************************************************* //

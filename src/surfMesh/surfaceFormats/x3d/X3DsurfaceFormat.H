@@ -73,10 +73,9 @@ public:
         X3DsurfaceFormat();
 
 
-    // Destructor
-
-        virtual ~X3DsurfaceFormat()
-        {}
+    //- Destructor
+    virtual ~X3DsurfaceFormat()
+    {}
 
 
     // Member Functions

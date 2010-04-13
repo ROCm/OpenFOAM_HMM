@@ -360,7 +360,7 @@ Foam::label Foam::meshSearch::findNearestBoundaryFaceWalk
 
         const labelList& myEdges = mesh_.faceEdges()[curFaceI];
 
-        forAll (myEdges, myEdgeI)
+        forAll(myEdges, myEdgeI)
         {
             const labelList& neighbours = mesh_.edgeFaces()[myEdges[myEdgeI]];
 

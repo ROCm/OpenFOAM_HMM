@@ -78,7 +78,7 @@ void Foam::pairGAMGAgglomeration::combineLevels(const label curLevel)
     const lduInterfacePtrsList& curInterLevel = interfaceLevels_[curLevel+1];
     lduInterfacePtrsList& prevInterLevel = interfaceLevels_[prevLevel+1];
 
-    forAll (prevInterLevel, inti)
+    forAll(prevInterLevel, inti)
     {
         if (prevInterLevel.set(inti))
         {

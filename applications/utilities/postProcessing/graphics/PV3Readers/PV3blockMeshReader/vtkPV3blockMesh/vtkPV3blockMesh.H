@@ -312,8 +312,7 @@ public:
 
 
     //- Destructor
-
-        ~vtkPV3blockMesh();
+    ~vtkPV3blockMesh();
 
 
     // Member Functions

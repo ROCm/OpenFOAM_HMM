@@ -179,10 +179,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~hierarchGeomDecomp()
-        {}
+    //- Destructor
+    virtual ~hierarchGeomDecomp()
+    {}
 
 
     // Member Functions

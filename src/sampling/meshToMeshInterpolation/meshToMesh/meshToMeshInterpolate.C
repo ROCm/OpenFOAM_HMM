@@ -67,7 +67,7 @@ void Foam::meshToMesh::interpolateField
     // get reference to cellCells
     const labelListList& cc = fromMesh_.cellCells();
 
-    forAll (toF, celli)
+    forAll(toF, celli)
     {
         if (adr[celli] != -1)
         {
@@ -97,7 +97,7 @@ void Foam::meshToMesh::interpolateField
     // Cell-Point interpolation
     interpolationCellPoint<Type> interpolator(fromVf);
 
-    forAll (toF, celli)
+    forAll(toF, celli)
     {
         if (adr[celli] != -1)
         {
@@ -206,7 +206,7 @@ void Foam::meshToMesh::interpolate
 {
     interpolateInternalField(toVf, fromVf, ord);
 
-    forAll (toMesh_.boundaryMesh(), patchi)
+    forAll(toMesh_.boundaryMesh(), patchi)
     {
         const fvPatch& toPatch = toMesh_.boundary()[patchi];
 
@@ -338,7 +338,7 @@ Foam::meshToMesh::interpolate
         boundaryAddressing_.size()
     );
 
-    forAll (boundaryAddressing_, patchI)
+    forAll(boundaryAddressing_, patchI)
     {
         patchFields.set
         (

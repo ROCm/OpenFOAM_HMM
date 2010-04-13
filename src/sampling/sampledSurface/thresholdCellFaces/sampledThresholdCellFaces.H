@@ -118,9 +118,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~sampledThresholdCellFaces();
+    //- Destructor
+    virtual ~sampledThresholdCellFaces();
 
 
     // Member Functions

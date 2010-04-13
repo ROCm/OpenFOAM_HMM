@@ -61,7 +61,7 @@ Foam::labelListList Foam::polyMesh::cellShapePointCells
 
     labelListList pointCellAddr(pc.size());
 
-    forAll (pc, pointI)
+    forAll(pc, pointI)
     {
         pointCellAddr[pointI].transfer(pc[pointI]);
     }
@@ -384,7 +384,7 @@ Foam::polyMesh::polyMesh
             label nextNei = -1;
             label minNei = cells.size();
 
-            forAll (neiCells, ncI)
+            forAll(neiCells, ncI)
             {
                 if (neiCells[ncI] > -1 && neiCells[ncI] < minNei)
                 {
@@ -433,7 +433,7 @@ Foam::polyMesh::polyMesh
     labelList patchSizes(boundaryFaces.size(), -1);
     labelList patchStarts(boundaryFaces.size(), -1);
 
-    forAll (boundaryFaces, patchI)
+    forAll(boundaryFaces, patchI)
     {
         const faceList& patchFaces = boundaryFaces[patchI];
 
@@ -449,7 +449,7 @@ Foam::polyMesh::polyMesh
         // Grab the start label
         label curPatchStart = nFaces;
 
-        forAll (patchFaces, faceI)
+        forAll(patchFaces, faceI)
         {
             const face& curFace = patchFaces[faceI];
 
@@ -462,7 +462,7 @@ Foam::polyMesh::polyMesh
 
             bool found = false;
 
-            forAll (facesOfCellInside, cellFaceI)
+            forAll(facesOfCellInside, cellFaceI)
             {
                 if (facesOfCellInside[cellFaceI] == curFace)
                 {
@@ -541,7 +541,7 @@ Foam::polyMesh::polyMesh
 
     // Warning: Patches can only be added once the face list is
     // completed, as they hold a subList of the face list
-    forAll (boundaryFaces, patchI)
+    forAll(boundaryFaces, patchI)
     {
         // add the patch to the list
         boundary_.set

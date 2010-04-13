@@ -124,10 +124,9 @@ public:
         static autoPtr<solid> New(Istream& is);
 
 
-    // Destructor
-
-        virtual ~solid()
-        {}
+    //- Destructor
+    virtual ~solid()
+    {}
 
 
     // Member Functions

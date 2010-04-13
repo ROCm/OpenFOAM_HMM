@@ -89,7 +89,7 @@ void Foam::linearValveFvMesh::addZonesAndModifiers()
 
     labelList isf(innerSlider.size());
 
-    forAll (isf, i)
+    forAll(isf, i)
     {
         isf[i] = innerSlider.start() + i;
     }
@@ -110,7 +110,7 @@ void Foam::linearValveFvMesh::addZonesAndModifiers()
 
     labelList osf(outerSlider.size());
 
-    forAll (osf, i)
+    forAll(osf, i)
     {
         osf[i] = outerSlider.start() + i;
     }
@@ -172,7 +172,7 @@ void Foam::linearValveFvMesh::makeSlidersDead()
     const polyTopoChanger& topoChanges = topoChanger_;
 
     // Enable layering
-    forAll (topoChanges, modI)
+    forAll(topoChanges, modI)
     {
         if (isA<slidingInterface>(topoChanges[modI]))
         {
@@ -194,7 +194,7 @@ void Foam::linearValveFvMesh::makeSlidersLive()
     const polyTopoChanger& topoChanges = topoChanger_;
 
     // Enable sliding interface
-    forAll (topoChanges, modI)
+    forAll(topoChanges, modI)
     {
         if (isA<slidingInterface>(topoChanges[modI]))
         {
@@ -217,7 +217,7 @@ bool Foam::linearValveFvMesh::attached() const
 
     bool result = false;
 
-    forAll (topoChanges, modI)
+    forAll(topoChanges, modI)
     {
         if (isA<slidingInterface>(topoChanges[modI]))
         {
@@ -228,7 +228,7 @@ bool Foam::linearValveFvMesh::attached() const
     }
 
     // Check thal all sliders are in sync (debug only)
-    forAll (topoChanges, modI)
+    forAll(topoChanges, modI)
     {
         if (isA<slidingInterface>(topoChanges[modI]))
         {

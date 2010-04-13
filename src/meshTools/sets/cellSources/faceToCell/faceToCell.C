@@ -73,18 +73,13 @@ void Foam::faceToCell::combine(topoSet& set, const bool add) const
 
 
     // Handle owner/neighbour/any selection
-    for
-    (
-        faceSet::const_iterator iter = loadedSet.begin();
-        iter != loadedSet.end();
-        ++iter
-    )
+    forAllConstIter(faceSet, loadedSet, iter)
     {
-        label faceI = iter.key();
+        const label faceI = iter.key();
 
         if ((option_ == OWNER) || (option_ == ANY))
         {
-            label cellI = mesh_.faceOwner()[faceI];
+            const label cellI = mesh_.faceOwner()[faceI];
 
             addOrDelete(set, cellI, add);
         }
@@ -93,7 +88,7 @@ void Foam::faceToCell::combine(topoSet& set, const bool add) const
         {
             if ((option_ == NEIGHBOUR) || (option_ == ANY))
             {
-                label cellI = mesh_.faceNeighbour()[faceI];
+                const label cellI = mesh_.faceNeighbour()[faceI];
 
                 addOrDelete(set, cellI, add);
             }
@@ -107,16 +102,10 @@ void Foam::faceToCell::combine(topoSet& set, const bool add) const
 
         Map<label> facesPerCell(loadedSet.size());
 
-        for
-        (
-            faceSet::const_iterator iter = loadedSet.begin();
-            iter != loadedSet.end();
-            ++iter
-        )
+        forAllConstIter(faceSet, loadedSet, iter)
         {
-            label faceI = iter.key();
-
-            label own = mesh_.faceOwner()[faceI];
+            const label faceI = iter.key();
+            const label own = mesh_.faceOwner()[faceI];
 
             Map<label>::iterator fndOwn = facesPerCell.find(own);
 
@@ -148,14 +137,9 @@ void Foam::faceToCell::combine(topoSet& set, const bool add) const
 
         // Include cells that are referenced as many times as they have faces
         // -> all faces in set.
-        for
-        (
-            Map<label>::const_iterator iter = facesPerCell.begin();
-            iter != facesPerCell.end();
-            ++iter
-        )
+        forAllConstIter(Map<label>, facesPerCell, iter)
         {
-            label cellI = iter.key();
+            const label cellI = iter.key();
 
             if (iter() == mesh_.cells()[cellI].size())
             {

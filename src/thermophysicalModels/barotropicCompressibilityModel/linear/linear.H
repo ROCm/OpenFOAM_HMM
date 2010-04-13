@@ -76,10 +76,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~linear()
-        {}
+    //- Destructor
+    ~linear()
+    {}
 
 
     // Member Functions

@@ -114,9 +114,8 @@ public:
         div();
 
 
-    // Destructor
-
-        virtual ~div();
+    //- Destructor
+    virtual ~div();
 };
 
 

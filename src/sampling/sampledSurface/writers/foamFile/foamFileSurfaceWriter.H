@@ -64,9 +64,8 @@ public:
         foamFileSurfaceWriter();
 
 
-    // Destructor
-
-        virtual ~foamFileSurfaceWriter();
+    //- Destructor
+    virtual ~foamFileSurfaceWriter();
 
 
     // Member Functions

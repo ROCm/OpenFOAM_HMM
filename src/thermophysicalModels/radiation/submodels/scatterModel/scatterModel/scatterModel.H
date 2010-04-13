@@ -97,9 +97,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~scatterModel();
+    //- Destructor
+    virtual ~scatterModel();
 
 
     // Member Functions

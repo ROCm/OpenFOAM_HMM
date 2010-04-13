@@ -64,7 +64,7 @@ void Foam::fvSurfaceMapper::calcAddressing() const
         labelList& addr = *directAddrPtr_;
 
         // Adjust for creation of an internal face from a boundary face
-        forAll (addr, faceI)
+        forAll(addr, faceI)
         {
             if (addr[faceI] > oldNInternal)
             {
@@ -90,7 +90,7 @@ void Foam::fvSurfaceMapper::calcAddressing() const
         scalarListList& w = *weightsPtr_;
 
         // Adjust for creation of an internal face from a boundary face
-        forAll (addr, faceI)
+        forAll(addr, faceI)
         {
             if (max(addr[faceI]) >= oldNInternal)
             {
@@ -112,7 +112,7 @@ void Foam::fvSurfaceMapper::calcAddressing() const
 
         label nIns = 0;
 
-        forAll (insFaces, faceI)
+        forAll(insFaces, faceI)
         {
             // If the face is internal, keep it here
             if (insFaces[faceI] < size())

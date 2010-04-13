@@ -112,9 +112,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~pointToFace();
+    //- Destructor
+    virtual ~pointToFace();
 
 
     // Member Functions

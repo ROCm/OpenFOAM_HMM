@@ -103,10 +103,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~SchnerrSauer()
-        {}
+    //- Destructor
+    virtual ~SchnerrSauer()
+    {}
 
 
     // Member Functions

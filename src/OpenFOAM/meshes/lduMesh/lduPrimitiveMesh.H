@@ -123,10 +123,9 @@ public:
         {}
 
 
-    // Destructor
-
-        virtual ~lduPrimitiveMesh()
-        {}
+    //- Destructor
+    virtual ~lduPrimitiveMesh()
+    {}
 
 
     // Member Functions

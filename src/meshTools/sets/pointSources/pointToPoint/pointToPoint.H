@@ -87,9 +87,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~pointToPoint();
+    //- Destructor
+    virtual ~pointToPoint();
 
 
     // Member Functions

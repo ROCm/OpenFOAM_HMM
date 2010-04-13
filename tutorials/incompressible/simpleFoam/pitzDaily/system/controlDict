@@ -37,46 +37,61 @@ writeFormat     ascii;
 
 writePrecision  6;
 
-writeCompression uncompressed;
+writeCompression off;
 
 timeFormat      general;
 
 timePrecision   6;
 
-runTimeModifiable yes;
+runTimeModifiable true;
 
 functions
-(
+{
+    convergenceChecks
+    {
+        type           residualControl;
+        functionObjectLibs ( "libjobControl.so" );
+        outputControl  timeStep;
+        outputInterval 1;
+
+        maxResiduals
+        {
+            p       1e-2;
+            U       1e-3;
+            "(k|epsilon|omega)" 1e-3;
+        }
+    }
+
     streamLines
     {
-        type streamLine;
+        type            streamLine;
 
         // Where to load it from (if not already in solver)
         functionObjectLibs ("libOpenFOAM.so" "libfieldFunctionObjects.so");
 
         // Output every
-        outputControl outputTime;
-        //outputInterval 10;
+        outputControl   outputTime;
+        // outputInterval 10;
 
-        setFormat vtk;//gnuplot;//xmgr; //raw;  //gnuplot;  //jplot;
+        setFormat       vtk; //gnuplot; //xmgr; //raw; //jplot;
 
         // Velocity field to use for tracking.
         U U;
 
         // Tracked forwards (+U) or backwards (-U)
-        trackForward true;
+        trackForward    true;
 
         // Names of fields to sample. Should contain above velocity field!
         fields (p k U);
 
         // Cells particles can travel before being removed
-        lifeTime 1000;
+        lifeTime        1000;
 
         // Cloud name to use
-        cloudName particleTracks;
+        cloudName       particleTracks;
 
         // Seeding method. See the sampleSets in sampleDict.
-        seedSampleSet uniform;  //cloud;//triSurfaceMeshPointSet;
+        seedSampleSet   uniform;  //cloud;//triSurfaceMeshPointSet;
 
         uniformCoeffs
         {
@@ -87,25 +102,7 @@ functions
             end         (-0.0205 0.0251 0.00001);
             nPoints     10;
         }
-
-//        cloudCoeffs
-//        {
-//            type        cloud;
-//            axis        x;
-//
-//            points
-//            (
-//                (-0.0205936225239282 0.0144729199524163 0.00001)
-//            );
-//        }
-
-//        triSurfaceMeshPointSetCoeffs
-//        {
-//            type        triSurfaceMeshPointSet;
-//            axis        distance;
-//            surface     twoTri.stl;
-//        }
     }
-);
+}
 
 // ************************************************************************* //

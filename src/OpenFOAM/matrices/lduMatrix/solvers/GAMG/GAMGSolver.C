@@ -127,11 +127,11 @@ Foam::GAMGSolver::GAMGSolver
 Foam::GAMGSolver::~GAMGSolver()
 {
     // Clear the the lists of pointers to the interfaces
-    forAll (interfaceLevels_, leveli)
+    forAll(interfaceLevels_, leveli)
     {
         lduInterfaceFieldPtrsList& curLevel = interfaceLevels_[leveli];
 
-        forAll (curLevel, i)
+        forAll(curLevel, i)
         {
             if (curLevel.set(i))
             {

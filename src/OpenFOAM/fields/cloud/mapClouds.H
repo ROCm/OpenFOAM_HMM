@@ -49,12 +49,7 @@ inline void mapClouds(const objectRegistry& db, const mapPolyMesh& mapper)
 {
     HashTable<const cloud*> clouds(db.lookupClass<cloud>());
 
-    for
-    (
-        HashTable<const cloud*>::iterator iter = clouds.begin();
-        iter != clouds.end();
-        ++iter
-    )
+    forAllIter(HashTable<const cloud*>, clouds, iter)
     {
         cloud& c = const_cast<cloud&>(*iter());
 

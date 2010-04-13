@@ -127,7 +127,7 @@ void Foam::meshWriters::STARCD::getCellTable()
         // get the cellZone <-> cellTable correspondence
         Info<< "matching cellZones to cellTable" << endl;
 
-        forAll (mesh_.cellZones(), zoneI)
+        forAll(mesh_.cellZones(), zoneI)
         {
             const cellZone& cZone = mesh_.cellZones()[zoneI];
             if (cZone.size())
@@ -144,7 +144,7 @@ void Foam::meshWriters::STARCD::getCellTable()
                     tableId = cellTable_.append(dict);
                 }
 
-                forAll (cZone, i)
+                forAll(cZone, i)
                 {
                     cellTableId_[cZone[i]] = tableId;
                 }
@@ -159,7 +159,7 @@ void Foam::meshWriters::STARCD::getCellTable()
             dict.add("MaterialType", "fluid");
             label tableId = cellTable_.append(dict);
 
-            forAll (cellTableId_, i)
+            forAll(cellTableId_, i)
             {
                 if (cellTableId_[i] < 0)
                 {

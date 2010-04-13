@@ -33,12 +33,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-void spray::evolve()
+void Foam::spray::evolve()
 {
     sms_.setSize(rho_.size());
     shs_.setSize(rho_.size());
@@ -71,7 +66,7 @@ void spray::evolve()
 }
 
 
-void spray::move()
+void Foam::spray::move()
 {
     // Reset Spray Source Terms
     sms_ = vector::zero;
@@ -85,9 +80,9 @@ void spray::move()
 }
 
 
-void spray::breakupLoop()
+void Foam::spray::breakupLoop()
 {
-    forAllIter(spray::iterator, *this, elmnt)
+    forAllIter(spray, *this, elmnt)
     {
         // interpolate...
         vector velocity = UInterpolator().interpolate
@@ -119,9 +114,9 @@ void spray::breakupLoop()
 }
 
 
-void spray::atomizationLoop()
+void Foam::spray::atomizationLoop()
 {
-    forAllIter(spray::iterator, *this, elmnt)
+    forAllIter(spray, *this, elmnt)
     {
         // interpolate...
         vector velocity = UInterpolator().interpolate
@@ -144,9 +139,5 @@ void spray::atomizationLoop()
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

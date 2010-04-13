@@ -68,15 +68,9 @@ void Foam::cellToPoint::combine(topoSet& set, const bool add) const
     cellSet loadedSet(mesh_, setName_);
 
     // Add all point from cells in loadedSet
-    for
-    (
-        cellSet::const_iterator iter = loadedSet.begin();
-        iter != loadedSet.end();
-        ++iter
-    )
+    forAllConstIter(cellSet, loadedSet, iter)
     {
-        label cellI = iter.key();
-
+        const label cellI = iter.key();
         const labelList& cFaces = mesh_.cells()[cellI];
 
         forAll(cFaces, cFaceI)

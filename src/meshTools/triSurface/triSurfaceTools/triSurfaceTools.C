@@ -2341,17 +2341,10 @@ Foam::triSurface Foam::triSurfaceTools::triangulate
 
     label newPatchI = 0;
 
-    for
-    (
-        labelHashSet::const_iterator iter = includePatches.begin();
-        iter != includePatches.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, includePatches, iter)
     {
-        label patchI = iter.key();
-
+        const label patchI = iter.key();
         const polyPatch& patch = bMesh[patchI];
-
         const pointField& points = patch.points();
 
         label nTriTotal = 0;
@@ -2402,19 +2395,12 @@ Foam::triSurface Foam::triSurfaceTools::triangulate
 
     newPatchI = 0;
 
-    for
-    (
-        labelHashSet::const_iterator iter = includePatches.begin();
-        iter != includePatches.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, includePatches, iter)
     {
-        label patchI = iter.key();
-
+        const label patchI = iter.key();
         const polyPatch& patch = bMesh[patchI];
 
         surface.patches()[newPatchI].name() = patch.name();
-
         surface.patches()[newPatchI].geometricType() = patch.type();
 
         newPatchI++;
@@ -2460,15 +2446,9 @@ Foam::triSurface Foam::triSurfaceTools::triangulateFaceCentre
 
     label newPatchI = 0;
 
-    for
-    (
-        labelHashSet::const_iterator iter = includePatches.begin();
-        iter != includePatches.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, includePatches, iter)
     {
-        label patchI = iter.key();
-
+        const label patchI = iter.key();
         const polyPatch& patch = bMesh[patchI];
 
         label nTriTotal = 0;
@@ -2518,19 +2498,12 @@ Foam::triSurface Foam::triSurfaceTools::triangulateFaceCentre
 
     newPatchI = 0;
 
-    for
-    (
-        labelHashSet::const_iterator iter = includePatches.begin();
-        iter != includePatches.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, includePatches, iter)
     {
-        label patchI = iter.key();
-
+        const label patchI = iter.key();
         const polyPatch& patch = bMesh[patchI];
 
         surface.patches()[newPatchI].name() = patch.name();
-
         surface.patches()[newPatchI].geometricType() = patch.type();
 
         newPatchI++;

@@ -80,10 +80,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~PBiCG()
-        {}
+    //- Destructor
+    virtual ~PBiCG()
+    {}
 
 
     // Member Functions

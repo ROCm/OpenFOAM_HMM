@@ -125,10 +125,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~barotropicCompressibilityModel()
-        {}
+    //- Destructor
+    virtual ~barotropicCompressibilityModel()
+    {}
 
 
     // Member Functions

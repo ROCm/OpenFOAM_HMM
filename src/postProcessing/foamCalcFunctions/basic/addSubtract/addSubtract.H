@@ -193,9 +193,8 @@ public:
         addSubtract();
 
 
-    // Destructor
-
-        virtual ~addSubtract();
+    //- Destructor
+    virtual ~addSubtract();
 };
 
 

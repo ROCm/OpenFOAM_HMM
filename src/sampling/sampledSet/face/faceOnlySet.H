@@ -121,7 +121,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~faceOnlySet();
 
 

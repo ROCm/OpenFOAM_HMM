@@ -101,9 +101,8 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~tabulatedAxialAngularSpring();
+    //- Destructor
+    virtual ~tabulatedAxialAngularSpring();
 
 
     // Member Functions

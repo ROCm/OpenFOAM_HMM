@@ -71,7 +71,7 @@ PatchToPatchInterpolation<FromPatch, ToPatch>::pointInterpolate
 
     const labelList& addr = pointAddr();
 
-    forAll (result, pointI)
+    forAll(result, pointI)
     {
         const scalarField& curWeights = weights[pointI];
 
@@ -80,7 +80,7 @@ PatchToPatchInterpolation<FromPatch, ToPatch>::pointInterpolate
             const labelList& hitFacePoints =
                 fromPatchLocalFaces[addr[pointI]];
 
-            forAll (curWeights, wI)
+            forAll(curWeights, wI)
             {
                 result[pointI] += curWeights[wI]*pf[hitFacePoints[wI]];
             }
@@ -142,7 +142,7 @@ PatchToPatchInterpolation<FromPatch, ToPatch>::faceInterpolate
 
     const labelList& addr = faceAddr();
 
-    forAll (result, faceI)
+    forAll(result, faceI)
     {
         const scalarField& curWeights = weights[faceI];
 

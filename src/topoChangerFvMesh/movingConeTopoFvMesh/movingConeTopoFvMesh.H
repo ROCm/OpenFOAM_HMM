@@ -114,9 +114,8 @@ public:
         explicit movingConeTopoFvMesh(const IOobject& io);
 
 
-    // Destructor
-
-        virtual ~movingConeTopoFvMesh();
+    //- Destructor
+    virtual ~movingConeTopoFvMesh();
 
 
     // Member Functions

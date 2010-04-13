@@ -37,14 +37,9 @@ Description
 #include "readHexLabel.H"
 #include "stringList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool triSurface::readTRI(const fileName& TRIfileName)
+bool Foam::triSurface::readTRI(const fileName& TRIfileName)
 {
     IFstream TRIfile(TRIfileName);
 
@@ -113,12 +108,12 @@ bool triSurface::readTRI(const fileName& TRIfileName)
 
         label region  = -1;
 
-        HashTable<label, string>::const_iterator findName =
+        HashTable<label, string>::const_iterator fnd =
             STLsolidNames.find(solidName);
 
-        if (findName != STLsolidNames.end())
+        if (fnd != STLsolidNames.end())
         {
-            region = findName();
+            region = fnd();
         }
         else
         {
@@ -135,22 +130,17 @@ bool triSurface::readTRI(const fileName& TRIfileName)
 
     pointField rawPoints(STLpoints.size());
 
-    label i = 0;
-    for
-    (
-        SLList<STLpoint>::iterator iter = STLpoints.begin();
-        iter != STLpoints.end();
-        ++iter
-    )
+    label pointI = 0;
+    forAllConstIter(SLList<STLpoint>, STLpoints, iter)
     {
-        rawPoints[i++] = *iter;
+        rawPoints[pointI++] = *iter;
     }
 
     setSize(STLlabels.size());
 
-    label pointI = 0;
-    SLList<label>::iterator iter = STLlabels.begin();
-    forAll (*this, i)
+    pointI = 0;
+    SLList<label>::const_iterator iter = STLlabels.begin();
+    forAll(*this, i)
     {
         operator[](i)[0] = pointI++;
         operator[](i)[1] = pointI++;
@@ -175,9 +165,5 @@ bool triSurface::readTRI(const fileName& TRIfileName)
     return true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

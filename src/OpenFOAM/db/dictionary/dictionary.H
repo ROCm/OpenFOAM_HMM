@@ -218,9 +218,8 @@ public:
         static autoPtr<dictionary> New(Istream&);
 
 
-    // Destructor
-
-        ~dictionary();
+    //- Destructor
+    ~dictionary();
 
 
     // Member functions

@@ -160,10 +160,9 @@ public:
         {}
 
 
-    // Destructor
-
-        virtual ~decompositionMethod()
-        {}
+    //- Destructor
+    virtual ~decompositionMethod()
+    {}
 
 
     // Member Functions

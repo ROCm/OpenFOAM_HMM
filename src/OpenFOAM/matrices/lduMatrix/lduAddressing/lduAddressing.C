@@ -44,7 +44,7 @@ void Foam::lduAddressing::calcLosort() const
 
     const unallocLabelList& nbr = upperAddr();
 
-    forAll (nbr, nbrI)
+    forAll(nbr, nbrI)
     {
         nNbrOfFace[nbr[nbrI]]++;
     }
@@ -52,7 +52,7 @@ void Foam::lduAddressing::calcLosort() const
     // Create temporary neighbour addressing
     labelListList cellNbrFaces(size());
 
-    forAll (cellNbrFaces, cellI)
+    forAll(cellNbrFaces, cellI)
     {
         cellNbrFaces[cellI].setSize(nNbrOfFace[cellI]);
     }
@@ -61,7 +61,7 @@ void Foam::lduAddressing::calcLosort() const
     nNbrOfFace = 0;
 
     // Scatter the neighbour faces
-    forAll (nbr, nbrI)
+    forAll(nbr, nbrI)
     {
         cellNbrFaces[nbr[nbrI]][nNbrOfFace[nbr[nbrI]]] = nbrI;
 
@@ -76,11 +76,11 @@ void Foam::lduAddressing::calcLosort() const
     // Set counter for losort
     label lstI = 0;
 
-    forAll (cellNbrFaces, cellI)
+    forAll(cellNbrFaces, cellI)
     {
         const labelList& curNbr = cellNbrFaces[cellI];
 
-        forAll (curNbr, curNbrI)
+        forAll(curNbr, curNbrI)
         {
             lst[lstI] = curNbr[curNbrI];
             lstI++;
@@ -109,7 +109,7 @@ void Foam::lduAddressing::calcOwnerStart() const
     label nOwnStart = 0;
     label i = 1;
 
-    forAll (own, faceI)
+    forAll(own, faceI)
     {
         label curOwn = own[faceI];
 
@@ -148,7 +148,7 @@ void Foam::lduAddressing::calcLosortStart() const
     label nLsrtStart = 0;
     label i = 0;
 
-    forAll (lsrt, faceI)
+    forAll(lsrt, faceI)
     {
         // Get neighbour
         const label curNbr = nbr[lsrt[faceI]];

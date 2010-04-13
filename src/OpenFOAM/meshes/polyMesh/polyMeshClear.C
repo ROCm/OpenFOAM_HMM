@@ -62,7 +62,7 @@ void Foam::polyMesh::clearGeom()
 
     primitiveMesh::clearGeom();
 
-    forAll (boundary_, patchI)
+    forAll(boundary_, patchI)
     {
         boundary_[patchI].clearGeom();
     }

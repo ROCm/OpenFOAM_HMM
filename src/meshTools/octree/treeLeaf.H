@@ -113,9 +113,8 @@ public:
         treeLeaf(Istream&);
 
 
-    // Destructor
-
-        ~treeLeaf();
+    //- Destructor
+    ~treeLeaf();
 
 
     // Member Functions

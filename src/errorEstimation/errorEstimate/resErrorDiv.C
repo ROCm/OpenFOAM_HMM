@@ -66,7 +66,7 @@ div
     > gradVf = fvc::grad(vf);
 
     // Internal faces
-    forAll (owner, faceI)
+    forAll(owner, faceI)
     {
         // Calculate the centre of the face
         const vector& curFaceCentre = faceCentres[faceI];
@@ -96,7 +96,7 @@ div
         aNorm[neighbour[faceI]] -= (1.0 - signF[faceI])*flux[faceI];
     }
 
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         const vectorField& patchFaceCentres =
             faceCentres.boundaryField()[patchI];
@@ -106,7 +106,7 @@ div
 
         const labelList& fCells = patches[patchI].faceCells();
 
-        forAll (fCells, faceI)
+        forAll(fCells, faceI)
         {
             vector d =
                 patchFaceCentres[faceI] - cellCentres[fCells[faceI]];

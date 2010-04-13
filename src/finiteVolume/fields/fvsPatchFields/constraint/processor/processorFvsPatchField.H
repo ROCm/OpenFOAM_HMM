@@ -130,9 +130,8 @@ public:
         }
 
 
-    // Destructor
-
-        ~processorFvsPatchField();
+    //- Destructor
+    ~processorFvsPatchField();
 
 
     // Member functions

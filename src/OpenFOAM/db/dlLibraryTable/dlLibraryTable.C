@@ -54,7 +54,7 @@ Foam::dlLibraryTable::readDlLibrary::readDlLibrary
 
 Foam::dlLibraryTable::~dlLibraryTable()
 {
-    forAllIter(dlLibraryTable, *this, iter)
+    forAllConstIter(dlLibraryTable, *this, iter)
     {
         dlclose(iter.key());
     }

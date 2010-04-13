@@ -95,7 +95,7 @@ bool Foam::layerAdditionRemoval::setLayerPairing() const
     label nPointErrors = 0;
     label nFaceErrors = 0;
 
-    forAll (mf, faceI)
+    forAll(mf, faceI)
     {
         // Get the local master face
         face curLocalFace = mlf[faceI];
@@ -128,7 +128,7 @@ bool Foam::layerAdditionRemoval::setLayerPairing() const
         ftc[faceI] = lidFace.oppositeIndex();
 
         // Using the local face insert the points into the lid list
-        forAll (curLocalFace, pointI)
+        forAll(curLocalFace, pointI)
         {
             const label clp = curLocalFace[pointI];
 

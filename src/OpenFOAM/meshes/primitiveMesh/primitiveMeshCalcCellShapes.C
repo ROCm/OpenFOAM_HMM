@@ -49,7 +49,7 @@ void Foam::primitiveMesh::calcCellShapes() const
         cellShapesPtr_ = new cellShapeList(nCells());
         cellShapeList& cellShapes = *cellShapesPtr_;
 
-        forAll (cellShapes, celli)
+        forAll(cellShapes, celli)
         {
             cellShapes[celli] = degenerateMatcher::match(*this, celli);
         }

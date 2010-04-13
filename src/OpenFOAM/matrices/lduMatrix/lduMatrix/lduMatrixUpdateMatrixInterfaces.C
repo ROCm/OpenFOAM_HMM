@@ -42,7 +42,7 @@ void Foam::lduMatrix::initMatrixInterfaces
      || Pstream::defaultCommsType == Pstream::nonBlocking
     )
     {
-        forAll (interfaces, interfaceI)
+        forAll(interfaces, interfaceI)
         {
             if (interfaces.set(interfaceI))
             {
@@ -117,7 +117,7 @@ void Foam::lduMatrix::updateMatrixInterfaces
             OPstream::waitRequests();
         }
 
-        forAll (interfaces, interfaceI)
+        forAll(interfaces, interfaceI)
         {
             if (interfaces.set(interfaceI))
             {
@@ -138,7 +138,7 @@ void Foam::lduMatrix::updateMatrixInterfaces
         const lduSchedule& patchSchedule = this->patchSchedule();
 
         // Loop over all the "normal" interfaces relating to standard patches
-        forAll (patchSchedule, i)
+        forAll(patchSchedule, i)
         {
             label interfaceI = patchSchedule[i].patch;
 

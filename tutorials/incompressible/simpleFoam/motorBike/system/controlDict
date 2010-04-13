@@ -18,13 +18,13 @@ libs            ("libincompressibleRASModels.so");
 
 application     simpleFoam;
 
-startFrom       latestTime;
+startFrom       startTime;
 
 startTime       0;
 
 stopAt          endTime;
 
-endTime         500;
+endTime         1000;
 
 deltaT          1;
 
@@ -38,12 +38,12 @@ writeFormat     ascii;
 
 writePrecision  6;
 
-writeCompression compressed;
+writeCompression off;
 
 timeFormat      general;
 
 timePrecision   6;
 
-runTimeModifiable yes;
+runTimeModifiable true;
 
 // ************************************************************************* //

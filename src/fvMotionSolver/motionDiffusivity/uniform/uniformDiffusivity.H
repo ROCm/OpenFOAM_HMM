@@ -86,9 +86,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~uniformDiffusivity();
+    //- Destructor
+    virtual ~uniformDiffusivity();
 
 
     // Member Functions

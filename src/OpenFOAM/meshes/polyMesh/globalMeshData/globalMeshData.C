@@ -64,7 +64,7 @@ void Foam::globalMeshData::initProcAddr()
 
     label nNeighbours = 0;
 
-    forAll (mesh_.boundaryMesh(), patchi)
+    forAll(mesh_.boundaryMesh(), patchi)
     {
         if (isA<processorPolyPatch>(mesh_.boundaryMesh()[patchi]))
         {
@@ -78,7 +78,7 @@ void Foam::globalMeshData::initProcAddr()
     if (Pstream::parRun())
     {
         // Send indices of my processor patches to my neighbours
-        forAll (processorPatches_, i)
+        forAll(processorPatches_, i)
         {
             label patchi = processorPatches_[i];
 

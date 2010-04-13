@@ -75,10 +75,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~harmonicSpring()
-        {}
+    //- Destructor
+    ~harmonicSpring()
+    {}
 
 
     // Member Functions

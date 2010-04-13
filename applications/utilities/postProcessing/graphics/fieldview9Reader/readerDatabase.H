@@ -116,9 +116,8 @@ public:
         readerDatabase();
 
 
-    // Destructor
-
-        ~readerDatabase();
+    //- Destructor
+    ~readerDatabase();
 
 
     // Member Functions

@@ -77,9 +77,8 @@ public:
         //- Construct null
         tetMatcher();
 
-    // Destructor
-
-        ~tetMatcher();
+    //- Destructor
+    ~tetMatcher();
 
 
     // Member Functions

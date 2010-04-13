@@ -110,9 +110,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~faceZoneToCell();
+    //- Destructor
+    virtual ~faceZoneToCell();
 
 
     // Member Functions

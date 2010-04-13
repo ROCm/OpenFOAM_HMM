@@ -119,9 +119,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~displacementInterpolationFvMotionSolver();
+    //- Destructor
+    ~displacementInterpolationFvMotionSolver();
 
 
     // Member Functions

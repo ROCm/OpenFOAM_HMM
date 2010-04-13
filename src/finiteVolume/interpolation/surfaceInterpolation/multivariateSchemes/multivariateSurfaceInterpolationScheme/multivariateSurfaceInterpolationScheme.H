@@ -142,9 +142,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~multivariateSurfaceInterpolationScheme();
+    //- Destructor
+    virtual ~multivariateSurfaceInterpolationScheme();
 
 
     // Member Functions

@@ -89,9 +89,8 @@ public:
         {}
 
 
-    // Destructor
-
-        virtual ~coupledFvPatch();
+    //- Destructor
+    virtual ~coupledFvPatch();
 
 
     // Member Functions

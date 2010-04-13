@@ -121,12 +121,7 @@ License
 //    // Snap outside points to surface
 //    pointField newPoints(points);
 //
-//    for
-//    (
-//        labelHashSet::const_iterator iter = flatCandidates.begin();
-//        iter != flatCandidates.end();
-//        ++iter
-//    )
+//    forAllConstIter(labelHashSet, flatCandidates, iter)
 //    {
 //        const cell& cFaces = cells[iter.key()];
 //
@@ -152,12 +147,7 @@ License
 //
 //    // Calculate new volume for mixed cells
 //    label nRemoved = 0;
-//    for
-//    (
-//        labelHashSet::const_iterator iter = flatCandidates.begin();
-//        iter != flatCandidates.end();
-//        ++iter
-//    )
+//    forAllConstIter(labelHashSet, flatCandidates, iter)
 //    {
 //        label cellI = iter.key();
 //
@@ -404,15 +394,9 @@ Foam::labelHashSet Foam::surfaceSets::getHangingCells
 
     labelHashSet mixedOnlyCells(internalCells.size());
 
-    for
-    (
-        labelHashSet::const_iterator iter = internalCells.begin();
-        iter != internalCells.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, internalCells, iter)
     {
-        label cellI = iter.key();
-
+        const label cellI = iter.key();
         const cell& cFaces = cells[cellI];
 
         label usesMixedOnly = true;

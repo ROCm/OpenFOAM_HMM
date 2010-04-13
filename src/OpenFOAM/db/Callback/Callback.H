@@ -76,9 +76,8 @@ public:
         Callback(const Callback<CallbackType>&);
 
 
-    // Destructor
-
-        virtual ~Callback();
+    //- Destructor
+    virtual ~Callback();
 
 
     // Member functions

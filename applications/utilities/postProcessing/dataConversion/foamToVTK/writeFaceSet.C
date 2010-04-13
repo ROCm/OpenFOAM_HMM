@@ -27,14 +27,9 @@ License
 #include "OFstream.H"
 #include "writeFuns.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-void writeFaceSet
+void Foam::writeFaceSet
 (
     const bool binary,
     const vtkMesh& vMesh,
@@ -73,12 +68,7 @@ void writeFaceSet
     labelList setFaceLabels(set.size());
     label setFaceI = 0;
 
-    for
-    (
-        faceSet::const_iterator iter = set.begin();
-        iter != set.end();
-        ++iter
-    )
+    forAllConstIter(faceSet, set, iter)
     {
         setFaceLabels[setFaceI] = iter.key();
         setFaces[setFaceI] = faces[iter.key()];
@@ -139,8 +129,5 @@ void writeFaceSet
     writeFuns::write(pStream, binary, setFaceLabels);
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -154,9 +154,8 @@ public:
         }
 
 
-    // Destructor
-
-        ~genericPolyPatch();
+    //- Destructor
+    ~genericPolyPatch();
 
 
     // Member functions

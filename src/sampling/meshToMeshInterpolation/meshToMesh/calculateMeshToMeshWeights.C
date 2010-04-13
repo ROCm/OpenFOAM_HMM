@@ -50,7 +50,7 @@ void Foam::meshToMesh::calculateInverseDistanceWeights() const
     const vectorField& centreFrom = fromMesh_.C().internalField();
     const vectorField& centreTo = toMesh_.C().internalField();
 
-    forAll (cellAddressing_, celli)
+    forAll(cellAddressing_, celli)
     {
         if (cellAddressing_[celli] != -1)
         {
@@ -81,7 +81,7 @@ void Foam::meshToMesh::calculateInverseDistanceWeights() const
                 scalar sumInvDist = invDist;
 
                 // now add the neighbours
-                forAll (neighbours, ni)
+                forAll(neighbours, ni)
                 {
                     invDist = 1.0/mag(target - centreFrom[neighbours[ni]]);
                     invDistCoeffs[celli][ni + 1] = invDist;
@@ -89,7 +89,7 @@ void Foam::meshToMesh::calculateInverseDistanceWeights() const
                 }
 
                 // divide by the total inverse-distance
-                forAll (invDistCoeffs[celli], i)
+                forAll(invDistCoeffs[celli], i)
                 {
                     invDistCoeffs[celli][i] /= sumInvDist;
                 }

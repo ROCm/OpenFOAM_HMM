@@ -111,7 +111,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~dynOneEqEddy()
     {}
 

@@ -117,9 +117,8 @@ public:
         timer(const unsigned int newTimeOut);
 
 
-    // Destructor
-
-        ~timer();
+    //- Destructor
+    ~timer();
 };
 
 

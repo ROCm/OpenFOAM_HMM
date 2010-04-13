@@ -89,10 +89,9 @@ public:
         );
 
 
-    // Destructor
-
-        ~doubleSigmoid()
-        {}
+    //- Destructor
+    ~doubleSigmoid()
+    {}
 
     // Member Functions
 

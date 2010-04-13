@@ -146,9 +146,8 @@ public:
         geomCellLooper(const polyMesh& mesh);
 
 
-    // Destructor
-
-        virtual ~geomCellLooper();
+    //- Destructor
+    virtual ~geomCellLooper();
 
 
     // Member Functions

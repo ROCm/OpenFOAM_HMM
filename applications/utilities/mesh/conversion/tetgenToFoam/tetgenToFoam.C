@@ -468,12 +468,7 @@ int main(int argc, char *argv[])
          // Print region to patch mapping
         Info<< "Regions:" << endl;
 
-        for
-        (
-            Map<label>::const_iterator iter = regionToPatch.begin();
-            iter != regionToPatch.end();
-            ++iter
-        )
+        forAllConstIter(Map<label>, regionToPatch, iter)
         {
             Info<< "    region:" << iter.key() << '\t' << "patch:"
                 << iter() << endl;

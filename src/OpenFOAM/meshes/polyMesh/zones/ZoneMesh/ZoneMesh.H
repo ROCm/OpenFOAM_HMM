@@ -105,9 +105,8 @@ public:
             const label size
         );
 
-    // Destructor
-
-        ~ZoneMesh();
+    //- Destructor
+    ~ZoneMesh();
 
 
     // Member functions

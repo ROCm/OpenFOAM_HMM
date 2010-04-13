@@ -93,9 +93,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~tetherPotentialList();
+    //- Destructor
+    ~tetherPotentialList();
 
 
     // Member Functions

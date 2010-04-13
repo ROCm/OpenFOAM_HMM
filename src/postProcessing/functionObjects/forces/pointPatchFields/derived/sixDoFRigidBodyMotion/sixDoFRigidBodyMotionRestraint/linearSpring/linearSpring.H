@@ -97,9 +97,8 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~linearSpring();
+    //- Destructor
+    virtual ~linearSpring();
 
 
     // Member Functions

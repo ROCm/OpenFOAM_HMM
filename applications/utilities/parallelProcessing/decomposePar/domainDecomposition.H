@@ -126,9 +126,8 @@ public:
         domainDecomposition(const IOobject& io);
 
 
-    // Destructor
-
-        ~domainDecomposition();
+    //- Destructor
+    ~domainDecomposition();
 
 
     // Member Functions

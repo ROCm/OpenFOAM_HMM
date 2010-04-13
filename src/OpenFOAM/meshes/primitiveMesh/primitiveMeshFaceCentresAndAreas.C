@@ -79,7 +79,7 @@ void Foam::primitiveMesh::makeFaceCentresAndAreas
 {
     const faceList& fs = faces();
 
-    forAll (fs, facei)
+    forAll(fs, facei)
     {
         const labelList& f = fs[facei];
         label nPoints = f.size();

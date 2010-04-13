@@ -37,8 +37,8 @@ SourceFiles
 #ifndef residualControl_H
 #define residualControl_H
 
+#include "dictionary.H"
 #include "pointFieldFwd.H"
-#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,8 +69,8 @@ protected:
         //- On/off switch - on if obr_ is an fvMesh object
         bool active_;
 
-        //- List of variable name vs max residual
-        List<Tuple2<word, scalar> > maxResiduals_;
+        //- Dictionary of variable names vs max residual
+        dictionary maxResiduals_;
 
         //- Flag to indicate whether convergence criteria have been met
         bool criteriaSatisfied_;
@@ -79,7 +79,7 @@ protected:
     // Protected Member Functions
 
         //- Perform residual control checks
-        bool checkCriteria(const bool output) const;
+        bool checkCriteria(const bool verbose) const;
 
         //- Disallow default bitwise copy construct
         residualControl(const residualControl&);
@@ -113,7 +113,7 @@ public:
 
     // Member Functions
 
-        //- Return name of the system call set
+        //- Return name of the residual criteria check name
         virtual const word& name() const
         {
             return name_;
@@ -122,13 +122,13 @@ public:
         //- Read the system calls
         virtual void read(const dictionary&);
 
-        //- Execute the "executeCalls" at each time-step
+        //- Check the residual criteria at each time-step
         virtual void execute();
 
-        //- Execute the "endCalls" at the final time-loop
+        //- Report residual criteria check at the final time-loop
         virtual void end();
 
-        //- Write, execute the "writeCalls"
+        //- Write, not used
         virtual void write();
 
         //- Update for changes of mesh

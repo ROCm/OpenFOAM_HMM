@@ -52,12 +52,7 @@ void MapConsistentVolFields
 
     IOobjectList fields = objects.lookupClass(fieldClassName);
 
-    for
-    (
-        IOobjectList::iterator fieldIter = fields.begin();
-        fieldIter != fields.end();
-        ++fieldIter
-    )
+    forAllIter(IOobjectList, fields, fieldIter)
     {
         Info<< "    interpolating " << fieldIter()->name()
             << endl;

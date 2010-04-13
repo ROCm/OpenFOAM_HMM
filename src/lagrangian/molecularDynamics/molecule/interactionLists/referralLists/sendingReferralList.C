@@ -104,13 +104,13 @@ bool operator==
 
     Foam::List<bool> fnd(a.size(), false);
 
-    forAll (b, bI)
+    forAll(b, bI)
     {
         Foam::label curLabel = b[bI];
 
         bool found = false;
 
-        forAll (a, aI)
+        forAll(a, aI)
         {
             if (a[aI] == curLabel)
             {
@@ -129,7 +129,7 @@ bool operator==
     // check if all labels on a were marked
     bool result = true;
 
-    forAll (fnd, aI)
+    forAll(fnd, aI)
     {
         result = (result && fnd[aI]);
     }

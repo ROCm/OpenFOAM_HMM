@@ -80,7 +80,7 @@ Foam::Keyed<T>::createList(const List<T>& lst, const label key)
 {
     List<Keyed<T> > newList(lst.size());
 
-    forAll (lst, elemI)
+    forAll(lst, elemI)
     {
         newList[elemI] = Keyed(lst[elemI], key);
     }
@@ -106,7 +106,7 @@ Foam::Keyed<T>::createList(const List<T>& lst, const List<label>& keys)
 
     List<Keyed<T> > newList(lst.size());
 
-    forAll (lst, elemI)
+    forAll(lst, elemI)
     {
         newList[elemI] = Keyed(lst[elemI], keys[elemI]);
     }

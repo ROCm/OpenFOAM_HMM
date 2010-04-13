@@ -105,9 +105,8 @@ public:
         twoDPointCorrector(const polyMesh& mesh);
 
 
-    // Destructor
-
-        ~twoDPointCorrector();
+    //- Destructor
+    ~twoDPointCorrector();
 
 
     // Member Functions

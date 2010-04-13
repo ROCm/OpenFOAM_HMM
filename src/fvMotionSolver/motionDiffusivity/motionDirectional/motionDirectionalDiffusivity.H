@@ -80,9 +80,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~motionDirectionalDiffusivity();
+    //- Destructor
+    virtual ~motionDirectionalDiffusivity();
 
 
     // Member Functions

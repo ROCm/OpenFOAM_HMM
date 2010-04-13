@@ -46,12 +46,7 @@ void setUpdater::updateSets(const mapPolyMesh& morphMap) const
     HashTable<const Type*> memSets =
         morphMap.mesh().objectRegistry::lookupClass<Type>();
 
-    for
-    (
-        typename HashTable<const Type*>::iterator iter = memSets.begin();
-        iter != memSets.end();
-        ++iter
-    )
+    forAllIter(typename HashTable<const Type*>, memSets, iter)
     {
         Type& set = const_cast<Type&>(*iter());
 
@@ -82,12 +77,7 @@ void setUpdater::updateSets(const mapPolyMesh& morphMap) const
 
     IOobjectList fileSets(Objects.lookupClass(Type::typeName));
 
-    for
-    (
-        IOobjectList::const_iterator iter = fileSets.begin();
-        iter != fileSets.end();
-        ++iter
-    )
+    forAllConstIter(IOobjectList, fileSets, iter)
     {
         if (!memSets.found(iter.key()))
         {

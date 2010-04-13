@@ -37,29 +37,30 @@ writeFormat     ascii;
 
 writePrecision  6;
 
-writeCompression uncompressed;
+writeCompression off;
 
 timeFormat      general;
 
 timePrecision   6;
 
-runTimeModifiable yes;
+runTimeModifiable true;
 
 functions
 {
     fileUpdate1
     {
-        type              timeActivatedFileUpdate;
+        type            timeActivatedFileUpdate;
         functionObjectLibs ("libutilityFunctionObjects.so");
-        outputControl     timeStep;
-        outputInterval    1;
-        fileToUpdate      "$FOAM_CASE/system/fvSolution";
+        outputControl   timeStep;
+        outputInterval  1;
+        fileToUpdate    "$FOAM_CASE/system/fvSolution";
+
         timeVsFile
         (
-            (-1 "$FOAM_CASE/system/fvSolution.0")
-            (0.10 "$FOAM_CASE/system/fvSolution.10")
-            (0.20 "$FOAM_CASE/system/fvSolution.20")
-            (0.35 "$FOAM_CASE/system/fvSolution.35")
+            ( -1   "$FOAM_CASE/system/fvSolution.0"  )
+            ( 0.10 "$FOAM_CASE/system/fvSolution.10" )
+            ( 0.20 "$FOAM_CASE/system/fvSolution.20" )
+            ( 0.35 "$FOAM_CASE/system/fvSolution.35" )
         );
     }
 }

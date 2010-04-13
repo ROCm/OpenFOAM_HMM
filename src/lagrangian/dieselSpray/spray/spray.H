@@ -198,9 +198,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~spray();
+    //- Destructor
+    ~spray();
 
 
     // Member Functions

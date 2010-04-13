@@ -93,9 +93,8 @@ public:
         surfaceWriter();
 
 
-    // Destructor
-
-        virtual ~surfaceWriter();
+    //- Destructor
+    virtual ~surfaceWriter();
 
 
     // Member Functions

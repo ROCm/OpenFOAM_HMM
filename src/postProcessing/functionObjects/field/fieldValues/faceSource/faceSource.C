@@ -33,32 +33,25 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
+defineTypeNameAndDebug(Foam::fieldValues::faceSource, 0);
+
+template<>
+const char* Foam::NamedEnum<Foam::fieldValues::faceSource::sourceType, 2>::
+names[] =
 {
-    namespace fieldValues
-    {
-        defineTypeNameAndDebug(faceSource, 0);
-    }
+    "faceZone", "patch"
+};
 
-    template<>
-    const char* NamedEnum<fieldValues::faceSource::sourceType, 2>::
-        names[] = {"faceZone", "patch"};
+template<>
+const char* Foam::NamedEnum<Foam::fieldValues::faceSource::operationType, 7>::
+names[] =
+{
+    "none", "sum", "areaAverage",
+    "areaIntegrate", "weightedAverage", "min", "max"
+};
 
-    const NamedEnum<fieldValues::faceSource::sourceType, 2>
-        fieldValues::faceSource::sourceTypeNames_;
-
-    template<>
-    const char* NamedEnum<fieldValues::faceSource::operationType, 7>::
-        names[] =
-        {
-            "none", "sum", "areaAverage",
-            "areaIntegrate", "weightedAverage", "min", "max"
-        };
-
-    const NamedEnum<fieldValues::faceSource::operationType, 7>
-        fieldValues::faceSource::operationTypeNames_;
-
-}
+const Foam::NamedEnum<Foam::fieldValues::faceSource::operationType, 7>
+    Foam::fieldValues::faceSource::operationTypeNames_;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

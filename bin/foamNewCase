@@ -55,7 +55,6 @@ USAGE
     exit 1
 }
 #------------------------------------------------------------------------------
-
 unset appName caseName listOpt
 
 # parse options
@@ -84,11 +83,18 @@ do
         version="$2"
         shift 2
         ;;
+    -*)
+        usage "unknown option: '$*'"
+        ;;
     *)
-        usage "unknown option/argument: '$*'"
+        usage "unexpected argument: '$*'"
         ;;
     esac
 done
+
+# need rsync, except for when listing
+type rsync >/dev/null 2>&1 || [ "$listOpt" = true ] || usage "Error: 'rsync' seems to be missing"
+
 
 #------------------------------------------------------------------------------
 

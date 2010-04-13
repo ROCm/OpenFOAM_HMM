@@ -114,7 +114,7 @@ tmp<vectorField> fvPatch::Cn() const
     // get reference to global cell centres
     const vectorField& gcc = boundaryMesh().mesh().cellCentres();
 
-    forAll (faceCells, faceI)
+    forAll(faceCells, faceI)
     {
         cc[faceI] = gcc[faceCells[faceI]];
     }

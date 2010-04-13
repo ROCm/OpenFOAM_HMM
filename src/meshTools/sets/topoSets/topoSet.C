@@ -154,12 +154,7 @@ void topoSet::topoSet::updateLabels(const labelList& map)
     // Iterate over map to see if anything changed
     bool changed = false;
 
-    for
-    (
-        labelHashSet::const_iterator iter = begin();
-        iter != end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, *this, iter)
     {
         if ((iter.key() < 0) || (iter.key() > map.size()))
         {
@@ -172,7 +167,7 @@ void topoSet::topoSet::updateLabels(const labelList& map)
                 << abort(FatalError);
         }
 
-        label newCellI = map[iter.key()];
+        const label newCellI = map[iter.key()];
 
         if (newCellI != iter.key())
         {
@@ -187,14 +182,9 @@ void topoSet::topoSet::updateLabels(const labelList& map)
     {
         labelHashSet newSet(2*size());
 
-        for
-        (
-            labelHashSet::const_iterator iter = begin();
-            iter != end();
-            ++iter
-        )
+        forAllConstIter(labelHashSet, *this, iter)
         {
-            label newCellI = map[iter.key()];
+            const label newCellI = map[iter.key()];
 
             if (newCellI >= 0)
             {
@@ -209,12 +199,7 @@ void topoSet::topoSet::updateLabels(const labelList& map)
 
 void topoSet::topoSet::check(const label maxLabel)
 {
-    for
-    (
-        topoSet::const_iterator iter = begin();
-        iter != end();
-        ++iter
-    )
+    forAllConstIter(topoSet, *this, iter)
     {
         if ((iter.key() < 0) || (iter.key() > maxLabel))
         {
@@ -309,9 +294,7 @@ void topoSet::writeDebug
 
         writeDebug(os, coords, halfLen, iter, n);
 
-        os<< endl
-          << "  .." << endl
-          << endl;
+        os  << nl << "  .." << nl << endl;
 
         for (; n < size() - halfLen; ++n)
         {
@@ -505,12 +488,7 @@ void topoSet::subset(const topoSet& set)
     clear();
     resize(2*min(currentSet.size(), set.size()));
 
-    for
-    (
-        labelHashSet::const_iterator iter = currentSet.begin();
-        iter != currentSet.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, currentSet, iter)
     {
         if (set.found(iter.key()))
         {
@@ -523,12 +501,7 @@ void topoSet::subset(const topoSet& set)
 
 void topoSet::addSet(const topoSet& set)
 {
-    for
-    (
-        topoSet::const_iterator iter = set.begin();
-        iter != set.end();
-        ++iter
-    )
+    forAllConstIter(topoSet, set, iter)
     {
         insert(iter.key());
     }
@@ -537,12 +510,7 @@ void topoSet::addSet(const topoSet& set)
 
 void topoSet::deleteSet(const topoSet& set)
 {
-    for
-    (
-        topoSet::const_iterator iter = set.begin();
-        iter != set.end();
-        ++iter
-    )
+    forAllConstIter(topoSet, set, iter)
     {
         erase(iter.key());
     }
@@ -574,9 +542,7 @@ void topoSet::writeDebug(Ostream& os, const label maxLen) const
 
         writeDebug(os, halfLen, iter, n);
 
-        os<< endl
-          << "  .." << endl
-          << endl;
+        os  << nl << "  .." << nl << endl;
 
         for (; n < size() - halfLen; ++n)
         {

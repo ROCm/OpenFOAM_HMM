@@ -133,9 +133,8 @@ public:
         blockMesh(IOdictionary&);
 
 
-    // Destructor
-
-        ~blockMesh();
+    //- Destructor
+    ~blockMesh();
 
 
     // Member Functions

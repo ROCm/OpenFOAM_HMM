@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -113,7 +113,7 @@ public:
         //- Construct by transferring the parameter contents
         explicit inline DynamicList(const Xfer<List<T> >&);
 
-        //- Construct from Istream. Size set to size of read list.
+        //- Construct from Istream. Size set to size of list read.
         explicit DynamicList(Istream&);
 
 
@@ -138,7 +138,8 @@ public:
             //  setting values (as per List usage).
             inline void setSize(const label);
 
-            //- Alter the addressed list size and fill new space with a constant.
+            //- Alter the addressed list size and fill new space with a
+            //  constant.
             inline void setSize(const label, const T&);
 
             //- Alter the addressed list size.
@@ -147,7 +148,8 @@ public:
             //  setting values (as per List usage).
             inline void resize(const label);
 
-            //- Alter the addressed list size and fill new space with a constant.
+            //- Alter the addressed list size and fill new space with a
+            //  constant.
             inline void resize(const label, const T&);
 
             //- Reserve allocation space for at least this size.
@@ -165,10 +167,10 @@ public:
             //  Returns a reference to the DynamicList.
             inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& shrink();
 
-            //- Transfer contents of the argument List into this DynamicList
+            //- Transfer contents of the argument List into this.
             inline void transfer(List<T>&);
 
-            //- Transfer contents of the argument DynamicList into this DynamicList
+            //- Transfer contents of the argument DynamicList into this.
             inline void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
 
             //- Transfer contents to the Xfer container as a plain List
@@ -189,7 +191,8 @@ public:
             //- Remove and return the top element
             inline T remove();
 
-            //- Return non-const access to an element, resizing list if necessary
+            //- Return non-const access to an element, resizing list if
+            //  necessary
             inline T& operator()(const label);
 
             //- Assignment of all addressed entries to the given value

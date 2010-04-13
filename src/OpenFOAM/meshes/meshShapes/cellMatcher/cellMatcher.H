@@ -196,10 +196,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~cellMatcher()
-        {}
+    //- Destructor
+    virtual ~cellMatcher()
+    {}
 
 
     // Member Functions

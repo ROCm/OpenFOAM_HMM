@@ -155,7 +155,7 @@ public:
             clippedLinearWeights.internalField() =
                 max(min(cdWeights.internalField(), 1 - wfLimit_), wfLimit_);
 
-            forAll (mesh.boundary(), patchi)
+            forAll(mesh.boundary(), patchi)
             {
                 if (mesh.boundary()[patchi].coupled())
                 {

@@ -213,7 +213,7 @@ surfaceInterpolationScheme<Type>::interpolate
 
     // Interpolate across coupled patches using given lambdas and ys
 
-    forAll (lambdas.boundaryField(), pi)
+    forAll(lambdas.boundaryField(), pi)
     {
         const fvsPatchScalarField& pLambda = lambdas.boundaryField()[pi];
         const fvsPatchScalarField& pY = ys.boundaryField()[pi];
@@ -291,7 +291,7 @@ surfaceInterpolationScheme<Type>::interpolate
 
     // Interpolate across coupled patches using given lambdas
 
-    forAll (lambdas.boundaryField(), pi)
+    forAll(lambdas.boundaryField(), pi)
     {
         const fvsPatchScalarField& pLambda = lambdas.boundaryField()[pi];
 

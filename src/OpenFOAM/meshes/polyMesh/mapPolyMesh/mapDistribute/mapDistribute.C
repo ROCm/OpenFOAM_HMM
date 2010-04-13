@@ -371,9 +371,9 @@ Foam::mapDistribute::mapDistribute
             label i = 0;
             forAllIter(Map<label>, compactMap[procI], iter)
             {
+                const label compactI = compactStart[procI] + iter();
                 remoteElem[i] = iter.key();
-                label compactI = compactStart[procI]+iter();
-                localElem[i] = compactI;
+                localElem[i]  = compactI;
                 iter() = compactI;
                 i++;
             }
@@ -525,9 +525,9 @@ Foam::mapDistribute::mapDistribute
             label i = 0;
             forAllIter(Map<label>, compactMap[procI], iter)
             {
+                const label compactI = compactStart[procI] + iter();
                 remoteElem[i] = iter.key();
-                label compactI = compactStart[procI]+iter();
-                localElem[i] = compactI;
+                localElem[i]  = compactI;
                 iter() = compactI;
                 i++;
             }

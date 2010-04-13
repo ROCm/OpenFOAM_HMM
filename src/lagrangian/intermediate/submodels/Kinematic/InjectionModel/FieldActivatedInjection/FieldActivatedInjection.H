@@ -143,7 +143,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~FieldActivatedInjection();
 
 

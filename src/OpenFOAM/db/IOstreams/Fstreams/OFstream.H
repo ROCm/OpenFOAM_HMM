@@ -69,9 +69,8 @@ class OFstreamAllocator
             IOstream::compressionType compression=IOstream::UNCOMPRESSED
         );
 
-    // Destructor
-
-        ~OFstreamAllocator();
+    //- Destructor
+    ~OFstreamAllocator();
 
 };
 
@@ -108,9 +107,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~OFstream();
+    //- Destructor
+    ~OFstream();
 
 
     // Member functions

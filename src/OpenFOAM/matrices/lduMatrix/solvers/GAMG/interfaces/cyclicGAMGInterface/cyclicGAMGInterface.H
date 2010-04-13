@@ -86,9 +86,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~cyclicGAMGInterface();
+    //- Destructor
+    virtual ~cyclicGAMGInterface();
 
 
     // Member Functions

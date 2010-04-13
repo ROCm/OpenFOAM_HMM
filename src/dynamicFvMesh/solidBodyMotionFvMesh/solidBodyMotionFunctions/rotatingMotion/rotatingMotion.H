@@ -89,9 +89,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~rotatingMotion();
+    //- Destructor
+    virtual ~rotatingMotion();
 
 
     // Member Functions

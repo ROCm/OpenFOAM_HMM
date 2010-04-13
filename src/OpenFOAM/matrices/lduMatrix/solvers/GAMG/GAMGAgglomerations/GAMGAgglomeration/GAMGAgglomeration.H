@@ -180,9 +180,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~GAMGAgglomeration();
+    //- Destructor
+    ~GAMGAgglomeration();
 
 
     // Member Functions

@@ -83,10 +83,9 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~upwindCECCellToFaceStencilObject()
-        {}
+    //- Destructor
+    virtual ~upwindCECCellToFaceStencilObject()
+    {}
 };
 
 

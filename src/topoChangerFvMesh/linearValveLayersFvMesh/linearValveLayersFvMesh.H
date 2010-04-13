@@ -94,9 +94,8 @@ public:
         explicit linearValveLayersFvMesh(const IOobject& io);
 
 
-    // Destructor
-
-        virtual ~linearValveLayersFvMesh();
+    //- Destructor
+    virtual ~linearValveLayersFvMesh();
 
 
     // Member Functions

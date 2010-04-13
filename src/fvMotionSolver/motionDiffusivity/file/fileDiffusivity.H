@@ -86,9 +86,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~fileDiffusivity();
+    //- Destructor
+    virtual ~fileDiffusivity();
 
 
     // Member Functions

@@ -61,7 +61,7 @@ Foam::tmp<Foam::scalarField> Foam::movingConeTopoFvMesh::vertexMarkup
     tmp<scalarField> tvertexMarkup(new scalarField(p.size()));
     scalarField& vertexMarkup = tvertexMarkup();
 
-    forAll (p, pI)
+    forAll(p, pI)
     {
         if (p[pI].x() < curLeft - SMALL)
         {
@@ -114,7 +114,7 @@ void Foam::movingConeTopoFvMesh::addZonesAndModifiers()
     boolList flipZone2(fc.size(), false);
     label nZoneFaces2 = 0;
 
-    forAll (fc, faceI)
+    forAll(fc, faceI)
     {
         if
         (

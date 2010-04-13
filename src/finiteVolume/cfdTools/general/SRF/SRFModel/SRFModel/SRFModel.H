@@ -135,9 +135,8 @@ public:
          );
 
 
-    // Destructor
-
-        virtual ~SRFModel();
+    //- Destructor
+    virtual ~SRFModel();
 
 
     // Member Functions

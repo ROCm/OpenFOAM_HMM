@@ -122,9 +122,8 @@ public:
         LList(const LList<LListBase, T>&);
 
 
-    // Destructor
-
-        ~LList();
+    //- Destructor
+    ~LList();
 
 
     // Member Functions

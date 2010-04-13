@@ -34,10 +34,7 @@ using namespace Foam::constant;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(dsmcFields, 0);
-}
+defineTypeNameAndDebug(Foam::dsmcFields, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

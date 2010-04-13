@@ -257,9 +257,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~topoSet();
+    //- Destructor
+    virtual ~topoSet();
 
 
     // Member functions

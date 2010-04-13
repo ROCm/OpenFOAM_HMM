@@ -77,9 +77,8 @@ public:
         regionProperties(const Time& runTime);
 
 
-    // Destructor
-
-        ~regionProperties();
+    //- Destructor
+    ~regionProperties();
 
 
     // Member Functions

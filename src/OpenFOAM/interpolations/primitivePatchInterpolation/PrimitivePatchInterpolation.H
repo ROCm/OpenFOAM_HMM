@@ -99,9 +99,8 @@ public:
         PrimitivePatchInterpolation(const Patch& p);
 
 
-    // Destructor
-
-        ~PrimitivePatchInterpolation();
+    //- Destructor
+    ~PrimitivePatchInterpolation();
 
 
     // Member Functions

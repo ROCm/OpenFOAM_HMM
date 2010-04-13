@@ -283,9 +283,8 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~cyclicPolyPatch();
+    //- Destructor
+    virtual ~cyclicPolyPatch();
 
 
     // Member Functions

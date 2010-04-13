@@ -88,9 +88,8 @@ public:
         dlLibraryTable();
 
 
-    // Destructor
-
-        ~dlLibraryTable();
+    //- Destructor
+    ~dlLibraryTable();
 
 
     // Member Functions

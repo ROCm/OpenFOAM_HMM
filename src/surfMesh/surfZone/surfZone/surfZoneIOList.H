@@ -83,9 +83,8 @@ public:
         surfZoneIOList(const IOobject&, const Xfer<surfZoneList>&);
 
 
-    // Destructor
-
-        ~surfZoneIOList();
+    //- Destructor
+    ~surfZoneIOList();
 
 
     // Member Functions

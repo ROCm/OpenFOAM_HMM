@@ -209,10 +209,8 @@ public:
         );
 
 
-    // Destructor
-
-        //- Virtual destructor
-        virtual ~Time();
+    //- Destructor
+    virtual ~Time();
 
 
     // Member functions

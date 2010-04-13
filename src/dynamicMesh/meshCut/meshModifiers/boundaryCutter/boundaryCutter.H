@@ -128,9 +128,8 @@ public:
         boundaryCutter(const polyMesh& mesh);
 
 
-    // Destructor
-
-        ~boundaryCutter();
+    //- Destructor
+    ~boundaryCutter();
 
 
     // Member Functions

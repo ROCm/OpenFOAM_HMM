@@ -36,10 +36,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(cellClassification, 0);
-}
+defineTypeNameAndDebug(Foam::cellClassification, 0);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -829,15 +826,10 @@ Foam::label Foam::cellClassification::fillRegionPoints
 
         label nChanged = 0;
 
-        for
-        (
-            labelHashSet::const_iterator iter = nonManifoldPoints.begin();
-            iter != nonManifoldPoints.end();
-            ++iter
-        )
+        forAllConstIter(labelHashSet, nonManifoldPoints, iter)
         {
             // Find a face on fp using point and remove it.
-            label patchPointI = meshPointMap[iter.key()];
+            const label patchPointI = meshPointMap[iter.key()];
 
             const labelList& pFaces = fp.pointFaces()[patchPointI];
 
@@ -846,16 +838,14 @@ Foam::label Foam::cellClassification::fillRegionPoints
             // one would be best to remove.
             forAll(pFaces, i)
             {
-                label patchFaceI = pFaces[i];
-
-                label ownerCell = outsideOwner[patchFaceI];
+                const label patchFaceI = pFaces[i];
+                const label ownerCell  = outsideOwner[patchFaceI];
 
                 if (operator[](ownerCell) == meshType)
                 {
                     operator[](ownerCell) = fillType;
 
                     nChanged++;
-
                     break;
                 }
             }

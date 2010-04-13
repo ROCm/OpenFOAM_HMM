@@ -110,34 +110,21 @@ int main(int argc, char *argv[])
         // Search list of objects for volScalarFields
         IOobjectList scalarFields(objects.lookupClass("volScalarField"));
 
-        for
-        (
-            IOobjectList::iterator scalarFieldIter = scalarFields.begin();
-            scalarFieldIter != scalarFields.end();
-            ++scalarFieldIter
-        )
+        forAllIter(IOobjectList, scalarFields, iter)
         {
             // Read field
-            volScalarField field
+            volScalarField field(*iter(), mesh);
+
+            // lookup field from dictionary and convert field
+            label unitNumber;
+            if
             (
-                *scalarFieldIter(),
-                mesh
-            );
-
-            // lookup field from dictionary
-            if (foamDataToFluentDict.found(field.name()))
+                foamDataToFluentDict.readIfPresent(field.name(), unitNumber)
+             && unitNumber > 0
+            )
             {
-                label unitNumber
-                (
-                    readLabel(foamDataToFluentDict.lookup(field.name()))
-                );
-
-                // Convert field
-                if (unitNumber > 0)
-                {
-                    Info<< "    Converting field " << field.name() << endl;
-                    writeFluentField(field, unitNumber, fluentDataFile);
-                }
+                Info<< "    Converting field " << field.name() << endl;
+                writeFluentField(field, unitNumber, fluentDataFile);
             }
         }
 
@@ -148,34 +135,21 @@ int main(int argc, char *argv[])
         // Search list of objects for volVectorFields
         IOobjectList vectorFields(objects.lookupClass("volVectorField"));
 
-        for
-        (
-            IOobjectList::iterator vectorFieldIter = vectorFields.begin();
-            vectorFieldIter != vectorFields.end();
-            ++vectorFieldIter
-        )
+        forAllIter(IOobjectList, vectorFields, iter)
         {
             // Read field
-            volVectorField field
+            volVectorField field(*iter(), mesh);
+
+            // lookup field from dictionary and convert field
+            label unitNumber;
+            if
             (
-                *vectorFieldIter(),
-                mesh
-            );
-
-            // lookup field from dictionary
-            if (foamDataToFluentDict.found(field.name()))
+                foamDataToFluentDict.readIfPresent(field.name(), unitNumber)
+             && unitNumber > 0
+            )
             {
-                label unitNumber
-                (
-                    readLabel(foamDataToFluentDict.lookup(field.name()))
-                );
-
-                // Convert field
-                if (unitNumber > 0)
-                {
-                    Info<< "    Converting field " << field.name() << endl;
-                    writeFluentField(field, unitNumber, fluentDataFile);
-                }
+                Info<< "    Converting field " << field.name() << endl;
+                writeFluentField(field, unitNumber, fluentDataFile);
             }
         }
 

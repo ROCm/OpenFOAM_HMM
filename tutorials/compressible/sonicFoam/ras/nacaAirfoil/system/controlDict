@@ -37,26 +37,28 @@ writeFormat     ascii;
 
 writePrecision  6;
 
-writeCompression compressed;
+writeCompression off;
 
 timeFormat      general;
 
 timePrecision   6;
 
-runTimeModifiable yes;
+runTimeModifiable true;
 
 functions
 {
     forces
     {
-        type        forceCoeffs;
+        type            forceCoeffs;
         functionObjectLibs ( "libforces.so" );
-        outputControl timeStep;
-        outputInterval 1;
+        outputControl   timeStep;
+        outputInterval  1;
+
         patches
         (
             WALL10
         );
+
         pName       p;
         UName       U;
         log         true;
@@ -70,6 +72,5 @@ functions
         Aref        1;
     }
 }
-
 
 // ************************************************************************* //

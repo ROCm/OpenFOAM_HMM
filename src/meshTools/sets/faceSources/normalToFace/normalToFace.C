@@ -150,9 +150,9 @@ void Foam::normalToFace::applyToSet
 
         DynamicList<label> toBeRemoved(set.size()/10);
 
-        forAllIter(topoSet, set, iter)
+        forAllConstIter(topoSet, set, iter)
         {
-            label faceI = iter.key();
+            const label faceI = iter.key();
 
             vector n = mesh_.faceAreas()[faceI];
             n /= mag(n) + VSMALL;

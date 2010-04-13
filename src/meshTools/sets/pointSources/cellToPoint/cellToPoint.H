@@ -109,9 +109,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~cellToPoint();
+    //- Destructor
+    virtual ~cellToPoint();
 
 
     // Member Functions

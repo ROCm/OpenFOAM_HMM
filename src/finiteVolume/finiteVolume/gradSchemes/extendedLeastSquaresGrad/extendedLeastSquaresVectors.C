@@ -29,10 +29,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(extendedLeastSquaresVectors, 0);
-}
+defineTypeNameAndDebug(Foam::extendedLeastSquaresVectors, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
@@ -160,7 +157,7 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
     additionalCellsPtr_ = new List<labelPair>(maxNaddCells);
     List<labelPair>& additionalCells_ = *additionalCellsPtr_;
 
-    forAll (detdd, i)
+    forAll(detdd, i)
     {
         label count = 0;
 

@@ -99,12 +99,7 @@ void addPatchFields(fvMesh& mesh, const word& patchFieldType)
         mesh.objectRegistry::lookupClass<GeoField>()
     );
 
-    for
-    (
-        typename HashTable<const GeoField*>::const_iterator iter = flds.begin();
-        iter != flds.end();
-        ++iter
-    )
+    forAllConstIter(typename HashTable<const GeoField*>, flds, iter)
     {
         const GeoField& fld = *iter();
 
@@ -139,12 +134,7 @@ void trimPatchFields(fvMesh& mesh, const label nPatches)
         mesh.objectRegistry::lookupClass<GeoField>()
     );
 
-    for
-    (
-        typename HashTable<const GeoField*>::const_iterator iter = flds.begin();
-        iter != flds.end();
-        ++iter
-    )
+    forAllConstIter(typename HashTable<const GeoField*>, flds, iter)
     {
         const GeoField& fld = *iter();
 
@@ -165,12 +155,7 @@ void reorderPatchFields(fvMesh& mesh, const labelList& oldToNew)
         mesh.objectRegistry::lookupClass<GeoField>()
     );
 
-    for
-    (
-        typename HashTable<const GeoField*>::const_iterator iter = flds.begin();
-        iter != flds.end();
-        ++iter
-    )
+    forAllConstIter(typename HashTable<const GeoField*>, flds, iter)
     {
         const GeoField& fld = *iter();
 

@@ -217,9 +217,8 @@ public:
         }
 
 
-    // Destructor
-
-        virtual ~processorPolyPatch();
+    //- Destructor
+    virtual ~processorPolyPatch();
 
 
     // Member functions

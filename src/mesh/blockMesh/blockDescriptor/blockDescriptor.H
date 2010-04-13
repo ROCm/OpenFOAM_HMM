@@ -133,9 +133,8 @@ public:
         }
 
 
-    // Destructor
-
-        ~blockDescriptor();
+    //- Destructor
+    ~blockDescriptor();
 
 
     // Member Functions
