@@ -42,6 +42,10 @@ names[] =
     "faceZone", "patch"
 };
 
+const Foam::NamedEnum<Foam::fieldValues::faceSource::sourceType, 2>
+    Foam::fieldValues::faceSource::sourceTypeNames_;
+
+
 template<>
 const char* Foam::NamedEnum<Foam::fieldValues::faceSource::operationType, 7>::
 names[] =
