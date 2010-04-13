@@ -71,7 +71,7 @@ void Foam::coupledPolyPatch::writeOBJ
     writeOBJ(os, p1);
     vertI++;
 
-    os<< "l " << vertI-1 << ' ' << vertI << nl;
+    os  << "l " << vertI-1 << ' ' << vertI << nl;
 }
 
 

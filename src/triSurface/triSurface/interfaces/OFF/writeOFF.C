@@ -48,7 +48,7 @@ void triSurface::writeOFF(const bool writeSorted, Ostream& os) const
         os  << "#     " << patchI << "    "
             << myPatches[patchI].name() << endl;
     }
-    os << endl << endl;
+    os  << nl << endl;
 
     const pointField& ps = points();
 
@@ -56,7 +56,7 @@ void triSurface::writeOFF(const bool writeSorted, Ostream& os) const
         << ps.size()
         << ' ' << size()
         << ' ' << nEdges()
-        << endl << endl;
+        << nl << endl;
 
     // Write vertex coords
     forAll(ps, pointi)
@@ -66,7 +66,7 @@ void triSurface::writeOFF(const bool writeSorted, Ostream& os) const
             << ps[pointi].z() << " #" << pointi << endl;
     }
 
-    os << endl;
+    os  << endl;
 
     if (writeSorted)
     {

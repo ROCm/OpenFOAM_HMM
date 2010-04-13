@@ -92,14 +92,14 @@ int main(int argc, char * argv[])
     {
         OSHA1stream os;
 
-        os << str;
+        os  << str;
         Info<< os.digest() << endl;
 
-        os << str;
+        os  << str;
         Info<< os.digest() << endl;
 
         os.rewind();
-        os << "The quick brown fox jumps over the lazy dog";
+        os  << "The quick brown fox jumps over the lazy dog";
         Info<< os.digest() << endl;
 
     }

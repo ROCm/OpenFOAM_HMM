@@ -974,7 +974,7 @@ int main(int argc, char *argv[])
             IStringStream is(rawLine + ' ');
 
             // Type: cellSet, faceSet, pointSet, faceZoneSet
-            is >> setType;
+            is  >> setType;
 
             stat = parseType(runTime, mesh, setType, is);
 

@@ -65,7 +65,7 @@ void writeOBJ(Ostream& os, const pointField& pts)
     {
         const point& pt = pts[i];
 
-        os << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
+        os  << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
     }
 }
 
@@ -85,7 +85,7 @@ void dumpPoints(const triSurface& surf, const labelList& borderPoint)
         {
             const point& pt = surf.localPoints()[pointI];
 
-            os << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
+            os  << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
         }
     }
 }
@@ -108,7 +108,7 @@ void dumpEdges(const triSurface& surf, const boolList& borderEdge)
         {
             const edge& e = surf.edges()[edgeI];
 
-            os << "l " << e.start()+1 << ' ' << e.end()+1 << endl;
+            os  << "l " << e.start()+1 << ' ' << e.end()+1 << endl;
         }
     }
 }
