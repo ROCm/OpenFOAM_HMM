@@ -25,7 +25,7 @@ Class
     Foam::fvPatch
 
 Description
-    Foam::fvPatch
+    A finiteVolume patch using a polyPatch and a fvBoundaryMesh
 
 SourceFiles
     fvPatch.C
@@ -121,14 +121,18 @@ public:
 
     // Constructors
 
-        //- Construct from polyPatch
+        //- Construct from polyPatch and fvBoundaryMesh
         fvPatch(const polyPatch&, const fvBoundaryMesh&);
 
 
     // Selectors
 
         //- Return a pointer to a new patch created on freestore from polyPatch
-        static autoPtr<fvPatch> New(const polyPatch&, const fvBoundaryMesh&);
+        static autoPtr<fvPatch> New
+        (
+            const polyPatch&,
+            const fvBoundaryMesh&
+        );
 
 
     //- Destructor
