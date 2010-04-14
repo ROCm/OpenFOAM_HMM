@@ -76,7 +76,7 @@ class WallSpringSliderDashpot
         //- allowable timestep
         void findMinMaxProperties
         (
-            scalar& RMin,
+            scalar& rMin,
             scalar& rhoMax,
             scalar& vMagMax
         ) const;

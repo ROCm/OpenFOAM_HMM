@@ -521,24 +521,29 @@ Foam::PairCollision<CloudType>::~PairCollision()
 template<class CloudType>
 Foam::label Foam::PairCollision<CloudType>::nSubCycles() const
 {
+    label nSubCycles = 1;
+
     if (pairModel_->controlsTimestep())
     {
-        label nSubCycles = returnReduce
+        label nPairSubCycles = returnReduce
         (
             pairModel_->nSubCycles(), maxOp<label>()
         );
 
-        if(nSubCycles > 1)
-        {
-            Info<< "    " << nSubCycles << " move-collide subCycles" << endl;
-        }
+        nSubCycles = max(nSubCycles, nPairSubCycles);
+    }
 
-        return nSubCycles;
-    }
-    else
+    if (wallModel_->controlsTimestep())
     {
-        return 1;
+        label nWallSubCycles = returnReduce
+        (
+            wallModel_->nSubCycles(), maxOp<label>()
+        );
+
+        nSubCycles = max(nSubCycles, nWallSubCycles);
     }
+
+    return nSubCycles;
 }
 
 

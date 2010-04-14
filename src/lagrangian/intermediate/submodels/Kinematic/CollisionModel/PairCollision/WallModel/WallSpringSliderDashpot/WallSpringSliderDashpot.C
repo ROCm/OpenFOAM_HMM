@@ -30,12 +30,12 @@ License
 template <class CloudType>
 void Foam::WallSpringSliderDashpot<CloudType>::findMinMaxProperties
 (
-    scalar& RMin,
+    scalar& rMin,
     scalar& rhoMax,
     scalar& UMagMax
 ) const
 {
-    RMin = VGREAT;
+    rMin = VGREAT;
     rhoMax = -VGREAT;
     UMagMax = -VGREAT;
 
@@ -44,7 +44,7 @@ void Foam::WallSpringSliderDashpot<CloudType>::findMinMaxProperties
         const typename CloudType::parcelType& p = iter();
 
         // Finding minimum diameter to avoid excessive arithmetic
-        RMin = min(p.d(), RMin);
+        rMin = min(p.d(), rMin);
 
         rhoMax = max(p.rho(), rhoMax);
 
@@ -57,11 +57,8 @@ void Foam::WallSpringSliderDashpot<CloudType>::findMinMaxProperties
 
     // Transform the minimum diameter into minimum radius
     //     rMin = dMin/2
-    // then rMin into minimum R,
-    //     1/RMin = 1/rMin + 1/rMin,
-    //     RMin = rMin/2 = dMin/4
 
-    RMin /= 4.0;
+    rMin /= 2.0;
 }
 
 
@@ -109,27 +106,31 @@ bool Foam::WallSpringSliderDashpot<CloudType>::controlsTimestep() const
 template<class CloudType>
 Foam::label Foam::WallSpringSliderDashpot<CloudType>::nSubCycles() const
 {
-    // if (!(this->owner().size()))
-    // {
-    //     return 1;
-    // }
+    if (!(this->owner().size()))
+    {
+        return 1;
+    }
 
-    // scalar RMin;
-    // scalar rhoMax;
-    // scalar UMagMax;
+    scalar rMin;
+    scalar rhoMax;
+    scalar UMagMax;
 
-    // findMinMaxProperties(RMin, rhoMax, UMagMax);
+    findMinMaxProperties(rMin, rhoMax, UMagMax);
 
-    // // Note:  pi^(7/5)*(5/4)^(2/5) = 5.429675
-    // scalar minCollisionDeltaT =
-    //     5.429675
-    //    *RMin
-    //    *pow(rhoMax/(Estar_*sqrt(UMagMax) + VSMALL), 0.4)
-    //    /collisionResolutionSteps_;
+    scalar pNu = this->owner().constProps().poissonsRatio();
 
-    // return ceil(this->owner().time().deltaTValue()/minCollisionDeltaT);
+    scalar pE = this->owner().constProps().youngsModulus();
 
-    return 1;
+    scalar Estar = 1/((1 - sqr(pNu))/pE + (1 - sqr(nu_))/E_);
+
+    // Note:  pi^(7/5)*(5/4)^(2/5) = 5.429675
+    scalar minCollisionDeltaT =
+        5.429675
+       *rMin
+       *pow(rhoMax/(Estar*sqrt(UMagMax) + VSMALL), 0.4)
+       /collisionResolutionSteps_;
+
+    return ceil(this->owner().time().deltaTValue()/minCollisionDeltaT);
 }
 
 

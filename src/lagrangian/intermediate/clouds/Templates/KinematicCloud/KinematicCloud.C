@@ -99,6 +99,8 @@ void Foam::KinematicCloud<ParcelType>::evolveCloud()
 
     if (nSubCycles > 1)
     {
+        Info<< "    " << nSubCycles << " move-collide subCycles" << endl;
+
         subCycleTime moveCollideSubCycle
         (
             const_cast<Time&>(this->db().time()),
