@@ -103,8 +103,8 @@ class fvMeshDistribute
             //- Find patch to put exposed faces into.
             label findNonEmptyPatch() const;
 
-            //- Appends processorPolyPatch. Returns patchID.
-            label addProcPatch(const word& patchName, const label nbrProc);
+            //- Appends polyPatch. Returns patchID.
+            label addPatch(polyPatch*);
 
             //- Add patch field
             template<class GeoField>
@@ -170,6 +170,7 @@ class fvMeshDistribute
                 const labelList& distribution,
                 labelList& sourceFace,
                 labelList& sourceProc,
+                labelList& sourcePatch,
                 labelList& sourceNewProc
             ) const;
 
@@ -187,10 +188,12 @@ class fvMeshDistribute
 
                 const labelList& sourceFace,
                 const labelList& sourceProc,
+                const labelList& sourcePatch,
                 const labelList& sourceNewProc,
 
                 labelList& subFace,
                 labelList& subProc,
+                labelList& subPatch,
                 labelList& subNewProc
             );
 
@@ -201,11 +204,13 @@ class fvMeshDistribute
                 const primitiveMesh&,
                 const labelList& sourceFace,
                 const labelList& sourceProc,
+                const labelList& sourcePatch,
 
                 const label domain,
                 const primitiveMesh& domainMesh,
                 const labelList& domainFace,
                 const labelList& domainProc,
+                const labelList& domainPatch,
 
                 labelList& masterCoupledFaces,
                 labelList& slaveCoupledFaces
@@ -236,15 +241,17 @@ class fvMeshDistribute
             //  proc the processor patchID.
             void addProcPatches
             (
-                const labelList&, // processor that neighbour is on
-                labelList& procPatchID
+                const labelList&, // processor that neighbour is now on
+                const labelList&, // -1 or patch that face originated from 
+                List<Map<label> >& procPatchID
             );
 
             //- Get boundary faces to be repatched. Is -1 or new patchID
-            static labelList getProcBoundaryPatch
+            static labelList getBoundaryPatch
             (
-                const labelList& neighbourNewProc,// new processor per b. face
-                const labelList& procPatchID      // patchID
+                const labelList& neighbourNewProc,  // new processor per b. face
+                const labelList& referPatchID,      // -1 or original patch
+                const List<Map<label> >& procPatchID// patchID
             );
 
             //- Send mesh and coupling data.
@@ -257,6 +264,7 @@ class fvMeshDistribute
                 const wordList& cellZoneNames,
                 const labelList& sourceFace,
                 const labelList& sourceProc,
+                const labelList& sourcePatch,
                 const labelList& sourceNewProc,
                 UOPstream& toDomain
             );
@@ -280,6 +288,7 @@ class fvMeshDistribute
                 const Time& runTime,
                 labelList& domainSourceFace,
                 labelList& domainSourceProc,
+                labelList& domainSourcePatch,
                 labelList& domainSourceNewProc,
                 UIPstream& fromNbr
             );
@@ -327,6 +336,7 @@ public:
             static void printCoupleInfo
             (
                 const primitiveMesh&,
+                const labelList&,
                 const labelList&,
                 const labelList&,
                 const labelList&
