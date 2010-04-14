@@ -1007,7 +1007,7 @@ bool Foam::cyclicPolyPatch::order
     else
     {
         // Get stored geometry from initOrder invocation of owner.
-        const primitivePatch& pp0 = ownerPatchPtr_();
+        const primitivePatch& pp0 = neighbPatch().ownerPatchPtr_();
 
         // Get geometric quantities
         pointField half0Ctrs, half1Ctrs, anchors0;
