@@ -35,7 +35,7 @@ Description
 
 SourceFiles
     pointPatchField.C
-    newpointPatchField.C
+    newPointPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -195,6 +195,18 @@ public:
         static autoPtr<pointPatchField<Type> > New
         (
             const word&,
+            const pointPatch&,
+            const DimensionedField<Type, pointMesh>&
+        );
+
+        //- Return a pointer to a new patchField created on freestore given
+        //  patch and internal field
+        //  (does not set the patch field values).
+        //  Allows override of constraint type
+        static autoPtr<pointPatchField<Type> > New
+        (
+            const word&,
+            const word& actualPatchType,
             const pointPatch&,
             const DimensionedField<Type, pointMesh>&
         );

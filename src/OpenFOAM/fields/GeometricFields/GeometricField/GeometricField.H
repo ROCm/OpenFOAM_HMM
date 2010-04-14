@@ -128,12 +128,14 @@ public:
 
             //- Construct from a BoundaryMesh,
             //  reference to the internal field
-            //  and a wordList of patch types
+            //  and a wordList of patch types and optional the actual patch
+            //  types (to override constraint patches)
             GeometricBoundaryField
             (
                 const BoundaryMesh&,
                 const DimensionedInternalField&,
-                const wordList&
+                const wordList& wantedPatchTypes,
+                const wordList& actualPatchTypes = wordList()
             );
 
             //- Construct from a BoundaryMesh,
@@ -283,7 +285,8 @@ public:
             const IOobject&,
             const Mesh&,
             const dimensionSet&,
-            const wordList& patchFieldTypes
+            const wordList& wantedPatchTypes,
+            const wordList& actualPatchTypes = wordList()
         );
 
         //- Constructor given IOobject, mesh, dimensioned<Type> and patch type.
@@ -301,7 +304,8 @@ public:
             const IOobject&,
             const Mesh&,
             const dimensioned<Type>&,
-            const wordList& patchFieldTypes
+            const wordList& wantedPatchTypes,
+            const wordList& actualPatchTypes = wordList()
         );
 
         //- Constructor from components
@@ -387,7 +391,8 @@ public:
         (
             const IOobject&,
             const GeometricField<Type, PatchField, GeoMesh>&,
-            const wordList& patchFieldTypes
+            const wordList& patchFieldTypes,
+            const wordList& actualPatchTypes = wordList()
         );
 
 

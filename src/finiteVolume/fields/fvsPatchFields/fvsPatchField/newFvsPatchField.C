@@ -34,14 +34,15 @@ template<class Type>
 tmp<fvsPatchField<Type> > fvsPatchField<Type>::New
 (
     const word& patchFieldType,
+    const word& actualPatchType,
     const fvPatch& p,
     const DimensionedField<Type, surfaceMesh>& iF
 )
 {
     if (debug)
     {
-        Info<< "fvsPatchField<Type>::New(const word&, const fvPatch&, "
-               "const Field<Type>&) : "
+        Info<< "fvsPatchField<Type>::New(const word&, const word&"
+               ", const fvPatch&, const Field<Type>&) : "
                "constructing fvsPatchField<Type>"
             << endl;
     }
@@ -53,8 +54,8 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::New
     {
         FatalErrorIn
         (
-            "fvsPatchField<Type>::New(const word&, const fvPatch&, "
-            "const Field<Type>&)"
+            "fvsPatchField<Type>::New(const word&, const word&, const fvPatch&"
+            ", const Field<Type>&)"
         )   << "Unknown patchTypefield type " << patchFieldType
             << endl << endl
             << "Valid patchField types are :" << endl
@@ -62,17 +63,40 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::New
             << exit(FatalError);
     }
 
-    typename patchConstructorTable::iterator patchTypeCstrIter =
-        patchConstructorTablePtr_->find(p.type());
-
-    if (patchTypeCstrIter != patchConstructorTablePtr_->end())
+    if
+    (
+        actualPatchType == word::null
+     || actualPatchType != p.type()
+    )
     {
-        return patchTypeCstrIter()(p, iF);
+        typename patchConstructorTable::iterator patchTypeCstrIter =
+            patchConstructorTablePtr_->find(p.type());
+
+        if (patchTypeCstrIter != patchConstructorTablePtr_->end())
+        {
+            return patchTypeCstrIter()(p, iF);
+        }
+        else
+        {
+            return cstrIter()(p, iF);
+        }
     }
     else
     {
         return cstrIter()(p, iF);
     }
+}
+
+
+template<class Type>
+tmp<fvsPatchField<Type> > fvsPatchField<Type>::New
+(
+    const word& patchFieldType,
+    const fvPatch& p,
+    const DimensionedField<Type, surfaceMesh>& iF
+)
+{
+    return New(patchFieldType, word::null, p, iF);
 }
 
 
