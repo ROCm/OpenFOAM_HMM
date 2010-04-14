@@ -21,79 +21,23 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::wedgePointPatch
-
-Description
-    Wedge front and back plane patch.
-
-SourceFiles
-    wedgePointPatch.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef wedgePointPatch_H
-#define wedgePointPatch_H
-
-#include "facePointPatch.H"
-#include "wedgePolyPatch.H"
+#include "cyclicSlipPointPatchFields.H"
+#include "pointPatchFields.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-/*---------------------------------------------------------------------------*\
-                       Class wedgePointPatch Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-class wedgePointPatch
-:
-    public facePointPatch
-{
-
-public:
-
-    //- Runtime type information
-    TypeName(wedgePolyPatch::typeName_());
-
-
-    // Constructors
-
-        //- Construct from polyPatch
-        wedgePointPatch
-        (
-            const polyPatch& patch,
-            const pointBoundaryMesh& bm
-        )
-        :
-            facePointPatch(patch, bm)
-        {}
-
-
-    // Member Functions
-
-        //- Return the constraint type this pointPatch implements.
-        virtual const word& constraintType() const
-        {
-            return type();
-        }
-
-        //- Accumulate the effect of constraint direction of this patch
-        virtual void applyConstraint
-        (
-            const label pointi,
-            pointConstraint&
-        ) const;
-};
-
+makePointPatchFields(cyclicSlip);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //
