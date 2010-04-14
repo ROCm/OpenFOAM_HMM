@@ -89,15 +89,30 @@
         "H",
         runTime.timeName(),
         mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
+        IOobject::NO_READ
     );
+
+    autoPtr<volVectorField> HPtr_;
 
     if (Hheader.headerOk())
     {
-
         Info<< "\nReading field H\n" << endl;
-        volVectorField H(Hheader, mesh);
+
+        HPtr_.reset
+        (
+            new volVectorField
+            (
+                IOobject
+                (
+                    "H",
+                    runTime.timeName(),
+                    mesh,
+                    IOobject::MUST_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                mesh
+            )
+        );
     }
 
     IOobject HdotGradHheader
@@ -105,13 +120,28 @@
         "HdotGradH",
         runTime.timeName(),
         mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
+        IOobject::NO_READ
     );
+
+    autoPtr<volVectorField> HdotGradHPtr_;
 
     if (HdotGradHheader.headerOk())
     {
-
         Info<< "\nReading field HdotGradH\n" << endl;
-        volVectorField HdotGradH(HdotGradHheader, mesh);
+
+        HdotGradHPtr_.reset
+        (
+            new volVectorField
+            (
+                IOobject
+                (
+                    "HdotGradH",
+                    runTime.timeName(),
+                    mesh,
+                    IOobject::MUST_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                mesh
+            )
+        );
     }
