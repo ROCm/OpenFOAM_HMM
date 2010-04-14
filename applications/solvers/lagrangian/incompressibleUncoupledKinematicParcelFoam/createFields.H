@@ -83,3 +83,31 @@
         mu,
         g
     );
+
+    Info<< "\nReading field H\n" << endl;
+    volVectorField H
+    (
+        IOobject
+        (
+            "H",
+            runTime.timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
+    Info<< "\nReading field HdotGradH\n" << endl;
+    volVectorField HdotGradH
+    (
+        IOobject
+        (
+            "HdotGradH",
+            runTime.timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
