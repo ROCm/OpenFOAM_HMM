@@ -84,30 +84,34 @@
         g
     );
 
-    Info<< "\nReading field H\n" << endl;
-    volVectorField H
+    IOobject Hheader
     (
-        IOobject
-        (
-            "H",
-            runTime.timeName(),
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
+        "H",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
     );
 
-    Info<< "\nReading field HdotGradH\n" << endl;
-    volVectorField HdotGradH
+    if (Hheader.headerOk())
+    {
+
+        Info<< "\nReading field H\n" << endl;
+        volVectorField H(Hheader, mesh);
+    }
+
+    IOobject HdotGradHheader
     (
-        IOobject
-        (
-            "HdotGradH",
-            runTime.timeName(),
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
+        "HdotGradH",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
     );
+
+    if (HdotGradHheader.headerOk())
+    {
+
+        Info<< "\nReading field HdotGradH\n" << endl;
+        volVectorField HdotGradH(HdotGradHheader, mesh);
+    }
