@@ -60,14 +60,14 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::setFieldValues
 
     if (obr_.foundObject<sf>(fieldName))
     {
-        return filterField(obr_.lookupObject<sf>(fieldName));
+        return filterField(obr_.lookupObject<sf>(fieldName), true);
     }
     else if (obr_.foundObject<vf>(fieldName))
     {
-        return filterField(obr_.lookupObject<vf>(fieldName));
+        return filterField(obr_.lookupObject<vf>(fieldName), true);
     }
 
-    return tmp<Field<Type> >(new Field<Type>(0.0));
+    return tmp<Field<Type> >(new Field<Type>(0));
 }
 
 
@@ -131,10 +131,13 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
 
     if (ok)
     {
+        // Get (correctly oriented) field
         Field<Type> values = combineFields(setFieldValues<Type>(fieldName));
 
-        scalarField magSf = combineFields(filterField(mesh().magSf()));
+        // Get unoriented magSf
+        scalarField magSf = combineFields(filterField(mesh().magSf(), false));
 
+        // Get (correctly oriented) weighting field
         scalarField weightField =
             combineFields(setFieldValues<scalar>(weightFieldName_));
 
@@ -177,7 +180,8 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
 template<class Type>
 Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::filterField
 (
-    const GeometricField<Type, fvPatchField, volMesh>& field
+    const GeometricField<Type, fvPatchField, volMesh>& field,
+    const bool applyOrientation
 ) const
 {
     tmp<Field<Type> > tvalues(new Field<Type>(faceId_.size()));
@@ -205,8 +209,14 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::filterField
                 << "    Unable to process internal faces for volume field "
                 << field.name() << nl << abort(FatalError);
         }
+    }
 
-        values[i] *= flipMap_[i];
+    if (applyOrientation)
+    {
+        forAll(values, i)
+        {
+            values[i] *= faceSign_[i];
+        }
     }
 
     return tvalues;
@@ -216,7 +226,8 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::filterField
 template<class Type>
 Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::filterField
 (
-    const GeometricField<Type, fvsPatchField, surfaceMesh>& field
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& field,
+    const bool applyOrientation
 ) const
 {
     tmp<Field<Type> > tvalues(new Field<Type>(faceId_.size()));
@@ -234,8 +245,14 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::filterField
         {
             values[i] = field[faceI];
         }
+    }
 
-        values[i] *= flipMap_[i];
+    if (applyOrientation)
+    {
+        forAll(values, i)
+        {
+            values[i] *= faceSign_[i];
+        }
     }
 
     return tvalues;
