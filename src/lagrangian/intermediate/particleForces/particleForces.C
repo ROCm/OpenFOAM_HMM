@@ -49,7 +49,7 @@ Foam::particleForces::particleForces
     Cvm_(0.0),
     pressureGradient_(dict_.lookup("pressureGradient")),
     paramagnetic_(dict_.lookup("paramagnetic")),
-    chi_(0.0),
+    magneticSusceptibility_(0.0),
     UName_(dict_.lookupOrDefault<word>("U", "U")),
     HName_(dict_.lookupOrDefault<word>("H", "H"))
 {
@@ -60,7 +60,7 @@ Foam::particleForces::particleForces
 
     if (paramagnetic_)
     {
-        dict_.lookup("chi") >> chi_;
+        dict_.lookup("magneticSusceptibility") >> magneticSusceptibility_;
     }
 }
 
@@ -77,7 +77,7 @@ Foam::particleForces::particleForces(const particleForces& f)
     Cvm_(f.Cvm_),
     pressureGradient_(f.pressureGradient_),
     paramagnetic_(f.paramagnetic_),
-    chi_(f.chi_),
+    magneticSusceptibility_(f.magneticSusceptibility_),
     UName_(f.UName_),
     HName_(f.HName_)
 {}
@@ -135,9 +135,9 @@ Foam::Switch Foam::particleForces::paramagnetic() const
 }
 
 
-Foam::scalar Foam::particleForces::chi() const
+Foam::scalar Foam::particleForces::magneticSusceptibility() const
 {
-    return chi_;
+    return magneticSusceptibility_;
 }
 
 
@@ -248,7 +248,7 @@ Foam::vector Foam::particleForces::calcNonCoupled
 
         Ftot +=
             3.0*constant::electromagnetic::mu0.value()/rho
-           *chi_/(chi_ + 3)
+           *magneticSusceptibility_/(magneticSusceptibility_ + 3)
            *(H[cellI] & gradH[cellI]);
 
         // force is:
@@ -257,7 +257,7 @@ Foam::vector Foam::particleForces::calcNonCoupled
         // *constant::mathematical::pi
         // *constant::electromagnetic::mu0.value()
         // *pow3(d/2)
-        // *chi/(chi + 3)
+        // *magneticSusceptibility/(magneticSusceptibility + 3)
         // *(H[cellI] & gradH[cellI]);
 
         // which is divided by mass ((4/3)*pi*r^3*rho) to produce

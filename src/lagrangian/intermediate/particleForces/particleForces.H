@@ -91,7 +91,7 @@ class particleForces
             Switch paramagnetic_;
 
             //- Magnetic susceptibility of particle
-            scalar chi_;
+            scalar magneticSusceptibility_;
 
 
         // Additional info
@@ -152,7 +152,7 @@ public:
             Switch paramagnetic() const;
 
             //- Return magnetic susceptibility
-            scalar chi() const;
+            scalar magneticSusceptibility() const;
 
             //- Return name of velocity field
             const word& HName() const;
