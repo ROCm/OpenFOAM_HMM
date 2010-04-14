@@ -73,6 +73,12 @@ public:
 
     // Member Functions
 
+        //- Return the constraint type this pointPatch implements.
+        virtual const word& constraintType() const
+        {
+            return type();
+        }
+
         //- Accumulate the effect of constraint direction of this patch
         virtual void applyConstraint
         (

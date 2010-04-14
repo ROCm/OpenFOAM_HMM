@@ -113,6 +113,12 @@ public:
 
         // Access
 
+            //- Return the constraint type this pointPatch implements.
+            virtual const word& constraintType() const
+            {
+                return type();
+            }
+
             //- Return the underlying cyclicPolyPatch
             const cyclicPolyPatch& cyclicPatch() const
             {

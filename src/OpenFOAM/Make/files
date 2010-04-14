@@ -506,6 +506,7 @@ $(constraintPointPatchFields)/empty/emptyPointPatchFields.C
 $(constraintPointPatchFields)/symmetry/symmetryPointPatchFields.C
 $(constraintPointPatchFields)/wedge/wedgePointPatchFields.C
 $(constraintPointPatchFields)/cyclic/cyclicPointPatchFields.C
+$(constraintPointPatchFields)/cyclicSlip/cyclicSlipPointPatchFields.C
 $(constraintPointPatchFields)/processor/processorPointPatchFields.C
 
 derivedPointPatchFields = $(pointPatchFields)/derived
