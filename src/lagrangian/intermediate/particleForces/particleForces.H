@@ -69,9 +69,6 @@ class particleForces
         //- Velocity gradient field
         const volTensorField* gradUPtr_;
 
-        //- Magnetic field strength gradient field
-        const volTensorField* gradHPtr_;
-
 
         // Forces to include in particle motion evaluation
 
@@ -99,8 +96,9 @@ class particleForces
             //- Name of velocity field - default = "U"
             const word UName_;
 
-            //- Name of magnetic field strength field - default = "H"
-            const word HName_;
+            //- Name of paramagnetic field strength field - default =
+            //  "HdotGradH"
+            const word HdotGradHName_;
 
 
 public:
@@ -154,8 +152,8 @@ public:
             //- Return magnetic susceptibility
             scalar magneticSusceptibility() const;
 
-            //- Return name of velocity field
-            const word& HName() const;
+            //- Return name of paramagnetic field strength field
+            const word& HdotGradHName() const;
 
 
        // Evaluation
