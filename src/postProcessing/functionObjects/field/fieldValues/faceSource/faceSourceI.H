@@ -49,9 +49,9 @@ Foam::fieldValues::faceSource::facePatch() const
 
 
 inline const Foam::labelList&
-Foam::fieldValues::faceSource::flipMap() const
+Foam::fieldValues::faceSource::faceSign() const
 {
-    return flipMap_;
+    return faceSign_;
 }
 
 
