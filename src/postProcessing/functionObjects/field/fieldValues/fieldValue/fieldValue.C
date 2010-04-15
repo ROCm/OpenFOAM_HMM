@@ -32,11 +32,6 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(fieldValue, 0);
-
-    defineTemplateTypeNameAndDebug(IOField<vector>, 0);
-    defineTemplateTypeNameAndDebug(IOField<sphericalTensor>, 0);
-    defineTemplateTypeNameAndDebug(IOField<symmTensor>, 0);
-    defineTemplateTypeNameAndDebug(IOField<tensor>, 0);
 }
 
 
