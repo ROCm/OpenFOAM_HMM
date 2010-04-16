@@ -29,19 +29,27 @@ Tested on channel395-splitCyclic with GAMG.
 - initTransfer in GAMGprocessorInterfaces using nonblocking+tags
 untested.
 
+- cyclic baffles. Tested on t-junction/
+    - with non-cyclic baffles ok
+    - cyclic baffles different!
+
+
 OK - regionSplit
 tested on singleCyclic
 
 OK - pointFields on cyclics. volPointInterpolation.
 tested on channel395-splitCyclic
 
-- NOT WORKING: fvMeshDistribute to split cyclic patches into ones
+NOT WORKING - fvMeshDistribute to split cyclic patches into ones
   with different separation.
+tested on singleCyclic
+
+- jumpCyclics. All usages of jump() now need to account for being owner() or
+  not.
 
 
 - test createPatch pointSync
 
-- jumpCyclics
 - fanFvPatchField
 - activeBaffleVelocity
 - work out overlapping communication for PstreamBuffers.
