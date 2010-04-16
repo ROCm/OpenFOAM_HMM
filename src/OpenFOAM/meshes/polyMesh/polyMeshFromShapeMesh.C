@@ -614,21 +614,56 @@ Foam::polyMesh::polyMesh
             << "Found " << nFaces - defaultPatchStart
             << " undefined faces in mesh; adding to default patch." << endl;
 
-        boundary_.set
-        (
-            nAllPatches,
-            polyPatch::New
-            (
-                defaultBoundaryPatchType,
-                defaultBoundaryPatchName,
-                nFaces - defaultPatchStart,
-                defaultPatchStart,
-                boundary_.size() - 1,
-                boundary_
-            )
-        );
+        // Check if there already exists a defaultFaces patch as last patch
+        // and reuse it.
+        label patchI = findIndex(boundaryPatchNames, defaultBoundaryPatchName);
 
-        nAllPatches++;
+        if (patchI != -1)
+        {
+            if (patchI != boundaryFaces.size()-1 || boundary_[patchI].size())
+            {
+                FatalErrorIn("polyMesh::polyMesh(... construct from shapes...)")
+                    << "Default patch " << boundary_[patchI].name()
+                    << " already has faces in it or is not"
+                    << " last in list of patches." << exit(FatalError);
+            }
+
+            WarningIn("polyMesh::polyMesh(... construct from shapes...)")
+                << "Reusing existing patch " << patchI
+                << " for undefined faces." << endl;
+
+            boundary_.set
+            (
+                patchI,
+                polyPatch::New
+                (
+                    boundaryPatchTypes[patchI],
+                    boundaryPatchNames[patchI],
+                    nFaces - defaultPatchStart,
+                    defaultPatchStart,
+                    patchI,
+                    boundary_
+                )
+            );
+        }
+        else
+        {
+            boundary_.set
+            (
+                nAllPatches,
+                polyPatch::New
+                (
+                    defaultBoundaryPatchType,
+                    defaultBoundaryPatchName,
+                    nFaces - defaultPatchStart,
+                    defaultPatchStart,
+                    boundary_.size() - 1,
+                    boundary_
+                )
+            );
+
+            nAllPatches++;
+        }
     }
 
     // Reset the size of the boundary

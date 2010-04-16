@@ -27,23 +27,34 @@ boundaryField
         intensity       0.05;       // 5% turbulent intensity
         value           uniform 1;
     }
-
     outlet1
     {
         type            inletOutlet;
         inletValue      uniform 1;
+        value           uniform 1;
     }
 
     outlet2
     {
         type            inletOutlet;
         inletValue      uniform 1;
+        value           uniform 1;
+    }
+    baffles
+    {
+        type            kqRWallFunction;
+        value           uniform 1;
+    }
+    fan
+    {
+        type            cyclic;
+        value           uniform 1;
     }
 
     defaultFaces
     {
         type            kqRWallFunction;
-        value           uniform 0;
+        value           uniform 1;
     }
 }
 

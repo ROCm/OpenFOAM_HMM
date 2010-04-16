@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+# Get application name
+application=`getApplication`
+
+runApplication blockMesh
+
+
+# Creating patches 'out of nothing' so willl get undefined value which
+# might cause floating point error
+unset FOAM_SIGFPE
+unset FOAM_SETNAN
+
+# Add cyclic baffles for fan
+runApplication setSet -batch selectCyclics.setSet
+runApplication createBaffles cyclicFaces fan -overwrite
+
+# Add wall baffles
+rm log.setSet
+runApplication setSet -batch selectBaffles.setSet
+rm log.createBaffles
+runApplication createBaffles baffleFaces baffles -overwrite
+
+runApplication $application

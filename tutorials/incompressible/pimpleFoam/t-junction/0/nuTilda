@@ -34,7 +34,15 @@ boundaryField
     {
         type            zeroGradient;
     }
-
+    baffles
+    {
+        type            zeroGradient;
+    }
+    fan
+    {
+        type            cyclic;
+        value           uniform 0;
+    }
     defaultFaces
     {
         type            zeroGradient;
