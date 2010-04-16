@@ -141,6 +141,12 @@ public:
             switch_(Switch::FALSE)
         {}
 
+        //- Construct from enumerated value
+        Switch(const switchType value)
+        :
+            switch_(value)
+        {}
+
         //- Construct from bool
         Switch(const bool value)
         :
@@ -154,15 +160,17 @@ public:
         {}
 
         //- Construct from std::string, string, word
-        Switch(const std::string& value)
+        //  Optionally allow bad words, and catch the error elsewhere
+        Switch(const std::string& value, const bool allowInvalid=false)
         :
-            switch_(asEnum(value))
+            switch_(asEnum(value, allowInvalid))
         {}
 
         //- Construct from character array
-        Switch(const char* value)
+        //  Optionally allow bad words, and catch the error elsewhere
+        Switch(const char* value, const bool allowInvalid=false)
         :
-            switch_(asEnum(std::string(value)))
+            switch_(asEnum(std::string(value, allowInvalid)))
         {}
 
         //- Construct from Istream
@@ -178,12 +186,28 @@ public:
         );
 
 
+    // Member Functions
+
+        //- Return true if the Switch has a valid value
+        bool valid() const
+        {
+            return switch_ <= Switch::NONE;
+        }
+
+
     // Member Operators
 
         //- Conversion to bool
         operator bool() const
         {
             return (switch_ & 0x1);
+        }
+
+        //- Assignment from enumerated value
+        const Switch& operator=(const switchType sw)
+        {
+            switch_ = sw;
+            return *this;
         }
 
         //- Assignment from bool
