@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,23 +44,17 @@ const char* Foam::Switch::names[Foam::Switch::INVALID+1] =
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
-Foam::Switch::switchType Foam::Switch::asEnum(const bool b)
-{
-    return b ? Switch::TRUE : Switch::FALSE;
-}
-
-
 Foam::Switch::switchType Foam::Switch::asEnum
 (
     const std::string& str,
     const bool allowInvalid
 )
 {
-    for (int sw = 0; sw < Switch::INVALID; sw++)
+    for (int sw = 0; sw < Switch::INVALID; ++sw)
     {
         if (str == names[sw])
         {
-            // convert n/y to no/yes (perhaps should deprecate y/n)
+            // convert n/y to no/yes - perhaps should deprecate y/n
             if (sw == Switch::NO_1 || sw == Switch::NONE)
             {
                 return Switch::NO;
@@ -78,56 +72,12 @@ Foam::Switch::switchType Foam::Switch::asEnum
 
     if (!allowInvalid)
     {
-        FatalErrorIn("Switch::asEnum(const std::string&)")
+        FatalErrorIn("Switch::asEnum(const std::string&, const bool)")
             << "unknown switch word " << str << nl
             << abort(FatalError);
     }
 
     return Switch::INVALID;
-}
-
-
-bool Foam::Switch::asBool(const switchType sw)
-{
-    // relies on (INVALID & 0x1) evaluating to false
-    return (sw & 0x1);
-}
-
-
-bool Foam::Switch::asBool
-(
-    const std::string& str,
-    const bool allowInvalid
-)
-{
-    // allow invalid values, but catch after for correct error message
-    switchType sw = asEnum(str, true);
-
-    if (sw == Switch::INVALID)
-    {
-        if (!allowInvalid)
-        {
-            FatalErrorIn("Switch::asBool(const std::string&)")
-                << "unknown switch word " << str << nl
-                << abort(FatalError);
-        }
-
-        return false;
-    }
-
-    return (sw & 0x1);
-}
-
-
-const char* Foam::Switch::asText(const bool b)
-{
-    return b ? names[Switch::TRUE] : names[Switch::FALSE];
-}
-
-
-const char* Foam::Switch::asText(const switchType sw)
-{
-    return names[sw];
 }
 
 
@@ -143,6 +93,18 @@ Foam::Switch Foam::Switch::lookupOrAddToDict
 
 
 // * * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * * //
+
+bool Foam::Switch::valid() const
+{
+    return switch_ <= Switch::NONE;
+}
+
+
+const char* Foam::Switch::asText() const
+{
+    return names[switch_];
+}
+
 
 bool Foam::Switch::readIfPresent(const word& name, const dictionary& dict)
 {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ Foam::Istream& Foam::operator>>(Istream& is, Switch& s)
 
     if (t.isLabel())
     {
-        s.switch_ = Switch::asEnum(bool(t.labelToken()));
+        s = bool(t.labelToken());
     }
     else if (t.isWord())
     {
@@ -57,12 +57,12 @@ Foam::Istream& Foam::operator>>(Istream& is, Switch& s)
 
         if (sw.valid())
         {
-            s.switch_ = sw.switch_;
+            s = sw;
         }
         else
         {
             is.setBad();
-            FatalIOErrorIn("operator>>(Istream&, Switch&)", is)
+            FatalIOErrorIn("operator>>(Istream&, bool/Switch&)", is)
                 << "expected 'true/false', 'on/off' ... found " << t.wordToken()
                 << exit(FatalIOError);
 
