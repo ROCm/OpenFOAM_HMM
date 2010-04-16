@@ -106,6 +106,10 @@ tmp<Field<Type> > jumpCyclicFvPatchField<Type>::patchNeighbourField() const
     Field<Type>& pnf = tpnf();
 
     tmp<Field<scalar> > tjf = jump();
+    if (!this->cyclicPatch().owner())
+    {
+        tjf = -tjf;
+    }
     const Field<scalar>& jf = tjf();
 
     if (this->doTransform())
@@ -149,6 +153,10 @@ void jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
     if (&psiInternal == &this->internalField())
     {
         tmp<Field<scalar> > tjf = jump();
+        if (!this->cyclicPatch().owner())
+        {
+            tjf = -tjf;
+        }
         const Field<scalar>& jf = tjf();
 
         forAll(*this, facei)
