@@ -129,7 +129,7 @@ public:
         //  allowable timestep
         virtual label nSubCycles() const = 0;
 
-        //- Calculate the wall interaction between parcels
+        //- Calculate the wall interaction for a parcel
         virtual void evaluateWall
         (
             typename CloudType::parcelType& p,

@@ -372,13 +372,51 @@ void Foam::InteractionLists<ParticleType>::fillReferredParticleCloud()
     {
         forAll(referredParticles_, refCellI)
         {
-            const IDLList<ParticleType>& refCell = referredParticles_[refCellI];
+            const IDLList<ParticleType>& refCell =
+            referredParticles_[refCellI];
 
             forAllConstIter(typename IDLList<ParticleType>, refCell, iter)
             {
                 cloud_.addParticle(iter().clone().ptr());
             }
         }
+    }
+}
+
+
+template<class ParticleType>
+void Foam::InteractionLists<ParticleType>::prepareWallDataToRefer()
+{
+    referredWallData_.setSize
+    (
+        wallFaceIndexAndTransformToDistribute_.size()
+    );
+
+    const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
+
+    forAll(referredWallData_, rWVI)
+    {
+        const labelPair& wfiat = wallFaceIndexAndTransformToDistribute_[rWVI];
+
+        label wallFaceIndex = globalTransforms_.index(wfiat);
+
+        // const vector& transform = globalTransforms_.transform
+        // (
+        //     globalTransforms_.transformIndex(wfiat)
+        // );
+
+        label patchI = mesh_.boundaryMesh().patchID()
+        [
+            wallFaceIndex - mesh_.nInternalFaces()
+        ];
+
+        label patchFaceI =
+            wallFaceIndex
+          - mesh_.boundaryMesh()[patchI].start();
+
+        // Need to transform velocity when tensor transforms are
+        // supported
+        referredWallData_[rWVI] = U.boundaryField()[patchI][patchFaceI];
     }
 }
 
@@ -394,27 +432,23 @@ void Foam::InteractionLists<ParticleType>::writeReferredWallFaces() const
 
     forAll(referredWallFaces_, rWFI)
     {
-        const Tuple2<face, pointField>& rwf = referredWallFaces_[rWFI];
+        const referredWallFace& rwf = referredWallFaces_[rWFI];
 
-        forAll(rwf.first(), fPtI)
+        forAll(rwf, fPtI)
         {
-            meshTools::writeOBJ
-            (
-                str,
-                rwf.second()[rwf.first()[fPtI]]
-            );
+            meshTools::writeOBJ(str, rwf.points()[rwf[fPtI]]);
         }
 
         str<< 'f';
 
-        forAll(rwf.first(), fPtI)
+        forAll(rwf, fPtI)
         {
             str<< ' ' << fPtI + offset;
         }
 
         str<< nl;
 
-        offset += rwf.first().size();
+        offset += rwf.size();
     }
 }
 
@@ -426,7 +460,8 @@ Foam::InteractionLists<ParticleType>::InteractionLists
 (
     const polyMesh& mesh,
     scalar maxDistance,
-    Switch writeCloud
+    Switch writeCloud,
+    const word& UName
 )
 :
     mesh_(mesh),
@@ -443,9 +478,12 @@ Foam::InteractionLists<ParticleType>::InteractionLists
     cellIndexAndTransformToDistribute_(),
     wallFaceIndexAndTransformToDistribute_(),
     referredWallFaces_(),
+    UName_(UName),
+    referredWallData_(),
     referredParticles_()
 {
-    Info<< "Building InteractionLists" << endl;
+    Info<< "Building InteractionLists with interaction distance "
+        << maxDistance_ << endl;
 
     Random rndGen(419715);
 
@@ -704,6 +742,10 @@ Foam::InteractionLists<ParticleType>::InteractionLists
 
     // Determine which wall faces to refer
 
+    // The referring of wall patch data relies on patches having the same
+    // index on each processor.
+    mesh_.boundaryMesh().checkParallelSync(true);
+
     // Determine the index of all of the wall faces on this processor
     DynamicList<label> localWallFaces;
 
@@ -913,9 +955,9 @@ Foam::InteractionLists<ParticleType>::InteractionLists
     // Refer wall faces to the appropriate processor
     referredWallFaces_.setSize(wallFaceIndexAndTransformToDistribute_.size());
 
-    forAll(referredWallFaces_, rwfI)
+    forAll(referredWallFaces_, rWFI)
     {
-        const labelPair& wfiat = wallFaceIndexAndTransformToDistribute_[rwfI];
+        const labelPair& wfiat = wallFaceIndexAndTransformToDistribute_[rWFI];
 
         label wallFaceIndex = globalTransforms_.index(wfiat);
 
@@ -924,18 +966,19 @@ Foam::InteractionLists<ParticleType>::InteractionLists
             globalTransforms_.transformIndex(wfiat)
         );
 
-        Tuple2<face, pointField>& rwf = referredWallFaces_[rwfI];
+        const face& f = mesh_.faces()[wallFaceIndex];
 
-        const labelList& facePts = mesh_.faces()[wallFaceIndex];
+        label patchI = mesh_.boundaryMesh().patchID()
+        [
+            wallFaceIndex - mesh_.nInternalFaces()
+        ];
 
-        rwf.first() = face(identity(facePts.size()));
-
-        rwf.second().setSize(facePts.size());
-
-        forAll(facePts, fPtI)
-        {
-            rwf.second()[fPtI] = mesh_.points()[facePts[fPtI]] - transform;
-        }
+        referredWallFaces_[rWFI] = referredWallFace
+        (
+            face(identity(f.size())),
+            f.points(mesh_.points()) - transform,
+            patchI
+        );
     }
 
     wallFaceMap().distribute(referredWallFaces_);
@@ -1034,6 +1077,8 @@ void Foam::InteractionLists<ParticleType>::sendReferredData
     PstreamBuffers& pBufs
 )
 {
+    prepareWallDataToRefer();
+
     prepareParticlesToRefer(cellOccupancy);
 
     for (label domain = 0; domain < Pstream::nProcs(); domain++)
@@ -1057,8 +1102,10 @@ void Foam::InteractionLists<ParticleType>::sendReferredData
         }
     }
 
-    // Start sending and receiving but do not block.
-    pBufs.finishedSends(false);
+    // Using the mapDistribute to start sending and receiving the
+    // buffer but not block, i.e. it is calling
+    //     pBufs.finishedSends(false);
+    wallFaceMap().send(pBufs, referredWallData_);
 };
 
 
@@ -1092,6 +1139,8 @@ void Foam::InteractionLists<ParticleType>::receiveReferredData
     }
 
     fillReferredParticleCloud();
+
+    wallFaceMap().receive(pBufs, referredWallData_);
 }
 
 

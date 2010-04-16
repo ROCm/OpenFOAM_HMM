@@ -61,6 +61,7 @@ SourceFiles
 
 #include "polyMesh.H"
 #include "globalIndexAndTransform.H"
+#include "referredWallFace.H"
 #include "indexedOctree.H"
 #include "Tuple2.H"
 #include "treeDataCell.H"
@@ -142,7 +143,13 @@ class InteractionLists
         List<labelPair> wallFaceIndexAndTransformToDistribute_;
 
         //- Referred wall faces
-        List<Tuple2<face, pointField> > referredWallFaces_;
+        List<referredWallFace> referredWallFaces_;
+
+        //- Velocity field name, default to "U"
+        const word UName_;
+
+        //- Referred wall face velocity field values;
+        List<vector> referredWallData_;
 
         //- Referred particle container
         List<IDLList<ParticleType> > referredParticles_;
@@ -187,6 +194,10 @@ class InteractionLists
         //- Fill the referredParticles so that it will be written out
         void fillReferredParticleCloud();
 
+        //- Populate the referredWallData container with data that
+        //  will be referred.
+        void prepareWallDataToRefer();
+
         //- Write the referred wall faces out for debug
         void writeReferredWallFaces() const;
 
@@ -206,7 +217,8 @@ public:
         (
             const polyMesh& mesh,
             scalar maxDistance,
-            Switch writeCloud = false
+            Switch writeCloud = false,
+            const word& UName = "U"
         );
 
     // Destructor
@@ -270,7 +282,10 @@ public:
             wallFaceIndexAndTransformToDistribute() const;
 
             //- Return access to the referred wall faces
-            const List<Tuple2<face, pointField> >& referredWallFaces() const;
+            const List<referredWallFace>& referredWallFaces() const;
+
+            //- Return access to the referred wall data
+            const List<vector>& referredWallData() const;
 
             //- Return access to the referred particle container
             inline const List<IDLList<ParticleType> >&
@@ -278,7 +293,6 @@ public:
 
             //- Return non-const access to the referred particle container
             inline List<IDLList<ParticleType> >& referredParticles();
-
 };
 
 

@@ -61,6 +61,32 @@ void Foam::WallSpringSliderDashpot<CloudType>::findMinMaxProperties
     rMin /= 2.0;
 }
 
+template <class CloudType>
+void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
+(
+    typename CloudType::parcelType& p,
+    const point& site,
+    scalar pNu,
+    scalar pE,
+    scalar Estar,
+    scalar kN
+) const
+{
+    vector r_PW = p.position() - site;
+
+    scalar normalOverlapMag = p.d()/2 - mag(r_PW);
+
+    vector rHat_PW = r_PW/(mag(r_PW) + VSMALL);
+
+    scalar etaN = alpha_*sqrt(p.mass()*kN)*pow025(normalOverlapMag);
+
+    vector fN_PW =
+    rHat_PW
+    *(kN*pow(normalOverlapMag, b_) - etaN*(p.U() & rHat_PW));
+
+    p.f() += fN_PW;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -152,38 +178,14 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 
     forAll(flatSites, siteI)
     {
-        vector r_PW = p.position() - flatSites[siteI];
-
-        scalar normalOverlapMag = p.d()/2 - mag(r_PW);
-
-        vector rHat_PW = r_PW/(mag(r_PW) + VSMALL);
-
-        scalar etaN = alpha_*sqrt(p.mass()*kN)*pow025(normalOverlapMag);
-
-        vector fN_PW =
-            rHat_PW
-           *(kN*pow(normalOverlapMag, b_) - etaN*(p.U() & rHat_PW));
-
-        p.f() += fN_PW;
+        evaluateWall(p, flatSites[siteI], pNu, pE, Estar, kN);
     }
-
-    // Treating sharp sites like flat sites
 
     forAll(sharpSites, siteI)
     {
-        vector r_PW = p.position() - sharpSites[siteI];
+        // Treating sharp sites like flat sites
 
-        scalar normalOverlapMag = p.d()/2 - mag(r_PW);
-
-        vector rHat_PW = r_PW/(mag(r_PW) + VSMALL);
-
-        scalar etaN = alpha_*sqrt(p.mass()*kN)*pow025(normalOverlapMag);
-
-        vector fN_PW =
-            rHat_PW
-           *(kN*pow(normalOverlapMag, b_) - etaN*(p.U() & rHat_PW));
-
-        p.f() += fN_PW;
+        evaluateWall(p, sharpSites[siteI], pNu, pE, Estar, kN);
     }
 }
 

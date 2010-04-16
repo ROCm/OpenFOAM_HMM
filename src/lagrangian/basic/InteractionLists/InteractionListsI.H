@@ -121,10 +121,18 @@ wallFaceIndexAndTransformToDistribute() const
 
 
 template<class ParticleType>
-const Foam::List<Foam::Tuple2<Foam::face, Foam::pointField> >&
+const Foam::List<Foam::referredWallFace>&
 Foam::InteractionLists<ParticleType>::referredWallFaces() const
 {
     return referredWallFaces_;
+}
+
+
+template<class ParticleType>
+const Foam::List<Foam::vector>&
+Foam::InteractionLists<ParticleType>::referredWallData() const
+{
+    return referredWallData_;
 }
 
 

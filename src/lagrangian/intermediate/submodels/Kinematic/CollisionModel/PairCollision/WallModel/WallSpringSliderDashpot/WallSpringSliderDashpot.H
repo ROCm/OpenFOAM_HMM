@@ -81,6 +81,18 @@ class WallSpringSliderDashpot
             scalar& vMagMax
         ) const;
 
+        //- Calculate the wall interaction for a parcel at a given site
+        void evaluateWall
+        (
+            typename CloudType::parcelType& p,
+            const point& site,
+            scalar pNu,
+            scalar pE,
+            scalar Estar,
+            scalar kN
+        ) const;
+
+
 public:
 
     //- Runtime type information
@@ -108,7 +120,7 @@ public:
         //  allowable timestep
         virtual label nSubCycles() const;
 
-        //- Calculate the wall interaction between parcels
+        //- Calculate the wall interaction for a parcel
         virtual void evaluateWall
         (
             typename CloudType::parcelType& p,

@@ -269,18 +269,16 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
             forAll(cellRefWallFaces, rWFI)
             {
-                const Tuple2<face, pointField>& rwf =
+                const referredWallFace& rwf =
                 il_.referredWallFaces()[cellRefWallFaces[rWFI]];
 
-                const face& f = rwf.first();
+                const pointField& pts = rwf.points();
 
-                const pointField& pts = rwf.second();
-
-                pointHit nearest = f.nearestPoint(pos, pts);
+                pointHit nearest = rwf.nearestPoint(pos, pts);
 
                 if (nearest.distance() < r)
                 {
-                    vector normal = f.normal(pts);
+                    vector normal = rwf.normal(pts);
 
                     normal /= mag(normal);
 
