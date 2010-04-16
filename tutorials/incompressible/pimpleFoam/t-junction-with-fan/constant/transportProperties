@@ -9,42 +9,30 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    location    "0";
-    object      k;
+    class       dictionary;
+    location    "constant";
+    object      transportProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [ 0 2 -2 0 0 0 0 ];
+transportModel  Newtonian;
 
-internalField   uniform 1;
+nu              nu [ 0 2 -1 0 0 0 0 ] 1e-05;
 
-boundaryField
+CrossPowerLawCoeffs
 {
-    inlet
-    {
-        type            turbulentIntensityKineticEnergyInlet;
-        intensity       0.05;       // 5% turbulent intensity
-        value           uniform 1;
-    }
+    nu0             nu0 [ 0 2 -1 0 0 0 0 ] 1e-06;
+    nuInf           nuInf [ 0 2 -1 0 0 0 0 ] 1e-06;
+    m               m [ 0 0 1 0 0 0 0 ] 1;
+    n               n [ 0 0 0 0 0 0 0 ] 1;
+}
 
-    outlet1
-    {
-        type            inletOutlet;
-        inletValue      uniform 1;
-    }
-
-    outlet2
-    {
-        type            inletOutlet;
-        inletValue      uniform 1;
-    }
-
-    defaultFaces
-    {
-        type            kqRWallFunction;
-        value           uniform 0;
-    }
+BirdCarreauCoeffs
+{
+    nu0             nu0 [ 0 2 -1 0 0 0 0 ] 1e-06;
+    nuInf           nuInf [ 0 2 -1 0 0 0 0 ] 1e-06;
+    k               k [ 0 0 1 0 0 0 0 ] 0;
+    n               n [ 0 0 0 0 0 0 0 ] 1;
 }
 
 

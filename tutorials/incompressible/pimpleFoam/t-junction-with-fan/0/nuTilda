@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,42 +10,43 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
-    object      k;
+    object      nuTilda;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [ 0 2 -2 0 0 0 0 ];
+dimensions      [0 2 -1 0 0 0 0];
 
-internalField   uniform 1;
+internalField   uniform 0;
 
 boundaryField
 {
     inlet
     {
-        type            turbulentIntensityKineticEnergyInlet;
-        intensity       0.05;       // 5% turbulent intensity
-        value           uniform 1;
+        type            zeroGradient;
     }
 
     outlet1
     {
-        type            inletOutlet;
-        inletValue      uniform 1;
+        type            zeroGradient;
     }
 
     outlet2
     {
-        type            inletOutlet;
-        inletValue      uniform 1;
+        type            zeroGradient;
     }
-
-    defaultFaces
+    baffles
     {
-        type            kqRWallFunction;
+        type            zeroGradient;
+    }
+    fan
+    {
+        type            cyclic;
         value           uniform 0;
     }
+    defaultFaces
+    {
+        type            zeroGradient;
+    }
 }
-
 
 // ************************************************************************* //

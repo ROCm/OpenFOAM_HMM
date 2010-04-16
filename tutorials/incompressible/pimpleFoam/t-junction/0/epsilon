@@ -27,33 +27,23 @@ boundaryField
         mixingLength    0.01;       // 1cm - half channel height
         value           uniform 1;
     }
+
     outlet1
     {
         type            inletOutlet;
         inletValue      uniform 1;
-        value           uniform 1;
     }
 
     outlet2
     {
         type            inletOutlet;
         inletValue      uniform 1;
-        value           uniform 1;
     }
-    baffles
-    {
-        type            epsilonWallFunction;
-        value           uniform 1;
-    }
-    fan
-    {
-        type            cyclic;
-        value           uniform 1;
-    }
+
     defaultFaces
     {
         type            epsilonWallFunction;
-        value           uniform 1;
+        value           uniform 0;
     }
 }
 
