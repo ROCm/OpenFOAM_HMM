@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -28,6 +27,8 @@ License
 #include "fvMesh.H"
 #include "volFields.H"
 #include "fvcGrad.H"
+#include "mathematicalConstants.H"
+#include "electromagneticConstants.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -46,11 +47,19 @@ Foam::particleForces::particleForces
     virtualMass_(dict_.lookup("virtualMass")),
     Cvm_(0.0),
     pressureGradient_(dict_.lookup("pressureGradient")),
-    UName_(dict_.lookupOrDefault<word>("U", "U"))
+    paramagnetic_(dict_.lookup("paramagnetic")),
+    magneticSusceptibility_(0.0),
+    UName_(dict_.lookupOrDefault<word>("U", "U")),
+    HdotGradHName_(dict_.lookupOrDefault<word>("HdotGradH", "HdotGradH"))
 {
     if (virtualMass_)
     {
         dict_.lookup("Cvm") >> Cvm_;
+    }
+
+    if (paramagnetic_)
+    {
+        dict_.lookup("magneticSusceptibility") >> magneticSusceptibility_;
     }
 }
 
@@ -65,7 +74,10 @@ Foam::particleForces::particleForces(const particleForces& f)
     virtualMass_(f.virtualMass_),
     Cvm_(f.Cvm_),
     pressureGradient_(f.pressureGradient_),
-    UName_(f.UName_)
+    paramagnetic_(f.paramagnetic_),
+    magneticSusceptibility_(f.magneticSusceptibility_),
+    UName_(f.UName_),
+    HdotGradHName_(f.HdotGradHName_)
 {}
 
 
@@ -103,9 +115,27 @@ Foam::Switch Foam::particleForces::virtualMass() const
 }
 
 
+Foam::scalar Foam::particleForces::Cvm() const
+{
+    return Cvm_;
+}
+
+
 Foam::Switch Foam::particleForces::pressureGradient() const
 {
     return pressureGradient_;
+}
+
+
+Foam::Switch Foam::particleForces::paramagnetic() const
+{
+    return paramagnetic_;
+}
+
+
+Foam::scalar Foam::particleForces::magneticSusceptibility() const
+{
+    return magneticSusceptibility_;
 }
 
 
@@ -115,11 +145,17 @@ const Foam::word& Foam::particleForces::UName() const
 }
 
 
+const Foam::word& Foam::particleForces::HdotGradHName() const
+{
+    return HdotGradHName_;
+}
+
+
 void Foam::particleForces::cacheFields(const bool store)
 {
     if (store && pressureGradient_)
     {
-        const volVectorField U = mesh_.lookupObject<volVectorField>(UName_);
+        const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
         gradUPtr_ = fvc::grad(U).ptr();
     }
     else
@@ -140,10 +176,11 @@ Foam::vector Foam::particleForces::calcCoupled
     const scalar rhoc,
     const scalar rho,
     const vector& Uc,
-    const vector& U
+    const vector& U,
+    const scalar d
 ) const
 {
-    vector Ftot = vector::zero;
+    vector accelTot = vector::zero;
 
     // Virtual mass force
     if (virtualMass_)
@@ -152,17 +189,17 @@ Foam::vector Foam::particleForces::calcCoupled
         (
             "Foam::particleForces::calcCoupled(...) - virtual mass force"
         );
-//        Ftot += Cvm_*rhoc/rho*d(Uc - U)/dt;
+//        accelTot += Cvm_*rhoc/rho*d(Uc - U)/dt;
     }
 
     // Pressure gradient force
     if (pressureGradient_)
     {
         const volTensorField& gradU = *gradUPtr_;
-        Ftot += rhoc/rho*(U & gradU[cellI]);
+        accelTot += rhoc/rho*(U & gradU[cellI]);
     }
 
-    return Ftot;
+    return accelTot;
 }
 
 
@@ -173,20 +210,47 @@ Foam::vector Foam::particleForces::calcNonCoupled
     const scalar rhoc,
     const scalar rho,
     const vector& Uc,
-    const vector& U
+    const vector& U,
+    const scalar d
 ) const
 {
-    vector Ftot = vector::zero;
+    vector accelTot = vector::zero;
 
     // Gravity force
     if (gravity_)
     {
-        Ftot += g_*(1.0 - rhoc/rho);
+        accelTot += g_*(1.0 - rhoc/rho);
     }
 
-    return Ftot;
+    // Magnetic field force
+
+    if (paramagnetic_)
+    {
+        const volVectorField& HdotGradH = mesh_.lookupObject<volVectorField>
+        (
+            HdotGradHName_
+        );
+
+        accelTot +=
+            3.0*constant::electromagnetic::mu0.value()/rho
+           *magneticSusceptibility_/(magneticSusceptibility_ + 3)
+           *HdotGradH[cellI];
+
+        // force is:
+
+        // 4.0
+        // *constant::mathematical::pi
+        // *constant::electromagnetic::mu0.value()
+        // *pow3(d/2)
+        // *magneticSusceptibility_/(magneticSusceptibility_ + 3)
+        // *HdotGradH[cellI];
+
+        // which is divided by mass ((4/3)*pi*r^3*rho) to produce
+        // acceleration
+    }
+
+    return accelTot;
 }
 
 
 // ************************************************************************* //
-

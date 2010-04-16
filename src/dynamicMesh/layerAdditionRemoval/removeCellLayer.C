@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
     Remove a layer of cells and prepare addressing data
@@ -58,7 +57,7 @@ bool Foam::layerAdditionRemoval::validCollapse() const
 
     label nBoundaryHits = 0;
 
-    forAll (mf, faceI)
+    forAll(mf, faceI)
     {
         if
         (
@@ -115,7 +114,7 @@ void Foam::layerAdditionRemoval::removeCellLayer
     const labelList& mc =
         topoChanger().mesh().faceZones()[faceZoneID_.index()].masterCells();
 
-    forAll (mc, cellI)
+    forAll(mc, cellI)
     {
         ref.setAction(polyRemoveCell(mc[cellI]));
     }
@@ -126,11 +125,11 @@ void Foam::layerAdditionRemoval::removeCellLayer
 
     const cellList& cells = mesh.cells();
 
-    forAll (mc, cellI)
+    forAll(mc, cellI)
     {
         const cell& curCell = cells[mc[cellI]];
 
-        forAll (curCell, faceI)
+        forAll(curCell, faceI)
         {
             // Check if the face is in the master zone.  If not, remove it
             if
@@ -150,7 +149,7 @@ void Foam::layerAdditionRemoval::removeCellLayer
     }
 
     // Remove all points that will be collapsed
-    forAll (ptc, pointI)
+    forAll(ptc, pointI)
     {
         ref.setAction(polyRemovePoint(ptc[pointI]));
     }
@@ -167,7 +166,7 @@ void Foam::layerAdditionRemoval::removeCellLayer
     const labelList& meshPoints =
         mesh.faceZones()[faceZoneID_.index()]().meshPoints();
 
-    forAll (ptc, pointI)
+    forAll(ptc, pointI)
     {
         removedPointMap.insert(ptc[pointI], meshPoints[pointI]);
     }
@@ -181,11 +180,11 @@ void Foam::layerAdditionRemoval::removeCellLayer
     // Make a list of faces to be modified using the map to avoid duplicates
     labelHashSet facesToModify(ptc.size()*primitiveMesh::facesPerPoint_);
 
-    forAll (ptc, pointI)
+    forAll(ptc, pointI)
     {
         const labelList& curFaces = pf[ptc[pointI]];
 
-        forAll (curFaces, faceI)
+        forAll(curFaces, faceI)
         {
             if (!facesToRemoveMap.found(curFaces[faceI]))
             {
@@ -198,7 +197,7 @@ void Foam::layerAdditionRemoval::removeCellLayer
 
 //Pout << "faces to modify: " << ftm << endl;
 
-    forAll (ftm, faceI)
+    forAll(ftm, faceI)
     {
         // For every face to modify, copy the face and re-map the vertices.
         // It is known all the faces will be changed since they hang off
@@ -207,7 +206,7 @@ void Foam::layerAdditionRemoval::removeCellLayer
 
         face newFace(faces[curFaceID]);
 
-        forAll (newFace, pointI)
+        forAll(newFace, pointI)
         {
             Map<label>::iterator rpmIter =
                 removedPointMap.find(newFace[pointI]);
@@ -270,7 +269,7 @@ void Foam::layerAdditionRemoval::removeCellLayer
     const labelList& mf = mesh.faceZones()[faceZoneID_.index()];
     const boolList& mfFlip = mesh.faceZones()[faceZoneID_.index()].flipMap();
 
-    forAll (mf, faceI)
+    forAll(mf, faceI)
     {
         // Grab the owner and neighbour of the faces to be collapsed and get rid
         // of the cell to be removed

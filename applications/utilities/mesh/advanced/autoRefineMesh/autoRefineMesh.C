@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
     Utility to refine cells near to a surface.
@@ -293,20 +292,14 @@ void addCutNeighbours
 
     labelHashSet addCutFaces(cutCells.size());
 
-    for
-    (
-        labelHashSet::const_iterator iter = cutCells.begin();
-        iter != cutCells.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, cutCells, iter)
     {
-        label cellI = iter.key();
-
+        const label cellI = iter.key();
         const labelList& cFaces = mesh.cells()[cellI];
 
         forAll(cFaces, i)
         {
-            label faceI = cFaces[i];
+            const label faceI = cFaces[i];
 
             if (mesh.isInternalFace(faceI))
             {
@@ -332,12 +325,7 @@ void addCutNeighbours
     Info<< "    Selected an additional " << addCutFaces.size()
         << " neighbours of cutCells to refine" << endl;
 
-    for
-    (
-        labelHashSet::const_iterator iter = addCutFaces.begin();
-        iter != addCutFaces.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, addCutFaces, iter)
     {
         cutCells.insert(iter.key());
     }
@@ -387,21 +375,15 @@ bool limitRefinementLevel
 
     labelHashSet addCutCells(cutCells.size());
 
-    for
-    (
-        labelHashSet::const_iterator iter = cutCells.begin();
-        iter != cutCells.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, cutCells, iter)
     {
         // cellI will be refined.
-        label cellI = iter.key();
-
+        const label cellI = iter.key();
         const labelList& cCells = mesh.cellCells()[cellI];
 
         forAll(cCells, i)
         {
-            label nbr = cCells[i];
+            const label nbr = cCells[i];
 
             if (!excludeCells.found(nbr) && !cutCells.found(nbr))
             {
@@ -420,12 +402,8 @@ bool limitRefinementLevel
         Info<< "Added an additional " << addCutCells.size() << " cells"
             << " to satisfy 1:" << limitDiff << " refinement level"
             << endl;
-        for
-        (
-            labelHashSet::const_iterator iter = addCutCells.begin();
-            iter != addCutCells.end();
-            ++iter
-        )
+
+        forAllConstIter(labelHashSet, addCutCells, iter)
         {
             cutCells.insert(iter.key());
         }

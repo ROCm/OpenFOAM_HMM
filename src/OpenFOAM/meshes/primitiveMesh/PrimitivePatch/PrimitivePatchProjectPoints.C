@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
     For every point on the patch find the closest face on the target side.
@@ -85,7 +84,7 @@ projectPoints
     // Estimate face centre of target side
     Field<PointType> masterFaceCentres(targetPatch.size());
 
-    forAll (masterFaceCentres, faceI)
+    forAll(masterFaceCentres, faceI)
     {
         masterFaceCentres[faceI] =
             average(masterFaces[faceI].points(masterPoints));
@@ -102,7 +101,7 @@ projectPoints
     label curFace = 0;
     label nNSquaredSearches = 0;
 
-    forAll (slavePointOrder, pointI)
+    forAll(slavePointOrder, pointI)
     {
         // Pick up slave point and direction
         const label curLocalPointLabel = slavePointOrder[pointI];
@@ -180,7 +179,7 @@ projectPoints
                     sqrDistance =
                         magSqr(missPlanePoint - masterFaceCentres[curFace]);
 
-                    forAll (masterNbrs, nbrI)
+                    forAll(masterNbrs, nbrI)
                     {
                         if
                         (
@@ -225,7 +224,7 @@ projectPoints
             result[curLocalPointLabel] = objectHit(false, -1);
             scalar minDistance = GREAT;
 
-            forAll (masterFaces, faceI)
+            forAll(masterFaces, faceI)
             {
                 PointHit<PointType> curHit =
                     masterFaces[faceI].ray
@@ -326,7 +325,7 @@ projectFaceCentres
 
     const typename ToPatch::PointFieldType& masterPoints = targetPatch.points();
 
-    forAll (masterFaceCentres, faceI)
+    forAll(masterFaceCentres, faceI)
     {
         masterFaceCentres[faceI] =
             masterFaces[faceI].centre(masterPoints);
@@ -349,7 +348,7 @@ projectFaceCentres
     label curFace = 0;
     label nNSquaredSearches = 0;
 
-    forAll (slaveFaceOrder, faceI)
+    forAll(slaveFaceOrder, faceI)
     {
         // pick up slave point and direction
         const label curLocalFaceLabel = slaveFaceOrder[faceI];
@@ -426,7 +425,7 @@ projectFaceCentres
 
                     const labelList& masterNbrs = masterFaceFaces[curFace];
 
-                    forAll (masterNbrs, nbrI)
+                    forAll(masterNbrs, nbrI)
                     {
                         if
                         (
@@ -468,7 +467,7 @@ projectFaceCentres
             result[curLocalFaceLabel] = objectHit(false, -1);
             scalar minDistance = GREAT;
 
-            forAll (masterFaces, faceI)
+            forAll(masterFaces, faceI)
             {
                 PointHit<PointType> curHit =
                     masterFaces[faceI].ray

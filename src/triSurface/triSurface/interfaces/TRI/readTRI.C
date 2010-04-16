@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
     TRI (triangle) file reader. Comes out of e.g. AC3D.
@@ -38,14 +37,9 @@ Description
 #include "readHexLabel.H"
 #include "stringList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool triSurface::readTRI(const fileName& TRIfileName)
+bool Foam::triSurface::readTRI(const fileName& TRIfileName)
 {
     IFstream TRIfile(TRIfileName);
 
@@ -114,12 +108,12 @@ bool triSurface::readTRI(const fileName& TRIfileName)
 
         label region  = -1;
 
-        HashTable<label, string>::const_iterator findName =
+        HashTable<label, string>::const_iterator fnd =
             STLsolidNames.find(solidName);
 
-        if (findName != STLsolidNames.end())
+        if (fnd != STLsolidNames.end())
         {
-            region = findName();
+            region = fnd();
         }
         else
         {
@@ -136,22 +130,17 @@ bool triSurface::readTRI(const fileName& TRIfileName)
 
     pointField rawPoints(STLpoints.size());
 
-    label i = 0;
-    for
-    (
-        SLList<STLpoint>::iterator iter = STLpoints.begin();
-        iter != STLpoints.end();
-        ++iter
-    )
+    label pointI = 0;
+    forAllConstIter(SLList<STLpoint>, STLpoints, iter)
     {
-        rawPoints[i++] = *iter;
+        rawPoints[pointI++] = *iter;
     }
 
     setSize(STLlabels.size());
 
-    label pointI = 0;
-    SLList<label>::iterator iter = STLlabels.begin();
-    forAll (*this, i)
+    pointI = 0;
+    SLList<label>::const_iterator iter = STLlabels.begin();
+    forAll(*this, i)
     {
         operator[](i)[0] = pointI++;
         operator[](i)[1] = pointI++;
@@ -176,9 +165,5 @@ bool triSurface::readTRI(const fileName& TRIfileName)
     return true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

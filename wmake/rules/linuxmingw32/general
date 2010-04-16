@@ -1,18 +1,10 @@
-CPP        = /lib/cpp $(GFLAGS)
 LD         = mingw32-ld
 
 PROJECT_LIBS = -l$(WM_PROJECT)
 
+include $(GENERAL_RULES)/standard
+
 include $(RULES)/X
-
-include $(GENERAL_RULES)/sourceToDep
-
-include $(GENERAL_RULES)/flex
-include $(GENERAL_RULES)/flex++
-include $(GENERAL_RULES)/byacc
-include $(GENERAL_RULES)/btyacc++
-include $(GENERAL_RULES)/moc
-
 include $(RULES)/c
 include $(RULES)/c++
 

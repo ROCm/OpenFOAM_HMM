@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
     Foam::Particle
@@ -60,6 +59,8 @@ class polyPatch;
 template<class ParticleType>
 class Particle;
 
+// Friend Operators
+
 template<class ParticleType>
 Ostream& operator<<
 (
@@ -67,6 +68,11 @@ Ostream& operator<<
     const Particle<ParticleType>&
 );
 
+template<class ParticleType>
+bool operator==(const Particle<ParticleType>&, const Particle<ParticleType>&);
+
+template<class ParticleType>
+bool operator!=(const Particle<ParticleType>&, const Particle<ParticleType>&);
 
 /*---------------------------------------------------------------------------*\
                            Class Particle Declaration
@@ -134,7 +140,7 @@ protected:
         label origId_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Return the 'lambda' value for the position, p, on the face,
         // where, p = from + lamda*(to - from)
@@ -468,12 +474,24 @@ public:
         //- Write the particle data
         void write(Ostream& os, bool writeFields) const;
 
-    // Ostream Operator
+    // Friend Operators
 
         friend Ostream& operator<< <ParticleType>
         (
             Ostream&,
             const Particle<ParticleType>&
+        );
+
+        friend bool operator== <ParticleType>
+        (
+            const Particle<ParticleType>& pA,
+            const Particle<ParticleType>& pB
+        );
+
+        friend bool operator!= <ParticleType>
+        (
+            const Particle<ParticleType>& pA,
+            const Particle<ParticleType>& pB
         );
 };
 

@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,15 +19,13 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
 #include "faceSource.H"
 #include "surfaceFields.H"
 #include "volFields.H"
-#include "IOList.H"
 #include "ListListOps.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -62,14 +60,14 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::setFieldValues
 
     if (obr_.foundObject<sf>(fieldName))
     {
-        return filterField(obr_.lookupObject<sf>(fieldName));
+        return filterField(obr_.lookupObject<sf>(fieldName), true);
     }
     else if (obr_.foundObject<vf>(fieldName))
     {
-        return filterField(obr_.lookupObject<vf>(fieldName));
+        return filterField(obr_.lookupObject<vf>(fieldName), true);
     }
 
-    return tmp<Field<Type> >(new Field<Type>(0.0));
+    return tmp<Field<Type> >(new Field<Type>(0));
 }
 
 
@@ -104,6 +102,16 @@ Type Foam::fieldValues::faceSource::processValues
             result = sum(values*weightField)/sum(weightField);
             break;
         }
+        case opMin:
+        {
+            result = min(values);
+            break;
+        }
+        case opMax:
+        {
+            result = max(values);
+            break;
+        }
         default:
         {
             // Do nothing
@@ -123,10 +131,13 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
 
     if (ok)
     {
+        // Get (correctly oriented) field
         Field<Type> values = combineFields(setFieldValues<Type>(fieldName));
 
-        scalarField magSf = combineFields(filterField(mesh().magSf()));
+        // Get unoriented magSf
+        scalarField magSf = combineFields(filterField(mesh().magSf(), false));
 
+        // Get (correctly oriented) weighting field
         scalarField weightField =
             combineFields(setFieldValues<scalar>(weightFieldName_));
 
@@ -136,7 +147,7 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
 
             if (valueOutput_)
             {
-                IOList<Type>
+                IOField<Type>
                 (
                     IOobject
                     (
@@ -169,7 +180,8 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
 template<class Type>
 Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::filterField
 (
-    const GeometricField<Type, fvPatchField, volMesh>& field
+    const GeometricField<Type, fvPatchField, volMesh>& field,
+    const bool applyOrientation
 ) const
 {
     tmp<Field<Type> > tvalues(new Field<Type>(faceId_.size()));
@@ -197,8 +209,14 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::filterField
                 << "    Unable to process internal faces for volume field "
                 << field.name() << nl << abort(FatalError);
         }
+    }
 
-        values[i] *= flipMap_[i];
+    if (applyOrientation)
+    {
+        forAll(values, i)
+        {
+            values[i] *= faceSign_[i];
+        }
     }
 
     return tvalues;
@@ -208,7 +226,8 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::filterField
 template<class Type>
 Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::filterField
 (
-    const GeometricField<Type, fvsPatchField, surfaceMesh>& field
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& field,
+    const bool applyOrientation
 ) const
 {
     tmp<Field<Type> > tvalues(new Field<Type>(faceId_.size()));
@@ -226,8 +245,14 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::filterField
         {
             values[i] = field[faceI];
         }
+    }
 
-        values[i] *= flipMap_[i];
+    if (applyOrientation)
+    {
+        forAll(values, i)
+        {
+            values[i] *= faceSign_[i];
+        }
     }
 
     return tvalues;

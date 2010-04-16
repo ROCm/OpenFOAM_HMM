@@ -9,10 +9,10 @@
 # License
 #     This file is part of OpenFOAM.
 #
-#     OpenFOAM is free software; you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by the
-#     Free Software Foundation; either version 2 of the License, or (at your
-#     option) any later version.
+#     OpenFOAM is free software: you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
 #
 #     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
 #     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -20,8 +20,7 @@
 #     for more details.
 #
 #     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM; if not, write to the Free Software Foundation,
-#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
 #     foamUpdateCaseFileHeader
@@ -33,41 +32,70 @@
 #     Also removes consecutive blank lines from file.
 #
 #------------------------------------------------------------------------------
-foamVersion=$WM_PROJECT_VERSION
-
 usage() {
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
 Usage: ${0##*/} [OPTION] <file1> ... <fileN>
 
 options:
-  -v VER  specifies the version to be written in the header
-  -h      help
+  -version <ver>    specifies the version to be written in the header
+  -help             print the usage
 
   Updates the header of application files and removes consecutive blank lines.
   By default, writes current OpenFOAM version in the header.
-  An alternative version can be specified with the -v option.
+  An alternative version can be specified with the -version option.
 
 USAGE
     exit 1
 }
 
+#------------------------------------------------------------------------------
 
-printHeader() {
+# parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)
+        usage
+        ;;
+    -v | -version)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        version="$2"
+        shift 2
+        ;;
+    -*)
+        usage "unknown option: '$*'"
+        ;;
+    *)
+        break
+        ;;
+    esac
+done
+
+# constant width for version - default to WM_PROJECT_VERSION
+version=$(printf %-36s ${version:-$WM_PROJECT_VERSION})
+
+[ $# -ge 1 ] || usage
+
+#------------------------------------------------------------------------------
+
+printHeader()
+{
     cat<<HEADER
 /*--------------------------------*- C++ -*----------------------------------*\\
 | =========                 |                                                 |
 | \\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\\\    /   O peration     | Version:  ${foamVersion}  |
+|  \\\\    /   O peration     | Version:  $version  |
 |   \\\\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\\\/     M anipulation  |                                                 |
 \\*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
-    format      ${1};
-    class       ${2};
-    object      ${3};
+    format      $1;
+    class       $2;
+    object      $3;
 }
 HEADER
 }
@@ -76,68 +104,40 @@ HEADER
 #
 # extract attribute '$1' from file '$2'
 #
-FoamFileAttribute() {
+FoamFileAttribute()
+{
     sed -n -e 's/[ ;]*$//' -e "s/^ *$1 *//p" $2
 }
 
 
 #
-# OPTIONS
+# main
 #
-opts=$(getopt hv: $*)
-if [ $? -ne 0 ]
-then
-    echo "Aborting due to invalid option"
-    usage
-fi
-eval set -- '$opts'
-while [ "$1" != "--" ]
-do
-    case $1 in
-    -v)
-        foamVersion=$2
-        shift
-        ;;
-    -h)
-        usage
-        ;;
-    esac
-    shift
-done
-shift
 
-[ $# -ge 1 ] || usage
-
-
-# constant width for version
-foamVersion=$(printf %-36s $foamVersion)
-
-#
-# MAIN
-#
-unset NOTE
-
+tmpFile=FoamFile.tmp$$
 for caseFile
 do
     if grep FoamFile $caseFile >/dev/null 2>&1
     then
         echo "Updating case file: $caseFile"
-        sed -n '/FoamFile/,/}/p' $caseFile > FoamFile.tmp
+        sed -n '/FoamFile/,/}/p' $caseFile > $tmpFile
 
-        FORMAT=$(FoamFileAttribute format FoamFile.tmp)
-        CLASS=$(FoamFileAttribute  class  FoamFile.tmp)
-        OBJECT=$(FoamFileAttribute object FoamFile.tmp)
-        # extract NOTE?
+        format=$(FoamFileAttribute format $tmpFile)
+        class=$(FoamFileAttribute  class  $tmpFile)
+        object=$(FoamFileAttribute object $tmpFile)
+        # extract note? - needs special handling
+        unset note
 
-        printHeader $FORMAT $CLASS $OBJECT $NOTE > FoamFile.tmp
-        sed '1,/}/d' $caseFile | sed '/./,/^$/!d' >> FoamFile.tmp
+        printHeader $format $class $object "$note" > $tmpFile
+
+        sed '1,/}/d' $caseFile | sed '/./,/^$/!d' >> $tmpFile
 
         # use cat to avoid removing/replace soft-links
-        [ -s FoamFile.tmp ] && cat FoamFile.tmp >| $caseFile
-        rm -f FoamFile.tmp 2>/dev/null
+        [ -s $tmpFile ] && cat $tmpFile >| $caseFile
+        rm -f $tmpFile 2>/dev/null
     else
         echo " Invalid case file: $caseFile" 1>&2
     fi
 done
 
-#------------------------------------------------------------------------------
+#------------------------------------------------------------------ end-of-file

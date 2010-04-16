@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
     reconstructPar
@@ -191,6 +190,10 @@ int main(int argc, char *argv[])
          || objects.lookupClass(volSymmTensorField::typeName).size()
          || objects.lookupClass(volTensorField::typeName).size()
          || objects.lookupClass(surfaceScalarField::typeName).size()
+         || objects.lookupClass(surfaceVectorField::typeName).size()
+         || objects.lookupClass(surfaceSphericalTensorField::typeName).size()
+         || objects.lookupClass(surfaceSymmTensorField::typeName).size()
+         || objects.lookupClass(surfaceTensorField::typeName).size()
         )
         {
             Info<< "Reconstructing FV fields" << nl << endl;
@@ -231,6 +234,26 @@ int main(int argc, char *argv[])
             );
 
             fvReconstructor.reconstructFvSurfaceFields<scalar>
+            (
+                objects,
+                selectedFields
+            );
+            fvReconstructor.reconstructFvSurfaceFields<vector>
+            (
+                objects,
+                selectedFields
+            );
+            fvReconstructor.reconstructFvSurfaceFields<sphericalTensor>
+            (
+                objects,
+                selectedFields
+            );
+            fvReconstructor.reconstructFvSurfaceFields<symmTensor>
+            (
+                objects,
+                selectedFields
+            );
+            fvReconstructor.reconstructFvSurfaceFields<tensor>
             (
                 objects,
                 selectedFields

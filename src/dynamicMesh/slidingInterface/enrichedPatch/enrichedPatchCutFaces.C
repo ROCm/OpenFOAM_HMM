@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
     Calculating cut faces of the enriched patch, together with the addressing
@@ -100,7 +99,7 @@ void Foam::enrichedPatch::calcCutFaces() const
         (pp.size()*primitiveMesh::edgesPerPoint_);
 
 
-    forAll (lf, faceI)
+    forAll(lf, faceI)
     {
         const face& curLocalFace = lf[faceI];
         const face& curGlobalFace = enFaces[faceI];
@@ -120,7 +119,7 @@ void Foam::enrichedPatch::calcCutFaces() const
 //         }
 //         {
 //             pointField facePoints = curLocalFace.points(lp);
-//             forAll (curLocalFace, pointI)
+//             forAll(curLocalFace, pointI)
 //             {
 //                 Pout << "v " << facePoints[pointI].x() << " "
 //                     << facePoints[pointI].y() << " "
@@ -142,7 +141,7 @@ void Foam::enrichedPatch::calcCutFaces() const
 
         // Insert the edges of current face into the seed list.
         edgeList cfe = curLocalFace.edges();
-        forAll (curLocalFace, edgeI)
+        forAll(curLocalFace, edgeI)
         {
             edgeSeeds.append(cfe[edgeI]);
         }
@@ -215,7 +214,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                 scalar atanTurn = -GREAT;
                 label bestAtanPoint = -1;
 
-                forAll (nextPoints, nextI)
+                forAll(nextPoints, nextI)
                 {
                     // Exclude the point we are coming from; there will always
                     // be more than one edge, so this is safe
@@ -315,7 +314,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                     // If the edge corresponds to a starting face edge,
                     // mark the starting face edge as true
 
-                    forAll (cutFaceLocal, cutI)
+                    forAll(cutFaceLocal, cutI)
                     {
                         const edge curCutFaceEdge
                         (
@@ -425,9 +424,9 @@ void Foam::enrichedPatch::calcCutFaces() const
 
                                 // For every current face, try to find it in the
                                 // zero-list
-                                forAll (curMasterFaces, i)
+                                forAll(curMasterFaces, i)
                                 {
-                                    forAll (masterFacesOfPZero, j)
+                                    forAll(masterFacesOfPZero, j)
                                     {
                                         if
                                         (
@@ -445,7 +444,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                             // If all point are found attempt matching
                             if (!miss)
                             {
-                                forAll (hits, pointI)
+                                forAll(hits, pointI)
                                 {
                                     if (hits[pointI] == cutFaceGlobal.size())
                                     {
@@ -523,7 +522,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                         faceSizeDebug *= 2;
 
                         // Check for duplicate points in the face
-                        forAll (cutFaceGlobalPoints, checkI)
+                        forAll(cutFaceGlobalPoints, checkI)
                         {
                             for
                             (

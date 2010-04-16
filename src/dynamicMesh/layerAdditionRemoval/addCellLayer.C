@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -61,7 +60,7 @@ Foam::tmp<Foam::vectorField> Foam::layerAdditionRemoval::extrusionDir() const
         // Detected a valid layer.  Grab the point and face collapse mapping
         const labelList& ptc = pointsPairing();
 
-        forAll (extrusionDir, mpI)
+        forAll(extrusionDir, mpI)
         {
             extrusionDir[mpI] = points[ptc[mpI]] - points[mp[mpI]];
         }
@@ -126,7 +125,7 @@ void Foam::layerAdditionRemoval::addCellLayer
     // Add the new points
     labelList addedPoints(mp.size());
 
-    forAll (mp, pointI)
+    forAll(mp, pointI)
     {
         // Add the point nominal thickness away from the master zone point
         // and grab the label
@@ -160,7 +159,7 @@ void Foam::layerAdditionRemoval::addCellLayer
 
     labelList addedCells(mf.size());
 
-    forAll (mf, faceI)
+    forAll(mf, faceI)
     {
         addedCells[faceI] =
             ref.setAction
@@ -188,13 +187,13 @@ void Foam::layerAdditionRemoval::addCellLayer
     // owner: if the master cell is equal to the face owner the flux
     // remains the same; otherwise it is flipped
 
-    forAll (zoneFaces, faceI)
+    forAll(zoneFaces, faceI)
     {
         const face oldFace = zoneFaces[faceI].reverseFace();
 
         face newFace(oldFace.size());
 
-        forAll (oldFace, pointI)
+        forAll(oldFace, pointI)
         {
             newFace[pointI] = addedPoints[oldFace[pointI]];
         }
@@ -236,7 +235,7 @@ void Foam::layerAdditionRemoval::addCellLayer
 
     const faceList& faces = mesh.faces();
 // Pout << "mfFlip: " << mfFlip << endl;
-    forAll (mf, faceI)
+    forAll(mf, faceI)
     {
         const label curfaceID = mf[faceI];
 
@@ -382,7 +381,7 @@ void Foam::layerAdditionRemoval::addCellLayer
         label patchID = -1;
         label zoneID = -1;
 
-        forAll (curFaces, faceI)
+        forAll(curFaces, faceI)
         {
             const label cf = curFaces[faceI];
 
@@ -448,11 +447,11 @@ void Foam::layerAdditionRemoval::addCellLayer
 
     const cellList& cells = mesh.cells();
 
-    forAll (mc, cellI)
+    forAll(mc, cellI)
     {
         const labelList& curFaces = cells[mc[cellI]];
 
-        forAll (curFaces, faceI)
+        forAll(curFaces, faceI)
         {
             // Check if the face belongs to the master zone; if not add it
             if (zoneMesh.whichZone(curFaces[faceI]) != faceZoneID_.index())
@@ -465,7 +464,7 @@ void Foam::layerAdditionRemoval::addCellLayer
     // Create the master layer point map
     Map<label> masterLayerPointMap(2*mp.size());
 
-    forAll (mp, pointI)
+    forAll(mp, pointI)
     {
         masterLayerPointMap.insert
         (
@@ -477,7 +476,7 @@ void Foam::layerAdditionRemoval::addCellLayer
     // Grab the list of faces of the master layer
     const labelList masterCellFaces = masterCellFaceMap.toc();
 
-    forAll (masterCellFaces, faceI)
+    forAll(masterCellFaces, faceI)
     {
         // Attempt to renumber the face using the masterLayerPointMap.
         // Missing point remain the same
@@ -490,7 +489,7 @@ void Foam::layerAdditionRemoval::addCellLayer
 
         bool changed = false;
 
-        forAll (oldFace, pointI)
+        forAll(oldFace, pointI)
         {
             if (masterLayerPointMap.found(oldFace[pointI]))
             {

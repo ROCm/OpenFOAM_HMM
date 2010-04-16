@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
     Utility to refine cells next to patches.
@@ -113,12 +112,7 @@ int main(int argc, char *argv[])
             << cells.instance()/cells.local()/cells.name()
             << nl << endl;
 
-        for
-        (
-            cellSet::const_iterator iter = cells.begin();
-            iter != cells.end();
-            ++iter
-        )
+        forAllConstIter(cellSet, cells, iter)
         {
             cutCells.erase(iter.key());
         }
@@ -132,7 +126,7 @@ int main(int argc, char *argv[])
 
     forAll(meshPoints, pointI)
     {
-        label meshPointI = meshPoints[pointI];
+        const label meshPointI = meshPoints[pointI];
 
         vertOnPatch[meshPointI] = true;
     }
@@ -152,8 +146,7 @@ int main(int argc, char *argv[])
 
         forAll(pEdges, pEdgeI)
         {
-            label edgeI = pEdges[pEdgeI];
-
+            const label edgeI = pEdges[pEdgeI];
             const edge& e = mesh.edges()[edgeI];
 
             label otherPointI = e.otherVertex(meshPointI);

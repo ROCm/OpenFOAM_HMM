@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -61,8 +60,7 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
 :
     polyPatchList(),
     regIOobject(io),
-    mesh_(mesh),
-    neighbourEdgesPtr_(NULL)
+    mesh_(mesh)
 {
     if (readOpt() == IOobject::MUST_READ)
     {
@@ -110,22 +108,19 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
 :
     polyPatchList(size),
     regIOobject(io),
-    mesh_(pm),
-    neighbourEdgesPtr_(NULL)
+    mesh_(pm)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::polyBoundaryMesh::~polyBoundaryMesh()
-{
-    deleteDemandDrivenData(neighbourEdgesPtr_);
-}
+{}
 
 
 void Foam::polyBoundaryMesh::clearGeom()
 {
-    forAll (*this, patchi)
+    forAll(*this, patchi)
     {
         operator[](patchi).clearGeom();
     }
@@ -134,9 +129,10 @@ void Foam::polyBoundaryMesh::clearGeom()
 
 void Foam::polyBoundaryMesh::clearAddressing()
 {
-    deleteDemandDrivenData(neighbourEdgesPtr_);
+    neighbourEdgesPtr_.clear();
+    patchIDPtr_.clear();
 
-    forAll (*this, patchi)
+    forAll(*this, patchi)
     {
         operator[](patchi).clearAddressing();
     }
@@ -201,10 +197,10 @@ Foam::polyBoundaryMesh::neighbourEdges() const
             << " boundaries." << endl;
     }
 
-    if (!neighbourEdgesPtr_)
+    if (!neighbourEdgesPtr_.valid())
     {
-        neighbourEdgesPtr_ = new List<labelPairList>(size());
-        List<labelPairList>& neighbourEdges = *neighbourEdgesPtr_;
+        neighbourEdgesPtr_.reset(new List<labelPairList>(size()));
+        List<labelPairList>& neighbourEdges = neighbourEdgesPtr_();
 
         // Initialize.
         label nEdgePairs = 0;
@@ -320,7 +316,36 @@ Foam::polyBoundaryMesh::neighbourEdges() const
         }
     }
 
-    return *neighbourEdgesPtr_;
+    return neighbourEdgesPtr_();
+}
+
+
+const Foam::labelList& Foam::polyBoundaryMesh::patchID() const
+{
+    if (!patchIDPtr_.valid())
+    {
+        patchIDPtr_.reset
+        (
+            new labelList
+            (
+                mesh_.nFaces()
+              - mesh_.nInternalFaces()
+            )
+        );
+        labelList& patchID = patchIDPtr_();
+
+        const polyBoundaryMesh& bm = *this;
+
+        forAll(bm, patchI)
+        {
+            label bFaceI = bm[patchI].start() - mesh_.nInternalFaces();
+            forAll(bm[patchI], i)
+            {
+                patchID[bFaceI++] = patchI;
+            }
+        }
+    }
+    return patchIDPtr_();
 }
 
 
@@ -330,7 +355,7 @@ Foam::wordList Foam::polyBoundaryMesh::names() const
 
     wordList t(patches.size());
 
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         t[patchI] = patches[patchI].name();
     }
@@ -345,7 +370,7 @@ Foam::wordList Foam::polyBoundaryMesh::types() const
 
     wordList t(patches.size());
 
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         t[patchI] = patches[patchI].type();
     }
@@ -360,7 +385,7 @@ Foam::wordList Foam::polyBoundaryMesh::physicalTypes() const
 
     wordList t(patches.size());
 
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         t[patchI] = patches[patchI].physicalType();
     }
@@ -373,7 +398,7 @@ Foam::label Foam::polyBoundaryMesh::findPatchID(const word& patchName) const
 {
     const polyPatchList& patches = *this;
 
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         if (patches[patchI].name() == patchName)
         {
@@ -415,7 +440,7 @@ Foam::label Foam::polyBoundaryMesh::whichPatch(const label faceIndex) const
         return -1;
     }
 
-    forAll (*this, patchI)
+    forAll(*this, patchI)
     {
         const polyPatch& bp = operator[](patchI);
 
@@ -493,7 +518,7 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
 
     label nonProcI = 0;
 
-    forAll (bm, patchI)
+    forAll(bm, patchI)
     {
         if (!isA<processorPolyPatch>(bm[patchI]))
         {
@@ -569,7 +594,7 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
 
     bool hasError = false;
 
-    forAll (bm, patchI)
+    forAll(bm, patchI)
     {
         if (bm[patchI].start() != nextPatchStart && !hasError)
         {
@@ -654,7 +679,8 @@ void Foam::polyBoundaryMesh::movePoints(const pointField& p)
 
 void Foam::polyBoundaryMesh::updateMesh()
 {
-    deleteDemandDrivenData(neighbourEdgesPtr_);
+    neighbourEdgesPtr_.clear();
+    patchIDPtr_.clear();
 
     PstreamBuffers pBufs(Pstream::defaultCommsType);
 

@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,7 +44,7 @@ void Foam::lduAddressing::calcLosort() const
 
     const unallocLabelList& nbr = upperAddr();
 
-    forAll (nbr, nbrI)
+    forAll(nbr, nbrI)
     {
         nNbrOfFace[nbr[nbrI]]++;
     }
@@ -53,7 +52,7 @@ void Foam::lduAddressing::calcLosort() const
     // Create temporary neighbour addressing
     labelListList cellNbrFaces(size());
 
-    forAll (cellNbrFaces, cellI)
+    forAll(cellNbrFaces, cellI)
     {
         cellNbrFaces[cellI].setSize(nNbrOfFace[cellI]);
     }
@@ -62,7 +61,7 @@ void Foam::lduAddressing::calcLosort() const
     nNbrOfFace = 0;
 
     // Scatter the neighbour faces
-    forAll (nbr, nbrI)
+    forAll(nbr, nbrI)
     {
         cellNbrFaces[nbr[nbrI]][nNbrOfFace[nbr[nbrI]]] = nbrI;
 
@@ -77,11 +76,11 @@ void Foam::lduAddressing::calcLosort() const
     // Set counter for losort
     label lstI = 0;
 
-    forAll (cellNbrFaces, cellI)
+    forAll(cellNbrFaces, cellI)
     {
         const labelList& curNbr = cellNbrFaces[cellI];
 
-        forAll (curNbr, curNbrI)
+        forAll(curNbr, curNbrI)
         {
             lst[lstI] = curNbr[curNbrI];
             lstI++;
@@ -110,7 +109,7 @@ void Foam::lduAddressing::calcOwnerStart() const
     label nOwnStart = 0;
     label i = 1;
 
-    forAll (own, faceI)
+    forAll(own, faceI)
     {
         label curOwn = own[faceI];
 
@@ -149,7 +148,7 @@ void Foam::lduAddressing::calcLosortStart() const
     label nLsrtStart = 0;
     label i = 0;
 
-    forAll (lsrt, faceI)
+    forAll(lsrt, faceI)
     {
         // Get neighbour
         const label curNbr = nbr[lsrt[faceI]];

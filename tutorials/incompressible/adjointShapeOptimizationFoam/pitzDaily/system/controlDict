@@ -37,12 +37,12 @@ writeFormat     ascii;
 
 writePrecision  12;
 
-writeCompression uncompressed;
+writeCompression off;
 
 timeFormat      general;
 
 timePrecision   12;
 
-runTimeModifiable yes;
+runTimeModifiable true;
 
 // ************************************************************************* //

@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
     ansysToFoam
@@ -269,13 +268,8 @@ int main(int argc, char *argv[])
 
     pointField points(slPoints.size());
 
-    label i=0;
-    for
-    (
-        SLList<point>::iterator pointIter = slPoints.begin();
-        pointIter != slPoints.end();
-        ++pointIter
-    )
+    label i = 0;
+    forAllConstIter(SLList<point>, slPoints, pointIter)
     {
         // Scale points for the given scale factor
         points[i++] = scaleFactor * pointIter();
@@ -284,13 +278,8 @@ int main(int argc, char *argv[])
 
     labelList pointMap(maxNodei+1);
 
-    i=0;
-    for
-    (
-        SLList<label>::iterator pointMapIter = slPointMap.begin();
-        pointMapIter != slPointMap.end();
-        ++pointMapIter
-    )
+    i = 0;
+    forAllConstIter(SLList<label>, slPointMap, pointMapIter)
     {
         pointMap[pointMapIter()] = i++;
     }
@@ -299,13 +288,8 @@ int main(int argc, char *argv[])
 
     labelList cellMap(maxCelli+1);
 
-    i=0;
-    for
-    (
-        SLList<label>::iterator cellMapIter = slCellMap.begin();
-        cellMapIter != slCellMap.end();
-        ++cellMapIter
-    )
+    i = 0;
+    forAllConstIter(SLList<label>, slCellMap, cellMapIter)
     {
         cellMap[cellMapIter()] = i++;
     }
@@ -324,12 +308,7 @@ int main(int argc, char *argv[])
     cellShapeList cellShapes(slCellLabels.size());
     label nCells = 0;
 
-    for
-    (
-        SLPtrList<labelList>::iterator cellIter = slCellLabels.begin();
-        cellIter != slCellLabels.end();
-        ++cellIter
-    )
+    forAllConstIter(SLPtrList<labelList>, slCellLabels, cellIter)
     {
         if      // Tetrahedron
         (

@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -33,6 +32,7 @@ License
 #include "InjectionModel.H"
 #include "PatchInteractionModel.H"
 #include "PostProcessingModel.H"
+#include "SurfaceFilmModel.H"
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
@@ -77,6 +77,8 @@ void Foam::KinematicCloud<ParcelType>::evolveCloud()
         muInterpolator(),
         g_.value()
     );
+
+    this->surfaceFilm().inject(td);
 
     this->injection().inject(td);
 
@@ -186,6 +188,15 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
             *this
         )
     ),
+    surfaceFilmModel_
+    (
+        SurfaceFilmModel<KinematicCloud<ParcelType> >::New
+        (
+            this->particleProperties_,
+            *this,
+            g
+        )
+    ),
     UIntegrator_
     (
         vectorIntegrationScheme::New
@@ -271,14 +282,12 @@ template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::info() const
 {
     Info<< "Cloud: " << this->name() << nl
-        << "    Total number of parcels added   = "
-        << this->injection().parcelsAddedTotal() << nl
-        << "    Total mass introduced           = "
-        << this->injection().massInjected() << nl
         << "    Current number of parcels       = "
         << returnReduce(this->size(), sumOp<label>()) << nl
         << "    Current mass in system          = "
         << returnReduce(massInSystem(), sumOp<scalar>()) << nl;
+    this->injection().info(Info);
+    this->surfaceFilm().info(Info);
 }
 
 

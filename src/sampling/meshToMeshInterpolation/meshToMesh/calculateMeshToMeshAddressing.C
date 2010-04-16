@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
     private member of meshToMesh.
@@ -72,12 +71,12 @@ void Foam::meshToMesh::calcAddressing()
     // set reference to boundary
     const polyPatchList& patchesFrom = fromMesh_.boundaryMesh();
 
-    forAll (patchesFrom, patchI)
+    forAll(patchesFrom, patchI)
     {
         // get reference to cells next to the boundary
         const unallocLabelList& bCells = patchesFrom[patchI].faceCells();
 
-        forAll (bCells, faceI)
+        forAll(bCells, faceI)
         {
             boundaryCell[bCells[faceI]] = true;
         }
@@ -127,7 +126,7 @@ void Foam::meshToMesh::calcAddressing()
         oc
     );
 
-    forAll (toMesh_.boundaryMesh(), patchi)
+    forAll(toMesh_.boundaryMesh(), patchi)
     {
         const polyPatch& toPatch = toMesh_.boundaryMesh()[patchi];
 
@@ -244,7 +243,7 @@ void Foam::meshToMesh::cellAddresses
     const vectorField& centresFrom = fromMesh.cellCentres();
     const labelListList& cc = fromMesh.cellCells();
 
-    forAll (points, toI)
+    forAll(points, toI)
     {
         // pick up target position
         const vector& p = points[toI];
@@ -261,7 +260,7 @@ void Foam::meshToMesh::cellAddresses
             // set the current list of neighbouring cells
             const labelList& neighbours = cc[curCell];
 
-            forAll (neighbours, nI)
+            forAll(neighbours, nI)
             {
                 scalar curDistSqr =
                     magSqr(p - centresFrom[neighbours[nI]]);
@@ -301,7 +300,7 @@ void Foam::meshToMesh::cellAddresses
                 // set the current list of neighbouring cells
                 const labelList& neighbours = cc[curCell];
 
-                forAll (neighbours, nI)
+                forAll(neighbours, nI)
                 {
                     // search through all the neighbours.
                     // If point is in neighbour reset current cell
@@ -320,12 +319,12 @@ void Foam::meshToMesh::cellAddresses
                     // set the current list of neighbouring cells
                     const labelList& neighbours = cc[curCell];
 
-                    forAll (neighbours, nI)
+                    forAll(neighbours, nI)
                     {
                         // set the current list of neighbour-neighbouring cells
                         const labelList& nn = cc[neighbours[nI]];
 
-                        forAll (nn, nI)
+                        forAll(nn, nI)
                         {
                             // search through all the neighbours.
                             // If point is in neighbour reset current cell

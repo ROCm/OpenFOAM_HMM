@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,43 +19,38 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
 #include "cellSource.H"
 #include "fvMesh.H"
 #include "volFields.H"
-#include "IOList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
+defineTypeNameAndDebug(Foam::fieldValues::cellSource, 0);
+
+template<>
+const char* Foam::NamedEnum<Foam::fieldValues::cellSource::sourceType, 1>::
+names[] =
 {
-    namespace fieldValues
-    {
-        defineTypeNameAndDebug(cellSource, 0);
-    }
+    "cellZone"
+};
 
-    template<>
-    const char* NamedEnum<fieldValues::cellSource::sourceType, 1>::
-        names[] = {"cellZone"};
+const Foam::NamedEnum<Foam::fieldValues::cellSource::sourceType, 1>
+    Foam::fieldValues::cellSource::sourceTypeNames_;
 
-    const NamedEnum<fieldValues::cellSource::sourceType, 1>
-        fieldValues::cellSource::sourceTypeNames_;
+template<>
+const char* Foam::NamedEnum<Foam::fieldValues::cellSource::operationType, 7>::
+names[] =
+{
+    "none", "sum", "volAverage",
+    "volIntegrate", "weightedAverage", "min", "max"
+};
 
-    template<>
-    const char* NamedEnum<fieldValues::cellSource::operationType, 5>::
-        names[] =
-        {
-            "none", "sum", "volAverage", "volIntegrate", "weightedAverage"
-        };
-
-    const NamedEnum<fieldValues::cellSource::operationType, 5>
-        fieldValues::cellSource::operationTypeNames_;
-
-}
+const Foam::NamedEnum<Foam::fieldValues::cellSource::operationType, 7>
+    Foam::fieldValues::cellSource::operationTypeNames_;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -85,10 +80,11 @@ void Foam::fieldValues::cellSource::setCellZoneCells()
     }
 
     cellId_.setSize(count);
+    nCells_ = returnReduce(cellId_.size(), sumOp<label>());
 
     if (debug)
     {
-        Info<< "Original cell zone size = " << cZone.size()
+        Pout<< "Original cell zone size = " << cZone.size()
             << ", new size = " << count << endl;
     }
 }
@@ -114,8 +110,8 @@ void Foam::fieldValues::cellSource::initialise(const dictionary& dict)
     }
 
     Info<< type() << " " << name_ << ":" << nl
-        << "    total cells  = " << cellId_.size() << nl
-        << "    total volume = " << sum(filterField(mesh().V()))
+        << "    total cells  = " << nCells_ << nl
+        << "    total volume = " << gSum(filterField(mesh().V()))
         << nl << endl;
 
     if (operation_ == opWeightedAverage)
@@ -149,7 +145,7 @@ void Foam::fieldValues::cellSource::writeFileHeader()
     {
         outputFilePtr_()
             << "# Source : " << sourceTypeNames_[source_] << " "
-            << sourceName_ <<  nl << "# Cells  : " << cellId_.size() << nl
+            << sourceName_ <<  nl << "# Cells  : " << nCells_ << nl
             << "# Time" << tab << "sum(V)";
 
         forAll(fields_, i)
@@ -177,6 +173,7 @@ Foam::fieldValues::cellSource::cellSource
     fieldValue(name, obr, dict, loadFromFiles),
     source_(sourceTypeNames_.read(dict.lookup("source"))),
     operation_(operationTypeNames_.read(dict.lookup("operation"))),
+    nCells_(0),
     cellId_()
 {
     read(dict);
@@ -239,4 +236,3 @@ void Foam::fieldValues::cellSource::write()
 
 
 // ************************************************************************* //
-

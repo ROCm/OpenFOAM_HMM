@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
     Add pointZones/faceZones/cellZones to the mesh from similar named
@@ -101,12 +100,7 @@ int main(int argc, char *argv[])
 
     //Pout<< "pointSets:" << pointObjects.names() << endl;
 
-    for
-    (
-        IOobjectList::const_iterator iter = pointObjects.begin();
-        iter != pointObjects.end();
-        ++iter
-    )
+    forAllConstIter(IOobjectList, pointObjects, iter)
     {
         // Not in memory. Load it.
         pointSet set(*iter());
@@ -150,12 +144,7 @@ int main(int argc, char *argv[])
 
     //Pout<< "faceSets:" << faceObjects.names() << endl;
 
-    for
-    (
-        IOobjectList::const_iterator iter = faceObjects.begin();
-        iter != faceObjects.end();
-        ++iter
-    )
+    forAllConstIter(IOobjectList, faceObjects, iter)
     {
         // Not in memory. Load it.
         faceSet set(*iter());
@@ -289,12 +278,7 @@ int main(int argc, char *argv[])
 
     //Pout<< "cellSets:" << cellObjects.names() << endl;
 
-    for
-    (
-        IOobjectList::const_iterator iter = cellObjects.begin();
-        iter != cellObjects.end();
-        ++iter
-    )
+    forAllConstIter(IOobjectList, cellObjects, iter)
     {
         if (!slaveCellSets.found(iter.key()))
         {

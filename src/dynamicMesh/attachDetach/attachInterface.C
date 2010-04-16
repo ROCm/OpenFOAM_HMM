@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -82,7 +81,7 @@ void Foam::attachDetach::attachInterface
 
     const labelList removedPoints = removedPointMap.toc();
 
-    forAll (removedPoints, pointI)
+    forAll(removedPoints, pointI)
     {
         ref.setAction(polyRemovePoint(removedPoints[pointI]));
     }
@@ -101,7 +100,7 @@ void Foam::attachDetach::attachInterface
 
     const boolList& mfFlip = mesh.faceZones()[faceZoneID_.index()].flipMap();
 
-    forAll (masterFaceCells, faceI)
+    forAll(masterFaceCells, faceI)
     {
         // If slave neighbour is greater than master, face does not need
         // turning.  Modify it to become internal
@@ -156,11 +155,11 @@ void Foam::attachDetach::attachInterface
 
     // Grab all the faces off the points in the slave patch.  If the face has
     //  not been removed, add it to the map of faces to renumber
-    forAll (slaveMeshPoints, pointI)
+    forAll(slaveMeshPoints, pointI)
     {
         const labelList& curFaces = pf[slaveMeshPoints[pointI]];
 
-        forAll (curFaces, faceI)
+        forAll(curFaces, faceI)
         {
             if (!ref.faceRemoved(curFaces[faceI]))
             {
@@ -172,7 +171,7 @@ void Foam::attachDetach::attachInterface
     // Grab the faces to be renumbered
     const labelList ftm = facesToModifyMap.toc();
 
-    forAll (ftm, faceI)
+    forAll(ftm, faceI)
     {
         // For every face to modify, copy the face and re-map the vertices.
         // It is known all the faces will be changed since they hang off
@@ -181,7 +180,7 @@ void Foam::attachDetach::attachInterface
 
         face newFace(faces[curFaceID]);
 
-        forAll (newFace, pointI)
+        forAll(newFace, pointI)
         {
             Map<label>::const_iterator rpmIter =
                 removedPointMap.find(newFace[pointI]);
@@ -268,7 +267,7 @@ void Foam::attachDetach::modifyMotionPoints
         // Calculate the difference in motion point positions
         scalar pointDiff = 0;
 
-        forAll (removedPoints, pointI)
+        forAll(removedPoints, pointI)
         {
             pointDiff +=
                 mag
@@ -285,7 +284,7 @@ void Foam::attachDetach::modifyMotionPoints
     }
 
     // Put the slave point on top of the master point
-    forAll (removedPoints, pointI)
+    forAll(removedPoints, pointI)
     {
         motionPoints[removedPoints[pointI]] =
             motionPoints[removedPointMap.find(removedPoints[pointI])()];

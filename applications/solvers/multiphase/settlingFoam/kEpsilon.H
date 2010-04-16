@@ -5,8 +5,8 @@ if (turbulence)
         y.correct();
     }
 
-    dimensionedScalar k0("k0", k.dimensions(), SMALL);
-    dimensionedScalar epsilon0("epsilon0", epsilon.dimensions(), SMALL);
+    dimensionedScalar kMin("kMin", k.dimensions(), SMALL);
+    dimensionedScalar epsilonMin("epsilonMin", epsilon.dimensions(), SMALL);
 
     volScalarField divU = fvc::div(phi/fvc::interpolate(rho));
 
@@ -15,7 +15,7 @@ if (turbulence)
     tgradU.clear();
 
     volScalarField Gcoef =
-        Cmu*k/sigmak*(g & fvc::grad(rho))/(epsilon + epsilon0);
+        Cmu*k/sigmak*(g & fvc::grad(rho))/(epsilon + epsilonMin);
 
     #include "wallFunctions.H"
 
@@ -40,7 +40,7 @@ if (turbulence)
     epsEqn.relax();
     epsEqn.solve();
 
-    bound(epsilon, epsilon0);
+    bound(epsilon, epsilonMin);
 
 
     // Turbulent kinetic energy equation
@@ -60,11 +60,13 @@ if (turbulence)
       - fvm::Sp(rho*epsilon/k, k)
     );
 
-    bound(k, k0);
+    //FIXME: why no kEqn.relax()?
+
+    bound(k, kMin);
 
 
     //- Re-calculate viscosity
-    mut = rho*Cmu*sqr(k)/(epsilon + epsilon0);
+    mut = rho*Cmu*sqr(k)/(epsilon + epsilonMin);
 
     #include "wallViscosity.H"
 }

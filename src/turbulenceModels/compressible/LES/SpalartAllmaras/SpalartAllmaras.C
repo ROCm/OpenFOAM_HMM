@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -302,7 +301,7 @@ void SpalartAllmaras::correct(const tmp<volTensorField>& tgradU)
     volScalarField Stilda =
         fv3()*::sqrt(2.0)*mag(skew(gradU)) + fv2()*nuTilda_/sqr(kappa_*dTilda_);
 
-    solve
+    tmp<fvScalarMatrix> nuTildaEqn
     (
         fvm::ddt(rho(), nuTilda_)
       + fvm::div(phi(), nuTilda_)
@@ -317,6 +316,9 @@ void SpalartAllmaras::correct(const tmp<volTensorField>& tgradU)
         rho()*Cb1_*Stilda*nuTilda_
       - fvm::Sp(rho()*Cw1_*fw(Stilda)*nuTilda_/sqr(dTilda_), nuTilda_)
     );
+
+    nuTildaEqn().relax();
+    nuTildaEqn().solve();
 
     bound(nuTilda_, dimensionedScalar("zero", nuTilda_.dimensions(), 0.0));
     nuTilda_.correctBoundaryConditions();

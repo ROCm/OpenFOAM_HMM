@@ -27,6 +27,8 @@ PatchInteractionModel StandardWallInteraction;
 
 PostProcessingModel none;
 
+SurfaceFilmModel none;
+
 coupled         true;
 
 cellValueSourceCorrection on;
@@ -73,8 +75,8 @@ ManualInjectionCoeffs
         {
             minValue        5e-05;
             maxValue        0.0001;
-            d               ( 7.5e-05 );
-            n               ( 0.5 );
+            d               7.5e-05;
+            n               0.5;
         }
     }
 }
@@ -86,7 +88,7 @@ ConeInjectionCoeffs
     position        ( 0.25 0.25 0.05 );
     direction       ( 0 -1 0 );
     parcelsPerSecond 10000;
-    volumeFlowRate  Constant 0.01;
+    flowRateProfile Constant 0.01;
     Umag            Constant 50;
     thetaInner      Constant 0;
     thetaOuter      Constant 30;

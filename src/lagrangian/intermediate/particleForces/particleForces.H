@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
     Foam::particleForces
@@ -85,11 +84,21 @@ class particleForces
             //- Pressure gradient
             Switch pressureGradient_;
 
+            //- Paramagnetic force
+            Switch paramagnetic_;
+
+            //- Magnetic susceptibility of particle
+            scalar magneticSusceptibility_;
+
 
         // Additional info
 
-            //- Name of velucity field - default = "U"
+            //- Name of velocity field - default = "U"
             const word UName_;
+
+            //- Name of paramagnetic field strength field - default =
+            //  "HdotGradH"
+            const word HdotGradHName_;
 
 
 public:
@@ -129,13 +138,22 @@ public:
             Switch virtualMass() const;
 
             //- Return virtual mass force coefficient
-            Switch Cvm() const;
+            scalar Cvm() const;
 
             //- Return pressure gradient force activate switch
             Switch pressureGradient() const;
 
             //- Return name of velocity field
             const word& UName() const;
+
+            //- Return paramagnetic force activate switch
+            Switch paramagnetic() const;
+
+            //- Return magnetic susceptibility
+            scalar magneticSusceptibility() const;
+
+            //- Return name of paramagnetic field strength field
+            const word& HdotGradHName() const;
 
 
        // Evaluation
@@ -151,7 +169,8 @@ public:
                 const scalar rhoc,
                 const scalar rho,
                 const vector& Uc,
-                const vector& U
+                const vector& U,
+                const scalar d
             ) const;
 
             //- Calculate external forces applied to the particles
@@ -162,7 +181,8 @@ public:
                 const scalar rhoc,
                 const scalar rho,
                 const vector& Uc,
-                const vector& U
+                const vector& U,
+                const scalar d
             ) const;
 };
 

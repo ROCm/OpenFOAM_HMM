@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 InClass
     decompositionMethod
@@ -216,6 +215,43 @@ void Foam::decompositionMethod::calcCellCells
 }
 
 
+// Return the minimum face between two cells. Only relevant for
+// cells with multiple faces inbetween.
+Foam::label Foam::decompositionMethod::masterFace
+(
+    const polyMesh& mesh,
+    const label own,
+    const label nei
+)
+{
+    label minFaceI = labelMax;
+
+    // Count multiple faces between own and nei only once
+    const cell& ownFaces = mesh.cells()[own];
+    forAll(ownFaces, i)
+    {
+        label otherFaceI = ownFaces[i];
+
+        if (mesh.isInternalFace(otherFaceI))
+        {
+            label nbrCellI =
+            (
+                mesh.faceNeighbour()[otherFaceI] != own
+              ? mesh.faceNeighbour()[otherFaceI]
+              : mesh.faceOwner()[otherFaceI]
+            );
+
+            if (nbrCellI == nei)
+            {
+                minFaceI = min(minFaceI, otherFaceI);
+            }
+        }
+    }
+
+    return minFaceI;
+}
+
+
 void Foam::decompositionMethod::calcCSR
 (
     const polyMesh& mesh,
@@ -223,61 +259,15 @@ void Foam::decompositionMethod::calcCSR
     List<int>& xadj
 )
 {
+    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+
     // Make Metis CSR (Compressed Storage Format) storage
     //   adjncy      : contains neighbours (= edges in graph)
     //   xadj(celli) : start of information in adjncy for celli
 
-    xadj.setSize(mesh.nCells()+1);
 
-    // Initialise the number of internal faces of the cells to twice the
-    // number of internal faces
-    label nInternalFaces = 2*mesh.nInternalFaces();
-
-    // Check the boundary for coupled patches and add to the number of
-    // internal faces
-    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-
-    forAll(pbm, patchi)
-    {
-        if (isA<cyclicPolyPatch>(pbm[patchi]))
-        {
-            nInternalFaces += pbm[patchi].size();
-        }
-    }
-
-    // Create the adjncy array the size of the total number of internal and
-    // coupled faces
-    adjncy.setSize(nInternalFaces);
-
-    // Fill in xadj
-    // ~~~~~~~~~~~~
-    label freeAdj = 0;
-
-    for (label cellI = 0; cellI < mesh.nCells(); cellI++)
-    {
-        xadj[cellI] = freeAdj;
-
-        const labelList& cFaces = mesh.cells()[cellI];
-
-        forAll(cFaces, i)
-        {
-            label faceI = cFaces[i];
-
-            if
-            (
-                mesh.isInternalFace(faceI)
-             || isA<cyclicPolyPatch>(pbm[pbm.whichPatch(faceI)])
-            )
-            {
-                freeAdj++;
-            }
-        }
-    }
-    xadj[mesh.nCells()] = freeAdj;
-
-
-    // Fill in adjncy
-    // ~~~~~~~~~~~~~~
+    // Count unique faces between cells
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     labelList nFacesPerCell(mesh.nCells(), 0);
 
@@ -287,22 +277,88 @@ void Foam::decompositionMethod::calcCSR
         label own = mesh.faceOwner()[faceI];
         label nei = mesh.faceNeighbour()[faceI];
 
-        adjncy[xadj[own] + nFacesPerCell[own]++] = nei;
-        adjncy[xadj[nei] + nFacesPerCell[nei]++] = own;
+        if (faceI == masterFace(mesh, own, nei))
+        {
+            nFacesPerCell[own]++;
+            nFacesPerCell[nei]++;
+        }
     }
 
     // Coupled faces. Only cyclics done.
-    forAll(pbm, patchi)
+    HashSet<edge, Hash<edge> > cellPair(mesh.nFaces()-mesh.nInternalFaces());
+
+    forAll(pbm, patchI)
+    {
+        if (isA<cyclicPolyPatch>(pbm[patchI]))
+        {
+            const unallocLabelList& faceCells = pbm[patchI].faceCells();
+
+            label sizeby2 = faceCells.size()/2;
+
+            for (label faceI=0; faceI<sizeby2; faceI++)
+            {
+                label own = faceCells[faceI];
+                label nei = faceCells[faceI + sizeby2];
+
+                if (cellPair.insert(edge(own, nei)))
+                {
+                    nFacesPerCell[own]++;
+                    nFacesPerCell[nei]++;
+                }
+            }
+        }
+    }
+
+
+    // Size tables
+    // ~~~~~~~~~~~
+
+    // Sum nFacesPerCell
+    xadj.setSize(mesh.nCells()+1);
+
+    label nConnections = 0;
+
+    for (label cellI = 0; cellI < mesh.nCells(); cellI++)
+    {
+        xadj[cellI] = nConnections;
+        nConnections += nFacesPerCell[cellI];
+    }
+    xadj[mesh.nCells()] = nConnections;
+    adjncy.setSize(nConnections);
+
+
+
+    // Fill tables
+    // ~~~~~~~~~~~
+
+    nFacesPerCell = 0;
+
+    // Internal faces
+    for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
+    {
+        label own = mesh.faceOwner()[faceI];
+        label nei = mesh.faceNeighbour()[faceI];
+
+        if (faceI == masterFace(mesh, own, nei))
+        {
+            adjncy[xadj[own] + nFacesPerCell[own]++] = nei;
+            adjncy[xadj[nei] + nFacesPerCell[nei]++] = own;
+        }
+    }
+
+    // Coupled faces. Only cyclics done.
+    cellPair.clear();
+    forAll(pbm, patchI)
     {
         if
         (
-            isA<cyclicPolyPatch>(pbm[patchi])
-         && refCast<const cyclicPolyPatch>(pbm[patchi]).owner()
+            isA<cyclicPolyPatch>(pbm[patchI])
+         && refCast<const cyclicPolyPatch>(pbm[patchI]).owner()
         )
         {
             const cyclicPolyPatch& cycPatch = refCast<const cyclicPolyPatch>
             (
-                pbm[patchi]
+                pbm[patchI]
             );
 
             const unallocLabelList& faceCells = cycPatch.faceCells();
@@ -330,12 +386,24 @@ void Foam::decompositionMethod::calcCSR
     List<int>& xadj
 )
 {
+    labelHashSet nbrCells;
+
     // Count number of internal faces
     label nConnections = 0;
 
     forAll(cellCells, coarseI)
     {
-        nConnections += cellCells[coarseI].size();
+        nbrCells.clear();
+
+        const labelList& cCells = cellCells[coarseI];
+
+        forAll(cCells, i)
+        {
+            if (nbrCells.insert(cCells[i]))
+            {
+                nConnections++;
+            }
+        }
     }
 
     // Create the adjncy array as twice the size of the total number of
@@ -353,11 +421,16 @@ void Foam::decompositionMethod::calcCSR
     {
         xadj[coarseI] = freeAdj;
 
+        nbrCells.clear();
+
         const labelList& cCells = cellCells[coarseI];
 
         forAll(cCells, i)
         {
-            adjncy[freeAdj++] = cCells[i];
+            if (nbrCells.insert(cCells[i]))
+            {
+                adjncy[freeAdj++] = cCells[i];
+            }
         }
     }
     xadj[cellCells.size()] = freeAdj;
@@ -423,15 +496,21 @@ void Foam::decompositionMethod::calcDistributedCSR
     // Number of faces per cell
     List<int> nFacesPerCell(mesh.nCells(), 0);
 
-    // Number of coupled faces
-    label nCoupledFaces = 0;
-
     for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
     {
-        nFacesPerCell[faceOwner[faceI]]++;
-        nFacesPerCell[faceNeighbour[faceI]]++;
+        label own = faceOwner[faceI];
+        label nei = faceNeighbour[faceI];
+
+        if (faceI == masterFace(mesh, own, nei))
+        {
+            nFacesPerCell[own]++;
+            nFacesPerCell[nei]++;
+        }
     }
+
     // Handle coupled faces
+    HashSet<edge, Hash<edge> > cellPair(mesh.nFaces()-mesh.nInternalFaces());
+
     forAll(patches, patchI)
     {
         const polyPatch& pp = patches[patchI];
@@ -439,11 +518,18 @@ void Foam::decompositionMethod::calcDistributedCSR
         if (pp.coupled())
         {
             label faceI = pp.start();
+            label bFaceI = pp.start()-mesh.nInternalFaces();
 
             forAll(pp, i)
             {
-                nCoupledFaces++;
-                nFacesPerCell[faceOwner[faceI++]]++;
+                label own =  faceOwner[faceI];
+                label globalNei = globalNeighbour[bFaceI];
+                if (cellPair.insert(edge(own, globalNei)))
+                {
+                    nFacesPerCell[own]++;
+                }
+                faceI++;
+                bFaceI++;
             }
         }
     }
@@ -469,7 +555,7 @@ void Foam::decompositionMethod::calcDistributedCSR
     // Fill in adjncy
     // ~~~~~~~~~~~~~~
 
-    adjncy.setSize(2*mesh.nInternalFaces() + nCoupledFaces);
+    adjncy.setSize(freeAdj);
 
     nFacesPerCell = 0;
 
@@ -479,10 +565,17 @@ void Foam::decompositionMethod::calcDistributedCSR
         label own = faceOwner[faceI];
         label nei = faceNeighbour[faceI];
 
-        adjncy[xadj[own] + nFacesPerCell[own]++] = globalCells.toGlobal(nei);
-        adjncy[xadj[nei] + nFacesPerCell[nei]++] = globalCells.toGlobal(own);
+        if (faceI == masterFace(mesh, own, nei))
+        {
+            adjncy[xadj[own] + nFacesPerCell[own]++] =
+                globalCells.toGlobal(nei);
+            adjncy[xadj[nei] + nFacesPerCell[nei]++] =
+                globalCells.toGlobal(own);
+        }
     }
+
     // For boundary faces is offsetted coupled neighbour
+    cellPair.clear();
     forAll(patches, patchI)
     {
         const polyPatch& pp = patches[patchI];
@@ -495,9 +588,11 @@ void Foam::decompositionMethod::calcDistributedCSR
             forAll(pp, i)
             {
                 label own = faceOwner[faceI];
-                adjncy[xadj[own] + nFacesPerCell[own]++] =
-                    globalNeighbour[bFaceI];
-
+                label globalNei = globalNeighbour[bFaceI];
+                if (cellPair.insert(edge(own, globalNei)))
+                {
+                    adjncy[xadj[own] + nFacesPerCell[own]++] = globalNei;
+                }
                 faceI++;
                 bFaceI++;
             }

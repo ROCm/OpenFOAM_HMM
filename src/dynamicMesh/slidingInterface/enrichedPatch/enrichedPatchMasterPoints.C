@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -57,11 +56,11 @@ void Foam::enrichedPatch::calcMasterPointFaces() const
     const faceList& ef = enrichedFaces();
 
     // Add the original face points
-    forAll (masterPatch_, faceI)
+    forAll(masterPatch_, faceI)
     {
         const face& curFace = ef[faceI + slavePatch_.size()];
 //         Pout << "Cur face in pfAddr: " << curFace << endl;
-        forAll (curFace, pointI)
+        forAll(curFace, pointI)
         {
             Map<DynamicList<label> >::iterator mpfIter =
                 mpf.find(curFace[pointI]);
@@ -88,7 +87,7 @@ void Foam::enrichedPatch::calcMasterPointFaces() const
     // Add the projected points which hit the face
     const labelList& slaveMeshPoints = slavePatch_.meshPoints();
 
-    forAll (slavePointFaceHits_, pointI)
+    forAll(slavePointFaceHits_, pointI)
     {
         if
         (
@@ -133,7 +132,7 @@ void Foam::enrichedPatch::calcMasterPointFaces() const
     masterPointFacesPtr_ = new Map<labelList>(2*mpfToc.size());
     Map<labelList>& masterPointFaceAddr = *masterPointFacesPtr_;
 
-    forAll (mpfToc, mpfTocI)
+    forAll(mpfToc, mpfTocI)
     {
         labelList l;
         l.transfer(mpf.find(mpfToc[mpfTocI])());

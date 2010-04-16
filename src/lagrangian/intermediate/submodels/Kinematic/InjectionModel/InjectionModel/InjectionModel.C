@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -136,38 +135,46 @@ void Foam::InjectionModel<CloudType>::findCellAtPosition
     vector& position
 )
 {
-    const vector p0 = position;
+    const volVectorField& cellCentres = owner_.mesh().C();
 
-    bool foundCell = false;
+    const vector p0 = position;
 
     cellI = owner_.mesh().findCell(position);
 
+    label procI = -1;
+
     if (cellI >= 0)
     {
-        const vector& C = owner_.mesh().C()[cellI];
-        position += SMALL*(C - position);
-
-        foundCell = owner_.mesh().pointInCell(position, cellI);
+        procI = Pstream::myProcNo();
     }
-    reduce(foundCell, orOp<bool>());
+    reduce(procI, maxOp<label>());
+    if (procI != Pstream::myProcNo())
+    {
+        cellI = -1;
+    }
 
     // Last chance - find nearest cell and try that one
     // - the point is probably on an edge
-    if (!foundCell)
+    if (procI == -1)
     {
         cellI = owner_.mesh().findNearestCell(position);
-
         if (cellI >= 0)
         {
-            const vector& C = owner_.mesh().C()[cellI];
-            position += SMALL*(C - position);
+            position += SMALL*(cellCentres[cellI] - position);
 
-            foundCell = owner_.mesh().pointInCell(position, cellI);
+            if (owner_.mesh().pointInCell(position, cellI))
+            {
+                procI = Pstream::myProcNo();
+            }
         }
-        reduce(foundCell, orOp<bool>());
+        reduce(procI, maxOp<label>());
+        if (procI != Pstream::myProcNo())
+        {
+            cellI = -1;
+        }
     }
 
-    if (!foundCell)
+    if (procI == -1)
     {
         FatalErrorIn
         (
@@ -434,6 +441,14 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     }
 
     postInjectCheck(parcelsAdded, massAdded);
+}
+
+
+template<class CloudType>
+void Foam::InjectionModel<CloudType>::info(Ostream& os) const
+{
+    os  << "    Total number of parcels added   = " << parcelsAddedTotal_ << nl
+        << "    Total mass introduced           = " << massInjected_ << nl;
 }
 
 

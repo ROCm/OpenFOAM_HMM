@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*----------------------------------------------------------------------------*/
 
@@ -58,7 +57,7 @@ void Foam::porousZone::addPowerLawResistance
     const scalar C0 = C0_;
     const scalar C1m1b2 = (C1_ - 1.0)/2.0;
 
-    forAll (cells, i)
+    forAll(cells, i)
     {
         Udiag[cells[i]] +=
             V[cells[i]]*rho[cells[i]]*C0*pow(magSqr(U[cells[i]]), C1m1b2);
@@ -81,7 +80,7 @@ void Foam::porousZone::addViscousInertialResistance
     const tensor& D = D_.value();
     const tensor& F = F_.value();
 
-    forAll (cells, i)
+    forAll(cells, i)
     {
         tensor dragCoeff = mu[cells[i]]*D + (rho[cells[i]]*mag(U[cells[i]]))*F;
         scalar isoDragCoeff = tr(dragCoeff);
@@ -105,7 +104,7 @@ void Foam::porousZone::addPowerLawResistance
     const scalar C0 = C0_;
     const scalar C1m1b2 = (C1_ - 1.0)/2.0;
 
-    forAll (cells, i)
+    forAll(cells, i)
     {
         AU[cells[i]] = AU[cells[i]]
           + I*(rho[cells[i]]*C0*pow(magSqr(U[cells[i]]), C1m1b2));
@@ -126,7 +125,7 @@ void Foam::porousZone::addViscousInertialResistance
     const tensor& D = D_.value();
     const tensor& F = F_.value();
 
-    forAll (cells, i)
+    forAll(cells, i)
     {
         AU[cells[i]] += mu[cells[i]]*D + (rho[cells[i]]*mag(U[cells[i]]))*F;
     }

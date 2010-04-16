@@ -9,10 +9,10 @@
 # License
 #     This file is part of OpenFOAM.
 #
-#     OpenFOAM is free software; you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by the
-#     Free Software Foundation; either version 2 of the License, or (at your
-#     option) any later version.
+#     OpenFOAM is free software: you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
 #
 #     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
 #     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -20,8 +20,7 @@
 #     for more details.
 #
 #     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM; if not, write to the Free Software Foundation,
-#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
 #     Alltest
@@ -37,17 +36,41 @@ usage()
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
-usage: $0 [OPTION]
+usage: ${0##*/} [OPTION]
 
 options:
-  -d            sets up a default scheme on all schemes
-  -h            this usage
+  -default          sets up a default scheme on all schemes
+  -help             print the usage
 
 * quickly tests the tutorials and writes out the scheme/solver information
 
 USAGE
     exit 1
 }
+
+#------------------------------------------------------------------------------
+
+unset DEFAULT_SCHEMES
+
+# parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)
+        usage
+        ;;
+    -d | -default)
+        DEFAULT_SCHEMES=true
+        shift
+        ;;
+    -*)
+        usage "unknown option: '$*'"
+        ;;
+    *)
+        break
+        ;;
+    esac
+done
 
 
 setDefaultFvSchemes()
@@ -99,6 +122,7 @@ done
 
 [ -f "$MAIN_CONTROL_DICT" ] || usage "main controlDict not found"
 
+
 TUTORIALS_DIR=.
 TEST_RUN_DIR=../tutorialsTest
 FV_SCHEMES=\
@@ -114,30 +138,7 @@ SCHEMES_FILE="FvSchemes"
 SCHEMES_TEMP="FvSchemes.temp"
 SOLVERS_FILE="FvSolution"
 SOLVERS_TEMP="FvSolution.temp"
-DEFAULT_SCHEMES=0
 
-#
-# OPTIONS
-#
-OPTS=`getopt hd $*`
-if [ $? -ne 0 ]
-then
-    usage "Aborting due to invalid option"
-fi
-eval set -- "$OPTS"
-while [ $1 != -- ]
-do
-    case $1 in
-    -d)
-        DEFAULT_SCHEMES=1
-        ;;
-    -h)
-        usage
-        ;;
-    esac
-    shift
-done
-shift
 
 #
 # MAIN
@@ -183,7 +184,7 @@ do
     ${CD}.org > ${CD}
 done
 
-if [ $DEFAULT_SCHEMES = 1 ]
+if [ "$DEFAULT_SCHEMES" = true ]
 then
     echo "Modifying the fvSchemes to contain only default schemes"
     for FV_SC in `find . -name fvSchemes`
@@ -210,8 +211,7 @@ do
     echo "$APP: " | tr -d "\n" >> $SOLVERS_FILE
     for ST in $FV_SCHEMES
     do
-        rm $SCHEMES_TEMP > /dev/null 2>&1
-        rm $SOLVERS_TEMP > /dev/null 2>&1
+        rm $SCHEMES_TEMP $SOLVERS_TEMP > /dev/null 2>&1
         echo "  ${ST}" >> $SCHEMES_FILE
         for LOG in `find ${APP} -name "log.${APP}"`
         do

@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -42,7 +41,7 @@ Foam::labelList Foam::cell::labels(const unallocFaceList& f) const
 
     const labelList& faces = *this;
 
-    forAll (faces, faceI)
+    forAll(faces, faceI)
     {
         maxVert += f[faces[faceI]].size();
     }
@@ -53,7 +52,7 @@ Foam::labelList Foam::cell::labels(const unallocFaceList& f) const
     // in the first face there is no duplicates
     const labelList& first = f[faces[0]];
 
-    forAll (first, pointI)
+    forAll(first, pointI)
     {
         p[pointI] = first[pointI];
     }
@@ -68,7 +67,7 @@ Foam::labelList Foam::cell::labels(const unallocFaceList& f) const
     {
         const labelList& curFace = f[faces[faceI]];
 
-        forAll (curFace, pointI)
+        forAll(curFace, pointI)
         {
             const label curPoint = curFace[pointI];
 
@@ -127,7 +126,7 @@ Foam::edgeList Foam::cell::edges(const unallocFaceList& f) const
     // create a list of edges
     label maxNoEdges = 0;
 
-    forAll (curFaces, faceI)
+    forAll(curFaces, faceI)
     {
         maxNoEdges += f[curFaces[faceI]].nEdges();
     }
@@ -135,11 +134,11 @@ Foam::edgeList Foam::cell::edges(const unallocFaceList& f) const
     edgeList allEdges(maxNoEdges);
     label nEdges = 0;
 
-    forAll (curFaces, faceI)
+    forAll(curFaces, faceI)
     {
         const edgeList curFaceEdges = f[curFaces[faceI]].edges();
 
-        forAll (curFaceEdges, faceEdgeI)
+        forAll(curFaceEdges, faceEdgeI)
         {
             const edge& curEdge = curFaceEdges[faceEdgeI];
 
@@ -198,7 +197,7 @@ Foam::point Foam::cell::centre
 
     const labelList& faces = *this;
 
-    forAll (faces, faceI)
+    forAll(faces, faceI)
     {
         scalar a = f[faces[faceI]].mag(p);
         cEst += f[faces[faceI]].centre(p)*a;
@@ -213,7 +212,7 @@ Foam::point Foam::cell::centre
 
     scalar sumV = 0;
 
-    forAll (faces, faceI)
+    forAll(faces, faceI)
     {
         // calculate pyramid volume. If it is greater than zero, OK.
         // If not, the pyramid is inside-out. Create a face with the opposite
@@ -257,7 +256,7 @@ Foam::scalar Foam::cell::mag
 
     const labelList& faces = *this;
 
-    forAll (faces, faceI)
+    forAll(faces, faceI)
     {
         cEst += f[faces[faceI]].centre(p);
         nCellFaces += 1;
@@ -268,7 +267,7 @@ Foam::scalar Foam::cell::mag
     // Calculate the magnitude by summing the mags of the pyramids
     scalar v = 0;
 
-    forAll (faces, faceI)
+    forAll(faces, faceI)
     {
         v += ::Foam::mag(pyramidPointFaceRef(f[faces[faceI]], cEst).mag(p));
     }
@@ -289,13 +288,13 @@ bool Foam::operator==(const cell& a, const cell& b)
 
     List<bool> fnd(a.size(), false);
 
-    forAll (b, bI)
+    forAll(b, bI)
     {
         label curLabel = b[bI];
 
         bool found = false;
 
-        forAll (a, aI)
+        forAll(a, aI)
         {
             if (a[aI] == curLabel)
             {
@@ -314,7 +313,7 @@ bool Foam::operator==(const cell& a, const cell& b)
     // check if all faces on a were marked
     bool result = true;
 
-    forAll (fnd, aI)
+    forAll(fnd, aI)
     {
         result = (result && fnd[aI]);
     }

@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -128,7 +127,7 @@ void Foam::meshWriters::STARCD::getCellTable()
         // get the cellZone <-> cellTable correspondence
         Info<< "matching cellZones to cellTable" << endl;
 
-        forAll (mesh_.cellZones(), zoneI)
+        forAll(mesh_.cellZones(), zoneI)
         {
             const cellZone& cZone = mesh_.cellZones()[zoneI];
             if (cZone.size())
@@ -145,7 +144,7 @@ void Foam::meshWriters::STARCD::getCellTable()
                     tableId = cellTable_.append(dict);
                 }
 
-                forAll (cZone, i)
+                forAll(cZone, i)
                 {
                     cellTableId_[cZone[i]] = tableId;
                 }
@@ -160,7 +159,7 @@ void Foam::meshWriters::STARCD::getCellTable()
             dict.add("MaterialType", "fluid");
             label tableId = cellTable_.append(dict);
 
-            forAll (cellTableId_, i)
+            forAll(cellTableId_, i)
             {
                 if (cellTableId_[i] < 0)
                 {

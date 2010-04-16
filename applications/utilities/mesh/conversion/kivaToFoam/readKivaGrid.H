@@ -327,12 +327,7 @@ if
 {
     scalar minz = GREAT;
 
-    for
-    (
-        SLList<face>::iterator iter = pFaces[CYLINDERHEAD][0].begin();
-        iter != pFaces[CYLINDERHEAD][0].end();
-        ++iter
-    )
+    forAllConstIter(SLList<face>, pFaces[CYLINDERHEAD][0], iter)
     {
         const face& pf = iter();
 
@@ -346,12 +341,7 @@ if
 
     SLList<face> newLinerFaces;
 
-    for
-    (
-        SLList<face>::iterator iter = pFaces[LINER][0].begin();
-        iter != pFaces[LINER][0].end();
-        ++iter
-    )
+    forAllConstIter(SLList<face>, pFaces[LINER][0], iter)
     {
         const face& pf = iter();
 
@@ -380,12 +370,7 @@ if
 
     SLList<face> newCylinderHeadFaces;
 
-    for
-    (
-        SLList<face>::iterator iter = pFaces[CYLINDERHEAD][0].begin();
-        iter != pFaces[CYLINDERHEAD][0].end();
-        ++iter
-    )
+    forAllConstIter(SLList<face>, pFaces[CYLINDERHEAD][0], iter)
     {
         const face& pf = iter();
 
@@ -456,12 +441,7 @@ if (pFaces[WEDGE].size() && pFaces[WEDGE][0].size())
     {
         pFaces[CYCLIC].setSize(1);
         pFaces[CYCLIC][0] = pFaces[WEDGE][0];
-        for
-        (
-            SLList<face>::iterator iterb = pFaces[WEDGE][1].begin();
-            iterb != pFaces[WEDGE][1].end();
-            ++iterb
-        )
+        forAllIter(SLList<face>, pFaces[WEDGE][1], iterb)
         {
             pFaces[CYCLIC][0].append(iterb());
         }

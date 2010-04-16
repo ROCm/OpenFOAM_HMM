@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -63,12 +62,7 @@ genericPointPatchField<Type>::genericPointPatchField
     actualTypeName_(dict.lookup("type")),
     dict_(dict)
 {
-    for
-    (
-        dictionary::const_iterator iter = dict_.begin();
-        iter != dict_.end();
-        ++iter
-    )
+    forAllConstIter(dictionary, dict_, iter)
     {
         if (iter().keyword() != "type")
         {
@@ -358,34 +352,39 @@ genericPointPatchField<Type>::genericPointPatchField
     actualTypeName_(ptf.actualTypeName_),
     dict_(ptf.dict_)
 {
-    for
+    forAllConstIter
     (
-        HashPtrTable<scalarField>::const_iterator iter =
-            ptf.scalarFields_.begin();
-        iter != ptf.scalarFields_.end();
-        ++iter
+        HashPtrTable<scalarField>,
+        ptf.scalarFields_,
+        iter
     )
     {
-        scalarFields_.insert(iter.key(), new scalarField(*iter(), mapper));
+        scalarFields_.insert
+        (
+            iter.key(),
+            new scalarField(*iter(), mapper)
+        );
     }
 
-    for
+    forAllConstIter
     (
-        HashPtrTable<vectorField>::const_iterator iter =
-            ptf.vectorFields_.begin();
-        iter != ptf.vectorFields_.end();
-        ++iter
+        HashPtrTable<vectorField>,
+        ptf.vectorFields_,
+        iter
     )
     {
-        vectorFields_.insert(iter.key(), new vectorField(*iter(), mapper));
+        vectorFields_.insert
+        (
+            iter.key(),
+            new vectorField(*iter(), mapper)
+        );
     }
 
-    for
+    forAllConstIter
     (
-        HashPtrTable<sphericalTensorField>::const_iterator iter =
-            ptf.sphericalTensorFields_.begin();
-        iter != ptf.sphericalTensorFields_.end();
-        ++iter
+        HashPtrTable<sphericalTensorField>,
+        ptf.sphericalTensorFields_,
+        iter
     )
     {
         sphericalTensorFields_.insert
@@ -395,12 +394,11 @@ genericPointPatchField<Type>::genericPointPatchField
         );
     }
 
-    for
+    forAllConstIter
     (
-        HashPtrTable<symmTensorField>::const_iterator iter =
-            ptf.symmTensorFields_.begin();
-        iter != ptf.symmTensorFields_.end();
-        ++iter
+        HashPtrTable<symmTensorField>,
+        ptf.symmTensorFields_,
+        iter
     )
     {
         symmTensorFields_.insert
@@ -410,15 +408,18 @@ genericPointPatchField<Type>::genericPointPatchField
         );
     }
 
-    for
+    forAllConstIter
     (
-        HashPtrTable<tensorField>::const_iterator iter =
-            ptf.tensorFields_.begin();
-        iter != ptf.tensorFields_.end();
-        ++iter
+        HashPtrTable<tensorField>,
+        ptf.tensorFields_,
+        iter
     )
     {
-        tensorFields_.insert(iter.key(), new tensorField(*iter(), mapper));
+        tensorFields_.insert
+        (
+            iter.key(),
+            new tensorField(*iter(), mapper)
+        );
     }
 }
 
@@ -449,53 +450,51 @@ void genericPointPatchField<Type>::autoMap
     const pointPatchFieldMapper& m
 )
 {
-    for
+    forAllIter
     (
-        HashPtrTable<scalarField>::iterator iter = scalarFields_.begin();
-        iter != scalarFields_.end();
-        ++iter
+        HashPtrTable<scalarField>,
+        scalarFields_,
+        iter
     )
     {
         iter()->autoMap(m);
     }
 
-    for
+    forAllIter
     (
-        HashPtrTable<vectorField>::iterator iter = vectorFields_.begin();
-        iter != vectorFields_.end();
-        ++iter
+        HashPtrTable<vectorField>,
+        vectorFields_,
+        iter
     )
     {
         iter()->autoMap(m);
     }
 
-    for
+    forAllIter
     (
-        HashPtrTable<sphericalTensorField>::iterator iter =
-            sphericalTensorFields_.begin();
-        iter != sphericalTensorFields_.end();
-        ++iter
+        HashPtrTable<sphericalTensorField>,
+        sphericalTensorFields_,
+        iter
     )
     {
         iter()->autoMap(m);
     }
 
-    for
+    forAllIter
     (
-        HashPtrTable<symmTensorField>::iterator iter =
-            symmTensorFields_.begin();
-        iter != symmTensorFields_.end();
-        ++iter
+        HashPtrTable<symmTensorField>,
+        symmTensorFields_,
+        iter
     )
     {
         iter()->autoMap(m);
     }
 
-    for
+    forAllIter
     (
-        HashPtrTable<tensorField>::iterator iter = tensorFields_.begin();
-        iter != tensorFields_.end();
-        ++iter
+        HashPtrTable<tensorField>,
+        tensorFields_,
+        iter
     )
     {
         iter()->autoMap(m);
@@ -513,11 +512,11 @@ void genericPointPatchField<Type>::rmap
     const genericPointPatchField<Type>& dptf =
         refCast<const genericPointPatchField<Type> >(ptf);
 
-    for
+    forAllIter
     (
-        HashPtrTable<scalarField>::iterator iter = scalarFields_.begin();
-        iter != scalarFields_.end();
-        ++iter
+        HashPtrTable<scalarField>,
+        scalarFields_,
+        iter
     )
     {
         HashPtrTable<scalarField>::const_iterator dptfIter =
@@ -529,11 +528,11 @@ void genericPointPatchField<Type>::rmap
         }
     }
 
-    for
+    forAllIter
     (
-        HashPtrTable<vectorField>::iterator iter = vectorFields_.begin();
-        iter != vectorFields_.end();
-        ++iter
+        HashPtrTable<vectorField>,
+        vectorFields_,
+        iter
     )
     {
         HashPtrTable<vectorField>::const_iterator dptfIter =
@@ -545,12 +544,11 @@ void genericPointPatchField<Type>::rmap
         }
     }
 
-    for
+    forAllIter
     (
-        HashPtrTable<sphericalTensorField>::iterator iter =
-            sphericalTensorFields_.begin();
-        iter != sphericalTensorFields_.end();
-        ++iter
+        HashPtrTable<sphericalTensorField>,
+        sphericalTensorFields_,
+        iter
     )
     {
         HashPtrTable<sphericalTensorField>::const_iterator dptfIter =
@@ -562,12 +560,11 @@ void genericPointPatchField<Type>::rmap
         }
     }
 
-    for
+    forAllIter
     (
-        HashPtrTable<symmTensorField>::iterator iter =
-            symmTensorFields_.begin();
-        iter != symmTensorFields_.end();
-        ++iter
+        HashPtrTable<symmTensorField>,
+        symmTensorFields_,
+        iter
     )
     {
         HashPtrTable<symmTensorField>::const_iterator dptfIter =
@@ -579,11 +576,11 @@ void genericPointPatchField<Type>::rmap
         }
     }
 
-    for
+    forAllIter
     (
-        HashPtrTable<tensorField>::iterator iter = tensorFields_.begin();
-        iter != tensorFields_.end();
-        ++iter
+        HashPtrTable<tensorField>,
+        tensorFields_,
+        iter
     )
     {
         HashPtrTable<tensorField>::const_iterator dptfIter =
@@ -602,12 +599,7 @@ void genericPointPatchField<Type>::write(Ostream& os) const
 {
     os.writeKeyword("type") << actualTypeName_ << token::END_STATEMENT << nl;
 
-    for
-    (
-        dictionary::const_iterator iter = dict_.begin();
-        iter != dict_.end();
-        ++iter
-    )
+    forAllConstIter(dictionary, dict_, iter)
     {
         if (iter().keyword() != "type")
         {

@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -439,7 +438,7 @@ Foam::polyMesh::polyMesh
     oldPointsPtr_(NULL)
 {
     // Check if the faces and cells are valid
-    forAll (faces_, faceI)
+    forAll(faces_, faceI)
     {
         const face& curFace = faces_[faceI];
 
@@ -595,7 +594,7 @@ Foam::polyMesh::polyMesh
     oldPointsPtr_(NULL)
 {
     // Check if faces are valid
-    forAll (faces_, faceI)
+    forAll(faces_, faceI)
     {
         const face& curFace = faces_[faceI];
 
@@ -620,7 +619,7 @@ Foam::polyMesh::polyMesh
     cellList cLst(cells);
 
     // Check if cells are valid
-    forAll (cLst, cellI)
+    forAll(cLst, cellI)
     {
         const cell& curCell = cLst[cellI];
 
@@ -702,7 +701,7 @@ void Foam::polyMesh::resetPrimitives
     setInstance(time().timeName());
 
     // Check if the faces and cells are valid
-    forAll (faces_, faceI)
+    forAll(faces_, faceI)
     {
         const face& curFace = faces_[faceI];
 
@@ -868,7 +867,7 @@ void Foam::polyMesh::addPatches
     boundary_.setSize(p.size());
 
     // Copy the patch pointers
-    forAll (p, pI)
+    forAll(p, pI)
     {
         boundary_.set(pI, p[pI]);
     }
@@ -920,7 +919,7 @@ void Foam::polyMesh::addZones
         pointZones_.setSize(pz.size());
 
         // Copy the zone pointers
-        forAll (pz, pI)
+        forAll(pz, pI)
         {
             pointZones_.set(pI, pz[pI]);
         }
@@ -934,7 +933,7 @@ void Foam::polyMesh::addZones
         faceZones_.setSize(fz.size());
 
         // Copy the zone pointers
-        forAll (fz, fI)
+        forAll(fz, fI)
         {
             faceZones_.set(fI, fz[fI]);
         }
@@ -948,7 +947,7 @@ void Foam::polyMesh::addZones
         cellZones_.setSize(cz.size());
 
         // Copy the zone pointers
-        forAll (cz, cI)
+        forAll(cz, cI)
         {
             cellZones_.set(cI, cz[cI]);
         }

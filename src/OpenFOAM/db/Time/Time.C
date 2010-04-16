@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -509,6 +508,27 @@ bool Foam::Time::run() const
         }
     }
 
+    if (running)
+    {
+        if (!subCycling_)
+        {
+            const_cast<Time&>(*this).readModifiedObjects();
+
+            if (timeIndex_ == startTimeIndex_)
+            {
+                functionObjects_.start();
+            }
+            else
+            {
+                functionObjects_.execute();
+            }
+        }
+
+        // Update the "running" status following the
+        // possible side-effects from functionObjects
+        running = value() < (endTime_ - 0.5*deltaT_);
+    }
+
     return running;
 }
 
@@ -664,20 +684,6 @@ Foam::Time& Foam::Time::operator+=(const scalar deltaT)
 
 Foam::Time& Foam::Time::operator++()
 {
-    if (!subCycling_)
-    {
-        readModifiedObjects();
-
-        if (timeIndex_ == startTimeIndex_)
-        {
-            functionObjects_.start();
-        }
-        else
-        {
-            functionObjects_.execute();
-        }
-    }
-
     deltaT0_ = deltaTSave_;
     deltaTSave_ = deltaT_;
 

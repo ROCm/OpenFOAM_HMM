@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -155,12 +154,7 @@ void topoSet::topoSet::updateLabels(const labelList& map)
     // Iterate over map to see if anything changed
     bool changed = false;
 
-    for
-    (
-        labelHashSet::const_iterator iter = begin();
-        iter != end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, *this, iter)
     {
         if ((iter.key() < 0) || (iter.key() > map.size()))
         {
@@ -173,7 +167,7 @@ void topoSet::topoSet::updateLabels(const labelList& map)
                 << abort(FatalError);
         }
 
-        label newCellI = map[iter.key()];
+        const label newCellI = map[iter.key()];
 
         if (newCellI != iter.key())
         {
@@ -188,14 +182,9 @@ void topoSet::topoSet::updateLabels(const labelList& map)
     {
         labelHashSet newSet(2*size());
 
-        for
-        (
-            labelHashSet::const_iterator iter = begin();
-            iter != end();
-            ++iter
-        )
+        forAllConstIter(labelHashSet, *this, iter)
         {
-            label newCellI = map[iter.key()];
+            const label newCellI = map[iter.key()];
 
             if (newCellI >= 0)
             {
@@ -210,12 +199,7 @@ void topoSet::topoSet::updateLabels(const labelList& map)
 
 void topoSet::topoSet::check(const label maxLabel)
 {
-    for
-    (
-        topoSet::const_iterator iter = begin();
-        iter != end();
-        ++iter
-    )
+    forAllConstIter(topoSet, *this, iter)
     {
         if ((iter.key() < 0) || (iter.key() > maxLabel))
         {
@@ -310,9 +294,7 @@ void topoSet::writeDebug
 
         writeDebug(os, coords, halfLen, iter, n);
 
-        os<< endl
-          << "  .." << endl
-          << endl;
+        os  << nl << "  .." << nl << endl;
 
         for (; n < size() - halfLen; ++n)
         {
@@ -506,12 +488,7 @@ void topoSet::subset(const topoSet& set)
     clear();
     resize(2*min(currentSet.size(), set.size()));
 
-    for
-    (
-        labelHashSet::const_iterator iter = currentSet.begin();
-        iter != currentSet.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, currentSet, iter)
     {
         if (set.found(iter.key()))
         {
@@ -524,12 +501,7 @@ void topoSet::subset(const topoSet& set)
 
 void topoSet::addSet(const topoSet& set)
 {
-    for
-    (
-        topoSet::const_iterator iter = set.begin();
-        iter != set.end();
-        ++iter
-    )
+    forAllConstIter(topoSet, set, iter)
     {
         insert(iter.key());
     }
@@ -538,12 +510,7 @@ void topoSet::addSet(const topoSet& set)
 
 void topoSet::deleteSet(const topoSet& set)
 {
-    for
-    (
-        topoSet::const_iterator iter = set.begin();
-        iter != set.end();
-        ++iter
-    )
+    forAllConstIter(topoSet, set, iter)
     {
         erase(iter.key());
     }
@@ -575,9 +542,7 @@ void topoSet::writeDebug(Ostream& os, const label maxLen) const
 
         writeDebug(os, halfLen, iter, n);
 
-        os<< endl
-          << "  .." << endl
-          << endl;
+        os  << nl << "  .." << nl << endl;
 
         for (; n < size() - halfLen; ++n)
         {

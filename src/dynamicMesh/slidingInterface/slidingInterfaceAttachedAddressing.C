@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -65,7 +64,7 @@ void Foam::slidingInterface::calcAttachedAddressing() const
         masterFaceCellsPtr_ = new labelList(masterPatchFaces.size());
         labelList& mfc = *masterFaceCellsPtr_;
 
-        forAll (masterPatchFaces, faceI)
+        forAll(masterPatchFaces, faceI)
         {
             if (masterFlip[faceI])
             {
@@ -91,7 +90,7 @@ void Foam::slidingInterface::calcAttachedAddressing() const
         slaveFaceCellsPtr_ = new labelList(slavePatchFaces.size());
         labelList& sfc = *slaveFaceCellsPtr_;
 
-        forAll (slavePatchFaces, faceI)
+        forAll(slavePatchFaces, faceI)
         {
             if (slaveFlip[faceI])
             {
@@ -108,7 +107,7 @@ void Foam::slidingInterface::calcAttachedAddressing() const
         {
             if (debug)
             {
-                forAll (mfc, faceI)
+                forAll(mfc, faceI)
                 {
                     if (mfc[faceI] < 0)
                     {
@@ -120,7 +119,7 @@ void Foam::slidingInterface::calcAttachedAddressing() const
                     }
                 }
 
-                forAll (sfc, faceI)
+                forAll(sfc, faceI)
                 {
                     if (sfc[faceI] < 0)
                     {
@@ -153,11 +152,11 @@ void Foam::slidingInterface::calcAttachedAddressing() const
 
         const labelList& masterMeshPoints = masterPatch.meshPoints();
 
-        forAll (masterMeshPoints, pointI)
+        forAll(masterMeshPoints, pointI)
         {
             const labelList& curFaces = pointFaces[masterMeshPoints[pointI]];
 
-            forAll (curFaces, faceI)
+            forAll(curFaces, faceI)
             {
                 // Check if the face belongs to the master face zone;
                 // if not add it
@@ -182,11 +181,11 @@ void Foam::slidingInterface::calcAttachedAddressing() const
 
         const labelList& slaveMeshPoints = slavePatch.meshPoints();
 
-        forAll (slaveMeshPoints, pointI)
+        forAll(slaveMeshPoints, pointI)
         {
             const labelList& curFaces = pointFaces[slaveMeshPoints[pointI]];
 
-            forAll (curFaces, faceI)
+            forAll(curFaces, faceI)
             {
                 // Check if the face belongs to the slave face zone;
                 // if not add it
@@ -273,7 +272,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
     const labelList& mfzRenumber =
         m.faceZoneFaceMap()[masterFaceZoneID_.index()];
 
-    forAll (mfc, faceI)
+    forAll(mfc, faceI)
     {
         label newCellI = reverseCellMap[mfc[mfzRenumber[faceI]]];
 
@@ -290,7 +289,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
     const labelList& sfzRenumber =
         m.faceZoneFaceMap()[slaveFaceZoneID_.index()];
 
-    forAll (sfc, faceI)
+    forAll(sfc, faceI)
     {
         label newCellI = reverseCellMap[sfc[sfzRenumber[faceI]]];
 
@@ -326,7 +325,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
     labelList* newMsofPtr = new labelList(msof.size(), -1);
     labelList& newMsof = *newMsofPtr;
 
-    forAll (msof, faceI)
+    forAll(msof, faceI)
     {
         label newFaceI = reverseFaceMap[msof[faceI]];
 
@@ -342,7 +341,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
     labelList* newSsofPtr = new labelList(ssof.size(), -1);
     labelList& newSsof = *newSsofPtr;
 
-    forAll (ssof, faceI)
+    forAll(ssof, faceI)
     {
         label newFaceI = reverseFaceMap[ssof[faceI]];
 
@@ -381,7 +380,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
 
     label key, value;
 
-    forAll (rpmToc, rpmTocI)
+    forAll(rpmToc, rpmTocI)
     {
         key = reversePointMap[rpmToc[rpmTocI]];
 
@@ -414,7 +413,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
 
     const labelList cpepmToc = cpepm.toc();
 
-    forAll (cpepmToc, cpepmTocI)
+    forAll(cpepmToc, cpepmTocI)
     {
         key = reversePointMap[cpepmToc[cpepmTocI]];
 
@@ -467,7 +466,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
     const labelList& sfzPointRenumber =
         m.faceZonePointMap()[slaveFaceZoneID_.index()];
 
-    forAll (newProjectedSlavePoints, pointI)
+    forAll(newProjectedSlavePoints, pointI)
     {
         if (sfzPointRenumber[pointI] > -1)
         {

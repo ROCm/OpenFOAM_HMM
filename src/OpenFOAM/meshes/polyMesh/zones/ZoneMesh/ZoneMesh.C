@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,7 +50,7 @@ void ZoneMesh<ZoneType, MeshType>::calcZoneMap() const
         // Count number of objects in all zones
         label nObjects = 0;
 
-        forAll (*this, zoneI)
+        forAll(*this, zoneI)
         {
             nObjects += this->operator[](zoneI).size();
         }
@@ -61,11 +60,11 @@ void ZoneMesh<ZoneType, MeshType>::calcZoneMap() const
 
         // Fill in objects of all zones into the map.  The key is the global
         // object index and the result is the zone index
-        forAll (*this, zoneI)
+        forAll(*this, zoneI)
         {
             const labelList& zoneObjects = this->operator[](zoneI);
 
-            forAll (zoneObjects, objI)
+            forAll(zoneObjects, objI)
             {
                 zm.insert(zoneObjects[objI], zoneI);
             }
@@ -202,7 +201,7 @@ wordList ZoneMesh<ZoneType, MeshType>::types() const
 
     wordList t(zones.size());
 
-    forAll (zones, zoneI)
+    forAll(zones, zoneI)
     {
         t[zoneI] = zones[zoneI].type();
     }
@@ -219,7 +218,7 @@ wordList ZoneMesh<ZoneType, MeshType>::names() const
 
     wordList t(zones.size());
 
-    forAll (zones, zoneI)
+    forAll(zones, zoneI)
     {
         t[zoneI] = zones[zoneI].name();
     }
@@ -233,7 +232,7 @@ label ZoneMesh<ZoneType, MeshType>::findZoneID(const word& zoneName) const
 {
     const PtrList<ZoneType>& zones = *this;
 
-    forAll (zones, zoneI)
+    forAll(zones, zoneI)
     {
         if (zones[zoneI].name() == zoneName)
         {
@@ -262,7 +261,7 @@ void ZoneMesh<ZoneType, MeshType>::clearAddressing()
 
     PtrList<ZoneType>& zones = *this;
 
-    forAll (zones, zoneI)
+    forAll(zones, zoneI)
     {
         zones[zoneI].clearAddressing();
     }
@@ -285,7 +284,7 @@ bool ZoneMesh<ZoneType, MeshType>::checkDefinition(const bool report) const
 
     const PtrList<ZoneType>& zones = *this;
 
-    forAll (zones, zoneI)
+    forAll(zones, zoneI)
     {
         inError |= zones[zoneI].checkDefinition(report);
     }
@@ -299,7 +298,7 @@ void ZoneMesh<ZoneType, MeshType>::movePoints(const pointField& p)
 {
     PtrList<ZoneType>& zones = *this;
 
-    forAll (zones, zoneI)
+    forAll(zones, zoneI)
     {
         zones[zoneI].movePoints(p);
     }

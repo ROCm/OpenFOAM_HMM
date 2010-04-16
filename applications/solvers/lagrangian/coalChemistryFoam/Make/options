@@ -16,6 +16,7 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/reactionThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/chemistryModel/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/radiation/lnInclude \
+    -I$(LIB_SRC)/surfaceFilmModels/lnInclude \
     -I$(LIB_SRC)/ODE/lnInclude
 
 EXE_LIBS = \
@@ -36,4 +37,5 @@ EXE_LIBS = \
     -lreactionThermophysicalModels \
     -lchemistryModel \
     -lradiation \
+    -lsurfaceFilmModels \
     -lODE

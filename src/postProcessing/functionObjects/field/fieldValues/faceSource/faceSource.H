@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
     Foam::fieldValues::faceSource
@@ -29,9 +28,9 @@ Description
     Face source variant of field value function object. Values of user-
     specified fields reported for collections of faces.
 
-    cellObj1                        // Name also used to identify output folder
+    faceObj1                        // Name also used to identify output folder
     {
-        type            cellSource;
+        type            faceSource;
         functionObjectLibs ("libfieldValueFunctionObjects.so");
         enabled         true;
         outputControl   outputTime;
@@ -54,6 +53,15 @@ Description
       - areaAverage
       - areaIntegrate
       - weightedAverage
+      - min
+      - max
+
+    Notes:
+    - faces on empty patches get ignored
+    - if the field is a volField the faceZone can only consist of boundary
+    faces.
+    - all fields get oriented according to the faceZone (so you might e.g. see
+    negative pressure)
 
 SourceFiles
     faceSource.C
@@ -65,7 +73,6 @@ SourceFiles
 
 #include "NamedEnum.H"
 #include "fieldValue.H"
-#include "labelList.H"
 #include "surfaceFieldsFwd.H"
 #include "volFieldsFwd.H"
 
@@ -107,16 +114,18 @@ public:
             opSum,
             opAreaAverage,
             opAreaIntegrate,
-            opWeightedAverage
+            opWeightedAverage,
+            opMin,
+            opMax
         };
 
         //- Operation type names
-        static const NamedEnum<operationType, 5> operationTypeNames_;
+        static const NamedEnum<operationType, 7> operationTypeNames_;
 
 
 private:
 
-    // Private member functions
+    // Private Member Functions
 
         //- Set faces to evaluate based on a face zone
         void setFaceZoneFaces();
@@ -135,20 +144,23 @@ protected:
         //- Operation to apply to values
         operationType operation_;
 
+        //- Global number of faces
+        label nFaces_;
+
         //- Local list of face IDs
         labelList faceId_;
 
         //- Local list of patch ID per face
         labelList facePatchId_;
 
-        //- List of +1/-1 representing face flip map
-        labelList flipMap_;
+        //- List of +1/-1 representing face flip map (1 use as is, -1 negate)
+        labelList faceSign_;
 
         //- Weight field name - only used for opWeightedAverage mode
         word weightFieldName_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Initialise, e.g. face addressing
         void initialise(const dictionary& dict);
@@ -194,7 +206,7 @@ public:
     virtual ~faceSource();
 
 
-    // Public member functions
+    // Public Member Functions
 
         // Access
 
@@ -208,7 +220,7 @@ public:
             inline const labelList& facePatch() const;
 
             //- Return the list of +1/-1 representing face flip map
-            inline const labelList& flipMap() const;
+            inline const labelList& faceSign() const;
 
 
         // Function object functions
@@ -227,14 +239,16 @@ public:
             template<class Type>
             tmp<Field<Type> > filterField
             (
-                const GeometricField<Type, fvsPatchField, surfaceMesh>& field
+                const GeometricField<Type, fvsPatchField, surfaceMesh>& field,
+                const bool applyOrientation
             ) const;
 
             //- Filter a volume field according to faceIds
             template<class Type>
             tmp<Field<Type> > filterField
             (
-                const GeometricField<Type, fvPatchField, volMesh>& field
+                const GeometricField<Type, fvPatchField, volMesh>& field,
+                const bool applyOrientation
             ) const;
 };
 

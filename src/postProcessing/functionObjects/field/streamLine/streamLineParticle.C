@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,27 +19,21 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*----------------------------------------------------------------------------*/
 
 #include "streamLineParticle.H"
+#include "vectorIOFieldField.H"
 
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(streamLineParticle, 0);
     defineParticleTypeNameAndDebug(streamLineParticle, 0);
-    defineTemplateTypeNameAndDebugWithName
-    (
-        IOField<vectorField>,
-        "vectorFieldField",
-        0
-    );
-};
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -400,13 +394,13 @@ void Foam::streamLineParticle::readFields(Cloud<streamLineParticle>& c)
     );
     c.checkFieldIOobject(c, lifeTime);
 
-    IOField<pointField> sampledPositions
+    vectorIOFieldField sampledPositions
     (
         c.fieldIOobject("sampledPositions", IOobject::MUST_READ)
     );
     c.checkFieldIOobject(c, sampledPositions);
 
-//    IOField<pointField> sampleVelocity
+//    vectorIOFieldField sampleVelocity
 //    (
 //        c.fieldIOobject("sampleVelocity", IOobject::MUST_READ)
 //    );
@@ -434,12 +428,12 @@ void Foam::streamLineParticle::writeFields(const Cloud<streamLineParticle>& c)
         c.fieldIOobject("lifeTime", IOobject::NO_READ),
         np
     );
-    IOField<pointField> sampledPositions
+    vectorIOFieldField sampledPositions
     (
         c.fieldIOobject("sampledPositions", IOobject::NO_READ),
         np
     );
-//    IOField<pointField> sampleVelocity
+//    vectorIOFieldField sampleVelocity
 //    (
 //        c.fieldIOobject("sampleVelocity", IOobject::NO_READ),
 //        np

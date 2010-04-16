@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -83,7 +82,7 @@ void Foam::slidingInterface::decoupleInterface
 
     // Recover faces in master patch
 
-    forAll (masterPatchAddr, faceI)
+    forAll(masterPatchAddr, faceI)
     {
         // Make a copy of the face and turn it if necessary
         face newFace = faces[masterPatchAddr[faceI]];
@@ -129,7 +128,7 @@ void Foam::slidingInterface::decoupleInterface
 
     // Recover faces in slave patch
 
-    forAll (slavePatchAddr, faceI)
+    forAll(slavePatchAddr, faceI)
     {
         // Make a copy of face and turn it if necessary
         face newFace = faces[slavePatchAddr[faceI]];
@@ -140,7 +139,7 @@ void Foam::slidingInterface::decoupleInterface
         }
 
         // Recover retired points on the slave side
-        forAll (newFace, pointI)
+        forAll(newFace, pointI)
         {
             Map<label>::const_iterator rpmIter = rpm.find(newFace[pointI]);
             if (rpmIter != rpm.end())
@@ -173,7 +172,7 @@ void Foam::slidingInterface::decoupleInterface
     // Grab the list of faces in the layer
     const labelList& masterStickOuts = masterStickOutFaces();
 
-    forAll (masterStickOuts, faceI)
+    forAll(masterStickOuts, faceI)
     {
         // Renumber the face and remove additional points
 
@@ -185,7 +184,7 @@ void Foam::slidingInterface::decoupleInterface
 
         bool changed = false;
 
-        forAll (oldFace, pointI)
+        forAll(oldFace, pointI)
         {
             // Check if the point is removed
             if (ref.pointRemoved(oldFace[pointI]))
@@ -257,11 +256,11 @@ void Foam::slidingInterface::decoupleInterface
         primitiveMesh::facesPerCell_*(masterPatch.size() + slavePatch.size())
     );
 
-    forAll (slaveFc, faceI)
+    forAll(slaveFc, faceI)
     {
         const labelList& curFaces = cells[slaveFc[faceI]];
 
-        forAll (curFaces, faceI)
+        forAll(curFaces, faceI)
         {
             // Check if the face belongs to the slave face zone; and
             // if it has been removed; if not add it
@@ -284,7 +283,7 @@ void Foam::slidingInterface::decoupleInterface
     // Grab master point mapping
     const Map<label>& masterPm = masterPatch.meshPointMap();
 
-    forAll (slaveStickOuts, faceI)
+    forAll(slaveStickOuts, faceI)
     {
         // Renumber the face and remove additional points
 
@@ -296,7 +295,7 @@ void Foam::slidingInterface::decoupleInterface
 
         bool changed = false;
 
-        forAll (oldFace, pointI)
+        forAll(oldFace, pointI)
         {
             // Check if the point is removed or retired
             if (rpm.found(oldFace[pointI]))
@@ -379,7 +378,7 @@ void Foam::slidingInterface::decoupleInterface
     const labelList& slaveMeshPoints =
         mesh.faceZones()[slaveFaceZoneID_.index()]().meshPoints();
 
-    forAll (slaveMeshPoints, pointI)
+    forAll(slaveMeshPoints, pointI)
     {
         ref.setAction
         (

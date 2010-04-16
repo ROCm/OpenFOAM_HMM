@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -751,6 +750,20 @@ Foam::argList::~argList()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::argList::printNotes() const
+{
+    // output notes directly - no automatic text wrapping
+    if (!notes.empty())
+    {
+        Info<< nl;
+        forAllConstIter(SLList<string>, notes, iter)
+        {
+            Info<< iter().c_str() << nl;
+        }
+    }
+}
+
+
 void Foam::argList::printUsage() const
 {
     Info<< "\nUsage: " << executable_ << " [OPTIONS]";
@@ -820,20 +833,7 @@ void Foam::argList::printUsage() const
     );
 
 
-    // output notes directly - no automatic text wrapping
-    if (!notes.empty())
-    {
-        Info<< nl;
-        for
-        (
-            SLList<string>::const_iterator iter = notes.begin();
-            iter != notes.end();
-            ++iter
-        )
-        {
-            Info<< iter().c_str() << nl;
-        }
-    }
+    printNotes();
 
     Info<< nl
         <<"Using OpenFOAM-" << Foam::FOAMversion

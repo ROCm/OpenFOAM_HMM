@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -186,7 +185,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             wordList oldTypes = boundary_.types();
             wordList oldNames = boundary_.names();
 
-            forAll (oldTypes, patchI)
+            forAll(oldTypes, patchI)
             {
                 if
                 (
@@ -209,14 +208,14 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             boundary_.clear();
             boundary_.setSize(newBoundary.size());
 
-            forAll (newBoundary, patchI)
+            forAll(newBoundary, patchI)
             {
                 boundary_.set(patchI, newBoundary[patchI].clone(boundary_));
             }
         }
         else
         {
-            forAll (boundary_, patchI)
+            forAll(boundary_, patchI)
             {
                 boundary_[patchI] = polyPatch
                 (
@@ -297,7 +296,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
         }
 
         // Reset existing ones
-        forAll (pointZones_, czI)
+        forAll(pointZones_, czI)
         {
             pointZones_[czI] = newPointZones[czI];
         }
@@ -334,7 +333,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
         }
 
         // Reset existing ones
-        forAll (faceZones_, fzI)
+        forAll(faceZones_, fzI)
         {
             faceZones_[fzI].resetAddressing
             (
@@ -375,7 +374,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
         }
 
         // Reset existing ones
-        forAll (cellZones_, czI)
+        forAll(cellZones_, czI)
         {
             cellZones_[czI] = newCellZones[czI];
         }

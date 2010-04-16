@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -827,12 +826,7 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
         OFstream objStream("nearestSamples.obj");
 
         label vertI = 0;
-        for
-        (
-            Map<label>::const_iterator iter = nearest.begin();
-            iter != nearest.end();
-            ++iter
-        )
+        forAllConstIter(Map<label>, nearest, iter)
         {
             meshTools::writeOBJ(objStream, samples[iter.key()]); vertI++;
             meshTools::writeOBJ(objStream, surfPoints[iter()]); vertI++;
@@ -958,14 +952,9 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
         OFstream objStream("nearestEdges.obj");
 
         label vertI = 0;
-        for
-        (
-            Map<label>::const_iterator iter = nearest.begin();
-            iter != nearest.end();
-            ++iter
-        )
+        forAllConstIter(Map<label>, nearest, iter)
         {
-            label sampleI = iter.key();
+            const label sampleI = iter.key();
 
             meshTools::writeOBJ(objStream, samples[sampleI]); vertI++;
 
@@ -1120,14 +1109,9 @@ Foam::Map<Foam::pointIndexHit> Foam::surfaceFeatures::nearestEdges
         OFstream objStream("nearestEdges.obj");
 
         label vertI = 0;
-        for
-        (
-            Map<pointIndexHit>::const_iterator iter = nearest.begin();
-            iter != nearest.end();
-            ++iter
-        )
+        forAllConstIter(Map<pointIndexHit>, nearest, iter)
         {
-            label sampleEdgeI = iter.key();
+            const label sampleEdgeI = iter.key();
 
             const edge& sampleEdge = sampleEdges[sampleEdgeI];
 

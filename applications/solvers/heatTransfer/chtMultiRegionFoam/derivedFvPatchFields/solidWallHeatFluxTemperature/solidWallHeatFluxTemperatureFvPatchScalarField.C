@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -125,6 +124,41 @@ void Foam::solidWallHeatFluxTemperatureFvPatchScalarField::rmap
 }
 
 
+Foam::tmp<Foam::scalarField>
+Foam::solidWallHeatFluxTemperatureFvPatchScalarField::K() const
+{
+    const fvMesh& mesh = patch().boundaryMesh().mesh();
+
+    if (mesh.objectRegistry::foundObject<volScalarField>(KName_))
+    {
+        return patch().lookupPatchField<volScalarField, scalar>(KName_);
+    }
+    else if (mesh.objectRegistry::foundObject<volSymmTensorField>(KName_))
+    {
+        const symmTensorField& KWall =
+            patch().lookupPatchField<volSymmTensorField, scalar>(KName_);
+
+        vectorField n = patch().nf();
+
+        return n & KWall & n;
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "solidWallHeatFluxTemperatureFvPatchScalarField::K()"
+            " const"
+        )   << "Did not find field " << KName_
+            << " on mesh " << mesh.name() << " patch " << patch().name()
+            << endl
+            << "Please set 'K' to a valid volScalarField"
+            << " or a valid volSymmTensorField." << exit(FatalError);
+
+        return scalarField(0);
+    }
+}
+
+
 void Foam::solidWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
 {
     if (updated())
@@ -132,12 +166,7 @@ void Foam::solidWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const scalarField& Kw = patch().lookupPatchField<volScalarField, scalar>
-    (
-        KName_
-    );
-
-    gradient() = q_/Kw;
+    gradient() = q_/K();
 
     fixedGradientFvPatchScalarField::updateCoeffs();
 }

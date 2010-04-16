@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -126,7 +125,7 @@ bool Foam::slidingInterface::projectPoints() const
     scalarField minMasterPointLength(masterLocalPoints.size(), GREAT);
     scalarField minMasterFaceLength(masterPatch.size(), GREAT);
 
-    forAll (masterEdges, edgeI)
+    forAll(masterEdges, edgeI)
     {
         const edge& curEdge = masterEdges[edgeI];
 
@@ -151,7 +150,7 @@ bool Foam::slidingInterface::projectPoints() const
         // Do faces
         const labelList& curFaces = masterEdgeFaces[edgeI];
 
-        forAll (curFaces, faceI)
+        forAll(curFaces, faceI)
         {
             minMasterFaceLength[curFaces[faceI]] =
                 min
@@ -169,7 +168,7 @@ bool Foam::slidingInterface::projectPoints() const
     scalarField minSlavePointLength(slaveLocalPoints.size(), GREAT);
     scalarField minSlaveFaceLength(slavePatch.size(), GREAT);
 
-    forAll (slaveEdges, edgeI)
+    forAll(slaveEdges, edgeI)
     {
         const edge& curEdge = slaveEdges[edgeI];
 
@@ -194,7 +193,7 @@ bool Foam::slidingInterface::projectPoints() const
         // Do faces
         const labelList& curFaces = slaveEdgeFaces[edgeI];
 
-        forAll (curFaces, faceI)
+        forAll(curFaces, faceI)
         {
             minSlaveFaceLength[curFaces[faceI]] =
                 min
@@ -233,7 +232,7 @@ bool Foam::slidingInterface::projectPoints() const
     {
         label nHits = 0;
 
-        forAll (slavePointFaceHits, pointI)
+        forAll(slavePointFaceHits, pointI)
         {
             if (slavePointFaceHits[pointI].hit())
             {
@@ -268,7 +267,7 @@ bool Foam::slidingInterface::projectPoints() const
                 << "Adjusting point projection for integral match: ";
         }
 
-        forAll (slavePointFaceHits, pointI)
+        forAll(slavePointFaceHits, pointI)
         {
             if (slavePointFaceHits[pointI].hit())
             {
@@ -344,7 +343,7 @@ bool Foam::slidingInterface::projectPoints() const
     }
     else if (matchType_ == PARTIAL)
     {
-        forAll (slavePointFaceHits, pointI)
+        forAll(slavePointFaceHits, pointI)
         {
             if (slavePointFaceHits[pointI].hit())
             {
@@ -386,7 +385,7 @@ bool Foam::slidingInterface::projectPoints() const
         scalar el = 0;
         label nShortEdges = 0;
 
-        forAll (slaveEdges, edgeI)
+        forAll(slaveEdges, edgeI)
         {
             el = slaveEdges[edgeI].mag(projectedSlavePoints);
 
@@ -441,7 +440,7 @@ bool Foam::slidingInterface::projectPoints() const
 
     label nMergedPoints = 0;
 
-    forAll (projectedSlavePoints, pointI)
+    forAll(projectedSlavePoints, pointI)
     {
         if (slavePointFaceHits[pointI].hit())
         {
@@ -456,7 +455,7 @@ bool Foam::slidingInterface::projectPoints() const
             scalar mergeDist = GREAT;
 
             // Try all point before deciding on best fit.
-            forAll (hitFace, hitPointI)
+            forAll(hitFace, hitPointI)
             {
                 scalar dist =
                     mag(masterLocalPoints[hitFace[hitPointI]] - curPoint);
@@ -506,7 +505,7 @@ bool Foam::slidingInterface::projectPoints() const
         scalar minEdgeLength = GREAT;
         scalar el = 0;
 
-        forAll (slaveEdges, edgeI)
+        forAll(slaveEdges, edgeI)
         {
             el = slaveEdges[edgeI].mag(projectedSlavePoints);
 
@@ -541,7 +540,7 @@ bool Foam::slidingInterface::projectPoints() const
 
     label nMovedPoints = 0;
 
-    forAll (projectedSlavePoints, pointI)
+    forAll(projectedSlavePoints, pointI)
     {
         // Eliminate the points merged into points
         if (slavePointPointHits[pointI] < 0)
@@ -565,7 +564,7 @@ bool Foam::slidingInterface::projectPoints() const
 
             scalar minDistance = GREAT;
 
-            forAll (hitFaceEdges, edgeI)
+            forAll(hitFaceEdges, edgeI)
             {
                 const edge& curEdge = masterEdges[hitFaceEdges[edgeI]];
 
@@ -614,7 +613,7 @@ bool Foam::slidingInterface::projectPoints() const
                 label mergePoint = -1;
                 scalar mergeDist = GREAT;
 
-                forAll (hitMasterEdge, hmeI)
+                forAll(hitMasterEdge, hmeI)
                 {
                     scalar hmeDist =
                         mag(masterLocalPoints[hitMasterEdge[hmeI]] - curPoint);
@@ -671,7 +670,7 @@ bool Foam::slidingInterface::projectPoints() const
         scalar minEdgeLength = GREAT;
         scalar el = 0;
 
-        forAll (slaveEdges, edgeI)
+        forAll(slaveEdges, edgeI)
         {
             el = slaveEdges[edgeI].mag(projectedSlavePoints);
 
@@ -759,7 +758,7 @@ bool Foam::slidingInterface::projectPoints() const
 
     labelHashSet addedFaces(2*primitiveMesh::edgesPerFace_);
 
-    forAll (slaveEdges, edgeI)
+    forAll(slaveEdges, edgeI)
     {
         const edge& curEdge = slaveEdges[edgeI];
 
@@ -802,11 +801,11 @@ bool Foam::slidingInterface::projectPoints() const
                 const labelList cf = addedFaces.toc();
                 addedFaces.clear();
 
-                forAll (cf, cfI)
+                forAll(cf, cfI)
                 {
                     const labelList& curNbrs = masterFaceFaces[cf[cfI]];
 
-                    forAll (curNbrs, nbrI)
+                    forAll(curNbrs, nbrI)
                     {
                         if (!curFaceMap.found(curNbrs[nbrI]))
                         {
@@ -853,11 +852,11 @@ bool Foam::slidingInterface::projectPoints() const
                     const labelList cf = addedFaces.toc();
                     addedFaces.clear();
 
-                    forAll (cf, cfI)
+                    forAll(cf, cfI)
                     {
                         const labelList& curNbrs = masterFaceFaces[cf[cfI]];
 
-                        forAll (curNbrs, nbrI)
+                        forAll(curNbrs, nbrI)
                         {
                             if (!curFaceMap.found(curNbrs[nbrI]))
                             {
@@ -901,11 +900,11 @@ bool Foam::slidingInterface::projectPoints() const
 
             const labelList curFaces = curFaceMap.toc();
 //             Pout << "curFaces: " << curFaces << endl;
-            forAll (curFaces, faceI)
+            forAll(curFaces, faceI)
             {
                 const face& f = masterLocalFaces[curFaces[faceI]];
 
-                forAll (f, pointI)
+                forAll(f, pointI)
                 {
                     curPointMap.insert(f[pointI]);
                 }
@@ -957,7 +956,7 @@ bool Foam::slidingInterface::projectPoints() const
 
             edgeNormalInPlane /= mag(edgeNormalInPlane);
 
-            forAll (curMasterPoints, pointI)
+            forAll(curMasterPoints, pointI)
             {
                 const label cmp = curMasterPoints[pointI];
 
@@ -1186,7 +1185,7 @@ bool Foam::slidingInterface::projectPoints() const
 
         const List<objectHit>& oldPointFaceHits = *slavePointFaceHitsPtr_;
 
-        forAll (slavePointFaceHits, pointI)
+        forAll(slavePointFaceHits, pointI)
         {
             if
             (

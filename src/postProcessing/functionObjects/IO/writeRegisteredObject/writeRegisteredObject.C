@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -30,10 +29,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(writeRegisteredObject, 0);
-}
+defineTypeNameAndDebug(Foam::writeRegisteredObject, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -68,28 +64,6 @@ void Foam::writeRegisteredObject::read(const dictionary& dict)
     if (active_)
     {
         dict.lookup("objectNames") >> objectNames_;
-
-        forAll(objectNames_, i)
-        {
-            if (obr_.foundObject<regIOobject>(objectNames_[i]))
-            {
-                regIOobject& obj =
-                    const_cast<regIOobject&>
-                    (
-                        obr_.lookupObject<regIOobject>(objectNames_[i])
-                    );
-                obj.writeOpt() = IOobject::NO_WRITE;
-            }
-            else
-            {
-                FatalErrorIn
-                (
-                    "Foam::writeRegisteredObject::read(const dictionary&)"
-                )   << "Object " << objectNames_[i] << " not found in "
-                    << "database. Available objects are:" << nl << obr_.toc()
-                    << nl << exit(FatalError);
-            }
-        }
     }
 }
 
@@ -112,9 +86,27 @@ void Foam::writeRegisteredObject::write()
     {
         forAll(objectNames_, i)
         {
-            const regIOobject& obj =
-                obr_.lookupObject<regIOobject>(objectNames_[i]);
-            obj.write();
+            if (obr_.foundObject<regIOobject>(objectNames_[i]))
+            {
+                regIOobject& obj =
+                    const_cast<regIOobject&>
+                    (
+                        obr_.lookupObject<regIOobject>(objectNames_[i])
+                    );
+                // Switch off automatic writing to prevent double write
+                obj.writeOpt() = IOobject::NO_WRITE;
+                obj.write();
+            }
+            else
+            {
+                WarningIn
+                (
+                    "Foam::writeRegisteredObject::read(const dictionary&)"
+                )   << "Object " << objectNames_[i] << " not found in "
+                    << "database. Available objects are:" << nl << obr_.toc()
+                    << endl;
+            }
+
         }
     }
 }

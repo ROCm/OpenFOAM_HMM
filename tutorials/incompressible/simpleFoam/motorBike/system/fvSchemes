@@ -24,7 +24,6 @@ gradSchemes
     default         Gauss linear;
     grad(p)         Gauss linear;
     grad(U)         Gauss linear;
-    //grad(U)         cellLimited Gauss linear 1;
 }
 
 divSchemes
@@ -38,20 +37,17 @@ divSchemes
 
 laplacianSchemes
 {
-    default         Gauss linear corrected;
-    //default         Gauss linear limited 0.5;
-    //default         Gauss linear limited 0.333;
+    default         Gauss linear limited 0.333;
 }
 
 interpolationSchemes
 {
     default         linear;
-    interpolate(U)  linear;
 }
 
 snGradSchemes
 {
-    default         corrected;
+    default         limited 0.333;
 }
 
 fluxRequired

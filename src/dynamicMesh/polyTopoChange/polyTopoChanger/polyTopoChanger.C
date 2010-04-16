@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -131,7 +130,7 @@ Foam::wordList Foam::polyTopoChanger::types() const
 
     wordList t(modifiers.size());
 
-    forAll (modifiers, modifierI)
+    forAll(modifiers, modifierI)
     {
         t[modifierI] = modifiers[modifierI].type();
     }
@@ -147,7 +146,7 @@ Foam::wordList Foam::polyTopoChanger::names() const
 
     wordList t(modifiers.size());
 
-    forAll (modifiers, modifierI)
+    forAll(modifiers, modifierI)
     {
         t[modifierI] = modifiers[modifierI].name();
     }
@@ -164,7 +163,7 @@ bool Foam::polyTopoChanger::changeTopology() const
 
     bool triggerChange = false;
 
-    forAll (topoChanges, morphI)
+    forAll(topoChanges, morphI)
     {
         if (topoChanges[morphI].active())
         {
@@ -212,7 +211,7 @@ Foam::polyTopoChanger::topoChangeRequest() const
     polyTopoChange* refPtr(new polyTopoChange(mesh()));
     polyTopoChange& ref = *refPtr;
 
-    forAll (topoChanges, morphI)
+    forAll(topoChanges, morphI)
     {
         if (topoChanges[morphI].active())
         {
@@ -229,7 +228,7 @@ void Foam::polyTopoChanger::modifyMotionPoints(pointField& p) const
 {
     const PtrList<polyMeshModifier>& topoChanges = *this;
 
-    forAll (topoChanges, morphI)
+    forAll(topoChanges, morphI)
     {
         if (topoChanges[morphI].active())
         {
@@ -245,7 +244,7 @@ void Foam::polyTopoChanger::update(const mapPolyMesh& m)
     // Go through all mesh modifiers and accumulate the morphing information
     PtrList<polyMeshModifier>& topoChanges = *this;
 
-    forAll (topoChanges, morphI)
+    forAll(topoChanges, morphI)
     {
         topoChanges[morphI].updateMesh(m);
     }
@@ -299,7 +298,7 @@ void Foam::polyTopoChanger::addTopologyModifiers
     setSize(tm.size());
 
     // Copy the patch pointers
-    forAll (tm, tmI)
+    forAll(tm, tmI)
     {
         if (tm[tmI]->topoChanger() != *this)
         {
@@ -324,7 +323,7 @@ Foam::label Foam::polyTopoChanger::findModifierID
 {
     const PtrList<polyMeshModifier>& topoChanges = *this;
 
-    forAll (topoChanges, morphI)
+    forAll(topoChanges, morphI)
     {
         if (topoChanges[morphI].name() == modName)
         {

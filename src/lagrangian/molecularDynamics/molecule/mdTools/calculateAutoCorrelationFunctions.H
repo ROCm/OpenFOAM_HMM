@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,27 +19,19 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
 if (mesh.time().timeIndex() % vacf.sampleSteps() == 0)
 {
-    IDLList<molecule>::iterator mol(molecules.begin());
-
     Field<vector> uVals(molecules.size());
 
     label uV = 0;
 
-    for
-    (
-        mol = molecules.begin();
-        mol != molecules.end();
-        ++mol, uV++
-    )
+    forAllConstIter(IDLList<molecule>, molecules, mol)
     {
-        uVals[uV] = mol().U();
+        uVals[uV++] = mol().U();
     }
 
     vacf.calculateCorrelationFunction(uVals);
@@ -47,16 +39,9 @@ if (mesh.time().timeIndex() % vacf.sampleSteps() == 0)
 
 if (mesh.time().timeIndex() % pacf.sampleSteps() == 0)
 {
-    IDLList<molecule>::iterator mol(molecules.begin());
-
     vector p = vector::zero;
 
-    for
-    (
-        mol = molecules.begin();
-        mol != molecules.end();
-        ++mol
-    )
+    forAllConstIter(IDLList<molecule>, molecules, mol)
     {
         p.x() +=
             mol().mass() * mol().U().y() * mol().U().z()
@@ -76,17 +61,9 @@ if (mesh.time().timeIndex() % pacf.sampleSteps() == 0)
 
 if (mesh.time().timeIndex() % hfacf.sampleSteps() == 0)
 {
-
-    IDLList<molecule>::iterator mol(molecules.begin());
-
     vector s = vector::zero;
 
-    for
-    (
-        mol = molecules.begin();
-        mol != molecules.end();
-        ++mol
-    )
+    forAllConstIter(IDLList<molecule>, molecules, mol)
     {
         s +=
         (

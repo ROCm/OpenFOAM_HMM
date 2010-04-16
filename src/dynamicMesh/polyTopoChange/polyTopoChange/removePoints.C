@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -253,10 +252,43 @@ Foam::label Foam::removePoints::countPointUsage
             pointCanBeDeleted[pointI] = true;
             nDeleted++;
         }
-
     }
     edge0.clear();
     edge1.clear();
+
+
+    // Protect any points on faces that would collapse down to nothing
+    // No particular intelligence so might protect too many points
+    forAll(mesh_.faces(), faceI)
+    {
+        const face& f = mesh_.faces()[faceI];
+
+        label nCollapse = 0;
+        forAll(f, fp)
+        {
+            if (pointCanBeDeleted[f[fp]])
+            {
+                nCollapse++;
+            }
+        }
+
+        if ((f.size() - nCollapse) < 3)
+        {
+            // Just unmark enough points
+            forAll(f, fp)
+            {
+                if (pointCanBeDeleted[f[fp]])
+                {
+                    pointCanBeDeleted[f[fp]] = false;
+                    --nCollapse;
+                    if (nCollapse == 0)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+    }
 
 
     // Point can be deleted only if all processors want to delete it

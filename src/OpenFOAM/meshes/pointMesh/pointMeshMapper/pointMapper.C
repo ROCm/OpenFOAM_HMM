@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -64,7 +63,7 @@ void Foam::pointMapper::calcAddressing() const
 
         label nInsertedPoints = 0;
 
-        forAll (directAddr, pointI)
+        forAll(directAddr, pointI)
         {
             if (directAddr[pointI] < 0)
             {
@@ -90,7 +89,7 @@ void Foam::pointMapper::calcAddressing() const
         // Points created from other points (i.e. points merged into it).
         const List<objectMap>& cfc = mpm_.pointsFromPointsMap();
 
-        forAll (cfc, cfcI)
+        forAll(cfc, cfcI)
         {
             // Get addressing
             const labelList& mo = cfc[cfcI].masterObjects();
@@ -116,7 +115,7 @@ void Foam::pointMapper::calcAddressing() const
 
         const labelList& cm = mpm_.pointMap();
 
-        forAll (cm, pointI)
+        forAll(cm, pointI)
         {
             if (cm[pointI] > -1 && addr[pointI].empty())
             {
@@ -133,7 +132,7 @@ void Foam::pointMapper::calcAddressing() const
 
         label nInsertedPoints = 0;
 
-        forAll (addr, pointI)
+        forAll(addr, pointI)
         {
             if (addr[pointI].empty())
             {
@@ -199,7 +198,7 @@ Foam::pointMapper::pointMapper(const pointMesh& pMesh, const mapPolyMesh& mpm)
 
         const List<objectMap>& cfc = mpm_.pointsFromPointsMap();
 
-        forAll (cfc, cfcI)
+        forAll(cfc, cfcI)
         {
             cm[cfc[cfcI].index()] = 0;
         }

@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -38,7 +37,7 @@ scalar spray::injectedMass(const scalar t) const
 {
     scalar sum = 0.0;
 
-    forAll (injectors_, i)
+    forAll(injectors_, i)
     {
         sum += injectors_[i].properties()->injectedMass(t);
     }
@@ -51,7 +50,7 @@ scalar spray::totalMassToInject() const
 {
     scalar sum = 0.0;
 
-    forAll (injectors_, i)
+    forAll(injectors_, i)
     {
         sum += injectors_[i].properties()->mass();
     }
@@ -68,7 +67,7 @@ scalar spray::injectedEnthalpy
     scalar sum = 0.0;
     label Nf = fuels_->components().size();
 
-    forAll (injectors_, i)
+    forAll(injectors_, i)
     {
         scalar T = injectors_[i].properties()->T(time);
         scalarField X(injectors_[i].properties()->X());
@@ -94,14 +93,9 @@ scalar spray::liquidMass() const
 {
     scalar sum = 0.0;
 
-    for
-    (
-        spray::const_iterator elmnt = begin();
-        elmnt != end();
-        ++elmnt
-    )
+    forAllConstIter(spray, *this, iter)
     {
-        sum += elmnt().m();
+        sum += iter().m();
     }
 
     if (twoD())
@@ -120,30 +114,25 @@ scalar spray::liquidEnthalpy() const
     scalar sum = 0.0;
     label Nf = fuels().components().size();
 
-    for
-    (
-        spray::const_iterator elmnt = begin();
-        elmnt != end();
-        ++elmnt
-    )
+    forAllConstIter(spray, *this, iter)
     {
-        scalar T = elmnt().T();
-        scalar pc = p()[elmnt().cell()];
-        scalar hlat = fuels().hl(pc, T, elmnt().X());
+        scalar T = iter().T();
+        scalar pc = p()[iter().cell()];
+        scalar hlat = fuels().hl(pc, T, iter().X());
         scalar hg = 0.0;
-        scalar Wl = fuels().W(elmnt().X());
+        scalar Wl = fuels().W(iter().X());
 
         for (label j=0; j<Nf; j++)
         {
             label k = liquidToGasIndex_[j];
 
             hg +=
-                gasProperties()[k].H(T)*gasProperties()[k].W()*elmnt().X()[j]
+                gasProperties()[k].H(T)*gasProperties()[k].W()*iter().X()[j]
                /Wl;
         }
 
         scalar h = hg - hlat;
-        sum += elmnt().m()*h;
+        sum += iter().m()*h;
     }
 
     if (twoD())
@@ -162,33 +151,28 @@ scalar spray::liquidTotalEnthalpy() const
     scalar sum = 0.0;
     label Nf = fuels().components().size();
 
-    for
-    (
-        spray::const_iterator elmnt = begin();
-        elmnt != end();
-        ++elmnt
-    )
+    forAllConstIter(spray, *this, iter)
     {
-        label celli = elmnt().cell();
-        scalar T = elmnt().T();
+        label celli = iter().cell();
+        scalar T = iter().T();
         scalar pc = p()[celli];
-        scalar rho = fuels().rho(pc, T, elmnt().X());
-        scalar hlat = fuels().hl(pc, T, elmnt().X());
+        scalar rho = fuels().rho(pc, T, iter().X());
+        scalar hlat = fuels().hl(pc, T, iter().X());
         scalar hg = 0.0;
-        scalar Wl = fuels().W(elmnt().X());
+        scalar Wl = fuels().W(iter().X());
 
         for (label j=0; j<Nf; j++)
         {
             label k = liquidToGasIndex_[j];
             hg +=
-                gasProperties()[k].H(T)*gasProperties()[k].W()*elmnt().X()[j]
+                gasProperties()[k].H(T)*gasProperties()[k].W()*iter().X()[j]
                /Wl;
         }
 
-        scalar psat = fuels().pv(pc, T, elmnt().X());
+        scalar psat = fuels().pv(pc, T, iter().X());
 
         scalar h = hg - hlat + (pc - psat)/rho;
-        sum += elmnt().m()*h;
+        sum += iter().m()*h;
     }
 
     if (twoD())
@@ -205,15 +189,11 @@ scalar spray::liquidTotalEnthalpy() const
 scalar spray::liquidKineticEnergy() const
 {
     scalar sum = 0.0;
-    for
-    (
-        spray::const_iterator elmnt = begin();
-        elmnt != end();
-        ++elmnt
-    )
+
+    forAllConstIter(spray, *this, iter)
     {
-        scalar ke = pow(mag(elmnt().U()), 2.0);
-        sum += elmnt().m()*ke;
+        const scalar ke = pow(mag(iter().U()), 2.0);
+        sum += iter().m()*ke;
     }
 
     if (twoD())
@@ -287,13 +267,13 @@ scalar spray::liquidPenetration
 
         for
         (
-            spray::const_iterator elmnt = ++first;
-            elmnt != end();
-            ++elmnt
+            spray::const_iterator iter = ++first;
+            iter != end();
+            ++iter
         )
         {
-            scalar de = mag(elmnt().position() - ip);
-            scalar me = elmnt().m();
+            scalar de = mag(iter().position() - ip);
+            scalar me = iter().m();
             mTot += me;
 
             n++;
@@ -358,8 +338,8 @@ scalar spray::liquidPenetration
     {
         if (Np > 0)
         {
-            spray::const_iterator elmnt = begin();
-            d = mag(elmnt().position() - ip);
+            spray::const_iterator iter = begin();
+            d = mag(iter().position() - ip);
         }
     }
 
@@ -373,20 +353,15 @@ scalar spray::smd() const
 {
     scalar numerator = 0.0, denominator = VSMALL;
 
-    for
-    (
-        spray::const_iterator elmnt = begin();
-        elmnt != end();
-        ++elmnt
-    )
+    forAllConstIter(spray, *this, iter)
     {
-        label celli = elmnt().cell();
+        label celli = iter().cell();
         scalar Pc = p()[celli];
-        scalar T = elmnt().T();
-        scalar rho = fuels_->rho(Pc, T, elmnt().X());
+        scalar T = iter().T();
+        scalar rho = fuels_->rho(Pc, T, iter().X());
 
-        scalar tmp = elmnt().N(rho)*pow(elmnt().d(), 2.0);
-        numerator += tmp*elmnt().d();
+        scalar tmp = iter().N(rho)*pow(iter().d(), 2.0);
+        numerator += tmp*iter().d();
         denominator += tmp;
     }
 
@@ -401,14 +376,9 @@ scalar spray::maxD() const
 {
     scalar maxD = 0.0;
 
-    for
-    (
-        spray::const_iterator elmnt = begin();
-        elmnt != end();
-        ++elmnt
-    )
+    forAllConstIter(spray, *this, iter)
     {
-        maxD = max(maxD, elmnt().d());
+        maxD = max(maxD, iter().d());
     }
 
     reduce(maxD, maxOp<scalar>());

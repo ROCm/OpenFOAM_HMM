@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -64,7 +63,7 @@ void Foam::cellMapper::calcAddressing() const
 
         label nInsertedCells = 0;
 
-        forAll (directAddr, cellI)
+        forAll(directAddr, cellI)
         {
             if (directAddr[cellI] < 0)
             {
@@ -89,7 +88,7 @@ void Foam::cellMapper::calcAddressing() const
 
         const List<objectMap>& cfp = mpm_.cellsFromPointsMap();
 
-        forAll (cfp, cfpI)
+        forAll(cfp, cfpI)
         {
             // Get addressing
             const labelList& mo = cfp[cfpI].masterObjects();
@@ -111,7 +110,7 @@ void Foam::cellMapper::calcAddressing() const
 
         const List<objectMap>& cfe = mpm_.cellsFromEdgesMap();
 
-        forAll (cfe, cfeI)
+        forAll(cfe, cfeI)
         {
             // Get addressing
             const labelList& mo = cfe[cfeI].masterObjects();
@@ -133,7 +132,7 @@ void Foam::cellMapper::calcAddressing() const
 
         const List<objectMap>& cff = mpm_.cellsFromFacesMap();
 
-        forAll (cff, cffI)
+        forAll(cff, cffI)
         {
             // Get addressing
             const labelList& mo = cff[cffI].masterObjects();
@@ -155,7 +154,7 @@ void Foam::cellMapper::calcAddressing() const
 
         const List<objectMap>& cfc = mpm_.cellsFromCellsMap();
 
-        forAll (cfc, cfcI)
+        forAll(cfc, cfcI)
         {
             // Get addressing
             const labelList& mo = cfc[cfcI].masterObjects();
@@ -181,7 +180,7 @@ void Foam::cellMapper::calcAddressing() const
 
         const labelList& cm = mpm_.cellMap();
 
-        forAll (cm, cellI)
+        forAll(cm, cellI)
         {
             if (cm[cellI] > -1 && addr[cellI].empty())
             {
@@ -198,7 +197,7 @@ void Foam::cellMapper::calcAddressing() const
 
         label nInsertedCells = 0;
 
-        forAll (addr, cellI)
+        forAll(addr, cellI)
         {
             if (addr[cellI].empty())
             {
@@ -271,28 +270,28 @@ Foam::cellMapper::cellMapper(const mapPolyMesh& mpm)
 
         const List<objectMap>& cfp = mpm_.cellsFromPointsMap();
 
-        forAll (cfp, cfpI)
+        forAll(cfp, cfpI)
         {
             cm[cfp[cfpI].index()] = 0;
         }
 
         const List<objectMap>& cfe = mpm_.cellsFromEdgesMap();
 
-        forAll (cfe, cfeI)
+        forAll(cfe, cfeI)
         {
             cm[cfe[cfeI].index()] = 0;
         }
 
         const List<objectMap>& cff = mpm_.cellsFromFacesMap();
 
-        forAll (cff, cffI)
+        forAll(cff, cffI)
         {
             cm[cff[cffI].index()] = 0;
         }
 
         const List<objectMap>& cfc = mpm_.cellsFromCellsMap();
 
-        forAll (cfc, cfcI)
+        forAll(cfc, cfcI)
         {
             cm[cfc[cfcI].index()] = 0;
         }

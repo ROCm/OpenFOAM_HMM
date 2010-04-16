@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
     Create polyMesh from cell and patch shapes
@@ -62,7 +61,7 @@ Foam::labelListList Foam::polyMesh::cellShapePointCells
 
     labelListList pointCellAddr(pc.size());
 
-    forAll (pc, pointI)
+    forAll(pc, pointI)
     {
         pointCellAddr[pointI].transfer(pc[pointI]);
     }
@@ -257,7 +256,7 @@ void Foam::polyMesh::setTopology
             label nextNei = -1;
             label minNei = cells.size();
 
-            forAll (neiCells, ncI)
+            forAll(neiCells, ncI)
             {
                 if (neiCells[ncI] > -1 && neiCells[ncI] < minNei)
                 {
@@ -307,7 +306,7 @@ void Foam::polyMesh::setTopology
     patchSizes.setSize(boundaryFaces.size(), -1);
     patchStarts.setSize(boundaryFaces.size(), -1);
 
-    forAll (boundaryFaces, patchI)
+    forAll(boundaryFaces, patchI)
     {
         const faceList& patchFaces = boundaryFaces[patchI];
 
@@ -323,7 +322,7 @@ void Foam::polyMesh::setTopology
         // Grab the start label
         label curPatchStart = nFaces;
 
-        forAll (patchFaces, faceI)
+        forAll(patchFaces, faceI)
         {
             const face& curFace = patchFaces[faceI];
 
@@ -336,7 +335,7 @@ void Foam::polyMesh::setTopology
 
             bool found = false;
 
-            forAll (facesOfCellInside, cellFaceI)
+            forAll(facesOfCellInside, cellFaceI)
             {
                 if (facesOfCellInside[cellFaceI] == curFace)
                 {
@@ -579,7 +578,7 @@ Foam::polyMesh::polyMesh
 
     // Warning: Patches can only be added once the face list is
     // completed, as they hold a subList of the face list
-    forAll (boundaryFaces, patchI)
+    forAll(boundaryFaces, patchI)
     {
         // add the patch to the list
         boundary_.set

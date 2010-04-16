@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -90,7 +89,7 @@ void Foam::mixerFvMesh::addZonesAndModifiers()
 
     labelList isf(innerSlider.size());
 
-    forAll (isf, i)
+    forAll(isf, i)
     {
         isf[i] = innerSlider.start() + i;
     }
@@ -111,7 +110,7 @@ void Foam::mixerFvMesh::addZonesAndModifiers()
 
     labelList osf(outerSlider.size());
 
-    forAll (osf, i)
+    forAll(osf, i)
     {
         osf[i] = outerSlider.start() + i;
     }
@@ -221,16 +220,16 @@ void Foam::mixerFvMesh::calcMovingMasks() const
     const labelList& cellAddr =
         cellZones()[cellZones().findZoneID("movingCells")];
 
-    forAll (cellAddr, cellI)
+    forAll(cellAddr, cellI)
     {
         const cell& curCell = c[cellAddr[cellI]];
 
-        forAll (curCell, faceI)
+        forAll(curCell, faceI)
         {
             // Mark all the points as moving
             const face& curFace = f[curCell[faceI]];
 
-            forAll (curFace, pointI)
+            forAll(curFace, pointI)
             {
                 movingPointsMask[curFace[pointI]] = 1;
             }
@@ -246,11 +245,11 @@ void Foam::mixerFvMesh::calcMovingMasks() const
     const labelList& innerSliderAddr =
         faceZones()[faceZones().findZoneID(innerSliderZoneName)];
 
-    forAll (innerSliderAddr, faceI)
+    forAll(innerSliderAddr, faceI)
     {
         const face& curFace = f[innerSliderAddr[faceI]];
 
-        forAll (curFace, pointI)
+        forAll(curFace, pointI)
         {
             movingPointsMask[curFace[pointI]] = 1;
         }
@@ -265,11 +264,11 @@ void Foam::mixerFvMesh::calcMovingMasks() const
     const labelList& outerSliderAddr =
         faceZones()[faceZones().findZoneID(outerSliderZoneName)];
 
-    forAll (outerSliderAddr, faceI)
+    forAll(outerSliderAddr, faceI)
     {
         const face& curFace = f[outerSliderAddr[faceI]];
 
-        forAll (curFace, pointI)
+        forAll(curFace, pointI)
         {
             movingPointsMask[curFace[pointI]] = 0;
         }

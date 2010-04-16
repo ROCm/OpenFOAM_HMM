@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -41,10 +40,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(multiDirRefinement, 0);
-}
+defineTypeNameAndDebug(Foam::multiDirRefinement, 0);
 
 
 // * * * * * * * * * * * * * Private Statc Functions * * * * * * * * * * * * //
@@ -94,12 +90,7 @@ void Foam::multiDirRefinement::update
 {
     field.setSize(field.size() + splitMap.size());
 
-    for
-    (
-        Map<label>::const_iterator iter = splitMap.begin();
-        iter != splitMap.end();
-        ++iter
-    )
+    forAllConstIter(Map<label>, splitMap, iter)
     {
         field[iter()] = field[iter.key()];
     }
@@ -117,12 +108,7 @@ void Foam::multiDirRefinement::addCells
 
     labels.setSize(labels.size() + splitMap.size());
 
-    for
-    (
-        Map<label>::const_iterator iter = splitMap.begin();
-        iter != splitMap.end();
-        ++iter
-    )
+    forAllConstIter(Map<label>, splitMap, iter)
     {
         labels[newCellI++] = iter();
     }
@@ -166,12 +152,7 @@ void Foam::multiDirRefinement::addCells
     }
 
 
-    for
-    (
-        Map<label>::const_iterator iter = splitMap.begin();
-        iter != splitMap.end();
-        ++iter
-    )
+    forAllConstIter(Map<label>, splitMap, iter)
     {
         label masterI = iter.key();
         label newCellI = iter();
@@ -308,7 +289,7 @@ void Foam::multiDirRefinement::refineHex8
         // Increment count
         forAll(consistentCells, i)
         {
-            label cellI = consistentCells[i];
+            const label cellI = consistentCells[i];
 
             Map<label>::iterator iter = hexCellSet.find(cellI);
 
@@ -381,7 +362,7 @@ void Foam::multiDirRefinement::refineHex8
 
     forAll(cellMap, cellI)
     {
-        label oldCellI = cellMap[cellI];
+        const label oldCellI = cellMap[cellI];
 
         if (addedCells_[oldCellI].size())
         {
@@ -440,7 +421,7 @@ void Foam::multiDirRefinement::refineAllDirs
             // Non uniform directions.
             forAll(refCells, refI)
             {
-                label cellI = cellLabels_[refI];
+                const label cellI = cellLabels_[refI];
 
                 refCells[refI] = refineCell(cellI, dirField[cellI]);
             }

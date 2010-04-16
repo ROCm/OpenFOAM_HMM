@@ -37,6 +37,8 @@ SurfaceReactionModel none;
 
 PostProcessingModel PatchPostProcessing;
 
+SurfaceFilmModel none;
+
 radiation       off;
 
 coupled         true;
@@ -98,7 +100,7 @@ PatchInjectionCoeffs
     duration        10000;
     parcelsPerSecond 1e5;
     U0              (40 0 0);
-    volumeFlowRate  constant 1;
+    flowRateProfile constant 1;
     parcelPDF
     {
         pdfType         general;

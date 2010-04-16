@@ -1,3 +1,1 @@
-PFLAGS     =
-PINC       =
-PLIBS      =
+../General/mplib

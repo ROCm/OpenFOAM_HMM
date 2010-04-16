@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
     Foam::fieldValues::cellSource
@@ -104,16 +103,18 @@ public:
             opSum,
             opVolAverage,
             opVolIntegrate,
-            opWeightedAverage
+            opWeightedAverage,
+            opMin,
+            opMax
         };
 
         //- Operation type names
-        static const NamedEnum<operationType, 5> operationTypeNames_;
+        static const NamedEnum<operationType, 7> operationTypeNames_;
 
 
 private:
 
-    // Private member functions
+    // Private Member Functions
 
         //- Set cells to evaluate based on a cell zone
         void setCellZoneCells();
@@ -132,6 +133,9 @@ protected:
         //- Operation to apply to values
         operationType operation_;
 
+        //- Global number of cells
+        label nCells_;
+
         //- Local list of cell IDs
         labelList cellId_;
 
@@ -139,7 +143,7 @@ protected:
         word weightFieldName_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Initialise, e.g. cell addressing
         void initialise(const dictionary& dict);
@@ -188,7 +192,7 @@ public:
     virtual ~cellSource();
 
 
-    // Public member functions
+    // Public Member Functions
 
         // Access
 

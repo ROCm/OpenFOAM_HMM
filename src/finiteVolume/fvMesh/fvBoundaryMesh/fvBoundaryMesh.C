@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -28,14 +27,9 @@ License
 #include "fvBoundaryMesh.H"
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void fvBoundaryMesh::addPatches(const polyBoundaryMesh& basicBdry)
+void Foam::fvBoundaryMesh::addPatches(const polyBoundaryMesh& basicBdry)
 {
     setSize(basicBdry.size());
 
@@ -51,7 +45,7 @@ void fvBoundaryMesh::addPatches(const polyBoundaryMesh& basicBdry)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-fvBoundaryMesh::fvBoundaryMesh
+Foam::fvBoundaryMesh::fvBoundaryMesh
 (
     const fvMesh& m
 )
@@ -61,7 +55,7 @@ fvBoundaryMesh::fvBoundaryMesh
 {}
 
 
-fvBoundaryMesh::fvBoundaryMesh
+Foam::fvBoundaryMesh::fvBoundaryMesh
 (
     const fvMesh& m,
     const polyBoundaryMesh& basicBdry
@@ -76,7 +70,7 @@ fvBoundaryMesh::fvBoundaryMesh
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void fvBoundaryMesh::movePoints()
+void Foam::fvBoundaryMesh::movePoints()
 {
     forAll(*this, patchi)
     {
@@ -90,11 +84,11 @@ void fvBoundaryMesh::movePoints()
 }
 
 
-lduInterfacePtrsList fvBoundaryMesh::interfaces() const
+Foam::lduInterfacePtrsList Foam::fvBoundaryMesh::interfaces() const
 {
     lduInterfacePtrsList interfaces(size());
 
-    forAll (interfaces, patchi)
+    forAll(interfaces, patchi)
     {
         if (isA<lduInterface>(this->operator[](patchi)))
         {
@@ -110,15 +104,11 @@ lduInterfacePtrsList fvBoundaryMesh::interfaces() const
 }
 
 
-void fvBoundaryMesh::readUpdate(const polyBoundaryMesh& basicBdry)
+void Foam::fvBoundaryMesh::readUpdate(const polyBoundaryMesh& basicBdry)
 {
     clear();
     addPatches(basicBdry);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

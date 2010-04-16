@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -82,8 +81,7 @@ Foam::label Foam::regionSide::otherEdge
 
     forAll(fEdges, fEdgeI)
     {
-        label otherEdgeI = fEdges[fEdgeI];
-
+        const label otherEdgeI = fEdges[fEdgeI];
         const edge& otherE = mesh.edges()[otherEdgeI];
 
         if
@@ -301,15 +299,9 @@ void Foam::regionSide::walkAllPointConnectedFaces
     //
     labelHashSet regionEdges(4*regionFaces.size());
 
-    for
-    (
-        labelHashSet::const_iterator iter = regionFaces.begin();
-        iter != regionFaces.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, regionFaces, iter)
     {
-        label faceI = iter.key();
-
+        const label faceI = iter.key();
         const labelList& fEdges = mesh.faceEdges()[faceI];
 
         forAll(fEdges, fEdgeI)
@@ -327,12 +319,7 @@ void Foam::regionSide::walkAllPointConnectedFaces
     labelHashSet visitedPoint(4*regionFaces.size());
 
     // Insert fence points so we don't visit them
-    for
-    (
-        labelHashSet::const_iterator iter = fencePoints.begin();
-        iter != fencePoints.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, fencePoints, iter)
     {
         visitedPoint.insert(iter.key());
     }
@@ -345,14 +332,9 @@ void Foam::regionSide::walkAllPointConnectedFaces
         Info<< "Excluding visit of points:" << visitedPoint << endl;
     }
 
-    for
-    (
-        labelHashSet::const_iterator iter = regionFaces.begin();
-        iter != regionFaces.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, regionFaces, iter)
     {
-        label faceI = iter.key();
+        const label faceI = iter.key();
 
         // Get side of face.
         label cellI;
@@ -460,12 +442,7 @@ Foam::regionSide::regionSide
 
     labelHashSet fencePoints(fenceEdges.size());
 
-    for
-    (
-        labelHashSet::const_iterator iter = fenceEdges.begin();
-        iter != fenceEdges.end();
-        ++iter
-    )
+    forAllConstIter(labelHashSet, fenceEdges, iter)
     {
         const edge& e = mesh.edges()[iter.key()];
 

@@ -9,10 +9,10 @@
 # License
 #     This file is part of OpenFOAM.
 #
-#     OpenFOAM is free software; you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by the
-#     Free Software Foundation; either version 2 of the License, or (at your
-#     option) any later version.
+#     OpenFOAM is free software: you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
 #
 #     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
 #     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -20,8 +20,7 @@
 #     for more details.
 #
 #     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM; if not, write to the Free Software Foundation,
-#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
 #     foamCopySettings
@@ -38,9 +37,12 @@
 #     to add any custom rsync options.
 #-------------------------------------------------------------------------------
 Script=${0##*/}
-if [ "$1" = "-h" -o "$1" = "-help" -o "$#" -ne 2 ]
-then
+
+#------------------------------------------------------------------------------
+usage() {
+    while [ "$#" -ge 1 ]; do echo "$1" 1>&2; shift; done
     cat <<USAGE 1>&2
+
 Usage: $Script srcDir dstDir
 
     Copy OpenFOAM settings from one case to another, without copying
@@ -53,7 +55,29 @@ Note
 
 USAGE
     exit 1
-fi
+}
+#------------------------------------------------------------------------------
+
+# parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)
+        usage
+        ;;
+    -*)
+        usage "unknown option: '$*'"
+        ;;
+    *)
+        break
+        ;;
+    esac
+done
+
+# need rsync
+type rsync >/dev/null 2>&1 || usage "Error: 'rsync' seems to be missing"
+
+[ "$#" -eq 2 ] || usage "Error: incorrect number of arguments"
 
 srcDir=${1%/}
 dstDir=${2%/}

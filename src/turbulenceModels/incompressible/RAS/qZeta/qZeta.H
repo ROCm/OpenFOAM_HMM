@@ -2,16 +2,16 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
     Foam::incompressible::RASModels::qZeta
@@ -66,6 +65,11 @@ class qZeta
             dimensionedScalar sigmaZeta_;
             Switch anisotropic_;
 
+        //- Lower limit of q
+        dimensionedScalar qMin_;
+
+        //- Lower limit of zeta
+        dimensionedScalar zetaMin_;
 
         // Fields
 
@@ -78,7 +82,7 @@ class qZeta
             volScalarField nut_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         tmp<volScalarField> fMu() const;
         tmp<volScalarField> f2() const;
@@ -106,6 +110,33 @@ public:
 
 
     // Member Functions
+
+       // Access
+
+            //- Return the lower allowable limit for q (default: SMALL)
+            const dimensionedScalar& qMin() const
+            {
+                return qMin_;
+            }
+
+            //- Return the lower allowable limit for zeta (default: SMALL)
+            const dimensionedScalar& zetaMin() const
+            {
+                return zetaMin_;
+            }
+
+            //- Allow qMin to be changed
+            dimensionedScalar& qMin()
+            {
+                return qMin_;
+            }
+
+            //- Allow zetaMin to be changed
+            dimensionedScalar& zetaMin()
+            {
+                return zetaMin_;
+            }
+
 
         //- Return the turbulence viscosity
         virtual tmp<volScalarField> nut() const

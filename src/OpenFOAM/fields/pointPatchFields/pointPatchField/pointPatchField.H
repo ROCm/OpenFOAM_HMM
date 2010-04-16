@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
     Foam::pointPatchField
@@ -36,7 +35,7 @@ Description
 
 SourceFiles
     pointPatchField.C
-    newpointPatchField.C
+    newPointPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -200,6 +199,18 @@ public:
             const DimensionedField<Type, pointMesh>&
         );
 
+        //- Return a pointer to a new patchField created on freestore given
+        //  patch and internal field
+        //  (does not set the patch field values).
+        //  Allows override of constraint type
+        static autoPtr<pointPatchField<Type> > New
+        (
+            const word&,
+            const word& actualPatchType,
+            const pointPatch&,
+            const DimensionedField<Type, pointMesh>&
+        );
+
         //- Return a pointer to a new patchField created on freestore from
         //  a given pointPatchField mapped onto a new patch
         static autoPtr<pointPatchField<Type> > New
@@ -230,10 +241,9 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~pointPatchField<Type>()
-        {}
+    //- Destructor
+    virtual ~pointPatchField<Type>()
+    {}
 
 
     // Member functions
@@ -338,8 +348,14 @@ public:
                 const Field<Type1>& pF
             ) const;
 
-            //- Return the type of the calculated for of pointPatchField
+            //- Return the type of the calculated form of pointPatchField
             static const word& calculatedType();
+
+            //- Return the constraint type this pointPatchField implements.
+            virtual const word& constraintType() const
+            {
+                return word::null;
+            }
 
 
         // Mapping functions

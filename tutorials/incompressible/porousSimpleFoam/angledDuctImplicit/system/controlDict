@@ -37,7 +37,7 @@ writeFormat     binary;
 
 writePrecision  6;
 
-writeCompression uncompressed;
+writeCompression off;
 
 timeFormat      general;
 
@@ -45,7 +45,7 @@ timePrecision   6;
 
 graphFormat     raw;
 
-runTimeModifiable yes;
+runTimeModifiable true;
 
 
 // ************************************************************************* //

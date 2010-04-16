@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 
 \*---------------------------------------------------------------------------*/
@@ -58,7 +57,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::nonOrthogonality() const
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
 
-    forAll (nei, faceI)
+    forAll(nei, faceI)
     {
         vector d = centres[nei[faceI]] - centres[own[faceI]];
         vector s = areas[faceI];
@@ -72,7 +71,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::nonOrthogonality() const
         result[nei[faceI]] = max(cosDDotS, result[nei[faceI]]);
     }
 
-    forAll (mesh_.boundaryMesh(), patchI)
+    forAll(mesh_.boundaryMesh(), patchI)
     {
         const unallocLabelList& faceCells =
             mesh_.boundaryMesh()[patchI].faceCells();
@@ -120,7 +119,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::skewness() const
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
 
-    forAll (nei, faceI)
+    forAll(nei, faceI)
     {
         scalar dOwn = mag
         (
@@ -145,7 +144,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::skewness() const
         result[nei[faceI]] = max(skewness, result[nei[faceI]]);
     }
 
-    forAll (mesh_.boundaryMesh(), patchI)
+    forAll(mesh_.boundaryMesh(), patchI)
     {
         const unallocLabelList& faceCells =
             mesh_.boundaryMesh()[patchI].faceCells();
@@ -197,7 +196,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceNonOrthogonality() const
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
 
-    forAll (nei, faceI)
+    forAll(nei, faceI)
     {
         vector d = centres[nei[faceI]] - centres[own[faceI]];
         vector s = areas[faceI];
@@ -211,7 +210,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceNonOrthogonality() const
 
     label globalFaceI = mesh_.nInternalFaces();
 
-    forAll (mesh_.boundaryMesh(), patchI)
+    forAll(mesh_.boundaryMesh(), patchI)
     {
         const unallocLabelList& faceCells =
             mesh_.boundaryMesh()[patchI].faceCells();
@@ -258,7 +257,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceSkewness() const
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
 
-    forAll (nei, faceI)
+    forAll(nei, faceI)
     {
         scalar dOwn = mag
         (
@@ -282,7 +281,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceSkewness() const
 
     label globalFaceI = mesh_.nInternalFaces();
 
-    forAll (mesh_.boundaryMesh(), patchI)
+    forAll(mesh_.boundaryMesh(), patchI)
     {
         const unallocLabelList& faceCells =
             mesh_.boundaryMesh()[patchI].faceCells();

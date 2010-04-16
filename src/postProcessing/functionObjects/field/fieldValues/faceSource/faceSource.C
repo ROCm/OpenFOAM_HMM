@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -31,35 +30,32 @@ License
 #include "coupledPolyPatch.H"
 #include "surfaceFields.H"
 #include "volFields.H"
-#include "IOList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
+defineTypeNameAndDebug(Foam::fieldValues::faceSource, 0);
+
+template<>
+const char* Foam::NamedEnum<Foam::fieldValues::faceSource::sourceType, 2>::
+names[] =
 {
-    namespace fieldValues
-    {
-        defineTypeNameAndDebug(faceSource, 0);
-    }
+    "faceZone", "patch"
+};
 
-    template<>
-    const char* NamedEnum<fieldValues::faceSource::sourceType, 2>::
-        names[] = {"faceZone", "patch"};
+const Foam::NamedEnum<Foam::fieldValues::faceSource::sourceType, 2>
+    Foam::fieldValues::faceSource::sourceTypeNames_;
 
-    const NamedEnum<fieldValues::faceSource::sourceType, 2>
-        fieldValues::faceSource::sourceTypeNames_;
 
-    template<>
-    const char* NamedEnum<fieldValues::faceSource::operationType, 5>::
-        names[] =
-        {
-            "none", "sum", "areaAverage", "areaIntegrate", "weightedAverage"
-        };
+template<>
+const char* Foam::NamedEnum<Foam::fieldValues::faceSource::operationType, 7>::
+names[] =
+{
+    "none", "sum", "areaAverage",
+    "areaIntegrate", "weightedAverage", "min", "max"
+};
 
-    const NamedEnum<fieldValues::faceSource::operationType, 5>
-        fieldValues::faceSource::operationTypeNames_;
-
-}
+const Foam::NamedEnum<Foam::fieldValues::faceSource::operationType, 7>
+    Foam::fieldValues::faceSource::operationTypeNames_;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -82,7 +78,7 @@ void Foam::fieldValues::faceSource::setFaceZoneFaces()
 
     faceId_.setSize(fZone.size());
     facePatchId_.setSize(fZone.size());
-    flipMap_.setSize(fZone.size());
+    faceSign_.setSize(fZone.size());
 
     label count = 0;
     forAll(fZone, i)
@@ -126,11 +122,11 @@ void Foam::fieldValues::faceSource::setFaceZoneFaces()
         {
             if (fZone.flipMap()[i])
             {
-                flipMap_[count] = -1;
+                faceSign_[count] = -1;
             }
             else
             {
-                flipMap_[count] = 1;
+                faceSign_[count] = 1;
             }
             faceId_[count] = faceId;
             facePatchId_[count] = facePatchId;
@@ -140,11 +136,12 @@ void Foam::fieldValues::faceSource::setFaceZoneFaces()
 
     faceId_.setSize(count);
     facePatchId_.setSize(count);
-    flipMap_.setSize(count);
+    faceSign_.setSize(count);
+    nFaces_ = returnReduce(faceId_.size(), sumOp<label>());
 
     if (debug)
     {
-        Info<< "Original face zone size = " << fZone.size()
+        Pout<< "Original face zone size = " << fZone.size()
             << ", new size = " << count << endl;
     }
 }
@@ -179,13 +176,14 @@ void Foam::fieldValues::faceSource::setPatchFaces()
 
     faceId_.setSize(nFaces);
     facePatchId_.setSize(nFaces);
-    flipMap_.setSize(nFaces);
+    faceSign_.setSize(nFaces);
+    nFaces_ = returnReduce(faceId_.size(), sumOp<label>());
 
     forAll(faceId_, faceI)
     {
         faceId_[faceI] = faceI;
         facePatchId_[faceI] = patchId;
-        flipMap_[faceI] = 1;
+        faceSign_[faceI] = 1;
     }
 }
 
@@ -208,7 +206,7 @@ void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
         }
         default:
         {
-            FatalErrorIn("faceSource::initiliase()")
+            FatalErrorIn("faceSource::initialise()")
                 << type() << " " << name_ << ": "
                 << sourceTypeNames_[source_] << "(" << sourceName_ << "):"
                 << nl << "    Unknown source type. Valid source types are:"
@@ -217,8 +215,10 @@ void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
     }
 
     Info<< type() << " " << name_ << ":" << nl
-        << "    total faces  = " << faceId_.size() << nl
-        << "    total area   = " << sum(filterField(mesh().magSf())) << nl;
+        << "    total faces  = " << nFaces_
+        << nl
+        << "    total area   = " << gSum(filterField(mesh().magSf(), false))
+        << nl;
 
     if (operation_ == opWeightedAverage)
     {
@@ -252,7 +252,7 @@ void Foam::fieldValues::faceSource::writeFileHeader()
     {
         outputFilePtr_()
             << "# Source : " << sourceTypeNames_[source_] << " "
-            << sourceName_ <<  nl << "# Faces  : " << faceId_.size() << nl
+            << sourceName_ <<  nl << "# Faces  : " << nFaces_ << nl
             << "# Time" << tab << "sum(magSf)";
 
         forAll(fields_, i)
@@ -280,9 +280,10 @@ Foam::fieldValues::faceSource::faceSource
     fieldValue(name, obr, dict, loadFromFiles),
     source_(sourceTypeNames_.read(dict.lookup("source"))),
     operation_(operationTypeNames_.read(dict.lookup("operation"))),
+    nFaces_(0),
     faceId_(),
     facePatchId_(),
-    flipMap_(),
+    faceSign_(),
     weightFieldName_("undefinedWeightedFieldName")
 {
     read(dict);
@@ -318,7 +319,7 @@ void Foam::fieldValues::faceSource::write()
         {
             outputFilePtr_()
                 << obr_.time().value() << tab
-                << sum(filterField(mesh().magSf()));
+                << sum(filterField(mesh().magSf(), false));
         }
 
         forAll(fields_, i)

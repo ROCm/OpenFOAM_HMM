@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -29,20 +28,18 @@ License
 #include "fvcMeshPhi.H"
 #include "surfaceInterpolate.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(layeredEngineMesh, 0);
+    addToRunTimeSelectionTable(engineMesh, layeredEngineMesh, IOobject);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(layeredEngineMesh, 0);
-
-addToRunTimeSelectionTable(engineMesh, layeredEngineMesh, IOobject);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-layeredEngineMesh::layeredEngineMesh(const IOobject& io)
+Foam::layeredEngineMesh::layeredEngineMesh(const IOobject& io)
 :
     engineMesh(io),
     pistonLayers_("pistonLayers", dimLength, 0.0)
@@ -56,13 +53,13 @@ layeredEngineMesh::layeredEngineMesh(const IOobject& io)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-layeredEngineMesh::~layeredEngineMesh()
+Foam::layeredEngineMesh::~layeredEngineMesh()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void layeredEngineMesh::move()
+void Foam::layeredEngineMesh::move()
 {
     scalar deltaZ = engineDB_.pistonDisplacement().value();
     Info<< "deltaZ = " << deltaZ << endl;
@@ -72,7 +69,7 @@ void layeredEngineMesh::move()
 
     pointField newPoints = points();
 
-    forAll (newPoints, pointi)
+    forAll(newPoints, pointi)
     {
         point& p = newPoints[pointi];
 
@@ -127,9 +124,5 @@ void layeredEngineMesh::move()
         << "Piston speed = " << pistonSpeed << " m/s" << endl;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

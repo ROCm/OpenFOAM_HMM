@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
     Given the cell and a face label, return the opposite face label
@@ -55,7 +54,7 @@ Foam::label Foam::cell::opposingFaceLabel
 
     label oppositeFaceLabel = -1;
 
-    forAll (curFaceLabels, faceI)
+    forAll(curFaceLabels, faceI)
     {
         // Compare the face with the master
         const face& curFace = meshFaces[curFaceLabels[faceI]];
@@ -71,11 +70,11 @@ Foam::label Foam::cell::opposingFaceLabel
 
             // Compare every vertex of the current face agains the
             // vertices of the master face
-            forAll (curFace, pointI)
+            forAll(curFace, pointI)
             {
                 const label l = curFace[pointI];
 
-                forAll (masterFace, masterPointI)
+                forAll(masterFace, masterPointI)
                 {
                     if (masterFace[masterPointI] == l)
                     {
@@ -150,11 +149,11 @@ Foam::oppositeFace Foam::cell::opposingFace
             oppFaceLabel
         );
 
-        forAll (masterFace, pointI)
+        forAll(masterFace, pointI)
         {
             // Go through the list of edges and find the edge from this vertex
             // to the slave face
-            forAll (e, edgeI)
+            forAll(e, edgeI)
             {
                 if (!usedEdges[edgeI])
                 {
@@ -167,7 +166,7 @@ Foam::oppositeFace Foam::cell::opposingFace
                         // Found an edge coming from this vertex.
                         // Check all vertices of the slave to find out
                         // if it exists.
-                        forAll (slaveFace, slavePointI)
+                        forAll(slaveFace, slavePointI)
                         {
                             if (slaveFace[slavePointI] == otherVertex)
                             {

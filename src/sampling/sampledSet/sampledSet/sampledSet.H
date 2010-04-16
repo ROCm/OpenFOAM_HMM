@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
     Foam::sampledSet
@@ -42,13 +41,10 @@ SourceFiles
 #ifndef sampledSet_H
 #define sampledSet_H
 
-#include "pointField.H"
-#include "word.H"
-#include "labelList.H"
+#include "coordSet.H"
 #include "typeInfo.H"
 #include "runTimeSelectionTables.H"
 #include "autoPtr.H"
-#include "coordSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,10 +76,6 @@ protected:
 
         //- Segment numbers
         labelList segments_;
-
-        //- Parameter along sample curve. Uniquely identifies position
-        //  along sampling. Used for combining parallel results.
-        scalarList curveDist_;
 
         //- Cell numbers
         labelList cells_;
@@ -245,9 +237,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~sampledSet();
+    //- Destructor
+    virtual ~sampledSet();
 
 
     // Member Functions
@@ -267,11 +258,6 @@ public:
             return segments_;
         }
 
-        const scalarList& curveDist() const
-        {
-            return curveDist_;
-        }
-
         const labelList& cells() const
         {
             return cells_;
@@ -281,9 +267,6 @@ public:
         {
             return faces_;
         }
-
-        //- Given all sampling points (on all processors) return reference point
-        virtual point getRefPoint(const List<point>&) const = 0;
 
         //- Output for debugging
         Ostream& write(Ostream&) const;

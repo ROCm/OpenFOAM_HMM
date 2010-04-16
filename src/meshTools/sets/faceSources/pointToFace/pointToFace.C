@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -74,15 +73,9 @@ void Foam::pointToFace::combine(topoSet& set, const bool add) const
     if (option_ == ANY)
     {
         // Add faces with any point in loadedSet
-        for
-        (
-            pointSet::const_iterator iter = loadedSet.begin();
-            iter != loadedSet.end();
-            ++iter
-        )
+        forAllConstIter(pointSet, loadedSet, iter)
         {
-            label pointI = iter.key();
-
+            const label pointI = iter.key();
             const labelList& pFaces = mesh_.pointFaces()[pointI];
 
             forAll(pFaces, pFaceI)
@@ -100,13 +93,12 @@ void Foam::pointToFace::combine(topoSet& set, const bool add) const
 
         forAllConstIter(pointSet, loadedSet, iter)
         {
-            label pointI = iter.key();
-
+            const label pointI = iter.key();
             const labelList& pFaces = mesh_.pointFaces()[pointI];
 
             forAll(pFaces, pFaceI)
             {
-                label faceI = pFaces[pFaceI];
+                const label faceI = pFaces[pFaceI];
 
                 Map<label>::iterator fndFace = numPoints.find(faceI);
 
@@ -124,14 +116,9 @@ void Foam::pointToFace::combine(topoSet& set, const bool add) const
 
         // Include faces that are referenced as many times as there are points
         // in face -> all points of face
-        for
-        (
-            Map<label>::const_iterator iter = numPoints.begin();
-            iter != numPoints.end();
-            ++iter
-        )
+        forAllConstIter(Map<label>, numPoints, iter)
         {
-            label faceI = iter.key();
+            const label faceI = iter.key();
 
             if (iter() == mesh_.faces()[faceI].size())
             {

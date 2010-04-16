@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
     Foam::GeometricField
@@ -82,7 +81,7 @@ class GeometricField
 :
     public DimensionedField<Type, GeoMesh>
 {
-    // Private member functions
+    // Private Member Functions
 
         //- Read from file if it is present
         bool readIfPresent();
@@ -129,12 +128,14 @@ public:
 
             //- Construct from a BoundaryMesh,
             //  reference to the internal field
-            //  and a wordList of patch types
+            //  and a wordList of patch types and optional the actual patch
+            //  types (to override constraint patches)
             GeometricBoundaryField
             (
                 const BoundaryMesh&,
                 const DimensionedInternalField&,
-                const wordList&
+                const wordList& wantedPatchTypes,
+                const wordList& actualPatchTypes = wordList()
             );
 
             //- Construct from a BoundaryMesh,
@@ -238,7 +239,7 @@ private:
         GeometricBoundaryField boundaryField_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Read the field from the dictionary
         tmp<GeometricBoundaryField> readField(const dictionary&);
@@ -284,7 +285,8 @@ public:
             const IOobject&,
             const Mesh&,
             const dimensionSet&,
-            const wordList& patchFieldTypes
+            const wordList& wantedPatchTypes,
+            const wordList& actualPatchTypes = wordList()
         );
 
         //- Constructor given IOobject, mesh, dimensioned<Type> and patch type.
@@ -302,7 +304,8 @@ public:
             const IOobject&,
             const Mesh&,
             const dimensioned<Type>&,
-            const wordList& patchFieldTypes
+            const wordList& wantedPatchTypes,
+            const wordList& actualPatchTypes = wordList()
         );
 
         //- Constructor from components
@@ -388,7 +391,8 @@ public:
         (
             const IOobject&,
             const GeometricField<Type, PatchField, GeoMesh>&,
-            const wordList& patchFieldTypes
+            const wordList& patchFieldTypes,
+            const wordList& actualPatchTypes = wordList()
         );
 
 

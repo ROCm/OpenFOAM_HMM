@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,13 +19,13 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveMesh.H"
 #include "pyramidPointFaceRef.H"
+#include "tetPointRef.H"
 #include "ListOps.H"
 #include "unitConversion.H"
 #include "SortableList.H"
@@ -37,6 +37,7 @@ Foam::scalar Foam::primitiveMesh::closedThreshold_  = 1.0e-6;
 Foam::scalar Foam::primitiveMesh::aspectThreshold_  = 1000;
 Foam::scalar Foam::primitiveMesh::nonOrthThreshold_ = 70;    // deg
 Foam::scalar Foam::primitiveMesh::skewThreshold_    = 4;
+Foam::scalar Foam::primitiveMesh::planarCosAngle_   = 1.0e-6;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -112,7 +113,7 @@ bool Foam::primitiveMesh::checkClosedCells
 
     label nErrorClosed = 0;
 
-    forAll (c, cI)
+    forAll(c, cI)
     {
         const cell& curCell = c[cI];
 
@@ -148,14 +149,14 @@ bool Foam::primitiveMesh::checkClosedCells
     const labelList& nei = faceNeighbour();
     const vectorField& areas = faceAreas();
 
-    forAll (own, faceI)
+    forAll(own, faceI)
     {
         // Add to owner
         sumClosed[own[faceI]] += areas[faceI];
         sumMagClosed[own[faceI]] += cmptMag(areas[faceI]);
     }
 
-    forAll (nei, faceI)
+    forAll(nei, faceI)
     {
         // Subtract from neighbour
         sumClosed[nei[faceI]] -= areas[faceI];
@@ -171,7 +172,7 @@ bool Foam::primitiveMesh::checkClosedCells
     const scalarField& vols = cellVolumes();
 
     // Check the sums
-    forAll (sumClosed, cellI)
+    forAll(sumClosed, cellI)
     {
         scalar maxOpenness = 0;
 
@@ -280,7 +281,7 @@ bool Foam::primitiveMesh::checkFaceAreas
     scalar minArea = GREAT;
     scalar maxArea = -GREAT;
 
-    forAll (magFaceAreas, faceI)
+    forAll(magFaceAreas, faceI)
     {
         if (magFaceAreas[faceI] < VSMALL)
         {
@@ -341,7 +342,7 @@ bool Foam::primitiveMesh::checkCellVolumes
 
     label nNegVolCells = 0;
 
-    forAll (vols, cellI)
+    forAll(vols, cellI)
     {
         if (vols[cellI] < VSMALL)
         {
@@ -401,7 +402,7 @@ bool Foam::primitiveMesh::checkFaceOrthogonality
             << "checking mesh non-orthogonality" << endl;
     }
 
-    // for all internal faces check theat the d dot S product is positive
+    // for all internal faces check that the d dot S product is positive
     const vectorField& centres = cellCentres();
     const vectorField& areas = faceAreas();
 
@@ -420,7 +421,7 @@ bool Foam::primitiveMesh::checkFaceOrthogonality
 
     label errorNonOrth = 0;
 
-    forAll (nei, faceI)
+    forAll(nei, faceI)
     {
         vector d = centres[nei[faceI]] - centres[own[faceI]];
         const vector& s = areas[faceI];
@@ -533,7 +534,7 @@ bool Foam::primitiveMesh::checkFacePyramids
 
     label nErrorPyrs = 0;
 
-    forAll (f, faceI)
+    forAll(f, faceI)
     {
         // Create the owner pyramid - it will have negative volume
         scalar pyrVol = pyramidPointFaceRef(f[faceI], ctrs[own[faceI]]).mag(p);
@@ -584,6 +585,114 @@ bool Foam::primitiveMesh::checkFacePyramids
         if (debug || report)
         {
             Info<< "    Face pyramids OK." << endl;
+        }
+
+        return false;
+    }
+}
+
+
+bool Foam::primitiveMesh::checkFaceTets
+(
+    const bool report,
+    const scalar minTetVol,
+    labelHashSet* setPtr
+) const
+{
+    if (debug)
+    {
+        Info<< "bool primitiveMesh::checkFaceTets("
+            << "const bool, const scalar, labelHashSet*) const: "
+            << "checking face orientation" << endl;
+    }
+
+    // check whether face area vector points to the cell with higher label
+    const vectorField& cc = cellCentres();
+    const vectorField& fc = faceCentres();
+
+    const labelList& own = faceOwner();
+    const labelList& nei = faceNeighbour();
+
+    const faceList& fcs = faces();
+
+    const pointField& p = points();
+
+    label nErrorPyrs = 0;
+
+    forAll(fcs, faceI)
+    {
+        // Create the owner tets - they will have negative volume
+        const face& f = fcs[faceI];
+
+        forAll(f, fp)
+        {
+            scalar tetVol = tetPointRef
+            (
+                p[f[fp]],
+                p[f.nextLabel(fp)],
+                fc[faceI],
+                cc[own[faceI]]
+            ).mag();
+
+            if (tetVol > -minTetVol)
+            {
+                if (setPtr)
+                {
+                    setPtr->insert(faceI);
+                }
+
+                nErrorPyrs++;
+                break;              // no need to check other tets
+            }
+        }
+
+        if (isInternalFace(faceI))
+        {
+            // Create the neighbour tet - it will have positive volume
+            const face& f = fcs[faceI];
+
+            forAll(f, fp)
+            {
+                scalar tetVol = tetPointRef
+                (
+                    p[f[fp]],
+                    p[f.nextLabel(fp)],
+                    fc[faceI],
+                    cc[nei[faceI]]
+                ).mag();
+
+                if (tetVol < minTetVol)
+                {
+                    if (setPtr)
+                    {
+                        setPtr->insert(faceI);
+                    }
+
+                    nErrorPyrs++;
+                    break;
+                }
+            }
+        }
+    }
+
+    reduce(nErrorPyrs, sumOp<label>());
+
+    if (nErrorPyrs > 0)
+    {
+        if (debug || report)
+        {
+            Info<< " ***Error in face tets: "
+                << nErrorPyrs << " faces have incorrectly oriented face"
+                << " decomposition triangles." << endl;
+        }
+
+        return true;
+    }
+    else
+    {
+        if (debug || report)
+        {
+            Info<< "    Face tets OK." << endl;
         }
 
         return false;
@@ -754,7 +863,7 @@ bool Foam::primitiveMesh::checkPoints
 
     const labelListList& pf = pointFaces();
 
-    forAll (pf, pointI)
+    forAll(pf, pointI)
     {
         if (pf[pointI].empty())
         {
@@ -768,7 +877,7 @@ bool Foam::primitiveMesh::checkPoints
     }
 
 
-    forAll (pf, pointI)
+    forAll(pf, pointI)
     {
         const labelList& pc = pointCells(pointI);
 
@@ -1251,7 +1360,7 @@ bool Foam::primitiveMesh::checkUpperTriangular
     // and add it to the check list (upper triangular order).
     // Once the list is completed, check it against the faceCell list
 
-    forAll (c, cellI)
+    forAll(c, cellI)
     {
         const labelList& curFaces = c[cellI];
 
@@ -1389,7 +1498,7 @@ bool Foam::primitiveMesh::checkCellsZipUp
     const faceList& f = faces();
     const cellList& c = cells();
 
-    forAll (c, cellI)
+    forAll(c, cellI)
     {
         const labelList& curFaces = c[cellI];
 
@@ -1397,15 +1506,15 @@ bool Foam::primitiveMesh::checkCellsZipUp
 
         labelList edgeUsage(cellEdges.size(), 0);
 
-        forAll (curFaces, faceI)
+        forAll(curFaces, faceI)
         {
             edgeList curFaceEdges = f[curFaces[faceI]].edges();
 
-            forAll (curFaceEdges, faceEdgeI)
+            forAll(curFaceEdges, faceEdgeI)
             {
                 const edge& curEdge = curFaceEdges[faceEdgeI];
 
-                forAll (cellEdges, cellEdgeI)
+                forAll(cellEdges, cellEdgeI)
                 {
                     if (cellEdges[cellEdgeI] == curEdge)
                     {
@@ -1419,7 +1528,7 @@ bool Foam::primitiveMesh::checkCellsZipUp
         edgeList singleEdges(cellEdges.size());
         label nSingleEdges = 0;
 
-        forAll (edgeUsage, edgeI)
+        forAll(edgeUsage, edgeI)
         {
             if (edgeUsage[edgeI] == 1)
             {
@@ -1490,7 +1599,7 @@ bool Foam::primitiveMesh::checkFaceVertices
 
     label nErrorFaces = 0;
 
-    forAll (f, fI)
+    forAll(f, fI)
     {
         const face& curFace = f[fI];
 
@@ -1886,7 +1995,7 @@ bool Foam::primitiveMesh::checkCellDeterminant
     scalar sumDet = 0;
     label nSummed = 0;
 
-    forAll (c, cellI)
+    forAll(c, cellI)
     {
         const labelList& curFaces = c[cellI];
 
@@ -1976,6 +2085,121 @@ bool Foam::primitiveMesh::checkCellDeterminant
         if (debug || report)
         {
             Info<< "    Cell determinant check OK." << endl;
+        }
+
+        return false;
+    }
+
+    return false;
+}
+
+
+bool Foam::primitiveMesh::checkConcaveCells
+(
+    const bool report,
+    labelHashSet* setPtr
+) const
+{
+    if (debug)
+    {
+        Info<< "bool primitiveMesh::checkConcaveCells(const bool"
+            << ", labelHashSet*) const: "
+            << "checking for concave cells" << endl;
+    }
+
+    const cellList& c = cells();
+    const labelList& fOwner = faceOwner();
+    const vectorField& fAreas = faceAreas();
+    const pointField& fCentres = faceCentres();
+
+    label nConcaveCells = 0;
+
+    forAll(c, cellI)
+    {
+        const cell& cFaces = c[cellI];
+
+        bool concave = false;
+
+        forAll(cFaces, i)
+        {
+            if (concave)
+            {
+                break;
+            }
+
+            label fI = cFaces[i];
+
+            const point& fC = fCentres[fI];
+
+            vector fN = fAreas[fI];
+
+            fN /= max(mag(fN), VSMALL);
+
+            // Flip normal if required so that it is always pointing out of
+            // the cell
+            if (fOwner[fI] != cellI)
+            {
+                fN *= -1;
+            }
+
+            // Is the centre of any other face of the cell on the
+            // wrong side of the plane of this face?
+
+            forAll(cFaces, j)
+            {
+                if (j != i)
+                {
+                    label fJ = cFaces[j];
+
+                    const point& pt = fCentres[fJ];
+
+                    // If the cell is concave, the point will be on the
+                    // positive normal side of the plane of f, defined by
+                    // its centre and normal, and the angle between (pt -
+                    // fC) and fN will be less than 90 degrees, so the dot
+                    // product will be positive.
+
+                    vector pC = (pt - fC);
+
+                    pC /= max(mag(pC), VSMALL);
+
+                    if ((pC & fN) > -planarCosAngle_)
+                    {
+                        // Concave or planar face
+
+                        concave = true;
+
+                        if (setPtr)
+                        {
+                            setPtr->insert(cellI);
+                        }
+
+                        nConcaveCells++;
+
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    reduce(nConcaveCells, sumOp<label>());
+
+    if (nConcaveCells > 0)
+    {
+        if (debug || report)
+        {
+            Info<< " ***Concave cells (using face planes) found,"
+                << " number of cells: " << nConcaveCells << endl;
+        }
+
+        return true;
+    }
+    else
+    {
+        if (debug || report)
+        {
+            Info<< "    Concave cell check OK." << endl;
         }
 
         return false;

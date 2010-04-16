@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -38,7 +37,7 @@ solidWallHeatFluxTemperatureFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF),
+    fixedGradientFvPatchScalarField(p, iF),
     q_(p.size(), 0.0),
     KName_("undefined-K")
 {}
@@ -53,7 +52,7 @@ solidWallHeatFluxTemperatureFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    fixedGradientFvPatchScalarField(ptf, p, iF, mapper),
     q_(ptf.q_, mapper),
     KName_(ptf.KName_)
 {}
@@ -67,7 +66,7 @@ solidWallHeatFluxTemperatureFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict),
+    fixedGradientFvPatchScalarField(p, iF, dict),
     q_("q", dict, p.size()),
     KName_(dict.lookup("K"))
 {}
@@ -79,7 +78,7 @@ solidWallHeatFluxTemperatureFvPatchScalarField
     const solidWallHeatFluxTemperatureFvPatchScalarField& tppsf
 )
 :
-    fixedValueFvPatchScalarField(tppsf),
+    fixedGradientFvPatchScalarField(tppsf),
     q_(tppsf.q_),
     KName_(tppsf.KName_)
 {}
@@ -92,7 +91,7 @@ solidWallHeatFluxTemperatureFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(tppsf, iF),
+    fixedGradientFvPatchScalarField(tppsf, iF),
     q_(tppsf.q_),
     KName_(tppsf.KName_)
 {}
@@ -105,7 +104,7 @@ void Foam::solidWallHeatFluxTemperatureFvPatchScalarField::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    fixedValueFvPatchScalarField::autoMap(m);
+    fixedGradientFvPatchScalarField::autoMap(m);
     q_.autoMap(m);
 }
 
@@ -116,7 +115,7 @@ void Foam::solidWallHeatFluxTemperatureFvPatchScalarField::rmap
     const labelList& addr
 )
 {
-    fixedValueFvPatchScalarField::rmap(ptf, addr);
+    fixedGradientFvPatchScalarField::rmap(ptf, addr);
 
     const solidWallHeatFluxTemperatureFvPatchScalarField& hfptf =
         refCast<const solidWallHeatFluxTemperatureFvPatchScalarField>(ptf);
@@ -132,14 +131,14 @@ void Foam::solidWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const scalarField& Kw =
-        patch().lookupPatchField<volScalarField, scalar>(KName_);
+    const scalarField& Kw = patch().lookupPatchField<volScalarField, scalar>
+    (
+        KName_
+    );
 
-    const fvPatchScalarField& Tw = *this;
+    gradient() = q_/Kw;
 
-    operator==(q_/(patch().deltaCoeffs()*Kw) + Tw.patchInternalField());
-
-    fixedValueFvPatchScalarField::updateCoeffs();
+    fixedGradientFvPatchScalarField::updateCoeffs();
 }
 
 
@@ -148,9 +147,10 @@ void Foam::solidWallHeatFluxTemperatureFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fixedValueFvPatchScalarField::write(os);
+    fixedGradientFvPatchScalarField::write(os);
     q_.writeEntry("q", os);
     os.writeKeyword("K") << KName_ << token::END_STATEMENT << nl;
+    this->writeEntry("value", os);
 }
 
 

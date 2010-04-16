@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
@@ -74,7 +73,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcPointAddressing() const
 
     bool doWeights = false;
 
-    forAll (pointAddressing, pointI)
+    forAll(pointAddressing, pointI)
     {
         doWeights = false;
 
@@ -147,7 +146,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcPointAddressing() const
             edgeList hitFaceEdges =
                 fromPatchFaces[proj[pointI].hitObject()].edges();
 
-            forAll (hitFaceEdges, edgeI)
+            forAll(hitFaceEdges, edgeI)
             {
                 minEdgeLength =
                     min
@@ -159,7 +158,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcPointAddressing() const
 
             const labelList& curEdges = toPatchPointEdges[pointI];
 
-            forAll (curEdges, edgeI)
+            forAll(curEdges, edgeI)
             {
                 minEdgeLength =
                     min
@@ -209,7 +208,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcPointAddressing() const
 
             pointField hitFacePoints = hitFace.points(fromPatchPoints);
 
-            forAll (hitFacePoints, masterPointI)
+            forAll(hitFacePoints, masterPointI)
             {
                 pointWeights[pointI][masterPointI] =
                     1.0/
@@ -253,7 +252,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcFaceAddressing() const
 
     vectorField fromPatchFaceCentres(fromPatchFaces.size());
 
-    forAll (fromPatchFaceCentres, faceI)
+    forAll(fromPatchFaceCentres, faceI)
     {
         fromPatchFaceCentres[faceI] =
             fromPatchFaces[faceI].centre(fromPatchPoints);
@@ -276,7 +275,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcFaceAddressing() const
     faceAddressingPtr_ = new labelList(proj.size(), -1);
     labelList& faceAddressing = *faceAddressingPtr_;
 
-    forAll (faceAddressing, faceI)
+    forAll(faceAddressing, faceI)
     {
         if (proj[faceI].hit())
         {
@@ -328,7 +327,7 @@ void PatchToPatchInterpolation<FromPatch, ToPatch>::calcFaceAddressing() const
 
                 faceWeights[faceI][0] = 1.0/m;
 
-                forAll (neighbours, nI)
+                forAll(neighbours, nI)
                 {
                     faceWeights[faceI][nI + 1] =
                     1.0/
