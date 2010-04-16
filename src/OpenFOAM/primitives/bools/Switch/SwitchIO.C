@@ -53,9 +53,13 @@ Foam::Istream& Foam::operator>>(Istream& is, Switch& s)
     else if (t.isWord())
     {
         // allow invalid values, but catch after for correct error message
-        Switch::switchType sw = Switch::asEnum(t.wordToken(), true);
+        Switch sw(t.wordToken(), true);
 
-        if (sw == Switch::INVALID)
+        if (sw.valid())
+        {
+            s.switch_ = sw.switch_;
+        }
+        else
         {
             is.setBad();
             FatalIOErrorIn("operator>>(Istream&, Switch&)", is)
@@ -63,10 +67,6 @@ Foam::Istream& Foam::operator>>(Istream& is, Switch& s)
                 << exit(FatalIOError);
 
             return is;
-        }
-        else
-        {
-            s.switch_ = sw;
         }
     }
     else

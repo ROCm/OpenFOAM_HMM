@@ -83,7 +83,7 @@ Foam::Switch::switchType Foam::Switch::asEnum
             << abort(FatalError);
     }
 
-    return INVALID;
+    return Switch::INVALID;
 }
 
 
@@ -114,7 +114,6 @@ bool Foam::Switch::asBool
 
         return false;
     }
-
 
     return (sw & 0x1);
 }
