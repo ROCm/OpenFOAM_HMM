@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,11 +25,11 @@ Class
     Foam::fvPatch
 
 Description
-    Foam::fvPatch
+    A finiteVolume patch using a polyPatch and a fvBoundaryMesh
 
 SourceFiles
     fvPatch.C
-    newFvPatch.C
+    fvPatchNew.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -121,14 +121,18 @@ public:
 
     // Constructors
 
-        //- Construct from polyPatch
+        //- Construct from polyPatch and fvBoundaryMesh
         fvPatch(const polyPatch&, const fvBoundaryMesh&);
 
 
     // Selectors
 
         //- Return a pointer to a new patch created on freestore from polyPatch
-        static autoPtr<fvPatch> New(const polyPatch&, const fvBoundaryMesh&);
+        static autoPtr<fvPatch> New
+        (
+            const polyPatch&,
+            const fvBoundaryMesh&
+        );
 
 
     //- Destructor
@@ -149,6 +153,12 @@ public:
             const word& name() const
             {
                 return polyPatch_.name();
+            }
+
+            //- Return start label of this patch in the polyMesh face list
+            label start() const
+            {
+                return polyPatch_.start();
             }
 
             //- Return size
@@ -185,7 +195,7 @@ public:
             template<class T>
             const typename List<T>::subList patchSlice(const List<T>& l) const
             {
-                return typename List<T>::subList(l, size(), polyPatch_.start());
+                return typename List<T>::subList(l, size(), start());
             }
 
             //- Return faceCells

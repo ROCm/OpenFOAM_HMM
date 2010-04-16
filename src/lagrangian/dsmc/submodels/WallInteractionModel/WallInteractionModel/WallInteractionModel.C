@@ -81,7 +81,7 @@ Foam::WallInteractionModel<CloudType>::coeffDict() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewWallInteractionModel.C"
+#include "WallInteractionModelNew.C"
 
 // ************************************************************************* //
 

@@ -1,5 +1,5 @@
 dragModels/dragModel/dragModel.C
-dragModels/dragModel/newDragModel.C
+dragModels/dragModel/dragModelNew.C
 dragModels/Ergun/Ergun.C
 dragModels/GidaspowErgunWenYu/GidaspowErgunWenYu.C
 dragModels/GidaspowSchillerNaumann/GidaspowSchillerNaumann.C

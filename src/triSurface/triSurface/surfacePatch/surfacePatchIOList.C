@@ -120,7 +120,7 @@ Foam::surfacePatchIOList::~surfacePatchIOList()
 // writeData member function required by regIOobject
 bool Foam::surfacePatchIOList::writeData(Ostream& os) const
 {
-    os << *this;
+    os  << *this;
     return os.good();
 }
 

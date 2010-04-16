@@ -61,9 +61,9 @@ Foam::IOstream::compressionType
 Foam::IOstream::compressionEnum(const word& compression)
 {
     // get Switch (bool) value, but allow it to fail
-    Switch::switchType sw = Switch::asEnum(compression, true);
+    Switch sw(compression, true);
 
-    if (sw != Switch::INVALID)
+    if (sw.valid())
     {
         return sw ? IOstream::COMPRESSED : IOstream::UNCOMPRESSED;
     }

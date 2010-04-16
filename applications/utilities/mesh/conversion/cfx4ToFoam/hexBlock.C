@@ -57,7 +57,7 @@ void hexBlock::readPoints(Istream& is)
 {
     forAll(points_, i)
     {
-        is >> points_[i].x() >> points_[i].y() >> points_[i].z();
+        is  >> points_[i].x() >> points_[i].y() >> points_[i].z();
     }
 
     // Calculate the handedness of the block

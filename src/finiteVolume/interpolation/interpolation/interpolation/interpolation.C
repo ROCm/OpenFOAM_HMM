@@ -56,6 +56,6 @@ interpolation<Type>::interpolation
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#   include "newInterpolation.C"
+#   include "interpolationNew.C"
 
 // ************************************************************************* //

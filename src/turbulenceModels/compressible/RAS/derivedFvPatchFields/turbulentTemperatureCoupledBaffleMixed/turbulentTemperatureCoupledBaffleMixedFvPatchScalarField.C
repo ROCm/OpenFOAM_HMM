@@ -200,7 +200,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
     // Get the coupling information from the directMappedPatchBase
     const directMappedPatchBase& mpp = refCast<const directMappedPatchBase>
     (
-        patch().patch()
+        this->patch().patch()
     );
     const polyMesh& nbrMesh = mpp.sampleMesh();
     const fvPatch& nbrPatch = refCast<const fvMesh>

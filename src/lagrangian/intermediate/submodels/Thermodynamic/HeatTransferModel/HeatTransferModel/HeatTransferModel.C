@@ -118,7 +118,7 @@ Foam::scalar Foam::HeatTransferModel<CloudType>::htc
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewHeatTransferModel.C"
+#include "HeatTransferModelNew.C"
 
 
 // ************************************************************************* //

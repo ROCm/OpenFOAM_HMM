@@ -9,7 +9,7 @@ $(fvBoundaryMesh)/fvBoundaryMesh.C
 
 fvPatches = fvMesh/fvPatches
 $(fvPatches)/fvPatch/fvPatch.C
-$(fvPatches)/fvPatch/newFvPatch.C
+$(fvPatches)/fvPatch/fvPatchNew.C
 
 basicFvPatches = $(fvPatches)/basic
 $(basicFvPatches)/coupled/coupledFvPatch.C
@@ -334,7 +334,7 @@ $(MRF)/MRFZones.C
 
 SRF = $(general)/SRF
 $(SRF)/SRFModel/SRFModel/SRFModel.C
-$(SRF)/SRFModel/SRFModel/newSRFModel.C
+$(SRF)/SRFModel/SRFModel/SRFModelNew.C
 $(SRF)/SRFModel/rpm/rpm.C
 $(SRF)/derivedFvPatchFields/SRFVelocityFvPatchVectorField/SRFVelocityFvPatchVectorField.C
 

@@ -51,7 +51,7 @@ using namespace Foam;
 
 void writeOBJ(const point& pt, Ostream& os)
 {
-    os << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
+    os  << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
 }
 
 // All edges of mesh

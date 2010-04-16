@@ -1,5 +1,5 @@
 viscosityModels/viscosityModel/viscosityModel.C
-viscosityModels/viscosityModel/newViscosityModel.C
+viscosityModels/viscosityModel/viscosityModelNew.C
 viscosityModels/Newtonian/Newtonian.C
 viscosityModels/powerLaw/powerLaw.C
 viscosityModels/CrossPowerLaw/CrossPowerLaw.C

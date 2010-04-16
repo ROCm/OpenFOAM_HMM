@@ -36,7 +36,7 @@ Description
 
 SourceFiles
     solidBodyMotionFunction.C
-    newDynamicFvMesh.C
+    dynamicFvMeshNew.C
 
 \*---------------------------------------------------------------------------*/
 

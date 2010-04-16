@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     basicPsiThermo.C
-    newBasicPsiThermo.C
+    basicPsiThermoNew.C
 
 \*---------------------------------------------------------------------------*/
 

@@ -454,6 +454,6 @@ void Foam::InjectionModel<CloudType>::info(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewInjectionModel.C"
+#include "InjectionModelNew.C"
 
 // ************************************************************************* //

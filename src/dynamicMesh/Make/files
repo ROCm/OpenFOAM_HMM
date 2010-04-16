@@ -19,7 +19,7 @@ $(enrichedPatch)/enrichedPatchMasterPoints.C
 
 polyMeshModifier = polyTopoChange/polyMeshModifier
 $(polyMeshModifier)/polyMeshModifier.C
-$(polyMeshModifier)/newPolyMeshModifier.C
+$(polyMeshModifier)/polyMeshModifierNew.C
 
 polyTopoChange/polyTopoChange/topoAction/topoActions.C
 polyTopoChange/polyTopoChanger/polyTopoChanger.C

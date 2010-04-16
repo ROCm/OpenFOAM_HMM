@@ -37,7 +37,7 @@ Description
 
 SourceFiles
     fvsPatchField.C
-    newFvsPatchField.C
+    fvsPatchFieldNew.C
 
 \*---------------------------------------------------------------------------*/
 
