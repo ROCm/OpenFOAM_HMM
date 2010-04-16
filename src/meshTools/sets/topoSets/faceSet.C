@@ -113,27 +113,30 @@ faceSet::~faceSet()
 
 void faceSet::sync(const polyMesh& mesh)
 {
-    boolList set(mesh.nFaces());
+    boolList set(mesh.nFaces(), false);
+
     forAllConstIter(faceSet, *this, iter)
     {
         set[iter.key()] = true;
     }
-    boolList syncSet(set);
-    syncTools::syncFaceList(mesh, syncSet, orEqOp<bool>());
+    syncTools::syncFaceList(mesh, set, orEqOp<bool>());
 
     label nAdded = 0;
 
     forAll(set, faceI)
     {
-        if (!set[faceI] && syncSet[faceI])
+        if (set[faceI])
         {
-            if (!insert(faceI))
+            if (insert(faceI))
             {
-                FatalErrorIn("faceSet::sync(const polyMesh&)")
-                    << "Problem at face " << faceI
-                    << abort(FatalError);
+                nAdded++;
             }
-            nAdded++;
+        }
+        else if (found(faceI))
+        {
+            FatalErrorIn("faceSet::sync(const polyMesh&)")
+                << "Problem : syncing removed faces from set."
+                << abort(FatalError);
         }
     }
 
