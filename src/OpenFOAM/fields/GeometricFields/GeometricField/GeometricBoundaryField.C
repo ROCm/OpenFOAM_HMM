@@ -72,7 +72,8 @@ GeometricBoundaryField
 (
     const BoundaryMesh& bmesh,
     const DimensionedField<Type, GeoMesh>& field,
-    const wordList& patchFieldTypes
+    const wordList& patchFieldTypes,
+    const wordList& constraintTypes
 )
 :
     FieldField<PatchField, Type>(bmesh.size()),
@@ -83,18 +84,22 @@ GeometricBoundaryField
         Info<< "GeometricField<Type, PatchField, GeoMesh>::"
                "GeometricBoundaryField::"
                "GeometricBoundaryField(const BoundaryMesh&, "
-               "const Field<Type>&, const wordList&)"
+               "const Field<Type>&, const wordList&, const wordList&)"
             << endl;
     }
 
-    if (patchFieldTypes.size() != this->size())
+    if
+    (
+        patchFieldTypes.size() != this->size()
+     || (constraintTypes.size() && (constraintTypes.size() != this->size()))
+    )
     {
         FatalErrorIn
         (
             "GeometricField<Type, PatchField, GeoMesh>::"
             "GeometricBoundaryField::"
             "GeometricBoundaryField(const BoundaryMesh&, "
-            "const Field<Type>&, const wordList&)"
+            "const Field<Type>&, const wordList&, const wordList&)"
         )   << "Incorrect number of patch type specifications given" << nl
             << "    Number of patches in mesh = " << bmesh.size()
             << " number of patch type specifications = "
@@ -102,18 +107,38 @@ GeometricBoundaryField
             << abort(FatalError);
     }
 
-    forAll(bmesh_, patchi)
+    if (constraintTypes.size())
     {
-        set
-        (
-            patchi,
-            PatchField<Type>::New
+        forAll(bmesh_, patchi)
+        {
+            set
             (
-                patchFieldTypes[patchi],
-                bmesh_[patchi],
-                field
-            )
-        );
+                patchi,
+                PatchField<Type>::New
+                (
+                    patchFieldTypes[patchi],
+                    constraintTypes[patchi],
+                    bmesh_[patchi],
+                    field
+                )
+            );
+        }
+    }
+    else
+    {
+        forAll(bmesh_, patchi)
+        {
+            set
+            (
+                patchi,
+                PatchField<Type>::New
+                (
+                    patchFieldTypes[patchi],
+                    bmesh_[patchi],
+                    field
+                )
+            );
+        }
     }
 }
 

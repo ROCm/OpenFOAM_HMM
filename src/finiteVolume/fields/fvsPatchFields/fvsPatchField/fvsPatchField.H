@@ -216,6 +216,18 @@ public:
             const DimensionedField<Type, surfaceMesh>&
         );
 
+        //- Return a pointer to a new patchField created on freestore given
+        //  patch and internal field
+        //  (does not set the patch field values)
+        //  Allows override of constraint type
+        static tmp<fvsPatchField<Type> > New
+        (
+            const word&,
+            const word& actualPatchType, 
+            const fvPatch&,
+            const DimensionedField<Type, surfaceMesh>&
+        );
+
         //- Return a pointer to a new patchField created on freestore from
         //  a given fvsPatchField mapped onto a new patch
         static tmp<fvsPatchField<Type> > New

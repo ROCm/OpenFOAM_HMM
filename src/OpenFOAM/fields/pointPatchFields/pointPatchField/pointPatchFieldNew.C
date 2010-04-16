@@ -29,6 +29,7 @@ template<class Type>
 Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
 (
     const word& patchFieldType,
+    const word& actualPatchType,
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF
 )
@@ -36,7 +37,8 @@ Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
     if (debug)
     {
         Info<< "PointPatchField<Type>::"
-               "New(const word&, const pointPatch&, const Field<Type>&) : "
+               "New(const word&, const word&"
+                ", const pointPatch&, const Field<Type>&) : "
                "constructing pointPatchField<Type>"
             << endl;
     }
@@ -49,7 +51,7 @@ Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
         FatalErrorIn
         (
             "PointPatchField<Type>::New"
-            "(const word&, const pointPatch&, const Field<Type>&)"
+            "(const word&, const word&, const pointPatch&, const Field<Type>&)"
         )   << "Unknown patchFieldType type "
             << patchFieldType
             << endl << endl
@@ -60,31 +62,48 @@ Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
 
     autoPtr<pointPatchField<Type> > pfPtr(cstrIter()(p, iF));
 
-    if (pfPtr().constraintType() == p.constraintType())
+    if
+    (
+        actualPatchType == word::null
+     || actualPatchType != p.type()
+    )
     {
-        // Compatible (constraint-wise) with the patch type
-        return pfPtr;
-    }
-    else
-    {
-        // Use default constraint type
-        typename pointPatchConstructorTable::iterator patchTypeCstrIter =
-            pointPatchConstructorTablePtr_->find(p.type());
-
-        if (patchTypeCstrIter == pointPatchConstructorTablePtr_->end())
+        if (pfPtr().constraintType() != p.constraintType())
         {
-            FatalErrorIn
-            (
-                "PointPatchField<Type>::New"
-                "(const word&, const pointPatch&, const Field<Type>&)"
-            )   << "inconsistent patch and patchField types for \n"
-                << "    patch type " << p.type()
-                << " and patchField type " << patchFieldType
-                << exit(FatalError);
-        }
+            // Use default constraint type
+            typename pointPatchConstructorTable::iterator patchTypeCstrIter =
+                pointPatchConstructorTablePtr_->find(p.type());
 
-        return patchTypeCstrIter()(p, iF);
+            if (patchTypeCstrIter == pointPatchConstructorTablePtr_->end())
+            {
+                FatalErrorIn
+                (
+                    "PointPatchField<Type>::New"
+                    "(const word&, const word&"
+                    ", const pointPatch&, const Field<Type>&)"
+                )   << "inconsistent patch and patchField types for \n"
+                    << "    patch type " << p.type()
+                    << " and patchField type " << patchFieldType
+                    << exit(FatalError);
+            }
+
+            return patchTypeCstrIter()(p, iF);
+        }
     }
+
+    return pfPtr;
+}
+
+
+template<class Type>
+Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
+(
+    const word& patchFieldType,
+    const pointPatch& p,
+    const DimensionedField<Type, pointMesh>& iF
+)
+{
+    return New(patchFieldType, word::null, p, iF);
 }
 
 

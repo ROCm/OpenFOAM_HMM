@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,39 +21,29 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::vectorIOFieldField
+
+Description
+    vectorField with IO.
+
 \*---------------------------------------------------------------------------*/
 
-#include "faceSource.H"
+#ifndef vectorIOFieldField_H
+#define vectorIOFieldField_H
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "vectorField.H"
+#include "IOField.H"
 
-inline const Foam::fieldValues::faceSource::sourceType&
-Foam::fieldValues::faceSource::source() const
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    return source_;
+    typedef IOField<vectorField> vectorIOFieldField;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline const Foam::labelList&
-Foam::fieldValues::faceSource::faceId() const
-{
-    return faceId_;
-}
-
-
-inline const Foam::labelList&
-Foam::fieldValues::faceSource::facePatch() const
-{
-    return facePatchId_;
-}
-
-
-inline const Foam::labelList&
-Foam::fieldValues::faceSource::faceSign() const
-{
-    return faceSign_;
-}
-
+#endif
 
 // ************************************************************************* //
-

@@ -29,14 +29,16 @@ template<class Type>
 Foam::tmp<Foam::fvPatchField<Type> > Foam::fvPatchField<Type>::New
 (
     const word& patchFieldType,
+    const word& actualPatchType,
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
 )
 {
     if (debug)
     {
-        Info<< "fvPatchField<Type>::New(const word&, const fvPatch&, "
-               "const DimensionedField<Type, volMesh>&) : patchFieldType="
+        Info<< "fvPatchField<Type>::New(const word&, const word&, "
+               "const fvPatch&, const DimensionedField<Type, volMesh>&) :"
+               " patchFieldType="
             << patchFieldType
             << endl;
     }
@@ -48,7 +50,7 @@ Foam::tmp<Foam::fvPatchField<Type> > Foam::fvPatchField<Type>::New
     {
         FatalErrorIn
         (
-            "fvPatchField<Type>::New(const word&, const fvPatch&, "
+            "fvPatchField<Type>::New(const word&, const word&, const fvPatch&, "
             "const DimensionedField<Type, volMesh>&)"
         )   << "Unknown patchTypefield type " << patchFieldType
             << endl << endl
@@ -57,17 +59,40 @@ Foam::tmp<Foam::fvPatchField<Type> > Foam::fvPatchField<Type>::New
             << exit(FatalError);
     }
 
-    typename patchConstructorTable::iterator patchTypeCstrIter =
-        patchConstructorTablePtr_->find(p.type());
-
-    if (patchTypeCstrIter != patchConstructorTablePtr_->end())
+    if
+    (
+        actualPatchType == word::null
+     || actualPatchType != p.type()
+    )
     {
-        return patchTypeCstrIter()(p, iF);
+        typename patchConstructorTable::iterator patchTypeCstrIter =
+            patchConstructorTablePtr_->find(p.type());
+
+        if (patchTypeCstrIter != patchConstructorTablePtr_->end())
+        {
+            return patchTypeCstrIter()(p, iF);
+        }
+        else
+        {
+            return cstrIter()(p, iF);
+        }
     }
     else
     {
         return cstrIter()(p, iF);
     }
+}
+
+
+template<class Type>
+Foam::tmp<Foam::fvPatchField<Type> > Foam::fvPatchField<Type>::New
+(
+    const word& patchFieldType,
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF
+)
+{
+    return New(patchFieldType, word::null, p, iF);
 }
 
 
