@@ -40,7 +40,7 @@ Description
 
 SourceFiles
     viscosityModel.C
-    newViscosityModel.C
+    viscosityModelNew.C
 
 \*---------------------------------------------------------------------------*/
 

@@ -53,7 +53,7 @@ void triSurface::writeDXGeometry
         os  << "#     " << patchI << "    "
             << myPatches[patchI].name() << endl;
     }
-    os << endl << endl;
+    os  << nl << endl;
 
     // Write vertex coordinates
 
@@ -63,7 +63,7 @@ void triSurface::writeDXGeometry
     forAll(localPoints(), pointI)
     {
         const point& pt = localPoints()[pointI];
-        os << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
+        os  << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
     }
     os  << endl;
 
@@ -87,10 +87,9 @@ void triSurface::writeDXGeometry
             )
             {
                 const label faceI = faceMap[faceIndex++];
-
                 const labelledTri& f = localFaces()[faceI];
 
-                os << f[0] << ' ' << f[1] << ' ' << f[2] << endl;
+                os  << f[0] << ' ' << f[1] << ' ' << f[2] << endl;
             }
         }
     }
@@ -100,11 +99,11 @@ void triSurface::writeDXGeometry
         {
             const labelledTri& f = localFaces()[faceI];
 
-            os << f[0] << ' ' << f[1] << ' ' << f[2] << endl;
+            os  << f[0] << ' ' << f[1] << ' ' << f[2] << endl;
         }
     }
-    os << "attribute \"element type\" string \"triangles\"" << endl
-       << "attribute \"ref\" string \"positions\"" << endl << endl;
+    os  << "attribute \"element type\" string \"triangles\"" << endl
+        << "attribute \"ref\" string \"positions\"" << endl << endl;
 }
 
 
@@ -139,7 +138,7 @@ void triSurface::writeDX(const bool writeSorted, Ostream& os) const
         {
             forAll(myPatches[patchI], patchFaceI)
             {
-                os << patchI << endl;
+                os  << patchI << endl;
             }
         }
     }
@@ -149,7 +148,7 @@ void triSurface::writeDX(const bool writeSorted, Ostream& os) const
 
         forAll(*this, faceI)
         {
-            os << faceI << endl;
+            os  << faceI << endl;
         }
     }
 
@@ -157,7 +156,7 @@ void triSurface::writeDX(const bool writeSorted, Ostream& os) const
 
     writeDXTrailer(os);
 
-    os << "end" << endl;
+    os  << "end" << endl;
 }
 
 
@@ -173,7 +172,7 @@ void triSurface::writeDX(const scalarField& field, Ostream& os) const
             << " data follows" << endl;
         forAll(field, faceI)
         {
-            os << field[faceI] << endl;
+            os  << field[faceI] << endl;
         }
         os  << endl
             << "attribute \"dep\" string \"connections\"" << endl << endl;
@@ -185,7 +184,7 @@ void triSurface::writeDX(const scalarField& field, Ostream& os) const
             << " data follows" << endl;
         forAll(field, pointI)
         {
-            os << field[pointI] << endl;
+            os  << field[pointI] << endl;
         }
         os  << endl
             << "attribute \"dep\" string \"positions\"" << endl << endl;
@@ -202,7 +201,7 @@ void triSurface::writeDX(const scalarField& field, Ostream& os) const
 
     writeDXTrailer(os);
 
-    os << "end" << endl;
+    os  << "end" << endl;
 }
 
 
@@ -251,7 +250,7 @@ void triSurface::writeDX(const vectorField& field, Ostream& os) const
 
     writeDXTrailer(os);
 
-    os << "end" << endl;
+    os  << "end" << endl;
 }
 
 

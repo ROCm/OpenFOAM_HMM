@@ -54,7 +54,7 @@ public:
 
     friend Ostream& operator<<(Ostream& os, const Scalar& s)
     {
-        os << s.data_;
+        os  << s.data_;
         return os;
     }
 

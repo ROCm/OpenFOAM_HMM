@@ -332,7 +332,7 @@ Foam::dynamicRefineFvMesh::refine
                 const fvsPatchScalarField& patchPhiU =
                     phiU.boundaryField()[patchI];
 
-                label faceI = patchPhi.patch().patch().start();
+                label faceI = patchPhi.patch().start();
 
                 forAll(patchPhi, i)
                 {

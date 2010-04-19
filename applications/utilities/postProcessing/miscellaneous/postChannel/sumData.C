@@ -41,7 +41,7 @@ Foam::Ostream& Foam::operator<<
 
 Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::sumData& wDist)
 {
-    return is >> wDist.oldFace_ >> wDist.sum_ >> wDist.count_;
+    return is  >> wDist.oldFace_ >> wDist.sum_ >> wDist.count_;
 }
 
 

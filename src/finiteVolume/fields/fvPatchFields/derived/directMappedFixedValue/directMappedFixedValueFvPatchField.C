@@ -249,7 +249,7 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
             {
                 const fvPatchField<Type>& pf =
                     nbrField.boundaryField()[patchI];
-                label faceStart = pf.patch().patch().start();
+                label faceStart = pf.patch().start();
 
                 forAll(pf, faceI)
                 {

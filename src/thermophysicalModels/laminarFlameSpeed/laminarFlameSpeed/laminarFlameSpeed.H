@@ -36,7 +36,7 @@ Description
 
 SourceFiles
     laminarFlameSpeed.C
-    newLaminarFlameSpeed.C
+    laminarFlameSpeedNew.C
 
 \*---------------------------------------------------------------------------*/
 

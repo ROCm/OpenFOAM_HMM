@@ -2,9 +2,8 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-chmod a+rX $WM_PROJECT_DIR
-chmod a+rX $WM_PROJECT_DIR/doc
-chmod -R a+rX Doxygen
+# fix permissions (NB: '+X' and not '+x'!)
+chmod a+rX $WM_PROJECT_DIR $WM_PROJECT_DIR/doc Doxygen
 
 Doxygen/Allwmake
 

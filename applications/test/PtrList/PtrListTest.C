@@ -60,7 +60,7 @@ public:
 
     friend Ostream& operator<<(Ostream& os, const Scalar& val)
     {
-        os << val.data_;
+        os  << val.data_;
         return os;
     }
 };

@@ -128,13 +128,13 @@ void hexBlock::readPoints
     Info<< "Reading " << nPoints << " x coordinates..." << endl;
     for (label i=0; i < nPoints; i++)
     {
-        is >> points_[i].x();
+        is  >> points_[i].x();
     }
 
     Info<< "Reading " << nPoints << " y coordinates..." << endl;
     for (label i=0; i < nPoints; i++)
     {
-        is >> points_[i].y();
+        is  >> points_[i].y();
     }
 
     if (twoDThicknes > 0)
@@ -156,7 +156,7 @@ void hexBlock::readPoints
         Info<< "Reading " << nPoints << " z coordinates..." << endl;
         for (label i=0; i < nPoints; i++)
         {
-            is >> points_[i].z();
+            is  >> points_[i].z();
         }
     }
 
@@ -166,7 +166,7 @@ void hexBlock::readPoints
         Info<< "Reading " << nPoints << " blanks..." << endl;
         for (label i=0; i < nPoints; i++)
         {
-            is >> iBlank;
+            is  >> iBlank;
         }
     }
 

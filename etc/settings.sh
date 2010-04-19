@@ -99,7 +99,8 @@ _foamAddLib  $FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN:$FOAM_LIBBIN/dummy
 
 # Compiler settings
 # ~~~~~~~~~~~~~~~~~
-unset gcc_version gmp_version mpfr_version MPFR_ARCH_PATH
+unset gcc_version gmp_version mpfr_version mpc_version
+unset MPFR_ARCH_PATH
 
 # Select compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -114,15 +115,16 @@ OpenFOAM)
         gmp_version=gmp-5.0.1
         mpfr_version=mpfr-2.4.2
         ;;
-    Gcc442)
-        gcc_version=gcc-4.4.2
-        gmp_version=gmp-4.2.4
-        mpfr_version=mpfr-2.4.1
+    Gcc45)
+        gcc_version=gcc-4.5.0
+        gmp_version=gmp-5.0.1
+        mpfr_version=mpfr-2.4.2
+        mpc_version=mpc-0.8.1
         ;;
     Gcc44)
-        gcc_version=gcc-4.4.2
-        gmp_version=gmp-4.2.4
-        mpfr_version=mpfr-2.4.1
+        gcc_version=gcc-4.4.3
+        gmp_version=gmp-5.0.1
+        mpfr_version=mpfr-2.4.2
         ;;
     Gcc43)
         gcc_version=gcc-4.3.3
@@ -143,6 +145,7 @@ OpenFOAM)
         gccDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$gcc_version
         gmpDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$gmp_version
         mpfrDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$mpfr_version
+        mpcDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$mpc_version
 
         # Check that the compiler directory can be found
         [ -d "$gccDir" ] || {
@@ -156,22 +159,30 @@ OpenFOAM)
 
         _foamAddMan     $gccDir/man
         _foamAddPath    $gccDir/bin
-        _foamAddLib     $gccDir/lib
 
         # 64-bit needs lib64, but 32-bit needs lib (not lib32)
         if [ "$WM_ARCH_OPTION" = 64 ]
         then
             _foamAddLib     $gccDir/lib$WM_COMPILER_LIB_ARCH
+        else
+            _foamAddLib     $gccDir/lib
         fi
 
         # add in gmp/mpfr libraries
         _foamAddLib     $gmpDir/lib
         _foamAddLib     $mpfrDir/lib
 
+        # add in mpc libraries (not need for older gcc)
+        if [ -n "$mpc_version" ]
+        then
+            _foamAddLib     $mpcDir/lib
+        fi
+
         # used by boost/CGAL:
         export MPFR_ARCH_PATH=$mpfrDir
     fi
-    unset gcc_version gccDir  gmp_version gmpDir  mpfr_version mpfrDir
+    unset gcc_version gccDir
+    unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
     ;;
 esac
 

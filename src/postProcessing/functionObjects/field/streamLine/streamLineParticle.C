@@ -24,22 +24,14 @@ License
 \*----------------------------------------------------------------------------*/
 
 #include "streamLineParticle.H"
+#include "vectorIOFieldField.H"
 
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(streamLineParticle, 0);
-
     defineParticleTypeNameAndDebug(streamLineParticle, 0);
-
-    defineTemplateTypeNameAndDebugWithName
-    (
-        IOField<vectorField>,
-        "vectorFieldField",
-        0
-    );
 }
 
 
@@ -402,13 +394,13 @@ void Foam::streamLineParticle::readFields(Cloud<streamLineParticle>& c)
     );
     c.checkFieldIOobject(c, lifeTime);
 
-    IOField<pointField> sampledPositions
+    vectorIOFieldField sampledPositions
     (
         c.fieldIOobject("sampledPositions", IOobject::MUST_READ)
     );
     c.checkFieldIOobject(c, sampledPositions);
 
-//    IOField<pointField> sampleVelocity
+//    vectorIOFieldField sampleVelocity
 //    (
 //        c.fieldIOobject("sampleVelocity", IOobject::MUST_READ)
 //    );
@@ -436,12 +428,12 @@ void Foam::streamLineParticle::writeFields(const Cloud<streamLineParticle>& c)
         c.fieldIOobject("lifeTime", IOobject::NO_READ),
         np
     );
-    IOField<pointField> sampledPositions
+    vectorIOFieldField sampledPositions
     (
         c.fieldIOobject("sampledPositions", IOobject::NO_READ),
         np
     );
-//    IOField<pointField> sampleVelocity
+//    vectorIOFieldField sampleVelocity
 //    (
 //        c.fieldIOobject("sampleVelocity", IOobject::NO_READ),
 //        np

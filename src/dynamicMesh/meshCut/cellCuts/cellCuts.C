@@ -3036,12 +3036,12 @@ void Foam::cellCuts::writeOBJ
         vertI++;
     }
 
-    os << 'f';
+    os  << 'f';
     forAll(loopPts, fp)
     {
         os  << ' ' << startVertI + fp + 1;
     }
-    os<< endl;
+    os  << endl;
 }
 
 

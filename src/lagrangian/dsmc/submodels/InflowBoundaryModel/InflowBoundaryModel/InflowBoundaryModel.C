@@ -80,7 +80,7 @@ const Foam::dictionary& Foam::InflowBoundaryModel<CloudType>::coeffDict() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewInflowBoundaryModel.C"
+#include "InflowBoundaryModelNew.C"
 
 // ************************************************************************* //
 

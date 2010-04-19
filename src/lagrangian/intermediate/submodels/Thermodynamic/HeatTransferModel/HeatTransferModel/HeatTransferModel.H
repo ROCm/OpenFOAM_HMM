@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     HeatTransferModel.C
-    NewHeatTransferModel.C
+    HeatTransferModelNew.C
 
 \*---------------------------------------------------------------------------*/
 

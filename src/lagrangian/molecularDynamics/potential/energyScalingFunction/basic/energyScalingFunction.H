@@ -28,7 +28,7 @@ Description
 
 SourceFiles
     energyScalingFunction.C
-    newEnergyScalingFunction.C
+    energyScalingFunctionNew.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class energyScalingFunction Declaration
+                    Class energyScalingFunction Declaration
 \*---------------------------------------------------------------------------*/
 
 class energyScalingFunction

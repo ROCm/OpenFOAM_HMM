@@ -104,7 +104,7 @@ void Foam::treeNode<Type>::space(Ostream& os, const label n)
 {
     for (label i=0; i<n; i++)
     {
-        os<< ' ';
+        os  << ' ';
     }
 }
 
