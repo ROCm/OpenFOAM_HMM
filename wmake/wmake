@@ -44,16 +44,15 @@ options:
 A general, easy-to-use make system for multi-platform development
 
 The 'target' is a Makefile target:
-    e.g., Make/linux64GccDPOpt/fvMesh.o
+  e.g., Make/linux64GccDPOpt/fvMesh.o
 
 or a special target:
-    all       all subdirectories
-              (NB: any Allwmake files will be used if they exist)
-    exe       build statically linked executable
-    lib       build statically linked archive lib (.a)
-    libo      build statically linked lib (.o)
-    libso     build dynamically linked lib (.so)
-    jar       build Java jar
+  all               all subdirectories, uses any Allwmake files if they exist
+  exe               build statically linked executable
+  lib               build statically linked archive lib (.a)
+  libo              build statically linked lib (.o)
+  libso             build dynamically linked lib (.so)
+  jar               build Java jar
 
 USAGE
     exit 1
@@ -104,7 +103,7 @@ if [ "$WM_NCOMPPROCS" ]
 then
     if [ "$WM_NCOMPPROCS" -gt 1 -a ! "$MAKEFLAGS" ]
     then
-        lockDir=$HOME/.wmakeScheduler
+        lockDir=$HOME/.$WM_PROJECT/.wmake
 
         if [ -d $lockDir ]
         then
@@ -168,16 +167,11 @@ then
         $make -k -f $WM_DIR/MakefileApps FOAM_APPS="$FOAM_APPS"
         exit $?
     fi
-
-    # This is the end of the recursion down the application directories tree
-    # so remove the "all" option so that the call to make builds the application
-    makeOption=
 fi
 
 
 #------------------------------------------------------------------------------
-# Check the existance of the Make directory and files file
-# If both exist, make the wmake derived files
+# Require the existence of the 'Make' directory and 'files' file
 #------------------------------------------------------------------------------
 
 [ -d $MakeDir ] || {
@@ -189,6 +183,18 @@ fi
     echo "$Script error: file '$MakeDir/files' does not exist" 1>&2
     exit 1
 }
+
+# transform "all" option to "libso" if that looks appropriate or remove it
+# so that the call to make builds the application
+if [ "$makeOption" = all ]
+then
+    unset makeOption
+    if grep -e '^ *LIB *=' "$MakeDir/files" >/dev/null 2>&1
+    then
+        makeOption=libso
+    fi
+fi
+
 
 # Spawn a sub-shell and unset MAKEFLAGS in that sub-shell to avoid
 # files and options being built in parallel
@@ -227,12 +233,8 @@ esac
 
 $make -s -f $WM_DIR/Makefile MAKE_DIR=$MakeDir INCLUDE_DEPS=$OBJECTS_DIR/dontIncludeDeps $OBJECTS_DIR/dependencies
 
-retVal=$?
-if [ $retVal -ne 0 ]
-then
-    exit $retVal
-fi
-
+rc=$?
+[ $rc -eq 0 ] || exit $rc
 
 #------------------------------------------------------------------------------
 # make the object files and link

@@ -46,12 +46,10 @@ Clean up the wmake control directory Make/\$WM_OPTIONS and remove the
 lnInclude directories generated for libraries.
 
 The targets correspond to a subset of the 'wmake' special targets:
-    all       all subdirectories
-              (NB: any Allwclean or Allclean files will be used if they exist)
-    exe       clean dir/Make
-    lib       clean dir/Make and dir/lnInclude
-    libo      clean dir/Make and dir/lnInclude
-    libso     clean dir/Make and dir/lnInclude
+  all               all subdirectories, uses any Allwclean or Allclean
+                    files if they exist
+  exe | lib | libo | libso
+                    clean Make, any *.dep files and lnInclude directories
 
 USAGE
    exit 1
@@ -122,20 +120,21 @@ then
         exit 0
     fi
 
-    # This is the end of the recursion down the application directories tree
-    # so remove the "all" option so that the call to make builds the application
-    makeOption=
 fi
 
+# makeOption is not needed beyond this point
+unset makeOption
+
+
 #------------------------------------------------------------------------------
-# Check the existance of the Make directory
+# Require the existence of the 'Make' directory
 #------------------------------------------------------------------------------
 
-if [ ! -d $MakeDir ]
-then
+[ -d $MakeDir ] || {
     echo "$Script error: '$MakeDir' directory does not exist" 1>&2
     exit 1
-fi
+}
+
 
 # -----------------------------------------------------------------------------
 
@@ -143,13 +142,10 @@ rm -rf $MakeDir/$WM_OPTIONS $MakeDir/classes 2>/dev/null
 
 find . -name "*.dep" -exec rm {} \;
 
-case "$makeOption" in
-lib | libo | libso )
-    rm -rf lnInclude 2>/dev/null
-    ;;
-esac
+# always safe to remove lnInclude
+rm -rf lnInclude 2>/dev/null
 
 rm -rf ii_files Templates.DB 2>/dev/null
-rm -f so_locations
+rm -f so_locations 2>/dev/null
 
 #------------------------------------------------------------------------------

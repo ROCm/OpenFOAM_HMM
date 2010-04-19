@@ -48,8 +48,7 @@
 #         eg,  export WM_NCOMPPROCS=$(wmakeScheduler -count)
 #
 #-------------------------------------------------------------------------------
-lockDir=$HOME/.wmakeScheduler
-
+lockDir=$HOME/.$WM_PROJECT/.wmake
 # fallback - 1 core on current host
 : ${WM_HOSTS:=$HOST:1}
 
