@@ -35,13 +35,15 @@ Foam::WallInteractionModel<CloudType>::New
     CloudType& owner
 )
 {
-    word WallInteractionModelType(dict.lookup("WallInteractionModel"));
+    const word modelType
+    (
+        dict.lookup("WallInteractionModel")
+    );
 
-    Info<< "Selecting WallInteractionModel " << WallInteractionModelType
-        << endl;
+    Info<< "Selecting WallInteractionModel " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(WallInteractionModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -50,11 +52,11 @@ Foam::WallInteractionModel<CloudType>::New
             "WallInteractionModel<CloudType>::New"
             "(const dictionary&, CloudType&)"
         )
-            << "Unknown WallInteractionModelType type "
-            << WallInteractionModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid WallInteractionModel types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+            << "Unknown WallInteractionModel type "
+            << modelType << nl << nl
+            << "Valid WallInteractionModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<WallInteractionModel<CloudType> >(cstrIter()(dict, owner));

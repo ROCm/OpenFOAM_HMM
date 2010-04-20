@@ -26,19 +26,17 @@ License
 #include "LESdelta.H"
 #include "calculatedFvPatchFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(LESdelta, 0);
-defineRunTimeSelectionTable(LESdelta, dictionary);
+    defineTypeNameAndDebug(LESdelta, 0);
+    defineRunTimeSelectionTable(LESdelta, dictionary);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-LESdelta::LESdelta(const word& name, const fvMesh& mesh)
+Foam::LESdelta::LESdelta(const word& name, const fvMesh& mesh)
 :
     mesh_(mesh),
     delta_
@@ -60,14 +58,15 @@ LESdelta::LESdelta(const word& name, const fvMesh& mesh)
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-autoPtr<LESdelta> LESdelta::New
+Foam::autoPtr<Foam::LESdelta>
+Foam::LESdelta::New
 (
     const word& name,
     const fvMesh& mesh,
     const dictionary& dict
 )
 {
-    word deltaType(dict.lookup("delta"));
+    const word deltaType(dict.lookup("delta"));
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(deltaType);
@@ -77,7 +76,8 @@ autoPtr<LESdelta> LESdelta::New
         FatalErrorIn
         (
             "LESdelta::New(const fvMesh&, const dictionary&)"
-        )   << "Unknown LESdelta type " << deltaType << endl << endl
+        )   << "Unknown LESdelta type "
+            << deltaType << nl << nl
             << "Valid LESdelta types are :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
@@ -86,9 +86,5 @@ autoPtr<LESdelta> LESdelta::New
     return autoPtr<LESdelta>(cstrIter()(name, mesh, dict));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

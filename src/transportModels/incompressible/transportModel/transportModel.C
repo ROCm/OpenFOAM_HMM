@@ -27,14 +27,10 @@ License
 #include "viscosityModel.H"
 #include "volFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-transportModel::transportModel
+Foam::transportModel::transportModel
 (
     const volVectorField& U,
     const surfaceScalarField& phi
@@ -56,20 +52,16 @@ transportModel::transportModel
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-transportModel::~transportModel()
+Foam::transportModel::~transportModel()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool transportModel::read()
+bool Foam::transportModel::read()
 {
     return regIOobject::read();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

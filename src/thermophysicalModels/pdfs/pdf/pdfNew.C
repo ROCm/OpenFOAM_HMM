@@ -27,23 +27,27 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::pdfs::pdf> Foam::pdfs::pdf::New
+Foam::autoPtr<Foam::pdfs::pdf>
+Foam::pdfs::pdf::New
 (
     const dictionary& dict,
     Random& rndGen
 )
 {
-    word pdfType(dict.lookup("pdfType"));
+    const word modelType
+    (
+        dict.lookup("pdfType")
+    );
 
-    Info<< "Selecting pdfType " << pdfType << endl;
+    Info<< "Selecting pdfType " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(pdfType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn("pdfs::pdf::New(const dictionary&, Random&)")
-            << "unknown pdf type " << pdfType << nl << nl
+            << "Unknown pdf type " << modelType << nl << nl
             << "Valid pdf types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);

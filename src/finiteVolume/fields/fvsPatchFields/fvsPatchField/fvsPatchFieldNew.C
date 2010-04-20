@@ -56,8 +56,8 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::New
         (
             "fvsPatchField<Type>::New(const word&, const word&, const fvPatch&"
             ", const Field<Type>&)"
-        )   << "Unknown patchTypefield type " << patchFieldType
-            << endl << endl
+        )   << "Unknown patchField type "
+            << patchFieldType << nl << nl
             << "Valid patchField types are :" << endl
             << patchConstructorTablePtr_->sortedToc()
             << exit(FatalError);
@@ -116,7 +116,7 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::New
             << endl;
     }
 
-    word patchFieldType(dict.lookup("type"));
+    const word patchFieldType(dict.lookup("type"));
 
     typename dictionaryConstructorTable::iterator cstrIter
         = dictionaryConstructorTablePtr_->find(patchFieldType);
@@ -136,7 +136,7 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::New
                 "const dictionary&)",
                 dict
             )   << "Unknown patchField type " << patchFieldType
-                << " for patch type " << p.type() << endl << endl
+                << " for patch type " << p.type() << nl << nl
                 << "Valid patchField types are :" << endl
                 << dictionaryConstructorTablePtr_->sortedToc()
                 << exit(FatalIOError);
@@ -204,7 +204,7 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::New
             "fvsPatchField<Type>::New(const fvsPatchField<Type>&, "
             "const fvPatch&, const Field<Type>&, "
             "const fvPatchFieldMapper&)"
-        )   << "unknown patchTypefield type " << ptf.type() << endl << endl
+        )   << "Unknown patchField type " << ptf.type() << nl << nl
             << "Valid patchField types are :" << endl
             << patchMapperConstructorTablePtr_->sortedToc()
             << exit(FatalError);

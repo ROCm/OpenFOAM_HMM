@@ -27,7 +27,8 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::PDRDragModel> Foam::PDRDragModel::New
+Foam::autoPtr<Foam::PDRDragModel>
+Foam::PDRDragModel::New
 (
     const dictionary& PDRProperties,
     const compressible::RASModel& turbulence,
@@ -36,12 +37,15 @@ Foam::autoPtr<Foam::PDRDragModel> Foam::PDRDragModel::New
     const surfaceScalarField& phi
 )
 {
-    word PDRDragModelTypeName = PDRProperties.lookup("PDRDragModel");
+    const word modelType
+    (
+        PDRProperties.lookup("PDRDragModel")
+    );
 
-    Info<< "Selecting flame-wrinkling model " << PDRDragModelTypeName << endl;
+    Info<< "Selecting flame-wrinkling model " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(PDRDragModelTypeName);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -49,7 +53,7 @@ Foam::autoPtr<Foam::PDRDragModel> Foam::PDRDragModel::New
         (
             "PDRDragModel::New"
         )   << "Unknown PDRDragModel type "
-            << PDRDragModelTypeName << endl << endl
+            << modelType << nl << nl
             << "Valid  PDRDragModels are : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);

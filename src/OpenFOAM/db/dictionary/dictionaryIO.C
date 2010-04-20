@@ -118,7 +118,8 @@ Foam::dictionary::dictionary(Istream& is)
 }
 
 
-Foam::autoPtr<Foam::dictionary> Foam::dictionary::New(Istream& is)
+Foam::autoPtr<Foam::dictionary>
+Foam::dictionary::New(Istream& is)
 {
     return autoPtr<dictionary>(new dictionary(is));
 }

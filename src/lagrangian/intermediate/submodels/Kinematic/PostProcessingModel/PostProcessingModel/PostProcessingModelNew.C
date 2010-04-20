@@ -35,12 +35,15 @@ Foam::PostProcessingModel<CloudType>::New
     CloudType& owner
 )
 {
-    word PostProcessingModelType(dict.lookup("PostProcessingModel"));
+    const word modelType
+    (
+        dict.lookup("PostProcessingModel")
+    );
 
-    Info<< "Selecting PostProcessingModel " << PostProcessingModelType << endl;
+    Info<< "Selecting PostProcessingModel " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(PostProcessingModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -51,11 +54,11 @@ Foam::PostProcessingModel<CloudType>::New
                 "const dictionary&, "
                 "CloudType&"
             ")"
-        )   << "Unknown PostProcessingModelType type "
-            << PostProcessingModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid PostProcessingModel types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+        )   << "Unknown PostProcessingModel type "
+            << modelType << nl << nl
+            << "Valid PostProcessingModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<PostProcessingModel<CloudType> >(cstrIter()(dict, owner));

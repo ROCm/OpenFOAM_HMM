@@ -28,47 +28,40 @@ License
 #include "LISA.H"
 #include "noAtomization.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-autoPtr<atomizationModel> atomizationModel::New
+Foam::autoPtr<Foam::atomizationModel>
+Foam::atomizationModel::New
 (
     const dictionary& dict,
     spray& sm
 )
 {
-    word atomizationModelType
+    const word modelType
     (
         dict.lookup("atomizationModel")
     );
 
-    Info<< "Selecting atomizationModel "
-         << atomizationModelType << endl;
+    Info<< "Selecting atomizationModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(atomizationModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalError
-            << "atomizationModel::New(const dictionary&, const spray&) : " << endl
-            << "    unknown atomizationModelType type "
-            << atomizationModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid atomizationModel types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
+        FatalErrorIn
+        (
+            "atomizationModel::New(const dictionary&, const spray&)"
+        )   << "Unknown atomizationModel type "
+            << modelType << nl << nl
+            << "Valid atomizationModel types are :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << abort(FatalError);
     }
 
     return autoPtr<atomizationModel>(cstrIter()(dict, sm));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

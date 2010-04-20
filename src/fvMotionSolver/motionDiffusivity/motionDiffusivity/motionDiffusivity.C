@@ -30,7 +30,6 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(motionDiffusivity, 0);
-
     defineRunTimeSelectionTable(motionDiffusivity, Istream);
 }
 
@@ -45,18 +44,19 @@ Foam::motionDiffusivity::motionDiffusivity(const fvMotionSolver& mSolver)
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::motionDiffusivity> Foam::motionDiffusivity::New
+Foam::autoPtr<Foam::motionDiffusivity>
+Foam::motionDiffusivity::New
 (
     const fvMotionSolver& mSolver,
     Istream& mdData
 )
 {
-    word diffTypeName(mdData);
+    const word motionType(mdData);
 
-    Info<< "Selecting motion diffusion: " << diffTypeName << endl;
+    Info<< "Selecting motion diffusion: " << motionType << endl;
 
     IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(diffTypeName);
+        IstreamConstructorTablePtr_->find(motionType);
 
     if (cstrIter == IstreamConstructorTablePtr_->end())
     {
@@ -64,8 +64,8 @@ Foam::autoPtr<Foam::motionDiffusivity> Foam::motionDiffusivity::New
         (
             "motionDiffusivity::New(const tetPolyMesh& tetMesh, "
             "const Istream& dict)"
-        )   << "Unknown diffusion type " << diffTypeName
-            << endl << endl
+        )   << "Unknown diffusion type "
+            << motionType << nl << nl
             << "Valid diffusion types are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalError);

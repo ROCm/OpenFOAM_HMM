@@ -28,18 +28,17 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::engineMesh> Foam::engineMesh::New
+Foam::autoPtr<Foam::engineMesh>
+Foam::engineMesh::New
 (
     const Foam::IOobject& io
 )
 {
-    word engineMeshTypeName;
-
-    // Enclose the creation of the engineGeometry to ensure it is
-    // deleted before the engineMesh is created otherwise the dictionary
-    // is entered in the database twice
-    {
-        IOdictionary engineGeometryDict
+    // get model name, but do not register the dictionary
+    // otherwise it is registered in the database twice
+    const word modelType
+    (
+        IOdictionary
         (
             IOobject
             (
@@ -50,23 +49,21 @@ Foam::autoPtr<Foam::engineMesh> Foam::engineMesh::New
                 IOobject::NO_WRITE,
                 false
             )
-        );
+        ).lookup("engineMesh")
+    );
 
-        engineGeometryDict.lookup("engineMesh") >> engineMeshTypeName;
-    }
-
-    Info<< "Selecting engineMesh " << engineMeshTypeName << endl;
+    Info<< "Selecting engineMesh " << modelType << endl;
 
     IOobjectConstructorTable::iterator cstrIter =
-        IOobjectConstructorTablePtr_->find(engineMeshTypeName);
+        IOobjectConstructorTablePtr_->find(modelType);
 
     if (cstrIter == IOobjectConstructorTablePtr_->end())
     {
         FatalErrorIn
         (
             "engineMesh::New(const IOobject&)"
-        )   << "Unknown engineMesh type " << engineMeshTypeName
-            << endl << endl
+        )   << "Unknown engineMesh type "
+            << modelType << nl << nl
             << "Valid engineMesh types are :" << endl
             << IOobjectConstructorTablePtr_->sortedToc()
             << exit(FatalError);

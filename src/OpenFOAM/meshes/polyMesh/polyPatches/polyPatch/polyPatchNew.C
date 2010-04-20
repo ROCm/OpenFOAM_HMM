@@ -28,7 +28,8 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
+Foam::autoPtr<Foam::polyPatch>
+Foam::polyPatch::New
 (
     const word& patchType,
     const word& name,
@@ -55,8 +56,8 @@ Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
         (
             "polyPatch::New(const word&, const word&, const label, "
             "const label, const label, const polyBoundaryMesh&) "
-        )   << "Unknown polyPatch type " << patchType << " for patch " << name
-            << endl << endl
+        )   << "Unknown polyPatch type "
+            << patchType << " for patch " << name << nl << nl
             << "Valid polyPatch types are :" << endl
             << wordConstructorTablePtr_->sortedToc()
             << exit(FatalError);
@@ -66,7 +67,8 @@ Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
 }
 
 
-Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
+Foam::autoPtr<Foam::polyPatch>
+Foam::polyPatch::New
 (
     const word& name,
     const dictionary& dict,
@@ -82,7 +84,6 @@ Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
     }
 
     word patchType(dict.lookup("type"));
-
     dict.readIfPresent("geometricType", patchType);
 
     dictionaryConstructorTable::iterator cstrIter =
@@ -102,9 +103,8 @@ Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
                 "polyPatch::New(const word&, const dictionary&, "
                 "const label, const polyBoundaryMesh&)",
                 dict
-            )   << "Unknown polyPatch type " << patchType
-                << " for patch " << name
-                << endl << endl
+            )   << "Unknown polyPatch type "
+                << patchType << " for patch " << name << nl << nl
                 << "Valid polyPatch types are :" << endl
                 << dictionaryConstructorTablePtr_->sortedToc()
                 << exit(FatalIOError);

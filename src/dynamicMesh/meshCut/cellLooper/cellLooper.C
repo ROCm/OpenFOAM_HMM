@@ -28,36 +28,34 @@ License
 #include "ListOps.H"
 #include "meshTools.H"
 
-
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(cellLooper, 0);
-defineRunTimeSelectionTable(cellLooper, word);
+    defineTypeNameAndDebug(cellLooper, 0);
+    defineRunTimeSelectionTable(cellLooper, word);
+}
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Construct named object from given arguments
-autoPtr<cellLooper> cellLooper::New
+Foam::autoPtr<Foam::cellLooper>
+Foam::cellLooper::New
 (
     const word& type,
     const polyMesh& mesh
 )
 {
     wordConstructorTable::iterator cstrIter =
-        wordConstructorTablePtr_
-            ->find(type);
+        wordConstructorTablePtr_->find(type);
 
     if (cstrIter == wordConstructorTablePtr_->end())
     {
         FatalErrorIn
         (
             "cellLooper::New(const word&, const polyMesh&)"
-        )   << "Unknown set type " << type
-            << endl << endl
+        )   << "Unknown set type "
+            << type << nl << nl
             << "Valid cellLooper types : " << endl
             << wordConstructorTablePtr_->sortedToc()
             << exit(FatalError);
@@ -66,7 +64,6 @@ autoPtr<cellLooper> cellLooper::New
     return autoPtr<cellLooper>(cstrIter()(mesh));
 }
 
-}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -207,7 +204,6 @@ Foam::label Foam::cellLooper::getMisAlignedEdge
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::cellLooper::cellLooper(const polyMesh& mesh)
 :
     edgeVertex(mesh)

@@ -27,7 +27,8 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::XiGModel> Foam::XiGModel::New
+Foam::autoPtr<Foam::XiGModel>
+Foam::XiGModel::New
 (
     const dictionary& XiGProperties,
     const hhuCombustionThermo& thermo,
@@ -35,12 +36,15 @@ Foam::autoPtr<Foam::XiGModel> Foam::XiGModel::New
     const volScalarField& Su
 )
 {
-    word XiGModelTypeName = XiGProperties.lookup("XiGModel");
+    const word modelType
+    (
+        XiGProperties.lookup("XiGModel")
+    );
 
-    Info<< "Selecting flame-wrinkling model " << XiGModelTypeName << endl;
+    Info<< "Selecting flame-wrinkling model " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(XiGModelTypeName);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -53,8 +57,8 @@ Foam::autoPtr<Foam::XiGModel> Foam::XiGModel::New
             "    const volScalarField& Su"
             ")"
         )   << "Unknown XiGModel type "
-            << XiGModelTypeName << endl << endl
-            << "Valid  XiGModels are : " << endl
+            << modelType << nl << nl
+            << "Valid XiGModels are : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

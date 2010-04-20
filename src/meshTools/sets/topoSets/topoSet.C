@@ -29,21 +29,21 @@ License
 #include "boundBox.H"
 #include "Time.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(topoSet, 0);
-defineRunTimeSelectionTable(topoSet, word);
-defineRunTimeSelectionTable(topoSet, size);
-defineRunTimeSelectionTable(topoSet, set);
+    defineTypeNameAndDebug(topoSet, 0);
+    defineRunTimeSelectionTable(topoSet, word);
+    defineRunTimeSelectionTable(topoSet, size);
+    defineRunTimeSelectionTable(topoSet, set);
+}
 
 
-// Construct named object from existing set.
-autoPtr<topoSet> topoSet::New
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::topoSet>
+Foam::topoSet::New
 (
     const word& setType,
     const polyMesh& mesh,
@@ -73,8 +73,8 @@ autoPtr<topoSet> topoSet::New
 }
 
 
-// Construct named object from size (non-existing set).
-autoPtr<topoSet> topoSet::New
+Foam::autoPtr<Foam::topoSet>
+Foam::topoSet::New
 (
     const word& setType,
     const polyMesh& mesh,
@@ -104,8 +104,8 @@ autoPtr<topoSet> topoSet::New
 }
 
 
-// Construct named object from existing set.
-autoPtr<topoSet> topoSet::New
+Foam::autoPtr<Foam::topoSet>
+Foam::topoSet::New
 (
     const word& setType,
     const polyMesh& mesh,
@@ -135,7 +135,7 @@ autoPtr<topoSet> topoSet::New
 }
 
 
-Foam::fileName topoSet::topoSet::localPath
+Foam::fileName Foam::topoSet::topoSet::localPath
 (
     const polyMesh& mesh,
     const word& name
@@ -149,7 +149,7 @@ Foam::fileName topoSet::topoSet::localPath
 
 // Update stored cell numbers using map.
 // Do in two passes to prevent allocation if nothing changed.
-void topoSet::topoSet::updateLabels(const labelList& map)
+void Foam::topoSet::topoSet::updateLabels(const labelList& map)
 {
     // Iterate over map to see if anything changed
     bool changed = false;
@@ -197,7 +197,7 @@ void topoSet::topoSet::updateLabels(const labelList& map)
 }
 
 
-void topoSet::topoSet::check(const label maxLabel)
+void Foam::topoSet::topoSet::check(const label maxLabel)
 {
     forAllConstIter(topoSet, *this, iter)
     {
@@ -214,7 +214,7 @@ void topoSet::topoSet::check(const label maxLabel)
 
 
 // Write maxElem elements, starting at iter. Updates iter and elemI.
-void topoSet::writeDebug
+void Foam::topoSet::writeDebug
 (
     Ostream& os,
     const label maxElem,
@@ -239,7 +239,7 @@ void topoSet::writeDebug
 
 
 // Write maxElem elements, starting at iter. Updates iter and elemI.
-void topoSet::writeDebug
+void Foam::topoSet::writeDebug
 (
     Ostream& os,
     const pointField& coords,
@@ -264,7 +264,7 @@ void topoSet::writeDebug
 }
 
 
-void topoSet::writeDebug
+void Foam::topoSet::writeDebug
 (
     Ostream& os,
     const pointField& coords,
@@ -308,7 +308,7 @@ void topoSet::writeDebug
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-topoSet::topoSet(const IOobject& obj, const word& wantedType)
+Foam::topoSet::topoSet(const IOobject& obj, const word& wantedType)
 :
     regIOobject(obj)
 {
@@ -331,7 +331,7 @@ topoSet::topoSet(const IOobject& obj, const word& wantedType)
 }
 
 
-topoSet::topoSet
+Foam::topoSet::topoSet
 (
     const polyMesh& mesh,
     const word& wantedType,
@@ -378,7 +378,7 @@ topoSet::topoSet
 }
 
 
-topoSet::topoSet
+Foam::topoSet::topoSet
 (
     const polyMesh& mesh,
     const word& name,
@@ -408,7 +408,7 @@ topoSet::topoSet
 {}
 
 
-topoSet::topoSet
+Foam::topoSet::topoSet
 (
     const polyMesh& mesh,
     const word& name,
@@ -438,14 +438,14 @@ topoSet::topoSet
 {}
 
 
-topoSet::topoSet(const IOobject& obj, const label size)
+Foam::topoSet::topoSet(const IOobject& obj, const label size)
 :
     regIOobject(obj),
     labelHashSet(size)
 {}
 
 
-topoSet::topoSet(const IOobject& obj, const labelHashSet& set)
+Foam::topoSet::topoSet(const IOobject& obj, const labelHashSet& set)
 :
     regIOobject(obj),
     labelHashSet(set)
@@ -455,13 +455,13 @@ topoSet::topoSet(const IOobject& obj, const labelHashSet& set)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-topoSet::~topoSet()
+Foam::topoSet::~topoSet()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void topoSet::invert(const label maxLen)
+void Foam::topoSet::invert(const label maxLen)
 {
     // Keep copy of current set.
     labelHashSet currentSet(*this);
@@ -480,7 +480,7 @@ void topoSet::invert(const label maxLen)
 }
 
 
-void topoSet::subset(const topoSet& set)
+void Foam::topoSet::subset(const topoSet& set)
 {
     // Keep copy of current set.
     labelHashSet currentSet(*this);
@@ -499,7 +499,7 @@ void topoSet::subset(const topoSet& set)
 }
 
 
-void topoSet::addSet(const topoSet& set)
+void Foam::topoSet::addSet(const topoSet& set)
 {
     forAllConstIter(topoSet, set, iter)
     {
@@ -508,7 +508,7 @@ void topoSet::addSet(const topoSet& set)
 }
 
 
-void topoSet::deleteSet(const topoSet& set)
+void Foam::topoSet::deleteSet(const topoSet& set)
 {
     forAllConstIter(topoSet, set, iter)
     {
@@ -517,13 +517,13 @@ void topoSet::deleteSet(const topoSet& set)
 }
 
 
-void topoSet::sync(const polyMesh&)
+void Foam::topoSet::sync(const polyMesh&)
 {
     notImplemented("topoSet::sync(const polyMesh&)");
 }
 
 
-void topoSet::writeDebug(Ostream& os, const label maxLen) const
+void Foam::topoSet::writeDebug(Ostream& os, const label maxLen) const
 {
     label n = 0;
 
@@ -554,7 +554,7 @@ void topoSet::writeDebug(Ostream& os, const label maxLen) const
 }
 
 
-//void topoSet::writeDebug
+//void Foam::topoSet::writeDebug
 //(
 //    Ostream&,
 //    const primitiveMesh&,
@@ -568,13 +568,13 @@ void topoSet::writeDebug(Ostream& os, const label maxLen) const
 //}
 
 
-bool topoSet::writeData(Ostream& os) const
+bool Foam::topoSet::writeData(Ostream& os) const
 {
     return (os << *this).good();
 }
 
 
-void topoSet::updateMesh(const mapPolyMesh&)
+void Foam::topoSet::updateMesh(const mapPolyMesh&)
 {
     notImplemented("topoSet::updateMesh(const mapPolyMesh&)");
 }
@@ -590,14 +590,10 @@ void topoSet::updateMesh(const mapPolyMesh&)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void topoSet::operator=(const topoSet& rhs)
+void Foam::topoSet::operator=(const topoSet& rhs)
 {
     labelHashSet::operator=(rhs);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

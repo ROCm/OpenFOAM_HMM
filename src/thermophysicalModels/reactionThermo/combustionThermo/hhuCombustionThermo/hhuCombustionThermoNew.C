@@ -28,20 +28,14 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+Foam::autoPtr<Foam::hhuCombustionThermo>
+Foam::hhuCombustionThermo::New(const fvMesh& mesh)
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-autoPtr<hhuCombustionThermo> hhuCombustionThermo::New(const fvMesh& mesh)
-{
-    word hhuCombustionThermoTypeName;
-
-    // Enclose the creation of the thermophysicalProperties to ensure it is
-    // deleted before the turbulenceModel is created otherwise the dictionary
-    // is entered in the database twice
-    {
-        IOdictionary thermoDict
+    // get model name, but do not register the dictionary
+    // otherwise it is registered in the database twice
+    const word modelType
+    (
+        IOdictionary
         (
             IOobject
             (
@@ -49,24 +43,22 @@ autoPtr<hhuCombustionThermo> hhuCombustionThermo::New(const fvMesh& mesh)
                 mesh.time().constant(),
                 mesh,
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                false
             )
-        );
+        ).lookup("thermoType")
+    );
 
-        thermoDict.lookup("thermoType") >> hhuCombustionThermoTypeName;
-    }
-
-    Info<< "Selecting thermodynamics package "
-        << hhuCombustionThermoTypeName << endl;
+    Info<< "Selecting thermodynamics package " << modelType << endl;
 
     fvMeshConstructorTable::iterator cstrIter =
-        fvMeshConstructorTablePtr_->find(hhuCombustionThermoTypeName);
+        fvMeshConstructorTablePtr_->find(modelType);
 
     if (cstrIter == fvMeshConstructorTablePtr_->end())
     {
         FatalErrorIn("hhuCombustionThermo::New(const fvMesh&)")
             << "Unknown hhuCombustionThermo type "
-            << hhuCombustionThermoTypeName << endl << endl
+            << modelType << nl << nl
             << "Valid hhuCombustionThermo types are :" << endl
             << fvMeshConstructorTablePtr_->sortedToc()
             << exit(FatalError);
@@ -75,9 +67,5 @@ autoPtr<hhuCombustionThermo> hhuCombustionThermo::New(const fvMesh& mesh)
     return autoPtr<hhuCombustionThermo>(cstrIter()(mesh));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

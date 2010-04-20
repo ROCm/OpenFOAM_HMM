@@ -27,7 +27,8 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::XiEqModel> Foam::XiEqModel::New
+Foam::autoPtr<Foam::XiEqModel>
+Foam::XiEqModel::New
 (
     const dictionary& XiEqProperties,
     const hhuCombustionThermo& thermo,
@@ -35,12 +36,15 @@ Foam::autoPtr<Foam::XiEqModel> Foam::XiEqModel::New
     const volScalarField& Su
 )
 {
-    word XiEqModelTypeName = XiEqProperties.lookup("XiEqModel");
+    const word modelType
+    (
+        XiEqProperties.lookup("XiEqModel")
+    );
 
-    Info<< "Selecting flame-wrinkling model " << XiEqModelTypeName << endl;
+    Info<< "Selecting flame-wrinkling model " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(XiEqModelTypeName);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -53,8 +57,8 @@ Foam::autoPtr<Foam::XiEqModel> Foam::XiEqModel::New
             "    const volScalarField& Su"
             ")"
         )   << "Unknown XiEqModel type "
-            << XiEqModelTypeName << endl << endl
-            << "Valid  XiEqModels are : " << endl
+            << modelType << nl << nl
+            << "Valid XiEqModels are : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

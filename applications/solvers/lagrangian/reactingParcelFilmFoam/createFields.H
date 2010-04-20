@@ -11,7 +11,7 @@
     basicMultiComponentMixture& composition = thermo.composition();
     PtrList<volScalarField>& Y = composition.Y();
 
-    word inertSpecie(thermo.lookup("inertSpecie"));
+    const word inertSpecie(thermo.lookup("inertSpecie"));
 
     volScalarField& p = thermo.p();
     volScalarField& hs = thermo.hs();

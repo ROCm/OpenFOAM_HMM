@@ -26,14 +26,10 @@ License
 #include "polyMeshModifier.H"
 #include "dictionary.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-autoPtr<polyMeshModifier> polyMeshModifier::New
+Foam::autoPtr<Foam::polyMeshModifier>
+Foam::polyMeshModifier::New
 (
     const word& name,
     const dictionary& dict,
@@ -49,10 +45,10 @@ autoPtr<polyMeshModifier> polyMeshModifier::New
             << endl;
     }
 
-    word patchType(dict.lookup("type"));
+    const word modifierType(dict.lookup("type"));
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(patchType);
+        dictionaryConstructorTablePtr_->find(modifierType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -61,7 +57,8 @@ autoPtr<polyMeshModifier> polyMeshModifier::New
             "polyMeshModifier::New(const word&, const dictionary&, "
             "const label, const polyMesh&)",
             dict
-        )   << "Unknown polyMeshModifier type " << patchType << endl << endl
+        )   << "Unknown polyMeshModifier type "
+            << modifierType << nl << nl
             << "Valid polyMeshModifier types are :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
@@ -70,9 +67,5 @@ autoPtr<polyMeshModifier> polyMeshModifier::New
     return autoPtr<polyMeshModifier>(cstrIter()(name, dict, index, mme));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

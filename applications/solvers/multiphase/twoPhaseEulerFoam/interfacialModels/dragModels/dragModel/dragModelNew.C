@@ -27,7 +27,8 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::dragModel> Foam::dragModel::New
+Foam::autoPtr<Foam::dragModel>
+Foam::dragModel::New
 (
     const dictionary& interfaceDict,
     const volScalarField& alpha,
@@ -35,7 +36,7 @@ Foam::autoPtr<Foam::dragModel> Foam::dragModel::New
     const phaseModel& phaseb
 )
 {
-    word dragModelType
+    const word modelType
     (
         interfaceDict.lookup("dragModel" + phasea.name())
     );
@@ -43,20 +44,21 @@ Foam::autoPtr<Foam::dragModel> Foam::dragModel::New
     Info<< "Selecting dragModel for phase "
         << phasea.name()
         << ": "
-        << dragModelType << endl;
+        << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(dragModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalError
-            << "dragModel::New : " << endl
-                << "    unknown dragModelType type "
-                << dragModelType
-                << ", constructor not in hash table" << endl << endl
-                << "    Valid dragModel types are : " << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
+        FatalErrorIn
+        (
+            "dragModel::New(...)"
+        )   << "Unknown dragModel type "
+            << modelType << nl << nl
+            << "Valid dragModel types are : " << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << abort(FatalError);
     }
 
     return cstrIter()(interfaceDict, alpha, phasea, phaseb);

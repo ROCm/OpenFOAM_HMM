@@ -57,7 +57,7 @@ Foam::tmp<Foam::fv::gradScheme<Type> > Foam::fv::gradScheme<Type>::New
             << exit(FatalIOError);
     }
 
-    word schemeName(schemeData);
+    const word schemeName(schemeData);
 
     typename IstreamConstructorTable::iterator cstrIter =
         IstreamConstructorTablePtr_->find(schemeName);
@@ -69,7 +69,7 @@ Foam::tmp<Foam::fv::gradScheme<Type> > Foam::fv::gradScheme<Type>::New
             "gradScheme<Type>::New"
             "(const fvMesh& mesh, Istream& schemeData)",
             schemeData
-        )   << "unknown grad scheme " << schemeName << endl << endl
+        )   << "Unknown grad scheme " << schemeName << nl << nl
             << "Valid grad schemes are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);

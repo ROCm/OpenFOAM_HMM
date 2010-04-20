@@ -28,18 +28,17 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::hCombustionThermo> Foam::hCombustionThermo::New
+Foam::autoPtr<Foam::hCombustionThermo>
+Foam::hCombustionThermo::New
 (
     const fvMesh& mesh
 )
 {
-    word hCombustionThermoTypeName;
-
-    // Enclose the creation of the thermophysicalProperties to ensure it is
-    // deleted before the turbulenceModel is created otherwise the dictionary
-    // is entered in the database twice
-    {
-        IOdictionary thermoDict
+    // get model name, but do not register the dictionary
+    // otherwise it is registered in the database twice
+    const word modelType
+    (
+        IOdictionary
         (
             IOobject
             (
@@ -47,24 +46,22 @@ Foam::autoPtr<Foam::hCombustionThermo> Foam::hCombustionThermo::New
                 mesh.time().constant(),
                 mesh,
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                false
             )
-        );
+        ).lookup("thermoType")
+    );
 
-        thermoDict.lookup("thermoType") >> hCombustionThermoTypeName;
-    }
-
-    Info<< "Selecting thermodynamics package " << hCombustionThermoTypeName
-        << endl;
+    Info<< "Selecting thermodynamics package " << modelType << endl;
 
     fvMeshConstructorTable::iterator cstrIter =
-        fvMeshConstructorTablePtr_->find(hCombustionThermoTypeName);
+        fvMeshConstructorTablePtr_->find(modelType);
 
     if (cstrIter == fvMeshConstructorTablePtr_->end())
     {
         FatalErrorIn("hCombustionThermo::New(const fvMesh&)")
             << "Unknown hCombustionThermo type "
-            << hCombustionThermoTypeName << nl << nl
+            << modelType << nl << nl
             << "Valid hCombustionThermo types are:" << nl
             << fvMeshConstructorTablePtr_->sortedToc() << nl
             << exit(FatalError);
@@ -74,19 +71,18 @@ Foam::autoPtr<Foam::hCombustionThermo> Foam::hCombustionThermo::New
 }
 
 
-Foam::autoPtr<Foam::hCombustionThermo> Foam::hCombustionThermo::NewType
+Foam::autoPtr<Foam::hCombustionThermo>
+Foam::hCombustionThermo::NewType
 (
     const fvMesh& mesh,
     const word& thermoType
 )
 {
-    word hCombustionThermoTypeName;
-
-    // Enclose the creation of the thermophysicalProperties to ensure it is
-    // deleted before the turbulenceModel is created otherwise the dictionary
-    // is entered in the database twice
-    {
-        IOdictionary thermoDict
+    // get model name, but do not register the dictionary
+    // otherwise it is registered in the database twice
+    const word modelType
+    (
+        IOdictionary
         (
             IOobject
             (
@@ -94,50 +90,55 @@ Foam::autoPtr<Foam::hCombustionThermo> Foam::hCombustionThermo::NewType
                 mesh.time().constant(),
                 mesh,
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                false
             )
-        );
+        ).lookup("thermoType")
+    );
 
-        thermoDict.lookup("thermoType") >> hCombustionThermoTypeName;
 
-        if (hCombustionThermoTypeName.find(thermoType) == string::npos)
+    if (modelType.find(thermoType) == string::npos)
+    {
+        wordList allModels = fvMeshConstructorTablePtr_->sortedToc();
+        DynamicList<word> validModels;
+        forAll(allModels, i)
         {
-            wordList allModels = fvMeshConstructorTablePtr_->sortedToc();
-            DynamicList<word> validModels;
-            forAll(allModels, i)
+            if (allModels[i].find(thermoType) != string::npos)
             {
-                if (allModels[i].find(thermoType) != string::npos)
-                {
-                    validModels.append(allModels[i]);
-                }
+                validModels.append(allModels[i]);
             }
-
-            FatalErrorIn
-            (
-                "autoPtr<hCombustionThermo> hCombustionThermo::NewType"
-                "("
-                    "const fvMesh&, "
-                    "const word&"
-                ")"
-            )   << "Inconsistent thermo package selected:" << nl << nl
-                << hCombustionThermoTypeName << nl << nl << "Please select a "
-                << "thermo package based on " << thermoType
-                << ". Valid options include:" << nl << validModels << nl
-                << exit(FatalError);
         }
+
+        FatalErrorIn
+        (
+            "autoPtr<hCombustionThermo> hCombustionThermo::NewType"
+            "("
+                "const fvMesh&, "
+                "const word&"
+            ")"
+        )   << "Inconsistent thermo package selected:" << nl << nl
+            << modelType << nl << nl << "Please select a "
+            << "thermo package based on " << thermoType
+            << ". Valid options include:" << nl << validModels << nl
+            << exit(FatalError);
     }
 
-    Info<< "Selecting thermodynamics package " << hCombustionThermoTypeName
-        << endl;
+    Info<< "Selecting thermodynamics package " << modelType << endl;
 
     fvMeshConstructorTable::iterator cstrIter =
-        fvMeshConstructorTablePtr_->find(hCombustionThermoTypeName);
+        fvMeshConstructorTablePtr_->find(modelType);
 
     if (cstrIter == fvMeshConstructorTablePtr_->end())
     {
-        FatalErrorIn("hCombustionThermo::New(const fvMesh&)")
-            << "Unknown hCombustionThermo type "
-            << hCombustionThermoTypeName << nl << nl
+        FatalErrorIn
+        (
+            "autoPtr<hCombustionThermo> hCombustionThermo::NewType"
+            "("
+                "const fvMesh&, "
+                "const word&"
+            ")"
+        )   << "Unknown hCombustionThermo type "
+            << modelType << nl << nl
             << "Valid hCombustionThermo types are:" << nl
             << fvMeshConstructorTablePtr_->sortedToc() << nl
             << exit(FatalError);

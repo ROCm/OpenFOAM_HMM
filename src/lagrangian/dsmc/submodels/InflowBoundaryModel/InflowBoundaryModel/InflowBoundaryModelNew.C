@@ -35,12 +35,15 @@ Foam::InflowBoundaryModel<CloudType>::New
     CloudType& owner
 )
 {
-    word InflowBoundaryModelType(dict.lookup("InflowBoundaryModel"));
+    const word modelType
+    (
+        dict.lookup("InflowBoundaryModel")
+    );
 
-    Info<< "Selecting InflowBoundaryModel " << InflowBoundaryModelType << endl;
+    Info<< "Selecting InflowBoundaryModel " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(InflowBoundaryModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -48,11 +51,11 @@ Foam::InflowBoundaryModel<CloudType>::New
         (
             "InflowBoundaryModel<CloudType>::New"
             "(const dictionary&, CloudType&)"
-        )   << "Unknown InflowBoundaryModelType type "
-            << InflowBoundaryModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid InflowBoundaryModel types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+        )   << "Unknown InflowBoundaryModel type "
+            << modelType << nl << nl
+            << "Valid InflowBoundaryModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<InflowBoundaryModel<CloudType> >(cstrIter()(dict, owner));

@@ -35,14 +35,15 @@ Foam::BinaryCollisionModel<CloudType>::New
     CloudType& owner
 )
 {
-    word BinaryCollisionModelType(dict.lookup("BinaryCollisionModel"));
+    const word modelType
+    (
+        dict.lookup("BinaryCollisionModel")
+    );
 
-    Info<< "Selecting BinaryCollisionModel "
-        << BinaryCollisionModelType
-        << endl;
+    Info<< "Selecting BinaryCollisionModel " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(BinaryCollisionModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -51,11 +52,11 @@ Foam::BinaryCollisionModel<CloudType>::New
             "BinaryCollisionModel<CloudType>::New"
             "(const dictionary&, CloudType&)"
         )
-            << "Unknown BinaryCollisionModelType type "
-            << BinaryCollisionModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid BinaryCollisionModel types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+            << "Unknown BinaryCollisionModel type "
+            << modelType << nl << nl
+            << "Valid BinaryCollisionModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<BinaryCollisionModel<CloudType> >

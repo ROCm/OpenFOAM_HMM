@@ -27,7 +27,8 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::solid> Foam::solid::New(Istream& is)
+Foam::autoPtr<Foam::solid>
+Foam::solid::New(Istream& is)
 {
     if (debug)
     {
@@ -36,9 +37,8 @@ Foam::autoPtr<Foam::solid> Foam::solid::New(Istream& is)
             << endl;
     }
 
-    word solidType(is);
-
-    word coeffs(is);
+    const word solidType(is);
+    const word coeffs(is);
 
     if (coeffs == "defaultCoeffs")
     {
@@ -49,7 +49,7 @@ Foam::autoPtr<Foam::solid> Foam::solid::New(Istream& is)
         {
             FatalErrorIn("solid::New(Istream&)")
                 << "Unknown solid type " << solidType << nl << nl
-                << "Valid solid types are:" << endl
+                << "Valid solid types are :" << endl
                 << ConstructorTablePtr_->sortedToc()
                 << exit(FatalError);
         }
@@ -65,7 +65,7 @@ Foam::autoPtr<Foam::solid> Foam::solid::New(Istream& is)
         {
             FatalErrorIn("solid::New(Istream&)")
                 << "Unknown solid type " << solidType << nl << nl
-                << "Valid solid types are:" << endl
+                << "Valid solid types are :" << endl
                 << IstreamConstructorTablePtr_->sortedToc()
                 << exit(FatalError);
         }

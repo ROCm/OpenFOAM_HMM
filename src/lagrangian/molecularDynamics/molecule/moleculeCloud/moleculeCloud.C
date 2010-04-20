@@ -64,9 +64,8 @@ void Foam::moleculeCloud::buildConstProps()
 
     forAll(idList, i)
     {
-        const word& id(idList[i]);
-
-        const dictionary& molDict(moleculePropertiesDict.subDict(id));
+        const word& id = idList[i];
+        const dictionary& molDict = moleculePropertiesDict.subDict(id);
 
         List<word> siteIdNames = molDict.lookup("siteIds");
 
@@ -1162,9 +1161,9 @@ void Foam::moleculeCloud::applyConstraintsAndThermostats
 
 void Foam::moleculeCloud::writeXYZ(const fileName& fName) const
 {
-    OFstream str(fName);
+    OFstream os(fName);
 
-    str << nSites() << nl << "moleculeCloud site positions in angstroms" << nl;
+    os  << nSites() << nl << "moleculeCloud site positions in angstroms" << nl;
 
     forAllConstIter(moleculeCloud, *this, mol)
     {
@@ -1174,7 +1173,7 @@ void Foam::moleculeCloud::writeXYZ(const fileName& fName) const
         {
             const point& sP = mol().sitePositions()[i];
 
-            str << pot_.siteIdList()[cP.siteIds()[i]]
+            os  << pot_.siteIdList()[cP.siteIds()[i]]
                 << ' ' << sP.x()*1e10
                 << ' ' << sP.y()*1e10
                 << ' ' << sP.z()*1e10

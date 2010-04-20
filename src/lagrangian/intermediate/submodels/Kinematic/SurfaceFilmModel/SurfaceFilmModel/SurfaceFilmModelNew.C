@@ -36,12 +36,15 @@ Foam::SurfaceFilmModel<CloudType>::New
     const dimensionedVector& g
 )
 {
-    word SurfaceFilmModelType(dict.lookup("SurfaceFilmModel"));
+    const word modelType
+    (
+        dict.lookup("SurfaceFilmModel")
+    );
 
-    Info<< "Selecting SurfaceFilmModel " << SurfaceFilmModelType << endl;
+    Info<< "Selecting SurfaceFilmModel " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(SurfaceFilmModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -53,10 +56,10 @@ Foam::SurfaceFilmModel<CloudType>::New
                 "CloudType&"
             ")"
         )   << "Unknown SurfaceFilmModel type "
-            << SurfaceFilmModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid SurfaceFilmModel types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+            << modelType << nl << nl
+            << "Valid SurfaceFilmModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<SurfaceFilmModel<CloudType> >(cstrIter()(dict, owner, g));

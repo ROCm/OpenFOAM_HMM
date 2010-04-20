@@ -74,7 +74,8 @@ Foam::autoPtr<Foam::curvedEdge> Foam::curvedEdge::clone() const
 }
 
 
-Foam::autoPtr<Foam::curvedEdge> Foam::curvedEdge::New
+Foam::autoPtr<Foam::curvedEdge>
+Foam::curvedEdge::New
 (
     const pointField& points,
     Istream& is
@@ -87,7 +88,7 @@ Foam::autoPtr<Foam::curvedEdge> Foam::curvedEdge::New
             << endl;
     }
 
-    word edgeType(is);
+    const word edgeType(is);
 
     IstreamConstructorTable::iterator cstrIter =
         IstreamConstructorTablePtr_->find(edgeType);
@@ -95,7 +96,8 @@ Foam::autoPtr<Foam::curvedEdge> Foam::curvedEdge::New
     if (cstrIter == IstreamConstructorTablePtr_->end())
     {
         FatalErrorIn("curvedEdge::New(const pointField&, Istream&)")
-            << "Unknown curvedEdge type " << edgeType << endl << endl
+            << "Unknown curvedEdge type "
+            << edgeType << nl << nl
             << "Valid curvedEdge types are" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << abort(FatalError);

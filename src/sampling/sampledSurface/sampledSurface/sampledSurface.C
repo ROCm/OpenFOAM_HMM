@@ -122,7 +122,10 @@ Foam::sampledSurface::New
     const dictionary& dict
 )
 {
-    word sampleType(dict.lookup("type"));
+    const word sampleType
+    (
+        dict.lookup("type")
+    );
     if (debug)
     {
         Info<< "Selecting sampledType " << sampleType << endl;
@@ -137,8 +140,8 @@ Foam::sampledSurface::New
         (
             "sampledSurface::New"
             "(const word&, const polyMesh&, const dictionary&)"
-        )   << "Unknown sample type " << sampleType
-            << endl << endl
+        )   << "Unknown sample type "
+            << sampleType << nl << nl
             << "Valid sample types : " << endl
             << wordConstructorTablePtr_->sortedToc()
             << exit(FatalError);

@@ -27,33 +27,32 @@ License
 #include "wallModel.H"
 #include "removeParcel.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-autoPtr<wallModel> wallModel::New
+Foam::autoPtr<Foam::wallModel>
+Foam::wallModel::New
 (
     const dictionary& dict,
     const volVectorField& U,
     spray& sm
 )
 {
-    word wallModelType(dict.lookup("wallModel"));
+    const word modelType
+    (
+        dict.lookup("wallModel")
+    );
 
-    Info<< "Selecting wallModel " << wallModelType << endl;
+    Info<< "Selecting wallModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(wallModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn("wallModel::New(const dictionary&, const spray&)")
-            << "Unknown wallModelType type " << wallModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid wallModel types are:" << nl
+            << "Unknown wallModel type "
+            << modelType << nl << nl
+            << "Valid wallModel types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << abort(FatalError);
     }
@@ -61,9 +60,5 @@ autoPtr<wallModel> wallModel::New
     return autoPtr<wallModel>(cstrIter()(dict, U, sm));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

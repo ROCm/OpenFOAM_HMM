@@ -36,22 +36,21 @@ Foam::phaseChangeTwoPhaseMixture::New
     const word& alpha1Name
 )
 {
-    IOdictionary transportPropertiesDict
+    // get model name, but do not register the dictionary
+    const word phaseChangeTwoPhaseMixtureTypeName
     (
-        IOobject
+        IOdictionary
         (
-            "transportProperties",
-            U.time().constant(),
-            U.db(),
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
-
-    word phaseChangeTwoPhaseMixtureTypeName
-    (
-        transportPropertiesDict.lookup("phaseChangeTwoPhaseMixture")
+            IOobject
+            (
+                "transportProperties",
+                U.time().constant(),
+                U.db(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            )
+        ).lookup("phaseChangeTwoPhaseMixture")
     );
 
     Info<< "Selecting phaseChange model "
@@ -67,8 +66,8 @@ Foam::phaseChangeTwoPhaseMixture::New
         (
             "phaseChangeTwoPhaseMixture::New"
         )   << "Unknown phaseChangeTwoPhaseMixture type "
-            << phaseChangeTwoPhaseMixtureTypeName << endl << endl
-            << "Valid  phaseChangeTwoPhaseMixtures are : " << endl
+            << phaseChangeTwoPhaseMixtureTypeName << nl << nl
+            << "Valid phaseChangeTwoPhaseMixture types are : " << endl
             << componentsConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

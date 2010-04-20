@@ -25,31 +25,28 @@ License
 
 #include "energyScalingFunction.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-autoPtr<energyScalingFunction> energyScalingFunction::New
+Foam::autoPtr<Foam::energyScalingFunction>
+Foam::energyScalingFunction::New
 (
     const word& name,
     const dictionary& energyScalingFunctionProperties,
     const pairPotential& pairPot
 )
 {
-    word energyScalingFunctionTypeName
+    const word scalingType
     (
         energyScalingFunctionProperties.lookup("energyScalingFunction")
     );
 
     Info<< "Selecting energy scaling function "
-        << energyScalingFunctionTypeName << " for "
+        << scalingType << " for "
         << name << " potential energy." << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(energyScalingFunctionTypeName);
+        dictionaryConstructorTablePtr_->find(scalingType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -57,8 +54,8 @@ autoPtr<energyScalingFunction> energyScalingFunction::New
         (
             "energyScalingFunction::New()"
         )   << "Unknown energyScalingFunction type "
-            << energyScalingFunctionTypeName << nl << nl
-            << "Valid  energyScalingFunctions are: " << nl
+            << scalingType << nl << nl
+            << "Valid energyScalingFunctions are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -67,9 +64,5 @@ autoPtr<energyScalingFunction> energyScalingFunction::New
         (cstrIter()(name, energyScalingFunctionProperties, pairPot));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

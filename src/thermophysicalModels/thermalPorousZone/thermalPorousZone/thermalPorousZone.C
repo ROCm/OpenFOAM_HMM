@@ -42,7 +42,7 @@ Foam::thermalPorousZone::thermalPorousZone
 {
     if (const dictionary* dictPtr = dict.subDictPtr("thermalModel"))
     {
-        word thermalModel(dictPtr->lookup("type"));
+        const word thermalModel(dictPtr->lookup("type"));
 
         if (thermalModel == "fixedTemperature")
         {

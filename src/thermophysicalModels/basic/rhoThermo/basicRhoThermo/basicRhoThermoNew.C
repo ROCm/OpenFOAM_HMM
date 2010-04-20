@@ -27,18 +27,17 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::basicRhoThermo> Foam::basicRhoThermo::New
+Foam::autoPtr<Foam::basicRhoThermo>
+Foam::basicRhoThermo::New
 (
     const fvMesh& mesh
 )
 {
-    word thermoTypeName;
-
-    // Enclose the creation of the thermophysicalProperties to ensure it is
-    // deleted before the turbulenceModel is created otherwise the dictionary
-    // is entered in the database twice
-    {
-        IOdictionary thermoDict
+    // get model name, but do not register the dictionary
+    // otherwise it is registered in the database twice
+    const word modelType
+    (
+        IOdictionary
         (
             IOobject
             (
@@ -46,22 +45,22 @@ Foam::autoPtr<Foam::basicRhoThermo> Foam::basicRhoThermo::New
                 mesh.time().constant(),
                 mesh,
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                false
             )
-        );
+        ).lookup("thermoType")
+    );
 
-        thermoDict.lookup("thermoType") >> thermoTypeName;
-    }
-
-    Info<< "Selecting thermodynamics package " << thermoTypeName << endl;
+    Info<< "Selecting thermodynamics package " << modelType << endl;
 
     fvMeshConstructorTable::iterator cstrIter =
-        fvMeshConstructorTablePtr_->find(thermoTypeName);
+        fvMeshConstructorTablePtr_->find(modelType);
 
     if (cstrIter == fvMeshConstructorTablePtr_->end())
     {
         FatalErrorIn("basicRhoThermo::New(const fvMesh&)")
-            << "Unknown basicRhoThermo type " << thermoTypeName << nl << nl
+            << "Unknown basicRhoThermo type "
+            << modelType << nl << nl
             << "Valid basicRhoThermo types are:" << nl
             << fvMeshConstructorTablePtr_->sortedToc() << nl
             << exit(FatalError);

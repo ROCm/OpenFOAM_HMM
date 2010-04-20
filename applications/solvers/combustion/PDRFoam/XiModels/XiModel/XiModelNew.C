@@ -27,7 +27,8 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::XiModel> Foam::XiModel::New
+Foam::autoPtr<Foam::XiModel>
+Foam::XiModel::New
 (
     const dictionary& XiProperties,
     const hhuCombustionThermo& thermo,
@@ -38,12 +39,15 @@ Foam::autoPtr<Foam::XiModel> Foam::XiModel::New
     const surfaceScalarField& phi
 )
 {
-    word XiModelTypeName = XiProperties.lookup("XiModel");
+    const word modelType
+    (
+        XiProperties.lookup("XiModel")
+    );
 
-    Info<< "Selecting flame-wrinkling model " << XiModelTypeName << endl;
+    Info<< "Selecting flame-wrinkling model " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(XiModelTypeName);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -51,8 +55,8 @@ Foam::autoPtr<Foam::XiModel> Foam::XiModel::New
         (
             "XiModel::New"
         )   << "Unknown XiModel type "
-            << XiModelTypeName << endl << endl
-            << "Valid  XiModels are : " << endl
+            << modelType << nl << nl
+            << "Valid XiModels are : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

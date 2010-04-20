@@ -28,28 +28,31 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::radiation::scatterModel> Foam::radiation::scatterModel::New
+Foam::autoPtr<Foam::radiation::scatterModel>
+Foam::radiation::scatterModel::New
 (
     const dictionary& dict,
     const fvMesh& mesh
 )
 {
-    word scatterModelType(dict.lookup("scatterModel"));
+    const word modelType
+    (
+        dict.lookup("scatterModel")
+    );
 
-    Info<< "Selecting scatterModel " << scatterModelType << endl;
+    Info<< "Selecting scatterModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(scatterModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn
         (
             "scatterModel::New(const dictionary&, const fvMesh&)"
-        )   << "Unknown scatterModelType type "
-            << scatterModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid scatterModel types are :" << nl
+        )   << "Unknown scatterModel type "
+            << modelType << nl << nl
+            << "Valid scatterModel types are :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

@@ -27,12 +27,8 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-autoPtr<facePointPatch> facePointPatch::New
+Foam::autoPtr<Foam::facePointPatch>
+Foam::facePointPatch::New
 (
     const polyPatch& patch,
     const pointBoundaryMesh& bm
@@ -57,7 +53,7 @@ autoPtr<facePointPatch> facePointPatch::New
             "const pointBoundaryMesh&) : "
         )   << "Unknown facePointPatch type "
             << patch.type()
-            << endl << endl
+            << nl << nl
             << "Valid facePointPatch types are :" << endl
             << polyPatchConstructorTablePtr_->sortedToc()
             << exit(FatalError);
@@ -66,9 +62,5 @@ autoPtr<facePointPatch> facePointPatch::New
     return autoPtr<facePointPatch>(cstrIter()(patch, bm));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

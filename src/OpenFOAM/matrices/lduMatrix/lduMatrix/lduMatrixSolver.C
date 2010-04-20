@@ -37,7 +37,8 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
+Foam::autoPtr<Foam::lduMatrix::solver>
+Foam::lduMatrix::solver::New
 (
     const word& fieldName,
     const lduMatrix& matrix,
@@ -47,7 +48,7 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
     const dictionary& solverControls
 )
 {
-    word name(solverControls.lookup("solver"));
+    const word name(solverControls.lookup("solver"));
 
     if (matrix.diagonal())
     {

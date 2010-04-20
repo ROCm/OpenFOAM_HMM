@@ -27,7 +27,8 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::calcType> Foam::calcType::New
+Foam::autoPtr<Foam::calcType>
+Foam::calcType::New
 (
     const word& calcTypeName
 )
@@ -40,9 +41,8 @@ Foam::autoPtr<Foam::calcType> Foam::calcType::New
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn("calcType::New()")
-            << "    unknown calcType type " << calcTypeName
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid calcType selections are: " << nl
+            << "Unknown calcType type " << calcTypeName
+            << "Valid calcType selections are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc() << nl
             << abort(FatalError);
     }

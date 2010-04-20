@@ -26,15 +26,10 @@ License
 #include "Reaction.H"
 #include "DynamicList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ReactionThermo>
-void Reaction<ReactionThermo>::setThermo
+void Foam::Reaction<ReactionThermo>::setThermo
 (
     const HashPtrTable<ReactionThermo>& thermoDatabase
 )
@@ -62,9 +57,8 @@ void Reaction<ReactionThermo>::setThermo
 }
 
 
-// Construct from components
 template<class ReactionThermo>
-Reaction<ReactionThermo>::Reaction
+Foam::Reaction<ReactionThermo>::Reaction
 (
     const speciesTable& species,
     const List<specieCoeffs>& lhs,
@@ -81,9 +75,8 @@ Reaction<ReactionThermo>::Reaction
 }
 
 
-// Construct as copy given new speciesTable
 template<class ReactionThermo>
-Reaction<ReactionThermo>::Reaction
+Foam::Reaction<ReactionThermo>::Reaction
 (
     const Reaction<ReactionThermo>& r,
     const speciesTable& species
@@ -97,7 +90,7 @@ Reaction<ReactionThermo>::Reaction
 
 
 template<class ReactionThermo>
-Reaction<ReactionThermo>::specieCoeffs::specieCoeffs
+Foam::Reaction<ReactionThermo>::specieCoeffs::specieCoeffs
 (
     const speciesTable& species,
     Istream& is
@@ -146,7 +139,7 @@ Reaction<ReactionThermo>::specieCoeffs::specieCoeffs
 
 
 template<class ReactionThermo>
-void Reaction<ReactionThermo>::setLRhs(Istream& is)
+void Foam::Reaction<ReactionThermo>::setLRhs(Istream& is)
 {
     DynamicList<specieCoeffs> dlrhs;
 
@@ -187,9 +180,8 @@ void Reaction<ReactionThermo>::setLRhs(Istream& is)
 }
 
 
-//- Construct from Istream
 template<class ReactionThermo>
-Reaction<ReactionThermo>::Reaction
+Foam::Reaction<ReactionThermo>::Reaction
 (
     const speciesTable& species,
     const HashPtrTable<ReactionThermo>& thermoDatabase,
@@ -207,7 +199,8 @@ Reaction<ReactionThermo>::Reaction
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 template<class ReactionThermo>
-autoPtr<Reaction<ReactionThermo> > Reaction<ReactionThermo>::New
+Foam::autoPtr<Foam::Reaction<ReactionThermo> >
+Foam::Reaction<ReactionThermo>::New
 (
     const speciesTable& species,
     const HashPtrTable<ReactionThermo>& thermoDatabase,
@@ -221,13 +214,13 @@ autoPtr<Reaction<ReactionThermo> > Reaction<ReactionThermo>::New
             "Reaction<ReactionThermo>::New(const speciesTable& species,"
             " const HashPtrTable<ReactionThermo>& thermoDatabase, Istream&)",
             is
-        )   << "Reaction type not specified" << endl << endl
+        )   << "Reaction type not specified" << nl << nl
             << "Valid Reaction types are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 
-    word reactionTypeName(is);
+    const word reactionTypeName(is);
 
     typename IstreamConstructorTable::iterator cstrIter
         = IstreamConstructorTablePtr_->find(reactionTypeName);
@@ -239,7 +232,8 @@ autoPtr<Reaction<ReactionThermo> > Reaction<ReactionThermo>::New
             "Reaction<ReactionThermo>::New(const speciesTable& species,"
             " const HashPtrTable<ReactionThermo>& thermoDatabase, Istream&)",
             is
-        )   << "Unknown reaction type " << reactionTypeName << endl << endl
+        )   << "Unknown reaction type "
+            << reactionTypeName << nl << nl
             << "Valid reaction types are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
@@ -255,7 +249,7 @@ autoPtr<Reaction<ReactionThermo> > Reaction<ReactionThermo>::New
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ReactionThermo>
-void Reaction<ReactionThermo>::write(Ostream& os) const
+void Foam::Reaction<ReactionThermo>::write(Ostream& os) const
 {
     os << type() << nl << "    ";
 
@@ -310,7 +304,7 @@ void Reaction<ReactionThermo>::write(Ostream& os) const
 
 
 template<class ReactionThermo>
-scalar Reaction<ReactionThermo>::kf
+Foam::scalar Foam::Reaction<ReactionThermo>::kf
 (
     const scalar T,
     const scalar p,
@@ -322,7 +316,7 @@ scalar Reaction<ReactionThermo>::kf
 
 
 template<class ReactionThermo>
-scalar Reaction<ReactionThermo>::kr
+Foam::scalar Foam::Reaction<ReactionThermo>::kr
 (
     const scalar kfwd,
     const scalar T,
@@ -334,7 +328,7 @@ scalar Reaction<ReactionThermo>::kr
 }
 
 template<class ReactionThermo>
-scalar Reaction<ReactionThermo>::kr
+Foam::scalar Foam::Reaction<ReactionThermo>::kr
 (
     const scalar T,
     const scalar p,
@@ -344,9 +338,5 @@ scalar Reaction<ReactionThermo>::kr
     return 0.0;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

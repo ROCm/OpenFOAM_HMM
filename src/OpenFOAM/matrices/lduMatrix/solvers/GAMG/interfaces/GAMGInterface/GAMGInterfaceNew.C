@@ -29,14 +29,15 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
+Foam::autoPtr<Foam::GAMGInterface>
+Foam::GAMGInterface::New
 (
     const lduInterface& fineInterface,
     const labelField& localRestrictAddressing,
     const labelField& neighbourRestrictAddressing
 )
 {
-    word coupleType(fineInterface.type());
+    const word coupleType(fineInterface.type());
 
     lduInterfaceConstructorTable::iterator cstrIter =
         lduInterfaceConstructorTablePtr_->find(coupleType);

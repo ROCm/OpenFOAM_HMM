@@ -29,41 +29,37 @@ License
 #include "reitzDiwakar.H"
 #include "reitzKHRT.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-autoPtr<breakupModel> breakupModel::New
+Foam::autoPtr<Foam::breakupModel>
+Foam::breakupModel::New
 (
     const dictionary& dict,
     spray& sm
 )
 {
-    word breakupModelType(dict.lookup("breakupModel"));
+    const word modelType
+    (
+        dict.lookup("breakupModel")
+    );
 
-    Info<< "Selecting breakupModel " << breakupModelType << endl;
+    Info<< "Selecting breakupModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(breakupModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn("breakupModel::New(const dictionary&, const spray&)")
-            << "    unknown breakupModelType type " << breakupModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid breakupModel types are :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
+            << "Unknown breakupModel type "
+            << modelType << nl << nl
+            << "Valid breakupModel types are :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << abort(FatalError);
     }
 
     return autoPtr<breakupModel>(cstrIter()(dict, sm));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

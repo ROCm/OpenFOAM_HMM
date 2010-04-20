@@ -35,12 +35,15 @@ Foam::PhaseChangeModel<CloudType>::New
     CloudType& owner
 )
 {
-    word PhaseChangeModelType(dict.lookup("PhaseChangeModel"));
+    const word modelType
+    (
+        dict.lookup("PhaseChangeModel")
+    );
 
-    Info<< "Selecting PhaseChangeModel " << PhaseChangeModelType << endl;
+    Info<< "Selecting PhaseChangeModel " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(PhaseChangeModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -51,11 +54,11 @@ Foam::PhaseChangeModel<CloudType>::New
                 "const dictionary&, "
                 "CloudType&"
             ")"
-        )   << "Unknown PhaseChangeModelType type "
-            << PhaseChangeModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid PhaseChangeModel types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+        )   << "Unknown PhaseChangeModel type "
+            << modelType << nl << nl
+            << "Valid PhaseChangeModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<PhaseChangeModel<CloudType> >(cstrIter()(dict, owner));

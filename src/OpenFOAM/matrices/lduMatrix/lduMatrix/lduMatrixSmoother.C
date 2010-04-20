@@ -58,7 +58,8 @@ Foam::lduMatrix::smoother::getName
 }
 
 
-Foam::autoPtr<Foam::lduMatrix::smoother> Foam::lduMatrix::smoother::New
+Foam::autoPtr<Foam::lduMatrix::smoother>
+Foam::lduMatrix::smoother::New
 (
     const word& fieldName,
     const lduMatrix& matrix,

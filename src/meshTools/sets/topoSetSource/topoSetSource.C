@@ -31,13 +31,43 @@ License
 
 namespace Foam
 {
+    defineTypeNameAndDebug(topoSetSource, 0);
+    defineRunTimeSelectionTable(topoSetSource, word);
+    defineRunTimeSelectionTable(topoSetSource, istream);
+}
 
-defineTypeNameAndDebug(topoSetSource, 0);
-defineRunTimeSelectionTable(topoSetSource, word);
-defineRunTimeSelectionTable(topoSetSource, istream);
 
-// Construct named object from dictionary
-autoPtr<topoSetSource> topoSetSource::New
+Foam::HashTable<Foam::string>* Foam::topoSetSource::usageTablePtr_ = NULL;
+
+template<>
+const char* Foam::NamedEnum<Foam::topoSetSource::setAction, 8>::names[] =
+{
+    "clear",
+    "new",
+    "invert",
+    "add",
+    "delete",
+    "subset",
+    "list",
+    "remove"
+};
+
+
+const Foam::NamedEnum<Foam::topoSetSource::setAction, 8>
+    Foam::topoSetSource::actionNames_;
+
+
+const Foam::string Foam::topoSetSource::illegalSource_
+(
+    "Illegal topoSetSource name"
+);
+
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::topoSetSource>
+Foam::topoSetSource::New
 (
     const word& topoSetSourceType,
     const polyMesh& mesh,
@@ -65,8 +95,8 @@ autoPtr<topoSetSource> topoSetSource::New
 }
 
 
-// Construct named object from Istream
-autoPtr<topoSetSource> topoSetSource::New
+Foam::autoPtr<Foam::topoSetSource>
+Foam::topoSetSource::New
 (
     const word& topoSetSourceType,
     const polyMesh& mesh,
@@ -92,35 +122,6 @@ autoPtr<topoSetSource> topoSetSource::New
 
     return autoPtr<topoSetSource>(cstrIter()(mesh, is));
 }
-
-
-} // End namespace Foam
-
-
-Foam::HashTable<Foam::string>* Foam::topoSetSource::usageTablePtr_ = NULL;
-
-template<>
-const char* Foam::NamedEnum<Foam::topoSetSource::setAction, 8>::names[] =
-{
-    "clear",
-    "new",
-    "invert",
-    "add",
-    "delete",
-    "subset",
-    "list",
-    "remove"
-};
-
-
-const Foam::NamedEnum<Foam::topoSetSource::setAction, 8>
-    Foam::topoSetSource::actionNames_;
-
-
-const Foam::string Foam::topoSetSource::illegalSource_
-(
-    "Illegal topoSetSource name"
-);
 
 
 Foam::Istream& Foam::topoSetSource::checkIs(Istream& is)
@@ -161,7 +162,6 @@ void Foam::topoSetSource::addOrDelete
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::topoSetSource::topoSetSource(const polyMesh& mesh)
 :
     mesh_(mesh)

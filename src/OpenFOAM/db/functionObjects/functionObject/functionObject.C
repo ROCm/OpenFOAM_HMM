@@ -43,14 +43,15 @@ Foam::functionObject::functionObject(const word& name)
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
+Foam::autoPtr<Foam::functionObject>
+Foam::functionObject::New
 (
     const word& name,
     const Time& t,
     const dictionary& functionDict
 )
 {
-    word functionType(functionDict.lookup("type"));
+    const word functionType(functionDict.lookup("type"));
 
     if (debug)
     {

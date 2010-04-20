@@ -59,9 +59,8 @@ int main(int argc, char *argv[])
     );
 
 
-    word setName(cellSetDict.lookup("name"));
-
-    word actionName(cellSetDict.lookup("action"));
+    const word setName(cellSetDict.lookup("name"));
+    const word actionName(cellSetDict.lookup("action"));
 
     topoSetSource::setAction action = topoSetSource::toAction(actionName);
 

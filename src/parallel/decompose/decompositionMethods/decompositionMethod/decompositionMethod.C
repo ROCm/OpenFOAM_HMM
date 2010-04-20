@@ -42,18 +42,21 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
+Foam::autoPtr<Foam::decompositionMethod>
+Foam::decompositionMethod::New
 (
     const dictionary& decompositionDict
 )
 {
-    word decompositionMethodTypeName(decompositionDict.lookup("method"));
+    const word methodType
+    (
+        decompositionDict.lookup("method")
+    );
 
-    Info<< "Selecting decompositionMethod "
-        << decompositionMethodTypeName << endl;
+    Info<< "Selecting decompositionMethod " << methodType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(decompositionMethodTypeName);
+        dictionaryConstructorTablePtr_->find(methodType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -62,7 +65,7 @@ Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
             "decompositionMethod::New"
             "(const dictionary& decompositionDict)"
         )   << "Unknown decompositionMethod "
-            << decompositionMethodTypeName << endl << endl
+            << methodType << nl << nl
             << "Valid decompositionMethods are : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
@@ -72,19 +75,22 @@ Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
 }
 
 
-Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
+Foam::autoPtr<Foam::decompositionMethod>
+Foam::decompositionMethod::New
 (
     const dictionary& decompositionDict,
     const polyMesh& mesh
 )
 {
-    word decompositionMethodTypeName(decompositionDict.lookup("method"));
+    const word methodType
+    (
+        decompositionDict.lookup("method")
+    );
 
-    Info<< "Selecting decompositionMethod "
-        << decompositionMethodTypeName << endl;
+    Info<< "Selecting decompositionMethod " << methodType << endl;
 
     dictionaryMeshConstructorTable::iterator cstrIter =
-        dictionaryMeshConstructorTablePtr_->find(decompositionMethodTypeName);
+        dictionaryMeshConstructorTablePtr_->find(methodType);
 
     if (cstrIter == dictionaryMeshConstructorTablePtr_->end())
     {
@@ -94,7 +100,7 @@ Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
             "(const dictionary& decompositionDict, "
             "const polyMesh& mesh)"
         )   << "Unknown decompositionMethod "
-            << decompositionMethodTypeName << endl << endl
+            << methodType << nl << nl
             << "Valid decompositionMethods are : " << endl
             << dictionaryMeshConstructorTablePtr_->sortedToc()
             << exit(FatalError);

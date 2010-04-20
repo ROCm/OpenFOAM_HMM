@@ -406,7 +406,8 @@ Foam::sampledSet::~sampledSet()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::sampledSet> Foam::sampledSet::New
+Foam::autoPtr<Foam::sampledSet>
+Foam::sampledSet::New
 (
     const word& name,
     const polyMesh& mesh,
@@ -414,7 +415,10 @@ Foam::autoPtr<Foam::sampledSet> Foam::sampledSet::New
     const dictionary& dict
 )
 {
-    word sampleType(dict.lookup("type"));
+    const word sampleType
+    (
+        dict.lookup("type")
+    );
 
     wordConstructorTable::iterator cstrIter =
         wordConstructorTablePtr_->find(sampleType);
@@ -423,10 +427,10 @@ Foam::autoPtr<Foam::sampledSet> Foam::sampledSet::New
     {
         FatalErrorIn
         (
-            "sampledSet::New(const word&, "
-            "const polyMesh&, meshSearch&, const dictionary&)"
-        )   << "Unknown sample type " << sampleType
-            << endl << endl
+            "sampledSet::New"
+            "(const word&, const polyMesh&, meshSearch&, const dictionary&)"
+        )   << "Unknown sample type "
+            << sampleType << nl << nl
             << "Valid sample types : " << endl
             << wordConstructorTablePtr_->sortedToc()
             << exit(FatalError);

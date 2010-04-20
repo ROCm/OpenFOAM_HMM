@@ -59,9 +59,8 @@ int main(int argc, char *argv[])
     );
 
 
-    word setName(pointSetDict.lookup("name"));
-
-    word actionName(pointSetDict.lookup("action"));
+    const word setName(pointSetDict.lookup("name"));
+    const word actionName(pointSetDict.lookup("action"));
 
     topoSetSource::setAction action = topoSetSource::toAction(actionName);
 

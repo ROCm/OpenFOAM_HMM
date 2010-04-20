@@ -127,7 +127,8 @@ Foam::coordinateRotation::coordinateRotation
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
+Foam::autoPtr<Foam::coordinateRotation>
+Foam::coordinateRotation::New
 (
     const dictionary& dict
 )
@@ -159,7 +160,8 @@ Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
         (
             "coordinateRotation::New(const dictionary&)",
             dict
-        )   << "Unknown coordinateRotation type " << rotType << nl << nl
+        )   << "Unknown coordinateRotation type "
+            << rotType << nl << nl
             << "Valid coordinateRotation types are :" <<  nl
             << "[default: axes " << typeName_() << "]"
             << dictionaryConstructorTablePtr_->sortedToc()

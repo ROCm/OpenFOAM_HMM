@@ -94,7 +94,7 @@ void Foam::Time::readDict()
 
     if (controlDict_.found("timeFormat"))
     {
-        word formatName(controlDict_.lookup("timeFormat"));
+        const word formatName(controlDict_.lookup("timeFormat"));
 
         if (formatName == "general")
         {

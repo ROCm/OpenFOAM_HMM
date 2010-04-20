@@ -30,17 +30,16 @@ License
 Foam::autoPtr<Foam::sixDoFRigidBodyMotionConstraint>
 Foam::sixDoFRigidBodyMotionConstraint::New(const dictionary& sDoFRBMCDict)
 {
-    word sixDoFRigidBodyMotionConstraintTypeName =
-        sDoFRBMCDict.lookup("sixDoFRigidBodyMotionConstraint");
+    const word constraintType
+    (
+        sDoFRBMCDict.lookup("sixDoFRigidBodyMotionConstraint")
+    );
 
     // Info<< "Selecting sixDoFRigidBodyMotionConstraint function "
-    //     << sixDoFRigidBodyMotionConstraintTypeName << endl;
+    //     << constraintType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-    dictionaryConstructorTablePtr_->find
-    (
-        sixDoFRigidBodyMotionConstraintTypeName
-    );
+        dictionaryConstructorTablePtr_->find(constraintType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -51,8 +50,8 @@ Foam::sixDoFRigidBodyMotionConstraint::New(const dictionary& sDoFRBMCDict)
                 "const dictionary& sDoFRBMCDict"
             ")"
         )   << "Unknown sixDoFRigidBodyMotionConstraint type "
-            << sixDoFRigidBodyMotionConstraintTypeName << endl << endl
-            << "Valid  sixDoFRigidBodyMotionConstraints are : " << endl
+            << constraintType << nl << nl
+            << "Valid sixDoFRigidBodyMotionConstraints are : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

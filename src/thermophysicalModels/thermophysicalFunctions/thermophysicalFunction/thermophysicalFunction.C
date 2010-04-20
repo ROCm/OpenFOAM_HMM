@@ -32,15 +32,15 @@ License
 
 namespace Foam
 {
+    defineTypeNameAndDebug(thermophysicalFunction, 0);
+    defineRunTimeSelectionTable(thermophysicalFunction, Istream);
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(thermophysicalFunction, 0);
-defineRunTimeSelectionTable(thermophysicalFunction, Istream);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-autoPtr<thermophysicalFunction> thermophysicalFunction::New(Istream& is)
+Foam::autoPtr<Foam::thermophysicalFunction>
+Foam::thermophysicalFunction::New(Istream& is)
 {
     if (debug)
     {
@@ -49,7 +49,7 @@ autoPtr<thermophysicalFunction> thermophysicalFunction::New(Istream& is)
             << endl;
     }
 
-    word thermophysicalFunctionType(is);
+    const word thermophysicalFunctionType(is);
 
     IstreamConstructorTable::iterator cstrIter =
         IstreamConstructorTablePtr_->find(thermophysicalFunctionType);
@@ -59,7 +59,7 @@ autoPtr<thermophysicalFunction> thermophysicalFunction::New(Istream& is)
         FatalErrorIn("thermophysicalFunction::New(Istream&)")
             << "Unknown thermophysicalFunction type "
             << thermophysicalFunctionType
-            << endl << endl
+            << nl << nl
             << "Valid thermophysicalFunction types are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << abort(FatalError);
@@ -67,10 +67,5 @@ autoPtr<thermophysicalFunction> thermophysicalFunction::New(Istream& is)
 
     return autoPtr<thermophysicalFunction>(cstrIter()(is));
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
