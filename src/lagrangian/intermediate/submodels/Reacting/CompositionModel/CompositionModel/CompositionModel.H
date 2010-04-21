@@ -31,7 +31,7 @@ Description
 
 SourceFiles
     CompositionModel.C
-    NewCompositionModel.C
+    CompositionModelNew.C
 
 \*---------------------------------------------------------------------------*/
 

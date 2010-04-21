@@ -502,15 +502,14 @@ void vtkPV3FoamReader::PrintSelf(ostream& os, vtkIndent indent)
     vtkDebugMacro(<<"PrintSelf");
 
     this->Superclass::PrintSelf(os,indent);
-    os<< indent << "File name: "
-      << (this->FileName ? this->FileName : "(none)") << "\n";
+    os  << indent << "File name: "
+        << (this->FileName ? this->FileName : "(none)") << "\n";
 
     foamData_->PrintSelf(os, indent);
 
-    os<< indent << "Time step range: "
-      << this->TimeStepRange[0] << " - " << this->TimeStepRange[1]
-      << "\n";
-    os<< indent << "Time step: " << this->GetTimeStep() << endl;
+    os  << indent << "Time step range: "
+        << this->TimeStepRange[0] << " - " << this->TimeStepRange[1] << "\n"
+        << indent << "Time step: " << this->GetTimeStep() << endl;
 }
 
 

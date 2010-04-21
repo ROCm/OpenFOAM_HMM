@@ -53,6 +53,15 @@ Description
       - areaAverage
       - areaIntegrate
       - weightedAverage
+      - min
+      - max
+
+    Notes:
+    - faces on empty patches get ignored
+    - if the field is a volField the faceZone can only consist of boundary
+    faces.
+    - all fields get oriented according to the faceZone (so you might e.g. see
+    negative pressure)
 
 SourceFiles
     faceSource.C
@@ -64,7 +73,6 @@ SourceFiles
 
 #include "NamedEnum.H"
 #include "fieldValue.H"
-#include "labelList.H"
 #include "surfaceFieldsFwd.H"
 #include "volFieldsFwd.H"
 
@@ -136,14 +144,17 @@ protected:
         //- Operation to apply to values
         operationType operation_;
 
+        //- Global number of faces
+        label nFaces_;
+
         //- Local list of face IDs
         labelList faceId_;
 
         //- Local list of patch ID per face
         labelList facePatchId_;
 
-        //- List of +1/-1 representing face flip map
-        labelList flipMap_;
+        //- List of +1/-1 representing face flip map (1 use as is, -1 negate)
+        labelList faceSign_;
 
         //- Weight field name - only used for opWeightedAverage mode
         word weightFieldName_;
@@ -209,7 +220,7 @@ public:
             inline const labelList& facePatch() const;
 
             //- Return the list of +1/-1 representing face flip map
-            inline const labelList& flipMap() const;
+            inline const labelList& faceSign() const;
 
 
         // Function object functions
@@ -228,14 +239,16 @@ public:
             template<class Type>
             tmp<Field<Type> > filterField
             (
-                const GeometricField<Type, fvsPatchField, surfaceMesh>& field
+                const GeometricField<Type, fvsPatchField, surfaceMesh>& field,
+                const bool applyOrientation
             ) const;
 
             //- Filter a volume field according to faceIds
             template<class Type>
             tmp<Field<Type> > filterField
             (
-                const GeometricField<Type, fvPatchField, volMesh>& field
+                const GeometricField<Type, fvPatchField, volMesh>& field,
+                const bool applyOrientation
             ) const;
 };
 

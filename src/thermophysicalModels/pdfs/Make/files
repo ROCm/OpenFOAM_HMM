@@ -1,5 +1,5 @@
 pdf/pdf.C
-pdf/newPdf.C
+pdf/pdfNew.C
 
 exponential/exponential.C
 fixedValue/fixedValue.C

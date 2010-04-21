@@ -99,7 +99,7 @@ Foam::scalar Foam::pdfs::general::sample() const
     scalar alpha = y + xy_[n-1][0]*(0.5*k*xy_[n-1][0] + d) - integral_[n-1];
     scalar x = 0.0;
 
-    // if k is small it's a linear equation, otherwise it's of second order
+    // if k is small it is a linear equation, otherwise it is of second order
     if (mag(k) > SMALL)
     {
         scalar p = 2.0*d/k;

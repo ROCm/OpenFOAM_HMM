@@ -508,19 +508,11 @@ bool Foam::Time::run() const
         }
     }
 
-    return running;
-}
-
-
-bool Foam::Time::loop()
-{
-    bool running = run();
-
     if (running)
     {
         if (!subCycling_)
         {
-            readModifiedObjects();
+            const_cast<Time&>(*this).readModifiedObjects();
 
             if (timeIndex_ == startTimeIndex_)
             {
@@ -532,14 +524,22 @@ bool Foam::Time::loop()
             }
         }
 
-        // Check update the "running" status following the "++" operation
-        // to take into account possible side-effects from functionObjects
-        running = run();
+        // Update the "running" status following the
+        // possible side-effects from functionObjects
+        running = value() < (endTime_ - 0.5*deltaT_);
+    }
 
-        if (running)
-        {
-            operator++();
-        }
+    return running;
+}
+
+
+bool Foam::Time::loop()
+{
+    bool running = run();
+
+    if (running)
+    {
+        operator++();
     }
 
     return running;

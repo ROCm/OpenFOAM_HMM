@@ -40,8 +40,8 @@ License
 
     OpenFOAM comes with full commercial support from OpenCFD, including
     <a href="http://www.openfoam.com/support/software.php">software support</a>,
-    <a href="http://www.openfoam.com/support/development.php">contracted developments</a> 
-    and a programme of <a href="http://www.openfoam.com/training">training courses</a>.
+    <a href="http://www.openfoam.com/support/development.php">contracted developments</a>
+    and a programme of <a href="http://www.openfoam.com/training/">training courses</a>.
     These activities fund the development, maintenance and release of
     OpenFOAM to make it an extremely viable commercial open source product.
 

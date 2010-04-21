@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     PatchInteractionModel.C
-    NewPatchInteractionModel.C
+    PatchInteractionModelNew.C
 
 \*---------------------------------------------------------------------------*/
 

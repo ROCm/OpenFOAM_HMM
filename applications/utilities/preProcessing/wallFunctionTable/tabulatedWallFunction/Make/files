@@ -1,5 +1,5 @@
 tabulatedWallFunction/tabulatedWallFunction.C
-tabulatedWallFunction/newTabulatedWallFunction.C
+tabulatedWallFunction/tabulatedWallFunctionNew.C
 
 SpaldingsLaw/SpaldingsLaw.C
 general/general.C

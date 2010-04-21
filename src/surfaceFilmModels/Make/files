@@ -1,6 +1,6 @@
 /* Surface film models */
 surfaceFilmModel/surfaceFilmModel/surfaceFilmModel.C
-surfaceFilmModel/surfaceFilmModel/newSurfaceFilmModel.C
+surfaceFilmModel/surfaceFilmModel/surfaceFilmModelNew.C
 surfaceFilmModel/noFilm/noFilm.C
 surfaceFilmModel/kinematicSingleLayer/kinematicSingleLayer.C
 surfaceFilmModel/thermoSingleLayer/thermoSingleLayer.C
@@ -8,12 +8,12 @@ surfaceFilmModel/thermoSingleLayer/thermoSingleLayer.C
 
 /* Sub-models */
 submodels/kinematic/injectionModel/injectionModel/injectionModel.C
-submodels/kinematic/injectionModel/injectionModel/newInjectionModel.C
+submodels/kinematic/injectionModel/injectionModel/injectionModelNew.C
 submodels/kinematic/injectionModel/noInjection/noInjection.C
 submodels/kinematic/injectionModel/removeInjection/removeInjection.C
 
 submodels/thermo/phaseChangeModel/phaseChangeModel/phaseChangeModel.C
-submodels/thermo/phaseChangeModel/phaseChangeModel/newPhaseChangeModel.C
+submodels/thermo/phaseChangeModel/phaseChangeModel/phaseChangeModelNew.C
 submodels/thermo/phaseChangeModel/noPhaseChange/noPhaseChange.C
 
 

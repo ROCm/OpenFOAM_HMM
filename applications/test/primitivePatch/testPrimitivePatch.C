@@ -47,8 +47,7 @@ void writeObj(Ostream& os,const pointField& points)
     {
         const point& pt = points[pointI];
 
-        os << "v " << pt.x() << ' ' << pt.y()
-            << ' ' << pt.z() << endl;
+        os  << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
     }
 }
 

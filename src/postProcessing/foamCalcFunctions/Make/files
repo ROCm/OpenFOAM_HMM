@@ -1,5 +1,5 @@
 calcType/calcType.C
-calcType/newCalcType.C
+calcType/calcTypeNew.C
 
 field/components/components.C
 field/mag/mag.C

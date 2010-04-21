@@ -283,8 +283,8 @@ void vtkPV3blockMeshReader::PrintSelf(ostream& os, vtkIndent indent)
     vtkDebugMacro(<<"PrintSelf");
 
     this->Superclass::PrintSelf(os,indent);
-    os<< indent << "File name: "
-      << (this->FileName ? this->FileName : "(none)") << "\n";
+    os  << indent << "File name: "
+        << (this->FileName ? this->FileName : "(none)") << "\n";
 
     foamData_->PrintSelf(os, indent);
 }

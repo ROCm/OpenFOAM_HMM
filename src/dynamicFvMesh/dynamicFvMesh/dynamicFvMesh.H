@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     dynamicFvMesh.C
-    newDynamicFvMesh.C
+    dynamicFvMeshNew.C
 
 \*---------------------------------------------------------------------------*/
 

@@ -122,19 +122,18 @@ void printSourceFileAndLine
 
         if (line == "")
         {
-            os << " addr2line failed";
+            os  << " addr2line failed";
         }
         else if (line == "??:0")
         {
-            os << " in " << filename;
+            os  << " in " << filename;
         }
         else
         {
             string cwdLine(line.replaceAll(cwd() + '/', ""));
-
             string homeLine(cwdLine.replaceAll(home(), '~'));
 
-            os << " at " << homeLine.c_str();
+            os  << " at " << homeLine.c_str();
         }
     }
 }
@@ -160,11 +159,11 @@ void getSymbolForRaw
 
         if (fcnt != "")
         {
-            os << fcnt.c_str();
+            os  << fcnt.c_str();
             return;
         }
     }
-    os << "Uninterpreted: " << raw.c_str();
+    os  << "Uninterpreted: " << raw.c_str();
 }
 
 
@@ -210,8 +209,8 @@ void error::printStack(Ostream& os)
         fileName programFile;
         word address;
 
-        os << '#' << label(i) << "  ";
-        //os << "Raw   : " << msg << "\n\t";
+        os  << '#' << label(i) << "  ";
+        //os  << "Raw   : " << msg << "\n\t";
         {
             string::size_type lPos = msg.find('[');
             string::size_type rPos = msg.find(']');
@@ -263,12 +262,12 @@ void error::printStack(Ostream& os)
 
                 if (status == 0 && cplusNamePtr)
                 {
-                    os << cplusNamePtr;
+                    os  << cplusNamePtr;
                     free(cplusNamePtr);
                 }
                 else
                 {
-                    os << cName.c_str();
+                    os  << cName.c_str();
                 }
             }
             else
@@ -279,7 +278,7 @@ void error::printStack(Ostream& os)
                 {
                     string fullName(msg.substr(start, endBracketPos-start));
 
-                    os << fullName.c_str() << nl;
+                    os  << fullName.c_str() << nl;
                 }
                 else
                 {
@@ -296,7 +295,7 @@ void error::printStack(Ostream& os)
 
         printSourceFileAndLine(os, addressMap, programFile, address);
 
-        os << nl;
+        os  << nl;
     }
 
     free(strings);

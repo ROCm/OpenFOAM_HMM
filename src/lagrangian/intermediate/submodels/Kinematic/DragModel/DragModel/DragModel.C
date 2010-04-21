@@ -78,7 +78,7 @@ Foam::scalar Foam::DragModel<CloudType>::utc
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewDragModel.C"
+#include "DragModelNew.C"
 
 // ************************************************************************* //
 

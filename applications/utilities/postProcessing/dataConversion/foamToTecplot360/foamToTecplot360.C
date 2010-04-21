@@ -99,12 +99,12 @@ void print(const char* msg, Ostream& os, const PtrList<GeoField>& flds)
 {
     if (flds.size())
     {
-        os << msg;
+        os  << msg;
         forAll(flds, i)
         {
-            os<< ' ' << flds[i].name();
+            os  << ' ' << flds[i].name();
         }
-        os << endl;
+        os  << endl;
     }
 }
 
@@ -113,9 +113,9 @@ void print(Ostream& os, const wordList& flds)
 {
     forAll(flds, i)
     {
-        os<< ' ' << flds[i];
+        os  << ' ' << flds[i];
     }
-    os << endl;
+    os  << endl;
 }
 
 
