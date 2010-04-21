@@ -25,7 +25,7 @@ Class
     Foam::refCount
 
 Description
-    Reference counter for tmp\<field\>.
+    Reference counter for various OpenFOAM components.
 
 \*---------------------------------------------------------------------------*/
 

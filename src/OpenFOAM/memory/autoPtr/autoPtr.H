@@ -96,7 +96,7 @@ public:
             //  pointer
             inline void reset(T* = 0);
 
-            //- Delete object and set pointer to NULL, if the pointer is valid.
+            //- Delete object (if the pointer is valid) and set pointer to NULL.
             inline void clear();
 
 
@@ -108,9 +108,7 @@ public:
             //- Return const reference to the object data
             inline const T& operator()() const;
 
-            // inline T& operator*();
-            // inline const T& operator*() const;
-
+            //- Const cast to the underlying type reference
             inline operator const T&() const;
 
             //- Return object pointer
@@ -119,7 +117,7 @@ public:
             //- Return const object pointer
             inline const T* operator->() const;
 
-            //- Take over object pointer from parameter
+            //- Take over the object pointer from parameter
             inline void operator=(const autoPtr<T>&);
 };
 
