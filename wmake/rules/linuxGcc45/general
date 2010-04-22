@@ -6,6 +6,5 @@ PROJECT_LIBS = -l$(WM_PROJECT) -liberty -ldl
 
 include $(GENERAL_RULES)/standard
 
-include $(RULES)/X
 include $(RULES)/c
 include $(RULES)/c++
