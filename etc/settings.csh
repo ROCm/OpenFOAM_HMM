@@ -137,8 +137,7 @@ case OpenFOAM:
         _foamAddPath    $gccDir/bin
 
         # 64-bit needs lib64, but 32-bit needs lib (not lib32)
-        if ( "$WM_ARCH_OPTION" = 64 ) then
-        then
+        if ($WM_ARCH_OPTION == 64) then
             _foamAddLib     $gccDir/lib$WM_COMPILER_LIB_ARCH
         else
             _foamAddLib     $gccDir/lib
@@ -150,7 +149,6 @@ case OpenFOAM:
 
         # add in mpc libraries (not need for older gcc)
         if ( $?mpc_version ) then
-        then
             _foamAddLib     $mpcDir/lib
         endif
 
@@ -209,18 +207,14 @@ case OPENMPI:
     breaksw
 
 case SYSTEMOPENMPI:
-    # This uses the installed openmpi. It needs mpicc installed!
+    # use the system installed openmpi, get library directory via mpicc
     set mpi_version=openmpi-system
-
-    # Set compilation flags here instead of in wmake/rules/../mplibSYSTEMOPENMPI
-    setenv PINC `mpicc --showme:compile`
-    setenv PLIBS `mpicc --showme:link`
-    set libDir=`echo "$PLIBS" | sed -e 's/.*-L\([^ ]*\).*/\1/'`
+    set libDir=`mpicc --showme:link | sed -e 's/.*-L\([^ ]*\).*/\1/'`
 
     if ($?FOAM_VERBOSE && $?prompt) then
-        echo "Using system installed MPI:"
-        echo "    compile flags : $PINC"
-        echo "    link flags    : $PLIBS"
+        echo "Using system installed OpenMPI:"
+        echo "    compile flags : `mpicc --showme:compile`"
+        echo "    link flags    : `mpicc --showme:link`"
         echo "    libmpi dir    : $libDir"
     endif
 
