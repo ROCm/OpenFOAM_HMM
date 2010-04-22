@@ -9,18 +9,51 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      thermophysicalProperties;
+    class       volScalarField;
+    location    "0";
+    object      nut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType      ePsiThermo<pureMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>>;
+dimensions      [ 0 2 -1 0 0 0 0 ];
 
-// Note: these are the properties for a "normalised" inviscid gas
-//       for which the speed of sound is 1 m/s at a temperature of 1K
-//       and gamma = 7/5
-mixture         normalisedGas 1 11640.31 2.5 0 0 1;
+internalField   uniform 0;
+
+boundaryField
+{
+    inlet
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+
+    outlet1
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+
+    outlet2
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+    baffles
+    {
+        type            nutkWallFunction;
+        value           uniform 0;
+    }
+    fan
+    {
+        type            cyclic;
+        value           uniform 0;
+    }
+    defaultFaces
+    {
+        type            nutkWallFunction;
+        value           uniform 0;
+    }
+}
 
 
 // ************************************************************************* //

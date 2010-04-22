@@ -101,6 +101,12 @@ patches
         (8 18 19 9)
     )
 
+    wall baffles
+    ()
+
+    cyclic fan
+    ()
+
     wall defaultFaces
     ()
 
