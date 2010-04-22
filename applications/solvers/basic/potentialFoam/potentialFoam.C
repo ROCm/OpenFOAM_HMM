@@ -39,13 +39,13 @@ int main(int argc, char *argv[])
 {
     argList::addBoolOption("writep", "write the final pressure field");
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "createFields.H"
-#   include "readSIMPLEControls.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "createFields.H"
+    #include "readSIMPLEControls.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< nl << "Calculating potential flow" << endl;
 
