@@ -28,8 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::fvPatch>
-Foam::fvPatch::New
+Foam::autoPtr<Foam::fvPatch> Foam::fvPatch::New
 (
     const polyPatch& patch,
     const fvBoundaryMesh& bm

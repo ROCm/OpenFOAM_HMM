@@ -27,8 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::dragModel>
-Foam::dragModel::New
+Foam::autoPtr<Foam::dragModel> Foam::dragModel::New
 (
     const dictionary& interfaceDict,
     const volScalarField& alpha,
@@ -36,15 +35,10 @@ Foam::dragModel::New
     const phaseModel& phaseb
 )
 {
-    const word modelType
-    (
-        interfaceDict.lookup("dragModel" + phasea.name())
-    );
+    const word modelType(interfaceDict.lookup("dragModel" + phasea.name()));
 
-    Info<< "Selecting dragModel for phase "
-        << phasea.name()
-        << ": "
-        << modelType << endl;
+    Info<< "Selecting dragModel for phase " << phasea.name()
+        << ": " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);

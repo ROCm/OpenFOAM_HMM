@@ -143,8 +143,10 @@ Foam::scalarField& Foam::graph::y()
 }
 
 
-Foam::autoPtr<Foam::graph::writer>
-Foam::graph::writer::New(const word& graphFormat)
+Foam::autoPtr<Foam::graph::writer> Foam::graph::writer::New
+(
+    const word& graphFormat
+)
 {
     if (!wordConstructorTablePtr_)
     {

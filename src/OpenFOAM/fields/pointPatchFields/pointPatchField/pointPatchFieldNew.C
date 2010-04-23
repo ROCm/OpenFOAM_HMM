@@ -26,8 +26,7 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::autoPtr< Foam::pointPatchField<Type> >
-Foam::pointPatchField<Type>::New
+Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
 (
     const word& patchFieldType,
     const word& actualPatchType,
@@ -96,8 +95,7 @@ Foam::pointPatchField<Type>::New
 
 
 template<class Type>
-Foam::autoPtr< Foam::pointPatchField<Type> >
-Foam::pointPatchField<Type>::New
+Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
 (
     const word& patchFieldType,
     const pointPatch& p,
@@ -109,8 +107,7 @@ Foam::pointPatchField<Type>::New
 
 
 template<class Type>
-Foam::autoPtr< Foam::pointPatchField<Type> >
-Foam::pointPatchField<Type>::New
+Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
@@ -196,8 +193,7 @@ Foam::pointPatchField<Type>::New
 // Return a pointer to a new patch created on freestore from
 // a given pointPatchField<Type> mapped onto a new patch
 template<class Type>
-Foam::autoPtr< Foam::pointPatchField<Type> >
-Foam::pointPatchField<Type>::New
+Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
 (
     const pointPatchField<Type>& ptf,
     const pointPatch& p,

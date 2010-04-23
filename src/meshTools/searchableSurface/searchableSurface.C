@@ -38,8 +38,7 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
-Foam::autoPtr<Foam::searchableSurface>
-Foam::searchableSurface::New
+Foam::autoPtr<Foam::searchableSurface> Foam::searchableSurface::New
 (
     const word& searchableSurfaceType,
     const IOobject& io,
@@ -47,15 +46,14 @@ Foam::searchableSurface::New
 )
 {
     dictConstructorTable::iterator cstrIter =
-        dictConstructorTablePtr_
-            ->find(searchableSurfaceType);
+        dictConstructorTablePtr_->find(searchableSurfaceType);
 
     if (cstrIter == dictConstructorTablePtr_->end())
     {
         FatalErrorIn
         (
-            "searchableSurface::New(const word&, const word&"
-            ", const IOobject&, const dictionary&)"
+            "searchableSurface::New(const word&,"
+            " const IOobject&, const dictionary&)"
         )   << "Unknown searchableSurface type " << searchableSurfaceType
             << endl << endl
             << "Valid searchableSurface types : " << endl

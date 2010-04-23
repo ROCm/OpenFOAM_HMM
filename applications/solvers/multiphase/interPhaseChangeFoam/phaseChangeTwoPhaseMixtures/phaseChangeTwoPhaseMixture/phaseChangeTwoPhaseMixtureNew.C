@@ -37,7 +37,7 @@ Foam::phaseChangeTwoPhaseMixture::New
 )
 {
     // get model name, but do not register the dictionary
-    const word phaseChangeTwoPhaseMixtureTypeName
+    const word mixtureType
     (
         IOdictionary
         (
@@ -53,12 +53,10 @@ Foam::phaseChangeTwoPhaseMixture::New
         ).lookup("phaseChangeTwoPhaseMixture")
     );
 
-    Info<< "Selecting phaseChange model "
-        << phaseChangeTwoPhaseMixtureTypeName << endl;
+    Info<< "Selecting phaseChange model " << mixtureType << endl;
 
     componentsConstructorTable::iterator cstrIter =
-        componentsConstructorTablePtr_
-            ->find(phaseChangeTwoPhaseMixtureTypeName);
+        componentsConstructorTablePtr_->find(mixtureType);
 
     if (cstrIter == componentsConstructorTablePtr_->end())
     {
@@ -66,7 +64,7 @@ Foam::phaseChangeTwoPhaseMixture::New
         (
             "phaseChangeTwoPhaseMixture::New"
         )   << "Unknown phaseChangeTwoPhaseMixture type "
-            << phaseChangeTwoPhaseMixtureTypeName << nl << nl
+            << mixtureType << nl << nl
             << "Valid phaseChangeTwoPhaseMixture types are : " << endl
             << componentsConstructorTablePtr_->sortedToc()
             << exit(FatalError);

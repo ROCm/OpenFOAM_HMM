@@ -191,8 +191,7 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
 }
 
 
-Foam::autoPtr<Foam::entry>
-Foam::entry::New(Istream& is)
+Foam::autoPtr<Foam::entry> Foam::entry::New(Istream& is)
 {
     is.fatalCheck("entry::New(Istream&)");
 

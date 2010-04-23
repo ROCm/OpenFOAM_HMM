@@ -27,8 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::laminarFlameSpeed>
-Foam::laminarFlameSpeed::New
+Foam::autoPtr<Foam::laminarFlameSpeed> Foam::laminarFlameSpeed::New
 (
     const hhuCombustionThermo& ct
 )
@@ -47,16 +46,12 @@ Foam::laminarFlameSpeed::New
         )
     );
 
-    const word laminarFlameSpeedType
-    (
-        propDict.lookup("laminarFlameSpeedCorrelation")
-    );
+    const word corrType(propDict.lookup("laminarFlameSpeedCorrelation"));
 
-    Info<< "Selecting laminar flame speed correlation "
-        << laminarFlameSpeedType << endl;
+    Info<< "Selecting laminar flame speed correlation " << corrType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(laminarFlameSpeedType);
+        dictionaryConstructorTablePtr_->find(corrType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -65,7 +60,7 @@ Foam::laminarFlameSpeed::New
             "laminarFlameSpeed::New(const hhuCombustionThermo&)",
             propDict
         )   << "Unknown laminarFlameSpeed type "
-            << laminarFlameSpeedType << nl << nl
+            << corrType << nl << nl
             << "Valid laminarFlameSpeed types are :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);

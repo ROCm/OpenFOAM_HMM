@@ -27,8 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::calcType>
-Foam::calcType::New
+Foam::autoPtr<Foam::calcType> Foam::calcType::New
 (
     const word& calcTypeName
 )

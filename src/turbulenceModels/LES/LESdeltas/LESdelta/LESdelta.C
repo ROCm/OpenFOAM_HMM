@@ -58,8 +58,7 @@ Foam::LESdelta::LESdelta(const word& name, const fvMesh& mesh)
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::LESdelta>
-Foam::LESdelta::New
+Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
 (
     const word& name,
     const fvMesh& mesh,

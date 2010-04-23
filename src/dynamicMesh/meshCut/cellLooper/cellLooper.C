@@ -39,8 +39,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::cellLooper>
-Foam::cellLooper::New
+Foam::autoPtr<Foam::cellLooper> Foam::cellLooper::New
 (
     const word& type,
     const polyMesh& mesh

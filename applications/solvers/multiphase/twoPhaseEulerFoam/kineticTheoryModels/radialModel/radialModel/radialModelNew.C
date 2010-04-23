@@ -27,16 +27,12 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::radialModel>
-Foam::radialModel::New
+Foam::autoPtr<Foam::radialModel> Foam::radialModel::New
 (
     const dictionary& dict
 )
 {
-    const word modelType
-    (
-        dict.lookup("radialModel")
-    );
+    const word modelType(dict.lookup("radialModel"));
 
     Info<< "Selecting radialModel " << modelType << endl;
 

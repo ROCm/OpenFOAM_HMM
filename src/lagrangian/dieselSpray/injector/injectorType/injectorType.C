@@ -46,17 +46,13 @@ Foam::injectorType::injectorType
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::injectorType>
-Foam::injectorType::New
+Foam::autoPtr<Foam::injectorType> Foam::injectorType::New
 (
     const Time& t,
     const dictionary& dict
 )
 {
-    const word modelType
-    (
-        dict.lookup("injectorType")
-    );
+    const word modelType(dict.lookup("injectorType"));
 
     Info<< "Selecting injectorType " << modelType << endl;
 

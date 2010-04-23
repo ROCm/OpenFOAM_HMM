@@ -36,10 +36,7 @@ Foam::SurfaceFilmModel<CloudType>::New
     const dimensionedVector& g
 )
 {
-    const word modelType
-    (
-        dict.lookup("SurfaceFilmModel")
-    );
+    const word modelType(dict.lookup("SurfaceFilmModel"));
 
     Info<< "Selecting SurfaceFilmModel " << modelType << endl;
 

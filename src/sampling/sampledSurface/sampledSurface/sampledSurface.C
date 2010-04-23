@@ -113,19 +113,15 @@ void Foam::sampledSurface::makeCf() const
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
-
-Foam::autoPtr<Foam::sampledSurface>
-Foam::sampledSurface::New
+Foam::autoPtr<Foam::sampledSurface> Foam::sampledSurface::New
 (
     const word& name,
     const polyMesh& mesh,
     const dictionary& dict
 )
 {
-    const word sampleType
-    (
-        dict.lookup("type")
-    );
+    const word sampleType(dict.lookup("type"));
+
     if (debug)
     {
         Info<< "Selecting sampledType " << sampleType << endl;
@@ -150,6 +146,7 @@ Foam::sampledSurface::New
     return autoPtr<sampledSurface>(cstrIter()(name, mesh, dict));
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::sampledSurface::sampledSurface
@@ -168,7 +165,6 @@ Foam::sampledSurface::sampledSurface
 {}
 
 
-// Construct from dictionary
 Foam::sampledSurface::sampledSurface
 (
     const word& name,

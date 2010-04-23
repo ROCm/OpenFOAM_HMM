@@ -30,7 +30,6 @@ License
 
 namespace Foam
 {
-
     defineTypeNameAndDebug(curvedEdge, 0);
     defineRunTimeSelectionTable(curvedEdge, Istream);
 }
@@ -74,8 +73,7 @@ Foam::autoPtr<Foam::curvedEdge> Foam::curvedEdge::clone() const
 }
 
 
-Foam::autoPtr<Foam::curvedEdge>
-Foam::curvedEdge::New
+Foam::autoPtr<Foam::curvedEdge> Foam::curvedEdge::New
 (
     const pointField& points,
     Istream& is

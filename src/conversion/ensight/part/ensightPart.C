@@ -126,8 +126,7 @@ Foam::ensightPart::ensightPart(const ensightPart& part)
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::ensightPart>
-Foam::ensightPart::New(Istream& is)
+Foam::autoPtr<Foam::ensightPart> Foam::ensightPart::New(Istream& is)
 {
     const word partType(is);
 

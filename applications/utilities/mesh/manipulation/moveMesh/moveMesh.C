@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createMesh.H"
 
-    autoPtr<Foam::motionSolver> motionPtr = motionSolver::New(mesh);
+    autoPtr<motionSolver> motionPtr = motionSolver::New(mesh);
 
     while (runTime.loop())
     {

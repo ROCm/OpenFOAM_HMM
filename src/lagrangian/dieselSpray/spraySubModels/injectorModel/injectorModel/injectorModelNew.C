@@ -31,17 +31,13 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::injectorModel>
-Foam::injectorModel::New
+Foam::autoPtr<Foam::injectorModel> Foam::injectorModel::New
 (
     const dictionary& dict,
     spray& sm
 )
 {
-    const word modelType
-    (
-        dict.lookup("injectorModel")
-    );
+    const word modelType(dict.lookup("injectorModel"));
 
     Info<< "Selecting injectorModel " << modelType << endl;
 

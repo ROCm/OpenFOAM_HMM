@@ -28,17 +28,13 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::pairPotential>
-Foam::pairPotential::New
+Foam::autoPtr<Foam::pairPotential> Foam::pairPotential::New
 (
     const word& name,
-    const dictionary& pairPotentialProperties
+    const dictionary& propDict
 )
 {
-    const word potentialType
-    (
-        pairPotentialProperties.lookup("pairPotential")
-    );
+    const word potentialType(propDict.lookup("pairPotential"));
 
     Info<< nl << "Selecting intermolecular pair potential "
         << potentialType << " for "
@@ -59,8 +55,7 @@ Foam::pairPotential::New
             << exit(FatalError);
     }
 
-    return autoPtr<pairPotential>
-        (cstrIter()(name, pairPotentialProperties));
+    return autoPtr<pairPotential>(cstrIter()(name, propDict));
 }
 
 

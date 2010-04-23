@@ -35,10 +35,7 @@ Foam::HeatTransferModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType
-    (
-        dict.lookup("HeatTransferModel")
-    );
+    const word modelType(dict.lookup("HeatTransferModel"));
 
     Info<< "Selecting HeatTransferModel " << modelType << endl;
 

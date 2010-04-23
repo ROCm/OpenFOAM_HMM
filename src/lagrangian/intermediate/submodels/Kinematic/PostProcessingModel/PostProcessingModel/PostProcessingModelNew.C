@@ -35,10 +35,7 @@ Foam::PostProcessingModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType
-    (
-        dict.lookup("PostProcessingModel")
-    );
+    const word modelType(dict.lookup("PostProcessingModel"));
 
     Info<< "Selecting PostProcessingModel " << modelType << endl;
 

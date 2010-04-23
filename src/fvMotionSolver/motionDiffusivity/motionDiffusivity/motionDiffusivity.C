@@ -44,8 +44,7 @@ Foam::motionDiffusivity::motionDiffusivity(const fvMotionSolver& mSolver)
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::motionDiffusivity>
-Foam::motionDiffusivity::New
+Foam::autoPtr<Foam::motionDiffusivity> Foam::motionDiffusivity::New
 (
     const fvMotionSolver& mSolver,
     Istream& mdData

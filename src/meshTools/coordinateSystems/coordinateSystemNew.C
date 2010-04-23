@@ -28,8 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::coordinateSystem>
-Foam::coordinateSystem::New
+Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
 (
     const word& name,
     const dictionary& dict
@@ -75,8 +74,7 @@ Foam::coordinateSystem::New
 }
 
 
-Foam::autoPtr<Foam::coordinateSystem>
-Foam::coordinateSystem::New
+Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
 (
     const word& coordType,
     const word& name,
@@ -113,14 +111,13 @@ Foam::coordinateSystem::New
 }
 
 
-Foam::autoPtr<Foam::coordinateSystem>
-Foam::coordinateSystem::New
+Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
 (
     Istream& is
 )
 {
-    word name(is);
-    dictionary dict(is);
+    const word name(is);
+    const dictionary dict(is);
 
     return New(name, dict);
 }

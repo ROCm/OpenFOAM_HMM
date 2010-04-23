@@ -49,8 +49,7 @@ Foam::solidMixture::solidMixture
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::solidMixture>
-Foam::solidMixture::New
+Foam::autoPtr<Foam::solidMixture> Foam::solidMixture::New
 (
     const dictionary& thermophysicalProperties
 )

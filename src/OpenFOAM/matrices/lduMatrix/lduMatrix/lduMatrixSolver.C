@@ -37,8 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::lduMatrix::solver>
-Foam::lduMatrix::solver::New
+Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
 (
     const word& fieldName,
     const lduMatrix& matrix,

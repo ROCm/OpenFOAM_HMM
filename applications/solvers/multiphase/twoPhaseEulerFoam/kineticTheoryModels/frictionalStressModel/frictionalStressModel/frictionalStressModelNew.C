@@ -27,16 +27,12 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::frictionalStressModel>
-Foam::frictionalStressModel::New
+Foam::autoPtr<Foam::frictionalStressModel> Foam::frictionalStressModel::New
 (
     const dictionary& dict
 )
 {
-    const word modelType
-    (
-        dict.lookup("frictionalStressModel")
-    );
+    const word modelType(dict.lookup("frictionalStressModel"));
 
     Info<< "Selecting frictionalStressModel " << modelType << endl;
 

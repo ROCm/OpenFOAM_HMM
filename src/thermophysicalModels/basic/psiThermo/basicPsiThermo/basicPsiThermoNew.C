@@ -27,8 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::basicPsiThermo>
-Foam::basicPsiThermo::New
+Foam::autoPtr<Foam::basicPsiThermo> Foam::basicPsiThermo::New
 (
     const fvMesh& mesh
 )

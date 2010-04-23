@@ -30,13 +30,9 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::dragModel>
-Foam::dragModel::New(const dictionary& dict)
+Foam::autoPtr<Foam::dragModel> Foam::dragModel::New(const dictionary& dict)
 {
-    const word modelType
-    (
-        dict.lookup("dragModel")
-    );
+    const word modelType(dict.lookup("dragModel"));
 
     Info<< "Selecting dragModel " << modelType << endl;
 

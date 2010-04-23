@@ -27,8 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::rhoChemistryModel>
-Foam::rhoChemistryModel::New
+Foam::autoPtr<Foam::rhoChemistryModel> Foam::rhoChemistryModel::New
 (
     const fvMesh& mesh
 )

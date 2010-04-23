@@ -27,19 +27,15 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::XiGModel>
-Foam::XiGModel::New
+Foam::autoPtr<Foam::XiGModel> Foam::XiGModel::New
 (
-    const dictionary& XiGProperties,
+    const dictionary& propDict,
     const hhuCombustionThermo& thermo,
     const compressible::RASModel& turbulence,
     const volScalarField& Su
 )
 {
-    const word modelType
-    (
-        XiGProperties.lookup("XiGModel")
-    );
+    const word modelType(propDict.lookup("XiGModel"));
 
     Info<< "Selecting flame-wrinkling model " << modelType << endl;
 
@@ -63,8 +59,7 @@ Foam::XiGModel::New
             << exit(FatalError);
     }
 
-    return autoPtr<XiGModel>
-        (cstrIter()(XiGProperties, thermo, turbulence, Su));
+    return autoPtr<XiGModel>(cstrIter()(propDict, thermo, turbulence, Su));
 }
 
 

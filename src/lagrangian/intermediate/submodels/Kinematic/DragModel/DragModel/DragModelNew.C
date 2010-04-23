@@ -28,17 +28,13 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::autoPtr<Foam::DragModel<CloudType> >
-Foam::DragModel<CloudType>::New
+Foam::autoPtr<Foam::DragModel<CloudType> > Foam::DragModel<CloudType>::New
 (
     const dictionary& dict,
     CloudType& owner
 )
 {
-    const word modelType
-    (
-        dict.lookup("DragModel")
-    );
+    const word modelType(dict.lookup("DragModel"));
 
     Info<< "Selecting DragModel " << modelType << endl;
 

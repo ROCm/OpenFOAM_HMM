@@ -37,8 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::LESfilter>
-Foam::LESfilter::New
+Foam::autoPtr<Foam::LESfilter> Foam::LESfilter::New
 (
     const fvMesh& mesh,
     const dictionary& dict

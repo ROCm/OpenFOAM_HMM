@@ -28,8 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::engineMesh>
-Foam::engineMesh::New
+Foam::autoPtr<Foam::engineMesh> Foam::engineMesh::New
 (
     const Foam::IOobject& io
 )

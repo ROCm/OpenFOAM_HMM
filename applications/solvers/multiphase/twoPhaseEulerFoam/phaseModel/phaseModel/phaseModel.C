@@ -134,8 +134,7 @@ Foam::phaseModel::phaseModel
 }
 
 
-Foam::autoPtr<Foam::phaseModel>
-Foam::phaseModel::New
+Foam::autoPtr<Foam::phaseModel> Foam::phaseModel::New
 (
     const fvMesh& mesh,
     const dictionary& transportProperties,

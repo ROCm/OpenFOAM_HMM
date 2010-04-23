@@ -42,16 +42,12 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::decompositionMethod>
-Foam::decompositionMethod::New
+Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
 (
     const dictionary& decompositionDict
 )
 {
-    const word methodType
-    (
-        decompositionDict.lookup("method")
-    );
+    const word methodType(decompositionDict.lookup("method"));
 
     Info<< "Selecting decompositionMethod " << methodType << endl;
 
@@ -75,17 +71,13 @@ Foam::decompositionMethod::New
 }
 
 
-Foam::autoPtr<Foam::decompositionMethod>
-Foam::decompositionMethod::New
+Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
 (
     const dictionary& decompositionDict,
     const polyMesh& mesh
 )
 {
-    const word methodType
-    (
-        decompositionDict.lookup("method")
-    );
+    const word methodType(decompositionDict.lookup("method"));
 
     Info<< "Selecting decompositionMethod " << methodType << endl;
 

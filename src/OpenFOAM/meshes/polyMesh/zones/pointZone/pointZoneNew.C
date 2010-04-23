@@ -28,8 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::pointZone>
-Foam::pointZone::New
+Foam::autoPtr<Foam::pointZone> Foam::pointZone::New
 (
     const word& name,
     const dictionary& dict,
@@ -44,10 +43,7 @@ Foam::pointZone::New
             << endl;
     }
 
-    const word zoneType
-    (
-        dict.lookup("type")
-    );
+    const word zoneType(dict.lookup("type"));
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(zoneType);

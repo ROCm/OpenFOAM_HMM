@@ -28,8 +28,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::autoPtr< Foam::DataEntry<Type> >
-Foam::DataEntry<Type>::New
+Foam::autoPtr<Foam::DataEntry<Type> > Foam::DataEntry<Type>::New
 (
     const word& entryName,
     const dictionary& dict

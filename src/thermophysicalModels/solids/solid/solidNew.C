@@ -27,8 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::solid>
-Foam::solid::New(Istream& is)
+Foam::autoPtr<Foam::solid> Foam::solid::New(Istream& is)
 {
     if (debug)
     {

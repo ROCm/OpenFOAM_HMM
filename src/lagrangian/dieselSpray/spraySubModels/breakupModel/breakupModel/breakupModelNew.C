@@ -31,17 +31,13 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::breakupModel>
-Foam::breakupModel::New
+Foam::autoPtr<Foam::breakupModel> Foam::breakupModel::New
 (
     const dictionary& dict,
     spray& sm
 )
 {
-    const word modelType
-    (
-        dict.lookup("breakupModel")
-    );
+    const word modelType(dict.lookup("breakupModel"));
 
     Info<< "Selecting breakupModel " << modelType << endl;
 

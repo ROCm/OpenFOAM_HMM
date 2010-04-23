@@ -66,8 +66,7 @@ const Foam::string Foam::topoSetSource::illegalSource_
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::topoSetSource>
-Foam::topoSetSource::New
+Foam::autoPtr<Foam::topoSetSource> Foam::topoSetSource::New
 (
     const word& topoSetSourceType,
     const polyMesh& mesh,
@@ -75,8 +74,7 @@ Foam::topoSetSource::New
 )
 {
     wordConstructorTable::iterator cstrIter =
-        wordConstructorTablePtr_
-            ->find(topoSetSourceType);
+        wordConstructorTablePtr_->find(topoSetSourceType);
 
     if (cstrIter == wordConstructorTablePtr_->end())
     {
@@ -95,8 +93,7 @@ Foam::topoSetSource::New
 }
 
 
-Foam::autoPtr<Foam::topoSetSource>
-Foam::topoSetSource::New
+Foam::autoPtr<Foam::topoSetSource> Foam::topoSetSource::New
 (
     const word& topoSetSourceType,
     const polyMesh& mesh,
@@ -104,8 +101,7 @@ Foam::topoSetSource::New
 )
 {
     istreamConstructorTable::iterator cstrIter =
-        istreamConstructorTablePtr_
-            ->find(topoSetSourceType);
+        istreamConstructorTablePtr_->find(topoSetSourceType);
 
     if (cstrIter == istreamConstructorTablePtr_->end())
     {

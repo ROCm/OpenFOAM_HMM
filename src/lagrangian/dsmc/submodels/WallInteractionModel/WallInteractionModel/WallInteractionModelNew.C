@@ -35,10 +35,7 @@ Foam::WallInteractionModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType
-    (
-        dict.lookup("WallInteractionModel")
-    );
+    const word modelType(dict.lookup("WallInteractionModel"));
 
     Info<< "Selecting WallInteractionModel " << modelType << endl;
 

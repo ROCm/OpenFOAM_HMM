@@ -27,10 +27,9 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::XiModel>
-Foam::XiModel::New
+Foam::autoPtr<Foam::XiModel> Foam::XiModel::New
 (
-    const dictionary& XiProperties,
+    const dictionary& propDict,
     const hhuCombustionThermo& thermo,
     const compressible::RASModel& turbulence,
     const volScalarField& Su,
@@ -39,10 +38,7 @@ Foam::XiModel::New
     const surfaceScalarField& phi
 )
 {
-    const word modelType
-    (
-        XiProperties.lookup("XiModel")
-    );
+    const word modelType(propDict.lookup("XiModel"));
 
     Info<< "Selecting flame-wrinkling model " << modelType << endl;
 
@@ -62,7 +58,7 @@ Foam::XiModel::New
     }
 
     return autoPtr<XiModel>
-        (cstrIter()(XiProperties, thermo, turbulence, Su, rho, b, phi));
+        (cstrIter()(propDict, thermo, turbulence, Su, rho, b, phi));
 }
 
 

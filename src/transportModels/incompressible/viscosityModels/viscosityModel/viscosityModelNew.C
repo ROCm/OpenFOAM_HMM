@@ -29,8 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::viscosityModel>
-Foam::viscosityModel::New
+Foam::autoPtr<Foam::viscosityModel> Foam::viscosityModel::New
 (
     const word& name,
     const dictionary& viscosityProperties,
@@ -38,10 +37,7 @@ Foam::viscosityModel::New
     const surfaceScalarField& phi
 )
 {
-    const word modelType
-    (
-        viscosityProperties.lookup("transportModel")
-    );
+    const word modelType(viscosityProperties.lookup("transportModel"));
 
     Info<< "Selecting incompressible transport model " << modelType << endl;
 

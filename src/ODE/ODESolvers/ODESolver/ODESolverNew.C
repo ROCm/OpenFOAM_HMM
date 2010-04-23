@@ -27,8 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::ODESolver>
-Foam::ODESolver::New
+Foam::autoPtr<Foam::ODESolver> Foam::ODESolver::New
 (
     const Foam::word& ODESolverTypeName,
     const Foam::ODE& ode

@@ -39,14 +39,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::liquid>
-Foam::liquid::New(Istream& is)
+Foam::autoPtr<Foam::liquid> Foam::liquid::New(Istream& is)
 {
     if (debug)
     {
-        Info<< "liquid::New(Istream&) : "
-            << "constructing liquid"
-            << endl;
+        Info<< "liquid::New(Istream&) : " << "constructing liquid" << endl;
     }
 
     const word liquidType(is);

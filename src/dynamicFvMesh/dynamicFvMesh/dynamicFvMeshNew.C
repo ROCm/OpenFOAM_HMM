@@ -29,8 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::dynamicFvMesh>
-Foam::dynamicFvMesh::New(const IOobject& io)
+Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
 {
     // do not register the dictionary
     IOdictionary dict

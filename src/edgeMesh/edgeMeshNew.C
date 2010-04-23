@@ -27,8 +27,11 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::autoPtr< Foam::edgeMesh >
-Foam::edgeMesh::New(const fileName& name, const word& ext)
+Foam::autoPtr<Foam::edgeMesh> Foam::edgeMesh::New
+(
+    const fileName& name,
+    const word& ext
+)
 {
     fileExtensionConstructorTable::iterator cstrIter =
         fileExtensionConstructorTablePtr_->find(ext);
@@ -49,8 +52,10 @@ Foam::edgeMesh::New(const fileName& name, const word& ext)
 }
 
 
-Foam::autoPtr< Foam::edgeMesh >
-Foam::edgeMesh::New(const fileName& name)
+Foam::autoPtr<Foam::edgeMesh> Foam::edgeMesh::New
+(
+    const fileName& name
+)
 {
     word ext = name.ext();
     if (ext == "gz")

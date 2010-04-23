@@ -39,8 +39,10 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::thermophysicalFunction>
-Foam::thermophysicalFunction::New(Istream& is)
+Foam::autoPtr<Foam::thermophysicalFunction> Foam::thermophysicalFunction::New
+(
+    Istream& is
+)
 {
     if (debug)
     {

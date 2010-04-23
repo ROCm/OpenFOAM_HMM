@@ -31,17 +31,13 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::atomizationModel>
-Foam::atomizationModel::New
+Foam::autoPtr<Foam::atomizationModel> Foam::atomizationModel::New
 (
     const dictionary& dict,
     spray& sm
 )
 {
-    const word modelType
-    (
-        dict.lookup("atomizationModel")
-    );
+    const word modelType(dict.lookup("atomizationModel"));
 
     Info<< "Selecting atomizationModel " << modelType << endl;
 

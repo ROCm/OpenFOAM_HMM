@@ -27,16 +27,12 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::extrudeModel>
-Foam::extrudeModel::New
+Foam::autoPtr<Foam::extrudeModel> Foam::extrudeModel::New
 (
     const dictionary& dict
 )
 {
-    const word modelType
-    (
-        dict.lookup("extrudeModel")
-    );
+    const word modelType(dict.lookup("extrudeModel"));
 
     Info<< "Selecting extrudeModel " << modelType << endl;
 

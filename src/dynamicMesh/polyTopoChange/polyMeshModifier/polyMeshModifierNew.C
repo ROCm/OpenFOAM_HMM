@@ -28,8 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::polyMeshModifier>
-Foam::polyMeshModifier::New
+Foam::autoPtr<Foam::polyMeshModifier> Foam::polyMeshModifier::New
 (
     const word& name,
     const dictionary& dict,

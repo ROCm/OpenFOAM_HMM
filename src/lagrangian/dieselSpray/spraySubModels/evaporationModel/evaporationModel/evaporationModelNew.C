@@ -31,13 +31,12 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::evaporationModel>
-Foam::evaporationModel::New(const dictionary& dict)
+Foam::autoPtr<Foam::evaporationModel> Foam::evaporationModel::New
+(
+    const dictionary& dict
+)
 {
-    const word modelType
-    (
-        dict.lookup("evaporationModel")
-    );
+    const word modelType(dict.lookup("evaporationModel"));
 
     Info<< "Selecting evaporationModel " << modelType << endl;
 

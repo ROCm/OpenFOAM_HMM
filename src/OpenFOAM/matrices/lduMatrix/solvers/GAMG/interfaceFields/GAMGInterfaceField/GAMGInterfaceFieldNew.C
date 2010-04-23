@@ -27,8 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::GAMGInterfaceField>
-Foam::GAMGInterfaceField::New
+Foam::autoPtr<Foam::GAMGInterfaceField> Foam::GAMGInterfaceField::New
 (
     const GAMGInterface& GAMGCp,
     const lduInterfaceField& fineInterface

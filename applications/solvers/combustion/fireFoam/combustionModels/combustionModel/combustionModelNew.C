@@ -27,23 +27,16 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::combustionModel>
-Foam::combustionModel::New
+Foam::autoPtr<Foam::combustionModel> Foam::combustionModel::New
 (
-    const dictionary& combustionProperties,
+    const dictionary& propDict,
     const hsCombustionThermo& thermo,
     const compressible::turbulenceModel& turbulence,
     const surfaceScalarField& phi,
     const volScalarField& rho
 )
 {
-    const word modelType
-    (
-        combustionProperties.lookup
-        (
-            "combustionModel"
-        )
-    );
+    const word modelType(propDict.lookup("combustionModel"));
 
     Info<< "Selecting combustion model " << modelType << endl;
 
@@ -63,7 +56,7 @@ Foam::combustionModel::New
     }
 
     return autoPtr<combustionModel>
-        (cstrIter()(combustionProperties, thermo, turbulence, phi, rho));
+        (cstrIter()(propDict, thermo, turbulence, phi, rho));
 }
 
 

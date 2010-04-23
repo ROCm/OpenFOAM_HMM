@@ -406,8 +406,7 @@ Foam::sampledSet::~sampledSet()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::sampledSet>
-Foam::sampledSet::New
+Foam::autoPtr<Foam::sampledSet> Foam::sampledSet::New
 (
     const word& name,
     const polyMesh& mesh,
@@ -415,10 +414,7 @@ Foam::sampledSet::New
     const dictionary& dict
 )
 {
-    const word sampleType
-    (
-        dict.lookup("type")
-    );
+    const word sampleType(dict.lookup("type"));
 
     wordConstructorTable::iterator cstrIter =
         wordConstructorTablePtr_->find(sampleType);

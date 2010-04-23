@@ -36,10 +36,7 @@ Foam::chemistrySolver<CompType, ThermoType>::New
     const word& thermoTypeName
 )
 {
-    const word modelName
-    (
-        model.lookup("chemistrySolver")
-    );
+    const word modelName(model.lookup("chemistrySolver"));
 
     const word chemistrySolverType =
         modelName + '<' + compTypeName + ',' + thermoTypeName + '>';

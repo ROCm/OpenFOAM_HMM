@@ -42,8 +42,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::topoSet>
-Foam::topoSet::New
+Foam::autoPtr<Foam::topoSet> Foam::topoSet::New
 (
     const word& setType,
     const polyMesh& mesh,
@@ -53,8 +52,7 @@ Foam::topoSet::New
 )
 {
     wordConstructorTable::iterator cstrIter =
-        wordConstructorTablePtr_
-            ->find(setType);
+        wordConstructorTablePtr_->find(setType);
 
     if (cstrIter == wordConstructorTablePtr_->end())
     {
@@ -73,8 +71,7 @@ Foam::topoSet::New
 }
 
 
-Foam::autoPtr<Foam::topoSet>
-Foam::topoSet::New
+Foam::autoPtr<Foam::topoSet> Foam::topoSet::New
 (
     const word& setType,
     const polyMesh& mesh,
@@ -84,8 +81,7 @@ Foam::topoSet::New
 )
 {
     sizeConstructorTable::iterator cstrIter =
-        sizeConstructorTablePtr_
-            ->find(setType);
+        sizeConstructorTablePtr_->find(setType);
 
     if (cstrIter == sizeConstructorTablePtr_->end())
     {
@@ -104,8 +100,7 @@ Foam::topoSet::New
 }
 
 
-Foam::autoPtr<Foam::topoSet>
-Foam::topoSet::New
+Foam::autoPtr<Foam::topoSet> Foam::topoSet::New
 (
     const word& setType,
     const polyMesh& mesh,
@@ -115,8 +110,7 @@ Foam::topoSet::New
 )
 {
     setConstructorTable::iterator cstrIter =
-        setConstructorTablePtr_
-            ->find(setType);
+        setConstructorTablePtr_->find(setType);
 
     if (cstrIter == setConstructorTablePtr_->end())
     {

@@ -28,8 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::polyPatch>
-Foam::polyPatch::New
+Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
 (
     const word& patchType,
     const word& name,
@@ -67,8 +66,7 @@ Foam::polyPatch::New
 }
 
 
-Foam::autoPtr<Foam::polyPatch>
-Foam::polyPatch::New
+Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
 (
     const word& name,
     const dictionary& dict,

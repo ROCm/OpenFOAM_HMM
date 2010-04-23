@@ -39,7 +39,7 @@ Foam::sixDoFRigidBodyMotionRestraint::New(const dictionary& sDoFRBMRDict)
     //     << restraintType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-    dictionaryConstructorTablePtr_->find(restraintType);
+        dictionaryConstructorTablePtr_->find(restraintType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {

@@ -28,8 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::hReactionThermo>
-Foam::hReactionThermo::New
+Foam::autoPtr<Foam::hReactionThermo> Foam::hReactionThermo::New
 (
     const fvMesh& mesh
 )
@@ -71,8 +70,7 @@ Foam::hReactionThermo::New
 }
 
 
-Foam::autoPtr<Foam::hReactionThermo>
-Foam::hReactionThermo::NewType
+Foam::autoPtr<Foam::hReactionThermo> Foam::hReactionThermo::NewType
 (
     const fvMesh& mesh,
     const word& thermoType

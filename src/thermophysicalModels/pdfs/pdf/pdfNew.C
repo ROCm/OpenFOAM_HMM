@@ -27,17 +27,13 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::pdfs::pdf>
-Foam::pdfs::pdf::New
+Foam::autoPtr<Foam::pdfs::pdf> Foam::pdfs::pdf::New
 (
     const dictionary& dict,
     Random& rndGen
 )
 {
-    const word modelType
-    (
-        dict.lookup("pdfType")
-    );
+    const word modelType(dict.lookup("pdfType"));
 
     Info<< "Selecting pdfType " << modelType << endl;
 

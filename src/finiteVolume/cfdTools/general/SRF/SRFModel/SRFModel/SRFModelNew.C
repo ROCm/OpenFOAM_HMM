@@ -27,8 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::SRF::SRFModel>
-Foam::SRF::SRFModel::New
+Foam::autoPtr<Foam::SRF::SRFModel> Foam::SRF::SRFModel::New
 (
     const volVectorField& Urel
 )

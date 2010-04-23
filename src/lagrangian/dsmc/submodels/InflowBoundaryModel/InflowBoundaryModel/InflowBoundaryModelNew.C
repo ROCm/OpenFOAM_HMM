@@ -35,10 +35,7 @@ Foam::InflowBoundaryModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType
-    (
-        dict.lookup("InflowBoundaryModel")
-    );
+    const word modelType(dict.lookup("InflowBoundaryModel"));
 
     Info<< "Selecting InflowBoundaryModel " << modelType << endl;
 

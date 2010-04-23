@@ -221,7 +221,7 @@ Foam::displacementLayeredMotionFvMotionSolver::faceZoneEvaluate
     tmp<vectorField> tfld(new vectorField(meshPoints.size()));
     vectorField& fld = tfld();
 
-    const word& type = dict.lookup("type");
+    const word type(dict.lookup("type"));
 
     if (type == "fixedValue")
     {

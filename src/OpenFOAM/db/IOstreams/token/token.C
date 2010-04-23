@@ -52,8 +52,7 @@ Foam::token::compound::~compound()
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::token::compound>
-Foam::token::compound::New
+Foam::autoPtr<Foam::token::compound> Foam::token::compound::New
 (
     const word& compoundType,
     Istream& is

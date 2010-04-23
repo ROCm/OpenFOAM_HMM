@@ -28,17 +28,13 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::radiation::scatterModel>
-Foam::radiation::scatterModel::New
+Foam::autoPtr<Foam::radiation::scatterModel> Foam::radiation::scatterModel::New
 (
     const dictionary& dict,
     const fvMesh& mesh
 )
 {
-    const word modelType
-    (
-        dict.lookup("scatterModel")
-    );
+    const word modelType(dict.lookup("scatterModel"));
 
     Info<< "Selecting scatterModel " << modelType << endl;
 

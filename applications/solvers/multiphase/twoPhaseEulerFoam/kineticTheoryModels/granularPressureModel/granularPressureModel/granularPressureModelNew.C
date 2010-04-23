@@ -27,16 +27,12 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::granularPressureModel>
-Foam::granularPressureModel::New
+Foam::autoPtr<Foam::granularPressureModel> Foam::granularPressureModel::New
 (
     const dictionary& dict
 )
 {
-    const word modelType
-    (
-        dict.lookup("granularPressureModel")
-    );
+    const word modelType(dict.lookup("granularPressureModel"));
 
     Info<< "Selecting granularPressureModel " << modelType << endl;
 

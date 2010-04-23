@@ -28,8 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::hsCombustionThermo>
-Foam::hsCombustionThermo::New
+Foam::autoPtr<Foam::hsCombustionThermo> Foam::hsCombustionThermo::New
 (
     const fvMesh& mesh
 )
@@ -71,8 +70,7 @@ Foam::hsCombustionThermo::New
 }
 
 
-Foam::autoPtr<Foam::hsCombustionThermo>
-Foam::hsCombustionThermo::NewType
+Foam::autoPtr<Foam::hsCombustionThermo> Foam::hsCombustionThermo::NewType
 (
     const fvMesh& mesh,
     const word& thermoType

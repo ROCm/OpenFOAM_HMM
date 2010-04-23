@@ -35,10 +35,7 @@ Foam::DispersionModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType
-    (
-        dict.lookup("DispersionModel")
-    );
+    const word modelType(dict.lookup("DispersionModel"));
 
     Info<< "Selecting DispersionModel " << modelType << endl;
 

@@ -35,10 +35,7 @@ Foam::PatchInteractionModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType
-    (
-        dict.lookup("PatchInteractionModel")
-    );
+    const word modelType(dict.lookup("PatchInteractionModel"));
 
     Info<< "Selecting PatchInteractionModel " << modelType << endl;
 

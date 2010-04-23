@@ -27,8 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::PDRDragModel>
-Foam::PDRDragModel::New
+Foam::autoPtr<Foam::PDRDragModel> Foam::PDRDragModel::New
 (
     const dictionary& PDRProperties,
     const compressible::RASModel& turbulence,
@@ -37,10 +36,7 @@ Foam::PDRDragModel::New
     const surfaceScalarField& phi
 )
 {
-    const word modelType
-    (
-        PDRProperties.lookup("PDRDragModel")
-    );
+    const word modelType(PDRProperties.lookup("PDRDragModel"));
 
     Info<< "Selecting flame-wrinkling model " << modelType << endl;
 

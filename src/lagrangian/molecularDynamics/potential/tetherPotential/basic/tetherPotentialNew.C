@@ -27,21 +27,16 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::tetherPotential>
-Foam::tetherPotential::New
+Foam::autoPtr<Foam::tetherPotential> Foam::tetherPotential::New
 (
     const word& name,
-    const dictionary& tetherPotentialProperties
+    const dictionary& propDict
 )
 {
-    const word potentialType
-    (
-        tetherPotentialProperties.lookup("tetherPotential")
-    );
+    const word potentialType(propDict.lookup("tetherPotential"));
 
-    Info<< nl << "Selecting tether potential "
-        << potentialType << " for "
-        << name << endl;
+    Info<< nl << "Selecting tether potential " << potentialType
+        << " for " << name << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(potentialType);
@@ -58,8 +53,7 @@ Foam::tetherPotential::New
             << exit(FatalError);
     }
 
-    return autoPtr<tetherPotential>
-        (cstrIter()(name, tetherPotentialProperties));
+    return autoPtr<tetherPotential>(cstrIter()(name, propDict));
 }
 
 

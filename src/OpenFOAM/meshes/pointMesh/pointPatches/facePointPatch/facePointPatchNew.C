@@ -27,8 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::facePointPatch>
-Foam::facePointPatch::New
+Foam::autoPtr<Foam::facePointPatch> Foam::facePointPatch::New
 (
     const polyPatch& patch,
     const pointBoundaryMesh& bm

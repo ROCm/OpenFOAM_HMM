@@ -29,18 +29,14 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::wallModel>
-Foam::wallModel::New
+Foam::autoPtr<Foam::wallModel> Foam::wallModel::New
 (
     const dictionary& dict,
     const volVectorField& U,
     spray& sm
 )
 {
-    const word modelType
-    (
-        dict.lookup("wallModel")
-    );
+    const word modelType(dict.lookup("wallModel"));
 
     Info<< "Selecting wallModel " << modelType << endl;
 

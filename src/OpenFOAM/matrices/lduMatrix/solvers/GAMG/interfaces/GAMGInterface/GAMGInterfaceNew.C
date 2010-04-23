@@ -29,8 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::GAMGInterface>
-Foam::GAMGInterface::New
+Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
 (
     const lduInterface& fineInterface,
     const labelField& localRestrictAddressing,

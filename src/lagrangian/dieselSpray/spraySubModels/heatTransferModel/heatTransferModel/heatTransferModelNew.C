@@ -31,16 +31,12 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::heatTransferModel>
-Foam::heatTransferModel::New
+Foam::autoPtr<Foam::heatTransferModel> Foam::heatTransferModel::New
 (
     const dictionary& dict
 )
 {
-    const word modelType
-    (
-        dict.lookup("heatTransferModel")
-    );
+    const word modelType(dict.lookup("heatTransferModel"));
 
     Info<< "Selecting heatTransferModel " << modelType << endl;
 

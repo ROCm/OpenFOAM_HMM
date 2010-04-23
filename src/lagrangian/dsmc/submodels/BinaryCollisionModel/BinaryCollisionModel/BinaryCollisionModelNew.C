@@ -35,10 +35,7 @@ Foam::BinaryCollisionModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType
-    (
-        dict.lookup("BinaryCollisionModel")
-    );
+    const word modelType(dict.lookup("BinaryCollisionModel"));
 
     Info<< "Selecting BinaryCollisionModel " << modelType << endl;
 

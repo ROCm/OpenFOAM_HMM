@@ -27,16 +27,12 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::conductivityModel>
-Foam::conductivityModel::New
+Foam::autoPtr<Foam::conductivityModel> Foam::conductivityModel::New
 (
     const dictionary& dict
 )
 {
-    const word modelType
-    (
-        dict.lookup("conductivityModel")
-    );
+    const word modelType(dict.lookup("conductivityModel"));
 
     Info<< "Selecting conductivityModel " << modelType << endl;
 

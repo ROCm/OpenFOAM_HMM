@@ -28,8 +28,10 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::hhuCombustionThermo>
-Foam::hhuCombustionThermo::New(const fvMesh& mesh)
+Foam::autoPtr<Foam::hhuCombustionThermo> Foam::hhuCombustionThermo::New
+(
+    const fvMesh& mesh
+)
 {
     // get model name, but do not register the dictionary
     // otherwise it is registered in the database twice

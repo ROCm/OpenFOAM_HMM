@@ -28,18 +28,14 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::energyScalingFunction>
-Foam::energyScalingFunction::New
+Foam::autoPtr<Foam::energyScalingFunction> Foam::energyScalingFunction::New
 (
     const word& name,
-    const dictionary& energyScalingFunctionProperties,
+    const dictionary& propDict,
     const pairPotential& pairPot
 )
 {
-    const word scalingType
-    (
-        energyScalingFunctionProperties.lookup("energyScalingFunction")
-    );
+    const word scalingType(propDict.lookup("energyScalingFunction"));
 
     Info<< "Selecting energy scaling function "
         << scalingType << " for "
@@ -60,8 +56,7 @@ Foam::energyScalingFunction::New
             << exit(FatalError);
     }
 
-    return autoPtr<energyScalingFunction>
-        (cstrIter()(name, energyScalingFunctionProperties, pairPot));
+    return autoPtr<energyScalingFunction>(cstrIter()(name, propDict, pairPot));
 }
 
 

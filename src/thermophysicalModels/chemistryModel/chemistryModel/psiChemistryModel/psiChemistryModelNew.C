@@ -27,8 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::psiChemistryModel>
-Foam::psiChemistryModel::New
+Foam::autoPtr<Foam::psiChemistryModel> Foam::psiChemistryModel::New
 (
     const fvMesh& mesh
 )

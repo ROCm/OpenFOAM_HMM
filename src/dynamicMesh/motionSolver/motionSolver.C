@@ -58,8 +58,7 @@ Foam::motionSolver::motionSolver(const polyMesh& mesh)
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::motionSolver>
-Foam::motionSolver::New(const polyMesh& mesh)
+Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::New(const polyMesh& mesh)
 {
     IOdictionary solverDict
     (

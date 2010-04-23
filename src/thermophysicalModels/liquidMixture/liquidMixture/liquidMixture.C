@@ -73,8 +73,7 @@ Foam::liquidMixture::liquidMixture
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::liquidMixture>
-Foam::liquidMixture::New
+Foam::autoPtr<Foam::liquidMixture> Foam::liquidMixture::New
 (
     const dictionary& thermophysicalProperties
 )

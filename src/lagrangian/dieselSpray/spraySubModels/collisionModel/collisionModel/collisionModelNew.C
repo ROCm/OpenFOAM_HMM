@@ -33,18 +33,14 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::collisionModel>
-Foam::collisionModel::New
+Foam::autoPtr<Foam::collisionModel> Foam::collisionModel::New
 (
     const dictionary& dict,
     spray& sm,
     Random& rndGen
 )
 {
-    const word modelType
-    (
-        dict.lookup("collisionModel")
-    );
+    const word modelType(dict.lookup("collisionModel"));
 
     Info<< "Selecting collisionModel " << modelType << endl;
 

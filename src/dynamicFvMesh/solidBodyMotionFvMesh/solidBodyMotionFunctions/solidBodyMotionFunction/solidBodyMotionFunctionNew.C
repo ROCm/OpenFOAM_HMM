@@ -27,17 +27,13 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::solidBodyMotionFunction>
-Foam::solidBodyMotionFunction::New
+Foam::autoPtr<Foam::solidBodyMotionFunction> Foam::solidBodyMotionFunction::New
 (
     const dictionary& SBMFCoeffs,
     const Time& runTime
 )
 {
-    const word motionType
-    (
-        SBMFCoeffs.lookup("solidBodyMotionFunction")
-    );
+    const word motionType(SBMFCoeffs.lookup("solidBodyMotionFunction"));
 
     Info<< "Selecting solid-body motion function " << motionType << endl;
 

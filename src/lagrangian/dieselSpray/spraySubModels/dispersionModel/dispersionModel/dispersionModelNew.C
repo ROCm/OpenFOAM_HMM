@@ -30,17 +30,13 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::dispersionModel>
-Foam::dispersionModel::New
+Foam::autoPtr<Foam::dispersionModel> Foam::dispersionModel::New
 (
     const dictionary& dict,
     spray& sm
 )
 {
-    const word modelType
-    (
-        dict.lookup("dispersionModel")
-    );
+    const word modelType(dict.lookup("dispersionModel"));
 
     Info<< "Selecting dispersionModel " << modelType << endl;
 

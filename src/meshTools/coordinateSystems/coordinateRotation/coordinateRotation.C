@@ -127,8 +127,7 @@ Foam::coordinateRotation::coordinateRotation
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::coordinateRotation>
-Foam::coordinateRotation::New
+Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
 (
     const dictionary& dict
 )
