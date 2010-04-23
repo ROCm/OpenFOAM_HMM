@@ -22,7 +22,7 @@ if (nVar >= 0)
 
     if (v.size())
     {
-        for (label n = 0; n < v.size(); n++)
+        forAll(v, n)
         {
             if (component == 0)
             {

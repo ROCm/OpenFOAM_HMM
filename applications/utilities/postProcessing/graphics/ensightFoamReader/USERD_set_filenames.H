@@ -99,7 +99,7 @@ int USERD_set_filenames
     label nVar = 0;
     wordList scalars = objects.names(scalarName);
 
-    for (label n=0; n<fieldNames.size(); n++)
+    forAll(fieldNames, n)
     {
         bool isitScalar = false;
         forAll(scalars,i)
@@ -115,7 +115,7 @@ int USERD_set_filenames
 
     wordList vectors = objects.names(vectorName);
 
-    for (label n=0; n<fieldNames.size(); n++)
+    forAll(fieldNames, n)
     {
         bool isitVector = false;
         forAll(vectors,i)
@@ -131,7 +131,7 @@ int USERD_set_filenames
 
     wordList tensors = objects.names(tensorName);
 
-    for (label n=0; n<fieldNames.size(); n++)
+    forAll(fieldNames, n)
     {
         bool isitTensor = false;
         forAll(tensors,i)

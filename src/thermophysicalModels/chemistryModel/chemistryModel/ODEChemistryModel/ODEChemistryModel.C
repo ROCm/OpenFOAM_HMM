@@ -160,8 +160,8 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::omega
     pf = 1.0;
     pr = 1.0;
 
-    label Nl = R.lhs().size();
-    label Nr = R.rhs().size();
+    const label Nl = R.lhs().size();
+    const label Nr = R.rhs().size();
 
     label slRef = 0;
     lRef = R.lhs()[slRef].index;
@@ -331,7 +331,7 @@ void Foam::ODEChemistryModel<CompType, ThermoType>::jacobian
     // length of the first argument must be nSpecie()
     dcdt = omega(c2, T, p);
 
-    for (label ri=0; ri<reactions_.size(); ri++)
+    forAll(reactions_, ri)
     {
         const Reaction<ThermoType>& R = reactions_[ri];
 

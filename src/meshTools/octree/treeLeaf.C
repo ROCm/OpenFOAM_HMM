@@ -453,7 +453,7 @@ Foam::Ostream& Foam::operator<< (Ostream& os, const treeLeaf<Type>& leaf)
     {
         // Storage not trimmed
         os << token::SPACE << leaf.size() << token::SPACE << token::BEGIN_LIST;
-        for (label i = 0; i < leaf.size(); i++)
+        forAll(leaf, i)
         {
             os << token::SPACE << leaf.indices()[i];
         }

@@ -258,7 +258,7 @@ void parcel::setRelaxationTimes
                 scalar vapourSurfaceEnthalpy = 0.0;
                 scalar vapourFarEnthalpy = 0.0;
 
-                for (label k = 0; k < sDB.gasProperties().size(); k++)
+                forAll(sDB.gasProperties(), k)
                 {
                     vapourSurfaceEnthalpy += sDB.composition().Y()[k][celli]*sDB.gasProperties()[k].H(tBoilingSurface);
                     vapourFarEnthalpy += sDB.composition().Y()[k][celli]*sDB.gasProperties()[k].H(temperature);
