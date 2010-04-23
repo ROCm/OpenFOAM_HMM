@@ -118,7 +118,7 @@ void Foam::lduMatrix::solverPerformance::print() const
 }
 
 
-Foam::lduMatrix::solverPerformance::solverPerformance Foam::max
+Foam::lduMatrix::solverPerformance Foam::max
 (
     const lduMatrix::solverPerformance& sp1,
     const lduMatrix::solverPerformance& sp2

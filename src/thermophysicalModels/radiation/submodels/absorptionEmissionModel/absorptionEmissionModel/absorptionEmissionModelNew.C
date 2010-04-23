@@ -35,23 +35,21 @@ Foam::radiation::absorptionEmissionModel::New
     const fvMesh& mesh
 )
 {
-    word absorptionEmissionModelType(dict.lookup("absorptionEmissionModel"));
+    const word modelType(dict.lookup("absorptionEmissionModel"));
 
-    Info<< "Selecting absorptionEmissionModel "
-        << absorptionEmissionModelType << endl;
+    Info<< "Selecting absorptionEmissionModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(absorptionEmissionModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn
         (
             "absorptionEmissionModel::New(const dictionary&, const fvMesh&)"
-        )   << "Unknown absorptionEmissionModelType type "
-            << absorptionEmissionModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid absorptionEmissionModel types are :" << nl
+        )   << "Unknown absorptionEmissionModel type "
+            << modelType << nl << nl
+            << "Valid absorptionEmissionModel types are :" << nl
             << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
     }
 

@@ -58,7 +58,7 @@ IFILES  = $(WM_OPTIONS)/includeDeps
 allFiles : $(FILES) $(SFILES) $(OFILES) $(DFILES) $(IFILES)
 
 $(FILES) : files
-	@$(CPP) $(GFLAGS) $(FFLAGS) files > $(FILES)
+	@$(CPP) $(GFLAGS) $(FFLAGS) files | sed -e 's@   *@ @g' > $(FILES)
 
 $(SFILES): files
 	@$(WM_SCRIPTS)/makeDerivedFiles

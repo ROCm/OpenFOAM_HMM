@@ -26,26 +26,18 @@ License
 #include "error.H"
 #include "radiationModel.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-namespace radiation
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-autoPtr<radiationModel> radiationModel::New
+Foam::autoPtr<Foam::radiation::radiationModel>
+Foam::radiation::radiationModel::New
 (
     const volScalarField& T
 )
 {
-    word radiationModelTypeName;
-
-    // Note: no need to register/keep radiationProperties since models read
-    // it themselves.
-    {
-        IOdictionary radiationPropertiesDict
+    // get model name, but do not register the dictionary
+    const word modelType
+    (
+        IOdictionary
         (
             IOobject
             (
@@ -56,24 +48,21 @@ autoPtr<radiationModel> radiationModel::New
                 IOobject::NO_WRITE,
                 false
             )
-        );
+        ).lookup("radiationModel")
+    );
 
-        radiationPropertiesDict.lookup("radiationModel")
-            >> radiationModelTypeName;
-    }
-
-    Info<< "Selecting radiationModel " << radiationModelTypeName << endl;
+    Info<< "Selecting radiationModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(radiationModelTypeName);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn
         (
             "radiationModel::New(const volScalarField&)"
-        )   << "Unknown radiationModel type " << radiationModelTypeName
-            << nl << nl
+        )   << "Unknown radiationModel type "
+            << modelType << nl << nl
             << "Valid radiationModel types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
@@ -82,10 +71,5 @@ autoPtr<radiationModel> radiationModel::New
     return autoPtr<radiationModel>(cstrIter()(T));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End radiation
-} // End namespace Foam
 
 // ************************************************************************* //

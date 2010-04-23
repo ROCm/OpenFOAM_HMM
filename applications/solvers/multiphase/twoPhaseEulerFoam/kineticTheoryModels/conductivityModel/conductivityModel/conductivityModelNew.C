@@ -32,23 +32,23 @@ Foam::autoPtr<Foam::conductivityModel> Foam::conductivityModel::New
     const dictionary& dict
 )
 {
-    word conductivityModelType(dict.lookup("conductivityModel"));
+    const word modelType(dict.lookup("conductivityModel"));
 
-    Info<< "Selecting conductivityModel "
-        << conductivityModelType << endl;
+    Info<< "Selecting conductivityModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(conductivityModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalError
-            << "conductivityModel::New(const dictionary&) : " << endl
-            << "    unknown conductivityModelType type "
-            << conductivityModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid conductivityModelType types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
+        FatalErrorIn
+        (
+            "conductivityModel::New(const dictionary&)"
+        )   << "Unknown conductivityModel type "
+            << modelType << nl << nl
+            << "Valid conductivityModel types are :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << abort(FatalError);
     }
 
     return autoPtr<conductivityModel>(cstrIter()(dict));

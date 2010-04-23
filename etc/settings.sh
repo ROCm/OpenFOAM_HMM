@@ -235,19 +235,15 @@ OPENMPI)
     ;;
 
 SYSTEMOPENMPI)
-    # This uses the installed openmpi. It needs mpicc installed!
+    # use the system installed openmpi, get library directory via mpicc
     mpi_version=openmpi-system
-
-    # Set compilation flags here instead of in wmake/rules/../mplibSYSTEMOPENMPI
-    export PINC=`mpicc --showme:compile`
-    export PLIBS=`mpicc --showme:link`
-    libDir=`echo "$PLIBS" | sed -e 's/.*-L\([^ ]*\).*/\1/'`
+    libDir=`mpicc --showme:link | sed -e 's/.*-L\([^ ]*\).*/\1/'`
 
     if [ "$FOAM_VERBOSE" -a "$PS1" ]
     then
-        echo "Using system installed MPI:"
-        echo "    compile flags : $PINC"
-        echo "    link flags    : $PLIBS"
+        echo "Using system installed OpenMPI:"
+        echo "    compile flags : `mpicc --showme:compile`"
+        echo "    link flags    : `mpicc --showme:link`"
         echo "    libmpi dir    : $libDir"
     fi
 

@@ -28,7 +28,8 @@ word format
 
 if ((format != "ascii") && (format != "ieeei4r8"))
 {
-    FatalError << "format type: " << format << " unknown."
+    FatalError
+        << "format type: " << format << " unknown."
         << " Valid options are: ascii ieeei4r8"
         << abort(FatalError);
 
@@ -44,6 +45,7 @@ if
     (cells != "hex")
 )
 {
-    FatalError << "cells type: " << cells << " unknown."
+    FatalError
+        << "cells type: " << cells << " unknown."
         << abort(FatalError);
 }

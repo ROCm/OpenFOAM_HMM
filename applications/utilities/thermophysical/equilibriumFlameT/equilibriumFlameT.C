@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 
 
     scalar P(readScalar(control.lookup("P")));
-    word fuel(control.lookup("fuel"));
+    const word fuelName(control.lookup("fuel"));
     scalar n(readScalar(control.lookup("n")));
     scalar m(readScalar(control.lookup("m")));
 
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     Info<< nl << "Reading Burcat data for relevant species" << nl << endl;
 
     // Reactants
-    thermo FUEL(thermoData.lookup(fuel));
+    thermo FUEL(thermoData.lookup(fuelName));
     thermo O2(thermoData.lookup("O2"));
     thermo N2(thermoData.lookup("N2"));
 

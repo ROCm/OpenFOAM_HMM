@@ -35,12 +35,12 @@ Foam::HeatTransferModel<CloudType>::New
     CloudType& owner
 )
 {
-    word HeatTransferModelType(dict.lookup("HeatTransferModel"));
+    const word modelType(dict.lookup("HeatTransferModel"));
 
-    Info<< "Selecting HeatTransferModel " << HeatTransferModelType << endl;
+    Info<< "Selecting HeatTransferModel " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(HeatTransferModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -51,11 +51,11 @@ Foam::HeatTransferModel<CloudType>::New
                 "const dictionary&, "
                 "CloudType&"
             ")"
-        )   << "Unknown HeatTransferModelType type "
-            << HeatTransferModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid HeatTransferModel types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+        )   << "Unknown HeatTransferModel type "
+            << modelType << nl << nl
+            << "Valid HeatTransferModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<HeatTransferModel<CloudType> >(cstrIter()(dict, owner));

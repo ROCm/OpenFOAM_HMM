@@ -32,23 +32,23 @@ Foam::autoPtr<Foam::granularPressureModel> Foam::granularPressureModel::New
     const dictionary& dict
 )
 {
-    word granularPressureModelType(dict.lookup("granularPressureModel"));
+    const word modelType(dict.lookup("granularPressureModel"));
 
-    Info<< "Selecting granularPressureModel "
-        << granularPressureModelType << endl;
+    Info<< "Selecting granularPressureModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(granularPressureModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalError
-            << "granularPressureModel::New(const dictionary&) : " << endl
-            << "    unknown granularPressureModelType type "
-            << granularPressureModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid granularPressureModelType types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
+        FatalErrorIn
+        (
+            "granularPressureModel::New(const dictionary&)"
+        )   << "Unknown granularPressureModel type "
+            << modelType << nl << nl
+            << "Valid granularPressureModel types are :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << abort(FatalError);
     }
 
     return autoPtr<granularPressureModel>(cstrIter()(dict));

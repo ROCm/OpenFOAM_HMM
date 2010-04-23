@@ -32,7 +32,8 @@ Foam::autoPtr<Foam::laminarFlameSpeed> Foam::laminarFlameSpeed::New
     const hhuCombustionThermo& ct
 )
 {
-    IOdictionary laminarFlameSpeedDict
+    // do not register the dictionary
+    IOdictionary propDict
     (
         IOobject
         (
@@ -45,31 +46,27 @@ Foam::autoPtr<Foam::laminarFlameSpeed> Foam::laminarFlameSpeed::New
         )
     );
 
-    word laminarFlameSpeedType
-    (
-        laminarFlameSpeedDict.lookup("laminarFlameSpeedCorrelation")
-    );
+    const word corrType(propDict.lookup("laminarFlameSpeedCorrelation"));
 
-    Info<< "Selecting laminar flame speed correlation "
-        << laminarFlameSpeedType << endl;
+    Info<< "Selecting laminar flame speed correlation " << corrType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(laminarFlameSpeedType);
+        dictionaryConstructorTablePtr_->find(corrType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalIOErrorIn
         (
             "laminarFlameSpeed::New(const hhuCombustionThermo&)",
-            laminarFlameSpeedDict
+            propDict
         )   << "Unknown laminarFlameSpeed type "
-            << laminarFlameSpeedType << endl << endl
+            << corrType << nl << nl
             << "Valid laminarFlameSpeed types are :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 
-    return autoPtr<laminarFlameSpeed>(cstrIter()(laminarFlameSpeedDict, ct));
+    return autoPtr<laminarFlameSpeed>(cstrIter()(propDict, ct));
 }
 
 

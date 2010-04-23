@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
     argList::validArgs.clear();
     argList::validArgs.append("OBJ file");
     argList::validArgs.append("output VTK file");
-    argList::argList args(argc, argv);
+    argList args(argc, argv);
 
     const fileName objName = args[1];
     const fileName outName = args[2];

@@ -36,7 +36,7 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
     const labelField& neighbourRestrictAddressing
 )
 {
-    word coupleType(fineInterface.type());
+    const word coupleType(fineInterface.type());
 
     lduInterfaceConstructorTable::iterator cstrIter =
         lduInterfaceConstructorTablePtr_->find(coupleType);

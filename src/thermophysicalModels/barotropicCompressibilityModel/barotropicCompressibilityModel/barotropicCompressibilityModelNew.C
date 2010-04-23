@@ -35,16 +35,15 @@ Foam::barotropicCompressibilityModel::New
     const word& psiName
 )
 {
-    word bcModelTypeName
+    const word modelType
     (
         compressibilityProperties.lookup("barotropicCompressibilityModel")
     );
 
-    Info<< "Selecting compressibility model "
-        << bcModelTypeName << endl;
+    Info<< "Selecting compressibility model " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(bcModelTypeName);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -52,8 +51,8 @@ Foam::barotropicCompressibilityModel::New
         (
             "barotropicCompressibilityModel::New(const volScalarField&)"
         )   << "Unknown barotropicCompressibilityModel type "
-            << bcModelTypeName << endl << endl
-            << "Valid  barotropicCompressibilityModels are : " << endl
+            << modelType << nl << nl
+            << "Valid barotropicCompressibilityModels are : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

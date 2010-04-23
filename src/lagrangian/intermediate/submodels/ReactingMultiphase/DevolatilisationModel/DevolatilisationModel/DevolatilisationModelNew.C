@@ -35,13 +35,12 @@ Foam::DevolatilisationModel<CloudType>::New
     CloudType& owner
 )
 {
-    word DevolatilisationModelType(dict.lookup("DevolatilisationModel"));
+    const word modelType(dict.lookup("DevolatilisationModel"));
 
-    Info<< "Selecting DevolatilisationModel " << DevolatilisationModelType
-        << endl;
+    Info<< "Selecting DevolatilisationModel " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(DevolatilisationModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -52,11 +51,11 @@ Foam::DevolatilisationModel<CloudType>::New
                 "const dictionary&, "
                 "CloudType&"
             ")"
-        )   << "Unknown DevolatilisationModelType type "
-            << DevolatilisationModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid DevolatilisationModel types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+        )   << "Unknown DevolatilisationModel type "
+            << modelType << nl << nl
+            << "Valid DevolatilisationModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<DevolatilisationModel<CloudType> >(cstrIter()(dict, owner));

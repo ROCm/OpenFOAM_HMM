@@ -29,22 +29,19 @@ License
 
 Foam::autoPtr<Foam::combustionModel> Foam::combustionModel::New
 (
-    const dictionary& combustionProperties,
+    const dictionary& propDict,
     const hsCombustionThermo& thermo,
     const compressible::turbulenceModel& turbulence,
     const surfaceScalarField& phi,
     const volScalarField& rho
 )
 {
-    word combustionModelTypeName = combustionProperties.lookup
-    (
-        "combustionModel"
-    );
+    const word modelType(propDict.lookup("combustionModel"));
 
-    Info<< "Selecting combustion model " << combustionModelTypeName << endl;
+    Info<< "Selecting combustion model " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(combustionModelTypeName);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -52,14 +49,14 @@ Foam::autoPtr<Foam::combustionModel> Foam::combustionModel::New
         (
             "combustionModel::New"
         )   << "Unknown combustionModel type "
-            << combustionModelTypeName << endl << endl
-            << "Valid  combustionModels are : " << endl
+            << modelType << nl << nl
+            << "Valid combustionModels are : " << endl
             << dictionaryConstructorTablePtr_->toc()
             << exit(FatalError);
     }
 
     return autoPtr<combustionModel>
-        (cstrIter()(combustionProperties, thermo, turbulence, phi, rho));
+        (cstrIter()(propDict, thermo, turbulence, phi, rho));
 }
 
 

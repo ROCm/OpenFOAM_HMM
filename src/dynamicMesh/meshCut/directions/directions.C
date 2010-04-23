@@ -303,7 +303,7 @@ Foam::directions::directions
 
     label nDirs = 0;
 
-    word coordSystem(dict.lookup("coordinateSystem"));
+    const word coordSystem(dict.lookup("coordinateSystem"));
 
     if (coordSystem == "global")
     {
@@ -341,7 +341,7 @@ Foam::directions::directions
     {
         const dictionary& patchDict = dict.subDict("patchLocalCoeffs");
 
-        word patchName(patchDict.lookup("patch"));
+        const word patchName(patchDict.lookup("patch"));
 
         label patchI = mesh.boundaryMesh().findPatchID(patchName);
 
@@ -352,7 +352,8 @@ Foam::directions::directions
                 "directions::directions(const polyMesh&, const dictionary&,"
                 "const twoDPointCorrector*"
             )   << "Cannot find patch "
-                << patchName << exit(FatalError);
+                << patchName
+                << exit(FatalError);
         }
 
         // Take zeroth face on patch
@@ -440,7 +441,8 @@ Foam::directions::directions
             "const twoDPointCorrector*"
         )   << "Unknown coordinate system "
             << coordSystem << endl
-            << "Known types are global and patchLocal" << exit(FatalError);
+            << "Known types are global and patchLocal"
+            << exit(FatalError);
     }
 }
 

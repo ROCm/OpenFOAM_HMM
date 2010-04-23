@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
     Info<< "\nStarting time loop\n" << endl;
 
-    autoPtr<Foam::motionSolver> motionPtr = motionSolver::New(mesh);
+    autoPtr<motionSolver> motionPtr = motionSolver::New(mesh);
 
     while (runTime.loop())
     {

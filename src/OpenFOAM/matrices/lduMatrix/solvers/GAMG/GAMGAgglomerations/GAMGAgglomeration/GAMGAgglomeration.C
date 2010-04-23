@@ -102,7 +102,7 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
         )
     )
     {
-        word agglomeratorType(controlDict.lookup("agglomerator"));
+        const word agglomeratorType(controlDict.lookup("agglomerator"));
 
         dlLibraryTable::open
         (
@@ -157,7 +157,7 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
         )
     )
     {
-        word agglomeratorType(controlDict.lookup("agglomerator"));
+        const word agglomeratorType(controlDict.lookup("agglomerator"));
 
         dlLibraryTable::open
         (

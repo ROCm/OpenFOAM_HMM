@@ -32,15 +32,11 @@ Foam::autoPtr<Foam::psiChemistryModel> Foam::psiChemistryModel::New
     const fvMesh& mesh
 )
 {
-    word psiChemistryModelType;
-    word thermoTypeName;
-    word userModel;
-
-    // Enclose the creation of the chemistrtyProperties to ensure it is
-    // deleted before the chemistrtyProperties is created otherwise the
-    // dictionary is entered in the database twice
-    {
-        IOdictionary chemistryPropertiesDict
+    // get model name, but do not register the dictionary
+    // otherwise it is registered in the database twice
+    const word userModel
+    (
+        IOdictionary
         (
             IOobject
             (
@@ -48,27 +44,26 @@ Foam::autoPtr<Foam::psiChemistryModel> Foam::psiChemistryModel::New
                 mesh.time().constant(),
                 mesh,
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                false
             )
-        );
+        ).lookup("psiChemistryModel")
+    );
 
-        chemistryPropertiesDict.lookup("psiChemistryModel") >> userModel;
+    // construct chemistry model type name by inserting first template argument
+    const label tempOpen = userModel.find('<');
+    const label tempClose = userModel.find('>');
 
-        // construct chemistry model type name by inserting first template
-        // argument
-        label tempOpen = userModel.find('<');
-        label tempClose = userModel.find('>');
+    const word className = userModel(0, tempOpen);
+    const word thermoTypeName =
+        userModel(tempOpen + 1, tempClose - tempOpen - 1);
 
-        word className = userModel(0, tempOpen);
-        thermoTypeName = userModel(tempOpen + 1, tempClose - tempOpen - 1);
-
-        psiChemistryModelType =
-            className + '<' + typeName + ',' + thermoTypeName + '>';
-    }
+    const word modelType =
+        className + '<' + typeName + ',' + thermoTypeName + '>';
 
     if (debug)
     {
-        Info<< "Selecting psiChemistryModel " << psiChemistryModelType << endl;
+        Info<< "Selecting psiChemistryModel " << modelType << endl;
     }
     else
     {
@@ -76,16 +71,18 @@ Foam::autoPtr<Foam::psiChemistryModel> Foam::psiChemistryModel::New
     }
 
     fvMeshConstructorTable::iterator cstrIter =
-        fvMeshConstructorTablePtr_->find(psiChemistryModelType);
+        fvMeshConstructorTablePtr_->find(modelType);
 
     if (cstrIter == fvMeshConstructorTablePtr_->end())
     {
         if (debug)
         {
             FatalErrorIn("psiChemistryModelBase::New(const mesh&)")
-                << "Unknown psiChemistryModel type " << psiChemistryModelType
-                << nl << nl << "Valid psiChemistryModel types are:" << nl
-                << fvMeshConstructorTablePtr_->sortedToc() << nl << exit(FatalError);
+                << "Unknown psiChemistryModel type "
+                << modelType << nl << nl
+                << "Valid psiChemistryModel types are:" << nl
+                << fvMeshConstructorTablePtr_->sortedToc() << nl
+                << exit(FatalError);
         }
         else
         {

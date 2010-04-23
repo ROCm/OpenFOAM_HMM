@@ -44,8 +44,8 @@ Foam::autoPtr<Foam::ODESolver> Foam::ODESolver::New
         (
             "ODESolver::New(const word& ODESolverTypeName, const ODE& ode)"
         )   << "Unknown ODESolver type "
-            << ODESolverTypeName << endl << endl
-            << "Valid  ODESolvers are : " << endl
+            << ODESolverTypeName << nl << nl
+            << "Valid ODESolvers are : " << endl
             << ODEConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

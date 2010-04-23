@@ -32,20 +32,21 @@ Foam::autoPtr<Foam::extrudeModel> Foam::extrudeModel::New
     const dictionary& dict
 )
 {
-    word extrudeModelType(dict.lookup("extrudeModel"));
+    const word modelType(dict.lookup("extrudeModel"));
 
-    Info<< "Selecting extrudeModel " << extrudeModelType << endl;
+    Info<< "Selecting extrudeModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(extrudeModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalErrorIn("extrudeModel::New(const dictionary&)")
-            << "Unknown extrudeModelType type "
-            << extrudeModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid extrudeModel types are :" << nl
+        FatalErrorIn
+        (
+            "extrudeModel::New(const dictionary&)"
+        )   << "Unknown extrudeModel type "
+            << modelType << nl << nl
+            << "Valid extrudeModel types are :" << nl
             << dictionaryConstructorTablePtr_->sortedToc() << nl
             << exit(FatalError);
     }
@@ -55,4 +56,3 @@ Foam::autoPtr<Foam::extrudeModel> Foam::extrudeModel::New
 
 
 // ************************************************************************* //
-

@@ -33,7 +33,7 @@ Foam::autoPtr<Foam::GAMGInterfaceField> Foam::GAMGInterfaceField::New
     const lduInterfaceField& fineInterface
 )
 {
-    word coupleType(fineInterface.interfaceFieldType());
+    const word coupleType(fineInterface.interfaceFieldType());
 
     lduInterfaceConstructorTable::iterator cstrIter =
         lduInterfaceConstructorTablePtr_->find(coupleType);
@@ -45,7 +45,8 @@ Foam::autoPtr<Foam::GAMGInterfaceField> Foam::GAMGInterfaceField::New
             "GAMGInterfaceField::New"
             "(const GAMGInterface& GAMGCp, "
             "const lduInterfaceField& fineInterface)"
-        )   << "Unknown GAMGInterfaceField type " << coupleType << ".\n"
+        )   << "Unknown GAMGInterfaceField type "
+            << coupleType << nl
             << "Valid GAMGInterfaceField types are :"
             << lduInterfaceConstructorTablePtr_->sortedToc()
             << exit(FatalError);

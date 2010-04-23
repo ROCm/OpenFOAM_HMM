@@ -30,52 +30,37 @@ License
 #include "ORourkeCollisionModel.H"
 #include "trajectoryModel.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-autoPtr<collisionModel> collisionModel::New
+Foam::autoPtr<Foam::collisionModel> Foam::collisionModel::New
 (
     const dictionary& dict,
     spray& sm,
     Random& rndGen
 )
 {
-    word collisionModelType
-    (
-        dict.lookup("collisionModel")
-    );
+    const word modelType(dict.lookup("collisionModel"));
 
-    Info<< "Selecting collisionModel "
-         << collisionModelType << endl;
-
+    Info<< "Selecting collisionModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(collisionModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalError
-            << "collisionModel::New(const dictionary&, const spray&) : "
-            << endl
-            << "    unknown collisionModelType type "
-            << collisionModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid collisionModel types are :"
-            << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc()
+        FatalErrorIn
+        (
+            "collisionModel::New(const dictionary&, const spray&)"
+        )   << "Unknown collisionModel type "
+            << modelType << nl << nl
+            << "Valid collisionModel types are :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << abort(FatalError);
     }
 
     return autoPtr<collisionModel>(cstrIter()(dict, sm, rndGen));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

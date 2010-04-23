@@ -28,48 +28,35 @@ License
 #include "dispersionModel.H"
 #include "noDispersion.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-autoPtr<dispersionModel> dispersionModel::New
+Foam::autoPtr<Foam::dispersionModel> Foam::dispersionModel::New
 (
     const dictionary& dict,
     spray& sm
 )
 {
-    word dispersionModelType
-    (
-        dict.lookup("dispersionModel")
-    );
+    const word modelType(dict.lookup("dispersionModel"));
 
-    Info<< "Selecting dispersionModel "
-         << dispersionModelType << endl;
+    Info<< "Selecting dispersionModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(dispersionModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalError
-            << "dispersionModel::New(const dictionary&, const spray&) : "
-            << endl
-            << "    unknown dispersionModelType type "
-            << dispersionModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid dispersionModel types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
+        FatalErrorIn
+        (
+            "dispersionModel::New(const dictionary&, const spray&)"
+        )   << "Unknown dispersionModel type "
+            << modelType << nl << nl
+            << "Valid dispersionModel types are :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << abort(FatalError);
     }
 
     return autoPtr<dispersionModel>(cstrIter()(dict, sm));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

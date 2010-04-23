@@ -29,7 +29,7 @@ License
 
 Foam::autoPtr<Foam::XiModel> Foam::XiModel::New
 (
-    const dictionary& XiProperties,
+    const dictionary& propDict,
     const hhuCombustionThermo& thermo,
     const compressible::RASModel& turbulence,
     const volScalarField& Su,
@@ -38,12 +38,12 @@ Foam::autoPtr<Foam::XiModel> Foam::XiModel::New
     const surfaceScalarField& phi
 )
 {
-    word XiModelTypeName = XiProperties.lookup("XiModel");
+    const word modelType(propDict.lookup("XiModel"));
 
-    Info<< "Selecting flame-wrinkling model " << XiModelTypeName << endl;
+    Info<< "Selecting flame-wrinkling model " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(XiModelTypeName);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -51,14 +51,14 @@ Foam::autoPtr<Foam::XiModel> Foam::XiModel::New
         (
             "XiModel::New"
         )   << "Unknown XiModel type "
-            << XiModelTypeName << endl << endl
-            << "Valid  XiModels are : " << endl
+            << modelType << nl << nl
+            << "Valid XiModels are : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
     return autoPtr<XiModel>
-        (cstrIter()(XiProperties, thermo, turbulence, Su, rho, b, phi));
+        (cstrIter()(propDict, thermo, turbulence, Su, rho, b, phi));
 }
 
 

@@ -28,33 +28,28 @@ License
 #include "injectorModel.H"
 #include "volFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-autoPtr<injectorModel> injectorModel::New
+Foam::autoPtr<Foam::injectorModel> Foam::injectorModel::New
 (
     const dictionary& dict,
     spray& sm
 )
 {
-    word injectorModelType(dict.lookup("injectorModel"));
+    const word modelType(dict.lookup("injectorModel"));
 
-    Info<< "Selecting injectorModel "
-         << injectorModelType << endl;
+    Info<< "Selecting injectorModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(injectorModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn("injectorModel::New(const dictionary&, spray&)")
-            << "Unknown injectorModelType type " << injectorModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid injectorModel types are:" << nl
+            << "Unknown injectorModel type "
+            << modelType << nl << nl
+            << "Valid injectorModel types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << abort(FatalError);
     }
@@ -62,9 +57,5 @@ autoPtr<injectorModel> injectorModel::New
     return autoPtr<injectorModel>(cstrIter()(dict, sm));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

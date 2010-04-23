@@ -29,12 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-autoPtr<viscosityModel> viscosityModel::New
+Foam::autoPtr<Foam::viscosityModel> Foam::viscosityModel::New
 (
     const word& name,
     const dictionary& viscosityProperties,
@@ -42,13 +37,12 @@ autoPtr<viscosityModel> viscosityModel::New
     const surfaceScalarField& phi
 )
 {
-    word viscosityModelTypeName(viscosityProperties.lookup("transportModel"));
+    const word modelType(viscosityProperties.lookup("transportModel"));
 
-    Info<< "Selecting incompressible transport model "
-        << viscosityModelTypeName << endl;
+    Info<< "Selecting incompressible transport model " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(viscosityModelTypeName);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -57,8 +51,8 @@ autoPtr<viscosityModel> viscosityModel::New
             "viscosityModel::New(const volVectorField&, "
             "const surfaceScalarField&)"
         )   << "Unknown viscosityModel type "
-            << viscosityModelTypeName << endl << endl
-            << "Valid  viscosityModels are : " << endl
+            << modelType << nl << nl
+            << "Valid viscosityModels are : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -67,9 +61,5 @@ autoPtr<viscosityModel> viscosityModel::New
         (cstrIter()(name, viscosityProperties, U, phi));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

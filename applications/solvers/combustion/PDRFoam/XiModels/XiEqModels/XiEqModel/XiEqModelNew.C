@@ -29,18 +29,18 @@ License
 
 Foam::autoPtr<Foam::XiEqModel> Foam::XiEqModel::New
 (
-    const dictionary& XiEqProperties,
+    const dictionary& propDict,
     const hhuCombustionThermo& thermo,
     const compressible::RASModel& turbulence,
     const volScalarField& Su
 )
 {
-    word XiEqModelTypeName = XiEqProperties.lookup("XiEqModel");
+    const word modelType(propDict.lookup("XiEqModel"));
 
-    Info<< "Selecting flame-wrinkling model " << XiEqModelTypeName << endl;
+    Info<< "Selecting flame-wrinkling model " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(XiEqModelTypeName);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -53,14 +53,13 @@ Foam::autoPtr<Foam::XiEqModel> Foam::XiEqModel::New
             "    const volScalarField& Su"
             ")"
         )   << "Unknown XiEqModel type "
-            << XiEqModelTypeName << endl << endl
-            << "Valid  XiEqModels are : " << endl
+            << modelType << nl << nl
+            << "Valid XiEqModels are : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
-    return autoPtr<XiEqModel>
-        (cstrIter()(XiEqProperties, thermo, turbulence, Su));
+    return autoPtr<XiEqModel>(cstrIter()(propDict, thermo, turbulence, Su));
 }
 
 

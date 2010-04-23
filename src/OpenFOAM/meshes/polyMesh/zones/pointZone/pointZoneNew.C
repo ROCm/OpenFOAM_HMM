@@ -43,7 +43,7 @@ Foam::autoPtr<Foam::pointZone> Foam::pointZone::New
             << endl;
     }
 
-    word zoneType(dict.lookup("type"));
+    const word zoneType(dict.lookup("type"));
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(zoneType);
@@ -55,7 +55,8 @@ Foam::autoPtr<Foam::pointZone> Foam::pointZone::New
             "pointZone::New(const word&, const dictionary&, "
             "const label, const pointZoneMesh&)",
             dict
-        )   << "Unknown pointZone type " << zoneType << endl << endl
+        )   << "Unknown pointZone type "
+            << zoneType << nl << nl
             << "Valid pointZone types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);

@@ -78,12 +78,12 @@ do
         continue
     fi
 
-    find $checkDir -depth -type d -name Make -print | while read makeDir
+    find $checkDir -depth -type d -name Make -print | while read MakeDir
     do
-        topDir=${makeDir%/Make}    # trim /Make from the end
+        topDir=${MakeDir%/Make}    # trim /Make from the end
         if [ -d "$topDir" ]
         then
-            if grep -e '^ *LIB *=' "$makeDir/files" >/dev/null 2>&1
+            if grep -e '^ *LIB *=' "$MakeDir/files" >/dev/null 2>&1
             then
                 wmakeLnInclude -f $topDir
             elif [ -d "$topDir/lnInclude" ]

@@ -46,7 +46,7 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
     {
         case PatchInteractionModel<CloudType>::itOther:
         {
-            word interactionTypeName(this->coeffDict().lookup("type"));
+            const word interactionTypeName(this->coeffDict().lookup("type"));
 
             FatalErrorIn
             (

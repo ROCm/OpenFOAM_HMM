@@ -33,14 +33,12 @@ Foam::autoPtr<Foam::solidBodyMotionFunction> Foam::solidBodyMotionFunction::New
     const Time& runTime
 )
 {
-    word solidBodyMotionFunctionTypeName =
-        SBMFCoeffs.lookup("solidBodyMotionFunction");
+    const word motionType(SBMFCoeffs.lookup("solidBodyMotionFunction"));
 
-    Info<< "Selecting solid-body motion function "
-        << solidBodyMotionFunctionTypeName << endl;
+    Info<< "Selecting solid-body motion function " << motionType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(solidBodyMotionFunctionTypeName);
+        dictionaryConstructorTablePtr_->find(motionType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -52,8 +50,8 @@ Foam::autoPtr<Foam::solidBodyMotionFunction> Foam::solidBodyMotionFunction::New
             "    const Time& runTime"
             ")"
         )   << "Unknown solidBodyMotionFunction type "
-            << solidBodyMotionFunctionTypeName << endl << endl
-            << "Valid  solidBodyMotionFunctions are : " << endl
+            << motionType << nl << nl
+            << "Valid solidBodyMotionFunctions are : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

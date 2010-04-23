@@ -25,27 +25,18 @@ License
 
 #include "SRFModel.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-namespace SRF
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-autoPtr<SRFModel> SRFModel::New
+Foam::autoPtr<Foam::SRF::SRFModel> Foam::SRF::SRFModel::New
 (
     const volVectorField& Urel
 )
 {
-    word SRFModelTypeName;
-
-    // Enclose the creation of the SRFPropertiesDict to ensure it is
-    // deleted before the SRFModel is created - otherwise the dictionary
-    // is entered in the database twice
-    {
-        IOdictionary SRFPropertiesDict
+    // get model name, but do not register the dictionary
+    // otherwise it is registered in the database twice
+    const word modelType
+    (
+        IOdictionary
         (
             IOobject
             (
@@ -53,25 +44,24 @@ autoPtr<SRFModel> SRFModel::New
                 Urel.time().constant(),
                 Urel.db(),
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                false
             )
-        );
+        ).lookup("SRFModel")
+    );
 
-        SRFPropertiesDict.lookup("SRFModel") >> SRFModelTypeName;
-    }
-
-    Info<< "Selecting SRFModel " << SRFModelTypeName << endl;
+    Info<< "Selecting SRFModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(SRFModelTypeName);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn
         (
             "SRFModel::New(const fvMesh&)"
-        )   << "Unknown SRFModel type " << SRFModelTypeName
-            << nl << nl
+        )   << "Unknown SRFModel type "
+            << modelType << nl << nl
             << "Valid SRFModel types are :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
@@ -80,10 +70,5 @@ autoPtr<SRFModel> SRFModel::New
     return autoPtr<SRFModel>(cstrIter()(Urel));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace SRF
-} // End namespace Foam
 
 // ************************************************************************* //

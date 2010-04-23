@@ -53,8 +53,7 @@ Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
             "PointPatchField<Type>::New"
             "(const word&, const word&, const pointPatch&, const Field<Type>&)"
         )   << "Unknown patchFieldType type "
-            << patchFieldType
-            << endl << endl
+            << patchFieldType << nl << nl
             << "Valid patchField types are :" << endl
             << pointPatchConstructorTablePtr_->sortedToc()
             << exit(FatalError);
@@ -143,7 +142,7 @@ Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
                 "New(const pointPatch&, const Field<Type>&, const dictionary&)",
                 dict
             )   << "Unknown patchField type " << patchFieldType
-                << " for patch type " << p.type() << endl << endl
+                << " for patch type " << p.type() << nl << nl
                 << "Valid patchField types are :" << endl
                 << dictionaryConstructorTablePtr_->sortedToc()
                 << exit(FatalIOError);
@@ -219,12 +218,15 @@ Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
     {
         FatalErrorIn
         (
-            "PointPatchField<Type>::"
-            "New(const pointPatchField<Type>&, "
-            "const pointPatch&, const Field<Type>&, "
-            "const pointPatchFieldMapper&)"
-        )   << "unknown patchTypefield type "
-            << ptf.type() << endl << endl
+            "PointPatchField<Type>::New"
+            "("
+            "const pointPatchField<Type>&, "
+            "const pointPatch&, "
+            "const DimensionedField<Type, pointMesh>&, "
+            "const pointPatchFieldMapper&"
+            ")"
+        )   << "Unknown patchField type "
+            << ptf.type() << nl << nl
             << "Valid patchField types are :" << endl
             << patchMapperConstructorTablePtr_->sortedToc()
             << exit(FatalError);

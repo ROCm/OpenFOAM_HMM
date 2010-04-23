@@ -29,16 +29,14 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::autoPtr<Foam::interpolation<Type> >
-Foam::interpolation<Type>::New
+Foam::autoPtr<Foam::interpolation<Type> > Foam::interpolation<Type>::New
 (
     const word& interpolationType,
     const GeometricField<Type, fvPatchField, volMesh>& psi
 )
 {
     typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_
-            ->find(interpolationType);
+        dictionaryConstructorTablePtr_->find(interpolationType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -58,8 +56,7 @@ Foam::interpolation<Type>::New
 
 
 template<class Type>
-Foam::autoPtr<Foam::interpolation<Type> >
-Foam::interpolation<Type>::New
+Foam::autoPtr<Foam::interpolation<Type> > Foam::interpolation<Type>::New
 (
     const dictionary& interpolationSchemes,
     const GeometricField<Type, fvPatchField, volMesh>& psi

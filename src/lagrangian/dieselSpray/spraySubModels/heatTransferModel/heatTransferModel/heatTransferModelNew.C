@@ -28,32 +28,27 @@ License
 #include "heatTransferModel.H"
 #include "noHeatTransfer.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-autoPtr<heatTransferModel> heatTransferModel::New
+Foam::autoPtr<Foam::heatTransferModel> Foam::heatTransferModel::New
 (
     const dictionary& dict
 )
 {
-    word heatTransferModelType(dict.lookup("heatTransferModel"));
+    const word modelType(dict.lookup("heatTransferModel"));
 
-    Info<< "Selecting heatTransferModel " << heatTransferModelType << endl;
+    Info<< "Selecting heatTransferModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(heatTransferModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn("heatTransferModel::New(const dictionary&)")
-            << "Unknown heatTransferModelType type "
-            << heatTransferModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid heatTransferModel types are:" << nl
+            << "Unknown heatTransferModel type "
+            << modelType << nl << nl
+            << "Valid heatTransferModel types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << abort(FatalError);
     }
@@ -61,9 +56,5 @@ autoPtr<heatTransferModel> heatTransferModel::New
     return autoPtr<heatTransferModel>(cstrIter()(dict));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

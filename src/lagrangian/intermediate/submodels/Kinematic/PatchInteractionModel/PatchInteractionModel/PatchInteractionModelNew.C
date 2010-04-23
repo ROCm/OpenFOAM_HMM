@@ -35,13 +35,12 @@ Foam::PatchInteractionModel<CloudType>::New
     CloudType& owner
 )
 {
-    word PatchInteractionModelType(dict.lookup("PatchInteractionModel"));
+    const word modelType(dict.lookup("PatchInteractionModel"));
 
-    Info<< "Selecting PatchInteractionModel " << PatchInteractionModelType
-        << endl;
+    Info<< "Selecting PatchInteractionModel " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(PatchInteractionModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -52,11 +51,11 @@ Foam::PatchInteractionModel<CloudType>::New
                 "const dictionary&, "
                 "CloudType&"
             ")"
-        )   << "Unknown PatchInteractionModelType type "
-            << PatchInteractionModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid PatchInteractionModel types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+        )   << "Unknown PatchInteractionModel type "
+            << modelType << nl << nl
+            << "Valid PatchInteractionModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<PatchInteractionModel<CloudType> >(cstrIter()(dict, owner));

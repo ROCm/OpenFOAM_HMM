@@ -32,23 +32,24 @@ Foam::autoPtr<Foam::radialModel> Foam::radialModel::New
     const dictionary& dict
 )
 {
-    word radialModelType(dict.lookup("radialModel"));
+    const word modelType(dict.lookup("radialModel"));
 
-    Info<< "Selecting radialModel "
-        << radialModelType << endl;
+    Info<< "Selecting radialModel " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(radialModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalError
-            << "radialModel::New(const dictionary&) : " << endl
-            << "    unknown radialModelType type "
-            << radialModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid radialModelType types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
+        FatalErrorIn
+        (
+            "radialModel::New(const dictionary&)"
+        )
+            << "Unknown radialModel type "
+            << modelType << nl << nl
+            << "Valid radialModel types are :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << abort(FatalError);
     }
 
     return autoPtr<radialModel>(cstrIter()(dict));

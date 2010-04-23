@@ -51,7 +51,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::spray::spray
 (
     const volVectorField& U,
@@ -340,8 +339,8 @@ Foam::spray::spray
                 Info<< specieName << endl;
             }
 
-            FatalError<<
-                "The liquid component " << liquidName
+            FatalError
+                << "The liquid component " << liquidName
                 << " does not exist in the species composition.Y() list.\n"
                 << "(Probably not defined in <chem.inp>)"
                 << abort(FatalError);

@@ -36,15 +36,13 @@ Foam::IntegrationScheme<Type>::New
     const dictionary& dict
 )
 {
-    word IntegrationSchemeTypeName;
-
-    dict.lookup(phiName) >> IntegrationSchemeTypeName;
+    const word schemeName(dict.lookup(phiName));
 
     Info<< "Selecting " << phiName << " IntegrationScheme "
-        << IntegrationSchemeTypeName << endl;
+        << schemeName << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(IntegrationSchemeTypeName);
+        dictionaryConstructorTablePtr_->find(schemeName);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -52,7 +50,7 @@ Foam::IntegrationScheme<Type>::New
         (
             "IntegrationScheme::New(const dictionary&)"
         )   << "Unknown IntegrationScheme type "
-            << IntegrationSchemeTypeName << nl << nl
+            << schemeName << nl << nl
             << "Valid IntegrationScheme types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc() << nl
             << exit(FatalError);

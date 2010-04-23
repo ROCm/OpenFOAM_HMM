@@ -189,7 +189,7 @@ Foam::plane::plane(const dictionary& dict)
     unitVector_(vector::zero),
     basePoint_(point::zero)
 {
-    word planeType(dict.lookup("planeType"));
+    const word planeType(dict.lookup("planeType"));
 
     if (planeType == "planeEquation")
     {

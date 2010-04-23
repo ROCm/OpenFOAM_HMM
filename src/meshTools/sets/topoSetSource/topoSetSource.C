@@ -31,70 +31,10 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(topoSetSource, 0);
-defineRunTimeSelectionTable(topoSetSource, word);
-defineRunTimeSelectionTable(topoSetSource, istream);
-
-// Construct named object from dictionary
-autoPtr<topoSetSource> topoSetSource::New
-(
-    const word& topoSetSourceType,
-    const polyMesh& mesh,
-    const dictionary& dict
-)
-{
-    wordConstructorTable::iterator cstrIter =
-        wordConstructorTablePtr_
-            ->find(topoSetSourceType);
-
-    if (cstrIter == wordConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "topoSetSource::New(const word&, "
-            "const polyMesh&, const dictionary&)"
-        )   << "Unknown topoSetSource type " << topoSetSourceType
-            << endl << endl
-            << "Valid topoSetSource types : " << endl
-            << wordConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
-    }
-
-    return autoPtr<topoSetSource>(cstrIter()(mesh, dict));
+    defineTypeNameAndDebug(topoSetSource, 0);
+    defineRunTimeSelectionTable(topoSetSource, word);
+    defineRunTimeSelectionTable(topoSetSource, istream);
 }
-
-
-// Construct named object from Istream
-autoPtr<topoSetSource> topoSetSource::New
-(
-    const word& topoSetSourceType,
-    const polyMesh& mesh,
-    Istream& is
-)
-{
-    istreamConstructorTable::iterator cstrIter =
-        istreamConstructorTablePtr_
-            ->find(topoSetSourceType);
-
-    if (cstrIter == istreamConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "topoSetSource::New(const word&, "
-            "const polyMesh&, Istream&)"
-        )   << "Unknown topoSetSource type " << topoSetSourceType
-            << endl << endl
-            << "Valid topoSetSource types : " << endl
-            << istreamConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
-    }
-
-    return autoPtr<topoSetSource>(cstrIter()(mesh, is));
-}
-
-
-} // End namespace Foam
 
 
 Foam::HashTable<Foam::string>* Foam::topoSetSource::usageTablePtr_ = NULL;
@@ -121,6 +61,63 @@ const Foam::string Foam::topoSetSource::illegalSource_
 (
     "Illegal topoSetSource name"
 );
+
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::topoSetSource> Foam::topoSetSource::New
+(
+    const word& topoSetSourceType,
+    const polyMesh& mesh,
+    const dictionary& dict
+)
+{
+    wordConstructorTable::iterator cstrIter =
+        wordConstructorTablePtr_->find(topoSetSourceType);
+
+    if (cstrIter == wordConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "topoSetSource::New(const word&, "
+            "const polyMesh&, const dictionary&)"
+        )   << "Unknown topoSetSource type " << topoSetSourceType
+            << endl << endl
+            << "Valid topoSetSource types : " << endl
+            << wordConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<topoSetSource>(cstrIter()(mesh, dict));
+}
+
+
+Foam::autoPtr<Foam::topoSetSource> Foam::topoSetSource::New
+(
+    const word& topoSetSourceType,
+    const polyMesh& mesh,
+    Istream& is
+)
+{
+    istreamConstructorTable::iterator cstrIter =
+        istreamConstructorTablePtr_->find(topoSetSourceType);
+
+    if (cstrIter == istreamConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "topoSetSource::New(const word&, "
+            "const polyMesh&, Istream&)"
+        )   << "Unknown topoSetSource type " << topoSetSourceType
+            << endl << endl
+            << "Valid topoSetSource types : " << endl
+            << istreamConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<topoSetSource>(cstrIter()(mesh, is));
+}
 
 
 Foam::Istream& Foam::topoSetSource::checkIs(Istream& is)
@@ -161,7 +158,6 @@ void Foam::topoSetSource::addOrDelete
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::topoSetSource::topoSetSource(const polyMesh& mesh)
 :
     mesh_(mesh)

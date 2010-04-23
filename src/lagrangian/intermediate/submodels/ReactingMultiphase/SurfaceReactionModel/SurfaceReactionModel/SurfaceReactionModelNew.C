@@ -35,13 +35,12 @@ Foam::SurfaceReactionModel<CloudType>::New
     CloudType& owner
 )
 {
-    word SurfaceReactionModelType(dict.lookup("SurfaceReactionModel"));
+    const word modelType(dict.lookup("SurfaceReactionModel"));
 
-    Info<< "Selecting SurfaceReactionModel " << SurfaceReactionModelType
-        << endl;
+    Info<< "Selecting SurfaceReactionModel " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(SurfaceReactionModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -52,11 +51,11 @@ Foam::SurfaceReactionModel<CloudType>::New
                 "const dictionary&, "
                 "CloudType&"
             ")"
-        )   << "Unknown SurfaceReactionModelType type "
-            << SurfaceReactionModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid SurfaceReactionModel types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+        )   << "Unknown SurfaceReactionModel type "
+            << modelType << nl << nl
+            << "Valid SurfaceReactionModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<SurfaceReactionModel<CloudType> >(cstrIter()(dict, owner));

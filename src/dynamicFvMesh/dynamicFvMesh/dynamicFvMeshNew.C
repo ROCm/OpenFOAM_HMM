@@ -31,10 +31,8 @@ License
 
 Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
 {
-    // Enclose the creation of the dynamicMesh to ensure it is
-    // deleted before the dynamicFvMesh is created otherwise the dictionary
-    // is entered in the database twice
-    IOdictionary dynamicMeshDict
+    // do not register the dictionary
+    IOdictionary dict
     (
         IOobject
         (
@@ -47,13 +45,13 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
         )
     );
 
-    word dynamicFvMeshTypeName(dynamicMeshDict.lookup("dynamicFvMesh"));
+    const word dynamicFvMeshTypeName(dict.lookup("dynamicFvMesh"));
 
     Info<< "Selecting dynamicFvMesh " << dynamicFvMeshTypeName << endl;
 
     dlLibraryTable::open
     (
-        dynamicMeshDict,
+        dict,
         "dynamicFvMeshLibs",
         IOobjectConstructorTablePtr_
     );
@@ -75,8 +73,8 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
         FatalErrorIn
         (
             "dynamicFvMesh::New(const IOobject&)"
-        )   << "Unknown dynamicFvMesh type " << dynamicFvMeshTypeName
-            << endl << endl
+        )   << "Unknown dynamicFvMesh type "
+            << dynamicFvMeshTypeName << nl << nl
             << "Valid dynamicFvMesh types are :" << endl
             << IOobjectConstructorTablePtr_->sortedToc()
             << exit(FatalError);

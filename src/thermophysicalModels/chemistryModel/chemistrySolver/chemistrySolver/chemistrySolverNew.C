@@ -36,9 +36,9 @@ Foam::chemistrySolver<CompType, ThermoType>::New
     const word& thermoTypeName
 )
 {
-    word modelName(model.lookup("chemistrySolver"));
+    const word modelName(model.lookup("chemistrySolver"));
 
-    word chemistrySolverType =
+    const word chemistrySolverType =
         modelName + '<' + compTypeName + ',' + thermoTypeName + '>';
 
     Info<< "Selecting chemistrySolver " << modelName << endl;
@@ -66,8 +66,9 @@ Foam::chemistrySolver<CompType, ThermoType>::New
                 "const word&, "
                 "const word&"
             ")"
-        )   << "Unknown chemistrySolver type " << modelName
-            << nl << nl << "Valid chemistrySolver types are:" << nl
+        )   << "Unknown chemistrySolver type "
+            << modelName << nl << nl
+            << "Valid chemistrySolver types are:" << nl
             << models << nl << exit(FatalError);
     }
 

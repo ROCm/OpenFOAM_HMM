@@ -34,12 +34,12 @@ Foam::autoPtr<Foam::DragModel<CloudType> > Foam::DragModel<CloudType>::New
     CloudType& owner
 )
 {
-    word DragModelType(dict.lookup("DragModel"));
+    const word modelType(dict.lookup("DragModel"));
 
-    Info<< "Selecting DragModel " << DragModelType << endl;
+    Info<< "Selecting DragModel " << modelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(DragModelType);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -50,10 +50,9 @@ Foam::autoPtr<Foam::DragModel<CloudType> > Foam::DragModel<CloudType>::New
                 "const dictionary&,"
                 "CloudType&"
             ")"
-        )   << "Unknown DragModelType type "
-            << DragModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid DragModel types are:" << nl
+        )   << "Unknown DragModel type "
+            << modelType << nl << nl
+            << "Valid DragModel types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

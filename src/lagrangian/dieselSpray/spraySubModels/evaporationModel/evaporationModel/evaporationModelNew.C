@@ -31,10 +31,12 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::evaporationModel>
-Foam::evaporationModel::New(const dictionary& dict)
+Foam::autoPtr<Foam::evaporationModel> Foam::evaporationModel::New
+(
+    const dictionary& dict
+)
 {
-    word modelType(dict.lookup("evaporationModel"));
+    const word modelType(dict.lookup("evaporationModel"));
 
     Info<< "Selecting evaporationModel " << modelType << endl;
 
@@ -44,9 +46,8 @@ Foam::evaporationModel::New(const dictionary& dict)
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn("evaporationModel::New(const dictionary&)")
-            << "Unknown evaporationModelType type " << modelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid evaporationModel types are: " << nl
+            << "Unknown evaporationModel type "
+            << modelType << nl << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << abort(FatalError);
     }
