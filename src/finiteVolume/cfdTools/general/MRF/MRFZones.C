@@ -86,6 +86,15 @@ void Foam::MRFZones::relativeVelocity(volVectorField& U) const
 }
 
 
+void Foam::MRFZones::absoluteVelocity(volVectorField& U) const
+{
+    forAll(*this, i)
+    {
+        operator[](i).absoluteVelocity(U);
+    }
+}
+
+
 void Foam::MRFZones::relativeFlux(surfaceScalarField& phi) const
 {
     forAll(*this, i)
