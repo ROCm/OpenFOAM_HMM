@@ -80,6 +80,23 @@ int main(int argc, char *argv[])
         );
 
         H.write();
+
+        Info<< nl
+            << "Creating field HdotGradH for time "
+            << runTime.timeName() << endl;
+
+        volVectorField HdotGradH
+        (
+            IOobject
+            (
+                "HdotGradH",
+                runTime.timeName(),
+                mesh
+            ),
+            H & fvc::grad(H)
+        );
+
+        HdotGradH.write();
     }
 
     if (!args.optionFound("noB"))
