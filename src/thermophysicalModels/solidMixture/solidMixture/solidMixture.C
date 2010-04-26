@@ -27,7 +27,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::solidMixture::solidMixture
 (
     const dictionary& thermophysicalProperties

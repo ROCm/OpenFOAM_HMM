@@ -149,7 +149,7 @@ Foam::PatchInteractionModel<CloudType>::coeffDict() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewPatchInteractionModel.C"
+#include "PatchInteractionModelNew.C"
 
 // ************************************************************************* //
 

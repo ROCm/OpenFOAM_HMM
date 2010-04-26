@@ -85,12 +85,12 @@ void writeBytes(char* start, int nBytes)
 // Debug: write wall flags data
 void writeWallFlags(Ostream& os, label cellI, const labelList& wallFlags)
 {
-    os << "cell " << cellI << " wallsFlags:";
+    os  << "cell " << cellI << " wallsFlags:";
     forAll(wallFlags, wallFaceI)
     {
-        os << wallFlags[wallFaceI] << " ";
+        os  << wallFlags[wallFaceI] << ' ';
     }
-    os << endl;
+    os  << endl;
 }
 
 

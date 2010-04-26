@@ -71,6 +71,6 @@ void Foam::PostProcessingModel<CloudType>::post()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewPostProcessingModel.C"
+#include "PostProcessingModelNew.C"
 
 // ************************************************************************* //

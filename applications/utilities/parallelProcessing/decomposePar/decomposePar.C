@@ -154,9 +154,9 @@ int main(int argc, char *argv[])
     }
 
     // get requested numberOfSubdomains
-    label nDomains = 0;
-    {
-        IOdictionary decompDict
+    const label nDomains = readLabel
+    (
+        IOdictionary
         (
             IOobject
             (
@@ -168,10 +168,8 @@ int main(int argc, char *argv[])
                 IOobject::NO_WRITE,
                 false
             )
-        );
-
-        decompDict.lookup("numberOfSubdomains") >> nDomains;
-    }
+        ).lookup("numberOfSubdomains")
+    );
 
     if (decomposeFieldsOnly)
     {

@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     DevolatilisationModel.C
-    NewDevolatilisationModel.C
+    DevolatilisationModelNew.C
 
 \*---------------------------------------------------------------------------*/
 

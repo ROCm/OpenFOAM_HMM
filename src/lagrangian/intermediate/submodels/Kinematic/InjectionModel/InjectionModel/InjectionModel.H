@@ -41,7 +41,7 @@ Description
 
 SourceFiles
     InjectionModel.C
-    NewInjectionModel.C
+    InjectionModelNew.C
 
 \*---------------------------------------------------------------------------*/
 

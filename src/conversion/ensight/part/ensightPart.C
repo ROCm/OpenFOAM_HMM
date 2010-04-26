@@ -128,7 +128,7 @@ Foam::ensightPart::ensightPart(const ensightPart& part)
 
 Foam::autoPtr<Foam::ensightPart> Foam::ensightPart::New(Istream& is)
 {
-    word partType(is);
+    const word partType(is);
 
     istreamConstructorTable::iterator cstrIter =
         istreamConstructorTablePtr_->find(partType);
@@ -139,7 +139,8 @@ Foam::autoPtr<Foam::ensightPart> Foam::ensightPart::New(Istream& is)
         (
             "ensightPart::New(Istream&)",
             is
-        )   << "unknown ensightPart type " << partType << endl << endl
+        )   << "unknown ensightPart type "
+            << partType << nl << nl
             << "Valid ensightPart types are :" << endl
             << istreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);

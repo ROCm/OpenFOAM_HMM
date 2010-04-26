@@ -45,7 +45,7 @@ void Foam::rawTopoChangerFvMesh::setUnmappedValues
             fld.boundaryField()[patchI]
         );
 
-        label start = fvp.patch().patch().start();
+        const label start = fvp.patch().start();
         forAll(fvp, i)
         {
             if (!mappedFace[start+i])

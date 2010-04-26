@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     argList::validArgs.append("surface file");
     argList::validArgs.append("min length");
     argList::validArgs.append("output surface file");
-    argList::argList args(argc, argv);
+    argList args(argc, argv);
 
     const fileName inFileName = args[1];
     const scalar minLen = args.argRead<scalar>(2);

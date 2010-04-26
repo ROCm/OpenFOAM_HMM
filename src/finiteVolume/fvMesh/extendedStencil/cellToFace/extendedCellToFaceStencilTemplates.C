@@ -139,7 +139,7 @@ Foam::extendedCellToFaceStencil::weightedSum
 
         if (pSfCorr.coupled())
         {
-            label faceI = pSfCorr.patch().patch().start();
+            label faceI = pSfCorr.patch().start();
 
             forAll(pSfCorr, i)
             {

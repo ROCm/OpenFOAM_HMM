@@ -38,7 +38,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, const Vector<C>& v)
     {
-        os << v.X << '\t' << v.Y << '\n';
+        os  << v.X << '\t' << v.Y << '\n';
         return os;
     }
 };

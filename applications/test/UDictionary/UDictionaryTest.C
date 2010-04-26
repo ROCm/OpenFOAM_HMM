@@ -56,7 +56,7 @@ public:
 
     friend Ostream& operator<<(Ostream& os, const ent& e)
     {
-        os << e.keyword_ << ' ' << e.i_ << endl;
+        os  << e.keyword_ << ' ' << e.i_ << endl;
         return os;
     }
 };

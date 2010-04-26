@@ -84,7 +84,7 @@ Foam::BinaryCollisionModel<CloudType>::coeffDict() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewBinaryCollisionModel.C"
+#include "BinaryCollisionModelNew.C"
 
 // ************************************************************************* //
 

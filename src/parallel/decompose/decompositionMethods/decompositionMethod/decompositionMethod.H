@@ -65,6 +65,10 @@ protected:
             labelListList& cellCells
         );
 
+        //- Calculate the minimum face between two neighbouring cells
+        //  (usually there is only one)
+        static label masterFace(const polyMesh&, const label, const label);
+
         // From mesh to compact row storage format
         // (like CompactListList)
         static void calcCSR

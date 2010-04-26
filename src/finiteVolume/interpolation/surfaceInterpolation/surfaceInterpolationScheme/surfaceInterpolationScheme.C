@@ -59,7 +59,7 @@ tmp<surfaceInterpolationScheme<Type> > surfaceInterpolationScheme<Type>::New
             << exit(FatalIOError);
     }
 
-    word schemeName(schemeData);
+    const word schemeName(schemeData);
 
     if (surfaceInterpolation::debug || surfaceInterpolationScheme<Type>::debug)
     {
@@ -79,8 +79,8 @@ tmp<surfaceInterpolationScheme<Type> > surfaceInterpolationScheme<Type>::New
         (
             "surfaceInterpolationScheme<Type>::New(const fvMesh&, Istream&)",
             schemeData
-        )   << "Unknown discretisation scheme " << schemeName
-            << endl << endl
+        )   << "Unknown discretisation scheme "
+            << schemeName << nl << nl
             << "Valid schemes are :" << endl
             << MeshConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
@@ -113,7 +113,7 @@ tmp<surfaceInterpolationScheme<Type> > surfaceInterpolationScheme<Type>::New
             << exit(FatalIOError);
     }
 
-    word schemeName(schemeData);
+    const word schemeName(schemeData);
 
     if (surfaceInterpolation::debug || surfaceInterpolationScheme<Type>::debug)
     {
@@ -134,8 +134,8 @@ tmp<surfaceInterpolationScheme<Type> > surfaceInterpolationScheme<Type>::New
             "surfaceInterpolationScheme<Type>::New"
             "(const fvMesh&, const surfaceScalarField&, Istream&)",
             schemeData
-        )   << "Unknown discretisation scheme " << schemeName
-            << endl << endl
+        )   << "Unknown discretisation scheme "
+            << schemeName << nl << nl
             << "Valid schemes are :" << endl
             << MeshFluxConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);

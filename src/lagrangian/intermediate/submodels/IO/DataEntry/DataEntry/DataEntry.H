@@ -32,7 +32,7 @@ Description
 
 SourceFiles
     DataEntry.C
-    NewDataEntry.C
+    DataEntryNew.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -172,7 +172,7 @@ public:
 
 #ifdef NoRepository
 #   include "DataEntry.C"
-#   include "NewDataEntry.C"
+#   include "DataEntryNew.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -193,7 +193,7 @@ bool Foam::sixDoFRigidBodyMotionRestraints::tabulatedAxialAngularSpring::read
 
     moment_ = interpolationTable<scalar>(sDoFRBMRCoeffs_);
 
-    word angleFormat = sDoFRBMRCoeffs_.lookup("angleFormat");
+    const word angleFormat = sDoFRBMRCoeffs_.lookup("angleFormat");
 
     if (angleFormat == "degrees" || angleFormat == "degree")
     {
@@ -210,7 +210,7 @@ bool Foam::sixDoFRigidBodyMotionRestraints::tabulatedAxialAngularSpring::read
             "Foam::sixDoFRigidBodyMotionRestraints::"
             "tabulatedAxialAngularSpring::read"
             "("
-                "const dictionary& sDoFRBMCDict"
+                "const dictionary&"
             ")"
         )
             << "angleFormat must be degree, degrees, radian or radians"

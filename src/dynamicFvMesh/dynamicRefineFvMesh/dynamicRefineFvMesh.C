@@ -332,7 +332,7 @@ Foam::dynamicRefineFvMesh::refine
                 const fvsPatchScalarField& patchPhiU =
                     phiU.boundaryField()[patchI];
 
-                label faceI = patchPhi.patch().patch().start();
+                label faceI = patchPhi.patch().start();
 
                 forAll(patchPhi, i)
                 {
@@ -1078,9 +1078,9 @@ bool Foam::dynamicRefineFvMesh::update()
                 << exit(FatalError);
         }
 
-        word field(refineDict.lookup("field"));
+        const word fieldName(refineDict.lookup("field"));
 
-        const volScalarField& vFld = lookupObject<volScalarField>(field);
+        const volScalarField& vFld = lookupObject<volScalarField>(fieldName);
 
         const scalar lowerRefineLevel =
             readScalar(refineDict.lookup("lowerRefineLevel"));

@@ -35,7 +35,7 @@ Foam::chemistryReader<ThermoType>::New
 )
 {
     // Let the chemistry reader type default to CHEMKIN
-    // for backward compatability
+    // for backward compatibility
     word chemistryReaderTypeName("chemkinReader");
 
     // otherwise use the specified reader
@@ -53,7 +53,7 @@ Foam::chemistryReader<ThermoType>::New
             "chemistryReader::New(const dictionary& thermoDict)"
         )   << "Unknown chemistryReader type "
             << chemistryReaderTypeName << nl << nl
-            << "Valid  chemistryReaders are: " << nl
+            << "Valid chemistryReader types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

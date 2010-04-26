@@ -84,7 +84,7 @@ const Foam::dictionary& Foam::DevolatilisationModel<CloudType>::coeffDict() cons
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewDevolatilisationModel.C"
+#include "DevolatilisationModelNew.C"
 
 // ************************************************************************* //
 

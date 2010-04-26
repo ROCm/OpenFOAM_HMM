@@ -319,7 +319,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
     Info<< "    Constructing " << owner.mesh().nGeometricD() << "-D injection"
         << endl;
 
-    word parcelBasisType = coeffDict_.lookup("parcelBasisType");
+    const word parcelBasisType = coeffDict_.lookup("parcelBasisType");
     if (parcelBasisType == "mass")
     {
         parcelBasis_ = pbMass;
@@ -454,6 +454,6 @@ void Foam::InjectionModel<CloudType>::info(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewInjectionModel.C"
+#include "InjectionModelNew.C"
 
 // ************************************************************************* //

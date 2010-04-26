@@ -65,7 +65,7 @@ limitedSurfaceInterpolationScheme<Type>::New
             << exit(FatalIOError);
     }
 
-    word schemeName(schemeData);
+    const word schemeName(schemeData);
 
     typename MeshConstructorTable::iterator constructorIter =
         MeshConstructorTablePtr_->find(schemeName);
@@ -77,8 +77,8 @@ limitedSurfaceInterpolationScheme<Type>::New
             "limitedSurfaceInterpolationScheme<Type>::"
             "New(const fvMesh&, Istream&)",
             schemeData
-        )   << "Unknown discretisation scheme " << schemeName
-            << endl << endl
+        )   << "Unknown discretisation scheme "
+            << schemeName << nl << nl
             << "Valid schemes are :" << endl
             << MeshConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
@@ -120,7 +120,7 @@ limitedSurfaceInterpolationScheme<Type>::New
             << exit(FatalIOError);
     }
 
-    word schemeName(schemeData);
+    const word schemeName(schemeData);
 
     typename MeshFluxConstructorTable::iterator constructorIter =
         MeshFluxConstructorTablePtr_->find(schemeName);
@@ -132,8 +132,8 @@ limitedSurfaceInterpolationScheme<Type>::New
             "limitedSurfaceInterpolationScheme<Type>::New"
             "(const fvMesh&, const surfaceScalarField&, Istream&)",
             schemeData
-        )   << "Unknown discretisation scheme " << schemeName
-            << endl << endl
+        )   << "Unknown discretisation scheme "
+            << schemeName << nl << nl
             << "Valid schemes are :" << endl
             << MeshFluxConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);

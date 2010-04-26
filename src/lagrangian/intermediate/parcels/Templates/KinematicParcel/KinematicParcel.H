@@ -232,6 +232,9 @@ protected:
 
         // Parcel properties
 
+            //- Active flag - tracking inactive when active = false
+            bool active_;
+
             //- Parcel type id
             label typeId_;
 
@@ -363,6 +366,9 @@ public:
 
         // Access
 
+            //- Return const access to active flag
+            inline bool active() const;
+
             //- Return const access to type id
             inline label typeId() const;
 
@@ -399,8 +405,11 @@ public:
 
         // Edit
 
+            //- Return const access to active flag
+            inline bool& active();
+
             //- Return access to type id
-            inline label typeId();
+            inline label& typeId();
 
             //- Return access to number of particles
             inline scalar& nParticle();

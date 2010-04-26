@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     PostProcessingModel.C
-    NewPostProcessingModel.C
+    PostProcessingModelNew.C
 
 \*---------------------------------------------------------------------------*/
 

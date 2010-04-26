@@ -30,7 +30,7 @@ Description
 
 SourceFiles
     InflowBoundaryModel.C
-    NewInflowBoundaryModel.C
+    InflowBoundaryModelNew.C
 
 \*---------------------------------------------------------------------------*/
 

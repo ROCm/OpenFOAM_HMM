@@ -134,11 +134,6 @@ private:
 
 public:
 
-    //- Run-time type information
-    TypeName("streamLineParticle");
-
-
-
     // Constructors
 
         //- Construct from components

@@ -139,7 +139,7 @@ Foam::PhaseChangeModel<CloudType>::enthalpyTransfer() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewPhaseChangeModel.C"
+#include "PhaseChangeModelNew.C"
 
 // ************************************************************************* //
 

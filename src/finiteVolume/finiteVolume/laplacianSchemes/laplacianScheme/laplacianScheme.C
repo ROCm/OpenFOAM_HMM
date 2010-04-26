@@ -66,7 +66,7 @@ tmp<laplacianScheme<Type, GType> > laplacianScheme<Type, GType>::New
             << exit(FatalIOError);
     }
 
-    word schemeName(schemeData);
+    const word schemeName(schemeData);
 
     typename IstreamConstructorTable::iterator cstrIter =
         IstreamConstructorTablePtr_->find(schemeName);
@@ -77,7 +77,7 @@ tmp<laplacianScheme<Type, GType> > laplacianScheme<Type, GType>::New
         (
             "laplacianScheme<Type, GType>::New(const fvMesh&, Istream&)",
             schemeData
-        )   << "unknown laplacian scheme " << schemeName << endl << endl
+        )   << "Unknown laplacian scheme " << schemeName << nl << nl
             << "Valid laplacian schemes are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);

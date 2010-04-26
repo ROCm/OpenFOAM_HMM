@@ -121,7 +121,7 @@ void Foam::UpwindFitData<Polynomial>::calcFit()
 
         if (pw.coupled())
         {
-            label facei = pw.patch().patch().start();
+            label facei = pw.patch().start();
 
             forAll(pw, i)
             {
@@ -180,7 +180,7 @@ void Foam::UpwindFitData<Polynomial>::calcFit()
 
         if (pw.coupled())
         {
-            label facei = pw.patch().patch().start();
+            label facei = pw.patch().start();
 
             forAll(pw, i)
             {

@@ -68,7 +68,8 @@ Foam::blobsSwirlInjector::blobsSwirlInjector
 
     if (sm.injectors().size() != coneAngle_.size())
     {
-        FatalError << "blobsSwirlInjector::blobsSwirlInjector"
+        FatalError
+            << "blobsSwirlInjector::blobsSwirlInjector"
             << "(const dictionary& dict, spray& sm)\n"
             << "Wrong number of entries in innerAngle"
             << abort(FatalError);

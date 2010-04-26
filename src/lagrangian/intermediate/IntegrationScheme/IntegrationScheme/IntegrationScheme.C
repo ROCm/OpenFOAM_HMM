@@ -48,6 +48,6 @@ Foam::IntegrationScheme<Type>::~IntegrationScheme()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-#include "newIntegrationScheme.C"
+#include "IntegrationSchemeNew.C"
 
 // ************************************************************************* //

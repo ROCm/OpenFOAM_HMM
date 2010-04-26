@@ -28,7 +28,7 @@ Description
 
 SourceFiles
     tetherPotential.C
-    newTetherPotential.C
+    tetherPotentialNew.C
 
 \*---------------------------------------------------------------------------*/
 

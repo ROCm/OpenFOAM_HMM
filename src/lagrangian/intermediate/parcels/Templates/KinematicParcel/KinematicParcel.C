@@ -279,7 +279,10 @@ bool Foam::KinematicParcel<ParcelType>::move(TrackData& td)
                 // will change if a face is hit
                 label cellI = p.cell();
 
-                dt *= p.trackToFace(p.position() + dt*U_, td);
+                if (p.active())
+                {
+                    dt *= p.trackToFace(p.position() + dt*U_, td);
+                }
 
                 tEnd -= dt;
                 p.stepFraction() = 1.0 - tEnd/deltaT;
@@ -364,6 +367,7 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
                 pp,
                 this->face(),
                 td.keepParticle,
+                active_,
                 U_
             );
     }

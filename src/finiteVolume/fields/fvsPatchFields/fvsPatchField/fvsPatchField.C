@@ -403,6 +403,6 @@ Ostream& operator<<(Ostream& os, const fvsPatchField<Type>& ptf)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#   include "newFvsPatchField.C"
+#   include "fvsPatchFieldNew.C"
 
 // ************************************************************************* //

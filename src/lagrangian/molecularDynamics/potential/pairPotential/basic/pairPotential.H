@@ -28,7 +28,7 @@ Description
 
 SourceFiles
     pairPotential.C
-    newPairPotential.C
+    pairPotentialNew.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -52,7 +52,7 @@ namespace Foam
 class energyScalingFunction;
 
 /*---------------------------------------------------------------------------*\
-                     Class pairPotential Declaration
+                        Class pairPotential Declaration
 \*---------------------------------------------------------------------------*/
 
 class pairPotential

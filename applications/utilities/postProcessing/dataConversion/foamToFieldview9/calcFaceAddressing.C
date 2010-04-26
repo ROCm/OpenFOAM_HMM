@@ -72,14 +72,17 @@ labelList calcFaceAddressing
                 << "    face labels:" << faces << endl
                 << "    cellI:" << cellI << endl;
 
-            FatalError << "Faces consist of vertices:" << endl;
+            FatalError
+                << "Faces consist of vertices:" << endl;
+
             forAll(faces, faceI)
             {
                 FatalError
                     << "    face:" << faces[faceI]
                     << allFaces[faces[faceI]] << endl;
             }
-            FatalError << exit(FatalError);
+            FatalError
+                << exit(FatalError);
         }
     }
     return shapeToMesh;

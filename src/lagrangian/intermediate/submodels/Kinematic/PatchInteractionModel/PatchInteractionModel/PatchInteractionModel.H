@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     PatchInteractionModel.C
-    NewPatchInteractionModel.C
+    PatchInteractionModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -155,6 +155,7 @@ public:
             const polyPatch& pp,
             const label faceId,
             bool& keepParticle,
+            bool& active,
             vector& U
         ) const = 0;
 };

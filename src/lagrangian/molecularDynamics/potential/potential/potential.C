@@ -27,10 +27,9 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::potential::setSiteIdList(const IOdictionary& moleculePropertiesDict)
+void Foam::potential::setSiteIdList(const dictionary& moleculePropertiesDict)
 {
     DynamicList<word> siteIdList;
-
     DynamicList<word> pairPotentialSiteIdList;
 
     forAll(idList_, i)
@@ -39,7 +38,7 @@ void Foam::potential::setSiteIdList(const IOdictionary& moleculePropertiesDict)
 
         if (!moleculePropertiesDict.found(id))
         {
-            FatalErrorIn("potential::setSiteIdList(const IOdictionary&)")
+            FatalErrorIn("potential::setSiteIdList(const dictionary&)")
                 << id << " molecule subDict not found"
                 << nl << abort(FatalError);
         }
@@ -66,7 +65,7 @@ void Foam::potential::setSiteIdList(const IOdictionary& moleculePropertiesDict)
 
             if (findIndex(siteIdNames, siteId) == -1)
             {
-                FatalErrorIn("potential::setSiteIdList(const IOdictionary&)")
+                FatalErrorIn("potential::setSiteIdList(const dictionary&)")
                     << siteId << " in pairPotentialSiteIds is not in siteIds: "
                     << siteIdNames << nl << abort(FatalError);
             }
@@ -112,20 +111,21 @@ void Foam::potential::potential::readPotentialDict()
 
     idList_ = List<word>(idListDict.lookup("idList"));
 
-    IOdictionary moleculePropertiesDict
+    setSiteIdList
     (
-        IOobject
+        IOdictionary
         (
-            "moleculeProperties",
-            mesh_.time().constant(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobject
+            (
+                "moleculeProperties",
+                mesh_.time().constant(),
+                mesh_,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            )
         )
     );
-
-    setSiteIdList(moleculePropertiesDict);
 
     List<word> pairPotentialSiteIdList
     (

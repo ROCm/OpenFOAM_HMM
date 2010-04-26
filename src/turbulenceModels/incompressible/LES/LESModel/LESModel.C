@@ -97,13 +97,11 @@ autoPtr<LESModel> LESModel::New
     transportModel& transport
 )
 {
-    word modelName;
-
-    // Enclose the creation of the dictionary to ensure it is deleted
-    // before the turbulenceModel is created otherwise the dictionary is
-    // entered in the database twice
-    {
-        IOdictionary dict
+    // get model name, but do not register the dictionary
+    // otherwise it is registered in the database twice
+    const word modelType
+    (
+        IOdictionary
         (
             IOobject
             (
@@ -111,17 +109,16 @@ autoPtr<LESModel> LESModel::New
                 U.time().constant(),
                 U.db(),
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                false
             )
-        );
+        ).lookup("LESModel")
+    );
 
-        dict.lookup("LESModel") >> modelName;
-    }
-
-    Info<< "Selecting LES turbulence model " << modelName << endl;
+    Info<< "Selecting LES turbulence model " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelName);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -133,9 +130,9 @@ autoPtr<LESModel> LESModel::New
                 "const surfaceScalarField& ,"
                 "transportModel&"
             ")"
-        )   << "Unknown LESModel type " << modelName
-            << endl << endl
-            << "Valid LESModel types are :" << endl
+        )   << "Unknown LESModel type "
+            << modelType << nl << nl
+            << "Valid LESModel types:" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

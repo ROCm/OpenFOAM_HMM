@@ -331,7 +331,7 @@ int main(int argc, char *argv[])
             )
         );
 
-        word setName(refineDict.lookup("set"));
+        const word setName(refineDict.lookup("set"));
 
         cellSet cells(mesh, setName);
 

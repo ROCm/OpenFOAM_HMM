@@ -1,6 +1,6 @@
 /* Radiation model */
 radiationModel/radiationModel/radiationModel.C
-radiationModel/radiationModel/newRadiationModel.C
+radiationModel/radiationModel/radiationModelNew.C
 radiationModel/noRadiation/noRadiation.C
 radiationModel/P1/P1.C
 radiationModel/fvDOM/fvDOM/fvDOM.C
@@ -10,13 +10,13 @@ radiationModel/fvDOM/absorptionCoeffs/absorptionCoeffs.C
 
 /* Scatter model */
 submodels/scatterModel/scatterModel/scatterModel.C
-submodels/scatterModel/scatterModel/newScatterModel.C
+submodels/scatterModel/scatterModel/scatterModelNew.C
 submodels/scatterModel/constantScatter/constantScatter.C
 
 
 /* Absorption/Emission model */
 submodels/absorptionEmissionModel/absorptionEmissionModel/absorptionEmissionModel.C
-submodels/absorptionEmissionModel/absorptionEmissionModel/newAbsorptionEmissionModel.C
+submodels/absorptionEmissionModel/absorptionEmissionModel/absorptionEmissionModelNew.C
 submodels/absorptionEmissionModel/noAbsorptionEmission/noAbsorptionEmission.C
 submodels/absorptionEmissionModel/constantAbsorptionEmission/constantAbsorptionEmission.C
 submodels/absorptionEmissionModel/binaryAbsorptionEmission/binaryAbsorptionEmission.C

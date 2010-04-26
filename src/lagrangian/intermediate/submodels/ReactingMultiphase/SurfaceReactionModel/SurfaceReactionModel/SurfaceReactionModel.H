@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     SurfaceReactionModel.C
-    NewSurfaceReactionModel.C
+    SurfaceReactionModelNew.C
 
 \*---------------------------------------------------------------------------*/
 

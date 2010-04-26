@@ -85,7 +85,7 @@ const Foam::dictionary& Foam::SurfaceReactionModel<CloudType>::coeffDict() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewSurfaceReactionModel.C"
+#include "SurfaceReactionModelNew.C"
 
 // ************************************************************************* //
 

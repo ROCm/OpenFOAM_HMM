@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     PhaseChangeModel.C
-    NewPhaseChangeModel.C
+    PhaseChangeModelNew.C
 
 \*---------------------------------------------------------------------------*/
 

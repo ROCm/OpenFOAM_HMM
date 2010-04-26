@@ -116,7 +116,7 @@ directMappedVelocityFluxFixedValueFvPatchField
     // Force calculation of schedule (uses parallel comms)
     const directMappedPolyPatch& mpp = refCast<const directMappedPolyPatch>
     (
-        patch().patch()
+        this->patch().patch()
     );
     (void)mpp.map().schedule();
 }
@@ -187,7 +187,7 @@ void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
                 const fvPatchVectorField& Upf = UField.boundaryField()[patchI];
                 const scalarField& phipf = phiField.boundaryField()[patchI];
 
-                label faceStart = Upf.patch().patch().start();
+                label faceStart = Upf.patch().start();
 
                 forAll(Upf, faceI)
                 {

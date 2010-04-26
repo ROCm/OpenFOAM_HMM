@@ -58,7 +58,8 @@ Foam::procLduInterface::procLduInterface
         (
             "procLduInterface::procLduInterface"
             "(const lduInterfaceField&, const scalarField&"
-        )   << "unknown lduInterface type " << interface.interface().type()
+        )   << "Unknown lduInterface type "
+            << interface.interface().type()
             << exit(FatalError);
     }
 }

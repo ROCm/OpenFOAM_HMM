@@ -79,6 +79,6 @@ const Foam::dictionary& Foam::DispersionModel<CloudType>::dict() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewDispersionModel.C"
+#include "DispersionModelNew.C"
 
 // ************************************************************************* //

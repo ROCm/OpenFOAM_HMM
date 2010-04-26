@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,7 +50,7 @@ Foam::Istream& Foam::operator>>(Istream& is, bool& b)
 Foam::Ostream& Foam::operator<<(Ostream& os, const bool b)
 {
     // we could also write as text string without any difficulty
-    // os << Switch::asText(b);
+    // os  << (b ? "true" : "false");
     os.write(label(b));
     os.check("Ostream& operator<<(Ostream&, const bool)");
     return os;
@@ -59,10 +59,10 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const bool b)
 
 bool Foam::readBool(Istream& is)
 {
-    bool val;
-    is >> val;
+    bool b;
+    is  >> b;
 
-    return val;
+    return b;
 }
 
 

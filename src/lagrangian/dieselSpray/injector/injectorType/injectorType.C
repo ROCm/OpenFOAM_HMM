@@ -52,20 +52,19 @@ Foam::autoPtr<Foam::injectorType> Foam::injectorType::New
     const dictionary& dict
 )
 {
-    word injectorTypeName(dict.lookup("injectorType"));
+    const word modelType(dict.lookup("injectorType"));
 
-    Info<< "Selecting injectorType " << injectorTypeName << endl;
+    Info<< "Selecting injectorType " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(injectorTypeName);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn("injectorType::New(const dictionary&)")
             << "Unknown injectorType type "
-            << injectorTypeName
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid injector types are:" << nl
+            << modelType << nl << nl
+            << "Valid injectorTypes are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << abort(FatalError);
     }

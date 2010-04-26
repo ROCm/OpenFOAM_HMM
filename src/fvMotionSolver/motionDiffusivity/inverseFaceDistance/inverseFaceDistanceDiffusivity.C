@@ -144,7 +144,7 @@ void Foam::inverseFaceDistanceDiffusivity::correct()
         }
         else
         {
-            label start = bfld.patch().patch().start();
+            const label start = bfld.patch().start();
 
             forAll(bfld, i)
             {

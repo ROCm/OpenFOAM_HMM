@@ -65,7 +65,8 @@ Foam::ChomiakInjector::ChomiakInjector
 
     if (sm.injectors().size() != maxSprayAngle_.size())
     {
-        FatalError << "ChomiakInjector::ChomiakInjector"
+        FatalError
+            << "ChomiakInjector::ChomiakInjector"
             << "(const dictionary& dict, spray& sm)\n"
             << "Wrong number of entries in maxSprayAngle"
             << abort(FatalError);

@@ -669,7 +669,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::L
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewCompositionModel.C"
+#include "CompositionModelNew.C"
 
 // ************************************************************************* //
 

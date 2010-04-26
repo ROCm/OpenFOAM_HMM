@@ -69,13 +69,11 @@ autoPtr<turbulenceModel> turbulenceModel::New
     const basicThermo& thermophysicalModel
 )
 {
-    word modelName;
-
-    // Enclose the creation of the dictionary to ensure it is deleted
-    // before the turbulenceModel is created otherwise the dictionary is
-    // entered in the database twice
-    {
-        IOdictionary dict
+    // get model name, but do not register the dictionary
+    // otherwise it is registered in the database twice
+    const word modelType
+    (
+        IOdictionary
         (
             IOobject
             (
@@ -83,17 +81,16 @@ autoPtr<turbulenceModel> turbulenceModel::New
                 U.time().constant(),
                 U.db(),
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                false
             )
-        );
+        ).lookup("simulationType")
+    );
 
-        dict.lookup("simulationType") >> modelName;
-    }
-
-    Info<< "Selecting turbulence model type " << modelName << endl;
+    Info<< "Selecting turbulence model type " << modelType << endl;
 
     turbulenceModelConstructorTable::iterator cstrIter =
-        turbulenceModelConstructorTablePtr_->find(modelName);
+        turbulenceModelConstructorTablePtr_->find(modelType);
 
     if (cstrIter == turbulenceModelConstructorTablePtr_->end())
     {
@@ -102,9 +99,9 @@ autoPtr<turbulenceModel> turbulenceModel::New
             "turbulenceModel::New(const volScalarField&, "
             "const volVectorField&, const surfaceScalarField&, "
             "basicThermo&)"
-        )   << "Unknown turbulenceModel type " << modelName
-            << endl << endl
-            << "Valid turbulenceModel types are :" << endl
+        )   << "Unknown turbulenceModel type "
+            << modelType << nl << nl
+            << "Valid turbulenceModel types:" << endl
             << turbulenceModelConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     BinaryCollisionModel.C
-    NewBinaryCollisionModel.C
+    BinaryCollisionModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
