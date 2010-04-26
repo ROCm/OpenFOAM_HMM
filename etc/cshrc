@@ -78,6 +78,21 @@ if ( $status == 0 ) then
 endif
 unset foamPrefs
 
+# Evaluate command-line parameters
+while ( $#argv > 0 )
+    switch ($argv[1])
+    case *=:
+        # name=       -> unsetenv name
+        eval "unsetenv $argv[1]:s/=//"
+        breaksw
+    case *=*:
+        # name=value  -> setenv name value
+        eval "setenv $argv[1]:s/=/ /"
+        breaksw
+    endsw
+    shift
+end
+
 
 # Operating System/Platform
 # ~~~~~~~~~~~~~~~~~~~~~~~~~
