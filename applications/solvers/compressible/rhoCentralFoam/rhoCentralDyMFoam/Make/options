@@ -1,9 +1,9 @@
 EXE_INC = \
-    -I../rhoCentralFoam \
+    -I.. \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
-    -I../rhoCentralFoam/BCs/lnInclude \
+    -I../BCs/lnInclude \
     -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude
