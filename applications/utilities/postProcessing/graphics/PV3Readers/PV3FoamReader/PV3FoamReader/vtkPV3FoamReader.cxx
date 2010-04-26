@@ -46,7 +46,6 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-vtkCxxRevisionMacro(vtkPV3FoamReader, "$Revision: 1.5$");
 vtkStandardNewMacro(vtkPV3FoamReader);
 
 

@@ -63,7 +63,7 @@ class VTK_IO_EXPORT vtkPV3FoamReader
     public vtkMultiBlockDataSetAlgorithm
 {
 public:
-    vtkTypeRevisionMacro(vtkPV3FoamReader,vtkMultiBlockDataSetAlgorithm);
+    vtkTypeMacro(vtkPV3FoamReader, vtkMultiBlockDataSetAlgorithm);
     void PrintSelf(ostream&, vtkIndent);
 
     static vtkPV3FoamReader* New();
