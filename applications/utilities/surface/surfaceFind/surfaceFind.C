@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     argList::addOption("y", "Y", "The point y-coordinate (if non-zero)");
     argList::addOption("z", "Z", "The point y-coordinate (if non-zero)");
 
-    argList::validArgs.append("surface file");
+    argList::validArgs.append("surfaceFile");
 
     argList args(argc, argv);
 

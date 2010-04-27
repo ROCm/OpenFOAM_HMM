@@ -315,7 +315,7 @@ for (label i=0; i<nPoints; i++)
     }
 }
 
-// Tranfer liner faces that are above the minimum cylinder-head z height
+// Transfer liner faces that are above the minimum cylinder-head z height
 // into the cylinder-head region
 if
 (

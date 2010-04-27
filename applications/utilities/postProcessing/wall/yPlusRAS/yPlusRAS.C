@@ -28,8 +28,8 @@ Description
     Calculates and reports yPlus for all wall patches, for the specified times
     when using RAS turbulence models.
 
-    Default behaviour assumes operating in incompressible mode. To apply to
-    compressible RAS cases, use the -compressible option.
+    Default behaviour assumes operating in incompressible mode.
+    Use the -compressible option for compressible RAS cases.
 
 \*---------------------------------------------------------------------------*/
 
@@ -185,14 +185,18 @@ int main(int argc, char *argv[])
 
     #include "addRegionOption.H"
 
-    argList::addBoolOption("compressible");
+    argList::addBoolOption
+    (
+        "compressible",
+        "calculate compressible y+"
+    );
 
     #include "setRootCase.H"
     #include "createTime.H"
     instantList timeDirs = timeSelector::select0(runTime, args);
     #include "createNamedMesh.H"
 
-    bool compressible = args.optionFound("compressible");
+    const bool compressible = args.optionFound("compressible");
 
     forAll(timeDirs, timeI)
     {
@@ -205,8 +209,7 @@ int main(int argc, char *argv[])
         {
             Info<< "Calculating wall distance\n" << endl;
             wallDist y(mesh, true);
-            Info<< "Writing wall distance to field "
-                << y.name() << nl << endl;
+            Info<< "Writing wall distance to field " << y.name() << nl << endl;
             y.write();
         }
 

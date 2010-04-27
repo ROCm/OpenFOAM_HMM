@@ -632,7 +632,7 @@ int main(int argc, char *argv[])
     argList::validArgs.append("thickness");
 
     #include "addRegionOption.H"
-    argList::validOptions.insert("overwrite", "");
+    #include "addOverwriteOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"

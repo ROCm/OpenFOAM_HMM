@@ -36,6 +36,11 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "write surface mesh regions to separate files"
+    );
+
     argList::noParallel();
     argList::validArgs.clear();
     argList::validArgs.append("input file");
@@ -103,7 +108,6 @@ int main(int argc, char *argv[])
 
         subSurf.write(outFile);
     }
-
 
     Info<< "End\n" << endl;
 

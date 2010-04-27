@@ -163,14 +163,29 @@ bool repatchFace
 
 int main(int argc, char *argv[])
 {
-    argList::noParallel();
-    argList::validArgs.append("surface file");
-    argList::addOption("faceSet", "faceSet name");
-    argList::addOption("tol", "fraction of mesh size");
+    argList::addNote
+    (
+        "reads surface and applies surface regioning to a mesh"
+    );
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createPolyMesh.H"
+    argList::noParallel();
+    argList::validArgs.append("surfaceFile");
+    argList::addOption
+    (
+        "faceSet",
+        "name",
+        "only repatch the faces in specified faceSet"
+    );
+    argList::addOption
+    (
+        "tol",
+        "scalar",
+        "search tolerance as fraction of mesh size (default 1e-3)"
+    );
+
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createPolyMesh.H"
 
     const fileName surfName = args[1];
 
@@ -190,7 +205,7 @@ int main(int argc, char *argv[])
             << " triangle ..." << endl;
     }
 
-    scalar searchTol = args.optionLookupOrDefault("tol", 1e-3);
+    const scalar searchTol = args.optionLookupOrDefault("tol", 1e-3);
 
     // Get search box. Anything not within this box will not be considered.
     const boundBox& meshBb = mesh.globalData().bb();
@@ -210,7 +225,6 @@ int main(int argc, char *argv[])
             << mesh.boundaryMesh()[patchI].size() << nl;
     }
     Info<< endl;
-
 
 
     boundaryMesh bMesh;

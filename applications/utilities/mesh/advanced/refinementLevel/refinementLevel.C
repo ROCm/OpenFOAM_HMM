@@ -96,11 +96,15 @@ bool limitRefinementLevel
 
 int main(int argc, char *argv[])
 {
-    argList::addBoolOption("readLevel");
+    argList::addBoolOption
+    (
+        "readLevel",
+        "read level from refinementLevel file"
+    );
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createPolyMesh.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createPolyMesh.H"
 
     Info<< "Dividing cells into bins depending on cell volume.\nThis will"
         << " correspond to refinement levels for a mesh with only 2x2x2"
@@ -109,7 +113,7 @@ int main(int argc, char *argv[])
         << " to allow for some truncation error."
         << nl << endl;
 
-    bool readLevel = args.optionFound("readLevel");
+    const bool readLevel = args.optionFound("readLevel");
 
     const scalarField& vols = mesh.cellVolumes();
 

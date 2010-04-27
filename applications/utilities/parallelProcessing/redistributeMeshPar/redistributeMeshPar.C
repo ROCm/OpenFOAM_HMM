@@ -503,7 +503,13 @@ void compareFields
 int main(int argc, char *argv[])
 {
 #   include "addRegionOption.H"
-    argList::addOption("mergeTol", "relative merge distance");
+    argList::addOption
+    (
+        "mergeTol",
+        "scalar",
+        "specify the merge distance relative to the bounding box size "
+        "(default 1E-6)"
+    );
     // Create argList. This will check for non-existing processor dirs.
 #   include "setRootCase.H"
 

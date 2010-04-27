@@ -48,9 +48,9 @@ int main(int argc, char *argv[])
 {
     argList::validArgs.clear();
     argList::noParallel();
-    argList::validArgs.append("surface file");
+    argList::validArgs.append("surfaceFile");
     argList::validArgs.append("min length");
-    argList::validArgs.append("output surface file");
+    argList::validArgs.append("output surfaceFile");
     argList args(argc, argv);
 
     const fileName inFileName = args[1];

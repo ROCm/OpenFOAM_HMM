@@ -371,27 +371,65 @@ void writePointCells
 
 int main(int argc, char *argv[])
 {
-    timeSelector::addOptions();
-    argList::addBoolOption("patchFaces");
-    argList::addBoolOption("patchEdges");
-    argList::addOption("cell", "cellI");
-    argList::addOption("face", "faceI");
-    argList::addOption("point", "pointI");
-    argList::addOption("cellSet", "setName");
-    argList::addOption("faceSet", "setName");
-#   include "addRegionOption.H"
+    argList::addNote
+    (
+        "for mesh debugging: write mesh as separate OBJ files"
+    );
 
-#   include "setRootCase.H"
-#   include "createTime.H"
+    timeSelector::addOptions();
+    argList::addBoolOption
+    (
+        "patchFaces",
+        "write patch faces edges"
+    );
+    argList::addBoolOption
+    (
+        "patchEdges",
+        "write patch boundary edges"
+    );
+    argList::addOption
+    (
+        "cell",
+        "int",
+        "write points for the specified cell"
+    );
+    argList::addOption
+    (
+        "face",
+        "int",
+        "write specified face"
+    );
+    argList::addOption
+    (
+        "point",
+        "int",
+        "write specified point"
+    );
+    argList::addOption
+    (
+        "cellSet",
+        "name",
+        "write points for specified cellSet"
+    );
+    argList::addOption
+    (
+        "faceSet",
+        "name",
+        "write points for specified faceSet"
+    );
+    #include "addRegionOption.H"
+
+    #include "setRootCase.H"
+    #include "createTime.H"
     runTime.functionObjects().off();
 
-    bool patchFaces = args.optionFound("patchFaces");
-    bool patchEdges = args.optionFound("patchEdges");
-    bool doCell     = args.optionFound("cell");
-    bool doPoint    = args.optionFound("point");
-    bool doFace     = args.optionFound("face");
-    bool doCellSet  = args.optionFound("cellSet");
-    bool doFaceSet  = args.optionFound("faceSet");
+    const bool patchFaces = args.optionFound("patchFaces");
+    const bool patchEdges = args.optionFound("patchEdges");
+    const bool doCell     = args.optionFound("cell");
+    const bool doPoint    = args.optionFound("point");
+    const bool doFace     = args.optionFound("face");
+    const bool doCellSet  = args.optionFound("cellSet");
+    const bool doFaceSet  = args.optionFound("faceSet");
 
 
     Info<< "Writing mesh objects as .obj files such that the object"
@@ -401,7 +439,7 @@ int main(int argc, char *argv[])
 
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-#   include "createNamedPolyMesh.H"
+    #include "createNamedPolyMesh.H"
 
     forAll(timeDirs, timeI)
     {
@@ -465,7 +503,6 @@ int main(int argc, char *argv[])
                     << endl;
 
                 writePoints(mesh, cells.toc(), runTime.timeName());
-
             }
             if (doFaceSet)
             {

@@ -43,9 +43,9 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.clear();
-    argList::validArgs.append("surface file");
+    argList::validArgs.append("surfaceFile");
     argList::validArgs.append("merge distance");
-    argList::validArgs.append("output file");
+    argList::validArgs.append("output surfaceFile");
     argList args(argc, argv);
 
     const fileName surfFileName = args[1];

@@ -226,13 +226,17 @@ labelList getSelectedPatches
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "legacy VTK file format writer"
+    );
     timeSelector::addOptions();
 
-#   include "addRegionOption.H"
-
+    #include "addRegionOption.H"
     argList::addOption
     (
-        "fields", "wordList",
+        "fields",
+        "wordList",
         "only convert the specified fields - eg '(p T U)'"
     );
     argList::addOption
@@ -241,25 +245,59 @@ int main(int argc, char *argv[])
         "name",
         "convert a mesh subset corresponding to the specified cellSet"
     );
-    argList::addOption("faceSet", "name");
-    argList::addOption("pointSet", "name");
+    argList::addOption
+    (
+        "faceSet",
+        "name",
+        "restrict conversion to the specified faceSet"
+    );
+    argList::addOption
+    (
+        "pointSet",
+        "name",
+        "restrict conversion to the specified pointSet"
+    );
     argList::addBoolOption
     (
         "ascii",
         "write in ASCII format instead of binary"
     );
-    argList::addBoolOption("surfaceFields");
-    argList::addBoolOption("nearCellValue");
-    argList::addBoolOption("noInternal");
-    argList::addBoolOption("noPointValues");
-    argList::addBoolOption("allPatches");
+    argList::addBoolOption
+    (
+        "surfaceFields",
+        "write surfaceScalarFields (e.g., phi)"
+    );
+    argList::addBoolOption
+    (
+        "nearCellValue",
+        "use cell value on patches instead of patch value itself"
+    );
+    argList::addBoolOption
+    (
+        "noInternal",
+        "do not generate file for mesh, only for patches"
+    );
+    argList::addBoolOption
+    (
+        "noPointValues",
+        "no pointFields"
+    );
+    argList::addBoolOption
+    (
+        "allPatches",
+        "combine all patches into a single file"
+    );
     argList::addOption
     (
         "excludePatches",
         "wordReList",
         "a list of patches to exclude - eg '( inlet \".*Wall\" )' "
     );
-    argList::addBoolOption("noFaceZones");
+    argList::addBoolOption
+    (
+        "noFaceZones",
+        "no faceZones"
+    );
     argList::addBoolOption
     (
         "noLinks",
@@ -271,8 +309,8 @@ int main(int argc, char *argv[])
         "use the time name instead of the time index when naming the files"
     );
 
-#   include "setRootCase.H"
-#   include "createTime.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
 
     const bool doWriteInternal = !args.optionFound("noInternal");
     const bool doFaceZones     = !args.optionFound("noFaceZones");

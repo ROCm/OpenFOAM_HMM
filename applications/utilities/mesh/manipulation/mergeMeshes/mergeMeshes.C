@@ -32,16 +32,76 @@ Description
 
 using namespace Foam;
 
+void getRootCase(fileName& casePath)
+{
+    casePath.clean();
+
+    if (casePath.empty() || casePath == ".")
+    {
+        // handle degenerate form and '.'
+        casePath = cwd();
+    }
+    else if (casePath[0] != '/' && casePath.name() == "..")
+    {
+        // avoid relative cases ending in '..' - makes for very ugly names
+        casePath = cwd()/casePath;
+        casePath.clean();
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
 int main(int argc, char *argv[])
 {
-    argList::noParallel();
-#   include "setRoots.H"
-#   include "createTimes.H"
+    argList::addNote
+    (
+        "merge two meshes"
+    );
 
-    Info<< "Reading master mesh for time = " << runTimeMaster.timeName() << endl;
+    argList::noParallel();
+    argList::validArgs.clear();
+
+    argList::validArgs.append("masterCase");
+    argList::addOption
+    (
+        "masterRegion",
+        "name",
+        "specify alternative mesh region for the master mesh"
+    );
+
+    argList::validArgs.append("addCase");
+    argList::addOption
+    (
+        "addRegion",
+        "name",
+        "specify alternative mesh region for the additional mesh"
+    );
+
+    argList args(argc, argv);
+    if (!args.check())
+    {
+         FatalError.exit();
+    }
+
+    fileName masterCase = args[1];
+    word masterRegion = polyMesh::defaultRegion;
+    args.optionReadIfPresent("masterRegion", masterRegion);
+
+    fileName addCase = args[2];
+    word addRegion = polyMesh::defaultRegion;
+    args.optionReadIfPresent("addRegion", addRegion);
+
+    getRootCase(masterCase);
+    getRootCase(addCase);
+
+    Info<< "Master:      " << masterCase << "  region " << masterRegion << nl
+        << "mesh to add: " << addCase    << "  region " << addRegion << endl;
+
+    #include "createTimes.H"
+
+    Info<< "Reading master mesh for time = " << runTimeMaster.timeName() << nl;
 
     Info<< "Create mesh\n" << endl;
     mergePolyMesh masterMesh
@@ -55,7 +115,7 @@ int main(int argc, char *argv[])
     );
 
 
-    Info<< "Reading mesh to add for time = " << runTimeToAdd.timeName() << endl;
+    Info<< "Reading mesh to add for time = " << runTimeToAdd.timeName() << nl;
 
     Info<< "Create mesh\n" << endl;
     polyMesh meshToAdd

@@ -38,7 +38,7 @@ Description
 
     E.g. to allow all faces on same patch to be merged:
 
-        combinePatchFaces .. cavity 180 -concaveAngle 90
+        combinePatchFaces 180 -concaveAngle 90
 
 \*---------------------------------------------------------------------------*/
 
@@ -429,15 +429,18 @@ int main(int argc, char *argv[])
 {
 #   include "addOverwriteOption.H"
 
-    argList::validArgs.append("feature angle [0..180]");
+    argList::validArgs.append("featureAngle [0..180]");
     argList::addOption
     (
         "concaveAngle",
-        "[0..180]",
-        "specify concave angle [0..180] degrees (default: 30.0 degrees)"
+        "degrees",
+        "specify concave angle [0..180] (default: 30 degrees)"
     );
-
-    argList::addBoolOption("snapMesh");
+    argList::addBoolOption
+    (
+        "snapMesh",
+        "use system/snapMeshDict"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"

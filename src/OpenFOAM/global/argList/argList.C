@@ -344,7 +344,7 @@ void Foam::argList::getRootCase()
     else
     {
         // qualify relative path
-        fileName casePath = cwd()/rootPath_/globalCase_;
+        casePath = cwd()/rootPath_/globalCase_;
         casePath.clean();
 
         setEnv("FOAM_CASE", casePath, true);

@@ -150,14 +150,25 @@ void subsetPointFields
 
 int main(int argc, char *argv[])
 {
-#   include "addOverwriteOption.H"
-    argList::validArgs.append("set");
-    argList::addOption("patch", "patch name");
+    argList::addNote
+    (
+        "select a mesh subset based on a cellSet"
+    );
 
-#   include "setRootCase.H"
-#   include "createTime.H"
+    #include "addOverwriteOption.H"
+    argList::validArgs.append("cellSet");
+    argList::addOption
+    (
+        "patch",
+        "name",
+        "add exposed internal faces to specified patch instead of to "
+        "'oldInternalFaces'"
+    );
+    #include "setRootCase.H"
+    #include "createTime.H"
     runTime.functionObjects().off();
-#   include "createMesh.H"
+    #include "createMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     const word setName = args[1];
@@ -190,7 +201,7 @@ int main(int argc, char *argv[])
     else
     {
         Info<< "Adding exposed internal faces to a patch called"
-            << " \"oldInternalFaces\" (created if nessecary)" << endl
+            << " \"oldInternalFaces\" (created if necessary)" << endl
             << endl;
     }
 

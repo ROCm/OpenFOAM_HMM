@@ -61,8 +61,8 @@ int main(int argc, char *argv[])
     );
     argList::noParallel();
     argList::validArgs.clear();
-    argList::validArgs.append("surface file");
-    argList::validArgs.append("output surface file");
+    argList::validArgs.append("surfaceFile");
+    argList::validArgs.append("output surfaceFile");
     argList::addOption
     (
         "translate",

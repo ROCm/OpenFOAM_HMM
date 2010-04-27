@@ -47,17 +47,16 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.clear();
-    argList::validArgs.append("input surface file");
-    argList::validArgs.append("output surface file");
-    argList::validArgs.append("included angle [0..180]");
+    argList::validArgs.append("input surfaceFile");
+    argList::validArgs.append("output surfaceFile");
+    argList::validArgs.append("includedAngle [0..180]");
     argList args(argc, argv);
 
     const fileName inFileName  = args[1];
     const fileName outFileName = args[2];
     const scalar includedAngle = args.argRead<scalar>(3);
 
-    Info<< "Surface        : " << inFileName << nl
-        << endl;
+    Info<< "Surface        : " << inFileName << nl << endl;
 
 
     // Read

@@ -289,8 +289,12 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::validArgs.append("surface file");
-    argList::addBoolOption("shellProperties");
+    argList::validArgs.append("surfaceFile");
+    argList::addBoolOption
+    (
+        "shellProperties",
+        "inertia of a thin shell"
+    );
 
     argList::addOption
     (

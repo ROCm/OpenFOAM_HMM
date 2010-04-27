@@ -65,9 +65,9 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.clear();
-    argList::validArgs.append("Foam surface file");
-    argList::validArgs.append("reduction factor");
-    argList::validArgs.append("Foam output file");
+    argList::validArgs.append("surfaceFile");
+    argList::validArgs.append("reductionFactor");
+    argList::validArgs.append("output surfaceFile");
     argList args(argc, argv);
 
     const fileName inFileName = args[1];

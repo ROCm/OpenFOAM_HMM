@@ -58,14 +58,32 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "convert between surface formats"
+    );
+
     argList::noParallel();
     argList::validArgs.clear();
     argList::validArgs.append("inputFile");
     argList::validArgs.append("outputFile");
 
-    argList::addBoolOption("clean");
-    argList::addBoolOption("group");
-    argList::addOption("scale", "scale");
+    argList::addBoolOption
+    (
+        "clean",
+        "perform some surface checking/cleanup on the input surface"
+    );
+    argList::addBoolOption
+    (
+        "group",
+        "reorder faces into groups; one per region"
+    );
+    argList::addOption
+    (
+        "scale",
+        "factor",
+        "geometry scaling factor - default is 1"
+    );
 
     argList args(argc, argv);
 
@@ -96,8 +114,7 @@ int main(int argc, char *argv[])
         Info<< endl;
     }
 
-    bool sortByRegion = args.optionFound("group");
-
+    const bool sortByRegion = args.optionFound("group");
     if (sortByRegion)
     {
         Info<< "Reordering faces into groups; one per region." << endl;

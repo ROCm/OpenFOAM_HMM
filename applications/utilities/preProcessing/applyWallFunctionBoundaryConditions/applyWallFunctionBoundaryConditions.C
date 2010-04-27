@@ -333,13 +333,17 @@ void updateIncompressibleCase(const fvMesh& mesh)
 int main(int argc, char *argv[])
 {
     #include "addTimeOptions.H"
-    argList::addBoolOption("compressible");
+    argList::addBoolOption
+    (
+        "compressible",
+        "force use of compressible wall functions. default is auto-detect."
+    );
 
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
 
-    bool compressible = args.optionFound("compressible");
+    const bool compressible = args.optionFound("compressible");
 
     Info<< "Updating turbulence fields to operate using new run time "
         << "selectable" << nl << "wall functions"

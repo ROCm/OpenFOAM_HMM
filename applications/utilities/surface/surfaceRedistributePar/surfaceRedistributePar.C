@@ -80,7 +80,7 @@ void writeProcStats
     {
         const List<treeBoundBox>& bbs = meshBb[procI];
 
-        Info<< "processor" << procI << endl
+        Info<< "processor" << procI << nl
             << "\tMesh bounds          : " << bbs[0] << nl;
         for (label i = 1; i < bbs.size(); i++)
         {
@@ -99,19 +99,27 @@ void writeProcStats
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "redistribute a triSurface"
+    );
+
     argList::validArgs.append("triSurfaceMesh");
     argList::validArgs.append("distributionType");
+    argList::addBoolOption
+    (
+        "keepNonMapped",
+        "preserve surface outside of mesh bounds"
+    );
 
-    argList::addBoolOption("keepNonMapped");
-#   include "setRootCase.H"
-#   include "createTime.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
     runTime.functionObjects().off();
 
     const fileName surfFileName = args[1];
     const word distType = args[2];
 
-    Info<< "Reading surface from " << surfFileName << nl
-        << nl
+    Info<< "Reading surface from " << surfFileName << nl << nl
         << "Using distribution method "
         << distributedTriSurfaceMesh::distributionTypeNames_[distType]
         << " " << distType << nl << endl;
@@ -138,7 +146,7 @@ int main(int argc, char *argv[])
     }
 
 
-#   include "createPolyMesh.H"
+    #include "createPolyMesh.H"
 
     Random rndGen(653213);
 

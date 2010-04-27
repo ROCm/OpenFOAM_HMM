@@ -46,12 +46,18 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-#   include "addOverwriteOption.H"
+    #include "addOverwriteOption.H"
     argList::noParallel();
     argList::validArgs.append("patchName");
     argList::validArgs.append("edgeWeight");
 
-    argList::addOption("useSet", "cellSet");
+    argList::addOption
+    (
+        "useSet",
+        "name",
+        "restrict cells to refine based on specified cellSet name"
+    );
+
 
 #   include "setRootCase.H"
 #   include "createTime.H"
