@@ -29,7 +29,8 @@ Description
 
     A Poisson's equation for the magnetic scalar potential psi is solved
     from which the magnetic field intensity H and magnetic flux density B
-    are obtained.
+    are obtained.  The paramagnetic particle force field (H dot grad(H))
+    is optionally available.
 
 \*---------------------------------------------------------------------------*/
 
@@ -42,8 +43,23 @@ Description
 
 int main(int argc, char *argv[])
 {
-    argList::addBoolOption("noH", "do not write the magnetic field");
-    argList::addBoolOption("noB", "do not write the magnetic field");
+    argList::addBoolOption
+    (
+        "noH",
+        "do not write the magnetic field intensity field"
+    );
+
+    argList::addBoolOption
+    (
+        "noB",
+        "do not write the magnetic flux density field"
+    );
+
+    argList::addBoolOption
+    (
+        "HdotGradH",
+        "write the paramagnetic particle force field"
+    );
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -64,10 +80,8 @@ int main(int argc, char *argv[])
 
     psi.write();
 
-    if (!args.optionFound("noH"))
+    if (!args.optionFound("noH") || args.optionFound("HdotGradH"))
     {
-        Info<< nl
-            << "Creating field H for time " << runTime.timeName() << endl;
         volVectorField H
         (
             IOobject
@@ -79,13 +93,42 @@ int main(int argc, char *argv[])
             fvc::reconstruct(fvc::snGrad(psi)*mesh.magSf())
         );
 
-        H.write();
+        if (!args.optionFound("noH"))
+        {
+            Info<< nl
+                << "Creating field H for time "
+                << runTime.timeName() << endl;
+
+            H.write();
+        }
+
+        if (args.optionFound("HdotGradH"))
+        {
+            Info<< nl
+                << "Creating field HdotGradH for time "
+                << runTime.timeName() << endl;
+
+            volVectorField HdotGradH
+            (
+                IOobject
+                (
+                    "HdotGradH",
+                    runTime.timeName(),
+                    mesh
+                ),
+                H & fvc::grad(H)
+            );
+
+            HdotGradH.write();
+        }
     }
 
     if (!args.optionFound("noB"))
     {
         Info<< nl
-            << "Creating field B for time " << runTime.timeName() << endl;
+            << "Creating field B for time "
+            << runTime.timeName() << endl;
+
         volVectorField B
         (
             IOobject

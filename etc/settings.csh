@@ -96,7 +96,7 @@ case OpenFOAM:
         set gcc_version=gcc-4.5.0
         set gmp_version=gmp-5.0.1
         set mpfr_version=mpfr-2.4.2
-        set mpc_version=mpc-2.4.2
+        set mpc_version=mpc-0.8.1
         breaksw
     case Gcc44:
         set gcc_version=gcc-4.4.3
@@ -121,7 +121,10 @@ case OpenFOAM:
         set gccDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$gcc_version
         set gmpDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$gmp_version
         set mpfrDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$mpfr_version
-        set mpcDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$mpc_version
+
+        if ( $?mpc_version ) then
+            set mpcDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$mpc_version
+        endif
 
         # Check that the compiler directory can be found
         if ( ! -d "$gccDir" ) then
