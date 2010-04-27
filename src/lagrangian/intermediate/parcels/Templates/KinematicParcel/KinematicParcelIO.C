@@ -149,7 +149,10 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
     IOField<vector> f(c.fieldIOobject("f", IOobject::MUST_READ));
     c.checkFieldIOobject(c, f);
 
-    IOField<vector> angularMomentum(c.fieldIOobject("angularMomentum", IOobject::MUST_READ));
+    IOField<vector> angularMomentum
+    (
+        c.fieldIOobject("angularMomentum", IOobject::MUST_READ)
+    );
     c.checkFieldIOobject(c, angularMomentum);
 
     IOField<vector> torque(c.fieldIOobject("torque", IOobject::MUST_READ));
@@ -201,7 +204,10 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
     IOField<scalar> d(c.fieldIOobject("d", IOobject::NO_READ), np);
     IOField<vector> U(c.fieldIOobject("U", IOobject::NO_READ), np);
     IOField<vector> f(c.fieldIOobject("f", IOobject::NO_READ), np);
-    IOField<vector> angularMomentum(c.fieldIOobject("angularMomentum", IOobject::NO_READ), np);
+    IOField<vector> angularMomentum
+    (
+        c.fieldIOobject("angularMomentum", IOobject::NO_READ), np
+    );
     IOField<vector> torque(c.fieldIOobject("torque", IOobject::NO_READ), np);
     IOField<scalar> rho(c.fieldIOobject("rho", IOobject::NO_READ), np);
     IOField<scalar> tTurb(c.fieldIOobject("tTurb", IOobject::NO_READ), np);
