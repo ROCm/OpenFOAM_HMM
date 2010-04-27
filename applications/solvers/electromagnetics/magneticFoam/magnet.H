@@ -60,7 +60,7 @@ class magnet
     // Private data
 
         word name_;
-        scalar relativPermeability_;
+        scalar relativePermeability_;
         dimensionedScalar remanence_;
         vector orientation_;
 
@@ -85,7 +85,7 @@ public:
         )
         :
             name_(name),
-            relativPermeability_(mur),
+            relativePermeability_(mur),
             remanence_("Mr", dimensionSet(0, -1, 0, 0, 0, 1, 0), Mr),
             orientation_(orientation)
         {}
@@ -111,7 +111,7 @@ public:
         //- Return relative permeability
         inline scalar mur() const
         {
-            return relativPermeability_;
+            return relativePermeability_;
         }
 
         //- Return remenance
@@ -133,7 +133,7 @@ public:
         {
             is.readBegin("magnet");
             is  >> m.name_
-                >> m.relativPermeability_
+                >> m.relativePermeability_
                 >> m.remanence_.value()
                 >> m.orientation_;
             is.readEnd("magnet");
@@ -148,7 +148,7 @@ public:
         {
             os  << token::BEGIN_LIST
                 << m.name_ << token::SPACE
-                << m.relativPermeability_ << token::SPACE
+                << m.relativePermeability_ << token::SPACE
                 << m.remanence_.value()
                 << m.orientation_
                 << token::END_LIST;
