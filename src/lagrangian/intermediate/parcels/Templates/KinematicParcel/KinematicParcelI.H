@@ -75,7 +75,7 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
 )
 :
     Particle<ParcelType>(owner, position, cellI),
-    active_(false),
+    active_(true),
     typeId_(owner.parcelTypeId()),
     nParticle_(0),
     d_(0.0),
