@@ -83,7 +83,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
         {
             is.read
             (
-                reinterpret_cast<char*>(&typeId_),
+                reinterpret_cast<char*>(&active_),
                 sizeof(active_)
               + sizeof(typeId_)
               + sizeof(nParticle_)
