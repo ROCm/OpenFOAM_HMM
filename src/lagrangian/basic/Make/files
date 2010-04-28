@@ -5,6 +5,7 @@ $(passiveParticle)/passiveParticleCloud.C
 $(indexedParticle)/indexedParticleCloud.C
 
 InteractionLists/globalIndexAndTransform/globalIndexAndTransform.C
+InteractionLists/globalIndexAndTransform/vectorTensorTransform/vectorTensorTransform.C
 InteractionLists/referredWallFace/referredWallFace.C
 
 LIB = $(FOAM_LIBBIN)/liblagrangian
