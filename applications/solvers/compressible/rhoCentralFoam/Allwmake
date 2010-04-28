@@ -4,5 +4,6 @@ set -x
 
 wmake libso BCs
 wmake
+wmake rhoCentralDyMFoam
 
 # ----------------------------------------------------------------- end-of-file
