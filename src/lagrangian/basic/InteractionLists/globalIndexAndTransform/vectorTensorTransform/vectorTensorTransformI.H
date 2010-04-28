@@ -28,29 +28,34 @@ License
 inline Foam::vectorTensorTransform::vectorTensorTransform()
 :
     t_(vector::zero),
-    R_(sphericalTensor::I)
+    R_(sphericalTensor::I),
+    hasR_(false)
 {}
 
 inline Foam::vectorTensorTransform::vectorTensorTransform
 (
     const vector& t,
-    const tensor& R
+    const tensor& R,
+    bool hasR
 )
 :
     t_(t),
-    R_(R)
+    R_(R),
+    hasR_(hasR)
 {}
 
 inline Foam::vectorTensorTransform::vectorTensorTransform(const vector& t)
 :
     t_(t),
-    R_(sphericalTensor::I)
+    R_(sphericalTensor::I),
+    hasR_(false)
 {}
 
 inline Foam::vectorTensorTransform::vectorTensorTransform(const tensor& R)
 :
     t_(vector::zero),
-    R_(R)
+    R_(R),
+    hasR_(true)
 {}
 
 
@@ -68,6 +73,12 @@ inline const Foam::tensor& Foam::vectorTensorTransform::R() const
 }
 
 
+inline bool Foam::vectorTensorTransform::hasR() const
+{
+    return hasR_;
+}
+
+
 inline Foam::vector& Foam::vectorTensorTransform::t()
 {
     return t_;
@@ -76,6 +87,11 @@ inline Foam::vector& Foam::vectorTensorTransform::t()
 
 inline Foam::tensor& Foam::vectorTensorTransform::R()
 {
+    // Assume that non-const access to R changes it from I, so set
+    // hasR to true
+
+    hasR_ = true;
+
     return R_;
 }
 
@@ -85,7 +101,30 @@ inline Foam::vector Foam::vectorTensorTransform::transform
     const vector& v
 ) const
 {
-    return t() + (R() & v);
+    if (hasR_)
+    {
+        return t() + (R() & v);
+    }
+    else
+    {
+        return t() + v;
+    }
+}
+
+
+inline Foam::pointField Foam::vectorTensorTransform::transform
+(
+    const pointField& pts
+) const
+{
+    if (hasR_)
+    {
+        return t() + (R() & pts);
+    }
+    else
+    {
+        return t() + pts;
+    }
 }
 
 
@@ -94,7 +133,30 @@ inline Foam::vector Foam::vectorTensorTransform::invTransform
     const vector& v
 ) const
 {
-    return (R().T() & (v - t()));
+    if (hasR_)
+    {
+        return (R().T() & (v - t()));
+    }
+    else
+    {
+        return v - t();
+    }
+}
+
+
+inline Foam::pointField Foam::vectorTensorTransform::invTransform
+(
+    const pointField& pts
+) const
+{
+    if (hasR_)
+    {
+        return (R().T() & (pts - t()));
+    }
+    else
+    {
+        return pts - t();
+    }
 }
 
 
@@ -107,6 +169,7 @@ inline void Foam::vectorTensorTransform::operator=
 {
     t_ = tr.t_;
     R_ = tr.R_;
+    hasR_ = tr.hasR_;
 }
 
 
@@ -117,6 +180,10 @@ inline void Foam::vectorTensorTransform::operator&=
 {
     t_ += tr.t_;
     R_ = tr.R_ & R_;
+
+    // If either of the two objects has hasR_ as true, then inherit
+    // it, otherwise, these should both be I tensors.
+    hasR_ = tr.hasR_ || hasR_;
 }
 
 
@@ -140,13 +207,25 @@ inline void Foam::vectorTensorTransform::operator-=(const vector& t)
 
 inline void Foam::vectorTensorTransform::operator=(const tensor& R)
 {
+    hasR_ = true;
+
     R_ = R;
 }
 
 
 inline void Foam::vectorTensorTransform::operator&=(const tensor& R)
 {
+    hasR_ = true;
+
     R_ = R & R_;
+}
+
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+inline Foam::vectorTensorTransform Foam::inv(const vectorTensorTransform& tr)
+{
+    return vectorTensorTransform(-tr.t(), tr.R().T(), tr.hasR());
 }
 
 
@@ -178,7 +257,7 @@ inline Foam::vectorTensorTransform Foam::operator+
     const vector& t
 )
 {
-    return vectorTensorTransform(tr.t() + t, tr.R());
+    return vectorTensorTransform(tr.t() + t, tr.R(), tr.hasR());
 }
 
 
@@ -188,7 +267,7 @@ inline Foam::vectorTensorTransform Foam::operator+
     const vectorTensorTransform& tr
 )
 {
-    return vectorTensorTransform(t + tr.t(), tr.R());
+    return vectorTensorTransform(t + tr.t(), tr.R(), tr.hasR());
 }
 
 
@@ -198,7 +277,7 @@ inline Foam::vectorTensorTransform Foam::operator-
     const vector& t
 )
 {
-    return vectorTensorTransform(tr.t() - t, tr.R());
+    return vectorTensorTransform(tr.t() - t, tr.R(), tr.hasR());
 }
 
 
@@ -211,7 +290,8 @@ inline Foam::vectorTensorTransform Foam::operator&
     return vectorTensorTransform
     (
         tr1.t() + tr2.t(),
-        tr1.R() & tr2.R()
+        tr1.R() & tr2.R(),
+        (tr1.hasR() || tr2.hasR())
     );
 }
 

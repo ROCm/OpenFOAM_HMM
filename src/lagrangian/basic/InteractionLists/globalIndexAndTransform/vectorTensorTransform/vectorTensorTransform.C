@@ -30,19 +30,21 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* const Foam::vectorTensorTransform::typeName =
-"vectorTensorTransform";
+    "vectorTensorTransform";
 
 const Foam::vectorTensorTransform Foam::vectorTensorTransform::zero
 (
     vector::zero,
-    tensor::zero
+    tensor::zero,
+    false
 );
 
 
 const Foam::vectorTensorTransform Foam::vectorTensorTransform::I
 (
     vector::zero,
-    sphericalTensor::I
+    sphericalTensor::I,
+    false
 );
 
 
@@ -73,7 +75,7 @@ Foam::Istream& Foam::operator>>(Istream& is, vectorTensorTransform& tr)
     // Read beginning of vectorTensorTransform
     is.readBegin("vectorTensorTransform");
 
-    is  >> tr.t() >> tr.R();
+    is  >> tr.t_ >> tr.R_ >> tr.hasR_;
 
     // Read end of vectorTensorTransform
     is.readEnd("vectorTensorTransform");
@@ -88,7 +90,7 @@ Foam::Istream& Foam::operator>>(Istream& is, vectorTensorTransform& tr)
 Foam::Ostream& Foam::operator<<(Ostream& os, const vectorTensorTransform& tr)
 {
     os  << token::BEGIN_LIST
-        << tr.t() << token::SPACE << tr.R()
+        << tr.t() << token::SPACE << tr.R() << token::SPACE << tr.hasR()
         << token::END_LIST;
 
     return os;

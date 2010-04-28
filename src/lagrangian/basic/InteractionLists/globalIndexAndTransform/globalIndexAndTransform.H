@@ -45,6 +45,7 @@ SourceFiles
 #include "Pstream.H"
 #include "List.H"
 #include "labelPair.H"
+#include "vectorTensorTransform.H"
 #include "polyMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -67,18 +68,19 @@ class globalIndexAndTransform
         const polyMesh& mesh_;
 
         //- The possible independent (non-permuted) transforms of the
-        //  geometry, i.e. for a geometry with two cyclic, two
-        //  transforms, not the eight permutations.  There may not be
-        //  more than three transforms in the range of
-        //  coupledPolyPatch geometries (separated XOR non-parallel)
-        //  and symmetries (cuboid periodicity only) supported.
-        List<vector> transforms_;
+        //  geometry, i.e. for a geometry with two cyclics, this
+        //  stores the two transforms, not the eight permutations.
+        //  There may not be more than three transforms in the range
+        //  of coupledPolyPatch geometries (separated XOR
+        //  non-parallel) and symmetries (cuboid periodicity only)
+        //  supported.
+        List<vectorTensorTransform> transforms_;
 
         //- The permutations of the transforms, stored for lookup
         //  efficiency.  If there are n transforms, then there are
         //  (3^n) permutations, including the no-transformation
         //  transform.
-        List<vector> transformPermutations_;
+        List<vectorTensorTransform> transformPermutations_;
 
 
     // Private static data
@@ -94,6 +96,15 @@ class globalIndexAndTransform
 
         //- Generate all of the transformation permutations
         void determineTransformPermutations();
+
+        //- Test a list of reference transforms to see if the test transform
+        bool matchTransform
+        (
+            const List<vectorTensorTransform>& refTransforms,
+            const vectorTensorTransform& testTransform,
+            scalar tolerance,
+            bool bothSigns
+        ) const;
 
         //- Disallow default bitwise copy construct
         globalIndexAndTransform(const globalIndexAndTransform&);
@@ -154,14 +165,18 @@ public:
             inline label nIndependentTransforms() const;
 
             //- Return access to the stored independent transforms
-            inline const List<vector>& transforms() const;
+            inline const List<vectorTensorTransform>& transforms() const;
 
             //- Return access to the permuted transforms
-            inline const List<vector>& transformPermutations() const;
+            inline const List<vectorTensorTransform>&
+            transformPermutations() const;
 
             //- Access the overall (permuted) transform corresponding
             //  to the transformIndex
-            inline const vector& transform(label transformIndex) const;
+            inline const vectorTensorTransform& transform
+            (
+                label transformIndex
+            ) const;
 };
 
 

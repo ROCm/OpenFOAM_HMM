@@ -166,21 +166,21 @@ Foam::label Foam::globalIndexAndTransform::nIndependentTransforms() const
 }
 
 
-const Foam::List<Foam::vector>&
+const Foam::List<Foam::vectorTensorTransform>&
 Foam::globalIndexAndTransform::transforms() const
 {
     return transforms_;
 }
 
 
-const Foam::List<Foam::vector>&
+const Foam::List<Foam::vectorTensorTransform>&
 Foam::globalIndexAndTransform::transformPermutations() const
 {
     return transformPermutations_;
 }
 
 
-const Foam::vector& Foam::globalIndexAndTransform::transform
+const Foam::vectorTensorTransform& Foam::globalIndexAndTransform::transform
 (
     label transformIndex
 ) const

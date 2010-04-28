@@ -41,6 +41,7 @@ SourceFiles
 #include "tensor.H"
 #include "word.H"
 #include "contiguous.H"
+#include "pointField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,6 +69,11 @@ class vectorTensorTransform
         //- Rotation tensor
         tensor R_;
 
+        //- Recording if the transform has non-identity transform to
+        //  allow its calculation to be skipped, which is the majority
+        //  of the expected cases
+        bool hasR_;
+
 
 public:
 
@@ -85,8 +91,14 @@ public:
         //- Construct null
         inline vectorTensorTransform();
 
-        //- Construct given a translation vector and rotation tensor
-        inline vectorTensorTransform(const vector& t, const tensor& R);
+        //- Construct given a translation vector, rotation tensor and
+        //  hasR bool
+        inline vectorTensorTransform
+        (
+            const vector& t,
+            const tensor& R,
+            bool hasR = true
+        );
 
         //- Construct a pure translation vectorTensorTransform given a
         //  translation vector
@@ -102,27 +114,35 @@ public:
 
     // Member functions
 
-           // Access
+        // Access
 
-               inline const vector& t() const;
+            inline const vector& t() const;
 
-               inline const tensor& R() const;
+            inline const tensor& R() const;
 
-
-           // Edit
-
-               inline vector& t();
-
-               inline tensor& R();
+            inline bool hasR() const;
 
 
-           // Transform
+        // Edit
 
-               //- Transform the given vector
-               inline vector transform(const vector& v) const;
+            inline vector& t();
 
-               //- Inverse Transform the given vector
-               inline vector invTransform(const vector& v) const;
+            inline tensor& R();
+
+
+        // Transform
+
+            //- Transform the given vector
+            inline vector transform(const vector& v) const;
+
+            //- Transform the given pointField
+            inline pointField transform(const pointField& pts) const;
+
+            //- Inverse transform the given vector
+            inline vector invTransform(const vector& v) const;
+
+            //- Inverse transform the given pointField
+            inline pointField invTransform(const pointField& pts) const;
 
 
     // Member operators
@@ -147,6 +167,10 @@ public:
 
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+//- Return the inverse of the given vectorTensorTransform
+inline vectorTensorTransform inv(const vectorTensorTransform& tr);
+
 
 //- Return a string representation of a vectorTensorTransform
 word name(const vectorTensorTransform&);

@@ -34,11 +34,92 @@ const Foam::label Foam::globalIndexAndTransform::base_ = 32;
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+bool Foam::globalIndexAndTransform::matchTransform
+(
+    const List<vectorTensorTransform>& refTransforms,
+    const vectorTensorTransform& testTransform,
+    scalar tolerance,
+    bool bothSigns
+) const
+{
+    // return min(mag(transforms_ - sepVec)) > tol
+
+    forAll(refTransforms, i)
+    {
+        const vectorTensorTransform& refTransform = refTransforms[i];
+
+        scalar maxVectorMag = sqrt
+        (
+            max(magSqr(testTransform.t()), magSqr(refTransform.t()))
+        );
+
+        // Test the difference between vector parts to see if it is
+        // less than tolerance times the larger vector part magnitude.
+
+        scalar vectorDiff =
+            mag(refTransform.t() - testTransform.t())
+           /(maxVectorMag + VSMALL)
+           /tolerance;
+
+        // Test the difference between tensor parts to see if it is
+        // less than the tolerance.  sqrt(3.0) factor used to scale
+        // differnces as this is magnitude of a rotation tensor.  If
+        // neither transform has a rotation, then the test is not
+        // necessary.
+
+        scalar tensorDiff = 0;
+
+        if (refTransform.hasR() || testTransform.hasR())
+        {
+            tensorDiff =
+                mag(refTransform.R() - testTransform.R())
+               /sqrt(3.0)
+               /tolerance;
+        }
+
+        // ...Diff result is < 1 if the test part matches the ref part
+        // within tolerance
+
+        if (vectorDiff < 1 && tensorDiff < 1)
+        {
+            return true;
+        }
+
+        if (bothSigns)
+        {
+            // Test the inverse transform differences too
+
+            vectorDiff =
+                mag(refTransform.t() + testTransform.t())
+               /(maxVectorMag + VSMALL)
+               /tolerance;
+
+            tensorDiff = 0;
+
+            if (refTransform.hasR() || testTransform.hasR())
+            {
+                tensorDiff =
+                    mag(refTransform.R() - testTransform.R().T())
+                   /sqrt(3.0)
+                   /tolerance;
+            }
+
+            if (vectorDiff < 1 && tensorDiff < 1)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
 void Foam::globalIndexAndTransform::determineTransforms()
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    transforms_ = List<vector>(6, vector::zero);
+    transforms_ = List<vectorTensorTransform>(6);
 
     label nextTrans = 0;
 
@@ -60,11 +141,13 @@ void Foam::globalIndexAndTransform::determineTransforms()
 
                     if (mag(sepVec) > SMALL)
                     {
-                        scalar tol = coupledPolyPatch::matchTol*mag(sepVec);
+                        scalar tol = coupledPolyPatch::matchTol;
 
-                        if (min(mag(transforms_ - sepVec)) > tol)
+                        vectorTensorTransform transform(sepVec);
+
+                        if (!matchTransform(transforms_, transform, tol, false))
                         {
-                            transforms_[nextTrans++] = sepVec;
+                            transforms_[nextTrans++] = transform;
                         }
 
                         if (nextTrans > 6)
@@ -83,21 +166,41 @@ void Foam::globalIndexAndTransform::determineTransforms()
             }
             else if (!cpp.parallel())
             {
-                WarningIn
-                (
-                    "void Foam::globalIndexAndTransform::determineTransforms()"
-                )
-                    << "Non-parallel patches not supported." << endl;
+                const tensorField& transTensors = cpp.forwardT();
 
-                // Pout<< cpp.forwardT() << nl
-                //     << cpp.reverseT() << nl
-                //     << (cpp.forwardT() & cpp.reverseT())
-                //     << endl;
+                forAll(transTensors, tTI)
+                {
+                    const tensor& transT = transTensors[tTI];
+
+                    if (mag(transT - I) > SMALL)
+                    {
+                        scalar tol = coupledPolyPatch::matchTol;
+
+                        vectorTensorTransform transform(transT);
+
+                        if (!matchTransform(transforms_, transform, tol, false))
+                        {
+                            transforms_[nextTrans++] = transform;
+                        }
+
+                        if (nextTrans > 6)
+                        {
+                            FatalErrorIn
+                            (
+                                "void Foam::globalIndexAndTransform::"
+                                "determineTransforms()"
+                            )
+                                << "More than six unsigned transforms detected:"
+                                << nl << transforms_
+                                << exit(FatalError);
+                        }
+                    }
+                }
             }
         }
     }
 
-    List<List<vector> > allTransforms(Pstream::nProcs());
+    List<List<vectorTensorTransform> > allTransforms(Pstream::nProcs());
 
     allTransforms[Pstream::myProcNo()] = transforms_;
 
@@ -105,36 +208,34 @@ void Foam::globalIndexAndTransform::determineTransforms()
 
     if (Pstream::master())
     {
-        transforms_ = List<vector>(3, vector::zero);
+        transforms_ = List<vectorTensorTransform>(3);
 
         label nextTrans = 0;
 
         forAll(allTransforms, procI)
         {
-            const List<vector>& procTransVecs = allTransforms[procI];
+            const List<vectorTensorTransform>& procTransVecs =
+                allTransforms[procI];
 
             forAll(procTransVecs, pSVI)
             {
-                const vector& procTransVec = procTransVecs[pSVI];
+                const vectorTensorTransform& transform = procTransVecs[pSVI];
 
-                if (mag(procTransVec) > SMALL)
+                if (mag(transform.t()) > SMALL || transform.hasR())
                 {
-                    scalar tol = coupledPolyPatch::matchTol*mag(procTransVec);
+                    scalar tol = coupledPolyPatch::matchTol;
 
-                    if
-                    (
-                        min(mag(procTransVec - transforms_)) > tol
-                     && min(mag(procTransVec + transforms_)) > tol
-                    )
+                    if (!matchTransform(transforms_, transform, tol, true))
                     {
-                        transforms_[nextTrans++] = procTransVec;
+                        transforms_[nextTrans++] = transform;
                     }
 
                     if (nextTrans > 3)
                     {
                         FatalErrorIn
                         (
-                            "List<vector> allTransforms(const polyMesh& mesh)"
+                            "void Foam::globalIndexAndTransform::"
+                            "determineTransforms()"
                         )
                             << "More than three independent basic "
                             << "transforms detected:" << nl
@@ -161,7 +262,7 @@ void Foam::globalIndexAndTransform::determineTransformPermutations()
 
     forAll(transformPermutations_, tPI)
     {
-        vector trans = vector::zero;
+        vectorTensorTransform transform;
 
         label transformIndex = tPI;
 
@@ -174,10 +275,17 @@ void Foam::globalIndexAndTransform::determineTransformPermutations()
 
             transformIndex /= 3;
 
-            trans += w*transforms_[b];
+            if (w > 0)
+            {
+                transform &= transforms_[b];
+            }
+            else if (w < 0)
+            {
+                transform &= inv(transforms_[b]);
+            }
         }
 
-        transformPermutations_[tPI] = trans;
+        transformPermutations_[tPI] = transform;
     }
 }
 
