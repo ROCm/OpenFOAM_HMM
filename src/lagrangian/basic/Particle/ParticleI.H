@@ -47,7 +47,7 @@ inline Foam::scalar Foam::Particle<ParticleType>::lambda
         vector Cf = mesh.faceCentres()[facei];
 
         // patch interaction
-        if (cloud_.boundaryFace(facei))
+        if (!cloud_.internalFace(facei))
         {
             label patchi = patch(facei);
             const polyPatch& patch = mesh.boundaryMesh()[patchi];
@@ -195,7 +195,7 @@ inline Foam::scalar Foam::Particle<ParticleType>::lambda
     vector Cf = mesh.faceCentres()[facei];
 
     // patch interaction
-    if (cloud_.boundaryFace(facei))
+    if (!cloud_.internalFace(facei))
     {
         label patchi = patch(facei);
         const polyPatch& patch = mesh.boundaryMesh()[patchi];
@@ -207,11 +207,10 @@ inline Foam::scalar Foam::Particle<ParticleType>::lambda
             scalar CCf = mag((C - Cf) & Sf);
             // check if distance between cell centre and face centre
             // is larger than wallImpactDistance
-
             const ParticleType& p = static_cast<const ParticleType&>(*this);
             if (CCf > p.wallImpactDistance(Sf))
             {
-                Cf -= p.wallImpactDistance(Sf)*Sf;
+                Cf -=p.wallImpactDistance(Sf)*Sf;
             }
         }
     }
