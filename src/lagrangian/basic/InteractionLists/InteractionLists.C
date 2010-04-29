@@ -28,475 +28,7 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class ParticleType>
-void Foam::InteractionLists<ParticleType>::findExtendedProcBbsInRange
-(
-    const treeBoundBox& procBb,
-    const List<treeBoundBox>& allExtendedProcBbs,
-    const globalIndexAndTransform& globalTransforms,
-    List<treeBoundBox>& extendedProcBbsInRange,
-    List<label>& extendedProcBbsTransformIndex,
-    List<label>& extendedProcBbsOrigProc
-)
-{
-    extendedProcBbsInRange.setSize(0);
-    extendedProcBbsTransformIndex.setSize(0);
-    extendedProcBbsOrigProc.setSize(0);
-
-    DynamicList<treeBoundBox> tmpExtendedProcBbsInRange;
-    DynamicList<label> tmpExtendedProcBbsTransformIndex;
-    DynamicList<label> tmpExtendedProcBbsOrigProc;
-
-    label nTrans = globalTransforms.nIndependentTransforms();
-
-    forAll(allExtendedProcBbs, procI)
-    {
-        List<label> permutationIndices(nTrans, 0);
-
-        vector s = vector::zero;
-
-        if (nTrans == 0 && procI != Pstream::myProcNo())
-        {
-            treeBoundBox extendedReferredProcBb = allExtendedProcBbs[procI];
-
-            if (procBb.overlaps(extendedReferredProcBb))
-            {
-                tmpExtendedProcBbsInRange.append
-                (
-                    extendedReferredProcBb
-                );
-
-                // Dummy index, there are no transforms, so there will
-                // be no resultant transform when this is decoded.
-                tmpExtendedProcBbsTransformIndex.append(0);
-
-                tmpExtendedProcBbsOrigProc.append(procI);
-            }
-        }
-        else if (nTrans == 3)
-        {
-            label& i = permutationIndices[0];
-            label& j = permutationIndices[1];
-            label& k = permutationIndices[2];
-
-            for (i = -1; i <= 1; i++)
-            {
-                for (j = -1; j <= 1; j++)
-                {
-                    for (k = -1; k <= 1; k++)
-                    {
-                        if
-                        (
-                            i == 0
-                         && j == 0
-                         && k == 0
-                         && procI == Pstream::myProcNo()
-                        )
-                        {
-                            // Skip this processor's extended boundBox
-                            // when it has no transformation
-                            continue;
-                        }
-
-                        label transI = globalTransforms.encodeTransformIndex
-                        (
-                            permutationIndices
-                        );
-
-                        const vectorTensorTransform& transform =
-                            globalTransforms.transform(transI);
-
-                        treeBoundBox extendedReferredProcBb
-                        (
-                            transform.transform
-                            (
-                                allExtendedProcBbs[procI].corners()
-                            )
-                        );
-
-                        if (procBb.overlaps(extendedReferredProcBb))
-                        {
-                            tmpExtendedProcBbsInRange.append
-                            (
-                                extendedReferredProcBb
-                            );
-
-                            tmpExtendedProcBbsTransformIndex.append(transI);
-
-                            tmpExtendedProcBbsOrigProc.append(procI);
-                        }
-                    }
-                }
-            }
-        }
-        else if (nTrans == 2)
-        {
-            label& i = permutationIndices[0];
-            label& j = permutationIndices[1];
-
-            for (i = -1; i <= 1; i++)
-            {
-                for (j = -1; j <= 1; j++)
-                {
-                    if (i == 0 && j == 0 && procI == Pstream::myProcNo())
-                    {
-                        // Skip this processor's extended boundBox
-                        // when it has no transformation
-                        continue;
-                    }
-
-                    label transI = globalTransforms.encodeTransformIndex
-                    (
-                        permutationIndices
-                    );
-
-                    const vectorTensorTransform& transform =
-                        globalTransforms.transform(transI);
-
-                    treeBoundBox extendedReferredProcBb
-                    (
-                        transform.transform
-                        (
-                            allExtendedProcBbs[procI].corners()
-                        )
-                    );
-
-                    if (procBb.overlaps(extendedReferredProcBb))
-                    {
-                        tmpExtendedProcBbsInRange.append
-                        (
-                            extendedReferredProcBb
-                        );
-
-                        tmpExtendedProcBbsTransformIndex.append(transI);
-
-                        tmpExtendedProcBbsOrigProc.append(procI);
-                    }
-                }
-            }
-        }
-        else if (nTrans == 1)
-        {
-            label& i = permutationIndices[0];
-
-            for (i = -1; i <= 1; i++)
-            {
-                if (i == 0 && procI == Pstream::myProcNo())
-                {
-                    // Skip this processor's extended boundBox when it
-                    // has no transformation
-                    continue;
-                }
-
-                label transI = globalTransforms.encodeTransformIndex
-                (
-                    permutationIndices
-                );
-
-                const vectorTensorTransform& transform =
-                    globalTransforms.transform(transI);
-
-                treeBoundBox extendedReferredProcBb
-                (
-                    transform.transform
-                    (
-                        allExtendedProcBbs[procI].corners()
-                    )
-                );
-
-                if (procBb.overlaps(extendedReferredProcBb))
-                {
-                    tmpExtendedProcBbsInRange.append
-                    (
-                        extendedReferredProcBb
-                    );
-
-                    tmpExtendedProcBbsTransformIndex.append(transI);
-
-                    tmpExtendedProcBbsOrigProc.append(procI);
-                }
-            }
-        }
-    }
-
-    extendedProcBbsInRange = tmpExtendedProcBbsInRange.xfer();
-    extendedProcBbsTransformIndex = tmpExtendedProcBbsTransformIndex.xfer();
-    extendedProcBbsOrigProc = tmpExtendedProcBbsOrigProc.xfer();
-}
-
-
-template<class ParticleType>
-void Foam::InteractionLists<ParticleType>::buildMap
-(
-    autoPtr<mapDistribute>& mapPtr,
-    const List<label>& toProc
-)
-{
-    // Determine send map
-    // ~~~~~~~~~~~~~~~~~~
-
-    // 1. Count
-    labelList nSend(Pstream::nProcs(), 0);
-
-    forAll(toProc, i)
-    {
-        label procI = toProc[i];
-
-        nSend[procI]++;
-    }
-
-    // Send over how many I need to receive
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    labelListList sendSizes(Pstream::nProcs());
-
-    sendSizes[Pstream::myProcNo()] = nSend;
-
-    combineReduce(sendSizes, UPstream::listEq());
-
-    // 2. Size sendMap
-    labelListList sendMap(Pstream::nProcs());
-
-    forAll(nSend, procI)
-    {
-        sendMap[procI].setSize(nSend[procI]);
-
-        nSend[procI] = 0;
-    }
-
-    // 3. Fill sendMap
-    forAll(toProc, i)
-    {
-        label procI = toProc[i];
-
-        sendMap[procI][nSend[procI]++] = i;
-    }
-
-    // Determine receive map
-    // ~~~~~~~~~~~~~~~~~~~~~
-
-    labelListList constructMap(Pstream::nProcs());
-
-    // Local transfers first
-    constructMap[Pstream::myProcNo()] = identity
-    (
-        sendMap[Pstream::myProcNo()].size()
-    );
-
-    label constructSize = constructMap[Pstream::myProcNo()].size();
-
-    forAll(constructMap, procI)
-    {
-        if (procI != Pstream::myProcNo())
-        {
-            label nRecv = sendSizes[procI][Pstream::myProcNo()];
-
-            constructMap[procI].setSize(nRecv);
-
-            for (label i = 0; i < nRecv; i++)
-            {
-                constructMap[procI][i] = constructSize++;
-            }
-        }
-    }
-
-    mapPtr.reset
-    (
-        new mapDistribute
-        (
-
-            constructSize,
-            sendMap.xfer(),
-            constructMap.xfer()
-        )
-    );
-}
-
-
-template<class ParticleType>
-void Foam::InteractionLists<ParticleType>::prepareParticlesToRefer
-(
-    const List<DynamicList<ParticleType*> >& cellOccupancy
-)
-{
-    referredParticles_.setSize(cellIndexAndTransformToDistribute_.size());
-
-    // Clear all existing referred particles
-
-    forAll(referredParticles_, i)
-    {
-        referredParticles_[i].clear();
-    }
-
-    // Clear all particles that may have been populated into the cloud
-    cloud_.clear();
-
-    forAll(cellIndexAndTransformToDistribute_, i)
-    {
-        const labelPair ciat = cellIndexAndTransformToDistribute_[i];
-
-        label cellIndex = globalTransforms_.index(ciat);
-
-        List<ParticleType*> realParticles = cellOccupancy[cellIndex];
-
-        IDLList<ParticleType>& particlesToRefer = referredParticles_[i];
-
-        forAll (realParticles, rM)
-        {
-            const ParticleType& particle = *realParticles[rM];
-
-            particlesToRefer.append(particle.clone().ptr());
-
-            prepareParticleToBeReferred(particlesToRefer.last(), ciat);
-        }
-    }
-}
-
-
-template<class ParticleType>
-void Foam::InteractionLists<ParticleType>::prepareParticleToBeReferred
-(
-    ParticleType* particle,
-    labelPair ciat
-)
-{
-    const vectorTensorTransform& transform = globalTransforms_.transform
-    (
-        globalTransforms_.transformIndex(ciat)
-    );
-
-    particle->position() = transform.invTransform(particle->position());
-
-    particle->transformProperties(-transform.t());
-
-    if (transform.hasR())
-    {
-        particle->transformProperties(transform.R().T());
-    }
-}
-
-
-template<class ParticleType>
-void Foam::InteractionLists<ParticleType>::fillReferredParticleCloud()
-{
-    if (writeCloud_)
-    {
-        forAll(referredParticles_, refCellI)
-        {
-            const IDLList<ParticleType>& refCell =
-                referredParticles_[refCellI];
-
-            forAllConstIter(typename IDLList<ParticleType>, refCell, iter)
-            {
-                cloud_.addParticle(iter().clone().ptr());
-            }
-        }
-    }
-}
-
-
-template<class ParticleType>
-void Foam::InteractionLists<ParticleType>::prepareWallDataToRefer()
-{
-    referredWallData_.setSize
-    (
-        wallFaceIndexAndTransformToDistribute_.size()
-    );
-
-    const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
-
-    forAll(referredWallData_, rWVI)
-    {
-        const labelPair& wfiat = wallFaceIndexAndTransformToDistribute_[rWVI];
-
-        label wallFaceIndex = globalTransforms_.index(wfiat);
-
-        const vectorTensorTransform& transform = globalTransforms_.transform
-        (
-            globalTransforms_.transformIndex(wfiat)
-        );
-
-        label patchI = mesh_.boundaryMesh().patchID()
-        [
-            wallFaceIndex - mesh_.nInternalFaces()
-        ];
-
-        label patchFaceI =
-            wallFaceIndex
-          - mesh_.boundaryMesh()[patchI].start();
-
-        // Need to transform velocity when tensor transforms are
-        // supported
-        referredWallData_[rWVI] = U.boundaryField()[patchI][patchFaceI];
-
-        if (transform.hasR())
-        {
-            referredWallData_[rWVI] =
-                transform.R().T() & referredWallData_[rWVI];
-        }
-    }
-}
-
-
-template<class ParticleType>
-void Foam::InteractionLists<ParticleType>::writeReferredWallFaces() const
-{
-    OFstream str(mesh_.time().path()/"referredWallFaces.obj");
-
-    Info<< "    Writing " << str.name().name() << endl;
-
-    label offset = 1;
-
-    forAll(referredWallFaces_, rWFI)
-    {
-        const referredWallFace& rwf = referredWallFaces_[rWFI];
-
-        forAll(rwf, fPtI)
-        {
-            meshTools::writeOBJ(str, rwf.points()[rwf[fPtI]]);
-        }
-
-        str<< 'f';
-
-        forAll(rwf, fPtI)
-        {
-            str<< ' ' << fPtI + offset;
-        }
-
-        str<< nl;
-
-        offset += rwf.size();
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class ParticleType>
-Foam::InteractionLists<ParticleType>::InteractionLists
-(
-    const polyMesh& mesh,
-    scalar maxDistance,
-    Switch writeCloud,
-    const word& UName
-)
-:
-    mesh_(mesh),
-    cloud_(mesh_, "referredParticleCloud", IDLList<ParticleType>()),
-    writeCloud_(writeCloud),
-    cellMapPtr_(),
-    wallFaceMapPtr_(),
-    globalTransforms_(mesh_),
-    maxDistance_(maxDistance),
-    dil_(),
-    dwfil_(),
-    ril_(),
-    rilInverse_(),
-    cellIndexAndTransformToDistribute_(),
-    wallFaceIndexAndTransformToDistribute_(),
-    referredWallFaces_(),
-    UName_(UName),
-    referredWallData_(),
-    referredParticles_()
+void Foam::InteractionLists<ParticleType>::buildInteractionLists()
 {
     Info<< "Building InteractionLists with interaction distance "
         << maxDistance_ << endl;
@@ -1087,6 +619,486 @@ Foam::InteractionLists<ParticleType>::InteractionLists
 }
 
 
+template<class ParticleType>
+void Foam::InteractionLists<ParticleType>::findExtendedProcBbsInRange
+(
+    const treeBoundBox& procBb,
+    const List<treeBoundBox>& allExtendedProcBbs,
+    const globalIndexAndTransform& globalTransforms,
+    List<treeBoundBox>& extendedProcBbsInRange,
+    List<label>& extendedProcBbsTransformIndex,
+    List<label>& extendedProcBbsOrigProc
+)
+{
+    extendedProcBbsInRange.setSize(0);
+    extendedProcBbsTransformIndex.setSize(0);
+    extendedProcBbsOrigProc.setSize(0);
+
+    DynamicList<treeBoundBox> tmpExtendedProcBbsInRange;
+    DynamicList<label> tmpExtendedProcBbsTransformIndex;
+    DynamicList<label> tmpExtendedProcBbsOrigProc;
+
+    label nTrans = globalTransforms.nIndependentTransforms();
+
+    forAll(allExtendedProcBbs, procI)
+    {
+        List<label> permutationIndices(nTrans, 0);
+
+        vector s = vector::zero;
+
+        if (nTrans == 0 && procI != Pstream::myProcNo())
+        {
+            treeBoundBox extendedReferredProcBb = allExtendedProcBbs[procI];
+
+            if (procBb.overlaps(extendedReferredProcBb))
+            {
+                tmpExtendedProcBbsInRange.append
+                (
+                    extendedReferredProcBb
+                );
+
+                // Dummy index, there are no transforms, so there will
+                // be no resultant transform when this is decoded.
+                tmpExtendedProcBbsTransformIndex.append(0);
+
+                tmpExtendedProcBbsOrigProc.append(procI);
+            }
+        }
+        else if (nTrans == 3)
+        {
+            label& i = permutationIndices[0];
+            label& j = permutationIndices[1];
+            label& k = permutationIndices[2];
+
+            for (i = -1; i <= 1; i++)
+            {
+                for (j = -1; j <= 1; j++)
+                {
+                    for (k = -1; k <= 1; k++)
+                    {
+                        if
+                        (
+                            i == 0
+                         && j == 0
+                         && k == 0
+                         && procI == Pstream::myProcNo()
+                        )
+                        {
+                            // Skip this processor's extended boundBox
+                            // when it has no transformation
+                            continue;
+                        }
+
+                        label transI = globalTransforms.encodeTransformIndex
+                        (
+                            permutationIndices
+                        );
+
+                        const vectorTensorTransform& transform =
+                            globalTransforms.transform(transI);
+
+                        treeBoundBox extendedReferredProcBb
+                        (
+                            transform.transform
+                            (
+                                allExtendedProcBbs[procI].corners()
+                            )
+                        );
+
+                        if (procBb.overlaps(extendedReferredProcBb))
+                        {
+                            tmpExtendedProcBbsInRange.append
+                            (
+                                extendedReferredProcBb
+                            );
+
+                            tmpExtendedProcBbsTransformIndex.append(transI);
+
+                            tmpExtendedProcBbsOrigProc.append(procI);
+                        }
+                    }
+                }
+            }
+        }
+        else if (nTrans == 2)
+        {
+            label& i = permutationIndices[0];
+            label& j = permutationIndices[1];
+
+            for (i = -1; i <= 1; i++)
+            {
+                for (j = -1; j <= 1; j++)
+                {
+                    if (i == 0 && j == 0 && procI == Pstream::myProcNo())
+                    {
+                        // Skip this processor's extended boundBox
+                        // when it has no transformation
+                        continue;
+                    }
+
+                    label transI = globalTransforms.encodeTransformIndex
+                    (
+                        permutationIndices
+                    );
+
+                    const vectorTensorTransform& transform =
+                        globalTransforms.transform(transI);
+
+                    treeBoundBox extendedReferredProcBb
+                    (
+                        transform.transform
+                        (
+                            allExtendedProcBbs[procI].corners()
+                        )
+                    );
+
+                    if (procBb.overlaps(extendedReferredProcBb))
+                    {
+                        tmpExtendedProcBbsInRange.append
+                        (
+                            extendedReferredProcBb
+                        );
+
+                        tmpExtendedProcBbsTransformIndex.append(transI);
+
+                        tmpExtendedProcBbsOrigProc.append(procI);
+                    }
+                }
+            }
+        }
+        else if (nTrans == 1)
+        {
+            label& i = permutationIndices[0];
+
+            for (i = -1; i <= 1; i++)
+            {
+                if (i == 0 && procI == Pstream::myProcNo())
+                {
+                    // Skip this processor's extended boundBox when it
+                    // has no transformation
+                    continue;
+                }
+
+                label transI = globalTransforms.encodeTransformIndex
+                (
+                    permutationIndices
+                );
+
+                const vectorTensorTransform& transform =
+                    globalTransforms.transform(transI);
+
+                treeBoundBox extendedReferredProcBb
+                (
+                    transform.transform
+                    (
+                        allExtendedProcBbs[procI].corners()
+                    )
+                );
+
+                if (procBb.overlaps(extendedReferredProcBb))
+                {
+                    tmpExtendedProcBbsInRange.append
+                    (
+                        extendedReferredProcBb
+                    );
+
+                    tmpExtendedProcBbsTransformIndex.append(transI);
+
+                    tmpExtendedProcBbsOrigProc.append(procI);
+                }
+            }
+        }
+    }
+
+    extendedProcBbsInRange = tmpExtendedProcBbsInRange.xfer();
+    extendedProcBbsTransformIndex = tmpExtendedProcBbsTransformIndex.xfer();
+    extendedProcBbsOrigProc = tmpExtendedProcBbsOrigProc.xfer();
+}
+
+
+template<class ParticleType>
+void Foam::InteractionLists<ParticleType>::buildMap
+(
+    autoPtr<mapDistribute>& mapPtr,
+    const List<label>& toProc
+)
+{
+    // Determine send map
+    // ~~~~~~~~~~~~~~~~~~
+
+    // 1. Count
+    labelList nSend(Pstream::nProcs(), 0);
+
+    forAll(toProc, i)
+    {
+        label procI = toProc[i];
+
+        nSend[procI]++;
+    }
+
+    // Send over how many I need to receive
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    labelListList sendSizes(Pstream::nProcs());
+
+    sendSizes[Pstream::myProcNo()] = nSend;
+
+    combineReduce(sendSizes, UPstream::listEq());
+
+    // 2. Size sendMap
+    labelListList sendMap(Pstream::nProcs());
+
+    forAll(nSend, procI)
+    {
+        sendMap[procI].setSize(nSend[procI]);
+
+        nSend[procI] = 0;
+    }
+
+    // 3. Fill sendMap
+    forAll(toProc, i)
+    {
+        label procI = toProc[i];
+
+        sendMap[procI][nSend[procI]++] = i;
+    }
+
+    // Determine receive map
+    // ~~~~~~~~~~~~~~~~~~~~~
+
+    labelListList constructMap(Pstream::nProcs());
+
+    // Local transfers first
+    constructMap[Pstream::myProcNo()] = identity
+    (
+        sendMap[Pstream::myProcNo()].size()
+    );
+
+    label constructSize = constructMap[Pstream::myProcNo()].size();
+
+    forAll(constructMap, procI)
+    {
+        if (procI != Pstream::myProcNo())
+        {
+            label nRecv = sendSizes[procI][Pstream::myProcNo()];
+
+            constructMap[procI].setSize(nRecv);
+
+            for (label i = 0; i < nRecv; i++)
+            {
+                constructMap[procI][i] = constructSize++;
+            }
+        }
+    }
+
+    mapPtr.reset
+    (
+        new mapDistribute
+        (
+
+            constructSize,
+            sendMap.xfer(),
+            constructMap.xfer()
+        )
+    );
+}
+
+
+template<class ParticleType>
+void Foam::InteractionLists<ParticleType>::prepareParticlesToRefer
+(
+    const List<DynamicList<ParticleType*> >& cellOccupancy
+)
+{
+    referredParticles_.setSize(cellIndexAndTransformToDistribute_.size());
+
+    // Clear all existing referred particles
+
+    forAll(referredParticles_, i)
+    {
+        referredParticles_[i].clear();
+    }
+
+    // Clear all particles that may have been populated into the cloud
+    cloud_.clear();
+
+    forAll(cellIndexAndTransformToDistribute_, i)
+    {
+        const labelPair ciat = cellIndexAndTransformToDistribute_[i];
+
+        label cellIndex = globalTransforms_.index(ciat);
+
+        List<ParticleType*> realParticles = cellOccupancy[cellIndex];
+
+        IDLList<ParticleType>& particlesToRefer = referredParticles_[i];
+
+        forAll (realParticles, rM)
+        {
+            const ParticleType& particle = *realParticles[rM];
+
+            particlesToRefer.append(particle.clone().ptr());
+
+            prepareParticleToBeReferred(particlesToRefer.last(), ciat);
+        }
+    }
+}
+
+
+template<class ParticleType>
+void Foam::InteractionLists<ParticleType>::prepareParticleToBeReferred
+(
+    ParticleType* particle,
+    labelPair ciat
+)
+{
+    const vectorTensorTransform& transform = globalTransforms_.transform
+    (
+        globalTransforms_.transformIndex(ciat)
+    );
+
+    particle->position() = transform.invTransform(particle->position());
+
+    particle->transformProperties(-transform.t());
+
+    if (transform.hasR())
+    {
+        particle->transformProperties(transform.R().T());
+    }
+}
+
+
+template<class ParticleType>
+void Foam::InteractionLists<ParticleType>::fillReferredParticleCloud()
+{
+    if (writeCloud_)
+    {
+        forAll(referredParticles_, refCellI)
+        {
+            const IDLList<ParticleType>& refCell =
+                referredParticles_[refCellI];
+
+            forAllConstIter(typename IDLList<ParticleType>, refCell, iter)
+            {
+                cloud_.addParticle(iter().clone().ptr());
+            }
+        }
+    }
+}
+
+
+template<class ParticleType>
+void Foam::InteractionLists<ParticleType>::prepareWallDataToRefer()
+{
+    referredWallData_.setSize
+    (
+        wallFaceIndexAndTransformToDistribute_.size()
+    );
+
+    const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
+
+    forAll(referredWallData_, rWVI)
+    {
+        const labelPair& wfiat = wallFaceIndexAndTransformToDistribute_[rWVI];
+
+        label wallFaceIndex = globalTransforms_.index(wfiat);
+
+        const vectorTensorTransform& transform = globalTransforms_.transform
+        (
+            globalTransforms_.transformIndex(wfiat)
+        );
+
+        label patchI = mesh_.boundaryMesh().patchID()
+        [
+            wallFaceIndex - mesh_.nInternalFaces()
+        ];
+
+        label patchFaceI =
+            wallFaceIndex
+          - mesh_.boundaryMesh()[patchI].start();
+
+        // Need to transform velocity when tensor transforms are
+        // supported
+        referredWallData_[rWVI] = U.boundaryField()[patchI][patchFaceI];
+
+        if (transform.hasR())
+        {
+            referredWallData_[rWVI] =
+                transform.R().T() & referredWallData_[rWVI];
+        }
+    }
+}
+
+
+template<class ParticleType>
+void Foam::InteractionLists<ParticleType>::writeReferredWallFaces() const
+{
+    OFstream str
+    (
+        mesh_.time().timeName()
+       /cloud::prefix
+       /cloud_.name()
+       /"referredWallFaces.obj"
+    );
+
+    Info<< "    Writing " << str.name() << endl;
+
+    label offset = 1;
+
+    forAll(referredWallFaces_, rWFI)
+    {
+        const referredWallFace& rwf = referredWallFaces_[rWFI];
+
+        forAll(rwf, fPtI)
+        {
+            meshTools::writeOBJ(str, rwf.points()[rwf[fPtI]]);
+        }
+
+        str<< 'f';
+
+        forAll(rwf, fPtI)
+        {
+            str<< ' ' << fPtI + offset;
+        }
+
+        str<< nl;
+
+        offset += rwf.size();
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class ParticleType>
+Foam::InteractionLists<ParticleType>::InteractionLists
+(
+    const polyMesh& mesh,
+    scalar maxDistance,
+    Switch writeCloud,
+    const word& UName
+)
+:
+    mesh_(mesh),
+    cloud_(mesh_, "referredParticleCloud", IDLList<ParticleType>()),
+    writeCloud_(writeCloud),
+    cellMapPtr_(),
+    wallFaceMapPtr_(),
+    globalTransforms_(mesh_),
+    maxDistance_(maxDistance),
+    dil_(),
+    dwfil_(),
+    ril_(),
+    rilInverse_(),
+    cellIndexAndTransformToDistribute_(),
+    wallFaceIndexAndTransformToDistribute_(),
+    referredWallFaces_(),
+    UName_(UName),
+    referredWallData_(),
+    referredParticles_()
+{
+    buildInteractionLists();
+}
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class ParticleType>
@@ -1103,6 +1115,22 @@ void Foam::InteractionLists<ParticleType>::sendReferredData
     PstreamBuffers& pBufs
 )
 {
+    if (mesh_.changing())
+    {
+        WarningIn
+        (
+            "void Foam::InteractionLists<ParticleType>::sendReferredData"
+            "("
+                "const List<DynamicList<ParticleType*> >& cellOccupancy,"
+                "PstreamBuffers& pBufs"
+            ")"
+        )
+            << "Mesh changing, rebuilding InteractionLists form scratch."
+            << endl;
+
+        buildInteractionLists();
+    }
+
     prepareWallDataToRefer();
 
     prepareParticlesToRefer(cellOccupancy);

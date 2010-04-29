@@ -157,6 +157,9 @@ class InteractionLists
 
     // Private Member Functions
 
+        //- Construct all interaction lists
+        void buildInteractionLists();
+
         //- Find the other processors which have interaction range
         //  extended bound boxes in range
         void findExtendedProcBbsInRange
@@ -212,7 +215,8 @@ public:
 
     // Constructors
 
-        //- Construct and create all information from the mesh
+        //- Construct and call function to create all information from
+        //  the mesh
         InteractionLists
         (
             const polyMesh& mesh,
