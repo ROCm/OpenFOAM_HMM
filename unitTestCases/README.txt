@@ -1,5 +1,3 @@
-channel395-newBlockMeshDict : channel395 with new blockMesh syntax
-
 channel395/
     - splitCyclic version
     dev/
@@ -10,7 +8,11 @@ singleCyclic
     dev/
     - dev version
 
-t-junction
+t-junction-with-fan
     - t-junction tutorial to test baffles and fan-cyclics
     dev/
     - dev version
+
+twoCavityCyclicForWallDistance
+    - single cyclic. bottom split into two patches to see how
+    wallDistance transfers through cyclic.
