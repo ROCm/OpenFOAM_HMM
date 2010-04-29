@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,15 +27,10 @@ License
 #include "entry.H"
 #include "demandDrivenData.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class ZoneType, class MeshType>
-void ZoneMesh<ZoneType, MeshType>::calcZoneMap() const
+void Foam::ZoneMesh<ZoneType, MeshType>::calcZoneMap() const
 {
     // It is an error to attempt to recalculate cellEdges
     // if the pointer is already set
@@ -77,7 +72,7 @@ void ZoneMesh<ZoneType, MeshType>::calcZoneMap() const
 
 // Read constructor given IOobject and a MeshType reference
 template<class ZoneType, class MeshType>
-ZoneMesh<ZoneType, MeshType>::ZoneMesh
+Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
 (
     const IOobject& io,
     const MeshType& mesh
@@ -136,7 +131,7 @@ ZoneMesh<ZoneType, MeshType>::ZoneMesh
 
 // Construct given size. Zones will be set later
 template<class ZoneType, class MeshType>
-ZoneMesh<ZoneType, MeshType>::ZoneMesh
+Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
 (
     const IOobject& io,
     const MeshType& mesh,
@@ -153,7 +148,7 @@ ZoneMesh<ZoneType, MeshType>::ZoneMesh
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class ZoneType, class MeshType>
-ZoneMesh<ZoneType, MeshType>::~ZoneMesh()
+Foam::ZoneMesh<ZoneType, MeshType>::~ZoneMesh()
 {
     clearAddressing();
 }
@@ -163,7 +158,8 @@ ZoneMesh<ZoneType, MeshType>::~ZoneMesh()
 
 // Map of zones for quick zone lookup
 template<class ZoneType, class MeshType>
-const Map<label>& ZoneMesh<ZoneType, MeshType>::zoneMap() const
+const Foam::Map<Foam::label>&
+Foam::ZoneMesh<ZoneType, MeshType>::zoneMap() const
 {
     if (!zoneMapPtr_)
     {
@@ -177,7 +173,10 @@ const Map<label>& ZoneMesh<ZoneType, MeshType>::zoneMap() const
 // Given a global object index, return the zone it is in.
 // If object does not belong to any zones, return -1
 template<class ZoneType, class MeshType>
-label ZoneMesh<ZoneType, MeshType>::whichZone(const label objectIndex) const
+Foam::label Foam::ZoneMesh<ZoneType, MeshType>::whichZone
+(
+    const label objectIndex
+) const
 {
     const Map<label>& zm = zoneMap();
     Map<label>::const_iterator zmIter = zm.find(objectIndex);
@@ -195,40 +194,43 @@ label ZoneMesh<ZoneType, MeshType>::whichZone(const label objectIndex) const
 
 // Return a list of zone names
 template<class ZoneType, class MeshType>
-wordList ZoneMesh<ZoneType, MeshType>::types() const
+Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::types() const
 {
     const PtrList<ZoneType>& zones = *this;
 
-    wordList t(zones.size());
+    wordList lst(zones.size());
 
     forAll(zones, zoneI)
     {
-        t[zoneI] = zones[zoneI].type();
+        lst[zoneI] = zones[zoneI].type();
     }
 
-    return t;
+    return lst;
 }
 
 
 // Return a list of zone names
 template<class ZoneType, class MeshType>
-wordList ZoneMesh<ZoneType, MeshType>::names() const
+Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::names() const
 {
     const PtrList<ZoneType>& zones = *this;
 
-    wordList t(zones.size());
+    wordList lst(zones.size());
 
     forAll(zones, zoneI)
     {
-        t[zoneI] = zones[zoneI].name();
+        lst[zoneI] = zones[zoneI].name();
     }
 
-    return t;
+    return lst;
 }
 
 
 template<class ZoneType, class MeshType>
-label ZoneMesh<ZoneType, MeshType>::findZoneID(const word& zoneName) const
+Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findZoneID
+(
+    const word& zoneName
+) const
 {
     const PtrList<ZoneType>& zones = *this;
 
@@ -243,19 +245,18 @@ label ZoneMesh<ZoneType, MeshType>::findZoneID(const word& zoneName) const
     // Zone not found
     if (debug)
     {
-        Info<< "label ZoneMesh<ZoneType>::findZoneID(const word& "
-            << "zoneName) const : "
+        Info<< "label ZoneMesh<ZoneType>::findZoneID(const word&) const : "
             << "Zone named " << zoneName << " not found.  "
             << "List of available zone names: " << names() << endl;
     }
 
-    // A dummy return to kep the compiler happy
+    // A dummy return to keep the compiler happy
     return -1;
 }
 
 
 template<class ZoneType, class MeshType>
-void ZoneMesh<ZoneType, MeshType>::clearAddressing()
+void Foam::ZoneMesh<ZoneType, MeshType>::clearAddressing()
 {
     deleteDemandDrivenData(zoneMapPtr_);
 
@@ -269,7 +270,7 @@ void ZoneMesh<ZoneType, MeshType>::clearAddressing()
 
 
 template<class ZoneType, class MeshType>
-void ZoneMesh<ZoneType, MeshType>::clear()
+void Foam::ZoneMesh<ZoneType, MeshType>::clear()
 {
     clearAddressing();
     PtrList<ZoneType>::clear();
@@ -278,7 +279,10 @@ void ZoneMesh<ZoneType, MeshType>::clear()
 
 // Check zone definition
 template<class ZoneType, class MeshType>
-bool ZoneMesh<ZoneType, MeshType>::checkDefinition(const bool report) const
+bool Foam::ZoneMesh<ZoneType, MeshType>::checkDefinition
+(
+    const bool report
+) const
 {
     bool inError = false;
 
@@ -294,7 +298,7 @@ bool ZoneMesh<ZoneType, MeshType>::checkDefinition(const bool report) const
 
 // Correct zone mesh after moving points
 template<class ZoneType, class MeshType>
-void ZoneMesh<ZoneType, MeshType>::movePoints(const pointField& p)
+void Foam::ZoneMesh<ZoneType, MeshType>::movePoints(const pointField& p)
 {
     PtrList<ZoneType>& zones = *this;
 
@@ -307,17 +311,66 @@ void ZoneMesh<ZoneType, MeshType>::movePoints(const pointField& p)
 
 // writeData member function required by regIOobject
 template<class ZoneType, class MeshType>
-bool ZoneMesh<ZoneType, MeshType>::writeData(Ostream& os) const
+bool Foam::ZoneMesh<ZoneType, MeshType>::writeData(Ostream& os) const
 {
-    os << *this;
+    os  << *this;
     return os.good();
+}
+
+// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
+
+template<class ZoneType, class MeshType>
+const ZoneType& Foam::ZoneMesh<ZoneType, MeshType>::operator[]
+(
+    const word& zoneName
+) const
+{
+    const label zoneI = findZoneID(zoneName);
+
+    if (zoneI < 0)
+    {
+        FatalErrorIn
+        (
+            "ZoneMesh<ZoneType>::operator[](const word&) const"
+        )   << "Zone named " << zoneName << " not found." << nl
+            << "Available zone names: " << names() << endl
+            << abort(FatalError);
+    }
+
+    return operator[](zoneI);
+}
+
+
+template<class ZoneType, class MeshType>
+ZoneType& Foam::ZoneMesh<ZoneType, MeshType>::operator[]
+(
+    const word& zoneName
+)
+{
+    const label zoneI = findZoneID(zoneName);
+
+    if (zoneI < 0)
+    {
+        FatalErrorIn
+        (
+            "ZoneMesh<ZoneType>::operator[](const word&)"
+        )   << "Zone named " << zoneName << " not found." << nl
+            << "Available zone names: " << names() << endl
+            << abort(FatalError);
+    }
+
+    return operator[](zoneI);
 }
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class ZoneType, class MeshType>
-Ostream& operator<<(Ostream& os, const ZoneMesh<ZoneType, MeshType>& zones)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const ZoneMesh<ZoneType, MeshType>& zones
+)
 {
     os  << zones.size() << nl << token::BEGIN_LIST;
 
@@ -331,9 +384,5 @@ Ostream& operator<<(Ostream& os, const ZoneMesh<ZoneType, MeshType>& zones)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

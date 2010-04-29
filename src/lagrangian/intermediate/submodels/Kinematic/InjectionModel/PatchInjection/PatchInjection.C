@@ -101,7 +101,7 @@ Foam::PatchInjection<CloudType>::PatchInjection
     cellOwners_(),
     fraction_(1.0)
 {
-    label patchId = owner.mesh().boundaryMesh().findPatchID(patchName_);
+    const label patchId = owner.mesh().boundaryMesh().findPatchID(patchName_);
 
     if (patchId < 0)
     {

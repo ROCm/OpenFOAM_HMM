@@ -123,7 +123,7 @@ void createDummyFvMeshFiles(const polyMesh& mesh, const word& regionName)
 
 label findPatchID(const polyBoundaryMesh& patches, const word& name)
 {
-    label patchID = patches.findPatchID(name);
+    const label patchID = patches.findPatchID(name);
 
     if (patchID == -1)
     {

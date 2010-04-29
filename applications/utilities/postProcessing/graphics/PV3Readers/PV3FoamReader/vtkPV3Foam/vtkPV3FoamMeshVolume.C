@@ -328,7 +328,7 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
                 VTK_POLYHEDRON,
                 nodeCount,
                 uniqueNodeIds.data(),
-                faceCount,
+                nFaces,
                 faceLabels.data()
             );
 #else

@@ -220,10 +220,7 @@ int main(int argc, char *argv[])
 #   include "createPolyMesh.H"
 
     const word patchName = args[1];
-
-    label patchI = mesh.boundaryMesh().findPatchID(patchName);
-
-    const polyPatch& patch = mesh.boundaryMesh()[patchI];
+    const polyPatch& patch = mesh.boundaryMesh()[patchName];
 
     Info<< "Patch:" << patch.name() << endl;
 

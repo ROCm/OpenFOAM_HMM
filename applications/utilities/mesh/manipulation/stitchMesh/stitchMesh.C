@@ -170,7 +170,7 @@ label addCellZone(const polyMesh& mesh, const word& name)
 // Checks whether patch present
 void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
 {
-    label patchI = bMesh.findPatchID(name);
+    const label patchI = bMesh.findPatchID(name);
 
     if (patchI == -1)
     {
@@ -312,11 +312,7 @@ int main(int argc, char *argv[])
     // Create and add face zones and mesh modifiers
 
     // Master patch
-    const polyPatch& masterPatch =
-        mesh.boundaryMesh()
-        [
-            mesh.boundaryMesh().findPatchID(masterPatchName)
-        ];
+    const polyPatch& masterPatch = mesh.boundaryMesh()[masterPatchName];
 
     // Make list of masterPatch faces
     labelList isf(masterPatch.size());
@@ -373,11 +369,7 @@ int main(int argc, char *argv[])
         );
 
         // Slave patch
-        const polyPatch& slavePatch =
-            mesh.boundaryMesh()
-            [
-                mesh.boundaryMesh().findPatchID(slavePatchName)
-            ];
+        const polyPatch& slavePatch = mesh.boundaryMesh()[slavePatchName];
 
         labelList osf(slavePatch.size());
 

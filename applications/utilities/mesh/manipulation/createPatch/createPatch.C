@@ -678,17 +678,17 @@ int main(int argc, char *argv[])
     {
         const dictionary& dict = patchSources[addedI];
 
-        word patchName(dict.lookup("name"));
-
+        const word patchName(dict.lookup("name"));
         label destPatchI = patches.findPatchID(patchName);
 
         if (destPatchI == -1)
         {
-            FatalErrorIn(args.executable()) << "patch " << patchName
-                << " not added. Problem." << abort(FatalError);
+            FatalErrorIn(args.executable())
+                << "patch " << patchName << " not added. Problem."
+                << abort(FatalError);
         }
 
-        word sourceType(dict.lookup("constructFrom"));
+        const word sourceType(dict.lookup("constructFrom"));
 
         if (sourceType == "patches")
         {
@@ -716,7 +716,7 @@ int main(int argc, char *argv[])
         }
         else if (sourceType == "set")
         {
-            word setName(dict.lookup("set"));
+            const word setName(dict.lookup("set"));
 
             faceSet faces(mesh, setName);
 

@@ -107,7 +107,7 @@ void modifyOrAddFace
 
 label findPatchID(const polyMesh& mesh, const word& name)
 {
-    label patchI = mesh.boundaryMesh().findPatchID(name);
+    const label patchI = mesh.boundaryMesh().findPatchID(name);
 
     if (patchI == -1)
     {

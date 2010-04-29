@@ -65,8 +65,8 @@ int main(int argc, char *argv[])
         {
             mesh.readUpdate();
 
-            label patchi = mesh.boundaryMesh().findPatchID(patchName);
-            if (patchi < 0)
+            const label patchI = mesh.boundaryMesh().findPatchID(patchName);
+            if (patchI < 0)
             {
                 FatalError
                     << "Unable to find patch " << patchName << nl
@@ -78,20 +78,20 @@ int main(int argc, char *argv[])
                 Info<< "    Reading volScalarField " << fieldName << endl;
                 volScalarField field(fieldHeader, mesh);
 
-                scalar area = gSum(mesh.magSf().boundaryField()[patchi]);
+                scalar area = gSum(mesh.magSf().boundaryField()[patchI]);
                 scalar sumField = 0;
 
                 if (area > 0)
                 {
                     sumField = gSum
                     (
-                        mesh.magSf().boundaryField()[patchi]
-                      * field.boundaryField()[patchi]
+                        mesh.magSf().boundaryField()[patchI]
+                      * field.boundaryField()[patchI]
                     ) / area;
                 }
 
                 Info<< "    Average of " << fieldName << " over patch "
-                    << patchName << '[' << patchi << ']' << " = "
+                    << patchName << '[' << patchI << ']' << " = "
                     << sumField << endl;
             }
             else

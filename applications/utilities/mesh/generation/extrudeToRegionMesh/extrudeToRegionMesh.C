@@ -849,8 +849,7 @@ int main(int argc, char *argv[])
     nExtrudeFaces = 0;
     forAll(zoneNames, i)
     {
-        label zoneI = faceZones.findZoneID(zoneNames[i]);
-        const faceZone& fz = faceZones[zoneI];
+        const faceZone& fz = faceZones[zoneNames[i]];
         forAll(fz, j)
         {
             extrudeTopPatchID[nExtrudeFaces] = interRegionTopPatch[i];

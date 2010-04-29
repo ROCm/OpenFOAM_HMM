@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
         forAll(patchNames, patchNameI)
         {
             const word& patchName = patchNames[patchNameI];
-            label patchI = bMesh.findPatchID(patchName);
+            const label patchI = bMesh.findPatchID(patchName);
 
             if (patchI == -1)
             {

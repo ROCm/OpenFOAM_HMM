@@ -128,7 +128,7 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
 {
     forAll(patchNames_, patchI)
     {
-        label id = mesh_.boundaryMesh().findPatchID(patchNames_[patchI]);
+        const label id = mesh_.boundaryMesh().findPatchID(patchNames_[patchI]);
         if (id < 0)
         {
             FatalErrorIn
