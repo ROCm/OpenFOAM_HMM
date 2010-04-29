@@ -88,9 +88,10 @@ integrationSchemes
 
 particleForces
 {
-    gravity         on;
-    virtualMass     off;
-    pressureGradient off;
+    gravity             on;
+    virtualMass         off;
+    pressureGradient    off;
+    paramagnetic        off;
 }
 
 ManualInjectionCoeffs
