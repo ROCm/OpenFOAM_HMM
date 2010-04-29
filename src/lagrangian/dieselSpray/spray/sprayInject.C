@@ -31,12 +31,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-void spray::inject()
+void Foam::spray::inject()
 {
     scalar time = runTime_.value();
     scalar time0 = time0_;
@@ -171,9 +166,5 @@ void spray::inject()
     time0_ = time;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

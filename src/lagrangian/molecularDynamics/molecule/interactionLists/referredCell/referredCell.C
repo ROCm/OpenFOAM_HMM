@@ -26,12 +26,10 @@ License
 #include "referredCell.H"
 #include "interactionLists.H"
 
-namespace Foam
-{
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void referredCell::setConstructionData
+void Foam::referredCell::setConstructionData
 (
     const polyMesh& mesh,
     const label sourceCell
@@ -92,7 +90,7 @@ void referredCell::setConstructionData
 }
 
 
-void referredCell::locallyMapEdgeList
+void Foam::referredCell::locallyMapEdgeList
 (
     const labelList& points,
     const edgeList& sourceCellEdges
@@ -125,7 +123,7 @@ void referredCell::locallyMapEdgeList
 }
 
 
-void referredCell::locallyMapFaceList
+void Foam::referredCell::locallyMapFaceList
 (
     const labelList& points,
     const labelListList& sourceCellFaces
@@ -159,25 +157,31 @@ void referredCell::locallyMapFaceList
 }
 
 
-vector referredCell::referPosition(const vector& positionToRefer)
+Foam::vector Foam::referredCell::referPosition(const vector& positionToRefer)
 {
     return offset_ + (rotation_ & positionToRefer);
 }
 
 
-vectorList referredCell::referPositions(const vectorList& positionsToRefer)
+Foam::vectorList Foam::referredCell::referPositions
+(
+    const vectorList& positionsToRefer
+)
 {
     return offset_ + (rotation_ & positionsToRefer);
 }
 
 
-vector referredCell::rotateVector(const vector& vectorToRotate)
+Foam::vector Foam::referredCell::rotateVector(const vector& vectorToRotate)
 {
     return rotation_ & vectorToRotate;
 }
 
 
-vectorList referredCell::rotateVectors(const vectorList& vectorsToRotate)
+Foam::vectorList Foam::referredCell::rotateVectors
+(
+    const vectorList& vectorsToRotate
+)
 {
     return rotation_ & vectorsToRotate;
 }
@@ -185,7 +189,7 @@ vectorList referredCell::rotateVectors(const vectorList& vectorsToRotate)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-referredCell::referredCell()
+Foam::referredCell::referredCell()
 :
     DynamicList<referredMolecule>(),
     sourceProc_(-1),
@@ -196,7 +200,7 @@ referredCell::referredCell()
 {}
 
 
-referredCell::referredCell
+Foam::referredCell::referredCell
 (
     const polyMesh& mesh,
     const label sourceProc,
@@ -215,7 +219,7 @@ referredCell::referredCell
 }
 
 
-referredCell::referredCell
+Foam::referredCell::referredCell
 (
     const label sourceProc,
     const label sourceCell,
@@ -248,7 +252,7 @@ referredCell::referredCell
 }
 
 
-referredCell::referredCell
+Foam::referredCell::referredCell
 (
     const polyMesh& mesh,
     const label sourceProc,
@@ -285,13 +289,13 @@ referredCell::referredCell
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-referredCell::~referredCell()
+Foam::referredCell::~referredCell()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-referredCell referredCell::reRefer
+Foam::referredCell Foam::referredCell::reRefer
 (
     const vector& cS,
     const vector& cD,
@@ -325,13 +329,16 @@ referredCell referredCell::reRefer
 }
 
 
-vector referredCell::referPosition(const vector& positionToRefer) const
+Foam::vector Foam::referredCell::referPosition
+(
+    const vector& positionToRefer
+) const
 {
     return offset_ + (rotation_ & positionToRefer);
 }
 
 
-vectorList referredCell::referPosition
+Foam::vectorList Foam::referredCell::referPosition
 (
     const vectorList& positionsToRefer
 ) const
@@ -340,19 +347,25 @@ vectorList referredCell::referPosition
 }
 
 
-vector referredCell::rotateVector(const vector& vectorToRotate) const
+Foam::vector Foam::referredCell::rotateVector
+(
+    const vector& vectorToRotate
+) const
 {
     return rotation_ & vectorToRotate;
 }
 
 
-vectorList referredCell::rotateVectors(const vectorList& vectorsToRotate) const
+Foam::vectorList Foam::referredCell::rotateVectors
+(
+    const vectorList& vectorsToRotate
+) const
 {
     return rotation_ & vectorsToRotate;
 }
 
 
-void referredCell::referInMols(const List<referredMolecule>& incomingMols)
+void Foam::referredCell::referInMols(const List<referredMolecule>& incomingMols)
 {
     clear();
 
@@ -379,7 +392,7 @@ void referredCell::referInMols(const List<referredMolecule>& incomingMols)
 }
 
 
-bool referredCell::duplicate(const referredCell& refCellDupl) const
+bool Foam::referredCell::duplicate(const referredCell& refCellDupl) const
 {
     return
     (
@@ -390,7 +403,7 @@ bool referredCell::duplicate(const referredCell& refCellDupl) const
 }
 
 
-bool referredCell::duplicate(const label procNo,const label nCells) const
+bool Foam::referredCell::duplicate(const label procNo,const label nCells) const
 {
     return
     (
@@ -403,9 +416,8 @@ bool referredCell::duplicate(const label procNo,const label nCells) const
 
 // * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
 
-Istream& operator>>(Istream& is, referredCell& rC)
+Foam::Istream& Foam::operator>>(Istream& is, referredCell& rC)
 {
-
     is  >> rC.sourceProc_
         >> rC.sourceCell_
         >> rC.vertexPositions_
@@ -422,9 +434,8 @@ Istream& operator>>(Istream& is, referredCell& rC)
 }
 
 
-Ostream& operator<<(Ostream& os, const referredCell& rC)
+Foam::Ostream& Foam::operator<<(Ostream& os, const referredCell& rC)
 {
-
     os  << rC.sourceProc()
         << token::SPACE << rC.sourceCell()
         << token::SPACE << rC.vertexPositions()
@@ -440,9 +451,5 @@ Ostream& operator<<(Ostream& os, const referredCell& rC)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-}  // End namespace Foam
 
 // ************************************************************************* //

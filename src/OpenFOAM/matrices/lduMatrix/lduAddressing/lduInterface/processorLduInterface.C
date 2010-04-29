@@ -27,10 +27,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(processorLduInterface, 0);
-}
+defineTypeNameAndDebug(Foam::processorLduInterface, 0);
 
 
 // * * * * * * * * * * * * * Private Member Functions *  * * * * * * * * * * //

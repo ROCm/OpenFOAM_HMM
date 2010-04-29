@@ -26,15 +26,10 @@ License
 #include "parcel.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // The diameter based Reynolds number
-scalar parcel::Re
+Foam::scalar Foam::parcel::Re
 (
     const vector& U,
     const scalar nu
@@ -44,7 +39,7 @@ scalar parcel::Re
 }
 
 // The diameter based Reynolds number
-scalar parcel::Re
+Foam::scalar Foam::parcel::Re
 (
     const scalar rho,
     const vector& U,
@@ -56,7 +51,7 @@ scalar parcel::Re
 }
 
 // The diameter based Weber number
-scalar parcel::We
+Foam::scalar Foam::parcel::We
 (
     const vector& U,
     const scalar rho,
@@ -67,7 +62,7 @@ scalar parcel::We
 }
 
 
-scalar parcel::Sc
+Foam::scalar Foam::parcel::Sc
 (
     const scalar mu,
     const scalar rho,
@@ -78,7 +73,7 @@ scalar parcel::Sc
 }
 
 
-scalar parcel::Sc
+Foam::scalar Foam::parcel::Sc
 (
     const scalar nu,
     const scalar massDiffusion
@@ -88,7 +83,7 @@ scalar parcel::Sc
 }
 
 
-scalar parcel::Pr
+Foam::scalar Foam::parcel::Pr
 (
     const scalar cp,
     const scalar mu,
@@ -99,26 +94,22 @@ scalar parcel::Pr
 }
 
 
-scalar parcel::N(const scalar rho) const
+Foam::scalar Foam::parcel::N(const scalar rho) const
 {
     return 6.0*m_/(rho*pow3(d_)*constant::mathematical::pi);
 }
 
 
-scalar parcel::Vd() const
+Foam::scalar Foam::parcel::Vd() const
 {
     return pow3(d_)*constant::mathematical::pi/6.0;
 }
 
 
-scalar parcel::V(const scalar rho) const
+Foam::scalar Foam::parcel::V(const scalar rho) const
 {
     return m_/rho;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

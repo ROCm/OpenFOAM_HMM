@@ -26,14 +26,10 @@ License
 #include "injector.H"
 #include "dictionary.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-injector::injector(const Time& t, Istream& is)
+Foam::injector::injector(const Time& t, Istream& is)
 :
     injectorDict_(is),
     properties_(injectorType::New(t, injectorDict_))
@@ -46,7 +42,7 @@ injector::injector(const Time& t, Istream& is)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const injector& injector)
+Foam::Ostream& Foam::operator<<(Ostream& os, const injector& injector)
 {
     // Check state of Ostream
     os.check("Ostream& operator<<(Ostream&, const injector&)");
@@ -56,9 +52,5 @@ Ostream& operator<<(Ostream& os, const injector& injector)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

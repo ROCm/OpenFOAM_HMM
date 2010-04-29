@@ -28,10 +28,8 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(cyclicLduInterface, 0);
-}
+defineTypeNameAndDebug(Foam::cyclicLduInterface, 0);
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 

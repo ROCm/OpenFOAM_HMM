@@ -31,22 +31,19 @@ License
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(emptyPointPatch, 0);
-
-addToRunTimeSelectionTable
-(
-    facePointPatch,
-    emptyPointPatch,
-    polyPatch
-);
+    defineTypeNameAndDebug(emptyPointPatch, 0);
+    addToRunTimeSelectionTable
+    (
+        facePointPatch,
+        emptyPointPatch,
+        polyPatch
+    );
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void emptyPointPatch::applyConstraint
+void Foam::emptyPointPatch::applyConstraint
 (
     const label pointi,
     pointConstraint& pc
@@ -55,9 +52,5 @@ void emptyPointPatch::applyConstraint
     pc.applyConstraint(pointNormals()[pointi]);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

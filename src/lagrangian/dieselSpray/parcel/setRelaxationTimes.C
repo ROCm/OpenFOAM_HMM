@@ -31,14 +31,10 @@ License
 #include "heatTransferModel.H"
 #include "basicMultiComponentMixture.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void parcel::setRelaxationTimes
+void Foam::parcel::setRelaxationTimes
 (
     label celli,
     scalar& tauMomentum,
@@ -55,7 +51,6 @@ void parcel::setRelaxationTimes
     const scalar dt
 )
 {
-
     const liquidMixture& fuels = sDB.fuels();
 
     scalar mCell = rho*sDB.mesh().V()[cell()];
@@ -291,9 +286,5 @@ void parcel::setRelaxationTimes
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
