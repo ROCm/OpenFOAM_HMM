@@ -112,7 +112,7 @@ cyclicFvPatchField<Type>::cyclicFvPatchField
 //        << "Underlying cyclic:" << cyclicPatch_.name()
 //        << " with parallel:" << cyclicPatch_.parallel() << endl;
 
-    //this->evaluate(Pstream::blocking);
+    this->evaluate(Pstream::blocking);
 }
 
 
