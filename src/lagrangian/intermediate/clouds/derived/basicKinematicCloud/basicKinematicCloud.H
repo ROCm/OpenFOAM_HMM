@@ -25,7 +25,7 @@ Class
     Foam::basicKinematicCloud
 
 Description
-    Cloud class to introduce interacting kinematic parcels
+    Cloud class to introduce kinematic parcels
 
 SourceFiles
     basicKinematicCloud.C
