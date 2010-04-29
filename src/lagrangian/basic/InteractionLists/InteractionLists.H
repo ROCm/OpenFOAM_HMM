@@ -67,6 +67,7 @@ SourceFiles
 #include "treeDataCell.H"
 #include "treeDataFace.H"
 #include "mapDistribute.H"
+#include "volFields.H"
 #include "Random.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
