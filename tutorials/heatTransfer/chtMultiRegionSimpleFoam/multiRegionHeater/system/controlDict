@@ -15,8 +15,6 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs            ("libOpenFOAM.so" "libcompressibleTurbulenceModel.so" "libcompressibleRASModels.so");
-
 application     chtMultiRegionSimpleFoam;
 
 startFrom       startTime;

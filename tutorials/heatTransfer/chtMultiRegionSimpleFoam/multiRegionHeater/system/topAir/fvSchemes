@@ -16,14 +16,12 @@ FoamFile
 
 ddtSchemes
 {
-    default Euler;
-    //default CoEuler phi rho 0.1;
+    default steadyState;
 }
 
 gradSchemes
 {
     default         Gauss linear;
-//    grad(U)         cellLimited Gauss linear 1;
 }
 
 divSchemes
