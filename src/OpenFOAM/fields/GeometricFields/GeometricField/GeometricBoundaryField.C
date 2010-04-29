@@ -26,6 +26,7 @@ License
 #include "emptyPolyPatch.H"
 #include "commSchedule.H"
 #include "globalMeshData.H"
+#include "cyclicPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -251,6 +252,29 @@ GeometricBoundaryField
     {
         if (bmesh_[patchi].type() != emptyPolyPatch::typeName)
         {
+            if
+            (
+                bmesh_[patchi].type() == cyclicPolyPatch::typeName
+             && !dict.found(bmesh_[patchi].name())
+            )
+            {
+                FatalIOErrorIn
+                (
+                    "GeometricField<Type, PatchField, GeoMesh>::\n"
+                    "GeometricBoundaryField::GeometricBoundaryField\n"
+                    "(\n"
+                    "    const BoundaryMesh&,\n"
+                    "    const DimensionedField<Type, GeoMesh>&,\n"
+                    "    const dictionary&\n"
+                    ")",
+                    dict
+                )   << "Cannot find patchField entry for cyclic "
+                    << bmesh_[patchi].name() << endl
+                    << "Is your field uptodate with split cyclics?" << endl
+                    << "Run foamUpgradeCyclics to convert mesh and fields"
+                    << " to split cyclics." << exit(FatalIOError);
+            }
+
             set
             (
                 patchi,
