@@ -1032,13 +1032,11 @@ void Foam::InteractionLists<ParticleType>::prepareWallDataToRefer()
 template<class ParticleType>
 void Foam::InteractionLists<ParticleType>::writeReferredWallFaces() const
 {
-    OFstream str
-    (
-        mesh_.time().timeName()
-       /cloud::prefix
-       /cloud_.name()
-       /"referredWallFaces.obj"
-    );
+    fileName objDir = mesh_.time().timeName()/cloud::prefix/cloud_.name();
+
+    mkDir(objDir);
+
+    OFstream str(objDir /"referredWallFaces.obj");
 
     Info<< "    Writing " << str.name() << endl;
 
