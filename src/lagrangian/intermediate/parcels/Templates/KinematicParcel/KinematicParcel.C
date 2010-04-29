@@ -449,7 +449,14 @@ template<class ParcelType>
 void Foam::KinematicParcel<ParcelType>::transformProperties(const tensor& T)
 {
     Particle<ParcelType>::transformProperties(T);
+
     U_ = transform(T, U_);
+
+    f_ = transform(T, f_);
+
+    angularMomentum_ = transform(T, angularMomentum_);
+
+    torque_ = transform(T, torque_);
 }
 
 
@@ -468,4 +475,3 @@ void Foam::KinematicParcel<ParcelType>::transformProperties
 #include "KinematicParcelIO.C"
 
 // ************************************************************************* //
-
