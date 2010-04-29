@@ -182,13 +182,6 @@ private:
 
     // Private data
 
-        //- Be careful with the ordering of data.
-        //  It has an impact on binary transfer:
-        //    -# Put the largest data members 1st
-        //    -# Pair up labels,
-        //    -# Don't go scalar-label, scalar-label, because in 64bit mode,
-        //       the labels will be padded by 4bytes.
-
         tensor Q_;
 
         vector v_;

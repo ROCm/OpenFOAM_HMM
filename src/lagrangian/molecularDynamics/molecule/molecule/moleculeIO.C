@@ -242,11 +242,17 @@ void Foam::molecule::writeFields(const Cloud<molecule>& mC)
     orientation2.write();
     orientation3.write();
 
-    const moleculeCloud& m = dynamic_cast<const moleculeCloud&>(mC);
-    m.writeXYZ
-    (
-        m.mesh().time().timePath() + "/lagrangian" + "/moleculeCloud.xmol"
-    );
+    Info<< "writeFields " << mC.name() << endl;
+
+    if (isA<moleculeCloud>(mC))
+    {
+        const moleculeCloud& m = dynamic_cast<const moleculeCloud&>(mC);
+
+        m.writeXYZ
+        (
+            m.mesh().time().timePath()/cloud::prefix/"moleculeCloud.xmol"
+        );
+    }
 }
 
 

@@ -209,7 +209,19 @@ bool Foam::molecule::move(molecule::trackData& td)
 
 void Foam::molecule::transformProperties(const tensor& T)
 {
+    Particle<molecule>::transformProperties(T);
+
     Q_ = T & Q_;
+
+    v_ = transform(T, v_);
+
+    a_ = transform(T, a_);
+
+    pi_ = Q_.T() & transform(T, Q_ & pi_);
+
+    tau_ = Q_.T() & transform(T, Q_ & tau_);
+
+    rf_ = transform(T, rf_);
 
     sitePositions_ = position_ + (T & (sitePositions_ - position_));
 
@@ -219,10 +231,14 @@ void Foam::molecule::transformProperties(const tensor& T)
 
 void Foam::molecule::transformProperties(const vector& separation)
 {
+    Particle<molecule>::transformProperties(separation);
+
     if (special_ == SPECIAL_TETHERED)
     {
         specialPosition_ += separation;
     }
+
+    sitePositions_ = sitePositions_ + separation;
 }
 
 

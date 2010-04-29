@@ -31,17 +31,17 @@ using namespace Foam::constant;
 
 inline void Foam::moleculeCloud::evaluatePair
 (
-    molecule* molI,
-    molecule* molJ
+    molecule& molI,
+    molecule& molJ
 )
 {
     const pairPotentialList& pairPot = pot_.pairPotentials();
 
     const pairPotential& electrostatic = pairPot.electrostatic();
 
-    label idI = molI->id();
+    label idI = molI.id();
 
-    label idJ = molJ->id();
+    label idJ = molJ.id();
 
     const molecule::constantProperties& constPropI(constProps(idI));
 
@@ -70,7 +70,7 @@ inline void Foam::moleculeCloud::evaluatePair
             if (pairPotentialSitesI[sI] && pairPotentialSitesJ[sJ])
             {
                 vector rsIsJ =
-                    molI->sitePositions()[sI] - molJ->sitePositions()[sJ];
+                    molI.sitePositions()[sI] - molJ.sitePositions()[sJ];
 
                 scalar rsIsJMagSq = magSqr(rsIsJ);
 
@@ -82,38 +82,34 @@ inline void Foam::moleculeCloud::evaluatePair
                         (rsIsJ/rsIsJMag)
                        *pairPot.force(idsI, idsJ, rsIsJMag);
 
-                    molI->siteForces()[sI] += fsIsJ;
+                    molI.siteForces()[sI] += fsIsJ;
 
-                    molJ->siteForces()[sJ] += -fsIsJ;
+                    molJ.siteForces()[sJ] += -fsIsJ;
 
                     scalar potentialEnergy
                     (
                         pairPot.energy(idsI, idsJ, rsIsJMag)
                     );
 
-                    molI->potentialEnergy() += 0.5*potentialEnergy;
+                    molI.potentialEnergy() += 0.5*potentialEnergy;
 
-                    molJ->potentialEnergy() += 0.5*potentialEnergy;
+                    molJ.potentialEnergy() += 0.5*potentialEnergy;
 
-                    vector rIJ = molI->position() - molJ->position();
+                    vector rIJ = molI.position() - molJ.position();
 
                     tensor virialContribution =
                         (rsIsJ*fsIsJ)*(rsIsJ & rIJ)/rsIsJMagSq;
 
-                    molI->rf() += virialContribution;
+                    molI.rf() += virialContribution;
 
-                    molJ->rf() += virialContribution;
-
-                    // molI->rf() += rsIsJ * fsIsJ;
-
-                    // molJ->rf() += rsIsJ * fsIsJ;
+                    molJ.rf() += virialContribution;
                 }
             }
 
             if (electrostaticSitesI[sI] && electrostaticSitesJ[sJ])
             {
                 vector rsIsJ =
-                molI->sitePositions()[sI] - molJ->sitePositions()[sJ];
+                molI.sitePositions()[sI] - molJ.sitePositions()[sJ];
 
                 scalar rsIsJMagSq = magSqr(rsIsJ);
 
@@ -129,149 +125,26 @@ inline void Foam::moleculeCloud::evaluatePair
                         (rsIsJ/rsIsJMag)
                        *chargeI*chargeJ*electrostatic.force(rsIsJMag);
 
-                    molI->siteForces()[sI] += fsIsJ;
+                    molI.siteForces()[sI] += fsIsJ;
 
-                    molJ->siteForces()[sJ] += -fsIsJ;
+                    molJ.siteForces()[sJ] += -fsIsJ;
 
                     scalar potentialEnergy =
                         chargeI*chargeJ
                        *electrostatic.energy(rsIsJMag);
 
-                    molI->potentialEnergy() += 0.5*potentialEnergy;
+                    molI.potentialEnergy() += 0.5*potentialEnergy;
 
-                    molJ->potentialEnergy() += 0.5*potentialEnergy;
+                    molJ.potentialEnergy() += 0.5*potentialEnergy;
 
-                    vector rIJ = molI->position() - molJ->position();
+                    vector rIJ = molI.position() - molJ.position();
 
                     tensor virialContribution =
                         (rsIsJ*fsIsJ)*(rsIsJ & rIJ)/rsIsJMagSq;
 
-                    molI->rf() += virialContribution;
+                    molI.rf() += virialContribution;
 
-                    molJ->rf() += virialContribution;
-
-                    // molI->rf() += rsIsJ * fsIsJ;
-
-                    // molJ->rf() += rsIsJ * fsIsJ;
-                }
-            }
-        }
-    }
-}
-
-
-inline void Foam::moleculeCloud::evaluatePair
-(
-    molecule* molReal,
-    referredMolecule* molRef
-)
-{
-    const pairPotentialList& pairPot = pot_.pairPotentials();
-
-    const pairPotential& electrostatic = pairPot.electrostatic();
-
-    label idReal = molReal->id();
-
-    label idRef = molRef->id();
-
-    const molecule::constantProperties& constPropReal(constProps(idReal));
-
-    const molecule::constantProperties& constPropRef(constProps(idRef));
-
-    List<label> siteIdsReal = constPropReal.siteIds();
-
-    List<label> siteIdsRef = constPropRef.siteIds();
-
-    List<bool> pairPotentialSitesReal = constPropReal.pairPotentialSites();
-
-    List<bool> electrostaticSitesReal = constPropReal.electrostaticSites();
-
-    List<bool> pairPotentialSitesRef = constPropRef.pairPotentialSites();
-
-    List<bool> electrostaticSitesRef = constPropRef.electrostaticSites();
-
-    forAll(siteIdsReal, sReal)
-    {
-        label idsReal(siteIdsReal[sReal]);
-
-        forAll(siteIdsRef, sRef)
-        {
-            label idsRef(siteIdsRef[sRef]);
-
-            if (pairPotentialSitesReal[sReal] && pairPotentialSitesRef[sRef])
-            {
-                vector rsRealsRef =
-                    molReal->sitePositions()[sReal]
-                  - molRef->sitePositions()[sRef];
-
-                scalar rsRealsRefMagSq = magSqr(rsRealsRef);
-
-                if (pairPot.rCutSqr(idsReal, idsRef, rsRealsRefMagSq))
-                {
-                    scalar rsRealsRefMag = mag(rsRealsRef);
-
-                    vector fsRealsRef =
-                        (rsRealsRef/rsRealsRefMag)
-                       *pairPot.force(idsReal, idsRef, rsRealsRefMag);
-
-                    molReal->siteForces()[sReal] += fsRealsRef;
-
-                    scalar potentialEnergy
-                    (
-                        pairPot.energy(idsReal, idsRef, rsRealsRefMag)
-                    );
-
-                    molReal->potentialEnergy() += 0.5*potentialEnergy;
-
-                    vector rRealRef = molReal->position() - molRef->position();
-
-                    molReal->rf() +=
-                        (rsRealsRef*fsRealsRef)
-                       *(rsRealsRef & rRealRef)
-                       /rsRealsRefMagSq;
-
-                    // molReal->rf() += rsRealsRef * fsRealsRef;
-
-                }
-            }
-
-            if (electrostaticSitesReal[sReal] && electrostaticSitesRef[sRef])
-            {
-                vector rsRealsRef =
-                    molReal->sitePositions()[sReal]
-                  - molRef->sitePositions()[sRef];
-
-                scalar rsRealsRefMagSq = magSqr(rsRealsRef);
-
-                if (rsRealsRefMagSq <= electrostatic.rCutSqr())
-                {
-                    scalar rsRealsRefMag = mag(rsRealsRef);
-
-                    scalar chargeReal = constPropReal.siteCharges()[sReal];
-
-                    scalar chargeRef = constPropRef.siteCharges()[sRef];
-
-                    vector fsRealsRef =
-                        (rsRealsRef/rsRealsRefMag)
-                       *chargeReal*chargeRef
-                       *electrostatic.force(rsRealsRefMag);
-
-                    molReal->siteForces()[sReal] += fsRealsRef;
-
-                    scalar potentialEnergy =
-                        chargeReal*chargeRef
-                       *electrostatic.energy(rsRealsRefMag);
-
-                    molReal->potentialEnergy() += 0.5*potentialEnergy;
-
-                    vector rRealRef = molReal->position() - molRef->position();
-
-                    molReal->rf() +=
-                        (rsRealsRef*fsRealsRef)
-                       *(rsRealsRef & rRealRef)
-                       /rsRealsRefMagSq;
-
-                    // molReal->rf() += rsRealsRef * fsRealsRef;
+                    molJ.rf() += virialContribution;
                 }
             }
         }
@@ -281,17 +154,17 @@ inline void Foam::moleculeCloud::evaluatePair
 
 inline bool Foam::moleculeCloud::evaluatePotentialLimit
 (
-    molecule* molI,
-    molecule* molJ
+    molecule& molI,
+    molecule& molJ
 ) const
 {
     const pairPotentialList& pairPot = pot_.pairPotentials();
 
     const pairPotential& electrostatic = pairPot.electrostatic();
 
-    label idI = molI->id();
+    label idI = molI.id();
 
-    label idJ = molJ->id();
+    label idJ = molJ.id();
 
     const molecule::constantProperties& constPropI(constProps(idI));
 
@@ -320,7 +193,7 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
             if (pairPotentialSitesI[sI] && pairPotentialSitesJ[sJ])
             {
                 vector rsIsJ =
-                    molI->sitePositions()[sI] - molJ->sitePositions()[sJ];
+                    molI.sitePositions()[sI] - molJ.sitePositions()[sJ];
 
                 scalar rsIsJMagSq = magSqr(rsIsJ);
 
@@ -369,7 +242,7 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
             if (electrostaticSitesI[sI] && electrostaticSitesJ[sJ])
             {
                 vector rsIsJ =
-                    molI->sitePositions()[sI] - molJ->sitePositions()[sJ];
+                    molI.sitePositions()[sI] - molJ.sitePositions()[sJ];
 
                 scalar rsIsJMagSq = magSqr(rsIsJ);
 
@@ -408,157 +281,6 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
                     if
                     (
                         mag(chargeI*chargeJ*electrostatic.energy(rsIsJMag))
-                      > pot_.potentialEnergyLimit()
-                    )
-                    {
-                        return true;
-                    };
-                }
-            }
-        }
-    }
-
-    return false;
-}
-
-
-inline bool Foam::moleculeCloud::evaluatePotentialLimit
-(
-    molecule* molReal,
-    referredMolecule* molRef
-) const
-{
-    const pairPotentialList& pairPot = pot_.pairPotentials();
-
-    const pairPotential& electrostatic = pairPot.electrostatic();
-
-    label idReal = molReal->id();
-
-    label idRef = molRef->id();
-
-    const molecule::constantProperties& constPropReal(constProps(idReal));
-
-    const molecule::constantProperties& constPropRef(constProps(idRef));
-
-    List<label> siteIdsReal = constPropReal.siteIds();
-
-    List<label> siteIdsRef = constPropRef.siteIds();
-
-    List<bool> pairPotentialSitesReal = constPropReal.pairPotentialSites();
-
-    List<bool> electrostaticSitesReal = constPropReal.electrostaticSites();
-
-    List<bool> pairPotentialSitesRef = constPropRef.pairPotentialSites();
-
-    List<bool> electrostaticSitesRef = constPropRef.electrostaticSites();
-
-    forAll(siteIdsReal, sReal)
-    {
-        label idsReal(siteIdsReal[sReal]);
-
-        forAll(siteIdsRef, sRef)
-        {
-            label idsRef(siteIdsRef[sRef]);
-
-            if (pairPotentialSitesReal[sReal] && pairPotentialSitesRef[sRef])
-            {
-                vector rsRealsRef =
-                    molReal->sitePositions()[sReal]
-                  - molRef->sitePositions()[sRef];
-
-                scalar rsRealsRefMagSq = magSqr(rsRealsRef);
-
-                if (pairPot.rCutSqr(idsReal, idsRef, rsRealsRefMagSq))
-                {
-                    scalar rsRealsRefMag = mag(rsRealsRef);
-
-                    // Guard against pairPot.energy being evaluated
-                    // if rRealRefMag < SMALL. A floating point exception will
-                    // happen otherwise.
-
-                    if (rsRealsRefMag < SMALL)
-                    {
-                        WarningIn("moleculeCloud::removeHighEnergyOverlaps()")
-                            << "Molecule site pair closer than "
-                            << SMALL
-                            << ": mag separation = " << rsRealsRefMag
-                            << ". These may have been placed on top of each"
-                            << " other by a rounding error in mdInitialise in"
-                            << " parallel or a block filled with molecules"
-                            << " twice. Removing one of the molecules."
-                            << endl;
-
-                        return true;
-                    }
-
-                    // Guard against pairPot.energy being evaluated if
-                    // rRealRefMag < rMin.  A tabulation lookup error will occur
-                    // otherwise.
-
-                    if (rsRealsRefMag < pairPot.rMin(idsReal, idsRef))
-                    {
-                        return true;
-                    }
-
-                    if
-                    (
-                        mag(pairPot.energy(idsReal, idsRef, rsRealsRefMag))
-                      > pot_.potentialEnergyLimit()
-                    )
-                    {
-                        return true;
-                    };
-                }
-            }
-
-            if (electrostaticSitesReal[sReal] && electrostaticSitesRef[sRef])
-            {
-                vector rsRealsRef =
-                    molReal->sitePositions()[sReal]
-                  - molRef->sitePositions()[sRef];
-
-                scalar rsRealsRefMagSq = magSqr(rsRealsRef);
-
-                if (pairPot.rCutMaxSqr(rsRealsRefMagSq))
-                {
-                    scalar rsRealsRefMag = mag(rsRealsRef);
-
-                    // Guard against pairPot.energy being evaluated
-                    // if rRealRefMag < SMALL. A floating point exception will
-                    // happen otherwise.
-
-                    if (rsRealsRefMag < SMALL)
-                    {
-                        WarningIn("moleculeCloud::removeHighEnergyOverlaps()")
-                            << "Molecule site pair closer than "
-                            << SMALL
-                            << ": mag separation = " << rsRealsRefMag
-                            << ". These may have been placed on top of each"
-                            << " other by a rounding error in mdInitialise in"
-                            << " parallel or a block filled with molecules"
-                            << " twice. Removing one of the molecules."
-                            << endl;
-
-                        return true;
-                    }
-
-                    if (rsRealsRefMag < electrostatic.rMin())
-                    {
-                        return true;
-                    }
-
-                    scalar chargeReal = constPropReal.siteCharges()[sReal];
-
-                    scalar chargeRef = constPropRef.siteCharges()[sRef];
-
-                    if
-                    (
-                        mag
-                        (
-                            chargeReal
-                           *chargeRef
-                           *electrostatic.energy(rsRealsRefMag)
-                        )
                       > pot_.potentialEnergyLimit()
                     )
                     {
@@ -638,7 +360,7 @@ inline const Foam::List<Foam::DynamicList<Foam::molecule*> >&
 }
 
 
-inline const Foam::interactionLists&
+inline const Foam::InteractionLists<Foam::molecule>&
     Foam::moleculeCloud::il() const
 {
     return il_;
