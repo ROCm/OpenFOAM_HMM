@@ -7,8 +7,8 @@ unitTestCases/singleCyclic/
 OK - test cyclics sequential running.
 unitTestCases/singleCyclic/
 
-- test decomposePar
-fails on channel395-splitCyclic
+OK - test decomposePar
+tested channel395
 
 OK - FaceCellWave
     unitTestCases/twoCavityCyclicForWallDistance/
@@ -61,6 +61,12 @@ this for separation. Should in fact make cyclic planar using patch centre and
 normal?
 test on twoCavityCyclicForWallDistance with point (0 1 0) set to (0 1.001 0)
 
+NO PROBLEM - renumberMesh
+It doesn't do renumbering through cyclics.
+
+OK - rotational cyclics.
+Tested on movingCone-with-cyclics
+
 
 - activeBaffleVelocity
 - work out overlapping communication for PstreamBuffers.
@@ -69,7 +75,6 @@ test on twoCavityCyclicForWallDistance with point (0 1 0) set to (0 1.001 0)
 - grep for size()/2
 - isoSurface.C
 - referredCellList.C
-- renumberMesh
 - work out scheduled communication?
 
 
