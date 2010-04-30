@@ -39,7 +39,7 @@ License
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStringArray.h"
 
-// Foam includes
+// OpenFOAM includes
 #include "vtkPV3Foam.H"
 
 #undef EXPERIMENTAL_TIME_CACHING
@@ -413,7 +413,7 @@ int vtkPV3FoamReader::RequestData
 
 #endif
 
-    // Do any cleanup on the Foam side
+    // Do any cleanup on the OpenFOAM side
     foamData_->CleanUp();
 
     return 1;

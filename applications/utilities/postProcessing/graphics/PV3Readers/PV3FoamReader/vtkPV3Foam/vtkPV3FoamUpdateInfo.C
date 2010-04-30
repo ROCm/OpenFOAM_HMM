@@ -25,7 +25,7 @@ License
 
 #include "vtkPV3Foam.H"
 
-// Foam includes
+// OpenFOAM includes
 #include "cellSet.H"
 #include "faceSet.H"
 #include "pointSet.H"

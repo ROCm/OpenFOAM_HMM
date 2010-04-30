@@ -39,7 +39,7 @@ License
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStringArray.h"
 
-// Foam includes
+// OpenFOAM includes
 #include "vtkPV3blockMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -226,7 +226,7 @@ int vtkPV3blockMeshReader::RequestData
     foamData_->Update(output);
     updatePointNumbersView(ShowPointNumbers);
 
-    // Do any cleanup on the Foam side
+    // Do any cleanup on the OpenFOAM side
     foamData_->CleanUp();
 
     return 1;

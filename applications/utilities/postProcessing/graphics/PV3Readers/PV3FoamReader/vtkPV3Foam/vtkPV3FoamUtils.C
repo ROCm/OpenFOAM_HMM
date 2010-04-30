@@ -29,7 +29,7 @@ Description
 #include "vtkPV3Foam.H"
 #include "vtkPV3FoamReader.h"
 
-// Foam includes
+// OpenFOAM includes
 #include "fvMesh.H"
 #include "Time.H"
 #include "IFstream.H"

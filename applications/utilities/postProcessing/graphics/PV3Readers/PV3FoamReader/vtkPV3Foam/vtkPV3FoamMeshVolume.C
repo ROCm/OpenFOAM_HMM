@@ -26,7 +26,7 @@ License
 #include "vtkPV3Foam.H"
 #include "vtkPV3FoamReader.h"
 
-// Foam includes
+// OpenFOAM includes
 #include "fvMesh.H"
 #include "cellModeller.H"
 #include "vtkOpenFOAMPoints.H"
@@ -74,15 +74,15 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
     labelList& superCells = decompInfo.superCells();
     labelList& addPointCellLabels = decompInfo.addPointCellLabels();
 
-    if (debug)
-    {
-        Info<< "... scanning" << endl;
-    }
-
     // Scan for cells which need to be decomposed and count additional points
     // and cells
     if (!reader_->GetUseVTKPolyhedron())
     {
+        if (debug)
+        {
+            Info<< "... scanning for polyhedra" << endl;
+        }
+
         forAll(cellShapes, cellI)
         {
             const cellModel& model = cellShapes[cellI].model();
@@ -138,7 +138,7 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
         Info<< "... converting points" << endl;
     }
 
-    // Convert Foam mesh vertices to VTK
+    // Convert OpenFOAM mesh vertices to VTK
     vtkPoints* vtkpoints = vtkPoints::New();
     vtkpoints->Allocate(mesh.nPoints() + nAddPoints);
 
@@ -163,6 +163,17 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
     // Create storage for points - needed for mapping from OpenFOAM to VTK
     // data types - max 'order' = hex = 8 points
     vtkIdType nodeIds[8];
+
+    // hash to establish unique node ids for a polyhedral cell
+    HashSet<vtkIdType, Hash<label> > hashUniqId(2*256);
+
+    // unique node ids for a polyhedral cell
+    DynamicList<vtkIdType> uniqueNodeIds(256);
+
+    // face-stream for a polyhedral cell
+    // [numFace0Pts, id1, id2, id3, numFace1Pts, id1, id2, id3, ...]
+    DynamicList<vtkIdType> faceStream(256);
+
 
     forAll(cellShapes, cellI)
     {
@@ -272,7 +283,6 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
             const labelList& cFaces = mesh.cells()[cellI];
 
             vtkIdType nFaces = cFaces.size();
-            vtkIdType nodeCount = 0;
             vtkIdType nLabels = nFaces;
 
             // count size for face stream
@@ -282,45 +292,50 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
                 nLabels += f.size();
             }
 
+            // hash to establish unique node ids for a polyhedral cell
+            hashUniqId.clear();
+
             // unique node ids - approximately equal to the number of point ids
-            DynamicList<vtkIdType> uniqueNodeIds(nLabels-nFaces);
+            uniqueNodeIds.clear();
+            uniqueNodeIds.reserve(nLabels-nFaces);
 
-            // zero-based index into uniqueNodeIds
-            DynamicList<vtkIdType> faceLabels(nLabels);
+            // build face-stream
+            // [numFace0Pts, id1, id2, id3, numFace1Pts, id1, id2, id3, ...]
+            // point Ids are global
+            faceStream.clear();
+            faceStream.reserve(nLabels + nFaces);
 
-            // localized point id within the cell
-            Map<label> mapLocalId(2*nLabels);
-
-            // establish the unique point ids,
-            // record the local mapping ids,
-            // create new face list
             forAll(cFaces, cFaceI)
             {
                 const face& f = mesh.faces()[cFaces[cFaceI]];
+                const bool isOwner = (owner[cFaces[cFaceI]] == cellI);
                 const label nFacePoints = f.size();
 
                 // number of labels for this face
-                faceLabels.append(nFacePoints);
+                faceStream.append(nFacePoints);
 
-                forAll(f, fp)
+                if (isOwner)
                 {
-                    const label nodeId = f[fp];
-
-                    if (mapLocalId.insert(nodeId, nodeCount))
+                    forAll(f, fp)
                     {
-                        // insertion was successful (node Id was unique)
-                        uniqueNodeIds.append(nodeId);
-                        // map orig vertex id -> localized point label
-                        faceLabels.append(nodeCount);
-                        ++nodeCount;
+                        hashUniqId.insert(f[fp]);
+                        faceStream.append(f[fp]);
                     }
-                    else
+                }
+                else
+                {
+                    // fairly immaterial if we reverse the list
+                    // or use face::reverseFace()
+                    forAllReverse(f, fp)
                     {
-                        // map orig vertex id -> localized point label
-                        faceLabels.append(mapLocalId[nodeId]);
+                        hashUniqId.insert(f[fp]);
+                        faceStream.append(f[fp]);
                     }
                 }
             }
+
+            uniqueNodeIds.append(hashUniqId.sortedToc());
+            vtkIdType nodeCount = uniqueNodeIds.size();
 
 #ifdef HAS_VTK_POLYHEDRON
             vtkmesh->InsertNextCell
@@ -329,9 +344,11 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
                 nodeCount,
                 uniqueNodeIds.data(),
                 nFaces,
-                faceLabels.data()
+                faceStream.data()
             );
 #else
+            // this is a horrible substitute
+            // but avoids crashes when there is no vtkPolyhedron support
             vtkmesh->InsertNextCell
             (
                 VTK_CONVEX_POINT_SET,

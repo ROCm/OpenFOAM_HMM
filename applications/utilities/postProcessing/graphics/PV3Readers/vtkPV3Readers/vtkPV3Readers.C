@@ -28,7 +28,7 @@ Description
 
 #include "vtkPV3Readers.H"
 
-// Foam includes
+// OpenFOAM includes
 #include "IFstream.H"
 
 // VTK includes
