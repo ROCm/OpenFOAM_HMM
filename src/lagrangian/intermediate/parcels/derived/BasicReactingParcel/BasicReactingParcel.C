@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,6 +49,9 @@ Foam::BasicReactingParcel<ThermoType>::BasicReactingParcel
     const scalar nParticle0,
     const scalar d0,
     const vector& U0,
+    const vector& f0,
+    const vector& angularMomentum0,
+    const vector& torque0,
     const scalarField& Y0,
     const typename ReactingParcel<BasicReactingParcel<ThermoType> >::
         constantProperties& constProps
@@ -63,6 +66,9 @@ Foam::BasicReactingParcel<ThermoType>::BasicReactingParcel
         nParticle0,
         d0,
         U0,
+        f0,
+        angularMomentum0,
+        torque0,
         Y0,
         constProps
     )
