@@ -83,7 +83,7 @@ int main()
 
     {
         OStringStream os;
-        os << table1;
+        os  << table1;
         HASHTABLE_CLASS<double> readTable(IStringStream(os.str())(), 100);
 
         Info<< "Istream constructor:" << readTable << endl;

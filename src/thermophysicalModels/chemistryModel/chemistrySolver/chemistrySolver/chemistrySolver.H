@@ -170,7 +170,7 @@ public:
 
 #ifdef NoRepository
 #   include "chemistrySolver.C"
-#   include "newChemistrySolver.C"
+#   include "chemistrySolverNew.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

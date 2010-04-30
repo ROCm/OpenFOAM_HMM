@@ -9,3 +9,5 @@ include $(GENERAL_RULES)/coco-cpp
 ## include $(GENERAL_RULES)/btyacc++
 include $(GENERAL_RULES)/bison
 include $(GENERAL_RULES)/moc
+
+include $(GENERAL_RULES)/X

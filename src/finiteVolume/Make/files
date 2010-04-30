@@ -9,7 +9,7 @@ $(fvBoundaryMesh)/fvBoundaryMesh.C
 
 fvPatches = fvMesh/fvPatches
 $(fvPatches)/fvPatch/fvPatch.C
-$(fvPatches)/fvPatch/newFvPatch.C
+$(fvPatches)/fvPatch/fvPatchNew.C
 
 basicFvPatches = $(fvPatches)/basic
 $(basicFvPatches)/coupled/coupledFvPatch.C
@@ -192,7 +192,9 @@ $(interpolation)/interpolationCellPointWallModified/cellPointWeightWallModified/
 $(interpolation)/interpolationCellPointWallModified/makeInterpolationCellPointWallModified.C
 
 volPointInterpolation = interpolation/volPointInterpolation
-/* $(volPointInterpolation)/pointPatchInterpolation/pointPatchInterpolation.C */
+/*
+$(volPointInterpolation)/pointPatchInterpolation/pointPatchInterpolation.C
+*/
 $(volPointInterpolation)/volPointInterpolation.C
 
 surfaceInterpolation = interpolation/surfaceInterpolation
@@ -310,8 +312,10 @@ $(snGradSchemes)/snGradScheme/snGradSchemes.C
 $(snGradSchemes)/correctedSnGrad/correctedSnGrads.C
 $(snGradSchemes)/limitedSnGrad/limitedSnGrads.C
 $(snGradSchemes)/uncorrectedSnGrad/uncorrectedSnGrads.C
-//$(snGradSchemes)/quadraticFitSnGrad/quadraticFitSnGradData.C
-//$(snGradSchemes)/quadraticFitSnGrad/quadraticFitSnGrads.C
+/*
+$(snGradSchemes)/quadraticFitSnGrad/quadraticFitSnGradData.C
+$(snGradSchemes)/quadraticFitSnGrad/quadraticFitSnGrads.C
+*/
 
 convectionSchemes = finiteVolume/convectionSchemes
 $(convectionSchemes)/convectionScheme/convectionSchemes.C
@@ -339,7 +343,7 @@ $(MRF)/MRFZones.C
 
 SRF = $(general)/SRF
 $(SRF)/SRFModel/SRFModel/SRFModel.C
-$(SRF)/SRFModel/SRFModel/newSRFModel.C
+$(SRF)/SRFModel/SRFModel/SRFModelNew.C
 $(SRF)/SRFModel/rpm/rpm.C
 $(SRF)/derivedFvPatchFields/SRFVelocityFvPatchVectorField/SRFVelocityFvPatchVectorField.C
 

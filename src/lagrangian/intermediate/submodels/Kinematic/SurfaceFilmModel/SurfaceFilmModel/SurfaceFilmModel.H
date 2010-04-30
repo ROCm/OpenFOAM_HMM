@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     SurfaceFilmModel.C
-    NewSurfaceFilmModel.C
+    SurfaceFilmModelNew.C
 
 \*---------------------------------------------------------------------------*/
 

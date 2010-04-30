@@ -43,14 +43,11 @@ Foam::autoPtr<Foam::liquid> Foam::liquid::New(Istream& is)
 {
     if (debug)
     {
-        Info<< "liquid::New(Istream&) : "
-            << "constructing liquid"
-            << endl;
+        Info<< "liquid::New(Istream&) : " << "constructing liquid" << endl;
     }
 
-    word liquidType(is);
-
-    word coeffs(is);
+    const word liquidType(is);
+    const word coeffs(is);
 
     if (coeffs == "defaultCoeffs")
     {
@@ -60,8 +57,8 @@ Foam::autoPtr<Foam::liquid> Foam::liquid::New(Istream& is)
         if (cstrIter == ConstructorTablePtr_->end())
         {
             FatalErrorIn("liquid::New(Istream&)")
-                << "Unknown liquid type " << liquidType
-                << nl << nl
+                << "Unknown liquid type "
+                << liquidType << nl << nl
                 << "Valid liquid types are:" << nl
                 << ConstructorTablePtr_->sortedToc()
                 << abort(FatalError);
@@ -77,8 +74,8 @@ Foam::autoPtr<Foam::liquid> Foam::liquid::New(Istream& is)
         if (cstrIter == IstreamConstructorTablePtr_->end())
         {
             FatalErrorIn("liquid::New(Istream&)")
-                << "Unknown liquid type " << liquidType
-                << endl << endl
+                << "Unknown liquid type "
+                << liquidType << nl << nl
                 << "Valid liquid types are:" << nl
                 << IstreamConstructorTablePtr_->sortedToc()
                 << abort(FatalError);

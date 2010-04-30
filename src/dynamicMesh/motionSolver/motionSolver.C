@@ -75,7 +75,7 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::New(const polyMesh& mesh)
 
     Istream& msData = solverDict.lookup("solver");
 
-    word solverTypeName(msData);
+    const word solverTypeName(msData);
 
     Info<< "Selecting motion solver: " << solverTypeName << endl;
 
@@ -103,9 +103,9 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::New(const polyMesh& mesh)
         FatalErrorIn
         (
             "motionSolver::New(const polyMesh& mesh)"
-        )   << "Unknown solver type " << solverTypeName
-            << endl << endl
-            << "Valid solver types are: " << endl
+        )   << "Unknown solver type "
+            << solverTypeName << nl << nl
+            << "Valid solver types are:" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

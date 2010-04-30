@@ -95,7 +95,7 @@ void Foam::Time::adjustDeltaT()
 void Foam::Time::setControls()
 {
     // default is to resume calculation from "latestTime"
-    word startFrom = controlDict_.lookupOrDefault<word>
+    const word startFrom = controlDict_.lookupOrDefault<word>
     (
         "startFrom",
         "latestTime"

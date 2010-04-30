@@ -112,13 +112,6 @@ directMappedFixedValueFvPatchField<Type>::directMappedFixedValueFvPatchField
             << " in file " << this->dimensionedInternalField().objectPath()
             << exit(FatalError);
     }
-
-    //// Force calculation of schedule (uses parallel comms)
-    //const directMappedPatchBase& mpp = refCast<const directMappedPatchBase>
-    //(
-    //    this->patch().patch()
-    //);
-    //(void)mpp.map().schedule();
 }
 
 
@@ -249,7 +242,7 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
             {
                 const fvPatchField<Type>& pf =
                     nbrField.boundaryField()[patchI];
-                label faceStart = pf.patch().patch().start();
+                label faceStart = pf.patch().start();
 
                 forAll(pf, faceI)
                 {

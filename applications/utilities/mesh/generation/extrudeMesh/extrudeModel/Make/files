@@ -1,5 +1,5 @@
 extrudeModel/extrudeModel.C
-extrudeModel/newExtrudeModel.C
+extrudeModel/extrudeModelNew.C
 linearNormal/linearNormal.C
 linearDirection/linearDirection.C
 linearRadial/linearRadial.C

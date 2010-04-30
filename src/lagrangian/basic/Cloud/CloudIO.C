@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ Foam::word Foam::Cloud<ParticleType>::cloudPropertiesName("cloudProperties");
 template<class ParticleType>
 void Foam::Cloud<ParticleType>::readCloudUniformProperties()
 {
-    IOobject uniformPropsDictHeader
+    IOobject dictObj
     (
         cloudPropertiesName,
         time().timeName(),
@@ -50,11 +50,11 @@ void Foam::Cloud<ParticleType>::readCloudUniformProperties()
         false
     );
 
-    if (uniformPropsDictHeader.headerOk())
+    if (dictObj.headerOk())
     {
-        const IOdictionary uniformPropsDict(uniformPropsDictHeader);
+        const IOdictionary uniformPropsDict(dictObj);
 
-        word procName("processor" + Foam::name(Pstream::myProcNo()));
+        const word procName("processor" + Foam::name(Pstream::myProcNo()));
         if (uniformPropsDict.found(procName))
         {
             uniformPropsDict.subDict(procName).lookup("particleCount")

@@ -38,16 +38,7 @@ boundaryField
         type            calculated;
         value           uniform 0;
     }
-    baffles
-    {
-        type            nutkWallFunction;
-        value           uniform 0;
-    }
-    fan
-    {
-        type            cyclic;
-        value           uniform 0;
-    }
+
     defaultFaces
     {
         type            nutkWallFunction;

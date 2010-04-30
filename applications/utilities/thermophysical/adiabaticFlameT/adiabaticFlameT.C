@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 
 
     scalar T0(readScalar(control.lookup("T0")));
-    word fuelName(control.lookup("fuel"));
+    const word fuelName(control.lookup("fuel"));
     scalar n(readScalar(control.lookup("n")));
     scalar m(readScalar(control.lookup("m")));
 

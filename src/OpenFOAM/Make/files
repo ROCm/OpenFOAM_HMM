@@ -258,14 +258,14 @@ $(GAMG)/GAMGSolverSolve.C
 
 GAMGInterfaces = $(GAMG)/interfaces
 $(GAMGInterfaces)/GAMGInterface/GAMGInterface.C
-$(GAMGInterfaces)/GAMGInterface/newGAMGInterface.C
+$(GAMGInterfaces)/GAMGInterface/GAMGInterfaceNew.C
 $(GAMGInterfaces)/processorGAMGInterface/processorGAMGInterface.C
 $(GAMGInterfaces)/processorCyclicGAMGInterface/processorCyclicGAMGInterface.C
 $(GAMGInterfaces)/cyclicGAMGInterface/cyclicGAMGInterface.C
 
 GAMGInterfaceFields = $(GAMG)/interfaceFields
 $(GAMGInterfaceFields)/GAMGInterfaceField/GAMGInterfaceField.C
-$(GAMGInterfaceFields)/GAMGInterfaceField/newGAMGInterfaceField.C
+$(GAMGInterfaceFields)/GAMGInterfaceField/GAMGInterfaceFieldNew.C
 $(GAMGInterfaceFields)/processorGAMGInterfaceField/processorGAMGInterfaceField.C
 $(GAMGInterfaceFields)/processorCyclicGAMGInterfaceField/processorCyclicGAMGInterfaceField.C
 $(GAMGInterfaceFields)/cyclicGAMGInterfaceField/cyclicGAMGInterfaceField.C
@@ -330,7 +330,7 @@ polyMesh = meshes/polyMesh
 
 polyPatches = $(polyMesh)/polyPatches
 $(polyPatches)/polyPatch/polyPatch.C
-$(polyPatches)/polyPatch/newPolyPatch.C
+$(polyPatches)/polyPatch/polyPatchNew.C
 
 basicPolyPatches = $(polyPatches)/basic
 $(basicPolyPatches)/coupled/coupledPolyPatch.C
@@ -365,15 +365,15 @@ $(zone)/zone.C
 
 cellZone = $(polyMesh)/zones/cellZone
 $(cellZone)/cellZone.C
-$(cellZone)/newCellZone.C
+$(cellZone)/cellZoneNew.C
 
 faceZone = $(polyMesh)/zones/faceZone
 $(faceZone)/faceZone.C
-$(faceZone)/newFaceZone.C
+$(faceZone)/faceZoneNew.C
 
 pointZone = $(polyMesh)/zones/pointZone
 $(pointZone)/pointZone.C
-$(pointZone)/newPointZone.C
+$(pointZone)/pointZoneNew.C
 
 $(polyMesh)/polyMesh.C
 $(polyMesh)/polyMeshFromShapeMesh.C
@@ -441,7 +441,7 @@ $(pointMeshMapper)/pointPatchMapper.C
 pointPatches = $(pointMesh)/pointPatches
 $(pointPatches)/pointPatch/pointPatch.C
 $(pointPatches)/facePointPatch/facePointPatch.C
-$(pointPatches)/facePointPatch/newFacePointPatch.C
+$(pointPatches)/facePointPatch/facePointPatchNew.C
 
 basicPointPatches = $(pointPatches)/basic
 $(basicPointPatches)/coupled/coupledPointPatch.C

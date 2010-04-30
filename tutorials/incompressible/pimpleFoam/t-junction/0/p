@@ -20,7 +20,7 @@ internalField   uniform 100000;
 
 boundaryField
 {
-    inlet
+    inlet      
     {
         //type            totalPressure;
         //p0              uniform 100040;
@@ -38,28 +38,18 @@ boundaryField
         value           uniform 100040;
     }
 
-    outlet1
+    outlet1     
     {
         type            fixedValue;
         value           uniform 100010;
     }
 
-    outlet2
+    outlet2    
     {
         type            fixedValue;
         value           uniform 100000;
     }
-    baffles
-    {
-        type            zeroGradient;
-    }
-    fan
-    {
-        type            fan;
-        patchType       cyclic;
-        f               2 ( 50 -0.1 );
-        value           uniform 100000;
-    }
+
     defaultFaces
     {
         type            zeroGradient;

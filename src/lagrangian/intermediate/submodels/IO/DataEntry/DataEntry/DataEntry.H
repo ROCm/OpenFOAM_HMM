@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ Description
 
 SourceFiles
     DataEntry.C
-    NewDataEntry.C
+    DataEntryNew.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -172,7 +172,7 @@ public:
 
 #ifdef NoRepository
 #   include "DataEntry.C"
-#   include "NewDataEntry.C"
+#   include "DataEntryNew.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -80,7 +80,7 @@ inline void Foam::autoPtr<T>::set(T* p)
 {
     if (ptr_)
     {
-        FatalErrorIn("void autoPtr<T>::set(T*)")
+        FatalErrorIn("void Foam::autoPtr<T>::set(T*)")
             << "object already allocated"
             << abort(FatalError);
     }
@@ -115,7 +115,7 @@ inline T& Foam::autoPtr<T>::operator()()
 {
     if (!ptr_)
     {
-        FatalErrorIn("T& autoPtr<T>::operator()()")
+        FatalErrorIn("T& Foam::autoPtr<T>::operator()()")
             << "object is not allocated"
             << abort(FatalError);
     }
@@ -129,29 +129,13 @@ inline const T& Foam::autoPtr<T>::operator()() const
 {
     if (!ptr_)
     {
-        FatalErrorIn("const T& autoPtr<T>::operator()() const")
+        FatalErrorIn("const T& Foam::autoPtr<T>::operator()() const")
             << "object is not allocated"
             << abort(FatalError);
     }
 
     return *ptr_;
 }
-
-
-/*
-template<class T>
-inline T& Foam::autoPtr<T>::operator*()
-{
-    return operator()();
-}
-
-
-template<class T>
-inline const T& Foam::autoPtr<T>::operator*() const
-{
-    return operator()();
-}
-*/
 
 
 template<class T>
@@ -166,7 +150,7 @@ inline T* Foam::autoPtr<T>::operator->()
 {
     if (!ptr_)
     {
-        FatalErrorIn("autoPtr<T>::operator->()")
+        FatalErrorIn("Foam::autoPtr<T>::operator->()")
             << "object is not allocated"
             << abort(FatalError);
     }

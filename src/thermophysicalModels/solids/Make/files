@@ -1,5 +1,5 @@
 solid/solid.C
-solid/newSolid.C
+solid/solidNew.C
 
 ash/ash.C
 C/C.C

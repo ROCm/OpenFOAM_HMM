@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     argList::validArgs.clear();
     argList::validArgs.append("surface file");
     argList::validArgs.append("output surface file");
-    argList::argList args(argc, argv);
+    argList args(argc, argv);
 
     const fileName surfFileName = args[1];
     const fileName outFileName  = args[2];

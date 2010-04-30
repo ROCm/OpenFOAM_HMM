@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,6 +54,9 @@ Foam::BasicReactingMultiphaseParcel<ThermoType>::BasicReactingMultiphaseParcel
     const scalar nParticle0,
     const scalar d0,
     const vector& U0,
+    const vector& f0,
+    const vector& angularMomentum0,
+    const vector& torque0,
     const scalarField& YGas0,
     const scalarField& YLiquid0,
     const scalarField& YSolid0,
@@ -72,6 +75,9 @@ Foam::BasicReactingMultiphaseParcel<ThermoType>::BasicReactingMultiphaseParcel
         nParticle0,
         d0,
         U0,
+        f0,
+        angularMomentum0,
+        torque0,
         YGas0,
         YLiquid0,
         YSolid0,

@@ -50,7 +50,7 @@ Istream& operator>>
     alphaContactAngleFvPatchScalarField::interfaceThetaProps& tp
 )
 {
-    is >> tp.theta0_ >> tp.uTheta_ >> tp.thetaA_ >> tp.thetaR_;
+    is  >> tp.theta0_ >> tp.uTheta_ >> tp.thetaA_ >> tp.thetaR_;
     return is;
 }
 

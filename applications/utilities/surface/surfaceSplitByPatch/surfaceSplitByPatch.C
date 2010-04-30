@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::validArgs.clear();
     argList::validArgs.append("input file");
-    argList::argList args(argc, argv);
+    argList args(argc, argv);
 
     const fileName surfName = args[1];
 

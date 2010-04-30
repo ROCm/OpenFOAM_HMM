@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     hhuCombustionThermo.C
-    newhhuCombustionThermo.C
+    hhuCombustionThermoNew.C
 
 \*---------------------------------------------------------------------------*/
 

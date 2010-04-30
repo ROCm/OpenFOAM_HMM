@@ -36,8 +36,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::word
-Foam::lduMatrix::preconditioner::getName
+Foam::word Foam::lduMatrix::preconditioner::getName
 (
     const dictionary& solverControls
 )

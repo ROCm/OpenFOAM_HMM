@@ -338,6 +338,6 @@ Ostream& operator<<
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "newPointPatchField.C"
+#include "pointPatchFieldNew.C"
 
 // ************************************************************************* //

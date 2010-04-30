@@ -166,7 +166,9 @@ void starMesh::markBoundaryFaces()
                     }
                 }
 
-                FatalError << " $ bset,add,vset,all" << abort(FatalError);
+                FatalError
+                    << " $ bset,add,vset,all"
+                    << abort(FatalError);
             }
         }
     }

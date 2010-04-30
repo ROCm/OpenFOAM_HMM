@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -67,7 +67,7 @@ bool Foam::IOPosition<ParticleType>::write() const
 template<class ParticleType>
 bool Foam::IOPosition<ParticleType>::writeData(Ostream& os) const
 {
-    os<< cloud_.size() << nl << token::BEGIN_LIST << nl;
+    os  << cloud_.size() << nl << token::BEGIN_LIST << nl;
 
     forAllConstIter(typename Cloud<ParticleType>, cloud_, iter)
     {
@@ -80,7 +80,7 @@ bool Foam::IOPosition<ParticleType>::writeData(Ostream& os) const
         os  << nl;
     }
 
-    os<< token::END_LIST << endl;
+    os  << token::END_LIST << endl;
 
     return os.good();
 }

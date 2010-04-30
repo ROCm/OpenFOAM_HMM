@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,10 +33,14 @@ License
 template <class ParcelType>
 Foam::string Foam::KinematicParcel<ParcelType>::propHeader =
     Particle<ParcelType>::propHeader
+  + " active"
   + " typeId"
   + " nParticle"
   + " d"
   + " (Ux Uy Uz)"
+  + " (fx fy fz)"
+  + " (angularMomentumx angularMomentumy angularMomentumz)"
+  + " (torquex torquey torquez)"
   + " rho"
   + " tTurb"
   + " (UTurbx UTurby UTurbz)";
@@ -53,13 +57,18 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
 )
 :
     Particle<ParcelType>(cloud, is, readFields),
+    active_(false),
     typeId_(0),
     nParticle_(0.0),
     d_(0.0),
     U_(vector::zero),
+    f_(vector::zero),
+    angularMomentum_(vector::zero),
+    torque_(vector::zero),
     rho_(0.0),
     tTurb_(0.0),
     UTurb_(vector::zero),
+    collisionRecords_(),
     rhoc_(0.0),
     Uc_(vector::zero),
     muc_(0.0)
@@ -68,27 +77,37 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     {
         if (is.format() == IOstream::ASCII)
         {
+            active_ = readBool(is);
             typeId_ = readLabel(is);
             nParticle_ = readScalar(is);
             d_ = readScalar(is);
             is >> U_;
+            is >> f_;
+            is >> angularMomentum_;
+            is >> torque_;
             rho_ = readScalar(is);
             tTurb_ = readScalar(is);
             is >> UTurb_;
+            is >> collisionRecords_;
         }
         else
         {
             is.read
             (
-                reinterpret_cast<char*>(&typeId_),
-                sizeof(typeId_)
+                reinterpret_cast<char*>(&active_),
+                sizeof(active_)
+              + sizeof(typeId_)
               + sizeof(nParticle_)
               + sizeof(d_)
               + sizeof(U_)
+              + sizeof(f_)
+              + sizeof(angularMomentum_)
+              + sizeof(torque_)
               + sizeof(rho_)
               + sizeof(tTurb_)
               + sizeof(UTurb_)
             );
+            is  >> collisionRecords_;
         }
     }
 
@@ -111,6 +130,9 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
 
     Particle<ParcelType>::readFields(c);
 
+    IOField<label> active(c.fieldIOobject("active", IOobject::MUST_READ));
+    c.checkFieldIOobject(c, active);
+
     IOField<label> typeId(c.fieldIOobject("typeId", IOobject::MUST_READ));
     c.checkFieldIOobject(c, typeId);
 
@@ -123,6 +145,18 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
 
     IOField<vector> U(c.fieldIOobject("U", IOobject::MUST_READ));
     c.checkFieldIOobject(c, U);
+
+    IOField<vector> f(c.fieldIOobject("f", IOobject::MUST_READ));
+    c.checkFieldIOobject(c, f);
+
+    IOField<vector> angularMomentum
+    (
+        c.fieldIOobject("angularMomentum", IOobject::MUST_READ)
+    );
+    c.checkFieldIOobject(c, angularMomentum);
+
+    IOField<vector> torque(c.fieldIOobject("torque", IOobject::MUST_READ));
+    c.checkFieldIOobject(c, torque);
 
     IOField<scalar> rho(c.fieldIOobject("rho", IOobject::MUST_READ));
     c.checkFieldIOobject(c, rho);
@@ -138,10 +172,13 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
     {
         ParcelType& p = iter();
 
+        p.active_ = active[i];
         p.typeId_ = typeId[i];
         p.nParticle_ = nParticle[i];
         p.d_ = d[i];
         p.U_ = U[i];
+        p.f_ = f[i];
+        p.angularMomentum_ = angularMomentum[i];
         p.rho_ = rho[i];
         p.tTurb_ = tTurb[i];
         p.UTurb_ = UTurb[i];
@@ -157,6 +194,7 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
 
     label np =  c.size();
 
+    IOField<label> active(c.fieldIOobject("active", IOobject::NO_READ), np);
     IOField<label> typeId(c.fieldIOobject("typeId", IOobject::NO_READ), np);
     IOField<scalar> nParticle
     (
@@ -165,6 +203,12 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
     );
     IOField<scalar> d(c.fieldIOobject("d", IOobject::NO_READ), np);
     IOField<vector> U(c.fieldIOobject("U", IOobject::NO_READ), np);
+    IOField<vector> f(c.fieldIOobject("f", IOobject::NO_READ), np);
+    IOField<vector> angularMomentum
+    (
+        c.fieldIOobject("angularMomentum", IOobject::NO_READ), np
+    );
+    IOField<vector> torque(c.fieldIOobject("torque", IOobject::NO_READ), np);
     IOField<scalar> rho(c.fieldIOobject("rho", IOobject::NO_READ), np);
     IOField<scalar> tTurb(c.fieldIOobject("tTurb", IOobject::NO_READ), np);
     IOField<vector> UTurb(c.fieldIOobject("UTurb", IOobject::NO_READ), np);
@@ -174,20 +218,28 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
     {
         const KinematicParcel<ParcelType>& p = iter();
 
+        active[i] = p.active();
         typeId[i] = p.typeId();
         nParticle[i] = p.nParticle();
         d[i] = p.d();
         U[i] = p.U();
+        f[i] = p.f();
+        angularMomentum[i] = p.angularMomentum();
+        torque[i] = p.torque();
         rho[i] = p.rho();
         tTurb[i] = p.tTurb();
         UTurb[i] = p.UTurb();
         i++;
     }
 
+    active.write();
     typeId.write();
     nParticle.write();
     d.write();
     U.write();
+    f.write();
+    angularMomentum.write();
+    torque.write();
     rho.write();
     tTurb.write();
     UTurb.write();
@@ -206,28 +258,38 @@ Foam::Ostream& Foam::operator<<
     if (os.format() == IOstream::ASCII)
     {
         os  << static_cast<const Particle<ParcelType>&>(p)
+            << token::SPACE << p.active()
             << token::SPACE << p.typeId()
             << token::SPACE << p.nParticle()
             << token::SPACE << p.d()
             << token::SPACE << p.U()
+            << token::SPACE << p.f()
+            << token::SPACE << p.angularMomentum()
+            << token::SPACE << p.torque()
             << token::SPACE << p.rho()
             << token::SPACE << p.tTurb()
-            << token::SPACE << p.UTurb();
+            << token::SPACE << p.UTurb()
+            << token::SPACE << p.collisionRecords();
     }
     else
     {
         os  << static_cast<const Particle<ParcelType>&>(p);
         os.write
         (
-            reinterpret_cast<const char*>(&p.typeId_),
-            sizeof(p.typeId())
+            reinterpret_cast<const char*>(&p.active_),
+            sizeof(p.active())
+          + sizeof(p.typeId())
           + sizeof(p.nParticle())
           + sizeof(p.d())
           + sizeof(p.U())
+          + sizeof(p.f())
+          + sizeof(p.angularMomentum())
+          + sizeof(p.torque())
           + sizeof(p.rho())
           + sizeof(p.tTurb())
           + sizeof(p.UTurb())
         );
+        os  << p.collisionRecords();
     }
 
     // Check state of Ostream

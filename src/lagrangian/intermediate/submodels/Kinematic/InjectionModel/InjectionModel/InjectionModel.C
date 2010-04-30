@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -319,7 +319,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
     Info<< "    Constructing " << owner.mesh().nGeometricD() << "-D injection"
         << endl;
 
-    word parcelBasisType = coeffDict_.lookup("parcelBasisType");
+    const word parcelBasisType = coeffDict_.lookup("parcelBasisType");
     if (parcelBasisType == "mass")
     {
         parcelBasis_ = pbMass;
@@ -454,6 +454,6 @@ void Foam::InjectionModel<CloudType>::info(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewInjectionModel.C"
+#include "InjectionModelNew.C"
 
 // ************************************************************************* //

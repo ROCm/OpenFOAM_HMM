@@ -94,20 +94,20 @@ void Foam::writeFuns::write
             fField.size()*sizeof(float)
         );
 
-        os << std::endl;
+        os  << std::endl;
     }
     else
     {
         forAll(fField, i)
         {
-            os << fField[i] << ' ';
+            os  << fField[i] << ' ';
 
             if (i > 0 && (i % 10) == 0)
             {
-                os << std::endl;
+                os  << std::endl;
             }
         }
-        os << std::endl;
+        os  << std::endl;
     }
 }
 
@@ -143,20 +143,20 @@ void Foam::writeFuns::write
             elems.size()*sizeof(label)
         );
 
-        os << std::endl;
+        os  << std::endl;
     }
     else
     {
         forAll(elems, i)
         {
-            os << elems[i] << ' ';
+            os  << elems[i] << ' ';
 
             if (i > 0 && (i % 10) == 0)
             {
-                os << std::endl;
+                os  << std::endl;
             }
         }
-        os << std::endl;
+        os  << std::endl;
     }
 }
 
@@ -186,11 +186,11 @@ void Foam::writeFuns::writeHeader
 
     if (binary)
     {
-        os << "BINARY" << std::endl;
+        os  << "BINARY" << std::endl;
     }
     else
     {
-        os << "ASCII" << std::endl;
+        os  << "ASCII" << std::endl;
     }
 }
 
