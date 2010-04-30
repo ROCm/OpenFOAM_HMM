@@ -639,11 +639,6 @@ void Foam::cyclicPolyPatch::calcGeometry
     const UList<point>& nbrCc
 )
 {
-    //polyPatch::calcGeometry();
-
-Pout<< "cyclicPolyPatch::calcGeometry : name:" << name()
-    << " referred from a patch with nFaces:" << referPatch.size() << endl;
-
     calcTransforms
     (
         referPatch,
@@ -719,6 +714,7 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledPoints() const
         forAll(*this, patchFaceI)
         {
             const face& fA = localFaces()[patchFaceI];
+            const face& fB = nbrLocalFaces[patchFaceI];
 
             forAll(fA, indexA)
             {
@@ -726,12 +722,10 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledPoints() const
 
                 if (coupledPoint[patchPointA] == -1)
                 {
-                    const face& fB = nbrLocalFaces[patchFaceI];
-
                     label indexB = (fB.size() - indexA) % fB.size();
 
                     // Filter out points on wedge axis
-                    if (patchPointA != fB[indexB])
+                    if (meshPoints()[patchPointA] != nbrMeshPoints[fB[indexB]])
                     {
                         coupledPoint[patchPointA] = fB[indexB];
                     }
