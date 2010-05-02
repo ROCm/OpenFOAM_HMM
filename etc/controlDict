@@ -21,8 +21,8 @@ Documentation
     docBrowser      "kde-open %f";
     doxyDocDirs
     (
-        "$WM_PROJECT_USER_DIR/Doxygen/html"
-        "~OpenFOAM/Doxygen/html"
+        "$WM_PROJECT_USER_DIR/html"
+        "~OpenFOAM/html"
         "$WM_PROJECT_DIR/doc/Doxygen/html"
     );
     doxySourceFileExts

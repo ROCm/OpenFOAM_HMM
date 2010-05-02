@@ -1,26 +1,49 @@
-/* tabs styles, based on http://www.alistapart.com/articles/slidingdoors */
+/*
+ * tabs styles, without slidingdoor graphics
+ * http://www.alistapart.com/articles/slidingdoors
+ */
+
+div.navigation
+{
+    margin: 0px;
+    padding: 0px;
+    border-bottom: 3px solid rgb(175,175,175);
+}
+
 
 div.tabs
 {
     float           : left;
     width           : 100%;
-    margin-bottom   : 2px;
-    padding-bottom  : 6px;
+    padding-top     : 3px;
+    padding-bottom  : 3px;
+    background:     rgb(240,240,240);
+    border-bottom: 1px solid rgb(175,175,175);
 }
 
 div.tabs ul
 {
-    margin          : 0px;
-    padding-left    : 0px;
-    border-right    : 1px solid #84B0C7;
-    list-style      : none;
+    margin: 0px;
+    padding-left: 10px;
+    padding-right: 10px;
+    list-style: none;
+/*    max-height: 16px; */
 }
+
 
 div.tabs li, div.tabs form
 {
     display         : inline;
     margin          : 0px;
     padding         : 0px;
+}
+
+div.tabs ul li
+{
+/*    margin          : 10px; */
+    padding-top: 10px;
+    padding-bottom: 10px;
+    height: 100%;
 }
 
 div.tabs form
@@ -33,19 +56,24 @@ div.tabs a
 {
     float           : left;
     font-size       : 12px;
-    font-weight     : bold;
+    font-weight     : normal;
     text-decoration : none;
-    border-right    : 1px solid #000000;
+    border-right: 1px solid rgb(175,175,175);
 }
 
+/* not needed - no image */
 div.tabs a:hover
 {
     background-position: 100% -150px;
 }
 
-div.tabs a:link, div.tabs a:visited, div.tabs a:active, div.tabs a:hover
+div.tabs a:link,
+div.tabs a:visited,
+div.tabs a:active,
+div.tabs a:hover
 {
     color           : #000000;
+    color:#555;
 }
 
 div.tabs span
@@ -56,16 +84,33 @@ div.tabs span
     white-space     : nowrap;
 }
 
+/* client-side search */
+div.tabs #MSearchBox
+{
+   float            : right;
+   background       : white;
+   display          : inline;
+   font-size        : 1em;
+}
+
+div.tabs #MSearchSelect
+{
+   float            : left;
+   display          : inline;
+   font-size        : 1em;
+}
+
+/* old name? */
 div.tabs input
 {
     float           : right;
     display         : inline;
-    font-size       : 12px;
+    font-size       : 1em;
 }
 
 div.tabs td
 {
-    font-size       : 12px;
+    font-size       : 80%;
     font-weight     : bold;
     text-decoration : none;
 }
@@ -74,27 +119,33 @@ div.tabs td
 div.tabs span { float : none; }
 /* End IE5-Mac hack */
 
+/* not needed - no image */
 div.tabs a:hover span
 {
     background-position: 0% -150px;
 }
 
-div.tabs li#current a
+div.tabs li.current a
 {
     border-width    : 0px;
-    border-right    : 1px solid #000000;
-    color           : #0000ff;
+    border-right: 1px solid rgb(175,175,175);
+    color           : #555;
 }
 
-div.tabs li#current span
+div.tabs li.current span
 {
-    padding-bottom  : 0px;
+    padding-bottom: 0px;
+    white-space: nowrap;
+    font-style: italic;
 }
 
-div.nav
+div.navpath
 {
-    background      : none;
-    border          : none;
-    border-bottom   : 1px solid #000000;
+    background       : none;
+    border           : none;
+    margin           : 0px;
+    padding          : 0px;
+    font-size        : 110%;
+    text-align       : center;
 }
 

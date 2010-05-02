@@ -5,8 +5,11 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UFT-8"/>
 <title> OpenFOAM&reg; programmer's C++ documentation </title>
 <!-- links -->
-<link rel="stylesheet" href="../css/doxyLayout.css" type="text/css" />
-<link rel="icon" href="../OpenFOAMdocIcon.png" type="image/png" />
+<link href="../OpenFOAMdocIcon.png" rel="icon" type="image/png" />
+<link href="search/search.css" rel="stylesheet" type="text/css" />
+<link href="../css/openfoam.css" rel="stylesheet" type="text/css" />
+<script type="text/javaScript" src="search/search.js"></script>
+
 <!-- meta info -->
 <meta
     name="keywords"
@@ -23,7 +26,7 @@
     <div class="header-top">
       <div class="round-border-topleft"></div>
       <div class="round-border-topright"></div>
-      <a class="sitelogo" href="/" title="Home"></a>
+      <a class="sitelogo" href="http://www.openfoam.com" title="Home"></a>
       <div class="sitename">
         <h1><a
           href="http://foam.sourceforge.net/doc/Doxygen/html/"
