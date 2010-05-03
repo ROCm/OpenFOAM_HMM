@@ -20,12 +20,13 @@ since it is no longer handled in a single patch.
 only work in non-blocking mode. Hence the underlying message passing library
 will require overlapping communications with message tags.
 - it is quite a code-change and there might be some oversights.
-
+- once converted (see foamUpgradeCyclics below) cases are not backwards
+compatible with previous versions.
 
 
 blockMesh
 ---------
-- blockMeshDict now allows patch definition using the construct-from-dictionary
+blockMeshDict now allows patch definition using the construct-from-dictionary
 constructor. This helps defining patches that require additional input e.g.
 directMapped and now cyclic:
 
@@ -44,6 +45,14 @@ required entry 'neighbourPatch' for cyclic.
 
 blockMesh still reads the old format. For a cyclic it will automatically
 introduce two patches for the halves, with names xxx_half0 and xxx_half1.
+
+
+foamUpgradeCyclics
+------------------
+This is a tool which reads the polyMesh/boundary file and any vol/surface/point
+fields and converts them.
+It will check if anything needs to be converted, backup the current file to .old
+and split any cyclic patchFields into two entries.
 
 
 decomposePar
@@ -94,5 +103,8 @@ type 'processorCyclic'.
 tag. This maps straight through into the MPI message tag.
 
 
+- when constructing a GeometricField from a dictionary it will explicitly
+check for non-existing entries for cyclic patches and exit with an error message
+warning to run foamUpgradeCyclics.
 
 
