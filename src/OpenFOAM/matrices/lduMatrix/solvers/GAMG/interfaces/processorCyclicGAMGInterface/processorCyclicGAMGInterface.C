@@ -70,46 +70,4 @@ Foam::processorCyclicGAMGInterface::~processorCyclicGAMGInterface()
 {}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-// void Foam::processorCyclicGAMGInterface::initTransfer
-// (
-//     const Pstream::commsTypes commsType,
-//     const unallocLabelList& interfaceData
-// ) const
-// {
-//     send(commsType, interfaceData);
-// }
-// 
-// 
-// Foam::tmp<Foam::labelField> Foam::processorCyclicGAMGInterface::transfer
-// (
-//     const Pstream::commsTypes commsType,
-//     const unallocLabelList& interfaceData
-// ) const
-// {
-//     return receive<label>(commsType, this->size());
-// }
-//
-//
-//void Foam::processorCyclicGAMGInterface::initInternalFieldTransfer
-//(
-//    const Pstream::commsTypes commsType,
-//    const unallocLabelList& iF
-//) const
-//{
-//    send(commsType, interfaceInternalField(iF)());
-//}
-//
-//
-//Foam::tmp<Foam::labelField> Foam::processorCyclicGAMGInterface::internalFieldTransfer
-//(
-//    const Pstream::commsTypes commsType,
-//    const unallocLabelList& iF
-//) const
-//{
-//    return receive<label>(commsType, this->size());
-//}
-
-
 // ************************************************************************* //

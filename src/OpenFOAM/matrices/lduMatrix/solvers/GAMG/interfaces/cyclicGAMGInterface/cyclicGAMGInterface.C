@@ -245,30 +245,6 @@ Foam::cyclicGAMGInterface::~cyclicGAMGInterface()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//Foam::tmp<Foam::labelField> Foam::cyclicGAMGInterface::transfer
-//(
-//    const Pstream::commsTypes,
-//    const unallocLabelList& interfaceData
-//) const
-//{
-//    notImplemented("cyclicGAMGInterface::transfer(..)");
-//
-////XXXXX to be done
-//    tmp<labelField> tpnf(new labelField(size()));
-//    labelField& pnf = tpnf();
-//
-//    label sizeby2 = size()/2;
-//
-//    for (label facei=0; facei<sizeby2; facei++)
-//    {
-//        pnf[facei] = interfaceData[facei + sizeby2];
-//        pnf[facei + sizeby2] = interfaceData[facei];
-//    }
-//
-//    return tpnf;
-//}
-
-
 Foam::tmp<Foam::labelField> Foam::cyclicGAMGInterface::internalFieldTransfer
 (
     const Pstream::commsTypes,

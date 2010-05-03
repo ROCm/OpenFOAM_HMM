@@ -65,7 +65,6 @@ class processorPointPatch
 
         mutable labelList reverseMeshPoints_;
 
-//        mutable labelList separatedPoints_;
 
     // Private Member Functions
 
@@ -173,9 +172,6 @@ public:
 
         //- Return mesh points in the correct order for the receiving side
         const labelList& reverseMeshPoints() const;
-
-//        //- List of separated coupled points
-//        virtual const labelList& separatedPoints() const;
 
 };
 

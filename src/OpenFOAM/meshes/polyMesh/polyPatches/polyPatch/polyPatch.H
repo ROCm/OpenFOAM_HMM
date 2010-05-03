@@ -87,12 +87,6 @@ class polyPatch
             mutable labelList* mePtr_;
 
 
-    // Private Member Functions
-
-//        //- Calculate labels of mesh edges
-//        void calcMeshEdges() const;
-
-
 protected:
 
     // Protected Member Functions

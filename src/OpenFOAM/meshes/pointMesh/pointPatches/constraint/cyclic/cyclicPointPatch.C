@@ -105,12 +105,6 @@ const edgeList& cyclicPointPatch::transformPairs() const
 }
 
 
-//const labelList& cyclicPointPatch::separatedPoints() const
-//{
-//    return separatedPoints_;
-//}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

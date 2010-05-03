@@ -160,8 +160,6 @@ public:
             //  neighbour patch.
             virtual const edgeList& transformPairs() const;
 
-//            //- List of separated coupled points
-//            virtual const labelList& separatedPoints() const;
 };
 
 

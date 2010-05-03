@@ -76,5 +76,5 @@ Tested on movingCone-with-cyclics
 - isoSurface.C
 - referredCellList.C
 - work out scheduled communication?
-
+- LUscalarMatrix::convert still expects interfaces to be cyclic
 

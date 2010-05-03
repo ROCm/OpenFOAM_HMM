@@ -96,13 +96,6 @@ public:
 
         // Interface transfer functions
 
-//            //- Transfer and return neighbour field
-//            virtual tmp<labelField> transfer
-//            (
-//                const Pstream::commsTypes commsType,
-//                const unallocLabelList& interfaceData
-//            ) const;
-
             //- Transfer and return internal field adjacent to the interface
             virtual tmp<labelField> internalFieldTransfer
             (
@@ -112,12 +105,6 @@ public:
 
 
         //- Cyclic interface functions
-
-//            //- Return my index
-//            virtual label patchID() const
-//            {
-//                return fineCyclicInterface_.patchID();
-//            }
 
             //- Return neigbour processor number
             virtual label neighbPatchID() const

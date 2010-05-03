@@ -108,10 +108,6 @@ cyclicFvPatchField<Type>::cyclicFvPatchField
             << exit(FatalIOError);
     }
 
-//    Pout<< "Construct from dictionary for " << p.name() << endl
-//        << "Underlying cyclic:" << cyclicPatch_.name()
-//        << " with parallel:" << cyclicPatch_.parallel() << endl;
-
     this->evaluate(Pstream::blocking);
 }
 

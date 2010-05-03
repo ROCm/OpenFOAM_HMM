@@ -85,19 +85,6 @@ protected:
         //- Initialise the calculation of the patch geometry
         void initGeometry(PstreamBuffers&);
 
-//        //- Initialise the calculation of the patch geometry with externally
-//        //  provided geometry
-//        virtual void initGeometry
-//        (
-//            const primitivePatch& referPatch,
-//            UList<point>&,
-//            UList<point>&,
-//            UList<point>&
-//        )
-//        {
-//            notImplemented("processorPolyPatch::initGeometry(..)");
-//        }
-
         //- Calculate the patch geometry
         void calcGeometry(PstreamBuffers&);
 
@@ -296,62 +283,9 @@ public:
             return Pstream::msgType();
         }
 
-//        //- Transform a patch-based field from other side to this side.
-//        virtual bool doTransform() const
-//        {
-//            return false;
-//        }
-//        virtual void transform(scalarField& l) const
-//        {}
-//        virtual void transform(vectorField& l) const
-//        {}
-//        virtual void transform(sphericalTensorField& l) const
-//        {}
-//        virtual void transform(diagTensorField& l) const
-//        {}
-//        virtual void transform(symmTensorField& l) const
-//        {}
-//        virtual void transform(tensorField& l) const
-//        {}
-
         //- Transform a patch-based position from other side to this side
         virtual void transformPosition(pointField& l) const
         {}
-
-//        //- Are the planes separated.
-//        virtual bool separated() const
-//        {
-//            //notImplemented("processorPolyPatch::separated(..)");
-//            return false;
-//        }
-//
-//        //- If the planes are separated the separation vector.
-//        virtual const vector& separation() const
-//        {
-//            //notImplemented("processorPolyPatch::separation(..)");
-//            return vector::zero;
-//        }
-//
-//        //- Are the cyclic planes parallel.
-//        virtual bool parallel() const
-//        {
-//            //notImplemented("processorPolyPatch::parallel()");
-//            return true;
-//        }
-//
-//        //- Return face transformation tensor.
-//        virtual const tensor& forwardT() const
-//        {
-//            notImplemented("processorPolyPatch::forwardT(..)");
-//            return tensor::zero;
-//        }
-//
-//        //- Return neighbour-cell transformation tensor.
-//        virtual const tensor& reverseT() const
-//        {
-//            notImplemented("processorPolyPatch::reverseT(..)");
-//            return tensor::zero;
-//        }
 
         //- Initialize ordering for primitivePatch. Does not
         //  refer to *this (except for name() and type() etc.)

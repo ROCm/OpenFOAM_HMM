@@ -839,6 +839,10 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
         // Use the edgeMap to get the edges on the B side.
 
         const cyclicPolyPatch& neighbPatch = this->neighbPatch();
+        const labelList& nbrMp = neighbPatch.meshPoints();
+        const labelList& mp = meshPoints();
+
+
 
         coupledEdgesPtr_ = new edgeList(edgeMap.size());
         edgeList& coupledEdges = *coupledEdgesPtr_;
@@ -860,9 +864,14 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
                 if (iter != edgeMap.end())
                 {
                     label edgeA = iter();
+                    const edge& eA = edges()[edgeA];
 
                     // Store correspondence. Filter out edges on wedge axis.
-                    if (edgeA != edgeI)
+                    if
+                    (
+                        edge(mp[eA[0]], mp[eA[1]])
+                     != edge(nbrMp[e[0]], nbrMp[e[1]])
+                    )
                     {
                         coupledEdges[coupleI++] = edge(edgeA, edgeI);
                     }
@@ -881,7 +890,7 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
         {
             const edge& e = coupledEdges[i];
 
-            if (e[0] == e[1] || e[0] < 0 || e[1] < 0)
+            if (e[0] < 0 || e[1] < 0)
             {
                 FatalErrorIn("cyclicPolyPatch::coupledEdges() const")
                     << "Problem : at position " << i

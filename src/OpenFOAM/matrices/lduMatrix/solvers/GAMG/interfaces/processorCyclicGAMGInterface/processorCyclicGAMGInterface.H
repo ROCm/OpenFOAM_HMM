@@ -52,13 +52,6 @@ class processorCyclicGAMGInterface
 :
     public processorGAMGInterface
 {
-    // Private data
-
-//        //- Reference tor the processorLduInterface from which this is
-//        //  agglomerated
-//        const processorLduInterface& fineProcInterface_;
-
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -91,65 +84,6 @@ public:
 
         virtual ~processorCyclicGAMGInterface();
 
-
-    // Member Functions
-
-        // Interface transfer functions
-
-//             //- Initialise interface data transfer
-//             virtual void initTransfer
-//             (
-//                 const Pstream::commsTypes commsType,
-//                 const unallocLabelList& interfaceData
-//             ) const;
-// 
-//             //- Transfer and return neighbour field
-//             virtual tmp<labelField> transfer
-//             (
-//                 const Pstream::commsTypes commsType,
-//                 const unallocLabelList& interfaceData
-//             ) const;
-
-//            //- Initialise neighbour field transfer
-//            virtual void initInternalFieldTransfer
-//            (
-//                const Pstream::commsTypes commsType,
-//                const unallocLabelList& iF
-//            ) const;
-//
-//            //- Transfer and return internal field adjacent to the interface
-//            virtual tmp<labelField> internalFieldTransfer
-//            (
-//                const Pstream::commsTypes commsType,
-//                const unallocLabelList& iF
-//            ) const;
-//
-//
-//        //- Processor interface functions
-//
-//            //- Return processor number
-//            virtual int myProcNo() const
-//            {
-//                return fineProcInterface_.myProcNo();
-//            }
-//
-//            //- Return neigbour processor number
-//            virtual int neighbProcNo() const
-//            {
-//                return fineProcInterface_.neighbProcNo();
-//            }
-//
-//            //- Return face transformation tensor
-//            virtual const tensorField& forwardT() const
-//            {
-//                return fineProcInterface_.forwardT();
-//            }
-//
-//            //- Return message tag used for sending
-//            virtual int tag() const
-//            {
-//                return fineProcInterface_.tag();
-//            }   
 };
 
 

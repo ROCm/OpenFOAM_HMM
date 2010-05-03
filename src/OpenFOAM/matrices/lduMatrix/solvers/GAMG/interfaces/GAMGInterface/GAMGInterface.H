@@ -36,7 +36,6 @@ SourceFiles
 #ifndef GAMGInterface_H
 #define GAMGInterface_H
 
-//#include "lduInterface.H"
 #include "autoPtr.H"
 #include "lduInterfacePtrsList.H"
 

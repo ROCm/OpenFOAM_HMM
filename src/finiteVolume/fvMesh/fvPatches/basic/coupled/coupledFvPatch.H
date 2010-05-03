@@ -131,21 +131,6 @@ public:
                 const unallocLabelList& internalData
             ) const = 0;
 
-//             //- Initialise interface data transfer
-//             virtual void initTransfer
-//             (
-//                 const Pstream::commsTypes commsType,
-//                 const unallocLabelList& interfaceData
-//             ) const
-//             {}
-// 
-//             //- Transfer and return neighbour field
-//             virtual tmp<labelField> transfer
-//             (
-//                 const Pstream::commsTypes commsType,
-//                 const unallocLabelList& interfaceData
-//             ) const = 0;
-
             //- Initialise neighbour field transfer
             virtual void initInternalFieldTransfer
             (

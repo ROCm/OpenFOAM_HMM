@@ -136,30 +136,6 @@ tmp<labelField> cyclicFvPatch::interfaceInternalField
 }
 
 
-//- Would need other side data!
-// tmp<labelField> cyclicFvPatch::transfer
-// (
-//     const Pstream::commsTypes,
-//     const unallocLabelList& interfaceData
-// ) const
-// {
-//     notImplemented("cyclicFvPatch::transfer(..)");
-// 
-//     tmp<labelField> tpnf(new labelField(this->size()));
-//     labelField& pnf = tpnf();
-// 
-//     label sizeby2 = this->size()/2;
-// 
-//     for (label facei=0; facei<sizeby2; facei++)
-//     {
-//         pnf[facei] = interfaceData[facei + sizeby2];
-//         pnf[facei + sizeby2] = interfaceData[facei];
-//     }
-// 
-//     return tpnf;
-// }
-
-
 tmp<labelField> cyclicFvPatch::internalFieldTransfer
 (
     const Pstream::commsTypes commsType,

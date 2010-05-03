@@ -43,7 +43,6 @@ processorCyclicFvPatchField<Type>::processorCyclicFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    //coupledFvPatchField<Type>(p, iF),
     processorFvPatchField<Type>(p, iF),
     procPatch_(refCast<const processorCyclicFvPatch>(p))
 {}

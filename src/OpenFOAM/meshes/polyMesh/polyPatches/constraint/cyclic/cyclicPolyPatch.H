@@ -48,7 +48,6 @@ SourceFiles
 
 #include "coupledPolyPatch.H"
 #include "edgeList.H"
-//#include "transform.H"
 #include "polyBoundaryMesh.H"
 #include "diagTensorField.H"
 
@@ -353,80 +352,11 @@ public:
         //  calculation!
         const edgeList& coupledEdges() const;
 
-//        //- Transform a patch-based field from other side to this side.
-//        template<class T>
-//        void transform(Field<T>& l) const
-//        {
-//            if (!parallel())
-//            {
-//                transform(forwardT_, l);
-//            }
-//        }
-//
-//
-//        virtual bool doTransform() const
-//        {
-//            return !parallel();
-//        }
-//        virtual void transform(scalarField& l) const
-//        {
-//            transform(l);
-//        }
-//        virtual void transform(vectorField& l) const
-//        {
-//            transform(l);
-//        }
-//        virtual void transform(sphericalTensorField& l) const
-//        {
-//            transform(l);
-//        }
-//        virtual void transform(diagTensorField& l) const
-//        {
-//            transform(l);
-//        }
-//        virtual void transform(symmTensorField& l) const
-//        {
-//            transform(l);
-//        }
-//        virtual void transform(tensorField& l) const
-//        {
-//            transform(l);
-//        }
-
         //- Transform a patch-based position from other side to this side
         virtual void transformPosition(pointField& l) const;
 
 
         // Transformation
-
-//        //- Are the coupled planes separated
-//        virtual bool separated() const
-//        {
-//            return separated_;
-//        }
-//
-//        virtual const vector& separation() const
-//        {
-//            return separation_;
-//        }
-//
-//        //- Are the cyclic planes parallel
-//        virtual bool parallel() const
-//        {
-//            return parallel_;
-//        }
-//
-//        //- Return face transformation tensor
-//        virtual const tensor& forwardT() const
-//        {
-//            return forwardT_;
-//        }
-//
-//        //- Return neighbour-cell transformation tensor
-//        virtual const tensor& reverseT() const
-//        {
-//            return reverseT_;
-//        }
 
         label transformGlobalFace(const label facei) const
         {
