@@ -131,8 +131,6 @@ void Foam::LUscalarMatrix::convert
     const lduInterfaceFieldPtrsList& interfaces
 )
 {
-//Pout<< "LUscalarMatrix::convert **" << endl;
-//
     const label* __restrict__ uPtr = ldum.lduAddr().upperAddr().begin();
     const label* __restrict__ lPtr = ldum.lduAddr().lowerAddr().begin();
 
