@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,6 +41,14 @@ inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
     minParticleMass_
     (
         dimensionedScalar(dict_.lookup("minParticleMass")).value()
+    ),
+    youngsModulus_
+    (
+        dimensionedScalar(dict_.lookup("youngsModulus")).value()
+    ),
+    poissonsRatio_
+    (
+        dimensionedScalar(dict_.lookup("poissonsRatio")).value()
     )
 {}
 
@@ -53,7 +61,8 @@ inline Foam::KinematicParcel<ParcelType>::trackData::trackData
     const interpolation<scalar>& rhoInterp,
     const interpolation<vector>& UInterp,
     const interpolation<scalar>& muInterp,
-    const vector& g
+    const vector& g,
+    trackPart part
 )
 :
     Particle<ParcelType>::trackData(cloud),
@@ -62,7 +71,8 @@ inline Foam::KinematicParcel<ParcelType>::trackData::trackData
     rhoInterp_(rhoInterp),
     UInterp_(UInterp),
     muInterp_(muInterp),
-    g_(g)
+    g_(g),
+    part_(part)
 {}
 
 
@@ -80,9 +90,13 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     nParticle_(0),
     d_(0.0),
     U_(vector::zero),
+    f_(vector::zero),
+    angularMomentum_(vector::zero),
+    torque_(vector::zero),
     rho_(0.0),
     tTurb_(0.0),
     UTurb_(vector::zero),
+    collisionRecords_(),
     rhoc_(0.0),
     Uc_(vector::zero),
     muc_(0.0)
@@ -99,6 +113,9 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     const scalar nParticle0,
     const scalar d0,
     const vector& U0,
+    const vector& f0,
+    const vector& angularMomentum0,
+    const vector& torque0,
     const constantProperties& constProps
 )
 :
@@ -108,9 +125,13 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     nParticle_(nParticle0),
     d_(d0),
     U_(U0),
+    f_(f0),
+    angularMomentum_(angularMomentum0),
+    torque_(torque0),
     rho_(constProps.rho0()),
     tTurb_(0.0),
     UTurb_(vector::zero),
+    collisionRecords_(),
     rhoc_(0.0),
     Uc_(vector::zero),
     muc_(0.0)
@@ -148,6 +169,24 @@ inline Foam::scalar
 Foam::KinematicParcel<ParcelType>::constantProperties::minParticleMass() const
 {
     return minParticleMass_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar
+Foam::KinematicParcel<ParcelType>::
+constantProperties::youngsModulus() const
+{
+    return youngsModulus_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar
+Foam::KinematicParcel<ParcelType>::
+constantProperties::poissonsRatio() const
+{
+    return poissonsRatio_;
 }
 
 
@@ -201,7 +240,25 @@ Foam::KinematicParcel<ParcelType>::trackData::g() const
 }
 
 
-// * * * * * * * * * * KinematicParcel Member Functions  * * * * * * * * * * //
+template<class ParcelType>
+inline
+typename Foam::KinematicParcel<ParcelType>::trackData::trackPart
+Foam::KinematicParcel<ParcelType>::trackData::part() const
+{
+    return part_;
+}
+
+
+template<class ParcelType>
+inline
+typename Foam::KinematicParcel<ParcelType>::trackData::trackPart&
+Foam::KinematicParcel<ParcelType>::trackData::part()
+{
+    return part_;
+}
+
+
+// * * * * * * * KinematicParcel Member Functions  * * * * * * * //
 
 template <class ParcelType>
 inline bool Foam::KinematicParcel<ParcelType>::active() const
@@ -239,6 +296,30 @@ inline const Foam::vector& Foam::KinematicParcel<ParcelType>::U() const
 
 
 template <class ParcelType>
+inline const Foam::vector&
+Foam::KinematicParcel<ParcelType>::f() const
+{
+    return f_;
+}
+
+
+template <class ParcelType>
+inline const Foam::vector&
+Foam::KinematicParcel<ParcelType>::angularMomentum() const
+{
+    return angularMomentum_;
+}
+
+
+template <class ParcelType>
+inline const Foam::vector&
+Foam::KinematicParcel<ParcelType>::torque() const
+{
+    return torque_;
+}
+
+
+template <class ParcelType>
 inline Foam::scalar Foam::KinematicParcel<ParcelType>::rho() const
 {
     return rho_;
@@ -263,6 +344,14 @@ template <class ParcelType>
 inline bool& Foam::KinematicParcel<ParcelType>::active()
 {
     return active_;
+}
+
+
+template <class ParcelType>
+inline const Foam::CollisionRecordList<Foam::vector>&
+Foam::KinematicParcel<ParcelType>::collisionRecords() const
+{
+    return collisionRecords_;
 }
 
 
@@ -295,6 +384,27 @@ inline Foam::vector& Foam::KinematicParcel<ParcelType>::U()
 
 
 template <class ParcelType>
+inline Foam::vector& Foam::KinematicParcel<ParcelType>::f()
+{
+    return f_;
+}
+
+
+template <class ParcelType>
+inline Foam::vector& Foam::KinematicParcel<ParcelType>::angularMomentum()
+{
+    return angularMomentum_;
+}
+
+
+template <class ParcelType>
+inline Foam::vector& Foam::KinematicParcel<ParcelType>::torque()
+{
+    return torque_;
+}
+
+
+template <class ParcelType>
 inline Foam::scalar& Foam::KinematicParcel<ParcelType>::rho()
 {
     return rho_;
@@ -316,12 +426,27 @@ inline Foam::vector& Foam::KinematicParcel<ParcelType>::UTurb()
 
 
 template <class ParcelType>
+inline Foam::CollisionRecordList<Foam::vector>&
+Foam::KinematicParcel<ParcelType>::collisionRecords()
+{
+    return collisionRecords_;
+}
+
+
+template <class ParcelType>
 inline Foam::scalar Foam::KinematicParcel<ParcelType>::wallImpactDistance
 (
     const vector&
 ) const
 {
-    return 0.5*d_;
+    // Do not use a wall impact distance to allow proper multiple face
+    // collisions.  In a twisted mesh the particle can be within range
+    // of a wall but not in the cell attached to a wall face, hence
+    // miss the interaction.
+
+    return 0.0;
+
+    // return 0.5*d_;
 }
 
 
@@ -354,6 +479,22 @@ template <class ParcelType>
 inline Foam::scalar Foam::KinematicParcel<ParcelType>::mass() const
 {
     return rho_*volume();
+}
+
+
+template <class ParcelType>
+inline Foam::scalar
+Foam::KinematicParcel<ParcelType>::momentOfInertia() const
+{
+    return 0.1*mass()*sqr(d_);
+}
+
+
+template <class ParcelType>
+inline Foam::vector
+Foam::KinematicParcel<ParcelType>::omega() const
+{
+    return angularMomentum_/momentOfInertia();
 }
 
 

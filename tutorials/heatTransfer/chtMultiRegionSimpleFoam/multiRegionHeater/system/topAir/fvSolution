@@ -38,50 +38,13 @@ solvers
         mergeLevels      1;
     }
 
-    pFinal
-    {
-        $p;
-        tolerance        1e-8;
-        relTol           0;
-    }
-
-    U
+    "(U|h|k|epsilon)"
     {
         solver           PBiCG;
         preconditioner   DILU;
         tolerance        1e-08;
-        relTol           0;
-    }
-
-    h
-    {
-        $U;
-        tolerance        1e-08;
         relTol           0.1;
     }
-
-    "(hFinal|k|epsilon|R)"
-    {
-        $U;
-    }
-}
-
-PISO
-{
-    momentumPredictor   off;
-    nOuterCorrectors     1;
-    nCorrectors     2;
-    nNonOrthogonalCorrectors 1;
-    pRefPoint       (-0.081 -0.0257 8.01);
-    pRefValue       1e5;
-}
-
-
-PIMPLE
-{
-    momentumPredictor   on;
-    nCorrectors         2;
-    nNonOrthogonalCorrectors 0;
 }
 
 SIMPLE
@@ -89,8 +52,6 @@ SIMPLE
     nNonOrthogonalCorrectors 0;
     pRefCell                0;
     pRefValue               100000;
-
-    //convergence             0.001;
 }
 
 relaxationFactors

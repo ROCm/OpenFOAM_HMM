@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,7 @@ SourceFiles
 #include "molecule.H"
 #include "IOdictionary.H"
 #include "potential.H"
-#include "interactionLists.H"
+#include "InteractionLists.H"
 #include "labelVector.H"
 #include "Random.H"
 #include "fileName.H"
@@ -69,7 +69,7 @@ private:
 
         List<DynamicList<molecule*> > cellOccupancy_;
 
-        interactionLists il_;
+        InteractionLists<molecule> il_;
 
         List<molecule::constantProperties> constPropList_;
 
@@ -89,26 +89,14 @@ private:
 
         inline void evaluatePair
         (
-            molecule* molI,
-            molecule* molJ
-        );
-
-        inline void evaluatePair
-        (
-            molecule* molReal,
-            referredMolecule* molRef
+            molecule& molI,
+            molecule& molJ
         );
 
         inline bool evaluatePotentialLimit
         (
-            molecule* molI,
-            molecule* molJ
-        ) const;
-
-        inline bool evaluatePotentialLimit
-        (
-            molecule* molReal,
-            referredMolecule* molRef
+            molecule& molI,
+            molecule& molJ
         ) const;
 
         void calculateTetherForce();
@@ -197,7 +185,7 @@ public:
 
             inline const List<DynamicList<molecule*> >& cellOccupancy() const;
 
-            inline const interactionLists& il() const;
+            inline const InteractionLists<molecule>& il() const;
 
             inline const List<molecule::constantProperties> constProps() const;
 

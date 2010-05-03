@@ -40,6 +40,8 @@ SurfaceReactionModel none;
 
 SurfaceFilmModel none;
 
+CollisionModel none;
+
 radiation       off;
 
 coupled         true;
@@ -54,6 +56,8 @@ constantProperties
     TMin            TMin [ 0 0 0 1 0 ] 200;
     pMin            pMin [ 1 -1 2 0 0 ] 1000;
     rho0            rho0 [ 1 -3 0 0 0 ] 1000;
+    youngsModulus   youngsModulus [1 -1 -2 0 0] 1e9;
+    poissonsRatio   poissonsRatio [ 0 0 0 0 0 ] 0.35;
     minParticleMass minParticleMass [ 1 0 0 0 0 ] 1e-15;
     T0              T0 [ 0 0 0 1 0 ] 300;
     cp0             cp0 [ 0 2 -2 -1 0 ] 4100;
@@ -85,9 +89,10 @@ integrationSchemes
 
 particleForces
 {
-    gravity         on;
-    virtualMass     off;
-    pressureGradient off;
+    gravity             on;
+    virtualMass         off;
+    pressureGradient    off;
+    paramagnetic        off;
 }
 
 ManualInjectionCoeffs

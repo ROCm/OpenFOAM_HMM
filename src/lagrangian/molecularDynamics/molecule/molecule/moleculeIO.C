@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,12 +60,12 @@ Foam::molecule::molecule
             is  >> pi_;
             is  >> tau_;
             is  >> siteForces_;
-            is  >> sitePositions_;
-            is  >> specialPosition_;
             potentialEnergy_ = readScalar(is);
             is  >> rf_;
             special_ = readLabel(is);
             id_ = readLabel(is);
+            is  >> sitePositions_;
+            is  >> specialPosition_;
         }
         else
         {
@@ -242,11 +242,17 @@ void Foam::molecule::writeFields(const Cloud<molecule>& mC)
     orientation2.write();
     orientation3.write();
 
-    const moleculeCloud& m = dynamic_cast<const moleculeCloud&>(mC);
-    m.writeXYZ
-    (
-        m.mesh().time().timePath() + "/lagrangian" + "/moleculeCloud.xmol"
-    );
+    Info<< "writeFields " << mC.name() << endl;
+
+    if (isA<moleculeCloud>(mC))
+    {
+        const moleculeCloud& m = dynamic_cast<const moleculeCloud&>(mC);
+
+        m.writeXYZ
+        (
+            m.mesh().time().timePath()/cloud::prefix/"moleculeCloud.xmol"
+        );
+    }
 }
 
 
