@@ -40,16 +40,14 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.clear();
+    argList::validArgs.append("surfaceFile");
     argList::addOption("x", "X", "The point x-coordinate (if non-zero)");
     argList::addOption("y", "Y", "The point y-coordinate (if non-zero)");
     argList::addOption("z", "Z", "The point y-coordinate (if non-zero)");
 
-    argList::validArgs.append("surfaceFile");
-
     argList args(argc, argv);
 
-    point samplePt
+    const point samplePt
     (
         args.optionLookupOrDefault<scalar>("x", 0),
         args.optionLookupOrDefault<scalar>("y", 0),

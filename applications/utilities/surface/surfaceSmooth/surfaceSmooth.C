@@ -42,7 +42,6 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validOptions.clear();
-    argList::validArgs.clear();
     argList::validArgs.append("surfaceFile");
     argList::validArgs.append("underrelax factor (0..1)");
     argList::validArgs.append("iterations");

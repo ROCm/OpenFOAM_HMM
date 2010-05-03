@@ -51,7 +51,6 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::validArgs.clear();
     argList::validArgs.append("surfaceFile");
     argList::validArgs.append("surfaceFile");
     argList::validArgs.append("output surfaceFile");

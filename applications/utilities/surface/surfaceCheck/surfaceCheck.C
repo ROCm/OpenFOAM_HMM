@@ -173,10 +173,7 @@ labelList countBins
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-
-    argList::validArgs.clear();
     argList::validArgs.append("surfaceFile");
-
     argList::addBoolOption
     (
         "checkSelfIntersection",

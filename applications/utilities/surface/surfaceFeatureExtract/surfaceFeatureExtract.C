@@ -95,8 +95,6 @@ int main(int argc, char *argv[])
         "extract and write surface features to file"
     );
     argList::noParallel();
-
-    argList::validArgs.clear();
     argList::validArgs.append("surface");
     argList::validArgs.append("output set");
 

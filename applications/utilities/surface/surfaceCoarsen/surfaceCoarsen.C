@@ -64,7 +64,6 @@ int mapVertex(::List<int>& collapse_map, int a, int mx)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.clear();
     argList::validArgs.append("surfaceFile");
     argList::validArgs.append("reductionFactor");
     argList::validArgs.append("output surfaceFile");

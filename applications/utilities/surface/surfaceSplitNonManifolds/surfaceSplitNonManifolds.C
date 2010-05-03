@@ -671,8 +671,6 @@ int main(int argc, char *argv[])
         "split multiply connected surface edges by duplicating points"
     );
     argList::noParallel();
-    argList::validArgs.clear();
-
     argList::validArgs.append("surfaceFile");
     argList::validArgs.append("output surfaceFile");
     argList::addBoolOption

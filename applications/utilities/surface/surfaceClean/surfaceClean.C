@@ -46,7 +46,6 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.clear();
     argList::noParallel();
     argList::validArgs.append("surfaceFile");
     argList::validArgs.append("min length");

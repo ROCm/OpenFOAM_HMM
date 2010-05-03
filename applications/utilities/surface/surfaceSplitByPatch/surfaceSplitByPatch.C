@@ -42,8 +42,7 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::validArgs.clear();
-    argList::validArgs.append("input file");
+    argList::validArgs.append("input surfaceFile");
     argList args(argc, argv);
 
     const fileName surfName = args[1];

@@ -232,7 +232,6 @@ int main(int argc, char *argv[])
         "map volume fields from one mesh to another"
     );
     argList::noParallel();
-    argList::validArgs.clear();
     argList::validArgs.append("sourceCase");
 
     argList::addOption

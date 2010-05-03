@@ -60,7 +60,6 @@ int main(int argc, char *argv[])
         "Like transformPoints but for surfaces."
     );
     argList::noParallel();
-    argList::validArgs.clear();
     argList::validArgs.append("surfaceFile");
     argList::validArgs.append("output surfaceFile");
     argList::addOption

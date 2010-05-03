@@ -43,7 +43,6 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.clear();
     argList args(argc, argv);
 
     FixedList<label, 4> list;
