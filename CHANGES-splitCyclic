@@ -3,16 +3,19 @@ Short overview of the changes to have cyclics split into two halves.
 Cyclics
 -------
 The two cyclic halves are now split like processor patches. There should be no
-difference in running. Just some of the reasons for switching over from the
-old 2-halves in one patch:
-- face ordering after topological changes becomes much easier since we
-now preserve what half the face comes from.
-- cyclic handling becomes more consistent with processor handling and can
-quite often be handled in the same condition.
+difference in running.
+
+Advantages:
 - decomposed cyclics can now be handled properly. It just needs to preserve
 the cyclic patch it originates from.
 - We can now construct a table of global transformations and handle
 points/edges/cells with transformations.
+- face ordering after topological changes becomes much easier since we
+now preserve what half the face comes from.
+- cyclic handling becomes more consistent with processor handling and can
+quite often be handled in the same condition.
+- transformation tensors now become single entry.
+
 The disadvantages:
 - a patch-wise loop now might need to store data to go to the neighbour half
 since it is no longer handled in a single patch.
