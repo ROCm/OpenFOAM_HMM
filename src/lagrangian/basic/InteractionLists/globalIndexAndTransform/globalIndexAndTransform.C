@@ -269,9 +269,9 @@ void Foam::globalIndexAndTransform::determineTransformPermutations()
         // Invert the ternary index encoding using repeated division by
         // three
 
-        for (label b = 0; b < transforms_.size(); b++)
+        forAll(transforms_, b)
         {
-            label w = (transformIndex % 3) - 1;
+            const label w = (transformIndex % 3) - 1;
 
             transformIndex /= 3;
 
