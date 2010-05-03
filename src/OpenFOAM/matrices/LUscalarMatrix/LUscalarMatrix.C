@@ -27,6 +27,7 @@ License
 #include "lduMatrix.H"
 #include "procLduMatrix.H"
 #include "procLduInterface.H"
+#include "cyclicLduInterface.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -130,6 +131,8 @@ void Foam::LUscalarMatrix::convert
     const lduInterfaceFieldPtrsList& interfaces
 )
 {
+//Pout<< "LUscalarMatrix::convert **" << endl;
+//
     const label* __restrict__ uPtr = ldum.lduAddr().upperAddr().begin();
     const label* __restrict__ lPtr = ldum.lduAddr().lowerAddr().begin();
 
@@ -160,19 +163,27 @@ void Foam::LUscalarMatrix::convert
         {
             const lduInterface& interface = interfaces[inti].interface();
 
-            const label* __restrict__ ulPtr = interface.faceCells().begin();
-            const scalar* __restrict__ upperLowerPtr =
-                interfaceCoeffs[inti].begin();
+            // Assume any interfaces are cyclic ones
 
-            register label inFaces = interface.faceCells().size()/2;
+            const label* __restrict__ lPtr = interface.faceCells().begin();
+
+            const cyclicLduInterface& cycInterface =
+                refCast<const cyclicLduInterface>(interface);
+            label nbrInt = cycInterface.neighbPatchID();
+            const label* __restrict__ uPtr =
+                interfaces[nbrInt].interface().faceCells().begin();
+
+            const scalar* __restrict__ nbrUpperLowerPtr =
+                interfaceCoeffs[nbrInt].begin();
+
+            register label inFaces = interface.faceCells().size();
 
             for (register label face=0; face<inFaces; face++)
             {
-                label uCell = ulPtr[face];
-                label lCell = ulPtr[face + inFaces];
+                label uCell = lPtr[face];
+                label lCell = uPtr[face];
 
-                operator[](uCell)[lCell] -= upperLowerPtr[face + inFaces];
-                operator[](lCell)[uCell] -= upperLowerPtr[face];
+                operator[](uCell)[lCell] -= nbrUpperLowerPtr[face];
             }
         }
     }
