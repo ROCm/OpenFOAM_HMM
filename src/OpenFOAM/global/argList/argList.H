@@ -37,7 +37,7 @@ Description
     @verbatim
         ( "file1.txt" "file2.txt" ... "fileN.txt" )
     @endverbatim
-    The backslash-escaping has been used to avoid shell expansions.
+    The backslash-escaping is required to avoid interpretation by the shell.
 
     @par Default command-line options
     @param -case \<dir\> \n
@@ -57,10 +57,14 @@ Description
     global case.
 
 Note
-    - Adjustment of the valid (mandatory) arguments
+    - The document browser used is defined by the @b FOAM_DOC_BROWSER
+      environment variable or the <tt>Documentation/docBrowser</tt> entry
+      in the <tt>~OpenFOAM/controlDict</tt> file. 
+      The \%f token is used as a placeholder for the file name.
+    - The valid (mandatory) arguments can be adjusted
       by directly manipulating the argList::validArgs static member.
-    - Adjustment of the valid options
-      via the addOption/removeOption static methods or by directly
+    - The valid options can be adjusted
+      via the addOption/removeOption static methods instead of directly
       manipulating the argList::validOptions static member.
 
 SourceFiles

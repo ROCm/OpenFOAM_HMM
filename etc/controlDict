@@ -18,7 +18,7 @@ FoamFile
 
 Documentation
 {
-    docBrowser      "kde-open %f";
+    docBrowser      "firefox %f";
     doxyDocDirs
     (
         "$WM_PROJECT_USER_DIR/html"
