@@ -67,14 +67,16 @@ It doesn't do renumbering through cyclics.
 OK - rotational cyclics.
 Tested on movingCone-with-cyclics
 
+OK - LUscalarMatrix::convert still expects interfaces to be cyclic
+tested on channel395 with 'directSolveCoarsest true;' 
+
+OK - grep for size()/2
 
 - activeBaffleVelocity
 - work out overlapping communication for PstreamBuffers.
   Different tag?
 - kivaToFoam/readKivaGrid.H sorts cyclics (but in incorrect order?)
-- grep for size()/2
 - isoSurface.C
 - referredCellList.C
 - work out scheduled communication?
-- LUscalarMatrix::convert still expects interfaces to be cyclic
 
