@@ -17,7 +17,7 @@ The disadvantages:
 - a patch-wise loop now might need to store data to go to the neighbour half
 since it is no longer handled in a single patch.
 - decomposed cyclics now require overlapping communications so will
-only work in non-blocking mode. Also the underlying message passing library
+only work in non-blocking mode. Hence the underlying message passing library
 will require overlapping communications with message tags.
 - it is quite a code-change and there might be some oversights.
 
