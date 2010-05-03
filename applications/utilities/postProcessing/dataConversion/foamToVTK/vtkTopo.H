@@ -93,11 +93,14 @@ public:
             VTK_POLYHEDRON = 42
         };
 
+    //- Enable/disable polyhedron decomposition. Default = true
+    static bool decomposePoly;
+
+
     // Constructors
 
         //- Construct from components
-        vtkTopo(const polyMesh& mesh);
-
+        vtkTopo(const polyMesh&);
 
     // Member Functions
 

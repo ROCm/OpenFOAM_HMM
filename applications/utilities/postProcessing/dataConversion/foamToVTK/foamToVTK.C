@@ -262,6 +262,14 @@ int main(int argc, char *argv[])
         "ascii",
         "write in ASCII format instead of binary"
     );
+/*
+    argList::addBoolOption
+    (
+        "noDecompose",
+        "do not decompose polyhedral cells into tets/prism cells"
+        "- NOT YET IMPLEMENTED"
+    );
+ */
     argList::addBoolOption
     (
         "surfaceFields",
@@ -317,6 +325,10 @@ int main(int argc, char *argv[])
     const bool doLinks         = !args.optionFound("noLinks");
     const bool binary          = !args.optionFound("ascii");
     const bool useTimeName     = args.optionFound("useTimeName");
+
+    // decomposition of polyhedral cells into tets/prism cells
+    // vtkTopo::decomposePoly     = !args.optionFound("noDecompose");
+
 
     if (binary && (sizeof(floatScalar) != 4 || sizeof(label) != 4))
     {
