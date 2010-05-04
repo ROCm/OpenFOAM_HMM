@@ -76,12 +76,12 @@ OK - grep for size()/2
     OK - DNS/dnsFoam/boxTurb16
     OK - channelFoam/channel395
     slight differences due to divergence. combustion/XiFoam/les/pitzDaily3D
-    combustion/fireFoam/les/smallPoolFire2D
+    OK - no cyclics. combustion/fireFoam/les/smallPoolFire2D
     discreteMethods/dsmcFoam/freeSpacePeriodic
     discreteMethods/dsmcFoam/wedge15Ma5
     discreteMethods/molecularDynamics/mdEquilibrationFoam/periodicCubeArgon
-    incompressible/boundaryFoam/boundaryLaunderSharma
-    incompressible/boundaryFoam/boundaryWallFunctions
+    OK - incompressible/boundaryFoam/boundaryLaunderSharma
+    OK - incompressible/boundaryFoam/boundaryWallFunctions
     incompressible/boundaryFoam/boundaryWallFunctionsProfile
     incompressible/channelFoam/channel395
     incompressible/pimpleFoam/t-junction-with-fan
