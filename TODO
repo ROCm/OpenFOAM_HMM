@@ -73,9 +73,9 @@ tested on channel395 with 'directSolveCoarsest true;'
 OK - grep for size()/2
 
 - all tutorials with cyclics:
-    OK- DNS/dnsFoam/boxTurb16
-    channelOodles/channel395
-    combustion/XiFoam/les/pitzDaily3D
+    OK - DNS/dnsFoam/boxTurb16
+    OK - channelFoam/channel395
+    slight differences due to divergence. combustion/XiFoam/les/pitzDaily3D
     combustion/fireFoam/les/smallPoolFire2D
     discreteMethods/dsmcFoam/freeSpacePeriodic
     discreteMethods/dsmcFoam/wedge15Ma5
