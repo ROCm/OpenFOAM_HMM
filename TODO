@@ -88,8 +88,9 @@ OK - grep for size()/2
     incompressible/simpleSRFFoam/mixer
     lagrangian/porousExplicitSourceReactingParcelFoam/filter
     lagrangian/reactingParcelFilmFoam/multipleBoxes
-    
 
+
+- have foamUpgradeCyclics split 'value' field
 - createBaffles
 - activeBaffleVelocity
 - kivaToFoam/readKivaGrid.H sorts cyclics (but in incorrect order?)
