@@ -73,8 +73,8 @@ tested on channel395 with 'directSolveCoarsest true;'
 OK - grep for size()/2
 
 - all tutorials with cyclics:
-    OK - DNS/dnsFoam/boxTurb16
-    OK - channelFoam/channel395
+    OK - incompressible/DNS/dnsFoam/boxTurb16
+    OK - incompressible/channelFoam/channel395
     slight differences due to divergence. combustion/XiFoam/les/pitzDaily3D
     OK - no cyclics. combustion/fireFoam/les/smallPoolFire2D
     discreteMethods/dsmcFoam/freeSpacePeriodic
@@ -83,9 +83,8 @@ OK - grep for size()/2
     OK - incompressible/boundaryFoam/boundaryLaunderSharma
     OK - incompressible/boundaryFoam/boundaryWallFunctions
     OK - incompressible/boundaryFoam/boundaryWallFunctionsProfile
-    incompressible/channelFoam/channel395
     incompressible/pimpleFoam/t-junction-with-fan
-    incompressible/simpleSRFFoam/mixer
+    OK - incompressible/simpleSRFFoam/mixer
     lagrangian/porousExplicitSourceReactingParcelFoam/filter
     lagrangian/reactingParcelFilmFoam/multipleBoxes
 
