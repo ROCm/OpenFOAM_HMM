@@ -308,6 +308,15 @@ void rewriteField
 
             dictionary patchDict(boundaryField.subDict(patchName));
 
+            if (patchDict.found("value"))
+            {
+                IOWarningIn("rewriteField(..)", patchDict)
+                    << "Cyclic patch " << patchName
+                    << " has value entry. Please removed this and rerun."
+                    << endl;
+            }
+
+
             boundaryField.changeKeyword(patchName, newName);
             boundaryField.add
             (
