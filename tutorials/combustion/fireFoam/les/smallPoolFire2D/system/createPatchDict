@@ -46,24 +46,16 @@ matchTolerance 1E-3;
 pointSync true;
 
 // Patches to create.
-patchInfo
+patches
 (
     {
         // Name of new patch
         name inlet;
 
         // Type of new patch
-        dictionary
+        patchInfo
         {
             type patch;
-
-            // Optional: explicitly set transformation tensor.
-            // Used when matching and synchronising points.
-            //transform translational;
-            //separationVector (-2289 0 0);
-            transform rotational;
-            rotationAxis (1 0 0);
-            rotationCentre (0 0 0);
         }
 
         // How to construct: either from 'patches' or 'set'
