@@ -72,9 +72,26 @@ tested on channel395 with 'directSolveCoarsest true;'
 
 OK - grep for size()/2
 
+- all tutorials with cyclics:
+    OK- DNS/dnsFoam/boxTurb16
+    channelOodles/channel395
+    combustion/XiFoam/les/pitzDaily3D
+    combustion/fireFoam/les/smallPoolFire2D
+    discreteMethods/dsmcFoam/freeSpacePeriodic
+    discreteMethods/dsmcFoam/wedge15Ma5
+    discreteMethods/molecularDynamics/mdEquilibrationFoam/periodicCubeArgon
+    incompressible/boundaryFoam/boundaryLaunderSharma
+    incompressible/boundaryFoam/boundaryWallFunctions
+    incompressible/boundaryFoam/boundaryWallFunctionsProfile
+    incompressible/channelFoam/channel395
+    incompressible/pimpleFoam/t-junction-with-fan
+    incompressible/simpleSRFFoam/mixer
+    lagrangian/porousExplicitSourceReactingParcelFoam/filter
+    lagrangian/reactingParcelFilmFoam/multipleBoxes
+    
+
+- createBaffles
 - activeBaffleVelocity
-- work out overlapping communication for PstreamBuffers.
-  Different tag?
 - kivaToFoam/readKivaGrid.H sorts cyclics (but in incorrect order?)
 - isoSurface.C
 - referredCellList.C
