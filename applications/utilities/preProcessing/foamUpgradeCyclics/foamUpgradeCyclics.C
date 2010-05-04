@@ -50,6 +50,7 @@ Usage
 #include "volFields.H"
 #include "pointFields.H"
 #include "surfaceFields.H"
+#include "string.H"
 
 using namespace Foam;
 
@@ -90,13 +91,7 @@ void rewriteBoundary
 
         if (word(patchDict["type"]) == cyclicPolyPatch::typeName)
         {
-            if (patchDict.found("neighbourPatch"))
-            {
-                Info<< "Patch " << patches[patchI].keyword()
-                    << " already has 'neighbourPatch' entry; assuming it"
-                    << " is already converted." << endl;
-            }
-            else
+            if (!patchDict.found("neighbourPatch"))
             {
                 Info<< "Patch " << patches[patchI].keyword()
                     << " does not have 'neighbourPatch' entry; assuming it"
@@ -130,69 +125,102 @@ void rewriteBoundary
         if
         (
             word(patchDict["type"]) == cyclicPolyPatch::typeName
-        && !patchDict.found("neighbourPatch")
         )
         {
             const word& name = oldPatches[patchI].keyword();
-            label nFaces = readLabel(patchDict["nFaces"]);
-            label startFace = readLabel(patchDict["startFace"]);
 
-            Info<< "Detected old style " << word(patchDict["type"])
-                << " patch " << name << " with" << nl
-                << "    nFaces    : " << nFaces << nl
-                << "    startFace : " << startFace << endl;
+            if (patchDict.found("neighbourPatch"))
+            {
+                patches.set(patchI, oldPatches.set(patchI, NULL));
+                oldToNew[patchI] = newPatchI++;
 
-            word thisName = name + "_half0";
-            word nbrName = name + "_half1";
+                // Check if patches come from automatic conversion
+                word oldName;
 
-            thisNames.insert(name, thisName);
-            nbrNames.insert(name, nbrName);
+                string::size_type i = name.rfind("_half0");
+                if (i != string::npos)
+                {
+                    oldName = name.substr(0, i);
+                    thisNames.insert(oldName, name);
+                    Info<< "Detected converted cyclic patch " << name
+                        << " ; assuming it originates from " << oldName
+                        << endl;
+                }
+                else
+                {
+                    i = name.rfind("_half1");
+                    if (i != string::npos)
+                    {
+                        oldName = name.substr(0, i);
+                        nbrNames.insert(oldName, name);
+                        Info<< "Detected converted cyclic patch " << name
+                            << " ; assuming it originates from " << oldName
+                            << endl;
+                    }
+                }
+            }
+            else
+            {
+                label nFaces = readLabel(patchDict["nFaces"]);
+                label startFace = readLabel(patchDict["startFace"]);
 
-            // Save current dictionary
-            const dictionary patchDict(patches[patchI].dict());
+                Info<< "Detected old style " << word(patchDict["type"])
+                    << " patch " << name << " with" << nl
+                    << "    nFaces    : " << nFaces << nl
+                    << "    startFace : " << startFace << endl;
 
-            // Change entry on this side
-            patches.set(patchI, oldPatches.set(patchI, NULL));
-            oldToNew[patchI] = newPatchI++;
-            dictionary& thisPatchDict = patches[patchI].dict();
-            thisPatchDict.add("neighbourPatch", nbrName);
-            thisPatchDict.set("nFaces", nFaces/2);
-            patches[patchI].keyword() = thisName;
+                word thisName = name + "_half0";
+                word nbrName = name + "_half1";
 
-            // Add entry on other side
-            patches.set
-            (
-                addedPatchI,
-                new dictionaryEntry
+                thisNames.insert(name, thisName);
+                nbrNames.insert(name, nbrName);
+
+                // Save current dictionary
+                const dictionary patchDict(patches[patchI].dict());
+
+                // Change entry on this side
+                patches.set(patchI, oldPatches.set(patchI, NULL));
+                oldToNew[patchI] = newPatchI++;
+                dictionary& thisPatchDict = patches[patchI].dict();
+                thisPatchDict.add("neighbourPatch", nbrName);
+                thisPatchDict.set("nFaces", nFaces/2);
+                patches[patchI].keyword() = thisName;
+
+                // Add entry on other side
+                patches.set
                 (
-                    nbrName,
-                    dictionary::null,
-                    patchDict
-                )
-            );      
-            oldToNew[addedPatchI] = newPatchI++;
-            dictionary& nbrPatchDict = patches[addedPatchI].dict();
-            nbrPatchDict.set("neighbourPatch", thisName);
-            nbrPatchDict.set("nFaces", nFaces/2);
-            nbrPatchDict.set("startFace", startFace+nFaces/2);
-            patches[addedPatchI].keyword() = nbrName;
+                    addedPatchI,
+                    new dictionaryEntry
+                    (
+                        nbrName,
+                        dictionary::null,
+                        patchDict
+                    )
+                );      
+                oldToNew[addedPatchI] = newPatchI++;
+                dictionary& nbrPatchDict = patches[addedPatchI].dict();
+                nbrPatchDict.set("neighbourPatch", thisName);
+                nbrPatchDict.set("nFaces", nFaces/2);
+                nbrPatchDict.set("startFace", startFace+nFaces/2);
+                patches[addedPatchI].keyword() = nbrName;
 
-            Info<< "Replaced with patches" << nl
-                << patches[patchI].keyword() << " with" << nl
-                << "    nFaces    : "
-                << readLabel(thisPatchDict.lookup("nFaces"))
-                << nl
-                << "    startFace : "
-                << readLabel(thisPatchDict.lookup("startFace")) << nl
-                << patches[addedPatchI].keyword() << " with" << nl
-                << "    nFaces    : "
-                << readLabel(nbrPatchDict.lookup("nFaces"))
-                << nl
-                << "    startFace : "
-                << readLabel(nbrPatchDict.lookup("startFace"))
-                << nl << endl;
+                Info<< "Replaced with patches" << nl
+                    << patches[patchI].keyword() << " with" << nl
+                    << "    nFaces    : "
+                    << readLabel(thisPatchDict.lookup("nFaces"))
+                    << nl
+                    << "    startFace : "
+                    << readLabel(thisPatchDict.lookup("startFace")) << nl
+                    << patches[addedPatchI].keyword() << " with" << nl
+                    << "    nFaces    : "
+                    << readLabel(nbrPatchDict.lookup("nFaces"))
+                    << nl
+                    << "    startFace : "
+                    << readLabel(nbrPatchDict.lookup("startFace"))
+                    << nl << endl;
 
-            addedPatchI++;
+                addedPatchI++;
+            }
         }
         else
         {
@@ -265,6 +293,7 @@ void rewriteField
     dictionary& boundaryField = fieldDict.subDict("boundaryField");
 
     label nChanged = 0;
+
     forAllConstIter(HashTable<word>, thisNames, iter)
     {
         const word& patchName = iter.key();
