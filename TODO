@@ -82,7 +82,7 @@ OK - grep for size()/2
     discreteMethods/molecularDynamics/mdEquilibrationFoam/periodicCubeArgon
     OK - incompressible/boundaryFoam/boundaryLaunderSharma
     OK - incompressible/boundaryFoam/boundaryWallFunctions
-    incompressible/boundaryFoam/boundaryWallFunctionsProfile
+    OK - incompressible/boundaryFoam/boundaryWallFunctionsProfile
     incompressible/channelFoam/channel395
     incompressible/pimpleFoam/t-junction-with-fan
     incompressible/simpleSRFFoam/mixer
