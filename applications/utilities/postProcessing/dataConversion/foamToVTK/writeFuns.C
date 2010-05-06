@@ -100,14 +100,18 @@ void Foam::writeFuns::write
     {
         forAll(fField, i)
         {
-            os  << fField[i] << ' ';
+            os  << fField[i];
 
             if (i > 0 && (i % 10) == 0)
             {
                 os  << std::endl;
             }
+            else
+            {
+                os  << ' ';
+            }
         }
-        os  << std::endl;
+        os << std::endl;
     }
 }
 
@@ -149,11 +153,15 @@ void Foam::writeFuns::write
     {
         forAll(elems, i)
         {
-            os  << elems[i] << ' ';
+            os  << elems[i];
 
             if (i > 0 && (i % 10) == 0)
             {
                 os  << std::endl;
+            }
+            else
+            {
+                os  << ' ';
             }
         }
         os  << std::endl;
