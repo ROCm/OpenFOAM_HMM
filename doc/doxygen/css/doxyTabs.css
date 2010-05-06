@@ -13,10 +13,9 @@ div.navigation
 
 div.tabs
 {
-    float           : left;
     width           : 100%;
-    padding-top     : 3px;
-    padding-bottom  : 3px;
+    padding-top     : 5px;
+    padding-bottom  : 5px;
     background:     rgb(240,240,240);
     border-bottom: 1px solid rgb(175,175,175);
 }
@@ -40,7 +39,6 @@ div.tabs li, div.tabs form
 
 div.tabs ul li
 {
-/*    margin          : 10px; */
     padding-top: 10px;
     padding-bottom: 10px;
     height: 100%;
@@ -48,13 +46,11 @@ div.tabs ul li
 
 div.tabs form
 {
-    float           : left;
     padding         : 0px 9px;
 }
 
 div.tabs a
 {
-    float           : left;
     font-size       : 12px;
     font-weight     : normal;
     text-decoration : none;
@@ -78,8 +74,7 @@ div.tabs a:hover
 
 div.tabs span
 {
-    float           : left;
-    display         : block;
+    display         : inline;
     padding         : 0px 9px;
     white-space     : nowrap;
 }
@@ -143,7 +138,7 @@ div.navpath
 {
     background       : none;
     border           : none;
-    margin           : 0px;
+    margin           : 10px 0px;
     padding          : 0px;
     font-size        : 110%;
     text-align       : center;
