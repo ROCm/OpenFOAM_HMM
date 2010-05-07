@@ -26,11 +26,8 @@ License
 #include "patchWriter.H"
 #include "writeFuns.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::patchWriter::patchWriter
 (
     const vtkMesh& vMesh,
@@ -91,8 +88,7 @@ Foam::patchWriter::patchWriter
     }
     writeFuns::write(os_, binary_, ptField);
 
-    os_ << "CELLS " << nFaces_ << ' ' << nFaceVerts
-        << std::endl;
+    os_ << "CELLS " << nFaces_ << ' ' << nFaceVerts << std::endl;
 
     DynamicList<label> vertLabels(nFaceVerts);
     DynamicList<label> faceTypes(nFaceVerts);
@@ -130,7 +126,6 @@ Foam::patchWriter::patchWriter
     writeFuns::write(os_, binary_, vertLabels);
 
     os_ << "CELL_TYPES " << nFaces_ << std::endl;
-
     writeFuns::write(os_, binary_, faceTypes);
 }
 

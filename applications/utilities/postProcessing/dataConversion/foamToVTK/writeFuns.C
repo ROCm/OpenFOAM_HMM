@@ -227,62 +227,59 @@ void Foam::writeFuns::writePointDataHeader
 }
 
 
-void Foam::writeFuns::insert(const scalar pt, DynamicList<floatScalar>& dest)
+void Foam::writeFuns::insert(const scalar src, DynamicList<floatScalar>& dest)
 {
-    dest.append(float(pt));
+    dest.append(float(src));
 }
 
 
-void Foam::writeFuns::insert(const vector& pt, DynamicList<floatScalar>& dest)
+void Foam::writeFuns::insert(const vector& src, DynamicList<floatScalar>& dest)
 {
-    for (direction cmpt = 0; cmpt < vector::nComponents; cmpt++)
+    for (direction cmpt = 0; cmpt < vector::nComponents; ++cmpt)
     {
-        dest.append(float(pt[cmpt]));
+        dest.append(float(src[cmpt]));
     }
 }
 
 
 void Foam::writeFuns::insert
 (
-    const sphericalTensor& pt,
+    const sphericalTensor& src,
     DynamicList<floatScalar>& dest
 )
 {
-    for (direction cmpt = 0; cmpt < sphericalTensor::nComponents; cmpt++)
+    for (direction cmpt = 0; cmpt < sphericalTensor::nComponents; ++cmpt)
     {
-        dest.append(float(pt[cmpt]));
+        dest.append(float(src[cmpt]));
     }
 }
 
 
 void Foam::writeFuns::insert
 (
-    const symmTensor& pt,
+    const symmTensor& src,
     DynamicList<floatScalar>& dest
 )
 {
-    for (direction cmpt = 0; cmpt < symmTensor::nComponents; cmpt++)
+    for (direction cmpt = 0; cmpt < symmTensor::nComponents; ++cmpt)
     {
-        dest.append(float(pt[cmpt]));
+        dest.append(float(src[cmpt]));
     }
 }
 
 
-void Foam::writeFuns::insert(const tensor& pt, DynamicList<floatScalar>& dest)
+void Foam::writeFuns::insert(const tensor& src, DynamicList<floatScalar>& dest)
 {
-    for (direction cmpt = 0; cmpt < tensor::nComponents; cmpt++)
+    for (direction cmpt = 0; cmpt < tensor::nComponents; ++cmpt)
     {
-        dest.append(float(pt[cmpt]));
+        dest.append(float(src[cmpt]));
     }
 }
 
 
-void Foam::writeFuns::insert(const labelList& source, DynamicList<label>& dest)
+void Foam::writeFuns::insert(const labelList& src, DynamicList<label>& dest)
 {
-    forAll(source, i)
-    {
-        dest.append(source[i]);
-    }
+    dest.append(src);
 }
 
 

@@ -28,12 +28,8 @@ License
 #include "Time.H"
 #include "cellSet.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::vtkMesh::vtkMesh
 (
     fvMesh& baseMesh,
@@ -63,8 +59,8 @@ Foam::polyMesh::readUpdateState Foam::vtkMesh::readUpdate()
 
     if (meshState != polyMesh::UNCHANGED)
     {
-        // Note: since fvMeshSubset has no movePoints() functionality reconstruct
-        // the subset even if only movement.
+        // Note: since fvMeshSubset has no movePoints() functionality,
+        // reconstruct the subset even if only movement.
 
         topoPtr_.clear();
 

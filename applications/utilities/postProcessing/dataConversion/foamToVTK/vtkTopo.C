@@ -102,10 +102,6 @@ Foam::vtkTopo::vtkTopo(const polyMesh& mesh)
             }
         }
     }
-    else
-    {
-        notImplemented("vtkTopo: non-decomposed polyhedron");
-    }
 
 
     // Set size of additional point addressing array
@@ -191,7 +187,7 @@ Foam::vtkTopo::vtkTopo(const polyMesh& mesh)
         }
         else if (decomposePoly)
         {
-            // Polyhedral cell. Decompose into tets + prisms.
+            // Polyhedral cell. Decompose into tets + pyramids.
 
             // Mapping from additional point to cell
             addPointCellLabels_[addPointI] = cellI;
@@ -314,6 +310,50 @@ Foam::vtkTopo::vtkTopo(const polyMesh& mesh)
         {
             // Polyhedral cell - not decomposed
             cellTypes_[cellI] = VTK_POLYHEDRON;
+
+            const labelList& cFaces = mesh_.cells()[cellI];
+
+            // space for the number of faces and size of each face
+            label nData = 1 + cFaces.size();
+
+            // count total number of face points
+            forAll(cFaces, cFaceI)
+            {
+                const face& f = mesh.faces()[cFaces[cFaceI]];
+                nData += f.size();   // space for the face labels
+            }
+
+            vtkVerts.setSize(nData);
+
+            nData = 0;
+            vtkVerts[nData++] = cFaces.size();
+
+            // build face stream
+            forAll(cFaces, cFaceI)
+            {
+                const face& f = mesh.faces()[cFaces[cFaceI]];
+                const bool isOwner = (owner[cFaces[cFaceI]] == cellI);
+
+                // number of labels for this face
+                vtkVerts[nData++] = f.size();
+
+                if (isOwner)
+                {
+                    forAll(f, fp)
+                    {
+                        vtkVerts[nData++] = f[fp];
+                    }
+                }
+                else
+                {
+                    // fairly immaterial if we reverse the list
+                    // or use face::reverseFace()
+                    forAllReverse(f, fp)
+                    {
+                        vtkVerts[nData++] = f[fp];
+                    }
+                }
+            }
         }
     }
 

@@ -40,7 +40,6 @@ Usage
 
     - foamToVTK [OPTION]
 
-
     @param -ascii \n
     Write VTK data in ASCII format instead of binary.
 
@@ -78,6 +77,9 @@ Usage
     @param -noLinks \n
     (in parallel) do not link processor files to master
 
+    @param poly \n
+    write polyhedral cells without tet/pyramid decomposition
+
     @param -allPatches \n
     Combine all patches into a single file
 
@@ -95,7 +97,7 @@ Usage
 
 Note
     mesh subset is handled by vtkMesh. Slight inconsistency in
-    interpolation: on the internal field it interpolates the whole volfield
+    interpolation: on the internal field it interpolates the whole volField
     to the whole-mesh pointField and then selects only those values it
     needs for the subMesh (using the fvMeshSubset cellMap(), pointMap()
     functions). For the patches however it uses the
@@ -262,14 +264,11 @@ int main(int argc, char *argv[])
         "ascii",
         "write in ASCII format instead of binary"
     );
-/*
     argList::addBoolOption
     (
-        "noDecompose",
-        "do not decompose polyhedral cells into tets/prism cells"
-        "- NOT YET IMPLEMENTED"
+        "poly",
+        "write polyhedral cells without tet/pyramid decomposition"
     );
- */
     argList::addBoolOption
     (
         "surfaceFields",
@@ -326,9 +325,8 @@ int main(int argc, char *argv[])
     const bool binary          = !args.optionFound("ascii");
     const bool useTimeName     = args.optionFound("useTimeName");
 
-    // decomposition of polyhedral cells into tets/prism cells
-    // vtkTopo::decomposePoly     = !args.optionFound("noDecompose");
-
+    // decomposition of polyhedral cells into tets/pyramids cells
+    vtkTopo::decomposePoly     = !args.optionFound("poly");
 
     if (binary && (sizeof(floatScalar) != 4 || sizeof(label) != 4))
     {
