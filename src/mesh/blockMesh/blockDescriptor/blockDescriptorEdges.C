@@ -39,7 +39,7 @@ namespace Foam
     {
         return dim > 1 ? pow(expRatio, 1.0/(dim - 1)) : 0.0;
     }
-    //! @endcond fileScope
+    //! @endcond
 
 } // End namespace Foam
 

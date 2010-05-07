@@ -48,7 +48,7 @@ namespace Foam
 // if necessary
 //! @cond fileScope
 labelList maxSendSize;
-//! @endcond fileScope
+//! @endcond
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

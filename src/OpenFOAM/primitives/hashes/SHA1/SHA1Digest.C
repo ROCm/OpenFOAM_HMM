@@ -32,7 +32,7 @@ License
 
 //! @cond fileScope
 const char hexChars[] = "0123456789abcdef";
-//! @endcond fileScope
+//! @endcond
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

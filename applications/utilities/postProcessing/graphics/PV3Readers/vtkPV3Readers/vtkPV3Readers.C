@@ -64,7 +64,7 @@ namespace Foam
         }
 
     }
-    //! @endcond fileScope
+    //! @endcond
 
 } // End namespace Foam
 
