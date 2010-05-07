@@ -186,11 +186,11 @@ void Foam::writeFuns::writeHeader
 (
     std::ostream& os,
     const bool binary,
-    const string& name
+    const std::string& title
 )
 {
     os  << "# vtk DataFile Version 2.0" << std::endl
-        << name << std::endl;
+        << title << std::endl;
 
     if (binary)
     {

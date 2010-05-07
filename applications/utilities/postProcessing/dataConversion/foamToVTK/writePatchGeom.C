@@ -40,16 +40,16 @@ void writePatchGeom
     const bool binary,
     const faceList& faces,
     const pointField& points,
-    std::ofstream& pStream
+    std::ofstream& ostr
 )
 {
-    pStream << "POINTS " << points.size() << " float" << std::endl;
+    ostr<< "POINTS " << points.size() << " float" << std::endl;
 
     DynamicList<floatScalar> ptField(3*points.size());
 
     writeFuns::insert(points, ptField);
 
-    writeFuns::write(pStream, binary, ptField);
+    writeFuns::write(ostr, binary, ptField);
 
 
     label nFaceVerts = 0;
@@ -58,8 +58,7 @@ void writePatchGeom
     {
         nFaceVerts += faces[faceI].size() + 1;
     }
-    pStream << "POLYGONS " << faces.size() << ' ' << nFaceVerts
-        << std::endl;
+    ostr<< "POLYGONS " << faces.size() << ' ' << nFaceVerts << std::endl;
 
 
     DynamicList<label> vertLabels(nFaceVerts);
@@ -72,7 +71,7 @@ void writePatchGeom
 
         writeFuns::insert(f, vertLabels);
     }
-    writeFuns::write(pStream, binary, vertLabels);
+    writeFuns::write(ostr, binary, vertLabels);
 }
 
 

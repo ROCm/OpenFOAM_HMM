@@ -989,17 +989,17 @@ int main(int argc, char *argv[])
 
                 Info<< "    FaceZone  : " << patchFileName << endl;
 
-                std::ofstream str(patchFileName.c_str());
+                std::ofstream ostr(patchFileName.c_str());
 
-                writeFuns::writeHeader(str, binary, pp.name());
-                str << "DATASET POLYDATA" << std::endl;
+                writeFuns::writeHeader(ostr, binary, pp.name());
+                ostr<< "DATASET POLYDATA" << std::endl;
 
                 writePatchGeom
                 (
                     binary,
                     pp().localFaces(),
                     pp().localPoints(),
-                    str
+                    ostr
                 );
             }
         }

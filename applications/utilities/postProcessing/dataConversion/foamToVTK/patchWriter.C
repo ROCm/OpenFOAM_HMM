@@ -56,7 +56,7 @@ Foam::patchWriter::patchWriter
     {
         writeFuns::writeHeader(os_, binary_, "patches");
     }
-    os_ << "DATASET UNSTRUCTURED_GRID" << std::endl;
+    os_ << "DATASET POLYDATA" << std::endl;
 
     // Write topology
     nPoints_ = 0;
@@ -88,10 +88,9 @@ Foam::patchWriter::patchWriter
     }
     writeFuns::write(os_, binary_, ptField);
 
-    os_ << "CELLS " << nFaces_ << ' ' << nFaceVerts << std::endl;
+    os_ << "POLYGONS " << nFaces_ << ' ' << nFaceVerts << std::endl;
 
     DynamicList<label> vertLabels(nFaceVerts);
-    DynamicList<label> faceTypes(nFaceVerts);
 
     label offset = 0;
 
@@ -103,30 +102,12 @@ Foam::patchWriter::patchWriter
         {
             const face& f = pp.localFaces()[faceI];
 
-            const label fSize = f.size();
-            vertLabels.append(fSize);
-
+            vertLabels.append(f.size());
             writeFuns::insert(f + offset, vertLabels);
-
-            if (fSize == 3)
-            {
-                faceTypes.append(vtkTopo::VTK_TRIANGLE);
-            }
-            else if (fSize == 4)
-            {
-                faceTypes.append(vtkTopo::VTK_QUAD);
-            }
-            else
-            {
-                faceTypes.append(vtkTopo::VTK_POLYGON);
-            }
         }
         offset += pp.nPoints();
     }
     writeFuns::write(os_, binary_, vertLabels);
-
-    os_ << "CELL_TYPES " << nFaces_ << std::endl;
-    writeFuns::write(os_, binary_, faceTypes);
 }
 
 
