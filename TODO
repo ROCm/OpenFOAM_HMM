@@ -83,10 +83,10 @@ OK - grep for size()/2
     OK - incompressible/boundaryFoam/boundaryLaunderSharma
     OK - incompressible/boundaryFoam/boundaryWallFunctions
     OK - incompressible/boundaryFoam/boundaryWallFunctionsProfile
-    incompressible/pimpleFoam/t-junction-with-fan
+    needs createBaffles. ncompressible/pimpleFoam/t-junction-with-fan
     OK - incompressible/simpleSRFFoam/mixer
-    lagrangian/porousExplicitSourceReactingParcelFoam/filter
-    lagrangian/reactingParcelFilmFoam/multipleBoxes
+    needs createBaffles. lagrangian/porousExplicitSourceReactingParcelFoam/filter
+    needs special coupledbcs. lagrangian/reactingParcelFilmFoam/multipleBoxes
 
 
 - have foamUpgradeCyclics split 'value' field
