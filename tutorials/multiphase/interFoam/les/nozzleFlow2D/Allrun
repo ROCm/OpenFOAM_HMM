@@ -17,19 +17,19 @@ runRefineMesh()
 runApplication blockMesh
 
 i=1
-if [ -f log.cellSet ]
+if [ -f log.topoSet ]
 then
     i=3
 fi
 
 while [ "$i" -lt 3 ]
 do
-    if [ -f log.cellSet ]
+    if [ -f log.topoSet ]
     then
-        mv log.cellSet log.cellSet.1
+        mv log.topoSet log.topoSet.1
     fi
-    cp system/cellSetDict.${i} system/cellSetDict
-    runApplication cellSet
+    cp system/topoSetDict.${i} system/topoSetDict
+    runApplication topoSet
     runRefineMesh
     cp -r 1e-08/polyMesh/* constant/polyMesh
     rm -rf 1e-08

@@ -167,6 +167,7 @@ int main(int argc, char *argv[])
             case topoSetSource::INVERT:
                 Info<< "    Inverting set" << endl;
                 currentSet().invert(currentSet().maxSize(mesh));
+                currentSet().write();
             break;
 
             default:

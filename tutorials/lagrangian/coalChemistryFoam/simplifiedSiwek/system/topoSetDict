@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,20 +10,24 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
-    object      cellSetDict.1;
+    object      topoSetDict;
 }
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-name            c0;
-
-action          new;
-
-topoSetSources
+actions
 (
-    boxToCell
     {
-        box (0.004 -0.001 -1) (0.012 0.001 1);
+        name ignitionCells;
+        type cellSet;
+        action new;
+
+        source sphereToCell;
+        sourceDict
+        {
+            centre          ( 0.125 0.375 0.05 );
+            radius          0.005;
+        }
     }
 );
 

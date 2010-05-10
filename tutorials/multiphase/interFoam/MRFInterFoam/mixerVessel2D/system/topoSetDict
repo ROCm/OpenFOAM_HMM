@@ -11,15 +11,24 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "system";
-    object      cellSetDict.3;
+    object      topoSetDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-name            c0;
 
-action          new;
-
-topoSetSources  ( boxToCell { box ( 0.00475 -0.000375 -1 ) ( 0.009 0.000375 1 ) ; } );
+actions
+(
+    {
+        name            rotor;
+        type            cellSet;
+        action          new;
+        source          zoneToCell;
+        sourceDict
+        {
+            name rotor;
+        }
+    }
+);
 
 
 // ************************************************************************* //
