@@ -49,17 +49,13 @@ void writeSurfFields
 
     std::ofstream str(fileName.c_str());
 
-    str << "# vtk DataFile Version 2.0" << std::endl
-        << "surfaceFields" << std::endl;
+    writeFuns::writeHeader
+    (
+        str,
+        binary,
+        "surfaceFields"
+    );
 
-    if (binary)
-    {
-        str << "BINARY" << std::endl;
-    }
-    else
-    {
-        str << "ASCII" << std::endl;
-    }
     str << "DATASET POLYDATA" << std::endl;
 
     const pointField& fc = mesh.faceCentres();

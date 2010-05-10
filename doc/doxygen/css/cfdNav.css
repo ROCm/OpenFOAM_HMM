@@ -98,7 +98,7 @@
 {
     white-space:nowrap /*IE hack*/;
     float:left;
-    width:954px;
+    width:100%;
     background:rgb(225,225,225);
     color:rgb(100,100,100);
     font-size:130%;
@@ -252,7 +252,7 @@
     color:rgb(70,122,167);
     font-size:100%;
 }
-.current, .nav3-grid dt a:hover, .nav3-grid dd a:hover
+.nav3-grid dt a:hover, .nav3-grid dd a:hover
 {
     background-color:rgb(225,225,225);
     color:rgb(42,90,138);

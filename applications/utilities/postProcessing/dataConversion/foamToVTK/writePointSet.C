@@ -42,21 +42,16 @@ void writePointSet
     const fileName& fileName
 )
 {
-    std::ofstream pStream(fileName.c_str());
+    std::ofstream ostr(fileName.c_str());
 
-    pStream
-        << "# vtk DataFile Version 2.0" << std::endl
-        << set.name() << std::endl;
-    if (binary)
-    {
-        pStream << "BINARY" << std::endl;
-    }
-    else
-    {
-        pStream << "ASCII" << std::endl;
-    }
-    pStream << "DATASET POLYDATA" << std::endl;
+    writeFuns::writeHeader
+    (
+        ostr,
+        binary,
+        set.name()
+    );
 
+    ostr<< "DATASET POLYDATA" << std::endl;
 
     //------------------------------------------------------------------
     //
@@ -67,7 +62,7 @@ void writePointSet
 
     // Write points
 
-    pStream << "POINTS " << set.size() << " float" << std::endl;
+    ostr<< "POINTS " << set.size() << " float" << std::endl;
 
     DynamicList<floatScalar> ptField(3*set.size());
 
@@ -77,7 +72,7 @@ void writePointSet
         ptField
     );
 
-    writeFuns::write(pStream, binary, ptField);
+    writeFuns::write(ostr, binary, ptField);
 
 
     //-----------------------------------------------------------------
@@ -88,16 +83,16 @@ void writePointSet
 
     // Write faceID
 
-    pStream
+    ostr
         << "POINT_DATA " << set.size() << std::endl
         << "FIELD attributes 1" << std::endl;
 
     // Cell ids first
-    pStream << "pointID 1 " << set.size() << " int" << std::endl;
+    ostr<< "pointID 1 " << set.size() << " int" << std::endl;
 
     labelList pointIDs(set.toc());
 
-    writeFuns::write(pStream, binary, pointIDs);
+    writeFuns::write(ostr, binary, pointIDs);
 }
 
 

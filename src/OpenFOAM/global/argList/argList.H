@@ -172,7 +172,7 @@ public:
 
             initValidTables();
         };
-        //! @endcond ignoreDocumentation
+        //! @endcond
 
 
     // Constructors

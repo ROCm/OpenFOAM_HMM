@@ -28,7 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::internalWriter::internalWriter
 (
     const vtkMesh& vMesh,
@@ -58,8 +57,7 @@ Foam::internalWriter::internalWriter
     const labelList& addPointCellLabels = topo.addPointCellLabels();
     const label nTotPoints = mesh.nPoints() + addPointCellLabels.size();
 
-    os_ << "POINTS " << nTotPoints
-        << " float" << std::endl;
+    os_ << "POINTS " << nTotPoints << " float" << std::endl;
 
     DynamicList<floatScalar> ptField(3*nTotPoints);
 
@@ -87,9 +85,7 @@ Foam::internalWriter::internalWriter
         nFaceVerts += vtkVertLabels[cellI].size() + 1;
     }
 
-    os_ << "CELLS " << vtkVertLabels.size() << ' ' << nFaceVerts
-        << std::endl;
-
+    os_ << "CELLS " << vtkVertLabels.size() << ' ' << nFaceVerts << std::endl;
 
     DynamicList<label> vertLabels(nFaceVerts);
 
@@ -102,7 +98,6 @@ Foam::internalWriter::internalWriter
         writeFuns::insert(vtkVerts, vertLabels);
     }
     writeFuns::write(os_, binary_, vertLabels);
-
 
 
     const labelList& vtkCellTypes = topo.cellTypes();
@@ -128,8 +123,7 @@ void Foam::internalWriter::writeCellIDs()
     const labelList& superCells = topo.superCells();
 
     // Cell ids first
-    os_ << "cellID 1 " << vtkCellTypes.size() << " int"
-        << std::endl;
+    os_ << "cellID 1 " << vtkCellTypes.size() << " int" << std::endl;
 
     labelList cellId(vtkCellTypes.size());
     label labelI = 0;

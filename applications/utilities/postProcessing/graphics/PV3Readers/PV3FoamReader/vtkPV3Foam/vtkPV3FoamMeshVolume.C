@@ -164,16 +164,9 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
     // data types - max 'order' = hex = 8 points
     vtkIdType nodeIds[8];
 
-    // hash to establish unique node ids for a polyhedral cell
-    HashSet<vtkIdType, Hash<label> > hashUniqId(2*256);
-
-    // unique node ids for a polyhedral cell
-    DynamicList<vtkIdType> uniqueNodeIds(256);
-
     // face-stream for a polyhedral cell
     // [numFace0Pts, id1, id2, id3, numFace1Pts, id1, id2, id3, ...]
     DynamicList<vtkIdType> faceStream(256);
-
 
     forAll(cellShapes, cellI)
     {
@@ -282,6 +275,7 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
             // Polyhedral cell - use VTK_POLYHEDRON
             const labelList& cFaces = mesh.cells()[cellI];
 
+#ifdef HAS_VTK_POLYHEDRON
             vtkIdType nFaces = cFaces.size();
             vtkIdType nLabels = nFaces;
 
@@ -291,13 +285,6 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
                 const face& f = mesh.faces()[cFaces[cFaceI]];
                 nLabels += f.size();
             }
-
-            // hash to establish unique node ids for a polyhedral cell
-            hashUniqId.clear();
-
-            // unique node ids - approximately equal to the number of point ids
-            uniqueNodeIds.clear();
-            uniqueNodeIds.reserve(nLabels-nFaces);
 
             // build face-stream
             // [numFace0Pts, id1, id2, id3, numFace1Pts, id1, id2, id3, ...]
@@ -318,7 +305,6 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
                 {
                     forAll(f, fp)
                     {
-                        hashUniqId.insert(f[fp]);
                         faceStream.append(f[fp]);
                     }
                 }
@@ -328,32 +314,37 @@ vtkUnstructuredGrid* Foam::vtkPV3Foam::volumeVTKMesh
                     // or use face::reverseFace()
                     forAllReverse(f, fp)
                     {
-                        hashUniqId.insert(f[fp]);
                         faceStream.append(f[fp]);
                     }
                 }
             }
 
-            uniqueNodeIds.append(hashUniqId.sortedToc());
-            vtkIdType nodeCount = uniqueNodeIds.size();
-
-#ifdef HAS_VTK_POLYHEDRON
-            vtkmesh->InsertNextCell
-            (
-                VTK_POLYHEDRON,
-                nodeCount,
-                uniqueNodeIds.data(),
-                nFaces,
-                faceStream.data()
-            );
+            vtkmesh->InsertNextCell(VTK_POLYHEDRON, nFaces, faceStream.data());
 #else
             // this is a horrible substitute
             // but avoids crashes when there is no vtkPolyhedron support
+
+            // establish unique node ids used
+            HashSet<vtkIdType, Hash<label> > hashUniqId(2*256);
+
+            forAll(cFaces, cFaceI)
+            {
+                const face& f = mesh.faces()[cFaces[cFaceI]];
+
+                forAll(f, fp)
+                {
+                    hashUniqId.insert(f[fp]);
+                }
+            }
+
+            // use face stream to store unique node ids:
+            faceStream = hashUniqId.sortedToc();
+
             vtkmesh->InsertNextCell
             (
                 VTK_CONVEX_POINT_SET,
-                nodeCount,
-                uniqueNodeIds.data()
+                vtkIdType(faceStream.size()),
+                faceStream.data()
             );
 #endif
         }

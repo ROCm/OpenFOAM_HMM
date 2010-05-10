@@ -7,8 +7,8 @@
 #     equivalent
 # -----------------------------------------------------------------------------
 
-/^License/,/\*\//{
 # new FSF address
+/^License/,/\*\//{
 /^License/,\%http://www.gnu.org/licenses%{
 s?^License.*?\*\/\
 \/\*! @file %filePath%\
@@ -130,11 +130,9 @@ s/^    //
 }
 
 
-/^To[Dd]o *$/,/^[^ ]/{
-/^To[Dd]o/c\
-@todo
-s/^    //
-}
+# remove ToDo paragraph to avoid them showing on related pages
+/^To[Dd]o *$/,/^ *$/d
+
 
 /^Warning *$/,/^[^ ]/{
 /^Warning/c\
