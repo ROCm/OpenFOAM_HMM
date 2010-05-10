@@ -49,7 +49,7 @@ Foam::label Foam::globalIndexAndTransform::encodeTransformIndex
 
     label w = 1;
 
-    for (label b = 0; b < transforms_.size(); b++)
+    forAll(transforms_, b)
     {
         if (mag(permutationIndices[b]) > 1)
         {

@@ -29,7 +29,7 @@ InClass
 #ifndef vtkPV3FoamVolFields_H
 #define vtkPV3FoamVolFields_H
 
-// Foam includes
+// OpenFOAM includes
 #include "emptyFvPatchField.H"
 #include "wallPolyPatch.H"
 #include "faceSet.H"

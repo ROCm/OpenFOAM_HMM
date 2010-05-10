@@ -126,7 +126,7 @@ public:
         void clearAddressing();
 
 
-    // Member functions
+    // Member Functions
 
         //- Return the mesh reference
         const polyMesh& mesh() const
@@ -193,6 +193,17 @@ public:
             IOstream::versionNumber ver,
             IOstream::compressionType cmp
         ) const;
+
+    // Member Operators
+
+        //- Return const and non-const reference to polyPatch by index.
+        using polyPatchList::operator[];
+
+        //- Return const reference to polyPatch by name.
+        const polyPatch& operator[](const word&) const;
+
+        //- Return reference to polyPatch by name.
+        polyPatch& operator[](const word&);
 
 
     // Ostream operator

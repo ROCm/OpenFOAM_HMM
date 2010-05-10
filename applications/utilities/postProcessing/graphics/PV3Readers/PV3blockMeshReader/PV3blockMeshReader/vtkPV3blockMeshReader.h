@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,7 +61,7 @@ class VTK_IO_EXPORT vtkPV3blockMeshReader
     public vtkMultiBlockDataSetAlgorithm
 {
 public:
-    vtkTypeRevisionMacro(vtkPV3blockMeshReader,vtkMultiBlockDataSetAlgorithm);
+    vtkTypeMacro(vtkPV3blockMeshReader, vtkMultiBlockDataSetAlgorithm);
     void PrintSelf(ostream&, vtkIndent);
 
     static vtkPV3blockMeshReader* New();

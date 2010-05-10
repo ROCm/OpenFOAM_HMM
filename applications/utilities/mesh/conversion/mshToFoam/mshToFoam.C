@@ -56,7 +56,11 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append(".msh file");
-    argList::addBoolOption("hex");
+    argList::addBoolOption
+    (
+        "hex",
+        "treat input as containing hex instead of tet cells"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -69,11 +73,11 @@ int main(int argc, char *argv[])
 
     if (readHex)
     {
-        Info<< "Trying to read " << nCells << " hexes." << endl << endl;
+        Info<< "Trying to read " << nCells << " hexes." << nl << endl;
     }
     else
     {
-        Info<< "Trying to read " << nCells << " tets." << endl << endl;
+        Info<< "Trying to read " << nCells << " tets." << nl << endl;
     }
 
     cellShapeList cells(nCells);

@@ -61,8 +61,8 @@ int main(int argc, char *argv[])
     argList::addOption
     (
         "scale",
-        "scale",
-        "specify geometry scaling factor"
+        "factor",
+        "geometry scaling factor - default is 1"
     );
     argList::addBoolOption
     (

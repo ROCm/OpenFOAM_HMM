@@ -88,7 +88,7 @@ void Foam::attachDetach::attachInterface
 
 // Pout << "Points to be mapped: " << removedPoints << endl;
     // Remove all faces from the slave patch
-    for (label i = 0; i < slavePatch.size(); i++)
+    forAll(slavePatch, i)
     {
         ref.setAction(polyRemoveFace(i + slavePatchStart));
 // Pout << "Removing face " << i + slavePatchStart << endl;

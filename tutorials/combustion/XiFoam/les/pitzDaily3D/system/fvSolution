@@ -48,5 +48,9 @@ PISO
     nNonOrthogonalCorrectors 0;
 }
 
+relaxationFactors
+{
+    "(Xi|Su)"     1;
+}
 
 // ************************************************************************* //

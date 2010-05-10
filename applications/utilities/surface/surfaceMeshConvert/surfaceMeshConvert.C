@@ -71,6 +71,11 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "convert between surface formats"
+    );
+
     argList::noParallel();
     argList::validArgs.append("inputFile");
     argList::validArgs.append("outputFile");
@@ -83,14 +88,14 @@ int main(int argc, char *argv[])
     argList::addOption
     (
         "scaleIn",
-        "scale",
-        "specify input geometry scaling factor"
+        "factor",
+        "geometry scaling factor on input"
     );
     argList::addOption
     (
         "scaleOut",
-        "scale",
-        "specify output geometry scaling factor"
+        "factor",
+        "geometry scaling factor on output"
     );
     argList::addOption
     (

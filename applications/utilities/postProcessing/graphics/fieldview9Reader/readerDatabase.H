@@ -25,7 +25,7 @@ Class
     Foam::readerDatabase
 
 Description
-    Singleton caching Foam database and mesh and various. Used in Fv reader
+    Singleton caching OpenFOAM database and mesh and various. Used in Fv reader
     to keep track of data inbetween callbacks.
 
 SourceFiles

@@ -213,7 +213,7 @@ void Foam::primitiveEntry::write(Ostream& os) const
 {
     os.writeKeyword(keyword());
 
-    for (label i=0; i<size(); i++)
+    for (label i=0; i<size(); ++i)
     {
         os << operator[](i);
 

@@ -63,8 +63,7 @@
                 << exit(FatalIOError);
         }
 
-        const labelList& faces =
-            mesh.faceZones()[magnetZonei];
+        const labelList& faces = mesh.faceZones()[magnetZonei];
 
         const scalar muri = magnets[i].mur();
         const scalar Mri = magnets[i].Mr().value();

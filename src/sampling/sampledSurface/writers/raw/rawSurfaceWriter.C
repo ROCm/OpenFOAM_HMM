@@ -206,9 +206,8 @@ void Foam::rawSurfaceWriter<Type>::writeData
 
             const symmTensor& v = values[elemI];
 
-            os  << v[0] << ' ' << v[1] << ' ' << v[2]
-                << v[3] << ' ' << v[4] << ' ' << v[5]
-                << nl;
+            os  << v[0] << ' ' << v[1] << ' ' << v[2] << ' '
+                << v[3] << ' ' << v[4] << ' ' << v[5] << nl;
         }
     }
     else
@@ -219,9 +218,8 @@ void Foam::rawSurfaceWriter<Type>::writeData
 
             const symmTensor& v = values[elemI];
 
-            os  << v[0] << ' ' << v[1] << ' ' << v[2]
-                << v[3] << ' ' << v[4] << ' ' << v[5]
-                << nl;
+            os  << v[0] << ' ' << v[1] << ' ' << v[2] << ' '
+                << v[3] << ' ' << v[4] << ' ' << v[5] << nl;
         }
     }
 }
@@ -254,8 +252,8 @@ void Foam::rawSurfaceWriter<Type>::writeData
             writeGeometry(points, elemI, os);
 
             const tensor& v = values[elemI];
-            os  << v[0] << ' ' << v[1] << ' ' << v[2]
-                << v[3] << ' ' << v[4] << ' ' << v[5]
+            os  << v[0] << ' ' << v[1] << ' ' << v[2] << ' '
+                << v[3] << ' ' << v[4] << ' ' << v[5] << ' '
                 << v[6] << ' ' << v[7] << ' ' << v[8] << nl;
         }
     }
@@ -266,8 +264,8 @@ void Foam::rawSurfaceWriter<Type>::writeData
             writeGeometry(points, faces, elemI, os);
 
             const tensor& v = values[elemI];
-            os  << v[0] << ' ' << v[1] << ' ' << v[2]
-                << v[3] << ' ' << v[4] << ' ' << v[5]
+            os  << v[0] << ' ' << v[1] << ' ' << v[2] << ' '
+                << v[3] << ' ' << v[4] << ' ' << v[5] << ' '
                 << v[6] << ' ' << v[7] << ' ' << v[8] << nl;
         }
     }

@@ -42,7 +42,7 @@ Usage
     Specify an alternative mesh region.
 
     @param -dict \<filename\> \n
-    Specify an alternative dictionary for the block mesh description.
+    Specify alternative dictionary for the block mesh description.
 
 \*---------------------------------------------------------------------------*/
 
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     (
         "dict",
         "file",
-        "specify an alternative dictionary for the blockMesh description"
+        "specify alternative dictionary for the blockMesh description"
     );
 
 #   include "addRegionOption.H"

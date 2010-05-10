@@ -65,7 +65,8 @@ int main(int argc, char *argv[])
     Foam::argList::addOption
     (
         "dict",
-        "dictionary name"
+        "name",
+        "dictionary to use"
     );
 
     #include "setRootCase.H"

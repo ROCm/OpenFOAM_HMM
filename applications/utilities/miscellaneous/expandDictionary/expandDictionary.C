@@ -44,7 +44,6 @@ int main(int argc, char *argv[])
 {
     argList::noBanner();
     argList::noParallel();
-    argList::validArgs.clear();
     argList::validArgs.append("inputDict");
     argList args(argc, argv);
 

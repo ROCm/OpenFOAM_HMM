@@ -56,7 +56,7 @@ inline void vtkSetOpenFOAMPoint
 }
 
 
-// Convert Foam mesh vertices to VTK
+// Convert OpenFOAM mesh vertices to VTK
 inline vtkPoints* vtkSetOpenFOAMPoints(const Foam::pointField& points)
 {
     vtkPoints *vtkpoints = vtkPoints::New();

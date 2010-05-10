@@ -73,7 +73,7 @@ extern "C"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // slightly changed with 2.0 from 1.0
-// (to handle complex variables -  not used by FOAM anyway)
+// (to handle complex variables - not used by OpenFOAM anyway)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "USERD_get_constant_val.H"

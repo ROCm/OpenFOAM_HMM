@@ -153,7 +153,7 @@ void Foam::walkPatch::faceToFace
             indexInFace_.append(fp);
 
             // Visit neighbouring faces in order, starting at fp.
-            for (label i = 0; i < f.size(); i++)
+            forAll(f, i)
             {
                 label fp1 = reverse_ ? f.rcIndex(fp) : f.fcIndex(fp);
                 label nbr = getNeighbour(faceI, fp, f[fp], f[fp1]);

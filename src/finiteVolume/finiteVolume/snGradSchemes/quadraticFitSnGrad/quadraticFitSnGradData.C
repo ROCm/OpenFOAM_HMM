@@ -31,10 +31,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(quadraticFitSnGradData, 0);
-}
+defineTypeNameAndDebug(Foam::quadraticFitSnGradData, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
@@ -205,7 +202,7 @@ Foam::label Foam::quadraticFitSnGradData::calcFit
     // calculate the matrix of the polynomial components
     scalarRectangularMatrix B(C.size(), minSize_, scalar(0));
 
-    for (label ip = 0; ip < C.size(); ip++)
+    forAll(C, ip)
     {
         const point& p = C[ip];
 

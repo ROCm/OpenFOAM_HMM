@@ -110,7 +110,6 @@ labelList parseVertices(const string& line)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.clear();
     argList::validArgs.append("OBJ file");
     argList::validArgs.append("output VTK file");
     argList args(argc, argv);

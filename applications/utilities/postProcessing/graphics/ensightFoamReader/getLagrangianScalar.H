@@ -21,7 +21,7 @@ if (nVar >= 0)
 
     if (s.size())
     {
-        for (label n = 0; n < s.size(); n++)
+        forAll(s, n)
         {
             var_array[n+1] = s[n];
         }

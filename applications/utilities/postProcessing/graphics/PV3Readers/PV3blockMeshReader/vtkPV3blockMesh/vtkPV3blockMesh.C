@@ -26,7 +26,7 @@ License
 #include "vtkPV3blockMesh.H"
 #include "vtkPV3blockMeshReader.h"
 
-// Foam includes
+// OpenFOAM includes
 #include "blockMesh.H"
 #include "Time.H"
 #include "patchZones.H"
@@ -298,7 +298,7 @@ void Foam::vtkPV3blockMesh::updateFoamMesh()
         Info<< "<beg> Foam::vtkPV3blockMesh::updateFoamMesh" << endl;
     }
 
-    // Check to see if the FOAM mesh has been created
+    // Check to see if the OpenFOAM mesh has been created
     if (!meshPtr_)
     {
         if (debug)
@@ -347,7 +347,7 @@ void Foam::vtkPV3blockMesh::Update
 
     reader_->UpdateProgress(0.2);
 
-    // Update the Foam mesh
+    // Update the OpenFOAM mesh
     updateFoamMesh();
     reader_->UpdateProgress(0.5);
 

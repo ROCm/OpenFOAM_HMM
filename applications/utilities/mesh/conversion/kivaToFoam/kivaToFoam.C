@@ -46,7 +46,7 @@ Description
 
 using namespace Foam;
 
-// Supported KIVA versions
+//- Supported KIVA versions
 enum kivaVersions
 {
     kiva3,
@@ -59,37 +59,51 @@ enum kivaVersions
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::addOption("file", "fileName");
-    argList::addOption("version", "[kiva3|kiva3v]");
-    argList::addOption("zHeadMin", "scalar");
+    argList::addOption
+    (
+        "file",
+        "name",
+        "specify alternative input file name - default is otape17"
+    );
+    argList::addOption
+    (
+        "version",
+        "version",
+        "specify kiva version [kiva3|kiva3v] - default is '3v'"
+    );
+    argList::addOption
+    (
+        "zHeadMin",
+        "scalar",
+        "minimum z-height for transferring liner faces to cylinder-head"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    fileName kivaFileName("otape17");
-    args.optionReadIfPresent("file", kivaFileName);
+    const fileName kivaFileName =
+        args.optionLookupOrDefault<fileName>("file", "otape17");
 
     kivaVersions kivaVersion = kiva3v;
     if (args.optionFound("version"))
     {
-        const word kivaVersionName = args["version"];
+        const word versionName = args["version"];
 
-        if (kivaVersionName == "kiva3")
+        if (versionName == "kiva3")
         {
             kivaVersion = kiva3;
         }
-        else if (kivaVersionName == "kiva3v")
+        else if (versionName == "kiva3v")
         {
             kivaVersion = kiva3v;
         }
         else
         {
             FatalErrorIn("main(int argc, char *argv[])")
-                << "KIVA file version " << kivaVersionName << " not supported"
+                << "KIVA file version " << versionName << " not supported"
                 << exit(FatalError);
 
             args.printUsage();
-
             FatalError.exit(1);
         }
     }

@@ -74,7 +74,7 @@ FNR == 1 {
 END {
     if (state == 2)
     {
-        print "//! @endcond OpenFOAMIgnoreAppDoxygen"
+        print "//! @endcond"
     }
 }
 

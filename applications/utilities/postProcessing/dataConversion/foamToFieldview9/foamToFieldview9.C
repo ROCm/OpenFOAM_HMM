@@ -176,7 +176,11 @@ static void writeFaceData
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::addBoolOption("noWall");
+    argList::addBoolOption
+    (
+        "noWall",
+        "skip setting wall information"
+    );
     timeSelector::addOptions(true, false);
 
 #   include "setRootCase.H"

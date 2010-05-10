@@ -25,23 +25,14 @@ License
 
 #include "lduInterfaceField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(lduInterfaceField, 0);
+defineTypeNameAndDebug(Foam::lduInterfaceField, 0);
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-lduInterfaceField::~lduInterfaceField()
+Foam::lduInterfaceField::~lduInterfaceField()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

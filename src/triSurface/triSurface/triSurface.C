@@ -33,10 +33,8 @@ License
 #include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-namespace Foam
-{
-    defineTypeNameAndDebug(Foam::triSurface, 0);
-}
+
+defineTypeNameAndDebug(Foam::triSurface, 0);
 
 
 Foam::fileName Foam::triSurface::triSurfInstance(const Time& d)

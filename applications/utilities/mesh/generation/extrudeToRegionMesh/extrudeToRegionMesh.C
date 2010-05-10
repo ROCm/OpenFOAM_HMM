@@ -632,7 +632,7 @@ int main(int argc, char *argv[])
     argList::validArgs.append("thickness");
 
     #include "addRegionOption.H"
-    argList::validOptions.insert("overwrite", "");
+    #include "addOverwriteOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"
@@ -849,8 +849,7 @@ int main(int argc, char *argv[])
     nExtrudeFaces = 0;
     forAll(zoneNames, i)
     {
-        label zoneI = faceZones.findZoneID(zoneNames[i]);
-        const faceZone& fz = faceZones[zoneI];
+        const faceZone& fz = faceZones[zoneNames[i]];
         forAll(fz, j)
         {
             extrudeTopPatchID[nExtrudeFaces] = interRegionTopPatch[i];

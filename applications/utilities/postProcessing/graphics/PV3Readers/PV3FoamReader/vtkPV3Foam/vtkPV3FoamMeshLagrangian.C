@@ -25,7 +25,7 @@ License
 
 #include "vtkPV3Foam.H"
 
-// Foam includes
+// OpenFOAM includes
 #include "Cloud.H"
 #include "fvMesh.H"
 #include "IOobjectList.H"

@@ -173,12 +173,17 @@ labelList countBins
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-
-    argList::validArgs.clear();
-    argList::validArgs.append("surface file");
-
-    argList::addBoolOption("checkSelfIntersection");
-    argList::addBoolOption("verbose");
+    argList::validArgs.append("surfaceFile");
+    argList::addBoolOption
+    (
+        "checkSelfIntersection",
+        "also check for self-intersection"
+    );
+    argList::addBoolOption
+    (
+        "verbose",
+        "verbose operation"
+    );
     argList::addBoolOption
     (
         "blockMesh",
@@ -224,8 +229,8 @@ int main(int argc, char *argv[])
             <<"    hex (0 1 2 3 4 5 6 7) (10 10 10) simpleGrading (1 1 1)\n"
             <<");\n" << nl;
 
-        Info<<"edges();" << nl
-            <<"patches();" << endl;
+        Info<<"edges\n();" << nl
+            <<"patches\n();" << endl;
     }
 
 

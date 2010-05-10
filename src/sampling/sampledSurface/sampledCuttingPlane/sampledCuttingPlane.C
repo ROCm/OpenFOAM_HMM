@@ -67,7 +67,7 @@ void Foam::sampledCuttingPlane::createGeometry()
         const polyBoundaryMesh& patches = mesh().boundaryMesh();
 
         // Patch to put exposed internal faces into
-        label exposedPatchI = patches.findPatchID(exposedPatchName_);
+        const label exposedPatchI = patches.findPatchID(exposedPatchName_);
 
         if (debug)
         {

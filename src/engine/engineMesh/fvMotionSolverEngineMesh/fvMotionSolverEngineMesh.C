@@ -28,20 +28,18 @@ License
 #include "fvcMeshPhi.H"
 #include "surfaceInterpolate.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(fvMotionSolverEngineMesh, 0);
+    addToRunTimeSelectionTable(engineMesh, fvMotionSolverEngineMesh, IOobject);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(fvMotionSolverEngineMesh, 0);
-
-addToRunTimeSelectionTable(engineMesh, fvMotionSolverEngineMesh, IOobject);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-fvMotionSolverEngineMesh::fvMotionSolverEngineMesh(const IOobject& io)
+Foam::fvMotionSolverEngineMesh::fvMotionSolverEngineMesh(const IOobject& io)
 :
     engineMesh(io),
     pistonLayers_("pistonLayers", dimLength, 0.0),
@@ -56,13 +54,13 @@ fvMotionSolverEngineMesh::fvMotionSolverEngineMesh(const IOobject& io)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-fvMotionSolverEngineMesh::~fvMotionSolverEngineMesh()
+Foam::fvMotionSolverEngineMesh::~fvMotionSolverEngineMesh()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void fvMotionSolverEngineMesh::move()
+void Foam::fvMotionSolverEngineMesh::move()
 {
     scalar deltaZ = engineDB_.pistonDisplacement().value();
     Info<< "deltaZ = " << deltaZ << endl;
@@ -124,9 +122,5 @@ void fvMotionSolverEngineMesh::move()
         << "Piston speed = " << pistonSpeed << " m/s" << endl;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

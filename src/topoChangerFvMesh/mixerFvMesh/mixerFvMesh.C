@@ -84,8 +84,7 @@ void Foam::mixerFvMesh::addZonesAndModifiers()
 
     // Inner slider
     const word innerSliderName(motionDict_.subDict("slider").lookup("inside"));
-    const polyPatch& innerSlider =
-        boundaryMesh()[boundaryMesh().findPatchID(innerSliderName)];
+    const polyPatch& innerSlider = boundaryMesh()[innerSliderName];
 
     labelList isf(innerSlider.size());
 
@@ -105,8 +104,7 @@ void Foam::mixerFvMesh::addZonesAndModifiers()
 
     // Outer slider
     const word outerSliderName(motionDict_.subDict("slider").lookup("outside"));
-    const polyPatch& outerSlider =
-        boundaryMesh()[boundaryMesh().findPatchID(outerSliderName)];
+    const polyPatch& outerSlider = boundaryMesh()[outerSliderName];
 
     labelList osf(outerSlider.size());
 
@@ -217,8 +215,7 @@ void Foam::mixerFvMesh::calcMovingMasks() const
     const cellList& c = cells();
     const faceList& f = faces();
 
-    const labelList& cellAddr =
-        cellZones()[cellZones().findZoneID("movingCells")];
+    const labelList& cellAddr = cellZones()["movingCells"];
 
     forAll(cellAddr, cellI)
     {
@@ -242,8 +239,7 @@ void Foam::mixerFvMesh::calcMovingMasks() const
       + "Zone"
     );
 
-    const labelList& innerSliderAddr =
-        faceZones()[faceZones().findZoneID(innerSliderZoneName)];
+    const labelList& innerSliderAddr = faceZones()[innerSliderZoneName];
 
     forAll(innerSliderAddr, faceI)
     {
@@ -261,8 +257,7 @@ void Foam::mixerFvMesh::calcMovingMasks() const
       + "Zone"
     );
 
-    const labelList& outerSliderAddr =
-        faceZones()[faceZones().findZoneID(outerSliderZoneName)];
+    const labelList& outerSliderAddr = faceZones()[outerSliderZoneName];
 
     forAll(outerSliderAddr, faceI)
     {

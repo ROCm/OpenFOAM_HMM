@@ -63,7 +63,7 @@ public:
 };
 
 deleteControlDictPtr deleteControlDictPtr_;
-//! @endcond ignoreDocumentation
+//! @endcond
 
 
 } // End namespace debug

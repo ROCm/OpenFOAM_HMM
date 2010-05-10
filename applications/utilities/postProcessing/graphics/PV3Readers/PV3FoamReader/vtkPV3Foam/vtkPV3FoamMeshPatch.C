@@ -25,7 +25,7 @@ License
 
 #include "vtkPV3Foam.H"
 
-// Foam includes
+// OpenFOAM includes
 #include "polyPatch.H"
 #include "primitivePatch.H"
 #include "vtkOpenFOAMPoints.H"
@@ -47,7 +47,7 @@ vtkPolyData* Foam::vtkPV3Foam::patchVTKMesh(const polyPatch& p)
         printMemory();
     }
 
-    // Convert Foam mesh vertices to VTK
+    // Convert OpenFOAM mesh vertices to VTK
     const Foam::pointField& points = p.localPoints();
 
     vtkPoints* vtkpoints = vtkPoints::New();

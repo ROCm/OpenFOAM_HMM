@@ -35,7 +35,7 @@ License
 //! @cond localScope
 const Foam::scalar zeroish  = Foam::SMALL;
 const Foam::scalar positive = Foam::SMALL * 1E3;
-//! @endcond localScope
+//! @endcond
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

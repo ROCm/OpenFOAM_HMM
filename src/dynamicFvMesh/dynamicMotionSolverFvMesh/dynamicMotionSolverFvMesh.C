@@ -28,20 +28,23 @@ License
 #include "motionSolver.H"
 #include "volFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(dynamicMotionSolverFvMesh, 0);
+    addToRunTimeSelectionTable
+    (
+        dynamicFvMesh,
+        dynamicMotionSolverFvMesh,
+        IOobject
+    );
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(dynamicMotionSolverFvMesh, 0);
-
-addToRunTimeSelectionTable(dynamicFvMesh, dynamicMotionSolverFvMesh, IOobject);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-dynamicMotionSolverFvMesh::dynamicMotionSolverFvMesh(const IOobject& io)
+Foam::dynamicMotionSolverFvMesh::dynamicMotionSolverFvMesh(const IOobject& io)
 :
     dynamicFvMesh(io),
     motionPtr_(motionSolver::New(*this))
@@ -50,13 +53,13 @@ dynamicMotionSolverFvMesh::dynamicMotionSolverFvMesh(const IOobject& io)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-dynamicMotionSolverFvMesh::~dynamicMotionSolverFvMesh()
+Foam::dynamicMotionSolverFvMesh::~dynamicMotionSolverFvMesh()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool dynamicMotionSolverFvMesh::update()
+bool Foam::dynamicMotionSolverFvMesh::update()
 {
     fvMesh::movePoints(motionPtr_->newPoints());
 
@@ -70,9 +73,5 @@ bool dynamicMotionSolverFvMesh::update()
     return true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

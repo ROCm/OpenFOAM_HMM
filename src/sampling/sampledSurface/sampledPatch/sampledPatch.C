@@ -111,7 +111,7 @@ bool Foam::sampledPatch::update()
         return false;
     }
 
-    label patchI = mesh().boundaryMesh().findPatchID(patchName_);
+    const label patchI = mesh().boundaryMesh().findPatchID(patchName_);
 
     if (patchI != -1)
     {

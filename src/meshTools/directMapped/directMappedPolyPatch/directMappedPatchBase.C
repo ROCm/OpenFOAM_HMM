@@ -744,7 +744,7 @@ const Foam::polyPatch& Foam::directMappedPatchBase::samplePolyPatch() const
 {
     const polyMesh& nbrMesh = sampleMesh();
 
-    label patchI = nbrMesh.boundaryMesh().findPatchID(samplePatch_);
+    const label patchI = nbrMesh.boundaryMesh().findPatchID(samplePatch_);
 
     if (patchI == -1)
     {

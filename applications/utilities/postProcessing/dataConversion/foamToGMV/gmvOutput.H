@@ -6,10 +6,10 @@ for (label i=0; i < nTypes; i++)
     {
         gmvFile << "variable" << nl;
     }
-    for (label j=0; j < fieldNames.size(); j++)
-    {
 
-        word fieldName = fieldNames[j];
+    forAll(fieldNames, j)
+    {
+        const word& fieldName = fieldNames[j];
 
         IOobject fieldObject
         (

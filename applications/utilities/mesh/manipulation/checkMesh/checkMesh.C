@@ -48,9 +48,21 @@ int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
 #   include "addRegionOption.H"
-    argList::addBoolOption("noTopology");
-    argList::addBoolOption("allGeometry");
-    argList::addBoolOption("allTopology");
+    argList::addBoolOption
+    (
+        "noTopology",
+        "skip checking the mesh topology"
+    );
+    argList::addBoolOption
+    (
+        "allGeometry",
+        "include bounding box checks"
+    );
+    argList::addBoolOption
+    (
+        "allTopology",
+        "include extra topology checks"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"

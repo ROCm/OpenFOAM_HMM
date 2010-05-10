@@ -40,6 +40,7 @@ Description
     Comparable to running a meshModifier of the form
     (if masterPatch is called "M" and slavePatch "S"):
 
+    @verbatim
     couple
     {
         type                    slidingInterface;
@@ -51,6 +52,7 @@ Description
         slavePatchName          S;
         typeOfMatch             partial or integral
     }
+    @endverbatim
 
 
 \*---------------------------------------------------------------------------*/
@@ -168,7 +170,7 @@ label addCellZone(const polyMesh& mesh, const word& name)
 // Checks whether patch present
 void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
 {
-    label patchI = bMesh.findPatchID(name);
+    const label patchI = bMesh.findPatchID(name);
 
     if (patchI == -1)
     {
@@ -192,22 +194,41 @@ void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "merge the faces on the specified patches (if geometrically possible)\n"
+        "so the faces become internal"
+    );
+
     argList::noParallel();
-#   include "addOverwriteOption.H"
-#   include "addRegionOption.H"
+    #include "addOverwriteOption.H"
+    #include "addRegionOption.H"
 
     argList::validArgs.append("masterPatch");
     argList::validArgs.append("slavePatch");
 
-    argList::addBoolOption("partial");
-    argList::addBoolOption("perfect");
+    argList::addBoolOption
+    (
+        "partial",
+        "couple partially overlapping patches"
+    );
+    argList::addBoolOption
+    (
+        "perfect",
+        "couple perfectly aligned patches"
+    );
+    argList::addOption
+    (
+        "toleranceDict",
+        "file",
+        "dictionary file with tolerances"
+    );
 
-    argList::addOption("toleranceDict", "file with tolerances");
-
-#   include "setRootCase.H"
-#   include "createTime.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
     runTime.functionObjects().off();
-#   include "createNamedMesh.H"
+    #include "createNamedMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     const word masterPatchName = args[1];
@@ -220,7 +241,7 @@ int main(int argc, char *argv[])
     if (partialCover && perfectCover)
     {
         FatalErrorIn(args.executable())
-            << "Cannot both supply partial and perfect." << endl
+            << "Cannot supply both partial and perfect." << endl
             << "Use perfect match option if the patches perfectly align"
             << " (both vertex positions and face centres)" << endl
             << exit(FatalError);
@@ -291,11 +312,7 @@ int main(int argc, char *argv[])
     // Create and add face zones and mesh modifiers
 
     // Master patch
-    const polyPatch& masterPatch =
-        mesh.boundaryMesh()
-        [
-            mesh.boundaryMesh().findPatchID(masterPatchName)
-        ];
+    const polyPatch& masterPatch = mesh.boundaryMesh()[masterPatchName];
 
     // Make list of masterPatch faces
     labelList isf(masterPatch.size());
@@ -352,11 +369,7 @@ int main(int argc, char *argv[])
         );
 
         // Slave patch
-        const polyPatch& slavePatch =
-            mesh.boundaryMesh()
-            [
-                mesh.boundaryMesh().findPatchID(slavePatchName)
-            ];
+        const polyPatch& slavePatch = mesh.boundaryMesh()[slavePatchName];
 
         labelList osf(slavePatch.size());
 

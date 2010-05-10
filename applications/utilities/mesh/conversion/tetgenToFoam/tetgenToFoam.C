@@ -97,7 +97,11 @@ label findFace(const primitiveMesh& mesh, const face& f)
 int main(int argc, char *argv[])
 {
     argList::validArgs.append("file prefix");
-    argList::addBoolOption("noFaceFile");
+    argList::addBoolOption
+    (
+        "noFaceFile",
+        "skip reading .face file for boundary information"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
