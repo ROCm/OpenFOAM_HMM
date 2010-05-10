@@ -98,7 +98,7 @@
 {
     white-space:nowrap /*IE hack*/;
     float:left;
-    width:954px;
+    width:100%;
     background:rgb(225,225,225);
     color:rgb(100,100,100);
     font-size:130%;
