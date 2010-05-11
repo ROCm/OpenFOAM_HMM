@@ -250,7 +250,11 @@ int main(int argc, char *argv[])
         "parallelTarget",
         "the target is decomposed"
     );
-    argList::addBoolOption("consistent");
+    argList::addBoolOption
+    (
+        "consistent",
+        "source and target geometry and boundary conditions identical"
+    );
 
     argList args(argc, argv);
 

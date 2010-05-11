@@ -1479,17 +1479,18 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "splits mesh into multiple regions"
+        "splits mesh into multiple regions (detected by walking across faces)"
     );
     #include "addOverwriteOption.H"
     argList::addBoolOption
     (
-        "cellZones"
+        "cellZones",
+        "additionally split cellZones off into separate regions"
     );
     argList::addBoolOption
     (
         "cellZonesOnly",
-        "use current cellZones to split mesh into regions"
+        "use cellZones only to split mesh into regions; do not use walking"
     );
     argList::addOption
     (
@@ -1500,7 +1501,8 @@ int main(int argc, char *argv[])
     argList::addOption
     (
         "blockedFaces",
-        "faceSet"
+        "faceSet",
+        "specify additional region boundaries that walking does not cross"
     );
     argList::addBoolOption
     (
@@ -1509,12 +1511,14 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
-        "largestOnly"
+        "largestOnly",
+        "only write largest region"
     );
     argList::addOption
     (
         "insidePoint",
-        "point"
+        "point",
+        "only write region containing point"
     );
     argList::addBoolOption
     (
@@ -1524,7 +1528,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "sloppyCellZones",
-        "try to match regions to existing cell zones"
+        "try to match heuristically regions to existing cell zones"
     );
 
     #include "setRootCase.H"
