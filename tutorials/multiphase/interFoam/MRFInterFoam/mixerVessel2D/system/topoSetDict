@@ -23,7 +23,7 @@ actions
         type            cellSet;
         action          new;
         source          zoneToCell;
-        sourceDict
+        sourceInfo
         {
             name rotor;
         }
