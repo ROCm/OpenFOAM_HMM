@@ -25,14 +25,9 @@ License
 
 #include "tolerances.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-tolerances::tolerances(const Time& t, const fileName& dictName)
+Foam::tolerances::tolerances(const Time& t, const fileName& dictName)
 :
     IOdictionary
     (
@@ -58,11 +53,11 @@ tolerances::tolerances(const Time& t, const fileName& dictName)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool tolerances::read()
+bool Foam::tolerances::read()
 {
     if (regIOobject::read())
     {
-        word toleranceSetName(lookup("toleranceSet"));
+        const word toleranceSetName(lookup("toleranceSet"));
         const dictionary& toleranceSet(subDict(toleranceSetName));
 
         if (toleranceSet.found("relaxationFactors"))
@@ -90,34 +85,34 @@ bool tolerances::read()
 }
 
 
-bool tolerances::relax(const word& name) const
+bool Foam::tolerances::relax(const word& name) const
 {
     return relaxationFactors_.found(name);
 }
 
-scalar tolerances::relaxationFactor(const word& name) const
+
+Foam::scalar Foam::tolerances::relaxationFactor(const word& name) const
 {
     return readScalar(relaxationFactors_.lookup(name));
 }
 
-scalar tolerances::solverTolerance(const word& name) const
+
+Foam::scalar Foam::tolerances::solverTolerance(const word& name) const
 {
     return readScalar(solverTolerances_.lookup(name));
 }
 
-bool tolerances::solverRelativeTolerances() const
+
+bool Foam::tolerances::solverRelativeTolerances() const
 {
     return solverRelativeTolerances_.size();
 }
 
-scalar tolerances::solverRelativeTolerance(const word& name) const
+
+Foam::scalar Foam::tolerances::solverRelativeTolerance(const word& name) const
 {
     return readScalar(solverRelativeTolerances_.lookup(name));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

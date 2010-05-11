@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,11 +84,21 @@ class particleForces
             //- Pressure gradient
             Switch pressureGradient_;
 
+            //- Paramagnetic force
+            Switch paramagnetic_;
+
+            //- Magnetic susceptibility of particle
+            scalar magneticSusceptibility_;
+
 
         // Additional info
 
-            //- Name of velucity field - default = "U"
+            //- Name of velocity field - default = "U"
             const word UName_;
+
+            //- Name of paramagnetic field strength field - default =
+            //  "HdotGradH"
+            const word HdotGradHName_;
 
 
 public:
@@ -128,13 +138,22 @@ public:
             Switch virtualMass() const;
 
             //- Return virtual mass force coefficient
-            Switch Cvm() const;
+            scalar Cvm() const;
 
             //- Return pressure gradient force activate switch
             Switch pressureGradient() const;
 
             //- Return name of velocity field
             const word& UName() const;
+
+            //- Return paramagnetic force activate switch
+            Switch paramagnetic() const;
+
+            //- Return magnetic susceptibility
+            scalar magneticSusceptibility() const;
+
+            //- Return name of paramagnetic field strength field
+            const word& HdotGradHName() const;
 
 
        // Evaluation
@@ -150,7 +169,8 @@ public:
                 const scalar rhoc,
                 const scalar rho,
                 const vector& Uc,
-                const vector& U
+                const vector& U,
+                const scalar d
             ) const;
 
             //- Calculate external forces applied to the particles
@@ -161,7 +181,8 @@ public:
                 const scalar rhoc,
                 const scalar rho,
                 const vector& Uc,
-                const vector& U
+                const vector& U,
+                const scalar d
             ) const;
 };
 

@@ -48,14 +48,16 @@ tmp<scalarField> nutUTabulatedWallFunctionFvPatchScalarField::calcNut() const
     const scalarField& y = rasModel.y()[patchI];
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
     const scalarField magUp = mag(Uw.patchInternalField() - Uw);
-    const scalarField magGradU = mag(Uw.snGrad()) + ROOTVSMALL;
+    const scalarField magGradU = mag(Uw.snGrad());
     const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
 
     return
         max
         (
             scalar(0),
-            sqr(magUp/(calcUPlus(magUp*y/nuw) + ROOTVSMALL))/magGradU - nuw
+            sqr(magUp/(calcUPlus(magUp*y/nuw) + ROOTVSMALL))
+           /(magGradU + ROOTVSMALL)
+          - nuw
         );
 }
 
@@ -190,7 +192,6 @@ tmp<scalarField> nutUTabulatedWallFunctionFvPatchScalarField::yPlus() const
 void nutUTabulatedWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-//    writeLocalEntries(os); // not applicable to this nut BC
     os.writeKeyword("uPlusTable") << uPlusTableName_
         << token::END_STATEMENT << nl;
     writeEntry("value", os);

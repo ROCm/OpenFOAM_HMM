@@ -186,7 +186,7 @@ void Foam::fvMeshDistribute::mapBoundaryFields
         forAll(bfld, patchI)
         {
             fvsPatchField<T>& patchFld = bfld[patchI];
-            label faceI = patchFld.patch().patch().start();
+            label faceI = patchFld.patch().start();
 
             forAll(patchFld, i)
             {

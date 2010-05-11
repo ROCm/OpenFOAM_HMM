@@ -186,6 +186,6 @@ void Foam::SurfaceFilmModel<CloudType>::setParcelProperties
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewSurfaceFilmModel.C"
+#include "SurfaceFilmModelNew.C"
 
 // ************************************************************************* //

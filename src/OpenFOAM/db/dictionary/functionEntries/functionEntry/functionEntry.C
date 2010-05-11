@@ -82,7 +82,7 @@ bool Foam::functionEntry::execute
             "(const word& functionName, dictionary& parentDict, Istream&)"
         )   << "Unknown functionEntry '" << functionName
             << "' in " << is.name() << " near line " << is.lineNumber()
-            << endl << endl
+            << nl << nl
             << "Valid functionEntries are :" << endl
             << executedictionaryIstreamMemberFunctionTablePtr_->toc()
             << exit(FatalError);
@@ -128,7 +128,7 @@ bool Foam::functionEntry::execute
             "(const word&, const dictionary&, primitiveEntry&, Istream&)"
         )   << "Unknown functionEntry '" << functionName
             << "' in " << is.name() << " near line " << is.lineNumber()
-            << endl << endl
+            << nl << nl
             << "Valid functionEntries are :" << endl
             << executeprimitiveEntryIstreamMemberFunctionTablePtr_->toc()
             << exit(FatalError);

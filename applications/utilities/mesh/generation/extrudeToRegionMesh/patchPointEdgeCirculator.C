@@ -58,7 +58,7 @@ Foam::Ostream& Foam::operator<<
 
     if (faceI != -1)
     {
-        os<< " fc:" << c.patch_.localFaces()[faceI].centre(pts);
+        os  << " fc:" << c.patch_.localFaces()[faceI].centre(pts);
     }
     return os;
 }

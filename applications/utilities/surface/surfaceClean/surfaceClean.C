@@ -46,12 +46,11 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.clear();
     argList::noParallel();
-    argList::validArgs.append("surface file");
+    argList::validArgs.append("surfaceFile");
     argList::validArgs.append("min length");
-    argList::validArgs.append("output surface file");
-    argList::argList args(argc, argv);
+    argList::validArgs.append("output surfaceFile");
+    argList args(argc, argv);
 
     const fileName inFileName = args[1];
     const scalar minLen = args.argRead<scalar>(2);

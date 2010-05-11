@@ -37,7 +37,7 @@ Description
 
 SourceFiles
     fvsPatchField.C
-    newFvsPatchField.C
+    fvsPatchFieldNew.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -212,6 +212,18 @@ public:
         static tmp<fvsPatchField<Type> > New
         (
             const word&,
+            const fvPatch&,
+            const DimensionedField<Type, surfaceMesh>&
+        );
+
+        //- Return a pointer to a new patchField created on freestore given
+        //  patch and internal field
+        //  (does not set the patch field values)
+        //  Allows override of constraint type
+        static tmp<fvsPatchField<Type> > New
+        (
+            const word&,
+            const word& actualPatchType, 
             const fvPatch&,
             const DimensionedField<Type, surfaceMesh>&
         );

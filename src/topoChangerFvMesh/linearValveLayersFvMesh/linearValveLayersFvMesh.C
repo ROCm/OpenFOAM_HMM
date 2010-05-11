@@ -37,7 +37,6 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(linearValveLayersFvMesh, 0);
-
     addToRunTimeSelectionTable(topoChangerFvMesh, linearValveLayersFvMesh, IOobject);
 }
 
@@ -87,8 +86,7 @@ void Foam::linearValveLayersFvMesh::addZonesAndModifiers()
 
     // Inner slider
     const word innerSliderName(motionDict_.subDict("slider").lookup("inside"));
-    const polyPatch& innerSlider =
-        boundaryMesh()[boundaryMesh().findPatchID(innerSliderName)];
+    const polyPatch& innerSlider = boundaryMesh()[innerSliderName];
 
     labelList isf(innerSlider.size());
 
@@ -108,8 +106,7 @@ void Foam::linearValveLayersFvMesh::addZonesAndModifiers()
 
     // Outer slider
     const word outerSliderName(motionDict_.subDict("slider").lookup("outside"));
-    const polyPatch& outerSlider =
-        boundaryMesh()[boundaryMesh().findPatchID(outerSliderName)];
+    const polyPatch& outerSlider = boundaryMesh()[outerSliderName];
 
     labelList osf(outerSlider.size());
 
@@ -143,8 +140,7 @@ void Foam::linearValveLayersFvMesh::addZonesAndModifiers()
         motionDict_.subDict("layer").lookup("patch")
     );
 
-    const polyPatch& layerPatch =
-        boundaryMesh()[boundaryMesh().findPatchID(layerPatchName)];
+    const polyPatch& layerPatch = boundaryMesh()[layerPatchName];
 
     labelList lpf(layerPatch.size());
 
@@ -317,8 +313,7 @@ Foam::tmp<Foam::pointField> Foam::linearValveLayersFvMesh::newPoints() const
         motionDict_.subDict("layer").lookup("patch")
     );
 
-    const polyPatch& layerPatch =
-        boundaryMesh()[boundaryMesh().findPatchID(layerPatchName)];
+    const polyPatch& layerPatch = boundaryMesh()[layerPatchName];
 
     const labelList& patchPoints = layerPatch.meshPoints();
 

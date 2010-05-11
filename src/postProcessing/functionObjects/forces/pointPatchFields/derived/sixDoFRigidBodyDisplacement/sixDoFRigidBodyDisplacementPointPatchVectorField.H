@@ -60,8 +60,13 @@ class sixDoFRigidBodyDisplacementPointPatchVectorField
         pointField initialPoints_;
 
         //- Reference density required by the forces object for
-        //  incompressible calculations
+        //  incompressible calculations, required if rhoName == rhoInf
         scalar rhoInf_;
+
+        //- Name of density field, optional unless used for an
+        //  incompressible simulation, when this needs to be specified
+        //  as rhoInf
+        word rhoName_;
 
 
 public:

@@ -221,7 +221,7 @@ Foam::displacementLayeredMotionFvMotionSolver::faceZoneEvaluate
     tmp<vectorField> tfld(new vectorField(meshPoints.size()));
     vectorField& fld = tfld();
 
-    const word& type = dict.lookup("type");
+    const word type(dict.lookup("type"));
 
     if (type == "fixedValue")
     {
@@ -353,8 +353,7 @@ void Foam::displacementLayeredMotionFvMotionSolver::cellZoneSolve
         const dictionary& faceZoneDict = patchIter().dict();
 
         // Determine the points of the faceZone within the cellZone
-        label zoneI = mesh().faceZones().findZoneID(faceZoneName);
-        const faceZone& fz = mesh().faceZones()[zoneI];
+        const faceZone& fz = mesh().faceZones()[faceZoneName];
         const labelList& fzMeshPoints = fz().meshPoints();
         DynamicList<label> meshPoints(fzMeshPoints.size());
         forAll(fzMeshPoints, i)

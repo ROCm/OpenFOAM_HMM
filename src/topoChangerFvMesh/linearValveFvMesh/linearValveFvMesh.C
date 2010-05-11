@@ -84,8 +84,7 @@ void Foam::linearValveFvMesh::addZonesAndModifiers()
 
     // Inner slider
     const word innerSliderName(motionDict_.subDict("slider").lookup("inside"));
-    const polyPatch& innerSlider =
-        boundaryMesh()[boundaryMesh().findPatchID(innerSliderName)];
+    const polyPatch& innerSlider = boundaryMesh()[innerSliderName];
 
     labelList isf(innerSlider.size());
 
@@ -105,8 +104,7 @@ void Foam::linearValveFvMesh::addZonesAndModifiers()
 
     // Outer slider
     const word outerSliderName(motionDict_.subDict("slider").lookup("outside"));
-    const polyPatch& outerSlider =
-        boundaryMesh()[boundaryMesh().findPatchID(outerSliderName)];
+    const polyPatch& outerSlider = boundaryMesh()[outerSliderName];
 
     labelList osf(outerSlider.size());
 

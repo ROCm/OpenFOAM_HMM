@@ -51,14 +51,23 @@ functions
     {
         type            faceSource;
         functionObjectLibs ("libfieldFunctionObjects.so");
+
         enabled         true;
         outputControl   outputTime;
+
+        // Output to log&file (true) or to file only
         log             true;
+
+        // Output field values as well
         valueOutput     true;
+
+        // Patch or faceZone to sample
         source          patch;
         sourceName      movingWall;
 //        source          faceZone;
 //        sourceName      f0;
+
+        // Operation: areaAverage/sum/weightedAverage ...
         operation       areaAverage;
 
         fields

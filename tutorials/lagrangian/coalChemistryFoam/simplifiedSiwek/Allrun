@@ -10,7 +10,7 @@ application=`getApplication`
 runApplication blockMesh
 
 # create ignition cells cellSet
-runApplication cellSet
+runApplication topoSet
 
 runApplication $application
 

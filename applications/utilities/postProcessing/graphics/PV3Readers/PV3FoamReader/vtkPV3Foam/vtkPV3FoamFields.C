@@ -25,7 +25,7 @@ License
 
 #include "vtkPV3Foam.H"
 
-// Foam includes
+// OpenFOAM includes
 #include "IOobjectList.H"
 #include "vtkPV3FoamReader.h"
 
@@ -94,7 +94,7 @@ void Foam::vtkPV3Foam::convertVolFields
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::convertVolFields" << nl
-            << "converting Foam volume fields" << endl;
+            << "converting OpenFOAM volume fields" << endl;
         forAllConstIter(IOobjectList, objects, iter)
         {
             Info<< "  " << iter()->name()
@@ -163,6 +163,10 @@ void Foam::vtkPV3Foam::convertPointFields
 
     if (selectedFields.empty())
     {
+        if (debug)
+        {
+            Info<< "no point fields selected" << endl;
+        }
         return;
     }
 
@@ -179,7 +183,7 @@ void Foam::vtkPV3Foam::convertPointFields
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::convertPointFields" << nl
-            << "converting Foam volume fields" << endl;
+            << "converting OpenFOAM volume fields -> point fields" << endl;
         forAllConstIter(IOobjectList, objects, iter)
         {
             Info<< "  " << iter()->name()
@@ -274,7 +278,7 @@ void Foam::vtkPV3Foam::convertLagrangianFields
 
         if (debug)
         {
-            Info<< "converting Foam lagrangian fields" << nl;
+            Info<< "converting OpenFOAM lagrangian fields" << nl;
             forAllConstIter(IOobjectList, objects, iter)
             {
                 Info<< "  " << iter()->name()

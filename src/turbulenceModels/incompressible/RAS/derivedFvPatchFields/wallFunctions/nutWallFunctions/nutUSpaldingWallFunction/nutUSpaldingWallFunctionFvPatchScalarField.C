@@ -46,10 +46,14 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcNut() const
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-    const scalarField magGradU = mag(Uw.snGrad()) + ROOTVSMALL;
+    const scalarField magGradU = mag(Uw.snGrad());
     const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
 
-    return max(scalar(0), sqr(calcUTau(magGradU))/magGradU - nuw);
+    return max
+    (
+        scalar(0),
+        sqr(calcUTau(magGradU))/(magGradU + ROOTVSMALL) - nuw
+    );
 }
 
 
@@ -73,10 +77,9 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
 
     forAll(uTau, facei)
     {
-        scalar ut =
-            sqrt((nutw[facei] + nuw[facei])*magGradU[facei]) + ROOTVSMALL;
+        scalar ut = sqrt((nutw[facei] + nuw[facei])*magGradU[facei]);
 
-        if (ut > VSMALL)
+        if (ut > ROOTVSMALL)
         {
             int iter = 0;
             scalar err = GREAT;
@@ -100,7 +103,7 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
                 err = mag((ut - uTauNew)/ut);
                 ut = uTauNew;
 
-            } while (ut > VSMALL && err > 0.01 && ++iter < 10);
+            } while (ut > ROOTVSMALL && err > 0.01 && ++iter < 10);
 
             uTau[facei] = max(0.0, ut);
         }

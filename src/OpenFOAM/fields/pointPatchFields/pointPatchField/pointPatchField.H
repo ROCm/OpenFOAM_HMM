@@ -35,7 +35,7 @@ Description
 
 SourceFiles
     pointPatchField.C
-    newpointPatchField.C
+    newPointPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -199,6 +199,18 @@ public:
             const DimensionedField<Type, pointMesh>&
         );
 
+        //- Return a pointer to a new patchField created on freestore given
+        //  patch and internal field
+        //  (does not set the patch field values).
+        //  Allows override of constraint type
+        static autoPtr<pointPatchField<Type> > New
+        (
+            const word&,
+            const word& actualPatchType,
+            const pointPatch&,
+            const DimensionedField<Type, pointMesh>&
+        );
+
         //- Return a pointer to a new patchField created on freestore from
         //  a given pointPatchField mapped onto a new patch
         static autoPtr<pointPatchField<Type> > New
@@ -336,8 +348,14 @@ public:
                 const Field<Type1>& pF
             ) const;
 
-            //- Return the type of the calculated for of pointPatchField
+            //- Return the type of the calculated form of pointPatchField
             static const word& calculatedType();
+
+            //- Return the constraint type this pointPatchField implements.
+            virtual const word& constraintType() const
+            {
+                return word::null;
+            }
 
 
         // Mapping functions

@@ -231,14 +231,15 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const IOobject& io,
     const Mesh& mesh,
     const dimensionSet& ds,
-    const wordList& patchFieldTypes
+    const wordList& patchFieldTypes,
+    const wordList& actualPatchTypes
 )
 :
     DimensionedField<Type, GeoMesh>(io, mesh, ds),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(NULL),
     fieldPrevIterPtr_(NULL),
-    boundaryField_(mesh.boundary(), *this, patchFieldTypes)
+    boundaryField_(mesh.boundary(), *this, patchFieldTypes, actualPatchTypes)
 {
     if (debug)
     {
@@ -287,14 +288,15 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const IOobject& io,
     const Mesh& mesh,
     const dimensioned<Type>& dt,
-    const wordList& patchFieldTypes
+    const wordList& patchFieldTypes,
+    const wordList& actualPatchTypes
 )
 :
     DimensionedField<Type, GeoMesh>(io, mesh, dt),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(NULL),
     fieldPrevIterPtr_(NULL),
-    boundaryField_(mesh.boundary(), *this, patchFieldTypes)
+    boundaryField_(mesh.boundary(), *this, patchFieldTypes, actualPatchTypes)
 {
     if (debug)
     {
@@ -653,14 +655,22 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
     const GeometricField<Type, PatchField, GeoMesh>& gf,
-    const wordList& patchFieldTypes
+    const wordList& patchFieldTypes,
+    const wordList& actualPatchTypes
+
 )
 :
     DimensionedField<Type, GeoMesh>(io, gf),
     timeIndex_(gf.timeIndex()),
     field0Ptr_(NULL),
     fieldPrevIterPtr_(NULL),
-    boundaryField_(this->mesh().boundary(), *this, patchFieldTypes)
+    boundaryField_
+    (
+        this->mesh().boundary(),
+        *this,
+        patchFieldTypes,
+        actualPatchTypes
+    )
 {
     if (debug)
     {

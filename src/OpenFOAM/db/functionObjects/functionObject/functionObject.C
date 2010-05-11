@@ -50,7 +50,7 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
     const dictionary& functionDict
 )
 {
-    word functionType(functionDict.lookup("type"));
+    const word functionType(functionDict.lookup("type"));
 
     if (debug)
     {

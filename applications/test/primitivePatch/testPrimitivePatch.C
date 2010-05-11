@@ -47,8 +47,7 @@ void writeObj(Ostream& os,const pointField& points)
     {
         const point& pt = points[pointI];
 
-        os << "v " << pt.x() << ' ' << pt.y()
-            << ' ' << pt.z() << endl;
+        os  << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
     }
 }
 
@@ -221,10 +220,7 @@ int main(int argc, char *argv[])
 #   include "createPolyMesh.H"
 
     const word patchName = args[1];
-
-    label patchI = mesh.boundaryMesh().findPatchID(patchName);
-
-    const polyPatch& patch = mesh.boundaryMesh()[patchI];
+    const polyPatch& patch = mesh.boundaryMesh()[patchName];
 
     Info<< "Patch:" << patch.name() << endl;
 

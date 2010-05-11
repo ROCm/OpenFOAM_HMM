@@ -95,13 +95,13 @@ public:
 
         friend Istream& operator>>(Istream& is, substance& s)
         {
-            is >> s.name_ >> s.volFrac_;
+            is  >> s.name_ >> s.volFrac_;
             return is;
         }
 
         friend Ostream& operator<<(Ostream& os, const substance& s)
         {
-            os << s.name_ << token::SPACE << s.volFrac_;
+            os  << s.name_ << token::SPACE << s.volFrac_;
             return os;
         }
 };

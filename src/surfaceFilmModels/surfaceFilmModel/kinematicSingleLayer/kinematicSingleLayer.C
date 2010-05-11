@@ -387,7 +387,7 @@ Foam::surfaceFilmModels::kinematicSingleLayer::tau
         dimensionedVector("zero", dimVelocity, vector::zero)
     );
 
-    for (label i=0; i<filmBottomPatchIDs_.size(); i++)
+    forAll(filmBottomPatchIDs_, i)
     {
         label patchI = filmBottomPatchIDs_[i];
         const polyPatch& pp = filmRegion_.boundaryMesh()[patchI];

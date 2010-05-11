@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -187,6 +187,19 @@ public:
                 const scalar convergenceDistSqr,
                 const point& start
             ) const;
+
+
+    // Member Operators
+
+        //- Return const and non-const reference to searchableSurface by index.
+        using PtrList<searchableSurface>::operator[];
+
+        //- Return const reference to searchableSurface by name.
+        const searchableSurface& operator[](const word&) const;
+
+        //- Return reference to searchableSurface by name.
+        searchableSurface& operator[](const word&);
+
 
 };
 

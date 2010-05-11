@@ -48,7 +48,7 @@ OPTIONS = $(WM_OPTIONS)/options
 #------------------------------------------------------------------------------
 
 $(OPTIONS) : options
-	@$(WM_SCRIPTS)/makeDir $(WM_OPTIONS) ; $(CPP) $(GFLAGS) options > $(OPTIONS)
+	@$(WM_SCRIPTS)/makeDir $(WM_OPTIONS) ; $(CPP) $(GFLAGS) options | sed -e 's@   *@ @g' > $(OPTIONS)
 
 
 #------------------------------------------------------------------------------

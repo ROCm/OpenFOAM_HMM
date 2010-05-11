@@ -1,101 +1,100 @@
 /* tabs styles, based on http://www.alistapart.com/articles/slidingdoors */
 
-DIV.tabs
+div.tabs
 {
-   float            : left;
-   width            : 100%;
-   margin-bottom    : 2px;
-   padding-bottom   : 6px;
+    float           : left;
+    width           : 100%;
+    margin-bottom   : 2px;
+    padding-bottom  : 6px;
 }
 
-DIV.tabs UL
+div.tabs ul
 {
-   margin           : 0px;
-   padding-left     : 0px;
-   border-right     : 1px solid #84B0C7;
-   list-style       : none;
+    margin          : 0px;
+    padding-left    : 0px;
+    border-right    : 1px solid #84B0C7;
+    list-style      : none;
 }
 
-DIV.tabs LI, DIV.tabs FORM
+div.tabs li, div.tabs form
 {
-   display          : inline;
-   margin           : 0px;
-   padding          : 0px;
+    display         : inline;
+    margin          : 0px;
+    padding         : 0px;
 }
 
-DIV.tabs FORM
+div.tabs form
 {
-   float            : left;
-   padding          : 0px 9px;
+    float           : left;
+    padding         : 0px 9px;
 }
 
-DIV.tabs A
+div.tabs a
 {
-   float            : left;
-   font-size        : 12px;
-   font-weight      : bold;
-   text-decoration  : none;
-   border-right     : 1px solid #000000;
+    float           : left;
+    font-size       : 12px;
+    font-weight     : bold;
+    text-decoration : none;
+    border-right    : 1px solid #000000;
 }
 
-DIV.tabs A:hover
+div.tabs a:hover
 {
-   background-position: 100% -150px;
+    background-position: 100% -150px;
 }
 
-DIV.tabs A:link, DIV.tabs A:visited,
-DIV.tabs A:active, DIV.tabs A:hover
+div.tabs a:link, div.tabs a:visited, div.tabs a:active, div.tabs a:hover
 {
-       color: #000000;
+    color           : #000000;
 }
 
-DIV.tabs SPAN
+div.tabs span
 {
-   float            : left;
-   display          : block;
-   padding          : 0px 9px;
-   white-space      : nowrap;
+    float           : left;
+    display         : block;
+    padding         : 0px 9px;
+    white-space     : nowrap;
 }
 
-DIV.tabs INPUT
+div.tabs input
 {
-   float            : right;
-   display          : inline;
-   font-size        : 12px;
+    float           : right;
+    display         : inline;
+    font-size       : 12px;
 }
 
-DIV.tabs TD
+div.tabs td
 {
-   font-size        : 12px;
-   font-weight      : bold;
-   text-decoration  : none;
+    font-size       : 12px;
+    font-weight     : bold;
+    text-decoration : none;
 }
 
-/* Commented Backslash Hack hides rule from IE5-Mac \*/
-DIV.tabs SPAN {float : none;}
+/* Commented backslash hack hides rule from IE5-Mac \*/
+div.tabs span { float : none; }
 /* End IE5-Mac hack */
 
-DIV.tabs A:hover SPAN
+div.tabs a:hover span
 {
-   background-position: 0% -150px;
+    background-position: 0% -150px;
 }
 
-DIV.tabs LI#current A
+div.tabs li#current a
 {
-   border-width     : 0px;
-   border-right     : 1px solid #000000;
-   color: #0000ff;
+    border-width    : 0px;
+    border-right    : 1px solid #000000;
+    color           : #0000ff;
 }
 
-DIV.tabs LI#current SPAN
+div.tabs li#current span
 {
-   padding-bottom   : 0px;
+    padding-bottom  : 0px;
 }
 
-DIV.nav
+div.nav
 {
-   background       : none;
-   border           : none;
-   border-bottom    : 1px solid #000000;
+    background      : none;
+    border          : none;
+    border-bottom   : 1px solid #000000;
 }
 

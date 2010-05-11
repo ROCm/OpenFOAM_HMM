@@ -35,7 +35,7 @@ Description
 
 SourceFiles
     pointZone.C
-    newPointZone.C
+    pointZoneNew.C
 
 \*---------------------------------------------------------------------------*/
 

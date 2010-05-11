@@ -17,7 +17,7 @@ FoamFile
 
 application     simpleFoam;
 
-startFrom       startTime;
+startFrom       latestTime;
 
 startTime       0;
 
@@ -50,7 +50,7 @@ functions
     convergenceChecks
     {
         type           residualControl;
-        functionObjectLibs ( "libjobControl.so" );
+        functionObjectLibs ("libjobControl.so");
         outputControl  timeStep;
         outputInterval 1;
 
@@ -67,7 +67,7 @@ functions
         type            streamLine;
 
         // Where to load it from (if not already in solver)
-        functionObjectLibs ("libOpenFOAM.so" "libfieldFunctionObjects.so");
+        functionObjectLibs ("libfieldFunctionObjects.so");
 
         // Output every
         outputControl   outputTime;

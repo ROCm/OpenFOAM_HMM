@@ -44,7 +44,7 @@ int yyFlexLexer::yylex()
         << abort(FatalError);
     return 0;
 }
-//! @endcond dummy
+//! @endcond
 
 // Dummy yywrap to keep yylex happy at compile time.
 // It is called by yylex but is not used as the mechanism to change file.
@@ -58,7 +58,7 @@ int yyFlexLexer::yywrap()
 {
     return 1;
 }
-//! @endcond dummy
+//! @endcond
 
 
 //- A lexer for parsing STL ASCII files.

@@ -110,10 +110,9 @@ labelList parseVertices(const string& line)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.clear();
     argList::validArgs.append("OBJ file");
     argList::validArgs.append("output VTK file");
-    argList::argList args(argc, argv);
+    argList args(argc, argv);
 
     const fileName objName = args[1];
     const fileName outName = args[2];

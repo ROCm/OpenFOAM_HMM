@@ -1473,26 +1473,68 @@ void writeCellToRegion(const fvMesh& mesh, const labelList& cellRegion)
 }
 
 
-
 // Main program:
 
 int main(int argc, char *argv[])
 {
-#   include "addOverwriteOption.H"
-    argList::addBoolOption("cellZones");
-    argList::addBoolOption("cellZonesOnly");
-    argList::addOption("cellZonesFileOnly", "cellZonesName");
-    argList::addOption("blockedFaces", "faceSet");
-    argList::addBoolOption("makeCellZones");
-    argList::addBoolOption("largestOnly");
-    argList::addOption("insidePoint", "point");
-    argList::addBoolOption("detectOnly");
-    argList::addBoolOption("sloppyCellZones");
+    argList::addNote
+    (
+        "splits mesh into multiple regions (detected by walking across faces)"
+    );
+    #include "addOverwriteOption.H"
+    argList::addBoolOption
+    (
+        "cellZones",
+        "additionally split cellZones off into separate regions"
+    );
+    argList::addBoolOption
+    (
+        "cellZonesOnly",
+        "use cellZones only to split mesh into regions; do not use walking"
+    );
+    argList::addOption
+    (
+        "cellZonesFileOnly",
+        "file",
+        "like -cellZonesOnly, but use specified file"
+    );
+    argList::addOption
+    (
+        "blockedFaces",
+        "faceSet",
+        "specify additional region boundaries that walking does not cross"
+    );
+    argList::addBoolOption
+    (
+        "makeCellZones",
+        "place cells into cellZones instead of splitting mesh"
+    );
+    argList::addBoolOption
+    (
+        "largestOnly",
+        "only write largest region"
+    );
+    argList::addOption
+    (
+        "insidePoint",
+        "point",
+        "only write region containing point"
+    );
+    argList::addBoolOption
+    (
+        "detectOnly",
+        "do not write mesh"
+    );
+    argList::addBoolOption
+    (
+        "sloppyCellZones",
+        "try to match heuristically regions to existing cell zones"
+    );
 
-#   include "setRootCase.H"
-#   include "createTime.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
     runTime.functionObjects().off();
-#   include "createMesh.H"
+    #include "createMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
     word blockedFacesName;
@@ -1514,10 +1556,7 @@ int main(int argc, char *argv[])
     if
     (
         (useCellZonesOnly || useCellZonesFile)
-     && (
-            blockedFacesName != word::null
-         || useCellZones
-        )
+     && (useCellZones || blockedFacesName.size())
     )
     {
         FatalErrorIn(args.executable())
@@ -1527,7 +1566,6 @@ int main(int argc, char *argv[])
             << " (which imply a split based on topology)"
             << exit(FatalError);
     }
-
 
 
     if (insidePoint && largestOnly)
@@ -1717,7 +1755,6 @@ int main(int argc, char *argv[])
 
     // Write decomposition to file
     writeCellToRegion(mesh, cellRegion);
-
 
 
     // Sizes per region

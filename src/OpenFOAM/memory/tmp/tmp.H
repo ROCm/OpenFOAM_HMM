@@ -62,7 +62,7 @@ class tmp
         //- Pointer to temporary object
         mutable T* ptr_;
 
-        // Const reference to constant object
+        //- Const reference to constant object
         const T& ref_;
 
 

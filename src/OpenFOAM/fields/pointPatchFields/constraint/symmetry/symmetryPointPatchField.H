@@ -119,6 +119,16 @@ public:
                 )
             );
         }
+
+
+    // Member functions
+
+        //- Return the constraint type this pointPatchField implements
+        virtual const word& constraintType() const
+        {
+            return symmetryPointPatch::typeName;
+        }
+
 };
 
 

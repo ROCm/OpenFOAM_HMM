@@ -6,7 +6,7 @@ cd ${0%/*} || exit 1    # run from this directory
 
 rm -rf constant/polyMesh/sets > /dev/null 2>&1
 rm -rf 0/polyMesh > /dev/null 2>&1
-rm system/cellSetDict > /dev/null 2>&1
+rm system/topoDict > /dev/null 2>&1
 cleanCase
 
 # ----------------------------------------------------------------- end-of-file

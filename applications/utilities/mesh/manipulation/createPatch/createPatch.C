@@ -521,7 +521,9 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
     runTime.functionObjects().off();
-#   include "createNamedPolyMesh.H"
+
+    Foam::word meshRegionName = polyMesh::defaultRegion;
+    args.optionReadIfPresent("region", meshRegionName);
 
     const bool overwrite = args.optionFound("overwrite");
 
@@ -534,8 +536,8 @@ int main(int argc, char *argv[])
             "createPatchDict",
             runTime.system(),
             (
-                regionName != polyMesh::defaultRegion
-              ? regionName
+                meshRegionName != polyMesh::defaultRegion
+              ? meshRegionName
               : word::null
             ),
             runTime,
@@ -556,6 +558,7 @@ int main(int argc, char *argv[])
         << " to match up faces and points" << nl << endl;
     coupledPolyPatch::matchTol = tol;
 
+#   include "createNamedPolyMesh.H"
 
     const word oldInstance = mesh.pointsInstance();
 
@@ -678,17 +681,17 @@ int main(int argc, char *argv[])
     {
         const dictionary& dict = patchSources[addedI];
 
-        word patchName(dict.lookup("name"));
-
+        const word patchName(dict.lookup("name"));
         label destPatchI = patches.findPatchID(patchName);
 
         if (destPatchI == -1)
         {
-            FatalErrorIn(args.executable()) << "patch " << patchName
-                << " not added. Problem." << abort(FatalError);
+            FatalErrorIn(args.executable())
+                << "patch " << patchName << " not added. Problem."
+                << abort(FatalError);
         }
 
-        word sourceType(dict.lookup("constructFrom"));
+        const word sourceType(dict.lookup("constructFrom"));
 
         if (sourceType == "patches")
         {
@@ -716,7 +719,7 @@ int main(int argc, char *argv[])
         }
         else if (sourceType == "set")
         {
-            word setName(dict.lookup("set"));
+            const word setName(dict.lookup("set"));
 
             faceSet faces(mesh, setName);
 

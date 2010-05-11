@@ -31,21 +31,18 @@ License
 #include "primitiveFacePatch.H"
 #include "emptyPolyPatch.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(processorPointPatch, 0);
-
-addToRunTimeSelectionTable
-(
-    facePointPatch,
-    processorPointPatch,
-    polyPatch
-);
+    defineTypeNameAndDebug(processorPointPatch, 0);
+    addToRunTimeSelectionTable
+    (
+        facePointPatch,
+        processorPointPatch,
+        polyPatch
+    );
+}
 
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
@@ -123,22 +120,26 @@ void Foam::processorPointPatch::calcGeometry(PstreamBuffers& pBufs)
 }
 
 
-void processorPointPatch::initMovePoints(PstreamBuffers&, const pointField&)
+void Foam::processorPointPatch::initMovePoints
+(
+    PstreamBuffers&,
+    const pointField&
+)
 {}
 
 
-void processorPointPatch::movePoints(PstreamBuffers&, const pointField&)
+void Foam::processorPointPatch::movePoints(PstreamBuffers&, const pointField&)
 {}
 
 
-void processorPointPatch::initUpdateMesh(PstreamBuffers& pBufs)
+void Foam::processorPointPatch::initUpdateMesh(PstreamBuffers& pBufs)
 {
     facePointPatch::initUpdateMesh(pBufs);
     processorPointPatch::initGeometry(pBufs);
 }
 
 
-void processorPointPatch::updateMesh(PstreamBuffers& pBufs)
+void Foam::processorPointPatch::updateMesh(PstreamBuffers& pBufs)
 {
     facePointPatch::updateMesh(pBufs);
     processorPointPatch::calcGeometry(pBufs);
@@ -147,7 +148,7 @@ void processorPointPatch::updateMesh(PstreamBuffers& pBufs)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-processorPointPatch::processorPointPatch
+Foam::processorPointPatch::processorPointPatch
 (
     const polyPatch& patch,
     const pointBoundaryMesh& bm
@@ -160,26 +161,22 @@ processorPointPatch::processorPointPatch
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-processorPointPatch::~processorPointPatch()
+Foam::processorPointPatch::~processorPointPatch()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const labelList& processorPointPatch::reverseMeshPoints() const
+const Foam::labelList& Foam::processorPointPatch::reverseMeshPoints() const
 {
     return reverseMeshPoints_;
 }
 
 
-const labelList& processorPointPatch::separatedPoints() const
+const Foam::labelList& Foam::processorPointPatch::separatedPoints() const
 {
     return separatedPoints_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

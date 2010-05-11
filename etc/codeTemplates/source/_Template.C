@@ -64,7 +64,8 @@ Foam::CLASSNAME::CLASSNAME(const CLASSNAME&)
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::CLASSNAME> Foam::CLASSNAME::New()
+Foam::autoPtr<Foam::CLASSNAME>
+Foam::CLASSNAME::New()
 {
     return autoPtr<CLASSNAME>(new CLASSNAME);
 }

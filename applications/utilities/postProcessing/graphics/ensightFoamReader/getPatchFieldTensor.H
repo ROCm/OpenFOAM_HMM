@@ -39,7 +39,7 @@ const polyBoundaryMesh& bMesh = meshPtr->boundaryMesh();
 if (which_type == Z_TRI03)
 {
     label counter = 1;
-    for (label n=0; n<tf.size(); n++)
+    forAll(tf, n)
     {
         label nPoints = bMesh[patchi][n].size();
         if (nPoints == 3)
@@ -52,7 +52,7 @@ if (which_type == Z_TRI03)
 if (which_type == Z_QUA04)
 {
     label counter = 1;
-    for (label n=0; n<tf.size(); n++)
+    forAll(tf, n)
     {
         label nPoints = bMesh[patchi][n].size();
         if (nPoints == 4)
@@ -65,7 +65,7 @@ if (which_type == Z_QUA04)
 if (which_type == Z_NSIDED)
 {
     label counter = 1;
-    for (label n=0; n<tf.size(); n++)
+    forAll(tf, n)
     {
         label nPoints = bMesh[patchi][n].size();
         if ((nPoints != 3) && (nPoints != 4))

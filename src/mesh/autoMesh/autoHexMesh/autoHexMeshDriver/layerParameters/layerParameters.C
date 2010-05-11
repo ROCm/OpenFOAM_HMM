@@ -209,6 +209,15 @@ Foam::layerParameters::layerParameters
     nLayerIter_(readLabel(dict.lookup("nLayerIter"))),
     nRelaxedIter_(labelMax)
 {
+    if (nGrow_ > 0)
+    {
+        WarningIn("layerParameters::layerParameters(..)")
+            << "The nGrow parameter effect has changed with respect to 1.6.x."
+            << endl
+            << "Please set nGrow=0 for 1.6.x behaviour."
+            << endl;
+    }
+
     if (dict.found("nRelaxedIter"))
     {
         dict.lookup("nRelaxedIter") >> nRelaxedIter_;
@@ -285,6 +294,15 @@ Foam::layerParameters::layerParameters
     nLayerIter_(readLabel(dict.lookup("nLayerIter"))),
     nRelaxedIter_(labelMax)
 {
+    if (nGrow_ > 0)
+    {
+        WarningIn("layerParameters::layerParameters(..)")
+            << "The nGrow parameter effect has changed with respect to 1.6.x."
+            << endl
+            << "Please set nGrow=0 for 1.6.x behaviour."
+            << endl;
+    }
+
     if (dict.found("nRelaxedIter"))
     {
         dict.lookup("nRelaxedIter") >> nRelaxedIter_;

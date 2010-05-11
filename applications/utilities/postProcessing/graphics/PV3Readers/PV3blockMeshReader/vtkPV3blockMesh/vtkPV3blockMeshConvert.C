@@ -26,7 +26,7 @@ License
 #include "vtkPV3blockMesh.H"
 #include "vtkPV3blockMeshReader.h"
 
-// Foam includes
+// OpenFOAM includes
 #include "blockMesh.H"
 #include "Time.H"
 
@@ -81,7 +81,7 @@ void Foam::vtkPV3blockMesh::convertMeshBlocks
 
         vtkUnstructuredGrid* vtkmesh = vtkUnstructuredGrid::New();
 
-        // Convert Foam mesh vertices to VTK
+        // Convert OpenFOAM mesh vertices to VTK
         vtkPoints *vtkpoints = vtkPoints::New();
         vtkpoints->Allocate( blockDef.nPoints() );
         const labelList& blockLabels = blockDef.blockShape();

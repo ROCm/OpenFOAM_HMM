@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     basicRhoThermo.C
-    newBasicRhoThermo.C
+    basicRhoThermoNew.C
 
 \*---------------------------------------------------------------------------*/
 

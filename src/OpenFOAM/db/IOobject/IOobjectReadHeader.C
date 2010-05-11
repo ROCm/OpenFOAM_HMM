@@ -72,7 +72,7 @@ bool Foam::IOobject::readHeader(Istream& is)
         is.format(headerDict.lookup("format"));
         headerClassName_ = word(headerDict.lookup("class"));
 
-        word headerObject(headerDict.lookup("object"));
+        const word headerObject(headerDict.lookup("object"));
         if (IOobject::debug && headerObject != name())
         {
             IOWarningIn("IOobject::readHeader(Istream&)", is)

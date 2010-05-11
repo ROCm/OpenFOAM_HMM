@@ -4,13 +4,13 @@ mixtures/basicMixture/basicMixtures.C
 basicThermo/basicThermo.C
 
 psiThermo/basicPsiThermo/basicPsiThermo.C
-psiThermo/basicPsiThermo/newBasicPsiThermo.C
+psiThermo/basicPsiThermo/basicPsiThermoNew.C
 psiThermo/hPsiThermo/hPsiThermos.C
 psiThermo/hsPsiThermo/hsPsiThermos.C
 psiThermo/ePsiThermo/ePsiThermos.C
 
 rhoThermo/basicRhoThermo/basicRhoThermo.C
-rhoThermo/basicRhoThermo/newBasicRhoThermo.C
+rhoThermo/basicRhoThermo/basicRhoThermoNew.C
 rhoThermo/hRhoThermo/hRhoThermos.C
 rhoThermo/hsRhoThermo/hsRhoThermos.C
 

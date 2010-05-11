@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,12 +39,11 @@ License
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStringArray.h"
 
-// Foam includes
+// OpenFOAM includes
 #include "vtkPV3blockMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-vtkCxxRevisionMacro(vtkPV3blockMeshReader, "$Revision:$");
 vtkStandardNewMacro(vtkPV3blockMeshReader);
 
 
@@ -227,7 +226,7 @@ int vtkPV3blockMeshReader::RequestData
     foamData_->Update(output);
     updatePointNumbersView(ShowPointNumbers);
 
-    // Do any cleanup on the Foam side
+    // Do any cleanup on the OpenFOAM side
     foamData_->CleanUp();
 
     return 1;
@@ -283,8 +282,8 @@ void vtkPV3blockMeshReader::PrintSelf(ostream& os, vtkIndent indent)
     vtkDebugMacro(<<"PrintSelf");
 
     this->Superclass::PrintSelf(os,indent);
-    os<< indent << "File name: "
-      << (this->FileName ? this->FileName : "(none)") << "\n";
+    os  << indent << "File name: "
+        << (this->FileName ? this->FileName : "(none)") << "\n";
 
     foamData_->PrintSelf(os, indent);
 }

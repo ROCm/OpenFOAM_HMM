@@ -94,17 +94,21 @@ void Foam::writeFuns::write
             fField.size()*sizeof(float)
         );
 
-        os << std::endl;
+        os  << std::endl;
     }
     else
     {
         forAll(fField, i)
         {
-            os << fField[i] << ' ';
+            os  << fField[i];
 
             if (i > 0 && (i % 10) == 0)
             {
-                os << std::endl;
+                os  << std::endl;
+            }
+            else
+            {
+                os  << ' ';
             }
         }
         os << std::endl;
@@ -143,20 +147,24 @@ void Foam::writeFuns::write
             elems.size()*sizeof(label)
         );
 
-        os << std::endl;
+        os  << std::endl;
     }
     else
     {
         forAll(elems, i)
         {
-            os << elems[i] << ' ';
+            os  << elems[i];
 
             if (i > 0 && (i % 10) == 0)
             {
-                os << std::endl;
+                os  << std::endl;
+            }
+            else
+            {
+                os  << ' ';
             }
         }
-        os << std::endl;
+        os  << std::endl;
     }
 }
 
@@ -178,19 +186,19 @@ void Foam::writeFuns::writeHeader
 (
     std::ostream& os,
     const bool binary,
-    const string& name
+    const std::string& title
 )
 {
     os  << "# vtk DataFile Version 2.0" << std::endl
-        << name << std::endl;
+        << title << std::endl;
 
     if (binary)
     {
-        os << "BINARY" << std::endl;
+        os  << "BINARY" << std::endl;
     }
     else
     {
-        os << "ASCII" << std::endl;
+        os  << "ASCII" << std::endl;
     }
 }
 
@@ -219,62 +227,59 @@ void Foam::writeFuns::writePointDataHeader
 }
 
 
-void Foam::writeFuns::insert(const scalar pt, DynamicList<floatScalar>& dest)
+void Foam::writeFuns::insert(const scalar src, DynamicList<floatScalar>& dest)
 {
-    dest.append(float(pt));
+    dest.append(float(src));
 }
 
 
-void Foam::writeFuns::insert(const vector& pt, DynamicList<floatScalar>& dest)
+void Foam::writeFuns::insert(const vector& src, DynamicList<floatScalar>& dest)
 {
-    for (direction cmpt = 0; cmpt < vector::nComponents; cmpt++)
+    for (direction cmpt = 0; cmpt < vector::nComponents; ++cmpt)
     {
-        dest.append(float(pt[cmpt]));
+        dest.append(float(src[cmpt]));
     }
 }
 
 
 void Foam::writeFuns::insert
 (
-    const sphericalTensor& pt,
+    const sphericalTensor& src,
     DynamicList<floatScalar>& dest
 )
 {
-    for (direction cmpt = 0; cmpt < sphericalTensor::nComponents; cmpt++)
+    for (direction cmpt = 0; cmpt < sphericalTensor::nComponents; ++cmpt)
     {
-        dest.append(float(pt[cmpt]));
+        dest.append(float(src[cmpt]));
     }
 }
 
 
 void Foam::writeFuns::insert
 (
-    const symmTensor& pt,
+    const symmTensor& src,
     DynamicList<floatScalar>& dest
 )
 {
-    for (direction cmpt = 0; cmpt < symmTensor::nComponents; cmpt++)
+    for (direction cmpt = 0; cmpt < symmTensor::nComponents; ++cmpt)
     {
-        dest.append(float(pt[cmpt]));
+        dest.append(float(src[cmpt]));
     }
 }
 
 
-void Foam::writeFuns::insert(const tensor& pt, DynamicList<floatScalar>& dest)
+void Foam::writeFuns::insert(const tensor& src, DynamicList<floatScalar>& dest)
 {
-    for (direction cmpt = 0; cmpt < tensor::nComponents; cmpt++)
+    for (direction cmpt = 0; cmpt < tensor::nComponents; ++cmpt)
     {
-        dest.append(float(pt[cmpt]));
+        dest.append(float(src[cmpt]));
     }
 }
 
 
-void Foam::writeFuns::insert(const labelList& source, DynamicList<label>& dest)
+void Foam::writeFuns::insert(const labelList& src, DynamicList<label>& dest)
 {
-    forAll(source, i)
-    {
-        dest.append(source[i]);
-    }
+    dest.append(src);
 }
 
 

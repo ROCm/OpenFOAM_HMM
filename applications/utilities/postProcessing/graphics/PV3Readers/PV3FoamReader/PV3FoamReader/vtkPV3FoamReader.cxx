@@ -39,14 +39,13 @@ License
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStringArray.h"
 
-// Foam includes
+// OpenFOAM includes
 #include "vtkPV3Foam.H"
 
 #undef EXPERIMENTAL_TIME_CACHING
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-vtkCxxRevisionMacro(vtkPV3FoamReader, "$Revision: 1.5$");
 vtkStandardNewMacro(vtkPV3FoamReader);
 
 
@@ -414,7 +413,7 @@ int vtkPV3FoamReader::RequestData
 
 #endif
 
-    // Do any cleanup on the Foam side
+    // Do any cleanup on the OpenFOAM side
     foamData_->CleanUp();
 
     return 1;
@@ -502,15 +501,14 @@ void vtkPV3FoamReader::PrintSelf(ostream& os, vtkIndent indent)
     vtkDebugMacro(<<"PrintSelf");
 
     this->Superclass::PrintSelf(os,indent);
-    os<< indent << "File name: "
-      << (this->FileName ? this->FileName : "(none)") << "\n";
+    os  << indent << "File name: "
+        << (this->FileName ? this->FileName : "(none)") << "\n";
 
     foamData_->PrintSelf(os, indent);
 
-    os<< indent << "Time step range: "
-      << this->TimeStepRange[0] << " - " << this->TimeStepRange[1]
-      << "\n";
-    os<< indent << "Time step: " << this->GetTimeStep() << endl;
+    os  << indent << "Time step range: "
+        << this->TimeStepRange[0] << " - " << this->TimeStepRange[1] << "\n"
+        << indent << "Time step: " << this->GetTimeStep() << endl;
 }
 
 

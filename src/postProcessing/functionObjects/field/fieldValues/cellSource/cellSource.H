@@ -103,11 +103,13 @@ public:
             opSum,
             opVolAverage,
             opVolIntegrate,
-            opWeightedAverage
+            opWeightedAverage,
+            opMin,
+            opMax
         };
 
         //- Operation type names
-        static const NamedEnum<operationType, 5> operationTypeNames_;
+        static const NamedEnum<operationType, 7> operationTypeNames_;
 
 
 private:
@@ -130,6 +132,9 @@ protected:
 
         //- Operation to apply to values
         operationType operation_;
+
+        //- Global number of cells
+        label nCells_;
 
         //- Local list of cell IDs
         labelList cellId_;

@@ -27,10 +27,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(pairGAMGAgglomeration, 0);
-}
+defineTypeNameAndDebug(Foam::pairGAMGAgglomeration, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

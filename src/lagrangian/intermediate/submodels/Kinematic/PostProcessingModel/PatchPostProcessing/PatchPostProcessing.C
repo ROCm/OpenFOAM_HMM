@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -128,7 +128,7 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
 {
     forAll(patchNames_, patchI)
     {
-        label id = mesh_.boundaryMesh().findPatchID(patchNames_[patchI]);
+        const label id = mesh_.boundaryMesh().findPatchID(patchNames_[patchI]);
         if (id < 0)
         {
             FatalErrorIn

@@ -47,10 +47,9 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.clear();
-    argList::validArgs.append("surface file");
-    argList::validArgs.append("output surface file");
-    argList::argList args(argc, argv);
+    argList::validArgs.append("surfaceFile");
+    argList::validArgs.append("output surfaceFile");
+    argList args(argc, argv);
 
     const fileName surfFileName = args[1];
     const fileName outFileName  = args[2];

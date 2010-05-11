@@ -36,6 +36,7 @@ SourceFiles
 #define basicSymmetryPointPatchField_H
 
 #include "pointPatchField.H"
+#include "symmetryPointPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -40,7 +40,6 @@ Usage
 
     - foamToVTK [OPTION]
 
-
     @param -ascii \n
     Write VTK data in ASCII format instead of binary.
 
@@ -78,6 +77,9 @@ Usage
     @param -noLinks \n
     (in parallel) do not link processor files to master
 
+    @param poly \n
+    write polyhedral cells without tet/pyramid decomposition
+
     @param -allPatches \n
     Combine all patches into a single file
 
@@ -95,7 +97,7 @@ Usage
 
 Note
     mesh subset is handled by vtkMesh. Slight inconsistency in
-    interpolation: on the internal field it interpolates the whole volfield
+    interpolation: on the internal field it interpolates the whole volField
     to the whole-mesh pointField and then selects only those values it
     needs for the subMesh (using the fvMeshSubset cellMap(), pointMap()
     functions). For the patches however it uses the
@@ -163,12 +165,12 @@ void print(const char* msg, Ostream& os, const PtrList<GeoField>& flds)
 {
     if (flds.size())
     {
-        os << msg;
+        os  << msg;
         forAll(flds, i)
         {
-            os<< ' ' << flds[i].name();
+            os  << ' ' << flds[i].name();
         }
-        os << endl;
+        os  << endl;
     }
 }
 
@@ -177,9 +179,9 @@ void print(Ostream& os, const wordList& flds)
 {
     forAll(flds, i)
     {
-        os<< ' ' << flds[i];
+        os  << ' ' << flds[i];
     }
-    os << endl;
+    os  << endl;
 }
 
 
@@ -226,13 +228,17 @@ labelList getSelectedPatches
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "legacy VTK file format writer"
+    );
     timeSelector::addOptions();
 
-#   include "addRegionOption.H"
-
+    #include "addRegionOption.H"
     argList::addOption
     (
-        "fields", "wordList",
+        "fields",
+        "wordList",
         "only convert the specified fields - eg '(p T U)'"
     );
     argList::addOption
@@ -241,25 +247,64 @@ int main(int argc, char *argv[])
         "name",
         "convert a mesh subset corresponding to the specified cellSet"
     );
-    argList::addOption("faceSet", "name");
-    argList::addOption("pointSet", "name");
+    argList::addOption
+    (
+        "faceSet",
+        "name",
+        "restrict conversion to the specified faceSet"
+    );
+    argList::addOption
+    (
+        "pointSet",
+        "name",
+        "restrict conversion to the specified pointSet"
+    );
     argList::addBoolOption
     (
         "ascii",
         "write in ASCII format instead of binary"
     );
-    argList::addBoolOption("surfaceFields");
-    argList::addBoolOption("nearCellValue");
-    argList::addBoolOption("noInternal");
-    argList::addBoolOption("noPointValues");
-    argList::addBoolOption("allPatches");
+    argList::addBoolOption
+    (
+        "poly",
+        "write polyhedral cells without tet/pyramid decomposition"
+    );
+    argList::addBoolOption
+    (
+        "surfaceFields",
+        "write surfaceScalarFields (e.g., phi)"
+    );
+    argList::addBoolOption
+    (
+        "nearCellValue",
+        "use cell value on patches instead of patch value itself"
+    );
+    argList::addBoolOption
+    (
+        "noInternal",
+        "do not generate file for mesh, only for patches"
+    );
+    argList::addBoolOption
+    (
+        "noPointValues",
+        "no pointFields"
+    );
+    argList::addBoolOption
+    (
+        "allPatches",
+        "combine all patches into a single file"
+    );
     argList::addOption
     (
         "excludePatches",
         "wordReList",
         "a list of patches to exclude - eg '( inlet \".*Wall\" )' "
     );
-    argList::addBoolOption("noFaceZones");
+    argList::addBoolOption
+    (
+        "noFaceZones",
+        "no faceZones"
+    );
     argList::addBoolOption
     (
         "noLinks",
@@ -271,14 +316,17 @@ int main(int argc, char *argv[])
         "use the time name instead of the time index when naming the files"
     );
 
-#   include "setRootCase.H"
-#   include "createTime.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
 
     const bool doWriteInternal = !args.optionFound("noInternal");
     const bool doFaceZones     = !args.optionFound("noFaceZones");
     const bool doLinks         = !args.optionFound("noLinks");
     const bool binary          = !args.optionFound("ascii");
     const bool useTimeName     = args.optionFound("useTimeName");
+
+    // decomposition of polyhedral cells into tets/pyramids cells
+    vtkTopo::decomposePoly     = !args.optionFound("poly");
 
     if (binary && (sizeof(floatScalar) != 4 || sizeof(label) != 4))
     {
@@ -941,17 +989,17 @@ int main(int argc, char *argv[])
 
                 Info<< "    FaceZone  : " << patchFileName << endl;
 
-                std::ofstream str(patchFileName.c_str());
+                std::ofstream ostr(patchFileName.c_str());
 
-                writeFuns::writeHeader(str, binary, pp.name());
-                str << "DATASET POLYDATA" << std::endl;
+                writeFuns::writeHeader(ostr, binary, pp.name());
+                ostr<< "DATASET POLYDATA" << std::endl;
 
                 writePatchGeom
                 (
                     binary,
                     pp().localFaces(),
                     pp().localPoints(),
-                    str
+                    ostr
                 );
             }
         }

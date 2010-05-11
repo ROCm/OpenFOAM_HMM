@@ -75,7 +75,7 @@ _foamAddLib  ${FOAM_USER_LIBBIN}:${FOAM_SITE_LIBBIN}:${FOAM_LIBBIN}:${FOAM_LIBBI
 
 # Compiler settings
 # ~~~~~~~~~~~~~~~~~
-unset gcc_version gmp_version mpfr_version
+unset gcc_version gmp_version mpfr_version mpc_version
 unsetenv MPFR_ARCH_PATH
 
 
@@ -92,25 +92,22 @@ case OpenFOAM:
         set gmp_version=gmp-5.0.1
         set mpfr_version=mpfr-2.4.2
         breaksw
-
-    case Gcc442:
-        set gcc_version=gcc-4.4.2
-        set gmp_version=gmp-4.2.4
-        set mpfr_version=mpfr-2.4.1
+    case Gcc45:
+        set gcc_version=gcc-4.5.0
+        set gmp_version=gmp-5.0.1
+        set mpfr_version=mpfr-2.4.2
+        set mpc_version=mpc-0.8.1
         breaksw
-
     case Gcc44:
-        set gcc_version=gcc-4.4.2
-        set gmp_version=gmp-4.2.4
-        set mpfr_version=mpfr-2.4.1
+        set gcc_version=gcc-4.4.3
+        set gmp_version=gmp-5.0.1
+        set mpfr_version=mpfr-2.4.2
         breaksw
-
     case Gcc43:
         set gcc_version=gcc-4.3.3
         set gmp_version=gmp-4.2.4
         set mpfr_version=mpfr-2.4.1
         breaksw
-
     default:
         echo
         echo "Warning in $WM_PROJECT_DIR/etc/settings.csh:"
@@ -118,13 +115,15 @@ case OpenFOAM:
         echo "    Please check your settings"
         echo
         breaksw
-
     endsw
 
     if ( $?gcc_version ) then
         set gccDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$gcc_version
         set gmpDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$gmp_version
         set mpfrDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$mpfr_version
+        if ( $?mpc_version ) then
+            set mpcDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$mpc_version
+        endif
 
         # Check that the compiler directory can be found
         if ( ! -d "$gccDir" ) then
@@ -138,17 +137,28 @@ case OpenFOAM:
 
         _foamAddMan     $gccDir/man
         _foamAddPath    $gccDir/bin
-        _foamAddLib     $gccDir/lib${WM_COMPILER_LIB_ARCH}:$gccDir/lib
+
+        # 64-bit needs lib64, but 32-bit needs lib (not lib32)
+        if ($WM_ARCH_OPTION == 64) then
+            _foamAddLib     $gccDir/lib$WM_COMPILER_LIB_ARCH
+        else
+            _foamAddLib     $gccDir/lib
+        endif
 
         # add in gmp/mpfr libraries
         _foamAddLib     $gmpDir/lib
         _foamAddLib     $mpfrDir/lib
 
+        # add in mpc libraries (not need for older gcc)
+        if ( $?mpc_version ) then
+            _foamAddLib     $mpcDir/lib
+        endif
+
         # used by boost/CGAL:
         setenv MPFR_ARCH_PATH $mpfrDir
     endif
-    unset gcc_version gccDir  gmp_version gmpDir  mpfr_version mpfrDir
-
+    unset gcc_version gccDir
+    unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
     breaksw
 endsw
 
@@ -199,18 +209,14 @@ case OPENMPI:
     breaksw
 
 case SYSTEMOPENMPI:
-    # This uses the installed openmpi. It needs mpicc installed!
+    # use the system installed openmpi, get library directory via mpicc
     set mpi_version=openmpi-system
-
-    # Set compilation flags here instead of in wmake/rules/../mplibSYSTEMOPENMPI
-    setenv PINC `mpicc --showme:compile`
-    setenv PLIBS `mpicc --showme:link`
-    set libDir=`echo "$PLIBS" | sed -e 's/.*-L\([^ ]*\).*/\1/'`
+    set libDir=`mpicc --showme:link | sed -e 's/.*-L\([^ ]*\).*/\1/'`
 
     if ($?FOAM_VERBOSE && $?prompt) then
-        echo "Using system installed MPI:"
-        echo "    compile flags : $PINC"
-        echo "    link flags    : $PLIBS"
+        echo "Using system installed OpenMPI:"
+        echo "    compile flags : `mpicc --showme:compile`"
+        echo "    link flags    : `mpicc --showme:link`"
         echo "    libmpi dir    : $libDir"
     endif
 

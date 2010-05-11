@@ -90,6 +90,22 @@ _foamSource()
 foamPrefs=`$WM_PROJECT_DIR/bin/foamEtcFile prefs.sh` && _foamSource $foamPrefs
 unset foamPrefs
 
+# Evaluate command-line parameters
+while [ $# -gt 0 ]
+do
+    case "$1" in
+    *=)
+        # name=       -> unset name
+        eval "unset ${1%=}"
+        ;;
+    *=*)
+        # name=value  -> export name=value
+        eval "export $1"
+        ;;
+    esac
+    shift
+done
+
 
 # Operating System/Platform
 # ~~~~~~~~~~~~~~~~~~~~~~~~~

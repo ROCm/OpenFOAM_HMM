@@ -29,6 +29,8 @@ PostProcessingModel none;
 
 SurfaceFilmModel none;
 
+CollisionModel none;
+
 coupled         true;
 
 cellValueSourceCorrection on;
@@ -40,6 +42,8 @@ constantProperties
     rhoMin          rhoMin [ 1 -3 0 0 0 ] 1e-15;
     minParticleMass minParticleMass [ 1 0 0 0 0 ] 1e-15;
     rho0            rho0 [ 1 -3 0 0 0 ] 5000;
+    youngsModulus   youngsModulus [1 -1 -2 0 0] 1e9;
+    poissonsRatio   poissonsRatio [ 0 0 0 0 0 ] 0.35;
 }
 
 interpolationSchemes
@@ -56,9 +60,10 @@ integrationSchemes
 
 particleForces
 {
-    gravity         on;
-    virtualMass     off;
-    pressureGradient off;
+    gravity             on;
+    virtualMass         off;
+    pressureGradient    off;
+    paramagnetic        off;
 }
 
 ManualInjectionCoeffs

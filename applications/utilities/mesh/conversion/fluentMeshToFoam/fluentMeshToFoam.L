@@ -866,9 +866,22 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("Fluent mesh file");
-    argList::addOption("scale", "scale factor");
-    argList::addBoolOption("writeSets");
-    argList::addBoolOption("writeZones");
+    argList::addOption
+    (
+        "scale",
+        "factor",
+        "geometry scaling factor - default is 1"
+    );
+    argList::addBoolOption
+    (
+        "writeSets",
+        "write cell zones and patches as sets"
+    );
+    argList::addBoolOption
+    (
+        "writeZones",
+        "write cell zones as zones"
+    );
 
     argList args(argc, argv);
 
@@ -877,8 +890,7 @@ int main(int argc, char *argv[])
         FatalError.exit();
     }
 
-    scalar scaleFactor = 1.0;
-    args.optionReadIfPresent("scale", scaleFactor);
+    const scalar scaleFactor = args.optionLookupOrDefault("scale", 1.0);
 
     const bool writeSets  = args.optionFound("writeSets");
     const bool writeZones = args.optionFound("writeZones");
@@ -1554,7 +1566,7 @@ int main(int argc, char *argv[])
     // interior boundaries are handled via faceSets
     // cell zones will only be written if there is more than one
 
-    if (writeZones && cellGroupZoneID.size()>1)
+    if (writeZones && cellGroupZoneID.size() > 1)
     {
         Info<< "Adding Zones" << endl;
         List<pointZone*> pz(0);

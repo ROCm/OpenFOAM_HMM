@@ -65,7 +65,7 @@ void writeOBJ(Ostream& os, const pointField& pts)
     {
         const point& pt = pts[i];
 
-        os << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
+        os  << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
     }
 }
 
@@ -85,7 +85,7 @@ void dumpPoints(const triSurface& surf, const labelList& borderPoint)
         {
             const point& pt = surf.localPoints()[pointI];
 
-            os << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
+            os  << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
         }
     }
 }
@@ -108,7 +108,7 @@ void dumpEdges(const triSurface& surf, const boolList& borderEdge)
         {
             const edge& e = surf.edges()[edgeI];
 
-            os << "l " << e.start()+1 << ' ' << e.end()+1 << endl;
+            os  << "l " << e.start()+1 << ' ' << e.end()+1 << endl;
         }
     }
 }
@@ -666,19 +666,24 @@ bool splitBorderEdges
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "split multiply connected surface edges by duplicating points"
+    );
     argList::noParallel();
-    argList::validArgs.clear();
-
-    argList::validArgs.append("surface file");
-    argList::validArgs.append("output surface file");
-    argList::addBoolOption("debug");
+    argList::validArgs.append("surfaceFile");
+    argList::validArgs.append("output surfaceFile");
+    argList::addBoolOption
+    (
+        "debug",
+        "add debugging output"
+    );
 
     argList args(argc, argv);
 
     const fileName inSurfName  = args[1];
     const fileName outSurfName = args[2];
     const bool debug = args.optionFound("debug");
-
 
     Info<< "Reading surface from " << inSurfName << endl;
 

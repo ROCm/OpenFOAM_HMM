@@ -104,13 +104,11 @@ autoPtr<RASModel> RASModel::New
     transportModel& transport
 )
 {
-    word modelName;
-
-    // Enclose the creation of the dictionary to ensure it is deleted
-    // before the turbulenceModel is created otherwise the dictionary is
-    // entered in the database twice
-    {
-        IOdictionary dict
+    // get model name, but do not register the dictionary
+    // otherwise it is registered in the database twice
+    const word modelType
+    (
+        IOdictionary
         (
             IOobject
             (
@@ -118,17 +116,16 @@ autoPtr<RASModel> RASModel::New
                 U.time().constant(),
                 U.db(),
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                false
             )
-        );
+        ).lookup("RASModel")
+    );
 
-        dict.lookup("RASModel") >> modelName;
-    }
-
-    Info<< "Selecting RAS turbulence model " << modelName << endl;
+    Info<< "Selecting RAS turbulence model " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelName);
+        dictionaryConstructorTablePtr_->find(modelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -140,9 +137,9 @@ autoPtr<RASModel> RASModel::New
                 "const surfaceScalarField&, "
                 "transportModel&"
             ")"
-        )   << "Unknown RASModel type " << modelName
-            << endl << endl
-            << "Valid RASModel types are :" << endl
+        )   << "Unknown RASModel type "
+            << modelType << nl << nl
+            << "Valid RASModel types:" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

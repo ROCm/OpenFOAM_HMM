@@ -26,14 +26,9 @@ License
 #include "engineTime.H"
 #include "ignition.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-ignition::ignition
+Foam::ignition::ignition
 (
     const dictionary& combustionProperties,
     const Time& db,
@@ -59,7 +54,7 @@ ignition::ignition
 }
 
 
-ignition::ignition
+Foam::ignition::ignition
 (
     const dictionary& combustionProperties,
     const engineTime& edb,
@@ -84,9 +79,5 @@ ignition::ignition
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

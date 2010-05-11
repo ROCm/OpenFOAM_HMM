@@ -450,7 +450,7 @@ bool Foam::faceTriangulation::split
         label index1 = -1;
         label index2 = -1;
 
-        for (label iter = 0; iter < f.size(); iter++)
+        forAll(f, iter)
         {
             findDiagonal
             (

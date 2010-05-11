@@ -49,7 +49,6 @@ typedef specieThermo<janafThermo<perfectGas> > thermo;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.clear();
     argList::validArgs.append("controlFile");
     argList args(argc, argv);
 
@@ -70,7 +69,7 @@ int main(int argc, char *argv[])
 
 
     scalar T0(readScalar(control.lookup("T0")));
-    word fuelName(control.lookup("fuel"));
+    const word fuelName(control.lookup("fuel"));
     scalar n(readScalar(control.lookup("n")));
     scalar m(readScalar(control.lookup("m")));
 

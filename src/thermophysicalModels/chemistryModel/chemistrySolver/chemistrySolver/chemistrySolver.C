@@ -25,9 +25,6 @@ License
 
 #include "chemistrySolver.H"
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CompType, class ThermoType>
@@ -48,9 +45,5 @@ template<class CompType, class ThermoType>
 Foam::chemistrySolver<CompType, ThermoType>::~chemistrySolver()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

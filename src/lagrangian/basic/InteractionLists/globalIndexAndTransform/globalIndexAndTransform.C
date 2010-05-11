@@ -1,0 +1,313 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+#include "globalIndexAndTransform.H"
+#include "coupledPolyPatch.H"
+#include "cyclicPolyPatch.H"
+
+// * * * * * * * * * * * * Private Static Data Members * * * * * * * * * * * //
+
+const Foam::label Foam::globalIndexAndTransform::base_ = 32;
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+bool Foam::globalIndexAndTransform::matchTransform
+(
+    const List<vectorTensorTransform>& refTransforms,
+    const vectorTensorTransform& testTransform,
+    scalar tolerance,
+    bool bothSigns
+) const
+{
+    // return min(mag(transforms_ - sepVec)) > tol
+
+    forAll(refTransforms, i)
+    {
+        const vectorTensorTransform& refTransform = refTransforms[i];
+
+        scalar maxVectorMag = sqrt
+        (
+            max(magSqr(testTransform.t()), magSqr(refTransform.t()))
+        );
+
+        // Test the difference between vector parts to see if it is
+        // less than tolerance times the larger vector part magnitude.
+
+        scalar vectorDiff =
+            mag(refTransform.t() - testTransform.t())
+           /(maxVectorMag + VSMALL)
+           /tolerance;
+
+        // Test the difference between tensor parts to see if it is
+        // less than the tolerance.  sqrt(3.0) factor used to scale
+        // differnces as this is magnitude of a rotation tensor.  If
+        // neither transform has a rotation, then the test is not
+        // necessary.
+
+        scalar tensorDiff = 0;
+
+        if (refTransform.hasR() || testTransform.hasR())
+        {
+            tensorDiff =
+                mag(refTransform.R() - testTransform.R())
+               /sqrt(3.0)
+               /tolerance;
+        }
+
+        // ...Diff result is < 1 if the test part matches the ref part
+        // within tolerance
+
+        if (vectorDiff < 1 && tensorDiff < 1)
+        {
+            return true;
+        }
+
+        if (bothSigns)
+        {
+            // Test the inverse transform differences too
+
+            vectorDiff =
+                mag(refTransform.t() + testTransform.t())
+               /(maxVectorMag + VSMALL)
+               /tolerance;
+
+            tensorDiff = 0;
+
+            if (refTransform.hasR() || testTransform.hasR())
+            {
+                tensorDiff =
+                    mag(refTransform.R() - testTransform.R().T())
+                   /sqrt(3.0)
+                   /tolerance;
+            }
+
+            if (vectorDiff < 1 && tensorDiff < 1)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
+void Foam::globalIndexAndTransform::determineTransforms()
+{
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    transforms_ = List<vectorTensorTransform>(6);
+
+    label nextTrans = 0;
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (isA<coupledPolyPatch>(pp))
+        {
+            const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>(pp);
+
+            if (cpp.separated())
+            {
+                const vectorField& sepVecs = cpp.separation();
+
+                forAll(sepVecs, sVI)
+                {
+                    const vector& sepVec = sepVecs[sVI];
+
+                    if (mag(sepVec) > SMALL)
+                    {
+                        scalar tol = coupledPolyPatch::matchTol;
+
+                        vectorTensorTransform transform(sepVec);
+
+                        if (!matchTransform(transforms_, transform, tol, false))
+                        {
+                            transforms_[nextTrans++] = transform;
+                        }
+
+                        if (nextTrans > 6)
+                        {
+                            FatalErrorIn
+                            (
+                                 "void Foam::globalIndexAndTransform::"
+                                 "determineTransforms()"
+                            )
+                                << "More than six unsigned transforms detected:"
+                                << nl << transforms_
+                                << exit(FatalError);
+                        }
+                    }
+                }
+            }
+            else if (!cpp.parallel())
+            {
+                const tensorField& transTensors = cpp.forwardT();
+
+                forAll(transTensors, tTI)
+                {
+                    const tensor& transT = transTensors[tTI];
+
+                    if (mag(transT - I) > SMALL)
+                    {
+                        scalar tol = coupledPolyPatch::matchTol;
+
+                        vectorTensorTransform transform(transT);
+
+                        if (!matchTransform(transforms_, transform, tol, false))
+                        {
+                            transforms_[nextTrans++] = transform;
+                        }
+
+                        if (nextTrans > 6)
+                        {
+                            FatalErrorIn
+                            (
+                                "void Foam::globalIndexAndTransform::"
+                                "determineTransforms()"
+                            )
+                                << "More than six unsigned transforms detected:"
+                                << nl << transforms_
+                                << exit(FatalError);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    List<List<vectorTensorTransform> > allTransforms(Pstream::nProcs());
+
+    allTransforms[Pstream::myProcNo()] = transforms_;
+
+    Pstream::gatherList(allTransforms);
+
+    if (Pstream::master())
+    {
+        transforms_ = List<vectorTensorTransform>(3);
+
+        label nextTrans = 0;
+
+        forAll(allTransforms, procI)
+        {
+            const List<vectorTensorTransform>& procTransVecs =
+                allTransforms[procI];
+
+            forAll(procTransVecs, pSVI)
+            {
+                const vectorTensorTransform& transform = procTransVecs[pSVI];
+
+                if (mag(transform.t()) > SMALL || transform.hasR())
+                {
+                    scalar tol = coupledPolyPatch::matchTol;
+
+                    if (!matchTransform(transforms_, transform, tol, true))
+                    {
+                        transforms_[nextTrans++] = transform;
+                    }
+
+                    if (nextTrans > 3)
+                    {
+                        FatalErrorIn
+                        (
+                            "void Foam::globalIndexAndTransform::"
+                            "determineTransforms()"
+                        )
+                            << "More than three independent basic "
+                            << "transforms detected:" << nl
+                            << allTransforms
+                            << transforms_
+                            << exit(FatalError);
+                    }
+                }
+            }
+        }
+
+        transforms_.setSize(nextTrans);
+    }
+
+    Pstream::scatter(transforms_);
+}
+
+
+void Foam::globalIndexAndTransform::determineTransformPermutations()
+{
+    label nTransformPermutations = pow(3, transforms_.size());
+
+    transformPermutations_.setSize(nTransformPermutations);
+
+    forAll(transformPermutations_, tPI)
+    {
+        vectorTensorTransform transform;
+
+        label transformIndex = tPI;
+
+        // Invert the ternary index encoding using repeated division by
+        // three
+
+        forAll(transforms_, b)
+        {
+            const label w = (transformIndex % 3) - 1;
+
+            transformIndex /= 3;
+
+            if (w > 0)
+            {
+                transform &= transforms_[b];
+            }
+            else if (w < 0)
+            {
+                transform &= inv(transforms_[b]);
+            }
+        }
+
+        transformPermutations_[tPI] = transform;
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::globalIndexAndTransform::globalIndexAndTransform
+(
+    const polyMesh& mesh
+)
+:
+    mesh_(mesh)
+{
+    determineTransforms();
+
+    determineTransformPermutations();
+}
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::globalIndexAndTransform::~globalIndexAndTransform()
+{}
+
+
+// ************************************************************************* //

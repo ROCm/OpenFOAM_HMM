@@ -33,7 +33,7 @@ Description
 
 SourceFiles
     faceZone.C
-    newFaceZone.C
+    faceZoneNew.C
 
 \*---------------------------------------------------------------------------*/
 

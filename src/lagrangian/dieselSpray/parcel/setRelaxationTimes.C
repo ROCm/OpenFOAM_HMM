@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,14 +31,10 @@ License
 #include "heatTransferModel.H"
 #include "basicMultiComponentMixture.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void parcel::setRelaxationTimes
+void Foam::parcel::setRelaxationTimes
 (
     label celli,
     scalar& tauMomentum,
@@ -55,7 +51,6 @@ void parcel::setRelaxationTimes
     const scalar dt
 )
 {
-
     const liquidMixture& fuels = sDB.fuels();
 
     scalar mCell = rho*sDB.mesh().V()[cell()];
@@ -258,7 +253,7 @@ void parcel::setRelaxationTimes
                 scalar vapourSurfaceEnthalpy = 0.0;
                 scalar vapourFarEnthalpy = 0.0;
 
-                for (label k = 0; k < sDB.gasProperties().size(); k++)
+                forAll(sDB.gasProperties(), k)
                 {
                     vapourSurfaceEnthalpy += sDB.composition().Y()[k][celli]*sDB.gasProperties()[k].H(tBoilingSurface);
                     vapourFarEnthalpy += sDB.composition().Y()[k][celli]*sDB.gasProperties()[k].H(temperature);
@@ -291,9 +286,5 @@ void parcel::setRelaxationTimes
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -1119,9 +1119,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
                     if (fzNames[surfI].size())
                     {
                         // Get zone
-                        label zoneI = fZones.findZoneID(fzNames[surfI]);
-
-                        const faceZone& fZone = fZones[zoneI];
+                        const faceZone& fZone = fZones[fzNames[surfI]];
 
                         forAll(fZone, i)
                         {
@@ -1540,7 +1538,7 @@ Foam::label Foam::meshRefinement::addPatch
     polyBoundaryMesh& polyPatches =
         const_cast<polyBoundaryMesh&>(mesh.boundaryMesh());
 
-    label patchI = polyPatches.findPatchID(patchName);
+    const label patchI = polyPatches.findPatchID(patchName);
     if (patchI != -1)
     {
         if (polyPatches[patchI].type() == patchType)

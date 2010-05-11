@@ -31,7 +31,7 @@ Usage
 
     - foamToTecplot360 [OPTION]
 
-    @param -fields \<fields\>\n
+    @param -fields \<names\>\n
     Convert selected fields only. For example,
     @verbatim
          -fields '( p T U )'
@@ -99,12 +99,12 @@ void print(const char* msg, Ostream& os, const PtrList<GeoField>& flds)
 {
     if (flds.size())
     {
-        os << msg;
+        os  << msg;
         forAll(flds, i)
         {
-            os<< ' ' << flds[i].name();
+            os  << ' ' << flds[i].name();
         }
-        os << endl;
+        os  << endl;
     }
 }
 
@@ -113,9 +113,9 @@ void print(Ostream& os, const wordList& flds)
 {
     forAll(flds, i)
     {
-        os<< ' ' << flds[i];
+        os  << ' ' << flds[i];
     }
-    os << endl;
+    os  << endl;
 }
 
 
@@ -163,30 +163,65 @@ labelList getSelectedPatches
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Tecplot binary file format writer"
+    );
+
     timeSelector::addOptions();
+    #include "addRegionOption.H"
 
-#   include "addRegionOption.H"
-
-    argList::addOption("fields", "fields");
-    argList::addOption("cellSet", "cellSet name");
-    argList::addOption("faceSet", "faceSet name");
-    argList::addBoolOption("nearCellValue");
-    argList::addBoolOption("noInternal");
-    argList::addBoolOption("noPointValues");
+    argList::addOption
+    (
+        "fields",
+        "names",
+        "convert selected fields only. eg, '(p T U)'"
+    );
+    argList::addOption
+    (
+        "cellSet",
+        "name",
+        "restrict conversion to the specified cellSet"
+    );
+    argList::addOption
+    (
+        "faceSet",
+        "name",
+        "restrict conversion to the specified cellSet"
+    );
+    argList::addBoolOption
+    (
+        "nearCellValue",
+        "output cell value on patches instead of patch value itself"
+    );
+    argList::addBoolOption
+    (
+        "noInternal",
+        "do not generate file for mesh, only for patches"
+    );
+    argList::addBoolOption
+    (
+        "noPointValues",
+        "no pointFields"
+    );
     argList::addOption
     (
         "excludePatches",
         "patches (wildcards) to exclude"
     );
-    argList::addBoolOption("noFaceZones");
+    argList::addBoolOption
+    (
+        "noFaceZones",
+        "no faceZones"
+    );
 
-#   include "setRootCase.H"
-#   include "createTime.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
 
-    bool doWriteInternal = !args.optionFound("noInternal");
-    bool doFaceZones     = !args.optionFound("noFaceZones");
-
-    bool nearCellValue = args.optionFound("nearCellValue");
+    const bool doWriteInternal = !args.optionFound("noInternal");
+    const bool doFaceZones     = !args.optionFound("noFaceZones");
+    const bool nearCellValue = args.optionFound("nearCellValue");
+    const bool noPointValues = args.optionFound("noPointValues");
 
     if (nearCellValue)
     {
@@ -194,8 +229,6 @@ int main(int argc, char *argv[])
             << "Using neighbouring cell value instead of patch value"
             << nl << endl;
     }
-
-    bool noPointValues = args.optionFound("noPointValues");
 
     if (noPointValues)
     {

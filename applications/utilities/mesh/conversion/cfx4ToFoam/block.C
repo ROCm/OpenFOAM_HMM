@@ -110,9 +110,9 @@ const labelListListList& block::boundaryPatches() const
 
 Ostream& operator<<(Ostream& os, const block& b)
 {
-    os << b.Vertices << nl
-       << b.Cells << nl
-       << b.BoundaryPatches << endl;
+    os  << b.Vertices << nl
+        << b.Cells << nl
+        << b.BoundaryPatches << endl;
 
     return os;
 }

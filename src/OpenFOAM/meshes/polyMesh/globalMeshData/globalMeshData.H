@@ -208,6 +208,10 @@ class globalMeshData
 
             mutable autoPtr<indirectPrimitivePatch> coupledPatchPtr_;
 
+            mutable autoPtr<labelList> coupledPatchMeshEdgesPtr_;
+
+            mutable autoPtr<Map<label> > coupledPatchMeshEdgeMapPtr_;
+
             // Collocated
 
                 // Coupled point to collocated coupled points
@@ -504,6 +508,13 @@ public:
 
             //- Return patch of all coupled faces
             const indirectPrimitivePatch& coupledPatch() const;
+
+            //- Return map from coupledPatch edges to mesh edges
+            const labelList& coupledPatchMeshEdges() const;
+
+            //- Return map from mesh edges to coupledPatch edges
+            const Map<label>& coupledPatchMeshEdgeMap() const;
+
 
             // Coupled point to collocated coupled points. Coupled points are
             // points on any coupled patch.

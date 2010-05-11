@@ -86,7 +86,7 @@ Foam::scalar Foam::ode<CompType, ThermoType>::solve
         dtEst
     );
 
-    for (label i=0; i<c.size(); i++)
+    forAll(c, i)
     {
         c[i] = max(0.0, c1[i]);
     }

@@ -344,7 +344,7 @@ void Foam::argList::getRootCase()
     else
     {
         // qualify relative path
-        fileName casePath = cwd()/rootPath_/globalCase_;
+        casePath = cwd()/rootPath_/globalCase_;
         casePath.clean();
 
         setEnv("FOAM_CASE", casePath, true);
@@ -881,7 +881,12 @@ void Foam::argList::displayDoc(bool source) const
 
     if (found)
     {
-        string docBrowser(docDict.lookup("docBrowser"));
+        string docBrowser = getEnv("FOAM_DOC_BROWSER");
+        if (docBrowser.empty())
+        {
+            docDict.lookup("docBrowser") >> docBrowser;
+        }
+        // can use FOAM_DOC_BROWSER='application file://%f' if required
         docBrowser.replaceAll("%f", docFile);
 
         Info<< "Show documentation: " << docBrowser.c_str() << endl;

@@ -30,7 +30,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::lagrangianWriter::lagrangianWriter
 (
     const vtkMesh& vMesh,

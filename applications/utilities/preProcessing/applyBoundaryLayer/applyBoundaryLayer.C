@@ -49,9 +49,28 @@ static const scalar kappa(0.41);
 
 int main(int argc, char *argv[])
 {
-    argList::addOption("ybl", "scalar");
-    argList::addOption("Cbl", "scalar");
-    argList::addBoolOption("writenut");
+    argList::addNote
+    (
+        "apply a simplified boundary-layer model to the velocity and\n"
+        "turbulence fields based on the 1/7th power-law."
+    );
+
+    argList::addOption
+    (
+        "ybl",
+        "scalar",
+        "specify the boundary-layer thickness"
+    );
+    argList::addOption
+    (
+        "Cbl", "scalar",
+        "boundary-layer thickness as Cbl * mean distance to wall"
+    );
+    argList::addBoolOption
+    (
+        "writenut",
+        "write nut field"
+    );
 
     #include "setRootCase.H"
     #include "createTime.H"

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,14 +26,10 @@ License
 #include "spray.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar spray::injectedMass(const scalar t) const
+Foam::scalar Foam::spray::injectedMass(const scalar t) const
 {
     scalar sum = 0.0;
 
@@ -46,7 +42,7 @@ scalar spray::injectedMass(const scalar t) const
 }
 
 
-scalar spray::totalMassToInject() const
+Foam::scalar Foam::spray::totalMassToInject() const
 {
     scalar sum = 0.0;
 
@@ -59,7 +55,7 @@ scalar spray::totalMassToInject() const
 }
 
 
-scalar spray::injectedEnthalpy
+Foam::scalar Foam::spray::injectedEnthalpy
 (
     const scalar time
 ) const
@@ -89,7 +85,7 @@ scalar spray::injectedEnthalpy
 }
 
 
-scalar spray::liquidMass() const
+Foam::scalar Foam::spray::liquidMass() const
 {
     scalar sum = 0.0;
 
@@ -109,7 +105,7 @@ scalar spray::liquidMass() const
 }
 
 
-scalar spray::liquidEnthalpy() const
+Foam::scalar Foam::spray::liquidEnthalpy() const
 {
     scalar sum = 0.0;
     label Nf = fuels().components().size();
@@ -146,7 +142,7 @@ scalar spray::liquidEnthalpy() const
 }
 
 
-scalar spray::liquidTotalEnthalpy() const
+Foam::scalar Foam::spray::liquidTotalEnthalpy() const
 {
     scalar sum = 0.0;
     label Nf = fuels().components().size();
@@ -186,7 +182,7 @@ scalar spray::liquidTotalEnthalpy() const
 }
 
 
-scalar spray::liquidKineticEnergy() const
+Foam::scalar Foam::spray::liquidKineticEnergy() const
 {
     scalar sum = 0.0;
 
@@ -208,19 +204,19 @@ scalar spray::liquidKineticEnergy() const
 }
 
 
-scalar spray::injectedLiquidKineticEnergy() const
+Foam::scalar Foam::spray::injectedLiquidKineticEnergy() const
 {
     return injectedLiquidKE_;
 }
 
 
-scalar spray::liquidPenetration(const scalar prc) const
+Foam::scalar Foam::spray::liquidPenetration(const scalar prc) const
 {
     return liquidPenetration(0, prc);
 }
 
 
-scalar spray::liquidPenetration
+Foam::scalar Foam::spray::liquidPenetration
 (
     const label nozzlei,
     const scalar prc
@@ -349,7 +345,7 @@ scalar spray::liquidPenetration
 }
 
 
-scalar spray::smd() const
+Foam::scalar Foam::spray::smd() const
 {
     scalar numerator = 0.0, denominator = VSMALL;
 
@@ -372,7 +368,7 @@ scalar spray::smd() const
 }
 
 
-scalar spray::maxD() const
+Foam::scalar Foam::spray::maxD() const
 {
     scalar maxD = 0.0;
 
@@ -387,20 +383,16 @@ scalar spray::maxD() const
 }
 
 
-void spray::calculateAmbientPressure()
+void Foam::spray::calculateAmbientPressure()
 {
     ambientPressure_ = p_.average().value();
 }
 
 
-void spray::calculateAmbientTemperature()
+void Foam::spray::calculateAmbientTemperature()
 {
     ambientTemperature_ = T_.average().value();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

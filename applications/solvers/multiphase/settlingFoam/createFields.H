@@ -159,7 +159,7 @@
 
     Info<< "Selecting Drift-Flux model " << endl;
 
-    word VdjModel(transportProperties.lookup("VdjModel"));
+    const word VdjModel(transportProperties.lookup("VdjModel"));
 
     Info<< tab << VdjModel << " selected\n" << endl;
 

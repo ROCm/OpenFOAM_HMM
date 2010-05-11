@@ -20,7 +20,7 @@ for (label indx=0;indx<nPoints;indx++)
 }
 gmvFile << nl;
 gmvFile << "cells   " << cells.size() << nl;
-for (label indx=0;indx<cells.size();indx++)
+forAll(cells, indx)
 {
     label nNodes = cells[indx].size();
     if (nNodes == 8)

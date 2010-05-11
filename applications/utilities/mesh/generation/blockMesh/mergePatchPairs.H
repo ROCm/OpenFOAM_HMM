@@ -27,10 +27,7 @@
                 // Master patch
                 const word masterPatchName(mergePatchPairs[pairI].first());
                 const polyPatch& masterPatch =
-                    mesh.boundaryMesh()
-                    [
-                        mesh.boundaryMesh().findPatchID(masterPatchName)
-                    ];
+                    mesh.boundaryMesh()[masterPatchName];
 
                 labelList isf(masterPatch.size());
 
@@ -51,10 +48,7 @@
                 // Slave patch
                 const word slavePatchName(mergePatchPairs[pairI].second());
                 const polyPatch& slavePatch =
-                    mesh.boundaryMesh()
-                    [
-                        mesh.boundaryMesh().findPatchID(slavePatchName)
-                    ];
+                    mesh.boundaryMesh()[slavePatchName];
 
                 labelList osf(slavePatch.size());
 

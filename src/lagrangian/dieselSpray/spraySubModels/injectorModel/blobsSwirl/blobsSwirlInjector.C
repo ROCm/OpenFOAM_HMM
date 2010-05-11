@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,7 +68,8 @@ Foam::blobsSwirlInjector::blobsSwirlInjector
 
     if (sm.injectors().size() != coneAngle_.size())
     {
-        FatalError << "blobsSwirlInjector::blobsSwirlInjector"
+        FatalError
+            << "blobsSwirlInjector::blobsSwirlInjector"
             << "(const dictionary& dict, spray& sm)\n"
             << "Wrong number of entries in innerAngle"
             << abort(FatalError);

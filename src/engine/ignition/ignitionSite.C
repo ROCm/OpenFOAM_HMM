@@ -27,14 +27,9 @@ License
 #include "Time.H"
 #include "volFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void ignitionSite::findIgnitionCells(const fvMesh& mesh)
+void Foam::ignitionSite::findIgnitionCells(const fvMesh& mesh)
 {
     // Bit tricky: generate C and V before shortcutting if cannot find
     // cell locally. mesh.C generation uses parallel communication.
@@ -90,7 +85,7 @@ void ignitionSite::findIgnitionCells(const fvMesh& mesh)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const labelList& ignitionSite::cells() const
+const Foam::labelList& Foam::ignitionSite::cells() const
 {
     if (mesh_.changing() && timeIndex_ != db_.timeIndex())
     {
@@ -102,7 +97,7 @@ const labelList& ignitionSite::cells() const
 }
 
 
-bool ignitionSite::igniting() const
+bool Foam::ignitionSite::igniting() const
 {
     scalar curTime = db_.value();
     scalar deltaT = db_.deltaTValue();
@@ -116,7 +111,7 @@ bool ignitionSite::igniting() const
 }
 
 
-bool ignitionSite::ignited() const
+bool Foam::ignitionSite::ignited() const
 {
     scalar curTime = db_.value();
     scalar deltaT = db_.deltaTValue();
@@ -127,7 +122,7 @@ bool ignitionSite::ignited() const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void ignitionSite::operator=(const ignitionSite& is)
+void Foam::ignitionSite::operator=(const ignitionSite& is)
 {
     location_ = is.location_;
     diameter_ = is.diameter_;
@@ -138,9 +133,5 @@ void ignitionSite::operator=(const ignitionSite& is)
     cellVolumes_ = is.cellVolumes_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

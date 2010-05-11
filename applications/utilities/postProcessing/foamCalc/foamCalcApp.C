@@ -51,7 +51,8 @@ int main(int argc, char *argv[])
     Foam::argList::addOption
     (
         "dict",
-        "dictionary name"
+        "name",
+        "dictionary to use"
     );
 
     if (argc < 2)
@@ -61,7 +62,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    word utilityName = argv[1];
+    const word utilityName = argv[1];
 
     Foam::autoPtr<Foam::calcType> utility
     (

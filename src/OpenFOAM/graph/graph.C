@@ -28,19 +28,18 @@ License
 #include "IOmanip.H"
 #include "Pair.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(graph::writer, 0);
+    defineRunTimeSelectionTable(graph::writer, word);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(graph::writer, 0);
-defineRunTimeSelectionTable(graph::writer, word);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void graph::readCurves(Istream& is)
+void Foam::graph::readCurves(Istream& is)
 {
     List<xy> xyData(is);
 
@@ -59,7 +58,7 @@ void graph::readCurves(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-graph::graph
+Foam::graph::graph
 (
     const string& title,
     const string& xName,
@@ -74,7 +73,7 @@ graph::graph
 {}
 
 
-graph::graph
+Foam::graph::graph
 (
     const string& title,
     const string& xName,
@@ -92,7 +91,7 @@ graph::graph
 }
 
 
-graph::graph
+Foam::graph::graph
 (
     const string& title,
     const string& xName,
@@ -108,7 +107,7 @@ graph::graph
 }
 
 
-graph::graph(Istream& is)
+Foam::graph::graph(Istream& is)
 :
     title_(is),
     xName_(is),
@@ -118,7 +117,7 @@ graph::graph(Istream& is)
 }
 
 
-const scalarField& graph::y() const
+const Foam::scalarField& Foam::graph::y() const
 {
     if (size() != 1)
     {
@@ -130,7 +129,8 @@ const scalarField& graph::y() const
     return *begin()();
 }
 
-scalarField& graph::y()
+
+Foam::scalarField& Foam::graph::y()
 {
     if (size() != 1)
     {
@@ -143,7 +143,10 @@ scalarField& graph::y()
 }
 
 
-autoPtr<graph::writer> graph::writer::New(const word& graphFormat)
+Foam::autoPtr<Foam::graph::writer> Foam::graph::writer::New
+(
+    const word& graphFormat
+)
 {
     if (!wordConstructorTablePtr_)
     {
@@ -173,7 +176,7 @@ autoPtr<graph::writer> graph::writer::New(const word& graphFormat)
 }
 
 
-void graph::writer::writeXY
+void Foam::graph::writer::writeXY
 (
     const scalarField& x,
     const scalarField& y,
@@ -187,7 +190,7 @@ void graph::writer::writeXY
 }
 
 
-void graph::writeTable(Ostream& os) const
+void Foam::graph::writeTable(Ostream& os) const
 {
     forAll(x_, xi)
     {
@@ -202,13 +205,13 @@ void graph::writeTable(Ostream& os) const
 }
 
 
-void graph::write(Ostream& os, const word& format) const
+void Foam::graph::write(Ostream& os, const word& format) const
 {
     writer::New(format)().write(*this, os);
 }
 
 
-void graph::write(const fileName& fName, const word& format) const
+void Foam::graph::write(const fileName& fName, const word& format) const
 {
     autoPtr<writer> graphWriter(writer::New(format));
 
@@ -227,16 +230,12 @@ void graph::write(const fileName& fName, const word& format) const
 }
 
 
-Ostream& operator<<(Ostream& os, const graph& g)
+Foam::Ostream& Foam::operator<<(Ostream& os, const graph& g)
 {
     g.writeTable(os);
     os.check("Ostream& operator<<(Ostream&, const graph&)");
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

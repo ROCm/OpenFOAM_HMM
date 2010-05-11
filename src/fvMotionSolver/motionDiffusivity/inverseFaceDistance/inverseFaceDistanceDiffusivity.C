@@ -78,7 +78,7 @@ void Foam::inverseFaceDistanceDiffusivity::correct()
 
     forAll(patchNames_, i)
     {
-        label pID = bdry.findPatchID(patchNames_[i]);
+        const label pID = bdry.findPatchID(patchNames_[i]);
 
         if (pID > -1)
         {
@@ -144,7 +144,7 @@ void Foam::inverseFaceDistanceDiffusivity::correct()
         }
         else
         {
-            label start = bfld.patch().patch().start();
+            const label start = bfld.patch().start();
 
             forAll(bfld, i)
             {

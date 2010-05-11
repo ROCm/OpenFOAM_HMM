@@ -47,7 +47,7 @@ int yyFlexLexer::yylex()
 
     return 0;
 }
-//! @endcond dummy
+//! @endcond
 
 
 // Dummy yywrap to keep yylex happy at compile time.
@@ -62,7 +62,7 @@ int yyFlexLexer::yywrap()
 {
     return 1;
 }
-//! @endcond dummy
+//! @endcond
 
 
 Foam::string foamSpecieString(const char* YYText)

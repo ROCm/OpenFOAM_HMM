@@ -1,4 +1,4 @@
-    Info << "Reading field p\n" << endl;
+    Info<< "Reading field p\n" << endl;
     volScalarField p
     (
         IOobject
@@ -12,7 +12,7 @@
         mesh
     );
 
-    Info << "Reading field U\n" << endl;
+    Info<< "Reading field U\n" << endl;
     volVectorField U
     (
         IOobject
@@ -34,7 +34,7 @@
     setRefCell(p, mesh.solutionDict().subDict("SIMPLE"), pRefCell, pRefValue);
 
 
-    Info << "Reading field pa\n" << endl;
+    Info<< "Reading field pa\n" << endl;
     volScalarField pa
     (
         IOobject
@@ -48,7 +48,7 @@
         mesh
     );
 
-    Info << "Reading field Ua\n" << endl;
+    Info<< "Reading field Ua\n" << endl;
     volVectorField Ua
     (
         IOobject
@@ -84,10 +84,8 @@
     dimensionedScalar lambda(laminarTransport.lookup("lambda"));
     dimensionedScalar alphaMax(laminarTransport.lookup("alphaMax"));
 
-    const labelList& inletCells =
-        mesh.boundary()[mesh.boundaryMesh().findPatchID("inlet")].faceCells();
-    //const labelList& outletCells =
-    //    mesh.boundary()[mesh.boundaryMesh().findPatchID("outlet")].faceCells();
+    const labelList& inletCells = mesh.boundary()["inlet"].faceCells();
+    //const labelList& outletCells = mesh.boundary()["outlet"].faceCells();
 
     volScalarField alpha
     (

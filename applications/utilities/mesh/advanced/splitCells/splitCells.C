@@ -517,17 +517,35 @@ void collectCuts
 
 int main(int argc, char *argv[])
 {
-#   include "addOverwriteOption.H"
+    argList::addNote
+    (
+        "split cells with flat faces"
+    );
+    #include "addOverwriteOption.H"
     argList::noParallel();
-    argList::addOption("set", "cellSet name");
-    argList::addBoolOption("geometry");
-    argList::addOption("tol", "edge snap tolerance");
-    argList::validArgs.append("edge angle [0..360]");
+    argList::validArgs.append("edgeAngle [0..360]");
 
-#   include "setRootCase.H"
-#   include "createTime.H"
+    argList::addOption
+    (
+        "set",
+        "name",
+        "split cells from specified cellSet only"
+    );
+    argList::addBoolOption
+    (
+        "geometry",
+        "use geometric cut for hexes as well"
+    );
+    argList::addOption
+    (
+        "tol",
+        "scalar", "edge snap tolerance (default 0.2)"
+    );
+
+    #include "setRootCase.H"
+    #include "createTime.H"
     runTime.functionObjects().off();
-#   include "createPolyMesh.H"
+    #include "createPolyMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
     const scalar featureAngle = args.argRead<scalar>(1);
@@ -538,7 +556,7 @@ int main(int argc, char *argv[])
     const bool geometry  = args.optionFound("geometry");
     const bool overwrite = args.optionFound("overwrite");
 
-    scalar edgeTol = args.optionLookupOrDefault("tol", 0.2);
+    const scalar edgeTol = args.optionLookupOrDefault("tol", 0.2);
 
     Info<< "Trying to split cells with internal angles > feature angle\n" << nl
         << "featureAngle      : " << featureAngle << nl

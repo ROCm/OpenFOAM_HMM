@@ -828,7 +828,12 @@ int main(int argc, char *argv[])
 #   include "addRegionOption.H"
     argList::addBoolOption("noVTK", "do not write VTK files");
     argList::addBoolOption("loop", "execute batch commands for all timesteps");
-    argList::addOption("batch", "file");
+    argList::addOption
+    (
+        "batch",
+        "file",
+        "process in batch mode, using input from specified file"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -974,7 +979,7 @@ int main(int argc, char *argv[])
             IStringStream is(rawLine + ' ');
 
             // Type: cellSet, faceSet, pointSet, faceZoneSet
-            is >> setType;
+            is  >> setType;
 
             stat = parseType(runTime, mesh, setType, is);
 

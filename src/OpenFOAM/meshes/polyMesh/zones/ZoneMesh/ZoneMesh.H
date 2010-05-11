@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -109,7 +109,7 @@ public:
     ~ZoneMesh();
 
 
-    // Member functions
+    // Member Functions
 
         //- Return the mesh reference
         const MeshType& mesh() const
@@ -148,6 +148,17 @@ public:
 
         //- writeData member function required by regIOobject
         bool writeData(Ostream&) const;
+
+    // Member Operators
+
+        //- Return const and non-const reference to ZoneType by index.
+        using PtrList<ZoneType>::operator[];
+
+        //- Return const reference to ZoneType by name.
+        const ZoneType& operator[](const word&) const;
+
+        //- Return reference to ZoneType by name.
+        ZoneType& operator[](const word&);
 
 
     // Ostream operator

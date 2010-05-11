@@ -26,21 +26,17 @@ License
 #include "staticEngineMesh.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 namespace Foam
 {
+    defineTypeNameAndDebug(staticEngineMesh, 0);
+    addToRunTimeSelectionTable(engineMesh, staticEngineMesh, IOobject);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(staticEngineMesh, 0);
-
-addToRunTimeSelectionTable(engineMesh, staticEngineMesh, IOobject);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct from objectRegistry, and read/write options
-staticEngineMesh::staticEngineMesh(const IOobject& io)
+Foam::staticEngineMesh::staticEngineMesh(const IOobject& io)
 :
     engineMesh(io)
 {}
@@ -48,18 +44,14 @@ staticEngineMesh::staticEngineMesh(const IOobject& io)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-staticEngineMesh::~staticEngineMesh()
+Foam::staticEngineMesh::~staticEngineMesh()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void staticEngineMesh::move()
+void Foam::staticEngineMesh::move()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
