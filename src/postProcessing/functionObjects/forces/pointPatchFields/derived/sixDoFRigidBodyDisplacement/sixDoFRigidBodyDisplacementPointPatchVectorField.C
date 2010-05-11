@@ -49,7 +49,8 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
     fixedValuePointPatchField<vector>(p, iF),
     motion_(),
     initialPoints_(p.localPoints()),
-    rhoInf_(1.0)
+    rhoInf_(1.0),
+    rhoName_("rho")
 {}
 
 
@@ -63,8 +64,14 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
 :
     fixedValuePointPatchField<vector>(p, iF, dict),
     motion_(dict),
-    rhoInf_(readScalar(dict.lookup("rhoInf")))
+    rhoInf_(1.0),
+    rhoName_(dict.lookupOrDefault<word>("rhoName", "rho"))
 {
+    if (rhoName_ == "rhoInf")
+    {
+        rhoInf_ = readScalar(dict.lookup("rhoInf"));
+    }
+
     if (!dict.found("value"))
     {
         updateCoeffs();
@@ -93,7 +100,8 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
     fixedValuePointPatchField<vector>(ptf, p, iF, mapper),
     motion_(ptf.motion_),
     initialPoints_(ptf.initialPoints_, mapper),
-    rhoInf_(ptf.rhoInf_)
+    rhoInf_(ptf.rhoInf_),
+    rhoName_(ptf.rhoName_)
 {}
 
 
@@ -107,7 +115,8 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
     fixedValuePointPatchField<vector>(ptf, iF),
     motion_(ptf.motion_),
     initialPoints_(ptf.initialPoints_),
-    rhoInf_(ptf.rhoInf_)
+    rhoInf_(ptf.rhoInf_),
+    rhoName_(ptf.rhoName_)
 {}
 
 
@@ -160,6 +169,7 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
 
     forcesDict.add("patches", wordList(1, ptPatch.name()));
     forcesDict.add("rhoInf", rhoInf_);
+    forcesDict.add("rhoName", rhoName_);
     forcesDict.add("CofR", motion_.centreOfMass());
 
     forces f("forces", db(), forcesDict);
@@ -200,6 +210,8 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::write(Ostream& os) const
     motion_.write(os);
     os.writeKeyword("rhoInf")
         << rhoInf_ << token::END_STATEMENT << nl;
+    os.writeKeyword("rhoName")
+        << rhoName_ << token::END_STATEMENT << nl;
     initialPoints_.writeEntry("initialPoints", os);
     writeEntry("value", os);
 }

@@ -47,8 +47,7 @@ uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField
 :
     fixedValuePointPatchField<vector>(p, iF),
     motion_(),
-    initialPoints_(p.localPoints()),
-    rhoInf_(1.0)
+    initialPoints_(p.localPoints())
 {}
 
 
@@ -61,8 +60,7 @@ uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField
 )
 :
     fixedValuePointPatchField<vector>(p, iF, dict),
-    motion_(dict),
-    rhoInf_(readScalar(dict.lookup("rhoInf")))
+    motion_(dict)
 {
     if (!dict.found("value"))
     {
@@ -91,8 +89,7 @@ uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField
 :
     fixedValuePointPatchField<vector>(ptf, p, iF, mapper),
     motion_(ptf.motion_),
-    initialPoints_(ptf.initialPoints_, mapper),
-    rhoInf_(ptf.rhoInf_)
+    initialPoints_(ptf.initialPoints_, mapper)
 {}
 
 
@@ -105,8 +102,7 @@ uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField
 :
     fixedValuePointPatchField<vector>(ptf, iF),
     motion_(ptf.motion_),
-    initialPoints_(ptf.initialPoints_),
-    rhoInf_(ptf.rhoInf_)
+    initialPoints_(ptf.initialPoints_)
 {}
 
 
@@ -182,8 +178,6 @@ void uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField::write
 {
     pointPatchField<vector>::write(os);
     motion_.write(os);
-    os.writeKeyword("rhoInf")
-        << rhoInf_ << token::END_STATEMENT << nl;
     initialPoints_.writeEntry("initialPoints", os);
     writeEntry("value", os);
 }
