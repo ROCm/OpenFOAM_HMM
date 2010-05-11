@@ -140,6 +140,23 @@ int main(int argc, char *argv[])
             case topoSetSource::NEW:
             case topoSetSource::ADD:
             case topoSetSource::DELETE:
+            {
+                Info<< "    Applying source " << word(dict.lookup("source"))
+                    << endl;
+                autoPtr<topoSetSource> source = topoSetSource::New
+                (
+                    dict.lookup("source"),
+                    mesh,
+                    dict.subDict("sourceInfo")
+                );
+
+                source().applyToSet(action, currentSet());
+                // Synchronize for coupled patches.
+                currentSet().sync(mesh);
+                currentSet().write();
+            }
+            break;
+
             case topoSetSource::SUBSET:
             {
                 Info<< "    Applying source " << word(dict.lookup("source"))
@@ -148,10 +165,26 @@ int main(int argc, char *argv[])
                 (
                     dict.lookup("source"),
                     mesh,
-                    dict.subDict("sourceDict")
+                    dict.subDict("sourceInfo")
                 );
 
-                source().applyToSet(action, currentSet());
+                // Backup current set.
+                autoPtr<topoSet> oldSet
+                (
+                    topoSet::New
+                    (
+                        setType,
+                        mesh,
+                        currentSet().name() + "_old2",
+                        currentSet()
+                    )
+                );
+
+                currentSet().clear();
+                source().applyToSet(topoSetSource::NEW, currentSet());
+
+                // Combine new value of currentSet with old one.
+                currentSet().subset(oldSet());
                 // Synchronize for coupled patches.
                 currentSet().sync(mesh);
                 currentSet().write();
