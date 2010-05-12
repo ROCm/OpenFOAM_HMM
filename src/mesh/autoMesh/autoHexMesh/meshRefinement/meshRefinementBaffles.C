@@ -1234,6 +1234,7 @@ void Foam::meshRefinement::findCellZoneTopo
         {
             label surfI = namedSurfaceIndex[faceI];
 
+            // Connected even if no cellZone defined for surface
             if (surfI != -1)
             {
                 // Calculate region to zone from cellRegions on either side
@@ -1286,6 +1287,7 @@ void Foam::meshRefinement::findCellZoneTopo
 
                     label surfI = namedSurfaceIndex[faceI];
 
+                    // Connected even if no cellZone defined for surface
                     if (surfI != -1)
                     {
                         bool changedCell = calcRegionToZone
