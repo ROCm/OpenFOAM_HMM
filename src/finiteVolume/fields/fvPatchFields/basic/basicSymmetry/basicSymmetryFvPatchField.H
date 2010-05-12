@@ -76,7 +76,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given basicSymmetryFvPatchField onto a new patch
+        //- Construct by mapping given basicSymmetryFvPatchField onto a new
+        //  patch
         basicSymmetryFvPatchField
         (
             const basicSymmetryFvPatchField<Type>&,
