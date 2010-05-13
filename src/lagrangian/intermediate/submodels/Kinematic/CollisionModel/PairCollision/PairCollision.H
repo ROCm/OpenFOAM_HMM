@@ -36,6 +36,7 @@ SourceFiles
 
 #include "CollisionModel.H"
 #include "InteractionLists.H"
+#include "WallInteractionSite.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

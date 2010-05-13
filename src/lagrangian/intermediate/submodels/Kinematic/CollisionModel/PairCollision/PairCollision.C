@@ -175,6 +175,10 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
     const labelListList directWallFaces = il_.dwfil();
 
+    const labelList& patchID = mesh.boundaryMesh().patchID();
+
+    const volVectorField& U = mesh.lookupObject<volVectorField>(il_.UName());
+
     // Storage for the wall interaction sites
     DynamicList<point> flatSites;
     DynamicList<scalar> flatSiteExclusionDistancesSqr;
@@ -199,7 +203,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
             sharpSiteExclusionDistancesSqr.clear();
 
             typename CloudType::parcelType& p =
-            *cellOccupancy_[realCellI][cellParticleI];
+                *cellOccupancy_[realCellI][cellParticleI];
 
             const point& pos = p.position();
 
@@ -269,8 +273,10 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
             forAll(cellRefWallFaces, rWFI)
             {
+                label refWallFaceI = cellRefWallFaces[rWFI];
+
                 const referredWallFace& rwf =
-                il_.referredWallFaces()[cellRefWallFaces[rWFI]];
+                    il_.referredWallFaces()[refWallFaceI];
 
                 const pointField& pts = rwf.points();
 
@@ -502,7 +508,8 @@ Foam::PairCollision<CloudType>::PairCollision
     (
         owner.mesh(),
         readScalar(this->coeffDict().lookup("maxInteractionDistance")),
-        Switch(this->coeffDict().lookup("writeReferredParticleCloud"))
+        Switch(this->coeffDict().lookup("writeReferredParticleCloud")),
+        this->coeffDict().lookupOrDefault("UName", word("U"))
     )
 {}
 

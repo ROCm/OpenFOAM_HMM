@@ -129,6 +129,13 @@ Foam::InteractionLists<ParticleType>::referredWallFaces() const
 
 
 template<class ParticleType>
+const Foam::word& Foam::InteractionLists<ParticleType>::UName() const
+{
+    return UName_;
+}
+
+
+template<class ParticleType>
 const Foam::List<Foam::vector>&
 Foam::InteractionLists<ParticleType>::referredWallData() const
 {
