@@ -22,21 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::WallInteractionSite
+    Foam::WallSiteData
 
 Description
     Stores the patch ID and templated data to represent a collision
     with a wall to be passed to the wall model.
 
 SourceFiles
-    WallInteractionSiteI.H
-    WallInteractionSite.C
-    WallInteractionSiteIO.C
+    WallSiteDataI.H
+    WallSiteData.C
+    WallSiteDataIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WallInteractionSite_H
-#define WallInteractionSite_H
+#ifndef WallSiteData_H
+#define WallSiteData_H
 
 #include "label.H"
 
@@ -48,21 +48,21 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 template<class Type>
-class WallInteractionSite;
+class WallSiteData;
 
 template<class Type>
-Istream& operator>>(Istream&, WallInteractionSite<Type>&);
+Istream& operator>>(Istream&, WallSiteData<Type>&);
 
 template<class Type>
-Ostream& operator<<(Ostream&, const WallInteractionSite<Type>&);
+Ostream& operator<<(Ostream&, const WallSiteData<Type>&);
 
 
 /*---------------------------------------------------------------------------*\
-                         Class WallInteractionSite Declaration
+                         Class WallSiteData Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class WallInteractionSite
+class WallSiteData
 {
     // Private data
 
@@ -78,10 +78,10 @@ public:
     // Constructors
 
         //- Construct null
-        WallInteractionSite();
+        WallSiteData();
 
         //- Construct from components
-        WallInteractionSite
+        WallSiteData
         (
             label patchI,
             const Type& wallData
@@ -89,7 +89,7 @@ public:
 
 
     //- Destructor
-    ~WallInteractionSite();
+    ~WallSiteData();
 
 
     // Member Functions
@@ -109,17 +109,17 @@ public:
 
     // Member Operators
 
-        bool operator==(const WallInteractionSite<Type>&) const;
-        bool operator!=(const WallInteractionSite<Type>&) const;
+        bool operator==(const WallSiteData<Type>&) const;
+        bool operator!=(const WallSiteData<Type>&) const;
 
 
     // IOstream Operators
 
         friend Istream& operator>> <Type>
-        (Istream&, WallInteractionSite<Type>&);
+        (Istream&, WallSiteData<Type>&);
 
         friend Ostream& operator<< <Type>
-        (Ostream&, const WallInteractionSite<Type>&);
+        (Ostream&, const WallSiteData<Type>&);
 };
 
 
@@ -129,12 +129,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "WallInteractionSiteI.H"
+#include "WallSiteDataI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "WallInteractionSite.C"
+#   include "WallSiteData.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

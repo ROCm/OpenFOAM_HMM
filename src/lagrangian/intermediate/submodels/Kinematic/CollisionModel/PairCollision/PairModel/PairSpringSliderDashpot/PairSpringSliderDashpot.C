@@ -215,7 +215,7 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
         {
             scalar kT = 8.0*sqrt(R*normalOverlapMag)*Gstar_;
 
-            scalar& etaT = etaN;
+            scalar etaT = etaN;
 
             // Tangential force
             vector fT_AB;
@@ -233,9 +233,9 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
             else
             {
                 fT_AB =
-                -kT*tangentialOverlapMag
-               *tangentialOverlap_AB/tangentialOverlapMag
-              - etaT*USlip_AB;
+                    -kT*tangentialOverlapMag
+                   *tangentialOverlap_AB/tangentialOverlapMag
+                  - etaT*USlip_AB;
             }
 
             pA.f() += fT_AB;

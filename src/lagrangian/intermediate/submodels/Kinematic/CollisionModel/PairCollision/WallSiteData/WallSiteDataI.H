@@ -28,28 +28,28 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::label Foam::WallInteractionSite<Type>::patchIndex() const
+Foam::label Foam::WallSiteData<Type>::patchIndex() const
 {
     return patchI_;
 }
 
 
 template<class Type>
-Foam::label& Foam::WallInteractionSite<Type>::patchIndex()
+Foam::label& Foam::WallSiteData<Type>::patchIndex()
 {
     return patchI_;
 }
 
 
 template<class Type>
-const Type& Foam::WallInteractionSite<Type>::wallData() const
+const Type& Foam::WallSiteData<Type>::wallData() const
 {
     return wallData_;
 }
 
 
 template<class Type>
-Type& Foam::WallInteractionSite<Type>::wallData()
+Type& Foam::WallSiteData<Type>::wallData()
 {
     return wallData_;
 }

@@ -23,12 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "WallInteractionSite.H"
+#include "WallSiteData.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::WallInteractionSite<Type>::WallInteractionSite()
+Foam::WallSiteData<Type>::WallSiteData()
 :
     patchI_(),
     wallData_()
@@ -36,7 +36,7 @@ Foam::WallInteractionSite<Type>::WallInteractionSite()
 
 
 template<class Type>
-Foam::WallInteractionSite<Type>::WallInteractionSite
+Foam::WallSiteData<Type>::WallSiteData
 (
     label patchI,
     const Type& wallData
@@ -50,26 +50,26 @@ Foam::WallInteractionSite<Type>::WallInteractionSite
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::WallInteractionSite<Type>::~WallInteractionSite()
+Foam::WallSiteData<Type>::~WallSiteData()
 {}
 
 
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
 template<class Type>
-bool Foam::WallInteractionSite<Type>::operator==
+bool Foam::WallSiteData<Type>::operator==
 (
-    const WallInteractionSite<Type>& rhs
+    const WallSiteData<Type>& rhs
 ) const
 {
-    return patchI_ == rhs.patch_ && wallData_ == rhs.wallData_;
+    return patchI_ == rhs.patchI_ && wallData_ == rhs.wallData_;
 }
 
 
 template<class Type>
-bool Foam::WallInteractionSite<Type>::operator!=
+bool Foam::WallSiteData<Type>::operator!=
 (
-    const WallInteractionSite<Type>& rhs
+    const WallSiteData<Type>& rhs
 ) const
 {
     return !(*this == rhs);
@@ -82,7 +82,7 @@ template<class Type>
 Foam::Istream& Foam::operator>>
 (
     Istream& is,
-    WallInteractionSite<Type>& wIS
+    WallSiteData<Type>& wIS
 )
 {
     is  >> wIS.patchI_ >> wIS.wallData_;
@@ -91,7 +91,7 @@ Foam::Istream& Foam::operator>>
     is.check
     (
         "Foam::Istream& Foam::operator>>"
-        "(Foam::Istream&, Foam::WallInteractionSite<Type>&)"
+        "(Foam::Istream&, Foam::WallSiteData<Type>&)"
     );
 
     return is;
@@ -102,7 +102,7 @@ template<class Type>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const WallInteractionSite<Type>& wIS
+    const WallSiteData<Type>& wIS
 )
 {
     os  << wIS.patchI_ << token::SPACE << wIS.wallData_;
@@ -111,7 +111,7 @@ Foam::Ostream& Foam::operator<<
     os.check
     (
         "Foam::Ostream& Foam::operator<<"
-        "(Ostream&, const WallInteractionSite<Type>&)"
+        "(Ostream&, const WallSiteData<Type>&)"
     );
 
     return os;

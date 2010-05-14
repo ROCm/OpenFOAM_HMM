@@ -36,7 +36,7 @@ SourceFiles
 
 #include "CollisionModel.H"
 #include "InteractionLists.H"
-#include "WallInteractionSite.H"
+#include "WallSiteData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -138,8 +138,10 @@ class PairCollision
         void evaluateWall
         (
             typename CloudType::parcelType& p,
-            const List<point>& flatSites,
-            const List<point>& sharpSites
+            const List<point>& flatSitePoints,
+            const List<WallSiteData<vector> >& flatSiteData,
+            const List<point>& sharpSitePoints,
+            const List<WallSiteData<vector> >& sharpSiteData
         ) const;
 
 

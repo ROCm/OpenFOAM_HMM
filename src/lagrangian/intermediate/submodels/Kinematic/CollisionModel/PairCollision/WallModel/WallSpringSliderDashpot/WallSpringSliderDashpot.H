@@ -86,10 +86,12 @@ class WallSpringSliderDashpot
         (
             typename CloudType::parcelType& p,
             const point& site,
+            const WallSiteData<vector>& data,
             scalar pNu,
             scalar pE,
             scalar Estar,
-            scalar kN
+            scalar kN,
+            scalar Gstar
         ) const;
 
 
@@ -124,8 +126,10 @@ public:
         virtual void evaluateWall
         (
             typename CloudType::parcelType& p,
-            const List<point>& flatSites,
-            const List<point>& sharpSites
+            const List<point>& flatSitePoints,
+            const List<WallSiteData<vector> >& flatSiteData,
+            const List<point>& sharpSitePoints,
+            const List<WallSiteData<vector> >& sharpSiteData
         ) const;
 };
 
