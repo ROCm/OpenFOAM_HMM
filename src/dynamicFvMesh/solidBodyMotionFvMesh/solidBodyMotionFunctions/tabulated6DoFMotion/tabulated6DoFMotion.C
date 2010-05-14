@@ -27,7 +27,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "Tuple2.H"
 #include "IFstream.H"
-#include "interpolateXY.H"
+#include "interpolateSplineXY.H"
 #include "mathematicalConstants.H"
 
 using namespace Foam::constant::mathematical;
@@ -98,7 +98,7 @@ Foam::solidBodyMotionFunctions::tabulated6DoFMotion::transformation() const
             << exit(FatalError);
     }
 
-    translationRotationVectors TRV = interpolateXY
+    translationRotationVectors TRV = interpolateSplineXY
     (
         t,
         times_,
