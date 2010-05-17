@@ -128,8 +128,12 @@ int main(int argc, char *argv[])
 #   include "addRegionOption.H"
 
     argList::validArgs.append("faceZone");
-    argList::validArgs.append("patch");
-    argList::addOption("additionalPatches", "(patch2 .. patchN)");
+    argList::validArgs.append("(masterPatch slavePatch)");
+    argList::addOption
+    (
+        "additionalPatches",
+        "((master2 slave2) .. (masterN slaveN))"
+    );
     argList::addBoolOption("internalFacesOnly");
 
 #   include "setRootCase.H"
@@ -142,7 +146,7 @@ int main(int argc, char *argv[])
     const faceZoneMesh& faceZones = mesh.faceZones();
 
     // Faces to baffle
-    faceZoneID zoneID(args[1], faceZones);
+    faceZoneID zoneID(args.additionalArgs()[0], faceZones);
 
     Info<< "Converting faces on zone " << zoneID.name()
         << " into baffles." << nl << endl;
@@ -165,28 +169,36 @@ int main(int argc, char *argv[])
     fZone.checkParallelSync(true);
 
     // Patches to put baffles into
-    DynamicList<label> newPatches(1);
+    DynamicList<label> newMasterPatches(1);
+    DynamicList<label> newSlavePatches(1);
 
-    const word patchName = args[2];
-    newPatches.append(findPatchID(mesh, patchName));
-    Info<< "Using patch " << patchName
-        << " at index " << newPatches[0] << endl;
+    const Pair<word> patchNames(IStringStream(args.additionalArgs()[1])());
+    newMasterPatches.append(findPatchID(mesh, patchNames[0]));
+    newSlavePatches.append(findPatchID(mesh, patchNames[1]));
+    Info<< "Using master patch " << patchNames[0]
+        << " at index " << newMasterPatches[0] << endl;
+    Info<< "Using slave patch " << patchNames[1]
+        << " at index " << newSlavePatches[0] << endl;
 
 
     // Additional patches
     if (args.optionFound("additionalPatches"))
     {
-        const wordList patchNames
+        const List<Pair<word> > patchNames
         (
             args.optionLookup("additionalPatches")()
         );
 
-        newPatches.reserve(patchNames.size() + 1);
+        newMasterPatches.reserve(patchNames.size() + 1);
+        newSlavePatches.reserve(patchNames.size() + 1);
         forAll(patchNames, i)
         {
-            newPatches.append(findPatchID(mesh, patchNames[i]));
-            Info<< "Using additional patch " << patchNames[i]
-                << " at index " << newPatches.last() << endl;
+            newMasterPatches.append(findPatchID(mesh, patchNames[i][0]));
+            newSlavePatches.append(findPatchID(mesh, patchNames[i][1]));
+            Info<< "Using additional patches " << patchNames[i]
+                << " at indices " << newMasterPatches.last()
+                << " and " << newSlavePatches.last()
+                << endl;
         }
     }
 
@@ -265,10 +277,8 @@ int main(int argc, char *argv[])
     }
     label nModified = 0;
 
-    forAll(newPatches, i)
+    forAll(newMasterPatches, i)
     {
-        label newPatchI = newPatches[i];
-
         // Pass 1. Do selected side of zone
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -288,7 +298,7 @@ int main(int argc, char *argv[])
                         faceI,                  // label of face
                         mesh.faceOwner()[faceI],// owner
                         false,                  // face flip
-                        newPatchI,              // patch for face
+                        newMasterPatches[i],    // patch for face
                         zoneID.index(),         // zone for face
                         false,                  // face flip in zone
                         modifiedFace            // modify or add status
@@ -304,7 +314,7 @@ int main(int argc, char *argv[])
                         faceI,                      // label of face
                         mesh.faceNeighbour()[faceI],// owner
                         true,                       // face flip
-                        newPatchI,                  // patch for face
+                        newMasterPatches[i],        // patch for face
                         zoneID.index(),             // zone for face
                         true,                       // face flip in zone
                         modifiedFace                // modify or add status
@@ -335,7 +345,7 @@ int main(int argc, char *argv[])
                         faceI,                              // label of face
                         mesh.faceNeighbour()[faceI],        // owner
                         true,                               // face flip
-                        newPatchI,                          // patch for face
+                        newSlavePatches[i],                 // patch for face
                         zoneID.index(),                     // zone for face
                         true,                               // face flip in zone
                         modifiedFace                        // modify or add
@@ -351,7 +361,7 @@ int main(int argc, char *argv[])
                         faceI,                  // label of face
                         mesh.faceOwner()[faceI],// owner
                         false,                  // face flip
-                        newPatchI,              // patch for face
+                        newSlavePatches[i],     // patch for face
                         zoneID.index(),         // zone for face
                         false,                  // face flip in zone
                         modifiedFace            // modify or add status
@@ -378,6 +388,8 @@ int main(int argc, char *argv[])
         forAll(patches, patchI)
         {
             const polyPatch& pp = patches[patchI];
+
+            label newPatchI = newMasterPatches[i];
 
             if (pp.coupled() && patches[newPatchI].coupled())
             {
@@ -428,7 +440,7 @@ int main(int argc, char *argv[])
 
 
     Info<< "Converted " << returnReduce(nModified, sumOp<label>())
-        << " faces into boundary faces on patch " << patchName << nl << endl;
+        << " faces into boundary faces on patches " << patchNames << nl << endl;
 
     if (!overwrite)
     {
