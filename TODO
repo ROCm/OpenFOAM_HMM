@@ -83,7 +83,7 @@ OK - grep for size()/2
     OK - incompressible/boundaryFoam/boundaryLaunderSharma
     OK - incompressible/boundaryFoam/boundaryWallFunctions
     OK - incompressible/boundaryFoam/boundaryWallFunctionsProfile
-    needs createBaffles. ncompressible/pimpleFoam/t-junction-with-fan
+    OK - needs createBaffles. incompressible/pimpleFoam/t-junction-with-fan
     OK - incompressible/simpleSRFFoam/mixer
     needs createBaffles. lagrangian/porousExplicitSourceReactingParcelFoam/filter
     needs special coupledbcs. lagrangian/reactingParcelFilmFoam/multipleBoxes
