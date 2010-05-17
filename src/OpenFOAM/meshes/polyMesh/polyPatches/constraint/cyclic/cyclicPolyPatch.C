@@ -467,7 +467,7 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 )
 :
     coupledPolyPatch(name, dict, index, bm),
-    neighbPatchName_(dict.lookup("neighbourPatch")),
+    neighbPatchName_(dict.lookupOrDefault("neighbourPatch", word::null)),
     neighbPatchID_(-1),
     transform_(UNKNOWN),
     rotationAxis_(vector::zero),
@@ -476,12 +476,30 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     coupledPointsPtr_(NULL),
     coupledEdgesPtr_(NULL)
 {
+    if (neighbPatchName_ == word::null)
+    {
+        FatalIOErrorIn
+        (
+            "cyclicPolyPatch::cyclicPolyPatch\n"
+            "(\n"
+            "    const word& name,\n"
+            "    const dictionary& dict,\n"
+            "    const label index,\n"
+            "    const polyBoundaryMesh& bm\n"
+            ")",
+            dict
+        )   << "No \"neighbourPatch\" provided." << endl
+            << "Is your mesh uptodate with split cyclics?" << endl
+            << "Run foamUpgradeCyclics to convert mesh and fields"
+            << " to split cyclics." << exit(FatalIOError);
+    }
+
     if (neighbPatchName_ == name)
     {
-        FatalErrorIn("cyclicPolyPatch::cyclicPolyPatch(..)")
+        FatalIOErrorIn("cyclicPolyPatch::cyclicPolyPatch(..)", dict)
             << "Neighbour patch name " << neighbPatchName_
             << " cannot be the same as this patch " << name
-            << exit(FatalError);
+            << exit(FatalIOError);
     }
 
     if (dict.found("transform"))
