@@ -932,7 +932,7 @@ void Foam::InteractionLists<ParticleType>::prepareParticlesToRefer
 
         IDLList<ParticleType>& particlesToRefer = referredParticles_[i];
 
-        forAll (realParticles, rM)
+        forAll(realParticles, rM)
         {
             const ParticleType& particle = *realParticles[rM];
 
@@ -1188,7 +1188,7 @@ void Foam::InteractionLists<ParticleType>::receiveReferredData
         {
             UIPstream str(domain, pBufs);
 
-            forAll (constructMap, i)
+            forAll(constructMap, i)
             {
                 referredParticles_[constructMap[i]] = IDLList<ParticleType>
                 (
