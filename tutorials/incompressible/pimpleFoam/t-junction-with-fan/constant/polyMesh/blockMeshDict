@@ -120,6 +120,7 @@ boundary
     {
         type cyclic;
         faces ();
+        neighbourPatch fan_half0;
     }
 
     defaultFaces

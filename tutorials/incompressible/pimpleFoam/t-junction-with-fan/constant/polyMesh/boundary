@@ -21,45 +21,45 @@ FoamFile
     {
         type            patch;
         nFaces          25;
-        startFace       10050;
+        startFace       10025;
     }
     outlet1
     {
         type            patch;
         nFaces          25;
-        startFace       10075;
+        startFace       10050;
     }
     outlet2
     {
         type            patch;
         nFaces          25;
-        startFace       10100;
+        startFace       10075;
     }
     baffles
     {
         type            wall;
-        nFaces          0;
-        startFace       10125;
+        nFaces          32;
+        startFace       10100;
     }
     fan_half0
     {
         type            cyclic;
-        nFaces          0;
-        startFace       10125;
+        nFaces          9;
+        startFace       10132;
         neighbourPatch  fan_half1;
     }
     fan_half1
     {
         type            cyclic;
-        nFaces          0;
-        startFace       10125;
+        nFaces          9;
+        startFace       10141;
         neighbourPatch  fan_half0;
     }
     defaultFaces
     {
         type            wall;
         nFaces          3075;
-        startFace       10125;
+        startFace       10150;
     }
 )
 

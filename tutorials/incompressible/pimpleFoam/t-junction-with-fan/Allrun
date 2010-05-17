@@ -16,12 +16,14 @@ unset FOAM_SETNAN
 
 # Add cyclic baffles for fan
 runApplication setSet -batch selectCyclics.setSet
-runApplication createBaffles cyclicFaces '(fan_half0 fan_half1)' -overwrite
+#runApplication createBaffles cyclicFaces '(fan_half0 fan_half1)' -overwrite
+createBaffles cyclicFaces '(fan_half0 fan_half1)' -overwrite > log.createBaffles 2>&1
 
 # Add wall baffles
 rm log.setSet
 runApplication setSet -batch selectBaffles.setSet
 rm log.createBaffles
-runApplication createBaffles baffleFaces '(baffles baffles)' -overwrite
+#runApplication createBaffles baffleFaces '(baffles baffles)' -overwrite
+createBaffles baffleFaces '(baffles baffles)' -overwrite > log.createBaffles 2>&1
 
 runApplication $application
