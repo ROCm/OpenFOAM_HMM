@@ -32,6 +32,21 @@ License
 #include "searchableSurfacesQueries.H"
 #include "UPtrList.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template<>
+const char*
+Foam::NamedEnum<Foam::refinementSurfaces::areaSelectionAlgo, 4>::names[] =
+{
+    "inside",
+    "outside",
+    "insidePoint",
+    "none"
+};
+
+const Foam::NamedEnum<Foam::refinementSurfaces::areaSelectionAlgo, 4>
+    Foam::refinementSurfaces::areaSelectionAlgoNames;
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -47,7 +62,8 @@ Foam::refinementSurfaces::refinementSurfaces
     names_(surfaceDicts.size()),
     faceZoneNames_(surfaceDicts.size()),
     cellZoneNames_(surfaceDicts.size()),
-    zoneInside_(surfaceDicts.size()),
+    zoneInside_(surfaceDicts.size(), NONE),
+    zoneInsidePoints_(surfaceDicts.size()),
     regionOffset_(surfaceDicts.size())
 {
     labelList globalMinLevel(surfaceDicts.size(), 0);
@@ -74,19 +90,51 @@ Foam::refinementSurfaces::refinementSurfaces
         globalMaxLevel[surfI] = readLabel(dict.lookup("maxRefinementLevel"));
 
         // Global zone names per surface
-        if (dict.found("faceZone"))
+        if (dict.readIfPresent("faceZone", faceZoneNames_[surfI]))
         {
-            dict.lookup("faceZone") >> faceZoneNames_[surfI];
-            bool hasSide = dict.readIfPresent("zoneInside", zoneInside_[surfI]);
+            // Read optional entry to determine inside of faceZone
+
+            word method;
+            bool hasSide = dict.readIfPresent("cellZoneInside", method);
+            if (hasSide)
+            {
+                zoneInside_[surfI] = areaSelectionAlgoNames[method];
+                if (zoneInside_[surfI] == INSIDEPOINT)
+                {
+                    dict.lookup("insidePoint") >> zoneInsidePoints_[surfI];
+                }
+            }
+            else
+            {
+                // Check old syntax
+                bool inside;
+                if (dict.readIfPresent("zoneInside", inside))
+                {
+                    hasSide = true;
+                    zoneInside_[surfI] = (inside ? INSIDE : OUTSIDE);
+                }
+            }
+
+            // Read optional cellZone name
+
             if (dict.readIfPresent("cellZone", cellZoneNames_[surfI]))
             {
-                if (hasSide && !allGeometry_[surfaces_[surfI]].hasVolumeType())
+                if
+                (
+                    (
+                        zoneInside_[surfI] == INSIDE
+                     || zoneInside_[surfI] == OUTSIDE
+                    )
+                 && !allGeometry_[surfaces_[surfI]].hasVolumeType()
+                )
                 {
                     IOWarningIn
                     (
                         "refinementSurfaces::refinementSurfaces(..)",
                         dict
-                    )   << "Unused entry zoneInside for faceZone "
+                    )   << "Illegal entry zoneInside "
+                        << areaSelectionAlgoNames[zoneInside_[surfI]]
+                        << " for faceZone "
                         << faceZoneNames_[surfI]
                         << " since surface " << names_[surfI]
                         << " is not closed." << endl;
@@ -282,7 +330,8 @@ Foam::refinementSurfaces::refinementSurfaces
     names_(surfacesDict.size()),
     faceZoneNames_(surfacesDict.size()),
     cellZoneNames_(surfacesDict.size()),
-    zoneInside_(surfacesDict.size()),
+    zoneInside_(surfacesDict.size(), NONE),
+    zoneInsidePoints_(surfacesDict.size()),
     regionOffset_(surfacesDict.size())
 {
     // Wilcard specification : loop over all surface, all regions
@@ -305,7 +354,7 @@ Foam::refinementSurfaces::refinementSurfaces
     names_.setSize(surfI);
     faceZoneNames_.setSize(surfI);
     cellZoneNames_.setSize(surfI);
-    zoneInside_.setSize(surfI);
+    zoneInside_.setSize(surfI, NONE);
     regionOffset_.setSize(surfI);
 
     labelList globalMinLevel(surfI, 0);
@@ -332,19 +381,42 @@ Foam::refinementSurfaces::refinementSurfaces
             globalMaxLevel[surfI] = refLevel[1];
 
             // Global zone names per surface
-            if (dict.found("faceZone"))
+            if (dict.readIfPresent("faceZone", faceZoneNames_[surfI]))
             {
-                dict.lookup("faceZone") >> faceZoneNames_[surfI];
-                bool hasSide = dict.readIfPresent
-                (
-                    "zoneInside",
-                    zoneInside_[surfI]
-                );
+                // Read optional entry to determine inside of faceZone
+
+                word method;
+                bool hasSide = dict.readIfPresent("cellZoneInside", method);
+                if (hasSide)
+                {
+                    zoneInside_[surfI] = areaSelectionAlgoNames[method];
+                    if (zoneInside_[surfI] == INSIDEPOINT)
+                    {
+                        dict.lookup("insidePoint") >> zoneInsidePoints_[surfI];
+                    }
+
+                }
+                else
+                {
+                    // Check old syntax
+                    bool inside;
+                    if (dict.readIfPresent("zoneInside", inside))
+                    {
+                        hasSide = true;
+                        zoneInside_[surfI] = (inside ? INSIDE : OUTSIDE);
+                    }
+                }
+
+                // Read optional cellZone name
+
                 if (dict.readIfPresent("cellZone", cellZoneNames_[surfI]))
                 {
                     if
                     (
-                        hasSide
+                        (
+                            zoneInside_[surfI] == INSIDE
+                         || zoneInside_[surfI] == OUTSIDE
+                        )
                     && !allGeometry_[surfaces_[surfI]].hasVolumeType()
                     )
                     {
@@ -352,7 +424,9 @@ Foam::refinementSurfaces::refinementSurfaces
                         (
                             "refinementSurfaces::refinementSurfaces(..)",
                             dict
-                        )   << "Unused entry zoneInside for faceZone "
+                        )   << "Illegal entry zoneInside "
+                            << areaSelectionAlgoNames[zoneInside_[surfI]]
+                            << " for faceZone "
                             << faceZoneNames_[surfI]
                             << " since surface " << names_[surfI]
                             << " is not closed." << endl;
@@ -533,12 +607,36 @@ Foam::labelList Foam::refinementSurfaces::getClosedNamedSurfaces() const
     label closedI = 0;
     forAll(cellZoneNames_, surfI)
     {
-        if (cellZoneNames_[surfI].size())
+        if
+        (
+            cellZoneNames_[surfI].size()
+         && (
+                zoneInside_[surfI] == INSIDE
+             || zoneInside_[surfI] == OUTSIDE
+            )
+         && allGeometry_[surfaces_[surfI]].hasVolumeType()
+        )
         {
-            if (allGeometry_[surfaces_[surfI]].hasVolumeType())
-            {
-                closed[closedI++] = surfI;
-            }
+            closed[closedI++] = surfI;
+        }
+    }
+    closed.setSize(closedI);
+
+    return closed;
+}
+
+
+// Get indices of named surfaces with a 
+Foam::labelList Foam::refinementSurfaces::getInsidePointNamedSurfaces() const
+{
+    labelList closed(cellZoneNames_.size());
+
+    label closedI = 0;
+    forAll(cellZoneNames_, surfI)
+    {
+        if (cellZoneNames_[surfI].size() && zoneInside_[surfI] == INSIDEPOINT)
+        {
+            closed[closedI++] = surfI;
         }
     }
     closed.setSize(closedI);
@@ -1199,6 +1297,16 @@ void Foam::refinementSurfaces::findInside
     {
         label surfI = testSurfaces[i];
 
+        if (zoneInside_[surfI] != INSIDE && zoneInside_[surfI] != OUTSIDE)
+        {
+            FatalErrorIn("refinementSurfaces::findInside(..)")
+                << "Trying to use surface "
+                << allGeometry_[surfaces_[surfI]].name()
+                << " which has non-geometric inside selection method "
+                << areaSelectionAlgoNames[zoneInside_[surfI]]
+                << exit(FatalError);
+        }
+
         if (allGeometry_[surfaces_[surfI]].hasVolumeType())
         {
             List<searchableSurface::volumeType> volType;
@@ -1212,11 +1320,11 @@ void Foam::refinementSurfaces::findInside
                     (
                         (
                             volType[pointI] == triSurfaceMesh::INSIDE
-                         && zoneInside_[surfI]
+                         && zoneInside_[surfI] == INSIDE
                         )
                      || (
                             volType[pointI] == triSurfaceMesh::OUTSIDE
-                         && !zoneInside_[surfI]
+                         && zoneInside_[surfI] == OUTSIDE
                         )
                     )
                     {

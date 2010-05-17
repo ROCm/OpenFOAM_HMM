@@ -143,11 +143,19 @@ castellatedMeshControls
                 }
             }
 
-            // Optional angle to detect small-large cell situation perpendicular
-            // to the surface. Is the angle of face w.r.t the local surface
-            // normal. Use on flat(ish) surfaces only. Otherwise
-            // leave out or set to negative number.
+            //- Optional angle to detect small-large cell situation
+            //  perpendicular to the surface. Is the angle of face w.r.t.
+            //  the local surface normal. Use on flat(ish) surfaces only.
+            //  Otherwise leave out or set to negative number.
             //perpendicularAngle 10;
+
+
+            //- Optional faceZone and (for closed surface) cellZone with
+            //  how to select the cells that are in the cellZone
+            //  (inside / outside / specified insidePoint)
+	    //faceZone sphere;
+            //cellZone sphere;
+            //cellZoneInside inside;  //outside/insidePoint
         }
     }
 
