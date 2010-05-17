@@ -20,8 +20,7 @@ Notes for fluentMeshToFoam with zone preservation
     with the cellZones(), faceZones() and pointZones() member functions
 
     - Example (Members from polyMesh.H and ZoneMesh.H):
-    label thisCellZoneID = mesh.cellZones().findZoneID("thisZoneName");
-    const labelList& thisCellZone = mesh.cellZones()[thisCellZoneID];
+    const labelList& thisCellZone = mesh.cellZones()["thisZoneName"];
 
     - Zone integrity is preserved during mesh modification and decompomposition.
 

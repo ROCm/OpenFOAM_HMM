@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     (
         "scale",
         "factor",
-        "specify geometry scaling factor - default is 1000 ([m] to [mm])"
+        "geometry scaling factor - default is 1000 ([m] to [mm])"
     );
     argList::addBoolOption
     (

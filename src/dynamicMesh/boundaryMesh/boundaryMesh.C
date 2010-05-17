@@ -1125,13 +1125,11 @@ void Foam::boundaryMesh::patchify
     forAll(oldPatches, oldPatchI)
     {
         const polyPatch& patch = oldPatches[oldPatchI];
-
-        label newPatchI = findPatchID(patch.name());
+        const label newPatchI = findPatchID(patch.name());
 
         if (newPatchI != -1)
         {
             nameToIndex.insert(patch.name(), newPatchI);
-
             indexToName.insert(newPatchI, patch.name());
         }
     }
@@ -1145,7 +1143,6 @@ void Foam::boundaryMesh::patchify
         if (!nameToIndex.found(bp.name()))
         {
             nameToIndex.insert(bp.name(), bPatchI);
-
             indexToName.insert(bPatchI, bp.name());
         }
     }
@@ -1167,10 +1164,10 @@ void Foam::boundaryMesh::patchify
     {
         const boundaryPatch& bp = patches_[bPatchI];
 
-        label newPatchI = nameToIndex[bp.name()];
+        const label newPatchI = nameToIndex[bp.name()];
 
         // Find corresponding patch in polyMesh
-        label oldPatchI = findPatchID(oldPatches, bp.name());
+        const label oldPatchI = findPatchID(oldPatches, bp.name());
 
         if (oldPatchI == -1)
         {
@@ -1599,7 +1596,7 @@ void Foam::boundaryMesh::addPatch(const word& patchName)
 
 void Foam::boundaryMesh::deletePatch(const word& patchName)
 {
-    label delPatchI = findPatchID(patchName);
+    const label delPatchI = findPatchID(patchName);
 
     if (delPatchI == -1)
     {
@@ -1658,7 +1655,7 @@ void Foam::boundaryMesh::changePatchType
     const word& patchType
 )
 {
-    label changeI = findPatchID(patchName);
+    const label changeI = findPatchID(patchName);
 
     if (changeI == -1)
     {

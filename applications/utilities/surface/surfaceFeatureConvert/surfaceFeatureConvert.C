@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     (
         "scale",
         "factor",
-        "specify a scaling factor for the points"
+        "geometry scaling factor - default is 1"
     );
 
     argList args(argc, argv);

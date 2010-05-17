@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,12 +30,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-defineTypeNameAndDebug(searchableSurfaces, 0);
-
-}
+defineTypeNameAndDebug(Foam::searchableSurfaces, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -256,8 +251,10 @@ Foam::searchableSurfaces::searchableSurfaces
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::searchableSurfaces::findSurfaceID(const word& wantedName)
- const
+Foam::label Foam::searchableSurfaces::findSurfaceID
+(
+    const word& wantedName
+) const
 {
     return findIndex(names_, wantedName);
 }
@@ -342,6 +339,49 @@ Foam::pointIndexHit Foam::searchableSurfaces::facesIntersection
         convergenceDistSqr,
         start
     );
+}
+
+// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
+
+const Foam::searchableSurface& Foam::searchableSurfaces::operator[]
+(
+    const word& surfName
+) const
+{
+    const label surfI = findSurfaceID(surfName);
+
+    if (surfI < 0)
+    {
+        FatalErrorIn
+        (
+            "searchableSurfaces::operator[](const word&) const"
+        )   << "Surface named " << surfName << " not found." << nl
+            << "Available surface names: " << names_ << endl
+            << abort(FatalError);
+    }
+
+    return operator[](surfI);
+}
+
+
+Foam::searchableSurface& Foam::searchableSurfaces::operator[]
+(
+    const word& surfName
+)
+{
+    const label surfI = findSurfaceID(surfName);
+
+    if (surfI < 0)
+    {
+        FatalErrorIn
+        (
+            "searchableSurfaces::operator[](const word&)"
+        )   << "Surface named " << surfName << " not found." << nl
+            << "Available surface names: " << names_ << endl
+            << abort(FatalError);
+    }
+
+    return operator[](surfI);
 }
 
 

@@ -177,7 +177,7 @@ void Foam::shellSurfaces::orient()
 
                 boundBox shellBb(points[0], points[0]);
                 // Assume surface is compact!
-                for (label i = 0; i < points.size(); i++)
+                forAll(points, i)
                 {
                     const point& pt = points[i];
                     shellBb.min() = min(shellBb.min(), pt);

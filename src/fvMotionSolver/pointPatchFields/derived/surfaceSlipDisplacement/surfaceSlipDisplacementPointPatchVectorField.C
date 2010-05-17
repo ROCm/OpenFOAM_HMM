@@ -86,7 +86,7 @@ void surfaceSlipDisplacementPointPatchVectorField::calcProjection
     {
         const pointZoneMesh& pZones = mesh.pointZones();
 
-        zonePtr = &pZones[pZones.findZoneID(frozenPointsZone_)];
+        zonePtr = &pZones[frozenPointsZone_];
 
         Pout<< "surfaceSlipDisplacementPointPatchVectorField : Fixing all "
             << zonePtr->size() << " points in pointZone " << zonePtr->name()

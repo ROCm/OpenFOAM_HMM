@@ -236,7 +236,7 @@ Foam::channelIndex::channelIndex
 
     forAll(patchNames, i)
     {
-        label patchI = patches.findPatchID(patchNames[i]);
+        const label patchI = patches.findPatchID(patchNames[i]);
 
         if (patchI == -1)
         {
@@ -254,7 +254,7 @@ Foam::channelIndex::channelIndex
 
     forAll(patchNames, i)
     {
-        const polyPatch& pp = patches[patches.findPatchID(patchNames[i])];
+        const polyPatch& pp = patches[patchNames[i]];
 
         forAll(pp, j)
         {

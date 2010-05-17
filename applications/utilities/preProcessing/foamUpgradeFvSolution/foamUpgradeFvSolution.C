@@ -48,8 +48,17 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "upgrade the syntax of system/fvSolution::solvers"
+    );
+
     argList::noParallel();
-    argList::addBoolOption("test");
+    argList::addBoolOption
+    (
+        "test",
+        "suppress writing the updated system/fvSolution file"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -88,7 +97,6 @@ int main(int argc, char *argv[])
                 Info<< "Backup to    "
                     << (solutionDict.objectPath() + ".old") << nl;
             }
-
 
             solutionDict.writeObject
             (

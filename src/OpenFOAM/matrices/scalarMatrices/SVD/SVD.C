@@ -363,7 +363,7 @@ Foam::SVD::SVD(const scalarRectangularMatrix& A, const scalar minCondition)
 
     // zero singular values that are less than minCondition*maxS
     const scalar minS = minCondition*S_[findMax(S_)];
-    for (label i = 0; i < S_.size(); i++)
+    forAll(S_, i)
     {
         if (S_[i] <= minS)
         {

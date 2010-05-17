@@ -38,7 +38,6 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.clear();
     argList::validArgs.append("CHEMKINFile");
     argList::validArgs.append("CHEMKINThermodynamicsFile");
     argList::validArgs.append("FOAMChemistryFile");

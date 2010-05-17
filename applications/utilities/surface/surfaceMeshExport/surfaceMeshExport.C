@@ -48,10 +48,10 @@ Usage
     Specify an alternative dictionary for constant/coordinateSystems.
 
     @param -from \<coordinateSystem\> \n
-    Specify a coordinate System when reading files.
+    Specify a coordinate system when reading files.
 
     @param -to \<coordinateSystem\> \n
-    Specify a coordinate System when writing files.
+    Specify a coordinate system when writing files.
 
 Note
     The filename extensions are used to determine the file format type.
@@ -72,17 +72,56 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "export from surfMesh to various third-party surface formats"
+    );
+
     argList::noParallel();
     argList::validArgs.append("outputFile");
 
-    argList::addBoolOption("clean");
-
-    argList::addOption("name",  "name");
-    argList::addOption("scaleIn",  "scale");
-    argList::addOption("scaleOut", "scale");
-    argList::addOption("dict", "coordinateSystemsDict");
-    argList::addOption("from", "sourceCoordinateSystem");
-    argList::addOption("to",   "targetCoordinateSystem");
+    argList::addBoolOption
+    (
+        "clean",
+        "perform some surface checking/cleanup on the input surface"
+    );
+    argList::addOption
+    (
+        "name",
+        "name",
+        "specify an alternative surface name when reading - "
+        "default is 'default'"
+    );
+    argList::addOption
+    (
+        "scaleIn",
+        "factor",
+        "geometry scaling factor on input - default is 1"
+    );
+    argList::addOption
+    (
+        "scaleOut",
+        "factor",
+        "geometry scaling factor on output - default is 1"
+    );
+    argList::addOption
+    (
+        "dict",
+        "file",
+        "specify an alternative dictionary for constant/coordinateSystems"
+    );
+    argList::addOption
+    (
+        "from",
+        "coordinateSystem",
+        "specify the source coordinate system, applied after '-scaleIn'"
+    );
+    argList::addOption
+    (
+        "to",
+        "coordinateSystem",
+        "specify the target coordinate system, applied before '-scaleOut'"
+    );
 
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());

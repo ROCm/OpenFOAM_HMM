@@ -29,15 +29,10 @@ License
 #include "mapPolyMesh.H"
 #include "IOobjectList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void setUpdater::updateSets(const mapPolyMesh& morphMap) const
+void Foam::setUpdater::updateSets(const mapPolyMesh& morphMap) const
 {
     //
     // Update all sets in memory.
@@ -105,9 +100,5 @@ void setUpdater::updateSets(const mapPolyMesh& morphMap) const
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

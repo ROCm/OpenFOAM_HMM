@@ -235,7 +235,12 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("ANSYS input file");
-    argList::addOption("scale", "scale factor");
+    argList::addOption
+    (
+        "scale",
+        "factor",
+        "geometry scaling factor - default is 1"
+    );
 
     argList args(argc, argv);
 
@@ -244,8 +249,7 @@ int main(int argc, char *argv[])
         FatalError.exit();
     }
 
-    scalar scaleFactor = 1.0;
-    args.optionReadIfPresent("scale", scaleFactor);
+    const scalar scaleFactor = args.optionLookupOrDefault("scale", 1.0);
 
 #   include "createTime.H"
 

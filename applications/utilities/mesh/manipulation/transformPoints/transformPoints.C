@@ -158,13 +158,13 @@ int main(int argc, char *argv[])
     (
         "rollPitchYaw",
         "vector",
-        "transform in terms of '( roll pitch yaw )' in degrees"
+        "transform in terms of '(roll pitch yaw)' in degrees"
     );
     argList::addOption
     (
         "yawPitchRoll",
         "vector",
-        "transform in terms of '( yaw pitch roll )' in degrees"
+        "transform in terms of '(yaw pitch roll)' in degrees"
     );
     argList::addBoolOption
     (

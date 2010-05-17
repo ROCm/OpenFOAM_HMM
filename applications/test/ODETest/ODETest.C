@@ -104,7 +104,6 @@ public:
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.clear();
     argList::validArgs.append("ODESolver");
     argList args(argc, argv);
 

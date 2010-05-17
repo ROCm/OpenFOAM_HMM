@@ -106,7 +106,7 @@ Foam::phaseModel::phaseModel
             calculatedFvPatchScalarField::typeName
         );
 
-        for (label i=0; i<U_.boundaryField().size(); i++)
+        forAll(U_.boundaryField(), i)
         {
             if (isA<fixedValueFvPatchVectorField>(U_.boundaryField()[i]))
             {

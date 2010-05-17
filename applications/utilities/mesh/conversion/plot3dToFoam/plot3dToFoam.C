@@ -57,10 +57,28 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("PLOT3D geom file");
-    argList::addOption("scale", "scale factor");
-    argList::addBoolOption("noBlank");
-    argList::addBoolOption("singleBlock");
-    argList::addOption("2D", "thickness");
+    argList::addOption
+    (
+        "scale",
+        "factor",
+        "geometry scaling factor - default is 1"
+    );
+    argList::addBoolOption
+    (
+        "noBlank",
+        "skip blank items"
+    );
+    argList::addBoolOption
+    (
+        "singleBlock",
+        "input is a single block"
+    );
+    argList::addOption
+    (
+        "2D",
+        "thickness",
+        "use when converting a 2-D geometry"
+    );
 
     argList args(argc, argv);
 
@@ -69,8 +87,7 @@ int main(int argc, char *argv[])
          FatalError.exit();
     }
 
-    scalar scaleFactor = 1.0;
-    args.optionReadIfPresent("scale", scaleFactor);
+    const scalar scaleFactor = args.optionLookupOrDefault("scale", 1.0);
 
     bool readBlank = !args.optionFound("noBlank");
     bool singleBlock = args.optionFound("singleBlock");

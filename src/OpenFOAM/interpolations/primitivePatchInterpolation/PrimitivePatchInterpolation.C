@@ -125,7 +125,7 @@ void PrimitivePatchInterpolation<Patch>::makeFaceToEdgeWeights() const
     faceToEdgeWeightsPtr_ = new scalarList(patch_.nInternalEdges());
     scalarList& weights = *faceToEdgeWeightsPtr_;
 
-    for (label edgei = 0; edgei < weights.size(); edgei++)
+    forAll(weights, edgei)
     {
         vector P = faces[edgeFaces[edgei][0]].centre(points);
         vector N = faces[edgeFaces[edgei][1]].centre(points);

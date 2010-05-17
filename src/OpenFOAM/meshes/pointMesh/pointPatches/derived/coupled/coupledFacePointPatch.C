@@ -26,19 +26,14 @@ License
 #include "coupledFacePointPatch.H"
 #include "pointBoundaryMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(coupledFacePointPatch, 0);
+defineTypeNameAndDebug(Foam::coupledFacePointPatch, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-coupledFacePointPatch::coupledFacePointPatch
+Foam::coupledFacePointPatch::coupledFacePointPatch
 (
     const polyPatch& patch,
     const pointBoundaryMesh& bm
@@ -52,12 +47,8 @@ coupledFacePointPatch::coupledFacePointPatch
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-coupledFacePointPatch::~coupledFacePointPatch()
+Foam::coupledFacePointPatch::~coupledFacePointPatch()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

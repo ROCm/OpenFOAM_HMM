@@ -47,7 +47,7 @@ SourceFiles
 class vtkDataArraySelection;
 class vtkCallbackCommand;
 
-// Foam forward declarations
+// OpenFOAM forward declarations
 namespace Foam
 {
     class vtkPV3Foam;
@@ -63,7 +63,7 @@ class VTK_IO_EXPORT vtkPV3FoamReader
     public vtkMultiBlockDataSetAlgorithm
 {
 public:
-    vtkTypeRevisionMacro(vtkPV3FoamReader,vtkMultiBlockDataSetAlgorithm);
+    vtkTypeMacro(vtkPV3FoamReader, vtkMultiBlockDataSetAlgorithm);
     void PrintSelf(ostream&, vtkIndent);
 
     static vtkPV3FoamReader* New();
@@ -78,16 +78,16 @@ public:
     vtkGetStringMacro(FileName);
 
     // Description:
-    // FOAM mesh caching control
+    // OpenFOAM mesh caching control
     vtkSetMacro(CacheMesh, int);
     vtkGetMacro(CacheMesh, int);
 
     // Description:
-    // FOAM refresh times/fields
+    // OpenFOAM refresh times/fields
     virtual void SetRefresh(int);
 
     // Description:
-    // FOAM Skip/include the 0/ time directory
+    // OpenFOAM skip/include the 0/ time directory
     vtkSetMacro(SkipZeroTime, int);
     vtkGetMacro(SkipZeroTime, int);
 
@@ -97,27 +97,27 @@ public:
     vtkGetMacro(UpdateGUI, int);
 
     // Description:
-    // FOAM extrapolate internal values onto the patches
+    // OpenFOAM extrapolate internal values onto the patches
     vtkSetMacro(ExtrapolatePatches, int);
     vtkGetMacro(ExtrapolatePatches, int);
 
     // Description:
-    // FOAM use vtkPolyhedron instead of decomposing polyhedra
+    // OpenFOAM use vtkPolyhedron instead of decomposing polyhedra
     vtkSetMacro(UseVTKPolyhedron, int);
     vtkGetMacro(UseVTKPolyhedron, int);
 
     // Description:
-    // FOAM read sets control
+    // OpenFOAM read sets control
     virtual void SetIncludeSets(int);
     vtkGetMacro(IncludeSets, int);
 
     // Description:
-    // FOAM read zones control
+    // OpenFOAM read zones control
     virtual void SetIncludeZones(int);
     vtkGetMacro(IncludeZones, int);
 
     // Description:
-    // FOAM display patch names control
+    // OpenFOAM display patch names control
     virtual void SetShowPatchNames(int);
     vtkGetMacro(ShowPatchNames, int);
 

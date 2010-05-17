@@ -29,25 +29,25 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(symmetryPointPatch, 0);
+namespace Foam
+{
+    defineTypeNameAndDebug(symmetryPointPatch, 0);
 
-// Add the patch constructor functions to the hash tables
-addToRunTimeSelectionTable
-(
-    facePointPatch,
-    symmetryPointPatch,
-    polyPatch
-);
+    // Add the patch constructor functions to the hash tables
+    addToRunTimeSelectionTable
+    (
+        facePointPatch,
+        symmetryPointPatch,
+        polyPatch
+    );
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void symmetryPointPatch::applyConstraint
+void Foam::symmetryPointPatch::applyConstraint
 (
     const label pointi,
     pointConstraint& pc
@@ -56,9 +56,5 @@ void symmetryPointPatch::applyConstraint
     pc.applyConstraint(pointNormals()[pointi]);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

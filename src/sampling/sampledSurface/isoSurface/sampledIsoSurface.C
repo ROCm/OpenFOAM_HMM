@@ -304,7 +304,7 @@ bool Foam::sampledIsoSurface::updateGeometry() const
         const polyBoundaryMesh& patches = mesh().boundaryMesh();
 
         // Patch to put exposed internal faces into
-        label exposedPatchI = patches.findPatchID(exposedPatchName_);
+        const label exposedPatchI = patches.findPatchID(exposedPatchName_);
 
         if (debug)
         {

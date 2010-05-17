@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,16 +70,33 @@ Foam::fvBoundaryMesh::fvBoundaryMesh
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::fvBoundaryMesh::movePoints()
+Foam::label Foam::fvBoundaryMesh::findPatchID(const word& patchName) const
 {
-    forAll(*this, patchi)
+    const fvPatchList& patches = *this;
+
+    forAll(patches, patchI)
     {
-        operator[](patchi).initMovePoints();
+        if (patches[patchI].name() == patchName)
+        {
+            return patchI;
+        }
     }
 
-    forAll(*this, patchi)
+    // Not found, return -1
+    return -1;
+}
+
+
+void Foam::fvBoundaryMesh::movePoints()
+{
+    forAll(*this, patchI)
     {
-        operator[](patchi).movePoints();
+        operator[](patchI).initMovePoints();
+    }
+
+    forAll(*this, patchI)
+    {
+        operator[](patchI).movePoints();
     }
 }
 
@@ -88,14 +105,14 @@ Foam::lduInterfacePtrsList Foam::fvBoundaryMesh::interfaces() const
 {
     lduInterfacePtrsList interfaces(size());
 
-    forAll(interfaces, patchi)
+    forAll(interfaces, patchI)
     {
-        if (isA<lduInterface>(this->operator[](patchi)))
+        if (isA<lduInterface>(this->operator[](patchI)))
         {
             interfaces.set
             (
-                patchi,
-               &refCast<const lduInterface>(this->operator[](patchi))
+                patchI,
+               &refCast<const lduInterface>(this->operator[](patchI))
             );
         }
     }
@@ -108,6 +125,48 @@ void Foam::fvBoundaryMesh::readUpdate(const polyBoundaryMesh& basicBdry)
 {
     clear();
     addPatches(basicBdry);
+}
+
+
+// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
+
+const Foam::fvPatch& Foam::fvBoundaryMesh::operator[]
+(
+    const word& patchName
+) const
+{
+    const label patchI = findPatchID(patchName);
+
+    if (patchI < 0)
+    {
+        FatalErrorIn
+        (
+            "fvBoundaryMesh::operator[](const word&) const"
+        )   << "Patch named " << patchName << " not found." << nl
+            << abort(FatalError);
+    }
+
+    return operator[](patchI);
+}
+
+
+Foam::fvPatch& Foam::fvBoundaryMesh::operator[]
+(
+    const word& patchName
+)
+{
+    const label patchI = findPatchID(patchName);
+
+    if (patchI < 0)
+    {
+        FatalErrorIn
+        (
+            "fvBoundaryMesh::operator[](const word&)"
+        )   << "Patch named " << patchName << " not found." << nl
+            << abort(FatalError);
+    }
+
+    return operator[](patchI);
 }
 
 

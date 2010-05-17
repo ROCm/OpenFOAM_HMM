@@ -137,7 +137,7 @@ Foam::tmp<Foam::fvScalarMatrix> Foam::surfaceFilmModels::thermoSingleLayer::q
         dimensionedScalar("zero", dimTemperature, 0.0)
     );
 
-    for (label i=0; i<filmBottomPatchIDs_.size(); i++)
+    forAll(filmBottomPatchIDs_, i)
     {
         label patchI = filmBottomPatchIDs_[i];
         const polyPatch& pp = filmRegion_.boundaryMesh()[patchI];

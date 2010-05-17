@@ -44,7 +44,7 @@ SourceFiles
 namespace Foam
 {
 
-// Write lagrangian fields.
+// Write surface vector fields
 void writeSurfFields
 (
     const bool binary,

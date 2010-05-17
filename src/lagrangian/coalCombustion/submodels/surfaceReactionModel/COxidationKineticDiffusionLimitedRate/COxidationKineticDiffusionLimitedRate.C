@@ -140,7 +140,7 @@ Foam::scalar Foam::COxidationKineticDiffusionLimitedRate<CloudType>::calculate
     const scalar Ap = constant::mathematical::pi*sqr(d);
 
     // Change in C mass [kg]
-    scalar dmC = Ap*rhoc*specie::RR*Tc*YO2/WO2_*D0*Rk/(D0 + Rk);
+    scalar dmC = Ap*rhoc*specie::RR*Tc*YO2/WO2_*D0*Rk/(D0 + Rk)*dt;
 
     // Limit mass transfer by availability of C
     dmC = min(mass*fComb, dmC);

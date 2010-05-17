@@ -49,7 +49,6 @@ typedef specieThermo<janafThermo<perfectGas> > thermo;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.clear();
     argList::validArgs.append("controlFile");
     argList args(argc, argv);
 

@@ -25,19 +25,14 @@ License
 
 #include "indexedParticleCloud.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineParticleTypeNameAndDebug(indexedParticle, 0);
+    defineTemplateTypeNameAndDebug(Cloud<indexedParticle>, 0);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineParticleTypeNameAndDebug(indexedParticle, 0);
-defineTemplateTypeNameAndDebug(Cloud<indexedParticle>, 0);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

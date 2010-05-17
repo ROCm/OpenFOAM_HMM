@@ -26,14 +26,14 @@ License
 #include "ignitionSite.H"
 #include "engineTime.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-ignitionSite::ignitionSite(Istream& is, const Time& db, const fvMesh& mesh)
+Foam::ignitionSite::ignitionSite
+(
+    Istream& is,
+    const Time& db,
+    const fvMesh& mesh
+)
 :
     db_(db),
     mesh_(mesh),
@@ -64,7 +64,7 @@ ignitionSite::ignitionSite(Istream& is, const Time& db, const fvMesh& mesh)
 }
 
 
-ignitionSite::ignitionSite
+Foam::ignitionSite::ignitionSite
 (
     Istream& is,
     const engineTime& edb,
@@ -99,9 +99,5 @@ ignitionSite::ignitionSite
     findIgnitionCells(mesh_);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

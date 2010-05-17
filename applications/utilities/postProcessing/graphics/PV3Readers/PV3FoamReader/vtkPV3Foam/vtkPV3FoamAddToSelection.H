@@ -26,7 +26,7 @@ License
 #ifndef vtkPV3FoamAddToSelection_H
 #define vtkPV3FoamAddToSelection_H
 
-// FOAM includes
+// OpenFOAM includes
 #include "IOobjectList.H"
 #include "SortableList.H"
 

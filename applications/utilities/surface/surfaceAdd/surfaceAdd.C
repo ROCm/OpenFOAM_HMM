@@ -45,14 +45,27 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::noParallel();
-    argList::validArgs.clear();
-    argList::validArgs.append("Foam surface file");
-    argList::validArgs.append("Foam surface file");
-    argList::validArgs.append("Foam output file");
+    argList::addNote
+    (
+        "add two surfaces via a geometric merge on points."
+    );
 
-    argList::addOption("points", "pointsFile");
-    argList::addBoolOption("mergeRegions");
+    argList::noParallel();
+    argList::validArgs.append("surfaceFile");
+    argList::validArgs.append("surfaceFile");
+    argList::validArgs.append("output surfaceFile");
+
+    argList::addOption
+    (
+        "points",
+        "file",
+        "provide additional points"
+    );
+    argList::addBoolOption
+    (
+        "mergeRegions",
+        "combine regions from both surfaces"
+    );
 
     argList args(argc, argv);
 

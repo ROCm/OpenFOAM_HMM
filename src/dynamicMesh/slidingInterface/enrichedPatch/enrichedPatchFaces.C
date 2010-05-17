@@ -200,7 +200,7 @@ void Foam::enrichedPatch::calcEnrichedFaces
                 // Go through the points and collect them based on
                 // weights from lower to higher.  This gives the
                 // correct order of points along the edge.
-                for (label passI = 0; passI < edgePointWeights.size(); passI++)
+                forAll(edgePointWeights, passI)
                 {
                     // Max weight can only be one, so the sorting is
                     // done by elimination.
@@ -351,7 +351,7 @@ void Foam::enrichedPatch::calcEnrichedFaces
                 // Go through the points and collect them based on
                 // weights from lower to higher.  This gives the
                 // correct order of points along the edge.
-                for (label pass = 0; pass < edgePointWeights.size(); pass++)
+                forAll(edgePointWeights, passI)
                 {
                     // Max weight can only be one, so the sorting is
                     // done by elimination.

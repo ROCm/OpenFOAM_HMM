@@ -343,7 +343,7 @@ Foam::directions::directions
 
         const word patchName(patchDict.lookup("patch"));
 
-        label patchI = mesh.boundaryMesh().findPatchID(patchName);
+        const label patchI = mesh.boundaryMesh().findPatchID(patchName);
 
         if (patchI == -1)
         {

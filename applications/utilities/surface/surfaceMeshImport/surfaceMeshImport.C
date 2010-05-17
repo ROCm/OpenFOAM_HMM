@@ -48,10 +48,10 @@ Usage
     Specify an alternative dictionary for constant/coordinateSystems.
 
     @param -from \<coordinateSystem\> \n
-    Specify a coordinate System when reading files.
+    Specify a coordinate system when reading files.
 
     @param -to \<coordinateSystem\> \n
-    Specify a coordinate System when writing files.
+    Specify a coordinate system when writing files.
 
 Note
     The filename extensions are used to determine the file format type.
@@ -72,20 +72,59 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "import from various third-party surface formats into surfMesh"
+    );
+
     argList::noParallel();
     argList::validArgs.append("inputFile");
 
-    argList::addBoolOption("clean");
+    argList::addBoolOption
+    (
+        "clean",
+        "perform some surface checking/cleanup on the input surface"
+    );
+    argList::addOption
+    (
+        "name",
+        "name",
+        "specify an alternative surface name when writing - "
+        "default is 'default'"
+    );
+    argList::addOption
+    (
+        "scaleIn",
+        "factor",
+        "geometry scaling factor on input - default is 1"
+    );
+    argList::addOption
+    (
+        "scaleOut",
+        "factor",
+        "geometry scaling factor on output - default is 1"
+    );
+    argList::addOption
+    (
+        "dict",
+        "file",
+        "specify an alternative dictionary for constant/coordinateSystems"
+    );
+    argList::addOption
+    (
+        "from",
+        "coordinateSystem",
+        "specify a local coordinate system when reading files."
+    );
+    argList::addOption
+    (
+        "to",
+        "coordinateSystem",
+        "specify a local coordinate system when writing files."
+    );
 
-    argList::addOption("name",  "name");
-    argList::addOption("scaleIn",  "scale");
-    argList::addOption("scaleOut", "scale");
-    argList::addOption("dict", "coordinateSystemsDict");
-    argList::addOption("from", "sourceCoordinateSystem");
-    argList::addOption("to",   "targetCoordinateSystem");
-
-#   include "setRootCase.H"
-#   include "createTime.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
 
     // try for the latestTime, but create "constant" as needed
     instantList Times = runTime.times();

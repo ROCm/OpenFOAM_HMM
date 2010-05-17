@@ -290,17 +290,25 @@ label twoDNess(const polyMesh& mesh)
 
 int main(int argc, char *argv[])
 {
-#   include "addOverwriteOption.H"
-    argList::addBoolOption("dict");
+    argList::addNote
+    (
+        "refine cells in multiple directions"
+    );
 
-#   include "setRootCase.H"
-#   include "createTime.H"
+    #include "addOverwriteOption.H"
+    argList::addBoolOption
+    (
+        "dict",
+        "refine according to system/refineMeshDict"
+    );
+
+    #include "setRootCase.H"
+    #include "createTime.H"
     runTime.functionObjects().off();
-#   include "createPolyMesh.H"
+    #include "createPolyMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
     printEdgeStats(mesh);
-
 
     //
     // Read/construct control dictionary

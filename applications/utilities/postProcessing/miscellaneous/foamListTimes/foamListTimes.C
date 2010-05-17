@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ Usage
     - foamListTimes [OPTION]
 
     @param -processor \n
-    List times from processor0 directory
+    List times from processor0/ directory
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,11 +46,19 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "list times using timeSelector"
+    );
+
     timeSelector::addOptions();  // -constant enabled
     argList::noBanner();
     argList::noParallel();
-    argList::addBoolOption("processor");
-
+    argList::addBoolOption
+    (
+        "processor",
+        "list times from processor0/ directory"
+    );
 #   include "setRootCase.H"
 
     label nProcs = 0;

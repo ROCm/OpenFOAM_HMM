@@ -26,7 +26,7 @@ License
 #include "vtkPV3Foam.H"
 #include "vtkPV3FoamReader.h"
 
-// Foam includes
+// OpenFOAM includes
 #include "fvMesh.H"
 #include "Time.H"
 #include "patchZones.H"
@@ -426,12 +426,12 @@ void Foam::vtkPV3Foam::updateFoamMesh()
         meshPtr_ = NULL;
     }
 
-    // Check to see if the FOAM mesh has been created
+    // Check to see if the OpenFOAM mesh has been created
     if (!meshPtr_)
     {
         if (debug)
         {
-            Info<< "Creating Foam mesh for region " << meshRegion_
+            Info<< "Creating OpenFOAM mesh for region " << meshRegion_
                 << " at time=" << dbPtr_().timeName()
                 << endl;
 
@@ -454,7 +454,7 @@ void Foam::vtkPV3Foam::updateFoamMesh()
     {
         if (debug)
         {
-            Info<< "Using existing Foam mesh" << endl;
+            Info<< "Using existing OpenFOAM mesh" << endl;
         }
     }
 
@@ -488,7 +488,7 @@ void Foam::vtkPV3Foam::Update
 
     reader_->UpdateProgress(0.15);
 
-    // Update the Foam mesh
+    // Update the OpenFOAM mesh
     updateFoamMesh();
     reader_->UpdateProgress(0.4);
 
@@ -527,6 +527,10 @@ void Foam::vtkPV3Foam::Update
     convertVolFields(output);
     convertPointFields(output);
     convertLagrangianFields(lagrangianOutput);
+    if (debug)
+    {
+        Info<< "done reader part" << endl;
+    }
     reader_->UpdateProgress(0.95);
 
     meshChanged_ = fieldsChanged_ = false;

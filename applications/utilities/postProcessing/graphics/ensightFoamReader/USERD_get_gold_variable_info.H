@@ -95,7 +95,7 @@ int USERD_get_gold_variable_info
             );
         }
 
-        for (label n=0; n<lagrangianVectorNames.size(); n++)
+        forAll(lagrangianVectorNames, n)
         {
             var_type[offset + Ns + n] = Z_VECTOR;
             var_classify[offset + Ns + n] = Z_PER_ELEM;

@@ -262,7 +262,7 @@ void Foam::repatchPolyTopoChanger::changeAnchorPoint
 
         label fVert = fp;
 
-        for (label i = 0; i < f.size(); i++)
+        forAll(f, i)
         {
             newFace[i] = f[fVert++];
 

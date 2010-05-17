@@ -28,7 +28,7 @@ Description
 
 #include "vtkPV3Readers.H"
 
-// Foam includes
+// OpenFOAM includes
 #include "IFstream.H"
 
 // VTK includes
@@ -64,7 +64,7 @@ namespace Foam
         }
 
     }
-    //! @endcond fileScope
+    //! @endcond
 
 } // End namespace Foam
 

@@ -29,10 +29,8 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(zone, 0);
-}
+defineTypeNameAndDebug(Foam::zone, 0);
+
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 

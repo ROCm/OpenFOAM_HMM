@@ -31,20 +31,18 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(cyclicPointPatch, 0);
-
-addToRunTimeSelectionTable
-(
-    facePointPatch,
-    cyclicPointPatch,
-    polyPatch
-);
-
+namespace Foam
+{
+    defineTypeNameAndDebug(cyclicPointPatch, 0);
+    addToRunTimeSelectionTable
+    (
+        facePointPatch,
+        cyclicPointPatch,
+        polyPatch
+    );
+}
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
@@ -77,22 +75,22 @@ void Foam::cyclicPointPatch::calcGeometry(PstreamBuffers&)
 }
 
 
-void cyclicPointPatch::initMovePoints(PstreamBuffers&, const pointField&)
+void Foam::cyclicPointPatch::initMovePoints(PstreamBuffers&, const pointField&)
 {}
 
 
-void cyclicPointPatch::movePoints(PstreamBuffers&, const pointField&)
+void Foam::cyclicPointPatch::movePoints(PstreamBuffers&, const pointField&)
 {}
 
 
-void cyclicPointPatch::initUpdateMesh(PstreamBuffers& pBufs)
+void Foam::cyclicPointPatch::initUpdateMesh(PstreamBuffers& pBufs)
 {
     facePointPatch::initUpdateMesh(pBufs);
     cyclicPointPatch::initGeometry(pBufs);
 }
 
 
-void cyclicPointPatch::updateMesh(PstreamBuffers& pBufs)
+void Foam::cyclicPointPatch::updateMesh(PstreamBuffers& pBufs)
 {
     facePointPatch::updateMesh(pBufs);
     cyclicPointPatch::calcGeometry(pBufs);
@@ -101,7 +99,7 @@ void cyclicPointPatch::updateMesh(PstreamBuffers& pBufs)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-cyclicPointPatch::cyclicPointPatch
+Foam::cyclicPointPatch::cyclicPointPatch
 (
     const polyPatch& patch,
     const pointBoundaryMesh& bm
@@ -114,26 +112,22 @@ cyclicPointPatch::cyclicPointPatch
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-cyclicPointPatch::~cyclicPointPatch()
+Foam::cyclicPointPatch::~cyclicPointPatch()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const edgeList& cyclicPointPatch::transformPairs() const
+const Foam::edgeList& Foam::cyclicPointPatch::transformPairs() const
 {
     return cyclicPolyPatch_.coupledPoints();
 }
 
 
-const labelList& cyclicPointPatch::separatedPoints() const
+const Foam::labelList& Foam::cyclicPointPatch::separatedPoints() const
 {
     return separatedPoints_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

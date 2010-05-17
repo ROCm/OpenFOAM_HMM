@@ -356,7 +356,7 @@ int main(int argc, char *argv[])
     argList::noParallel();
     timeSelector::addOptions(true, false);
 
-    argList::validArgs.append("feature angle[0-180]");
+    argList::validArgs.append("featureAngle [0-180]");
     argList::addBoolOption
     (
         "splitAllFaces",

@@ -85,12 +85,12 @@ label findEdge(const primitiveMesh& mesh, const label v0, const label v1)
 // Checks whether patch present
 void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
 {
-    label patchI = bMesh.findPatchID(name);
+    const label patchI = bMesh.findPatchID(name);
 
     if (patchI == -1)
     {
         FatalErrorIn("checkPatch(const polyBoundaryMesh&, const word&)")
-            << "Cannot find patch " << name << endl
+            << "Cannot find patch " << name << nl
             << "It should be present but of zero size" << endl
             << "Valid patches are " << bMesh.names()
             << exit(FatalError);
