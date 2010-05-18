@@ -42,7 +42,7 @@ template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::preEvolve()
 {
     this->dispersion().cacheFields(true);
-    forces_.cacheFields(true);
+    forces_.cacheFields(true, interpolationSchemes_);
 }
 
 
@@ -152,7 +152,7 @@ void Foam::KinematicCloud<ParcelType>::postEvolve()
     }
 
     this->dispersion().cacheFields(false);
-    forces_.cacheFields(false);
+    forces_.cacheFields(false, interpolationSchemes_);
 
     this->postProcessing().post();
 }
