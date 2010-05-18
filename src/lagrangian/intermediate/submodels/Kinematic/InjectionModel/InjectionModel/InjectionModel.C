@@ -212,7 +212,12 @@ Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
         }
         case pbNumber:
         {
-            nP = massTotal_/(rho*volumeTotal_*parcels);
+            nP = massTotal_/(rho*volumeTotal_);
+            break;
+        }
+        case pbFixed:
+        {
+            nP = nParticlesFixed_;
             break;
         }
         default:
@@ -285,6 +290,7 @@ Foam::InjectionModel<CloudType>::InjectionModel(CloudType& owner)
     nInjections_(0),
     parcelsAddedTotal_(0),
     parcelBasis_(pbNumber),
+    nParticlesFixed_(0.0),
     time0_(0.0),
     timeStep0_(0.0)
 {
@@ -310,6 +316,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
     nInjections_(0),
     parcelsAddedTotal_(0),
     parcelBasis_(pbNumber),
+    nParticlesFixed_(0.0),
     time0_(owner.db().time().value()),
     timeStep0_(0.0)
 {
@@ -320,6 +327,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
         << endl;
 
     const word parcelBasisType = coeffDict_.lookup("parcelBasisType");
+
     if (parcelBasisType == "mass")
     {
         parcelBasis_ = pbMass;
@@ -327,6 +335,16 @@ Foam::InjectionModel<CloudType>::InjectionModel
     else if (parcelBasisType == "number")
     {
         parcelBasis_ = pbNumber;
+    }
+    else if (parcelBasisType == "fixed")
+    {
+        parcelBasis_ = pbFixed;
+
+        Info<< "    Choosing nParticles to be a fixed value, massTotal "
+            << "variable now does not determine anything."
+            << endl;
+
+        nParticlesFixed_ = readScalar(coeffDict_.lookup("nParticles"));
     }
     else
     {
@@ -338,7 +356,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
                 "CloudType&, "
                 "const word&"
             ")"
-        )<< "parcelBasisType must be either 'number' or 'mass'" << nl
+        )<< "parcelBasisType must be either 'number', 'mass' or 'fixed'" << nl
          << exit(FatalError);
     }
 

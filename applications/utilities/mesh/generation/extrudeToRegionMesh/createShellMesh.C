@@ -158,7 +158,6 @@ void Foam::createShellMesh::calcPointRegions
 }
 
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::createShellMesh::createShellMesh
@@ -183,7 +182,6 @@ Foam::createShellMesh::createShellMesh
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 
 void Foam::createShellMesh::setRefinement
 (

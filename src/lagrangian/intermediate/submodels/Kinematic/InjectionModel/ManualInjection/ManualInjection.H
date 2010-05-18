@@ -76,9 +76,6 @@ class ManualInjection
         //- Parcel size PDF model
         const autoPtr<pdfs::pdf> parcelPDF_;
 
-        //- Number of particles represented by each parcel
-        scalar nParticlesPerParcel_;
-
 
 protected:
 
