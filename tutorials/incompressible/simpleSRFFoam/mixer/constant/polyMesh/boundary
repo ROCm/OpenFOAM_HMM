@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
+|  \\    /   O peration     | Version:  splitCyclic                           |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-5
+6
 (
     inlet
     {
@@ -41,12 +41,19 @@ FoamFile
         nFaces          880;
         startFace       100840;
     }
-    cyclic
+    cyclic_half0
     {
         type            cyclic;
-        nFaces          3200;
+        nFaces          1600;
         startFace       101720;
-        featureCos      0.9;
+        neighbourPatch  cyclic_half1;
+    }
+    cyclic_half1
+    {
+        type            cyclic;
+        nFaces          1600;
+        startFace       103320;
+        neighbourPatch  cyclic_half0;
     }
 )
 

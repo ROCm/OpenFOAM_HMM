@@ -99,6 +99,12 @@ public:
             return procPolyPatch_.neighbProcNo();
         }
 
+        //- Return message tag used for sending
+        virtual int tag() const
+        {
+            return UPstream::msgType();
+        }
+
         //- Return true if running parallel
         virtual bool coupled() const
         {
@@ -112,14 +118,31 @@ public:
             }
         }
 
+        const processorPolyPatch& procPolyPatch() const
+        {
+            return procPolyPatch_;
+        }
+
+        //- Are the cyclic planes parallel
+        virtual bool parallel() const
+        {
+            return procPolyPatch_.parallel();
+        }
+
         //- Return face transformation tensor
         virtual const tensorField& forwardT() const
         {
             return procPolyPatch_.forwardT();
         }
 
+        //- Return neighbour-cell transformation tensor.
+        virtual const tensorField& reverseT() const
+        {
+            return procPolyPatch_.reverseT();
+        }
+
         //- Return delta (P to N) vectors across coupled patch
-        tmp<vectorField> delta() const;
+        virtual tmp<vectorField> delta() const;
 
 
         // Interface transfer functions
@@ -129,20 +152,6 @@ public:
             virtual tmp<labelField> interfaceInternalField
             (
                 const unallocLabelList& internalData
-            ) const;
-
-            //- Initialise interface data transfer
-            virtual void initTransfer
-            (
-                const Pstream::commsTypes commsType,
-                const unallocLabelList& interfaceData
-            ) const;
-
-            //- Transfer and return neighbour field
-            virtual tmp<labelField> transfer
-            (
-                const Pstream::commsTypes commsType,
-                const unallocLabelList& interfaceData
             ) const;
 
             //- Initialise neighbour field transfer

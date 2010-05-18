@@ -27,6 +27,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "cyclicFvPatch.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -44,6 +45,7 @@ activeBaffleVelocityFvPatchVectorField
     orientation_(1),
     initWallSf_(0),
     initCyclicSf_(0),
+    nbrCyclicSf_(0),
     openFraction_(0),
     openingTime_(0),
     maxOpenFractionDelta_(0),
@@ -67,6 +69,7 @@ activeBaffleVelocityFvPatchVectorField
     orientation_(ptf.orientation_),
     initWallSf_(ptf.initWallSf_),
     initCyclicSf_(ptf.initCyclicSf_),
+    nbrCyclicSf_(ptf.nbrCyclicSf_),
     openFraction_(ptf.openFraction_),
     openingTime_(ptf.openingTime_),
     maxOpenFractionDelta_(ptf.maxOpenFractionDelta_),
@@ -89,6 +92,13 @@ activeBaffleVelocityFvPatchVectorField
     orientation_(readLabel(dict.lookup("orientation"))),
     initWallSf_(p.Sf()),
     initCyclicSf_(p.boundaryMesh()[cyclicPatchLabel_].Sf()),
+    nbrCyclicSf_
+    (
+        refCast<const cyclicFvPatch>
+        (
+            p.boundaryMesh()[cyclicPatchLabel_]
+        ).neighbFvPatch().Sf()
+    ),
     openFraction_(readScalar(dict.lookup("openFraction"))),
     openingTime_(readScalar(dict.lookup("openingTime"))),
     maxOpenFractionDelta_(readScalar(dict.lookup("maxOpenFractionDelta"))),
@@ -111,6 +121,7 @@ activeBaffleVelocityFvPatchVectorField
     orientation_(ptf.orientation_),
     initWallSf_(ptf.initWallSf_),
     initCyclicSf_(ptf.initCyclicSf_),
+    nbrCyclicSf_(ptf.nbrCyclicSf_),
     openFraction_(ptf.openFraction_),
     openingTime_(ptf.openingTime_),
     maxOpenFractionDelta_(ptf.maxOpenFractionDelta_),
@@ -132,6 +143,7 @@ activeBaffleVelocityFvPatchVectorField
     orientation_(ptf.orientation_),
     initWallSf_(ptf.initWallSf_),
     initCyclicSf_(ptf.initCyclicSf_),
+    nbrCyclicSf_(ptf.nbrCyclicSf_),
     openFraction_(ptf.openFraction_),
     openingTime_(ptf.openingTime_),
     maxOpenFractionDelta_(ptf.maxOpenFractionDelta_),
@@ -160,6 +172,13 @@ void Foam::activeBaffleVelocityFvPatchVectorField::autoMap
     [
         cyclicPatchLabel_
     ].patchSlice(areas);
+    nbrCyclicSf_ = refCast<const cyclicFvPatch>
+    (
+        patch().boundaryMesh()
+        [
+            cyclicPatchLabel_
+        ]
+    ).neighbFvPatch().patch().patchSlice(areas);
 }
 
 void Foam::activeBaffleVelocityFvPatchVectorField::rmap
@@ -177,6 +196,13 @@ void Foam::activeBaffleVelocityFvPatchVectorField::rmap
     [
         cyclicPatchLabel_
     ].patchSlice(areas);
+    nbrCyclicSf_ = refCast<const cyclicFvPatch>
+    (
+        patch().boundaryMesh()
+        [
+            cyclicPatchLabel_
+        ]
+    ).neighbFvPatch().patch().patchSlice(areas);
 }
 
 
@@ -197,19 +223,24 @@ void Foam::activeBaffleVelocityFvPatchVectorField::updateCoeffs()
 
         const fvPatch& cyclicPatch = patch().boundaryMesh()[cyclicPatchLabel_];
         const labelList& cyclicFaceCells = cyclicPatch.patch().faceCells();
-        label nCyclicFaces = cyclicFaceCells.size();
-        label nCyclicFacesPerSide = nCyclicFaces/2;
+        const fvPatch& nbrPatch = refCast<const cyclicFvPatch>
+        (
+            cyclicPatch
+        ).neighbFvPatch();
+        const labelList& nbrFaceCells = nbrPatch.patch().faceCells();
 
         scalar forceDiff = 0;
 
-        for (label facei=0; facei<nCyclicFacesPerSide; facei++)
+        // Add this side
+        forAll(cyclicFaceCells, facei)
         {
             forceDiff += p[cyclicFaceCells[facei]]*mag(initCyclicSf_[facei]);
         }
 
-        for (label facei=nCyclicFacesPerSide; facei<nCyclicFaces; facei++)
+        // Remove other side
+        forAll(nbrFaceCells, facei)
         {
-            forceDiff -= p[cyclicFaceCells[facei]]*mag(initCyclicSf_[facei]);
+            forceDiff -= p[nbrFaceCells[facei]]*mag(nbrCyclicSf_[facei]);
         }
 
         openFraction_ =
@@ -239,10 +270,16 @@ void Foam::activeBaffleVelocityFvPatchVectorField::updateCoeffs()
         }
         const_cast<scalarField&>(patch().magSf()) = mag(patch().Sf());
 
+        // Update owner side of cyclic
         const_cast<vectorField&>(cyclicPatch.Sf()) =
             openFraction_*initCyclicSf_;
         const_cast<scalarField&>(cyclicPatch.magSf()) =
             mag(cyclicPatch.Sf());
+        // Update neighbour side of cyclic
+        const_cast<vectorField&>(nbrPatch.Sf()) =
+            openFraction_*nbrCyclicSf_;
+        const_cast<scalarField&>(nbrPatch.magSf()) =
+            mag(nbrPatch.Sf());
 
         curTimeIndex_ = this->db().time().timeIndex();
     }

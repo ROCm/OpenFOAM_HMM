@@ -251,12 +251,13 @@ bool Foam::FaceCellWave<Type>::updateFace
 template <class Type>
 void Foam::FaceCellWave<Type>::checkCyclic(const polyPatch& patch) const
 {
-    label cycOffset = patch.size()/2;
+    const cyclicPolyPatch& nbrPatch =
+        refCast<const cyclicPolyPatch>(patch).neighbPatch();
 
-    for (label patchFaceI = 0; patchFaceI < cycOffset; patchFaceI++)
+    forAll(patch, patchFaceI)
     {
         label i1 = patch.start() + patchFaceI;
-        label i2 = i1 + cycOffset;
+        label i2 = nbrPatch.start() + patchFaceI;
 
         if (!allFaceInfo_[i1].sameGeometry(mesh_, allFaceInfo_[i2], geomTol_))
         {
@@ -334,8 +335,7 @@ void Foam::FaceCellWave<Type>::mergeFaceInfo
     const polyPatch& patch,
     const label nFaces,
     const labelList& changedFaces,
-    const List<Type>& changedFacesInfo,
-    const bool
+    const List<Type>& changedFacesInfo
 )
 {
     for (label changedFaceI = 0; changedFaceI < nFaces; changedFaceI++)
@@ -599,8 +599,7 @@ void Foam::FaceCellWave<Type>::handleProcPatches()
                 patch,
                 nReceiveFaces,
                 receiveFaces,
-                receiveFacesInfo,
-                procPatch.parallel()
+                receiveFacesInfo
             );
         }
     }
@@ -619,87 +618,42 @@ void Foam::FaceCellWave<Type>::handleCyclicPatches()
 
         if (isA<cyclicPolyPatch>(patch))
         {
-            label halfSize = patch.size()/2;
+            const cyclicPolyPatch& nbrPatch =
+                refCast<const cyclicPolyPatch>(patch).neighbPatch();
 
             // Allocate buffers
-            label nSendFaces;
-            labelList sendFaces(halfSize);
-            List<Type> sendFacesInfo(halfSize);
-
             label nReceiveFaces;
-            labelList receiveFaces(halfSize);
-            List<Type> receiveFacesInfo(halfSize);
+            labelList receiveFaces(patch.size());
+            List<Type> receiveFacesInfo(patch.size());
 
-            // Half1: Determine which faces changed. Use sendFaces for storage
-            nSendFaces = getChangedPatchFaces
-            (
-                patch,
-                0,
-                halfSize,
-                sendFaces,
-                sendFacesInfo
-            );
-
-            // Half2: Determine which faces changed. Use receiveFaces_  ,,
+            // Determine which faces changed
             nReceiveFaces = getChangedPatchFaces
             (
-                patch,
-                halfSize,
-                halfSize,
+                nbrPatch,
+                0,
+                nbrPatch.size(),
                 receiveFaces,
                 receiveFacesInfo
             );
 
-            //Info<< "Half1:" << endl;
-            //writeFaces(nSendFaces, sendFaces, sendFacesInfo, Info);
-            //Info<< endl;
-            //
-            //Info<< "Half2:" << endl;
-            //writeFaces(nReceiveFaces, receiveFaces, receiveFacesInfo, Info);
-            //Info<< endl;
-
-
-            // Half1: Adapt wallInfo for leaving domain
+            // Adapt wallInfo for leaving domain
             leaveDomain
             (
-                patch,
-                nSendFaces,
-                sendFaces,
-                sendFacesInfo
-            );
-            // Half2: Adapt wallInfo for leaving domain
-            leaveDomain
-            (
-                patch,
+                nbrPatch,
                 nReceiveFaces,
                 receiveFaces,
                 receiveFacesInfo
             );
 
-            // Half1: 'transfer' to other side by offsetting patchFaceI
-            offset(patch, halfSize, nSendFaces, sendFaces);
-
-            // Half2: 'transfer' to other side
-            offset(patch, -halfSize, nReceiveFaces, receiveFaces);
-
-            // Apply rotation for non-parallel planes
             const cyclicPolyPatch& cycPatch =
                 refCast<const cyclicPolyPatch>(patch);
 
             if (!cycPatch.parallel())
             {
-                // sendFaces = received data from half1
+                // received data from other half
                 transform
                 (
                     cycPatch.forwardT(),
-                    nSendFaces,
-                    sendFacesInfo
-                );
-
-                // receiveFaces = received data from half2
-                transform
-                (
-                    cycPatch.reverseT(),
                     nReceiveFaces,
                     receiveFacesInfo
                 );
@@ -707,25 +661,15 @@ void Foam::FaceCellWave<Type>::handleCyclicPatches()
 
             if (debug)
             {
-                Pout<< " Cyclic patch " << patchI << ' ' << patch.name()
-                    << "  Changed on first half : " << nSendFaces
-                    << "  Changed on second half : " << nReceiveFaces
+                Pout<< " Cyclic patch " << patchI << ' ' << cycPatch.name()
+                    << "  Changed : " << nReceiveFaces
                     << endl;
             }
-
-            // Half1: Adapt wallInfo for entering domain
-            enterDomain
-            (
-                patch,
-                nSendFaces,
-                sendFaces,
-                sendFacesInfo
-            );
 
             // Half2: Adapt wallInfo for entering domain
             enterDomain
             (
-                patch,
+                cycPatch,
                 nReceiveFaces,
                 receiveFaces,
                 receiveFacesInfo
@@ -734,25 +678,15 @@ void Foam::FaceCellWave<Type>::handleCyclicPatches()
             // Merge into global storage
             mergeFaceInfo
             (
-                patch,
-                nSendFaces,
-                sendFaces,
-                sendFacesInfo,
-                cycPatch.parallel()
-            );
-            // Merge into global storage
-            mergeFaceInfo
-            (
-                patch,
+                cycPatch,
                 nReceiveFaces,
                 receiveFaces,
-                receiveFacesInfo,
-                cycPatch.parallel()
+                receiveFacesInfo
             );
 
             if (debug)
             {
-                checkCyclic(patch);
+                checkCyclic(cycPatch);
             }
         }
     }

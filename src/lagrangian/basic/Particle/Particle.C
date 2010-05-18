@@ -474,25 +474,27 @@ void Foam::Particle<ParticleType>::hitCyclicPatch
     TrackData&
 )
 {
-    label patchFacei_ = cpp.whichFace(facei_);
+//    label patchFacei_ = cpp.whichFace(facei_);
 
     facei_ = cpp.transformGlobalFace(facei_);
 
     celli_ = cloud_.polyMesh_.faceOwner()[facei_];
 
+    // Now the particle is on the receiving side
+
     if (!cpp.parallel())
     {
-        const tensor& T = cpp.transformT(patchFacei_);
+        const tensor& T = cpp.reverseT()[0];
 
         transformPosition(T);
         static_cast<ParticleType&>(*this).transformProperties(T);
     }
     else if (cpp.separated())
     {
-        position_ += cpp.separation(patchFacei_);
+        position_ += cpp.separation()[0];
         static_cast<ParticleType&>(*this).transformProperties
         (
-            cpp.separation(patchFacei_)
+            cpp.separation()[0]
         );
     }
 }

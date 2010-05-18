@@ -25,6 +25,7 @@ License
 
 #include "CECCellToCellStencil.H"
 #include "syncTools.H"
+#include "dummyTransform.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -56,13 +57,7 @@ void Foam::CECCellToCellStencil::calcEdgeBoundaryData
         );
     }
 
-    syncTools::syncEdgeMap
-    (
-        mesh(),
-        neiGlobal,
-        unionEqOp(),
-        false           // apply separation
-    );
+    syncTools::syncEdgeMap(mesh(), neiGlobal, unionEqOp(), dummyTransform());
 }
 
 

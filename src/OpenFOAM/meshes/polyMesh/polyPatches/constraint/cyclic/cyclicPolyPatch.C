@@ -33,7 +33,8 @@ License
 #include "matchPoints.H"
 #include "EdgeMap.H"
 #include "Time.H"
-#include "transformList.H"
+#include "diagTensor.H"
+#include "transformField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -88,38 +89,12 @@ void Foam::cyclicPolyPatch::calcTransforms()
 {
     if (size())
     {
-        const pointField& points = this->points();
+        // Half0
 
-        // Determine geometric quantities on the two halves
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const cyclicPolyPatch& half0 = *this;
 
-        primitivePatch half0
-        (
-            SubList<face>
-            (
-                *this,
-                size()/2
-            ),
-            points
-        );
+        const pointField& half0Ctrs = half0.faceCentres();
 
-        pointField half0Ctrs(calcFaceCentres(half0, half0.points()));
-
-        scalarField half0Tols(calcFaceTol(half0, half0.points(), half0Ctrs));
-
-        primitivePatch half1
-        (
-            SubList<face>
-            (
-                *this,
-                size()/2,
-                size()/2
-            ),
-            points
-        );
-        pointField half1Ctrs(calcFaceCentres(half1, half1.points()));
-
-        // Dump halves
         if (debug)
         {
             fileName casePath(boundaryMesh().mesh().time().path());
@@ -128,6 +103,27 @@ void Foam::cyclicPolyPatch::calcTransforms()
             Pout<< "cyclicPolyPatch::calcTransforms : Writing half0"
                 << " faces to OBJ file " << nm0 << endl;
             writeOBJ(nm0, half0, half0.points());
+        }
+
+        vectorField half0Areas(half0.size());
+
+        forAll(half0, facei)
+        {
+            half0Areas[facei] = half0[facei].normal(half0.points());
+        }
+
+
+
+        // Half0
+
+        const cyclicPolyPatch& half1 = neighbPatch();
+
+        const pointField& half1Ctrs = half1.faceCentres();
+
+        // Dump halves
+        if (debug)
+        {
+            fileName casePath(boundaryMesh().mesh().time().path());
 
             fileName nm1(casePath/name()+"_half1_faces.obj");
             Pout<< "cyclicPolyPatch::calcTransforms : Writing half1"
@@ -151,17 +147,65 @@ void Foam::cyclicPolyPatch::calcTransforms()
             }
         }
 
-        vectorField half0Normals(half0.size());
-        vectorField half1Normals(half1.size());
+        vectorField half1Areas(half1.size());
 
-        for (label facei = 0; facei < size()/2; facei++)
+        forAll(half1, facei)
         {
-            half0Normals[facei] = operator[](facei).normal(points);
-            label nbrFacei = facei+size()/2;
-            half1Normals[facei] = operator[](nbrFacei).normal(points);
+            half1Areas[facei] = half1[facei].normal(half1.points());
+        }
 
-            scalar magSf = mag(half0Normals[facei]);
-            scalar nbrMagSf = mag(half1Normals[facei]);
+        calcTransforms
+        (
+            half0,
+            half0Ctrs,
+            half0Areas,
+            half1Ctrs,
+            half1Areas
+        );
+    }
+}
+
+
+void Foam::cyclicPolyPatch::calcTransforms
+(
+    const primitivePatch& half0,
+    const UList<point>& half0Ctrs,
+    const UList<point>& half0Areas,
+    const UList<point>& half1Ctrs,
+    const UList<point>& half1Areas
+)
+{
+    if (half0Ctrs.size() != half1Ctrs.size())
+    {
+        FatalErrorIn
+        (
+            "cyclicPolyPatch::calcTransforms()"
+        )   << "For patch " << name()
+            << " there are " << half0Ctrs.size()
+            << " face centres, for the neighbour patch " << neighbPatch().name()
+            << " there are " << half1Ctrs.size()
+            << exit(FatalError);
+    }
+
+    if (half0Ctrs.size() > 0)
+    {
+        scalarField half0Tols
+        (
+            calcFaceTol
+            (
+                half0,
+                half0.points(),
+                static_cast<const pointField&>(half0Ctrs)
+            )
+        );
+
+        vectorField half0Normals(half0Areas.size());
+        vectorField half1Normals(half1Areas.size());
+
+        forAll(half0, facei)
+        {
+            scalar magSf = mag(half0Areas[facei]);
+            scalar nbrMagSf = mag(half1Areas[facei]);
             scalar avSf = (magSf + nbrMagSf)/2.0;
 
             if (magSf < ROOTVSMALL && nbrMagSf < ROOTVSMALL)
@@ -177,8 +221,7 @@ void Foam::cyclicPolyPatch::calcTransforms()
                 FatalErrorIn
                 (
                     "cyclicPolyPatch::calcTransforms()"
-                )   << "face " << facei << " area does not match neighbour "
-                    << nbrFacei << " by "
+                )   << "face " << facei << " area does not match neighbour by "
                     << 100*mag(magSf - nbrMagSf)/avSf
                     << "% -- possible face ordering problem." << endl
                     << "patch:" << name()
@@ -187,268 +230,29 @@ void Foam::cyclicPolyPatch::calcTransforms()
                     << " matching tolerance:" << coupledPolyPatch::matchTol
                      << endl
                     << "Mesh face:" << start()+facei
-                    << " vertices:"
-                    << UIndirectList<point>(points, operator[](facei))()
+                    << " fc:" << half0Ctrs[facei]
                     << endl
-                    << "Neighbour face:" << start()+nbrFacei
-                    << " vertices:"
-                    << UIndirectList<point>(points, operator[](nbrFacei))()
+                    << "Neighbour fc:" << half1Ctrs[facei]
                     << endl
                     << "Rerun with cyclic debug flag set"
                     << " for more information." << exit(FatalError);
             }
             else
             {
-                half0Normals[facei] /= magSf;
-                half1Normals[facei] /= nbrMagSf;
+                half0Normals[facei] = half0Areas[facei] / magSf;
+                half1Normals[facei] = half1Areas[facei] / nbrMagSf;
             }
         }
 
-
-        // See if transformation is prescribed
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        switch (transform_)
-        {
-            case ROTATIONAL:
-            {
-                // Specified single rotation tensor.
-
-                // Get best fitting face and its opposite number
-                label face0 = getConsistentRotationFace(half0Ctrs);
-                label face1 = face0;
-
-                vector n0 =
-                    (
-                        (half0Ctrs[face0] - rotationCentre_)
-                      ^ rotationAxis_
-                    );
-                vector n1 =
-                    (
-                        (half1Ctrs[face1] - rotationCentre_)
-                      ^ -rotationAxis_
-                    );
-                n0 /= mag(n0) + VSMALL;
-                n1 /= mag(n1) + VSMALL;
-
-                if (debug)
-                {
-                    Pout<< "cyclicPolyPatch::calcTransforms :"
-                        << " Specified rotation :"
-                        << " n0:" << n0 << " n1:" << n1 << endl;
-                }
-
-                // Calculate transformation tensors from face0,1 only.
-                // Note: can use tight tolerance now.
-                calcTransformTensors
-                (
-                    pointField(1, half0Ctrs[face0]),
-                    pointField(1, half1Ctrs[face1]),
-                    vectorField(1, n0),
-                    vectorField(1, n1),
-                    scalarField(1, half0Tols[face0]),
-                    1E-4
-                );
-
-                break;
-            }
-
-            default:
-            {
-                // Calculate transformation tensors from all faces.
-                calcTransformTensors
-                (
-                    half0Ctrs,
-                    half1Ctrs,
-                    half0Normals,
-                    half1Normals,
-                    half0Tols
-                );
-
-                break;
-            }
-        }
-    }
-}
-
-
-// Get geometric zones of patch by looking at normals.
-// Method 1: any edge with sharpish angle is edge between two halves.
-//           (this will handle e.g. wedge geometries).
-//           Also two fully disconnected regions will be handled this way.
-// Method 2: sort faces into two halves based on face normal.
-bool Foam::cyclicPolyPatch::getGeometricHalves
-(
-    const primitivePatch& pp,
-    labelList& half0ToPatch,
-    labelList& half1ToPatch
-) const
-{
-    // Calculate normals
-    const vectorField& faceNormals = pp.faceNormals();
-
-    // Find edges with sharp angles.
-    boolList regionEdge(pp.nEdges(), false);
-
-    const labelListList& edgeFaces = pp.edgeFaces();
-
-    label nRegionEdges = 0;
-
-    forAll(edgeFaces, edgeI)
-    {
-        const labelList& eFaces = edgeFaces[edgeI];
-
-        // Check manifold edges for sharp angle.
-        // (Non-manifold already handled by patchZones)
-        if (eFaces.size() == 2)
-        {
-            if ((faceNormals[eFaces[0]] & faceNormals[eFaces[1]])< featureCos_)
-            {
-                regionEdge[edgeI] = true;
-
-                nRegionEdges++;
-            }
-        }
-    }
-
-
-    // For every face determine zone it is connected to (without crossing
-    // any regionEdge)
-    patchZones ppZones(pp, regionEdge);
-
-    if (debug)
-    {
-        Pout<< "cyclicPolyPatch::getGeometricHalves : "
-            << "Found " << nRegionEdges << " edges on patch " << name()
-            << " where the cos of the angle between two connected faces"
-            << " was less than " << featureCos_ << nl
-            << "Patch divided by these and by single sides edges into "
-            << ppZones.nZones() << " parts." << endl;
-
-
-        // Dumping zones to obj files.
-
-        labelList nZoneFaces(ppZones.nZones());
-
-        for (label zoneI = 0; zoneI < ppZones.nZones(); zoneI++)
-        {
-            OFstream stream
-            (
-                boundaryMesh().mesh().time().path()
-               /name()+"_zone_"+Foam::name(zoneI)+".obj"
-            );
-            Pout<< "cyclicPolyPatch::getGeometricHalves : Writing zone "
-                << zoneI << " face centres to OBJ file " << stream.name()
-                << endl;
-
-            labelList zoneFaces(findIndices(ppZones, zoneI));
-
-            forAll(zoneFaces, i)
-            {
-                writeOBJ(stream, pp[zoneFaces[i]].centre(pp.points()));
-            }
-
-            nZoneFaces[zoneI] = zoneFaces.size();
-        }
-    }
-
-
-    if (ppZones.nZones() == 2)
-    {
-        half0ToPatch = findIndices(ppZones, 0);
-        half1ToPatch = findIndices(ppZones, 1);
-    }
-    else
-    {
-        if (debug)
-        {
-            Pout<< "cyclicPolyPatch::getGeometricHalves :"
-                << " falling back to face-normal comparison" << endl;
-        }
-        label n0Faces = 0;
-        half0ToPatch.setSize(pp.size());
-
-        label n1Faces = 0;
-        half1ToPatch.setSize(pp.size());
-
-        // Compare to face 0 normal.
-        forAll(faceNormals, faceI)
-        {
-            if ((faceNormals[faceI] & faceNormals[0]) > 0)
-            {
-                half0ToPatch[n0Faces++] = faceI;
-            }
-            else
-            {
-                half1ToPatch[n1Faces++] = faceI;
-            }
-        }
-        half0ToPatch.setSize(n0Faces);
-        half1ToPatch.setSize(n1Faces);
-
-        if (debug)
-        {
-            Pout<< "cyclicPolyPatch::getGeometricHalves :"
-                << " Number of faces per zone:("
-                << n0Faces << ' ' << n1Faces << ')' << endl;
-        }
-    }
-
-    if (half0ToPatch.size() != half1ToPatch.size())
-    {
-        fileName casePath(boundaryMesh().mesh().time().path());
-
-        // Dump halves
-        {
-            fileName nm0(casePath/name()+"_half0_faces.obj");
-            Pout<< "cyclicPolyPatch::getGeometricHalves : Writing half0"
-                << " faces to OBJ file " << nm0 << endl;
-            writeOBJ(nm0, UIndirectList<face>(pp, half0ToPatch)(), pp.points());
-
-            fileName nm1(casePath/name()+"_half1_faces.obj");
-            Pout<< "cyclicPolyPatch::getGeometricHalves : Writing half1"
-                << " faces to OBJ file " << nm1 << endl;
-            writeOBJ(nm1, UIndirectList<face>(pp, half1ToPatch)(), pp.points());
-        }
-
-        // Dump face centres
-        {
-            OFstream str0(casePath/name()+"_half0.obj");
-            Pout<< "cyclicPolyPatch::getGeometricHalves : Writing half0"
-                << " face centres to OBJ file " << str0.name() << endl;
-
-            forAll(half0ToPatch, i)
-            {
-                writeOBJ(str0, pp[half0ToPatch[i]].centre(pp.points()));
-            }
-
-            OFstream str1(casePath/name()+"_half1.obj");
-            Pout<< "cyclicPolyPatch::getGeometricHalves : Writing half1"
-                << " face centres to OBJ file " << str1.name() << endl;
-            forAll(half1ToPatch, i)
-            {
-                writeOBJ(str1, pp[half1ToPatch[i]].centre(pp.points()));
-            }
-        }
-
-        SeriousErrorIn
+        // Calculate transformation tensors
+        calcTransformTensors
         (
-            "cyclicPolyPatch::getGeometricHalves"
-            "(const primitivePatch&, labelList&, labelList&) const"
-        )   << "Patch " << name() << " gets decomposed in two zones of"
-            << "inequal size: " << half0ToPatch.size()
-            << " and " << half1ToPatch.size() << endl
-            << "This means that the patch is either not two separate regions"
-            << " or one region where the angle between the different regions"
-            << " is not sufficiently sharp." << endl
-            << "Please adapt the featureCos setting." << endl
-            << "Continuing with incorrect face ordering from now on!" << endl;
-
-        return false;
-    }
-    else
-    {
-        return true;
+            static_cast<const pointField&>(half0Ctrs),
+            static_cast<const pointField&>(half1Ctrs),
+            half0Normals,
+            half1Normals,
+            half0Tols
+        );
     }
 }
 
@@ -458,11 +262,9 @@ bool Foam::cyclicPolyPatch::getGeometricHalves
 // right ones.
 void Foam::cyclicPolyPatch::getCentresAndAnchors
 (
-    const primitivePatch& pp,
-    const faceList& half0Faces,
-    const faceList& half1Faces,
+    const primitivePatch& pp0,
+    const primitivePatch& pp1,
 
-    pointField& ppPoints,
     pointField& half0Ctrs,
     pointField& half1Ctrs,
     pointField& anchors0,
@@ -470,9 +272,9 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
 ) const
 {
     // Get geometric data on both halves.
-    half0Ctrs = calcFaceCentres(half0Faces, pp.points());
-    anchors0 = getAnchorPoints(half0Faces, pp.points());
-    half1Ctrs = calcFaceCentres(half1Faces, pp.points());
+    half0Ctrs = pp0.faceCentres();
+    anchors0 = getAnchorPoints(pp0, pp0.points());
+    half1Ctrs = pp1.faceCentres();
 
     switch (transform_)
     {
@@ -503,8 +305,6 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
                 anchors0[faceI] = Foam::transform(reverseT, anchors0[faceI]);
             }
 
-            ppPoints = Foam::transform(reverseT, pp.points());
-
             break;
         }
         //- Problem: usually specified translation is not accurate enough
@@ -531,12 +331,12 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
 
             // Determine the face with max area on both halves. These
             // two faces are used to determine the transformation tensors
-            label max0I = findMaxArea(pp.points(), half0Faces);
-            vector n0 = half0Faces[max0I].normal(pp.points());
+            label max0I = findMaxArea(pp0.points(), pp0);
+            vector n0 = pp0[max0I].normal(pp0.points());
             n0 /= mag(n0) + VSMALL;
 
-            label max1I = findMaxArea(pp.points(), half1Faces);
-            vector n1 = half1Faces[max1I].normal(pp.points());
+            label max1I = findMaxArea(pp1.points(), pp1);
+            vector n1 = pp1[max1I].normal(pp1.points());
             n1 /= mag(n1) + VSMALL;
 
             if (mag(n0 & n1) < 1-coupledPolyPatch::matchTol)
@@ -565,19 +365,13 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
                         anchors0[faceI]
                     );
                 }
-                ppPoints = Foam::transform(reverseT, pp.points());
             }
             else
             {
                 // Parallel translation. Get average of all used points.
 
-                primitiveFacePatch half0(half0Faces, pp.points());
-                const pointField& half0Pts = half0.localPoints();
-                const point ctr0(sum(half0Pts)/half0Pts.size());
-
-                primitiveFacePatch half1(half1Faces, pp.points());
-                const pointField& half1Pts = half1.localPoints();
-                const point ctr1(sum(half1Pts)/half1Pts.size());
+                const point ctr0(sum(pp0.localPoints())/pp0.nPoints());
+                const point ctr1(sum(pp1.localPoints())/pp1.nPoints());
 
                 if (debug)
                 {
@@ -589,7 +383,6 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
 
                 half0Ctrs += ctr1 - ctr0;
                 anchors0 += ctr1 - ctr0;
-                ppPoints = pp.points() + ctr1 - ctr0;
             }
             break;
         }
@@ -597,92 +390,7 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
 
 
     // Calculate typical distance per face
-    tols = calcFaceTol(half1Faces, pp.points(), half1Ctrs);
-}
-
-
-// Calculates faceMap and rotation. Returns true if all ok.
-bool Foam::cyclicPolyPatch::matchAnchors
-(
-    const bool report,
-    const primitivePatch& pp,
-    const labelList& half0ToPatch,
-    const pointField& anchors0,
-
-    const labelList& half1ToPatch,
-    const faceList& half1Faces,
-    const labelList& from1To0,
-
-    const scalarField& tols,
-
-    labelList& faceMap,
-    labelList& rotation
-) const
-{
-    // Set faceMap such that half0 faces get first and corresponding half1
-    // faces last.
-
-    forAll(half0ToPatch, half0FaceI)
-    {
-        // Label in original patch
-        label patchFaceI = half0ToPatch[half0FaceI];
-
-        faceMap[patchFaceI] = half0FaceI;
-
-        // No rotation
-        rotation[patchFaceI] = 0;
-    }
-
-    bool fullMatch = true;
-
-    forAll(from1To0, half1FaceI)
-    {
-        label patchFaceI = half1ToPatch[half1FaceI];
-
-        // This face has to match the corresponding one on half0.
-        label half0FaceI = from1To0[half1FaceI];
-
-        label newFaceI = half0FaceI + pp.size()/2;
-
-        faceMap[patchFaceI] = newFaceI;
-
-        // Rotate patchFaceI such that its f[0] aligns with that of
-        // the corresponding face
-        // (which after shuffling will be at position half0FaceI)
-
-        const point& wantedAnchor = anchors0[half0FaceI];
-
-        rotation[newFaceI] = getRotation
-        (
-            pp.points(),
-            half1Faces[half1FaceI],
-            wantedAnchor,
-            tols[half1FaceI]
-        );
-
-        if (rotation[newFaceI] == -1)
-        {
-            fullMatch = false;
-
-            if (report)
-            {
-                const face& f = half1Faces[half1FaceI];
-                SeriousErrorIn
-                (
-                    "cyclicPolyPatch::matchAnchors(..)"
-                )   << "Patch:" << name() << " : "
-                    << "Cannot find point on face " << f
-                    << " with vertices:"
-                    << UIndirectList<point>(pp.points(), f)()
-                    << " that matches point " << wantedAnchor
-                    << " when matching the halves of cyclic patch " << name()
-                    << endl
-                    << "Continuing with incorrect face ordering from now on!"
-                    << endl;
-            }
-        }
-    }
-    return fullMatch;
+    tols = calcFaceTol(pp1, pp1.points(), half1Ctrs);
 }
 
 
@@ -715,7 +423,7 @@ Foam::label Foam::cyclicPolyPatch::getConsistentRotationFace
 
     if (debug)
     {
-        Info<< "getConsistentRotationFace(const pointField&)" << nl
+        Pout<< "getConsistentRotationFace(const pointField&)" << nl
             << "    rotFace = " << rotFace << nl
             << "    point =  " << faceCentres[rotFace] << endl;
     }
@@ -736,14 +444,18 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 )
 :
     coupledPolyPatch(name, size, start, index, bm),
-    coupledPointsPtr_(NULL),
-    coupledEdgesPtr_(NULL),
-    featureCos_(0.9),
+    neighbPatchName_(word::null),
+    neighbPatchID_(-1),
     transform_(UNKNOWN),
     rotationAxis_(vector::zero),
     rotationCentre_(point::zero),
-    separationVector_(vector::zero)
-{}
+    separationVector_(vector::zero),
+    coupledPointsPtr_(NULL),
+    coupledEdgesPtr_(NULL)
+{
+    // Neighbour patch might not be valid yet so no transformation
+    // calculation possible.
+}
 
 
 Foam::cyclicPolyPatch::cyclicPolyPatch
@@ -755,15 +467,40 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 )
 :
     coupledPolyPatch(name, dict, index, bm),
-    coupledPointsPtr_(NULL),
-    coupledEdgesPtr_(NULL),
-    featureCos_(0.9),
+    neighbPatchName_(dict.lookupOrDefault("neighbourPatch", word::null)),
+    neighbPatchID_(-1),
     transform_(UNKNOWN),
     rotationAxis_(vector::zero),
     rotationCentre_(point::zero),
-    separationVector_(vector::zero)
+    separationVector_(vector::zero),
+    coupledPointsPtr_(NULL),
+    coupledEdgesPtr_(NULL)
 {
-    dict.readIfPresent("featureCos", featureCos_);
+    if (neighbPatchName_ == word::null)
+    {
+        FatalIOErrorIn
+        (
+            "cyclicPolyPatch::cyclicPolyPatch\n"
+            "(\n"
+            "    const word& name,\n"
+            "    const dictionary& dict,\n"
+            "    const label index,\n"
+            "    const polyBoundaryMesh& bm\n"
+            ")",
+            dict
+        )   << "No \"neighbourPatch\" provided." << endl
+            << "Is your mesh uptodate with split cyclics?" << endl
+            << "Run foamUpgradeCyclics to convert mesh and fields"
+            << " to split cyclics." << exit(FatalIOError);
+    }
+
+    if (neighbPatchName_ == name)
+    {
+        FatalIOErrorIn("cyclicPolyPatch::cyclicPolyPatch(..)", dict)
+            << "Neighbour patch name " << neighbPatchName_
+            << " cannot be the same as this patch " << name
+            << exit(FatalIOError);
+    }
 
     if (dict.found("transform"))
     {
@@ -787,6 +524,9 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
             }
         }
     }
+
+    // Neighbour patch might not be valid yet so no transformation
+    // calculation possible.
 }
 
 
@@ -797,14 +537,18 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 )
 :
     coupledPolyPatch(pp, bm),
-    coupledPointsPtr_(NULL),
-    coupledEdgesPtr_(NULL),
-    featureCos_(pp.featureCos_),
+    neighbPatchName_(pp.neighbPatchName()),
+    neighbPatchID_(-1),
     transform_(pp.transform_),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
-    separationVector_(pp.separationVector_)
-{}
+    separationVector_(pp.separationVector_),
+    coupledPointsPtr_(NULL),
+    coupledEdgesPtr_(NULL)
+{
+    // Neighbour patch might not be valid yet so no transformation
+    // calculation possible.
+}
 
 
 Foam::cyclicPolyPatch::cyclicPolyPatch
@@ -813,18 +557,31 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     const polyBoundaryMesh& bm,
     const label index,
     const label newSize,
-    const label newStart
+    const label newStart,
+    const word& neighbPatchName
 )
 :
     coupledPolyPatch(pp, bm, index, newSize, newStart),
-    coupledPointsPtr_(NULL),
-    coupledEdgesPtr_(NULL),
-    featureCos_(pp.featureCos_),
+    neighbPatchName_(neighbPatchName),
+    neighbPatchID_(-1),
     transform_(pp.transform_),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
-    separationVector_(pp.separationVector_)
-{}
+    separationVector_(pp.separationVector_),
+    coupledPointsPtr_(NULL),
+    coupledEdgesPtr_(NULL)
+{
+    if (neighbPatchName_ == name())
+    {
+        FatalErrorIn("cyclicPolyPatch::cyclicPolyPatch(..)")
+            << "Neighbour patch name " << neighbPatchName_
+            << " cannot be the same as this patch " << name()
+            << exit(FatalError);
+    }
+
+    // Neighbour patch might not be valid yet so no transformation
+    // calculation possible.
+}
 
 
 Foam::cyclicPolyPatch::cyclicPolyPatch
@@ -837,13 +594,14 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 )
 :
     coupledPolyPatch(pp, bm, index, mapAddressing, newStart),
-    coupledPointsPtr_(NULL),
-    coupledEdgesPtr_(NULL),
-    featureCos_(pp.featureCos_),
+    neighbPatchName_(pp.neighbPatchName_),
+    neighbPatchID_(-1),
     transform_(pp.transform_),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
-    separationVector_(pp.separationVector_)
+    separationVector_(pp.separationVector_),
+    coupledPointsPtr_(NULL),
+    coupledEdgesPtr_(NULL)
 {}
 
 
@@ -859,16 +617,71 @@ Foam::cyclicPolyPatch::~cyclicPolyPatch()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::cyclicPolyPatch::transformPosition(pointField& l) const
+{
+    if (!parallel())
+    {
+        Foam::transform(forwardT(), l);
+    }
+    else if (separated())
+    {
+        l -= separation();
+    }
+}
+
+
 void Foam::cyclicPolyPatch::initGeometry(PstreamBuffers& pBufs)
 {
     polyPatch::initGeometry(pBufs);
 }
 
+
+void Foam::cyclicPolyPatch::initGeometry
+(
+    const primitivePatch& referPatch,
+    UList<point>& nbrCtrs,
+    UList<point>& nbrAreas,
+    UList<point>& nbrCc
+)
+{}
+
+
+void Foam::cyclicPolyPatch::calcGeometry
+(
+    const primitivePatch& referPatch,
+    const UList<point>& thisCtrs,
+    const UList<point>& thisAreas,
+    const UList<point>& thisCc,
+    const UList<point>& nbrCtrs,
+    const UList<point>& nbrAreas,
+    const UList<point>& nbrCc
+)
+{
+    calcTransforms
+    (
+        referPatch,
+        thisCtrs,
+        thisAreas,
+        nbrCtrs,
+        nbrAreas
+    );
+}
+
+
 void Foam::cyclicPolyPatch::calcGeometry(PstreamBuffers& pBufs)
 {
-    polyPatch::calcGeometry(pBufs);
-    calcTransforms();
+    calcGeometry
+    (
+        *this,
+        faceCentres(),
+        faceAreas(),
+        faceCellCentres(),
+        neighbPatch().faceCentres(),
+        neighbPatch().faceAreas(),
+        neighbPatch().faceCellCentres()
+    );
 }
+
 
 void Foam::cyclicPolyPatch::initMovePoints
 (
@@ -906,17 +719,20 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledPoints() const
 {
     if (!coupledPointsPtr_)
     {
-        // Look at cyclic patch as two halves, A and B.
-        // Now all we know is that relative face index in halfA is same
-        // as coupled face in halfB and also that the 0th vertex
+        const faceList& nbrLocalFaces = neighbPatch().localFaces();
+        const labelList& nbrMeshPoints = neighbPatch().meshPoints();
+
+        // Now all we know is that relative face index in *this is same
+        // as coupled face in nbrPatch and also that the 0th vertex
         // corresponds.
 
-        // From halfA point to halfB or -1.
+        // From local point to nbrPatch or -1.
         labelList coupledPoint(nPoints(), -1);
 
-        for (label patchFaceA = 0; patchFaceA < size()/2; patchFaceA++)
+        forAll(*this, patchFaceI)
         {
-            const face& fA = localFaces()[patchFaceA];
+            const face& fA = localFaces()[patchFaceI];
+            const face& fB = nbrLocalFaces[patchFaceI];
 
             forAll(fA, indexA)
             {
@@ -924,12 +740,10 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledPoints() const
 
                 if (coupledPoint[patchPointA] == -1)
                 {
-                    const face& fB = localFaces()[patchFaceA + size()/2];
-
                     label indexB = (fB.size() - indexA) % fB.size();
 
                     // Filter out points on wedge axis
-                    if (patchPointA != fB[indexB])
+                    if (meshPoints()[patchPointA] != nbrMeshPoints[fB[indexB]])
                     {
                         coupledPoint[patchPointA] = fB[indexB];
                     }
@@ -958,7 +772,7 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledPoints() const
             OFstream str
             (
                 boundaryMesh().mesh().time().path()
-               /"coupledPoints.obj"
+               /name() + "_coupledPoints.obj"
             );
             label vertI = 0;
 
@@ -968,7 +782,7 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledPoints() const
             forAll(connected, i)
             {
                 const point& a = points()[meshPoints()[connected[i][0]]];
-                const point& b = points()[meshPoints()[connected[i][1]]];
+                const point& b = points()[nbrMeshPoints[connected[i][1]]];
 
                 str<< "v " << a.x() << ' ' << a.y() << ' ' << a.z() << nl;
                 str<< "v " << b.x() << ' ' << b.y() << ' ' << b.z() << nl;
@@ -979,8 +793,20 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledPoints() const
         }
 
         // Remove any addressing calculated for the coupled edges calculation
-        const_cast<primitivePatch&>(static_cast<const primitivePatch&>(*this))
-            .clearOut();
+        const_cast<primitivePatch&>
+        (
+            static_cast<const primitivePatch&>
+            (
+                *this
+            )
+        ).clearOut();
+        const_cast<primitivePatch&>
+        (
+            static_cast<const primitivePatch&>
+            (
+                neighbPatch()
+            )
+        ).clearOut();
     }
     return *coupledPointsPtr_;
 }
@@ -990,9 +816,9 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
 {
     if (!coupledEdgesPtr_)
     {
-        // Build map from points on halfA to points on halfB.
         const edgeList& pointCouples = coupledPoints();
 
+        // Build map from points on *this (A) to points on neighbourpatch (B)
         Map<label> aToB(2*pointCouples.size());
 
         forAll(pointCouples, i)
@@ -1002,12 +828,12 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
             aToB.insert(e[0], e[1]);
         }
 
-        // Map from edge on half A to points (in halfB indices)
+        // Map from edge on A to points (in B indices)
         EdgeMap<label> edgeMap(nEdges());
 
-        for (label patchFaceA = 0; patchFaceA < size()/2; patchFaceA++)
+        forAll(*this, patchFaceI)
         {
-            const labelList& fEdges = faceEdges()[patchFaceA];
+            const labelList& fEdges = faceEdges()[patchFaceI];
 
             forAll(fEdges, i)
             {
@@ -1015,8 +841,7 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
 
                 const edge& e = edges()[edgeI];
 
-                // Convert edge end points to corresponding points on halfB
-                // side.
+                // Convert edge end points to corresponding points on B side.
                 Map<label>::const_iterator fnd0 = aToB.find(e[0]);
                 if (fnd0 != aToB.end())
                 {
@@ -1029,31 +854,44 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
             }
         }
 
-        coupledEdgesPtr_ = new edgeList(nEdges()/2);
+        // Use the edgeMap to get the edges on the B side.
+
+        const cyclicPolyPatch& neighbPatch = this->neighbPatch();
+        const labelList& nbrMp = neighbPatch.meshPoints();
+        const labelList& mp = meshPoints();
+
+
+
+        coupledEdgesPtr_ = new edgeList(edgeMap.size());
         edgeList& coupledEdges = *coupledEdgesPtr_;
         label coupleI = 0;
 
-        for (label patchFaceB = size()/2; patchFaceB < size(); patchFaceB++)
+        forAll(neighbPatch, patchFaceI)
         {
-            const labelList& fEdges = faceEdges()[patchFaceB];
+            const labelList& fEdges = neighbPatch.faceEdges()[patchFaceI];
 
             forAll(fEdges, i)
             {
                 label edgeI = fEdges[i];
 
-                const edge& e = edges()[edgeI];
+                const edge& e = neighbPatch.edges()[edgeI];
 
-                // Look up halfA edge from HashTable.
+                // Look up A edge from HashTable.
                 EdgeMap<label>::iterator iter = edgeMap.find(e);
 
                 if (iter != edgeMap.end())
                 {
-                    label halfAEdgeI = iter();
+                    label edgeA = iter();
+                    const edge& eA = edges()[edgeA];
 
                     // Store correspondence. Filter out edges on wedge axis.
-                    if (halfAEdgeI != edgeI)
+                    if
+                    (
+                        edge(mp[eA[0]], mp[eA[1]])
+                     != edge(nbrMp[e[0]], nbrMp[e[1]])
+                    )
                     {
-                        coupledEdges[coupleI++] = edge(halfAEdgeI, edgeI);
+                        coupledEdges[coupleI++] = edge(edgeA, edgeI);
                     }
 
                     // Remove so we build unique list
@@ -1070,7 +908,7 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
         {
             const edge& e = coupledEdges[i];
 
-            if (e[0] == e[1] || e[0] < 0 || e[1] < 0)
+            if (e[0] < 0 || e[1] < 0)
             {
                 FatalErrorIn("cyclicPolyPatch::coupledEdges() const")
                     << "Problem : at position " << i
@@ -1084,7 +922,7 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
             OFstream str
             (
                 boundaryMesh().mesh().time().path()
-               /"coupledEdges.obj"
+               /name() + "_coupledEdges.obj"
             );
             label vertI = 0;
 
@@ -1096,7 +934,10 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
                 const edge& e = coupledEdges[i];
 
                 const point& a = edges()[e[0]].centre(localPoints());
-                const point& b = edges()[e[1]].centre(localPoints());
+                const point& b = neighbPatch.edges()[e[1]].centre
+                (
+                    neighbPatch.localPoints()
+                );
 
                 str<< "v " << a.x() << ' ' << a.y() << ' ' << a.z() << nl;
                 str<< "v " << b.x() << ' ' << b.y() << ' ' << b.z() << nl;
@@ -1107,8 +948,20 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
         }
 
         // Remove any addressing calculated for the coupled edges calculation
-        const_cast<primitivePatch&>(static_cast<const primitivePatch&>(*this))
-            .clearOut();
+        const_cast<primitivePatch&>
+        (
+            static_cast<const primitivePatch&>
+            (
+                *this
+            )
+        ).clearOut();
+        const_cast<primitivePatch&>
+        (
+            static_cast<const primitivePatch&>
+            (
+                neighbPatch
+            )
+        ).clearOut();
     }
     return *coupledEdgesPtr_;
 }
@@ -1119,7 +972,21 @@ void Foam::cyclicPolyPatch::initOrder
     PstreamBuffers&,
     const primitivePatch& pp
 ) const
-{}
+{
+    if (owner())
+    {
+        // Save patch for use in non-owner side ordering. Equivalent to
+        // processorPolyPatch using OPstream.
+        ownerPatchPtr_.reset
+        (
+            new primitivePatch
+            (
+                pp,
+                pp.points()
+            )
+        );
+    }
+}
 
 
 //  Return new ordering. Ordering is -faceMap: for every face index
@@ -1140,148 +1007,36 @@ bool Foam::cyclicPolyPatch::order
     rotation.setSize(pp.size());
     rotation = 0;
 
-    if (pp.empty())
+    if (pp.empty() || transform_ == NOORDERING)
     {
         // No faces, nothing to change.
         return false;
     }
 
-    if (pp.size()&1)
+    if (owner())
     {
-        FatalErrorIn("cyclicPolyPatch::order(..)")
-            << "Size of cyclic " << name() << " should be a multiple of 2"
-            << ". It is " << pp.size() << abort(FatalError);
-    }
-
-    if (transform_ == NOORDERING)
-    {
-        if (debug)
+        // Do nothing (i.e. identical mapping, zero rotation).
+        // See comment at top.
+        forAll(faceMap, patchFaceI)
         {
-            Pout<< "cyclicPolyPatch::order : noOrdering mode." << endl;
+            faceMap[patchFaceI] = patchFaceI;
         }
+
         return false;
     }
-
-
-    label halfSize = pp.size()/2;
-
-    // Supplied primitivePatch already with new points.
-    // Cyclics are limited to one transformation tensor
-    // currently anyway (i.e. straight plane) so should not be too big a
-    // problem.
-
-
-    // Indices of faces on half0
-    labelList half0ToPatch;
-    // Indices of faces on half1
-    labelList half1ToPatch;
-
-
-    // 1. Test if already correctly oriented by starting from trivial ordering.
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    half0ToPatch = identity(halfSize);
-    half1ToPatch = half0ToPatch + halfSize;
-
-    // Get faces
-    faceList half0Faces(UIndirectList<face>(pp, half0ToPatch));
-    faceList half1Faces(UIndirectList<face>(pp, half1ToPatch));
-
-    // Get geometric quantities
-    pointField half0Ctrs, half1Ctrs, anchors0, ppPoints;
-    scalarField tols;
-    getCentresAndAnchors
-    (
-        pp,
-        half0Faces,
-        half1Faces,
-
-        ppPoints,
-        half0Ctrs,
-        half1Ctrs,
-        anchors0,
-        tols
-    );
-
-    // Geometric match of face centre vectors
-    labelList from1To0;
-    bool matchedAll = matchPoints
-    (
-        half1Ctrs,
-        half0Ctrs,
-        tols,
-        false,
-        from1To0
-    );
-
-    if (debug)
+    else
     {
-        Pout<< "cyclicPolyPatch::order : test if already ordered:"
-            << matchedAll << endl;
+        // Get stored geometry from initOrder invocation of owner.
+        const primitivePatch& pp0 = neighbPatch().ownerPatchPtr_();
 
-        // Dump halves
-        fileName nm0("match1_"+name()+"_half0_faces.obj");
-        Pout<< "cyclicPolyPatch::order : Writing half0"
-            << " faces to OBJ file " << nm0 << endl;
-        writeOBJ(nm0, half0Faces, ppPoints);
-
-        fileName nm1("match1_"+name()+"_half1_faces.obj");
-        Pout<< "cyclicPolyPatch::order : Writing half1"
-            << " faces to OBJ file " << nm1 << endl;
-        writeOBJ(nm1, half1Faces, pp.points());
-
-        OFstream ccStr
-        (
-            boundaryMesh().mesh().time().path()
-           /"match1_"+ name() + "_faceCentres.obj"
-        );
-        Pout<< "cyclicPolyPatch::order : "
-            << "Dumping currently found cyclic match as lines between"
-            << " corresponding face centres to file " << ccStr.name()
-            << endl;
-
-        // Recalculate untransformed face centres
-        //pointField rawHalf0Ctrs = calcFaceCentres(half0Faces, pp.points());
-        label vertI = 0;
-
-        forAll(half1Ctrs, i)
-        {
-            //if (from1To0[i] != -1)
-            {
-                // Write edge between c1 and c0
-                //const point& c0 = rawHalf0Ctrs[from1To0[i]];
-                //const point& c0 = half0Ctrs[from1To0[i]];
-                const point& c0 = half0Ctrs[i];
-                const point& c1 = half1Ctrs[i];
-                writeOBJ(ccStr, c0, c1, vertI);
-            }
-        }
-    }
-
-
-    // 2. Ordered in pairs (so 0,1 coupled and 2,3 etc.)
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    if (!matchedAll)
-    {
-        label faceI = 0;
-        for (label i = 0; i < halfSize; i++)
-        {
-            half0ToPatch[i] = faceI++;
-            half1ToPatch[i] = faceI++;
-        }
-
-        // And redo all matching
-        half0Faces = UIndirectList<face>(pp, half0ToPatch);
-        half1Faces = UIndirectList<face>(pp, half1ToPatch);
-
+        // Get geometric quantities
+        pointField half0Ctrs, half1Ctrs, anchors0;
+        scalarField tols;
         getCentresAndAnchors
         (
+            pp0,
             pp,
-            half0Faces,
-            half1Faces,
 
-            ppPoints,
             half0Ctrs,
             half1Ctrs,
             anchors0,
@@ -1289,34 +1044,40 @@ bool Foam::cyclicPolyPatch::order
         );
 
         // Geometric match of face centre vectors
-        matchedAll = matchPoints
+        bool matchedAll = matchPoints
         (
             half1Ctrs,
             half0Ctrs,
             tols,
-            false,
-            from1To0
+            true,
+            faceMap
         );
 
-        if (debug)
+        if (!matchedAll || debug)
         {
-            Pout<< "cyclicPolyPatch::order : test if pairwise ordered:"
-                << matchedAll << endl;
             // Dump halves
-            fileName nm0("match2_"+name()+"_half0_faces.obj");
+            fileName nm0
+            (
+                boundaryMesh().mesh().time().path()
+               /name()+"_half0_faces.obj"
+            );
             Pout<< "cyclicPolyPatch::order : Writing half0"
                 << " faces to OBJ file " << nm0 << endl;
-            writeOBJ(nm0, half0Faces, ppPoints);
+            writeOBJ(nm0, pp0, pp0.points());
 
-            fileName nm1("match2_"+name()+"_half1_faces.obj");
+            fileName nm1
+            (
+                boundaryMesh().mesh().time().path()
+               /name()+"_half1_faces.obj"
+            );
             Pout<< "cyclicPolyPatch::order : Writing half1"
                 << " faces to OBJ file " << nm1 << endl;
-            writeOBJ(nm1, half1Faces, pp.points());
+            writeOBJ(nm1, pp, pp.points());
 
             OFstream ccStr
             (
                 boundaryMesh().mesh().time().path()
-               /"match2_"+name()+"_faceCentres.obj"
+               /name() + "_faceCentres.obj"
             );
             Pout<< "cyclicPolyPatch::order : "
                 << "Dumping currently found cyclic match as lines between"
@@ -1330,312 +1091,95 @@ bool Foam::cyclicPolyPatch::order
 
             forAll(half1Ctrs, i)
             {
-                if (from1To0[i] != -1)
+                if (faceMap[i] != -1)
                 {
                     // Write edge between c1 and c0
-                    //const point& c0 = rawHalf0Ctrs[from1To0[i]];
-                    const point& c0 = half0Ctrs[from1To0[i]];
+                    const point& c0 = half0Ctrs[faceMap[i]];
                     const point& c1 = half1Ctrs[i];
                     writeOBJ(ccStr, c0, c1, vertI);
                 }
             }
         }
-    }
 
-
-    // 3. Baffles(coincident faces) converted into cyclics (e.g. jump)
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    if (!matchedAll)
-    {
-        label baffleI = 0;
-
-        forAll(pp, faceI)
+        if (!matchedAll)
         {
-            const face& f = pp.localFaces()[faceI];
-            const labelList& pFaces = pp.pointFaces()[f[0]];
+            SeriousErrorIn
+            (
+                "cyclicPolyPatch::order"
+                "(const primitivePatch&, labelList&, labelList&) const"
+            )   << "Patch:" << name() << " : "
+                << "Cannot match vectors to faces on both sides of patch"
+                << endl
+                << "    Perhaps your faces do not match?"
+                << " The obj files written contain the current match." << endl
+                << "    Continuing with incorrect face ordering from now on!"
+                << endl;
 
-            label matchedFaceI = -1;
-
-            forAll(pFaces, i)
-            {
-                label otherFaceI = pFaces[i];
-
-                if (otherFaceI > faceI)
-                {
-                    const face& otherF = pp.localFaces()[otherFaceI];
-
-                    // Note: might pick up two similar oriented faces
-                    //       (but that is illegal anyway)
-                    if (f == otherF)
-                    {
-                        matchedFaceI = otherFaceI;
-                        break;
-                    }
-                }
-            }
-
-            if (matchedFaceI != -1)
-            {
-                half0ToPatch[baffleI] = faceI;
-                half1ToPatch[baffleI] = matchedFaceI;
-                baffleI++;
-            }
+                return false;
         }
 
-        if (baffleI == halfSize)
+
+        // Set rotation.
+        forAll(faceMap, oldFaceI)
         {
-            // And redo all matching
-            half0Faces = UIndirectList<face>(pp, half0ToPatch);
-            half1Faces = UIndirectList<face>(pp, half1ToPatch);
+            // The face f will be at newFaceI (after morphing) and we want its
+            // anchorPoint (= f[0]) to align with the anchorpoint for the
+            // corresponding face on the other side.
 
-            getCentresAndAnchors
+            label newFaceI = faceMap[oldFaceI];
+
+            const point& wantedAnchor = anchors0[newFaceI];
+
+            rotation[newFaceI] = getRotation
             (
-                pp,
-                half0Faces,
-                half1Faces,
-
-                ppPoints,
-                half0Ctrs,
-                half1Ctrs,
-                anchors0,
-                tols
+                pp.points(),
+                pp[oldFaceI],
+                wantedAnchor,
+                tols[oldFaceI]
             );
 
-            // Geometric match of face centre vectors
-            matchedAll = matchPoints
-            (
-                half1Ctrs,
-                half0Ctrs,
-                tols,
-                false,
-                from1To0
-            );
-
-            if (debug)
+            if (rotation[newFaceI] == -1)
             {
-                Pout<< "cyclicPolyPatch::order : test if baffles:"
-                    << matchedAll << endl;
-                // Dump halves
-                fileName nm0("match3_"+name()+"_half0_faces.obj");
-                Pout<< "cyclicPolyPatch::order : Writing half0"
-                    << " faces to OBJ file " << nm0 << endl;
-                writeOBJ(nm0, half0Faces, ppPoints);
-
-                fileName nm1("match3_"+name()+"_half1_faces.obj");
-                Pout<< "cyclicPolyPatch::order : Writing half1"
-                    << " faces to OBJ file " << nm1 << endl;
-                writeOBJ(nm1, half1Faces, pp.points());
-
-                OFstream ccStr
+                SeriousErrorIn
                 (
-                    boundaryMesh().mesh().time().path()
-                   /"match3_"+ name() + "_faceCentres.obj"
-                );
-                Pout<< "cyclicPolyPatch::order : "
-                    << "Dumping currently found cyclic match as lines between"
-                    << " corresponding face centres to file " << ccStr.name()
+                    "cyclicPolyPatch::order(const primitivePatch&"
+                    ", labelList&, labelList&) const"
+                )   << "in patch " << name()
+                    << " : "
+                    << "Cannot find point on face " << pp[oldFaceI]
+                    << " with vertices "
+                    << IndirectList<point>(pp.points(), pp[oldFaceI])()
+                    << " that matches point " << wantedAnchor
+                    << " when matching the halves of processor patch " << name()
+                    << "Continuing with incorrect face ordering from now on!"
                     << endl;
 
-                // Recalculate untransformed face centres
-                //pointField rawHalf0Ctrs =
-                //    calcFaceCentres(half0Faces, pp.points());
-                label vertI = 0;
-
-                forAll(half1Ctrs, i)
-                {
-                    if (from1To0[i] != -1)
-                    {
-                        // Write edge between c1 and c0
-                        //const point& c0 = rawHalf0Ctrs[from1To0[i]];
-                        const point& c0 = half0Ctrs[from1To0[i]];
-                        const point& c1 = half1Ctrs[i];
-                        writeOBJ(ccStr, c0, c1, vertI);
-                    }
-                }
+                return false;
             }
         }
-    }
 
+        ownerPatchPtr_.clear();
 
-    // 4. Automatic geometric ordering
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // Return false if no change neccesary, true otherwise.
 
-    if (!matchedAll)
-    {
-        // Split faces according to feature angle or topology
-        bool okSplit = getGeometricHalves(pp, half0ToPatch, half1ToPatch);
-
-        if (!okSplit)
+        forAll(faceMap, faceI)
         {
-            // Did not split into two equal parts.
-            return false;
-        }
-
-        // And redo all matching
-        half0Faces = UIndirectList<face>(pp, half0ToPatch);
-        half1Faces = UIndirectList<face>(pp, half1ToPatch);
-
-        getCentresAndAnchors
-        (
-            pp,
-            half0Faces,
-            half1Faces,
-
-            ppPoints,
-            half0Ctrs,
-            half1Ctrs,
-            anchors0,
-            tols
-        );
-
-        // Geometric match of face centre vectors
-        matchedAll = matchPoints
-        (
-            half1Ctrs,
-            half0Ctrs,
-            tols,
-            false,
-            from1To0
-        );
-
-        if (debug)
-        {
-            Pout<< "cyclicPolyPatch::order : automatic ordering result:"
-                << matchedAll << endl;
-            // Dump halves
-            fileName nm0("match4_"+name()+"_half0_faces.obj");
-            Pout<< "cyclicPolyPatch::order : Writing half0"
-                << " faces to OBJ file " << nm0 << endl;
-            writeOBJ(nm0, half0Faces, ppPoints);
-
-            fileName nm1("match4_"+name()+"_half1_faces.obj");
-            Pout<< "cyclicPolyPatch::order : Writing half1"
-                << " faces to OBJ file " << nm1 << endl;
-            writeOBJ(nm1, half1Faces, pp.points());
-
-            OFstream ccStr
-            (
-                boundaryMesh().mesh().time().path()
-               /"match4_"+ name() + "_faceCentres.obj"
-            );
-            Pout<< "cyclicPolyPatch::order : "
-                << "Dumping currently found cyclic match as lines between"
-                << " corresponding face centres to file " << ccStr.name()
-                << endl;
-
-            // Recalculate untransformed face centres
-            //pointField rawHalf0Ctrs =
-            //    calcFaceCentres(half0Faces, pp.points());
-            label vertI = 0;
-
-            forAll(half1Ctrs, i)
+            if (faceMap[faceI] != faceI || rotation[faceI] != 0)
             {
-                if (from1To0[i] != -1)
-                {
-                    // Write edge between c1 and c0
-                    //const point& c0 = rawHalf0Ctrs[from1To0[i]];
-                    const point& c0 = half0Ctrs[from1To0[i]];
-                    const point& c1 = half1Ctrs[i];
-                    writeOBJ(ccStr, c0, c1, vertI);
-                }
+                return true;
             }
         }
+
+        return false;
     }
-
-
-    if (!matchedAll || debug)
-    {
-        // Dump halves
-        fileName nm0(name()+"_half0_faces.obj");
-        Pout<< "cyclicPolyPatch::order : Writing half0"
-            << " faces to OBJ file " << nm0 << endl;
-        writeOBJ(nm0, half0Faces, pp.points());
-
-        fileName nm1(name()+"_half1_faces.obj");
-        Pout<< "cyclicPolyPatch::order : Writing half1"
-            << " faces to OBJ file " << nm1 << endl;
-        writeOBJ(nm1, half1Faces, pp.points());
-
-        OFstream ccStr
-        (
-            boundaryMesh().mesh().time().path()
-           /name() + "_faceCentres.obj"
-        );
-        Pout<< "cyclicPolyPatch::order : "
-            << "Dumping currently found cyclic match as lines between"
-            << " corresponding face centres to file " << ccStr.name()
-            << endl;
-
-        // Recalculate untransformed face centres
-        //pointField rawHalf0Ctrs = calcFaceCentres(half0Faces, pp.points());
-        label vertI = 0;
-
-        forAll(half1Ctrs, i)
-        {
-            if (from1To0[i] != -1)
-            {
-                // Write edge between c1 and c0
-                //const point& c0 = rawHalf0Ctrs[from1To0[i]];
-                const point& c0 = half0Ctrs[from1To0[i]];
-                const point& c1 = half1Ctrs[i];
-                writeOBJ(ccStr, c0, c1, vertI);
-            }
-        }
-    }
-
-
-    if (!matchedAll)
-    {
-        SeriousErrorIn
-        (
-            "cyclicPolyPatch::order"
-            "(const primitivePatch&, labelList&, labelList&) const"
-        )   << "Patch:" << name() << " : "
-            << "Cannot match vectors to faces on both sides of patch" << endl
-            << "    Perhaps your faces do not match?"
-            << " The obj files written contain the current match." << endl
-            << "    Continuing with incorrect face ordering from now on!"
-            << endl;
-
-            return false;
-    }
-
-
-    // Set faceMap such that half0 faces get first and corresponding half1
-    // faces last.
-    matchAnchors
-    (
-        true,                   // report if anchor matching error
-        pp,
-        half0ToPatch,
-        anchors0,
-        half1ToPatch,
-        half1Faces,
-        from1To0,
-        tols,
-        faceMap,
-        rotation
-    );
-
-    // Return false if no change neccesary, true otherwise.
-
-    forAll(faceMap, faceI)
-    {
-        if (faceMap[faceI] != faceI || rotation[faceI] != 0)
-        {
-            return true;
-        }
-    }
-
-    return false;
 }
 
 
 void Foam::cyclicPolyPatch::write(Ostream& os) const
 {
     polyPatch::write(os);
-    os.writeKeyword("featureCos") << featureCos_ << token::END_STATEMENT << nl;
+    os.writeKeyword("neighbourPatch") << neighbPatchName_
+        << token::END_STATEMENT << nl;
     switch (transform_)
     {
         case ROTATIONAL:

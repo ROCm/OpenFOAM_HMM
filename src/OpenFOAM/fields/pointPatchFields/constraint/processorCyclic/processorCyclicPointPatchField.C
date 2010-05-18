@@ -1,0 +1,168 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+\*---------------------------------------------------------------------------*/
+
+#include "processorCyclicPointPatchField.H"
+#include "transformField.H"
+#include "processorPolyPatch.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
+
+template<class Type>
+processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
+(
+    const pointPatch& p,
+    const DimensionedField<Type, pointMesh>& iF
+)
+:
+    coupledPointPatchField<Type>(p, iF),
+    procPatch_(refCast<const processorCyclicPointPatch>(p))
+{}
+
+
+template<class Type>
+processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
+(
+    const pointPatch& p,
+    const DimensionedField<Type, pointMesh>& iF,
+    const dictionary& dict
+)
+:
+    coupledPointPatchField<Type>(p, iF, dict),
+    procPatch_(refCast<const processorCyclicPointPatch>(p))
+{}
+
+
+template<class Type>
+processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
+(
+    const processorCyclicPointPatchField<Type>& ptf,
+    const pointPatch& p,
+    const DimensionedField<Type, pointMesh>& iF,
+    const pointPatchFieldMapper& mapper
+)
+:
+    coupledPointPatchField<Type>(ptf, p, iF, mapper),
+    procPatch_(refCast<const processorCyclicPointPatch>(ptf.patch()))
+{}
+
+
+template<class Type>
+processorCyclicPointPatchField<Type>::processorCyclicPointPatchField
+(
+    const processorCyclicPointPatchField<Type>& ptf,
+    const DimensionedField<Type, pointMesh>& iF
+)
+:
+    coupledPointPatchField<Type>(ptf, iF),
+    procPatch_(refCast<const processorCyclicPointPatch>(ptf.patch()))
+{}
+
+
+// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
+
+template<class Type>
+processorCyclicPointPatchField<Type>::~processorCyclicPointPatchField()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+void processorCyclicPointPatchField<Type>::initSwapAddSeparated
+(
+    const Pstream::commsTypes commsType,
+    Field<Type>& pField
+) const
+{
+    if (Pstream::parRun())
+    {
+        // Get internal field into correct order for opposite side
+        Field<Type> pf
+        (
+            this->patchInternalField
+            (
+                pField,
+                procPatch_.reverseMeshPoints()
+            )
+        );
+
+        OPstream::write
+        (
+            commsType,
+            procPatch_.neighbProcNo(),
+            reinterpret_cast<const char*>(pf.begin()),
+            pf.byteSize(),
+            procPatch_.tag()
+        );
+    }
+}
+
+
+template<class Type>
+void processorCyclicPointPatchField<Type>::swapAddSeparated
+(
+    const Pstream::commsTypes commsType,
+    Field<Type>& pField
+) const
+{
+    if (Pstream::parRun())
+    {
+        Field<Type> pnf(this->size());
+
+        IPstream::read
+        (
+            commsType,
+            procPatch_.neighbProcNo(),
+            reinterpret_cast<char*>(pnf.begin()),
+            pnf.byteSize(),
+            procPatch_.tag()
+        );
+
+        if (doTransform())
+        {
+            const processorCyclicPolyPatch& ppp =
+                procPatch_.procCyclicPolyPatch();
+            const tensor& forwardT = ppp.forwardT()[0];
+
+            transform(pnf, forwardT, pnf);
+        }
+
+        // All points are separated
+        addToInternalField(pField, pnf);
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// ************************************************************************* //

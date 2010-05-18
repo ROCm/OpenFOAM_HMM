@@ -102,6 +102,8 @@ void Foam::fvMeshSubset::doCoupledPatches
 
     if (syncPar && Pstream::parRun())
     {
+        PstreamBuffers pBufs(Pstream::nonBlocking);
+
         // Send face usage across processor patches
         forAll(oldPatches, oldPatchI)
         {
@@ -112,17 +114,14 @@ void Foam::fvMeshSubset::doCoupledPatches
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(pp);
 
-                OPstream toNeighbour
-                (
-                    Pstream::blocking,
-                    procPatch.neighbProcNo()
-                );
+                UOPstream toNeighbour(procPatch.neighbProcNo(), pBufs);
 
                 toNeighbour
                     << SubList<label>(nCellsUsingFace, pp.size(), pp.start());
             }
         }
 
+        pBufs.finishedSends();
 
         // Receive face usage count and check for faces that become uncoupled.
         forAll(oldPatches, oldPatchI)
@@ -134,11 +133,7 @@ void Foam::fvMeshSubset::doCoupledPatches
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(pp);
 
-                IPstream fromNeighbour
-                (
-                    Pstream::blocking,
-                    procPatch.neighbProcNo()
-                );
+                UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs);
 
                 labelList nbrCellsUsingFace(fromNeighbour);
 

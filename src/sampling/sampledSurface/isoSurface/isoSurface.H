@@ -149,19 +149,6 @@ class isoSurface
             //- Per face whether is collocated
             PackedBoolList collocatedFaces(const coupledPolyPatch&) const;
 
-            //- Take value at local point patchPointI and assign it to its
-            //  correct place in patchValues (for transferral) and sharedValues
-            //  (for reduction)
-            void insertPointData
-            (
-                const processorPolyPatch& pp,
-                const Map<label>& meshToShared,
-                const pointField& pointValues,
-                const label patchPointI,
-                pointField& patchValues,
-                pointField& sharedValues
-            ) const;
-
             //- Synchonise points on all non-separated coupled patches
             void syncUnseparatedPoints
             (

@@ -130,6 +130,7 @@ Usage
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "cyclicPolyPatch.H"
+#include "syncTools.H"
 
 using namespace Foam;
 
@@ -595,6 +596,237 @@ void createDummyFvMeshFiles(const polyMesh& mesh, const word& regionName)
 }
 
 
+//XXXXXXXXX
+label findUncoveredPatchFace
+(
+    const fvMesh& mesh,
+    const UIndirectList<label>& extrudeMeshFaces,// mesh faces that are extruded
+    const label meshEdgeI                       // mesh edge
+)
+{
+    // Make set of extruded faces.
+    labelHashSet extrudeFaceSet(extrudeMeshFaces.size());
+    forAll(extrudeMeshFaces, i)
+    {
+        extrudeFaceSet.insert(extrudeMeshFaces[i]);
+    }
+
+    label patchI = -1;
+
+    const labelList& eFaces = mesh.edgeFaces()[meshEdgeI];
+    forAll(eFaces, i)
+    {
+        label faceI = eFaces[i];
+        if (!mesh.isInternalFace(faceI) && !extrudeFaceSet.found(faceI))
+        {
+            patchI = mesh.boundaryMesh().whichPatch(faceI);
+            break;
+        }
+    }
+    return patchI;
+}
+// Count the number of faces in patches that need to be created
+void countExtrudePatches
+(
+    const fvMesh& mesh,
+    const primitiveFacePatch& extrudePatch,
+    const label nZones,
+    const labelList& zoneID,
+    const labelList& extrudeMeshFaces,
+    const labelList& extrudeMeshEdges,
+
+    labelList& zoneSidePatch,
+    labelList& zoneZonePatch
+)
+{
+    const labelListList& edgeFaces = extrudePatch.edgeFaces();
+
+    forAll(edgeFaces, edgeI)
+    {
+        const labelList& eFaces = edgeFaces[edgeI];
+        if (eFaces.size() == 2)
+        {
+            label zone0 = zoneID[eFaces[0]];
+            label zone1 = zoneID[eFaces[1]];
+
+            if (zone0 != zone1)
+            {
+                label minZone = min(zone0,zone1);
+                label maxZone = max(zone0,zone1);
+                zoneZonePatch[minZone*nZones+maxZone]++;
+            }
+        }
+        else
+        {
+            // Check whether we are on a mesh edge with external patches. If
+            // so choose any uncovered one. If none found put face in
+            // undetermined zone 'side' patch
+
+            label patchI = findUncoveredPatchFace
+            (
+                mesh,
+                UIndirectList<label>(extrudeMeshFaces, eFaces),
+                extrudeMeshEdges[edgeI]
+            );
+
+            if (patchI == -1)
+            {
+                // Determine the min zone of all connected zones.
+                label minZone = zoneID[eFaces[0]];
+                for (label i = 1; i < eFaces.size(); i++)
+                {
+                    minZone = min(minZone, zoneID[eFaces[i]]);
+                }
+                zoneSidePatch[minZone]++;
+            }
+        }
+    }
+    Pstream::listCombineGather(zoneSidePatch, plusEqOp<label>());
+    Pstream::listCombineScatter(zoneSidePatch);
+    Pstream::listCombineGather(zoneZonePatch, plusEqOp<label>());
+    Pstream::listCombineScatter(zoneZonePatch);
+}
+bool lessThan(const point& x, const point& y)
+{
+    for (direction dir = 0; dir < point::nComponents; dir++)
+    {
+        if (x[dir] < y[dir]) return true;
+        if (x[dir] > y[dir]) return false;
+    }
+    return false;
+}
+
+class minEqVectorListOp
+{
+    public:
+    void operator()(List<vector>& x, const List<vector>& y) const
+    {
+        if (y.size())
+        {
+            if (x.size())
+            {
+                forAll(x, i)
+                {
+                    if (lessThan(y[i], x[i]))
+                    {
+                        x[i] = y[i];
+                    }
+                }
+            }
+            else
+            {
+                x = y;
+            }
+        }
+    }
+};
+// Constrain&sync normals on points that are on coupled patches.
+void constrainCoupledNormals
+(
+    const fvMesh& mesh,
+    const primitiveFacePatch& extrudePatch,
+    const labelList& regionToPoint,
+
+    vectorField& regionNormals
+)
+{
+    // Invert regionToPoint to create pointToRegions.
+    labelListList pointToRegions
+    (
+        invertOneToMany
+        (
+            extrudePatch.nPoints(),
+            regionToPoint
+        )
+    );
+    // Sort acc. to region so (hopefully) coupled points will do the same.
+    forAll(pointToRegions, pointI)
+    {
+        sort(pointToRegions[pointI]);
+    }
+
+
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    // Constrain displacement on cyclic patches
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Note: bit contentious to always do this on cyclic - should user use
+    // different patch type, e.g. 'cyclicSlip' instead?
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (isA<cyclicPolyPatch>(pp))
+        {
+            forAll(pp.meshPoints(), pointI)
+            {
+                Map<label>::const_iterator fnd =
+                    extrudePatch.meshPointMap().find
+                    (
+                        pp.meshPoints()[pointI]
+                    );
+                if (fnd != extrudePatch.meshPointMap().end())
+                {
+                    // fnd() is a point on this cyclic.
+                    const vector& cycNormal = pp.pointNormals()[pointI];
+                    const labelList& pRegions = pointToRegions[fnd()];
+                    forAll(pRegions, i)
+                    {
+                        // Remove cyclic normal component.
+                        vector& regionNormal = regionNormals[pRegions[i]];
+                        regionNormal -= (regionNormal&cycNormal)*cycNormal;
+                    }
+                }
+            }
+        }
+    }
+
+
+    // Synchronise regionNormals
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Re-work regionNormals into multiple normals per point
+    List<List<vector> > pointNormals(mesh.nPoints());
+    forAll(pointToRegions, pointI)
+    {
+        const labelList& pRegions = pointToRegions[pointI];
+
+        label meshPointI = extrudePatch.meshPoints()[pointI];
+        List<vector>& pNormals = pointNormals[meshPointI];
+        pNormals.setSize(pRegions.size());
+        forAll(pRegions, i)
+        {
+            pNormals[i] = regionNormals[pRegions[i]];
+        }
+    }
+
+    // Synchronise
+    syncTools::syncPointList
+    (
+        mesh,
+        pointNormals,
+        minEqVectorListOp(),
+        List<vector>(),         // nullValue
+        false                   // applySeparation
+    );
+
+    // Re-work back into regionNormals
+    forAll(pointToRegions, pointI)
+    {
+        const labelList& pRegions = pointToRegions[pointI];
+
+        label meshPointI = extrudePatch.meshPoints()[pointI];
+        const List<vector>& pNormals = pointNormals[meshPointI];
+        forAll(pRegions, i)
+        {
+            regionNormals[pRegions[i]] = pNormals[i];
+        }
+    }
+}
+//XXXXXXXXX
+
+
 tmp<pointField> calcOffset
 (
     const primitiveFacePatch& extrudePatch,
@@ -739,6 +971,16 @@ int main(int argc, char *argv[])
         << endl;
 
 
+    // Determine corresponding mesh edges
+    const labelList extrudeMeshEdges
+    (
+        extrudePatch.meshEdges
+        (
+            mesh.edges(),
+            mesh.pointEdges()
+        )
+    );
+
 
 
     // Check whether the zone is internal or external faces to determine
@@ -772,7 +1014,7 @@ int main(int argc, char *argv[])
             Info<< "FaceZone " << fz.name() << " has boundary faces" << endl;
         }
     }
-
+    Info<< endl;
 
 
 
@@ -866,36 +1108,18 @@ int main(int argc, char *argv[])
     labelList zoneSidePatch(faceZones.size(), 0);
     labelList zoneZonePatch(faceZones.size()*faceZones.size(), 0);
 
-    forAll(edgeFaces, edgeI)
-    {
-        const labelList& eFaces = edgeFaces[edgeI];
-        if (eFaces.size() == 2)
-        {
-            label zone0 = zoneID[eFaces[0]];
-            label zone1 = zoneID[eFaces[1]];
+    countExtrudePatches
+    (
+        mesh,
+        extrudePatch,
+        faceZones.size(),
+        zoneID,
+        extrudeMeshFaces,
+        extrudeMeshEdges,
 
-            if (zone0 != zone1)
-            {
-                label minZone = min(zone0,zone1);
-                label maxZone = max(zone0,zone1);
-                zoneZonePatch[minZone*faceZones.size()+maxZone]++;
-            }
-        }
-        else
-        {
-            // Determine the min zone of all connected zones.
-            label minZone = zoneID[eFaces[0]];
-            for (label i = 1; i < eFaces.size(); i++)
-            {
-                minZone = min(minZone, zoneID[eFaces[i]]);
-            }
-            zoneSidePatch[minZone]++;
-        }
-    }
-    Pstream::listCombineGather(zoneSidePatch, plusEqOp<label>());
-    Pstream::listCombineScatter(zoneSidePatch);
-    Pstream::listCombineGather(zoneZonePatch, plusEqOp<label>());
-    Pstream::listCombineScatter(zoneZonePatch);
+        zoneSidePatch,
+        zoneZonePatch
+    );
 
     // Now check which patches to add.
     Info<< "Adding patches for edges on zones:" << nl << nl
@@ -980,6 +1204,7 @@ int main(int argc, char *argv[])
     // Is edge an non-manifold edge
     PackedBoolList nonManifoldEdge(extrudePatch.nEdges());
 
+    // Note: logic has to be same as in countExtrudePatches.
     forAll(edgeFaces, edgeI)
     {
         const labelList& eFaces = edgeFaces[edgeI];
@@ -1004,62 +1229,28 @@ int main(int argc, char *argv[])
         }
         else
         {
-            ePatches.setSize(eFaces.size());
-            forAll(eFaces, i)
+            label patchI = findUncoveredPatchFace
+            (
+                mesh,
+                UIndirectList<label>(extrudeMeshFaces, eFaces),
+                extrudeMeshEdges[edgeI]
+            );
+
+            if (patchI != -1)
             {
-                ePatches[i] = zoneSidePatch[zoneID[eFaces[i]]];
+                ePatches.setSize(eFaces.size(), patchI);
+            }
+            else
+            {
+                ePatches.setSize(eFaces.size());
+                forAll(eFaces, i)
+                {
+                    ePatches[i] = zoneSidePatch[zoneID[eFaces[i]]];
+                }
             }
             nonManifoldEdge[edgeI] = 1;
         }
     }
-
-    // Override constraint types
-    {
-        const edgeList& extrudeEdges = extrudePatch.edges();
-        const labelList& extrudeMeshPts = extrudePatch.meshPoints();
-
-        // Map from mesh edge to local patch edge index
-        EdgeMap<label> extrudeMeshEdges(extrudePatch.nEdges());
-
-        forAll(extrudeEdges, edgeI)
-        {
-            if (edgeFaces[edgeI].size() == 1)
-            {
-                const edge& e = extrudeEdges[edgeI];
-                const edge meshE(extrudeMeshPts[e[0]], extrudeMeshPts[e[1]]);
-                extrudeMeshEdges.insert(meshE, edgeI);
-            }
-        }
-        forAll(patches, patchI)
-        {
-            const polyPatch& pp = patches[patchI];
-
-            if (polyPatch::constraintType(pp.type()))
-            {
-                const edgeList& edges = pp.edges();
-
-                forAll(edges, ppEdgeI)
-                {
-                    const edge& e = edges[ppEdgeI];
-                    edge meshE(pp.meshPoints()[e[0]], pp.meshPoints()[e[1]]);
-                    EdgeMap<label>::const_iterator iter = extrudeMeshEdges.find
-                    (
-                        meshE
-                    );
-                    if (iter != extrudeMeshEdges.end())
-                    {
-                        label extrudeEdgeI = iter();
-                        extrudeEdgePatches[extrudeEdgeI] = labelList
-                        (
-                            edgeFaces[extrudeEdgeI].size(),
-                            patchI
-                        );
-                    }
-                }
-            }
-        }
-    }
-
 
 
 
@@ -1075,6 +1266,7 @@ int main(int argc, char *argv[])
     (
         extrudePatch,
         nonManifoldEdge,
+
         pointRegions,
         regionPoints
     );
@@ -1096,6 +1288,18 @@ int main(int argc, char *argv[])
     }
     regionNormals /= mag(regionNormals);
 
+
+    // Constrain&sync normals on points that are on coupled patches.
+    constrainCoupledNormals
+    (
+        mesh,
+        extrudePatch,
+        regionPoints,
+
+        regionNormals
+    );
+
+
     // For debugging: dump hedgehog plot of normals
     {
         OFstream str(runTime.path()/"regionNormals.obj");
@@ -1112,7 +1316,7 @@ int main(int argc, char *argv[])
 
                 meshTools::writeOBJ(str, pt);
                 vertI++;
-                meshTools::writeOBJ(str, pt+0.01*regionNormals[region]);
+                meshTools::writeOBJ(str, pt+thickness*regionNormals[region]);
                 vertI++;
                 str << "l " << vertI-1 << ' ' << vertI << nl;
             }

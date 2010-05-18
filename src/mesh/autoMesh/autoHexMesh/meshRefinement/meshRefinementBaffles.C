@@ -354,8 +354,8 @@ void Foam::meshRefinement::getBafflePatches
     //   might not be owner on the other processor but the neighbour is
     //   not used when creating baffles from proc faces.
     // - tolerances issues occasionally crop up.
-    syncTools::syncFaceList(mesh_, ownPatch, maxEqOp<label>(), false);
-    syncTools::syncFaceList(mesh_, neiPatch, maxEqOp<label>(), false);
+    syncTools::syncFaceList(mesh_, ownPatch, maxEqOp<label>());
+    syncTools::syncFaceList(mesh_, neiPatch, maxEqOp<label>());
 }
 
 
@@ -386,9 +386,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
     if (debug)
     {
         labelList syncedOwnPatch(ownPatch);
-        syncTools::syncFaceList(mesh_, syncedOwnPatch, maxEqOp<label>(), false);
+        syncTools::syncFaceList(mesh_, syncedOwnPatch, maxEqOp<label>());
         labelList syncedNeiPatch(neiPatch);
-        syncTools::syncFaceList(mesh_, syncedNeiPatch, maxEqOp<label>(), false);
+        syncTools::syncFaceList(mesh_, syncedNeiPatch, maxEqOp<label>());
 
         forAll(syncedOwnPatch, faceI)
         {
@@ -669,8 +669,7 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::filterDuplicateFaces
         mesh_,
         nBafflesPerEdge,
         plusEqOp<label>(),  // in-place add
-        0,                  // initial value
-        false               // no separation
+        0                   // initial value
     );
 
 
@@ -1030,7 +1029,7 @@ void Foam::meshRefinement::findCellZoneGeometric
             }
         }
     }
-    syncTools::swapBoundaryFaceList(mesh_, neiCellZone, false);
+    syncTools::swapBoundaryFaceList(mesh_, neiCellZone);
 
     forAll(patches, patchI)
     {
@@ -1058,13 +1057,7 @@ void Foam::meshRefinement::findCellZoneGeometric
     }
 
     // Sync
-    syncTools::syncFaceList
-    (
-        mesh_,
-        namedSurfaceIndex,
-        maxEqOp<label>(),
-        false
-    );
+    syncTools::syncFaceList(mesh_, namedSurfaceIndex, maxEqOp<label>());
 }
 //XXXXXXXXX
 void Foam::meshRefinement::findCellZoneInsideWalk
@@ -1371,7 +1364,7 @@ void Foam::meshRefinement::findCellZoneTopo
                 }
             }
         }
-        syncTools::swapBoundaryFaceList(mesh_, neiCellRegion, false);
+        syncTools::swapBoundaryFaceList(mesh_, neiCellRegion);
 
         // Calculate region to zone from cellRegions on either side of coupled
         // face.
@@ -1492,7 +1485,7 @@ void Foam::meshRefinement::makeConsistentFaceIndex
             }
         }
     }
-    syncTools::swapBoundaryFaceList(mesh_, neiCellZone, false);
+    syncTools::swapBoundaryFaceList(mesh_, neiCellZone);
 
     // Use coupled cellZone to do check
     forAll(patches, patchI)
@@ -1812,7 +1805,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
             blockedFace[faceI] = true;
         }
     }
-    syncTools::syncFaceList(mesh_, blockedFace, orEqOp<bool>(), false);
+    syncTools::syncFaceList(mesh_, blockedFace, orEqOp<bool>());
 
     // Set region per cell based on walking
     regionSplit cellRegion(mesh_, blockedFace);
@@ -1924,8 +1917,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
             mesh_,
             pointBaffle,
             maxEqOp<label>(),
-            -1,                 // null value
-            false               // no separation
+            -1                  // null value
         );
 
 
@@ -1950,7 +1942,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
                 }
             }
         }
-        syncTools::syncFaceList(mesh_, ownPatch, maxEqOp<label>(), false);
+        syncTools::syncFaceList(mesh_, ownPatch, maxEqOp<label>());
 
 
         // 3. From faces to cells (cellRegion) and back to faces (ownPatch)
@@ -1999,7 +1991,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
 
         ownPatch.transfer(newOwnPatch);
 
-        syncTools::syncFaceList(mesh_, ownPatch, maxEqOp<label>(), false);
+        syncTools::syncFaceList(mesh_, ownPatch, maxEqOp<label>());
     }
 
 
@@ -2376,8 +2368,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
         (
             mesh_,
             namedSurfaceIndex,
-            maxEqOp<label>(),
-            false
+            maxEqOp<label>()
         );
 
         // Print a bit
@@ -2541,7 +2532,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
             }
         }
     }
-    syncTools::swapBoundaryFaceList(mesh_, neiCellZone, false);
+    syncTools::swapBoundaryFaceList(mesh_, neiCellZone);
 
     // Get per face whether is it master (of a coupled set of faces)
     PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));

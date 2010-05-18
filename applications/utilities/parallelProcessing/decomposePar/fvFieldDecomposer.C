@@ -144,7 +144,11 @@ Foam::fvFieldDecomposer::fvFieldDecomposer
 {
     forAll(boundaryAddressing_, patchi)
     {
-        if (boundaryAddressing_[patchi] >= 0)
+        if
+        (
+            boundaryAddressing_[patchi] >= 0
+        && !isA<processorLduInterface>(procMesh.boundary()[patchi])
+        )
         {
             patchFieldDecomposerPtrs_[patchi] = new patchFieldDecomposer
             (

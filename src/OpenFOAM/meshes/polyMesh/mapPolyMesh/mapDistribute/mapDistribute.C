@@ -74,7 +74,7 @@ Foam::List<Foam::labelPair> Foam::mapDistribute::schedule
             slave++
         )
         {
-            IPstream fromSlave(Pstream::blocking, slave);
+            IPstream fromSlave(Pstream::scheduled, slave);
             List<labelPair> nbrData(fromSlave);
 
             forAll(nbrData, i)
@@ -95,18 +95,18 @@ Foam::List<Foam::labelPair> Foam::mapDistribute::schedule
             slave++
         )
         {
-            OPstream toSlave(Pstream::blocking, slave);
+            OPstream toSlave(Pstream::scheduled, slave);
             toSlave << allComms;
         }
     }
     else
     {
         {
-            OPstream toMaster(Pstream::blocking, Pstream::masterNo());
+            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
             toMaster << allComms;
         }
         {
-            IPstream fromMaster(Pstream::blocking, Pstream::masterNo());
+            IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
             fromMaster >> allComms;
         }
     }
@@ -595,6 +595,7 @@ void Foam::mapDistribute::compact(const boolList& elemIsUsed)
 
     // Send elemIsUsed field to neighbour. Use nonblocking code from
     // mapDistribute but in reverse order.
+    if (Pstream::parRun())
     {
         List<boolList> sendFields(Pstream::nProcs());
 
