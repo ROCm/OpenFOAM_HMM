@@ -85,15 +85,16 @@ OK - grep for size()/2
     OK - incompressible/boundaryFoam/boundaryWallFunctionsProfile
     OK - needs createBaffles. incompressible/pimpleFoam/t-junction-with-fan
     OK - incompressible/simpleSRFFoam/mixer
-    needs createBaffles. lagrangian/porousExplicitSourceReactingParcelFoam/filter
+    OK - needs createBaffles. lagrangian/porousExplicitSourceReactingParcelFoam/filter
     needs special coupledbcs. lagrangian/reactingParcelFilmFoam/multipleBoxes
 
 
+OK - createBaffles
+
 - have foamUpgradeCyclics split 'value' field
-- createBaffles
 - activeBaffleVelocity
 - kivaToFoam/readKivaGrid.H sorts cyclics (but in incorrect order?)
 - isoSurface.C
 - referredCellList.C
 - work out scheduled communication?
-
+OK - add neighbourPatch checking to 16x.
