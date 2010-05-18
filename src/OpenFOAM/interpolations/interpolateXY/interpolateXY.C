@@ -41,7 +41,7 @@ Field<Type> interpolateXY
     const Field<Type>& yOld
 )
 {
-    scalarField yNew(xNew.size());
+    Field<Type> yNew(xNew.size());
 
     forAll(xNew, i)
     {

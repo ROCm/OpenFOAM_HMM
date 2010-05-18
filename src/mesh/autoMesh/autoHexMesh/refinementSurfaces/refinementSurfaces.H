@@ -57,6 +57,21 @@ class triSurfaceMesh;
 
 class refinementSurfaces
 {
+public:
+
+    //- Types of selection of area
+    enum areaSelectionAlgo
+    {
+        INSIDE,
+        OUTSIDE,
+        INSIDEPOINT,
+        NONE
+    };
+
+    static const NamedEnum<areaSelectionAlgo, 4> areaSelectionAlgoNames;
+
+private:
+
     // Private data
 
         //- Reference to all geometry.
@@ -75,9 +90,12 @@ class refinementSurfaces
         wordList cellZoneNames_;
 
         //- Per 'interface' surface : (only used if surface is closed)
-        //  whether to zone cells inside or outside surface.
-        boolList zoneInside_;
+        //  How to select zone cells : surface inside or outside or given
+        //  inside location.
+        List<areaSelectionAlgo> zoneInside_;
 
+        //- If zoneInside=location gives the corresponding inside point
+        pointField zoneInsidePoints_;
 
         //- From local region number to global region number
         labelList regionOffset_;
@@ -159,8 +177,19 @@ public:
             //- Get indices of named surfaces (surfaces with faceZoneName)
             labelList getNamedSurfaces() const;
 
-            //- Get indices of closed surfaces with a cellZone
+            //- Get indices of surfaces with a cellZone that are closed and
+            //  have 'inside' or 'outside' selection.
             labelList getClosedNamedSurfaces() const;
+
+            //- Get indices of surfaces with a cellZone that have 'insidePoint'
+            //  section.
+            labelList getInsidePointNamedSurfaces() const;
+
+            //- Get specified inside locations for surfaces with a cellZone
+            const pointField& zoneInsidePoints() const
+            {
+                return zoneInsidePoints_;
+            }
 
             //- From local region number to global region number
             const labelList& regionOffset() const
