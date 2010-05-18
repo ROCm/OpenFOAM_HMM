@@ -412,8 +412,7 @@ Foam::scalar Foam::hexRef8::getLevel0EdgeLength() const
             mesh_,
             edgeLevel,
             ifEqEqOp<labelMax>(),
-            labelMin,
-            false               // no separation
+            labelMin
         );
 
         // Now use the edgeLevel with a valid value to determine the
@@ -1618,7 +1617,7 @@ Foam::label Foam::hexRef8::faceConsistentRefinement
     }
 
     // Swap to neighbour
-    syncTools::swapBoundaryFaceList(mesh_, neiLevel, false);
+    syncTools::swapBoundaryFaceList(mesh_, neiLevel);
 
     // Now we have neighbour value see which cells need refinement
     forAll(neiLevel, i)
@@ -1700,7 +1699,7 @@ void Foam::hexRef8::checkWantedRefinementLevels
     }
 
     // Swap to neighbour
-    syncTools::swapBoundaryFaceList(mesh_, neiLevel, false);
+    syncTools::swapBoundaryFaceList(mesh_, neiLevel);
 
     // Now we have neighbour value see which cells need refinement
     forAll(neiLevel, i)
@@ -2369,8 +2368,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
             mesh_,
             maxPointCount,
             maxEqOp<label>(),
-            labelMin,           // null value
-            false               // no separation
+            labelMin            // null value
         );
 
         // Update allFaceInfo from maxPointCount for all points to check
@@ -2509,9 +2507,9 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
         }
 
         // Swap to neighbour
-        syncTools::swapBoundaryFaceList(mesh_, neiLevel, false);
-        syncTools::swapBoundaryFaceList(mesh_, neiCount, false);
-        syncTools::swapBoundaryFaceList(mesh_, neiRefCount, false);
+        syncTools::swapBoundaryFaceList(mesh_, neiLevel);
+        syncTools::swapBoundaryFaceList(mesh_, neiCount);
+        syncTools::swapBoundaryFaceList(mesh_, neiRefCount);
 
         // Now we have neighbour value see which cells need refinement
         forAll(neiLevel, i)
@@ -3156,8 +3154,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
         mesh_,
         edgeMidPoint,
         maxEqOp<label>(),
-        labelMin,
-        false               // no separation
+        labelMin
     );
 
 
@@ -3179,13 +3176,12 @@ Foam::labelListList Foam::hexRef8::setRefinement
                 edgeMids[edgeI] = mesh_.edges()[edgeI].centre(mesh_.points());
             }
         }
-        syncTools::syncEdgeList
+        syncTools::syncEdgePositions
         (
             mesh_,
             edgeMids,
             maxEqOp<vector>(),
-            point(-GREAT, -GREAT, -GREAT),
-            true               // apply separation
+            point(-GREAT, -GREAT, -GREAT)
         );
 
 
@@ -3310,7 +3306,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
         }
 
         // Swap.
-        syncTools::swapBoundaryFaceList(mesh_, newNeiLevel, false);
+        syncTools::swapBoundaryFaceList(mesh_, newNeiLevel);
 
         // So now we have information on the neighbour.
 
@@ -3342,8 +3338,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
     (
         mesh_,
         faceMidPoint,
-        maxEqOp<label>(),
-        false
+        maxEqOp<label>()
     );
 
 
@@ -3369,12 +3364,11 @@ Foam::labelListList Foam::hexRef8::setRefinement
                 bFaceMids[i] = mesh_.faceCentres()[faceI];
             }
         }
-        syncTools::syncBoundaryFaceList
+        syncTools::syncBoundaryFacePositions
         (
             mesh_,
             bFaceMids,
-            maxEqOp<vector>(),
-            true               // apply separation
+            maxEqOp<vector>()
         );
 
         forAll(faceMidPoint, faceI)
@@ -4404,7 +4398,7 @@ void Foam::hexRef8::checkMesh() const
         }
 
         // Replace data on coupled patches with their neighbour ones.
-        syncTools::swapBoundaryFaceList(mesh_, nei, false);
+        syncTools::swapBoundaryFaceList(mesh_, nei);
 
         const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
@@ -4459,7 +4453,7 @@ void Foam::hexRef8::checkMesh() const
         }
 
         // Replace data on coupled patches with their neighbour ones.
-        syncTools::swapBoundaryFaceList(mesh_, neiFaceAreas, false);
+        syncTools::swapBoundaryFaceList(mesh_, neiFaceAreas);
 
         forAll(neiFaceAreas, i)
         {
@@ -4502,7 +4496,7 @@ void Foam::hexRef8::checkMesh() const
         }
 
         // Replace data on coupled patches with their neighbour ones.
-        syncTools::swapBoundaryFaceList(mesh_, nVerts, false);
+        syncTools::swapBoundaryFaceList(mesh_, nVerts);
 
         forAll(nVerts, i)
         {
@@ -4551,7 +4545,7 @@ void Foam::hexRef8::checkMesh() const
         // Replace data on coupled patches with their neighbour ones. Apply
         // rotation transformation (but not separation since is relative vector
         // to point on same face.
-        syncTools::swapBoundaryFaceList(mesh_, anchorPoints, false);
+        syncTools::swapBoundaryFaceList(mesh_, anchorPoints);
 
         forAll(anchorPoints, i)
         {
@@ -4656,7 +4650,7 @@ void Foam::hexRef8::checkRefinementLevels
         }
 
         // No separation
-        syncTools::swapBoundaryFaceList(mesh_, neiLevel, false);
+        syncTools::swapBoundaryFaceList(mesh_, neiLevel);
 
         forAll(neiLevel, i)
         {
@@ -4698,8 +4692,7 @@ void Foam::hexRef8::checkRefinementLevels
             mesh_,
             syncPointLevel,
             minEqOp<label>(),
-            labelMax,
-            false               // no separation
+            labelMax
         );
 
 
@@ -4746,8 +4739,7 @@ void Foam::hexRef8::checkRefinementLevels
             mesh_,
             maxPointLevel,
             maxEqOp<label>(),
-            labelMin,           // null value
-            false               // no separation
+            labelMin            // null value
         );
 
         // Check 2:1 across boundary points
@@ -5197,7 +5189,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
         }
 
         // Swap to neighbour
-        syncTools::swapBoundaryFaceList(mesh_, neiLevel, false);
+        syncTools::swapBoundaryFaceList(mesh_, neiLevel);
 
         forAll(neiLevel, i)
         {

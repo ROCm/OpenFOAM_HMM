@@ -496,8 +496,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
         mesh_,
         isBoundaryPoint,
         orEqOp<bool>(),
-        false,              // null value
-        false               // no separation
+        false               // null value
     );
 
     syncTools::syncEdgeList
@@ -505,16 +504,14 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
         mesh_,
         isBoundaryEdge,
         orEqOp<bool>(),
-        false,              // null value
-        false               // no separation
+        false               // null value
     );
 
     syncTools::syncFaceList
     (
         mesh_,
         isBoundaryFace,
-        orEqOp<bool>(),
-        false               // no separation
+        orEqOp<bool>()
     );
 
 
@@ -807,8 +804,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
         mesh_,
         isBoundaryPoint,
         orEqOp<bool>(),
-        false,              // null value
-        false               // no separation
+        false               // null value
     );
 
     syncTools::syncEdgeList
@@ -816,16 +812,14 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
         mesh_,
         isBoundaryEdge,
         orEqOp<bool>(),
-        false,              // null value
-        false               // no separation
+        false               // null value
     );
 
     syncTools::syncFaceList
     (
         mesh_,
         isBoundaryFace,
-        orEqOp<bool>(),
-        false               // no separation
+        orEqOp<bool>()
     );
 
 
@@ -1109,8 +1103,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 //    (
 //        mesh_,
 //        facePatch,
-//        maxEqOp<label>(),
-//        false               // no separation
+//        maxEqOp<label>()
 //    );
 //
 //    return facePatch;

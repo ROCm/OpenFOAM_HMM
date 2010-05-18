@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
+|  \\    /   O peration     | Version:  splitCyclic                           |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -3 0 0 0 0];
+dimensions      [ 0 2 -3 0 0 0 0 ];
 
 internalField   uniform 1e-08;
 
@@ -31,14 +31,17 @@ boundaryField
         type            epsilonWallFunction;
         value           uniform 1e-08;
     }
-    frontBack
+    frontBack_half0
     {
         type            cyclic;
-        value           uniform 1e-08;
     }
     defaultFaces
     {
         type            empty;
+    }
+    frontBack_half1
+    {
+        type            cyclic;
     }
 }
 

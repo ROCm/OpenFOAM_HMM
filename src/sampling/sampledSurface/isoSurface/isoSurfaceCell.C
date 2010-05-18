@@ -755,13 +755,12 @@ void Foam::isoSurfaceCell::calcSnappedPoint
         }
     }
 
-    syncTools::syncPointList
+    syncTools::syncPointPositions
     (
         mesh_,
         collapsedPoint,
         minEqOp<point>(),
-        point::max,
-        true                // are coordinates so separate
+        point::max
     );
 
     snappedPoint.setSize(mesh_.nPoints());

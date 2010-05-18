@@ -29,11 +29,10 @@ Description
 
     Note: morph patch face ordering uses geometric matching so with the
     following restrictions:
-        -halves should be flat planes.
+        -coupled patches should be flat planes.
         -no rotation in patch plane
 
-    Uses a featureCos to find the two halves (or should be fully
-    disconnected). Uses coupledPolyPatch::calcFaceTol to calculate
+    Uses coupledPolyPatch::calcFaceTol to calculate
     tolerance per face which might need tweaking.
 
     Switch on 'cyclicPolyPatch' debug flag to write .obj files to show
@@ -48,10 +47,9 @@ SourceFiles
 #define cyclicPolyPatch_H
 
 #include "coupledPolyPatch.H"
-#include "SubField.H"
-#include "FixedList.H"
 #include "edgeList.H"
-#include "transform.H"
+#include "polyBoundaryMesh.H"
+#include "diagTensorField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,18 +80,11 @@ private:
 
     // Private data
 
-        //- List of edges formed from connected points. e[0] is the point on
-        //  the first half of the patch, e[1] the corresponding point on the
-        //  second half.
-        mutable edgeList* coupledPointsPtr_;
+        //- Name of other half
+        const word neighbPatchName_;
 
-        //- List of connected edges. e[0] is the edge on the first half of the
-        //  patch, e[1] the corresponding edge on the second half.
-        mutable edgeList* coupledEdgesPtr_;
-
-        //- Morph:angle between normals of neighbouring faces.
-        //  Used to split cyclic into halves.
-        scalar featureCos_;
+        //- Index of other half
+        mutable label neighbPatchID_;
 
         //- Type of transformation - rotational or translational
         transformType transform_;
@@ -112,60 +103,50 @@ private:
             vector separationVector_;
 
 
+        //- List of edges formed from connected points. e[0] is the point on
+        //  the first half of the patch, e[1] the corresponding point on the
+        //  second half.
+        mutable edgeList* coupledPointsPtr_;
+
+        //- List of connected edges. e[0] is the edge on the first half of the
+        //  patch, e[1] the corresponding edge on the second half.
+        mutable edgeList* coupledEdgesPtr_;
+
+        //- Temporary storage of owner side patch during ordering.
+        mutable autoPtr<primitivePatch> ownerPatchPtr_;
+
+
     // Private Member Functions
 
         //- Find amongst selected faces the one with the largest area
         static label findMaxArea(const pointField&, const faceList&);
 
+        void calcTransforms
+        (
+            const primitivePatch& half0,
+            const UList<point>& half0Ctrs,
+            const UList<point>& half0Areas,
+            const UList<point>& half1Ctrs,
+            const UList<point>& half1Areas
+        );
 
         // Face ordering
-
-            //- Find the two parts of the faces of pp using feature edges.
-            //  Returns true if successfull.
-            bool getGeometricHalves
-            (
-                const primitivePatch&,
-                labelList&,
-                labelList&
-            ) const;
 
             //- Calculate geometric factors of the two halves.
             void getCentresAndAnchors
             (
-                const primitivePatch&,
-                const faceList& half0Faces,
-                const faceList& half1Faces,
+                const primitivePatch& pp0,
+                const primitivePatch& pp1,
 
-                pointField& ppPoints,
                 pointField& half0Ctrs,
                 pointField& half1Ctrs,
                 pointField& anchors0,
                 scalarField& tols
             ) const;
 
-            //- Given matched faces matches the anchor point. Sets faceMap,
-            //  rotation. Returns true if all matched.
-            bool matchAnchors
-            (
-                const bool report,
-                const primitivePatch&,
-                const labelList&,
-                const pointField&,
-                const labelList&,
-                const faceList&,
-                const labelList&,
-                const scalarField&,
-
-                labelList& faceMap,
-                labelList& rotation
-            ) const;
-
             //- For rotational cases, try to find a unique face on each side
             //  of the cyclic.
-            label getConsistentRotationFace
-            (
-                const pointField& faceCentres
-            ) const;
+            label getConsistentRotationFace(const pointField&) const;
 
 
 protected:
@@ -178,8 +159,29 @@ protected:
         //- Initialise the calculation of the patch geometry
         virtual void initGeometry(PstreamBuffers&);
 
+        //- Initialise the calculation of the patch geometry
+        virtual void initGeometry
+        (
+            const primitivePatch& referPatch,
+            UList<point>& nbrCtrs,
+            UList<point>& nbrAreas,
+            UList<point>& nbrCc
+        );
+
         //- Calculate the patch geometry
         virtual void calcGeometry(PstreamBuffers&);
+
+        //- Calculate the patch geometry
+        virtual void calcGeometry
+        (
+            const primitivePatch& referPatch,
+            const UList<point>& thisCtrs,
+            const UList<point>& thisAreas,
+            const UList<point>& thisCc,
+            const UList<point>& nbrCtrs,
+            const UList<point>& nbrAreas,
+            const UList<point>& nbrCc
+        );
 
         //- Initialise the patches for moving points
         virtual void initMovePoints(PstreamBuffers&, const pointField&);
@@ -231,7 +233,8 @@ public:
             const polyBoundaryMesh& bm,
             const label index,
             const label newSize,
-            const label newStart
+            const label newStart,
+            const word& neighbPatchName
         );
 
         //- Construct given the original patch and a map
@@ -262,7 +265,15 @@ public:
         {
             return autoPtr<polyPatch>
             (
-                new cyclicPolyPatch(*this, bm, index, newSize, newStart)
+                new cyclicPolyPatch
+                (
+                    *this,
+                    bm,
+                    index,
+                    newSize,
+                    newStart,
+                    neighbPatchName_
+                )
             );
         }
 
@@ -289,103 +300,107 @@ public:
 
     // Member Functions
 
-        //- Return connected points (in patch local point indexing). Demand
-        //  driven calculation. Does primitivePatch::clearOut after calculation!
+        const word& neighbPatchName() const
+        {
+            return neighbPatchName_;
+        }
+
+        //- Neighbour patchID.
+        virtual label neighbPatchID() const
+        {
+            if (neighbPatchID_ == -1)
+            {
+                neighbPatchID_ = this->boundaryMesh().findPatchID
+                (
+                    neighbPatchName_
+                );
+                if (neighbPatchID_ == -1)
+                {
+                    FatalErrorIn("cyclicPolyPatch::neighbPatchID() const")
+                        << "Illegal neighbourPatch name " << neighbPatchName_
+                        << endl << "Valid patch names are "
+                        << this->boundaryMesh().names()
+                        << exit(FatalError);
+                }
+            }
+            return neighbPatchID_;
+        }
+
+        virtual bool owner() const
+        {
+            return index() < neighbPatchID();
+        }
+
+        virtual bool neighbour() const
+        {
+            return !owner();
+        }
+
+        const cyclicPolyPatch& neighbPatch() const
+        {
+            const polyPatch& pp = this->boundaryMesh()[neighbPatchID()];
+            return refCast<const cyclicPolyPatch>(pp);
+        }
+
+        //- Return connected points (from patch local to neighbour patch local)
+        //  Demand driven calculation. Does primitivePatch::clearOut after
+        //  calculation!
         const edgeList& coupledPoints() const;
 
-        //- Return connected edges (in patch local edge indexing). Demand
-        //  driven calculation. Does primitivePatch::clearOut after calculation!
+        //- Return connected edges (from patch local to neighbour patch local).
+        //  Demand driven calculation. Does primitivePatch::clearOut after
+        //  calculation!
         const edgeList& coupledEdges() const;
 
+        //- Transform a patch-based position from other side to this side
+        virtual void transformPosition(pointField& l) const;
 
 
         // Transformation
 
-            vector separation(const label facei) const
-            {
-                if (facei < size()/2)
-                {
-                    return coupledPolyPatch::separation()[0];
-                }
-                else
-                {
-                    return -coupledPolyPatch::separation()[0];
-                }
-            }
+        label transformGlobalFace(const label facei) const
+        {
+            label offset = facei-start();
+            label neighbStart = neighbPatch().start();
 
-            const tensor& transformT(const label facei) const
+            if (offset >= 0 && offset < size())
             {
-                if (facei < size()/2)
-                {
-                    return reverseT()[0];
-                }
-                else
-                {
-                    return forwardT()[0];
-                }
+                return neighbStart+offset;
             }
-
-            template<class T>
-            T transform(const T& t, const label facei) const
+            else
             {
-                if (parallel())
-                {
-                    return t;
-                }
-                else
-                {
-                    return Foam::transform(transformT(facei), t);
-                }
+                FatalErrorIn
+                (
+                    "cyclicPolyPatch::transformGlobalFace(const label) const"
+                )   << "Face " << facei << " not in patch " << name()
+                    << exit(FatalError);
+                return -1;
             }
+        }
 
-            label transformLocalFace(const label facei) const
-            {
-                if (facei < size()/2)
-                {
-                    return facei + size()/2;
-                }
-                else
-                {
-                    return facei - size()/2;
-                }
-            }
+        //- Type of transform
+        transformType transform() const
+        {
+            return transform_;
+        }
 
-            label transformGlobalFace(const label facei) const
-            {
-                if (facei - start() < size()/2)
-                {
-                    return facei + size()/2;
-                }
-                else
-                {
-                    return facei - size()/2;
-                }
-            }
+        //- Axis of rotation for rotational cyclics
+        const vector& rotationAxis() const
+        {
+            return rotationAxis_;
+        }
 
-            //- Type of transform
-            transformType transform() const
-            {
-                return transform_;
-            }
+        //- point on axis of rotation for rotational cyclics
+        const point& rotationCentre() const
+        {
+            return rotationCentre_;
+        }
 
-            //- Axis of rotation for rotational cyclics
-            const vector& rotationAxis() const
-            {
-                return rotationAxis_;
-            }
-
-            //- point on axis of rotation for rotational cyclics
-            const point& rotationCentre() const
-            {
-                return rotationCentre_;
-            }
-
-            //- Translation vector for translational cyclics
-            const vector& separationVector() const
-            {
-                return separationVector_;
-            }
-
+        //- Translation vector for translational cyclics
+        const vector& separationVector() const
+        {
+            return separationVector_;
+        }
 
 
         //- Initialize ordering for primitivePatch. Does not

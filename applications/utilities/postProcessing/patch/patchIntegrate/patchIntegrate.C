@@ -30,7 +30,6 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "cyclicPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
@@ -76,35 +75,12 @@ int main(int argc, char *argv[])
             }
 
             // Give patch area
-            if (isA<cyclicPolyPatch>(mesh.boundaryMesh()[patchI]))
-            {
-                Info<< "    Cyclic patch vector area: " << nl;
-                label nFaces = mesh.boundaryMesh()[patchI].size();
-                vector sum1 = vector::zero;
-                vector sum2 = vector::zero;
-                for (label i=0; i<nFaces/2; i++)
-                {
-                    sum1 += mesh.Sf().boundaryField()[patchI][i];
-                    sum2 += mesh.Sf().boundaryField()[patchI][i+nFaces/2];
-                }
-                reduce(sum1, sumOp<vector>());
-                reduce(sum2, sumOp<vector>());
-                Info<< "    - half 1 = " << sum1 << ", " << mag(sum1) << nl
-                    << "    - half 2 = " << sum2 << ", " << mag(sum2) << nl
-                    << "    - total  = " << (sum1 + sum2) << ", "
-                    << mag(sum1 + sum2) << endl;
-                Info<< "    Cyclic patch area magnitude = "
-                    << gSum(mesh.magSf().boundaryField()[patchI])/2.0 << endl;
-            }
-            else
-            {
-                Info<< "    Area vector of patch "
-                    << patchName << '[' << patchI << ']' << " = "
-                    << gSum(mesh.Sf().boundaryField()[patchI]) << endl;
-                Info<< "    Area magnitude of patch "
-                    << patchName << '[' << patchI << ']' << " = "
-                    << gSum(mesh.magSf().boundaryField()[patchI]) << endl;
-            }
+            Info<< "    Area vector of patch "
+                << patchName << '[' << patchI << ']' << " = "
+                << gSum(mesh.Sf().boundaryField()[patchI]) << endl;
+            Info<< "    Area magnitude of patch "
+                << patchName << '[' << patchI << ']' << " = "
+                << gSum(mesh.magSf().boundaryField()[patchI]) << endl;
 
             // Read field and calc integral
             if (fieldHeader.headerClassName() == volScalarField::typeName)

@@ -78,7 +78,7 @@ void Foam::CFCCellToCellStencil::calcFaceBoundaryData
             }
         }
     }
-    syncTools::swapBoundaryFaceList(mesh(), neiGlobal, false);
+    syncTools::swapBoundaryFaceList(mesh(), neiGlobal);
 }
 
 
