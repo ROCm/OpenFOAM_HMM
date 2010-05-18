@@ -80,8 +80,13 @@ Usage
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "decompose a mesh and fields of a case for parallel execution"
+    );
+
     argList::noParallel();
-#   include "addRegionOption.H"
+    #include "addRegionOption.H"
     argList::addBoolOption
     (
         "cellDist",
@@ -109,12 +114,7 @@ int main(int argc, char *argv[])
         "only decompose geometry if the number of domains has changed"
     );
 
-    argList::addNote
-    (
-        "decompose a mesh and fields of a case for parallel execution"
-    );
-
-#   include "setRootCase.H"
+    #include "setRootCase.H"
 
     word regionName = fvMesh::defaultRegion;
     word regionDir = word::null;
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     bool forceOverwrite          = args.optionFound("force");
     bool ifRequiredDecomposition = args.optionFound("ifRequired");
 
-#   include "createTime.H"
+    #include "createTime.H"
 
     Info<< "Time = " << runTime.timeName() << endl;
 

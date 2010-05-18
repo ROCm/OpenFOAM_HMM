@@ -70,9 +70,7 @@ Foam::Map<Foam::label> Foam::autoSnapDriver::getZoneBafflePatches
         if (faceZoneNames[surfI].size())
         {
             // Get zone
-            label zoneI = fZones.findZoneID(faceZoneNames[surfI]);
-
-            const faceZone& fZone = fZones[zoneI];
+            const faceZone& fZone = fZones[faceZoneNames[surfI]];
 
             //// Get patch allocated for zone
             //label patchI = surfaceToCyclicPatch_[surfI];
@@ -1287,11 +1285,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::repatchToSurface
 
         forAll(zonedSurfaces, i)
         {
-            label zoneSurfI = zonedSurfaces[i];
-
-            label zoneI = fZones.findZoneID(faceZoneNames[zoneSurfI]);
-
-            const faceZone& fZone = fZones[zoneI];
+            const label zoneSurfI = zonedSurfaces[i];
+            const faceZone& fZone = fZones[faceZoneNames[zoneSurfI]];
 
             forAll(fZone, i)
             {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,11 +39,23 @@ Foam::autoPtr<Foam::calcType> Foam::calcType::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalErrorIn("calcType::New()")
-            << "Unknown calcType type " << calcTypeName
-            << "Valid calcType selections are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << nl
-            << abort(FatalError);
+        // special treatment for -help
+        // exit without stack trace
+        if (calcTypeName == "-help")
+        {
+            FatalErrorIn("calcType::New()")
+                << "Valid calcType selections are:" << nl
+                << dictionaryConstructorTablePtr_->sortedToc() << nl
+                << exit(FatalError);
+        }
+        else
+        {
+            FatalErrorIn("calcType::New()")
+                << "Unknown calcType type " << calcTypeName << nl
+                << "Valid calcType selections are:" << nl
+                << dictionaryConstructorTablePtr_->sortedToc() << nl
+                << abort(FatalError);
+        }
     }
 
     return autoPtr<calcType>(cstrIter()());

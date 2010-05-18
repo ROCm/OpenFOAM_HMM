@@ -341,9 +341,9 @@ int main(int argc, char *argv[])
         {
             wordList fieldNames = objects.names(volFieldTypes[i]);
 
-            for (label j=0; j<fieldNames.size(); j++)
+            forAll(fieldNames, j)
             {
-                word fieldName = fieldNames[j];
+                const word& fieldName = fieldNames[j];
 
 #               include "checkData.H"
 

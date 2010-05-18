@@ -227,7 +227,56 @@ wordList addProcessorPatches
 
 int main(int argc, char *argv[])
 {
-    #include "setRoots.H"
+    argList::addNote
+    (
+        "map volume fields from one mesh to another"
+    );
+    argList::noParallel();
+    argList::validArgs.append("sourceCase");
+
+    argList::addOption
+    (
+        "sourceTime",
+        "scalar",
+        "specify the source time"
+    );
+    argList::addBoolOption
+    (
+        "parallelSource",
+        "the source is decomposed"
+    );
+    argList::addBoolOption
+    (
+        "parallelTarget",
+        "the target is decomposed"
+    );
+    argList::addBoolOption
+    (
+        "consistent",
+        "source and target geometry and boundary conditions identical"
+    );
+
+    argList args(argc, argv);
+
+    if (!args.check())
+    {
+         FatalError.exit();
+    }
+
+    fileName rootDirTarget(args.rootPath());
+    fileName caseDirTarget(args.globalCaseName());
+
+    const fileName casePath = args[1];
+    const fileName rootDirSource = casePath.path();
+    const fileName caseDirSource = casePath.name();
+
+    Info<< "Source: " << rootDirSource << " " << caseDirSource << nl
+        << "Target: " << rootDirTarget << " " << caseDirTarget << endl;
+
+    const bool parallelSource = args.optionFound("parallelSource");
+    const bool parallelTarget = args.optionFound("parallelTarget");
+    const bool consistent     = args.optionFound("consistent");
+
     #include "createTimes.H"
 
     HashTable<word> patchMap;
@@ -249,7 +298,6 @@ int main(int argc, char *argv[])
         );
 
         mapFieldsDict.lookup("patchMap") >> patchMap;
-
         mapFieldsDict.lookup("cuttingPatches") >>  cuttingPatches;
     }
 

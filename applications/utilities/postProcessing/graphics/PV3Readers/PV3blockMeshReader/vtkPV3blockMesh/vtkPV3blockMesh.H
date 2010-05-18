@@ -71,7 +71,7 @@ class vtkIndent;
 namespace Foam
 {
 
-// Foam class forward declarations
+// OpenFOAM class forward declarations
 class argList;
 class Time;
 class blockMesh;
@@ -167,10 +167,10 @@ class vtkPV3blockMesh
         //- Access to the controlling vtkPV3blockMeshReader
         vtkPV3blockMeshReader* reader_;
 
-        //- Foam time control
+        //- OpenFOAM time control
         autoPtr<Time> dbPtr_;
 
-        //- Foam mesh
+        //- OpenFOAM mesh
         blockMesh* meshPtr_;
 
         //- Selected geometrical parts
@@ -242,7 +242,7 @@ class vtkPV3blockMesh
 
         // Update helper functions
 
-            //- Foam mesh
+            //- OpenFOAM mesh
             void updateFoamMesh();
 
         // Mesh conversion functions

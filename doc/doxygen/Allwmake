@@ -1,0 +1,22 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+set -x
+
+rm -rf latex man
+
+# remove html directory in background
+mv html html-stagedRemove$$ 2> /dev/null
+rm -rf html-stagedRemove$$ >/dev/null 2>&1 &
+
+# ensure that created files are readable by everyone
+umask 22
+doxygen
+
+# fix permissions (NB: '+X' and not '+x'!)
+chmod -R a+rX html latex man 2>/dev/null
+
+echo
+echo "Done doxygen"
+echo
+
+# ----------------------------------------------------------------- end-of-file

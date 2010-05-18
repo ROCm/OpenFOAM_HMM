@@ -48,13 +48,26 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "extract surface from a polyMesh and triangulate boundary faces"
+    );
     argList::validArgs.append("output file");
-#   include "addRegionOption.H"
-    argList::addBoolOption("excludeProcPatches");
-    argList::addOption("patches", "(patch0 .. patchN)");
+    #include "addRegionOption.H"
+    argList::addBoolOption
+    (
+        "excludeProcPatches",
+        "exclude processor patches"
+    );
+    argList::addOption
+    (
+        "patches",
+        "(patch0 .. patchN)",
+        "only triangulate named patches"
+    );
 
-#   include "setRootCase.H"
-#   include "createTime.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
 
     const fileName outFileName(runTime.path()/args[1]);
 
@@ -63,9 +76,9 @@ int main(int argc, char *argv[])
 
     Pout<< "Reading mesh from time " << runTime.value() << endl;
 
-#   include "createNamedPolyMesh.H"
+    #include "createNamedPolyMesh.H"
 
-    bool includeProcPatches =
+    const bool includeProcPatches =
        !(
             args.optionFound("excludeProcPatches")
          || Pstream::parRun()
@@ -92,7 +105,7 @@ int main(int argc, char *argv[])
         forAll(patchNames, patchNameI)
         {
             const word& patchName = patchNames[patchNameI];
-            label patchI = bMesh.findPatchID(patchName);
+            const label patchI = bMesh.findPatchID(patchName);
 
             if (patchI == -1)
             {

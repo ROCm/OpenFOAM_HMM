@@ -214,11 +214,12 @@ class motionSmoother
         (
             const Field<Type>&,
             const CombineOp& cop,
-            const Type& zero
+            const Type& zero,
+            const scalar maxMag
         ) const;
 
         //- Test synchronisation of points
-        void testSyncPositions(const pointField&) const;
+        void testSyncPositions(const pointField&, const scalar maxMag) const;
 
         //- Assemble tensors for multi-patch constraints
         void makePatchPatchAddressing();

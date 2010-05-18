@@ -47,7 +47,7 @@ void Foam::Reaction<ReactionThermo>::setThermo
         );
     }
 
-    for (label i=0; i<lhs_.size(); i++)
+    forAll(lhs_, i)
     {
         operator-=
         (

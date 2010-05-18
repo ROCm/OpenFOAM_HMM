@@ -346,7 +346,7 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
 {
     ParcelType& p = static_cast<ParcelType&>(*this);
 
-    // Invoke poost-processing mdoel
+    // Invoke post-processing model
     td.cloud().postProcessing().postPatch(p, patchI);
 
     // Invoke surface film model

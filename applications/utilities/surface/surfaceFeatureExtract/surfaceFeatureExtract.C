@@ -90,19 +90,51 @@ void deleteBox
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "extract and write surface features to file"
+    );
     argList::noParallel();
-
-    argList::validArgs.clear();
     argList::validArgs.append("surface");
     argList::validArgs.append("output set");
 
-    argList::addOption("includedAngle", "included angle [0..180]");
-    argList::addOption("set", "input feature set");
+    argList::addOption
+    (
+        "includedAngle",
+        "degrees",
+        "construct feature set from included angle [0..180]"
+    );
+    argList::addOption
+    (
+        "set",
+        "name",
+        "use existing feature set from file"
+    );
+    argList::addOption
+    (
+        "minLen",
+        "scalar",
+        "remove features shorter than the specified cumulative length"
+    );
+    argList::addOption
+    (
+        "minElem",
+        "int",
+        "remove features with fewer than the specified number of edges"
+    );
+    argList::addOption
+    (
+        "subsetBox",
+        "((x0 y0 z0)(x1 y1 z1))",
+        "remove edges outside specified bounding box"
+    );
+    argList::addOption
+    (
+        "deleteBox",
+        "((x0 y0 z0)(x1 y1 z1))",
+        "remove edges within specified bounding box"
+    );
 
-    argList::addOption("minLen", "cumulative length of feature");
-    argList::addOption("minElem", "number of edges in feature");
-    argList::addOption("subsetBox", "((x0 y0 z0)(x1 y1 z1))");
-    argList::addOption("deleteBox", "((x0 y0 z0)(x1 y1 z1))");
     argList args(argc, argv);
 
     Info<< "Feature line extraction is only valid on closed manifold surfaces."
@@ -143,7 +175,7 @@ int main(int argc, char *argv[])
     }
     else if (args.optionFound("includedAngle"))
     {
-        scalar includedAngle = args.optionRead<scalar>("includedAngle");
+        const scalar includedAngle = args.optionRead<scalar>("includedAngle");
 
         Info<< "Constructing feature set from included angle " << includedAngle
             << endl;
@@ -175,8 +207,6 @@ int main(int argc, char *argv[])
         << endl;
 
 
-
-
     // Trim set
     // ~~~~~~~~
 
@@ -198,7 +228,6 @@ int main(int argc, char *argv[])
         set.trimFeatures(minLen, minElem);
         Info<< endl << "Removed small features" << endl;
     }
-
 
 
     // Subset

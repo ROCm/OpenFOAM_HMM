@@ -71,6 +71,13 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "convert between surface formats, "
+        "but primarily for testing functionality\n"
+        "Normally use surfaceMeshConvert instead."
+    );
+
     argList::noParallel();
     argList::validArgs.append("inputFile");
     argList::validArgs.append("outputFile");
@@ -82,7 +89,12 @@ int main(int argc, char *argv[])
     argList::addBoolOption("unsorted");
     argList::addBoolOption("triFace");
 
-    argList::addOption("scale", "scale");
+    argList::addOption
+    (
+        "scale",
+        "factor",
+        "geometry scaling factor - default is 1"
+    );
 
 #   include "setRootCase.H"
 

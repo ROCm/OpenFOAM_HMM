@@ -57,8 +57,6 @@ class cyclicPointPatch
         //- Local reference cast into the cyclic patch
         const cyclicPolyPatch& cyclicPolyPatch_;
 
-//        //- List of local points that are not collocated
-//        mutable labelList separatedPoints_;
 
     // Private Member Functions
 

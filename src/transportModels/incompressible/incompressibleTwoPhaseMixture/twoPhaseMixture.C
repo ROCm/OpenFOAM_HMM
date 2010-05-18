@@ -28,15 +28,11 @@ License
 #include "surfaceFields.H"
 #include "fvc.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 //- Calculate and return the laminar viscosity
-void twoPhaseMixture::calcNu()
+void Foam::twoPhaseMixture::calcNu()
 {
     nuModel1_->correct();
     nuModel2_->correct();
@@ -54,7 +50,7 @@ void twoPhaseMixture::calcNu()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-twoPhaseMixture::twoPhaseMixture
+Foam::twoPhaseMixture::twoPhaseMixture
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
@@ -114,7 +110,7 @@ twoPhaseMixture::twoPhaseMixture
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-tmp<volScalarField> twoPhaseMixture::mu() const
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixture::mu() const
 {
     volScalarField limitedAlpha1 = min(max(alpha1_, scalar(0)), scalar(1));
 
@@ -130,7 +126,7 @@ tmp<volScalarField> twoPhaseMixture::mu() const
 }
 
 
-tmp<surfaceScalarField> twoPhaseMixture::muf() const
+Foam::tmp<Foam::surfaceScalarField> Foam::twoPhaseMixture::muf() const
 {
     surfaceScalarField alpha1f =
         min(max(fvc::interpolate(alpha1_), scalar(0)), scalar(1));
@@ -147,7 +143,7 @@ tmp<surfaceScalarField> twoPhaseMixture::muf() const
 }
 
 
-tmp<surfaceScalarField> twoPhaseMixture::nuf() const
+Foam::tmp<Foam::surfaceScalarField> Foam::twoPhaseMixture::nuf() const
 {
     surfaceScalarField alpha1f =
         min(max(fvc::interpolate(alpha1_), scalar(0)), scalar(1));
@@ -166,7 +162,7 @@ tmp<surfaceScalarField> twoPhaseMixture::nuf() const
 }
 
 
-bool twoPhaseMixture::read()
+bool Foam::twoPhaseMixture::read()
 {
     if (transportModel::read())
     {
@@ -192,9 +188,5 @@ bool twoPhaseMixture::read()
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -289,8 +289,12 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::validArgs.append("surface file");
-    argList::addBoolOption("shellProperties");
+    argList::validArgs.append("surfaceFile");
+    argList::addBoolOption
+    (
+        "shellProperties",
+        "inertia of a thin shell"
+    );
 
     argList::addOption
     (
@@ -587,18 +591,27 @@ int main(int argc, char *argv[])
 
     if (showTransform)
     {
-        Info<< "Transform tensor from reference state (Q). " << nl
+        Info<< "Transform tensor from reference state (orientation):" << nl
+            << eVec.T() << nl
             << "Rotation tensor required to transform "
                "from the body reference frame to the global "
                "reference frame, i.e.:" << nl
-            << "globalVector = Q & bodyLocalVector"
-            << nl << eVec.T()
+            << "globalVector = orientation & bodyLocalVector"
+            << endl;
+
+        Info<< nl
+            << "Entries for sixDoFRigidBodyDisplacement boundary condition:"
+            << nl
+            << "        mass            " << m << token::END_STATEMENT << nl
+            << "        centreOfMass    " << cM << token::END_STATEMENT << nl
+            << "        momentOfInertia " << eVal << token::END_STATEMENT << nl
+            << "        orientation     " << eVec.T() << token::END_STATEMENT
             << endl;
     }
 
     if (calcAroundRefPt)
     {
-        Info << "Inertia tensor relative to " << refPt << ": "
+        Info<< nl << "Inertia tensor relative to " << refPt << ": " << nl
             << applyParallelAxisTheorem(m, cM, J, refPt)
             << endl;
     }

@@ -164,7 +164,7 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
     // Matrix of the polynomial components
     scalarRectangularMatrix B(C.size(), minSize_, scalar(0));
 
-    for (label ip = 0; ip < C.size(); ip++)
+    forAll(C, ip)
     {
         const point& p = C[ip];
 

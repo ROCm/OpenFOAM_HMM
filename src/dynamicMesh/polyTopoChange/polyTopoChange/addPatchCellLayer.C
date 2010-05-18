@@ -914,7 +914,7 @@ void Foam::addPatchCellLayer::setRefinement
 
             vector disp = firstLayerDisp[patchPointI];
 
-            for (label i = 0; i < addedPoints_[patchPointI].size(); i++)
+            forAll(addedPoints_[patchPointI], i)
             {
                 pt += disp;
 
@@ -999,7 +999,7 @@ void Foam::addPatchCellLayer::setRefinement
 
             face newFace(f.size());
 
-            for (label i = 0; i < addedCells[patchFaceI].size(); i++)
+            forAll(addedCells[patchFaceI], i)
             {
                 forAll(f, fp)
                 {

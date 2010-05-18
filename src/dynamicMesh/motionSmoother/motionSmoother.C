@@ -40,7 +40,11 @@ defineTypeNameAndDebug(Foam::motionSmoother, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::motionSmoother::testSyncPositions(const pointField& fld) const
+void Foam::motionSmoother::testSyncPositions
+(
+    const pointField& fld,
+    const scalar maxMag
+) const
 {
     pointField syncedFld(fld);
 
@@ -54,7 +58,7 @@ void Foam::motionSmoother::testSyncPositions(const pointField& fld) const
 
     forAll(syncedFld, i)
     {
-        if (syncedFld[i] != fld[i])
+        if (mag(syncedFld[i] - fld[i]) > maxMag)
         {
             FatalErrorIn
             (
@@ -835,7 +839,7 @@ Foam::tmp<Foam::scalarField> Foam::motionSmoother::movePoints
     {
         Pout<< "motionSmoother::movePoints : testing sync of newPoints."
             << endl;
-        testSyncPositions(newPoints);
+        testSyncPositions(newPoints, 1E-6*mesh_.bounds().mag());
     }
 
     tmp<scalarField> tsweptVol = mesh_.movePoints(newPoints);
@@ -983,7 +987,8 @@ bool Foam::motionSmoother::scaleMesh
             (
                 totalDisplacement,
                 maxMagEqOp(),
-                vector::zero    // null value
+                vector::zero,   // null value
+                1E-6*mesh_.bounds().mag()
             );
         }
 

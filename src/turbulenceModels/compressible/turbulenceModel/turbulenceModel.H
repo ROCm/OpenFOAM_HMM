@@ -206,6 +206,10 @@ public:
         //- Return the turbulence kinetic energy dissipation rate
         virtual tmp<volScalarField> epsilon() const = 0;
 
+        //- Return the laminar+turbulence kinetic energy dissipation rate
+        //  Used as the viscous contribution to the energy equations
+        virtual tmp<volScalarField> rhoEpsilonEff() const;
+
         //- Return the Reynolds stress tensor
         virtual tmp<volSymmTensorField> R() const = 0;
 

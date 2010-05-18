@@ -148,8 +148,7 @@ displacementInterpolationFvMotionSolver
         forAll(faceZoneToTable, i)
         {
             const word& zoneName = faceZoneToTable[i][0];
-            label zoneI = fZones.findZoneID(zoneName);
-            const faceZone& fz = fZones[zoneI];
+            const faceZone& fz = fZones[zoneName];
 
             scalar minCoord = VGREAT;
             scalar maxCoord = -VGREAT;

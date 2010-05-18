@@ -64,7 +64,7 @@ bool Foam::uniformSet::nextSample
     samplePt += offset;
     sampleI++;
 
-    for(; sampleI < nPoints_; sampleI++)
+    for (; sampleI < nPoints_; sampleI++)
     {
         scalar s = (samplePt - currentPt) & normOffset;
 
@@ -328,7 +328,7 @@ void Foam::uniformSet::calcSamples
         );
 
         // fill sampleSegments
-        for(label i = samplingPts.size() - 1; i >= startSegmentI; --i)
+        for (label i = samplingPts.size() - 1; i >= startSegmentI; --i)
         {
             samplingSegments.append(segmentI);
         }

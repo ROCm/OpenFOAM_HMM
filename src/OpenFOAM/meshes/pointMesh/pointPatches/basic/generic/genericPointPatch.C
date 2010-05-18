@@ -26,26 +26,20 @@ License
 #include "genericPointPatch.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(genericPointPatch, 0);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Add the patch constructor functions to the hash tables
+    addToRunTimeSelectionTable
+    (
+        facePointPatch,
+        genericPointPatch,
+        polyPatch
+    );
+}
 
-defineTypeNameAndDebug(genericPointPatch, 0);
-
-// Add the patch constructor functions to the hash tables
-addToRunTimeSelectionTable
-(
-    facePointPatch,
-    genericPointPatch,
-    polyPatch
-);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -43,13 +43,13 @@ SourceFiles
 namespace Foam
 {
 
-// Write lagrangian fields.
+// Write patch geometry
 void writePatchGeom
 (
     const bool binary,
     const faceList& faces,
     const pointField& points,
-    std::ofstream& pStream
+    std::ofstream&
 );
 
 } // End namespace Foam

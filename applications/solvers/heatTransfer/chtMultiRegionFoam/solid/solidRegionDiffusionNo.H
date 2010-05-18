@@ -8,7 +8,7 @@
             (
                 solidRegions[regionI],
                 runTime,
-                rhosCps[regionI],
+                rhos[regionI]*cps[regionI],
                 Ks[regionI]
             ),
             DiNum

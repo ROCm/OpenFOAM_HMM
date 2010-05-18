@@ -54,7 +54,7 @@ void Foam::domainDecomposition::distributeCells()
 
         forAll(pNames, i)
         {
-            label patchI = patches.findPatchID(pNames[i]);
+            const label patchI = patches.findPatchID(pNames[i]);
 
             if (patchI == -1)
             {

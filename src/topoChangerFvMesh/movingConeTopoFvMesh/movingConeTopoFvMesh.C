@@ -290,18 +290,12 @@ Foam::movingConeTopoFvMesh::movingConeTopoFvMesh(const IOobject& io)
 
     curLeft_ = average
     (
-        faceZones()
-        [
-            faceZones().findZoneID("leftExtrusionFaces")
-        ]().localPoints()
+        faceZones()["leftExtrusionFaces"]().localPoints()
     ).x() - SMALL;
 
     curRight_ = average
     (
-        faceZones()
-        [
-            faceZones().findZoneID("rightExtrusionFaces")
-        ]().localPoints()
+        faceZones()["rightExtrusionFaces"]().localPoints()
     ).x() + SMALL;
 }
 
@@ -448,18 +442,12 @@ bool Foam::movingConeTopoFvMesh::update()
 //    curRight_ += curMotionVel_.x()*time().deltaTValue();
     curLeft_ = average
     (
-        faceZones()
-        [
-            faceZones().findZoneID("leftExtrusionFaces")
-        ]().localPoints()
+        faceZones()["leftExtrusionFaces"]().localPoints()
     ).x() - SMALL;
 
     curRight_ = average
     (
-        faceZones()
-        [
-            faceZones().findZoneID("rightExtrusionFaces")
-        ]().localPoints()
+        faceZones()["rightExtrusionFaces"]().localPoints()
     ).x() + SMALL;
 
 

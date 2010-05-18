@@ -666,19 +666,24 @@ bool splitBorderEdges
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "split multiply connected surface edges by duplicating points"
+    );
     argList::noParallel();
-    argList::validArgs.clear();
-
-    argList::validArgs.append("surface file");
-    argList::validArgs.append("output surface file");
-    argList::addBoolOption("debug");
+    argList::validArgs.append("surfaceFile");
+    argList::validArgs.append("output surfaceFile");
+    argList::addBoolOption
+    (
+        "debug",
+        "add debugging output"
+    );
 
     argList args(argc, argv);
 
     const fileName inSurfName  = args[1];
     const fileName outSurfName = args[2];
     const bool debug = args.optionFound("debug");
-
 
     Info<< "Reading surface from " << inSurfName << endl;
 

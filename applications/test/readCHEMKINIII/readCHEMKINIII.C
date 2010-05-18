@@ -35,7 +35,6 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.clear();
     argList::validArgs.append("CHEMKINIIIFile");
     argList::addOption("thermo", "fileName");
     argList args(argc, argv);

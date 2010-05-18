@@ -35,7 +35,7 @@ namespace Foam
 // Outstanding non-blocking operations.
 //! @cond fileScope
 DynamicList<MPI_Request> PstreamGlobals::outstandingRequests_;
-//! @endcond fileScope
+//! @endcond
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

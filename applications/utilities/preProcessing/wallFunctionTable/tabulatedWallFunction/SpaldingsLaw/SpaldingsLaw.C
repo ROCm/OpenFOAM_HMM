@@ -57,7 +57,7 @@ void Foam::tabulatedWallFunctions::SpaldingsLaw::invertFunction()
     scalar uPlus = 1;
 
     // Populate the table
-    for (label i=0; i<invertedTable_.size(); i++)
+    forAll(invertedTable_, i)
     {
         if (invertedTable_.log10())
         {

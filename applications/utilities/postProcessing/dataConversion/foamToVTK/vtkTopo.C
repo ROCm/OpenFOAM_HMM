@@ -34,6 +34,11 @@ Description
 #include "cellModeller.H"
 #include "Swap.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+bool Foam::vtkTopo::decomposePoly = true;
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::vtkTopo::vtkTopo(const polyMesh& mesh)
@@ -50,9 +55,7 @@ Foam::vtkTopo::vtkTopo(const polyMesh& mesh)
     const cellModel& tetWedge = *(cellModeller::lookup("tetWedge"));
     const cellModel& hex = *(cellModeller::lookup("hex"));
 
-
     const cellShapeList& cellShapes = mesh_.cellShapes();
-
 
     // Number of additional points needed by the decomposition of polyhedra
     label nAddPoints = 0;
@@ -65,38 +68,41 @@ Foam::vtkTopo::vtkTopo(const polyMesh& mesh)
 
     // Scan for cells which need to be decomposed and count additional points
     // and cells
-
-    forAll(cellShapes, cellI)
+    if (decomposePoly)
     {
-        const cellModel& model = cellShapes[cellI].model();
-
-        if
-        (
-            model != hex
-            // && model != wedge    // See above.
-         && model != prism
-         && model != pyr
-         && model != tet
-         && model != tetWedge
-        )
+        forAll(cellShapes, cellI)
         {
-            const cell& cFaces = mesh_.cells()[cellI];
+            const cellModel& model = cellShapes[cellI].model();
 
-            forAll(cFaces, cFaceI)
+            if
+            (
+                model != hex
+                // && model != wedge    // See above.
+             && model != prism
+             && model != pyr
+             && model != tet
+             && model != tetWedge
+            )
             {
-                const face& f = mesh_.faces()[cFaces[cFaceI]];
+                const cell& cFaces = mesh_.cells()[cellI];
 
-                label nQuads = 0;
-                label nTris = 0;
-                f.nTrianglesQuads(mesh_.points(), nTris, nQuads);
+                forAll(cFaces, cFaceI)
+                {
+                    const face& f = mesh_.faces()[cFaces[cFaceI]];
 
-                nAddCells += nQuads + nTris;
+                    label nQuads = 0;
+                    label nTris = 0;
+                    f.nTrianglesQuads(mesh_.points(), nTris, nQuads);
+
+                    nAddCells += nQuads + nTris;
+                }
+
+                nAddCells--;
+                nAddPoints++;
             }
-
-            nAddCells--;
-            nAddPoints++;
         }
     }
+
 
     // Set size of additional point addressing array
     // (from added point to original cell)
@@ -179,9 +185,9 @@ Foam::vtkTopo::vtkTopo(const polyMesh& mesh)
 
             cellTypes_[cellI] = VTK_HEXAHEDRON;
         }
-        else
+        else if (decomposePoly)
         {
-            // Polyhedral cell. Decompose into tets + prisms.
+            // Polyhedral cell. Decompose into tets + pyramids.
 
             // Mapping from additional point to cell
             addPointCellLabels_[addPointI] = cellI;
@@ -300,13 +306,67 @@ Foam::vtkTopo::vtkTopo(const polyMesh& mesh)
 
             addPointI++;
         }
+        else
+        {
+            // Polyhedral cell - not decomposed
+            cellTypes_[cellI] = VTK_POLYHEDRON;
+
+            const labelList& cFaces = mesh_.cells()[cellI];
+
+            // space for the number of faces and size of each face
+            label nData = 1 + cFaces.size();
+
+            // count total number of face points
+            forAll(cFaces, cFaceI)
+            {
+                const face& f = mesh.faces()[cFaces[cFaceI]];
+                nData += f.size();   // space for the face labels
+            }
+
+            vtkVerts.setSize(nData);
+
+            nData = 0;
+            vtkVerts[nData++] = cFaces.size();
+
+            // build face stream
+            forAll(cFaces, cFaceI)
+            {
+                const face& f = mesh.faces()[cFaces[cFaceI]];
+                const bool isOwner = (owner[cFaces[cFaceI]] == cellI);
+
+                // number of labels for this face
+                vtkVerts[nData++] = f.size();
+
+                if (isOwner)
+                {
+                    forAll(f, fp)
+                    {
+                        vtkVerts[nData++] = f[fp];
+                    }
+                }
+                else
+                {
+                    // fairly immaterial if we reverse the list
+                    // or use face::reverseFace()
+                    forAllReverse(f, fp)
+                    {
+                        vtkVerts[nData++] = f[fp];
+                    }
+                }
+            }
+        }
     }
 
-    Pout<< "    Original cells:" << mesh_.nCells()
-        << " points:" << mesh_.nPoints()
-        << "   Additional cells:" << superCells_.size()
-        << "  additional points:" << addPointCellLabels_.size()
-        << nl << endl;
+    if (decomposePoly)
+    {
+        Pout<< "    Original cells:" << mesh_.nCells()
+            << " points:" << mesh_.nPoints()
+            << "   Additional cells:" << superCells_.size()
+            << "  additional points:" << addPointCellLabels_.size()
+            << nl << endl;
+    }
+
 }
+
 
 // ************************************************************************* //

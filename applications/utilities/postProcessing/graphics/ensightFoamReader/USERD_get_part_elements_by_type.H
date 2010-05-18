@@ -234,7 +234,7 @@ int USERD_get_part_elements_by_type
     }
     else if (part_number == nPatches+2)
     {
-        for (label n=0; n<sprayPtr->size(); n++)
+        forAll(*sprayPtr, n)
         {
             conn_array[n][0] = n + 1;
         }

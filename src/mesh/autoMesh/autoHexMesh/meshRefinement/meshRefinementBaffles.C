@@ -1059,6 +1059,106 @@ void Foam::meshRefinement::findCellZoneGeometric
     // Sync
     syncTools::syncFaceList(mesh_, namedSurfaceIndex, maxEqOp<label>());
 }
+//XXXXXXXXX
+void Foam::meshRefinement::findCellZoneInsideWalk
+(
+    const labelList& locationSurfaces,  // indices of surfaces with inside point
+    const labelList& namedSurfaceIndex, // per face index of named surface
+    const labelList& surfaceToCellZone, // cell zone index per surface
+
+    labelList& cellToZone
+) const
+{
+    // Analyse regions. Reuse regionsplit
+    boolList blockedFace(mesh_.nFaces());
+
+    forAll(namedSurfaceIndex, faceI)
+    {
+        if (namedSurfaceIndex[faceI] == -1)
+        {
+            blockedFace[faceI] = false;
+        }
+        else
+        {
+            blockedFace[faceI] = true;
+        }
+    }
+    // No need to sync since namedSurfaceIndex already is synced
+
+    // Set region per cell based on walking
+    regionSplit cellRegion(mesh_, blockedFace);
+    blockedFace.clear();
+
+
+    // For all locationSurface find the cell
+    forAll(locationSurfaces, i)
+    {
+        label surfI = locationSurfaces[i];
+        const point& insidePoint = surfaces_.zoneInsidePoints()[surfI];
+
+        Info<< "For surface " << surfaces_.names()[surfI]
+            << " finding inside point " << insidePoint
+            << endl;
+
+        // Find the region containing the insidePoint
+        label keepRegionI = -1;
+
+        label cellI = mesh_.findCell(insidePoint);
+
+        if (cellI != -1)
+        {
+            keepRegionI = cellRegion[cellI];
+        }
+        reduce(keepRegionI, maxOp<label>());
+
+        Info<< "For surface " << surfaces_.names()[surfI]
+            << " found point " << insidePoint << " in cell " << cellI
+            << " in global region " << keepRegionI
+            << " out of " << cellRegion.nRegions() << " regions." << endl;
+
+        if (keepRegionI == -1)
+        {
+            FatalErrorIn
+            (
+                "meshRefinement::findCellZoneInsideWalk"
+                "(const labelList&, const labelList&"
+                ", const labelList&, const labelList&)"
+            )   << "Point " << insidePoint
+                << " is not inside the mesh." << nl
+                << "Bounding box of the mesh:" << mesh_.globalData().bb()
+                << exit(FatalError);
+        }
+
+        // Set all cells with this region
+        forAll(cellRegion, cellI)
+        {
+            if (cellRegion[cellI] == keepRegionI)
+            {
+                if (cellToZone[cellI] == -2)
+                {
+                    cellToZone[cellI] = surfaceToCellZone[surfI];
+                }
+                else if (cellToZone[cellI] != surfaceToCellZone[surfI])
+                {
+                    WarningIn
+                    (
+                        "meshRefinement::findCellZoneInsideWalk"
+                        "(const labelList&, const labelList&"
+                        ", const labelList&, const labelList&)"
+                    )   << "Cell " << cellI
+                        << " at " << mesh_.cellCentres()[cellI]
+                        << " is inside surface " << surfaces_.names()[surfI]
+                        << " but already marked as being in zone "
+                        << cellToZone[cellI] << endl
+                        << "This can happen if your surfaces are not"
+                        << " (sufficiently) closed."
+                        << endl;
+                }
+            }
+        }
+    }
+}
+//XXXXXXXXX
 
 
 bool Foam::meshRefinement::calcRegionToZone
@@ -1227,6 +1327,7 @@ void Foam::meshRefinement::findCellZoneTopo
         {
             label surfI = namedSurfaceIndex[faceI];
 
+            // Connected even if no cellZone defined for surface
             if (surfI != -1)
             {
                 // Calculate region to zone from cellRegions on either side
@@ -1279,6 +1380,7 @@ void Foam::meshRefinement::findCellZoneTopo
 
                     label surfI = namedSurfaceIndex[faceI];
 
+                    // Connected even if no cellZone defined for surface
                     if (surfI != -1)
                     {
                         bool changedCell = calcRegionToZone
@@ -2286,9 +2388,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     // Put the cells into the correct zone
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // Closed surfaces with cellZone specified.
-    labelList closedNamedSurfaces(surfaces_.getClosedNamedSurfaces());
-
     // Zone per cell:
     // -2 : unset
     // -1 : not in any zone
@@ -2299,6 +2398,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     // Set using geometric test
     // ~~~~~~~~~~~~~~~~~~~~~~~~
 
+    // Closed surfaces with cellZone specified.
+    labelList closedNamedSurfaces(surfaces_.getClosedNamedSurfaces());
+
     if (closedNamedSurfaces.size())
     {
         Info<< "Found " << closedNamedSurfaces.size()
@@ -2308,17 +2410,41 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
         findCellZoneGeometric
         (
-            closedNamedSurfaces,   // indices of closed surfaces
-            namedSurfaceIndex,     // per face index of named surface
-            surfaceToCellZone,     // cell zone index per surface
+            closedNamedSurfaces,    // indices of closed surfaces
+            namedSurfaceIndex,      // per face index of named surface
+            surfaceToCellZone,      // cell zone index per surface
+
             cellToZone
         );
     }
 
+
+    // Set using provided locations
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    labelList locationSurfaces(surfaces_.getInsidePointNamedSurfaces());
+    if (locationSurfaces.size())
+    {
+        Info<< "Found " << locationSurfaces.size()
+            << " named surfaces with a provided inside point."
+            << " Assigning cells inside these surfaces"
+            << " to the corresponding cellZone."
+            << nl << endl;
+
+        findCellZoneInsideWalk
+        (
+            locationSurfaces,       // indices of closed surfaces
+            namedSurfaceIndex,      // per face index of named surface
+            surfaceToCellZone,      // cell zone index per surface
+
+            cellToZone
+        );
+    }
+
+
     // Set using walking
     // ~~~~~~~~~~~~~~~~~
 
-    //if (!allowFreeStandingZoneFaces)
     {
         Info<< "Walking from location-in-mesh " << keepPoint
             << " to assign cellZones "
@@ -2330,6 +2456,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
             keepPoint,
             namedSurfaceIndex,
             surfaceToCellZone,
+
             cellToZone
         );
     }

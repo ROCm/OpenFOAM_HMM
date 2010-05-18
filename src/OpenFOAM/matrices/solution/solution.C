@@ -41,7 +41,7 @@ static const Foam::List<Foam::word> subDictNames
 (
     Foam::IStringStream("(preconditioner smoother)")()
 );
-//! @endcond localScope
+//! @endcond
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

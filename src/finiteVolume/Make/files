@@ -154,6 +154,7 @@ $(derivedFvPatchFields)/turbulentIntensityKineticEnergyInlet/turbulentIntensityK
 $(derivedFvPatchFields)/uniformFixedValue/uniformFixedValueFvPatchFields.C
 $(derivedFvPatchFields)/waveTransmissive/waveTransmissiveFvPatchFields.C
 $(derivedFvPatchFields)/uniformDensityHydrostaticPressure/uniformDensityHydrostaticPressureFvPatchScalarField.C
+$(derivedFvPatchFields)/swirlMassFlowRateInletVelocity/swirlMassFlowRateInletVelocityFvPatchVectorField.C
 
 fvsPatchFields = fields/fvsPatchFields
 $(fvsPatchFields)/fvsPatchField/fvsPatchFields.C

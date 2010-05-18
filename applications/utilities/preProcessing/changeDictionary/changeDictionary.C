@@ -244,15 +244,24 @@ bool merge
 
 int main(int argc, char *argv[])
 {
-    argList::addOption("instance", "instance");
-    argList::addBoolOption("literalRE");
+    argList::addOption
+    (
+        "instance",
+        "name",
+        "specify alternate time instance - default is latest time"
+    );
+    argList::addBoolOption
+    (
+        "literalRE",
+        "treat regular expressions literally (ie, as a keyword)"
+    );
     #include "addRegionOption.H"
 
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"
 
-    bool literalRE = args.optionFound("literalRE");
+    const bool literalRE = args.optionFound("literalRE");
 
     if (literalRE)
     {

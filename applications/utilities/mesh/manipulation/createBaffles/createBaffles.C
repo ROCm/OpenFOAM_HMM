@@ -107,7 +107,7 @@ void modifyOrAddFace
 
 label findPatchID(const polyMesh& mesh, const word& name)
 {
-    label patchI = mesh.boundaryMesh().findPatchID(name);
+    const label patchI = mesh.boundaryMesh().findPatchID(name);
 
     if (patchI == -1)
     {
@@ -124,8 +124,14 @@ label findPatchID(const polyMesh& mesh, const word& name)
 
 int main(int argc, char *argv[])
 {
-#   include "addOverwriteOption.H"
-#   include "addRegionOption.H"
+    argList::addNote
+    (
+        "Makes internal faces into boundary faces.\n"
+        "Does not duplicate points, unlike mergeOrSplitBaffles."
+    );
+
+    #include "addOverwriteOption.H"
+    #include "addRegionOption.H"
 
     argList::validArgs.append("faceZone");
     argList::validArgs.append("(masterPatch slavePatch)");
@@ -136,10 +142,23 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption("internalFacesOnly");
 
-#   include "setRootCase.H"
-#   include "createTime.H"
+    argList::addOption
+    (
+        "additionalPatches",
+        "(patch2 .. patchN)",
+        "specify additional patches for creating baffles"
+    );
+    argList::addBoolOption
+    (
+        "internalFacesOnly",
+        "do not convert boundary faces"
+    );
+
+    #include "setRootCase.H"
+    #include "createTime.H"
     runTime.functionObjects().off();
-#   include "createNamedMesh.H"
+    #include "createNamedMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();

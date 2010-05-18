@@ -761,10 +761,30 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.append("Fluent mesh file");
-    argList::addOption("scale", "scale factor");
-    argList::addOption("ignoreCellGroups", "cell group names");
-    argList::addOption("ignoreFaceGroups", "face group names");
-    argList::addBoolOption("cubit");
+    argList::addOption
+    (
+        "scale",
+        "factor",
+        "geometry scaling factor - default is 1"
+    );
+    argList::addOption
+    (
+        "ignoreCellGroups",
+        "names",
+        "specify cell groups to ignore"
+    );
+    argList::addOption
+    (
+        "ignoreFaceGroups",
+        "names",
+        "specify face groups to ignore"
+    );
+
+    argList::addBoolOption
+    (
+        "cubit",
+        "special parsing of (incorrect) cubit files"
+    );
 
     argList args(argc, argv);
 

@@ -66,7 +66,7 @@ Foam::scalar Foam::sequential<CompType, ThermoType>::solve
     scalar pf, cf, pb, cb;
     label lRef, rRef;
 
-    for (label i=0; i<this->model_.reactions().size(); i++)
+    forAll(this->model_.reactions(), i)
     {
         const Reaction<ThermoType>& R = this->model_.reactions()[i];
 
@@ -95,7 +95,7 @@ Foam::scalar Foam::sequential<CompType, ThermoType>::solve
 
 
         // update species
-        for (label s=0; s<R.lhs().size(); s++)
+        forAll(R.lhs(), s)
         {
             label si = R.lhs()[s].index;
             scalar sl = R.lhs()[s].stoichCoeff;
@@ -103,7 +103,7 @@ Foam::scalar Foam::sequential<CompType, ThermoType>::solve
             c[si] = max(0.0, c[si]);
         }
 
-        for (label s=0; s<R.rhs().size(); s++)
+        forAll(R.rhs(), s)
         {
             label si = R.rhs()[s].index;
             scalar sr = R.rhs()[s].stoichCoeff;

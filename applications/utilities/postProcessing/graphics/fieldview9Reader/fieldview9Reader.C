@@ -117,7 +117,7 @@ void register_functions()
 
 
 //
-// Storage for all Foam state (mainly database & mesh)
+// Storage for all OpenFOAM state (mainly database & mesh)
 //
 static readerDatabase db_;
 
@@ -521,7 +521,7 @@ void user_query_file_function
             (
                 "Could not find system/ and constant/ directory in\n"
               + rootAndCase
-              + "\nPlease select a Foam case directory."
+              + "\nPlease select an OpenFOAM case directory."
             );
 
             *iret = 1;

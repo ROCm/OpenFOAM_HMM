@@ -25,23 +25,15 @@ License
 
 #include "lduInterface.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(lduInterface, 0);
+defineTypeNameAndDebug(Foam::lduInterface, 0);
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-lduInterface::~lduInterface()
+Foam::lduInterface::~lduInterface()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -115,7 +115,7 @@ void fftRenumber
     List<complex> renumData(data);
 
     label nnprod(1);
-    for (label i=0; i<nn.size(); i++)
+    forAll(nn, i)
     {
         nnprod *= nn[i];
     }

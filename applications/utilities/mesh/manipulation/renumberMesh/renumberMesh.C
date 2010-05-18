@@ -365,9 +365,21 @@ autoPtr<mapPolyMesh> reorderMesh
 
 int main(int argc, char *argv[])
 {
-    argList::addBoolOption("blockOrder");
-    argList::addBoolOption("orderPoints");
-    argList::addBoolOption("writeMaps");
+    argList::addBoolOption
+    (
+        "blockOrder",
+        "order cells into regions (using decomposition)"
+    );
+    argList::addBoolOption
+    (
+        "orderPoints",
+        "order points into internal and boundary points"
+    );
+    argList::addBoolOption
+    (
+        "writeMaps",
+        "write cellMap, faceMap, pointMap in polyMesh/"
+    );
 
 #   include "addOverwriteOption.H"
 #   include "addTimeOptions.H"

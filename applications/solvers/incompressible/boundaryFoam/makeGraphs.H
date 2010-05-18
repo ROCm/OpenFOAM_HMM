@@ -25,9 +25,9 @@ makeGraph(y, flowDirection & R & flowDirection, "Rff", gFormat);
 makeGraph(y, wallNormal & R & wallNormal, "Rww", gFormat);
 makeGraph(y, flowDirection & R & wallNormal, "Rfw", gFormat);
 
-makeGraph(y, sqrt(mag(R.component(tensor::XX))), "u", gFormat);
-makeGraph(y, sqrt(mag(R.component(tensor::YY))), "v", gFormat);
-makeGraph(y, sqrt(mag(R.component(tensor::ZZ))), "w", gFormat);
-makeGraph(y, R.component(tensor::XY), "uv", gFormat);
+makeGraph(y, sqrt(mag(R.component(symmTensor::XX))), "u", gFormat);
+makeGraph(y, sqrt(mag(R.component(symmTensor::YY))), "v", gFormat);
+makeGraph(y, sqrt(mag(R.component(symmTensor::ZZ))), "w", gFormat);
+makeGraph(y, R.component(symmTensor::XY), "uv", gFormat);
 
 makeGraph(y, mag(fvc::grad(U)), "gammaDot", gFormat);

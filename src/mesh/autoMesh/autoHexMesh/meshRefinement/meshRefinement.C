@@ -258,6 +258,8 @@ void Foam::meshRefinement::checkData()
     meshCutter_.checkRefinementLevels(1, labelList(0));
 
 
+    label nBnd = mesh_.nFaces()-mesh_.nInternalFaces();
+
     Pout<< "meshRefinement::checkData() : Checking synchronization."
         << endl;
 
@@ -267,7 +269,7 @@ void Foam::meshRefinement::checkData()
         pointField::subList boundaryFc
         (
             mesh_.faceCentres(),
-            mesh_.nFaces()-mesh_.nInternalFaces(),
+            nBnd,
             mesh_.nInternalFaces()
         );
 
@@ -292,8 +294,8 @@ void Foam::meshRefinement::checkData()
     // Check meshRefinement
     {
         // Get boundary face centre and level. Coupled aware.
-        labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-        pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+        labelList neiLevel(nBnd);
+        pointField neiCc(nBnd);
         calcNeighbourData(neiLevel, neiCc);
 
         // Collect segments we want to test for
@@ -327,11 +329,22 @@ void Foam::meshRefinement::checkData()
                 surfaceLevel
             );
         }
+        // Get the coupled hit
+        labelList neiHit
+        (
+            SubList<label>
+            (
+                surfaceHit,
+                nBnd,
+                mesh_.nInternalFaces()
+            )
+        );
+        syncTools::swapBoundaryFaceList(mesh_, neiHit);
 
         // Check
         forAll(surfaceHit, faceI)
         {
-            if (surfaceHit[faceI] != surfaceIndex_[faceI])
+            if (surfaceIndex_[faceI] != surfaceHit[faceI])
             {
                 if (mesh_.isInternalFace(faceI))
                 {
@@ -346,7 +359,11 @@ void Foam::meshRefinement::checkData()
                         << mesh_.cellCentres()[mesh_.faceNeighbour()[faceI]]
                         << endl;
                 }
-                else
+                else if
+                (
+                    surfaceIndex_[faceI]
+                 != neiHit[faceI-mesh_.nInternalFaces()]
+                )
                 {
                     WarningIn("meshRefinement::checkData()")
                         << "Boundary face:" << faceI
@@ -355,6 +372,7 @@ void Foam::meshRefinement::checkData()
                         << " current:" << surfaceHit[faceI]
                         << " ownCc:"
                         << mesh_.cellCentres()[mesh_.faceOwner()[faceI]]
+                        << " end:" << end[faceI]
                         << endl;
                 }
             }
@@ -1118,9 +1136,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
                     if (fzNames[surfI].size())
                     {
                         // Get zone
-                        label zoneI = fZones.findZoneID(fzNames[surfI]);
-
-                        const faceZone& fZone = fZones[zoneI];
+                        const faceZone& fZone = fZones[fzNames[surfI]];
 
                         forAll(fZone, i)
                         {
@@ -1538,7 +1554,7 @@ Foam::label Foam::meshRefinement::addPatch
     polyBoundaryMesh& polyPatches =
         const_cast<polyBoundaryMesh&>(mesh.boundaryMesh());
 
-    label patchI = polyPatches.findPatchID(patchName);
+    const label patchI = polyPatches.findPatchID(patchName);
     if (patchI != -1)
     {
         if (polyPatches[patchI].type() == patchType)

@@ -43,7 +43,7 @@ namespace Foam
    {
        return (k + j*nn[2] + i*nn[1]*nn[2]);
    }
-   //! @endcond fileScope
+   //! @endcond
 
 } // End namespace Foam
 

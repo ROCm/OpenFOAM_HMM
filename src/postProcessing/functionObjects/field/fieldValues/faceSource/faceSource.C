@@ -149,7 +149,7 @@ void Foam::fieldValues::faceSource::setFaceZoneFaces()
 
 void Foam::fieldValues::faceSource::setPatchFaces()
 {
-    label patchId = mesh().boundaryMesh().findPatchID(sourceName_);
+    const label patchId = mesh().boundaryMesh().findPatchID(sourceName_);
 
     if (patchId < 0)
     {
