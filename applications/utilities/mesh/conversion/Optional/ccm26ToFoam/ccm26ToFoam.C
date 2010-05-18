@@ -579,12 +579,17 @@ void ReadCells
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "read CCM files as written by proSTAR/ccm\n"
+        " - does not handle 'interfaces' (couples), cyclics or data\n"
+        " - does not handle mesh regions (porosity, solids, ...)\n"
+    );
     argList::noParallel();
-    argList::validArgs.append("ccm26 file");
+    argList::validArgs.append("ccmFile");
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-
+    #include "setRootCase.H"
+    #include "createTime.H"
 
     // Foam mesh data
     // ~~~~~~~~~~~~~~
@@ -615,6 +620,7 @@ int main(int argc, char *argv[])
 
     {
         const fileName ccmFile = args[1];
+        const word ccmExt = ccmFile.ext();
 
         if (!isFile(ccmFile))
         {
@@ -622,8 +628,6 @@ int main(int argc, char *argv[])
                 << "Cannot read file " << ccmFile
                 << exit(FatalError);
         }
-
-        word ccmExt = ccmFile.ext();
 
         if (ccmExt != "ccm" && ccmExt != "ccmg")
         {
