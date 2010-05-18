@@ -90,7 +90,7 @@ cellShape create3DCellShape
     // make a list of outward-pointing faces
     labelListList localFaces(faceLabels.size());
 
-    forAll(faceLabels, faceI)
+    forAll  (faceLabels, faceI)
     {
         const label curFaceLabel = faceLabels[faceI];
 
