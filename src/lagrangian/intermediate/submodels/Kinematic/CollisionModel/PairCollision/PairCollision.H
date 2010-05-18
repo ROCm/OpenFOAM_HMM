@@ -174,6 +174,10 @@ public:
         //- Flag to indicate whether model activates injection model
         virtual bool active() const;
 
+        //- Indicates whether model determines wall collisions or not,
+        //  used to determine what value to use for wallImpactDistance
+        virtual bool controlsWallInteraction() const;
+
         // Collision function
         virtual void collide();
 };

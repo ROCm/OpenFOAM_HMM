@@ -612,6 +612,13 @@ bool Foam::PairCollision<CloudType>::active() const
 
 
 template<class CloudType>
+bool Foam::PairCollision<CloudType>::controlsWallInteraction() const
+{
+    return true;
+}
+
+
+template<class CloudType>
 void Foam::PairCollision<CloudType>::collide()
 {
     preInteraction();
