@@ -25,6 +25,8 @@ Class
     Foam::outputFilterOutputControl
 
 Description
+    An output control for function objects.
+    The default is time-step execution at every interval.
 
 SourceFiles
     outputFilterOutputControl.C
@@ -51,10 +53,11 @@ class outputFilterOutputControl
 {
 public:
 
+    //- The output control options
     enum outputControls
     {
-        ocTimeStep,
-        ocOutputTime
+        ocTimeStep,   /*!< execution is coupled to the time-step */
+        ocOutputTime  /*!< execution is coupled to the output-time */
     };
 
 
@@ -71,7 +74,7 @@ private:
         //- Type of output
         outputControls outputControl_;
 
-        //- The execution interval (in time steps) when using TIMESTEP mode
+        //- The execution interval (in time steps) when using @c timeStep mode,
         //  a value <= 1 means execute at every time step
         label outputInterval_;
 
