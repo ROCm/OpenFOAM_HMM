@@ -80,11 +80,14 @@ void Foam::outputFilterOutputControl::read(const dictionary& dict)
     switch (outputControl_)
     {
         case ocTimeStep:
+        {
             outputInterval_ = dict.lookupOrDefault<label>("outputInterval", 0);
             break;
-
+        }
         default:
+        {
             break;
+        }
     }
 }
 
@@ -94,24 +97,28 @@ bool Foam::outputFilterOutputControl::output() const
     switch (outputControl_)
     {
         case ocTimeStep:
+        {
             return
             (
                 (outputInterval_ <= 1)
              || !(time_.timeIndex() % outputInterval_)
             );
             break;
-
+        }
         case ocOutputTime:
+        {
             return time_.outputTime();
             break;
-
+        }
         default:
+        {
             // this error should not actually be possible
             FatalErrorIn("bool Foam::outputFilterOutputControl::output()")
                 << "Undefined output control: "
                 << outputControlNames_[outputControl_] << nl
                 << abort(FatalError);
             break;
+        }
     }
 
     return false;
