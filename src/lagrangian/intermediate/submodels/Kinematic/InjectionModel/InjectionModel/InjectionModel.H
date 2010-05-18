@@ -138,9 +138,9 @@ protected:
             //- Parcel basis enumeration
             parcelBasis parcelBasis_;
 
-            //- nParticles to assign to parcels when the 'fixed' basis
+            //- nParticle to assign to parcels when the 'fixed' basis
             //  is selected
-            scalar nParticlesFixed_;
+            scalar nParticleFixed_;
 
             //- Continuous phase time at start of injection time step [s]
             scalar time0_;

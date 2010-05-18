@@ -69,6 +69,24 @@ class WallSpringSliderDashpot
         //  harmonic approximation of the collision period
         scalar collisionResolutionSteps_;
 
+        //- Volume factor for determining the equivalent size of a
+        //  parcel where nParticles is not 1.  The equivalent size of
+        //  the parcel is
+        //      parcelEquivVolume = volumeFactor*nParticles*p.volume()
+        //  so
+        //      parcelEquivD = cbrt(volumeFactor*nParticles)*p.d()
+        //  + When volumeFactor = 1, the particles are compressed
+        //    together so that the equivalent volume of the parcel is
+        //    the sum of the constituent particles
+        //  + When volumeFactor = 3*sqrt(2)/pi, the particles are
+        //    close packed, but uncompressed.
+        //  + When volumeFactor > 3*sqrt(2)/pi, the particles loosely
+        //    grouped.
+        // 3*sqrt(2)/pi = 1.350474 is the volume factor for close
+        // packing, i.e pi/(3*sqrt(2)) is the maximum close packing
+        // factor
+        scalar volumeFactor_;
+
 
     // Private Member Functions
 
@@ -89,6 +107,7 @@ class WallSpringSliderDashpot
             const WallSiteData<vector>& data,
             scalar pNu,
             scalar pE,
+            scalar pREff,
             scalar Estar,
             scalar kN,
             scalar Gstar
@@ -112,6 +131,15 @@ public:
 
 
     // Member Functions
+
+        //- Return the volumeFactor
+        inline scalar volumeFactor() const
+        {
+            return volumeFactor_;
+        }
+
+        //- Return the effective radius for a particle for the model
+        virtual scalar pREff(const typename CloudType::parcelType& p) const;
 
         //- Whether the WallModel has a timestep limit that will
         //  require subCycling

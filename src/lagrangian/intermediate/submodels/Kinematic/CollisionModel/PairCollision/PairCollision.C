@@ -213,7 +213,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
             const point& pos = p.position();
 
-            scalar r = p.d()/2;
+            scalar r = wallModel_->pREff(p);
 
             // real wallFace interactions
 

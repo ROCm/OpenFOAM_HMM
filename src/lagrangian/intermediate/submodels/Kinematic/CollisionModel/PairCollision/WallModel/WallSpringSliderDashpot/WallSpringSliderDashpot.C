@@ -44,13 +44,16 @@ void Foam::WallSpringSliderDashpot<CloudType>::findMinMaxProperties
         const typename CloudType::parcelType& p = iter();
 
         // Finding minimum diameter to avoid excessive arithmetic
-        rMin = min(p.d(), rMin);
+
+        scalar dEff = p.d()*cbrt(p.nParticle()*volumeFactor_);
+
+        rMin = min(dEff, rMin);
 
         rhoMax = max(p.rho(), rhoMax);
 
         UMagMax = max
         (
-            mag(p.U()) + mag(p.omega())*p.d()/2,
+            mag(p.U()) + mag(p.omega())*dEff/2,
             UMagMax
         );
     }
@@ -69,18 +72,17 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
     const WallSiteData<vector>& data,
     scalar pNu,
     scalar pE,
+    scalar pREff,
     scalar Estar,
     scalar kN,
     scalar Gstar
 ) const
 {
-    scalar pR = p.d()/2;
-
     vector r_PW = p.position() - site;
 
     vector U_PW = p.U() - data.wallData();
 
-    scalar normalOverlapMag = pR - mag(r_PW);
+    scalar normalOverlapMag = pREff - mag(r_PW);
 
     vector rHat_PW = r_PW/(mag(r_PW) + VSMALL);
 
@@ -94,7 +96,7 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 
     vector USlip_PW =
         U_PW - (U_PW & rHat_PW)*rHat_PW
-      + (p.omega() ^ (pR*-rHat_PW));
+      + (p.omega() ^ (pREff*-rHat_PW));
 
     scalar deltaT = this->owner().mesh().time().deltaTValue();
 
@@ -108,7 +110,7 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 
     if (tangentialOverlapMag > VSMALL)
     {
-        scalar kT = 8.0*sqrt(pR*normalOverlapMag)*Gstar;
+        scalar kT = 8.0*sqrt(pREff*normalOverlapMag)*Gstar;
 
         scalar etaT = etaN;
 
@@ -134,7 +136,7 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 
         p.f() += fT_PW;
 
-        p.torque() += (pR*-rHat_PW) ^ fT_PW;
+        p.torque() += (pREff*-rHat_PW) ^ fT_PW;
     }
 }
 
@@ -160,7 +162,8 @@ Foam::WallSpringSliderDashpot<CloudType>::WallSpringSliderDashpot
         (
             this->coeffDict().lookup("collisionResolutionSteps")
         )
-    )
+    ),
+    volumeFactor_(this->dict().lookupOrDefault("volumeFactor", 1.0))
 {}
 
 
@@ -172,6 +175,15 @@ Foam::WallSpringSliderDashpot<CloudType>::~WallSpringSliderDashpot()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::scalar Foam::WallSpringSliderDashpot<CloudType>::pREff
+(
+    const typename CloudType::parcelType& p
+) const
+{
+    return p.d()/2*cbrt(p.nParticle()*volumeFactor_);
+}
 
 template<class CloudType>
 bool Foam::WallSpringSliderDashpot<CloudType>::controlsTimestep() const
@@ -225,9 +237,11 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 
     scalar pE = this->owner().constProps().youngsModulus();
 
+    scalar pREff = this->pREff(p);
+
     scalar Estar = 1/((1 - sqr(pNu))/pE + (1 - sqr(nu_))/E_);
 
-    scalar kN = (4.0/3.0)*sqrt(p.d()/2)*Estar;
+    scalar kN = (4.0/3.0)*sqrt(pREff)*Estar;
 
     scalar GStar = 1/(2*((2 + pNu - sqr(pNu))/pE + (2 + nu_ - sqr(nu_))/E_));
 
@@ -240,6 +254,7 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
             flatSiteData[siteI],
             pNu,
             pE,
+            pREff,
             Estar,
             kN,
             GStar
@@ -257,6 +272,7 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
             sharpSiteData[siteI],
             pNu,
             pE,
+            pREff,
             Estar,
             kN,
             GStar

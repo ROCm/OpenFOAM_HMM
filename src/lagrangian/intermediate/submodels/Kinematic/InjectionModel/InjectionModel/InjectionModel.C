@@ -217,7 +217,7 @@ Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
         }
         case pbFixed:
         {
-            nP = nParticlesFixed_;
+            nP = nParticleFixed_;
             break;
         }
         default:
@@ -290,7 +290,7 @@ Foam::InjectionModel<CloudType>::InjectionModel(CloudType& owner)
     nInjections_(0),
     parcelsAddedTotal_(0),
     parcelBasis_(pbNumber),
-    nParticlesFixed_(0.0),
+    nParticleFixed_(0.0),
     time0_(0.0),
     timeStep0_(0.0)
 {
@@ -316,7 +316,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
     nInjections_(0),
     parcelsAddedTotal_(0),
     parcelBasis_(pbNumber),
-    nParticlesFixed_(0.0),
+    nParticleFixed_(0.0),
     time0_(owner.db().time().value()),
     timeStep0_(0.0)
 {
@@ -340,11 +340,11 @@ Foam::InjectionModel<CloudType>::InjectionModel
     {
         parcelBasis_ = pbFixed;
 
-        Info<< "    Choosing nParticles to be a fixed value, massTotal "
+        Info<< "    Choosing nParticle to be a fixed value, massTotal "
             << "variable now does not determine anything."
             << endl;
 
-        nParticlesFixed_ = readScalar(coeffDict_.lookup("nParticles"));
+        nParticleFixed_ = readScalar(coeffDict_.lookup("nParticle"));
     }
     else
     {
