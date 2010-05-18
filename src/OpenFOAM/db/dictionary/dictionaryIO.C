@@ -82,7 +82,7 @@ bool Foam::dictionary::read(Istream& is, const bool keepHeader)
 {
     if (!is.good())
     {
-        FatalIOErrorIn("dictionary::read(Istream&, bool)", is)
+        FatalIOErrorIn("dictionary::read(Istream&, const bool)", is)
             << "Istream not OK for reading dictionary "
             << exit(FatalIOError);
 
