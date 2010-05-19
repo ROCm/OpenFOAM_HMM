@@ -351,7 +351,7 @@ void Foam::domainDecomposition::decomposeMesh()
         procProcessorPatchSubPatchIDs_[procI].setSize(nInterfaces);
         procProcessorPatchSubPatchStarts_[procI].setSize(nInterfaces);
 
-        Info<< "Processor " << procI << endl;
+        //Info<< "Processor " << procI << endl;
 
         // Get sorted neighbour processors
         const Map<label>& curNbrToInterPatch = procNbrToInterPatch[procI];
@@ -366,8 +366,10 @@ void Foam::domainDecomposition::decomposeMesh()
             const label nbrProc = nbrs[i];
             const label interPatch = curNbrToInterPatch[nbrProc];
 
-            procNeighbourProcessors_[procI][i] = nbrProc;
-            procProcessorPatchSize_[procI][i] = curInterPatchFaces[i].size();
+            procNeighbourProcessors_[procI][i] =
+                nbrProc;
+            procProcessorPatchSize_[procI][i] =
+                curInterPatchFaces[interPatch].size();
             procProcessorPatchStartIndex_[procI][i] =
                 procFaceAddressing_[procI].size();
 
@@ -386,15 +388,15 @@ void Foam::domainDecomposition::decomposeMesh()
                 subPatchStarts[procI][interPatch]
             );
 
-            Info<< "    nbr:" << nbrProc << endl;
-            Info<< "    interpatch:" << interPatch << endl;
-            Info<< "    size:" << procProcessorPatchSize_[procI][i] << endl;
-            Info<< "    start:" << procProcessorPatchStartIndex_[procI][i]
-                << endl;
-            Info<< "    subPatches:" << procProcessorPatchSubPatchIDs_[procI][i]
-                << endl;
-            Info<< "    subStarts:"
-                << procProcessorPatchSubPatchStarts_[procI][i] << endl;
+            //Info<< "    nbr:" << nbrProc << endl;
+            //Info<< "    interpatch:" << interPatch << endl;
+            //Info<< "    size:" << procProcessorPatchSize_[procI][i] << endl;
+            //Info<< "    start:" << procProcessorPatchStartIndex_[procI][i]
+            //    << endl;
+            //Info<< "    subPatches:" << procProcessorPatchSubPatchIDs_[procI][i]
+            //    << endl;
+            //Info<< "    subStarts:"
+            //    << procProcessorPatchSubPatchStarts_[procI][i] << endl;
 
             // And add all the face labels for interPatch
             DynamicList<label>& interPatchFaces =
@@ -411,40 +413,41 @@ void Foam::domainDecomposition::decomposeMesh()
     }
 
 
-//XXXXXXX
-// Print a bit
-    forAll(procPatchStartIndex_, procI)
-    {
-        Info<< "Processor:" << procI << endl;
-
-        Info<< "    total faces:" << procFaceAddressing_[procI].size() << endl;
-
-        const labelList& curProcPatchStartIndex = procPatchStartIndex_[procI];
-
-        forAll(curProcPatchStartIndex, patchI)
-        {
-            Info<< "    patch:" << patchI
-                << "\tstart:" << curProcPatchStartIndex[patchI]
-                << "\tsize:" << procPatchSize_[procI][patchI]
-                << endl;
-        }
-    }
-    Info<< endl;
-
-    forAll(procNeighbourProcessors_, procI)
-    {
-        Info<< "Processor " << procI << endl;
-
-        forAll(procNeighbourProcessors_[procI], i)
-        {
-            Info<< "    nbr:" << procNeighbourProcessors_[procI][i] << endl;
-            Info<< "    size:" << procProcessorPatchSize_[procI][i] << endl;
-            Info<< "    start:" << procProcessorPatchStartIndex_[procI][i]
-                << endl;
-        }
-    }
-    Info<< endl;
-
+////XXXXXXX
+//// Print a bit
+//    forAll(procPatchStartIndex_, procI)
+//    {
+//        Info<< "Processor:" << procI << endl;
+//
+//        Info<< "    total faces:" << procFaceAddressing_[procI].size()
+//            << endl;
+//
+//        const labelList& curProcPatchStartIndex = procPatchStartIndex_[procI];
+//
+//        forAll(curProcPatchStartIndex, patchI)
+//        {
+//            Info<< "    patch:" << patchI
+//                << "\tstart:" << curProcPatchStartIndex[patchI]
+//                << "\tsize:" << procPatchSize_[procI][patchI]
+//                << endl;
+//        }
+//    }
+//    Info<< endl;
+//
+//    forAll(procNeighbourProcessors_, procI)
+//    {
+//        Info<< "Processor " << procI << endl;
+//
+//        forAll(procNeighbourProcessors_[procI], i)
+//        {
+//            Info<< "    nbr:" << procNeighbourProcessors_[procI][i] << endl;
+//            Info<< "    size:" << procProcessorPatchSize_[procI][i] << endl;
+//            Info<< "    start:" << procProcessorPatchStartIndex_[procI][i]
+//                << endl;
+//        }
+//    }
+//    Info<< endl;
+//
 //    forAll(procFaceAddressing_, procI)
 //    {
 //        Info<< "Processor:" << procI << endl;

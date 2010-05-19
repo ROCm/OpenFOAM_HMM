@@ -358,23 +358,23 @@ bool Foam::domainDecomposition::writeDecomposition()
         label nInterProcPatches = 0;
         forAll(curSubPatchIDs, procPatchI)
         {
-            Info<< "For processor " << procI
-                << " have to destination processor "
-                << curNeighbourProcessors[procPatchI] << endl;
-
-            forAll(curSubPatchIDs[procPatchI], i)
-            {
-                Info<< "    from patch:" << curSubPatchIDs[procPatchI][i]
-                    << " starting at:" << curSubStarts[procPatchI][i]
-                    << endl;
-            }
+            //Info<< "For processor " << procI
+            //    << " have to destination processor "
+            //    << curNeighbourProcessors[procPatchI] << endl;
+            //
+            //forAll(curSubPatchIDs[procPatchI], i)
+            //{
+            //    Info<< "    from patch:" << curSubPatchIDs[procPatchI][i]
+            //        << " starting at:" << curSubStarts[procPatchI][i]
+            //        << endl;
+            //}
 
             nInterProcPatches += curSubPatchIDs[procPatchI].size();
         }
 
-        Info<< "For processor " << procI
-            << " have " << nInterProcPatches << " to neighbouring processors"
-            << endl;
+        //Info<< "For processor " << procI
+        //    << " have " << nInterProcPatches
+        //    << " patches to neighbouring processors" << endl;
 
 
         List<polyPatch*> procPatches
@@ -431,12 +431,12 @@ bool Foam::domainDecomposition::writeDecomposition()
                   : curProcessorPatchSizes[procPatchI] - subStarts[i]
                 );
 
-                Info<< "From processor:" << procI << endl
-                    << "  to processor:" << curNeighbourProcessors[procPatchI]
-                    << endl
-                    << "    via patch:" << subPatchID[i] << endl
-                    << "    start    :" << curStart << endl
-                    << "    size     :" << size << endl;
+                //Info<< "From processor:" << procI << endl
+                //    << "  to processor:" << curNeighbourProcessors[procPatchI]
+                //    << endl
+                //    << "    via patch:" << subPatchID[i] << endl
+                //    << "    start    :" << curStart << endl
+                //    << "    size     :" << size << endl;
 
                 if (subPatchID[i] == -1)
                 {
@@ -486,14 +486,14 @@ bool Foam::domainDecomposition::writeDecomposition()
         }
 
 
-forAll(procPatches, patchI)
-{
-    Pout<< "    " << patchI
-        << '\t' << "name:" << procPatches[patchI]->name()
-        << '\t' << "type:" << procPatches[patchI]->type()
-        << '\t' << "size:" << procPatches[patchI]->size()
-        << endl;
-}
+        //forAll(procPatches, patchI)
+        //{
+        //    Pout<< "    " << patchI
+        //        << '\t' << "name:" << procPatches[patchI]->name()
+        //        << '\t' << "type:" << procPatches[patchI]->type()
+        //        << '\t' << "size:" << procPatches[patchI]->size()
+        //        << endl;
+        //}
 
         // Add boundary patches
         procMesh.addPatches(procPatches);
