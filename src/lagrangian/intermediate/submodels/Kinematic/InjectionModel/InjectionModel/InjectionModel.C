@@ -129,10 +129,11 @@ void Foam::InjectionModel<CloudType>::prepareForNextTimeStep
 
 
 template<class CloudType>
-void Foam::InjectionModel<CloudType>::findCellAtPosition
+bool Foam::InjectionModel<CloudType>::findCellAtPosition
 (
     label& cellI,
-    vector& position
+    vector& position,
+    bool errorOnNotFound
 )
 {
     const volVectorField& cellCentres = owner_.mesh().C();
@@ -176,17 +177,26 @@ void Foam::InjectionModel<CloudType>::findCellAtPosition
 
     if (procI == -1)
     {
-        FatalErrorIn
-        (
-            "Foam::InjectionModel<CloudType>::findCellAtPosition"
-            "("
-                "label&, "
-                "vector&"
-            ")"
-        )<< "Cannot find parcel injection cell. "
-         << "Parcel position = " << p0 << nl
-         << abort(FatalError);
+        if (errorOnNotFound)
+        {
+            FatalErrorIn
+            (
+                "Foam::InjectionModel<CloudType>::findCellAtPosition"
+                "("
+                    "label&, "
+                    "vector&"
+                ")"
+            )   << "Cannot find parcel injection cell. "
+                << "Parcel position = " << p0 << nl
+                << abort(FatalError);
+        }
+        else
+        {
+            return false;
+        }
     }
+
+    return true;
 }
 
 
