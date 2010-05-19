@@ -25,7 +25,7 @@ numberOfSubdomains  4;
 
 //- Keep owner and neighbour on same processor for faces in patches:
 //  (makes sense only for cyclic patches)
-//preservePatches (cyclic_left_right);
+//preservePatches (cyclic_half0 cyclic_half1);
 
 
 method          scotch;
