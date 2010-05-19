@@ -24,11 +24,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicSlipPointPatchFields_H
-#define cyclicSlipPointPatchFields_H
-
-#include "cyclicSlipPointPatchField.H"
-#include "fieldTypes.H"
+#include "cyclicSlipFvPatch.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -37,14 +34,12 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePointPatchFieldTypedefs(cyclicSlip);
+defineTypeNameAndDebug(cyclicSlipFvPatch, 0);
+addToRunTimeSelectionTable(fvPatch, cyclicSlipFvPatch, polyPatch);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

@@ -24,9 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "cyclicSlipPointPatchField.H"
-#include "transformField.H"
-#include "symmTransformField.H"
+#include "cyclicSlipFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -36,72 +34,60 @@ namespace Foam
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-cyclicSlipPointPatchField<Type>::cyclicSlipPointPatchField
+cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
 (
-    const pointPatch& p,
-    const DimensionedField<Type, pointMesh>& iF
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF
 )
 :
-    cyclicPointPatchField<Type>(p, iF)
+    cyclicFvPatchField<Type>(p, iF)
 {}
 
 
 template<class Type>
-cyclicSlipPointPatchField<Type>::cyclicSlipPointPatchField
+cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
 (
-    const pointPatch& p,
-    const DimensionedField<Type, pointMesh>& iF,
+    const cyclicSlipFvPatchField<Type>& ptf,
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
+    const fvPatchFieldMapper& mapper
+)
+:
+    cyclicFvPatchField<Type>(ptf, p, iF, mapper)
+{}
+
+
+template<class Type>
+cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
+(
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
     const dictionary& dict
 )
 :
-    cyclicPointPatchField<Type>(p, iF, dict)
+    cyclicFvPatchField<Type>(p, iF, dict)
 {}
 
 
 template<class Type>
-cyclicSlipPointPatchField<Type>::cyclicSlipPointPatchField
+cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
 (
-    const cyclicSlipPointPatchField<Type>& ptf,
-    const pointPatch& p,
-    const DimensionedField<Type, pointMesh>& iF,
-    const pointPatchFieldMapper& mapper
+    const cyclicSlipFvPatchField<Type>& ptf
 )
 :
-    cyclicPointPatchField<Type>(ptf, p, iF, mapper)
+    cyclicFvPatchField<Type>(ptf)
 {}
 
 
 template<class Type>
-cyclicSlipPointPatchField<Type>::cyclicSlipPointPatchField
+cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
 (
-    const cyclicSlipPointPatchField<Type>& ptf,
-    const DimensionedField<Type, pointMesh>& iF
+    const cyclicSlipFvPatchField<Type>& ptf,
+    const DimensionedField<Type, volMesh>& iF
 )
 :
-    cyclicPointPatchField<Type>(ptf, iF)
+    cyclicFvPatchField<Type>(ptf, iF)
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-void cyclicSlipPointPatchField<Type>::evaluate(const Pstream::commsTypes)
-{
-    const vectorField& nHat = this->patch().pointNormals();
-
-    tmp<Field<Type> > tvalues =
-    (
-        (
-            this->patchInternalField()
-          + transform(I - 2.0*sqr(nHat), this->patchInternalField())
-        )/2.0
-    );
-
-    // Get internal field to insert values into
-    Field<Type>& iF = const_cast<Field<Type>&>(this->internalField());
-
-    setInInternalField(iF, tvalues());
-}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

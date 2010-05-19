@@ -24,10 +24,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicSlipPointPatchFields_H
-#define cyclicSlipPointPatchFields_H
+#ifndef cyclicSlipFvPatchFieldsFwd_H
+#define cyclicSlipFvPatchFieldsFwd_H
 
-#include "cyclicSlipPointPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -37,7 +36,9 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePointPatchFieldTypedefs(cyclicSlip);
+template<class Type> class cyclicSlipFvPatchField;
+
+makePatchTypeFieldTypedefs(cyclicSlip)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

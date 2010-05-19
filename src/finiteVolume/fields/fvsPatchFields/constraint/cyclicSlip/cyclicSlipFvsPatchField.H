@@ -23,21 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::cyclicSlipPointPatchField
+    Foam::cyclicSlipFvsPatchField
 
 Description
-    Cyclic + slip constraints
+    Foam::cyclicSlipFvsPatchField
 
 SourceFiles
-    cyclicSlipPointPatchField.C
+    cyclicSlipFvsPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicSlipPointPatchField_H
-#define cyclicSlipPointPatchField_H
+#ifndef cyclicSlipFvsPatchField_H
+#define cyclicSlipFvsPatchField_H
 
-#include "cyclicPointPatchField.H"
-#include "cyclicSlipPointPatch.H"
+#include "cyclicFvsPatchField.H"
+#include "cyclicSlipFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,92 +45,80 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class cyclicSlipPointPatchField Declaration
+                           Class cyclicSlipFvsPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class cyclicSlipPointPatchField
+class cyclicSlipFvsPatchField
 :
-    public cyclicPointPatchField<Type>
+    public cyclicFvsPatchField<Type>
 {
 
 public:
 
     //- Runtime type information
-    TypeName(cyclicSlipPointPatch::typeName_());
+    TypeName(cyclicSlipFvPatch::typeName_());
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        cyclicSlipPointPatchField
+        cyclicSlipFvsPatchField
         (
-            const pointPatch&,
-            const DimensionedField<Type, pointMesh>&
+            const fvPatch&,
+            const DimensionedField<Type, surfaceMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        cyclicSlipPointPatchField
+        cyclicSlipFvsPatchField
         (
-            const pointPatch&,
-            const DimensionedField<Type, pointMesh>&,
+            const fvPatch&,
+            const DimensionedField<Type, surfaceMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
-        cyclicSlipPointPatchField
+        //- Construct by mapping given cyclicSlipFvsPatchField onto a new patch
+        cyclicSlipFvsPatchField
         (
-            const cyclicSlipPointPatchField<Type>&,
-            const pointPatch&,
-            const DimensionedField<Type, pointMesh>&,
-            const pointPatchFieldMapper&
+            const cyclicSlipFvsPatchField<Type>&,
+            const fvPatch&,
+            const DimensionedField<Type, surfaceMesh>&,
+            const fvPatchFieldMapper&
+        );
+
+        //- Construct as copy
+        cyclicSlipFvsPatchField
+        (
+            const cyclicSlipFvsPatchField<Type>&
         );
 
         //- Construct and return a clone
-        virtual autoPtr<pointPatchField<Type> > clone() const
+        virtual tmp<fvsPatchField<Type> > clone() const
         {
-            return autoPtr<pointPatchField<Type> >
+            return tmp<fvsPatchField<Type> >
             (
-                new cyclicSlipPointPatchField<Type>
-                (
-                    *this
-                )
+                new cyclicSlipFvsPatchField<Type>(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        cyclicSlipPointPatchField
+        cyclicSlipFvsPatchField
         (
-            const cyclicSlipPointPatchField<Type>&,
-            const DimensionedField<Type, pointMesh>&
+            const cyclicSlipFvsPatchField<Type>&,
+            const DimensionedField<Type, surfaceMesh>&
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual autoPtr<pointPatchField<Type> > clone
+        virtual tmp<fvsPatchField<Type> > clone
         (
-            const DimensionedField<Type, pointMesh>& iF
+            const DimensionedField<Type, surfaceMesh>& iF
         ) const
         {
-            return autoPtr<pointPatchField<Type> >
+            return tmp<fvsPatchField<Type> >
             (
-                new cyclicSlipPointPatchField<Type>
-                (
-                    *this, iF
-                )
+                new cyclicSlipFvsPatchField<Type>(*this, iF)
             );
         }
-
-
-    // Member functions
-
-        // Evaluation functions
-
-            //- Evaluate the patch field
-            virtual void evaluate
-            (
-                const Pstream::commsTypes commsType=Pstream::blocking
-            );
-
 };
 
 
@@ -141,7 +129,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#    include "cyclicSlipPointPatchField.C"
+#   include "cyclicSlipFvsPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -24,11 +24,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicSlipPointPatchFields_H
-#define cyclicSlipPointPatchFields_H
-
-#include "cyclicSlipPointPatchField.H"
-#include "fieldTypes.H"
+#include "cyclicSlipPointPatch.H"
+#include "pointConstraint.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -37,14 +35,41 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePointPatchFieldTypedefs(cyclicSlip);
+defineTypeNameAndDebug(cyclicSlipPointPatch, 0);
+
+// Add the patch constructor functions to the hash tables
+addToRunTimeSelectionTable
+(
+    facePointPatch,
+    cyclicSlipPointPatch,
+    polyPatch
+);
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+const vectorField& cyclicSlipPointPatch::pointNormals() const
+{
+    // Use underlying patch normals
+    return refCast<const facePointPatch>
+    (
+        *this
+    ).facePointPatch::pointNormals();
+}
+
+
+void cyclicSlipPointPatch::applyConstraint
+(
+    const label pointi,
+    pointConstraint& pc
+) const
+{
+    pc.applyConstraint(pointNormals()[pointi]);
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

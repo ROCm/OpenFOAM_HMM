@@ -22,22 +22,52 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Class
+    Foam::cyclicSlipFvPatch
+
+Description
+    Cyclic-plane patch.
+
+SourceFiles
+    cyclicSlipFvPatch.C
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicSlipPointPatchFields_H
-#define cyclicSlipPointPatchFields_H
+#ifndef cyclicSlipFvPatch_H
+#define cyclicSlipFvPatch_H
 
-#include "cyclicSlipPointPatchField.H"
-#include "fieldTypes.H"
+#include "cyclicFvPatch.H"
+#include "cyclicSlipPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+/*---------------------------------------------------------------------------*\
+                           Class cyclicSlipFvPatch Declaration
+\*---------------------------------------------------------------------------*/
 
-makePointPatchFieldTypedefs(cyclicSlip);
+class cyclicSlipFvPatch
+:
+    public cyclicFvPatch
+{
+
+public:
+
+    //- Runtime type information
+    TypeName(cyclicSlipPolyPatch::typeName_());
+
+
+    // Constructors
+
+        //- Construct from polyPatch
+        cyclicSlipFvPatch(const polyPatch& patch, const fvBoundaryMesh& bm)
+        :
+            cyclicFvPatch(patch, bm)
+        {}
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

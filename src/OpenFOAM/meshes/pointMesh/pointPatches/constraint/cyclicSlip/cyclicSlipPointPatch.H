@@ -22,22 +22,75 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Class
+    Foam::cyclicSlipPointPatch
+
+Description
+    Cyclic patch with slip constraint
+
+SourceFiles
+    cyclicSlipPointPatch.C
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicSlipPointPatchFields_H
-#define cyclicSlipPointPatchFields_H
+#ifndef cyclicSlipPointPatch_H
+#define cyclicSlipPointPatch_H
 
-#include "cyclicSlipPointPatchField.H"
-#include "fieldTypes.H"
+#include "cyclicPointPatch.H"
+#include "cyclicSlipPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+/*---------------------------------------------------------------------------*\
+                      Class cyclicSlipPointPatch Declaration
+\*---------------------------------------------------------------------------*/
 
-makePointPatchFieldTypedefs(cyclicSlip);
+class cyclicSlipPointPatch
+:
+    public cyclicPointPatch
+{
+
+public:
+
+    //- Runtime type information
+    TypeName(cyclicSlipPolyPatch::typeName_());
+
+
+    // Constructors
+
+        //- Construct from components
+        cyclicSlipPointPatch
+        (
+            const polyPatch& patch,
+            const pointBoundaryMesh& bm
+        )
+        :
+            cyclicPointPatch(patch, bm)
+        {}
+
+
+    // Destructor
+
+        virtual ~cyclicSlipPointPatch()
+        {}
+
+
+    // Member Functions
+
+        //- Return point unit normals.
+        virtual const vectorField& pointNormals() const;
+
+        //- Accumulate the effect of constraint direction of this patch
+        virtual void applyConstraint
+        (
+            const label pointi,
+            pointConstraint&
+        ) const;
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
