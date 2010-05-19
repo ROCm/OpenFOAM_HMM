@@ -287,16 +287,25 @@ void Foam::decompositionMethod::calcCSR
 
     forAll(pbm, patchI)
     {
-        if (isA<cyclicPolyPatch>(pbm[patchI]))
+        if
+        (
+            isA<cyclicPolyPatch>(pbm[patchI])
+         && refCast<const cyclicPolyPatch>(pbm[patchI]).owner()
+        )
         {
-            const unallocLabelList& faceCells = pbm[patchI].faceCells();
+            const cyclicPolyPatch& cycPatch = refCast<const cyclicPolyPatch>
+            (
+                pbm[patchI]
+            );
 
-            label sizeby2 = faceCells.size()/2;
+            const unallocLabelList& faceCells = cycPatch.faceCells();
+            const unallocLabelList& nbrCells =
+                cycPatch.neighbPatch().faceCells();
 
-            for (label faceI=0; faceI<sizeby2; faceI++)
+            forAll(faceCells, facei)
             {
-                label own = faceCells[faceI];
-                label nei = faceCells[faceI + sizeby2];
+                label own = faceCells[facei];
+                label nei = nbrCells[facei];
 
                 if (cellPair.insert(edge(own, nei)))
                 {
@@ -348,16 +357,25 @@ void Foam::decompositionMethod::calcCSR
     cellPair.clear();
     forAll(pbm, patchI)
     {
-        if (isA<cyclicPolyPatch>(pbm[patchI]))
+        if
+        (
+            isA<cyclicPolyPatch>(pbm[patchI])
+         && refCast<const cyclicPolyPatch>(pbm[patchI]).owner()
+        )
         {
-            const unallocLabelList& faceCells = pbm[patchI].faceCells();
+            const cyclicPolyPatch& cycPatch = refCast<const cyclicPolyPatch>
+            (
+                pbm[patchI]
+            );
 
-            label sizeby2 = faceCells.size()/2;
+            const unallocLabelList& faceCells = cycPatch.faceCells();
+            const unallocLabelList& nbrCells =
+                cycPatch.neighbPatch().faceCells();
 
-            for (label faceI=0; faceI<sizeby2; faceI++)
+            forAll(faceCells, facei)
             {
-                label own = faceCells[faceI];
-                label nei = faceCells[faceI + sizeby2];
+                label own = faceCells[facei];
+                label nei = nbrCells[facei];
 
                 if (cellPair.insert(edge(own, nei)))
                 {
@@ -479,7 +497,7 @@ void Foam::decompositionMethod::calcDistributedCSR
     }
 
     // Get the cell on the other side of coupled patches
-    syncTools::swapBoundaryFaceList(mesh, globalNeighbour, false);
+    syncTools::swapBoundaryFaceList(mesh, globalNeighbour);
 
 
     // Count number of faces (internal + coupled)

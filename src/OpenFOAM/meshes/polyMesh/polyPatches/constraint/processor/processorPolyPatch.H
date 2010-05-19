@@ -40,6 +40,8 @@ SourceFiles
 #define processorPolyPatch_H
 
 #include "coupledPolyPatch.H"
+#include "polyBoundaryMesh.H"
+#include "faceListFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,23 +72,11 @@ class processorPolyPatch
 
         //- Corresponding neighbouring local point label for every local point
         //  (so localPoints()[i] == neighb.localPoints()[neighbPoints_[i]])
-        mutable labelList* neighbPointsPtr_;
+        mutable autoPtr<labelList> neighbPointsPtr_;
 
         //- Corresponding neighbouring local edge label for every local edge
         //  (so edges()[i] == neighb.edges()[neighbEdges_[i]])
-        mutable labelList* neighbEdgesPtr_;
-
-
-
-    // Private static data
-
-        //- Whether to use geometric or topological matching
-        static bool geometricMatch_;
-
-        //- Relative tolerance (for geometric matching only). Is factor of
-        //  maximum edge length per face.
-        static scalar matchTol_;
-
+        mutable autoPtr<labelList> neighbEdgesPtr_;
 
 protected:
 
@@ -97,6 +87,22 @@ protected:
 
         //- Calculate the patch geometry
         void calcGeometry(PstreamBuffers&);
+
+        //- Calculate the patch geometry with externally
+        //  provided geometry
+        virtual void calcGeometry
+        (
+            const primitivePatch& referPatch,
+            const UList<point>& thisCtrs,
+            const UList<point>& thisAreas,
+            const UList<point>& thisCc,
+            const UList<point>& nbrCtrs,
+            const UList<point>& nbrAreas,
+            const UList<point>& nbrCc
+        )
+        {
+            notImplemented("processorPolyPatch::calcGeometry(..)");
+        }
 
         //- Initialise the patches for moving points
         void initMovePoints(PstreamBuffers&, const pointField&);
@@ -236,7 +242,7 @@ public:
         }
 
         //- Does the processor own the patch ?
-        bool owner() const
+        virtual bool owner() const
         {
             return (myProcNo_ < neighbProcNo_);
         }
@@ -265,16 +271,21 @@ public:
             return neighbFaceCellCentres_;
         }
 
-        //- Return neighbour point labels. This is for my local point (-1 or)
-        //  the corresponding local point on the other side. It is -1 if
-        //  there are multiple corresponding points on this or the other side
-        //  (can happen for cyclics being converted into proc patches)
+        //- Return neighbour point labels. WIP.
         const labelList& neighbPoints() const;
 
-        //- Return neighbour edge labels. This is for my local edge (-1 or) the
-        //  corresponding local edge on the other side. See above for -1 cause.
+        //- Return neighbour edge labels. WIP.
         const labelList& neighbEdges() const;
 
+        //- Return message tag to use for communication
+        virtual int tag() const
+        {
+            return Pstream::msgType();
+        }
+
+        //- Transform a patch-based position from other side to this side
+        virtual void transformPosition(pointField& l) const
+        {}
 
         //- Initialize ordering for primitivePatch. Does not
         //  refer to *this (except for name() and type() etc.)

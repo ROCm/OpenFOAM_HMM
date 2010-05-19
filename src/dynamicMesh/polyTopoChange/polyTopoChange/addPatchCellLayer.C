@@ -34,6 +34,7 @@ License
 #include "polyModifyFace.H"
 #include "polyAddCell.H"
 #include "globalIndex.H"
+#include "dummyTransform.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -103,8 +104,8 @@ Foam::labelListList Foam::addPatchCellLayer::calcGlobalEdgeFaces
         mesh,
         globalEdgeFaces,
         uniqueEqOp(),
-        labelList(),    // null value
-        false           // no separation
+        labelList(),            // null value
+        Foam::dummyTransform()  // dummy transform
     );
 
     // Extract pp part
@@ -636,7 +637,7 @@ void Foam::addPatchCellLayer::setRefinement
         {
             labelList n(mesh_.nPoints(), 0);
             UIndirectList<label>(n, meshPoints) = nPointLayers;
-            syncTools::syncPointList(mesh_, n, maxEqOp<label>(), 0, false);
+            syncTools::syncPointList(mesh_, n, maxEqOp<label>(), 0);
 
             // Non-synced
             forAll(meshPoints, i)
@@ -680,8 +681,7 @@ void Foam::addPatchCellLayer::setRefinement
                 mesh_,
                 nFromFace,
                 maxEqOp<label>(),
-                0,
-                false
+                0
             );
 
             forAll(nPointLayers, i)
@@ -718,8 +718,7 @@ void Foam::addPatchCellLayer::setRefinement
                 mesh_,
                 d,
                 minEqOp<vector>(),
-                vector::max,
-                false
+                vector::max
             );
 
             forAll(meshPoints, i)
@@ -1190,8 +1189,7 @@ void Foam::addPatchCellLayer::setRefinement
             mesh_,
             meshEdgeLayers,
             maxEqOp<label>(),
-            0,                  // initial value
-            false               // no separation
+            0                   // initial value
         );
 
         forAll(meshEdges, edgeI)

@@ -54,7 +54,7 @@ class WallModel
 {
     // Private data
 
-        //- The cloud dictionary
+        //- The CollisionModel dictionary
         const dictionary& dict_;
 
         //- Reference to the owner cloud class
@@ -120,6 +120,9 @@ public:
 
     // Member Functions
 
+        //- Return the effective radius for a particle for the model
+        virtual scalar pREff(const typename CloudType::parcelType& p) const = 0;
+
         //- Whether the WallModel has a timestep limit that will
         //  require subCycling
         virtual bool controlsTimestep() const = 0;
@@ -133,8 +136,10 @@ public:
         virtual void evaluateWall
         (
             typename CloudType::parcelType& p,
-            const List<point>& flatSites,
-            const List<point>& sharpSites
+            const List<point>& flatSitePoints,
+            const List<WallSiteData<vector> >& flatSiteData,
+            const List<point>& sharpSitePoints,
+            const List<WallSiteData<vector> >& sharpSiteData
         ) const = 0;
 };
 

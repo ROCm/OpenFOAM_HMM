@@ -1,0 +1,113 @@
+Short overview of the changes to have cyclics split into two halves.
+
+Cyclics
+-------
+The two cyclic halves are now split like processor patches. There should be no
+difference in running.
+
+Advantages:
+- decomposed cyclics can now be handled properly. It just needs to preserve
+the cyclic patch it originates from.
+- We can now construct a table of global transformations and handle
+points/edges/cells with transformations.
+- face ordering after topological changes becomes much easier since we
+now preserve what half the face comes from.
+- cyclic handling becomes more consistent with processor handling and can
+quite often be handled in the same condition.
+- transformation tensors now become single entry.
+
+The disadvantages:
+- a patch-wise loop now might need to store data to go to the neighbour half
+since it is no longer handled in a single patch.
+- decomposed cyclics now require overlapping communications so will
+only work in non-blocking mode. Hence the underlying message passing library
+will require overlapping communications with message tags.
+- it is quite a code-change and there might be some oversights.
+- once converted (see foamUpgradeCyclics below) cases are not backwards
+compatible with previous versions.
+
+
+blockMesh
+---------
+blockMeshDict now allows patch definition using the construct-from-dictionary
+constructor. This helps defining patches that require additional input e.g.
+directMapped and now cyclic:
+
+boundary         
+(
+    sides2_half0
+    {
+        type            cyclic;
+        neighbourPatch  sides2_half1;
+        faces           ((2 4 5 3));
+    }
+
+The syntax is - like the polyMesh/boundary file - a list of dictionaries with
+one additional entry 'faces' for the block faces. Above shows the new
+required entry 'neighbourPatch' for cyclic.
+
+blockMesh still reads the old format. For a cyclic it will automatically
+introduce two patches for the halves, with names xxx_half0 and xxx_half1.
+
+
+foamUpgradeCyclics
+------------------
+This is a tool which reads the polyMesh/boundary file and any vol/surface/point
+fields and converts them.
+It will check if anything needs to be converted, backup the current file to .old
+and split any cyclic patchFields into two entries.
+
+
+decomposePar
+------------
+Decomposes cyclics into processorCyclic:
+
+    procBoundary0to1throughsides1_half0
+    {
+        type            processorCyclic;
+        nFaces          1000;
+        startFace       91350;
+        myProcNo        0;
+        neighbProcNo    1;
+        referPatch      sides1_half0;
+    }
+
+They have an additional 'referPatch' entry which gives the (cyclic) patch
+to use for any transformation.
+
+
+Details
+-------
+- the cyclic patch dictionary has an entry neighbourPatch. The
+patch has new member functions:
+
+    //- Get neighbouring patchID
+    label neighbPatchID() const
+
+    //- Get neighbouring patch
+    const cyclicPolyPatch& neighbPatch()
+
+    //- Am I the owner half
+    bool owner()
+
+The cyclic still has forward() and reverse() transformations (with
+the reverse() equal to the neighbPatch().forward()).
+
+There is no transformLocalFace anymore - the ordering is the same for
+both halves.
+
+
+- 'pure' processor patches now are always coincident - they (should) have no
+transformation. As said above cyclics are decomposed into a derived
+type 'processorCyclic'.
+
+
+- processor patches use overlapping communication using a different message
+tag. This maps straight through into the MPI message tag.
+
+
+- when constructing a GeometricField from a dictionary it will explicitly
+check for non-existing entries for cyclic patches and exit with an error message
+warning to run foamUpgradeCyclics.
+
+

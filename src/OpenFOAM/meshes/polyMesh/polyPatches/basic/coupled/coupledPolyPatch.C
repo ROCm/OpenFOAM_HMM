@@ -111,23 +111,6 @@ void Foam::coupledPolyPatch::writeOBJ
 }
 
 
-Foam::pointField Foam::coupledPolyPatch::calcFaceCentres
-(
-    const UList<face>& faces,
-    const pointField& points
-)
-{
-    pointField ctrs(faces.size());
-
-    forAll(faces, faceI)
-    {
-        ctrs[faceI] = faces[faceI].centre(points);
-    }
-
-    return ctrs;
-}
-
-
 Foam::pointField Foam::coupledPolyPatch::getAnchorPoints
 (
     const UList<face>& faces,
@@ -142,43 +125,6 @@ Foam::pointField Foam::coupledPolyPatch::getAnchorPoints
     }
 
     return anchors;
-}
-
-
-bool Foam::coupledPolyPatch::inPatch
-(
-    const labelList& oldToNew,
-    const label oldFaceI
-) const
-{
-    label faceI = oldToNew[oldFaceI];
-
-    return faceI >= start() && faceI < start()+size();
-}
-
-
-Foam::label Foam::coupledPolyPatch::whichPatch
-(
-    const labelList& patchStarts,
-    const label faceI
-)
-{
-    forAll(patchStarts, patchI)
-    {
-        if (patchStarts[patchI] <= faceI)
-        {
-            if (patchI == patchStarts.size()-1)
-            {
-                return patchI;
-            }
-            else if (patchStarts[patchI+1] > faceI)
-            {
-                return patchI;
-            }
-        }
-    }
-
-    return -1;
 }
 
 
@@ -266,7 +212,8 @@ void Foam::coupledPolyPatch::calcTransformTensors
         Pout<< "coupledPolyPatch::calcTransformTensors : " << name() << endl
             << "    (half)size:" << Cf.size() << nl
             << "    absTol:" << absTol << nl
-            //<< "    smallDist:" << smallDist << nl
+            << "    smallDist min:" << min(smallDist) << nl
+            << "    smallDist max:" << max(smallDist) << nl
             << "    sum(mag(nf & nr)):" << sum(mag(nf & nr)) << endl;
     }
 
@@ -278,7 +225,7 @@ void Foam::coupledPolyPatch::calcTransformTensors
     // Then the overall error of summing the normals is sqrt(size())*absTol
     // - separation calculation: pass in from the outside an allowable error.
 
-    if (size() == 0)
+    if (Cf.size() == 0)
     {
         // Dummy geometry.
         separation_.setSize(0);

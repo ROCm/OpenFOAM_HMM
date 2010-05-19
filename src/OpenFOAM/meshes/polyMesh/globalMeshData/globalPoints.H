@@ -158,10 +158,6 @@ class globalPoints
 
     // Private Member Functions
 
-        //- Return per point collocated status
-        static PackedBoolList collocatedPoints(const coupledPolyPatch&);
-
-
         // Wrappers around global point numbering to add collocated bit
 
             //- Convert into globalIndices and add collocated bit
@@ -300,9 +296,8 @@ class globalPoints
             DynamicList<label>&
         );
 
-        //- Should move into cyclicPolyPatch ordering problem
-        //  keeps on giving problems.
-        static edgeList coupledPoints(const cyclicPolyPatch&);
+        //- Return mesh points of other side in same order as my meshPoints.
+        static labelList reverseMeshPoints(const cyclicPolyPatch&);
 
         //- Do all calculations.
         void calculateSharedPoints

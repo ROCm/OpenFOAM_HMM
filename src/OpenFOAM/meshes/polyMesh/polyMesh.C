@@ -717,6 +717,7 @@ void Foam::polyMesh::resetPrimitives
                 "    const Xfer<labelList>& neighbour,\n"
                 "    const labelList& patchSizes,\n"
                 "    const labelList& patchStarts\n"
+                "    const bool validBoundary\n"
                 ")\n"
             )   << "Face " << faceI << " contains vertex labels out of range: "
                 << curFace << " Max point index = " << points_.size()
@@ -759,9 +760,9 @@ void Foam::polyMesh::resetPrimitives
                 "    const Xfer<labelList>& neighbour,\n"
                 "    const labelList& patchSizes,\n"
                 "    const labelList& patchStarts\n"
+                "    const bool validBoundary\n"
                 ")\n"
-            )
-                << "no points or no cells in mesh" << endl;
+            )   << "no points or no cells in mesh" << endl;
         }
     }
 }

@@ -79,7 +79,7 @@ void Foam::channelIndex::walkOppositeFaces
                 isFrontBndFace[faceI-mesh.nInternalFaces()] = true;
             }
         }
-        syncTools::swapBoundaryFaceList(mesh, isFrontBndFace, false);
+        syncTools::swapBoundaryFaceList(mesh, isFrontBndFace);
 
         // Add
         forAll(isFrontBndFace, i)

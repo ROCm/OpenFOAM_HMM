@@ -80,6 +80,8 @@ public:
         //  local and neighbour restrict addressing
         processorGAMGInterface
         (
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
             const lduInterface& fineInterface,
             const labelField& restrictAddressing,
             const labelField& neighbourRestrictAddressing
@@ -93,20 +95,6 @@ public:
     // Member Functions
 
         // Interface transfer functions
-
-            //- Initialise interface data transfer
-            virtual void initTransfer
-            (
-                const Pstream::commsTypes commsType,
-                const unallocLabelList& interfaceData
-            ) const;
-
-            //- Transfer and return neighbour field
-            virtual tmp<labelField> transfer
-            (
-                const Pstream::commsTypes commsType,
-                const unallocLabelList& interfaceData
-            ) const;
 
             //- Initialise neighbour field transfer
             virtual void initInternalFieldTransfer
@@ -142,6 +130,12 @@ public:
             {
                 return fineProcInterface_.forwardT();
             }
+
+            //- Return message tag used for sending
+            virtual int tag() const
+            {
+                return fineProcInterface_.tag();
+            }   
 };
 
 

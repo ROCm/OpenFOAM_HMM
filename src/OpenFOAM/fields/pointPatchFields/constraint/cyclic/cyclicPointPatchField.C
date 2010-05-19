@@ -25,6 +25,8 @@ License
 
 #include "cyclicPointPatchField.H"
 #include "Swap.H"
+#include "transformField.H"
+#include "pointFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -127,28 +129,57 @@ void cyclicPointPatchField<Type>::swapAddSeparated
     Field<Type>& pField
 ) const
 {
-    Field<Type> pf(this->patchInternalField(pField));
+    // Get neighbouring pointPatch
+    const cyclicPointPatch& nbrPatch = cyclicPatch_.neighbPatch();
 
-    const edgeList& pairs = cyclicPatch_.transformPairs();
-
-    if (doTransform())
+    if (cyclicPatch_.cyclicPatch().owner())
     {
-        forAll(pairs, pairi)
-        {
-            Type tmp = pf[pairs[pairi][0]];
-            pf[pairs[pairi][0]] = transform(forwardT()[0], pf[pairs[pairi][1]]);
-            pf[pairs[pairi][1]] = transform(reverseT()[0], tmp);
-        }
-    }
-    else
-    {
-        forAll(pairs, pairi)
-        {
-            Swap(pf[pairs[pairi][0]], pf[pairs[pairi][1]]);
-        }
-    }
+        // We inplace modify pField. To prevent the other side (which gets
+        // evaluated at a later date) using already changed values we do
+        // all swaps on the side that gets evaluated first.
 
-    addToInternalField(pField, pf, cyclicPatch_.separatedPoints());
+        // Get neighbouring pointPatchField
+        const GeometricField<Type, pointPatchField, pointMesh>& fld =
+            refCast<const GeometricField<Type, pointPatchField, pointMesh> >
+            (
+                this->dimensionedInternalField()
+            );
+
+        const cyclicPointPatchField<Type>& nbr =
+            refCast<const cyclicPointPatchField<Type> >
+            (
+                fld.boundaryField()[nbrPatch.index()]
+            );
+
+
+        Field<Type> pf(this->patchInternalField(pField));
+        Field<Type> nbrPf(nbr.patchInternalField(pField));
+
+        const edgeList& pairs = cyclicPatch_.transformPairs();
+
+        if (doTransform())
+        {
+            // Transform both sides.
+            forAll(pairs, pairi)
+            {
+                label pointi = pairs[pairi][0];
+                label nbrPointi = pairs[pairi][1];
+
+                Type tmp = pf[pointi];
+                pf[pointi] = transform(forwardT()[0], nbrPf[nbrPointi]);
+                nbrPf[nbrPointi] = transform(reverseT()[0], tmp);
+            }
+        }
+        else
+        {
+            forAll(pairs, pairi)
+            {
+                Swap(pf[pairs[pairi][0]], nbrPf[pairs[pairi][1]]);
+            }
+        }
+        addToInternalField(pField, pf);
+        nbr.addToInternalField(pField, nbrPf);
+    }
 }
 
 

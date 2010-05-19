@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cyclicFvPatchField.H"
+#include "transformField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -141,34 +142,28 @@ template<class Type>
 tmp<Field<Type> > cyclicFvPatchField<Type>::patchNeighbourField() const
 {
     const Field<Type>& iField = this->internalField();
-    const unallocLabelList& faceCells = cyclicPatch_.faceCells();
+    const unallocLabelList& nbrFaceCells =
+        cyclicPatch().cyclicPatch().neighbPatch().faceCells();
 
     tmp<Field<Type> > tpnf(new Field<Type>(this->size()));
     Field<Type>& pnf = tpnf();
 
-    label sizeby2 = this->size()/2;
 
     if (doTransform())
     {
-        for (label facei=0; facei<sizeby2; facei++)
+        forAll(pnf, facei)
         {
             pnf[facei] = transform
             (
-                forwardT()[0], iField[faceCells[facei + sizeby2]]
-            );
-
-            pnf[facei + sizeby2] = transform
-            (
-                reverseT()[0], iField[faceCells[facei]]
+                forwardT()[0], iField[nbrFaceCells[facei]]
             );
         }
     }
     else
     {
-        for (label facei=0; facei<sizeby2; facei++)
+        forAll(pnf, facei)
         {
-            pnf[facei] = iField[faceCells[facei + sizeby2]];
-            pnf[facei + sizeby2] = iField[faceCells[facei]];
+            pnf[facei] = iField[nbrFaceCells[facei]];
         }
     }
 
@@ -189,19 +184,20 @@ void cyclicFvPatchField<Type>::updateInterfaceMatrix
 {
     scalarField pnf(this->size());
 
-    label sizeby2 = this->size()/2;
-    const unallocLabelList& faceCells = cyclicPatch_.faceCells();
+    const unallocLabelList& nbrFaceCells =
+        cyclicPatch().cyclicPatch().neighbPatch().faceCells();
 
-    for (label facei=0; facei<sizeby2; facei++)
+    forAll(pnf, facei)
     {
-        pnf[facei] = psiInternal[faceCells[facei + sizeby2]];
-        pnf[facei + sizeby2] = psiInternal[faceCells[facei]];
+        pnf[facei] = psiInternal[nbrFaceCells[facei]];
     }
 
     // Transform according to the transformation tensors
     transformCoupleField(pnf, cmpt);
 
     // Multiply the field by coefficients and add into the result
+    const unallocLabelList& faceCells = cyclicPatch_.faceCells();
+
     forAll(faceCells, elemI)
     {
         result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];

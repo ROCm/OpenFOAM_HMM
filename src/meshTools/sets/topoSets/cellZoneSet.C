@@ -26,8 +26,6 @@ License
 #include "cellZoneSet.H"
 #include "mapPolyMesh.H"
 #include "polyMesh.H"
-#include "processorPolyPatch.H"
-#include "cyclicPolyPatch.H"
 
 #include "addToRunTimeSelectionTable.H"
 

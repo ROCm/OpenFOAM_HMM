@@ -56,49 +56,6 @@ void Foam::PointEdgeWave<Type>::offset(const label val, labelList& elems)
 // - list of halfA points (in cyclic patch points)
 // - list of halfB points (can overlap with A!)
 // - for every patchPoint its corresponding point
-template <class Type>
-void Foam::PointEdgeWave<Type>::calcCyclicAddressing()
-{
-    label cycHalf = 0;
-
-    forAll(mesh_.boundaryMesh(), patchI)
-    {
-        const polyPatch& patch = mesh_.boundaryMesh()[patchI];
-
-        if (isA<cyclicPolyPatch>(patch))
-        {
-            label halfSize = patch.size()/2;
-
-            SubList<face> halfAFaces
-            (
-                mesh_.faces(),
-                halfSize,
-                patch.start()
-            );
-
-            cycHalves_.set
-            (
-                cycHalf++,
-                new primitivePatch(halfAFaces, mesh_.points())
-            );
-
-            SubList<face> halfBFaces
-            (
-                mesh_.faces(),
-                halfSize,
-                patch.start() + halfSize
-            );
-
-            cycHalves_.set
-            (
-                cycHalf++,
-                new primitivePatch(halfBFaces, mesh_.points())
-            );
-        }
-    }
-}
-
-
 // Handle leaving domain. Implementation referred to Type
 template <class Type>
 void Foam::PointEdgeWave<Type>::leaveDomain
@@ -575,96 +532,57 @@ void Foam::PointEdgeWave<Type>::handleCyclicPatches()
     // 1. Send all point info on cyclic patches. Send as
     // face label + offset in face.
 
-    label cycHalf = 0;
-
     forAll(mesh_.boundaryMesh(), patchI)
     {
         const polyPatch& patch = mesh_.boundaryMesh()[patchI];
 
         if (isA<cyclicPolyPatch>(patch))
         {
-            const primitivePatch& halfA = cycHalves_[cycHalf++];
-            const primitivePatch& halfB = cycHalves_[cycHalf++];
-
-            // HalfA : get all changed points in relative addressing
-
-            DynamicList<Type> halfAInfo(halfA.nPoints());
-            DynamicList<label> halfAPoints(halfA.nPoints());
-            DynamicList<label> halfAOwner(halfA.nPoints());
-            DynamicList<label> halfAIndex(halfA.nPoints());
-
-            getChangedPatchPoints
-            (
-                halfA,
-                halfAInfo,
-                halfAPoints,
-                halfAOwner,
-                halfAIndex
-            );
-
-            // HalfB : get all changed points in relative addressing
-
-            DynamicList<Type> halfBInfo(halfB.nPoints());
-            DynamicList<label> halfBPoints(halfB.nPoints());
-            DynamicList<label> halfBOwner(halfB.nPoints());
-            DynamicList<label> halfBIndex(halfB.nPoints());
-
-            getChangedPatchPoints
-            (
-                halfB,
-                halfBInfo,
-                halfBPoints,
-                halfBOwner,
-                halfBIndex
-            );
-
-
-            // HalfA : adapt for leaving domain
-            leaveDomain(patch, halfA, halfAPoints, halfAInfo);
-
-            // HalfB : adapt for leaving domain
-            leaveDomain(patch, halfB, halfBPoints, halfBInfo);
-
-
-            // Apply rotation for non-parallel planes
             const cyclicPolyPatch& cycPatch =
                 refCast<const cyclicPolyPatch>(patch);
+
+            const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
+
+            DynamicList<Type> nbrInfo(nbrPatch.nPoints());
+            DynamicList<label> nbrPoints(nbrPatch.nPoints());
+            DynamicList<label> nbrOwner(nbrPatch.nPoints());
+            DynamicList<label> nbrIndex(nbrPatch.nPoints());
+
+            getChangedPatchPoints
+            (
+                nbrPatch,
+                nbrInfo,
+                nbrPoints,
+                nbrOwner,
+                nbrIndex
+            );
+
+            // nbr : adapt for leaving domain
+            leaveDomain(nbrPatch, nbrPatch, nbrPoints, nbrInfo);
+
+            // Apply rotation for non-parallel planes
 
             if (!cycPatch.parallel())
             {
                 // received data from half1
-                transform(cycPatch.forwardT(), halfAInfo);
-
-                // received data from half2
-                transform(cycPatch.reverseT(), halfBInfo);
+                transform(cycPatch.forwardT(), nbrInfo);
             }
 
             if (debug)
             {
                 Pout<< "Cyclic patch " << patchI << ' ' << patch.name()
-                    << "  Changed on first half : " << halfAInfo.size()
-                    << "  Changed on second half : " << halfBInfo.size()
+                    << "  Changed : " << nbrInfo.size()
                     << endl;
             }
 
             // Half1: update with data from halfB
             updateFromPatchInfo
             (
-                patch,
-                halfA,
-                halfBOwner,
-                halfBIndex,
-                halfBInfo
-            );
-
-            // Half2: update with data from halfA
-            updateFromPatchInfo
-            (
-                patch,
-                halfB,
-                halfAOwner,
-                halfAIndex,
-                halfAInfo
+                cycPatch,
+                cycPatch,
+                nbrOwner,
+                nbrIndex,
+                nbrInfo
             );
 
             if (debug)
@@ -703,7 +621,6 @@ Foam::PointEdgeWave<Type>::PointEdgeWave
     changedEdges_(mesh_.nEdges()),
     nChangedEdges_(0),
     nCyclicPatches_(countPatchType<cyclicPolyPatch>()),
-    cycHalves_(2*nCyclicPatches_),
     nEvals_(0),
     nUnvisitedPoints_(mesh_.nPoints()),
     nUnvisitedEdges_(mesh_.nEdges())
@@ -733,13 +650,6 @@ Foam::PointEdgeWave<Type>::PointEdgeWave
             << "    edgeInfo   :" << allEdgeInfo_.size() << endl
             << "    mesh.nEdges:" << mesh_.nEdges()
             << exit(FatalError);
-    }
-
-
-    // Calculate cyclic halves addressing.
-    if (nCyclicPatches_ > 0)
-    {
-        calcCyclicAddressing();
     }
 
 

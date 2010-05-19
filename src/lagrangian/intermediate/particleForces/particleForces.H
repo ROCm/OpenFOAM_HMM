@@ -40,6 +40,7 @@ SourceFiles
 #include "Switch.H"
 #include "vector.H"
 #include "volFieldsFwd.H"
+#include "interpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,6 +69,9 @@ class particleForces
 
         //- Velocity gradient field
         const volTensorField* gradUPtr_;
+
+        //- HdotGradH interpolator
+        const interpolation<vector>* HdotGradHInterPtr_;
 
 
         // Forces to include in particle motion evaluation
@@ -99,6 +103,12 @@ class particleForces
             //- Name of paramagnetic field strength field - default =
             //  "HdotGradH"
             const word HdotGradHName_;
+
+
+    // Private Member Functions
+
+        //- Delete cached carrier fields
+        void deleteFields();
 
 
 public:
@@ -159,11 +169,16 @@ public:
        // Evaluation
 
             //- Cache carrier fields
-            void cacheFields(const bool store);
+            void cacheFields
+            (
+                const bool store,
+                const dictionary& interpolationSchemes
+            );
 
             //- Calculate action/reaction forces between carrier and particles
             vector calcCoupled
             (
+                const vector& position,
                 const label cellI,
                 const scalar dt,
                 const scalar rhoc,
@@ -176,6 +191,7 @@ public:
             //- Calculate external forces applied to the particles
             vector calcNonCoupled
             (
+                const vector& position,
                 const label cellI,
                 const scalar dt,
                 const scalar rhoc,

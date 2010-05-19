@@ -1,4 +1,4 @@
-    Info<< "Reading transportProperties\n" << endl;
+    Info<< "\nReading transportProperties\n" << endl;
 
     IOdictionary transportProperties
     (
@@ -31,7 +31,7 @@
         rhoInfValue
     );
 
-    Info<< "\nReading field U\n" << endl;
+    Info<< "Reading field U\n" << endl;
     volVectorField U
     (
         IOobject
@@ -127,7 +127,7 @@
 
     if (HdotGradHheader.headerOk())
     {
-        Info<< "\nReading field HdotGradH\n" << endl;
+        Info<< "Reading field HdotGradH" << endl;
 
         HdotGradHPtr_.reset
         (

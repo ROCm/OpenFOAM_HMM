@@ -129,10 +129,11 @@ void Foam::InjectionModel<CloudType>::prepareForNextTimeStep
 
 
 template<class CloudType>
-void Foam::InjectionModel<CloudType>::findCellAtPosition
+bool Foam::InjectionModel<CloudType>::findCellAtPosition
 (
     label& cellI,
-    vector& position
+    vector& position,
+    bool errorOnNotFound
 )
 {
     const volVectorField& cellCentres = owner_.mesh().C();
@@ -176,17 +177,26 @@ void Foam::InjectionModel<CloudType>::findCellAtPosition
 
     if (procI == -1)
     {
-        FatalErrorIn
-        (
-            "Foam::InjectionModel<CloudType>::findCellAtPosition"
-            "("
-                "label&, "
-                "vector&"
-            ")"
-        )<< "Cannot find parcel injection cell. "
-         << "Parcel position = " << p0 << nl
-         << abort(FatalError);
+        if (errorOnNotFound)
+        {
+            FatalErrorIn
+            (
+                "Foam::InjectionModel<CloudType>::findCellAtPosition"
+                "("
+                    "label&, "
+                    "vector&"
+                ")"
+            )   << "Cannot find parcel injection cell. "
+                << "Parcel position = " << p0 << nl
+                << abort(FatalError);
+        }
+        else
+        {
+            return false;
+        }
     }
+
+    return true;
 }
 
 
@@ -212,7 +222,12 @@ Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
         }
         case pbNumber:
         {
-            nP = massTotal_/(rho*volumeTotal_*parcels);
+            nP = massTotal_/(rho*volumeTotal_);
+            break;
+        }
+        case pbFixed:
+        {
+            nP = nParticleFixed_;
             break;
         }
         default:
@@ -285,6 +300,7 @@ Foam::InjectionModel<CloudType>::InjectionModel(CloudType& owner)
     nInjections_(0),
     parcelsAddedTotal_(0),
     parcelBasis_(pbNumber),
+    nParticleFixed_(0.0),
     time0_(0.0),
     timeStep0_(0.0)
 {
@@ -310,6 +326,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
     nInjections_(0),
     parcelsAddedTotal_(0),
     parcelBasis_(pbNumber),
+    nParticleFixed_(0.0),
     time0_(owner.db().time().value()),
     timeStep0_(0.0)
 {
@@ -320,6 +337,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
         << endl;
 
     const word parcelBasisType = coeffDict_.lookup("parcelBasisType");
+
     if (parcelBasisType == "mass")
     {
         parcelBasis_ = pbMass;
@@ -327,6 +345,16 @@ Foam::InjectionModel<CloudType>::InjectionModel
     else if (parcelBasisType == "number")
     {
         parcelBasis_ = pbNumber;
+    }
+    else if (parcelBasisType == "fixed")
+    {
+        parcelBasis_ = pbFixed;
+
+        Info<< "    Choosing nParticle to be a fixed value, massTotal "
+            << "variable now does not determine anything."
+            << endl;
+
+        nParticleFixed_ = readScalar(coeffDict_.lookup("nParticle"));
     }
     else
     {
@@ -338,7 +366,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
                 "CloudType&, "
                 "const word&"
             ")"
-        )<< "parcelBasisType must be either 'number' or 'mass'" << nl
+        )<< "parcelBasisType must be either 'number', 'mass' or 'fixed'" << nl
          << exit(FatalError);
     }
 

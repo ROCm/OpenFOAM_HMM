@@ -182,8 +182,8 @@ public:
 
         // Constructors
 
-           //- Construct from components
-           inline trackData
+            //- Construct from components
+            inline trackData
             (
                 KinematicCloud<ParcelType>& cloud,
                 const constantProperties& constProps,
