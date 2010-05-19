@@ -23,18 +23,52 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fixedShearStressFvPatchVectorField
+    ABLInletVelocityFvPatchVectorField
 
 Description
-    Set a constant shear stress as tau0 = -nuEff dU/dn.
+    Boundary condition specifies a atmospheric boundary layer (ABL)
+    velocity inlet profile given the friction velocity value,
+    flow direction n and direction of the parabolic coordinate z.
+
+    @verbatim
+        U = (Ustar/K) ln((z + z0)/z0)
+
+    where:
+
+        Ustar is the frictional velocity
+        K is karman's constant
+        z0 is the surface roughness lenght
+        z is the verical coordinate
+
+    and:
+
+        Ustar = K Uref/ln((Zref + z0)/z0)
+
+    where:
+
+        Uref is the reference velocity at Zref
+        Zref is the reference height.
+
+    @endverbatim
+
+    Reference:
+    D.M. Hargreaves and N.G. Wright
+    "On the use of the k-epsilon model in commercial CFD software to model the
+     neutral atmospheric boundary layer"
+    Journal of Wind Engineering and Industrial Aerodynamics 95(2007) 355-369.
+
+NOTE: D.M. Hargreaves and N.G. Wright recommend Gamma epsilon in the k-epsilon
+      model should be changed from 1.3 to 1.11 for consistency.
+      The roughness height (Er) is given by Er = 20 z0 following the same
+      reference
 
 SourceFiles
-    fixedShearStressFvPatchVectorField.C
+    ABLInletVelocityFvPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedShearStressFvPatchVectorField_H
-#define fixedShearStressFvPatchVectorField_H
+#ifndef ABLInletVelocityFvPatchVectorField_H
+#define ABLInletVelocityFvPatchVectorField_H
 
 #include "fvPatchFields.H"
 #include "fixedValueFvPatchFields.H"
@@ -45,56 +79,63 @@ namespace Foam
 {
 namespace incompressible
 {
+
 /*---------------------------------------------------------------------------*\
-            Class fixedShearStressFvPatchVectorField Declaration
+             Class ABLInletVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
-class fixedShearStressFvPatchVectorField
+class ABLInletVelocityFvPatchVectorField
 :
     public fixedValueFvPatchVectorField
 {
     // Private data
 
-        //- Constant shear stress
-        vector tau0_;
+        //- Friction velocity
+        scalar Ustar_;
 
+        //- Flow direction
+        vector n_;
+
+        //- Direction of the z-coordinate
+        vector z_;
+
+        //- Surface roughness lenght
+        scalar z0_;
+
+        //- Von Karman constant
+        scalar kappa_;
 
 public:
 
     //- Runtime type information
-    TypeName("fixedShearStress");
+    TypeName("ABLInletVelocity");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        fixedShearStressFvPatchVectorField
+        ABLInletVelocityFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        fixedShearStressFvPatchVectorField
+        ABLInletVelocityFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given
-        fixedShearStressFvPatchVectorField
+        //- Construct by mapping given ABLInletVelocityFvPatchVectorField
+        //  onto a new patch
+        ABLInletVelocityFvPatchVectorField
         (
-            const fixedShearStressFvPatchVectorField&,
+            const ABLInletVelocityFvPatchVectorField&,
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
             const fvPatchFieldMapper&
-        );
-
-        //- Construct as copy
-        fixedShearStressFvPatchVectorField
-        (
-            const fixedShearStressFvPatchVectorField&
         );
 
         //- Construct and return a clone
@@ -102,14 +143,14 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new fixedShearStressFvPatchVectorField(*this)
+                new ABLInletVelocityFvPatchVectorField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        fixedShearStressFvPatchVectorField
+        ABLInletVelocityFvPatchVectorField
         (
-            const fixedShearStressFvPatchVectorField&,
+            const ABLInletVelocityFvPatchVectorField&,
             const DimensionedField<vector, volMesh>&
         );
 
@@ -121,14 +162,32 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new fixedShearStressFvPatchVectorField(*this, iF)
+                new ABLInletVelocityFvPatchVectorField(*this, iF)
             );
         }
 
 
     // Member functions
 
-        //- Update the coefficients associated with the patch field
+        //- Return max value
+        scalar& Ustar()
+        {
+            return Ustar_;
+        }
+
+        //- Return flow direction
+        vector& n()
+        {
+            return n_;
+        }
+
+        //- Return y direction
+        vector& z()
+        {
+            return z_;
+        }
+
+        //- Update coefficients
         virtual void updateCoeffs();
 
         //- Write
@@ -140,6 +199,7 @@ public:
 
 } // End namespace incompressible
 } // End namespace Foam
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif

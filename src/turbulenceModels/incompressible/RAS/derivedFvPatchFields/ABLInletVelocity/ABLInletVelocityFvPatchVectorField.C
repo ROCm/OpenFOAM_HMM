@@ -24,11 +24,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fixedShearStressFvPatchVectorField.H"
+#include "ABLInletVelocityFvPatchVectorField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
-#include "RASModel.H"
+#include "surfaceFields.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -38,20 +39,39 @@ namespace incompressible
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-fixedShearStressFvPatchVectorField::
-fixedShearStressFvPatchVectorField
+ABLInletVelocityFvPatchVectorField::ABLInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    tau0_(vector::zero)
+    Ustar_(0),
+    n_(pTraits<vector>::zero),
+    z_(pTraits<vector>::zero),
+    z0_(0),
+    kappa_(0.41)
 {}
 
 
-fixedShearStressFvPatchVectorField::
-fixedShearStressFvPatchVectorField
+ABLInletVelocityFvPatchVectorField::ABLInletVelocityFvPatchVectorField
+(
+    const ABLInletVelocityFvPatchVectorField& ptf,
+    const fvPatch& p,
+    const DimensionedField<vector, volMesh>& iF,
+    const fvPatchFieldMapper& mapper
+)
+:
+    fixedValueFvPatchVectorField(ptf, p, iF, mapper),
+    Ustar_(ptf.Ustar_),
+    n_(ptf.n_),
+    z_(ptf.z_),
+    z0_(ptf.z0_),
+    kappa_(ptf.kappa_)
+{}
+
+
+ABLInletVelocityFvPatchVectorField::ABLInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
@@ -59,106 +79,76 @@ fixedShearStressFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    tau0_(dict.lookupOrDefault<vector>("tau", vector::zero))
+    Ustar_(readScalar(dict.lookup("Ustar"))),
+    n_(dict.lookup("n")),
+    z_(dict.lookup("z")),
+    z0_(readScalar(dict.lookup("z0"))),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41))
 {
-    fvPatchField<vector>::operator=(patchInternalField());
+    if (mag(n_) < SMALL || mag(z_) < SMALL)
+    {
+        FatalErrorIn("ABLInletVelocityFvPatchVectorField(dict)")
+            << "n or z given with zero size not correct"
+            << abort(FatalError);
+    }
+
+    n_ /= mag(n_);
+    z_ /= mag(z_);
+
+    evaluate();
 }
 
 
-fixedShearStressFvPatchVectorField::
-fixedShearStressFvPatchVectorField
+ABLInletVelocityFvPatchVectorField::ABLInletVelocityFvPatchVectorField
 (
-    const fixedShearStressFvPatchVectorField& ptf,
-    const fvPatch& p,
-    const DimensionedField<vector, volMesh>& iF,
-    const fvPatchFieldMapper& mapper
-)
-:
-    fixedValueFvPatchVectorField(ptf, p, iF, mapper),
-    tau0_(ptf.tau0_)
-{}
-
-
-fixedShearStressFvPatchVectorField::
-fixedShearStressFvPatchVectorField
-(
-    const fixedShearStressFvPatchVectorField& ptf
-)
-:
-    fixedValueFvPatchVectorField(ptf),
-    tau0_(ptf.tau0_)
-{}
-
-
-fixedShearStressFvPatchVectorField::
-fixedShearStressFvPatchVectorField
-(
-    const fixedShearStressFvPatchVectorField& ptf,
+    const ABLInletVelocityFvPatchVectorField& fcvpvf,
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    fixedValueFvPatchVectorField(ptf, iF),
-    tau0_(ptf.tau0_)
+    fixedValueFvPatchVectorField(fcvpvf, iF),
+    Ustar_(fcvpvf.Ustar_),
+    n_(fcvpvf.n_),
+    z_(fcvpvf.z_),
+    z0_(fcvpvf.z0_),
+    kappa_(fcvpvf.kappa_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void fixedShearStressFvPatchVectorField::updateCoeffs()
+void ABLInletVelocityFvPatchVectorField::updateCoeffs()
 {
-    if (updated())
-    {
-        return;
-    }
-
-    const label patchI = patch().index();
-
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-
-    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-
-    const vectorField Ui = Uw.patchInternalField();
-
-    vector tauHat = tau0_/mag(tau0_);
-
-    const scalarField& ry = patch().deltaCoeffs();
-
-    scalarField nuEffw = rasModel.nuEff()().boundaryField()[patchI];
-
-    vectorField UwUpdated =
-        tauHat*(tauHat & (tau0_*(1.0/(ry*nuEffw)) + Ui));
-
-    operator==(UwUpdated);
-
-    if (debug)
-    {
-        vectorField nHat = this->patch().nf();
-        volSymmTensorField Reff = rasModel.devReff();
-        Info << "tau : " << (nHat & Reff.boundaryField()[patchI])() << endl;
-    }
-
-    fixedValueFvPatchVectorField::updateCoeffs();
+    const vectorField& c = patch().Cf();
+    scalarField coord = (c & z_);
+    vectorField::operator=(n_*(Ustar_/kappa_)*log((coord + z0_)/z0_));
 }
 
 
-void fixedShearStressFvPatchVectorField::write(Ostream& os) const
+// Write
+void ABLInletVelocityFvPatchVectorField::write(Ostream& os) const
 {
-    fixedValueFvPatchVectorField::write(os);
-    os.writeKeyword("tau") << tau0_ << token::END_STATEMENT << nl;
+    fvPatchVectorField::write(os);
+    os.writeKeyword("Ustar")
+        << Ustar_ << token::END_STATEMENT << nl;
+    os.writeKeyword("z0")
+        << z0_ << token::END_STATEMENT << nl;
+    os.writeKeyword("n")
+        << n_ << token::END_STATEMENT << nl;
+    os.writeKeyword("z")
+        << z_ << token::END_STATEMENT << nl;
+     os.writeKeyword("kappa")
+        << kappa_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchVectorField,
-    fixedShearStressFvPatchVectorField
-);
+makePatchTypeField(fvPatchVectorField, ABLInletVelocityFvPatchVectorField);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace incompressible
 } // End namespace Foam
+
 // ************************************************************************* //

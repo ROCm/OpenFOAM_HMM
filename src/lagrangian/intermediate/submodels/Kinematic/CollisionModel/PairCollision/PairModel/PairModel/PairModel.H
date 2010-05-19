@@ -54,7 +54,7 @@ class PairModel
 {
     // Private data
 
-        //- The cloud dictionary
+        //- The CollisionModel dictionary
         const dictionary& dict_;
 
         //- Reference to the owner cloud class

@@ -1,8 +1,8 @@
-/*---------------------------------------------------------------------------*\
+#/*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,54 +23,38 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NoCollision.H"
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::NoCollision<CloudType>::NoCollision
-(
-    const dictionary& dict,
-    CloudType& owner
-)
-:
-    CollisionModel<CloudType>(owner)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::NoCollision<CloudType>::~NoCollision()
-{}
-
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::label Foam::NoCollision<CloudType>::nSubCycles() const
+template<class Type>
+Foam::label Foam::WallSiteData<Type>::patchIndex() const
 {
-    return 1;
+    return patchI_;
 }
 
 
-template<class CloudType>
-bool Foam::NoCollision<CloudType>::active() const
+template<class Type>
+Foam::label& Foam::WallSiteData<Type>::patchIndex()
 {
-    return false;
+    return patchI_;
 }
 
 
-template<class CloudType>
-bool Foam::NoCollision<CloudType>::controlsWallInteraction() const
+template<class Type>
+const Type& Foam::WallSiteData<Type>::wallData() const
 {
-    return false;
+    return wallData_;
 }
 
 
-template<class CloudType>
-void Foam::NoCollision<CloudType>::collide()
-{}
+template<class Type>
+Type& Foam::WallSiteData<Type>::wallData()
+{
+    return wallData_;
+}
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

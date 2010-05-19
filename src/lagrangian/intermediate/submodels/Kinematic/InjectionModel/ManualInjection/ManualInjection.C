@@ -25,6 +25,8 @@ License
 
 #include "ManualInjection.H"
 #include "mathematicalConstants.H"
+#include "PackedBoolList.H"
+#include "Switch.H"
 
 using namespace Foam::constant::mathematical;
 
@@ -100,6 +102,40 @@ Foam::ManualInjection<CloudType>::ManualInjection
         )
     )
 {
+    Switch checkAndIgnoreOutOfBounds
+    (
+        this->coeffDict().lookupOrDefault("checkAndIgnoreOutOfBounds", false)
+    );
+
+    label nRejected = 0;
+
+    if (checkAndIgnoreOutOfBounds)
+    {
+        // Dummy cell
+        label cellI = -1;
+
+        PackedBoolList keep(positions_.size(), true);
+
+        forAll(positions_, pI)
+        {
+            if (!this->findCellAtPosition(cellI, positions_[pI], false))
+            {
+                keep[pI] = false;
+
+                nRejected++;
+            }
+        }
+
+        if (nRejected > 0)
+        {
+            inplaceSubset(keep, positions_);
+            inplaceSubset(keep, diameters_);
+
+            Info<< "    " << nRejected
+                << " particles ignored, out of bounds." << endl;
+        }
+    }
+
     // Construct parcel diameters
     forAll(diameters_, i)
     {
