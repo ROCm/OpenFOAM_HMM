@@ -21,16 +21,15 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 Class
-    Foam::LarsenBorgnakkeVariableHardSphere
+    Foam::NoBinaryCollision
 
 Description
-    Variable Hard Sphere BinaryCollision Model with Larsen Borgnakke internal
-    energy redistribution.  Based on the INELRS subroutine in Bird's DSMC0R.FOR
+    No collison BinaryCollision Model
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef LarsenBorgnakkeVariableHardSphere_H
-#define LarsenBorgnakkeVariableHardSphere_H
+#ifndef NoBinaryCollision_H
+#define NoBinaryCollision_H
 
 #include "BinaryCollisionModel.H"
 
@@ -39,44 +38,24 @@ Description
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                      Class LarsenBorgnakkeVariableHardSphere Declaration
+                      Class NoBinaryCollision Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class LarsenBorgnakkeVariableHardSphere
+class NoBinaryCollision
 :
     public BinaryCollisionModel<CloudType>
 {
-    // Private data
-
-        //- Reference temperature
-        const scalar Tref_;
-
-        //- Relaxation collision number
-        const scalar relaxationCollisionNumber_;
-
-
-    // Private Member Functions
-
-        //- Calculate the energy ratio for distribution to internal degrees of
-        // freedom
-        scalar energyRatio
-        (
-            scalar ChiA,
-            scalar ChiB
-        );
-
-
 public:
 
     //- Runtime type information
-    TypeName("LarsenBorgnakkeVariableHardSphere");
+    TypeName("none");
 
 
     // Constructors
 
         //- Construct from dictionary
-        LarsenBorgnakkeVariableHardSphere
+        NoBinaryCollision
         (
             const dictionary& dict,
             CloudType& cloud
@@ -84,7 +63,7 @@ public:
 
 
     //- Destructor
-    virtual ~LarsenBorgnakkeVariableHardSphere();
+    virtual ~NoBinaryCollision();
 
 
     // Member Functions
@@ -121,7 +100,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "LarsenBorgnakkeVariableHardSphere.C"
+#   include "NoBinaryCollision.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
