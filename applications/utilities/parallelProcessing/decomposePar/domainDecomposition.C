@@ -110,11 +110,7 @@ Foam::domainDecomposition::domainDecomposition(const IOobject& io)
     procProcessorPatchStartIndex_(nProcs_),
     cyclicParallel_(false)
 {
-    if (decompositionDict_.found("distributed"))
-    {
-        Switch distributed(decompositionDict_.lookup("distributed"));
-        distributed_ = distributed;
-    }
+    decompositionDict_.readIfPresent("distributed", distributed_);
 }
 
 

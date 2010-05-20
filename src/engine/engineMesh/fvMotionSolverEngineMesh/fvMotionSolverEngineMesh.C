@@ -45,10 +45,7 @@ Foam::fvMotionSolverEngineMesh::fvMotionSolverEngineMesh(const IOobject& io)
     pistonLayers_("pistonLayers", dimLength, 0.0),
     motionSolver_(*this, engineDB_.engineDict().lookup("motionSolver"))
 {
-    if (engineDB_.engineDict().found("pistonLayers"))
-    {
-        engineDB_.engineDict().lookup("pistonLayers") >> pistonLayers_;
-    }
+    engineDB_.engineDict().readIfPresent("pistonLayers", pistonLayers_);
 }
 
 

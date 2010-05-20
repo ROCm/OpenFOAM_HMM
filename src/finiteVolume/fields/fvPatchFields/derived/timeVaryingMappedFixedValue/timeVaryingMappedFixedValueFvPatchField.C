@@ -130,10 +130,7 @@ timeVaryingMappedFixedValueFvPatchField
             << endl;
     }
 
-    if (dict.found("fieldTableName"))
-    {
-        dict.lookup("fieldTableName") >> fieldTableName_;
-    }
+    dict.readIfPresent("fieldTableName", fieldTableName_);
 
     if (dict.found("value"))
     {

@@ -1,7 +1,6 @@
 word fluxScheme("Kurganov");
-if (mesh.schemesDict().found("fluxScheme"))
+if (mesh.schemesDict().readIfPresent("fluxScheme", fluxScheme))
 {
-    fluxScheme = word(mesh.schemesDict().lookup("fluxScheme"));
     if ((fluxScheme == "Tadmor") || (fluxScheme == "Kurganov"))
     {
         Info<< "fluxScheme: " << fluxScheme << endl;

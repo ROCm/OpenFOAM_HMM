@@ -43,10 +43,10 @@ namespace Foam
 
     addToRunTimeSelectionTable(polyPatch, cyclicPolyPatch, word);
     addToRunTimeSelectionTable(polyPatch, cyclicPolyPatch, dictionary);
-
+}
 
 template<>
-const char* NamedEnum<cyclicPolyPatch::transformType, 4>::names[] =
+const char* Foam::NamedEnum<Foam::cyclicPolyPatch::transformType, 4>::names[] =
 {
     "unknown",
     "rotational",
@@ -54,9 +54,8 @@ const char* NamedEnum<cyclicPolyPatch::transformType, 4>::names[] =
     "noOrdering"
 };
 
-const NamedEnum<cyclicPolyPatch::transformType, 4>
-    cyclicPolyPatch::transformTypeNames;
-}
+const Foam::NamedEnum<Foam::cyclicPolyPatch::transformType, 4>
+    Foam::cyclicPolyPatch::transformTypeNames;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
