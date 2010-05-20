@@ -1,27 +1,17 @@
-    dictionary piso = fluidRegions[i].solutionDict().subDict("PISO");
+    const dictionary& piso = fluidRegions[i].solutionDict().subDict("PISO");
 
-    int nCorr(readInt(piso.lookup("nCorrectors")));
+    const int nOuterCorr =
+        piso.lookupOrDefault<int>("nOuterCorrectors", 1);
 
-    int nNonOrthCorr = 0;
-    if (piso.found("nNonOrthogonalCorrectors"))
-    {
-        nNonOrthCorr = readInt(piso.lookup("nNonOrthogonalCorrectors"));
-    }
+    const int nCorr =
+        piso.lookupOrDefault<int>("nCorrectors", 1);
 
-    bool momentumPredictor = true;
-    if (piso.found("momentumPredictor"))
-    {
-        momentumPredictor = Switch(piso.lookup("momentumPredictor"));
-    }
+    const int nNonOrthCorr =
+        piso.lookupOrDefault<int>("nNonOrthogonalCorrectors", 0);
 
-    bool transonic = false;
-    if (piso.found("transonic"))
-    {
-        transonic = Switch(piso.lookup("transonic"));
-    }
+    const bool momentumPredictor =
+        piso.lookupOrDefault<bool>("momentumPredictor", true);
 
-    int nOuterCorr = 1;
-    if (piso.found("nOuterCorrectors"))
-    {
-        nOuterCorr = readInt(piso.lookup("nOuterCorrectors"));
-    }
+    const bool transonic =
+        piso.lookupOrDefault<bool>("transonic", false);
+

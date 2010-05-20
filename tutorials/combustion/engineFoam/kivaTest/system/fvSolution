@@ -46,7 +46,6 @@ PISO
     nCorrectors     2;
     nNonOrthogonalCorrectors 1;
     momentumPredictor yes;
-    fluxGradp       no;
 }
 
 

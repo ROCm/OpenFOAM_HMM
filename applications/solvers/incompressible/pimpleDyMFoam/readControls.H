@@ -1,14 +1,9 @@
-#   include "readTimeControls.H"
-#   include "readPIMPLEControls.H"
+    #include "readTimeControls.H"
+    #include "readPIMPLEControls.H"
 
-    bool correctPhi = false;
-    if (pimple.found("correctPhi"))
-    {
-        correctPhi = Switch(pimple.lookup("correctPhi"));
-    }
+    const bool correctPhi =
+        pimple.lookupOrDefault<bool>("correctPhi", false);
 
-    bool checkMeshCourantNo = false;
-    if (pimple.found("checkMeshCourantNo"))
-    {
-        checkMeshCourantNo = Switch(pimple.lookup("checkMeshCourantNo"));
-    }
+    const bool checkMeshCourantNo =
+        pimple.lookupOrDefault<bool>("checkMeshCourantNo", false);
+

@@ -1,14 +1,11 @@
-    dictionary simple = mesh.solutionDict().subDict("SIMPLE");
+    const dictionary& simple = mesh.solutionDict().subDict("SIMPLE");
 
-    int nNonOrthCorr =
+    const int nNonOrthCorr =
         simple.lookupOrDefault<int>("nNonOrthogonalCorrectors", 0);
 
-    bool momentumPredictor =
-        simple.lookupOrDefault<Switch>("momentumPredictor", true);
+    const bool momentumPredictor =
+        simple.lookupOrDefault<bool>("momentumPredictor", true);
 
-    bool fluxGradp =
-        simple.lookupOrDefault<Switch>("fluxGradp", false);
-
-    bool transonic =
-        simple.lookupOrDefault<Switch>("transonic", false);
+    const bool transonic =
+        simple.lookupOrDefault<bool>("transonic", false);
 

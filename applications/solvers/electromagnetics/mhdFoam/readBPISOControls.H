@@ -1,3 +1,4 @@
-const dictionary& Bpiso = mesh.solutionDict().subDict("BPISO");
+    const dictionary& Bpiso = mesh.solutionDict().subDict("BPISO");
 
-int nBcorr(readInt(Bpiso.lookup("nCorrectors")));
+    const int nBcorr = Bpiso.lookupOrDefault<int>("nCorrectors", 1);
+

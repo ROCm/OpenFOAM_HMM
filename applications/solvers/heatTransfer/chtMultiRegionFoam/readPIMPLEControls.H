@@ -4,4 +4,6 @@
 
     const dictionary& pimple = solutionDict.subDict("PIMPLE");
 
-    int nOuterCorr(readInt(pimple.lookup("nOuterCorrectors")));
+    const int nOuterCorr =
+        pimple.lookupOrDefault<int>("nOuterCorrectors", 1);
+
