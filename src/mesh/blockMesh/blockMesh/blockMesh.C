@@ -77,6 +77,24 @@ const Foam::polyMesh& Foam::blockMesh::topology() const
 }
 
 
+Foam::PtrList<Foam::dictionary> Foam::blockMesh::patchDicts() const
+{
+    const polyPatchList& patchTopologies = topology().boundaryMesh();
+
+    PtrList<dictionary> patchDicts(patchTopologies.size());
+
+    forAll(patchTopologies, patchI)
+    {
+        OStringStream os;
+        patchTopologies[patchI].write(os);
+        IStringStream is(os.str());
+        patchDicts.set(patchI, new dictionary(is));
+        patchDicts[patchI].set("name", patchTopologies[patchI].name());
+    }
+    return patchDicts;
+}
+
+
 Foam::scalar Foam::blockMesh::scaleFactor() const
 {
     return scaleFactor_;
@@ -116,22 +134,22 @@ const Foam::faceListList& Foam::blockMesh::patches() const
 }
 
 
-Foam::wordList Foam::blockMesh::patchNames() const
-{
-    return topology().boundaryMesh().names();
-}
-
-
-Foam::wordList Foam::blockMesh::patchTypes() const
-{
-    return topology().boundaryMesh().types();
-}
-
-
-Foam::wordList Foam::blockMesh::patchPhysicalTypes() const
-{
-    return topology().boundaryMesh().physicalTypes();
-}
+//Foam::wordList Foam::blockMesh::patchNames() const
+//{
+//    return topology().boundaryMesh().names();
+//}
+//
+//
+//Foam::wordList Foam::blockMesh::patchTypes() const
+//{
+//    return topology().boundaryMesh().types();
+//}
+//
+//
+//Foam::wordList Foam::blockMesh::patchPhysicalTypes() const
+//{
+//    return topology().boundaryMesh().physicalTypes();
+//}
 
 
 Foam::label Foam::blockMesh::numZonedBlocks() const

@@ -27,6 +27,7 @@ License
 #include "cellToFaceStencil.H"
 #include "syncTools.H"
 #include "SortableList.H"
+#include "dummyTransform.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -315,7 +316,15 @@ void Foam::extendedUpwindCellToFaceStencil::transportStencils
     {
         neiBndStencil[faceI-mesh_.nInternalFaces()] = ownStencil[faceI];
     }
-    syncTools::swapBoundaryFaceList(mesh_, neiBndStencil, false);
+    //syncTools::swapBoundaryFaceList(mesh_, neiBndStencil);
+    syncTools::syncBoundaryFaceList
+    (
+        mesh_,
+        neiBndStencil,
+        eqOp<labelList>(),
+        dummyTransform()
+    );
+
 
 
     // Do the neighbour side

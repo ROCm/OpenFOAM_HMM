@@ -1,7 +1,6 @@
     // Initialise solid field pointer lists
     PtrList<volScalarField> rhos(solidRegions.size());
     PtrList<volScalarField> cps(solidRegions.size());
-    PtrList<volScalarField> rhosCps(solidRegions.size());
     PtrList<volScalarField> Ks(solidRegions.size());
     PtrList<volScalarField> Ts(solidRegions.size());
 
@@ -45,12 +44,6 @@
                 ),
                 solidRegions[i]
             )
-        );
-
-        rhosCps.set
-        (
-            i,
-            new volScalarField("rhosCps", rhos[i]*cps[i])
         );
 
         Info<< "    Adding to Ks\n" << endl;

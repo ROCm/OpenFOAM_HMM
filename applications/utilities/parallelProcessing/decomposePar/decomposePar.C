@@ -62,7 +62,6 @@ Usage
 #include "OSspecific.H"
 #include "fvCFD.H"
 #include "IOobjectList.H"
-#include "processorFvPatchFields.H"
 #include "domainDecomposition.H"
 #include "labelIOField.H"
 #include "scalarIOField.H"

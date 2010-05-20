@@ -209,16 +209,22 @@ void Foam::regionSplit::fillSeedMask
         {
             const polyPatch& pp = patches[patchI];
 
-            if (isA<cyclicPolyPatch>(pp))
+            if
+            (
+                isA<cyclicPolyPatch>(pp)
+             && refCast<const cyclicPolyPatch>(pp).owner()
+            )
             {
-                label faceI = pp.start();
+                // Transfer from neighbourPatch to here or vice versa.
 
-                label halfSz = pp.size()/2;
+                const cyclicPolyPatch& cycPatch =
+                    refCast<const cyclicPolyPatch>(pp);
 
-                for (label i = 0; i < halfSz; i++)
+                label faceI = cycPatch.start();
+
+                forAll(cycPatch, i)
                 {
-                    label otherFaceI = refCast<const cyclicPolyPatch>(pp)
-                        .transformGlobalFace(faceI);
+                    label otherFaceI = cycPatch.transformGlobalFace(faceI);
 
                     transferCoupledFaceRegion
                     (
@@ -268,7 +274,7 @@ Foam::label Foam::regionSplit::calcRegionSplit
         {
             // Check that blockedFace is synced.
             boolList syncBlockedFace(blockedFace);
-            syncTools::swapFaceList(mesh_, syncBlockedFace, false);
+            syncTools::swapFaceList(mesh_, syncBlockedFace);
 
             forAll(syncBlockedFace, faceI)
             {

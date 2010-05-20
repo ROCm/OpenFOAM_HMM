@@ -64,8 +64,7 @@ void Foam::autoLayerDriver::averageNeighbours
         meshPoints,
         average,
         plusEqOp<Type>(),
-        pTraits<Type>::zero,    // null value
-        false                   // no separation
+        pTraits<Type>::zero     // null value
     );
 
     average *= invSumWeight;

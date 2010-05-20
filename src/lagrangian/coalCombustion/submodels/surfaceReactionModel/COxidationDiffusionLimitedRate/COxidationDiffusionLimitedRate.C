@@ -123,7 +123,8 @@ Foam::scalar Foam::COxidationDiffusionLimitedRate<CloudType>::calculate
     const scalar YO2 = this->owner().mcCarrierThermo().Y(O2GlobalId_)[cellI];
 
     // Change in C mass [kg]
-    scalar dmC = 4.0*constant::mathematical::pi*d*D_*YO2*Tc*rhoc/(Sb_*(T + Tc))*dt;
+    scalar dmC =
+        4.0*constant::mathematical::pi*d*D_*YO2*Tc*rhoc/(Sb_*(T + Tc))*dt;
 
     // Limit mass transfer by availability of C
     dmC = min(mass*fComb, dmC);

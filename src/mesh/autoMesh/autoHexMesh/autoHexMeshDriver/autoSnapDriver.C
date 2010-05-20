@@ -274,8 +274,7 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
         pp.meshPoints(),
         avgBoundary,
         plusEqOp<point>(),  // combine op
-        vector::zero,       // null value
-        false               // no separation
+        vector::zero        // null value
     );
     syncTools::syncPointList
     (
@@ -283,8 +282,7 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
         pp.meshPoints(),
         nBoundary,
         plusEqOp<label>(),  // combine op
-        0,                  // null value
-        false               // no separation
+        0                   // null value
     );
 
     forAll(avgBoundary, i)
@@ -322,36 +320,18 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
 
         forAll(patches, patchI)
         {
-            if (Pstream::parRun() && isA<processorPolyPatch>(patches[patchI]))
+            if
+            (
+                patches[patchI].coupled()
+             && refCast<const coupledPolyPatch>(patches[patchI]).owner()
+            )
             {
-                const processorPolyPatch& pp =
-                    refCast<const processorPolyPatch>(patches[patchI]);
-
-                if (pp.myProcNo() < pp.neighbProcNo())
-                {
-                    const vectorField::subField faceCentres = pp.faceCentres();
-
-                    forAll(pp, i)
-                    {
-                        const face& f = pp[i];
-                        const point& fc = faceCentres[i];
-
-                        forAll(f, fp)
-                        {
-                            globalSum[f[fp]] += fc;
-                            globalNum[f[fp]]++;
-                        }
-                    }
-                }
-            }
-            else if (isA<cyclicPolyPatch>(patches[patchI]))
-            {
-                const cyclicPolyPatch& pp =
-                    refCast<const cyclicPolyPatch>(patches[patchI]);
+                const coupledPolyPatch& pp =
+                    refCast<const coupledPolyPatch>(patches[patchI]);
 
                 const vectorField::subField faceCentres = pp.faceCentres();
 
-                for (label i = 0; i < pp.size()/2; i++)
+                forAll(pp, i)
                 {
                     const face& f = pp[i];
                     const point& fc = faceCentres[i];
@@ -370,16 +350,14 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
             mesh,
             globalSum,
             plusEqOp<vector>(), // combine op
-            vector::zero,       // null value
-            false               // no separation
+            vector::zero        // null value
         );
         syncTools::syncPointList
         (
             mesh,
             globalNum,
             plusEqOp<label>(),  // combine op
-            0,                  // null value
-            false               // no separation
+            0                   // null value
         );
 
         avgInternal.setSize(meshPoints.size());
@@ -815,8 +793,7 @@ Foam::scalarField Foam::autoSnapDriver::calcSnapDistance
         pp.meshPoints(),
         maxEdgeLen,
         maxEqOp<scalar>(),  // combine op
-        -GREAT,             // null value
-        false               // no separation
+        -GREAT              // null value
     );
 
     return snapParams.snapTol()*maxEdgeLen;
@@ -1123,8 +1100,7 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
         pp.meshPoints(),
         patchDisp,
         minMagEqOp(),                   // combine op
-        vector(GREAT, GREAT, GREAT),    // null value
-        false                           // no separation
+        vector(GREAT, GREAT, GREAT)     // null value
     );
 
 
@@ -1178,7 +1154,7 @@ void Foam::autoSnapDriver::smoothDisplacement
         }
         pointVectorField oldDisp(disp);
 
-        meshMover.smooth(oldDisp, edgeGamma, false, disp);
+        meshMover.smooth(oldDisp, edgeGamma, disp);
     }
     Info<< "Displacement smoothed in = "
         << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;

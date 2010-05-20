@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
+|  \\    /   O peration     | Version:  splitCyclic                           |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -24,7 +24,7 @@ boundaryField
     inlet
     {
         type            turbulentIntensityKineticEnergyInlet;
-        intensity       0.05;       // 5% turbulent intensity
+        intensity       0.05;
         value           uniform 1;
     }
     outlet1
@@ -33,7 +33,6 @@ boundaryField
         inletValue      uniform 1;
         value           uniform 1;
     }
-
     outlet2
     {
         type            inletOutlet;
@@ -45,16 +44,18 @@ boundaryField
         type            kqRWallFunction;
         value           uniform 1;
     }
-    fan
+    fan_half0
     {
         type            cyclic;
-        value           uniform 1;
     }
-
     defaultFaces
     {
         type            kqRWallFunction;
         value           uniform 1;
+    }
+    fan_half1
+    {
+        type            cyclic;
     }
 }
 

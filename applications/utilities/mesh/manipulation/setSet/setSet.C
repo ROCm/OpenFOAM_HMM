@@ -439,6 +439,7 @@ bool doCommand
     const word& actionName,
     const bool writeVTKFile,
     const bool writeCurrentTime,
+    const bool noSync,
     Istream& is
 )
 {
@@ -581,7 +582,7 @@ bool doCommand
                 // Set will have been modified.
 
                 // Synchronize for coupled patches.
-                currentSet.sync(mesh);
+                if (!noSync) currentSet.sync(mesh);
 
                 // Write
                 if (writeVTKFile)
@@ -834,6 +835,11 @@ int main(int argc, char *argv[])
         "file",
         "process in batch mode, using input from specified file"
     );
+    argList::addBoolOption
+    (
+        "noSync",
+        "do not synchronise selection across coupled patches"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -842,6 +848,7 @@ int main(int argc, char *argv[])
     const bool writeVTK = !args.optionFound("noVTK");
     const bool loop = args.optionFound("loop");
     const bool batch = args.optionFound("batch");
+    const bool noSync = args.optionFound("noSync");
 
     if (loop && !batch)
     {
@@ -1008,7 +1015,8 @@ int main(int argc, char *argv[])
                     setName,
                     actionName,
                     writeVTK,
-                    loop,       // if in looping mode dump sets to time directory
+                    loop,   // if in looping mode dump sets to time directory
+                    noSync,
                     is
                 );
 

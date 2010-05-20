@@ -45,13 +45,15 @@ void Foam::PairSpringSliderDashpot<CloudType>::findMinMaxProperties
 
         // Finding minimum diameter to avoid excessive arithmetic
 
-        RMin = min(p.d(), RMin);
+        scalar dEff = p.d()*cbrt(p.nParticle()*volumeFactor_);
+
+        RMin = min(dEff, RMin);
 
         rhoMax = max(p.rho(), rhoMax);
 
         UMagMax = max
         (
-            mag(p.U()) + mag(p.omega())*p.d()/2,
+            mag(p.U()) + mag(p.omega())*dEff/2,
             UMagMax
         );
     }
@@ -91,7 +93,8 @@ Foam::PairSpringSliderDashpot<CloudType>::PairSpringSliderDashpot
         (
             this->coeffDict().lookup("collisionResolutionSteps")
         )
-    )
+    ),
+    volumeFactor_(this->dict().lookupOrDefault("volumeFactor", 1.0))
 {
     scalar nu = this->owner().constProps().poissonsRatio();
 
@@ -155,7 +158,11 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
 {
     vector r_AB = (pA.position() - pB.position());
 
-    scalar normalOverlapMag = 0.5*(pA.d() + pB.d()) - mag(r_AB);
+    scalar dAEff = pA.d()*cbrt(pA.nParticle()*volumeFactor_);
+
+    scalar dBEff = pB.d()*cbrt(pB.nParticle()*volumeFactor_);
+
+    scalar normalOverlapMag = 0.5*(dAEff + dBEff) - mag(r_AB);
 
     if (normalOverlapMag > 0)
     {
@@ -166,7 +173,7 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
         vector U_AB = pA.U() - pB.U();
 
         // Effective radius
-        scalar R = 0.5*pA.d()*pB.d()/(pA.d() + pB.d());
+        scalar R = 0.5*dAEff*dBEff/(dAEff + dBEff);
 
         // Effective mass
         scalar M = pA.mass()*pB.mass()/(pA.mass() + pB.mass());
@@ -185,8 +192,8 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
 
         vector USlip_AB =
             U_AB - (U_AB & rHat_AB)*rHat_AB
-          + (pA.omega() ^ (pA.d()/2*-rHat_AB))
-          - (pB.omega() ^ (pB.d()/2*rHat_AB));
+          + (pA.omega() ^ (dAEff/2*-rHat_AB))
+          - (pB.omega() ^ (dBEff/2*rHat_AB));
 
         scalar deltaT = this->owner().mesh().time().deltaTValue();
 
@@ -215,7 +222,7 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
         {
             scalar kT = 8.0*sqrt(R*normalOverlapMag)*Gstar_;
 
-            scalar& etaT = etaN;
+            scalar etaT = etaN;
 
             // Tangential force
             vector fT_AB;
@@ -233,16 +240,16 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
             else
             {
                 fT_AB =
-                -kT*tangentialOverlapMag
-               *tangentialOverlap_AB/tangentialOverlapMag
-              - etaT*USlip_AB;
+                    -kT*tangentialOverlapMag
+                   *tangentialOverlap_AB/tangentialOverlapMag
+                  - etaT*USlip_AB;
             }
 
             pA.f() += fT_AB;
             pB.f() += -fT_AB;
 
-            pA.torque() += (pA.d()/2*-rHat_AB) ^ fT_AB;
-            pB.torque() += (pB.d()/2*rHat_AB) ^ -fT_AB;
+            pA.torque() += (dAEff/2*-rHat_AB) ^ fT_AB;
+            pB.torque() += (dBEff/2*rHat_AB) ^ -fT_AB;
         }
     }
 }

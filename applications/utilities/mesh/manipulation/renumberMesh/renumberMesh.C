@@ -305,6 +305,7 @@ autoPtr<mapPolyMesh> reorderMesh
     labelList patchStarts(patches.size());
     labelList oldPatchNMeshPoints(patches.size());
     labelListList patchPointMap(patches.size());
+
     forAll(patches, patchI)
     {
         patchSizes[patchI] = patches[patchI].size();
@@ -320,7 +321,8 @@ autoPtr<mapPolyMesh> reorderMesh
         xferMove(newOwner),
         xferMove(newNeighbour),
         patchSizes,
-        patchStarts
+        patchStarts,
+        true
     );
 
     return autoPtr<mapPolyMesh>

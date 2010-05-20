@@ -193,6 +193,19 @@ private:
                 const label patchID
             ) const;
 
+            void setTopology
+            (
+                const cellShapeList& cellsAsShapes,
+                const faceListList& boundaryFaces,
+                const wordList& boundaryPatchNames,
+                labelList& patchSizes,
+                labelList& patchStarts,
+                label& defaultPatchStart,
+                label& nFaces,
+                cellList& cells
+            );
+
+
 
 public:
 
@@ -252,6 +265,20 @@ public:
             const word& defaultBoundaryPatchName,
             const word& defaultBoundaryPatchType,
             const wordList& boundaryPatchPhysicalTypes,
+            const bool syncPar = true
+        );
+
+        //- Construct from cell shapes with patch information in dictionary
+        //  format.
+        polyMesh
+        (
+            const IOobject& io,
+            const Xfer<pointField>& points,
+            const cellShapeList& shapes,
+            const faceListList& boundaryFaces,
+            const PtrList<dictionary>& boundaryDicts,
+            const word& defaultBoundaryPatchName,
+            const word& defaultBoundaryPatchType,
             const bool syncPar = true
         );
 
@@ -442,8 +469,6 @@ public:
             //- Reset mesh primitive data. Assumes all patch info correct
             //  (so does e.g. parallel communication). If not use
             //  validBoundary=false
-            //  (still assumes patchStarts[0] = nInternalFaces and last
-            //  patch ends at nActiveFaces) and change patches with addPatches.
             void resetPrimitives
             (
                 const Xfer<pointField>& points,

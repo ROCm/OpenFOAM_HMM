@@ -162,6 +162,7 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     // Momentum source due to particle forces
     const vector FCoupled = mass*td.cloud().forces().calcCoupled
     (
+        this->position(),
         cellI,
         dt,
         rhoc_,
@@ -173,6 +174,7 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 
     const vector FNonCoupled = mass*td.cloud().forces().calcNonCoupled
     (
+        this->position(),
         cellI,
         dt,
         rhoc_,
@@ -346,7 +348,7 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
 {
     ParcelType& p = static_cast<ParcelType&>(*this);
 
-    // Invoke poost-processing mdoel
+    // Invoke post-processing model
     td.cloud().postProcessing().postPatch(p, patchI);
 
     // Invoke surface film model

@@ -49,10 +49,17 @@ int main(int argc, char *argv[])
         "specify an alternative dictionary for the topoSet dictionary"
     );
 #   include "addRegionOption.H"
+    argList::addBoolOption
+    (
+        "noSync",
+        "do not synchronise selection across coupled patches"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createNamedPolyMesh.H"
+
+    const bool noSync = args.optionFound("noSync");
 
     const word dictName("topoSetDict");
 
@@ -152,7 +159,7 @@ int main(int argc, char *argv[])
 
                 source().applyToSet(action, currentSet());
                 // Synchronize for coupled patches.
-                currentSet().sync(mesh);
+                if (!noSync) currentSet().sync(mesh);
                 currentSet().write();
             }
             break;
@@ -186,7 +193,7 @@ int main(int argc, char *argv[])
                 // Combine new value of currentSet with old one.
                 currentSet().subset(oldSet());
                 // Synchronize for coupled patches.
-                currentSet().sync(mesh);
+                if (!noSync) currentSet().sync(mesh);
                 currentSet().write();
             }
             break;

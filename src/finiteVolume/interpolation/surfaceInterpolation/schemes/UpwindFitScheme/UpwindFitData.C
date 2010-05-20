@@ -27,7 +27,6 @@ License
 #include "surfaceFields.H"
 #include "volFields.H"
 #include "SVD.H"
-#include "syncTools.H"
 #include "extendedUpwindCellToFaceStencil.H"
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //

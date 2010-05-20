@@ -127,7 +127,7 @@ void Foam::cellToFace::combine(topoSet& set, const bool add) const
                 }
             }
         }
-        syncTools::swapBoundaryFaceList(mesh_, neiInSet, false);
+        syncTools::swapBoundaryFaceList(mesh_, neiInSet);
 
 
         // Check all boundary faces

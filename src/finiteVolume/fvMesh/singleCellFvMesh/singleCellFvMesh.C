@@ -81,7 +81,7 @@ void Foam::singleCellFvMesh::agglomerateMesh
                 }
             }
         }
-        syncTools::swapBoundaryFaceList(mesh, nbrAgglom, false);
+        syncTools::swapBoundaryFaceList(mesh, nbrAgglom);
 
 
         // Get correspondence between this agglomeration and remote one

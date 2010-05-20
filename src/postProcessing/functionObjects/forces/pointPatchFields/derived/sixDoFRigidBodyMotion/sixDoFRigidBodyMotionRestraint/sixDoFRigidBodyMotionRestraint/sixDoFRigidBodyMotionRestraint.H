@@ -36,7 +36,7 @@ Description
 
 SourceFiles
     sixDoFRigidBodyMotionRestraint.C
-    dynamicFvMeshNew.C
+    sixDoFRigidBodyMotionRestraintNew.C
 
 \*---------------------------------------------------------------------------*/
 

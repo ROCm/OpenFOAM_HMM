@@ -36,8 +36,8 @@ SourceFiles
 #ifndef GAMGInterface_H
 #define GAMGInterface_H
 
-#include "lduInterface.H"
 #include "autoPtr.H"
+#include "lduInterfacePtrsList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,6 +56,12 @@ class GAMGInterface
 protected:
 
     // Protected data
+
+        //- My index in coarseInterfaces
+        const label index_;
+
+        //- All interfaces
+        const lduInterfacePtrsList& coarseInterfaces_;
 
         //- Face-cell addressing
         labelField faceCells_;
@@ -89,11 +95,15 @@ public:
             GAMGInterface,
             lduInterface,
             (
+                const label index,
+                const lduInterfacePtrsList& coarseInterfaces,
                 const lduInterface& fineInterface,
                 const labelField& localRestrictAddressing,
                 const labelField& neighbourRestrictAddressing
             ),
             (
+                index,
+                coarseInterfaces,
                 fineInterface,
                 localRestrictAddressing,
                 neighbourRestrictAddressing
@@ -107,6 +117,8 @@ public:
         //  the fine interface
         static autoPtr<GAMGInterface> New
         (
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
             const lduInterface& fineInterface,
             const labelField& localRestrictAddressing,
             const labelField& neighbourRestrictAddressing
@@ -119,10 +131,15 @@ public:
         //  local and neighbour restrict addressing
         GAMGInterface
         (
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
             const lduInterface&,
             const labelField&,
             const labelField&
         )
+        :
+            index_(index),
+            coarseInterfaces_(coarseInterfaces)
         {}
 
 
@@ -134,6 +151,16 @@ public:
             virtual label size() const
             {
                 return faceCells_.size();
+            }
+
+            virtual label index() const
+            {
+                return index_;
+            }
+
+            virtual const lduInterfacePtrsList& coarseInterfaces() const
+            {
+                return coarseInterfaces_;
             }
 
             //- Return faceCell addressing

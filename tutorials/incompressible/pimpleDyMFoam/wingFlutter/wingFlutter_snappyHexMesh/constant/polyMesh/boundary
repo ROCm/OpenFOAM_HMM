@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -17,45 +17,41 @@ FoamFile
 
 6
 (
-    bottomWall
+    topAndBottom
+    {
+        type            patch;
+        nFaces          150;
+        startFace       2098769;
+    }
+    inlet
+    {
+        type            patch;
+        nFaces          48;
+        startFace       2098919;
+    }
+    outlet
+    {
+        type            patch;
+        nFaces          48;
+        startFace       2098967;
+    }
+    front
+    {
+        type            empty;
+        nFaces          38129;
+        startFace       2099015;
+    }
+    back
+    {
+        type            empty;
+        nFaces          38120;
+        startFace       2137144;
+    }
+    wing_5degrees.obj_WALL10
     {
         type            wall;
-        nFaces          1200;
-        startFace       175300;
-    }
-    topWall
-    {
-        type            wall;
-        nFaces          1200;
-        startFace       176500;
-    }
-    sides1
-    {
-        type            cyclic;
-        nFaces          2000;
-        startFace       177700;
-        featureCos      0.9;
-    }
-    sides2
-    {
-        type            cyclic;
-        nFaces          2000;
-        startFace       179700;
-        featureCos      0.9;
-    }
-    inout1
-    {
-        type            cyclic;
-        nFaces          1500;
-        startFace       181700;
-        featureCos      0.9;
-    }
-    inout2
-    {
-        type            cyclic;
-        nFaces          1500;
-        startFace       183200;
-        featureCos      0.9;
+        nFaces          49792;
+        startFace       2175264;
     }
 )
 

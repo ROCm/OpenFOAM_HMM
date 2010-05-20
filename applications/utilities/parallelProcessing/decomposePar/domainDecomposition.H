@@ -29,6 +29,7 @@ Description
 
 SourceFiles
     domainDecomposition.C
+    decomposeMesh.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -78,9 +79,9 @@ class domainDecomposition
         // index is negative, the processor face is the reverse of the
         // original face. In order to do this properly, all face
         // indices will be incremented by 1 and the decremented as
-        // necessary t avoid the problem of face number zero having no
-        // sign.
-        labelListList procFaceAddressing_;
+        // necessary to avoid the problem of face number zero having no
+        // sign.  
+        List<DynamicList<label> > procFaceAddressing_;
 
         //- Labels of cells for each processor
         labelListList procCellAddressing_;
@@ -93,18 +94,23 @@ class domainDecomposition
         // Excludes inter-processor boundaries
         labelListList procPatchStartIndex_;
 
+
+        // Per inter-processor patch information
+
         //- Neighbour processor ID for inter-processor boundaries
         labelListList procNeighbourProcessors_;
 
         //- Sizes for inter-processor patches
         labelListList procProcessorPatchSize_;
 
-        //- Start indices for inter-processor patches
+        //- Start indices (in procFaceAddressing_) for inter-processor patches
         labelListList procProcessorPatchStartIndex_;
 
-        //- Are there cyclic-parallel faces
-        bool cyclicParallel_;
+        //- Sub patch IDs for inter-processor patches
+        List<labelListList> procProcessorPatchSubPatchIDs_;
 
+        //- Sub patch sizes for inter-processor patches
+        List<labelListList> procProcessorPatchSubPatchStarts_;
 
     // Private Member Functions
 
@@ -117,6 +123,21 @@ class domainDecomposition
             const label zoneI,
             labelList& elementToZone
         );
+
+        //- Append single element to list
+        static void append(labelList&, const label);
+
+        //- Add face to interProcessor patch.
+        void addInterProcFace
+        (
+            const label facei,
+            const label ownerProc,
+            const label nbrProc,
+
+            List<Map<label> >&,
+            List<DynamicList<DynamicList<label> > >&
+        ) const;
+
 
 public:
 

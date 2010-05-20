@@ -17,10 +17,10 @@ setsToZones -noFlipMap >& log.setsToZones
 
 # create the first cyclic - lhs of porous zone
 unset FOAM_SETNAN
-createBaffles cycLeft cycLeft -overwrite >& log.createBaffles1
+createBaffles cycLeft '(cycLeft_half0 cycLeft_half1)' -overwrite >& log.createBaffles1
 
 # create the second cyclic - rhs of porous zone
-createBaffles cycRight cycRight -overwrite >& log.createBaffles2
+createBaffles cycRight '(cycRight_half0 cycRight_half1)' -overwrite >& log.createBaffles2
 
 runApplication $application
 
