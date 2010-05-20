@@ -4,8 +4,8 @@
         simple.lookupOrDefault<int>("nNonOrthogonalCorrectors", 0);
 
     const bool momentumPredictor =
-        simple.lookupOrDefault<bool>("momentumPredictor", true);
+        simple.lookupOrDefault("momentumPredictor", true);
 
     const bool transonic =
-        simple.lookupOrDefault<bool>("transonic", false);
+        simple.lookupOrDefault("transonic", false);
 

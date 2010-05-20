@@ -7,5 +7,5 @@
         pimple.lookupOrDefault<int>("nNonOrthogonalCorrectors", 0);
 
     const bool momentumPredictor =
-        pimple.lookupOrDefault<bool>("momentumPredictor", true);
+        pimple.lookupOrDefault("momentumPredictor", true);
 

@@ -30,7 +30,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 const bool adjustTimeStep =
-    runTime.controlDict().lookupOrDefault<bool>("adjustTimeStep", false);
+    runTime.controlDict().lookupOrDefault("adjustTimeStep", false);
 
 scalar maxCo =
     runTime.controlDict().lookupOrDefault<scalar>("maxCo", 1.0);

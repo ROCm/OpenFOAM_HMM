@@ -276,7 +276,7 @@
         )
     );
 
-    if (RASProperties.lookupOrDefault<Switch>("printCoeffs", false))
+    if (RASProperties.lookupOrDefault("printCoeffs", false))
     {
         Info<< "kEpsilonCoeffs" << kEpsilonDict << nl
             << "wallFunctionCoeffs" << wallFunctionDict << endl;

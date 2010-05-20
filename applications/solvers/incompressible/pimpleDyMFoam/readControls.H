@@ -2,8 +2,8 @@
     #include "readPIMPLEControls.H"
 
     const bool correctPhi =
-        pimple.lookupOrDefault<bool>("correctPhi", false);
+        pimple.lookupOrDefault("correctPhi", false);
 
     const bool checkMeshCourantNo =
-        pimple.lookupOrDefault<bool>("checkMeshCourantNo", false);
+        pimple.lookupOrDefault("checkMeshCourantNo", false);
 

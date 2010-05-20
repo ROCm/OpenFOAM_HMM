@@ -10,8 +10,8 @@
         piso.lookupOrDefault<int>("nNonOrthogonalCorrectors", 0);
 
     const bool momentumPredictor =
-        piso.lookupOrDefault<bool>("momentumPredictor", true);
+        piso.lookupOrDefault("momentumPredictor", true);
 
     const bool transonic =
-        piso.lookupOrDefault<bool>("transonic", false);
+        piso.lookupOrDefault("transonic", false);
 

@@ -255,7 +255,7 @@ bool Foam::solution::read()
         if (dict.found("cache"))
         {
             cache_ = dict.subDict("cache");
-            caching_ = cache_.lookupOrDefault<Switch>("active", true);
+            caching_ = cache_.lookupOrDefault("active", true);
         }
 
         if (dict.found("relaxationFactors"))

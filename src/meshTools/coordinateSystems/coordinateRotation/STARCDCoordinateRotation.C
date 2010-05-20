@@ -25,7 +25,6 @@ License
 
 #include "STARCDCoordinateRotation.H"
 
-#include "Switch.H"
 #include "mathematicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -138,7 +137,7 @@ Foam::STARCDCoordinateRotation::STARCDCoordinateRotation
         rotation.component(vector::X),
         rotation.component(vector::Y),
         rotation.component(vector::Z),
-        dict.lookupOrDefault<Switch>("degrees", true)
+        dict.lookupOrDefault("degrees", true)
     );
 }
 

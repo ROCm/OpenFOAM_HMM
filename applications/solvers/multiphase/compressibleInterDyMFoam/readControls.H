@@ -20,8 +20,8 @@
     }
 
     const bool correctPhi =
-        piso.lookupOrDefault<bool>("correctPhi", true);
+        piso.lookupOrDefault("correctPhi", true);
 
     const bool checkMeshCourantNo =
-        piso.lookupOrDefault<bool>("checkMeshCourantNo", false);
+        piso.lookupOrDefault("checkMeshCourantNo", false);
 
