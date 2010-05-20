@@ -34,7 +34,7 @@ Foam::NoInflow<CloudType>::NoInflow
     CloudType& cloud
 )
 :
-    InflowBoundaryModel<CloudType>(dict, cloud, typeName)
+    InflowBoundaryModel<CloudType>(cloud)
 {}
 
 

@@ -85,6 +85,9 @@ public:
 
     // Constructors
 
+        //- Construct null from owner
+        BinaryCollisionModel(CloudType& owner);
+
         //- Construct from components
         BinaryCollisionModel
         (

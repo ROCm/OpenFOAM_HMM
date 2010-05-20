@@ -27,8 +27,6 @@ nEquivalentParticles            1e12;
 
 WallInteractionModel            MaxwellianThermal;
 
-MaxwellianThermalCoeffs {}
-
 
 // Binary Collision Model
 // ~~~~~~~~~~~~~~~~~~~~~~
