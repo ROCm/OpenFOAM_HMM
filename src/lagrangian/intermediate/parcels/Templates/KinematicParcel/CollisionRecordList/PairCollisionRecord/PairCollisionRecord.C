@@ -23,12 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "CollisionRecord.H"
+#include "PairCollisionRecord.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::CollisionRecord<Type>::CollisionRecord()
+Foam::PairCollisionRecord<Type>::PairCollisionRecord()
 :
     origProcOfOther_(-VGREAT),
     origIdOfOther_(-VGREAT),
@@ -37,7 +37,7 @@ Foam::CollisionRecord<Type>::CollisionRecord()
 
 
 template<class Type>
-Foam::CollisionRecord<Type>::CollisionRecord
+Foam::PairCollisionRecord<Type>::PairCollisionRecord
 (
     label origProcOfOther,
     label origIdOfOther,
@@ -51,33 +51,39 @@ Foam::CollisionRecord<Type>::CollisionRecord
 
 
 template<class Type>
-Foam::CollisionRecord<Type>::CollisionRecord(const CollisionRecord<Type>& cR)
+Foam::PairCollisionRecord<Type>::PairCollisionRecord
+(
+    const PairCollisionRecord<Type>& pCR
+)
 :
-    origProcOfOther_(cR.origProcOfOther() + 1),
-    origIdOfOther_(cR.origIdOfOther_),
-    data_(cR.data_)
+    origProcOfOther_(pCR.origProcOfOther() + 1),
+    origIdOfOther_(pCR.origIdOfOther_),
+    data_(pCR.data_)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::CollisionRecord<Type>::~CollisionRecord()
+Foam::PairCollisionRecord<Type>::~PairCollisionRecord()
 {}
 
 
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::CollisionRecord<Type>::operator=(const CollisionRecord<Type>& rhs)
+void Foam::PairCollisionRecord<Type>::operator=
+(
+    const PairCollisionRecord<Type>& rhs
+)
 {
     // Check for assignment to self
     if (this == &rhs)
     {
         FatalErrorIn
         (
-            "Foam::CollisionRecord<Type>::operator="
-            "(const Foam::CollisionRecord<Type>&)"
+            "Foam::PairCollisionRecord<Type>::operator="
+            "(const Foam::PairCollisionRecord<Type>&)"
         )
             << "Attempted assignment to self"
             << abort(FatalError);
@@ -91,7 +97,7 @@ void Foam::CollisionRecord<Type>::operator=(const CollisionRecord<Type>& rhs)
 
 // * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * * * //
 
-#include "CollisionRecordIO.C"
+#include "PairCollisionRecordIO.C"
 
 
 // ************************************************************************* //

@@ -23,35 +23,38 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "CollisionRecord.H"
+#include "PairCollisionRecord.H"
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::CollisionRecord<Type>::CollisionRecord(Istream& is)
+Foam::PairCollisionRecord<Type>::PairCollisionRecord(Istream& is)
 :
     origProcOfOther_(readLabel(is)),
     origIdOfOther_(readLabel(is)),
     data_(is)
 {
     // Check state of Istream
-    is.check("Foam::CollisionRecord<Type>::CollisionRecord(Foam::Istream&)");
+    is.check
+    (
+        "Foam::PairCollisionRecord<Type>::PairCollisionRecord(Foam::Istream&)"
+    );
 }
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class Type>
-Foam::Istream& Foam::operator>>(Istream& is, CollisionRecord<Type>& cR)
+Foam::Istream& Foam::operator>>(Istream& is, PairCollisionRecord<Type>& pCR)
 {
-    is  >> cR.origProcOfOther_ >> cR.origIdOfOther_ >> cR.data_;
+    is  >> pCR.origProcOfOther_ >> pCR.origIdOfOther_ >> pCR.data_;
 
     // Check state of Istream
     is.check
     (
         "Foam::Istream&"
-        "Foam::operator>>(Foam::Istream&, Foam::CollisionRecord<Type>&)"
+        "Foam::operator>>(Foam::Istream&, Foam::PairCollisionRecord<Type>&)"
     );
 
     return is;
@@ -59,17 +62,21 @@ Foam::Istream& Foam::operator>>(Istream& is, CollisionRecord<Type>& cR)
 
 
 template<class Type>
-Foam::Ostream& Foam::operator<<(Ostream& os, const CollisionRecord<Type>& cR)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const PairCollisionRecord<Type>& pCR
+)
 {
-    os  << cR.origProcOfOther_
-        << token::SPACE << cR.origIdOfOther_
-        << token::SPACE << cR.data_;
+    os  << pCR.origProcOfOther_
+        << token::SPACE << pCR.origIdOfOther_
+        << token::SPACE << pCR.data_;
 
     // Check state of Ostream
     os.check
     (
         "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
-        "const Foam::CollisionRecord<Type>&)"
+        "const Foam::PairCollisionRecord<Type>&)"
     );
 
     return os;

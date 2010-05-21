@@ -33,7 +33,7 @@ Description
 #define PairSpringSliderDashpot_H
 
 #include "PairModel.H"
-#include "CollisionRecord.H"
+#include "CollisionRecordList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
