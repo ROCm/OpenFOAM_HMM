@@ -26,7 +26,7 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-inline bool Foam::CollisionRecord<Type>::match
+inline bool Foam::PairCollisionRecord<Type>::match
 (
     label queryOrigProcOfOther,
     label queryOrigIdOfOther
@@ -41,14 +41,14 @@ inline bool Foam::CollisionRecord<Type>::match
 
 
 template<class Type>
-inline Foam::label Foam::CollisionRecord<Type>::origProcOfOther() const
+inline Foam::label Foam::PairCollisionRecord<Type>::origProcOfOther() const
 {
     return mag(origProcOfOther_) - 1;
 }
 
 
 template<class Type>
-inline Foam::label Foam::CollisionRecord<Type>::origIdOfOther() const
+inline Foam::label Foam::PairCollisionRecord<Type>::origIdOfOther() const
 {
     return origIdOfOther_;
 }
@@ -56,35 +56,35 @@ inline Foam::label Foam::CollisionRecord<Type>::origIdOfOther() const
 
 template<class Type>
 inline const Type&
-Foam::CollisionRecord<Type>::collisionData() const
+Foam::PairCollisionRecord<Type>::collisionData() const
 {
     return data_;
 }
 
 
 template<class Type>
-inline Type& Foam::CollisionRecord<Type>::collisionData()
+inline Type& Foam::PairCollisionRecord<Type>::collisionData()
 {
     return data_;
 }
 
 
 template<class Type>
-inline bool Foam::CollisionRecord<Type>::accessed() const
+inline bool Foam::PairCollisionRecord<Type>::accessed() const
 {
     return pos(origProcOfOther_);
 }
 
 
 template<class Type>
-inline void Foam::CollisionRecord<Type>::setAccessed()
+inline void Foam::PairCollisionRecord<Type>::setAccessed()
 {
     origProcOfOther_ = origProcOfOther() + 1;
 }
 
 
 template<class Type>
-inline void Foam::CollisionRecord<Type>::setUnaccessed()
+inline void Foam::PairCollisionRecord<Type>::setUnaccessed()
 {
     origProcOfOther_ = -(origProcOfOther() + 1);
 }
@@ -95,8 +95,8 @@ inline void Foam::CollisionRecord<Type>::setUnaccessed()
 template<class Type>
 inline bool Foam::operator==
 (
-    const CollisionRecord<Type>& a,
-    const CollisionRecord<Type>& b
+    const PairCollisionRecord<Type>& a,
+    const PairCollisionRecord<Type>& b
 )
 {
     return
@@ -107,11 +107,12 @@ inline bool Foam::operator==
     );
 }
 
+
 template<class Type>
 inline bool Foam::operator!=
 (
-    const CollisionRecord<Type>& a,
-    const CollisionRecord<Type>& b
+    const PairCollisionRecord<Type>& a,
+    const PairCollisionRecord<Type>& b
 )
 {
     return !(a == b);

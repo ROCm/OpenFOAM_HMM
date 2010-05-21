@@ -32,9 +32,9 @@ boundaryField
         value           uniform 550;
     }
 
-    periodic
+    frontAndBack
     {
-        type            cyclic;
+        type            empty;
     }
 }
 

@@ -198,20 +198,20 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
         scalar deltaT = this->owner().mesh().time().deltaTValue();
 
         vector& tangentialOverlap_AB =
-            pA.collisionRecords().matchRecord
+            pA.collisionRecords().matchPairRecord
             (
                 pB.origProc(),
                 pB.origId()
             ).collisionData();
 
         vector& tangentialOverlap_BA =
-            pB.collisionRecords().matchRecord
+            pB.collisionRecords().matchPairRecord
             (
                 pA.origProc(),
                 pA.origId()
             ).collisionData();
 
-        vector deltaTangentialOverlap_AB = USlip_AB * deltaT;
+        vector deltaTangentialOverlap_AB = USlip_AB*deltaT;
 
         tangentialOverlap_AB += deltaTangentialOverlap_AB;
         tangentialOverlap_BA += -deltaTangentialOverlap_AB;

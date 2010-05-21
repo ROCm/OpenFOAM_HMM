@@ -23,36 +23,64 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "dsmcParcel.H"
-#include "DsmcCloud.H"
-#include "NoBinaryCollision.H"
-#include "VariableHardSphere.H"
-#include "LarsenBorgnakkeVariableHardSphere.H"
+#include "WallCollisionRecord.H"
+#include "IOstreams.H"
 
-namespace Foam
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::WallCollisionRecord<Type>::WallCollisionRecord(Istream& is)
+:
+    accessed_(is),
+    pRel_(is),
+    data_(is)
 {
-    makeBinaryCollisionModel(DsmcCloud<dsmcParcel>);
+    // Check state of Istream
+    is.check
+    (
+        "Foam::WallCollisionRecord<Type>::WallCollisionRecord(Foam::Istream&)"
+    );
+}
 
-    // Add instances of collision model to the table
-    makeBinaryCollisionModelType
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+template<class Type>
+Foam::Istream& Foam::operator>>(Istream& is, WallCollisionRecord<Type>& wCR)
+{
+    is  >> wCR.accessed_ >> wCR.pRel_ >> wCR.data_;
+
+    // Check state of Istream
+    is.check
     (
-        NoBinaryCollision,
-        DsmcCloud,
-        dsmcParcel
+        "Foam::Istream&"
+        "Foam::operator>>(Foam::Istream&, Foam::WallCollisionRecord<Type>&)"
     );
-    makeBinaryCollisionModelType
+
+    return is;
+}
+
+
+template<class Type>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const WallCollisionRecord<Type>& wCR
+)
+{
+    os  << wCR.accessed_
+        << token::SPACE << wCR.pRel_
+        << token::SPACE << wCR.data_;
+
+    // Check state of Ostream
+    os.check
     (
-        VariableHardSphere,
-        DsmcCloud,
-        dsmcParcel
+        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
+        "const Foam::WallCollisionRecord<Type>&)"
     );
-    makeBinaryCollisionModelType
-    (
-        LarsenBorgnakkeVariableHardSphere,
-        DsmcCloud,
-        dsmcParcel
-    );
-};
+
+    return os;
+}
 
 
 // ************************************************************************* //

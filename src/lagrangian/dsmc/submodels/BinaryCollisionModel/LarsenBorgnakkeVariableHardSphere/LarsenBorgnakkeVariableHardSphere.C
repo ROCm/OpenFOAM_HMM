@@ -117,6 +117,12 @@ Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+template<class CloudType>
+bool Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::active() const
+{
+    return true;
+}
+
 
 template <class CloudType>
 Foam::scalar Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::sigmaTcR

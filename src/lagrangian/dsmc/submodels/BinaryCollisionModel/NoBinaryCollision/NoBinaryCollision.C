@@ -23,73 +23,80 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "InflowBoundaryModel.H"
+#include "NoBinaryCollision.H"
+#include "constants.H"
+
+using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::InflowBoundaryModel<CloudType>::InflowBoundaryModel(CloudType& owner)
-:
-    dict_(dictionary::null),
-    owner_(owner),
-    coeffDict_(dictionary::null)
-{}
-
-
-template<class CloudType>
-Foam::InflowBoundaryModel<CloudType>::InflowBoundaryModel
+template <class CloudType>
+Foam::NoBinaryCollision<CloudType>::NoBinaryCollision
 (
     const dictionary& dict,
-    CloudType& owner,
-    const word& type
+    CloudType& cloud
 )
 :
-    dict_(dict),
-    owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs"))
+    BinaryCollisionModel<CloudType>(cloud)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::InflowBoundaryModel<CloudType>::~InflowBoundaryModel()
+template <class CloudType>
+Foam::NoBinaryCollision<CloudType>::~NoBinaryCollision()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-const CloudType& Foam::InflowBoundaryModel<CloudType>::owner() const
+bool Foam::NoBinaryCollision<CloudType>::active() const
 {
-    return owner_;
+    return false;
 }
 
 
-template<class CloudType>
-CloudType& Foam::InflowBoundaryModel<CloudType>::owner()
+template <class CloudType>
+Foam::scalar Foam::NoBinaryCollision<CloudType>::sigmaTcR
+(
+    label typeIdP,
+    label typeIdQ,
+    const vector& UP,
+    const vector& UQ
+) const
 {
-    return owner_;
+    FatalErrorIn
+    (
+        "Foam::scalar Foam::NoBinaryCollision<CloudType>::sigmaTcR"
+        "("
+            "label typeIdP,"
+            "label typeIdQ,"
+            "const vector& UP,"
+            "const vector& UQ"
+        ") const"
+    )
+        << "sigmaTcR called on NoBinaryCollision model, this should "
+        << "not happen, this is not an actual model." << nl
+        << "Enclose calls to sigmaTcR within a if(binaryCollision().active()) "
+        << " check."
+        << abort(FatalError);
+
+    return 0.0;
 }
 
 
-template<class CloudType>
-const Foam::dictionary& Foam::InflowBoundaryModel<CloudType>::dict() const
-{
-    return dict_;
-}
+template <class CloudType>
+void Foam::NoBinaryCollision<CloudType>::collide
+(
+    label typeIdP,
+    label typeIdQ,
+    vector& UP,
+    vector& UQ,
+    scalar& EiP,
+    scalar& EiQ
+)
+{}
 
-
-template<class CloudType>
-const Foam::dictionary& Foam::InflowBoundaryModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "InflowBoundaryModelNew.C"
 
 // ************************************************************************* //
-

@@ -20,32 +20,31 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
 Class
-    Foam::NoInflow
+    Foam::NoBinaryCollision
 
 Description
-    Not inserting any particles
+    No collison BinaryCollision Model
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NoInflow_H
-#define NoInflow_H
+#ifndef NoBinaryCollision_H
+#define NoBinaryCollision_H
 
-#include "InflowBoundaryModel.H"
+#include "BinaryCollisionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                          Class NoInflow Declaration
+                      Class NoBinaryCollision Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class NoInflow
+class NoBinaryCollision
 :
-    public InflowBoundaryModel<CloudType>
+    public BinaryCollisionModel<CloudType>
 {
 public:
 
@@ -56,7 +55,7 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        NoInflow
+        NoBinaryCollision
         (
             const dictionary& dict,
             CloudType& cloud
@@ -64,13 +63,33 @@ public:
 
 
     //- Destructor
-    virtual ~NoInflow();
+    virtual ~NoBinaryCollision();
 
 
     // Member Functions
 
-        //- Introduce particles (none in this case)
-        virtual void inflow();
+        //- Flag to indicate whether model activates collision model
+        virtual bool active() const;
+
+        //- Return the collision cross section * relative velocity product
+        virtual scalar sigmaTcR
+        (
+            label typeIdP,
+            label typeIdQ,
+            const vector& UP,
+            const vector& UQ
+        ) const;
+
+        //- Apply collision
+        virtual void collide
+        (
+            label typeIdP,
+            label typeIdQ,
+            vector& UP,
+            vector& UQ,
+            scalar& EiP,
+            scalar& EiQ
+        );
 };
 
 
@@ -81,7 +100,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "NoInflow.C"
+#   include "NoBinaryCollision.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

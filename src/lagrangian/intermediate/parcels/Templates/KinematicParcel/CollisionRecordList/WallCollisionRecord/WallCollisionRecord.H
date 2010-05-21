@@ -22,29 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::CollisionRecord
+    Foam::WallCollisionRecord
 
 Description
-
     Record of a collision between the particle holding the record and
-    the particle with the stored id.
-
-    The access status of the record is to be coded in the
-    origProcOfOther data member.  The actual processor is offset by
-    +1.  A negative value means that the record has not been accessed,
-    positive means that it has.
+    a wall face at the position relative to the centre of the particle.
 
 SourceFiles
-    CollisionRecordI.H
-    CollisionRecord.C
-    CollisionRecordIO.C
+    WallCollisionRecordI.H
+    WallCollisionRecord.C
+    WallCollisionRecordIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CollisionRecord_H
-#define CollisionRecord_H
+#ifndef WallCollisionRecord_H
+#define WallCollisionRecord_H
 
-#include "label.H"
 #include "vector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -54,44 +47,43 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 template<class Type>
-class CollisionRecord;
+class WallCollisionRecord;
 
 template<class Type>
 inline bool operator==
 (
-    const CollisionRecord<Type>&,
-    const CollisionRecord<Type>&
+    const WallCollisionRecord<Type>&,
+    const WallCollisionRecord<Type>&
 );
 
 template<class Type>
 inline bool operator!=
 (
-    const CollisionRecord<Type>&,
-    const CollisionRecord<Type>&
+    const WallCollisionRecord<Type>&,
+    const WallCollisionRecord<Type>&
 );
 
 template<class Type>
-Istream& operator>>(Istream&, CollisionRecord<Type>&);
+Istream& operator>>(Istream&, WallCollisionRecord<Type>&);
 
 template<class Type>
-Ostream& operator<<(Ostream&, const CollisionRecord<Type>&);
+Ostream& operator<<(Ostream&, const WallCollisionRecord<Type>&);
 
 
 /*---------------------------------------------------------------------------*\
-                         Class CollisionRecord Declaration
+                         Class WallCollisionRecord Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class CollisionRecord
+class WallCollisionRecord
 {
     // Private data
 
-        //- Originating processor id of other collision partner
-        label origProcOfOther_;
+        // //- Recording whether or not this record has been accessed
+        bool accessed_;
 
-        //- Local particle id on originating processor of other
-        //  collision partner
-        label origIdOfOther_;
+        //- The position of wall impact relative to the cell centre
+        vector pRel_;
 
         //- Collision data, stored as if the storing particle was the
         //  first particle (particle A) in the collision.
@@ -103,25 +95,24 @@ public:
     // Constructors
 
         //- Construct null
-        CollisionRecord();
+        WallCollisionRecord();
 
         //- Construct from components
-        CollisionRecord
+        WallCollisionRecord
         (
-            label origProcOfOther,
-            label origIdOfOther,
+            const vector& pRel,
             const Type& data = pTraits<Type>::zero
         );
 
         //- Construct from Istream
-        CollisionRecord(Istream&);
+        WallCollisionRecord(Istream&);
 
         //- Construct as copy
-        CollisionRecord(const CollisionRecord&);
+        WallCollisionRecord(const WallCollisionRecord&);
 
 
     //- Destructor
-    ~CollisionRecord();
+    ~WallCollisionRecord();
 
 
     // Member Functions
@@ -129,11 +120,8 @@ public:
 
         // Access
 
-            //- Return the origProcOfOther data
-            inline label origProcOfOther() const;
-
-            //- Return the origIdOfOther data
-            inline label origIdOfOther() const;
+            //- Return the pRel data
+            inline const vector& pRel() const;
 
             //- Return access to the collision data
             inline const Type& collisionData() const;
@@ -144,11 +132,7 @@ public:
 
         // Check
 
-            inline bool match
-            (
-                label queryOrigProcOfOther,
-                label queryOrigIdOfOther
-            ) const;
+            inline bool match(const vector& pRel, scalar radius);
 
             //- Return the accessed status of the record
             inline bool accessed() const;
@@ -165,21 +149,21 @@ public:
 
     // Member Operators
 
-        void operator=(const CollisionRecord&);
+        void operator=(const WallCollisionRecord&);
 
 
     // Friend Operators
 
         friend bool operator== <Type>
         (
-            const CollisionRecord<Type>&,
-            const CollisionRecord<Type>&
+            const WallCollisionRecord<Type>&,
+            const WallCollisionRecord<Type>&
         );
 
         friend bool operator!= <Type>
         (
-            const CollisionRecord<Type>&,
-            const CollisionRecord<Type>&
+            const WallCollisionRecord<Type>&,
+            const WallCollisionRecord<Type>&
         );
 
 
@@ -188,13 +172,13 @@ public:
         friend Istream& operator>> <Type>
         (
             Istream&,
-            CollisionRecord<Type>&
+            WallCollisionRecord<Type>&
         );
 
         friend Ostream& operator<< <Type>
         (
             Ostream&,
-            const CollisionRecord<Type>&
+            const WallCollisionRecord<Type>&
         );
 };
 
@@ -205,12 +189,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "CollisionRecordI.H"
+#include "WallCollisionRecordI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "CollisionRecord.C"
+#   include "WallCollisionRecord.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

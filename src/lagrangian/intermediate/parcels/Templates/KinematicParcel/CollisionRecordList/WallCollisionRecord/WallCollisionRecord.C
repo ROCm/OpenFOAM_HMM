@@ -23,33 +23,80 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NoInflow.H"
+#include "WallCollisionRecord.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::NoInflow<CloudType>::NoInflow
+template<class Type>
+Foam::WallCollisionRecord<Type>::WallCollisionRecord()
+:
+    accessed_(false),
+    pRel_(),
+    data_(pTraits<Type>::zero)
+{}
+
+
+template<class Type>
+Foam::WallCollisionRecord<Type>::WallCollisionRecord
 (
-    const dictionary& dict,
-    CloudType& cloud
+    const vector& pRel,
+    const Type& data
 )
 :
-    InflowBoundaryModel<CloudType>(cloud)
+    accessed_(true),
+    pRel_(pRel),
+    data_(data)
+{}
+
+
+template<class Type>
+Foam::WallCollisionRecord<Type>::WallCollisionRecord
+(
+    const WallCollisionRecord<Type>& wCR
+)
+:
+    accessed_(wCR.accessed_),
+    pRel_(wCR.pRel_),
+    data_(wCR.data_)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::NoInflow<CloudType>::~NoInflow()
+template<class Type>
+Foam::WallCollisionRecord<Type>::~WallCollisionRecord()
 {}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
-template <class CloudType>
-void Foam::NoInflow<CloudType>::inflow()
-{}
+template<class Type>
+void Foam::WallCollisionRecord<Type>::operator=
+(
+    const WallCollisionRecord<Type>& rhs
+)
+{
+    // Check for assignment to self
+    if (this == &rhs)
+    {
+        FatalErrorIn
+        (
+            "Foam::WallCollisionRecord<Type>::operator="
+            "(const Foam::WallCollisionRecord<Type>&)"
+        )
+            << "Attempted assignment to self"
+            << abort(FatalError);
+    }
+
+    accessed_ = rhs.accessed_;
+    pRel_ = rhs.pRel_;
+    data_ = rhs.data_;
+}
+
+
+// * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * * * //
+
+#include "WallCollisionRecordIO.C"
 
 
 // ************************************************************************* //
