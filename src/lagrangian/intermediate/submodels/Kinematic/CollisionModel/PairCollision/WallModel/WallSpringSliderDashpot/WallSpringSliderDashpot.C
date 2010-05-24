@@ -45,7 +45,8 @@ void Foam::WallSpringSliderDashpot<CloudType>::findMinMaxProperties
 
         // Finding minimum diameter to avoid excessive arithmetic
 
-        scalar dEff = p.d()*cbrt(p.nParticle()*volumeFactor_);
+        scalar dEff = p.d();
+        // scalar dEff = p.d()*cbrt(p.nParticle()*volumeFactor_);
 
         rMin = min(dEff, rMin);
 
@@ -181,7 +182,8 @@ Foam::scalar Foam::WallSpringSliderDashpot<CloudType>::pREff
     const typename CloudType::parcelType& p
 ) const
 {
-    return p.d()/2*cbrt(p.nParticle()*volumeFactor_);
+    // return p.d()/2*cbrt(p.nParticle()*volumeFactor_);
+    return p.d()/2;
 }
 
 template<class CloudType>

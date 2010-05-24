@@ -45,7 +45,8 @@ void Foam::PairSpringSliderDashpot<CloudType>::findMinMaxProperties
 
         // Finding minimum diameter to avoid excessive arithmetic
 
-        scalar dEff = p.d()*cbrt(p.nParticle()*volumeFactor_);
+        scalar dEff = p.d();
+        // scalar dEff = p.d()*cbrt(p.nParticle()*volumeFactor_);
 
         RMin = min(dEff, RMin);
 
@@ -158,9 +159,11 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
 {
     vector r_AB = (pA.position() - pB.position());
 
-    scalar dAEff = pA.d()*cbrt(pA.nParticle()*volumeFactor_);
+    //scalar dAEff = pA.d()*cbrt(pA.nParticle()*volumeFactor_);
+    scalar dAEff = pA.d();
 
-    scalar dBEff = pB.d()*cbrt(pB.nParticle()*volumeFactor_);
+    // scalar dBEff = pB.d()*cbrt(pB.nParticle()*volumeFactor_);
+    scalar dBEff = pB.d();
 
     scalar normalOverlapMag = 0.5*(dAEff + dBEff) - mag(r_AB);
 

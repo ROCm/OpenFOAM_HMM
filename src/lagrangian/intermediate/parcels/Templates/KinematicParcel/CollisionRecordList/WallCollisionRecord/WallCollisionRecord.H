@@ -82,7 +82,7 @@ class WallCollisionRecord
         // //- Recording whether or not this record has been accessed
         bool accessed_;
 
-        //- The position of wall impact relative to the cell centre
+        //- The position of wall impact relative to the particle centre
         vector pRel_;
 
         //- Collision data, stored as if the storing particle was the

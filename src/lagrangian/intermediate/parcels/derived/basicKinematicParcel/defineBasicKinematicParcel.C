@@ -31,7 +31,6 @@ License
 
 namespace Foam
 {
-
     defineTemplateTypeNameAndDebug(Cloud<basicKinematicParcel>, 0);
 
     defineParcelTypeNameAndDebug(KinematicCloud<basicKinematicParcel>, 0);
