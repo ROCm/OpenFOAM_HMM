@@ -43,7 +43,8 @@ Foam::string Foam::KinematicParcel<ParcelType>::propHeader =
   + " (torquex torquey torquez)"
   + " rho"
   + " tTurb"
-  + " (UTurbx UTurby UTurbz)";
+  + " (UTurbx UTurby UTurbz)"
+  + " pairCollisions wallCollisions";
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -167,6 +168,31 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
     IOField<vector> UTurb(c.fieldIOobject("UTurb", IOobject::MUST_READ));
     c.checkFieldIOobject(c, UTurb);
 
+    collisionRecordIOList collisionRecords
+    (
+        IOobject
+        (
+            "collisionRecords",
+            c.time().timeName(),
+            c,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+
+    if (collisionRecords.size() != c.size())
+    {
+        FatalErrorIn
+        (
+            "void Foam::KinematicParcel<ParcelType>::readFields"
+            "(Cloud<ParcelType>& c)"
+        )   << "Size of " << collisionRecords.name()
+            << " field " << collisionRecords.size()
+            << " does not match the number of particles " << c.size()
+            << abort(FatalError);
+    }
+
     label i = 0;
     forAllIter(typename Cloud<ParcelType>, c, iter)
     {
@@ -182,6 +208,7 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
         p.rho_ = rho[i];
         p.tTurb_ = tTurb[i];
         p.UTurb_ = UTurb[i];
+        p.collisionRecords_ = collisionRecords[i];
         i++;
     }
 }
@@ -213,7 +240,22 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
     IOField<scalar> tTurb(c.fieldIOobject("tTurb", IOobject::NO_READ), np);
     IOField<vector> UTurb(c.fieldIOobject("UTurb", IOobject::NO_READ), np);
 
+    collisionRecordIOList collisionRecords
+    (
+        IOobject
+        (
+            "collisionRecords",
+            c.time().timeName(),
+            c,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        np
+    );
+
     label i = 0;
+
     forAllConstIter(typename Cloud<ParcelType>, c, iter)
     {
         const KinematicParcel<ParcelType>& p = iter();
@@ -229,6 +271,7 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
         rho[i] = p.rho();
         tTurb[i] = p.tTurb();
         UTurb[i] = p.UTurb();
+        collisionRecords[i] = p.collisionRecords();
         i++;
     }
 
@@ -243,6 +286,7 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
     rho.write();
     tTurb.write();
     UTurb.write();
+    collisionRecords.write();
 }
 
 

@@ -25,14 +25,23 @@ License
 
 #include "basicKinematicParcel.H"
 #include "KinematicCloud.H"
+#include "KinematicParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
     defineTemplateTypeNameAndDebug(Cloud<basicKinematicParcel>, 0);
 
     defineParcelTypeNameAndDebug(KinematicCloud<basicKinematicParcel>, 0);
+
+    defineTemplateTypeNameAndDebugWithName
+    (
+        collisionRecordIOList,
+        "collisionRecordList",
+        0
+    );
 };
 
 
