@@ -39,7 +39,7 @@ inline bool Foam::WallCollisionRecord<Type>::match
     // Using the new data as the acceptance criterion
     scalar cosAcceptanceAngle = magpRel/radius;
 
-    if (cosAcceptanceAngle > 1.0)
+    if (cosAcceptanceAngle > 1.0 + SMALL)
     {
         Info<< "pRel_ " << pRel_ << " " << magpRel_ << nl
             << "pRel " << pRel << " " << magpRel << nl

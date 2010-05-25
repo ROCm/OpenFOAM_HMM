@@ -50,11 +50,11 @@ class WallSpringSliderDashpot
 {
     // Private data
 
-        //- Young's modulus of the wall
-        scalar E_;
+        //- Effective Young's modulus value
+        scalar Estar_;
 
-        //- Poisson's ratio of the wall
-        scalar nu_;
+        //- Effective shear modulus value
+        scalar Gstar_;
 
         //- alpha-coefficient, related to coefficient of restitution
         scalar alpha_;
@@ -109,12 +109,8 @@ class WallSpringSliderDashpot
             typename CloudType::parcelType& p,
             const point& site,
             const WallSiteData<vector>& data,
-            scalar pNu,
-            scalar pE,
             scalar pREff,
-            scalar Estar,
-            scalar kN,
-            scalar Gstar
+            scalar kN
         ) const;
 
 

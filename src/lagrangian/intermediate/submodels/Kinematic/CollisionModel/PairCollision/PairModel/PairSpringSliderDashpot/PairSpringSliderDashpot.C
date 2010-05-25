@@ -100,11 +100,11 @@ Foam::PairSpringSliderDashpot<CloudType>::PairSpringSliderDashpot
         )
     ),
     volumeFactor_(1.0),
-    useEquivalentSize_(Switch(this->dict().lookup("useEquivalentSize")))
+    useEquivalentSize_(Switch(this->coeffDict().lookup("useEquivalentSize")))
 {
     if (useEquivalentSize_)
     {
-        volumeFactor_ = readScalar(this->dict().lookup("volumeFactor"));
+        volumeFactor_ = readScalar(this->coeffDict().lookup("volumeFactor"));
     }
 
     scalar nu = this->owner().constProps().poissonsRatio();

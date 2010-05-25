@@ -23,12 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "WallSpringSliderDashpot.H"
+#include "WallLocalSpringSliderDashpot.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template <class CloudType>
-void Foam::WallSpringSliderDashpot<CloudType>::findMinMaxProperties
+void Foam::WallLocalSpringSliderDashpot<CloudType>::findMinMaxProperties
 (
     scalar& rMin,
     scalar& rhoMax,
@@ -71,15 +71,24 @@ void Foam::WallSpringSliderDashpot<CloudType>::findMinMaxProperties
 
 
 template <class CloudType>
-void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
+void Foam::WallLocalSpringSliderDashpot<CloudType>::evaluateWall
 (
     typename CloudType::parcelType& p,
     const point& site,
     const WallSiteData<vector>& data,
-    scalar pREff,
-    scalar kN
+    scalar pREff
 ) const
 {
+    // wall patch index
+    label wPI = patchMap_[data.patchIndex()];
+
+    // data for this patch
+    scalar Estar = Estar_[wPI];
+    scalar Gstar = Gstar_[wPI];
+    scalar alpha = alpha_[wPI];
+    scalar b = b_[wPI];
+    scalar mu = mu_[wPI];
+
     vector r_PW = p.position() - site;
 
     vector U_PW = p.U() - data.wallData();
@@ -88,11 +97,13 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 
     vector rHat_PW = r_PW/(mag(r_PW) + VSMALL);
 
-    scalar etaN = alpha_*sqrt(p.mass()*kN)*pow025(normalOverlapMag);
+    scalar kN = (4.0/3.0)*sqrt(pREff)*Estar;
+
+    scalar etaN = alpha*sqrt(p.mass()*kN)*pow025(normalOverlapMag);
 
     vector fN_PW =
         rHat_PW
-       *(kN*pow(normalOverlapMag, b_) - etaN*(U_PW & rHat_PW));
+       *(kN*pow(normalOverlapMag, b) - etaN*(U_PW & rHat_PW));
 
     p.f() += fN_PW;
 
@@ -111,19 +122,19 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 
     if (tangentialOverlapMag > VSMALL)
     {
-        scalar kT = 8.0*sqrt(pREff*normalOverlapMag)*Gstar_;
+        scalar kT = 8.0*sqrt(pREff*normalOverlapMag)*Gstar;
 
         scalar etaT = etaN;
 
         // Tangential force
         vector fT_PW;
 
-        if (kT*tangentialOverlapMag > mu_*mag(fN_PW))
+        if (kT*tangentialOverlapMag > mu*mag(fN_PW))
         {
             // Tangential force greater than sliding friction,
             // particle slips
 
-            fT_PW = -mu_*mag(fN_PW)*USlip_PW/mag(USlip_PW);
+            fT_PW = -mu*mag(fN_PW)*USlip_PW/mag(USlip_PW);
 
             tangentialOverlap_PW = vector::zero;
         }
@@ -145,7 +156,7 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::WallSpringSliderDashpot<CloudType>::WallSpringSliderDashpot
+Foam::WallLocalSpringSliderDashpot<CloudType>::WallLocalSpringSliderDashpot
 (
     const dictionary& dict,
     CloudType& cloud
@@ -154,9 +165,11 @@ Foam::WallSpringSliderDashpot<CloudType>::WallSpringSliderDashpot
     WallModel<CloudType>(dict, cloud, typeName),
     Estar_(),
     Gstar_(),
-    alpha_(dimensionedScalar(this->coeffDict().lookup("alpha")).value()),
-    b_(dimensionedScalar(this->coeffDict().lookup("b")).value()),
-    mu_(dimensionedScalar(this->coeffDict().lookup("mu")).value()),
+    alpha_(),
+    b_(),
+    mu_(),
+    patchMap_(),
+    maxEstarIndex_(-1),
     collisionResolutionSteps_
     (
         readScalar
@@ -172,37 +185,87 @@ Foam::WallSpringSliderDashpot<CloudType>::WallSpringSliderDashpot
         volumeFactor_ = readScalar(this->coeffDict().lookup("volumeFactor"));
     }
 
-    scalar nu = dimensionedScalar
-    (
-        this->coeffDict().lookup("poissonsRatio")
-    ).value();
-
-    scalar E = dimensionedScalar
-    (
-        this->coeffDict().lookup("youngsModulus")
-    ).value();
-
     scalar pNu = this->owner().constProps().poissonsRatio();
 
     scalar pE = this->owner().constProps().youngsModulus();
 
-    Estar_ = 1/((1 - sqr(pNu))/pE + (1 - sqr(nu))/E);
+    const polyMesh& mesh = cloud.mesh();
 
-    Gstar_ = 1/(2*((2 + pNu - sqr(pNu))/pE + (2 + nu - sqr(nu))/E));
+    const polyBoundaryMesh& bMesh = mesh.boundaryMesh();
+
+    patchMap_.setSize(bMesh.size(), -1);
+
+    DynamicList<label> wallPatchIndices;
+
+    forAll(bMesh, patchI)
+    {
+        if (isA<wallPolyPatch>(bMesh[patchI]))
+        {
+            wallPatchIndices.append(bMesh[patchI].index());
+        }
+    }
+
+    label nWallPatches = wallPatchIndices.size();
+
+    Estar_.setSize(nWallPatches);
+    Gstar_.setSize(nWallPatches);
+    alpha_.setSize(nWallPatches);
+    b_.setSize(nWallPatches);
+    mu_.setSize(nWallPatches);
+
+    scalar maxEstar = -GREAT;
+
+    forAll(wallPatchIndices, wPI)
+    {
+        const dictionary& patchCoeffDict
+        (
+            this->coeffDict().subDict(bMesh[wallPatchIndices[wPI]].name())
+        );
+
+        patchMap_[wallPatchIndices[wPI]] = wPI;
+
+        scalar nu = dimensionedScalar
+        (
+            patchCoeffDict.lookup("poissonsRatio")
+        ).value();
+
+        scalar E = dimensionedScalar
+        (
+            patchCoeffDict.lookup("youngsModulus")
+        ).value();
+
+        Estar_[wPI] = 1/((1 - sqr(pNu))/pE + (1 - sqr(nu))/E);
+
+        Gstar_[wPI] = 1/(2*((2 + pNu - sqr(pNu))/pE + (2 + nu - sqr(nu))/E));
+
+        alpha_[wPI] =
+            dimensionedScalar(patchCoeffDict.lookup("alpha")).value();
+
+        b_[wPI] = dimensionedScalar(patchCoeffDict.lookup("b")).value();
+
+        mu_[wPI] = dimensionedScalar(patchCoeffDict.lookup("mu")).value();
+
+        if (Estar_[wPI] > maxEstar)
+        {
+            maxEstarIndex_ = wPI;
+
+            maxEstar = Estar_[wPI];
+        }
+    }
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::WallSpringSliderDashpot<CloudType>::~WallSpringSliderDashpot()
+Foam::WallLocalSpringSliderDashpot<CloudType>::~WallLocalSpringSliderDashpot()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::scalar Foam::WallSpringSliderDashpot<CloudType>::pREff
+Foam::scalar Foam::WallLocalSpringSliderDashpot<CloudType>::pREff
 (
     const typename CloudType::parcelType& p
 ) const
@@ -219,14 +282,14 @@ Foam::scalar Foam::WallSpringSliderDashpot<CloudType>::pREff
 
 
 template<class CloudType>
-bool Foam::WallSpringSliderDashpot<CloudType>::controlsTimestep() const
+bool Foam::WallLocalSpringSliderDashpot<CloudType>::controlsTimestep() const
 {
     return true;
 }
 
 
 template<class CloudType>
-Foam::label Foam::WallSpringSliderDashpot<CloudType>::nSubCycles() const
+Foam::label Foam::WallLocalSpringSliderDashpot<CloudType>::nSubCycles() const
 {
     if (!(this->owner().size()))
     {
@@ -243,7 +306,7 @@ Foam::label Foam::WallSpringSliderDashpot<CloudType>::nSubCycles() const
     scalar minCollisionDeltaT =
         5.429675
        *rMin
-       *pow(rhoMax/(Estar_*sqrt(UMagMax) + VSMALL), 0.4)
+       *pow(rhoMax/(Estar_[maxEstarIndex_]*sqrt(UMagMax) + VSMALL), 0.4)
        /collisionResolutionSteps_;
 
     return ceil(this->owner().time().deltaTValue()/minCollisionDeltaT);
@@ -251,7 +314,7 @@ Foam::label Foam::WallSpringSliderDashpot<CloudType>::nSubCycles() const
 
 
 template<class CloudType>
-void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
+void Foam::WallLocalSpringSliderDashpot<CloudType>::evaluateWall
 (
     typename CloudType::parcelType& p,
     const List<point>& flatSitePoints,
@@ -262,8 +325,6 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 {
     scalar pREff = this->pREff(p);
 
-    scalar kN = (4.0/3.0)*sqrt(pREff)*Estar_;
-
     forAll(flatSitePoints, siteI)
     {
         evaluateWall
@@ -271,8 +332,7 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
             p,
             flatSitePoints[siteI],
             flatSiteData[siteI],
-            pREff,
-            kN
+            pREff
         );
     }
 
@@ -285,8 +345,7 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
             p,
             sharpSitePoints[siteI],
             sharpSiteData[siteI],
-            pREff,
-            kN
+            pREff
         );
     }
 }
