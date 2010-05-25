@@ -92,6 +92,10 @@ class PairSpringSliderDashpot
         // factor
         scalar volumeFactor_;
 
+        //- Switch to control use of equivalent size particles.  Used
+        //  because cbrt calculation is very expensive.
+        bool useEquivalentSize_;
+
 
     // Private Member Functions
 

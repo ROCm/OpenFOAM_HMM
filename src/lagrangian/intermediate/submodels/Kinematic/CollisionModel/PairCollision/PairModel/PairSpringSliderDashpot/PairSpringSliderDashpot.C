@@ -46,7 +46,11 @@ void Foam::PairSpringSliderDashpot<CloudType>::findMinMaxProperties
         // Finding minimum diameter to avoid excessive arithmetic
 
         scalar dEff = p.d();
-        // scalar dEff = p.d()*cbrt(p.nParticle()*volumeFactor_);
+
+        if (useEquivalentSize_)
+        {
+            dEff *= cbrt(p.nParticle()*volumeFactor_);
+        }
 
         RMin = min(dEff, RMin);
 
@@ -95,8 +99,14 @@ Foam::PairSpringSliderDashpot<CloudType>::PairSpringSliderDashpot
             this->coeffDict().lookup("collisionResolutionSteps")
         )
     ),
-    volumeFactor_(this->dict().lookupOrDefault("volumeFactor", 1.0))
+    volumeFactor_(1.0),
+    useEquivalentSize_(Switch(this->dict().lookup("useEquivalentSize")))
 {
+    if (useEquivalentSize_)
+    {
+        volumeFactor_ = readScalar(this->dict().lookup("volumeFactor"));
+    }
+
     scalar nu = this->owner().constProps().poissonsRatio();
 
     scalar E = this->owner().constProps().youngsModulus();
@@ -159,11 +169,19 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
 {
     vector r_AB = (pA.position() - pB.position());
 
-    //scalar dAEff = pA.d()*cbrt(pA.nParticle()*volumeFactor_);
     scalar dAEff = pA.d();
 
-    // scalar dBEff = pB.d()*cbrt(pB.nParticle()*volumeFactor_);
+    if (useEquivalentSize_)
+    {
+        dAEff *= cbrt(pA.nParticle()*volumeFactor_);
+    }
+
     scalar dBEff = pB.d();
+
+    if (useEquivalentSize_)
+    {
+        dBEff *= cbrt(pB.nParticle()*volumeFactor_);
+    }
 
     scalar normalOverlapMag = 0.5*(dAEff + dBEff) - mag(r_AB);
 

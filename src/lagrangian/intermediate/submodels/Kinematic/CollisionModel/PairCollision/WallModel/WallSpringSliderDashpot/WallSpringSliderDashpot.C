@@ -46,7 +46,11 @@ void Foam::WallSpringSliderDashpot<CloudType>::findMinMaxProperties
         // Finding minimum diameter to avoid excessive arithmetic
 
         scalar dEff = p.d();
-        // scalar dEff = p.d()*cbrt(p.nParticle()*volumeFactor_);
+
+        if (useEquivalentSize_)
+        {
+            dEff *= cbrt(p.nParticle()*volumeFactor_);
+        }
 
         rMin = min(dEff, rMin);
 
@@ -64,6 +68,7 @@ void Foam::WallSpringSliderDashpot<CloudType>::findMinMaxProperties
 
     rMin /= 2.0;
 }
+
 
 template <class CloudType>
 void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
@@ -163,8 +168,14 @@ Foam::WallSpringSliderDashpot<CloudType>::WallSpringSliderDashpot
             this->coeffDict().lookup("collisionResolutionSteps")
         )
     ),
-    volumeFactor_(this->dict().lookupOrDefault("volumeFactor", 1.0))
-{}
+    volumeFactor_(1.0),
+    useEquivalentSize_(Switch(this->dict().lookup("useEquivalentSize")))
+{
+    if (useEquivalentSize_)
+    {
+        volumeFactor_ = readScalar(this->dict().lookup("volumeFactor"));
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -182,9 +193,16 @@ Foam::scalar Foam::WallSpringSliderDashpot<CloudType>::pREff
     const typename CloudType::parcelType& p
 ) const
 {
-    // return p.d()/2*cbrt(p.nParticle()*volumeFactor_);
-    return p.d()/2;
+    if (useEquivalentSize_)
+    {
+        return p.d()/2*cbrt(p.nParticle()*volumeFactor_);
+    }
+    else
+    {
+        return p.d()/2;
+    }
 }
+
 
 template<class CloudType>
 bool Foam::WallSpringSliderDashpot<CloudType>::controlsTimestep() const
