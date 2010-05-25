@@ -1,6 +1,5 @@
 rho = thermo.rho();
 
-volScalarField rUA = 1.0/UEqn().A();
 U = rUA*UEqn().H();
 
 if (nCorr <= 1)
@@ -29,19 +28,20 @@ if (transonic)
           - fvm::laplacian(rho*rUA, p)
         );
 
-        if
+        pEqn.solve
         (
-            oCorr == nOuterCorr-1
-            && corr == nCorr-1
-            && nonOrth == nNonOrthCorr
-        )
-        {
-            pEqn.solve(mesh.solver("pFinal"));
-        }
-        else
-        {
-            pEqn.solve();
-        }
+            mesh.solver
+            (
+                p.select
+                (
+                    (
+                        finalIter
+                     && corr == nCorr-1
+                     && nonOrth == nNonOrthCorr
+                    )
+                )
+            )
+        );
 
         if (nonOrth == nNonOrthCorr)
         {
@@ -55,7 +55,7 @@ else
         fvc::interpolate(rho)*
         (
             (fvc::interpolate(U) & mesh.Sf())
-        //+ fvc::ddtPhiCorr(rUA, rho, U, phi)
+          + fvc::ddtPhiCorr(rUA, rho, U, phi)
         );
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
@@ -68,19 +68,20 @@ else
           - fvm::laplacian(rho*rUA, p)
         );
 
-        if
+        pEqn.solve
         (
-            oCorr == nOuterCorr-1
-         && corr == nCorr-1
-         && nonOrth == nNonOrthCorr
-        )
-        {
-            pEqn.solve(mesh.solver("pFinal"));
-        }
-        else
-        {
-            pEqn.solve();
-        }
+            mesh.solver
+            (
+                p.select
+                (
+                    (
+                        finalIter
+                     && corr == nCorr-1
+                     && nonOrth == nNonOrthCorr
+                    )
+                )
+            )
+        );
 
         if (nonOrth == nNonOrthCorr)
         {
@@ -92,30 +93,15 @@ else
 #include "rhoEqn.H"
 #include "compressibleContinuityErrs.H"
 
-//if (oCorr != nOuterCorr-1)
-{
-    // Explicitly relax pressure for momentum corrector
-    p.relax();
+// Explicitly relax pressure for momentum corrector
+p.relax();
 
-    rho = thermo.rho();
-    rho.relax();
-    Info<< "rho max/min : " << max(rho).value()
-        << " " << min(rho).value() << endl;
-}
+// Recalculate density from the relaxed pressure
+rho = thermo.rho();
+Info<< "rho max/min : " << max(rho).value()
+    << " " << min(rho).value() << endl;
 
 U -= rUA*fvc::grad(p);
 U.correctBoundaryConditions();
 
 DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
-
-bound(p, pMin);
-
-// For closed-volume cases adjust the pressure and density levels
-// to obey overall mass continuity
-/*
-if (closedVolume)
-{
-    p += (initialMass - fvc::domainIntegrate(psi*p))
-        /fvc::domainIntegrate(psi);
-}
-*/

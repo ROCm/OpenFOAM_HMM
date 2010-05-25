@@ -30,19 +30,20 @@ if (transonic)
           - fvm::laplacian(rho*rUA, p)
         );
 
-        if
+        pEqn.solve
         (
-            oCorr == nOuterCorr-1
-            && corr == nCorr-1
-            && nonOrth == nNonOrthCorr
-        )
-        {
-            pEqn.solve(mesh.solver("pFinal"));
-        }
-        else
-        {
-            pEqn.solve();
-        }
+            mesh.solver
+            (
+                p.select
+                (
+                    (
+                        finalIter
+                     && corr == nCorr-1
+                     && nonOrth == nNonOrthCorr
+                    )
+                )
+            )
+        );
 
         if (nonOrth == nNonOrthCorr)
         {
@@ -70,19 +71,20 @@ else
           - fvm::laplacian(rho*rUA, p)
         );
 
-        if
+        pEqn.solve
         (
-            oCorr == nOuterCorr-1
-         && corr == nCorr-1
-         && nonOrth == nNonOrthCorr
-        )
-        {
-            pEqn.solve(mesh.solver("pFinal"));
-        }
-        else
-        {
-            pEqn.solve();
-        }
+            mesh.solver
+            (
+                p.select
+                (
+                    (
+                        finalIter
+                     && corr == nCorr-1
+                     && nonOrth == nNonOrthCorr
+                    )
+                )
+            )
+        );
 
         if (nonOrth == nNonOrthCorr)
         {
