@@ -55,10 +55,20 @@ Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
 )
 :
     processorPolyPatch(name, size, start, index, bm, myProcNo, neighbProcNo),
-    tag_(UPstream::allocateTag()),
+    tag_
+    (
+        Pstream::nProcs()*max(myProcNo, neighbProcNo)
+      + min(myProcNo, neighbProcNo)
+    ),
     referPatchName_(referPatchName),
     referPatchID_(-1)
-{}
+{
+    if (debug)
+    {
+        Pout<< "processorCyclicPolyPatch " << name << " uses tag " << tag_
+            << endl;
+    }
+}
 
 
 Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
@@ -70,10 +80,20 @@ Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
 )
 :
     processorPolyPatch(name, dict, index, bm),
-    tag_(UPstream::allocateTag()),
+    tag_
+    (
+        Pstream::nProcs()*max(myProcNo(), neighbProcNo())
+      + min(myProcNo(), neighbProcNo())
+    ),
     referPatchName_(dict.lookup("referPatch")),
     referPatchID_(-1)
-{}
+{
+    if (debug)
+    {
+        Pout<< "processorCyclicPolyPatch " << name << " uses tag " << tag_
+            << endl;
+    }
+}
 
 
 Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
@@ -125,9 +145,7 @@ Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::processorCyclicPolyPatch::~processorCyclicPolyPatch()
-{
-    UPstream::freeTag(tag_);
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

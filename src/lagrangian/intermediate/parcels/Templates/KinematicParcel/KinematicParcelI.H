@@ -348,7 +348,7 @@ inline bool& Foam::KinematicParcel<ParcelType>::active()
 
 
 template <class ParcelType>
-inline const Foam::CollisionRecordList<Foam::vector>&
+inline const Foam::CollisionRecordList<Foam::vector, Foam::vector>&
 Foam::KinematicParcel<ParcelType>::collisionRecords() const
 {
     return collisionRecords_;
@@ -426,7 +426,7 @@ inline Foam::vector& Foam::KinematicParcel<ParcelType>::UTurb()
 
 
 template <class ParcelType>
-inline Foam::CollisionRecordList<Foam::vector>&
+inline Foam::CollisionRecordList<Foam::vector, Foam::vector>&
 Foam::KinematicParcel<ParcelType>::collisionRecords()
 {
     return collisionRecords_;

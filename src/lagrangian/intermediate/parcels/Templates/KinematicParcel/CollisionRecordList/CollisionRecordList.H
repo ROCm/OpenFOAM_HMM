@@ -37,22 +37,53 @@ SourceFiles
 #define CollisionRecordList_H
 
 #include "DynamicList.H"
-#include "CollisionRecord.H"
+#include "PairCollisionRecord.H"
+#include "WallCollisionRecord.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+template<class PairType, class WallType>
+class CollisionRecordList;
+
+template<class PairType, class WallType>
+inline bool operator==
+(
+    const CollisionRecordList<PairType, WallType>&,
+    const CollisionRecordList<PairType, WallType>&
+);
+
+template<class PairType, class WallType>
+inline bool operator!=
+(
+    const CollisionRecordList<PairType, WallType>&,
+    const CollisionRecordList<PairType, WallType>&
+);
+
+template<class PairType, class WallType>
+Istream& operator>>(Istream&, CollisionRecordList<PairType, WallType>&);
+
+template<class PairType, class WallType>
+Ostream& operator<<(Ostream&, const CollisionRecordList<PairType, WallType>&);
+
+
 /*---------------------------------------------------------------------------*\
                      Class CollisionRecordList Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
+template<class PairType, class WallType>
 class CollisionRecordList
-:
-    public DynamicList<CollisionRecord<Type> >
 {
+    // Private data
+
+        //- List of active pair collisions
+        DynamicList<PairCollisionRecord<PairType> > pairRecords_;
+
+        //- List of active wall collisions
+        DynamicList<WallCollisionRecord<WallType> > wallRecords_;
 
 public:
 
@@ -72,19 +103,66 @@ public:
     // Member Functions
 
         //- Enquires if the proc and id pair of the other particle are
-        //  present in the records.  If so, return access to the
-        //  collisionData and mark the CollisionRecord as accessed this
-        //  step, if not, create the record and return access to it.
-        CollisionRecord<Type>& matchRecord
+        //  present in the records.  If so, return non-const access to
+        //  the PairCollisionRecord (hence the data) and mark the
+        //  PairCollisionRecord as accessed this step, if not, create
+        //  the record and return access to it.
+        PairCollisionRecord<PairType>& matchPairRecord
         (
             label origProcOfOther,
             label origIdOfOther
+        );
+
+        //- Enquires if the position of wall impact relative to the
+        //  particle centre is present in the records.  If so, return
+        //  access to the WallCollisionRecord (hence the data) and
+        //  mark the WallCollisionRecord as accesses this step, if
+        //  not, create the record and return access to it.
+        WallCollisionRecord<WallType>& matchWallRecord
+        (
+            const vector& pRel,
+            scalar radius
         );
 
         //- Update the collision records, deleting any records not
         //  marked as having been accessed, then mark all records as
         //  not accessed ready for the next evaluation
         void update();
+
+
+        // Member Operators
+
+            void operator=(const CollisionRecordList&);
+
+
+        // Friend Operators
+
+            friend bool operator== <PairType, WallType>
+            (
+                const CollisionRecordList<PairType, WallType>&,
+                const CollisionRecordList<PairType, WallType>&
+            );
+
+            friend bool operator!= <PairType, WallType>
+            (
+                const CollisionRecordList<PairType, WallType>&,
+                const CollisionRecordList<PairType, WallType>&
+            );
+
+
+        // IOstream Operators
+
+            friend Istream& operator>> <PairType, WallType>
+            (
+                Istream&,
+                CollisionRecordList<PairType, WallType>&
+            );
+
+            friend Ostream& operator<< <PairType, WallType>
+            (
+                Ostream&,
+                const CollisionRecordList<PairType, WallType>&
+            );
 };
 
 

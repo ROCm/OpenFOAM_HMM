@@ -219,30 +219,6 @@ Foam::List<int> Foam::UPstream::procIDs_(1, 0);
 // Standard transfer message type
 int Foam::UPstream::msgType_(1);
 
-// New message type 
-int Foam::UPstream::freeTag_(msgType()+1);
-
-// Free'd message types
-Foam::LIFOStack<int> Foam::UPstream::freedTags_;
-
-int Foam::UPstream::allocateTag()
-{
-    if (freedTags_.empty())
-    {
-        return freeTag_++;
-    }
-    else
-    {
-        return freedTags_.pop();
-    }
-}
-
-void Foam::UPstream::freeTag(const int tag)
-{
-    freedTags_.push(tag);
-}
-
-
 // Linear communication schedule
 Foam::List<Foam::UPstream::commsStruct> Foam::UPstream::linearCommunication_(0);
 

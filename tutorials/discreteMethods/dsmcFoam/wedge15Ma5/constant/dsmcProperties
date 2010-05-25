@@ -27,8 +27,6 @@ nEquivalentParticles            5e12;
 
 WallInteractionModel            MaxwellianThermal;
 
-MaxwellianThermalCoeffs {}
-
 
 // Binary Collision Model
 // ~~~~~~~~~~~~~~~~~~~~~~
@@ -46,8 +44,6 @@ LarsenBorgnakkeVariableHardSphereCoeffs
 // ~~~~~~~~~~~~~~~~~~~~~
 
 InflowBoundaryModel             FreeStream;
-
-NoInflowCoeffs {}
 
 FreeStreamCoeffs
 {
