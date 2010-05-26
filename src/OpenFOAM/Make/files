@@ -545,4 +545,6 @@ $(writers)/gnuplotGraph/gnuplotGraph.C
 $(writers)/xmgrGraph/xmgrGraph.C
 $(writers)/jplotGraph/jplotGraph.C
 
+meshes/data/data.C
+
 LIB = $(FOAM_LIBBIN)/libOpenFOAM

@@ -31,14 +31,20 @@
               - fvm::laplacian(rho*rUA, p)
             );
 
-            if (ocorr == nOuterCorr && corr == nCorr && nonOrth == nNonOrthCorr)
-            {
-                pEqn.solve(mesh.solver(p.name() + "Final"));
-            }
-            else
-            {
-                pEqn.solve();
-            }
+            pEqn.solve
+            (
+                mesh.solver
+                (
+                    p.select
+                    (
+                        (
+                            finalIter
+                            && corr == nCorr-1
+                            && nonOrth == nNonOrthCorr
+                        )
+                    )
+                )
+            );
 
             if (nonOrth == nNonOrthCorr)
             {
@@ -64,14 +70,20 @@
               - fvm::laplacian(rho*rUA, p)
             );
 
-            if (ocorr == nOuterCorr && corr == nCorr && nonOrth == nNonOrthCorr)
-            {
-                pEqn.solve(mesh.solver(p.name() + "Final"));
-            }
-            else
-            {
-                pEqn.solve();
-            }
+            pEqn.solve
+            (
+                mesh.solver
+                (
+                    p.select
+                    (
+                        (
+                            finalIter
+                            && corr == nCorr-1
+                            && nonOrth == nNonOrthCorr
+                        )
+                    )
+                )
+            );
 
             if (nonOrth == nNonOrthCorr)
             {

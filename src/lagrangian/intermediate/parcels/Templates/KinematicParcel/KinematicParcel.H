@@ -268,7 +268,7 @@ protected:
             vector UTurb_;
 
             //- Particle collision records
-            CollisionRecordList<vector> collisionRecords_;
+            CollisionRecordList<vector, vector> collisionRecords_;
 
 
         // Cell-based quantities
@@ -400,7 +400,8 @@ public:
             inline const vector& UTurb() const;
 
             //- Return const access to the collision records
-            inline const CollisionRecordList<vector>& collisionRecords() const;
+            inline const CollisionRecordList<vector, vector>&
+            collisionRecords() const;
 
 
         // Edit
@@ -439,7 +440,7 @@ public:
             inline vector& UTurb();
 
             //- Return access to collision records
-            inline CollisionRecordList<vector>& collisionRecords();
+            inline CollisionRecordList<vector, vector>& collisionRecords();
 
 
         // Helper functions

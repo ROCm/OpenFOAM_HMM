@@ -100,11 +100,10 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 
     scalar deltaT = this->owner().mesh().time().deltaTValue();
 
-    // For remembering previous overlap
-    // vector deltaTangentialOverlap_PW = USlip_PW * deltaT;
-    // tangentialOverlap_PW += deltaTangentialOverlap_PW;
+    vector& tangentialOverlap_PW =
+        p.collisionRecords().matchWallRecord(-r_PW, pREff).collisionData();
 
-    vector tangentialOverlap_PW = USlip_PW * deltaT;
+    tangentialOverlap_PW += USlip_PW*deltaT;
 
     scalar tangentialOverlapMag = mag(tangentialOverlap_PW);
 
@@ -124,7 +123,7 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 
             fT_PW = -mu_*mag(fN_PW)*USlip_PW/mag(USlip_PW);
 
-            // tangentialOverlap_PW = vector::zero;
+            tangentialOverlap_PW = vector::zero;
         }
         else
         {

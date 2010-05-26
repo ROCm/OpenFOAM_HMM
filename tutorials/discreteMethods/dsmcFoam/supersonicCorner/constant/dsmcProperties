@@ -25,29 +25,17 @@ nEquivalentParticles            1.2e12;
 // Wall Interaction Model
 // ~~~~~~~~~~~~~~~~~~~~~~
 
-//WallInteractionModel            SpecularReflection;
 WallInteractionModel            MaxwellianThermal;
-
-SpecularReflectionCoeffs {}
-
-MaxwellianThermalCoeffs {}
 
 
 // Binary Collision Model
 // ~~~~~~~~~~~~~~~~~~~~~~
 
-//BinaryCollisionModel            VariableHardSphere;
-BinaryCollisionModel            LarsenBorgnakkeVariableHardSphere;
+BinaryCollisionModel            VariableHardSphere;
 
 VariableHardSphereCoeffs
 {
     Tref        273;
-}
-
-LarsenBorgnakkeVariableHardSphereCoeffs
-{
-    Tref                        273;
-    relaxationCollisionNumber   5.0;
 }
 
 
@@ -55,9 +43,6 @@ LarsenBorgnakkeVariableHardSphereCoeffs
 // ~~~~~~~~~~~~~~~~~~~~~
 
 InflowBoundaryModel             FreeStream;
-//InflowBoundaryModel             NoInflow;
-
-NoInflowCoeffs {}
 
 FreeStreamCoeffs
 {

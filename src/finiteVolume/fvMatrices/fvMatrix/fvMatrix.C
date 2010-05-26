@@ -506,6 +506,13 @@ void Foam::fvMatrix<Type>::relax(const scalar alpha)
         return;
     }
 
+    if (debug)
+    {
+        InfoIn("fvMatrix<Type>::relax(const scalar alpha)")
+            << "Relaxing " << psi_.name() << " by " << alpha
+            << endl;
+    }
+
     Field<Type>& S = source();
     scalarField& D = diag();
 
@@ -591,9 +598,14 @@ void Foam::fvMatrix<Type>::relax(const scalar alpha)
 template<class Type>
 void Foam::fvMatrix<Type>::relax()
 {
-    if (psi_.mesh().relax(psi_.name()))
+    word name = psi_.select
+    (
+        psi_.mesh().data::lookupOrDefault<bool>("finalIteration", false)
+    );
+
+    if (psi_.mesh().relax(name))
     {
-        relax(psi_.mesh().relaxationFactor(psi_.name()));
+        relax(psi_.mesh().relaxationFactor(name));
     }
 }
 

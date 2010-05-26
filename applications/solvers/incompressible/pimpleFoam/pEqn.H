@@ -21,19 +21,20 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 
     pEqn.setReference(pRefCell, pRefValue);
 
-    if
+    pEqn.solve
     (
-        oCorr == nOuterCorr-1
-     && corr == nCorr-1
-     && nonOrth == nNonOrthCorr
-    )
-    {
-        pEqn.solve(mesh.solver("pFinal"));
-    }
-    else
-    {
-        pEqn.solve();
-    }
+        mesh.solver
+        (
+            p.select
+            (
+                (
+                    finalIter
+                 && corr == nCorr-1
+                 && nonOrth == nNonOrthCorr
+                )
+            )
+        )
+    );
 
     if (nonOrth == nNonOrthCorr)
     {
@@ -43,11 +44,8 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 
 #include "continuityErrs.H"
 
-// Explicitly relax pressure for momentum corrector except for last corrector
-if (oCorr != nOuterCorr-1)
-{
-    p.relax();
-}
+// Explicitly relax pressure for momentum corrector
+p.relax();
 
 U -= rUA*fvc::grad(p);
 U.correctBoundaryConditions();

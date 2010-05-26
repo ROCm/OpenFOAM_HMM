@@ -27,6 +27,7 @@ License
 #include "Time.H"
 #include "demandDrivenData.H"
 #include "dictionary.H"
+#include "data.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -918,6 +919,15 @@ bool Foam::GeometricField<Type, PatchField, GeoMesh>::needReference() const
 template<class Type, template<class> class PatchField, class GeoMesh>
 void Foam::GeometricField<Type, PatchField, GeoMesh>::relax(const scalar alpha)
 {
+    if (debug)
+    {
+        InfoIn
+        (
+            "GeometricField<Type, PatchField, GeoMesh>::relax"
+            "(const scalar alpha)"
+        )  << "Relaxing" << endl << this->info() << " by " << alpha << endl;
+    }
+
     operator==(prevIter() + alpha*(*this - prevIter()));
 }
 
@@ -925,16 +935,33 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::relax(const scalar alpha)
 template<class Type, template<class> class PatchField, class GeoMesh>
 void Foam::GeometricField<Type, PatchField, GeoMesh>::relax()
 {
-    scalar alpha = 0;
+    word name = this->name();
 
-    if (this->mesh().relax(this->name()))
+    if (this->mesh().data::lookupOrDefault<bool>("finalIteration", false))
     {
-        alpha = this->mesh().relaxationFactor(this->name());
+        name += "Final";
     }
 
-    if (alpha > 0)
+    if (this->mesh().relax(name))
     {
-        relax(alpha);
+        relax(this->mesh().relaxationFactor(name));
+    }
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::word Foam::GeometricField<Type, PatchField, GeoMesh>::select
+(
+    bool final
+) const
+{
+    if (final)
+    {
+        return this->name() + "Final";
+    }
+    else
+    {
+        return this->name();
     }
 }
 
