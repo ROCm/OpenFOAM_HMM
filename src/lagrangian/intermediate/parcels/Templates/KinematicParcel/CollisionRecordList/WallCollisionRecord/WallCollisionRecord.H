@@ -92,6 +92,12 @@ class WallCollisionRecord
 
 public:
 
+    // Static data members
+
+        //- Tolerance for detecting seriously erroneous wall matches
+        static const scalar errorCosAngle;
+
+
     // Constructors
 
         //- Construct null

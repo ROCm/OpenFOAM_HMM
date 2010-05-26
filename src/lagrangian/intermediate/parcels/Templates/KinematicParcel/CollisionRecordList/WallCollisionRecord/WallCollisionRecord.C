@@ -25,6 +25,12 @@ License
 
 #include "WallCollisionRecord.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template<class Type>
+const Foam::scalar Foam::WallCollisionRecord<Type>::errorCosAngle(1.0 + 1e-6);
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
