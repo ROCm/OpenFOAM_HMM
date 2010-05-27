@@ -34,12 +34,6 @@ Description
 namespace Foam
 {
     defineTemplateTypeNameAndDebugWithName(scalarIOList, "scalarList", 0);
-    defineTemplateTypeNameAndDebugWithName
-    (
-        scalarListIOList,
-        "scalarListList",
-        0
-    );
 }
 
 // ************************************************************************* //

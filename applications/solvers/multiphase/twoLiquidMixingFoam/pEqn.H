@@ -22,18 +22,20 @@
 
         pEqn.setReference(pRefCell, pRefValue);
 
-        if
+        pEqn.solve
         (
-            corr == nCorr-1
-         && nonOrth == nNonOrthCorr
-        )
-        {
-            pEqn.solve(mesh.solver(p.name() + "Final"));
-        }
-        else
-        {
-            pEqn.solve(mesh.solver(p.name()));
-        }
+            mesh.solver
+            (
+                p.select
+                (
+                    (
+                        finalIter
+                     && corr == nCorr-1
+                     && nonOrth == nNonOrthCorr
+                    )
+                )
+            )
+        );
 
         if (nonOrth == nNonOrthCorr)
         {

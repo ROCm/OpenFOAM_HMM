@@ -69,8 +69,14 @@ int main(int argc, char *argv[])
         #include "chemistry.H"
         #include "rhoEqn.H"
 
-        for (label ocorr=1; ocorr <= nOuterCorr; ocorr++)
+        for (label oCorr=1; oCorr <= nOuterCorr; oCorr++)
         {
+            bool finalIter = oCorr == nOuterCorr-1;
+            if (finalIter)
+            {
+                mesh.data::add("finalIteration", true);
+            }
+
             #include "UEqn.H"
             #include "YEqn.H"
             #include "hsEqn.H"
@@ -79,6 +85,11 @@ int main(int argc, char *argv[])
             for (int corr=1; corr<=nCorr; corr++)
             {
                 #include "pEqn.H"
+            }
+
+            if (finalIter)
+            {
+                mesh.data::remove("finalIteration");
             }
         }
 

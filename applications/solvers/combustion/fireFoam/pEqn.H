@@ -30,14 +30,20 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 
         closedVolume = p.needReference();
 
-        if (corr == nCorr-1 && nonOrth == nNonOrthCorr)
-        {
-            pEqn.solve(mesh.solver(p.name() + "Final"));
-        }
-        else
-        {
-            pEqn.solve(mesh.solver(p.name()));
-        }
+        pEqn.solve
+        (
+            mesh.solver
+            (
+                p.select
+                (
+                    (
+                        finalIter
+                     && corr == nCorr-1
+                     && nonOrth == nNonOrthCorr
+                    )
+                )
+            )
+        );
 
         if (nonOrth == nNonOrthCorr)
         {
