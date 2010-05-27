@@ -22,24 +22,26 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
-    Foam::labelIOList
+    Foam::vectorListIOList
 
 Description
-    Label container classes
+    Scalar container classes
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelIOList_H
-#define labelIOList_H
+#ifndef vectorListIOList_H
+#define vectorListIOList_H
 
-#include "label.H"
+#include "vectorList.H"
 #include "IOList.H"
+#include "IOListList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef IOList<label> labelIOList;
+    typedef IOList<vectorList> vectorListIOList;
+    typedef IOListList<vectorList, vector> vectorIOListList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

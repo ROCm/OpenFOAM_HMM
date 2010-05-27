@@ -74,9 +74,13 @@ containers/LinkedLists/linkTypes/DLListBase/DLListBase.C
 primitiveLists = primitives/Lists
 $(primitiveLists)/boolList.C
 $(primitiveLists)/labelIOList.C
+$(primitiveLists)/labelListIOList.C
 $(primitiveLists)/scalarList.C
 $(primitiveLists)/scalarIOList.C
+$(primitiveLists)/scalarListIOList.C
 $(primitiveLists)/vectorList.C
+$(primitiveLists)/vectorIOList.C
+$(primitiveLists)/vectorListIOList.C
 $(primitiveLists)/sphericalTensorList.C
 $(primitiveLists)/symmTensorList.C
 $(primitiveLists)/tensorList.C
@@ -486,9 +490,12 @@ $(Fields)/symmTensorField/symmTensorField.C
 $(Fields)/tensorField/tensorField.C
 $(Fields)/complexFields/complexFields.C
 
-$(Fields)/labelField/labelIOField.C
+$(Fields)/labelField/labelIOField.
+$(Fields)/labelField/labelFieldIOField.C
 $(Fields)/scalarField/scalarIOField.C
+$(Fields)/scalarField/scalarFieldIOField.C
 $(Fields)/vectorField/vectorIOField.C
+$(Fields)/vectorField/vectorFieldIOField.C
 $(Fields)/vector2DField/vector2DIOField.C
 $(Fields)/sphericalTensorField/sphericalTensorIOField.C
 $(Fields)/diagTensorField/diagTensorIOField.C

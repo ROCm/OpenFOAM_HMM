@@ -21,29 +21,30 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::labelIOList
-
 Description
-    Label container classes
+    labelField with IO.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelIOList_H
-#define labelIOList_H
-
-#include "label.H"
-#include "IOList.H"
+#include "labelFieldIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef IOList<label> labelIOList;
+    defineTemplateTypeNameAndDebugWithName
+    (
+        labelFieldIOField,
+        "labelFieldField",
+        0
+    );
+
+    defineTemplateTypeNameAndDebugWithName
+    (
+        labelIOFieldField,
+        "labelCompactFieldField",
+        0
+    );
 }
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

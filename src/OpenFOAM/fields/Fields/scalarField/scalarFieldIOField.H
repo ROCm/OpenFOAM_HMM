@@ -22,24 +22,26 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
-    Foam::labelIOList
+    Foam::scalarFieldIOField
 
 Description
-    Label container classes
+    scalarFieldField with IO.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelIOList_H
-#define labelIOList_H
+#ifndef scalarFieldIOField_H
+#define scalarFieldIOField_H
 
-#include "label.H"
-#include "IOList.H"
+#include "scalarField.H"
+#include "IOField.H"
+#include "IOFieldField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef IOList<label> labelIOList;
+    typedef IOField<scalarField> scalarFieldIOField;
+    typedef IOFieldField<scalarField, scalar> scalarIOFieldField;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

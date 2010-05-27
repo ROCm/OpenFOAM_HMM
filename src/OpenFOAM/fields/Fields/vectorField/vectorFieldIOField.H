@@ -22,24 +22,26 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
-    Foam::labelIOList
+    Foam::vectorFieldIOField
 
 Description
-    Label container classes
+    vectorFieldField with IO.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelIOList_H
-#define labelIOList_H
+#ifndef vectorFieldIOField_H
+#define vectorFieldIOField_H
 
-#include "label.H"
-#include "IOList.H"
+#include "vectorField.H"
+#include "IOField.H"
+#include "IOFieldField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef IOList<label> labelIOList;
+    typedef IOField<vectorField> vectorFieldIOField;
+    typedef IOFieldField<vectorField, vector> vectorIOFieldField;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
