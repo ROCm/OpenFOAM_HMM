@@ -233,7 +233,8 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
     IOField<vector> f(c.fieldIOobject("f", IOobject::NO_READ), np);
     IOField<vector> angularMomentum
     (
-        c.fieldIOobject("angularMomentum", IOobject::NO_READ), np
+        c.fieldIOobject("angularMomentum", IOobject::NO_READ),
+        np
     );
     IOField<vector> torque(c.fieldIOobject("torque", IOobject::NO_READ), np);
     IOField<scalar> rho(c.fieldIOobject("rho", IOobject::NO_READ), np);
@@ -251,6 +252,12 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
             IOobject::NO_WRITE,
             false
         ),
+        np
+    );
+
+    pairDataIOFieldField collisionRecords_pairData
+    (
+        c.fieldIOobject("collisionRecords_pairData", IOobject::NO_READ),
         np
     );
 
@@ -272,6 +279,19 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
         tTurb[i] = p.tTurb();
         UTurb[i] = p.UTurb();
         collisionRecords[i] = p.collisionRecords();
+        collisionRecords_pairData[i] = p.collisionRecords().pairData();
+
+        // collisionRecords_pairData[i].setSize
+        // (
+        //     p.collisionRecords().pairRecords().size()
+        // );
+
+        // forAll(p.collisionRecords().pairRecords(), j)
+        // {
+        //     collisionRecords_pairData[i][j] =
+        //         p.collisionRecords().pairRecords()[j].collisionData();
+        // }
+
         i++;
     }
 
@@ -287,6 +307,7 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
     tTurb.write();
     UTurb.write();
     collisionRecords.write();
+    collisionRecords_pairData.write();
 }
 
 

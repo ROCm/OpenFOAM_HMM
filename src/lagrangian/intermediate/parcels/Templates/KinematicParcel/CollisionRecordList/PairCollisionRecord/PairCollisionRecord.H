@@ -121,7 +121,7 @@ public:
 
 
     //- Destructor
-    ~PairCollisionRecord();
+        ~PairCollisionRecord();
 
 
     // Member Functions

@@ -102,6 +102,17 @@ public:
 
     // Member Functions
 
+        //- Return the active pair collisions
+        inline const DynamicList<PairCollisionRecord<PairType> >&
+        pairRecords() const;
+
+        //- Return the active wall collisions
+        inline const DynamicList<WallCollisionRecord<WallType> >&
+        wallRecords() const;
+
+        //- Return field of pair data from each record, used for field IO
+        Field<PairType> pairData() const;
+
         //- Enquires if the proc and id pair of the other particle are
         //  present in the records.  If so, return non-const access to
         //  the PairCollisionRecord (hence the data) and mark the
@@ -169,6 +180,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "CollisionRecordListI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

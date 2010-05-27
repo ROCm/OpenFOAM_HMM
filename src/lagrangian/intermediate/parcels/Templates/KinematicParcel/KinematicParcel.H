@@ -53,6 +53,8 @@ SourceFiles
 
 #include "KinematicCloud.H"
 #include "CollisionRecordList.H"
+#include "labelFieldIOField.H"
+#include "vectorFieldIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,6 +62,8 @@ namespace Foam
 {
 
 typedef CollisionRecordList<vector, vector> collisionRecordList;
+typedef vectorIOFieldField pairDataIOFieldField;
+
 typedef IOList<collisionRecordList> collisionRecordIOList;
 
 template<class ParcelType>

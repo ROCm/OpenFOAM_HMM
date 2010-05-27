@@ -26,7 +26,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "vector2DIOField.H"
+#include "vector2DFieldIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -34,8 +34,15 @@ namespace Foam
 {
     defineTemplateTypeNameAndDebugWithName
     (
-        vector2DIOField,
-        "vector2DField",
+        vector2DFieldIOField,
+        "vector2DFieldField",
+        0
+    );
+
+    defineTemplateTypeNameAndDebugWithName
+    (
+        vector2DIOFieldField,
+        "vector2DCompactFieldField",
         0
     );
 }

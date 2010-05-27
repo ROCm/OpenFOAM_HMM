@@ -32,7 +32,12 @@ Description
 
 namespace Foam
 {
-    defineTemplateTypeNameAndDebugWithName(sphericalTensorIOField, "sphericalTensorField", 0);
+    defineTemplateTypeNameAndDebugWithName
+    (
+        sphericalTensorIOField,
+        "sphericalTensorField",
+        0
+    );
 }
 
 // ************************************************************************* //

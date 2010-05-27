@@ -37,6 +37,7 @@ SourceFiles
 #define lagrangianFieldDecomposer_H
 
 #include "Cloud.H"
+#include "IOFieldField.H"
 #include "indexedParticle.H"
 #include "passiveParticle.H"
 
@@ -102,6 +103,19 @@ public:
 //            PtrList<IOField<Type> >& lagrangianFields
         );
 
+        template<class Type>
+        static void readFieldFields
+        (
+            const label cloudI,
+            const IOobjectList& lagrangianObjects,
+            PtrList
+            <
+                PtrList<IOFieldField<Field<Type>, Type> >
+            >& lagrangianFields
+//            PtrList<IOFieldField<Field<Type>, Type > >& lagrangianFields
+        );
+
+
         //- Decompose volume field
         template<class Type>
         tmp<IOField<Type> > decomposeField
@@ -110,8 +124,23 @@ public:
             const IOField<Type>& field
         ) const;
 
+        template<class Type>
+        tmp<IOFieldField<Field<Type>, Type> > decomposeFieldField
+        (
+            const word& cloudName,
+            const IOFieldField<Field<Type>, Type>& field
+        ) const;
+
+
         template<class GeoField>
         void decomposeFields
+        (
+            const word& cloudName,
+            const PtrList<GeoField>& fields
+        ) const;
+
+        template<class GeoField>
+        void decomposeFieldFields
         (
             const word& cloudName,
             const PtrList<GeoField>& fields

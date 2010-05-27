@@ -402,6 +402,13 @@ int main(int argc, char *argv[])
                         procMeshes.meshes(),
                         sprayObjs
                     );
+                    reconstructLagrangianFieldFields<label>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
                     reconstructLagrangianFields<scalar>
                     (
                         cloudName,
@@ -409,7 +416,21 @@ int main(int argc, char *argv[])
                         procMeshes.meshes(),
                         sprayObjs
                     );
+                    reconstructLagrangianFieldFields<scalar>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
                     reconstructLagrangianFields<vector>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
+                    reconstructLagrangianFieldFields<vector>
                     (
                         cloudName,
                         mesh,

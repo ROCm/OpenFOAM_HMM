@@ -22,11 +22,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    vector2DField with IO.
+    symmTensorField with IO.
 
 \*---------------------------------------------------------------------------*/
 
-#include "vector2DIOField.H"
+#include "symmTensorFieldIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -34,8 +34,15 @@ namespace Foam
 {
     defineTemplateTypeNameAndDebugWithName
     (
-        vector2DIOField,
-        "vector2DField",
+        symmTensorFieldIOField,
+        "symmTensorFieldField",
+        0
+    );
+
+    defineTemplateTypeNameAndDebugWithName
+    (
+        symmTensorIOFieldField,
+        "symmTensorCompactFieldField",
         0
     );
 }

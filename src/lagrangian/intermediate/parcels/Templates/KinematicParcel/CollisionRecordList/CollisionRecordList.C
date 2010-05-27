@@ -61,6 +61,21 @@ Foam::CollisionRecordList<PairType, WallType>::~CollisionRecordList()
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class PairType, class WallType>
+Foam::Field<PairType>
+Foam::CollisionRecordList<PairType, WallType>::pairData() const
+{
+    Field<PairType> f(pairRecords_.size());
+
+    forAll(pairRecords_, i)
+    {
+        f[i] = pairRecords_[i].collisionData();
+    }
+
+    return f;
+}
+
+
+template<class PairType, class WallType>
 Foam::PairCollisionRecord<PairType>&
 Foam::CollisionRecordList<PairType, WallType>::matchPairRecord
 (

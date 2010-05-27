@@ -21,23 +21,33 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::sphericalTensorFieldIOField
+
 Description
-    vector2DField with IO.
+    sphericalTensorFieldField with IO.
 
 \*---------------------------------------------------------------------------*/
 
-#include "vector2DIOField.H"
+#ifndef sphericalTensorFieldIOField_H
+#define sphericalTensorFieldIOField_H
+
+#include "sphericalTensorField.H"
+#include "IOField.H"
+#include "IOFieldField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTemplateTypeNameAndDebugWithName
-    (
-        vector2DIOField,
-        "vector2DField",
-        0
-    );
+    typedef IOField<sphericalTensorField> sphericalTensorFieldIOField;
+
+    typedef IOFieldField<sphericalTensorField, sphericalTensor>
+    sphericalTensorIOFieldField;
 }
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

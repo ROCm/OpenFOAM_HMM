@@ -64,8 +64,11 @@ Usage
 #include "IOobjectList.H"
 #include "domainDecomposition.H"
 #include "labelIOField.H"
+#include "labelFieldIOField.H"
 #include "scalarIOField.H"
+#include "scalarFieldIOField.H"
 #include "vectorIOField.H"
+#include "vectorFieldIOField.H"
 #include "sphericalTensorIOField.H"
 #include "symmTensorIOField.H"
 #include "tensorIOField.H"
@@ -374,8 +377,20 @@ int main(int argc, char *argv[])
     PtrList< List<SLList<indexedParticle*>*> > cellParticles(cloudDirs.size());
 
     PtrList<PtrList<labelIOField> > lagrangianLabelFields(cloudDirs.size());
+    PtrList<PtrList<labelIOFieldField> > lagrangianLabelFieldFields
+    (
+        cloudDirs.size()
+    );
     PtrList<PtrList<scalarIOField> > lagrangianScalarFields(cloudDirs.size());
+    PtrList<PtrList<scalarIOFieldField> > lagrangianScalarFieldFields
+    (
+        cloudDirs.size()
+    );
     PtrList<PtrList<vectorIOField> > lagrangianVectorFields(cloudDirs.size());
+    PtrList<PtrList<vectorIOFieldField> > lagrangianVectorFieldFields
+    (
+        cloudDirs.size()
+    );
     PtrList<PtrList<sphericalTensorIOField> > lagrangianSphericalTensorFields
     (
         cloudDirs.size()
@@ -487,6 +502,13 @@ int main(int argc, char *argv[])
                 lagrangianLabelFields
             );
 
+            lagrangianFieldDecomposer::readFieldFields
+            (
+                cloudI,
+                lagrangianObjects,
+                lagrangianLabelFieldFields
+            );
+
             lagrangianFieldDecomposer::readFields
             (
                 cloudI,
@@ -494,11 +516,26 @@ int main(int argc, char *argv[])
                 lagrangianScalarFields
             );
 
+            lagrangianFieldDecomposer::readFieldFields
+            (
+                cloudI,
+                lagrangianObjects,
+                lagrangianScalarFieldFields
+            );
+
+
             lagrangianFieldDecomposer::readFields
             (
                 cloudI,
                 lagrangianObjects,
                 lagrangianVectorFields
+            );
+
+            lagrangianFieldDecomposer::readFieldFields
+            (
+                cloudI,
+                lagrangianObjects,
+                lagrangianVectorFieldFields
             );
 
             lagrangianFieldDecomposer::readFields
@@ -529,8 +566,11 @@ int main(int argc, char *argv[])
     lagrangianPositions.setSize(cloudI);
     cellParticles.setSize(cloudI);
     lagrangianLabelFields.setSize(cloudI);
+    lagrangianLabelFieldFields.setSize(cloudI);
     lagrangianScalarFields.setSize(cloudI);
+    lagrangianScalarFieldFields.setSize(cloudI);
     lagrangianVectorFields.setSize(cloudI);
+    lagrangianVectorFieldFields.setSize(cloudI);
     lagrangianSphericalTensorFields.setSize(cloudI);
     lagrangianSymmTensorFields.setSize(cloudI);
     lagrangianTensorFields.setSize(cloudI);
@@ -725,8 +765,11 @@ int main(int argc, char *argv[])
                 if
                 (
                     lagrangianLabelFields[cloudI].size()
+                 || lagrangianLabelFieldFields[cloudI].size()
                  || lagrangianScalarFields[cloudI].size()
+                 || lagrangianScalarFieldFields[cloudI].size()
                  || lagrangianVectorFields[cloudI].size()
+                 || lagrangianVectorFieldFields[cloudI].size()
                  || lagrangianSphericalTensorFields[cloudI].size()
                  || lagrangianSymmTensorFields[cloudI].size()
                  || lagrangianTensorFields[cloudI].size()
@@ -737,15 +780,30 @@ int main(int argc, char *argv[])
                         cloudDirs[cloudI],
                         lagrangianLabelFields[cloudI]
                     );
+                    fieldDecomposer.decomposeFieldFields
+                    (
+                        cloudDirs[cloudI],
+                        lagrangianLabelFieldFields[cloudI]
+                    );
                     fieldDecomposer.decomposeFields
                     (
                         cloudDirs[cloudI],
                         lagrangianScalarFields[cloudI]
                     );
+                    fieldDecomposer.decomposeFieldFields
+                    (
+                        cloudDirs[cloudI],
+                        lagrangianScalarFieldFields[cloudI]
+                    );
                     fieldDecomposer.decomposeFields
                     (
                         cloudDirs[cloudI],
                         lagrangianVectorFields[cloudI]
+                    );
+                    fieldDecomposer.decomposeFieldFields
+                    (
+                        cloudDirs[cloudI],
+                        lagrangianVectorFieldFields[cloudI]
                     );
                     fieldDecomposer.decomposeFields
                     (

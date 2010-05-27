@@ -21,23 +21,31 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::symmTensorFieldIOField
+
 Description
-    vector2DField with IO.
+    symmTensorFieldField with IO.
 
 \*---------------------------------------------------------------------------*/
 
-#include "vector2DIOField.H"
+#ifndef symmTensorFieldIOField_H
+#define symmTensorFieldIOField_H
+
+#include "symmTensorField.H"
+#include "IOField.H"
+#include "IOFieldField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTemplateTypeNameAndDebugWithName
-    (
-        vector2DIOField,
-        "vector2DField",
-        0
-    );
+    typedef IOField<symmTensorField> symmTensorFieldIOField;
+    typedef IOFieldField<symmTensorField, symmTensor> symmTensorIOFieldField;
 }
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //
