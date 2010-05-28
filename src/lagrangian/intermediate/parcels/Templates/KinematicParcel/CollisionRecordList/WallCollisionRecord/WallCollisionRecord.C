@@ -45,11 +45,12 @@ Foam::WallCollisionRecord<Type>::WallCollisionRecord()
 template<class Type>
 Foam::WallCollisionRecord<Type>::WallCollisionRecord
 (
+    bool accessed,
     const vector& pRel,
     const Type& data
 )
 :
-    accessed_(true),
+    accessed_(accessed),
     pRel_(pRel),
     data_(data)
 {}

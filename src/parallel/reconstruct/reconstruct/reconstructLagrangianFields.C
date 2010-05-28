@@ -89,7 +89,7 @@ Foam::tmp<Foam::IOField<Type> > Foam::reconstructLagrangianField
 
 
 template<class Type>
-Foam::tmp<Foam::IOFieldField<Field<Type>, Type> >
+Foam::tmp<Foam::IOFieldField<Foam::Field<Type>, Type> >
 Foam::reconstructLagrangianFieldField
 (
     const word& cloudName,

@@ -70,8 +70,11 @@ Usage
 #include "vectorIOField.H"
 #include "vectorFieldIOField.H"
 #include "sphericalTensorIOField.H"
+#include "sphericalTensorFieldIOField.H"
 #include "symmTensorIOField.H"
+#include "symmTensorFieldIOField.H"
 #include "tensorIOField.H"
+#include "tensorFieldIOField.H"
 #include "pointFields.H"
 
 #include "readFields.H"
@@ -395,11 +398,21 @@ int main(int argc, char *argv[])
     (
         cloudDirs.size()
     );
+    PtrList<PtrList<sphericalTensorIOFieldField> >
+        lagrangianSphericalTensorFieldFields(cloudDirs.size());
     PtrList<PtrList<symmTensorIOField> > lagrangianSymmTensorFields
     (
         cloudDirs.size()
     );
+    PtrList<PtrList<symmTensorIOFieldField> > lagrangianSymmTensorFieldFields
+    (
+        cloudDirs.size()
+    );
     PtrList<PtrList<tensorIOField> > lagrangianTensorFields
+    (
+        cloudDirs.size()
+    );
+    PtrList<PtrList<tensorIOFieldField> > lagrangianTensorFieldFields
     (
         cloudDirs.size()
     );
@@ -545,6 +558,13 @@ int main(int argc, char *argv[])
                 lagrangianSphericalTensorFields
             );
 
+            lagrangianFieldDecomposer::readFieldFields
+            (
+                cloudI,
+                lagrangianObjects,
+                lagrangianSphericalTensorFieldFields
+            );
+
             lagrangianFieldDecomposer::readFields
             (
                 cloudI,
@@ -552,11 +572,25 @@ int main(int argc, char *argv[])
                 lagrangianSymmTensorFields
             );
 
+            lagrangianFieldDecomposer::readFieldFields
+            (
+                cloudI,
+                lagrangianObjects,
+                lagrangianSymmTensorFieldFields
+            );
+
             lagrangianFieldDecomposer::readFields
             (
                 cloudI,
                 lagrangianObjects,
                 lagrangianTensorFields
+            );
+
+            lagrangianFieldDecomposer::readFieldFields
+            (
+                cloudI,
+                lagrangianObjects,
+                lagrangianTensorFieldFields
             );
 
             cloudI++;
@@ -572,8 +606,11 @@ int main(int argc, char *argv[])
     lagrangianVectorFields.setSize(cloudI);
     lagrangianVectorFieldFields.setSize(cloudI);
     lagrangianSphericalTensorFields.setSize(cloudI);
+    lagrangianSphericalTensorFieldFields.setSize(cloudI);
     lagrangianSymmTensorFields.setSize(cloudI);
+    lagrangianSymmTensorFieldFields.setSize(cloudI);
     lagrangianTensorFields.setSize(cloudI);
+    lagrangianTensorFieldFields.setSize(cloudI);
 
 
     // Any uniform data to copy/link?
@@ -771,8 +808,11 @@ int main(int argc, char *argv[])
                  || lagrangianVectorFields[cloudI].size()
                  || lagrangianVectorFieldFields[cloudI].size()
                  || lagrangianSphericalTensorFields[cloudI].size()
+                 || lagrangianSphericalTensorFieldFields[cloudI].size()
                  || lagrangianSymmTensorFields[cloudI].size()
+                 || lagrangianSymmTensorFieldFields[cloudI].size()
                  || lagrangianTensorFields[cloudI].size()
+                 || lagrangianTensorFieldFields[cloudI].size()
                 )
                 {
                     fieldDecomposer.decomposeFields
@@ -810,15 +850,30 @@ int main(int argc, char *argv[])
                         cloudDirs[cloudI],
                         lagrangianSphericalTensorFields[cloudI]
                     );
+                    fieldDecomposer.decomposeFieldFields
+                    (
+                        cloudDirs[cloudI],
+                        lagrangianSphericalTensorFieldFields[cloudI]
+                    );
                     fieldDecomposer.decomposeFields
                     (
                         cloudDirs[cloudI],
                         lagrangianSymmTensorFields[cloudI]
                     );
+                    fieldDecomposer.decomposeFieldFields
+                    (
+                        cloudDirs[cloudI],
+                        lagrangianSymmTensorFieldFields[cloudI]
+                    );
                     fieldDecomposer.decomposeFields
                     (
                         cloudDirs[cloudI],
                         lagrangianTensorFields[cloudI]
+                    );
+                    fieldDecomposer.decomposeFieldFields
+                    (
+                        cloudDirs[cloudI],
+                        lagrangianTensorFieldFields[cloudI]
                     );
                 }
             }

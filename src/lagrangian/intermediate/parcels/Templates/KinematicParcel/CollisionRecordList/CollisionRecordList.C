@@ -51,6 +51,104 @@ Foam::CollisionRecordList<PairType, WallType>::CollisionRecordList(Istream& is)
 }
 
 
+template<class PairType, class WallType>
+Foam::CollisionRecordList<PairType, WallType>::CollisionRecordList
+(
+    const labelField& pairAccessed,
+    const labelField& pairOrigProcOfOther,
+    const labelField& pairOrigIdOfOther,
+    const Field<PairType>& pairData,
+    const labelField& wallAccessed,
+    const vectorField& wallPRel,
+    const Field<WallType>& wallData
+)
+:
+    pairRecords_(),
+    wallRecords_()
+{
+    label nPair = pairAccessed.size();
+
+    if
+    (
+        pairOrigProcOfOther.size() != nPair
+     || pairOrigIdOfOther.size() != nPair
+     || pairData.size() != nPair
+    )
+    {
+        FatalErrorIn
+        (
+            "Foam::CollisionRecordList<PairType, WallType>::CollisionRecordList"
+            "("
+                "const labelField& pairAccessed,"
+                "const labelField& pairOrigProcOfOther,"
+                "const labelField& pairOrigIdOfOther,"
+                "const Field<PairType>& pairData,"
+                "const labelField& wallAccessed,"
+                "const vectorField& wallPRel,"
+                "const Field<WallType>& wallData"
+            ")"
+        )
+            << "Pair field size mismatch." << nl
+            << pairAccessed << nl
+            << pairOrigProcOfOther << nl
+            << pairOrigIdOfOther << nl
+            << pairData << nl
+            << abort(FatalError);
+    }
+
+    forAll(pairAccessed, i)
+    {
+        pairRecords_.append
+        (
+            PairCollisionRecord<PairType>
+            (
+                pairAccessed[i],
+                pairOrigProcOfOther[i],
+                pairOrigIdOfOther[i],
+                pairData[i]
+            )
+        );
+    }
+
+    label nWall = wallAccessed.size();
+
+    if (wallPRel.size() != nWall || wallData.size() != nWall)
+    {
+        FatalErrorIn
+        (
+            "Foam::CollisionRecordList<PairType, WallType>::CollisionRecordList"
+            "("
+                "const labelField& pairAccessed,"
+                "const labelField& pairOrigProcOfOther,"
+                "const labelField& pairOrigIdOfOther,"
+                "const Field<PairType>& pairData,"
+                "const labelField& wallAccessed,"
+                "const vectorField& wallPRel,"
+                "const Field<WallType>& wallData"
+            ")"
+        )
+            << "Wall field size mismatch." << nl
+            << wallAccessed << nl
+            << wallPRel << nl
+            << wallData << nl
+            << abort(FatalError);
+    }
+
+    forAll(wallAccessed, i)
+    {
+        wallRecords_.append
+        (
+            WallCollisionRecord<WallType>
+            (
+                wallAccessed[i],
+                wallPRel[i],
+                wallData[i]
+            )
+        );
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * /
 
 template<class PairType, class WallType>
@@ -61,6 +159,51 @@ Foam::CollisionRecordList<PairType, WallType>::~CollisionRecordList()
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class PairType, class WallType>
+Foam::labelField
+Foam::CollisionRecordList<PairType, WallType>::pairAccessed() const
+{
+    labelField f(pairRecords_.size());
+
+    forAll(pairRecords_, i)
+    {
+        f[i] = pairRecords_[i].accessed();
+    }
+
+    return f;
+}
+
+
+template<class PairType, class WallType>
+Foam::labelField
+Foam::CollisionRecordList<PairType, WallType>::pairOrigProcOfOther() const
+{
+    labelField f(pairRecords_.size());
+
+    forAll(pairRecords_, i)
+    {
+        f[i] = pairRecords_[i].origProcOfOther();
+    }
+
+    return f;
+}
+
+
+template<class PairType, class WallType>
+Foam::labelField
+Foam::CollisionRecordList<PairType, WallType>::pairOrigIdOfOther() const
+{
+    labelField f(pairRecords_.size());
+
+    forAll(pairRecords_, i)
+    {
+        f[i] = pairRecords_[i].origIdOfOther();
+    }
+
+    return f;
+}
+
+
+template<class PairType, class WallType>
 Foam::Field<PairType>
 Foam::CollisionRecordList<PairType, WallType>::pairData() const
 {
@@ -69,6 +212,51 @@ Foam::CollisionRecordList<PairType, WallType>::pairData() const
     forAll(pairRecords_, i)
     {
         f[i] = pairRecords_[i].collisionData();
+    }
+
+    return f;
+}
+
+
+template<class PairType, class WallType>
+Foam::labelField
+Foam::CollisionRecordList<PairType, WallType>::wallAccessed() const
+{
+    labelField f(wallRecords_.size());
+
+    forAll(wallRecords_, i)
+    {
+        f[i] = wallRecords_[i].accessed();
+    }
+
+    return f;
+}
+
+
+template<class PairType, class WallType>
+Foam::vectorField
+Foam::CollisionRecordList<PairType, WallType>::wallPRel() const
+{
+    vectorField f(wallRecords_.size());
+
+    forAll(wallRecords_, i)
+    {
+        f[i] = wallRecords_[i].pRel();
+    }
+
+    return f;
+}
+
+
+template<class PairType, class WallType>
+Foam::Field<WallType>
+Foam::CollisionRecordList<PairType, WallType>::wallData() const
+{
+    Field<WallType> f(wallRecords_.size());
+
+    forAll(wallRecords_, i)
+    {
+        f[i] = wallRecords_[i].collisionData();
     }
 
     return f;
@@ -100,12 +288,12 @@ Foam::CollisionRecordList<PairType, WallType>::matchPairRecord
     }
 
     // Record not found, create a new one and return it as the last
-    // member of the list.  The status of the record will be accessed
-    // by construction.
+    // member of the list.  Setting the status of the record to be accessed
+    // on construction.
 
     pairRecords_.append
     (
-        PairCollisionRecord<PairType>(origProcOfOther, origIdOfOther)
+        PairCollisionRecord<PairType>(true, origProcOfOther, origIdOfOther)
     );
 
     return pairRecords_.last();
@@ -136,10 +324,10 @@ Foam::CollisionRecordList<PairType, WallType>::matchWallRecord
     }
 
     // Record not found, create a new one and return it as the last
-    // member of the list.  The status of the record will be accessed
-    // by construction.
+    // member of the list.  Setting the status of the record to be accessed
+    // on construction.
 
-    wallRecords_.append(WallCollisionRecord<WallType>(pRel));
+    wallRecords_.append(WallCollisionRecord<WallType>(true, pRel));
 
     return wallRecords_.last();
 }

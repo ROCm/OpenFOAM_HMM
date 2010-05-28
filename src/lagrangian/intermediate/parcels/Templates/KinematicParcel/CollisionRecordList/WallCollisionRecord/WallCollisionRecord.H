@@ -106,6 +106,7 @@ public:
         //- Construct from components
         WallCollisionRecord
         (
+            bool accessed,
             const vector& pRel,
             const Type& data = pTraits<Type>::zero
         );

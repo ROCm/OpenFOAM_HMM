@@ -108,6 +108,7 @@ public:
         //- Construct from components
         PairCollisionRecord
         (
+            bool accessed,
             label origProcOfOther,
             label origIdOfOther,
             const Type& data = pTraits<Type>::zero

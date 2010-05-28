@@ -444,6 +444,13 @@ int main(int argc, char *argv[])
                         procMeshes.meshes(),
                         sprayObjs
                     );
+                    reconstructLagrangianFieldFields<sphericalTensor>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
                     reconstructLagrangianFields<symmTensor>
                     (
                         cloudName,
@@ -451,7 +458,21 @@ int main(int argc, char *argv[])
                         procMeshes.meshes(),
                         sprayObjs
                     );
+                    reconstructLagrangianFieldFields<symmTensor>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
                     reconstructLagrangianFields<tensor>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
+                    reconstructLagrangianFieldFields<tensor>
                     (
                         cloudName,
                         mesh,

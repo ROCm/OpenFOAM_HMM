@@ -76,6 +76,14 @@ inline bool Foam::WallCollisionRecord<Type>::match
 
 
 template<class Type>
+inline const Foam::vector&
+Foam::WallCollisionRecord<Type>::pRel() const
+{
+    return pRel_;
+}
+
+
+template<class Type>
 inline const Type&
 Foam::WallCollisionRecord<Type>::collisionData() const
 {
