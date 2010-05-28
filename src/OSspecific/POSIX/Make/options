@@ -1,0 +1,3 @@
+#ifdef SunOS64
+EXE_INC = -DFOAM_USE_STAT
+#endif

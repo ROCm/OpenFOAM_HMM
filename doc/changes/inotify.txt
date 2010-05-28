@@ -1,0 +1,44 @@
+2010-05-28
+
+Using asynchronous file modification (using inotify) instead of timestamp
+checking.
+
+- all files (usually only IOdictionary) that need to be monitored
+should be registered using MUST_READ_IF_MODIFIED. The MUST_READ should
+be used for objects that do not need to be re-read (e.g. fields).
+In the old system it would actually monitor e.g. 0/U and constant/polyMesh
+files.
+I've temporarily added a warning in IOdictionary if constructed with MUST_READ.
+Same for IOList,IOField,IOMap if constructed with MUST_READ_IF_MODIFIED
+(or is rereading supported?). Please let me know if something does not work or
+you see this warning.
+
+- all file monitoring is done by an instance of 'fileMonitor' in the Time
+class. The fileMonitor class can be found in OSspecific. Default is
+to use the (linux-specific) 'inotify' system calls.
+If compiled with -DFOAM_USE_STAT it will revert to the current 'stat' system
+calls.
+
+- inotify does not need timestamps. There is no need for fileModificationSkew
+to allow for time differences. (there can still temporarily be a difference
+in modified status between different processors due to nfs lagging)
+
+- all reductions to synchronise status on different processors are done with
+a single reduction instead of one reduction per registered object. This could
+be quite a gain on large numbers of processors.
+
+- fileMonitor stores two hashtables per file so there is a small overhead
+adding and removing files from monitoring.
+
+- if runTimeModifiable is false at start of run no files will get monitored,
+however if runTimeModified gets set to false during the run and monitored files
+will still get monitored (though never reloaded). This is only a hypothetical
+problem in that the kernel still stores events for the monitored files. However
+inotify is very efficient - e.g. it gets used to track changes on file systems
+for desktop search engines.
+
+- any monitored and modified file will get reloaded from the exact path
+that was monitored. In the old system it would/could do a re-search through all
+times.
+
+
