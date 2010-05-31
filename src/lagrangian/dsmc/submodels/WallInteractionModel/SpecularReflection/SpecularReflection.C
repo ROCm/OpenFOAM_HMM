@@ -36,7 +36,7 @@ Foam::SpecularReflection<CloudType>::SpecularReflection
     CloudType& cloud
 )
 :
-    WallInteractionModel<CloudType>(dict, cloud, typeName)
+    WallInteractionModel<CloudType>(cloud)
 {}
 
 

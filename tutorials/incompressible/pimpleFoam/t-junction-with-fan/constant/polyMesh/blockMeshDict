@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -84,32 +84,50 @@ edges
 (
 );
 
-patches         
-(
-    patch inlet
-    (
-        (0 10 13 3)
-    )
+boundary
+(         
+    inlet
+    {
+        type patch;
+        faces  ((0 10 13 3));
+    }
 
-    patch outlet1
-    (
-        (6 7 17 16)
-    )
+    outlet1
+    {
+        type patch;
+        faces ((6 7 17 16));
+    }
 
-    patch outlet2
-    (
-        (8 18 19 9)
-    )
+    outlet2
+    {
+        type patch;
+        faces ((8 18 19 9));
+    }
 
-    wall baffles
-    ()
+    baffles
+    {
+        type wall;
+        faces ();
+    }
 
-    cyclic fan
-    ()
+    fan_half0
+    {
+        type cyclic;
+        faces ();
+        neighbourPatch fan_half1;
+    }
+    fan_half1
+    {
+        type cyclic;
+        faces ();
+        neighbourPatch fan_half0;
+    }
 
-    wall defaultFaces
-    ()
-
+    defaultFaces
+    {
+        type wall;
+        faces ();
+    }
 );
 
 mergePatchPairs

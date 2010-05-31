@@ -97,7 +97,7 @@ void Foam::regionToCell::combine(topoSet& set, const bool add) const
         {
              neiSet[faceI-nInt] = inSubset[mesh_.faceOwner()[faceI]];
         }
-        syncTools::swapBoundaryFaceList(mesh_, neiSet, false);
+        syncTools::swapBoundaryFaceList(mesh_, neiSet);
 
         // Find faces inbetween subSet and non-subset.
         for (label faceI = 0; faceI < nInt; faceI++)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::cyclicSlipPointPatchField
 
 Description
-    Specialisation of cyclic that constrains to the patch
+    Cyclic + slip constraints
 
 SourceFiles
     cyclicSlipPointPatchField.C
@@ -36,6 +36,7 @@ SourceFiles
 #define cyclicSlipPointPatchField_H
 
 #include "cyclicPointPatchField.H"
+#include "cyclicSlipPointPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,7 +56,7 @@ class cyclicSlipPointPatchField
 public:
 
     //- Runtime type information
-    TypeName("cyclicSlip");
+    TypeName(cyclicSlipPointPatch::typeName_());
 
 
     // Constructors
@@ -121,18 +122,13 @@ public:
 
     // Member functions
 
-        //- Update the patch field
-        virtual void evaluate
-        (
-            const Pstream::commsTypes commsType=Pstream::blocking
-        );
+        // Evaluation functions
 
-        //- Accumulate the effect of constraint direction of this patch
-        virtual void applyConstraint
-        (
-            const label pointi,
-            pointConstraint&
-        ) const;
+            //- Evaluate the patch field
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::blocking
+            );
 
 };
 

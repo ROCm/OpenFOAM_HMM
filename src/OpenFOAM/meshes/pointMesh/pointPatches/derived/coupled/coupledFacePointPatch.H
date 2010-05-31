@@ -108,8 +108,6 @@ public:
                 return true;
             }
 
-            //- List of separated coupled points
-            virtual const labelList& separatedPoints() const = 0;
 };
 
 

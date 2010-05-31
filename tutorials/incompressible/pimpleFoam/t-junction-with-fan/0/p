@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
+|  \\    /   O peration     | Version:  splitCyclic                           |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -10,11 +10,12 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
+    location    "0";
     object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
+dimensions      [ 0 2 -2 0 0 0 0 ];
 
 internalField   uniform 100000;
 
@@ -22,14 +23,10 @@ boundaryField
 {
     inlet
     {
-        //type            totalPressure;
-        //p0              uniform 100040;
-
         type            timeVaryingTotalPressure;
-        p0              100040; // only used for restarts
+        p0              100040;
         outOfBounds     clamp;
         fileName        "$FOAM_CASE/constant/p0vsTime";
-
         U               U;
         phi             phi;
         rho             none;
@@ -37,13 +34,11 @@ boundaryField
         gamma           1;
         value           uniform 100040;
     }
-
     outlet1
     {
         type            fixedValue;
         value           uniform 100010;
     }
-
     outlet2
     {
         type            fixedValue;
@@ -53,17 +48,25 @@ boundaryField
     {
         type            zeroGradient;
     }
-    fan
+    fan_half0
     {
         type            fan;
         patchType       cyclic;
         f               2 ( 50 -0.1 );
-        value           uniform 100000;
+        value           $internalField;
     }
     defaultFaces
     {
         type            zeroGradient;
     }
+    fan_half1
+    {
+        type            fan;
+        patchType       cyclic;
+        f               2 ( 50 -0.1 );
+        value           $internalField;
+    }
 }
+
 
 // ************************************************************************* //

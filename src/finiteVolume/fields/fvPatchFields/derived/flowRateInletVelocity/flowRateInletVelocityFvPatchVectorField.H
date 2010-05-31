@@ -37,9 +37,9 @@ Description
     @verbatim
     inlet
     {
-        type        flowRateInletVelocity;
-        flowRate    0.2;        // Volumetric/mass flow rate [m3/s or kg/s]
-        value       uniform (0 0 0); // placeholder
+        type            flowRateInletVelocity;
+        flowRate        0.2;        // Volumetric/mass flow rate [m3/s or kg/s]
+        value           uniform (0 0 0); // placeholder
     }
     @endverbatim
 

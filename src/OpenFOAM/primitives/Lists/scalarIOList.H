@@ -32,7 +32,7 @@ Description
 #ifndef scalarIOList_H
 #define scalarIOList_H
 
-#include "scalarList.H"
+#include "scalar.H"
 #include "IOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -40,7 +40,6 @@ Description
 namespace Foam
 {
     typedef IOList<scalar> scalarIOList;
-    typedef IOList<scalarList> scalarListIOList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

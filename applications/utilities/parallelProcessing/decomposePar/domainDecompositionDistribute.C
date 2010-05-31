@@ -26,7 +26,6 @@ License
 #include "domainDecomposition.H"
 #include "decompositionMethod.H"
 #include "cpuTime.H"
-#include "cyclicPolyPatch.H"
 #include "cellSet.H"
 #include "regionSplit.H"
 

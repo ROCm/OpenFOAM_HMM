@@ -26,7 +26,6 @@ License
 #include "isoSurface.H"
 #include "fvMesh.H"
 #include "mergePoints.H"
-#include "syncTools.H"
 #include "addToRunTimeSelectionTable.H"
 #include "slicedVolFields.H"
 #include "volFields.H"
@@ -56,10 +55,10 @@ bool Foam::isoSurface::noTransform(const tensor& tt) const
 }
 
 
+// Calculates per face whether couple is collocated.
 bool Foam::isoSurface::collocatedPatch(const polyPatch& pp)
 {
     const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>(pp);
-
     return cpp.parallel() && !cpp.separated();
 }
 
@@ -73,78 +72,29 @@ Foam::PackedBoolList Foam::isoSurface::collocatedFaces
     // Initialise to false
     PackedBoolList collocated(pp.size());
 
-    const vectorField& separation = pp.separation();
-    const tensorField& forwardT = pp.forwardT();
-
-    if (forwardT.size() == 0)
+    if (isA<processorPolyPatch>(pp) && collocatedPatch(pp))
     {
-        // Parallel.
-        if (separation.size() == 0)
+        forAll(pp, i)
         {
-            collocated = 1u;
-        }
-        else if (separation.size() == 1)
-        {
-            // Fully separate. Do not synchronise.
-        }
-        else
-        {
-            // Per face separation.
-            forAll(pp, faceI)
-            {
-                if (mag(separation[faceI]) < mergeDistance_)
-                {
-                    collocated[faceI] = 1u;
-                }
-            }
+            collocated[i] = 1u;
         }
     }
-    else if (forwardT.size() == 1)
+    else if (isA<cyclicPolyPatch>(pp) && collocatedPatch(pp))
     {
-        // Fully transformed.
+        forAll(pp, i)
+        {
+            collocated[i] = 1u;
+        }
     }
     else
     {
-        // Per face transformation.
-        forAll(pp, faceI)
-        {
-            if (noTransform(forwardT[faceI]))
-            {
-                collocated[faceI] = 1u;
-            }
-        }
+        FatalErrorIn
+        (
+            "isoSurface::collocatedFaces(const coupledPolyPatch&) const"
+        )   << "Unhandled coupledPolyPatch type " << pp.type()
+            << abort(FatalError);
     }
     return collocated;
-}
-
-
-// Insert the data for local point patchPointI into patch local values
-// and/or into the shared values field.
-void Foam::isoSurface::insertPointData
-(
-    const processorPolyPatch& pp,
-    const Map<label>& meshToShared,
-    const pointField& pointValues,
-    const label patchPointI,
-    pointField& patchValues,
-    pointField& sharedValues
-) const
-{
-    label meshPointI = pp.meshPoints()[patchPointI];
-
-    // Store in local field
-    label nbrPointI = pp.neighbPoints()[patchPointI];
-    if (nbrPointI >= 0 && nbrPointI < patchValues.size())
-    {
-        minEqOp<point>()(patchValues[nbrPointI], pointValues[meshPointI]);
-    }
-
-    // Store in shared field
-    Map<label>::const_iterator iter = meshToShared.find(meshPointI);
-    if (iter != meshToShared.end())
-    {
-        minEqOp<point>()(sharedValues[iter()], pointValues[meshPointI]);
-    }
 }
 
 
@@ -157,20 +107,6 @@ void Foam::isoSurface::syncUnseparatedPoints
     // Until syncPointList handles separated coupled patches with multiple
     // transforms do our own synchronisation of non-separated patches only
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-    const globalMeshData& pd = mesh_.globalData();
-    const labelList& sharedPtAddr = pd.sharedPointAddr();
-    const labelList& sharedPtLabels = pd.sharedPointLabels();
-
-    // Create map from meshPoint to globalShared index.
-    Map<label> meshToShared(2*sharedPtLabels.size());
-    forAll(sharedPtLabels, i)
-    {
-        meshToShared.insert(sharedPtLabels[i], sharedPtAddr[i]);
-    }
-
-    // Values on shared points.
-    pointField sharedInfo(pd.nGlobalPoints(), nullValue);
-
 
     if (Pstream::parRun())
     {
@@ -181,37 +117,21 @@ void Foam::isoSurface::syncUnseparatedPoints
             (
                 isA<processorPolyPatch>(patches[patchI])
              && patches[patchI].nPoints() > 0
+             && collocatedPatch(patches[patchI])
             )
             {
                 const processorPolyPatch& pp =
                     refCast<const processorPolyPatch>(patches[patchI]);
+
                 const labelList& meshPts = pp.meshPoints();
+                const labelList& nbrPts = pp.neighbPoints();
 
-                pointField patchInfo(meshPts.size(), nullValue);
+                pointField patchInfo(meshPts.size());
 
-                PackedBoolList isCollocated(collocatedFaces(pp));
-
-                forAll(isCollocated, faceI)
+                forAll(nbrPts, pointI)
                 {
-                    if (isCollocated[faceI])
-                    {
-                        const face& f = pp.localFaces()[faceI];
-
-                        forAll(f, fp)
-                        {
-                            label pointI = f[fp];
-
-                            insertPointData
-                            (
-                                pp,
-                                meshToShared,
-                                pointValues,
-                                pointI,
-                                patchInfo,
-                                sharedInfo
-                            );
-                        }
-                    }
+                    label nbrPointI = nbrPts[pointI];
+                    patchInfo[nbrPointI] = pointValues[meshPts[pointI]];
                 }
 
                 OPstream toNbr(Pstream::blocking, pp.neighbProcNo());
@@ -227,6 +147,7 @@ void Foam::isoSurface::syncUnseparatedPoints
             (
                 isA<processorPolyPatch>(patches[patchI])
              && patches[patchI].nPoints() > 0
+             && collocatedPatch(patches[patchI])
             )
             {
                 const processorPolyPatch& pp =
@@ -239,9 +160,6 @@ void Foam::isoSurface::syncUnseparatedPoints
                     IPstream fromNbr(Pstream::blocking, pp.neighbProcNo());
                     fromNbr >> nbrPatchInfo;
                 }
-
-                // Null any value which is not on neighbouring processor
-                nbrPatchInfo.setSize(pp.nPoints(), nullValue);
 
                 const labelList& meshPts = pp.meshPoints();
 
@@ -258,22 +176,72 @@ void Foam::isoSurface::syncUnseparatedPoints
         }
     }
 
-
-    // Don't do cyclics for now. Are almost always separated anyway.
-
-
-    // Shared points
-
-    // Combine on master.
-    Pstream::listCombineGather(sharedInfo, minEqOp<point>());
-    Pstream::listCombineScatter(sharedInfo);
-
-    // Now we will all have the same information. Merge it back with
-    // my local information. (Note assignment and not combine operator)
-    forAll(sharedPtLabels, i)
+    // Do the cyclics.
+    forAll(patches, patchI)
     {
-        label meshPointI = sharedPtLabels[i];
-        pointValues[meshPointI] = sharedInfo[sharedPtAddr[i]];
+        if (isA<cyclicPolyPatch>(patches[patchI]))
+        {
+            const cyclicPolyPatch& cycPatch =
+                refCast<const cyclicPolyPatch>(patches[patchI]);
+
+            if (cycPatch.owner() && collocatedPatch(cycPatch))
+            {
+                // Owner does all.
+
+                const edgeList& coupledPoints = cycPatch.coupledPoints();
+                const labelList& meshPts = cycPatch.meshPoints();
+                const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
+                const labelList& nbrMeshPoints = nbrPatch.meshPoints();
+
+                pointField half0Values(coupledPoints.size());
+                pointField half1Values(coupledPoints.size());
+
+                forAll(coupledPoints, i)
+                {
+                    const edge& e = coupledPoints[i];
+                    half0Values[i] = pointValues[meshPts[e[0]]];
+                    half1Values[i] = pointValues[nbrMeshPoints[e[1]]];
+                }
+
+                forAll(coupledPoints, i)
+                {
+                    const edge& e = coupledPoints[i];
+                    label p0 = meshPts[e[0]];
+                    label p1 = nbrMeshPoints[e[1]];
+
+                    minEqOp<point>()(pointValues[p0], half1Values[i]);
+                    minEqOp<point>()(pointValues[p1], half0Values[i]);
+                }
+            }
+        }
+    }
+
+    // Synchronize multiple shared points.
+    const globalMeshData& pd = mesh_.globalData();
+
+    if (pd.nGlobalPoints() > 0)
+    {
+        // Values on shared points.
+        pointField sharedPts(pd.nGlobalPoints(), nullValue);
+
+        forAll(pd.sharedPointLabels(), i)
+        {
+            label meshPointI = pd.sharedPointLabels()[i];
+            // Fill my entries in the shared points
+            sharedPts[pd.sharedPointAddr()[i]] = pointValues[meshPointI];
+        }
+
+        // Combine on master.
+        Pstream::listCombineGather(sharedPts, minEqOp<point>());
+        Pstream::listCombineScatter(sharedPts);
+
+        // Now we will all have the same information. Merge it back with
+        // my local information.
+        forAll(pd.sharedPointLabels(), i)
+        {
+            label meshPointI = pd.sharedPointLabels()[i];
+            pointValues[meshPointI] = sharedPts[pd.sharedPointAddr()[i]];
+        }
     }
 }
 
@@ -1801,7 +1769,7 @@ Foam::isoSurface::isoSurface
         const polyPatch& pp = patches[patchI];
 
         // Adapt separated coupled (proc and cyclic) patches
-        if (isA<coupledPolyPatch>(pp) && !collocatedPatch(pp))
+        if (isA<coupledPolyPatch>(pp))
         {
             fvPatchVectorField& pfld = const_cast<fvPatchVectorField&>
             (
@@ -1918,26 +1886,23 @@ Foam::isoSurface::isoSurface
 
             if (patches[patchI].coupled())
             {
-                if (!collocatedPatch(patches[patchI]))
+                const coupledPolyPatch& cpp =
+                    refCast<const coupledPolyPatch>
+                    (
+                        patches[patchI]
+                    );
+
+                PackedBoolList isCollocated(collocatedFaces(cpp));
+
+                forAll(isCollocated, i)
                 {
-                    const coupledPolyPatch& cpp =
-                        refCast<const coupledPolyPatch>
-                        (
-                            patches[patchI]
-                        );
-
-                    PackedBoolList isCollocated(collocatedFaces(cpp));
-
-                    forAll(isCollocated, i)
+                    if (!isCollocated[i])
                     {
-                        if (!isCollocated[i])
-                        {
-                            const face& f = mesh_.faces()[cpp.start()+i];
+                        const face& f = mesh_.faces()[cpp.start()+i];
 
-                            forAll(f, fp)
-                            {
-                                isBoundaryPoint.set(f[fp], 1);
-                            }
+                        forAll(f, fp)
+                        {
+                            isBoundaryPoint.set(f[fp], 1);
                         }
                     }
                 }

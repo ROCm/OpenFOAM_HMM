@@ -552,9 +552,8 @@ bool Foam::Time::end() const
 }
 
 
-bool Foam::Time::stopAt(const stopAtControls sa) const
+void Foam::Time::stopAt(const stopAtControls sa) const
 {
-    const bool changed = (stopAt_ != sa);
     stopAt_ = sa;
 
     // adjust endTime
@@ -566,7 +565,6 @@ bool Foam::Time::stopAt(const stopAtControls sa) const
     {
         endTime_ = GREAT;
     }
-    return changed;
 }
 
 

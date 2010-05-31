@@ -59,11 +59,6 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::addNote
-    (
-        "convert pro-STAR (v4) mesh to OpenFOAM"
-    );
-
     argList::noParallel();
     argList::validArgs.append("pro-STAR prefix");
     argList::addBoolOption

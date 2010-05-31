@@ -198,7 +198,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
     // Get the coupling information from the directMappedPatchBase
     const directMappedPatchBase& mpp = refCast<const directMappedPatchBase>
     (
-        this->patch().patch()
+        patch().patch()
     );
     const polyMesh& nbrMesh = mpp.sampleMesh();
     const fvPatch& nbrPatch = refCast<const fvMesh>
@@ -285,11 +285,11 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
 
         Info<< patch().boundaryMesh().mesh().name() << ':'
             << patch().name() << ':'
-            << this->dimensionedInternalField().name() << " -> "
+            << this->dimensionedInternalField().name() << " <- "
             << nbrMesh.name() << ':'
             << nbrPatch.name() << ':'
             << this->dimensionedInternalField().name() << " :"
-            << " heatFlux:" << Q
+            << " heat[W]:" << Q
             << " walltemperature "
             << " min:" << gMin(*this)
             << " max:" << gMax(*this)

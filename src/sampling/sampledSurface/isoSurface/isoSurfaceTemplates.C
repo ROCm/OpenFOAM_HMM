@@ -116,7 +116,7 @@ Foam::isoSurface::adaptPatchFields
         {
             // Already has interpolate as value
         }
-        else if (isA<processorPolyPatch>(pp) && !collocatedPatch(pp))
+        else if (isA<processorPolyPatch>(pp))
         {
             fvPatchField<Type>& pfld = const_cast<fvPatchField<Type>&>
             (
@@ -568,8 +568,8 @@ void Foam::isoSurface::generateTriPoints
             }
         }
     }
-    syncTools::swapBoundaryFaceList(mesh_, neiSnapped, false);
-    syncTools::swapBoundaryFaceList(mesh_, neiSnappedPoint, false);
+    syncTools::swapBoundaryFaceList(mesh_, neiSnapped);
+    syncTools::swapBoundaryFaceList(mesh_, neiSnappedPoint);
 
 
 

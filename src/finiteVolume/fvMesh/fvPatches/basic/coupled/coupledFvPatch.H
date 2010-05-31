@@ -103,23 +103,14 @@ public:
                 return coupledPolyPatch_.coupled();
             }
 
-            //- Return face transformation tensor
-            const tensorField& forwardT() const
-            {
-                return coupledPolyPatch_.forwardT();
-            }
+            //- Are the cyclic planes parallel.
+            virtual bool parallel() const = 0;
 
-            //- Return neighbour-cell transformation tensor
-            const tensorField& reverseT() const
-            {
-                return coupledPolyPatch_.reverseT();
-            }
+            //- Return face transformation tensor.
+            virtual const tensorField& forwardT() const = 0;
 
-            //- Are the cyclic planes parallel
-            bool parallel() const
-            {
-                return coupledPolyPatch_.parallel();
-            }
+            //- Return neighbour-cell transformation tensor.
+            virtual const tensorField& reverseT() const = 0;
 
             //- Return faceCell addressing
             virtual const unallocLabelList& faceCells() const
@@ -138,21 +129,6 @@ public:
             virtual tmp<labelField> interfaceInternalField
             (
                 const unallocLabelList& internalData
-            ) const = 0;
-
-            //- Initialise interface data transfer
-            virtual void initTransfer
-            (
-                const Pstream::commsTypes commsType,
-                const unallocLabelList& interfaceData
-            ) const
-            {}
-
-            //- Transfer and return neighbour field
-            virtual tmp<labelField> transfer
-            (
-                const Pstream::commsTypes commsType,
-                const unallocLabelList& interfaceData
             ) const = 0;
 
             //- Initialise neighbour field transfer

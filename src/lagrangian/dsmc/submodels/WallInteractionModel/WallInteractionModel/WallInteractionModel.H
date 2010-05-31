@@ -85,6 +85,9 @@ public:
 
     // Constructors
 
+        //- Construct null from owner
+        WallInteractionModel(CloudType& owner);
+
         //- Construct from components
         WallInteractionModel
         (

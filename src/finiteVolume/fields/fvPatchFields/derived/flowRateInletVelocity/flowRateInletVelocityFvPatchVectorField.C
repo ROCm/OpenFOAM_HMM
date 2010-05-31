@@ -118,9 +118,9 @@ void Foam::flowRateInletVelocityFvPatchVectorField::updateCoeffs()
     }
 
     // a simpler way of doing this would be nice
-    const scalar avgU = -flowRate_/gSum(patch().magSf());
+    scalar avgU = -flowRate_/gSum(patch().magSf());
 
-    tmp<vectorField> n = patch().nf();
+    vectorField n = patch().nf();
 
     const surfaceScalarField& phi =
         db().lookupObject<surfaceScalarField>(phiName_);

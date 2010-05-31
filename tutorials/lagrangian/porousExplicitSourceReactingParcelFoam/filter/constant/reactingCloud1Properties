@@ -136,7 +136,11 @@ LocalInteractionCoeffs
         {
             type    rebound;
         }
-        cycLeft
+        cycLeft_half0
+        {
+            type    rebound;
+        }
+        cycLeft_half1
         {
             type    rebound;
         }
@@ -184,7 +188,8 @@ PatchPostProcessingCoeffs
 
     patches
     (
-        cycLeft
+        cycLeft_half0
+        cycLeft_half1
     );
 }
 

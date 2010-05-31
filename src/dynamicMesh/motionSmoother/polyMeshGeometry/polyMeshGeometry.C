@@ -425,13 +425,13 @@ bool Foam::polyMeshGeometry::checkFaceDotProduct
 
 
     // Calculate coupled cell centre
-    vectorField neiCc(mesh.nFaces()-mesh.nInternalFaces());
+    pointField neiCc(mesh.nFaces()-mesh.nInternalFaces());
 
     for (label faceI = mesh.nInternalFaces(); faceI < mesh.nFaces(); faceI++)
     {
         neiCc[faceI-mesh.nInternalFaces()] = cellCentres[own[faceI]];
     }
-    syncTools::swapBoundaryFaceList(mesh, neiCc, true);
+    syncTools::swapBoundaryFacePositions(mesh, neiCc);
 
 
     scalar minDDotS = GREAT;
@@ -927,13 +927,13 @@ bool Foam::polyMeshGeometry::checkFaceSkewness
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     // Calculate coupled cell centre
-    vectorField neiCc(mesh.nFaces()-mesh.nInternalFaces());
+    pointField neiCc(mesh.nFaces()-mesh.nInternalFaces());
 
     for (label faceI = mesh.nInternalFaces(); faceI < mesh.nFaces(); faceI++)
     {
         neiCc[faceI-mesh.nInternalFaces()] = cellCentres[own[faceI]];
     }
-    syncTools::swapBoundaryFaceList(mesh, neiCc, true);
+    syncTools::swapBoundaryFacePositions(mesh, neiCc);
 
 
     scalar maxSkew = 0;
@@ -1135,13 +1135,13 @@ bool Foam::polyMeshGeometry::checkFaceWeights
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     // Calculate coupled cell centre
-    vectorField neiCc(mesh.nFaces()-mesh.nInternalFaces());
+    pointField neiCc(mesh.nFaces()-mesh.nInternalFaces());
 
     for (label faceI = mesh.nInternalFaces(); faceI < mesh.nFaces(); faceI++)
     {
         neiCc[faceI-mesh.nInternalFaces()] = cellCentres[own[faceI]];
     }
-    syncTools::swapBoundaryFaceList(mesh, neiCc, true);
+    syncTools::swapBoundaryFacePositions(mesh, neiCc);
 
 
     scalar minWeight = GREAT;
@@ -1298,7 +1298,7 @@ bool Foam::polyMeshGeometry::checkVolRatio
     {
         neiVols[faceI-mesh.nInternalFaces()] = cellVolumes[own[faceI]];
     }
-    syncTools::swapBoundaryFaceList(mesh, neiVols, true);
+    syncTools::swapBoundaryFaceList(mesh, neiVols);
 
 
     scalar minRatio = GREAT;
@@ -1641,13 +1641,13 @@ bool Foam::polyMeshGeometry::checkFaceTwist
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     // Calculate coupled cell centre
-    vectorField neiCc(mesh.nFaces()-mesh.nInternalFaces());
+    pointField neiCc(mesh.nFaces()-mesh.nInternalFaces());
 
     for (label faceI = mesh.nInternalFaces(); faceI < mesh.nFaces(); faceI++)
     {
         neiCc[faceI-mesh.nInternalFaces()] = cellCentres[own[faceI]];
     }
-    syncTools::swapBoundaryFaceList(mesh, neiCc, true);
+    syncTools::swapBoundaryFacePositions(mesh, neiCc);
 
     forAll(checkFaces, i)
     {

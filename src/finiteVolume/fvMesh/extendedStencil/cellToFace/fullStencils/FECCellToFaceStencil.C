@@ -26,9 +26,7 @@ License
 #include "FECCellToFaceStencil.H"
 #include "syncTools.H"
 #include "emptyPolyPatch.H"
-//#include "meshTools.H"
-//#include "OFstream.H"
-//#include "Time.H"
+#include "dummyTransform.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -60,13 +58,7 @@ void Foam::FECCellToFaceStencil::calcEdgeBoundaryData
         );
     }
 
-    syncTools::syncEdgeMap
-    (
-        mesh(),
-        neiGlobal,
-        unionEqOp(),
-        false           // apply separation
-    );
+    syncTools::syncEdgeMap(mesh(), neiGlobal, unionEqOp(), dummyTransform());
 }
 
 
@@ -104,7 +96,7 @@ void Foam::FECCellToFaceStencil::calcFaceStencil
             }
         }
     }
-    syncTools::swapBoundaryFaceList(mesh(), neiGlobalCell, false);
+    syncTools::swapBoundaryFaceList(mesh(), neiGlobalCell);
 
 
 

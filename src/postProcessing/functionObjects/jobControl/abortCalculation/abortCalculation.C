@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,6 @@ License
 #include "error.H"
 #include "Time.H"
 #include "OSspecific.H"
-#include "PstreamReduceOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -53,12 +52,8 @@ const Foam::NamedEnum<Foam::abortCalculation::actionType, 3>
 
 void Foam::abortCalculation::removeFile() const
 {
-    bool hasAbort = isFile(abortFile_);
-    reduce(hasAbort, orOp<bool>());
-
-    if (hasAbort && Pstream::master())
+    if (isFile(abortFile_))
     {
-        // cleanup ABORT file (on master only)
         rm(abortFile_);
     }
 }
@@ -97,9 +92,14 @@ Foam::abortCalculation::~abortCalculation()
 
 void Foam::abortCalculation::read(const dictionary& dict)
 {
+    word actionName;
+
     if (dict.found("action"))
     {
-        action_ = actionTypeNames_.read(dict.lookup("action"));
+        action_ = actionTypeNames_.read
+        (
+            dict.lookup("action")
+        );
     }
     else
     {
@@ -115,41 +115,26 @@ void Foam::abortCalculation::read(const dictionary& dict)
 
 void Foam::abortCalculation::execute()
 {
-    bool hasAbort = isFile(abortFile_);
-    reduce(hasAbort, orOp<bool>());
-
-    if (hasAbort)
+    if (isFile(abortFile_))
     {
         switch (action_)
         {
             case noWriteNow :
-                if (obr_.time().stopAt(Time::saNoWriteNow))
-                {
-                    Info<< "USER REQUESTED ABORT (timeIndex="
-                        << obr_.time().timeIndex()
-                        << "): stop without writing data"
-                        << endl;
-                }
+                obr_.time().stopAt(Time::saNoWriteNow);
+                Info<< "user requested abort - "
+                       "stop immediately without writing data" << endl;
                 break;
 
             case writeNow :
-                if (obr_.time().stopAt(Time::saWriteNow))
-                {
-                    Info<< "USER REQUESTED ABORT (timeIndex="
-                        << obr_.time().timeIndex()
-                        << "): stop+write data"
-                        << endl;
-                }
+                obr_.time().stopAt(Time::saWriteNow);
+                Info<< "user requested abort - "
+                       "stop immediately with writing data" << endl;
                 break;
 
             case nextWrite :
-                if (obr_.time().stopAt(Time::saNextWrite))
-                {
-                    Info<< "USER REQUESTED ABORT (timeIndex="
-                        << obr_.time().timeIndex()
-                        << "): stop after next data write"
-                        << endl;
-                }
+                obr_.time().stopAt(Time::saNextWrite);
+                Info<< "user requested abort - "
+                       "stop after next data write" << endl;
                 break;
         }
     }
@@ -164,7 +149,7 @@ void Foam::abortCalculation::end()
 
 void Foam::abortCalculation::write()
 {
-    // Do nothing - only valid on execute
+    execute();
 }
 
 

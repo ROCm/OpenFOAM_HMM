@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
+|  \\    /   O peration     | Version:  splitCyclic                           |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -10,45 +10,58 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volTensorField;
+    location    "1";
     object      B;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
+dimensions      [ 0 2 -2 0 0 0 0 ];
 
-internalField   uniform (0 0 0 0 0 0 0 0 0);
+internalField   uniform ( 0 0 0 0 0 0 0 0 0 );
 
 boundaryField
 {
-    bottomWall      
+    bottomWall
     {
         type            zeroGradient;
     }
-
-    topWall         
+    topWall
     {
         type            zeroGradient;
     }
-
-    sides1          
+    sides1_half0
     {
         type            cyclic;
     }
-
-    sides2          
+    sides2_half0
     {
         type            cyclic;
     }
-
-    inout1          
+    inout1_half0
     {
         type            cyclic;
     }
-
-    inout2          
+    inout2_half0
+    {
+        type            cyclic;
+    }
+    sides2_half1
+    {
+        type            cyclic;
+    }
+    sides1_half1
+    {
+        type            cyclic;
+    }
+    inout1_half1
+    {
+        type            cyclic;
+    }
+    inout2_half1
     {
         type            cyclic;
     }
 }
+
 
 // ************************************************************************* //

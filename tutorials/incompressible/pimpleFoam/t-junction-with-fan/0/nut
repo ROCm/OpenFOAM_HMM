@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
+|  \\    /   O peration     | Version:  splitCyclic                           |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -26,13 +26,11 @@ boundaryField
         type            calculated;
         value           uniform 0;
     }
-
     outlet1
     {
         type            calculated;
         value           uniform 0;
     }
-
     outlet2
     {
         type            calculated;
@@ -43,15 +41,18 @@ boundaryField
         type            nutkWallFunction;
         value           uniform 0;
     }
-    fan
+    fan_half0
     {
         type            cyclic;
-        value           uniform 0;
     }
     defaultFaces
     {
         type            nutkWallFunction;
         value           uniform 0;
+    }
+    fan_half1
+    {
+        type            cyclic;
     }
 }
 

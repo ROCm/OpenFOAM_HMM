@@ -37,7 +37,6 @@ namespace Foam
     addCompoundToRunTimeSelectionTable(List<label>, labelList);
 
     defineTemplateTypeNameAndDebugWithName(labelIOList, "labelList", 0);
-    defineTemplateTypeNameAndDebugWithName(labelListIOList, "labelListList", 0);
 }
 
 // ************************************************************************* //

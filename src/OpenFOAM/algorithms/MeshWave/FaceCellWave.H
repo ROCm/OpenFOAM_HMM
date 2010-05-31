@@ -192,8 +192,7 @@ class FaceCellWave
                 const polyPatch& patch,
                 const label nFaces,
                 const labelList&,
-                const List<Type>&,
-                const bool isParallel
+                const List<Type>&
             );
 
             //- Extract info for single patch only

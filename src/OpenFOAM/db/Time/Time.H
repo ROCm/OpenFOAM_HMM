@@ -406,8 +406,7 @@ public:
 
             //- Adjust the current stopAtControl. Note that this value
             //  only persists until the next time the dictionary is read.
-            //  Return true if the stopAtControl changed.
-            virtual bool stopAt(const stopAtControls) const;
+            virtual void stopAt(const stopAtControls) const;
 
             //- Reset the time and time-index to those of the given time
             virtual void setTime(const Time&);

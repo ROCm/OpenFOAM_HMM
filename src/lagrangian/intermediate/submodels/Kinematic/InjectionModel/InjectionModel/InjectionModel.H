@@ -138,9 +138,9 @@ protected:
             //- Parcel basis enumeration
             parcelBasis parcelBasis_;
 
-            //- nParticles to assign to parcels when the 'fixed' basis
+            //- nParticle to assign to parcels when the 'fixed' basis
             //  is selected
-            scalar nParticlesFixed_;
+            scalar nParticleFixed_;
 
             //- Continuous phase time at start of injection time step [s]
             scalar time0_;
@@ -180,7 +180,12 @@ protected:
         //- Find the cell that contains the supplied position
         //  Will modify position slightly towards the owner cell centroid to
         //  ensure that it lies in a cell and not edge/face
-        virtual void findCellAtPosition(label& cellI, vector& position);
+        virtual bool findCellAtPosition
+        (
+            label& cellI,
+            vector& position,
+            bool errorOnNotFound = true
+        );
 
         //- Set number of particles to inject given parcel properties
         virtual scalar setNumberOfParticles

@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
-  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+  \\      /  F ield         | OpenOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
@@ -26,10 +26,15 @@ License
 #include "directionMixedFvPatchField.H"
 #include "symmTransformField.H"
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::directionMixedFvPatchField<Type>::directionMixedFvPatchField
+directionMixedFvPatchField<Type>::directionMixedFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -43,7 +48,7 @@ Foam::directionMixedFvPatchField<Type>::directionMixedFvPatchField
 
 
 template<class Type>
-Foam::directionMixedFvPatchField<Type>::directionMixedFvPatchField
+directionMixedFvPatchField<Type>::directionMixedFvPatchField
 (
     const directionMixedFvPatchField<Type>& ptf,
     const fvPatch& p,
@@ -59,7 +64,7 @@ Foam::directionMixedFvPatchField<Type>::directionMixedFvPatchField
 
 
 template<class Type>
-Foam::directionMixedFvPatchField<Type>::directionMixedFvPatchField
+directionMixedFvPatchField<Type>::directionMixedFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -76,7 +81,7 @@ Foam::directionMixedFvPatchField<Type>::directionMixedFvPatchField
 
 
 template<class Type>
-Foam::directionMixedFvPatchField<Type>::directionMixedFvPatchField
+directionMixedFvPatchField<Type>::directionMixedFvPatchField
 (
     const directionMixedFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
@@ -92,7 +97,7 @@ Foam::directionMixedFvPatchField<Type>::directionMixedFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::directionMixedFvPatchField<Type>::autoMap
+void directionMixedFvPatchField<Type>::autoMap
 (
     const fvPatchFieldMapper& m
 )
@@ -105,7 +110,7 @@ void Foam::directionMixedFvPatchField<Type>::autoMap
 
 
 template<class Type>
-void Foam::directionMixedFvPatchField<Type>::rmap
+void directionMixedFvPatchField<Type>::rmap
 (
     const fvPatchField<Type>& ptf,
     const labelList& addr
@@ -123,8 +128,7 @@ void Foam::directionMixedFvPatchField<Type>::rmap
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> >
-Foam::directionMixedFvPatchField<Type>::snGrad() const
+tmp<Field<Type> > directionMixedFvPatchField<Type>::snGrad() const
 {
     Field<Type> pif = this->patchInternalField();
 
@@ -142,7 +146,7 @@ Foam::directionMixedFvPatchField<Type>::snGrad() const
 
 
 template<class Type>
-void Foam::directionMixedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
+void directionMixedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {
@@ -164,8 +168,7 @@ void Foam::directionMixedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> >
-Foam::directionMixedFvPatchField<Type>::snGradTransformDiag() const
+tmp<Field<Type> > directionMixedFvPatchField<Type>::snGradTransformDiag() const
 {
     vectorField diag(valueFraction_.size());
 
@@ -190,7 +193,7 @@ Foam::directionMixedFvPatchField<Type>::snGradTransformDiag() const
 
 
 template<class Type>
-void Foam::directionMixedFvPatchField<Type>::write(Ostream& os) const
+void directionMixedFvPatchField<Type>::write(Ostream& os) const
 {
     transformFvPatchField<Type>::write(os);
     refValue_.writeEntry("refValue", os);
@@ -199,5 +202,9 @@ void Foam::directionMixedFvPatchField<Type>::write(Ostream& os) const
     this->writeEntry("value", os);
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // ************************************************************************* //

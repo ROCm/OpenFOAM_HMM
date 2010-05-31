@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,25 +68,17 @@ Foam::outputFilterOutputControl::~outputFilterOutputControl()
 
 void Foam::outputFilterOutputControl::read(const dictionary& dict)
 {
-    if (dict.found("outputControl"))
-    {
-        outputControl_ = outputControlNames_.read(dict.lookup("outputControl"));
-    }
-    else
-    {
-        outputControl_ = ocTimeStep;
-    }
+    outputControl_ = outputControlNames_.read(dict.lookup("outputControl"));
 
     switch (outputControl_)
     {
         case ocTimeStep:
         {
-            outputInterval_ = dict.lookupOrDefault<label>("outputInterval", 0);
-            break;
+            dict.lookup("outputInterval") >> outputInterval_;
         }
         default:
         {
-            break;
+            // do nothing
         }
     }
 }
@@ -112,12 +104,10 @@ bool Foam::outputFilterOutputControl::output() const
         }
         default:
         {
-            // this error should not actually be possible
             FatalErrorIn("bool Foam::outputFilterOutputControl::output()")
-                << "Undefined output control: "
+                << "Unknown output control: "
                 << outputControlNames_[outputControl_] << nl
                 << abort(FatalError);
-            break;
         }
     }
 

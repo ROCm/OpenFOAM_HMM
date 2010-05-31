@@ -146,8 +146,8 @@ void Foam::meshRefinement::calcNeighbourData
     }
 
     // Swap coupled boundaries. Apply separation to cc since is coordinate.
-    syncTools::swapBoundaryFaceList(mesh_, neiCc, true);
-    syncTools::swapBoundaryFaceList(mesh_, neiLevel, false);
+    syncTools::swapBoundaryFacePositions(mesh_, neiCc);
+    syncTools::swapBoundaryFaceList(mesh_, neiLevel);
 }
 
 
@@ -235,7 +235,7 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
 
     // Make sure both sides have same information. This should be
     // case in general since same vectors but just to make sure.
-    syncTools::syncFaceList(mesh_, surfaceIndex_, maxEqOp<label>(), false);
+    syncTools::syncFaceList(mesh_, surfaceIndex_, maxEqOp<label>());
 
     label nHits = countHits();
     label nTotHits = returnReduce(nHits, sumOp<label>());
@@ -275,11 +275,11 @@ void Foam::meshRefinement::checkData()
 
         // Get neighbouring face centres
         pointField neiBoundaryFc(boundaryFc);
-        syncTools::swapBoundaryFaceList
+        syncTools::syncBoundaryFacePositions
         (
             mesh_,
             neiBoundaryFc,
-            true
+            eqOp<point>()
         );
 
         // Compare
@@ -339,7 +339,7 @@ void Foam::meshRefinement::checkData()
                 mesh_.nInternalFaces()
             )
         );
-        syncTools::swapBoundaryFaceList(mesh_, neiHit, false);
+        syncTools::swapBoundaryFaceList(mesh_, neiHit);
 
         // Check
         forAll(surfaceHit, faceI)
@@ -390,8 +390,7 @@ void Foam::meshRefinement::checkData()
         syncTools::swapBoundaryFaceList
         (
             mesh_,
-            neiBoundarySurface,
-            false
+            neiBoundarySurface
         );
 
         // Compare
@@ -1158,8 +1157,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
                 (
                     mesh_,
                     blockedFace,
-                    andEqOp<bool>(),    // combine operator
-                    false               // separation
+                    andEqOp<bool>()     // combine operator
                 );
             }
             reduce(nUnblocked, sumOp<label>());
@@ -1527,7 +1525,7 @@ void Foam::meshRefinement::checkCoupledFaceZones(const polyMesh& mesh)
     }
 
     labelList neiFaceToZone(faceToZone);
-    syncTools::swapBoundaryFaceList(mesh, neiFaceToZone, false);
+    syncTools::swapBoundaryFaceList(mesh, neiFaceToZone);
 
     forAll(faceToZone, i)
     {

@@ -51,6 +51,12 @@ Foam::VariableHardSphere<CloudType>::~VariableHardSphere()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+template<class CloudType>
+bool Foam::VariableHardSphere<CloudType>::active() const
+{
+    return true;
+}
+
 
 template <class CloudType>
 Foam::scalar Foam::VariableHardSphere<CloudType>::sigmaTcR

@@ -25,6 +25,7 @@ License
 
 #include "CPCCellToCellStencil.H"
 #include "syncTools.H"
+#include "dummyTransform.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -61,7 +62,7 @@ void Foam::CPCCellToCellStencil::calcPointBoundaryData
         mesh(),
         neiGlobal,
         unionEqOp(),
-        false           // apply separation
+        Foam::dummyTransform()      // dummy transformation
     );
 }
 

@@ -33,25 +33,25 @@ Foam::NamedEnum<Enum, nEnum>::NamedEnum()
 :
     HashTable<int>(2*nEnum)
 {
-    for (int enumI = 0; enumI < nEnum; ++enumI)
+    for (int i=0; i<nEnum; i++)
     {
-        if (!names[enumI] || names[enumI][0] == '\0')
+        if (!names[i] || names[i][0] == '\0')
         {
-            stringList goodNames(enumI);
+            stringList goodNames(i);
 
-            for (int i = 0; i < enumI; ++i)
+            for (int j = 0; j < i; j++)
             {
-                goodNames[i] = names[i];
+                goodNames[j] = names[j];
             }
 
             FatalErrorIn("NamedEnum<Enum, nEnum>::NamedEnum()")
-                << "Illegal enumeration name at position " << enumI << endl
+                << "Illegal enumeration name at position " << i << endl
                 << "after entries " << goodNames << ".\n"
                 << "Possibly your NamedEnum<Enum, nEnum>::names array"
                 << " is not of size " << nEnum << endl
                 << abort(FatalError);
         }
-        insert(names[enumI], enumI);
+        insert(names[i], i);
     }
 }
 
@@ -61,7 +61,7 @@ Foam::NamedEnum<Enum, nEnum>::NamedEnum()
 template<class Enum, int nEnum>
 Enum Foam::NamedEnum<Enum, nEnum>::read(Istream& is) const
 {
-    const word name(is);
+    word name(is);
 
     HashTable<int>::const_iterator iter = find(name);
 
@@ -71,7 +71,7 @@ Enum Foam::NamedEnum<Enum, nEnum>::read(Istream& is) const
         (
             "NamedEnum<Enum, nEnum>::read(Istream&) const", is
         )   << name << " is not in enumeration: "
-            << sortedToc() << exit(FatalIOError);
+            << toc() << exit(FatalIOError);
     }
 
     return Enum(iter());

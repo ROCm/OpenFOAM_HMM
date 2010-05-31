@@ -44,13 +44,16 @@ void Foam::WallSpringSliderDashpot<CloudType>::findMinMaxProperties
         const typename CloudType::parcelType& p = iter();
 
         // Finding minimum diameter to avoid excessive arithmetic
-        rMin = min(p.d(), rMin);
+
+        scalar dEff = p.d()*cbrt(p.nParticle()*volumeFactor_);
+
+        rMin = min(dEff, rMin);
 
         rhoMax = max(p.rho(), rhoMax);
 
         UMagMax = max
         (
-            mag(p.U()) + mag(p.omega())*p.d()/2,
+            mag(p.U()) + mag(p.omega())*dEff/2,
             UMagMax
         );
     }
@@ -66,25 +69,74 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 (
     typename CloudType::parcelType& p,
     const point& site,
+    const WallSiteData<vector>& data,
     scalar pNu,
     scalar pE,
+    scalar pREff,
     scalar Estar,
-    scalar kN
+    scalar kN,
+    scalar Gstar
 ) const
 {
     vector r_PW = p.position() - site;
 
-    scalar normalOverlapMag = p.d()/2 - mag(r_PW);
+    vector U_PW = p.U() - data.wallData();
+
+    scalar normalOverlapMag = pREff - mag(r_PW);
 
     vector rHat_PW = r_PW/(mag(r_PW) + VSMALL);
 
     scalar etaN = alpha_*sqrt(p.mass()*kN)*pow025(normalOverlapMag);
 
     vector fN_PW =
-    rHat_PW
-    *(kN*pow(normalOverlapMag, b_) - etaN*(p.U() & rHat_PW));
+        rHat_PW
+       *(kN*pow(normalOverlapMag, b_) - etaN*(U_PW & rHat_PW));
 
     p.f() += fN_PW;
+
+    vector USlip_PW =
+        U_PW - (U_PW & rHat_PW)*rHat_PW
+      + (p.omega() ^ (pREff*-rHat_PW));
+
+    scalar deltaT = this->owner().mesh().time().deltaTValue();
+
+    vector& tangentialOverlap_PW =
+        p.collisionRecords().matchWallRecord(-r_PW, pREff).collisionData();
+
+    tangentialOverlap_PW += USlip_PW*deltaT;
+
+    scalar tangentialOverlapMag = mag(tangentialOverlap_PW);
+
+    if (tangentialOverlapMag > VSMALL)
+    {
+        scalar kT = 8.0*sqrt(pREff*normalOverlapMag)*Gstar;
+
+        scalar etaT = etaN;
+
+        // Tangential force
+        vector fT_PW;
+
+        if (kT*tangentialOverlapMag > mu_*mag(fN_PW))
+        {
+            // Tangential force greater than sliding friction,
+            // particle slips
+
+            fT_PW = -mu_*mag(fN_PW)*USlip_PW/mag(USlip_PW);
+
+            tangentialOverlap_PW = vector::zero;
+        }
+        else
+        {
+            fT_PW =
+                -kT*tangentialOverlapMag
+               *tangentialOverlap_PW/tangentialOverlapMag
+              - etaT*USlip_PW;
+        }
+
+        p.f() += fT_PW;
+
+        p.torque() += (pREff*-rHat_PW) ^ fT_PW;
+    }
 }
 
 
@@ -109,7 +161,8 @@ Foam::WallSpringSliderDashpot<CloudType>::WallSpringSliderDashpot
         (
             this->coeffDict().lookup("collisionResolutionSteps")
         )
-    )
+    ),
+    volumeFactor_(this->dict().lookupOrDefault("volumeFactor", 1.0))
 {}
 
 
@@ -121,6 +174,15 @@ Foam::WallSpringSliderDashpot<CloudType>::~WallSpringSliderDashpot()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::scalar Foam::WallSpringSliderDashpot<CloudType>::pREff
+(
+    const typename CloudType::parcelType& p
+) const
+{
+    return p.d()/2*cbrt(p.nParticle()*volumeFactor_);
+}
 
 template<class CloudType>
 bool Foam::WallSpringSliderDashpot<CloudType>::controlsTimestep() const
@@ -164,28 +226,56 @@ template<class CloudType>
 void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 (
     typename CloudType::parcelType& p,
-    const List<point>& flatSites,
-    const List<point>& sharpSites
+    const List<point>& flatSitePoints,
+    const List<WallSiteData<vector> >& flatSiteData,
+    const List<point>& sharpSitePoints,
+    const List<WallSiteData<vector> >& sharpSiteData
 ) const
 {
     scalar pNu = this->owner().constProps().poissonsRatio();
 
     scalar pE = this->owner().constProps().youngsModulus();
 
+    scalar pREff = this->pREff(p);
+
     scalar Estar = 1/((1 - sqr(pNu))/pE + (1 - sqr(nu_))/E_);
 
-    scalar kN = (4.0/3.0)*sqrt(p.d()/2)*Estar;
+    scalar kN = (4.0/3.0)*sqrt(pREff)*Estar;
 
-    forAll(flatSites, siteI)
+    scalar GStar = 1/(2*((2 + pNu - sqr(pNu))/pE + (2 + nu_ - sqr(nu_))/E_));
+
+    forAll(flatSitePoints, siteI)
     {
-        evaluateWall(p, flatSites[siteI], pNu, pE, Estar, kN);
+        evaluateWall
+        (
+            p,
+            flatSitePoints[siteI],
+            flatSiteData[siteI],
+            pNu,
+            pE,
+            pREff,
+            Estar,
+            kN,
+            GStar
+        );
     }
 
-    forAll(sharpSites, siteI)
+    forAll(sharpSitePoints, siteI)
     {
         // Treating sharp sites like flat sites
 
-        evaluateWall(p, sharpSites[siteI], pNu, pE, Estar, kN);
+        evaluateWall
+        (
+            p,
+            sharpSitePoints[siteI],
+            sharpSiteData[siteI],
+            pNu,
+            pE,
+            pREff,
+            Estar,
+            kN,
+            GStar
+        );
     }
 }
 
