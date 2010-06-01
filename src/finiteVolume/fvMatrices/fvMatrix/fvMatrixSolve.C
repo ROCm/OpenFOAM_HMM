@@ -150,6 +150,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
         solverPerf.print();
 
         solverPerfVec = max(solverPerfVec, solverPerf);
+        solverPerfVec.solverName() = solverPerf.solverName();
 
         psi.internalField().replace(cmpt, psiCmpt);
         diag() = saveDiag;

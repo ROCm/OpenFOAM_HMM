@@ -145,6 +145,13 @@ public:
                 return solverName_;
             }
 
+            //- Return solver name
+            word& solverName()
+            {
+                return solverName_;
+            }
+
+
             //- Return initial residual
             scalar initialResidual() const
             {
