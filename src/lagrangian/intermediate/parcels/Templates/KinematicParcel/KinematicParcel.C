@@ -315,18 +315,15 @@ bool Foam::KinematicParcel<ParcelType>::move(TrackData& td)
 
         case TrackData::tpRotationalTrack:
         {
-            Info<< "No rotational tracking implementation" << endl;
+            notImplemented("TrackData::tpRotationalTrack");
 
             break;
         }
 
         default:
         {
-            FatalErrorIn
-            (
-                "KinematicParcel<ParcelType>::move(TrackData& td)"
-            )   << td.part()
-                << " is an invalid part of the tracking method."
+            FatalErrorIn("KinematicParcel<ParcelType>::move(TrackData& td)")
+                << td.part() << " is an invalid part of the tracking method."
                 << abort(FatalError);
         }
     }
