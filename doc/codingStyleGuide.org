@@ -2,7 +2,7 @@
 #
 #+TITLE:                 OpenFOAM C++ style guide
 #+AUTHOR:                      OpenCFD Ltd.
-#+DATE:                          May 2010
+#+DATE:                         June 2010
 #+LINK:                  http://www.opencfd.co.uk
 #+OPTIONS: author:nil ^:{}
 
@@ -13,9 +13,12 @@
     + The normal indentation is 4 spaces per logical level.
     + Use spaces for indentation, not tab characters.
     + Avoid trailing whitespace.
-    + The body of control statements (eg, =if=, =else=, =while=, etc).
+    + The body of control statements (eg, =if=, =else=, =while=, etc). is
       always delineated with brace brackets. A possible exception can be
-      made with =break= or =continue= as part of a control structure.
+      made in conjunction with =break= or =continue= as part of a control
+      structure.
+    + The body of =case= statements is usually delineated with brace brackets.
+    + A fall-through =case= should be commented as such.
 
     + stream output
       + =<<= is always four characters after the start of the stream,
@@ -132,22 +135,25 @@
     + Use two empty lines between functions
 
 *** Coding Practice
-    + passing data as arguments or return
-      Pass bool, label and scalar as copy, anything larger by reference.
+    + passing data as arguments or return values.
+      + Pass bool, label and scalar as copy, anything larger by reference.
 
     + const
-      Use everywhere it is applicable.
+      + Use everywhere it is applicable.
 
-    + variable initialisation using =
-
-    : const className& variableName = otherClass.data();
+    + variable initialisation using
+#+BEGIN_EXAMPLE
+    const className& variableName = otherClass.data();
+#+END_EXAMPLE
 
       NOT
 
-    : const className& variableName(otherClass.data());
+#+BEGIN_EXAMPLE
+    const className& variableName(otherClass.data());
+#+END_EXAMPLE
 
     + virtual functions
-      If a class is virtual - make all derived classes virtual.
+      + If a class is virtual, make all derived classes virtual.
 
 *** Conditional Statements
 #+BEGIN_EXAMPLE
@@ -169,7 +175,7 @@
     }
 #+END_EXAMPLE
 
-    NOT (no space between =if= and =(=)
+    NOT (no space between =if= and =(= used)
 
 #+BEGIN_EXAMPLE
     if(condition)
@@ -201,7 +207,7 @@
     }
 #+END_EXAMPLE
 
-    NOT (no space between =for= and =(=)
+    NOT this (no space between =for= and =(= used)
 
 #+BEGIN_EXAMPLE
     for(i = 0; i < maxI; i++)
@@ -349,7 +355,7 @@
       * (k + t);
 #+END_EXAMPLE
 
-      This is sometime more legible when surrounded by extra parentheses:
+      This is sometimes more legible when surrounded by extra parentheses:
 
 #+BEGIN_EXAMPLE
     variableName =
@@ -437,15 +443,15 @@
 
 *** Doxygen Special Commands
 
-    Doxygen has a large number of special commands with a '\' prefix or a
-    (alternatively) an '@' prefix.
+    Doxygen has a large number of special commands with a =\= prefix or
+    (alternatively) an =@= prefix.
 
-    The '@' prefix form is recommended for most Doxygen specials, since it
+    The =@= prefix form is recommended for most Doxygen specials, since it
     has the advantage of standing out. It also happens to be what projects
     like gcc and VTK are using.
 
-    The '\' prefix form, however, looks a bit better for the '\n' newline
-    command and when escaping single characters - eg, '\@', '\<', '\>', etc.
+    The =\= prefix form, however, looks a bit better for the =\n= newline
+    command and when escaping single characters - eg, =\@=, =\<=, =\>=, etc.
 
     Since the filtering removes the leading 4 spaces within the blocks, the
     Doxygen commmands can be inserted within the block without problems.
@@ -514,7 +520,7 @@
 #+END_EXAMPLE
 
 
-*** Documenting Typedefs and classes defined via macros
+*** Documenting typedefs and classes defined via macros
 
     ... not yet properly resolved
 
