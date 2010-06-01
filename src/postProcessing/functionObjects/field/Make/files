@@ -19,6 +19,5 @@ streamLine/streamLine.C
 streamLine/streamLineParticle.C
 streamLine/streamLineParticleCloud.C
 streamLine/streamLineFunctionObject.C
-streamLine/vectorIOFieldField.C
 
 LIB = $(FOAM_LIBBIN)/libfieldFunctionObjects
