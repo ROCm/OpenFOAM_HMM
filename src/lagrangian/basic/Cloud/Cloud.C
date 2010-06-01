@@ -102,8 +102,18 @@ template<class TrackingData>
 void Foam::Cloud<ParticleType>::move(TrackingData& td)
 {
     const globalMeshData& pData = polyMesh_.globalData();
-    const labelList& processorPatches = pData.processorPatches();
-    const labelList& processorPatchIndices = pData.processorPatchIndices();
+    const labelList& neighbourProcs = pData[Pstream::myProcNo()];
+    const labelList& procPatches = pData.processorPatches();
+    const labelList& procPatchIndices = pData.processorPatchIndices();
+    const labelList& procPatchNeighbours = pData.processorPatchNeighbours();
+    const polyBoundaryMesh& pbm = pMesh().boundaryMesh();
+
+    labelList neighbourProcIndices(Pstream::nProcs(), -1);
+
+    forAll(neighbourProcs, i)
+    {
+        neighbourProcIndices[neighbourProcs[i]] = i;
+    }
 
     // Initialise the stepFraction moved for the particles
     forAllIter(typename Cloud<ParticleType>, *this, pIter)
@@ -114,9 +124,19 @@ void Foam::Cloud<ParticleType>::move(TrackingData& td)
     // While there are particles to transfer
     while (true)
     {
-        // List of lists of particles to be transfered for all the processor
-        // patches
-        List<IDLList<ParticleType> > transferList(processorPatches.size());
+        // List of lists of particles to be transfered for all of the
+        // neighbour processors
+        List<IDLList<ParticleType> > particleTransferLists
+        (
+            neighbourProcs.size()
+        );
+
+        // List of destination processorPatches indices for all of the
+        // neighbour processors
+        List<DynamicList<label> > patchIndexTransferLists
+        (
+            neighbourProcs.size()
+        );
 
         // Loop over all particles
         forAllIter(typename Cloud<ParticleType>, *this, pIter)
@@ -134,15 +154,28 @@ void Foam::Cloud<ParticleType>::move(TrackingData& td)
                 // boundary face
                 if (Pstream::parRun() && p.facei_ >= pMesh().nInternalFaces())
                 {
-                    label patchi = pMesh().boundaryMesh().whichPatch(p.facei_);
-                    label n = processorPatchIndices[patchi];
+                    label patchi = pbm.whichPatch(p.facei_);
 
                     // ... and the face is on a processor patch
                     // prepare it for transfer
-                    if (n != -1)
+                    if (procPatchIndices[patchi] != -1)
                     {
+                        label n = neighbourProcIndices
+                        [
+                            refCast<const processorPolyPatch>
+                            (
+                                pbm[patchi]
+                            ).neighbProcNo()
+                        ];
+
                         p.prepareForParallelTransfer(patchi, td);
-                        transferList[n].append(this->remove(&p));
+
+                        particleTransferLists[n].append(this->remove(&p));
+
+                        patchIndexTransferLists[n].append
+                        (
+                            procPatchNeighbours[patchi]
+                        );
                     }
                 }
             }
@@ -157,31 +190,30 @@ void Foam::Cloud<ParticleType>::move(TrackingData& td)
             break;
         }
 
-
         // Allocate transfer buffers
         PstreamBuffers pBufs(Pstream::nonBlocking);
 
         // Stream into send buffers
-        forAll(transferList, i)
+        forAll(particleTransferLists, i)
         {
-            if (transferList[i].size())
+            if (particleTransferLists[i].size())
             {
                 UOPstream particleStream
                 (
-                    refCast<const processorPolyPatch>
-                    (
-                        pMesh().boundaryMesh()[processorPatches[i]]
-                    ).neighbProcNo(),
+                    neighbourProcs[i],
                     pBufs
                 );
 
-                particleStream << transferList[i];
+                particleStream
+                    << labelList(patchIndexTransferLists[i])
+                    << particleTransferLists[i];
             }
         }
 
         // Set up transfers when in non-blocking mode. Returns sizes (in bytes)
         // to be sent/received.
         labelListList allNTrans(Pstream::nProcs());
+
         pBufs.finishedSends(allNTrans);
 
         bool transfered = false;
@@ -203,23 +235,18 @@ void Foam::Cloud<ParticleType>::move(TrackingData& td)
             break;
         }
 
-
         // Retrieve from receive buffers
-        forAll(processorPatches, i)
+        forAll(neighbourProcs, i)
         {
-            label patchi = processorPatches[i];
+            label neighbProci = neighbourProcs[i];
 
-            const processorPolyPatch& procPatch =
-                refCast<const processorPolyPatch>
-                (pMesh().boundaryMesh()[patchi]);
+            label nRec = allNTrans[neighbProci][Pstream::myProcNo()];
 
-            label neighbProci = procPatch.neighbProcNo();
-
-            label nRecPs = allNTrans[neighbProci][Pstream::myProcNo()];
-
-            if (nRecPs)
+            if (nRec)
             {
                 UIPstream particleStream(neighbProci, pBufs);
+
+                labelList receivePatchIndex(particleStream);
 
                 IDLList<ParticleType> newParticles
                 (
@@ -227,10 +254,16 @@ void Foam::Cloud<ParticleType>::move(TrackingData& td)
                     typename ParticleType::iNew(*this)
                 );
 
+                label pI = 0;
+
                 forAllIter(typename Cloud<ParticleType>, newParticles, newpIter)
                 {
                     ParticleType& newp = newpIter();
+
+                    label patchi = procPatches[receivePatchIndex[pI++]];
+
                     newp.correctAfterParallelTransfer(patchi, td);
+
                     addParticle(newParticles.remove(&newp));
                 }
             }
