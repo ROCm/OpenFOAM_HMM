@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -23,30 +23,28 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     wmakeFilesAndOptions
+#     wmakeFindEmptyMake
 #
 # Description
-#     Scan current directory for directories and source files
-#     and construct Make/files and Make/options
-#
-#     Usage : wmakeFilesAndOptions
+#     Find 'Make/' directories without 'files' or 'options'.
+#     These typically correspond to (partially) removed applications.
 #
 #------------------------------------------------------------------------------
-Script=${0##*/}
-
 usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
-usage: ${0##*/}
+usage: ${0##*/} [dir1 .. dirN]
 
-    Scan current directory for directories and source files
-    and construct 'Make/files' and 'Make/options'
+    Find 'Make/' directories without 'files' or 'options'.
+    These typically correspond to (partially) removed applications.
 
 USAGE
     exit 1
 }
 
+#------------------------------------------------------------------------------
+findName=lnInclude
 
 # simple parse options
 while [ "$#" -gt 0 ]
@@ -64,36 +62,26 @@ do
     esac
 done
 
-# no arguments
-[ "$#" -eq 0 ] || usage "unexpected arguments: '$*'"
 
-#
-# check environment variables
-#
-for check in WM_OPTIONS WM_LINK_LANGUAGE WM_DIR
+# default to searching from pwd
+[ "$#" -gt 0 ] || set -- .
+
+for checkDir
 do
-    eval test "\$$check" || {
-        echo "$Script error: environment variable \$$check not set" 1>&2
-        exit 1
-    }
+    if [ -d $checkDir ]
+    then
+        echo "searching: $checkDir for 'Make' directories without 'files' or 'options'" 1>&2
+        echo "---------" 1>&2
+    else
+        echo "skipping non-dir: $checkDir" 1>&2
+        echo "----------------" 1>&2
+        continue
+    fi
+
+    find $checkDir -depth -type d -name Make -print | while read MakeDir
+    do
+        [ -f "$MakeDir/files" -o -f "$MakeDir/options" ] || echo $MakeDir
+    done
 done
-
-if [ -d Make ]
-then
-    echo "$Script error: Make directory already exists" 1>&2
-    exit 1
-else
-    mkdir Make
-fi
-
-[ -e Make/files ] || {
-    echo "$Script: Creating Make/files"
-    $WM_DIR/scripts/makeFiles
-}
-
-[ -e Make/options ] || {
-    echo "$Script: Creating Make/options"
-    $WM_DIR/scripts/makeOptions
-}
 
 #------------------------------------------------------------------------------
