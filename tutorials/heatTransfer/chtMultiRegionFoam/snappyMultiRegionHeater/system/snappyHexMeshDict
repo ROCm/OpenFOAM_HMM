@@ -130,7 +130,7 @@ castellatedMeshControls
 
 	    faceZone bottomAir;
             cellZone bottomAir;
-            zoneInside true;
+            cellZoneInside inside;
         }
 
         topAir
@@ -140,7 +140,7 @@ castellatedMeshControls
 
 	    faceZone topAir;
             cellZone topAir;
-            zoneInside true;
+            cellZoneInside inside;
         }
 
         heater
@@ -150,7 +150,7 @@ castellatedMeshControls
 
 	    faceZone heater;
             cellZone heater;
-            zoneInside true;
+            cellZoneInside inside;
         }
 
         leftSolid
@@ -160,7 +160,7 @@ castellatedMeshControls
 
 	    faceZone leftSolid;
             cellZone leftSolid;
-            zoneInside true;
+            cellZoneInside inside;
         }
 
         rightSolid
@@ -170,7 +170,7 @@ castellatedMeshControls
 
 	    faceZone rightSolid;
             cellZone rightSolid;
-            zoneInside true;
+            cellZoneInside inside;
         }
     }
 

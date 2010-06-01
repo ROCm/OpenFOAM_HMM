@@ -33,6 +33,7 @@ License
 #include "polyModifyFace.H"
 #include "syncTools.H"
 #include "faceSet.H"
+#include "dummyTransform.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -40,6 +41,55 @@ namespace Foam
 {
 
 defineTypeNameAndDebug(removePoints, 0);
+
+//- Combine-reduce operator to combine data on faces. Takes care
+//  of reverse orientation on coupled face.
+template <class T, template<class> class CombineOp>
+class faceEqOp
+{
+
+public:
+
+    void operator()(List<T>& x, const List<T>& y) const
+    {
+        if (y.size() > 0)
+        {
+            if (x.size() == 0)
+            {
+                x = y;
+            }
+            else
+            {
+                label j = 0;
+                forAll(x, i)
+                {
+                    CombineOp<T>()(x[i], y[j]);
+                    j = y.rcIndex(j);
+                }
+            }
+        }
+    }
+};
+
+
+//// Dummy transform for List. Used in synchronisation.
+//template <class T>
+//class dummyTransformList
+//{
+//public:
+//    void operator()(const coupledPolyPatch&, Field<List<T> >&) const
+//    {}
+//};
+//// Dummy template specialisation. Used in synchronisation.
+//template<>
+//class pTraits<boolList>
+//{
+//public:
+//
+//    //- Component type
+//    typedef label cmptType;
+//};
+
 
 }
 
@@ -247,8 +297,7 @@ Foam::label Foam::removePoints::countPointUsage
         mesh_,
         pointCanBeDeleted,
         andEqOp<bool>(),
-        true,               // null value
-        false               // no separation
+        true                // null value
     );
 
     return returnReduce(nDeleted, sumOp<label>());
@@ -662,7 +711,7 @@ void Foam::removePoints::getUnrefimentSet
             mesh_,
             faceVertexRestore,
             faceEqOp<bool, orEqOp>(),   // special operator to handle faces
-            false                       // no separation
+            Foam::dummyTransform()      // no transformation
         );
 
         // So now if any of the points-to-restore is used by any coupled face

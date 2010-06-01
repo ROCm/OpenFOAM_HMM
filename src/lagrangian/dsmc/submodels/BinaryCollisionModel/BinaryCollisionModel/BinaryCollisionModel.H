@@ -85,6 +85,9 @@ public:
 
     // Constructors
 
+        //- Construct null from owner
+        BinaryCollisionModel(CloudType& owner);
+
         //- Construct from components
         BinaryCollisionModel
         (
@@ -122,6 +125,9 @@ public:
 
 
     // Member Functions
+
+        //- Flag to indicate whether model activates collision model
+        virtual bool active() const = 0;
 
         //- Return the collision cross section * relative velocity product
         virtual scalar sigmaTcR

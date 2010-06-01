@@ -436,6 +436,16 @@ private:
                 labelList& cellToZone
             ) const;
 
+            //- Finds zone per cell for cells inside named surfaces that have
+            //  an inside point specified.
+            void findCellZoneInsideWalk
+            (
+                const labelList& locationSurfaces,
+                const labelList& namedSurfaceIndex,
+                const labelList& surfaceToCellZone,
+                labelList& cellToZone
+            ) const;
+
             //- Determines cell zone from cell region information.
             bool calcRegionToZone
             (

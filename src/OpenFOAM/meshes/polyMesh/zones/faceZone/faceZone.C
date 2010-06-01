@@ -463,9 +463,9 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
             }
         }
         boolList myZoneFace(neiZoneFace);
-        syncTools::swapBoundaryFaceList(mesh, neiZoneFace, false);
+        syncTools::swapBoundaryFaceList(mesh, neiZoneFace);
         boolList myZoneFlip(neiZoneFlip);
-        syncTools::swapBoundaryFaceList(mesh, neiZoneFlip, false);
+        syncTools::swapBoundaryFaceList(mesh, neiZoneFlip);
 
         forAll(*this, i)
         {

@@ -37,7 +37,7 @@ Foam::MaxwellianThermal<CloudType>::MaxwellianThermal
     CloudType& cloud
 )
 :
-    WallInteractionModel<CloudType>(dict, cloud, typeName)
+    WallInteractionModel<CloudType>(cloud)
 {}
 
 

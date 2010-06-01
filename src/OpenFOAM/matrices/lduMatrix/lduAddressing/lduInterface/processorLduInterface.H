@@ -93,6 +93,8 @@ public:
             //- Return face transformation tensor
             virtual const tensorField& forwardT() const = 0;
 
+            //- Return message tag used for sending
+            virtual int tag() const = 0;
 
         // Transfer functions
 

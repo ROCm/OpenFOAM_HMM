@@ -111,10 +111,13 @@ void Foam::lduMatrix::updateMatrixInterfaces
     )
     {
         // Block until all sends/receives have been finished
-        if (Pstream::defaultCommsType == Pstream::nonBlocking)
+        if
+        (
+            Pstream::parRun()
+         && Pstream::defaultCommsType == Pstream::nonBlocking
+        )
         {
-            IPstream::waitRequests();
-            OPstream::waitRequests();
+            UPstream::waitRequests();
         }
 
         forAll(interfaces, interfaceI)

@@ -50,7 +50,7 @@ class NoInflow
 public:
 
     //- Runtime type information
-    TypeName("NoInflow");
+    TypeName("none");
 
 
     // Constructors

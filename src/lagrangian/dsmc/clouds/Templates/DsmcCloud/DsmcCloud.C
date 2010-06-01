@@ -291,7 +291,10 @@ void Foam::DsmcCloud<ParcelType>::initialise
 template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::collisions()
 {
-    buildCellOccupancy();
+    if (!binaryCollision().active())
+    {
+        return;
+    }
 
     // Temporary storage for subCells
     List<DynamicList<label> > subCells(8);
@@ -1056,6 +1059,9 @@ void Foam::DsmcCloud<ParcelType>::evolve()
 
     // Move the particles ballistically with their current velocities
     Cloud<ParcelType>::move(td);
+
+    // Update cell occupancy
+    buildCellOccupancy();
 
     // Calculate new velocities via stochastic collisions
     collisions();

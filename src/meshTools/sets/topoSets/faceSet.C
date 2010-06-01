@@ -26,8 +26,7 @@ License
 #include "faceSet.H"
 #include "mapPolyMesh.H"
 #include "polyMesh.H"
-#include "processorPolyPatch.H"
-#include "cyclicPolyPatch.H"
+#include "syncTools.H"
 
 #include "addToRunTimeSelectionTable.H"
 
@@ -113,116 +112,40 @@ faceSet::~faceSet()
 
 void faceSet::sync(const polyMesh& mesh)
 {
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+    boolList set(mesh.nFaces(), false);
+
+    forAllConstIter(faceSet, *this, iter)
+    {
+        set[iter.key()] = true;
+    }
+    syncTools::syncFaceList(mesh, set, orEqOp<bool>());
 
     label nAdded = 0;
 
-    if (Pstream::parRun())
+    forAll(set, faceI)
     {
-        // Send faces in set that are on a processorPatch. Send as patch face
-        // indices.
-        forAll(patches, patchI)
+        if (set[faceI])
         {
-            const polyPatch& pp = patches[patchI];
-
-            if (isA<processorPolyPatch>(pp))
+            if (insert(faceI))
             {
-                const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(pp);
-
-                // Convert faceSet locally to labelList.
-                DynamicList<label> setFaces(pp.size());
-
-                forAll(pp, i)
-                {
-                    if (found(pp.start() + i))
-                    {
-                        setFaces.append(i);
-                    }
-                }
-                setFaces.shrink();
-
-                OPstream toNeighbour
-                (
-                    Pstream::blocking,
-                    procPatch.neighbProcNo()
-                );
-
-                toNeighbour << setFaces;
+                nAdded++;
             }
         }
-
-        // Receive
-        forAll(patches, patchI)
+        else if (found(faceI))
         {
-            const polyPatch& pp = patches[patchI];
-
-            if (isA<processorPolyPatch>(pp))
-            {
-                const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(pp);
-
-                IPstream fromNeighbour
-                (
-                    Pstream::blocking,
-                    procPatch.neighbProcNo()
-                );
-
-                labelList setFaces(fromNeighbour);
-
-                forAll(setFaces, i)
-                {
-                    if (insert(pp.start() + setFaces[i]))
-                    {
-                        nAdded++;
-                    }
-                }
-            }
+            FatalErrorIn("faceSet::sync(const polyMesh&)")
+                << "Problem : syncing removed faces from set."
+                << abort(FatalError);
         }
     }
-
-    // Couple cyclic patches
-    forAll(patches, patchI)
-    {
-        const polyPatch& pp = patches[patchI];
-
-        if (isA<cyclicPolyPatch>(pp))
-        {
-            const cyclicPolyPatch& cycPatch =
-                refCast<const cyclicPolyPatch>(pp);
-
-            forAll(cycPatch, i)
-            {
-                label thisFaceI = cycPatch.start() + i;
-                label otherFaceI = cycPatch.transformGlobalFace(thisFaceI);
-
-                if (found(thisFaceI))
-                {
-                    if (insert(otherFaceI))
-                    {
-                        nAdded++;
-                    }
-                }
-                else if (found(otherFaceI))
-                {
-                    if (insert(thisFaceI))
-                    {
-                        nAdded++;
-                    }
-                }
-            }
-        }
-    }
-
 
     reduce(nAdded, sumOp<label>());
-
-    //if (nAdded > 0)
-    //{
-    //    Info<< "Added an additional " << nAdded
-    //        << " faces on coupled patches. "
-    //        << "(processorPolyPatch, cyclicPolyPatch)" << endl;
-    //}
+    if (nAdded > 0)
+    {
+        Info<< "Added an additional " << nAdded
+            << " faces on coupled patches. "
+            << "(processorPolyPatch, cyclicPolyPatch)" << endl;
+    }
 }
 
 

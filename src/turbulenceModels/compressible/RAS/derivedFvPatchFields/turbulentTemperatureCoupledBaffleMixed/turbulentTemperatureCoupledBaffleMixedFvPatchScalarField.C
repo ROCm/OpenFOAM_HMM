@@ -151,13 +151,11 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::K() const
         const compressible::RASModel& model =
             db().lookupObject<compressible::RASModel>("RASProperties");
 
-        tmp<volScalarField> talpha = model.alphaEff();
-
         const basicThermo& thermo =
             db().lookupObject<basicThermo>("thermophysicalProperties");
 
         return
-            talpha().boundaryField()[patch().index()]
+            model.alphaEff()().boundaryField()[patch().index()]
            *thermo.Cp()().boundaryField()[patch().index()];
     }
     else if (mesh.objectRegistry::foundObject<volScalarField>(KName_))
@@ -200,7 +198,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
     // Get the coupling information from the directMappedPatchBase
     const directMappedPatchBase& mpp = refCast<const directMappedPatchBase>
     (
-        this->patch().patch()
+        patch().patch()
     );
     const polyMesh& nbrMesh = mpp.sampleMesh();
     const fvPatch& nbrPatch = refCast<const fvMesh>
@@ -287,11 +285,11 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
 
         Info<< patch().boundaryMesh().mesh().name() << ':'
             << patch().name() << ':'
-            << this->dimensionedInternalField().name() << " -> "
+            << this->dimensionedInternalField().name() << " <- "
             << nbrMesh.name() << ':'
             << nbrPatch.name() << ':'
             << this->dimensionedInternalField().name() << " :"
-            << " heatFlux:" << Q
+            << " heat[W]:" << Q
             << " walltemperature "
             << " min:" << gMin(*this)
             << " max:" << gMax(*this)

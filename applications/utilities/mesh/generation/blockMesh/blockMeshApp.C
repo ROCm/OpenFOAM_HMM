@@ -206,25 +206,8 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Creating polyMesh from blockMesh" << endl;
 
-    wordList patchNames = blocks.patchNames();
-    wordList patchTypes = blocks.patchTypes();
     word defaultFacesName = "defaultFaces";
     word defaultFacesType = emptyPolyPatch::typeName;
-    wordList patchPhysicalTypes = blocks.patchPhysicalTypes();
-
-
-    preservePatchTypes
-    (
-        runTime,
-        runTime.constant(),
-        polyMeshDir,
-        patchNames,
-        patchTypes,
-        defaultFacesName,
-        defaultFacesType,
-        patchPhysicalTypes
-    );
-
     polyMesh mesh
     (
         IOobject
@@ -236,11 +219,9 @@ int main(int argc, char *argv[])
         xferCopy(blocks.points()),           // could we re-use space?
         blocks.cells(),
         blocks.patches(),
-        patchNames,
-        patchTypes,
+        blocks.patchDicts(),
         defaultFacesName,
-        defaultFacesType,
-        patchPhysicalTypes
+        defaultFacesType
     );
 
 

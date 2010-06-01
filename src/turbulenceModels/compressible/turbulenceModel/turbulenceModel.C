@@ -26,6 +26,7 @@ License
 #include "turbulenceModel.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "fvcGrad.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -114,6 +115,13 @@ autoPtr<turbulenceModel> turbulenceModel::New
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+tmp<volScalarField> turbulenceModel::rhoEpsilonEff() const
+{
+    tmp<volTensorField> tgradU = fvc::grad(U_);
+    return mu()*(tgradU() && dev(twoSymm(tgradU()))) + rho_*epsilon();
+}
+
 
 void turbulenceModel::correct()
 {}

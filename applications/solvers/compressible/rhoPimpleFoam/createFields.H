@@ -37,12 +37,7 @@
         mesh
     );
 
-#   include "compressibleCreatePhi.H"
-
-    dimensionedScalar pMin
-    (
-        mesh.solutionDict().subDict("PIMPLE").lookup("pMin")
-    );
+    #include "compressibleCreatePhi.H"
 
     Info<< "Creating turbulence model\n" << endl;
     autoPtr<compressible::turbulenceModel> turbulence
@@ -55,9 +50,6 @@
             thermo
         )
     );
-
-    //dimensionedScalar initialMass = fvc::domainIntegrate(rho);
-
 
     Info<< "Creating field DpDt\n" << endl;
     volScalarField DpDt =

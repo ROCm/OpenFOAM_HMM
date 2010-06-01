@@ -62,6 +62,13 @@ bool Foam::NoCollision<CloudType>::active() const
 
 
 template<class CloudType>
+bool Foam::NoCollision<CloudType>::controlsWallInteraction() const
+{
+    return false;
+}
+
+
+template<class CloudType>
 void Foam::NoCollision<CloudType>::collide()
 {}
 

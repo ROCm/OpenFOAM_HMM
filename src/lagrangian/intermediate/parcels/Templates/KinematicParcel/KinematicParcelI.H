@@ -348,7 +348,7 @@ inline bool& Foam::KinematicParcel<ParcelType>::active()
 
 
 template <class ParcelType>
-inline const Foam::CollisionRecordList<Foam::vector>&
+inline const Foam::CollisionRecordList<Foam::vector, Foam::vector>&
 Foam::KinematicParcel<ParcelType>::collisionRecords() const
 {
     return collisionRecords_;
@@ -426,7 +426,7 @@ inline Foam::vector& Foam::KinematicParcel<ParcelType>::UTurb()
 
 
 template <class ParcelType>
-inline Foam::CollisionRecordList<Foam::vector>&
+inline Foam::CollisionRecordList<Foam::vector, Foam::vector>&
 Foam::KinematicParcel<ParcelType>::collisionRecords()
 {
     return collisionRecords_;
@@ -439,14 +439,23 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::wallImpactDistance
     const vector&
 ) const
 {
-    // Do not use a wall impact distance to allow proper multiple face
-    // collisions.  In a twisted mesh the particle can be within range
-    // of a wall but not in the cell attached to a wall face, hence
-    // miss the interaction.
+    const KinematicCloud<ParcelType>& c =
+        dynamic_cast<const KinematicCloud<ParcelType>&>(this->cloud());
 
-    return 0.0;
+    if (c.collision().controlsWallInteraction())
+    {
+        // Do not use a wall impact distance if the collision model
+        // controls wall interactions to allow proper multiple face
+        // collisions.  In a twisted mesh the particle can be within
+        // range of a wall but not in the cell attached to a wall
+        // face, hence miss the interaction.
 
-    // return 0.5*d_;
+        return 0.0;
+    }
+    else
+    {
+        return 0.5*d_;
+    }
 }
 
 

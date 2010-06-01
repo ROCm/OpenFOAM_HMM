@@ -74,9 +74,13 @@ containers/LinkedLists/linkTypes/DLListBase/DLListBase.C
 primitiveLists = primitives/Lists
 $(primitiveLists)/boolList.C
 $(primitiveLists)/labelIOList.C
+$(primitiveLists)/labelListIOList.C
 $(primitiveLists)/scalarList.C
 $(primitiveLists)/scalarIOList.C
+$(primitiveLists)/scalarListIOList.C
 $(primitiveLists)/vectorList.C
+$(primitiveLists)/vectorIOList.C
+$(primitiveLists)/vectorListIOList.C
 $(primitiveLists)/sphericalTensorList.C
 $(primitiveLists)/symmTensorList.C
 $(primitiveLists)/tensorList.C
@@ -260,12 +264,14 @@ GAMGInterfaces = $(GAMG)/interfaces
 $(GAMGInterfaces)/GAMGInterface/GAMGInterface.C
 $(GAMGInterfaces)/GAMGInterface/GAMGInterfaceNew.C
 $(GAMGInterfaces)/processorGAMGInterface/processorGAMGInterface.C
+$(GAMGInterfaces)/processorCyclicGAMGInterface/processorCyclicGAMGInterface.C
 $(GAMGInterfaces)/cyclicGAMGInterface/cyclicGAMGInterface.C
 
 GAMGInterfaceFields = $(GAMG)/interfaceFields
 $(GAMGInterfaceFields)/GAMGInterfaceField/GAMGInterfaceField.C
 $(GAMGInterfaceFields)/GAMGInterfaceField/GAMGInterfaceFieldNew.C
 $(GAMGInterfaceFields)/processorGAMGInterfaceField/processorGAMGInterfaceField.C
+$(GAMGInterfaceFields)/processorCyclicGAMGInterfaceField/processorCyclicGAMGInterfaceField.C
 $(GAMGInterfaceFields)/cyclicGAMGInterfaceField/cyclicGAMGInterfaceField.C
 
 GAMGAgglomerations = $(GAMG)/GAMGAgglomerations
@@ -339,6 +345,8 @@ $(constraintPolyPatches)/empty/emptyPolyPatch.C
 $(constraintPolyPatches)/symmetry/symmetryPolyPatch.C
 $(constraintPolyPatches)/wedge/wedgePolyPatch.C
 $(constraintPolyPatches)/cyclic/cyclicPolyPatch.C
+$(constraintPolyPatches)/cyclicSlip/cyclicSlipPolyPatch.C
+$(constraintPolyPatches)/processorCyclic/processorCyclicPolyPatch.C
 $(constraintPolyPatches)/processor/processorPolyPatch.C
 
 derivedPolyPatches = $(polyPatches)/derived
@@ -449,7 +457,9 @@ $(constraintPointPatches)/empty/emptyPointPatch.C
 $(constraintPointPatches)/symmetry/symmetryPointPatch.C
 $(constraintPointPatches)/wedge/wedgePointPatch.C
 $(constraintPointPatches)/cyclic/cyclicPointPatch.C
+$(constraintPointPatches)/cyclicSlip/cyclicSlipPointPatch.C
 $(constraintPointPatches)/processor/processorPointPatch.C
+$(constraintPointPatches)/processorCyclic/processorCyclicPointPatch.C
 
 derivedPointPatches = $(pointPatches)/derived
 $(derivedPointPatches)/coupled/coupledFacePointPatch.C
@@ -480,9 +490,12 @@ $(Fields)/symmTensorField/symmTensorField.C
 $(Fields)/tensorField/tensorField.C
 $(Fields)/complexFields/complexFields.C
 
-$(Fields)/labelField/labelIOField.C
+$(Fields)/labelField/labelIOField.
+$(Fields)/labelField/labelFieldIOField.C
 $(Fields)/scalarField/scalarIOField.C
+$(Fields)/scalarField/scalarFieldIOField.C
 $(Fields)/vectorField/vectorIOField.C
+$(Fields)/vectorField/vectorFieldIOField.C
 $(Fields)/vector2DField/vector2DIOField.C
 $(Fields)/sphericalTensorField/sphericalTensorIOField.C
 $(Fields)/diagTensorField/diagTensorIOField.C
@@ -508,6 +521,7 @@ $(constraintPointPatchFields)/wedge/wedgePointPatchFields.C
 $(constraintPointPatchFields)/cyclic/cyclicPointPatchFields.C
 $(constraintPointPatchFields)/cyclicSlip/cyclicSlipPointPatchFields.C
 $(constraintPointPatchFields)/processor/processorPointPatchFields.C
+$(constraintPointPatchFields)/processorCyclic/processorCyclicPointPatchFields.C
 
 derivedPointPatchFields = $(pointPatchFields)/derived
 $(derivedPointPatchFields)/slip/slipPointPatchFields.C
@@ -537,5 +551,7 @@ $(writers)/rawGraph/rawGraph.C
 $(writers)/gnuplotGraph/gnuplotGraph.C
 $(writers)/xmgrGraph/xmgrGraph.C
 $(writers)/jplotGraph/jplotGraph.C
+
+meshes/data/data.C
 
 LIB = $(FOAM_LIBBIN)/libOpenFOAM
