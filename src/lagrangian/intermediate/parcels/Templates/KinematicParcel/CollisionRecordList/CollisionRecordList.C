@@ -108,4 +108,5 @@ void Foam::CollisionRecordList<Type>::update()
     DynamicList<CollisionRecord<Type> >::operator=(updatedRecords);
 }
 
+
 // ************************************************************************* //
