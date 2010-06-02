@@ -85,6 +85,9 @@ void Foam::polyMesh::calcDirections() const
         }
     }
 
+    reduce(nEmptyPatches, maxOp<label>());
+    reduce(nWedgePatches, maxOp<label>());
+
     if (nEmptyPatches)
     {
         reduce(emptyDirVec, sumOp<vector>());

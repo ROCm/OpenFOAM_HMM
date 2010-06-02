@@ -89,7 +89,8 @@ public:
         //- Source type enumeration
         enum sourceType
         {
-            stCellZone
+            stCellZone,
+            stAll
         };
 
         //- Source type names
