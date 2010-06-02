@@ -44,7 +44,7 @@ Foam::autoPtr<Foam::engineMesh> Foam::engineMesh::New
                 "engineGeometry",
                 io.time().constant(),
                 io.db(),
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
                 false
             )

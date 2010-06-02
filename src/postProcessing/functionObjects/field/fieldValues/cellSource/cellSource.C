@@ -32,11 +32,11 @@ License
 defineTypeNameAndDebug(Foam::fieldValues::cellSource, 0);
 
 template<>
-const char* NamedEnum<fieldValues::cellSource::sourceType, 2>::
+const char* Foam::NamedEnum<Foam::fieldValues::cellSource::sourceType, 2>::
 names[] = {"cellZone", "all"};
 
-const NamedEnum<fieldValues::cellSource::sourceType, 2>
-    fieldValues::cellSource::sourceTypeNames_;
+const Foam::NamedEnum<Foam::fieldValues::cellSource::sourceType, 2>
+    Foam::fieldValues::cellSource::sourceTypeNames_;
 
 template<>
 const char* Foam::NamedEnum<Foam::fieldValues::cellSource::operationType, 7>::

@@ -39,9 +39,16 @@ Description
     @param MUST_READ
         Object must be read from Istream on construction. \n
         Error if Istream does not exist or can't be read.
+        Does not check timestamp or re-read.
+    @param MUST_READ_IF_MODIFIED
+        Object must be read from Istream on construction. \n
+        Error if Istream does not exist or can't be read. If object is
+        registered its timestamp will be checked every timestep and possibly
+        re-read.
     @param READ_IF_PRESENT
         Read object from Istream if Istream exists, otherwise don't. \n
         Error only if Istream exists but can't be read.
+        Does not check timestamp or re-read.
     @param NO_READ
           Don't read
 
@@ -100,6 +107,7 @@ public:
         enum readOption
         {
             MUST_READ,
+            MUST_READ_IF_MODIFIED,
             READ_IF_PRESENT,
             NO_READ
         };
@@ -153,6 +161,10 @@ protected:
         //- Construct and return an IFstream for the object.
         //  The results is NULL if the stream construction failed
         Istream* objectStream();
+
+        //- Construct and return an IFstream for the object given the
+        //  exact file. The results is NULL if the stream construction failed
+        Istream* objectStream(const fileName&);
 
         //- Set the object state to bad
         void setBad(const string&);

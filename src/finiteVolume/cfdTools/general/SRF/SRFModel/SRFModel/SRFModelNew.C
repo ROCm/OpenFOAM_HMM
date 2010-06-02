@@ -43,7 +43,7 @@ Foam::autoPtr<Foam::SRF::SRFModel> Foam::SRF::SRFModel::New
                 "SRFProperties",
                 Urel.time().constant(),
                 Urel.db(),
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
                 false
             )

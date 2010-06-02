@@ -44,7 +44,7 @@ Foam::autoPtr<Foam::hhuCombustionThermo> Foam::hhuCombustionThermo::New
                 "thermophysicalProperties",
                 mesh.time().constant(),
                 mesh,
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
                 false
             )

@@ -94,7 +94,7 @@ public:
         };
 
         //- Source type names
-        static const NamedEnum<sourceType, 1> sourceTypeNames_;
+        static const NamedEnum<sourceType, 2> sourceTypeNames_;
 
 
         //- Operation type enumeration

@@ -316,8 +316,12 @@ Foam::fileName Foam::IOobject::filePath() const
 
 Foam::Istream* Foam::IOobject::objectStream()
 {
-    fileName fName = filePath();
+    return objectStream(filePath());
+}
 
+
+Foam::Istream* Foam::IOobject::objectStream(const fileName& fName)
+{
     if (fName.size())
     {
         IFstream* isPtr = new IFstream(fName);

@@ -94,7 +94,7 @@ Foam::domainDecomposition::domainDecomposition(const IOobject& io)
             "decomposeParDict",
             time().system(),
             *this,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     ),
