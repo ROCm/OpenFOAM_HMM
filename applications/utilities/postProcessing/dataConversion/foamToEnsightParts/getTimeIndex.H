@@ -26,7 +26,7 @@
 
         if (io.headerOk())
         {
-            io.readOpt() = IOobject::MUST_READ;
+            io.readOpt() = IOobject::MUST_READ_IF_MODIFIED;
             IOdictionary timeObject(io);
 
             timeObject.lookup("index") >> timeIndex;

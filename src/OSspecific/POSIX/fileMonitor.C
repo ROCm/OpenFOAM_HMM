@@ -30,6 +30,7 @@ Class
 #include "IOstreams.H"
 #include "Pstream.H"
 #include "PackedList.H"
+#include "PstreamReduceOps.H"
 
 #ifdef FOAM_USE_STAT
 #   include "OSspecific.H"
@@ -57,12 +58,14 @@ const Foam::NamedEnum<Foam::fileMonitor::fileState, 3>
 
 namespace Foam
 {
-    class fileStateEqOp
+    // Reduction operator for PackedList of fileState
+    class reduceFileStates
     {
         public:
-        void operator()(unsigned int& x, const unsigned int& y) const
+        unsigned int operator()(const unsigned int x, const unsigned int y)
+        const
         {
-            // x,y are list of 2bits representing fileState
+            // x,y are sets of 2bits representing fileState
 
             unsigned int mask = 3u;
             unsigned int shift = 0;
@@ -82,7 +85,17 @@ namespace Foam
                 shift += 2;
                 mask <<= 2;
             }
-            x = result;
+            return result;
+        }
+    };
+
+    // Combine operator for PackedList of fileState
+    class combineReduceFileStates
+    {
+        public:
+        void operator()(unsigned int& x, const unsigned int y) const
+        {
+            x = reduceFileStates()(x, y);
         }
     };
 }
@@ -323,7 +336,19 @@ void Foam::fileMonitor::updateStates(const bool syncPar) const
         // Save local state for warning message below
         PackedList<2> thisProcStats(stats);
 
-        Pstream::listCombineGather(stats.storage(), fileStateEqOp());
+        if (stats.storage().size() == 1)
+        {
+            // Optimisation valid for most cases.
+            reduce(stats.storage()[0], reduceFileStates());
+        }
+        else
+        {
+            Pstream::listCombineGather
+            (
+                stats.storage(),
+                combineReduceFileStates()
+            );
+        }
 
         i = 0;
         forAllIter(Map<fileState>, state_, iter)

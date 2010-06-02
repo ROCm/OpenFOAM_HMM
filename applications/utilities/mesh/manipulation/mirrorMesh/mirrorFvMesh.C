@@ -39,7 +39,7 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
             "mirrorMeshDict",
             time().system(),
             *this,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     ),

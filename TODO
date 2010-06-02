@@ -1,100 +1,23 @@
-- allocate/free tags.
-Not tested.
-
-OK - test blockMesh with cyclics
-unitTestCases/singleCyclic/
-
-OK - test cyclics sequential running.
-unitTestCases/singleCyclic/
-
-OK - test decomposePar
-tested channel395
-
-OK - FaceCellWave
-    unitTestCases/twoCavityCyclicForWallDistance/
-
-OK - non-parallel finite volume : channelFoam
-    unitTestCases/channel395-splitCyclic vs. channel395-dev
-
-OK - parallel finite volume with processorCyclic: channelFoam
-    unitTestCases/channel395-splitCyclic vs. channel395-dev
-
-OK - preProcessing/foamUpgradeCyclics
-
-OK - gamg - sequential.
-Tested on channel395-splitCyclic with GAMG.
-OK - gamg parallel.
-Tested on channel395-splitCyclic with GAMG.
-
-- initTransfer in GAMGprocessorInterfaces using nonblocking+tags
-untested.
-
-OK - cyclic baffles.
-Tested on t-junction-with-fan
-
-OK. - jumpCyclics/fanFvPatchField. All usages of jump() now need to account
-for being owner() or not.
-Tested on t-junction-with-fan.
-
-OK - regionSplit
-tested on singleCyclic
-
-OK - pointFields on cyclics. volPointInterpolation.
-tested on channel395-splitCyclic
-
-OK - fvMeshSubset
-tested on singleCyclic
-
-OK - pointEdgeWave (maybe test through inversePointDistanceDiffusivity?)
-tested on twoCavityCyclicForWallDistance
-
-OK - scotchDecomp
-tested with testCalcCSR on twoCavityCyclicForWallDistance
-
-NOT WORKING - fvMeshDistribute to split cyclic patches into ones
-  with different separation.
-tested on singleCyclic
-
-OK - test createPatch pointSync
-note: only works if face-centre position of 0th faces is ok since uses
-this for separation. Should in fact make cyclic planar using patch centre and
-normal?
-test on twoCavityCyclicForWallDistance with point (0 1 0) set to (0 1.001 0)
-
-NO PROBLEM - renumberMesh
-It doesn't do renumbering through cyclics.
-
-OK - rotational cyclics.
-Tested on movingCone-with-cyclics
-
-OK - LUscalarMatrix::convert still expects interfaces to be cyclic
-tested on channel395 with 'directSolveCoarsest true;' 
-
-OK - grep for size()/2
-
-- all tutorials with cyclics:
-    OK - incompressible/DNS/dnsFoam/boxTurb16
-    OK - incompressible/channelFoam/channel395
-    slight differences due to divergence. combustion/XiFoam/les/pitzDaily3D
-    OK - no cyclics. combustion/fireFoam/les/smallPoolFire2D
-    discreteMethods/dsmcFoam/freeSpacePeriodic
-    discreteMethods/dsmcFoam/wedge15Ma5
-    discreteMethods/molecularDynamics/mdEquilibrationFoam/periodicCubeArgon
-    OK - incompressible/boundaryFoam/boundaryLaunderSharma
-    OK - incompressible/boundaryFoam/boundaryWallFunctions
-    OK - incompressible/boundaryFoam/boundaryWallFunctionsProfile
-    OK - needs createBaffles. incompressible/pimpleFoam/t-junction-with-fan
-    OK - incompressible/simpleSRFFoam/mixer
-    OK - needs createBaffles. lagrangian/porousExplicitSourceReactingParcelFoam/filter
-    needs special coupledbcs. lagrangian/reactingParcelFilmFoam/multipleBoxes
+- check 
+    new fvMesh
+    new fvMeshSubset
+for consistency with createMesh.H
 
 
-OK - createBaffles
 
-- have foamUpgradeCyclics split 'value' field
-- activeBaffleVelocity
-- kivaToFoam/readKivaGrid.H sorts cyclics (but in incorrect order?)
-- isoSurface.C
-- referredCellList.C
-- work out scheduled communication?
-OK - add neighbourPatch checking to 16x.
+- Check the following:
+
+doc/changes/inotify.txt
+ 
+
+
+
+
+
+
+
+
+
+
+
+

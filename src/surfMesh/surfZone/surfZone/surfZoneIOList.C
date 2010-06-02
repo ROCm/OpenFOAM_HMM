@@ -45,7 +45,11 @@ Foam::surfZoneIOList::surfZoneIOList
         "(const IOobject& io)";
 
 
-    if (readOpt() == IOobject::MUST_READ)
+    if
+    (
+        readOpt() == IOobject::MUST_READ
+     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
+    )
     {
         surfZoneList& zones = *this;
 

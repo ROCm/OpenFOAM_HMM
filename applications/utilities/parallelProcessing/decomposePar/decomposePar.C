@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
                 runTime.time().system(),
                 regionDir,          // use region if non-standard
                 runTime,
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
                 false
             )

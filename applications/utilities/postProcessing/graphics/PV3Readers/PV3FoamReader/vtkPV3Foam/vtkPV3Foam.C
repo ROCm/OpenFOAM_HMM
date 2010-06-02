@@ -444,7 +444,7 @@ void Foam::vtkPV3Foam::updateFoamMesh()
                 meshRegion_,
                 dbPtr_().timeName(),
                 dbPtr_(),
-                IOobject::MUST_READ
+                IOobject::MUST_READ_IF_MODIFIED
             )
         );
 

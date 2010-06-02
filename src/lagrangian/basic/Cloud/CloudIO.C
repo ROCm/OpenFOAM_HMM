@@ -45,7 +45,7 @@ void Foam::Cloud<ParticleType>::readCloudUniformProperties()
         time().timeName(),
         "uniform"/cloud::prefix/name(),
         db(),
-        IOobject::MUST_READ,
+        IOobject::MUST_READ_IF_MODIFIED,
         IOobject::NO_WRITE,
         false
     );

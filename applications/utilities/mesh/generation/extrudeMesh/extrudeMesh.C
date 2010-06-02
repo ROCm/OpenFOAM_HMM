@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
             runTimeExtruded.constant(),
             regionDir,
             runTimeExtruded,
-            IOobject::MUST_READ
+            IOobject::MUST_READ_IF_MODIFIED
         )
     );
 
