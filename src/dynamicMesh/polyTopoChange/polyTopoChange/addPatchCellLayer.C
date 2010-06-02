@@ -1001,8 +1001,6 @@ void Foam::addPatchCellLayer::setRefinement
         {
             layerFaces_[patchFaceI].setSize(addedCells[patchFaceI].size() + 1);
 
-            label zoneI = mesh_.faceZones().whichZone(meshFaceI);
-
             // Get duplicated vertices on the patch face.
             const face& f = pp.localFaces()[patchFaceI];
 
