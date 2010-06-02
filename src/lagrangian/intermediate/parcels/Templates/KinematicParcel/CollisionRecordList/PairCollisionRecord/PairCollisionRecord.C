@@ -30,8 +30,8 @@ License
 template<class Type>
 Foam::PairCollisionRecord<Type>::PairCollisionRecord()
 :
-    origProcOfOther_(-VGREAT),
-    origIdOfOther_(-VGREAT),
+    origProcOfOther_(0),
+    origIdOfOther_(-1),
     data_(pTraits<Type>::zero)
 {}
 
@@ -39,6 +39,7 @@ Foam::PairCollisionRecord<Type>::PairCollisionRecord()
 template<class Type>
 Foam::PairCollisionRecord<Type>::PairCollisionRecord
 (
+    bool accessed,
     label origProcOfOther,
     label origIdOfOther,
     const Type& data
@@ -47,7 +48,14 @@ Foam::PairCollisionRecord<Type>::PairCollisionRecord
     origProcOfOther_(origProcOfOther + 1),
     origIdOfOther_(origIdOfOther),
     data_(data)
-{}
+{
+    // Default assignment to origProcOfOther_ assumes accessed is true
+
+    if (!accessed)
+    {
+        setUnaccessed();
+    }
+}
 
 
 template<class Type>
@@ -56,7 +64,7 @@ Foam::PairCollisionRecord<Type>::PairCollisionRecord
     const PairCollisionRecord<Type>& pCR
 )
 :
-    origProcOfOther_(pCR.origProcOfOther() + 1),
+    origProcOfOther_(pCR.origProcOfOther_),
     origIdOfOther_(pCR.origIdOfOther_),
     data_(pCR.data_)
 {}

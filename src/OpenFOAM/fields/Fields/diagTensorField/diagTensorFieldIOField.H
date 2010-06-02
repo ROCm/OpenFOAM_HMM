@@ -21,23 +21,31 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::diagTensorFieldIOField
+
 Description
-    vector2DField with IO.
+    diagTensorFieldField with IO.
 
 \*---------------------------------------------------------------------------*/
 
-#include "vector2DIOField.H"
+#ifndef diagTensorFieldIOField_H
+#define diagTensorFieldIOField_H
+
+#include "diagTensorField.H"
+#include "IOField.H"
+#include "IOFieldField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTemplateTypeNameAndDebugWithName
-    (
-        vector2DIOField,
-        "vector2DField",
-        0
-    );
+    typedef IOField<diagTensorField> diagTensorFieldIOField;
+    typedef IOFieldField<diagTensorField, diagTensor> diagTensorIOFieldField;
 }
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

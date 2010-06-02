@@ -95,12 +95,67 @@ public:
         //- Construct from Istream
         CollisionRecordList(Istream&);
 
+        //- Construct from component fields (for IO)
+        CollisionRecordList
+        (
+            const labelField& pairAccessed,
+            const labelField& pairOrigProcOfOther,
+            const labelField& pairOrigIdOfOther,
+            const Field<PairType>& pairData,
+            const labelField& wallAccessed,
+            const vectorField& wallPRel,
+            const Field<WallType>& wallData
+        );
 
     //- Destructor
     ~CollisionRecordList();
 
 
     // Member Functions
+
+        //- Return the active pair collisions
+        inline const DynamicList<PairCollisionRecord<PairType> >&
+        pairRecords() const;
+
+        //- Return the active wall collisions
+        inline const DynamicList<WallCollisionRecord<WallType> >&
+        wallRecords() const;
+
+        // Fields representing the data from each record, i.e if the
+        // records 0-N containing each data members {a, b, c, d...}
+        // are organised:
+        //
+        // a0 b0 c0 d0 ...
+        // a1 b1 c1 d1 ...
+        // a2 b2 c2 d2 ...
+        // ...
+        // aN bN cN dN ...
+        //
+        // Then these field return, for example, (c0, c1, c2,... cN)
+
+        //- Return field of pair accessed from each record, used for
+        //  field IO
+        labelField pairAccessed() const;
+
+        //- Return field of pair origProcOfOther from each record,
+        //  used for field IO
+        labelField pairOrigProcOfOther() const;
+
+        //- Return field of pair origIdOfOther from each record, used
+        //  for field IO
+        labelField pairOrigIdOfOther() const;
+
+        //- Return field of pair data from each record, used for field IO
+        Field<PairType> pairData() const;
+
+        //- Return field of wall accessed from each record, used for field IO
+        labelField wallAccessed() const;
+
+        //- Return field of wall pRel from each record, used for field IO
+        vectorField wallPRel() const;
+
+        //- Return field of wall data from each record, used for field IO
+        Field<WallType> wallData() const;
 
         //- Enquires if the proc and id pair of the other particle are
         //  present in the records.  If so, return non-const access to
@@ -169,6 +224,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "CollisionRecordListI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

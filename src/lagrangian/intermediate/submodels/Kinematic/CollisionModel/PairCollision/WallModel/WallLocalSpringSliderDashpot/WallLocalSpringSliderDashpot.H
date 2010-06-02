@@ -22,50 +22,54 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::PairSpringSliderDashpot
+    Foam::WallLocalSpringSliderDashpot
 
 Description
-    Pair forces between particles colliding with a spring, slider, damper model
+    Forces between particles and walls, interacting with a spring,
+    slider, damper model
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PairSpringSliderDashpot_H
-#define PairSpringSliderDashpot_H
+#ifndef WallLocalSpringSliderDashpot_H
+#define WallLocalSpringSliderDashpot_H
 
-#include "PairModel.H"
-#include "CollisionRecordList.H"
+#include "WallModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                    Class PairSpringSliderDashpot Declaration
+                Class WallLocalSpringSliderDashpot Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class PairSpringSliderDashpot
+class WallLocalSpringSliderDashpot
 :
-    public PairModel<CloudType>
+    public WallModel<CloudType>
 {
     // Private data
 
-        //- Effective Young's modulus value, assuming both particles have
-        //  the same E value
-        scalar Estar_;
+        //- Effective Young's modulus value
+        scalarList Estar_;
 
-        //- Effective shear modulus value, assuming both particles have
-        //  the same Poisson's ratio and Young's modulus
-        scalar Gstar_;
+        //- Effective shear modulus value
+        scalarList Gstar_;
 
         //- alpha-coefficient, related to coefficient of restitution
-        scalar alpha_;
+        scalarList alpha_;
 
         //- Spring power (b = 1 for linear, b = 3/2 for Hertzian)
-        scalar b_;
+        scalarList b_;
 
         //- Coefficient of friction in for tangential sliding
-        scalar mu_;
+        scalarList mu_;
+
+        //- Mapping the patch index to the model data
+        labelList patchMap_;
+
+        //- Index of the maximum value of Estar_
+        label maxEstarIndex_;
 
         //- The number of steps over which to resolve the minimum
         //  harmonic approximation of the collision period
@@ -100,25 +104,35 @@ class PairSpringSliderDashpot
         //- allowable timestep
         void findMinMaxProperties
         (
-            scalar& RMin,
+            scalar& rMin,
             scalar& rhoMax,
             scalar& vMagMax
         ) const;
 
+        //- Calculate the wall interaction for a parcel at a given site
+        void evaluateWall
+        (
+            typename CloudType::parcelType& p,
+            const point& site,
+            const WallSiteData<vector>& data,
+            scalar pREff
+        ) const;
+
+
 public:
 
     //- Runtime type information
-    TypeName("PairSpringSliderDashpot");
+    TypeName("WallLocalSpringSliderDashpot");
 
 
     // Constructors
 
         //- Construct from dictionary
-        PairSpringSliderDashpot(const dictionary& dict, CloudType& cloud);
+        WallLocalSpringSliderDashpot(const dictionary& dict, CloudType& cloud);
 
 
     //- Destructor
-    virtual ~PairSpringSliderDashpot();
+    virtual ~WallLocalSpringSliderDashpot();
 
 
     // Member Functions
@@ -129,20 +143,26 @@ public:
             return volumeFactor_;
         }
 
-        //- Whether the PairModel has a timestep limit that will
+        //- Return the effective radius for a particle for the model
+        virtual scalar pREff(const typename CloudType::parcelType& p) const;
+
+        //- Whether the WallModel has a timestep limit that will
         //  require subCycling
         virtual bool controlsTimestep() const;
 
-        //- For PairModels that control the timestep, calculate the
+        //- For WallModels that control the timestep, calculate the
         //  number of subCycles needed to satisfy the minimum
         //  allowable timestep
         virtual label nSubCycles() const;
 
-        //- Calculate the pair interaction between parcels
-        virtual void evaluatePair
+        //- Calculate the wall interaction for a parcel
+        virtual void evaluateWall
         (
-            typename CloudType::parcelType& pA,
-            typename CloudType::parcelType& pB
+            typename CloudType::parcelType& p,
+            const List<point>& flatSitePoints,
+            const List<WallSiteData<vector> >& flatSiteData,
+            const List<point>& sharpSitePoints,
+            const List<WallSiteData<vector> >& sharpSiteData
         ) const;
 };
 
@@ -154,7 +174,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "PairSpringSliderDashpot.C"
+#   include "WallLocalSpringSliderDashpot.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,23 +21,29 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    vector2DField with IO.
-
 \*---------------------------------------------------------------------------*/
-
-#include "vector2DIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class PairType, class WallType>
+const Foam::DynamicList<Foam::PairCollisionRecord<PairType> >&
+Foam::CollisionRecordList<PairType, WallType>::pairRecords() const
 {
-    defineTemplateTypeNameAndDebugWithName
-    (
-        vector2DIOField,
-        "vector2DField",
-        0
-    );
+    return pairRecords_;
 }
+
+
+template<class PairType, class WallType>
+const Foam::DynamicList<Foam::WallCollisionRecord<WallType> >&
+Foam::CollisionRecordList<PairType, WallType>::wallRecords() const
+{
+    return wallRecords_;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 
 // ************************************************************************* //

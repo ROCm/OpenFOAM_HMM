@@ -59,6 +59,14 @@ Foam::WallModel<CloudType>::owner() const
 
 
 template<class CloudType>
+CloudType&
+Foam::WallModel<CloudType>::owner()
+{
+    return owner_;
+}
+
+
+template<class CloudType>
 const Foam::dictionary& Foam::WallModel<CloudType>::dict() const
 {
     return dict_;

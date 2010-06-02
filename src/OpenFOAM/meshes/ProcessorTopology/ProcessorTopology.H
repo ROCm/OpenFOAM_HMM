@@ -30,6 +30,9 @@ Description
 
     *this[procI] gives the list of neighbouring processors.
 
+    TODO: This does not currently correctly support multiple processor
+    patches connecting two processors.
+
 SourceFiles
     ProcessorTopology.C
 
