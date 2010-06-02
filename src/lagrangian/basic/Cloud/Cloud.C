@@ -101,13 +101,23 @@ template<class ParticleType>
 template<class TrackingData>
 void Foam::Cloud<ParticleType>::move(TrackingData& td)
 {
-    const globalMeshData& pData = polyMesh_.globalData();
-    const labelList& neighbourProcs = pData[Pstream::myProcNo()];
-    const labelList& procPatches = pData.processorPatches();
-    const labelList& procPatchIndices = pData.processorPatchIndices();
-    const labelList& procPatchNeighbours = pData.processorPatchNeighbours();
     const polyBoundaryMesh& pbm = pMesh().boundaryMesh();
+    const globalMeshData& pData = polyMesh_.globalData();
 
+    // Which patches are processor patches
+    const labelList& procPatches = pData.processorPatches();
+
+    // Indexing of patches into the procPatches list
+    const labelList& procPatchIndices = pData.processorPatchIndices();
+
+    // Indexing of equivalent patch on neighbour processor into the
+    // procPatches list on the neighbour
+    const labelList& procPatchNeighbours = pData.processorPatchNeighbours();
+
+    // Which processors this processor is connected to
+    const labelList& neighbourProcs = pData[Pstream::myProcNo()];
+
+    // Indexing from the processor number into the neighbourProcs list
     labelList neighbourProcIndices(Pstream::nProcs(), -1);
 
     forAll(neighbourProcs, i)
@@ -205,7 +215,7 @@ void Foam::Cloud<ParticleType>::move(TrackingData& td)
                 );
 
                 particleStream
-                    << labelList(patchIndexTransferLists[i])
+                    << patchIndexTransferLists[i]
                     << particleTransferLists[i];
             }
         }
