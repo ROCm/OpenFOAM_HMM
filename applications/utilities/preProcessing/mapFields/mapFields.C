@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
                 "mapFieldsDict",
                 runTimeTarget.system(),
                 runTimeTarget,
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
                 false
             )
@@ -310,7 +310,7 @@ int main(int argc, char *argv[])
                 "decomposeParDict",
                 runTimeSource.system(),
                 runTimeSource,
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE
             )
         );
@@ -375,7 +375,7 @@ int main(int argc, char *argv[])
                 "decomposeParDict",
                 runTimeTarget.system(),
                 runTimeTarget,
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE
             )
         );
@@ -446,7 +446,7 @@ int main(int argc, char *argv[])
                 "decomposeParDict",
                 runTimeSource.system(),
                 runTimeSource,
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE
             )
         );
@@ -464,7 +464,7 @@ int main(int argc, char *argv[])
                 "decomposeParDict",
                 runTimeTarget.system(),
                 runTimeTarget,
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE
             )
         );

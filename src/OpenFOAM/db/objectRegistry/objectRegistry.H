@@ -173,7 +173,6 @@ public:
             //- Remove an regIOobject from registry
             bool checkOut(regIOobject&) const;
 
-
         // Reading
 
             //- Return true if any of the object's files have been modified

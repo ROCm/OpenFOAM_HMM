@@ -51,6 +51,7 @@ SourceFiles
 #include "typeInfo.H"
 #include "dlLibraryTable.H"
 #include "functionObjectList.H"
+#include "fileMonitor.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,6 +71,9 @@ class Time
     public TimeState
 {
     // Private data
+
+        //- file-change monitor for all registered files
+        mutable fileMonitor monitor_;
 
         //- The controlDict
         IOdictionary controlDict_;
@@ -275,11 +279,35 @@ public:
                 return graphFormat_;
             }
 
+            //- Supports re-reading
+            const Switch& runTimeModifiable() const
+            {
+                return runTimeModifiable_;
+            }
+
             //- Read control dictionary, update controls and time
             virtual bool read();
 
-            //- Read the objects that have been modified
-            void readModifiedObjects();
+            // Automatic rereading
+
+                //- Read the objects that have been modified
+                void readModifiedObjects();
+
+                //- Add watching of a file. Returns handle
+                label addWatch(const fileName&) const;
+
+                //- Remove watch on a file (using handle)
+                bool removeWatch(const label) const;
+
+                //- Get name of file being watched (using handle)
+                const fileName& getFile(const label) const;
+
+                //- Get current state of file (using handle)
+                fileMonitor::fileState getState(const label) const;
+
+                //- Set current state of file (using handle) to unmodified
+                void setUnmodified(const label) const;
+
 
             //- Return the location of "dir" containing the file "name".
             //  (eg, used in reading mesh data)

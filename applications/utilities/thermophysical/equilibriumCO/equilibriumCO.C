@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
             "BurcatCpData",
             runTime.constant(),
             runTime,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
             false
         )

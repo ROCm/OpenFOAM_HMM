@@ -126,7 +126,11 @@ Foam::word Foam::Time::findInstance
                     << endl;
             }
 
-            if (rOpt == IOobject::MUST_READ)
+            if
+            (
+                rOpt == IOobject::MUST_READ
+             || rOpt == IOobject::MUST_READ_IF_MODIFIED
+            )
             {
                 FatalErrorIn
                 (
@@ -174,7 +178,7 @@ Foam::word Foam::Time::findInstance
         return constant();
     }
 
-    if (rOpt == IOobject::MUST_READ)
+    if (rOpt == IOobject::MUST_READ || rOpt == IOobject::MUST_READ_IF_MODIFIED)
     {
         FatalErrorIn
         (
