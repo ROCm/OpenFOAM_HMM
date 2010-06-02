@@ -131,7 +131,7 @@ public:
 
     // Member Functions
 
-        // Phisical constants which define the solid
+        // Physical constants which define the solid
 
             //- Density [kg/m3]
             inline scalar rho() const;
