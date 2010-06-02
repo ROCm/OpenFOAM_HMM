@@ -152,6 +152,13 @@ public:
             }
 
 
+            //- Return field name
+            const word& fieldName() const
+            {
+                return fieldName_;
+            }
+
+
             //- Return initial residual
             scalar initialResidual() const
             {
