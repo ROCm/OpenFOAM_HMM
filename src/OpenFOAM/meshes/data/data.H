@@ -47,13 +47,19 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class data Declaration
+                            Class data Declaration
 \*---------------------------------------------------------------------------*/
 
 class data
 :
     public IOdictionary
 {
+    // Private data
+
+        //- Previously used time-index, used for reset between iterations
+        mutable label prevTimeIndex_;
+
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
