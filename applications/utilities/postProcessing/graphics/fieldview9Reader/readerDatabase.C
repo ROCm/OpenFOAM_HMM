@@ -260,7 +260,7 @@ void Foam::readerDatabase::loadMesh()
     meshPtr_ = new fvMeshSubset
     (
         *runTimePtr_,
-        IOobject::MUST_READ_IF_MODIFIED,
+        IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     );
 
