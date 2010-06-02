@@ -223,6 +223,10 @@ public:
             //- Print summary of solver performance
             void print() const;
 
+        // Member Operators
+
+            bool operator!=(const solverPerformance&) const;
+
 
         // Friend functions
 
@@ -236,6 +240,7 @@ public:
 
         // Ostream Operator
 
+            friend Istream& operator>>(Istream&, solverPerformance&);
             friend Ostream& operator<<(Ostream&, const solverPerformance&);
     };
 
