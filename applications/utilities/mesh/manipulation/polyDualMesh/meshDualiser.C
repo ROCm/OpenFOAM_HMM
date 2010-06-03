@@ -881,9 +881,6 @@ Foam::meshDualiser::meshDualiser(const polyMesh& mesh)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::meshDualiser::setRefinement
@@ -1467,16 +1464,6 @@ void Foam::meshDualiser::setRefinement
         dumpPolyTopoChange(meshMod, "generatedFacesFromBndFaces_");
     }
 }
-
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

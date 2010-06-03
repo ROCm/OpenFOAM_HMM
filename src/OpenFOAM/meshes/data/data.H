@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,13 +47,19 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class data Declaration
+                            Class data Declaration
 \*---------------------------------------------------------------------------*/
 
 class data
 :
     public IOdictionary
 {
+    // Private data
+
+        //- Previously used time-index, used for reset between iterations
+        mutable label prevTimeIndex_;
+
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -88,6 +94,12 @@ public:
             void setSolverPerformance
             (
                 const word& name,
+                const lduMatrix::solverPerformance&
+            ) const;
+
+            //- Add/set the solverPerformance entry, using its fieldName
+            void setSolverPerformance
+            (
                 const lduMatrix::solverPerformance&
             ) const;
 };

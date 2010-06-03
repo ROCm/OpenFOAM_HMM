@@ -44,10 +44,7 @@ Foam::layeredEngineMesh::layeredEngineMesh(const IOobject& io)
     engineMesh(io),
     pistonLayers_("pistonLayers", dimLength, 0.0)
 {
-    if (engineDB_.engineDict().found("pistonLayers"))
-    {
-        engineDB_.engineDict().lookup("pistonLayers") >> pistonLayers_;
-    }
+    engineDB_.engineDict().readIfPresent("pistonLayers", pistonLayers_);
 }
 
 

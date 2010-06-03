@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "swirlMassFlowRateInletVelocityFvPatchVectorField.H"
+#include "swirlFlowRateInletVelocityFvPatchVectorField.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
@@ -33,8 +33,8 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::
-swirlMassFlowRateInletVelocityFvPatchVectorField::
-swirlMassFlowRateInletVelocityFvPatchVectorField
+swirlFlowRateInletVelocityFvPatchVectorField::
+swirlFlowRateInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF
@@ -49,10 +49,10 @@ swirlMassFlowRateInletVelocityFvPatchVectorField
 
 
 Foam::
-swirlMassFlowRateInletVelocityFvPatchVectorField::
-swirlMassFlowRateInletVelocityFvPatchVectorField
+swirlFlowRateInletVelocityFvPatchVectorField::
+swirlFlowRateInletVelocityFvPatchVectorField
 (
-    const swirlMassFlowRateInletVelocityFvPatchVectorField& ptf,
+    const swirlFlowRateInletVelocityFvPatchVectorField& ptf,
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -66,8 +66,8 @@ swirlMassFlowRateInletVelocityFvPatchVectorField
 
 
 Foam::
-swirlMassFlowRateInletVelocityFvPatchVectorField::
-swirlMassFlowRateInletVelocityFvPatchVectorField
+swirlFlowRateInletVelocityFvPatchVectorField::
+swirlFlowRateInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
@@ -83,10 +83,10 @@ swirlMassFlowRateInletVelocityFvPatchVectorField
 
 
 Foam::
-swirlMassFlowRateInletVelocityFvPatchVectorField::
-swirlMassFlowRateInletVelocityFvPatchVectorField
+swirlFlowRateInletVelocityFvPatchVectorField::
+swirlFlowRateInletVelocityFvPatchVectorField
 (
-    const swirlMassFlowRateInletVelocityFvPatchVectorField& ptf
+    const swirlFlowRateInletVelocityFvPatchVectorField& ptf
 )
 :
     fixedValueFvPatchField<vector>(ptf),
@@ -98,10 +98,10 @@ swirlMassFlowRateInletVelocityFvPatchVectorField
 
 
 Foam::
-swirlMassFlowRateInletVelocityFvPatchVectorField::
-swirlMassFlowRateInletVelocityFvPatchVectorField
+swirlFlowRateInletVelocityFvPatchVectorField::
+swirlFlowRateInletVelocityFvPatchVectorField
 (
-    const swirlMassFlowRateInletVelocityFvPatchVectorField& ptf,
+    const swirlFlowRateInletVelocityFvPatchVectorField& ptf,
     const DimensionedField<vector, volMesh>& iF
 )
 :
@@ -115,25 +115,28 @@ swirlMassFlowRateInletVelocityFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::swirlMassFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
+void Foam::swirlFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
 {
     if (updated())
     {
         return;
     }
 
-    scalar totArea   = gSum(patch().magSf());
+    const scalar totArea   = gSum(patch().magSf());
     // a simpler way of doing this would be nice
-    scalar avgU = -flowRate_/totArea;
+    const scalar avgU = -flowRate_/totArea;
 
-    vector center = gSum(patch().Cf()*patch().magSf())/totArea;
-    vector normal = gSum(patch().nf()*patch().magSf())/totArea;
+    const vector avgCenter = gSum(patch().Cf()*patch().magSf())/totArea;
+    const vector avgNormal = gSum(patch().Sf())/totArea;
 
-    vectorField tangVelo =
+    // Update angular velocity - convert [rpm] to [rad/s]
+    vectorField tangentialVelocity =
+    (
         (rpm_*constant::mathematical::pi/30.0)
-       *(patch().Cf() - center) ^ normal;
+      * (patch().Cf() - avgCenter) ^ avgNormal
+    );
 
-    vectorField n = patch().nf();
+    tmp<vectorField> n = patch().nf();
 
     const surfaceScalarField& phi =
         db().lookupObject<surfaceScalarField>(phiName_);
@@ -141,7 +144,7 @@ void Foam::swirlMassFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
     if (phi.dimensions() == dimVelocity*dimArea)
     {
         // volumetric flow-rate
-        operator==(tangVelo + n*avgU);
+        operator==(tangentialVelocity + n*avgU);
     }
     else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
     {
@@ -149,13 +152,13 @@ void Foam::swirlMassFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
             patch().lookupPatchField<volScalarField, scalar>(rhoName_);
 
         // mass flow-rate
-        operator==(tangVelo + n*avgU/rhop);
+        operator==(tangentialVelocity + n*avgU/rhop);
     }
     else
     {
         FatalErrorIn
         (
-            "swirlMassFlowRateInletVelocityFvPatchVectorField::updateCoeffs()"
+            "swirlFlowRateInletVelocityFvPatchVectorField::updateCoeffs()"
         )   << "dimensions of " << phiName_ << " are incorrect" << nl
             << "    on patch " << this->patch().name()
             << " of field " << this->dimensionedInternalField().name()
@@ -167,18 +170,15 @@ void Foam::swirlMassFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
 }
 
 
-void Foam::swirlMassFlowRateInletVelocityFvPatchVectorField::write(Ostream& os) const
+void Foam::swirlFlowRateInletVelocityFvPatchVectorField::write
+(
+    Ostream& os
+) const
 {
     fvPatchField<vector>::write(os);
     os.writeKeyword("flowRate") << flowRate_ << token::END_STATEMENT << nl;
-    if (phiName_ != "phi")
-    {
-        os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
-    }
-    if (rhoName_ != "rho")
-    {
-        os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
-    }
+    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
+    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
     os.writeKeyword("rpm") << rpm_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
@@ -191,7 +191,7 @@ namespace Foam
    makePatchTypeField
    (
        fvPatchVectorField,
-       swirlMassFlowRateInletVelocityFvPatchVectorField
+       swirlFlowRateInletVelocityFvPatchVectorField
    );
 }
 

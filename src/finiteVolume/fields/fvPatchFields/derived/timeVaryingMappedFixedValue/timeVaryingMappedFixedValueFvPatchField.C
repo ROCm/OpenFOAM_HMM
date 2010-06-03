@@ -112,10 +112,7 @@ timeVaryingMappedFixedValueFvPatchField
     endSampledValues_(0),
     endAverage_(pTraits<Type>::zero)
 {
-    if (dict.found("fieldTableName"))
-    {
-        dict.lookup("fieldTableName") >> fieldTableName_;
-    }
+    dict.readIfPresent("fieldTableName", fieldTableName_);
 
     if (dict.found("value"))
     {

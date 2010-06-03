@@ -26,13 +26,46 @@
 #     wmakeFilesAndOptions
 #
 # Description
-#     Script to scan the current directory for directories and source files
+#     Scan current directory for directories and source files
 #     and construct Make/files and Make/options
 #
 #     Usage : wmakeFilesAndOptions
 #
 #------------------------------------------------------------------------------
 Script=${0##*/}
+
+usage() {
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
+
+usage: ${0##*/}
+
+    Scan current directory for directories and source files
+    and construct 'Make/files' and 'Make/options'
+
+USAGE
+    exit 1
+}
+
+
+# simple parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)   # provide immediate help
+        usage
+        ;;
+    -*)
+        usage "unknown option: '$*'"
+        ;;
+    *)
+        break
+        ;;
+    esac
+done
+
+# no arguments
+[ "$#" -eq 0 ] || usage "unexpected arguments: '$*'"
 
 #
 # check environment variables

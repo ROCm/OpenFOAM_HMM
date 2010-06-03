@@ -175,10 +175,8 @@
     );
 
     word dragPhase("blended");
-    if (interfacialProperties.found("dragPhase"))
+    if (interfacialProperties.readIfPresent("dragPhase", dragPhase))
     {
-        dragPhase = word(interfacialProperties.lookup("dragPhase"));
-
         bool validDrag =
             dragPhase == "a" || dragPhase == "b" || dragPhase == "blended";
 

@@ -37,8 +37,9 @@ usage() {
 
 Usage: ${0##*/} [OPTIONS] file1 [.. fileN]
 options:
-  -html   create html (default)
-  -latex  create LaTeX
+  -html      create html (default)
+  -latex     create LaTeX
+  -pdflatex  create pdf via pdflatex
 
 * Batch process emacs org-mode files to create html/LaTeX etc.
 
@@ -49,8 +50,14 @@ USAGE
 
 # default is html export:
 mode=html
+unset makePDF
 
+echo "have $Script"
 case $Script in
+*pdflatex)
+    mode=latex
+    makePDF=pdflatex
+    ;;
 *latex)
     mode=latex
     ;;
@@ -58,7 +65,6 @@ case $Script in
     mode=html
     ;;
 esac
-
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -73,6 +79,11 @@ do
         ;;
     -latex)
         mode=latex
+        shift
+        ;;
+    -pdflatex)
+        mode=latex
+        makePDF=pdflatex
         shift
         ;;
     -*)
@@ -98,6 +109,21 @@ do
     then
         emacs --batch -l org --visit=$org \
               --funcall org-export-as-$mode-batch
+
+        # post-processing step to create pdf
+        case "$makePDF" in
+        pdflatex)
+            input="${org%.org}.tex"
+
+            if [ -f "$input" ]
+            then
+                pdflatex "$input"
+            else
+                echo "No $input to convert to pdf"
+            fi
+            ;;
+        esac
+
     else
         echo "File not found"
     fi

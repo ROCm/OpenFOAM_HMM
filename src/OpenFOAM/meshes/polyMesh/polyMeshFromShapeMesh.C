@@ -856,7 +856,7 @@ Foam::polyMesh::polyMesh
 
     // Warning: Patches can only be added once the face list is
     // completed, as they hold a subList of the face list
-    forAll (boundaryFaces, patchI)
+    forAll(boundaryFaces, patchI)
     {
         dictionary patchDict(boundaryDicts[patchI]);
 
