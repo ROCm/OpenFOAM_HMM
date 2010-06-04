@@ -17,7 +17,7 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains  4;
+numberOfSubdomains  8;
 
 
 //- Keep owner and neighbour on same processor for faces in zones:
@@ -29,28 +29,32 @@ numberOfSubdomains  4;
 //preservePatches (cyclic_half0 cyclic_half1);
 
 
-// method          scotch;
+method          scotch;
 // method          hierarchical;
 // method          simple;
 // method          metis;
 // method          manual;
-method          multiLevel;
+// method          multiLevel;
 
 multiLevelCoeffs
 {
+    // Decomposition methods to apply in turn. This is like hierarchical but
+    // fully general - every method can be used at every level.
+
     level0
     {
         numberOfSubdomains  2;
-        method simple;
-        simpleCoeffs
-        {
-            n           (2 1 1);
-            delta       0.001;
-        }
+        //method simple;
+        //simpleCoeffs
+        //{
+        //    n           (2 1 1);
+        //    delta       0.001;
+        //}
+        method scotch;
     }
     level1
     {
-        numberOfSubdomains  2;
+        numberOfSubdomains  4;
         method scotch;
     }
 }
