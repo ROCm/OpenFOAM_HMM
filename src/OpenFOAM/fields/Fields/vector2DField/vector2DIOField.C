@@ -32,7 +32,12 @@ Description
 
 namespace Foam
 {
-    defineTemplateTypeNameAndDebugWithName(vector2DIOField, "vector2DField", 0);
+    defineTemplateTypeNameAndDebugWithName
+    (
+        vector2DIOField,
+        "vector2DField",
+        0
+    );
 }
 
 // ************************************************************************* //

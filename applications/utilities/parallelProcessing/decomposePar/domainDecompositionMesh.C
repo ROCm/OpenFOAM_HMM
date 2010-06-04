@@ -130,7 +130,7 @@ void Foam::domainDecomposition::decomposeMesh()
     procFaceAddressing_.setSize(nProcs_);
 
     // Internal faces
-    forAll (neighbour, facei)
+    forAll(neighbour, facei)
     {
         if (cellToProc_[owner[facei]] == cellToProc_[neighbour[facei]])
         {
@@ -141,16 +141,16 @@ void Foam::domainDecomposition::decomposeMesh()
 
     // for all processors, set the size of start index and patch size
     // lists to the number of patches in the mesh
-    forAll (procPatchSize_, procI)
+    forAll(procPatchSize_, procI)
     {
         procPatchSize_[procI].setSize(patches.size());
         procPatchStartIndex_[procI].setSize(patches.size());
     }
 
-    forAll (patches, patchi)
+    forAll(patches, patchi)
     {
         // Reset size and start index for all processors
-        forAll (procPatchSize_, procI)
+        forAll(procPatchSize_, procI)
         {
             procPatchSize_[procI][patchi] = 0;
             procPatchStartIndex_[procI][patchi] =
@@ -167,7 +167,7 @@ void Foam::domainDecomposition::decomposeMesh()
             const unallocLabelList& patchFaceCells =
                 patches[patchi].faceCells();
 
-            forAll (patchFaceCells, facei)
+            forAll(patchFaceCells, facei)
             {
                 const label curProc = cellToProc_[patchFaceCells[facei]];
 
@@ -190,7 +190,7 @@ void Foam::domainDecomposition::decomposeMesh()
             const unallocLabelList& nbrPatchFaceCells =
                 pp.neighbPatch().faceCells();
 
-            forAll (patchFaceCells, facei)
+            forAll(patchFaceCells, facei)
             {
                 const label curProc = cellToProc_[patchFaceCells[facei]];
                 const label nbrProc = cellToProc_[nbrPatchFaceCells[facei]];
@@ -216,7 +216,7 @@ void Foam::domainDecomposition::decomposeMesh()
     List<DynamicList<DynamicList<label> > > interPatchFaces(nProcs_);
 
     // Processor boundaries from internal faces
-    forAll (neighbour, facei)
+    forAll(neighbour, facei)
     {
         label ownerProc = cellToProc_[owner[facei]];
         label nbrProc = cellToProc_[neighbour[facei]];
@@ -249,7 +249,7 @@ void Foam::domainDecomposition::decomposeMesh()
     }
 
     // Processor boundaries from split cyclics
-    forAll (patches, patchi)
+    forAll(patches, patchi)
     {
         if (isA<cyclicPolyPatch>(patches[patchi]))
         {
@@ -279,7 +279,7 @@ void Foam::domainDecomposition::decomposeMesh()
             }
 
             // Add faces with different owner and neighbour processors
-            forAll (patchFaceCells, facei)
+            forAll(patchFaceCells, facei)
             {
                 const label ownerProc = cellToProc_[patchFaceCells[facei]];
                 const label nbrProc = cellToProc_[nbrPatchFaceCells[facei]];

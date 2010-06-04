@@ -63,7 +63,6 @@ PISO
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;
     momentumPredictor yes;
-    fluxGradp       no;
 }
 
 relaxationFactors

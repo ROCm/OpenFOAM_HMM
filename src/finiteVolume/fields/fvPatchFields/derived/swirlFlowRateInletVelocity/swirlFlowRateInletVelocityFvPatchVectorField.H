@@ -22,11 +22,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::swirlMassFlowRateInletVelocityFvPatchVectorField
+    Foam::swirlFlowRateInletVelocityFvPatchVectorField
 
 Description
     Describes a volumetric/mass flow normal vector boundary condition by its
-    magnitude as an integral over its area with a swirl component determined
+    magnitude as an integral over its area, with a swirl component determined
     by the RPM
 
     The basis of the patch (volumetric or mass) is determined by the
@@ -38,22 +38,30 @@ Description
     @verbatim
     inlet
     {
-        type            swirlMassFlowRateInletVelocity;
-        flowRate        0.2;        // Volumetric/mass flow rate [m3/s or kg/s]
-        rpm             100;
+        type        swirlFlowRateInletVelocity;
+        flowRate    0.2;        // Volumetric/mass flow rate [m3/s or kg/s]
+        rpm         100;
+        value       uniform (0 0 0); // placeholder
     }
     @endverbatim
 
 Note
     - The value is positive inwards
+    - May not work correctly for transonic inlets
+    - Swirl is defined in RPM about the patch centre-axis according
+      to a right-hand rule (inwards axis).
+    - Primarily useful for planar patches.
+
+See Also
+    Foam::flowRateInletVelocityFvPatchVectorField
 
 SourceFiles
-    swirlMassFlowRateInletVelocityFvPatchVectorField.C
+    swirlFlowRateInletVelocityFvPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef swirlMassFlowRateInletVelocityFvPatchVectorField_H
-#define swirlMassFlowRateInletVelocityFvPatchVectorField_H
+#ifndef swirlFlowRateInletVelocityFvPatchVectorField_H
+#define swirlFlowRateInletVelocityFvPatchVectorField_H
 
 #include "fixedValueFvPatchFields.H"
 
@@ -62,10 +70,10 @@ SourceFiles
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-      Class swirlMassFlowRateInletVelocityFvPatchVectorField Declaration
+        Class swirlFlowRateInletVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
-class swirlMassFlowRateInletVelocityFvPatchVectorField
+class swirlFlowRateInletVelocityFvPatchVectorField
 :
     public fixedValueFvPatchVectorField
 {
@@ -80,27 +88,27 @@ class swirlMassFlowRateInletVelocityFvPatchVectorField
         //- Name of the density field used to normalize the mass flux
         word rhoName_;
 
-        //- RPM
+        //- Swirl rate [rpm]
         scalar rpm_;
 
 
 public:
 
    //- Runtime type information
-   TypeName("swirlMassFlowRateInletVelocity");
+   TypeName("swirlFlowRateInletVelocity");
 
 
    // Constructors
 
         //- Construct from patch and internal field
-        swirlMassFlowRateInletVelocityFvPatchVectorField
+        swirlFlowRateInletVelocityFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        swirlMassFlowRateInletVelocityFvPatchVectorField
+        swirlFlowRateInletVelocityFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
@@ -110,18 +118,18 @@ public:
         //- Construct by mapping given
         //  flowRateInletVelocityFvPatchVectorField
         //  onto a new patch
-        swirlMassFlowRateInletVelocityFvPatchVectorField
+        swirlFlowRateInletVelocityFvPatchVectorField
         (
-            const swirlMassFlowRateInletVelocityFvPatchVectorField&,
+            const swirlFlowRateInletVelocityFvPatchVectorField&,
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        swirlMassFlowRateInletVelocityFvPatchVectorField
+        swirlFlowRateInletVelocityFvPatchVectorField
         (
-            const swirlMassFlowRateInletVelocityFvPatchVectorField&
+            const swirlFlowRateInletVelocityFvPatchVectorField&
         );
 
         //- Construct and return a clone
@@ -129,14 +137,14 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new swirlMassFlowRateInletVelocityFvPatchVectorField(*this)
+                new swirlFlowRateInletVelocityFvPatchVectorField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        swirlMassFlowRateInletVelocityFvPatchVectorField
+        swirlFlowRateInletVelocityFvPatchVectorField
         (
-            const swirlMassFlowRateInletVelocityFvPatchVectorField&,
+            const swirlFlowRateInletVelocityFvPatchVectorField&,
             const DimensionedField<vector, volMesh>&
         );
 
@@ -148,7 +156,7 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new swirlMassFlowRateInletVelocityFvPatchVectorField(*this, iF)
+                new swirlFlowRateInletVelocityFvPatchVectorField(*this, iF)
             );
         }
 
@@ -167,6 +175,18 @@ public:
             scalar& flowRate()
             {
                 return flowRate_;
+            }
+
+            //- Return the swirl rpm
+            scalar rpm() const
+            {
+                return rpm_;
+            }
+
+            //- Return reference to the swirl rpm to allow adjustment
+            scalar& rpm()
+            {
+                return rpm_;
             }
 
 

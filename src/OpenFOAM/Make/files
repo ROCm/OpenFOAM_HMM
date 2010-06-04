@@ -497,10 +497,15 @@ $(Fields)/scalarField/scalarFieldIOField.C
 $(Fields)/vectorField/vectorIOField.C
 $(Fields)/vectorField/vectorFieldIOField.C
 $(Fields)/vector2DField/vector2DIOField.C
+$(Fields)/vector2DField/vector2DFieldIOField.C
 $(Fields)/sphericalTensorField/sphericalTensorIOField.C
+$(Fields)/sphericalTensorField/sphericalTensorFieldIOField.C
 $(Fields)/diagTensorField/diagTensorIOField.C
+$(Fields)/diagTensorField/diagTensorFieldIOField.C
 $(Fields)/symmTensorField/symmTensorIOField.C
+$(Fields)/symmTensorField/symmTensorFieldIOField.C
 $(Fields)/tensorField/tensorIOField.C
+$(Fields)/tensorField/tensorFieldIOField.C
 $(Fields)/transformField/transformField.C
 
 pointPatchFields = fields/pointPatchFields

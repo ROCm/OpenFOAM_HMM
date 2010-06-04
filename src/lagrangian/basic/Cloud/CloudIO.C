@@ -206,6 +206,31 @@ void Foam::Cloud<ParticleType>::checkFieldIOobject
 
 
 template<class ParticleType>
+template<class DataType>
+void Foam::Cloud<ParticleType>::checkFieldFieldIOobject
+(
+    const Cloud<ParticleType>& c,
+    const IOFieldField<Field<DataType>, DataType>& data
+) const
+{
+    if (data.size() != c.size())
+    {
+        FatalErrorIn
+        (
+            "void Cloud<ParticleType>::checkFieldFieldIOobject"
+            "("
+                "const Cloud<ParticleType>&, "
+                "const IOFieldField<Field<DataType>, DataType>&"
+            ") const"
+        )   << "Size of " << data.name()
+            << " field " << data.size()
+            << " does not match the number of particles " << c.size()
+            << abort(FatalError);
+    }
+}
+
+
+template<class ParticleType>
 void Foam::Cloud<ParticleType>::readFields()
 {}
 

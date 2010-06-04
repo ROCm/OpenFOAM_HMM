@@ -25,6 +25,7 @@ License
 
 #include "basicKinematicParcel.H"
 #include "KinematicCloud.H"
+#include "KinematicParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

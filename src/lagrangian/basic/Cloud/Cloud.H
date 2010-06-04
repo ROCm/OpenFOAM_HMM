@@ -38,6 +38,7 @@ SourceFiles
 #include "cloud.H"
 #include "IDLList.H"
 #include "IOField.H"
+#include "IOFieldField.H"
 #include "polyMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -265,6 +266,14 @@ public:
             (
                 const Cloud<ParticleType>& c,
                 const IOField<DataType>& data
+            ) const;
+
+            //- Check lagrangian data fieldfield
+            template<class DataType>
+            void checkFieldFieldIOobject
+            (
+                const Cloud<ParticleType>& c,
+                const IOFieldField<Field<DataType>, DataType>& data
             ) const;
 
             //- Read the field data for the cloud of particles. Dummy at

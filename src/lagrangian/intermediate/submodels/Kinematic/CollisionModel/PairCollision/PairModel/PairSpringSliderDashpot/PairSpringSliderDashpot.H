@@ -58,9 +58,6 @@ class PairSpringSliderDashpot
         //  the same Poisson's ratio and Young's modulus
         scalar Gstar_;
 
-        //- Poisson's ratio of both particles
-        scalar sigma_;
-
         //- alpha-coefficient, related to coefficient of restitution
         scalar alpha_;
 
@@ -91,6 +88,10 @@ class PairSpringSliderDashpot
         // packing, i.e pi/(3*sqrt(2)) is the maximum close packing
         // factor
         scalar volumeFactor_;
+
+        //- Switch to control use of equivalent size particles.  Used
+        //  because the calculation can be very expensive.
+        bool useEquivalentSize_;
 
 
     // Private Member Functions

@@ -76,7 +76,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
 
     label nCoarseFaces = 0;
 
-    forAll (localRestrictAddressing, ffi)
+    forAll(localRestrictAddressing, ffi)
     {
         label curMaster = -1;
         label curSlave = -1;
@@ -164,7 +164,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
     if (owner())
     {
         // On master side, the owner addressing is stored in table of contents
-        forAll (contents, masterI)
+        forAll(contents, masterI)
         {
             SLList<label>& curNbrs = neighboursTable.find(contents[masterI])();
 
@@ -200,7 +200,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
     else
     {
         // On slave side, the owner addressing is stored in linked lists
-        forAll (contents, masterI)
+        forAll(contents, masterI)
         {
             SLList<label>& curNbrs = neighboursTable.find(contents[masterI])();
 

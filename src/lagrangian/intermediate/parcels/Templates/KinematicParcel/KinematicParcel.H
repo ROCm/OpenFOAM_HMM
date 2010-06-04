@@ -33,7 +33,7 @@ Description
     - drag
     - turbulent dispersion
     - wall interactions
-    - many-body collisions
+    - many-body collisions, including memory of data from previous collision
 
 SourceFiles
     KinematicParcelI.H
@@ -53,11 +53,17 @@ SourceFiles
 
 #include "KinematicCloud.H"
 #include "CollisionRecordList.H"
+#include "labelFieldIOField.H"
+#include "vectorFieldIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+typedef CollisionRecordList<vector, vector> collisionRecordList;
+typedef vectorIOFieldField pairDataIOFieldField;
+typedef vectorIOFieldField wallDataIOFieldField;
 
 template<class ParcelType>
 class KinematicParcel;
@@ -268,7 +274,7 @@ protected:
             vector UTurb_;
 
             //- Particle collision records
-            CollisionRecordList<vector, vector> collisionRecords_;
+            collisionRecordList collisionRecords_;
 
 
         // Cell-based quantities
@@ -400,8 +406,7 @@ public:
             inline const vector& UTurb() const;
 
             //- Return const access to the collision records
-            inline const CollisionRecordList<vector, vector>&
-            collisionRecords() const;
+            inline const collisionRecordList& collisionRecords() const;
 
 
         // Edit
@@ -440,7 +445,7 @@ public:
             inline vector& UTurb();
 
             //- Return access to collision records
-            inline CollisionRecordList<vector, vector>& collisionRecords();
+            inline collisionRecordList& collisionRecords();
 
 
         // Helper functions

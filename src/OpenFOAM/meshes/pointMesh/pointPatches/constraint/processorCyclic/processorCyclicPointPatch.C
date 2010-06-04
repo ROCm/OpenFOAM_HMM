@@ -69,7 +69,7 @@ addToRunTimeSelectionTable
 //
 //        faceList masterFaces(pp.size());
 //
-//        forAll (pp, faceI)
+//        forAll(pp, faceI)
 //        {
 //            masterFaces[faceI] = pp[faceI].reverseFace();
 //        }
@@ -119,13 +119,13 @@ addToRunTimeSelectionTable
 //
 //        label noFiltPoints = 0;
 //
-//        forAll (meshPoints_, pointI)
+//        forAll(meshPoints_, pointI)
 //        {
 //            label curP = meshPoints_[pointI];
 //
 //            bool found = false;
 //
-//            forAll (sharedPoints, sharedI)
+//            forAll(sharedPoints, sharedI)
 //            {
 //                if (sharedPoints[sharedI] == curP)
 //                {
@@ -165,7 +165,7 @@ addToRunTimeSelectionTable
 //    // Create a HashSet of the point labels for this patch
 //    Map<label> patchPointSet(2*ppmp.size());
 //
-//    forAll (ppmp, ppi)
+//    forAll(ppmp, ppi)
 //    {
 //        patchPointSet.insert(ppmp[ppi], ppi);
 //    }
@@ -296,7 +296,7 @@ addToRunTimeSelectionTable
 //            // Create a HashSet of the point labels for the patch
 //            Map<label> patchPointSet(2*fmp.size());
 //
-//            forAll (fmp, ppi)
+//            forAll(fmp, ppi)
 //            {
 //                patchPointSet.insert(fmp[ppi], ppi);
 //            }

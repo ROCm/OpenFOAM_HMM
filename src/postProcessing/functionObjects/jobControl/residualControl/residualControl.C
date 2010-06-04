@@ -47,8 +47,12 @@ bool Foam::residualControl::checkCriteria(const bool verbose) const
 
         if (maxResiduals_.readIfPresent(variableName, maxResidual))
         {
+            // use the residual from the first solution
             const scalar eqnResidual =
-                lduMatrix::solverPerformance(iter().stream()).initialResidual();
+                List<lduMatrix::solverPerformance>
+                (
+                    iter().stream()
+                ).first().initialResidual();
 
             achieved = achieved && (eqnResidual < maxResidual);
 

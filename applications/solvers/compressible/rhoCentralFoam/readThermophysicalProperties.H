@@ -14,9 +14,13 @@ IOdictionary thermophysicalProperties
     )
 );
 
-dimensionedScalar Pr = dimensionedScalar("Pr", dimless, 1.0);
+dimensionedScalar Pr
+(
+    dimensionedScalar::lookupOrDefault
+    (
+        "Pr",
+        thermophysicalProperties,
+        1.0
+    )
+);
 
-if (thermophysicalProperties.found("Pr"))
-{
-    Pr = thermophysicalProperties.lookup("Pr");
-}

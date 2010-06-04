@@ -25,7 +25,6 @@ License
 
 #include "EulerCoordinateRotation.H"
 
-#include "Switch.H"
 #include "mathematicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -137,7 +136,7 @@ Foam::EulerCoordinateRotation::EulerCoordinateRotation
         rotation.component(vector::X),
         rotation.component(vector::Y),
         rotation.component(vector::Z),
-        dict.lookupOrDefault<Switch>("degrees", true)
+        dict.lookupOrDefault("degrees", true)
     );
 }
 

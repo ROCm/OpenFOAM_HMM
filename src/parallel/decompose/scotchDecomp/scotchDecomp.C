@@ -22,8 +22,8 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
     From scotch forum:
- 	
-    By: Francois PELLEGRINI RE: Graph mapping 'strategy' string [ reply ]  
+
+    By: Francois PELLEGRINI RE: Graph mapping 'strategy' string [ reply ]
     2008-08-22 10:09 Strategy handling in Scotch is a bit tricky. In order
     not to be confused, you must have a clear view of how they are built.
     Here are some rules:
@@ -179,40 +179,35 @@ Foam::label Foam::scotchDecomp::decompose
         const dictionary& scotchCoeffs =
             decompositionDict_.subDict("scotchCoeffs");
 
-        if (scotchCoeffs.found("writeGraph"))
+        if (scotchCoeffs.lookupOrDefault("writeGraph", false))
         {
-            Switch writeGraph(scotchCoeffs.lookup("writeGraph"));
+            OFstream str(meshPath + ".grf");
 
-            if (writeGraph)
+            Info<< "Dumping Scotch graph file to " << str.name() << endl
+                << "Use this in combination with gpart." << endl;
+
+            label version = 0;
+            str << version << nl;
+            // Numer of vertices
+            str << xadj.size()-1 << ' ' << adjncy.size() << nl;
+            // Numbering starts from 0
+            label baseval = 0;
+            // Has weights?
+            label hasEdgeWeights = 0;
+            label hasVertexWeights = 0;
+            label numericflag = 10*hasEdgeWeights+hasVertexWeights;
+            str << baseval << ' ' << numericflag << nl;
+            for (label cellI = 0; cellI < xadj.size()-1; cellI++)
             {
-                OFstream str(meshPath + ".grf");
+                label start = xadj[cellI];
+                label end = xadj[cellI+1];
+                str << end-start;
 
-                Info<< "Dumping Scotch graph file to " << str.name() << endl
-                    << "Use this in combination with gpart." << endl;
-
-                label version = 0;
-                str << version << nl;
-                // Numer of vertices
-                str << xadj.size()-1 << ' ' << adjncy.size() << nl;
-                // Numbering starts from 0
-                label baseval = 0;
-                // Has weights?
-                label hasEdgeWeights = 0;
-                label hasVertexWeights = 0;
-                label numericflag = 10*hasEdgeWeights+hasVertexWeights;
-                str << baseval << ' ' << numericflag << nl;
-                for (label cellI = 0; cellI < xadj.size()-1; cellI++)
+                for (label i = start; i < end; i++)
                 {
-                    label start = xadj[cellI];
-                    label end = xadj[cellI+1];
-                    str << end-start;
-
-                    for (label i = start; i < end; i++)
-                    {
-                        str << ' ' << adjncy[i];
-                    }
-                    str << nl;
+                    str << ' ' << adjncy[i];
                 }
+                str << nl;
             }
         }
     }
@@ -229,7 +224,6 @@ Foam::label Foam::scotchDecomp::decompose
     {
         const dictionary& scotchCoeffs =
             decompositionDict_.subDict("scotchCoeffs");
-
 
         string strategy;
         if (scotchCoeffs.readIfPresent("strategy", strategy))
