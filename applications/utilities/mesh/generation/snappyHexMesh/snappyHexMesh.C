@@ -334,8 +334,7 @@ int main(int argc, char *argv[])
     (
         decompositionMethod::New
         (
-            decomposeDict,
-            mesh
+            decomposeDict
         )
     );
     decompositionMethod& decomposer = decomposerPtr();

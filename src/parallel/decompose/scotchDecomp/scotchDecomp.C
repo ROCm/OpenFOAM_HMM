@@ -145,7 +145,7 @@ namespace Foam
     (
         decompositionMethod,
         scotchDecomp,
-        dictionaryMesh
+        dictionary
     );
 }
 
@@ -165,6 +165,7 @@ void Foam::scotchDecomp::check(const int retVal, const char* str)
 // Call scotch with options from dictionary.
 Foam::label Foam::scotchDecomp::decompose
 (
+    const fileName& meshPath,
     const List<int>& adjncy,
     const List<int>& xadj,
     const scalarField& cWeights,
@@ -184,7 +185,7 @@ Foam::label Foam::scotchDecomp::decompose
 
             if (writeGraph)
             {
-                OFstream str(mesh_.time().path() / mesh_.name() + ".grf");
+                OFstream str(meshPath + ".grf");
 
                 Info<< "Dumping Scotch graph file to " << str.name() << endl
                     << "Use this in combination with gpart." << endl;
@@ -408,14 +409,9 @@ Foam::label Foam::scotchDecomp::decompose
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::scotchDecomp::scotchDecomp
-(
-    const dictionary& decompositionDict,
-    const polyMesh& mesh
-)
+Foam::scotchDecomp::scotchDecomp(const dictionary& decompositionDict)
 :
-    decompositionMethod(decompositionDict),
-    mesh_(mesh)
+    decompositionMethod(decompositionDict)
 {}
 
 
@@ -423,11 +419,12 @@ Foam::scotchDecomp::scotchDecomp
 
 Foam::labelList Foam::scotchDecomp::decompose
 (
+    const polyMesh& mesh,
     const pointField& points,
     const scalarField& pointWeights
 )
 {
-    if (points.size() != mesh_.nCells())
+    if (points.size() != mesh.nCells())
     {
         FatalErrorIn
         (
@@ -437,20 +434,24 @@ Foam::labelList Foam::scotchDecomp::decompose
             << endl
             << "and supply one coordinate (cellCentre) for every cell." << endl
             << "The number of coordinates " << points.size() << endl
-            << "The number of cells in the mesh " << mesh_.nCells()
+            << "The number of cells in the mesh " << mesh.nCells()
             << exit(FatalError);
     }
 
-    // Make Metis CSR (Compressed Storage Format) storage
-    //   adjncy      : contains neighbours (= edges in graph)
-    //   xadj(celli) : start of information in adjncy for celli
-    List<int> adjncy;
-    List<int> xadj;
-    calcCSR(mesh_, adjncy, xadj);
+
+    CompactListList<label> cellCells;
+    calcCellCells(mesh, identity(mesh.nCells()), mesh.nCells(), cellCells);
 
     // Decompose using default weights
     List<int> finalDecomp;
-    decompose(adjncy, xadj, pointWeights, finalDecomp);
+    decompose
+    (
+        mesh.time().path()/mesh.name(),
+        cellCells.m(),
+        cellCells.offsets(),
+        pointWeights,
+        finalDecomp
+    );
 
     // Copy back to labelList
     labelList decomp(finalDecomp.size());
@@ -464,43 +465,35 @@ Foam::labelList Foam::scotchDecomp::decompose
 
 Foam::labelList Foam::scotchDecomp::decompose
 (
+    const polyMesh& mesh,
     const labelList& agglom,
     const pointField& agglomPoints,
     const scalarField& pointWeights
 )
 {
-    if (agglom.size() != mesh_.nCells())
+    if (agglom.size() != mesh.nCells())
     {
         FatalErrorIn
         (
             "scotchDecomp::decompose(const labelList&, const pointField&)"
         )   << "Size of cell-to-coarse map " << agglom.size()
-            << " differs from number of cells in mesh " << mesh_.nCells()
+            << " differs from number of cells in mesh " << mesh.nCells()
             << exit(FatalError);
     }
 
-    // Make Metis CSR (Compressed Storage Format) storage
-    //   adjncy      : contains neighbours (= edges in graph)
-    //   xadj(celli) : start of information in adjncy for celli
-    List<int> adjncy;
-    List<int> xadj;
-    {
-        // Get cellCells on coarse mesh.
-        labelListList cellCells;
-        calcCellCells
-        (
-            mesh_,
-            agglom,
-            agglomPoints.size(),
-            cellCells
-        );
-
-        calcCSR(cellCells, adjncy, xadj);
-    }
+    CompactListList<label> cellCells;
+    calcCellCells(mesh, agglom, agglomPoints.size(), cellCells);
 
     // Decompose using weights
     List<int> finalDecomp;
-    decompose(adjncy, xadj, pointWeights, finalDecomp);
+    decompose
+    (
+        mesh.time().path()/mesh.name(),
+        cellCells.m(),
+        cellCells.offsets(),
+        pointWeights,
+        finalDecomp
+    );
 
     // Rework back into decomposition for original mesh_
     labelList fineDistribution(agglom.size());
@@ -537,13 +530,11 @@ Foam::labelList Foam::scotchDecomp::decompose
     //   adjncy      : contains neighbours (= edges in graph)
     //   xadj(celli) : start of information in adjncy for celli
 
-    List<int> adjncy;
-    List<int> xadj;
-    calcCSR(globalCellCells, adjncy, xadj);
+    CompactListList<label> cellCells(globalCellCells);
 
     // Decompose using weights
     List<int> finalDecomp;
-    decompose(adjncy, xadj, cWeights, finalDecomp);
+    decompose(".", cellCells.m(), cellCells.offsets(), cWeights, finalDecomp);
 
     // Copy back to labelList
     labelList decomp(finalDecomp.size());

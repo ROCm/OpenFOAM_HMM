@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,18 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::scotchDecomp
+    Foam::multiLevelDecomp
 
 Description
-    Scotch domain decomposition
+    Decomposition given using consecutive application of decomposers.
 
 SourceFiles
-    scotchDecomp.C
+    multiLevelDecomp.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef scotchDecomp_H
-#define scotchDecomp_H
+#ifndef multiLevelDecomp_H
+#define multiLevelDecomp_H
 
 #include "decompositionMethod.H"
 
@@ -41,62 +41,72 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class scotchDecomp Declaration
+                           Class multiLevelDecomp Declaration
 \*---------------------------------------------------------------------------*/
 
-class scotchDecomp
+class multiLevelDecomp
 :
     public decompositionMethod
 {
+    // Private data
+
+        PtrList<decompositionMethod> methods_;
+
+
     // Private Member Functions
 
-        //- Check and print error message
-        static void check(const int, const char*);
-
-        label decompose
+        //- Given connectivity across processors work out connectivity
+        //  for a (consistent) subset
+        void subsetGlobalCellCells
         (
-            const fileName& meshPath,
-            const List<int>& adjncy,
-            const List<int>& xadj,
-            const scalarField& cWeights,
-            List<int>& finalDecomp
+            const labelListList& cellCells,
+            const labelList& set,
+            labelListList& subCellCells,
+            label& cutConnections
+        ) const;
+
+        //- Decompose level methodI without addressing
+        void decompose
+        (
+            const labelListList& pointPoints,
+            const pointField& points,
+            const scalarField& pointWeights,
+            const labelList& pointMap,  // map back to original points
+            const label levelI,
+
+            labelField& finalDecomp
         );
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const scotchDecomp&);
-        scotchDecomp(const scotchDecomp&);
+        void operator=(const multiLevelDecomp&);
+        multiLevelDecomp(const multiLevelDecomp&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("scotch");
+    TypeName("multiLevel");
 
 
     // Constructors
 
-        //- Construct given the decomposition dictionary and mesh
-        scotchDecomp(const dictionary& decompositionDict);
+        //- Construct given the decomposition dictionary
+        multiLevelDecomp(const dictionary& decompositionDict);
 
 
     //- Destructor
-    virtual ~scotchDecomp()
+    virtual ~multiLevelDecomp()
     {}
 
 
     // Member Functions
 
-        virtual bool parallelAware() const
-        {
-            // Metis does not know about proc boundaries
-            return false;
-        }
+        //- Is method parallel aware (i.e. does it synchronize domains across
+        //  proc boundaries)
+        virtual bool parallelAware() const;
 
         //- Return for every coordinate the wanted processor number. Use the
         //  mesh connectivity (if needed)
-        //  Weights get truncated to convert into integer
-        //  so e.g. 3.5 is seen as 3. The overall sum of weights
-        //  might otherwise overflow.
         virtual labelList decompose
         (
             const polyMesh& mesh,
@@ -104,27 +114,8 @@ public:
             const scalarField& pointWeights
         );
 
-        //- Return for every coordinate the wanted processor number. Gets
-        //  passed agglomeration map (from fine to coarse cells) and coarse cell
-        //  location. Can be overridden by decomposers that provide this
-        //  functionality natively.
-        //  See note on weights above.
-        virtual labelList decompose
-        (
-            const polyMesh& mesh,
-            const labelList& agglom,
-            const pointField& regionPoints,
-            const scalarField& regionWeights
-        );
-
         //- Return for every coordinate the wanted processor number. Explicitly
-        //  provided mesh connectivity.
-        //  The connectivity is equal to mesh.cellCells() except for
-        //  - in parallel the cell numbers are global cell numbers (starting
-        //    from 0 at processor0 and then incrementing all through the
-        //    processors)
-        //  - the connections are across coupled patches
-        //  See note on weights above.
+        //  provided connectivity - does not use mesh_.
         virtual labelList decompose
         (
             const labelListList& globalCellCells,

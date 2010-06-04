@@ -154,7 +154,6 @@ class hierarchGeomDecomp
             labelList& finalDecomp          // overall decomposition
         );
 
-
         //- Disallow default bitwise copy construct and assignment
         void operator=(const hierarchGeomDecomp&);
         hierarchGeomDecomp(const hierarchGeomDecomp&);
@@ -171,13 +170,6 @@ public:
         //- Construct given the decomposition dictionary
         hierarchGeomDecomp(const dictionary& decompositionDict);
 
-        //- Construct given the decomposition dictionary and mesh
-        hierarchGeomDecomp
-        (
-            const dictionary& decompositionDict,
-            const polyMesh& mesh
-        );
-
 
     //- Destructor
     virtual ~hierarchGeomDecomp()
@@ -192,8 +184,7 @@ public:
             return true;
         }
 
-        //- Return for every coordinate the wanted processor number. Use the
-        //  mesh connectivity (if needed)
+        //- Return for every coordinate the wanted processor number.
         virtual labelList decompose
         (
             const pointField&,
@@ -203,6 +194,26 @@ public:
         //- Without weights. Code for weighted decomposition is a bit complex
         //  so kept separate for now.
         virtual labelList decompose(const pointField&);
+
+
+        //- Return for every coordinate the wanted processor number. Use the
+        //  mesh connectivity (if needed)
+        virtual labelList decompose
+        (
+            const polyMesh& mesh,
+            const pointField& cc,
+            const scalarField& cWeights
+        )
+        {
+            return decompose(cc, cWeights);
+        }
+
+        //- Without weights. Code for weighted decomposition is a bit complex
+        //  so kept separate for now.
+        virtual labelList decompose(const polyMesh& mesh, const pointField& cc)
+        {
+            return decompose(cc);
+        }
 
         //- Return for every coordinate the wanted processor number. Explicitly
         //  provided connectivity - does not use mesh_.

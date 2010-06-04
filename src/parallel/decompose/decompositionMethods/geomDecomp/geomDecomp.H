@@ -71,6 +71,17 @@ public:
             const dictionary& decompositionDict,
             const word& derivedType
         );
+
+        //- Return for every coordinate the wanted processor number.
+        virtual labelList decompose
+        (
+            const pointField& points,
+            const scalarField& pointWeights
+        ) = 0;
+
+        //- Like decompose but with uniform weights on the points
+        virtual labelList decompose(const pointField&) = 0;
+
 };
 
 

@@ -1214,6 +1214,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
                 // Normal decomposition
                 distribution = decomposer.decompose
                 (
+                    mesh_,
                     mesh_.cellCentres(),
                     cellWeights
                 );
@@ -1224,6 +1225,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
             // Normal decomposition
             distribution = decomposer.decompose
             (
+                mesh_,
                 mesh_.cellCentres(),
                 cellWeights
             );

@@ -489,11 +489,17 @@ int main(int argc, char *argv[])
         );
         autoPtr<decompositionMethod> decomposePtr = decompositionMethod::New
         (
-            decomposeDict,
-            mesh
+            decomposeDict
         );
 
-        labelList cellToRegion(decomposePtr().decompose(mesh.cellCentres()));
+        labelList cellToRegion
+        (
+            decomposePtr().decompose
+            (
+                mesh,
+                mesh.cellCentres()
+            )
+        );
 
         // For debugging: write out region
         {

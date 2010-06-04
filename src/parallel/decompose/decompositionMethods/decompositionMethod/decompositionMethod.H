@@ -37,6 +37,7 @@ SourceFiles
 
 #include "polyMesh.H"
 #include "pointField.H"
+#include "CompactListList.H"
 
 namespace Foam
 {
@@ -56,43 +57,37 @@ protected:
         label nProcessors_;
 
 
-        //- Helper: determine (non-parallel) cellCells from mesh agglomeration.
+        //- Helper: determine (global) cellCells from mesh agglomeration.
         static void calcCellCells
         (
             const polyMesh& mesh,
             const labelList& agglom,
             const label nCoarse,
-            labelListList& cellCells
+            CompactListList<label>& cellCells
         );
 
         //- Calculate the minimum face between two neighbouring cells
         //  (usually there is only one)
         static label masterFace(const polyMesh&, const label, const label);
 
-        // From mesh to compact row storage format
-        // (like CompactListList)
-        static void calcCSR
-        (
-            const polyMesh& mesh,
-            List<int>& adjncy,
-            List<int>& xadj
-        );
+//        // From mesh to compact row storage format
+//        // (like CompactListList)
+//        static void calcCSR
+//        (
+//            const polyMesh& mesh,
+//            List<int>& adjncy,
+//            List<int>& xadj
+//        );
+//
+//        // From cell-cell connections to compact row storage format
+//        // (like CompactListList)
+//        static void calcCSR
+//        (
+//            const labelListList& cellCells,
+//            List<int>& adjncy,
+//            List<int>& xadj
+//        );
 
-        // From cell-cell connections to compact row storage format
-        // (like CompactListList)
-        static void calcCSR
-        (
-            const labelListList& cellCells,
-            List<int>& adjncy,
-            List<int>& xadj
-        );
-
-        static void calcDistributedCSR
-        (
-            const polyMesh& mesh,
-            List<int>& adjncy,
-            List<int>& xadj
-        );
 
 private:
 
@@ -122,18 +117,6 @@ public:
             (decompositionDict)
         );
 
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            decompositionMethod,
-            dictionaryMesh,
-            (
-                const dictionary& decompositionDict,
-                const polyMesh& mesh
-            ),
-            (decompositionDict, mesh)
-        );
-
 
     // Selectors
 
@@ -141,13 +124,6 @@ public:
         static autoPtr<decompositionMethod> New
         (
             const dictionary& decompositionDict
-        );
-
-        //- Return a reference to the selected decomposition method
-        static autoPtr<decompositionMethod> New
-        (
-            const dictionary& decompositionDict,
-            const polyMesh& mesh
         );
 
 
@@ -171,63 +147,105 @@ public:
 
     // Member Functions
 
+        label nDomains() const
+        {
+            return nProcessors_;
+        }
+
         //- Is method parallel aware (i.e. does it synchronize domains across
         //  proc boundaries)
         virtual bool parallelAware() const = 0;
 
-        //- Return for every coordinate the wanted processor number. Use the
-        //  mesh connectivity (if needed)
-        virtual labelList decompose
-        (
-            const pointField& points,
-            const scalarField& pointWeights
-        ) = 0;
 
-        //- Like decompose but with uniform weights on the points
-        virtual labelList decompose(const pointField&);
+        // No topology (implemented by geometric decomposers)
 
+            //- Return for every coordinate the wanted processor number.
+            virtual labelList decompose
+            (
+                const pointField& points,
+                const scalarField& pointWeights
+            )
+            {
+                notImplemented
+                (
+                    "decompositionMethod:decompose(const pointField&"
+                    ", const scalarField&)"
+                );
+                return labelList(0);
+            }
 
-        //- Return for every coordinate the wanted processor number. Gets
-        //  passed agglomeration map (from fine to coarse cells) and coarse cell
-        //  location. Can be overridden by decomposers that provide this
-        //  functionality natively. Coarse cells are local to the processor
-        //  (if in parallel). If you want to have coarse cells spanning
-        //  processors use the globalCellCells instead.
-        virtual labelList decompose
-        (
-            const labelList& cellToRegion,
-            const pointField& regionPoints,
-            const scalarField& regionWeights
-        );
-
-        //- Like decompose but with uniform weights on the regions
-        virtual labelList decompose
-        (
-            const labelList& cellToRegion,
-            const pointField& regionPoints
-        );
+            //- Like decompose but with uniform weights on the points
+            virtual labelList decompose(const pointField&)
+            {
+                notImplemented
+                (
+                    "decompositionMethod:decompose(const pointField&)"
+                );
+                return labelList(0);
+            }
 
 
-        //- Return for every coordinate the wanted processor number. Explicitly
-        //  provided connectivity - does not use mesh_.
-        //  The connectivity is equal to mesh.cellCells() except for
-        //  - in parallel the cell numbers are global cell numbers (starting
-        //    from 0 at processor0 and then incrementing all through the
-        //    processors)
-        //  - the connections are across coupled patches
-        virtual labelList decompose
-        (
-            const labelListList& globalCellCells,
-            const pointField& cc,
-            const scalarField& cWeights
-        ) = 0;
+        // Topology provided by mesh
 
-        //- Like decompose but with uniform weights on the cells
-        virtual labelList decompose
-        (
-            const labelListList& globalCellCells,
-            const pointField& cc
-        );
+            //- Return for every coordinate the wanted processor number. Use the
+            //  mesh connectivity (if needed)
+            virtual labelList decompose
+            (
+                const polyMesh& mesh,
+                const pointField& points,
+                const scalarField& pointWeights
+            ) = 0;
+
+            //- Like decompose but with uniform weights on the points
+            virtual labelList decompose(const polyMesh&, const pointField&);
+
+
+            //- Return for every coordinate the wanted processor number. Gets
+            //  passed agglomeration map (from fine to coarse cells) and coarse
+            //  cell
+            //  location. Can be overridden by decomposers that provide this
+            //  functionality natively. Coarse cells are local to the processor
+            //  (if in parallel). If you want to have coarse cells spanning
+            //  processors use the globalCellCells instead.
+            virtual labelList decompose
+            (
+                const polyMesh& mesh,
+                const labelList& cellToRegion,
+                const pointField& regionPoints,
+                const scalarField& regionWeights
+            );
+
+            //- Like decompose but with uniform weights on the regions
+            virtual labelList decompose
+            (
+                const polyMesh& mesh,
+                const labelList& cellToRegion,
+                const pointField& regionPoints
+            );
+
+
+        // Topology provided explicitly addressing
+
+            //- Return for every coordinate the wanted processor number.
+            //  The connectivity is equal to mesh.cellCells() except for
+            //  - in parallel the cell numbers are global cell numbers
+            //    (starting
+            //    from 0 at processor0 and then incrementing all through the
+            //    processors)
+            //  - the connections are across coupled patches
+            virtual labelList decompose
+            (
+                const labelListList& globalCellCells,
+                const pointField& cc,
+                const scalarField& cWeights
+            ) = 0;
+
+            //- Like decompose but with uniform weights on the cells
+            virtual labelList decompose
+            (
+                const labelListList& globalCellCells,
+                const pointField& cc
+            );
 
 };
 

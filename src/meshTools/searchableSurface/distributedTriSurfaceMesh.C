@@ -34,6 +34,7 @@ License
 
 #include "IFstream.H"
 #include "decompositionMethod.H"
+#include "geomDecomp.H"
 #include "vectorList.H"
 #include "PackedBoolList.H"
 
@@ -855,6 +856,19 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
                 << " does not decompose in parallel."
                 << " Please choose one that does." << exit(FatalError);
         }
+
+        if (!isA<geomDecomp>(decomposer_()))
+        {
+            FatalErrorIn
+            (
+                "distributedTriSurfaceMesh::independentlyDistributedBbs"
+                "(const triSurface&)"
+            )   << "The decomposition method " << decomposer_().typeName
+                << " is not a geometric decomposition method." << endl
+                << "Only geometric decomposition methods are currently"
+                << " supported."
+                << exit(FatalError);
+        }
     }
 
     // Do decomposition according to triangle centre
@@ -864,8 +878,11 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
         triCentres[triI] = s[triI].centre(s.points());
     }
 
+
+    geomDecomp& decomposer = refCast<geomDecomp>(decomposer_());
+
     // Do the actual decomposition
-    labelList distribution(decomposer_->decompose(triCentres));
+    labelList distribution(decomposer.decompose(triCentres));
 
     // Find bounding box for all triangles on new distribution.
 

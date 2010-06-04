@@ -141,12 +141,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(ptscotchDecomp, 0);
 
-    addToRunTimeSelectionTable
-    (
-        decompositionMethod,
-        ptscotchDecomp,
-        dictionaryMesh
-    );
+    addToRunTimeSelectionTable(decompositionMethod, ptscotchDecomp, dictionary);
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -414,14 +409,9 @@ Foam::label Foam::ptscotchDecomp::decompose
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::ptscotchDecomp::ptscotchDecomp
-(
-    const dictionary& decompositionDict,
-    const polyMesh& mesh
-)
+Foam::ptscotchDecomp::ptscotchDecomp(const dictionary& decompositionDict)
 :
-    decompositionMethod(decompositionDict),
-    mesh_(mesh)
+    decompositionMethod(decompositionDict)
 {}
 
 
@@ -429,11 +419,12 @@ Foam::ptscotchDecomp::ptscotchDecomp
 
 Foam::labelList Foam::ptscotchDecomp::decompose
 (
+    const polyMesh& mesh,
     const pointField& points,
     const scalarField& pointWeights
 )
 {
-    if (points.size() != mesh_.nCells())
+    if (points.size() != mesh.nCells())
     {
         FatalErrorIn
         (
@@ -443,7 +434,7 @@ Foam::labelList Foam::ptscotchDecomp::decompose
             << endl
             << "and supply one coordinate (cellCentre) for every cell." << endl
             << "The number of coordinates " << points.size() << endl
-            << "The number of cells in the mesh " << mesh_.nCells()
+            << "The number of cells in the mesh " << mesh.nCells()
             << exit(FatalError);
     }
 
@@ -457,20 +448,14 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     // Make Metis CSR (Compressed Storage Format) storage
     //   adjncy      : contains neighbours (= edges in graph)
     //   xadj(celli) : start of information in adjncy for celli
-    // Connections
-    Field<int> adjncy;
-    // Offsets into adjncy
-    Field<int> xadj;
-    calcDistributedCSR
-    (
-        mesh_,
-        adjncy,
-        xadj
-    );
+
+
+    CompactListList<label> cellCells;
+    calcCellCells(mesh, identity(mesh.nCells()), mesh.nCells(), cellCells);
 
     // Decompose using default weights
     List<int> finalDecomp;
-    decompose(adjncy, xadj, pointWeights, finalDecomp);
+    decompose(cellCells.m(), cellCells.offsets(), pointWeights, finalDecomp);
 
     // Copy back to labelList
     labelList decomp(finalDecomp.size());
@@ -484,52 +469,40 @@ Foam::labelList Foam::ptscotchDecomp::decompose
 
 Foam::labelList Foam::ptscotchDecomp::decompose
 (
+    const polyMesh& mesh,
     const labelList& agglom,
     const pointField& agglomPoints,
     const scalarField& pointWeights
 )
 {
-    if (agglom.size() != mesh_.nCells())
+    if (agglom.size() != mesh.nCells())
     {
         FatalErrorIn
         (
             "ptscotchDecomp::decompose(const labelList&, const pointField&)"
         )   << "Size of cell-to-coarse map " << agglom.size()
-            << " differs from number of cells in mesh " << mesh_.nCells()
+            << " differs from number of cells in mesh " << mesh.nCells()
             << exit(FatalError);
     }
 
 //    // For running sequential ...
 //    if (Pstream::nProcs() <= 1)
 //    {
-//        return scotchDecomp(decompositionDict_, mesh_)
+//        return scotchDecomp(decompositionDict_, mesh)
 //            .decompose(agglom, agglomPoints, pointWeights);
 //    }
 
     // Make Metis CSR (Compressed Storage Format) storage
     //   adjncy      : contains neighbours (= edges in graph)
     //   xadj(celli) : start of information in adjncy for celli
-    List<int> adjncy;
-    List<int> xadj;
-    {
-        // Get cellCells on coarse mesh.
-        labelListList cellCells;
-        calcCellCells
-        (
-            mesh_,
-            agglom,
-            agglomPoints.size(),
-            cellCells
-        );
-
-        calcCSR(cellCells, adjncy, xadj);
-    }
+    CompactListList<label> cellCells;
+    calcCellCells(mesh, agglom, agglomPoints.size(), cellCells);
 
     // Decompose using weights
     List<int> finalDecomp;
-    decompose(adjncy, xadj, pointWeights, finalDecomp);
+    decompose(cellCells.m(), cellCells.offsets(), pointWeights, finalDecomp);
 
-    // Rework back into decomposition for original mesh_
+    // Rework back into decomposition for original mesh
     labelList fineDistribution(agglom.size());
 
     forAll(fineDistribution, i)
@@ -561,7 +534,7 @@ Foam::labelList Foam::ptscotchDecomp::decompose
 //    // For running sequential ...
 //    if (Pstream::nProcs() <= 1)
 //    {
-//        return scotchDecomp(decompositionDict_, mesh_)
+//        return scotchDecomp(decompositionDict_, mesh)
 //            .decompose(globalCellCells, cellCentres, cWeights);
 //    }
 
@@ -570,13 +543,11 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     //   adjncy      : contains neighbours (= edges in graph)
     //   xadj(celli) : start of information in adjncy for celli
 
-    List<int> adjncy;
-    List<int> xadj;
-    calcCSR(globalCellCells, adjncy, xadj);
+    CompactListList<label> cellCells(globalCellCells);
 
     // Decompose using weights
     List<int> finalDecomp;
-    decompose(adjncy, xadj, cWeights, finalDecomp);
+    decompose(cellCells.m(), cellCells.offsets(), cWeights, finalDecomp);
 
     // Copy back to labelList
     labelList decomp(finalDecomp.size());
