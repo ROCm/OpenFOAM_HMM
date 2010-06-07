@@ -61,7 +61,21 @@ Foam::Istream& Foam::regIOobject::readStream()
         }
         else
         {
+            // Search intelligently for file
             objPath = filePath();
+
+            if (!objPath.size())
+            {
+                FatalIOError
+                (
+                    "regIOobject::readStream()",
+                    __FILE__,
+                    __LINE__,
+                    objectPath(),
+                    0
+                )   << "cannot find file"
+                    << exit(FatalIOError);
+            }
         }
 
         if (!(isPtr_ = objectStream(objPath)))
