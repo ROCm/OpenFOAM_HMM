@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,15 +25,10 @@ License
 
 #include "DynamicField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-DynamicField<Type>::DynamicField()
+Foam::DynamicField<Type>::DynamicField()
 :
     Field<Type>(),
     capacity_(0)
@@ -41,7 +36,7 @@ DynamicField<Type>::DynamicField()
 
 
 template<class Type>
-DynamicField<Type>::DynamicField(const label size)
+Foam::DynamicField<Type>::DynamicField(const label size)
 :
     Field<Type>(size),
     capacity_(Field<Type>::size())
@@ -73,7 +68,7 @@ inline Foam::DynamicField<Type>::DynamicField
 
 
 template<class Type>
-DynamicField<Type>::DynamicField
+Foam::DynamicField<Type>::DynamicField
 (
     const UList<Type>& mapF,
     const labelList& mapAddressing
@@ -85,7 +80,7 @@ DynamicField<Type>::DynamicField
 
 
 template<class Type>
-DynamicField<Type>::DynamicField
+Foam::DynamicField<Type>::DynamicField
 (
     const UList<Type>& mapF,
     const labelListList& mapAddressing,
@@ -99,7 +94,7 @@ DynamicField<Type>::DynamicField
 
 //- Construct by mapping from the given field
 template<class Type>
-DynamicField<Type>::DynamicField
+Foam::DynamicField<Type>::DynamicField
 (
     const UList<Type>& mapF,
     const FieldMapper& map
@@ -111,7 +106,7 @@ DynamicField<Type>::DynamicField
 
 
 template<class Type>
-DynamicField<Type>::DynamicField(const DynamicField<Type>& f)
+Foam::DynamicField<Type>::DynamicField(const DynamicField<Type>& f)
 :
     Field<Type>(f),
     capacity_(Field<Type>::size())
@@ -119,7 +114,7 @@ DynamicField<Type>::DynamicField(const DynamicField<Type>& f)
 
 
 template<class Type>
-DynamicField<Type>::DynamicField(DynamicField<Type>& f, bool reUse)
+Foam::DynamicField<Type>::DynamicField(DynamicField<Type>& f, bool reUse)
 :
     Field<Type>(f, reUse),
     capacity_(Field<Type>::size())
@@ -127,7 +122,7 @@ DynamicField<Type>::DynamicField(DynamicField<Type>& f, bool reUse)
 
 
 template<class Type>
-DynamicField<Type>::DynamicField(const Xfer<DynamicField<Type> >& f)
+Foam::DynamicField<Type>::DynamicField(const Xfer<DynamicField<Type> >& f)
 :
     Field<Type>(f),
     capacity_(Field<Type>::size())
@@ -137,14 +132,14 @@ DynamicField<Type>::DynamicField(const Xfer<DynamicField<Type> >& f)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::label DynamicField<Type>::capacity() const
+Foam::label Foam::DynamicField<Type>::capacity() const
 {
     return capacity_;
 }
 
 
 template<class Type>
-void DynamicField<Type>::append(const Type& t)
+void Foam::DynamicField<Type>::append(const Type& t)
 {
     label elemI = Field<Type>::size();
     setSize(elemI + 1);
@@ -156,7 +151,7 @@ void DynamicField<Type>::append(const Type& t)
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Type>
-void DynamicField<Type>::operator=(const DynamicField<Type>& rhs)
+void Foam::DynamicField<Type>::operator=(const DynamicField<Type>& rhs)
 {
     if (this == &rhs)
     {
@@ -171,7 +166,7 @@ void DynamicField<Type>::operator=(const DynamicField<Type>& rhs)
 
 
 template<class Type>
-void DynamicField<Type>::operator=(const UList<Type>& rhs)
+void Foam::DynamicField<Type>::operator=(const UList<Type>& rhs)
 {
     Field<Type>::operator=(rhs);
     capacity_ = Field<Type>::size();
@@ -179,7 +174,7 @@ void DynamicField<Type>::operator=(const UList<Type>& rhs)
 
 
 template<class Type>
-void DynamicField<Type>::operator=(const tmp<DynamicField>& rhs)
+void Foam::DynamicField<Type>::operator=(const tmp<DynamicField>& rhs)
 {
     if (this == &(rhs()))
     {
@@ -196,25 +191,7 @@ void DynamicField<Type>::operator=(const tmp<DynamicField>& rhs)
 }
 
 
-template<class Type>
-Type& DynamicField<Type>::operator[](const label i)
-{
-    return Field<Type>::operator[](i);
-}
-
-
-template<class Type>
-const Type& DynamicField<Type>::operator[](const label i) const
-{
-    return Field<Type>::operator[](i);
-}
-
-
 // * * * * * * * * * * * * * * * IOstream Operator * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
