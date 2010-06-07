@@ -310,7 +310,7 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
     const T& t
 )
 {
-    label elemI = List<T>::size();
+    const label elemI = List<T>::size();
     setSize(elemI + 1);
 
     this->operator[](elemI) = t;
@@ -361,7 +361,7 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline T Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::remove()
 {
-    label elemI = List<T>::size() - 1;
+    const label elemI = List<T>::size() - 1;
 
     if (elemI < 0)
     {

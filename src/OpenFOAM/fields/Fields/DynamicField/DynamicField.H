@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -175,10 +175,7 @@ public:
         inline void operator=(const tmp<DynamicField<Type> >&);
 
         //- Return element of Field.
-        inline Type& operator[](const label i);
-
-        //- Return element of constant Field.
-        inline const Type& operator[](const label) const;
+        using Field<Type>::operator[];
 
     // IOstream operators
 

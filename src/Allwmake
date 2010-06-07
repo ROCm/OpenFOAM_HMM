@@ -17,7 +17,7 @@ wmakeLnInclude OpenFOAM
 wmakeLnInclude OSspecific/$WM_OSTYPE
 Pstream/Allwmake
 
-wmake libo  OSspecific/$WM_OSTYPE
+OSspecific/$WM_OSTYPE/Allwmake
 wmake libso OpenFOAM
 
 wmake libso lagrangian/basic

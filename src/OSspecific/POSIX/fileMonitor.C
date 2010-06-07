@@ -37,7 +37,6 @@ Class
 #   include "regIOobject.H"     // for fileModificationSkew symbol
 #else
 #   include <sys/inotify.h>
-#   include <stropts.h>
 #   include <sys/ioctl.h>
 #endif
 
@@ -49,8 +48,8 @@ template<>
 const char* Foam::NamedEnum<Foam::fileMonitor::fileState, 3>::names[] =
 {
     "unmodified",
-    "deleted",
-    "modified"
+    "modified",
+    "deleted"
 };
 const Foam::NamedEnum<Foam::fileMonitor::fileState, 3>
     Foam::fileMonitor::fileStateNames_;
@@ -58,7 +57,7 @@ const Foam::NamedEnum<Foam::fileMonitor::fileState, 3>
 
 namespace Foam
 {
-    // Reduction operator for PackedList of fileState
+    //- Reduction operator for PackedList of fileState
     class reduceFileStates
     {
         public:
@@ -89,7 +88,7 @@ namespace Foam
         }
     };
 
-    // Combine operator for PackedList of fileState
+    //- Combine operator for PackedList of fileState
     class combineReduceFileStates
     {
         public:
@@ -98,22 +97,101 @@ namespace Foam
             x = reduceFileStates()(x, y);
         }
     };
+
+
+
+    //! @cond internalClass
+    //- Internal tracking via stat(3p) or inotify(7)
+    class fileMonitorWatcher
+    {
+    public:
+
+#ifdef FOAM_USE_STAT
+        //- From watch descriptor to modified time
+        HashTable<label, time_t> lastMod;
+
+        //- initialize HashTable size
+        inline fileMonitorWatcher(const label sz = 20)
+        :
+            lastMod(sz)
+        {}
+
+        inline label addWatch(const fileName& fName)
+        {
+            const label watchFd = lastMod.size();
+            lastMod.insert(watchFd, lastModified(fName));
+            return watchFd;
+        }
+
+        inline bool removeWatch(const label watchFd)
+        {
+            return lastMod.erase(watchFd);
+        }
+
+#else
+        //- File descriptor for the inotify instance
+        int fd;
+
+        //- Pre-allocated structure containing file descriptors
+        fd_set fdSet;
+
+        //- initialize inotify
+        inline fileMonitorWatcher(const label dummy = 0)
+        :
+            fd(inotify_init())
+        {
+            // Add notify descriptor to select fd_set
+            FD_ZERO(&fdSet);
+            FD_SET(fd, &fdSet);
+        }
+
+        //- test if file descriptor is set
+        inline bool isSet() const
+        {
+            return FD_ISSET(fd, &fdSet);
+        }
+
+        //- reset file descriptor
+        inline void reset()
+        {
+            FD_SET(fd, &fdSet);
+        }
+
+        inline label addWatch(const fileName& fName)
+        {
+            return inotify_add_watch
+            (
+                fd,
+                fName.c_str(),
+                // IN_ALL_EVENTS
+                IN_CLOSE_WRITE | IN_DELETE_SELF | IN_MODIFY
+            );
+        }
+
+        inline bool removeWatch(const label watchFd)
+        {
+            return inotify_rm_watch(fd, int(watchFd)) == 0;
+        }
+#endif
+
+    };
+    //! @endcond
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-#ifdef FOAM_USE_STAT
 void Foam::fileMonitor::checkFiles() const
 {
+#ifdef FOAM_USE_STAT
     for
     (
-        HashTable<label, time_t>::iterator iter = lastModified_.begin();
-        iter != lastModified_.end();
+        HashTable<label, time_t>::iterator iter = watcher_->lastMod.begin();
+        iter != watcher_->lastMod.end();
         ++iter
     )
     {
-        label watchFd = iter.key();
+        const label watchFd = iter.key();
         const fileName& fName = watchFile_[watchFd];
         time_t newTime = lastModified(fName);
 
@@ -135,21 +213,18 @@ void Foam::fileMonitor::checkFiles() const
             }
         }
     }
-}
 #else
-void Foam::fileMonitor::checkFiles() const
-{
     while (true)
     {
         struct timeval zeroTimeout = {0, 0};
 
         int ready = select
         (
-            inotifyFd_+1,       // num filedescriptors in watchSet_
-            &watchSet_,         // watchSet_ with only inotifyFd
-            NULL,
-            NULL,
-            &zeroTimeout
+            watcher_->fd+1,        // num filedescriptors in fdSet
+            &(watcher_->fdSet),    // fdSet with only inotifyFd
+            NULL,                  // No writefds
+            NULL,                  // No errorfds
+            &zeroTimeout           // eNo timeout
         );
 
         if (ready < 0)
@@ -158,14 +233,14 @@ void Foam::fileMonitor::checkFiles() const
                 << "Problem in issuing select."
                 << abort(FatalError);
         }
-        else if (FD_ISSET(inotifyFd_, &watchSet_))
+        else if (watcher_->isSet())
         {
             struct inotify_event inotifyEvent;
 
             // Read first event
             ssize_t nBytes = read
             (
-                inotifyFd_,
+                watcher_->fd,
                 &inotifyEvent,
                 sizeof(inotifyEvent)
             );
@@ -178,9 +253,9 @@ void Foam::fileMonitor::checkFiles() const
                     << abort(FatalError);
             }
 
-            //Pout<< "mask:" << inotifyEvent.mask << endl;
-            //Pout<< "watchFd:" << inotifyEvent.wd << endl;
-            //Pout<< "watchName:" << watchFile_[inotifyEvent.wd] << endl;
+            // Pout<< "mask:" << inotifyEvent.mask << nl
+            //     << "watchFd:" << inotifyEvent.wd << nl
+            //     << "watchName:" << watchFile_[inotifyEvent.wd] << endl;
 
             switch (inotifyEvent.mask)
             {
@@ -204,51 +279,37 @@ void Foam::fileMonitor::checkFiles() const
         }
         else
         {
-            // No data. Reset watchSet_
-            FD_SET(inotifyFd_, &watchSet_);
+            // No data - reset
+            watcher_->reset();
             return;
         }
     }
-}
 #endif
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Null constructor
-#ifdef FOAM_USE_STAT
 
 Foam::fileMonitor::fileMonitor()
 :
     state_(20),
     watchFile_(20),
-    lastModified_(20)
+    watcher_(new fileMonitorWatcher(20))
 {}
 
-#else
-
-Foam::fileMonitor::fileMonitor()
-:
-    state_(20),
-    watchFile_(20),
-    inotifyFd_(inotify_init())
-{
-    //- Add notify descriptor to select set
-    FD_ZERO(&watchSet_);
-    FD_SET(inotifyFd_, &watchSet_);
-}
-
-#endif
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::fileMonitor::~fileMonitor()
 {
-    // Remove any remaining files
+    // Remove watch on any remaining files
     List<label> watchFds(state_.toc());
     forAll(watchFds, i)
     {
         removeWatch(watchFds[i]);
     }
+
+    delete watcher_;
 }
 
 
@@ -257,18 +318,7 @@ Foam::fileMonitor::~fileMonitor()
 
 Foam::label Foam::fileMonitor::addWatch(const fileName& fName)
 {
-#ifdef FOAM_USE_STAT
-    label watchFd = lastModified_.size();
-    lastModified_.insert(watchFd, lastModified(fName));
-#else
-    label watchFd = inotify_add_watch
-    (
-        inotifyFd_,
-        fName.c_str(),
-        //IN_ALL_EVENTS
-        IN_CLOSE_WRITE | IN_DELETE_SELF | IN_MODIFY
-    );
-#endif
+    const label watchFd = watcher_->addWatch(fName);
 
     if (debug)
     {
@@ -300,11 +350,7 @@ bool Foam::fileMonitor::removeWatch(const label watchFd)
 
     state_.erase(watchFd);
     watchFile_.erase(watchFd);
-#ifdef FOAM_USE_STAT
-    return lastModified_.erase(watchFd);
-#else
-    return inotify_rm_watch(inotifyFd_, int(watchFd)) == 0;
-#endif
+    return watcher_->removeWatch(watchFd);
 }
 
 
@@ -331,7 +377,7 @@ void Foam::fileMonitor::updateStates(const bool syncPar) const
         label i = 0;
         forAllConstIter(Map<fileState>, state_, iter)
         {
-            stats[i++] = (unsigned int)(iter());
+            stats[i++] = static_cast<unsigned int>(iter());
         }
         // Save local state for warning message below
         PackedList<2> thisProcStats(stats);
@@ -378,7 +424,7 @@ void Foam::fileMonitor::updateStates(const bool syncPar) const
 void Foam::fileMonitor::setUnmodified(const label watchFd)
 {
 #ifdef FOAM_USE_STAT
-    lastModified_[watchFd] = lastModified(watchFile_[watchFd]);
+    watcher_->lastMod[watchFd] = lastModified(watchFile_[watchFd]);
 #endif
 
     Map<fileState>::iterator iter = state_.find(watchFd);

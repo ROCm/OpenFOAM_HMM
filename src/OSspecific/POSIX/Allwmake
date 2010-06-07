@@ -1,0 +1,21 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
+#
+# use <sys/inotify.h> if available (Linux)
+# unless otherwise specified (with FOAM_USE_STAT)
+#
+# eg,  ./Allwmake FOAM_USE_STAT
+#
+if [ -f /usr/include/sys/inotify.h -a "${1%USE_STAT}" = "$1" ]
+then
+    unset FOAM_FILE_MONITOR
+else
+    export FOAM_FILE_MONITOR="-DFOAM_USE_STAT"
+fi
+
+
+# make (non-shared) object
+wmake libo
+
+# ----------------------------------------------------------------- end-of-file

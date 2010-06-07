@@ -27,13 +27,13 @@ Class
 Description
     Checking for changes to files.
 
-!!!!!!!NOTE:
-    Default is to use inotify (Linux specific, since 2.6.13)
+Note
+    The default is to use inotify (Linux specific, since 2.6.13)
 
-    Compile with FOAM_USE_STAT to use the stat function call.
+    Compiling with FOAM_USE_STAT (or if /usr/include/sys/inotify.h
+    does not exist) uses the stat function call.
 
-
-    - works fine except for if file gets deleted and recreated
+    - works fine except when a file is deleted and recreated:
     it stops monitoring the file!
     (does work though if the file gets moved)
 
@@ -48,7 +48,6 @@ SourceFiles
 #include <sys/types.h>
 #include "Map.H"
 #include "NamedEnum.H"
-#include "labelList.H"
 #include "className.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -57,9 +56,10 @@ namespace Foam
 {
 
 class fileMonitor;
+class fileMonitorWatcher;
 
 /*---------------------------------------------------------------------------*\
-                           Class fileMonitor Declaration
+                         Class fileMonitor Declaration
 \*---------------------------------------------------------------------------*/
 
 class fileMonitor
@@ -73,8 +73,8 @@ public:
         enum fileState
         {
             UNMODIFIED = 0,
-            DELETED = 1,
-            MODIFIED = 2
+            MODIFIED = 1,
+            DELETED = 2,
         };
 
         static const NamedEnum<fileState, 3> fileStateNames_;
@@ -84,22 +84,16 @@ private:
 
         //- State for all watchFds
         mutable Map<fileState> state_;
-        
+
         //- From watch descriptor to filename
         HashTable<fileName, label> watchFile_;
 
-#ifdef FOAM_USE_STAT
+        //- Watch mechanism (stat or inotify)
+        mutable fileMonitorWatcher *watcher_;
 
-        //- From watch descriptor to modified time
-        mutable HashTable<label, time_t> lastModified_;
-#else
-        //- File descriptor for the inotify instance
-        int inotifyFd_;
 
-        //- Pre-allocated structure containing file descriptors
-        mutable fd_set watchSet_;
+    // Private Member Functions
 
-#endif
         //- Update state_ from any events.
         void checkFiles() const;
 
@@ -121,14 +115,13 @@ public:
         fileMonitor();
 
 
-    // Destructor
-
-        ~fileMonitor();
+    //- Destructor
+    ~fileMonitor();
 
 
     // Member Functions
 
-        //- Add file to watch. Returns watch descriptor
+        //- Add file to watch. Return watch descriptor
         label addWatch(const fileName&);
 
         //- Remove file to watch. Return true if successful
