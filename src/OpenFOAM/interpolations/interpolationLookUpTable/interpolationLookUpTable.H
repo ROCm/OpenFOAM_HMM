@@ -65,7 +65,7 @@ class interpolationLookUpTable
 {
 private:
 
-    // Privsate data
+    // Private data
 
         //- File name
         fileName fileName_;
