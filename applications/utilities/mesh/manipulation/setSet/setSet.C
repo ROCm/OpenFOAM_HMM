@@ -49,7 +49,7 @@ Description
 #include <stdio.h>
 
 
-#if READLINE != 0
+#ifdef HAS_READLINE
 # include <readline/readline.h>
 # include <readline/history.h>
 #endif
@@ -59,28 +59,9 @@ using namespace Foam;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
-#if READLINE != 0
+#ifdef HAS_READLINE
 static const char* historyFile = ".setSet";
 #endif
-
-Istream& selectStream(Istream* is0Ptr, Istream* is1Ptr)
-{
-    if (is0Ptr)
-    {
-        return *is0Ptr;
-    }
-    else if (is1Ptr)
-    {
-        return *is1Ptr;
-    }
-    else
-    {
-        FatalErrorIn("selectStream(Istream*, Istream*)")
-            << "No valid stream opened" << abort(FatalError);
-
-        return *is0Ptr;
-    }
-}
 
 
 // Write set to VTK readable files
@@ -867,7 +848,7 @@ int main(int argc, char *argv[])
     printAllSets(mesh, Info);
 
     // Read history if interactive
-#   if READLINE != 0
+#   ifdef HAS_READLINE
     if (!batch && !read_history(historyFile))
     {
         Info<< "Successfully read history from " << historyFile << endl;
@@ -949,7 +930,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-#               if READLINE != 0
+#               ifdef HAS_READLINE
                 {
                     char* linePtr = readline("readline>");
 
