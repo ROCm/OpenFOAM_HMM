@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,12 +28,13 @@ Description
     Table with uniform interval in independant variable, with linear
     interpolation
 
-    Example usage (scalar): values specified in a dictionary:
+    Example usage (scalar): values specified within a dictionary:
 
+    @verbatim
     {
-        x0              0;      // lower limit
-        dx              0.2;    // fixed interval
-        log10           true;   // take log(10) when interpolating?
+        x0          0;          // lower limit
+        dx          0.2;        // fixed interval
+        log10       true;       // take log(10) when interpolating?
         data                    // list of dependent data values
         (
             7870                // value at x0
@@ -42,6 +43,7 @@ Description
             7870                // value at x0 + n*dx
         );
     }
+    @endverbatim
 
 SourceFiles
     uniformInterpolationTable.C
@@ -73,7 +75,7 @@ class uniformInterpolationTable
 {
     // Private data
 
-        // Control parameetrs
+        // Control parameters
 
             //- Lower limit
             scalar x0_;
@@ -81,7 +83,7 @@ class uniformInterpolationTable
             //- Fixed interval
             scalar dx_;
 
-            //- Flag to indicate that x data is given in log10(x) form
+            //- Flag to indicate that x data are given in log10(x) form
             Switch log10_;
 
             //- Bound x values
@@ -101,9 +103,9 @@ public:
 
     // Constructors
 
-        //- Construct from IOobject and readFields flag. Creates a null object
-        //  if readFields = false
-        uniformInterpolationTable(const IOobject& io, const bool readFields);
+        //- Construct from IOobject and readFields flag.
+        //  Creates a null object if readFields = false
+        uniformInterpolationTable(const IOobject&, const bool readFields);
 
         //- Construct from name, objectRegistry and dictionary.
         //  If initialiseOnly flag is set, control parameters are read from
@@ -111,13 +113,13 @@ public:
         uniformInterpolationTable
         (
             const word& tableName,
-            const objectRegistry& db,
-            const dictionary& dict,
+            const objectRegistry&,
+            const dictionary&,
             const bool initialiseOnly = false
         );
 
         //- Construct as copy
-        uniformInterpolationTable(const uniformInterpolationTable& uit);
+        uniformInterpolationTable(const uniformInterpolationTable&);
 
 
     //- Destructor
@@ -174,22 +176,10 @@ public:
         // Override ancestor size() function and [] operator
 
             //- Return the size of the table
-            label size() const
-            {
-                return List<Type>::size();
-            }
+            using List<Type>::size;
 
-            //- Use List[] operator for read access
-            Type operator[](label x) const
-            {
-                return List<Type>::operator[](x);
-            }
-
-            //- Use List[] operator for write access
-            Type& operator[](label x)
-            {
-                return List<Type>::operator[](x);
-            }
+            //- Use List[] operator for read/write access
+            using List<Type>::operator[];
 
 
         // I-O

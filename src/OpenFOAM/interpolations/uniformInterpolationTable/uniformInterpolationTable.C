@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,8 +65,8 @@ Foam::uniformInterpolationTable<Type>::uniformInterpolationTable
         dict.lookup("data") >> *this;
         dict.lookup("x0") >> x0_;
         dict.lookup("dx") >> dx_;
-        dict.lookup("log10") >> log10_;
-        dict.lookup("bound") >> bound_;
+        dict.readIfPresent("log10", log10_);
+        dict.readIfPresent("bound", bound_);
     }
 
     checkTable();
@@ -94,13 +94,13 @@ Foam::uniformInterpolationTable<Type>::uniformInterpolationTable
     List<scalar>(2, 0.0),
     x0_(readScalar(dict.lookup("x0"))),
     dx_(readScalar(dict.lookup("dx"))),
-    log10_(dict.lookup("log10")),
-    bound_(dict.lookup("bound"))
+    log10_(dict.lookupOrDefault<Switch>("log10", false)),
+    bound_(dict.lookupOrDefault<Switch>("bound", false))
 {
     if (initialiseOnly)
     {
-        scalar xMax = readScalar(dict.lookup("xMax"));
-        label nIntervals = static_cast<label>(xMax - x0_)/dx_ + 1;
+        const scalar xMax = readScalar(dict.lookup("xMax"));
+        const label nIntervals = static_cast<label>(xMax - x0_)/dx_ + 1;
         this->setSize(nIntervals);
     }
     else
@@ -168,9 +168,9 @@ Type Foam::uniformInterpolationTable<Type>::interpolate(scalar x) const
         }
     }
 
-    label i = static_cast<label>((x - x0_)/dx_);
+    const label i = static_cast<label>((x - x0_)/dx_);
 
-    scalar xLo = x0_ + i*dx_;
+    const scalar xLo = x0_ + i*dx_;
 
     Type fx = (x - xLo)/dx_*(operator[](i+1) - operator[](i)) + operator[](i);
 
@@ -225,8 +225,14 @@ void Foam::uniformInterpolationTable<Type>::write() const
     dict.add("data", static_cast<const List<scalar>&>(*this));
     dict.add("x0", x0_);
     dict.add("dx", dx_);
-    dict.add("log10", log10_);
-    dict.add("bound", bound_);
+    if (log10_)
+    {
+        dict.add("log10", log10_);
+    }
+    if (bound_)
+    {
+        dict.add("bound", bound_);
+    }
 
     dict.regIOobject::write();
 }
