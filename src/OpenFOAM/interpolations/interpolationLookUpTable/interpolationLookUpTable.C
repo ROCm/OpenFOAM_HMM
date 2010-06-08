@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IFstream.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -239,7 +238,9 @@ Foam::interpolationLookUpTable<Type>::interpolationLookUpTable()
 template<class Type>
 Foam::interpolationLookUpTable<Type>::interpolationLookUpTable
 (
-    const fileName& fn, const word& instance, const fvMesh& mesh
+    const fileName& fn,
+    const word& instance,
+    const fvMesh& mesh
 )
 :
     List<scalarField>(),
@@ -357,11 +358,11 @@ void Foam::interpolationLookUpTable<Type>::write
 
     control.writeHeader(os);
 
-    os.writeKeyword("fields");
-    os << entries_ << token::END_STATEMENT << nl;
+    os.writeKeyword("fields")
+        << entries_ << token::END_STATEMENT << nl;
 
-    os.writeKeyword("output");
-    os << output_ << token::END_STATEMENT << nl;
+    os.writeKeyword("output")
+        << output_ << token::END_STATEMENT << nl;
 
     if (this->size() == 0)
     {
@@ -370,8 +371,8 @@ void Foam::interpolationLookUpTable<Type>::write
             "Foam::interpolationTable<Type>::write()"
         )   << "table is empty" << nl << exit(FatalError);
     }
-    os.writeKeyword("values");
-    os << *this << token::END_STATEMENT << nl;
+    os.writeKeyword("values")
+        << *this << token::END_STATEMENT << nl;
 }
 
 
@@ -381,8 +382,7 @@ template<class Type>
 Foam::scalarField&
 Foam::interpolationLookUpTable<Type>::operator[](const label i)
 {
-    label ii = i;
-    label n  = this->size();
+    const label n = this->size();
 
     if (n <= 1)
     {
@@ -391,22 +391,22 @@ Foam::interpolationLookUpTable<Type>::operator[](const label i)
             "Foam::interpolationLookUpTable<Type>::operator[](const label)"
         )   << "table has (" << n << ") columns" << nl << exit(FatalError);
     }
-    else if (ii < 0)
+    else if (i < 0)
     {
         FatalErrorIn
         (
             "Foam::interpolationLookUpTable<Type>::operator[](const label)"
-        )   << "index (" << ii << ") underflow" << nl << exit(FatalError);
+        )   << "index (" << i << ") underflow" << nl << exit(FatalError);
     }
-    else if (ii > n)
+    else if (i >= n)
     {
         FatalErrorIn
         (
             "Foam::interpolationLookUpTable<Type>::operator[](const label)"
-        )   << "index (" << ii << ") overflow" << nl << exit(FatalError);
+        )   << "index (" << i << ") overflow" << nl << exit(FatalError);
     }
 
-    return List<scalarField>::operator[](ii);
+    return List<scalarField>::operator[](i);
 }
 
 
@@ -414,8 +414,7 @@ template<class Type>
 const Foam::scalarField&
 Foam::interpolationLookUpTable<Type>::operator[](const label i) const
 {
-    label ii = i;
-    label n  = this->size();
+    const label n = this->size();
 
     if (n <= 1)
     {
@@ -425,26 +424,25 @@ Foam::interpolationLookUpTable<Type>::operator[](const label i) const
             "(const label) const"
         )   << "table has (" << n << ") columns" << nl << exit(FatalError);
     }
-    else if (ii < 0)
+    else if (i < 0)
     {
         FatalErrorIn
         (
             "Foam::interpolationLookUpTable<Type>::operator[]"
             "(const label) const"
-        )   << "index (" << ii << ") underflow" << nl << exit(FatalError);
+        )   << "index (" << i << ") underflow" << nl << exit(FatalError);
     }
-
-    else if (ii > n)
+    else if (i >= n)
     {
         FatalErrorIn
         (
             "Foam::interpolationLookUpTable<Type>::operator[]"
             "(const label) const"
-        )   << "index (" << ii << ") overflow" << nl
+        )   << "index (" << i << ") overflow" << nl
             << exit(FatalError);
     }
 
-    return List<scalarField>::operator[](ii);
+    return List<scalarField>::operator[](i);
 }
 
 
