@@ -256,7 +256,7 @@ void RNGkEpsilon::correct()
     volScalarField R =
         ((eta*(scalar(1) - eta/eta0_))/(scalar(1) + beta_*eta*sqr(eta)));
 
-    // Update espsilon and G at the wall
+    // Update epsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation

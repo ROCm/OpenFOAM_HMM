@@ -277,7 +277,7 @@ void realizableKE::correct()
 
     volScalarField G("RASModel::G", nut_*S2);
 
-    // Update espsilon and G at the wall
+    // Update epsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();
 
 

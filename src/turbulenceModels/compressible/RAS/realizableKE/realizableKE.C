@@ -317,7 +317,7 @@ void realizableKE::correct()
 
     volScalarField G("RASModel::G", mut_*(gradU && dev(twoSymm(gradU))));
 
-    // Update espsilon and G at the wall
+    // Update epsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation

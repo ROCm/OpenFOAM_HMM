@@ -282,7 +282,7 @@ void kEpsilon::correct()
     volScalarField G("RASModel::G", mut_*(tgradU() && dev(twoSymm(tgradU()))));
     tgradU.clear();
 
-    // Update espsilon and G at the wall
+    // Update epsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation

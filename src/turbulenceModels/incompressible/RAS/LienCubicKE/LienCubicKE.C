@@ -341,7 +341,7 @@ void LienCubicKE::correct()
         Cmu_*sqr(k_)/epsilon_*S2 - (nonlinearStress_ && gradU_)
     );
 
-    // Update espsilon and G at the wall
+    // Update epsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation
