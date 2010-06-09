@@ -50,10 +50,14 @@ namespace Foam
 // is in the cells from neighbouring processors which need to be renumbered.
 void Foam::multiLevelDecomp::subsetGlobalCellCells
 (
+    const label nDomains,
+    const label domainI,
+    const labelList& dist,
+
     const labelListList& cellCells,
     const labelList& set,
     labelListList& subCellCells,
-    label& cutConnections
+    labelList& cutConnections
 ) const
 {
     // Determine new index for cells by inverting subset
@@ -68,10 +72,14 @@ void Foam::multiLevelDecomp::subsetGlobalCellCells
     List<Map<label> > compactMap;
     mapDistribute map(globalCells, subCellCells, compactMap);
     map.distribute(oldToNew);
+    labelList allDist(dist);
+    map.distribute(allDist);
+
 
     // Now subCellCells contains indices into oldToNew which are the
     // new locations of the neighbouring cells.
 
+    cutConnections.setSize(nDomains);
     cutConnections = 0;
 
     forAll(subCellCells, subCellI)
@@ -85,7 +93,7 @@ void Foam::multiLevelDecomp::subsetGlobalCellCells
             label subCellI = oldToNew[cCells[i]];
             if (subCellI == -1)
             {
-                cutConnections++;
+                cutConnections[allDist[cCells[i]]]++;
             }
             else
             {
@@ -118,16 +126,6 @@ void Foam::multiLevelDecomp::decompose
         )
     );
 
-//Pout<< "At level " << levelI << endl;
-//forAll(dist, i)
-//{
-//    Pout<< "    " << i << " at:" << points[i]
-//        << " original:" << pointMap[i] << "  dist:" << dist[i]
-//        << " connected to:" << pointField(points, pointPoints[i])
-//        << endl;
-//}
-//Pout<< endl;
-
     forAll(pointMap, i)
     {
         label orig = pointMap[i];
@@ -146,30 +144,62 @@ void Foam::multiLevelDecomp::decompose
         finalDecomp *= methods_[levelI+1].nDomains();
 
         // Extract processor+local index from point-point addressing
-
-        forAll(domainToPoints, domainI)
+        if (debug && Pstream::master())
         {
-            const labelList& myPoints = domainToPoints[domainI];
+            Pout<< "Decomposition at level " << levelI << " :" << endl;
+        }
+
+        for (label domainI = 0; domainI < n; domainI++)
+        {
+            // Extract elements for current domain
+            const labelList domainPoints(findIndices(dist, domainI));
 
             // Subset point-wise data.
-            pointField subPoints(points, myPoints);
-            scalarField subWeights(pointWeights, myPoints);
-            labelList subPointMap(UIndirectList<label>(pointMap, myPoints));
+            pointField subPoints(points, domainPoints);
+            scalarField subWeights(pointWeights, domainPoints);
+            labelList subPointMap(UIndirectList<label>(pointMap, domainPoints));
             // Subset point-point addressing (adapt global numbering)
             labelListList subPointPoints;
-            label nOutsideConnections;
+            labelList nOutsideConnections;
             subsetGlobalCellCells
             (
+                n,
+                domainI,
+                dist,
+
                 pointPoints,
-                myPoints,
+                domainPoints,
+
                 subPointPoints,
                 nOutsideConnections
             );
 
-            //Info<< "At level " << levelI << "  domain " << domainI
-            //    << " have connections to other domains "
-            //    << returnReduce(nOutsideConnections, sumOp<label>())
-            //    << endl;
+            label nPoints = returnReduce(domainPoints.size(), plusOp<label>());
+            Pstream::listCombineGather(nOutsideConnections, plusEqOp<label>());
+            Pstream::listCombineScatter(nOutsideConnections);
+            label nPatches = 0;
+            label nFaces = 0;
+            forAll(nOutsideConnections, i)
+            {
+                if (nOutsideConnections[i] > 0)
+                {
+                    nPatches++;
+                    nFaces += nOutsideConnections[i];
+                }
+            }
+
+            string oldPrefix;
+            if (debug && Pstream::master())
+            {
+                Pout<< "    Domain " << domainI << nl
+                    << "        Number of cells = " << nPoints << nl
+                    << "        Number of inter-domain patches = " << nPatches
+                    << nl
+                    << "        Number of inter-domain faces = " << nFaces << nl
+                    << endl;
+                oldPrefix = Pout.prefix();
+                Pout.prefix() = "  " + oldPrefix;
+            }
 
             decompose
             (
@@ -181,6 +211,97 @@ void Foam::multiLevelDecomp::decompose
 
                 finalDecomp
             );
+            if (debug && Pstream::master())
+            {
+                Pout.prefix() = oldPrefix;
+            }
+        }
+
+
+        if (debug)
+        {
+            // Do straight decompose of two levels
+            label nNext = methods_[levelI+1].nDomains();
+            label nTotal = n*nNext;
+
+            // Retrieve original level0 dictionary and modify number of domains
+            dictionary::const_iterator iter = decompositionDict_.begin();
+            dictionary myDict = iter().dict();
+            myDict.set("numberOfSubdomains", nTotal);
+
+            if (debug && Pstream::master())
+            {
+                Pout<< "Reference decomposition with " << myDict << " :"
+                    << endl;
+            }
+
+            autoPtr<decompositionMethod> method0 = decompositionMethod::New
+            (
+                myDict
+            );
+            labelList dist
+            (
+                method0().decompose
+                (
+                    pointPoints,
+                    points,
+                    pointWeights
+                )
+            );
+
+            for (label blockI = 0; blockI < n; blockI++)
+            {
+                // Count the number inbetween blocks of nNext size
+
+                label nPoints = 0;
+                labelList nOutsideConnections(n, 0);
+                forAll(pointPoints, pointI)
+                {
+                    if ((dist[pointI] / nNext) == blockI)
+                    {
+                        nPoints++;
+
+                        const labelList& pPoints = pointPoints[pointI];
+
+                        forAll(pPoints, i)
+                        {
+                            label distBlockI = dist[pPoints[i]] / nNext;
+                            if (distBlockI != blockI)
+                            {
+                                nOutsideConnections[distBlockI]++;
+                            }
+                        }
+                    }
+                }
+
+                reduce(nPoints, plusOp<label>());
+                Pstream::listCombineGather
+                (
+                    nOutsideConnections,
+                    plusEqOp<label>()
+                );
+                Pstream::listCombineScatter(nOutsideConnections);
+                label nPatches = 0;
+                label nFaces = 0;
+                forAll(nOutsideConnections, i)
+                {
+                    if (nOutsideConnections[i] > 0)
+                    {
+                        nPatches++;
+                        nFaces += nOutsideConnections[i];
+                    }
+                }
+
+                if (debug && Pstream::master())
+                {
+                    Pout<< "    Domain " << blockI << nl
+                        << "        Number of cells = " << nPoints << nl
+                        << "        Number of inter-domain patches = "
+                        << nPatches << nl
+                        << "        Number of inter-domain faces = " << nFaces
+                        << nl << endl;
+                }
+            }
         }
     }
 }

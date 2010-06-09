@@ -59,10 +59,14 @@ class multiLevelDecomp
         //  for a (consistent) subset
         void subsetGlobalCellCells
         (
+            const label nDomains,
+            const label domainI,
+            const labelList& dist,
+
             const labelListList& cellCells,
             const labelList& set,
             labelListList& subCellCells,
-            label& cutConnections
+            labelList& cutConnections
         ) const;
 
         //- Decompose level methodI without addressing

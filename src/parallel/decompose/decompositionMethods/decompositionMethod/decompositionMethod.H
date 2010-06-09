@@ -70,25 +70,6 @@ protected:
         //  (usually there is only one)
         static label masterFace(const polyMesh&, const label, const label);
 
-//        // From mesh to compact row storage format
-//        // (like CompactListList)
-//        static void calcCSR
-//        (
-//            const polyMesh& mesh,
-//            List<int>& adjncy,
-//            List<int>& xadj
-//        );
-//
-//        // From cell-cell connections to compact row storage format
-//        // (like CompactListList)
-//        static void calcCSR
-//        (
-//            const labelListList& cellCells,
-//            List<int>& adjncy,
-//            List<int>& xadj
-//        );
-
-
 private:
 
     // Private Member Functions
