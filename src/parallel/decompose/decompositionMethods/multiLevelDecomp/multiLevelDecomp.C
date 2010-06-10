@@ -225,7 +225,8 @@ void Foam::multiLevelDecomp::decompose
             label nTotal = n*nNext;
 
             // Retrieve original level0 dictionary and modify number of domains
-            dictionary::const_iterator iter = decompositionDict_.begin();
+            dictionary::const_iterator iter =
+                decompositionDict_.subDict(typeName + "Coeffs").begin();
             dictionary myDict = iter().dict();
             myDict.set("numberOfSubdomains", nTotal);
 
