@@ -81,7 +81,7 @@ solvers
     {
         solver          smoothSolver;
         smoother        GaussSeidel;
-        tolerance       1e-08;
+        tolerance       1e-9;
         relTol          0;
         nSweeps         1;
     }
@@ -94,7 +94,7 @@ PISO
     nAlphaCorr      4;
     nAlphaSubCycles 4;
     cycleAlpha      yes;
-    cAlpha          4;
+    cAlpha          2;
 }
 
 
