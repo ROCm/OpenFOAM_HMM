@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -39,7 +39,7 @@ laplacianSchemes
 {
     default         none;
     laplacian(muEff,U) Gauss linear uncorrected;
-    laplacian((rho*(1|A(U))),p) Gauss linear uncorrected;
+    laplacian((rho*(1|A(U))),p_rgh) Gauss linear uncorrected;
     laplacian(alphaEff,h) Gauss linear uncorrected;
     laplacian(DkEff,k) Gauss linear uncorrected;
     laplacian(DepsilonEff,epsilon) Gauss linear uncorrected;
@@ -59,7 +59,7 @@ snGradSchemes
 fluxRequired
 {
     default         no;
-    p;
+    p_rgh;
 }
 
 

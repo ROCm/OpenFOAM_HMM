@@ -25,7 +25,7 @@ Class
     Foam::interpolationCell
 
 Description
-    Foam::interpolationCell
+    Uses the cell value for any point in the cell
 
 \*---------------------------------------------------------------------------*/
 
