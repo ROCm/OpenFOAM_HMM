@@ -47,9 +47,21 @@ turbulenceModel::turbulenceModel
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermophysicalModel
+    const basicThermo& thermophysicalModel,
+    const word& turbulenceModelName
 )
 :
+    regIOobject
+    (
+        IOobject
+        (
+            turbulenceModelName,
+            U.time().constant(),
+            U.db(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        )
+    ),
     runTime_(U.time()),
     mesh_(U.mesh()),
 
@@ -67,7 +79,8 @@ autoPtr<turbulenceModel> turbulenceModel::New
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermophysicalModel
+    const basicThermo& thermophysicalModel,
+    const word& turbulenceModelName
 )
 {
     // get model name, but do not register the dictionary
@@ -99,7 +112,7 @@ autoPtr<turbulenceModel> turbulenceModel::New
         (
             "turbulenceModel::New(const volScalarField&, "
             "const volVectorField&, const surfaceScalarField&, "
-            "basicThermo&)"
+            "basicThermo&, const word&)"
         )   << "Unknown turbulenceModel type "
             << modelType << nl << nl
             << "Valid turbulenceModel types:" << endl
@@ -109,7 +122,7 @@ autoPtr<turbulenceModel> turbulenceModel::New
 
     return autoPtr<turbulenceModel>
     (
-        cstrIter()(rho, U, phi, thermophysicalModel)
+        cstrIter()(rho, U, phi, thermophysicalModel, turbulenceModelName)
     );
 }
 

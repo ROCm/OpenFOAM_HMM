@@ -27,7 +27,6 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
-#include "RASModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,6 +61,7 @@ turbulentHeatFluxTemperatureFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(p, iF),
+    temperatureCoupledBase(patch(), "undefined", "undefined-K"),
     heatSource_(hsPower),
     q_(p.size(), 0.0)
 {}
@@ -77,6 +77,7 @@ turbulentHeatFluxTemperatureFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(ptf, p, iF, mapper),
+    temperatureCoupledBase(patch(), ptf.KMethod(), ptf.KName()),
     heatSource_(ptf.heatSource_),
     q_(ptf.q_, mapper)
 {}
@@ -91,6 +92,7 @@ turbulentHeatFluxTemperatureFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(p, iF),
+    temperatureCoupledBase(patch(), dict),
     heatSource_(heatSourceTypeNames_.read(dict.lookup("heatSource"))),
     q_("q", dict, p.size())
 {
@@ -106,6 +108,7 @@ turbulentHeatFluxTemperatureFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(thftpsf),
+    temperatureCoupledBase(patch(), thftpsf.KMethod(), thftpsf.KName()),
     heatSource_(thftpsf.heatSource_),
     q_(thftpsf.q_)
 {}
@@ -119,6 +122,7 @@ turbulentHeatFluxTemperatureFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(thftpsf, iF),
+    temperatureCoupledBase(patch(), thftpsf.KMethod(), thftpsf.KName()),
     heatSource_(thftpsf.heatSource_),
     q_(thftpsf.q_)
 {}
@@ -161,27 +165,19 @@ void turbulentHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const label patchI = patch().index();
-
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-
-    const scalarField alphaEffp = rasModel.alphaEff(patchI);
-
     const scalarField& Tp = *this;
-
-    const scalarField Cpp = rasModel.thermo().Cp(Tp, patchI);
 
     switch (heatSource_)
     {
         case hsPower:
         {
             const scalar Ap = gSum(patch().magSf());
-            gradient() = q_/(Ap*Cpp*alphaEffp);
+            gradient() = q_/(Ap*K(Tp));
             break;
         }
         case hsFlux:
         {
-            gradient() = q_/(Cpp*alphaEffp);
+            gradient() = q_/K(Tp);
             break;
         }
         default:
@@ -208,12 +204,11 @@ void turbulentHeatFluxTemperatureFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchScalarField::write(os);
+    fixedGradientFvPatchScalarField::write(os);
     os.writeKeyword("heatSource") << heatSourceTypeNames_[heatSource_]
         << token::END_STATEMENT << nl;
+    temperatureCoupledBase::write(os);
     q_.writeEntry("q", os);
-    gradient().writeEntry("gradient", os);
-    writeEntry("value", os);
 }
 
 

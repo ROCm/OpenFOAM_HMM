@@ -22,30 +22,29 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::compressible::turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
+    turbulentTemperatureCoupledBaffleFvPatchScalarField
 
 Description
-    Mixed boundary condition for temperature, to be used for heat-transfer
-    on back-to-back baffles.
+    Harmonic fixed value boundary condition for temperature, to be used
+    for heat-transfer on back-to-back baffles.
 
-    If my temperature is T1, neighbour is T2:
+    If my temperature is T1, heat conductivity K1 and neighbour is T2,K2
 
-    T1 > T2: my side becomes fixedValue T2 bc, other side becomes fixedGradient.
-
+    both sides get fixedValue (K1/dx1*T1 + K2/dx2*T2)/(K1/dx1+K2/dx2)
 
     Example usage:
         myInterfacePatchName
         {
-            type        compressible::turbulentTemperatureCoupledBaffleMixed;
+            type    compressible::turbulentTemperatureCoupledBaffle;
             neighbourFieldName  T;
-            K                   K; // or none
+            K                   lookup;
+            KName               K; // or none
             value               uniform 300;
         }
 
     Needs to be on underlying directMapped(Wall)FvPatch.
 
-    Note: if K is "none" looks up RASModel and basicThermo, otherwise expects
-    the solver to calculate a 'K' field.
+    Note: see temperatureCoupledBase on ways to specify K.
 
     Note: runs in parallel with arbitrary decomposition. Uses directMapped
     functionality to calculate exchange.
@@ -57,58 +56,59 @@ Description
     this for last outer iteration but don't have access to this.
 
 SourceFiles
-    turbulentTemperatureCoupledBaffleMixedFvPatchScalarField.C
+    turbulentTemperatureCoupledBaffleFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef turbulentTemperatureCoupledBaffleMixedFvPatchScalarField_H
-#define turbulentTemperatureCoupledBaffleMixedFvPatchScalarField_H
+#ifndef turbulentTemperatureCoupledBaffleFvPatchScalarField_H
+#define turbulentTemperatureCoupledBaffleFvPatchScalarField_H
 
-//#include "fvPatchFields.H"
-#include "mixedFvPatchFields.H"
-//#include "fvPatch.H"
+#include "fixedValueFvPatchFields.H"
+#include "temperatureCoupledBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace compressible
-{
 
 /*---------------------------------------------------------------------------*\
-   Class turbulentTemperatureCoupledBaffleMixedFvPatchScalarField Declaration
+        Class turbulentTemperatureCoupledBaffleFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
+class turbulentTemperatureCoupledBaffleFvPatchScalarField
 :
-    public mixedFvPatchScalarField
+    public fixedValueFvPatchScalarField,
+    public temperatureCoupledBase
 {
     // Private data
 
         //- Name of field on the neighbour region
         const word neighbourFieldName_;
 
-        //- Name of thermal conductivity field
-        const word KName_;
+
+    // Private Member Functions
+
+        //- Am I or neighbour owner of interface
+        bool interfaceOwner(const polyMesh&, const polyPatch&) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("compressible::turbulentTemperatureCoupledBaffleMixed");
+    TypeName("compressible::turbulentTemperatureCoupledBaffle");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
+        turbulentTemperatureCoupledBaffleFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
+        turbulentTemperatureCoupledBaffleFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -116,11 +116,10 @@ public:
         );
 
         //- Construct by mapping given
-        //  turbulentTemperatureCoupledBaffleMixedFvPatchScalarField onto a
-        //  new patch
-        turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
+        //  turbulentTemperatureCoupledBaffleFvPatchScalarField onto a new patch
+        turbulentTemperatureCoupledBaffleFvPatchScalarField
         (
-            const turbulentTemperatureCoupledBaffleMixedFvPatchScalarField&,
+            const turbulentTemperatureCoupledBaffleFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
@@ -131,17 +130,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
-                (
-                    *this
-                )
+                new turbulentTemperatureCoupledBaffleFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
+        turbulentTemperatureCoupledBaffleFvPatchScalarField
         (
-            const turbulentTemperatureCoupledBaffleMixedFvPatchScalarField&,
+            const turbulentTemperatureCoupledBaffleFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -153,7 +149,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
+                new turbulentTemperatureCoupledBaffleFvPatchScalarField
                 (
                     *this,
                     iF
@@ -163,9 +159,6 @@ public:
 
 
     // Member functions
-
-        //- Get corresponding K field
-        tmp<scalarField> K() const;
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
@@ -177,7 +170,6 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace compressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

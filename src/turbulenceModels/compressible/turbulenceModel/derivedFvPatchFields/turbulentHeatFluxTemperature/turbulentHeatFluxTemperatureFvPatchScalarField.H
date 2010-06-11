@@ -36,6 +36,7 @@ Description
             type            compressible::turbulentHeatFluxTemperature;
             heatSource      flux;        // power [W]; flux [W/m2]
             q               uniform 10;  // heat power or flux
+            K               basicThermo; // calculate K by alphaEff*thermo.Cp
             value           uniform 300; // initial temperature value
         }
 
@@ -48,9 +49,8 @@ SourceFiles
 #ifndef turbulentHeatFluxTemperatureFvPatchScalarFields_H
 #define turbulentHeatFluxTemperatureFvPatchScalarFields_H
 
-#include "fvPatchFields.H"
 #include "fixedGradientFvPatchFields.H"
-#include "NamedEnum.H"
+#include "temperatureCoupledBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,7 +65,8 @@ namespace compressible
 
 class turbulentHeatFluxTemperatureFvPatchScalarField
 :
-    public fixedGradientFvPatchScalarField
+    public fixedGradientFvPatchScalarField,
+    public temperatureCoupledBase
 {
 public:
 

@@ -28,9 +28,6 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "directMappedPatchBase.H"
-#include "regionProperties.H"
-#include "basicThermo.H"
-#include "RASModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,8 +49,8 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    neighbourFieldName_("undefined-neighbourFieldName"),
-    KName_("undefined-K")
+    temperatureCoupledBase(patch(), "undefined", "undefined-K"),
+    neighbourFieldName_("undefined-neighbourFieldName")
 {
     this->refValue() = 0.0;
     this->refGrad() = 0.0;
@@ -71,8 +68,8 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf, p, iF, mapper),
-    neighbourFieldName_(ptf.neighbourFieldName_),
-    KName_(ptf.KName_)
+    temperatureCoupledBase(patch(), ptf.KMethod(), ptf.KName()),
+    neighbourFieldName_(ptf.neighbourFieldName_)
 {}
 
 
@@ -85,8 +82,8 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    neighbourFieldName_(dict.lookup("neighbourFieldName")),
-    KName_(dict.lookup("K"))
+    temperatureCoupledBase(patch(), dict),
+    neighbourFieldName_(dict.lookup("neighbourFieldName"))
 {
     if (!isA<directMappedPatchBase>(this->patch().patch()))
     {
@@ -134,59 +131,12 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(wtcsf, iF),
-    neighbourFieldName_(wtcsf.neighbourFieldName_),
-    KName_(wtcsf.KName_)
+    temperatureCoupledBase(patch(), wtcsf.KMethod(), wtcsf.KName()),
+    neighbourFieldName_(wtcsf.neighbourFieldName_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-tmp<scalarField>
-turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::K() const
-{
-    const fvMesh& mesh = patch().boundaryMesh().mesh();
-
-    if (KName_ == "none")
-    {
-        const compressible::RASModel& model =
-            db().lookupObject<compressible::RASModel>("RASProperties");
-
-        const basicThermo& thermo =
-            db().lookupObject<basicThermo>("thermophysicalProperties");
-
-        return
-            model.alphaEff()().boundaryField()[patch().index()]
-           *thermo.Cp()().boundaryField()[patch().index()];
-    }
-    else if (mesh.objectRegistry::foundObject<volScalarField>(KName_))
-    {
-        return patch().lookupPatchField<volScalarField, scalar>(KName_);
-    }
-    else if (mesh.objectRegistry::foundObject<volSymmTensorField>(KName_))
-    {
-        const symmTensorField& KWall =
-            patch().lookupPatchField<volSymmTensorField, scalar>(KName_);
-
-        vectorField n = patch().nf();
-
-        return n & KWall & n;
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::K()"
-            " const"
-        )   << "Did not find field " << KName_
-            << " on mesh " << mesh.name() << " patch " << patch().name()
-            << endl
-            << "Please set 'K' to 'none', a valid volScalarField"
-            << " or a valid volSymmTensorField." << exit(FatalError);
-
-        return scalarField(0);
-    }
-}
-
 
 void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
 {
@@ -240,7 +190,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
     );
 
     // Swap to obtain full local values of neighbour K*delta
-    scalarField nbrKDelta = nbrField.K()*nbrPatch.deltaCoeffs();
+    scalarField nbrKDelta = nbrField.K(nbrField)*nbrPatch.deltaCoeffs();
     mapDistribute::distribute
     (
         Pstream::defaultCommsType,
@@ -251,7 +201,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
         nbrKDelta
     );
 
-    tmp<scalarField> myKDelta = K()*patch().deltaCoeffs();
+    tmp<scalarField> myKDelta = K(*this)*patch().deltaCoeffs();
 
 
     // Both sides agree on
@@ -281,7 +231,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
 
     if (debug)
     {
-        scalar Q = gSum(K()*patch().magSf()*snGrad());
+        scalar Q = gSum(K(*this)*patch().magSf()*snGrad());
 
         Info<< patch().boundaryMesh().mesh().name() << ':'
             << patch().name() << ':'
@@ -307,7 +257,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::write
     mixedFvPatchScalarField::write(os);
     os.writeKeyword("neighbourFieldName")<< neighbourFieldName_
         << token::END_STATEMENT << nl;
-    os.writeKeyword("K") << KName_ << token::END_STATEMENT << nl;
+    temperatureCoupledBase::write(os);
 }
 
 

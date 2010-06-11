@@ -29,8 +29,6 @@ License
 #include "volFields.H"
 #include "directMappedPatchBase.H"
 #include "regionProperties.H"
-#include "basicThermo.H"
-#include "RASModel.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -111,8 +109,8 @@ turbulentTemperatureCoupledBaffleFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    neighbourFieldName_("undefined-neighbourFieldName"),
-    KName_("undefined-K")
+    temperatureCoupledBase(patch(), "undefined", "undefined-K"),
+    neighbourFieldName_("undefined-neighbourFieldName")
 {}
 
 
@@ -126,8 +124,8 @@ turbulentTemperatureCoupledBaffleFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
-    neighbourFieldName_(ptf.neighbourFieldName_),
-    KName_(ptf.KName_)
+    temperatureCoupledBase(patch(), ptf.KMethod(), ptf.KName()),
+    neighbourFieldName_(ptf.neighbourFieldName_)
 {}
 
 
@@ -140,8 +138,8 @@ turbulentTemperatureCoupledBaffleFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    neighbourFieldName_(dict.lookup("neighbourFieldName")),
-    KName_(dict.lookup("K"))
+    temperatureCoupledBase(patch(), dict),
+    neighbourFieldName_(dict.lookup("neighbourFieldName"))
 {
     if (!isA<directMappedPatchBase>(this->patch().patch()))
     {
@@ -172,60 +170,12 @@ turbulentTemperatureCoupledBaffleFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(wtcsf, iF),
-    neighbourFieldName_(wtcsf.neighbourFieldName_),
-    KName_(wtcsf.KName_)
+    temperatureCoupledBase(patch(), wtcsf.KMethod(), wtcsf.KName()),
+    neighbourFieldName_(wtcsf.neighbourFieldName_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::tmp<Foam::scalarField>
-Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::K() const
-{
-    const fvMesh& mesh = patch().boundaryMesh().mesh();
-
-    if (KName_ == "none")
-    {
-        const compressible::RASModel& model =
-            db().lookupObject<compressible::RASModel>("RASProperties");
-
-        tmp<volScalarField> talpha = model.alphaEff();
-
-        const basicThermo& thermo =
-            db().lookupObject<basicThermo>("thermophysicalProperties");
-
-        return
-            talpha().boundaryField()[patch().index()]
-           *thermo.Cp()().boundaryField()[patch().index()];
-    }
-    else if (mesh.objectRegistry::foundObject<volScalarField>(KName_))
-    {
-        return patch().lookupPatchField<volScalarField, scalar>(KName_);
-    }
-    else if (mesh.objectRegistry::foundObject<volSymmTensorField>(KName_))
-    {
-        const symmTensorField& KWall =
-            patch().lookupPatchField<volSymmTensorField, scalar>(KName_);
-
-        vectorField n = patch().nf();
-
-        return n & KWall & n;
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "turbulentTemperatureCoupledBaffleFvPatchScalarField::K() const"
-        )   << "Did not find field " << KName_
-            << " on mesh " << mesh.name() << " patch " << patch().name()
-            << endl
-            << "Please set 'K' to 'none', a valid volScalarField"
-            << " or a valid volSymmTensorField." << exit(FatalError);
-
-        return scalarField(0);
-    }
-}
-
 
 void Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::updateCoeffs()
 {
@@ -283,7 +233,7 @@ void Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::updateCoeffs()
         );
 
         // Swap to obtain full local values of neighbour K*delta
-        scalarField nbrKDelta = nbrField.K()*nbrPatch.deltaCoeffs();
+        scalarField nbrKDelta = nbrField.K(nbrField)*nbrPatch.deltaCoeffs();
         mapDistribute::distribute
         (
             Pstream::defaultCommsType,
@@ -294,7 +244,7 @@ void Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::updateCoeffs()
             nbrKDelta
         );
 
-        tmp<scalarField> myKDelta = K()*patch().deltaCoeffs();
+        tmp<scalarField> myKDelta = K(*this)*patch().deltaCoeffs();
 
         // Calculate common wall temperature. Reuse *this to store common value.
         scalarField Twall
@@ -326,7 +276,7 @@ void Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::updateCoeffs()
         //    (*this-intFld())
         //  * patch().deltaCoeffs();
 
-        scalar Q = gSum(K()*patch().magSf()*snGrad());
+        scalar Q = gSum(K(*this)*patch().magSf()*snGrad());
 
         Info<< patch().boundaryMesh().mesh().name() << ':'
             << patch().name() << ':'
@@ -354,7 +304,7 @@ void Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::write
     fixedValueFvPatchScalarField::write(os);
     os.writeKeyword("neighbourFieldName")<< neighbourFieldName_
         << token::END_STATEMENT << nl;
-    os.writeKeyword("K") << KName_ << token::END_STATEMENT << nl;
+    temperatureCoupledBase::write(os);
 }
 
 

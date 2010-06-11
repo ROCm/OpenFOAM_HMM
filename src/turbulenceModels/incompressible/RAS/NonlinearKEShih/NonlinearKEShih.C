@@ -47,10 +47,11 @@ NonlinearKEShih::NonlinearKEShih
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& transport
+    transportModel& transport,
+    const word& turbulenceModelName
 )
 :
-    RASModel(typeName, U, phi, transport),
+    RASModel(typeName, U, phi, transport, turbulenceModelName),
 
     C1_
     (

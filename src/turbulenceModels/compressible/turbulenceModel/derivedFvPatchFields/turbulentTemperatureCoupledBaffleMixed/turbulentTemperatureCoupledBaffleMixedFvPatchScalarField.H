@@ -22,29 +22,34 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    turbulentTemperatureCoupledBaffleFvPatchScalarField
+    Foam::compressible::turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 
 Description
-    Harmonic fixed value boundary condition for temperature, to be used
-    for heat-transfer on back-to-back baffles.
+    Mixed boundary condition for temperature, to be used for heat-transfer
+    on back-to-back baffles.
 
-    If my temperature is T1, heat conductivity K1 and neighbour is T2,K2
+    If my temperature is T1, neighbour is T2:
 
-    both sides get fixedValue (K1/dx1*T1 + K2/dx2*T2)/(K1/dx1+K2/dx2)
+    T1 > T2: my side becomes fixedValue T2 bc, other side becomes fixedGradient.
+
 
     Example usage:
         myInterfacePatchName
         {
-            type    compressible::turbulentTemperatureCoupledBaffle;
+            type        compressible::turbulentTemperatureCoupledBaffleMixed;
             neighbourFieldName  T;
-            K                   K; // or none
+            K                   lookup;
+            KName               K;
             value               uniform 300;
         }
 
     Needs to be on underlying directMapped(Wall)FvPatch.
 
-    Note: if K is "none" looks up RASModel and basicThermo, otherwise expects
-    the solver to calculate a 'K' field.
+    Note: K : heat conduction at patch. Gets supplied how to lookup/calculate K:
+    - 'lookup' : lookup volScalarField (or volSymmTensorField) with name
+    - 'basicThermo' : use basicThermo and compressible::RASmodel to calculate K
+    - 'solidThermo' : use basicSolidThermo K()
+    - 'directionalSolidThermo' directionalK()
 
     Note: runs in parallel with arbitrary decomposition. Uses directMapped
     functionality to calculate exchange.
@@ -56,60 +61,55 @@ Description
     this for last outer iteration but don't have access to this.
 
 SourceFiles
-    turbulentTemperatureCoupledBaffleFvPatchScalarField.C
+    turbulentTemperatureCoupledBaffleMixedFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef turbulentTemperatureCoupledBaffleFvPatchScalarField_H
-#define turbulentTemperatureCoupledBaffleFvPatchScalarField_H
+#ifndef turbulentTemperatureCoupledBaffleMixedFvPatchScalarField_H
+#define turbulentTemperatureCoupledBaffleMixedFvPatchScalarField_H
 
-#include "fixedValueFvPatchFields.H"
+#include "mixedFvPatchFields.H"
+#include "temperatureCoupledBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace compressible
+{
 
 /*---------------------------------------------------------------------------*\
-        Class turbulentTemperatureCoupledBaffleFvPatchScalarField Declaration
+   Class turbulentTemperatureCoupledBaffleMixedFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class turbulentTemperatureCoupledBaffleFvPatchScalarField
+class turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 :
-    public fixedValueFvPatchScalarField
+    public mixedFvPatchScalarField,
+    public temperatureCoupledBase
 {
     // Private data
 
         //- Name of field on the neighbour region
         const word neighbourFieldName_;
 
-        //- Name of thermal conductivity field
-        const word KName_;
-
-
-    // Private Member Functions
-
-        //- Am I or neighbour owner of interface
-        bool interfaceOwner(const polyMesh&, const polyPatch&) const;
-
 
 public:
 
     //- Runtime type information
-    TypeName("compressible::turbulentTemperatureCoupledBaffle");
+    TypeName("compressible::turbulentTemperatureCoupledBaffleMixed");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        turbulentTemperatureCoupledBaffleFvPatchScalarField
+        turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        turbulentTemperatureCoupledBaffleFvPatchScalarField
+        turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -117,10 +117,11 @@ public:
         );
 
         //- Construct by mapping given
-        //  turbulentTemperatureCoupledBaffleFvPatchScalarField onto a new patch
-        turbulentTemperatureCoupledBaffleFvPatchScalarField
+        //  turbulentTemperatureCoupledBaffleMixedFvPatchScalarField onto a
+        //  new patch
+        turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
         (
-            const turbulentTemperatureCoupledBaffleFvPatchScalarField&,
+            const turbulentTemperatureCoupledBaffleMixedFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
@@ -131,14 +132,17 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new turbulentTemperatureCoupledBaffleFvPatchScalarField(*this)
+                new turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
+                (
+                    *this
+                )
             );
         }
 
         //- Construct as copy setting internal field reference
-        turbulentTemperatureCoupledBaffleFvPatchScalarField
+        turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
         (
-            const turbulentTemperatureCoupledBaffleFvPatchScalarField&,
+            const turbulentTemperatureCoupledBaffleMixedFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -150,7 +154,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new turbulentTemperatureCoupledBaffleFvPatchScalarField
+                new turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
                 (
                     *this,
                     iF
@@ -160,9 +164,6 @@ public:
 
 
     // Member functions
-
-        //- Get corresponding K field
-        tmp<scalarField> K() const;
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
@@ -174,6 +175,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace compressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

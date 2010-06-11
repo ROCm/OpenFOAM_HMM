@@ -58,10 +58,11 @@ RASModel::RASModel
     const word& type,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& transport
+    transportModel& transport,
+    const word& turbulenceModelName
 )
 :
-    turbulenceModel(U, phi, transport),
+    turbulenceModel(U, phi, transport, turbulenceModelName),
 
     IOdictionary
     (
@@ -101,7 +102,8 @@ autoPtr<RASModel> RASModel::New
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& transport
+    transportModel& transport,
+    const word& turbulenceModelName
 )
 {
     // get model name, but do not register the dictionary
@@ -135,7 +137,8 @@ autoPtr<RASModel> RASModel::New
             "("
                 "const volVectorField&, "
                 "const surfaceScalarField&, "
-                "transportModel&"
+                "transportModel&, "
+                "const word&"
             ")"
         )   << "Unknown RASModel type "
             << modelType << nl << nl
@@ -144,7 +147,10 @@ autoPtr<RASModel> RASModel::New
             << exit(FatalError);
     }
 
-    return autoPtr<RASModel>(cstrIter()(U, phi, transport));
+    return autoPtr<RASModel>
+    (
+        cstrIter()(U, phi, transport, turbulenceModelName)
+    );
 }
 
 
@@ -206,7 +212,22 @@ void RASModel::correct()
 
 bool RASModel::read()
 {
-    if (regIOobject::read())
+    //if (regIOobject::read())
+
+    // Bit of trickery : we are both IOdictionary ('RASProperties') and
+    // an regIOobject from the turbulenceModel level. Problem is to distinguish
+    // between the two - we only want to reread the IOdictionary.
+    
+    bool ok = IOdictionary::readData
+    (
+        IOdictionary::readStream
+        (
+            IOdictionary::type()
+        )
+    );
+    IOdictionary::close();
+
+    if (ok)
     {
         lookup("turbulence") >> turbulence_;
 
