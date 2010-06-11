@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs            ("libOpenFOAM.so" "libcompressibleTurbulenceModel.so" "libcompressibleRASModels.so");
+libs            ("libcompressibleTurbulenceModel.so" "libcompressibleRASModels.so");
 
 application     chtMultiRegionFoam;
 
