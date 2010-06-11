@@ -36,7 +36,8 @@ Foam::IOField<Type>::IOField(const IOobject& io)
     if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
     {
         WarningIn("IOField::IOField(const IOobject&)")
-            << "IOField constructed with IOobject::MUST_READ_IF_MODIFIED"
+            << "IOField " << name()
+            << " constructed with IOobject::MUST_READ_IF_MODIFIED"
             " but IOField does not support automatic rereading."
             << endl;
     }
@@ -65,7 +66,8 @@ Foam::IOField<Type>::IOField(const IOobject& io, const label size)
     if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
     {
         WarningIn("IOField::IOField(const IOobject&, const label)")
-            << "IOField constructed with IOobject::MUST_READ_IF_MODIFIED"
+            << "IOField " << name()
+            << " constructed with IOobject::MUST_READ_IF_MODIFIED"
             " but IOField does not support automatic rereading."
             << endl;
     }
@@ -98,7 +100,8 @@ Foam::IOField<Type>::IOField(const IOobject& io, const Field<Type>& f)
     if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
     {
         WarningIn("IOField::IOField(const IOobject&, const Field<Type>&)")
-            << "IOField constructed with IOobject::MUST_READ_IF_MODIFIED"
+            << "IOField " << name()
+            << " constructed with IOobject::MUST_READ_IF_MODIFIED"
             " but IOField does not support automatic rereading."
             << endl;
     }
@@ -133,7 +136,8 @@ Foam::IOField<Type>::IOField(const IOobject& io, const Xfer<Field<Type> >& f)
         WarningIn
         (
             "IOField::IOField(const IOobject&, const Xfer<Field<Type> >&)"
-        )   << "IOField constructed with IOobject::MUST_READ_IF_MODIFIED"
+        )   << "IOField " << name()
+            << " constructed with IOobject::MUST_READ_IF_MODIFIED"
             " but IOField does not support automatic rereading."
             << endl;
     }
