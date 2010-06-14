@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -309,12 +309,12 @@ public:
 
         // Operations
 
-            //- Set solution in given cells and eliminate corresponding
-            //  equations from the matrix
+            //- Set solution in given cells to the specified values
+            //  and eliminate the corresponding equations from the matrix.
             void setValues
             (
-                const labelList& cells,
-                const Field<Type>& values
+                const unallocLabelList& cells,
+                const UList<Type>& values
             );
 
             //- Set reference level for solution

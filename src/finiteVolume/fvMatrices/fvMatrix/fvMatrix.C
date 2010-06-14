@@ -393,13 +393,11 @@ Foam::fvMatrix<Type>::~fvMatrix()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Set solution in given cells and eliminate corresponding
-// equations from the matrix
 template<class Type>
 void Foam::fvMatrix<Type>::setValues
 (
-    const labelList& cellLabels,
-    const Field<Type>& values
+    const unallocLabelList& cellLabels,
+    const UList<Type>& values
 )
 {
     const fvMesh& mesh = psi_.mesh();
@@ -417,10 +415,11 @@ void Foam::fvMatrix<Type>::setValues
 
     forAll(cellLabels, i)
     {
-        label celli = cellLabels[i];
+        const label celli = cellLabels[i];
+        const Type& value = values[i];
 
-        psi[celli] = values[i];
-        source_[celli] = values[i]*Diag[celli];
+        psi[celli] = value;
+        source_[celli] = value*Diag[celli];
 
         if (symmetric() || asymmetric())
         {
@@ -428,7 +427,7 @@ void Foam::fvMatrix<Type>::setValues
 
             forAll(c, j)
             {
-                label facei = c[j];
+                const label facei = c[j];
 
                 if (mesh.isInternalFace(facei))
                 {
@@ -436,11 +435,11 @@ void Foam::fvMatrix<Type>::setValues
                     {
                         if (celli == own[facei])
                         {
-                            source_[nei[facei]] -= upper()[facei]*values[i];
+                            source_[nei[facei]] -= upper()[facei]*value;
                         }
                         else
                         {
-                            source_[own[facei]] -= upper()[facei]*values[i];
+                            source_[own[facei]] -= upper()[facei]*value;
                         }
 
                         upper()[facei] = 0.0;
@@ -449,11 +448,11 @@ void Foam::fvMatrix<Type>::setValues
                     {
                         if (celli == own[facei])
                         {
-                            source_[nei[facei]] -= lower()[facei]*values[i];
+                            source_[nei[facei]] -= lower()[facei]*value;
                         }
                         else
                         {
-                            source_[own[facei]] -= upper()[facei]*values[i];
+                            source_[own[facei]] -= upper()[facei]*value;
                         }
 
                         upper()[facei] = 0.0;
