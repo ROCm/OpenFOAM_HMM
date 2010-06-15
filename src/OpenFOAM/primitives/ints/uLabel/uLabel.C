@@ -41,6 +41,12 @@ const uLabel pTraits<uLabel>::max = uLabelMax;
 
 const char* pTraits<uLabel>::componentNames[] = { "x" };
 
+pTraits<uLabel>::pTraits(const uLabel& p)
+:
+    p_(p)
+{}
+
+
 pTraits<uLabel>::pTraits(Istream& is)
 {
     is >> p_;

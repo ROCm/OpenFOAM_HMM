@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,10 +28,16 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const char* const Foam::pTraits<bool>::typeName = "bool";
-const bool Foam::pTraits<bool>::zero(false);
-const bool Foam::pTraits<bool>::one(true);
+const bool Foam::pTraits<bool>::zero = false;
+const bool Foam::pTraits<bool>::one = true;
 
 const char* Foam::pTraits<bool>::componentNames[] = { "x" };
+
+Foam::pTraits<bool>::pTraits(const bool& p)
+:
+    p_(p)
+{}
+
 
 Foam::pTraits<bool>::pTraits(Istream& is)
 {
