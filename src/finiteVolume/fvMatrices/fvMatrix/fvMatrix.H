@@ -101,6 +101,8 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > operator&
 template<class Type>
 Ostream& operator<<(Ostream&, const fvMatrix<Type>&);
 
+template<class T> class UIndirectList;
+
 
 /*---------------------------------------------------------------------------*\
                            Class fvMatrix Declaration
@@ -192,6 +194,16 @@ public:
                 Field<Type>& source,
                 const bool couples=true
             ) const;
+
+        // Matrix manipulation functionality
+
+            //- Set solution in given cells to the specified values
+            template<template<class> class ListType>
+            void setValuesFromList
+            (
+                const unallocLabelList& cells,
+                const ListType<Type>& values
+            );
 
 
 public:
@@ -315,6 +327,14 @@ public:
             (
                 const unallocLabelList& cells,
                 const UList<Type>& values
+            );
+
+            //- Set solution in given cells to the specified values
+            //  and eliminate the corresponding equations from the matrix.
+            void setValues
+            (
+                const unallocLabelList& cells,
+                const UIndirectList<Type>& values
             );
 
             //- Set reference level for solution
