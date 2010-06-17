@@ -83,10 +83,10 @@ class DsmcCloud
         //- Dictionary of particle properties
         IOdictionary particleProperties_;
 
-        //- A list of unique instances of molecule types in the simulation.
-        // The position of an entry in the list maps to the label identifying
-        // the typeId, i.e. where typeIdList_ = (N2 O2 CO2)
-        // N2 has typeId label = 0, O2 = 1, CO2 = 2.
+        //- A list of unique instances of molecule types in the
+        //  simulation.  The position of an entry in the list maps to
+        //  the label identifying the typeId, i.e. where typeIdList_ =
+        //  (N2 O2 CO2) N2 has typeId label = 0, O2 = 1, CO2 = 2.
         List<word> typeIdList_;
 
         //- Number of real atoms/molecules represented by a parcel
@@ -95,9 +95,9 @@ class DsmcCloud
         //- A data structure holding which particles are in which cell
         List<DynamicList<ParcelType*> > cellOccupancy_;
 
-        //- An IOField holding the value of (sigmaT * cR)max for each cell (see
-        // Bird p220). Initialised with the parcels, updated as required, and
-        // read in on start/restart.
+        //- A field holding the value of (sigmaT * cR)max for each
+        //  cell (see Bird p220). Initialised with the parcels,
+        //  updated as required, and read in on start/restart.
         volScalarField sigmaTcRMax_;
 
         //- A field holding the remainder from the previous collision selections
