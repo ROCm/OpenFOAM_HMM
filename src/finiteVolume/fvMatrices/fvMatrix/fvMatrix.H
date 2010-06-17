@@ -114,8 +114,6 @@ class fvMatrix
     public refCount,
     public lduMatrix
 {
-public:
-
     // Private data
 
         //- Const reference to GeometricField<Type, fvPatchField, volMesh>
@@ -141,8 +139,12 @@ public:
         mutable GeometricField<Type, fvsPatchField, surfaceMesh>
             *faceFluxCorrectionPtr_;
 
+protected:
 
-    // Private Member Functions
+    //- Declare friendship with the fvSolver class
+    friend class fvSolver;
+
+    // Protected Member Functions
 
         //- Add patch contribution to internal field
         template<class Type2>
@@ -210,7 +212,7 @@ public:
 
     //- Solver class returned by the solver function
     //  used for systems in which it is useful to cache the solver for reuse
-    //  e.g. if the solver is potentialy expensive to construct (AMG) and can
+    //  e.g. if the solver is potentially expensive to construct (AMG) and can
     //  be used several times (PISO)
     class fvSolver
     {
