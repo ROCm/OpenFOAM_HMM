@@ -34,6 +34,11 @@ namespace compressible
 namespace LESModels
 {
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameWithName(GenSGSStress, "GenSGSStress");
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 GenSGSStress::GenSGSStress

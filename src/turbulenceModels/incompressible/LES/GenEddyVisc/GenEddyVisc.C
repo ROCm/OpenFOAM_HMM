@@ -34,6 +34,11 @@ namespace incompressible
 namespace LESModels
 {
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameWithName(GenEddyVisc, "GenEddyVisc");
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 GenEddyVisc::GenEddyVisc

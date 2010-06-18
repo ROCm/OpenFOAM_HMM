@@ -82,6 +82,9 @@ protected:
 
 public:
 
+    //- Partial Runtime type information
+    static const word typeName;
+
     // Constructors
 
         //- Construct from components
@@ -92,7 +95,7 @@ public:
             const surfaceScalarField& phi,
             const basicThermo& thermoPhysicalModel,
             const word& turbulenceModelName = turbulenceModel::typeName,
-            const word& modelName = "GenEddyVisc"
+            const word& modelName = typeName
         );
 
 
