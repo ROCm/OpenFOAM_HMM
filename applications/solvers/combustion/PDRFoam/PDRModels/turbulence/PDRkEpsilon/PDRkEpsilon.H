@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,12 +25,13 @@ Class
     Foam::compressible::RASModels::PDRkEpsilon
 
 Description
-    Standard k-epsilon turbulence model with additional source terms
+    Standard k-epsilon turbulence model for compressible flow
+    with additional source terms
     corresponding to PDR basic drag model (\link basic.H \endlink)
 
     The default model coefficients correspond to the following:
     @verbatim
-        kEpsilonCoeffs
+        PDRkEpsilonCoeffs
         {
             Cmu         0.09;
             C1          1.44;
@@ -53,7 +54,6 @@ Description
 
 SourceFiles
     PDRkEpsilon.C
-    PDRkEpsilonCorrect.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -61,6 +61,7 @@ SourceFiles
 #define compressiblePDRkEpsilon_H
 
 #include "RASModel.H"
+#include "kEpsilon.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,29 +78,8 @@ namespace RASModels
 
 class PDRkEpsilon
 :
-    public RASModel
+    public kEpsilon
 {
-
-protected:
-
-    // Protected data
-
-    // Model coefficients
-
-        dimensionedScalar Cmu_;
-        dimensionedScalar C1_;
-        dimensionedScalar C2_;
-        dimensionedScalar sigmak_;
-        dimensionedScalar sigmaEps_;
-        dimensionedScalar Prt_;
-
-    // Fields
-
-        volScalarField k_;
-        volScalarField epsilon_;
-        volScalarField mut_;
-        volScalarField alphat_;
-
 
 public:
 
@@ -128,62 +108,9 @@ public:
 
     // Member Functions
 
-        //- Return the effective diffusivity for k
-        tmp<volScalarField> DkEff() const
-        {
-            return tmp<volScalarField>
-            (
-                new volScalarField("DkEff", mut_/sigmak_ + mu())
-            );
-        }
-
-        //- Return the effective diffusivity for epsilon
-        tmp<volScalarField> DepsilonEff() const
-        {
-            return tmp<volScalarField>
-            (
-                new volScalarField("DepsilonEff", mut_/sigmaEps_ + mu())
-            );
-        }
-
-        //- Return the turbulence viscosity
-        virtual tmp<volScalarField> mut() const
-        {
-            return mut_;
-        }
-
-        //- Return the turbulence thermal diffusivity
-        virtual tmp<volScalarField> alphat() const
-        {
-            return alphat_;
-        }
-
-        //- Return the turbulence kinetic energy
-        virtual tmp<volScalarField> k() const
-        {
-            return k_;
-        }
-
-        //- Return the turbulence kinetic energy dissipation rate
-        virtual tmp<volScalarField> epsilon() const
-        {
-            return epsilon_;
-        }
-
-        //- Return the Reynolds stress tensor
-        virtual tmp<volSymmTensorField> R() const;
-
-        //- Return the effective stress tensor including the laminar stress
-        virtual tmp<volSymmTensorField> devRhoReff() const;
-
-        //- Return the source term for the momentum equation
-        virtual tmp<fvVectorMatrix> divDevRhoReff(volVectorField& U) const;
-
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct();
 
-        //- Read turbulenceProperties dictionary
-        virtual bool read();
 };
 
 
