@@ -51,6 +51,7 @@ class linearRadial
     // Private data
 
         scalar R_;
+        scalar Rsurface_;
 
 
 public:

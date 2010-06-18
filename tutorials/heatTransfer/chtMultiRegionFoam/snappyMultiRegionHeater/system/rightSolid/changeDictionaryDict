@@ -16,143 +16,36 @@ FoamFile
 
 dictionaryReplacement
 {
+    boundary
+    {
+        minZ
+        {
+            type            patch;
+        }
+        maxZ
+        {
+            type            patch;
+        }
+    }
+
     T
     {
         internalField   uniform 300;
 
         boundaryField
         {
-            maxX
+            ".*"
             {
                 type            zeroGradient;
-            }
-            minZ
-            {
-                type            zeroGradient;
-            }
-            maxZ
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_heater
-            {
-                type            compressible::turbulentTemperatureCoupledBaffle;
-                neighbourFieldName T;
-                K               K;
                 value           uniform 300;
             }
-            rightSolid_to_bottomAir
+            "rightSolid_to_.*"
             {
-                type            compressible::turbulentTemperatureCoupledBaffle;
+                type            compressible::turbulentTemperatureCoupledBaffleMixed;
                 neighbourFieldName T;
-                K               K;
+                K               solidThermo;
+                KName           none;
                 value           uniform 300;
-            }
-            rightSolid_to_topAir
-            {
-                type            compressible::turbulentTemperatureCoupledBaffle;
-                neighbourFieldName T;
-                K               K;
-                value           uniform 300;
-            }
-        }
-    }
-
-    rho
-    {
-        internalField   uniform 8000;
-
-        boundaryField
-        {
-            maxX
-            {
-                type            zeroGradient;
-            }
-            minZ
-            {
-                type            zeroGradient;
-            }
-            maxZ
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_bottomAir
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_heater
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_topAir
-            {
-                type            zeroGradient;
-            }
-        }
-    }
-
-    K
-    {
-        internalField   uniform 80;
-
-        boundaryField
-        {
-            maxX
-            {
-                type            zeroGradient;
-            }
-            minZ
-            {
-                type            zeroGradient;
-            }
-            maxZ
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_bottomAir
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_heater
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_topAir
-            {
-                type            zeroGradient;
-            }
-        }
-    }
-
-    cp
-    {
-        internalField   uniform 450;
-
-        boundaryField
-        {
-            maxX
-            {
-                type            zeroGradient;
-            }
-            minZ
-            {
-                type            zeroGradient;
-            }
-            maxZ
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_bottomAir
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_heater
-            {
-                type            zeroGradient;
-            }
-            rightSolid_to_topAir
-            {
-                type            zeroGradient;
             }
         }
     }

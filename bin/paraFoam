@@ -52,6 +52,10 @@ USAGE
     exit 1
 }
 
+# We want to do nice exit when running paraview to give paraview opportunity
+# to clean up
+unset FOAM_ABORT
+
 unset regionName touchOpt
 
 # reader extension

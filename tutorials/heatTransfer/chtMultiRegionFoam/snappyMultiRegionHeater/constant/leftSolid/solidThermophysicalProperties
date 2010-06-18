@@ -1,0 +1,76 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.6                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      solidThermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+thermoType constSolidThermo;
+//thermoType interpolatedSolidThermo;
+//thermoType directionalSolidThermo;
+
+constSolidThermoCoeffs
+{
+    //- constant properties
+
+    rho rho [1 -3  0  0 0 0 0] 8000;
+    cp  cp  [0  2 -2 -1 0 0 0] 450;
+    K   K   [1  1 -3 -1 0 0 0] 80;
+
+    // N/A
+    Hf  Hf  [0  2 -2  0 0 0 0] 1;
+    emissivity  emissivity  [0 0 0 0 0 0 0] 1;
+}
+
+
+interpolatedSolidThermoCoeffs
+{
+    //- interpolated properties
+
+    TValues             (100 1000);
+    rhoValues           (1700 1700);
+    cpValues            (1700 1700);
+    KValues             (80 40);
+    HfValues            (1 1);
+    emissivityValues    (1 1);
+}
+
+
+directionalSolidThermoCoeffs
+{
+    //- does interpolation and directional K in coordinate system.
+    //  Specify multiple values, one for each temperature. Properties are
+    //  interpolated according to the local temperature.
+
+
+    TValues             (100 1000);
+    rhoValues           (1700 1700);
+    cpValues            (1700 1700);
+
+    KValues             ((40 40 40) (40 40 40));
+    
+    coordinateSystem
+    {
+        origin  (-0.000062 0.000019 0.000039);
+        coordinateRotation
+        {
+            type    axes;
+            e1      (1 0 0);
+            e3      (-3.1807824E-6 -0.99813473 0.0610505);
+        }
+    }
+
+    HfValues            (1 1);
+    emissivityValues    (1 1);
+}
+
+// ************************************************************************* //

@@ -26,7 +26,7 @@
         mesh
     );
 
-#   include "createPhi.H"
+    #include "createPhi.H"
 
     multiphaseMixture mixture(U, phi);
 

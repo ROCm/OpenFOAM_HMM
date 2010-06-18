@@ -46,10 +46,11 @@ dynMixedSmagorinsky::dynMixedSmagorinsky
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& transport
+    transportModel& transport,
+    const word& turbulenceModelName
 )
 :
-    LESModel(typeName, U, phi, transport),
+    LESModel(typeName, U, phi, transport, turbulenceModelName),
     scaleSimilarity(U, phi, transport),
     dynSmagorinsky(U, phi, transport)
 {

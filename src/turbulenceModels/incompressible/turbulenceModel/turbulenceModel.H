@@ -67,6 +67,8 @@ namespace incompressible
 \*---------------------------------------------------------------------------*/
 
 class turbulenceModel
+:
+    public regIOobject
 {
 
 protected:
@@ -109,9 +111,10 @@ public:
             (
                 const volVectorField& U,
                 const surfaceScalarField& phi,
-                transportModel& transport
+                transportModel& transport,
+                const word& turbulenceModelName
             ),
-            (U, phi, transport)
+            (U, phi, transport, turbulenceModelName)
         );
 
 
@@ -122,7 +125,8 @@ public:
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
-            transportModel& transport
+            transportModel& transport,
+            const word& turbulenceModelName = typeName
         );
 
 
@@ -133,7 +137,8 @@ public:
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
-            transportModel& transport
+            transportModel& transport,
+            const word& turbulenceModelName = typeName
         );
 
 
@@ -194,6 +199,12 @@ public:
 
         //- Read LESProperties or RASProperties dictionary
         virtual bool read() = 0;
+
+        //- Default dummy write function
+        virtual bool writeData(Ostream&) const
+        {
+            return true;
+        }
 };
 
 

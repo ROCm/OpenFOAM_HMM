@@ -40,10 +40,11 @@ GenSGSStress::GenSGSStress
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& transport
+    transportModel& transport,
+    const word& turbulenceModelName
 )
 :
-    LESModel(word("GenSGSStress"), U, phi, transport),
+    LESModel(word("GenSGSStress"), U, phi, transport, turbulenceModelName),
 
     ce_
     (

@@ -48,7 +48,8 @@ Foam::IOdictionary::IOdictionary(const IOobject& io)
     {
         WarningIn("IOdictionary::IOdictionary(const IOobject&)")
         //FatalErrorIn("IOdictionary::IOdictionary(const IOobject&)")
-            << "Dictionary constructed with IOobject::MUST_READ"
+            << "Dictionary " << name()
+            << " constructed with IOobject::MUST_READ"
             " instead of IOobject::MUST_READ_IF_MODIFIED." << nl
             << "Use MUST_READ_IF_MODIFIED if you need automatic rereading."
             << endl;
@@ -82,7 +83,8 @@ Foam::IOdictionary::IOdictionary(const IOobject& io, const dictionary& dict)
         WarningIn
         (
             "IOdictionary::IOdictionary(const IOobject& const dictionary&)"
-        )   << "Dictionary constructed with IOobject::MUST_READ"
+        )   << "Dictionary " << name()
+            << " constructed with IOobject::MUST_READ"
             " instead of IOobject::MUST_READ_IF_MODIFIED." << nl
             << "Use MUST_READ_IF_MODIFIED if you need automatic rereading."
             << endl;
