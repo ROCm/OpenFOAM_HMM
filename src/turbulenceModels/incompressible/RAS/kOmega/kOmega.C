@@ -49,10 +49,11 @@ kOmega::kOmega
     const volVectorField& U,
     const surfaceScalarField& phi,
     transportModel& transport,
-    const word& turbulenceModelName
+    const word& turbulenceModelName,
+    const word& modelName
 )
 :
-    RASModel(typeName, U, phi, transport, turbulenceModelName),
+    RASModel(modelName, U, phi, transport, turbulenceModelName),
 
     Cmu_
     (

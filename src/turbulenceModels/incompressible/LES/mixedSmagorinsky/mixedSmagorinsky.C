@@ -47,10 +47,11 @@ mixedSmagorinsky::mixedSmagorinsky
     const volVectorField& U,
     const surfaceScalarField& phi,
     transportModel& transport,
-    const word& turbulenceModelName
+    const word& turbulenceModelName,
+    const word& modelName
 )
 :
-    LESModel(typeName, U, phi, transport, turbulenceModelName),
+    LESModel(modelName, U, phi, transport, turbulenceModelName),
     scaleSimilarity(U, phi, transport),
     Smagorinsky(U, phi, transport)
 {

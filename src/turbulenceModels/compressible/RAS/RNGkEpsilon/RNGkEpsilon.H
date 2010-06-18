@@ -109,7 +109,8 @@ public:
             const volVectorField& U,
             const surfaceScalarField& phi,
             const basicThermo& thermophysicalModel,
-            const word& turbulenceModelName = turbulenceModel::typeName
+            const word& turbulenceModelName = turbulenceModel::typeName,
+            const word& modelName = typeName
         );
 
 

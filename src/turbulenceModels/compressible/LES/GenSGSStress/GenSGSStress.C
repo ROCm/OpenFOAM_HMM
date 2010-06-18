@@ -42,18 +42,11 @@ GenSGSStress::GenSGSStress
     const volVectorField& U,
     const surfaceScalarField& phi,
     const basicThermo& thermoPhysicalModel,
-    const word& turbulenceModelName
+    const word& turbulenceModelName,
+    const word& modelName
 )
 :
-    LESModel
-    (
-        word("GenSGSStress"),
-        rho,
-        U,
-        phi,
-        thermoPhysicalModel,
-        turbulenceModelName
-    ),
+    LESModel(modelName, rho, U, phi, thermoPhysicalModel, turbulenceModelName),
 
     ce_
     (
