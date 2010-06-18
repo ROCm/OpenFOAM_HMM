@@ -76,7 +76,10 @@ class LaunderGibsonRSTM
 :
     public RASModel
 {
-    // Private data
+
+protected:
+
+    // Protected data
 
         // Model coefficients
 

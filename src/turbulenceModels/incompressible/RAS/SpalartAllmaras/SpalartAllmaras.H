@@ -86,7 +86,10 @@ class SpalartAllmaras
 :
     public RASModel
 {
-    // Private data
+
+protected:
+
+    // Protected data
 
         // Model coefficients
 
@@ -110,7 +113,7 @@ class SpalartAllmaras
             wallDist d_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
         tmp<volScalarField> chi() const;
 

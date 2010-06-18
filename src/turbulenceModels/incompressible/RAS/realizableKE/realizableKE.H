@@ -77,7 +77,10 @@ class realizableKE
 :
     public RASModel
 {
-    // Private data
+
+protected:
+
+    // Protected data
 
         // Model coefficients
 
@@ -95,7 +98,7 @@ class realizableKE
             volScalarField nut_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
         tmp<volScalarField> rCmu
         (

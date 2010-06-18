@@ -56,7 +56,10 @@ class LamBremhorstKE
 :
     public RASModel
 {
-    // Private data
+
+protected:
+
+    // Protected data
 
         dimensionedScalar Cmu_;
         dimensionedScalar C1_;
