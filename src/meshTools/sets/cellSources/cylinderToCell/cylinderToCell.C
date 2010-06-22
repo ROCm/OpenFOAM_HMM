@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -139,7 +139,7 @@ void Foam::cylinderToCell::applyToSet
     }
     else if (action == topoSetSource::DELETE)
     {
-        Info<< "    Removing cells with centre within sphere, with p1 = "
+        Info<< "    Removing cells with centre within cylinder, with p1 = "
             << p1_ << ", p2 = " << p2_ << " and radius = " << radius_ << endl;
 
         combine(set, false);
