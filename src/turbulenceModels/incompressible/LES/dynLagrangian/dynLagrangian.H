@@ -58,7 +58,7 @@ Description
     @endverbatim
 
     Reference:
-    1. Charles Meneveau, Thomas Lund and William Cabot 
+    1. Charles Meneveau, Thomas Lund and William Cabot
     "A Lagrangian dynamic subgrid-scale model of turbulence"
     J. Fluid Mech (1996), vol 319, pp. 353-385
 
@@ -129,7 +129,8 @@ public:
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
-            transportModel& transport
+            transportModel& transport,
+            const word& turbulenceModelName = turbulenceModel::typeName
         );
 
 
