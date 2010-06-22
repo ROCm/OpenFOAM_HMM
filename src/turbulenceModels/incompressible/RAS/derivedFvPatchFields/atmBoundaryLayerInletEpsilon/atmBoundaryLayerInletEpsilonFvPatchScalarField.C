@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ABLInletEpsilonFvPatchScalarField.H"
+#include "atmBoundaryLayerInletEpsilonFvPatchScalarField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
@@ -39,7 +39,8 @@ namespace incompressible
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-ABLInletEpsilonFvPatchScalarField::ABLInletEpsilonFvPatchScalarField
+atmBoundaryLayerInletEpsilonFvPatchScalarField::
+atmBoundaryLayerInletEpsilonFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -49,13 +50,15 @@ ABLInletEpsilonFvPatchScalarField::ABLInletEpsilonFvPatchScalarField
     Ustar_(0),
     z_(pTraits<vector>::zero),
     z0_(0),
-    kappa_(0.41)
+    kappa_(0.41),
+    zGround_(0)
 {}
 
 
-ABLInletEpsilonFvPatchScalarField::ABLInletEpsilonFvPatchScalarField
+atmBoundaryLayerInletEpsilonFvPatchScalarField::
+atmBoundaryLayerInletEpsilonFvPatchScalarField
 (
-    const ABLInletEpsilonFvPatchScalarField& ptf,
+    const atmBoundaryLayerInletEpsilonFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -65,11 +68,13 @@ ABLInletEpsilonFvPatchScalarField::ABLInletEpsilonFvPatchScalarField
     Ustar_(ptf.Ustar_),
     z_(ptf.z_),
     z0_(ptf.z0_),
-    kappa_(ptf.kappa_)
+    kappa_(ptf.kappa_),
+    zGround_(ptf.zGround_)
 {}
 
 
-ABLInletEpsilonFvPatchScalarField::ABLInletEpsilonFvPatchScalarField
+atmBoundaryLayerInletEpsilonFvPatchScalarField::
+atmBoundaryLayerInletEpsilonFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -80,11 +85,12 @@ ABLInletEpsilonFvPatchScalarField::ABLInletEpsilonFvPatchScalarField
     Ustar_(readScalar(dict.lookup("Ustar"))),
     z_(dict.lookup("z")),
     z0_(readScalar(dict.lookup("z0"))),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41))
+    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    zGround_(readScalar(dict.lookup("zGround")))
 {
     if (mag(z_) < SMALL)
     {
-        FatalErrorIn("ABLInletEpsilonFvPatchScalarField(dict)")
+        FatalErrorIn("atmBoundaryLayerInletEpsilonFvPatchScalarField(dict)")
             << "z is not correct"
             << abort(FatalError);
     }
@@ -95,9 +101,10 @@ ABLInletEpsilonFvPatchScalarField::ABLInletEpsilonFvPatchScalarField
 }
 
 
-ABLInletEpsilonFvPatchScalarField::ABLInletEpsilonFvPatchScalarField
+atmBoundaryLayerInletEpsilonFvPatchScalarField::
+atmBoundaryLayerInletEpsilonFvPatchScalarField
 (
-    const ABLInletEpsilonFvPatchScalarField& fcvpvf,
+    const atmBoundaryLayerInletEpsilonFvPatchScalarField& fcvpvf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -105,22 +112,23 @@ ABLInletEpsilonFvPatchScalarField::ABLInletEpsilonFvPatchScalarField
     Ustar_(fcvpvf.Ustar_),
     z_(fcvpvf.z_),
     z0_(fcvpvf.z0_),
-    kappa_(fcvpvf.kappa_)
+    kappa_(fcvpvf.kappa_),
+    zGround_(fcvpvf.zGround_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void ABLInletEpsilonFvPatchScalarField::updateCoeffs()
+void atmBoundaryLayerInletEpsilonFvPatchScalarField::updateCoeffs()
 {
     const vectorField& c = patch().Cf();
     scalarField coord = (c & z_);
-    scalarField::operator=(pow(Ustar_, 3.0)/(kappa_*(coord + z0_)));
+    scalarField::operator=(pow(Ustar_, 3.0)/(kappa_*(coord - zGround_ + z0_)));
 }
 
 
 // Write
-void ABLInletEpsilonFvPatchScalarField::write(Ostream& os) const
+void atmBoundaryLayerInletEpsilonFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
     os.writeKeyword("Ustar")
@@ -131,13 +139,19 @@ void ABLInletEpsilonFvPatchScalarField::write(Ostream& os) const
         << z0_ << token::END_STATEMENT << nl;
     os.writeKeyword("kappa")
         << kappa_ << token::END_STATEMENT << nl;
+    os.writeKeyword("zGround")
+        << zGround_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, ABLInletEpsilonFvPatchScalarField);
+makePatchTypeField
+(
+    fvPatchScalarField,
+    atmBoundaryLayerInletEpsilonFvPatchScalarField
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
