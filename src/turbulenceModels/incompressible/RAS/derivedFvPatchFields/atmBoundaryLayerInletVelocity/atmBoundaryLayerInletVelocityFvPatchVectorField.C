@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ABLInletVelocityFvPatchVectorField.H"
+#include "atmBoundaryLayerInletVelocityFvPatchVectorField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
@@ -39,7 +39,8 @@ namespace incompressible
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-ABLInletVelocityFvPatchVectorField::ABLInletVelocityFvPatchVectorField
+atmBoundaryLayerInletVelocityFvPatchVectorField::
+atmBoundaryLayerInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF
@@ -50,13 +51,17 @@ ABLInletVelocityFvPatchVectorField::ABLInletVelocityFvPatchVectorField
     n_(pTraits<vector>::zero),
     z_(pTraits<vector>::zero),
     z0_(0),
-    kappa_(0.41)
+    kappa_(0.41),
+    Uref_(0),
+    Href_(0),
+    zGround_(0)
 {}
 
 
-ABLInletVelocityFvPatchVectorField::ABLInletVelocityFvPatchVectorField
+atmBoundaryLayerInletVelocityFvPatchVectorField::
+atmBoundaryLayerInletVelocityFvPatchVectorField
 (
-    const ABLInletVelocityFvPatchVectorField& ptf,
+    const atmBoundaryLayerInletVelocityFvPatchVectorField& ptf,
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -67,11 +72,15 @@ ABLInletVelocityFvPatchVectorField::ABLInletVelocityFvPatchVectorField
     n_(ptf.n_),
     z_(ptf.z_),
     z0_(ptf.z0_),
-    kappa_(ptf.kappa_)
+    kappa_(ptf.kappa_),
+    Uref_(ptf.Uref_),
+    Href_(ptf.Href_),
+    zGround_(ptf.zGround_)
 {}
 
 
-ABLInletVelocityFvPatchVectorField::ABLInletVelocityFvPatchVectorField
+atmBoundaryLayerInletVelocityFvPatchVectorField::
+atmBoundaryLayerInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
@@ -79,29 +88,35 @@ ABLInletVelocityFvPatchVectorField::ABLInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    Ustar_(readScalar(dict.lookup("Ustar"))),
+    Ustar_(0),
     n_(dict.lookup("n")),
     z_(dict.lookup("z")),
     z0_(readScalar(dict.lookup("z0"))),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41))
+    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    Uref_(readScalar(dict.lookup("Uref"))),
+    Href_(readScalar(dict.lookup("Href"))),
+    zGround_(readScalar(dict.lookup("zGround")))
 {
-    if (mag(n_) < SMALL || mag(z_) < SMALL)
+    if (mag(n_) < SMALL || mag(z_) < SMALL || mag(z0_) < SMALL)
     {
-        FatalErrorIn("ABLInletVelocityFvPatchVectorField(dict)")
-            << "n or z given with zero size not correct"
+        FatalErrorIn("atmBoundaryLayerInletVelocityFvPatchVectorField(dict)")
+            << "n, z or z0 given are close to zero is not correct"
             << abort(FatalError);
     }
 
     n_ /= mag(n_);
     z_ /= mag(z_);
 
+    Ustar_ = kappa_*Uref_/(log((Href_  + z0_)/min(z0_ , 0.001)));
+
     evaluate();
 }
 
 
-ABLInletVelocityFvPatchVectorField::ABLInletVelocityFvPatchVectorField
+atmBoundaryLayerInletVelocityFvPatchVectorField::
+atmBoundaryLayerInletVelocityFvPatchVectorField
 (
-    const ABLInletVelocityFvPatchVectorField& fcvpvf,
+    const atmBoundaryLayerInletVelocityFvPatchVectorField& fcvpvf,
     const DimensionedField<vector, volMesh>& iF
 )
 :
@@ -110,41 +125,68 @@ ABLInletVelocityFvPatchVectorField::ABLInletVelocityFvPatchVectorField
     n_(fcvpvf.n_),
     z_(fcvpvf.z_),
     z0_(fcvpvf.z0_),
-    kappa_(fcvpvf.kappa_)
+    kappa_(fcvpvf.kappa_),
+    Uref_(fcvpvf.Uref_),
+    Href_(fcvpvf.Href_),
+    zGround_(fcvpvf.zGround_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void ABLInletVelocityFvPatchVectorField::updateCoeffs()
+void atmBoundaryLayerInletVelocityFvPatchVectorField::updateCoeffs()
 {
     const vectorField& c = patch().Cf();
     scalarField coord = (c & z_);
-    vectorField::operator=(n_*(Ustar_/kappa_)*log((coord + z0_)/z0_));
+    scalarField Un(coord.size());
+
+    forAll(coord, i)
+    {
+        if((coord[i] - zGround_) < Href_)
+        {
+            Un[i] = (Ustar_/kappa_)*log((coord[i] - zGround_ + z0_)/z0_);
+        }
+        else
+        {
+            Un[i] = (Uref_);
+        }
+    }
+
+    vectorField::operator=(n_*Un);
+
+    fixedValueFvPatchVectorField::updateCoeffs();
 }
 
 
 // Write
-void ABLInletVelocityFvPatchVectorField::write(Ostream& os) const
+void atmBoundaryLayerInletVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    os.writeKeyword("Ustar")
-        << Ustar_ << token::END_STATEMENT << nl;
     os.writeKeyword("z0")
         << z0_ << token::END_STATEMENT << nl;
     os.writeKeyword("n")
         << n_ << token::END_STATEMENT << nl;
     os.writeKeyword("z")
         << z_ << token::END_STATEMENT << nl;
-     os.writeKeyword("kappa")
+    os.writeKeyword("kappa")
         << kappa_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Uref")
+        << Uref_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Href")
+        << Href_ << token::END_STATEMENT << nl;
+    os.writeKeyword("zGround")
+        << zGround_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchVectorField, ABLInletVelocityFvPatchVectorField);
+makePatchTypeField
+(
+    fvPatchVectorField,
+    atmBoundaryLayerInletVelocityFvPatchVectorField
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
