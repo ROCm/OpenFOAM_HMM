@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    ABLInletVelocityFvPatchVectorField
+    atmBoundaryLayerInletVelocityFvPatchVectorField
 
 Description
     Boundary condition specifies a atmospheric boundary layer (ABL)
@@ -31,7 +31,7 @@ Description
     flow direction n and direction of the parabolic coordinate z.
 
     @verbatim
-        U = (Ustar/K) ln((z + z0)/z0)
+        U = (Ustar/K) ln((z - zGround + z0)/z0)
 
     where:
 
@@ -39,6 +39,7 @@ Description
         K is karman's constant
         z0 is the surface roughness lenght
         z is the verical coordinate
+        zGround is the minumum coordinate value in z direction.
 
     and:
 
@@ -63,12 +64,12 @@ NOTE: D.M. Hargreaves and N.G. Wright recommend Gamma epsilon in the k-epsilon
       reference
 
 SourceFiles
-    ABLInletVelocityFvPatchVectorField.C
+    atmBoundaryLayerInletVelocityFvPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ABLInletVelocityFvPatchVectorField_H
-#define ABLInletVelocityFvPatchVectorField_H
+#ifndef atmBoundaryLayerInletVelocityFvPatchVectorField_H
+#define atmBoundaryLayerInletVelocityFvPatchVectorField_H
 
 #include "fvPatchFields.H"
 #include "fixedValueFvPatchFields.H"
@@ -81,16 +82,16 @@ namespace incompressible
 {
 
 /*---------------------------------------------------------------------------*\
-             Class ABLInletVelocityFvPatchVectorField Declaration
+       Class atmBoundaryLayerInletVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
-class ABLInletVelocityFvPatchVectorField
+class atmBoundaryLayerInletVelocityFvPatchVectorField
 :
     public fixedValueFvPatchVectorField
 {
     // Private data
 
-        //- Friction velocity
+        //- Frictional velocity
         scalar Ustar_;
 
         //- Flow direction
@@ -105,34 +106,44 @@ class ABLInletVelocityFvPatchVectorField
         //- Von Karman constant
         scalar kappa_;
 
+        //- Reference velocity
+        scalar Uref_;
+
+        //- Reference hight
+        scalar Href_;
+
+        //- Minimum corrdinate value in z direction
+        scalar zGround_;
+
+
 public:
 
     //- Runtime type information
-    TypeName("ABLInletVelocity");
+    TypeName("atmBoundaryLayerInletVelocity");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        ABLInletVelocityFvPatchVectorField
+        atmBoundaryLayerInletVelocityFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        ABLInletVelocityFvPatchVectorField
+        atmBoundaryLayerInletVelocityFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given ABLInletVelocityFvPatchVectorField
-        //  onto a new patch
-        ABLInletVelocityFvPatchVectorField
+        //- Construct by mapping given
+        // atmBoundaryLayerInletVelocityFvPatchVectorField onto a new patch
+        atmBoundaryLayerInletVelocityFvPatchVectorField
         (
-            const ABLInletVelocityFvPatchVectorField&,
+            const atmBoundaryLayerInletVelocityFvPatchVectorField&,
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
             const fvPatchFieldMapper&
@@ -143,14 +154,14 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new ABLInletVelocityFvPatchVectorField(*this)
+                new atmBoundaryLayerInletVelocityFvPatchVectorField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        ABLInletVelocityFvPatchVectorField
+        atmBoundaryLayerInletVelocityFvPatchVectorField
         (
-            const ABLInletVelocityFvPatchVectorField&,
+            const atmBoundaryLayerInletVelocityFvPatchVectorField&,
             const DimensionedField<vector, volMesh>&
         );
 
@@ -162,14 +173,14 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new ABLInletVelocityFvPatchVectorField(*this, iF)
+                new atmBoundaryLayerInletVelocityFvPatchVectorField(*this, iF)
             );
         }
 
 
     // Member functions
 
-        //- Return max value
+        //- Return Ustar
         scalar& Ustar()
         {
             return Ustar_;
@@ -181,7 +192,7 @@ public:
             return n_;
         }
 
-        //- Return y direction
+        //- Return z direction
         vector& z()
         {
             return z_;

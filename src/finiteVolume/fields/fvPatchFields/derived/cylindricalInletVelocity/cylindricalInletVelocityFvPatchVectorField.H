@@ -10,7 +10,7 @@ License
 
     OpenFOAM is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
+    Free Software Foundation; either version 3 of the License, or (at your
     option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
@@ -23,38 +23,33 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::swirlFlowRateInletVelocityFvPatchVectorField
+    Foam::cylindricalInletVelocityFvPatchVectorField
 
 Description
-    Describes a volumetric/mass flow normal vector boundary condition by its
-    magnitude as an integral over its area with a swirl component determined
-    by the RPM
-
-    The basis of the patch (volumetric or mass) is determined by the
-    dimensions of the flux, phi.
-    The current density is used to correct the velocity when applying the
-    mass basis.
+    Describes an inlet vector boundary condition in cylindrical coordinates
+    given a central axis, central point, rpm, axial and radial velocity.
 
     Example of the boundary condition specification:
     @verbatim
     inlet
     {
-        type            swirlFlowRateInletVelocity;
-        flowRate        0.2;        // Volumetric/mass flow rate [m3/s or kg/s]
+        type            cylindricalInletVelocity;
+        axis            (0 0 1);
+        centre          (0 0 0);
+        axialVelocity   30;
         rpm             100;
+        radialVelocity  -10;
     }
     @endverbatim
 
-Note
-    - The value is positive inwards
 
 SourceFiles
-    swirlFlowRateInletVelocityFvPatchVectorField.C
+    cylindricalInletVelocityFvPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef swirlFlowRateInletVelocityFvPatchVectorField_H
-#define swirlFlowRateInletVelocityFvPatchVectorField_H
+#ifndef cylindricalInletVelocityFvPatchVectorField_H
+#define cylindricalInletVelocityFvPatchVectorField_H
 
 #include "fixedValueFvPatchFields.H"
 
@@ -63,45 +58,48 @@ SourceFiles
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-      Class swirlFlowRateInletVelocityFvPatchVectorField Declaration
+         Class cylindricalInletVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
-class swirlFlowRateInletVelocityFvPatchVectorField
+class cylindricalInletVelocityFvPatchVectorField
 :
     public fixedValueFvPatchVectorField
 {
     // Private data
 
-        //- Inlet integral flow rate
-        scalar flowRate_;
+        //- Axial velocity
+        const scalar axialVelocity_;
 
-        //- Name of the flux transporting the field
-        word phiName_;
+        //- Central point
+        const vector centre_;
 
-        //- Name of the density field used to normalize the mass flux
-        word rhoName_;
+        //- Axis
+        const vector axis_;
 
         //- RPM
-        scalar rpm_;
+        const scalar rpm_;
+
+        //- Radial velocity
+        const scalar radialVelocity_;
 
 
 public:
 
    //- Runtime type information
-   TypeName("swirlFlowRateInletVelocity");
+   TypeName("cylindricalInletVelocity");
 
 
    // Constructors
 
         //- Construct from patch and internal field
-        swirlFlowRateInletVelocityFvPatchVectorField
+        cylindricalInletVelocityFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        swirlFlowRateInletVelocityFvPatchVectorField
+        cylindricalInletVelocityFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
@@ -111,18 +109,18 @@ public:
         //- Construct by mapping given
         //  flowRateInletVelocityFvPatchVectorField
         //  onto a new patch
-        swirlFlowRateInletVelocityFvPatchVectorField
+        cylindricalInletVelocityFvPatchVectorField
         (
-            const swirlFlowRateInletVelocityFvPatchVectorField&,
+            const cylindricalInletVelocityFvPatchVectorField&,
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        swirlFlowRateInletVelocityFvPatchVectorField
+        cylindricalInletVelocityFvPatchVectorField
         (
-            const swirlFlowRateInletVelocityFvPatchVectorField&
+            const cylindricalInletVelocityFvPatchVectorField&
         );
 
         //- Construct and return a clone
@@ -130,14 +128,14 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new swirlFlowRateInletVelocityFvPatchVectorField(*this)
+                new cylindricalInletVelocityFvPatchVectorField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        swirlFlowRateInletVelocityFvPatchVectorField
+        cylindricalInletVelocityFvPatchVectorField
         (
-            const swirlFlowRateInletVelocityFvPatchVectorField&,
+            const cylindricalInletVelocityFvPatchVectorField&,
             const DimensionedField<vector, volMesh>&
         );
 
@@ -149,26 +147,12 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new swirlFlowRateInletVelocityFvPatchVectorField(*this, iF)
+                new cylindricalInletVelocityFvPatchVectorField(*this, iF)
             );
         }
 
 
     // Member functions
-
-        // Access
-
-            //- Return the flux
-            scalar flowRate() const
-            {
-                return flowRate_;
-            }
-
-            //- Return reference to the flux to allow adjustment
-            scalar& flowRate()
-            {
-                return flowRate_;
-            }
 
 
         //- Update the coefficients associated with the patch field

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    ABLInletEpsilonFvPatchScalarField
+    atmBoundaryLayerInletEpsilonFvPatchScalarField
 
 Description
     Boundary condition specifies a epsilon inlet for the atmospheric boundary
@@ -31,7 +31,7 @@ Description
     ABLInletVelocity.
 
     @verbatim
-        epsilon = Ustar^3 / (K(z + z0))
+        epsilon = Ustar^3 / (K(z - zGround + z0))
 
     where:
 
@@ -39,6 +39,7 @@ Description
         K is karman's constant
         z is the verical coordinate
         z0 is the surface roughness lenght
+        zGround minium vlaue in z direction
 
     @endverbatim
 
@@ -49,12 +50,12 @@ Description
     Journal of Wind Engineering and Industrial Aerodynamics 95(2007) 355-369.
 
 SourceFiles
-    ABLInletEpsilonFvPatchScalarField.C
+    atmBoundaryLayerInletEpsilonFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ABLInletEpsilonFvPatchScalarField_H
-#define ABLInletEpsilonFvPatchScalarField_H
+#ifndef atmBoundaryLayerInletEpsilonFvPatchScalarField_H
+#define atmBoundaryLayerInletEpsilonFvPatchScalarField_H
 
 #include "fvPatchFields.H"
 #include "fixedValueFvPatchFields.H"
@@ -67,16 +68,16 @@ namespace incompressible
 {
 
 /*---------------------------------------------------------------------------*\
-              Class ABLInletEpsilonFvPatchScalarField Declaration
+        Class atmBoundaryLayerInletEpsilonFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class ABLInletEpsilonFvPatchScalarField
+class atmBoundaryLayerInletEpsilonFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
     // Private data
 
-        //- Peak velocity magnitude
+        //- Frictional velocity
         scalar Ustar_;
 
         //- Direction of the z-coordinate
@@ -88,34 +89,38 @@ class ABLInletEpsilonFvPatchScalarField
          //- Von Karman constant
         scalar kappa_;
 
+         //- Minimum corrdinate value in z direction
+        scalar zGround_;
+
+
 public:
 
     //- Runtime type information
-    TypeName("ABLInletEpsilon");
+    TypeName("atmBoundaryLayerInletEpsilon");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        ABLInletEpsilonFvPatchScalarField
+        atmBoundaryLayerInletEpsilonFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        ABLInletEpsilonFvPatchScalarField
+        atmBoundaryLayerInletEpsilonFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given ABLInletEpsilonFvPatchScalarField
-        //  onto a new patch
-        ABLInletEpsilonFvPatchScalarField
+        //- Construct by mapping given
+        //  atmBoundaryLayerInletEpsilonFvPatchScalarField onto a new patch
+        atmBoundaryLayerInletEpsilonFvPatchScalarField
         (
-            const ABLInletEpsilonFvPatchScalarField&,
+            const atmBoundaryLayerInletEpsilonFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
@@ -126,14 +131,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new ABLInletEpsilonFvPatchScalarField(*this)
+                new atmBoundaryLayerInletEpsilonFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        ABLInletEpsilonFvPatchScalarField
+        atmBoundaryLayerInletEpsilonFvPatchScalarField
         (
-            const ABLInletEpsilonFvPatchScalarField&,
+            const atmBoundaryLayerInletEpsilonFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -145,7 +150,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new ABLInletEpsilonFvPatchScalarField(*this, iF)
+                new atmBoundaryLayerInletEpsilonFvPatchScalarField(*this, iF)
             );
         }
 
