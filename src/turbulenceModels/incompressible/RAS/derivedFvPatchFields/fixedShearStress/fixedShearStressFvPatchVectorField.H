@@ -56,7 +56,7 @@ class fixedShearStressFvPatchVectorField
     // Private data
 
         //- Constant shear stress
-        vector tau0_;
+        const vector tau0_;
 
 
 public:
@@ -140,6 +140,7 @@ public:
 
 } // End namespace incompressible
 } // End namespace Foam
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif

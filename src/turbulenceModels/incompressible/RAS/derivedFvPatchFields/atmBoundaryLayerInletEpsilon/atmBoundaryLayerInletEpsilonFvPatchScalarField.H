@@ -78,19 +78,19 @@ class atmBoundaryLayerInletEpsilonFvPatchScalarField
     // Private data
 
         //- Frictional velocity
-        scalar Ustar_;
+        const scalar Ustar_;
 
         //- Direction of the z-coordinate
         vector z_;
 
-         //- Surface roughness lenght
-        scalar z0_;
+        //- Surface roughness lenght
+        const scalar z0_;
 
-         //- Von Karman constant
-        scalar kappa_;
+        //- Von Karman constant
+        const scalar kappa_;
 
-         //- Minimum corrdinate value in z direction
-        scalar zGround_;
+        //- Minimum corrdinate value in z direction
+        const scalar zGround_;
 
 
 public:
@@ -158,13 +158,13 @@ public:
     // Member functions
 
         //- Return max value
-        scalar& Ustar()
+        scalar Ustar() const
         {
             return Ustar_;
         }
 
         //- Return z direction
-        vector& z()
+        const vector& z() const
         {
             return z_;
         }
