@@ -58,8 +58,8 @@ Description
         note            "some catalyst";
         coordinateSystem    system_10;
         porosity        0.809;
-        intensity       0.001;      // optional: default 1% turbulence
-        mixingLength    0.0001;     // optional: default 1mm mixingLength
+        intensity       0.001;      // optional
+        mixingLength    0.0001;     // optional
         printCoeffs     yes;        // optional: feedback for the user
 
         Darcy
@@ -130,10 +130,10 @@ class porousZone
         //  Currently unused.
         scalar porosity_;
 
-        //- Turbulent intensity as fraction of the velocity (default: 0.01)
+        //- Turbulent intensity as fraction of the velocity
         scalar intensity_;
 
-        //- Turbulent length scale (default: 0.001)
+        //- Turbulent length scale
         scalar mixingLength_;
 
         //- powerLaw coefficient C0
