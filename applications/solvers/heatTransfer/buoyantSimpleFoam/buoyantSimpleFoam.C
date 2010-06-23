@@ -55,14 +55,17 @@ int main(int argc, char *argv[])
 
         #include "readSIMPLEControls.H"
 
-        p.storePrevIter();
+        p_rgh.storePrevIter();
         rho.storePrevIter();
 
         // Pressure-velocity SIMPLE corrector
         {
             #include "UEqn.H"
             #include "hEqn.H"
+            for (int i=0; i<3; i++)
+            {
             #include "pEqn.H"
+            }
         }
 
         turbulence->correct();

@@ -107,19 +107,20 @@ void Foam::MULES::explicitSolve
     {
         psiIf =
         (
-            mesh.Vsc0()*rho.oldTime()*psi0/(deltaT*mesh.Vsc())
-          + Su
+            mesh.Vsc0()().field()*rho.oldTime().field()
+           *psi0/(deltaT*mesh.Vsc()().field())
+          + Su.field()
           - psiIf
-        )/(rho/deltaT - Sp);
+        )/(rho.field()/deltaT - Sp.field());
     }
     else
     {
         psiIf =
         (
-            rho.oldTime()*psi0/deltaT
-          + Su
+            rho.oldTime().field()*psi0/deltaT
+          + Su.field()
           - psiIf
-        )/(rho/deltaT - Sp);
+        )/(rho.field()/deltaT - Sp.field());
     }
 
     psi.correctBoundaryConditions();
@@ -456,23 +457,32 @@ void Foam::MULES::limiter
         tmp<volScalarField::DimensionedInternalField> V0 = mesh.Vsc0();
 
         psiMaxn =
-            V*((rho/deltaT - Sp)*psiMaxn - Su)
-          - (V0()/deltaT)*rho.oldTime()*psi0
+            V*((rho.field()/deltaT - Sp.field())*psiMaxn - Su.field())
+          - (V0().field()/deltaT)*rho.oldTime().field()*psi0
           + sumPhiBD;
 
         psiMinn =
-            V*(Su - (rho/deltaT - Sp)*psiMinn)
-          + (V0/deltaT)*rho.oldTime()*psi0
+            V*(Su.field() - (rho.field()/deltaT - Sp.field())*psiMinn)
+          + (V0().field()/deltaT)*rho.oldTime().field()*psi0
           - sumPhiBD;
     }
     else
     {
         psiMaxn =
-            V*((rho/deltaT - Sp)*psiMaxn - (rho.oldTime()/deltaT)*psi0 - Su)
+            V
+           *(
+               (rho.field()/deltaT - Sp.field())*psiMaxn
+             - (rho.oldTime().field()/deltaT)*psi0
+             - Su.field()
+            )
           + sumPhiBD;
 
         psiMinn =
-            V*((rho/deltaT)*psi0 - (rho.oldTime()/deltaT - Sp)*psiMinn + Su)
+            V
+           *(
+               (rho.field()/deltaT)*psi0
+             - (rho.oldTime().field()/deltaT - Sp.field())*psiMinn + Su.field()
+            )
           - sumPhiBD;
     }
 
