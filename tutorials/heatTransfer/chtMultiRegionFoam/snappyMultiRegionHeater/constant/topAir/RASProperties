@@ -2,7 +2,11 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
+<<<<<<< HEAD
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+=======
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+>>>>>>> 34d87d1a94f83ac39028abe5f447f2b6d069380b
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -14,9 +18,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-RASModel kEpsilon;
+RASModel laminar;
 
-turbulence      off;
+turbulence      on;
 
 printCoeffs     on;
 

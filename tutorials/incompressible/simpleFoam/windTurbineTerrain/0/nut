@@ -1,0 +1,61 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+<<<<<<< HEAD:tutorials/heatTransfer/chtMultiRegionFoam/snappyMultiRegionHeater/0/K
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+=======
+|  \\    /   O peration     | Version:  1.7                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+>>>>>>> 34d87d1a94f83ac39028abe5f447f2b6d069380b:tutorials/incompressible/simpleFoam/windTurbineTerrain/0/nut
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0";
+    object      nut;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 2 -1 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+
+    inlet
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+
+    outlet
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+
+    "terrain_.*"
+    {
+        type            nutkRoughWallFunction;
+        Ks              0.2; //Ks = 20 Z0
+        Cs              0.5;
+        value           uniform 0.0;
+    }
+
+    ground
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+
+    #include "include/sideAndTopPatches"
+
+}
+
+
+// ************************************************************************* //

@@ -15,9 +15,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs            ("libOpenFOAM.so" "libcompressibleTurbulenceModel.so" "libcompressibleRASModels.so");
+libs            ("libcompressibleTurbulenceModel.so" "libcompressibleRASModels.so");
 
-application     snappyHexMesh;
+application     chtMultiRegionFoam;
 
 startFrom       latestTime;
 
@@ -30,9 +30,8 @@ endTime         200;
 deltaT          0.001;
 
 writeControl    adjustableRunTime;
+
 writeInterval   50;
-//writeControl    timeStep;
-//writeInterval   100;
 
 purgeWrite      0;
 
@@ -49,6 +48,8 @@ timePrecision   6;
 runTimeModifiable true;
 
 maxCo           0.3;
+
+maxDi          10.0;
 
 adjustTimeStep  yes;
 

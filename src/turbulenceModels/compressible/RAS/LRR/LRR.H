@@ -73,7 +73,10 @@ class LRR
 :
     public RASModel
 {
-    // Private data
+
+protected:
+
+    // Protected data
 
         // Model coefficients
 
@@ -116,7 +119,9 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const basicThermo& thermophysicalModel
+            const basicThermo& thermophysicalModel,
+            const word& turbulenceModelName = turbulenceModel::typeName,
+            const word& modelName = typeName
         );
 
 

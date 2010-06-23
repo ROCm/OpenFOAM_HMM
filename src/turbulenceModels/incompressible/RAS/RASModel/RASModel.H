@@ -131,9 +131,10 @@ public:
             (
                 const volVectorField& U,
                 const surfaceScalarField& phi,
-                transportModel& transport
+                transportModel& transport,
+                const word& turbulenceModelName
             ),
-            (U, phi, transport)
+            (U, phi, transport, turbulenceModelName)
         );
 
 
@@ -145,7 +146,8 @@ public:
             const word& type,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            transportModel& transport
+            transportModel& transport,
+            const word& turbulenceModelName = turbulenceModel::typeName
         );
 
 
@@ -156,7 +158,8 @@ public:
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
-            transportModel& transport
+            transportModel& transport,
+            const word& turbulenceModelName = turbulenceModel::typeName
         );
 
 

@@ -66,9 +66,10 @@ dictionaryReplacement
 
             "topAir_to_.*"
             {
-                type            compressible::turbulentTemperatureCoupledBaffle;
+                type            compressible::turbulentTemperatureCoupledBaffleMixed;
                 neighbourFieldName T;
-                K               K;
+                K               basicThermo;
+                KName           none;
                 value           uniform 300;
             }
         }

@@ -34,16 +34,23 @@ namespace incompressible
 namespace LESModels
 {
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameWithName(GenSGSStress, "GenSGSStress");
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 GenSGSStress::GenSGSStress
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& transport
+    transportModel& transport,
+    const word& turbulenceModelName,
+    const word& modelName
 )
 :
-    LESModel(word("GenSGSStress"), U, phi, transport),
+    LESModel(modelName, U, phi, transport, turbulenceModelName),
 
     ce_
     (

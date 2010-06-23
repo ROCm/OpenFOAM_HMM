@@ -1,0 +1,54 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+<<<<<<< HEAD:tutorials/heatTransfer/chtMultiRegionFoam/multiRegionHeater/0/cp
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+=======
+|  \\    /   O peration     | Version:  1.6                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+>>>>>>> 34d87d1a94f83ac39028abe5f447f2b6d069380b:tutorials/incompressible/simpleFoam/windTurbineTerrain/0/p
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      p;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include        "include/initialConditions"
+
+dimensions      [0 2 -2 0 0 0 0];
+
+internalField   uniform $pressure;
+
+boundaryField
+{
+    inlet
+    {
+        type            zeroGradient;
+    }
+
+    outlet
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
+
+    "terrain_.*"
+    {
+        type            zeroGradient;
+    }
+
+    ground
+    {
+        type            zeroGradient;
+    }
+
+    #include "include/sideAndTopPatches"
+}
+
+// ************************************************************************* //

@@ -207,6 +207,10 @@ public:
             //- Assignment from UList
             inline void operator=(const UList<T>&);
 
+            //- Assignment from UIndirectList
+            inline void operator=(const UIndirectList<T>&);
+
+
 
         // IOstream operators
 

@@ -409,29 +409,6 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
 (
-    const UList<T>& lst
-)
-{
-    if (capacity_ >= lst.size())
-    {
-        // can copy w/o reallocating, match initial size to avoid reallocation
-        List<T>::size(lst.size());
-        List<T>::operator=(lst);
-    }
-    else
-    {
-        // make everything available for the copy operation
-        List<T>::size(capacity_);
-
-        List<T>::operator=(lst);
-        capacity_ = List<T>::size();
-    }
-}
-
-
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
-(
     const DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
 )
 {
@@ -460,5 +437,50 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
     }
 }
 
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
+(
+    const UList<T>& lst
+)
+{
+    if (capacity_ >= lst.size())
+    {
+        // can copy w/o reallocating, match initial size to avoid reallocation
+        List<T>::size(lst.size());
+        List<T>::operator=(lst);
+    }
+    else
+    {
+        // make everything available for the copy operation
+        List<T>::size(capacity_);
+
+        List<T>::operator=(lst);
+        capacity_ = List<T>::size();
+    }
+}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::operator=
+(
+    const UIndirectList<T>& lst
+)
+{
+    if (capacity_ >= lst.size())
+    {
+        // can copy w/o reallocating, match initial size to avoid reallocation
+        List<T>::size(lst.size());
+        List<T>::operator=(lst);
+    }
+    else
+    {
+        // make everything available for the copy operation
+        List<T>::size(capacity_);
+
+        List<T>::operator=(lst);
+        capacity_ = List<T>::size();
+    }
+}
 
 // ************************************************************************* //

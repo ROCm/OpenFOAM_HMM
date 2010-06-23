@@ -36,8 +36,9 @@ Foam::IOList<T>::IOList(const IOobject& io)
     if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
     {
         WarningIn("IOList::IOList(const IOobject&)")
-            << "IOField constructed with IOobject::MUST_READ_IF_MODIFIED"
-            " but IOField does not support automatic rereading."
+            << "IOList " << name()
+            << " constructed with IOobject::MUST_READ_IF_MODIFIED"
+            " but IOList does not support automatic rereading."
             << endl;
     }
     if
@@ -64,8 +65,9 @@ Foam::IOList<T>::IOList(const IOobject& io, const label size)
     if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
     {
         WarningIn("IOList::IOList(const IOobject&, const label)")
-            << "IOField constructed with IOobject::MUST_READ_IF_MODIFIED"
-            " but IOField does not support automatic rereading."
+            << "IOList " << name()
+            << " constructed with IOobject::MUST_READ_IF_MODIFIED"
+            " but IOList does not support automatic rereading."
             << endl;
     }
     if
@@ -96,8 +98,9 @@ Foam::IOList<T>::IOList(const IOobject& io, const List<T>& list)
     if (io.readOpt() == IOobject::MUST_READ_IF_MODIFIED)
     {
         WarningIn("IOList::IOList(const IOobject&, const List<T>&)")
-            << "IOField constructed with IOobject::MUST_READ_IF_MODIFIED"
-            " but IOField does not support automatic rereading."
+            << "IOList " << name()
+            << " constructed with IOobject::MUST_READ_IF_MODIFIED"
+            " but IOList does not support automatic rereading."
             << endl;
     }
 
@@ -131,8 +134,9 @@ Foam::IOList<T>::IOList(const IOobject& io, const Xfer<List<T> >& list)
         WarningIn
         (
             "IOList::IOList(const IOobject&, const Xfer<List<T> >&)"
-        )   << "IOField constructed with IOobject::MUST_READ_IF_MODIFIED"
-            " but IOField does not support automatic rereading."
+        )   << "IOList " << name()
+            << " constructed with IOobject::MUST_READ_IF_MODIFIED"
+            " but IOList does not support automatic rereading."
             << endl;
     }
 
