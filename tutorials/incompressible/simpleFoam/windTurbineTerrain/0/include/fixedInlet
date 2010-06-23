@@ -1,13 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-<<<<<<< HEAD:tutorials/heatTransfer/chtMultiRegionFoam/snappyMultiRegionHeater/0/cp
 |  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
-=======
-|  \\    /   O peration     | Version:  1.7                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
->>>>>>> 34d87d1a94f83ac39028abe5f447f2b6d069380b:tutorials/incompressible/simpleFoam/windTurbineTerrain/0/include/fixedInlet
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
