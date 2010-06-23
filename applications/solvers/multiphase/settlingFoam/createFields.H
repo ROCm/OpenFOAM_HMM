@@ -50,7 +50,7 @@
             "transportProperties",
             runTime.constant(),
             mesh,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     );
@@ -184,7 +184,7 @@
             "RASProperties",
             runTime.constant(),
             mesh,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     );
@@ -276,7 +276,7 @@
         )
     );
 
-    if (RASProperties.lookupOrDefault<Switch>("printCoeffs", false))
+    if (RASProperties.lookupOrDefault("printCoeffs", false))
     {
         Info<< "kEpsilonCoeffs" << kEpsilonDict << nl
             << "wallFunctionCoeffs" << wallFunctionDict << endl;

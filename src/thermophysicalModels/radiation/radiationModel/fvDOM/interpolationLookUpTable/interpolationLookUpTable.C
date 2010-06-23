@@ -203,7 +203,7 @@ void Foam::interpolationLookUpTable<Type>::readTable
             fileName_,
             instance,
             mesh,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     );

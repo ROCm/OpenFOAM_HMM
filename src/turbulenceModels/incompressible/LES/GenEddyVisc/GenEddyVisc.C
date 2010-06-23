@@ -40,10 +40,11 @@ GenEddyVisc::GenEddyVisc
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& transport
+    transportModel& transport,
+    const word& turbulenceModelName
 )
 :
-    LESModel(word("GenEddyVisc"), U, phi, transport),
+    LESModel(word("GenEddyVisc"), U, phi, transport, turbulenceModelName),
 
     ce_
     (

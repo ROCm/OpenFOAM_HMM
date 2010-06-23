@@ -81,7 +81,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             "RASProperties",
             runTime.constant(),
             mesh,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         );
 
@@ -90,7 +90,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             "LESProperties",
             runTime.constant(),
             mesh,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         );
 
@@ -174,7 +174,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                         "transportProperties",
                         runTime.constant(),
                         mesh,
-                        IOobject::MUST_READ,
+                        IOobject::MUST_READ_IF_MODIFIED,
                         IOobject::NO_WRITE
                     )
                 );
@@ -299,7 +299,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                         "transportProperties",
                         runTime.constant(),
                         mesh,
-                        IOobject::MUST_READ,
+                        IOobject::MUST_READ_IF_MODIFIED,
                         IOobject::NO_WRITE
                     )
                 );

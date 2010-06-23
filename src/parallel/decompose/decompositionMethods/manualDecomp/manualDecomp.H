@@ -50,8 +50,6 @@ class manualDecomp
 {
     // Private data
 
-        const polyMesh* meshPtr_;
-
         fileName decompDataFile_;
 
 
@@ -73,14 +71,6 @@ public:
         //- Construct given the decomposition dictionary
         manualDecomp(const dictionary& decompositionDict);
 
-        //- Construct given the decomposition dictionary and mesh
-        manualDecomp
-        (
-            const dictionary& decompositionDict,
-            const polyMesh& mesh
-        );
-
-
     //- Destructor
     virtual ~manualDecomp()
     {}
@@ -99,8 +89,9 @@ public:
         //  mesh connectivity (if needed)
         virtual labelList decompose
         (
-            const pointField& points,
-            const scalarField& pointWeights
+            const polyMesh& mesh,
+            const pointField& cc,
+            const scalarField& cWeights
         );
 
         //- Return for every coordinate the wanted processor number. Explicitly
@@ -117,8 +108,14 @@ public:
             const scalarField& cWeights
         )
         {
-            return decompose(cc, cWeights);
+            notImplemented
+            (
+                "decompose(const labelListList&, const pointField&"
+                ", const scalarField)"
+            );
+            return labelList(0);
         }
+
 };
 
 

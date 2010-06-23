@@ -19,6 +19,7 @@ dynSmagorinsky/dynSmagorinsky.C
 LRRDiffStress/LRRDiffStress.C
 DeardorffDiffStress/DeardorffDiffStress.C
 spectEddyVisc/spectEddyVisc.C
+dynLagrangian/dynLagrangian.C
 
 scaleSimilarity/scaleSimilarity.C
 mixedSmagorinsky/mixedSmagorinsky.C

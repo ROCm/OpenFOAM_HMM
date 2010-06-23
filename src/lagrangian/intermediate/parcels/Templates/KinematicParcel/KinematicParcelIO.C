@@ -43,7 +43,14 @@ Foam::string Foam::KinematicParcel<ParcelType>::propHeader =
   + " (torquex torquey torquez)"
   + " rho"
   + " tTurb"
-  + " (UTurbx UTurby UTurbz)";
+  + " (UTurbx UTurby UTurbz)"
+  + " collisionRecordsPairAccessed"
+  + " collisionRecordsPairOrigProcOfOther"
+  + " collisionRecordsPairOrigIdOfOther"
+  + " (collisionRecordsPairData)"
+  + " collisionRecordsWallAccessed"
+  + " collisionRecordsWallPRel"
+  + " (collisionRecordsWallData)";
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -167,7 +174,58 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
     IOField<vector> UTurb(c.fieldIOobject("UTurb", IOobject::MUST_READ));
     c.checkFieldIOobject(c, UTurb);
 
+    labelIOFieldField collisionRecordsPairAccessed
+    (
+        c.fieldIOobject("collisionRecordsPairAccessed", IOobject::MUST_READ)
+    );
+    c.checkFieldFieldIOobject(c, collisionRecordsPairAccessed);
+
+    labelIOFieldField collisionRecordsPairOrigProcOfOther
+    (
+        c.fieldIOobject
+        (
+            "collisionRecordsPairOrigProcOfOther",
+            IOobject::MUST_READ
+        )
+    );
+    c.checkFieldFieldIOobject(c, collisionRecordsPairOrigProcOfOther);
+
+    labelIOFieldField collisionRecordsPairOrigIdOfOther
+    (
+        c.fieldIOobject
+        (
+            "collisionRecordsPairOrigIdOfOther",
+            IOobject::MUST_READ
+        )
+    );
+    c.checkFieldFieldIOobject(c, collisionRecordsPairOrigProcOfOther);
+
+    pairDataIOFieldField collisionRecordsPairData
+    (
+        c.fieldIOobject("collisionRecordsPairData", IOobject::MUST_READ)
+    );
+    c.checkFieldFieldIOobject(c, collisionRecordsPairData);
+
+    labelIOFieldField collisionRecordsWallAccessed
+    (
+        c.fieldIOobject("collisionRecordsWallAccessed", IOobject::MUST_READ)
+    );
+    c.checkFieldFieldIOobject(c, collisionRecordsWallAccessed);
+
+    vectorIOFieldField collisionRecordsWallPRel
+    (
+        c.fieldIOobject("collisionRecordsWallPRel", IOobject::MUST_READ)
+    );
+    c.checkFieldFieldIOobject(c, collisionRecordsWallPRel);
+
+    wallDataIOFieldField collisionRecordsWallData
+    (
+        c.fieldIOobject("collisionRecordsWallData", IOobject::MUST_READ)
+    );
+    c.checkFieldFieldIOobject(c, collisionRecordsWallData);
+
     label i = 0;
+
     forAllIter(typename Cloud<ParcelType>, c, iter)
     {
         ParcelType& p = iter();
@@ -182,6 +240,17 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
         p.rho_ = rho[i];
         p.tTurb_ = tTurb[i];
         p.UTurb_ = UTurb[i];
+        p.collisionRecords_ = collisionRecordList
+        (
+            collisionRecordsPairAccessed[i],
+            collisionRecordsPairOrigProcOfOther[i],
+            collisionRecordsPairOrigIdOfOther[i],
+            collisionRecordsPairData[i],
+            collisionRecordsWallAccessed[i],
+            collisionRecordsWallPRel[i],
+            collisionRecordsWallData[i]
+        );
+
         i++;
     }
 }
@@ -206,14 +275,56 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
     IOField<vector> f(c.fieldIOobject("f", IOobject::NO_READ), np);
     IOField<vector> angularMomentum
     (
-        c.fieldIOobject("angularMomentum", IOobject::NO_READ), np
+        c.fieldIOobject("angularMomentum", IOobject::NO_READ),
+        np
     );
     IOField<vector> torque(c.fieldIOobject("torque", IOobject::NO_READ), np);
     IOField<scalar> rho(c.fieldIOobject("rho", IOobject::NO_READ), np);
     IOField<scalar> tTurb(c.fieldIOobject("tTurb", IOobject::NO_READ), np);
     IOField<vector> UTurb(c.fieldIOobject("UTurb", IOobject::NO_READ), np);
 
+    labelIOFieldField collisionRecordsPairAccessed
+    (
+        c.fieldIOobject("collisionRecordsPairAccessed", IOobject::NO_READ),
+        np
+    );
+    labelIOFieldField collisionRecordsPairOrigProcOfOther
+    (
+        c.fieldIOobject
+        (
+            "collisionRecordsPairOrigProcOfOther",
+            IOobject::NO_READ
+        ),
+        np
+    );
+    labelIOFieldField collisionRecordsPairOrigIdOfOther
+    (
+        c.fieldIOobject("collisionRecordsPairOrigIdOfOther", IOobject::NO_READ),
+        np
+    );
+    pairDataIOFieldField collisionRecordsPairData
+    (
+        c.fieldIOobject("collisionRecordsPairData", IOobject::NO_READ),
+        np
+    );
+    labelIOFieldField collisionRecordsWallAccessed
+    (
+        c.fieldIOobject("collisionRecordsWallAccessed", IOobject::NO_READ),
+        np
+    );
+    vectorIOFieldField collisionRecordsWallPRel
+    (
+        c.fieldIOobject("collisionRecordsWallPRel", IOobject::NO_READ),
+        np
+    );
+    wallDataIOFieldField collisionRecordsWallData
+    (
+        c.fieldIOobject("collisionRecordsWallData", IOobject::NO_READ),
+        np
+    );
+
     label i = 0;
+
     forAllConstIter(typename Cloud<ParcelType>, c, iter)
     {
         const KinematicParcel<ParcelType>& p = iter();
@@ -229,6 +340,16 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
         rho[i] = p.rho();
         tTurb[i] = p.tTurb();
         UTurb[i] = p.UTurb();
+        collisionRecordsPairAccessed[i] = p.collisionRecords().pairAccessed();
+        collisionRecordsPairOrigProcOfOther[i] =
+            p.collisionRecords().pairOrigProcOfOther();
+        collisionRecordsPairOrigIdOfOther[i] =
+            p.collisionRecords().pairOrigIdOfOther();
+        collisionRecordsPairData[i] = p.collisionRecords().pairData();
+        collisionRecordsWallAccessed[i] = p.collisionRecords().wallAccessed();
+        collisionRecordsWallPRel[i] = p.collisionRecords().wallPRel();
+        collisionRecordsWallData[i] = p.collisionRecords().wallData();
+
         i++;
     }
 
@@ -243,6 +364,13 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
     rho.write();
     tTurb.write();
     UTurb.write();
+    collisionRecordsPairAccessed.write();
+    collisionRecordsPairOrigProcOfOther.write();
+    collisionRecordsPairOrigIdOfOther.write();
+    collisionRecordsPairData.write();
+    collisionRecordsWallAccessed.write();
+    collisionRecordsWallPRel.write();
+    collisionRecordsWallData.write();
 }
 
 

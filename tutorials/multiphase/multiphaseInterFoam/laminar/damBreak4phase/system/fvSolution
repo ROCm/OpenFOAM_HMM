@@ -94,7 +94,7 @@ PISO
     nAlphaCorr      4;
     nAlphaSubCycles 4;
     cycleAlpha      yes;
-    cAlpha          4;
+    cAlpha          2;
 }
 
 

@@ -109,10 +109,11 @@ SpalartAllmaras::SpalartAllmaras
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermophysicalModel
+    const basicThermo& thermophysicalModel,
+    const word& turbulenceModelName
 )
 :
-    RASModel(typeName, rho, U, phi, thermophysicalModel),
+    RASModel(typeName, rho, U, phi, thermophysicalModel, turbulenceModelName),
 
     sigmaNut_
     (

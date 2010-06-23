@@ -32,15 +32,7 @@ Description
 
 Foam::lduMatrix::solverPerformance::solverPerformance(Istream& is)
 {
-    is.readBeginList("lduMatrix::solverPerformance");
-    is  >> solverName_
-        >> fieldName_
-        >> initialResidual_
-        >> finalResidual_
-        >> noIterations_
-        >> converged_
-        >> singular_;
-    is.readEndList("lduMatrix::solverPerformance");
+    is  >> *this;
 }
 
 
@@ -118,6 +110,24 @@ void Foam::lduMatrix::solverPerformance::print() const
 }
 
 
+bool Foam::lduMatrix::solverPerformance::operator!=
+(
+    const lduMatrix::solverPerformance& sp
+) const
+{
+    return
+    (
+        solverName()      != sp.solverName()
+     || fieldName()       != sp.fieldName()
+     || initialResidual() != sp.initialResidual()
+     || finalResidual()   != sp.finalResidual()
+     || nIterations()     != sp.nIterations()
+     || converged()       != sp.converged()
+     || singular()        != sp.singular()
+    );
+}
+
+
 Foam::lduMatrix::solverPerformance Foam::max
 (
     const lduMatrix::solverPerformance& sp1,
@@ -134,6 +144,26 @@ Foam::lduMatrix::solverPerformance Foam::max
         sp1.converged() && sp2.converged(),
         sp1.singular() || sp2.singular()
     );
+}
+
+
+Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    Foam::lduMatrix::solverPerformance& sp
+)
+{
+    is.readBeginList("lduMatrix::solverPerformance");
+    is  >> sp.solverName_
+        >> sp.fieldName_
+        >> sp.initialResidual_
+        >> sp.finalResidual_
+        >> sp.noIterations_
+        >> sp.converged_
+        >> sp.singular_;
+    is.readEndList("lduMatrix::solverPerformance");
+
+    return is;
 }
 
 

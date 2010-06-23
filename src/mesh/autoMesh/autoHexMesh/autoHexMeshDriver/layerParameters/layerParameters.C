@@ -218,10 +218,7 @@ Foam::layerParameters::layerParameters
             << endl;
     }
 
-    if (dict.found("nRelaxedIter"))
-    {
-        dict.lookup("nRelaxedIter") >> nRelaxedIter_;
-    }
+    dict.readIfPresent("nRelaxedIter", nRelaxedIter_);
 
     if (nLayerIter_ < 0 || nRelaxedIter_ < 0)
     {
@@ -303,10 +300,8 @@ Foam::layerParameters::layerParameters
             << endl;
     }
 
-    if (dict.found("nRelaxedIter"))
-    {
-        dict.lookup("nRelaxedIter") >> nRelaxedIter_;
-    }
+    dict.readIfPresent("nRelaxedIter", nRelaxedIter_);
+
     if (nLayerIter_ < 0 || nRelaxedIter_ < 0)
     {
         FatalErrorIn("layerParameters::layerParameters(..)")

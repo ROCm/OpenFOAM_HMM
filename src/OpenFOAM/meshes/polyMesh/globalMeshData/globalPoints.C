@@ -1164,7 +1164,7 @@ Foam::labelList Foam::globalPoints::reverseMeshPoints
 
     faceList masterFaces(nbrPatch.size());
 
-    forAll (nbrPatch, faceI)
+    forAll(nbrPatch, faceI)
     {
         masterFaces[faceI] = nbrPatch[faceI].reverseFace();
     }

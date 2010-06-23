@@ -402,7 +402,21 @@ int main(int argc, char *argv[])
                         procMeshes.meshes(),
                         sprayObjs
                     );
+                    reconstructLagrangianFieldFields<label>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
                     reconstructLagrangianFields<scalar>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
+                    reconstructLagrangianFieldFields<scalar>
                     (
                         cloudName,
                         mesh,
@@ -416,7 +430,21 @@ int main(int argc, char *argv[])
                         procMeshes.meshes(),
                         sprayObjs
                     );
+                    reconstructLagrangianFieldFields<vector>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
                     reconstructLagrangianFields<sphericalTensor>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
+                    reconstructLagrangianFieldFields<sphericalTensor>
                     (
                         cloudName,
                         mesh,
@@ -430,7 +458,21 @@ int main(int argc, char *argv[])
                         procMeshes.meshes(),
                         sprayObjs
                     );
+                    reconstructLagrangianFieldFields<symmTensor>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
                     reconstructLagrangianFields<tensor>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
+                    reconstructLagrangianFieldFields<tensor>
                     (
                         cloudName,
                         mesh,

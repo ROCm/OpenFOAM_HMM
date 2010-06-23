@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,15 +29,11 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-Switch adjustTimeStep
-(
-    runTime.controlDict().lookup("adjustTimeStep")
-);
+const bool adjustTimeStep =
+    runTime.controlDict().lookupOrDefault("adjustTimeStep", false);
 
-scalar maxCo
-(
-    readScalar(runTime.controlDict().lookup("maxCo"))
-);
+scalar maxCo =
+    runTime.controlDict().lookupOrDefault<scalar>("maxCo", 1.0);
 
 scalar maxDeltaT =
     runTime.controlDict().lookupOrDefault<scalar>("maxDeltaT", GREAT);

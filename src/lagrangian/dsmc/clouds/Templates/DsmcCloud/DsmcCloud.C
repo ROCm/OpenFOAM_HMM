@@ -28,6 +28,7 @@ License
 #include "WallInteractionModel.H"
 #include "InflowBoundaryModel.H"
 #include "constants.H"
+#include "zeroGradientFvPatchFields.H"
 
 using namespace Foam::constant;
 
@@ -459,6 +460,8 @@ void Foam::DsmcCloud<ParcelType>::collisions()
 
     reduce(collisionCandidates, sumOp<label>());
 
+    sigmaTcRMax_.correctBoundaryConditions();
+
     if (collisionCandidates)
     {
         Info<< "    Collisions                      = "
@@ -550,6 +553,8 @@ void Foam::DsmcCloud<ParcelType>::calculateFields()
     rhoM *= nParticle_/mesh().cellVolumes();
     rhoM_.correctBoundaryConditions();
 
+    dsmcRhoN_.correctBoundaryConditions();
+
     linearKE *= nParticle_/mesh().cellVolumes();
     linearKE_.correctBoundaryConditions();
 
@@ -611,7 +616,7 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
             cloudName + "Properties",
             mesh_.time().constant(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     ),
@@ -833,7 +838,7 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
             cloudName + "Properties",
             mesh_.time().constant(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     ),
@@ -851,7 +856,8 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar("zero",  dimensionSet(0, 3, -1, 0, 0), 0.0)
+        dimensionedScalar("zero",  dimensionSet(0, 3, -1, 0, 0), 0.0),
+        zeroGradientFvPatchScalarField::typeName
     ),
     collisionSelectionRemainder_(),
     q_

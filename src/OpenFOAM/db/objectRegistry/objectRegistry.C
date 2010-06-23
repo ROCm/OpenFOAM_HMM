@@ -273,7 +273,7 @@ void Foam::objectRegistry::rename(const word& newName)
 
 bool Foam::objectRegistry::modified() const
 {
-    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
+    forAllConstIter(HashTable<regIOobject*>, *this, iter)
     {
         if (iter()->modified())
         {
@@ -317,7 +317,7 @@ bool Foam::objectRegistry::writeObject
 {
     bool ok = true;
 
-    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
+    forAllConstIter(HashTable<regIOobject*>, *this, iter)
     {
         if (objectRegistry::debug)
         {

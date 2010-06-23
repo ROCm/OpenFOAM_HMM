@@ -498,10 +498,9 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
                         break;
                     }
                 }
-
-                // Flip state should be opposite.
-                if (myZoneFlip[bFaceI] == neiZoneFlip[bFaceI])
+                else if (myZoneFlip[bFaceI] == neiZoneFlip[bFaceI])
                 {
+                    // Flip state should be opposite.
                     hasError = true;
 
                     if (report)

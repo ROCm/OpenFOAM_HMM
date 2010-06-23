@@ -126,6 +126,20 @@ processorCyclicFvPatchField<Type>::processorCyclicFvPatchField
             << " in file " << this->dimensionedInternalField().objectPath()
             << exit(FatalIOError);
     }
+
+    if (Pstream::defaultCommsType == Pstream::scheduled)
+    {
+        WarningIn
+        (
+            "processorCyclicFvPatchField<Type>::processorCyclicFvPatchField\n"
+            "(\n"
+            "    const fvPatch& p,\n"
+            "    const DimensionedField<Type, volMesh>& iF,\n"
+            "    const dictionary& dict\n"
+            ")\n"
+        )   << "Scheduled communication with split cyclics not supported."
+            << endl;
+    }
 }
 
 

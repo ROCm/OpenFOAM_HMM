@@ -43,9 +43,25 @@ Foam::IOdictionary::IOdictionary(const IOobject& io)
 :
     regIOobject(io)
 {
+    // Temporary warning
+    if (io.readOpt() == IOobject::MUST_READ)
+    {
+        WarningIn("IOdictionary::IOdictionary(const IOobject&)")
+        //FatalErrorIn("IOdictionary::IOdictionary(const IOobject&)")
+            << "Dictionary " << name()
+            << " constructed with IOobject::MUST_READ"
+            " instead of IOobject::MUST_READ_IF_MODIFIED." << nl
+            << "Use MUST_READ_IF_MODIFIED if you need automatic rereading."
+            << endl;
+            //<< abort(FatalError);
+    }
+
     if
     (
-        io.readOpt() == IOobject::MUST_READ
+        (
+            io.readOpt() == IOobject::MUST_READ
+         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
+        )
      || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {
@@ -61,9 +77,25 @@ Foam::IOdictionary::IOdictionary(const IOobject& io, const dictionary& dict)
 :
     regIOobject(io)
 {
+    // Temporary warning
+    if (io.readOpt() == IOobject::MUST_READ)
+    {
+        WarningIn
+        (
+            "IOdictionary::IOdictionary(const IOobject& const dictionary&)"
+        )   << "Dictionary " << name()
+            << " constructed with IOobject::MUST_READ"
+            " instead of IOobject::MUST_READ_IF_MODIFIED." << nl
+            << "Use MUST_READ_IF_MODIFIED if you need automatic rereading."
+            << endl;
+    }
+
     if
     (
-        io.readOpt() == IOobject::MUST_READ
+        (
+            io.readOpt() == IOobject::MUST_READ
+         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
+        )
      || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {

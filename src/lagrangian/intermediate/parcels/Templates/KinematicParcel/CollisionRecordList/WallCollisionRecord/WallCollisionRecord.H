@@ -82,7 +82,7 @@ class WallCollisionRecord
         // //- Recording whether or not this record has been accessed
         bool accessed_;
 
-        //- The position of wall impact relative to the cell centre
+        //- The position of wall impact relative to the particle centre
         vector pRel_;
 
         //- Collision data, stored as if the storing particle was the
@@ -92,6 +92,12 @@ class WallCollisionRecord
 
 public:
 
+    // Static data members
+
+        //- Tolerance for detecting seriously erroneous wall matches
+        static const scalar errorCosAngle;
+
+
     // Constructors
 
         //- Construct null
@@ -100,6 +106,7 @@ public:
         //- Construct from components
         WallCollisionRecord
         (
+            bool accessed,
             const vector& pRel,
             const Type& data = pTraits<Type>::zero
         );

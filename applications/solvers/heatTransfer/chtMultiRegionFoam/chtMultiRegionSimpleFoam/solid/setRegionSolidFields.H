@@ -1,6 +1,14 @@
     fvMesh& mesh = solidRegions[i];
+    basicSolidThermo& thermo = thermos[i];
 
-    volScalarField& rho = rhos[i];
-    volScalarField& cp = cps[i];
-    volScalarField& K = Ks[i];
-    volScalarField& T = Ts[i];
+    tmp<volScalarField> trho = thermo.rho();
+    const volScalarField& rho = trho();
+
+    tmp<volScalarField> tcp = thermo.cp();
+    const volScalarField& cp = tcp();
+
+    tmp<volScalarField> tK = thermo.K();
+    //tmp<volSymmTensorField> tK = thermo.directionalK();
+    const volScalarField& K = tK();
+
+    volScalarField& T = thermo.T();

@@ -29,14 +29,9 @@ License
 #include "volFields.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
+Foam::smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -52,7 +47,8 @@ smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
     valueFraction() = 0.0;
 }
 
-smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
+
+Foam::smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
 (
     const smoluchowskiJumpTFvPatchScalarField& ptf,
     const fvPatch& p,
@@ -67,7 +63,7 @@ smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
 {}
 
 
-smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
+Foam::smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -118,7 +114,7 @@ smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
 }
 
 
-smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
+Foam::smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
 (
     const smoluchowskiJumpTFvPatchScalarField& ptpsf,
     const DimensionedField<scalar, volMesh>& iF
@@ -134,7 +130,7 @@ smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Map from self
-void smoluchowskiJumpTFvPatchScalarField::autoMap
+void Foam::smoluchowskiJumpTFvPatchScalarField::autoMap
 (
     const fvPatchFieldMapper& m
 )
@@ -144,7 +140,7 @@ void smoluchowskiJumpTFvPatchScalarField::autoMap
 
 
 // Reverse-map the given fvPatchField onto this fvPatchField
-void smoluchowskiJumpTFvPatchScalarField::rmap
+void Foam::smoluchowskiJumpTFvPatchScalarField::rmap
 (
     const fvPatchField<scalar>& ptf,
     const labelList& addr
@@ -155,7 +151,7 @@ void smoluchowskiJumpTFvPatchScalarField::rmap
 
 
 // Update the coefficients associated with the patch field
-void smoluchowskiJumpTFvPatchScalarField::updateCoeffs()
+void Foam::smoluchowskiJumpTFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -174,11 +170,16 @@ void smoluchowskiJumpTFvPatchScalarField::updateCoeffs()
     // Prandtl number reading consistent with rhoCentralFoam
     const dictionary& thermophysicalProperties =
         db().lookupObject<IOdictionary>("thermophysicalProperties");
-    dimensionedScalar Pr = dimensionedScalar("Pr", dimless, 1.0);
-    if (thermophysicalProperties.found("Pr"))
-    {
-        Pr = thermophysicalProperties.lookup("Pr");
-    }
+
+    dimensionedScalar Pr
+    (
+        dimensionedScalar::lookupOrDefault
+        (
+            "Pr",
+            thermophysicalProperties,
+            1.0
+        )
+    );
 
     Field<scalar> C2 = pmu/prho
         *sqrt(ppsi*constant::mathematical::piByTwo)
@@ -197,7 +198,7 @@ void smoluchowskiJumpTFvPatchScalarField::updateCoeffs()
 
 
 // Write
-void smoluchowskiJumpTFvPatchScalarField::write(Ostream& os) const
+void Foam::smoluchowskiJumpTFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
     os.writeKeyword("accommodationCoeff")
@@ -211,10 +212,12 @@ void smoluchowskiJumpTFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+namespace Foam
+{
+
 makePatchTypeField(fvPatchScalarField, smoluchowskiJumpTFvPatchScalarField);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+}
 
-} // End namespace Foam
 
 // ************************************************************************* //

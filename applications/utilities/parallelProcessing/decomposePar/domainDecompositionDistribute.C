@@ -109,13 +109,12 @@ void Foam::domainDecomposition::distributeCells()
 
     autoPtr<decompositionMethod> decomposePtr = decompositionMethod::New
     (
-        decompositionDict_,
-        *this
+        decompositionDict_
     );
 
     if (sameProcFaces.empty())
     {
-        cellToProc_ = decomposePtr().decompose(cellCentres());
+        cellToProc_ = decomposePtr().decompose(*this, cellCentres());
     }
     else
     {
@@ -174,7 +173,12 @@ void Foam::domainDecomposition::distributeCells()
 
         // Do decomposition on agglomeration
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        cellToProc_ = decomposePtr().decompose(globalRegion, regionCentres);
+        cellToProc_ = decomposePtr().decompose
+        (
+            *this,
+            globalRegion,
+            regionCentres
+        );
     }
 
     Info<< "\nFinished decomposition in "

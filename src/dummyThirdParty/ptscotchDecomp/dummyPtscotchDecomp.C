@@ -48,7 +48,7 @@ namespace Foam
     (
         decompositionMethod,
         ptscotchDecomp,
-        dictionaryMesh
+        dictionary
     );
 }
 
@@ -85,12 +85,10 @@ Foam::label Foam::ptscotchDecomp::decompose
 
 Foam::ptscotchDecomp::ptscotchDecomp
 (
-    const dictionary& decompositionDict,
-    const polyMesh& mesh
+    const dictionary& decompositionDict
 )
 :
-    decompositionMethod(decompositionDict),
-    mesh_(mesh)
+    decompositionMethod(decompositionDict)
 {}
 
 
@@ -98,6 +96,7 @@ Foam::ptscotchDecomp::ptscotchDecomp
 
 Foam::labelList Foam::ptscotchDecomp::decompose
 (
+    const polyMesh& mesh,
     const pointField& points,
     const scalarField& pointWeights
 )
@@ -117,6 +116,7 @@ Foam::labelList Foam::ptscotchDecomp::decompose
 
 Foam::labelList Foam::ptscotchDecomp::decompose
 (
+    const polyMesh& mesh,
     const labelList& agglom,
     const pointField& agglomPoints,
     const scalarField& pointWeights

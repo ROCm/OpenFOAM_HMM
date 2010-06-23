@@ -38,8 +38,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "convert pro-STAR (v3) mesh to OpenFOAM"
+    );
+
     argList::noParallel();
-    argList::validArgs.append("STAR mesh file prefix");
+    argList::validArgs.append("pro-STAR prefix");
     argList::addOption
     (
         "scale",
@@ -56,7 +61,7 @@ int main(int argc, char *argv[])
 
     const scalar scaleFactor = args.optionLookupOrDefault("scale", 1.0);
 
-#   include "createTime.H"
+    #include "createTime.H"
 
     starMesh makeMesh(args[1], runTime, scaleFactor);
 

@@ -45,9 +45,21 @@ turbulenceModel::turbulenceModel
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& transport
+    transportModel& transport,
+    const word& turbulenceModelName
 )
 :
+    regIOobject
+    (
+        IOobject
+        (
+            turbulenceModelName,
+            U.time().constant(),
+            U.db(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        )
+    ),
     runTime_(U.time()),
     mesh_(U.mesh()),
 
@@ -63,7 +75,8 @@ autoPtr<turbulenceModel> turbulenceModel::New
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& transport
+    transportModel& transport,
+    const word& turbulenceModelName
 )
 {
     // get model name, but do not register the dictionary
@@ -77,7 +90,7 @@ autoPtr<turbulenceModel> turbulenceModel::New
                 "turbulenceProperties",
                 U.time().constant(),
                 U.db(),
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
                 false
             )
@@ -94,7 +107,7 @@ autoPtr<turbulenceModel> turbulenceModel::New
         FatalErrorIn
         (
             "turbulenceModel::New(const volVectorField&, "
-            "const surfaceScalarField&, transportModel&)"
+            "const surfaceScalarField&, transportModel&, const word&)"
         )   << "Unknown turbulenceModel type "
             << modelType << nl << nl
             << "Valid turbulenceModel types:" << endl
@@ -102,7 +115,10 @@ autoPtr<turbulenceModel> turbulenceModel::New
             << exit(FatalError);
     }
 
-    return autoPtr<turbulenceModel>(cstrIter()(U, phi, transport));
+    return autoPtr<turbulenceModel>
+    (
+        cstrIter()(U, phi, transport, turbulenceModelName)
+    );
 }
 
 

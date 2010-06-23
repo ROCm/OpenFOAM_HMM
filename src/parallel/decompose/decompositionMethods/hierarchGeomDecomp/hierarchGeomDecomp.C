@@ -40,13 +40,6 @@ namespace Foam
         hierarchGeomDecomp,
         dictionary
     );
-
-    addToRunTimeSelectionTable
-    (
-        decompositionMethod,
-        hierarchGeomDecomp,
-        dictionaryMesh
-    );
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -685,35 +678,6 @@ void Foam::hierarchGeomDecomp::sortComponent
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::hierarchGeomDecomp::hierarchGeomDecomp
-(
-    const dictionary& decompositionDict
-)
-:
-    geomDecomp(decompositionDict, typeName),
-    decompOrder_()
-{
-    setDecompOrder();
-}
-
-
-Foam::hierarchGeomDecomp::hierarchGeomDecomp
-(
-    const dictionary& decompositionDict,
-    const polyMesh&
-)
-:
-    geomDecomp(decompositionDict, hierarchGeomDecomp::typeName),
-    decompOrder_()
-{
-    setDecompOrder();
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 Foam::labelList Foam::hierarchGeomDecomp::decompose
 (
     const pointField& points
@@ -796,5 +760,21 @@ Foam::labelList Foam::hierarchGeomDecomp::decompose
     return finalDecomp;
 }
 
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::hierarchGeomDecomp::hierarchGeomDecomp
+(
+    const dictionary& decompositionDict
+)
+:
+    geomDecomp(decompositionDict, typeName),
+    decompOrder_()
+{
+    setDecompOrder();
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

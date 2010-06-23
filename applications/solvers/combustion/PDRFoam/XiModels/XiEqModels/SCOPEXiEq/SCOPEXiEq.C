@@ -62,7 +62,7 @@ Foam::XiEqModels::SCOPEXiEq::SCOPEXiEq
                 "combustionProperties",
                 Su.mesh().time().constant(),
                 Su.mesh(),
-                IOobject::MUST_READ
+                IOobject::MUST_READ_IF_MODIFIED
             )
         ),
         thermo

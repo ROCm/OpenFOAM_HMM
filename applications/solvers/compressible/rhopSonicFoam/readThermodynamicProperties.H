@@ -7,7 +7,7 @@
             "thermodynamicProperties",
             runTime.constant(),
             mesh,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     );
@@ -26,8 +26,13 @@
 
     dimensionedScalar gamma = Cp/Cv;
 
-    dimensionedScalar Pr = dimensionedScalar("Pr", dimless, 1.0);
-    if (thermodynamicProperties.found("Pr"))
-    {
-        Pr = thermodynamicProperties.lookup("Pr");
-    }
+    dimensionedScalar Pr
+    (
+        dimensionedScalar::lookupOrDefault
+        (
+            "Pr",
+            thermodynamicProperties,
+            1.0
+        )
+    );
+

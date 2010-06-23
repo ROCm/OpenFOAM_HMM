@@ -45,7 +45,7 @@ void Foam::Cloud<ParticleType>::readCloudUniformProperties()
         time().timeName(),
         "uniform"/cloud::prefix/name(),
         db(),
-        IOobject::MUST_READ,
+        IOobject::MUST_READ_IF_MODIFIED,
         IOobject::NO_WRITE,
         false
     );
@@ -197,6 +197,31 @@ void Foam::Cloud<ParticleType>::checkFieldIOobject
         (
             "void Cloud<ParticleType>::checkFieldIOobject"
             "(const Cloud<ParticleType>&, const IOField<DataType>&) const"
+        )   << "Size of " << data.name()
+            << " field " << data.size()
+            << " does not match the number of particles " << c.size()
+            << abort(FatalError);
+    }
+}
+
+
+template<class ParticleType>
+template<class DataType>
+void Foam::Cloud<ParticleType>::checkFieldFieldIOobject
+(
+    const Cloud<ParticleType>& c,
+    const IOFieldField<Field<DataType>, DataType>& data
+) const
+{
+    if (data.size() != c.size())
+    {
+        FatalErrorIn
+        (
+            "void Cloud<ParticleType>::checkFieldFieldIOobject"
+            "("
+                "const Cloud<ParticleType>&, "
+                "const IOFieldField<Field<DataType>, DataType>&"
+            ") const"
         )   << "Size of " << data.name()
             << " field " << data.size()
             << " does not match the number of particles " << c.size()

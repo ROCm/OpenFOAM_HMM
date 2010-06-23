@@ -58,7 +58,6 @@ SourceFiles
 #include "labelField.H"
 #include "primitiveFields.H"
 #include "LUscalarMatrix.H"
-#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,7 +74,7 @@ class GAMGSolver
 {
     // Private data
 
-        Switch cacheAgglomeration_;
+        bool cacheAgglomeration_;
 
         //- Number of pre-smoothing sweeps
         label nPreSweeps_;

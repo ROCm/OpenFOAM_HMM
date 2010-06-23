@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -16,169 +16,49 @@ FoamFile
 
 dictionaryReplacement
 {
+    boundary
+    {
+        minY
+        {
+            type            patch;
+        }
+        minZ
+        {
+            type            patch;
+        }
+        maxZ
+        {
+            type            patch;
+        }
+    }
+
     T
     {
         internalField   uniform 300;
 
         boundaryField
         {
+            ".*"
+            {
+                type            zeroGradient;
+                value           uniform 300;
+            }
+            "heater_to_.*"
+            {
+                type            compressible::turbulentTemperatureCoupledBaffleMixed;
+                neighbourFieldName T;
+                K               solidThermo;
+                KName           none;
+                value           uniform 300;
+            }
             minY
             {
                 type            fixedValue;
                 value           uniform 500;
             }
-
-            minZ
-            {
-                type            zeroGradient;
-            }
-            maxZ
-            {
-                type            zeroGradient;
-            }
-
-            heater_to_bottomAir
-            {
-                type            compressible::turbulentTemperatureCoupledBaffle;
-                neighbourFieldName T;
-                K               K;
-                value           uniform 300;
-
-            }
-            heater_to_leftSolid
-            {
-                type            compressible::turbulentTemperatureCoupledBaffle;
-                neighbourFieldName T;
-                K               K;
-                value           uniform 300;
-            }
-            heater_to_rightSolid
-            {
-                type            compressible::turbulentTemperatureCoupledBaffle;
-                neighbourFieldName T;
-                K               K;
-                value           uniform 300;
-            }
-            heater_to_topAir
-            {
-                type            compressible::turbulentTemperatureCoupledBaffle;
-                neighbourFieldName T;
-                K               K;
-                value           uniform 300;
-            }
         }
     }
 
-    rho
-    {
-        internalField   uniform 8000;
-
-        boundaryField
-        {
-            minY
-            {
-                type            zeroGradient;
-            }
-            minZ
-            {
-                type            zeroGradient;
-            }
-            maxZ
-            {
-                type            zeroGradient;
-            }
-            heater_to_bottomAir
-            {
-                type            zeroGradient;
-            }
-            heater_to_leftSolid
-            {
-                type            zeroGradient;
-            }
-            heater_to_rightSolid
-            {
-                type            zeroGradient;
-            }
-            heater_to_topAir
-            {
-                type            zeroGradient;
-            }
-        }
-    }
-
-    K
-    {
-        internalField   uniform 80;
-
-        boundaryField
-        {
-            minY
-            {
-                type            zeroGradient;
-            }
-            minZ
-            {
-                type            zeroGradient;
-            }
-            maxZ
-            {
-                type            zeroGradient;
-            }
-            heater_to_bottomAir
-            {
-                type            zeroGradient;
-            }
-            heater_to_leftSolid
-            {
-                type            zeroGradient;
-            }
-            heater_to_rightSolid
-            {
-                type            zeroGradient;
-            }
-            heater_to_topAir
-            {
-                type            zeroGradient;
-            }
-        }
-    }
-
-    cp
-    {
-        internalField   uniform 450;
-
-        boundaryField
-        {
-            minY
-            {
-                type            zeroGradient;
-            }
-            minZ
-            {
-                type            zeroGradient;
-            }
-            maxZ
-            {
-                type            zeroGradient;
-            }
-            heater_to_bottomAir
-            {
-                type            zeroGradient;
-            }
-            heater_to_leftSolid
-            {
-                type            zeroGradient;
-            }
-            heater_to_rightSolid
-            {
-                type            zeroGradient;
-            }
-            heater_to_topAir
-            {
-                type            zeroGradient;
-            }
-        }
-    }
 }
 
 // ************************************************************************* //

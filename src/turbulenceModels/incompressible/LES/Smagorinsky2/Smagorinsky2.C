@@ -46,10 +46,11 @@ Smagorinsky2::Smagorinsky2
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    transportModel& transport
+    transportModel& transport,
+    const word& turbulenceModelName
 )
 :
-    LESModel(typeName, U, phi, transport),
+    LESModel(typeName, U, phi, transport, turbulenceModelName),
     Smagorinsky(U, phi, transport),
 
     cD2_

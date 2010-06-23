@@ -64,6 +64,56 @@ void Foam::lagrangianFieldDecomposer::readFields
 
 
 template<class Type>
+void Foam::lagrangianFieldDecomposer::readFieldFields
+(
+    const label cloudI,
+    const IOobjectList& lagrangianObjects,
+    PtrList<PtrList<IOFieldField<Field<Type>, Type> > >& lagrangianFields
+)
+{
+    // Search list of objects for lagrangian fields
+    IOobjectList lagrangianTypeObjectsA
+    (
+        lagrangianObjects.lookupClass(IOField<Field<Type> >::typeName)
+    );
+
+    IOobjectList lagrangianTypeObjectsB
+    (
+        lagrangianObjects.lookupClass(IOFieldField<Field<Type>, Type>::typeName)
+    );
+
+    lagrangianFields.set
+    (
+        cloudI,
+        new PtrList<IOFieldField<Field<Type>, Type> >
+        (
+            lagrangianTypeObjectsA.size() + lagrangianTypeObjectsB.size()
+        )
+    );
+
+    label lagrangianFieldi=0;
+
+    forAllIter(IOobjectList, lagrangianTypeObjectsA, iter)
+    {
+        lagrangianFields[cloudI].set
+        (
+            lagrangianFieldi++,
+            new IOFieldField<Field<Type>, Type>(*iter())
+        );
+    }
+
+    forAllIter(IOobjectList, lagrangianTypeObjectsB, iter)
+    {
+        lagrangianFields[cloudI].set
+        (
+            lagrangianFieldi++,
+            new IOFieldField<Field<Type>, Type>(*iter())
+        );
+    }
+}
+
+
+template<class Type>
 Foam::tmp<Foam::IOField<Type> >
 Foam::lagrangianFieldDecomposer::decomposeField
 (
@@ -94,6 +144,37 @@ Foam::lagrangianFieldDecomposer::decomposeField
 }
 
 
+template<class Type>
+Foam::tmp<Foam::IOFieldField<Foam::Field<Type>, Type> >
+Foam::lagrangianFieldDecomposer::decomposeFieldField
+(
+    const word& cloudName,
+    const IOFieldField<Field<Type>, Type>& field
+) const
+{
+    // Create and map the internal field values
+    Field<Field<Type> > procField(field, particleIndices_);
+
+    // Create the field for the processor
+    return tmp<IOFieldField<Field<Type>, Type> >
+    (
+        new IOFieldField<Field<Type>, Type>
+        (
+            IOobject
+            (
+                field.name(),
+                procMesh_.time().timeName(),
+                cloud::prefix/cloudName,
+                procMesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            procField
+        )
+    );
+}
+
+
 template<class GeoField>
 void Foam::lagrangianFieldDecomposer::decomposeFields
 (
@@ -106,6 +187,23 @@ void Foam::lagrangianFieldDecomposer::decomposeFields
         forAll(fields, fieldI)
         {
             decomposeField(cloudName, fields[fieldI])().write();
+        }
+    }
+}
+
+
+template<class GeoField>
+void Foam::lagrangianFieldDecomposer::decomposeFieldFields
+(
+    const word& cloudName,
+    const PtrList<GeoField>& fields
+) const
+{
+    if (particleIndices_.size())
+    {
+        forAll(fields, fieldI)
+        {
+            decomposeFieldField(cloudName, fields[fieldI])().write();
         }
     }
 }

@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
     );
 
     const bool invertSelection =
-        meshSubsetDict.lookupOrDefault<bool>("invertSelection", false);
+        meshSubsetDict.lookupOrDefault("invertSelection", false);
 
     // Mark the cells for the subset
 

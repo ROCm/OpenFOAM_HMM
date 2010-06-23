@@ -1,10 +1,10 @@
-/*-------------------------------*- C++ -*---------------------------------*\
-|    =========                                                              |
-|    \\      /     OpenFOAM                                                 |
-|     \\    /                                                               |
-|      \\  /       The Open Source CFD Toolbox                              |
-|       \\/                                        http://www.OpenFOAM.org  |
-\*-------------------------------------------------------------------------*/
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.6                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
@@ -22,8 +22,8 @@ numberOfSubdomains  4;
 //- Keep owner and neighbour on same processor for faces in zones:
 // preserveFaceZones (heater solid1 solid3);
 
-method          scotch;
-// method          hierarchical;
+// method          scotch;
+method          hierarchical;
 // method          simple;
 // method          metis;
 // method          manual;

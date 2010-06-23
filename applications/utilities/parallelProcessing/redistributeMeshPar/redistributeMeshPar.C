@@ -581,7 +581,7 @@ int main(int argc, char *argv[])
             "decomposeParDict",
             runTime.system(),
             mesh,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     );
@@ -594,8 +594,7 @@ int main(int argc, char *argv[])
         (
             decompositionMethod::New
             (
-                decompositionDict,
-                mesh
+                decompositionDict
             )
         );
 
@@ -612,7 +611,7 @@ int main(int argc, char *argv[])
                 << endl;
         }
 
-        finalDecomp = decomposer().decompose(mesh.cellCentres());
+        finalDecomp = decomposer().decompose(mesh, mesh.cellCentres());
     }
 
     // Dump decomposition to volScalarField

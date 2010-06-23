@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -41,52 +41,11 @@ dictionaryReplacement
             }
             "rightSolid_to_.*"
             {
-                type            compressible::turbulentTemperatureCoupledBaffle;
+                type            compressible::turbulentTemperatureCoupledBaffleMixed;
                 neighbourFieldName T;
-                K               K;
+                K               solidThermo;
+                KName           none;
                 value           uniform 300;
-            }
-        }
-    }
-
-    rho
-    {
-        internalField   uniform 8000;
-
-        boundaryField
-        {
-            ".*"
-            {
-                type            calculated;
-                value           uniform 8000;
-            }
-        }
-    }
-
-    K
-    {
-        internalField   uniform 80;
-
-        boundaryField
-        {
-            ".*"
-            {
-                type            zeroGradient;
-                value           uniform 80;
-            }
-        }
-    }
-
-    cp
-    {
-        internalField   uniform 450;
-
-        boundaryField
-        {
-            ".*"
-            {
-                type            zeroGradient;
-                value           uniform 450;
             }
         }
     }

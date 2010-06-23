@@ -210,7 +210,7 @@ public:
 
 
     //- Destructor
-    ~multiphaseMixture()
+    virtual ~multiphaseMixture()
     {}
 
 

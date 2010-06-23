@@ -7,7 +7,7 @@
             "transportProperties",
             runTime.constant(),
             mesh,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     );
@@ -153,7 +153,7 @@
             "interfacialProperties",
             runTime.constant(),
             mesh,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     );
@@ -175,10 +175,8 @@
     );
 
     word dragPhase("blended");
-    if (interfacialProperties.found("dragPhase"))
+    if (interfacialProperties.readIfPresent("dragPhase", dragPhase))
     {
-        dragPhase = word(interfacialProperties.lookup("dragPhase"));
-
         bool validDrag =
             dragPhase == "a" || dragPhase == "b" || dragPhase == "blended";
 

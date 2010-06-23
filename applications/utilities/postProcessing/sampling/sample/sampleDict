@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
@@ -132,7 +132,7 @@ surfaces
         normalVector    (0.1 0.1 1);
 
         //- Optional: restrict to a particular zone
-        // zoneName        zone1;
+        // zone        zone1;
     }
 
     interpolatedPlane

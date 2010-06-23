@@ -86,9 +86,24 @@ Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
     if
     (
         readOpt() == IOobject::MUST_READ
+     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
      || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {
+        if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
+        {
+            WarningIn
+            (
+                "ZoneMesh::ZoneMesh\n"
+                "(\n"
+                "    const IOobject&,\n"
+                "    const MeshType&\n"
+                ")"
+            )   << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
+                << " does not support automatic rereading."
+                << endl;
+        }
+
         PtrList<ZoneType>& zones = *this;
 
         // Read zones

@@ -43,13 +43,6 @@ namespace Foam
         manualDecomp,
         dictionary
     );
-
-    addToRunTimeSelectionTable
-    (
-        decompositionMethod,
-        manualDecomp,
-        dictionaryMesh
-    );
 }
 
 
@@ -57,20 +50,7 @@ namespace Foam
 
 Foam::manualDecomp::manualDecomp(const dictionary& decompositionDict)
 :
-    decompositionMethod(decompositionDict)
-{
-    notImplemented("manualDecomp(const dictionary&)");
-}
-
-
-Foam::manualDecomp::manualDecomp
-(
-    const dictionary& decompositionDict,
-    const polyMesh& mesh
-)
-:
     decompositionMethod(decompositionDict),
-    meshPtr_(&mesh),
     decompDataFile_
     (
         decompositionDict.subDict(word(decompositionDict.lookup("method"))
@@ -83,12 +63,11 @@ Foam::manualDecomp::manualDecomp
 
 Foam::labelList Foam::manualDecomp::decompose
 (
+    const polyMesh& mesh,
     const pointField& points,
     const scalarField& pointWeights
 )
 {
-    const polyMesh& mesh = *meshPtr_;
-
     labelIOList finalDecomp
     (
         IOobject

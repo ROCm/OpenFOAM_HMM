@@ -26,7 +26,7 @@ License
 #include "regIOobject.H"
 #include "IFstream.H"
 #include "Time.H"
-#include "PstreamReduceOps.H"
+//#include "PstreamReduceOps.H"
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -52,14 +52,40 @@ Foam::Istream& Foam::regIOobject::readStream()
     // Construct object stream and read header if not already constructed
     if (!isPtr_)
     {
-        if (!(isPtr_ = objectStream()))
+
+        fileName objPath;
+        if (watchIndex_ != -1)
+        {
+            // File is being watched. Read exact file that is being watched.
+            objPath = time().getFile(watchIndex_);
+        }
+        else
+        {
+            // Search intelligently for file
+            objPath = filePath();
+
+            if (!objPath.size())
+            {
+                FatalIOError
+                (
+                    "regIOobject::readStream()",
+                    __FILE__,
+                    __LINE__,
+                    objectPath(),
+                    0
+                )   << "cannot find file"
+                    << exit(FatalIOError);
+            }
+        }
+
+        if (!(isPtr_ = objectStream(objPath)))
         {
             FatalIOError
             (
                 "regIOobject::readStream()",
                 __FILE__,
                 __LINE__,
-                objectPath(),
+                objPath,
                 0
             )   << "cannot open file"
                 << exit(FatalIOError);
@@ -72,9 +98,10 @@ Foam::Istream& Foam::regIOobject::readStream()
         }
     }
 
-    if (!lastModified_)
+    // Mark as uptodate if read succesfully
+    if (watchIndex_ != -1)
     {
-        lastModified_ = lastModified(filePath());
+        time().setUnmodified(watchIndex_);
     }
 
     return *isPtr_;
@@ -151,49 +178,27 @@ bool Foam::regIOobject::read()
 
 bool Foam::regIOobject::modified() const
 {
-    return
-    (
-        lastModified_
-     && lastModified(filePath()) > (lastModified_ + fileModificationSkew)
-    );
+    if (watchIndex_ != -1)
+    {
+        return time().getState(watchIndex_) != fileMonitor::UNMODIFIED;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 
 bool Foam::regIOobject::readIfModified()
 {
-    if (lastModified_)
+    if (watchIndex_ != -1)
     {
-        time_t newTimeStamp = lastModified(filePath());
-
-        bool readFile = false;
-
-        if (newTimeStamp > (lastModified_ + fileModificationSkew))
+        if (modified())
         {
-            readFile = true;
-        }
-
-        if (Pstream::parRun())
-        {
-            bool readFileOnThisProc = readFile;
-            reduce(readFile, andOp<bool>());
-
-            if (readFileOnThisProc && !readFile)
-            {
-                WarningIn("regIOobject::readIfModified()")
-                    << "Delaying reading " << name()
-                    << " of class " << headerClassName()
-                    << " due to inconsistent "
-                       "file time-stamps between processors"
-                    << endl;
-            }
-        }
-
-        if (readFile)
-        {
-            lastModified_ = newTimeStamp;
+            const fileName& fName = time().getFile(watchIndex_);
             Info<< "regIOobject::readIfModified() : " << nl
-                << "    Reading object " << name()
-                << " from file " << filePath() << endl;
+                << "    Re-reading object " << name()
+                << " from file " << fName << endl;
             return read();
         }
         else

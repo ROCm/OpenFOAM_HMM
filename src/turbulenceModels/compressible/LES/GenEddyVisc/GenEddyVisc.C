@@ -41,12 +41,18 @@ GenEddyVisc::GenEddyVisc
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermoPhysicalModel
+    const basicThermo& thermoPhysicalModel,
+    const word& turbulenceModelName
 )
 :
     LESModel
     (
-        word("GenEddyVisc"), rho, U, phi, thermoPhysicalModel
+        word("GenEddyVisc"),
+        rho,
+        U,
+        phi,
+        thermoPhysicalModel,
+        turbulenceModelName
     ),
 
     ce_

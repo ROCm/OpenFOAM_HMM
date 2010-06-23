@@ -1,5 +1,5 @@
-   #include "readPISOControls.H"
-   #include "readTimeControls.H"
+    #include "readPISOControls.H"
+    #include "readTimeControls.H"
 
     label nAlphaCorr
     (
@@ -19,14 +19,9 @@
             << exit(FatalError);
     }
 
-    bool correctPhi = true;
-    if (piso.found("correctPhi"))
-    {
-        correctPhi = Switch(piso.lookup("correctPhi"));
-    }
+    const bool correctPhi =
+        piso.lookupOrDefault("correctPhi", true);
 
-    bool checkMeshCourantNo = false;
-    if (piso.found("checkMeshCourantNo"))
-    {
-        checkMeshCourantNo = Switch(piso.lookup("checkMeshCourantNo"));
-    }
+    const bool checkMeshCourantNo =
+        piso.lookupOrDefault("checkMeshCourantNo", false);
+

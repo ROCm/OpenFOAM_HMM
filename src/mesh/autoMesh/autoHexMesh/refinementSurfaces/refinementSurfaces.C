@@ -151,17 +151,10 @@ Foam::refinementSurfaces::refinementSurfaces
         }
 
         // Global perpendicular angle
-        if (dict.found("perpendicularAngle"))
-        {
-            globalAngle[surfI] = readScalar(dict.lookup("perpendicularAngle"));
-        }
+        dict.readIfPresent("perpendicularAngle", globalAngle[surfI]);
 
         //// Global patch name per surface
-        //if (dict.found("patchType"))
-        //{
-        //    dict.lookup("patchType") >> globalPatchType[surfI];
-        //}
-
+        //dict.readIfPresent("patchType", globalPatchType[surfI]);
 
         if (dict.found("regions"))
         {
@@ -446,13 +439,7 @@ Foam::refinementSurfaces::refinementSurfaces
             }
 
             // Global perpendicular angle
-            if (dict.found("perpendicularAngle"))
-            {
-                globalAngle[surfI] = readScalar
-                (
-                    dict.lookup("perpendicularAngle")
-                );
-            }
+            dict.readIfPresent("perpendicularAngle", globalAngle[surfI]);
 
             if (dict.found("regions"))
             {

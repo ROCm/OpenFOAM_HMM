@@ -40,9 +40,19 @@ Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
     if
     (
         io.readOpt() == IOobject::MUST_READ
+     || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
      || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {
+        if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
+        {
+            WarningIn("featureEdgeMesh::featureEdgeMesh(const IOobject&)")
+                << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
+                << " does not support automatic rereading."
+                << endl;
+        }
+
+
         readStream(typeName) >> *this;
         close();
     }
@@ -82,9 +92,19 @@ Foam::featureEdgeMesh::featureEdgeMesh
     if
     (
         io.readOpt() == IOobject::MUST_READ
+     || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
      || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {
+        if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
+        {
+            WarningIn("featureEdgeMesh::featureEdgeMesh(const IOobject&)")
+                << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
+                << " does not support automatic rereading."
+                << endl;
+        }
+
+
         readStream(typeName) >> *this;
         close();
     }
