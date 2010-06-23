@@ -63,10 +63,7 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        basicSourceList
-        (
-            const basicSourceList&
-        );
+        basicSourceList(const basicSourceList&);
 
         //- Disallow default bitwise assignment
         void operator=(const basicSourceList&);
@@ -77,14 +74,10 @@ public:
     // Constructors
 
         //- Construct from components with list of field names
-        basicSourceList
-        (
-            const fvMesh& mesh,
-            const dictionary& dict
-        );
+        basicSourceList(const fvMesh& mesh, const dictionary& dict);
 
 
-    // Destructor
+        //- Destructor
         virtual ~basicSourceList()
         {}
 

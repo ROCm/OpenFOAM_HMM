@@ -138,11 +138,11 @@ void dynLagrangian::correct(const tmp<volTensorField>& gradU)
 
     fvScalarMatrix flmEqn
     (
-       fvm::ddt(flm_)
-     + fvm::div(phi(), flm_)
-    ==
-       invT*LM
-     - fvm::Sp(invT, flm_)
+        fvm::ddt(flm_)
+      + fvm::div(phi(), flm_)
+     ==
+        invT*LM
+      - fvm::Sp(invT, flm_)
     );
 
     flmEqn.relax();
@@ -154,11 +154,11 @@ void dynLagrangian::correct(const tmp<volTensorField>& gradU)
 
     fvScalarMatrix fmmEqn
     (
-       fvm::ddt(fmm_)
-     + fvm::div(phi(), fmm_)
-    ==
-       invT*MM
-     - fvm::Sp(invT, fmm_)
+        fvm::ddt(fmm_)
+      + fvm::div(phi(), fmm_)
+     ==
+        invT*MM
+      - fvm::Sp(invT, fmm_)
     );
 
     fmmEqn.relax();

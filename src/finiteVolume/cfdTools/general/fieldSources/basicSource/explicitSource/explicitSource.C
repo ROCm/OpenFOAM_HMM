@@ -66,30 +66,13 @@ void Foam::explicitSource::setSelectedCellsFromPoints()
 
         if (globalCellI < 0)
         {
-            WarningIn
-            (
-                "explicitSource::setSelectedCellsFromPoints()"
-            )
-            << "Unable to find owner cell for point " << points_[i]
-            << endl;
+            WarningIn("explicitSource::setSelectedCellsFromPoints()")
+                << "Unable to find owner cell for point " << points_[i]
+                << endl;
         }
     }
 
     this->cells() = selectedCells.toc();
-}
-
-
-template<class Type>
-void Foam::explicitSource::addSources
-(
-    Field<Type>& fieldSource,
-    Type& data
-) const
-{
-    forAll(this->cells(), i)
-    {
-        fieldSource[this->cells()[i]] = data/volSource_[i];
-    }
 }
 
 
@@ -136,49 +119,8 @@ Foam::word Foam::explicitSource::volumeModeTypeToWord
     }
 }
 
-template <class Type>
-void Foam::explicitSource::addField
-(
-    HashTable<Type>& fields,
-    const wordList& fieldTypes,
-    const wordList& fieldNames,
-    const dictionary& fieldDataDict
-)
-{
-    forAll (fieldTypes, fieldI)
-    {
-        word fieldName = fieldNames[fieldI];
-        word fieldType = fieldTypes[fieldI];
 
-        typedef GeometricField<Type, fvPatchField, volMesh> geometricField;
-
-        if
-        (
-            (
-                fieldType
-             == GeometricField<Type, fvPatchField, volMesh>::typeName
-            ) &&
-            (
-                this->mesh().foundObject<geometricField>(fieldName)
-            )
-        )
-        {
-            Type fieldValue = fieldDataDict.lookupOrDefault<Type>
-            (
-                fieldName,
-                pTraits<Type>::zero
-            );
-
-            fields.insert(fieldName, fieldValue);
-        }
-    }
-}
-
-
-void Foam::explicitSource::setFieldData
-(
-    const dictionary& dict
-)
+void Foam::explicitSource::setFieldData(const dictionary& dict)
 {
     scalarFields_.clear();
     vectorFields_.clear();
@@ -271,10 +213,7 @@ Foam::explicitSource::explicitSource
 }
 
 
-void Foam::explicitSource::addSu
-(
-    fvMatrix<scalar>& Eqn
-)
+void Foam::explicitSource::addSu(fvMatrix<scalar>& Eqn)
 {
     Field<scalar>& source = Eqn.source();
     scalar data = scalarFields_[Eqn.psi().name()];
@@ -282,10 +221,7 @@ void Foam::explicitSource::addSu
 }
 
 
-void Foam::explicitSource::addSu
-(
-    fvMatrix<vector>& Eqn
-)
+void Foam::explicitSource::addSu(fvMatrix<vector>& Eqn)
 {
     Field<vector>& source = Eqn.source();
     vector data = vectorFields_[Eqn.psi().name()];
@@ -293,29 +229,25 @@ void Foam::explicitSource::addSu
 }
 
 
-void Foam::explicitSource::addSu
-(
-    DimensionedField<scalar, volMesh>& field
-)
+void Foam::explicitSource::addSu(DimensionedField<scalar, volMesh>& field)
 {
     scalar data = scalarFields_[field.name()];
     addSources<scalar>(field, data);
 }
 
 
-void Foam::explicitSource::addSu
-(
-    DimensionedField<vector, volMesh>& field
-)
+void Foam::explicitSource::addSu(DimensionedField<vector, volMesh>& field)
 {
     vector data = vectorFields_[field.name()];
     addSources<vector>(field, data);
 }
+
 
 void Foam::explicitSource::addExplicitSources()
 {
     scalarFields_.applySources();
     vectorFields_.applySources();
 }
+
 
 // ************************************************************************* //

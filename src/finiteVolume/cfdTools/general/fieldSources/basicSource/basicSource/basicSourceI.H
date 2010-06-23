@@ -27,7 +27,6 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 inline const Foam::word& Foam::basicSource::name() const
 {
     return name_;
@@ -75,8 +74,7 @@ Foam::basicSource::selectionMode() const
 }
 
 
-inline const Foam::word&
-Foam::basicSource::cellSetName() const
+inline const Foam::word& Foam::basicSource::cellSetName() const
 {
     return cellSetName_;
 }
@@ -88,8 +86,7 @@ inline Foam::scalar Foam::basicSource::V() const
 }
 
 
-inline const Foam::labelList&
-Foam::basicSource::cells() const
+inline const Foam::labelList& Foam::basicSource::cells() const
 {
     return cells_;
 }

@@ -92,6 +92,7 @@ class atmBoundaryLayerInletEpsilonFvPatchScalarField
          //- Minimum corrdinate value in z direction
         scalar zGround_;
 
+
 public:
 
     //- Runtime type information

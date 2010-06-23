@@ -62,7 +62,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class actuationDiskSource Declaration
+                     Class actuationDiskSource Declaration
 \*---------------------------------------------------------------------------*/
 
 class actuationDiskSource
@@ -73,6 +73,9 @@ class actuationDiskSource
 
         //- Cell zone ID
         label cellZoneID_;
+
+        //- Sub dictionary with actuationDisk information
+        const dictionary& dict_;
 
         //- Disk area normal
         vector diskDir_;
@@ -85,9 +88,6 @@ class actuationDiskSource
 
         //- Disk area
         scalar diskArea_;
-
-        //- Sub dictionary with actuationDisk information
-        const dictionary& dict_;
 
 
     // Private Member Functions

@@ -69,11 +69,7 @@ bool Foam::explicitSource::read(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<
-(
-    Ostream& os,
-    const explicitSource& source
-)
+Foam::Ostream& Foam::operator<<(Ostream& os, const explicitSource& source)
 {
     source.writeData(os);
     return os;

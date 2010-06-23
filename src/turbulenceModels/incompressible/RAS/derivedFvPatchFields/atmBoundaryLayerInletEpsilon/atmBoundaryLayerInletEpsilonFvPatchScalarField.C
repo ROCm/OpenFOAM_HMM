@@ -90,8 +90,16 @@ atmBoundaryLayerInletEpsilonFvPatchScalarField
 {
     if (mag(z_) < SMALL)
     {
-        FatalErrorIn("atmBoundaryLayerInletEpsilonFvPatchScalarField(dict)")
-            << "z is not correct"
+        FatalErrorIn
+        (
+            "atmBoundaryLayerInletEpsilonFvPatchScalarField"
+            "("
+                "const fvPatch&, "
+                "const DimensionedField<scalar, volMesh>&, "
+                "const dictionary&"
+            ")"
+        )
+            << "magnitude of z vector must be greater than zero"
             << abort(FatalError);
     }
 
@@ -104,16 +112,16 @@ atmBoundaryLayerInletEpsilonFvPatchScalarField
 atmBoundaryLayerInletEpsilonFvPatchScalarField::
 atmBoundaryLayerInletEpsilonFvPatchScalarField
 (
-    const atmBoundaryLayerInletEpsilonFvPatchScalarField& fcvpvf,
+    const atmBoundaryLayerInletEpsilonFvPatchScalarField& blpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(fcvpvf, iF),
-    Ustar_(fcvpvf.Ustar_),
-    z_(fcvpvf.z_),
-    z0_(fcvpvf.z0_),
-    kappa_(fcvpvf.kappa_),
-    zGround_(fcvpvf.zGround_)
+    fixedValueFvPatchScalarField(blpsf, iF),
+    Ustar_(blpsf.Ustar_),
+    z_(blpsf.z_),
+    z0_(blpsf.z0_),
+    kappa_(blpsf.kappa_),
+    zGround_(blpsf.zGround_)
 {}
 
 
@@ -123,11 +131,10 @@ void atmBoundaryLayerInletEpsilonFvPatchScalarField::updateCoeffs()
 {
     const vectorField& c = patch().Cf();
     scalarField coord = (c & z_);
-    scalarField::operator=(pow(Ustar_, 3.0)/(kappa_*(coord - zGround_ + z0_)));
+    scalarField::operator=(pow3(Ustar_)/(kappa_*(coord - zGround_ + z0_)));
 }
 
 
-// Write
 void atmBoundaryLayerInletEpsilonFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);

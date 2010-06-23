@@ -115,6 +115,7 @@ class atmBoundaryLayerInletVelocityFvPatchVectorField
         //- Minimum corrdinate value in z direction
         scalar zGround_;
 
+
 public:
 
     //- Runtime type information
@@ -138,8 +139,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given atmBoundaryLayerInletVelocityFvPatchVectorField
-        //  onto a new patch
+        //- Construct by mapping given
+        // atmBoundaryLayerInletVelocityFvPatchVectorField onto a new patch
         atmBoundaryLayerInletVelocityFvPatchVectorField
         (
             const atmBoundaryLayerInletVelocityFvPatchVectorField&,

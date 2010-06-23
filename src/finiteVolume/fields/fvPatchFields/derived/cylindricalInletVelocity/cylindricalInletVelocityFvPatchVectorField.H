@@ -68,19 +68,19 @@ class cylindricalInletVelocityFvPatchVectorField
     // Private data
 
         //- Axial velocity
-        scalar axialVelocity_;
+        const scalar axialVelocity_;
 
         //- Central point
-        vector centre_;
+        const vector centre_;
 
         //- Axis
-        vector axis_;
+        const vector axis_;
 
         //- RPM
-        scalar rpm_;
+        const scalar rpm_;
 
         //- Radial velocity
-        scalar radialVelocity_;
+        const scalar radialVelocity_;
 
 
 public:

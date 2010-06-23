@@ -91,7 +91,7 @@ protected:
         //- Chemistry solver
         autoPtr<chemistrySolver<CompType, ThermoType> > solver_;
 
-        //- Chemical source term [kg/m3/s]
+        //- List of reaction rate per specie [kg/m3/s]
         PtrList<scalarField> RR_;
 
 

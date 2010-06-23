@@ -27,7 +27,6 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 void Foam::basicSource::writeData(Ostream& os) const
 {
     os  << indent << name_ << nl

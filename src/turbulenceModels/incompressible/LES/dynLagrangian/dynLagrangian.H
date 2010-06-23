@@ -84,7 +84,7 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class dynLagrangian Declaration
+                       Class dynLagrangian Declaration
 \*---------------------------------------------------------------------------*/
 
 class dynLagrangian
@@ -104,6 +104,8 @@ class dynLagrangian
 
         dimensionedScalar flm0_;
         dimensionedScalar fmm0_;
+
+
     // Private Member Functions
 
         //- Update sub-grid scale fields
@@ -141,14 +143,13 @@ public:
 
     // Member Functions
 
-       //- Return SGS kinetic energy
-
+        //- Return SGS kinetic energy
         tmp<volScalarField> k(const tmp<volTensorField>& gradU) const
         {
             return 2.0*sqr(delta())*magSqr(dev(symm(gradU)));
         }
 
-         //- Return SGS kinetic energy
+        //- Return SGS kinetic energy
         virtual tmp<volScalarField> k() const
         {
             return k(fvc::grad(U()));

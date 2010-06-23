@@ -61,6 +61,7 @@ Foam::basicSourceList::basicSourceList
     }
 }
 
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
@@ -176,5 +177,6 @@ Foam::Ostream& Foam::operator<<
     sources.writeData(os);
     return os;
 }
+
 
 // ************************************************************************* //

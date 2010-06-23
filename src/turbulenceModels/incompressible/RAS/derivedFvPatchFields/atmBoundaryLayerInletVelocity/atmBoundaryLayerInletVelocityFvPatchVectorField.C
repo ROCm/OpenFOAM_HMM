@@ -99,8 +99,16 @@ atmBoundaryLayerInletVelocityFvPatchVectorField
 {
     if (mag(n_) < SMALL || mag(z_) < SMALL || mag(z0_) < SMALL)
     {
-        FatalErrorIn("atmBoundaryLayerInletVelocityFvPatchVectorField(dict)")
-            << "n, z or z0 given are close to zero is not correct"
+        FatalErrorIn
+        (
+            "atmBoundaryLayerInletVelocityFvPatchVectorField"
+            "("
+                "const fvPatch&, "
+                "const DimensionedField<vector, volMesh>&, "
+                "onst dictionary&"
+            ")"
+        )
+            << "magnitude of n, z and z0 vectors must be greater than zero"
             << abort(FatalError);
     }
 
@@ -116,19 +124,19 @@ atmBoundaryLayerInletVelocityFvPatchVectorField
 atmBoundaryLayerInletVelocityFvPatchVectorField::
 atmBoundaryLayerInletVelocityFvPatchVectorField
 (
-    const atmBoundaryLayerInletVelocityFvPatchVectorField& fcvpvf,
+    const atmBoundaryLayerInletVelocityFvPatchVectorField& blpvf,
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    fixedValueFvPatchVectorField(fcvpvf, iF),
-    Ustar_(fcvpvf.Ustar_),
-    n_(fcvpvf.n_),
-    z_(fcvpvf.z_),
-    z0_(fcvpvf.z0_),
-    kappa_(fcvpvf.kappa_),
-    Uref_(fcvpvf.Uref_),
-    Href_(fcvpvf.Href_),
-    zGround_(fcvpvf.zGround_)
+    fixedValueFvPatchVectorField(blpvf, iF),
+    Ustar_(blpvf.Ustar_),
+    n_(blpvf.n_),
+    z_(blpvf.z_),
+    z0_(blpvf.z0_),
+    kappa_(blpvf.kappa_),
+    Uref_(blpvf.Uref_),
+    Href_(blpvf.Href_),
+    zGround_(blpvf.zGround_)
 {}
 
 
@@ -158,7 +166,6 @@ void atmBoundaryLayerInletVelocityFvPatchVectorField::updateCoeffs()
 }
 
 
-// Write
 void atmBoundaryLayerInletVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);

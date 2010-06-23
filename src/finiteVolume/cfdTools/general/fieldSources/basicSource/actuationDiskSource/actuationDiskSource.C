@@ -34,10 +34,8 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(actuationDiskSource, 0);
-addToRunTimeSelectionTable(basicSource, actuationDiskSource, dictionary);
-
+    defineTypeNameAndDebug(actuationDiskSource, 0);
+    addToRunTimeSelectionTable(basicSource, actuationDiskSource, dictionary);
 }
 
 
@@ -45,20 +43,22 @@ addToRunTimeSelectionTable(basicSource, actuationDiskSource, dictionary);
 
 void Foam::actuationDiskSource::checkData()
 {
-    if
-    (
-        magSqr(diskArea_) <= VSMALL
-    || Cp_ <= VSMALL
-    || Ct_ <= VSMALL
-    || diskDir_ == vector::zero
-    )
+    if (magSqr(diskArea_) <= VSMALL)
     {
-        FatalIOErrorIn
-        (
-            "Foam::actuationDiskSource::checkData()",
-            dict_
-        )  << "diskArea, Cp or Ct is small "
-           << "or  disk direction not specified"
+        FatalErrorIn("Foam::actuationDiskSource::checkData()")
+           << "diskArea is approximately zero"
+           << exit(FatalIOError);
+    }
+    if (Cp_ <= VSMALL || Ct_ <= VSMALL)
+    {
+        FatalErrorIn("Foam::actuationDiskSource::checkData()")
+           << "Cp and Ct must be greater than zero"
+           << exit(FatalIOError);
+    }
+    if (mag(diskDir_) < VSMALL)
+    {
+        FatalErrorIn("Foam::actuationDiskSource::checkData()")
+           << "disk direction vector is approximately zero"
            << exit(FatalIOError);
     }
 }
@@ -75,11 +75,11 @@ Foam::actuationDiskSource::actuationDiskSource
 :
     basicSource(name, dict, mesh),
     cellZoneID_(mesh.cellZones().findZoneID(this->cellSetName())),
-    diskDir_(vector::zero),
-    Cp_(0),
-    Ct_(0),
-    diskArea_(0),
-    dict_(dict.subDict(typeName + "Coeffs"))
+    dict_(dict.subDict(typeName + "Coeffs")),
+    diskDir_(dict_.lookup("diskDir")),
+    Cp_(readScalar(dict_.lookup("Cp"))),
+    Ct_(readScalar(dict_.lookup("Ct"))),
+    diskArea_(readScalar(dict_.lookup("diskArea")))
 {
     Info<< "    - creating actuation disk zone: "
         << this->name() << endl;
@@ -97,11 +97,6 @@ Foam::actuationDiskSource::actuationDiskSource
         )   << "cannot find porous cellZone " << this->name()
             << exit(FatalError);
     }
-
-    dict_.readIfPresent("diskDir", diskDir_);
-    dict_.readIfPresent("Cp", Cp_);
-    dict_.readIfPresent("Ct", Ct_);
-    dict_.readIfPresent("diskArea", diskArea_);
 
     checkData();
 }
@@ -132,7 +127,7 @@ void Foam::actuationDiskSource::addSu(fvMatrix<vector>& UEqn)
         addActuationDiskAxialInertialResistance
         (
             Usource,
-            cells,//this->cells(),
+            cells,
             V,
             this->mesh().lookupObject<volScalarField>("rho"),
             U
@@ -143,7 +138,7 @@ void Foam::actuationDiskSource::addSu(fvMatrix<vector>& UEqn)
         addActuationDiskAxialInertialResistance
         (
             Usource,
-            cells,//this->cells(),
+            cells,
             V,
             geometricOneField(),
             U

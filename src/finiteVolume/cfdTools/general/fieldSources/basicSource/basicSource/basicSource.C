@@ -39,8 +39,7 @@ namespace Foam
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
-const Foam::wordList Foam::basicSource::
-selectionModeTypeNames_
+const Foam::wordList Foam::basicSource::selectionModeTypeNames_
 (
     IStringStream("(points cellSet cellZone all)")()
 );
@@ -48,8 +47,7 @@ selectionModeTypeNames_
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-Foam::basicSource::selectionModeType
-Foam::basicSource::wordToSelectionModeType
+Foam::basicSource::selectionModeType Foam::basicSource::wordToSelectionModeType
 (
     const word& smtName
 ) const
@@ -93,16 +91,13 @@ Foam::word Foam::basicSource::selectionModeTypeToWord
 }
 
 
-void Foam::basicSource::setSelection
-(
-    const dictionary& dict
-)
+void Foam::basicSource::setSelection(const dictionary& dict)
 {
     switch (selectionMode_)
     {
         case smPoints:
         {
-            //Do nothing. It should be sorted out by derived class//
+            // Do nothing. It should be sorted out by derived class
             break;
         }
         case smCellSet:
@@ -236,11 +231,7 @@ Foam::autoPtr<Foam::basicSource> Foam::basicSource::New
     const fvMesh& mesh
 )
 {
-    word typeModel;
-
-    {
-        dict.lookup("typeModel") >> typeModel;
-    }
+    word typeModel(dict.lookup("typeModel"));
 
     Info<< "Selecting model type " << typeModel << endl;
 
@@ -254,9 +245,9 @@ Foam::autoPtr<Foam::basicSource> Foam::basicSource::New
             "basicSource::New(const volVectorField&, "
             "const surfaceScalarField&, transportModel&)"
         )   << "Unknown Model type " << typeModel
-            << endl << endl
-            << "Valid model types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << nl << nl
+            << "Valid model types are :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
