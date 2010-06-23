@@ -34,6 +34,11 @@ namespace compressible
 namespace LESModels
 {
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameWithName(GenEddyVisc, "GenEddyVisc");
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 GenEddyVisc::GenEddyVisc
@@ -42,18 +47,11 @@ GenEddyVisc::GenEddyVisc
     const volVectorField& U,
     const surfaceScalarField& phi,
     const basicThermo& thermoPhysicalModel,
-    const word& turbulenceModelName
+    const word& turbulenceModelName,
+    const word& modelName
 )
 :
-    LESModel
-    (
-        word("GenEddyVisc"),
-        rho,
-        U,
-        phi,
-        thermoPhysicalModel,
-        turbulenceModelName
-    ),
+    LESModel(modelName, rho, U, phi, thermoPhysicalModel, turbulenceModelName),
 
     ce_
     (

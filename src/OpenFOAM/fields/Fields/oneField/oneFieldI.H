@@ -33,4 +33,10 @@ inline Foam::scalar Foam::oneField::operator[](const label) const
 }
 
 
+inline Foam::oneField Foam::oneField::field() const
+{
+    return oneField();
+}
+
+
 // ************************************************************************* //

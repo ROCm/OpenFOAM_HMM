@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,6 +40,12 @@ const label pTraits<label>::min = labelMin;
 const label pTraits<label>::max = labelMax;
 
 const char* pTraits<label>::componentNames[] = { "x" };
+
+pTraits<label>::pTraits(const label& p)
+:
+    p_(p)
+{}
+
 
 pTraits<label>::pTraits(Istream& is)
 {

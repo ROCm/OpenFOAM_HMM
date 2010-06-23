@@ -31,6 +31,41 @@ Description
 
 using namespace Foam;
 
+template<class T>
+void printInfo
+(
+    const word& tag,
+    const UList<T>& lst,
+    const bool showSize = false
+)
+{
+    Info<< "<" << tag;
+    if (showSize)
+    {
+        Info<< " size=\"" << lst.size() << "\"";
+    }
+    Info<< ">" << lst << "</" << tag << ">" << endl;
+}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+void printInfo
+(
+    const word& tag,
+    const DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst,
+    const bool showSize = false
+)
+{
+    Info<< "<" << tag;
+    if (showSize)
+    {
+        Info<< " size=\"" << lst.size()
+            << "\" capacity=\"" << lst.capacity() << "\"";
+    }
+    Info<< ">" << lst << "</" << tag << ">" << endl;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
@@ -104,10 +139,8 @@ int main(int argc, char *argv[])
     List<label> lstA;
     lstA.transfer(dlB);
     Info<< "Transferred to normal list" << endl;
-    Info<< "<lstA>" << lstA << "</lstA>" << nl << "sizes: "
-        << " " << lstA.size() << endl;
-    Info<< "<dlB>" << dlB << "</dlB>" << nl << "sizes: "
-        << " " << dlB.size() << "/" << dlB.capacity() << endl;
+    printInfo("lstA", lstA, true);
+    printInfo("dlB", dlB, true);
 
     // Copy back and append a few time
     for (label i=0; i < 3; i++)
@@ -116,15 +149,12 @@ int main(int argc, char *argv[])
     }
 
     Info<< "appended list a few times" << endl;
-    Info<< "<dlB>" << dlB << "</dlB>" << nl << "sizes: "
-        << " " << dlB.size() << "/" << dlB.capacity() << endl;
+    printInfo("dlB", dlB, true);
 
     // assign the list (should maintain allocated space)
     dlB = lstA;
     Info<< "assigned list" << endl;
-    Info<< "<dlB>" << dlB << "</dlB>" << nl << "sizes: "
-        << " " << dlB.size() << "/" << dlB.capacity() << endl;
-
+    printInfo("dlB", dlB, true);
 
     // Copy back and append a few time
     for (label i=0; i < 3; i++)
@@ -136,38 +166,30 @@ int main(int argc, char *argv[])
     // check allocation granularity
     DynamicList<label, 6, 0> dlC;
 
-    Info<< "<dlC>" << dlC << "</dlC>" << nl << "sizes: "
-        << " " << dlC.size() << "/" << dlC.capacity() << endl;
+    printInfo("dlC", dlC, true);
 
     dlC.reserve(dlB.size());
     dlC = dlB;
 
-    Info<< "<dlC>" << dlC << "</dlC>" << nl << "sizes: "
-        << " " << dlC.size() << "/" << dlC.capacity() << endl;
+    printInfo("dlC", dlC, true);
 
     List<label> lstB(dlC.xfer());
 
     Info<< "Transferred to normal list via the xfer() method" << endl;
-    Info<< "<lstB>" << lstB << "</lstB>" << nl << "sizes: "
-        << " " << lstB.size() << endl;
-    Info<< "<dlC>" << dlC << "</dlC>" << nl << "sizes: "
-        << " " << dlC.size() << "/" << dlC.capacity() << endl;
+    printInfo("lstB", lstB, true);
+    printInfo("dlC", dlC, true);
 
     DynamicList<label> dlD(lstB.xfer());
 
     Info<< "Transfer construct from normal list" << endl;
-    Info<< "<lstB>" << lstB << "</lstB>" << nl << "sizes: "
-        << " " << lstB.size() << endl;
-    Info<< "<dlD>" << dlD << "</dlD>" << nl << "sizes: "
-        << " " << dlD.size() << "/" << dlD.capacity() << endl;
+    printInfo("lstB", lstB, true);
+    printInfo("dlD", dlD, true);
 
     DynamicList<label,10> dlE1(10);
     DynamicList<label> dlE2(dlE1);   // construct dissimilar
 
-    Info<< "<dlE1>" << dlE1 << "</dlE1>" << nl << "sizes: "
-        << " " << dlE1.size() << "/" << dlE1.capacity() << endl;
-    Info<< "<dlE2>" << dlE2 << "</dlE2>" << nl << "sizes: "
-        << " " << dlE2.size() << "/" << dlE2.capacity() << endl;
+    printInfo("dlE1", dlE1, true);
+    printInfo("dlE2", dlE2, true);
 
     for (label elemI=0; elemI < 5; ++elemI)
     {
@@ -175,19 +197,42 @@ int main(int argc, char *argv[])
         dlE2.append(elemI);
     }
 
-    Info<< "<dlE2>" << dlE2 << "</dlE2>" << endl;
+    printInfo("dlE2", dlE2, true);
 
     DynamicList<label> dlE3(dlE2);   // construct identical
-    Info<< "<dlE3>" << dlE3 << "</dlE3>" << endl;
+    printInfo("dlE3", dlE3, true);
 
     dlE3 = dlE1;   // assign dissimilar
-    Info<< "<dlE3>" << dlE3 << "</dlE3>" << endl;
+    printInfo("dlE3", dlE3, true);
 
     dlE3 = dlE2;   // assign identical
-    Info<< "<dlE3>" << dlE3 << "</dlE3>" << endl;
+    printInfo("dlE3", dlE3, true);
 
     DynamicList<label> dlE4(reorder(identity(dlE3.size()), dlE3));
-    Info<< "<dlE4>" << dlE4 << "</dlE4>" << endl;
+    printInfo("dlE4", dlE4, true);
+
+    printInfo("dlE3", dlE3, true);
+
+
+    {
+        DynamicList<label> addr(10);
+        addr.append(3);
+        addr.append(1);
+        addr.append(2);
+
+        forAll(dlE2, i)
+        {
+            dlE2[i] *= 10;
+        }
+
+        UIndirectList<label> uil
+        (
+            dlE2, addr
+        );
+        Info<< "use UIndirectList " << uil << " remapped from " << dlE2 << endl;
+        dlE4 = uil;
+        printInfo("dlE4", dlE4, true);
+     }
 
 
     Info<< "\nEnd\n";

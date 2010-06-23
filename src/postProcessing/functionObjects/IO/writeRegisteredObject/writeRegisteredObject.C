@@ -103,7 +103,7 @@ void Foam::writeRegisteredObject::write()
                 (
                     "Foam::writeRegisteredObject::read(const dictionary&)"
                 )   << "Object " << objectNames_[i] << " not found in "
-                    << "database. Available objects are:" << nl << obr_.toc()
+                    << "database. Available objects:" << nl << obr_.sortedToc()
                     << endl;
             }
 

@@ -86,7 +86,10 @@ class SpalartAllmaras
 :
     public RASModel
 {
-    // Private data
+
+protected:
+
+    // Protected data
 
         // Model coefficients
 
@@ -110,7 +113,7 @@ class SpalartAllmaras
             wallDist d_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
         tmp<volScalarField> chi() const;
 
@@ -145,7 +148,8 @@ public:
             const volVectorField& U,
             const surfaceScalarField& phi,
             transportModel& transport,
-            const word& turbulenceModelName = turbulenceModel::typeName
+            const word& turbulenceModelName = turbulenceModel::typeName,
+            const word& modelName = typeName
         );
 
 

@@ -65,7 +65,7 @@ class interpolationLookUpTable
 {
 private:
 
-    // Privsate data
+    // Private data
 
         //- File name
         fileName fileName_;
@@ -88,10 +88,10 @@ private:
         //- Output dictionaries
         List<dictionary> output_;
 
-        //- Input indices from the look up table
+        //- Input indices from the lookup table
         List<label> entryIndices_;
 
-        //- Output Indeces from the Look Up Table
+        //- Output indices from the lookup Table
         List<label> outputIndices_;
 
         //- Field names and indices
@@ -118,7 +118,7 @@ private:
         //- Check range of lookup value
         bool checkRange(const scalar, const label) const;
 
-        //- Interpolate function return an scalar
+        //- Interpolate function returning a scalar
         scalar interpolate
         (
             const label lo,
@@ -159,13 +159,13 @@ public:
 
     // Member Functions
 
-        //- Return true if the filed exists in the table
+        //- Return true if the field exists in the table
         bool found(const word& fieldName) const;
 
         //- Return the output list given a single input scalar
         const List<scalar>& lookUp(const scalar);
 
-        //- Write Look Up Table to filename.
+        //- Write lookup table to filename.
         void write
         (
             Ostream&,

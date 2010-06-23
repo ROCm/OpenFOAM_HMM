@@ -91,8 +91,10 @@ public:
             //- Return the last element of the list.
             inline const T& last() const;
 
-
+            //- Return the complete list
             inline const UList<T>& completeList() const;
+
+            //- Return the list addressing
             inline const List<label>& addressing() const;
 
 

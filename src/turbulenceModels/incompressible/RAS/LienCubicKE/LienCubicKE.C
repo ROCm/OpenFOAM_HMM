@@ -49,10 +49,11 @@ LienCubicKE::LienCubicKE
     const volVectorField& U,
     const surfaceScalarField& phi,
     transportModel& transport,
-    const word& turbulenceModelName
+    const word& turbulenceModelName,
+    const word& modelName
 )
 :
-    RASModel(typeName, U, phi, transport, turbulenceModelName),
+    RASModel(modelName, U, phi, transport, turbulenceModelName),
 
     C1_
     (
@@ -342,7 +343,7 @@ void LienCubicKE::correct()
         Cmu_*sqr(k_)/epsilon_*S2 - (nonlinearStress_ && gradU_)
     );
 
-    // Update espsilon and G at the wall
+    // Update epsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation

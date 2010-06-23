@@ -56,7 +56,10 @@ class LamBremhorstKE
 :
     public RASModel
 {
-    // Private data
+
+protected:
+
+    // Protected data
 
         dimensionedScalar Cmu_;
         dimensionedScalar C1_;
@@ -87,7 +90,8 @@ public:
             const volVectorField& U,
             const surfaceScalarField& phi,
             transportModel& transport,
-            const word& turbulenceModelName = turbulenceModel::typeName
+            const word& turbulenceModelName = turbulenceModel::typeName,
+            const word& modelName = typeName
         );
 
 

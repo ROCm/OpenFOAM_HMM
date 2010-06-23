@@ -48,10 +48,11 @@ laminar::laminar
     const volVectorField& U,
     const surfaceScalarField& phi,
     const basicThermo& thermophysicalModel,
-    const word& turbulenceModelName
+    const word& turbulenceModelName,
+    const word& modelName
 )
 :
-    RASModel(typeName, rho, U, phi, thermophysicalModel, turbulenceModelName)
+    RASModel(modelName, rho, U, phi, thermophysicalModel, turbulenceModelName)
 {}
 
 

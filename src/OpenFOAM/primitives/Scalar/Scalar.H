@@ -65,6 +65,9 @@ public:
 
     // Constructors
 
+        //- Construct from primitive
+        explicit pTraits(const Scalar&);
+
         //- Construct from Istream
         pTraits(Istream&);
 
