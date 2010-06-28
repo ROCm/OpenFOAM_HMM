@@ -574,10 +574,11 @@ class vtkPV3Foam
                 const label datasetNo
             );
 
-            //- Lagrangian field
+            //- Lagrangian field, use specified display name
             template<class Type>
             void convertLagrangianField
             (
+                const word& displayName,
                 const IOField<Type>&,
                 vtkMultiBlockDataSet* output,
                 const arrayRange&,

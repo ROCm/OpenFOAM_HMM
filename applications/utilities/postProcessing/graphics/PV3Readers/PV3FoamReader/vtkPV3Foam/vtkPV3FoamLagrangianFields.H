@@ -51,7 +51,9 @@ void Foam::vtkPV3Foam::convertLagrangianFields
         if (iter()->headerClassName() == IOField<Type>::typeName)
         {
             IOField<Type> tf(*iter());
-            convertLagrangianField(tf, output, range, datasetNo);
+            // display name for lagrangian field
+            const word& displayName = tf.name();
+            convertLagrangianField(displayName, tf, output, range, datasetNo);
         }
     }
 }
@@ -60,6 +62,7 @@ void Foam::vtkPV3Foam::convertLagrangianFields
 template<class Type>
 void Foam::vtkPV3Foam::convertLagrangianField
 (
+    const word& displayName,
     const IOField<Type>& tf,
     vtkMultiBlockDataSet* output,
     const arrayRange& range,
@@ -72,7 +75,7 @@ void Foam::vtkPV3Foam::convertLagrangianField
     pointData->SetNumberOfTuples(tf.size());
     pointData->SetNumberOfComponents(nComp);
     pointData->Allocate(nComp*tf.size());
-    pointData->SetName(tf.name().c_str());
+    pointData->SetName(displayName.c_str());
 
     if (debug)
     {
