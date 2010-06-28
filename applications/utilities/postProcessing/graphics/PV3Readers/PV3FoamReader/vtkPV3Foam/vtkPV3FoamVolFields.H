@@ -110,11 +110,6 @@ void Foam::vtkPV3Foam::convertVolFields
         //
         // Convert patches - if activated
         //
-
-        // The name for the interpolated patch point field must be consistent
-        // with the interpolated volume point field.
-        const word& pointFldName = tf.name();
-
         for
         (
             int partId = arrayRangePatches_.start();
@@ -161,7 +156,7 @@ void Foam::vtkPV3Foam::convertVolFields
 
                 convertPatchPointField
                 (
-                    pointFldName,
+                    tf.name(),
                     ppInterpList[patchId].faceToPointInterpolate(tpptf)(),
                     output,
                     arrayRangePatches_,
@@ -181,7 +176,7 @@ void Foam::vtkPV3Foam::convertVolFields
 
                 convertPatchPointField
                 (
-                    pointFldName,
+                    tf.name(),
                     ppInterpList[patchId].faceToPointInterpolate(ptf)(),
                     output,
                     arrayRangePatches_,
@@ -275,14 +270,21 @@ void Foam::vtkPV3Foam::convertVolFieldBlock
     const List<polyDecomp>& decompLst
 )
 {
-    const word& pointFldName = tf.name();
-
     for (int partId = range.start(); partId < range.end(); ++partId)
     {
         const label datasetNo = partDataset_[partId];
 
         if (datasetNo >= 0 && partStatus_[partId])
         {
+            convertVolField
+            (
+                tf,
+                output,
+                range,
+                datasetNo,
+                decompLst[datasetNo]
+            );
+
             if (!ptfPtr.valid())
             {
                 if (debug)
@@ -297,18 +299,8 @@ void Foam::vtkPV3Foam::convertVolFieldBlock
                 );
             }
 
-            convertVolField
-            (
-                tf,
-                output,
-                range,
-                datasetNo,
-                decompLst[datasetNo]
-            );
-
             convertPointField
             (
-                pointFldName,
                 ptfPtr(),
                 tf,
                 output,

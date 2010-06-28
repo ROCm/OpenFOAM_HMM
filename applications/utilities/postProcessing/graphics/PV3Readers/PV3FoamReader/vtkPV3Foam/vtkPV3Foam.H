@@ -574,11 +574,10 @@ class vtkPV3Foam
                 const label datasetNo
             );
 
-            //- Lagrangian field, use specified display name
+            //- Lagrangian field
             template<class Type>
             void convertLagrangianField
             (
-                const word& displayName,
                 const IOField<Type>&,
                 vtkMultiBlockDataSet* output,
                 const arrayRange&,
@@ -595,22 +594,20 @@ class vtkPV3Foam
                 vtkMultiBlockDataSet* output
             );
 
-            //- Point field - all selected parts, use specified display name
+            //- Point field - all selected parts
             template<class Type>
             void convertPointFieldBlock
             (
-                const word& displayName,
                 const GeometricField<Type, pointPatchField, pointMesh>&,
                 vtkMultiBlockDataSet* output,
                 const arrayRange&,
                 const List<polyDecomp>&
             );
 
-            //- Point field, use specified display name
+            //- Point fields
             template<class Type>
             void convertPointField
             (
-                const word& displayName,
                 const GeometricField<Type, pointPatchField, pointMesh>&,
                 const GeometricField<Type, fvPatchField, volMesh>&,
                 vtkMultiBlockDataSet* output,
@@ -619,11 +616,11 @@ class vtkPV3Foam
                 const polyDecomp&
             );
 
-            //- Patch point field, use specified display name
+            //- Patch point field
             template<class Type>
             void convertPatchPointField
             (
-                const word& displayName,
+                const word& name,
                 const Field<Type>&,
                 vtkMultiBlockDataSet* output,
                 const arrayRange&,
