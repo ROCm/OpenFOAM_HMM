@@ -594,20 +594,22 @@ class vtkPV3Foam
                 vtkMultiBlockDataSet* output
             );
 
-            //- Point field - all selected parts
+            //- Point field - all selected parts, use specified display name
             template<class Type>
             void convertPointFieldBlock
             (
+                const word& displayName,
                 const GeometricField<Type, pointPatchField, pointMesh>&,
                 vtkMultiBlockDataSet* output,
                 const arrayRange&,
                 const List<polyDecomp>&
             );
 
-            //- Point fields
+            //- Point field, use specified display name
             template<class Type>
             void convertPointField
             (
+                const word& displayName,
                 const GeometricField<Type, pointPatchField, pointMesh>&,
                 const GeometricField<Type, fvPatchField, volMesh>&,
                 vtkMultiBlockDataSet* output,
@@ -616,11 +618,11 @@ class vtkPV3Foam
                 const polyDecomp&
             );
 
-            //- Patch point field
+            //- Patch point field, use specified display name
             template<class Type>
             void convertPatchPointField
             (
-                const word& name,
+                const word& displayName,
                 const Field<Type>&,
                 vtkMultiBlockDataSet* output,
                 const arrayRange&,

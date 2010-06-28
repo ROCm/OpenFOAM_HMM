@@ -76,6 +76,7 @@ void Foam::vtkPV3Foam::convertPointFields
         // Convert activated internalMesh regions
         convertPointFieldBlock
         (
+            fieldName,
             ptf,
             output,
             arrayRangeVolume_,
@@ -85,6 +86,7 @@ void Foam::vtkPV3Foam::convertPointFields
         // Convert activated cellZones
         convertPointFieldBlock
         (
+            fieldName,
             ptf,
             output,
             arrayRangeCellZones_,
@@ -94,6 +96,7 @@ void Foam::vtkPV3Foam::convertPointFields
         // Convert activated cellSets
         convertPointFieldBlock
         (
+            fieldName,
             ptf,
             output,
             arrayRangeCellSets_,
@@ -136,6 +139,7 @@ void Foam::vtkPV3Foam::convertPointFields
 template<class Type>
 void Foam::vtkPV3Foam::convertPointFieldBlock
 (
+    const word& displayName,
     const GeometricField<Type, pointPatchField, pointMesh>& ptf,
     vtkMultiBlockDataSet* output,
     const arrayRange& range,
@@ -150,6 +154,7 @@ void Foam::vtkPV3Foam::convertPointFieldBlock
        {
            convertPointField
            (
+               displayName,
                ptf,
                GeometricField<Type, fvPatchField, volMesh>::null(),
                output,
@@ -165,6 +170,7 @@ void Foam::vtkPV3Foam::convertPointFieldBlock
 template<class Type>
 void Foam::vtkPV3Foam::convertPointField
 (
+    const word& displayName,
     const GeometricField<Type, pointPatchField, pointMesh>& ptf,
     const GeometricField<Type, fvPatchField, volMesh>& tf,
     vtkMultiBlockDataSet* output,
@@ -192,7 +198,7 @@ void Foam::vtkPV3Foam::convertPointField
     pointData->SetNumberOfTuples(nPoints + addPointCellLabels.size());
     pointData->SetNumberOfComponents(nComp);
     pointData->Allocate(nComp*(nPoints + addPointCellLabels.size()));
-    pointData->SetName(ptf.name().c_str());
+    pointData->SetName(displayName.c_str());
 
     if (debug)
     {

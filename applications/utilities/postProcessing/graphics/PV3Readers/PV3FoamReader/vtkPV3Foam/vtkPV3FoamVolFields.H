@@ -113,8 +113,7 @@ void Foam::vtkPV3Foam::convertVolFields
 
         // The name for the interpolated patch point field must be consistent
         // with the interpolated volume point field.
-        // This could be done better.
-        const word pointFldName = "volPointInterpolate(" + tf.name() + ')';
+        const word& pointFldName = tf.name();
 
         for
         (
@@ -276,21 +275,14 @@ void Foam::vtkPV3Foam::convertVolFieldBlock
     const List<polyDecomp>& decompLst
 )
 {
+    const word& pointFldName = tf.name();
+
     for (int partId = range.start(); partId < range.end(); ++partId)
     {
         const label datasetNo = partDataset_[partId];
 
         if (datasetNo >= 0 && partStatus_[partId])
         {
-            convertVolField
-            (
-                tf,
-                output,
-                range,
-                datasetNo,
-                decompLst[datasetNo]
-            );
-
             if (!ptfPtr.valid())
             {
                 if (debug)
@@ -305,8 +297,18 @@ void Foam::vtkPV3Foam::convertVolFieldBlock
                 );
             }
 
+            convertVolField
+            (
+                tf,
+                output,
+                range,
+                datasetNo,
+                decompLst[datasetNo]
+            );
+
             convertPointField
             (
+                pointFldName,
                 ptfPtr(),
                 tf,
                 output,
