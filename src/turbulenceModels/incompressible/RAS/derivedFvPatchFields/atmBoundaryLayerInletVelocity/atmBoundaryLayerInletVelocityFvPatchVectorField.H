@@ -101,19 +101,19 @@ class atmBoundaryLayerInletVelocityFvPatchVectorField
         vector z_;
 
         //- Surface roughness lenght
-        scalar z0_;
+        const scalar z0_;
 
         //- Von Karman constant
-        scalar kappa_;
+        const scalar kappa_;
 
         //- Reference velocity
-        scalar Uref_;
+        const scalar Uref_;
 
         //- Reference hight
-        scalar Href_;
+        const scalar Href_;
 
         //- Minimum corrdinate value in z direction
-        scalar zGround_;
+        const scalar zGround_;
 
 
 public:

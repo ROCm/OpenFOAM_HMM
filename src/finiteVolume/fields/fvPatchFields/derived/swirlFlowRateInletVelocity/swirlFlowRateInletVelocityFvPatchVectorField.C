@@ -61,7 +61,8 @@ swirlFlowRateInletVelocityFvPatchVectorField
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
     flowRate_(ptf.flowRate_),
     phiName_(ptf.phiName_),
-    rhoName_(ptf.rhoName_)
+    rhoName_(ptf.rhoName_),
+    rpm_(ptf.rpm_)
 {}
 
 

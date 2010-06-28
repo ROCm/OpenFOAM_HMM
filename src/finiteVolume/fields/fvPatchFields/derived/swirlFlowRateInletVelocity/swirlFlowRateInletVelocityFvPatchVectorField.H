@@ -63,7 +63,7 @@ SourceFiles
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-      Class swirlFlowRateInletVelocityFvPatchVectorField Declaration
+       Class swirlFlowRateInletVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class swirlFlowRateInletVelocityFvPatchVectorField
@@ -73,16 +73,16 @@ class swirlFlowRateInletVelocityFvPatchVectorField
     // Private data
 
         //- Inlet integral flow rate
-        scalar flowRate_;
+        const scalar flowRate_;
 
         //- Name of the flux transporting the field
-        word phiName_;
+        const word phiName_;
 
         //- Name of the density field used to normalize the mass flux
-        word rhoName_;
+        const word rhoName_;
 
         //- RPM
-        scalar rpm_;
+        const scalar rpm_;
 
 
 public:
@@ -164,19 +164,12 @@ public:
                 return flowRate_;
             }
 
-            //- Return reference to the flux to allow adjustment
-            scalar& flowRate()
-            {
-                return flowRate_;
-            }
-
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
 
         //- Write
         virtual void write(Ostream&) const;
-
 };
 
 
