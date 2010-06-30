@@ -64,6 +64,8 @@ public:
     // Member Operators
 
         inline scalar operator[](const label) const;
+
+        inline zeroField field() const;
 };
 
 

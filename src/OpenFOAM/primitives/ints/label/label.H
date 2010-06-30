@@ -165,6 +165,9 @@ public:
 
     // Constructors
 
+        //- Construct from primitive
+        explicit pTraits(const label&);
+
         //- Construct from Istream
         pTraits(Istream&);
 

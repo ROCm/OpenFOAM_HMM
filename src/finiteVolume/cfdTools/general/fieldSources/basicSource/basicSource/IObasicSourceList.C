@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,53 +23,43 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
-#include "dispersionModel.H"
-#include "noDispersion.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+#include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-autoPtr<dispersionModel> dispersionModel::New
+Foam::IObasicSourceList::IObasicSourceList
 (
-    const dictionary& dict,
-    spray& sm
+    const fvMesh& mesh
 )
-{
-    word dispersionModelType
+:
+    IOdictionary
     (
-        dict.lookup("dispersionModel")
-    );
+        IOobject
+        (
+            "sourcesProperties",
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    ),
+    basicSourceList(mesh, *this)
+{}
 
-    Info<< "Selecting dispersionModel "
-         << dispersionModelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(dispersionModelType);
-
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+bool Foam::IObasicSourceList::read()
+{
+    if (regIOobject::read())
     {
-        FatalError
-            << "dispersionModel::New(const dictionary&, const spray&) : "
-            << endl
-            << "    unknown dispersionModelType type "
-            << dispersionModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid dispersionModel types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
+        basicSourceList::read(*this);
+        return true;
     }
-
-    return autoPtr<dispersionModel>(cstrIter()(dict, sm));
+    else
+    {
+        return false;
+    }
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
 // ************************************************************************* //
+

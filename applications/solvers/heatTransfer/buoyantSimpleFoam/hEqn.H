@@ -10,7 +10,6 @@
     );
 
     hEqn.relax();
-
     hEqn.solve();
 
     thermo.correct();

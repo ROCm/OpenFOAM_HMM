@@ -65,7 +65,10 @@ class kEpsilon
 :
     public RASModel
 {
-    // Private data
+
+protected:
+
+    // Protected data
 
         // Model coefficients
 
@@ -95,7 +98,8 @@ public:
             const volVectorField& U,
             const surfaceScalarField& phi,
             transportModel& transport,
-            const word& turbulenceModelName = turbulenceModel::typeName
+            const word& turbulenceModelName = turbulenceModel::typeName,
+            const word& modelName = typeName
         );
 
 

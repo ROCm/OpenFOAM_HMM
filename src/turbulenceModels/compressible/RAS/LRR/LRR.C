@@ -51,10 +51,11 @@ LRR::LRR
     const volVectorField& U,
     const surfaceScalarField& phi,
     const basicThermo& thermophysicalModel,
-    const word& turbulenceModelName
+    const word& turbulenceModelName,
+    const word& modelName
 )
 :
-    RASModel(typeName, rho, U, phi, thermophysicalModel, turbulenceModelName),
+    RASModel(modelName, rho, U, phi, thermophysicalModel, turbulenceModelName),
 
     Cmu_
     (
@@ -342,7 +343,7 @@ void LRR::correct()
     volSymmTensorField P = -twoSymm(R_ & fvc::grad(U_));
     volScalarField G("RASModel::G", 0.5*mag(tr(P)));
 
-    // Update espsilon and G at the wall
+    // Update epsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation

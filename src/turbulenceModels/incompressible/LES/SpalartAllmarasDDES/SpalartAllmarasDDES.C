@@ -94,10 +94,11 @@ SpalartAllmarasDDES::SpalartAllmarasDDES
     const volVectorField& U,
     const surfaceScalarField& phi,
     transportModel& transport,
-    const word& turbulenceModelName
+    const word& turbulenceModelName,
+    const word& modelName
 )
 :
-    SpalartAllmaras(U, phi, transport, turbulenceModelName, typeName)
+    SpalartAllmaras(U, phi, transport, turbulenceModelName, modelName)
 {}
 
 

@@ -1,15 +1,20 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
 
-if [ -f /usr/include/readline/readline.h ]
+unset COMP_FLAGS LINK_FLAGS
+
+#
+# use readline if available
+# unless otherwise specified (with NO_READLINE)
+#
+# eg,  ./Allwmake NO_READLINE
+#
+
+if [ -f /usr/include/readline/readline.h -a "${1%NO_READLINE}" = "$1" ]
 then
-    echo "Found readline/readline.h  --  enabling readline support."
-    export READLINE=1
-    export READLINELINK="-lreadline -lncurses"
-else
-    # no readline/readline.h  --  disabling readline support
-    export READLINE=0
-    unset READLINELINK
+    echo "Found <readline/readline.h>  --  enabling readline support."
+    export COMP_FLAGS="-DHAS_READLINE"
+    export LINK_FLAGS="-lreadline -lncurses"
 fi
 
 wmake

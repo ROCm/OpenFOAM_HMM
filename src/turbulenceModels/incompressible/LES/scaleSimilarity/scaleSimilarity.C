@@ -45,10 +45,11 @@ scaleSimilarity::scaleSimilarity
     const volVectorField& U,
     const surfaceScalarField& phi,
     transportModel& transport,
-    const word& turbulenceModelName
+    const word& turbulenceModelName,
+    const word& modelName
 )
 :
-    LESModel(typeName, U, phi, transport, turbulenceModelName),
+    LESModel(modelName, U, phi, transport, turbulenceModelName),
     filterPtr_(LESfilter::New(U.mesh(), coeffDict())),
     filter_(filterPtr_())
 {

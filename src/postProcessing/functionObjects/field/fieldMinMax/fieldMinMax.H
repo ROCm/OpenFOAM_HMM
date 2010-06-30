@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,10 +74,12 @@ public:
         mdCmpt
     };
 
-
 protected:
 
     // Protected data
+
+        //- Mode type names
+        static const NamedEnum<modeType, 2> modeTypeNames_;
 
         //- Name of this set of field min/max.
         //  Also used as the name of the output directory.
@@ -88,18 +90,17 @@ protected:
         //- on/off switch
         bool active_;
 
-        //- Switch to send output to Info as well as to file
-        Switch log_;
+        //- Switch to enable/disable writing to file
+        Switch write_;
 
-        //- Mode type names
-        static const NamedEnum<modeType, 2> modeTypeNames_;
+        //- Switch to send output to Info as well
+        Switch log_;
 
         //- Mode for min/max - only applicable for ranks > 0
         modeType mode_;
 
         //- Fields to assess min/max
         wordList fieldSet_;
-
 
         //- Min/max file ptr
         autoPtr<OFstream> fieldMinMaxFilePtr_;

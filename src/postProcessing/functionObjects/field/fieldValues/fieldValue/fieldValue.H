@@ -61,7 +61,7 @@ protected:
 
     // Protected data
 
-         //- Name of this fieldValue object
+        //- Name of this fieldValue object
         word name_;
 
         //- Database this class is registered to

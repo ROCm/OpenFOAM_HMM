@@ -91,6 +91,9 @@ public:
 
     // Constructors
 
+        //- Construct from primitive
+        explicit pTraits(const bool&);
+
         //- Construct from Istream
         pTraits(Istream&);
 

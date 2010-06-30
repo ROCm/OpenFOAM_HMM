@@ -23,31 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    ABLInletVelocityFvPatchVectorField
+    atmBoundaryLayerInletEpsilonFvPatchScalarField
 
 Description
-    Boundary condition specifies a atmospheric boundary layer (ABL)
-    velocity inlet profile given the friction velocity value,
-    flow direction n and direction of the parabolic coordinate z.
+    Boundary condition specifies a epsilon inlet for the atmospheric boundary
+    layer (ABL). This boundaty is to be used in conjunction with
+    ABLInletVelocity.
 
     @verbatim
-        U = (Ustar/K) ln((z + z0)/z0)
+        epsilon = Ustar^3 / (K(z - zGround + z0))
 
     where:
 
         Ustar is the frictional velocity
         K is karman's constant
-        z0 is the surface roughness lenght
         z is the verical coordinate
-
-    and:
-
-        Ustar = K Uref/ln((Zref + z0)/z0)
-
-    where:
-
-        Uref is the reference velocity at Zref
-        Zref is the reference height.
+        z0 is the surface roughness lenght
+        zGround minium vlaue in z direction
 
     @endverbatim
 
@@ -57,18 +49,13 @@ Description
      neutral atmospheric boundary layer"
     Journal of Wind Engineering and Industrial Aerodynamics 95(2007) 355-369.
 
-NOTE: D.M. Hargreaves and N.G. Wright recommend Gamma epsilon in the k-epsilon
-      model should be changed from 1.3 to 1.11 for consistency.
-      The roughness height (Er) is given by Er = 20 z0 following the same
-      reference
-
 SourceFiles
-    ABLInletVelocityFvPatchVectorField.C
+    atmBoundaryLayerInletEpsilonFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ABLInletVelocityFvPatchVectorField_H
-#define ABLInletVelocityFvPatchVectorField_H
+#ifndef atmBoundaryLayerInletEpsilonFvPatchScalarField_H
+#define atmBoundaryLayerInletEpsilonFvPatchScalarField_H
 
 #include "fvPatchFields.H"
 #include "fixedValueFvPatchFields.H"
@@ -81,88 +68,89 @@ namespace incompressible
 {
 
 /*---------------------------------------------------------------------------*\
-             Class ABLInletVelocityFvPatchVectorField Declaration
+        Class atmBoundaryLayerInletEpsilonFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class ABLInletVelocityFvPatchVectorField
+class atmBoundaryLayerInletEpsilonFvPatchScalarField
 :
-    public fixedValueFvPatchVectorField
+    public fixedValueFvPatchScalarField
 {
     // Private data
 
-        //- Friction velocity
-        scalar Ustar_;
-
-        //- Flow direction
-        vector n_;
+        //- Frictional velocity
+        const scalar Ustar_;
 
         //- Direction of the z-coordinate
         vector z_;
 
         //- Surface roughness lenght
-        scalar z0_;
+        const scalar z0_;
 
         //- Von Karman constant
-        scalar kappa_;
+        const scalar kappa_;
+
+        //- Minimum corrdinate value in z direction
+        const scalar zGround_;
+
 
 public:
 
     //- Runtime type information
-    TypeName("ABLInletVelocity");
+    TypeName("atmBoundaryLayerInletEpsilon");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        ABLInletVelocityFvPatchVectorField
+        atmBoundaryLayerInletEpsilonFvPatchScalarField
         (
             const fvPatch&,
-            const DimensionedField<vector, volMesh>&
+            const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        ABLInletVelocityFvPatchVectorField
+        atmBoundaryLayerInletEpsilonFvPatchScalarField
         (
             const fvPatch&,
-            const DimensionedField<vector, volMesh>&,
+            const DimensionedField<scalar, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given ABLInletVelocityFvPatchVectorField
-        //  onto a new patch
-        ABLInletVelocityFvPatchVectorField
+        //- Construct by mapping given
+        //  atmBoundaryLayerInletEpsilonFvPatchScalarField onto a new patch
+        atmBoundaryLayerInletEpsilonFvPatchScalarField
         (
-            const ABLInletVelocityFvPatchVectorField&,
+            const atmBoundaryLayerInletEpsilonFvPatchScalarField&,
             const fvPatch&,
-            const DimensionedField<vector, volMesh>&,
+            const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchVectorField> clone() const
+        virtual tmp<fvPatchScalarField> clone() const
         {
-            return tmp<fvPatchVectorField>
+            return tmp<fvPatchScalarField>
             (
-                new ABLInletVelocityFvPatchVectorField(*this)
+                new atmBoundaryLayerInletEpsilonFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        ABLInletVelocityFvPatchVectorField
+        atmBoundaryLayerInletEpsilonFvPatchScalarField
         (
-            const ABLInletVelocityFvPatchVectorField&,
-            const DimensionedField<vector, volMesh>&
+            const atmBoundaryLayerInletEpsilonFvPatchScalarField&,
+            const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchVectorField> clone
+        virtual tmp<fvPatchScalarField> clone
         (
-            const DimensionedField<vector, volMesh>& iF
+            const DimensionedField<scalar, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchVectorField>
+            return tmp<fvPatchScalarField>
             (
-                new ABLInletVelocityFvPatchVectorField(*this, iF)
+                new atmBoundaryLayerInletEpsilonFvPatchScalarField(*this, iF)
             );
         }
 
@@ -170,19 +158,13 @@ public:
     // Member functions
 
         //- Return max value
-        scalar& Ustar()
+        scalar Ustar() const
         {
             return Ustar_;
         }
 
-        //- Return flow direction
-        vector& n()
-        {
-            return n_;
-        }
-
-        //- Return y direction
-        vector& z()
+        //- Return z direction
+        const vector& z() const
         {
             return z_;
         }

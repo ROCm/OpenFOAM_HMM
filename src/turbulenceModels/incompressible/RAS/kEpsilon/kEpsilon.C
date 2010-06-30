@@ -49,10 +49,11 @@ kEpsilon::kEpsilon
     const volVectorField& U,
     const surfaceScalarField& phi,
     transportModel& transport,
-    const word& turbulenceModelName
+    const word& turbulenceModelName,
+    const word& modelName
 )
 :
-    RASModel(typeName, U, phi, transport, turbulenceModelName),
+    RASModel(modelName, U, phi, transport, turbulenceModelName),
 
     Cmu_
     (
@@ -220,7 +221,7 @@ void kEpsilon::correct()
 
     volScalarField G("RASModel::G", nut_*2*magSqr(symm(fvc::grad(U_))));
 
-    // Update espsilon and G at the wall
+    // Update epsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation

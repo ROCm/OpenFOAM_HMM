@@ -51,6 +51,25 @@ Description
     The porousZones method porousZones::ddt() mirrors the normal fvm::ddt()
     method, but accounts for the effective volume of the cells.
 
+    An example dictionary entry:
+    @verbatim
+    cat1
+    {
+        note            "some catalyst";
+        coordinateSystem    system_10;
+        porosity        0.809;
+        intensity       0.001;      // optional
+        mixingLength    0.0001;     // optional
+        printCoeffs     yes;        // optional: feedback for the user
+
+        Darcy
+        {
+            d   d [0 -2 0 0 0]  (-1000 -1000 5.3756e+07);
+            f   f [0 -1 0 0 0]  (-1000 -1000 15.83);
+        }
+    }
+    @endverbatim
+
 See Also
     porousZones and coordinateSystems
 
@@ -110,6 +129,12 @@ class porousZone
         //  Placeholder for treatment of temporal terms.
         //  Currently unused.
         scalar porosity_;
+
+        //- Turbulent intensity as fraction of the velocity
+        scalar intensity_;
+
+        //- Turbulent length scale
+        scalar mixingLength_;
 
         //- powerLaw coefficient C0
         scalar C0_;
@@ -281,6 +306,30 @@ public:
             scalar& porosity()
             {
                 return porosity_;
+            }
+
+            //- Return turbulent intensity
+            scalar intensity() const
+            {
+                return intensity_;
+            }
+
+            //- Edit access to turbulent intensity
+            scalar& intensity()
+            {
+                return intensity_;
+            }
+
+            //- Return turbulent length scale
+            scalar mixingLength() const
+            {
+                return mixingLength_;
+            }
+
+            //- Edit access to turbulent length scale
+            scalar& mixingLength()
+            {
+                return mixingLength_;
             }
 
 

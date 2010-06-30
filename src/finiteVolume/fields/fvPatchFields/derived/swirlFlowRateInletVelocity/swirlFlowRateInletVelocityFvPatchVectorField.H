@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,14 +19,15 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
     Foam::swirlFlowRateInletVelocityFvPatchVectorField
 
 Description
     Describes a volumetric/mass flow normal vector boundary condition by its
-    magnitude as an integral over its area, with a swirl component determined
+    magnitude as an integral over its area with a swirl component determined
     by the RPM
 
     The basis of the patch (volumetric or mass) is determined by the
@@ -38,22 +39,14 @@ Description
     @verbatim
     inlet
     {
-        type        swirlFlowRateInletVelocity;
-        flowRate    0.2;        // Volumetric/mass flow rate [m3/s or kg/s]
-        rpm         100;
-        value       uniform (0 0 0); // placeholder
+        type            swirlFlowRateInletVelocity;
+        flowRate        0.2;        // Volumetric/mass flow rate [m3/s or kg/s]
+        rpm             100;
     }
     @endverbatim
 
 Note
     - The value is positive inwards
-    - May not work correctly for transonic inlets
-    - Swirl is defined in RPM about the patch centre-axis according
-      to a right-hand rule (inwards axis).
-    - Primarily useful for planar patches.
-
-See Also
-    Foam::flowRateInletVelocityFvPatchVectorField
 
 SourceFiles
     swirlFlowRateInletVelocityFvPatchVectorField.C
@@ -70,7 +63,7 @@ SourceFiles
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-        Class swirlFlowRateInletVelocityFvPatchVectorField Declaration
+       Class swirlFlowRateInletVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class swirlFlowRateInletVelocityFvPatchVectorField
@@ -80,16 +73,16 @@ class swirlFlowRateInletVelocityFvPatchVectorField
     // Private data
 
         //- Inlet integral flow rate
-        scalar flowRate_;
+        const scalar flowRate_;
 
         //- Name of the flux transporting the field
-        word phiName_;
+        const word phiName_;
 
         //- Name of the density field used to normalize the mass flux
-        word rhoName_;
+        const word rhoName_;
 
-        //- Swirl rate [rpm]
-        scalar rpm_;
+        //- RPM
+        const scalar rpm_;
 
 
 public:
@@ -171,31 +164,12 @@ public:
                 return flowRate_;
             }
 
-            //- Return reference to the flux to allow adjustment
-            scalar& flowRate()
-            {
-                return flowRate_;
-            }
-
-            //- Return the swirl rpm
-            scalar rpm() const
-            {
-                return rpm_;
-            }
-
-            //- Return reference to the swirl rpm to allow adjustment
-            scalar& rpm()
-            {
-                return rpm_;
-            }
-
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
 
         //- Write
         virtual void write(Ostream&) const;
-
 };
 
 

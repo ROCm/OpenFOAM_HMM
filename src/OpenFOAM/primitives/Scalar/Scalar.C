@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,12 @@ const Scalar pTraits<Scalar>::min = -ScalarVGREAT;
 const Scalar pTraits<Scalar>::max = ScalarVGREAT;
 
 const char* pTraits<Scalar>::componentNames[] = { "x" };
+
+pTraits<Scalar>::pTraits(const Scalar& p)
+:
+    p_(p)
+{}
+
 
 pTraits<Scalar>::pTraits(Istream& is)
 {

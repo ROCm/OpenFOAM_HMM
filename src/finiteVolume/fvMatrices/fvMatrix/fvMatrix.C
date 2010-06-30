@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ License
 #include "calculatedFvPatchFields.H"
 #include "zeroGradientFvPatchFields.H"
 #include "coupledFvPatchFields.H"
+#include "UIndirectList.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -171,6 +172,95 @@ void Foam::fvMatrix<Type>::addBoundarySource
             forAll(addr, facei)
             {
                 source[addr[facei]] += cmptMultiply(pbc[facei], pnf[facei]);
+            }
+        }
+    }
+}
+
+
+template<class Type>
+template<template<class> class ListType>
+void Foam::fvMatrix<Type>::setValuesFromList
+(
+    const unallocLabelList& cellLabels,
+    const ListType<Type>& values
+)
+{
+    const fvMesh& mesh = psi_.mesh();
+
+    const cellList& cells = mesh.cells();
+    const unallocLabelList& own = mesh.owner();
+    const unallocLabelList& nei = mesh.neighbour();
+
+    scalarField& Diag = diag();
+    Field<Type>& psi =
+        const_cast
+        <
+            GeometricField<Type, fvPatchField, volMesh>&
+        >(psi_).internalField();
+
+    forAll(cellLabels, i)
+    {
+        const label celli = cellLabels[i];
+        const Type& value = values[i];
+
+        psi[celli] = value;
+        source_[celli] = value*Diag[celli];
+
+        if (symmetric() || asymmetric())
+        {
+            const cell& c = cells[celli];
+
+            forAll(c, j)
+            {
+                const label facei = c[j];
+
+                if (mesh.isInternalFace(facei))
+                {
+                    if (symmetric())
+                    {
+                        if (celli == own[facei])
+                        {
+                            source_[nei[facei]] -= upper()[facei]*value;
+                        }
+                        else
+                        {
+                            source_[own[facei]] -= upper()[facei]*value;
+                        }
+
+                        upper()[facei] = 0.0;
+                    }
+                    else
+                    {
+                        if (celli == own[facei])
+                        {
+                            source_[nei[facei]] -= lower()[facei]*value;
+                        }
+                        else
+                        {
+                            source_[own[facei]] -= upper()[facei]*value;
+                        }
+
+                        upper()[facei] = 0.0;
+                        lower()[facei] = 0.0;
+                    }
+                }
+                else
+                {
+                    label patchi = mesh.boundaryMesh().whichPatch(facei);
+
+                    if (internalCoeffs_[patchi].size())
+                    {
+                        label patchFacei =
+                            mesh.boundaryMesh()[patchi].whichFace(facei);
+
+                        internalCoeffs_[patchi][patchFacei] =
+                            pTraits<Type>::zero;
+
+                        boundaryCoeffs_[patchi][patchFacei] =
+                            pTraits<Type>::zero;
+                    }
+                }
             }
         }
     }
@@ -393,92 +483,25 @@ Foam::fvMatrix<Type>::~fvMatrix()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Set solution in given cells and eliminate corresponding
-// equations from the matrix
 template<class Type>
 void Foam::fvMatrix<Type>::setValues
 (
-    const labelList& cellLabels,
-    const Field<Type>& values
+    const unallocLabelList& cellLabels,
+    const UList<Type>& values
 )
 {
-    const fvMesh& mesh = psi_.mesh();
+    this->setValuesFromList(cellLabels, values);
+}
 
-    const cellList& cells = mesh.cells();
-    const unallocLabelList& own = mesh.owner();
-    const unallocLabelList& nei = mesh.neighbour();
 
-    scalarField& Diag = diag();
-    Field<Type>& psi =
-        const_cast
-        <
-            GeometricField<Type, fvPatchField, volMesh>&
-        >(psi_).internalField();
-
-    forAll(cellLabels, i)
-    {
-        label celli = cellLabels[i];
-
-        psi[celli] = values[i];
-        source_[celli] = values[i]*Diag[celli];
-
-        if (symmetric() || asymmetric())
-        {
-            const cell& c = cells[celli];
-
-            forAll(c, j)
-            {
-                label facei = c[j];
-
-                if (mesh.isInternalFace(facei))
-                {
-                    if (symmetric())
-                    {
-                        if (celli == own[facei])
-                        {
-                            source_[nei[facei]] -= upper()[facei]*values[i];
-                        }
-                        else
-                        {
-                            source_[own[facei]] -= upper()[facei]*values[i];
-                        }
-
-                        upper()[facei] = 0.0;
-                    }
-                    else
-                    {
-                        if (celli == own[facei])
-                        {
-                            source_[nei[facei]] -= lower()[facei]*values[i];
-                        }
-                        else
-                        {
-                            source_[own[facei]] -= upper()[facei]*values[i];
-                        }
-
-                        upper()[facei] = 0.0;
-                        lower()[facei] = 0.0;
-                    }
-                }
-                else
-                {
-                    label patchi = mesh.boundaryMesh().whichPatch(facei);
-
-                    if (internalCoeffs_[patchi].size())
-                    {
-                        label patchFacei =
-                            mesh.boundaryMesh()[patchi].whichFace(facei);
-
-                        internalCoeffs_[patchi][patchFacei] =
-                            pTraits<Type>::zero;
-
-                        boundaryCoeffs_[patchi][patchFacei] =
-                            pTraits<Type>::zero;
-                    }
-                }
-            }
-        }
-    }
+template<class Type>
+void Foam::fvMatrix<Type>::setValues
+(
+    const unallocLabelList& cellLabels,
+    const UIndirectList<Type>& values
+)
+{
+    this->setValuesFromList(cellLabels, values);
 }
 
 

@@ -62,6 +62,7 @@ class polyLine
         //- Disallow default bitwise assignment
         void operator=(const polyLine&);
 
+
 protected:
 
     // Protected data
@@ -75,16 +76,17 @@ protected:
         //- The rational (0-1) cumulative parameter value for each point
         scalarList param_;
 
+
     // Protected Member Functions
 
         //- Precalculate the rational cumulative parameter value
         //  and the line-length
         void calcParam();
 
-
         //- Return the line segment and the local parameter [0..1]
         //  corresponding to the global lambda [0..1]
         label localParameter(scalar& lambda) const;
+
 
 public:
 

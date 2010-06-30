@@ -73,6 +73,8 @@ Foam::porousZone::porousZone
     cellZoneID_(mesh_.cellZones().findZoneID(name)),
     coordSys_(dict, mesh),
     porosity_(1),
+    intensity_(0),
+    mixingLength_(0),
     C0_(0),
     C1_(0),
     D_("D", dimensionSet(0, -2, 0, 0, 0), tensor::zero),
@@ -95,20 +97,56 @@ Foam::porousZone::porousZone
 
 
     // porosity
-    if (dict_.readIfPresent("porosity", porosity_))
+    if
+    (
+        dict_.readIfPresent("porosity", porosity_)
+     && (porosity_ <= 0.0 || porosity_ > 1.0)
+    )
     {
-        if (porosity_ <= 0.0 || porosity_ > 1.0)
-        {
-            FatalIOErrorIn
-            (
-                "Foam::porousZone::porousZone"
-                "(const fvMesh&, const word&, const dictionary&)",
-                dict_
-            )
-                << "out-of-range porosity value " << porosity_
-                << exit(FatalIOError);
-        }
+        FatalIOErrorIn
+        (
+            "Foam::porousZone::porousZone"
+            "(const fvMesh&, const word&, const dictionary&)",
+            dict_
+        )
+            << "out-of-range porosity value " << porosity_
+            << exit(FatalIOError);
     }
+
+    // turbulent intensity
+    if
+    (
+        dict_.readIfPresent("intensity", intensity_)
+     && (intensity_ <= 0.0 || intensity_ > 1.0)
+    )
+    {
+        FatalIOErrorIn
+        (
+            "Foam::porousZone::porousZone"
+            "(const fvMesh&, const word&, const dictionary&)",
+            dict_
+        )
+            << "out-of-range turbulent intensity value " << intensity_
+            << exit(FatalIOError);
+    }
+
+    // turbulent length scale
+    if
+    (
+        dict_.readIfPresent("mixingLength", mixingLength_)
+     && (mixingLength_ <= 0.0)
+    )
+    {
+        FatalIOErrorIn
+        (
+            "Foam::porousZone::porousZone"
+            "(const fvMesh&, const word&, const dictionary&)",
+            dict_
+        )
+            << "out-of-range turbulent length scale " << mixingLength_
+            << exit(FatalIOError);
+    }
+
 
     // powerLaw coefficients
     if (const dictionary* dictPtr = dict_.subDictPtr("powerLaw"))
@@ -171,9 +209,6 @@ Foam::porousZone::porousZone
         }
     }
 
-    // provide some feedback for the user
-    // writeDict(Info, false);
-
     // it is an error not to define anything
     if
     (
@@ -190,6 +225,12 @@ Foam::porousZone::porousZone
         )   << "neither powerLaw (C0/C1) "
                "nor Darcy-Forchheimer law (d/f) specified"
             << exit(FatalIOError);
+    }
+
+    // feedback for the user
+    if (dict.lookupOrDefault("printCoeffs", false))
+    {
+        writeDict(Info, false);
     }
 }
 
@@ -365,7 +406,8 @@ void Foam::porousZone::writeDict(Ostream& os, bool subDict) const
     if (subDict)
     {
         os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
-        os.writeKeyword("name") << zoneName() << token::END_STATEMENT << nl;
+        os.writeKeyword("name")
+            << zoneName() << token::END_STATEMENT << nl;
     }
     else
     {
@@ -375,40 +417,53 @@ void Foam::porousZone::writeDict(Ostream& os, bool subDict) const
 
     if (dict_.found("note"))
     {
-        os.writeKeyword("note") << string(dict_.lookup("note"))
-            << token::END_STATEMENT << nl;
+        os.writeKeyword("note")
+            << string(dict_.lookup("note")) << token::END_STATEMENT << nl;
     }
 
     coordSys_.writeDict(os, true);
 
     if (dict_.found("porosity"))
     {
-        os.writeKeyword("porosity") << porosity() << token::END_STATEMENT << nl;
+        os.writeKeyword("porosity")
+            << porosity() << token::END_STATEMENT << nl;
+    }
+
+    if (dict_.found("intensity"))
+    {
+        os.writeKeyword("intensity")
+            << intensity() << token::END_STATEMENT << nl;
+    }
+
+    if (dict_.found("mixingLength"))
+    {
+        os.writeKeyword("mixingLength")
+            << mixingLength() << token::END_STATEMENT << nl;
     }
 
     // powerLaw coefficients
     if (const dictionary* dictPtr = dict_.subDictPtr("powerLaw"))
     {
-        os << indent << "powerLaw";
+        os  << indent << "powerLaw";
         dictPtr->write(os);
     }
 
     // Darcy-Forchheimer coefficients
     if (const dictionary* dictPtr = dict_.subDictPtr("Darcy"))
     {
-        os << indent << "Darcy";
+        os  << indent << "Darcy";
         dictPtr->write(os);
     }
 
-    os << decrIndent << indent << token::END_BLOCK << endl;
+    os  << decrIndent << indent << token::END_BLOCK << endl;
 }
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const porousZone& pZone)
+Foam::Ostream& Foam::operator<<(Ostream& os, const porousZone& pz)
 {
-    pZone.writeDict(os);
+    pz.writeDict(os);
     return os;
 }
 
