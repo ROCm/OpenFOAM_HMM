@@ -70,17 +70,7 @@ do
 done
 
 # get list of directories
-dirList=$(
-    for dir in \
-        $packDir/lib/$arch \
-        $packDir/applications/bin/$arch \
-        $packDir/wmake/rules \
-        $packDir/wmake/bin/$baseArch \
-        ;
-    do
-        [ -d $dir ] && echo $dir
-    done
-)
+dirList=`foamBinDirs $packDir $arch`
 
 echo
 echo "Packing $arch ($baseArch) port of $packDir into $packFile"
