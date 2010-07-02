@@ -204,8 +204,6 @@ void epsilonWallFunctionFvPatchScalarField::updateCoeffs()
     const tmp<volScalarField> tk = rasModel.k();
     const volScalarField& k = tk();
 
-    const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
-
     const scalarField& muw = rasModel.mu().boundaryField()[patchI];
 
     const tmp<volScalarField> tmut = rasModel.mut();

@@ -1,0 +1,19 @@
+Source: openfoamdev
+Section: optional
+Priority: optional
+Maintainer: OpenCFD Ltd. <patches@opencfd.co.uk>
+Build-Depends: debhelper (>= 7), quilt
+Standards-Version: 3.8.4
+Homepage: http://www.openfoam.com
+
+Package: openfoamdev
+Architecture: any
+Depends: csh,g++,${shlibs:Depends}, ${misc:Depends},binutils-dev,flex,libscotch-dev,libopenmpi-dev,libxt-dev,openmpi-bin
+Description: OpenFOAM
+ OpenFOAM is a free, open source CFD software package produced by a
+ commercial  company, OpenCFD Ltd. It has a large user base across
+ most areas of engineering and science, from both commercial and academic
+ organisations. OpenFOAM has an extensive range of features to solve
+ anything from complex fluid flows involving chemical reactions, turbulence
+ and heat transfer, to solid dynamics and electromagnetics.
+

@@ -12,7 +12,10 @@ wmakeCheckPwd "$WM_PROJECT_DIR" || {
 ( cd wmake/src && make )
 
 # build ThirdParty sources
-$WM_THIRD_PARTY_DIR/Allwmake
+if [ -d "$WM_THIRD_PARTY_DIR" ]
+then
+    $WM_THIRD_PARTY_DIR/Allwmake
+fi
 
 # build OpenFOAM libraries and applications
 src/Allwmake

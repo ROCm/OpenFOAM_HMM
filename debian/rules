@@ -1,0 +1,109 @@
+#!/usr/bin/make -f
+#-*- makefile -*-
+# After debian/rules from less package
+
+include /usr/share/quilt/quilt.make
+
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+
+# This is the debhelper compatibility version to use.
+
+#DEB_BUILD_GNU_TYPE	= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+#DEB_HOST_GNU_TYPE	= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+#ifneq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
+#CONFARGS= --host=$(DEB_HOST_GNU_TYPE)
+#endif
+#
+#CFLAGS = -Wall -g #-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+#
+#ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+#CFLAGS += -O0
+#else
+#CFLAGS += -O2
+#endif
+
+DEB_BUILD_ARCH_BITS	= $(shell dpkg-architecture -qDEB_BUILD_ARCH_BITS)
+foamArch=
+ifeq ($(DEB_BUILD_ARCH_BITS),64)
+foamArch=linux64GccDPOpt
+else
+foamArch=linuxGccDPOpt
+endif
+
+packageName		= $(shell dh_listpackages)
+installDir		= debian/$(packageName)/opt/$(packageName)
+paraviewInstallDir	= /opt/paraviewopenfoam380
+
+DEB_DH_SHLIBDEPS_ARGS=-L$(installDir)/lib/$(foamArch)
+
+build: patch build-stamp
+build-stamp:
+	dh_testdir
+
+	# Add here commands to compile the package.
+	#./Allwmake
+
+	touch build-stamp
+
+clean: unpatch
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp
+
+	# Add here commands to clean up after the build process.
+	#./Allwclean
+	#set
+
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+
+	# Install source files into debian/.
+	install -d $(installDir)
+	tar cf - `bin/foamSourceFiles .` | (cd $(installDir); tar xfp -)
+	(cd $(installDir); bin/tools/foamConfigurePaths --foamInstall /opt  --projectName $(packageName) --paraviewInstall $(paraviewInstallDir) )
+
+	# Install binary files into debian/.
+	tar cf - `bin/foamBinDirs . $(foamArch)` | (cd $(installDir); tar xfp -)
+
+# Build architecture-independent files here.
+binary-indep: build install
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_installdebconf
+	dh_installdocs
+	dh_installexamples
+	dh_installmenu
+#	dh_installemacsen
+#	dh_installinit
+	dh_installmime
+	dh_installcron
+	#dh_installman debian/lesspipe.1
+	#dh_undocumented
+	dh_installchangelogs
+	#dh_link
+	#dh_strip
+	dh_compress
+	dh_fixperms
+	dh_makeshlibs
+	dh_installdeb
+#	dh_perl 
+	dh_shlibdeps -- --ignore-missing-info	#We depend on vtk libs without info
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+source diff:                                                                  
+	@echo >&2 'source and diff are obsolete - use dpkg-source -b'; false
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary
