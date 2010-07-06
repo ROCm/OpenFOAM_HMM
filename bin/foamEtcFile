@@ -52,10 +52,9 @@ options:
   -list             list the directories to be searched
   -mode <mode>      any combination of u(user), g(group), o(other)
   -prefix <dir>     specify an alternative installation prefix
-                        (default: $WM_PROJECT_INST_DIR)
   -quiet            suppress all normal output
   -version <ver>    specify an alternative OpenFOAM version
-                        (default: $WM_PROJECT_VERSION)
+                    in the form Maj.Min.Rev (eg, 1.7.0)
   -help             print the usage
 
   Locate user/group/shipped file with semantics similar to the
@@ -73,20 +72,64 @@ USAGE
     exit 1
 }
 
+#
+# This script must exist in <foamInstall>/OpenFOAM-<VERSION>/bin/
+# or <foamInstall>/openfoam<VERSION>/bin/ (for the debian version)
+#
+#-------------------------------------------------------------------------------
+
+# the bindir:
+binDir="${0%/*}"
+
+# the project dir:
+projectDir="${binDir%/bin}"
+
+# the prefix dir (same as foamInstall):
+prefixDir="${projectDir%/*}"
+
+# the name used for the project directory
+projectDirName="${projectDir##*/}"
+
+# version number used for debian packaging
+unset versionNum
+
+#
+# handle standard and debian naming convention
+#
+case "$projectDirName" in
+OpenFOAM-*)         # standard naming convention OpenFOAM-<VERSION>
+    version="${projectDirName##OpenFOAM-}"
+    ;;
+
+openfoam[0-9]*)     # debian naming convention 'openfoam<VERSION>'
+    versionNum="${projectDirName##openfoam}"
+    case "$versionNum" in
+    ??)         # convert 2 digit version number to decimal delineated
+        version=$(echo "$versionNum" | sed -e 's@\(.\)\(.\)@\1.\2@')
+        ;;
+    ???)        # convert 3 digit version number to decimal delineated
+        version=$(echo "$versionNum" | sed -e 's@\(.\)\(.\)\(.\)@\1.\2.\3@')
+        ;;
+    ????)       # convert 4 digit version number to decimal delineated
+        version=$(echo "$versionNum" | sed -e 's@\(.\)\(.\)\(.\)\(.\)@\1.\2.\3.\4@')
+        ;;
+    *)          # failback - use current environment setting
+        version="$WM_PROJECT_VERSION"
+        ;;
+    esac
+    ;;
+
+*)
+    echo "Error : unknown/unsupported naming convention"
+    exit 1
+    ;;
+esac
+
 
 # default mode is 'ugo'
 mode=ugo
-
-# default prefix/version correspond to the active values,
-# but could also extract from the $0 value.
-prefix="$WM_PROJECT_INST_DIR"
-version="$WM_PROJECT_VERSION"
-
-# default naming convention is "OpenFOAM-<VERSION>"
-projectNamePrefix="${WM_PROJECT:-OpenFOAM}-"
-
-
 unset listOpt quietOpt
+
 # parse options
 while [ "$#" -gt 0 ]
 do
@@ -96,7 +139,6 @@ do
         ;;
     -l | -list)
         listOpt=true
-        shift
         ;;
     -m | -mode)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
@@ -110,21 +152,29 @@ do
            usage "'$1' option with invalid mode '$mode'"
            ;;
         esac
-        shift 2
+        shift
         ;;
     -p | -prefix)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-        prefix="$2"
-        shift 2
+        prefixDir="$2"
+        shift
         ;;
     -q | -quiet)
         quietOpt=true
-        shift
         ;;
     -v | -version)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         version="$2"
-        shift 2
+        # convert x.y.z -> xyz version (if installation looked like debian)
+        if [ -n "$versionNum" ]
+        then
+            versionNum=$(echo "$version" | sed -e 's@\.@@g')
+        fi
+        shift
+        ;;
+    --)
+        shift
+        break
         ;;
     -*)
         usage "unknown option: '$*'"
@@ -133,23 +183,16 @@ do
         break
         ;;
     esac
+    shift
 done
 
 
-#
-# handle standard and debian naming convention
-#
-case "$version" in
-OpenFOAM-*)         # standard naming convention OpenFOAM-<VERSION>
-    projectNamePrefix="OpenFOAM-"
-    version="${version##OpenFOAM-}"
-    ;;
-
-openfoam[0-9]*)     # debian naming convention 'openfoam<VERSION>'
-    projectNamePrefix="openfoam"
-    version="${version##openfoam}"
-    ;;
-esac
+# debugging:
+# echo "Installed locations:"
+# for i in projectDir prefixDir projectDirName version versionNum
+# do
+#     eval echo "$i=\$$i"
+# done
 
 
 # Save the essential bits of information:
@@ -167,14 +210,21 @@ esac
 
 case "$mode" in
 *g*)  # group
-    dirList="$dirList $prefix/site/$version"
-    dirList="$dirList $prefix/site"
+    dirList="$dirList $prefixDir/site/$version"
+    dirList="$dirList $prefixDir/site"
     ;;
 esac
 
 case "$mode" in
 *o*)  # other (shipped)
-    dirList="$dirList $prefix/$projectNamePrefix$version/etc"
+    if [ -n "$versionNum" ]
+    then
+        # debian packaging
+        dirList="$dirList $prefixDir/openfoam$versionNum/etc"
+    else
+        # standard packaging
+        dirList="$dirList $prefixDir/${WM_PROJECT:-OpenFOAM}-$version/etc"
+    fi
     ;;
 esac
 set -- $dirList

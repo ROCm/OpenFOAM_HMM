@@ -35,10 +35,8 @@
 #     mpirun -np <nProcs> \
 #         foamExec -v <foamVersion> <foamCommand> ... -parallel
 #
-#     Note: - not consistent with foamEtcFiles - does not search 'site'
-#             directories
-#           - version switch -v will not work with the debian naming
-#             openfoamXXX
+# SeeAlso
+#    foamEtcFile
 #------------------------------------------------------------------------------
 usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
@@ -48,7 +46,7 @@ Usage: ${0##*/} [OPTION] <application> ...
 
 options:
   -version <ver>    specify an alternative OpenFOAM version
-                    (default: taken from \$0 parameter)
+                    pass through to foamEtcFile
   -help             this usage
 
 * run a particular OpenFOAM version of <application>
@@ -57,54 +55,14 @@ USAGE
     exit 1
 }
 
+#
 # This script must exist in <foamInstall>/OpenFOAM-<VERSION>/bin/
 # or <foamInstall>/openfoam<VERSION>/bin/ (for the debian version)
 #
+# foamEtcFile is found in the same directory
+#-------------------------------------------------------------------------------
 
-# the bindir:
-binDir="${0%/*}"
-
-# the project dir:
-projectDir="${binDir%/bin}"
-export WM_PROJECT_DIR="$projectDir"
-
-# the prefix dir (same as foamInstall):
-prefixDir="${projectDir%/*}"
-foamInstall="$prefixDir"
-
-# the name used for the project directory
-projectDirName="${projectDir##*/}"
-
-#
-# handle standard and debian naming convention
-#
-case "$projectDirName" in
-OpenFOAM-*)         # standard naming convention OpenFOAM-<VERSION>
-    projectNamePrefix="OpenFOAM-"
-    version="${projectDirName##OpenFOAM-}"
-    versionNum=$version
-    ;;
-
-openfoam[0-9]*)     # debian naming convention 'openfoam<VERSION>'
-    projectNamePrefix="openfoam"
-    versionNum="${projectDirName##openfoam}"
-    version=$WM_PROJECT_DIR
-    ;;
-*)
-    echo "Error : unknown/unsupported naming convention"
-    exit 1
-    ;;
-esac
-
-
-# debugging:
-# echo "Installed locations:"
-# for i in projectDir prefixDir foamInstall projectDirName version versionNum
-# do
-#     eval echo "$i=\$$i"
-# done
-
-
+unset etcOpts
 # parse options
 while [ "$#" -gt 0 ]
 do
@@ -112,11 +70,10 @@ do
     -h | -help)
         usage
         ;;
-    -v | version)
+    -v | -version)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-        version=$2
-        versionNum=$version
-        shift 2
+        etcOpts="-version $2"
+        shift
         ;;
     --)
         shift
@@ -129,14 +86,13 @@ do
         break
         ;;
     esac
+    shift
 done
 
 [ "$#" -ge 1 ] || usage "no application specified"
 
-
 # find OpenFOAM settings (bashrc)
-foamDotFile="$($binDir/foamEtcFile -version $version bashrc)"
-[ $? -eq 0 ] || {
+foamDotFile="$(${0%/*}/foamEtcFile $etcOpts bashrc)" || {
     echo "Error : bashrc file could not be found for OpenFOAM-$version" 1>&2
     exit 1
 }
