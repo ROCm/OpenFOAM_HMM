@@ -35,6 +35,10 @@
 #     mpirun -np <nProcs> \
 #         foamExec -v <foamVersion> <foamCommand> ... -parallel
 #
+#     Note: - not consistent with foamEtcFiles - does not search 'site'
+#             directories
+#           - version switch -v will not work with the debian naming
+#             openfoamXXX
 #------------------------------------------------------------------------------
 usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
@@ -54,7 +58,7 @@ USAGE
 }
 
 # This script must exist in <foamInstall>/OpenFOAM-<VERSION>/bin/
-# or <foamInstall>/openfoamVERSION/bin/
+# or <foamInstall>/openfoam<VERSION>/bin/ (for the debian version)
 #
 
 # the bindir:
@@ -71,12 +75,31 @@ foamInstall="$prefixDir"
 # the name used for the project directory
 projectDirName="${projectDir##*/}"
 
-# version from OpenFOAM-VERSION (normal) or openfoamVERSION (debian)
-version=$(echo $projectDirName | sed -e 's@^openfoam-*@@i')
+#
+# handle standard and debian naming convention
+#
+case "$projectDirName" in
+OpenFOAM-*)         # standard naming convention OpenFOAM-<VERSION>
+    projectNamePrefix="OpenFOAM-"
+    version="${projectDirName##OpenFOAM-}"
+    versionNum=$version
+    ;;
+
+openfoam[0-9]*)     # debian naming convention 'openfoam<VERSION>'
+    projectNamePrefix="openfoam"
+    versionNum="${projectDirName##openfoam}"
+    version=$WM_PROJECT_DIR
+    ;;
+*)
+    echo "Error : unknown/unsupported naming convention"
+    exit 1
+    ;;
+esac
+
 
 # debugging:
 # echo "Installed locations:"
-# for i in projectDir prefixDir foamInstall projectDirName version
+# for i in projectDir prefixDir foamInstall projectDirName version versionNum
 # do
 #     eval echo "$i=\$$i"
 # done
@@ -92,6 +115,7 @@ do
     -v | version)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         version=$2
+        versionNum=$version
         shift 2
         ;;
     --)
