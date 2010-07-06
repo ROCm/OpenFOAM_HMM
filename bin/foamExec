@@ -43,8 +43,9 @@ usage() {
 Usage: ${0##*/} [OPTION] <application> ...
 
 options:
-  -v ver        specify OpenFOAM version
-  -help         this usage
+  -version <ver>    specify an alternative OpenFOAM version
+                    (default: taken from \$0 parameter)
+  -help             this usage
 
 * run a particular OpenFOAM version of <application>
 
@@ -52,17 +53,34 @@ USAGE
     exit 1
 }
 
+# This script must exist in <foamInstall>/OpenFOAM-<VERSION>/bin/
+# or <foamInstall>/openfoamVERSION/bin/
+#
 
-# This script should exist in <foamInstall>/OpenFOAM-<VERSION>/bin/
-# extract the <foamInstall> and <version> elements
-# using a function preserves the command args
-getDefaults() {
-    set -- $(echo $0 | sed -e 's@/OpenFOAM-\([^/]*\)/bin/[^/]*$@ \1@')
-    foamInstall=$1
-    version=$2
-}
+# the bindir:
+binDir="${0%/*}"
 
-getDefaults
+# the project dir:
+projectDir="${binDir%/bin}"
+export WM_PROJECT_DIR="$projectDir"
+
+# the prefix dir (same as foamInstall):
+prefixDir="${projectDir%/*}"
+foamInstall="$prefixDir"
+
+# the name used for the project directory
+projectDirName="${projectDir##*/}"
+
+# version from OpenFOAM-VERSION (normal) or openfoamVERSION (debian)
+version=$(echo $projectDirName | sed -e 's@^openfoam-*@@i')
+
+# debugging:
+# echo "Installed locations:"
+# for i in projectDir prefixDir foamInstall projectDirName version
+# do
+#     eval echo "$i=\$$i"
+# done
+
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -71,10 +89,10 @@ do
     -h | -help)
         usage
         ;;
-    -v)
-        shift
-        version=$1
-        shift
+    -v | version)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        version=$2
+        shift 2
         ;;
     --)
         shift
@@ -89,41 +107,21 @@ do
     esac
 done
 
-if [ "$#" -lt 1 ]
-then
-    usage "no application specified"
-fi
-
-unset foamDotFile
-
-# Check user-specific OpenFOAM bashrc file
-foamDotFile="$HOME/.OpenFOAM/$version/bashrc"
-if [ -f $foamDotFile ]
-then
-    . $foamDotFile
-    foamDotFile=okay
-else
-    # Use the FOAM_INST_DIR variable for locating the installed version
-    for FOAM_INST_DIR in $foamInstall $WM_PROJECT_INST_DIR
-    do
-        foamDotFile="$FOAM_INST_DIR/OpenFOAM-$version/etc/bashrc"
-        if [ -f $foamDotFile ]
-        then
-            . $foamDotFile
-            foamDotFile=okay
-            break
-        fi
-    done
-fi
+[ "$#" -ge 1 ] || usage "no application specified"
 
 
-if [ "$foamDotFile" != okay ]
-then
+# find OpenFOAM settings (bashrc)
+foamDotFile="$($binDir/foamEtcFile -version $version bashrc)"
+[ $? -eq 0 ] || {
     echo "Error : bashrc file could not be found for OpenFOAM-$version" 1>&2
     exit 1
-fi
+}
 
-# Pass on the rest of the arguments
-exec $*
+# preserve arguments (can otherwise get lost when sourcing the foamDotFile)
+args="$*"
+. $foamDotFile
+
+# execute
+exec $args
 
 #------------------------------------------------------------------------------
