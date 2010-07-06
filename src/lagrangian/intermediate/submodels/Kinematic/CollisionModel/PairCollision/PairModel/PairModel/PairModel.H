@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     PairModel.C
-    NewPairModel.C
+    PairModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
