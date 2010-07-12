@@ -1,4 +1,4 @@
-Source: openfoamdev
+Source: openfoam170
 Section: optional
 Priority: optional
 Maintainer: OpenCFD Ltd. <patches@opencfd.co.uk>
@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 7), quilt
 Standards-Version: 3.8.4
 Homepage: http://www.openfoam.com
 
-Package: openfoamdev
+Package: openfoam170
 Architecture: any
 Depends: csh,g++,${shlibs:Depends}, ${misc:Depends},binutils-dev,flex,libscotch-dev,libopenmpi-dev,libxt-dev,openmpi-bin
 Description: OpenFOAM

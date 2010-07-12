@@ -24,7 +24,7 @@ case "$1" in
        echo ""
        echo "** To use OpenFOAM please add"
        echo "**"
-       echo "**    . /opt/openfoamdev/etc/bashrc"
+       echo "**    . /opt/openfoam170/etc/bashrc"
        echo "**"
        echo "** To your ~/.bashrc"
        echo ""
