@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -57,7 +57,7 @@ directionalSolidThermoCoeffs
     cpValues            (1700 1700);
 
     KValues             ((40 40 40) (40 40 40));
-    
+
     coordinateSystem
     {
         origin  (-0.000062 0.000019 0.000039);
