@@ -208,6 +208,13 @@ bool Foam::blockMesh::readBoundary
     {
         const entry& patchInfo = patchesInfo[patchI];
 
+        if (!patchInfo.isDict())
+        {
+            FatalIOErrorIn("blockMesh::readBoundary(..)", meshDescription)
+                << "Entry " << patchInfo << " in boundary section is not a"
+                << " valid dictionary." << exit(FatalIOError);
+        }
+
         // Construct dictionary and add name
         patchDicts.set(patchI, new dictionary(patchInfo.dict()));
         patchDicts[patchI].set("name", patchInfo.keyword());
