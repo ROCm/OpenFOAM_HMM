@@ -549,8 +549,14 @@ public:
 
             //- Find deepest node (as parent+octant) containing point. Starts
             //  off from starting index in nodes_ (use 0 to start from top)
-            //  Use getNode, getOctant to extract info.
+            //  Use getNode and getOctant to extract info, or call findIndices.
             labelBits findNode(const label nodeI, const point&) const;
+
+            //- Find shape containing point in tree
+            label find(const point&) const;
+
+            //- Find the shape indices that occupy the result of findNode
+            labelList findIndices(const point&) const;
 
             //- Determine type (inside/outside/mixed) for point. unknown if
             //  cannot be determined (e.g. non-manifold surface)

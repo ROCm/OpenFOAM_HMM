@@ -145,6 +145,16 @@ bool Foam::treeDataCell::overlaps
 }
 
 
+bool Foam::treeDataCell::contains
+(
+    const label index,
+    const point& sample
+) const
+{
+    return mesh_.pointInCell(sample, cellLabels_[index]);
+}
+
+
 // Calculate nearest point to sample. Updates (if any) nearestDistSqr, minIndex,
 // nearestPoint.
 void Foam::treeDataCell::findNearest

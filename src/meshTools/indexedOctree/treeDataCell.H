@@ -142,6 +142,13 @@ public:
                 const treeBoundBox& sampleBb
             ) const;
 
+            //- Does shape at index contain sample
+            bool contains
+            (
+                const label index,
+                const point& sample
+            ) const;
+
             //- Calculates nearest (to sample) point in shape.
             //  Returns actual point and distance (squared)
             void findNearest

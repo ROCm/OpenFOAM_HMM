@@ -103,6 +103,11 @@ public:
 
         // Access
 
+            const labelList& edgeLabels() const
+            {
+                return edgeLabels_;
+            }
+
             label size() const
             {
                 return edgeLabels_.size();

@@ -2495,6 +2495,59 @@ Foam::labelBits Foam::indexedOctree<Type>::findNode
 }
 
 
+template <class Type>
+Foam::label Foam::indexedOctree<Type>::find(const point& sample) const
+{
+    labelBits index = findNode(0, sample);
+
+    const node& nod = nodes_[getNode(index)];
+
+    labelBits contentIndex = nod.subNodes_[getOctant(index)];
+
+    // Need to check for the presence of content, in-case the node is empty
+    if (isContent(contentIndex))
+    {
+        labelList indices = contents_[getContent(contentIndex)];
+
+        forAll(indices, elemI)
+        {
+            label shapeI = indices[elemI];
+
+            if (shapes_.contains(shapeI, sample))
+            {
+                return shapeI;
+            }
+        }
+    }
+
+    return -1;
+}
+
+
+template <class Type>
+Foam::labelList Foam::indexedOctree<Type>::findIndices
+(
+    const point& sample
+) const
+{
+    labelBits index = findNode(0, sample);
+
+    const node& nod = nodes_[getNode(index)];
+
+    labelBits contentIndex = nod.subNodes_[getOctant(index)];
+
+    // Need to check for the presence of content, in-case the node is empty
+    if (isContent(contentIndex))
+    {
+        return contents_[getContent(contentIndex)];
+    }
+    else
+    {
+        return labelList(0);
+    }
+}
+
+
 // Determine type (inside/outside/mixed) per node.
 template <class Type>
 typename Foam::indexedOctree<Type>::volumeType
