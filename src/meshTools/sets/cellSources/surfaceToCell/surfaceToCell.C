@@ -29,6 +29,7 @@ License
 #include "triSurface.H"
 #include "triSurfaceSearch.H"
 #include "cellClassification.H"
+#include "cpuTime.H"
 
 #include "addToRunTimeSelectionTable.H"
 

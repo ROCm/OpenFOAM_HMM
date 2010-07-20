@@ -32,6 +32,9 @@ License
 #include "Random.H"
 #include "treeDataFace.H"
 #include "indexedOctree.H"
+#include "polyMesh.H"
+#include "polyPatch.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

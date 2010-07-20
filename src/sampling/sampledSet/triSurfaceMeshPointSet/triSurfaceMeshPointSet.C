@@ -29,6 +29,7 @@ License
 #include "polyMesh.H"
 #include "addToRunTimeSelectionTable.H"
 #include "triSurfaceMesh.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
