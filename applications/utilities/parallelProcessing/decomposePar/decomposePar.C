@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,6 +41,9 @@ Usage
 
     @param -copyUniform \n
     Copy any @a uniform directories too.
+
+    @param -constant \n
+    Override controlDict settings and use constant directory.
 
     @param -fields \n
     Use existing geometry decomposition and convert fields only.
@@ -119,6 +122,11 @@ int main(int argc, char *argv[])
         "ifRequired",
         "only decompose geometry if the number of domains has changed"
     );
+    argList::addBoolOption
+    (
+        "constant",
+        "include the 'constant/' dir in the times list"
+    );
 
     #include "setRootCase.H"
 
@@ -138,6 +146,20 @@ int main(int argc, char *argv[])
     bool ifRequiredDecomposition = args.optionFound("ifRequired");
 
     #include "createTime.H"
+
+    // Allow -constant to override controlDict settings.
+    if (args.optionFound("constant"))
+    {
+        instantList timeDirs = timeSelector::select0(runTime, args);
+        if (runTime.timeName() != runTime.constant())
+        {
+            FatalErrorIn(args.executable())
+                << "No '" << runTime.constant() << "' time present." << endl
+                << "Valid times are " << runTime.times()
+                << exit(FatalError);
+        }
+    }
+
 
     Info<< "Time = " << runTime.timeName() << endl;
 
