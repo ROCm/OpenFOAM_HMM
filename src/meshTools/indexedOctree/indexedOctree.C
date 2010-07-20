@@ -1046,7 +1046,8 @@ Foam::point Foam::indexedOctree<Type>::pushPointIntoFace
 }
 
 
-//// Takes a bb and a point on the outside of the bb. Checks if on multiple faces
+//// Takes a bb and a point on the outside of the bb. Checks if on multiple
+// faces
 //// and if so perturbs point so it is only on one face.
 //template <class Type>
 //void Foam::indexedOctree<Type>::checkMultipleFaces
