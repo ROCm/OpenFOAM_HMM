@@ -70,10 +70,10 @@ fi
 fileList=$(git diff-index --name-only $against --)
 unset badFiles
 
-# join badFiles with this
-NL=$'\n    '
+# join badFiles with this amount of space
+Indent="    "
 
-showBadFiles()
+reportBadFiles()
 {
     if [ -n "$badFiles" ]
     then
@@ -81,7 +81,8 @@ showBadFiles()
         echo '-----------------------' 1>&2
         echo "$@" 1>&2
         echo '' 1>&2
-        echo "File(s):$badFiles" 1>&2
+        echo "File(s):" 1>&2
+        echo "$badFiles" 1>&2
         echo ''  1>&2
         exit 1
     fi
@@ -92,27 +93,27 @@ showBadFiles()
 #
 checkIllegalCode()
 {
-    TAB=$'\t'
-    BAD=("[N]abla" "$TAB")
-    BADmsg=("nabla" "<TAB>")
-    n=${#BAD[@]};
+    badWords=("[N]abla" $'\t')
+    badMsg=("nabla" "<TAB>")
+    nWords=${#badWords[@]};
 
-    unset errorType
-    for (( i = 0; i < $n; i++ ))
+    for (( i = 0; i < $nWords; i++ ))
     do
+        illegal="${badWords[$i]}"
+
+        badFiles=$(
         for f in $fileList
         do
-            illegalWord="${BAD[$i]}"
-            if git grep -q --cached "$illegalWord" -- "$f"
-            then
-                errorType="${BADmsg[$i]}"
-                badFiles="$badFiles$NL$f"
-                break 2
-            fi
+            git grep -q --cached -e "$illegal" -- "$f" && \
+                echo "$Indent$f"
         done
-    done
+        )
 
-    showBadFiles "Remove/correct '$errorType' references before pushing"
+        if [ -n "$badFiles" ]
+        then
+            reportBadFiles "Remove/correct bad '${badMsg[$i]}' references"
+        fi
+    done
 }
 
 
@@ -123,61 +124,63 @@ checkCopyright()
 {
     year=$(date +%Y)
 
+    badFiles=$(
     for f in $fileList
     do
-        present=`git grep --cached Copyright -- "$f" | grep OpenCFD`
-        if [ -n "$present" ]
+        copyright=$(git grep --cached -e Copyright -- "$f" | grep OpenCFD)
+        if [ -n "$copyright" ]
         then
-            echo "$present" | grep -q "$year" || badFiles="$badFiles$NL$f"
+            echo "$copyright" | grep -q "$year" || echo "$Indent$f"
         fi
     done
+    )
 
-    showBadFiles "Update copyright year before pushing, e.g. XXXX-$year"
+    reportBadFiles "Update copyright year, e.g. XXXX-$year"
 }
 
 
 #
 # limit line length to 80-columns, except C++ comment lines
+# parses
+#        path/fileName:<lineNr>:   contents
+# and extracts line numbers for non-comment lines
 #
 checkLineLength()
 {
+    badFiles=$(
     for f in $fileList
     do
         # limit to *.[CH] files
         case "$f" in
-        *.[CH])
-            ## detect long lines, but ignore C++ comment-lines
-            ## extract line numbers
-            longLines=$(git grep -n --cached ".\{81,\}" -- "$f" |
-                sed -ne '\@^[^:]*:[^:]*: *//.*@b; s@^[^:]*:\([0-9]*\):.*@\1@p' |
+        (*.[CH])
+            lines=$(git grep -n --cached -e ".\{81,\}" -- "$f" |
+                sed -n \
+                    -e '\@^[^:]*:[^:]*: *//.*@b' \
+                    -e 's@^[^:]*:\([0-9]*\):.*@\1@p' |
                 tr '\n' ' '
             )
-            if [ -n "$longLines" ]
-            then
-                badFiles="$badFiles$NL$f -- lines: $longLines"
-            fi
+            [ -n "$lines" ] && echo "$Indent$f -- lines: $lines"
         ;;
         esac
     done
-
-    showBadFiles "Limit code to 80 columns before pushing"
+    )
+    reportBadFiles "Limit code to 80 columns before pushing"
 }
 
 
 # do all checks
 #~~~~~~~~~~~~~~
 
-# use builtin whitespace checks to avoid trailing space
+# builtin whitespace check to avoid trailing space, including CR-LF endings
 bad=$(git diff-index --check --cached $against --) || die "$bad"
 
-# check for illegal code, e.g. <TAB>, nabla etc
+# check for illegal code, e.g. <TAB>, etc
 checkIllegalCode
 
-# if OpenCFD copyright exists, ensure it contains correct year
+# ensure OpenCFD copyright contains correct year
 checkCopyright
 
-# ensure code conforms to 80 col max
+# ensure code conforms to 80 columns max
 checkLineLength
-
 
 #------------------------------------------------------------------------------
