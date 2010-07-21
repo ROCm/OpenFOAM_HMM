@@ -93,8 +93,8 @@ showBadFiles()
 checkIllegalCode()
 {
     TAB=$'\t'
-    BAD=("Nabla" "$TAB")
-    BADmsg=("Nabla" "<TAB>")
+    BAD=("[N]abla" "$TAB")
+    BADmsg=("nabla" "<TAB>")
     n=${#BAD[@]};
 
     unset errorType
@@ -170,7 +170,7 @@ checkLineLength()
 # use builtin whitespace checks to avoid trailing space
 bad=$(git diff-index --check --cached $against --) || die "$bad"
 
-# check for illegal code, e.g. <TAB>, Nabla etc
+# check for illegal code, e.g. <TAB>, nabla etc
 checkIllegalCode
 
 # if OpenCFD copyright exists, ensure it contains correct year
