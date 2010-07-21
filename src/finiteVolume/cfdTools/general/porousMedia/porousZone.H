@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -110,8 +110,8 @@ class porousZone
 {
     // Private data
 
-        //- Name of this zone
-        word name_;
+        //- Name of this zone, or a regular expression
+        keyType key_;
 
         //- Reference to the finite volume mesh this zone is part of
         const fvMesh& mesh_;
@@ -119,8 +119,8 @@ class porousZone
         //- Dictionary containing the parameters
         dictionary dict_;
 
-        //- Cell zone ID
-        label cellZoneID_;
+        //- Cell zone Ids
+        labelList cellZoneIds_;
 
         //- Coordinate system used for the zone (Cartesian)
         coordinateSystem coordSys_;
@@ -159,7 +159,6 @@ class porousZone
         void addPowerLawResistance
         (
             scalarField& Udiag,
-            const labelList& cells,
             const scalarField& V,
             const RhoFieldType& rho,
             const vectorField& U
@@ -171,7 +170,6 @@ class porousZone
         (
             scalarField& Udiag,
             vectorField& Usource,
-            const labelList& cells,
             const scalarField& V,
             const RhoFieldType& rho,
             const scalarField& mu,
@@ -184,7 +182,6 @@ class porousZone
         void addPowerLawResistance
         (
             tensorField& AU,
-            const labelList& cells,
             const RhoFieldType& rho,
             const vectorField& U
         ) const;
@@ -194,7 +191,6 @@ class porousZone
         void addViscousInertialResistance
         (
             tensorField& AU,
-            const labelList& cells,
             const RhoFieldType& rho,
             const scalarField& mu,
             const vectorField& U
@@ -213,7 +209,7 @@ public:
     // Constructors
 
         //- Construct from components
-        porousZone(const word& name, const fvMesh&, const dictionary&);
+        porousZone(const keyType& key, const fvMesh&, const dictionary&);
 
         //- Return clone
         autoPtr<porousZone> clone() const
@@ -237,10 +233,10 @@ public:
 
             autoPtr<porousZone> operator()(Istream& is) const
             {
-                word name(is);
+                keyType key(is);
                 dictionary dict(is);
 
-                return autoPtr<porousZone>(new porousZone(name, mesh_, dict));
+                return autoPtr<porousZone>(new porousZone(key, mesh_, dict));
             }
         };
 
@@ -255,9 +251,9 @@ public:
         // Access
 
             //- cellZone name
-            const word& zoneName() const
+            const keyType& zoneName() const
             {
-                return name_;
+                return key_;
             }
 
             //- Return mesh
@@ -266,10 +262,10 @@ public:
                 return mesh_;
             }
 
-            //- cellZone number
-            label zoneId() const
+            //- cellZone numbers
+            const labelList& zoneIds() const
             {
-                return cellZoneID_;
+                return cellZoneIds_;
             }
 
             //- dictionary values used for the porousZone
