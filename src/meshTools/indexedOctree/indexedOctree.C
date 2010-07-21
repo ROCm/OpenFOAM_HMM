@@ -2497,7 +2497,7 @@ Foam::labelBits Foam::indexedOctree<Type>::findNode
 
 
 template <class Type>
-Foam::label Foam::indexedOctree<Type>::find(const point& sample) const
+Foam::label Foam::indexedOctree<Type>::findInside(const point& sample) const
 {
     labelBits index = findNode(0, sample);
 
@@ -2526,7 +2526,7 @@ Foam::label Foam::indexedOctree<Type>::find(const point& sample) const
 
 
 template <class Type>
-Foam::labelList Foam::indexedOctree<Type>::findIndices
+const Foam::labelList& Foam::indexedOctree<Type>::findIndices
 (
     const point& sample
 ) const
@@ -2544,7 +2544,7 @@ Foam::labelList Foam::indexedOctree<Type>::findIndices
     }
     else
     {
-        return labelList(0);
+        return emptyList<label>();
     }
 }
 
