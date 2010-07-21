@@ -1,4 +1,4 @@
-CPP        = cpp -DICC_IA64_PREFETCH
+CPP        = /lib/cpp -traditional-cpp $(GFLAGS) -DICC_IA64_PREFETCH
 
 GLIBS      = -liberty
 
