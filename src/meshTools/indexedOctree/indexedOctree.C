@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1046,7 +1046,8 @@ Foam::point Foam::indexedOctree<Type>::pushPointIntoFace
 }
 
 
-//// Takes a bb and a point on the outside of the bb. Checks if on multiple faces
+//// Takes a bb and a point on the outside of the bb. Checks if on multiple
+// faces
 //// and if so perturbs point so it is only on one face.
 //template <class Type>
 //void Foam::indexedOctree<Type>::checkMultipleFaces
@@ -2491,6 +2492,59 @@ Foam::labelBits Foam::indexedOctree<Type>::findNode
     {
         // Empty. Return treenode+octant
         return nodePlusOctant(nodeI, octant);
+    }
+}
+
+
+template <class Type>
+Foam::label Foam::indexedOctree<Type>::findInside(const point& sample) const
+{
+    labelBits index = findNode(0, sample);
+
+    const node& nod = nodes_[getNode(index)];
+
+    labelBits contentIndex = nod.subNodes_[getOctant(index)];
+
+    // Need to check for the presence of content, in-case the node is empty
+    if (isContent(contentIndex))
+    {
+        labelList indices = contents_[getContent(contentIndex)];
+
+        forAll(indices, elemI)
+        {
+            label shapeI = indices[elemI];
+
+            if (shapes_.contains(shapeI, sample))
+            {
+                return shapeI;
+            }
+        }
+    }
+
+    return -1;
+}
+
+
+template <class Type>
+const Foam::labelList& Foam::indexedOctree<Type>::findIndices
+(
+    const point& sample
+) const
+{
+    labelBits index = findNode(0, sample);
+
+    const node& nod = nodes_[getNode(index)];
+
+    labelBits contentIndex = nod.subNodes_[getOctant(index)];
+
+    // Need to check for the presence of content, in-case the node is empty
+    if (isContent(contentIndex))
+    {
+        return contents_[getContent(contentIndex)];
+    }
+    else
+    {
+        return emptyList<label>();
     }
 }
 

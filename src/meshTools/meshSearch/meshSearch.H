@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,7 @@ SourceFiles
 #define meshSearch_H
 
 #include "pointIndexHit.H"
-#include "passiveParticleCloud.H"
+#include "pointField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,7 +48,6 @@ namespace Foam
 class polyMesh;
 class treeDataCell;
 class treeDataFace;
-class treeDataPoint;
 template<class Type> class indexedOctree;
 
 /*---------------------------------------------------------------------------*\
@@ -65,14 +64,10 @@ class meshSearch
         //- Whether to use face decomposition for all geometric tests
         const bool faceDecomp_;
 
-        //- Dummy cloud to put particles on for tracking.
-        passiveParticleCloud cloud_;
-
         //- demand driven octrees
 
-        mutable indexedOctree<treeDataFace>* boundaryTreePtr_;
-        mutable indexedOctree<treeDataCell>* cellTreePtr_;
-        mutable indexedOctree<treeDataPoint>* cellCentreTreePtr_;
+        mutable autoPtr<indexedOctree<treeDataFace> > boundaryTreePtr_;
+        mutable autoPtr<indexedOctree<treeDataCell> > cellTreePtr_;
 
 
     // Private Member Functions
@@ -112,8 +107,12 @@ class meshSearch
             //- cell containing location. Linear search.
             label findCellLinear(const point&) const;
 
+            //- walk from seed. Does not 'go around' boundary, just returns
+            //  last cell before boundary.
+            label findCellWalk(const point&, const label) const;
 
-        // Cells
+
+        // Faces
 
             label findNearestFaceTree(const point&) const;
 
@@ -187,9 +186,6 @@ public:
 
             //- Get (demand driven) reference to octree holding all cells
             const indexedOctree<treeDataCell>& cellTree() const;
-
-            //- Get (demand driven) reference to octree holding all cell centres
-            const indexedOctree<treeDataPoint>& cellCentreTree() const;
 
 
         // Queries
