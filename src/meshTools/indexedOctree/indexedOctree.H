@@ -552,11 +552,12 @@ public:
             //  Use getNode and getOctant to extract info, or call findIndices.
             labelBits findNode(const label nodeI, const point&) const;
 
-            //- Find shape containing point in tree
-            label find(const point&) const;
+            //- Find shape containing point. Only implemented for certain
+            //  shapes.
+            label findInside(const point&) const;
 
             //- Find the shape indices that occupy the result of findNode
-            labelList findIndices(const point&) const;
+            const labelList& findIndices(const point&) const;
 
             //- Determine type (inside/outside/mixed) for point. unknown if
             //  cannot be determined (e.g. non-manifold surface)

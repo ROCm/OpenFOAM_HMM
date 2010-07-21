@@ -745,7 +745,7 @@ Foam::label Foam::meshSearch::findCell
     {
         if (useTreeSearch)
         {
-            return cellTree().find(location);
+            return cellTree().findInside(location);
         }
         else
         {
