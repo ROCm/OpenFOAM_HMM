@@ -70,10 +70,13 @@ fi
 fileList=$(git diff-index --name-only $against --)
 unset badFiles
 
-# join badFiles with this amount of space
+# join list of files with this amount of space
 Indent="    "
 
-reportBadFiles()
+#
+# report bad files and die if there are any
+#
+dieOnBadFiles()
 {
     if [ -n "$badFiles" ]
     then
@@ -88,14 +91,15 @@ reportBadFiles()
     fi
 }
 
+
 #
 # check for bad characters or strings
 #
 checkIllegalCode()
 {
     badWords=("[N]abla" $'\t')
-    badMsg=("nabla" "<TAB>")
-    nWords=${#badWords[@]};
+    badMsg=("NABLA" "<TAB>")
+    nWords=${#badWords[@]}
 
     for (( i = 0; i < $nWords; i++ ))
     do
@@ -104,15 +108,17 @@ checkIllegalCode()
         badFiles=$(
         for f in $fileList
         do
-            git grep -q --cached -e "$illegal" -- "$f" && \
-                echo "$Indent$f"
+            # parse line numbers from this:
+            #        path/fileName:<lineNr>:   contents
+            lines=$(git grep --cached -n -e "$illegal" -- "$f" |
+                sed -e 's@^[^:]*:\([0-9]*\):.*@\1@' |
+                tr '\n' ' '
+            )
+            [ -n "$lines" ] && echo "$Indent$f -- lines: $lines"
         done
         )
 
-        if [ -n "$badFiles" ]
-        then
-            reportBadFiles "Remove/correct bad '${badMsg[$i]}' references"
-        fi
+        dieOnBadFiles "Remove/correct bad '${badMsg[$i]}' references"
     done
 }
 
@@ -127,23 +133,25 @@ checkCopyright()
     badFiles=$(
     for f in $fileList
     do
-        copyright=$(git grep --cached -e Copyright -- "$f" | grep OpenCFD)
-        if [ -n "$copyright" ]
-        then
-            echo "$copyright" | grep -q "$year" || echo "$Indent$f"
-        fi
+        # parse line numbers from this:
+        #        path/fileName:<lineNr>:   contents
+        # for Copyright lines without the current year
+        lines=$(git grep --cached -n -e Copyright -- "$f" |
+            sed -n \
+                -e "/OpenCFD/{ /$year/b;" \
+                -e 's@^[^:]*:\([0-9]*\):.*@\1@p }' |
+            tr '\n' ' '
+        )
+        [ -n "$lines" ] && echo "$Indent$f -- lines: $lines"
     done
     )
 
-    reportBadFiles "Update copyright year, e.g. XXXX-$year"
+    dieOnBadFiles "Update copyright year, e.g. XXXX-$year"
 }
 
 
 #
-# limit line length to 80-columns, except C++ comment lines
-# parses
-#        path/fileName:<lineNr>:   contents
-# and extracts line numbers for non-comment lines
+# limit line length to 80-columns
 #
 checkLineLength()
 {
@@ -153,7 +161,36 @@ checkLineLength()
         # limit to *.[CH] files
         case "$f" in
         (*.[CH])
-            lines=$(git grep -n --cached -e ".\{81,\}" -- "$f" |
+            # parse line numbers from this:
+            #        path/fileName:<lineNr>:   contents
+            lines=$(git grep --cached -n -e ".\{81,\}" -- "$f" |
+                sed -e 's@^[^:]*:\([0-9]*\):.*@\1@' |
+                tr '\n' ' '
+            )
+            [ -n "$lines" ] && echo "$Indent$f -- lines: $lines"
+        ;;
+        esac
+    done
+    )
+
+    dieOnBadFiles "Limit code to 80 columns before pushing"
+}
+
+
+#
+# limit line length to 80-columns, except C++ comment lines
+#
+checkLineLengthNonComments()
+{
+    badFiles=$(
+    for f in $fileList
+    do
+        # limit to *.[CH] files
+        case "$f" in
+        (*.[CH])
+            # parse line numbers from this (strip comment lines):
+            #        path/fileName:<lineNr>:   contents
+            lines=$(git grep --cached -n -e ".\{81,\}" -- "$f" |
                 sed -n \
                     -e '\@^[^:]*:[^:]*: *//.*@b' \
                     -e 's@^[^:]*:\([0-9]*\):.*@\1@p' |
@@ -164,15 +201,17 @@ checkLineLength()
         esac
     done
     )
-    reportBadFiles "Limit code to 80 columns before pushing"
+
+    dieOnBadFiles "Limit code to 80 columns before pushing"
 }
 
 
+
 # do all checks
-#~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~
 
 # builtin whitespace check to avoid trailing space, including CR-LF endings
-bad=$(git diff-index --check --cached $against --) || die "$bad"
+bad=$(git diff-index --cached --check $against --) || die "$bad"
 
 # check for illegal code, e.g. <TAB>, etc
 checkIllegalCode
@@ -183,4 +222,6 @@ checkCopyright
 # ensure code conforms to 80 columns max
 checkLineLength
 
+
+exit 0
 #------------------------------------------------------------------------------
