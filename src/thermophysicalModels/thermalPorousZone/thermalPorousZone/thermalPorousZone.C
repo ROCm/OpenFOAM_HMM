@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,12 +32,12 @@ License
 
 Foam::thermalPorousZone::thermalPorousZone
 (
-    const word& name,
+    const keyType& key,
     const fvMesh& mesh,
     const dictionary& dict
 )
 :
-    porousZone(name, mesh, dict),
+    porousZone(key, mesh, dict),
     T_("T", dimTemperature, -GREAT)
 {
     if (const dictionary* dictPtr = dict.subDictPtr("thermalModel"))
@@ -53,11 +53,7 @@ Foam::thermalPorousZone::thermalPorousZone
             FatalIOErrorIn
             (
                 "thermalPorousZone::thermalPorousZone"
-                "("
-                    "const word& name, "
-                    "const fvMesh& mesh, "
-                    "const dictionary& dict"
-                ")",
+                "(const keyType&, const fvMesh&, const dictionary&)",
                 *dictPtr
             )   << "thermalModel " << thermalModel << " is not supported" << nl
                 << "    Supported thermalModels are: fixedTemperature"
@@ -76,23 +72,28 @@ void Foam::thermalPorousZone::addEnthalpySource
     fvScalarMatrix& hEqn
 ) const
 {
-    if (zoneId() == -1 || T_.value() < 0.0)
+    const labelList& zones = this->zoneIds();
+    if (zones.empty() || T_.value() < 0.0)
     {
         return;
     }
 
-    const labelList& cells = mesh().cellZones()[zoneId()];
     const scalarField& V = mesh().V();
     scalarField& hDiag = hEqn.diag();
     scalarField& hSource = hEqn.source();
 
-    scalarField hZone = thermo.h(scalarField(cells.size(), T_.value()), cells);
-    scalar rate = 1e6;
+    // TODO: generalize for non-fixedTemperature methods
+    const scalar rate = 1e6;
 
-    forAll(cells, i)
+    forAll(zones, zoneI)
     {
-        hDiag[cells[i]] += rate*V[cells[i]]*rho[cells[i]];
-        hSource[cells[i]] += rate*V[cells[i]]*rho[cells[i]]*hZone[i];
+        const labelList& cells = mesh().cellZones()[zones[zoneI]];
+
+        forAll(cells, i)
+        {
+            hDiag[cells[i]] += rate*V[cells[i]]*rho[cells[i]];
+            hSource[cells[i]] += rate*V[cells[i]]*rho[cells[i]]*T_.value();
+        }
     }
 }
 

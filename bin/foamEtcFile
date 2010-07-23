@@ -195,9 +195,10 @@ done
 # done
 
 
-# Save the essential bits of information:
+# Save the essential bits of information
+# silently remove leading ~OpenFOAM/ (used in Foam::findEtcFile)
 nArgs=$#
-fileName="$1"
+fileName="${1#~OpenFOAM/}"
 
 # Define the various places to be searched:
 unset dirList

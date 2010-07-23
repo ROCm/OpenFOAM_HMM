@@ -83,6 +83,6 @@ Foam::WallModel<CloudType>::coeffDict() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewWallModel.C"
+#include "WallModelNew.C"
 
 // ************************************************************************* //
