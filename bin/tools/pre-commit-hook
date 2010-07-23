@@ -97,8 +97,8 @@ dieOnBadFiles()
 #
 checkIllegalCode()
 {
-    reBad="(N""abla|"$'\t'"|"$'\r\n'")"
-    msgBad="N""abla, <TAB>, or DOS-style line ending"
+    reBad="(N""abla|"$'\t'")"
+    msgBad="N""abla or <TAB>"
 
     badFiles=$(
     for f in $fileList
@@ -219,5 +219,4 @@ checkLineLength
 
 
 exit 0
-
 #------------------------------------------------------------------------------
