@@ -93,33 +93,27 @@ dieOnBadFiles()
 
 
 #
-# check for bad characters or strings
+# check for bad strings, characters, etc
 #
 checkIllegalCode()
 {
-    badWords=("[N]abla" $'\t')
-    badMsg=("NABLA" "<TAB>")
-    nWords=${#badWords[@]}
+    reBad="(N""abla|"$'\t'")"
+    msgBad="N""abla or <TAB>"
 
-    for (( i = 0; i < $nWords; i++ ))
+    badFiles=$(
+    for f in $fileList
     do
-        illegal="${badWords[$i]}"
-
-        badFiles=$(
-        for f in $fileList
-        do
-            # parse line numbers from this:
-            #        path/fileName:<lineNr>:   contents
-            lines=$(git grep --cached -n -e "$illegal" -- "$f" |
-                sed -e 's@^[^:]*:\([0-9]*\):.*@\1@' |
-                tr '\n' ' '
-            )
-            [ -n "$lines" ] && echo "$Indent$f -- lines: $lines"
-        done
+        # parse line numbers from this:
+        #        path/fileName:<lineNr>:   contents
+        lines=$(git grep --cached -n -E -e "$reBad" -- "$f" |
+            sed -e 's@^[^:]*:\([0-9]*\):.*@\1@' |
+            tr '\n' ' '
         )
-
-        dieOnBadFiles "Remove/correct bad '${badMsg[$i]}' references"
+        [ -n "$lines" ] && echo "$Indent$f -- lines: $lines"
     done
+    )
+
+    dieOnBadFiles "Remove/correct bad '$msgBad' references"
 }
 
 
@@ -138,7 +132,8 @@ checkCopyright()
         # for Copyright lines without the current year
         lines=$(git grep --cached -n -e Copyright -- "$f" |
             sed -n \
-                -e "/OpenCFD/{ /$year/b;" \
+                -e '/OpenCFD/{ ' \
+                -e "/$year/b"   \
                 -e 's@^[^:]*:\([0-9]*\):.*@\1@p }' |
             tr '\n' ' '
         )
