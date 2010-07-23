@@ -639,7 +639,7 @@ int main(int argc, char *argv[])
         "motionProperties",
         runTime.constant(),
         mesh,
-        IOobject::MUST_READ,
+        IOobject::MUST_READ_IF_MODIFIED,
         IOobject::NO_WRITE
     );
 
@@ -669,7 +669,7 @@ int main(int argc, char *argv[])
             "autoRefineMeshDict",
             runTime.system(),
             mesh,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     );

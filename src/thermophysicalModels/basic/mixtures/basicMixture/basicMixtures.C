@@ -57,7 +57,7 @@ makeBasicMixture
 (
     pureMixture,
     constTransport,
-    hConstThermo,
+    eConstThermo,
     perfectGas
 );
 
@@ -65,15 +65,16 @@ makeBasicMixture
 (
     pureMixture,
     sutherlandTransport,
-    hConstThermo,
+    eConstThermo,
     perfectGas
 );
+
 
 makeBasicMixture
 (
     pureMixture,
     constTransport,
-    eConstThermo,
+    hConstThermo,
     perfectGas
 );
 
@@ -81,7 +82,7 @@ makeBasicMixture
 (
     pureMixture,
     sutherlandTransport,
-    eConstThermo,
+    hConstThermo,
     perfectGas
 );
 

@@ -31,7 +31,8 @@ Description
     - if extruding boundary faces:
         - convert boundary faces to directMappedWall patches
     - extrude edges of faceZone as a <zone>_sidePatch
-    - extrude edges inbetween different faceZones as a cyclic <zoneA>_<zoneB>
+    - extrude edges inbetween different faceZones as a
+      (nonuniformTransform)cyclic <zoneA>_<zoneB>
     - extrudes into master direction (i.e. away from the owner cell
       if flipMap is false)
     - not parallel
@@ -129,8 +130,9 @@ Usage
 #include "createShellMesh.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "cyclicPolyPatch.H"
 #include "syncTools.H"
+#include "cyclicPolyPatch.H"
+#include "nonuniformTransformCyclicPolyPatch.H"
 
 using namespace Foam;
 
@@ -596,7 +598,7 @@ void createDummyFvMeshFiles(const polyMesh& mesh, const word& regionName)
 }
 
 
-//XXXXXXXXX
+// Find a patch face that is not extruded. Return -1 if not found.
 label findUncoveredPatchFace
 (
     const fvMesh& mesh,
@@ -611,20 +613,19 @@ label findUncoveredPatchFace
         extrudeFaceSet.insert(extrudeMeshFaces[i]);
     }
 
-    label patchI = -1;
-
     const labelList& eFaces = mesh.edgeFaces()[meshEdgeI];
     forAll(eFaces, i)
     {
         label faceI = eFaces[i];
         if (!mesh.isInternalFace(faceI) && !extrudeFaceSet.found(faceI))
         {
-            patchI = mesh.boundaryMesh().whichPatch(faceI);
-            break;
+            return faceI;
         }
     }
-    return patchI;
+    return -1;
 }
+
+
 // Count the number of faces in patches that need to be created
 void countExtrudePatches
 (
@@ -662,14 +663,14 @@ void countExtrudePatches
             // so choose any uncovered one. If none found put face in
             // undetermined zone 'side' patch
 
-            label patchI = findUncoveredPatchFace
+            label faceI = findUncoveredPatchFace
             (
                 mesh,
                 UIndirectList<label>(extrudeMeshFaces, eFaces),
                 extrudeMeshEdges[edgeI]
             );
 
-            if (patchI == -1)
+            if (faceI == -1)
             {
                 // Determine the min zone of all connected zones.
                 label minZone = zoneID[eFaces[0]];
@@ -686,6 +687,9 @@ void countExtrudePatches
     Pstream::listCombineGather(zoneZonePatch, plusEqOp<label>());
     Pstream::listCombineScatter(zoneZonePatch);
 }
+
+
+// Lexical ordering for vectors.
 bool lessThan(const point& x, const point& y)
 {
     for (direction dir = 0; dir < point::nComponents; dir++)
@@ -696,86 +700,137 @@ bool lessThan(const point& x, const point& y)
     return false;
 }
 
-class minEqVectorListOp
+
+// Combine vectors
+class minEqVectorOp
 {
     public:
-    void operator()(List<vector>& x, const List<vector>& y) const
+    void operator()(vector& x, const vector& y) const
     {
-        if (y.size())
+        if (y != vector::zero)
         {
-            if (x.size())
+            if (x == vector::zero)
             {
-                forAll(x, i)
-                {
-                    if (lessThan(y[i], x[i]))
-                    {
-                        x[i] = y[i];
-                    }
-                }
+                x = y;
             }
-            else
+            else if (lessThan(y, x))
             {
                 x = y;
             }
         }
     }
 };
-// Constrain&sync normals on points that are on coupled patches.
+
+
+// Constrain&sync normals on points that are on coupled patches to make sure
+// the face extruded from the edge has a valid normal with its coupled
+// equivalent.
+// Note that only points on cyclic edges need to be constrained and not
+// all points touching cyclics since only edges become faces.
 void constrainCoupledNormals
 (
     const fvMesh& mesh,
     const primitiveFacePatch& extrudePatch,
-    const labelList& regionToPoint,
+    const labelList& meshEdges,
+    const faceList& pointRegions,   // per face, per index the region
 
     vectorField& regionNormals
 )
 {
-    // Invert regionToPoint to create pointToRegions.
-    labelListList pointToRegions
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    // Mark edges that are on boundary of extrusion.
+    Map<label> meshToExtrudEdge
     (
-        invertOneToMany
-        (
-            extrudePatch.nPoints(),
-            regionToPoint
-        )
+        2*(extrudePatch.nEdges()-extrudePatch.nInternalEdges())
     );
-    // Sort acc. to region so (hopefully) coupled points will do the same.
-    forAll(pointToRegions, pointI)
+    for
+    (
+        label extrudeEdgeI = extrudePatch.nInternalEdges();
+        extrudeEdgeI < extrudePatch.nEdges();
+        extrudeEdgeI++
+    )
     {
-        sort(pointToRegions[pointI]);
+        meshToExtrudEdge.insert(meshEdges[extrudeEdgeI], extrudeEdgeI);
     }
 
 
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+    // For owner: normal at first point of edge when walking through faces
+    // in order.
+    vectorField edgeNormals0(mesh.nEdges(), vector::zero);
+    vectorField edgeNormals1(mesh.nEdges(), vector::zero);
 
-    // Constrain displacement on cyclic patches
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Note: bit contentious to always do this on cyclic - should user use
-    // different patch type, e.g. 'cyclicSlip' instead?
-
+    // Loop through all edges of patch. If they are to be extruded mark the
+    // point normals in order.
     forAll(patches, patchI)
     {
         const polyPatch& pp = patches[patchI];
 
         if (isA<cyclicPolyPatch>(pp))
         {
-            forAll(pp.meshPoints(), pointI)
+            bool isOwner = refCast<const cyclicPolyPatch>(pp).owner();
+
+            forAll(pp.faceEdges(), faceI)
             {
-                Map<label>::const_iterator fnd =
-                    extrudePatch.meshPointMap().find
-                    (
-                        pp.meshPoints()[pointI]
-                    );
-                if (fnd != extrudePatch.meshPointMap().end())
+                const labelList& fEdges = pp.faceEdges()[faceI];
+                forAll(fEdges, fp)
                 {
-                    // fnd() is a point on this cyclic.
-                    const vector& cycNormal = pp.pointNormals()[pointI];
-                    const labelList& pRegions = pointToRegions[fnd()];
-                    forAll(pRegions, i)
+                    label meshEdgeI = pp.meshEdges()[fEdges[fp]];
+                    if (meshToExtrudEdge.found(meshEdgeI))
                     {
-                        // Remove cyclic normal component.
-                        vector& regionNormal = regionNormals[pRegions[i]];
-                        regionNormal -= (regionNormal&cycNormal)*cycNormal;
+                        // Edge corresponds to a extrusion edge. Store extrusion
+                        // normals on edge so we can syncTools it.
+
+                        //const edge& ppE = pp.edges()[fEdges[fp]];
+                        //Pout<< "ppedge:" << pp.localPoints()[ppE[0]]
+                        //    << pp.localPoints()[ppE[1]]
+                        //    << endl;
+
+                        const face& f = pp.localFaces()[faceI];
+                        label fp0 = fp;
+                        label fp1 = f.fcIndex(fp0);
+                        label mp0 = pp[faceI][fp0];
+                        label mp1 = pp[faceI][fp1];
+
+                        // Find corresponding face and indices.
+                        vector regionN0;
+                        vector regionN1;
+                        {
+                            label exEdgeI = meshToExtrudEdge[meshEdgeI];
+                            const labelList& eFaces =
+                                extrudePatch.edgeFaces()[exEdgeI];
+                            // Use 0th face.
+                            label exFaceI = eFaces[0];
+                            const face& exF = extrudePatch[exFaceI];
+                            const face& exRegions = pointRegions[exFaceI];
+                            // Find points
+                            label r0 = exRegions[findIndex(exF, mp0)];
+                            regionN0 = regionNormals[r0];
+                            label r1 = exRegions[findIndex(exF, mp1)];
+                            regionN1 = regionNormals[r1];
+                        }
+
+                        vector& nA =
+                        (
+                            isOwner
+                          ? edgeNormals0[meshEdgeI]
+                          : edgeNormals1[meshEdgeI]
+                        );
+
+                        nA = regionN0;
+                        const vector& cyc0 = pp.pointNormals()[f[fp0]];
+                        nA -= (nA&cyc0)*cyc0;
+
+                        vector& nB =
+                        (
+                            isOwner
+                          ? edgeNormals1[meshEdgeI]
+                          : edgeNormals0[meshEdgeI]
+                        );
+
+                        nB = regionN1;
+                        const vector& cyc1 = pp.pointNormals()[f[fp1]];
+                        nB -= (nB&cyc1)*cyc1;
                     }
                 }
             }
@@ -786,45 +841,82 @@ void constrainCoupledNormals
     // Synchronise regionNormals
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // Re-work regionNormals into multiple normals per point
-    List<List<vector> > pointNormals(mesh.nPoints());
-    forAll(pointToRegions, pointI)
-    {
-        const labelList& pRegions = pointToRegions[pointI];
-
-        label meshPointI = extrudePatch.meshPoints()[pointI];
-        List<vector>& pNormals = pointNormals[meshPointI];
-        pNormals.setSize(pRegions.size());
-        forAll(pRegions, i)
-        {
-            pNormals[i] = regionNormals[pRegions[i]];
-        }
-    }
-
     // Synchronise
-    syncTools::syncPointList
+    syncTools::syncEdgeList
     (
         mesh,
-        pointNormals,
-        minEqVectorListOp(),
-        List<vector>(),         // nullValue
-        false                   // applySeparation
+        edgeNormals0,
+        minEqVectorOp(),
+        vector::zero            // nullValue
+    );
+    syncTools::syncEdgeList
+    (
+        mesh,
+        edgeNormals1,
+        minEqVectorOp(),
+        vector::zero            // nullValue
     );
 
-    // Re-work back into regionNormals
-    forAll(pointToRegions, pointI)
-    {
-        const labelList& pRegions = pointToRegions[pointI];
 
-        label meshPointI = extrudePatch.meshPoints()[pointI];
-        const List<vector>& pNormals = pointNormals[meshPointI];
-        forAll(pRegions, i)
+    // Re-work back into regionNormals
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (isA<cyclicPolyPatch>(pp))
         {
-            regionNormals[pRegions[i]] = pNormals[i];
+            bool isOwner = refCast<const cyclicPolyPatch>(pp).owner();
+
+            forAll(pp.faceEdges(), faceI)
+            {
+                const labelList& fEdges = pp.faceEdges()[faceI];
+                forAll(fEdges, fp)
+                {
+                    label meshEdgeI = pp.meshEdges()[fEdges[fp]];
+                    if (meshToExtrudEdge.found(meshEdgeI))
+                    {
+                        const face& f = pp.localFaces()[faceI];
+                        label fp0 = fp;
+                        label fp1 = f.fcIndex(fp0);
+                        label mp0 = pp[faceI][fp0];
+                        label mp1 = pp[faceI][fp1];
+
+
+                        const vector& nA =
+                        (
+                            isOwner
+                          ? edgeNormals0[meshEdgeI]
+                          : edgeNormals1[meshEdgeI]
+                        );
+
+                        const vector& nB =
+                        (
+                            isOwner
+                          ? edgeNormals1[meshEdgeI]
+                          : edgeNormals0[meshEdgeI]
+                        );
+
+                        // Find corresponding face and indices.
+                        {
+                            label exEdgeI = meshToExtrudEdge[meshEdgeI];
+                            const labelList& eFaces =
+                                extrudePatch.edgeFaces()[exEdgeI];
+                            // Use 0th face.
+                            label exFaceI = eFaces[0];
+                            const face& exF = extrudePatch[exFaceI];
+                            const face& exRegions = pointRegions[exFaceI];
+                            // Find points
+                            label r0 = exRegions[findIndex(exF, mp0)];
+                            regionNormals[r0] = nA;
+                            label r1 = exRegions[findIndex(exF, mp1)];
+                            regionNormals[r1] = nB;
+                        }
+                    }
+                }
+            }
         }
     }
 }
-//XXXXXXXXX
 
 
 tmp<pointField> calcOffset
@@ -1106,7 +1198,10 @@ int main(int argc, char *argv[])
     // - zoneXXX_sides
     // - zoneXXX_zoneYYY
     labelList zoneSidePatch(faceZones.size(), 0);
-    labelList zoneZonePatch(faceZones.size()*faceZones.size(), 0);
+    // Patch to use for minZone
+    labelList zoneZonePatch_min(faceZones.size()*faceZones.size(), 0);
+    // Patch to use for maxZone
+    labelList zoneZonePatch_max(faceZones.size()*faceZones.size(), 0);
 
     countExtrudePatches
     (
@@ -1117,8 +1212,8 @@ int main(int argc, char *argv[])
         extrudeMeshFaces,
         extrudeMeshEdges,
 
-        zoneSidePatch,
-        zoneZonePatch
+        zoneSidePatch,      // reuse for counting
+        zoneZonePatch_min   // reuse for counting
     );
 
     // Now check which patches to add.
@@ -1162,30 +1257,47 @@ int main(int argc, char *argv[])
     );
 
     label nInter = 0;
-    forAll(zoneZonePatch, minZone)
+    forAll(zoneZonePatch_min, minZone)
     {
         for (label maxZone = minZone; maxZone < faceZones.size(); maxZone++)
         {
             label index = minZone*faceZones.size()+maxZone;
 
-            if (zoneZonePatch[index] > 0)
+            if (zoneZonePatch_min[index] > 0)
             {
-                word patchName =
+                word minToMax =
                     faceZones[minZone].name()
-                  + "_"
+                  + "_to_"
                   + faceZones[maxZone].name();
+                word maxToMin =
+                    faceZones[maxZone].name()
+                  + "_to_"
+                  + faceZones[minZone].name();
+                {
+                    transformDict.set("neighbourPatch", maxToMin);
+                    zoneZonePatch_min[index] =
+                    addPatch<nonuniformTransformCyclicPolyPatch>
+                    (
+                        mesh,
+                        minToMax,
+                        transformDict
+                    );
+                    Info<< zoneZonePatch_min[index] << '\t' << minToMax << nl;
+                    nInter++;
+                }
+                {
+                    transformDict.set("neighbourPatch", minToMax);
+                    zoneZonePatch_max[index] =
+                    addPatch<nonuniformTransformCyclicPolyPatch>
+                    (
+                        mesh,
+                        maxToMin,
+                        transformDict
+                    );
+                    Info<< zoneZonePatch_max[index] << '\t' << maxToMin << nl;
+                    nInter++;
+                }
 
-                zoneZonePatch[index] = addPatch<cyclicPolyPatch>
-                (
-                    mesh,
-                    patchName,
-                    transformDict
-                );
-
-                Info<< zoneZonePatch[index]
-                    << '\t' << patchName << nl;
-
-                nInter++;
             }
         }
     }
@@ -1220,24 +1332,36 @@ int main(int argc, char *argv[])
             {
                 label minZone = min(zone0,zone1);
                 label maxZone = max(zone0,zone1);
-                label patchI = zoneZonePatch[minZone*faceZones.size()+maxZone];
+                label index = minZone*faceZones.size()+maxZone;
+
                 ePatches.setSize(eFaces.size());
-                ePatches = patchI;
+
+                if (zone0 == minZone)
+                {
+                    ePatches[0] = zoneZonePatch_min[index];
+                    ePatches[1] = zoneZonePatch_max[index];
+                }
+                else
+                {
+                    ePatches[0] = zoneZonePatch_max[index];
+                    ePatches[1] = zoneZonePatch_min[index];
+                }
 
                 nonManifoldEdge[edgeI] = 1;
             }
         }
         else
         {
-            label patchI = findUncoveredPatchFace
+            label faceI = findUncoveredPatchFace
             (
                 mesh,
                 UIndirectList<label>(extrudeMeshFaces, eFaces),
                 extrudeMeshEdges[edgeI]
             );
 
-            if (patchI != -1)
+            if (faceI != -1)
             {
+                label patchI = mesh.boundaryMesh().whichPatch(faceI);
                 ePatches.setSize(eFaces.size(), patchI);
             }
             else
@@ -1294,11 +1418,11 @@ int main(int argc, char *argv[])
     (
         mesh,
         extrudePatch,
-        regionPoints,
+        extrudeMeshEdges,
+        pointRegions,
 
         regionNormals
     );
-
 
     // For debugging: dump hedgehog plot of normals
     {

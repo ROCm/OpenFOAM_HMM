@@ -9,14 +9,18 @@ IOdictionary thermophysicalProperties
         "thermophysicalProperties",
         runTime.constant(),
         mesh,
-        IOobject::MUST_READ,
+        IOobject::MUST_READ_IF_MODIFIED,
         IOobject::NO_WRITE
     )
 );
 
-dimensionedScalar Pr = dimensionedScalar("Pr", dimless, 1.0);
+dimensionedScalar Pr
+(
+    dimensionedScalar::lookupOrDefault
+    (
+        "Pr",
+        thermophysicalProperties,
+        1.0
+    )
+);
 
-if (thermophysicalProperties.found("Pr"))
-{
-    Pr = thermophysicalProperties.lookup("Pr");
-}

@@ -172,7 +172,7 @@ updateCoeffs()
     radiativeIntensityRay& ray =
         const_cast<radiativeIntensityRay&>(dom.IRay(rayId));
 
-    ray.Qr().boundaryField()[patchI] += Iw*(-n & ray.dAve());
+    ray.Qr().boundaryField()[patchI] += Iw*(n & ray.dAve());
 
     forAll(Iw, faceI)
     {

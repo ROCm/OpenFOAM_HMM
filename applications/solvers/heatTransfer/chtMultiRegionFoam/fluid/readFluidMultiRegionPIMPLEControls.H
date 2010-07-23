@@ -1,9 +1,11 @@
     const dictionary& pimple = mesh.solutionDict().subDict("PIMPLE");
 
-    int nCorr(readInt(pimple.lookup("nCorrectors")));
+    const int nCorr =
+        pimple.lookupOrDefault<int>("nCorrectors", 1);
 
-    int nNonOrthCorr =
+    const int nNonOrthCorr =
         pimple.lookupOrDefault<int>("nNonOrthogonalCorrectors", 0);
 
-    bool momentumPredictor =
-        pimple.lookupOrDefault<Switch>("momentumPredictor", true);
+    const bool momentumPredictor =
+        pimple.lookupOrDefault("momentumPredictor", true);
+

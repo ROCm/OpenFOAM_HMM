@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -17,11 +17,11 @@ FoamFile
 
 solvers
 {
-    p
+    p_rgh
     {
         solver           GAMG;
         tolerance        1e-7;
-        relTol           0.1;
+        relTol           0.01;
 
         smoother         DICGaussSeidel;
 
@@ -42,16 +42,18 @@ solvers
 
 SIMPLE
 {
+    momentumPredictor yes;
     nNonOrthogonalCorrectors 0;
-    pRefCell        0;
+    p_rghRefCell    0;
+    p_rghRefValue   100000;
     pRefValue       100000;
     convergence     1e-04;
 }
 
 relaxationFactors
 {
-    p               0.3;
-    U               0.7;
+    p_rgh           0.9;
+    U               0.3;
     h               0.7;
     "(k|epsilon|omega)" 0.7;
 }

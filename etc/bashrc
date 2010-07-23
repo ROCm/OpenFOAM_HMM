@@ -32,7 +32,7 @@
 #------------------------------------------------------------------------------
 
 export WM_PROJECT=OpenFOAM
-[ -z "$WM_PROJECT_VERSION" ] && export WM_PROJECT_VERSION=1.6
+[ -z "$WM_PROJECT_VERSION" ] && export WM_PROJECT_VERSION=dev
 
 ################################################################################
 # USER EDITABLE PART. Note changes made here may be lost with the next upgrade
@@ -131,7 +131,7 @@ unset WM_COMPILER_ARCH WM_COMPILER_LIB_ARCH
 # WM_COMPILE_OPTION = Opt | Debug | Prof
 : ${WM_COMPILE_OPTION:=Opt}; export WM_COMPILE_OPTION
 
-# WM_MPLIB = | OPENMPI | MPICH | MPICH-GM | HPMPI | GAMMA | MPI | QSMPI
+# WM_MPLIB = SYSTEMOPENMPI | OPENMPI | MPICH | MPICH-GM | HPMPI | GAMMA | MPI | QSMPI
 : ${WM_MPLIB:=OPENMPI}; export WM_MPLIB
 
 
@@ -226,7 +226,7 @@ SunOS)
     cat <<USAGE
 
     Your "$WM_ARCH" operating system is not supported by this release
-    of OpenFOAM. For further assistance, please contact www.OpenFOAM.org
+    of OpenFOAM. For further assistance, please contact www.OpenFOAM.com
 
 USAGE
     ;;

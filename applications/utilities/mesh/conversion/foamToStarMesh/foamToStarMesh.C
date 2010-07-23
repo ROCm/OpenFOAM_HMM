@@ -62,6 +62,10 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "read OpenFOAM mesh and write a pro-STAR (v4) bnd/cel/vrt format"
+    );
     argList::noParallel();
     timeSelector::addOptions();
 
@@ -74,7 +78,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "noBnd",
-        "suppress writing the .bnd file"
+        "suppress writing a boundary (.bnd) file"
     );
 
 #   include "setRootCase.H"

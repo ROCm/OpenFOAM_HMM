@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -15,28 +15,49 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-3
+6
 (
-    xPeriodic
+    xPeriodic_half0
     {
         type            cyclic;
-        nFaces          512;
+        nFaces          256;
         startFace       14464;
-        featureCos      0.9;
+        neighbourPatch  xPeriodic_half1;
     }
-    yPeriodic
+    xPeriodic_half1
     {
         type            cyclic;
-        nFaces          640;
+        nFaces          256;
+        startFace       14720;
+        neighbourPatch  xPeriodic_half0;
+    }
+    yPeriodic_half0
+    {
+        type            cyclic;
+        nFaces          320;
         startFace       14976;
-        featureCos      0.9;
+        neighbourPatch  yPeriodic_half1;
     }
-    zPeriodic
+    yPeriodic_half1
     {
         type            cyclic;
-        nFaces          640;
+        nFaces          320;
+        startFace       15296;
+        neighbourPatch  yPeriodic_half0;
+    }
+    zPeriodic_half0
+    {
+        type            cyclic;
+        nFaces          320;
         startFace       15616;
-        featureCos      0.9;
+        neighbourPatch  zPeriodic_half1;
+    }
+    zPeriodic_half1
+    {
+        type            cyclic;
+        nFaces          320;
+        startFace       15936;
+        neighbourPatch  zPeriodic_half0;
     }
 )
 

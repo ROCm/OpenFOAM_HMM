@@ -1,3 +1,5 @@
+CPP        = /lib/cpp -traditional-cpp $(GFLAGS)
+
 PROJECT_LIBS = -l$(WM_PROJECT) -liberty -ldl
 
 include $(GENERAL_RULES)/standard

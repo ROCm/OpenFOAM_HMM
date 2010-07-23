@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    compressibleLesInterFoam
+    compressibleInterFoam
 
 Description
     Solver for 2 compressible, isothermal immiscible fluids using a VOF

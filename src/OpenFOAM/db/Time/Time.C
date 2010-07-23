@@ -217,7 +217,7 @@ Foam::Time::Time
             controlDictName,
             system(),
             *this,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
             false
         )
@@ -242,6 +242,12 @@ Foam::Time::Time
     readLibs_(controlDict_, "libs"),
     functionObjects_(*this)
 {
+    // Time objects not registered so do like objectRegistry::checkIn ourselves.
+    if (runTimeModifiable_)
+    {
+        controlDict_.watchIndex() = addWatch(controlDict_.filePath());
+    }
+
     setControls();
 }
 
@@ -298,6 +304,13 @@ Foam::Time::Time
     readLibs_(controlDict_, "libs"),
     functionObjects_(*this)
 {
+
+    // Time objects not registered so do like objectRegistry::checkIn ourselves.
+    if (runTimeModifiable_)
+    {
+        controlDict_.watchIndex() = addWatch(controlDict_.filePath());
+    }
+
     setControls();
 }
 
@@ -364,6 +377,38 @@ Foam::Time::~Time()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::label Foam::Time::addWatch(const fileName& fName) const
+{
+    return monitor_.addWatch(fName);
+}
+
+
+bool Foam::Time::removeWatch(const label watchIndex) const
+{
+    return monitor_.removeWatch(watchIndex);
+}
+
+const Foam::fileName& Foam::Time::getFile(const label watchIndex) const
+{
+    return monitor_.getFile(watchIndex);
+}
+
+
+Foam::fileMonitor::fileState Foam::Time::getState
+(
+    const label watchFd
+) const
+{
+    return monitor_.getState(watchFd);
+}
+
+
+void Foam::Time::setUnmodified(const label watchFd) const
+{
+    monitor_.setUnmodified(watchFd);
+}
+
 
 Foam::word Foam::Time::timeName(const scalar t)
 {
@@ -552,8 +597,9 @@ bool Foam::Time::end() const
 }
 
 
-void Foam::Time::stopAt(const stopAtControls sa) const
+bool Foam::Time::stopAt(const stopAtControls sa) const
 {
+    const bool changed = (stopAt_ != sa);
     stopAt_ = sa;
 
     // adjust endTime
@@ -565,6 +611,7 @@ void Foam::Time::stopAt(const stopAtControls sa) const
     {
         endTime_ = GREAT;
     }
+    return changed;
 }
 
 

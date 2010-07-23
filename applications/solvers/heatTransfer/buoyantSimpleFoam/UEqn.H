@@ -8,13 +8,18 @@
 
     UEqn().relax();
 
-    solve
-    (
-        UEqn()
-     ==
-        fvc::reconstruct
+    if (momentumPredictor)
+    {
+        solve
         (
-            fvc::interpolate(rho)*(g & mesh.Sf())
-          - fvc::snGrad(p)*mesh.magSf()
-        )
-    );
+            UEqn()
+         ==
+            fvc::reconstruct
+            (
+                (
+                  - ghf*fvc::snGrad(rho)
+                  - fvc::snGrad(p_rgh)
+                )*mesh.magSf()
+            )
+        );
+    }

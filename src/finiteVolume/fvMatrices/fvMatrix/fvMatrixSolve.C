@@ -150,6 +150,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
         solverPerf.print();
 
         solverPerfVec = max(solverPerfVec, solverPerf);
+        solverPerfVec.solverName() = solverPerf.solverName();
 
         psi.internalField().replace(cmpt, psiCmpt);
         diag() = saveDiag;
@@ -167,21 +168,48 @@ template<class Type>
 Foam::autoPtr<typename Foam::fvMatrix<Type>::fvSolver>
 Foam::fvMatrix<Type>::solver()
 {
-    return solver(psi_.mesh().solverDict(psi_.name()));
+    return solver
+    (
+        psi_.mesh().solverDict
+        (
+            psi_.select
+            (
+                psi_.mesh().data::lookupOrDefault<bool>("finalIteration", false)
+            )
+        )
+    );
 }
 
 
 template<class Type>
 Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::fvSolver::solve()
 {
-    return solve(psi_.mesh().solverDict(psi_.name()));
+    return solve
+    (
+        psi_.mesh().solverDict
+        (
+            psi_.select
+            (
+                psi_.mesh().data::lookupOrDefault<bool>("finalIteration", false)
+            )
+        )
+    );
 }
 
 
 template<class Type>
 Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve()
 {
-    return solve(psi_.mesh().solverDict(psi_.name()));
+    return solve
+    (
+        psi_.mesh().solverDict
+        (
+            psi_.select
+            (
+                psi_.mesh().data::lookupOrDefault<bool>("finalIteration", false)
+            )
+        )
+    );
 }
 
 

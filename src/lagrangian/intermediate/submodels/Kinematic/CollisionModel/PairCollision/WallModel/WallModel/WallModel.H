@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     WallModel.C
-    NewWallModel.C
+    WallModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -110,6 +110,9 @@ public:
 
         //- Return the owner cloud object
         const CloudType& owner() const;
+
+        //- Return non-const access to the owner cloud object
+        CloudType& owner();
 
         //- Return the dictionary
         const dictionary& dict() const;

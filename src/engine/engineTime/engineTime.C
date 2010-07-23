@@ -72,7 +72,7 @@ Foam::engineTime::engineTime
             "engineGeometry",
             constant(),
             *this,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
             false
         )

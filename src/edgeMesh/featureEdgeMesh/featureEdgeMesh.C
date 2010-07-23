@@ -601,7 +601,7 @@ Foam::featureEdgeMesh::featureEdgeMesh
 {}
 
 
-// * * * * * * * * * * * * * * * * Destruct or  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::featureEdgeMesh::~featureEdgeMesh()
 {}

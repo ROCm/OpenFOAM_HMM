@@ -59,10 +59,11 @@ RASModel::RASModel
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermophysicalModel
+    const basicThermo& thermophysicalModel,
+    const word& turbulenceModelName
 )
 :
-    turbulenceModel(rho, U, phi, thermophysicalModel),
+    turbulenceModel(rho, U, phi, thermophysicalModel, turbulenceModelName),
 
     IOdictionary
     (
@@ -71,7 +72,7 @@ RASModel::RASModel
             "RASProperties",
             U.time().constant(),
             U.db(),
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     ),
@@ -103,7 +104,8 @@ autoPtr<RASModel> RASModel::New
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermophysicalModel
+    const basicThermo& thermophysicalModel,
+    const word& turbulenceModelName
 )
 {
     // get model name, but do not register the dictionary
@@ -117,7 +119,7 @@ autoPtr<RASModel> RASModel::New
                 "RASProperties",
                 U.time().constant(),
                 U.db(),
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
                 false
             )
@@ -138,7 +140,8 @@ autoPtr<RASModel> RASModel::New
                 "const volScalarField&, "
                 "const volVectorField&, "
                 "const surfaceScalarField&, "
-                "basicThermo&"
+                "basicThermo&, "
+                "const word&"
             ")"
         )   << "Unknown RASModel type "
             << modelType << nl << nl
@@ -149,7 +152,7 @@ autoPtr<RASModel> RASModel::New
 
     return autoPtr<RASModel>
     (
-        cstrIter()(rho, U, phi, thermophysicalModel)
+        cstrIter()(rho, U, phi, thermophysicalModel, turbulenceModelName)
     );
 }
 
@@ -212,7 +215,22 @@ void RASModel::correct()
 
 bool RASModel::read()
 {
-    if (regIOobject::read())
+    //if (regIOobject::read())
+
+    // Bit of trickery : we are both IOdictionary ('RASProperties') and
+    // an regIOobject from the turbulenceModel level. Problem is to distinguish
+    // between the two - we only want to reread the IOdictionary.
+    
+    bool ok = IOdictionary::readData
+    (
+        IOdictionary::readStream
+        (
+            IOdictionary::type()
+        )
+    );
+    IOdictionary::close();
+
+    if (ok)
     {
         lookup("turbulence") >> turbulence_;
 

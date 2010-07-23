@@ -20,6 +20,7 @@ $(constraintFvPatches)/empty/emptyFvPatch.C
 $(constraintFvPatches)/symmetry/symmetryFvPatch.C
 $(constraintFvPatches)/wedge/wedgeFvPatch.C
 $(constraintFvPatches)/cyclic/cyclicFvPatch.C
+$(constraintFvPatches)/cyclicSlip/cyclicSlipFvPatch.C
 $(constraintFvPatches)/processor/processorFvPatch.C
 $(constraintFvPatches)/processorCyclic/processorCyclicFvPatch.C
 
@@ -96,6 +97,7 @@ $(basicFvPatchFields)/zeroGradient/zeroGradientFvPatchFields.C
 
 constraintFvPatchFields = $(fvPatchFields)/constraint
 $(constraintFvPatchFields)/cyclic/cyclicFvPatchFields.C
+$(constraintFvPatchFields)/cyclicSlip/cyclicSlipFvPatchFields.C
 $(constraintFvPatchFields)/empty/emptyFvPatchFields.C
 $(constraintFvPatchFields)/jumpCyclic/jumpCyclicFvPatchFields.C
 $(constraintFvPatchFields)/processor/processorFvPatchFields.C
@@ -154,7 +156,9 @@ $(derivedFvPatchFields)/turbulentIntensityKineticEnergyInlet/turbulentIntensityK
 $(derivedFvPatchFields)/uniformFixedValue/uniformFixedValueFvPatchFields.C
 $(derivedFvPatchFields)/waveTransmissive/waveTransmissiveFvPatchFields.C
 $(derivedFvPatchFields)/uniformDensityHydrostaticPressure/uniformDensityHydrostaticPressureFvPatchScalarField.C
-$(derivedFvPatchFields)/swirlMassFlowRateInletVelocity/swirlMassFlowRateInletVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/swirlFlowRateInletVelocity/swirlFlowRateInletVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/cylindricalInletVelocity/cylindricalInletVelocityFvPatchVectorField.C
+
 
 fvsPatchFields = fields/fvsPatchFields
 $(fvsPatchFields)/fvsPatchField/fvsPatchFields.C
@@ -167,6 +171,7 @@ $(basicFvsPatchFields)/sliced/slicedFvsPatchFields.C
 
 constraintFvsPatchFields = $(fvsPatchFields)/constraint
 $(constraintFvsPatchFields)/cyclic/cyclicFvsPatchFields.C
+$(constraintFvsPatchFields)/cyclicSlip/cyclicSlipFvsPatchFields.C
 $(constraintFvsPatchFields)/empty/emptyFvsPatchFields.C
 $(constraintFvsPatchFields)/processor/processorFvsPatchFields.C
 $(constraintFvsPatchFields)/processorCyclic/processorCyclicFvsPatchFields.C
@@ -270,7 +275,6 @@ $(multivariateSchemes)/limitedCubic/multivariateLimitedCubic.C
 
 finiteVolume/fv/fv.C
 finiteVolume/fvSchemes/fvSchemes.C
-finiteVolume/fvData/fvData.C
 
 ddtSchemes = finiteVolume/ddtSchemes
 $(ddtSchemes)/ddtScheme/ddtSchemes.C
@@ -351,5 +355,14 @@ $(SRF)/derivedFvPatchFields/SRFVelocityFvPatchVectorField/SRFVelocityFvPatchVect
 fieldSources = $(general)/fieldSources
 $(fieldSources)/pressureGradientExplicitSource/pressureGradientExplicitSource.C
 $(fieldSources)/timeActivatedExplicitSource/timeActivatedExplicitSource.C
+
+basicSource = $(general)/fieldSources/basicSource
+$(basicSource)/basicSource/basicSource.C
+$(basicSource)/basicSource/basicSourceIO.C
+$(basicSource)/basicSource/basicSourceList.C
+$(basicSource)/basicSource/IObasicSourceList.C
+$(basicSource)/actuationDiskSource/actuationDiskSource.C
+$(basicSource)/explicitSource/explicitSource.C
+
 
 LIB = $(FOAM_LIBBIN)/libfiniteVolume

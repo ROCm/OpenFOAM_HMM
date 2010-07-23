@@ -82,6 +82,9 @@ protected:
 
 public:
 
+    //- Partial Runtime type information
+    static const word typeName;
+
     // Constructors
 
         //- Constructor from components
@@ -90,7 +93,9 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const basicThermo& thermoPhysicalModel
+            const basicThermo& thermoPhysicalModel,
+            const word& turbulenceModelName = turbulenceModel::typeName,
+            const word& modelName = typeName
         );
 
 

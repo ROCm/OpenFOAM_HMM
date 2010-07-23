@@ -15,14 +15,7 @@
     //- fvc::div(rho*turbulence->nuEff()*dev(fvc::grad(U)().T()))
     );
 
-    if (oCorr == nOuterCorr-1)
-    {
-        UEqn.relax(1);
-    }
-    else
-    {
-        UEqn.relax();
-    }
+    UEqn.relax();
 
     if (momentumPredictor)
     {
@@ -34,7 +27,6 @@
             (
                 fvc::interpolate(rho)*(g & mesh.Sf())
               - mesh.magSf()*fvc::snGrad(p)
-            ),
-            mesh.solver(oCorr == nOuterCorr-1 ? "UFinal" : "U")
+            )
         );
     }

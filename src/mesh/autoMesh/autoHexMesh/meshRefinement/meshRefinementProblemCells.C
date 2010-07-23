@@ -519,11 +519,9 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Collapse checking parameters
-    scalar volFraction = -1;
-    if (motionDict.found("minVolCollapseRatio"))
-    {
-        volFraction = readScalar(motionDict.lookup("minVolCollapseRatio"));
-    }
+    const scalar volFraction =
+        motionDict.lookupOrDefault<scalar>("minVolCollapseRatio", -1);
+
     const bool checkCollapse = (volFraction > 0);
     scalar minArea = -1;
     scalar maxNonOrtho = -1;

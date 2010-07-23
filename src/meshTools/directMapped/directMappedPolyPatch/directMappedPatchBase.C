@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,6 +32,9 @@ License
 #include "Random.H"
 #include "treeDataFace.H"
 #include "indexedOctree.H"
+#include "polyMesh.H"
+#include "polyPatch.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -362,7 +365,7 @@ void Foam::directMappedPatchBase::findSamples
                 "(const pointField&, labelList&"
                 ", labelList&, pointField&)"
             )   << "Did not find sample " << samples[sampleI]
-                << " on any processor of region" << sampleRegion_
+                << " on any processor of region " << sampleRegion_
                 << exit(FatalError);
         }
     }

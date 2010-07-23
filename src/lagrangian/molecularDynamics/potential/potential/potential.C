@@ -104,7 +104,7 @@ void Foam::potential::potential::readPotentialDict()
             "idList",
             mesh_.time().constant(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     );
@@ -120,7 +120,7 @@ void Foam::potential::potential::readPotentialDict()
                 "moleculeProperties",
                 mesh_.time().constant(),
                 mesh_,
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
                 false
             )
@@ -151,7 +151,7 @@ void Foam::potential::potential::readPotentialDict()
             "potentialDict",
             mesh_.time().system(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     );
@@ -229,18 +229,12 @@ void Foam::potential::potential::readPotentialDict()
 
     if (potentialDict.found("external"))
     {
-
         Info<< nl << "Reading external forces:" << endl;
 
         const dictionary& externalDict = potentialDict.subDict("external");
 
-        // *********************************************************************
         // gravity
-
-        if (externalDict.found("gravity"))
-        {
-            gravity_ = externalDict.lookup("gravity");
-        }
+        externalDict.readIfPresent("gravity", gravity_);
     }
 
     Info<< nl << tab << "gravity = " << gravity_ << endl;
@@ -260,7 +254,7 @@ void Foam::potential::potential::readMdInitialiseDict
             "moleculeProperties",
             mesh_.time().constant(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
             false
         )

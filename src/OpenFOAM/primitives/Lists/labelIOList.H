@@ -32,7 +32,7 @@ Description
 #ifndef labelIOList_H
 #define labelIOList_H
 
-#include "labelList.H"
+#include "label.H"
 #include "IOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -40,7 +40,6 @@ Description
 namespace Foam
 {
     typedef IOList<label> labelIOList;
-    typedef IOList<labelList> labelListIOList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

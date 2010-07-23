@@ -67,7 +67,10 @@ class LaunderSharmaKE
 :
     public RASModel
 {
-    // Private data
+
+protected:
+
+    // Protected data
 
         // Model coefficients
 
@@ -84,7 +87,7 @@ class LaunderSharmaKE
             volScalarField nut_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
         tmp<volScalarField> fMu() const;
         tmp<volScalarField> f2() const;
@@ -102,7 +105,9 @@ public:
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
-            transportModel& transport
+            transportModel& transport,
+            const word& turbulenceModelName = turbulenceModel::typeName,
+            const word& modelName = typeName
         );
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 #include "fvMesh.H"
 #include "fvMatrices.H"
 #include "geometricOneField.H"
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
@@ -62,25 +63,45 @@ void Foam::porousZone::adjustNegativeResistance(dimensionedVector& resist)
 
 Foam::porousZone::porousZone
 (
-    const word& name,
+    const keyType& key,
     const fvMesh& mesh,
     const dictionary& dict
 )
 :
-    name_(name),
+    key_(key),
     mesh_(mesh),
     dict_(dict),
-    cellZoneID_(mesh_.cellZones().findZoneID(name)),
+    cellZoneIds_(0),
     coordSys_(dict, mesh),
     porosity_(1),
+    intensity_(0),
+    mixingLength_(0),
     C0_(0),
     C1_(0),
     D_("D", dimensionSet(0, -2, 0, 0, 0), tensor::zero),
     F_("F", dimensionSet(0, -1, 0, 0, 0), tensor::zero)
 {
-    Info<< "Creating porous zone: " << name_ << endl;
+    Info<< "Creating porous zone: " << key_ << endl;
 
-    bool foundZone = (cellZoneID_ != -1);
+    if (key_.isPattern())
+    {
+        cellZoneIds_ = findStrings
+        (
+            key_,
+            mesh_.cellZones().names()
+        );
+    }
+    else
+    {
+        const label zoneId = mesh_.cellZones().findZoneID(key_);
+        if (zoneId != -1)
+        {
+            cellZoneIds_.setSize(1);
+            cellZoneIds_[0] = zoneId;
+        }
+    }
+
+    bool foundZone = !cellZoneIds_.empty();
     reduce(foundZone, orOp<bool>());
 
     if (!foundZone && Pstream::master())
@@ -88,27 +109,63 @@ Foam::porousZone::porousZone
         FatalErrorIn
         (
             "Foam::porousZone::porousZone"
-            "(const fvMesh&, const word&, const dictionary&)"
-        )   << "cannot find porous cellZone " << name_
+            "(const keyType&, const fvMesh&, const dictionary&)"
+        )   << "cannot find porous cellZone " << key_
             << exit(FatalError);
     }
 
 
     // porosity
-    if (dict_.readIfPresent("porosity", porosity_))
+    if
+    (
+        dict_.readIfPresent("porosity", porosity_)
+     && (porosity_ <= 0.0 || porosity_ > 1.0)
+    )
     {
-        if (porosity_ <= 0.0 || porosity_ > 1.0)
-        {
-            FatalIOErrorIn
-            (
-                "Foam::porousZone::porousZone"
-                "(const fvMesh&, const word&, const dictionary&)",
-                dict_
-            )
-                << "out-of-range porosity value " << porosity_
-                << exit(FatalIOError);
-        }
+        FatalIOErrorIn
+        (
+            "Foam::porousZone::porousZone"
+            "(const keyType&, const fvMesh&, const dictionary&)",
+            dict_
+        )
+            << "out-of-range porosity value " << porosity_
+            << exit(FatalIOError);
     }
+
+    // turbulent intensity
+    if
+    (
+        dict_.readIfPresent("intensity", intensity_)
+     && (intensity_ <= 0.0 || intensity_ > 1.0)
+    )
+    {
+        FatalIOErrorIn
+        (
+            "Foam::porousZone::porousZone"
+            "(const keyType&, const fvMesh&, const dictionary&)",
+            dict_
+        )
+            << "out-of-range turbulent intensity value " << intensity_
+            << exit(FatalIOError);
+    }
+
+    // turbulent length scale
+    if
+    (
+        dict_.readIfPresent("mixingLength", mixingLength_)
+     && (mixingLength_ <= 0.0)
+    )
+    {
+        FatalIOErrorIn
+        (
+            "Foam::porousZone::porousZone"
+            "(const keyType&, const fvMesh&, const dictionary&)",
+            dict_
+        )
+            << "out-of-range turbulent length scale " << mixingLength_
+            << exit(FatalIOError);
+    }
+
 
     // powerLaw coefficients
     if (const dictionary* dictPtr = dict_.subDictPtr("powerLaw"))
@@ -131,7 +188,7 @@ Foam::porousZone::porousZone
                 FatalIOErrorIn
                 (
                     "Foam::porousZone::porousZone"
-                    "(const fvMesh&, const word&, const dictionary&)",
+                    "(const keyType&, const fvMesh&, const dictionary&)",
                     dict_
                 )   << "incorrect dimensions for d: " << d.dimensions()
                     << " should be " << D_.dimensions()
@@ -154,7 +211,7 @@ Foam::porousZone::porousZone
                 FatalIOErrorIn
                 (
                     "Foam::porousZone::porousZone"
-                    "(const fvMesh&, const word&, const dictionary&)",
+                    "(const keyType&, const fvMesh&, const dictionary&)",
                     dict_
                 )   << "incorrect dimensions for f: " << f.dimensions()
                     << " should be " << F_.dimensions()
@@ -171,9 +228,6 @@ Foam::porousZone::porousZone
         }
     }
 
-    // provide some feedback for the user
-    // writeDict(Info, false);
-
     // it is an error not to define anything
     if
     (
@@ -185,11 +239,17 @@ Foam::porousZone::porousZone
         FatalIOErrorIn
         (
             "Foam::porousZone::porousZone"
-            "(const fvMesh&, const word&, const dictionary&)",
+            "(const keyType&, const fvMesh&, const dictionary&)",
             dict_
         )   << "neither powerLaw (C0/C1) "
                "nor Darcy-Forchheimer law (d/f) specified"
             << exit(FatalIOError);
+    }
+
+    // feedback for the user
+    if (dict.lookupOrDefault("printCoeffs", false))
+    {
+        writeDict(Info, false);
     }
 }
 
@@ -198,7 +258,7 @@ Foam::porousZone::porousZone
 
 void Foam::porousZone::addResistance(fvVectorMatrix& UEqn) const
 {
-    if (cellZoneID_ == -1)
+    if (cellZoneIds_.empty())
     {
         return;
     }
@@ -209,7 +269,6 @@ void Foam::porousZone::addResistance(fvVectorMatrix& UEqn) const
         compressible = true;
     }
 
-    const labelList& cells = mesh_.cellZones()[cellZoneID_];
     const scalarField& V = mesh_.V();
     scalarField& Udiag = UEqn.diag();
     vectorField& Usource = UEqn.source();
@@ -222,7 +281,6 @@ void Foam::porousZone::addResistance(fvVectorMatrix& UEqn) const
             addPowerLawResistance
             (
                 Udiag,
-                cells,
                 V,
                 mesh_.lookupObject<volScalarField>("rho"),
                 U
@@ -233,7 +291,6 @@ void Foam::porousZone::addResistance(fvVectorMatrix& UEqn) const
             addPowerLawResistance
             (
                 Udiag,
-                cells,
                 V,
                 geometricOneField(),
                 U
@@ -252,7 +309,6 @@ void Foam::porousZone::addResistance(fvVectorMatrix& UEqn) const
             (
                 Udiag,
                 Usource,
-                cells,
                 V,
                 mesh_.lookupObject<volScalarField>("rho"),
                 mesh_.lookupObject<volScalarField>("mu"),
@@ -265,7 +321,6 @@ void Foam::porousZone::addResistance(fvVectorMatrix& UEqn) const
             (
                 Udiag,
                 Usource,
-                cells,
                 V,
                 geometricOneField(),
                 mesh_.lookupObject<volScalarField>("nu"),
@@ -283,7 +338,7 @@ void Foam::porousZone::addResistance
     bool correctAUprocBC
 ) const
 {
-    if (cellZoneID_ == -1)
+    if (cellZoneIds_.empty())
     {
         return;
     }
@@ -294,7 +349,6 @@ void Foam::porousZone::addResistance
         compressible = true;
     }
 
-    const labelList& cells = mesh_.cellZones()[cellZoneID_];
     const vectorField& U = UEqn.psi();
 
     if (C0_ > VSMALL)
@@ -304,7 +358,6 @@ void Foam::porousZone::addResistance
             addPowerLawResistance
             (
                 AU,
-                cells,
                 mesh_.lookupObject<volScalarField>("rho"),
                 U
             );
@@ -314,7 +367,6 @@ void Foam::porousZone::addResistance
             addPowerLawResistance
             (
                 AU,
-                cells,
                 geometricOneField(),
                 U
             );
@@ -331,7 +383,6 @@ void Foam::porousZone::addResistance
             addViscousInertialResistance
             (
                 AU,
-                cells,
                 mesh_.lookupObject<volScalarField>("rho"),
                 mesh_.lookupObject<volScalarField>("mu"),
                 U
@@ -342,7 +393,6 @@ void Foam::porousZone::addResistance
             addViscousInertialResistance
             (
                 AU,
-                cells,
                 geometricOneField(),
                 mesh_.lookupObject<volScalarField>("nu"),
                 U
@@ -365,7 +415,8 @@ void Foam::porousZone::writeDict(Ostream& os, bool subDict) const
     if (subDict)
     {
         os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
-        os.writeKeyword("name") << zoneName() << token::END_STATEMENT << nl;
+        os.writeKeyword("name")
+            << zoneName() << token::END_STATEMENT << nl;
     }
     else
     {
@@ -375,40 +426,53 @@ void Foam::porousZone::writeDict(Ostream& os, bool subDict) const
 
     if (dict_.found("note"))
     {
-        os.writeKeyword("note") << string(dict_.lookup("note"))
-            << token::END_STATEMENT << nl;
+        os.writeKeyword("note")
+            << string(dict_.lookup("note")) << token::END_STATEMENT << nl;
     }
 
     coordSys_.writeDict(os, true);
 
     if (dict_.found("porosity"))
     {
-        os.writeKeyword("porosity") << porosity() << token::END_STATEMENT << nl;
+        os.writeKeyword("porosity")
+            << porosity() << token::END_STATEMENT << nl;
+    }
+
+    if (dict_.found("intensity"))
+    {
+        os.writeKeyword("intensity")
+            << intensity() << token::END_STATEMENT << nl;
+    }
+
+    if (dict_.found("mixingLength"))
+    {
+        os.writeKeyword("mixingLength")
+            << mixingLength() << token::END_STATEMENT << nl;
     }
 
     // powerLaw coefficients
     if (const dictionary* dictPtr = dict_.subDictPtr("powerLaw"))
     {
-        os << indent << "powerLaw";
+        os  << indent << "powerLaw";
         dictPtr->write(os);
     }
 
     // Darcy-Forchheimer coefficients
     if (const dictionary* dictPtr = dict_.subDictPtr("Darcy"))
     {
-        os << indent << "Darcy";
+        os  << indent << "Darcy";
         dictPtr->write(os);
     }
 
-    os << decrIndent << indent << token::END_BLOCK << endl;
+    os  << decrIndent << indent << token::END_BLOCK << endl;
 }
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const porousZone& pZone)
+Foam::Ostream& Foam::operator<<(Ostream& os, const porousZone& pz)
 {
-    pZone.writeDict(os);
+    pz.writeDict(os);
     return os;
 }
 

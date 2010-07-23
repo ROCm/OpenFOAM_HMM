@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,11 @@ Description
             d   d [0 -2 0 0 0]  (-1000 -1000 0.50753e+08);
             f   f [0 -1 0 0 0]  (-1000 -1000 12.83);
         }
-        Temperature [0 0 1 0 0] 600;
+        thermalModel
+        {
+            type    fixedTemperature;
+            T       T [0 0 1 0 0] 600;
+        }
     }
     )
     @endverbatim
@@ -69,7 +73,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class thermalPorousZones Declaration
+                     Class thermalPorousZones Declaration
 \*---------------------------------------------------------------------------*/
 
 class thermalPorousZones

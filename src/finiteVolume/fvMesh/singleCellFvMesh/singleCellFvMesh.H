@@ -40,6 +40,7 @@ SourceFiles
 
 #include "fvPatchFieldMapper.H"
 #include "fvMesh.H"
+#include "labelListIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

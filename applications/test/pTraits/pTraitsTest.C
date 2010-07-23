@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,15 +27,49 @@ Description
 
 #include "IOstreams.H"
 #include "pTraits.H"
+#include "vector.H"
+#include "tensor.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
+template<class T>
+void printTraits()
+{
+    Info<< pTraits<T>::typeName
+        << ": zero=" << pTraits<T>::zero
+        << " one=" << pTraits<T>::one << endl;
+}
+
+
+template<class T>
+void printTraits(const pTraits<T>& p)
+{
+    Info<< p.typeName << " == " << p << endl;
+}
+
+
 int main()
 {
-    Info<< pTraits<scalar>::typeName << endl;
+    printTraits<bool>();
+    printTraits<label>();
+    printTraits<scalar>();
+    printTraits<vector>();
+    printTraits<tensor>();
+
+    {
+        pTraits<bool> b(true);
+        printTraits(b);
+    }
+
+    {
+        pTraits<label> l(100);
+        printTraits(l);
+    }
+
+    printTraits(pTraits<scalar>(3.14159));
 
     Info<< "End\n" << endl;
 

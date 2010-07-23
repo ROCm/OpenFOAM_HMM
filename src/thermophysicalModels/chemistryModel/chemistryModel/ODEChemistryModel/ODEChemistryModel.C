@@ -508,10 +508,7 @@ Foam::ODEChemistryModel<CompType, ThermoType>::tc() const
             {
                 const Reaction<ThermoType>& R = reactions_[i];
 
-                omega
-                (
-                    R, c, Ti, pi, pf, cf, lRef, pr, cr, rRef
-                );
+                omega(R, c, Ti, pi, pf, cf, lRef, pr, cr, rRef);
 
                 forAll(R.rhs(), s)
                 {

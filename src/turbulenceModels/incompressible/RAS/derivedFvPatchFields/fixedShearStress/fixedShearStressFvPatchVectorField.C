@@ -38,8 +38,7 @@ namespace incompressible
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-fixedShearStressFvPatchVectorField::
-fixedShearStressFvPatchVectorField
+fixedShearStressFvPatchVectorField::fixedShearStressFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF
@@ -50,8 +49,7 @@ fixedShearStressFvPatchVectorField
 {}
 
 
-fixedShearStressFvPatchVectorField::
-fixedShearStressFvPatchVectorField
+fixedShearStressFvPatchVectorField::fixedShearStressFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
@@ -65,8 +63,7 @@ fixedShearStressFvPatchVectorField
 }
 
 
-fixedShearStressFvPatchVectorField::
-fixedShearStressFvPatchVectorField
+fixedShearStressFvPatchVectorField::fixedShearStressFvPatchVectorField
 (
     const fixedShearStressFvPatchVectorField& ptf,
     const fvPatch& p,
@@ -79,8 +76,7 @@ fixedShearStressFvPatchVectorField
 {}
 
 
-fixedShearStressFvPatchVectorField::
-fixedShearStressFvPatchVectorField
+fixedShearStressFvPatchVectorField::fixedShearStressFvPatchVectorField
 (
     const fixedShearStressFvPatchVectorField& ptf
 )
@@ -90,8 +86,7 @@ fixedShearStressFvPatchVectorField
 {}
 
 
-fixedShearStressFvPatchVectorField::
-fixedShearStressFvPatchVectorField
+fixedShearStressFvPatchVectorField::fixedShearStressFvPatchVectorField
 (
     const fixedShearStressFvPatchVectorField& ptf,
     const DimensionedField<vector, volMesh>& iF
@@ -119,7 +114,7 @@ void fixedShearStressFvPatchVectorField::updateCoeffs()
 
     const vectorField Ui = Uw.patchInternalField();
 
-    vector tauHat = tau0_/mag(tau0_);
+    vector tauHat = tau0_/(mag(tau0_) + ROOTVSMALL);
 
     const scalarField& ry = patch().deltaCoeffs();
 
@@ -161,4 +156,5 @@ makePatchTypeField
 
 } // End namespace incompressible
 } // End namespace Foam
+
 // ************************************************************************* //

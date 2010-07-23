@@ -315,7 +315,7 @@ void Foam::vtkPV3blockMesh::updateFoamMesh()
                 dbPtr_().constant(),
                 polyMesh::meshSubDir,
                 dbPtr_(),
-                IOobject::MUST_READ,
+                IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
                 false
             )

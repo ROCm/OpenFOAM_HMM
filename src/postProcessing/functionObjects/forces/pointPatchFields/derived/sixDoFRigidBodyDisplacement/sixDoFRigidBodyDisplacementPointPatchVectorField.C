@@ -76,11 +76,9 @@ sixDoFRigidBodyDisplacementPointPatchVectorField
         rhoInf_ = readScalar(dict.lookup("rhoInf"));
     }
 
-    if (dict.found("g"))
+    if (dict.readIfPresent("g", g_))
     {
         lookupGravity_ = -2;
-
-        g_ = dict.lookup("g");
     }
 
     if (!dict.found("value"))
@@ -248,9 +246,12 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::write(Ostream& os) const
 {
     pointPatchField<vector>::write(os);
 
-    os.writeKeyword("rhoInf") << rhoInf_ << token::END_STATEMENT << nl;
-
     os.writeKeyword("rhoName") << rhoName_ << token::END_STATEMENT << nl;
+
+    if (rhoName_ == "rhoInf")
+    {
+        os.writeKeyword("rhoInf") << rhoInf_ << token::END_STATEMENT << nl;
+    }
 
     if (lookupGravity_ == 0 || lookupGravity_ == -2)
     {

@@ -80,6 +80,7 @@ cellZoneSet::cellZoneSet
     if
     (
         (r == IOobject::MUST_READ)
+     || (r == IOobject::MUST_READ_IF_MODIFIED)
      || (r == IOobject::READ_IF_PRESENT && zoneID != -1)
     )
     {

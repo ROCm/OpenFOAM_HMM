@@ -44,10 +44,10 @@ namespace Foam
 
     addToRunTimeSelectionTable(polyPatch, cyclicPolyPatch, word);
     addToRunTimeSelectionTable(polyPatch, cyclicPolyPatch, dictionary);
-
+}
 
 template<>
-const char* NamedEnum<cyclicPolyPatch::transformType, 4>::names[] =
+const char* Foam::NamedEnum<Foam::cyclicPolyPatch::transformType, 4>::names[] =
 {
     "unknown",
     "rotational",
@@ -55,9 +55,8 @@ const char* NamedEnum<cyclicPolyPatch::transformType, 4>::names[] =
     "noOrdering"
 };
 
-const NamedEnum<cyclicPolyPatch::transformType, 4>
-    cyclicPolyPatch::transformTypeNames;
-}
+const Foam::NamedEnum<Foam::cyclicPolyPatch::transformType, 4>
+    Foam::cyclicPolyPatch::transformTypeNames;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -99,8 +98,8 @@ void Foam::cyclicPolyPatch::calcTransforms()
         {
             fileName casePath(boundaryMesh().mesh().time().path());
 
-            fileName nm0(casePath/name()+"_half0_faces.obj");
-            Pout<< "cyclicPolyPatch::calcTransforms : Writing half0"
+            fileName nm0(casePath/name()+"_faces.obj");
+            Pout<< "cyclicPolyPatch::calcTransforms : Writing " << name()
                 << " faces to OBJ file " << nm0 << endl;
             writeOBJ(nm0, half0, half0.points());
         }
@@ -114,7 +113,7 @@ void Foam::cyclicPolyPatch::calcTransforms()
 
 
 
-        // Half0
+        // Half1
 
         const cyclicPolyPatch& half1 = neighbPatch();
 
@@ -125,12 +124,12 @@ void Foam::cyclicPolyPatch::calcTransforms()
         {
             fileName casePath(boundaryMesh().mesh().time().path());
 
-            fileName nm1(casePath/name()+"_half1_faces.obj");
-            Pout<< "cyclicPolyPatch::calcTransforms : Writing half1"
+            fileName nm1(casePath/half1.name()+"_faces.obj");
+            Pout<< "cyclicPolyPatch::calcTransforms : Writing " << half1.name()
                 << " faces to OBJ file " << nm1 << endl;
             writeOBJ(nm1, half1, half1.points());
 
-            OFstream str(casePath/name()+"_half0_to_half1.obj");
+            OFstream str(casePath/name()+"_to_" + half1.name() + ".obj");
             label vertI = 0;
             Pout<< "cyclicPolyPatch::calcTransforms :"
                 << " Writing coupled face centres as lines to " << str.name()
@@ -1059,18 +1058,18 @@ bool Foam::cyclicPolyPatch::order
             fileName nm0
             (
                 boundaryMesh().mesh().time().path()
-               /name()+"_half0_faces.obj"
+               /neighbPatch().name()+"_faces.obj"
             );
-            Pout<< "cyclicPolyPatch::order : Writing half0"
+            Pout<< "cyclicPolyPatch::order : Writing neighbour"
                 << " faces to OBJ file " << nm0 << endl;
             writeOBJ(nm0, pp0, pp0.points());
 
             fileName nm1
             (
                 boundaryMesh().mesh().time().path()
-               /name()+"_half1_faces.obj"
+               /name()+"_faces.obj"
             );
-            Pout<< "cyclicPolyPatch::order : Writing half1"
+            Pout<< "cyclicPolyPatch::order : Writing my"
                 << " faces to OBJ file " << nm1 << endl;
             writeOBJ(nm1, pp, pp.points());
 

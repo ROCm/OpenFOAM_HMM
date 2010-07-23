@@ -415,11 +415,7 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
 
     {
         // Decomposition
-        decomposerPtr_ = decompositionMethod::New
-        (
-            decomposeDict,
-            mesh_
-        );
+        decomposerPtr_ = decompositionMethod::New(decomposeDict);
         decompositionMethod& decomposer = decomposerPtr_();
 
 

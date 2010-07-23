@@ -41,12 +41,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(metisDecomp, 0);
 
-    addToRunTimeSelectionTable
-    (
-        decompositionMethod,
-        metisDecomp,
-        dictionaryMesh
-    );
+    addToRunTimeSelectionTable(decompositionMethod, metisDecomp, dictionary);
 }
 
 
@@ -170,31 +165,31 @@ Foam::label Foam::metisDecomp::decompose
             }
         }
 
-        if (metisCoeffs.readIfPresent("cellWeightsFile", weightsFile))
-        {
-            Info<< "metisDecomp : Using cell-based weights." << endl;
-
-            IOList<int> cellIOWeights
-            (
-                IOobject
-                (
-                    weightsFile,
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE
-                )
-            );
-            cellWeights.transfer(cellIOWeights);
-
-            if (cellWeights.size() != xadj.size()-1)
-            {
-                FatalErrorIn("metisDecomp::decompose(const pointField&)")
-                    << "Number of cell weights " << cellWeights.size()
-                    << " does not equal number of cells " << xadj.size()-1
-                    << exit(FatalError);
-            }
-        }
+        //if (metisCoeffs.readIfPresent("cellWeightsFile", weightsFile))
+        //{
+        //    Info<< "metisDecomp : Using cell-based weights." << endl;
+        //
+        //    IOList<int> cellIOWeights
+        //    (
+        //        IOobject
+        //        (
+        //            weightsFile,
+        //            mesh_.time().timeName(),
+        //            mesh_,
+        //            IOobject::MUST_READ,
+        //            IOobject::AUTO_WRITE
+        //        )
+        //    );
+        //    cellWeights.transfer(cellIOWeights);
+        //
+        //    if (cellWeights.size() != xadj.size()-1)
+        //    {
+        //        FatalErrorIn("metisDecomp::decompose(const pointField&)")
+        //            << "Number of cell weights " << cellWeights.size()
+        //            << " does not equal number of cells " << xadj.size()-1
+        //            << exit(FatalError);
+        //    }
+        //}
     }
 
     int nProcs = nProcessors_;
@@ -304,14 +299,9 @@ Foam::label Foam::metisDecomp::decompose
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::metisDecomp::metisDecomp
-(
-    const dictionary& decompositionDict,
-    const polyMesh& mesh
-)
+Foam::metisDecomp::metisDecomp(const dictionary& decompositionDict)
 :
-    decompositionMethod(decompositionDict),
-    mesh_(mesh)
+    decompositionMethod(decompositionDict)
 {}
 
 
@@ -319,11 +309,12 @@ Foam::metisDecomp::metisDecomp
 
 Foam::labelList Foam::metisDecomp::decompose
 (
+    const polyMesh& mesh,
     const pointField& points,
     const scalarField& pointWeights
 )
 {
-    if (points.size() != mesh_.nCells())
+    if (points.size() != mesh.nCells())
     {
         FatalErrorIn
         (
@@ -332,71 +323,53 @@ Foam::labelList Foam::metisDecomp::decompose
             << endl
             << "and supply one coordinate (cellCentre) for every cell." << endl
             << "The number of coordinates " << points.size() << endl
-            << "The number of cells in the mesh " << mesh_.nCells()
+            << "The number of cells in the mesh " << mesh.nCells()
             << exit(FatalError);
     }
 
-    List<int> adjncy;
-    List<int> xadj;
-    calcCSR(mesh_, adjncy, xadj);
+    CompactListList<label> cellCells;
+    calcCellCells(mesh, identity(mesh.nCells()), mesh.nCells(), cellCells);
 
     // Decompose using default weights
-    List<int> finalDecomp;
-    decompose(adjncy, xadj, pointWeights, finalDecomp);
+    labelList decomp;
+    decompose(cellCells.m(), cellCells.offsets(), pointWeights, decomp);
 
-    // Copy back to labelList
-    labelList decomp(finalDecomp.size());
-    forAll(decomp, i)
-    {
-        decomp[i] = finalDecomp[i];
-    }
     return decomp;
 }
 
 
 Foam::labelList Foam::metisDecomp::decompose
 (
+    const polyMesh& mesh,
     const labelList& agglom,
     const pointField& agglomPoints,
     const scalarField& agglomWeights
 )
 {
-    if (agglom.size() != mesh_.nCells())
+    if (agglom.size() != mesh.nCells())
     {
         FatalErrorIn
         (
             "metisDecomp::decompose"
             "(const labelList&, const pointField&, const scalarField&)"
         )   << "Size of cell-to-coarse map " << agglom.size()
-            << " differs from number of cells in mesh " << mesh_.nCells()
+            << " differs from number of cells in mesh " << mesh.nCells()
             << exit(FatalError);
     }
 
     // Make Metis CSR (Compressed Storage Format) storage
     //   adjncy      : contains neighbours (= edges in graph)
     //   xadj(celli) : start of information in adjncy for celli
-    List<int> adjncy;
-    List<int> xadj;
-    {
-        // Get cellCells on coarse mesh.
-        labelListList cellCells;
-        calcCellCells
-        (
-            mesh_,
-            agglom,
-            agglomPoints.size(),
-            cellCells
-        );
 
-        calcCSR(cellCells, adjncy, xadj);
-    }
+    CompactListList<label> cellCells;
+    calcCellCells(mesh, agglom, agglomPoints.size(), cellCells);
 
     // Decompose using default weights
-    List<int> finalDecomp;
-    decompose(adjncy, xadj, agglomWeights, finalDecomp);
+    labelList finalDecomp;
+    decompose(cellCells.m(), cellCells.offsets(), agglomWeights, finalDecomp);
 
 
-    // Rework back into decomposition for original mesh_
+    // Rework back into decomposition for original mesh
     labelList fineDistribution(agglom.size());
 
     forAll(fineDistribution, i)
@@ -404,7 +377,7 @@ Foam::labelList Foam::metisDecomp::decompose
         fineDistribution[i] = finalDecomp[agglom[i]];
     }
 
-    return fineDistribution;
+    return finalDecomp;
 }
 
 
@@ -431,21 +404,12 @@ Foam::labelList Foam::metisDecomp::decompose
     //   adjncy      : contains neighbours (= edges in graph)
     //   xadj(celli) : start of information in adjncy for celli
 
-    List<int> adjncy;
-    List<int> xadj;
-    calcCSR(globalCellCells, adjncy, xadj);
-
+    CompactListList<label> cellCells(globalCellCells);
 
     // Decompose using default weights
-    List<int> finalDecomp;
-    decompose(adjncy, xadj, cellWeights, finalDecomp);
+    labelList decomp;
+    decompose(cellCells.m(), cellCells.offsets(), cellWeights, decomp);
 
-    // Copy back to labelList
-    labelList decomp(finalDecomp.size());
-    forAll(decomp, i)
-    {
-        decomp[i] = finalDecomp[i];
-    }
     return decomp;
 }
 

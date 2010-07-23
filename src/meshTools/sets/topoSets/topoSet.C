@@ -309,6 +309,7 @@ Foam::topoSet::topoSet(const IOobject& obj, const word& wantedType)
     if
     (
         readOpt() == IOobject::MUST_READ
+     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
      || (
             readOpt() == IOobject::READ_IF_PRESENT
          && headerOk()
@@ -356,6 +357,7 @@ Foam::topoSet::topoSet
     if
     (
         readOpt() == IOobject::MUST_READ
+     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
      || (
             readOpt() == IOobject::READ_IF_PRESENT
          && headerOk()

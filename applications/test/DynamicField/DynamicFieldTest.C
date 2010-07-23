@@ -43,6 +43,9 @@ int main(int argc, char *argv[])
         dl.append(2);
         dl.append(1);
         Pout<< "appending : dl:" << dl << endl;
+
+        dl[2] *= 10;
+        Pout<< "assigning : dl:" << dl << endl;
     }
 
     {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,14 +42,18 @@ void Foam::fieldMinMax::calcMinMaxFields(const word& fieldName)
         {
             case mdMag:
             {
-                scalar minValue = min(mag(field)).value();
-                scalar maxValue = max(mag(field)).value();
+                const scalar minValue = min(mag(field)).value();
+                const scalar maxValue = max(mag(field)).value();
 
                 if (Pstream::master())
                 {
-                    fieldMinMaxFilePtr_() << obr_.time().value() << tab
-                        << fieldName << tab << minValue << tab << maxValue
-                        << endl;
+                    if (write_)
+                    {
+                        fieldMinMaxFilePtr_()
+                            << obr_.time().value() << tab
+                            << fieldName << tab << minValue << tab << maxValue
+                            << endl;
+                    }
 
                     if (log_)
                     {
@@ -65,14 +69,18 @@ void Foam::fieldMinMax::calcMinMaxFields(const word& fieldName)
             }
             case mdCmpt:
             {
-                Type minValue = min(field).value();
-                Type maxValue = max(field).value();
+                const Type minValue = min(field).value();
+                const Type maxValue = max(field).value();
 
                 if (Pstream::master())
                 {
-                    fieldMinMaxFilePtr_() << obr_.time().value() << tab
-                        << fieldName << tab << minValue << tab << maxValue
-                        << endl;
+                    if (write_)
+                    {
+                        fieldMinMaxFilePtr_()
+                            << obr_.time().value() << tab
+                            << fieldName << tab << minValue << tab << maxValue
+                            << endl;
+                    }
 
                     if (log_)
                     {

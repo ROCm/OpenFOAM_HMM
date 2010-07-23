@@ -94,7 +94,7 @@ Foam::domainDecomposition::domainDecomposition(const IOobject& io)
             "decomposeParDict",
             time().system(),
             *this,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     ),
@@ -112,11 +112,7 @@ Foam::domainDecomposition::domainDecomposition(const IOobject& io)
     procProcessorPatchSubPatchIDs_(nProcs_),
     procProcessorPatchSubPatchStarts_(nProcs_)
 {
-    if (decompositionDict_.found("distributed"))
-    {
-        Switch distributed(decompositionDict_.lookup("distributed"));
-        distributed_ = distributed;
-    }
+    decompositionDict_.readIfPresent("distributed", distributed_);
 }
 
 

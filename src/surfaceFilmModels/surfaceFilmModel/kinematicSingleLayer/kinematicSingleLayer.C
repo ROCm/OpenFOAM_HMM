@@ -587,7 +587,7 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
             filmRegionName_,
             time_.timeName(),
             time_,
-            IOobject::MUST_READ
+            IOobject::MUST_READ_IF_MODIFIED
         )
     ),
     nHat_

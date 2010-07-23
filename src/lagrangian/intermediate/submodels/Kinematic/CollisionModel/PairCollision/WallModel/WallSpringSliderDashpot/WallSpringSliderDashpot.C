@@ -45,7 +45,12 @@ void Foam::WallSpringSliderDashpot<CloudType>::findMinMaxProperties
 
         // Finding minimum diameter to avoid excessive arithmetic
 
-        scalar dEff = p.d()*cbrt(p.nParticle()*volumeFactor_);
+        scalar dEff = p.d();
+
+        if (useEquivalentSize_)
+        {
+            dEff *= cbrt(p.nParticle()*volumeFactor_);
+        }
 
         rMin = min(dEff, rMin);
 
@@ -64,25 +69,22 @@ void Foam::WallSpringSliderDashpot<CloudType>::findMinMaxProperties
     rMin /= 2.0;
 }
 
+
 template <class CloudType>
 void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 (
     typename CloudType::parcelType& p,
     const point& site,
     const WallSiteData<vector>& data,
-    scalar pNu,
-    scalar pE,
     scalar pREff,
-    scalar Estar,
-    scalar kN,
-    scalar Gstar
+    scalar kN
 ) const
 {
     vector r_PW = p.position() - site;
 
     vector U_PW = p.U() - data.wallData();
 
-    scalar normalOverlapMag = pREff - mag(r_PW);
+    scalar normalOverlapMag = max(pREff - mag(r_PW), 0.0);
 
     vector rHat_PW = r_PW/(mag(r_PW) + VSMALL);
 
@@ -100,17 +102,16 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 
     scalar deltaT = this->owner().mesh().time().deltaTValue();
 
-    // For remembering previous overlap
-    // vector deltaTangentialOverlap_PW = USlip_PW * deltaT;
-    // tangentialOverlap_PW += deltaTangentialOverlap_PW;
+    vector& tangentialOverlap_PW =
+        p.collisionRecords().matchWallRecord(-r_PW, pREff).collisionData();
 
-    vector tangentialOverlap_PW = USlip_PW * deltaT;
+    tangentialOverlap_PW += USlip_PW*deltaT;
 
     scalar tangentialOverlapMag = mag(tangentialOverlap_PW);
 
     if (tangentialOverlapMag > VSMALL)
     {
-        scalar kT = 8.0*sqrt(pREff*normalOverlapMag)*Gstar;
+        scalar kT = 8.0*sqrt(pREff*normalOverlapMag)*Gstar_;
 
         scalar etaT = etaN;
 
@@ -124,7 +125,7 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 
             fT_PW = -mu_*mag(fN_PW)*USlip_PW/mag(USlip_PW);
 
-            // tangentialOverlap_PW = vector::zero;
+            tangentialOverlap_PW = vector::zero;
         }
         else
         {
@@ -151,8 +152,8 @@ Foam::WallSpringSliderDashpot<CloudType>::WallSpringSliderDashpot
 )
 :
     WallModel<CloudType>(dict, cloud, typeName),
-    E_(dimensionedScalar(this->coeffDict().lookup("youngsModulus")).value()),
-    nu_(dimensionedScalar(this->coeffDict().lookup("poissonsRatio")).value()),
+    Estar_(),
+    Gstar_(),
     alpha_(dimensionedScalar(this->coeffDict().lookup("alpha")).value()),
     b_(dimensionedScalar(this->coeffDict().lookup("b")).value()),
     mu_(dimensionedScalar(this->coeffDict().lookup("mu")).value()),
@@ -163,8 +164,32 @@ Foam::WallSpringSliderDashpot<CloudType>::WallSpringSliderDashpot
             this->coeffDict().lookup("collisionResolutionSteps")
         )
     ),
-    volumeFactor_(this->dict().lookupOrDefault("volumeFactor", 1.0))
-{}
+    volumeFactor_(1.0),
+    useEquivalentSize_(Switch(this->coeffDict().lookup("useEquivalentSize")))
+{
+    if (useEquivalentSize_)
+    {
+        volumeFactor_ = readScalar(this->coeffDict().lookup("volumeFactor"));
+    }
+
+    scalar nu = dimensionedScalar
+    (
+        this->coeffDict().lookup("poissonsRatio")
+    ).value();
+
+    scalar E = dimensionedScalar
+    (
+        this->coeffDict().lookup("youngsModulus")
+    ).value();
+
+    scalar pNu = this->owner().constProps().poissonsRatio();
+
+    scalar pE = this->owner().constProps().youngsModulus();
+
+    Estar_ = 1/((1 - sqr(pNu))/pE + (1 - sqr(nu))/E);
+
+    Gstar_ = 1/(2*((2 + pNu - sqr(pNu))/pE + (2 + nu - sqr(nu))/E));
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -182,8 +207,16 @@ Foam::scalar Foam::WallSpringSliderDashpot<CloudType>::pREff
     const typename CloudType::parcelType& p
 ) const
 {
-    return p.d()/2*cbrt(p.nParticle()*volumeFactor_);
+    if (useEquivalentSize_)
+    {
+        return p.d()/2*cbrt(p.nParticle()*volumeFactor_);
+    }
+    else
+    {
+        return p.d()/2;
+    }
 }
+
 
 template<class CloudType>
 bool Foam::WallSpringSliderDashpot<CloudType>::controlsTimestep() const
@@ -206,17 +239,11 @@ Foam::label Foam::WallSpringSliderDashpot<CloudType>::nSubCycles() const
 
     findMinMaxProperties(rMin, rhoMax, UMagMax);
 
-    scalar pNu = this->owner().constProps().poissonsRatio();
-
-    scalar pE = this->owner().constProps().youngsModulus();
-
-    scalar Estar = 1/((1 - sqr(pNu))/pE + (1 - sqr(nu_))/E_);
-
     // Note:  pi^(7/5)*(5/4)^(2/5) = 5.429675
     scalar minCollisionDeltaT =
         5.429675
        *rMin
-       *pow(rhoMax/(Estar*sqrt(UMagMax) + VSMALL), 0.4)
+       *pow(rhoMax/(Estar_*sqrt(UMagMax) + VSMALL), 0.4)
        /collisionResolutionSteps_;
 
     return ceil(this->owner().time().deltaTValue()/minCollisionDeltaT);
@@ -233,17 +260,9 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
     const List<WallSiteData<vector> >& sharpSiteData
 ) const
 {
-    scalar pNu = this->owner().constProps().poissonsRatio();
-
-    scalar pE = this->owner().constProps().youngsModulus();
-
     scalar pREff = this->pREff(p);
 
-    scalar Estar = 1/((1 - sqr(pNu))/pE + (1 - sqr(nu_))/E_);
-
-    scalar kN = (4.0/3.0)*sqrt(pREff)*Estar;
-
-    scalar GStar = 1/(2*((2 + pNu - sqr(pNu))/pE + (2 + nu_ - sqr(nu_))/E_));
+    scalar kN = (4.0/3.0)*sqrt(pREff)*Estar_;
 
     forAll(flatSitePoints, siteI)
     {
@@ -252,12 +271,8 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
             p,
             flatSitePoints[siteI],
             flatSiteData[siteI],
-            pNu,
-            pE,
             pREff,
-            Estar,
-            kN,
-            GStar
+            kN
         );
     }
 
@@ -270,12 +285,8 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
             p,
             sharpSitePoints[siteI],
             sharpSiteData[siteI],
-            pNu,
-            pE,
             pREff,
-            Estar,
-            kN,
-            GStar
+            kN
         );
     }
 }

@@ -26,7 +26,6 @@ License
 #include "sphericalCS.H"
 
 #include "one.H"
-#include "Switch.H"
 #include "mathematicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -106,7 +105,7 @@ Foam::sphericalCS::sphericalCS
 )
 :
     coordinateSystem(name, dict),
-    inDegrees_(dict.lookupOrDefault<Switch>("degrees", true))
+    inDegrees_(dict.lookupOrDefault("degrees", true))
 {}
 
 

@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 
         #include "readSIMPLEControls.H"
 
-        p.storePrevIter();
+        p_rgh.storePrevIter();
 
         // Pressure-velocity SIMPLE corrector
         {

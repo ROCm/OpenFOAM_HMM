@@ -189,7 +189,8 @@ void Foam::fieldToCell::applyToSet
         mesh().time().timeName(),
         mesh(),
         IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
+        IOobject::AUTO_WRITE,
+        false
     );
 
     if (!fieldObject.headerOk())

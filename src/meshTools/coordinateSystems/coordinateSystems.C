@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 #include "coordinateSystems.H"
 #include "IOPtrList.H"
 #include "Time.H"
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -97,13 +98,25 @@ const Foam::coordinateSystems& Foam::coordinateSystems::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::coordinateSystems::find(const word& keyword) const
+Foam::label Foam::coordinateSystems::find(const keyType& key) const
 {
-    forAll(*this, i)
+    if (key.isPattern())
     {
-        if (keyword == operator[](i).name())
+        labelList allFound = findAll(key);
+        // return first element
+        if (!allFound.empty())
         {
-            return i;
+            return allFound[0];
+        }
+    }
+    else
+    {
+        forAll(*this, i)
+        {
+            if (key == operator[](i).name())
+            {
+                return i;
+            }
         }
     }
 
@@ -111,9 +124,34 @@ Foam::label Foam::coordinateSystems::find(const word& keyword) const
 }
 
 
-bool Foam::coordinateSystems::found(const word& keyword) const
+Foam::labelList Foam::coordinateSystems::findAll(const keyType& key) const
 {
-    return find(keyword) >= 0;
+    labelList allFound;
+    if (key.isPattern())
+    {
+        allFound = findStrings(key, toc());
+    }
+    else
+    {
+        allFound.setSize(size());
+        label nFound = 0;
+        forAll(*this, i)
+        {
+            if (key == operator[](i).name())
+            {
+                allFound[nFound++] = i;
+            }
+        }
+        allFound.setSize(nFound);
+    }
+
+    return allFound;
+}
+
+
+bool Foam::coordinateSystems::found(const keyType& key) const
+{
+    return find(key) >= 0;
 }
 
 

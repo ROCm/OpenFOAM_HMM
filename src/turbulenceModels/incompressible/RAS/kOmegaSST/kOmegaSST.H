@@ -98,7 +98,10 @@ class kOmegaSST
 :
     public RASModel
 {
-    // Private data
+
+protected:
+
+    // Protected data
 
         // Model coefficients
             dimensionedScalar alphaK1_;
@@ -129,7 +132,7 @@ class kOmegaSST
             volScalarField nut_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
         tmp<volScalarField> F1(const volScalarField& CDkOmega) const;
         tmp<volScalarField> F2() const;
@@ -178,7 +181,9 @@ public:
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
-            transportModel& transport
+            transportModel& transport,
+            const word& turbulenceModelName = turbulenceModel::typeName,
+            const word& modelName = typeName
         );
 
 

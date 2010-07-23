@@ -24,8 +24,7 @@ License
 \*----------------------------------------------------------------------------*/
 
 #include "streamLineParticle.H"
-#include "vectorIOFieldField.H"
-
+#include "vectorFieldIOField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -394,13 +393,13 @@ void Foam::streamLineParticle::readFields(Cloud<streamLineParticle>& c)
     );
     c.checkFieldIOobject(c, lifeTime);
 
-    vectorIOFieldField sampledPositions
+    vectorFieldIOField sampledPositions
     (
         c.fieldIOobject("sampledPositions", IOobject::MUST_READ)
     );
     c.checkFieldIOobject(c, sampledPositions);
 
-//    vectorIOFieldField sampleVelocity
+//    vectorFieldIOField sampleVelocity
 //    (
 //        c.fieldIOobject("sampleVelocity", IOobject::MUST_READ)
 //    );
@@ -428,12 +427,12 @@ void Foam::streamLineParticle::writeFields(const Cloud<streamLineParticle>& c)
         c.fieldIOobject("lifeTime", IOobject::NO_READ),
         np
     );
-    vectorIOFieldField sampledPositions
+    vectorFieldIOField sampledPositions
     (
         c.fieldIOobject("sampledPositions", IOobject::NO_READ),
         np
     );
-//    vectorIOFieldField sampleVelocity
+//    vectorFieldIOField sampleVelocity
 //    (
 //        c.fieldIOobject("sampleVelocity", IOobject::NO_READ),
 //        np

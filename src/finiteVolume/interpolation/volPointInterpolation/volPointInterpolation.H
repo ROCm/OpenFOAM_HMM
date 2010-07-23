@@ -25,7 +25,8 @@ Class
     Foam::volPointInterpolation
 
 Description
-    Foam::volPointInterpolation
+    Interpolate from cell centres to points (vertices) using inverse distance
+    weighting
 
 SourceFiles
     volPointInterpolation.C

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -101,6 +101,8 @@ tmp<GeometricField<Type, fvPatchField, volMesh> > operator&
 template<class Type>
 Ostream& operator<<(Ostream&, const fvMatrix<Type>&);
 
+template<class T> class UIndirectList;
+
 
 /*---------------------------------------------------------------------------*\
                            Class fvMatrix Declaration
@@ -112,8 +114,6 @@ class fvMatrix
     public refCount,
     public lduMatrix
 {
-public:
-
     // Private data
 
         //- Const reference to GeometricField<Type, fvPatchField, volMesh>
@@ -139,8 +139,12 @@ public:
         mutable GeometricField<Type, fvsPatchField, surfaceMesh>
             *faceFluxCorrectionPtr_;
 
+protected:
 
-    // Private Member Functions
+    //- Declare friendship with the fvSolver class
+    friend class fvSolver;
+
+    // Protected Member Functions
 
         //- Add patch contribution to internal field
         template<class Type2>
@@ -193,12 +197,22 @@ public:
                 const bool couples=true
             ) const;
 
+        // Matrix manipulation functionality
+
+            //- Set solution in given cells to the specified values
+            template<template<class> class ListType>
+            void setValuesFromList
+            (
+                const unallocLabelList& cells,
+                const ListType<Type>& values
+            );
+
 
 public:
 
     //- Solver class returned by the solver function
     //  used for systems in which it is useful to cache the solver for reuse
-    //  e.g. if the solver is potentialy expensive to construct (AMG) and can
+    //  e.g. if the solver is potentially expensive to construct (AMG) and can
     //  be used several times (PISO)
     class fvSolver
     {
@@ -309,12 +323,20 @@ public:
 
         // Operations
 
-            //- Set solution in given cells and eliminate corresponding
-            //  equations from the matrix
+            //- Set solution in given cells to the specified values
+            //  and eliminate the corresponding equations from the matrix.
             void setValues
             (
-                const labelList& cells,
-                const Field<Type>& values
+                const unallocLabelList& cells,
+                const UList<Type>& values
+            );
+
+            //- Set solution in given cells to the specified values
+            //  and eliminate the corresponding equations from the matrix.
+            void setValues
+            (
+                const unallocLabelList& cells,
+                const UIndirectList<Type>& values
             );
 
             //- Set reference level for solution

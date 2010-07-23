@@ -39,13 +39,6 @@ namespace Foam
         simpleGeomDecomp,
         dictionary
     );
-
-    addToRunTimeSelectionTable
-    (
-        decompositionMethod,
-        simpleGeomDecomp,
-        dictionaryMesh
-    );
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -132,26 +125,6 @@ void Foam::simpleGeomDecomp::assignToProcessorGroup
     }
 }
 
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::simpleGeomDecomp::simpleGeomDecomp(const dictionary& decompositionDict)
-:
-    geomDecomp(decompositionDict, typeName)
-{}
-
-
-Foam::simpleGeomDecomp::simpleGeomDecomp
-(
-    const dictionary& decompositionDict,
-    const polyMesh&
-)
-:
-    geomDecomp(decompositionDict, typeName)
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::labelList Foam::simpleGeomDecomp::decompose(const pointField& points)
 {
@@ -315,4 +288,16 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
 
     return finalDecomp;
 }
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::simpleGeomDecomp::simpleGeomDecomp(const dictionary& decompositionDict)
+:
+    geomDecomp(decompositionDict, typeName)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 // ************************************************************************* //

@@ -48,11 +48,6 @@ class scotchDecomp
 :
     public decompositionMethod
 {
-    // Private data
-
-        const polyMesh& mesh_;
-
-
     // Private Member Functions
 
         //- Check and print error message
@@ -60,6 +55,7 @@ class scotchDecomp
 
         label decompose
         (
+            const fileName& meshPath,
             const List<int>& adjncy,
             const List<int>& xadj,
             const scalarField& cWeights,
@@ -80,11 +76,7 @@ public:
     // Constructors
 
         //- Construct given the decomposition dictionary and mesh
-        scotchDecomp
-        (
-            const dictionary& decompositionDict,
-            const polyMesh& mesh
-        );
+        scotchDecomp(const dictionary& decompositionDict);
 
 
     //- Destructor
@@ -107,6 +99,7 @@ public:
         //  might otherwise overflow.
         virtual labelList decompose
         (
+            const polyMesh& mesh,
             const pointField& points,
             const scalarField& pointWeights
         );
@@ -118,6 +111,7 @@ public:
         //  See note on weights above.
         virtual labelList decompose
         (
+            const polyMesh& mesh,
             const labelList& agglom,
             const pointField& regionPoints,
             const scalarField& regionWeights

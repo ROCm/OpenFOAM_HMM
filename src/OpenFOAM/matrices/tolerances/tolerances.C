@@ -36,7 +36,7 @@ Foam::tolerances::tolerances(const Time& t, const fileName& dictName)
             dictName,
             t.system(),
             t,
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     ),

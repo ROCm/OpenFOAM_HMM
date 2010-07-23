@@ -138,7 +138,7 @@ nutUTabulatedWallFunctionFvPatchScalarField
             uPlusTableName_,
             patch().boundaryMesh().mesh().time().constant(),
             patch().boundaryMesh().mesh(),
-            IOobject::MUST_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
             false
         ),

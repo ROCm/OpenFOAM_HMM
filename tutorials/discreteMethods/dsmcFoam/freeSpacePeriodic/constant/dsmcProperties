@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -27,7 +27,6 @@ nEquivalentParticles            1e12;
 
 WallInteractionModel            SpecularReflection;
 
-SpecularReflectionCoeffs {}
 
 // Binary Collision Model
 // ~~~~~~~~~~~~~~~~~~~~~~
@@ -43,9 +42,8 @@ LarsenBorgnakkeVariableHardSphereCoeffs
 
 // Inflow Boundary Model
 // ~~~~~~~~~~~~~~~~~~~~~
-InflowBoundaryModel             NoInflow;
+InflowBoundaryModel             none;
 
-NoInflowCoeffs {}
 
 // Molecular species
 // ~~~~~~~~~~~~~~~~~

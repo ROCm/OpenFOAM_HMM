@@ -47,7 +47,7 @@ namespace Foam
     (
         decompositionMethod,
         scotchDecomp,
-        dictionaryMesh
+        dictionary
     );
 }
 
@@ -59,6 +59,7 @@ void Foam::scotchDecomp::check(const int retVal, const char* str)
 
 Foam::label Foam::scotchDecomp::decompose
 (
+    const fileName& meshPath,
     const List<int>& adjncy,
     const List<int>& xadj,
     const scalarField& cWeights,
@@ -68,13 +69,14 @@ Foam::label Foam::scotchDecomp::decompose
 {
     FatalErrorIn
     (
-        "label scotchDecomp::decompose"
-        "("
-            "const List<int>&, "
-            "const List<int>&, "
-            "const scalarField&, "
-            "List<int>&"
-        ")"
+        "label scotchDecomp::decompose\n"
+        "(\n"
+            "const fileName& meshPath,\n"
+            "const List<int>&,\n"
+            "const List<int>&,\n"
+            "const scalarField&,\n"
+            "List<int>&\n"
+        ")\n"
     )   << notImplementedMessage << exit(FatalError);
 
     return -1;
@@ -85,12 +87,10 @@ Foam::label Foam::scotchDecomp::decompose
 
 Foam::scotchDecomp::scotchDecomp
 (
-    const dictionary& decompositionDict,
-    const polyMesh& mesh
+    const dictionary& decompositionDict
 )
 :
-    decompositionMethod(decompositionDict),
-    mesh_(mesh)
+    decompositionMethod(decompositionDict)
 {}
 
 
@@ -98,6 +98,7 @@ Foam::scotchDecomp::scotchDecomp
 
 Foam::labelList Foam::scotchDecomp::decompose
 (
+    const polyMesh& mesh,
     const pointField& points,
     const scalarField& pointWeights
 )
@@ -117,6 +118,7 @@ Foam::labelList Foam::scotchDecomp::decompose
 
 Foam::labelList Foam::scotchDecomp::decompose
 (
+    const polyMesh& mesh,
     const labelList& agglom,
     const pointField& agglomPoints,
     const scalarField& pointWeights

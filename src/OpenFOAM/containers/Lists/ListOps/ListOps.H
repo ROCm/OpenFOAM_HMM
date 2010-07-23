@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,6 +42,16 @@ SourceFiles
 
 namespace Foam
 {
+
+extern const labelList emptyLabelList;
+
+//- Return reference to zero-sized list. Compare to List::null() which returns
+//  null pointer cast as list reference.
+template<class Type>
+static const List<Type>& emptyList()
+{
+    return *reinterpret_cast<const List<Type>* >(&emptyLabelList);
+}
 
 //- Renumber the values (not the indices) of a list.
 //  Negative ListType elements are left as is.

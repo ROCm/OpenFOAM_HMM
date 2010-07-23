@@ -40,7 +40,7 @@ void Foam::InjectionModel<CloudType>::readProps()
         owner_.db().time().timeName(),
         "uniform"/cloud::prefix/owner_.name(),
         owner_.db(),
-        IOobject::MUST_READ,
+        IOobject::MUST_READ_IF_MODIFIED,
         IOobject::NO_WRITE,
         false
     );

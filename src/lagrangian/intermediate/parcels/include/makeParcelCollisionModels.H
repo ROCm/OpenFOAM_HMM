@@ -36,6 +36,7 @@ License
 #include "PairSpringSliderDashpot.H"
 
 #include "WallSpringSliderDashpot.H"
+#include "WallLocalSpringSliderDashpot.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,6 +72,13 @@ License
     makeWallModelType                                                         \
     (                                                                         \
         WallSpringSliderDashpot,                                              \
+        KinematicCloud,                                                       \
+        ParcelType                                                            \
+    );                                                                        \
+                                                                              \
+    makeWallModelType                                                         \
+    (                                                                         \
+        WallLocalSpringSliderDashpot,                                         \
         KinematicCloud,                                                       \
         ParcelType                                                            \
     );
