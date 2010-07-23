@@ -75,6 +75,6 @@ Foam::PairModel<CloudType>::coeffDict() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewPairModel.C"
+#include "PairModelNew.C"
 
 // ************************************************************************* //

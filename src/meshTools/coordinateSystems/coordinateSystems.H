@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -97,11 +97,14 @@ public:
 
     // Member Functions
 
-        //- Find and return index for a given keyword, returns -1 if not found
-        label find(const word& key) const;
+        //- Find and return index for the first match, returns -1 if not found
+        label find(const keyType& key) const;
 
-        //- Search for given keyword
-        bool found(const word& keyword) const;
+        //- Find and return indices for all matches
+        labelList findAll(const keyType& key) const;
+
+        //- Search for given key
+        bool found(const keyType& key) const;
 
         //- Return the table of contents (list of all keywords)
         wordList toc() const;

@@ -1,11 +1,11 @@
 #!/bin/sh
-#------------------------------------------------------------------------------
+#---------------------------------*- sh -*-------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -23,47 +23,38 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     foamPackGeneral [outputDir]
+#     foamBinDirs <packDir> <arch>
 #
 # Description
-#     Packs and compresses the OpenFOAM directory for release
+#     Returns all directories containing binary files of OpenFOAM
 #
 #------------------------------------------------------------------------------
 
-timeStamp=$(date +%Y-%m-%d)
-packDir=$WM_PROJECT-$WM_PROJECT_VERSION
-packFile=${packDir}.General_${timeStamp}.gtgz
-
-if [ ! -d $packDir ]
+if [ $# -ne 2 ]
 then
-    echo "Error: directory $packDir does not exist"
+    echo "Error: architecture type expected, exiting"
+    echo
+    echo "Usage : ${0##*/} <packDir> <arch>"
+    echo
     exit 1
 fi
+packDir=$1
+arch=$2
 
-# add optional output directory
-if [ -d "$1" ]
-then
-    packFile="$1/$packFile"
-fi
+# base arch (w/o precision, optimization, etc)
+baseArch=$(echo "$arch" | sed -e 's@[DS]P.*$@@')
 
-if [ -f $packFile ]
-then
-    echo "Error: $packFile already exists"
-    exit 1
-fi
-
-# Create time stamp file
-# ~~~~~~~~~~~~~~~~~~~~~~
-
-echo $timeStamp 2>/dev/null > $packDir/.timeStamp
-
-# Pack and compress the packFile
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-echo
-echo "Packing $packDir source files into $packFile"
-echo
-
-foamPackSource $packDir $packFile
+# get list of directories
+(
+    for dir in \
+        $packDir/lib/$arch \
+        $packDir/applications/bin/$arch \
+        $packDir/wmake/rules \
+        $packDir/wmake/bin/$baseArch \
+        ;
+    do
+        [ -d $dir ] && echo $dir
+    done
+)
 
 #------------------------------------------------------------------------------

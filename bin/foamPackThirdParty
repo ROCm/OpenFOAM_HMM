@@ -1,11 +1,11 @@
 #!/bin/sh
-#------------------------------------------------------------------------------
+#---------------------------------*- sh -*-------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -23,7 +23,7 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     foamPackThirdPartyGeneral [outputDir]
+#     foamPackThirdParty [outputDir]
 #
 # Description
 #     Packs and compresses the OpenFOAM ThirdParty directory for release
@@ -33,7 +33,7 @@
 timeStamp=$(date +%Y-%m-%d)
 packDir=${WM_THIRD_PARTY_DIR:-ThirdParty}
 packDir=${packDir##*/}
-packFile=${packDir}.General_${timeStamp}.gtgz
+packFile=${packDir}_${timeStamp}.gtgz
 
 if [ ! -d $packDir ]
 then

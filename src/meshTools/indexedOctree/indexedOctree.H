@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -549,8 +549,15 @@ public:
 
             //- Find deepest node (as parent+octant) containing point. Starts
             //  off from starting index in nodes_ (use 0 to start from top)
-            //  Use getNode, getOctant to extract info.
+            //  Use getNode and getOctant to extract info, or call findIndices.
             labelBits findNode(const label nodeI, const point&) const;
+
+            //- Find shape containing point. Only implemented for certain
+            //  shapes.
+            label findInside(const point&) const;
+
+            //- Find the shape indices that occupy the result of findNode
+            const labelList& findIndices(const point&) const;
 
             //- Determine type (inside/outside/mixed) for point. unknown if
             //  cannot be determined (e.g. non-manifold surface)

@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     WallModel.C
-    NewWallModel.C
+    WallModelNew.C
 
 \*---------------------------------------------------------------------------*/
 

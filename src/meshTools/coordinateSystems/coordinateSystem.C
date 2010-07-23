@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -136,37 +136,36 @@ Foam::coordinateSystem::coordinateSystem
 {
     const entry* entryPtr = dict.lookupEntryPtr(typeName_(), false, false);
 
-    // a simple entry is a lookup into global coordinateSystems
+    // non-dictionary entry is a lookup into global coordinateSystems
     if (entryPtr && !entryPtr->isDict())
     {
-        word csName;
-        entryPtr->stream() >> csName;
+        keyType key(entryPtr->stream());
 
-        const coordinateSystems& csLst = coordinateSystems::New(obr);
+        const coordinateSystems& lst = coordinateSystems::New(obr);
+        const label id = lst.find(key);
 
-        label csId = csLst.find(csName);
         if (debug)
         {
             Info<< "coordinateSystem::coordinateSystem"
                 "(const dictionary&, const objectRegistry&):"
                 << nl << "using global coordinate system: "
-                << csName << "=" << csId << endl;
+                << key << "=" << id << endl;
         }
 
-        if (csId < 0)
+        if (id < 0)
         {
             FatalErrorIn
             (
                 "coordinateSystem::coordinateSystem"
                 "(const dictionary&, const objectRegistry&)"
-            )   << "could not find coordinate system: " << csName << nl
-                << "available coordinate systems: " << csLst.toc() << nl << nl
+            )   << "could not find coordinate system: " << key << nl
+                << "available coordinate systems: " << lst.toc() << nl << nl
                 << exit(FatalError);
         }
 
         // copy coordinateSystem, but assign the name as the typeName
         // to avoid strange things in writeDict()
-        operator=(csLst[csId]);
+        operator=(lst[id]);
         name_ = typeName_();
     }
     else
