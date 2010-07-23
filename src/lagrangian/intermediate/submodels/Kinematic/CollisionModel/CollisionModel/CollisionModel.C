@@ -59,6 +59,6 @@ Foam::CollisionModel<CloudType>::~CollisionModel()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewCollisionModel.C"
+#include "CollisionModelNew.C"
 
 // ************************************************************************* //

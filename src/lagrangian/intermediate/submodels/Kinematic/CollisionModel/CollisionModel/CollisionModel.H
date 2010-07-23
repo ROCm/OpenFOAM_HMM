@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     CollisionModel.C
-    NewCollisionModel.C
+    CollisionModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
