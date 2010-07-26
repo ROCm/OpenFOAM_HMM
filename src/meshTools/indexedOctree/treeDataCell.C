@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -142,6 +142,16 @@ bool Foam::treeDataCell::overlaps
     {
         return cubeBb.overlaps(calcCellBb(cellLabels_[index]));
     }
+}
+
+
+bool Foam::treeDataCell::contains
+(
+    const label index,
+    const point& sample
+) const
+{
+    return mesh_.pointInCell(sample, cellLabels_[index]);
 }
 
 

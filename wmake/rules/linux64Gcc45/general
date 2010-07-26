@@ -1,4 +1,3 @@
-# need single-line output from cpp
 CPP        = cpp -traditional-cpp
 
 PROJECT_LIBS = -l$(WM_PROJECT) -liberty -ldl

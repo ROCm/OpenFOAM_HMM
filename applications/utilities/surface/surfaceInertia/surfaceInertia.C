@@ -360,7 +360,7 @@ int main(int argc, char *argv[])
     if (m < 0)
     {
         WarningIn(args.executable() + "::main")
-            << "Negative mass detected" << endl;
+            << "Negative mass detected, the surface may be inside-out." << endl;
     }
 
     vector eVal = eigenValues(J);
