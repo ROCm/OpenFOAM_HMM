@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -140,6 +140,13 @@ public:
             (
                 const label index,
                 const treeBoundBox& sampleBb
+            ) const;
+
+            //- Does shape at index contain sample
+            bool contains
+            (
+                const label index,
+                const point& sample
             ) const;
 
             //- Calculates nearest (to sample) point in shape.

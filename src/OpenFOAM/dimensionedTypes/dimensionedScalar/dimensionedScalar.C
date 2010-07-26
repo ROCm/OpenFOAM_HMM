@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -155,7 +155,7 @@ dimensionedScalar cbrt(const dimensionedScalar& ds)
     return dimensionedScalar
     (
         "cbrt(" + ds.name() + ')',
-        pow(ds.dimensions(), dimensionedScalar("(1/3)", dimless, 1.0/3.0)),
+        pow(ds.dimensions(), dimensionedScalar("(1|3)", dimless, 1.0/3.0)),
         ::cbrt(ds.value())
     );
 }

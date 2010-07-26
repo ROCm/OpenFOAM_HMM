@@ -7,6 +7,7 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/barotropicCompressibilityModel/lnInclude
 
 EXE_LIBS = \
+    -lincompressibleTurbulenceModel \
     -lincompressibleTransportModels \
     -lincompressibleRASModels \
     -lincompressibleLESModels \

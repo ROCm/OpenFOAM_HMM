@@ -1,3 +1,4 @@
+CPP        = cpp -traditional-cpp $(GFLAGS)
 LD         = ld -A64
 
 PROJECT_LIBS = -l$(WM_PROJECT) -liberty -ldl

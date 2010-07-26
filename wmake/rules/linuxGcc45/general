@@ -1,4 +1,3 @@
-# need single-line output from cpp
 CPP        = cpp -traditional-cpp
 LD         = ld -melf_i386
 

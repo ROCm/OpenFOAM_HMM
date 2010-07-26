@@ -28,6 +28,7 @@ License
 #include "meshSearch.H"
 #include "Tuple2.H"
 #include "globalIndex.H"
+#include "treeDataCell.H"
 
 #include "addToRunTimeSelectionTable.H"
 
@@ -166,8 +167,7 @@ bool Foam::sampledTriSurfaceMesh::update()
 
     meshSearch meshSearcher(mesh(), false);
 
-    const indexedOctree<treeDataPoint>& cellCentreTree =
-        meshSearcher.cellCentreTree();
+    const indexedOctree<treeDataCell>& cellTree = meshSearcher.cellTree();
 
 
     // Global numbering for cells - only used to uniquely identify local cells.
@@ -182,7 +182,7 @@ bool Foam::sampledTriSurfaceMesh::update()
     // Search triangles using nearest on local mesh
     forAll(fc, triI)
     {
-        pointIndexHit nearInfo = cellCentreTree.findNearest
+        pointIndexHit nearInfo = cellTree.findNearest
         (
             fc[triI],
             sqr(GREAT)
