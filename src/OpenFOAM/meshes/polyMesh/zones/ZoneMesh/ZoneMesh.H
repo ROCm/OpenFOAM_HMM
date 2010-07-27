@@ -121,8 +121,8 @@ public:
         //  Return -1 if the object is not in the zone
         const Map<label>& zoneMap() const;
 
-        //- Given a global object index, return the zone it is in.  If
-        //object does not belong to any zones, return -1
+        //- Given a global object index, return the zone it is in.
+        // If object does not belong to any zones, return -1
         label whichZone(const label objectIndex) const;
 
         //- Return a list of zone types
@@ -133,6 +133,12 @@ public:
 
         //- Find zone index given a name
         label findZoneID(const word& zoneName) const;
+
+        //- Return zone indices for all matches
+        labelList findIndices(const keyType&) const;
+
+        //- Return zone index for the first match, return -1 if not found
+        label findIndex(const keyType&) const;
 
         //- Clear addressing
         void clearAddressing();

@@ -195,8 +195,8 @@ int main(int argc, char *argv[])
         {
             const word csName = args["from"];
 
-            label csId = csLst.find(csName);
-            if (csId < 0)
+            const label csIndex = csLst.findIndex(csName);
+            if (csIndex < 0)
             {
                 FatalErrorIn(args.executable())
                     << "Cannot find -from " << csName << nl
@@ -204,15 +204,15 @@ int main(int argc, char *argv[])
                     << exit(FatalError);
             }
 
-            fromCsys.reset(new coordinateSystem(csLst[csId]));
+            fromCsys.reset(new coordinateSystem(csLst[csIndex]));
         }
 
         if (args.optionFound("to"))
         {
             const word csName = args["to"];
 
-            label csId = csLst.find(csName);
-            if (csId < 0)
+            const label csIndex = csLst.findIndex(csName);
+            if (csIndex < 0)
             {
                 FatalErrorIn(args.executable())
                     << "Cannot find -to " << csName << nl
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
                     << exit(FatalError);
             }
 
-            toCsys.reset(new coordinateSystem(csLst[csId]));
+            toCsys.reset(new coordinateSystem(csLst[csIndex]));
         }
 
 

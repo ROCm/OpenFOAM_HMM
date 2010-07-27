@@ -200,6 +200,34 @@ checkLineLengthNonComments()
     dieOnBadFiles "Limit code to 80 columns before pushing"
 }
 
+#
+# limit line length to 80-columns, except #directive lines
+#
+checkLineLengthNonDirective()
+{
+    badFiles=$(
+    for f in $fileList
+    do
+        # limit to *.[CH] files
+        case "$f" in
+        (*.[CH])
+            # parse line numbers from this (strip comment lines):
+            #        path/fileName:<lineNr>:   contents
+            lines=$(git grep --cached -n -e ".\{81,\}" -- "$f" |
+                sed -n \
+                    -e '\@^[^:]*:[^:]*: *#.*@b' \
+                    -e 's@^[^:]*:\([0-9]*\):.*@\1@p' |
+                tr '\n' ' '
+            )
+            [ -n "$lines" ] && echo "$Indent$f -- lines: $lines"
+        ;;
+        esac
+    done
+    )
+
+    dieOnBadFiles "Limit code to 80 columns before pushing"
+}
+
 
 
 # do all checks
@@ -215,7 +243,7 @@ checkIllegalCode
 checkCopyright
 
 # ensure code conforms to 80 columns max
-checkLineLength
+checkLineLengthNonDirective
 
 
 exit 0
