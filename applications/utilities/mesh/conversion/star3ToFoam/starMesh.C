@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,7 +52,8 @@ const cellModel* starMesh::sammTrim2Ptr_ = cellModeller::lookup("sammTrim2");
 const cellModel* starMesh::sammTrim3Ptr_ = cellModeller::lookup("sammTrim3");
 const cellModel* starMesh::sammTrim4Ptr_ = cellModeller::lookup("sammTrim4");
 const cellModel* starMesh::sammTrim5Ptr_ = cellModeller::lookup("sammTrim5");
-const cellModel* starMesh::sammTrim8Ptr_ = cellModeller::lookup("hexagonalPrism");
+const cellModel* starMesh::sammTrim8Ptr_ =
+    cellModeller::lookup("hexagonalPrism");
 
 // Regular cell point addressing
 // SAMM point addressing

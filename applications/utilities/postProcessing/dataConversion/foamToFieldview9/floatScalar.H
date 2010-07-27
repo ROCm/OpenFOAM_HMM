@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,9 +59,9 @@ namespace Foam
 {
     typedef float floatScalar;
 
-    // Largest and smallest floatScalar values allowed in certain parts of the code
-    // (6 is the number of significant figures in an
-    //  IEEE single precision number.  See limits.h or float.h)
+    // Largest and smallest floatScalar values allowed in certain
+    // parts of the code (6 is the number of significant figures in an
+    // IEEE single precision number.  See limits.h or float.h)
     static const floatScalar GREAT = 1.0e+6;
     static const floatScalar VGREAT = 1.0e+37;
     static const floatScalar SMALL = 1.0e-6;

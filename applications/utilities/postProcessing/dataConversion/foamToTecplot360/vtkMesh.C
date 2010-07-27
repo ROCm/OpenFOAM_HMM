@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,8 +60,8 @@ Foam::polyMesh::readUpdateState Foam::vtkMesh::readUpdate()
 
     if (meshState != polyMesh::UNCHANGED)
     {
-        // Note: since fvMeshSubset has no movePoints() functionality reconstruct
-        // the subset even if only movement.
+        // Note: since fvMeshSubset has no movePoints() functionality
+        // reconstruct the subset even if only movement.
 
 //        topoPtr_.clear();
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,7 +65,14 @@ void testPackedList(const polyMesh& mesh, Random& rndGen)
         syncTools::syncEdgeList(mesh, edgeValues, minEqOp<label>(), 0, false);
 
         syncTools::syncEdgeList(mesh, maxBits, maxEqOp<unsigned int>(), 0);
-        syncTools::syncEdgeList(mesh, maxEdgeValues, maxEqOp<label>(), 0, false);
+        syncTools::syncEdgeList
+        (
+            mesh,
+            maxEdgeValues,
+            maxEqOp<label>(),
+            0,
+            false
+        );
 
         forAll(bits, i)
         {
@@ -106,7 +113,14 @@ void testPackedList(const polyMesh& mesh, Random& rndGen)
         syncTools::syncPointList(mesh, pointValues, minEqOp<label>(), 0, false);
 
         syncTools::syncPointList(mesh, maxBits, maxEqOp<unsigned int>(), 0);
-        syncTools::syncPointList(mesh, maxPointValues, maxEqOp<label>(), 0, false);
+        syncTools::syncPointList
+        (
+            mesh,
+            maxPointValues,
+            maxEqOp<label>(),
+            0,
+            false
+        );
 
         forAll(bits, i)
         {
@@ -203,7 +217,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
 
             sparseData.insert(meshPointI, pt);
             fullData[meshPointI] = pt;
-        }    
+        }
 
         //Pout<< "sparseData:" << sparseData << endl;
 
@@ -288,7 +302,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
 
             sparseData.insert(mesh.edges()[meshEdgeI], pt);
             fullData[meshEdgeI] = pt;
-        }    
+        }
 
         //Pout<< "sparseData:" << sparseData << endl;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -152,8 +152,9 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given multiphaseAlphaContactAngleFvPatchScalarField
-        //  onto a new patch
+        //- Construct by mapping given
+        //  multiphaseAlphaContactAngleFvPatchScalarField onto a new
+        //  patch
         multiphaseAlphaContactAngleFvPatchScalarField
         (
             const multiphaseAlphaContactAngleFvPatchScalarField&,
