@@ -379,6 +379,9 @@ public:
             inline label cell() const;
 
             //- Return current face particle is on otherwise -1
+            inline label& face();
+
+            //- Return current face particle is on otherwise -1
             inline label face() const;
 
             //- Return reference to the particle cloud
