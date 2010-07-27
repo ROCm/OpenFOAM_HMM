@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,13 +30,14 @@ License
 void Foam::setRefCell
 (
     const volScalarField& field,
+    const volScalarField& fieldRef,
     const dictionary& dict,
     label& refCelli,
     scalar& refValue,
     const bool forceReference
 )
 {
-    if (field.needReference() || forceReference)
+    if (fieldRef.needReference() || forceReference)
     {
         word refCellName = field.name() + "RefCell";
         word refPointName = field.name() + "RefPoint";
@@ -55,6 +56,7 @@ void Foam::setRefCell
                     (
                         "void Foam::setRefCell\n"
                          "(\n"
+                         "    const volScalarField&,\n"
                          "    const volScalarField&,\n"
                          "    const dictionary&,\n"
                          "    label& scalar&,\n"
@@ -76,13 +78,14 @@ void Foam::setRefCell
             point refPointi(dict.lookup(refPointName));
             refCelli = field.mesh().findCell(refPointi);
             label hasRef = (refCelli >= 0 ? 1 : 0);
-            label sumHasRef = returnReduce(hasRef, sumOp<label>());
+            label sumHasRef = returnReduce<label>(hasRef, sumOp<label>());
             if (sumHasRef != 1)
             {
                 FatalIOErrorIn
                 (
                     "void Foam::setRefCell\n"
                      "(\n"
+                     "    const volScalarField&,\n"
                      "    const volScalarField&,\n"
                      "    const dictionary&,\n"
                      "    label& scalar&,\n"
@@ -103,6 +106,7 @@ void Foam::setRefCell
                 "void Foam::setRefCell\n"
                  "(\n"
                  "    const volScalarField&,\n"
+                 "    const volScalarField&,\n"
                  "    const dictionary&,\n"
                  "    label& scalar&,\n"
                  "    bool\n"
@@ -116,6 +120,19 @@ void Foam::setRefCell
 
         refValue = readScalar(dict.lookup(refValueName));
     }
+}
+
+
+void Foam::setRefCell
+(
+    const volScalarField& field,
+    const dictionary& dict,
+    label& refCelli,
+    scalar& refValue,
+    const bool forceReference
+)
+{
+    setRefCell(field, field, dict, refCelli, refValue, forceReference);
 }
 
 
