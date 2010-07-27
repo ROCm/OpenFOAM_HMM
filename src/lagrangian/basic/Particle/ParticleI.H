@@ -326,6 +326,13 @@ inline Foam::label Foam::Particle<ParticleType>::face() const
 
 
 template<class ParticleType>
+inline Foam::label& Foam::Particle<ParticleType>::face()
+{
+    return facei_;
+}
+
+
+template<class ParticleType>
 inline bool Foam::Particle<ParticleType>::onBoundary() const
 {
     return facei_ != -1 && facei_ >= cloud_.pMesh().nInternalFaces();

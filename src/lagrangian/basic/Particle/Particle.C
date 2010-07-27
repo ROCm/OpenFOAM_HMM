@@ -334,11 +334,18 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
                 position_ = endPosition;
             }
 
+            label origFacei = facei_;
             label patchi = patch(facei_);
-            const polyPatch& patch = mesh.boundaryMesh()[patchi];
 
-            if (!p.hitPatch(patch, td, patchi))
+            if (!p.hitPatch(mesh.boundaryMesh()[patchi], td, patchi))
             {
+                // Did patch interaction model switch patches?
+                if (facei_ != origFacei)
+                {
+                    patchi = patch(facei_);
+                }
+                const polyPatch& patch = mesh.boundaryMesh()[patchi];
+
                 if (isA<wedgePolyPatch>(patch))
                 {
                     p.hitWedgePatch

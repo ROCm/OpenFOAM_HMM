@@ -38,10 +38,10 @@ boundaryField
         type                zeroGradient;
     }
 
-	frontBack
-	{
-	type					empty;
-	}
+    frontBack
+    {
+        type                empty;
+    }
 
 }
 
