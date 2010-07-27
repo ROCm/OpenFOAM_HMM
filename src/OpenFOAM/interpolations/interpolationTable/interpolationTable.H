@@ -26,7 +26,7 @@ Class
 
 Description
     An interpolation/look-up table of scalar vs <Type> values.
-    The reference scalar values must be positive and monotonically increasing.
+    The reference scalar values must be monotonically increasing.
 
     The handling of out-of-bounds values depends on the current setting
     of @a outOfBounds.
@@ -138,6 +138,10 @@ public:
 
         //- Write
         void write(Ostream& os) const;
+
+        //- Return the rate of change at the interpolation location
+        //  for the give value
+        Type rateOfChange(const scalar) const;
 
 
     // Member Operators

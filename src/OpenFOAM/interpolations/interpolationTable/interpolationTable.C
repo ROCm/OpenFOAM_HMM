@@ -236,6 +236,166 @@ void Foam::interpolationTable<Type>::write(Ostream& os) const
 }
 
 
+template<class Type>
+Type Foam::interpolationTable<Type>::rateOfChange(const scalar value) const
+{
+    label n = this->size();
+
+    if (n <= 1)
+    {
+        // There are not enough entries to provide a rate of change
+        return 0;
+    }
+
+    scalar minLimit = List<Tuple2<scalar, Type> >::operator[](0).first();
+    scalar maxLimit = List<Tuple2<scalar, Type> >::operator[](n-1).first();
+    scalar lookupValue = value;
+
+    if (lookupValue < minLimit)
+    {
+        switch (boundsHandling_)
+        {
+            case interpolationTable::ERROR:
+            {
+                FatalErrorIn
+                (
+                    "Foam::interpolationTable<Type>::operator[]"
+                    "(const scalar) const"
+                )   << "value (" << lookupValue << ") underflow" << nl
+                    << exit(FatalError);
+                break;
+            }
+            case interpolationTable::WARN:
+            {
+                WarningIn
+                (
+                    "Foam::interpolationTable<Type>::operator[]"
+                    "(const scalar) const"
+                )   << "value (" << lookupValue << ") underflow" << nl
+                    << "    Zero rate of change."
+                    << endl;
+                // fall-through to 'CLAMP'
+            }
+            case interpolationTable::CLAMP:
+            {
+                return 0;
+                break;
+            }
+            case interpolationTable::REPEAT:
+            {
+                // adjust lookupValue to >= minLimit
+                while (lookupValue < minLimit)
+                {
+                    lookupValue += maxLimit;
+                }
+                break;
+            }
+        }
+    }
+    else if (lookupValue >= maxLimit)
+    {
+        switch (boundsHandling_)
+        {
+            case interpolationTable::ERROR:
+            {
+                FatalErrorIn
+                (
+                    "Foam::interpolationTable<Type>::operator[]"
+                    "(const label) const"
+                )   << "value (" << lookupValue << ") overflow" << nl
+                    << exit(FatalError);
+                break;
+            }
+            case interpolationTable::WARN:
+            {
+                WarningIn
+                (
+                    "Foam::interpolationTable<Type>::operator[]"
+                    "(const label) const"
+                )   << "value (" << lookupValue << ") overflow" << nl
+                    << "    Zero rate of change."
+                    << endl;
+                // fall-through to 'CLAMP'
+            }
+            case interpolationTable::CLAMP:
+            {
+                return 0;
+                break;
+            }
+            case interpolationTable::REPEAT:
+            {
+                // adjust lookupValue <= maxLimit
+                while (lookupValue > maxLimit)
+                {
+                    lookupValue -= maxLimit;
+                }
+                break;
+            }
+        }
+    }
+
+    label lo = 0;
+    label hi = 0;
+
+    // look for the correct range
+    for (label i = 0; i < n; ++i)
+    {
+        if (lookupValue >= List<Tuple2<scalar, Type> >::operator[](i).first())
+        {
+            lo = hi = i;
+        }
+        else
+        {
+            hi = i;
+            break;
+        }
+    }
+
+    if (lo == hi)
+    {
+        // we are at the end of the table - or there is only a single entry
+        return 0;
+    }
+    else if (hi == 0)
+    {
+        // this treatment should should only occur under these conditions:
+        //  -> the 'REPEAT' treatment
+        //  -> (0 <= value <= minLimit)
+        //  -> minLimit > 0
+        // Use the value at maxLimit as the value for value=0
+        lo = n - 1;
+
+        return
+        (
+            (
+                List<Tuple2<scalar, Type> >::operator[](hi).second()
+              - List<Tuple2<scalar, Type> >::operator[](lo).second()
+            )
+           /(
+               List<Tuple2<scalar, Type> >::operator[](hi).first()
+             + minLimit
+             - List<Tuple2<scalar, Type> >::operator[](lo).first()
+            )
+        );
+    }
+    else
+    {
+        // normal rate of change
+        return
+        (
+            (
+                List<Tuple2<scalar, Type> >::operator[](hi).second()
+              - List<Tuple2<scalar, Type> >::operator[](lo).second()
+            )
+           /(
+                List<Tuple2<scalar, Type> >::operator[](hi).first()
+              - List<Tuple2<scalar, Type> >::operator[](lo).first()
+            )
+        );
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -380,8 +540,8 @@ Type Foam::interpolationTable<Type>::operator()(const scalar value) const
             }
             case interpolationTable::REPEAT:
             {
-                // adjust lookupValue to >= 0
-                while (lookupValue < 0)
+                // adjust lookupValue to >= minLimin
+                while (lookupValue < minLimit)
                 {
                     lookupValue += maxLimit;
                 }
