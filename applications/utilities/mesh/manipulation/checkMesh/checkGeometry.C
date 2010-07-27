@@ -360,7 +360,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
     }
 
     {
-        faceSet faces(mesh, "zeroAreaFaces", mesh.nFaces()/100 + 1);
+        faceSet faces(mesh, "zeroAreaFaces", mesh.nFaces()/100+1);
         if (mesh.checkFaceAreas(true, &faces))
         {
             noFailedChecks++;
@@ -378,7 +378,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
     }
 
     {
-        cellSet cells(mesh, "zeroVolumeCells", mesh.nCells()/100 + 1);
+        cellSet cells(mesh, "zeroVolumeCells", mesh.nCells()/100+1);
         if (mesh.checkCellVolumes(true, &cells))
         {
             noFailedChecks++;
@@ -396,7 +396,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
     }
 
     {
-        faceSet faces(mesh, "nonOrthoFaces", mesh.nFaces()/100 + 1);
+        faceSet faces(mesh, "nonOrthoFaces", mesh.nFaces()/100+1);
         if (mesh.checkFaceOrthogonality(true, &faces))
         {
             noFailedChecks++;
@@ -434,7 +434,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
     }
 
     {
-        faceSet faces(mesh, "wrongOrientedTriangleFaces", mesh.nFaces()/100 + 1);
+        faceSet faces(mesh, "wrongOrientedTriangleFaces", mesh.nFaces()/100+1);
         if (mesh.checkFaceTets(true, 0, &faces))
         {
             noFailedChecks++;
@@ -453,7 +453,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
     }
 
     {
-        faceSet faces(mesh, "skewFaces", mesh.nFaces()/100 + 1);
+        faceSet faces(mesh, "skewFaces", mesh.nFaces()/100+1);
         if (mesh.checkFaceSkewness(true, &faces))
         {
             noFailedChecks++;
