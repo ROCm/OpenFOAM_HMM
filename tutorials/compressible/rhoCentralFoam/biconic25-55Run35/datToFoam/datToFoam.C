@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -139,7 +139,11 @@ int main(int argc, char *argv[])
     forAll(points, i)
     {
         pointsWedge[i] = (rotateZ & points[i]);
-        pointsWedge[i+nPointsij] = cmptMultiply(vector(1.0, 1.0, -1.0), pointsWedge[i]);
+        pointsWedge[i+nPointsij] = cmptMultiply
+        (
+            vector(1.0, 1.0, -1.0),
+            pointsWedge[i]
+        );
     }
 
     Info<< "Writing points to: " << nl
