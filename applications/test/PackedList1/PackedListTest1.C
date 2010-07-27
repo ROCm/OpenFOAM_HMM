@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -133,7 +133,8 @@ int main(int argc, char *argv[])
         }
         else
         {
-            Info<< "[20] is false (expected) list size should be unchanged (const)\n";
+            Info<< "[20] is false (expected) list size should be unchanged "
+                << "(const)\n";
         }
         constLst.print(Info);
 
@@ -144,7 +145,8 @@ int main(int argc, char *argv[])
         }
         else
         {
-            Info<< "[20] is false (expected) but list was resized?? (non-const)\n";
+            Info<< "[20] is false (expected) but list was resized?? "
+                << "(non-const)\n";
         }
         list1.print(Info);
     }
@@ -338,7 +340,8 @@ int main(int argc, char *argv[])
         }
         else
         {
-            Info<< "[20] is false (expected) list size should be unchanged (const)\n";
+            Info<< "[20] is false (expected) list size should be unchanged "
+                << "(const)\n";
         }
         Info<< constLst << endl;
     }

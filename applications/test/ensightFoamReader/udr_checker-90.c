@@ -74,7 +74,7 @@
  *
  *
  *         Part Builder
- *         ============                                                 
+ *         ============
  *
  *         both unstructured and structured
  *         --------------------------------
@@ -103,7 +103,7 @@
  *         USERD_get_part_node_ids              (If node ids given)
  *         USERD_get_part_element_ids_by_type   (If element ids given)
  *
- *         both again 
+ *         both again
  *         ----------
  *         USERD_get_border_availability        (If border representation
  *         USERD_get_border_elements_by_type     is selected)
@@ -143,7 +143,7 @@
  *         USERD_get_part_element_ids_by_type   (If element ids given)
  *
  *         USERD_get_border_availability        (If border representation
- *         USERD_get_border_elements_by_type     is selected) 
+ *         USERD_get_border_elements_by_type     is selected)
  *
  *
  *         Loading Variables
@@ -201,7 +201,7 @@
  *
  *        Set the filenames
  *        =================
- *        USERD_set_extra_gui_data        (optional    -extra_gui on command line)  
+ *        USERD_set_extra_gui_data        (optional    -extra_gui on command line)
  *        USERD_set_filenames
  *        USERD_get_number_of_time_steps
  *        USERD_get_solution_times
@@ -415,7 +415,7 @@ typedef struct {
 }BUILDINFO;
 
 typedef struct {
-  char  description[Z_BUFL];  /* description */ 
+  char  description[Z_BUFL];  /* description */
   char  filename[Z_BUFL];     /* real filename */
   char  ifilename[Z_BUFL];    /* imaginary filename */
   int   type;
@@ -586,7 +586,7 @@ EINFO Elem_info[Z_MAXTYPE] = {"Z_POINT",  1,
 
 /* Prototypes
  *-----------*/
-static int load_fail_defaults(void); 
+static int load_fail_defaults(void);
 static int prelim_info(int *two_fields,
                        int *any_extra_gui,
                        int *any_var_extract);
@@ -594,7 +594,7 @@ static int get_input(int set_server_number,
                      int use_playfile,
                      char playfile[Z_MAXFILENP],
                      int two_fields,
-		     int any_extra_gui,
+                     int any_extra_gui,
                      int any_var_extract,
                      int *swapbytes);
 static int time_info( void );
@@ -775,14 +775,14 @@ int main(int argc, char *argv[])
                   use_playfile,
                   playfile,
                   two_fields,
-		  any_extra_gui,
+                  any_extra_gui,
                   any_var_extract,
                   &swapbytes);
   if(err == Z_ERR) {
     fprintf(stderr,"Stopping because of error in get_input\n");
     exit(1);
   }
-  
+
 
   /*----------
    * Time info
@@ -836,10 +836,10 @@ int main(int argc, char *argv[])
 
   /*-----------------------------------------------
    * Mel needs to do these species routines yet!!!
-   *----------------------------------------------*/  
+   *----------------------------------------------*/
   /* USERD_get_matsp_info
      USERD_get_number_of_species */
-  
+
 
   /* See if any rigid body in model
    *-------------------------------*/
@@ -1046,21 +1046,21 @@ prelim_info(int *two_fields, int *any_extra_gui, int *any_var_extract)
     return(Z_ERR);
   }
 
-  /* Get the Extra GUI stuff (optional) 
+  /* Get the Extra GUI stuff (optional)
    * ---------------------------------------------------------- */
 #ifdef _EGS
 
-  /* Get the Extra GUI numbers of toggles, pulldowns, & fields 
+  /* Get the Extra GUI numbers of toggles, pulldowns, & fields
    * ---------------------------------------------------------- */
-    
+
   USERD_get_extra_gui_numbers( &Num_toggles,
                                &Num_pulldowns,
                                &Num_fields );
-    
+
   if ( Num_toggles > 0 || Num_pulldowns > 0 || Num_fields > 0 ) {
 
     *any_extra_gui = TRUE;
-      
+
     if (Num_toggles>0) {
       Toggle_title = (char **) calloc(Num_toggles,sizeof(char*));
       if (Toggle_title == (char **)NULL) return(Z_ERR);
@@ -1071,21 +1071,21 @@ prelim_info(int *two_fields, int *any_extra_gui, int *any_var_extract)
       Toggle_default_status = (int *) calloc(Num_toggles,sizeof(int));
       Toggle_choice = (int *) calloc(Num_toggles,sizeof(int));
     }
-      
+
     if (Num_pulldowns > 0) {
       Pulldown_title = (char **) calloc( Num_pulldowns , sizeof(char*) );
       if (Pulldown_title == (char **)NULL) return(Z_ERR);
-        
+
       Pulldown_item_strings = (char ***) calloc( Num_pulldowns , sizeof(char**) );
       if (Pulldown_item_strings == (char ***)NULL) return(Z_ERR);
-        
+
       for (i=0; i<Num_pulldowns; i++) {
         Pulldown_title[i] = (char *) calloc( Z_LEN_GUI_TITLE_STR , sizeof(char) );
         if ( Pulldown_title[i] == (char *)NULL ) return(Z_ERR);
-          
+
         Pulldown_item_strings[i] = (char **) calloc( Z_MAX_NUM_GUI_PULL_ITEMS , sizeof(char *) );
         if (Pulldown_item_strings[i] == (char **)NULL) return(Z_ERR);
-          
+
         for(j = 0; j < Z_MAX_NUM_GUI_PULL_ITEMS; j++) {
           Pulldown_item_strings[i][j] = (char *) calloc( Z_LEN_GUI_PULL_STR , sizeof(char) );
           if ( Pulldown_item_strings[i][j] == (char *)NULL ) return(Z_ERR);
@@ -1095,7 +1095,7 @@ prelim_info(int *two_fields, int *any_extra_gui, int *any_var_extract)
       Pulldown_default_selection = (int *) calloc(Num_pulldowns,sizeof(int));
       Pulldown_choice = (int *) calloc(Num_pulldowns,sizeof(int));
     }
-   
+
     if (Num_fields > 0) {
       Field_title = (char **) calloc(Num_fields,sizeof(char*));
       Field_user_string = (char **) calloc(Num_fields,sizeof(char*));
@@ -1107,8 +1107,8 @@ prelim_info(int *two_fields, int *any_extra_gui, int *any_var_extract)
         if ( Field_user_string[i] == (char *)NULL) return(Z_ERR);
       }
     }
-      
-   
+
+
     err = USERD_get_extra_gui_defaults(
           Toggle_title,                 /* [num_toggles][Z_LEN_GUI_TITLE_STR] */
           Toggle_default_status,        /* [num_toggles] */
@@ -1120,17 +1120,17 @@ prelim_info(int *two_fields, int *any_extra_gui, int *any_var_extract)
           Field_user_string              /* [num_fields][Z_LEN_GUI_FIELD_STR] */
                                        );
     if (Z_ERR == err) return(Z_ERR);
-     
+
     fprintf(stderr,"\n**********************************************\n");
     fprintf(stderr,"****          Extra GUI Information        ***\n");
     fprintf(stderr,"**********************************************\n\n");
-      
+
     fprintf(stderr,"\nTOGGLE INFO: %d active toggles\n",Num_toggles);
     for (i=0; i<Num_toggles; i++) {
       fprintf(stderr,"Toggle Title %d : %s\n",i,Toggle_title[i]);
       fprintf(stderr,"Default status = %d \n",Toggle_default_status[i]);
     }
-      
+
     fprintf(stderr,"\nPULLDOWN INFO: %d active pulldowns\n",Num_pulldowns);
     for (i=0; i<Num_pulldowns; i++) {
       fprintf(stderr,"Pulldown Title %d : %s\n", i , Pulldown_title[i] );
@@ -1145,7 +1145,7 @@ prelim_info(int *two_fields, int *any_extra_gui, int *any_var_extract)
       fprintf(stderr,"Default selection: %d\n\n",Pulldown_default_selection[i]);
     }
     fprintf(stderr,"\n");
-   
+
     fprintf(stderr,"\nFIELDINFO: %d active fields\n",Num_fields);
     for (i=0; i<Num_fields; i++) {
       fprintf(stderr,"Field Title %d : %s\n",i,Field_title[i]);
@@ -1155,12 +1155,12 @@ prelim_info(int *two_fields, int *any_extra_gui, int *any_var_extract)
   }
 #endif
 
- 
-  /* Get the var_extract stuff (optional) 
+
+  /* Get the var_extract stuff (optional)
    * ---------------------------------------------------------- */
 #ifdef _VES
 
-  /* Get the var_extract numbers of toggles, pulldowns, & fields 
+  /* Get the var_extract numbers of toggles, pulldowns, & fields
    * ---------------------------------------------------------- */
   USERD_get_var_extract_gui_numbers(&Num_ve_toggles,
                                     &Num_ve_pulldowns,
@@ -1183,17 +1183,17 @@ prelim_info(int *two_fields, int *any_extra_gui, int *any_var_extract)
     if (Num_ve_pulldowns > 0) {
       Pulldown_ve_title = (char **) calloc( Num_ve_pulldowns , sizeof(char*) );
       if (Pulldown_ve_title == (char **)NULL) return(Z_ERR);
-        
+
       Pulldown_ve_item_strings = (char ***) calloc( Num_ve_pulldowns , sizeof(char**) );
       if (Pulldown_ve_item_strings == (char ***)NULL) return(Z_ERR);
-        
+
       for (i=0; i<Num_ve_pulldowns; i++) {
         Pulldown_ve_title[i] = (char *) calloc( Z_LEN_GUI_TITLE_STR , sizeof(char) );
         if ( Pulldown_ve_title[i] == (char *)NULL ) return(Z_ERR);
-          
+
         Pulldown_ve_item_strings[i] = (char **)calloc(Z_MAX_NUM_GUI_PULL_ITEMS, sizeof(char *));
         if (Pulldown_ve_item_strings[i] == (char **)NULL) return(Z_ERR);
-          
+
         for(j = 0; j < Z_MAX_NUM_GUI_PULL_ITEMS; j++) {
           Pulldown_ve_item_strings[i][j] = (char *) calloc( Z_LEN_GUI_PULL_STR , sizeof(char) );
           if ( Pulldown_ve_item_strings[i][j] == (char *)NULL ) return(Z_ERR);
@@ -1203,7 +1203,7 @@ prelim_info(int *two_fields, int *any_extra_gui, int *any_var_extract)
       Pulldown_ve_default_selection = (int *) calloc(Num_ve_pulldowns,sizeof(int));
       Pulldown_ve_choice = (int *) calloc(Num_ve_pulldowns,sizeof(int));
     }
-   
+
     if (Num_ve_fields > 0) {
       Field_ve_title = (char **) calloc(Num_ve_fields,sizeof(char*));
       Field_ve_user_string = (char **) calloc(Num_ve_fields,sizeof(char*));
@@ -1215,8 +1215,8 @@ prelim_info(int *two_fields, int *any_extra_gui, int *any_var_extract)
         if ( Field_ve_user_string[i] == (char *)NULL) return(Z_ERR);
       }
     }
-   
-   
+
+
     err = USERD_get_var_extract_gui_defaults(
           Toggle_ve_title,                 /* [num_ve_toggles][Z_LEN_GUI_TITLE_STR] */
           Toggle_ve_default_status,        /* [num_ve_toggles] */
@@ -1228,17 +1228,17 @@ prelim_info(int *two_fields, int *any_extra_gui, int *any_var_extract)
           Field_ve_user_string             /* [num_ve_fields][Z_LEN_GUI_FIELD_STR] */
                                              );
     if (Z_ERR == err) return(Z_ERR);
-     
+
     fprintf(stderr,"\n**********************************************\n");
     fprintf(stderr,"****          Var Extract Information      ***\n");
     fprintf(stderr,"**********************************************\n\n");
-      
+
     fprintf(stderr,"\nTOGGLE INFO: %d active toggles\n",Num_ve_toggles);
     for (i=0; i<Num_ve_toggles; i++) {
       fprintf(stderr,"Toggle Title %d : %s\n",i,Toggle_ve_title[i]);
       fprintf(stderr,"Default status = %d \n",Toggle_ve_default_status[i]);
     }
-      
+
     fprintf(stderr,"\nPULLDOWN INFO: %d active pulldowns\n",Num_ve_pulldowns);
     for (i=0; i<Num_ve_pulldowns; i++) {
       fprintf(stderr,"Pulldown Title %d : %s\n", i , Pulldown_ve_title[i] );
@@ -1253,7 +1253,7 @@ prelim_info(int *two_fields, int *any_extra_gui, int *any_var_extract)
       fprintf(stderr,"Default selection: %d\n\n",Pulldown_ve_default_selection[i]);
     }
     fprintf(stderr,"\n");
-   
+
     fprintf(stderr,"\nFIELDINFO: %d active fields\n",Num_ve_fields);
     for (i=0; i<Num_ve_fields; i++) {
       fprintf(stderr,"Field Title %d : %s\n",i,Field_ve_title[i]);
@@ -1262,8 +1262,8 @@ prelim_info(int *two_fields, int *any_extra_gui, int *any_var_extract)
     fprintf(stderr,"\n\n\n");
   }
 #endif
- 
- 
+
+
 #if (defined GT_USERD_API_100)
 
   /* Get the reader api used
@@ -1321,7 +1321,7 @@ get_input(int set_server_number,
           int use_playfile,
           char playfile[Z_MAXFILENP],
           int two_fields,
-	  int any_extra_gui,
+          int any_extra_gui,
           int any_var_extract,
           int *swapbytes)
 {
@@ -1393,22 +1393,22 @@ get_input(int set_server_number,
 
       fprintf(stderr, "\n      TOGGLE INPUT \n");
       for (i=0; i<Num_toggles; i++) {
-	fprintf(stderr, "      Enter Toggle Value for '%s' (1=toggle on, 0=toggle off)\n",Toggle_title[i]);
-	scanf("%d",&Toggle_choice[i]);
+        fprintf(stderr, "      Enter Toggle Value for '%s' (1=toggle on, 0=toggle off)\n",Toggle_title[i]);
+        scanf("%d",&Toggle_choice[i]);
       }
       fprintf(stderr, "\n      PULLDOWN INPUT \n");
       for (i=0; i<Num_pulldowns; i++) {
-	fprintf(stderr, "\n      PULLDOWN # %d \n",i);	
-	for (j = 0; j<Pulldown_number_in_list[i]; j++) {
-	  fprintf(stderr, "              %d %s\n",j,Pulldown_item_strings[i][j]);
-	}
-	fprintf(stderr, "              Enter Pulldown Value for '%s' (0 to %d)\n",Pulldown_title[i],Pulldown_number_in_list[i]-1);
-	scanf("%d",&Pulldown_choice[i]);	
+        fprintf(stderr, "\n      PULLDOWN # %d \n",i);
+        for (j = 0; j<Pulldown_number_in_list[i]; j++) {
+          fprintf(stderr, "              %d %s\n",j,Pulldown_item_strings[i][j]);
+        }
+        fprintf(stderr, "              Enter Pulldown Value for '%s' (0 to %d)\n",Pulldown_title[i],Pulldown_number_in_list[i]-1);
+        scanf("%d",&Pulldown_choice[i]);
       }
       fprintf(stderr, "\n      FIELD INPUT \n");
       for (i=0; i<Num_fields; i++) {
-	fprintf(stderr, "Enter string for field %d '%s'\n",i,Field_title[i]);
-	scanf("%s",Field_user_string[i]);
+        fprintf(stderr, "Enter string for field %d '%s'\n",i,Field_title[i]);
+        scanf("%s",Field_user_string[i]);
       }
 
     }                /* end if there is any extra gui stuff */
@@ -1420,22 +1420,22 @@ get_input(int set_server_number,
 
       fprintf(stderr, "\n      TOGGLE INPUT \n");
       for (i=0; i<Num_ve_toggles; i++) {
-	fprintf(stderr, "      Enter Toggle Value for '%s' (1=toggle on, 0=toggle off)\n",Toggle_ve_title[i]);
-	scanf("%d",&Toggle_ve_choice[i]);
+        fprintf(stderr, "      Enter Toggle Value for '%s' (1=toggle on, 0=toggle off)\n",Toggle_ve_title[i]);
+        scanf("%d",&Toggle_ve_choice[i]);
       }
       fprintf(stderr, "\n      PULLDOWN INPUT \n");
       for (i=0; i<Num_ve_pulldowns; i++) {
-	fprintf(stderr, "\n      PULLDOWN # %d \n",i);	
-	for (j = 0; j<Pulldown_ve_number_in_list[i]; j++) {
-	  fprintf(stderr, "              %d %s\n",j,Pulldown_ve_item_strings[i][j]);
-	}
-	fprintf(stderr, "              Enter Pulldown Value for '%s' (0 to %d)\n",Pulldown_ve_title[i],Pulldown_ve_number_in_list[i]-1);
-	scanf("%d",&Pulldown_ve_choice[i]);	
+        fprintf(stderr, "\n      PULLDOWN # %d \n",i);
+        for (j = 0; j<Pulldown_ve_number_in_list[i]; j++) {
+          fprintf(stderr, "              %d %s\n",j,Pulldown_ve_item_strings[i][j]);
+        }
+        fprintf(stderr, "              Enter Pulldown Value for '%s' (0 to %d)\n",Pulldown_ve_title[i],Pulldown_ve_number_in_list[i]-1);
+        scanf("%d",&Pulldown_ve_choice[i]);
       }
       fprintf(stderr, "\n      FIELD INPUT \n");
       for (i=0; i<Num_ve_fields; i++) {
-	fprintf(stderr, "Enter string for field %d '%s'\n",i,Field_ve_title[i]);
-	scanf("%s",Field_ve_user_string[i]);
+        fprintf(stderr, "Enter string for field %d '%s'\n",i,Field_ve_title[i]);
+        scanf("%s",Field_ve_user_string[i]);
       }
 
     }                /* end if there is any var_extract stuff */
@@ -1460,17 +1460,17 @@ get_input(int set_server_number,
        * --------------------- */
       if (TRUE == any_extra_gui) {
 
-	for (i=0; i<Num_toggles; i++) {
-	  fscanf(fplay,"%d",&Toggle_choice[i]);
-	}
-	
-	for (i=0; i<Num_pulldowns; i++) {
-	  fscanf(fplay,"%d",&Pulldown_choice[i]);
-	}
+        for (i=0; i<Num_toggles; i++) {
+          fscanf(fplay,"%d",&Toggle_choice[i]);
+        }
 
-	for (i=0; i<Num_fields; i++) {
-	  fscanf(fplay,"%s",Field_user_string[i]);
-	}
+        for (i=0; i<Num_pulldowns; i++) {
+          fscanf(fplay,"%d",&Pulldown_choice[i]);
+        }
+
+        for (i=0; i<Num_fields; i++) {
+          fscanf(fplay,"%s",Field_user_string[i]);
+        }
       }
 
       /* ---------------------
@@ -1478,17 +1478,17 @@ get_input(int set_server_number,
        * --------------------- */
       if (TRUE == any_var_extract) {
 
-	for (i=0; i<Num_ve_toggles; i++) {
-	  fscanf(fplay,"%d",&Toggle_ve_choice[i]);
-	}
-	
-	for (i=0; i<Num_ve_pulldowns; i++) {
-	  fscanf(fplay,"%d",&Pulldown_ve_choice[i]);
-	}
+        for (i=0; i<Num_ve_toggles; i++) {
+          fscanf(fplay,"%d",&Toggle_ve_choice[i]);
+        }
 
-	for (i=0; i<Num_ve_fields; i++) {
-	  fscanf(fplay,"%s",Field_ve_user_string[i]);
-	}
+        for (i=0; i<Num_ve_pulldowns; i++) {
+          fscanf(fplay,"%d",&Pulldown_ve_choice[i]);
+        }
+
+        for (i=0; i<Num_ve_fields; i++) {
+          fscanf(fplay,"%s",Field_ve_user_string[i]);
+        }
       }
 
       fclose(fplay);
@@ -1499,33 +1499,33 @@ get_input(int set_server_number,
   /* -------------------------------------------
    * set the user choices here and run the code
    * ------------------------------------------- */
-  
-  /* set your choices here 
+
+  /* set your choices here
      Toggle_choice[0..Num_toggles]
      Pulldown_choice[0..Num_pulldowns]
-     Field_user_string[Num_fields][0..Numfields] 
+     Field_user_string[Num_fields][0..Numfields]
      amd then send your choices into this routine */
 
   USERD_set_extra_gui_data(Toggle_choice,            /* [num_toggle] */
                            Pulldown_choice,          /* [num_pulldown] */
-                           Field_user_string  );    /* [num_fields][Z_LEN_GUI_FIELD_STR] */ 
-    
+                           Field_user_string  );    /* [num_fields][Z_LEN_GUI_FIELD_STR] */
+
   for (i=0; i<Num_toggles; i++) {
     fprintf(stderr,"Toggle Title %d : %s\n",i,Toggle_title[i]);
     fprintf(stderr,"User selection = %d \n",Toggle_choice[i]);
   }
   fprintf(stderr,"\n\n");
-    
+
   for (i=0; i<Num_pulldowns; i++) {
     fprintf(stderr,"Pulldown Title %d : %s\n", i , Pulldown_title[i] );
     fprintf(stderr,"Pulldown selection is # %d : %s\n",
             Pulldown_choice[i],Pulldown_item_strings[i][Pulldown_choice[i]]);
   }
-  
+
   for (i=0; i<Num_fields; i++) {
     fprintf(stderr,"Field Title %d : %s\n",i,Field_title[i]);
     fprintf(stderr,"Field string %d: %s\n",i,Field_user_string[i]);
-    
+
   }
 #endif
 
@@ -1533,29 +1533,29 @@ get_input(int set_server_number,
   /* -------------------------------------------
    * set the user choices here and run the code
    * ------------------------------------------- */
-  
-  /* set your choices here 
+
+  /* set your choices here
      Toggle_ve_choice[0..Num_ve_toggles]
      Pulldown_ve_choice[0..Num_ve_pulldowns]
-     Field_ve_user_string[Num_ve_fields][0..Numfields] 
+     Field_ve_user_string[Num_ve_fields][0..Numfields]
      amd then send your choices into this routine */
-    
+
   USERD_set_var_extract_gui_data(Toggle_ve_choice,      /* [num_ve_toggle] */
                                  Pulldown_ve_choice,    /* [num_ve_pulldown] */
-                                 Field_ve_user_string); /*[num_ve_fields][Z_LEN_GUI_FIELD_STR] */ 
+                                 Field_ve_user_string); /*[num_ve_fields][Z_LEN_GUI_FIELD_STR] */
 
   for (i=0; i<Num_ve_toggles; i++) {
     fprintf(stderr,"Toggle Title %d : %s\n",i,Toggle_ve_title[i]);
     fprintf(stderr,"User selection = %d \n",Toggle_ve_choice[i]);
   }
   fprintf(stderr,"\n\n");
-  
+
   for (i=0; i<Num_ve_pulldowns; i++) {
     fprintf(stderr,"Pulldown Title %d : %s\n", i , Pulldown_ve_title[i] );
     fprintf(stderr,"Pulldown selection is # %d : %s\n",
             Pulldown_ve_choice[i],Pulldown_ve_item_strings[i][Pulldown_ve_choice[i]]);
   }
-    
+
   for (i=0; i<Num_ve_fields; i++) {
     fprintf(stderr,"Field Title %d : %s\n",i,Field_ve_title[i]);
     fprintf(stderr,"Field string %d: %s\n",i,Field_ve_user_string[i]);
@@ -1667,7 +1667,7 @@ time_info( void )
       fprintf(stderr," (Must be >0 to be okay)\n");
       return(Z_ERR);
     }
-    
+
 
     /* Get the solution times
      *-----------------------*/
@@ -1705,8 +1705,8 @@ time_info( void )
     fprintf(stderr," (Must be >0 to be okay)\n");
     return(Z_ERR);
   }
-    
-  
+
+
   /* Get the solution times
    *-----------------------*/
   if(Num_time_steps > 0) {
@@ -1759,7 +1759,7 @@ part_build_info(int geom_time_step)
   int **ijk_dimensions;
   int **iblanking_options;
   char **part_descriptions;
-  
+
   int ghosts_in_block;
 
   int *max_num_nodes;
@@ -1816,7 +1816,7 @@ part_build_info(int geom_time_step)
     fprintf(stderr," Invalid Geom changing status!!\n");
   }
 
-  
+
   /* Get the node label status
    *--------------------------*/
   Node_labels = USERD_get_node_label_status();
@@ -1947,7 +1947,7 @@ part_build_info(int geom_time_step)
     return(Z_ERR);
   }
 
-  
+
 
   /* Get the gold part build info
    *-----------------------------*/
@@ -2707,7 +2707,7 @@ gold_part_builder(int geom_time_step)
   int num_failed = 0;
   int *fail_flags = (int *) NULL;
   float values[14], vals[10];
-  
+
   fprintf(stderr,"\n------------- part_builder --------------\n");
 
   if(Num_time_sets > 0) {
@@ -2825,7 +2825,7 @@ gold_part_builder(int geom_time_step)
               fprintf(stderr,"Error: getting nsided conn array\n");
               return(Z_ERR);
             }
-            
+
             /* First element of the type
              *--------------------------*/
             i = 0;
@@ -2838,7 +2838,7 @@ gold_part_builder(int geom_time_step)
               fprintf(stderr," %d",nsid_con[j]);
             }
             fprintf(stderr,"\n");
-            
+
             /* Last element of the type
              *-------------------------*/
             i = ne - 1;
@@ -2848,7 +2848,7 @@ gold_part_builder(int geom_time_step)
                 fprintf(stderr,"      id: %d\n",elemids[i]);
               }
               fprintf(stderr,"      connectivity:");
-              
+
               for(j=nsid_len-conns[i][0]; j<nsid_len; ++j) {
                 fprintf(stderr," %d",nsid_con[j]);
               }
@@ -2894,7 +2894,7 @@ gold_part_builder(int geom_time_step)
               fprintf(stderr,"Error: getting nfaced conn array\n");
               return(Z_ERR);
             }
-            
+
             /* First element of the type
              *--------------------------*/
             jj = 0;
@@ -2951,26 +2951,26 @@ gold_part_builder(int geom_time_step)
             }
             fprintf(stderr,"\n");
 
-	    /* check the connectivity for negative numbers
-	     * -------------------------------------------*/
+            /* check the connectivity for negative numbers
+             * -------------------------------------------*/
 #if defined GT_USERD_API_100
-	    for (i=0;i<ne;i++){
-	      for(j=0; j<Elem_info[et].con_len; ++j) {
-		/* ---------- uncomment to print out connectivity values ---------- */
-/*  		fprintf(stderr," %d",conns[i][j]);  */
-		if (conns[i][j] <= 0 || conns[i][j] > Pbuild[p].nn ) {
-		  fprintf(stderr,"\n****************************\n");
-		  fprintf(stderr,"Connectivity value out of bounds: \n");
-		  fprintf(stderr,"Either less than zero or greater than \n");
-		  fprintf(stderr,"  number of nodes in part!!  \n");
-		  fprintf(stderr,"i = %d   j = %d  conns[i][j] = %d \n",i,j,conns[i][j]);
-		  fprintf(stderr,"****************************\n");
-		}
-	      }
-		/* ---------- uncomment to print out connectivity values ---------- */
-/* 	      fprintf(stderr,"\n"); */
-	    }
-#endif            
+            for (i=0;i<ne;i++){
+              for(j=0; j<Elem_info[et].con_len; ++j) {
+                /* ---------- uncomment to print out connectivity values ---------- */
+/*              fprintf(stderr," %d",conns[i][j]);  */
+                if (conns[i][j] <= 0 || conns[i][j] > Pbuild[p].nn ) {
+                  fprintf(stderr,"\n****************************\n");
+                  fprintf(stderr,"Connectivity value out of bounds: \n");
+                  fprintf(stderr,"Either less than zero or greater than \n");
+                  fprintf(stderr,"  number of nodes in part!!  \n");
+                  fprintf(stderr,"i = %d   j = %d  conns[i][j] = %d \n",i,j,conns[i][j]);
+                  fprintf(stderr,"****************************\n");
+                }
+              }
+                /* ---------- uncomment to print out connectivity values ---------- */
+/*            fprintf(stderr,"\n"); */
+            }
+#endif
             /* Last element of the type
              *-------------------------*/
             i = ne - 1;
@@ -2986,7 +2986,7 @@ gold_part_builder(int geom_time_step)
               fprintf(stderr,"\n");
             }
           }
-  
+
           /* Free the allocated memory
            *--------------------------*/
           if(NULL != conns) {
@@ -3024,7 +3024,7 @@ gold_part_builder(int geom_time_step)
             }
           }
         }
-        
+
         if(Node_labels) {
           nodeids = (int *) calloc((nn+1),sizeof(int));
           if(nodeids == (int *) NULL) {
@@ -3147,7 +3147,7 @@ gold_part_builder(int geom_time_step)
             if(Doing_Structured_Cinching) {
               bdim[comp] = Pbuild[p].ne[comp];
 
-              /* even */              
+              /* even */
               if((bdim[comp] % 2) == 0) {
                 bdim[comp] = (bdim[comp]/2) + 1;
               }
@@ -3164,7 +3164,7 @@ gold_part_builder(int geom_time_step)
         }
 
         nn = bdim[0] * bdim[1] * bdim[2];
-        
+
         bd1 = bdim[0]-1;
         if(bd1 < 1) {
           bd1 = 1;
@@ -3178,7 +3178,7 @@ gold_part_builder(int geom_time_step)
           bd3 = 1;
         }
         ne = bd1 * bd2 * bd3;
-        
+
         /* Determine cell type
          *--------------------*/
         num_dims = 3;
@@ -3196,7 +3196,7 @@ gold_part_builder(int geom_time_step)
         else {
           cell_type = Z_BAR02;
         }
-        
+
         coords = (float **) calloc(num_dims,sizeof(float *));
         if(coords == (float **) NULL) {
           fprintf(stderr,"Error: allocating coords array\n");
@@ -3211,7 +3211,7 @@ gold_part_builder(int geom_time_step)
             }
           }
         }
-        
+
         /* Get the coords
          *---------------*/
         for(comp=0; comp<num_dims; ++comp) {
@@ -3231,10 +3231,10 @@ gold_part_builder(int geom_time_step)
             return(Z_ERR);
           }
         }
-        
-        
+
+
 #if (defined GT_USERD_API_200)
-        
+
         if(Node_labels) {
           nodeids = (int *) calloc(nn,sizeof(int));
           if(nodeids == (int *) NULL) {
@@ -3255,15 +3255,15 @@ gold_part_builder(int geom_time_step)
 
         /* Echo "some" info
          *-----------------*/
-        
+
         /* First node
          *-----------*/
         if(nn > 0) {
           i = 0;
           fprintf(stderr,"   Node %d of %d:\n",i+1,nn);
-          
+
 #if (defined GT_USERD_API_200)
-          
+
           if(Node_labels) {
             fprintf(stderr,"      id: %d\n",nodeids[i]);
           }
@@ -3286,14 +3286,14 @@ gold_part_builder(int geom_time_step)
                     coords[0][i]);
             mm[0] = mm[1] = coords[0][i];
           }
-          
-          
+
+
           /* Last node
            *----------*/
           i = nn-1;
           if(i > 1) {
             fprintf(stderr,"   Node %d of %d:\n",i+1,nn);
-            
+
 #if (defined GT_USERD_API_200)
             if(Node_labels) {
               fprintf(stderr,"      id: %d\n",nodeids[i]);
@@ -3313,7 +3313,7 @@ gold_part_builder(int geom_time_step)
             }
           }
         }
-        
+
         /* Min and max coordinate values
          *------------------------------*/
         for(i=1; i<nn; ++i) {
@@ -3340,7 +3340,7 @@ gold_part_builder(int geom_time_step)
             }
           }
         }
-        
+
         fprintf(stderr,"   Coordinate ranges:\n");
         fprintf(stderr,"      min x: %g\n",mm[0]);
         fprintf(stderr,"      max x: %g\n",mm[1]);
@@ -3365,7 +3365,7 @@ gold_part_builder(int geom_time_step)
           free(nodeids);
         }
 #endif
-        
+
         /* Get the block iblanking - if any
          *---------------------------------*/
         if(Pbuild[p].type == Z_IBLANKED) {
@@ -3389,7 +3389,7 @@ gold_part_builder(int geom_time_step)
           ib[Z_BND]    = 0;
           ib[Z_INTBND] = 0;
           ib[Z_SYM]    = 0;
-          
+
           for(i=0; i<nn; ++i) {
             ++ib[iblanking[i]];
           }
@@ -3400,7 +3400,7 @@ gold_part_builder(int geom_time_step)
           fprintf(stderr,"      Number of Z_BND:    %d\n",ib[Z_BND]);
           fprintf(stderr,"      Number of Z_INTBND: %d\n",ib[Z_INTBND]);
           fprintf(stderr,"      Number of Z_SYM:    %d\n",ib[Z_SYM]);
-          
+
           free(iblanking);
         }
 
@@ -3425,20 +3425,20 @@ gold_part_builder(int geom_time_step)
           /* Echo "some" info
            *-----------------*/
           num_ghosts = 0;
-          
+
           for(i=0; i<ne; ++i) {
             if(ghost_flag[i] > 0) {
               ++num_ghosts;
             }
           }
-          
+
           fprintf(stderr,"   Block Ghost flag breakdown:\n");
           fprintf(stderr,"      %d ghost cells out of %d total cells\n",
                   num_ghosts,ne);
-          
+
           free(ghost_flag);
         }
-        
+
         /* Get the element ids - if any
          *-----------------------------*/
         if(Element_labels) {
@@ -3462,7 +3462,7 @@ gold_part_builder(int geom_time_step)
           i = 0;
           fprintf(stderr,"   %s Element %d of %d:\n",Elem_info[et].name,i+1,ne);
           fprintf(stderr,"      id: %d\n",elemids[i]);
-          
+
           /* Last element of the type
            *-------------------------*/
           i = ne - 1;
@@ -3671,7 +3671,7 @@ gold_var_loader(int var_time_step)
       /* Get the timeset used for the variable
        *---------------------------------------*/
       var_timeset = Varinfo[v].timeset;
-      
+
       /* Get the number of time steps for this timeset
        *----------------------------------------------*/
       Num_time_steps = USERD_get_num_of_time_steps(var_timeset);
@@ -3684,12 +3684,12 @@ gold_var_loader(int var_time_step)
       if(var_time_step > (Num_time_steps - 1)) {
         var_time_step = Num_time_steps - 1;
       }
-      
+
       /* Set the timeset and step - to first step by default, but
        * can set it at others using -vts command argument
        *---------------------------------------------------------*/
       USERD_set_time_set_and_step(var_timeset,var_time_step);
-      
+
       fprintf(stderr,"   Using timeset:   %d  (step range is %d through %d)\n",
               var_timeset,0,Num_time_steps-1);
       fprintf(stderr,"   Using time step: %d\n",var_time_step);
@@ -3772,8 +3772,8 @@ gold_var_loader(int var_time_step)
 
                 if(Doing_Structured_Cinching) {
                   bdim[comp] = Pbuild[p].ne[comp];
-                  
-                  /* even */              
+
+                  /* even */
                   if((bdim[comp] % 2) == 0) {
                     bdim[comp] = (bdim[comp]/2) + 1;
                   }
@@ -3782,7 +3782,7 @@ gold_var_loader(int var_time_step)
                     bdim[comp] = ((bdim[comp]-1)/2) + 1;
                   }
                 }
-                
+
                 else {
                   bdim[comp] = Pbuild[p].ne[comp];
                 }
@@ -3835,7 +3835,7 @@ gold_var_loader(int var_time_step)
                   maxv = values[i];
                 }
               }
-              
+
               fprintf(stderr,"     For component %d: \n",comp);
               fprintf(stderr,"       node %10d value:   %g\n",1,values[1]);
               fprintf(stderr,"       node %10d value:   %g\n",nsize,values[nsize]);
@@ -3853,7 +3853,7 @@ gold_var_loader(int var_time_step)
                 if(err == Z_UNDEF) {
                   fprintf(stderr,"  Variable not defined on this part\n");
                 }
-                
+
                 /* For the component, show 1st node, last node, min, max values
                  *-------------------------------------------------------------*/
                 minv = maxv = values[1];
@@ -3865,7 +3865,7 @@ gold_var_loader(int var_time_step)
                     maxv = values[i];
                   }
                 }
-                
+
                 fprintf(stderr,"     For component %d (imag): \n",comp);
                 fprintf(stderr,"       node %10d value:   %g\n",1,values[1]);
                 fprintf(stderr,"       node %10d value:   %g\n",nsize,values[nsize]);
@@ -3893,8 +3893,8 @@ gold_var_loader(int var_time_step)
               else {
                 if(Doing_Structured_Cinching) {
                   bdim[comp] = Pbuild[p].ne[comp];
-                  
-                  /* even */              
+
+                  /* even */
                   if((bdim[comp] % 2) == 0) {
                     bdim[comp] = (bdim[comp]/2) + 1;
                   }
@@ -3903,7 +3903,7 @@ gold_var_loader(int var_time_step)
                     bdim[comp] = ((bdim[comp]-1)/2) + 1;
                   }
                 }
-                
+
                 else {
                   bdim[comp] = Pbuild[p].ne[comp];
                 }
@@ -3979,9 +3979,9 @@ gold_var_loader(int var_time_step)
                 fprintf(stderr,"Error: alocating variable values\n");
                 return(Z_ERR);
               }
-              
+
               for(comp=0; comp<num_comps; ++comp) {
-                
+
                 err = USERD_get_var_by_component(vn,
                                                  pn,
                                                  Varinfo[v].type,
@@ -3992,7 +3992,7 @@ gold_var_loader(int var_time_step)
                 if(err == Z_UNDEF) {
                   fprintf(stderr,"  Variable not defined on this part\n");
                 }
-                
+
                 /* For the component, show 1st elem, last elem, min, max values
                  *-------------------------------------------------------------*/
                 minv = maxv = values[1];
@@ -4004,13 +4004,13 @@ gold_var_loader(int var_time_step)
                     maxv = values[i];
                   }
                 }
-                
+
                 fprintf(stderr,"     For component %d: \n",comp);
                 fprintf(stderr,"       elem %10d value:  %g\n",1,values[1]);
                 fprintf(stderr,"       elem %10d value:  %g\n",nsize,values[nsize]);
                 fprintf(stderr,"       min value:              %g\n",minv);
                 fprintf(stderr,"       max value:              %g\n",maxv);
-                
+
                 if(Varinfo[v].complex) {
                   err = USERD_get_var_by_component(vn,
                                                    pn,
@@ -4022,7 +4022,7 @@ gold_var_loader(int var_time_step)
                   if(err == Z_UNDEF) {
                     fprintf(stderr,"  Variable not defined on this part\n");
                   }
-                  
+
                   /* For the component, show 1st elem, last elem, min, max values
                    *-------------------------------------------------------------*/
                   minv = maxv = values[1];
@@ -4034,13 +4034,13 @@ gold_var_loader(int var_time_step)
                       maxv = values[i];
                     }
                   }
-                  
+
                   fprintf(stderr,"     For component %d (imag): \n",comp);
                   fprintf(stderr,"       elem %10d value:  %g\n",1,values[1]);
                   fprintf(stderr,"       elem %10d value:  %g\n",nsize,values[nsize]);
                   fprintf(stderr,"       min value:              %g\n",minv);
                   fprintf(stderr,"       max value:              %g\n",maxv);
-                  
+
                 }
               }
               free(values);
@@ -4094,7 +4094,7 @@ part_builder(int geom_time_step)
      * can set it at others using -gts command argument
      *---------------------------------------------------*/
     USERD_set_time_step(geom_time_step);
-    
+
     fprintf(stderr," Using time step: %d  (where range is %d through %d\n",
             geom_time_step,0,Num_time_steps-1);
   }
@@ -4111,7 +4111,7 @@ part_builder(int geom_time_step)
       fprintf(stderr,"Error: allocating crds array\n");
       return(Z_ERR);
     }
-        
+
     if(Node_labels) {
       nodeids = (int *) calloc(nn,sizeof(int));
       if(nodeids == (int *) NULL) {
@@ -4119,8 +4119,8 @@ part_builder(int geom_time_step)
         return(Z_ERR);
       }
     }
-    
-    
+
+
     err = USERD_get_global_coords(crds);
     if(err == Z_ERR) {
       fprintf(stderr,"Error: getting unstructured coords\n");
@@ -4163,7 +4163,7 @@ part_builder(int geom_time_step)
       fprintf(stderr,"      x y z coordinates: %g %g %g\n",
               crds[i].xyz[0], crds[i].xyz[1], crds[i].xyz[2]);
     }
-    
+
     /* Min and max coordinate values
      *------------------------------*/
     for(i=1; i<nn; ++i) {
@@ -4254,7 +4254,7 @@ part_builder(int geom_time_step)
         fprintf(stderr,"Error: getting element connectivities\n");
         return(Z_ERR);
       }
-      
+
       /* Get the element ids - if any
        *-----------------------------*/
       if(Element_labels) {
@@ -4385,7 +4385,7 @@ part_builder(int geom_time_step)
           }
         }
       }
-        
+
       /* Get the coords
        *---------------*/
       for(comp=0; comp<num_dims; ++comp) {
@@ -4395,7 +4395,7 @@ part_builder(int geom_time_step)
           return(Z_ERR);
         }
       }
-      
+
 
       /* Echo "some" info
        *-----------------*/
@@ -4405,7 +4405,7 @@ part_builder(int geom_time_step)
       if(nn > 0) {
         i = 0;
         fprintf(stderr,"   Node %d of %d:\n",i+1,nn);
-        
+
         if(num_dims == 3) {
           fprintf(stderr,"      x y z coordinates: %g %g %g\n",
                   coords[0][i], coords[1][i], coords[2][i]);
@@ -4425,13 +4425,13 @@ part_builder(int geom_time_step)
           mm[0] = mm[1] = coords[0][i];
         }
 
-        
+
         /* Last node
          *----------*/
         i = nn-1;
         if(i > 1) {
           fprintf(stderr,"   Node %d of %d:\n",i+1,nn);
-          
+
           if(num_dims == 3) {
             fprintf(stderr,"      x y z coordinates: %g %g %g\n",
                     coords[0][i], coords[1][i], coords[2][i]);
@@ -4473,7 +4473,7 @@ part_builder(int geom_time_step)
           }
         }
       }
-      
+
       fprintf(stderr,"   Coordinate ranges:\n");
       fprintf(stderr,"      min x: %g\n",mm[0]);
       fprintf(stderr,"      max x: %g\n",mm[1]);
@@ -4572,12 +4572,12 @@ var_loader(int var_time_step)
     if(var_time_step > (Num_time_steps - 1)) {
       var_time_step = Num_time_steps - 1;
     }
-    
+
     /* Set the time step - to first step by default, but
      * can set it at others using -vts command argument
      *---------------------------------------------------------*/
     USERD_set_time_step(var_time_step);
-    
+
     fprintf(stderr," Using time step: %d  (where range is %d through %d)\n\n",
             var_time_step,0,Num_time_steps-1);
   }
@@ -4702,7 +4702,7 @@ var_loader(int var_time_step)
                   maxv[0] = values[i];
                 }
               }
-              
+
               fprintf(stderr,"       node %10d value: %g\n",1,values[0]);
               fprintf(stderr,"       node %10d value: %g\n",nsize,values[nsize-1]);
               fprintf(stderr,"       min value:             %g\n",minv[0]);
@@ -4763,7 +4763,7 @@ var_loader(int var_time_step)
                   }
                 }
               }
-              
+
               fprintf(stderr,"       node %10d values: %g %g %g\n",1,
                       values[0],values[1],values[2]);
               fprintf(stderr,"       node %10d values: %g %g %g\n",nsize,
@@ -4886,12 +4886,12 @@ var_loader(int var_time_step)
                     maxv[0] = values[i];
                   }
                 }
-                
+
                 fprintf(stderr,"       elem %10d value: %g\n",1,values[0]);
                 fprintf(stderr,"       elem %10d value: %g\n",nsize,values[nsize-1]);
                 fprintf(stderr,"       min value:             %g\n",minv[0]);
                 fprintf(stderr,"       max value:             %g\n",maxv[0]);
-                
+
               }
 
               else if(num_comps == 3) {
@@ -4907,13 +4907,13 @@ var_loader(int var_time_step)
                   }
                 }
                 else {
-                  
+
                   tvalues = (float *) calloc(nsize,sizeof(float));
                   if(tvalues == (float *) NULL) {
                     fprintf(stderr,"Error: alocating tvalues array\n");
                     return(Z_ERR);
                   }
-                  
+
                   for(i=0; i<3; ++i) {
                     err = USERD_get_block_vector_values_by_component(pn,
                                                                      vn,
@@ -4947,7 +4947,7 @@ var_loader(int var_time_step)
                     }
                   }
                 }
-                
+
                 fprintf(stderr,"       elem %10d values: %g %g %g\n",1,
                         values[0],values[1],values[2]);
                 fprintf(stderr,"       elem %10d values: %g %g %g\n",nsize,
@@ -4956,7 +4956,7 @@ var_loader(int var_time_step)
                         minv[0],minv[1],minv[2]);
                 fprintf(stderr,"       max values:             %g %g %g\n",
                         maxv[0],maxv[1],maxv[2]);
-                
+
               }
               free(values);
             }
@@ -5072,7 +5072,7 @@ materials_info( void )
           fprintf(stderr," Problems allocating for material ids\n");
           return(Z_ERR);
         }
-        
+
         mdesc = (char **) calloc(num_materials[i],sizeof(char *));
         if(mdesc == (char **)NULL) {
           fprintf(stderr," Problems allocating for material desc\n");
@@ -5098,7 +5098,7 @@ materials_info( void )
             /* Echo some feedback
              *-------------------*/
             fprintf(stderr,"   For Material %d:\n",j+1);
-            
+
             fprintf(stderr,"     index:       %d\n",mids[j]);
             fprintf(stderr,"     description: %s\n",mdesc[j]);
           }
@@ -5156,7 +5156,7 @@ gold_materials_loader(int geom_time_step)
     /* Get the timeset used for the geometry
      *--------------------------------------*/
     geom_timeset = USERD_get_geom_timeset_number();
-    
+
     /* Get the number of time steps for this timeset
      *----------------------------------------------*/
     Num_time_steps = USERD_get_num_of_time_steps(geom_timeset);
@@ -5173,7 +5173,7 @@ gold_materials_loader(int geom_time_step)
      * can set it at others using -gts command argument
      *---------------------------------------------------------*/
     USERD_set_time_set_and_step(geom_timeset,geom_time_step);
-    
+
     fprintf(stderr," Using timeset:   %d  (step range is %d through %d)\n",
             geom_timeset,0,Num_time_steps-1);
     fprintf(stderr," Using time step: %d\n",geom_time_step);
@@ -5207,7 +5207,7 @@ gold_materials_loader(int geom_time_step)
           }
         }
         nn = bdim[0] * bdim[1] * bdim[2];
-        
+
         bd1 = bdim[0]-1;
         if(bd1 < 1) {
           bd1 = 1;
@@ -5221,7 +5221,7 @@ gold_materials_loader(int geom_time_step)
           bd3 = 1;
         }
         ne = bd1 * bd2 * bd3;
-        
+
         /* Determine cell type
          *--------------------*/
         num_dims = 3;
@@ -5262,7 +5262,7 @@ gold_materials_loader(int geom_time_step)
                                      &matf_size);
           if(err == Z_OK && matf_size > 0) {
 
-              
+
             /* Go get the material ids
              *------------------------*/
             ivals = (int *) calloc(matf_size,sizeof(int));
@@ -5331,12 +5331,12 @@ gold_materials_loader(int geom_time_step)
                                         et,
                                         Z_MIX_VALUE,
                                         &matfv_size);
-            
+
             if(err1 == Z_OK &&
                err2 == Z_OK &&
                matf_size > 0 &&
                matfv_size > 0) {
-                
+
               /* Go get the material ids
                *------------------------*/
               ivals = (int *) calloc(matf_size,sizeof(int));
@@ -5349,14 +5349,14 @@ gold_materials_loader(int geom_time_step)
                 fprintf(stderr," Problems allocating for mixed material values\n");
                 return(Z_ERR);
               }
-              
+
               err1 = USERD_load_matf_data(ms,
                                           pn,
                                           et,
                                           Z_MIX_INDEX,
                                           ivals,
                                           fvals);
-              
+
               err2 = USERD_load_matf_data(ms,
                                           pn,
                                           et,
@@ -5379,7 +5379,7 @@ gold_materials_loader(int geom_time_step)
                   fprintf(stderr,"       mixed mat id[%d] = %d\n",k,ivals[k]);
                 }
                 free(ivals);
-                
+
                 if(matfv_size < 20) {
                   fprintf(stderr,"     Printing all mixed mat values for %s elements\n",
                           Elem_info[et].name);
@@ -5460,12 +5460,12 @@ entity_querys(int var_time_step)
     if(var_time_step > (Num_time_steps - 1)) {
       var_time_step = Num_time_steps - 1;
     }
-        
+
     /* Set the time step - to first step by default, but
      * can set it at others using -vts command argument
      *---------------------------------------------------------*/
     USERD_set_time_step(var_time_step);
-    
+
     fprintf(stderr," Using time step: %d  (where range is %d through %d)\n\n",
             var_time_step,0,Num_time_steps-1);
   }
@@ -5492,7 +5492,7 @@ entity_querys(int var_time_step)
         /* Get the timeset used for the variable
          *---------------------------------------*/
         var_timeset = Varinfo[v].timeset;
-        
+
         /* Get the number of time steps for this timeset
          *----------------------------------------------*/
         Num_time_steps = USERD_get_num_of_time_steps(var_timeset);
@@ -5510,14 +5510,14 @@ entity_querys(int var_time_step)
          * can set it at others using -vts command argument
          *---------------------------------------------------------*/
         USERD_set_time_set_and_step(var_timeset,var_time_step);
-        
+
         fprintf(stderr,"   Using timeset:   %d  (step range is %d through %d)\n",
                 var_timeset,0,Num_time_steps-1);
         fprintf(stderr,"   Using time step: %d\n",var_time_step);
       }
 #endif
 
-      
+
       /* Get the var description line
        *-----------------------------*/
 #if (defined GT_USERD_API_100)
@@ -5762,7 +5762,7 @@ entity_querys(int var_time_step)
                   fprintf(stderr,"     Vector values are: %g %g %g\n",
                           qvals[0],qvals[1],qvals[2]);
                 }
-                
+
 #if (defined GT_USERD_API_100)
                 if(Varinfo[v].complex) {
 
@@ -5784,7 +5784,7 @@ entity_querys(int var_time_step)
                       fprintf(stderr,"     Vector values (imag) are: %g %g %g\n",
                               qvals[0],qvals[1],qvals[2]);
                     }
-                  }                  
+                  }
                 }
 #endif
               }
@@ -5832,7 +5832,7 @@ exercise_bkup( void )
   fprintf(stderr," Archive test completed\n");
 
   fclose(arcfile);
-  
+
   return(Z_OK);
 }
 
@@ -5852,19 +5852,19 @@ exercise_bkup( void )
  *      Z_ELE_FAILED_LOGIC_MANY
  *
  * ------------------------------------------------------ */
-int load_fail_defaults(void) 
+int load_fail_defaults(void)
 {
-  int check_for_failed = FALSE; 
+  int check_for_failed = FALSE;
   int cri1 = 0;                 /* Criteria1 ELE_FAILED_GREATER, etc */
-  int cri2 = 0;       
+  int cri2 = 0;
   int  logic_cri2 = 0;        /* Logic for criteria 2  ELE_FAILED_LOGIC_NONE, AND, etc */
   float val1 = 0.0;           /* failure threshold 1 */
   float  val2= 0.0;           /* failure threshold 2 */
   char failed_var_name[Z_MXVARIABLEDESC]={EOS};
-  
-  check_for_failed =  USERD_get_uns_failed_params( failed_var_name, 
-						   &val1, &val2, &cri1, &cri2,
-						   &logic_cri2 );
+
+  check_for_failed =  USERD_get_uns_failed_params( failed_var_name,
+                                                   &val1, &val2, &cri1, &cri2,
+                                                   &logic_cri2 );
   fprintf(stderr,"\n------------- failed element info -------------\n");
   if (check_for_failed == TRUE) {
     fprintf(stderr," Failed element criteria info \n");
@@ -5878,7 +5878,7 @@ int load_fail_defaults(void)
     fprintf(stderr," No Failed elements\n");
   }
   return(Z_OK);
-}  
+}
 
 
 /* End of File */

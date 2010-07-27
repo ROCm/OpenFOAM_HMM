@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,11 +90,15 @@ int main(int argc, char *argv[])
         surfaceScalarField phiv_neg = U_neg & mesh.Sf();
 
         volScalarField c = sqrt(thermo.Cp()/thermo.Cv()*rPsi);
-        surfaceScalarField cSf_pos = fvc::interpolate(c, pos, "reconstruct(T)")*mesh.magSf();
-        surfaceScalarField cSf_neg = fvc::interpolate(c, neg, "reconstruct(T)")*mesh.magSf();
+        surfaceScalarField cSf_pos =
+            fvc::interpolate(c, pos, "reconstruct(T)")*mesh.magSf();
+        surfaceScalarField cSf_neg =
+            fvc::interpolate(c, neg, "reconstruct(T)")*mesh.magSf();
 
-        surfaceScalarField ap = max(max(phiv_pos + cSf_pos, phiv_neg + cSf_neg), v_zero);
-        surfaceScalarField am = min(min(phiv_pos - cSf_pos, phiv_neg - cSf_neg), v_zero);
+        surfaceScalarField ap =
+            max(max(phiv_pos + cSf_pos, phiv_neg + cSf_neg), v_zero);
+        surfaceScalarField am =
+            min(min(phiv_pos - cSf_pos, phiv_neg - cSf_neg), v_zero);
 
         surfaceScalarField a_pos = ap/(ap - am);
 
