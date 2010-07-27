@@ -88,10 +88,11 @@ castellatedMeshControls
     // actually be a lot less.
     maxGlobalCells 2000000;
 
-    // The surface refinement loop might spend lots of iterations refining just a
-    // few cells. This setting will cause refinement to stop if <= minimumRefine
-    // are selected for refinement. Note: it will at least do one iteration
-    // (unless the number of cells to refine is 0)
+    // The surface refinement loop might spend lots of iterations
+    // refining just a few cells. This setting will cause refinement
+    // to stop if <= minimumRefine are selected for refinement. Note:
+    // it will at least do one iteration (unless the number of cells
+    // to refine is 0)
     minRefinementCells 10;
 
     // Number of buffer layers between different levels.
@@ -128,7 +129,7 @@ castellatedMeshControls
             // Surface-wise min and max refinement level
             level (1 1);
 
-	    faceZone bottomAir;
+            faceZone bottomAir;
             cellZone bottomAir;
             cellZoneInside inside;
         }
@@ -138,7 +139,7 @@ castellatedMeshControls
             // Surface-wise min and max refinement level
             level (1 1);
 
-	    faceZone topAir;
+            faceZone topAir;
             cellZone topAir;
             cellZoneInside inside;
         }
@@ -148,7 +149,7 @@ castellatedMeshControls
             // Surface-wise min and max refinement level
             level (0 0);
 
-	    faceZone heater;
+            faceZone heater;
             cellZone heater;
             cellZoneInside inside;
         }
@@ -158,7 +159,7 @@ castellatedMeshControls
             // Surface-wise min and max refinement level
             level (1 1);
 
-	    faceZone leftSolid;
+            faceZone leftSolid;
             cellZone leftSolid;
             cellZoneInside inside;
         }
@@ -168,7 +169,7 @@ castellatedMeshControls
             // Surface-wise min and max refinement level
             level (1 1);
 
-	    faceZone rightSolid;
+            faceZone rightSolid;
             cellZone rightSolid;
             cellZoneInside inside;
         }
@@ -250,15 +251,15 @@ addLayersControls
     // Per final patch (so not geometry!) the layer information
     layers
     {
-	//flowAirDuctReagent_flowAirDuctReagent
+        //flowAirDuctReagent_flowAirDuctReagent
         //{
         //    nSurfaceLayers 1;
         //}
-	//flowAirDuctReagent_inlet1
+        //flowAirDuctReagent_inlet1
         //{
         //    nSurfaceLayers 1;
         //}
-	//flowAirDuctReagent_inlet2
+        //flowAirDuctReagent_inlet2
         //{
         //    nSurfaceLayers 1;
         //}

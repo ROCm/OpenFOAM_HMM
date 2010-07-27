@@ -153,7 +153,7 @@ castellatedMeshControls
             //- Optional faceZone and (for closed surface) cellZone with
             //  how to select the cells that are in the cellZone
             //  (inside / outside / specified insidePoint)
-	    //faceZone sphere;
+            //faceZone sphere;
             //cellZone sphere;
             //cellZoneInside inside;  //outside/insidePoint
         }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 #include "fvMesh.H"
 #include "fvMatrices.H"
 #include "geometricOneField.H"
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
@@ -62,15 +63,15 @@ void Foam::porousZone::adjustNegativeResistance(dimensionedVector& resist)
 
 Foam::porousZone::porousZone
 (
-    const word& name,
+    const keyType& key,
     const fvMesh& mesh,
     const dictionary& dict
 )
 :
-    name_(name),
+    key_(key),
     mesh_(mesh),
     dict_(dict),
-    cellZoneID_(mesh_.cellZones().findZoneID(name)),
+    cellZoneIds_(mesh_.cellZones().findIndices(key_)),
     coordSys_(dict, mesh),
     porosity_(1),
     intensity_(0),
@@ -80,9 +81,9 @@ Foam::porousZone::porousZone
     D_("D", dimensionSet(0, -2, 0, 0, 0), tensor::zero),
     F_("F", dimensionSet(0, -1, 0, 0, 0), tensor::zero)
 {
-    Info<< "Creating porous zone: " << name_ << endl;
+    Info<< "Creating porous zone: " << key_ << endl;
 
-    bool foundZone = (cellZoneID_ != -1);
+    bool foundZone = !cellZoneIds_.empty();
     reduce(foundZone, orOp<bool>());
 
     if (!foundZone && Pstream::master())
@@ -90,8 +91,8 @@ Foam::porousZone::porousZone
         FatalErrorIn
         (
             "Foam::porousZone::porousZone"
-            "(const fvMesh&, const word&, const dictionary&)"
-        )   << "cannot find porous cellZone " << name_
+            "(const keyType&, const fvMesh&, const dictionary&)"
+        )   << "cannot find porous cellZone " << key_
             << exit(FatalError);
     }
 
@@ -106,7 +107,7 @@ Foam::porousZone::porousZone
         FatalIOErrorIn
         (
             "Foam::porousZone::porousZone"
-            "(const fvMesh&, const word&, const dictionary&)",
+            "(const keyType&, const fvMesh&, const dictionary&)",
             dict_
         )
             << "out-of-range porosity value " << porosity_
@@ -123,7 +124,7 @@ Foam::porousZone::porousZone
         FatalIOErrorIn
         (
             "Foam::porousZone::porousZone"
-            "(const fvMesh&, const word&, const dictionary&)",
+            "(const keyType&, const fvMesh&, const dictionary&)",
             dict_
         )
             << "out-of-range turbulent intensity value " << intensity_
@@ -140,7 +141,7 @@ Foam::porousZone::porousZone
         FatalIOErrorIn
         (
             "Foam::porousZone::porousZone"
-            "(const fvMesh&, const word&, const dictionary&)",
+            "(const keyType&, const fvMesh&, const dictionary&)",
             dict_
         )
             << "out-of-range turbulent length scale " << mixingLength_
@@ -169,7 +170,7 @@ Foam::porousZone::porousZone
                 FatalIOErrorIn
                 (
                     "Foam::porousZone::porousZone"
-                    "(const fvMesh&, const word&, const dictionary&)",
+                    "(const keyType&, const fvMesh&, const dictionary&)",
                     dict_
                 )   << "incorrect dimensions for d: " << d.dimensions()
                     << " should be " << D_.dimensions()
@@ -192,7 +193,7 @@ Foam::porousZone::porousZone
                 FatalIOErrorIn
                 (
                     "Foam::porousZone::porousZone"
-                    "(const fvMesh&, const word&, const dictionary&)",
+                    "(const keyType&, const fvMesh&, const dictionary&)",
                     dict_
                 )   << "incorrect dimensions for f: " << f.dimensions()
                     << " should be " << F_.dimensions()
@@ -220,7 +221,7 @@ Foam::porousZone::porousZone
         FatalIOErrorIn
         (
             "Foam::porousZone::porousZone"
-            "(const fvMesh&, const word&, const dictionary&)",
+            "(const keyType&, const fvMesh&, const dictionary&)",
             dict_
         )   << "neither powerLaw (C0/C1) "
                "nor Darcy-Forchheimer law (d/f) specified"
@@ -239,7 +240,7 @@ Foam::porousZone::porousZone
 
 void Foam::porousZone::addResistance(fvVectorMatrix& UEqn) const
 {
-    if (cellZoneID_ == -1)
+    if (cellZoneIds_.empty())
     {
         return;
     }
@@ -250,7 +251,6 @@ void Foam::porousZone::addResistance(fvVectorMatrix& UEqn) const
         compressible = true;
     }
 
-    const labelList& cells = mesh_.cellZones()[cellZoneID_];
     const scalarField& V = mesh_.V();
     scalarField& Udiag = UEqn.diag();
     vectorField& Usource = UEqn.source();
@@ -263,7 +263,6 @@ void Foam::porousZone::addResistance(fvVectorMatrix& UEqn) const
             addPowerLawResistance
             (
                 Udiag,
-                cells,
                 V,
                 mesh_.lookupObject<volScalarField>("rho"),
                 U
@@ -274,7 +273,6 @@ void Foam::porousZone::addResistance(fvVectorMatrix& UEqn) const
             addPowerLawResistance
             (
                 Udiag,
-                cells,
                 V,
                 geometricOneField(),
                 U
@@ -293,7 +291,6 @@ void Foam::porousZone::addResistance(fvVectorMatrix& UEqn) const
             (
                 Udiag,
                 Usource,
-                cells,
                 V,
                 mesh_.lookupObject<volScalarField>("rho"),
                 mesh_.lookupObject<volScalarField>("mu"),
@@ -306,7 +303,6 @@ void Foam::porousZone::addResistance(fvVectorMatrix& UEqn) const
             (
                 Udiag,
                 Usource,
-                cells,
                 V,
                 geometricOneField(),
                 mesh_.lookupObject<volScalarField>("nu"),
@@ -324,7 +320,7 @@ void Foam::porousZone::addResistance
     bool correctAUprocBC
 ) const
 {
-    if (cellZoneID_ == -1)
+    if (cellZoneIds_.empty())
     {
         return;
     }
@@ -335,7 +331,6 @@ void Foam::porousZone::addResistance
         compressible = true;
     }
 
-    const labelList& cells = mesh_.cellZones()[cellZoneID_];
     const vectorField& U = UEqn.psi();
 
     if (C0_ > VSMALL)
@@ -345,7 +340,6 @@ void Foam::porousZone::addResistance
             addPowerLawResistance
             (
                 AU,
-                cells,
                 mesh_.lookupObject<volScalarField>("rho"),
                 U
             );
@@ -355,7 +349,6 @@ void Foam::porousZone::addResistance
             addPowerLawResistance
             (
                 AU,
-                cells,
                 geometricOneField(),
                 U
             );
@@ -372,7 +365,6 @@ void Foam::porousZone::addResistance
             addViscousInertialResistance
             (
                 AU,
-                cells,
                 mesh_.lookupObject<volScalarField>("rho"),
                 mesh_.lookupObject<volScalarField>("mu"),
                 U
@@ -383,7 +375,6 @@ void Foam::porousZone::addResistance
             addViscousInertialResistance
             (
                 AU,
-                cells,
                 geometricOneField(),
                 mesh_.lookupObject<volScalarField>("nu"),
                 U

@@ -742,6 +742,27 @@ int main(int argc, char *argv[])
     Info<< "Writing mesh to " << mesh.facesInstance() << endl;
 
     mesh.write();
+    if (cellProcAddressing.headerOk())
+    {
+        cellProcAddressing.instance() = mesh.facesInstance();
+        cellProcAddressing.write();
+    }
+    if (faceProcAddressing.headerOk())
+    {
+        faceProcAddressing.instance() = mesh.facesInstance();
+        faceProcAddressing.write();
+    }
+    if (pointProcAddressing.headerOk())
+    {
+        pointProcAddressing.instance() = mesh.facesInstance();
+        pointProcAddressing.write();
+    }
+    if (boundaryProcAddressing.headerOk())
+    {
+        boundaryProcAddressing.instance() = mesh.facesInstance();
+        boundaryProcAddressing.write();
+    }
+
 
     if (writeMaps)
     {

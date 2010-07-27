@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    
+
 Description
 
 \*---------------------------------------------------------------------------*/
@@ -37,7 +37,8 @@ using namespace Foam;
 
 int main()
 {
-    string a("a"), b("b"), c("c"), d("d"), e("e"), f("f"), g("g"), h("h"), i("i"), j("j");
+    string a("a"), b("b"), c("c"), d("d"), e("e"),
+           f("f"), g("g"), h("h"), i("i"), j("j");
 
     Info<< "1) a = b + c + d + e + f + g;\n";
     a = b + c + d + e + f + g;

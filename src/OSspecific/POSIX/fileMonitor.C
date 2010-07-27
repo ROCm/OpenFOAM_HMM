@@ -257,24 +257,21 @@ void Foam::fileMonitor::checkFiles() const
             //     << "watchFd:" << inotifyEvent.wd << nl
             //     << "watchName:" << watchFile_[inotifyEvent.wd] << endl;
 
-            switch (inotifyEvent.mask)
+            if (inotifyEvent.mask % IN_DELETE_SELF)
             {
-                case IN_DELETE_SELF:
-                {
-                    Map<fileState>::iterator iter =
-                        state_.find(label(inotifyEvent.wd));
-                    iter() = DELETED;
-                }
-                break;
-
-                case IN_MODIFY:
-                case IN_CLOSE_WRITE:
-                {
-                    Map<fileState>::iterator iter =
-                        state_.find(label(inotifyEvent.wd));
-                    iter() = MODIFIED;
-                }
-                break;
+                Map<fileState>::iterator iter =
+                    state_.find(label(inotifyEvent.wd));
+                iter() = DELETED;
+            }
+            else if
+            (
+                (inotifyEvent.mask % IN_MODIFY)
+             || (inotifyEvent.mask % IN_CLOSE_WRITE)
+            )
+            {
+                Map<fileState>::iterator iter =
+                    state_.find(label(inotifyEvent.wd));
+                iter() = MODIFIED;
             }
         }
         else

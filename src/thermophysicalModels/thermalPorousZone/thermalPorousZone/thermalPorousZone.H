@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,7 +33,6 @@ See Also
 
 SourceFiles
     thermalPorousZone.C
-    thermalPorousZoneTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -76,7 +75,7 @@ public:
     // Constructors
 
         //- Construct from components
-        thermalPorousZone(const word& name, const fvMesh&, const dictionary&);
+        thermalPorousZone(const keyType& key, const fvMesh&, const dictionary&);
 
         //- Return clone
         autoPtr<thermalPorousZone> clone() const
@@ -101,12 +100,12 @@ public:
 
             autoPtr<thermalPorousZone> operator()(Istream& is) const
             {
-                word name(is);
+                keyType key(is);
                 dictionary dict(is);
 
                 return autoPtr<thermalPorousZone>
                 (
-                    new thermalPorousZone(name, mesh_, dict)
+                    new thermalPorousZone(key, mesh_, dict)
                 );
             }
         };
@@ -146,12 +145,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-//#   include "thermalPorousZoneTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

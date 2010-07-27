@@ -50,7 +50,8 @@ extern "C" {
 
 #define Z_NOT_IMPLEMENTED       (3)          /*Routine not implemented*/
                                              /*(currently only checked for */
-                                             /* get_var_value_at_specific routine)*/ 
+                                             /* get_var_value_at_specific */
+                                             /* routine)*/
 #ifndef TRUE
 # define TRUE                   (1)
 # define FALSE                  (0)
@@ -116,9 +117,9 @@ typedef struct {
 }DBLCRD;
 #endif
 
-/*----------------*/ 
+/*----------------*/
 /* Variable Types */
-/*----------------*/ 
+/*----------------*/
 enum z_var_type
 {
   Z_CONSTANT,
@@ -390,7 +391,7 @@ enum z_element_failure_logic
  * We include the prototype header file
  *----------------------------------------------------------*/
 #include "global_extern_proto.h"
-     
+
 /* ---------------------
  * export the file pointer  if windows
  *   because windows can't open a file in the
@@ -409,4 +410,3 @@ typedef struct _USERD_globals_struct {
 
 /*--------------------------------------------------------------------*/
 #endif /*GLOBAL_EXTERN_H*/
-

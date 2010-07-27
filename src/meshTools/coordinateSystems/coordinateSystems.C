@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 #include "coordinateSystems.H"
 #include "IOPtrList.H"
 #include "Time.H"
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -97,13 +98,56 @@ const Foam::coordinateSystems& Foam::coordinateSystems::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::coordinateSystems::find(const word& keyword) const
+Foam::label Foam::coordinateSystems::find(const keyType& key) const
 {
-    forAll(*this, i)
+    return findIndex(key);
+}
+
+
+Foam::labelList Foam::coordinateSystems::findIndices(const keyType& key) const
+{
+    labelList indices;
+    if (key.isPattern())
     {
-        if (keyword == operator[](i).name())
+        indices = findStrings(key, toc());
+    }
+    else
+    {
+        indices.setSize(size());
+        label nFound = 0;
+        forAll(*this, i)
         {
-            return i;
+            if (key == operator[](i).name())
+            {
+                indices[nFound++] = i;
+            }
+        }
+        indices.setSize(nFound);
+    }
+
+    return indices;
+}
+
+
+Foam::label Foam::coordinateSystems::findIndex(const keyType& key) const
+{
+    if (key.isPattern())
+    {
+        labelList indices = findIndices(key);
+        // return first element
+        if (!indices.empty())
+        {
+            return indices[0];
+        }
+    }
+    else
+    {
+        forAll(*this, i)
+        {
+            if (key == operator[](i).name())
+            {
+                return i;
+            }
         }
     }
 
@@ -111,9 +155,9 @@ Foam::label Foam::coordinateSystems::find(const word& keyword) const
 }
 
 
-bool Foam::coordinateSystems::found(const word& keyword) const
+bool Foam::coordinateSystems::found(const keyType& key) const
 {
-    return find(keyword) >= 0;
+    return findIndex(key) != -1;
 }
 
 
