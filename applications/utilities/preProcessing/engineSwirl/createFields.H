@@ -59,7 +59,12 @@ volVectorField U
 
 vector zT = swirlAxis;
 vector yT = vector(0, zT.z(), -zT.y());
-vector xT = vector(zT.y()*zT.y() + zT.z()*zT.z(), -zT.x()*zT.y(), -zT.x()*zT.z());
+vector xT = vector
+(
+    zT.y()*zT.y() + zT.z()*zT.z(),
+    -zT.x()*zT.y(),
+    -zT.x()*zT.z()
+);
 
 // if swirl is around (1, 0, 0) we have to find another transformation
 if (mag(yT) < SMALL)

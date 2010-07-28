@@ -32,8 +32,18 @@ namespace Foam
 {
     defineTypeNameAndDebug(nonuniformTransformCyclicPolyPatch, 0);
 
-    addToRunTimeSelectionTable(polyPatch, nonuniformTransformCyclicPolyPatch, word);
-    addToRunTimeSelectionTable(polyPatch, nonuniformTransformCyclicPolyPatch, dictionary);
+    addToRunTimeSelectionTable
+    (
+        polyPatch,
+        nonuniformTransformCyclicPolyPatch,
+        word
+    );
+    addToRunTimeSelectionTable
+    (
+        polyPatch,
+        nonuniformTransformCyclicPolyPatch,
+        dictionary
+    );
 }
 
 

@@ -33,7 +33,8 @@ namespace Foam
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-nonuniformTransformCyclicFvsPatchField<Type>::nonuniformTransformCyclicFvsPatchField
+nonuniformTransformCyclicFvsPatchField<Type>::
+nonuniformTransformCyclicFvsPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, surfaceMesh>& iF
@@ -44,7 +45,8 @@ nonuniformTransformCyclicFvsPatchField<Type>::nonuniformTransformCyclicFvsPatchF
 
 
 template<class Type>
-nonuniformTransformCyclicFvsPatchField<Type>::nonuniformTransformCyclicFvsPatchField
+nonuniformTransformCyclicFvsPatchField<Type>::
+nonuniformTransformCyclicFvsPatchField
 (
     const nonuniformTransformCyclicFvsPatchField<Type>& ptf,
     const fvPatch& p,
@@ -57,7 +59,8 @@ nonuniformTransformCyclicFvsPatchField<Type>::nonuniformTransformCyclicFvsPatchF
 
 
 template<class Type>
-nonuniformTransformCyclicFvsPatchField<Type>::nonuniformTransformCyclicFvsPatchField
+nonuniformTransformCyclicFvsPatchField<Type>::
+nonuniformTransformCyclicFvsPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, surfaceMesh>& iF,
@@ -69,7 +72,8 @@ nonuniformTransformCyclicFvsPatchField<Type>::nonuniformTransformCyclicFvsPatchF
 
 
 template<class Type>
-nonuniformTransformCyclicFvsPatchField<Type>::nonuniformTransformCyclicFvsPatchField
+nonuniformTransformCyclicFvsPatchField<Type>::
+nonuniformTransformCyclicFvsPatchField
 (
     const nonuniformTransformCyclicFvsPatchField<Type>& ptf
 )
@@ -79,7 +83,8 @@ nonuniformTransformCyclicFvsPatchField<Type>::nonuniformTransformCyclicFvsPatchF
 
 
 template<class Type>
-nonuniformTransformCyclicFvsPatchField<Type>::nonuniformTransformCyclicFvsPatchField
+nonuniformTransformCyclicFvsPatchField<Type>::
+nonuniformTransformCyclicFvsPatchField
 (
     const nonuniformTransformCyclicFvsPatchField<Type>& ptf,
     const DimensionedField<Type, surfaceMesh>& iF

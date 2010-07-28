@@ -1245,15 +1245,19 @@ label findCorrespondingRegion
 //    {
 //        forAll(cellRegion, cellI)
 //        {
-//            if (cellRegion[cellI] == regionI && existingZoneID[cellI] != zoneI)
+//            if
+//            (
+//                cellRegion[cellI] == regionI
+//             && existingZoneID[cellI] != zoneI
+//            )
 //            {
 //                // cellI in regionI but not in zoneI
 //                regionI = -1;
 //                break;
 //            }
 //        }
-//        // If one in error, all should be in error. Note that branch gets taken
-//        // on all procs.
+//        // If one in error, all should be in error. Note that branch
+//        // gets taken on all procs.
 //        reduce(regionI, minOp<label>());
 //    }
 //

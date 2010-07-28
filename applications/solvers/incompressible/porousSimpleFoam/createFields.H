@@ -49,7 +49,10 @@
     const bool pressureImplicitPorosity =
     (
         pZones.size()
-     && mesh.solutionDict().subDict("SIMPLE").readIfPresent("nUCorrectors", nUCorr)
+     && mesh.solutionDict().subDict("SIMPLE").readIfPresent
+        (
+            "nUCorrectors",
+            nUCorr
+        )
      && (nUCorr > 0)
     );
-

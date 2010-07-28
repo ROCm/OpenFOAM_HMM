@@ -179,9 +179,10 @@ processorCyclicFvPatchField<Type>::~processorCyclicFvPatchField()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 //template<class Type>
-//tmp<Field<Type> > processorCyclicFvPatchField<Type>::patchNeighbourField() const
+//tmp<Field<Type> >
+//processorCyclicFvPatchField<Type>::patchNeighbourField() const
 //{
-//    return *this;
+//   return *this;
 //}
 //
 //

@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class nonuniformTransformCyclicFvsPatch Declaration
+             Class nonuniformTransformCyclicFvsPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -76,7 +76,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given nonuniformTransformCyclicFvsPatchField onto a new patch
+        //- Construct by mapping given
+        //  nonuniformTransformCyclicFvsPatchField onto a new patch
         nonuniformTransformCyclicFvsPatchField
         (
             const nonuniformTransformCyclicFvsPatchField<Type>&,

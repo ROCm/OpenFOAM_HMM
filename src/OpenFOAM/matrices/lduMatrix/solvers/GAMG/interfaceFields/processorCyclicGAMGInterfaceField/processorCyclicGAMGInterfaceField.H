@@ -43,7 +43,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class processorCyclicGAMGInterfaceField Declaration
+               Class processorCyclicGAMGInterfaceField Declaration
 \*---------------------------------------------------------------------------*/
 
 class processorCyclicGAMGInterfaceField
@@ -65,7 +65,10 @@ class processorCyclicGAMGInterfaceField
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        processorCyclicGAMGInterfaceField(const processorCyclicGAMGInterfaceField&);
+        processorCyclicGAMGInterfaceField
+        (
+            const processorCyclicGAMGInterfaceField&
+        );
 
         //- Disallow default bitwise assignment
         void operator=(const processorCyclicGAMGInterfaceField&);
