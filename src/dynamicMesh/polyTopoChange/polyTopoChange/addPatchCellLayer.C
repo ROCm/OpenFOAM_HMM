@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -976,7 +976,8 @@ void Foam::addPatchCellLayer::setRefinement
                         -1,             // master point
                         -1,             // master edge
                         -1,             // master face
-                        (addToMesh_ ? mesh_.faceOwner()[meshFaceI] : -1),//master
+                        (addToMesh_ ? mesh_.faceOwner()[meshFaceI] : -1),
+                                        //master
                         ownZoneI        // zone for cell
                     )
                 );

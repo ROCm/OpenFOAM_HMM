@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -147,7 +147,13 @@ public:
 
 // Add the patch constructor functions to the hash tables
 
-#define makeCentredFitSurfaceInterpolationTypeScheme(SS, POLYNOMIAL, STENCIL, TYPE) \
+#define makeCentredFitSurfaceInterpolationTypeScheme\
+(                                                                             \
+    SS,                                                                       \
+    POLYNOMIAL,                                                               \
+    STENCIL,                                                                  \
+    TYPE                                                                      \
+)                                                                             \
                                                                               \
 typedef CentredFitScheme<TYPE, POLYNOMIAL, STENCIL>                           \
     CentredFitScheme##TYPE##POLYNOMIAL##STENCIL##_;                           \
@@ -166,7 +172,13 @@ surfaceInterpolationScheme<TYPE>::addMeshFluxConstructorToTable               \
                                                                               \
 makeCentredFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,scalar)    \
 makeCentredFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,vector)    \
-makeCentredFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,sphericalTensor) \
+makeCentredFitSurfaceInterpolationTypeScheme                                  \
+(                                                                             \
+    SS,                                                                       \
+    POLYNOMIAL,                                                               \
+    STENCIL,                                                                  \
+    sphericalTensor                                                           \
+)                                                                             \
 makeCentredFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,symmTensor)\
 makeCentredFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,tensor)
 

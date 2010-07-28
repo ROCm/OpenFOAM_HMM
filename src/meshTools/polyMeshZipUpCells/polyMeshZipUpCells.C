@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -690,7 +690,13 @@ bool Foam::polyMeshZipUpCells(polyMesh& mesh)
                                 {
                                     if (newFace[checkI] == newFace[checkJ])
                                     {
-                                        WarningIn("void polyMeshZipUpCells(polyMesh& mesh)")
+                                        WarningIn
+                                        (
+                                            "void polyMeshZipUpCells"
+                                            "("
+                                                "polyMesh& mesh"
+                                            ")"
+                                        )
                                             << "Duplicate point found "
                                             << "in the new face. " << nl
                                             << "Point: "

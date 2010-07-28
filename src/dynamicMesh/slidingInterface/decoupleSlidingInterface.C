@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -107,7 +107,13 @@ void Foam::slidingInterface::decoupleInterface
                 false                            // zone flip.  Face corrected
             )
         );
-//         Pout << "Modifying master patch face no " << masterPatchAddr[faceI] << " face: " << faces[masterPatchAddr[faceI]] << " old owner: " << own[masterPatchAddr[faceI]] << " new owner: " << masterFc[faceI] << endl;
+
+        // Pout<< "Modifying master patch face no "
+        //     << masterPatchAddr[faceI]
+        //     << " face: " << faces[masterPatchAddr[faceI]]
+        //     << " old owner: " << own[masterPatchAddr[faceI]]
+        //     << " new owner: " << masterFc[faceI]
+        //     << endl;
     }
 
     // Slave side
@@ -145,7 +151,10 @@ void Foam::slidingInterface::decoupleInterface
             if (rpmIter != rpm.end())
             {
                 // Master of retired point; grab its original
-//                 Pout << "Reinstating retired point: " << newFace[pointI] << " with old: " << rpm.find(newFace[pointI])() << endl;
+                // Pout<< "Reinstating retired point: " << newFace[pointI]
+                //     << " with old: " << rpm.find(newFace[pointI])()
+                //     << endl;
+
                 newFace[pointI] = rpmIter();
             }
         }
@@ -228,7 +237,10 @@ void Foam::slidingInterface::decoupleInterface
             face newFace;
             newFace.transfer(newFaceLabels);
 
-//             Pout << "Modifying master stick-out face " << curFaceID << " old face: " << oldFace << " new face: " << newFace << endl;
+            // Pout<< "Modifying master stick-out face " << curFaceID
+            //     << " old face: " << oldFace
+            //     << " new face: " << newFace
+            //     << endl;
 
             // Modify the face
             ref.setAction
@@ -302,7 +314,11 @@ void Foam::slidingInterface::decoupleInterface
             {
                 // Master of retired point; grab its original
                 changed = true;
-//                 Pout << "Reinstating retired point: " << oldFace[pointI] << " with old: " << rpm.find(oldFace[pointI])() << endl;
+
+                // Pout<< "Reinstating retired point: " << oldFace[pointI]
+                //     << " with old: " << rpm.find(oldFace[pointI])()
+                //     << endl;
+
                 newFaceLabels.append(rpm.find(oldFace[pointI])());
             }
             else if (ref.pointRemoved(oldFace[pointI]))
@@ -351,7 +367,10 @@ void Foam::slidingInterface::decoupleInterface
             face newFace;
             newFace.transfer(newFaceLabels);
 
-//             Pout << "Modifying slave stick-out face " << curFaceID << " old face: " << oldFace << " new face: " << newFace << endl;
+            // Pout<< "Modifying slave stick-out face " << curFaceID
+            //     << " old face: " << oldFace
+            //     << " new face: " << newFace
+            //     << endl;
 
             // Modify the face
             ref.setAction

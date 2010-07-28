@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -97,7 +97,8 @@ Type interpolationCellPointFace<Type>::interpolate
             scalar multiplierNumerator = (faceCentreTmp - cellCentre) & normal;
             scalar multiplierDenominator = projection & normal;
 
-            // if normal and projection are not orthogonal this could be the one...
+            // if normal and projection are not orthogonal this could
+            // be the one...
             if (mag(multiplierDenominator) > SMALL)
             {
                 scalar multiplier = multiplierNumerator/multiplierDenominator;
@@ -216,14 +217,20 @@ Type interpolationCellPointFace<Type>::interpolate
             }
             else
             {
-                label patchi = this->pMesh_.boundaryMesh().whichPatch(closestFace);
+                label patchi =
+                    this->pMesh_.boundaryMesh().whichPatch(closestFace);
 
                 // If the boundary patch is not empty use the face value
                 // else use the cell value
                 if (this->psi_.boundaryField()[patchi].size())
                 {
                     ts[2] = this->psi_.boundaryField()[patchi]
-                        [this->pMesh_.boundaryMesh()[patchi].whichFace(closestFace)];
+                    [
+                        this->pMesh_.boundaryMesh()[patchi].whichFace
+                        (
+                            closestFace
+                        )
+                    ];
                 }
                 else
                 {
@@ -255,14 +262,20 @@ Type interpolationCellPointFace<Type>::interpolate
             }
             else
             {
-                label patchi = this->pMesh_.boundaryMesh().whichPatch(closestFace);
+                label patchi =
+                    this->pMesh_.boundaryMesh().whichPatch(closestFace);
 
                 // If the boundary patch is not empty use the face value
                 // else use the cell value
                 if (this->psi_.boundaryField()[patchi].size())
                 {
                     t = this->psi_.boundaryField()[patchi]
-                        [this->pMesh_.boundaryMesh()[patchi].whichFace(closestFace)];
+                    [
+                        this->pMesh_.boundaryMesh()[patchi].whichFace
+                        (
+                            closestFace
+                        )
+                    ];
                 }
                 else
                 {

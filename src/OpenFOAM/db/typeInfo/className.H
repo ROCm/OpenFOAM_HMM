@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,8 +51,8 @@ Description
     inline const char* typeName_() { return TypeNameString; }                 \
     extern const ::Foam::word typeName
 
-//- Add typeName information from argument @a TemplateNameString to a template class.
-//  Without debug information.
+//- Add typeName information from argument @a TemplateNameString to a
+//  template class.  Without debug information.
 #define TemplateNameNoDebug(TemplateNameString)                               \
 class TemplateNameString##Name                                                \
 {                                                                             \
@@ -80,8 +80,8 @@ public:                                                                       \
     NamespaceNameNoDebug(TypeNameString);                                     \
     extern int debug
 
-//- Add typeName information from argument @a TypeNameString to a template class.
-//  Also declares debug information.
+//- Add typeName information from argument @a TypeNameString to a
+//  template class.  Also declares debug information.
 #define TemplateName(TemplateNameString)                                      \
 class TemplateNameString##Name                                                \
 {                                                                             \
@@ -176,7 +176,8 @@ public:                                                                       \
     defineTemplateTypeNameWithName(Type, Name);                               \
     defineTemplateDebugSwitchWithName(Type, Name, DebugSwitch)
 
-//- Define the typeName and debug information for templates, useful with typedefs
+//- Define the typeName and debug information for templates, useful
+//  with typedefs
 #define defineTemplateTypeNameAndDebug(Type, DebugSwitch)                     \
     defineTemplateTypeNameAndDebugWithName(Type, #Type, DebugSwitch)
 

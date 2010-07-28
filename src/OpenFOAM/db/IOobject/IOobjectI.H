@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,21 +52,29 @@ inline Stream& Foam::IOobject::writeBanner(Stream& os, bool noHint)
     if (noHint)
     {
         os  <<
-            "/*---------------------------------------------------------------------------*\\\n";
+            "/*--------------------------------------"
+            "-------------------------------------*\\\n";
     }
     else
     {
         os  <<
-            "/*--------------------------------*- C++ -*----------------------------------*\\\n";
+            "/*--------------------------------*- C++ "
+            "-*----------------------------------*\\\n";
     }
 
     os  <<
-        "| =========                 |                                                 |\n"
-        "| \\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |\n"
-        "|  \\\\    /   O peration     | Version:  " << FOAMversion << spaces << "|\n"
-        "|   \\\\  /    A nd           | Web:      www.OpenFOAM.com                      |\n"
-        "|    \\\\/     M anipulation  |                                                 |\n"
-        "\\*---------------------------------------------------------------------------*/\n";
+        "| =========                 |"
+        "                                                 |\n"
+        "| \\\\      /  F ield         |"
+        " OpenFOAM: The Open Source CFD Toolbox           |\n"
+        "|  \\\\    /   O peration     |"
+        " Version:  " << FOAMversion << spaces << "|\n"
+        "|   \\\\  /    A nd           |"
+        " Web:      www.OpenFOAM.com                      |\n"
+        "|    \\\\/     M anipulation  |"
+        "                                                 |\n"
+        "\\*-----------------------------------------"
+        "----------------------------------*/\n";
 
     return os;
 }
@@ -76,7 +84,8 @@ template<class Stream>
 inline Stream& Foam::IOobject::writeDivider(Stream& os)
 {
     os  <<
-        "// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n";
+        "// * * * * * * * * * * * * * * * * * "
+        "* * * * * * * * * * * * * * * * * * * * //\n";
 
     return os;
 }
@@ -85,7 +94,8 @@ template<class Stream>
 inline Stream& Foam::IOobject::writeEndDivider(Stream& os)
 {
     os  << "\n\n"
-        "// ************************************************************************* //\n";
+        "// *****************************************"
+        "******************************** //\n";
 
     return os;
 }

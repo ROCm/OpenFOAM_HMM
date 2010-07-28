@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -187,14 +187,16 @@ Description
 (baseType,memberFunction,argNames,Targ)                                       \
                                                                               \
     /* Table memberFunction called from the table add function */             \
-    void baseType<Targ>::construct##memberFunction##argNames##MemberFunctionTables()\
+    void baseType<Targ>::construct##memberFunction##argNames##                \
+    MemberFunctionTables()                                                    \
     {                                                                         \
         static bool constructed = false;                                      \
                                                                               \
         if (!constructed)                                                     \
         {                                                                     \
-            baseType<Targ>::memberFunction##argNames##MemberFunctionTablePtr_       \
-                = new baseType<Targ>::memberFunction##argNames##MemberFunctionTable;\
+            baseType<Targ>::memberFunction##argNames##MemberFunctionTablePtr_ \
+                = new baseType<Targ>::memberFunction##argNames##              \
+                  MemberFunctionTable;                                        \
                                                                               \
             constructed = true;                                               \
         }                                                                     \
@@ -208,12 +210,18 @@ Description
 (baseType,memberFunction,argNames,Targ)                                       \
                                                                               \
     /* Table destructor called from the table add function destructor */      \
-    void baseType<Targ>::destroy##memberFunction##argNames##MemberFunctionTables()  \
+    void baseType<Targ>::destroy##memberFunction##argNames##                  \
+    MemberFunctionTables()                                                    \
     {                                                                         \
-        if (baseType<Targ>::memberFunction##argNames##MemberFunctionTablePtr_)      \
+        if                                                                    \
+        (                                                                     \
+            baseType<Targ>::memberFunction##argNames##MemberFunctionTablePtr_ \
+        )                                                                     \
         {                                                                     \
-            delete baseType<Targ>::memberFunction##argNames##MemberFunctionTablePtr_;\
-            baseType<Targ>::memberFunction##argNames##MemberFunctionTablePtr_ = NULL;\
+            delete baseType<Targ>::memberFunction##argNames##                 \
+                MemberFunctionTablePtr_;                                      \
+            baseType<Targ>::memberFunction##argNames##                        \
+                MemberFunctionTablePtr_ = NULL;                               \
         }                                                                     \
     }
 

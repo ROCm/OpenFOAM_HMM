@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,22 +73,22 @@ Description
     E.g. 3 boundary faces on patches a,b. b gets extruded, a doesn't.
 
     @verbatim
-           a      b      b          <- patch of boundary face
+           a      b      b        <- patch of boundary face
         +------+------+------+
-        |      |      |      |      <- cells
+        |      |      |      |    <- cells
         +------+------+------+
 
 
-               ^      ^             <- wanted extrusion vector (none at far right)
-           a   |  b   |  b          <- patch of boundary face
+               ^      ^           <- wanted extrusion vector (none at far right)
+           a   |  b   |  b        <- patch of boundary face
         +------+------+------+
-        |      |      |      |      <- cells
+        |      |      |      |    <- cells
         +------+------+------+
 
                   b
-               +------+\ b          1. prism cell added onto second b face since
+               +------+\ b        1. prism cell added onto second b face since
            a  a|      | ----\          only one side gets extruded.
-        +------+------+------+      2. side-face gets patch a, not b.
+        +------+------+------+    2. side-face gets patch a, not b.
         |      |      |      |
         +------+------+------+
     @endverbatim
@@ -294,8 +294,9 @@ public:
             //- Play commands into polyTopoChange to create layers on top
             //  of indirectPrimitivePatch (have to be outside faces).
             //  Gets displacement per patch point.
-            //  - exposedPatchID : only used if creating a new mesh (addToMesh=false)
-            //    gives per pp face the patch the exposed face should get.
+            //  - exposedPatchID : only used if creating a new mesh
+            //    (addToMesh=false) gives per pp face the patch the
+            //    exposed face should get.
             //  - nPointLayers : number of layers per (patch)point.
             //  - nFaceLayers : number of layers per (patch) face.
             //  - firstDisplacement : displacement per point for first

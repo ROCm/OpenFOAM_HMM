@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -213,7 +213,8 @@ surfaceInterpolationScheme<Type>::addMeshFluxConstructorToTable<SS<Type> >     \
 limitedSurfaceInterpolationScheme<Type>::addMeshConstructorToTable<SS<Type> >  \
     add##SS##Type##MeshConstructorToLimitedTable_;                             \
                                                                                \
-limitedSurfaceInterpolationScheme<Type>::addMeshFluxConstructorToTable<SS<Type> >\
+limitedSurfaceInterpolationScheme<Type>::                                      \
+    addMeshFluxConstructorToTable<SS<Type> >                                   \
     add##SS##Type##MeshFluxConstructorToLimitedTable_;
 
 #define makelimitedSurfaceInterpolationScheme(SS)                              \

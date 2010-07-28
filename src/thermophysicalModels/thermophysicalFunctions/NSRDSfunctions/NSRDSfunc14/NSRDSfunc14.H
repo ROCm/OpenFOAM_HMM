@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -110,7 +110,12 @@ public:
         scalar f(scalar, scalar T) const
         {
             scalar t = 1.0 - T/Tc_;
-            return a_*a_/t + b_ - t*(2.0*a_*c_ + t*(a_*d_ + t*(c_*c_/3.0 + t*(0.5*c_*d_ + 0.2*d_*d_*t))));
+            return
+                a_*a_/t + b_ - t
+               *(
+                   2.0*a_*c_
+                 + t*(a_*d_ + t*(c_*c_/3.0 + t*(0.5*c_*d_ + 0.2*d_*d_*t)))
+                );
         }
 
 

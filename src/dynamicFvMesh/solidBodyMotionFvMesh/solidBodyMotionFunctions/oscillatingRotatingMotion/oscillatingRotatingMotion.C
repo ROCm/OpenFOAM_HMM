@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,8 @@ namespace solidBodyMotionFunctions
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::solidBodyMotionFunctions::oscillatingRotatingMotion::oscillatingRotatingMotion
+Foam::solidBodyMotionFunctions::oscillatingRotatingMotion::
+oscillatingRotatingMotion
 (
     const dictionary& SBMFCoeffs,
     const Time& runTime
@@ -62,14 +63,16 @@ Foam::solidBodyMotionFunctions::oscillatingRotatingMotion::oscillatingRotatingMo
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::solidBodyMotionFunctions::oscillatingRotatingMotion::~oscillatingRotatingMotion()
+Foam::solidBodyMotionFunctions::oscillatingRotatingMotion::
+~oscillatingRotatingMotion()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::septernion
-Foam::solidBodyMotionFunctions::oscillatingRotatingMotion::transformation() const
+Foam::solidBodyMotionFunctions::oscillatingRotatingMotion::
+transformation() const
 {
     scalar t = time_.value();
 
@@ -81,7 +84,8 @@ Foam::solidBodyMotionFunctions::oscillatingRotatingMotion::transformation() cons
     quaternion R(eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
     septernion TR(septernion(CofG_)*R*septernion(-CofG_));
 
-    Info<< "solidBodyMotionFunctions::oscillatingRotatingMotion::transformation(): "
+    Info<< "solidBodyMotionFunctions::oscillatingRotatingMotion::"
+        << "transformation(): "
         << "Time = " << t << " transformation: " << TR << endl;
 
     return TR;

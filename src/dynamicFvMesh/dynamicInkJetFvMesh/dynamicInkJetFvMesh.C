@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,7 +90,11 @@ Foam::dynamicInkJetFvMesh::~dynamicInkJetFvMesh()
 bool Foam::dynamicInkJetFvMesh::update()
 {
     scalar scalingFunction =
-        0.5*(::cos(constant::mathematical::twoPi*frequency_*time().value()) - 1.0);
+        0.5*
+        (
+            ::cos(constant::mathematical::twoPi*frequency_*time().value())
+          - 1.0
+        );
 
     Info<< "Mesh scaling. Time = " << time().value() << " scaling: "
         << scalingFunction << endl;

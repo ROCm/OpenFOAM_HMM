@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -191,7 +191,8 @@ public:
                 tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tcorr =
                     tScheme_().correction(vf);
 
-                GeometricField<Type, fvsPatchField, surfaceMesh>& corr = tcorr();
+                GeometricField<Type, fvsPatchField, surfaceMesh>& corr =
+                    tcorr();
 
                 const fvMesh& mesh_ = this->mesh();
                 const cellList& cells = mesh_.cells();
@@ -231,8 +232,10 @@ public:
             }
             else
             {
-                return
-                    tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >(NULL);
+                return tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+                (
+                    NULL
+                );
             }
         }
 };

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -287,10 +287,12 @@ void Foam::LUscalarMatrix::convert
                     neiInterfaces[neiInterfacei];
 
                 const label* __restrict__ uPtr = interface.faceCells_.begin();
-                const label* __restrict__ lPtr = neiInterface.faceCells_.begin();
+                const label* __restrict__ lPtr =
+                    neiInterface.faceCells_.begin();
 
                 const scalar* __restrict__ upperPtr = interface.coeffs_.begin();
-                const scalar* __restrict__ lowerPtr = neiInterface.coeffs_.begin();
+                const scalar* __restrict__ lowerPtr =
+                    neiInterface.coeffs_.begin();
 
                 register label inFaces = interface.faceCells_.size();
                 label neiOffset = procOffsets_[interface.neighbProcNo_];

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -175,10 +175,18 @@ public:
     // IOstream operators
 
         //- Read Matrix from Istream, discarding contents of existing Matrix.
-        friend Istream& operator>> <Form, Type>(Istream&, Matrix<Form, Type>&);
+        friend Istream& operator>> <Form, Type>
+        (
+            Istream&,
+            Matrix<Form, Type>&
+        );
 
         // Write Matrix to Ostream.
-        friend Ostream& operator<< <Form, Type>(Ostream&, const Matrix<Form, Type>&);
+        friend Ostream& operator<< <Form, Type>
+        (
+            Ostream&,
+            const Matrix<Form, Type>&
+        );
 };
 
 

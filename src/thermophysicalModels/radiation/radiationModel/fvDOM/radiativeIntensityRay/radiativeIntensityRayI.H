@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,13 +23,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-inline const Foam::volScalarField& Foam::radiation::radiativeIntensityRay::I() const
+inline const Foam::volScalarField&
+Foam::radiation::radiativeIntensityRay::I() const
 {
     return I_;
 }
 
 
-inline const Foam::volScalarField& Foam::radiation::radiativeIntensityRay::Qr() const
+inline const Foam::volScalarField&
+Foam::radiation::radiativeIntensityRay::Qr() const
 {
     return Qr_;
 }
@@ -77,7 +79,8 @@ inline Foam::scalar Foam::radiation::radiativeIntensityRay::omega() const
 }
 
 
-inline const Foam::volScalarField& Foam::radiation::radiativeIntensityRay::ILambda
+inline const Foam::volScalarField&
+Foam::radiation::radiativeIntensityRay::ILambda
 (
     const label lambdaI
 ) const
