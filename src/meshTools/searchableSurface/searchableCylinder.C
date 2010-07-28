@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -383,7 +383,9 @@ void Foam::searchableCylinder::findLineAll
 Foam::boundBox Foam::searchableCylinder::calcBounds() const
 {
 
-    // Adapted from http://www.gamedev.net/community/forums/topic.asp?topic_id=338522&forum_id=20&gforum_id=0
+    // Adapted from
+    // http://www.gamedev.net/community/forums
+    //       /topic.asp?topic_id=338522&forum_id=20&gforum_id=0
 
     // Let cylinder have end points A,B and radius r,
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,7 +60,13 @@ inline uint32_t Foam::SHA1::swapBytes(uint32_t n)
 # if (__BYTE_ORDER == __BIG_ENDIAN)
     return n;
 # else
-    return (((n) << 24) | (((n) & 0xff00) << 8) | (((n) >> 8) & 0xff00) | ((n) >> 24));
+    return
+    (
+        ((n) << 24)
+      | (((n) & 0xff00) << 8)
+      | (((n) >> 8) & 0xff00)
+      | ((n) >> 24)
+    );
 # endif
 
 #else
@@ -74,7 +80,13 @@ inline uint32_t Foam::SHA1::swapBytes(uint32_t n)
     }
     else
     {
-        return (((n) << 24) | (((n) & 0xff00) << 8) | (((n) >> 8) & 0xff00) | ((n) >> 24));
+        return
+        (
+            ((n) << 24)
+          | (((n) & 0xff00) << 8)
+          | (((n) >> 8) & 0xff00)
+          | ((n) >> 24)
+        );
     }
 #endif
 }
@@ -119,7 +131,8 @@ void Foam::SHA1::processBytes(const void *data, size_t len)
             processBlock(buffer_, bufLen_ & ~63);
 
             bufLen_ &= 63;
-            // The regions in the following copy operation do not (cannot) overlap
+            // The regions in the following copy operation do not
+            // (cannot) overlap
             memcpy(buffer_, &bufp[(remaining + add) & ~63], bufLen_);
         }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,13 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(sampledIsoSurfaceCell, 0);
-    addNamedToRunTimeSelectionTable(sampledSurface, sampledIsoSurfaceCell, word, isoSurfaceCell);
+    addNamedToRunTimeSelectionTable
+    (
+        sampledSurface,
+        sampledIsoSurfaceCell,
+        word,
+        isoSurfaceCell
+    );
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

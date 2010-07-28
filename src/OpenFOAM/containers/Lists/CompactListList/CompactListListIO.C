@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,11 @@ Foam::Istream& Foam::operator>>(Istream& is, CompactListList<T, Container>& lst)
 
 
 template<class T, class Container>
-Foam::Ostream& Foam::operator<<(Ostream& os, const CompactListList<T, Container>& lst)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const CompactListList<T, Container>& lst
+)
 {
     os  << lst.offsets_ << lst.m_;
     return os;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,7 +42,10 @@ template<>
 const word surfPointVectorField::typeName("surfPointVectorField");
 
 template<>
-const word surfPointSphericalTensorField::typeName("surfPointSphericalTensorField");
+const word surfPointSphericalTensorField::typeName
+(
+    "surfPointSphericalTensorField"
+);
 
 template<>
 const word surfPointSymmTensorField::typeName("surfPointSymmTensorField");

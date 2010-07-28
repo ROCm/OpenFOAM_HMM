@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -285,7 +285,8 @@ Foam::label Foam::ptscotchDecomp::decompose
             0,                      // baseval, c-style numbering
             xadj.size()-1,          // vertlocnbr, nCells
             xadj.size()-1,          // vertlocmax
-            const_cast<SCOTCH_Num*>(xadj.begin()),  // vertloctab, start index per cell into
+            const_cast<SCOTCH_Num*>(xadj.begin()),
+                                    // vertloctab, start index per cell into
                                     // adjncy
             &xadj[1],               // vendloctab, end index  ,,
 
@@ -322,7 +323,8 @@ Foam::label Foam::ptscotchDecomp::decompose
     {
         if (debug)
         {
-            Info<< "ptscotchDecomp : Using procesor weights " << processorWeights
+            Info<< "ptscotchDecomp : Using procesor weights "
+                << processorWeights
                 << endl;
         }
         check

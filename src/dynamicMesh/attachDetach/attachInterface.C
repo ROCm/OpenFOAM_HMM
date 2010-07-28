@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -86,12 +86,12 @@ void Foam::attachDetach::attachInterface
         ref.setAction(polyRemovePoint(removedPoints[pointI]));
     }
 
-// Pout << "Points to be mapped: " << removedPoints << endl;
+// Pout<< "Points to be mapped: " << removedPoints << endl;
     // Remove all faces from the slave patch
     forAll(slavePatch, i)
     {
         ref.setAction(polyRemoveFace(i + slavePatchStart));
-// Pout << "Removing face " << i + slavePatchStart << endl;
+// Pout<< "Removing face " << i + slavePatchStart << endl;
     }
 
     // Modify the faces from the master patch
@@ -144,7 +144,7 @@ void Foam::attachDetach::attachInterface
     }
 
     // Renumber faces affected by point removal
-// Pout << "slaveMeshPoints: " << slaveMeshPoints << endl;
+// Pout<< "slaveMeshPoints: " << slaveMeshPoints << endl;
     // Make a map of faces that need to be renumbered
     labelHashSet facesToModifyMap
     (
@@ -192,7 +192,10 @@ void Foam::attachDetach::attachInterface
             }
         }
 
-// Pout<< "face label: " << curFaceID << " old face: " << faces[curFaceID] << " new face: " << newFace << endl;
+        // Pout<< "face label: " << curFaceID
+        //     << " old face: " << faces[curFaceID]
+        //     << " new face: " << newFace
+        //     << endl;
 
         // Get face zone and its flip
         label modifiedFaceZone = mesh.faceZones().whichZone(curFaceID);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1741,8 +1741,8 @@ bool Foam::polyMeshGeometry::checkFaceTwist
                 ", const pointField&, const pointField&, const pointField&"
                 ", const labelList&, labelHashSet*)"
             )   << nWarped  << " faces with severe warpage "
-                << "(cosine of the angle between triangle normal and face normal"
-                << " < " << minTwist << ") found.\n"
+                << "(cosine of the angle between triangle normal and "
+                << "face normal < " << minTwist << ") found.\n"
                 << endl;
         }
 

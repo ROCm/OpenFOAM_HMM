@@ -142,17 +142,17 @@ Foam::coordinateSystem::coordinateSystem
         keyType key(entryPtr->stream());
 
         const coordinateSystems& lst = coordinateSystems::New(obr);
-        const label id = lst.find(key);
+        const label index = lst.findIndex(key);
 
         if (debug)
         {
             Info<< "coordinateSystem::coordinateSystem"
                 "(const dictionary&, const objectRegistry&):"
                 << nl << "using global coordinate system: "
-                << key << "=" << id << endl;
+                << key << "=" << index << endl;
         }
 
-        if (id < 0)
+        if (index < 0)
         {
             FatalErrorIn
             (
@@ -165,7 +165,7 @@ Foam::coordinateSystem::coordinateSystem
 
         // copy coordinateSystem, but assign the name as the typeName
         // to avoid strange things in writeDict()
-        operator=(lst[id]);
+        operator=(lst[index]);
         name_ = typeName_();
     }
     else

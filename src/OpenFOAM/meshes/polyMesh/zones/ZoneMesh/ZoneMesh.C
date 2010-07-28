@@ -26,6 +26,7 @@ License
 #include "ZoneMesh.H"
 #include "entry.H"
 #include "demandDrivenData.H"
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -242,6 +243,66 @@ Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::names() const
 
 
 template<class ZoneType, class MeshType>
+Foam::labelList Foam::ZoneMesh<ZoneType, MeshType>::findIndices
+(
+    const keyType& key
+) const
+{
+    labelList indices;
+    if (key.isPattern())
+    {
+        indices = findStrings(key, this->names());
+    }
+    else
+    {
+        indices.setSize(this->size());
+        label nFound = 0;
+        forAll(*this, i)
+        {
+            if (key == operator[](i).name())
+            {
+                indices[nFound++] = i;
+            }
+        }
+        indices.setSize(nFound);
+     }
+
+    return indices;
+}
+
+
+template<class ZoneType, class MeshType>
+Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findIndex
+(
+    const keyType& key
+) const
+{
+    if (key.isPattern())
+    {
+        labelList indices = this->findIndices(key);
+        // return first element
+        if (!indices.empty())
+        {
+            return indices[0];
+        }
+    }
+    else
+    {
+        forAll(*this, i)
+        {
+            if (key == operator[](i).name())
+            {
+                return i;
+            }
+        }
+    }
+
+    // not found
+    return -1;
+}
+
+
+template<class ZoneType, class MeshType>
 Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findZoneID
 (
     const word& zoneName
@@ -265,7 +326,7 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findZoneID
             << "List of available zone names: " << names() << endl;
     }
 
-    // A dummy return to keep the compiler happy
+    // not found
     return -1;
 }
 

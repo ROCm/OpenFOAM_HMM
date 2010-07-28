@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,7 +50,8 @@ Description
                                                                               \
     /* Add the thisType constructor function to the table, find by lookup */  \
     baseType::add##argNames##ConstructorToTable< thisType >                   \
-        add_##lookup##_##thisType##argNames##ConstructorTo##baseType##Table_(#lookup)
+        add_##lookup##_##thisType##argNames##ConstructorTo##baseType##Table_  \
+        (#lookup)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,7 +73,8 @@ Description
                                                                               \
     /* Add the thisType constructor function to the table, find by lookup */  \
     baseType::add##argNames##ConstructorToTable< thisType< Targ > >           \
-        add_##lookup##_##thisType##Targ##argNames##ConstructorTo##baseType##Table_(#lookup)
+        add_##lookup##_##thisType##Targ##argNames##ConstructorTo##baseType    \
+        ##Table_(#lookup)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -95,7 +97,8 @@ Description
                                                                               \
     /* Add the thisType constructor function to the table, find by lookup */  \
     baseType< Targ >::add##argNames##ConstructorToTable< thisType< Targ > >   \
-        add_##lookup##_##thisType##Targ##argNames##ConstructorTo##baseType##Targ##Table_(#lookup)
+        add_##lookup##_##thisType##Targ##argNames##ConstructorTo##baseType##  \
+        Targ##Table_(#lookup)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

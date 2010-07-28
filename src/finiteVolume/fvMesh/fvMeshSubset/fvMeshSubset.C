@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -550,9 +550,9 @@ void Foam::fvMeshSubset::setCellSubset
         globalPointMap[pointMap_[pointI]] = pointI;
     }
 
-    Pout << "Number of cells in new mesh: " << nCellsInSet << endl;
-    Pout << "Number of faces in new mesh: " << globalFaceMap.size() << endl;
-    Pout << "Number of points in new mesh: " << globalPointMap.size() << endl;
+    Pout<< "Number of cells in new mesh: " << nCellsInSet << endl;
+    Pout<< "Number of faces in new mesh: " << globalFaceMap.size() << endl;
+    Pout<< "Number of points in new mesh: " << globalPointMap.size() << endl;
 
     // Make a new mesh
     pointField newPoints(globalPointMap.size());

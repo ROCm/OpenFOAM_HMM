@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -248,8 +248,8 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
             //     << "    sing vals " << svd.S() << endl;
         // }
 
-        if (!goodFit) // (not good fit so increase weight in the centre and weight
-                      //  for constant and linear terms)
+        if (!goodFit) // (not good fit so increase weight in the centre and
+                      //  weight for constant and linear terms)
         {
             // if (iIt == 7)
             // {

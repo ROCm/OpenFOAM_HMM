@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,8 +25,9 @@ Class
     Foam::RectangularMatrix
 
 Description
-    A templated 2D rectangular matrix of objects of \<T\>, where the n x n matrix
-    dimension is known and used for subscript bounds checking, etc.
+    A templated 2D rectangular matrix of objects of \<T\>, where the n
+    x n matrix dimension is known and used for subscript bounds
+    checking, etc.
 
 SourceFiles
     RectangularMatrixI.H

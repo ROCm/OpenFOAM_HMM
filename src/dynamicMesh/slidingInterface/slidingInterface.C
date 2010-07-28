@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -474,7 +474,7 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
             {
                 if (debug)
                 {
-                    Pout << "p";
+                    Pout<< "p";
                 }
 
                 // Cut point is a retired point
@@ -491,7 +491,10 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
 
                 if (cpepmIter != cpepm.end())
                 {
-//                     Pout << "Need to re-create hit for point " << cutPoints[pointI] << " lookup: " << cpepmIter() << endl;
+                    // Pout<< "Need to re-create hit for point "
+                    //     << cutPoints[pointI]
+                    //     << " lookup: " << cpepmIter()
+                    //     << endl;
 
                     // Note.
                     // The edge cutting code is repeated in
@@ -518,7 +521,11 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
                         );
 
                     const edge& cme = masterEdges[curMasterEdgeIndex];
-//                     Pout << "curMasterEdgeIndex: " << curMasterEdgeIndex << " cme: " << cme << endl;
+
+                    // Pout<< "curMasterEdgeIndex: " << curMasterEdgeIndex
+                    //     << " cme: " << cme
+                    //     << endl;
+
                     const edge& globalSlaveEdge = cpepmIter().second();
 
                     const label curSlaveEdgeIndex =
@@ -538,7 +545,9 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
                         );
 
                     const edge& curSlaveEdge = slaveEdges[curSlaveEdgeIndex];
-//                     Pout << "curSlaveEdgeIndex: " << curSlaveEdgeIndex << " curSlaveEdge: " << curSlaveEdge << endl;
+                    // Pout<< "curSlaveEdgeIndex: " << curSlaveEdgeIndex
+                    //     << " curSlaveEdge: " << curSlaveEdge
+                    //     << endl;
                     const point& a = projectedSlavePoints[curSlaveEdge.start()];
                     const point& b = projectedSlavePoints[curSlaveEdge.end()];
 
@@ -646,7 +655,7 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
         }
         if (debug)
         {
-            Pout << endl;
+            Pout<< endl;
         }
     }
 }

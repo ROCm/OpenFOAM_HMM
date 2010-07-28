@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -158,7 +158,13 @@ public:
 
 // Add the patch constructor functions to the hash tables
 
-#define makeUpwindFitSurfaceInterpolationTypeScheme(SS, POLYNOMIAL, STENCIL, TYPE) \
+#define makeUpwindFitSurfaceInterpolationTypeScheme\
+(                                                                             \
+    SS,                                                                       \
+    POLYNOMIAL,                                                               \
+    STENCIL,                                                                  \
+    TYPE                                                                      \
+)                                                                             \
                                                                               \
 typedef UpwindFitScheme<TYPE, POLYNOMIAL, STENCIL>                            \
     UpwindFitScheme##TYPE##POLYNOMIAL##STENCIL##_;                            \
@@ -177,7 +183,13 @@ surfaceInterpolationScheme<TYPE>::addMeshFluxConstructorToTable               \
                                                                               \
 makeUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,scalar)     \
 makeUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,vector)     \
-makeUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,sphericalTensor) \
+makeUpwindFitSurfaceInterpolationTypeScheme                                   \
+(                                                                             \
+    SS,                                                                       \
+    POLYNOMIAL,                                                               \
+    STENCIL,                                                                  \
+    sphericalTensor                                                           \
+)                                                                             \
 makeUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,symmTensor) \
 makeUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,tensor)
 

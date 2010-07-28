@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -325,7 +325,8 @@ Form Foam::operator+(const Matrix<Form, Type>& a, const Matrix<Form, Type>& b)
     {
         FatalErrorIn
         (
-            "Matrix<Form, Type>::operator+(const Matrix<Form, Type>&, const Matrix<Form, Type>&)"
+            "Matrix<Form, Type>::operator+"
+            "(const Matrix<Form, Type>&, const Matrix<Form, Type>&)"
         )   << "attempted add matrices with different number of rows: "
             << a.n() << ", " << b.n()
             << abort(FatalError);
@@ -335,7 +336,8 @@ Form Foam::operator+(const Matrix<Form, Type>& a, const Matrix<Form, Type>& b)
     {
         FatalErrorIn
         (
-            "Matrix<Form, Type>::operator+(const Matrix<Form, Type>&, const Matrix<Form, Type>&)"
+            "Matrix<Form, Type>::operator+"
+            "(const Matrix<Form, Type>&, const Matrix<Form, Type>&)"
         )   << "attempted add matrices with different number of columns: "
             << a.m() << ", " << b.m()
             << abort(FatalError);
@@ -364,7 +366,8 @@ Form Foam::operator-(const Matrix<Form, Type>& a, const Matrix<Form, Type>& b)
     {
         FatalErrorIn
         (
-            "Matrix<Form, Type>::operator-(const Matrix<Form, Type>&, const Matrix<Form, Type>&)"
+            "Matrix<Form, Type>::operator-"
+            "(const Matrix<Form, Type>&, const Matrix<Form, Type>&)"
         )   << "attempted add matrices with different number of rows: "
             << a.n() << ", " << b.n()
             << abort(FatalError);
@@ -374,7 +377,8 @@ Form Foam::operator-(const Matrix<Form, Type>& a, const Matrix<Form, Type>& b)
     {
         FatalErrorIn
         (
-            "Matrix<Form, Type>::operator-(const Matrix<Form, Type>&, const Matrix<Form, Type>&)"
+            "Matrix<Form, Type>::operator-"
+            "(const Matrix<Form, Type>&, const Matrix<Form, Type>&)"
         )   << "attempted add matrices with different number of columns: "
             << a.m() << ", " << b.m()
             << abort(FatalError);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -381,7 +381,17 @@ Type sumCmptProd(const UList<Type>& f1, const UList<Type>& f2)
     if (f1.size() && (f1.size() == f2.size()))
     {
         Type SumProd = pTraits<Type>::zero;
-        TFOR_ALL_S_OP_FUNC_F_F(Type, SumProd, +=, cmptMultiply, Type, f1, Type, f2)
+        TFOR_ALL_S_OP_FUNC_F_F
+        (
+            Type,
+            SumProd,
+            +=,
+            cmptMultiply,
+            Type,
+            f1,
+            Type,
+            f2
+        )
         return SumProd;
     }
     else

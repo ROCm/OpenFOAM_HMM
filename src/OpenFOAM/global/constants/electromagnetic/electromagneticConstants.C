@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -91,7 +91,12 @@ const Foam::dimensionedScalar Foam::constant::electromagnetic::kappa
         dimensionedScalar
         (
             "kappa",
-            dimensionedScalar("C", dimless, 1.0/(4.0*constant::mathematical::pi))
+            dimensionedScalar
+            (
+                "C",
+                dimless,
+                1.0/(4.0*constant::mathematical::pi)
+            )
            /epsilon0
         )
     )

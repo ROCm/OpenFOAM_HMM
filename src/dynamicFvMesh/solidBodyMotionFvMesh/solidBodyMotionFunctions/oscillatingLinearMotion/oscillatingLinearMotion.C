@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,7 +59,8 @@ Foam::solidBodyMotionFunctions::oscillatingLinearMotion::oscillatingLinearMotion
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::solidBodyMotionFunctions::oscillatingLinearMotion::~oscillatingLinearMotion()
+Foam::solidBodyMotionFunctions::oscillatingLinearMotion::
+~oscillatingLinearMotion()
 {}
 
 
@@ -75,7 +76,8 @@ Foam::solidBodyMotionFunctions::oscillatingLinearMotion::transformation() const
     quaternion R(0, 0, 0);
     septernion TR(septernion(displacement)*R);
 
-    Info<< "solidBodyMotionFunctions::oscillatingLinearMotion::transformation(): "
+    Info<< "solidBodyMotionFunctions::oscillatingLinearMotion::"
+        << "transformation(): "
         << "Time = " << t << " transformation: " << TR << endl;
 
     return TR;
