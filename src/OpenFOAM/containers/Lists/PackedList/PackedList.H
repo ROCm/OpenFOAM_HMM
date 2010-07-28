@@ -72,6 +72,10 @@ Note
         list[8] = 1;
     @endcode
 
+    Also note that all unused internal storage elements are guaranteed to
+    always be bit-wise zero. This property must not be violated by any
+    inheriting classes.
+
 SeeAlso
     Foam::DynamicList
 
@@ -114,12 +118,19 @@ class PackedList
 :
     private List<unsigned int>
 {
+protected:
+
     typedef unsigned int      StorageType;
     typedef List<StorageType> StorageList;
 
-    //- nBits must be positive (non-zero) and fit within the storage
-    //  For simplicity, assume 8-bit bytes
-    StaticAssert(nBits && nBits < (sizeof(StorageType) << 3));
+private:
+
+    //- nBits must be positive (non-zero) and fit within the storage.
+    //  For efficiency, however, require packing at least 2 items otherwise
+    //  it is more efficient to use a normal list.
+    //  Thus max nBits is 1/2 of the base storage size.
+    //  For simplicity, assume 8-bit bytes in the assert.
+    StaticAssert(nBits && nBits <= (sizeof(StorageType) << 2));
 
     // Private data
 
@@ -163,20 +174,20 @@ public:
         //- Null constructor
         inline PackedList();
 
-        //- Construct with given size, initializes list to 0.
+        //- Construct with given size, initializes list to 0
         explicit inline PackedList(const label size);
 
-        //- Construct with given size and value for all elements.
+        //- Construct with given size and value for all elements
         PackedList(const label size, const unsigned val);
 
-        //- Copy constructor.
+        //- Copy constructor
         inline PackedList(const PackedList<nBits>&);
 
         //- Construct by transferring the parameter contents
         inline PackedList(const Xfer<PackedList<nBits> >&);
 
         //- Construct from a list of labels
-        explicit PackedList(const UList<label>&);
+        explicit inline PackedList(const UList<label>&);
 
         //- Clone
         inline autoPtr< PackedList<nBits> > clone() const;
@@ -209,6 +220,7 @@ public:
             inline bool unset(const label);
 
             //- Return the underlying packed storage
+            //  Manipulate with utmost caution
             inline List<unsigned int>& storage();
 
             //- Return the underlying packed storage
@@ -219,19 +231,29 @@ public:
             //  http://en.wikipedia.org/wiki/Hamming_weight
             unsigned int count() const;
 
-            //- Return the values as a labelList
-            labelList values() const;
+            //- Return the values as a list of labels
+            Xfer<labelList> values() const;
 
-            //- Print values and information
-            Ostream& print(Ostream&) const;
+            //- Print values and information, optionally output unused elements
+            //
+            // addressable bits:
+            //   on: '1', off: '-'
+            //
+            // non-addressable bits:
+            //   on: '!', off: '.'
+            //
+            Ostream& print(Ostream&, const bool fullOutput=false) const;
 
         // Edit
 
             //- Trim any trailing zero elements
             bool trim();
 
-            //- Invert the bits in the addressable region.
+            //- Invert the bits in the addressable region
             void flip();
+
+            //- Clear all bits
+            inline void reset();
 
             //- Alter the size of the underlying storage.
             //  The addressed size will be truncated if needed to fit, but will
@@ -240,10 +262,10 @@ public:
 
             //- Reset addressable list size, does not shrink the allocated size.
             //  Optionally specify a value for new elements.
-            inline void resize(const label, const unsigned int& val = 0);
+            inline void resize(const label, const unsigned int& val = 0u);
 
             //- Alias for resize()
-            inline void setSize(const label, const unsigned int& val = 0);
+            inline void setSize(const label, const unsigned int& val = 0u);
 
             //- Reserve allocation space for at least this size.
             //  Never shrinks the allocated size.
@@ -287,23 +309,13 @@ public:
             inline iteratorBase operator[](const label);
 
             //- Assignment of all entries to the given value. Takes linear time.
-            inline void operator=(const unsigned int val);
+            inline PackedList<nBits>& operator=(const unsigned int val);
 
             //- Assignment operator. Takes linear time.
-            void operator=(const PackedList<nBits>&);
+            PackedList<nBits>& operator=(const PackedList<nBits>&);
 
             //- Assignment operator. Takes linear time.
-            void operator=(const UList<label>&);
-
-
-        // Ostream operator
-
-         // // Write PackedList to Ostream.
-         // friend Ostream& operator<< <nBits>
-         // (
-         //     Ostream&,
-         //     const PackedList<nBits>&
-         // );
+            PackedList<nBits>& operator=(const UList<label>&);
 
 
     // Iterators and helpers
@@ -347,6 +359,12 @@ public:
 
         public:
 
+            // Member Functions
+
+                //- Return the element index corresponding to the iterator
+                inline label key() const;
+
+
             // Member Operators
 
                 //- Compare values (not positions)
@@ -376,11 +394,12 @@ public:
             public iteratorBase
         {
 
-            //- Disallow copy constructor from const_iterator -
-            //  violates const-ness!
+            //- Disallow copy constructor from const_iterator
+            //  This would violate const-ness!
             iterator(const const_iterator&);
 
-            //- Disallow assignment from const_iterator - violates const-ness!
+            //- Disallow assignment from const_iterator
+            //  This would violate const-ness!
             void operator=(const const_iterator&);
 
 

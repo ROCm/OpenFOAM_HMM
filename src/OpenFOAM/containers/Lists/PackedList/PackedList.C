@@ -33,7 +33,10 @@ Foam::PackedList<nBits>::PackedList(const label size, const unsigned int val)
     StorageList(packedLength(size), 0u),
     size_(size)
 {
-    operator=(val);
+    if (val)
+    {
+        operator=(val);
+    }
 }
 
 
@@ -82,25 +85,11 @@ unsigned int Foam::PackedList<nBits>::count() const
 
     if (size_)
     {
-        // mask value for complete segments
-        unsigned int mask = maskLower(packing());
+        const label packLen = packedLength(size_);
 
-        const unsigned int endSeg = size_ / packing();
-        const unsigned int endOff = size_ % packing();
-
-        // count bits in complete segments
-        for (unsigned i = 0; i < endSeg; ++i)
+        for (label i = 0; i < packLen; ++i)
         {
-            register unsigned int bits = StorageList::operator[](i) & mask;
-            COUNT_PACKEDBITS(c, bits);
-        }
-
-        // count bits in partial segment
-        if (endOff)
-        {
-            mask = maskLower(endOff);
-
-            register unsigned int bits = StorageList::operator[](endSeg) & mask;
+            register unsigned int bits = StorageList::operator[](i);
             COUNT_PACKEDBITS(c, bits);
         }
     }
@@ -117,64 +106,61 @@ bool Foam::PackedList<nBits>::trim()
         return false;
     }
 
-    // mask value for complete segments
-    unsigned int mask = maskLower(packing());
+    const label oldSize = size_;
 
-    label currElem = packedLength(size_) - 1;
-    unsigned int endOff = size_ % packing();
-
-    // clear trailing bits on final segment
-    if (endOff)
+    for (label storeI = packedLength(size_) - 1; storeI >= 0; --storeI)
     {
-        StorageList::operator[](currElem) &= maskLower(endOff);
-    }
+        size_ = storeI * packing();
+        unsigned int bits = StorageList::operator[](storeI);
 
-    // test entire segment
-    while (currElem > 0 && !(StorageList::operator[](currElem) &= mask))
-    {
-        currElem--;
-    }
-
-    // test segment
-    label newsize = (currElem + 1) * packing();
-
-    // mask for the final segment
-    mask = max_value() << (nBits * (packing() - 1));
-
-    for (endOff = packing(); endOff >= 1; --endOff, --newsize)
-    {
-        if (StorageList::operator[](currElem) & mask)
+        // found some bits
+        if (bits)
         {
+            while (bits)
+            {
+                bits >>= nBits;
+                ++size_;
+            }
             break;
         }
-
-        mask >>= nBits;
     }
 
-    if (size_ == newsize)
-    {
-        return false;
-    }
-
-    size_ = newsize;
-    return false;
+    return (size_ != oldSize);
 }
 
 
 template<unsigned nBits>
 void Foam::PackedList<nBits>::flip()
 {
-    label packLen = packedLength(size_);
-
-    for (label i=0; i < packLen; i++)
+    if (!size_)
     {
-        StorageList::operator[](i) = ~StorageList::operator[](i);
+        return;
+    }
+
+    // mask value for complete segments
+    const unsigned int mask = maskLower(packing());
+
+    const label packLen = packedLength(size_);
+    for (label i=0; i < packLen; ++i)
+    {
+        StorageList::operator[](i) = mask & ~StorageList::operator[](i);
+    }
+
+    // mask off the final partial segment
+    {
+        const unsigned int off = size_ % packing();
+        if (off)
+        {
+            const unsigned int seg = size_ / packing();
+
+            StorageList::operator[](seg) &= maskLower(off);
+        }
     }
 }
 
 
 template<unsigned nBits>
-Foam::labelList Foam::PackedList<nBits>::values() const
+Foam::Xfer<Foam::labelList> Foam::PackedList<nBits>::values() const
 {
     labelList elems(size_);
 
@@ -182,7 +168,8 @@ Foam::labelList Foam::PackedList<nBits>::values() const
     {
         elems[i] = get(i);
     }
-    return elems;
+
+    return elems.xfer();
 }
 
 
@@ -201,7 +188,11 @@ Foam::Ostream& Foam::PackedList<nBits>::iteratorBase::print(Ostream& os) const
 
 
 template<unsigned nBits>
-Foam::Ostream& Foam::PackedList<nBits>::print(Ostream& os) const
+Foam::Ostream& Foam::PackedList<nBits>::print
+(
+    Ostream& os,
+    const bool fullOutput
+) const
 {
     const label packLen = packedLength(size_);
 
@@ -215,45 +206,56 @@ Foam::Ostream& Foam::PackedList<nBits>::print(Ostream& os) const
 
     // mask value for complete segments
     unsigned int mask = maskLower(packing());
+    const label outputLen = fullOutput ? StorageList::size() : packLen;
 
-    for (label i=0; i < packLen; i++)
+    for (label i=0; i < outputLen; ++i)
     {
         const StorageType& rawBits = StorageList::operator[](i);
 
         // the final segment may not be full, modify mask accordingly
-        if (i+1 == packLen)
+        if (i == packLen-1)
         {
-            unsigned int endOff = size_ % packing();
+            const unsigned int off = size_ % packing();
 
-            if (endOff)
+            if (off)
             {
-                mask = maskLower(endOff);
-            }
-            else
-            {
-                continue;
+                mask = maskLower(off);
             }
         }
+        else if (i == packLen)
+        {
+            // no mask for unaddressed bit
+            mask = 0u;
+        }
+
 
         for (unsigned int testBit = (1u << max_bits()); testBit; testBit >>= 1)
         {
             if (mask & testBit)
             {
+                // addressable region
                 if (rawBits & testBit)
                 {
-                    os << '1';
+                    os  << '1';
                 }
                 else
                 {
-                    os << '-';
+                    os  << '-';
                 }
             }
             else
             {
-                os << 'x';
+                if (rawBits & testBit)
+                {
+                    os  << '!';
+                }
+                else
+                {
+                    os  << '.';
+                }
             }
         }
-        os << '\n';
+        os  << '\n';
     }
     os << ")\n";
 
@@ -264,15 +266,18 @@ Foam::Ostream& Foam::PackedList<nBits>::print(Ostream& os) const
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<unsigned nBits>
-void Foam::PackedList<nBits>::operator=(const PackedList<nBits>& lst)
+Foam::PackedList<nBits>&
+Foam::PackedList<nBits>::operator=(const PackedList<nBits>& lst)
 {
     StorageList::operator=(lst);
     size_ = lst.size();
+    return *this;
 }
 
 
 template<unsigned nBits>
-void Foam::PackedList<nBits>::operator=(const UList<label>& lst)
+Foam::PackedList<nBits>&
+Foam::PackedList<nBits>::operator=(const UList<label>& lst)
 {
     setCapacity(lst.size());
     size_ = lst.size();
@@ -281,19 +286,8 @@ void Foam::PackedList<nBits>::operator=(const UList<label>& lst)
     {
         set(i, lst[i]);
     }
+    return *this;
 }
 
-
-// * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
-
-//template<unsigned nBits>
-//Foam::Ostream& ::Foam::operator<<(Ostream& os, const PackedList<nBits>& lst)
-//{
-//    os << lst();
-//    return os;
-//}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

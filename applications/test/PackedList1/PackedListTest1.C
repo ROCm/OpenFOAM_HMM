@@ -329,22 +329,41 @@ int main(int argc, char *argv[])
     list3.print(Info);
 
 
-    List<bool> list4(4, true);
+    List<bool> list4(16, false);
     {
-        const List<bool>& constLst = list4;
+        // fill with some values
+        forAll(list4, i)
+        {
+            list4[i] = i % 3;
+        }
+
+        const UList<bool>& constLst = list4;
         Info<< "\ntest operator[] const with out-of-range index\n";
         Info<< constLst << endl;
-        if (constLst[20])
+        if (constLst[100])
         {
-            Info<< "[20] is true (unexpected)\n";
+            Info<< "[100] is true (unexpected)\n";
         }
         else
         {
-            Info<< "[20] is false (expected) list size should be unchanged "
-                << "(const)\n";
+            Info<< "[100] is false (expected) "
+                << "list size should be unchanged (const)\n";
         }
         Info<< constLst << endl;
     }
+
+
+    PackedBoolList listb(list4);
+
+    Info<< "copied from bool list " << endl;
+    listb.print(Info, true);
+
+    {
+        labelList indices = listb.used();
+
+        Info<< "indices: " << indices << endl;
+    }
+
 
     Info<< "\n\nDone.\n";
 
