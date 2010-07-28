@@ -100,13 +100,44 @@ const Foam::coordinateSystems& Foam::coordinateSystems::New
 
 Foam::label Foam::coordinateSystems::find(const keyType& key) const
 {
+    return findIndex(key);
+}
+
+
+Foam::labelList Foam::coordinateSystems::findIndices(const keyType& key) const
+{
+    labelList indices;
     if (key.isPattern())
     {
-        labelList allFound = findAll(key);
-        // return first element
-        if (!allFound.empty())
+        indices = findStrings(key, toc());
+    }
+    else
+    {
+        indices.setSize(size());
+        label nFound = 0;
+        forAll(*this, i)
         {
-            return allFound[0];
+            if (key == operator[](i).name())
+            {
+                indices[nFound++] = i;
+            }
+        }
+        indices.setSize(nFound);
+    }
+
+    return indices;
+}
+
+
+Foam::label Foam::coordinateSystems::findIndex(const keyType& key) const
+{
+    if (key.isPattern())
+    {
+        labelList indices = findIndices(key);
+        // return first element
+        if (!indices.empty())
+        {
+            return indices[0];
         }
     }
     else
@@ -124,34 +155,9 @@ Foam::label Foam::coordinateSystems::find(const keyType& key) const
 }
 
 
-Foam::labelList Foam::coordinateSystems::findAll(const keyType& key) const
-{
-    labelList allFound;
-    if (key.isPattern())
-    {
-        allFound = findStrings(key, toc());
-    }
-    else
-    {
-        allFound.setSize(size());
-        label nFound = 0;
-        forAll(*this, i)
-        {
-            if (key == operator[](i).name())
-            {
-                allFound[nFound++] = i;
-            }
-        }
-        allFound.setSize(nFound);
-    }
-
-    return allFound;
-}
-
-
 bool Foam::coordinateSystems::found(const keyType& key) const
 {
-    return find(key) >= 0;
+    return findIndex(key) != -1;
 }
 
 

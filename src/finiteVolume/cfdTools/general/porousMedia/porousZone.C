@@ -71,7 +71,7 @@ Foam::porousZone::porousZone
     key_(key),
     mesh_(mesh),
     dict_(dict),
-    cellZoneIds_(0),
+    cellZoneIds_(mesh_.cellZones().findIndices(key_)),
     coordSys_(dict, mesh),
     porosity_(1),
     intensity_(0),
@@ -82,24 +82,6 @@ Foam::porousZone::porousZone
     F_("F", dimensionSet(0, -1, 0, 0, 0), tensor::zero)
 {
     Info<< "Creating porous zone: " << key_ << endl;
-
-    if (key_.isPattern())
-    {
-        cellZoneIds_ = findStrings
-        (
-            key_,
-            mesh_.cellZones().names()
-        );
-    }
-    else
-    {
-        const label zoneId = mesh_.cellZones().findZoneID(key_);
-        if (zoneId != -1)
-        {
-            cellZoneIds_.setSize(1);
-            cellZoneIds_[0] = zoneId;
-        }
-    }
 
     bool foundZone = !cellZoneIds_.empty();
     reduce(foundZone, orOp<bool>());

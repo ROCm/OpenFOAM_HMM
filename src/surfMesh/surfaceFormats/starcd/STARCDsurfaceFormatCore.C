@@ -91,7 +91,7 @@ void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
 
     forAll(zoneLst, zoneI)
     {
-        os  << "ctable " << zoneI + 1 << " shell" << nl
+        os  << "ctable " << zoneI + 1 << " shell" << " ,,,,,," << nl
             << "ctname " << zoneI + 1 << " "
             << zoneLst[zoneI].name() << nl;
     }

@@ -97,11 +97,15 @@ public:
 
     // Member Functions
 
-        //- Find and return index for the first match, returns -1 if not found
-        label find(const keyType& key) const;
-
         //- Find and return indices for all matches
-        labelList findAll(const keyType& key) const;
+        labelList findIndices(const keyType& key) const;
+
+        //- Find and return index for the first match, return -1 if not found
+        label findIndex(const keyType& key) const;
+
+        //- Find and return index for the first match, returns -1 if not found
+        // @deprecated use findIndex() instead (deprecated Jul 2010)
+        label find(const keyType& key) const;
 
         //- Search for given key
         bool found(const keyType& key) const;
