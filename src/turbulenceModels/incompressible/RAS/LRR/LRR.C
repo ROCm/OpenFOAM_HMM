@@ -340,8 +340,11 @@ void LRR::correct()
             forAll(curPatch, facei)
             {
                 label faceCelli = curPatch.faceCells()[facei];
-                P[faceCelli]
-                    *= min(G[faceCelli]/(0.5*mag(tr(P[faceCelli])) + SMALL), 1.0);
+                P[faceCelli] *= min
+                (
+                    G[faceCelli]/(0.5*mag(tr(P[faceCelli])) + SMALL),
+                    1.0
+                );
             }
         }
     }

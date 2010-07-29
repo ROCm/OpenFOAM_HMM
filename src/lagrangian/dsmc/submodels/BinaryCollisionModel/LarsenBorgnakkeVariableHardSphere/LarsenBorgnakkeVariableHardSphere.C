@@ -92,7 +92,8 @@ Foam::scalar Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::energyRatio
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::LarsenBorgnakkeVariableHardSphere
+Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::
+LarsenBorgnakkeVariableHardSphere
 (
     const dictionary& dict,
     CloudType& cloud

@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class nonuniformTransformCyclicFvPatch Declaration
+            Class nonuniformTransformCyclicFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class nonuniformTransformCyclicFvPatch
@@ -61,7 +61,11 @@ public:
     // Constructors
 
         //- Construct from polyPatch
-        nonuniformTransformCyclicFvPatch(const polyPatch& patch, const fvBoundaryMesh& bm)
+        nonuniformTransformCyclicFvPatch
+        (
+            const polyPatch& patch,
+            const fvBoundaryMesh& bm
+        )
         :
             cyclicFvPatch(patch, bm)
         {}

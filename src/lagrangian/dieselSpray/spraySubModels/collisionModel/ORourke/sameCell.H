@@ -48,7 +48,11 @@ if (( xx > collProb) && (mMin > VSMALL) && (mMax > VSMALL)) {
     // use mass-averaged temperature to calculate We number
     scalar averageTemp = (pMax().T()*mMax + pMin().T()*mMin)/mTot;
     // and mass averaged mole fractions ...
-    scalarField Xav((pMax().m()*pMax().X()+pMin().m()*pMin().X())/(pMax().m() + pMin().m()));
+    scalarField Xav
+    (
+        (pMax().m()*pMax().X()+pMin().m()*pMin().X())
+       /(pMax().m() + pMin().m())
+    );
     scalar sigma = spray_.fuels().sigma(pc, averageTemp, Xav);
     sigma = max(1.0e-6, sigma);
     scalar rho = spray_.fuels().rho(pc, averageTemp, Xav);

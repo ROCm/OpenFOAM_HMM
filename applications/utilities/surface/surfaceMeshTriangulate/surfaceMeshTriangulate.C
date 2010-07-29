@@ -88,7 +88,8 @@ int main(int argc, char *argv[])
     // - explicitly named patches only (-patches (at your option)
     // - all patches (default in sequential mode)
     // - all non-processor patches (default in parallel mode)
-    // - all non-processor patches (sequential mode, -excludeProcPatches (at your option)
+    // - all non-processor patches (sequential mode, -excludeProcPatches
+    //   (at your option)
 
     // Construct table of patches to include.
     const polyBoundaryMesh& bMesh = mesh.boundaryMesh();

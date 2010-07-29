@@ -1400,8 +1400,8 @@ Foam::polyDualMesh::polyDualMesh
     polyMesh
     (
         mesh,
-        xferCopy(pointField()),   // to prevent any warnings "points not allocated"
-        xferCopy(faceList()),     // to prevent any warnings "faces  not allocated"
+        xferCopy(pointField()),// to prevent any warnings "points not allocated"
+        xferCopy(faceList()),  // to prevent any warnings "faces  not allocated"
         xferCopy(cellList())
     ),
     cellPoint_
@@ -1445,8 +1445,8 @@ Foam::polyDualMesh::polyDualMesh
     polyMesh
     (
         mesh,
-        xferCopy(pointField()),   // to prevent any warnings "points not allocated"
-        xferCopy(faceList()),     // to prevent any warnings "faces  not allocated"
+        xferCopy(pointField()),// to prevent any warnings "points not allocated"
+        xferCopy(faceList()),  // to prevent any warnings "faces  not allocated"
         xferCopy(cellList())
     ),
     cellPoint_

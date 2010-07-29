@@ -54,8 +54,9 @@ addToRunTimeSelectionTable
 //void Foam::processorCyclicPointPatch::initGeometry(PstreamBuffers& pBufs)
 //{
 //    // Algorithm:
-//    // Depending on whether the patch is a master or a slave, get the primitive
-//    // patch points and filter away the points from the global patch.
+//    // Depending on whether the patch is a master or a slave, get the
+//    // primitive patch points and filter away the points from the
+//    // global patch.
 //
 //    if (isMaster())
 //    {
@@ -152,7 +153,8 @@ addToRunTimeSelectionTable
 //{
 //    if (debug)
 //    {
-//        Info<< "processorCyclicPointPatch::initPatchPatchPoints(PstreamBuffers&) : "
+//        Info<< "processorCyclicPointPatch::"
+//            << "initPatchPatchPoints(PstreamBuffers&) : "
 //            << "constructing patch-patch points"
 //            << endl;
 //    }
@@ -204,8 +206,8 @@ addToRunTimeSelectionTable
 //
 //                if (iter != patchPointSet.end())
 //                {
-//                    // If it is shared initialise the patchPatchPoints for this
-//                    // patch
+//                    // If it is shared initialise the patchPatchPoints for
+//                    // this patch
 //                    if (!patchPatchPoints[patchi].size())
 //                    {
 //                        patchPatchPoints[patchi].setSize(ppmp.size());
@@ -244,7 +246,10 @@ addToRunTimeSelectionTable
 //}
 //
 //
-//void Foam::processorCyclicPointPatch::calcPatchPatchPoints(PstreamBuffers& pBufs)
+//void Foam::processorCyclicPointPatch::calcPatchPatchPoints
+//(
+//    PstreamBuffers& pBufs
+//)
 //{
 //    // Get the patchPatchPoints from the neighbouring processor
 //    UIPstream fromNeighbProc(neighbProcNo(), pBufs);
@@ -264,7 +269,10 @@ addToRunTimeSelectionTable
 //    // separate.
 //    if (nbrNPoints != ppmp.size())
 //    {
-//        WarningIn("processorCyclicPointPatch::calcPatchPatchPoints(PstreamBuffers&)")
+//        WarningIn
+//        (
+//            "processorCyclicPointPatch::calcPatchPatchPoints(PstreamBuffers&)"
+//        )
 //            << "Processor patch " << name()
 //            << " has " << ppmp.size() << " points; coupled patch has "
 //            << nbrNPoints << " points." << endl
@@ -280,9 +288,11 @@ addToRunTimeSelectionTable
 //    forAll(patchPatchPoints, patchi)
 //    {
 //        const labelList& patchPoints = patchPatchPoints[patchi];
-//        const List<vector>& patchPointNormals = patchPatchPointNormals[patchi];
+//        const List<vector>& patchPointNormals =
+//            patchPatchPointNormals[patchi];
 //
-//        // If there are potentially shared points for the patch being considered
+//        // If there are potentially shared points for the patch being
+//        // considered
 //        if (patchPoints.size())
 //        {
 //            // Get the current meshPoints list for the patch
@@ -351,7 +361,11 @@ addToRunTimeSelectionTable
 //}
 
 
-//void processorCyclicPointPatch::initMovePoints(PstreamBuffers&, const pointField&)
+//void processorCyclicPointPatch::initMovePoints
+//(
+//    PstreamBuffers&,
+//    const pointField&
+//)
 //{}
 //
 //

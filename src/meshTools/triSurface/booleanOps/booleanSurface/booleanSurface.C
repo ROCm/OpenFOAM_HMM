@@ -590,7 +590,10 @@ Foam::booleanSurface::booleanSurface
 
     // Copy points from subSurf1 and remember the labels of the ones in
     // the intersection
-    labelList intersectionLabels(cutSurf1.nPoints() - cutSurf1.nSurfacePoints());
+    labelList intersectionLabels
+    (
+        cutSurf1.nPoints() - cutSurf1.nSurfacePoints()
+    );
 
     label combinedPointI = 0;
 

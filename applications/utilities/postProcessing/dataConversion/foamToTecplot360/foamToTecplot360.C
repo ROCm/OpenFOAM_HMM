@@ -1272,7 +1272,10 @@ int main(int argc, char *argv[])
                 //Info<< "        symm tensors      :";
                 //print(Info, symmNames);
                 //
-                //wordList tensorNames(sprayObjs.names(tensorIOField::typeName));
+                //wordList tensorNames
+                //(
+                //    sprayObjs.names(tensorIOField::typeName)
+                //);
                 //Info<< "        tensors           :";
                 //print(Info, tensorNames);
 

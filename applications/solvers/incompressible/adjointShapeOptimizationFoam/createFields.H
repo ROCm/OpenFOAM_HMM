@@ -67,7 +67,13 @@
 
     label paRefCell = 0;
     scalar paRefValue = 0.0;
-    setRefCell(pa, mesh.solutionDict().subDict("SIMPLE"), paRefCell, paRefValue);
+    setRefCell
+    (
+        pa,
+        mesh.solutionDict().subDict("SIMPLE"),
+        paRefCell,
+        paRefValue
+    );
 
 
     singlePhaseTransportModel laminarTransport(U, phi);

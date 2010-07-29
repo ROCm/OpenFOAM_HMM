@@ -35,7 +35,8 @@ namespace Foam
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-nonuniformTransformCyclicPointPatchField<Type>::nonuniformTransformCyclicPointPatchField
+nonuniformTransformCyclicPointPatchField<Type>::
+nonuniformTransformCyclicPointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF
@@ -46,7 +47,8 @@ nonuniformTransformCyclicPointPatchField<Type>::nonuniformTransformCyclicPointPa
 
 
 template<class Type>
-nonuniformTransformCyclicPointPatchField<Type>::nonuniformTransformCyclicPointPatchField
+nonuniformTransformCyclicPointPatchField<Type>::
+nonuniformTransformCyclicPointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
@@ -58,7 +60,8 @@ nonuniformTransformCyclicPointPatchField<Type>::nonuniformTransformCyclicPointPa
 
 
 template<class Type>
-nonuniformTransformCyclicPointPatchField<Type>::nonuniformTransformCyclicPointPatchField
+nonuniformTransformCyclicPointPatchField<Type>::
+nonuniformTransformCyclicPointPatchField
 (
     const nonuniformTransformCyclicPointPatchField<Type>& ptf,
     const pointPatch& p,
@@ -71,7 +74,8 @@ nonuniformTransformCyclicPointPatchField<Type>::nonuniformTransformCyclicPointPa
 
 
 template<class Type>
-nonuniformTransformCyclicPointPatchField<Type>::nonuniformTransformCyclicPointPatchField
+nonuniformTransformCyclicPointPatchField<Type>::
+nonuniformTransformCyclicPointPatchField
 (
     const nonuniformTransformCyclicPointPatchField<Type>& ptf,
     const DimensionedField<Type, pointMesh>& iF
@@ -84,7 +88,10 @@ nonuniformTransformCyclicPointPatchField<Type>::nonuniformTransformCyclicPointPa
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void nonuniformTransformCyclicPointPatchField<Type>::evaluate(const Pstream::commsTypes)
+void nonuniformTransformCyclicPointPatchField<Type>::evaluate
+(
+    const Pstream::commsTypes
+)
 {
     const vectorField& nHat = this->patch().pointNormals();
 

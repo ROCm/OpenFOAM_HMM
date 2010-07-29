@@ -6,4 +6,3 @@ void PostString(char *_s,int _x,int _y,float _life=5.0);
 void RenderStrings();
 
 #endif
-

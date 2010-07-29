@@ -34,7 +34,12 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(nonuniformTransformCyclicFvPatch, 0);
-addToRunTimeSelectionTable(fvPatch, nonuniformTransformCyclicFvPatch, polyPatch);
+addToRunTimeSelectionTable
+(
+    fvPatch,
+    nonuniformTransformCyclicFvPatch,
+    polyPatch
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

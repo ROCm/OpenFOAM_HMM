@@ -347,7 +347,8 @@ void ReadProblem
                 char* name = new char[size + 1];
                 CCMIOReadOptstr(NULL, boundary, "BoundaryName", &size, name);
                 name[size] = '\0';
-                foamPatchNames[foamPatchI] = string::validate<word>(string(name));
+                foamPatchNames[foamPatchI] =
+                    string::validate<word>(string(name));
                 delete [] name;
             }
             else if
@@ -359,7 +360,8 @@ void ReadProblem
                 char* name = new char[size + 1];
                 CCMIOReadOptstr(NULL, boundary, "Label", &size, name);
                 name[size] = '\0';
-                foamPatchNames[foamPatchI] = string::validate<word>(string(name));
+                foamPatchNames[foamPatchI] =
+                    string::validate<word>(string(name));
                 delete [] name;
             }
             else
@@ -641,7 +643,13 @@ int main(int argc, char *argv[])
         // in NULL (which always means kCCMIONoErr) and then assign the return
         // value to 'err'.).
         CCMIOID root;
-        CCMIOError err = CCMIOOpenFile(NULL, ccmFile.c_str(), kCCMIORead, &root);
+        CCMIOError err = CCMIOOpenFile
+        (
+            NULL,
+            ccmFile.c_str(),
+            kCCMIORead,
+            &root
+        );
 
         // We are going to assume that we have a state with a known name.
         // We could instead use CCMIONextEntity() to walk through all the

@@ -258,7 +258,8 @@ Foam::tmp<Foam::volScalarField> Foam::interpolatedSolidThermo::Hf() const
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::interpolatedSolidThermo::emissivity() const
+Foam::tmp<Foam::volScalarField>
+Foam::interpolatedSolidThermo::emissivity() const
 {
     tmp<volScalarField> temissivity
     (

@@ -481,8 +481,8 @@ label sharedFace
 }
 
 
-// Calculate (inward pointing) normals on edges shared by faces in faceToEdge and
-// averages them to pointNormals.
+// Calculate (inward pointing) normals on edges shared by faces in
+// faceToEdge and averages them to pointNormals.
 void calcPointVecs
 (
     const triSurface& surf,
@@ -696,8 +696,9 @@ int main(int argc, char *argv[])
     boolList borderEdge(surf.nEdges(), false);
     markBorderEdges(debug, surf, borderEdge);
 
-    // Points on two sides connected to borderEdges are called borderPoints and
-    // will be duplicated. borderPoint contains label of newly introduced vertex.
+    // Points on two sides connected to borderEdges are called
+    // borderPoints and will be duplicated. borderPoint contains label
+    // of newly introduced vertex.
     labelList borderPoint(surf.nPoints(), -1);
     markBorderPoints(debug, surf, borderEdge, borderPoint);
 

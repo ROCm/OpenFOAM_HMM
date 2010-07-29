@@ -50,7 +50,8 @@ void Foam::tetherPotentialList::readTetherPotentialDict
         if (tetherId == -1)
         {
             FatalErrorIn("tetherPotentialList::readTetherPotentialDict")
-                << nl << "No matching entry found in siteIdList for tether name "
+                << nl
+                << "No matching entry found in siteIdList for tether name "
                 << tetherPotentialName
                 << abort(FatalError);
         }

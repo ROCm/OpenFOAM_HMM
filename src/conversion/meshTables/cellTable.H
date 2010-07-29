@@ -140,7 +140,8 @@ public:
         //- Return a Map of (id => names) selected by patterns
         Map<word> names(const UList<wordRe>& patterns) const;
 
-        //- Return a Map of (id => name) for materialType (fluid | solid | shell)
+        //- Return a Map of (id => name) for materialType
+        //  (fluid | solid | shell)
         Map<word> selectType(const word& materialType) const;
 
         //- Return a Map of (id => name) for fluids

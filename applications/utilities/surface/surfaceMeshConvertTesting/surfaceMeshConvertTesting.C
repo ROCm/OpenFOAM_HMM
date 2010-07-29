@@ -364,7 +364,8 @@ int main(int argc, char *argv[])
 
 
 
-            Info<< "writing surfMesh again well: " << surfOut.objectPath() << endl;
+            Info<< "writing surfMesh again well: " << surfOut.objectPath()
+                << endl;
             surfOut.write();
 
             // write directly

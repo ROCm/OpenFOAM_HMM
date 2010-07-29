@@ -190,7 +190,8 @@ void Foam::parcel::setRelaxationTimes
         {
             if (!boiling)
             {
-                // for saturation evaporation, only use 99.99% for numerical robustness
+                // for saturation evaporation, only use 99.99% for
+                // numerical robustness
                 scalar dm = max(SMALL, 0.9999*msat[i] - mfg[i]);
 
                 tauEvaporation[i] = sDB.evaporation().relaxationTime
@@ -213,16 +214,23 @@ void Foam::parcel::setRelaxationTimes
                 scalar Nusselt =
                     sDB.heatTransfer().Nu(Reynolds, Prandtl);
 
-//              calculating the boiling temperature of the liquid at ambient pressure
+                // calculating the boiling temperature of the liquid
+                // at ambient pressure
                 scalar tBoilingSurface = Td;
 
                 label Niter = 0;
                 scalar deltaT = 10.0;
-                scalar dp0 = fuels.properties()[i].pv(pressure, tBoilingSurface) - pressure;
+                scalar dp0 =
+                    fuels.properties()[i].pv(pressure, tBoilingSurface)
+                  - pressure;
                 while ((Niter < 200) && (mag(deltaT) > 1.0e-3))
                 {
                     Niter++;
-                    scalar pBoil = fuels.properties()[i].pv(pressure, tBoilingSurface);
+                    scalar pBoil = fuels.properties()[i].pv
+                    (
+                        pressure,
+                        tBoilingSurface
+                    );
                     scalar dp = pBoil - pressure;
                     if ( (dp > 0.0) && (dp0 > 0.0) )
                     {
@@ -255,11 +263,19 @@ void Foam::parcel::setRelaxationTimes
 
                 forAll(sDB.gasProperties(), k)
                 {
-                    vapourSurfaceEnthalpy += sDB.composition().Y()[k][celli]*sDB.gasProperties()[k].H(tBoilingSurface);
-                    vapourFarEnthalpy += sDB.composition().Y()[k][celli]*sDB.gasProperties()[k].H(temperature);
+                    vapourSurfaceEnthalpy +=
+                        sDB.composition().Y()[k][celli]
+                       *sDB.gasProperties()[k].H(tBoilingSurface);
+                    vapourFarEnthalpy +=
+                        sDB.composition().Y()[k][celli]
+                       *sDB.gasProperties()[k].H(temperature);
                 }
 
-                scalar kLiquid = fuels.properties()[i].K(pressure, 0.5*(tBoilingSurface+T()));
+                scalar kLiquid = fuels.properties()[i].K
+                (
+                    pressure,
+                    0.5*(tBoilingSurface+T())
+                );
 
                 tauBoiling[i] = sDB.evaporation().boilingTime
                 (

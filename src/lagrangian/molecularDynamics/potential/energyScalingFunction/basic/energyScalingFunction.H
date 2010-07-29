@@ -132,7 +132,10 @@ public:
         }
 
         //- Read energyScalingFunction dictionary
-        virtual bool read(const dictionary& energyScalingFunctionProperties) = 0;
+        virtual bool read
+        (
+            const dictionary& energyScalingFunctionProperties
+        ) = 0;
 };
 
 
