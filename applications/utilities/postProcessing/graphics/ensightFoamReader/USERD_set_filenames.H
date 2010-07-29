@@ -198,7 +198,8 @@ int USERD_set_filenames
     runTime.setTime(timeDirs[Current_time_step], Current_time_step);
 
     Num_variables = nVar + nSprayVariables;
-    Numparts_available = Num_unstructured_parts + Num_structured_parts + nPatches;
+    Numparts_available =
+        Num_unstructured_parts + Num_structured_parts + nPatches;
 
 #ifdef ENSIGHTDEBUG
     Info<< "Leaving: USERD_set_filenames" << endl << flush;
@@ -206,4 +207,3 @@ int USERD_set_filenames
 
     return Z_OK;
 }
-

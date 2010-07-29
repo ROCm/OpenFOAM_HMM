@@ -28,7 +28,9 @@ Description
     Rosin-Rammler pdf
 
    @f[
-       cumulative pdf = (1.0 - exp( -((x - d0)/d)^n ) / (1.0 - exp( -((d1 - d0)/d)^n )
+       cumulative pdf =
+           (1.0 - exp( -(( x - d0)/d)^n )
+         / (1.0 - exp( -((d1 - d0)/d)^n )
    @f]
 
 

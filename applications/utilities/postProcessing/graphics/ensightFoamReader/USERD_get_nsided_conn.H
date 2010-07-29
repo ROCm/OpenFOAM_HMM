@@ -1,4 +1,3 @@
-
 int USERD_get_nsided_conn
 (
     int part_number,
@@ -13,7 +12,8 @@ int USERD_get_nsided_conn
 #endif
     if (part_number == 1)
     {
-        Info<< "************* EEEEEEEEERRRRRRRRRRRRRRRRRR *************** " << endl << flush;
+        Info<< "************* EEEEEEEEERRRRRRRRRRRRRRRRRR *************** "
+            << endl << flush;
 
     }
     else if (part_number < nPatches+2)

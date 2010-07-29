@@ -465,7 +465,8 @@ void Foam::parcel::updateParcelProperties
     while ((n < sDB.evaporation().nEvapIter()) && (m() > VSMALL))
     {
         n++;
-        // new characteristic times does not need to be calculated the first time
+        // new characteristic times does not need to be calculated the
+        // first time
         if (n > 1)
         {
             newDensity = fuels.rho(pg, Tnew, X());

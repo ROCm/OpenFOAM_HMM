@@ -62,11 +62,13 @@ int main(int argc, char *argv[])
             dictionary dict2(dict1.xfer());
 
             Info<< "dict1.toc(): " << dict1.name() << " " << dict1.toc() << nl
-                << "dict2.toc(): " << dict2.name() << " " << dict2.toc() << endl;
+                << "dict2.toc(): " << dict2.name() << " " << dict2.toc()
+                << endl;
 
             // copy back
             dict1 = dict2;
-            Info<< "dict1.toc(): " << dict1.name() << " " << dict1.toc() << endl;
+            Info<< "dict1.toc(): " << dict1.name() << " " << dict1.toc()
+                << endl;
 
             dictionary dict3(dict2.subDictPtr("boundaryField"));
             dictionary dict4(dict2.subDictPtr("NONEXISTENT"));

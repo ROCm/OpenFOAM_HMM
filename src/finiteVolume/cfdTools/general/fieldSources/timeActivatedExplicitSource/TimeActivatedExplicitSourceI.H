@@ -208,7 +208,10 @@ inline Foam::labelList& Foam::TimeActivatedExplicitSource<Type>::cells()
 
 
 template<class Type>
-inline Foam::List<typename Foam::TimeActivatedExplicitSource<Type>::fieldNameValuePair>&
+inline Foam::List
+<
+    typename Foam::TimeActivatedExplicitSource<Type>::fieldNameValuePair
+>&
 Foam::TimeActivatedExplicitSource<Type>::fieldData()
 {
     return fieldData_;

@@ -693,7 +693,8 @@ void Foam::meshReaders::STARCD::readBoundary(const fileName& inputName)
 
                     maxId = max(maxId, starRegion);
 
-                    if (patchType == "BAFF")    // should actually be case-insensitive
+                    // should actually be case-insensitive
+                    if (patchType == "BAFF")
                     {
                         nBafflePatches++;
                     }

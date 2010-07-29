@@ -76,7 +76,8 @@ const Foam::dictionary& Foam::DevolatilisationModel<CloudType>::dict() const
 
 
 template<class CloudType>
-const Foam::dictionary& Foam::DevolatilisationModel<CloudType>::coeffDict() const
+const Foam::dictionary&
+Foam::DevolatilisationModel<CloudType>::coeffDict() const
 {
     return coeffDict_;
 }
@@ -87,4 +88,3 @@ const Foam::dictionary& Foam::DevolatilisationModel<CloudType>::coeffDict() cons
 #include "DevolatilisationModelNew.C"
 
 // ************************************************************************* //
-

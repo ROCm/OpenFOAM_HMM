@@ -59,7 +59,8 @@ if (nWallFaces == 0)
 }
 else
 {
-    Info<< "Generating wall data for patch: " << patches[patchId].name() << endl;
+    Info<< "Generating wall data for patch: " << patches[patchId].name()
+        << endl;
 }
 
 // store local id of near-walll cell to process
@@ -71,4 +72,3 @@ scalarField y =
   & (mesh.C().internalField() - mesh.C().boundaryField()[patchId][faceId]);
 
 Info<< "    Height to first cell centre y0 = " << y[cellId] << endl;
-

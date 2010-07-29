@@ -381,7 +381,10 @@ Foam::scalar Foam::commonRailInjector::Cd
 }
 
 
-Foam::scalar Foam::commonRailInjector::fractionOfInjection(const scalar time) const
+Foam::scalar Foam::commonRailInjector::fractionOfInjection
+(
+    const scalar time
+) const
 {
     return integrateTable(massFlowRateProfile_, time)/mass_;
 }

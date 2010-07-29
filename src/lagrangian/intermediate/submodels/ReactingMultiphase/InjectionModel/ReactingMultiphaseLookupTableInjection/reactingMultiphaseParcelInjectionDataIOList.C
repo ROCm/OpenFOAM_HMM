@@ -29,7 +29,11 @@ License
 
 namespace Foam
 {
-    defineTemplateTypeNameAndDebug(IOList<reactingMultiphaseParcelInjectionData>, 0);
+    defineTemplateTypeNameAndDebug
+    (
+        IOList<reactingMultiphaseParcelInjectionData>,
+        0
+    );
 }
 
 
