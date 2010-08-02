@@ -141,7 +141,7 @@ public:
         inline const chemistrySolver<CompType, ThermoType>& solver() const;
 
         //- dc/dt = omega, rate of change in concentration, for each species
-        virtual scalarField omega
+        virtual tmp<scalarField> omega
         (
             const scalarField& c,
             const scalar T,
