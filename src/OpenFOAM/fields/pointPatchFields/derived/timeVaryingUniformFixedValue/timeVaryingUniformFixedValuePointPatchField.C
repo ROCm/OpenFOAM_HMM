@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -118,7 +118,10 @@ void Foam::timeVaryingUniformFixedValuePointPatchField<Type>::updateCoeffs()
 
 
 template<class Type>
-void Foam::timeVaryingUniformFixedValuePointPatchField<Type>::write(Ostream& os) const
+void Foam::timeVaryingUniformFixedValuePointPatchField<Type>::write
+(
+    Ostream& os
+) const
 {
     fixedValuePointPatchField<Type>::write(os);
     timeSeries_.write(os);

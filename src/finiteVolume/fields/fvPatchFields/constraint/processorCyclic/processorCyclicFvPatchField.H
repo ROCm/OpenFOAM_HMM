@@ -46,7 +46,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class processorCyclicFvPatch Declaration
+                    Class processorCyclicFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -63,8 +63,12 @@ class processorCyclicFvPatchField
 
     // Private Member Functions
 
-//        //- Get other patchfield
-//        const coupledFvPatchField<Type>& patchField(const label patchID) const;
+        // //- Get other patchfield
+        // const coupledFvPatchField<Type>& patchField
+        // (
+        //     const label patchID
+        // ) const;
+
 public:
 
     //- Runtime type information
@@ -261,7 +265,10 @@ public:
 //                const label start
 //            ) const
 //            {
-//                notImplemented("processorCyclicFvPatchField::initEvaluate(..)");
+//                notImplemented
+//                (
+//                    "processorCyclicFvPatchField::initEvaluate(..)"
+//                );
 //            }
 //
 //            //- Evaluate the patch field.
@@ -292,7 +299,8 @@ public:
 //            {
 //                notImplemented
 //                (
-//                    "processorCyclicFvPatchField::initInterfaceMatrixUpdate(..)"
+//                    "processorCyclicFvPatchField::"
+//                    "initInterfaceMatrixUpdate(..)"
 //                );
 //            }
 //

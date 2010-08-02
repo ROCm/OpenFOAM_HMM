@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,7 +72,12 @@ bool triSurface::stitchTriangles
                 tri.region()
             );
 
-            if ((newTri[0] != newTri[1]) && (newTri[0] != newTri[2]) && (newTri[1] != newTri[2]))
+            if
+            (
+                (newTri[0] != newTri[1])
+             && (newTri[0] != newTri[2])
+             && (newTri[1] != newTri[2])
+            )
             {
                 operator[](newTriangleI++) = newTri;
             }

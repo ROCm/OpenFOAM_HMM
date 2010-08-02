@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,11 +64,23 @@ SlicedGeometricField<vector, fvsPatchField, slicedFvsPatchField, surfaceMesh>
     slicedSurfaceVectorField;
 
 typedef
-SlicedGeometricField<sphericalTensor, fvsPatchField, slicedFvsPatchField, surfaceMesh>
+SlicedGeometricField
+<
+    sphericalTensor,
+    fvsPatchField,
+    slicedFvsPatchField,
+    surfaceMesh
+>
     slicedSurfaceSphericalTensorField;
 
 typedef
-SlicedGeometricField<symmTensor, fvsPatchField, slicedFvsPatchField, surfaceMesh>
+SlicedGeometricField
+<
+    symmTensor,
+    fvsPatchField,
+    slicedFvsPatchField,
+    surfaceMesh
+>
     slicedSurfaceSymmTensorField;
 
 typedef

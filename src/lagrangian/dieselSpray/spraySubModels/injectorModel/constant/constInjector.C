@@ -129,7 +129,8 @@ Foam::vector Foam::constInjector::direction
         v  (alpha)
     */
 
-    scalar angle = rndGen_.scalar01()*sprayAngle_[n]*constant::mathematical::pi/360.0;
+    scalar angle =
+        rndGen_.scalar01()*sprayAngle_[n]*constant::mathematical::pi/360.0;
     scalar alpha = sin(angle);
     scalar dcorr = cos(angle);
 
@@ -143,7 +144,10 @@ Foam::vector Foam::constInjector::direction
         scalar reduce = 0.01;
         // correct beta if this is a 2D run
         // map it onto the 'angleOfWedge'
-        beta *= (1.0 - 2.0*reduce)*0.5*sm_.angleOfWedge()/constant::mathematical::pi;
+        beta *=
+            (1.0 - 2.0*reduce)
+           *0.5*sm_.angleOfWedge()
+           /constant::mathematical::pi;
         beta += reduce*sm_.angleOfWedge();
 
         normal =

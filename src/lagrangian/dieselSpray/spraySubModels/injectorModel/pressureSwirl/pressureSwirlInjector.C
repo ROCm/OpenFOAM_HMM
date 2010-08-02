@@ -145,7 +145,10 @@ Foam::vector Foam::pressureSwirlInjector::direction
         // correct beta if this is a 2D run
         // map it onto the 'angleOfWedge'
 
-        beta *= (1.0 - 2.0*reduce)*sm_.angleOfWedge()/(constant::mathematical::twoPi);
+        beta *=
+            (1.0 - 2.0*reduce)
+           *sm_.angleOfWedge()
+          /(constant::mathematical::twoPi);
         beta += reduce*sm_.angleOfWedge();
         normal =
             alpha

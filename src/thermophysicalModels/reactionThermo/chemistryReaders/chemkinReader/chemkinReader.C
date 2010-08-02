@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,7 +82,11 @@ void Foam::chemkinReader::initReactionKeywordTable()
 {
     reactionKeywordTable_.insert("M", thirdBodyReactionType);
     reactionKeywordTable_.insert("LOW", unimolecularFallOffReactionType);
-    reactionKeywordTable_.insert("HIGH", chemicallyActivatedBimolecularReactionType);
+    reactionKeywordTable_.insert
+    (
+        "HIGH",
+        chemicallyActivatedBimolecularReactionType
+    );
     reactionKeywordTable_.insert("TROE", TroeReactionType);
     reactionKeywordTable_.insert("SRI", SRIReactionType);
     reactionKeywordTable_.insert("LT", LandauTellerReactionType);

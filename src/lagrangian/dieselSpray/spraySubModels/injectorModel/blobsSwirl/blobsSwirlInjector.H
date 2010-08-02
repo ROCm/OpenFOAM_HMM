@@ -30,7 +30,8 @@ Description
     Accurate description in:
     @verbatim
         Z. Han, S. Parrish, P.V. Farrell, R.D. Reitz
-        "Modeling Atomization Processes Of Pressure Swirl Hollow-Cone Fuel Sprays"
+        "Modeling Atomization Processes Of Pressure
+        Swirl Hollow-Cone Fuel Sprays"
         Atomization and Sprays, vol. 7, pp. 663-684, 1997
     @endverbatim
     and

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -283,7 +283,7 @@ bool Foam::layerAdditionRemoval::changeTopology() const
     {
         if (debug)
         {
-            Pout << "First step. No addition/removal" << endl;
+            Pout<< "First step. No addition/removal" << endl;
         }
 
         // No topological changes allowed before first mesh motion
@@ -414,11 +414,11 @@ void Foam::layerAdditionRemoval::updateMesh(const mapPolyMesh&)
 
         if (pointsPairingPtr_ || facesPairingPtr_)
         {
-            Pout << "Pointers set." << endl;
+            Pout<< "Pointers set." << endl;
         }
         else
         {
-            Pout << "Pointers not set." << endl;
+            Pout<< "Pointers not set." << endl;
         }
     }
 

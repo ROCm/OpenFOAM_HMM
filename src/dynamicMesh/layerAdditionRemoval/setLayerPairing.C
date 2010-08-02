@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -88,8 +88,10 @@ bool Foam::layerAdditionRemoval::setLayerPairing() const
 
     facesPairingPtr_ = new labelList(mf.size(), -1);
     labelList& ftc = *facesPairingPtr_;
-//     Pout << "meshPoints: " << meshPoints << nl
-//          << "localPoints: " << mesh.faceZones()[faceZoneID_.index()]().localPoints() << endl;
+    // Pout<< "meshPoints: " << meshPoints << nl
+    //      << "localPoints: "
+    //     << mesh.faceZones()[faceZoneID_.index()]().localPoints()
+    //     << endl;
 
     // For all faces, create the mapping
     label nPointErrors = 0;
@@ -153,7 +155,7 @@ bool Foam::layerAdditionRemoval::setLayerPairing() const
                 }
             }
         }
-//         Pout << "ptc: " << ptc << endl;
+//         Pout<< "ptc: " << ptc << endl;
     }
 
     reduce(nPointErrors, sumOp<label>());
@@ -218,7 +220,7 @@ void Foam::layerAdditionRemoval::modifyMotionPoints
 
     if (debug)
     {
-        Pout << "No motion point adjustment" << endl;
+        Pout<< "No motion point adjustment" << endl;
     }
 }
 

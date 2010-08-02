@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -172,7 +172,8 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
                 faceFaceTable.find(contents[masterI])();
 
             SLList<label>::iterator nbrsIter = curNbrs.begin();
-            SLList<SLList<label> >::iterator faceFacesIter = curFaceFaces.begin();
+            SLList<SLList<label> >::iterator faceFacesIter =
+                curFaceFaces.begin();
 
             for
             (
@@ -209,7 +210,8 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
 
             SLList<label>::iterator nbrsIter = curNbrs.begin();
 
-            SLList<SLList<label> >::iterator faceFacesIter = curFaceFaces.begin();
+            SLList<SLList<label> >::iterator faceFacesIter =
+                curFaceFaces.begin();
 
             for
             (

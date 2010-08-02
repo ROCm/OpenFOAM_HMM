@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -123,7 +123,8 @@ private:
             Ostream& os
         );
 
-        //- Debug:Dump selected edges to stream. Renumbers vertices to local ordering.
+        //- Debug:Dump selected edges to stream. Renumbers vertices to
+        //  local ordering.
         static void writeLocalOBJ
         (
             const pointField& points,

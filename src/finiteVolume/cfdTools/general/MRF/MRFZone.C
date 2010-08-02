@@ -247,7 +247,8 @@ Foam::MRFZone::MRFZone(const fvMesh& mesh, Istream& is)
         WarningIn("MRFZone(const fvMesh&, Istream&)")
             << "Ignoring entry 'patches'\n"
             << "    By default all patches within the rotating region rotate.\n"
-            << "    Optionally supply excluded patches using 'nonRotatingPatches'."
+            << "    Optionally supply excluded patches "
+            << "using 'nonRotatingPatches'."
             << endl;
     }
 

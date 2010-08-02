@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -143,14 +143,14 @@ void Foam::layerAdditionRemoval::addCellLayer
             );
     }
 
-// Pout << "mp: " << mp << " addedPoints: " << addedPoints << endl;
+    // Pout<< "mp: " << mp << " addedPoints: " << addedPoints << endl;
     // Create the cells
 
     const labelList& mc =
         mesh.faceZones()[faceZoneID_.index()].masterCells();
     const labelList& sc =
         mesh.faceZones()[faceZoneID_.index()].slaveCells();
-// Pout << "mc: " << mc << " sc: " << sc << endl;
+    // Pout<< "mc: " << mc << " sc: " << sc << endl;
     const labelList& mf = mesh.faceZones()[faceZoneID_.index()];
     const boolList& mfFlip = mesh.faceZones()[faceZoneID_.index()].flipMap();
 
@@ -228,13 +228,18 @@ void Foam::layerAdditionRemoval::addCellLayer
             )
         );
 
-// Pout << "adding face: " << newFace << " own: " << mc[faceI] << " nei: " << addedCells[faceI] << endl;
+        // Pout<< "adding face: " << newFace
+        //     << " own: " << mc[faceI]
+        //     << " nei: " << addedCells[faceI]
+        //     << endl;
     }
 
     // Modify the faces from the master zone for the new neighbour
 
     const faceList& faces = mesh.faces();
-// Pout << "mfFlip: " << mfFlip << endl;
+
+    // Pout<< "mfFlip: " << mfFlip << endl;
+
     forAll(mf, faceI)
     {
         const label curfaceID = mf[faceI];
@@ -258,7 +263,10 @@ void Foam::layerAdditionRemoval::addCellLayer
                     mfFlip[faceI]                // face flip in zone
                 )
             );
-// Pout << "Modifying a boundary face. Face: " << curfaceID << " flip: " << mfFlip[faceI] << endl;
+
+            // Pout<< "Modifying a boundary face. Face: " << curfaceID
+            //     << " flip: " << mfFlip[faceI]
+            //     << endl;
         }
         // If slave cell is owner, the face remains the same (but with
         // a new neighbour - the newly created cell).  Otherwise, the
@@ -282,7 +290,10 @@ void Foam::layerAdditionRemoval::addCellLayer
                 )
             );
 
-// Pout << "modify face, no flip " << curfaceID << " own: " << own[curfaceID] << " nei: " << addedCells[faceI] << endl;
+            // Pout<< "modify face, no flip " << curfaceID
+            //     << " own: " << own[curfaceID]
+            //     << " nei: " << addedCells[faceI]
+            //     << endl;
         }
         else
         {
@@ -302,7 +313,11 @@ void Foam::layerAdditionRemoval::addCellLayer
                     !mfFlip[faceI]                  // face flip in zone
                 )
             );
-// Pout << "modify face, with flip " << curfaceID << " own: " << own[curfaceID] << " nei: " << addedCells[faceI] << endl;
+
+            // Pout<< "modify face, with flip " << curfaceID
+            //     << " own: " << own[curfaceID]
+            //     << " nei: " << addedCells[faceI]
+            //     << endl;
         }
     }
 
@@ -344,7 +359,10 @@ void Foam::layerAdditionRemoval::addCellLayer
             )
         );
 
-// Pout << "Add internal face off edge: " << newFace << " own: " << addedCells[edgeFaces[curEdgeID][0]] << " nei: " << addedCells[edgeFaces[curEdgeID][1]] << endl;
+        // Pout<< "Add internal face off edge: " << newFace
+        //     << " own: " << addedCells[edgeFaces[curEdgeID][0]]
+        //     << " nei: " << addedCells[edgeFaces[curEdgeID][1]]
+        //     << endl;
     }
 
     // Prepare creation of faces from boundary edges.
@@ -426,7 +444,11 @@ void Foam::layerAdditionRemoval::addCellLayer
                 false                                  // zone face flip
             )
         );
-// Pout << "add boundary face: " << newFace << " into patch " << patchID << " own: " << addedCells[edgeFaces[curEdgeID][0]] << endl;
+
+        // Pout<< "add boundary face: " << newFace
+        //     << " into patch " << patchID
+        //     << " own: " << addedCells[edgeFaces[curEdgeID][0]]
+        //     << endl;
     }
 
     // Modify the remaining faces of the master cells to reconnect to the new
@@ -536,7 +558,13 @@ void Foam::layerAdditionRemoval::addCellLayer
                         modifiedFaceZoneFlip    // face flip in zone
                     )
                 );
-// Pout << "modifying stick-out face. Internal Old face: " << oldFace << " new face: " << newFace << " own: " << own[curFaceID] << " nei: " << nei[curFaceID] << endl;
+
+                // Pout<< "modifying stick-out face. Internal Old face: "
+                //     << oldFace
+                //     << " new face: " << newFace
+                //     << " own: " << own[curFaceID]
+                //     << " nei: " << nei[curFaceID]
+                //     << endl;
             }
             else
             {
@@ -549,13 +577,21 @@ void Foam::layerAdditionRemoval::addCellLayer
                         own[curFaceID],         // owner
                         -1,                     // neighbour
                         false,                  // face flip
-                        mesh.boundaryMesh().whichPatch(curFaceID), // patch for face
+                        mesh.boundaryMesh().whichPatch(curFaceID),
+                                                // patch for face
                         false,                  // remove from zone
                         modifiedFaceZone,       // zone for face
                         modifiedFaceZoneFlip    // face flip in zone
                     )
                 );
-// Pout << "modifying stick-out face. Boundary Old face: " << oldFace << " new face: " << newFace << " own: " << own[curFaceID] << " patch: " << mesh.boundaryMesh().whichPatch(curFaceID) << endl;
+
+                // Pout<< "modifying stick-out face. Boundary Old face: "
+                //     << oldFace
+                //     << " new face: " << newFace
+                //     << " own: " << own[curFaceID]
+                //     << " patch: "
+                //     << mesh.boundaryMesh().whichPatch(curFaceID)
+                //     << endl;
             }
         }
     }

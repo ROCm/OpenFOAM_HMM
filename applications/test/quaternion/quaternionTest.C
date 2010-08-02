@@ -29,8 +29,11 @@ int main()
 
     Info<< "tr.transform(v) " << tr.transform(v) << endl;
 
-    Info<< "(septernion(vector(0, -1, 0))*q*septernion(vector(0, 1, 0))).transform(v) "
-        << (septernion(vector(0, -1, 0))*q*septernion(vector(0, 1, 0))).transform(v)
+    Info<< "(septernion(vector(0, -1, 0))*q*septernion(vector(0, 1, 0)))"
+        << ".transform(v) "
+        <<  (septernion(vector(0, -1, 0))
+           *q
+           *septernion(vector(0, 1, 0))).transform(v)
         << endl;
 
     return 0;

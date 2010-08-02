@@ -112,7 +112,10 @@ Note
 
     @verbatim
       <?xml version="1.0"?>
-      <VTKFile type="Collection" version="0.1" byte_order="LittleEndian" compressor="vtkZLibDataCompressor">
+      <VTKFile type="Collection"
+           version="0.1"
+           byte_order="LittleEndian"
+           compressor="vtkZLibDataCompressor">
         <Collection>
           <DataSet timestep="50" file="pitzDaily_2.vtu"/>
           <DataSet timestep="100" file="pitzDaily_3.vtu"/>

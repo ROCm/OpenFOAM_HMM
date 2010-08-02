@@ -56,7 +56,10 @@ bool Foam::explicitSource::read(const dictionary& dict)
     if (basicSource::read(dict))
     {
         const dictionary& sourceDict = dict.subDict(name());
-        const dictionary& subDictCoeffs = sourceDict.subDict(typeName + "Coeffs");
+        const dictionary& subDictCoeffs = sourceDict.subDict
+        (
+            typeName + "Coeffs"
+        );
         setFieldData(subDictCoeffs.subDict("fieldData"));
         return true;
     }

@@ -250,11 +250,11 @@ void d2vec_part_quick_a ( int n, double a[], int *l, int *r )
 
   return;
 }
-//*******************************************************************************
+//******************************************************************************
 
 void d2vec_permute ( int n, double a[], int p[] )
 
-//*******************************************************************************
+//******************************************************************************
 //
 //  Purpose:
 //
@@ -383,7 +383,8 @@ int *d2vec_sort_heap_index_a ( int n, double a[] )
 //
 //  Purpose:
 //
-//    D2VEC_SORT_HEAP_INDEX_A does an indexed heap ascending sort of an R2 vector.
+//    D2VEC_SORT_HEAP_INDEX_A does an indexed heap ascending sort of
+//    an R2 vector.
 //
 //  Discussion:
 //
@@ -864,7 +865,8 @@ void dmat_uniform ( int m, int n, double b, double c, int *seed, double r[] )
 //
 //  Purpose:
 //
-//    DMAT_UNIFORM fills a double precision array with scaled pseudorandom values.
+//    DMAT_UNIFORM fills a double precision array with scaled
+//    pseudorandom values.
 //
 //  Discussion:
 //
@@ -983,8 +985,9 @@ int dtris2 ( int point_num, double point_xy[], int *tri_num,
 //
 //    Input, int POINT_NUM, the number of vertices.
 //
-//    Input/output, double POINT_XY[POINT_NUM*2], the coordinates of the vertices.
-//    On output, the vertices have been sorted into dictionary order.
+//    Input/output, double POINT_XY[POINT_NUM*2], the coordinates of
+//    the vertices.  On output, the vertices have been sorted into
+//    dictionary order.
 //
 //    Output, int *TRI_NUM, the number of triangles in the triangulation;
 //    TRI_NUM is equal to 2*POINT_NUM - NB - 2, where NB is the number
@@ -1703,11 +1706,11 @@ int i_sign ( int i )
   }
 
 }
-//*******************************************************************************
+//******************************************************************************
 
 int i_wrap ( int ival, int ilo, int ihi )
 
-//*******************************************************************************
+//******************************************************************************
 //
 //  Purpose:
 //
@@ -3008,7 +3011,8 @@ double *triangle_circumcenter_2d ( double t[] )
 //
 //    Input, double T[2*3], the triangle vertices.
 //
-//    Output, double *X, *Y, the coordinates of the circumcenter of the triangle.
+//    Output, double *X, *Y, the coordinates of the circumcenter of
+//    the triangle.
 //
 {
 # define DIM_NUM 2
@@ -3043,8 +3047,8 @@ double *triangle_circumcenter_2d ( double t[] )
 }
 //******************************************************************************
 
-bool triangulation_plot_eps ( const char *file_out_name, int g_num, double g_xy[],
-  int tri_num, int nod_tri[] )
+bool triangulation_plot_eps ( const char *file_out_name, int g_num,
+  double g_xy[], int tri_num, int nod_tri[] )
 
 //******************************************************************************
 //

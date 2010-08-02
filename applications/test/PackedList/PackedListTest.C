@@ -53,12 +53,15 @@ inline void reportInfo()
         << " utilization: " << (nBits * offset) << nl;
 
     Info<< " Masking:" << nl
-        << "  shift << " << unsigned(nBits * offset) << nl
-        << "  shift >> " << unsigned((sizeof(unsigned)*CHAR_BIT) - nBits * offset)
+        << "  shift << "
+        << unsigned(nBits * offset) << nl
+        << "  shift >> "
+        << unsigned((sizeof(unsigned)*CHAR_BIT) - nBits * offset)
         << nl;
 
     hex(Info);
-    Info<< "   maskLower: " << PackedList<nBits>::maskLower(PackedList<nBits>::packing())
+    Info<< "   maskLower: "
+        << PackedList<nBits>::maskLower(PackedList<nBits>::packing())
         << nl
         << "      useSHL: " << useSHL << nl
         << "      useSHR: " << useSHR << nl;

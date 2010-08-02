@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,7 +77,11 @@ inline scalar thirdBodyArrheniusReactionRate::operator()
 }
 
 
-inline Ostream& operator<<(Ostream& os, const thirdBodyArrheniusReactionRate& arr)
+inline Ostream& operator<<
+(
+    Ostream& os,
+    const thirdBodyArrheniusReactionRate& arr
+)
 {
     os  << token::BEGIN_LIST
         << static_cast<const ArrheniusReactionRate&>(arr)

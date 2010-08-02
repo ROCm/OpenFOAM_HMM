@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -167,13 +167,13 @@ public:
         //- Expand initial tildes and all occurences of environment variables
         //  Expansion includes:
         //  -# environment variables
-        //     - "$VAR", "${VAR}"
+        //    - "$VAR", "${VAR}"
         //  -# current directory
-        //     - leading "./" : the current directory
+        //    - leading "./" : the current directory
         //  -# tilde expansion
-        //     - leading "~/" : home directory
-        //     - leading "~user" : home directory for specified user
-        //     - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
+        //    - leading "~/" : home directory
+        //    - leading "~user" : home directory for specified user
+        //    - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
         //
         //  @sa
         //  Foam::findEtcFile

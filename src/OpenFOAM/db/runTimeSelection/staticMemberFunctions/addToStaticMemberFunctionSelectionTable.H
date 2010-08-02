@@ -39,9 +39,10 @@ Description
 (baseType,thisType,memberFunction,argNames,lookup,functionPtr)                \
                                                                               \
     /* Add the thisType memberFunction to the table, find by lookup name */   \
-    baseType::add##memberFunction##argNames##StaticMemberFunctionToTable<thisType>  \
-    add_##lookup##_##thisType##memberFunction##argNames##StaticMemberFunctionTo##baseType##Table_\
-    (#lookup, functionPtr)
+    baseType::add##memberFunction##argNames##                                 \
+    StaticMemberFunctionToTable<thisType>                                     \
+    add_##lookup##_##thisType##memberFunction##argNames##                     \
+    StaticMemberFunctionTo##baseType##Table_(#lookup, functionPtr)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

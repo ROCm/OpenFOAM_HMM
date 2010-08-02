@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,8 @@ namespace Foam
 
 typedef UniformDimensionedField<scalar> uniformDimensionedScalarField;
 typedef UniformDimensionedField<vector> uniformDimensionedVectorField;
-typedef UniformDimensionedField<sphericalTensor> uniformDimensionedSphericalTensorField;
+typedef UniformDimensionedField<sphericalTensor>
+    uniformDimensionedSphericalTensorField;
 typedef UniformDimensionedField<symmTensor> uniformDimensionedSymmTensorField;
 typedef UniformDimensionedField<tensor> uniformDimensionedTensorField;
 

@@ -31,7 +31,8 @@ Description
     @verbatim
         @ARTICLE{MA_Maitland_Smith,
         author = {{Maitland}, G.~C. and {Smith}, E.~B.},
-        title = {A simplified representation of intermolecular potential energy},
+        title = {A simplified representation of
+        intermolecular potential energy},
         journal = {Chemical Physics Letters},
         year = 1973,
         month = oct,
@@ -45,7 +46,8 @@ Description
     Parameters for other monoatomics from:
     @verbatim
         @BOOK{MD_Maitland_Rigby_Smith_Wakeham,
-        AUTHOR =       {Geoffrey C. Maitland and Maurice Rigby and E. Brian Smith and William A. Wakeham},
+        AUTHOR =       {Geoffrey C. Maitland and Maurice Rigby and
+        E. Brian Smith and William A. Wakeham},
         TITLE =        {Intermolecular Forces: Their Origin and Determination},
         PUBLISHER =    {Oxford University Press},
         YEAR =         {1981}

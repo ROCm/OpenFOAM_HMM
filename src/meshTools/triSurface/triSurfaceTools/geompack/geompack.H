@@ -30,8 +30,8 @@ void ivec_heap_d ( int n, int a[] );
 int *ivec_indicator ( int n );
 void ivec_sort_heap_a ( int n, int a[] );
 void ivec_sorted_unique ( int n, int a[], int *nuniq );
-int lrline ( double xu, double yu, double xv1, double yv1, double xv2, double yv2,
-  double dv );
+int lrline ( double xu, double yu, double xv1, double yv1, double xv2,
+  double yv2, double dv );
 bool perm_check ( int n, int p[] );
 void perm_inv ( int n, int p[] );
 int *points_delaunay_naive_2d ( int n, double p[], int *ntri );
@@ -42,10 +42,9 @@ int swapec ( int i, int *top, int *btri, int *bedg, int point_num,
 void timestamp ( void );
 char *timestring ( void );
 double *triangle_circumcenter_2d ( double t[] );
-bool triangulation_plot_eps ( const char *file_out_name, int g_num, double g_xy[],
-  int tri_num, int nod_tri[] );
+bool triangulation_plot_eps ( const char *file_out_name,
+  int g_num, double g_xy[], int tri_num, int nod_tri[] );
 void triangulation_print ( int point_num, double xc[], int tri_num,
   int tri_vert[], int tri_nabe[] );
 void vbedg ( double x, double y, int point_num, double point_xy[], int tri_num,
   int tri_vert[], int tri_nabe[], int *ltri, int *ledg, int *rtri, int *redg );
-

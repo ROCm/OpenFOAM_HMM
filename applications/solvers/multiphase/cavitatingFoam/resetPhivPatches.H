@@ -1,6 +1,11 @@
-surfaceScalarField::GeometricBoundaryField& phivPatches = phiv.boundaryField();
-const volVectorField::GeometricBoundaryField& Upatches = U.boundaryField();
-const surfaceVectorField::GeometricBoundaryField& SfPatches = mesh.Sf().boundaryField();
+surfaceScalarField::GeometricBoundaryField& phivPatches =
+    phiv.boundaryField();
+
+const volVectorField::GeometricBoundaryField& Upatches =
+    U.boundaryField();
+
+const surfaceVectorField::GeometricBoundaryField& SfPatches =
+    mesh.Sf().boundaryField();
 
 forAll(phivPatches, patchI)
 {

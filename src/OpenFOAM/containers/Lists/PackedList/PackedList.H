@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -298,8 +298,12 @@ public:
 
         // Ostream operator
 
-//          // Write PackedList to Ostream.
-//          friend Ostream& operator<< <nBits> (Ostream&, const PackedList<nBits>&);
+         // // Write PackedList to Ostream.
+         // friend Ostream& operator<< <nBits>
+         // (
+         //     Ostream&,
+         //     const PackedList<nBits>&
+         // );
 
 
     // Iterators and helpers
@@ -372,7 +376,8 @@ public:
             public iteratorBase
         {
 
-            //- Disallow copy constructor from const_iterator - violates const-ness!
+            //- Disallow copy constructor from const_iterator -
+            //  violates const-ness!
             iterator(const const_iterator&);
 
             //- Disallow assignment from const_iterator - violates const-ness!

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -292,7 +292,10 @@ Foam::label Foam::fvMeshDistribute::findNonEmptyPatch() const
 //
 //    if (polyPatches.findPatchID(patchName) != -1)
 //    {
-//        FatalErrorIn("fvMeshDistribute::addProcPatch(const word&, const label)")
+//        FatalErrorIn
+//        (
+//            "fvMeshDistribute::addProcPatch(const word&, const label)"
+//        )
 //            << "Cannot create patch " << patchName << " since already exists."
 //            << nl
 //            << "Current patch names:" << polyPatches.names()
@@ -352,7 +355,8 @@ Foam::label Foam::fvMeshDistribute::addPatch(polyPatch* patchPtr)
         FatalErrorIn("fvMeshDistribute::addPatch(polyPatch*)")
             << "Cannot create patch " << patchPtr->name()
             << " since already exists." << nl
-            << "Current patch names:" << polyPatches.names() << exit(FatalError);
+            << "Current patch names:" << polyPatches.names()
+            << exit(FatalError);
     }
 
 
@@ -1668,7 +1672,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     // ?    sourceProc = proc
     // ?    sourceNewNbrProc = distribution of coupled cell
     // ?    sourceFace = face (on owner side)
-    // ?    sourcePatch = patchID 
+    // ?    sourcePatch = patchID
     // processor-cyclic boundary:
     //     sourceProc = proc (on owner side)
     //     sourceNewNbrProc = distribution of coupled cell

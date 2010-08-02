@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -192,13 +192,14 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
                 motionDict,
                 errorFaces
             );
-            //if (checkEdgeConnectivity)
-            //{
+
+            // if (checkEdgeConnectivity)
+            // {
             //    Info<< "Checking edge-face connectivity (duplicate faces"
             //        << " or non-consecutive shared vertices)" << endl;
-            //
+
             //    label nOldSize = errorFaces.size();
-            //
+
             //    hasErrors =
             //        mesh.checkFaceFaces
             //        (
@@ -206,12 +207,16 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
             //            &errorFaces
             //        )
             //     || hasErrors;
-            //
+
             //    Info<< "Detected additional "
-            //        << returnReduce(errorFaces.size()-nOldSize, sumOp<label>())
+            //        <<  returnReduce
+            //            (
+            //                errorFaces.size() - nOldSize,
+            //                sumOp<label>()
+            //            )
             //        << " faces with illegal face-face connectivity"
             //        << endl;
-            //}
+            // }
 
             if (!hasErrors)
             {

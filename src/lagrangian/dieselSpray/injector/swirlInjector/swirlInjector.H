@@ -103,13 +103,20 @@ private:
         //- Return the fraction of the total injected liquid
         scalar fractionOfInjection(const scalar time) const;
 
-/*
-        //- Return the average injection velocity
-        scalar averageInjectionVelocityTime(const scalar liquidDensity) const;
 
-        //- Return the instantaneous injection velocity
-        scalar injectionVelocity(const scalar, const scalar liquidDensity) const;
-*/
+        // //- Return the average injection velocity
+        // scalar averageInjectionVelocityTime
+        // (
+        //     const scalar liquidDensity
+        // ) const;
+
+        // //- Return the instantaneous injection velocity
+        // scalar injectionVelocity
+        // (
+        //     const scalar,
+        //     const scalar liquidDensity
+        // ) const;
+
 
 
 public:

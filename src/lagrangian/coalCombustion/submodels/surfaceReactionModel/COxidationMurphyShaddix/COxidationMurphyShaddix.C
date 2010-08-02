@@ -163,7 +163,7 @@ Foam::scalar Foam::COxidationMurphyShaddix<CloudType>::calculate
 
     if (debug)
     {
-        Pout << "qCsLim = " << qCsLim << endl;
+        Pout<< "qCsLim = " << qCsLim << endl;
     }
 
     label iter = 0;

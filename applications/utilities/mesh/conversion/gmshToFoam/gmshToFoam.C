@@ -236,7 +236,9 @@ void storeCellInZone
 // Reads mesh format
 scalar readMeshFormat(IFstream& inFile)
 {
-    Info<< "Starting to read mesh format at line " << inFile.lineNumber() << endl;
+    Info<< "Starting to read mesh format at line "
+        << inFile.lineNumber()
+        << endl;
 
     string line;
     inFile.getLine(line);
@@ -1086,4 +1088,3 @@ int main(int argc, char *argv[])
 
 
 // ************************************************************************* //
-
