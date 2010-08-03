@@ -105,6 +105,8 @@ maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
         (
             vectorField("value", dict, p.size())
         );
+        refValue() = vectorField("refValue", dict, p.size());
+        valueFraction() = scalarField("valueFraction", dict, p.size());
     }
     else
     {
@@ -188,10 +190,8 @@ void maxwellSlipUFvPatchVectorField::write(Ostream& os) const
         << thermalCreep_ << token::END_STATEMENT << nl;
     os.writeKeyword("curvature") << curvature_ << token::END_STATEMENT << nl;
 
-    os.writeKeyword("refValue")
-        << refValue() << token::END_STATEMENT << nl;
-    os.writeKeyword("valueFraction")
-        << valueFraction() << token::END_STATEMENT << nl;
+    refValue().writeEntry("refValue", os);
+    valueFraction().writeEntry("valueFraction", os);
 
     writeEntry("value", os);
 }
