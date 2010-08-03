@@ -28,8 +28,7 @@ License
 #include "mathematicalConstants.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
-#include "surfaceFields.H"
-#include "fvCFD.H"
+#include "fvcGrad.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
