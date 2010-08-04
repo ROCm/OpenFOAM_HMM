@@ -35,6 +35,8 @@ Description
 #ifndef polyPatchID_H
 #define polyPatchID_H
 
+#include "keyType.H"
+#include "labelList.H"
 #include "polyBoundaryMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -45,11 +47,11 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 class polyPatchID;
-Ostream& operator<<(Ostream& os, const polyPatchID& p);
+Ostream& operator<<(Ostream&, const polyPatchID&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class polyPatchID Declaration
+                         Class polyPatchID Declaration
 \*---------------------------------------------------------------------------*/
 
 class polyPatchID
@@ -57,10 +59,10 @@ class polyPatchID
     // Private data
 
         //- Patch name
-        word name_;
+        keyType key_;
 
-        //- Patch index
-        label index_;
+        //- Patch indices
+        labelList indices_;
 
 
 public:
@@ -68,18 +70,21 @@ public:
     // Constructors
 
         //- Construct from name
-        polyPatchID(const word& name, const polyBoundaryMesh& bm)
+        polyPatchID(const keyType& key, const polyBoundaryMesh& bm)
         :
-            name_(name),
-            index_(bm.findPatchID(name))
+            key_(key),
+            index_(bm.findIndices(key_))
         {}
 
         //- Construct from Istream
         polyPatchID(Istream& is, const polyBoundaryMesh& bm)
         :
-            name_(is),
-            index_(bm.findPatchID(name_))
+            key_(is),
+            index_(bm.findIndices(key_))
         {}
+
+
+    // Destructor - default
 
 
     // Member Functions
@@ -87,21 +92,27 @@ public:
         // Access
 
             //- Return name
-            const word& name() const
+            const keyType& name() const
             {
-                return name_;
+                return key_;
             }
 
-            //- Return index
+            //- Return indices of matching patches
+            const labelList& indices() const
+            {
+                return indices_;
+            }
+
+            //- Return index of first matching patch
             label index() const
             {
-                return index_;
+                return indices_.empty() ? -1 : indices_[0];
             }
 
             //- Has the patch been found
             bool active() const
             {
-                return index_ > -1;
+                return !indices_.empty();
             }
 
 
@@ -110,25 +121,30 @@ public:
             //- Update
             void update(const polyBoundaryMesh& bm)
             {
-                index_ = bm.findPatchID(name_);
+                indices_ = bm.findIndices(key_);
             }
 
 
     // Ostream Operator
 
-        friend Ostream& operator<<(Ostream& os, const polyPatchID& p)
-        {
-            os  << token::BEGIN_LIST
-                << p.name_ << token::SPACE
-                << p.index_
-                << token::END_LIST;
+        friend Ostream& operator<<(Ostream&, const polyPatchID&);
 
-            // Check state of Ostream
-            os.check("Ostream& operator<<(Ostream&, const polyPatchID&)");
-
-            return os;
-        }
 };
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Ostream& operator<<(Ostream& os, const polyPatchID& p)
+{
+    os  << token::BEGIN_LIST
+        << p.name() << token::SPACE << p.index()
+        << token::END_LIST;
+
+    // Check state of Ostream
+    os.check("Ostream& operator<<(Ostream&, const polyPatchID&)");
+
+    return os;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

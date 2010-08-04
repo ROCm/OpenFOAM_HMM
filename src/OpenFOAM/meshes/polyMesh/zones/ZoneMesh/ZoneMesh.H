@@ -132,17 +132,17 @@ public:
         //- Return a list of zone names
         wordList names() const;
 
-        //- Find zone index given a name
-        label findZoneID(const word& zoneName) const;
-
         //- Return zone indices for all matches
         labelList findIndices(const keyType&) const;
 
         //- Return zone index for the first match, return -1 if not found
         label findIndex(const keyType&) const;
 
-        //- Mark all elements that are in the matching zones
-        PackedBoolList inZone(const keyType&) const;
+        //- Find zone index given a name
+        label findZoneID(const word& zoneName) const;
+
+        //- Mark cells that match the zone specification
+        PackedBoolList findMatching(const keyType&) const;
 
         //- Clear addressing
         void clearAddressing();

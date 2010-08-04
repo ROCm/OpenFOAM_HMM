@@ -134,19 +134,15 @@ bool Foam::sampledPlane::update()
 
     sampledSurface::clearGeom();
 
-    PackedBoolList cellsInZone;
-    if (zoneKey_.size())
-    {
-        cellsInZone = mesh().cellZones().inZone(zoneKey_);
-    }
+    labelList selectedCells = mesh().cellZones().findMatching(zoneKey_).used();
 
-    if (cellsInZone.empty())
+    if (selectedCells.empty())
     {
         reCut(mesh(), true);    // always triangulate. Note:Make option?
     }
     else
     {
-        reCut(mesh(), true, cellsInZone.used()());
+        reCut(mesh(), true, selectedCells);
     }
 
     if (debug)

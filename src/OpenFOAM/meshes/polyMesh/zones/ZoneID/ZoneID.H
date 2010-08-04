@@ -35,8 +35,8 @@ Description
 #ifndef ZoneID_H
 #define ZoneID_H
 
-#include "label.H"
-#include "word.H"
+#include "keyType.H"
+#include "labelList.H"
 #include "polyMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -63,10 +63,10 @@ class ZoneID
     // Private data
 
         //- Zone name
-        word name_;
+        keyType key_;
 
-        //- Zone index
-        label index_;
+        //- Zone indices
+        labelList indices_;
 
 
 public:
@@ -74,17 +74,17 @@ public:
     // Constructors
 
         //- Construct from name
-        ZoneID(const word& name, const ZoneMesh<ZoneType, polyMesh>& zm)
+        ZoneID(const keyType& key, const ZoneMesh<ZoneType, polyMesh>& zm)
         :
-            name_(name),
-            index_(zm.findZoneID(name))
+            key_(key),
+            indices_(zm.findIndices(key_))
         {}
 
         //- Construct from Istream
         ZoneID(Istream& is, const ZoneMesh<ZoneType, polyMesh>& zm)
         :
-            name_(is),
-            index_(zm.findZoneID(name_))
+            key_(is),
+            indices_(zm.findIndices(key_))
         {}
 
 
@@ -96,21 +96,27 @@ public:
         // Access
 
             //- Return name
-            const word& name() const
+            const keyType& name() const
             {
-                return name_;
+                return key_;
             }
 
-            //- Return index
+            //- Return indices of matching zones
+            const labelList& indices() const
+            {
+                return indices_;
+            }
+
+            //- Return index of first matching zone
             label index() const
             {
-                return index_;
+                return indices_.empty() ? -1 : indices_[0];
             }
 
             //- Has the zone been found
             bool active() const
             {
-                return index_ > -1;
+                return !indices_.empty();
             }
 
 
@@ -119,30 +125,24 @@ public:
             //- Update
             void update(const ZoneMesh<ZoneType, polyMesh>& zm)
             {
-                index_ = zm.findZoneID(name_);
+                indices_ = zm.findIndices(key_);
             }
 
 
     // IOstream Operators
 
         friend Ostream& operator<< <ZoneType>
-        (
-            Ostream& os, const ZoneID<ZoneType>& p
-        );
+        (Ostream&, const ZoneID<ZoneType>&);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class ZoneType>
-Ostream& operator<<
-(
-    Ostream& os, const ZoneID<ZoneType>& p
-)
+Ostream& operator<<(Ostream& os, const ZoneID<ZoneType>& p)
 {
     os  << token::BEGIN_LIST
-        << p.name_ << token::SPACE
-        << p.index_
+        << p.name() << token::SPACE << p.index()
         << token::END_LIST;
 
     // Check state of Ostream

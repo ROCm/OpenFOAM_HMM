@@ -31,6 +31,7 @@ License
 #include "PstreamBuffers.H"
 #include "lduSchedule.H"
 #include "globalMeshData.H"
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -413,6 +414,66 @@ Foam::wordList Foam::polyBoundaryMesh::physicalTypes() const
 }
 
 
+Foam::labelList Foam::polyBoundaryMesh::findIndices(const keyType& key) const
+{
+    labelList indices;
+
+    if (!key.empty())
+    {
+        if (key.isPattern())
+        {
+            indices = findStrings(key, this->names());
+        }
+        else
+        {
+            indices.setSize(this->size());
+            label nFound = 0;
+            forAll(*this, i)
+            {
+                if (key == operator[](i).name())
+                {
+                    indices[nFound++] = i;
+                }
+            }
+            indices.setSize(nFound);
+        }
+    }
+
+    return indices;
+}
+
+
+Foam::label Foam::polyBoundaryMesh::findIndex(const keyType& key) const
+{
+    if (!key.empty())
+    {
+        if (key.isPattern())
+        {
+            labelList indices = this->findIndices(key);
+
+            // return first element
+            if (!indices.empty())
+            {
+                return indices[0];
+            }
+        }
+        else
+        {
+            forAll(*this, i)
+            {
+                if (key == operator[](i).name())
+                {
+                    return i;
+                }
+            }
+        }
+    }
+
+    // not found
+    return -1;
+}
+
+
 Foam::label Foam::polyBoundaryMesh::findPatchID(const word& patchName) const
 {
     const polyPatchList& patches = *this;
@@ -444,7 +505,11 @@ Foam::label Foam::polyBoundaryMesh::whichPatch(const label faceIndex) const
     // with patch start labels.
     // If the face is internal, return -1;
     // if it is off the end of the list, abort
-    if (faceIndex >= mesh().nFaces())
+    if (faceIndex < mesh().nInternalFaces())
+    {
+        return -1;
+    }
+    else if (faceIndex >= mesh().nFaces())
     {
         FatalErrorIn
         (
@@ -453,10 +518,6 @@ Foam::label Foam::polyBoundaryMesh::whichPatch(const label faceIndex) const
             << abort(FatalError);
     }
 
-    if (faceIndex < mesh().nInternalFaces())
-    {
-        return -1;
-    }
 
     forAll(*this, patchI)
     {
@@ -578,7 +639,7 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
 
     // Have every processor check but only master print error.
 
-    for (label procI = 1; procI < allNames.size(); procI++)
+    for (label procI = 1; procI < allNames.size(); ++procI)
     {
         if
         (
