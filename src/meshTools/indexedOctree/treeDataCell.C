@@ -64,19 +64,7 @@ Foam::treeBoundBox Foam::treeDataCell::calcCellBb(const label cellI) const
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-// Construct from components
-Foam::treeDataCell::treeDataCell
-(
-    const bool cacheBb,
-    const primitiveMesh& mesh,
-    const labelList& cellLabels
-)
-:
-    mesh_(mesh),
-    cellLabels_(cellLabels),
-    cacheBb_(cacheBb)
+void Foam::treeDataCell::update()
 {
     if (cacheBb_)
     {
@@ -90,6 +78,38 @@ Foam::treeDataCell::treeDataCell
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::treeDataCell::treeDataCell
+(
+    const bool cacheBb,
+    const primitiveMesh& mesh,
+    const unallocLabelList& cellLabels
+)
+:
+    mesh_(mesh),
+    cellLabels_(cellLabels),
+    cacheBb_(cacheBb)
+{
+    update();
+}
+
+
+Foam::treeDataCell::treeDataCell
+(
+    const bool cacheBb,
+    const primitiveMesh& mesh,
+    const Xfer<labelList>& cellLabels
+)
+:
+    mesh_(mesh),
+    cellLabels_(cellLabels),
+    cacheBb_(cacheBb)
+{
+    update();
+}
+
+
 Foam::treeDataCell::treeDataCell
 (
     const bool cacheBb,
@@ -100,15 +120,7 @@ Foam::treeDataCell::treeDataCell
     cellLabels_(identity(mesh_.nCells())),
     cacheBb_(cacheBb)
 {
-    if (cacheBb_)
-    {
-        bbs_.setSize(cellLabels_.size());
-
-        forAll(cellLabels_, i)
-        {
-            bbs_[i] = calcCellBb(cellLabels_[i]);
-        }
-    }
+    update();
 }
 
 
@@ -159,7 +171,7 @@ bool Foam::treeDataCell::contains
 // nearestPoint.
 void Foam::treeDataCell::findNearest
 (
-    const labelList& indices,
+    const unallocLabelList& indices,
     const point& sample,
 
     scalar& nearestDistSqr,

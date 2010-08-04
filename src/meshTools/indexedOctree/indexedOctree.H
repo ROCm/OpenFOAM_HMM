@@ -164,8 +164,8 @@ private:
 
         // Construction
 
-            //- Split list of indices into 8 bins according to where they are in
-            //  relation to mid.
+            //- Split list of indices into 8 bins
+            //  according to where they are in relation to mid.
             void divide
             (
                 const labelList& indices,
@@ -173,8 +173,8 @@ private:
                 labelListList& result
             ) const;
 
-            //- Subdivide the contents node at position contentI. Appends to
-            //  contents.
+            //- Subdivide the contents node at position contentI.
+            //  Appends to contents.
             node divide
             (
                 const treeBoundBox& bb,

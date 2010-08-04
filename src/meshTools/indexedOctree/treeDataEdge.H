@@ -81,6 +81,9 @@ class treeDataEdge
         //- Calculate edge bounding box
         treeBoundBox calcBb(const label edgeI) const;
 
+        //- Initialise all member data
+        void update();
+
 public:
 
     // Declare name of the class and its debug switch
@@ -95,7 +98,17 @@ public:
             const bool cacheBb,
             const edgeList& edges,
             const pointField& points,
-            const labelList& edgeLabels
+            const unallocLabelList& edgeLabels
+        );
+
+        //- Construct from selected edges, transferring contents.
+        // !Holds references to edges and points
+        treeDataEdge
+        (
+            const bool cacheBb,
+            const edgeList& edges,
+            const pointField& points,
+            const Xfer<labelList>& edgeLabels
         );
 
 
@@ -139,7 +152,7 @@ public:
             //  Returns actual point and distance (squared)
             void findNearest
             (
-                const labelList& indices,
+                const unallocLabelList& indices,
                 const point& sample,
 
                 scalar& nearestDistSqr,
@@ -151,7 +164,7 @@ public:
             //  Returns point and distance (squared)
             void findNearest
             (
-                const labelList& indices,
+                const unallocLabelList& indices,
                 const linePointRef& ln,
 
                 treeBoundBox& tightest,
