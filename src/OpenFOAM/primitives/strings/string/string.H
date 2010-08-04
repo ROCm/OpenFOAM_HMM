@@ -82,6 +82,8 @@ public:
 
         static const char* const typeName;
         static int debug;
+
+        //- An empty string
         static const string null;
 
 
@@ -142,6 +144,9 @@ public:
         //- Return a String with quoted meta-characters from the given string
         template<class String>
         static inline string quotemeta(const string&, const char quote='\\');
+
+        //- True when strings match literally
+        inline bool match(const std::string&) const;
 
         //- Avoid masking the normal std::string replace
         using std::string::replace;

@@ -52,8 +52,8 @@ $(strings)/word/word.C
 $(strings)/word/wordIO.C
 $(strings)/fileName/fileName.C
 $(strings)/fileName/fileNameIO.C
-$(strings)/keyType/keyTypeIO.C
-$(strings)/wordRe/wordReIO.C
+$(strings)/keyType/keyType.C
+$(strings)/wordRe/wordRe.C
 
 primitives/hashes/Hasher/Hasher.C
 

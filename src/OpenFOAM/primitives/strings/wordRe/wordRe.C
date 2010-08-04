@@ -27,7 +27,12 @@ License
 #include "IOstreams.H"
 #include "InfoProxy.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const Foam::wordRe Foam::wordRe::null;
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::wordRe::wordRe(Istream& is)
 :
@@ -37,6 +42,8 @@ Foam::wordRe::wordRe(Istream& is)
     is >> *this;
 }
 
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Istream& Foam::operator>>(Istream& is, wordRe& w)
 {
