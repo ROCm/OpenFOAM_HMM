@@ -329,7 +329,7 @@ $(cellShape)/cellShapeEqual.C
 $(cellShape)/cellShapeIO.C
 $(cellShape)/cellShapeIOList.C
 
-meshes/patchIdentifier/patchIdentifier.C
+meshes/Identifiers/patch/patchIdentifier.C
 
 polyMesh = meshes/polyMesh
 

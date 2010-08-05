@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,22 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::polyPatchID
+    Foam::DynamicID
 
 Description
-    A class holds the data needed to identify a patch in a dynamic mesh.
+    A class that holds the data needed to identify things (zones, patches)
+    in a dynamic mesh.
 
-    The patch is identified by name and its index in the boundary mesh
-    is updated if the mesh has changed.
+    The thing is identified by name.
+    Its indices are updated if the mesh has changed.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef polyPatchID_H
-#define polyPatchID_H
+#ifndef DynamicID_H
+#define DynamicID_H
 
 #include "keyType.H"
 #include "labelList.H"
-#include "polyBoundaryMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,23 +45,24 @@ namespace Foam
 {
 
 // Forward declaration of friend functions and operators
+template<class> class DynamicID;
 
-class polyPatchID;
-Ostream& operator<<(Ostream&, const polyPatchID&);
-
+template<class ObjectType>
+Ostream& operator<<(Ostream&, const DynamicID<ObjectType>&);
 
 /*---------------------------------------------------------------------------*\
-                         Class polyPatchID Declaration
+                          Class DynamicID Declaration
 \*---------------------------------------------------------------------------*/
 
-class polyPatchID
+template<class ObjectType>
+class DynamicID
 {
     // Private data
 
-        //- Patch name
+        //- Zone name
         keyType key_;
 
-        //- Patch indices
+        //- Zone indices
         labelList indices_;
 
 
@@ -70,17 +71,17 @@ public:
     // Constructors
 
         //- Construct from name
-        polyPatchID(const keyType& key, const polyBoundaryMesh& bm)
+        DynamicID(const keyType& key, const ObjectType& obj)
         :
             key_(key),
-            index_(bm.findIndices(key_))
+            indices_(obj.findIndices(key_))
         {}
 
         //- Construct from Istream
-        polyPatchID(Istream& is, const polyBoundaryMesh& bm)
+        DynamicID(Istream& is, const ObjectType& obj)
         :
             key_(is),
-            index_(bm.findIndices(key_))
+            indices_(obj.findIndices(key_))
         {}
 
 
@@ -97,19 +98,19 @@ public:
                 return key_;
             }
 
-            //- Return indices of matching patches
+            //- Return indices of matching zones
             const labelList& indices() const
             {
                 return indices_;
             }
 
-            //- Return index of first matching patch
+            //- Return index of first matching zone
             label index() const
             {
                 return indices_.empty() ? -1 : indices_[0];
             }
 
-            //- Has the patch been found
+            //- Has the zone been found
             bool active() const
             {
                 return !indices_.empty();
@@ -119,29 +120,30 @@ public:
         // Edit
 
             //- Update
-            void update(const polyBoundaryMesh& bm)
+            void update(const ObjectType& obj)
             {
-                indices_ = bm.findIndices(key_);
+                indices_ = obj.findIndices(key_);
             }
 
 
-    // Ostream Operator
+    // IOstream Operators
 
-        friend Ostream& operator<<(Ostream&, const polyPatchID&);
-
+        friend Ostream& operator<< <ObjectType>
+        (Ostream&, const DynamicID<ObjectType>&);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const polyPatchID& p)
+template<class ObjectType>
+Ostream& operator<<(Ostream& os, const DynamicID<ObjectType>& dynId)
 {
     os  << token::BEGIN_LIST
-        << p.name() << token::SPACE << p.index()
+        << dynId.name() << token::SPACE << dynId.index()
         << token::END_LIST;
 
     // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const polyPatchID&)");
+    os.check("Ostream& operator<<(Ostream&, const DynamicID<ObjectType>&)");
 
     return os;
 }
