@@ -68,6 +68,9 @@ class pointFieldReconstructor
         //- Point patch addressing
         labelListListList patchPointAddressing_;
 
+        //- Number of fields reconstructed
+        label nReconstructed_;
+
 
     // Private Member Functions
 
@@ -129,6 +132,12 @@ public:
 
 
     // Member Functions
+
+        //- Return number of fields reconstructed
+        label nReconstructed() const
+        {
+            return nReconstructed_;
+        }
 
         //- Reconstruct field
         template<class Type>
