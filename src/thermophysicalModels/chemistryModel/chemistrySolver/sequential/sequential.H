@@ -59,12 +59,17 @@ class sequential
 {
     // Private data
 
+        //- Coefficients dictionary
         dictionary coeffsDict_;
+
 
         // Model constants
 
+            //- Chemistry time scale
             scalar cTauChem_;
-            Switch equil_;
+
+            //- Equilibrium rate limiter flag (on/off)
+            Switch eqRateLimiter_;
 
 
 public:
@@ -74,7 +79,6 @@ public:
 
 
     // Constructors
-
 
         //- Construct from components
         sequential

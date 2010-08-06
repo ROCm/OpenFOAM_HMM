@@ -57,12 +57,17 @@ class EulerImplicit
 {
     // Private data
 
+        //- Coefficients dictionary
         dictionary coeffsDict_;
+
 
         // Model constants
 
+            //- Chemistry timescale
             scalar cTauChem_;
-            Switch equil_;
+
+            //- Equilibrium rate limiter flag (on/off)
+            Switch eqRateLimiter_;
 
 
 public:

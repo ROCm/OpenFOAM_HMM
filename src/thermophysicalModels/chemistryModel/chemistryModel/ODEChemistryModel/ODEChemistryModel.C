@@ -151,7 +151,7 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::omega
 ) const
 {
     scalarField c2(nSpecie_, 0.0);
-    for (label i=0; i<nSpecie_; i++)
+    for (label i = 0; i < nSpecie_; i++)
     {
         c2[i] = max(0.0, c[i]);
     }
@@ -169,7 +169,7 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::omega
     lRef = R.lhs()[slRef].index;
 
     pf = kf;
-    for (label s=1; s<Nl; s++)
+    for (label s = 1; s < Nl; s++)
     {
         const label si = R.lhs()[s].index;
 
@@ -212,7 +212,7 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::omega
 
     // find the matrix element and element position for the rhs
     pr = kr;
-    for (label s=1; s<Nr; s++)
+    for (label s = 1; s < Nr; s++)
     {
         const label si = R.rhs()[s].index;
         if (c[si] < c[rRef])
@@ -270,7 +270,7 @@ void Foam::ODEChemistryModel<CompType, ThermoType>::derivatives
     // dT/dt = ...
     scalar rho = 0.0;
     scalar cSum = 0.0;
-    for (label i=0; i<nSpecie_; i++)
+    for (label i = 0; i < nSpecie_; i++)
     {
         const scalar W = specieThermo_[i].W();
         cSum += c[i];
@@ -287,7 +287,7 @@ void Foam::ODEChemistryModel<CompType, ThermoType>::derivatives
     cp /= mw;
 
     scalar dT = 0.0;
-    for (label i=0; i<nSpecie_; i++)
+    for (label i = 0; i < nSpecie_; i++)
     {
         const scalar hi = specieThermo_[i].h(T);
         dT += hi*dcdt[i];
@@ -552,6 +552,7 @@ Foam::ODEChemistryModel<CompType, ThermoType>::Sh() const
         )
     );
 
+
     if (this->chemistry_)
     {
         scalarField& Sh = tSh();
@@ -560,7 +561,7 @@ Foam::ODEChemistryModel<CompType, ThermoType>::Sh() const
         {
             forAll(Sh, cellI)
             {
-                scalar hi = specieThermo_[i].Hc();
+                const scalar hi = specieThermo_[i].Hc();
                 Sh[cellI] -= hi*RR_[i][cellI];
             }
         }
@@ -734,7 +735,7 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
             t += dt;
 
             // update the temperature
-            scalar cTot = sum(c);
+            const scalar cTot = sum(c);
             ThermoType mixture(0.0*specieThermo_[0]);
             for (label i=0; i<nSpecie_; i++)
             {
