@@ -47,7 +47,7 @@ const char * const Foam::cellZone::labelsName = "cellLabels";
 Foam::cellZone::cellZone
 (
     const word& name,
-    const labelList& addr,
+    const unallocLabelList& addr,
     const label index,
     const cellZoneMesh& zm
 )
@@ -86,7 +86,7 @@ Foam::cellZone::cellZone
 Foam::cellZone::cellZone
 (
     const cellZone& cz,
-    const labelList& addr,
+    const unallocLabelList& addr,
     const label index,
     const cellZoneMesh& zm
 )
@@ -154,7 +154,14 @@ void Foam::cellZone::operator=(const cellZone& zn)
 }
 
 
-void Foam::cellZone::operator=(const labelList& addr)
+void Foam::cellZone::operator=(const unallocLabelList& addr)
+{
+    clearAddressing();
+    labelList::operator=(addr);
+}
+
+
+void Foam::cellZone::operator=(const Xfer<labelList>& addr)
 {
     clearAddressing();
     labelList::operator=(addr);

@@ -25,7 +25,7 @@ Class
     Foam::ZoneMesh
 
 Description
-    List of mesh zones
+    A list of mesh zones.
 
 SourceFiles
     ZoneMesh.C
@@ -37,8 +37,9 @@ SourceFiles
 
 #include "List.H"
 #include "regIOobject.H"
-#include "HashSet.H"
 #include "pointFieldsFwd.H"
+#include "Map.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -139,6 +140,9 @@ public:
 
         //- Return zone index for the first match, return -1 if not found
         label findIndex(const keyType&) const;
+
+        //- Mark all elements that are in the matching zones
+        PackedBoolList inZone(const keyType&) const;
 
         //- Clear addressing
         void clearAddressing();

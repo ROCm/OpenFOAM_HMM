@@ -303,6 +303,24 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findIndex
 
 
 template<class ZoneType, class MeshType>
+Foam::PackedBoolList Foam::ZoneMesh<ZoneType, MeshType>::inZone
+(
+    const keyType& key
+) const
+{
+    PackedBoolList lst;
+
+    const labelList indices = this->findIndices(key);
+    forAll(indices, i)
+    {
+        lst |= static_cast<const labelList&>(this->operator[](indices[i]));
+    }
+
+    return lst;
+}
+
+
+template<class ZoneType, class MeshType>
 Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findZoneID
 (
     const word& zoneName

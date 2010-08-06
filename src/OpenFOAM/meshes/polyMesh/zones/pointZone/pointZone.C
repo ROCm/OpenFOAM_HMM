@@ -46,7 +46,7 @@ const char* const Foam::pointZone::labelsName = "pointLabels";
 Foam::pointZone::pointZone
 (
     const word& name,
-    const labelList& addr,
+    const unallocLabelList& addr,
     const label index,
     const pointZoneMesh& zm
 )
@@ -85,7 +85,7 @@ Foam::pointZone::pointZone
 Foam::pointZone::pointZone
 (
     const pointZone& pz,
-    const labelList& addr,
+    const unallocLabelList& addr,
     const label index,
     const pointZoneMesh& zm
 )
@@ -154,7 +154,14 @@ void Foam::pointZone::operator=(const pointZone& zn)
 }
 
 
-void Foam::pointZone::operator=(const labelList& addr)
+void Foam::pointZone::operator=(const unallocLabelList& addr)
+{
+    clearAddressing();
+    labelList::operator=(addr);
+}
+
+
+void Foam::pointZone::operator=(const Xfer<labelList>& addr)
 {
     clearAddressing();
     labelList::operator=(addr);
