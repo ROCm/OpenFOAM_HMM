@@ -29,6 +29,8 @@ License
 #include "psiChemistryModel.H"
 #include "rhoChemistryModel.H"
 
+#include "noChemistrySolver.H"
+
 #include "EulerImplicit.H"
 #include "ode.H"
 #include "sequential.H"
@@ -38,11 +40,23 @@ License
 namespace Foam
 {
     makeChemistrySolver(psiChemistryModel, gasThermoPhysics)
+    makeChemistrySolverType
+    (
+        noChemistrySolver,
+        psiChemistryModel,
+        gasThermoPhysics
+    )
     makeChemistrySolverType(EulerImplicit, psiChemistryModel, gasThermoPhysics)
     makeChemistrySolverType(ode, psiChemistryModel, gasThermoPhysics)
     makeChemistrySolverType(sequential, psiChemistryModel, gasThermoPhysics)
 
     makeChemistrySolver(psiChemistryModel, icoPoly8ThermoPhysics)
+    makeChemistrySolverType
+    (
+        noChemistrySolver,
+        psiChemistryModel,
+        icoPoly8ThermoPhysics
+    )
     makeChemistrySolverType
     (
         EulerImplicit,
@@ -58,11 +72,23 @@ namespace Foam
     )
 
     makeChemistrySolver(rhoChemistryModel, gasThermoPhysics)
+    makeChemistrySolverType
+    (
+        noChemistrySolver,
+        rhoChemistryModel,
+        gasThermoPhysics
+    )
     makeChemistrySolverType(EulerImplicit, rhoChemistryModel, gasThermoPhysics)
     makeChemistrySolverType(ode, rhoChemistryModel, gasThermoPhysics)
     makeChemistrySolverType(sequential, rhoChemistryModel, gasThermoPhysics)
 
     makeChemistrySolver(rhoChemistryModel, icoPoly8ThermoPhysics)
+    makeChemistrySolverType
+    (
+        noChemistrySolver,
+        rhoChemistryModel,
+        icoPoly8ThermoPhysics
+    )
     makeChemistrySolverType
     (
         EulerImplicit,
