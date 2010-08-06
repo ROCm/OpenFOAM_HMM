@@ -39,7 +39,8 @@ Foam::pointFieldReconstructor::pointFieldReconstructor
     procMeshes_(procMeshes),
     pointProcAddressing_(pointProcAddressing),
     boundaryProcAddressing_(boundaryProcAddressing),
-    patchPointAddressing_(procMeshes.size())
+    patchPointAddressing_(procMeshes.size()),
+    nReconstructed_(0)
 {
     // Inverse-addressing of the patch point labels.
     labelList pointMap(mesh_.size(), -1);

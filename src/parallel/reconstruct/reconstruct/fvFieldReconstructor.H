@@ -71,6 +71,9 @@ class fvFieldReconstructor
         //- List of processor boundary addressing lists
         const PtrList<labelIOList>& boundaryProcAddressing_;
 
+        //- Number of fields reconstructed
+        label nReconstructed_;
+
 
     // Private Member Functions
 
@@ -134,20 +137,33 @@ public:
 
     // Member Functions
 
+        //- Return number of fields reconstructed
+        label nReconstructed() const
+        {
+            return nReconstructed_;
+        }
+
+        //- Reconstruct volume internal field
+        template<class Type>
+        tmp<DimensionedField<Type, volMesh> >
+        reconstructFvVolumeInternalField(const IOobject& fieldIoObject);
+
         //- Reconstruct volume field
         template<class Type>
         tmp<GeometricField<Type, fvPatchField, volMesh> >
-        reconstructFvVolumeField
-        (
-            const IOobject& fieldIoObject
-        );
+        reconstructFvVolumeField(const IOobject& fieldIoObject);
 
         //- Reconstruct surface field
         template<class Type>
         tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
-        reconstructFvSurfaceField
+        reconstructFvSurfaceField(const IOobject& fieldIoObject);
+
+        //- Reconstruct and write all/selected volume internal fields
+        template<class Type>
+        void reconstructFvVolumeInternalFields
         (
-            const IOobject& fieldIoObject
+            const IOobjectList& objects,
+            const HashSet<word>& selectedFields
         );
 
         //- Reconstruct and write all/selected volume fields
@@ -158,7 +174,7 @@ public:
             const HashSet<word>& selectedFields
         );
 
-        //- Reconstruct and write all/selected volume fields
+        //- Reconstruct and write all/selected surface fields
         template<class Type>
         void reconstructFvSurfaceFields
         (

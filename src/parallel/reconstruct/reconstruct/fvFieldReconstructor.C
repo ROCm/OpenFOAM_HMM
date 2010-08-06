@@ -40,7 +40,8 @@ Foam::fvFieldReconstructor::fvFieldReconstructor
     procMeshes_(procMeshes),
     faceProcAddressing_(faceProcAddressing),
     cellProcAddressing_(cellProcAddressing),
-    boundaryProcAddressing_(boundaryProcAddressing)
+    boundaryProcAddressing_(boundaryProcAddressing),
+    nReconstructed_(0)
 {}
 
 
