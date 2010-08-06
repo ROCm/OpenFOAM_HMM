@@ -296,6 +296,7 @@ int main(int argc, char *argv[])
     );
 
     #include "addOverwriteOption.H"
+    #include "addRegionOption.H"
     argList::addBoolOption
     (
         "dict",
@@ -305,7 +306,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     runTime.functionObjects().off();
-    #include "createPolyMesh.H"
+    #include "createNamedPolyMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
     printEdgeStats(mesh);
