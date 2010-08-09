@@ -24,6 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PackedList.H"
+#include "IOstreams.H"
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -37,6 +39,16 @@ Foam::PackedList<nBits>::PackedList(const label size, const unsigned int val)
     {
         operator=(val);
     }
+}
+
+
+template<unsigned nBits>
+Foam::PackedList<nBits>::PackedList(Istream& is)
+:
+    StorageList(),
+    size_(0)
+{
+    is  >> *this;
 }
 
 
@@ -287,6 +299,199 @@ Foam::PackedList<nBits>::operator=(const UList<label>& lst)
         set(i, lst[i]);
     }
     return *this;
+}
+
+
+// * * * * * * * * * * * * * *  Friend Operators * * * * * * * * * * * * * * //
+
+template<unsigned nBits>
+Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    PackedList<nBits>& lst
+)
+{
+    lst.clear();
+    is.fatalCheck("operator>>(Istream&, PackedList<nBits>&)");
+
+    token firstTok(is);
+    is.fatalCheck
+    (
+        "operator>>(Istream&, PackedList<nBits>&) : reading first token"
+    );
+
+    if (firstTok.isLabel())
+    {
+        const label sz = firstTok.labelToken();
+
+        // Set list length to that read
+        lst.setSize(sz);
+
+        {
+            // Read beginning of contents
+            const char delimiter = is.readBeginList("List");
+
+            if (sz)
+            {
+                unsigned int val;
+
+                if (delimiter == token::BEGIN_LIST)
+                {
+                    for (register label i=0; i<sz; ++i)
+                    {
+                        is  >> val;
+
+                        if (val > lst.max_value())
+                        {
+                            FatalIOErrorIn
+                            (
+                                "operator>>(Istream&, PackedList<nBits>&)",
+                                is
+                            )
+                                << "out-of-range value: "
+                                << val << " > " << lst.max_value()
+                                << exit(FatalIOError);
+                        }
+
+                        is.fatalCheck
+                        (
+                            "operator>>(Istream&, PackedList<nBits>&) : "
+                            "reading entry"
+                        );
+                    }
+                }
+                else
+                {
+                    is  >> val;
+
+                    is.fatalCheck
+                    (
+                        "operator>>(Istream&, PackedList<nBits>&) : "
+                        "reading the single entry"
+                    );
+
+                    if (val > lst.max_value())
+                    {
+                        FatalIOErrorIn
+                        (
+                            "operator>>(Istream&, PackedList<nBits>&)",
+                            is
+                        )
+                            << "out-of-range value: "
+                            << val << " > " << lst.max_value()
+                            << exit(FatalIOError);
+                    }
+
+                    // assign for all entries
+                    lst = val;
+                }
+            }
+
+            // Read end of contents
+            is.readEndList("PackedList<nBits>");
+        }
+    }
+    else if (firstTok.isPunctuation())
+    {
+        if (firstTok.pToken() != token::BEGIN_LIST)
+        {
+            FatalIOErrorIn
+            (
+                "operator>>(Istream&, PackedList<nBits>&)",
+                is
+            )
+                << "incorrect first token, expected '(', found "
+                << firstTok.info()
+                << exit(FatalIOError);
+        }
+
+        token nextTok(is);
+        is.fatalCheck("operator>>(Istream&, PackedList<nBits>&)");
+
+        unsigned int val;
+
+        while
+        (
+            !(nextTok.isPunctuation() && nextTok.pToken() == token::END_LIST)
+        )
+        {
+            is.putBack(nextTok);
+            is  >> val;
+            lst.append(val);
+
+            if (val > lst.max_value())
+            {
+                FatalIOErrorIn
+                (
+                    "operator>>(Istream&, PackedList<nBits>&)",
+                    is
+                )
+                    << "out-of-range value: "
+                    << val << " > " << lst.max_value()
+                    << exit(FatalIOError);
+            }
+
+            is  >> nextTok;
+            is.fatalCheck("operator>>(Istream&, PackedList<nBits>&)");
+        }
+    }
+    else
+    {
+        FatalIOErrorIn
+        (
+            "operator>>(Istream&, PackedList<nBits>&)",
+            is
+        )
+            << "incorrect first token, expected <int> or '(', found "
+            << firstTok.info()
+            << exit(FatalIOError);
+    }
+
+    return is;
+}
+
+
+template<unsigned nBits>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    PackedList<nBits>& lst
+)
+{
+    if (lst.size() < 11)
+    {
+        // Write size and start delimiter
+        os  << lst.size() << token::BEGIN_LIST;
+
+        // Write contents
+        forAll(lst, i)
+        {
+            if (i)
+            {
+                os  << token::SPACE;
+            }
+            os  << lst[i];
+        }
+
+        // Write end delimiter
+        os  << token::END_LIST;
+    }
+    else
+    {
+        // Write size and start delimiter
+        os  << nl << lst.size() << nl << token::BEGIN_LIST;
+
+        // Write contents
+        forAll(lst, i)
+        {
+            os  << nl << lst[i];
+        }
+
+        // Write end delimiter
+        os  << nl << token::END_LIST << nl;
+    }
+
+    return os;
 }
 
 

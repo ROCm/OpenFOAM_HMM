@@ -30,6 +30,7 @@ Description
 #include "uLabel.H"
 #include "IOstreams.H"
 #include "PackedBoolList.H"
+#include "IStringStream.H"
 
 using namespace Foam;
 
@@ -45,7 +46,7 @@ int main(int argc, char *argv[])
         list1[i] = i % 2;
     }
 
-    Info<< "\nalternative bit pattern\n";
+    Info<< "\nalternating bit pattern\n";
     list1.print(Info, true);
 
     PackedBoolList list2 = ~list1;
@@ -116,6 +117,39 @@ int main(int argc, char *argv[])
         PackedBoolList list3 = list1;
         (list3 -= list2Labels).print(Info, true);
     }
+
+
+    PackedBoolList list4
+    (
+        IStringStream
+        (
+            "(AB 05 10 0F F0)"
+        )()
+    );
+
+    Info<< "\ntest Istream constructor\n";
+
+    list4.print(Info, true);
+    Info<< list4 << " indices: " << list4.used()() <<endl;
+
+    Info<< "\nassign from labelList\n";
+    list4 = labelList
+    (
+        IStringStream
+        (
+            "(0 1 2 3 12 13 14 15 17 19 20 21)"
+        )()
+    );
+
+    list4.print(Info, true);
+    Info<< list4 << " indices: " << list4.used()() <<endl;
+
+    Info<< "\nread from Istream\n";
+    IStringStream("(0f 3a)")() >> list4;
+
+    list4.print(Info, true);
+    Info<< list4 << " indices: " << list4.used()() <<endl;
+
 
     return 0;
 }

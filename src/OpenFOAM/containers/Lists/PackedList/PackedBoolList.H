@@ -27,6 +27,31 @@ Class
 Description
     A bit-packed bool list
 
+Note
+    The input/output format differs from that of Foam::PackedBoolList in
+    that it is also packed. The input/output is always byte-wise, with
+    the lowest bytes first.
+
+    Thus this label sequence
+    @code
+        0 1 2 3 12 13 14 15 17 19 20 21
+    @endcode
+    which has this bit representation:
+    @code
+        ..........111-1-1111--------1111
+    @endcode
+    and this internal representation
+    @code
+        0x003AF00F
+    @endcode
+    would be read/written in one of these formats:
+    @code
+        22(0f f0 3a)
+        22(0ff03a)
+    @endcode
+    Whitespace can be used to separate byte values, but must not appear
+    within a byte itself.
+
 SourceFiles
     PackedBoolListI.H
     PackedBoolList.C
@@ -47,6 +72,16 @@ SeeAlso
 namespace Foam
 {
 
+// Forward declaration of classes
+class Istream;
+class Ostream;
+
+// Forward declaration of friend functions and operators
+class PackedBoolList;
+Istream& operator>>(Istream&, PackedBoolList&);
+Ostream& operator<<(Ostream&, const PackedBoolList&);
+
+
 /*---------------------------------------------------------------------------*\
                        Class PackedBoolList Declaration
 \*---------------------------------------------------------------------------*/
@@ -55,7 +90,6 @@ class PackedBoolList
 :
     public PackedList<1>
 {
-
     // Private Member Functions
 
         //- Modulo is everything that is not in lst
@@ -72,13 +106,15 @@ class PackedBoolList
         template<class LabelListType>
         label unsetFromIndices(const LabelListType& indices);
 
-
 public:
 
     // Constructors
 
         //- Construct null
         inline PackedBoolList();
+
+        //- Construct from Istream
+        PackedBoolList(Istream&);
 
         //- Construct with given size, initializes list to 0
         explicit inline PackedBoolList(const label size);
@@ -217,6 +253,10 @@ public:
             //- Remove entries from this list
             inline PackedBoolList& operator-=(const UIndirectList<label>&);
 
+    // IOstream Operators
+
+        friend Istream& operator>>(Istream&, PackedBoolList&);
+        friend Ostream& operator<<(Ostream&, const PackedBoolList&);
 };
 
 

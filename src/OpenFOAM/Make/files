@@ -67,7 +67,7 @@ containers/HashTables/HashTable/HashTableCore.C
 containers/HashTables/StaticHashTable/StaticHashTableCore.C
 containers/Lists/SortableList/ParSortableListName.C
 containers/Lists/PackedList/PackedListName.C
-containers/Lists/PackedList/APackedBoolList.C
+containers/Lists/PackedList/PackedBoolList.C
 containers/Lists/ListOps/ListOps.C
 containers/LinkedLists/linkTypes/SLListBase/SLListBase.C
 containers/LinkedLists/linkTypes/DLListBase/DLListBase.C

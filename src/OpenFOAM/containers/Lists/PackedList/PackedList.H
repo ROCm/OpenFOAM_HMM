@@ -96,11 +96,17 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes
+class Istream;
+class Ostream;
+
 // Forward declaration of friend functions and operators
 template<unsigned nBits> class PackedList;
 
-// template<unsigned nBits>
-// Ostream& operator<<(Ostream&, const PackedList<nBits>&);
+template<unsigned nBits>
+Istream& operator>>(Istream&, PackedList<nBits>&);
+template<unsigned nBits>
+Ostream& operator<<(Ostream&, const PackedList<nBits>&);
 
 
 /*---------------------------------------------------------------------------*\
@@ -179,6 +185,9 @@ public:
 
         //- Construct with given size and value for all elements
         PackedList(const label size, const unsigned val);
+
+        //- Construct from Istream
+        PackedList(Istream&);
 
         //- Copy constructor
         inline PackedList(const PackedList<nBits>&);
@@ -515,6 +524,21 @@ public:
 
         //- const_iterator set to beyond the end of the PackedList
         inline const_iterator end() const;
+
+
+    // IOstream Operators
+
+        friend Istream& operator>> <nBits>
+        (
+            Istream&,
+            PackedList<nBits>&
+        );
+
+        friend Ostream& operator<< <nBits>
+        (
+            Ostream&,
+            const PackedList<nBits>&
+        );
 
 };
 

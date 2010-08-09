@@ -135,7 +135,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
                 << exit(FatalIOError);
         }
 
-        // Putback the openning bracket
+        // Putback the opening bracket
         is.putBack(firstToken);
 
         // Now read as a singly-linked list
