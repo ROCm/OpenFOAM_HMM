@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  1.7.0                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -29,7 +29,7 @@ deltaT          0.001;
 
 writeControl    adjustableRunTime;
 
-writeInterval   0.05;
+writeInterval   0.01;
 
 purgeWrite      0;
 
@@ -37,17 +37,18 @@ writeFormat     ascii;
 
 writePrecision  6;
 
-writeCompression off;
+writeCompression uncompressed;
 
 timeFormat      general;
 
 timePrecision   6;
 
-runTimeModifiable true;
+runTimeModifiable yes;
 
 adjustTimeStep  yes;
 
 maxCo           0.5;
+maxAlphaCo      0.5;
 
 maxDeltaT       1;
 
