@@ -39,7 +39,7 @@ Foam::EulerImplicit<CompType, ThermoType>::EulerImplicit
     chemistrySolver<CompType, ThermoType>(model, modelName),
     coeffsDict_(model.subDict(modelName + "Coeffs")),
     cTauChem_(readScalar(coeffsDict_.lookup("cTauChem"))),
-    equil_(coeffsDict_.lookup("equilibriumRateLimiter"))
+    eqRateLimiter_(coeffsDict_.lookup("equilibriumRateLimiter"))
 {}
 
 
@@ -65,12 +65,12 @@ Foam::scalar Foam::EulerImplicit<CompType, ThermoType>::solve
     const label nSpecie = this->model_.nSpecie();
     simpleMatrix<scalar> RR(nSpecie, 0, 0);
 
-    for (label i=0; i<nSpecie; i++)
+    for (label i = 0; i < nSpecie; i++)
     {
         c[i] = max(0.0, c[i]);
     }
 
-    for (label i=0; i<nSpecie; i++)
+    for (label i = 0; i < nSpecie; i++)
     {
         RR.source()[i] = c[i]/dt;
     }
@@ -88,9 +88,9 @@ Foam::scalar Foam::EulerImplicit<CompType, ThermoType>::solve
         );
 
         scalar corr = 1.0;
-        if (equil_)
+        if (eqRateLimiter_)
         {
-            if (omegai<0.0)
+            if (omegai < 0.0)
             {
                 corr = 1.0/(1.0 + pr*dt);
             }
@@ -100,31 +100,31 @@ Foam::scalar Foam::EulerImplicit<CompType, ThermoType>::solve
             }
         }
 
-        forAll(R.lhs(), s)
+        forAll(R.lhs(), specieI)
         {
-            label si = R.lhs()[s].index;
-            scalar sl = R.lhs()[s].stoichCoeff;
-            RR[si][rRef] -= sl*pr*corr;
-            RR[si][lRef] += sl*pf*corr;
+            const label id = R.lhs()[specieI].index;
+            const scalar sc = R.lhs()[specieI].stoichCoeff;
+            RR[id][rRef] -= sc*pr*corr;
+            RR[id][lRef] += sc*pf*corr;
         }
 
-        forAll(R.rhs(), s)
+        forAll(R.rhs(), specieI)
         {
-            label si = R.rhs()[s].index;
-            scalar sr = R.rhs()[s].stoichCoeff;
-            RR[si][lRef] -= sr*pf*corr;
-            RR[si][rRef] += sr*pr*corr;
+            const label id = R.rhs()[specieI].index;
+            const scalar sc = R.rhs()[specieI].stoichCoeff;
+            RR[id][lRef] -= sc*pf*corr;
+            RR[id][rRef] += sc*pr*corr;
         }
     }
 
 
-    for (label i=0; i<nSpecie; i++)
+    for (label i = 0; i < nSpecie; i++)
     {
         RR[i][i] += 1.0/dt;
     }
 
     c = RR.LUsolve();
-    for (label i=0; i<nSpecie; i++)
+    for (label i = 0; i < nSpecie; i++)
     {
         c[i] = max(0.0, c[i]);
     }
@@ -134,7 +134,7 @@ Foam::scalar Foam::EulerImplicit<CompType, ThermoType>::solve
     const label nEqns = this->model_.nEqns();
     scalarField c1(nEqns, 0.0);
 
-    for (label i=0; i<nSpecie; i++)
+    for (label i = 0; i < nSpecie; i++)
     {
         c1[i] = c[i];
     }
@@ -144,9 +144,9 @@ Foam::scalar Foam::EulerImplicit<CompType, ThermoType>::solve
     scalarField dcdt(nEqns, 0.0);
     this->model_.derivatives(0.0, c1, dcdt);
 
-    scalar sumC = sum(c);
+    const scalar sumC = sum(c);
 
-    for (label i=0; i<nSpecie; i++)
+    for (label i = 0; i < nSpecie; i++)
     {
         scalar d = dcdt[i];
         if (d < -SMALL)

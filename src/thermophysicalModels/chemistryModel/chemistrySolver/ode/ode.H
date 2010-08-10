@@ -65,7 +65,6 @@ class ode
         // Model constants
 
             scalar eps_;
-            scalar scale_;
 
 
 public:

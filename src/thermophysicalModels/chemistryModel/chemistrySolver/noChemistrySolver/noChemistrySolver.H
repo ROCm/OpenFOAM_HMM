@@ -2,16 +2,16 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,23 +19,23 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::sequential
+    Foam::noChemistry
 
 Description
-    Foam::sequential
+    Dummy chemistry solver for 'none' option
 
 SourceFiles
-    sequentialI.H
-    sequential.C
-    sequentialIO.C
+    noChemistrySolver.H
+    noChemistrySolver.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sequential_H
-#define sequential_H
+#ifndef noChemistySolver_H
+#define noChemistySolver_H
 
 #include "chemistrySolver.H"
 
@@ -46,42 +46,29 @@ namespace Foam
 
 // Forward declaration of classes
 template<class CompType, class ThermoType>
-class sequential;
+class noChemistrySolver;
 
 /*---------------------------------------------------------------------------*\
-                         Class sequential Declaration
+                      Class noChemistrySolver Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CompType, class ThermoType>
-class sequential
+class noChemistrySolver
 :
     public chemistrySolver<CompType, ThermoType>
 {
-    // Private data
-
-        //- Coefficients dictionary
-        dictionary coeffsDict_;
-
-
-        // Model constants
-
-            //- Chemistry time scale
-            scalar cTauChem_;
-
-            //- Equilibrium rate limiter flag (on/off)
-            Switch eqRateLimiter_;
-
 
 public:
 
     //- Runtime type information
-    TypeName("sequential");
+    TypeName("none");
 
 
     // Constructors
 
+
         //- Construct from components
-        sequential
+        noChemistrySolver
         (
             ODEChemistryModel<CompType, ThermoType>& model,
             const word& modelName
@@ -89,7 +76,7 @@ public:
 
 
     //- Destructor
-    virtual ~sequential();
+    virtual ~noChemistrySolver();
 
 
     // Member Functions
@@ -113,7 +100,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "sequential.C"
+#   include "noChemistrySolver.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
