@@ -55,6 +55,7 @@ die()
     echo '-----------------------' 1>&2
     echo '' 1>&2
     echo "$@" 1>&2
+    echo '' 1>&2
     exit 1
 }
 
@@ -85,7 +86,12 @@ else
     fileList=$(git diff-index --cached --name-only $against --)
 fi
 
-# echo "files: $fileList" 1>&2
+#
+# no files changed: can skip all the checks
+# this usage can correspond to a 'git commit --amend'
+#
+[ -n "$fileList" ] || exit 0
+
 
 unset badFiles
 # join list of files with this amount of space
