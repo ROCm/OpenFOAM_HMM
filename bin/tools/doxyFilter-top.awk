@@ -4,7 +4,7 @@
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
 #    \\/     M anipulation  |
-# -----------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -22,23 +22,60 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     doxyFilt-ignore.awk
+#     doxyFilter-top.awk
 #
 # Description
-#     - Prefix file contents with doxygen @file tag and %filePath% tag
-#       that will be changed in a subsequent sed script
-#     - Surround the contents of an entire file with @cond / @endcond
-#       to skip documenting all classes/variables
+#     Only output the first /* ... */ comment section found in the file
+#     Use @cond / @endcond to suppress documenting all classes/variables
+#     - This is useful for application files in which only the first
+#       block documents the application itself.
 #
 # -----------------------------------------------------------------------------
 BEGIN {
-   print "//! @file %filePath%"
-   print "//! @cond OpenFOAMIgnoreAppDoxygen"
+    state = 0
 }
 
-{ print }
+# a '/*' at the beginning of a line starts a comment block
+/^ *\/\*/ {
+   state++
+}
+
+# check first line
+# either started with a comment or skip documentation for the whole file
+FNR == 1 {
+   if (!state)
+   {
+      print "//! @cond OpenFOAMIgnoreAppDoxygen"
+      state = 2
+   }
+}
+
+# a '*/' ends the comment block
+# skip documentation for rest of the file
+/\*\// {
+    if (state == 1)
+    {
+        print
+        print "//! @cond OpenFOAMIgnoreAppDoxygen"
+    }
+    state = 2
+    next
+}
+
+# print everything within the first comment block
+{
+    if (state)
+    {
+        print
+    }
+    next
+}
 
 END {
-   print "//! @endcond"
+    if (state == 2)
+    {
+        print "//! @endcond"
+    }
 }
+
 # -----------------------------------------------------------------------------

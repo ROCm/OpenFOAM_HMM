@@ -22,7 +22,7 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     doxyFilt.awk
+#     doxyFilter.awk
 #
 # Description
 #     Converts cocoon style sentinel strings into doxygen style strings
