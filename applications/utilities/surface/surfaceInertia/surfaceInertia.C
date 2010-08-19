@@ -398,7 +398,12 @@ int main(int argc, char *argv[])
     )
     {
         // Make the eigenvectors a right handed orthogonal triplet
-        eVec.z() *= sign((eVec.x() ^ eVec.y()) & eVec.z());
+        eVec = tensor
+        (
+            eVec.x(),
+            eVec.y(),
+            eVec.z() * sign((eVec.x() ^ eVec.y()) & eVec.z())
+        );
 
         // Finding the most natural transformation.  Using Lists
         // rather than tensors to allow indexed permutation.
@@ -557,9 +562,7 @@ int main(int argc, char *argv[])
             eVal = tEVal;
         }
 
-        eVec.x() = principal[0];
-        eVec.y() = principal[1];
-        eVec.z() = principal[2];
+        eVec = tensor(principal[0], principal[1], principal[2]);
 
         // {
         //     tensor R = rotationTensor(vector(1, 0, 0), eVec.x());

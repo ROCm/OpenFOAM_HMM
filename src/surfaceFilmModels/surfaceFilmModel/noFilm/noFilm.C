@@ -137,7 +137,7 @@ const Foam::volVectorField& Foam::surfaceFilmModels::noFilm::U() const
         "const volScalarField& noFilm::U() const"
     )   << "U field not available for " << type() << abort(FatalError);
 
-    return reinterpret_cast<const volVectorField&>(null);
+    return volVectorField::null();
 }
 
 
@@ -148,7 +148,7 @@ const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::rho() const
         "const volScalarField& noFilm::rho() const"
     )   << "rho field not available for " << type() << abort(FatalError);
 
-    return reinterpret_cast<const volScalarField&>(null);
+    return volScalarField::null();
 }
 
 
@@ -159,7 +159,7 @@ const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::T() const
         "const Foam::volScalarField& Foam::noFilm::T() const"
     )   << "T field not available for " << type() << abort(FatalError);
 
-    return reinterpret_cast<const volScalarField&>(null);
+    return volScalarField::null();
 }
 
 
@@ -170,7 +170,7 @@ const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::cp() const
         "const volScalarField& noFilm::cp() const"
     )   << "cp field not available for " << type() << abort(FatalError);
 
-    return reinterpret_cast<const volScalarField&>(null);
+    return volScalarField::null();
 }
 
 
@@ -183,7 +183,7 @@ Foam::surfaceFilmModels::noFilm::massForPrimary() const
     )   << "massForPrimary field not available for " << type()
         << abort(FatalError);
 
-    return reinterpret_cast<const volScalarField&>(null);
+    return volScalarField::null();
 }
 
 
@@ -196,7 +196,7 @@ Foam::surfaceFilmModels::noFilm::diametersForPrimary() const
     )   << "diametersForPrimary field not available for " << type()
         << abort(FatalError);
 
-    return reinterpret_cast<const volScalarField&>(null);
+    return volScalarField::null();
 }
 
 
