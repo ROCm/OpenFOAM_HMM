@@ -955,6 +955,12 @@ int main(int argc, char *argv[])
     argList::validArgs.append("faceZones");
     argList::validArgs.append("thickness");
 
+    Foam::argList::addBoolOption
+    (
+        "oneD",
+        "generate columns of 1D cells"
+    );
+
     #include "addRegionOption.H"
     #include "addOverwriteOption.H"
     #include "setRootCase.H"
@@ -966,6 +972,7 @@ int main(int argc, char *argv[])
     const wordList zoneNames(IStringStream(args.additionalArgs()[1])());
     scalar thickness = readScalar(IStringStream(args.additionalArgs()[2])());
     bool overwrite = args.optionFound("overwrite");
+    bool oneD = args.optionFound("oneD");
 
 
     Info<< "Extruding zones " << zoneNames
@@ -1225,9 +1232,25 @@ int main(int argc, char *argv[])
     label nSide = 0;
     forAll(zoneSidePatch, zoneI)
     {
-        if (zoneSidePatch[zoneI] > 0)
+        if (oneD)
+        {
+            // Always add empty patches, one per zone.
+            word patchName = faceZones[zoneI].name() + "_" + "side";
+
+            zoneSidePatch[zoneI] = addPatch<emptyPolyPatch>
+            (
+                mesh,
+                patchName
+            );
+
+            Info<< zoneSidePatch[zoneI] << '\t' << patchName << nl;
+
+            nSide++;
+        }
+        else if (zoneSidePatch[zoneI] > 0)
         {
             word patchName = faceZones[zoneI].name() + "_" + "side";
+
             zoneSidePatch[zoneI] = addPatch<polyPatch>
             (
                 mesh,
@@ -1257,47 +1280,53 @@ int main(int argc, char *argv[])
     );
 
     label nInter = 0;
-    forAll(zoneZonePatch_min, minZone)
+    if (!oneD)
     {
-        for (label maxZone = minZone; maxZone < faceZones.size(); maxZone++)
+        forAll(zoneZonePatch_min, minZone)
         {
-            label index = minZone*faceZones.size()+maxZone;
-
-            if (zoneZonePatch_min[index] > 0)
+            for (label maxZone = minZone; maxZone < faceZones.size(); maxZone++)
             {
-                word minToMax =
-                    faceZones[minZone].name()
-                  + "_to_"
-                  + faceZones[maxZone].name();
-                word maxToMin =
-                    faceZones[maxZone].name()
-                  + "_to_"
-                  + faceZones[minZone].name();
-                {
-                    transformDict.set("neighbourPatch", maxToMin);
-                    zoneZonePatch_min[index] =
-                    addPatch<nonuniformTransformCyclicPolyPatch>
-                    (
-                        mesh,
-                        minToMax,
-                        transformDict
-                    );
-                    Info<< zoneZonePatch_min[index] << '\t' << minToMax << nl;
-                    nInter++;
-                }
-                {
-                    transformDict.set("neighbourPatch", minToMax);
-                    zoneZonePatch_max[index] =
-                    addPatch<nonuniformTransformCyclicPolyPatch>
-                    (
-                        mesh,
-                        maxToMin,
-                        transformDict
-                    );
-                    Info<< zoneZonePatch_max[index] << '\t' << maxToMin << nl;
-                    nInter++;
-                }
+                label index = minZone*faceZones.size()+maxZone;
 
+                if (zoneZonePatch_min[index] > 0)
+                {
+                    word minToMax =
+                        faceZones[minZone].name()
+                      + "_to_"
+                      + faceZones[maxZone].name();
+                    word maxToMin =
+                        faceZones[maxZone].name()
+                      + "_to_"
+                      + faceZones[minZone].name();
+
+                    {
+                        transformDict.set("neighbourPatch", maxToMin);
+                        zoneZonePatch_min[index] =
+                        addPatch<nonuniformTransformCyclicPolyPatch>
+                        (
+                            mesh,
+                            minToMax,
+                            transformDict
+                        );
+                        Info<< zoneZonePatch_min[index] << '\t' << minToMax
+                            << nl;
+                        nInter++;
+                    }
+                    {
+                        transformDict.set("neighbourPatch", minToMax);
+                        zoneZonePatch_max[index] =
+                        addPatch<nonuniformTransformCyclicPolyPatch>
+                        (
+                            mesh,
+                            maxToMin,
+                            transformDict
+                        );
+                        Info<< zoneZonePatch_max[index] << '\t' << maxToMin
+                            << nl;
+                        nInter++;
+                    }
+
+                }
             }
         }
     }
@@ -1323,7 +1352,16 @@ int main(int argc, char *argv[])
 
         labelList& ePatches = extrudeEdgePatches[edgeI];
 
-        if (eFaces.size() == 2)
+        if (oneD)
+        {
+            nonManifoldEdge[edgeI] = 1;
+            ePatches.setSize(eFaces.size());
+            forAll(eFaces, i)
+            {
+                ePatches[i] = zoneSidePatch[zoneID[eFaces[i]]];
+            }
+        }
+        else if (eFaces.size() == 2)
         {
             label zone0 = zoneID[eFaces[0]];
             label zone1 = zoneID[eFaces[1]];
