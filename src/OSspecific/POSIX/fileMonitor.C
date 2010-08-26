@@ -38,6 +38,10 @@ Class
 #else
 #   include <sys/inotify.h>
 #   include <sys/ioctl.h>
+
+#   define EVENT_SIZE  ( sizeof (struct inotify_event) )
+#   define EVENT_LEN   (EVENT_SIZE + 16)
+#   define EVENT_BUF_LEN     ( 1024 * EVENT_LEN )
 #endif
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -132,30 +136,11 @@ namespace Foam
         //- File descriptor for the inotify instance
         int fd;
 
-        //- Pre-allocated structure containing file descriptors
-        fd_set fdSet;
-
         //- initialize inotify
         inline fileMonitorWatcher(const label dummy = 0)
         :
             fd(inotify_init())
-        {
-            // Add notify descriptor to select fd_set
-            FD_ZERO(&fdSet);
-            FD_SET(fd, &fdSet);
-        }
-
-        //- test if file descriptor is set
-        inline bool isSet() const
-        {
-            return FD_ISSET(fd, &fdSet);
-        }
-
-        //- reset file descriptor
-        inline void reset()
-        {
-            FD_SET(fd, &fdSet);
-        }
+        {}
 
         inline label addWatch(const fileName& fName)
         {
@@ -164,7 +149,7 @@ namespace Foam
                 fd,
                 fName.c_str(),
                 // IN_ALL_EVENTS
-                IN_CLOSE_WRITE | IN_DELETE_SELF | IN_MODIFY
+                IN_CLOSE_WRITE | IN_DELETE_SELF //| IN_MODIFY
             );
         }
 
@@ -214,17 +199,26 @@ void Foam::fileMonitor::checkFiles() const
         }
     }
 #else
+    // Large buffer for lots of events
+    char buffer[EVENT_BUF_LEN];
+
     while (true)
     {
         struct timeval zeroTimeout = {0, 0};
 
+        //- Pre-allocated structure containing file descriptors
+        fd_set fdSet;
+        // Add notify descriptor to select fd_set
+        FD_ZERO(&fdSet);
+        FD_SET(watcher_->fd, &fdSet);
+
         int ready = select
         (
-            watcher_->fd+1,        // num filedescriptors in fdSet
-            &(watcher_->fdSet),    // fdSet with only inotifyFd
-            NULL,                  // No writefds
-            NULL,                  // No errorfds
-            &zeroTimeout           // eNo timeout
+            watcher_->fd+1,     // num filedescriptors in fdSet
+            &fdSet,             // fdSet with only inotifyFd
+            NULL,               // No writefds
+            NULL,               // No errorfds
+            &zeroTimeout        // eNo timeout
         );
 
         if (ready < 0)
@@ -233,51 +227,55 @@ void Foam::fileMonitor::checkFiles() const
                 << "Problem in issuing select."
                 << abort(FatalError);
         }
-        else if (watcher_->isSet())
+        else if (FD_ISSET(watcher_->fd, &fdSet))
         {
-            struct inotify_event inotifyEvent;
+            // Read events
+            ssize_t nBytes = read(watcher_->fd, buffer, EVENT_BUF_LEN);
 
-            // Read first event
-            ssize_t nBytes = read
-            (
-                watcher_->fd,
-                &inotifyEvent,
-                sizeof(inotifyEvent)
-            );
-
-            if (nBytes != sizeof(inotifyEvent))
+            if (nBytes < 0)
             {
                 FatalErrorIn("fileMonitor::updateStates(const fileName&)")
-                    << "Read " << label(nBytes) << " ; expected "
-                    << label(sizeof(inotifyEvent))
+                    << "read of " << watcher_->fd
+                    << " failed with " << label(nBytes)
                     << abort(FatalError);
             }
 
-            // Pout<< "mask:" << inotifyEvent.mask << nl
-            //     << "watchFd:" << inotifyEvent.wd << nl
-            //     << "watchName:" << watchFile_[inotifyEvent.wd] << endl;
+            // Go through buffer, consuming events
+            int i = 0;
+            while (i < nBytes)
+            {
+                const struct inotify_event* inotifyEvent =
+                    reinterpret_cast<const struct inotify_event*>
+                    (
+                        &buffer[i]
+                    );
 
-            if (inotifyEvent.mask % IN_DELETE_SELF)
-            {
-                Map<fileState>::iterator iter =
-                    state_.find(label(inotifyEvent.wd));
-                iter() = DELETED;
-            }
-            else if
-            (
-                (inotifyEvent.mask % IN_MODIFY)
-             || (inotifyEvent.mask % IN_CLOSE_WRITE)
-            )
-            {
-                Map<fileState>::iterator iter =
-                    state_.find(label(inotifyEvent.wd));
-                iter() = MODIFIED;
+                // Pout<< "mask:" << inotifyEvent->mask << nl
+                //     << "watchFd:" << inotifyEvent->wd << nl
+                //     << "watchName:" << watchFile_[inotifyEvent->wd] << endl;
+
+                if (inotifyEvent->mask % IN_DELETE_SELF)
+                {
+                    Map<fileState>::iterator iter =
+                        state_.find(label(inotifyEvent->wd));
+                    iter() = DELETED;
+                }
+                else if
+                (
+                    //(inotifyEvent->mask % IN_MODIFY)
+                    (inotifyEvent->mask % IN_CLOSE_WRITE)
+                )
+                {
+                    Map<fileState>::iterator iter =
+                        state_.find(label(inotifyEvent->wd));
+                    iter() = MODIFIED;
+                }
+                i += EVENT_SIZE + inotifyEvent->len;
             }
         }
         else
         {
-            // No data - reset
-            watcher_->reset();
+            // No data
             return;
         }
     }
