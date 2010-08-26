@@ -32,14 +32,12 @@ parallel/decompose/AllwmakeLnInclude
 # dummyThirdParty (dummy metisDecomp, scotchDecomp etc) needed by e.g. meshTools
 dummyThirdParty/Allwmake
 
-# Build the proper scotchDecomp, metisDecomp etc.
-parallel/decompose/Allwmake
-
 wmake libso meshTools
 wmake libso finiteVolume
 wmake libso genericPatchFields
 
-parallel/reconstruct/Allwmake
+# Build the proper scotchDecomp, metisDecomp etc.
+parallel/Allwmake
 
 wmake libso sampling
 
