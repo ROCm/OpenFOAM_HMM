@@ -49,12 +49,12 @@ namespace Foam
 
 Foam::structuredDecomp::structuredDecomp(const dictionary& decompositionDict)
 :
-    decompositionMethod(decompositionDict)
+    decompositionMethod(decompositionDict),
+    methodDict_(decompositionDict_.subDict(typeName + "Coeffs"))
 {
-    dictionary myDict = decompositionDict_.subDict(typeName + "Coeffs");
-    myDict.set("numberOfSubdomains", nDomains());
-    method_ = decompositionMethod::New(myDict);
-    patches_ = wordList(myDict.lookup("patches"));
+    methodDict_.set("numberOfSubdomains", nDomains());
+    method_ = decompositionMethod::New(methodDict_);
+    patches_ = wordList(methodDict_.lookup("patches"));
 }
 
 

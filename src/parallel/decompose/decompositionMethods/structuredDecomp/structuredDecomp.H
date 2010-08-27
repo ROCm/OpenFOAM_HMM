@@ -50,38 +50,14 @@ class structuredDecomp
 {
     // Private data
 
+        dictionary methodDict_;
+
         autoPtr<decompositionMethod> method_;
 
         wordList patches_;
 
 
     // Private Member Functions
-
-        //- Given connectivity across processors work out connectivity
-        //  for a (consistent) subset
-        void subsetGlobalCellCells
-        (
-            const label nDomains,
-            const label domainI,
-            const labelList& dist,
-
-            const labelListList& cellCells,
-            const labelList& set,
-            labelListList& subCellCells,
-            labelList& cutConnections
-        ) const;
-
-        //- Decompose level methodI without addressing
-        void decompose
-        (
-            const labelListList& pointPoints,
-            const pointField& points,
-            const scalarField& pointWeights,
-            const labelList& pointMap,  // map back to original points
-            const label levelI,
-
-            labelField& finalDecomp
-        );
 
         //- Disallow default bitwise copy construct and assignment
         void operator=(const structuredDecomp&);

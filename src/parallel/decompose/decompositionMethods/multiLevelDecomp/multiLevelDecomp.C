@@ -312,13 +312,12 @@ void Foam::multiLevelDecomp::decompose
 
 Foam::multiLevelDecomp::multiLevelDecomp(const dictionary& decompositionDict)
 :
-    decompositionMethod(decompositionDict)
+    decompositionMethod(decompositionDict),
+    methodsDict_(decompositionDict_.subDict(typeName + "Coeffs"))
 {
-    const dictionary& myDict = decompositionDict_.subDict(typeName + "Coeffs");
-
-    methods_.setSize(myDict.size());
+    methods_.setSize(methodsDict_.size());
     label i = 0;
-    forAllConstIter(dictionary, myDict, iter)
+    forAllConstIter(dictionary, methodsDict_, iter)
     {
         methods_.set(i++, decompositionMethod::New(iter().dict()));
     }

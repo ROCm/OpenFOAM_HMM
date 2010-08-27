@@ -53,7 +53,7 @@ protected:
 
     // Protected data
 
-        const dictionary decompositionDict_;
+        const dictionary& decompositionDict_;
         label nProcessors_;
 
 
