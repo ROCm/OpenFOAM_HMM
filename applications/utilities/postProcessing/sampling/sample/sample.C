@@ -96,17 +96,26 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
-#   include "addRegionOption.H"
-#   include "setRootCase.H"
-#   include "createTime.H"
+    #include "addRegionOption.H"
+    argList::addOption
+    (
+        "dict",
+        "word",
+        "name of dictionary to provide sample information"
+    );
+
+    #include "setRootCase.H"
+    #include "createTime.H"
     instantList timeDirs = timeSelector::select0(runTime, args);
-#   include "createNamedMesh.H"
+    #include "createNamedMesh.H"
+
+    word sampleDict(args.optionLookupOrDefault<word>("dict", "sampleDict"));
 
     IOsampledSets sSets
     (
         sampledSets::typeName,
         mesh,
-        "sampleDict",
+        sampleDict,
         IOobject::MUST_READ,
         true
     );
@@ -115,7 +124,7 @@ int main(int argc, char *argv[])
     (
         sampledSurfaces::typeName,
         mesh,
-        "sampleDict",
+        sampleDict,
         IOobject::MUST_READ,
         true
     );
