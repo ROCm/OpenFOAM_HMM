@@ -113,7 +113,7 @@ Foam::label Foam::UList<T>::byteSize() const
             << abort(FatalError);
     }
 
-    return this->size_*sizeof(T);
+    return this->size_*label(sizeof(T));
 }
 
 
