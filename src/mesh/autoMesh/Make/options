@@ -13,4 +13,5 @@ LIB_LIBS = \
     -llagrangian \
     -lmeshTools \
     -ledgeMesh \
-    -ltriSurface
+    -ltriSurface \
+    -ldistributed

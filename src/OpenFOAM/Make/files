@@ -530,6 +530,7 @@ $(constraintPointPatchFields)/processorCyclic/processorCyclicPointPatchFields.C
 
 derivedPointPatchFields = $(pointPatchFields)/derived
 $(derivedPointPatchFields)/slip/slipPointPatchFields.C
+$(derivedPointPatchFields)/fixedNormalSlip/fixedNormalSlipPointPatchFields.C
 /*
 $(derivedPointPatchFields)/global/globalPointPatchFields.C
 */

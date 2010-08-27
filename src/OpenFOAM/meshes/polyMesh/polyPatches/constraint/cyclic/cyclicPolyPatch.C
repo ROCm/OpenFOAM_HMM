@@ -624,7 +624,18 @@ void Foam::cyclicPolyPatch::transformPosition(pointField& l) const
     }
     else if (separated())
     {
-        l -= separation();
+        const vectorField& s = separation();
+        if (s.size() == 1)
+        {
+            forAll(l, i)
+            {
+                l[i] -= s[0];
+            }
+        }
+        else
+        {
+            l -= s;
+        }
     }
 }
 

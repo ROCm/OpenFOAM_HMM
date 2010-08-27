@@ -1008,7 +1008,7 @@ Foam::surfaceFilmModels::kinematicSingleLayer::T() const
         "const volScalarField& kinematicSingleLayer::T() const"
     )   << "T field not available for " << type() << abort(FatalError);
 
-    return reinterpret_cast<const volScalarField&>(null);
+    return volScalarField::null();
 }
 
 
@@ -1020,7 +1020,7 @@ Foam::surfaceFilmModels::kinematicSingleLayer::cp() const
         "const volScalarField& kinematicSingleLayer::cp() const"
     )   << "cp field not available for " << type() << abort(FatalError);
 
-    return reinterpret_cast<const volScalarField&>(null);
+    return volScalarField::null();
 }
 
 
