@@ -119,7 +119,15 @@ void Foam::pointMVCWeight::calcWeights
             //Pout<< "    uj:" << u[j] << " ujPlus1:" << u[jPlus1] << endl;
 
             vector temp = u[j] ^ u[jPlus1];
-            temp /= mag(temp);
+
+            scalar magTemp = mag(temp);
+
+            if (magTemp < VSMALL)
+            {
+                continue;
+            }
+
+            temp /= magTemp;
 
             //Pout<< "    uj:" << u[j] << " ujPlus1:" << u[jPlus1]
             //    << " temp:" << temp << endl;
