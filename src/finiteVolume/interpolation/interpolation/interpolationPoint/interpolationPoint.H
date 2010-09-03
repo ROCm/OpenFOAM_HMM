@@ -60,7 +60,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("cellPoint");
+    TypeName("point");
 
 
     // Constructors

@@ -371,6 +371,11 @@ Foam::Time::Time
 
 Foam::Time::~Time()
 {
+    if (controlDict_.watchIndex() != -1)
+    {
+        removeWatch(controlDict_.watchIndex());
+    }
+
     // destroy function objects first
     functionObjects_.clear();
 }

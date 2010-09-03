@@ -33,10 +33,6 @@ Note
     Compiling with FOAM_USE_STAT (or if /usr/include/sys/inotify.h
     does not exist) uses the stat function call.
 
-    - works fine except when a file is deleted and recreated:
-    it stops monitoring the file!
-    (does work though if the file gets moved)
-
 SourceFiles
     fileMonitor.C
 
@@ -46,9 +42,9 @@ SourceFiles
 #define fileMonitor_H
 
 #include <sys/types.h>
-#include "Map.H"
 #include "NamedEnum.H"
 #include "className.H"
+#include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -83,13 +79,16 @@ private:
     // Private data
 
         //- State for all watchFds
-        mutable Map<fileState> state_;
+        mutable DynamicList<fileState> state_;
 
-        //- From watch descriptor to filename
-        HashTable<fileName, label> watchFile_;
+        //- Filename for all watchFds
+        DynamicList<fileName> watchFile_;
+
+        //- Free watchFds
+        DynamicList<label> freeWatchFds_;
 
         //- Watch mechanism (stat or inotify)
-        mutable fileMonitorWatcher *watcher_;
+        mutable autoPtr<fileMonitorWatcher> watcher_;
 
 
     // Private Member Functions
