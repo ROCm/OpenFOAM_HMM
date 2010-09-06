@@ -200,7 +200,7 @@ void Foam::kineticTheoryModel::solve(const volTensorField& gradUat)
         return;
     }
 
-    const scalar sqrtPi = sqrt(mathematicalConstant::pi);
+    const scalar sqrtPi = sqrt(constant::mathematical::pi);
 
     surfaceScalarField phi = 1.5*rhoa_*phia_*fvc::interpolate(alpha_);
 
