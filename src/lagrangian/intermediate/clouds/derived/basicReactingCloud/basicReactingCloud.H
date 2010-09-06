@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,25 +21,29 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::basicReactingCloud
+
+Description
+    Cloud class to introduce reacting parcels
+
+SourceFiles
+    BasicReactingCloud.C
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef createReactingMultiphaseParcelTypes_H
-#define createReactingMultiphaseParcelTypes_H
+#ifndef basicReactingCloud_H
+#define basicReactingCloud_H
 
-#include "ReactingMultiphaseParcel.H"
-#include "ReactingMultiphaseCloud.H"
-
-#include "createReactingParcelTypes.H"
+#include "ReactingCloud.H"
+#include "basicReactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define createReactingMultiphaseParcelTypes(ParcelType)                       \
-                                                                              \
-    createReactingParcelTypes(ParcelType);                                    \
-                                                                              \
-    defineParcelTypeNameAndDebug(ReactingMultiphaseParcel<ParcelType>, 0);    \
-    defineTemplateTypeNameAndDebug(ReactingMultiphaseParcel<ParcelType>, 0);  \
-    defineParcelTypeNameAndDebug(ReactingMultiphaseCloud<ParcelType>, 0);
+namespace Foam
+{
+    typedef ReactingCloud<basicReactingParcel> basicReactingCloud;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

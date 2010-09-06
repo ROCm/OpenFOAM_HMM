@@ -33,13 +33,15 @@ $(THERMOPARCEL)/makeBasicThermoParcelSubmodels.C
 
 
 /* reacting parcel sub-models */
-REACTINGPARCEL=$(DERIVEDPARCELS)/BasicReactingParcel
+REACTINGPARCEL=$(DERIVEDPARCELS)/basicReactingParcel
+$(REACTINGPARCEL)/basicReactingParcel.C
 $(REACTINGPARCEL)/defineBasicReactingParcel.C
 $(REACTINGPARCEL)/makeBasicReactingParcelSubmodels.C
 
 
 /* reacting multiphase parcel sub-models */
-REACTINGMPPARCEL=$(DERIVEDPARCELS)/BasicReactingMultiphaseParcel
+REACTINGMPPARCEL=$(DERIVEDPARCELS)/basicReactingMultiphaseParcel
+$(REACTINGMPPARCEL)/basicReactingMultiphaseParcel.C
 $(REACTINGMPPARCEL)/defineBasicReactingMultiphaseParcel.C
 $(REACTINGMPPARCEL)/makeBasicReactingMultiphaseParcelSubmodels.C
 

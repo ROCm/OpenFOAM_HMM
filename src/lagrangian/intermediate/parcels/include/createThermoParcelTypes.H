@@ -21,56 +21,31 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::BasicReactingMultiphaseCloud
-
-Description
-    Reacting multiphase cloud templated on the type of carrier phase
-    thermodynamics
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef BasicReactingMultiphaseCloud_H
-#define BasicReactingMultiphaseCloud_H
+#ifndef createThermoParcelTypes_H
+#define createThermoParcelTypes_H
 
-#include "ReactingMultiphaseCloud.H"
-#include "BasicReactingMultiphaseParcel.H"
-#include "thermoPhysicsTypes.H"
+#include "ThermoParcel.H"
+#include "ThermoCloud.H"
+
+#include "createKinematicParcelTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    typedef ReactingMultiphaseCloud
-        <
-            BasicReactingMultiphaseParcel
-            <
-                constGasThermoPhysics
-            >
-        >
-        constThermoReactingMultiphaseCloud;
+#define createThermoParcelTypes(ParcelType)                                   \
+                                                                              \
+    createKinematicParcelTypes(ParcelType);                                   \
+                                                                              \
+    defineParcelTypeNameAndDebug(ThermoParcel<ParcelType>, 0);                \
+    defineTemplateTypeNameAndDebug(ThermoParcel<ParcelType>, 0);              \
+    defineParcelTypeNameAndDebug(ThermoCloud<ParcelType>, 0);
 
-    typedef ReactingMultiphaseCloud
-        <
-            BasicReactingMultiphaseParcel
-            <
-                gasThermoPhysics
-            >
-        >
-        thermoReactingMultiphaseCloud;
-
-    typedef ReactingMultiphaseCloud
-        <
-            BasicReactingMultiphaseParcel
-            <
-                icoPoly8ThermoPhysics
-            >
-        >
-        icoPoly8ThermoReactingMultiphaseCloud;
-}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 
 // ************************************************************************* //
+
+

@@ -23,19 +23,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "BasicReactingMultiphaseParcel.H"
+#include "basicReactingMultiphaseParcel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::BasicReactingMultiphaseParcel<ThermoType>::BasicReactingMultiphaseParcel
+Foam::basicReactingMultiphaseParcel::basicReactingMultiphaseParcel
 (
-    ReactingMultiphaseCloud<BasicReactingMultiphaseParcel<ThermoType> >& owner,
+    ReactingMultiphaseCloud<basicReactingMultiphaseParcel>& owner,
     const vector& position,
     const label cellI
 )
 :
-    ReactingMultiphaseParcel<BasicReactingMultiphaseParcel<ThermoType> >
+    ReactingMultiphaseParcel<basicReactingMultiphaseParcel>
     (
         owner,
         position,
@@ -44,10 +43,9 @@ Foam::BasicReactingMultiphaseParcel<ThermoType>::BasicReactingMultiphaseParcel
 {}
 
 
-template<class ThermoType>
-Foam::BasicReactingMultiphaseParcel<ThermoType>::BasicReactingMultiphaseParcel
+Foam::basicReactingMultiphaseParcel::basicReactingMultiphaseParcel
 (
-    ReactingMultiphaseCloud<BasicReactingMultiphaseParcel<ThermoType> >& owner,
+    ReactingMultiphaseCloud<basicReactingMultiphaseParcel>& owner,
     const vector& position,
     const label cellI,
     const label typeId,
@@ -61,12 +59,11 @@ Foam::BasicReactingMultiphaseParcel<ThermoType>::BasicReactingMultiphaseParcel
     const scalarField& YLiquid0,
     const scalarField& YSolid0,
     const scalarField& Y0,
-    const typename
-        ReactingMultiphaseParcel<BasicReactingMultiphaseParcel>::
+    const ReactingMultiphaseParcel<basicReactingMultiphaseParcel>::
         constantProperties& constProps
 )
 :
-    ReactingMultiphaseParcel<BasicReactingMultiphaseParcel<ThermoType> >
+    ReactingMultiphaseParcel<basicReactingMultiphaseParcel >
     (
         owner,
         position,
@@ -87,15 +84,14 @@ Foam::BasicReactingMultiphaseParcel<ThermoType>::BasicReactingMultiphaseParcel
 {}
 
 
-template<class ThermoType>
-Foam::BasicReactingMultiphaseParcel<ThermoType>::BasicReactingMultiphaseParcel
+Foam::basicReactingMultiphaseParcel::basicReactingMultiphaseParcel
 (
-    const Cloud<BasicReactingMultiphaseParcel<ThermoType> >& cloud,
+    const Cloud<basicReactingMultiphaseParcel>& cloud,
     Istream& is,
     bool readFields
 )
 :
-    ReactingMultiphaseParcel<BasicReactingMultiphaseParcel<ThermoType> >
+    ReactingMultiphaseParcel<basicReactingMultiphaseParcel>
     (
         cloud,
         is,
@@ -104,21 +100,18 @@ Foam::BasicReactingMultiphaseParcel<ThermoType>::BasicReactingMultiphaseParcel
 {}
 
 
-template<class ThermoType>
-Foam::BasicReactingMultiphaseParcel<ThermoType>::BasicReactingMultiphaseParcel
+Foam::basicReactingMultiphaseParcel::basicReactingMultiphaseParcel
 (
-    const BasicReactingMultiphaseParcel<ThermoType>& p
+    const basicReactingMultiphaseParcel& p
 )
 :
-    ReactingMultiphaseParcel<BasicReactingMultiphaseParcel<ThermoType> >(p)
+    ReactingMultiphaseParcel<basicReactingMultiphaseParcel>(p)
 {}
 
 
 // * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::BasicReactingMultiphaseParcel<ThermoType>::
-~BasicReactingMultiphaseParcel()
+Foam::basicReactingMultiphaseParcel::~basicReactingMultiphaseParcel()
 {}
 
 

@@ -28,45 +28,20 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "thermoPhysicsTypes.H"
 #include "ReactingMultiphaseCloud.H"
-
 #include "NoSurfaceReaction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReactingMultiphaseSurfaceReactionModels(ParcelType)               \
+#define makeReactingMultiphaseParcelSurfaceReactionModels(ParcelType)         \
                                                                               \
-    makeReactingMultiphaseSurfaceReactionModelThermoType                      \
-    (                                                                         \
-        ParcelType,                                                           \
-        constGasThermoPhysics                                                 \
-    );                                                                        \
-    makeReactingMultiphaseSurfaceReactionModelThermoType                      \
-    (                                                                         \
-        ParcelType,                                                           \
-        gasThermoPhysics                                                      \
-    );                                                                        \
-    makeReactingMultiphaseSurfaceReactionModelThermoType                      \
-    (                                                                         \
-        ParcelType,                                                           \
-        icoPoly8ThermoPhysics                                                 \
-    );
-
-
-#define makeReactingMultiphaseSurfaceReactionModelThermoType(ParcelType, ThermoType)\
+    makeSurfaceReactionModel(ReactingMultiphaseCloud<ParcelType>);            \
                                                                               \
-    makeSurfaceReactionModel                                                  \
-    (                                                                         \
-        ReactingMultiphaseCloud<ParcelType<ThermoType> >                      \
-    );                                                                        \
-                                                                              \
-    makeSurfaceReactionModelThermoType                                        \
+    makeSurfaceReactionModelType                                              \
     (                                                                         \
         NoSurfaceReaction,                                                    \
         ReactingMultiphaseCloud,                                              \
-        ParcelType,                                                           \
-        ThermoType                                                            \
+        ParcelType                                                            \
     );
 
 

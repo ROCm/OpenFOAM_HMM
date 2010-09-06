@@ -170,8 +170,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::cellValueSourceCorrection
         forAll(td.cloud().rhoTrans(), i)
         {
             scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
-            cpEff +=
-                Y*td.cloud().mcCarrierThermo().speciesData()[i].Cp(this->Tc_);
+            cpEff += Y*td.cloud().thermo().carrier().Cp(i, this->Tc_);
         }
     }
     const scalar cpc = td.cpInterp().psi()[cellI];
@@ -247,7 +246,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     scalar NCpW = 0.0;
 
     // Surface concentrations of emitted species
-    scalarField Cs(td.cloud().mcCarrierThermo().species().size(), 0.0);
+    scalarField Cs(td.cloud().composition().carrier().species().size(), 0.0);
 
     // Calc mass and enthalpy transfer due to phase change
     calcPhaseChange
@@ -313,7 +312,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     scalarField
         dMassSRCarrier
         (
-            td.cloud().mcCarrierThermo().species().size(),
+            td.cloud().composition().carrier().species().size(),
             0.0
         );
 
@@ -547,8 +546,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
         const scalar beta = sqr(cbrt(15.0) + cbrt(15.0));
         const label id =
             td.cloud().composition().localToGlobalCarrierId(GAS, i);
-        const scalar Cp = td.cloud().mcCarrierThermo().speciesData()[id].Cp(Ts);
-        const scalar W = td.cloud().mcCarrierThermo().speciesData()[id].W();
+        const scalar Cp = td.cloud().thermo().carrier().Cp(id, Ts);
+        const scalar W = td.cloud().thermo().carrier().W(id);
         const scalar Ni = dMassDV[i]/(this->areaS(d)*dt*W);
 
         // Dab calc'd using API vapour mass diffusivity function

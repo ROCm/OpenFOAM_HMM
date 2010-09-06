@@ -22,19 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::BasicReactingParcel
+    Foam::basicReactingParcel
 
 Description
 
 
 SourceFiles
-    BasicReactingParcel.C
-    BasicReactingParcelIO.C
+    basicReactingParcel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef BasicReactingParcel_H
-#define BasicReactingParcel_H
+#ifndef basicReactingParcel_H
+#define basicReactingParcel_H
 
 #include "ReactingParcel.H"
 
@@ -43,43 +42,35 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-template<class ThermoType>
-class BasicReactingParcel;
-
 /*---------------------------------------------------------------------------*\
-                    Class BasicReactingParcel Declaration
+                    Class basicReactingParcel Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ThermoType>
-class BasicReactingParcel
+class basicReactingParcel
 :
-    public ReactingParcel<BasicReactingParcel<ThermoType> >
+    public ReactingParcel<basicReactingParcel>
 {
 
 public:
 
-    //- The type of thermodynamics this parcel was instantiated for
-    typedef ThermoType thermoType;
-
     //- Run-time type information
-    TypeName("BasicReactingParcel");
+    TypeName("basicReactingParcel");
 
     // Constructors
 
         //- Construct from owner, position, and cloud owner
         //  Other properties initialised as null
-        BasicReactingParcel
+        basicReactingParcel
         (
-            ReactingCloud<BasicReactingParcel>& owner,
+            ReactingCloud<basicReactingParcel>& owner,
             const vector& position,
             const label cellI
         );
 
         //- Construct from components
-        BasicReactingParcel
+        basicReactingParcel
         (
-            ReactingCloud<BasicReactingParcel>& owner,
+            ReactingCloud<basicReactingParcel>& owner,
             const vector& position,
             const label cellI,
             const label typeId,
@@ -90,46 +81,47 @@ public:
             const vector& angularMomentum0,
             const vector& torque0,
             const scalarField& Y0,
-            const typename ReactingParcel<BasicReactingParcel>::
-                constantProperties& constProps
+            const ReactingParcel<basicReactingParcel>::constantProperties&
+                constProps
         );
 
         //- Construct from Istream
-        BasicReactingParcel
+        basicReactingParcel
         (
-            const Cloud<BasicReactingParcel>& c,
+            const Cloud<basicReactingParcel>& c,
             Istream& is,
             bool readFields = true
         );
 
         //- Construct as a copy
-        BasicReactingParcel(const BasicReactingParcel& p);
+        basicReactingParcel(const basicReactingParcel& p);
 
         //- Construct and return a clone
-        autoPtr<BasicReactingParcel> clone() const
+        autoPtr<basicReactingParcel> clone() const
         {
             return
-                autoPtr<BasicReactingParcel>
+                autoPtr<basicReactingParcel>
                 (
-                    new BasicReactingParcel(*this)
+                    new basicReactingParcel(*this)
                 );
         }
 
 
     //- Destructor
-    virtual ~BasicReactingParcel();
+    virtual ~basicReactingParcel();
 };
+
+
+template<>
+inline bool contiguous<basicReactingParcel>()
+{
+    return false;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "BasicReactingParcel.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

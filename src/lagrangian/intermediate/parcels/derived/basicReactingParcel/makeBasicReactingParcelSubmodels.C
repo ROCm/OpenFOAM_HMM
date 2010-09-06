@@ -23,18 +23,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "BasicReactingParcel.H"
+#include "basicReactingParcel.H"
 
 // Kinematic
-#include "makeReactingParcelDispersionModels.H"
-#include "makeReactingParcelDragModels.H"
-#include "makeReactingParcelInjectionModels.H"
-#include "makeReactingParcelCollisionModels.H"
-#include "makeReactingParcelPatchInteractionModels.H"
-#include "makeReactingParcelPostProcessingModels.H"
+#include "makeParcelDispersionModels.H"
+#include "makeParcelDragModels.H"
+#include "makeReactingParcelInjectionModels.H" // Reacting variant
+#include "makeParcelCollisionModels.H"
+#include "makeParcelPatchInteractionModels.H"
+#include "makeParcelPostProcessingModels.H"
 
 // Thermodynamic
-#include "makeReactingParcelHeatTransferModels.H"
+#include "makeParcelHeatTransferModels.H"
 
 // Reacting
 #include "makeReactingParcelCompositionModels.H"
@@ -46,20 +46,20 @@ License
 namespace Foam
 {
     // Kinematic sub-models
-    makeReactingDispersionModels(BasicReactingParcel);
-    makeReactingDragModels(BasicReactingParcel);
-    makeReactingInjectionModels(BasicReactingParcel);
-    makeReactingCollisionModels(BasicReactingParcel);
-    makeReactingPatchInteractionModels(BasicReactingParcel);
-    makeReactingPostProcessingModels(BasicReactingParcel);
+    makeParcelDispersionModels(basicReactingParcel);
+    makeParcelDragModels(basicReactingParcel);
+    makeReactingParcelInjectionModels(basicReactingParcel);
+    makeParcelCollisionModels(basicReactingParcel);
+    makeParcelPatchInteractionModels(basicReactingParcel);
+    makeParcelPostProcessingModels(basicReactingParcel);
 
     // Thermo sub-models
-    makeReactingHeatTransferModels(BasicReactingParcel);
+    makeParcelHeatTransferModels(basicReactingParcel);
 
     // Reacting sub-models
-    makeReactingCompositionModels(BasicReactingParcel);
-    makeReactingPhaseChangeModels(BasicReactingParcel);
-    makeReactingSurfaceFilmModels(BasicReactingParcel);
+    makeReactingParcelCompositionModels(basicReactingParcel);
+    makeReactingParcelPhaseChangeModels(basicReactingParcel);
+    makeReactingParcelSurfaceFilmModels(basicReactingParcel);
 };
 
 

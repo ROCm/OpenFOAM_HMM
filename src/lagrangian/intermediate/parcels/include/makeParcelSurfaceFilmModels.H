@@ -23,15 +23,33 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "createReactingMultiphaseParcelTypes.H"
-#include "BasicReactingMultiphaseParcel.H"
+#ifndef makeParcelSurfaceFilmModels_H
+#define makeParcelSurfaceFilmModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    createReactingMultiphaseParcelType(BasicReactingMultiphaseParcel);
-};
+#include "KinematicCloud.H"
 
+#include "NoSurfaceFilm.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#define makeParcelSurfaceFilmModels(ParcelType)                               \
+                                                                              \
+    makeSurfaceFilmModel(KinematicCloud<ParcelType>);                         \
+                                                                              \
+    makeSurfaceFilmModelType                                                  \
+    (                                                                         \
+        NoSurfaceFilm,                                                        \
+        KinematicCloud,                                                       \
+        ParcelType                                                            \
+    );
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //
+
+

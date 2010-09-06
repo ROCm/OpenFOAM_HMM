@@ -28,7 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "thermoPhysicsTypes.H"
 #include "ReactingCloud.H"
 
 #include "NoPhaseChange.H"
@@ -36,44 +35,21 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReactingPhaseChangeModels(ParcelType)                             \
+#define makeReactingParcelPhaseChangeModels(ParcelType)                       \
                                                                               \
-    makeReactingPhaseChangeModelThermoType                                    \
-    (                                                                         \
-        ParcelType,                                                           \
-        constGasThermoPhysics                                                 \
-    );                                                                        \
+    makePhaseChangeModel(ReactingCloud<ParcelType>);                          \
                                                                               \
-    makeReactingPhaseChangeModelThermoType                                    \
-    (                                                                         \
-        ParcelType,                                                           \
-        gasThermoPhysics                                                      \
-    );                                                                        \
-                                                                              \
-    makeReactingPhaseChangeModelThermoType                                    \
-    (                                                                         \
-        ParcelType,                                                           \
-        icoPoly8ThermoPhysics                                                 \
-    );
-
-
-#define makeReactingPhaseChangeModelThermoType(ParcelType, ThermoType)        \
-                                                                              \
-    makePhaseChangeModel(ReactingCloud<ParcelType<ThermoType> >);             \
-                                                                              \
-    makePhaseChangeModelThermoType                                            \
+    makePhaseChangeModelType                                                  \
     (                                                                         \
         NoPhaseChange,                                                        \
         ReactingCloud,                                                        \
-        ParcelType,                                                           \
-        ThermoType                                                            \
+        ParcelType                                                            \
     );                                                                        \
-    makePhaseChangeModelThermoType                                            \
+    makePhaseChangeModelType                                                  \
     (                                                                         \
         LiquidEvaporation,                                                    \
         ReactingCloud,                                                        \
-        ParcelType,                                                           \
-        ThermoType                                                            \
+        ParcelType                                                            \
     );
 
 
@@ -82,3 +58,4 @@ License
 #endif
 
 // ************************************************************************* //
+

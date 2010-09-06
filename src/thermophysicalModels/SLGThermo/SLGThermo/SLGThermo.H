@@ -48,7 +48,7 @@ SourceFiles
 
 #include "MeshObject.H"
 #include "basicThermo.H"
-#include "basicMultiComponentMixtureNew.H"
+#include "basicMultiComponentMixture.H"
 #include "liquidMixture.H"
 #include "solidMixture.H"
 
@@ -71,7 +71,7 @@ class SLGThermo
         basicThermo& thermo_;
 
         //- Reference to the multi-component carrier phase thermo
-        basicMultiComponentMixtureNew* carrier_;
+        basicMultiComponentMixture* carrier_;
 
         //- Additional liquid properties data
         autoPtr<liquidMixture> liquids_;
@@ -103,7 +103,7 @@ public:
             const basicThermo& thermo() const;
 
             //- Return reference to the gaseous components
-            const basicMultiComponentMixtureNew& carrier() const;
+            const basicMultiComponentMixture& carrier() const;
 
             //- Return reference to the global (additional) liquids
             const liquidMixture& liquids() const;

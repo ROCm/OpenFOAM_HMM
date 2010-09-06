@@ -21,40 +21,17 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::BasicReactingCloud
-
-Description
-    Reacting cloud templated on the type of carrier phase thermodynamics
-
-SourceFiles
-    BasicReactingCloud.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef BasicReactingCloud_H
-#define BasicReactingCloud_H
-
-#include "ReactingCloud.H"
-#include "BasicReactingParcel.H"
-#include "thermoPhysicsTypes.H"
+#include "basicReactingParcel.H"
+#include "createReactingParcelTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef ReactingCloud<BasicReactingParcel<constGasThermoPhysics> >
-        constThermoReactingCloud;
+    createReactingParcelTypes(basicReactingParcel);
+};
 
-    typedef ReactingCloud<BasicReactingParcel<gasThermoPhysics> >
-        thermoReactingCloud;
-
-    typedef ReactingCloud<BasicReactingParcel<icoPoly8ThermoPhysics> >
-        icoPoly8ThermoReactingCloud;
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

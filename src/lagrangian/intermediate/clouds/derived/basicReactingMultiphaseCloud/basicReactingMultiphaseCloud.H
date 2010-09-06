@@ -21,25 +21,30 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::basicReactingMultiphaseCloud
+
+Description
+    Cloud class to introduce multi-phase reacting parcels
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef createReactingMultiphaseParcelTypes_H
-#define createReactingMultiphaseParcelTypes_H
+#ifndef basicReactingMultiphaseCloud_H
+#define basicReactingMultiphaseCloud_H
 
-#include "ReactingMultiphaseParcel.H"
 #include "ReactingMultiphaseCloud.H"
-
-#include "createReactingParcelTypes.H"
+#include "basicReactingMultiphaseParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define createReactingMultiphaseParcelTypes(ParcelType)                       \
-                                                                              \
-    createReactingParcelTypes(ParcelType);                                    \
-                                                                              \
-    defineParcelTypeNameAndDebug(ReactingMultiphaseParcel<ParcelType>, 0);    \
-    defineTemplateTypeNameAndDebug(ReactingMultiphaseParcel<ParcelType>, 0);  \
-    defineParcelTypeNameAndDebug(ReactingMultiphaseCloud<ParcelType>, 0);
+namespace Foam
+{
+    typedef ReactingMultiphaseCloud
+        <
+            basicReactingMultiphaseParcel
+        >
+        basicReactingMultiphaseCloud;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

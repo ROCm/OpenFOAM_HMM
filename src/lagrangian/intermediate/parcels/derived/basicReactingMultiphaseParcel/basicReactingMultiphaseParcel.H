@@ -28,13 +28,13 @@ Description
 
 
 SourceFiles
-    BasicReactingMultiphaseParcel.C
-    BasicReactingMultiphaseParcelIO.C
+    basicReactingMultiphaseParcel.C
+    basicReactingMultiphaseParcelIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef BasicReactingMultiphaseParcel_H
-#define BasicReactingMultiphaseParcel_H
+#ifndef basicReactingMultiphaseParcel_H
+#define basicReactingMultiphaseParcel_H
 
 #include "ReactingMultiphaseParcel.H"
 
@@ -44,43 +44,35 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-template<class ThermoType>
-class BasicReactingMultiphaseParcel;
-
 /*---------------------------------------------------------------------------*\
-               Class BasicReactingMultiphaseParcel Declaration
+               Class basicReactingMultiphaseParcel Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ThermoType>
-class BasicReactingMultiphaseParcel
+class basicReactingMultiphaseParcel
 :
-    public ReactingMultiphaseParcel<BasicReactingMultiphaseParcel<ThermoType> >
+    public ReactingMultiphaseParcel<basicReactingMultiphaseParcel>
 {
 
 public:
 
-    //- The type of thermodynamics this parcel was instantiated for
-    typedef ThermoType thermoType;
-
     //- Run-time type information
-    TypeName("BasicReactingMultiphaseParcel");
+    TypeName("basicReactingMultiphaseParcel");
 
     // Constructors
 
         //- Construct from owner, position, and cloud owner
         //  Other properties initialised as null
-        BasicReactingMultiphaseParcel
+        basicReactingMultiphaseParcel
         (
-             ReactingMultiphaseCloud<BasicReactingMultiphaseParcel>& owner,
+             ReactingMultiphaseCloud<basicReactingMultiphaseParcel>& owner,
              const vector& position,
              const label cellI
         );
 
         //- Construct from components
-        BasicReactingMultiphaseParcel
+        basicReactingMultiphaseParcel
         (
-             ReactingMultiphaseCloud<BasicReactingMultiphaseParcel>& owner,
+             ReactingMultiphaseCloud<basicReactingMultiphaseParcel>& owner,
              const vector& position,
              const label cellI,
              const label typeId,
@@ -94,47 +86,40 @@ public:
              const scalarField& YLiquid0,
              const scalarField& YSolid0,
              const scalarField& Y0,
-             const typename
-                ReactingMultiphaseParcel<BasicReactingMultiphaseParcel>::
+             const ReactingMultiphaseParcel<basicReactingMultiphaseParcel>::
                 constantProperties& constProps
         );
 
         //- Construct from Istream
-        BasicReactingMultiphaseParcel
+        basicReactingMultiphaseParcel
         (
-            const Cloud<BasicReactingMultiphaseParcel>& c,
+            const Cloud<basicReactingMultiphaseParcel>& c,
             Istream& is,
             bool readFields = true
         );
 
         //- Construct as a copy
-        BasicReactingMultiphaseParcel(const BasicReactingMultiphaseParcel& p);
+        basicReactingMultiphaseParcel(const basicReactingMultiphaseParcel& p);
 
         //- Construct and return a clone
-        autoPtr<BasicReactingMultiphaseParcel> clone() const
+        autoPtr<basicReactingMultiphaseParcel> clone() const
         {
             return
-                autoPtr<BasicReactingMultiphaseParcel>
+                autoPtr<basicReactingMultiphaseParcel>
                 (
-                    new BasicReactingMultiphaseParcel(*this)
+                    new basicReactingMultiphaseParcel(*this)
                 );
         }
 
 
     //- Destructor
-    virtual ~BasicReactingMultiphaseParcel();
+    virtual ~basicReactingMultiphaseParcel();
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "BasicReactingMultiphaseParcel.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

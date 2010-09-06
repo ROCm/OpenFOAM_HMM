@@ -46,10 +46,10 @@ Foam::SLGThermo::SLGThermo(const fvMesh& mesh, basicThermo& thermo)
 {
     Info<< "Creating component thermo properties:" << endl;
 
-    if (isA<basicMultiComponentMixtureNew>(thermo))
+    if (isA<basicMultiComponentMixture>(thermo))
     {
-        basicMultiComponentMixtureNew& mcThermo =
-            dynamic_cast<basicMultiComponentMixtureNew&>(thermo);
+        basicMultiComponentMixture& mcThermo =
+            dynamic_cast<basicMultiComponentMixture&>(thermo);
         carrier_ = &mcThermo;
 
         Info<< "    multi-component carrier - " << mcThermo.species().size()
@@ -98,13 +98,13 @@ const Foam::basicThermo& Foam::SLGThermo::thermo() const
 }
 
 
-const Foam::basicMultiComponentMixtureNew& Foam::SLGThermo::carrier() const
+const Foam::basicMultiComponentMixture& Foam::SLGThermo::carrier() const
 {
     if (carrier_ == NULL)
     {
         FatalErrorIn
         (
-            "const Foam::basicMultiComponentMixtureNew& "
+            "const Foam::basicMultiComponentMixture& "
             "Foam::SLGThermo::carrier() const"
         )   << "carrier requested, but object is not allocated"
             << abort(FatalError);

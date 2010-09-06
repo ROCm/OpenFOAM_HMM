@@ -23,26 +23,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "BasicReactingMultiphaseParcel.H"
+#include "basicReactingMultiphaseParcel.H"
 
 // Kinematic
-#include "makeReactingParcelDispersionModels.H"
-#include "makeReactingParcelDragModels.H"
+#include "makeParcelDispersionModels.H"
+#include "makeParcelDragModels.H"
 #include "makeReactingMultiphaseParcelInjectionModels.H" // MP variant
-#include "makeReactingParcelCollisionModels.H"
-#include "makeReactingParcelPatchInteractionModels.H"
-#include "makeReactingParcelPostProcessingModels.H"
+#include "makeParcelCollisionModels.H"
+#include "makeParcelPatchInteractionModels.H"
+#include "makeParcelPostProcessingModels.H"
 
 // Thermodynamic
-#include "makeReactingParcelHeatTransferModels.H"
+#include "makeParcelHeatTransferModels.H"
 
 // Reacting
-#include "makeReactingMultiphaseParcelCompositionModels.H" // MP variant
+#include "makeReactingMultiphaseParcelCompositionModels.H" // MP Variant
 #include "makeReactingParcelPhaseChangeModels.H"
+#include "makeReactingParcelSurfaceFilmModels.H"
 
 // Reacting multiphase
 #include "makeReactingMultiphaseParcelDevolatilisationModels.H"
-#include "makeReactingMultiphaseParcelSurfaceFilmModels.H"
 #include "makeReactingMultiphaseParcelSurfaceReactionModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -50,32 +50,32 @@ License
 namespace Foam
 {
     // Kinematic sub-models
-    makeReactingDispersionModels(BasicReactingMultiphaseParcel);
-    makeReactingDragModels(BasicReactingMultiphaseParcel);
-    makeReactingMultiphaseInjectionModels(BasicReactingMultiphaseParcel);
-    makeReactingCollisionModels(BasicReactingMultiphaseParcel);
-    makeReactingPatchInteractionModels(BasicReactingMultiphaseParcel);
-    makeReactingPostProcessingModels(BasicReactingMultiphaseParcel);
+    makeParcelDispersionModels(basicReactingMultiphaseParcel);
+    makeParcelDragModels(basicReactingMultiphaseParcel);
+    makeReactingMultiphaseParcelInjectionModels(basicReactingMultiphaseParcel);
+    makeParcelCollisionModels(basicReactingMultiphaseParcel);
+    makeParcelPatchInteractionModels(basicReactingMultiphaseParcel);
+    makeParcelPostProcessingModels(basicReactingMultiphaseParcel);
 
     // Thermo sub-models
-    makeReactingHeatTransferModels(BasicReactingMultiphaseParcel);
+    makeParcelHeatTransferModels(basicReactingMultiphaseParcel);
 
     // Reacting sub-models
-    makeReactingMultiphaseCompositionModels(BasicReactingMultiphaseParcel);
-    makeReactingPhaseChangeModels(BasicReactingMultiphaseParcel);
+    makeReactingMultiphaseParcelCompositionModels(basicReactingMultiphaseParcel);
+    makeReactingParcelPhaseChangeModels(basicReactingMultiphaseParcel);
 
     // Reacting multiphase sub-models
-    makeReactingMultiphaseDevolatilisationModels
+    makeReactingMultiphaseParcelDevolatilisationModels
     (
-        BasicReactingMultiphaseParcel
+        basicReactingMultiphaseParcel
     );
-    makeReactingMultiphaseSurfaceFilmModels
+    makeReactingParcelSurfaceFilmModels
     (
-        BasicReactingMultiphaseParcel
+        basicReactingMultiphaseParcel
     );
-    makeReactingMultiphaseSurfaceReactionModels
+    makeReactingMultiphaseParcelSurfaceReactionModels
     (
-        BasicReactingMultiphaseParcel
+        basicReactingMultiphaseParcel
     );
 };
 
