@@ -23,60 +23,63 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "writePatchGeom.H"
-#include "OFstream.H"
-#include "floatScalar.H"
+#include "surfaceMeshWriter.H"
 #include "writeFuns.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
-
-void writePatchGeom
+Foam::surfaceMeshWriter::surfaceMeshWriter
 (
+    const vtkMesh& vMesh,
     const bool binary,
-    const faceList& faces,
-    const pointField& points,
-    std::ofstream& ostr
+    const indirectPrimitivePatch& pp,
+    const word& name,
+    const fileName& fName
 )
+:
+    vMesh_(vMesh),
+    binary_(binary),
+    pp_(pp),
+    fName_(fName),
+    os_(fName.c_str())
 {
-    ostr<< "POINTS " << points.size() << " float" << std::endl;
+    // Write header
+    writeFuns::writeHeader(os_, binary_, name);
 
-    DynamicList<floatScalar> ptField(3*points.size());
+    os_ << "DATASET POLYDATA" << std::endl;
 
-    writeFuns::insert(points, ptField);
-
-    writeFuns::write(ostr, binary, ptField);
-
-
+    // Write topology
     label nFaceVerts = 0;
 
-    forAll(faces, faceI)
+    forAll(pp, faceI)
     {
-        nFaceVerts += faces[faceI].size() + 1;
+        nFaceVerts += pp[faceI].size() + 1;
     }
-    ostr<< "POLYGONS " << faces.size() << ' ' << nFaceVerts << std::endl;
 
+    os_ << "POINTS " << pp.nPoints() << " float" << std::endl;
+
+    DynamicList<floatScalar> ptField(3*pp.nPoints());
+    writeFuns::insert(pp.localPoints(), ptField);
+    writeFuns::write(os_, binary, ptField);
+
+
+    os_ << "POLYGONS " << pp.size() << ' ' << nFaceVerts << std::endl;
 
     DynamicList<label> vertLabels(nFaceVerts);
 
-    forAll(faces, faceI)
+    forAll(pp, faceI)
     {
-        const face& f = faces[faceI];
+        const face& f = pp.localFaces()[faceI];
 
         vertLabels.append(f.size());
-
         writeFuns::insert(f, vertLabels);
     }
-    writeFuns::write(ostr, binary, vertLabels);
+    writeFuns::write(os_, binary_, vertLabels);
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-} // End namespace Foam
+
 
 // ************************************************************************* //
