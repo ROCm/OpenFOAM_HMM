@@ -23,18 +23,24 @@ foamChemistryFile "$FOAM_CASE/constant/reactions";
 
 foamChemistryThermoFile "$FOAM_CASE/constant/thermo.incompressiblePoly";
 
-liquidComponents
-(
-    H2O
-);
+inertSpecie     air;
 
-H2O             H2O defaultCoeffs;
+liquids
+{
+    liquidComponents
+    (
+        H2O
+    );
 
-solidComponents
-(
-);
+    H2O             H2O defaultCoeffs;
+}
 
-inertSpecie      air;
+solids
+{
+    solidComponents
+    (
+    );
+}
 
 
 // ************************************************************************* //
