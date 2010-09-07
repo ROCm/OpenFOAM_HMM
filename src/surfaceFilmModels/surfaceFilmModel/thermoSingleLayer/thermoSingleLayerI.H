@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "thermoSingleLayer.H"
+#include "specie.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,6 +47,8 @@ Foam::surfaceFilmModels::thermoSingleLayer::hs
     const volScalarField& T
 ) const
 {
+    const dimensionedScalar Tstd("Tstd", dimTemperature, specie::Tstd);
+
     return tmp<volScalarField>
     (
         new volScalarField
@@ -58,7 +61,7 @@ Foam::surfaceFilmModels::thermoSingleLayer::hs
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            cp_*(T - (dimensionedScalar("Tstd", dimTemperature, 298.15))),
+            cp_*(T - Tstd),
             zeroGradientFvPatchScalarField::typeName
         )
     );
@@ -71,6 +74,8 @@ Foam::surfaceFilmModels::thermoSingleLayer::T
     const volScalarField& hs
 ) const
 {
+    const dimensionedScalar Tstd("Tstd", dimTemperature, specie::Tstd);
+
     return tmp<volScalarField>
     (
         new volScalarField
@@ -83,7 +88,7 @@ Foam::surfaceFilmModels::thermoSingleLayer::T
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            hs/cp_ + dimensionedScalar("Tstd", dimTemperature, 298.15),
+            hs/cp_ + Tstd,
             zeroGradientFvPatchScalarField::typeName
         )
     );

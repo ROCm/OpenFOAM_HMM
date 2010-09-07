@@ -30,6 +30,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "zeroGradientFvPatchFields.H"
 #include "directMappedWallPolyPatch.H"
+#include "specie.H"
 
 // Sub-models
 #include "heatTransferModel.H"
@@ -195,12 +196,12 @@ Foam::tmp<Foam::fvScalarMatrix> Foam::surfaceFilmModels::thermoSingleLayer::q
     volScalarField& hs
 ) const
 {
+    const dimensionedScalar Tstd("Tstd", dimTemperature, specie::Tstd);
+
     return
     (
-      - fvm::Sp(htcs_->h()/cp_, hs)
-      - htcs_->h()*(dimensionedScalar("Tstd", dimTemperature, 298.15) - Ts_)
-      - fvm::Sp(htcw_->h()/cp_, hs)
-      - htcw_->h()*(dimensionedScalar("Tstd", dimTemperature, 298.15) - Tw_)
+      - fvm::Sp(htcs_->h()/cp_, hs) - htcs_->h()*(Tstd - Ts_)
+      - fvm::Sp(htcw_->h()/cp_, hs) - htcw_->h()*(Tstd - Tw_)
     );
 }
 
