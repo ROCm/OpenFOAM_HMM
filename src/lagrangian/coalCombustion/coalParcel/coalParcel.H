@@ -22,19 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    CoalParcel
+    coalParcel
 
 Description
-
+    Coal parcel class
 
 SourceFiles
     CoalParcel.C
-    CoalParcelIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CoalParcel_H
-#define CoalParcel_H
+#ifndef coalParcel_H
+#define coalParcel_H
 
 #include "ReactingMultiphaseParcel.H"
 
@@ -43,42 +42,34 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-template<class ThermoType>
-class CoalParcel;
-
 /*---------------------------------------------------------------------------*\
-                         Class CoalParcel Declaration
+                         Class coalParcel Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ThermoType>
-class CoalParcel
+class coalParcel
 :
-    public ReactingMultiphaseParcel<CoalParcel<ThermoType> >
+    public ReactingMultiphaseParcel<coalParcel>
 {
 public:
 
-    //- The type of thermodynamics this parcel was instantiated for
-    typedef ThermoType thermoType;
-
     // Run-time type information
-    TypeName("CoalParcel");
+    TypeName("coalParcel");
 
     // Constructors
 
         //- Construct from owner, position, and cloud owner
         //  Other properties initialised as null
-        CoalParcel
+        coalParcel
         (
-             ReactingMultiphaseCloud<CoalParcel>& owner,
+             ReactingMultiphaseCloud<coalParcel>& owner,
              const vector& position,
              const label cellI
         );
 
         //- Construct from components
-        CoalParcel
+        coalParcel
         (
-             ReactingMultiphaseCloud<CoalParcel>& owner,
+             ReactingMultiphaseCloud<coalParcel>& owner,
              const vector& position,
              const label cellI,
              const label typeId,
@@ -92,40 +83,36 @@ public:
              const scalarField& YGas0,
              const scalarField& YLiquid0,
              const scalarField& YSolid0,
-             const typename
-                 ReactingMultiphaseParcel<CoalParcel>::
-                 constantProperties& constProps
+             const ReactingMultiphaseParcel<coalParcel>::constantProperties&
+                 constProps
         );
 
         //- Construct from Istream
-        CoalParcel
+        coalParcel
         (
-            const Cloud<CoalParcel>& c,
+            const Cloud<coalParcel>& c,
             Istream& is,
             bool readFields = true
         );
 
+        //- Construct as a copy
+        coalParcel(const coalParcel& p);
+
         //- Construct and return a clone
-        autoPtr<CoalParcel> clone() const
+        autoPtr<coalParcel> clone() const
         {
-            return autoPtr<CoalParcel>(new CoalParcel(*this));
+            return autoPtr<coalParcel>(new coalParcel(*this));
         }
 
 
     //- Destructor
-    virtual ~CoalParcel();
+    virtual ~coalParcel();
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "CoalParcel.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -23,14 +23,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "createCoalParcelTypes.H"
-#include "CoalParcel.H"
+#include "createReactingMultiphaseParcelTypes.H"
+#include "coalParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    createCoalParcelType(CoalParcel);
+    createReactingMultiphaseParcelTypes(coalParcel);
 };
 
 

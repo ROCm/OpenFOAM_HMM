@@ -25,29 +25,21 @@ Class
     CoalCloud
 
 Description
-    Coal cloud templated on the type of carrier phase thermodynamics
+    Coal cloud
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CoalCloud_H
-#define CoalCloud_H
+#ifndef coalCloud_H
+#define coalCloud_H
 
 #include "ReactingMultiphaseCloud.H"
-#include "CoalParcel.H"
-#include "thermoPhysicsTypes.H"
+#include "coalParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef ReactingMultiphaseCloud<CoalParcel<constGasThermoPhysics> >
-        constThermoCoalCloud;
-
-    typedef ReactingMultiphaseCloud<CoalParcel<gasThermoPhysics> >
-        thermoCoalCloud;
-
-    typedef ReactingMultiphaseCloud<CoalParcel<icoPoly8ThermoPhysics> >
-        icoPoly8ThermoCoalCloud;
+    typedef ReactingMultiphaseCloud<coalParcel> coalCloud;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

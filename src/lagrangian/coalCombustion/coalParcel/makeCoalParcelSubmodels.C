@@ -23,26 +23,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "CoalParcel.H"
+#include "coalParcel.H"
 
 // Kinematic
-#include "makeReactingParcelDispersionModels.H"
-#include "makeReactingParcelDragModels.H"
+#include "makeParcelDispersionModels.H"
+#include "makeParcelDragModels.H"
 #include "makeReactingMultiphaseParcelInjectionModels.H" // MP variant
-#include "makeReactingParcelCollisionModels.H"
-#include "makeReactingParcelPatchInteractionModels.H"
-#include "makeReactingParcelPostProcessingModels.H"
+#include "makeParcelCollisionModels.H"
+#include "makeParcelPatchInteractionModels.H"
+#include "makeParcelPostProcessingModels.H"
 
 // Thermodynamic
-#include "makeReactingParcelHeatTransferModels.H"
+#include "makeParcelHeatTransferModels.H"
 
 // Reacting
 #include "makeReactingMultiphaseParcelCompositionModels.H" // MP variant
 #include "makeReactingParcelPhaseChangeModels.H"
+#include "makeReactingParcelSurfaceFilmModels.H"
 
 // Reacting multiphase
 #include "makeReactingMultiphaseParcelDevolatilisationModels.H"
-#include "makeReactingMultiphaseParcelSurfaceFilmModels.H"
 
 // Coal specific
 #include "makeCoalParcelSurfaceReactionModels.H"
@@ -52,24 +52,24 @@ License
 namespace Foam
 {
     // Kinematic sub-models
-    makeReactingDispersionModels(CoalParcel);
-    makeReactingDragModels(CoalParcel);
-    makeReactingMultiphaseInjectionModels(CoalParcel);
-    makeReactingCollisionModels(CoalParcel);
-    makeReactingPatchInteractionModels(CoalParcel);
-    makeReactingPostProcessingModels(CoalParcel);
+    makeParcelDispersionModels(coalParcel);
+    makeParcelDragModels(coalParcel);
+    makeReactingMultiphaseParcelInjectionModels(coalParcel);
+    makeParcelCollisionModels(coalParcel);
+    makeParcelPatchInteractionModels(coalParcel);
+    makeParcelPostProcessingModels(coalParcel);
 
     // Thermo sub-models
-    makeReactingHeatTransferModels(CoalParcel);
+    makeParcelHeatTransferModels(coalParcel);
 
     // Reacting sub-models
-    makeReactingMultiphaseCompositionModels(CoalParcel);
-    makeReactingPhaseChangeModels(CoalParcel);
+    makeReactingMultiphaseParcelCompositionModels(coalParcel);
+    makeReactingParcelPhaseChangeModels(coalParcel);
 
     // Reacting multiphase sub-models
-    makeReactingMultiphaseDevolatilisationModels(CoalParcel);
-    makeReactingMultiphaseSurfaceFilmModels(CoalParcel);
-    makeCoalSurfaceReactionModels(CoalParcel);
+    makeReactingMultiphaseParcelDevolatilisationModels(coalParcel);
+    makeReactingParcelSurfaceFilmModels(coalParcel);
+    makeCoalParcelSurfaceReactionModels(coalParcel);
 };
 
 

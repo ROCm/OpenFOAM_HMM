@@ -23,26 +23,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "CoalParcel.H"
+#include "coalParcel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::CoalParcel<ThermoType>::CoalParcel
+Foam::coalParcel::coalParcel
 (
-    ReactingMultiphaseCloud<CoalParcel<ThermoType> >& owner,
+    ReactingMultiphaseCloud<coalParcel>& owner,
     const vector& position,
     const label cellI
 )
 :
-    ReactingMultiphaseParcel<CoalParcel<ThermoType> >(owner, position, cellI)
+    ReactingMultiphaseParcel<coalParcel>(owner, position, cellI)
 {}
 
 
-template<class ThermoType>
-Foam::CoalParcel<ThermoType>::CoalParcel
+Foam::coalParcel::coalParcel
 (
-    ReactingMultiphaseCloud<CoalParcel<ThermoType> >& owner,
+    ReactingMultiphaseCloud<coalParcel>& owner,
     const vector& position,
     const label cellI,
     const label typeId,
@@ -56,12 +54,10 @@ Foam::CoalParcel<ThermoType>::CoalParcel
     const scalarField& YGas0,
     const scalarField& YLiquid0,
     const scalarField& YSolid0,
-    const typename
-        ReactingMultiphaseParcel<CoalParcel<ThermoType> >::
-        constantProperties& constProps
+    const ReactingMultiphaseParcel<coalParcel>::constantProperties& constProps
 )
 :
-    ReactingMultiphaseParcel<CoalParcel<ThermoType> >
+    ReactingMultiphaseParcel<coalParcel>
     (
         owner,
         position,
@@ -82,22 +78,27 @@ Foam::CoalParcel<ThermoType>::CoalParcel
 {}
 
 
-template<class ThermoType>
-Foam::CoalParcel<ThermoType>::CoalParcel
+Foam::coalParcel::coalParcel
 (
-    const Cloud<CoalParcel<ThermoType> >& cloud,
+    const Cloud<coalParcel>& cloud,
     Istream& is,
     bool readFields
 )
 :
-    ReactingMultiphaseParcel<CoalParcel<ThermoType> >(cloud, is, readFields)
+    ReactingMultiphaseParcel<coalParcel>(cloud, is, readFields)
 {}
+
+
+Foam::coalParcel::coalParcel(const coalParcel& p)
+:
+    ReactingMultiphaseParcel<coalParcel>(p)
+{
+}
 
 
 // * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::CoalParcel<ThermoType>::~CoalParcel()
+Foam::coalParcel::~coalParcel()
 {}
 
 

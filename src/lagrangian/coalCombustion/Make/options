@@ -11,6 +11,7 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/solids/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/solidMixture/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/reactionThermo/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/SLGThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/radiation/lnInclude \
     -I$(LIB_SRC)/turbulenceModels \
     -I$(LIB_SRC)/turbulenceModels/compressible/turbulenceModel \
@@ -32,6 +33,7 @@ LIB_LIBS = \
     -lsolids \
     -lsolidMixture \
     -lreactionThermophysicalModels \
+    -lSLGThermo \
     -lcompressibleRASModels \
     -lcompressibleLESModels \
     -lsurfaceFilmModels

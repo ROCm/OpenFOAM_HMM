@@ -1,5 +1,6 @@
 /* Coal parcel and sub-models */
-CoalParcel/defineCoalParcel.C
-CoalParcel/makeCoalParcelSubmodels.C
+coalParcel/coalParcel.C
+coalParcel/defineCoalParcel.C
+coalParcel/makeCoalParcelSubmodels.C
 
 LIB = $(FOAM_LIBBIN)/libcoalCombustion
