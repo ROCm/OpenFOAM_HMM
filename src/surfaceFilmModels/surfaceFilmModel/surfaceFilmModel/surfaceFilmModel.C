@@ -24,8 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "surfaceFilmModel.H"
-#include "fvc.H"
+#include "volMesh.H"
 #include "fvMesh.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
