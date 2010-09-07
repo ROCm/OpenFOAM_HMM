@@ -107,11 +107,11 @@ directMappedNamedFixedValueFvPatchField
             "directMappedNamedFixedValueFvPatchField<Type>::"
             "directMappedNamedFixedValueFvPatchField"
             "("
-            "    const fvPatch&, "
-            "    const DimensionedField<Type, volMesh>& iF, "
-            "    const dictionary&"
+                "const fvPatch&, "
+                "const DimensionedField<Type, volMesh>& iF, "
+                "const dictionary&"
             ")"
-        )   << "\n    patch type '" << p.type()
+        )   << "    patch type '" << p.type()
             << "' not type '" << directMappedPatchBase::typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << fieldName_
