@@ -25,6 +25,15 @@ Class
     Foam::injectionModel
 
 Description
+    Injection model class for use with surface film modelling
+
+    Sets the newly injected fluid properties by manipulating two arrays:
+
+      - massToInject
+      - diameterToInject
+
+    This mass is later subtracted from the film
+
 
 SourceFiles
     injectionModelI.H

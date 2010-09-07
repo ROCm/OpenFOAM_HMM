@@ -25,6 +25,7 @@ Class
     Foam::surfaceFilmModel
 
 Description
+    Top level class that provides surface film modelling functionality
 
 SourceFiles
     surfaceFilmModelI.H
