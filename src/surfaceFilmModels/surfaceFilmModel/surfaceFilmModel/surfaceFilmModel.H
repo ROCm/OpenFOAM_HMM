@@ -40,7 +40,9 @@ SourceFiles
 #include "dimensionedVector.H"
 #include "runTimeSelectionTables.H"
 #include "volFieldsFwd.H"
+#include "DimensionedField.H"
 #include "labelList.H"
+#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,6 +64,21 @@ class surfaceFilmModel
 :
     public IOdictionary
 {
+public:
+
+    // Data types
+
+        //- Enumeration listing the possible thermo types
+        enum thermoModelType
+        {
+            tmConstant,
+            tmSingleComponent
+        };
+
+        //- Named enumeration for the thermoType
+        static const NamedEnum<thermoModelType, 2> thermoModelTypeNames_;
+
+
 private:
 
     // Private Member Functions
@@ -95,14 +112,14 @@ protected:
         //- Model coefficients dictionary
         dictionary coeffs_;
 
+        //- Thermo type
+        thermoModelType thermoModel_;
+
 
     // Protected member functions
 
         //- Read control parameters from dictionary
         virtual bool read();
-
-        //- Evolve the film
-        virtual void evolveFilm() = 0;
 
 
 public:
@@ -170,6 +187,9 @@ public:
             //- Return the model coefficients dictionary
             inline const dictionary& coeffs() const;
 
+            //- Return the thermo type
+            inline const thermoModelType& thermoModel() const;
+
             //- Return the film mesh database
             virtual const fvMesh& film() const = 0;
 
@@ -202,14 +222,29 @@ public:
            //- Return the film velocity [m/s]
            virtual const volVectorField& U() const = 0;
 
+           //- Return the film surface velocity [m/s]
+           virtual const volVectorField& Us() const = 0;
+
+           //- Return the film wall velocity [m/s]
+           virtual const volVectorField& Uw() const = 0;
+
            //- Return the film density [kg/m3]
            virtual const volScalarField& rho() const = 0;
 
-           //- Return the film temperature [K]
+           //- Return the film mean temperature [K]
            virtual const volScalarField& T() const = 0;
 
-           //- Return the film specific heat capacity [J/kg/K]
+           //- Return the film surface temperature [K]
+           virtual const volScalarField& Ts() const = 0;
+
+           //- Return the film wall temperature [K]
+           virtual const volScalarField& Tw() const = 0;
+
+            //- Return the film specific heat capacity [J/kg/K]
            virtual const volScalarField& cp() const = 0;
+
+           //- Return the film thermal conductivity [W/m/K]
+           virtual const volScalarField& kappa() const = 0;
 
 
            // Transfer fields - to the primary region
@@ -220,14 +255,41 @@ public:
                //- Return the parcel diameters originating from film
                virtual const volScalarField& diametersForPrimary() const = 0;
 
+               //- Return the film mass evolved via phase change
+               virtual const volScalarField& massPhaseChangeForPrimary()
+                   const = 0;
+
 
        // Evolution
 
             //- Evolve the film
             virtual void evolve();
 
+            //- Pre-evolve film hook
+            virtual void preEvolveFilm() = 0;
 
-       // I-O
+            //- Evolve the film
+            virtual void evolveFilm() = 0;
+
+
+        // Source fields
+
+            // Mapped into primary region
+
+                //- Return total mass source - Eulerian phase only
+                virtual tmp<DimensionedField<scalar, volMesh> > Srho() const;
+
+                //- Return mass source for specie i - Eulerian phase only
+                virtual tmp<DimensionedField<scalar, volMesh> > Srho
+                (
+                    const label i
+                ) const;
+
+                //- Return enthalpy source - Eulerian phase only
+                virtual tmp<DimensionedField<scalar, volMesh> > Sh() const;
+
+
+        // I-O
 
             //- Provide some feedback
             virtual void info() const = 0;

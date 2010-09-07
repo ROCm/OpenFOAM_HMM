@@ -27,17 +27,16 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline const Foam::dimensionedScalar&
-Foam::surfaceFilmModels::thermoSingleLayer::htcw() const
+inline const Foam::SLGThermo&
+Foam::surfaceFilmModels::thermoSingleLayer::thermo() const
 {
-    return htcw_;
+    return thermo_;
 }
 
 
-inline const Foam::dimensionedScalar&
-Foam::surfaceFilmModels::thermoSingleLayer::htcs() const
+inline Foam::label Foam::surfaceFilmModels::thermoSingleLayer::liquidId() const
 {
-    return htcs_;
+    return liquidId_;
 }
 
 
@@ -59,7 +58,8 @@ Foam::surfaceFilmModels::thermoSingleLayer::hs
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            cp_*(T - (dimensionedScalar("Tstd", dimTemperature, 298.15)))
+            cp_*(T - (dimensionedScalar("Tstd", dimTemperature, 298.15))),
+            zeroGradientFvPatchScalarField::typeName
         )
     );
 }
@@ -83,28 +83,57 @@ Foam::surfaceFilmModels::thermoSingleLayer::T
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            hs/cp_ + dimensionedScalar("Tstd", dimTemperature, 298.15)
+            hs/cp_ + dimensionedScalar("Tstd", dimTemperature, 298.15),
+            zeroGradientFvPatchScalarField::typeName
         )
     );
 }
 
 
-inline Foam::volScalarField&
-Foam::surfaceFilmModels::thermoSingleLayer::hsSpPrimary()
-{
-    return hsSpPrimary_;
-}
-
-
-inline Foam::volScalarField&
-Foam::surfaceFilmModels::thermoSingleLayer::hsSp()
+inline const Foam::volScalarField&
+Foam::surfaceFilmModels::thermoSingleLayer::hsSp() const
 {
     return hsSp_;
 }
 
 
-inline Foam::surfaceFilmModels::phaseChangeModel&
-Foam::surfaceFilmModels::thermoSingleLayer::phaseChange()
+inline const Foam::volScalarField&
+Foam::surfaceFilmModels::thermoSingleLayer::hsSpPrimary() const
+{
+    return hsSpPrimary_;
+}
+
+
+inline const Foam::volScalarField&
+Foam::surfaceFilmModels::thermoSingleLayer::TPrimary() const
+{
+    return TPrimary_;
+}
+
+
+inline const Foam::PtrList<Foam::volScalarField>&
+Foam::surfaceFilmModels::thermoSingleLayer::YPrimary() const
+{
+    return YPrimary_;
+}
+
+
+inline const Foam::surfaceFilmModels::heatTransferModel&
+Foam::surfaceFilmModels::thermoSingleLayer::htcs() const
+{
+    return htcs_();
+}
+
+
+inline const Foam::surfaceFilmModels::heatTransferModel&
+Foam::surfaceFilmModels::thermoSingleLayer::htcw() const
+{
+    return htcw_();
+}
+
+
+inline const Foam::surfaceFilmModels::phaseChangeModel&
+Foam::surfaceFilmModels::thermoSingleLayer::phaseChange() const
 {
     return phaseChange_();
 }

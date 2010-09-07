@@ -22,20 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::noPhaseChange
+    Foam::cloudInjection
 
 Description
-    Dummy phase change model for 'none'
+    Cloud injection model
 
 SourceFiles
-    noPhaseChange.C
+    cloudInjection.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef noPhaseChange_H
-#define noPhaseChange_H
+#ifndef cloudInjection_H
+#define cloudInjection_H
 
-#include "phaseChangeModel.H"
+#include "injectionModel.H"
+#include "pdf.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,38 +46,55 @@ namespace surfaceFilmModels
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class noPhaseChange Declaration
+                        Class cloudInjection Declaration
 \*---------------------------------------------------------------------------*/
 
-class noPhaseChange
+class cloudInjection
 :
-    public phaseChangeModel
+    public injectionModel
 {
 private:
 
     // Private member functions
 
         //- Disallow default bitwise copy construct
-        noPhaseChange(const noPhaseChange&);
+        cloudInjection(const cloudInjection&);
 
         //- Disallow default bitwise assignment
-        void operator=(const noPhaseChange&);
+        void operator=(const cloudInjection&);
+
+
+protected:
+
+    // Protected data
+
+        //- Number of particles per parcel
+        scalar particlesPerParcel_;
+
+        //- Random number generator
+        Random rndGen_;
+
+        //- Parcel size PDF model
+        const autoPtr<pdfs::pdf> parcelPDF_;
+
+        //- Diameters of particles to inject into the cloud
+        scalarList diameter_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("none");
+    TypeName("cloudInjection");
 
 
     // Constructors
 
         //- Construct from surface film model
-        noPhaseChange(const surfaceFilmModel& owner, const dictionary& dict);
+        cloudInjection(const surfaceFilmModel& owner, const dictionary& dict);
 
 
     //- Destructor
-    virtual ~noPhaseChange();
+    virtual ~cloudInjection();
 
 
     // Member Functions
@@ -84,7 +102,11 @@ public:
         // Evolution
 
             //- Correct
-            virtual void correct(const scalar dt, scalarField& dMass);
+            virtual void correct
+            (
+                scalarField& massToInject,
+                scalarField& diameterToInject
+            );
 };
 
 

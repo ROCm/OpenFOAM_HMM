@@ -23,8 +23,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "noPhaseChange.H"
+#include "constantHeatTransfer.H"
+#include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
+#include "zeroGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -32,40 +34,72 @@ namespace Foam
 {
     namespace surfaceFilmModels
     {
-        defineTypeNameAndDebug(noPhaseChange, 0);
-        addToRunTimeSelectionTable(phaseChangeModel, noPhaseChange, dictionary);
+        defineTypeNameAndDebug(constantHeatTransfer, 0);
+        addToRunTimeSelectionTable
+        (
+            heatTransferModel,
+            constantHeatTransfer,
+            dictionary
+        );
     }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfaceFilmModels::noPhaseChange::noPhaseChange
+Foam::surfaceFilmModels::constantHeatTransfer::constantHeatTransfer
 (
     const surfaceFilmModel& owner,
-    const dictionary&
+    const dictionary& dict
 )
 :
-    phaseChangeModel(owner)
+    heatTransferModel(typeName, owner, dict),
+    c0_(readScalar(coeffs_.lookup("c0")))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::surfaceFilmModels::noPhaseChange::~noPhaseChange()
+Foam::surfaceFilmModels::constantHeatTransfer::~constantHeatTransfer()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::surfaceFilmModels::noPhaseChange::correct
-(
-    const scalar,
-    scalarField&
-)
+void Foam::surfaceFilmModels::constantHeatTransfer::correct()
 {
     // do nothing
 }
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::surfaceFilmModels::constantHeatTransfer::h() const
+{
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "htc",
+                owner_.time().timeName(),
+                owner_.film(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            owner_.film(),
+            dimensionedScalar
+            (
+                "c0",
+                dimEnergy/dimTime/sqr(dimLength)/dimTemperature,
+                c0_
+            ),
+            zeroGradientFvPatchScalarField::typeName
+        )
+    );
+}
+
 
 
 // ************************************************************************* //

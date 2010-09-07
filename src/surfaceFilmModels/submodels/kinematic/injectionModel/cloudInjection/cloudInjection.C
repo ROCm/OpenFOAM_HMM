@@ -23,8 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "noPhaseChange.H"
+#include "cloudInjection.H"
 #include "addToRunTimeSelectionTable.H"
+#include "fvMesh.H"
+#include "Time.H"
+#include "mathematicalConstants.H"
+#include "Random.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -32,39 +37,72 @@ namespace Foam
 {
     namespace surfaceFilmModels
     {
-        defineTypeNameAndDebug(noPhaseChange, 0);
-        addToRunTimeSelectionTable(phaseChangeModel, noPhaseChange, dictionary);
+        defineTypeNameAndDebug(cloudInjection, 0);
+        addToRunTimeSelectionTable(injectionModel, cloudInjection, dictionary);
     }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfaceFilmModels::noPhaseChange::noPhaseChange
+Foam::surfaceFilmModels::cloudInjection::cloudInjection
 (
     const surfaceFilmModel& owner,
-    const dictionary&
+    const dictionary& dict
 )
 :
-    phaseChangeModel(owner)
-{}
+    injectionModel(type(), owner, dict),
+    particlesPerParcel_(readScalar(coeffs_.lookup("particlesPerParcel"))),
+    rndGen_(label(0)),
+    parcelPDF_(pdfs::pdf::New(coeffs_.subDict("parcelPDF"), rndGen_)),
+    diameter_(owner.film().nCells(), 0.0)
+{
+    forAll(diameter_, faceI)
+    {
+        diameter_[faceI] = parcelPDF_->sample();
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::surfaceFilmModels::noPhaseChange::~noPhaseChange()
+Foam::surfaceFilmModels::cloudInjection::~cloudInjection()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::surfaceFilmModels::noPhaseChange::correct
+void Foam::surfaceFilmModels::cloudInjection::correct
 (
-    const scalar,
-    scalarField&
+    scalarField& massToInject,
+    scalarField& diameterToInject
 )
 {
-    // do nothing
+    const scalar pi = constant::mathematical::pi;
+    const scalarField& rhoFilm = owner().rho();
+
+    // Collect the data to be transferred
+    forAll(massToInject, cellI)
+    {
+        scalar rho = rhoFilm[cellI];
+        scalar diam = diameter_[cellI];
+        scalar minMass = particlesPerParcel_*rho*pi/6*pow3(diam);
+
+        if (massToInject[cellI] > minMass)
+        {
+            // All mass can be injected - set particle diameter
+            diameterToInject[cellI] = diameter_[cellI];
+
+            // Retrieve new particle diameter sample
+            diameter_[cellI] = parcelPDF_->sample();
+        }
+        else
+        {
+            // Mass below minimum threshold - cannot be injected
+            massToInject[cellI] = 0.0;
+            diameterToInject[cellI] = -1.0;
+        }
+    }
 }
 
 

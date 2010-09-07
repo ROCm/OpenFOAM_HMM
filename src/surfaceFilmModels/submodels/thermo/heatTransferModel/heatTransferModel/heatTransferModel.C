@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,29 +23,47 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfaceFilmModel.H"
+#include "heatTransferModel.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-inline const Foam::Switch&
-Foam::surfaceFilmModels::surfaceFilmModel::active() const
+namespace Foam
 {
-    return active_;
+    namespace surfaceFilmModels
+    {
+        defineTypeNameAndDebug(heatTransferModel, 0);
+        defineRunTimeSelectionTable(heatTransferModel, dictionary);
+    }
 }
 
 
-inline const Foam::dictionary&
-Foam::surfaceFilmModels::surfaceFilmModel::coeffs() const
-{
-    return coeffs_;
-}
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::surfaceFilmModels::heatTransferModel::heatTransferModel
+(
+    const surfaceFilmModel& owner
+)
+:
+    owner_(owner)
+{}
 
 
-inline const Foam::surfaceFilmModels::surfaceFilmModel::thermoModelType&
-Foam::surfaceFilmModels::surfaceFilmModel::thermoModel() const
-{
-    return thermoModel_;
-}
+Foam::surfaceFilmModels::heatTransferModel::heatTransferModel
+(
+    const word& type,
+    const surfaceFilmModel& owner,
+    const dictionary& dict
+)
+:
+    owner_(owner),
+    coeffs_(dict.subDict(type + "Coeffs"))
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::surfaceFilmModels::heatTransferModel::~heatTransferModel()
+{}
 
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,18 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::noPhaseChange
+    Foam::standardPhaseChange
 
 Description
-    Dummy phase change model for 'none'
+
 
 SourceFiles
-    noPhaseChange.C
+    standardPhaseChange.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef noPhaseChange_H
-#define noPhaseChange_H
+#ifndef standardPhaseChange_H
+#define standardPhaseChange_H
 
 #include "phaseChangeModel.H"
 
@@ -45,10 +45,10 @@ namespace surfaceFilmModels
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class noPhaseChange Declaration
+                    Class standardPhaseChange Declaration
 \*---------------------------------------------------------------------------*/
 
-class noPhaseChange
+class standardPhaseChange
 :
     public phaseChangeModel
 {
@@ -57,26 +57,47 @@ private:
     // Private member functions
 
         //- Disallow default bitwise copy construct
-        noPhaseChange(const noPhaseChange&);
+        standardPhaseChange(const standardPhaseChange&);
 
         //- Disallow default bitwise assignment
-        void operator=(const noPhaseChange&);
+        void operator=(const standardPhaseChange&);
+
+
+protected:
+
+    // Protected data
+
+        //- Minimum film height for model to be active
+        const scalar deltaMin_;
+
+        //- Length scalae / [m]
+        const scalar L_;
+
+
+    // Protected member functions
+
+        //- Return Sherwood number as a function of Reynolds and Schmidt numbers
+        scalar Sh(const scalar Re, const scalar Sc) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("none");
+    TypeName("standardPhaseChange");
 
 
     // Constructors
 
         //- Construct from surface film model
-        noPhaseChange(const surfaceFilmModel& owner, const dictionary& dict);
+        standardPhaseChange
+        (
+            const surfaceFilmModel& owner,
+            const dictionary& dict
+        );
 
 
     //- Destructor
-    virtual ~noPhaseChange();
+    virtual ~standardPhaseChange();
 
 
     // Member Functions

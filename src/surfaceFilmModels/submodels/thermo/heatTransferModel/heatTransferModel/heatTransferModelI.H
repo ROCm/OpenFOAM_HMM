@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,28 +23,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfaceFilmModel.H"
+#include "heatTransferModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline const Foam::Switch&
-Foam::surfaceFilmModels::surfaceFilmModel::active() const
+inline const Foam::surfaceFilmModels::surfaceFilmModel&
+Foam::surfaceFilmModels::heatTransferModel::owner() const
 {
-    return active_;
+    return owner_;
 }
 
 
 inline const Foam::dictionary&
-Foam::surfaceFilmModels::surfaceFilmModel::coeffs() const
+Foam::surfaceFilmModels::heatTransferModel::coeffs() const
 {
     return coeffs_;
-}
-
-
-inline const Foam::surfaceFilmModels::surfaceFilmModel::thermoModelType&
-Foam::surfaceFilmModels::surfaceFilmModel::thermoModel() const
-{
-    return thermoModel_;
 }
 
 

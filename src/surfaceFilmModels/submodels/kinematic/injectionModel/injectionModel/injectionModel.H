@@ -97,7 +97,7 @@ public:
     // Constructors
 
         //- Construct null
-        injectionModel(const surfaceFilmModel& owner, const dictionary& dict);
+        injectionModel(const surfaceFilmModel& owner);
 
         //- Construct from type name, dictionary and surface film model
         injectionModel

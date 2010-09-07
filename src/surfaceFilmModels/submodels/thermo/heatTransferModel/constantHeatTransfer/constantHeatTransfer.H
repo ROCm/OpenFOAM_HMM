@@ -22,20 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::noPhaseChange
+    Foam::constantHeatTransfer
 
 Description
-    Dummy phase change model for 'none'
+    Constant heat transfer model
 
 SourceFiles
-    noPhaseChange.C
+    constantHeatTransfer.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef noPhaseChange_H
-#define noPhaseChange_H
+#ifndef constantHeatTransfer_H
+#define constantHeatTransfer_H
 
-#include "phaseChangeModel.H"
+#include "heatTransferModel.H"
+#include "volFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,38 +46,48 @@ namespace surfaceFilmModels
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class noPhaseChange Declaration
+                        Class constantHeatTransfer Declaration
 \*---------------------------------------------------------------------------*/
 
-class noPhaseChange
+class constantHeatTransfer
 :
-    public phaseChangeModel
+    public heatTransferModel
 {
 private:
+
+    // Private data
+
+        //- Constant heat transfer coefficient [W/m2/K]
+        scalar c0_;
+
 
     // Private member functions
 
         //- Disallow default bitwise copy construct
-        noPhaseChange(const noPhaseChange&);
+        constantHeatTransfer(const constantHeatTransfer&);
 
         //- Disallow default bitwise assignment
-        void operator=(const noPhaseChange&);
+        void operator=(const constantHeatTransfer&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("none");
+    TypeName("constant");
 
 
     // Constructors
 
-        //- Construct from surface film model
-        noPhaseChange(const surfaceFilmModel& owner, const dictionary& dict);
+        //- Construct from surface film model and dictionary
+        constantHeatTransfer
+        (
+            const surfaceFilmModel& owner,
+            const dictionary& dict
+        );
 
 
     //- Destructor
-    virtual ~noPhaseChange();
+    virtual ~constantHeatTransfer();
 
 
     // Member Functions
@@ -84,7 +95,10 @@ public:
         // Evolution
 
             //- Correct
-            virtual void correct(const scalar dt, scalarField& dMass);
+            virtual void correct();
+
+            //- Return the heat transfer coefficient [W/m2/K]
+            virtual tmp<volScalarField> h() const;
 };
 
 

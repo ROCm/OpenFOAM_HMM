@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,23 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::phaseChangeModel
+    Foam::heatTransferModel
 
 Description
-    Phase change model for surface film modelling.
+    Base class for heat transfer models
 
 SourceFiles
-    phaseChangeModelI.H
-    phaseChangeModel.C
+    heatTransferModelI.H
+    heatTransferModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef phaseChangeModel_H
-#define phaseChangeModel_H
+#ifndef heatTransferModel_H
+#define heatTransferModel_H
 
 #include "surfaceFilmModel.H"
 #include "runTimeSelectionTables.H"
-#include "scalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,20 +47,20 @@ namespace surfaceFilmModels
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class phaseChangeModel Declaration
+                      Class heatTransferModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class phaseChangeModel
+class heatTransferModel
 {
 private:
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        phaseChangeModel(const phaseChangeModel&);
+        heatTransferModel(const heatTransferModel&);
 
         //- Disallow default bitwise assignment
-        void operator=(const phaseChangeModel&);
+        void operator=(const heatTransferModel&);
 
 
 protected:
@@ -78,7 +77,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("phaseChangeModel");
+    TypeName("heatTransferModel");
 
 
     // Declare runtime constructor selection table
@@ -86,11 +85,11 @@ public:
          declareRunTimeSelectionTable
          (
              autoPtr,
-             phaseChangeModel,
+             heatTransferModel,
              dictionary,
              (
-                const surfaceFilmModel& owner,
-                const dictionary& dict
+                 const surfaceFilmModel& owner,
+                 const dictionary& dict
              ),
              (owner, dict)
          );
@@ -98,10 +97,10 @@ public:
     // Constructors
 
         //- Construct null
-        phaseChangeModel(const surfaceFilmModel& owner);
+        heatTransferModel(const surfaceFilmModel& owner);
 
         //- Construct from type name, dictionary and surface film model
-        phaseChangeModel
+        heatTransferModel
         (
             const word& type,
             const surfaceFilmModel& owner,
@@ -112,7 +111,7 @@ public:
     // Selectors
 
         //- Return a reference to the selected phase change model
-        static autoPtr<phaseChangeModel> New
+        static autoPtr<heatTransferModel> New
         (
             const surfaceFilmModel& owner,
             const dictionary& dict
@@ -120,7 +119,7 @@ public:
 
 
     //- Destructor
-    virtual ~phaseChangeModel();
+    virtual ~heatTransferModel();
 
 
     // Member Functions
@@ -137,7 +136,10 @@ public:
         // Evolution
 
             //- Correct
-            virtual void correct(const scalar dt, scalarField& dMass) = 0;
+            virtual void correct() = 0;
+
+            //- Return the heat transfer coefficient [W/m2/K]
+            virtual tmp<volScalarField> h() const = 0;
 };
 
 
@@ -148,7 +150,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "phaseChangeModelI.H"
+#include "heatTransferModelI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

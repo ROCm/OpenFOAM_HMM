@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,20 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::noPhaseChange
+    Foam::mappedConvectiveHeatTransfer
 
 Description
-    Dummy phase change model for 'none'
+    Convective heat transfer model based on a re-working of a Nusselt number
+    correlation
 
 SourceFiles
-    noPhaseChange.C
+    mappedConvectiveHeatTransfer.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef noPhaseChange_H
-#define noPhaseChange_H
+#ifndef mappedConvectiveHeatTransfer_H
+#define mappedConvectiveHeatTransfer_H
 
-#include "phaseChangeModel.H"
+#include "heatTransferModel.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,38 +47,53 @@ namespace surfaceFilmModels
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class noPhaseChange Declaration
+                Class mappedConvectiveHeatTransfer Declaration
 \*---------------------------------------------------------------------------*/
 
-class noPhaseChange
+class mappedConvectiveHeatTransfer
 :
-    public phaseChangeModel
+    public heatTransferModel
 {
 private:
+
+    // Private data
+
+        //- Heat transfer coefficient - primary region [W/m2/K]
+        volScalarField htcConvPrimary_;
+
+        //- Heat transfer coefficient - film region [W/m2/K]
+        //  Assumes that the primary regtion to film region boundaries are
+        //  described as directMappedPushed types
+        volScalarField htcConvFilm_;
+
 
     // Private member functions
 
         //- Disallow default bitwise copy construct
-        noPhaseChange(const noPhaseChange&);
+        mappedConvectiveHeatTransfer(const mappedConvectiveHeatTransfer&);
 
         //- Disallow default bitwise assignment
-        void operator=(const noPhaseChange&);
+        void operator=(const mappedConvectiveHeatTransfer&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("none");
+    TypeName("mappedConvectiveHeatTransfer");
 
 
     // Constructors
 
-        //- Construct from surface film model
-        noPhaseChange(const surfaceFilmModel& owner, const dictionary& dict);
+        //- Construct from surface film model and dictionary
+        mappedConvectiveHeatTransfer
+        (
+            const surfaceFilmModel& owner,
+            const dictionary& dict
+        );
 
 
     //- Destructor
-    virtual ~noPhaseChange();
+    virtual ~mappedConvectiveHeatTransfer();
 
 
     // Member Functions
@@ -84,7 +101,10 @@ public:
         // Evolution
 
             //- Correct
-            virtual void correct(const scalar dt, scalarField& dMass);
+            virtual void correct();
+
+            //- Return the heat transfer coefficient [W/m2/K]
+            virtual tmp<volScalarField> h() const;
 };
 
 

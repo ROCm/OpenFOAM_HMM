@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,29 +23,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfaceFilmModel.H"
+#include "directMappedNamedFixedValueFvPatchFields.H"
+#include "volMesh.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline const Foam::Switch&
-Foam::surfaceFilmModels::surfaceFilmModel::active() const
+namespace Foam
 {
-    return active_;
-}
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-inline const Foam::dictionary&
-Foam::surfaceFilmModels::surfaceFilmModel::coeffs() const
-{
-    return coeffs_;
-}
+makePatchFields(directMappedNamedFixedValue);
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline const Foam::surfaceFilmModels::surfaceFilmModel::thermoModelType&
-Foam::surfaceFilmModels::surfaceFilmModel::thermoModel() const
-{
-    return thermoModel_;
-}
-
+} // End namespace Foam
 
 // ************************************************************************* //

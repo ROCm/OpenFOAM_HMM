@@ -38,6 +38,22 @@ namespace Foam
     }
 }
 
+
+template<>
+const char*
+Foam::NamedEnum<Foam::surfaceFilmModels::surfaceFilmModel::thermoModelType, 2>::
+names[] =
+{
+    "constant",
+    "singleComponent"
+};
+
+
+const
+Foam::NamedEnum<Foam::surfaceFilmModels::surfaceFilmModel::thermoModelType, 2>
+    Foam::surfaceFilmModels::surfaceFilmModel::thermoModelTypeNames_;
+
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 bool Foam::surfaceFilmModels::surfaceFilmModel::read()
@@ -74,7 +90,7 @@ Foam::surfaceFilmModels::surfaceFilmModel::surfaceFilmModel
             "surfaceFilmProperties",
             mesh.time().constant(),
             mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
     ),
@@ -83,7 +99,8 @@ Foam::surfaceFilmModels::surfaceFilmModel::surfaceFilmModel
     active_(false),
     g_(g),
     filmRegionName_("none"),
-    coeffs_(dictionary::null)
+    coeffs_(dictionary::null),
+    thermoModel_(tmConstant)
 {}
 
 
@@ -101,7 +118,7 @@ Foam::surfaceFilmModels::surfaceFilmModel::surfaceFilmModel
             "surfaceFilmProperties",
             mesh.time().constant(),
             mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
     ),
@@ -111,7 +128,8 @@ Foam::surfaceFilmModels::surfaceFilmModel::surfaceFilmModel
     active_(lookup("active")),
     g_(g),
     filmRegionName_(lookup("filmRegionName")),
-    coeffs_(subDict(type + "Coeffs"))
+    coeffs_(subDict(type + "Coeffs")),
+    thermoModel_(thermoModelTypeNames_.read(coeffs_.lookup("thermoModel")))
 {}
 
 
@@ -152,6 +170,9 @@ void Foam::surfaceFilmModels::surfaceFilmModel::evolve()
         // Update any input information
         read();
 
+        // Pre-evolve
+        preEvolveFilm();
+
         // Increment the film equations up to the new time level
         evolveFilm();
 
@@ -160,6 +181,42 @@ void Foam::surfaceFilmModels::surfaceFilmModel::evolve()
         info();
         Info<< endl << decrIndent;
     }
+}
+
+
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::surfaceFilmModels::surfaceFilmModel::Srho() const
+{
+    notImplemented
+    (
+        "Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> > "
+        "Foam::surfaceFilmModels::surfaceFilmModel::Srho() const"
+    )
+    return tmp<DimensionedField<scalar, volMesh> >(NULL);
+}
+
+
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::surfaceFilmModels::surfaceFilmModel::Srho(const label) const
+{
+    notImplemented
+    (
+        "Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> > "
+        "Foam::surfaceFilmModels::surfaceFilmModel::Srho(const label) const"
+    )
+    return tmp<DimensionedField<scalar, volMesh> >(NULL);
+}
+
+
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::surfaceFilmModels::surfaceFilmModel::Sh() const
+{
+    notImplemented
+    (
+        "Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> > "
+        "Foam::surfaceFilmModels::surfaceFilmModel::Sh() const"
+    )
+    return tmp<DimensionedField<scalar, volMesh> >(NULL);
 }
 
 
