@@ -120,7 +120,7 @@ protected:
             //- Skin frition coefficient for film/primary region interface
             scalar Cf_;
 
-            //- Stable film thickness - film cannot detach until this is reached
+            //- Stable film thickness - film cannot detach until reached
             dimensionedScalar deltaStable_;
 
 
@@ -434,7 +434,7 @@ public:
                 const label patchI,            // patchI on primary region
                 const label faceI,             // faceI of patchI
                 const scalar massSource,       // [kg]
-                const vector& momentumSource,  // [kg.m/s] (tangential momentum)
+                const vector& momentumSource,  // [kg.m/s] (tang'l momentum)
                 const scalar pressureSource,   // [kg.m/s] (normal momentum)
                 const scalar energySource = 0  // [J]
             );

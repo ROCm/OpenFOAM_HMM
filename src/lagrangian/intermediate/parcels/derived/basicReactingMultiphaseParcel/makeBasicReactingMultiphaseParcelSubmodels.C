@@ -61,7 +61,10 @@ namespace Foam
     makeParcelHeatTransferModels(basicReactingMultiphaseParcel);
 
     // Reacting sub-models
-    makeReactingMultiphaseParcelCompositionModels(basicReactingMultiphaseParcel);
+    makeReactingMultiphaseParcelCompositionModels
+    (
+        basicReactingMultiphaseParcel
+    );
     makeReactingParcelPhaseChangeModels(basicReactingMultiphaseParcel);
 
     // Reacting multiphase sub-models

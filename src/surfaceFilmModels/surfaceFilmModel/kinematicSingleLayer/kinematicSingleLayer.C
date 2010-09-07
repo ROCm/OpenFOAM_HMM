@@ -59,7 +59,8 @@ bool Foam::surfaceFilmModels::kinematicSingleLayer::read()
 {
     if (surfaceFilmModel::read())
     {
-        const dictionary& solution = filmRegion_.solutionDict().subDict("PISO");
+        const dictionary& solution =
+            filmRegion_.solutionDict().subDict("PISO");
         solution.lookup("momentumPredictor") >> momentumPredictor_;
         solution.lookup("nOuterCorr") >> nOuterCorr_;
         solution.lookup("nCorr") >> nCorr_;
@@ -903,7 +904,7 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
     (
         IOobject
         (
-            "U", // must have same name as U on primary region to enable mapping
+            "U", // must have same name as U to enable mapping
             time_.timeName(),
             filmRegion_,
             IOobject::MUST_READ,
@@ -915,7 +916,7 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
     (
         IOobject
         (
-            "p", // must have same name as p on primary region to enable mapping
+            "p", // must have same name as p to enable mapping
             time_.timeName(),
             filmRegion_,
             IOobject::MUST_READ,
@@ -1172,7 +1173,8 @@ Foam::surfaceFilmModels::kinematicSingleLayer::diametersForPrimary() const
 
 
 const Foam::volScalarField&
-Foam::surfaceFilmModels::kinematicSingleLayer::massPhaseChangeForPrimary() const
+Foam::surfaceFilmModels::kinematicSingleLayer::massPhaseChangeForPrimary()
+const
 {
     return massPhaseChangeForPrimary_;
 }
