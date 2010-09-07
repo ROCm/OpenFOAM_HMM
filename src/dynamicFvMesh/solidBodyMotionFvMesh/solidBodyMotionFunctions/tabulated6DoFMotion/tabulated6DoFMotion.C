@@ -127,7 +127,10 @@ bool Foam::solidBodyMotionFunctions::tabulated6DoFMotion::read
 
     // If the timeDataFileName has changed read the file
 
-    fileName newTimeDataFileName(SBMFCoeffs_.lookup("timeDataFileName"));
+    fileName newTimeDataFileName
+    (
+        fileName(SBMFCoeffs_.lookup("timeDataFileName")).expand()
+    );
 
     if (newTimeDataFileName != timeDataFileName_)
     {
