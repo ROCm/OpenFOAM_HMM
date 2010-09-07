@@ -39,11 +39,12 @@ Description
 #include "hCombustionThermo.H"
 #include "turbulenceModel.H"
 #include "basicThermoCloud.H"
-#include "CoalCloud.H"
+#include "coalCloud.H"
 #include "psiChemistryModel.H"
 #include "chemistrySolver.H"
 #include "timeActivatedExplicitSource.H"
 #include "radiationModel.H"
+#include "SLGThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
