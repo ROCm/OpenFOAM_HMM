@@ -70,13 +70,13 @@ directMappedNamedFixedValueFvPatchField
         (
             "directMappedNamedFixedValueFvPatchField<Type>::"
             "directMappedNamedFixedValueFvPatchField\n"
-            "(\n"
-            "    const directMappedNamedFixedValueFvPatchField<Type>&,\n"
-            "    const fvPatch&,\n"
-            "    const Field<Type>&,\n"
-            "    const fvPatchFieldMapper&\n"
-            ")\n"
-        )   << "\n    patch type '" << p.type()
+            "("
+                "const directMappedNamedFixedValueFvPatchField<Type>&, "
+                "const fvPatch&, "
+                "const Field<Type>&, "
+                "const fvPatchFieldMapper& "
+            ")"
+        )   << "    patch type '" << p.type()
             << "' not type '" << directMappedPatchBase::typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->dimensionedInternalField().name()
