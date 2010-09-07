@@ -23,60 +23,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "writePatchGeom.H"
-#include "OFstream.H"
-#include "floatScalar.H"
-#include "writeFuns.H"
+#ifndef outletMappedUniformInletFvPatchFieldsFwd_H
+#define outletMappedUniformInletFvPatchFieldsFwd_H
+
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void writePatchGeom
-(
-    const bool binary,
-    const faceList& faces,
-    const pointField& points,
-    std::ofstream& ostr
-)
-{
-    ostr<< "POINTS " << points.size() << " float" << std::endl;
+template<class Type> class outletMappedUniformInletFvPatchField;
 
-    DynamicList<floatScalar> ptField(3*points.size());
-
-    writeFuns::insert(points, ptField);
-
-    writeFuns::write(ostr, binary, ptField);
-
-
-    label nFaceVerts = 0;
-
-    forAll(faces, faceI)
-    {
-        nFaceVerts += faces[faceI].size() + 1;
-    }
-    ostr<< "POLYGONS " << faces.size() << ' ' << nFaceVerts << std::endl;
-
-
-    DynamicList<label> vertLabels(nFaceVerts);
-
-    forAll(faces, faceI)
-    {
-        const face& f = faces[faceI];
-
-        vertLabels.append(f.size());
-
-        writeFuns::insert(f, vertLabels);
-    }
-    writeFuns::write(ostr, binary, vertLabels);
-}
-
+makePatchTypeFieldTypedefs(outletMappedUniformInlet)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

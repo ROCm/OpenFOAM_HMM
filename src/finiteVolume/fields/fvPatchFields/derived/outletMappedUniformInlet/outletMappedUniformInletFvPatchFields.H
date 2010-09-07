@@ -21,39 +21,26 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InClass
-    Foam::writePatchGeom
-
-Description
-    Write patch geometry to stream
-
-SourceFiles
-    writePatchGeom.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef writePatchGeom_H
-#define writePatchGeom_H
+#ifndef outletMappedUniformInletFvPatchFields_H
+#define outletMappedUniformInletFvPatchFields_H
 
-#include "faceList.H"
-#include "pointField.H"
+#include "outletMappedUniformInletFvPatchField.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Write patch geometry
-void writePatchGeom
-(
-    const bool binary,
-    const faceList& faces,
-    const pointField& points,
-    std::ofstream&
-);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+makePatchTypeFieldTypedefs(outletMappedUniformInlet)
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

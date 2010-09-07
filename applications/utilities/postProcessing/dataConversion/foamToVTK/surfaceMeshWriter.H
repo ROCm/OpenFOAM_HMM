@@ -22,86 +22,117 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::SchaefferFrictionalStress
+    Foam::surfaceMeshWriter
 
 Description
+    Write faces with fields
 
 SourceFiles
-    SchaefferFrictionalStress.C
+    surfaceMeshWriter.C
+    surfaceMeshWriterTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SchaefferFrictionalStress_H
-#define SchaefferFrictionalStress_H
+#ifndef surfaceMeshWriter_H
+#define surfaceMeshWriter_H
 
-#include "frictionalStressModel.H"
+#include "pointMesh.H"
+#include "OFstream.H"
+#include "volFields.H"
+#include "surfaceFields.H"
+#include "vtkMesh.H"
+#include "indirectPrimitivePatch.H"
+
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+class volPointInterpolation;
+
 /*---------------------------------------------------------------------------*\
-                           Class SchaefferFrictionalStress Declaration
+                           Class surfaceMeshWriter Declaration
 \*---------------------------------------------------------------------------*/
 
-class SchaefferFrictionalStress
-:
-    public frictionalStressModel
+class surfaceMeshWriter
 {
+    const vtkMesh& vMesh_;
+
+    const bool binary_;
+
+    const indirectPrimitivePatch& pp_;
+
+    const fileName fName_;
+
+    std::ofstream os_;
+
+//    label nPoints_;
+//
+//    label nFaces_;
 
 public:
-
-        //- Runtime type information
-        TypeName("Schaeffer");
-
 
     // Constructors
 
         //- Construct from components
-        SchaefferFrictionalStress(const dictionary& dict);
-
-
-    //- Destructor
-    virtual ~SchaefferFrictionalStress();
-
-
-    // Member functions
-
-        virtual tmp<volScalarField> frictionalPressure
+        surfaceMeshWriter
         (
-            const volScalarField& alpha,
-            const dimensionedScalar& alphaMinFriction,
-            const dimensionedScalar& alphaMax,
-            const dimensionedScalar& Fr,
-            const dimensionedScalar& eta,
-            const dimensionedScalar& p
+            const vtkMesh&,
+            const bool binary,
+            const indirectPrimitivePatch& pp,
+            const word& name,
+            const fileName&
+        );
+
+
+    // Member Functions
+
+        std::ofstream& os()
+        {
+            return os_;
+        }
+
+//        label nPoints() const
+//        {
+//            return nPoints_;
+//        }
+//
+//        label nFaces() const
+//        {
+//            return nFaces_;
+//        }
+//
+//        //- Write cellIDs
+//        void writePatchIDs();
+
+        //- Extract face data
+        template<class Type>
+        tmp<Field<Type> > getFaceField
+        (
+            const GeometricField<Type, fvsPatchField, surfaceMesh>&
         ) const;
 
-        virtual tmp<volScalarField> frictionalPressurePrime
+        //- Write surfaceFields
+        template<class Type>
+        void write
         (
-            const volScalarField& alpha,
-            const dimensionedScalar& alphaMinFriction,
-            const dimensionedScalar& alphaMax,
-            const dimensionedScalar& Fr,
-            const dimensionedScalar& n,
-            const dimensionedScalar& p
-        ) const;
-
-        virtual tmp<volScalarField> muf
-        (
-            const volScalarField& alpha,
-            const dimensionedScalar& alphaMax,
-            const volScalarField& pf,
-            const volSymmTensorField& D,
-            const dimensionedScalar& phi
-        ) const;
+            const PtrList<GeometricField<Type, fvsPatchField, surfaceMesh> >&
+        );
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "surfaceMeshWriterTemplates.C"
+#endif
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

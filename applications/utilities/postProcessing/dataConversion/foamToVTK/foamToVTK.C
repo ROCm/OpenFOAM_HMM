@@ -157,7 +157,7 @@ Note
 
 #include "writeFaceSet.H"
 #include "writePointSet.H"
-#include "writePatchGeom.H"
+#include "surfaceMeshWriter.H"
 #include "writeSurfFields.H"
 
 
@@ -963,20 +963,42 @@ int main(int argc, char *argv[])
 
         if (doFaceZones)
         {
+            PtrList<surfaceScalarField> ssf;
+            readFields
+            (
+                vMesh,
+                vMesh.baseMesh(),
+                objects,
+                selectedFields,
+                ssf
+            );
+            print("    surfScalarFields  :", Info, ssf);
+
+            PtrList<surfaceVectorField> svf;
+            readFields
+            (
+                vMesh,
+                vMesh.baseMesh(),
+                objects,
+                selectedFields,
+                svf
+            );
+            print("    surfVectorFields  :", Info, svf);
+
             const faceZoneMesh& zones = mesh.faceZones();
 
             forAll(zones, zoneI)
             {
-                const faceZone& pp = zones[zoneI];
+                const faceZone& fz = zones[zoneI];
 
-                mkDir(fvPath/pp.name());
+                mkDir(fvPath/fz.name());
 
                 fileName patchFileName;
 
                 if (vMesh.useSubMesh())
                 {
                     patchFileName =
-                        fvPath/pp.name()/cellSetName
+                        fvPath/fz.name()/cellSetName
                       + "_"
                       + timeDesc
                       + ".vtk";
@@ -984,7 +1006,7 @@ int main(int argc, char *argv[])
                 else
                 {
                     patchFileName =
-                        fvPath/pp.name()/pp.name()
+                        fvPath/fz.name()/fz.name()
                       + "_"
                       + timeDesc
                       + ".vtk";
@@ -992,18 +1014,31 @@ int main(int argc, char *argv[])
 
                 Info<< "    FaceZone  : " << patchFileName << endl;
 
-                std::ofstream ostr(patchFileName.c_str());
-
-                writeFuns::writeHeader(ostr, binary, pp.name());
-                ostr<< "DATASET POLYDATA" << std::endl;
-
-                writePatchGeom
+                indirectPrimitivePatch pp
                 (
-                    binary,
-                    pp().localFaces(),
-                    pp().localPoints(),
-                    ostr
+                    IndirectList<face>(mesh.faces(), fz),
+                    mesh.points()
                 );
+
+                surfaceMeshWriter writer
+                (
+                    vMesh,
+                    binary,
+                    pp,
+                    fz.name(),
+                    patchFileName
+                );
+
+                // Number of fields
+                writeFuns::writeCellDataHeader
+                (
+                    writer.os(),
+                    pp.size(),
+                    ssf.size()+svf.size()
+                );
+
+                writer.write(ssf);
+                writer.write(svf);
             }
         }
 
