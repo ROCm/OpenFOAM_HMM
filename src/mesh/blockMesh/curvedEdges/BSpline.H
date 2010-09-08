@@ -47,11 +47,10 @@ Description
     segments. In rare cases (sections with very high curvatures), the
     resulting distribution may be sub-optimal.
 
+    A future implementation could also handle closed splines.
+
 SeeAlso
     CatmullRomSpline
-
-ToDo
-    A future implementation could also handle closed splines.
 
 SourceFiles
     BSpline.C

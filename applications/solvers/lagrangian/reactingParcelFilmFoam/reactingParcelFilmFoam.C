@@ -33,11 +33,12 @@ Description
 #include "fvCFD.H"
 #include "hCombustionThermo.H"
 #include "turbulenceModel.H"
-#include "BasicReactingCloud.H"
+#include "basicReactingCloud.H"
 #include "surfaceFilmModel.H"
 #include "psiChemistryModel.H"
 #include "chemistrySolver.H"
 #include "radiationModel.H"
+#include "SLGThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

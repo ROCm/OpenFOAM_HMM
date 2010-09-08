@@ -69,10 +69,8 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
         thermoCloud1.evolve();
-        thermoCloud1.info();
 
         kinematicCloud1.evolve();
-        kinematicCloud1.info();
 
 
         #include "rhoEqn.H"

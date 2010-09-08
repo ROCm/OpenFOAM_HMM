@@ -147,20 +147,6 @@ public:
             add##SS##CloudType##ParcelType##ConstructorToTable_;
 
 
-#define makeDragModelThermoType(SS, CloudType, ParcelType, ThermoType)        \
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug                                       \
-    (                                                                         \
-        SS<CloudType<ParcelType<ThermoType> > >,                              \
-        0                                                                     \
-    );                                                                        \
-                                                                              \
-    DragModel<CloudType<ParcelType<ThermoType> > >::                          \
-        adddictionaryConstructorToTable                                       \
-            <SS<CloudType<ParcelType<ThermoType> > > >                        \
-            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository

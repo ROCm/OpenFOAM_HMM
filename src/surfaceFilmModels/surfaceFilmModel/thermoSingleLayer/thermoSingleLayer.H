@@ -40,6 +40,7 @@ SourceFiles
 #define thermoSingleLayer_H
 
 #include "kinematicSingleLayer.H"
+#include "SLGThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,6 +50,7 @@ namespace surfaceFilmModels
 {
 
 // Forward declaration of classes
+class heatTransferModel;
 class phaseChangeModel;
 
 /*---------------------------------------------------------------------------*\
@@ -74,29 +76,36 @@ protected:
 
     // Protected data
 
-        // Thermo properties  TODO: currently read from coeffs dictionary
+        // Thermo properties
 
-            //- Specific heat capacity / [J/kg/K]
-            volScalarField cp_;
+            //- Reference to the SLGThermo
+            const SLGThermo& thermo_;
 
+            // Single component
 
-        // Model parameters
-
-            //- Heat transfer coefficient bewteen wall and film [W/m2/K]
-            dimensionedScalar htcw_;
-
-            //- Heat transfer coefficient bewteen film surface and primary
-            //  region [W/m2/K]
-            dimensionedScalar htcs_;
+                //- Id of component in thermo database
+                label liquidId_;
 
 
-        // Fields
+            // Fields
 
-            //- Temperature / [K]
-            volScalarField T_;
+                //- Specific heat capacity / [J/kg/K]
+                volScalarField cp_;
 
-            //- Sensible)enthalpy / [J/kg]
-            volScalarField hs_;
+                //- Thermal conductivity / [W/m/K]
+                volScalarField kappa_;
+
+                //- Temperature - mean / [K]
+                volScalarField T_;
+
+                //- Temperature - surface / [K]
+                volScalarField Ts_;
+
+                //- Temperature - wall / [K]
+                volScalarField Tw_;
+
+                //- Sensible enthalpy / [J/kg]
+                volScalarField hs_;
 
 
         // Source term fields
@@ -122,26 +131,39 @@ protected:
             //- Temperature / [K]
             volScalarField TPrimary_;
 
+            //- List of specie mass fractions / [0-1]
+            PtrList<volScalarField> YPrimary_;
+
 
         // Sub-models
+
+            //- Heat transfer coefficient bewteen film surface and primary
+            //  region [W/m2/K]
+            autoPtr<heatTransferModel> htcs_;
+
+            //- Heat transfer coefficient bewteen wall and film [W/m2/K]
+            autoPtr<heatTransferModel> htcw_;
 
             //- Phase change
             autoPtr<phaseChangeModel> phaseChange_;
 
+            //- Total mass transferred to primary region [kg]
+            scalar totalMassPhaseChange_;
 
-       // Detached surface properties
-
-           //- Energy sink from film to carrier phase [kg]
-           scalarField hsSpDetach_;
+            //- Film energy evolved via phase change
+            volScalarField energyPhaseChangeForPrimary_;
 
 
     // Protected member functions
 
-        //- Initialise the film model - called on construction
-        void initialise();
-
         //- Read control parameters from dictionary
         virtual bool read();
+
+        //- Correct the thermo fields
+        virtual void correctThermoFields();
+
+        //- Correct the film surface and wall temperatures
+        virtual void updateSurfaceTemperatures();
 
         //- Reset source term fields
         virtual void resetPrimaryRegionSourceTerms();
@@ -185,38 +207,51 @@ public:
 
     // Member Functions
 
-        // Model parameters
-
-            //- Return the heat transfer coefficient bewteen wall and film
-            inline const dimensionedScalar& htcw() const;
-
-            //- Return the Heat transfer coefficient bewteen film surface and
-            //  primary region
-            inline const dimensionedScalar& htcs() const;
-
-
         // Thermo properties
 
-            //- Return sensible enthalpy as a function of temperature
-            inline tmp<Foam::volScalarField> hs
-            (
-                const volScalarField& T
-            ) const;
+            //- Return const reference to the SLGThermo object
+            inline const SLGThermo& thermo() const;
 
-            //- Return temperature as a function of sensible enthalpy
-            inline tmp<Foam::volScalarField> T
-            (
-                const volScalarField& hs
-            ) const;
+            // Single component
+
+                //- Return the Id of component in thermo database
+                inline label liquidId() const;
 
 
-        // Fields
+            // Fields
 
-            //- Return the film temperature [K]
-            virtual const volScalarField& T() const;
+                //- Return the film specific heat capacity [J/kg/K]
+                virtual const volScalarField& cp() const;
 
-            //- Return the film specific heat capacity [J/kg/K]
-            virtual const volScalarField& cp() const;
+                //- Return the film thermal conductivity [W/m/K]
+                virtual const volScalarField& kappa() const;
+
+                //- Return the film mean temperature [K]
+                virtual const volScalarField& T() const;
+
+                //- Return the film surface temperature [K]
+                virtual const volScalarField& Ts() const;
+
+                //- Return the film wall temperature [K]
+                virtual const volScalarField& Tw() const;
+
+                //- Return the film sensible enthalpy [J/kg]
+                virtual const volScalarField& hs() const;
+
+
+            // Helper functions
+
+                //- Return sensible enthalpy as a function of temperature
+                inline tmp<Foam::volScalarField> hs
+                (
+                    const volScalarField& T
+                ) const;
+
+                //- Return temperature as a function of sensible enthalpy
+                inline tmp<Foam::volScalarField> T
+                (
+                    const volScalarField& hs
+                ) const;
 
 
          // Source fields (read/write access)
@@ -233,28 +268,63 @@ public:
             );
 
 
-            // Primary region
-
-                //- Energy / [J/m2/s]
-                inline volScalarField& hsSpPrimary();
-
+        // Source term fields
 
             // Film region
 
                 //- Energy / [J/m2/s]
-                inline volScalarField& hsSp();
+                inline const volScalarField& hsSp() const;
+
+
+            // Primary region
+
+                //- Energy / [J/m2/s]
+                inline const volScalarField& hsSpPrimary() const;
+
+
+        // Fields mapped from the primary region
+
+            //- Temperature / [K]
+            inline const volScalarField& TPrimary() const;
+
+            //- Specie mass fractions / [0-1]
+            inline const PtrList<volScalarField>& YPrimary() const;
+
 
 
         // Sub-models
 
-            //- Phase change
-            inline phaseChangeModel& phaseChange();
+            //- Return const access to the (surface) heat transfer model
+            inline const heatTransferModel& htcs() const;
+
+            //- Return const access to the (wall) heat transfer model
+            inline const heatTransferModel& htcw() const;
+
+            //- Return const access to the phawse change model
+            inline const phaseChangeModel& phaseChange() const;
 
 
         // Evolution
 
+            //- Pre-evolve film hook
+            virtual void preEvolveFilm();
+
             //- Evolve the film equations
             virtual void evolveFilm();
+
+
+        // Source fields
+
+            // Mapped into primary region
+
+                //- Return mass source for specie i - Eulerian phase only
+                virtual tmp<DimensionedField<scalar, volMesh> > Srho
+                (
+                    const label i
+                ) const;
+
+                //- Return enthalpy source - Eulerian phase only
+                virtual tmp<DimensionedField<scalar, volMesh> > Sh() const;
 
 
        // I-O

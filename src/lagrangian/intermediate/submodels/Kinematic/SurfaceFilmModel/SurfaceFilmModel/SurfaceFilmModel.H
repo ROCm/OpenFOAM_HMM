@@ -263,21 +263,6 @@ public:
             add##SS##CloudType##ParcelType##ConstructorToTable_;
 
 
-#define makeSurfaceFilmModelThermoType(SS, CloudType, ParcelType, ThermoType) \
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug                                       \
-    (                                                                         \
-        SS<CloudType<ParcelType<ThermoType> > >,                              \
-        0                                                                     \
-    );                                                                        \
-                                                                              \
-    SurfaceFilmModel<CloudType<ParcelType<ThermoType> > >::                   \
-        adddictionaryConstructorToTable                                       \
-        <SS<CloudType<ParcelType<ThermoType> > > >                            \
-            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
-
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "SurfaceFilmModelI.H"

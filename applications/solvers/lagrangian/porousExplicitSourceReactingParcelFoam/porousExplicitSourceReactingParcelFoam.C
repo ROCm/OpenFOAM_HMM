@@ -33,7 +33,6 @@ Description
     - reacting multiphase parcel cloud
     - porous media
     - mass, momentum and energy sources
-    - polynomial based, incompressible thermodynamics (f(T))
 
     Note: ddtPhiCorr not used here when porous zones are active
     - not well defined for porous calculations
@@ -43,12 +42,13 @@ Description
 #include "fvCFD.H"
 #include "hReactionThermo.H"
 #include "turbulenceModel.H"
-#include "BasicReactingMultiphaseCloud.H"
+#include "basicReactingMultiphaseCloud.H"
 #include "rhoChemistryModel.H"
 #include "chemistrySolver.H"
 #include "radiationModel.H"
 #include "porousZones.H"
 #include "timeActivatedExplicitSource.H"
+#include "SLGThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

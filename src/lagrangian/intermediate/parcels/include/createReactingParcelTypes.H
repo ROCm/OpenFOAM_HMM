@@ -26,39 +26,20 @@ License
 #ifndef createReactingParcelTypes_H
 #define createReactingParcelTypes_H
 
-#include "thermoPhysicsTypes.H"
+#include "ReactingParcel.H"
+#include "ReactingCloud.H"
+
+#include "createThermoParcelTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define createReactingParcelType(ParcelType)                                  \
+#define createReactingParcelTypes(ParcelType)                                 \
                                                                               \
-    createReactingParcelThermoType(ParcelType, constGasThermoPhysics);        \
-    createReactingParcelThermoType(ParcelType, gasThermoPhysics);             \
-    createReactingParcelThermoType(ParcelType, icoPoly8ThermoPhysics);
-
-
-#define createReactingParcelThermoType(ParcelType, ThermoType)                \
+    createThermoParcelTypes(ParcelType);                                      \
                                                                               \
-    typedef ParcelType<ThermoType> ParcelType##ThermoType;                    \
-                                                                              \
-    defineTemplateTypeNameAndDebug(ParcelType##ThermoType, 0);                \
-    defineTemplateTypeNameAndDebug(Particle<ParcelType##ThermoType>, 0);      \
-    defineTemplateTypeNameAndDebug(Cloud<ParcelType##ThermoType>, 0);         \
-                                                                              \
-    defineParcelTypeNameAndDebug(KinematicParcel<ParcelType##ThermoType>, 0); \
-    defineTemplateTypeNameAndDebug                                            \
-    (                                                                         \
-        KinematicParcel<ParcelType##ThermoType>,                              \
-        0                                                                     \
-    );                                                                        \
-    defineParcelTypeNameAndDebug(ThermoParcel<ParcelType##ThermoType>, 0);    \
-    defineTemplateTypeNameAndDebug(ThermoParcel<ParcelType##ThermoType>, 0);  \
-    defineParcelTypeNameAndDebug(ReactingParcel<ParcelType##ThermoType>, 0);  \
-    defineTemplateTypeNameAndDebug(ReactingParcel<ParcelType##ThermoType>, 0);\
-                                                                              \
-    defineParcelTypeNameAndDebug(KinematicCloud<ParcelType##ThermoType>, 0);  \
-    defineParcelTypeNameAndDebug(ThermoCloud<ParcelType##ThermoType>, 0);     \
-    defineParcelTypeNameAndDebug(ReactingCloud<ParcelType##ThermoType>, 0);
+    defineParcelTypeNameAndDebug(ReactingParcel<ParcelType>, 0);              \
+    defineTemplateTypeNameAndDebug(ReactingParcel<ParcelType>, 0);            \
+    defineParcelTypeNameAndDebug(ReactingCloud<ParcelType>, 0);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

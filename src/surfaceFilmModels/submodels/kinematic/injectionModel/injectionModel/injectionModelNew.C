@@ -34,7 +34,7 @@ Foam::surfaceFilmModels::injectionModel::New
     const dictionary& dict
 )
 {
-    const word modelType(dict.lookup("injectionModel"));
+    word modelType(dict.lookup("injectionModel"));
 
     Info<< "    Selecting injectionModel " << modelType << endl;
 
