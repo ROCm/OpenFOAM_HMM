@@ -90,7 +90,8 @@ Foam::surfaceFilmModels::standardPhaseChange::~standardPhaseChange()
 void Foam::surfaceFilmModels::standardPhaseChange::correct
 (
     const scalar dt,
-    scalarField& dMass
+    scalarField& dMass,
+    scalarField& dEnergy
 )
 {
     const thermoSingleLayer& film = refCast<const thermoSingleLayer>(owner_);
@@ -111,11 +112,11 @@ void Foam::surfaceFilmModels::standardPhaseChange::correct
     const scalarField& TInf = film.TPrimary();
     const scalarField& rho = film.rho();
     const scalarField& mu = film.mu();
-    const scalarField& hs = film.hs();
     const scalarField& magSf = film.magSf();
     const scalarField hInf = film.htcs().h();
     const scalarField hFilm = film.htcw().h();
     const vectorField dU = film.UPrimary() - film.Us();
+    const scalarField availableMass = delta*rho*magSf;
 
     // Reynolds number
     const scalarField Re = rho*mag(dU)*L_/mu;
@@ -136,18 +137,16 @@ void Foam::surfaceFilmModels::standardPhaseChange::correct
             // saturation pressure
             const scalar pSat = liq.pv(pc, Ts[cellI]);
 
+            // latent heat
+            const scalar hVap = liq.hl(pc, Ts[cellI]);
+
             // calculate mass transfer
             if (pSat > pc)
             {
                 // boiling
                 const scalar qDotInf = hInf[cellI]*(TInf[cellI] - T[cellI]);
                 const scalar qDotFilm = hFilm[cellI]*(T[cellI] - Tw[cellI]);
-                dMass[cellI] +=
-                    max
-                    (
-                        0.0,
-                        dt*magSf[cellI]/hs[cellI]*(qDotInf - qDotFilm)
-                    );
+                dMass[cellI] = dt*magSf[cellI]/hVap*(qDotInf - qDotFilm);
             }
             else
             {
@@ -171,12 +170,11 @@ void Foam::surfaceFilmModels::standardPhaseChange::correct
 
                 // add mass contribution to source
                 dMass[cellI] =
-                    max
-                    (
-                        0.0,
-                        dt*magSf[cellI]*rhoAve*hm*(Ys - YInf[cellI])/(1.0 - Ys)
-                    );
+                    dt*magSf[cellI]*rhoAve*hm*(Ys - YInf[cellI])/(1.0 - Ys);
             }
+
+            dMass[cellI] = min(availableMass[cellI], max(0.0, dMass[cellI]));
+            dEnergy[cellI] = dMass[cellI]*hVap;
         }
     }
 }

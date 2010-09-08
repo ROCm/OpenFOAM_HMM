@@ -137,7 +137,12 @@ public:
         // Evolution
 
             //- Correct
-            virtual void correct(const scalar dt, scalarField& dMass) = 0;
+            virtual void correct
+            (
+                const scalar dt,
+                scalarField& dMass,
+                scalarField& dEnergy
+            ) = 0;
 };
 
 

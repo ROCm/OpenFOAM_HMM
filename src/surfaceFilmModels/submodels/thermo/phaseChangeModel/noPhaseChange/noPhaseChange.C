@@ -61,6 +61,7 @@ Foam::surfaceFilmModels::noPhaseChange::~noPhaseChange()
 void Foam::surfaceFilmModels::noPhaseChange::correct
 (
     const scalar,
+    scalarField&,
     scalarField&
 )
 {

@@ -150,6 +150,9 @@ protected:
             //- Total mass transferred to primary region [kg]
             scalar totalMassPhaseChange_;
 
+            //- Film energy evolved via phase change
+            volScalarField energyPhaseChangeForPrimary_;
+
 
     // Protected member functions
 

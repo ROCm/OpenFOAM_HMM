@@ -131,7 +131,7 @@ void Foam::surfaceFilmModels::thermoSingleLayer::updateSurfaceTemperatures()
     Ts_ =
         (
             // qRad
-          - massPhaseChangeForPrimary_*hs_/(time_.deltaT()*magSf_)
+          - energyPhaseChangeForPrimary_/(time_.deltaT()*magSf_)
           + TPrimary_*htcs_->h()
           + kappaDeltaBy2*T_
         )
@@ -176,7 +176,14 @@ void Foam::surfaceFilmModels::thermoSingleLayer::updateSubmodels()
 
     // Update phase change
     massPhaseChangeForPrimary_ == dimensionedScalar("zero", dimMass, 0.0);
-    phaseChange_->correct(time_.deltaTValue(), massPhaseChangeForPrimary_);
+    energyPhaseChangeForPrimary_ == dimensionedScalar("zero", dimEnergy, 0.0);
+
+    phaseChange_->correct
+    (
+        time_.deltaTValue(),
+        massPhaseChangeForPrimary_,
+        energyPhaseChangeForPrimary_
+    );
     massPhaseChangeForPrimary_.correctBoundaryConditions();
     totalMassPhaseChange_ += sum(massPhaseChangeForPrimary_).value();
 
@@ -187,7 +194,8 @@ void Foam::surfaceFilmModels::thermoSingleLayer::updateSubmodels()
     const dimensionedScalar deltaT = time_.deltaT();
     rhoSp_ -= massPhaseChangeForPrimary_/magSf_/deltaT;
     USp_ -= massPhaseChangeForPrimary_*U_/magSf_/deltaT;
-    hsSp_ -= (massForPrimary_ + massPhaseChangeForPrimary_)*hs_/magSf_/deltaT;
+    hsSp_ -=
+        (massForPrimary_*hs_ + energyPhaseChangeForPrimary_)/magSf_/deltaT;
 }
 
 
@@ -380,7 +388,21 @@ Foam::surfaceFilmModels::thermoSingleLayer::thermoSingleLayer
         heatTransferModel::New(*this, coeffs_.subDict("lowerSurfaceModels"))
     ),
     phaseChange_(phaseChangeModel::New(*this, coeffs_)),
-    totalMassPhaseChange_(0.0)
+    totalMassPhaseChange_(0.0),
+    energyPhaseChangeForPrimary_
+    (
+        IOobject
+        (
+            "energyPhaseChangeForPrimary",
+            time_.timeName(),
+            filmRegion_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        filmRegion_,
+        dimensionedScalar("zero", dimEnergy, 0),
+        zeroGradientFvPatchScalarField::typeName
+    )
 {
     if (thermo_.hasMultiComponentCarrier())
     {
