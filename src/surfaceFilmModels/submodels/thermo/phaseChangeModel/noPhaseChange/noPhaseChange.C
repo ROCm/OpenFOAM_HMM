@@ -43,10 +43,10 @@ namespace Foam
 Foam::surfaceFilmModels::noPhaseChange::noPhaseChange
 (
     const surfaceFilmModel& owner,
-    const dictionary& dict
+    const dictionary&
 )
 :
-    phaseChangeModel(owner, dict)
+    phaseChangeModel(owner)
 {}
 
 
@@ -58,7 +58,12 @@ Foam::surfaceFilmModels::noPhaseChange::~noPhaseChange()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::surfaceFilmModels::noPhaseChange::correct()
+void Foam::surfaceFilmModels::noPhaseChange::correct
+(
+    const scalar,
+    scalarField&,
+    scalarField&
+)
 {
     // do nothing
 }

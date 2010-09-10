@@ -34,7 +34,7 @@ Foam::surfaceFilmModels::phaseChangeModel::New
     const dictionary& dict
 )
 {
-    const word modelType(dict.lookup("phaseChangeModel"));
+    word modelType(dict.lookup("phaseChangeModel"));
 
     Info<< "    Selecting phaseChangeModel " << modelType << endl;
 

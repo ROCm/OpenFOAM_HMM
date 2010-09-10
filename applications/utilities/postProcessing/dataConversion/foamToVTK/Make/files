@@ -1,9 +1,10 @@
+surfaceMeshWriter.C
+
 foamToVTK.C
 internalWriter.C
 lagrangianWriter.C
 patchWriter.C
 writeFuns.C
-writePatchGeom.C
 writeFaceSet.C
 writePointSet.C
 writeSurfFields.C

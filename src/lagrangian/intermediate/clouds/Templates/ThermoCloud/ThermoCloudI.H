@@ -38,18 +38,9 @@ Foam::ThermoCloud<ParcelType>::constProps() const
 
 
 template<class ParcelType>
-inline const Foam::basicThermo&
-Foam::ThermoCloud<ParcelType>::carrierThermo() const
+inline const Foam::SLGThermo& Foam::ThermoCloud<ParcelType>::thermo() const
 {
-    return carrierThermo_;
-}
-
-
-template<class ParcelType>
-inline Foam::basicThermo&
-Foam::ThermoCloud<ParcelType>::carrierThermo()
-{
-    return carrierThermo_;
+    return thermo_;
 }
 
 

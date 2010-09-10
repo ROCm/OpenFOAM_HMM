@@ -43,10 +43,10 @@ namespace Foam
 Foam::surfaceFilmModels::removeInjection::removeInjection
 (
     const surfaceFilmModel& owner,
-    const dictionary& dict
+    const dictionary&
 )
 :
-    injectionModel(owner, dict)
+    injectionModel(owner)
 {}
 
 

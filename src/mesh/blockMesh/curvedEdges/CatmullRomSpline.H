@@ -48,12 +48,11 @@ Description
     segments. In rare cases (sections with very high curvatures), the
     resulting distribution may be sub-optimal.
 
+    A future implementation could also handle closed splines.
+
 SeeAlso
     http://www.algorithmist.net/catmullrom.html provides a nice
     introduction
-
-ToDo
-    A future implementation could also handle closed splines.
 
 SourceFiles
     CatmullRomSpline.C

@@ -28,7 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "thermoPhysicsTypes.H"
 #include "ReactingMultiphaseCloud.H"
 
 #include "ConstantRateDevolatilisation.H"
@@ -37,52 +36,27 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReactingMultiphaseDevolatilisationModels(ParcelType)              \
+#define makeReactingMultiphaseParcelDevolatilisationModels(ParcelType)        \
                                                                               \
-    makeReactingMultiphaseDevolatilisationModelThermoType                     \
-    (                                                                         \
-        ParcelType,                                                           \
-        constGasThermoPhysics                                                 \
-    );                                                                        \
-    makeReactingMultiphaseDevolatilisationModelThermoType                     \
-    (                                                                         \
-        ParcelType,                                                           \
-        gasThermoPhysics                                                      \
-    );                                                                        \
-    makeReactingMultiphaseDevolatilisationModelThermoType                     \
-    (                                                                         \
-        ParcelType,                                                           \
-        icoPoly8ThermoPhysics                                                 \
-    );
-
-
-#define makeReactingMultiphaseDevolatilisationModelThermoType(ParcelType, ThermoType)\
+    makeDevolatilisationModel(ReactingMultiphaseCloud<ParcelType>);           \
                                                                               \
-    makeDevolatilisationModel                                                 \
-    (                                                                         \
-        ReactingMultiphaseCloud<ParcelType<ThermoType> >                      \
-    );                                                                        \
-                                                                              \
-    makeDevolatilisationModelThermoType                                       \
+    makeDevolatilisationModelType                                             \
     (                                                                         \
         ConstantRateDevolatilisation,                                         \
         ReactingMultiphaseCloud,                                              \
-        ParcelType,                                                           \
-        ThermoType                                                            \
+        ParcelType                                                            \
     );                                                                        \
-    makeDevolatilisationModelThermoType                                       \
+    makeDevolatilisationModelType                                             \
     (                                                                         \
         NoDevolatilisation,                                                   \
         ReactingMultiphaseCloud,                                              \
-        ParcelType,                                                           \
-        ThermoType                                                            \
+        ParcelType                                                            \
     );                                                                        \
-    makeDevolatilisationModelThermoType                                       \
+    makeDevolatilisationModelType                                             \
     (                                                                         \
         SingleKineticRateDevolatilisation,                                    \
         ReactingMultiphaseCloud,                                              \
-        ParcelType,                                                           \
-        ThermoType                                                            \
+        ParcelType                                                            \
     );
 
 

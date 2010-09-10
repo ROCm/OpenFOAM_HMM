@@ -136,6 +136,41 @@ Foam::surfaceFilmModels::kinematicSingleLayer::rhoSp()
 }
 
 
+inline const Foam::volVectorField&
+Foam::surfaceFilmModels::kinematicSingleLayer::USp() const
+{
+    return USp_;
+}
+
+
+inline const Foam::volScalarField&
+Foam::surfaceFilmModels::kinematicSingleLayer::pSp() const
+{
+    return pSp_;
+}
+
+
+inline const Foam::volScalarField&
+Foam::surfaceFilmModels::kinematicSingleLayer::rhoSp() const
+{
+    return rhoSp_;
+}
+
+
+inline const Foam::volVectorField&
+Foam::surfaceFilmModels::kinematicSingleLayer::UPrimary() const
+{
+    return UPrimary_;
+}
+
+
+inline const Foam::volScalarField&
+Foam::surfaceFilmModels::kinematicSingleLayer::pPrimary() const
+{
+    return pPrimary_;
+}
+
+
 inline Foam::surfaceFilmModels::injectionModel&
 Foam::surfaceFilmModels::kinematicSingleLayer::injection()
 {

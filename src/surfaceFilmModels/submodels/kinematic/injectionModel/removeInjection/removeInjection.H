@@ -66,7 +66,7 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("remove");
+    TypeName("removeInjection");
 
 
     // Constructors

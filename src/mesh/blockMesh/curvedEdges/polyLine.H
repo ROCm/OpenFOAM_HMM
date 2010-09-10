@@ -28,7 +28,6 @@ Description
     A series of straight line segments, which can also be interpreted as
     a series of control points for splines, etc.
 
-ToDo
     A future implementation could also handle a closed polyLine.
 
 SourceFiles

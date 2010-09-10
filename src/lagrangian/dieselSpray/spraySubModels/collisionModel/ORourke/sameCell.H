@@ -13,7 +13,8 @@ spray::iterator pMax = p2;
 scalar dMin = pMin().d();
 scalar dMax = pMax().d();
 
-if (dMin > dMax) {
+if (dMin > dMax)
+{
     dMin = pMax().d();
     dMax = pMin().d();
     pMin = p2;
@@ -31,13 +32,14 @@ scalar nMin = pMin().N(rhoMin);
 
 scalar mdMin = mMin/nMin;
 
-scalar nu0 = 0.25*constant::mathematical::pi*sumD*sumD*magVRel*dt/vols_[cell1];
+scalar nu0 = 0.25*constant::mathematical::pi*sqr(sumD)*magVRel*dt/vols_[cell1];
 scalar nu = nMin*nu0;
 scalar collProb = exp(-nu);
 scalar xx = rndGen_.scalar01();
 
-// collision occur
-if (( xx > collProb) && (mMin > VSMALL) && (mMax > VSMALL)) {
+if ((xx > collProb) && (mMin > VSMALL) && (mMax > VSMALL))
+{
+    // collision occurs
 
     scalar gamma = dMax/max(dMin, 1.0e-12);
     scalar f = gamma*gamma*gamma + 2.7*gamma - 2.4*gamma*gamma;
@@ -63,8 +65,8 @@ if (( xx > collProb) && (mMin > VSMALL) && (mMax > VSMALL)) {
     scalar prob = rndGen_.scalar01();
 
     // Coalescence
-    if ( prob < coalesceProb && coalescence_) {
-
+    if (prob < coalesceProb && coalescence_)
+    {
         // How 'many' of the droplets coalesce
         // This is the kiva way ... which actually works best
 
@@ -73,14 +75,17 @@ if (( xx > collProb) && (mMin > VSMALL) && (mMax > VSMALL)) {
         label n=2;
 
         // xx > collProb=zz
-        while ((zz < xx) && (n<1000)) {
+        while ((zz < xx) && (n<1000))
+        {
             zz += vnu;
             vnu *= nu/n;
+            n++;
         }
-        //Info<< "vnu = " << vnu << ", n = " << n << endl;
         scalar nProb = n - 1;
+
         // All droplets coalesce
-        if (nProb*nMax > nMin) {
+        if (nProb*nMax > nMin)
+        {
             nProb = nMin/nMax;
         }
 
@@ -93,7 +98,7 @@ if (( xx > collProb) && (mMin > VSMALL) && (mMax > VSMALL)) {
 
         pMax().T() = (averageTemp*mTot - newMinMass*pMin().T())/newMaxMass;
         rhoMax = spray_.fuels().rho(pc, pMax().T(), pMax().X());
-        scalar d3 = pow(dMax, 3) + nProb*pow(dMin,3);
+        scalar d3 = pow3(dMax) + nProb*pow3(dMin);
         pMax().d() = cbrt(d3);
         pMax().U() = (momMax + (1.0-newMinMass/mMin)*momMin)/newMaxMass;
 
@@ -110,14 +115,15 @@ if (( xx > collProb) && (mMin > VSMALL) && (mMax > VSMALL)) {
         {
             pMax().X()[i] = Ynew[i]/(spray_.fuels().properties()[i].W()*Wlinv);
         }
-
     }
-    // Grazing collision (no coalescence)
-    else {
+    else
+    {
+        // Grazing collision (no coalescence)
 
         scalar gf = sqrt(prob) - sqrt(coalesceProb);
         scalar denom = 1.0 - sqrt(coalesceProb);
-        if (denom < 1.0e-5) {
+        if (denom < 1.0e-5)
+        {
             denom = 1.0;
         }
         gf /= denom;
@@ -139,16 +145,16 @@ if (( xx > collProb) && (mMin > VSMALL) && (mMax > VSMALL)) {
         vector v1p = (mr + m2*gf*vRel)/(m1+m2);
         vector v2p = (mr - m1*gf*vRel)/(m1+m2);
 
-        if (n1 < n2) {
+        if (n1 < n2)
+        {
             p1().U() = v1p;
             p2().U() = (n1*v2p + (n2-n1)*v2)/n2;
         }
-        else {
+        else
+        {
             p1().U() = (n2*v1p + (n1-n2)*v1)/n1;
             p2().U() = v2p;
         }
-
-    } // if - coalescence or not
-
-} // if - collision
+    }
+}
 

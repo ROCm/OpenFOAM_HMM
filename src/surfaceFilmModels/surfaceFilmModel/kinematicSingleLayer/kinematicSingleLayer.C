@@ -59,7 +59,8 @@ bool Foam::surfaceFilmModels::kinematicSingleLayer::read()
 {
     if (surfaceFilmModel::read())
     {
-        const dictionary& solution = filmRegion_.solutionDict().subDict("PISO");
+        const dictionary& solution =
+            filmRegion_.solutionDict().subDict("PISO");
         solution.lookup("momentumPredictor") >> momentumPredictor_;
         solution.lookup("nOuterCorr") >> nOuterCorr_;
         solution.lookup("nCorr") >> nCorr_;
@@ -170,6 +171,26 @@ void Foam::surfaceFilmModels::kinematicSingleLayer::initialise()
 }
 
 
+void Foam::surfaceFilmModels::kinematicSingleLayer::correctThermoFields()
+{
+    if (thermoModel_ == tmConstant)
+    {
+        rho_ == dimensionedScalar(coeffs_.lookup("rho0"));
+        mu_ == dimensionedScalar(coeffs_.lookup("mu0"));
+        sigma_ == dimensionedScalar(coeffs_.lookup("sigma0"));
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "void Foam::surfaceFilmModels::kinematicSingleLayer::"
+            "correctThermo()"
+        )   << "Kinematic surface film must use "
+            << thermoModelTypeNames_[thermoModel_] << "thermodynamics" << endl;
+    }
+}
+
+
 void Foam::surfaceFilmModels::kinematicSingleLayer::
 resetPrimaryRegionSourceTerms()
 {
@@ -197,7 +218,7 @@ transferPrimaryRegionFields()
 
     // Convert accummulated source terms into per unit area per unit time
     // Note: boundary values will still have original (neat) values
-    const scalar deltaT = filmRegion_.time().deltaTValue();
+    const scalar deltaT = time_.deltaTValue();
     rhoSp_.field() /= magSf_*deltaT;
     USp_.field() /= magSf_*deltaT;
     pSp_.field() /= magSf_*deltaT;
@@ -214,7 +235,7 @@ Foam::surfaceFilmModels::kinematicSingleLayer::pu()
             IOobject
             (
                 "pu",
-                filmRegion_.time().timeName(),
+                time_.timeName(),
                 filmRegion_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
@@ -237,7 +258,7 @@ Foam::surfaceFilmModels::kinematicSingleLayer::pp()
             IOobject
             (
                 "pp",
-                filmRegion_.time().timeName(),
+                time_.timeName(),
                 filmRegion_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
@@ -260,7 +281,12 @@ void Foam::surfaceFilmModels::kinematicSingleLayer::correctDetachedFilm()
         if (gNorm[i] > SMALL)
         {
             scalar ddelta = max(0.0, delta_[i] - deltaStable_.value());
-            massForPrimary_[i] = ddelta*rho_[i]*magSf_[i];
+            massForPrimary_[i] =
+                max
+                (
+                    0.0,
+                    ddelta*rho_[i]*magSf_[i] - massPhaseChangeForPrimary_[i]
+                );
         }
     }
 }
@@ -281,7 +307,7 @@ void Foam::surfaceFilmModels::kinematicSingleLayer::updateSubmodels()
     diametersForPrimary_.correctBoundaryConditions();
 
     // Update source fields
-    const dimensionedScalar deltaT = filmRegion_.time().deltaT();
+    const dimensionedScalar deltaT = time_.deltaT();
     rhoSp_ -= massForPrimary_/magSf_/deltaT;
     USp_ -= massForPrimary_*U_/magSf_/deltaT;
 }
@@ -366,67 +392,44 @@ void Foam::surfaceFilmModels::kinematicSingleLayer::solveContinuity()
 }
 
 
+void Foam::surfaceFilmModels::kinematicSingleLayer::updateSurfaceVelocities()
+{
+    // Push boundary film velocity values into internal field
+    for (label i=0; i<filmBottomPatchIDs_.size(); i++)
+    {
+        label patchI = filmBottomPatchIDs_[i];
+        const polyPatch& pp = filmRegion_.boundaryMesh()[patchI];
+        UIndirectList<vector>(Uw_, pp.faceCells()) =
+            U_.boundaryField()[patchI];
+    }
+    Uw_ -= nHat_*(Uw_ & nHat_);
+    Uw_.correctBoundaryConditions();
+
+    // TODO: apply quadratic profile to determine surface velocity
+    Us_ = U_;
+    Us_.correctBoundaryConditions();
+}
+
+
 Foam::tmp<Foam::fvVectorMatrix>
 Foam::surfaceFilmModels::kinematicSingleLayer::tau
 (
     volVectorField& U
 ) const
 {
-    DimensionedField<vector, volMesh> Uw
-    (
-        IOobject
-        (
-            "Uw",
-            time_.timeName(),
-            filmRegion_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        filmRegion_,
-        dimensionedVector("zero", dimVelocity, vector::zero)
-    );
-
-    forAll(filmBottomPatchIDs_, i)
-    {
-        label patchI = filmBottomPatchIDs_[i];
-        const polyPatch& pp = filmRegion_.boundaryMesh()[patchI];
-        UIndirectList<vector>(Uw, pp.faceCells()) =
-            UPrimary_.boundaryField()[patchI];
-    }
-    Uw -= nHat_*(Uw & nHat_);
-
-    volVectorField Us
-    (
-        IOobject
-        (
-            "Us",
-            time_.timeName(),
-            filmRegion_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        filmRegion_,
-        dimensionedVector("zero", dimVelocity, vector::zero)
-    );
-
-    // TODO: use wall functions
-    Us.dimensionedInternalField() = UPrimary_.dimensionedInternalField();
-    Us -= nHat_*(Us & nHat_);
-
-    volScalarField Cs("Cs", rho_*Cf_*mag(Us - U_));
+    // Calculate shear stress
+    volScalarField Cs("Cs", rho_*Cf_*mag(Us_ - U));
     volScalarField Cw
     (
         "Cw",
-        mu_/(0.5*(delta_ + dimensionedScalar("SMALL", dimLength, SMALL)))
+        mu_/(0.3333*(delta_ + dimensionedScalar("SMALL", dimLength, SMALL)))
     );
     Cw.min(1.0e+06);
 
     return
     (
-       - fvm::Sp(Cs, U) + Cs*Us
-       - fvm::Sp(Cw, U) + Cw*Uw
+       - fvm::Sp(Cs, U) + Cs*Us_
+       - fvm::Sp(Cw, U) + Cw*Uw_
     );
 }
 
@@ -443,6 +446,8 @@ Foam::surfaceFilmModels::kinematicSingleLayer::solveMomentum
         Info<< "kinematicSingleLayer::solveMomentum()" << endl;
     }
 
+    updateSurfaceVelocities();
+
     // Momentum
     tmp<fvVectorMatrix> tUEqn
     (
@@ -451,6 +456,7 @@ Foam::surfaceFilmModels::kinematicSingleLayer::solveMomentum
      ==
         USp_
       + tau(U_)
+      + fvc::grad(sigma_)
     );
 
     fvVectorMatrix& UEqn = tUEqn();
@@ -587,7 +593,7 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
             filmRegionName_,
             time_.timeName(),
             time_,
-            IOobject::MUST_READ_IF_MODIFIED
+            IOobject::MUST_READ
         )
     ),
     nHat_
@@ -622,15 +628,34 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
     filmTopPatchIDs_(0),
     filmBottomPatchIDs_(0),
 
-    momentumPredictor_(true),
-    nOuterCorr_(-1),
-    nCorr_(-1),
-    nNonOrthCorr_(-1),
+    momentumPredictor_
+    (
+        filmRegion_.solutionDict().subDict("PISO").lookup("momentumPredictor")
+    ),
+    nOuterCorr_
+    (
+        readLabel
+        (
+            filmRegion_.solutionDict().subDict("PISO").lookup("nOuterCorr")
+        )
+    ),
+    nCorr_
+    (
+        readLabel(filmRegion_.solutionDict().subDict("PISO").lookup("nCorr"))
+    ),
+    nNonOrthCorr_
+    (
+        readLabel
+        (
+            filmRegion_.solutionDict().subDict("PISO").lookup("nNonOrthCorr")
+        )
+    ),
     cumulativeContErr_(0.0),
 
-    Cf_(0.0),
-    deltaStable_("deltaStable", dimLength, 0.0),
+    Cf_(readScalar(coeffs_.lookup("Cf"))),
+    deltaStable_(coeffs_.lookup("deltaStable")),
 
+    initialisedThermo_(false),
     rho_
     (
         IOobject
@@ -639,10 +664,11 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
             time_.timeName(),
             filmRegion_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
         filmRegion_,
-        dimensionedScalar(coeffs_.lookup("rho"))
+        dimensionedScalar("zero", dimDensity, 0.0),
+        zeroGradientFvPatchScalarField::typeName
     ),
     mu_
     (
@@ -652,10 +678,11 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
             time_.timeName(),
             filmRegion_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
         filmRegion_,
-        dimensionedScalar(coeffs_.lookup("mu"))
+        dimensionedScalar("zero", dimPressure*dimTime, 0.0),
+        zeroGradientFvPatchScalarField::typeName
     ),
     sigma_
     (
@@ -665,10 +692,11 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
             time_.timeName(),
             filmRegion_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
         filmRegion_,
-        dimensionedScalar(coeffs_.lookup("sigma"))
+        dimensionedScalar("zero", dimMass/sqr(dimTime), 0.0),
+        zeroGradientFvPatchScalarField::typeName
     ),
 
     delta_
@@ -695,6 +723,32 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
         ),
         filmRegion_
     ),
+    Us_
+    (
+        IOobject
+        (
+            "Usf",
+            time_.timeName(),
+            filmRegion_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        U_,
+        zeroGradientFvPatchScalarField::typeName
+    ),
+    Uw_
+    (
+        IOobject
+        (
+            "Uwf",
+            time_.timeName(),
+            filmRegion_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        U_,
+        zeroGradientFvPatchScalarField::typeName
+    ),
     deltaRho_
     (
         IOobject
@@ -705,7 +759,8 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        delta_*rho_,
+        filmRegion_,
+        dimensionedScalar("zero", delta_.dimensions()*rho_.dimensions(), 0.0),
         zeroGradientFvPatchScalarField::typeName
     ),
 
@@ -719,7 +774,8 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
-        fvc::interpolate(delta_*rho_*U_) & filmRegion_.Sf()
+        filmRegion_,
+        dimLength*dimMass/dimTime
     ),
 
     massForPrimary_
@@ -748,6 +804,20 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
         ),
         filmRegion_,
         dimensionedScalar("zero", dimLength, -1.0),
+        zeroGradientFvPatchScalarField::typeName
+    ),
+    massPhaseChangeForPrimary_
+    (
+        IOobject
+        (
+            "massPhaseChangeForPrimary",
+            time_.timeName(),
+            filmRegion_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        filmRegion_,
+        dimensionedScalar("zero", dimMass, 0),
         zeroGradientFvPatchScalarField::typeName
     ),
 
@@ -834,7 +904,7 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
     (
         IOobject
         (
-            "U", // must have same name as U on primary region to enable mapping
+            "U", // must have same name as U to enable mapping
             time_.timeName(),
             filmRegion_,
             IOobject::MUST_READ,
@@ -846,7 +916,7 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
     (
         IOobject
         (
-            "p", // must have same name as p on primary region to enable mapping
+            "p", // must have same name as p to enable mapping
             time_.timeName(),
             filmRegion_,
             IOobject::MUST_READ,
@@ -860,8 +930,6 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
     addedMass_(0.0),
     detachedMass_(0.0)
 {
-    read();
-
     initialise();
 }
 
@@ -950,6 +1018,19 @@ void Foam::surfaceFilmModels::kinematicSingleLayer::addSources
 }
 
 
+void Foam::surfaceFilmModels::kinematicSingleLayer::preEvolveFilm()
+{
+    if (!initialisedThermo_)
+    {
+        correctThermoFields();
+
+        deltaRho_ == delta_*rho_;
+        phi_ = fvc::interpolate(deltaRho_*U_) & filmRegion_.Sf();
+        initialisedThermo_ = true;
+    }
+}
+
+
 void Foam::surfaceFilmModels::kinematicSingleLayer::evolveFilm()
 {
     transferPrimaryRegionFields();
@@ -962,24 +1043,27 @@ void Foam::surfaceFilmModels::kinematicSingleLayer::evolveFilm()
     for (int oCorr=0; oCorr<nOuterCorr_; oCorr++)
     {
         // Explicit pressure source contribution
-        tmp<volScalarField> pu = this->pu();
+        tmp<volScalarField> tpu = this->pu();
 
         // Implicit pressure source coefficient
-        tmp<volScalarField> pp = this->pp();
+        tmp<volScalarField> tpp = this->pp();
 
         // Solve for momentum for U_
-        tmp<fvVectorMatrix> UEqn = solveMomentum(pu(), pp());
+        tmp<fvVectorMatrix> UEqn = solveMomentum(tpu(), tpp());
 
         // Film thickness correction loop
         for (int corr=1; corr<=nCorr_; corr++)
         {
             // Solve thickness for delta_
-            solveThickness(pu(), pp(), UEqn());
+            solveThickness(tpu(), tpp(), UEqn());
         }
     }
 
     // Update deltaRho_ with new delta_
     deltaRho_ == delta_*rho_;
+
+    // Update film wall and surface velocities
+    updateSurfaceVelocities();
 
     // Reset source terms for next time integration
     resetPrimaryRegionSourceTerms();
@@ -990,6 +1074,20 @@ const Foam::volVectorField&
 Foam::surfaceFilmModels::kinematicSingleLayer::U() const
 {
     return U_;
+}
+
+
+const Foam::volVectorField&
+Foam::surfaceFilmModels::kinematicSingleLayer::Us() const
+{
+    return Us_;
+}
+
+
+const Foam::volVectorField&
+Foam::surfaceFilmModels::kinematicSingleLayer::Uw() const
+{
+    return Uw_;
 }
 
 
@@ -1013,6 +1111,30 @@ Foam::surfaceFilmModels::kinematicSingleLayer::T() const
 
 
 const Foam::volScalarField&
+Foam::surfaceFilmModels::kinematicSingleLayer::Ts() const
+{
+    FatalErrorIn
+    (
+        "const volScalarField& kinematicSingleLayer::Ts() const"
+    )   << "Ts field not available for " << type() << abort(FatalError);
+
+    return volScalarField::null();
+}
+
+
+const Foam::volScalarField&
+Foam::surfaceFilmModels::kinematicSingleLayer::Tw() const
+{
+    FatalErrorIn
+    (
+        "const volScalarField& kinematicSingleLayer::Tw() const"
+    )   << "Tw field not available for " << type() << abort(FatalError);
+
+    return volScalarField::null();
+}
+
+
+const Foam::volScalarField&
 Foam::surfaceFilmModels::kinematicSingleLayer::cp() const
 {
     FatalErrorIn
@@ -1023,6 +1145,17 @@ Foam::surfaceFilmModels::kinematicSingleLayer::cp() const
     return volScalarField::null();
 }
 
+
+const Foam::volScalarField&
+Foam::surfaceFilmModels::kinematicSingleLayer::kappa() const
+{
+    FatalErrorIn
+    (
+        "const volScalarField& kinematicSingleLayer::kappa() const"
+    )   << "kappa field not available for " << type() << abort(FatalError);
+
+    return volScalarField::null();
+}
 
 
 const Foam::volScalarField&
@@ -1039,6 +1172,14 @@ Foam::surfaceFilmModels::kinematicSingleLayer::diametersForPrimary() const
 }
 
 
+const Foam::volScalarField&
+Foam::surfaceFilmModels::kinematicSingleLayer::massPhaseChangeForPrimary()
+const
+{
+    return massPhaseChangeForPrimary_;
+}
+
+
 void Foam::surfaceFilmModels::kinematicSingleLayer::info() const
 {
     Info<< "\nSurface film: " << type() << endl;
@@ -1046,16 +1187,117 @@ void Foam::surfaceFilmModels::kinematicSingleLayer::info() const
     // Output Courant number for info only - does not change time step
     CourantNumber();
 
-    Info<< indent << "added mass      = "
+    Info<< indent << "added mass        = "
         << returnReduce<scalar>(addedMass_, sumOp<scalar>()) << nl
-        << indent << "current mass    = "
+        << indent << "current mass      = "
         << gSum((deltaRho_*magSf_)()) << nl
-        << indent << "detached mass   = "
+        << indent << "detached mass     = "
         << returnReduce<scalar>(detachedMass_, sumOp<scalar>()) << nl
-        << indent << "min/max(mag(U)) = " << min(mag(U_)).value() << ", "
+        << indent << "min/max(mag(U))   = " << min(mag(U_)).value() << ", "
         << max(mag(U_)).value() << nl
-        << indent << "min/max(delta)  = " << min(delta_).value() << ", "
+        << indent << "min/max(delta)    = " << min(delta_).value() << ", "
         << max(delta_).value() << nl;
+}
+
+
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::surfaceFilmModels::kinematicSingleLayer::Srho() const
+{
+    tmp<DimensionedField<scalar, volMesh> > tSrho
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                "kinematicSingleLayer::Srho",
+                time_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+        )
+    );
+
+    scalarField& Srho = tSrho();
+    const scalarField& V = mesh_.V();
+    const scalar dt = time_.deltaTValue();
+
+    forAll(filmBottomPatchIDs_, i)
+    {
+        const label primaryPatchI = primaryPatchIDs_[i];
+        const directMappedWallPolyPatch& wpp =
+            refCast<const directMappedWallPolyPatch>
+            (
+                 mesh_.boundaryMesh()[primaryPatchI]
+            );
+
+        const mapDistribute& distMap = wpp.map();
+
+        const label filmPatchI = filmBottomPatchIDs_[i];
+
+        scalarField patchMass =
+            massPhaseChangeForPrimary().boundaryField()[filmPatchI];
+
+        distMap.distribute(patchMass);
+
+        const unallocLabelList& cells = wpp.faceCells();
+
+        forAll(patchMass, j)
+        {
+            Srho[cells[j]] = patchMass[j]/(V[cells[j]]*dt);
+        }
+    }
+
+    return tSrho;
+}
+
+
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::surfaceFilmModels::kinematicSingleLayer::Srho(const label) const
+{
+    return tmp<DimensionedField<scalar, volMesh> >
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                "kinematicSingleLayer::Srho(i)",
+                time_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+        )
+    );
+}
+
+
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::surfaceFilmModels::kinematicSingleLayer::Sh() const
+{
+    return tmp<DimensionedField<scalar, volMesh> >
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                "kinematicSingleLayer::Sh",
+                time_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimEnergy/dimVolume/dimTime, 0.0)
+        )
+    );
 }
 
 

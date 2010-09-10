@@ -43,10 +43,7 @@ SourceFiles
 #include "runTimeSelectionTables.H"
 
 #include "PtrList.H"
-#include "multiComponentMixture.H"
-
-#include "liquidMixture.H"
-#include "solidMixture.H"
+#include "SLGThermo.H"
 
 #include "phasePropertiesList.H"
 
@@ -73,14 +70,8 @@ class CompositionModel
         //- The coefficients dictionary
         const dictionary& coeffDict_;
 
-        //- Reference to the multi-component carrier phase thermo
-        multiComponentMixture<typename CloudType::thermoType>& mcCarrierThermo_;
-
-        //- Global (additional) liquid properties data
-        autoPtr<liquidMixture> liquids_;
-
-        //- Global (additional) solid properties data
-        autoPtr<solidMixture> solids_;
+        //- Reference to the thermo database
+        const SLGThermo& thermo_;
 
         //- List of phase properties
         phasePropertiesList phaseProps_;
@@ -141,12 +132,14 @@ public:
             //- Return the coefficients dictionary
             const dictionary& coeffDict() const;
 
-            //- Return the carrier phase thermo package
-            const multiComponentMixture<typename CloudType::thermoType>&
-                mcCarrierThermo() const;
+            //- Return the thermo database
+            const SLGThermo& thermo() const;
 
 
             // Composition lists
+
+                //- Return the carrier components (wrapper function)
+                const basicMultiComponentMixture& carrier() const;
 
                 //- Return the global (additional) liquids
                 const liquidMixture& liquids() const;
@@ -197,11 +190,7 @@ public:
 
                 //- Return the list of phase phaseI volume fractions fractions
                 //  based on supplied mass fractions Y
-                scalarField X
-                (
-                    const label phaseI,
-                    const scalarField& Y
-                ) const;
+                scalarField X(const label phaseI, const scalarField& Y) const;
 
 
             // Mixture properties
@@ -293,18 +282,13 @@ public:
     );
 
 
-#define makeCompositionModelThermoType(SS, CloudType, ParcelType, ThermoType) \
+#define makeCompositionModelType(SS, CloudType, ParcelType)                   \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug                                       \
-    (                                                                         \
-        SS<CloudType<ParcelType<ThermoType> > >,                              \
-        0                                                                     \
-    );                                                                        \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
                                                                               \
-    CompositionModel<CloudType<ParcelType<ThermoType> > >::                   \
-        adddictionaryConstructorToTable                                       \
-            <SS<CloudType<ParcelType<ThermoType> > > >                        \
-            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
+    CompositionModel<CloudType<ParcelType> >::                                \
+        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
+            add##SS##CloudType##ParcelType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -94,7 +94,7 @@ tmp<scalarField> mutkRoughWallFunctionFvPatchScalarField::calcMut() const
         if (KsPlus > 2.25)
         {
             Edash /= fnRough(KsPlus, Cs_[faceI]);
-            yPlusLamNew = rasModel.yPlusLam(kappa_, Edash);
+            yPlusLamNew = calcYPlusLam(kappa_, Edash);
         }
 
         if (debug)
