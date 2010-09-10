@@ -212,6 +212,12 @@ protected:
             //- Pressure / [Pa]
             volScalarField pPrimary_;
 
+            //- Density / [kg/m3]
+            volScalarField rhoPrimary_;
+
+            //- Viscosity / [Pa.s]
+            volScalarField muPrimary_;
+
 
         // Sub-models
 
@@ -482,6 +488,12 @@ public:
 
             //- Pressure / [Pa]
             inline const volScalarField& pPrimary() const;
+
+            //- Density / [kg/m3]
+            inline const volScalarField& rhoPrimary() const;
+
+            //- Viscosity / [Pa.s]
+            inline const volScalarField& muPrimary() const;
 
 
         // Sub-models

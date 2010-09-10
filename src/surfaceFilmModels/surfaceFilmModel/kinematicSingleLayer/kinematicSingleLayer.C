@@ -203,10 +203,12 @@ resetPrimaryRegionSourceTerms()
 void Foam::surfaceFilmModels::kinematicSingleLayer::
 transferPrimaryRegionFields()
 {
-    // Update pressure and velocity from primary region via direct mapped
+    // Update fields from primary region via direct mapped
     // (coupled) boundary conditions
     UPrimary_.correctBoundaryConditions();
     pPrimary_.correctBoundaryConditions();
+    rhoPrimary_.correctBoundaryConditions();
+    muPrimary_.correctBoundaryConditions();
 
     // Retrieve the source fields from the primary region via direct mapped
     // (coupled) boundary conditions
@@ -930,6 +932,34 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
         ),
         filmRegion_
     ),
+    rhoPrimary_
+    (
+        IOobject
+        (
+            "rho", // must have same name as rho to enable mapping
+            time_.timeName(),
+            filmRegion_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        filmRegion_,
+        dimensionedScalar("zero", dimDensity, 0.0),
+        pPrimary_.boundaryField().types()
+    ),
+    muPrimary_
+    (
+        IOobject
+        (
+            "mu", // must have same name as mu to enable mapping
+            time_.timeName(),
+            filmRegion_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        filmRegion_,
+        dimensionedScalar("zero", dimPressure*dimTime, 0.0),
+        pPrimary_.boundaryField().types()
+    ),
 
     injection_(injectionModel::New(*this, coeffs_)),
 
@@ -1193,15 +1223,15 @@ void Foam::surfaceFilmModels::kinematicSingleLayer::info() const
     // Output Courant number for info only - does not change time step
     CourantNumber();
 
-    Info<< indent << "added mass        = "
+    Info<< indent << "added mass         = "
         << returnReduce<scalar>(addedMass_, sumOp<scalar>()) << nl
-        << indent << "current mass      = "
+        << indent << "current mass       = "
         << gSum((deltaRho_*magSf_)()) << nl
-        << indent << "detached mass     = "
+        << indent << "detached mass      = "
         << returnReduce<scalar>(detachedMass_, sumOp<scalar>()) << nl
-        << indent << "min/max(mag(U))   = " << min(mag(U_)).value() << ", "
+        << indent << "min/max(mag(U))    = " << min(mag(U_)).value() << ", "
         << max(mag(U_)).value() << nl
-        << indent << "min/max(delta)    = " << min(delta_).value() << ", "
+        << indent << "min/max(delta)     = " << min(delta_).value() << ", "
         << max(delta_).value() << nl;
 }
 

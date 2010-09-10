@@ -126,19 +126,7 @@ void Foam::surfaceFilmModels::thermoSingleLayer::updateSurfaceTemperatures()
     Tw_.correctBoundaryConditions();
 
     // Update film surface temperature
-    dimensionedScalar deltaSmall("SMALL", dimLength, SMALL);
-    volScalarField kappaDeltaBy2 = kappa_/(0.5*delta_ + deltaSmall);
-    Ts_ =
-        (
-            // qRad
-          - energyPhaseChangeForPrimary_/(time_.deltaT()*magSf_)
-          + TPrimary_*htcs_->h()
-          + kappaDeltaBy2*T_
-        )
-       /(
-            htcs_->h()
-          + kappaDeltaBy2
-        );
+    Ts_ = T_;
     Ts_.correctBoundaryConditions();
 }
 
@@ -581,10 +569,12 @@ void Foam::surfaceFilmModels::thermoSingleLayer::info() const
 {
     kinematicSingleLayer::info();
 
-    Info<< indent << "min/max(T)        = " << min(T_).value() << ", "
+    Info<< indent << "min/max(T)         = " << min(T_).value() << ", "
         << max(T_).value() << nl
-        << indent << "mass phase change = "
-        << returnReduce(totalMassPhaseChange_, sumOp<scalar>()) << nl;
+        << indent << "mass phase change  = "
+        << returnReduce(totalMassPhaseChange_, sumOp<scalar>()) << nl
+        << indent << "vapourisation rate = "
+        << sum(massPhaseChangeForPrimary_).value()/time_.deltaTValue() << nl;
 }
 
 

@@ -171,6 +171,20 @@ Foam::surfaceFilmModels::kinematicSingleLayer::pPrimary() const
 }
 
 
+inline const Foam::volScalarField&
+Foam::surfaceFilmModels::kinematicSingleLayer::rhoPrimary() const
+{
+    return rhoPrimary_;
+}
+
+
+inline const Foam::volScalarField&
+Foam::surfaceFilmModels::kinematicSingleLayer::muPrimary() const
+{
+    return muPrimary_;
+}
+
+
 inline Foam::surfaceFilmModels::injectionModel&
 Foam::surfaceFilmModels::kinematicSingleLayer::injection()
 {
