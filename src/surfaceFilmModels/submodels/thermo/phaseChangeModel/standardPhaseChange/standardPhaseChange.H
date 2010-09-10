@@ -67,10 +67,13 @@ protected:
 
     // Protected data
 
+        //- Boiling temperature / [K]
+        const scalar Tb_;
+
         //- Minimum film height for model to be active
         const scalar deltaMin_;
 
-        //- Length scalae / [m]
+        //- Length scale / [m]
         const scalar L_;
 
 

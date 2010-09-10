@@ -222,6 +222,10 @@ transferPrimaryRegionFields()
     rhoSp_.field() /= magSf_*deltaT;
     USp_.field() /= magSf_*deltaT;
     pSp_.field() /= magSf_*deltaT;
+
+    // reset transfer to primary fields
+    massForPrimary_ == dimensionedScalar("zero", dimMass, 0.0);
+    diametersForPrimary_ == dimensionedScalar("zero", dimLength, -1.0);
 }
 
 
@@ -271,9 +275,6 @@ Foam::surfaceFilmModels::kinematicSingleLayer::pp()
 
 void Foam::surfaceFilmModels::kinematicSingleLayer::correctDetachedFilm()
 {
-    massForPrimary_ == dimensionedScalar("zero", dimMass, 0.0);
-    diametersForPrimary_ == dimensionedScalar("zero", dimLength, -1.0);
-
     const scalarField gNorm = this->gNorm();
 
     forAll(gNorm, i)
@@ -308,8 +309,7 @@ void Foam::surfaceFilmModels::kinematicSingleLayer::updateSubmodels()
 
     // Update source fields
     const dimensionedScalar deltaT = time_.deltaT();
-    rhoSp_ -= massForPrimary_/magSf_/deltaT;
-    USp_ -= massForPrimary_*U_/magSf_/deltaT;
+    rhoSp_ -= (massForPrimary_ + massPhaseChangeForPrimary_)/magSf_/deltaT;
 }
 
 
@@ -457,6 +457,12 @@ Foam::surfaceFilmModels::kinematicSingleLayer::solveMomentum
         USp_
       + tau(U_)
       + fvc::grad(sigma_)
+      - fvm::Sp
+        (
+            (massForPrimary_ + massPhaseChangeForPrimary_)
+           /magSf_/time_.deltaT(),
+            U_
+        )
     );
 
     fvVectorMatrix& UEqn = tUEqn();
@@ -1239,7 +1245,7 @@ Foam::surfaceFilmModels::kinematicSingleLayer::Srho() const
         const label filmPatchI = filmBottomPatchIDs_[i];
 
         scalarField patchMass =
-            massPhaseChangeForPrimary().boundaryField()[filmPatchI];
+            massPhaseChangeForPrimary_.boundaryField()[filmPatchI];
 
         distMap.distribute(patchMass);
 
