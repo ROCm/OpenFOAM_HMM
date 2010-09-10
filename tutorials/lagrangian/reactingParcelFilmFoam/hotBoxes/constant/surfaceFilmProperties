@@ -94,6 +94,7 @@ thermoSingleLayerCoeffs
 
     standardPhaseChangeCoeffs
     {
+        Tb              374.8;
         deltaMin        1e-8;
         L               1.0;
     }
