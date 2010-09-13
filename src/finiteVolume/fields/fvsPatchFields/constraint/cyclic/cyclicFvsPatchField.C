@@ -56,7 +56,7 @@ cyclicFvsPatchField<Type>::cyclicFvsPatchField
     coupledFvsPatchField<Type>(ptf, p, iF, mapper),
     cyclicPatch_(refCast<const cyclicFvPatch>(p))
 {
-    if (!isType<cyclicFvPatch>(this->patch()))
+    if (!isA<cyclicFvPatch>(this->patch()))
     {
         FatalErrorIn
         (
@@ -87,7 +87,7 @@ cyclicFvsPatchField<Type>::cyclicFvsPatchField
     coupledFvsPatchField<Type>(p, iF, dict),
     cyclicPatch_(refCast<const cyclicFvPatch>(p))
 {
-    if (!isType<cyclicFvPatch>(p))
+    if (!isA<cyclicFvPatch>(p))
     {
         FatalIOErrorIn
         (
