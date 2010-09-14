@@ -37,6 +37,7 @@ const char* Foam::Switch::names[Foam::Switch::INVALID+1] =
     "off",   "on",
     "no",    "yes",
     "n",     "y",
+    "f",     "t",
     "none",  "true",  // is there a reasonable counterpart to "none"?
     "invalid"
 };
@@ -54,18 +55,39 @@ Foam::Switch::switchType Foam::Switch::asEnum
     {
         if (str == names[sw])
         {
-            // convert n/y to no/yes - perhaps should deprecate y/n
-            if (sw == Switch::NO_1 || sw == Switch::NONE)
+            // handle aliases
+            switch (sw)
             {
-                return Switch::NO;
-            }
-            else if (sw == Switch::YES_1)
-            {
-                return Switch::YES;
-            }
-            else
-            {
-                return switchType(sw);
+                case Switch::NO_1:
+                case Switch::NONE:
+                {
+                    return Switch::NO;
+                    break;
+                }
+
+                case Switch::YES_1:
+                {
+                    return Switch::YES;
+                    break;
+                }
+
+                case Switch::FALSE_1:
+                {
+                    return Switch::FALSE;
+                    break;
+                }
+
+                case Switch::TRUE_1:
+                {
+                    return Switch::TRUE;
+                    break;
+                }
+
+                default:
+                {
+                    return switchType(sw);
+                    break;
+                }
             }
         }
     }
