@@ -180,13 +180,22 @@ public:
         // Member Operators
 
             //- Append an element at the end of the list
-            inline void append(const T&);
+            inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& append
+            (
+                const T&
+            );
 
             //- Append a List at the end of this list
-            inline void append(const UList<T>&);
+            inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& append
+            (
+                const UList<T>&
+            );
 
             //- Append a UIndirectList at the end of this list
-            inline void append(const UIndirectList<T>&);
+            inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& append
+            (
+                const UIndirectList<T>&
+            );
 
             //- Remove and return the top element
             inline T remove();

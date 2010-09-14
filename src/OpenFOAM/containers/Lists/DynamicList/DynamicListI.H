@@ -305,7 +305,8 @@ Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::xfer()
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
+inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>&
+Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
 (
     const T& t
 )
@@ -314,11 +315,13 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
     setSize(elemI + 1);
 
     this->operator[](elemI) = t;
+    return *this;
 }
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
+inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>&
+Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
 (
     const UList<T>& lst
 )
@@ -339,11 +342,13 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
     {
         this->operator[](nextFree++) = lst[elemI];
     }
+    return *this;
 }
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
+inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>&
+Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
 (
     const UIndirectList<T>& lst
 )
@@ -355,6 +360,7 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
     {
         this->operator[](nextFree++) = lst[elemI];
     }
+    return *this;
 }
 
 
