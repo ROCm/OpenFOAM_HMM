@@ -67,11 +67,117 @@ inline Foam::label Foam::PackedList<nBits>::packedLength(const label nElem)
 }
 
 
+namespace Foam
+{
+    // Template specialization for bool entries
+    template<>
+    inline unsigned int Foam::PackedList<1>::readValue(Istream& is)
+    {
+        return readBool(is);
+    }
+
+    // Template specialization for bool entries
+    template<>
+    inline void Foam::PackedList<1>::setPair(Istream& is)
+    {
+        set(readLabel(is), true);
+    }
+
+    // Template specialization for bool entries
+    template<>
+    inline bool Foam::PackedList<1>::iteratorBase::writeIfSet(Ostream& os) const
+    {
+        if (this->get())
+        {
+            os  << index_;
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+}
+
+
+template<unsigned nBits>
+inline unsigned int Foam::PackedList<nBits>::readValue(Istream& is)
+{
+    const unsigned int val = readLabel(is);
+
+    if (val > max_value())
+    {
+        FatalIOErrorIn
+        (
+            "PackedList<nBits>::readValue(Istream&)",
+            is
+        )
+            << "Out-of-range value " << val << " for PackedList<" << nBits
+            << ">. Maximum permitted value is " << max_value() << "."
+            << exit(FatalIOError);
+    }
+
+    return val;
+}
+
+
+template<unsigned nBits>
+inline void Foam::PackedList<nBits>::setPair(Istream& is)
+{
+    is.readBegin("Tuple2<label, unsigned int>");
+
+    const label ind = readLabel(is);
+    const unsigned int val = readLabel(is);
+
+    is.readEnd("Tuple2<label, unsigned int>");
+
+    if (val > max_value())
+    {
+        FatalIOErrorIn
+        (
+            "PackedList<nBits>::setPair(Istream&)",
+            is
+        )
+            << "Out-of-range value " << val << " for PackedList<" << nBits
+            << "> at index " << ind
+            << ". Maximum permitted value is " << max_value() << "."
+            << exit(FatalIOError);
+    }
+
+    set(ind, val);
+
+    // Check state of Istream
+    is.check("PackedList<nBits>::setPair(Istream&)");
+}
+
+
+template<unsigned nBits>
+inline bool Foam::PackedList<nBits>::iteratorBase::writeIfSet(Ostream& os) const
+{
+    const label val = this->get();
+
+    if (val)
+    {
+        os  << token::BEGIN_LIST
+            << index_ << token::SPACE << val
+            << token::END_LIST;
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<unsigned nBits>
 inline Foam::PackedList<nBits>::PackedList()
 :
+    PackedListCore(),
     StorageList(),
     size_(0)
 {}
@@ -80,14 +186,45 @@ inline Foam::PackedList<nBits>::PackedList()
 template<unsigned nBits>
 inline Foam::PackedList<nBits>::PackedList(const label size)
 :
+    PackedListCore(),
     StorageList(packedLength(size), 0u),
     size_(size)
 {}
 
 
 template<unsigned nBits>
+inline Foam::PackedList<nBits>::PackedList
+(
+    const label size,
+    const unsigned int val
+)
+:
+    PackedListCore(),
+    StorageList(packedLength(size), 0u),
+    size_(size)
+{
+    if (val)
+    {
+        operator=(val);
+    }
+}
+
+
+template<unsigned nBits>
+inline Foam::PackedList<nBits>::PackedList(Istream& is)
+:
+    PackedListCore(),
+    StorageList(),
+    size_(0)
+{
+    read(is);
+}
+
+
+template<unsigned nBits>
 inline Foam::PackedList<nBits>::PackedList(const PackedList<nBits>& lst)
 :
+    PackedListCore(),
     StorageList(lst),
     size_(lst.size_)
 {}
@@ -97,6 +234,20 @@ template<unsigned nBits>
 inline Foam::PackedList<nBits>::PackedList(const Xfer<PackedList<nBits> >& lst)
 {
     transfer(lst());
+}
+
+
+template<unsigned nBits>
+inline Foam::PackedList<nBits>::PackedList(const UList<label>& lst)
+:
+    PackedListCore(),
+    StorageList(packedLength(lst.size()), 0u),
+    size_(lst.size())
+{
+    forAll(lst, i)
+    {
+        set(i, lst[i]);
+    }
 }
 
 
@@ -797,23 +948,14 @@ inline Foam::Xfer<Foam::PackedList<nBits> > Foam::PackedList<nBits>::xfer()
 template<unsigned nBits>
 inline unsigned int Foam::PackedList<nBits>::get(const label i) const
 {
-#   ifdef FULLDEBUG
-    if (i < 0)
-    {
-        FatalErrorIn("PackedList<nBits>::get(const label)")
-            << "negative index " << i << " max=" << size_-1
-            << abort(FatalError);
-    }
-#   endif
-
     // lazy evaluation - return 0 for out-of-range
-    if (i < size_)
+    if (i < 0 || i >= size_)
     {
-        return iteratorBase(this, i).get();
+        return 0;
     }
     else
     {
-        return 0;
+        return iteratorBase(this, i).get();
     }
 }
 
@@ -822,13 +964,13 @@ template<unsigned nBits>
 inline unsigned int Foam::PackedList<nBits>::operator[](const label i) const
 {
     // lazy evaluation - return 0 for out-of-range
-    if (i < size_)
+    if (i < 0 || i >= size_)
     {
-        return iteratorBase(this, i).get();
+        return 0;
     }
     else
     {
-        return 0;
+        return iteratorBase(this, i).get();
     }
 }
 
@@ -840,18 +982,14 @@ inline bool Foam::PackedList<nBits>::set
     const unsigned int val
 )
 {
-#   ifdef FULLDEBUG
     if (i < 0)
     {
-        FatalErrorIn("PackedList<nBits>::set(const label)")
-            << "negative index " << i << " max=" << size_-1
-            << abort(FatalError);
+        // lazy evaluation - ignore out-of-bounds
+        return false;
     }
-#   endif
-
-    // lazy evaluation - increase size on assigment
-    if (i >= size_)
+    else if (i >= size_)
     {
+        // lazy evaluation - increase size on assigment
         resize(i + 1);
     }
 
@@ -862,24 +1000,28 @@ inline bool Foam::PackedList<nBits>::set
 template<unsigned nBits>
 inline bool Foam::PackedList<nBits>::unset(const label i)
 {
-    // lazy - ignore out-of-bounds
+    // lazy evaluation - ignore out-of-bounds
     if (i < 0 || i >= size_)
     {
         return false;
     }
-
-    return iteratorBase(this, i).set(0u);
+    else
+    {
+        return iteratorBase(this, i).set(0u);
+    }
 }
 
 
 template<unsigned nBits>
-inline void Foam::PackedList<nBits>::append(const unsigned int val)
+inline Foam::PackedList<nBits>&
+Foam::PackedList<nBits>::append(const unsigned int val)
 {
     const label elemI = size_;
     reserve(elemI + 1);
     size_++;
 
     iteratorBase(this, elemI).set(val);
+    return *this;
 }
 
 

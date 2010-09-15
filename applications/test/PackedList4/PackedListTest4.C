@@ -47,12 +47,12 @@ int main(int argc, char *argv[])
     }
 
     Info<< "\nalternating bit pattern\n";
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     PackedBoolList list2 = ~list1;
 
     Info<< "\ncomplementary bit pattern\n";
-    list2.print(Info, true);
+    list2.printInfo(Info, true);
 
     list2.resize(24, true);
     list2.resize(28, false);
@@ -62,74 +62,73 @@ int main(int argc, char *argv[])
     }
 
     Info<< "\nresized with 4 true + 4 false, bottom 4 bits true\n";
-    list2.print(Info, true);
+    list2.printInfo(Info, true);
 
     labelList list2Labels = list2.used();
 
     Info<< "\noperator|\n";
-    (list1 | list2).print(Info, true);
+    (list1 | list2).printInfo(Info, true);
 
     Info<< "\noperator& : does trim\n";
-    (list1 & list2).print(Info, true);
+    (list1 & list2).printInfo(Info, true);
 
     Info<< "\noperator^\n";
-    (list1 ^ list2).print(Info, true);
+    (list1 ^ list2).printInfo(Info, true);
 
 
     Info<< "\noperator|=\n";
     {
         PackedBoolList list3 = list1;
-        (list3 |= list2).print(Info, true);
+        (list3 |= list2).printInfo(Info, true);
     }
 
     Info<< "\noperator|= with UList<label>\n";
     {
         PackedBoolList list3 = list1;
-        (list3 |= list2Labels).print(Info, true);
+        (list3 |= list2Labels).printInfo(Info, true);
     }
 
     Info<< "\noperator&=\n";
     {
         PackedBoolList list3 = list1;
-        (list3 &= list2).print(Info, true);
+        (list3 &= list2).printInfo(Info, true);
     }
 
     Info<< "\noperator+=\n";
     {
         PackedBoolList list3 = list1;
-        (list3 += list2).print(Info, true);
+        (list3 += list2).printInfo(Info, true);
     }
 
     Info<< "\noperator+= with UList<label>\n";
     {
         PackedBoolList list3 = list1;
-        (list3 += list2Labels).print(Info, true);
+        (list3 += list2Labels).printInfo(Info, true);
     }
 
     Info<< "\noperator-=\n";
     {
         PackedBoolList list3 = list1;
-        (list3 -= list2).print(Info, true);
+        (list3 -= list2).printInfo(Info, true);
     }
 
     Info<< "\noperator-= with UList<label>\n";
     {
         PackedBoolList list3 = list1;
-        (list3 -= list2Labels).print(Info, true);
+        (list3 -= list2Labels).printInfo(Info, true);
     }
-
 
     PackedBoolList list4
     (
         IStringStream
         (
-            "(AB 05 10 0F F0)"
+            "(1 n 1 n 1 n 1 1 off 0 0 f f 0 y yes y true y false on t)"
         )()
     );
 
     Info<< "\ntest Istream constructor\n";
 
-    list4.print(Info, true);
+    list4.printInfo(Info, true);
     Info<< list4 << " indices: " << list4.used()() <<endl;
 
     Info<< "\nassign from labelList\n";
@@ -137,19 +136,55 @@ int main(int argc, char *argv[])
     (
         IStringStream
         (
-            "(0 1 2 3 12 13 14 15 17 19 20 21)"
+            "(0 1 2 3 12 13 14 19 20 21)"
         )()
     );
 
-    list4.print(Info, true);
+    list4.printInfo(Info, true);
     Info<< list4 << " indices: " << list4.used()() <<endl;
 
-    Info<< "\nread from Istream\n";
-    IStringStream("(0f 3a)")() >> list4;
+    Info<< "\nassign from indices\n";
+    list4.read
+    (
+        IStringStream
+        (
+            "{0 1 2 3 12 13 14 19 20 21}"
+        )()
+    );
 
-    list4.print(Info, true);
+
+    list4.printInfo(Info, true);
     Info<< list4 << " indices: " << list4.used()() <<endl;
 
+    List<bool> boolLst(list4.size());
+    forAll(list4, i)
+    {
+        boolLst[i] = list4[i];
+    }
+
+    Info<< "List<bool>: " << boolLst <<endl;
+
+
+    // check roundabout assignments
+    PackedList<2> pl2
+    (
+        IStringStream
+        (
+            "{(0 3)(1 3)(2 3)(3 3)(12 3)(13 3)(14 3)(19 3)(20 3)(21 3)}"
+        )()
+    );
+
+    Info<< "roundabout assignment: " << pl2 << endl;
+
+    list4.clear();
+    forAll(pl2, i)
+    {
+        list4[i] = pl2[i];
+    }
+
+    list4.write(Info, true) << endl;
+
+    list4.writeEntry("PackedBoolList", Info);
 
     return 0;
 }

@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("info"))
         {
-            packLst.print(Info);
+            packLst.printInfo(Info);
         }
 
         Info<< nl;

@@ -76,6 +76,19 @@ Note
     always be bit-wise zero. This property must not be violated by any
     inheriting classes.
 
+    In addition to the normal output format, PackedList also supports a
+    compact ASCII format that may be convenient for user input in some
+    situations. The general format is a group of index/value pairs:
+    @verbatim
+        { (index1 value1) (index2 value2) (index3 value3) }
+    @endverbatim
+    The bool specialization just uses the indices corresponding to
+    non-zero entries instead of a index/value pair:
+    @verbatim
+        { index1 index2 index3 }
+    @endverbatim
+    In both cases, the supplied indices can be randomly ordered.
+
 SeeAlso
     Foam::DynamicList
 
@@ -110,10 +123,20 @@ Ostream& operator<<(Ostream&, const PackedList<nBits>&);
 
 
 /*---------------------------------------------------------------------------*\
-                      Class PackedListName Declaration
+                       Class PackedListCore Declaration
 \*---------------------------------------------------------------------------*/
 
-TemplateName(PackedList);
+//- Template-invariant bits for PackedList
+struct PackedListCore
+{
+    //- Construct null
+    PackedListCore()
+    {}
+
+    //- Define template name and debug
+    ClassName("PackedList");
+};
+
 
 /*---------------------------------------------------------------------------*\
                          Class PackedList Declaration
@@ -122,12 +145,25 @@ TemplateName(PackedList);
 template<unsigned nBits=1>
 class PackedList
 :
+    public PackedListCore,
     private List<unsigned int>
 {
 protected:
 
     typedef unsigned int      StorageType;
     typedef List<StorageType> StorageList;
+
+    // Protected Member Functions
+
+        //- Calculate the list length when packed
+        inline static label packedLength(const label);
+
+        //- Read a list entry (allows for specialization)
+        inline static unsigned int readValue(Istream&);
+
+        //- Read an index/value pair and set accordingly.
+        //  For bool specialization, read a single index value
+        inline void setPair(Istream&);
 
 private:
 
@@ -142,12 +178,6 @@ private:
 
         //- Number of nBits entries
         label size_;
-
-    // Private Member Functions
-
-        //- Calculate the list length when packed
-        inline static label packedLength(const label);
-
 
 public:
 
@@ -184,10 +214,10 @@ public:
         explicit inline PackedList(const label size);
 
         //- Construct with given size and value for all elements
-        PackedList(const label size, const unsigned val);
+        inline PackedList(const label size, const unsigned val);
 
         //- Construct from Istream
-        PackedList(Istream&);
+        inline PackedList(Istream&);
 
         //- Copy constructor
         inline PackedList(const PackedList<nBits>&);
@@ -235,6 +265,10 @@ public:
             //- Return the underlying packed storage
             inline const List<unsigned int>& storage() const;
 
+            //- Return the binary size in number of characters
+            //  used in the underlying storage
+            label byteSize() const;
+
             //- Count number of bits set, O(log(n))
             //  Uses the Hamming weight (population count) method
             //  http://en.wikipedia.org/wiki/Hamming_weight
@@ -243,7 +277,7 @@ public:
             //- Return the values as a list of labels
             Xfer<labelList> values() const;
 
-            //- Print values and information, optionally output unused elements
+            //- Print information and values, optionally output unused elements
             //
             // addressable bits:
             //   on: '1', off: '-'
@@ -251,7 +285,8 @@ public:
             // non-addressable bits:
             //   on: '!', off: '.'
             //
-            Ostream& print(Ostream&, const bool fullOutput=false) const;
+            Ostream& printInfo(Ostream&, const bool fullOutput=false) const;
+
 
         // Edit
 
@@ -300,10 +335,43 @@ public:
             inline Xfer<PackedList<nBits> > xfer();
 
 
+        // IO
+
+            //- Clear list and read from stream
+            Istream& read(Istream&);
+
+            //- Write, optionally with indexedOutput
+            //
+            // The indexed output may be convenient in some situations.
+            // The general format is a group of index/value pairs:
+            //  @verbatim
+            //      { (index1 value1) (index2 value2) (index3 value3) }
+            // @endverbatim
+            // The bool specialization just uses the indices corresponding to
+            // non-zero entries instead of a index/value pair:
+            // @verbatim
+            //     { index1 index2 index3 }
+            // @endverbatim
+            //
+            // Note the indexed output is only supported for ASCII streams.
+            Ostream& write
+            (
+                Ostream&,
+                const bool indexedOutput=false
+            ) const;
+
+
+            //- Write as a dictionary entry
+            void writeEntry(Ostream&) const;
+
+            //- Write as a dictionary entry with keyword
+            void writeEntry(const word& keyword, Ostream&) const;
+
+
     // Member operators
 
             //- Append a value at the end of the list
-            inline void append(const unsigned int val);
+            inline PackedList<nBits>& append(const unsigned int val);
 
             //- Remove and return the last element
             inline unsigned int remove();
@@ -373,6 +441,9 @@ public:
                 //- Return the element index corresponding to the iterator
                 inline label key() const;
 
+                //- Write index/value for a non-zero entry
+                //  The bool specialization writes the index only
+                inline bool writeIfSet(Ostream&) const;
 
             // Member Operators
 
@@ -392,8 +463,8 @@ public:
                 //  Never auto-vivify entries.
                 inline operator unsigned int () const;
 
-            //- Print value and information
-            Ostream& print(Ostream&) const;
+            //- Print information and values
+            Ostream& printInfo(Ostream&) const;
         };
 
 

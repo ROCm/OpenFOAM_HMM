@@ -25,32 +25,11 @@ Class
     Foam::PackedBoolList
 
 Description
-    A bit-packed bool list
+    A bit-packed bool list.
 
-Note
-    The input/output format differs from that of Foam::PackedBoolList in
-    that it is also packed. The input/output is always byte-wise, with
-    the lowest bytes first.
-
-    Thus this label sequence
-    @code
-        0 1 2 3 12 13 14 15 17 19 20 21
-    @endcode
-    which has this bit representation:
-    @code
-        ..........111-1-1111--------1111
-    @endcode
-    and this internal representation
-    @code
-        0x003AF00F
-    @endcode
-    would be read/written in one of these formats:
-    @code
-        22(0f f0 3a)
-        22(0ff03a)
-    @endcode
-    Whitespace can be used to separate byte values, but must not appear
-    within a byte itself.
+    In addition to the obvious memory advantage over using a
+    List\<bool\>, this class also provides a number of bit-like
+    operations.
 
 SourceFiles
     PackedBoolListI.H
@@ -71,16 +50,6 @@ SeeAlso
 
 namespace Foam
 {
-
-// Forward declaration of classes
-class Istream;
-class Ostream;
-
-// Forward declaration of friend functions and operators
-class PackedBoolList;
-Istream& operator>>(Istream&, PackedBoolList&);
-Ostream& operator<<(Ostream&, const PackedBoolList&);
-
 
 /*---------------------------------------------------------------------------*\
                        Class PackedBoolList Declaration
@@ -235,13 +204,13 @@ public:
             PackedBoolList& operator^=(const PackedList<1>&);
 
 
-            //- Synonymous with the or operator
+            //- Add entries to this list, synonymous with the or operator
             inline PackedBoolList& operator+=(const PackedList<1>&);
 
-            //- Synonymous with the or operator
+            //- Add entries to this list, synonymous with the or operator
             inline PackedBoolList& operator+=(const UList<label>& indices);
 
-            //- Synonymous with the or operator
+            //- Add entries to this list, synonymous with the or operator
             inline PackedBoolList& operator+=(const UIndirectList<label>&);
 
             //- Remove entries from this list
@@ -253,10 +222,6 @@ public:
             //- Remove entries from this list
             inline PackedBoolList& operator-=(const UIndirectList<label>&);
 
-    // IOstream Operators
-
-        friend Istream& operator>>(Istream&, PackedBoolList&);
-        friend Ostream& operator<<(Ostream&, const PackedBoolList&);
 };
 
 

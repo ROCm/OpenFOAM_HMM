@@ -27,45 +27,13 @@ License
 #include "IOstreams.H"
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<unsigned nBits>
-Foam::PackedList<nBits>::PackedList(const label size, const unsigned int val)
-:
-    StorageList(packedLength(size), 0u),
-    size_(size)
-{
-    if (val)
-    {
-        operator=(val);
-    }
-}
-
-
-template<unsigned nBits>
-Foam::PackedList<nBits>::PackedList(Istream& is)
-:
-    StorageList(),
-    size_(0)
-{
-    is  >> *this;
-}
-
-
-template<unsigned nBits>
-Foam::PackedList<nBits>::PackedList(const UList<label>& lst)
-:
-    StorageList(packedLength(lst.size()), 0u),
-    size_(lst.size())
-{
-    forAll(lst, i)
-    {
-        set(i, lst[i]);
-    }
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<unsigned nBits>
+inline Foam::label Foam::PackedList<nBits>::byteSize() const
+{
+    return packedLength(this->size()) * sizeof(StorageType);
+}
 
 
 #if (UINT_MAX == 0xFFFFFFFF)
@@ -186,7 +154,10 @@ Foam::Xfer<Foam::labelList> Foam::PackedList<nBits>::values() const
 
 
 template<unsigned nBits>
-Foam::Ostream& Foam::PackedList<nBits>::iteratorBase::print(Ostream& os) const
+Foam::Ostream& Foam::PackedList<nBits>::iteratorBase::printInfo
+(
+    Ostream& os
+) const
 {
     os  << "iterator<"  << label(nBits) << "> ["
         << this->index_ << "]"
@@ -200,7 +171,7 @@ Foam::Ostream& Foam::PackedList<nBits>::iteratorBase::print(Ostream& os) const
 
 
 template<unsigned nBits>
-Foam::Ostream& Foam::PackedList<nBits>::print
+Foam::Ostream& Foam::PackedList<nBits>::printInfo
 (
     Ostream& os,
     const bool fullOutput
@@ -275,6 +246,278 @@ Foam::Ostream& Foam::PackedList<nBits>::print
 }
 
 
+template<unsigned nBits>
+Foam::Istream& Foam::PackedList<nBits>::read(Istream& is)
+{
+    PackedList<nBits>& lst = *this;
+
+    lst.clear();
+    is.fatalCheck("PackedList<nBits>::read(Istream&)");
+
+    token firstTok(is);
+    is.fatalCheck
+    (
+        "PackedList<nBits>::read(Istream&) : "
+        "reading first token"
+    );
+
+    if (firstTok.isLabel())
+    {
+        const label sz = firstTok.labelToken();
+
+        // Set list length to that read
+        lst.resize(sz);
+
+        // Read list contents depending on data format
+        if (is.format() == IOstream::ASCII)
+        {
+            // Read beginning of contents
+            const char delimiter = is.readBeginList("PackedList<nBits>");
+
+            if (sz)
+            {
+                if (delimiter == token::BEGIN_LIST)
+                {
+                    for (register label i=0; i<sz; ++i)
+                    {
+                        lst[i] = lst.readValue(is);
+
+                        is.fatalCheck
+                        (
+                            "PackedList<nBits>::read(Istream&) : "
+                            "reading entry"
+                        );
+                    }
+                }
+                else if (delimiter == token::BEGIN_BLOCK)
+                {
+                    // assign for all entries
+                    lst = lst.readValue(is);
+
+                    is.fatalCheck
+                    (
+                        "PackedList<nBits>::read(Istream&) : "
+                        "reading the single entry"
+                    );
+                }
+                else
+                {
+                    FatalIOErrorIn
+                    (
+                        "PackedList<nBits>::read(Istream&)",
+                        is
+                    )
+                        << "incorrect list token, expected '(' or '{', found "
+                        << firstTok.info()
+                        << exit(FatalIOError);
+                }
+            }
+
+            // Read end of contents
+            is.readEndList("PackedList<nBits>");
+        }
+        else
+        {
+            if (sz)
+            {
+                is.read
+                (
+                    reinterpret_cast<char*>(lst.storage().data()),
+                    lst.byteSize()
+                );
+
+                is.fatalCheck
+                (
+                    "PackedList<nBits>::read(Istream&) : "
+                    "reading the binary block"
+                );
+            }
+        }
+    }
+    else if (firstTok.isPunctuation())
+    {
+        if (firstTok.pToken() == token::BEGIN_LIST)
+        {
+            token nextTok(is);
+            is.fatalCheck("PackedList<nBits>::read(Istream&)");
+
+            while
+            (
+                !(   nextTok.isPunctuation()
+                  && nextTok.pToken() == token::END_LIST
+                 )
+            )
+            {
+                is.putBack(nextTok);
+                lst.append(lst.readValue(is));
+
+                is  >> nextTok;
+                is.fatalCheck("PackedList<nBits>::read(Istream&)");
+            }
+        }
+        else if (firstTok.pToken() == token::BEGIN_BLOCK)
+        {
+            token nextTok(is);
+            is.fatalCheck("PackedList<nBits>::read(Istream&)");
+
+            while
+            (
+                !(   nextTok.isPunctuation()
+                  && nextTok.pToken() == token::END_BLOCK
+                 )
+            )
+            {
+                is.putBack(nextTok);
+                lst.setPair(is);
+
+                is  >> nextTok;
+                is.fatalCheck("PackedList<nBits>::read(Istream&)");
+            }
+        }
+        else
+        {
+            FatalIOErrorIn
+            (
+                "PackedList<nBits>::read(Istream&)",
+                is
+            )
+                << "incorrect first token, expected '(', found "
+                << firstTok.info()
+                << exit(FatalIOError);
+        }
+    }
+    else
+    {
+        FatalIOErrorIn
+        (
+            "PackedList<nBits>::read(Istream&)",
+            is
+        )
+            << "incorrect first token, expected <int>, '(' or '{', found "
+            << firstTok.info()
+            << exit(FatalIOError);
+    }
+
+    return is;
+}
+
+
+template<unsigned nBits>
+Foam::Ostream& Foam::PackedList<nBits>::write
+(
+    Ostream& os,
+    const bool indexedOutput
+) const
+{
+    const PackedList<nBits>& lst = *this;
+    const label sz = lst.size();
+
+    // Write list contents depending on data format
+    if (os.format() == IOstream::ASCII)
+    {
+        bool uniform = false;
+
+        if (sz > 1 && !indexedOutput)
+        {
+            uniform = true;
+
+            forAll(lst, i)
+            {
+                if (lst[i] != lst[0])
+                {
+                    uniform = false;
+                    break;
+                }
+            }
+        }
+
+        if (uniform)
+        {
+            // uniform values:
+            os  << sz << token::BEGIN_BLOCK << lst[0] << token::END_BLOCK;
+        }
+        else if (indexedOutput)
+        {
+            // indexed output
+            os  << nl << token::BEGIN_BLOCK << nl;
+
+            for
+            (
+                typename PackedList<nBits>::const_iterator iter = lst.cbegin();
+                iter != lst.cend();
+                ++iter
+            )
+            {
+                if (iter.writeIfSet(os))
+                {
+                    os  << nl;
+                }
+            }
+
+            os  << token::END_BLOCK << nl;
+        }
+        else if (sz < 11)
+        {
+            // short list:
+            os  << sz << token::BEGIN_LIST;
+            forAll(lst, i)
+            {
+                if (i)
+                {
+                    os  << token::SPACE;
+                }
+                os  << lst[i];
+            }
+            os  << token::END_LIST;
+        }
+        else
+        {
+            // longer list:
+            os  << nl << sz << nl << token::BEGIN_LIST;
+            forAll(lst, i)
+            {
+                os  << nl << lst[i];
+            }
+            os  << nl << token::END_LIST << nl;
+        }
+    }
+    else
+    {
+        os  << nl << sz << nl;
+        if (sz)
+        {
+            os.write
+            (
+                reinterpret_cast<const char*>(lst.storage().cdata()),
+                lst.byteSize()
+            );
+        }
+    }
+
+    return os;
+}
+
+
+template<unsigned nBits>
+void Foam::PackedList<nBits>::writeEntry(Ostream& os) const
+{
+    os << *this;
+}
+
+
+template<unsigned nBits>
+void Foam::PackedList<nBits>::writeEntry
+(
+    const word& keyword,
+    Ostream& os
+) const
+{
+    os.writeKeyword(keyword);
+    writeEntry(os);
+    os << token::END_STATEMENT << endl;
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<unsigned nBits>
@@ -305,193 +548,16 @@ Foam::PackedList<nBits>::operator=(const UList<label>& lst)
 // * * * * * * * * * * * * * *  Friend Operators * * * * * * * * * * * * * * //
 
 template<unsigned nBits>
-Foam::Istream& Foam::operator>>
-(
-    Istream& is,
-    PackedList<nBits>& lst
-)
+Foam::Istream& Foam::operator>>(Istream& is, PackedList<nBits>& lst)
 {
-    lst.clear();
-    is.fatalCheck("operator>>(Istream&, PackedList<nBits>&)");
-
-    token firstTok(is);
-    is.fatalCheck
-    (
-        "operator>>(Istream&, PackedList<nBits>&) : reading first token"
-    );
-
-    if (firstTok.isLabel())
-    {
-        const label sz = firstTok.labelToken();
-
-        // Set list length to that read
-        lst.setSize(sz);
-
-        {
-            // Read beginning of contents
-            const char delimiter = is.readBeginList("List");
-
-            if (sz)
-            {
-                unsigned int val;
-
-                if (delimiter == token::BEGIN_LIST)
-                {
-                    for (register label i=0; i<sz; ++i)
-                    {
-                        is  >> val;
-
-                        if (val > lst.max_value())
-                        {
-                            FatalIOErrorIn
-                            (
-                                "operator>>(Istream&, PackedList<nBits>&)",
-                                is
-                            )
-                                << "out-of-range value: "
-                                << val << " > " << lst.max_value()
-                                << exit(FatalIOError);
-                        }
-
-                        is.fatalCheck
-                        (
-                            "operator>>(Istream&, PackedList<nBits>&) : "
-                            "reading entry"
-                        );
-                    }
-                }
-                else
-                {
-                    is  >> val;
-
-                    is.fatalCheck
-                    (
-                        "operator>>(Istream&, PackedList<nBits>&) : "
-                        "reading the single entry"
-                    );
-
-                    if (val > lst.max_value())
-                    {
-                        FatalIOErrorIn
-                        (
-                            "operator>>(Istream&, PackedList<nBits>&)",
-                            is
-                        )
-                            << "out-of-range value: "
-                            << val << " > " << lst.max_value()
-                            << exit(FatalIOError);
-                    }
-
-                    // assign for all entries
-                    lst = val;
-                }
-            }
-
-            // Read end of contents
-            is.readEndList("PackedList<nBits>");
-        }
-    }
-    else if (firstTok.isPunctuation())
-    {
-        if (firstTok.pToken() != token::BEGIN_LIST)
-        {
-            FatalIOErrorIn
-            (
-                "operator>>(Istream&, PackedList<nBits>&)",
-                is
-            )
-                << "incorrect first token, expected '(', found "
-                << firstTok.info()
-                << exit(FatalIOError);
-        }
-
-        token nextTok(is);
-        is.fatalCheck("operator>>(Istream&, PackedList<nBits>&)");
-
-        unsigned int val;
-
-        while
-        (
-            !(nextTok.isPunctuation() && nextTok.pToken() == token::END_LIST)
-        )
-        {
-            is.putBack(nextTok);
-            is  >> val;
-            lst.append(val);
-
-            if (val > lst.max_value())
-            {
-                FatalIOErrorIn
-                (
-                    "operator>>(Istream&, PackedList<nBits>&)",
-                    is
-                )
-                    << "out-of-range value: "
-                    << val << " > " << lst.max_value()
-                    << exit(FatalIOError);
-            }
-
-            is  >> nextTok;
-            is.fatalCheck("operator>>(Istream&, PackedList<nBits>&)");
-        }
-    }
-    else
-    {
-        FatalIOErrorIn
-        (
-            "operator>>(Istream&, PackedList<nBits>&)",
-            is
-        )
-            << "incorrect first token, expected <int> or '(', found "
-            << firstTok.info()
-            << exit(FatalIOError);
-    }
-
-    return is;
+    return lst.read(is);
 }
 
 
 template<unsigned nBits>
-Foam::Ostream& Foam::operator<<
-(
-    Ostream& os,
-    PackedList<nBits>& lst
-)
+Foam::Ostream& Foam::operator<<(Ostream& os, const PackedList<nBits>& lst)
 {
-    if (lst.size() < 11)
-    {
-        // Write size and start delimiter
-        os  << lst.size() << token::BEGIN_LIST;
-
-        // Write contents
-        forAll(lst, i)
-        {
-            if (i)
-            {
-                os  << token::SPACE;
-            }
-            os  << lst[i];
-        }
-
-        // Write end delimiter
-        os  << token::END_LIST;
-    }
-    else
-    {
-        // Write size and start delimiter
-        os  << nl << lst.size() << nl << token::BEGIN_LIST;
-
-        // Write contents
-        forAll(lst, i)
-        {
-            os  << nl << lst[i];
-        }
-
-        // Write end delimiter
-        os  << nl << token::END_LIST << nl;
-    }
-
-    return os;
+    return lst.write(os, false);
 }
 
 

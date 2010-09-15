@@ -42,42 +42,42 @@ int main(int argc, char *argv[])
 
     Info<< "\ntest allocation with value\n";
     PackedList<3> list1(5,1);
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest assign uniform value\n";
     list1 = 3;
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest assign uniform value (with overflow)\n";
     list1 = -1;
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest zero\n";
     list1 = 0;
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest set() with default argument (max_value)\n";
     list1.set(1);
     list1.set(3);
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest unset() with in-range and out-of-range\n";
     list1.unset(3);
     list1.unset(100000);
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest assign between references\n";
     list1[2] = 3;
     list1[4] = list1[2];
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest assign between references, with chaining\n";
     list1[0] = list1[4] = 1;
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest assign between references, with chaining and auto-vivify\n";
     list1[1] = list1[8] = list1[10] = list1[14] = 2;
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
 
     Info<< "\ntest operator== between references\n";
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
     {
         const PackedList<3>& constLst = list1;
         Info<< "\ntest operator[] const with out-of-range index\n";
-        constLst.print(Info, true);
+        constLst.printInfo(Info, true);
         if (constLst[20])
         {
             Info<< "[20] is true (unexpected)\n";
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
             Info<< "[20] is false (expected) list size should be unchanged "
                 << "(const)\n";
         }
-        constLst.print(Info, true);
+        constLst.printInfo(Info, true);
 
         Info<< "\ntest operator[] non-const with out-of-range index\n";
         if (list1[20])
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
             Info<< "[20] is false (expected) but list was resized?? "
                 << "(non-const)\n";
         }
-        list1.print(Info, true);
+        list1.printInfo(Info, true);
     }
 
 
@@ -157,85 +157,85 @@ int main(int argc, char *argv[])
     {
         Info<< "[20] is false, as expected\n";
     }
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest resize with value (without reallocation)\n";
     list1.resize(8, list1.max_value());
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest flip() function\n";
     list1.flip();
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\nre-flip()\n";
     list1.flip();
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest set() function\n";
     list1.set(1, 5);
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest assign bool\n";
     list1 = false;
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest assign bool\n";
     list1 = true;
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest resize without value (with reallocation)\n";
     list1.resize(12);
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest resize with value (with reallocation)\n";
     list1.resize(25, list1.max_value());
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest resize smaller (should not touch allocation)\n";
     list1.resize(8);
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest append() operation\n";
     list1.append(2);
     list1.append(3);
     list1.append(4);
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest reserve() operation\n";
     list1.reserve(32);
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest shrink() operation\n";
     list1.shrink();
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest setCapacity() operation\n";
     list1.setCapacity(15);
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest setCapacity() operation\n";
     list1.setCapacity(100);
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest operator[] assignment\n";
     list1[16] = 5;
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest operator[] assignment with auto-vivify\n";
     list1[36] = list1.max_value();
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest setCapacity smaller\n";
     list1.setCapacity(24);
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest resize much smaller\n";
     list1.resize(150);
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest trim\n";
     list1.trim();
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     // add in some misc values
     list1[31] = 1;
@@ -245,40 +245,40 @@ int main(int argc, char *argv[])
     Info<< "\ntest iterator\n";
     PackedList<3>::iterator iter = list1.begin();
     Info<< "begin():";
-    iter.print(Info) << "\n";
+    iter.printInfo(Info) << "\n";
 
     Info<< "iterator:" << iter() << "\n";
     iter() = 5;
-    iter.print(Info);
-    list1.print(Info, true);
+    iter.printInfo(Info);
+    list1.printInfo(Info, true);
 
     iter = list1[31];
     Info<< "iterator:" << iter() << "\n";
-    iter.print(Info);
+    iter.printInfo(Info);
 
 
     Info<< "\ntest get() method\n";
     Info<< "get(10):" << list1.get(10) << " and list[10]:" << list1[10] << "\n";
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
     Info<< "\ntest iterator indexing\n";
     Info<< "cend() ";
-    list1.cend().print(Info) << "\n";
+    list1.cend().printInfo(Info) << "\n";
 
     {
         Info<< "\ntest assignment of iterator\n";
-        list1.print(Info, true);
+        list1.printInfo(Info, true);
         Info<< "cend()\n";
-        list1.end().print(Info);
+        list1.end().printInfo(Info);
         PackedList<3>::iterator cit = list1[100];
         Info<< "out-of-range: ";
-        cit.print(Info);
+        cit.printInfo(Info);
         cit = list1[15];
         Info<< "in-range: ";
-        cit.print(Info);
+        cit.printInfo(Info);
         Info<< "out-of-range: ";
         cit = list1[1000];
-        cit.print(Info);
+        cit.printInfo(Info);
     }
 
 
@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
         ++cit
     )
     {
-        cit.print(Info);
+        cit.printInfo(Info);
     }
 
     Info<< "\ntest operator[] auto-vivify\n";
@@ -304,16 +304,16 @@ int main(int argc, char *argv[])
     Info<< "size after write:" << list1.size() << "\n";
     Info<< "list[45]:" << list1[45] << "\n";
     list1[49] = list1[100];
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
 
 
     Info<< "\ntest copy constructor + append\n";
     PackedList<3> list2(list1);
     list2.append(4);
     Info<< "source list:\n";
-    list1.print(Info, true);
+    list1.printInfo(Info, true);
     Info<< "destination list:\n";
-    list2.print(Info, true);
+    list2.printInfo(Info, true);
 
     Info<< "\ntest pattern that fills all bits\n";
     PackedList<4> list3(8, 8);
@@ -323,10 +323,10 @@ int main(int argc, char *argv[])
     list3[pos--] = list3.max_value();
     list3[pos--] = 0;
     list3[pos--] = list3.max_value();
-    list3.print(Info, true);
+    list3.printInfo(Info, true);
 
     Info<< "removed final value: " << list3.remove() << endl;
-    list3.print(Info, true);
+    list3.printInfo(Info, true);
 
     Info<<"list: " << list3 << endl;
 
@@ -358,7 +358,7 @@ int main(int argc, char *argv[])
     PackedBoolList listb(list4);
 
     Info<< "copied from bool list " << endl;
-    listb.print(Info, true);
+    listb.printInfo(Info, true);
 
     {
         labelList indices = listb.used();

@@ -27,6 +27,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::PackedListName, 0);
+defineTypeNameAndDebug(Foam::PackedListCore, 0);
+
 
 // ************************************************************************* //
