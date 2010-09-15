@@ -239,6 +239,11 @@ MPICH)
         cmd="${cmd} -n 1 ${procXtermCmdFile}"
     done < $PWD/mpirun.schema
     ;;
+*)
+    echo
+    echo "Unsupported WM_MPLIB setting : $WM_MPLIB"
+    printUsage
+    exit 1
 esac
 
 echo "Constructed $PWD/mpirun.schema file."

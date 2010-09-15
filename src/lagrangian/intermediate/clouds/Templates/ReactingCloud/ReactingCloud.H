@@ -42,7 +42,6 @@ SourceFiles
 
 #include "ThermoCloud.H"
 #include "reactingCloud.H"
-#include "multiComponentMixture.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,11 +66,6 @@ class ReactingCloud
     public ThermoCloud<ParcelType>,
     public reactingCloud
 {
-public:
-
-    //- Type of thermodynamics the cloud was instantiated for
-    typedef typename ParcelType::thermoType thermoType;
-
 
 private:
 
@@ -90,9 +84,6 @@ protected:
 
         //- Parcel constant properties
         typename ParcelType::constantProperties constProps_;
-
-        //- Multi-component carrier phase thermo
-        multiComponentMixture<thermoType>& mcCarrierThermo_;
 
 
         // References to the cloud sub-models
@@ -154,7 +145,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,
-            basicThermo& thermo,
+            const SLGThermo& thermo,
             bool readFields = true
         );
 
@@ -174,13 +165,6 @@ public:
             //- Return the constant properties
             inline const typename ParcelType::constantProperties&
                 constProps() const;
-
-            //- Return const access to multi-component carrier phase thermo
-            inline const multiComponentMixture<thermoType>&
-                mcCarrierThermo() const;
-
-            //- Return access to multi-component carrier phase thermo
-            inline multiComponentMixture<thermoType>& mcCarrierThermo();
 
 
             // Sub-models

@@ -28,7 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "thermoPhysicsTypes.H"
 #include "KinematicCloud.H"
 
 #include "NoSurfaceFilm.H"
@@ -36,44 +35,21 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReactingSurfaceFilmModels(ParcelType)                             \
+#define makeReactingParcelSurfaceFilmModels(ParcelType)                       \
                                                                               \
-    makeReactingSurfaceFilmModelThermoType                                    \
-    (                                                                         \
-        ParcelType,                                                           \
-        constGasThermoPhysics                                                 \
-    );                                                                        \
+    makeSurfaceFilmModel(KinematicCloud<ParcelType>);                         \
                                                                               \
-    makeReactingSurfaceFilmModelThermoType                                    \
-    (                                                                         \
-        ParcelType,                                                           \
-        gasThermoPhysics                                                      \
-    );                                                                        \
-                                                                              \
-    makeReactingSurfaceFilmModelThermoType                                    \
-    (                                                                         \
-        ParcelType,                                                           \
-        icoPoly8ThermoPhysics                                                 \
-    );
-
-
-#define makeReactingSurfaceFilmModelThermoType(ParcelType, ThermoType)        \
-                                                                              \
-    makeSurfaceFilmModel(KinematicCloud<ParcelType<ThermoType> >);            \
-                                                                              \
-    makeSurfaceFilmModelThermoType                                            \
+    makeSurfaceFilmModelType                                                  \
     (                                                                         \
         NoSurfaceFilm,                                                        \
         KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
+        ParcelType                                                            \
     );                                                                        \
-    makeSurfaceFilmModelThermoType                                            \
+    makeSurfaceFilmModelType                                                  \
     (                                                                         \
         ThermoSurfaceFilm,                                                    \
         KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
+        ParcelType                                                            \
     );
 
 

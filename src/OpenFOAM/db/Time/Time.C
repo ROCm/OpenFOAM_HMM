@@ -371,6 +371,11 @@ Foam::Time::Time
 
 Foam::Time::~Time()
 {
+    if (controlDict_.watchIndex() != -1)
+    {
+        removeWatch(controlDict_.watchIndex());
+    }
+
     // destroy function objects first
     functionObjects_.clear();
 }
@@ -799,7 +804,11 @@ Foam::Time& Foam::Time::operator++()
 
             case wcCpuTime:
             {
-                label outputIndex = label(elapsedCpuTime()/writeInterval_);
+                label outputIndex = label
+                (
+                    returnReduce(elapsedCpuTime(), maxOp<double>())
+                  / writeInterval_
+                );
                 if (outputIndex > outputTimeIndex_)
                 {
                     outputTime_ = true;
@@ -814,7 +823,11 @@ Foam::Time& Foam::Time::operator++()
 
             case wcClockTime:
             {
-                label outputIndex = label(elapsedClockTime()/writeInterval_);
+                label outputIndex = label
+                (
+                    returnReduce(label(elapsedClockTime()), maxOp<label>())
+                  / writeInterval_
+                );
                 if (outputIndex > outputTimeIndex_)
                 {
                     outputTime_ = true;

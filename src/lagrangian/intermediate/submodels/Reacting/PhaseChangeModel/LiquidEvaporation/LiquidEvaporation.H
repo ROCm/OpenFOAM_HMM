@@ -54,7 +54,7 @@ protected:
     // Protected data
 
         //- Global liquid properties data
-        autoPtr<liquidMixture> liquids_;
+        const liquidMixture& liquids_;
 
         //- List of active liquid names
         List<word> activeLiquids_;

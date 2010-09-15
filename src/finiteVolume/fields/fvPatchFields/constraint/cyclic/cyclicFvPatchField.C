@@ -57,18 +57,18 @@ cyclicFvPatchField<Type>::cyclicFvPatchField
     coupledFvPatchField<Type>(ptf, p, iF, mapper),
     cyclicPatch_(refCast<const cyclicFvPatch>(p))
 {
-    if (!isType<cyclicFvPatch>(this->patch()))
+    if (!isA<cyclicFvPatch>(this->patch()))
     {
         FatalErrorIn
         (
-            "cyclicFvPatchField<Type>::cyclicFvPatchField\n"
-            "(\n"
-            "    const cyclicFvPatchField<Type>& ptf,\n"
-            "    const fvPatch& p,\n"
-            "    const DimensionedField<Type, volMesh>& iF,\n"
-            "    const fvPatchFieldMapper& mapper\n"
-            ")\n"
-        )   << "\n    patch type '" << p.type()
+            "cyclicFvPatchField<Type>::cyclicFvPatchField"
+            "("
+                "const cyclicFvPatchField<Type>& ,"
+                "const fvPatch&, "
+                "const DimensionedField<Type, volMesh>&, "
+                "const fvPatchFieldMapper&"
+            ")"
+        )   << "    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->dimensionedInternalField().name()
@@ -89,18 +89,18 @@ cyclicFvPatchField<Type>::cyclicFvPatchField
     coupledFvPatchField<Type>(p, iF, dict),
     cyclicPatch_(refCast<const cyclicFvPatch>(p))
 {
-    if (!isType<cyclicFvPatch>(p))
+    if (!isA<cyclicFvPatch>(p))
     {
         FatalIOErrorIn
         (
-            "cyclicFvPatchField<Type>::cyclicFvPatchField\n"
-            "(\n"
-            "    const fvPatch& p,\n"
-            "    const Field<Type>& field,\n"
-            "    const dictionary& dict\n"
-            ")\n",
+            "cyclicFvPatchField<Type>::cyclicFvPatchField"
+            "("
+                "const fvPatch&, "
+                "const Field<Type>&, "
+                "const dictionary&"
+            ")",
             dict
-        )   << "\n    patch type '" << p.type()
+        )   << "    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->dimensionedInternalField().name()

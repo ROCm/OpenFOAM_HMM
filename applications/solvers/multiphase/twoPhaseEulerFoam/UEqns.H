@@ -4,11 +4,23 @@ fvVectorMatrix UbEqn(Ub, Ub.dimensions()*dimVol/dimTime);
 {
     {
         volTensorField gradUaT = fvc::grad(Ua)().T();
+
+        if (kineticTheory.on())
+        {
+            kineticTheory.solve(gradUaT);
+            nuEffa = kineticTheory.mua()/rhoa;
+        }
+        else // If not using kinetic theory is using Ct model
+        {
+            nuEffa = sqr(Ct)*nutb + nua;
+        }
+
         volTensorField Rca
         (
             "Rca",
             ((2.0/3.0)*I)*(sqr(Ct)*k + nuEffa*tr(gradUaT)) - nuEffa*gradUaT
         );
+
 
         if (kineticTheory.on())
         {

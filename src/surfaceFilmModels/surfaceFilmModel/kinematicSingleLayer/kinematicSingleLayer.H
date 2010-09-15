@@ -52,7 +52,7 @@ namespace surfaceFilmModels
 class injectionModel;
 
 /*---------------------------------------------------------------------------*\
-                      Class kinematicSingleLayer Declaration
+                   Class kinematicSingleLayer Declaration
 \*---------------------------------------------------------------------------*/
 
 class kinematicSingleLayer
@@ -117,23 +117,28 @@ protected:
 
         // Model parameters
 
-            //- Skin frition coefficient for film/main region interface
+            //- Skin frition coefficient for film/primary region interface
             scalar Cf_;
 
-            //- Stable film thickness - film cannot detach until this is reached
+            //- Stable film thickness - film cannot detach until reached
             dimensionedScalar deltaStable_;
 
 
         // Thermo properties
 
-            //- Density / [kg/m3]
-            volScalarField rho_;
+            // Fields
 
-            //- Dynamic viscosity / [Pa.s]
-            volScalarField mu_;
+                //- Initiliased thermo flag
+                bool initialisedThermo_;
 
-            //- Surface tension / [m/s2]
-            volScalarField sigma_;
+                //- Density / [kg/m3]
+                volScalarField rho_;
+
+                //- Dynamic viscosity / [Pa.s]
+                volScalarField mu_;
+
+                //- Surface tension / [m/s2]
+                volScalarField sigma_;
 
 
         // Fields
@@ -141,8 +146,14 @@ protected:
             //- Film thickness / [m]
             volScalarField delta_;
 
-            //- Velocity / [m/s]
+            //- Velocity - mean / [m/s]
             volVectorField U_;
+
+            //- Velocity - surface / [m/s]
+            volVectorField Us_;
+
+            //- Velocity - wall / [m/s]
+            volVectorField Uw_;
 
             //- Film thickness*density (helper field) / [kg/m2]
             volScalarField deltaRho_;
@@ -153,11 +164,14 @@ protected:
 
             // Transfer fields - to the primary region
 
-                //- Return the film mass available for transfer
+                //- Film mass available for transfer
                 volScalarField massForPrimary_;
 
-                //- Return the parcel diameters originating from film
+                //- Parcel diameters originating from film
                 volScalarField diametersForPrimary_;
+
+                //- Film mass evolved via phase change
+                volScalarField massPhaseChangeForPrimary_;
 
 
         // Source term fields
@@ -198,6 +212,12 @@ protected:
             //- Pressure / [Pa]
             volScalarField pPrimary_;
 
+            //- Density / [kg/m3]
+            volScalarField rhoPrimary_;
+
+            //- Viscosity / [Pa.s]
+            volScalarField muPrimary_;
+
 
         // Sub-models
 
@@ -225,6 +245,9 @@ protected:
         //- Read control parameters from dictionary
         virtual bool read();
 
+        //- Correct the thermo fields
+        virtual void correctThermoFields();
+
         //- Reset source term fields
         virtual void resetPrimaryRegionSourceTerms();
 
@@ -248,6 +271,9 @@ protected:
 
         //- Continuity check
         virtual void continuityCheck();
+
+        //- Update film surface velocities
+        virtual void updateSurfaceVelocities();
 
         //- Return the stress term for the momentum equation
         virtual tmp<fvVectorMatrix> tau(volVectorField& dU) const;
@@ -365,14 +391,29 @@ public:
             //- Return the film velocity [m/s]
             virtual const volVectorField& U() const;
 
+            //- Return the film surface velocity [m/s]
+            virtual const volVectorField& Us() const;
+
+            //- Return the film wall velocity [m/s]
+            virtual const volVectorField& Uw() const;
+
             //- Return the film density [kg/m3]
             virtual const volScalarField& rho() const;
 
-            //- Return the film temperature [K]
+            //- Return the film mean temperature [K]
             virtual const volScalarField& T() const;
+
+            //- Return the film surface temperature [K]
+            virtual const volScalarField& Ts() const;
+
+            //- Return the film wall temperature [K]
+            virtual const volScalarField& Tw() const;
 
             //- Return the film specific heat capacity [J/kg/K]
             virtual const volScalarField& cp() const;
+
+            //- Return the film thermal conductivity [W/m/K]
+            virtual const volScalarField& kappa() const;
 
 
            // Transfer fields - to the primary region
@@ -382,6 +423,9 @@ public:
 
                //- Return the parcel diameters originating from film
                virtual const volScalarField& diametersForPrimary() const;
+
+               //- Return the film mass evolved via phase change
+               virtual const volScalarField& massPhaseChangeForPrimary() const;
 
 
         // External helper functions
@@ -396,7 +440,7 @@ public:
                 const label patchI,            // patchI on primary region
                 const label faceI,             // faceI of patchI
                 const scalar massSource,       // [kg]
-                const vector& momentumSource,  // [kg.m/s] (tangential momentum)
+                const vector& momentumSource,  // [kg.m/s] (tang'l momentum)
                 const scalar pressureSource,   // [kg.m/s] (normal momentum)
                 const scalar energySource = 0  // [J]
             );
@@ -418,7 +462,7 @@ public:
 
             // Film region
 
-                //- Momementum / [kg/m/s2]
+                //- Momentum / [kg/m/s2]
                 inline volVectorField& USp();
 
                 //- Pressure / [Pa]
@@ -426,6 +470,30 @@ public:
 
                 //- Mass / [kg/m2/s]
                 inline volScalarField& rhoSp();
+
+                //- Momentum / [kg/m/s2]
+                inline const volVectorField& USp() const;
+
+                //- Pressure / [Pa]
+                inline const volScalarField& pSp() const;
+
+                //- Mass / [kg/m2/s]
+                inline const volScalarField& rhoSp() const;
+
+
+        // Fields mapped from primary region
+
+            //- Velocity / [m/s]
+            inline const volVectorField& UPrimary() const;
+
+            //- Pressure / [Pa]
+            inline const volScalarField& pPrimary() const;
+
+            //- Density / [kg/m3]
+            inline const volScalarField& rhoPrimary() const;
+
+            //- Viscosity / [Pa.s]
+            inline const volScalarField& muPrimary() const;
 
 
         // Sub-models
@@ -447,10 +515,30 @@ public:
             inline tmp<volScalarField> gNormClipped() const;
 
 
-       // Evolution
+        // Evolution
+
+            //- Pre-evolve film hook
+            virtual void preEvolveFilm();
 
             //- Evolve the film equations
             virtual void evolveFilm();
+
+
+        // Source fields
+
+            // Mapped into primary region
+
+                //- Return total mass source - Eulerian phase only
+                virtual tmp<DimensionedField<scalar, volMesh> > Srho() const;
+
+                //- Return mass source for specie i - Eulerian phase only
+                virtual tmp<DimensionedField<scalar, volMesh> > Srho
+                (
+                    const label i
+                ) const;
+
+                //- Return enthalpy source - Eulerian phase only
+                virtual tmp<DimensionedField<scalar, volMesh> > Sh() const;
 
 
        // I-O

@@ -171,18 +171,13 @@ public:
     );
 
 
-#define makeSurfaceReactionModelThermoType(SS, CloudType, ParcelType, ThermoType)\
+#define makeSurfaceReactionModelType(SS, CloudType, ParcelType)               \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug                                       \
-    (                                                                         \
-        SS<CloudType<ParcelType<ThermoType> > >,                              \
-        0                                                                     \
-    );                                                                        \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
                                                                               \
-    SurfaceReactionModel<CloudType<ParcelType<ThermoType> > >::               \
-        adddictionaryConstructorToTable                                       \
-            <SS<CloudType<ParcelType<ThermoType> > > >                        \
-            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
+    SurfaceReactionModel<CloudType<ParcelType> >::                            \
+        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
+            add##SS##CloudType##ParcelType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

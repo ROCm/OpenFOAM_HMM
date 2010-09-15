@@ -117,6 +117,57 @@ public:
             const volScalarField& ft,
             const dimensionedScalar& stoicRatio
         ) const;
+
+
+        // Per specie properties
+
+            //- Number of moles []
+            virtual scalar nMoles(const label specieI) const = 0;
+
+            //- Molecular weight [kg/kmol]
+            virtual scalar W(const label specieI) const = 0;
+
+
+        // Per specie thermo properties
+
+            //- Heat capacity at constant pressure [J/(kg K)]
+            virtual scalar Cp(const label specieI, const scalar T) const = 0;
+
+            //- Heat capacity at constant volume [J/(kg K)]
+            virtual scalar Cv(const label specieI, const scalar T) const = 0;
+
+            //- Enthalpy [J/kg]
+            virtual scalar H(const label specieI, const scalar T) const = 0;
+
+            //- Sensible enthalpy [J/kg]
+            virtual scalar Hs(const label specieI, const scalar T) const = 0;
+
+            //- Chemical enthalpy [J/kg]
+            virtual scalar Hc(const label specieI) const = 0;
+
+            //- Entropy [J/(kg K)]
+            virtual scalar S(const label specieI, const scalar T) const = 0;
+
+            //- Internal energy [J/kg]
+            virtual scalar E(const label specieI, const scalar T) const = 0;
+
+            //- Gibbs free energy [J/kg]
+            virtual scalar G(const label specieI, const scalar T) const = 0;
+
+            //- Helmholtz free energy [J/kg]
+            virtual scalar A(const label specieI, const scalar T) const = 0;
+
+
+        // Per specie transport properties
+
+            //- Dynamic viscosity [kg/m/s]
+            virtual scalar mu(const label specieI, const scalar T) const = 0;
+
+            //- Thermal conductivity [W/m/K]
+            virtual scalar kappa(const label specieI, const scalar T) const = 0;
+
+            //- Thermal diffusivity [kg/m/s]
+            virtual scalar alpha(const label specieI, const scalar T) const = 0;
 };
 
 

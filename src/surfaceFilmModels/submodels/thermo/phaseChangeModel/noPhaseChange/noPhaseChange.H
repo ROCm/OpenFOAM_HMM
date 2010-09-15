@@ -84,7 +84,12 @@ public:
         // Evolution
 
             //- Correct
-            virtual void correct();
+            virtual void correct
+            (
+                const scalar dt,
+                scalarField& dMass,
+                scalarField& dEnergy
+            );
 };
 
 

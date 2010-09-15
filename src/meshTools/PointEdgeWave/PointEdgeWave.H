@@ -275,6 +275,15 @@ public:
             const label maxIter
         );
 
+        //- Construct from mesh. Use setPointInfo and iterate() to do
+        //  actual calculation
+        PointEdgeWave
+        (
+            const polyMesh& mesh,
+            List<Type>& allPointInfo,
+            List<Type>& allEdgeInfo
+        );
+
 
     //- Destructor
     ~PointEdgeWave();

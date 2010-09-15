@@ -41,8 +41,8 @@ void Foam::ThermoCloud<ParcelType>::preEvolve()
 template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::evolveCloud()
 {
-    const volScalarField& T = carrierThermo_.T();
-    const volScalarField cp = carrierThermo_.Cp();
+    const volScalarField& T = thermo_.thermo().T();
+    const volScalarField cp = thermo_.thermo().Cp();
 
     autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
     (
@@ -115,7 +115,7 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
-    basicThermo& thermo,
+    const SLGThermo& thermo,
     bool readFields
 )
 :
@@ -124,13 +124,13 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
         cloudName,
         rho,
         U,
-        thermo.mu(),
+        thermo.thermo().mu(),
         g,
         false
     ),
     thermoCloud(),
     constProps_(this->particleProperties()),
-    carrierThermo_(thermo),
+    thermo_(thermo),
     heatTransferModel_
     (
         HeatTransferModel<ThermoCloud<ParcelType> >::New

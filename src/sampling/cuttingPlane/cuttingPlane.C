@@ -313,7 +313,7 @@ void Foam::cuttingPlane::walkCellCuts
             face f(faceVerts);
 
             // Orient face to point in the same direction as the plane normal
-            if ((f.normal(cutPoints) && normal()) < 0)
+            if ((f.normal(cutPoints) & normal()) < 0)
             {
                 f = f.reverseFace();
             }

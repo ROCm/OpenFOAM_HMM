@@ -5,7 +5,7 @@
         rho,
         U,
         g,
-        thermo
+        slgThermo
     );
 
     Info<< "Constructing kinematicCloud1" << endl;
