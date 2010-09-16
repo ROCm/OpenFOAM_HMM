@@ -252,6 +252,20 @@ inline Foam::PackedList<nBits>::PackedList(const UList<label>& lst)
 
 
 template<unsigned nBits>
+inline Foam::PackedList<nBits>::PackedList(const UIndirectList<label>& lst)
+:
+    PackedListCore(),
+    StorageList(packedLength(lst.size()), 0u),
+    size_(lst.size())
+{
+    forAll(lst, i)
+    {
+        set(i, lst[i]);
+    }
+}
+
+
+template<unsigned nBits>
 inline Foam::autoPtr<Foam::PackedList<nBits> >
 Foam::PackedList<nBits>::clone() const
 {

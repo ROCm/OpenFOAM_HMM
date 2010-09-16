@@ -545,6 +545,21 @@ Foam::PackedList<nBits>::operator=(const UList<label>& lst)
 }
 
 
+template<unsigned nBits>
+Foam::PackedList<nBits>&
+Foam::PackedList<nBits>::operator=(const UIndirectList<label>& lst)
+{
+    setCapacity(lst.size());
+    size_ = lst.size();
+
+    forAll(lst, i)
+    {
+        set(i, lst[i]);
+    }
+    return *this;
+}
+
+
 // * * * * * * * * * * * * * *  Friend Operators * * * * * * * * * * * * * * //
 
 template<unsigned nBits>

@@ -102,6 +102,7 @@ SourceFiles
 #define PackedList_H
 
 #include "labelList.H"
+#include "UIndirectList.H"
 #include "StaticAssert.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -227,6 +228,9 @@ public:
 
         //- Construct from a list of labels
         explicit inline PackedList(const UList<label>&);
+
+        //- Construct from an indirect list of labels
+        explicit inline PackedList(const UIndirectList<label>&);
 
         //- Clone
         inline autoPtr< PackedList<nBits> > clone() const;
@@ -388,11 +392,14 @@ public:
             //- Assignment of all entries to the given value. Takes linear time.
             inline PackedList<nBits>& operator=(const unsigned int val);
 
-            //- Assignment operator. Takes linear time.
+            //- Assignment operator.
             PackedList<nBits>& operator=(const PackedList<nBits>&);
 
-            //- Assignment operator. Takes linear time.
+            //- Assignment operator.
             PackedList<nBits>& operator=(const UList<label>&);
+
+            //- Assignment operator.
+            PackedList<nBits>& operator=(const UIndirectList<label>&);
 
 
     // Iterators and helpers
