@@ -869,10 +869,7 @@ inline void Foam::PackedList<nBits>::setCapacity(const label nElem)
 
 
 template<unsigned nBits>
-inline void Foam::PackedList<nBits>::reserve
-(
-    const label nElem
-)
+inline void Foam::PackedList<nBits>::reserve(const label nElem)
 {
     const label len = packedLength(nElem);
 
@@ -919,9 +916,8 @@ inline void Foam::PackedList<nBits>::clearStorage()
 template<unsigned nBits>
 inline void Foam::PackedList<nBits>::shrink()
 {
-    const label len = packedLength(size_);
-
-    // we have unused space?
+    // any uneed space allocated?
+    const label len = packedLength();
     if (len < StorageList::size())
     {
         StorageList::setSize(len);
@@ -939,6 +935,20 @@ template<unsigned nBits>
 inline const Foam::List<unsigned int>& Foam::PackedList<nBits>::storage() const
 {
     return static_cast<const StorageList&>(*this);
+}
+
+
+template<unsigned nBits>
+inline Foam::label Foam::PackedList<nBits>::packedLength() const
+{
+    return packedLength(size_);
+}
+
+
+template<unsigned nBits>
+inline Foam::label Foam::PackedList<nBits>::byteSize() const
+{
+    return packedLength() * sizeof(StorageType);
 }
 
 
@@ -1070,7 +1080,7 @@ template<unsigned nBits>
 inline Foam::PackedList<nBits>&
 Foam::PackedList<nBits>::operator=(const unsigned int val)
 {
-    const label packLen = packedLength(size_);
+    const label packLen = packedLength();
 
     if (val && size_)
     {

@@ -29,13 +29,6 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<unsigned nBits>
-inline Foam::label Foam::PackedList<nBits>::byteSize() const
-{
-    return packedLength(this->size()) * sizeof(StorageType);
-}
-
-
 #if (UINT_MAX == 0xFFFFFFFF)
 // 32-bit counting, Hamming weight method
 #   define COUNT_PACKEDBITS(sum, x)                                           \
@@ -65,8 +58,7 @@ unsigned int Foam::PackedList<nBits>::count() const
 
     if (size_)
     {
-        const label packLen = packedLength(size_);
-
+        const label packLen = packedLength();
         for (label i = 0; i < packLen; ++i)
         {
             register unsigned int bits = StorageList::operator[](i);
@@ -87,8 +79,7 @@ bool Foam::PackedList<nBits>::trim()
     }
 
     const label oldSize = size_;
-
-    for (label storeI = packedLength(size_) - 1; storeI >= 0; --storeI)
+    for (label storeI = packedLength()-1; storeI >= 0; --storeI)
     {
         size_ = storeI * packing();
         unsigned int bits = StorageList::operator[](storeI);
@@ -120,7 +111,7 @@ void Foam::PackedList<nBits>::flip()
     // mask value for complete segments
     const unsigned int mask = maskLower(packing());
 
-    const label packLen = packedLength(size_);
+    const label packLen = packedLength();
     for (label i=0; i < packLen; ++i)
     {
         StorageList::operator[](i) = mask & ~StorageList::operator[](i);
@@ -171,26 +162,19 @@ Foam::Ostream& Foam::PackedList<nBits>::iteratorBase::printInfo
 
 
 template<unsigned nBits>
-Foam::Ostream& Foam::PackedList<nBits>::printInfo
+Foam::Ostream& Foam::PackedList<nBits>::printBits
 (
     Ostream& os,
     const bool fullOutput
 ) const
 {
-    const label packLen = packedLength(size_);
-
-    os  << "PackedList<" << nBits << ">"
-        << " max_value:" << max_value()
-        << " packing:"   << packing() << nl
-        << " count: "     << count() << nl
-        << " size/capacity: " << size_ << "/" << capacity() << nl
-        << " storage/capacity: " << packLen << "/" << StorageList::size()
-        << "\n(\n";
+    const label packLen = packedLength();
 
     // mask value for complete segments
     unsigned int mask = maskLower(packing());
     const label outputLen = fullOutput ? StorageList::size() : packLen;
 
+    os  << "(\n";
     for (label i=0; i < outputLen; ++i)
     {
         const StorageType& rawBits = StorageList::operator[](i);
@@ -240,9 +224,29 @@ Foam::Ostream& Foam::PackedList<nBits>::printInfo
         }
         os  << '\n';
     }
-    os << ")\n";
+    os  << ")\n";
 
     return os;
+}
+
+
+template<unsigned nBits>
+Foam::Ostream& Foam::PackedList<nBits>::printInfo
+(
+    Ostream& os,
+    const bool fullOutput
+) const
+{
+    os  << "PackedList<" << nBits << ">"
+        << " max_value:" << max_value()
+        << " packing:"   << packing() << nl
+        << " count: "     << count() << nl
+        << " size/capacity: " << size_ << "/" << capacity() << nl
+        << " storage/capacity: "
+        << packedLength() << "/" << StorageList::size()
+        << "\n";
+
+    return printBits(os, fullOutput);
 }
 
 
@@ -501,7 +505,7 @@ Foam::Ostream& Foam::PackedList<nBits>::write
 template<unsigned nBits>
 void Foam::PackedList<nBits>::writeEntry(Ostream& os) const
 {
-    os << *this;
+    os  << *this;
 }
 
 
@@ -514,7 +518,7 @@ void Foam::PackedList<nBits>::writeEntry
 {
     os.writeKeyword(keyword);
     writeEntry(os);
-    os << token::END_STATEMENT << endl;
+    os  << token::END_STATEMENT << endl;
 }
 
 

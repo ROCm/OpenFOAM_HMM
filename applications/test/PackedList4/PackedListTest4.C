@@ -40,10 +40,10 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     PackedBoolList list1(20);
-    // set every other one on
+    // set every third one on
     forAll(list1, i)
     {
-        list1[i] = i % 2;
+        list1[i] = !(i % 3);
     }
 
     Info<< "\nalternating bit pattern\n";
@@ -52,70 +52,84 @@ int main(int argc, char *argv[])
     PackedBoolList list2 = ~list1;
 
     Info<< "\ncomplementary bit pattern\n";
-    list2.printInfo(Info, true);
+    list2.printBits(Info);
 
-    list2.resize(24, true);
+    // set every other on
+    forAll(list2, i)
+    {
+        list2[i] = !(i % 2);
+    }
+
+    Info<< "\nalternating bit pattern\n";
+    list2.printBits(Info);
+
     list2.resize(28, false);
+    list2.resize(34, true);
+    list2.resize(40, false);
     for (label i=0; i < 4; ++i)
     {
         list2[i] = true;
     }
 
-    Info<< "\nresized with 4 true + 4 false, bottom 4 bits true\n";
+    Info<< "\nresized with false, 6 true + 6 false, bottom 4 bits true\n";
     list2.printInfo(Info, true);
 
     labelList list2Labels = list2.used();
 
     Info<< "\noperator|\n";
-    (list1 | list2).printInfo(Info, true);
+
+    list1.printBits(Info);
+    list2.printBits(Info);
+    Info<< "==\n";
+    (list1 | list2).printBits(Info);
 
     Info<< "\noperator& : does trim\n";
-    (list1 & list2).printInfo(Info, true);
+    (list1 & list2).printBits(Info);
 
     Info<< "\noperator^\n";
-    (list1 ^ list2).printInfo(Info, true);
+    (list1 ^ list2).printBits(Info);
 
 
     Info<< "\noperator|=\n";
     {
         PackedBoolList list3 = list1;
-        (list3 |= list2).printInfo(Info, true);
+        (list3 |= list2).printBits(Info);
     }
 
     Info<< "\noperator|= with UList<label>\n";
     {
         PackedBoolList list3 = list1;
-        (list3 |= list2Labels).printInfo(Info, true);
+        (list3 |= list2Labels).printBits(Info);
     }
 
     Info<< "\noperator&=\n";
     {
         PackedBoolList list3 = list1;
-        (list3 &= list2).printInfo(Info, true);
+        (list3 &= list2).printBits(Info);
     }
 
     Info<< "\noperator+=\n";
     {
         PackedBoolList list3 = list1;
-        (list3 += list2).printInfo(Info, true);
+        (list3 += list2).printBits(Info);
     }
 
     Info<< "\noperator+= with UList<label>\n";
     {
         PackedBoolList list3 = list1;
-        (list3 += list2Labels).printInfo(Info, true);
+        (list3 += list2Labels).printBits(Info);
     }
 
     Info<< "\noperator-=\n";
     {
         PackedBoolList list3 = list1;
-        (list3 -= list2).printInfo(Info, true);
+        (list3 -= list2).printBits(Info);
     }
 
     Info<< "\noperator-= with UList<label>\n";
     {
         PackedBoolList list3 = list1;
-        (list3 -= list2Labels).printInfo(Info, true);
+        (list3 -= list2Labels).printBits(Info);
     }
 
     PackedBoolList list4

@@ -269,9 +269,12 @@ public:
             //- Return the underlying packed storage
             inline const List<unsigned int>& storage() const;
 
+            //- The list length when packed
+            inline label packedLength() const;
+
             //- Return the binary size in number of characters
             //  used in the underlying storage
-            label byteSize() const;
+            inline label byteSize() const;
 
             //- Count number of bits set, O(log(n))
             //  Uses the Hamming weight (population count) method
@@ -281,7 +284,7 @@ public:
             //- Return the values as a list of labels
             Xfer<labelList> values() const;
 
-            //- Print information and values, optionally output unused elements
+            //- Print bit patterns, optionally output unused elements
             //
             // addressable bits:
             //   on: '1', off: '-'
@@ -289,6 +292,9 @@ public:
             // non-addressable bits:
             //   on: '!', off: '.'
             //
+            Ostream& printBits(Ostream&, const bool fullOutput=false) const;
+
+            //- Print information and bit patterns (with printBits)
             Ostream& printInfo(Ostream&, const bool fullOutput=false) const;
 
 

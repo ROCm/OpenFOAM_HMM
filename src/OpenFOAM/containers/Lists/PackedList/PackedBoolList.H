@@ -61,19 +61,19 @@ class PackedBoolList
 {
     // Private Member Functions
 
-        //- Modulo is everything that is not in lst
-        //  This is equivalent to unsetting the bits specified in lst
-        void modulo(const PackedList<1>&);
+        //- Preparation, resizing before a bitor operation
+        //  returns true if the later result needs trimming
+        bool bitorPrepare(const PackedList<1>& lst, label& maxPackLen);
 
         //- Set the listed indices. Return number of elements changed.
         //  Does auto-vivify for non-existent entries.
         template<class LabelListType>
-        label setFromIndices(const LabelListType& indices);
+        label setIndices(const LabelListType& indices);
 
         //- Unset the listed indices. Return number of elements changed.
         //  Never auto-vivify entries.
         template<class LabelListType>
-        label unsetFromIndices(const LabelListType& indices);
+        label unsetIndices(const LabelListType& indices);
 
 public:
 
@@ -184,6 +184,13 @@ public:
             //- Complement operator
             inline PackedBoolList operator~() const;
 
+            //- And operator (lists may be dissimilar sizes)
+            PackedBoolList& operator&=(const PackedList<1>&);
+
+            //- Xor operator (lists may be dissimilar sizes)
+            //  Retains unique entries
+            PackedBoolList& operator^=(const PackedList<1>&);
+
             //- Or operator (lists may be dissimilar sizes)
             PackedBoolList& operator|=(const PackedList<1>&);
 
@@ -195,14 +202,6 @@ public:
             //  using the labels as indices to indicate which bits are set
             inline PackedBoolList& operator|=(const UIndirectList<label>&);
 
-            //- And operator (lists may be dissimilar sizes)
-            //  The result is trimmed to the smallest intersecting size
-            PackedBoolList& operator&=(const PackedList<1>&);
-
-            //- And operator (lists may be dissimilar sizes)
-            //  Only retain unique entries
-            PackedBoolList& operator^=(const PackedList<1>&);
-
 
             //- Add entries to this list, synonymous with the or operator
             inline PackedBoolList& operator+=(const PackedList<1>&);
@@ -213,27 +212,19 @@ public:
             //- Add entries to this list, synonymous with the or operator
             inline PackedBoolList& operator+=(const UIndirectList<label>&);
 
-            //- Remove entries from this list
-            inline PackedBoolList& operator-=(const PackedList<1>&);
+            //- Remove entries from this list - unset the specified bits
+            PackedBoolList& operator-=(const PackedList<1>&);
 
-            //- Remove entries from this list
+            //- Remove entries from this list - unset the specified bits
             inline PackedBoolList& operator-=(const UList<label>& indices);
 
-            //- Remove entries from this list
+            //- Remove entries from this list - unset the specified bits
             inline PackedBoolList& operator-=(const UIndirectList<label>&);
 
 };
 
 
 // Global Operators
-
-//- Combine lists
-PackedBoolList operator|
-(
-    const PackedBoolList& lst1,
-    const PackedBoolList& lst2
-);
-
 
 //- Intersect lists - the result is trimmed to the smallest intersecting size
 PackedBoolList operator&
@@ -244,7 +235,16 @@ PackedBoolList operator&
 
 
 //- Combine to form a unique list (xor)
+//  The result is trimmed to the smallest intersecting size
 PackedBoolList operator^
+(
+    const PackedBoolList& lst1,
+    const PackedBoolList& lst2
+);
+
+
+//- Combine lists
+PackedBoolList operator|
 (
     const PackedBoolList& lst1,
     const PackedBoolList& lst2
