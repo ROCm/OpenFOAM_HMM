@@ -149,6 +149,10 @@ public:
         //- Check zone definition. Return true if in error.
         bool checkDefinition(const bool report = false) const;
 
+        //- Check whether all procs have all zones and in same order. Return
+        //  true if in error.
+        bool checkParallelSync(const bool report = false) const;
+
         //- Correct zone mesh after moving points
         void movePoints(const pointField&);
 

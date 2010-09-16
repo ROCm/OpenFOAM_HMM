@@ -29,6 +29,7 @@ License
 #include "polyMesh.H"
 #include "primitiveMesh.H"
 #include "demandDrivenData.H"
+#include "syncTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -131,6 +132,49 @@ Foam::label Foam::pointZone::whichPoint(const label globalPointID) const
 bool Foam::pointZone::checkDefinition(const bool report) const
 {
     return zone::checkDefinition(zoneMesh_.mesh().points().size(), report);
+}
+
+
+bool Foam::pointZone::checkParallelSync(const bool report) const
+{
+    const polyMesh& mesh = zoneMesh().mesh();
+
+    labelList maxZone(mesh.nPoints(), -1);
+    labelList minZone(mesh.nPoints(), labelMax);
+    forAll(*this, i)
+    {
+        label pointI = operator[](i);
+        maxZone[pointI] = index();
+        minZone[pointI] = index();
+    }
+    syncTools::syncPointList(mesh, maxZone, maxEqOp<label>(), -1);
+    syncTools::syncPointList(mesh, minZone, minEqOp<label>(), labelMax);
+
+    bool error = false;
+
+    forAll(maxZone, pointI)
+    {
+        // Check point in zone on both sides
+        if (maxZone[pointI] != minZone[pointI])
+        {
+            if (report && !error)
+            {
+                Info<< " ***Problem with pointZone " << index()
+                    << " named " << name()
+                    << ". Point " << pointI
+                    << " at " << mesh.points()[pointI]
+                    << " is in zone "
+                    << (minZone[pointI] == labelMax ? -1 : minZone[pointI])
+                    << " on some processors and in zone "
+                    << maxZone[pointI]
+                    << " on some other processors."
+                    << endl;
+            }
+            error = true;
+        }
+    }
+
+    return error;
 }
 
 
