@@ -76,7 +76,9 @@ Foam::surfaceFilmModels::standardPhaseChange::standardPhaseChange
     phaseChangeModel(typeName, owner, dict),
     Tb_(readScalar(coeffs_.lookup("Tb"))),
     deltaMin_(readScalar(coeffs_.lookup("deltaMin"))),
-    L_(readScalar(coeffs_.lookup("L")))
+    L_(readScalar(coeffs_.lookup("L"))),
+    totalMass_(0.0),
+    vapourRate_(0.0)
 {}
 
 
@@ -191,6 +193,19 @@ void Foam::surfaceFilmModels::standardPhaseChange::correct
             dEnergy[cellI] = dMass[cellI]*hVap;
         }
     }
+
+    const scalar sumdMass = sum(dMass);
+    totalMass_ += sumdMass;
+    vapourRate_ = sumdMass/owner().time().deltaTValue();
+}
+
+
+void Foam::surfaceFilmModels::standardPhaseChange::info() const
+{
+    Info<< indent << "mass phase change  = "
+        << returnReduce(totalMass_, sumOp<scalar>()) << nl
+        << indent << "vapourisation rate = "
+        << returnReduce(vapourRate_, sumOp<scalar>()) << nl;
 }
 
 

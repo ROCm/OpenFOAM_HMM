@@ -212,7 +212,8 @@ void Foam::surfaceFilmModels::thermoSingleLayer::solveEnergy()
         fvm::ddt(deltaRho_, hs_)
       + fvm::div(phi_, hs_)
      ==
-        fvm::Sp(hsSp_/hs_, hs_)
+//        fvm::Sp(hsSp_/hs_, hs_)
+        hsSp_
       + q(hs_)
       - fvm::Sp(massForPrimary_/magSf_/time_.deltaT(), hs_)
     );
@@ -570,11 +571,9 @@ void Foam::surfaceFilmModels::thermoSingleLayer::info() const
     kinematicSingleLayer::info();
 
     Info<< indent << "min/max(T)         = " << min(T_).value() << ", "
-        << max(T_).value() << nl
-        << indent << "mass phase change  = "
-        << returnReduce(totalMassPhaseChange_, sumOp<scalar>()) << nl
-        << indent << "vapourisation rate = "
-        << sum(massPhaseChangeForPrimary_).value()/time_.deltaTValue() << nl;
+        << max(T_).value() << nl;
+
+    phaseChange_->info();
 }
 
 

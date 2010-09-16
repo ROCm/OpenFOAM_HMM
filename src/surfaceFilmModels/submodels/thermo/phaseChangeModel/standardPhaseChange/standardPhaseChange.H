@@ -76,6 +76,12 @@ protected:
         //- Length scale / [m]
         const scalar L_;
 
+        //- Total mass evolved / [kg]
+        scalar totalMass_;
+
+        //- Vapouristaion rate / kg/s
+        scalar vapourRate_;
+
 
     // Protected member functions
 
@@ -114,6 +120,12 @@ public:
                 scalarField& dMass,
                 scalarField& dEnergy
             );
+
+
+        // Input/output
+
+            //- Output model statistics
+            virtual void info() const;
 };
 
 

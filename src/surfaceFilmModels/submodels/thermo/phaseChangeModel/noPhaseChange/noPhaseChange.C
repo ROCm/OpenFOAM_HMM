@@ -69,4 +69,10 @@ void Foam::surfaceFilmModels::noPhaseChange::correct
 }
 
 
+void Foam::surfaceFilmModels::noPhaseChange::info() const
+{
+    // do nothing
+}
+
+
 // ************************************************************************* //
