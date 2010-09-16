@@ -1,0 +1,2 @@
+# Create face set
+faceSet wallFilmFaces new patchToFace filmWalls
