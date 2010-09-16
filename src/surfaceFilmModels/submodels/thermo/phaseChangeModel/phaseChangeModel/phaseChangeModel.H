@@ -143,6 +143,12 @@ public:
                 scalarField& dMass,
                 scalarField& dEnergy
             ) = 0;
+
+
+        // Input/output
+
+            //- Output model statistics
+            virtual void info() const = 0;
 };
 
 
