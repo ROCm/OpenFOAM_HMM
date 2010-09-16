@@ -85,9 +85,6 @@ protected:
 
         // Cached injector fields per film patch
 
-            //- Injector cell / patch face
-            labelList injectorCellsPatch_;
-
             //- Parcel mass / patch face
             scalarList massParcelPatch_;
 

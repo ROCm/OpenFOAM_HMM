@@ -80,7 +80,7 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
     {
         const polyPatch& pp = this->owner().mesh().boundaryMesh()[patchI];
 
-        label faceI = pp.whichFace(p.face());
+        const label faceI = pp.whichFace(p.face());
 
         // Patch face normal
         const vector& nf = pp.faceNormals()[faceI];
@@ -137,7 +137,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::cacheFilmFields
         filmModel
     );
 
-    TFilmPatch_ = filmModel.T().boundaryField()[filmPatchI];
+    TFilmPatch_ = filmModel.Ts().boundaryField()[filmPatchI];
     distMap.distribute(TFilmPatch_);
 
     cpFilmPatch_ = filmModel.cp().boundaryField()[filmPatchI];
