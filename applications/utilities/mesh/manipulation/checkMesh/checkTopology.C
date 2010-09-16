@@ -7,32 +7,6 @@
 #include "pointSet.H"
 #include "IOmanip.H"
 
-bool Foam::checkSync(const wordList& names)
-{
-    List<wordList> allNames(Pstream::nProcs());
-    allNames[Pstream::myProcNo()] = names;
-    Pstream::gatherList(allNames);
-    Pstream::scatterList(allNames);
-
-    bool hasError = false;
-
-    for (label procI = 1; procI < allNames.size(); procI++)
-    {
-        if (allNames[procI] != allNames[0])
-        {
-            hasError = true;
-
-            Info<< " ***Inconsistent zones across processors, "
-                   "processor 0 has zones:" << allNames[0]
-                << ", processor " << procI << " has zones:"
-                << allNames[procI]
-                << endl;
-        }
-    }
-    return hasError;
-}
-
-
 Foam::label Foam::checkTopology
 (
     const polyMesh& mesh,
