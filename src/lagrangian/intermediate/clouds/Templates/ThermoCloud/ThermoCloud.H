@@ -41,7 +41,7 @@ SourceFiles
 
 #include "KinematicCloud.H"
 #include "thermoCloud.H"
-#include "basicThermo.H"
+#include "SLGThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,8 +82,8 @@ protected:
 
         // References to the carrier gas fields
 
-            //- Thermodynamics package (basic)
-            basicThermo& carrierThermo_;
+            //- SLG thermodynamics package
+            const SLGThermo& thermo_;
 
 
         // References to the cloud sub-models
@@ -136,7 +136,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,
-            basicThermo& thermo,
+            const SLGThermo& thermo,
             bool readFields = true
         );
 
@@ -158,10 +158,7 @@ public:
                 constProps() const;
 
             //- Return const access to thermo package
-            inline const basicThermo& carrierThermo() const;
-
-            //- Return access to thermo package
-            inline basicThermo& carrierThermo();
+            inline const SLGThermo& thermo() const;
 
 
             // Sub-models

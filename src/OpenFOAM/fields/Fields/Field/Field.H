@@ -127,14 +127,14 @@ public:
         Field
         (
             const UList<Type>& mapF,
-            const labelList& mapAddressing
+            const UList<label>& mapAddressing
         );
 
         //- Construct by 1 to 1 mapping from the given tmp field
         Field
         (
             const tmp<Field<Type> >& tmapF,
-            const labelList& mapAddressing
+            const UList<label>& mapAddressing
         );
 
         //- Construct by interpolative mapping from the given field
@@ -208,14 +208,14 @@ public:
         void map
         (
             const UList<Type>& mapF,
-            const labelList& mapAddressing
+            const UList<label>& mapAddressing
         );
 
         //- 1 to 1 map from the given tmp field
         void map
         (
             const tmp<Field<Type> >& tmapF,
-            const labelList& mapAddressing
+            const UList<label>& mapAddressing
         );
 
         //- Interpolative map from the given field
@@ -258,30 +258,30 @@ public:
         void rmap
         (
             const UList<Type>& mapF,
-            const labelList& mapAddressing
+            const UList<label>& mapAddressing
         );
 
         //- 1 to 1 reverse-map from the given tmp field
         void rmap
         (
             const tmp<Field<Type> >& tmapF,
-            const labelList& mapAddressing
+            const UList<label>& mapAddressing
         );
 
         //- Interpolative reverse map from the given field
         void rmap
         (
             const UList<Type>& mapF,
-            const labelList& mapAddressing,
-            const scalarList& weights
+            const UList<label>& mapAddressing,
+            const UList<scalar>& weights
         );
 
         //- Interpolative reverse map from the given tmp field
         void rmap
         (
             const tmp<Field<Type> >& tmapF,
-            const labelList& mapAddressing,
-            const scalarList& weights
+            const UList<label>& mapAddressing,
+            const UList<scalar>& weights
         );
 
         //- Negate this field

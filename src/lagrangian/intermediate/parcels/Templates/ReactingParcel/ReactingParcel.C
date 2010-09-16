@@ -89,8 +89,7 @@ void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection
         forAll(td.cloud().rhoTrans(), i)
         {
             scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
-            cpEff +=
-                Y*td.cloud().mcCarrierThermo().speciesData()[i].Cp(this->Tc_);
+            cpEff += Y*td.cloud().composition().carrier().Cp(i, this->Tc_);
         }
     }
     const scalar cpc = td.cpInterp().psi()[cellI];
@@ -121,13 +120,13 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
     }
 
     // Far field carrier  molar fractions
-    scalarField Xinf(td.cloud().mcCarrierThermo().speciesData().size());
+    scalarField Xinf(td.cloud().thermo().carrier().species().size());
 
     forAll(Xinf, i)
     {
         Xinf[i] =
-            td.cloud().mcCarrierThermo().Y(i)[cellI]
-           /td.cloud().mcCarrierThermo().speciesData()[i].W();
+            td.cloud().thermo().carrier().Y(i)[cellI]
+           /td.cloud().thermo().carrier().W(i);
     }
     Xinf /= sum(Xinf);
 
@@ -149,7 +148,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
         const scalar Csi = Cs[i] + Xsff*Xinf[i]*CsTot;
 
         Xs[i] = (2.0*Csi + Xinf[i]*CsTot)/3.0;
-        Ys[i] = Xs[i]*td.cloud().mcCarrierThermo().speciesData()[i].W();
+        Ys[i] = Xs[i]*td.cloud().thermo().carrier().W(i);
     }
     Xs /= sum(Xs);
     Ys /= sum(Ys);
@@ -164,16 +163,13 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
 
     forAll(Ys, i)
     {
-        const scalar sqrtW =
-            sqrt(td.cloud().mcCarrierThermo().speciesData()[i].W());
-        const scalar cbrtW =
-            cbrt(td.cloud().mcCarrierThermo().speciesData()[i].W());
+        const scalar sqrtW = sqrt(td.cloud().thermo().carrier().W(i));
+        const scalar cbrtW = cbrt(td.cloud().thermo().carrier().W(i));
 
-        rhos += Xs[i]*td.cloud().mcCarrierThermo().speciesData()[i].W();
-        mus += Ys[i]*sqrtW*td.cloud().mcCarrierThermo().speciesData()[i].mu(T);
-        kappa +=
-            Ys[i]*cbrtW*td.cloud().mcCarrierThermo().speciesData()[i].kappa(T);
-        cps += Xs[i]*td.cloud().mcCarrierThermo().speciesData()[i].Cp(T);
+        rhos += Xs[i]*td.cloud().thermo().carrier().W(i);
+        mus += Ys[i]*sqrtW*td.cloud().thermo().carrier().mu(i, T);
+        kappa += Ys[i]*cbrtW*td.cloud().thermo().carrier().kappa(i, T);
+        cps += Xs[i]*td.cloud().thermo().carrier().Cp(i, T);
 
         sumYiSqrtW += Ys[i]*sqrtW;
         sumYiCbrtW += Ys[i]*cbrtW;
@@ -267,7 +263,7 @@ void Foam::ReactingParcel<ParcelType>::calc
     scalar NCpW = 0.0;
 
     // Surface concentrations of emitted species
-    scalarField Cs(td.cloud().mcCarrierThermo().species().size(), 0.0);
+    scalarField Cs(td.cloud().composition().carrier().species().size(), 0.0);
 
     // Calc mass and enthalpy transfer due to phase change
     calcPhaseChange
@@ -416,10 +412,10 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     scalarField& Cs
 )
 {
-    typedef PhaseChangeModel
-    <
-        typename ReactingParcel<ParcelType>::trackData::cloudType
-    > phaseChangeModelType;
+    typedef typename ReactingParcel<ParcelType>::trackData::cloudType cloudType;
+    typedef PhaseChangeModel<cloudType> phaseChangeModelType;
+    const CompositionModel<cloudType>& composition = td.cloud().composition();
+
 
     if
     (
@@ -458,9 +454,8 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
 
     forAll(YComponents, i)
     {
-        const label idc =
-            td.cloud().composition().localToGlobalCarrierId(idPhase, i);
-        const label idl = td.cloud().composition().globalIds(idPhase)[i];
+        const label idc = composition.localToGlobalCarrierId(idPhase, i);
+        const label idl = composition.globalIds(idPhase)[i];
 
         // Calculate enthalpy transfer
         if
@@ -469,28 +464,25 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
          == phaseChangeModelType::etLatentHeat
         )
         {
-            scalar hlp =
-                td.cloud().composition().liquids().properties()[idl].hl(pc_, T);
+            scalar hlp = composition.liquids().properties()[idl].hl(pc_, T);
 
             Sh -= dMassPC[i]*hlp/dt;
         }
         else
         {
             // Note: enthalpies of both phases must use the same reference
-            scalar hc = td.cloud().mcCarrierThermo().speciesData()[idc].H(T);
-            scalar hp =
-                td.cloud().composition().liquids().properties()[idl].h(pc_, T);
+            scalar hc = composition.carrier().H(idc, T);
+            scalar hp = composition.liquids().properties()[idl].h(pc_, T);
 
             Sh -= dMassPC[i]*(hc - hp)/dt;
         }
 
         // Update particle surface thermo properties
         const scalar Dab =
-            td.cloud().composition().liquids().properties()[idl].D(pc_, Ts, Wc);
+            composition.liquids().properties()[idl].D(pc_, Ts, Wc);
 
-        const scalar Cp =
-            td.cloud().mcCarrierThermo().speciesData()[idc].Cp(Ts);
-        const scalar W = td.cloud().mcCarrierThermo().speciesData()[idc].W();
+        const scalar Cp = composition.carrier().Cp(idc, Ts);
+        const scalar W = composition.carrier().W(idc);
         const scalar Ni = dMassPC[i]/(this->areaS(d)*dt*W);
 
         // Molar flux of species coming from the particle (kmol/m^2/s)

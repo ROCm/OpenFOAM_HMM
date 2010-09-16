@@ -25,22 +25,27 @@ foamChemistryFile "$FOAM_CASE/chemkin/foam.inp";
 
 inertSpecie     N2;
 
-liquidComponents
-(
-    H2O
-);
+liquids
+{
+    liquidComponents
+    (
+        H2O
+    );
 
-H2O             H2O defaultCoeffs;
+    H2O             H2O defaultCoeffs;
+}
 
-solidComponents
-(
-    C
-    ash
-);
+solids
+{
+    solidComponents
+    (
+        C
+        ash
+    );
 
-C               C defaultCoeffs;
-
-ash             ash defaultCoeffs;
+    C               C defaultCoeffs;
+    ash             ash defaultCoeffs;
+}
 
 
 // ************************************************************************* //

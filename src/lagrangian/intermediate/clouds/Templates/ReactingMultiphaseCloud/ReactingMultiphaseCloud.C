@@ -40,9 +40,9 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::preEvolve()
 template<class ParcelType>
 void Foam::ReactingMultiphaseCloud<ParcelType>::evolveCloud()
 {
-    const volScalarField& T = this->carrierThermo().T();
-    const volScalarField cp = this->carrierThermo().Cp();
-    const volScalarField& p = this->carrierThermo().p();
+    const volScalarField& T = this->thermo().thermo().T();
+    const volScalarField cp = this->thermo().thermo().Cp();
+    const volScalarField& p = this->thermo().thermo().p();
 
     autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
     (
@@ -122,7 +122,7 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
-    basicThermo& thermo,
+    const SLGThermo& thermo,
     bool readFields
 )
 :

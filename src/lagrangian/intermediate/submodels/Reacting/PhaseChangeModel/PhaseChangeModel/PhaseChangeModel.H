@@ -191,18 +191,13 @@ public:
     );
 
 
-#define makePhaseChangeModelThermoType(SS, CloudType, ParcelType, ThermoType) \
+#define makePhaseChangeModelType(SS, CloudType, ParcelType)                   \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug                                       \
-    (                                                                         \
-        SS<CloudType<ParcelType<ThermoType> > >,                              \
-        0                                                                     \
-    );                                                                        \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
                                                                               \
-    PhaseChangeModel<CloudType<ParcelType<ThermoType> > >::                   \
-        adddictionaryConstructorToTable                                       \
-            <SS<CloudType<ParcelType<ThermoType> > > >                        \
-            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
+    PhaseChangeModel<CloudType<ParcelType> >::                                \
+        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
+            add##SS##CloudType##ParcelType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

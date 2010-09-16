@@ -41,8 +41,7 @@ namespace Foam
 
 Foam::surfaceFilmModels::injectionModel::injectionModel
 (
-    const surfaceFilmModel& owner,
-    const dictionary& dict
+    const surfaceFilmModel& owner
 )
 :
     owner_(owner),

@@ -66,7 +66,7 @@ template<class Type>
 Field<Type>::Field
 (
     const UList<Type>& mapF,
-    const labelList& mapAddressing
+    const UList<label>& mapAddressing
 )
 :
     List<Type>(mapAddressing.size())
@@ -78,7 +78,7 @@ template<class Type>
 Field<Type>::Field
 (
     const tmp<Field<Type> >& tmapF,
-    const labelList& mapAddressing
+    const UList<label>& mapAddressing
 )
 :
     List<Type>(mapAddressing.size())
@@ -297,7 +297,7 @@ template<class Type>
 void Field<Type>::map
 (
     const UList<Type>& mapF,
-    const labelList& mapAddressing
+    const UList<label>& mapAddressing
 )
 {
     Field<Type>& f = *this;
@@ -326,7 +326,7 @@ template<class Type>
 void Field<Type>::map
 (
     const tmp<Field<Type> >& tmapF,
-    const labelList& mapAddressing
+    const UList<label>& mapAddressing
 )
 {
     map(tmapF(), mapAddressing);
@@ -455,7 +455,7 @@ template<class Type>
 void Field<Type>::rmap
 (
     const UList<Type>& mapF,
-    const labelList& mapAddressing
+    const UList<label>& mapAddressing
 )
 {
     Field<Type>& f = *this;
@@ -475,7 +475,7 @@ template<class Type>
 void Field<Type>::rmap
 (
     const tmp<Field<Type> >& tmapF,
-    const labelList& mapAddressing
+    const UList<label>& mapAddressing
 )
 {
     rmap(tmapF(), mapAddressing);
@@ -487,8 +487,8 @@ template<class Type>
 void Field<Type>::rmap
 (
     const UList<Type>& mapF,
-    const labelList& mapAddressing,
-    const scalarList& mapWeights
+    const UList<label>& mapAddressing,
+    const UList<scalar>& mapWeights
 )
 {
     Field<Type>& f = *this;
@@ -505,8 +505,8 @@ template<class Type>
 void Field<Type>::rmap
 (
     const tmp<Field<Type> >& tmapF,
-    const labelList& mapAddressing,
-    const scalarList& mapWeights
+    const UList<label>& mapAddressing,
+    const UList<scalar>& mapWeights
 )
 {
     rmap(tmapF(), mapAddressing, mapWeights);

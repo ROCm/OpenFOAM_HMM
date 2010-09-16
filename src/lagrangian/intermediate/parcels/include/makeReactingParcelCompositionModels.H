@@ -28,42 +28,20 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "thermoPhysicsTypes.H"
 #include "ReactingCloud.H"
-
 #include "SinglePhaseMixture.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReactingCompositionModels(ParcelType)                             \
+#define makeReactingParcelCompositionModels(ParcelType)                       \
                                                                               \
-    makeReactingCompositionModelThermoType                                    \
-    (                                                                         \
-        ParcelType,                                                           \
-        constGasThermoPhysics                                                 \
-    );                                                                        \
-    makeReactingCompositionModelThermoType                                    \
-    (                                                                         \
-        ParcelType,                                                           \
-        gasThermoPhysics                                                      \
-    );                                                                        \
-    makeReactingCompositionModelThermoType                                    \
-    (                                                                         \
-        ParcelType,                                                           \
-        icoPoly8ThermoPhysics                                                 \
-    );
-
-
-#define makeReactingCompositionModelThermoType(ParcelType, ThermoType)        \
+    makeCompositionModel(ReactingCloud<ParcelType>);                          \
                                                                               \
-    makeCompositionModel(ReactingCloud<ParcelType<ThermoType> >);             \
-                                                                              \
-    makeCompositionModelThermoType                                            \
+    makeCompositionModelType                                                  \
     (                                                                         \
         SinglePhaseMixture,                                                   \
         ReactingCloud,                                                        \
-        ParcelType,                                                           \
-        ThermoType                                                            \
+        ParcelType                                                            \
     );
 
 

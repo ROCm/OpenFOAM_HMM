@@ -184,6 +184,7 @@ void Foam::Time::readDict()
     if (!runTimeModifiable_ && controlDict_.watchIndex() != -1)
     {
         removeWatch(controlDict_.watchIndex());
+        controlDict_.watchIndex() = -1;
     }
 }
 

@@ -381,6 +381,7 @@ int main(int argc, char *argv[])
         "write cellMap, faceMap, pointMap in polyMesh/"
     );
 
+#   include "addRegionOption.H"
 #   include "addOverwriteOption.H"
 #   include "addTimeOptions.H"
 
@@ -396,7 +397,7 @@ int main(int argc, char *argv[])
 
     runTime.setTime(Times[startTime], startTime);
 
-#   include "createMesh.H"
+#   include "createNamedMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
     const bool blockOrder = args.optionFound("blockOrder");

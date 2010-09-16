@@ -67,9 +67,9 @@ void Foam::ReactingCloud<ParcelType>::preEvolve()
 template<class ParcelType>
 void Foam::ReactingCloud<ParcelType>::evolveCloud()
 {
-    const volScalarField& T = this->carrierThermo().T();
-    const volScalarField cp = this->carrierThermo().Cp();
-    const volScalarField& p = this->carrierThermo().p();
+    const volScalarField& T = this->thermo().thermo().T();
+    const volScalarField cp = this->thermo().thermo().Cp();
+    const volScalarField& p = this->thermo().thermo().p();
 
     autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
     (
@@ -149,17 +149,13 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
-    basicThermo& thermo,
+    const SLGThermo& thermo,
     bool readFields
 )
 :
     ThermoCloud<ParcelType>(cloudName, rho, U, g, thermo, false),
     reactingCloud(),
     constProps_(this->particleProperties()),
-    mcCarrierThermo_
-    (
-        dynamic_cast<multiComponentMixture<thermoType>&>(thermo)
-    ),
     compositionModel_
     (
         CompositionModel<ReactingCloud<ParcelType> >::New
@@ -176,12 +172,13 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
             *this
         )
     ),
-    rhoTrans_(mcCarrierThermo_.species().size()),
+    rhoTrans_(thermo.carrier().species().size()),
     dMassPhaseChange_(0.0)
 {
     // Set storage for mass source fields and initialise to zero
     forAll(rhoTrans_, i)
     {
+        const word& specieName = thermo.carrier().species()[i];
         rhoTrans_.set
         (
             i,
@@ -189,7 +186,7 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
             (
                 IOobject
                 (
-                    this->name() + "rhoTrans_" + mcCarrierThermo_.species()[i],
+                    this->name() + "rhoTrans_" + specieName,
                     this->db().time().timeName(),
                     this->db(),
                     IOobject::NO_READ,

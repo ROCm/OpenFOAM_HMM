@@ -579,7 +579,7 @@ void Foam::parcel::updateParcelProperties
             {
                 // can not go above boiling temperature
                 scalar Terr = 1.0e-3;
-                label n=0;
+                label n = 0;
                 scalar dT = 1.0;
                 scalar pOld = pAtSurface;
                 while (dT > Terr)

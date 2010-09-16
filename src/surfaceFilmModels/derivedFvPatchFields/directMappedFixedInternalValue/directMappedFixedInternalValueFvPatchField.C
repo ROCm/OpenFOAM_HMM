@@ -111,10 +111,8 @@ void directMappedFixedInternalValueFvPatchField<Type>::updateCoeffs()
     directMappedFixedValueFvPatchField<Type>::updateCoeffs();
 
     // Get the coupling information from the directMappedPatchBase
-    const directMappedPatchBase& mpp = refCast<const directMappedPatchBase>
-    (
-        this->patch().patch()
-    );
+    const directMappedPatchBase& mpp =
+        refCast<const directMappedPatchBase>(this->patch().patch());
     const polyMesh& nbrMesh = mpp.sampleMesh();
     const fvPatch& nbrPatch =
         refCast<const fvMesh>
