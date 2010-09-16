@@ -134,7 +134,7 @@ Foam::surfaceFilmModels::surfaceFilmModel::surfaceFilmModel
 {
     if (active_)
     {
-        filmRegionName_ = lookup("filmRegionName");
+        lookup("filmRegionName") >> filmRegionName_;
         coeffs_ = subDict(type + "Coeffs");
         thermoModel_ =
             thermoModelTypeNames_.read(coeffs_.lookup("thermoModel"));
