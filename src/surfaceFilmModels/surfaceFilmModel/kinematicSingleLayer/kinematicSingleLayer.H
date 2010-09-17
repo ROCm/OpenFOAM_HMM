@@ -120,9 +120,6 @@ protected:
             //- Skin frition coefficient for film/primary region interface
             scalar Cf_;
 
-            //- Stable film thickness - film cannot detach until reached
-            dimensionedScalar deltaStable_;
-
 
         // Thermo properties
 
@@ -231,12 +228,6 @@ protected:
            scalar addedMass_;
 
 
-       // Detached surface properties
-
-           //- Cumulative mass detached [kg]
-           scalar detachedMass_;
-
-
     // Protected member functions
 
         //- Initialise the film model - called on construction
@@ -253,9 +244,6 @@ protected:
 
         //- Transfer fields from the primary region to the film region
         virtual void transferPrimaryRegionFields();
-
-        //- Correct the source terms for film that detaches from film region
-        virtual void correctDetachedFilm();
 
         // Explicit pressure source contribution
         virtual tmp<volScalarField> pu();

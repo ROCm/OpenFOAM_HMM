@@ -252,6 +252,75 @@ Foam::surfaceFilmModels::noFilm::massPhaseChangeForPrimary() const
 }
 
 
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::surfaceFilmModels::noFilm::Srho() const
+{
+    return tmp<DimensionedField<scalar, volMesh> >
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                "noFilm::Srho",
+                time_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+        )
+    );
+}
+
+
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::surfaceFilmModels::noFilm::Srho(const label) const
+{
+    return tmp<DimensionedField<scalar, volMesh> >
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                "kinematicSingleLayer::Srho(i)",
+                time_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+        )
+    );
+}
+
+
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::surfaceFilmModels::noFilm::Sh() const
+{
+    return tmp<DimensionedField<scalar, volMesh> >
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                "kinematicSingleLayer::Sh",
+                time_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimEnergy/dimVolume/dimTime, 0.0)
+        )
+    );
+}
+
+
 void Foam::surfaceFilmModels::noFilm::info() const
 {
     // do nothing

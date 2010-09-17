@@ -207,6 +207,12 @@ void Foam::surfaceFilmModels::thermoSingleLayer::solveEnergy()
 
     updateSurfaceTemperatures();
 
+    volScalarField mLossCoeff
+    (
+        "mLossCoeff",
+        massForPrimary_/magSf_/time_.deltaT()
+    );
+
     solve
     (
         fvm::ddt(deltaRho_, hs_)
@@ -215,7 +221,7 @@ void Foam::surfaceFilmModels::thermoSingleLayer::solveEnergy()
 //        fvm::Sp(hsSp_/hs_, hs_)
         hsSp_
       + q(hs_)
-      - fvm::Sp(massForPrimary_/magSf_/time_.deltaT(), hs_)
+      - fvm::Sp(mLossCoeff, hs_)
     );
 
     correctThermoFields();
@@ -574,6 +580,61 @@ void Foam::surfaceFilmModels::thermoSingleLayer::info() const
         << max(T_).value() << nl;
 
     phaseChange_->info();
+}
+
+
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::surfaceFilmModels::thermoSingleLayer::Srho() const
+{
+    tmp<DimensionedField<scalar, volMesh> > tSrho
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                "thermoSingleLayer::Srho",
+                time_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+        )
+    );
+
+    scalarField& Srho = tSrho();
+    const scalarField& V = mesh_.V();
+    const scalar dt = time_.deltaTValue();
+
+    forAll(filmBottomPatchIDs_, i)
+    {
+        const label primaryPatchI = primaryPatchIDs_[i];
+        const directMappedWallPolyPatch& wpp =
+            refCast<const directMappedWallPolyPatch>
+            (
+                 mesh_.boundaryMesh()[primaryPatchI]
+            );
+
+        const mapDistribute& distMap = wpp.map();
+
+        const label filmPatchI = filmBottomPatchIDs_[i];
+
+        scalarField patchMass =
+            massPhaseChangeForPrimary_.boundaryField()[filmPatchI];
+
+        distMap.distribute(patchMass);
+
+        const unallocLabelList& cells = wpp.faceCells();
+
+        forAll(patchMass, j)
+        {
+            Srho[cells[j]] = patchMass[j]/(V[cells[j]]*dt);
+        }
+    }
+
+    return tSrho;
 }
 
 

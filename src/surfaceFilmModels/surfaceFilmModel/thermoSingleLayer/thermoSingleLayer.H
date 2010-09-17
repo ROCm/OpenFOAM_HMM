@@ -317,6 +317,9 @@ public:
 
             // Mapped into primary region
 
+                //- Return total mass source - Eulerian phase only
+                virtual tmp<DimensionedField<scalar, volMesh> > Srho() const;
+
                 //- Return mass source for specie i - Eulerian phase only
                 virtual tmp<DimensionedField<scalar, volMesh> > Srho
                 (
