@@ -147,9 +147,6 @@ protected:
             //- Phase change
             autoPtr<phaseChangeModel> phaseChange_;
 
-            //- Total mass transferred to primary region [kg]
-            scalar totalMassPhaseChange_;
-
             //- Film energy evolved via phase change
             volScalarField energyPhaseChangeForPrimary_;
 

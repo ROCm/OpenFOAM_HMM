@@ -163,9 +163,6 @@ void Foam::surfaceFilmModels::thermoSingleLayer::updateSubmodels()
     htcw_->correct();
 
     // Update phase change
-    massPhaseChangeForPrimary_.internalField() = 0.0;
-    energyPhaseChangeForPrimary_.internalField() = 0.0;
-
     phaseChange_->correct
     (
         time_.deltaTValue(),
@@ -173,7 +170,6 @@ void Foam::surfaceFilmModels::thermoSingleLayer::updateSubmodels()
         energyPhaseChangeForPrimary_
     );
     massPhaseChangeForPrimary_.correctBoundaryConditions();
-    totalMassPhaseChange_ += sum(massPhaseChangeForPrimary_).value();
 
     // Update kinematic sub-models
     kinematicSingleLayer::updateSubmodels();
@@ -380,7 +376,6 @@ Foam::surfaceFilmModels::thermoSingleLayer::thermoSingleLayer
         heatTransferModel::New(*this, coeffs_.subDict("lowerSurfaceModels"))
     ),
     phaseChange_(phaseChangeModel::New(*this, coeffs_)),
-    totalMassPhaseChange_(0.0),
     energyPhaseChangeForPrimary_
     (
         IOobject
