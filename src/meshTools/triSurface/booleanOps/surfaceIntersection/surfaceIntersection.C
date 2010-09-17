@@ -30,8 +30,6 @@ License
 #include "HashSet.H"
 #include "triSurface.H"
 #include "pointIndexHit.H"
-#include "octreeDataTriSurface.H"
-#include "octree.H"
 #include "mergePoints.H"
 #include "plane.H"
 #include "edgeIntersections.H"

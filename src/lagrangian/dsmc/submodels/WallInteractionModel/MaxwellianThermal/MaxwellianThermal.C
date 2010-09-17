@@ -53,20 +53,21 @@ Foam::MaxwellianThermal<CloudType>::~MaxwellianThermal()
 template <class CloudType>
 void Foam::MaxwellianThermal<CloudType>::correct
 (
-    const wallPolyPatch& wpp,
-    const label faceId,
-    vector& U,
-    scalar& Ei,
-    label typeId
+    typename CloudType::parcelType& p,
+    const wallPolyPatch& wpp
 )
 {
+    vector& U = p.U();
+
+    scalar& Ei = p.Ei();
+
+    label typeId = p.typeId();
+
     label wppIndex = wpp.index();
 
-    label wppLocalFace = wpp.whichFace(faceId);
+    label wppLocalFace = wpp.whichFace(p.face());
 
-    vector nw = wpp.faceAreas()[wppLocalFace];
-
-    // Normal unit vector
+    vector nw = p.normal();
     nw /= mag(nw);
 
     // Normal velocity magnitude

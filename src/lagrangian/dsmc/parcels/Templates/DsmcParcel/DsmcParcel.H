@@ -185,7 +185,9 @@ public:
             const vector& position,
             const vector& U,
             const scalar Ei,
-            const label celli,
+            const label cellI,
+            const label tetFaceI,
+            const label tetPtI,
             const label typeId
         );
 
@@ -244,7 +246,9 @@ public:
             (
                 const polyPatch&,
                 TrackData& td,
-                const label patchI
+                const label patchI,
+                const scalar trackFraction,
+                const tetIndices& tetIs
             );
 
             //- Overridable function to handle the particle hitting a
@@ -269,7 +273,8 @@ public:
             void hitWallPatch
             (
                 const wallPolyPatch&,
-                TrackData& td
+                TrackData& td,
+                const tetIndices&
             );
 
             //- Overridable function to handle the particle hitting a wallPatch
@@ -277,7 +282,8 @@ public:
             void hitWallPatch
             (
                 const wallPolyPatch&,
-                int&
+                int&,
+                const tetIndices&
             );
 
             //- Overridable function to handle the particle hitting a polyPatch
@@ -352,4 +358,3 @@ public:
 #endif
 
 // ************************************************************************* //
-

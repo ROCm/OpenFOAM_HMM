@@ -82,6 +82,18 @@ protected:
         //- Model coefficients dictionary
         dictionary coeffs_;
 
+        //- Cumulative injected mass
+        scalar injectedMass_;
+
+        //- Stable film thickness - film cannot detach until reached
+        scalar deltaStable_;
+
+
+    // Protected Member Functions
+
+        //- Correct film detached mass
+        void correctDetachedFilm(scalarField& mass) const;
+
 
 public:
 
@@ -141,15 +153,31 @@ public:
             //- Return the model coefficients dictionary
             inline const dictionary& coeffs() const;
 
+            //- Return access to the injected mass [kg]
+            inline scalar injectedMass() const;
+
 
         // Evolution
 
-            //- Correct
+            //- Correct - wrapper around inject(...)
             virtual void correct
+            (
+                volScalarField& massToInject,
+                volScalarField& diameterToInject
+            );
+
+            //- Inject
+            virtual void inject
             (
                 scalarField& massToInject,
                 scalarField& diameterToInject
             ) = 0;
+
+
+        // Input/output
+
+            //- Output model statistics
+            virtual void info() const;
 };
 
 

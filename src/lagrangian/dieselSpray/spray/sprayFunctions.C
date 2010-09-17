@@ -149,9 +149,9 @@ Foam::scalar Foam::spray::liquidTotalEnthalpy() const
 
     forAllConstIter(spray, *this, iter)
     {
-        label celli = iter().cell();
+        label cellI = iter().cell();
         scalar T = iter().T();
-        scalar pc = p()[celli];
+        scalar pc = p()[cellI];
         scalar rho = fuels().rho(pc, T, iter().X());
         scalar hlat = fuels().hl(pc, T, iter().X());
         scalar hg = 0.0;
@@ -351,8 +351,8 @@ Foam::scalar Foam::spray::smd() const
 
     forAllConstIter(spray, *this, iter)
     {
-        label celli = iter().cell();
-        scalar Pc = p()[celli];
+        label cellI = iter().cell();
+        scalar Pc = p()[cellI];
         scalar T = iter().T();
         scalar rho = fuels_->rho(Pc, T, iter().X());
 

@@ -214,6 +214,10 @@ public:
     virtual ~DsmcCloud();
 
 
+    //- Type of parcel the cloud was instantiated for
+    typedef ParcelType parcelType;
+
+
     // Member Functions
 
         // Access
@@ -452,7 +456,9 @@ public:
                 const vector& position,
                 const vector& U,
                 const scalar Ei,
-                const label cellId,
+                const label cellI,
+                const label tetFaceI,
+                const label tetPtI,
                 const label typeId
             );
 

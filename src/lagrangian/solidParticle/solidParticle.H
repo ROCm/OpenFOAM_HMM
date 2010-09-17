@@ -127,8 +127,10 @@ public:
         (
             const Cloud<solidParticle>& c,
             const vector& position,
-            const label celli,
-            const scalar m,
+            const label cellI,
+            const label tetFaceI,
+            const label tetPtI,
+            const scalar d,
             const vector& U
         );
 
@@ -176,7 +178,9 @@ public:
             (
                 const polyPatch&,
                 solidParticle::trackData& td,
-                const label patchI
+                const label patchI,
+                const scalar trackFraction,
+                const tetIndices& tetIs
             );
 
             //- Overridable function to handle the particle hitting a patch
@@ -185,7 +189,9 @@ public:
             (
                 const polyPatch& p,
                 int& td,
-                const label patchI
+                const label patchI,
+                const scalar trackFraction,
+                const tetIndices& tetIs
             );
 
             //- Overridable function to handle the particle hitting a
@@ -208,7 +214,8 @@ public:
             void hitWallPatch
             (
                 const wallPolyPatch&,
-                solidParticle::trackData& td
+                solidParticle::trackData& td,
+                const tetIndices&
             );
 
             //- Overridable function to handle the particle hitting a wallPatch
@@ -216,7 +223,8 @@ public:
             void hitWallPatch
             (
                 const wallPolyPatch&,
-                int&
+                int&,
+                const tetIndices&
             );
 
             //- Overridable function to handle the particle hitting a polyPatch

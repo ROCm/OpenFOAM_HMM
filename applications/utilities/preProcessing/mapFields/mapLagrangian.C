@@ -38,12 +38,13 @@ static const scalar perturbFactor = 1E-6;
 
 // Special version of findCell that generates a cell guaranteed to be
 // compatible with tracking.
-static label findCell(const meshSearch& meshSearcher, const point& pt)
+static label findCell(const Cloud<passiveParticle>& cloud, const point& pt)
 {
-    const polyMesh& mesh = meshSearcher.mesh();
+    label cellI = -1;
+    label tetFaceI = -1;
+    label tetPtI = -1;
 
-    // Use tracking to find cell containing pt
-    label cellI = meshSearcher.findCell(pt);
+    cloud.findCellFacePt(pt, cellI, tetFaceI, tetPtI);
 
     if (cellI >= 0)
     {
@@ -54,16 +55,24 @@ static label findCell(const meshSearch& meshSearcher, const point& pt)
         // See if particle on face by finding nearest face and shifting
         // particle.
 
+        const polyMesh& mesh = cloud.pMesh();
+
+        meshSearch meshSearcher(mesh, false);
+
         label faceI = meshSearcher.findNearestBoundaryFace(pt);
 
         if (faceI >= 0)
         {
             const point& cc = mesh.cellCentres()[mesh.faceOwner()[faceI]];
+
             const point perturbPt = (1-perturbFactor)*pt+perturbFactor*cc;
 
-            return meshSearcher.findCell(perturbPt);
+            cloud.findCellFacePt(perturbPt, cellI, tetFaceI, tetPtI);
+
+            return cellI;
         }
     }
+
     return -1;
 }
 
@@ -207,8 +216,6 @@ void mapLagrangian(const meshToMesh& meshToMeshInterp)
 
             if (unmappedSource.size())
             {
-                meshSearch targetSearcher(meshTarget, false);
-
                 sourceParticleI = 0;
 
                 forAllIter(Cloud<passiveParticle>, sourceParcels, iter)
@@ -216,7 +223,7 @@ void mapLagrangian(const meshToMesh& meshToMeshInterp)
                     if (unmappedSource.found(sourceParticleI))
                     {
                         label targetCell =
-                            findCell(targetSearcher, iter().position());
+                            findCell(targetParcels, iter().position());
 
                         if (targetCell >= 0)
                         {

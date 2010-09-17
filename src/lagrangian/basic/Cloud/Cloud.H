@@ -40,6 +40,11 @@ SourceFiles
 #include "IOField.H"
 #include "IOFieldField.H"
 #include "polyMesh.H"
+#include "indexedOctree.H"
+#include "treeDataCell.H"
+#include "tetPointRef.H"
+#include "polyMeshTetDecomposition.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -78,14 +83,27 @@ class Cloud
         //- Overall count of particles ever created. Never decreases.
         mutable label particleCount_;
 
-        //- Temporary storage for addressing. Used in findFaces.
+        //- Temporary storage for addressing. Used in findTris.
         mutable DynamicList<label> labels_;
+
+        //- Search tree to allow spatial tet searching
+        mutable autoPtr<indexedOctree<treeDataCell> > cellTree_;
+
+        //- Count of how many tracking rescue corrections have been
+        //  applied
+        mutable label nTrackingRescues_;
+
+        //- Does the cell have wall faces
+        mutable autoPtr<PackedBoolList> cellWallFacesPtr_;
 
 
     // Private Member Functions
 
         //- Initialise cloud on IO constructor
         void initCloud(const bool checkClass);
+
+        //- Find all cells which have wall faces
+        void calcCellWallFaces() const;
 
         //- Read cloud properties dictionary
         void readCloudUniformProperties();
@@ -114,6 +132,10 @@ public:
 
         //- Name of cloud properties dictionary
         static word cloudPropertiesName;
+
+        //- Fraction of distance to tet centre to move a particle to
+        // 'rescue' it from a tracking problem
+        static const scalar trackingCorrectionTol;
 
 
     // Constructors
@@ -163,33 +185,88 @@ public:
             }
 
             //- Is this global face an internal face?
-            bool internalFace(const label facei) const
+            bool internalFace(const label faceI) const
             {
-                return polyMesh_.isInternalFace(facei);
+                return polyMesh_.isInternalFace(faceI);
             }
 
             //- Is this global face a boundary face?
-            bool boundaryFace(const label facei) const
+            bool boundaryFace(const label faceI) const
             {
-                return !internalFace(facei);
+                return !internalFace(faceI);
             }
 
             //- Which patch is this global face on
-            label facePatch(const label facei) const
+            label facePatch(const label faceI) const
             {
-                return polyMesh_.boundaryMesh().whichPatch(facei);
+                return polyMesh_.boundaryMesh().whichPatch(faceI);
             }
 
             //- Which face of this patch is this global face
-            label patchFace(const label patchi, const label facei) const
+            label patchFace(const label patchI, const label faceI) const
             {
-                return polyMesh_.boundaryMesh()[patchi].whichFace(facei);
+                return polyMesh_.boundaryMesh()[patchI].whichFace(faceI);
             }
 
             label size() const
             {
                 return IDLList<ParticleType>::size();
             };
+
+            //- Find the cell, tetFaceI and tetPtI for the given
+            //  position
+            void findCellFacePt
+            (
+                const point& pt,
+                label& cellI,
+                label& tetFaceI,
+                label& tetPtI
+            ) const;
+
+            //- Find the tetFaceI and tetPtI for the given position in
+            //  the supplied cell, tetFaceI and tetPtI = -1 if not
+            //  found
+            void findFacePt
+            (
+                label cellI,
+                const point& pt,
+                label& tetFaceI,
+                label& tetPtI
+            ) const;
+
+            //- Test if the given position is inside the give tet
+            bool inTet
+            (
+                const point& pt,
+                const tetPointRef& tet
+            ) const;
+
+            //- Build (if necessary) and return the cell search tree
+            const indexedOctree<treeDataCell>& cellTree() const;
+
+            //- Return nTrackingRescues
+            label nTrackingRescues() const
+            {
+                return nTrackingRescues_;
+            }
+
+            //- Increment the nTrackingRescues counter
+            void trackingRescue() const
+            {
+                nTrackingRescues_++;
+            }
+
+            //- Whether each cell has any wall faces (demand driven data)
+            const PackedBoolList& cellHasWallFaces() const;
+
+            //- Switch to specify if particles of the cloud can return
+            //  non-zero wall distance values.  By default, assume
+            //  that they can't (default for wallImpactDistance in
+            //  Particle is 0.0).
+            virtual bool hasWallImpactDistance() const
+            {
+                return false;
+            }
 
 
             // Iterators

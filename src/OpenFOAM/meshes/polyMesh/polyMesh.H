@@ -62,6 +62,7 @@ namespace Foam
 
 class globalMeshData;
 class mapPolyMesh;
+class polyMeshTetDecomposition;
 
 /*---------------------------------------------------------------------------*\
                           Class polyMesh Declaration
@@ -126,6 +127,9 @@ private:
             //- vector of valid directions in mesh
             //  defined according to the presence of empty patches
             mutable Vector<label> solutionD_;
+
+            //- Base point for face decomposition into tets
+            mutable labelList* tetBasePtIsPtr_;
 
 
         // Zoning information
@@ -355,6 +359,9 @@ public:
 
             //- Return the number of valid solved-for dimensions in the mesh
             label nSolutionD() const;
+
+            //- Return the tetBasePtIs
+            const labelList& tetBasePtIs() const;
 
             //- Return point zone mesh
             const pointZoneMesh& pointZones() const

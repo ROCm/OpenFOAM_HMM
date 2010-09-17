@@ -20,8 +20,6 @@ Pstream/Allwmake
 OSspecific/$WM_OSTYPE/Allwmake
 wmake libso OpenFOAM
 
-wmake libso lagrangian/basic
-
 wmake libso fileFormats
 wmake libso edgeMesh
 wmake libso surfMesh
@@ -33,6 +31,7 @@ parallel/decompose/AllwmakeLnInclude
 dummyThirdParty/Allwmake
 
 wmake libso meshTools
+wmake libso lagrangian/basic
 wmake libso finiteVolume
 wmake libso genericPatchFields
 

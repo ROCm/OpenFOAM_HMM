@@ -132,6 +132,8 @@ template<class CloudType>
 bool Foam::InjectionModel<CloudType>::findCellAtPosition
 (
     label& cellI,
+    label& tetFaceI,
+    label& tetPtI,
     vector& position,
     bool errorOnNotFound
 )
@@ -140,7 +142,13 @@ bool Foam::InjectionModel<CloudType>::findCellAtPosition
 
     const vector p0 = position;
 
-    cellI = owner_.mesh().findCell(position);
+    owner_.findCellFacePt
+    (
+        position,
+        cellI,
+        tetFaceI,
+        tetPtI
+    );
 
     label procI = -1;
 
@@ -148,10 +156,14 @@ bool Foam::InjectionModel<CloudType>::findCellAtPosition
     {
         procI = Pstream::myProcNo();
     }
+
     reduce(procI, maxOp<label>());
+
     if (procI != Pstream::myProcNo())
     {
         cellI = -1;
+        tetFaceI = -1;
+        tetPtI = -1;
     }
 
     // Last chance - find nearest cell and try that one
@@ -168,10 +180,14 @@ bool Foam::InjectionModel<CloudType>::findCellAtPosition
                 procI = Pstream::myProcNo();
             }
         }
+
         reduce(procI, maxOp<label>());
+
         if (procI != Pstream::myProcNo())
         {
             cellI = -1;
+            tetFaceI = -1;
+            tetPtI = -1;
         }
     }
 
@@ -421,8 +437,21 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
 
             // Determine the injection position and owner cell
             label cellI = -1;
+            label tetFaceI = -1;
+            label tetPtI = -1;
+
             vector pos = vector::zero;
-            setPositionAndCell(parcelI, newParcels, timeInj, pos, cellI);
+
+            setPositionAndCell
+            (
+                parcelI,
+                newParcels,
+                timeInj,
+                pos,
+                cellI,
+                tetFaceI,
+                tetPtI
+            );
 
             if (cellI > -1)
             {
@@ -433,7 +462,14 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                 meshTools::constrainToMeshCentre(mesh, pos);
 
                 // Create a new parcel
-                parcelType* pPtr = new parcelType(td.cloud(), pos, cellI);
+                parcelType* pPtr = new parcelType
+                (
+                    td.cloud(),
+                    pos,
+                    cellI,
+                    tetFaceI,
+                    tetPtI
+                );
 
                 // Assign new parcel properties in injection model
                 setProperties(parcelI, newParcels, timeInj, *pPtr);

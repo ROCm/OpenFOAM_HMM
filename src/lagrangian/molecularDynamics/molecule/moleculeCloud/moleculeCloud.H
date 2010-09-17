@@ -114,6 +114,8 @@ private:
         (
             const point& position,
             label cell,
+            label tetFace,
+            label tetPt,
             label id,
             bool tethered,
             scalar temperature,

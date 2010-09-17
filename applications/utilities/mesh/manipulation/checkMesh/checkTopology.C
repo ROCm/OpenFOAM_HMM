@@ -7,32 +7,6 @@
 #include "pointSet.H"
 #include "IOmanip.H"
 
-bool Foam::checkSync(const wordList& names)
-{
-    List<wordList> allNames(Pstream::nProcs());
-    allNames[Pstream::myProcNo()] = names;
-    Pstream::gatherList(allNames);
-    Pstream::scatterList(allNames);
-
-    bool hasError = false;
-
-    for (label procI = 1; procI < allNames.size(); procI++)
-    {
-        if (allNames[procI] != allNames[0])
-        {
-            hasError = true;
-
-            Info<< " ***Inconsistent zones across processors, "
-                   "processor 0 has zones:" << allNames[0]
-                << ", processor " << procI << " has zones:"
-                << allNames[procI]
-                << endl;
-        }
-    }
-    return hasError;
-}
-
-
 Foam::label Foam::checkTopology
 (
     const polyMesh& mesh,
@@ -51,33 +25,20 @@ Foam::label Foam::checkTopology
     mesh.boundaryMesh().checkParallelSync(true);
 
     // Check names of zones are equal
-    if (checkSync(mesh.cellZones().names()))
+    mesh.cellZones().checkDefinition(true);
+    if (mesh.cellZones().checkParallelSync(true))
     {
         noFailedChecks++;
     }
-    if (checkSync(mesh.faceZones().names()))
+    mesh.faceZones().checkDefinition(true);
+    if (mesh.faceZones().checkParallelSync(true))
     {
         noFailedChecks++;
     }
-    if (checkSync(mesh.pointZones().names()))
+    mesh.pointZones().checkDefinition(true);
+    if (mesh.pointZones().checkParallelSync(true))
     {
         noFailedChecks++;
-    }
-
-    // Check contents of faceZones consistent
-    {
-        forAll(mesh.faceZones(), zoneI)
-        {
-            if (mesh.faceZones()[zoneI].checkParallelSync(false))
-            {
-                Info<< " ***FaceZone " << mesh.faceZones()[zoneI].name()
-                    << " is not correctly synchronised"
-                    << " across coupled boundaries."
-                    << " (coupled faces are either not both "
-                    << " present in set or have same flipmap)" << endl;
-                noFailedChecks++;
-            }
-        }
     }
 
     {

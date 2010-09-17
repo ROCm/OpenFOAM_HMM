@@ -93,13 +93,24 @@ Foam::ThermoLookupTableInjection<CloudType>::ThermoLookupTableInjection
             IOobject::NO_WRITE
         )
     ),
-    injectorCells_(0)
+    injectorCells_(0),
+    injectorTetFaces_(0),
+    injectorTetPts_(0)
 {
     // Set/cache the injector cells
     injectorCells_.setSize(injectors_.size());
+    injectorTetFaces_.setSize(injectors_.size());
+    injectorTetPts_.setSize(injectors_.size());
+
     forAll(injectors_, i)
     {
-        this->findCellAtPosition(injectorCells_[injectorI], injectors_[i].x());
+        this->findCellAtPosition
+        (
+            injectorCells_[i],
+            injectorTetFaces_[i],
+            injectorTetPts_[i],
+            injectors_[i].x()
+        );
     }
 
     // Determine volume of particles to inject
@@ -142,13 +153,17 @@ void Foam::ThermoLookupTableInjection<CloudType>::setPositionAndCell
     const label nParcels,
     const scalar time,
     vector& position,
-    label& cellOwner
+    label& cellOwner,
+    label& tetFaceI,
+    label& tetPtI
 )
 {
     label injectorI = parcelI*injectorCells_.size()/nParcels;
 
     position = injectors_[injectorI].x();
     cellOwner = injectorCells_[injectorI];
+    tetFaceI = injectorTetFaces_[injectorI];
+    tetPtI = injectorTetPts_[injectorI];
 }
 
 

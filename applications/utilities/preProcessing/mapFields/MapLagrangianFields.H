@@ -37,6 +37,7 @@ Description
 #include "GeometricField.H"
 #include "meshToMesh.H"
 #include "IOobjectList.H"
+#include "IOFieldField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,37 +57,118 @@ void MapLagrangianFields
 {
     const fvMesh& meshTarget = meshToMeshInterp.toMesh();
 
-    IOobjectList fields = objects.lookupClass(IOField<Type>::typeName);
-
-    forAllIter(IOobjectList, fields, fieldIter)
     {
-        Info<< "    mapping lagrangian field " << fieldIter()->name() << endl;
+        IOobjectList fields = objects.lookupClass(IOField<Type>::typeName);
 
-        // Read field (does not need mesh)
-        IOField<Type> fieldSource(*fieldIter());
-
-        // Map
-        IOField<Type> fieldTarget
-        (
-            IOobject
-            (
-                fieldIter()->name(),
-                meshTarget.time().timeName(),
-                cloud::prefix/cloudName,
-                meshTarget,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            addParticles.size()
-        );
-        forAll(addParticles, i)
+        forAllIter(IOobjectList, fields, fieldIter)
         {
-            fieldTarget[i] = fieldSource[addParticles[i]];
-        }
+            Info<< "    mapping lagrangian field "
+                << fieldIter()->name() << endl;
 
-        // Write field
-        fieldTarget.write();
+            // Read field (does not need mesh)
+            IOField<Type> fieldSource(*fieldIter());
+
+            // Map
+            IOField<Type> fieldTarget
+            (
+                IOobject
+                (
+                    fieldIter()->name(),
+                    meshTarget.time().timeName(),
+                    cloud::prefix/cloudName,
+                    meshTarget,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                addParticles.size()
+            );
+
+            forAll(addParticles, i)
+            {
+                fieldTarget[i] = fieldSource[addParticles[i]];
+            }
+
+            // Write field
+            fieldTarget.write();
+        }
+    }
+
+    {
+        IOobjectList fieldFields =
+            objects.lookupClass(IOField<Field<Type> >::typeName);
+
+        forAllIter(IOobjectList, fieldFields, fieldIter)
+        {
+            Info<< "    mapping lagrangian fieldField "
+                << fieldIter()->name() << endl;
+
+            // Read field (does not need mesh)
+            IOField<Field<Type> > fieldSource(*fieldIter());
+
+            // Map - use IOFieldField to automatically write in
+            // compact form for binary format.
+            IOFieldField<Field<Type>, Type> fieldTarget
+            (
+                IOobject
+                (
+                    fieldIter()->name(),
+                    meshTarget.time().timeName(),
+                    cloud::prefix/cloudName,
+                    meshTarget,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                addParticles.size()
+            );
+
+            forAll(addParticles, i)
+            {
+                fieldTarget[i] = fieldSource[addParticles[i]];
+            }
+
+            // Write field
+            fieldTarget.write();
+        }
+    }
+
+    {
+        IOobjectList fieldFields =
+            objects.lookupClass(IOFieldField<Field<Type>, Type>::typeName);
+
+        forAllIter(IOobjectList, fieldFields, fieldIter)
+        {
+            Info<< "    mapping lagrangian fieldField "
+                << fieldIter()->name() << endl;
+
+            // Read field (does not need mesh)
+            IOFieldField<Field<Type>, Type> fieldSource(*fieldIter());
+
+            // Map
+            IOFieldField<Field<Type>, Type> fieldTarget
+            (
+                IOobject
+                (
+                    fieldIter()->name(),
+                    meshTarget.time().timeName(),
+                    cloud::prefix/cloudName,
+                    meshTarget,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                addParticles.size()
+            );
+
+            forAll(addParticles, i)
+            {
+                fieldTarget[i] = fieldSource[addParticles[i]];
+            }
+
+            // Write field
+            fieldTarget.write();
+        }
     }
 }
 

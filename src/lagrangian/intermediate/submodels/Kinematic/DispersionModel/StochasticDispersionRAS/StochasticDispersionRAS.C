@@ -58,7 +58,7 @@ template<class CloudType>
 Foam::vector Foam::StochasticDispersionRAS<CloudType>::update
 (
     const scalar dt,
-    const label celli,
+    const label cellI,
     const vector& U,
     const vector& Uc,
     vector& UTurb,
@@ -74,8 +74,8 @@ Foam::vector Foam::StochasticDispersionRAS<CloudType>::update
 
     const scalar tTurbLoc = min
     (
-        k[celli]/epsilon[celli],
-        cps*pow(k[celli], 1.5)/epsilon[celli]/(UrelMag + SMALL)
+        k[cellI]/epsilon[cellI],
+        cps*pow(k[cellI], 1.5)/epsilon[cellI]/(UrelMag + SMALL)
     );
 
     // Parcel is perturbed by the turbulence
@@ -87,7 +87,7 @@ Foam::vector Foam::StochasticDispersionRAS<CloudType>::update
         {
             tTurb = 0.0;
 
-            scalar sigma = sqrt(2.0*k[celli]/3.0);
+            scalar sigma = sqrt(2.0*k[cellI]/3.0);
             vector dir = 2.0*this->owner().rndGen().vector01() - vector::one;
             dir /= mag(dir) + SMALL;
 

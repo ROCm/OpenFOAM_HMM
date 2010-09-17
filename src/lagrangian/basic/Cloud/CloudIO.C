@@ -126,6 +126,13 @@ void Foam::Cloud<ParticleType>::initCloud(const bool checkClass)
             << "    " << ioP.path() << nl
             << "    assuming the initial cloud contains 0 particles." << endl;
     }
+
+    forAllIter(typename Cloud<ParticleType>, *this, pIter)
+    {
+        ParticleType& p = pIter();
+
+        p.initCellFacePt();
+    }
 }
 
 
@@ -140,7 +147,11 @@ Foam::Cloud<ParticleType>::Cloud
 :
     cloud(pMesh),
     polyMesh_(pMesh),
-    particleCount_(0)
+    particleCount_(0),
+    labels_(),
+    cellTree_(),
+    nTrackingRescues_(),
+    cellWallFacesPtr_()
 {
     initCloud(checkClass);
 }
@@ -156,7 +167,11 @@ Foam::Cloud<ParticleType>::Cloud
 :
     cloud(pMesh, cloudName),
     polyMesh_(pMesh),
-    particleCount_(0)
+    particleCount_(0),
+    labels_(),
+    cellTree_(),
+    nTrackingRescues_(),
+    cellWallFacesPtr_()
 {
     initCloud(checkClass);
 }

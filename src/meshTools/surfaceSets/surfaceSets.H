@@ -102,9 +102,8 @@ class surfaceSets
         //);
 
         ////- Select all points out of pointSet where the distance to
-        ////  the surface is less
-        ////  than a factor times a local length scale (minimum length of
-        ////  connected edges)
+        ////  the surface is less than a factor times a local length
+        ////  scale (minimum length of connected edges)
         //static void getNearPoints
         //(
         //    const primitiveMesh& mesh,

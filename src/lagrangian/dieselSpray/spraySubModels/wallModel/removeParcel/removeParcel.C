@@ -65,7 +65,7 @@ Foam::removeParcel::~removeParcel()
 bool Foam::removeParcel::wallTreatment
 (
     parcel&,
-    const label facei
+    const label faceI
 ) const
 {
     return false;

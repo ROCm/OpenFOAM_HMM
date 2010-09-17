@@ -780,6 +780,7 @@ DebugSwitches
     syringePressure     0;
     tensorAverageField  0;
     tensorField         0;
+    tetDecomposedPolyMesh 0;
     thermoCloud         0;
     thermophysicalFunction 0;
     time                0;

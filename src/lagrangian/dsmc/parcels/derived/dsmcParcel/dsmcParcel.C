@@ -43,7 +43,9 @@ Foam::dsmcParcel::dsmcParcel
     const vector& position,
     const vector& U,
     const scalar Ei,
-    const label celli,
+    const label cellI,
+    const label tetFaceI,
+    const label tetPtI,
     const label typeId
 )
 :
@@ -53,7 +55,9 @@ Foam::dsmcParcel::dsmcParcel
         position,
         U,
         Ei,
-        celli,
+        cellI,
+        tetFaceI,
+        tetPtI,
         typeId
     )
 {}

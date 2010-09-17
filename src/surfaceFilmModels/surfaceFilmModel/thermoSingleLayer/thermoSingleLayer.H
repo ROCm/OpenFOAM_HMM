@@ -147,9 +147,6 @@ protected:
             //- Phase change
             autoPtr<phaseChangeModel> phaseChange_;
 
-            //- Total mass transferred to primary region [kg]
-            scalar totalMassPhaseChange_;
-
             //- Film energy evolved via phase change
             volScalarField energyPhaseChangeForPrimary_;
 
@@ -316,6 +313,9 @@ public:
         // Source fields
 
             // Mapped into primary region
+
+                //- Return total mass source - Eulerian phase only
+                virtual tmp<DimensionedField<scalar, volMesh> > Srho() const;
 
                 //- Return mass source for specie i - Eulerian phase only
                 virtual tmp<DimensionedField<scalar, volMesh> > Srho

@@ -50,9 +50,9 @@ namespace Foam
 {
 
 template<class Type>
-class octree;
+class indexedOctree;
 
-class octreeDataCell;
+class treeDataCell;
 
 /*---------------------------------------------------------------------------*\
                          Class meshToMesh Declaration
@@ -99,7 +99,7 @@ class meshToMesh
             const pointField& points,
             const fvMesh& fromMesh,
             const List<bool>& boundaryCell,
-            const octree<octreeDataCell>& oc
+            const indexedOctree<treeDataCell>& oc
         ) const;
 
         void calculateInverseDistanceWeights() const;

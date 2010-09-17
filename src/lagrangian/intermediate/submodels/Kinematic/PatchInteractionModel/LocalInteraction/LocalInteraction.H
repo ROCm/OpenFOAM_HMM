@@ -51,7 +51,7 @@ class LocalInteraction
     // Private data
 
         //- List of participating patches
-        const List<patchInteractionData> patchData_;
+        const List<patchInteractionData> patchProperties_;
 
         //- List of participating patch ids
         List<label> patchIds_;
@@ -89,11 +89,11 @@ public:
         //  Returns true if particle remains in same cell
         virtual bool correct
         (
+            typename CloudType::parcelType& p,
             const polyPatch& pp,
-            const label faceId,
             bool& keepParticle,
-            bool& active,
-            vector& U
+            const scalar trackFraction,
+            const tetIndices& tetIs
         ) const;
 };
 

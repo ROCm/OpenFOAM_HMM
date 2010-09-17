@@ -36,7 +36,7 @@ License
 
 void Foam::parcel::setRelaxationTimes
 (
-    label celli,
+    label cellI,
     scalar& tauMomentum,
     scalarField& tauEvaporation,
     scalar& tauHeatTransfer,
@@ -70,7 +70,7 @@ void Foam::parcel::setRelaxationTimes
 
     for (label i=0; i<Ns; i++)
     {
-        scalar Y = sDB.composition().Y()[i][celli];
+        scalar Y = sDB.composition().Y()[i][cellI];
         W += Y/sDB.gasProperties()[i].W();
         // Using mass-fractions to average...
         kMixture += Y*sDB.gasProperties()[i].kappa(Tf);
@@ -87,7 +87,7 @@ void Foam::parcel::setRelaxationTimes
     for (label i=0; i<Nf; i++)
     {
         label j = sDB.liquidToGasIndex()[i];
-        scalar Y = sDB.composition().Y()[j][celli];
+        scalar Y = sDB.composition().Y()[j][cellI];
         scalar Wi = sDB.gasProperties()[j].W();
         Yf[i] = Y;
         Xf[i] = Y*W/Wi;
@@ -264,10 +264,10 @@ void Foam::parcel::setRelaxationTimes
                 forAll(sDB.gasProperties(), k)
                 {
                     vapourSurfaceEnthalpy +=
-                        sDB.composition().Y()[k][celli]
+                        sDB.composition().Y()[k][cellI]
                        *sDB.gasProperties()[k].H(tBoilingSurface);
                     vapourFarEnthalpy +=
-                        sDB.composition().Y()[k][celli]
+                        sDB.composition().Y()[k][cellI]
                        *sDB.gasProperties()[k].H(temperature);
                 }
 

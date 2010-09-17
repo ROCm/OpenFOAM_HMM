@@ -365,6 +365,8 @@ $(globalMeshData)/globalPoints.C
 $(globalMeshData)/globalIndex.C
 
 $(polyMesh)/syncTools/syncTools.C
+$(polyMesh)/polyMeshTetDecomposition/polyMeshTetDecomposition.C
+$(polyMesh)/polyMeshTetDecomposition/tetIndices.C
 
 zone = $(polyMesh)/zones/zone
 $(zone)/zone.C

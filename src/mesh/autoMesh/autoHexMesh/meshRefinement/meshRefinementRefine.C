@@ -279,7 +279,11 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
     Cloud<trackedParticle> cloud(mesh_, IDLList<trackedParticle>());
 
     // Create particles on whichever processor holds the keepPoint.
-    label cellI = mesh_.findCell(keepPoint);
+    label cellI = -1;
+    label tetFaceI = -1;
+    label tetPtI = -1;
+
+    cloud.findCellFacePt(keepPoint, cellI, tetFaceI, tetPtI);
 
     if (cellI != -1)
     {
@@ -308,6 +312,8 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
                             cloud,
                             keepPoint,
                             cellI,
+                            tetFaceI,
+                            tetPtI,
                             featureMesh.points()[pointI],   // endpos
                             featureLevels[featI],           // level
                             featI,                          // featureMesh

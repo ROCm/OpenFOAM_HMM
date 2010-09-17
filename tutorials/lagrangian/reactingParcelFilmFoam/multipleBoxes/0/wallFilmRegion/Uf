@@ -21,10 +21,10 @@ internalField   uniform (0 0 0);
 
 boundaryField
 {
-    // cyclic boundaries between film patches
-    "(cube[0-9][0-9]_side[0-9]_cube[0-9][0-9]_side[0-9])"
+    // nonuniformTransformCyclic boundaries between film patches
+    "(cube[0-9][0-9]_side[0-9]_to_cube[0-9][0-9]_side[0-9])"
     {
-        type            cyclic;
+        type            nonuniformTransformCyclic;
     }
 
     // top film surface
@@ -40,7 +40,7 @@ boundaryField
     }
 
     // floor sides
-    floor_side
+    walls
     {
         type            fixedValue;
         value           uniform (0 0 0);

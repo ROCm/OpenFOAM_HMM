@@ -118,7 +118,7 @@ public:
         virtual bool wallTreatment
         (
             parcel&,
-            const label facei
+            const label faceI
         ) const = 0;
 };
 

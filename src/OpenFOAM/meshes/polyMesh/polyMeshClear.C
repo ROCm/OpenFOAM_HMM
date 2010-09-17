@@ -71,6 +71,9 @@ void Foam::polyMesh::clearGeom()
     geometricD_ = Vector<label>::zero;
     solutionD_ = Vector<label>::zero;
 
+    // Remove the stored tet base points
+    deleteDemandDrivenData(tetBasePtIsPtr_);
+
     pointMesh::Delete(*this);
 }
 

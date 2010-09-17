@@ -558,7 +558,6 @@ int main(int argc, char *argv[])
                 lagrangianScalarFieldFields
             );
 
-
             lagrangianFieldDecomposer::readFields
             (
                 cloudI,
@@ -687,6 +686,19 @@ int main(int argc, char *argv[])
             )
         );
 
+        labelIOList faceProcAddressing
+        (
+            IOobject
+            (
+                "faceProcAddressing",
+                procMesh.facesInstance(),
+                procMesh.meshSubDir,
+                procMesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
+
         labelIOList cellProcAddressing
         (
             IOobject
@@ -728,19 +740,6 @@ int main(int argc, char *argv[])
          || surfaceTensorFields.size()
         )
         {
-            labelIOList faceProcAddressing
-            (
-                IOobject
-                (
-                    "faceProcAddressing",
-                    procMesh.facesInstance(),
-                    procMesh.meshSubDir,
-                    procMesh,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            );
-
             fvFieldDecomposer fieldDecomposer
             (
                 mesh,
@@ -814,6 +813,7 @@ int main(int argc, char *argv[])
                 (
                     mesh,
                     procMesh,
+                    faceProcAddressing,
                     cellProcAddressing,
                     cloudDirs[cloudI],
                     lagrangianPositions[cloudI],
