@@ -343,6 +343,9 @@ public:
 
         // Solution parameters
 
+            //- Return the film region solution dictionary
+            inline const dictionary& solution() const;
+
             //- Return the momentum predictor
             inline const Switch& momentumPredictor() const;
 

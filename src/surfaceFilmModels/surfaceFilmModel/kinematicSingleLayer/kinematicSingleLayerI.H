@@ -41,6 +41,13 @@ Foam::surfaceFilmModels::kinematicSingleLayer::magSf() const
 }
 
 
+inline const Foam::dictionary&
+Foam::surfaceFilmModels::kinematicSingleLayer::solution() const
+{
+    return filmRegion_.solutionDict().subDict("PISO");
+}
+
+
 inline const Foam::Switch&
 Foam::surfaceFilmModels::kinematicSingleLayer::momentumPredictor() const
 {

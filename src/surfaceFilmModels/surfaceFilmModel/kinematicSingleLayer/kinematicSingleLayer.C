@@ -59,12 +59,10 @@ bool Foam::surfaceFilmModels::kinematicSingleLayer::read()
 {
     if (surfaceFilmModel::read())
     {
-        const dictionary& solution =
-            filmRegion_.solutionDict().subDict("PISO");
-        solution.lookup("momentumPredictor") >> momentumPredictor_;
-        solution.lookup("nOuterCorr") >> nOuterCorr_;
-        solution.lookup("nCorr") >> nCorr_;
-        solution.lookup("nNonOrthCorr") >> nNonOrthCorr_;
+        solution().lookup("momentumPredictor") >> momentumPredictor_;
+        solution().lookup("nOuterCorr") >> nOuterCorr_;
+        solution().lookup("nCorr") >> nCorr_;
+        solution().lookup("nNonOrthCorr") >> nNonOrthCorr_;
 
         coeffs_.lookup("Cf") >> Cf_;
 
@@ -579,7 +577,7 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
             time_.timeName(),
             filmRegion_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
         filmRegion_,
         dimensionedVector("zero", dimless, vector::zero),
@@ -593,7 +591,7 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
             time_.timeName(),
             filmRegion_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
         filmRegion_,
         dimensionedScalar("zero", dimArea, 0.0),
@@ -603,28 +601,10 @@ Foam::surfaceFilmModels::kinematicSingleLayer::kinematicSingleLayer
     filmTopPatchIDs_(0),
     filmBottomPatchIDs_(0),
 
-    momentumPredictor_
-    (
-        filmRegion_.solutionDict().subDict("PISO").lookup("momentumPredictor")
-    ),
-    nOuterCorr_
-    (
-        readLabel
-        (
-            filmRegion_.solutionDict().subDict("PISO").lookup("nOuterCorr")
-        )
-    ),
-    nCorr_
-    (
-        readLabel(filmRegion_.solutionDict().subDict("PISO").lookup("nCorr"))
-    ),
-    nNonOrthCorr_
-    (
-        readLabel
-        (
-            filmRegion_.solutionDict().subDict("PISO").lookup("nNonOrthCorr")
-        )
-    ),
+    momentumPredictor_(solution().lookup("momentumPredictor")),
+    nOuterCorr_(readLabel(solution().lookup("nOuterCorr"))),
+    nCorr_(readLabel(solution().lookup("nCorr"))),
+    nNonOrthCorr_(readLabel(solution().lookup("nNonOrthCorr"))),
     cumulativeContErr_(0.0),
 
     Cf_(readScalar(coeffs_.lookup("Cf"))),
