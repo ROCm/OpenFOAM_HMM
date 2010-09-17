@@ -714,6 +714,9 @@ Foam::surfaceFilmModels::thermoSingleLayer::Sh() const
             dimensionedScalar("zero", dimEnergy/dimVolume/dimTime, 0.0)
         )
     );
+
+    // All of enthalpy change due to phase change added to film energy equation
+
 /*
     scalarField& Sh = tSh();
     const scalarField& V = mesh_.V();
