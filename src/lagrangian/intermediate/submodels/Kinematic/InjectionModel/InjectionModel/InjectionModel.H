@@ -183,6 +183,8 @@ protected:
         virtual bool findCellAtPosition
         (
             label& cellI,
+            label& tetFaceI,
+            label& tetPtI,
             vector& position,
             bool errorOnNotFound = true
         );
@@ -305,14 +307,16 @@ public:
 
         // Injection geometry
 
-            //- Set the injection position and owner cell
+            //- Set the injection position and owner cell, tetFace and tetPt
             virtual void setPositionAndCell
             (
                 const label parcelI,
                 const label nParcels,
                 const scalar time,
                 vector& position,
-                label& cellOwner
+                label& cellOwner,
+                label& tetFaceI,
+                label& tetPtI
             ) = 0;
 
             //- Set the parcel properties

@@ -121,11 +121,30 @@ void Foam::SurfaceFilmModel<CloudType>::inject(TrackData& td)
             if (diameterParcelPatch_[j] > 0)
             {
                 const label cellI = injectorCellsPatch[j];
+
+                // The position is at the cell centre, which could be
+                // in any tet of the decomposed cell, so arbitrarily
+                // choose the first face of the cell as the tetFace
+                // and the first point on the face after the base
+                // point as the tetPt.  The tracking will
+                // pick the cell consistent with the motion in the
+                // first tracking step.
+                const label tetFaceI = this->owner().mesh().cells()[cellI][0];
+                const label tetPtI = 1;
+
                 const point& pos = this->owner().mesh().C()[cellI];
 
                 // Create a new parcel
                 typename CloudType::parcelType* pPtr =
-                    new typename CloudType::parcelType(td.cloud(), pos, cellI);
+                    new typename CloudType::parcelType
+                    (
+                        td.cloud(),
+                        pos,
+                        cellI,
+                        tetFaceI,
+                        tetPtI
+                    );
+
                 setParcelProperties(*pPtr, j);
 
                 // Check new parcel properties

@@ -39,7 +39,7 @@ SourceFiles
 #include "vector.H"
 #include "tensor.H"
 #include "pointHit.H"
-
+#include "Random.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -141,12 +141,14 @@ public:
             inline vector normal() const;
 
             //- Return circum-centre
-            inline vector circumCentre() const;
+            inline Point circumCentre() const;
 
             //- Return circum-radius
             inline scalar circumRadius() const;
 
-            //- Return quality: Ratio triangle and circum-circle area
+            //- Return quality: Ratio of triangle and circum-circle
+            //  area, scaled so that an equilateral triangle has a
+            //  quality of 1
             inline scalar quality() const;
 
             //- Return swept-volume
@@ -158,6 +160,19 @@ public:
             (
                 PointRef refPt = vector::zero,
                 scalar density = 1.0
+            ) const;
+
+            //- Return a random point on the triangle from a uniform
+            //  distribution
+            inline Point randomPoint(Random& rndGen) const;
+
+            //- Calculate the barycentric coordinates of the given
+            //  point, in the same order as a, b, c.  Returns the
+            //  determinant of the solution.
+            inline scalar barycentric
+            (
+                const point& pt,
+                List<scalar>& bary
             ) const;
 
             //- Return point intersection with a ray.

@@ -503,6 +503,7 @@ Foam::polyMesh::polyMesh
     bounds_(points_, syncPar),
     geometricD_(Vector<label>::zero),
     solutionD_(Vector<label>::zero),
+    tetBasePtIsPtr_(NULL),
     pointZones_
     (
         IOobject
@@ -775,6 +776,7 @@ Foam::polyMesh::polyMesh
     bounds_(points_, syncPar),
     geometricD_(Vector<label>::zero),
     solutionD_(Vector<label>::zero),
+    tetBasePtIsPtr_(NULL),
     pointZones_
     (
         IOobject

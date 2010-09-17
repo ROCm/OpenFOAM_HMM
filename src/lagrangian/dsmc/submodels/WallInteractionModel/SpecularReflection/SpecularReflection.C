@@ -52,14 +52,13 @@ Foam::SpecularReflection<CloudType>::~SpecularReflection()
 template <class CloudType>
 void Foam::SpecularReflection<CloudType>::correct
 (
-    const wallPolyPatch& wpp,
-    const label faceId,
-    vector& U,
-    scalar& Ei,
-    label typeId
+    typename CloudType::parcelType& p,
+    const wallPolyPatch& wpp
 )
 {
-    vector nw = wpp.faceAreas()[wpp.whichFace(faceId)];
+    vector& U = p.U();
+
+    vector nw = p.normal();
     nw /= mag(nw);
 
     scalar U_dot_nw = U & nw;

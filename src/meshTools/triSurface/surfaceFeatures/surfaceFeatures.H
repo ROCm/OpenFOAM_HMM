@@ -268,28 +268,30 @@ public:
 
         // Find
 
-            //- Find nearest sample for selected surface points (usually the
-            //  set of featurePoints). Return map from index in
-            //  samples to surface point. Do not include points that are further
-            //  than maxDist away (separate maxDist for every sample)
+            //- Find nearest sample for selected surface points
+            //  (usually the set of featurePoints). Return map from
+            //  index in samples to surface point. Do not include
+            //  points that are further than maxDist away (separate
+            //  maxDist for every sample).  Supply maxDistSqr.
             Map<label> nearestSamples
             (
                 const labelList& selectedPoints,
                 const pointField& samples,
-                const scalarField& maxDist
+                const scalarField& maxDistSqr
             ) const;
 
-            //- Find nearest sample for regularly sampled points along the
-            //  selected (surface) edges. Return map from sample to edge.
-            //  maxDist is distance below which gets snapped.
-            //  Edge gets sampled at points sampleDist[sampleI] apart.
-            //  (with a maximum of 10 samples per edge)
+            //- Find nearest sample for regularly sampled points along
+            //  the selected (surface) edges. Return map from sample
+            //  to edge.  maxDistSqr is distance squared below which
+            //  gets snapped.  Edge gets sampled at points
+            //  sampleDist[sampleI] apart.  (with a maximum of 10
+            //  samples per edge)
             Map<label> nearestSamples
             (
                 const labelList& selectedEdges,
                 const pointField& samples,
                 const scalarField& sampleDist,
-                const scalarField& maxDist,
+                const scalarField& maxDistSqr,
                 const scalar minSampleDist = 0.1
             ) const;
 
@@ -303,7 +305,7 @@ public:
                 const labelList& selectedSampleEdges,
                 const pointField& samplePoints,
                 const scalarField& sampleDist,
-                const scalarField& maxDist,
+                const scalarField& maxDistSqr,
                 const scalar minSampleDist = 0.1
             ) const;
 
@@ -319,7 +321,7 @@ public:
             (
                 const labelList& selectedEdges,
                 const pointField& samples,
-                const vector& searchSpan,   // search span
+                scalar searchSpanSqr,   // search span
                 labelList& edgeLabel,
                 labelList& edgeEndPoint,
                 pointField& edgePoint

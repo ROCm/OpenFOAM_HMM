@@ -331,7 +331,9 @@ public:
         (
             KinematicCloud<ParcelType>& owner,
             const vector& position,
-            const label cellI
+            const label cellI,
+            const label tetFaceI,
+            const label tetPtI
         );
 
         //- Construct from components
@@ -340,6 +342,8 @@ public:
             KinematicCloud<ParcelType>& owner,
             const vector& position,
             const label cellI,
+            const label tetFaceI,
+            const label tetPtI,
             const label typeId,
             const scalar nParticle0,
             const scalar d0,
@@ -544,9 +548,10 @@ public:
             (
                 const polyPatch& p,
                 TrackData& td,
-                const label patchI
+                const label patchI,
+                const scalar trackFraction,
+                const tetIndices& tetIs
             );
-
 
             //- Overridable function to handle the particle hitting a patch
             //  Executed before other patch-hitting functions without trackData
@@ -554,9 +559,10 @@ public:
             (
                 const polyPatch& p,
                 int& td,
-                const label patchI
+                const label patchI,
+                const scalar trackFraction,
+                const tetIndices& tetIs
             );
-
 
             //- Overridable function to handle the particle hitting a
             //  processorPatch
@@ -580,7 +586,8 @@ public:
             void hitWallPatch
             (
                 const wallPolyPatch&,
-                TrackData& td
+                TrackData& td,
+                const tetIndices&
             );
 
             //- Overridable function to handle the particle hitting a wallPatch
@@ -588,7 +595,8 @@ public:
             void hitWallPatch
             (
                 const wallPolyPatch&,
-                int&
+                int&,
+                const tetIndices&
             );
 
             //- Overridable function to handle the particle hitting a polyPatch

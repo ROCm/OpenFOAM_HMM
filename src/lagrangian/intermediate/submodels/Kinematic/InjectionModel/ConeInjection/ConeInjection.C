@@ -80,6 +80,8 @@ Foam::ConeInjection<CloudType>::ConeInjection
     duration_(readScalar(this->coeffDict().lookup("duration"))),
     position_(this->coeffDict().lookup("position")),
     injectorCell_(-1),
+    injectorTetFace_(-1),
+    injectorTetPt_(-1),
     direction_(this->coeffDict().lookup("direction")),
     parcelsPerSecond_
     (
@@ -150,7 +152,13 @@ Foam::ConeInjection<CloudType>::ConeInjection
     this->volumeTotal_ = flowRateProfile_().integrate(0.0, duration_);
 
     // Set/cache the injector cell
-    this->findCellAtPosition(injectorCell_, position_);
+    this->findCellAtPosition
+    (
+        injectorCell_,
+        injectorTetFace_,
+        injectorTetPt_,
+        position_
+    );
 }
 
 
@@ -184,11 +192,15 @@ void Foam::ConeInjection<CloudType>::setPositionAndCell
     const label,
     const scalar,
     vector& position,
-    label& cellOwner
+    label& cellOwner,
+    label& tetFaceI,
+    label& tetPtI
 )
 {
     position = position_;
     cellOwner = injectorCell_;
+    tetFaceI = injectorTetFace_;
+    tetPtI = injectorTetPt_;
 }
 
 

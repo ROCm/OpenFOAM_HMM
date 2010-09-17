@@ -126,6 +126,13 @@ inline vector tetrahedron<Point, PointRef>::Sd() const
 
 
 template<class Point, class PointRef>
+inline Point tetrahedron<Point, PointRef>::centre() const
+{
+    return 0.25*(a_ + b_ + c_ + d_);
+}
+
+
+template<class Point, class PointRef>
 inline scalar tetrahedron<Point, PointRef>::mag() const
 {
     return (1.0/6.0)*(((b_ - a_) ^ (c_ - a_)) & (d_ - a_));
@@ -133,19 +140,19 @@ inline scalar tetrahedron<Point, PointRef>::mag() const
 
 
 template<class Point, class PointRef>
-inline vector tetrahedron<Point, PointRef>::circumCentre() const
+inline Point tetrahedron<Point, PointRef>::circumCentre() const
 {
     vector a = b_ - a_;
     vector b = c_ - a_;
     vector c = d_ - a_;
 
-    scalar lamda = magSqr(c) - (a&c);
-    scalar mu = magSqr(b) - (a&b);
+    scalar lambda = magSqr(c) - (a & c);
+    scalar mu = magSqr(b) - (a & b);
 
-    vector ba = b^a;
-    vector ca = c^a;
+    vector ba = b ^ a;
+    vector ca = c ^ a;
 
-    return a_ + 0.5*(a + (lamda*ba - mu*ca)/(c&ba));
+    return a_ + 0.5*(a + (lambda*ba - mu*ca)/((c & ba) + ROOTVSMALL));
 }
 
 
@@ -153,6 +160,196 @@ template<class Point, class PointRef>
 inline scalar tetrahedron<Point, PointRef>::circumRadius() const
 {
     return Foam::mag(a_ - circumCentre());
+}
+
+
+template<class Point, class PointRef>
+inline scalar tetrahedron<Point, PointRef>::quality() const
+{
+    // Note: 8/(9*sqrt(3)) = 0.5132002393
+
+    return mag()/(0.5132002393*pow3(min(circumRadius(), GREAT)) + ROOTVSMALL);
+}
+
+
+template<class Point, class PointRef>
+inline Point tetrahedron<Point, PointRef>::randomPoint(Random& rndGen) const
+{
+    // Adapted from
+    // http://vcg.isti.cnr.it/activities/geometryegraphics/pointintetraedro.html
+
+    scalar s = rndGen.scalar01();
+    scalar t = rndGen.scalar01();
+    scalar u = rndGen.scalar01();
+
+    if (s + t > 1.0)
+    {
+        s = 1.0 - s;
+        t = 1.0 - t;
+    }
+
+    if (t + u > 1.0)
+    {
+        scalar tmp = u;
+        u = 1.0 - s - t;
+        t = 1.0 - tmp;
+    }
+    else if (s + t + u > 1.0)
+    {
+        scalar tmp = u;
+        u = s + t + u - 1.0;
+        s = 1.0 - t - tmp;
+    }
+
+    return (1 - s - t - u)*a_ + s*b_ + t*c_ + u*d_;
+}
+
+
+template<class Point, class PointRef>
+scalar tetrahedron<Point, PointRef>::barycentric
+(
+    const point& pt,
+    List<scalar>& bary
+) const
+{
+    // From:
+    // http://en.wikipedia.org/wiki/Barycentric_coordinate_system_(mathematics)
+
+    vector e0(a_ - d_);
+    vector e1(b_ - d_);
+    vector e2(c_ - d_);
+
+    tensor t
+    (
+        e0.x(), e1.x(), e2.x(),
+        e0.y(), e1.y(), e2.y(),
+        e0.z(), e1.z(), e2.z()
+    );
+
+    scalar detT = det(t);
+
+    if (Foam::mag(detT) < SMALL)
+    {
+        WarningIn
+        (
+            "List<scalar> tetrahedron<Point, PointRef>::barycentric"
+            "("
+                "const point& pt"
+            ") const"
+        )
+            << "Degenerate triangle - returning 1/4 barycentric coordinates."
+            << endl;
+
+        bary = List<scalar>(4, 0.25);
+
+        return detT;
+    }
+
+    vector res = inv(t, detT) & (pt - d_);
+
+    bary.setSize(4);
+
+    bary[0] = res.x();
+    bary[1] = res.y();
+    bary[2] = res.z();
+    bary[3] = (1.0 - res.x() - res.y() - res.z());
+
+    return detT;
+}
+
+
+template<class Point, class PointRef>
+inline pointHit tetrahedron<Point, PointRef>::nearestPoint
+(
+    const point& p
+) const
+{
+    // Adapted from:
+    // Real-time collision detection, Christer Ericson, 2005, p142-144
+
+    // Assuming initially that the point is inside all of the
+    // halfspaces, so closest to itself.
+
+    point closestPt = p;
+
+    scalar minOutsideDistance = VGREAT;
+
+    bool inside = true;
+
+    if (((p - b_) & Sa()) >= 0)
+    {
+        // p is outside halfspace plane of tri
+        pointHit info = triangle<Point, PointRef>(b_, c_, d_).nearestPoint(p);
+
+        inside = false;
+
+        if (info.distance() < minOutsideDistance)
+        {
+            closestPt = info.rawPoint();
+
+            minOutsideDistance = info.distance();
+        }
+    }
+
+    if (((p - a_) & Sb()) >= 0)
+    {
+        // p is outside halfspace plane of tri
+        pointHit info = triangle<Point, PointRef>(a_, d_, c_).nearestPoint(p);
+
+        inside = false;
+
+        if (info.distance() < minOutsideDistance)
+        {
+            closestPt = info.rawPoint();
+
+            minOutsideDistance = info.distance();
+        }
+    }
+
+    if (((p - a_) & Sc()) >= 0)
+    {
+        // p is outside halfspace plane of tri
+        pointHit info = triangle<Point, PointRef>(a_, b_, d_).nearestPoint(p);
+
+        inside = false;
+
+        if (info.distance() < minOutsideDistance)
+        {
+            closestPt = info.rawPoint();
+
+            minOutsideDistance = info.distance();
+        }
+    }
+
+    if (((p - a_) & Sd()) >= 0)
+    {
+        // p is outside halfspace plane of tri
+        pointHit info = triangle<Point, PointRef>(a_, c_, b_).nearestPoint(p);
+
+        inside = false;
+
+        if (info.distance() < minOutsideDistance)
+        {
+            closestPt = info.rawPoint();
+
+            minOutsideDistance = info.distance();
+        }
+    }
+
+    // If the point is inside, then the distance to the closest point
+    // is zero
+    if (inside)
+    {
+        minOutsideDistance = 0;
+    }
+
+    return pointHit
+    (
+        inside,
+        closestPt,
+        minOutsideDistance,
+        !inside
+    );
 }
 
 

@@ -259,7 +259,7 @@ inline vector triangle<Point, PointRef>::normal() const
 
 
 template<class Point, class PointRef>
-inline vector triangle<Point, PointRef>::circumCentre() const
+inline Point triangle<Point, PointRef>::circumCentre() const
 {
     scalar d1 = (c_ - a_)&(b_ - a_);
     scalar d2 = -(c_ - b_)&(b_ - a_);
@@ -303,12 +303,14 @@ inline scalar triangle<Point, PointRef>::circumRadius() const
 template<class Point, class PointRef>
 inline scalar triangle<Point, PointRef>::quality() const
 {
+    // Note: 3*sqr(3)/(4*pi) = 0.4134966716
+
     return
         mag()
       / (
             constant::mathematical::pi
            *Foam::sqr(circumRadius())
-           *0.413497
+           *0.4134966716
           + VSMALL
         );
 }
@@ -365,6 +367,72 @@ inline tensor triangle<Point, PointRef>::inertia
     )
    *density;
 }
+
+
+template<class Point, class PointRef>
+inline Point triangle<Point, PointRef>::randomPoint(Random& rndGen) const
+{
+    // Generating Random Points in Triangles
+    // by Greg Turk
+    // from "Graphics Gems", Academic Press, 1990
+    // http://tog.acm.org/GraphicsGems/gems/TriPoints.c
+
+    scalar s = rndGen.scalar01();
+
+    scalar t = sqrt(rndGen.scalar01());
+
+    return (1 - t)*a_ + (1 - s)*t*b_ + s*t*c_;
+}
+
+
+template<class Point, class PointRef>
+scalar triangle<Point, PointRef>::barycentric
+(
+    const point& pt,
+    List<scalar>& bary
+) const
+{
+    // From:
+    // Real-time collision detection, Christer Ericson, 2005, p47-48
+
+    vector v0 = b_ - a_;
+    vector v1 = c_ - a_;
+    vector v2 = pt - a_;
+
+    scalar d00 = v0 & v0;
+    scalar d01 = v0 & v1;
+    scalar d11 = v1 & v1;
+    scalar d20 = v2 & v0;
+    scalar d21 = v2 & v1;
+
+    scalar denom = d00*d11 - d01*d01;
+
+    if (Foam::mag(denom) < SMALL)
+    {
+        WarningIn
+        (
+            "List<scalar> triangle<Point, PointRef>::barycentric"
+            "("
+                "const point& pt"
+            ") const"
+        )
+            << "Degenerate triangle - returning 1/3 barycentric coordinates."
+            << endl;
+
+        bary = List<scalar>(3, 1.0/3.0);
+
+        return denom;
+    }
+
+    bary.setSize(3);
+
+    bary[0] = (d11*d20 - d01*d21)/denom;
+    bary[1] = (d00*d21 - d01*d20)/denom;
+    bary[2] = 1.0 - bary[0] - bary[1];
+
+    return denom;
+}
+
 
 template<class Point, class PointRef>
 inline pointHit triangle<Point, PointRef>::ray
@@ -775,4 +843,3 @@ inline Ostream& operator<<(Ostream& os, const triangle<Point, PointRef>& t)
 } // End namespace Foam
 
 // ************************************************************************* //
-

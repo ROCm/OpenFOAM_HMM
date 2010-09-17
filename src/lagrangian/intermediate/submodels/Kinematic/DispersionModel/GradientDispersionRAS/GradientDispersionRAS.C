@@ -81,7 +81,7 @@ template<class CloudType>
 Foam::vector Foam::GradientDispersionRAS<CloudType>::update
 (
     const scalar dt,
-    const label celli,
+    const label cellI,
     const vector& U,
     const vector& Uc,
     vector& UTurb,
@@ -98,8 +98,8 @@ Foam::vector Foam::GradientDispersionRAS<CloudType>::update
 
     const scalar tTurbLoc = min
     (
-        k[celli]/epsilon[celli],
-        cps*pow(k[celli], 1.5)/epsilon[celli]/(UrelMag + SMALL)
+        k[cellI]/epsilon[cellI],
+        cps*pow(k[cellI], 1.5)/epsilon[cellI]/(UrelMag + SMALL)
     );
 
     // Parcel is perturbed by the turbulence
@@ -111,8 +111,8 @@ Foam::vector Foam::GradientDispersionRAS<CloudType>::update
         {
             tTurb = 0.0;
 
-            scalar sigma = sqrt(2.0*k[celli]/3.0);
-            vector dir = -gradk[celli]/(mag(gradk[celli]) + SMALL);
+            scalar sigma = sqrt(2.0*k[cellI]/3.0);
+            vector dir = -gradk[cellI]/(mag(gradk[cellI]) + SMALL);
 
             // Numerical Recipes... Ch. 7. Random Numbers...
             scalar x1 = 0.0;

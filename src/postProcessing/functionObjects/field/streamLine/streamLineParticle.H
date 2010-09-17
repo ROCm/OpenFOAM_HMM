@@ -141,7 +141,7 @@ public:
         (
             const Cloud<streamLineParticle>& c,
             const vector& position,
-            const label celli,
+            const label cellI,
             const label lifeTime
         );
 
@@ -182,13 +182,18 @@ public:
             (
                 const polyPatch&,
                 streamLineParticle::trackData& td,
-                const label patchI
+                const label patchI,
+                const scalar trackFraction,
+                const tetIndices& tetIs
             );
+
             bool hitPatch
             (
                 const polyPatch&,
                 int&,
-                const label patchI
+                const label,
+                const scalar,
+                const tetIndices&
            );
 
             //- Overridable function to handle the particle hitting a wedge
@@ -245,12 +250,14 @@ public:
             void hitWallPatch
             (
                 const wallPolyPatch&,
-                streamLineParticle::trackData& td
+                streamLineParticle::trackData& td,
+                const tetIndices&
             );
             void hitWallPatch
             (
                 const wallPolyPatch&,
-                int&
+                int&,
+                const tetIndices&
             );
 
             //- Overridable function to handle the particle hitting a polyPatch

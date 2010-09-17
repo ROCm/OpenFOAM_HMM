@@ -70,7 +70,16 @@ class ManualInjection
         //- Field of parcel diameters
         scalarList diameters_;
 
-        //- Initial parcel velocity
+        //- List of cell labels corresponding to injector positions
+        labelList injectorCells_;
+
+        //- List of tetFace labels corresponding to injector positions
+        labelList injectorTetFaces_;
+
+        //- List of tetPt labels corresponding to injector positions
+        labelList injectorTetPts_;
+
+    //- Initial parcel velocity
         const vector U0_;
 
         //- Parcel size PDF model
@@ -127,14 +136,16 @@ public:
 
         // Injection geometry
 
-            //- Set the injection position and owner cell
+            //- Set the injection position and owner cell, tetFace and tetPt
             virtual void setPositionAndCell
             (
                 const label parcelI,
                 const label nParcels,
                 const scalar time,
                 vector& position,
-                label& cellOwner
+                label& cellOwner,
+                label& tetFaceI,
+                label& tetPtI
             );
 
             //- Set the parcel properties

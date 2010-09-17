@@ -88,7 +88,7 @@ void Foam::spray::breakupLoop()
         vector velocity = UInterpolator().interpolate
         (
             elmnt().position(),
-            elmnt().cell()
+            elmnt().currentTetIndices()
         );
 
         // liquidCore < 0.5 indicates discrete drops
@@ -122,7 +122,7 @@ void Foam::spray::atomizationLoop()
         vector velocity = UInterpolator().interpolate
         (
             elmnt().position(),
-            elmnt().cell()
+            elmnt().currentTetIndices()
         );
 
         // liquidCore > 0.5 indicates a liquid core

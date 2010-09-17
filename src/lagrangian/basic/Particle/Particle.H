@@ -38,6 +38,10 @@ Description
 #include "faceList.H"
 #include "typeInfo.H"
 #include "OFstream.H"
+#include "tetPointRef.H"
+#include "FixedList.H"
+#include "polyMeshTetDecomposition.H"
+#include "wallPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -125,13 +129,22 @@ protected:
         vector position_;
 
         //- Index of the cell it is in
-        label celli_;
+        label cellI_;
 
         //- Face index if the particle is on a face otherwise -1
-        label facei_;
+        label faceI_;
 
         //- Fraction of time-step completed
         scalar stepFraction_;
+
+        //- Index of the face that owns the decomposed tet that the
+        //  particle is in
+        label tetFaceI_;
+
+        //- Index of the point on the face that defines the decomposed
+        //  tet that the particle is in.  Relative to the face base
+        //  point.
+        label tetPtI_;
 
         //- Originating processor id
         label origProc_;
@@ -142,54 +155,82 @@ protected:
 
     // Private Member Functions
 
-        //- Return the 'lambda' value for the position, p, on the face,
-        // where, p = from + lamda*(to - from)
-        // for non-static meshes
-        inline scalar lambda
+        //- Find the tet tri faces between position and tet centre
+        inline void findTris
+        (
+            const vector& position,
+            DynamicList<label>& faceList,
+            const tetPointRef& tet,
+            const FixedList<vector, 4>& tetAreas,
+            const FixedList<label, 4>& tetPlaneBasePtIs
+        ) const;
+
+        //- Find the lambda value for the line to-from across the
+        //  given tri face, where p = from + lambda*(to - from)
+        inline scalar tetLambda
         (
             const vector& from,
             const vector& to,
-            const label facei,
-            const scalar stepFraction
+            const label triI,
+            const vector& tetArea,
+            const label tetPlaneBasePtI,
+            const label cellI,
+            const label tetFaceI,
+            const label tetPtI
         ) const;
 
-        //- Return the 'lambda' value for the position, p, on the face,
-        // where, p = from + lamda*(to - from)
-        // for static meshes
-        inline scalar lambda
+         //- Find the lambda value for a moving tri face
+         inline scalar movingTetLambda
+         (
+             const vector& from,
+             const vector& to,
+             const label triI,
+             const vector& tetArea,
+             const label tetPlaneBasePtI,
+             const label cellI,
+             const label tetFaceI,
+             const label tetPtI
+         ) const;
+
+        //- Modify the tet owner data by crossing triI
+        inline void tetNeighbour(label triI);
+
+        //- Cross the from the given face across the given edge of the
+        //  given cell to find the resulting face and tetPtI
+        inline void crossEdgeConnectedFace
+        (
+            const label& cellI,
+            label& tetFaceI,
+            label& tetPtI,
+            const edge& e
+        );
+
+        //- Hit wall faces in the current cell if the
+        //- wallImpactDistance is non-zero.  They may not be in
+        //- different tets to the current.
+        inline void hitWallFaces
         (
             const vector& from,
             const vector& to,
-            const label facei
-        ) const;
-
-        //- Find the faces between position and cell centre
-        void findFaces
-        (
-            const vector& position,
-            DynamicList<label>& faceList
-        ) const;
-
-        //- Find the faces between position and cell centre
-        void findFaces
-        (
-            const vector& position,
-            const label celli,
-            const scalar stepFraction,
-            DynamicList<label>& faceList
-        ) const;
+            scalar& lambdaMin,
+            tetIndices& closestTetIs
+        );
 
 
     // Patch interactions
 
-        //- Overridable function to handle the particle hitting a patch
-        //  Executed before other patch-hitting functions
+        //- Overridable function to handle the particle hitting a
+        //  patch.  Executed before other patch-hitting functions.
+        //  trackFraction is passed in to allow mesh motion to
+        //  interpolate in time to the correct face state.
         template<class TrackData>
         bool hitPatch
         (
             const polyPatch&,
             TrackData& td,
-            const label patchI
+            const label patchI,
+            const scalar trackFraction,
+            const tetIndices& tetIs
         );
 
         //- Overridable function to handle the particle hitting a wedgePatch
@@ -231,7 +272,8 @@ protected:
         void hitWallPatch
         (
             const wallPolyPatch&,
-            TrackData& td
+            TrackData& td,
+            const tetIndices& tetIs
         );
 
         //- Overridable function to handle the particle hitting a
@@ -264,12 +306,12 @@ protected:
         //- Convert global addressing to the processor patch
         //  local equivalents
         template<class TrackData>
-        void prepareForParallelTransfer(const label patchi, TrackData& td);
+        void prepareForParallelTransfer(const label patchI, TrackData& td);
 
         //- Convert processor patch addressing to the global equivalents
-        //  and set the celli to the face-neighbour
+        //  and set the cellI to the face-neighbour
         template<class TrackData>
-        void correctAfterParallelTransfer(const label patchi, TrackData& td);
+        void correctAfterParallelTransfer(const label patchI, TrackData& td);
 
 
 public:
@@ -293,7 +335,18 @@ public:
         (
             const Cloud<ParticleType>&,
             const vector& position,
-            const label celli
+            const label cellI,
+            const label tetFaceI,
+            const label tetPtI
+        );
+
+        //- Construct from components, tetFaceI_ and tetPtI_ are not
+        //  supplied so they will be deduced by a search
+        Particle
+        (
+            const Cloud<ParticleType>&,
+            const vector& position,
+            const label cellI
         );
 
         //- Construct from Istream
@@ -355,17 +408,6 @@ public:
 
         // Access
 
-            //- Return true if particle is in cell
-            inline bool inCell() const;
-
-            //- Return true if position is in cell i
-            inline bool inCell
-            (
-                const vector& position,
-                const label celli,
-                const scalar stepFraction
-            ) const;
-
             //- Return current particle position
             inline const vector& position() const;
 
@@ -377,6 +419,35 @@ public:
 
             //- Return current cell particle is in
             inline label cell() const;
+
+            //- Return current tet face particle is in
+            inline label& tetFace();
+
+            //- Return current tet face particle is in
+            inline label tetFace() const;
+
+            //- Return current tet face particle is in
+            inline label& tetPt();
+
+            //- Return current tet face particle is in
+            inline label tetPt() const;
+
+            //- Return the indices of the current tet that the
+            //  particle occupies.
+            inline tetIndices currentTetIndices() const;
+
+            //- Return the geometry of the current tet that the
+            //  particle occupies.
+            inline tetPointRef currentTet() const;
+
+            //- Return the normal of the tri on tetFaceI_ for the
+            //  current tet.
+            inline vector normal() const;
+
+            //- Return the normal of the tri on tetFaceI_ for the
+            //  current tet at the start of the timestep, i.e. based
+            //  on oldPoints
+            inline vector oldNormal() const;
 
             //- Return current face particle is on otherwise -1
             inline label& face();
@@ -396,17 +467,21 @@ public:
 
         // Check
 
+            //- Check the stored cell value (setting if necessary) and
+            //  initialise the tetFace and tetPt values
+            inline void initCellFacePt();
+
             //- Is the particle on the boundary/(or outside the domain)?
             inline bool onBoundary() const;
 
             //- Which patch is particle on
-            inline label patch(const label facei) const;
+            inline label patch(const label faceI) const;
 
             //- Which face of this patch is this particle on
             inline label patchFace
             (
-                const label patchi,
-                const label facei
+                const label patchI,
+                const label faceI
             ) const;
 
             //- The nearest distance to a wall that

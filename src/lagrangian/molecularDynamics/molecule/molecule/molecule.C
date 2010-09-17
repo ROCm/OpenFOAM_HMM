@@ -260,7 +260,9 @@ bool Foam::molecule::hitPatch
 (
     const polyPatch&,
     molecule::trackData&,
-    const label
+    const label,
+    const scalar,
+    const tetIndices&
 )
 {
     return false;
@@ -271,7 +273,9 @@ bool Foam::molecule::hitPatch
 (
     const polyPatch&,
     int&,
-    const label
+    const label,
+    const scalar,
+    const tetIndices&
 )
 {
     return false;
@@ -299,10 +303,13 @@ void Foam::molecule::hitProcessorPatch
 void Foam::molecule::hitWallPatch
 (
     const wallPolyPatch& wpp,
-    molecule::trackData& td
+    molecule::trackData& td,
+    const tetIndices& tetIs
 )
 {
-    vector nw = wpp.faceAreas()[wpp.whichFace(face())];
+    // Use of the normal from tetIs is not required as
+    // hasWallImpactDistance for a moleculeCloud is false.
+    vector nw = normal();
     nw /= mag(nw);
 
     scalar vn = v_ & nw;
@@ -318,7 +325,8 @@ void Foam::molecule::hitWallPatch
 void Foam::molecule::hitWallPatch
 (
     const wallPolyPatch&,
-    int&
+    int&,
+    const tetIndices&
 )
 {}
 

@@ -2,36 +2,25 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    object      U;
+    class       dictionary;
+    object      motionProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 -1 0 0 0 0];
+dynamicFvMesh      dynamicMotionSolverFvMesh;
 
-internalField   uniform (0 0 0);
+motionSolverLibs ("libfvMotionSolvers.so");
 
-boundaryField
-{
-    periodicX
-    {
-        type            cyclic;
-    }
-    periodicY
-    {
-        type            cyclic;
-    }
-    periodicZ
-    {
-        type            cyclic;
-    }
-}
+solver            displacementLaplacian;
+
+diffusivity       inverseDistance (movingBlock);
+
 
 // ************************************************************************* //

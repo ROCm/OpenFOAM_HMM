@@ -31,13 +31,13 @@ inline Type Foam::interpolationCellPointWallModified<Type>::interpolate
     const cellPointWeightWallModified& cpw
 ) const
 {
-    const FixedList<scalar, 4>& weights = cpw.weights();
-    const FixedList<label, 3>& faceVertices = cpw.faceVertices();
+    const List<scalar>& weights = cpw.weights();
+    const List<label>& faceVertices = cpw.faceVertices();
 
-    Type t = this->psip_[faceVertices[0]]*weights[0];
-    t += this->psip_[faceVertices[1]]*weights[1];
-    t += this->psip_[faceVertices[2]]*weights[2];
-    t += this->psi_[cpw.cell()]*weights[3];
+    Type t = this->psi_[cpw.cell()]*weights[0];
+    t += this->psip_[faceVertices[0]]*weights[1];
+    t += this->psip_[faceVertices[1]]*weights[2];
+    t += this->psip_[faceVertices[2]]*weights[3];
 
     return t;
 }
@@ -47,21 +47,73 @@ template<class Type>
 inline Type Foam::interpolationCellPointWallModified<Type>::interpolate
 (
     const vector& position,
-    const label celli,
-    const label facei
+    const label cellI,
+    const label faceI
 ) const
 {
-    return
-        interpolate
+    return interpolate
+    (
+        cellPointWeightWallModified
         (
-            cellPointWeightWallModified
+            this->pMesh_,
+            position,
+            cellI,
+            faceI
+        )
+    );
+}
+
+
+template<class Type>
+inline Type Foam::interpolationCellPointWallModified<Type>::interpolate
+(
+    const vector& position,
+    const tetIndices& tetIs,
+    const label faceI
+) const
+{
+    if (faceI >= 0)
+    {
+        if (faceI != tetIs.face())
+        {
+            FatalErrorIn
             (
-                this->pMesh_,
-                position,
-                celli,
-                facei
+                "inline Type "
+                "Foam::interpolationCellPointWallModifie<Type>::interpolate"
+                "("
+                    "const vector& position, "
+                    "const tetIndices& tetIs, "
+                    "const label faceI"
+                ") const"
             )
-        );
+                << "specified face " << faceI << " inconsistent with the face "
+                << "stored by tetIndices: " << tetIs.face()
+                << exit(FatalError);
+        }
+
+        const polyBoundaryMesh& bm = this->pMesh_.boundaryMesh();
+        label patchI = bm.whichPatch(faceI);
+
+        if (patchI != -1)
+        {
+            if (isA<wallPolyPatch>(bm[patchI]))
+            {
+                Type t = this->psi_[tetIs.cell()];
+
+                return t;
+            }
+        }
+    }
+
+    // If the wall face selection did not return, then use the normal
+    // interpolate method
+
+    return interpolationCellPoint<Type>::interpolate
+    (
+        position,
+        tetIs,
+        faceI
+    );
 }
 
 

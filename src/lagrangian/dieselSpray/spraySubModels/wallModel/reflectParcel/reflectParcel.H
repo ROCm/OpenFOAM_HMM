@@ -87,7 +87,7 @@ public:
 
         //- Return true if parcel is to be kept, and false if it is to be
         // removed
-        bool wallTreatment(parcel& parcel, const label facei) const;
+        bool wallTreatment(parcel& parcel, const label faceI) const;
 };
 
 

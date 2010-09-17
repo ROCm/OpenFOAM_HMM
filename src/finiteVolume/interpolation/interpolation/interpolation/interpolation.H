@@ -38,6 +38,7 @@ Description
 #include "typeInfo.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "tetIndices.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -130,9 +131,23 @@ public:
         virtual Type interpolate
         (
             const vector& position,
-            const label nCell,
-            const label facei = -1
+            const label cellI,
+            const label faceI = -1
         ) const = 0;
+
+        //- Interpolate field to the given point in the tetrahedron
+        //  defined by the given indices.  Calls interpolate function
+        //  above here execpt where overridden by derived
+        //  interpolation types.
+        virtual Type interpolate
+        (
+            const vector& position,
+            const tetIndices& tetIs,
+            const label faceI = -1
+        ) const
+        {
+            return interpolate(position, tetIs.cell(), faceI);
+        }
 };
 
 

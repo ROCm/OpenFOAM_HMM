@@ -67,11 +67,26 @@ public:
         (
             const Cloud<indexedParticle>& c,
             const vector& position,
-            const label celli,
+            const label cellI,
+            const label tetFaceI,
+            const label tetPtI,
             const label index = 0
         )
         :
-            Particle<indexedParticle>(c, position, celli),
+            Particle<indexedParticle>(c, position, cellI, tetFaceI, tetPtI),
+            index_(index)
+        {}
+
+        //- Construct from components, with searching for tetFace and tetPt
+        indexedParticle
+        (
+            const Cloud<indexedParticle>& c,
+            const vector& position,
+            const label cellI,
+            const label index = 0
+        )
+        :
+            Particle<indexedParticle>(c, position, cellI),
             index_(index)
         {}
 

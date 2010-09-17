@@ -9,4 +9,5 @@ LIB_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
     -lsurfMesh \
-    -ltriSurface
+    -ltriSurface \
+    -llagrangian

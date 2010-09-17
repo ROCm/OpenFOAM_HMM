@@ -221,7 +221,9 @@ inline Foam::molecule::molecule
 (
     const Cloud<molecule>& c,
     const vector& position,
-    const label celli,
+    const label cellI,
+    const label tetFaceI,
+    const label tetPtI,
     const tensor& Q,
     const vector& v,
     const vector& a,
@@ -234,7 +236,7 @@ inline Foam::molecule::molecule
 
 )
 :
-    Particle<molecule>(c, position, celli),
+    Particle<molecule>(c, position, cellI, tetFaceI, tetPtI),
     Q_(Q),
     v_(v),
     a_(a),

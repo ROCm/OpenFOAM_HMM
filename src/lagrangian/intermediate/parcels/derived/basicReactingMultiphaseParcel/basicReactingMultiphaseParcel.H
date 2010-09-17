@@ -66,7 +66,9 @@ public:
         (
              ReactingMultiphaseCloud<basicReactingMultiphaseParcel>& owner,
              const vector& position,
-             const label cellI
+             const label cellI,
+             const label tetFaceI,
+             const label tetPtI
         );
 
         //- Construct from components
@@ -75,6 +77,8 @@ public:
              ReactingMultiphaseCloud<basicReactingMultiphaseParcel>& owner,
              const vector& position,
              const label cellI,
+             const label tetFaceI,
+             const label tetPtI,
              const label typeId,
              const scalar nParticle0,
              const scalar d0,

@@ -132,21 +132,15 @@ public:
         //- Return the collision cross section * relative velocity product
         virtual scalar sigmaTcR
         (
-            label typeIdP,
-            label typeIdQ,
-            const vector& UP,
-            const vector& UQ
+            const typename CloudType::parcelType& pP,
+            const typename CloudType::parcelType& pQ
         ) const = 0;
 
         //- Apply collision
         virtual void collide
         (
-            label typeIdP,
-            label typeIdQ,
-            vector& UP,
-            vector& UQ,
-            scalar& EiP,
-            scalar& EiQ
+            typename CloudType::parcelType& pP,
+            typename CloudType::parcelType& pQ
         ) = 0;
 };
 

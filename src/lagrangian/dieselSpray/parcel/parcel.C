@@ -50,6 +50,8 @@ Foam::parcel::parcel
     const Cloud<parcel>& cloud,
     const vector& position,
     const label cellI,
+    const label tetFaceI,
+    const label tetPtI,
     const vector& n,
     const scalar d,
     const scalar T,
@@ -67,7 +69,7 @@ Foam::parcel::parcel
     const List<word>& liquidNames
 )
 :
-    Particle<parcel>(cloud, position, cellI),
+    Particle<parcel>(cloud, position, cellI, tetFaceI, tetPtI),
     liquidComponents_
     (
         liquidNames
@@ -103,12 +105,13 @@ bool Foam::parcel::move(spray& sDB)
     label Nf = fuels.components().size();
     label Ns = sDB.composition().Y().size();
 
+    tetIndices tetIs = this->currentTetIndices();
+
     // Calculate the interpolated gas properties at the position of the parcel
-    vector Up = sDB.UInterpolator().interpolate(position(), cell())
-        + Uturb();
-    scalar rhog = sDB.rhoInterpolator().interpolate(position(), cell());
-    scalar pg = sDB.pInterpolator().interpolate(position(), cell());
-    scalar Tg = sDB.TInterpolator().interpolate(position(), cell());
+    vector Up = sDB.UInterpolator().interpolate(position(), tetIs) + Uturb();
+    scalar rhog = sDB.rhoInterpolator().interpolate(position(), tetIs);
+    scalar pg = sDB.pInterpolator().interpolate(position(), tetIs);
+    scalar Tg = sDB.TInterpolator().interpolate(position(), tetIs);
 
     scalarField Yfg(Nf, 0.0);
 
@@ -119,8 +122,8 @@ bool Foam::parcel::move(spray& sDB)
         if (sDB.isLiquidFuel()[i])
         {
             label j = sDB.gasToLiquidIndex()[i];
-            scalar Yicelli = Yi[cell()];
-            Yfg[j] = Yicelli;
+            scalar YicellI = Yi[cell()];
+            Yfg[j] = YicellI;
         }
         cpMixture += Yi[cell()]*sDB.gasProperties()[i].Cp(Tg);
     }
@@ -199,8 +202,8 @@ bool Foam::parcel::move(spray& sDB)
 
         // remember which cell the parcel is in
         // since this will change if a face is hit
-        label celli = cell();
-        scalar p = sDB.p()[celli];
+        label cellI = cell();
+        scalar p = sDB.p()[cellI];
 
         // track parcel to face, or end of trajectory
         if (keepParcel)
@@ -259,7 +262,7 @@ bool Foam::parcel::move(spray& sDB)
         (
             dt,
             sDB,
-            celli,
+            cellI,
             face()
         );
 
@@ -283,11 +286,11 @@ bool Foam::parcel::move(spray& sDB)
         // Update the Spray Source Terms
         forAll(nMass, i)
         {
-            sDB.srhos()[i][celli] += oMass[i] - nMass[i];
+            sDB.srhos()[i][cellI] += oMass[i] - nMass[i];
         }
-        sDB.sms()[celli] += oMom - nMom;
+        sDB.sms()[cellI] += oMom - nMom;
 
-        sDB.shs()[celli] += oTotMass*(oH + oPE) - m()*(nH + nPE);
+        sDB.shs()[cellI] += oTotMass*(oH + oPE) - m()*(nH + nPE);
 
         // Remove evaporated mass from stripped mass
         ms() -= ms()*(oTotMass-m())/oTotMass;
@@ -300,11 +303,11 @@ bool Foam::parcel::move(spray& sDB)
             // ... and add the removed 'stuff' to the gas
             forAll(nMass, i)
             {
-                sDB.srhos()[i][celli] += nMass[i];
+                sDB.srhos()[i][cellI] += nMass[i];
             }
 
-            sDB.sms()[celli] += nMom;
-            sDB.shs()[celli] += m()*(nH + nPE);
+            sDB.sms()[cellI] += nMom;
+            sDB.shs()[cellI] += m()*(nH + nPE);
         }
 
         if (onBoundary() && keepParcel)
@@ -327,8 +330,8 @@ void Foam::parcel::updateParcelProperties
 (
     const scalar dt,
     spray& sDB,
-    const label celli,
-    const label facei
+    const label cellI,
+    const label faceI
 )
 {
     const liquidMixture& fuels = sDB.fuels();
@@ -340,34 +343,34 @@ void Foam::parcel::updateParcelProperties
     scalar W = 0.0;
     for (label i=0; i<Ns; i++)
     {
-        W += sDB.composition().Y()[i][celli]/sDB.gasProperties()[i].W();
+        W += sDB.composition().Y()[i][cellI]/sDB.gasProperties()[i].W();
 
     }
     W = 1.0/W;
 
     // Calculate the interpolated gas properties at the position of the parcel
-    vector Up = sDB.UInterpolator().interpolate(position(), celli, facei)
+    vector Up = sDB.UInterpolator().interpolate(position(), cellI, faceI)
         + Uturb();
-    scalar rhog = sDB.rhoInterpolator().interpolate(position(), celli, facei);
-    scalar pg = sDB.pInterpolator().interpolate(position(), celli, facei);
-    scalar Tg0 = sDB.TInterpolator().interpolate(position(), celli, facei);
+    scalar rhog = sDB.rhoInterpolator().interpolate(position(), cellI, faceI);
+    scalar pg = sDB.pInterpolator().interpolate(position(), cellI, faceI);
+    scalar Tg0 = sDB.TInterpolator().interpolate(position(), cellI, faceI);
 
     // correct the gaseous temperature for evaporated fuel
     scalar cpMix = 0.0;
     for (label i=0; i<Ns; i++)
     {
-        cpMix += sDB.composition().Y()[i][celli]
+        cpMix += sDB.composition().Y()[i][cellI]
                 *sDB.gasProperties()[i].Cp(T());
     }
-    scalar cellV            = sDB.mesh().V()[celli];
-    scalar rho              = sDB.rho()[celli];
+    scalar cellV            = sDB.mesh().V()[cellI];
+    scalar rho              = sDB.rho()[cellI];
     scalar cellMass         = rho*cellV;
-    scalar dh               = sDB.shs()[celli];
+    scalar dh               = sDB.shs()[cellI];
     scalarField addedMass(Nf, 0.0);
 
     forAll(addedMass, i)
     {
-        addedMass[i] += sDB.srhos()[i][celli]*cellV;
+        addedMass[i] += sDB.srhos()[i][cellI]*cellV;
     }
 
     scalar Tg  = Tg0 + dh/(cpMix*cellMass);
@@ -378,7 +381,7 @@ void Foam::parcel::updateParcelProperties
     {
         label j = sDB.liquidToGasIndex()[i];
         const volScalarField& Yj = sDB.composition().Y()[j];
-        scalar Yfg0 = Yj[celli];
+        scalar Yfg0 = Yj[cellI];
         Yfg[i] = (Yfg0*cellMass + addedMass[i])/(addedMass[i] + cellMass);
     }
 
@@ -389,7 +392,7 @@ void Foam::parcel::updateParcelProperties
 
     setRelaxationTimes
     (
-        celli,
+        cellI,
         tauMomentum,
         tauEvaporation,
         tauHeatTransfer,
@@ -492,14 +495,14 @@ void Foam::parcel::updateParcelProperties
             {
                 label j = sDB.liquidToGasIndex()[i];
                 const volScalarField& Yj = sDB.composition().Y()[j];
-                scalar Yfg0 = Yj[celli];
+                scalar Yfg0 = Yj[cellI];
                 Yfg[i] = (Yfg0*cellMass + addedMass[i] + dm)
                         /(addedMass[i] + cellMass + dm);
             }
 
             setRelaxationTimes
             (
-                celli,
+                cellI,
                 tauMomentum,
                 tauEvaporation,
                 tauHeatTransfer,
@@ -530,7 +533,7 @@ void Foam::parcel::updateParcelProperties
             }
             else
             {
-                scalar Y = sDB.composition().Y()[i][celli];
+                scalar Y = sDB.composition().Y()[i][cellI];
                 cpMix += Y*sDB.gasProperties()[i].Cp(Taverage);
             }
         }
