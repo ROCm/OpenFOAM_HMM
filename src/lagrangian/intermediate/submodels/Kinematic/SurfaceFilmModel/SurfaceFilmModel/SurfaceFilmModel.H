@@ -85,9 +85,6 @@ protected:
 
         // Cached injector fields per film patch
 
-            //- Injector cell / patch face
-            labelList injectorCellsPatch_;
-
             //- Parcel mass / patch face
             scalarList massParcelPatch_;
 
@@ -261,21 +258,6 @@ public:
     SurfaceFilmModel<CloudType<ParcelType> >::                                \
         adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
             add##SS##CloudType##ParcelType##ConstructorToTable_;
-
-
-#define makeSurfaceFilmModelThermoType(SS, CloudType, ParcelType, ThermoType) \
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug                                       \
-    (                                                                         \
-        SS<CloudType<ParcelType<ThermoType> > >,                              \
-        0                                                                     \
-    );                                                                        \
-                                                                              \
-    SurfaceFilmModel<CloudType<ParcelType<ThermoType> > >::                   \
-        adddictionaryConstructorToTable                                       \
-        <SS<CloudType<ParcelType<ThermoType> > > >                            \
-            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
-
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -37,13 +37,13 @@ Foam::scalarField Foam::LiquidEvaporation<CloudType>::calcXc
     const label cellI
 ) const
 {
-    scalarField Xc(this->owner().mcCarrierThermo().Y().size());
+    scalarField Xc(this->owner().thermo().carrier().Y().size());
 
     forAll(Xc, i)
     {
         Xc[i] =
-            this->owner().mcCarrierThermo().Y()[i][cellI]
-           /this->owner().mcCarrierThermo().speciesData()[i].W();
+            this->owner().thermo().carrier().Y()[i][cellI]
+           /this->owner().thermo().carrier().W(i);
     }
 
     return Xc/sum(Xc);
@@ -71,16 +71,7 @@ Foam::LiquidEvaporation<CloudType>::LiquidEvaporation
 )
 :
     PhaseChangeModel<CloudType>(dict, owner, typeName),
-    liquids_
-    (
-        liquidMixture::New
-        (
-            owner.mesh().objectRegistry::lookupObject<dictionary>
-            (
-                owner.carrierThermo().name()
-            )
-        )
-    ),
+    liquids_(owner.thermo().liquids()),
     activeLiquids_(this->coeffDict().lookup("activeLiquids")),
     liqToCarrierMap_(activeLiquids_.size(), -1),
     liqToLiqMap_(activeLiquids_.size(), -1)
@@ -158,7 +149,7 @@ void Foam::LiquidEvaporation<CloudType>::calculate
         label lid = liqToLiqMap_[i];
 
         // vapour diffusivity [m2/s]
-        scalar Dab = liquids_->properties()[lid].D(pc, Ts);
+        scalar Dab = liquids_.properties()[lid].D(pc, Ts);
 
         // saturation pressure for species i [pa]
         // - carrier phase pressure assumed equal to the liquid vapour pressure
@@ -166,7 +157,7 @@ void Foam::LiquidEvaporation<CloudType>::calculate
         // NOTE: if pSat > pc then particle is superheated
         // calculated evaporation rate will be greater than that of a particle
         // at boiling point, but this is not a boiling model
-        scalar pSat = liquids_->properties()[lid].pv(pc, T);
+        scalar pSat = liquids_.properties()[lid].pv(pc, T);
 
         // Schmidt number
         scalar Sc = nu/(Dab + ROOTVSMALL);
@@ -187,7 +178,7 @@ void Foam::LiquidEvaporation<CloudType>::calculate
         scalar Ni = max(kc*(Cs - Cinf), 0.0);
 
         // mass transfer [kg]
-        dMassPC[lid] += Ni*A*liquids_->properties()[lid].W()*dt;
+        dMassPC[lid] += Ni*A*liquids_.properties()[lid].W()*dt;
     }
 }
 

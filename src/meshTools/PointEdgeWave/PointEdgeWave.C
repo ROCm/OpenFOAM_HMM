@@ -680,6 +680,30 @@ Foam::PointEdgeWave<Type>::PointEdgeWave
 }
 
 
+template <class Type>
+Foam::PointEdgeWave<Type>::PointEdgeWave
+(
+    const polyMesh& mesh,
+    List<Type>& allPointInfo,
+    List<Type>& allEdgeInfo
+)
+:
+    mesh_(mesh),
+    allPointInfo_(allPointInfo),
+    allEdgeInfo_(allEdgeInfo),
+    changedPoint_(mesh_.nPoints(), false),
+    changedPoints_(mesh_.nPoints()),
+    nChangedPoints_(0),
+    changedEdge_(mesh_.nEdges(), false),
+    changedEdges_(mesh_.nEdges()),
+    nChangedEdges_(0),
+    nCyclicPatches_(countPatchType<cyclicPolyPatch>()),
+    nEvals_(0),
+    nUnvisitedPoints_(mesh_.nPoints()),
+    nUnvisitedEdges_(mesh_.nEdges())
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template <class Type>

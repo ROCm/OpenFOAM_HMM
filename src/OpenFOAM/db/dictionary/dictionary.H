@@ -38,8 +38,7 @@ Description
     dictionaries since, unlike the IOdictionary class, it does not use an
     objectRegistry itself to work.
 
-ToDo
-    A merge() member function with a non-const dictionary parameter.
+    To add - a merge() member function with a non-const dictionary parameter?
     This would avoid unnecessary cloning in the add(entry*, bool) method.
 
 SourceFiles

@@ -50,10 +50,10 @@ Foam::COxidationDiffusionLimitedRate<CloudType>::COxidationDiffusionLimitedRate
     CsLocalId_ = owner.composition().localId(idSolid, "C");
 
     // Set local copies of thermo properties
-    WO2_ = owner.mcCarrierThermo().speciesData()[O2GlobalId_].W();
-    scalar WCO2 = owner.mcCarrierThermo().speciesData()[CO2GlobalId_].W();
+    WO2_ = owner.thermo().carrier().W(O2GlobalId_);
+    const scalar WCO2 = owner.thermo().carrier().W(CO2GlobalId_);
     WC_ = WCO2 - WO2_;
-    HcCO2_ = owner.mcCarrierThermo().speciesData()[CO2GlobalId_].Hc();
+    HcCO2_ = owner.thermo().carrier().Hc(CO2GlobalId_);
 
     if (Sb_ < 0)
     {
@@ -120,7 +120,7 @@ Foam::scalar Foam::COxidationDiffusionLimitedRate<CloudType>::calculate
     }
 
     // Local mass fraction of O2 in the carrier phase
-    const scalar YO2 = this->owner().mcCarrierThermo().Y(O2GlobalId_)[cellI];
+    const scalar YO2 = this->owner().thermo().carrier().Y(O2GlobalId_)[cellI];
 
     // Change in C mass [kg]
     scalar dmC =

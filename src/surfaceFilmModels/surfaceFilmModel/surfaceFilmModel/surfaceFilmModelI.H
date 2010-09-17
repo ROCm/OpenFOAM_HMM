@@ -41,4 +41,11 @@ Foam::surfaceFilmModels::surfaceFilmModel::coeffs() const
 }
 
 
+inline const Foam::surfaceFilmModels::surfaceFilmModel::thermoModelType&
+Foam::surfaceFilmModels::surfaceFilmModel::thermoModel() const
+{
+    return thermoModel_;
+}
+
+
 // ************************************************************************* //

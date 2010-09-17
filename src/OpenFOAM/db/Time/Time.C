@@ -804,7 +804,11 @@ Foam::Time& Foam::Time::operator++()
 
             case wcCpuTime:
             {
-                label outputIndex = label(elapsedCpuTime()/writeInterval_);
+                label outputIndex = label
+                (
+                    returnReduce(elapsedCpuTime(), maxOp<double>())
+                  / writeInterval_
+                );
                 if (outputIndex > outputTimeIndex_)
                 {
                     outputTime_ = true;
@@ -819,7 +823,11 @@ Foam::Time& Foam::Time::operator++()
 
             case wcClockTime:
             {
-                label outputIndex = label(elapsedClockTime()/writeInterval_);
+                label outputIndex = label
+                (
+                    returnReduce(label(elapsedClockTime()), maxOp<label>())
+                  / writeInterval_
+                );
                 if (outputIndex > outputTimeIndex_)
                 {
                     outputTime_ = true;

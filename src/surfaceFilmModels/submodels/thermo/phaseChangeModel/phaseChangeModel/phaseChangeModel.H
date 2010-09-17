@@ -25,6 +25,7 @@ Class
     Foam::phaseChangeModel
 
 Description
+    Phase change model for surface film modelling.
 
 SourceFiles
     phaseChangeModelI.H
@@ -37,6 +38,7 @@ SourceFiles
 
 #include "surfaceFilmModel.H"
 #include "runTimeSelectionTables.H"
+#include "scalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -96,7 +98,7 @@ public:
     // Constructors
 
         //- Construct null
-        phaseChangeModel(const surfaceFilmModel& owner, const dictionary& dict);
+        phaseChangeModel(const surfaceFilmModel& owner);
 
         //- Construct from type name, dictionary and surface film model
         phaseChangeModel
@@ -134,8 +136,19 @@ public:
 
         // Evolution
 
-            //- Correct // TODO
-            virtual void correct() = 0;
+            //- Correct
+            virtual void correct
+            (
+                const scalar dt,
+                scalarField& dMass,
+                scalarField& dEnergy
+            ) = 0;
+
+
+        // Input/output
+
+            //- Output model statistics
+            virtual void info() const = 0;
 };
 
 
