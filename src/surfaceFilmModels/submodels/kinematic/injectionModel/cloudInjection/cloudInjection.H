@@ -101,8 +101,8 @@ public:
 
         // Evolution
 
-            //- Correct
-            virtual void correct
+            //- Inject
+            virtual void inject
             (
                 scalarField& massToInject,
                 scalarField& diameterToInject

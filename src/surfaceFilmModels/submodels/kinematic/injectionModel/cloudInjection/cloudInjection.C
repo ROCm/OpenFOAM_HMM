@@ -72,12 +72,14 @@ Foam::surfaceFilmModels::cloudInjection::~cloudInjection()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::surfaceFilmModels::cloudInjection::correct
+void Foam::surfaceFilmModels::cloudInjection::inject
 (
     scalarField& massToInject,
     scalarField& diameterToInject
 )
 {
+    correctDetachedFilm(massToInject);
+
     const scalar pi = constant::mathematical::pi;
     const scalarField& rhoFilm = owner().rho();
 
