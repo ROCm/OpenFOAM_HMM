@@ -60,10 +60,23 @@ public:
         (
             const Cloud<passiveParticle>& c,
             const vector& position,
-            const label celli
+            const label cellI,
+            const label tetFaceI,
+            const label tetPtI
         )
         :
-            Particle<passiveParticle>(c, position, celli)
+            Particle<passiveParticle>(c, position, cellI, tetFaceI, tetPtI)
+        {}
+
+        //- Construct from components, with searching for tetFace and tetPt
+        passiveParticle
+        (
+            const Cloud<passiveParticle>& c,
+            const vector& position,
+            const label cellI
+        )
+        :
+            Particle<passiveParticle>(c, position, cellI)
         {}
 
         //- Construct from Istream

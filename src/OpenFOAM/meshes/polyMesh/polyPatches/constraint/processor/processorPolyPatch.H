@@ -229,6 +229,19 @@ public:
 
     // Member functions
 
+        //- Return true only if this is a parallel run
+        virtual bool coupled() const
+        {
+            if (Pstream::parRun())
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         //- Return processor number
         int myProcNo() const
         {

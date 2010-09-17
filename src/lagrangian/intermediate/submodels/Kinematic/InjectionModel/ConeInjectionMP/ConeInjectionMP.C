@@ -99,6 +99,8 @@ Foam::ConeInjectionMP<CloudType>::ConeInjectionMP
         )
     ),
     injectorCells_(positions_.size()),
+    injectorTetFaces_(positions_.size()),
+    injectorTetPts_(positions_.size()),
     axesFile_(this->coeffDict().lookup("axesFile")),
     axes_
     (
@@ -190,6 +192,8 @@ Foam::ConeInjectionMP<CloudType>::ConeInjectionMP
         this->findCellAtPosition
         (
             injectorCells_[i],
+            injectorTetFaces_[i],
+            injectorTetPts_[i],
             positions_[i]
         );
     }
@@ -226,13 +230,17 @@ void Foam::ConeInjectionMP<CloudType>::setPositionAndCell
     const label,
     const scalar,
     vector& position,
-    label& cellOwner
+    label& cellOwner,
+    label& tetFaceI,
+    label& tetPtI
 )
 {
-    const label i = parcelI%positions_.size();
+    const label i = parcelI % positions_.size();
 
     position = positions_[i];
     cellOwner = injectorCells_[i];
+    tetFaceI = injectorTetFaces_[i];
+    tetPtI = injectorTetPts_[i];
 }
 
 

@@ -46,12 +46,14 @@ inline Foam::solidParticle::solidParticle
 (
     const Cloud<solidParticle>& c,
     const vector& position,
-    const label celli,
+    const label cellI,
+    const label tetFaceI,
+    const label tetPtI,
     const scalar d,
     const vector& U
 )
 :
-    Particle<solidParticle>(c, position, celli),
+    Particle<solidParticle>(c, position, cellI, tetFaceI, tetPtI),
     d_(d),
     U_(U)
 {}
@@ -64,17 +66,20 @@ inline Foam::solidParticleCloud& Foam::solidParticle::trackData::spc()
     return spc_;
 }
 
+
 inline const Foam::interpolationCellPoint<Foam::scalar>&
 Foam::solidParticle::trackData::rhoInterp() const
 {
     return rhoInterp_;
 }
 
+
 inline const Foam::interpolationCellPoint<Foam::vector>&
 Foam::solidParticle::trackData::UInterp() const
 {
     return UInterp_;
 }
+
 
 inline const Foam::interpolationCellPoint<Foam::scalar>&
 Foam::solidParticle::trackData::nuInterp() const
@@ -93,10 +98,12 @@ inline Foam::scalar Foam::solidParticle::d() const
     return d_;
 }
 
+
 inline Foam::scalar Foam::solidParticle::wallImpactDistance(const vector&) const
 {
     return 0.5*d_;
 }
+
 
 inline const Foam::vector& Foam::solidParticle::U() const
 {

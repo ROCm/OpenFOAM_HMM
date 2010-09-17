@@ -24,6 +24,7 @@ if (transonic)
           - fvm::laplacian(rho*rUA, p)
          ==
             parcels.Srho()
+          + surfaceFilm.Srho()
         );
 
         pEqn.solve();
@@ -52,6 +53,7 @@ else
           - fvm::laplacian(rho*rUA, p)
          ==
             parcels.Srho()
+          + surfaceFilm.Srho()
         );
 
         pEqn.solve();

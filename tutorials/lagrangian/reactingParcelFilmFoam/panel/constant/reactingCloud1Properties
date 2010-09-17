@@ -67,7 +67,7 @@ constantProperties
 interpolationSchemes
 {
     rho             cell;
-    U               cell; // cellPointFace;
+    U               cell; // cellPoint;
     mu              cell;
     T               cell;
     Cp              cell;

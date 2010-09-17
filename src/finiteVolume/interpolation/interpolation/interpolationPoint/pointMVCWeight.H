@@ -119,8 +119,8 @@ public:
         (
             const polyMesh& mesh,
             const vector& position,
-            const label nCell,
-            const label facei = -1
+            const label cellI,
+            const label faceI = -1
         );
 
 

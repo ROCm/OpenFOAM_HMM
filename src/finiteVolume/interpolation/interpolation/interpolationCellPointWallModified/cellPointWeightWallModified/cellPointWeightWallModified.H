@@ -36,6 +36,9 @@ SourceFiles
 #define cellPointWeightWallModified_H
 
 #include "cellPointWeight.H"
+#include "wallPolyPatch.H"
+#include "polyMesh.H"
+#include "polyBoundaryMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,8 +64,8 @@ public:
         (
             const polyMesh& mesh,
             const vector& position,
-            const label nCell,
-            const label facei = -1
+            const label cellI,
+            const label faceI = -1
         );
 };
 

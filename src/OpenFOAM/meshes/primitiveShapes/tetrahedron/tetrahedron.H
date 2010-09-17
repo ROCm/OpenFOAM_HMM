@@ -42,6 +42,7 @@ SourceFiles
 #include "point.H"
 #include "primitiveFieldsFwd.H"
 #include "pointHit.H"
+#include "Random.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -133,15 +134,41 @@ public:
 
             inline vector Sd() const;
 
+            //- Return centre (centroid)
+            inline Point centre() const;
 
             //- Return volume
             inline scalar mag() const;
 
             //- Return circum-centre
-            inline vector circumCentre() const;
+            inline Point circumCentre() const;
 
             //- Return circum-radius
             inline scalar circumRadius() const;
+
+            //- Return quality: Ratio of tetrahedron and circum-sphere
+            //  volume, scaled so that a regular tetrahedron has a
+            //  quality of 1
+            inline scalar quality() const;
+
+            //- Return a random point in the tetrahedron from a
+            //  uniform distribution
+            inline Point randomPoint(Random& rndGen) const;
+
+            //- Calculate the barycentric coordinates of the given
+            //  point, in the same order as a, b, c, d.  Returns the
+            //  determinant of the solution.
+            inline scalar barycentric
+            (
+                const point& pt,
+                List<scalar>& bary
+            ) const;
+
+            //- Return nearest point to p on tetrahedron
+            inline pointHit nearestPoint
+            (
+                const point& p
+            ) const;
 
             //- Return (min)containment sphere, i.e. the smallest sphere with
             //  all points inside. Returns pointHit with:

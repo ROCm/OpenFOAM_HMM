@@ -175,6 +175,23 @@ public:
             virtual void evolveFilm();
 
 
+        // Source fields
+
+            // Mapped into primary region
+
+                //- Return total mass source - Eulerian phase only
+                virtual tmp<DimensionedField<scalar, volMesh> > Srho() const;
+
+                //- Return mass source for specie i - Eulerian phase only
+                virtual tmp<DimensionedField<scalar, volMesh> > Srho
+                (
+                    const label i
+                ) const;
+
+                //- Return enthalpy source - Eulerian phase only
+                virtual tmp<DimensionedField<scalar, volMesh> > Sh() const;
+
+
        // I-O
 
             //- Provide some feedback

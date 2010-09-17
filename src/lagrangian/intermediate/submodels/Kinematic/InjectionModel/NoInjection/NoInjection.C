@@ -93,6 +93,8 @@ void Foam::NoInjection<CloudType>::setPositionAndCell
     const label,
     const scalar,
     vector&,
+    label&,
+    label&,
     label&
 )
 {}

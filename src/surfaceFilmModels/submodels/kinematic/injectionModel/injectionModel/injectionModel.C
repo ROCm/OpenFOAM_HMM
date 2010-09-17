@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "injectionModel.H"
+#include "kinematicSingleLayer.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -37,6 +38,35 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::surfaceFilmModels::injectionModel::correctDetachedFilm
+(
+    scalarField& mass
+) const
+{
+    mass = 0.0;
+
+    const kinematicSingleLayer& film =
+        refCast<const kinematicSingleLayer>(owner_);
+
+    const scalarField gNorm = film.gNorm();
+    const scalarField& delta = film.delta();
+    const scalarField& rho = film.rho();
+    const scalarField& magSf = film.magSf();
+    const scalarField& massPhaseChange = film.massPhaseChangeForPrimary();
+
+    forAll(gNorm, i)
+    {
+        if (gNorm[i] > SMALL)
+        {
+            const scalar ddelta = max(0.0, delta[i] - deltaStable_);
+            mass[i] = max(0.0, ddelta*rho[i]*magSf[i] - massPhaseChange[i]);
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::surfaceFilmModels::injectionModel::injectionModel
@@ -45,7 +75,8 @@ Foam::surfaceFilmModels::injectionModel::injectionModel
 )
 :
     owner_(owner),
-    coeffs_(dictionary::null)
+    coeffs_(dictionary::null),
+    injectedMass_(0.0)
 {}
 
 
@@ -57,7 +88,9 @@ Foam::surfaceFilmModels::injectionModel::injectionModel
 )
 :
     owner_(owner),
-    coeffs_(dict.subDict(type + "Coeffs"))
+    coeffs_(dict.subDict(type + "Coeffs")),
+    injectedMass_(0.0),
+    deltaStable_(readScalar(coeffs_.lookup("deltaStable")))
 {}
 
 
@@ -65,6 +98,29 @@ Foam::surfaceFilmModels::injectionModel::injectionModel
 
 Foam::surfaceFilmModels::injectionModel::~injectionModel()
 {}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::surfaceFilmModels::injectionModel::correct
+(
+    volScalarField& massToInject,
+    volScalarField& diameterToInject
+)
+{
+    inject(massToInject, diameterToInject);
+    massToInject.correctBoundaryConditions();
+    diameterToInject.correctBoundaryConditions();
+
+    injectedMass_ += sum(massToInject.internalField());
+}
+
+
+void Foam::surfaceFilmModels::injectionModel::info() const
+{
+    Info<< indent << "injected mass      = "
+        << returnReduce<scalar>(injectedMass_, sumOp<scalar>()) << nl;
+}
 
 
 // ************************************************************************* //

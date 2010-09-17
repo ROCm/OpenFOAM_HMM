@@ -74,8 +74,17 @@ public:
         inline Type interpolate
         (
             const vector& position,
-            const label nCell,
-            const label facei = -1
+            const label cellI,
+            const label faceI = -1
+        ) const;
+
+        //- Interpolate field to the given point in the tetrahedron
+        //  defined by the given indices.
+        inline Type interpolate
+        (
+            const vector& position,
+            const tetIndices& tetIs,
+            const label faceI = -1
         ) const;
 };
 

@@ -88,11 +88,11 @@ Foam::streamLineParticle::streamLineParticle
 (
     const Cloud<streamLineParticle>& c,
     const vector& position,
-    const label celli,
+    const label cellI,
     const label lifeTime
 )
 :
-    Particle<streamLineParticle>(c, position, celli),
+    Particle<streamLineParticle>(c, position, cellI),
     lifeTime_(lifeTime)
 {}
 
@@ -246,7 +246,9 @@ bool Foam::streamLineParticle::hitPatch
 (
     const polyPatch&,
     streamLineParticle::trackData& td,
-    const label patchI
+    const label patchI,
+    const scalar trackFraction,
+    const tetIndices& tetIs
 )
 {
     // Disable generic patch interaction
@@ -258,7 +260,9 @@ bool Foam::streamLineParticle::hitPatch
 (
     const polyPatch&,
     int&,
-    const label
+    const label,
+    const scalar,
+    const tetIndices&
 )
 {
     // Disable generic patch interaction
@@ -345,7 +349,8 @@ void Foam::streamLineParticle::hitProcessorPatch
 void Foam::streamLineParticle::hitWallPatch
 (
     const wallPolyPatch& wpp,
-    streamLineParticle::trackData& td
+    streamLineParticle::trackData& td,
+    const tetIndices&
 )
 {
     // Remove particle
@@ -356,7 +361,8 @@ void Foam::streamLineParticle::hitWallPatch
 void Foam::streamLineParticle::hitWallPatch
 (
     const wallPolyPatch& wpp,
-    int&
+    int&,
+    const tetIndices&
 )
 {}
 

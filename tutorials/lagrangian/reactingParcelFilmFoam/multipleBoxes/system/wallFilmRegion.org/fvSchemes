@@ -36,6 +36,7 @@ gradSchemes
 {
     default none;
     grad(pL) Gauss linear;
+    grad(sigmaf) Gauss linear;
     snGradCorr(deltaf) Gauss linear;
     snGradCorr(pp) Gauss linear;
     snGradCorr(pu) Gauss linear;

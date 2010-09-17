@@ -6,6 +6,7 @@
 #include "EdgeMap.H"
 #include "wedgePolyPatch.H"
 #include "unitConversion.H"
+#include "polyMeshTetDecomposition.H"
 
 
 // Find wedge with opposite orientation. Note: does not actually check that
@@ -83,7 +84,7 @@ bool Foam::checkWedges
             {
                 Info<< "    Wedge " << pp.name() << " with angle "
                     << radToDeg(wedgeAngle) << " degrees"
-                    << endl;                
+                    << endl;
             }
 
             // Find opposite
@@ -413,7 +414,6 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
         }
     }
 
-
     {
         faceSet faces(mesh, "wrongOrientedFaces", mesh.nFaces()/100 + 1);
         if (mesh.checkFacePyramids(true, -SMALL, &faces))
@@ -434,25 +434,6 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
     }
 
     {
-        faceSet faces(mesh, "wrongOrientedTriangleFaces", mesh.nFaces()/100+1);
-        if (mesh.checkFaceTets(true, 0, &faces))
-        {
-            noFailedChecks++;
-
-            label nFaces = returnReduce(faces.size(), sumOp<label>());
-
-            if (nFaces > 0)
-            {
-                Info<< "  <<Writing " << nFaces
-                    << " faces with incorrectly orientated triangles to set "
-                    << faces.name() << endl;
-                faces.instance() = mesh.pointsInstance();
-                faces.write();
-            }
-        }
-    }
-
-    {
         faceSet faces(mesh, "skewFaces", mesh.nFaces()/100+1);
         if (mesh.checkFaceSkewness(true, &faces))
         {
@@ -464,6 +445,35 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
             {
                 Info<< "  <<Writing " << nFaces
                     << " skew faces to set " << faces.name() << endl;
+                faces.instance() = mesh.pointsInstance();
+                faces.write();
+            }
+        }
+    }
+
+    if (allGeometry)
+    {
+        faceSet faces(mesh, "lowQualityTetFaces", mesh.nFaces()/100+1);
+        if
+        (
+            polyMeshTetDecomposition::checkFaceTets
+            (
+                mesh,
+                polyMeshTetDecomposition::minTetQuality,
+                true,
+                &faces
+            )
+        )
+        {
+            noFailedChecks++;
+
+            label nFaces = returnReduce(faces.size(), sumOp<label>());
+
+            if (nFaces > 0)
+            {
+                Info<< "  <<Writing " << nFaces
+                    << " faces with low quality or negative volume "
+                    << "decomposition tets to set " << faces.name() << endl;
                 faces.instance() = mesh.pointsInstance();
                 faces.write();
             }

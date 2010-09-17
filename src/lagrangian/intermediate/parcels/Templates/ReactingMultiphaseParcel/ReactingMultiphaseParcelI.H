@@ -89,10 +89,12 @@ inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
 (
     ReactingMultiphaseCloud<ParcelType>& owner,
     const vector& position,
-    const label cellI
+    const label cellI,
+    const label tetFaceI,
+    const label tetPtI
 )
 :
-    ReactingParcel<ParcelType>(owner, position, cellI),
+    ReactingParcel<ParcelType>(owner, position, cellI, tetFaceI, tetPtI),
     YGas_(0),
     YLiquid_(0),
     YSolid_(0),
@@ -106,6 +108,8 @@ inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
     ReactingMultiphaseCloud<ParcelType>& owner,
     const vector& position,
     const label cellI,
+    const label tetFaceI,
+    const label tetPtI,
     const label typeId,
     const scalar nParticle0,
     const scalar d0,
@@ -125,6 +129,8 @@ inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
         owner,
         position,
         cellI,
+        tetFaceI,
+        tetPtI,
         typeId,
         nParticle0,
         d0,

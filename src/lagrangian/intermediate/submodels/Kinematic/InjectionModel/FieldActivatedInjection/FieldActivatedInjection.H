@@ -86,13 +86,19 @@ class FieldActivatedInjection
             //- Field of injector (x,y,z) positions
             vectorIOField positions_;
 
-            //- Field of cell labels corresponding to injector positions
+            //- List of cell labels corresponding to injector positions
             labelList injectorCells_;
+
+            //- List of tetFace labels corresponding to injector positions
+            labelList injectorTetFaces_;
+
+            //- List of tetPt labels corresponding to injector positions
+            labelList injectorTetPts_;
 
             //- Number of parcels per injector
             const label nParcelsPerInjector_;
 
-            //- Field of number of parcels injected for each injector
+            //- List of number of parcels injected for each injector
             labelList nParcelsInjected_;
 
 
@@ -101,7 +107,7 @@ class FieldActivatedInjection
             //- Initial parcel velocity
             const vector U0_;
 
-            //- Field of parcel diameters
+            //- List of parcel diameters
             scalarList diameters_;
 
             //- Parcel size PDF model
@@ -158,14 +164,16 @@ public:
 
         // Injection geometry
 
-            //- Set the injection position and owner cell
+            //- Set the injection position and owner cell, tetFace and tetPt
             virtual void setPositionAndCell
             (
                 const label parcelI,
                 const label nParcels,
                 const scalar time,
                 vector& position,
-                label& cellOwner
+                label& cellOwner,
+                label& tetFaceI,
+                label& tetPtI
             );
 
             //- Set the parcel properties

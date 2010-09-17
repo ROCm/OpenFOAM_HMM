@@ -78,15 +78,15 @@ void Foam::reitzKHRT::breakupParcel
     const liquidMixture& fuels
 ) const
 {
-    label celli = p.cell();
+    label cellI = p.cell();
     scalar T = p.T();
     scalar r = 0.5*p.d();
-    scalar pc = spray_.p()[celli];
+    scalar pc = spray_.p()[cellI];
 
     scalar sigma = fuels.sigma(pc, T, p.X());
     scalar rhoLiquid = fuels.rho(pc, T, p.X());
     scalar muLiquid = fuels.mu(pc, T, p.X());
-    scalar rhoGas = spray_.rho()[celli];
+    scalar rhoGas = spray_.rho()[cellI];
     scalar Np = p.N(rhoLiquid);
     scalar semiMass = Np*pow3(p.d());
 
@@ -198,6 +198,8 @@ void Foam::reitzKHRT::breakupParcel
                         spray_,
                         p.position(),
                         p.cell(),
+                        p.tetFace(),
+                        p.tetPt(),
                         p.n(),
                         dc,
                         p.T(),

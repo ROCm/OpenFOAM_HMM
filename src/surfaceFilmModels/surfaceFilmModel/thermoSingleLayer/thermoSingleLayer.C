@@ -163,9 +163,6 @@ void Foam::surfaceFilmModels::thermoSingleLayer::updateSubmodels()
     htcw_->correct();
 
     // Update phase change
-    massPhaseChangeForPrimary_.internalField() = 0.0;
-    energyPhaseChangeForPrimary_.internalField() = 0.0;
-
     phaseChange_->correct
     (
         time_.deltaTValue(),
@@ -173,7 +170,6 @@ void Foam::surfaceFilmModels::thermoSingleLayer::updateSubmodels()
         energyPhaseChangeForPrimary_
     );
     massPhaseChangeForPrimary_.correctBoundaryConditions();
-    totalMassPhaseChange_ += sum(massPhaseChangeForPrimary_).value();
 
     // Update kinematic sub-models
     kinematicSingleLayer::updateSubmodels();
@@ -207,6 +203,12 @@ void Foam::surfaceFilmModels::thermoSingleLayer::solveEnergy()
 
     updateSurfaceTemperatures();
 
+    volScalarField mLossCoeff
+    (
+        "mLossCoeff",
+        massForPrimary_/magSf_/time_.deltaT()
+    );
+
     solve
     (
         fvm::ddt(deltaRho_, hs_)
@@ -215,7 +217,7 @@ void Foam::surfaceFilmModels::thermoSingleLayer::solveEnergy()
 //        fvm::Sp(hsSp_/hs_, hs_)
         hsSp_
       + q(hs_)
-      - fvm::Sp(massForPrimary_/magSf_/time_.deltaT(), hs_)
+      - fvm::Sp(mLossCoeff, hs_)
     );
 
     correctThermoFields();
@@ -374,7 +376,6 @@ Foam::surfaceFilmModels::thermoSingleLayer::thermoSingleLayer
         heatTransferModel::New(*this, coeffs_.subDict("lowerSurfaceModels"))
     ),
     phaseChange_(phaseChangeModel::New(*this, coeffs_)),
-    totalMassPhaseChange_(0.0),
     energyPhaseChangeForPrimary_
     (
         IOobject
@@ -578,6 +579,61 @@ void Foam::surfaceFilmModels::thermoSingleLayer::info() const
 
 
 Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::surfaceFilmModels::thermoSingleLayer::Srho() const
+{
+    tmp<DimensionedField<scalar, volMesh> > tSrho
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                "thermoSingleLayer::Srho",
+                time_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+        )
+    );
+
+    scalarField& Srho = tSrho();
+    const scalarField& V = mesh_.V();
+    const scalar dt = time_.deltaTValue();
+
+    forAll(filmBottomPatchIDs_, i)
+    {
+        const label primaryPatchI = primaryPatchIDs_[i];
+        const directMappedWallPolyPatch& wpp =
+            refCast<const directMappedWallPolyPatch>
+            (
+                 mesh_.boundaryMesh()[primaryPatchI]
+            );
+
+        const mapDistribute& distMap = wpp.map();
+
+        const label filmPatchI = filmBottomPatchIDs_[i];
+
+        scalarField patchMass =
+            massPhaseChangeForPrimary_.boundaryField()[filmPatchI];
+
+        distMap.distribute(patchMass);
+
+        const unallocLabelList& cells = wpp.faceCells();
+
+        forAll(patchMass, j)
+        {
+            Srho[cells[j]] = patchMass[j]/(V[cells[j]]*dt);
+        }
+    }
+
+    return tSrho;
+}
+
+
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
 Foam::surfaceFilmModels::thermoSingleLayer::Srho(const label i) const
 {
     const label vapId =
@@ -658,6 +714,9 @@ Foam::surfaceFilmModels::thermoSingleLayer::Sh() const
             dimensionedScalar("zero", dimEnergy/dimVolume/dimTime, 0.0)
         )
     );
+
+    // All of enthalpy change due to phase change added to film energy equation
+
 /*
     scalarField& Sh = tSh();
     const scalarField& V = mesh_.V();

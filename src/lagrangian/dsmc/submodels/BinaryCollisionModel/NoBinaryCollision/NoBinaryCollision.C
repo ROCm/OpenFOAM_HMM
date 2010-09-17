@@ -60,10 +60,8 @@ bool Foam::NoBinaryCollision<CloudType>::active() const
 template <class CloudType>
 Foam::scalar Foam::NoBinaryCollision<CloudType>::sigmaTcR
 (
-    label typeIdP,
-    label typeIdQ,
-    const vector& UP,
-    const vector& UQ
+    const typename CloudType::parcelType& pP,
+    const typename CloudType::parcelType& pQ
 ) const
 {
     FatalErrorIn
@@ -89,12 +87,8 @@ Foam::scalar Foam::NoBinaryCollision<CloudType>::sigmaTcR
 template <class CloudType>
 void Foam::NoBinaryCollision<CloudType>::collide
 (
-    label typeIdP,
-    label typeIdQ,
-    vector& UP,
-    vector& UQ,
-    scalar& EiP,
-    scalar& EiQ
+    typename CloudType::parcelType& pP,
+    typename CloudType::parcelType& pQ
 )
 {}
 

@@ -39,13 +39,13 @@ template<class Type>
 inline Type Foam::interpolationPoint<Type>::interpolate
 (
     const vector& position,
-    const label celli,
-    const label facei
+    const label cellI,
+    const label faceI
 ) const
 {
     return interpolate
     (
-        pointMVCWeight(this->pMesh_, position, celli, facei)
+        pointMVCWeight(this->pMesh_, position, cellI, faceI)
     );
 }
 

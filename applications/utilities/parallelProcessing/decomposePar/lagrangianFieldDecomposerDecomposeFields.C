@@ -51,7 +51,7 @@ void Foam::lagrangianFieldDecomposer::readFields
         )
     );
 
-    label lagrangianFieldi=0;
+    label lagrangianFieldi = 0;
     forAllIter(IOobjectList, lagrangianTypeObjects, iter)
     {
         lagrangianFields[cloudI].set
@@ -91,7 +91,7 @@ void Foam::lagrangianFieldDecomposer::readFieldFields
         )
     );
 
-    label lagrangianFieldi=0;
+    label lagrangianFieldi = 0;
 
     forAllIter(IOobjectList, lagrangianTypeObjectsA, iter)
     {

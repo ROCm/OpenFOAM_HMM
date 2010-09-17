@@ -95,13 +95,17 @@ bool Foam::StandardWallInteraction<CloudType>::active() const
 template <class CloudType>
 bool Foam::StandardWallInteraction<CloudType>::correct
 (
+    typename CloudType::parcelType& p,
     const polyPatch& pp,
-    const label faceId,
     bool& keepParticle,
-    bool& active,
-    vector& U
+    const scalar trackFraction,
+    const tetIndices& tetIs
 ) const
 {
+    vector& U = p.U();
+
+    bool& active = p.active();
+
     if (isA<wallPolyPatch>(pp))
     {
         switch (interactionType_)
@@ -125,8 +129,13 @@ bool Foam::StandardWallInteraction<CloudType>::correct
                 keepParticle = true;
                 active = true;
 
-                vector nw = pp.faceAreas()[pp.whichFace(faceId)];
-                nw /= mag(nw);
+                vector nw;
+                vector Up;
+
+                this->patchData(p, pp, trackFraction, tetIs, nw, Up);
+
+                // Calculate motion relative to patch velocity
+                U -= Up;
 
                 scalar Un = U & nw;
                 vector Ut = U - Un*nw;
@@ -137,6 +146,9 @@ bool Foam::StandardWallInteraction<CloudType>::correct
                 }
 
                 U -= mu_*Ut;
+
+                // Return velocity to global space
+                U += Up;
 
                 break;
             }

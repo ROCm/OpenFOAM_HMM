@@ -97,6 +97,9 @@ void Foam::surfaceFilmModels::standardPhaseChange::correct
     scalarField& dEnergy
 )
 {
+    dMass = 0.0;
+    dEnergy = 0.0;
+
     const thermoSingleLayer& film = refCast<const thermoSingleLayer>(owner_);
 
     // set local thermo properties

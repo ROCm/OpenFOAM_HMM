@@ -84,6 +84,7 @@ public:
         (
             const polyMesh& mesh,
             const polyMesh& procMesh,
+            const labelList& faceProcAddressing,
             const labelList& cellProcAddressing,
             const word& cloudName,
             const Cloud<indexedParticle>& lagrangianPositions,

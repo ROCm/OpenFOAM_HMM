@@ -30,7 +30,6 @@ Description
 #include "triPointRef.H"
 #include "scalarField.H"
 
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // (Probably very inefficient) minimum containment sphere calculation.

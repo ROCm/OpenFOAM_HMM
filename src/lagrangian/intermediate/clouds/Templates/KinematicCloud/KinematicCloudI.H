@@ -28,6 +28,13 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
+inline bool Foam::KinematicCloud<ParcelType>::hasWallImpactDistance() const
+{
+    return !collision().controlsWallInteraction();
+}
+
+
+template<class ParcelType>
 inline Foam::label Foam::KinematicCloud<ParcelType>::parcelTypeId() const
 {
     return parcelTypeId_;

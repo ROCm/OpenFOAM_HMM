@@ -81,10 +81,12 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
 (
     KinematicCloud<ParcelType>& owner,
     const vector& position,
-    const label cellI
+    const label cellI,
+    const label tetFaceI,
+    const label tetPtI
 )
 :
-    Particle<ParcelType>(owner, position, cellI),
+    Particle<ParcelType>(owner, position, cellI, tetFaceI, tetPtI),
     active_(true),
     typeId_(owner.parcelTypeId()),
     nParticle_(0),
@@ -109,6 +111,8 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     KinematicCloud<ParcelType>& owner,
     const vector& position,
     const label cellI,
+    const label tetFaceI,
+    const label tetPtI,
     const label typeId,
     const scalar nParticle0,
     const scalar d0,
@@ -119,7 +123,7 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     const constantProperties& constProps
 )
 :
-    Particle<ParcelType>(owner, position, cellI),
+    Particle<ParcelType>(owner, position, cellI, tetFaceI, tetPtI),
     active_(true),
     typeId_(typeId),
     nParticle_(nParticle0),
@@ -439,23 +443,7 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::wallImpactDistance
     const vector&
 ) const
 {
-    const KinematicCloud<ParcelType>& c =
-        dynamic_cast<const KinematicCloud<ParcelType>&>(this->cloud());
-
-    if (c.collision().controlsWallInteraction())
-    {
-        // Do not use a wall impact distance if the collision model
-        // controls wall interactions to allow proper multiple face
-        // collisions.  In a twisted mesh the particle can be within
-        // range of a wall but not in the cell attached to a wall
-        // face, hence miss the interaction.
-
-        return 0.0;
-    }
-    else
-    {
-        return 0.5*d_;
-    }
+    return 0.5*d_;
 }
 
 

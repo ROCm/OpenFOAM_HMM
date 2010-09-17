@@ -84,8 +84,14 @@ class ReactingLookupTableInjection
         //- List of injectors
         reactingParcelInjectionDataIOList injectors_;
 
-        //- List of injector cells per injector
-        List<label> injectorCells_;
+        //- List of cell labels corresoponding to injector positions
+        labelList injectorCells_;
+
+        //- List of tetFace labels corresoponding to injector positions
+        labelList injectorTetFaces_;
+
+        //- List of tetPt labels corresoponding to injector positions
+        labelList injectorTetPts_;
 
 
 protected:
@@ -138,14 +144,16 @@ public:
 
         // Injection geometry
 
-            //- Set the injection position and owner cell
+            //- Set the injection position and owner cell, tetFace and tetPt
             virtual void setPositionAndCell
             (
                 const label parcelI,
                 const label nParcels,
                 const scalar time,
                 vector& position,
-                label& cellOwner
+                label& cellOwner,
+                label& tetFaceI,
+                label& tetPtI
             );
 
             //- Set the parcel properties

@@ -99,11 +99,11 @@ public:
         //  Returns true if particle remains in same cell
         virtual bool correct
         (
+            typename CloudType::parcelType& p,
             const polyPatch& pp,
-            const label faceId,
             bool& keepParticle,
-            bool& active,
-            vector& U
+            const scalar trackFraction,
+            const tetIndices& tetIs
         ) const;
 };
 

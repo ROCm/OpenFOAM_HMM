@@ -32,14 +32,16 @@ Foam::trackedParticle::trackedParticle
 (
     const Cloud<trackedParticle>& c,
     const vector& position,
-    const label celli,
+    const label cellI,
+    const label tetFaceI,
+    const label tetPtI,
     const point& end,
     const label level,
     const label i,
     const label j
 )
 :
-    ExactParticle<trackedParticle>(c, position, celli),
+    Particle<trackedParticle>(c, position, cellI, tetFaceI, tetPtI),
     end_(end),
     level_(level),
     i_(i),
@@ -55,7 +57,7 @@ Foam::trackedParticle::trackedParticle
     bool readFields
 )
 :
-    ExactParticle<trackedParticle>(c, is, readFields)
+    Particle<trackedParticle>(c, is, readFields)
 {
     if (readFields)
     {
@@ -118,7 +120,9 @@ bool Foam::trackedParticle::hitPatch
 (
     const polyPatch&,
     trackedParticle::trackData& td,
-    const label patchI
+    const label patchI,
+    const scalar trackFraction,
+    const tetIndices& tetIs
 )
 {
     return false;
@@ -129,7 +133,9 @@ bool Foam::trackedParticle::hitPatch
 (
     const polyPatch&,
     int&,
-    const label
+    const label,
+    const scalar trackFraction,
+    const tetIndices& tetIs
 )
 {
     return false;
@@ -215,7 +221,8 @@ void Foam::trackedParticle::hitProcessorPatch
 void Foam::trackedParticle::hitWallPatch
 (
     const wallPolyPatch& wpp,
-    trackedParticle::trackData& td
+    trackedParticle::trackData& td,
+    const tetIndices&
 )
 {
     // Remove particle
@@ -226,7 +233,8 @@ void Foam::trackedParticle::hitWallPatch
 void Foam::trackedParticle::hitWallPatch
 (
     const wallPolyPatch& wpp,
-    int&
+    int&,
+    const tetIndices&
 )
 {}
 
@@ -256,7 +264,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const trackedParticle& p)
 {
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const ExactParticle<trackedParticle>&>(p)
+        os  << static_cast<const Particle<trackedParticle>&>(p)
             << token::SPACE << p.end_
             << token::SPACE << p.level_
             << token::SPACE << p.i_
@@ -264,7 +272,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const trackedParticle& p)
     }
     else
     {
-        os  << static_cast<const ExactParticle<trackedParticle>&>(p);
+        os  << static_cast<const Particle<trackedParticle>&>(p);
         os.write
         (
             reinterpret_cast<const char*>(&p.end_),
