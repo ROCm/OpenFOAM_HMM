@@ -27,6 +27,7 @@ License
 #include "entry.H"
 #include "demandDrivenData.H"
 #include "stringListOps.H"
+#include "Pstream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -369,6 +370,84 @@ bool Foam::ZoneMesh<ZoneType, MeshType>::checkDefinition
         inError |= zones[zoneI].checkDefinition(report);
     }
     return inError;
+}
+
+
+template<class ZoneType, class MeshType>
+bool Foam::ZoneMesh<ZoneType, MeshType>::checkParallelSync
+(
+    const bool report
+) const
+{
+    if (!Pstream::parRun())
+    {
+        return false;
+    }
+
+
+    const PtrList<ZoneType>& zones = *this;
+
+    bool hasError = false;
+
+    // Collect all names
+    List<wordList> allNames(Pstream::nProcs());
+    allNames[Pstream::myProcNo()] = this->names();
+    Pstream::gatherList(allNames);
+    Pstream::scatterList(allNames);
+
+    List<wordList> allTypes(Pstream::nProcs());
+    allTypes[Pstream::myProcNo()] = this->types();
+    Pstream::gatherList(allTypes);
+    Pstream::scatterList(allTypes);
+
+    // Have every processor check but only master print error.
+
+    for (label procI = 1; procI < allNames.size(); procI++)
+    {
+        if
+        (
+            (allNames[procI] != allNames[0])
+         || (allTypes[procI] != allTypes[0])
+        )
+        {
+            hasError = true;
+
+            if (debug || (report && Pstream::master()))
+            {
+                Info<< " ***Inconsistent zones across processors, "
+                       "processor 0 has zone names:" << allNames[0]
+                    << " zone types:" << allTypes[0]
+                    << " processor " << procI << " has zone names:"
+                    << allNames[procI]
+                    << " zone types:" << allTypes[procI]
+                    << endl;
+            }
+        }
+    }
+
+    // Check contents
+    if (!hasError)
+    {
+        forAll(zones, zoneI)
+        {
+            if (zones[zoneI].checkParallelSync(false))
+            {
+                hasError = true;
+
+                if (debug || (report && Pstream::master()))
+                {
+                    Info<< " ***Zone " << zones[zoneI].name()
+                        << " of type " << zones[zoneI].type()
+                        << " is not correctly synchronised"
+                        << " across coupled boundaries."
+                        << " (coupled faces are either not both "
+                        << " present in set or have same flipmap)" << endl;
+                }
+            }
+        }
+    }
+
+    return hasError;
 }
 
 
