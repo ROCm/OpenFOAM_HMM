@@ -151,6 +151,26 @@ Foam::PackedBoolList::operator=(const PackedList<1>& lst)
 }
 
 
+inline Foam::PackedBoolList&
+Foam::PackedBoolList::operator=(const UList<label>& indices)
+{
+    clear();
+    set(indices);
+
+    return *this;
+}
+
+
+inline Foam::PackedBoolList&
+Foam::PackedBoolList::operator=(const UIndirectList<label>& indices)
+{
+    clear();
+    set(indices);
+
+    return *this;
+}
+
+
 inline Foam::PackedBoolList
 Foam::PackedBoolList::operator~() const
 {
@@ -158,6 +178,38 @@ Foam::PackedBoolList::operator~() const
     result.flip();
 
     return result;
+}
+
+
+inline Foam::PackedBoolList&
+Foam::PackedBoolList::operator&=(const PackedList<1>& lst)
+{
+    subset(lst);
+    return *this;
+}
+
+
+inline Foam::PackedBoolList&
+Foam::PackedBoolList::operator&=(const UList<label>& indices)
+{
+    subset(indices);
+    return *this;
+}
+
+
+inline Foam::PackedBoolList&
+Foam::PackedBoolList::operator&=(const UIndirectList<label>& indices)
+{
+    subset(indices);
+    return *this;
+}
+
+
+inline Foam::PackedBoolList&
+Foam::PackedBoolList::operator|=(const PackedList<1>& lst)
+{
+    set(lst);
+    return *this;
 }
 
 
@@ -180,21 +232,29 @@ Foam::PackedBoolList::operator|=(const UIndirectList<label>& indices)
 inline Foam::PackedBoolList&
 Foam::PackedBoolList::operator+=(const PackedList<1>& lst)
 {
-    return this->operator|=(lst);
+    return operator|=(lst);
 }
 
 
 inline Foam::PackedBoolList&
 Foam::PackedBoolList::operator+=(const UList<label>& indices)
 {
-    return this->operator|=(indices);
+    return operator|=(indices);
 }
 
 
 inline Foam::PackedBoolList&
 Foam::PackedBoolList::operator+=(const UIndirectList<label>& indices)
 {
-    return this->operator|=(indices);
+    return operator|=(indices);
+}
+
+
+inline Foam::PackedBoolList&
+Foam::PackedBoolList::operator-=(const PackedList<1>& lst)
+{
+    unset(lst);
+    return *this;
 }
 
 

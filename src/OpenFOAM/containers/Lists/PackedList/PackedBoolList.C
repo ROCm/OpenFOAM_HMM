@@ -89,42 +89,6 @@ bool Foam::PackedBoolList::bitorPrepare
 }
 
 
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::PackedBoolList::PackedBoolList(Istream& is)
-:
-    PackedList<1>()
-{
-    is  >> *this;
-}
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-Foam::Xfer<Foam::labelList> Foam::PackedBoolList::used() const
-{
-    labelList lst(this->count());
-
-    if (lst.size())
-    {
-        label nElem = 0;
-
-        forAll(*this, elemI)
-        {
-            if (get(elemI))
-            {
-                lst[nElem++] = elemI;
-            }
-        }
-
-        lst.setSize(nElem);
-    }
-
-    return lst.xfer();
-}
-
-
 template<class LabelListType>
 Foam::label Foam::PackedBoolList::setIndices(const LabelListType& indices)
 {
@@ -160,6 +124,70 @@ Foam::label Foam::PackedBoolList::unsetIndices(const LabelListType& indices)
 }
 
 
+template<class LabelListType>
+Foam::label Foam::PackedBoolList::subsetIndices(const LabelListType& indices)
+{
+    // handle trivial case
+    if (empty() || indices.empty())
+    {
+        clear();
+        return 0;
+    }
+
+    // normal case
+    PackedBoolList anded;
+    anded.reserve(size());
+
+    label cnt = 0;
+    forAll(indices, elemI)
+    {
+        const label& index = indices[elemI];
+        if (operator[](index))
+        {
+            anded.set(index);
+            ++cnt;
+        }
+    }
+
+    transfer(anded);
+    return cnt;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::PackedBoolList::PackedBoolList(Istream& is)
+:
+    PackedList<1>()
+{
+    is  >> *this;
+}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::PackedBoolList::set(const PackedList<1>& lst)
+{
+    // extend addressable area if needed, return maximum size possible
+    label len = 0;
+    const bool needTrim = bitorPrepare(lst, len);
+
+    // operate directly with the underlying storage
+    StorageList& lhs = this->storage();
+    const StorageList& rhs = lst.storage();
+
+    for (label i=0; i < len; ++i)
+    {
+        lhs[i] |= rhs[i];
+    }
+
+    if (needTrim)
+    {
+        trim();
+    }
+}
+
+
 Foam::label Foam::PackedBoolList::set(const UList<label>& indices)
 {
     return setIndices(indices);
@@ -169,6 +197,22 @@ Foam::label Foam::PackedBoolList::set(const UList<label>& indices)
 Foam::label Foam::PackedBoolList::set(const UIndirectList<label>& indices)
 {
     return setIndices(indices);
+}
+
+
+void Foam::PackedBoolList::unset(const PackedList<1>& lst)
+{
+    // operate directly with the underlying storage
+    StorageList& lhs = this->storage();
+    const StorageList& rhs = lst.storage();
+
+    // overlapping storage size
+    const label len = min(this->packedLength(), lst.packedLength());
+
+    for (label i=0; i < len; ++i)
+    {
+        lhs[i] &= ~rhs[i];
+    }
 }
 
 
@@ -184,44 +228,7 @@ Foam::label Foam::PackedBoolList::unset(const UIndirectList<label>& indices)
 }
 
 
-// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
-
-Foam::PackedBoolList&
-Foam::PackedBoolList::operator=(const UList<bool>& lst)
-{
-    this->setSize(lst.size());
-
-    forAll(*this, elemI)
-    {
-        set(elemI, lst[elemI]);
-    }
-
-    return *this;
-}
-
-
-Foam::PackedBoolList&
-Foam::PackedBoolList::operator=(const UList<label>& indices)
-{
-    clear();
-    set(indices);
-
-    return *this;
-}
-
-
-Foam::PackedBoolList&
-Foam::PackedBoolList::operator=(const UIndirectList<label>& indices)
-{
-    clear();
-    set(indices);
-
-    return *this;
-}
-
-
-Foam::PackedBoolList&
-Foam::PackedBoolList::operator&=(const PackedList<1>& lst)
+void Foam::PackedBoolList::subset(const PackedList<1>& lst)
 {
     // shrink addressable area if needed
     if (this->size() > lst.size())
@@ -238,6 +245,56 @@ Foam::PackedBoolList::operator&=(const PackedList<1>& lst)
     for (label i=0; i < len; ++i)
     {
         lhs[i] &= rhs[i];
+    }
+}
+
+
+Foam::label Foam::PackedBoolList::subset(const UList<label>& indices)
+{
+    return subsetIndices(indices);
+}
+
+
+Foam::label Foam::PackedBoolList::subset(const UIndirectList<label>& indices)
+{
+    return subsetIndices(indices);
+}
+
+
+Foam::Xfer<Foam::labelList> Foam::PackedBoolList::used() const
+{
+    labelList lst(this->count());
+
+    if (lst.size())
+    {
+        label nElem = 0;
+
+        forAll(*this, elemI)
+        {
+            if (get(elemI))
+            {
+                lst[nElem++] = elemI;
+            }
+        }
+
+        lst.setSize(nElem);
+    }
+
+    return lst.xfer();
+}
+
+
+// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
+
+Foam::PackedBoolList&
+Foam::PackedBoolList::operator=(const UList<bool>& lst)
+{
+    this->setSize(lst.size());
+
+    // overwrite with new true/false values
+    forAll(*this, elemI)
+    {
+        set(elemI, lst[elemI]);
     }
 
     return *this;
@@ -263,50 +320,6 @@ Foam::PackedBoolList::operator^=(const PackedList<1>& lst)
     if (needTrim)
     {
         trim();
-    }
-
-    return *this;
-}
-
-
-Foam::PackedBoolList&
-Foam::PackedBoolList::operator|=(const PackedList<1>& lst)
-{
-    // extend addressable area if needed, return maximum size possible
-    label len = 0;
-    const bool needTrim = bitorPrepare(lst, len);
-
-    // operate directly with the underlying storage
-    StorageList& lhs = this->storage();
-    const StorageList& rhs = lst.storage();
-
-    for (label i=0; i < len; ++i)
-    {
-        lhs[i] |= rhs[i];
-    }
-
-    if (needTrim)
-    {
-        trim();
-    }
-
-    return *this;
-}
-
-
-Foam::PackedBoolList&
-Foam::PackedBoolList::operator-=(const PackedList<1>& lst)
-{
-    // operate directly with the underlying storage
-    StorageList& lhs = this->storage();
-    const StorageList& rhs = lst.storage();
-
-    // overlapping storage size
-    const label len = min(this->packedLength(), lst.packedLength());
-
-    for (label i=0; i < len; ++i)
-    {
-        lhs[i] &= ~rhs[i];
     }
 
     return *this;

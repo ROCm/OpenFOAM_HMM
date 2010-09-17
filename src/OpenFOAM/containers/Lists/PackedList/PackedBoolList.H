@@ -75,6 +75,10 @@ class PackedBoolList
         template<class LabelListType>
         label unsetIndices(const LabelListType& indices);
 
+        //- Subset with the listed indices. Return number of elements subsetted.
+        template<class LabelListType>
+        label subsetIndices(const LabelListType& indices);
+
 public:
 
     // Constructors
@@ -122,11 +126,11 @@ public:
 
         // Access
 
-            //- Return indices of the used (true) elements as a list of labels
-            Xfer<labelList> used() const;
-
             using PackedList<1>::set;
             using PackedList<1>::unset;
+
+            //- Set specified bits.
+            void set(const PackedList<1>&);
 
             //- Set the listed indices. Return number of elements changed.
             //  Does auto-vivify for non-existent entries.
@@ -136,6 +140,9 @@ public:
             //  Does auto-vivify for non-existent entries.
             label set(const UIndirectList<label>& indices);
 
+            //- Unset specified bits.
+            void unset(const PackedList<1>&);
+
             //- Unset the listed indices. Return number of elements changed.
             //  Never auto-vivify entries.
             label unset(const UList<label>& indices);
@@ -143,6 +150,21 @@ public:
             //- Unset the listed indices. Return number of elements changed.
             //  Never auto-vivify entries.
             label unset(const UIndirectList<label>& indices);
+
+            //- Subset with the specified list.
+            void subset(const PackedList<1>&);
+
+            //- Subset with the listed indices.
+            //  Return number of elements subsetted.
+            label subset(const UList<label>& indices);
+
+            //- Subset with the listed indices.
+            //  Return number of elements subsetted.
+            label subset(const UIndirectList<label>& indices);
+
+
+            //- Return indices of the used (true) elements as a list of labels
+            Xfer<labelList> used() const;
 
 
         // Edit
@@ -175,24 +197,32 @@ public:
 
             //- Assignment operator,
             //  using the labels as indices to indicate which bits are set
-            PackedBoolList& operator=(const UList<label>& indices);
+            inline PackedBoolList& operator=(const UList<label>& indices);
 
             //- Assignment operator,
             //  using the labels as indices to indicate which bits are set
-            PackedBoolList& operator=(const UIndirectList<label>& indices);
+            inline PackedBoolList& operator=(const UIndirectList<label>&);
 
             //- Complement operator
             inline PackedBoolList operator~() const;
 
             //- And operator (lists may be dissimilar sizes)
-            PackedBoolList& operator&=(const PackedList<1>&);
+            inline PackedBoolList& operator&=(const PackedList<1>&);
+
+            //- And operator (lists may be dissimilar sizes)
+            //  using the labels as indices to indicate which bits are set
+            inline PackedBoolList& operator&=(const UList<label>& indices);
+
+            //- And operator (lists may be dissimilar sizes)
+            //  using the labels as indices to indicate which bits are set
+            inline PackedBoolList& operator&=(const UIndirectList<label>&);
 
             //- Xor operator (lists may be dissimilar sizes)
             //  Retains unique entries
             PackedBoolList& operator^=(const PackedList<1>&);
 
             //- Or operator (lists may be dissimilar sizes)
-            PackedBoolList& operator|=(const PackedList<1>&);
+            inline PackedBoolList& operator|=(const PackedList<1>&);
 
             //- Or operator (lists may be dissimilar sizes),
             //  using the labels as indices to indicate which bits are set
@@ -213,7 +243,7 @@ public:
             inline PackedBoolList& operator+=(const UIndirectList<label>&);
 
             //- Remove entries from this list - unset the specified bits
-            PackedBoolList& operator-=(const PackedList<1>&);
+            inline PackedBoolList& operator-=(const PackedList<1>&);
 
             //- Remove entries from this list - unset the specified bits
             inline PackedBoolList& operator-=(const UList<label>& indices);
