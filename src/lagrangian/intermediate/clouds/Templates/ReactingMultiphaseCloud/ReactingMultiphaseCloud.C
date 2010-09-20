@@ -93,7 +93,18 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::evolveCloud()
         this->g().value()
     );
 
+    label preInjectionSize = this->size();
+
     this->surfaceFilm().inject(td);
+
+    // Update the cellOccupancy if the size of the cloud has changed
+    // during the injection.
+    if (preInjectionSize != this->size())
+    {
+        this->updateCellOccupancy();
+
+        preInjectionSize = this->size();
+    }
 
     this->injection().inject(td);
 
@@ -102,7 +113,19 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::evolveCloud()
         resetSourceTerms();
     }
 
-    Cloud<ParcelType>::move(td);
+    // Assume that motion will update the cellOccupancy as necessary
+    // before it is required.
+    motion(td);
+}
+
+
+template<class ParcelType>
+void  Foam::ReactingMultiphaseCloud<ParcelType>::motion
+(
+    typename ParcelType::trackData& td
+)
+{
+    ReactingCloud<ParcelType>::motion(td);
 }
 
 
