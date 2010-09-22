@@ -297,9 +297,10 @@ public:
                 //- Return refernce to the random object
                 inline Random& rndGen();
 
-                //- Return the cell occupancy information for each parcel,
-                //  non-const access, the caller is responsible for updating
-                //  it if particles are removed or created.
+                //- Return the cell occupancy information for each
+                //  parcel, non-const access, the caller is
+                //  responsible for updating it for its own purposes
+                //  if particles are removed or created.
                 inline List<DynamicList<ParcelType*> >& cellOccupancy();
 
 

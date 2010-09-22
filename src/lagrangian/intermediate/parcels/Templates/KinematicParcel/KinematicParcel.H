@@ -250,6 +250,9 @@ protected:
             //- Diameter [m]
             scalar d_;
 
+            //- Target diameter [m]
+            scalar dTarget_;
+
             //- Velocity of Parcel [m/s]
             vector U_;
 
@@ -347,6 +350,7 @@ public:
             const label typeId,
             const scalar nParticle0,
             const scalar d0,
+            const scalar dTarget0,
             const vector& U0,
             const vector& f0,
             const vector& angularMomentum0,
@@ -388,6 +392,9 @@ public:
             //- Return const access to diameter
             inline scalar d() const;
 
+            //- Return const access to target diameter
+            inline scalar dTarget() const;
+
             //- Return const access to velocity
             inline const vector& U() const;
 
@@ -426,6 +433,9 @@ public:
 
             //- Return access to diameter
             inline scalar& d();
+
+            //- Return access to target diameter
+            inline scalar& dTarget();
 
             //- Return access to velocity
             inline vector& U();
@@ -478,19 +488,19 @@ public:
             inline scalar volume() const;
 
             //- Particle volume for a given diameter
-            inline scalar volume(const scalar d) const;
+            inline static scalar volume(const scalar d);
 
             //- Particle projected area
             inline scalar areaP() const;
 
             //- Projected area for given diameter
-            inline scalar areaP(const scalar d) const;
+            inline static scalar areaP(const scalar d);
 
             //- Particle surface area
             inline scalar areaS() const;
 
             //- Surface area for given diameter
-            inline scalar areaS(const scalar d) const;
+            inline static scalar areaS(const scalar d);
 
             //- Reynolds number
             inline scalar Re
