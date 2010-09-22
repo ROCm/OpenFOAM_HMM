@@ -68,15 +68,17 @@ public:
             Particle<passiveParticle>(c, position, cellI, tetFaceI, tetPtI)
         {}
 
-        //- Construct from components, with searching for tetFace and tetPt
+        //- Construct from components, with searching for tetFace and
+        //  tetPt unless disabled by doCellFacePt = false.
         passiveParticle
         (
             const Cloud<passiveParticle>& c,
             const vector& position,
-            const label cellI
+            const label cellI,
+            bool doCellFacePt = true
         )
         :
-            Particle<passiveParticle>(c, position, cellI)
+            Particle<passiveParticle>(c, position, cellI, doCellFacePt)
         {}
 
         //- Construct from Istream
