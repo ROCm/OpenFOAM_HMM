@@ -201,6 +201,7 @@ void Foam::conformalVoronoiMesh::writeMesh
     }
 }
 
+
 void Foam::conformalVoronoiMesh::writeMesh
 (
     const word& meshName,
@@ -228,7 +229,7 @@ void Foam::conformalVoronoiMesh::writeMesh
         IOobject::AUTO_WRITE
     );
 
-    polyMesh pMesh
+    fvMesh mesh
     (
         io,
         xferMove(points),
@@ -247,18 +248,20 @@ void Foam::conformalVoronoiMesh::writeMesh
             patchSizes[p],
             patchStarts[p],
             p,
-            pMesh.boundaryMesh()
+            mesh.boundaryMesh()
         );
     }
 
-    pMesh.addPatches(patches);
+    mesh.addFvPatches(patches);
 
-    if (!pMesh.write())
+    if (!mesh.write())
     {
         FatalErrorIn("Foam::conformalVoronoiMesh::writeMesh")
             << "Failed writing polyMesh."
             << exit(FatalError);
     }
+
+    writeCellSizes(mesh);
 }
 
 
@@ -294,22 +297,12 @@ void Foam::conformalVoronoiMesh::writeObjMesh
 }
 
 
-void Foam::conformalVoronoiMesh::writeTargetCellSize() const
+void Foam::conformalVoronoiMesh::writeCellSizes
+(
+    const fvMesh& mesh
+) const
 {
     {
-        Info<< nl << "Create fvMesh" << endl;
-
-        fvMesh fMesh
-        (
-            IOobject
-            (
-                Foam::polyMesh::defaultRegion,
-                runTime_.constant(),
-                runTime_,
-                IOobject::MUST_READ
-            )
-        );
-
         timeCheck();
 
         Info<< nl << "Create targetCellSize volScalarField" << endl;
@@ -319,26 +312,95 @@ void Foam::conformalVoronoiMesh::writeTargetCellSize() const
             IOobject
             (
                 "targetCellSize",
-                runTime_.timeName(),
+                mesh.polyMesh::instance(),
                 runTime_,
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE
             ),
-            fMesh,
+            mesh,
             dimensionedScalar("cellSize", dimLength, 0),
             zeroGradientPointPatchField<scalar>::typeName
         );
 
         scalarField& cellSize = targetCellSize.internalField();
 
-        const vectorField& C = fMesh.cellCentres();
+        const vectorField& C = mesh.cellCentres();
 
         forAll(cellSize, i)
         {
             cellSize[i] = cellSizeControl().cellSize(C[i]);
         }
 
+        Info<< nl << "Create targetCellVolume volScalarField" << endl;
+
+        volScalarField targetCellVolume
+        (
+            IOobject
+            (
+                "targetCellVolume",
+                mesh.polyMesh::instance(),
+                runTime_,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("cellVolume", dimLength, 0),
+            zeroGradientPointPatchField<scalar>::typeName
+        );
+
+        targetCellVolume.internalField() = pow3(cellSize);
+
+        Info<< nl << "Create actualCellVolume volScalarField" << endl;
+
+        volScalarField actualCellVolume
+        (
+            IOobject
+            (
+                "actualCellVolume",
+                mesh.polyMesh::instance(),
+                runTime_,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("cellVolume", dimVolume, 0),
+            zeroGradientPointPatchField<scalar>::typeName
+        );
+
+        actualCellVolume.internalField() = mesh.cellVolumes();
+
+        Info<< nl << "Create equivalentCellSize volScalarField" << endl;
+
+        volScalarField equivalentCellSize
+        (
+            IOobject
+            (
+                "equivalentCellSize",
+                mesh.polyMesh::instance(),
+                runTime_,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("cellSize", dimLength, 0),
+            zeroGradientPointPatchField<scalar>::typeName
+        );
+
+        equivalentCellSize.internalField() = pow
+        (
+            actualCellVolume.internalField(),
+            1.0/3.0
+        );
+
+        targetCellSize.correctBoundaryConditions();
+        targetCellVolume.correctBoundaryConditions();
+        actualCellVolume.correctBoundaryConditions();
+        equivalentCellSize.correctBoundaryConditions();
+
         targetCellSize.write();
+        targetCellVolume.write();
+        actualCellVolume.write();
+        equivalentCellSize.write();
     }
 
     // {

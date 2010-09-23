@@ -938,7 +938,8 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
 
     // for
     // (
-    //     Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+    //     Triangulation::Finite_vertices_iterator vit =
+    //         finite_vertices_begin();
     //     vit != finite_vertices_end();
     //     vit++
     // )
@@ -1488,8 +1489,6 @@ void Foam::conformalVoronoiMesh::move()
     if (runTime_.outputTime())
     {
         writeMesh(runTime_.timeName(), false);
-
-        writeTargetCellSize();
     }
 
     // Remove the entire tessellation

@@ -746,9 +746,10 @@ public:
                 const fileName& fName
             ) const;
 
-            //- Read mesh from file as an fvMesh then calculate and write a
-            //  field of the target cell size
-            void writeTargetCellSize() const;
+            //- Calculate and write a field of the target cell size,
+            //  target cell volume, actual cell volume and equivalent
+            //  actual cell size (cbrt(actual cell volume)).
+            void writeCellSizes(const fvMesh& mesh) const;
 };
 
 
