@@ -43,6 +43,52 @@ void Foam::KinematicCloud<ParcelType>::preEvolve()
 {
     this->dispersion().cacheFields(true);
     forces_.cacheFields(true, interpolationSchemes_);
+    updateCellOccupancy();
+}
+
+
+template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::buildCellOccupancy()
+{
+    if (cellOccupancyPtr_.empty())
+    {
+        cellOccupancyPtr_.reset
+        (
+            new List<DynamicList<ParcelType*> >(mesh_.nCells())
+        );
+    }
+    else if (cellOccupancyPtr_().size() != mesh_.nCells())
+    {
+        // If the size of the mesh has changed, reset the
+        // cellOccupancy size
+
+        cellOccupancyPtr_().setSize(mesh_.nCells());
+    }
+
+    List<DynamicList<ParcelType*> >& cellOccupancy = cellOccupancyPtr_();
+
+    forAll(cellOccupancy, cO)
+    {
+        cellOccupancy[cO].clear();
+    }
+
+    forAllIter(typename KinematicCloud<ParcelType>, *this, iter)
+    {
+        cellOccupancy[iter().cell()].append(&iter());
+    }
+}
+
+
+template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::updateCellOccupancy()
+{
+    // Only build the cellOccupancy if the pointer is set, i.e. it has
+    // been requested before.
+
+    if (cellOccupancyPtr_.valid())
+    {
+        buildCellOccupancy();
+    }
 }
 
 
@@ -80,7 +126,18 @@ void Foam::KinematicCloud<ParcelType>::evolveCloud()
         g_.value()
     );
 
+    label preInjectionSize = this->size();
+
     this->surfaceFilm().inject(td);
+
+    // Update the cellOccupancy if the size of the cloud has changed
+    // during the injection.
+    if (preInjectionSize != this->size())
+    {
+        updateCellOccupancy();
+
+        preInjectionSize = this->size();
+    }
 
     this->injection().inject(td);
 
@@ -89,6 +146,18 @@ void Foam::KinematicCloud<ParcelType>::evolveCloud()
         resetSourceTerms();
     }
 
+    // Assume that motion will update the cellOccupancy as necessary
+    // before it is required.
+    motion(td);
+}
+
+
+template<class ParcelType>
+void  Foam::KinematicCloud<ParcelType>::motion
+(
+    typename ParcelType::trackData& td
+)
+{
     // Sympletic leapfrog integration of particle forces:
     // + apply half deltaV with stored force
     // + move positions with new velocity
@@ -135,6 +204,8 @@ void  Foam::KinematicCloud<ParcelType>::moveCollide
 
     // td.part() = ParcelType::trackData::tpRotationalTrack;
     // Cloud<ParcelType>::move(td);
+
+    updateCellOccupancy();
 
     this->collision().collide();
 
@@ -194,6 +265,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
         particleProperties_.lookup("cellValueSourceCorrection")
     ),
     rndGen_(label(0)),
+    cellOccupancyPtr_(),
     rho_(rho),
     U_(U),
     mu_(mu),

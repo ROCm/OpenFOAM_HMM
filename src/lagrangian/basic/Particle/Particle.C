@@ -162,7 +162,8 @@ Foam::Particle<ParticleType>::Particle
 (
     const Cloud<ParticleType>& cloud,
     const vector& position,
-    const label cellI
+    const label cellI,
+    bool doCellFacePt
 )
 :
     cloud_(cloud),
@@ -175,7 +176,10 @@ Foam::Particle<ParticleType>::Particle
     origProc_(Pstream::myProcNo()),
     origId_(cloud_.getNewParticleID())
 {
-    initCellFacePt();
+    if (doCellFacePt)
+    {
+        initCellFacePt();
+    }
 }
 
 

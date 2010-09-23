@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,120 +22,99 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::ConeInjectionMP
+    Foam::InflationInjection
 
 Description
-    Cone injection multi-point
-
-    - User specifies
-      - time of start of injection
-      - injector positions
-      - directions (along injection axes)
-      - parcel flow rate
-      - parcel velocities
-      - inner and outer cone angles
-    - Parcel diameters obtained by PDF model
+    Inflation injection - creates new particles by splitting existing
+    particles within in a set of generation cells, then inflating them
+    to a target diameter within the generation cells and an additional
+    set of inflation cells.
 
 SourceFiles
-    ConeInjectionMP.C
+    InflationInjection.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ConeInjectionMP_H
-#define ConeInjectionMP_H
+#ifndef InflationInjection_H
+#define InflationInjection_H
 
 #include "InjectionModel.H"
 #include "pdf.H"
-#include "vectorList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
+// Structure to hold:
+// + position = vectorPairScalarPair::first().first()
+// + velocity = vectorPairScalarPair::first().second()
+// + diameter = vectorPairScalarPair::second().first()
+// + target diameter = vectorPairScalarPair::second().second()
+// One structure to allow single operation parallel comms
+typedef Tuple2<Pair<vector>, Pair<scalar> > vectorPairScalarPair;
 
-template<class Type>
-class DataEntry;
 
 /*---------------------------------------------------------------------------*\
-                       Class ConeInjectionMP Declaration
+                      Class InflationInjection Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class ConeInjectionMP
+class InflationInjection
 :
     public InjectionModel<CloudType>
 {
     // Private data
 
-        //- Name of file containing positions data
-        const word positionsFile_;
+        //- Name of cellSet for generating new particles
+        word generationSetName_;
 
-        //- Field of injector positions
-        vectorIOField positions_;
+        //- Name of cellSet for inflating new particles
+        word inflationSetName_;
 
-        //- List of cell labels corresponding to injector positions
-        labelList injectorCells_;
+        //- Set of cells to generate particles in
+        labelList generationCells_;
 
-        //- List of tetFace labels corresponding to injector positions
-        labelList injectorTetFaces_;
-
-        //- List of tetPt labels corresponding to injector positions
-        labelList injectorTetPts_;
-
-        //- Name of file containing axes data
-        const word axesFile_;
-
-        //- Field of injector positions
-        vectorIOField axes_;
+        //- Set of cells to inflate particles in, includes all
+        //  generation cells
+        labelList inflationCells_;
 
         //- Injection duration [s]
         const scalar duration_;
 
-        //- Number of parcels to introduce per injector
-        const label parcelsPerInjector_;
-
-        //- Flow rate profile relative to SOI []
+        //- Flow rate profile relative to SOI [m3/s]
         const autoPtr<DataEntry<scalar> > flowRateProfile_;
 
-        //- Parcel velocity magnitude relative to SOI [m/s]
-        const autoPtr<DataEntry<scalar> > Umag_;
+        //- Growth rate of particle diameters towards target [m/s]
+        const autoPtr<DataEntry<scalar> > growthRate_;
 
-        //- Inner cone angle relative to SOI [deg]
-        const autoPtr<DataEntry<scalar> > thetaInner_;
+        //- Positions, velocities, diameters and target diameters of
+        //  new particles after splitting
+        DynamicList<vectorPairScalarPair> newParticles_;
 
-        //- Outer cone angle relative to SOI [deg]
-        const autoPtr<DataEntry<scalar> > thetaOuter_;
+        //- Accumulation variable to carry over volume from one injection
+        //  to the next
+        scalar volumeAccumulator_;
+
+        //- Fraction of injection controlled by this processor
+        scalar fraction_;
 
         //- Parcel size PDF model
         const autoPtr<pdfs::pdf> parcelPDF_;
-
-        //- Number of parcels per injector already injected
-        mutable label nInjected_;
-
-
-        // Tangential vectors to the direction vector
-
-            //- First tangential vector
-            vectorList tanVec1_;
-
-            //- Second tangential vector
-            vectorList tanVec2_;
 
 
 protected:
 
     // Protected Member Functions
 
-        //- Number of parcels to introduce over the time step
+        //- Number of parcels to introduce over the time step relative to SOI
         label parcelsToInject
         (
             const scalar time0,
             const scalar time1
         );
 
-        //- Number of parcels to introduce over the time step
+        //- Volume of parcels to introduce over the time step relative to SOI
         scalar volumeToInject
         (
             const scalar time0,
@@ -146,13 +125,13 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("ConeInjectionMP");
+    TypeName("InflationInjection");
 
 
     // Constructors
 
         //- Construct from dictionary
-        ConeInjectionMP
+        InflationInjection
         (
             const dictionary& dict,
             CloudType& owner
@@ -160,7 +139,7 @@ public:
 
 
     //- Destructor
-    virtual ~ConeInjectionMP();
+    virtual ~InflationInjection();
 
 
     // Member Functions
@@ -211,7 +190,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ConeInjectionMP.C"
+#   include "InflationInjection.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

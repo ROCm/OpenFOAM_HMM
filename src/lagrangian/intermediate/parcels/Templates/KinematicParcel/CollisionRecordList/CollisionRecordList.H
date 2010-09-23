@@ -168,6 +168,10 @@ public:
             label origIdOfOther
         );
 
+        //- Enquire if the specified record exists without modifying
+        //  its accessed status
+        bool checkPairRecord(label origProcOfOther, label origIdOfOther);
+
         //- Enquires if the position of wall impact relative to the
         //  particle centre is present in the records.  If so, return
         //  access to the WallCollisionRecord (hence the data) and
@@ -178,6 +182,10 @@ public:
             const vector& pRel,
             scalar radius
         );
+
+        //- Enquire if the specified record exists without modifying
+        //  its accessed status
+        bool checkWallRecord(const vector& pRel, scalar radius);
 
         //- Update the collision records, deleting any records not
         //  marked as having been accessed, then mark all records as

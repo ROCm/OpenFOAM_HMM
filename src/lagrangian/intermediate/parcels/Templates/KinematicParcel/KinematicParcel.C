@@ -225,6 +225,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     typeId_(p.typeId_),
     nParticle_(p.nParticle_),
     d_(p.d_),
+    dTarget_(p.dTarget_),
     U_(p.U_),
     f_(p.f_),
     angularMomentum_(p.angularMomentum_),

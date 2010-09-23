@@ -102,7 +102,8 @@ Foam::lagrangianFieldDecomposer::lagrangianFieldDecomposer
                     (
                         positions_,
                         ppi.position(),
-                        procCelli
+                        procCelli,
+                        false
                     )
                 );
             }

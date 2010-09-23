@@ -33,7 +33,7 @@ Foam::label Foam::KinematicLookupTableInjection<CloudType>::parcelsToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
@@ -51,7 +51,7 @@ Foam::scalar Foam::KinematicLookupTableInjection<CloudType>::volumeToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     scalar volume = 0.0;
     if ((time0 >= 0.0) && (time0 < duration_))
