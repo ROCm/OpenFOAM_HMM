@@ -586,7 +586,6 @@ int main(int argc, char *argv[])
     Info<< nl << setprecision(10)
         << "Density: " << density << nl
         << "Mass: " << m << nl
-        << "Volume: " << m/density << nl
         << "Centre of mass: " << cM << nl
         << "Inertia tensor around centre of mass: " << nl << J << nl
         << "eigenValues (principal moments): " << eVal << nl
