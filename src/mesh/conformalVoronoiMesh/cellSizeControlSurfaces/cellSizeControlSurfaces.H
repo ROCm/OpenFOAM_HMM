@@ -74,8 +74,7 @@ class cellSizeControlSurfaces
         scalar defaultCellSize_;
 
         //- Assigning a priority to all requests for cell sizes, the highest
-        //  overrules.  Regions requesting with the same priority take the
-        //  average
+        //  overrules.
         label defaultPriority_;
 
 

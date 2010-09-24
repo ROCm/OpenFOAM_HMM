@@ -39,6 +39,7 @@ Foam::cellSizeControlSurfaces::cellSizeControlSurfaces
     cvMesh_(cvMesh),
     allGeometry_(allGeometry),
     surfaces_(),
+    cellSizeFunctions_(),
     defaultCellSize_(readScalar(motionControlDict.lookup("defaultCellSize"))),
     defaultPriority_
     (
@@ -161,44 +162,89 @@ Foam::scalar Foam::cellSizeControlSurfaces::cellSize
     bool isSurfacePoint
 ) const
 {
-    scalar sizeAccumulator = 0;
-    scalar numberOfFunctions = 0;
 
-    label previousPriority = defaultPriority_;
+    // Regions requesting with the same priority take the average
+
+    // scalar sizeAccumulator = 0;
+    // scalar numberOfFunctions = 0;
+
+    // label previousPriority = defaultPriority_;
+
+    // if (cellSizeFunctions_.size())
+    // {
+    //     previousPriority =
+    //         cellSizeFunctions_[cellSizeFunctions_.size() - 1].priority();
+
+    //     forAll(cellSizeFunctions_, i)
+    //     {
+    //         const cellSizeFunction& cSF = cellSizeFunctions_[i];
+
+    //         if (cSF.priority() < previousPriority && numberOfFunctions > 0)
+    //         {
+    //             return sizeAccumulator/numberOfFunctions;
+    //         }
+
+    //         scalar sizeI;
+
+    //         if (cSF.cellSize(pt, sizeI, isSurfacePoint))
+    //         {
+    //             previousPriority = cSF.priority();
+
+    //             sizeAccumulator += sizeI;
+    //             numberOfFunctions++;
+    //         }
+    //     }
+    // }
+
+    // if (previousPriority == defaultPriority_ || numberOfFunctions == 0)
+    // {
+    //     sizeAccumulator += defaultCellSize_;
+    //     numberOfFunctions++;
+    // }
+
+    // return sizeAccumulator/numberOfFunctions;
+
+
+    // Regions requesting with the same priority take the smallest
+
+    scalar minSize = defaultCellSize_;
 
     if (cellSizeFunctions_.size())
     {
-        previousPriority =
-            cellSizeFunctions_[cellSizeFunctions_.size() - 1].priority();
+        // Initialise to the last (lowest) priority
+        label previousPriority = cellSizeFunctions_.last().priority();
 
         forAll(cellSizeFunctions_, i)
         {
             const cellSizeFunction& cSF = cellSizeFunctions_[i];
 
-            if (cSF.priority() < previousPriority && numberOfFunctions > 0)
+            if (cSF.priority() < previousPriority)
             {
-                return sizeAccumulator/numberOfFunctions;
+                return minSize;
             }
 
             scalar sizeI;
 
             if (cSF.cellSize(pt, sizeI, isSurfacePoint))
             {
-                previousPriority = cSF.priority();
+                if (cSF.priority() == previousPriority)
+                {
+                    if (sizeI < minSize)
+                    {
+                        minSize = sizeI;
+                    }
+                }
+                else
+                {
+                    minSize = sizeI;
+                }
 
-                sizeAccumulator += sizeI;
-                numberOfFunctions++;
+                previousPriority = cSF.priority();
             }
         }
     }
 
-    if (previousPriority == defaultPriority_ || numberOfFunctions == 0)
-    {
-        sizeAccumulator += defaultCellSize_;
-        numberOfFunctions++;
-    }
-
-    return sizeAccumulator/numberOfFunctions;
+    return minSize;
 }
 
 
@@ -237,7 +283,3 @@ Foam::scalarField Foam::cellSizeControlSurfaces::cellSize
 
 
 // ************************************************************************* //
-
-
-
-
