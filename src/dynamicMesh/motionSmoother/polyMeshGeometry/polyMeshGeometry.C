@@ -787,7 +787,7 @@ bool Foam::polyMeshGeometry::checkFaceTets
     // check whether decomposing each cell into tets results in
     // positive volume, non-flat tets
     const labelList& own = mesh.faceOwner();
-    const labelList& nei = mesh.faceNeighbour();
+    // const labelList& nei = mesh.faceNeighbour();
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     // Calculate coupled cell centre

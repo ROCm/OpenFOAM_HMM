@@ -378,11 +378,11 @@ bool Foam::polyMeshTetDecomposition::checkFaceTets
 )
 {
     const labelList& own = mesh.faceOwner();
-    const labelList& nei = mesh.faceNeighbour();
+    // const labelList& nei = mesh.faceNeighbour();
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     const vectorField& cc = mesh.cellCentres();
-    const vectorField& fc = mesh.faceCentres();
+    // const vectorField& fc = mesh.faceCentres();
 
     // Calculate coupled cell centre
     pointField neiCc(mesh.nFaces() - mesh.nInternalFaces());
@@ -396,13 +396,13 @@ bool Foam::polyMeshTetDecomposition::checkFaceTets
 
     const faceList& fcs = mesh.faces();
 
-    const pointField& p = mesh.points();
+    // const pointField& p = mesh.points();
 
     label nErrorTets = 0;
 
     forAll(fcs, faceI)
     {
-        const face& f = fcs[faceI];
+        // const face& f = fcs[faceI];
 
         // forAll(f, fPtI)
         // {
@@ -429,7 +429,7 @@ bool Foam::polyMeshTetDecomposition::checkFaceTets
         if (mesh.isInternalFace(faceI))
         {
             // Create the neighbour tet - it will have positive volume
-            const face& f = fcs[faceI];
+            // const face& f = fcs[faceI];
 
             // forAll(f, fPtI)
             // {
