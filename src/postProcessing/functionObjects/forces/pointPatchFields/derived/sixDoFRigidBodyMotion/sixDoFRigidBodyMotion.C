@@ -374,7 +374,6 @@ void Foam::sixDoFRigidBodyMotion::updatePosition
         centreOfMass() += deltaT*v();
 
         // Leapfrog orientation adjustment
-
         rotate(Q(), pi(), deltaT);
     }
 
