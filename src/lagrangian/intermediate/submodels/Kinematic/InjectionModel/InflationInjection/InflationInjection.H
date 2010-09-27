@@ -40,6 +40,7 @@ SourceFiles
 
 #include "InjectionModel.H"
 #include "pdf.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -98,6 +99,13 @@ class InflationInjection
 
         //- Fraction of injection controlled by this processor
         scalar fraction_;
+
+        //- Switch to control whether or not the injector is allowed
+        //  to create new particles in empty cells
+        Switch selfSeed_;
+
+        //- Diameter with which to create new seed particles
+        scalar dSeed_;
 
         //- Parcel size PDF model
         const autoPtr<pdfs::pdf> parcelPDF_;
