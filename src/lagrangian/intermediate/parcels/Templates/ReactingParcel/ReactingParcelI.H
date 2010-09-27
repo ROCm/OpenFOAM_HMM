@@ -75,10 +75,12 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
 (
     ReactingCloud<ParcelType>& owner,
     const vector& position,
-    const label cellI
+    const label cellI,
+    const label tetFaceI,
+    const label tetPtI
 )
 :
-    ThermoParcel<ParcelType>(owner, position, cellI),
+    ThermoParcel<ParcelType>(owner, position, cellI, tetFaceI, tetPtI),
     mass0_(0.0),
     Y_(0),
     pc_(0.0)
@@ -91,9 +93,12 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
     ReactingCloud<ParcelType>& owner,
     const vector& position,
     const label cellI,
+    const label tetFaceI,
+    const label tetPtI,
     const label typeId,
     const scalar nParticle0,
     const scalar d0,
+    const scalar dTarget0,
     const vector& U0,
     const vector& f0,
     const vector& angularMomentum0,
@@ -107,9 +112,12 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
         owner,
         position,
         cellI,
+        tetFaceI,
+        tetPtI,
         typeId,
         nParticle0,
         d0,
+        dTarget0,
         U0,
         f0,
         angularMomentum0,

@@ -15,12 +15,11 @@ if (isA<wallPolyPatch>(pbMesh[patch(face())]))
 else if (isA<wedgePolyPatch>(pbMesh[patch(face())]))
 {
     // check if parcel is trying to move out of the domain
-    label patchi = patch(face());
-    label patchFacei = patchFace(patchi, face());
-    const polyPatch& patch = mesh.boundaryMesh()[patchi];
-    vector nf = patch.faceAreas()[patchFacei];
+
+    vector nf = normal();
 
     scalar Un = U() & nf;
+
     if (Un > 0)
     {
         scalar Un2 = U() & n();
@@ -30,12 +29,11 @@ else if (isA<wedgePolyPatch>(pbMesh[patch(face())]))
 else if (isA<symmetryPolyPatch>(pbMesh[patch(face())]))
 {
     // check if parcel is trying to move out of the domain
-    label patchi = patch(face());
-    label patchFacei = patchFace(patchi, face());
-    const polyPatch& patch = mesh.boundaryMesh()[patchi];
-    vector nf = patch.faceAreas()[patchFacei];
+
+    vector nf = normal();
 
     scalar Un = U() & nf;
+
     if (Un > 0)
     {
         if (sDB.twoD())

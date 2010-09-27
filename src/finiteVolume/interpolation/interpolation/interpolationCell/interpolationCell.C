@@ -49,11 +49,11 @@ template<class Type>
 Type interpolationCell<Type>::interpolate
 (
     const vector&,
-    const label celli,
+    const label cellI,
     const label
 ) const
 {
-    return this->psi_[celli];
+    return this->psi_[cellI];
 }
 
 

@@ -29,23 +29,35 @@ License
 
 Foam::basicReactingParcel::basicReactingParcel
 (
-    ReactingCloud<basicReactingParcel >& owner,
+    ReactingCloud<basicReactingParcel>& owner,
     const vector& position,
-    const label cellI
+    const label cellI,
+    const label tetFaceI,
+    const label tetPtI
 )
 :
-    ReactingParcel<basicReactingParcel >(owner, position, cellI)
+    ReactingParcel<basicReactingParcel>
+    (
+        owner,
+        position,
+        cellI,
+        tetFaceI,
+        tetPtI
+    )
 {}
 
 
 Foam::basicReactingParcel::basicReactingParcel
 (
-    ReactingCloud<basicReactingParcel >& owner,
+    ReactingCloud<basicReactingParcel>& owner,
     const vector& position,
     const label cellI,
+    const label tetFaceI,
+    const label tetPtI,
     const label typeId,
     const scalar nParticle0,
     const scalar d0,
+    const scalar dTarget0,
     const vector& U0,
     const vector& f0,
     const vector& angularMomentum0,
@@ -54,14 +66,17 @@ Foam::basicReactingParcel::basicReactingParcel
     const ReactingParcel<basicReactingParcel>::constantProperties& constProps
 )
 :
-    ReactingParcel<basicReactingParcel >
+    ReactingParcel<basicReactingParcel>
     (
         owner,
         position,
         cellI,
+        tetFaceI,
+        tetPtI,
         typeId,
         nParticle0,
         d0,
+        dTarget0,
         U0,
         f0,
         angularMomentum0,
@@ -74,7 +89,7 @@ Foam::basicReactingParcel::basicReactingParcel
 
 Foam::basicReactingParcel::basicReactingParcel
 (
-    const Cloud<basicReactingParcel >& cloud,
+    const Cloud<basicReactingParcel>& cloud,
     Istream& is,
     bool readFields
 )

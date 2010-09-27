@@ -75,8 +75,14 @@ class ConeInjectionMP
         //- Field of injector positions
         vectorIOField positions_;
 
-        //- Field of cell labels corresoponding to injector positions
+        //- List of cell labels corresponding to injector positions
         labelList injectorCells_;
+
+        //- List of tetFace labels corresponding to injector positions
+        labelList injectorTetFaces_;
+
+        //- List of tetPt labels corresponding to injector positions
+        labelList injectorTetPts_;
 
         //- Name of file containing axes data
         const word axesFile_;
@@ -127,14 +133,14 @@ protected:
         (
             const scalar time0,
             const scalar time1
-        ) const;
+        );
 
         //- Number of parcels to introduce over the time step
         scalar volumeToInject
         (
             const scalar time0,
             const scalar time1
-        ) const;
+        );
 
 
 public:
@@ -168,14 +174,16 @@ public:
 
         // Injection geometry
 
-            //- Set the injection position and owner cell
+            //- Set the injection position and owner cell, tetFace and tetPt
             virtual void setPositionAndCell
             (
                 const label parcelI,
                 const label nParcels,
                 const scalar time,
                 vector& position,
-                label& cellOwner
+                label& cellOwner,
+                label& tetFaceI,
+                label& tetPtI
             );
 
             //- Set the parcel properties

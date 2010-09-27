@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|  \\    /   O peration     | Version:  1.6                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -11,31 +11,36 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      dynamicMeshDict;
+    object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dynamicFvMeshLib "libtopoChangerFvMesh.so";
+thermoType      hsPsiMixtureThermo<reactingMixture<gasThermoPhysics>>;
 
-dynamicFvMesh   mixerFvMesh;
+chemistryReader foamChemistryReader;
 
-mixerFvMeshCoeffs
+foamChemistryFile "$FOAM_CASE/chemkin/foam.inp";
+
+foamChemistryThermoFile "$FOAM_CASE/chemkin/foam.dat";
+
+inertSpecie     N2;
+
+
+liquids
 {
-    coordinateSystem
-    {
-        type            cylindrical;
-        origin          ( 0 0 0 );
-        axis            ( 0 0 1 );
-        direction       ( 1 0 0 );
-    }
+    liquidComponents
+    (
+        H2O
+    );
 
-    rpm             10;
+    H2O             H2O defaultCoeffs;
+}
 
-    slider
-    {
-        inside          insideSlider;
-        outside         outsideSlider;
-    }
+
+solids
+{
+    solidComponents
+    ();
 }
 
 

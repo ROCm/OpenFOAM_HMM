@@ -34,7 +34,7 @@ Foam::label Foam::PatchInjection<CloudType>::parcelsToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
@@ -52,7 +52,7 @@ Foam::scalar Foam::PatchInjection<CloudType>::volumeToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
@@ -98,7 +98,7 @@ Foam::PatchInjection<CloudType>::PatchInjection
             owner.rndGen()
         )
     ),
-    cellOwners_(),
+    injectorCells_(),
     fraction_(1.0)
 {
     const label patchId = owner.mesh().boundaryMesh().findPatchID(patchName_);
@@ -119,9 +119,9 @@ Foam::PatchInjection<CloudType>::PatchInjection
 
     const polyPatch& patch = owner.mesh().boundaryMesh()[patchId];
 
-    cellOwners_ = patch.faceCells();
+    injectorCells_ = patch.faceCells();
 
-    label patchSize = cellOwners_.size();
+    label patchSize = injectorCells_.size();
     label totalPatchSize = patchSize;
     reduce(totalPatchSize, sumOp<label>());
     fraction_ = scalar(patchSize)/totalPatchSize;
@@ -162,19 +162,37 @@ void Foam::PatchInjection<CloudType>::setPositionAndCell
     const label,
     const scalar,
     vector& position,
-    label& cellOwner
+    label& cellOwner,
+    label& tetFaceI,
+    label& tetPtI
 )
 {
-    if (cellOwners_.size() > 0)
+    if (injectorCells_.size() > 0)
     {
-        label cellI = this->owner().rndGen().integer(0, cellOwners_.size() - 1);
+        label cellI = this->owner().rndGen().integer
+        (
+            0,
+            injectorCells_.size() - 1
+        );
 
-        cellOwner = cellOwners_[cellI];
+        cellOwner = injectorCells_[cellI];
+
+        // The position is at the cell centre, which could be in any
+        // tet of the decomposed cell, so arbitrarily choose the first
+        // face of the cell as the tetFace and the first point after
+        // the base point on the face as the tetPt.  The tracking will
+        // pick the cell consistent with the motion in the first
+        // tracking step.
+        tetFaceI = this->owner().mesh().cells()[cellOwner][0];
+        tetPtI = 1;
+
         position = this->owner().mesh().C()[cellOwner];
     }
     else
     {
         cellOwner = -1;
+        tetFaceI = -1;
+        tetPtI = -1;
         // dummy position
         position = pTraits<vector>::max;
     }

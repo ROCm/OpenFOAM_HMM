@@ -70,18 +70,18 @@ Foam::reflectParcel::~reflectParcel()
 bool Foam::reflectParcel::wallTreatment
 (
     parcel& p,
-    const label globalFacei
+    const label globalFaceI
 ) const
 {
-    label patchi = p.patch(globalFacei);
-    label facei = p.patchFace(patchi, globalFacei);
+    label patchI = p.patch(globalFaceI);
+    label faceI = p.patchFace(patchI, globalFaceI);
 
     const polyMesh& mesh = spray_.mesh();
 
-    if (isA<wallPolyPatch>(mesh_.boundaryMesh()[patchi]))
+    if (isA<wallPolyPatch>(mesh_.boundaryMesh()[patchI]))
     {
         // wallNormal defined to point outwards of domain
-        vector Sf = mesh_.Sf().boundaryField()[patchi][facei];
+        vector Sf = mesh_.Sf().boundaryField()[patchI][faceI];
         Sf /= mag(Sf);
 
         if (!mesh.moving())
@@ -97,17 +97,17 @@ bool Foam::reflectParcel::wallTreatment
         else
         {
             // moving mesh
-            vector Ub1 = U_.boundaryField()[patchi][facei];
-            vector Ub0 = U_.oldTime().boundaryField()[patchi][facei];
+            vector Ub1 = U_.boundaryField()[patchI][faceI];
+            vector Ub0 = U_.oldTime().boundaryField()[patchI][faceI];
 
             scalar dt = spray_.runTime().deltaTValue();
             const vectorField& oldPoints = mesh.oldPoints();
 
-            const vector& Cf1 = mesh.faceCentres()[globalFacei];
+            const vector& Cf1 = mesh.faceCentres()[globalFaceI];
 
-            vector Cf0 = mesh.faces()[globalFacei].centre(oldPoints);
+            vector Cf0 = mesh.faces()[globalFaceI].centre(oldPoints);
             vector Cf = Cf0 + p.stepFraction()*(Cf1 - Cf0);
-            vector Sf0 = mesh.faces()[globalFacei].normal(oldPoints);
+            vector Sf0 = mesh.faces()[globalFaceI].normal(oldPoints);
 
             // for layer addition Sf0 = vector::zero and we use Sf
             if (mag(Sf0) > SMALL)
@@ -157,10 +157,10 @@ bool Foam::reflectParcel::wallTreatment
                 {
                     Info<< "reflectParcel:: v = " << v
                         << ", Ub = " << Ub
-                        << ", facei = " << facei
-                        << ", patchi = " << patchi
-                        << ", globalFacei = " << globalFacei
-                        << ", name = " << mesh_.boundaryMesh()[patchi].name()
+                        << ", faceI = " << faceI
+                        << ", patchI = " << patchI
+                        << ", globalFaceI = " << globalFaceI
+                        << ", name = " << mesh_.boundaryMesh()[patchI].name()
                         << endl;
                 }
             */
@@ -175,7 +175,7 @@ bool Foam::reflectParcel::wallTreatment
     else
     {
         FatalErrorIn("bool reflectParcel::wallTreatment(parcel& parcel) const")
-            << " parcel has hit a boundary " << mesh_.boundary()[patchi].type()
+            << " parcel has hit a boundary " << mesh_.boundary()[patchI].type()
             << " which not yet has been implemented." << nl
             << abort(FatalError);
     }

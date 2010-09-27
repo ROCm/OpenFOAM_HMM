@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,31 +10,23 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
-    object      dynamicMeshDict;
+    location    "system";
+    object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dynamicFvMeshLib "libtopoChangerFvMesh.so";
-
-dynamicFvMesh   mixerFvMesh;
-
-mixerFvMeshCoeffs
+solvers
 {
-    coordinateSystem
+    cellDisplacement
     {
-        type            cylindrical;
-        origin          ( 0 0 0 );
-        axis            ( 0 0 1 );
-        direction       ( 1 0 0 );
-    }
-
-    rpm             10;
-
-    slider
-    {
-        inside          insideSlider;
-        outside         outsideSlider;
+        solver          GAMG;
+        tolerance       1e-06;
+        relTol          0;
+        smoother        GaussSeidel;
+        cacheAgglomeration true;
+        nCellsInCoarsestLevel 10;
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
     }
 }
 

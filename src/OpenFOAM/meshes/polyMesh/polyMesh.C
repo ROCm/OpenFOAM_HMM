@@ -33,6 +33,7 @@ License
 #include "processorPolyPatch.H"
 #include "OSspecific.H"
 #include "demandDrivenData.H"
+#include "polyMeshTetDecomposition.H"
 
 #include "pointMesh.H"
 
@@ -204,6 +205,7 @@ Foam::polyMesh::polyMesh(const IOobject& io)
     bounds_(points_),
     geometricD_(Vector<label>::zero),
     solutionD_(Vector<label>::zero),
+    tetBasePtIsPtr_(NULL),
     pointZones_
     (
         IOobject
@@ -392,6 +394,7 @@ Foam::polyMesh::polyMesh
     bounds_(points_, syncPar),
     geometricD_(Vector<label>::zero),
     solutionD_(Vector<label>::zero),
+    tetBasePtIsPtr_(NULL),
     pointZones_
     (
         IOobject
@@ -548,6 +551,7 @@ Foam::polyMesh::polyMesh
     bounds_(points_, syncPar),
     geometricD_(Vector<label>::zero),
     solutionD_(Vector<label>::zero),
+    tetBasePtIsPtr_(NULL),
     pointZones_
     (
         IOobject
@@ -844,6 +848,28 @@ const Foam::Vector<Foam::label>& Foam::polyMesh::solutionD() const
 Foam::label Foam::polyMesh::nSolutionD() const
 {
     return cmptSum(solutionD() + Vector<label>::one)/2;
+}
+
+
+const Foam::labelList& Foam::polyMesh::tetBasePtIs() const
+{
+    if (!tetBasePtIsPtr_)
+    {
+        if (debug)
+        {
+            WarningIn("const labelList& polyMesh::tetBasePtIs() const")
+                << "Tet base point indices not available.  "
+                << "Forcing storage of base points."
+                << endl;
+        }
+
+        tetBasePtIsPtr_ = new labelList
+        (
+            polyMeshTetDecomposition::findFaceBasePts(*this)
+        );
+    }
+
+    return *tetBasePtIsPtr_;
 }
 
 

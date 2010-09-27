@@ -77,6 +77,12 @@ class ConeInjection
         //- Cell containing injector position []
         label injectorCell_;
 
+        //- tetFace of tet containing injector position []
+        label injectorTetFace_;
+
+        //- tetPt of tet containing injector position []
+        label injectorTetPt_;
+
         //- Injector direction []
         vector direction_;
 
@@ -117,14 +123,14 @@ protected:
         (
             const scalar time0,
             const scalar time1
-        ) const;
+        );
 
         //- Number of parcels to introduce over the time step relative to SOI
         scalar volumeToInject
         (
             const scalar time0,
             const scalar time1
-        ) const;
+        );
 
 
 public:
@@ -158,14 +164,16 @@ public:
 
         // Injection geometry
 
-            //- Set the injection position and owner cell
+            //- Set the injection position and owner cell, tetFace and tetPt
             virtual void setPositionAndCell
             (
                 const label parcelI,
                 const label nParcels,
                 const scalar time,
                 vector& position,
-                label& cellOwner
+                label& cellOwner,
+                label& tetFaceI,
+                label& tetPtI
             );
 
             //- Set the parcel properties

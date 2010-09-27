@@ -63,7 +63,9 @@ public:
         (
              ReactingMultiphaseCloud<coalParcel>& owner,
              const vector& position,
-             const label cellI
+             const label cellI,
+             const label tetFaceI,
+             const label tetPtI
         );
 
         //- Construct from components
@@ -72,9 +74,12 @@ public:
              ReactingMultiphaseCloud<coalParcel>& owner,
              const vector& position,
              const label cellI,
+             const label tetFaceI,
+             const label tetPtI,
              const label typeId,
              const scalar nParticle0,
              const scalar d0,
+             const scalar dTarget0,
              const vector& U0,
              const vector& f0,
              const vector& pi0,

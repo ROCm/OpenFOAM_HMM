@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "polyMeshGeometry.H"
+#include "polyMeshTetDecomposition.H"
 #include "pyramidPointFaceRef.H"
 #include "tetPointRef.H"
 #include "syncTools.H"
@@ -313,7 +314,7 @@ bool Foam::polyMeshGeometry::checkFaceTet
 (
     const polyMesh& mesh,
     const bool report,
-    const scalar minTetVol,
+    const scalar minTetQuality,
     const pointField& p,
     const label faceI,
     const point& fc,    // face centre
@@ -326,15 +327,15 @@ bool Foam::polyMeshGeometry::checkFaceTet
 
     forAll(f, fp)
     {
-        scalar tetVol = tetPointRef
+        scalar tetQual = tetPointRef
         (
             p[f[fp]],
             p[f.nextLabel(fp)],
             fc,
             cc
-        ).mag();
+        ).quality();
 
-        if (tetVol < minTetVol)
+        if (tetQual < minTetQuality)
         {
             if (report)
             {
@@ -345,7 +346,7 @@ bool Foam::polyMeshGeometry::checkFaceTet
                     << "face " << faceI
                     << " has a triangle that points the wrong way."
                      << endl
-                    << "Tet volume: " << tetVol
+                    << "Tet quality: " << tetQual
                     << " Face " << faceI
                     << endl;
             }
@@ -423,16 +424,15 @@ bool Foam::polyMeshGeometry::checkFaceDotProduct
     // Severe nonorthogonality threshold
     const scalar severeNonorthogonalityThreshold = ::cos(degToRad(orthWarn));
 
-
     // Calculate coupled cell centre
-    pointField neiCc(mesh.nFaces()-mesh.nInternalFaces());
+    pointField neiCc(mesh.nFaces() - mesh.nInternalFaces());
 
     for (label faceI = mesh.nInternalFaces(); faceI < mesh.nFaces(); faceI++)
     {
         neiCc[faceI-mesh.nInternalFaces()] = cellCentres[own[faceI]];
     }
-    syncTools::swapBoundaryFacePositions(mesh, neiCc);
 
+    syncTools::swapBoundaryFacePositions(mesh, neiCc);
 
     scalar minDDotS = GREAT;
 
@@ -754,7 +754,7 @@ bool Foam::polyMeshGeometry::checkFacePyramids
                 "polyMeshGeometry::checkFacePyramids("
                 "const bool, const scalar, const pointField&"
                 ", const labelList&, labelHashSet*)"
-            )   << "Error in face pyramids: faces pointing the wrong way!"
+            )   << "Error in face pyramids: faces pointing the wrong way."
                 << endl;
         }
 
@@ -775,7 +775,7 @@ bool Foam::polyMeshGeometry::checkFacePyramids
 bool Foam::polyMeshGeometry::checkFaceTets
 (
     const bool report,
-    const scalar minTetVol,
+    const scalar minTetQuality,
     const polyMesh& mesh,
     const vectorField& cellCentres,
     const vectorField& faceCentres,
@@ -785,11 +785,23 @@ bool Foam::polyMeshGeometry::checkFaceTets
     labelHashSet* setPtr
 )
 {
-    // check whether face area vector points to the cell with higher label
+    // check whether decomposing each cell into tets results in
+    // positive volume, non-flat tets
     const labelList& own = mesh.faceOwner();
     const labelList& nei = mesh.faceNeighbour();
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    label nErrorPyrs = 0;
+    // Calculate coupled cell centre
+    pointField neiCc(mesh.nFaces() - mesh.nInternalFaces());
+
+    for (label faceI = mesh.nInternalFaces(); faceI < mesh.nFaces(); faceI++)
+    {
+        neiCc[faceI - mesh.nInternalFaces()] = cellCentres[own[faceI]];
+    }
+
+    syncTools::swapBoundaryFacePositions(mesh, neiCc);
+
+    label nErrorTets = 0;
 
     forAll(checkFaces, i)
     {
@@ -801,36 +813,104 @@ bool Foam::polyMeshGeometry::checkFaceTets
         (
             mesh,
             report,
-            minTetVol,
+            minTetQuality,
             p,
             faceI,
             cellCentres[own[faceI]],    // face centre
-            faceCentres[faceI],    // cell centre
+            faceCentres[faceI],         // cell centre
             setPtr
         );
 
         if (tetError)
         {
-            nErrorPyrs++;
+            nErrorTets++;
         }
 
         if (mesh.isInternalFace(faceI))
         {
-            // Create the neighbour pyramid - it will have positive volume
+            // Create the neighbour tets - they will have positive volume
             bool tetError = checkFaceTet
             (
                 mesh,
                 report,
-                minTetVol,
+                minTetQuality,
                 p,
                 faceI,
-                faceCentres[faceI],    // face centre
+                faceCentres[faceI],         // face centre
                 cellCentres[nei[faceI]],    // cell centre
                 setPtr
             );
+
             if (tetError)
             {
-                nErrorPyrs++;
+                nErrorTets++;
+            }
+
+            if
+            (
+                polyMeshTetDecomposition::findSharedBasePoint
+                (
+                    mesh,
+                    faceI,
+                    minTetQuality,
+                    report
+                ) == -1
+            )
+            {
+                if (setPtr)
+                {
+                    setPtr->insert(faceI);
+                }
+
+                nErrorTets++;
+            }
+        }
+        else
+        {
+            label patchI = patches.whichPatch(faceI);
+
+            if (patches[patchI].coupled())
+            {
+                if
+                (
+                    polyMeshTetDecomposition::findSharedBasePoint
+                    (
+                        mesh,
+                        faceI,
+                        neiCc[faceI - mesh.nInternalFaces()],
+                        minTetQuality,
+                        report
+                    ) == -1
+                )
+                {
+                    if (setPtr)
+                    {
+                        setPtr->insert(faceI);
+                    }
+
+                    nErrorTets++;
+                }
+            }
+            else
+            {
+                if
+                (
+                    polyMeshTetDecomposition::findBasePoint
+                    (
+                        mesh,
+                        faceI,
+                        minTetQuality,
+                        report
+                    ) == -1
+                )
+                {
+                    if (setPtr)
+                    {
+                        setPtr->insert(faceI);
+                    }
+
+                    nErrorTets++;
+                }
             }
         }
     }
@@ -844,7 +924,7 @@ bool Foam::polyMeshGeometry::checkFaceTets
         (
             mesh,
             report,
-            minTetVol,
+            minTetQuality,
             p,
             face0,
             cellCentres[own[face0]],    // face centre
@@ -854,15 +934,15 @@ bool Foam::polyMeshGeometry::checkFaceTets
 
         if (tetError)
         {
-            nErrorPyrs++;
+            nErrorTets++;
         }
 
-        // Create the neighbour pyramid - it will have positive volume
+        // Create the neighbour tets - they will have positive volume
         tetError = checkFaceTet
         (
             mesh,
             report,
-            minTetVol,
+            minTetQuality,
             p,
             face0,
             faceCentres[face0],         // face centre
@@ -872,13 +952,33 @@ bool Foam::polyMeshGeometry::checkFaceTets
 
         if (tetError)
         {
-            nErrorPyrs++;
+            nErrorTets++;
+        }
+
+        if
+        (
+            polyMeshTetDecomposition::findSharedBasePoint
+            (
+                mesh,
+                face0,
+                cellCentres[own[face1]],
+                minTetQuality,
+                report
+            ) == -1
+        )
+        {
+            if (setPtr)
+            {
+                setPtr->insert(face0);
+            }
+
+            nErrorTets++;
         }
     }
 
-    reduce(nErrorPyrs, sumOp<label>());
+    reduce(nErrorTets, sumOp<label>());
 
-    if (nErrorPyrs > 0)
+    if (nErrorTets > 0)
     {
         if (report)
         {
@@ -887,7 +987,7 @@ bool Foam::polyMeshGeometry::checkFaceTets
                 "polyMeshGeometry::checkFaceTets("
                 "const bool, const scalar, const pointField&, const pointField&"
                 ", const labelList&, labelHashSet*)"
-            )   << "Error in face pyramids: faces pointing the wrong way!"
+            )   << "Error in face decomposition: negative tets."
                 << endl;
         }
 
@@ -2135,7 +2235,7 @@ bool Foam::polyMeshGeometry::checkFacePyramids
 bool Foam::polyMeshGeometry::checkFaceTets
 (
     const bool report,
-    const scalar minTetVol,
+    const scalar minTetQuality,
     const pointField& p,
     const labelList& checkFaces,
     const List<labelPair>& baffles,
@@ -2145,7 +2245,7 @@ bool Foam::polyMeshGeometry::checkFaceTets
     return checkFaceTets
     (
         report,
-        minTetVol,
+        minTetQuality,
         mesh_,
         cellCentres_,
         faceCentres_,

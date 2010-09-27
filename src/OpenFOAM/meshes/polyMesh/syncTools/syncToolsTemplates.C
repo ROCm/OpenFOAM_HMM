@@ -1223,7 +1223,7 @@ void Foam::syncTools::syncBoundaryFaceList
                 label patchStart = procPatch.start()-mesh.nInternalFaces();
 
                 UOPstream toNbr(procPatch.neighbProcNo(), pBufs);
-                toNbr << 
+                toNbr <<
                     SubField<T>
                     (
                         faceValues,
@@ -1423,7 +1423,7 @@ void Foam::syncTools::syncFaceList
                     cop(t, val1);
                     faceValues[meshFace0] = t;
 
-                    cop(val1, val0);                
+                    cop(val1, val0);
                     faceValues[meshFace1] = val1;
                 }
             }
@@ -1683,7 +1683,7 @@ void Foam::syncTools::syncEdgeList
                 const processorPolyPatch& procPatch =
                     refCast<const processorPolyPatch>(patches[patchI]);
 
-                // Receive from neighbour. 
+                // Receive from neighbour.
                 List<unsigned int> nbrPatchInfo(procPatch.nEdges());
 
                 {

@@ -128,10 +128,18 @@ Foam::surfaceFilmModels::surfaceFilmModel::surfaceFilmModel
 
     active_(lookup("active")),
     g_(g),
-    filmRegionName_(lookup("filmRegionName")),
-    coeffs_(subDict(type + "Coeffs")),
-    thermoModel_(thermoModelTypeNames_.read(coeffs_.lookup("thermoModel")))
-{}
+    filmRegionName_("none"),
+    coeffs_(dictionary::null),
+    thermoModel_(tmConstant)
+{
+    if (active_)
+    {
+        lookup("filmRegionName") >> filmRegionName_;
+        coeffs_ = subDict(type + "Coeffs");
+        thermoModel_ =
+            thermoModelTypeNames_.read(coeffs_.lookup("thermoModel"));
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

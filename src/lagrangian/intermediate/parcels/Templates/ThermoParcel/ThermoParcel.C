@@ -41,9 +41,11 @@ void Foam::ThermoParcel<ParcelType>::setCellValues
 {
     KinematicParcel<ParcelType>::setCellValues(td, dt, cellI);
 
-    cpc_ = td.cpInterp().interpolate(this->position(), cellI);
+    tetIndices tetIs = this->currentTetIndices();
 
-    Tc_ = td.TInterp().interpolate(this->position(), cellI);
+    cpc_ = td.cpInterp().interpolate(this->position(), tetIs);
+
+    Tc_ = td.TInterp().interpolate(this->position(), tetIs);
 
     if (Tc_ < td.constProps().TMin())
     {
@@ -96,10 +98,14 @@ void Foam::ThermoParcel<ParcelType>::calcSurfaceValues
     // Surface temperature using two thirds rule
     Ts = (2.0*T + Tc_)/3.0;
 
+    tetIndices tetIs = this->currentTetIndices();
+
     // Assuming thermo props vary linearly with T for small dT
-    scalar factor = td.TInterp().interpolate(this->position(), cellI)/Ts;
+    scalar factor = td.TInterp().interpolate (this->position(), tetIs)/Ts;
+
     rhos = this->rhoc_*factor;
-    mus = td.muInterp().interpolate(this->position(), cellI)/factor;
+
+    mus = td.muInterp().interpolate (this->position(), tetIs)/factor;
 
     Pr = td.constProps().Pr();
     kappa = cpc_*mus/Pr;

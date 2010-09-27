@@ -6,9 +6,10 @@
       - fvm::laplacian(turbulence->alphaEff(), hs)
      ==
         DpDt
-     +  parcels.Sh()
-     +  radiation->Shs(thermo)
-     +  chemistrySh
+      + parcels.Sh()
+      + surfaceFilm.Sh()
+      + radiation->Shs(thermo)
+      + chemistrySh
     );
 
     hsEqn.relax();

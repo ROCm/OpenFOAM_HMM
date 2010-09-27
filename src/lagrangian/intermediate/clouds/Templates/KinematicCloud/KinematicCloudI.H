@@ -28,6 +28,13 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
+inline bool Foam::KinematicCloud<ParcelType>::hasWallImpactDistance() const
+{
+    return !collision().controlsWallInteraction();
+}
+
+
+template<class ParcelType>
 inline Foam::label Foam::KinematicCloud<ParcelType>::parcelTypeId() const
 {
     return parcelTypeId_;
@@ -292,6 +299,19 @@ template<class ParcelType>
 inline Foam::Random& Foam::KinematicCloud<ParcelType>::rndGen()
 {
     return rndGen_;
+}
+
+
+template<class ParcelType>
+inline Foam::List<Foam::DynamicList<ParcelType*> >&
+Foam::KinematicCloud<ParcelType>::cellOccupancy()
+{
+    if (cellOccupancyPtr_.empty())
+    {
+        buildCellOccupancy();
+    }
+
+    return cellOccupancyPtr_();
 }
 
 

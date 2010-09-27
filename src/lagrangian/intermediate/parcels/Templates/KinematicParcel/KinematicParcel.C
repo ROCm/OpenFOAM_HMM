@@ -36,7 +36,10 @@ void Foam::KinematicParcel<ParcelType>::setCellValues
     const label cellI
 )
 {
-    rhoc_ = td.rhoInterp().interpolate(this->position(), cellI);
+    tetIndices tetIs = this->currentTetIndices();
+
+    rhoc_ = td.rhoInterp().interpolate(this->position(), tetIs);
+
     if (rhoc_ < td.constProps().rhoMin())
     {
         WarningIn
@@ -53,9 +56,9 @@ void Foam::KinematicParcel<ParcelType>::setCellValues
         rhoc_ = td.constProps().rhoMin();
     }
 
-    Uc_ = td.UInterp().interpolate(this->position(), cellI);
+    Uc_ = td.UInterp().interpolate(this->position(), tetIs);
 
-    muc_ = td.muInterp().interpolate(this->position(), cellI);
+    muc_ = td.muInterp().interpolate(this->position(), tetIs);
 
     // Apply dispersion components to carrier phase velocity
     Uc_ = td.cloud().dispersion().update
@@ -159,11 +162,13 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     // Momentum transfer coefficient
     const scalar utc = td.cloud().drag().utc(Re, d, mu) + ROOTVSMALL;
 
+    tetIndices tetIs = this->currentTetIndices();
+
     // Momentum source due to particle forces
     const vector FCoupled = mass*td.cloud().forces().calcCoupled
     (
         this->position(),
-        cellI,
+        tetIs,
         dt,
         rhoc_,
         rho,
@@ -175,7 +180,7 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     const vector FNonCoupled = mass*td.cloud().forces().calcNonCoupled
     (
         this->position(),
-        cellI,
+        tetIs,
         dt,
         rhoc_,
         rho,
@@ -220,6 +225,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     typeId_(p.typeId_),
     nParticle_(p.nParticle_),
     d_(p.d_),
+    dTarget_(p.dTarget_),
     U_(p.U_),
     f_(p.f_),
     angularMomentum_(p.angularMomentum_),
@@ -340,7 +346,9 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
 (
     const polyPatch& pp,
     TrackData& td,
-    const label patchI
+    const label patchI,
+    const scalar trackFraction,
+    const tetIndices& tetIs
 )
 {
     ParcelType& p = static_cast<ParcelType&>(*this);
@@ -360,15 +368,14 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
     else
     {
         // Invoke patch interaction model
-        return
-            td.cloud().patchInteraction().correct
-            (
-                pp,
-                this->face(),
-                td.keepParticle,
-                active_,
-                U_
-            );
+        return td.cloud().patchInteraction().correct
+        (
+            static_cast<ParcelType&>(*this),
+            pp,
+            td.keepParticle,
+            trackFraction,
+            tetIs
+        );
     }
 }
 
@@ -378,7 +385,9 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
 (
     const polyPatch& pp,
     int& td,
-    const label patchI
+    const label patchI,
+    const scalar trackFraction,
+    const tetIndices& tetIs
 )
 {
     return false;
@@ -411,7 +420,8 @@ template<class TrackData>
 void Foam::KinematicParcel<ParcelType>::hitWallPatch
 (
     const wallPolyPatch& wpp,
-    TrackData& td
+    TrackData& td,
+    const tetIndices&
 )
 {
     // Wall interactions handled by generic hitPatch function
@@ -422,7 +432,8 @@ template<class ParcelType>
 void Foam::KinematicParcel<ParcelType>::hitWallPatch
 (
     const wallPolyPatch&,
-    int&
+    int&,
+    const tetIndices&
 )
 {}
 
@@ -440,7 +451,11 @@ void Foam::KinematicParcel<ParcelType>::hitPatch
 
 
 template<class ParcelType>
-void Foam::KinematicParcel<ParcelType>::hitPatch(const polyPatch&, int&)
+void Foam::KinematicParcel<ParcelType>::hitPatch
+(
+    const polyPatch&,
+    int&
+)
 {}
 
 

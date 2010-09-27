@@ -120,9 +120,6 @@ protected:
             //- Skin frition coefficient for film/primary region interface
             scalar Cf_;
 
-            //- Stable film thickness - film cannot detach until reached
-            dimensionedScalar deltaStable_;
-
 
         // Thermo properties
 
@@ -212,6 +209,12 @@ protected:
             //- Pressure / [Pa]
             volScalarField pPrimary_;
 
+            //- Density / [kg/m3]
+            volScalarField rhoPrimary_;
+
+            //- Viscosity / [Pa.s]
+            volScalarField muPrimary_;
+
 
         // Sub-models
 
@@ -223,12 +226,6 @@ protected:
 
            //- Cumulative mass added via sources [kg]
            scalar addedMass_;
-
-
-       // Detached surface properties
-
-           //- Cumulative mass detached [kg]
-           scalar detachedMass_;
 
 
     // Protected member functions
@@ -247,9 +244,6 @@ protected:
 
         //- Transfer fields from the primary region to the film region
         virtual void transferPrimaryRegionFields();
-
-        //- Correct the source terms for film that detaches from film region
-        virtual void correctDetachedFilm();
 
         // Explicit pressure source contribution
         virtual tmp<volScalarField> pu();
@@ -348,6 +342,9 @@ public:
 
 
         // Solution parameters
+
+            //- Return the film region solution dictionary
+            inline const dictionary& solution() const;
 
             //- Return the momentum predictor
             inline const Switch& momentumPredictor() const;
@@ -482,6 +479,12 @@ public:
 
             //- Pressure / [Pa]
             inline const volScalarField& pPrimary() const;
+
+            //- Density / [kg/m3]
+            inline const volScalarField& rhoPrimary() const;
+
+            //- Viscosity / [Pa.s]
+            inline const volScalarField& muPrimary() const;
 
 
         // Sub-models

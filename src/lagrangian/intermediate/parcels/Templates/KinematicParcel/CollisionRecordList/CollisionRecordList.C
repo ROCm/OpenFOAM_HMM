@@ -301,6 +301,27 @@ Foam::CollisionRecordList<PairType, WallType>::matchPairRecord
 
 
 template<class PairType, class WallType>
+bool Foam::CollisionRecordList<PairType, WallType>::checkPairRecord
+(
+    label origProcOfOther,
+    label origIdOfOther
+)
+{
+    forAll(pairRecords_, i)
+    {
+        PairCollisionRecord<PairType>& pCR = pairRecords_[i];
+
+        if (pCR.match(origProcOfOther, origIdOfOther))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+template<class PairType, class WallType>
 Foam::WallCollisionRecord<WallType>&
 Foam::CollisionRecordList<PairType, WallType>::matchWallRecord
 (
@@ -332,6 +353,26 @@ Foam::CollisionRecordList<PairType, WallType>::matchWallRecord
     return wallRecords_.last();
 }
 
+
+template<class PairType, class WallType>
+bool Foam::CollisionRecordList<PairType, WallType>::checkWallRecord
+(
+    const vector& pRel,
+    scalar radius
+)
+{
+    forAll(wallRecords_, i)
+    {
+        WallCollisionRecord<WallType>& wCR = wallRecords_[i];
+
+        if (wCR.match(pRel, radius))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 
 template<class PairType, class WallType>

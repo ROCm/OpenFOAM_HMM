@@ -35,7 +35,6 @@ Description
 #include "IOdictionary.H"
 #include "boundBox.H"
 #include "indexedOctree.H"
-#include "octree.H"
 #include "treeDataTriSurface.H"
 #include "Random.H"
 

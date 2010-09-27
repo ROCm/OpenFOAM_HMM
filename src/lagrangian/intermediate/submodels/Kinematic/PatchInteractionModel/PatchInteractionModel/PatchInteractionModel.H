@@ -40,6 +40,8 @@ SourceFiles
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 #include "polyPatch.H"
+#include "wallPolyPatch.H"
+#include "tetIndices.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,6 +83,9 @@ private:
 
         //- The coefficients dictionary
         const dictionary coeffDict_;
+
+        //- Name of velocity field - default = "U"
+        const word UName_;
 
 
 public:
@@ -136,6 +141,9 @@ public:
         //- Return the coefficients dictionary
         const dictionary& coeffDict() const;
 
+        //- Return name of velocity field
+        const word& UName() const;
+
 
     // Member Functions
 
@@ -152,12 +160,24 @@ public:
         //  Returns true if particle remains in same cell
         virtual bool correct
         (
+            typename CloudType::parcelType& p,
             const polyPatch& pp,
-            const label faceId,
             bool& keepParticle,
-            bool& active,
-            vector& U
+            const scalar trackFraction,
+            const tetIndices& tetIs
         ) const = 0;
+
+        //- Calculate the patch normal and velocity to interact with,
+        //  accounting for patch motion if required.
+        void patchData
+        (
+            typename CloudType::parcelType& p,
+            const polyPatch& pp,
+            const scalar trackFraction,
+            const tetIndices& tetIs,
+            vector& normal,
+            vector& Up
+        ) const;
 };
 
 

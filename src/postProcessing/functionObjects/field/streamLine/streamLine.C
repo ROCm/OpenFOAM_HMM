@@ -56,6 +56,7 @@ void Foam::streamLine::track()
     //Pout<< "Seeding particles." << endl;
 
     const sampledSet& seedPoints = sampledSetPtr_();
+
     forAll(seedPoints, i)
     {
         //Pout<< "Seeded particle at " << seedPoints[i]
@@ -73,17 +74,16 @@ void Foam::streamLine::track()
             )
         );
     }
-    label nSeeds = returnReduce(particles.size(), sumOp<label>());
-    Info<< "Seeded " << nSeeds
-        << " particles." << endl;
 
+    label nSeeds = returnReduce(particles.size(), sumOp<label>());
+
+    Info<< "Seeded " << nSeeds << " particles." << endl;
 
     // Read or lookup fields
     PtrList<volScalarField> vsFlds;
     PtrList<interpolationCellPoint<scalar> > vsInterp;
     PtrList<volVectorField> vvFlds;
     PtrList<interpolationCellPoint<vector> > vvInterp;
-
 
     label UIndex = -1;
 
@@ -188,7 +188,6 @@ void Foam::streamLine::track()
         vectorNames_[i] = vvInterp[i].psi().name();
     }
 
-
     // Check that we know the index of U in the interpolators.
 
     if (UIndex == -1)
@@ -201,8 +200,6 @@ void Foam::streamLine::track()
             << " and in the objectRegistry." << endl
             << exit(FatalError);
     }
-
-
 
     // Sampled data
     // ~~~~~~~~~~~~
@@ -490,7 +487,6 @@ void Foam::streamLine::write()
 
             mkDir(vtkPath);
 
-
             // Convert track positions
 
             PtrList<coordSet> tracks(allTracks_.size());
@@ -507,8 +503,6 @@ void Foam::streamLine::write()
                 );
                 tracks[trackI].transfer(allTracks_[trackI]);
             }
-
-
 
             // Convert scalar values
 

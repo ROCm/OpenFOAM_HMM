@@ -66,6 +66,7 @@ SourceFiles
 #include "HashSet.H"
 #include "Map.H"
 #include "EdgeMap.H"
+#include "boundBox.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -574,14 +575,6 @@ public:
                 (
                     const bool report = false,
                     const scalar minPyrVol = -SMALL,
-                    labelHashSet* setPtr = NULL
-                ) const;
-
-                //- Check face-decomposition tet volume
-                bool checkFaceTets
-                (
-                    const bool report = false,
-                    const scalar minTetVol = 0,
                     labelHashSet* setPtr = NULL
                 ) const;
 

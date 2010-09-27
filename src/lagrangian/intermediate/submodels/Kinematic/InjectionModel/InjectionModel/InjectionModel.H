@@ -156,14 +156,14 @@ protected:
         (
             const scalar time0,
             const scalar time1
-        ) const = 0;
+        ) = 0;
 
         //- Volume of parcels to introduce over the time step relative to SOI
         virtual scalar volumeToInject
         (
             const scalar time0,
             const scalar time1
-        ) const = 0;
+        ) = 0;
 
         //- Additional flag to identify whether or not injection of parcelI is
         //  permitted
@@ -183,6 +183,8 @@ protected:
         virtual bool findCellAtPosition
         (
             label& cellI,
+            label& tetFaceI,
+            label& tetPtI,
             vector& position,
             bool errorOnNotFound = true
         );
@@ -305,14 +307,16 @@ public:
 
         // Injection geometry
 
-            //- Set the injection position and owner cell
+            //- Set the injection position and owner cell, tetFace and tetPt
             virtual void setPositionAndCell
             (
                 const label parcelI,
                 const label nParcels,
                 const scalar time,
                 vector& position,
-                label& cellOwner
+                label& cellOwner,
+                label& tetFaceI,
+                label& tetPtI
             ) = 0;
 
             //- Set the parcel properties

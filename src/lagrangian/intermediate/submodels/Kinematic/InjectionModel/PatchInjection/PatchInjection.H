@@ -85,8 +85,8 @@ class PatchInjection
         //- Parcel size PDF model
         const autoPtr<pdfs::pdf> parcelPDF_;
 
-        //- Cell owners
-        labelList cellOwners_;
+        //- List of cell labels corresponding to injector positions
+        labelList injectorCells_;
 
         //- Fraction of injection controlled by this processor
         scalar fraction_;
@@ -101,14 +101,14 @@ protected:
         (
             const scalar time0,
             const scalar time1
-        ) const;
+        );
 
         //- Volume of parcels to introduce over the time step relative to SOI
         scalar volumeToInject
         (
             const scalar time0,
             const scalar time1
-        ) const;
+        );
 
 
 public:
@@ -142,14 +142,16 @@ public:
 
         // Injection geometry
 
-            //- Set the injection position and owner cell
+            //- Set the injection position and owner cell, tetFace and tetPt
             virtual void setPositionAndCell
             (
                 const label parcelI,
                 const label nParcels,
                 const scalar time,
                 vector& position,
-                label& cellOwner
+                label& cellOwner,
+                label& tetFaceI,
+                label& tetPtI
             );
 
             virtual void setProperties

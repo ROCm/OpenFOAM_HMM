@@ -76,9 +76,6 @@ class PairCollision
 
     // Private data
 
-        //- Cell occupancy information for each parcel
-        List<DynamicList<typename CloudType::parcelType*> > cellOccupancy_;
-
         //- PairModel to calculate the interaction between two parcels
         autoPtr<PairModel<CloudType> > pairModel_;
 
@@ -123,9 +120,6 @@ class PairCollision
 
         //- Post collision tasks
         void postInteraction();
-
-        //- Build the cell occupancy information for each parcel
-        void buildCellOccupancy();
 
         //- Calculate the pair force between parcels
         void evaluatePair

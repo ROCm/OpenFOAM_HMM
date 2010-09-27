@@ -41,6 +41,7 @@ SourceFiles
 #include "vector.H"
 #include "volFieldsFwd.H"
 #include "interpolation.H"
+#include "tetIndices.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -179,7 +180,7 @@ public:
             vector calcCoupled
             (
                 const vector& position,
-                const label cellI,
+                const tetIndices& tetIs,
                 const scalar dt,
                 const scalar rhoc,
                 const scalar rho,
@@ -192,7 +193,7 @@ public:
             vector calcNonCoupled
             (
                 const vector& position,
-                const label cellI,
+                const tetIndices& tetIs,
                 const scalar dt,
                 const scalar rhoc,
                 const scalar rho,

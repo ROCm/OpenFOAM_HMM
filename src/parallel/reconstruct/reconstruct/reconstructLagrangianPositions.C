@@ -50,11 +50,18 @@ void Foam::reconstructLagrangianPositions
     {
         const labelList& cellMap = cellProcAddressing[i];
 
+        // faceProcAddressing not required currently.
+        // const labelList& faceMap = faceProcAddressing[i];
+
         Cloud<passiveParticle> lpi(meshes[i], cloudName, false);
 
         forAllConstIter(Cloud<passiveParticle>, lpi, iter)
         {
             const passiveParticle& ppi = iter();
+
+            // // Inverting sign if necessary and subtracting 1 from
+            // // faceProcAddressing
+            // label mappedTetFace = mag(faceMap[ppi.tetFace()]) - 1;
 
             lagrangianPositions.append
             (
@@ -62,7 +69,8 @@ void Foam::reconstructLagrangianPositions
                 (
                     lagrangianPositions,
                     ppi.position(),
-                    cellMap[ppi.cell()]
+                    cellMap[ppi.cell()],
+                    false
                 )
             );
         }

@@ -138,10 +138,8 @@ void Foam::surfaceFilmModels::noFilm::addSources
 
 const Foam::volVectorField& Foam::surfaceFilmModels::noFilm::U() const
 {
-    FatalErrorIn
-    (
-        "const volScalarField& noFilm::U() const"
-    )   << "U field not available for " << type() << abort(FatalError);
+    FatalErrorIn("const volScalarField& noFilm::U() const")
+        << "U field not available for " << type() << abort(FatalError);
 
     return volVectorField::null();
 }
@@ -149,10 +147,8 @@ const Foam::volVectorField& Foam::surfaceFilmModels::noFilm::U() const
 
 const Foam::volVectorField& Foam::surfaceFilmModels::noFilm::Us() const
 {
-    FatalErrorIn
-    (
-        "const volScalarField& noFilm::Us() const"
-    )   << "Us field not available for " << type() << abort(FatalError);
+    FatalErrorIn("const volScalarField& noFilm::Us() const")
+        << "Us field not available for " << type() << abort(FatalError);
 
     return volVectorField::null();
 }
@@ -160,10 +156,8 @@ const Foam::volVectorField& Foam::surfaceFilmModels::noFilm::Us() const
 
 const Foam::volVectorField& Foam::surfaceFilmModels::noFilm::Uw() const
 {
-    FatalErrorIn
-    (
-        "const volScalarField& noFilm::Uw() const"
-    )   << "Uw field not available for " << type() << abort(FatalError);
+    FatalErrorIn("const volScalarField& noFilm::Uw() const")
+        << "Uw field not available for " << type() << abort(FatalError);
 
     return volVectorField::null();
 }
@@ -171,10 +165,8 @@ const Foam::volVectorField& Foam::surfaceFilmModels::noFilm::Uw() const
 
 const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::rho() const
 {
-    FatalErrorIn
-    (
-        "const volScalarField& noFilm::rho() const"
-    )   << "rho field not available for " << type() << abort(FatalError);
+    FatalErrorIn("const volScalarField& noFilm::rho() const")
+        << "rho field not available for " << type() << abort(FatalError);
 
     return volScalarField::null();
 }
@@ -182,10 +174,8 @@ const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::rho() const
 
 const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::T() const
 {
-    FatalErrorIn
-    (
-        "const Foam::volScalarField& Foam::noFilm::T() const"
-    )   << "T field not available for " << type() << abort(FatalError);
+    FatalErrorIn("const Foam::volScalarField& Foam::noFilm::T() const")
+        << "T field not available for " << type() << abort(FatalError);
 
     return volScalarField::null();
 }
@@ -193,10 +183,8 @@ const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::T() const
 
 const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::Ts() const
 {
-    FatalErrorIn
-    (
-        "const Foam::volScalarField& Foam::noFilm::Ts() const"
-    )   << "Ts field not available for " << type() << abort(FatalError);
+    FatalErrorIn("const Foam::volScalarField& Foam::noFilm::Ts() const")
+        << "Ts field not available for " << type() << abort(FatalError);
 
     return volScalarField::null();
 }
@@ -204,10 +192,8 @@ const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::Ts() const
 
 const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::Tw() const
 {
-    FatalErrorIn
-    (
-        "const Foam::volScalarField& Foam::noFilm::Tw() const"
-    )   << "Tw field not available for " << type() << abort(FatalError);
+    FatalErrorIn("const Foam::volScalarField& Foam::noFilm::Tw() const")
+        << "Tw field not available for " << type() << abort(FatalError);
 
     return volScalarField::null();
 }
@@ -215,10 +201,8 @@ const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::Tw() const
 
 const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::cp() const
 {
-    FatalErrorIn
-    (
-        "const volScalarField& noFilm::cp() const"
-    )   << "cp field not available for " << type() << abort(FatalError);
+    FatalErrorIn("const volScalarField& noFilm::cp() const")
+        << "cp field not available for " << type() << abort(FatalError);
 
     return volScalarField::null();
 }
@@ -226,10 +210,8 @@ const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::cp() const
 
 const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::kappa() const
 {
-    FatalErrorIn
-    (
-        "const volScalarField& noFilm::kappa() const"
-    )   << "kappa field not available for " << type() << abort(FatalError);
+    FatalErrorIn("const volScalarField& noFilm::kappa() const")
+        << "kappa field not available for " << type() << abort(FatalError);
 
     return volScalarField::null();
 }
@@ -238,10 +220,8 @@ const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::kappa() const
 const Foam::volScalarField&
 Foam::surfaceFilmModels::noFilm::massForPrimary() const
 {
-    FatalErrorIn
-    (
-        "const volScalarField& noFilm::massForPrimary() const"
-    )   << "massForPrimary field not available for " << type()
+    FatalErrorIn("const volScalarField& noFilm::massForPrimary() const")
+        << "massForPrimary field not available for " << type()
         << abort(FatalError);
 
     return volScalarField::null();
@@ -251,10 +231,8 @@ Foam::surfaceFilmModels::noFilm::massForPrimary() const
 const Foam::volScalarField&
 Foam::surfaceFilmModels::noFilm::diametersForPrimary() const
 {
-    FatalErrorIn
-    (
-        "const volScalarField& noFilm::diametersForPrimary() const"
-    )   << "diametersForPrimary field not available for " << type()
+    FatalErrorIn("const volScalarField& noFilm::diametersForPrimary() const")
+        << "diametersForPrimary field not available for " << type()
         << abort(FatalError);
 
     return volScalarField::null();
@@ -267,10 +245,79 @@ Foam::surfaceFilmModels::noFilm::massPhaseChangeForPrimary() const
     FatalErrorIn
     (
         "const volScalarField& noFilm::massPhaseChangeForPrimary() const"
-    )   << "massPhaseChangeForPrimary field not available for " << type()
+    )   << "massPhaseChange field not available for " << type()
         << abort(FatalError);
 
     return volScalarField::null();
+}
+
+
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::surfaceFilmModels::noFilm::Srho() const
+{
+    return tmp<DimensionedField<scalar, volMesh> >
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                "noFilm::Srho",
+                time_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+        )
+    );
+}
+
+
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::surfaceFilmModels::noFilm::Srho(const label) const
+{
+    return tmp<DimensionedField<scalar, volMesh> >
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                "kinematicSingleLayer::Srho(i)",
+                time_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+        )
+    );
+}
+
+
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::surfaceFilmModels::noFilm::Sh() const
+{
+    return tmp<DimensionedField<scalar, volMesh> >
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                "kinematicSingleLayer::Sh",
+                time_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimEnergy/dimVolume/dimTime, 0.0)
+        )
+    );
 }
 
 

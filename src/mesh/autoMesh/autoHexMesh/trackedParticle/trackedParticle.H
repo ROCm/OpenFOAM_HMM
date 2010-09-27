@@ -26,8 +26,7 @@ Class
 
 Description
     Particle class that marks cells it passes through. Used to mark cells
-    visited by feature edges. Uses ExactParticle tracking class so
-    will work on concave cells.
+    visited by feature edges.
 
 SourceFiles
     trackedParticle.C
@@ -37,7 +36,7 @@ SourceFiles
 #ifndef trackedParticle_H
 #define trackedParticle_H
 
-#include "ExactParticle.H"
+#include "Particle.H"
 #include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -53,7 +52,7 @@ class trackedParticleCloud;
 
 class trackedParticle
 :
-    public ExactParticle<trackedParticle>
+    public Particle<trackedParticle>
 {
     // Private data
 
@@ -118,7 +117,9 @@ public:
         (
             const Cloud<trackedParticle>& c,
             const vector& position,
-            const label celli,
+            const label cellI,
+            const label tetFaceI,
+            const label tetPtI,
             const point& end,
             const label level,
             const label i,
@@ -174,13 +175,17 @@ public:
             (
                 const polyPatch&,
                 trackedParticle::trackData& td,
-                const label patchI
+                const label patchI,
+                const scalar trackFraction,
+                const tetIndices& tetIs
             );
             bool hitPatch
             (
                 const polyPatch&,
                 int&,
-                const label patchI
+                const label patchI,
+                const scalar trackFraction,
+                const tetIndices& tetIs
            );
 
             //- Overridable function to handle the particle hitting a wedge
@@ -237,12 +242,14 @@ public:
             void hitWallPatch
             (
                 const wallPolyPatch&,
-                trackedParticle::trackData& td
+                trackedParticle::trackData& td,
+                const tetIndices&
             );
             void hitWallPatch
             (
                 const wallPolyPatch&,
-                int&
+                int&,
+                const tetIndices&
             );
 
             //- Overridable function to handle the particle hitting a polyPatch

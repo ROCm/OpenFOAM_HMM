@@ -81,14 +81,17 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
 (
     KinematicCloud<ParcelType>& owner,
     const vector& position,
-    const label cellI
+    const label cellI,
+    const label tetFaceI,
+    const label tetPtI
 )
 :
-    Particle<ParcelType>(owner, position, cellI),
+    Particle<ParcelType>(owner, position, cellI, tetFaceI, tetPtI),
     active_(true),
     typeId_(owner.parcelTypeId()),
     nParticle_(0),
     d_(0.0),
+    dTarget_(0.0),
     U_(vector::zero),
     f_(vector::zero),
     angularMomentum_(vector::zero),
@@ -109,9 +112,12 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     KinematicCloud<ParcelType>& owner,
     const vector& position,
     const label cellI,
+    const label tetFaceI,
+    const label tetPtI,
     const label typeId,
     const scalar nParticle0,
     const scalar d0,
+    const scalar dTarget0,
     const vector& U0,
     const vector& f0,
     const vector& angularMomentum0,
@@ -119,11 +125,12 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     const constantProperties& constProps
 )
 :
-    Particle<ParcelType>(owner, position, cellI),
+    Particle<ParcelType>(owner, position, cellI, tetFaceI, tetPtI),
     active_(true),
     typeId_(typeId),
     nParticle_(nParticle0),
     d_(d0),
+    dTarget_(dTarget0),
     U_(U0),
     f_(f0),
     angularMomentum_(angularMomentum0),
@@ -289,6 +296,13 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::d() const
 
 
 template <class ParcelType>
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::dTarget() const
+{
+    return dTarget_;
+}
+
+
+template <class ParcelType>
 inline const Foam::vector& Foam::KinematicParcel<ParcelType>::U() const
 {
     return U_;
@@ -377,6 +391,13 @@ inline Foam::scalar& Foam::KinematicParcel<ParcelType>::d()
 
 
 template <class ParcelType>
+inline Foam::scalar& Foam::KinematicParcel<ParcelType>::dTarget()
+{
+    return dTarget_;
+}
+
+
+template <class ParcelType>
 inline Foam::vector& Foam::KinematicParcel<ParcelType>::U()
 {
     return U_;
@@ -439,23 +460,7 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::wallImpactDistance
     const vector&
 ) const
 {
-    const KinematicCloud<ParcelType>& c =
-        dynamic_cast<const KinematicCloud<ParcelType>&>(this->cloud());
-
-    if (c.collision().controlsWallInteraction())
-    {
-        // Do not use a wall impact distance if the collision model
-        // controls wall interactions to allow proper multiple face
-        // collisions.  In a twisted mesh the particle can be within
-        // range of a wall but not in the cell attached to a wall
-        // face, hence miss the interaction.
-
-        return 0.0;
-    }
-    else
-    {
-        return 0.5*d_;
-    }
+    return 0.5*d_;
 }
 
 
@@ -516,7 +521,7 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::volume() const
 
 template <class ParcelType>
 inline Foam::scalar
-Foam::KinematicParcel<ParcelType>::volume(const scalar d) const
+Foam::KinematicParcel<ParcelType>::volume(const scalar d)
 {
     return pi/6.0*pow3(d);
 }
@@ -531,7 +536,7 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::areaP() const
 
 template <class ParcelType>
 inline Foam::scalar
-Foam::KinematicParcel<ParcelType>::areaP(const scalar d) const
+Foam::KinematicParcel<ParcelType>::areaP(const scalar d)
 {
     return 0.25*areaS(d);
 }
@@ -546,7 +551,7 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::areaS() const
 
 template <class ParcelType>
 inline Foam::scalar
-Foam::KinematicParcel<ParcelType>::areaS(const scalar d) const
+Foam::KinematicParcel<ParcelType>::areaS(const scalar d)
 {
     return pi*d*d;
 }

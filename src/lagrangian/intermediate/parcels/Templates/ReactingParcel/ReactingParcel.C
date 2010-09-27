@@ -42,7 +42,12 @@ void Foam::ReactingParcel<ParcelType>::setCellValues
 {
     ThermoParcel<ParcelType>::setCellValues(td, dt, cellI);
 
-    pc_ = td.pInterp().interpolate(this->position(), cellI);
+    pc_ = td.pInterp().interpolate
+    (
+        this->position(),
+        this->currentTetIndices()
+    );
+
     if (pc_ < td.constProps().pMin())
     {
         WarningIn

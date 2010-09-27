@@ -81,8 +81,14 @@ class KinematicLookupTableInjection
         //- List of injectors
         kinematicParcelInjectionDataIOList injectors_;
 
-        //- List of injector cells per injector
-        List<label> injectorCells_;
+        //- List of cell labels corresponding to injector positions
+        labelList injectorCells_;
+
+        //- List of tetFace labels corresponding to injector positions
+        labelList injectorTetFaces_;
+
+        //- List of tetPt labels corresponding to injector positions
+        labelList injectorTetPts_;
 
 
 protected:
@@ -94,14 +100,14 @@ protected:
         (
             const scalar time0,
             const scalar time1
-        ) const;
+        );
 
         //- Volume of parcels to introduce over the time step relative to SOI
         scalar volumeToInject
         (
             const scalar time0,
             const scalar time1
-        ) const;
+        );
 
 
 public:
@@ -135,14 +141,16 @@ public:
 
         // Injection geometry
 
-            //- Set the injection position and owner cell
+            //- Set the injection position and owner cell, tetFace and tetPt
             virtual void setPositionAndCell
             (
                 const label parcelI,
                 const label nParcels,
                 const scalar time,
                 vector& position,
-                label& cellOwner
+                label& cellOwner,
+                label& tetFaceI,
+                label& tetPtI
             );
 
             //- Set the parcel properties

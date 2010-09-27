@@ -74,8 +74,11 @@ Foam::surfaceFilmModels::standardPhaseChange::standardPhaseChange
 )
 :
     phaseChangeModel(typeName, owner, dict),
+    Tb_(readScalar(coeffs_.lookup("Tb"))),
     deltaMin_(readScalar(coeffs_.lookup("deltaMin"))),
-    L_(readScalar(coeffs_.lookup("L")))
+    L_(readScalar(coeffs_.lookup("L"))),
+    totalMass_(0.0),
+    vapourRate_(0.0)
 {}
 
 
@@ -94,6 +97,9 @@ void Foam::surfaceFilmModels::standardPhaseChange::correct
     scalarField& dEnergy
 )
 {
+    dMass = 0.0;
+    dEnergy = 0.0;
+
     const thermoSingleLayer& film = refCast<const thermoSingleLayer>(owner_);
 
     // set local thermo properties
@@ -107,76 +113,102 @@ void Foam::surfaceFilmModels::standardPhaseChange::correct
     const scalarField& YInf = film.YPrimary()[vapId];
     const scalarField& pInf = film.pPrimary();
     const scalarField& T = film.T();
-    const scalarField& Ts = film.Ts();
     const scalarField& Tw = film.Tw();
-    const scalarField& TInf = film.TPrimary();
     const scalarField& rho = film.rho();
-    const scalarField& mu = film.mu();
+    const scalarField& TInf = film.TPrimary();
+    const scalarField& rhoInf = film.rhoPrimary();
+    const scalarField& muInf = film.muPrimary();
     const scalarField& magSf = film.magSf();
     const scalarField hInf = film.htcs().h();
     const scalarField hFilm = film.htcw().h();
     const vectorField dU = film.UPrimary() - film.Us();
-    const scalarField availableMass = delta*rho*magSf;
+    const scalarField availableMass = (delta - deltaMin_)*rho*magSf;
 
-    // Reynolds number
-    const scalarField Re = rho*mag(dU)*L_/mu;
-
-    // molecular weight of vapour
-    const scalar Wvap = thermo.carrier().W(vapId);
-
-    // molecular weight of liquid
-    const scalar Wliq = liq.W();
 
     forAll(dMass, cellI)
     {
         if (delta[cellI] > deltaMin_)
         {
-            // cell pressure
+            // cell pressure [Pa]
             const scalar pc = pInf[cellI];
 
-            // saturation pressure
-            const scalar pSat = liq.pv(pc, Ts[cellI]);
+            // local temperature - impose lower limit of 200 K for stability
+            const scalar Tloc = min(liq.Tc(), max(200.0, T[cellI]));
 
-            // latent heat
-            const scalar hVap = liq.hl(pc, Ts[cellI]);
+            // saturation pressure [Pa]
+            const scalar pSat = liq.pv(pc, Tloc);
+
+            // latent heat [J/kg]
+            const scalar hVap = liq.hl(pc, Tloc);
 
             // calculate mass transfer
-            if (pSat > pc)
+            if (pSat >= 0.95*pc)
             {
                 // boiling
                 const scalar qDotInf = hInf[cellI]*(TInf[cellI] - T[cellI]);
                 const scalar qDotFilm = hFilm[cellI]*(T[cellI] - Tw[cellI]);
-                dMass[cellI] = dt*magSf[cellI]/hVap*(qDotInf - qDotFilm);
+
+                const scalar cp = liq.cp(pc, Tloc);
+                const scalar qCorr = availableMass[cellI]*cp*(T[cellI] - Tb_);
+                dMass[cellI] =
+                    dt*magSf[cellI]/hVap*(qDotInf + qDotFilm)
+                  + qCorr/hVap;
+
             }
             else
             {
+                // Primary region density [kg/m3]
+                const scalar rhoInfc = rhoInf[cellI];
+
+                // Primary region viscosity [Pa.s]
+                const scalar muInfc = muInf[cellI];
+
+                // Reynolds number
+                const scalar Re = rhoInfc*mag(dU[cellI])*L_/muInfc;
+
+                // molecular weight of vapour [kg/kmol]
+                const scalar Wvap = thermo.carrier().W(vapId);
+
+                // molecular weight of liquid [kg/kmol]
+                const scalar Wliq = liq.W();
+
                 // vapour mass fraction at interface
                 const scalar Ys = Wliq*pSat/(Wliq*pSat + Wvap*(pc - pSat));
 
-                // bulk gas average density
-                const scalar rhoAve = pc/(specie::RR*Ts[cellI]);
-
                 // vapour diffusivity [m2/s]
-                const scalar Dab = liq.D(pc, Ts[cellI]);
+                const scalar Dab = liq.D(pc, Tloc);
 
                 // Schmidt number
-                const scalar Sc = mu[cellI]/(rho[cellI]*(Dab + ROOTVSMALL));
+                const scalar Sc = muInfc/(rhoInfc*(Dab + ROOTVSMALL));
 
                 // Sherwood number
-                const scalar Sh = this->Sh(Re[cellI], Sc);
+                const scalar Sh = this->Sh(Re, Sc);
 
                 // mass transfer coefficient [m/s]
                 const scalar hm = Sh*Dab/L_;
 
                 // add mass contribution to source
                 dMass[cellI] =
-                    dt*magSf[cellI]*rhoAve*hm*(Ys - YInf[cellI])/(1.0 - Ys);
+                    dt*magSf[cellI]*rhoInfc*hm*(Ys - YInf[cellI])/(1.0 - Ys);
             }
 
             dMass[cellI] = min(availableMass[cellI], max(0.0, dMass[cellI]));
             dEnergy[cellI] = dMass[cellI]*hVap;
         }
     }
+
+    const scalar sumdMass = sum(dMass);
+    totalMass_ += sumdMass;
+    vapourRate_ = sumdMass/owner().time().deltaTValue();
+}
+
+
+void Foam::surfaceFilmModels::standardPhaseChange::info() const
+{
+    Info<< indent << "mass phase change  = "
+        << returnReduce(totalMass_, sumOp<scalar>()) << nl
+        << indent << "vapourisation rate = "
+        << returnReduce(vapourRate_, sumOp<scalar>()) << nl;
 }
 
 

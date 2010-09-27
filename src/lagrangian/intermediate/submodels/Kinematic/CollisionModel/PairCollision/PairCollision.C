@@ -51,8 +51,6 @@ void Foam::PairCollision<CloudType>::preInteraction()
 
         p.torque() = vector::zero;
     }
-
-    buildCellOccupancy();
 }
 
 
@@ -61,7 +59,7 @@ void Foam::PairCollision<CloudType>::parcelInteraction()
 {
     PstreamBuffers pBufs(Pstream::nonBlocking);
 
-    il_.sendReferredData(cellOccupancy_, pBufs);
+    il_.sendReferredData(this->owner().cellOccupancy(), pBufs);
 
     realRealInteraction();
 
@@ -80,17 +78,20 @@ void Foam::PairCollision<CloudType>::realRealInteraction()
     typename CloudType::parcelType* pA_ptr = NULL;
     typename CloudType::parcelType* pB_ptr = NULL;
 
+    List<DynamicList<typename CloudType::parcelType*> >& cellOccupancy =
+        this->owner().cellOccupancy();
+
     forAll(dil, realCellI)
     {
         // Loop over all Parcels in cell A (a)
-        forAll(cellOccupancy_[realCellI], a)
+        forAll(cellOccupancy[realCellI], a)
         {
-            pA_ptr = cellOccupancy_[realCellI][a];
+            pA_ptr = cellOccupancy[realCellI][a];
 
             forAll(dil[realCellI], interactingCells)
             {
                 List<typename CloudType::parcelType*> cellBParcels =
-                    cellOccupancy_[dil[realCellI][interactingCells]];
+                    cellOccupancy[dil[realCellI][interactingCells]];
 
                 // Loop over all Parcels in cell B (b)
                 forAll(cellBParcels, b)
@@ -102,9 +103,9 @@ void Foam::PairCollision<CloudType>::realRealInteraction()
             }
 
             // Loop over the other Parcels in cell A (aO)
-            forAll(cellOccupancy_[realCellI], aO)
+            forAll(cellOccupancy[realCellI], aO)
             {
-                pB_ptr = cellOccupancy_[realCellI][aO];
+                pB_ptr = cellOccupancy[realCellI][aO];
 
                 // Do not double-evaluate, compare pointers, arbitrary
                 // order
@@ -126,6 +127,9 @@ void Foam::PairCollision<CloudType>::realReferredInteraction()
 
     List<IDLList<typename CloudType::parcelType> >& referredParticles =
     il_.referredParticles();
+
+    List<DynamicList<typename CloudType::parcelType*> >& cellOccupancy =
+        this->owner().cellOccupancy();
 
     // Loop over all referred cells
     forAll(ril, refCellI)
@@ -150,7 +154,7 @@ void Foam::PairCollision<CloudType>::realReferredInteraction()
             forAll(realCells, realCellI)
             {
                 List<typename CloudType::parcelType*> realCellParcels =
-                    cellOccupancy_[realCells[realCellI]];
+                    cellOccupancy[realCells[realCellI]];
 
                 forAll(realCellParcels, realParcelI)
                 {
@@ -179,6 +183,9 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
     const volVectorField& U = mesh.lookupObject<volVectorField>(il_.UName());
 
+    List<DynamicList<typename CloudType::parcelType*> >& cellOccupancy =
+        this->owner().cellOccupancy();
+
     // Storage for the wall interaction sites
     DynamicList<point> flatSitePoints;
     DynamicList<scalar> flatSiteExclusionDistancesSqr;
@@ -196,7 +203,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
         const labelList& realWallFaces = directWallFaces[realCellI];
 
         // Loop over all Parcels in cell
-        forAll(cellOccupancy_[realCellI], cellParticleI)
+        forAll(cellOccupancy[realCellI], cellParticleI)
         {
             flatSitePoints.clear();
             flatSiteExclusionDistancesSqr.clear();
@@ -209,7 +216,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
             sharpSiteData.clear();
 
             typename CloudType::parcelType& p =
-                *cellOccupancy_[realCellI][cellParticleI];
+                *cellOccupancy[realCellI][cellParticleI];
 
             const point& pos = p.position();
 
@@ -483,21 +490,6 @@ void Foam::PairCollision<CloudType>::postInteraction()
 
 
 template<class CloudType>
-void Foam::PairCollision<CloudType>::buildCellOccupancy()
-{
-    forAll(cellOccupancy_, cO)
-    {
-        cellOccupancy_[cO].clear();
-    }
-
-    forAllIter(typename CloudType, this->owner(), iter)
-    {
-        cellOccupancy_[iter().cell()].append(&iter());
-    }
-}
-
-
-template<class CloudType>
 void Foam::PairCollision<CloudType>::evaluatePair
 (
     typename CloudType::parcelType& pA,
@@ -539,7 +531,6 @@ Foam::PairCollision<CloudType>::PairCollision
 )
 :
     CollisionModel<CloudType>(dict, owner, typeName),
-    cellOccupancy_(owner.mesh().nCells()),
     pairModel_
     (
         PairModel<CloudType>::New
@@ -560,7 +551,14 @@ Foam::PairCollision<CloudType>::PairCollision
     (
         owner.mesh(),
         readScalar(this->coeffDict().lookup("maxInteractionDistance")),
-        Switch(this->coeffDict().lookup("writeReferredParticleCloud")),
+        Switch
+        (
+            this->coeffDict().lookupOrDefault
+            (
+                "writeReferredParticleCloud",
+                false
+            )
+        ),
         this->coeffDict().lookupOrDefault("UName", word("U"))
     )
 {}

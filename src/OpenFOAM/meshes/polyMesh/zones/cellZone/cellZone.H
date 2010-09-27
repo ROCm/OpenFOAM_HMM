@@ -209,6 +209,13 @@ public:
         //- Check zone definition. Return true if in error.
         virtual bool checkDefinition(const bool report = false) const;
 
+        //- Check whether zone is synchronised across coupled boundaries. Return
+        //  true if in error.
+        virtual bool checkParallelSync(const bool report = false) const
+        {
+            return false;
+        }
+
         //- Write dictionary
         virtual void writeDict(Ostream&) const;
 

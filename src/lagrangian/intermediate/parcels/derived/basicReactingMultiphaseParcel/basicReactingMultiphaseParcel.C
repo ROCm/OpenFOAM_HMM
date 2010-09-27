@@ -31,14 +31,18 @@ Foam::basicReactingMultiphaseParcel::basicReactingMultiphaseParcel
 (
     ReactingMultiphaseCloud<basicReactingMultiphaseParcel>& owner,
     const vector& position,
-    const label cellI
+    const label cellI,
+    const label tetFaceI,
+    const label tetPtI
 )
 :
     ReactingMultiphaseParcel<basicReactingMultiphaseParcel>
     (
         owner,
         position,
-        cellI
+        cellI,
+        tetFaceI,
+        tetPtI
     )
 {}
 
@@ -48,9 +52,12 @@ Foam::basicReactingMultiphaseParcel::basicReactingMultiphaseParcel
     ReactingMultiphaseCloud<basicReactingMultiphaseParcel>& owner,
     const vector& position,
     const label cellI,
+    const label tetFaceI,
+    const label tetPtI,
     const label typeId,
     const scalar nParticle0,
     const scalar d0,
+    const scalar dTarget0,
     const vector& U0,
     const vector& f0,
     const vector& angularMomentum0,
@@ -63,14 +70,17 @@ Foam::basicReactingMultiphaseParcel::basicReactingMultiphaseParcel
         constantProperties& constProps
 )
 :
-    ReactingMultiphaseParcel<basicReactingMultiphaseParcel >
+    ReactingMultiphaseParcel<basicReactingMultiphaseParcel>
     (
         owner,
         position,
         cellI,
+        tetFaceI,
+        tetPtI,
         typeId,
         nParticle0,
         d0,
+        dTarget0,
         U0,
         f0,
         angularMomentum0,
