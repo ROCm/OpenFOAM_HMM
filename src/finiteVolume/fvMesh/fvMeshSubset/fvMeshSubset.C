@@ -675,6 +675,8 @@ void Foam::fvMeshSubset::setCellSubset
     }
 
 
+    // Delete any old mesh
+    fvMeshSubsetPtr_.clear();
     // Make a new mesh
     fvMeshSubsetPtr_.reset
     (
@@ -1169,11 +1171,15 @@ void Foam::fvMeshSubset::setLargeCellSubset
     }
 
 
+    // Delete any old one
+    fvMeshSubsetPtr_.clear();
+
     // Make a new mesh
     // Note that mesh gets registered with same name as original mesh. This is
     // not proper but cannot be avoided since otherwise surfaceInterpolation
     // cannot find its fvSchemes (it will try to read e.g.
     // system/region0SubSet/fvSchemes)
+    // Make a new mesh
     fvMeshSubsetPtr_.reset
     (
         new fvMesh
