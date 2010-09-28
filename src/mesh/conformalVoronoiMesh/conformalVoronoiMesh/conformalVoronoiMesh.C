@@ -924,7 +924,8 @@ void Foam::conformalVoronoiMesh::updateSizesAndAlignments
 {
     if
     (
-        runTime_.timeIndex()
+        runTime_.run()
+     && runTime_.timeIndex()
       % cvMeshControls().sizeAndAlignmentRebuildFrequency() == 0
     )
     {
