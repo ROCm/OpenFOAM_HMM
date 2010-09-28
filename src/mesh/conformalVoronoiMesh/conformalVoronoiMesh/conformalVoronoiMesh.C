@@ -33,7 +33,7 @@ License
 Foam::conformalVoronoiMesh::conformalVoronoiMesh
 (
     const Time& runTime,
-    const IOdictionary& cvMeshDict
+    const dictionary& cvMeshDict
 )
 :
     HTriangulation(),
@@ -519,7 +519,28 @@ void Foam::conformalVoronoiMesh::insertFlatEdgePointGroup
     const pointIndexHit& edHit
 )
 {
-    Info<< "NOT INSERTING FLAT EDGE POINT GROUP, NOT IMPLEMENTED" << endl;
+    const point& edgePt = edHit.hitPoint();
+
+    scalar ppDist = pointPairDistance(edgePt);
+
+    const vectorField& feNormals = feMesh.normals();
+    const labelList& edNormalIs = feMesh.edgeNormals()[edHit.index()];
+
+    // As this is a flat edge, there are two normals by definition
+    const vector& nA = feNormals[edNormalIs[0]];
+    const vector& nB = feNormals[edNormalIs[1]];
+
+    // Average normal to remove any bias to one side, although as this
+    // is a flat edge, the normals should be essentially the same
+    vector n = 0.5*(nA + nB);
+
+    // Direction along the surface to the control point, sense of edge
+    // direction not important, as +s and -s can be used because this
+    // is a flat edge
+    vector s = 2.0*ppDist*(feMesh.edgeDirections()[edHit.index()] ^ n);
+
+    insertPointPair(ppDist, edgePt + s, n);
+    insertPointPair(ppDist, edgePt - s, n);
 }
 
 

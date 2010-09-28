@@ -25,7 +25,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::IOdictionary& Foam::cvControls::cvMeshDict() const
+inline const Foam::dictionary& Foam::cvControls::cvMeshDict() const
 {
     return cvMeshDict_;
 }

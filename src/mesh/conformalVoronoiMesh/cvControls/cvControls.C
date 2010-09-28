@@ -31,7 +31,7 @@ License
 Foam::cvControls::cvControls
 (
     const conformalVoronoiMesh& cvMesh,
-    const IOdictionary& cvMeshDict
+    const dictionary& cvMeshDict
 )
 :
     cvMesh_(cvMesh),

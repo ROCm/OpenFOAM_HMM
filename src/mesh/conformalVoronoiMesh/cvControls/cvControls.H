@@ -35,7 +35,7 @@ SourceFiles
 #ifndef cvControls_H
 #define cvControls_H
 
-#include "IOdictionary.H"
+#include "dictionary.H"
 #include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -58,7 +58,7 @@ class cvControls
         const conformalVoronoiMesh& cvMesh_;
 
         //- Reference to the cvMeshDict
-        const IOdictionary& cvMeshDict_;
+        const dictionary& cvMeshDict_;
 
         // General parameters
 
@@ -282,11 +282,11 @@ public:
 
    // Constructors
 
-        //- Construct from references to conformalVoronoiMesh and IOdictionary
+        //- Construct from references to conformalVoronoiMesh and dictionary
         cvControls
         (
             const conformalVoronoiMesh& cvMesh,
-            const IOdictionary& cvMeshDict
+            const dictionary& cvMeshDict
         );
 
 
@@ -299,7 +299,7 @@ public:
         // Access
 
             //- Return the cvMeshDict
-            inline const IOdictionary& cvMeshDict() const;
+            inline const dictionary& cvMeshDict() const;
 
             //- Return the span
             inline scalar span() const;

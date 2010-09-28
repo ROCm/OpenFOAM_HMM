@@ -657,7 +657,7 @@ public:
         conformalVoronoiMesh
         (
             const Time& runTime,
-            const IOdictionary& cvMeshDict
+            const dictionary& cvMeshDict
         );
 
 
