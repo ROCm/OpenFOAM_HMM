@@ -115,6 +115,12 @@ inline Foam::scalar Foam::cvControls::cosAlignmentAcceptanceAngle() const
 }
 
 
+inline Foam::label Foam::cvControls::sizeAndAlignmentRebuildFrequency() const
+{
+    return sizeAndAlignmentRebuildFrequency_;
+}
+
+
 inline Foam::scalar Foam::cvControls::insertionDistCoeff() const
 {
     return insertionDistCoeff_;

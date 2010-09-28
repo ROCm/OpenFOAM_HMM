@@ -196,6 +196,9 @@ class cvControls
         //  face will be accepted for rotation
         scalar cosAlignmentAcceptanceAngle_;
 
+        //- Now often to re-store the size and alignment data
+        label sizeAndAlignmentRebuildFrequency_;
+
         // Point insertion criteria
 
             //- Length between Delaunay vertices above which a new Dv should be
@@ -364,6 +367,9 @@ public:
 
             //- Return the cosAlignmentAcceptanceAngle
             inline scalar cosAlignmentAcceptanceAngle() const;
+
+            //- Return the sizeAndAlignmentRebuildFrequency
+            inline label sizeAndAlignmentRebuildFrequency() const;
 
             //- Return the insertionDistCoeff
             inline scalar insertionDistCoeff() const;

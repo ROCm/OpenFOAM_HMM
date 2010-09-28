@@ -68,11 +68,11 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     startOfSurfacePointPairs_(0),
     featureVertices_(),
     featurePointLocations_(),
-    featurePointTree_(),
+    featurePointTreePtr_(),
     sizeAndAlignmentLocations_(),
     storedSizes_(),
     storedAlignments_(),
-    sizeAndAlignmentTree_(),
+    sizeAndAlignmentTreePtr_(),
     surfaceConformationVertices_(),
     initialPointsMethod_
     (
@@ -800,7 +800,7 @@ void Foam::conformalVoronoiMesh::reinsertFeaturePoints()
 const Foam::indexedOctree<Foam::treeDataPoint>&
 Foam::conformalVoronoiMesh::featurePointTree() const
 {
-    if (featurePointTree_.empty())
+    if (featurePointTreePtr_.empty())
     {
         Random rndGen(92561);
 
@@ -812,7 +812,7 @@ Foam::conformalVoronoiMesh::featurePointTree() const
         overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
-        featurePointTree_.reset
+        featurePointTreePtr_.reset
         (
             new indexedOctree<treeDataPoint>
             (
@@ -825,7 +825,7 @@ Foam::conformalVoronoiMesh::featurePointTree() const
         );
     }
 
-    return featurePointTree_();
+    return featurePointTreePtr_();
 }
 
 
@@ -862,14 +862,14 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 
 void Foam::conformalVoronoiMesh::storeSizesAndAlignments
 (
-    const std::vector<Point>& initPts
+    const std::vector<Point>& storePts
 )
 {
     timeCheck();
 
-    Info << nl << "Initialise stored size and alignment data" << endl;
+    Info << nl << "Store size and alignment" << endl;
 
-    sizeAndAlignmentLocations_.setSize(initPts.size());
+    sizeAndAlignmentLocations_.setSize(storePts.size());
 
     storedSizes_.setSize(sizeAndAlignmentLocations_.size());
 
@@ -877,7 +877,7 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
 
     forAll(sizeAndAlignmentLocations_, i)
     {
-        sizeAndAlignmentLocations_[i] = topoint(initPts[i]);
+        sizeAndAlignmentLocations_[i] = topoint(storePts[i]);
 
         storedSizes_[i] = cellSizeControl().cellSize
         (
@@ -896,16 +896,33 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
 }
 
 
+void Foam::conformalVoronoiMesh::updateSizesAndAlignments
+(
+    const std::vector<Point>& storePts
+)
+{
+    if
+    (
+        runTime_.timeIndex()
+      % cvMeshControls().sizeAndAlignmentRebuildFrequency() == 0
+    )
+    {
+        storeSizesAndAlignments(storePts);
+    }
+}
+
+
 const Foam::indexedOctree<Foam::treeDataPoint>&
 Foam::conformalVoronoiMesh::sizeAndAlignmentTree() const
 {
-    if (sizeAndAlignmentTree_.empty())
+    if (sizeAndAlignmentTreePtr_.empty())
     {
         buildSizeAndAlignmentTree();
     }
 
-    return sizeAndAlignmentTree_();
+    return sizeAndAlignmentTreePtr_();
 }
+
 
 void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
 {
@@ -1514,6 +1531,8 @@ void Foam::conformalVoronoiMesh::move()
     timeCheck();
 
     conformToSurface();
+
+    updateSizesAndAlignments(pointsToInsert);
 
     timeCheck();
 

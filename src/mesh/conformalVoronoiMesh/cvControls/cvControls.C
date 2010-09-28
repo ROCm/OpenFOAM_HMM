@@ -229,6 +229,12 @@ Foam::cvControls::cvControls
         degToRad(readScalar(motionDict.lookup("alignmentAcceptanceAngle")))
     );
 
+    sizeAndAlignmentRebuildFrequency_ = max
+    (
+        1,
+        readLabel(motionDict.lookup("sizeAndAlignmentRebuildFrequency"))
+    );
+
     // Point removal criteria
 
     const dictionary& insertionDict

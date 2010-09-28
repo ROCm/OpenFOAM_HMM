@@ -134,11 +134,11 @@ private:
         List<Vb> featureVertices_;
 
         //- Storing the locations of all of the features to be conformed to.
-        //  Single pointField required by the featurePointTree_.
+        //  Single pointField required by the featurePointTree.
         pointField featurePointLocations_;
 
         //- Search tree for feature point locations
-        mutable autoPtr<indexedOctree<treeDataPoint> > featurePointTree_;
+        mutable autoPtr<indexedOctree<treeDataPoint> > featurePointTreePtr_;
 
         //- Store locations where the cell size and alignments will be
         //  pre-calculated and looked up
@@ -151,7 +151,7 @@ private:
         tensorField storedAlignments_;
 
         //- Search tree for size and alignment lookup points
-        mutable autoPtr<indexedOctree<treeDataPoint> > sizeAndAlignmentTree_;
+        mutable autoPtr<indexedOctree<treeDataPoint> > sizeAndAlignmentTreePtr_;
 
         //- Store the surface and feature edge conformation locations to be
         //  reinserted
@@ -341,8 +341,11 @@ private:
         void insertInitialPoints();
 
         //- Store data for sizeAndAlignmentLocations_, storedSizes_ and
-        //  storedAlignments_ and initialise the sizeAndAlignmentTree_
-        void storeSizesAndAlignments(const std::vector<Point>& initPts);
+        //  storedAlignments_ and initialise the sizeAndAlignmentTreePtr_
+        void storeSizesAndAlignments(const std::vector<Point>& storePts);
+
+        //- Restore the sizes and alignments if required
+        void updateSizesAndAlignments(const std::vector<Point>& storePts);
 
         //- Demand driven construction of octree for and alignment points
         const indexedOctree<treeDataPoint>& sizeAndAlignmentTree() const;

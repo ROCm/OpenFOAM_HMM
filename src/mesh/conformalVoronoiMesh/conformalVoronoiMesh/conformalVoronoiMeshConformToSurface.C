@@ -668,7 +668,7 @@ void Foam::conformalVoronoiMesh::buildSizeAndAlignmentTree() const
     overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
     overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
-    sizeAndAlignmentTree_.reset
+    sizeAndAlignmentTreePtr_.reset
     (
         new indexedOctree<treeDataPoint>
         (
