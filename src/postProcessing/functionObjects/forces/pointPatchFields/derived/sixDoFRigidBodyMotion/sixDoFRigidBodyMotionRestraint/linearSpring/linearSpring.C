@@ -96,7 +96,7 @@ void Foam::sixDoFRigidBodyMotionRestraints::linearSpring::restrain
 
     if (motion.report())
     {
-        Info<< " attachmentPt - anchor " << r
+        Info<< " attachmentPt - anchor " << r*magR
             << " spring length " << magR
             << " force " << restraintForce
             << " moment " << restraintMoment

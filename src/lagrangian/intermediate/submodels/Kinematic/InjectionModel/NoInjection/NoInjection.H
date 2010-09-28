@@ -60,14 +60,14 @@ protected:
         (
             const scalar,
             const scalar
-        ) const;
+        );
 
         //- Volume of parcels to introduce over the time step relative to SOI
         scalar volumeToInject
         (
             const scalar,
             const scalar
-        ) const;
+        );
 
 
 public:

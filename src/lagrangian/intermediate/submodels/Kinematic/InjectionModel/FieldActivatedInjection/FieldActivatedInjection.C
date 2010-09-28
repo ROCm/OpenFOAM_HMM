@@ -36,7 +36,7 @@ Foam::label Foam::FieldActivatedInjection<CloudType>::parcelsToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     if (sum(nParcelsInjected_) < nParcelsPerInjector_*positions_.size())
     {
@@ -54,7 +54,7 @@ Foam::scalar Foam::FieldActivatedInjection<CloudType>::volumeToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     if (sum(nParcelsInjected_) < nParcelsPerInjector_*positions_.size())
     {

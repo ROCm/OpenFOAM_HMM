@@ -100,14 +100,14 @@ protected:
         (
             const scalar time0,
             const scalar time1
-        ) const;
+        );
 
         //- Volume of parcels to introduce over the time step relative to SOI
         scalar volumeToInject
         (
             const scalar time0,
             const scalar time1
-        ) const;
+        );
 
 
 public:

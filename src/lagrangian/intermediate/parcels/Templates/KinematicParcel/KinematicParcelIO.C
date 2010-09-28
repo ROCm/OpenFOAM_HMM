@@ -37,6 +37,7 @@ Foam::string Foam::KinematicParcel<ParcelType>::propHeader =
   + " typeId"
   + " nParticle"
   + " d"
+  + " dTarget "
   + " (Ux Uy Uz)"
   + " (fx fy fz)"
   + " (angularMomentumx angularMomentumy angularMomentumz)"
@@ -68,6 +69,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     typeId_(0),
     nParticle_(0.0),
     d_(0.0),
+    dTarget_(0.0),
     U_(vector::zero),
     f_(vector::zero),
     angularMomentum_(vector::zero),
@@ -88,6 +90,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
             typeId_ = readLabel(is);
             nParticle_ = readScalar(is);
             d_ = readScalar(is);
+            dTarget_ = readScalar(is);
             is >> U_;
             is >> f_;
             is >> angularMomentum_;
@@ -106,6 +109,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
               + sizeof(typeId_)
               + sizeof(nParticle_)
               + sizeof(d_)
+              + sizeof(dTarget_)
               + sizeof(U_)
               + sizeof(f_)
               + sizeof(angularMomentum_)
@@ -149,6 +153,9 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
 
     IOField<scalar> d(c.fieldIOobject("d", IOobject::MUST_READ));
     c.checkFieldIOobject(c, d);
+
+    IOField<scalar> dTarget(c.fieldIOobject("dTarget", IOobject::MUST_READ));
+    c.checkFieldIOobject(c, dTarget);
 
     IOField<vector> U(c.fieldIOobject("U", IOobject::MUST_READ));
     c.checkFieldIOobject(c, U);
@@ -234,6 +241,7 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
         p.typeId_ = typeId[i];
         p.nParticle_ = nParticle[i];
         p.d_ = d[i];
+        p.dTarget_ = dTarget[i];
         p.U_ = U[i];
         p.f_ = f[i];
         p.angularMomentum_ = angularMomentum[i];
@@ -271,6 +279,7 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
         np
     );
     IOField<scalar> d(c.fieldIOobject("d", IOobject::NO_READ), np);
+    IOField<scalar> dTarget(c.fieldIOobject("dTarget", IOobject::NO_READ), np);
     IOField<vector> U(c.fieldIOobject("U", IOobject::NO_READ), np);
     IOField<vector> f(c.fieldIOobject("f", IOobject::NO_READ), np);
     IOField<vector> angularMomentum
@@ -333,6 +342,7 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
         typeId[i] = p.typeId();
         nParticle[i] = p.nParticle();
         d[i] = p.d();
+        dTarget[i] = p.dTarget();
         U[i] = p.U();
         f[i] = p.f();
         angularMomentum[i] = p.angularMomentum();
@@ -357,6 +367,7 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
     typeId.write();
     nParticle.write();
     d.write();
+    dTarget.write();
     U.write();
     f.write();
     angularMomentum.write();
@@ -390,6 +401,7 @@ Foam::Ostream& Foam::operator<<
             << token::SPACE << p.typeId()
             << token::SPACE << p.nParticle()
             << token::SPACE << p.d()
+            << token::SPACE << p.dTarget()
             << token::SPACE << p.U()
             << token::SPACE << p.f()
             << token::SPACE << p.angularMomentum()
@@ -409,6 +421,7 @@ Foam::Ostream& Foam::operator<<
           + sizeof(p.typeId())
           + sizeof(p.nParticle())
           + sizeof(p.d())
+          + sizeof(p.dTarget())
           + sizeof(p.U())
           + sizeof(p.f())
           + sizeof(p.angularMomentum())

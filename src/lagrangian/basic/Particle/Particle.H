@@ -346,7 +346,8 @@ public:
         (
             const Cloud<ParticleType>&,
             const vector& position,
-            const label cellI
+            const label cellI,
+            bool doCellFacePt = true
         );
 
         //- Construct from Istream

@@ -37,7 +37,7 @@ Foam::label Foam::ManualInjection<CloudType>::parcelsToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     if ((0.0 >= time0) && (0.0 < time1))
     {
@@ -55,7 +55,7 @@ Foam::scalar Foam::ManualInjection<CloudType>::volumeToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     // All parcels introduced at SOI
     if ((0.0 >= time0) && (0.0 < time1))

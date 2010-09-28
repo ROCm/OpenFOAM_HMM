@@ -69,7 +69,8 @@ void Foam::reconstructLagrangianPositions
                 (
                     lagrangianPositions,
                     ppi.position(),
-                    cellMap[ppi.cell()]
+                    cellMap[ppi.cell()],
+                    false
                 )
             );
         }

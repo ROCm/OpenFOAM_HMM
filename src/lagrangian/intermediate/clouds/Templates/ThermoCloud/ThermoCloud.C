@@ -86,7 +86,18 @@ void Foam::ThermoCloud<ParcelType>::evolveCloud()
         this->g().value()
     );
 
+    label preInjectionSize = this->size();
+
+    // Update the cellOccupancy if the size of the cloud has changed
+    // during the injection.
     this->surfaceFilm().inject(td);
+
+    if (preInjectionSize != this->size())
+    {
+        this->updateCellOccupancy();
+
+        preInjectionSize = this->size();
+    }
 
     this->injection().inject(td);
 
@@ -95,7 +106,19 @@ void Foam::ThermoCloud<ParcelType>::evolveCloud()
         resetSourceTerms();
     }
 
-    Cloud<ParcelType>::move(td);
+    // Assume that motion will update the cellOccupancy as necessary
+    // before it is required.
+    motion(td);
+}
+
+
+template<class ParcelType>
+void  Foam::ThermoCloud<ParcelType>::motion
+(
+    typename ParcelType::trackData& td
+)
+{
+    KinematicCloud<ParcelType>::motion(td);
 }
 
 

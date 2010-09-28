@@ -36,7 +36,7 @@ Foam::label Foam::ConeInjectionMP<CloudType>::parcelsToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
@@ -63,7 +63,7 @@ Foam::scalar Foam::ConeInjectionMP<CloudType>::volumeToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {

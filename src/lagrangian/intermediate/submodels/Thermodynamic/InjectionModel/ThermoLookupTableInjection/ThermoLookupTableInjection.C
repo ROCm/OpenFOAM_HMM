@@ -33,7 +33,7 @@ Foam::label Foam::ThermoLookupTableInjection<CloudType>::parcelsToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
@@ -51,7 +51,7 @@ Foam::scalar Foam::ThermoLookupTableInjection<CloudType>::volumeToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     scalar volume = 0.0;
     if ((time0 >= 0.0) && (time0 < duration_))
