@@ -21,7 +21,6 @@ fvVectorMatrix UbEqn(Ub, Ub.dimensions()*dimVol/dimTime);
             ((2.0/3.0)*I)*(sqr(Ct)*k + nuEffa*tr(gradUaT)) - nuEffa*gradUaT
         );
 
-
         if (kineticTheory.on())
         {
             Rca -= ((kineticTheory.lambda()/rhoa)*tr(gradUaT))*tensor(I);

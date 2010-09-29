@@ -48,7 +48,7 @@ namespace Foam
 
 class conductivityModel
 {
-    // Private Member Functions
+    // Private member functions
 
         //- Disallow default bitwise copy construct
         conductivityModel(const conductivityModel&);

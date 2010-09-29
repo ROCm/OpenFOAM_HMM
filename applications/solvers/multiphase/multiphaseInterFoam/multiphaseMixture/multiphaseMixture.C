@@ -24,11 +24,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "multiphaseMixture.H"
-#include "multiphaseAlphaContactAngleFvPatchScalarField.H"
+#include "alphaContactAngleFvPatchScalarField.H"
 #include "Time.H"
 #include "subCycle.H"
 #include "fvCFD.H"
-#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * //
 
@@ -237,7 +236,7 @@ Foam::multiphaseMixture::surfaceTensionForce() const
 }
 
 
-void Foam::multiphaseMixture::correct()
+void Foam::multiphaseMixture::solve()
 {
     forAllIter(PtrDictionary<phase>, phases_, iter)
     {
@@ -296,6 +295,10 @@ void Foam::multiphaseMixture::correct()
 }
 
 
+void Foam::multiphaseMixture::correct()
+{}
+
+
 Foam::tmp<Foam::surfaceVectorField> Foam::multiphaseMixture::nHatfv
 (
     const volScalarField& alpha1,
@@ -351,11 +354,10 @@ void Foam::multiphaseMixture::correctContactAngle
 
     forAll(boundary, patchi)
     {
-        if (isA<multiphaseAlphaContactAngleFvPatchScalarField>(gbf[patchi]))
+        if (isA<alphaContactAngleFvPatchScalarField>(gbf[patchi]))
         {
-            const multiphaseAlphaContactAngleFvPatchScalarField& acap =
-                refCast<const multiphaseAlphaContactAngleFvPatchScalarField>
-                (gbf[patchi]);
+            const alphaContactAngleFvPatchScalarField& acap =
+                refCast<const alphaContactAngleFvPatchScalarField>(gbf[patchi]);
 
             vectorField& nHatPatch = nHatb[patchi];
 
@@ -363,7 +365,7 @@ void Foam::multiphaseMixture::correctContactAngle
                 mesh_.Sf().boundaryField()[patchi]
                /mesh_.magSf().boundaryField()[patchi];
 
-            multiphaseAlphaContactAngleFvPatchScalarField::thetaPropsTable::
+            alphaContactAngleFvPatchScalarField::thetaPropsTable::
                 const_iterator tp =
                 acap.thetaProps().find(interfacePair(alpha1, alpha2));
 
@@ -455,6 +457,34 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseMixture::K
 }
 
 
+Foam::tmp<Foam::surfaceScalarField>
+Foam::multiphaseMixture::nearInterface() const
+{
+    tmp<surfaceScalarField> tnearInt
+    (
+        new surfaceScalarField
+        (
+            IOobject
+            (
+                "nearInterface",
+                mesh_.time().timeName(),
+                mesh_
+            ),
+            mesh_,
+            dimensionedScalar("nearInterface", dimless, 0.0)
+        )
+    );
+
+    forAllConstIter(PtrDictionary<phase>, phases_, iter)
+    {
+        surfaceScalarField alphaf = fvc::interpolate(iter());
+        tnearInt() = max(tnearInt(), pos(alphaf - 0.01)*pos(0.99 - alphaf));
+    }
+
+    return tnearInt;
+}
+
+
 void Foam::multiphaseMixture::solveAlphas
 (
     const label nAlphaCorr,
@@ -466,7 +496,7 @@ void Foam::multiphaseMixture::solveAlphas
     nSolves++;
 
     word alphaScheme("div(phi,alpha)");
-    word alphacScheme("div(phic,alpha)");
+    word alphacScheme("div(phirb,alpha)");
 
     tmp<fv::convectionScheme<scalar> > mvConvection
     (

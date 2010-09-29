@@ -48,7 +48,7 @@ namespace Foam
 
 class granularPressureModel
 {
-    // Private Member Functions
+    // Private member functions
 
         //- Disallow default bitwise copy construct
         granularPressureModel(const granularPressureModel&);

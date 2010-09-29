@@ -43,7 +43,6 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
-    #include "readGravitationalAcceleration.H"
     #include "readPISOControls.H"
     #include "initContinuityErrs.H"
     #include "createFields.H"
@@ -61,13 +60,14 @@ int main(int argc, char *argv[])
         #include "readPISOControls.H"
         #include "readTimeControls.H"
         #include "CourantNo.H"
+        #include "alphaCourantNo.H"
         #include "setDeltaT.H"
 
         runTime++;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        mixture.correct();
+        mixture.solve();
         rho = mixture.rho();
 
         #include "UEqn.H"
@@ -78,18 +78,16 @@ int main(int argc, char *argv[])
             #include "pEqn.H"
         }
 
-        #include "continuityErrs.H"
-
-        //turbulence->correct();
+        turbulence->correct();
 
         runTime.write();
 
-        Info<< "ExecutionTime = "
-            << runTime.elapsedCpuTime()
-            << " s\n" << endl << endl;
+        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+            << nl << endl;
     }
 
-    Info<< "\n end \n";
+    Info<< "End\n" << endl;
 
     return 0;
 }

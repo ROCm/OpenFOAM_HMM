@@ -11,7 +11,7 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "system";
-    object      topoSetDict.2;
+    object      topoSetDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -24,10 +24,9 @@ actions
         source  boxToCell;
         sourceInfo
         {
-            box ( 0 0 -2e-05 ) ( 0.0036 0.0003 2e-05 );
+            box (0 0 -2e-05) (0.0036 0.0003 2e-05);
         }
     }
 );
-
 
 // ************************************************************************* //
