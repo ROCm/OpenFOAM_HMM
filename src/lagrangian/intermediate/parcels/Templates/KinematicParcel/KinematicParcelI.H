@@ -91,6 +91,7 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     typeId_(owner.parcelTypeId()),
     nParticle_(0),
     d_(0.0),
+    dTarget_(0.0),
     U_(vector::zero),
     f_(vector::zero),
     angularMomentum_(vector::zero),
@@ -116,6 +117,7 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     const label typeId,
     const scalar nParticle0,
     const scalar d0,
+    const scalar dTarget0,
     const vector& U0,
     const vector& f0,
     const vector& angularMomentum0,
@@ -128,6 +130,7 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     typeId_(typeId),
     nParticle_(nParticle0),
     d_(d0),
+    dTarget_(dTarget0),
     U_(U0),
     f_(f0),
     angularMomentum_(angularMomentum0),
@@ -293,6 +296,13 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::d() const
 
 
 template <class ParcelType>
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::dTarget() const
+{
+    return dTarget_;
+}
+
+
+template <class ParcelType>
 inline const Foam::vector& Foam::KinematicParcel<ParcelType>::U() const
 {
     return U_;
@@ -377,6 +387,13 @@ template <class ParcelType>
 inline Foam::scalar& Foam::KinematicParcel<ParcelType>::d()
 {
     return d_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar& Foam::KinematicParcel<ParcelType>::dTarget()
+{
+    return dTarget_;
 }
 
 
@@ -504,7 +521,7 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::volume() const
 
 template <class ParcelType>
 inline Foam::scalar
-Foam::KinematicParcel<ParcelType>::volume(const scalar d) const
+Foam::KinematicParcel<ParcelType>::volume(const scalar d)
 {
     return pi/6.0*pow3(d);
 }
@@ -519,7 +536,7 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::areaP() const
 
 template <class ParcelType>
 inline Foam::scalar
-Foam::KinematicParcel<ParcelType>::areaP(const scalar d) const
+Foam::KinematicParcel<ParcelType>::areaP(const scalar d)
 {
     return 0.25*areaS(d);
 }
@@ -534,7 +551,7 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::areaS() const
 
 template <class ParcelType>
 inline Foam::scalar
-Foam::KinematicParcel<ParcelType>::areaS(const scalar d) const
+Foam::KinematicParcel<ParcelType>::areaS(const scalar d)
 {
     return pi*d*d;
 }

@@ -303,6 +303,19 @@ inline Foam::Random& Foam::KinematicCloud<ParcelType>::rndGen()
 
 
 template<class ParcelType>
+inline Foam::List<Foam::DynamicList<ParcelType*> >&
+Foam::KinematicCloud<ParcelType>::cellOccupancy()
+{
+    if (cellOccupancyPtr_.empty())
+    {
+        buildCellOccupancy();
+    }
+
+    return cellOccupancyPtr_();
+}
+
+
+template<class ParcelType>
 inline Foam::DimensionedField<Foam::vector, Foam::volMesh>&
 Foam::KinematicCloud<ParcelType>::UTrans()
 {

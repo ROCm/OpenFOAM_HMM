@@ -121,6 +121,9 @@ protected:
             //- Evolve the cloud
             void evolveCloud();
 
+            //- Particle motion
+            void motion(typename ParcelType::trackData& td);
+
             //- Post-evolve
             void postEvolve();
 

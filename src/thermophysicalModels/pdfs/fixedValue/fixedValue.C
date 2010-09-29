@@ -62,13 +62,13 @@ Foam::scalar Foam::pdfs::fixedValue::fixedValue::sample() const
 
 Foam::scalar Foam::pdfs::fixedValue::fixedValue::minValue() const
 {
-    return -VGREAT;
+    return value_;
 }
 
 
 Foam::scalar Foam::pdfs::fixedValue::fixedValue::maxValue() const
 {
-    return VGREAT;
+    return value_;
 }
 
 

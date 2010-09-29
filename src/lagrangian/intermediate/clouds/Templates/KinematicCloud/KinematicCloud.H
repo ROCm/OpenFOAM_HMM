@@ -136,6 +136,9 @@ protected:
         //- Random number generator - used by some injection routines
         Random rndGen_;
 
+        //- Cell occupancy information for each parcel, (demand driven)
+        autoPtr<List<DynamicList<ParcelType*> > > cellOccupancyPtr_;
+
 
         // References to the carrier gas fields
 
@@ -209,10 +212,20 @@ protected:
             //- Pre-evolve
             void preEvolve();
 
+            //- Build the cellOccupancy
+            void buildCellOccupancy();
+
+            //- Update (i.e. build) the cellOccupancy if it has
+            //  already been used
+            void updateCellOccupancy();
+
             //- Evolve the cloud
             void evolveCloud();
 
-            //- Move-collide
+            //- Particle motion
+            void motion(typename ParcelType::trackData& td);
+
+            //- Move-collide particles
             void moveCollide(typename ParcelType::trackData& td);
 
             //- Post-evolve
@@ -283,6 +296,12 @@ public:
 
                 //- Return refernce to the random object
                 inline Random& rndGen();
+
+                //- Return the cell occupancy information for each
+                //  parcel, non-const access, the caller is
+                //  responsible for updating it for its own purposes
+                //  if particles are removed or created.
+                inline List<DynamicList<ParcelType*> >& cellOccupancy();
 
 
             // References to the carrier gas fields

@@ -77,7 +77,7 @@ protected:
         //- Coefficients dictionary
         const dictionary pdfDict_;
 
-        //- Reference to the randmo number generator
+        //- Reference to the random number generator
         Random& rndGen_;
 
 
