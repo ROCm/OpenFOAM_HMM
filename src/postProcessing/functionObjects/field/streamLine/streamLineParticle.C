@@ -157,7 +157,9 @@ bool Foam::streamLineParticle::move(streamLineParticle::trackData& td)
     td.switchProcessor = false;
     td.keepParticle = true;
 
-    scalar deltaT = GREAT;  //cloud().pMesh().time().deltaTValue();
+    // Set very large dt. Note: cannot use GREAT since 1/GREAT is SMALL
+    // which is a trigger value for the tracking...
+    scalar deltaT = Foam::sqrt(GREAT);  //cloud().pMesh().time().deltaTValue();
     scalar tEnd = (1.0 - stepFraction())*deltaT;
     scalar dtMax = tEnd;
 
@@ -169,6 +171,9 @@ bool Foam::streamLineParticle::move(streamLineParticle::trackData& td)
     && tEnd > ROOTVSMALL
     )
     {
+        // TBD: implement subcycling so step through cells in more than
+        //      one step.
+
         // set the lagrangian time-step
         scalar dt = min(dtMax, tEnd);
 
