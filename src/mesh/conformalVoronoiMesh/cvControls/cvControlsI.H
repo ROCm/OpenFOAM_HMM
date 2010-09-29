@@ -31,18 +31,6 @@ inline const Foam::dictionary& Foam::cvControls::cvMeshDict() const
 }
 
 
-inline Foam::scalar Foam::cvControls::span() const
-{
-    return span_;
-}
-
-
-inline Foam::scalar Foam::cvControls::spanSqr() const
-{
-    return spanSqr_;
-}
-
-
 inline Foam::scalar Foam::cvControls::pointPairDistanceCoeff() const
 {
     return pointPairDistanceCoeff_;

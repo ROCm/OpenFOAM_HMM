@@ -91,7 +91,7 @@ std::vector<Vb::Point> densityWeightedStochastic::initialPoints() const
 
         scalar localSize = cvMesh_.cellSizeControl().cellSize(p);
 
-        scalar localDensity = 1/pow3(max(localSize, VSMALL));
+        scalar localDensity = 1/pow3(max(localSize, SMALL));
 
         // Accept possible placements proportional to the relative local density
         if (localDensity/maxDensity_ > rndGen.scalar01())

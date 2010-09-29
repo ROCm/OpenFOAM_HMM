@@ -60,15 +60,6 @@ class cvControls
         //- Reference to the cvMeshDict
         const dictionary& cvMeshDict_;
 
-        // General parameters
-
-            //- Span of the domain
-            scalar span_;
-
-            //- Square of span_
-            scalar spanSqr_;
-
-
         // Surface conformation controls
 
             //- Point pair spacing coefficient - fraction of the local target
@@ -300,12 +291,6 @@ public:
 
             //- Return the cvMeshDict
             inline const dictionary& cvMeshDict() const;
-
-            //- Return the span
-            inline scalar span() const;
-
-            //- Return spanSqr
-            inline scalar spanSqr() const;
 
             //- Return the pointPairDistanceCoeff
             inline scalar pointPairDistanceCoeff() const;

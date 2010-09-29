@@ -56,4 +56,16 @@ const Foam::boundBox& Foam::conformationSurfaces::bounds() const
 }
 
 
+inline Foam::scalar Foam::conformationSurfaces::spanMag() const
+{
+    return spanMag_;
+}
+
+
+inline Foam::scalar Foam::conformationSurfaces::spanMagSqr() const
+{
+    return spanMagSqr_;
+}
+
+
 // ************************************************************************* //

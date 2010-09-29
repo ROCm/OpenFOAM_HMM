@@ -136,7 +136,7 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
     geometryToConformTo_.findSurfaceNearest
     (
         pt,
-        cvMeshControls().spanSqr(),
+        geometryToConformTo_.spanMagSqr(),
         surfHit,
         hitSurface
     );
@@ -186,7 +186,7 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
             0
         );
 
-        spoke *= cvMeshControls().span();
+        spoke *= geometryToConformTo_.spanMag();
 
         spoke = Rp & spoke;
 
@@ -569,16 +569,21 @@ void Foam::conformalVoronoiMesh::createFeaturePoints()
 {
     Info<< nl << "Creating bounding points" << endl;
 
-    scalar bigSpan = 10*cvMeshControls().span();
+    pointField farPts = geometryToConformTo_.bounds().corners();
 
-    insertPoint(point(-bigSpan, -bigSpan, -bigSpan), Vb::ptFarPoint);
-    insertPoint(point(-bigSpan, -bigSpan,  bigSpan), Vb::ptFarPoint);
-    insertPoint(point(-bigSpan,  bigSpan, -bigSpan), Vb::ptFarPoint);
-    insertPoint(point(-bigSpan,  bigSpan,  bigSpan), Vb::ptFarPoint);
-    insertPoint(point( bigSpan, -bigSpan, -bigSpan), Vb::ptFarPoint);
-    insertPoint(point( bigSpan, -bigSpan,  bigSpan), Vb::ptFarPoint);
-    insertPoint(point( bigSpan,  bigSpan, -bigSpan), Vb::ptFarPoint);
-    insertPoint(point( bigSpan,  bigSpan , bigSpan), Vb::ptFarPoint);
+    // Shift corners of bounds relative to origin
+    farPts -= geometryToConformTo_.bounds().midpoint();
+
+    // Scale the box up
+    farPts *= 10.0;
+
+    // Shift corners of bounds back to be relative to midpoint
+    farPts += geometryToConformTo_.bounds().midpoint();
+
+    forAll(farPts, fPI)
+    {
+        insertPoint(farPts[fPI], Vb::ptFarPoint);
+    }
 
     Info<< nl << "Conforming to feature points" << endl;
 
@@ -950,7 +955,7 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
 {
     Info<< nl << "Looking up target cell alignment and size" << endl;
 
-    scalar spanSqr = cvMeshControls().spanSqr();
+    scalar spanSqr = geometryToConformTo_.spanMagSqr();
 
     const indexedOctree<treeDataPoint>& tree = sizeAndAlignmentTree();
 

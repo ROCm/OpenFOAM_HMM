@@ -137,7 +137,7 @@ public:
             //- The midpoint of the bounding box
             point midpoint() const
             {
-                return 0.5 * (max_ + min_);
+                return 0.5*(max_ + min_);
             }
 
             //- The bounding box span (from minimum to maximum)

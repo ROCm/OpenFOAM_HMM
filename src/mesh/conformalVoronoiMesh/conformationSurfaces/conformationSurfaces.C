@@ -45,6 +45,8 @@ Foam::conformationSurfaces::conformationSurfaces
     patchNames_(0),
     patchOffsets_(),
     bounds_(),
+    spanMag_(),
+    spanMagSqr_(),
     referenceVolumeTypes_(0)
 {
     const dictionary& surfacesDict
@@ -165,6 +167,10 @@ Foam::conformationSurfaces::conformationSurfaces
     }
 
     bounds_ = searchableSurfacesQueries::bounds(allGeometry_, surfaces_);
+
+    spanMag_ = bounds_.mag();
+
+    spanMagSqr_ = sqr(spanMag_);
 
     // Look at all surfaces at determine whether the locationInMesh point is
     // inside or outside each, to establish a signature for the domain to be
@@ -667,7 +673,7 @@ Foam::label Foam::conformationSurfaces::findPatch(const point& pt) const
     findSurfaceNearest
     (
         pt,
-        cvMesh_.cvMeshControls().spanSqr(),
+        spanMagSqr_,
         surfHit,
         hitSurface
     );

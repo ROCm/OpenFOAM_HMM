@@ -37,17 +37,6 @@ Foam::cvControls::cvControls
     cvMesh_(cvMesh),
     cvMeshDict_(cvMeshDict)
 {
-    // General parameters
-
-    const boundBox& bb = cvMesh_.geometryToConformTo().bounds();
-
-    span_ =
-        max(mag(bb.max().x()), mag(bb.min().x()))
-      + max(mag(bb.max().y()), mag(bb.min().y()))
-      + max(mag(bb.max().z()), mag(bb.min().z()));
-
-    spanSqr_ = sqr(span_);
-
     // Surface conformation controls
 
     const dictionary& surfDict(cvMeshDict_.subDict("surfaceConformation"));

@@ -93,6 +93,13 @@ class conformationSurfaces
         //- The overall boundBox of all of the surfaces to be conformed to
         boundBox bounds_;
 
+        //- Magnitude of the span of the domain
+        scalar spanMag_;
+
+        //- Square of span_
+        scalar spanMagSqr_;
+
+
         //- The pattern/signature of volumeTypes representing a point in the
         // domain to be meshed
         List<searchableSurface::volumeType> referenceVolumeTypes_;
@@ -143,6 +150,12 @@ public:
 
             //- Return the boundBox
             inline const boundBox& bounds() const;
+
+            //- Return the spanMag
+            inline scalar spanMag() const;
+
+            //- Return spanSqr
+            inline scalar spanMagSqr() const;
 
 
         // Query
