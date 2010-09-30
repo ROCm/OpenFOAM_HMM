@@ -311,7 +311,7 @@ void rewriteField
             {
                 IOWarningIn("rewriteField(..)", patchDict)
                     << "Cyclic patch " << patchName
-                    << " has value entry. Please removed this and rerun."
+                    << " has value entry. Please remove this and rerun."
                     << endl;
             }
 
