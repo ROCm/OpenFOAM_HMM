@@ -33,13 +33,14 @@ Description
 #define edgeIOList_H
 
 #include "edge.H"
-#include "IOList.H"
+#include "CompactIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     typedef IOList<edge> edgeIOList;
+    typedef CompactIOList<edge, label> edgeCompactIOList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

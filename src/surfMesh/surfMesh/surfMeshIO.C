@@ -98,7 +98,7 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
             )
         );
 
-        storedFaces() = faceIOList
+        storedFaces() = faceCompactIOList
         (
             IOobject
             (

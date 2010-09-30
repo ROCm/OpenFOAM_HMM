@@ -23,13 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IOListList.H"
+#include "CompactIOList.H"
 #include "labelList.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class T, class BaseType>
-void Foam::IOListList<T, BaseType>::readFromStream()
+void Foam::CompactIOList<T, BaseType>::readFromStream()
 {
     Istream& is = readStream(word::null);
 
@@ -47,7 +47,7 @@ void Foam::IOListList<T, BaseType>::readFromStream()
     {
         FatalIOErrorIn
         (
-            "IOListList<T, BaseType>::readFromStream()",
+            "CompactIOList<T, BaseType>::readFromStream()",
             is
         )   << "unexpected class name " << headerClassName()
             << " expected " << typeName << " or " << IOList<T>::typeName
@@ -61,7 +61,7 @@ void Foam::IOListList<T, BaseType>::readFromStream()
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 template<class T, class BaseType>
-Foam::IOListList<T, BaseType>::IOListList(const IOobject& io)
+Foam::CompactIOList<T, BaseType>::CompactIOList(const IOobject& io)
 :
     regIOobject(io)
 {
@@ -77,7 +77,11 @@ Foam::IOListList<T, BaseType>::IOListList(const IOobject& io)
 
 
 template<class T, class BaseType>
-Foam::IOListList<T, BaseType>::IOListList(const IOobject& io, const label size)
+Foam::CompactIOList<T, BaseType>::CompactIOList
+(
+    const IOobject& io,
+    const label size
+)
 :
     regIOobject(io)
 {
@@ -97,7 +101,7 @@ Foam::IOListList<T, BaseType>::IOListList(const IOobject& io, const label size)
 
 
 template<class T, class BaseType>
-Foam::IOListList<T, BaseType>::IOListList
+Foam::CompactIOList<T, BaseType>::CompactIOList
 (
     const IOobject& io,
     const List<T>& list
@@ -121,7 +125,7 @@ Foam::IOListList<T, BaseType>::IOListList
 
 
 template<class T, class BaseType>
-Foam::IOListList<T, BaseType>::IOListList
+Foam::CompactIOList<T, BaseType>::CompactIOList
 (
     const IOobject& io,
     const Xfer<List<T> >& list
@@ -145,7 +149,7 @@ Foam::IOListList<T, BaseType>::IOListList
 // * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
 
 template<class T, class BaseType>
-Foam::IOListList<T, BaseType>::~IOListList()
+Foam::CompactIOList<T, BaseType>::~CompactIOList()
 {}
 
 
@@ -153,7 +157,7 @@ Foam::IOListList<T, BaseType>::~IOListList()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, class BaseType>
-bool Foam::IOListList<T, BaseType>::writeObject
+bool Foam::CompactIOList<T, BaseType>::writeObject
 (
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
@@ -182,7 +186,7 @@ bool Foam::IOListList<T, BaseType>::writeObject
 
 
 template<class T, class BaseType>
-bool Foam::IOListList<T, BaseType>::writeData(Ostream& os) const
+bool Foam::CompactIOList<T, BaseType>::writeData(Ostream& os) const
 {
     return (os << *this).good();
 }
@@ -191,9 +195,9 @@ bool Foam::IOListList<T, BaseType>::writeData(Ostream& os) const
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T, class BaseType>
-void Foam::IOListList<T, BaseType>::operator=
+void Foam::CompactIOList<T, BaseType>::operator=
 (
-    const IOListList<T, BaseType>& rhs
+    const CompactIOList<T, BaseType>& rhs
 )
 {
     List<T>::operator=(rhs);
@@ -201,7 +205,7 @@ void Foam::IOListList<T, BaseType>::operator=
 
 
 template<class T, class BaseType>
-void Foam::IOListList<T, BaseType>::operator=(const List<T>& rhs)
+void Foam::CompactIOList<T, BaseType>::operator=(const List<T>& rhs)
 {
     List<T>::operator=(rhs);
 }
@@ -213,7 +217,7 @@ template<class T, class BaseType>
 Foam::Istream& Foam::operator>>
 (
     Foam::Istream& is,
-    Foam::IOListList<T, BaseType>& L
+    Foam::CompactIOList<T, BaseType>& L
 )
 {
     // Read compact
@@ -244,7 +248,7 @@ template<class T, class BaseType>
 Foam::Ostream& Foam::operator<<
 (
     Foam::Ostream& os,
-    const Foam::IOListList<T, BaseType>& L
+    const Foam::CompactIOList<T, BaseType>& L
 )
 {
     // Keep ascii writing same.
