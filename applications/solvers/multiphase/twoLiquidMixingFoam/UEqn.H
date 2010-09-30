@@ -12,7 +12,6 @@
       - fvm::laplacian(muEff, U)
       - (fvc::grad(U) & fvc::grad(muEff))
     //- fvc::div(muEff*(fvc::interpolate(dev(fvc::grad(U))) & mesh.Sf()))
-    //- fvc::div(rho*turbulence->nuEff()*dev(fvc::grad(U)().T()))
     );
 
     UEqn.relax();
@@ -25,8 +24,10 @@
          ==
             fvc::reconstruct
             (
-                fvc::interpolate(rho)*(g & mesh.Sf())
-              - mesh.magSf()*fvc::snGrad(p)
+                (
+                  - ghf*fvc::snGrad(rho)
+                  - fvc::snGrad(p_rgh)
+                ) * mesh.magSf()
             )
         );
     }

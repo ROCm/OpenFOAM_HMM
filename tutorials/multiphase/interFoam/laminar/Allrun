@@ -7,11 +7,10 @@ cd ${0%/*} || exit 1    # run from this directory
 # Set application name
 application="interFoam"
 
-setDamBreakFine()
+setDamBreakFine ()
 {
     blockMeshDict="constant/polyMesh/blockMeshDict"
     controlDict="system/controlDict"
-
     sed \
     -e s/"23 8"/"46 10"/g \
     -e s/"19 8"/"40 10"/g \
@@ -20,7 +19,6 @@ setDamBreakFine()
     -e s/"19 42\(.*\) 1 1)"/"40 76\1 2 1)"/g \
     $blockMeshDict > temp.$$
     mv temp.$$ $blockMeshDict
-
     sed \
     -e s/"\(deltaT[ \t]*\) 0.001;"/"\1 5e-04;"/g \
     -e s/"\(endTime[ \t]*\) 1;"/"\1 0.4;"/g \
@@ -53,6 +51,15 @@ cloneCase damBreak damBreakFine
     runApplication decomposePar
     runParallel $application 4
     runApplication reconstructPar
+)
+
+# Do capillaryRise
+(
+    cd capillaryRise || exit
+
+    runApplication blockMesh
+    runApplication setFields
+    runApplication $application
 )
 
 # ----------------------------------------------------------------- end-of-file

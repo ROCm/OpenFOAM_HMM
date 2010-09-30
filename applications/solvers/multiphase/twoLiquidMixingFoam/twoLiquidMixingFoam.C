@@ -86,8 +86,6 @@ int main(int argc, char *argv[])
                 #include "pEqn.H"
             }
 
-            #include "continuityErrs.H"
-
             turbulence->correct();
 
             if (finalIter)

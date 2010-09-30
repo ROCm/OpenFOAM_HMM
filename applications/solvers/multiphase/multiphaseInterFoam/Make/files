@@ -1,6 +1,3 @@
-multiphaseMixture/phase/phase.C
-multiphaseMixture/multiphaseAlphaContactAngle/multiphaseAlphaContactAngleFvPatchScalarField.C
-multiphaseMixture/multiphaseMixture.C
 multiphaseInterFoam.C
 
 EXE = $(FOAM_APPBIN)/multiphaseInterFoam

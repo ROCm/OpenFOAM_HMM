@@ -7,7 +7,7 @@
             "transportProperties",
             runTime.constant(),
             mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
     );
@@ -153,7 +153,7 @@
             "interfacialProperties",
             runTime.constant(),
             mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
     );
@@ -175,8 +175,10 @@
     );
 
     word dragPhase("blended");
-    if (interfacialProperties.readIfPresent("dragPhase", dragPhase))
+    if (interfacialProperties.found("dragPhase"))
     {
+        dragPhase = word(interfacialProperties.lookup("dragPhase"));
+
         bool validDrag =
             dragPhase == "a" || dragPhase == "b" || dragPhase == "blended";
 
@@ -188,7 +190,7 @@
         }
     }
 
-    Info<< "dragPhase is " << dragPhase << endl;
+    Info << "dragPhase is " << dragPhase << endl;
     kineticTheoryModel kineticTheory
     (
         phasea,

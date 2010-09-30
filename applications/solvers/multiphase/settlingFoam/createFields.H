@@ -1,9 +1,9 @@
-    Info<< "Reading field pmh\n" << endl;
-    volScalarField pmh
+    Info<< "Reading field p_rgh\n" << endl;
+    volScalarField p_rgh
     (
         IOobject
         (
-            "pmh",
+            "p_rgh",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -357,32 +357,27 @@
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        pmh + rho*gh
+        p_rgh + rho*gh
     );
 
-    label pmhRefCell = 0;
-    scalar pmhRefValue = 0.0;
+    label pRefCell = 0;
+    scalar pRefValue = 0.0;
     setRefCell
     (
-        pmh,
+        p,
+        p_rgh,
         mesh.solutionDict().subDict("PISO"),
-        pmhRefCell,
-        pmhRefValue
+        pRefCell,
+        pRefValue
     );
 
-    scalar pRefValue = 0.0;
-
-    if (pmh.needReference())
+    if (p_rgh.needReference())
     {
-        pRefValue = readScalar
-        (
-            mesh.solutionDict().subDict("PISO").lookup("pRefValue")
-        );
-
         p += dimensionedScalar
         (
             "p",
             p.dimensions(),
-            pRefValue - getRefCellValue(p, pmhRefCell)
+            pRefValue - getRefCellValue(p, pRefCell)
         );
+        p_rgh = p - rho*gh;
     }

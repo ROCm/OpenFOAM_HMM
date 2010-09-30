@@ -164,7 +164,7 @@ private:
         multivariateSurfaceInterpolationScheme<scalar>::fieldTable alphaTable_;
 
 
-    // Private Member Functions
+    // Private member functions
 
         void calcAlphas();
 
@@ -255,6 +255,13 @@ public:
         tmp<surfaceScalarField> nuf() const;
 
         tmp<surfaceScalarField> surfaceTensionForce() const;
+
+        //- Indicator of the proximity of the interface
+        //  Field values are 1 near and 0 away for the interface.
+        tmp<surfaceScalarField> nearInterface() const;
+
+        //- Solve for the mixture phase-fractions
+        void solve();
 
         //- Correct the mixture properties
         void correct();

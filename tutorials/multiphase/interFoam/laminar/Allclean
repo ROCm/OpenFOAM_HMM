@@ -4,26 +4,22 @@ cd ${0%/*} || exit 1    # run from this directory
 # Source tutorial clean functions
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions
 
-keepCases="damBreak"
+keepCases="damBreak capillaryRise"
 loseCases="damBreakFine"
 
-for caseName in $keepCases
+for case in $keepCases
 do
-(
-    cd $caseName || exit
+    (cd $case && foamCleanTutorials)
 
-    foamCleanTutorials
-
-    if [ "$caseName" = damBreak ]
+    if [ "$case" = "damBreak" ]
     then
-        cp 0/alpha1.org 0/alpha1
+        cp $case/0/alpha1.org $case/0/alpha1
     fi
-)
 done
 
-for caseName in $loseCases
+for case in $loseCases
 do
-    removeCase $caseName
+    removeCase $case
 done
 
 # ----------------------------------------------------------------- end-of-file
