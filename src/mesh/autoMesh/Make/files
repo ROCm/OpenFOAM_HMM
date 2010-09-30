@@ -5,7 +5,6 @@ $(autoHexMeshDriver)/autoLayerDriver.C
 $(autoHexMeshDriver)/autoLayerDriverShrink.C
 $(autoHexMeshDriver)/autoSnapDriver.C
 $(autoHexMeshDriver)/autoRefineDriver.C
-$(autoHexMeshDriver)/autoHexMeshDriver.C
 
 $(autoHexMeshDriver)/layerParameters/layerParameters.C
 $(autoHexMeshDriver)/refinementParameters/refinementParameters.C

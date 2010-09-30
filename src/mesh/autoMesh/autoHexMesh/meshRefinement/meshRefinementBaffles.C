@@ -216,7 +216,7 @@ Foam::label Foam::meshRefinement::getBafflePatch
 }
 
 
-// Determine patches for baffles.
+// Determine patches for baffles on all intersected unnamed faces
 void Foam::meshRefinement::getBafflePatches
 (
     const labelList& globalToPatch,
@@ -356,6 +356,70 @@ void Foam::meshRefinement::getBafflePatches
     // - tolerances issues occasionally crop up.
     syncTools::syncFaceList(mesh_, ownPatch, maxEqOp<label>());
     syncTools::syncFaceList(mesh_, neiPatch, maxEqOp<label>());
+}
+
+
+// Get faces to repatch. Returns map from face to patch.
+Foam::Map<Foam::label> Foam::meshRefinement::getZoneBafflePatches
+(
+    const bool allowBoundary,
+    const labelList& globalToPatch
+) const
+{
+    Map<label> bafflePatch(mesh_.nFaces()/1000);
+
+    const wordList& faceZoneNames = surfaces_.faceZoneNames();
+    const faceZoneMesh& fZones = mesh_.faceZones();
+
+    forAll(faceZoneNames, surfI)
+    {
+        if (faceZoneNames[surfI].size())
+        {
+            // Get zone
+            label zoneI = fZones.findZoneID(faceZoneNames[surfI]);
+
+            const faceZone& fZone = fZones[zoneI];
+
+            //// Get patch allocated for zone
+            //label patchI = surfaceToCyclicPatch_[surfI];
+            // Get patch of (first region) of surface
+            label patchI = globalToPatch[surfaces_.globalRegion(surfI, 0)];
+
+            Info<< "For surface "
+                << surfaces_.names()[surfI]
+                << " found faceZone " << fZone.name()
+                << " and patch " << mesh_.boundaryMesh()[patchI].name()
+                << endl;
+
+
+            forAll(fZone, i)
+            {
+                label faceI = fZone[i];
+
+                if (allowBoundary || mesh_.isInternalFace(faceI))
+                {
+                    if (!bafflePatch.insert(faceI, patchI))
+                    {
+                        label oldPatchI = bafflePatch[faceI];
+
+                        if (oldPatchI != patchI)
+                        {
+                            FatalErrorIn("getZoneBafflePatches(const bool)")
+                                << "Face " << faceI
+                                << " fc:" << mesh_.faceCentres()[faceI]
+                                << " in zone " << fZone.name()
+                                << " is in patch "
+                                << mesh_.boundaryMesh()[oldPatchI].name()
+                                << " and in patch "
+                                << mesh_.boundaryMesh()[patchI].name()
+                                << abort(FatalError);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return bafflePatch;
 }
 
 
@@ -583,6 +647,90 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::getDuplicateFaces
     }
 
     return duplicateFaces;
+}
+
+
+Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createZoneBaffles
+(
+    const labelList& globalToPatch,
+    List<labelPair>& baffles
+)
+{
+    labelList zonedSurfaces = surfaces_.getNamedSurfaces();
+
+    autoPtr<mapPolyMesh> map;
+
+    // No need to sync; all processors will have all same zonedSurfaces.
+    if (zonedSurfaces.size())
+    {
+        // Split internal faces on interface surfaces
+        Info<< "Converting zoned faces into baffles ..." << endl;
+
+        // Get faces (internal only) to be baffled. Map from face to patch
+        // label.
+        Map<label> faceToPatch(getZoneBafflePatches(false, globalToPatch));
+
+        label nZoneFaces = returnReduce(faceToPatch.size(), sumOp<label>());
+        if (nZoneFaces > 0)
+        {
+            // Convert into labelLists
+            labelList ownPatch(mesh_.nFaces(), -1);
+            forAllConstIter(Map<label>, faceToPatch, iter)
+            {
+                ownPatch[iter.key()] = iter();
+            }
+
+            // Create baffles. both sides same patch.
+            map = createBaffles(ownPatch, ownPatch);
+
+            // Get pairs of faces created.
+            // Just loop over faceMap and store baffle if we encounter a slave
+            // face.
+
+            baffles.setSize(faceToPatch.size());
+            label baffleI = 0;
+
+            const labelList& faceMap = map().faceMap();
+            const labelList& reverseFaceMap = map().reverseFaceMap();
+
+            forAll(faceMap, faceI)
+            {
+                label oldFaceI = faceMap[faceI];
+
+                // Does face originate from face-to-patch
+                Map<label>::const_iterator iter = faceToPatch.find(oldFaceI);
+
+                if (iter != faceToPatch.end())
+                {
+                    label masterFaceI = reverseFaceMap[oldFaceI];
+                    if (faceI != masterFaceI)
+                    {
+                        baffles[baffleI++] = labelPair(masterFaceI, faceI);
+                    }
+                }
+            }
+
+            if (baffleI != faceToPatch.size())
+            {
+                FatalErrorIn("meshRefinement::createZoneBaffles(..)")
+                    << "Had " << faceToPatch.size() << " patches to create "
+                    << " but encountered " << baffleI
+                    << " slave faces originating from patcheable faces."
+                    << abort(FatalError);
+            }
+
+            if (debug)
+            {
+                const_cast<Time&>(mesh_.time())++;
+                Pout<< "Writing baffled mesh to time "
+                    << mesh_.time().timeName() << endl;
+                mesh_.write();
+            }
+        }
+        Info<< "Created " << nZoneFaces << " baffles in = "
+            << mesh_.time().cpuTimeIncrement() << " s\n" << nl << endl;
+    }
+    return map;
 }
 
 
