@@ -32,6 +32,7 @@ inline Foam::vectorTensorTransform::vectorTensorTransform()
     hasR_(false)
 {}
 
+
 inline Foam::vectorTensorTransform::vectorTensorTransform
 (
     const vector& t,
@@ -44,12 +45,14 @@ inline Foam::vectorTensorTransform::vectorTensorTransform
     hasR_(hasR)
 {}
 
+
 inline Foam::vectorTensorTransform::vectorTensorTransform(const vector& t)
 :
     t_(t),
     R_(sphericalTensor::I),
     hasR_(false)
 {}
+
 
 inline Foam::vectorTensorTransform::vectorTensorTransform(const tensor& R)
 :
