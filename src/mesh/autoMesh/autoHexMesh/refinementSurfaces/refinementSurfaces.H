@@ -109,6 +109,9 @@ private:
         //- From global region number to perpendicular angle
         scalarField perpendicularAngle_;
 
+        //- From global region number to patchType
+        PtrList<dictionary> patchInfo_;
+
 
     // Private Member Functions
 
@@ -122,13 +125,6 @@ private:
 public:
 
     // Constructors
-
-        //- Construct from surfaces and dictionaries
-        refinementSurfaces
-        (
-            const searchableSurfaces& allGeometry,
-            const PtrList<dictionary>&
-        );
 
         //- Construct from surfaces and dictionary
         refinementSurfaces
@@ -213,6 +209,12 @@ public:
             const scalarField& perpendicularAngle() const
             {
                 return perpendicularAngle_;
+            }
+
+            //- From global region number to patch type
+            const PtrList<dictionary>& patchInfo() const
+            {
+                return patchInfo_;
             }
 
 

@@ -364,7 +364,8 @@ Foam::layerParameters::layerParameters
         {
             IOWarningIn("layerParameters::layerParameters(..)", layersDict)
                 << "Wildcard layer specification for " << wildCards[i]
-                << " does not match any patch." << endl;
+                << " does not match any patch." << endl
+                << "Valid patches are " << boundaryMesh.names() << endl;
         }
     }
 
@@ -376,7 +377,8 @@ Foam::layerParameters::layerParameters
         {
             IOWarningIn("layerParameters::layerParameters(..)", layersDict)
                 << "Layer specification for " << nonWildCards[i]
-                << " does not match any patch." << endl;
+                << " does not match any patch." << endl
+                << "Valid patches are " << boundaryMesh.names() << endl;
         }
     }
 }

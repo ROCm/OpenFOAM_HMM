@@ -945,6 +945,7 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
 (
     motionSmoother& meshMover,
     const dictionary& meshQualityDict,
+    const List<labelPair>& baffles,
     const label nSmoothThickness,
     const scalar maxThicknessToMedialRatio,
     const label nAllowableErrors,
@@ -1135,7 +1136,7 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
             meshMover.scaleMesh
             (
                 checkFaces,
-                List<labelPair>(0),
+                baffles,
                 meshMover.paramDict(),
                 meshQualityDict,
                 true,

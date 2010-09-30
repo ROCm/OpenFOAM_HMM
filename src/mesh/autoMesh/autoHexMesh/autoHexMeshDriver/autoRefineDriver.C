@@ -844,10 +844,10 @@ void Foam::autoRefineDriver::doRefine
             << "---------------------" << nl
             << endl;
 
-        if (debug)
-        {
-            const_cast<Time&>(mesh.time())++;
-        }
+        //if (debug)
+        //{
+        //    const_cast<Time&>(mesh.time())++;
+        //}
 
         // Do final balancing. Keep zoned faces on one processor since the
         // snap phase will convert them to baffles and this only works for

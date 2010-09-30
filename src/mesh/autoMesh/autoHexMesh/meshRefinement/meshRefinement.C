@@ -1127,6 +1127,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 
                 const wordList& fzNames = surfaces().faceZoneNames();
                 const faceZoneMesh& fZones = mesh_.faceZones();
+                const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 
                 // Get faces whose owner and neighbour should stay together,
                 // i.e. they are not 'blocked'.
@@ -1140,10 +1141,18 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 
                         forAll(fZone, i)
                         {
-                            if (blockedFace[fZone[i]])
+                            label faceI = fZone[i];
+                            if (blockedFace[faceI])
                             {
-                                blockedFace[fZone[i]] = false;
-                                nUnblocked++;
+                                if
+                                (
+                                    mesh_.isInternalFace(faceI)
+                                 || pbm[pbm.whichPatch(faceI)].coupled()
+                                )
+                                {
+                                    blockedFace[faceI] = false;
+                                    nUnblocked++;
+                                }
                             }
                         }
                     }
@@ -1550,7 +1559,7 @@ Foam::label Foam::meshRefinement::addPatch
 (
     fvMesh& mesh,
     const word& patchName,
-    const word& patchType
+    const dictionary& patchInfo
 )
 {
     polyBoundaryMesh& polyPatches =
@@ -1559,21 +1568,8 @@ Foam::label Foam::meshRefinement::addPatch
     const label patchI = polyPatches.findPatchID(patchName);
     if (patchI != -1)
     {
-        if (polyPatches[patchI].type() == patchType)
-        {
-            // Already there
-            return patchI;
-        }
-        //else
-        //{
-        //    FatalErrorIn
-        //    (
-        //        "meshRefinement::addPatch(fvMesh&, const word&, const word&)"
-        //    )   << "Patch " << patchName << " already exists but with type "
-        //        << patchType << nl
-        //        << "Current patch names:" << polyPatches.names()
-        //        << exit(FatalError);
-        //}
+        // Already there
+        return patchI;
     }
 
 
@@ -1603,6 +1599,10 @@ Foam::label Foam::meshRefinement::addPatch
 
     fvBoundaryMesh& fvPatches = const_cast<fvBoundaryMesh&>(mesh.boundary());
 
+    dictionary patchDict(patchInfo);
+    patchDict.set("nFaces", 0);
+    patchDict.set("startFace", startFaceI);
+
     // Add polyPatch at the end
     polyPatches.setSize(sz+1);
     polyPatches.set
@@ -1610,10 +1610,8 @@ Foam::label Foam::meshRefinement::addPatch
         sz,
         polyPatch::New
         (
-            patchType,
             patchName,
-            0,              // size
-            startFaceI,
+            patchDict,
             insertPatchI,
             polyPatches
         )
@@ -1720,7 +1718,7 @@ Foam::label Foam::meshRefinement::addPatch
 Foam::label Foam::meshRefinement::addMeshedPatch
 (
     const word& name,
-    const word& type
+    const dictionary& patchInfo
 )
 {
     label meshedI = findIndex(meshedPatches_, name);
@@ -1733,7 +1731,7 @@ Foam::label Foam::meshRefinement::addMeshedPatch
     else
     {
         // Add patch
-        label patchI = addPatch(mesh_, name, type);
+        label patchI = addPatch(mesh_, name, patchInfo);
 
         // Store
         label sz = meshedPatches_.size();
@@ -1747,16 +1745,23 @@ Foam::label Foam::meshRefinement::addMeshedPatch
 
 Foam::labelList Foam::meshRefinement::meshedPatches() const
 {
-    labelList patchIDs(meshedPatches_.size());
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    DynamicList<label> patchIDs(meshedPatches_.size());
     forAll(meshedPatches_, i)
     {
-        patchIDs[i] = mesh_.boundaryMesh().findPatchID(meshedPatches_[i]);
+        label patchI = patches.findPatchID(meshedPatches_[i]);
 
-        if (patchIDs[i] == -1)
+        if (patchI == -1)
         {
             FatalErrorIn("meshRefinement::meshedPatches() const")
                 << "Problem : did not find patch " << meshedPatches_[i]
+                << endl << "Valid patches are " << patches.names()
                 << abort(FatalError);
+        }
+        if (!polyPatch::constraintType(patches[patchI].type()))
+        {
+            patchIDs.append(patchI);
         }
     }
 
