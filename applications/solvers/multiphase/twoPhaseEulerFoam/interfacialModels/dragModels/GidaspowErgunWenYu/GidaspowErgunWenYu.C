@@ -88,7 +88,7 @@ Foam::tmp<Foam::volScalarField> Foam::GidaspowErgunWenYu::K
     volScalarField& KWenYu = tKWenYu();
 
     // Ergun
-    forAll(beta, cellj)
+    forAll (beta, cellj)
     {
         if (beta[cellj] <= 0.8)
         {

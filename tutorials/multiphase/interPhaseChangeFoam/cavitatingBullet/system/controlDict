@@ -14,36 +14,37 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     interPhaseChangeFoam;
+application                interPhaseChangeFoam;
 
-startFrom       latestTime;
+startFrom                  latestTime;
 
-startTime       0;
+startTime                  0;
 
-stopAt          endTime;
+stopAt                     endTime;
 
-endTime         0.05;
+endTime                    0.05;
 
-deltaT          1e-8;
+deltaT                     1e-8;
 
-writeControl    adjustableRunTime;
+writeControl               adjustableRunTime;
 
-writeInterval   0.001;
+writeInterval              0.001;
 
-purgeWrite      0;
+purgeWrite                 0;
 
-writeFormat     ascii;
+writeFormat                ascii;
 
-writePrecision  6;
+writePrecision             6;
 
-writeCompression off;
+writeCompression           uncompressed;
 
-timeFormat      general;
+timeFormat                 general;
 
-runTimeModifiable true;
+runTimeModifiable          yes;
 
-adjustTimeStep  yes;
+adjustTimeStep             on;
 
-maxCo           1.0;
+maxCo                      1.0;
+
 
 // ************************************************************************* //

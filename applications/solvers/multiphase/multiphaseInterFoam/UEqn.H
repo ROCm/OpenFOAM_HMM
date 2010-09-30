@@ -24,10 +24,10 @@
          ==
             fvc::reconstruct
             (
-                fvc::interpolate(rho)*(g & mesh.Sf())
-              + (
+                (
                     mixture.surfaceTensionForce()
-                  - fvc::snGrad(p)
+                  - ghf*fvc::snGrad(rho)
+                  - fvc::snGrad(p_rgh)
                 ) * mesh.magSf()
             )
         );

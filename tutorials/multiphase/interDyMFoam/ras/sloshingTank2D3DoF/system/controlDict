@@ -37,18 +37,18 @@ writeFormat     ascii;
 
 writePrecision  6;
 
-writeCompression off;
+writeCompression compressed;
 
 timeFormat      general;
 
 timePrecision   6;
 
-runTimeModifiable true;
+runTimeModifiable yes;
 
 adjustTimeStep  yes;
 
 maxCo           0.5;
-
+maxAlphaCo      0.5;
 maxDeltaT       1;
 
 functions
@@ -59,27 +59,24 @@ functions
         functionObjectLibs ("libsampling.so");
         outputControl   timeStep;
         outputInterval  1;
-
-        fields
-        (
-            p
-        );
-
         probeLocations
         (
             ( 0 9.95 19.77 )
             ( 0 -9.95 19.77 )
+        );
+        fields
+        (
+            p
         );
     }
 
     wallPressure
     {
         type            surfaces;
+        functionObjectLibs ("libsampling.so");
         outputControl   timeStep;
         outputInterval  10;
         surfaceFormat   raw;
-        functionObjectLibs ("libsampling.so");
-
         fields
         (
             p
@@ -96,5 +93,6 @@ functions
         );
     }
 }
+
 
 // ************************************************************************* //

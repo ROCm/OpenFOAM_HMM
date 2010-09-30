@@ -7,7 +7,7 @@
         labelListList neighbour = mesh.cellCells();
         scalarField cellVolumes = mesh.cellVolumes();
 
-        forAll(alphaEx, celli)
+        forAll (alphaEx, celli)
         {
             // Finding the labels of the neighbouring cells
             labelList neighbourCell = neighbour[celli];
@@ -15,12 +15,12 @@
             // Initializing neighbouring cells contribution
             scalar neighboursEx = 0.0;
 
-            forAll(neighbourCell, cellj)
+            forAll (neighbourCell, cellj)
             {
                 labelList neighboursNeighbour = neighbour[neighbourCell[cellj]];
                 scalar neighboursNeighbourCellVolumes = 0.0;
 
-                forAll(neighboursNeighbour, cellk)
+                forAll (neighboursNeighbour, cellk)
                 {
                     neighboursNeighbourCellVolumes +=
                         cellVolumes[neighboursNeighbour[cellk]];

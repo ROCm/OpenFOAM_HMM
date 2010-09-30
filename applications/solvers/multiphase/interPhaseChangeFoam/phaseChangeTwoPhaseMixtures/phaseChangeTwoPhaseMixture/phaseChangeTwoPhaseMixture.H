@@ -28,7 +28,7 @@ Description
 
 SourceFiles
     phaseChangeTwoPhaseMixture.C
-    phaseChangeModelNew.C
+    newPhaseChangeModel.C
 
 \*---------------------------------------------------------------------------*/
 
