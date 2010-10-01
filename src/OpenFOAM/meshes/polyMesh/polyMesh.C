@@ -272,7 +272,7 @@ Foam::polyMesh::polyMesh(const IOobject& io)
     }
     else
     {
-        cellIOList cLst
+        cellCompactIOList cLst
         (
             IOobject
             (

@@ -33,15 +33,14 @@ Description
 #define scalarListIOList_H
 
 #include "scalarList.H"
-#include "IOList.H"
-#include "IOListList.H"
+#include "CompactIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     typedef IOList<scalarList> scalarListIOList;
-    typedef IOListList<scalarList, scalar> scalarIOListList;
+    typedef CompactIOList<scalarList, scalar> scalarListCompactIOList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
