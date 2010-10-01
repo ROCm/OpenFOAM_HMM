@@ -33,15 +33,14 @@ Description
 #define vector2DFieldIOField_H
 
 #include "vector2DField.H"
-#include "IOField.H"
-#include "IOFieldField.H"
+#include "CompactIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     typedef IOField<vector2DField> vector2DFieldIOField;
-    typedef IOFieldField<vector2DField, vector2D> vector2DIOFieldField;
+    typedef CompactIOField<vector2DField, vector2D> vector2DFieldCompactIOField;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

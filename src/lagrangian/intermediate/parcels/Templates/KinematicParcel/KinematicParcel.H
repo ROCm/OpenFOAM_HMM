@@ -62,8 +62,8 @@ namespace Foam
 {
 
 typedef CollisionRecordList<vector, vector> collisionRecordList;
-typedef vectorIOFieldField pairDataIOFieldField;
-typedef vectorIOFieldField wallDataIOFieldField;
+typedef vectorFieldCompactIOField pairDataFieldCompactIOField;
+typedef vectorFieldCompactIOField wallDataFieldCompactIOField;
 
 template<class ParcelType>
 class KinematicParcel;

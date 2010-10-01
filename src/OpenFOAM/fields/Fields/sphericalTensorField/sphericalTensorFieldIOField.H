@@ -33,8 +33,7 @@ Description
 #define sphericalTensorFieldIOField_H
 
 #include "sphericalTensorField.H"
-#include "IOField.H"
-#include "IOFieldField.H"
+#include "CompactIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,8 +41,8 @@ namespace Foam
 {
     typedef IOField<sphericalTensorField> sphericalTensorFieldIOField;
 
-    typedef IOFieldField<sphericalTensorField, sphericalTensor>
-    sphericalTensorIOFieldField;
+    typedef CompactIOField<sphericalTensorField, sphericalTensor>
+    sphericalTensorFieldCompactIOField;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

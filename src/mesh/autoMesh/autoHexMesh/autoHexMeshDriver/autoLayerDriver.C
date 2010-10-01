@@ -3116,11 +3116,12 @@ void Foam::autoLayerDriver::addLayers
         );
 
         // Update numbering of baffles
+        List<labelPair> newMeshBaffles(baffles.size());
         forAll(baffles, i)
         {
-            labelPair& p = baffles[i];
-            p[0] = map().reverseFaceMap()[p[0]];
-            p[1] = map().reverseFaceMap()[p[1]];
+            const labelPair& p = baffles[i];
+            newMeshBaffles[i][0] = map().reverseFaceMap()[p[0]];
+            newMeshBaffles[i][1] = map().reverseFaceMap()[p[1]];
         }
 
         // Collect layer faces and cells for outside loop.
@@ -3167,7 +3168,7 @@ void Foam::autoLayerDriver::addLayers
         (
             addLayer,
             meshQualityDict,
-            baffles,
+            newMeshBaffles,
             pp(),
             newMesh,
 
@@ -3234,6 +3235,16 @@ void Foam::autoLayerDriver::addLayers
     }
 
     meshRefiner_.updateMesh(map, labelList(0));
+
+
+    // Update numbering on baffles
+    forAll(baffles, i)
+    {
+        labelPair& p = baffles[i];
+        p[0] = map().reverseFaceMap()[p[0]];
+        p[1] = map().reverseFaceMap()[p[1]];
+    }
+
 
     label nBaffles = returnReduce(baffles.size(), sumOp<label>());
     if (nBaffles > 0)

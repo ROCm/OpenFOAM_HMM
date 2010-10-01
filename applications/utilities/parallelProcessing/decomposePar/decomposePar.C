@@ -402,17 +402,17 @@ int main(int argc, char *argv[])
     PtrList< List<SLList<indexedParticle*>*> > cellParticles(cloudDirs.size());
 
     PtrList<PtrList<labelIOField> > lagrangianLabelFields(cloudDirs.size());
-    PtrList<PtrList<labelIOFieldField> > lagrangianLabelFieldFields
+    PtrList<PtrList<labelFieldCompactIOField> > lagrangianLabelFieldFields
     (
         cloudDirs.size()
     );
     PtrList<PtrList<scalarIOField> > lagrangianScalarFields(cloudDirs.size());
-    PtrList<PtrList<scalarIOFieldField> > lagrangianScalarFieldFields
+    PtrList<PtrList<scalarFieldCompactIOField> > lagrangianScalarFieldFields
     (
         cloudDirs.size()
     );
     PtrList<PtrList<vectorIOField> > lagrangianVectorFields(cloudDirs.size());
-    PtrList<PtrList<vectorIOFieldField> > lagrangianVectorFieldFields
+    PtrList<PtrList<vectorFieldCompactIOField> > lagrangianVectorFieldFields
     (
         cloudDirs.size()
     );
@@ -420,13 +420,14 @@ int main(int argc, char *argv[])
     (
         cloudDirs.size()
     );
-    PtrList<PtrList<sphericalTensorIOFieldField> >
+    PtrList<PtrList<sphericalTensorFieldCompactIOField> >
         lagrangianSphericalTensorFieldFields(cloudDirs.size());
     PtrList<PtrList<symmTensorIOField> > lagrangianSymmTensorFields
     (
         cloudDirs.size()
     );
-    PtrList<PtrList<symmTensorIOFieldField> > lagrangianSymmTensorFieldFields
+    PtrList<PtrList<symmTensorFieldCompactIOField> >
+    lagrangianSymmTensorFieldFields
     (
         cloudDirs.size()
     );
@@ -434,7 +435,7 @@ int main(int argc, char *argv[])
     (
         cloudDirs.size()
     );
-    PtrList<PtrList<tensorIOFieldField> > lagrangianTensorFieldFields
+    PtrList<PtrList<tensorFieldCompactIOField> > lagrangianTensorFieldFields
     (
         cloudDirs.size()
     );

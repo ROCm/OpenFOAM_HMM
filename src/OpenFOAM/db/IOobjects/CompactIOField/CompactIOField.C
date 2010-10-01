@@ -23,13 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IOFieldField.H"
+#include "CompactIOField.H"
 #include "labelList.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class T, class BaseType>
-void Foam::IOFieldField<T, BaseType>::readFromStream()
+void Foam::CompactIOField<T, BaseType>::readFromStream()
 {
     Istream& is = readStream(word::null);
 
@@ -47,7 +47,7 @@ void Foam::IOFieldField<T, BaseType>::readFromStream()
     {
         FatalIOErrorIn
         (
-            "IOFieldField<T, BaseType>::readFromStream()",
+            "CompactIOField<T, BaseType>::readFromStream()",
             is
         )   << "unexpected class name " << headerClassName()
             << " expected " << typeName << " or " << IOField<T>::typeName
@@ -61,7 +61,7 @@ void Foam::IOFieldField<T, BaseType>::readFromStream()
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 template<class T, class BaseType>
-Foam::IOFieldField<T, BaseType>::IOFieldField(const IOobject& io)
+Foam::CompactIOField<T, BaseType>::CompactIOField(const IOobject& io)
 :
     regIOobject(io)
 {
@@ -77,7 +77,7 @@ Foam::IOFieldField<T, BaseType>::IOFieldField(const IOobject& io)
 
 
 template<class T, class BaseType>
-Foam::IOFieldField<T, BaseType>::IOFieldField
+Foam::CompactIOField<T, BaseType>::CompactIOField
 (
     const IOobject& io,
     const label size
@@ -101,7 +101,7 @@ Foam::IOFieldField<T, BaseType>::IOFieldField
 
 
 template<class T, class BaseType>
-Foam::IOFieldField<T, BaseType>::IOFieldField
+Foam::CompactIOField<T, BaseType>::CompactIOField
 (
     const IOobject& io,
     const Field<T>& list
@@ -125,7 +125,7 @@ Foam::IOFieldField<T, BaseType>::IOFieldField
 
 
 template<class T, class BaseType>
-Foam::IOFieldField<T, BaseType>::IOFieldField
+Foam::CompactIOField<T, BaseType>::CompactIOField
 (
     const IOobject& io,
     const Xfer<Field<T> >& list
@@ -149,7 +149,7 @@ Foam::IOFieldField<T, BaseType>::IOFieldField
 // * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
 
 template<class T, class BaseType>
-Foam::IOFieldField<T, BaseType>::~IOFieldField()
+Foam::CompactIOField<T, BaseType>::~CompactIOField()
 {}
 
 
@@ -157,7 +157,7 @@ Foam::IOFieldField<T, BaseType>::~IOFieldField()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, class BaseType>
-bool Foam::IOFieldField<T, BaseType>::writeObject
+bool Foam::CompactIOField<T, BaseType>::writeObject
 (
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
@@ -186,7 +186,7 @@ bool Foam::IOFieldField<T, BaseType>::writeObject
 
 
 template<class T, class BaseType>
-bool Foam::IOFieldField<T, BaseType>::writeData(Ostream& os) const
+bool Foam::CompactIOField<T, BaseType>::writeData(Ostream& os) const
 {
     return (os << *this).good();
 }
@@ -195,9 +195,9 @@ bool Foam::IOFieldField<T, BaseType>::writeData(Ostream& os) const
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T, class BaseType>
-void Foam::IOFieldField<T, BaseType>::operator=
+void Foam::CompactIOField<T, BaseType>::operator=
 (
-    const IOFieldField<T, BaseType>& rhs
+    const CompactIOField<T, BaseType>& rhs
 )
 {
     Field<T>::operator=(rhs);
@@ -205,7 +205,7 @@ void Foam::IOFieldField<T, BaseType>::operator=
 
 
 template<class T, class BaseType>
-void Foam::IOFieldField<T, BaseType>::operator=(const Field<T>& rhs)
+void Foam::CompactIOField<T, BaseType>::operator=(const Field<T>& rhs)
 {
     Field<T>::operator=(rhs);
 }
@@ -217,7 +217,7 @@ template<class T, class BaseType>
 Foam::Istream& Foam::operator>>
 (
     Foam::Istream& is,
-    Foam::IOFieldField<T, BaseType>& L
+    Foam::CompactIOField<T, BaseType>& L
 )
 {
     // Read compact
@@ -248,7 +248,7 @@ template<class T, class BaseType>
 Foam::Ostream& Foam::operator<<
 (
     Foam::Ostream& os,
-    const Foam::IOFieldField<T, BaseType>& L
+    const Foam::CompactIOField<T, BaseType>& L
 )
 {
     // Keep ascii writing same.

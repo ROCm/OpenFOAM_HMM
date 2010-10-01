@@ -68,7 +68,7 @@ void Foam::lagrangianFieldDecomposer::readFieldFields
 (
     const label cloudI,
     const IOobjectList& lagrangianObjects,
-    PtrList<PtrList<IOFieldField<Field<Type>, Type> > >& lagrangianFields
+    PtrList<PtrList<CompactIOField<Field<Type>, Type> > >& lagrangianFields
 )
 {
     // Search list of objects for lagrangian fields
@@ -79,13 +79,17 @@ void Foam::lagrangianFieldDecomposer::readFieldFields
 
     IOobjectList lagrangianTypeObjectsB
     (
-        lagrangianObjects.lookupClass(IOFieldField<Field<Type>, Type>::typeName)
+        lagrangianObjects.lookupClass
+        (
+            CompactIOField<Field<Type>,
+            Type>::typeName
+        )
     );
 
     lagrangianFields.set
     (
         cloudI,
-        new PtrList<IOFieldField<Field<Type>, Type> >
+        new PtrList<CompactIOField<Field<Type>, Type> >
         (
             lagrangianTypeObjectsA.size() + lagrangianTypeObjectsB.size()
         )
@@ -98,7 +102,7 @@ void Foam::lagrangianFieldDecomposer::readFieldFields
         lagrangianFields[cloudI].set
         (
             lagrangianFieldi++,
-            new IOFieldField<Field<Type>, Type>(*iter())
+            new CompactIOField<Field<Type>, Type>(*iter())
         );
     }
 
@@ -107,7 +111,7 @@ void Foam::lagrangianFieldDecomposer::readFieldFields
         lagrangianFields[cloudI].set
         (
             lagrangianFieldi++,
-            new IOFieldField<Field<Type>, Type>(*iter())
+            new CompactIOField<Field<Type>, Type>(*iter())
         );
     }
 }
@@ -145,20 +149,20 @@ Foam::lagrangianFieldDecomposer::decomposeField
 
 
 template<class Type>
-Foam::tmp<Foam::IOFieldField<Foam::Field<Type>, Type> >
+Foam::tmp<Foam::CompactIOField<Foam::Field<Type>, Type> >
 Foam::lagrangianFieldDecomposer::decomposeFieldField
 (
     const word& cloudName,
-    const IOFieldField<Field<Type>, Type>& field
+    const CompactIOField<Field<Type>, Type>& field
 ) const
 {
     // Create and map the internal field values
     Field<Field<Type> > procField(field, particleIndices_);
 
     // Create the field for the processor
-    return tmp<IOFieldField<Field<Type>, Type> >
+    return tmp<CompactIOField<Field<Type>, Type> >
     (
-        new IOFieldField<Field<Type>, Type>
+        new CompactIOField<Field<Type>, Type>
         (
             IOobject
             (

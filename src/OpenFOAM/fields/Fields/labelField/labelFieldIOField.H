@@ -34,14 +34,14 @@ Description
 
 #include "labelField.H"
 #include "IOField.H"
-#include "IOFieldField.H"
+#include "CompactIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     typedef IOField<labelField> labelFieldIOField;
-    typedef IOFieldField<labelField, label> labelIOFieldField;
+    typedef CompactIOField<labelField, label> labelFieldCompactIOField;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
