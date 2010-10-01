@@ -263,7 +263,11 @@ void kappatJayatillekeWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, kappatJayatillekeWallFunctionFvPatchScalarField);
+makePatchTypeField
+(
+    fvPatchScalarField,
+    kappatJayatillekeWallFunctionFvPatchScalarField
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
