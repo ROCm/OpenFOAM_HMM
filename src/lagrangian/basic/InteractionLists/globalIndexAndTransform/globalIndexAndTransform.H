@@ -184,7 +184,7 @@ public:
             transformPermutations() const;
 
             //- Return access to the per-patch transform-sign pairs
-            const List<Pair<label> >& patchTransformSign() const;
+            inline const List<Pair<label> >& patchTransformSign() const;
 
             //- Access the overall (permuted) transform corresponding
             //  to the transformIndex
