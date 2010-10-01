@@ -36,10 +36,10 @@ omegaWallFunctions = $(wallFunctions)/omegaWallFunctions
 $(omegaWallFunctions)/omegaWallFunction/omegaWallFunctionFvPatchScalarField.C
 
 kqRWallFunctions = $(wallFunctions)/kqRWallFunctions
-$(kqRWakappatWallFunctions = $(wallFunctions)/kappatWallFunctions
+$(kqRWallFunctions)/kqRWallFunction/kqRWallFunctionFvPatchFields.C
 
+kappatWallFunctions = $(wallFunctions)/kappatWallFunctions
 $(kappatWallFunctions)/kappatJayatillekeWallFunction/kappatJayatillekeWallFunctionFvPatchScalarField.C
-llFunctions)/kqRWallFunction/kqRWallFunctionFvPatchFields.C
 
 
 /* Patch fields */
