@@ -46,74 +46,15 @@ Description
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::autoSnapDriver, 0);
+namespace Foam
+{
+
+defineTypeNameAndDebug(autoSnapDriver, 0);
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-// Get faces to repatch. Returns map from face to patch.
-Foam::Map<Foam::label> Foam::autoSnapDriver::getZoneBafflePatches
-(
-    const bool allowBoundary
-) const
-{
-    const fvMesh& mesh = meshRefiner_.mesh();
-    const refinementSurfaces& surfaces = meshRefiner_.surfaces();
-
-    Map<label> bafflePatch(mesh.nFaces()/1000);
-
-    const wordList& faceZoneNames = surfaces.faceZoneNames();
-    const faceZoneMesh& fZones = mesh.faceZones();
-
-    forAll(faceZoneNames, surfI)
-    {
-        if (faceZoneNames[surfI].size())
-        {
-            // Get zone
-            const faceZone& fZone = fZones[faceZoneNames[surfI]];
-
-            //// Get patch allocated for zone
-            //label patchI = surfaceToCyclicPatch_[surfI];
-            // Get patch of (first region) of surface
-            label patchI = globalToPatch_[surfaces.globalRegion(surfI, 0)];
-
-            Info<< "For surface "
-                << surfaces.names()[surfI]
-                << " found faceZone " << fZone.name()
-                << " and patch " << mesh.boundaryMesh()[patchI].name()
-                << endl;
-
-
-            forAll(fZone, i)
-            {
-                label faceI = fZone[i];
-
-                if (allowBoundary || mesh.isInternalFace(faceI))
-                {
-                    if (!bafflePatch.insert(faceI, patchI))
-                    {
-                        label oldPatchI = bafflePatch[faceI];
-
-                        if (oldPatchI != patchI)
-                        {
-                            FatalErrorIn("getZoneBafflePatches(const bool)")
-                                << "Face " << faceI
-                                << " fc:" << mesh.faceCentres()[faceI]
-                                << " in zone " << fZone.name()
-                                << " is in patch "
-                                << mesh.boundaryMesh()[oldPatchI].name()
-                                << " and in patch "
-                                << mesh.boundaryMesh()[patchI].name()
-                                << abort(FatalError);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return bafflePatch;
-}
-
 
 // Calculate geometrically collocated points, Requires PackedList to be
 // sized and initalised!
@@ -646,91 +587,6 @@ Foam::autoSnapDriver::autoSnapDriver
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::createZoneBaffles
-(
-    List<labelPair>& baffles
-)
-{
-    labelList zonedSurfaces = meshRefiner_.surfaces().getNamedSurfaces();
-
-    autoPtr<mapPolyMesh> map;
-
-    // No need to sync; all processors will have all same zonedSurfaces.
-    if (zonedSurfaces.size())
-    {
-        fvMesh& mesh = meshRefiner_.mesh();
-
-        // Split internal faces on interface surfaces
-        Info<< "Converting zoned faces into baffles ..." << endl;
-
-        // Get faces (internal only) to be baffled. Map from face to patch
-        // label.
-        Map<label> faceToPatch(getZoneBafflePatches(false));
-
-        label nZoneFaces = returnReduce(faceToPatch.size(), sumOp<label>());
-        if (nZoneFaces > 0)
-        {
-            // Convert into labelLists
-            labelList ownPatch(mesh.nFaces(), -1);
-            forAllConstIter(Map<label>, faceToPatch, iter)
-            {
-                ownPatch[iter.key()] = iter();
-            }
-
-            // Create baffles. both sides same patch.
-            map = meshRefiner_.createBaffles(ownPatch, ownPatch);
-
-            // Get pairs of faces created.
-            // Just loop over faceMap and store baffle if we encounter a slave
-            // face.
-
-            baffles.setSize(faceToPatch.size());
-            label baffleI = 0;
-
-            const labelList& faceMap = map().faceMap();
-            const labelList& reverseFaceMap = map().reverseFaceMap();
-
-            forAll(faceMap, faceI)
-            {
-                label oldFaceI = faceMap[faceI];
-
-                // Does face originate from face-to-patch
-                Map<label>::const_iterator iter = faceToPatch.find(oldFaceI);
-
-                if (iter != faceToPatch.end())
-                {
-                    label masterFaceI = reverseFaceMap[oldFaceI];
-                    if (faceI != masterFaceI)
-                    {
-                        baffles[baffleI++] = labelPair(masterFaceI, faceI);
-                    }
-                }
-            }
-
-            if (baffleI != faceToPatch.size())
-            {
-                FatalErrorIn("autoSnapDriver::createZoneBaffles(..)")
-                    << "Had " << faceToPatch.size() << " patches to create "
-                    << " but encountered " << baffleI
-                    << " slave faces originating from patcheable faces."
-                    << abort(FatalError);
-            }
-
-            if (debug)
-            {
-                const_cast<Time&>(mesh.time())++;
-                Pout<< "Writing baffled mesh to time "
-                    << meshRefiner_.timeName() << endl;
-                mesh.write();
-            }
-        }
-        Info<< "Created " << nZoneFaces << " baffles in = "
-            << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
-    }
-    return map;
-}
-
 
 Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::mergeZoneBaffles
 (
@@ -1419,7 +1275,7 @@ void Foam::autoSnapDriver::doSnap
     // Create baffles (pairs of faces that share the same points)
     // Baffles stored as owner and neighbour face that have been created.
     List<labelPair> baffles;
-    createZoneBaffles(baffles);
+    meshRefiner_.createZoneBaffles(globalToPatch_, baffles);
 
     {
         autoPtr<indirectPrimitivePatch> ppPtr

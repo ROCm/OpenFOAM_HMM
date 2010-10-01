@@ -193,13 +193,13 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
                 errorFaces
             );
 
-            // if (checkEdgeConnectivity)
-            // {
+            //if (checkEdgeConnectivity)
+            //{
             //    Info<< "Checking edge-face connectivity (duplicate faces"
             //        << " or non-consecutive shared vertices)" << endl;
-
+            //
             //    label nOldSize = errorFaces.size();
-
+            //
             //    hasErrors =
             //        mesh.checkFaceFaces
             //        (
@@ -207,7 +207,7 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
             //            &errorFaces
             //        )
             //     || hasErrors;
-
+            //
             //    Info<< "Detected additional "
             //        <<  returnReduce
             //            (
@@ -216,7 +216,7 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
             //            )
             //        << " faces with illegal face-face connectivity"
             //        << endl;
-            // }
+            //}
 
             if (!hasErrors)
             {
@@ -2344,6 +2344,7 @@ Foam::label Foam::autoLayerDriver::checkAndUnmark
 (
     const addPatchCellLayer& addLayer,
     const dictionary& meshQualityDict,
+    const List<labelPair>& baffles,
     const indirectPrimitivePatch& pp,
     const fvMesh& newMesh,
 
@@ -2355,7 +2356,15 @@ Foam::label Foam::autoLayerDriver::checkAndUnmark
     // Check the resulting mesh for errors
     Info<< nl << "Checking mesh with layer ..." << endl;
     faceSet wrongFaces(newMesh, "wrongFaces", newMesh.nFaces()/1000);
-    motionSmoother::checkMesh(false, newMesh, meshQualityDict, wrongFaces);
+    motionSmoother::checkMesh
+    (
+        false,
+        newMesh,
+        meshQualityDict,
+        identity(newMesh.nFaces()),
+        baffles,
+        wrongFaces
+    );
     Info<< "Detected " << returnReduce(wrongFaces.size(), sumOp<label>())
         << " illegal faces"
         << " (concave, zero area or negative cell pyramid volume)"
@@ -2484,9 +2493,14 @@ void Foam::autoLayerDriver::getLayerCellsFaces
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoLayerDriver::autoLayerDriver(meshRefinement& meshRefiner)
+Foam::autoLayerDriver::autoLayerDriver
+(
+    meshRefinement& meshRefiner,
+    const labelList& globalToPatch
+)
 :
-    meshRefiner_(meshRefiner)
+    meshRefiner_(meshRefiner),
+    globalToPatch_(globalToPatch)
 {}
 
 
@@ -2535,6 +2549,20 @@ void Foam::autoLayerDriver::addLayers
 )
 {
     fvMesh& mesh = meshRefiner_.mesh();
+
+    // Create baffles (pairs of faces that share the same points)
+    // Baffles stored as owner and neighbour face that have been created.
+    List<labelPair> baffles;
+    meshRefiner_.createZoneBaffles(globalToPatch_, baffles);
+
+
+    if (debug)
+    {
+        const_cast<Time&>(mesh.time())++;
+        Info<< "Writing baffled mesh to " << meshRefiner_.timeName() << endl;
+        mesh.write();
+    }
+
 
     autoPtr<indirectPrimitivePatch> pp
     (
@@ -2920,6 +2948,7 @@ void Foam::autoLayerDriver::addLayers
             (
                 meshMover(),
                 meshQualityDict,
+                baffles,
 
                 layerParams.nSmoothThickness(),
                 layerParams.maxThicknessToMedialRatio(),
@@ -3086,6 +3115,14 @@ void Foam::autoLayerDriver::addLayers
             identity(pp().nPoints())
         );
 
+        // Update numbering of baffles
+        forAll(baffles, i)
+        {
+            labelPair& p = baffles[i];
+            p[0] = map().reverseFaceMap()[p[0]];
+            p[1] = map().reverseFaceMap()[p[1]];
+        }
+
         // Collect layer faces and cells for outside loop.
         getLayerCellsFaces
         (
@@ -3130,6 +3167,7 @@ void Foam::autoLayerDriver::addLayers
         (
             addLayer,
             meshQualityDict,
+            baffles,
             pp(),
             newMesh,
 
@@ -3196,6 +3234,24 @@ void Foam::autoLayerDriver::addLayers
     }
 
     meshRefiner_.updateMesh(map, labelList(0));
+
+    label nBaffles = returnReduce(baffles.size(), sumOp<label>());
+    if (nBaffles > 0)
+    {
+        // Merge any baffles
+        Info<< "Converting " << nBaffles
+            << " baffles back into zoned faces ..."
+            << endl;
+
+        autoPtr<mapPolyMesh> map = meshRefiner_.mergeBaffles(baffles);
+
+        inplaceReorder(map().reverseCellMap(), flaggedCells);
+        inplaceReorder(map().reverseFaceMap(), flaggedFaces);
+
+        Info<< "Converted baffles in = "
+            << meshRefiner_.mesh().time().cpuTimeIncrement()
+            << " s\n" << nl << endl;
+    }
 
 
     // Do final balancing
@@ -3280,8 +3336,19 @@ void Foam::autoLayerDriver::doLayers
     {
         if (numLayers[patchI] > 0)
         {
-            patchIDs.append(patchI);
-            nFacesWithLayers += mesh.boundaryMesh()[patchI].size();
+            const polyPatch& pp = mesh.boundaryMesh()[patchI];
+
+            if (!polyPatch::constraintType(pp.type()))
+            {
+                patchIDs.append(patchI);
+                nFacesWithLayers += mesh.boundaryMesh()[patchI].size();
+            }
+            else
+            {
+                WarningIn("autoLayerDriver::doLayers(..)")
+                    << "Ignoring layers on constraint patch " << pp.name()
+                    << endl;
+            }
         }
     }
     patchIDs.shrink();
@@ -3331,28 +3398,17 @@ void Foam::autoLayerDriver::doLayers
                 }
             }
 
-            // Balance mesh (and meshRefinement). No restriction on face zones
-            // and baffles.
+            // Balance mesh (and meshRefinement). Restrict faceZones to
+            // be on internal faces only since they will be converted into
+            // baffles.
             autoPtr<mapDistributePolyMesh> map = meshRefiner_.balance
             (
-                false,
+                true,   //false,    // keepZoneFaces
                 false,
                 cellWeights,
                 decomposer,
                 distributor
             );
-
-            //{
-            //    globalIndex globalCells(mesh.nCells());
-            //
-            //    Info<< "** Distribution after balancing:" << endl;
-            //    for (label procI = 0; procI < Pstream::nProcs(); procI++)
-            //    {
-            //        Info<< "    " << procI << '\t'
-            //            << globalCells.localSize(procI) << endl;
-            //    }
-            //    Info<< endl;
-            //}
         }
 
 

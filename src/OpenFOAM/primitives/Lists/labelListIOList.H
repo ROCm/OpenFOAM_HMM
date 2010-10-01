@@ -33,15 +33,14 @@ Description
 #define labelListIOList_H
 
 #include "labelList.H"
-#include "IOList.H"
-#include "IOListList.H"
+#include "CompactIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     typedef IOList<labelList> labelListIOList;
-    typedef IOListList<labelList, label> labelIOListList;
+    typedef CompactIOList<labelList, label> labelListCompactIOList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

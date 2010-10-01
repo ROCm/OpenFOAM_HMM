@@ -30,7 +30,6 @@ Description
 #include "Time.H"
 #include "polyMesh.H"
 #include "primitivePatch.H"
-#include "faceIOList.H"
 #include "IFstream.H"
 #include "OFstream.H"
 

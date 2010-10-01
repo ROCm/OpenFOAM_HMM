@@ -36,6 +36,12 @@ namespace Foam
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTemplateTypeNameAndDebugWithName(faceIOList, "faceList", 0);
+defineTemplateTypeNameAndDebugWithName
+(
+    faceCompactIOList,
+    "faceCompactList",
+    0
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

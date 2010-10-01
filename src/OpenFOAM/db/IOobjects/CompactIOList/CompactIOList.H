@@ -22,18 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::IOListList
+    Foam::CompactIOList
 
 Description
-    A List of objects of type \<T\> with automated input and output.
+    A List of objects of type \<T\> with automated input and output using
+    a compact storage. Behaves like IOList except when binary output in
+    case it writes a CompactListList.
+
+    Useful for lists of small sublists e.g. faceList, cellList.
 
 SourceFiles
-    IOListList.C
+    CompactIOList.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOListList_H
-#define IOListList_H
+#ifndef CompactIOList_H
+#define CompactIOList_H
 
 #include "IOList.H"
 #include "regIOobject.H"
@@ -47,25 +51,25 @@ class Istream;
 class Ostream;
 
 // Forward declaration of friend functions and operators
-template<class T, class BaseType> class IOListList;
+template<class T, class BaseType> class CompactIOList;
 
 template<class T, class BaseType> Istream& operator>>
 (
     Istream&,
-    IOListList<T, BaseType>&
+    CompactIOList<T, BaseType>&
 );
 template<class T, class BaseType> Ostream& operator<<
 (
     Ostream&,
-    const IOListList<T, BaseType>&
+    const CompactIOList<T, BaseType>&
 );
 
 /*---------------------------------------------------------------------------*\
-                           Class IOListList Declaration
+                           Class CompactIOList Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T, class BaseType>
-class IOListList
+class CompactIOList
 :
     public regIOobject,
     public List<T>
@@ -78,27 +82,27 @@ class IOListList
 public:
 
     //- Runtime type information
-    TypeName("ListList");
+    TypeName("CompactList");
 
 
     // Constructors
 
         //- Construct from IOobject
-        IOListList(const IOobject&);
+        CompactIOList(const IOobject&);
 
-        //- Construct from IOobject and size of IOListList
-        IOListList(const IOobject&, const label);
+        //- Construct from IOobject and size of CompactIOList
+        CompactIOList(const IOobject&, const label);
 
         //- Construct from IOobject and a List
-        IOListList(const IOobject&, const List<T>&);
+        CompactIOList(const IOobject&, const List<T>&);
 
         //- Construct by transferring the List contents
-        IOListList(const IOobject&, const Xfer<List<T> >&);
+        CompactIOList(const IOobject&, const Xfer<List<T> >&);
 
 
     // Destructor
 
-        virtual ~IOListList();
+        virtual ~CompactIOList();
 
 
     // Member functions
@@ -115,7 +119,7 @@ public:
 
     // Member operators
 
-        void operator=(const IOListList<T, BaseType>&);
+        void operator=(const CompactIOList<T, BaseType>&);
 
         void operator=(const List<T>&);
 
@@ -126,14 +130,14 @@ public:
         friend Istream& operator>> <T, BaseType>
         (
             Istream&,
-            IOListList<T, BaseType>&
+            CompactIOList<T, BaseType>&
         );
 
         // Write List to Ostream.
         friend Ostream& operator<< <T, BaseType>
         (
             Ostream&,
-            const IOListList<T, BaseType>&
+            const CompactIOList<T, BaseType>&
         );
 };
 
@@ -145,7 +149,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "IOListList.C"
+#   include "CompactIOList.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

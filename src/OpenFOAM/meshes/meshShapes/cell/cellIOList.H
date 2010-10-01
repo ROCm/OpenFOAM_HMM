@@ -33,13 +33,14 @@ Description
 #define cellIOList_H
 
 #include "cell.H"
-#include "IOList.H"
+#include "CompactIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     typedef IOList<cell> cellIOList;
+    typedef CompactIOList<cell, label> cellCompactIOList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

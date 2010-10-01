@@ -150,7 +150,7 @@ void Foam::MeshedSurfaceProxy<Face>::write
 
     // write surfMesh/faces
     {
-        faceIOList io
+        faceCompactIOList io
         (
             IOobject
             (

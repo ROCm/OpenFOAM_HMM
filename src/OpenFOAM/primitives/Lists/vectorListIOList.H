@@ -25,7 +25,7 @@ Typedef
     Foam::vectorListIOList
 
 Description
-    Scalar container classes
+    Lists of vectors container class
 
 \*---------------------------------------------------------------------------*/
 
@@ -33,15 +33,14 @@ Description
 #define vectorListIOList_H
 
 #include "vectorList.H"
-#include "IOList.H"
-#include "IOListList.H"
+#include "CompactIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     typedef IOList<vectorList> vectorListIOList;
-    typedef IOListList<vectorList, vector> vectorIOListList;
+    typedef CompactIOList<vectorList, vector> vectorListCompactIOList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

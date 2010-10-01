@@ -33,10 +33,14 @@ Description
 
 namespace Foam
 {
-    defineCompoundTypeName(List<edge>, edgeList);
-    addCompoundToRunTimeSelectionTable(List<edge>, edgeList);
 
-    defineTemplateTypeNameAndDebugWithName(edgeIOList, "edgeList", 0);
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineCompoundTypeName(List<edge>, edgeList);
+addCompoundToRunTimeSelectionTable(List<edge>, edgeList);
+
+defineTemplateTypeNameAndDebugWithName(edgeIOList, "edgeList", 0);
+defineTemplateTypeNameAndDebugWithName(edgeCompactIOList, "edgeCompactList", 0);
 }
 
 // ************************************************************************* //

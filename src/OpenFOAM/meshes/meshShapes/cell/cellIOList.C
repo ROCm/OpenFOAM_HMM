@@ -35,7 +35,8 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-    defineTemplateTypeNameAndDebugWithName(cellIOList, "cellList", 0);
+defineTemplateTypeNameAndDebugWithName(cellIOList, "cellList", 0);
+defineTemplateTypeNameAndDebugWithName(cellCompactIOList, "cellCompactList", 0);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
