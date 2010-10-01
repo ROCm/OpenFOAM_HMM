@@ -33,15 +33,14 @@ Description
 #define scalarFieldIOField_H
 
 #include "scalarField.H"
-#include "IOField.H"
-#include "IOFieldField.H"
+#include "CompactIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     typedef IOField<scalarField> scalarFieldIOField;
-    typedef IOFieldField<scalarField, scalar> scalarIOFieldField;
+    typedef CompactIOField<scalarField, scalar> scalarFieldCompactIOField;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

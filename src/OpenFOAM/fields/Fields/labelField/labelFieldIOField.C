@@ -41,8 +41,8 @@ namespace Foam
 
     defineTemplateTypeNameAndDebugWithName
     (
-        labelIOFieldField,
-        "labelCompactFieldField",
+        labelFieldCompactIOField,
+        "labelFieldCompactField",
         0
     );
 }

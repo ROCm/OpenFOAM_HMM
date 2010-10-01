@@ -37,7 +37,7 @@ SourceFiles
 #define lagrangianFieldDecomposer_H
 
 #include "Cloud.H"
-#include "IOFieldField.H"
+#include "CompactIOField.H"
 #include "indexedParticle.H"
 #include "passiveParticle.H"
 
@@ -111,9 +111,9 @@ public:
             const IOobjectList& lagrangianObjects,
             PtrList
             <
-                PtrList<IOFieldField<Field<Type>, Type> >
+                PtrList<CompactIOField<Field<Type>, Type> >
             >& lagrangianFields
-//            PtrList<IOFieldField<Field<Type>, Type > >& lagrangianFields
+//            PtrList<CompactIOField<Field<Type>, Type > >& lagrangianFields
         );
 
 
@@ -126,10 +126,10 @@ public:
         ) const;
 
         template<class Type>
-        tmp<IOFieldField<Field<Type>, Type> > decomposeFieldField
+        tmp<CompactIOField<Field<Type>, Type> > decomposeFieldField
         (
             const word& cloudName,
-            const IOFieldField<Field<Type>, Type>& field
+            const CompactIOField<Field<Type>, Type>& field
         ) const;
 
 

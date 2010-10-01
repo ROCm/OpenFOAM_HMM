@@ -22,18 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::IOFieldField
+    Foam::CompactIOField
 
 Description
-    A Field of objects of type \<T\> with automated input and output.
+    A Field of objects of type \<T\> with automated input and output using
+    a compact storage. Behaves like IOField except when binary output in
+    case it writes a CompactListList.
+
+    Useful for fields of small subfields e.g. in lagrangian
 
 SourceFiles
-    IOFieldField.C
+    CompactIOField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOFieldField_H
-#define IOFieldField_H
+#ifndef CompactIOField_H
+#define CompactIOField_H
 
 #include "IOField.H"
 #include "regIOobject.H"
@@ -47,25 +51,25 @@ class Istream;
 class Ostream;
 
 // Forward declaration of friend functions and operators
-template<class T, class BaseType> class IOFieldField;
+template<class T, class BaseType> class CompactIOField;
 
 template<class T, class BaseType> Istream& operator>>
 (
     Istream&,
-    IOFieldField<T, BaseType>&
+    CompactIOField<T, BaseType>&
 );
 template<class T, class BaseType> Ostream& operator<<
 (
     Ostream&,
-    const IOFieldField<T, BaseType>&
+    const CompactIOField<T, BaseType>&
 );
 
 /*---------------------------------------------------------------------------*\
-                        Class IOFieldField Declaration
+                        Class CompactIOField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T, class BaseType>
-class IOFieldField
+class CompactIOField
 :
     public regIOobject,
     public Field<T>
@@ -84,21 +88,21 @@ public:
     // Constructors
 
         //- Construct from IOobject
-        IOFieldField(const IOobject&);
+        CompactIOField(const IOobject&);
 
-        //- Construct from IOobject and size of IOFieldField
-        IOFieldField(const IOobject&, const label);
+        //- Construct from IOobject and size
+        CompactIOField(const IOobject&, const label);
 
         //- Construct from IOobject and a Field
-        IOFieldField(const IOobject&, const Field<T>&);
+        CompactIOField(const IOobject&, const Field<T>&);
 
         //- Construct by transferring the Field contents
-        IOFieldField(const IOobject&, const Xfer<Field<T> >&);
+        CompactIOField(const IOobject&, const Xfer<Field<T> >&);
 
 
     // Destructor
 
-        virtual ~IOFieldField();
+        virtual ~CompactIOField();
 
 
     // Member functions
@@ -115,7 +119,7 @@ public:
 
     // Member operators
 
-        void operator=(const IOFieldField<T, BaseType>&);
+        void operator=(const CompactIOField<T, BaseType>&);
 
         void operator=(const Field<T>&);
 
@@ -126,14 +130,14 @@ public:
         friend Istream& operator>> <T, BaseType>
         (
             Istream&,
-            IOFieldField<T, BaseType>&
+            CompactIOField<T, BaseType>&
         );
 
         // Write Field to Ostream.
         friend Ostream& operator<< <T, BaseType>
         (
             Ostream&,
-            const IOFieldField<T, BaseType>&
+            const CompactIOField<T, BaseType>&
         );
 };
 
@@ -145,7 +149,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "IOFieldField.C"
+#   include "CompactIOField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

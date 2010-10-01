@@ -33,15 +33,15 @@ Description
 #define symmTensorFieldIOField_H
 
 #include "symmTensorField.H"
-#include "IOField.H"
-#include "IOFieldField.H"
+#include "CompactIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     typedef IOField<symmTensorField> symmTensorFieldIOField;
-    typedef IOFieldField<symmTensorField, symmTensor> symmTensorIOFieldField;
+    typedef CompactIOField<symmTensorField, symmTensor>
+    symmTensorFieldCompactIOField;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
