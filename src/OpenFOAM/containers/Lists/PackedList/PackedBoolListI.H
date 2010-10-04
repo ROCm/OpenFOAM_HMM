@@ -124,7 +124,6 @@ inline Foam::Xfer<Foam::PackedBoolList> Foam::PackedBoolList::xfer()
 }
 
 
-
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 inline Foam::PackedBoolList&

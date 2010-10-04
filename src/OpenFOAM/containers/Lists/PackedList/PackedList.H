@@ -166,6 +166,7 @@ protected:
         //  For bool specialization, read a single index value
         inline void setPair(Istream&);
 
+
 private:
 
     //- nBits must be positive (non-zero) and fit within the storage.
@@ -179,6 +180,7 @@ private:
 
         //- Number of nBits entries
         label size_;
+
 
 public:
 
@@ -623,7 +625,6 @@ public:
             Ostream&,
             const PackedList<nBits>&
         );
-
 };
 
 

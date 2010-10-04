@@ -79,6 +79,7 @@ class PackedBoolList
         template<class LabelListType>
         label subsetIndices(const LabelListType& indices);
 
+
 public:
 
     // Constructors
@@ -250,7 +251,6 @@ public:
 
             //- Remove entries from this list - unset the specified bits
             inline PackedBoolList& operator-=(const UIndirectList<label>&);
-
 };
 
 

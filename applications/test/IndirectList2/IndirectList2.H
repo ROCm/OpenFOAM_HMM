@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,6 +63,7 @@ class IndirectListAddressing
         //- Disallow default bitwise assignment
         void operator=(const IndirectListAddressing&);
 
+
 protected:
 
     // Constructors
@@ -108,6 +109,7 @@ class IndirectList2
         //- Disable assignment from UIndirectList
         void operator=(const UIndirectList<T>&);
 
+
 public:
 
     // Constructors
@@ -133,6 +135,7 @@ public:
             //- Return the list addressing
             using UIndirectList<T>::addressing;
 
+
         // Edit
 
             //- Reset addressing
@@ -143,7 +146,6 @@ public:
 
             //- Assignment operator
             using UIndirectList<T>::operator=;
-
 };
 
 
