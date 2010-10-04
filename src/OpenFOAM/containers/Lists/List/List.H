@@ -131,9 +131,6 @@ public:
         //- Construct as copy of SLList<T>
         explicit List(const SLList<T>&);
 
-        //- Construct as copy of IndirectList<T>
-        explicit List(const IndirectList<T>&);
-
         //- Construct as copy of UIndirectList<T>
         explicit List(const UIndirectList<T>&);
 
@@ -218,9 +215,6 @@ public:
 
         //- Assignment from SLList operator. Takes linear time.
         void operator=(const SLList<T>&);
-
-        //- Assignment from IndirectList operator. Takes linear time.
-        void operator=(const IndirectList<T>&);
 
         //- Assignment from UIndirectList operator. Takes linear time.
         void operator=(const UIndirectList<T>&);
