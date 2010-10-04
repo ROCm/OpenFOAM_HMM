@@ -68,8 +68,8 @@ class sampledIsoSurfaceCell
         //- Whether to recalculate cell values as average of point values
         const Switch average_;
 
-        //- zone name (if restricted to zones)
-        word zoneName_;
+        //- If restricted to zones, name of this zone or a regular expression
+        keyType zoneKey_;
 
         //- triangles converted to faceList
         mutable autoPtr<faceList> facesPtr_;

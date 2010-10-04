@@ -205,20 +205,17 @@ Foam::sampledIsoSurfaceCell::sampledIsoSurfaceCell
     isoVal_(readScalar(dict.lookup("isoValue"))),
     regularise_(dict.lookupOrDefault("regularise", true)),
     average_(dict.lookupOrDefault("average", true)),
-    zoneName_(word::null),
+    zoneKey_(keyType::null),
     facesPtr_(NULL),
     prevTimeIndex_(-1),
     meshCells_(0)
 {
-//    dict.readIfPresent("zone", zoneName_);
+//    dict.readIfPresent("zone", zoneKey_);
 //
-//    if (debug && zoneName_.size())
+//    if (debug && zoneKey_.size() && mesh.cellZones().findZoneID(zoneKey_) < 0)
 //    {
-//        if (mesh.cellZones().findZoneID(zoneName_) < 0)
-//        {
-//            Info<< "cellZone \"" << zoneName_
-//                << "\" not found - using entire mesh" << endl;
-//        }
+//        Info<< "cellZone " << zoneKey_
+//            << " not found - using entire mesh" << endl;
 //    }
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,10 +23,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PackedList.H"
+#ifndef polyPatchID_H
+#define polyPatchID_H
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "DynamicID.H"
+#include "polyBoundaryMesh.H"
 
-defineTypeNameAndDebug(Foam::PackedListName, 0);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    //- Foam::polyPatchID
+    typedef DynamicID<polyBoundaryMesh> polyPatchID;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

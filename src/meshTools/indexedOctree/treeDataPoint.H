@@ -69,14 +69,14 @@ public:
     // Constructors
 
         //- Construct from components. Holds reference to points!
-        treeDataPoint(const pointField& points);
+        treeDataPoint(const pointField&);
 
 
     // Member Functions
 
         // Access
 
-            label size() const
+            inline label size() const
             {
                 return points_.size();
             }
@@ -107,7 +107,7 @@ public:
             //  Returns actual point and distance (squared)
             void findNearest
             (
-                const labelList& indices,
+                const unallocLabelList& indices,
                 const point& sample,
 
                 scalar& nearestDistSqr,
@@ -119,7 +119,7 @@ public:
             //  Returns point and distance (squared)
             void findNearest
             (
-                const labelList& indices,
+                const unallocLabelList& indices,
                 const linePointRef& ln,
 
                 treeBoundBox& tightest,

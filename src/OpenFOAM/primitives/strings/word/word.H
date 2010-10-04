@@ -73,6 +73,8 @@ public:
 
         static const char* const typeName;
         static int debug;
+
+        //- An empty word
         static const word null;
 
 

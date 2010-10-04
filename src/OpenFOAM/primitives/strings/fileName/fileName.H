@@ -93,6 +93,8 @@ public:
 
         static const char* const typeName;
         static int debug;
+
+        //- An empty fileName
         static const fileName null;
 
 

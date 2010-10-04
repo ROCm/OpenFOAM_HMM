@@ -67,8 +67,8 @@ class sampledThresholdCellFaces
         //- Threshold value
         const scalar upperThreshold_;
 
-        //- zone name (if restricted to zones)
-        word zoneName_;
+        //- If restricted to zones, name of this zone or a regular expression
+        keyType zoneKey_;
 
         //- Triangulated faces or keep faces as is
         bool triangulate_;

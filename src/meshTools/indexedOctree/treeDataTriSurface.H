@@ -91,12 +91,12 @@ public:
 
         // Access
 
-            const triSurface& surface() const
+            inline const triSurface& surface() const
             {
                 return surface_;
             }
 
-            label size() const
+            inline label size() const
             {
                 return surface_.size();
             }
@@ -127,7 +127,7 @@ public:
             //  Returns actual point and distance (squared)
             void findNearest
             (
-                const labelList& indices,
+                const unallocLabelList& indices,
                 const point& sample,
 
                 scalar& nearestDistSqr,
@@ -139,7 +139,7 @@ public:
             //  Returns point and distance (squared)
             void findNearest
             (
-                const labelList& indices,
+                const unallocLabelList& indices,
                 const linePointRef& ln,
 
                 treeBoundBox& tightest,

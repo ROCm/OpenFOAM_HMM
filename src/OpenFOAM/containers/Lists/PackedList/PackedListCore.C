@@ -21,29 +21,13 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::PackedBoolList
-
-Description
-    A bit-packed bool list
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef PackedBoolList_H
-#define PackedBoolList_H
-
-#include "bool.H"
 #include "PackedList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    typedef PackedList<> PackedBoolList;
-}
+defineTypeNameAndDebug(Foam::PackedListCore, 0);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

@@ -26,7 +26,7 @@ Class
 
 Description
     A simple wrapper around bool so that it can be read as a word:
-    true/false, on/off, yes/no or y/n or none.
+    true/false, on/off, yes/no, y/n, t/f, or none.
 
 SourceFiles
     Switch.C
@@ -78,6 +78,8 @@ public:
         #undef YES
         #undef NO_1
         #undef YES_1
+        #undef FALSE_1
+        #undef TRUE_1
         #undef NONE
         #undef PLACEHOLDER
         #undef INVALID
@@ -86,11 +88,12 @@ public:
         //  These also correspond to the entries in names.
         enum switchType
         {
-            FALSE = 0,  TRUE  = 1,
-            OFF   = 2,  ON    = 3,
-            NO    = 4,  YES   = 5,
-            NO_1  = 6,  YES_1 = 7,
-            NONE  = 8,  PLACEHOLDER = 9,
+            FALSE   = 0,  TRUE   = 1,
+            OFF     = 2,  ON     = 3,
+            NO      = 4,  YES    = 5,
+            NO_1    = 6,  YES_1  = 7,
+            FALSE_1 = 8,  TRUE_1 = 9,
+            NONE    = 10, PLACEHOLDER = 11,
             INVALID
         };
 

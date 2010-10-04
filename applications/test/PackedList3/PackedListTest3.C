@@ -33,7 +33,6 @@ Description
 #include "StaticHashTable.H"
 #include "cpuTime.H"
 #include <vector>
-#include "PackedList.H"
 #include "PackedBoolList.H"
 
 using namespace Foam;
@@ -57,7 +56,7 @@ int main(int argc, char *argv[])
     {
         if ((i % nReport) == 0 && i)
         {
-            Info<< "i:" << i << " in " << timer.cpuTimeIncrement() << " s" 
+            Info<< "i:" << i << " in " << timer.cpuTimeIncrement() << " s"
                 <<endl;
         }
         packed[i] = 1;

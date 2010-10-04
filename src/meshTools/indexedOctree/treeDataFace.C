@@ -76,12 +76,27 @@ void Foam::treeDataFace::update()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::treeDataFace::treeDataFace
 (
     const bool cacheBb,
     const primitiveMesh& mesh,
-    const labelList& faceLabels
+    const unallocLabelList& faceLabels
+)
+:
+    mesh_(mesh),
+    faceLabels_(faceLabels),
+    isTreeFace_(mesh.nFaces(), 0),
+    cacheBb_(cacheBb)
+{
+    update();
+}
+
+
+Foam::treeDataFace::treeDataFace
+(
+    const bool cacheBb,
+    const primitiveMesh& mesh,
+    const Xfer<labelList>& faceLabels
 )
 :
     mesh_(mesh),
@@ -467,7 +482,7 @@ bool Foam::treeDataFace::overlaps
 // nearestPoint.
 void Foam::treeDataFace::findNearest
 (
-    const labelList& indices,
+    const unallocLabelList& indices,
     const point& sample,
 
     scalar& nearestDistSqr,
@@ -477,7 +492,7 @@ void Foam::treeDataFace::findNearest
 {
     forAll(indices, i)
     {
-        label index = indices[i];
+        const label index = indices[i];
 
         const face& f = mesh_.faces()[faceLabels_[index]];
 
@@ -514,7 +529,7 @@ bool Foam::treeDataFace::intersects
         }
     }
 
-    label faceI = faceLabels_[index];
+    const label faceI = faceLabels_[index];
 
     const vector dir(end - start);
 

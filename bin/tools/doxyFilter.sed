@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # Script
-#     doxyFilt.sed
+#     doxyFilter.sed
 #
 # Description
 #     Transform human-readable tags such as 'Description' into the Doxygen

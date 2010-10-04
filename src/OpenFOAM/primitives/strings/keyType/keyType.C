@@ -22,24 +22,54 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Istream constructor and IOstream operators for word.
+    Istream constructor and IOstream operators for keyType.
 
 \*---------------------------------------------------------------------------*/
 
 #include "keyType.H"
+#include "regExp.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const Foam::keyType Foam::keyType::null;
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::keyType::keyType(Istream& is)
 :
-    word()
+    word(),
+    isPattern_(false)
 {
-    is >> *this;
+    is  >> *this;
 }
 
 
-Foam::Istream& Foam::operator>>(Istream& is, keyType& w)
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::keyType::match
+(
+    const std::string& str,
+    bool literalMatch
+) const
+{
+    if (literalMatch || !isPattern_)
+    {
+        // check as string
+        return (str == *this);
+    }
+    else
+    {
+        // check as regex
+        return regExp(*this).match(str);
+    }
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+Foam::Istream& Foam::operator>>(Istream& is, keyType& kw)
 {
     token t(is);
 
@@ -51,15 +81,16 @@ Foam::Istream& Foam::operator>>(Istream& is, keyType& w)
 
     if (t.isWord())
     {
-        w = t.wordToken();
+        kw = t.wordToken();
     }
     else if (t.isString())
     {
-        // Assign from string. Sets regular expression.
-        w = t.stringToken();
+        // Assign from string. Set as regular expression.
+        kw = t.stringToken();
+        kw.isPattern_ = true;
 
         // flag empty strings as an error
-        if (w.empty())
+        if (kw.empty())
         {
             is.setBad();
             FatalIOErrorIn("operator>>(Istream&, keyType&)", is)
@@ -86,9 +117,9 @@ Foam::Istream& Foam::operator>>(Istream& is, keyType& w)
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const keyType& w)
+Foam::Ostream& Foam::operator<<(Ostream& os, const keyType& kw)
 {
-    os.write(w);
+    os.write(kw);
     os.check("Ostream& operator<<(Ostream&, const keyType&)");
     return os;
 }
