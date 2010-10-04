@@ -381,7 +381,7 @@ void Foam::List<T>::setSize(const label newSize)
 template<class T>
 void Foam::List<T>::setSize(const label newSize, const T& a)
 {
-    label oldSize = this->size_;
+    label oldSize = label(this->size_);
     this->setSize(newSize);
 
     if (newSize > oldSize)
