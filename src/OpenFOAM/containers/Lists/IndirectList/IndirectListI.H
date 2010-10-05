@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,25 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+
+inline Foam::IndirectListAddressing::IndirectListAddressing
+(
+    const UList<label>& addr
+)
+:
+    addressing_(addr)
+{}
+
+
+inline Foam::IndirectListAddressing::IndirectListAddressing
+(
+    const Xfer<List<label> >& addr
+)
+:
+    addressing_(addr)
+{}
+
+
 template<class T>
 inline Foam::IndirectList<T>::IndirectList
 (
@@ -32,8 +51,12 @@ inline Foam::IndirectList<T>::IndirectList
     const UList<label>& addr
 )
 :
-    completeList_(const_cast<UList<T>&>(completeList)),
-    addressing_(addr)
+    IndirectListAddressing(addr),
+    UIndirectList<T>
+    (
+        completeList,
+        IndirectListAddressing::addressing()
+    )
 {}
 
 
@@ -44,71 +67,55 @@ inline Foam::IndirectList<T>::IndirectList
     const Xfer<List<label> >& addr
 )
 :
-    completeList_(const_cast<UList<T>&>(completeList)),
-    addressing_(addr)
+    IndirectListAddressing(addr),
+    UIndirectList<T>
+    (
+        completeList,
+        IndirectListAddressing::addressing()
+    )
+{}
+
+
+template<class T>
+inline Foam::IndirectList<T>::IndirectList
+(
+    const IndirectList<T>& lst
+)
+:
+    IndirectListAddressing(lst.addressing()),
+    UIndirectList<T>
+    (
+        lst.completeList(),
+        IndirectListAddressing::addressing()
+    )
+{}
+
+
+template<class T>
+inline Foam::IndirectList<T>::IndirectList
+(
+    const UIndirectList<T>& lst
+)
+:
+    IndirectListAddressing(lst.addressing()),
+    UIndirectList<T>
+    (
+        lst.completeList(),
+        IndirectListAddressing::addressing()
+    )
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class T>
-inline Foam::label Foam::IndirectList<T>::size() const
-{
-    return addressing_.size();
-}
-
-
-template<class T>
-inline bool Foam::IndirectList<T>::empty() const
-{
-    return addressing_.empty();
-}
-
-
-template<class T>
-inline T& Foam::IndirectList<T>::first()
-{
-    return completeList_[addressing_.first()];
-}
-
-
-template<class T>
-inline const T& Foam::IndirectList<T>::first() const
-{
-    return completeList_[addressing_.first()];
-}
-
-
-template<class T>
-inline T& Foam::IndirectList<T>::last()
-{
-    return completeList_[addressing_.last()];
-}
-
-
-template<class T>
-inline const T& Foam::IndirectList<T>::last() const
-{
-    return completeList_[addressing_.last()];
-}
-
-
-template<class T>
-inline const Foam::UList<T>& Foam::IndirectList<T>::completeList() const
-{
-    return completeList_;
-}
-
-
-template<class T>
-inline const Foam::List<Foam::label>& Foam::IndirectList<T>::addressing() const
+inline const Foam::List<Foam::label>&
+Foam::IndirectListAddressing::addressing() const
 {
     return addressing_;
 }
 
 
-template<class T>
-inline void Foam::IndirectList<T>::resetAddressing
+inline void Foam::IndirectListAddressing::resetAddressing
 (
     const UList<label>& addr
 )
@@ -117,72 +124,12 @@ inline void Foam::IndirectList<T>::resetAddressing
 }
 
 
-template<class T>
-inline void Foam::IndirectList<T>::resetAddressing
+inline void Foam::IndirectListAddressing::resetAddressing
 (
     const Xfer<List<label> >& addr
 )
 {
     addressing_.transfer(addr());
-}
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-template<class T>
-inline Foam::List<T> Foam::IndirectList<T>::operator()() const
-{
-    List<T> result(size());
-
-    forAll(*this, i)
-    {
-        result[i] = operator[](i);
-    }
-
-    return result;
-}
-
-
-template<class T>
-inline T& Foam::IndirectList<T>::operator[](const label i)
-{
-    return completeList_[addressing_[i]];
-}
-
-
-template<class T>
-inline const T& Foam::IndirectList<T>::operator[](const label i) const
-{
-    return completeList_[addressing_[i]];
-}
-
-
-template<class T>
-inline void Foam::IndirectList<T>::operator=(const UList<T>& ae)
-{
-    if (addressing_.size() != ae.size())
-    {
-        FatalErrorIn("IndirectList<T>::operator=(const UList<T>&)")
-            << "Addressing and list of addressed elements "
-               "have different sizes: "
-            << addressing_.size() << " " << ae.size()
-            << abort(FatalError);
-    }
-
-    forAll(addressing_, i)
-    {
-        completeList_[addressing_[i]] = ae[i];
-    }
-}
-
-
-template<class T>
-inline void Foam::IndirectList<T>::operator=(const T& t)
-{
-    forAll(addressing_, i)
-    {
-        completeList_[addressing_[i]] = t;
-    }
 }
 
 
