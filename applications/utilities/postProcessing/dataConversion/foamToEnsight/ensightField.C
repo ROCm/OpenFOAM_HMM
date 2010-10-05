@@ -259,7 +259,7 @@ void writePatchField
 
     word timeFile = prepend + itoa(timeIndex);
 
-    autoPtr<ensightStream> ensightFilePtr;
+    ensightStream* ensightFilePtr = NULL;
     if (Pstream::master())
     {
         if (timeIndex == 0)
@@ -279,29 +279,23 @@ void writePatchField
 
         if (binary)
         {
-            ensightFilePtr.reset
+            ensightFilePtr = new ensightBinaryStream
             (
-                new ensightBinaryStream
-                (
-                    postProcPath/ensightFileName,
-                    runTime
-                )
+                postProcPath/ensightFileName,
+                runTime
             );
         }
         else
         {
-            ensightFilePtr.reset
+            ensightFilePtr = new ensightAsciiStream
             (
-                new ensightAsciiStream
-                (
-                    postProcPath/ensightFileName,
-                    runTime
-                )
+                postProcPath/ensightFileName,
+                runTime
             );
         }
     }
 
-    ensightStream& ensightFile = ensightFilePtr();
+    ensightStream& ensightFile = *ensightFilePtr;
 
     if (Pstream::master())
     {
@@ -333,6 +327,11 @@ void writePatchField
             nPatchPrims.find(patchName)(),
             ensightFile
         );
+    }
+
+    if (Pstream::master())
+    {
+        delete ensightFilePtr;
     }
 }
 
@@ -374,7 +373,7 @@ void ensightField
     const labelList& hexes = meshCellSets.hexes;
     const labelList& polys = meshCellSets.polys;
 
-    autoPtr<ensightStream> ensightFilePtr;
+    ensightStream* ensightFilePtr = NULL;
     if (Pstream::master())
     {
         // set the filename of the ensight file
@@ -382,29 +381,23 @@ void ensightField
 
         if (binary)
         {
-            ensightFilePtr.reset
+            ensightFilePtr = new ensightBinaryStream
             (
-                new ensightBinaryStream
-                (
-                    postProcPath/ensightFileName,
-                    runTime
-                )
+                postProcPath/ensightFileName,
+                runTime
             );
         }
         else
         {
-            ensightFilePtr.reset
+            ensightFilePtr = new ensightAsciiStream
             (
-                new ensightAsciiStream
-                (
-                    postProcPath/ensightFileName,
-                    runTime
-                )
+                postProcPath/ensightFileName,
+                runTime
             );
         }
     }
 
-    ensightStream& ensightFile = ensightFilePtr();
+    ensightStream& ensightFile = *ensightFilePtr;
 
     if (patchNames.empty())
     {
@@ -595,6 +588,10 @@ void ensightField
             }
         }
     }
+    if (Pstream::master())
+    {
+        delete ensightFilePtr;
+    }
 }
 
 
@@ -614,10 +611,7 @@ void ensightPointField
 
     word timeFile = prepend + itoa(timeIndex);
 
-    //const fvMesh& mesh = eMesh.mesh();
-    //const Time& runTime = mesh.time();
-
-    autoPtr<ensightStream> ensightFilePtr;
+    ensightStream* ensightFilePtr = NULL;
     if (Pstream::master())
     {
         // set the filename of the ensight file
@@ -625,29 +619,23 @@ void ensightPointField
 
         if (binary)
         {
-            ensightFilePtr.reset
+            ensightFilePtr = new ensightBinaryStream
             (
-                new ensightBinaryStream
-                (
-                    postProcPath/ensightFileName,
-                    eMesh.mesh().time()
-                )
+                postProcPath/ensightFileName,
+                eMesh.mesh().time()
             );
         }
         else
         {
-            ensightFilePtr.reset
+            ensightFilePtr = new ensightAsciiStream
             (
-                new ensightAsciiStream
-                (
-                    postProcPath/ensightFileName,
-                    eMesh.mesh().time()
-                )
+                postProcPath/ensightFileName,
+                eMesh.mesh().time()
             );
         }
     }
 
-    ensightStream& ensightFile = ensightFilePtr();
+    ensightStream& ensightFile = *ensightFilePtr;
 
     if (eMesh.patchNames().empty())
     {
@@ -699,6 +687,11 @@ void ensightPointField
                 toMaster<< uniqueFld.component(cmpt);
             }
         }
+    }
+
+    if (Pstream::master())
+    {
+        delete ensightFilePtr;
     }
 }
 

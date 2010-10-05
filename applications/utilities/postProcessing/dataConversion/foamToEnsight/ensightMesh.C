@@ -1012,35 +1012,29 @@ void Foam::ensightMesh::write
     // set the filename of the ensight file
     fileName ensightGeometryFileName = timeFile + "mesh";
 
-    autoPtr<ensightStream> ensightGeometryFilePtr;
+    ensightStream* ensightGeometryFilePtr = NULL;
     if (Pstream::master())
     {
         if (binary_)
         {
-            ensightGeometryFilePtr.reset
+            ensightGeometryFilePtr = new ensightBinaryStream
             (
-                new ensightBinaryStream
-                (
-                    postProcPath/ensightGeometryFileName,
-                    runTime
-                )
+                postProcPath/ensightGeometryFileName,
+                runTime
             );
-            ensightGeometryFilePtr().write("C binary");
+            ensightGeometryFilePtr->write("C binary");
         }
         else
         {
-            ensightGeometryFilePtr.reset
+            ensightGeometryFilePtr = new ensightAsciiStream
             (
-                new ensightAsciiStream
-                (
-                    postProcPath/ensightGeometryFileName,
-                    runTime
-                )
+                postProcPath/ensightGeometryFileName,
+                runTime
             );
         }
     }
 
-    ensightStream& ensightGeometryFile = ensightGeometryFilePtr();
+    ensightStream& ensightGeometryFile = *ensightGeometryFilePtr;
 
     if (Pstream::master())
     {
@@ -1288,6 +1282,11 @@ void Foam::ensightMesh::write
                 ensightGeometryFile
             );
         }
+    }
+
+    if (Pstream::master())
+    {
+        delete ensightGeometryFilePtr;
     }
 }
 
