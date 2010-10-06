@@ -296,6 +296,7 @@ primitiveShapes = meshes/primitiveShapes
 $(primitiveShapes)/line/line.C
 $(primitiveShapes)/plane/plane.C
 $(primitiveShapes)/triangle/intersection.C
+$(primitiveShapes)/objectHit/pointIndexHitIOList.C
 
 meshShapes = meshes/meshShapes
 $(meshShapes)/edge/edge.C

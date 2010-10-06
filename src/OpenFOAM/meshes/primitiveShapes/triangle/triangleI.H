@@ -32,158 +32,6 @@ License
 namespace Foam
 {
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-template<class Point, class PointRef>
-pointHit triangle<Point, PointRef>::nearestPoint
-(
-    const Point& baseVertex,
-    const vector& E0,
-    const vector& E1,
-    const point& P
-)
-{
-    // Distance vector
-    const vector D(baseVertex - P);
-
-    // Some geometrical factors
-    const scalar a = E0 & E0;
-    const scalar b = E0 & E1;
-    const scalar c = E1 & E1;
-
-    // Precalculate distance factors
-    const scalar d = E0 & D;
-    const scalar e = E1 & D;
-    const scalar f = D & D;
-
-    // Do classification
-    const scalar det = a*c - b*b;
-    scalar s = b*e - c*d;
-    scalar t = b*d - a*e;
-
-    bool inside = false;
-
-    if (s+t < det)
-    {
-        if (s < 0)
-        {
-            if (t < 0)
-            {
-                // Region 4
-                if (e > 0)
-                {
-                    // min on edge t = 0
-                    t = 0;
-                    s = (d >= 0 ? 0 : (-d >= a ? 1 : -d/a));
-                }
-                else
-                {
-                    // min on edge s=0
-                    s = 0;
-                    t = (e >= 0 ? 0 : (-e >= c ? 1 : -e/c));
-                }
-            }
-            else
-            {
-                // Region 3. Min on edge s = 0
-                s = 0;
-                t = (e >= 0 ? 0 : (-e >= c ? 1 : -e/c));
-            }
-        }
-        else if (t < 0)
-        {
-            // Region 5
-            t = 0;
-            s = (d >= 0 ? 0 : (-d >= a ? 1 : -d/a));
-        }
-        else
-        {
-            // Region 0
-            const scalar invDet = 1/det;
-            s *= invDet;
-            t *= invDet;
-
-            inside = true;
-        }
-    }
-    else
-    {
-        if (s < 0)
-        {
-            // Region 2
-            const scalar tmp0 = b + d;
-            const scalar tmp1 = c + e;
-            if (tmp1 > tmp0)
-            {
-                // min on edge s+t=1
-                const scalar numer = tmp1 - tmp0;
-                const scalar denom = a-2*b+c;
-                s = (numer >= denom ? 1 : numer/denom);
-                t = 1 - s;
-            }
-            else
-            {
-                // min on edge s=0
-                s = 0;
-                t = (tmp1 <= 0 ? 1 : (e >= 0 ? 0 : - e/c));
-            }
-        }
-        else if (t < 0)
-        {
-            // Region 6
-            const scalar tmp0 = b + d;
-            const scalar tmp1 = c + e;
-            if (tmp1 > tmp0)
-            {
-                // min on edge s+t=1
-                const scalar numer = tmp1 - tmp0;
-                const scalar denom = a-2*b+c;
-                s = (numer >= denom ? 1 : numer/denom);
-                t = 1 - s;
-            }
-            else
-            {
-                // min on edge t=0
-                t = 0;
-                s = (tmp1 <= 0 ? 1 : (d >= 0 ? 0 : - d/a));
-            }
-        }
-        else
-        {
-            // Region 1
-            const scalar numer = c+e-(b+d);
-            if (numer <= 0)
-            {
-                s = 0;
-            }
-            else
-            {
-                const scalar denom = a-2*b+c;
-                s = (numer >= denom ? 1 : numer/denom);
-            }
-        }
-
-        t = 1 - s;
-    }
-
-    // Calculate distance.
-    // Note: Foam::mag used since truncation error causes negative distances
-    // with points very close to one of the triangle vertices.
-    // (Up to -2.77556e-14 seen). Could use +SMALL but that not large enough.
-
-    return pointHit
-    (
-        inside,
-        baseVertex + s*E0 + t*E1,
-        Foam::sqrt
-        (
-            Foam::mag(a*s*s + 2*b*s*t + c*t*t + 2*d*s + 2*e*t + f)
-        ),
-        !inside
-    );
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
 template<class Point, class PointRef>
@@ -247,7 +95,7 @@ inline Point triangle<Point, PointRef>::centre() const
 template<class Point, class PointRef>
 inline scalar triangle<Point, PointRef>::mag() const
 {
-    return ::Foam::mag(normal());
+    return Foam::mag(normal());
 }
 
 
@@ -536,7 +384,7 @@ inline pointHit triangle<Point, PointRef>::ray
         inter.setMiss(eligible);
 
         // The miss point is the nearest point on the triangle
-        inter.setPoint(nearestPoint(a_, E0, E1, p).rawPoint());
+        inter.setPoint(nearestPoint(p).rawPoint());
 
         // The distance to the miss is the distance between the
         // original point and plane of intersection
@@ -634,17 +482,129 @@ inline pointHit triangle<Point, PointRef>::intersection
 
 
 template<class Point, class PointRef>
+pointHit triangle<Point, PointRef>::nearestPointClassify
+(
+    const point& p,
+    label& nearType,
+    label& nearLabel
+) const
+{
+    // Adapted from:
+    // Real-time collision detection, Christer Ericson, 2005, 136-142
+
+    // Check if P in vertex region outside A
+    vector ab = b_ - a_;
+    vector ac = c_ - a_;
+    vector ap = p - a_;
+
+    scalar d1 = ab & ap;
+    scalar d2 = ac & ap;
+
+    if (d1 <= 0.0 && d2 <= 0.0)
+    {
+        // barycentric coordinates (1, 0, 0)
+
+        nearType = POINT;
+        nearLabel = 0;
+        return pointHit(false, a_, Foam::mag(a_ - p), true);
+    }
+
+    // Check if P in vertex region outside B
+    vector bp = p - b_;
+    scalar d3 = ab & bp;
+    scalar d4 = ac & bp;
+
+    if (d3 >= 0.0 && d4 <= d3)
+    {
+        // barycentric coordinates (0, 1, 0)
+
+        nearType = POINT;
+        nearLabel = 1;
+        return pointHit(false, b_, Foam::mag(b_ - p), true);
+    }
+
+    // Check if P in edge region of AB, if so return projection of P onto AB
+    scalar vc = d1*d4 - d3*d2;
+
+    if (vc <= 0.0 && d1 >= 0.0 && d3 <= 0.0)
+    {
+        // barycentric coordinates (1-v, v, 0)
+        scalar v = d1/(d1 - d3);
+
+        point nearPt =  a_ + v*ab;
+        nearType = EDGE;
+        nearLabel = 0;
+        return pointHit(false, nearPt, Foam::mag(nearPt - p), true);
+    }
+
+    // Check if P in vertex region outside C
+    vector cp = p - c_;
+    scalar d5 = ab & cp;
+    scalar d6 = ac & cp;
+
+    if (d6 >= 0.0 && d5 <= d6)
+    {
+        // barycentric coordinates (0, 0, 1)
+
+        nearType = POINT;
+        nearLabel = 2;
+        return pointHit(false, c_, Foam::mag(c_ - p), true);
+    }
+
+    // Check if P in edge region of AC, if so return projection of P onto AC
+    scalar vb = d5*d2 - d1*d6;
+
+    if (vb <= 0.0 && d2 >= 0.0 && d6 <= 0.0)
+    {
+        // barycentric coordinates (1-w, 0, w)
+        scalar w = d2/(d2 - d6);
+
+        point nearPt = a_ + w*ac;
+        nearType = EDGE;
+        nearLabel = 2;
+        return pointHit(false, nearPt, Foam::mag(nearPt - p), true);
+    }
+
+    // Check if P in edge region of BC, if so return projection of P onto BC
+    scalar va = d3*d6 - d5*d4;
+
+    if (va <= 0.0 && (d4 - d3) >= 0.0 && (d5 - d6) >= 0.0)
+    {
+        // barycentric coordinates (0, 1-w, w)
+        scalar w = (d4 - d3)/((d4 - d3) + (d5 - d6));
+
+        point nearPt = b_ + w*(c_ - b_);
+        nearType = EDGE;
+        nearLabel = 1;
+        return pointHit(false, nearPt, Foam::mag(nearPt - p), true);
+    }
+
+    // P inside face region. Compute Q through its barycentric
+    // coordinates (u, v, w)
+    scalar denom = 1.0/(va + vb + vc);
+    scalar v = vb * denom;
+    scalar w = vc * denom;
+
+    // = u*a + v*b + w*c, u = va*denom = 1.0 - v - w
+
+    point nearPt = a_ + ab*v + ac*w;
+    nearType = NONE,
+    nearLabel = -1;
+    return pointHit(true, nearPt, Foam::mag(nearPt - p), false);
+}
+
+
+template<class Point, class PointRef>
 inline pointHit triangle<Point, PointRef>::nearestPoint
 (
     const point& p
 ) const
 {
-    // Express triangle in terms of baseVertex (point a_) and
-    // two edge vectors
-    vector E0 = b_ - a_;
-    vector E1 = c_ - a_;
+    // Dummy labels
+    label nearType = -1;
+    label nearLabel = -1;
 
-    return nearestPoint(a_, E0, E1, p);
+    return nearestPointClassify(p, nearType, nearLabel);
 }
 
 
@@ -652,158 +612,12 @@ template<class Point, class PointRef>
 inline bool triangle<Point, PointRef>::classify
 (
     const point& p,
-    const scalar tol,
     label& nearType,
     label& nearLabel
 ) const
 {
-    const vector E0 = b_ - a_;
-    const vector E1 = c_ - a_;
-    const vector n = 0.5*(E0 ^ E1);
-
-    // Get largest component of normal
-    scalar magX = Foam::mag(n.x());
-    scalar magY = Foam::mag(n.y());
-    scalar magZ = Foam::mag(n.z());
-
-    label i0 = -1;
-    if ((magX >= magY) && (magX >= magZ))
-    {
-        i0 = 0;
-    }
-    else if ((magY >= magX) && (magY >= magZ))
-    {
-        i0 = 1;
-    }
-    else
-    {
-        i0 = 2;
-    }
-
-    // Get other components
-    label i1 = (i0 + 1) % 3;
-    label i2 = (i1 + 1) % 3;
-
-
-    scalar u1 = E0[i1];
-    scalar v1 = E0[i2];
-
-    scalar u2 = E1[i1];
-    scalar v2 = E1[i2];
-
-    scalar det = v2*u1 - u2*v1;
-
-    scalar u0 = p[i1] - a_[i1];
-    scalar v0 = p[i2] - a_[i2];
-
-    scalar alpha = 0;
-    scalar beta = 0;
-
-    bool hit = false;
-
-    if (Foam::mag(u1) < ROOTVSMALL)
-    {
-        beta = u0/u2;
-
-        alpha = (v0 - beta*v2)/v1;
-
-        hit = ((alpha >= 0) && ((alpha + beta) <= 1));
-    }
-    else
-    {
-        beta = (v0*u1 - u0*v1)/det;
-
-        alpha = (u0 - beta*u2)/u1;
-
-        hit = ((alpha >= 0) && ((alpha + beta) <= 1));
-    }
-
-    //
-    // Now alpha, beta are the coordinates in the triangle local coordinate
-    // system E0, E1
-    //
-
-    //Pout<< "alpha:" << alpha << endl;
-    //Pout<< "beta:" << beta << endl;
-    //Pout<< "hit:" << hit << endl;
-    //Pout<< "tol:" << tol << endl;
-
-    if (hit)
-    {
-        // alpha,beta might get negative due to precision errors
-        alpha = max(0.0, min(1.0, alpha));
-        beta = max(0.0, min(1.0, beta));
-    }
-
-    nearType = NONE;
-    nearLabel = -1;
-
-    if (Foam::mag(alpha+beta-1) <= tol)
-    {
-        // On edge between vert 1-2 (=edge 1)
-
-        if (Foam::mag(alpha) <= tol)
-        {
-            nearType = POINT;
-            nearLabel = 2;
-        }
-        else if (Foam::mag(beta) <= tol)
-        {
-            nearType = POINT;
-            nearLabel = 1;
-        }
-        else if ((alpha >= 0) && (alpha <= 1) && (beta >= 0) && (beta <= 1))
-        {
-            nearType = EDGE;
-            nearLabel = 1;
-        }
-    }
-    else if (Foam::mag(alpha) <= tol)
-    {
-        // On edge between vert 2-0 (=edge 2)
-
-        if (Foam::mag(beta) <= tol)
-        {
-            nearType = POINT;
-            nearLabel = 0;
-        }
-        else if (Foam::mag(beta-1) <= tol)
-        {
-            nearType = POINT;
-            nearLabel = 2;
-        }
-        else if ((beta >= 0) && (beta <= 1))
-        {
-            nearType = EDGE;
-            nearLabel = 2;
-        }
-    }
-    else if (Foam::mag(beta) <= tol)
-    {
-        // On edge between vert 0-1 (= edge 0)
-
-        if (Foam::mag(alpha) <= tol)
-        {
-            nearType = POINT;
-            nearLabel = 0;
-        }
-        else if (Foam::mag(alpha-1) <= tol)
-        {
-            nearType = POINT;
-            nearLabel = 1;
-        }
-        else if ((alpha >= 0) && (alpha <= 1))
-        {
-            nearType = EDGE;
-            nearLabel = 0;
-        }
-    }
-
-    return hit;
+    return nearestPointClassify(p, nearType, nearLabel).hit();
 }
-
-
-
 
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //

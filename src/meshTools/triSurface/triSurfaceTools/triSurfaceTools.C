@@ -2121,12 +2121,13 @@ Foam::vector Foam::triSurfaceTools::surfaceNormal
 
     label nearType;
     label nearLabel;
+
     triPointRef
     (
         points[f[0]],
         points[f[1]],
         points[f[2]]
-    ).classify(nearestPt, 1E-6, nearType, nearLabel);
+    ).classify(nearestPt, nearType, nearLabel);
 
     if (nearType == triPointRef::NONE)
     {
@@ -2199,28 +2200,61 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
 (
     const triSurface& surf,
     const point& sample,
-    const label nearestFaceI,   // nearest face
-    const point& nearestPoint,  // nearest point on nearest face
-    const scalar tol
+    const label nearestFaceI
 )
 {
     const labelledTri& f = surf[nearestFaceI];
     const pointField& points = surf.points();
 
-    // Find where point is on triangle. Note tolerance needed. Is relative
-    // one (used in comparing normalized [0..1] triangle coordinates).
+    // Find where point is on triangle.
     label nearType, nearLabel;
-    triPointRef
+
+    pointHit pHit = triPointRef
     (
         points[f[0]],
         points[f[1]],
         points[f[2]]
-    ).classify(nearestPoint, tol, nearType, nearLabel);
+    ).nearestPointClassify(sample, nearType, nearLabel);
+
+    const point& nearestPoint(pHit.rawPoint());
 
     if (nearType == triPointRef::NONE)
     {
+        vector sampleNearestVec = (sample - nearestPoint);
+
         // Nearest to face interior. Use faceNormal to determine side
-        scalar c = (sample - nearestPoint) & surf.faceNormals()[nearestFaceI];
+        scalar c = sampleNearestVec & surf.faceNormals()[nearestFaceI];
+
+        // // If the sample is essentially on the face, do not check for
+        // // it being perpendicular.
+
+        // scalar magSampleNearestVec = mag(sampleNearestVec);
+
+        // if (magSampleNearestVec > SMALL)
+        // {
+        //     c /= magSampleNearestVec*mag(surf.faceNormals()[nearestFaceI]);
+
+        //     if (mag(c) < 0.99)
+        //     {
+        //         FatalErrorIn("triSurfaceTools::surfaceSide")
+        //             << "nearestPoint identified as being on triangle face "
+        //             << "but vector from nearestPoint to sample is not "
+        //             << "perpendicular to the normal." << nl
+        //             << "sample: " << sample << nl
+        //             << "nearestPoint: " << nearestPoint << nl
+        //             << "sample - nearestPoint: "
+        //             << sample - nearestPoint << nl
+        //             << "normal: " << surf.faceNormals()[nearestFaceI] << nl
+        //             << "mag(sample - nearestPoint): "
+        //             << mag(sample - nearestPoint) << nl
+        //             << "normalised dot product: " << c << nl
+        //             << "triangle vertices: " << nl
+        //             << "    " << points[f[0]] << nl
+        //             << "    " << points[f[1]] << nl
+        //             << "    " << points[f[2]] << nl
+        //             << abort(FatalError);
+        //     }
+        // }
 
         if (c > 0)
         {
@@ -2239,13 +2273,13 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
         // Get the edge. Assume order of faceEdges same as face vertices.
         label edgeI = surf.faceEdges()[nearestFaceI][nearLabel];
 
-        //if (debug)
-        //{
+        // if (debug)
+        // {
         //    // Check order of faceEdges same as face vertices.
         //    const edge& e = surf.edges()[edgeI];
         //    const labelList& meshPoints = surf.meshPoints();
         //    const edge meshEdge(meshPoints[e[0]], meshPoints[e[1]]);
-        //
+
         //    if
         //    (
         //        meshEdge
@@ -2259,7 +2293,7 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
         //            << " in face " << f
         //            << abort(FatalError);
         //    }
-        //}
+        // }
 
         return edgeSide(surf, sample, nearestPoint, edgeI);
     }
@@ -2717,7 +2751,14 @@ void Foam::triSurfaceTools::calcInterpolationWeights
 
             triPointRef tri(f.tri(points));
 
-            pointHit nearest = tri.nearestPoint(samplePt);
+            label nearType, nearLabel;
+
+            pointHit nearest = tri.nearestPointClassify
+            (
+                samplePt,
+                nearType,
+                nearLabel
+            );
 
             if (nearest.hit())
             {
@@ -2741,14 +2782,6 @@ void Foam::triSurfaceTools::calcInterpolationWeights
                 minDistance = nearest.distance();
 
                 // Outside triangle. Store nearest.
-                label nearType, nearLabel;
-                tri.classify
-                (
-                    nearest.rawPoint(),
-                    1E-6,               // relative tolerance
-                    nearType,
-                    nearLabel
-                );
 
                 if (nearType == triPointRef::POINT)
                 {
@@ -2779,12 +2812,12 @@ void Foam::triSurfaceTools::calcInterpolationWeights
                         max
                         (
                             0,
-                            mag(nearest.rawPoint()-p0)/mag(p1-p0)
+                            mag(nearest.rawPoint() - p0)/mag(p1 - p0)
                         )
                     );
 
                     // Interpolate
-                    weights[0] = 1-s;
+                    weights[0] = 1 - s;
                     weights[1] = s;
                     weights[2] = -GREAT;
 
@@ -2830,7 +2863,6 @@ Foam::surfaceLocation Foam::triSurfaceTools::classify
     triPointRef(s[triI].tri(s.points())).classify
     (
         trianglePoint,
-        1E-6,
         elemType,
         index
     );
