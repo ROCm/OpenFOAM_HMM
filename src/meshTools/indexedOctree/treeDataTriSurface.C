@@ -360,8 +360,8 @@ void Foam::treeDataTriSurface::findNearest
             // scalar b(E0& E1);
             // scalar c(E1& E1);
 
-            // // Get nearest point in s,t coordinates (s is along E0, t is along
-            // // E1)
+            // // Get nearest point in s,t coordinates (s is along E0, t
+            // // is along E1)
             // scalar s;
             // scalar t;
 
