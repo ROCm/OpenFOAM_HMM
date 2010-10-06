@@ -33,15 +33,15 @@ Description
 #define diagTensorFieldIOField_H
 
 #include "diagTensorField.H"
-#include "IOField.H"
-#include "IOFieldField.H"
+#include "CompactIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     typedef IOField<diagTensorField> diagTensorFieldIOField;
-    typedef IOFieldField<diagTensorField, diagTensor> diagTensorIOFieldField;
+    typedef CompactIOField<diagTensorField, diagTensor>
+    diagTensorFieldCompactIOField;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

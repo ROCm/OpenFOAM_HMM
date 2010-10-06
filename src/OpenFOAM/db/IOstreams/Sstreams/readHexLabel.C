@@ -22,11 +22,12 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Read of a non-delimited hex label
+    Read a non-delimited hex label
 
 \*---------------------------------------------------------------------------*/
 
 #include "readHexLabel.H"
+#include <cctype>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,7 +56,7 @@ Foam::label Foam::readHexLabel(ISstream& is)
                 << exit(FatalIOError);
         }
 
-        result *= 16;
+        result <<= 4;
 
         if (isdigit(c))
         {

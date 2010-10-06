@@ -52,8 +52,8 @@ $(strings)/word/word.C
 $(strings)/word/wordIO.C
 $(strings)/fileName/fileName.C
 $(strings)/fileName/fileNameIO.C
-$(strings)/keyType/keyTypeIO.C
-$(strings)/wordRe/wordReIO.C
+$(strings)/keyType/keyType.C
+$(strings)/wordRe/wordRe.C
 
 primitives/hashes/Hasher/Hasher.C
 
@@ -66,7 +66,8 @@ primitives/random/Random.C
 containers/HashTables/HashTable/HashTableCore.C
 containers/HashTables/StaticHashTable/StaticHashTableCore.C
 containers/Lists/SortableList/ParSortableListName.C
-containers/Lists/PackedList/PackedListName.C
+containers/Lists/PackedList/PackedListCore.C
+containers/Lists/PackedList/PackedBoolList.C
 containers/Lists/ListOps/ListOps.C
 containers/LinkedLists/linkTypes/SLListBase/SLListBase.C
 containers/LinkedLists/linkTypes/DLListBase/DLListBase.C
@@ -329,7 +330,7 @@ $(cellShape)/cellShapeEqual.C
 $(cellShape)/cellShapeIO.C
 $(cellShape)/cellShapeIOList.C
 
-meshes/patchIdentifier/patchIdentifier.C
+meshes/Identifiers/patch/patchIdentifier.C
 
 polyMesh = meshes/polyMesh
 

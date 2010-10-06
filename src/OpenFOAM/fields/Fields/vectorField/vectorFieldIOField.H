@@ -33,15 +33,14 @@ Description
 #define vectorFieldIOField_H
 
 #include "vectorField.H"
-#include "IOField.H"
-#include "IOFieldField.H"
+#include "CompactIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     typedef IOField<vectorField> vectorFieldIOField;
-    typedef IOFieldField<vectorField, vector> vectorIOFieldField;
+    typedef CompactIOField<vectorField, vector> vectorFieldCompactIOField;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

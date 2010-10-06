@@ -181,13 +181,13 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
     IOField<vector> UTurb(c.fieldIOobject("UTurb", IOobject::MUST_READ));
     c.checkFieldIOobject(c, UTurb);
 
-    labelIOFieldField collisionRecordsPairAccessed
+    labelFieldCompactIOField collisionRecordsPairAccessed
     (
         c.fieldIOobject("collisionRecordsPairAccessed", IOobject::MUST_READ)
     );
     c.checkFieldFieldIOobject(c, collisionRecordsPairAccessed);
 
-    labelIOFieldField collisionRecordsPairOrigProcOfOther
+    labelFieldCompactIOField collisionRecordsPairOrigProcOfOther
     (
         c.fieldIOobject
         (
@@ -197,7 +197,7 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
     );
     c.checkFieldFieldIOobject(c, collisionRecordsPairOrigProcOfOther);
 
-    labelIOFieldField collisionRecordsPairOrigIdOfOther
+    labelFieldCompactIOField collisionRecordsPairOrigIdOfOther
     (
         c.fieldIOobject
         (
@@ -207,25 +207,25 @@ void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
     );
     c.checkFieldFieldIOobject(c, collisionRecordsPairOrigProcOfOther);
 
-    pairDataIOFieldField collisionRecordsPairData
+    pairDataFieldCompactIOField collisionRecordsPairData
     (
         c.fieldIOobject("collisionRecordsPairData", IOobject::MUST_READ)
     );
     c.checkFieldFieldIOobject(c, collisionRecordsPairData);
 
-    labelIOFieldField collisionRecordsWallAccessed
+    labelFieldCompactIOField collisionRecordsWallAccessed
     (
         c.fieldIOobject("collisionRecordsWallAccessed", IOobject::MUST_READ)
     );
     c.checkFieldFieldIOobject(c, collisionRecordsWallAccessed);
 
-    vectorIOFieldField collisionRecordsWallPRel
+    vectorFieldCompactIOField collisionRecordsWallPRel
     (
         c.fieldIOobject("collisionRecordsWallPRel", IOobject::MUST_READ)
     );
     c.checkFieldFieldIOobject(c, collisionRecordsWallPRel);
 
-    wallDataIOFieldField collisionRecordsWallData
+    wallDataFieldCompactIOField collisionRecordsWallData
     (
         c.fieldIOobject("collisionRecordsWallData", IOobject::MUST_READ)
     );
@@ -292,12 +292,12 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
     IOField<scalar> tTurb(c.fieldIOobject("tTurb", IOobject::NO_READ), np);
     IOField<vector> UTurb(c.fieldIOobject("UTurb", IOobject::NO_READ), np);
 
-    labelIOFieldField collisionRecordsPairAccessed
+    labelFieldCompactIOField collisionRecordsPairAccessed
     (
         c.fieldIOobject("collisionRecordsPairAccessed", IOobject::NO_READ),
         np
     );
-    labelIOFieldField collisionRecordsPairOrigProcOfOther
+    labelFieldCompactIOField collisionRecordsPairOrigProcOfOther
     (
         c.fieldIOobject
         (
@@ -306,27 +306,27 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
         ),
         np
     );
-    labelIOFieldField collisionRecordsPairOrigIdOfOther
+    labelFieldCompactIOField collisionRecordsPairOrigIdOfOther
     (
         c.fieldIOobject("collisionRecordsPairOrigIdOfOther", IOobject::NO_READ),
         np
     );
-    pairDataIOFieldField collisionRecordsPairData
+    pairDataFieldCompactIOField collisionRecordsPairData
     (
         c.fieldIOobject("collisionRecordsPairData", IOobject::NO_READ),
         np
     );
-    labelIOFieldField collisionRecordsWallAccessed
+    labelFieldCompactIOField collisionRecordsWallAccessed
     (
         c.fieldIOobject("collisionRecordsWallAccessed", IOobject::NO_READ),
         np
     );
-    vectorIOFieldField collisionRecordsWallPRel
+    vectorFieldCompactIOField collisionRecordsWallPRel
     (
         c.fieldIOobject("collisionRecordsWallPRel", IOobject::NO_READ),
         np
     );
-    wallDataIOFieldField collisionRecordsWallData
+    wallDataFieldCompactIOField collisionRecordsWallData
     (
         c.fieldIOobject("collisionRecordsWallData", IOobject::NO_READ),
         np

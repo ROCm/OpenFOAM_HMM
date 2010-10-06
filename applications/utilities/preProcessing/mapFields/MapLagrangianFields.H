@@ -37,7 +37,7 @@ Description
 #include "GeometricField.H"
 #include "meshToMesh.H"
 #include "IOobjectList.H"
-#include "IOFieldField.H"
+#include "CompactIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -106,9 +106,9 @@ void MapLagrangianFields
             // Read field (does not need mesh)
             IOField<Field<Type> > fieldSource(*fieldIter());
 
-            // Map - use IOFieldField to automatically write in
+            // Map - use CompactIOField to automatically write in
             // compact form for binary format.
-            IOFieldField<Field<Type>, Type> fieldTarget
+            CompactIOField<Field<Type>, Type> fieldTarget
             (
                 IOobject
                 (
@@ -135,7 +135,7 @@ void MapLagrangianFields
 
     {
         IOobjectList fieldFields =
-            objects.lookupClass(IOFieldField<Field<Type>, Type>::typeName);
+            objects.lookupClass(CompactIOField<Field<Type>, Type>::typeName);
 
         forAllIter(IOobjectList, fieldFields, fieldIter)
         {
@@ -143,10 +143,10 @@ void MapLagrangianFields
                 << fieldIter()->name() << endl;
 
             // Read field (does not need mesh)
-            IOFieldField<Field<Type>, Type> fieldSource(*fieldIter());
+            CompactIOField<Field<Type>, Type> fieldSource(*fieldIter());
 
             // Map
-            IOFieldField<Field<Type>, Type> fieldTarget
+            CompactIOField<Field<Type>, Type> fieldTarget
             (
                 IOobject
                 (

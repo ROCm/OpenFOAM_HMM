@@ -52,6 +52,21 @@
         incompressible::RASModel::New(U, phi, laminarTransport)
     );
 
+    // kinematic turbulent thermal thermal conductivity m2/s
+    Info<< "Reading field kappat\n" << endl;
+    volScalarField kappat
+    (
+        IOobject
+        (
+            "kappat",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
     label pRefCell = 0;
     scalar pRefValue = 0.0;
     setRefCell

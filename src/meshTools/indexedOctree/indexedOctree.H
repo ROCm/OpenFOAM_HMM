@@ -164,8 +164,8 @@ private:
 
         // Construction
 
-            //- Split list of indices into 8 bins according to where they are in
-            //  relation to mid.
+            //- Split list of indices into 8 bins
+            //  according to where they are in relation to mid.
             void divide
             (
                 const labelList& indices,
@@ -173,8 +173,8 @@ private:
                 labelListList& result
             ) const;
 
-            //- Subdivide the contents node at position contentI. Appends to
-            //  contents.
+            //- Subdivide the contents node at position contentI.
+            //  Appends to contents.
             node divide
             (
                 const treeBoundBox& bb,
@@ -335,6 +335,22 @@ private:
                 const treeBoundBox& searchBox,
                 labelHashSet& elements
             ) const;
+
+
+            template <class CompareOp>
+            static void findNear
+            (
+                const scalar nearDist,
+                const bool okOrder,
+                const indexedOctree<Type>& tree1,
+                const labelBits index1,
+                const treeBoundBox& bb1,
+                const indexedOctree<Type>& tree2,
+                const labelBits index2,
+                const treeBoundBox& bb2,
+                CompareOp& cop
+            );
+
 
         // Other
 
@@ -580,6 +596,16 @@ public:
                 const scalar nearestDistSqr,
                 const point& sample
             );
+
+            //- Find near pairs and apply CompareOp to them.
+            //  tree2 can be *this or different tree.
+            template <class CompareOp>
+            void findNear
+            (
+                const scalar nearDist,
+                const indexedOctree<Type>& tree2,
+                CompareOp& cop
+            ) const;
 
 
         // Write

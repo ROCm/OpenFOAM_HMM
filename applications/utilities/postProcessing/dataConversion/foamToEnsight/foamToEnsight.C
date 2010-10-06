@@ -105,6 +105,11 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
+        "nodeValues",
+        "write values in nodes"
+    );
+    argList::addBoolOption
+    (
         "noPatches",
         "suppress writing any patches"
     );
@@ -126,6 +131,7 @@ int main(int argc, char *argv[])
 
     // Check options
     const bool binary = !args.optionFound("ascii");
+    const bool nodeValues = args.optionFound("nodeValues");
 
 #   include "createTime.H"
 
@@ -191,7 +197,29 @@ int main(int argc, char *argv[])
     OFstream& ensightCaseFile = *ensightCaseFilePtr;
 
     // Construct the EnSight mesh
-    ensightMesh eMesh(mesh, args, binary);
+    const bool selectedPatches = args.optionFound("patches");
+    wordReList patchPatterns;
+    if (selectedPatches)
+    {
+        patchPatterns = wordReList(args.optionLookup("patches")());
+    }
+    const bool selectedZones = args.optionFound("faceZones");
+    wordReList zonePatterns;
+    if (selectedZones)
+    {
+        zonePatterns = wordReList(args.optionLookup("faceZones")());
+    }
+
+    ensightMesh eMesh
+    (
+        mesh,
+        args.optionFound("noPatches"),
+        selectedPatches,
+        patchPatterns,
+        selectedZones,
+        zonePatterns,
+        binary
+    );
 
     // Set Time to the last time before looking for the lagrangian objects
     runTime.setTime(Times.last(), Times.size()-1);
@@ -313,6 +341,11 @@ int main(int argc, char *argv[])
 
         polyMesh::readUpdateState meshState = mesh.readUpdate();
 
+        if (meshState != polyMesh::UNCHANGED)
+        {
+            eMesh.correct();
+        }
+
         if (timeIndex == 0 || (meshState != polyMesh::UNCHANGED))
         {
             eMesh.write
@@ -371,6 +404,7 @@ int main(int argc, char *argv[])
                         prepend,
                         timeIndex,
                         binary,
+                        nodeValues,
                         ensightCaseFile
                     );
                 }
@@ -384,6 +418,7 @@ int main(int argc, char *argv[])
                         prepend,
                         timeIndex,
                         binary,
+                        nodeValues,
                         ensightCaseFile
                     );
                 }
@@ -397,6 +432,7 @@ int main(int argc, char *argv[])
                         prepend,
                         timeIndex,
                         binary,
+                        nodeValues,
                         ensightCaseFile
                     );
                 }
@@ -410,6 +446,7 @@ int main(int argc, char *argv[])
                         prepend,
                         timeIndex,
                         binary,
+                        nodeValues,
                         ensightCaseFile
                     );
                 }
@@ -423,6 +460,7 @@ int main(int argc, char *argv[])
                         prepend,
                         timeIndex,
                         binary,
+                        nodeValues,
                         ensightCaseFile
                     );
                 }

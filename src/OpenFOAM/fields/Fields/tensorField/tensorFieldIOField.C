@@ -41,8 +41,8 @@ namespace Foam
 
     defineTemplateTypeNameAndDebugWithName
     (
-        tensorIOFieldField,
-        "tensorCompactFieldField",
+        tensorFieldCompactIOField,
+        "tensorFieldCompactField",
         0
     );
 }

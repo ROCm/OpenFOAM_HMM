@@ -320,20 +320,17 @@ Foam::distanceSurface::distanceSurface
     signed_(readBool(dict.lookup("signed"))),
     regularise_(dict.lookupOrDefault("regularise", true)),
     average_(dict.lookupOrDefault("average", false)),
-    zoneName_(word::null),
+    zoneKey_(keyType::null),
     needsUpdate_(true),
     isoSurfPtr_(NULL),
     facesPtr_(NULL)
 {
-//    dict.readIfPresent("zone", zoneName_);
+//    dict.readIfPresent("zone", zoneKey_);
 //
-//    if (debug && zoneName_.size())
+//    if (debug && zoneKey_.size() && mesh.cellZones().findZoneID(zoneKey_) < 0)
 //    {
-//        if (mesh.cellZones().findZoneID(zoneName_) < 0)
-//        {
-//            Info<< "cellZone \"" << zoneName_
-//                << "\" not found - using entire mesh" << endl;
-//        }
+//        Info<< "cellZone " << zoneKey_
+//            << " not found - using entire mesh" << endl;
 //    }
 }
 

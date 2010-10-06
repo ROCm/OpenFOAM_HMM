@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class sampledPlane Declaration
+                        Class sampledPlane Declaration
 \*---------------------------------------------------------------------------*/
 
 class sampledPlane
@@ -57,8 +57,8 @@ class sampledPlane
 {
     // Private data
 
-        //- zone name (if restricted to zones)
-        word zoneName_;
+        //- If restricted to zones, name of this zone or a regular expression
+        keyType zoneKey_;
 
         //- Track if the surface needs an update
         mutable bool needsUpdate_;
@@ -92,7 +92,7 @@ public:
             const word& name,
             const polyMesh& mesh,
             const plane& planeDesc,
-            const word& zoneName = word::null
+            const keyType& zoneKey = word::null
         );
 
         //- Construct from dictionary

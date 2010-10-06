@@ -27,7 +27,6 @@ License
 #include "fvMesh.H"
 #include "fvMatrices.H"
 #include "geometricOneField.H"
-#include "stringListOps.H"
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 

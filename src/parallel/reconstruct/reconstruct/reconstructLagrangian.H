@@ -38,7 +38,7 @@ SourceFiles
 #include "cloud.H"
 #include "polyMesh.H"
 #include "IOobjectList.H"
-#include "IOFieldField.H"
+#include "CompactIOField.H"
 #include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -69,7 +69,7 @@ tmp<IOField<Type> > reconstructLagrangianField
 
 
 template<class Type>
-tmp<IOFieldField<Field<Type>, Type> > reconstructLagrangianFieldField
+tmp<CompactIOField<Field<Type>, Type> > reconstructLagrangianFieldField
 (
     const word& cloudName,
     const polyMesh& mesh,
