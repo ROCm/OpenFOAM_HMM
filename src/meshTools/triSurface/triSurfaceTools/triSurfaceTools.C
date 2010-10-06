@@ -2242,7 +2242,8 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
         //             << "perpendicular to the normal." << nl
         //             << "sample: " << sample << nl
         //             << "nearestPoint: " << nearestPoint << nl
-        //             << "sample - nearestPoint: " << sample - nearestPoint << nl
+        //             << "sample - nearestPoint: "
+        //             << sample - nearestPoint << nl
         //             << "normal: " << surf.faceNormals()[nearestFaceI] << nl
         //             << "mag(sample - nearestPoint): "
         //             << mag(sample - nearestPoint) << nl
