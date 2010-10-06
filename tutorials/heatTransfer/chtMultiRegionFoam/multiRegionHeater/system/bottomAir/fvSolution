@@ -24,7 +24,7 @@ solvers
         relTol          0;
     }
 
-    p
+    p_rgh
     {
         solver           GAMG;
         tolerance        1e-8;
@@ -38,31 +38,26 @@ solvers
         mergeLevels      1;
     }
 
-    pFinal
+    p_rghFinal
     {
-        $p;
+        $p_rgh;
         tolerance        1e-8;
         relTol           0;
     }
 
-    U
+    "(U|h|k|epsilon|R)"
     {
         solver           PBiCG;
         preconditioner   DILU;
         tolerance        1e-08;
-        relTol           0;
-    }
-
-    h
-    {
-        $U;
-        tolerance        1e-08;
         relTol           0.1;
     }
 
-    "(hFinal|k|epsilon|R)"
+    "(U|h|k|epsilon|R)Final"
     {
         $U;
+        tolerance        1e-08;
+        relTol           0;
     }
 }
 

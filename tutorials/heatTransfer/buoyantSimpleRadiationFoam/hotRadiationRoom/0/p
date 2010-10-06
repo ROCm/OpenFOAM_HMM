@@ -22,26 +22,26 @@ boundaryField
 {
     floor
     {
-        type            buoyantPressure;
-        value           uniform 100000;
+        type            calculated;
+        value           $internalField;
     }
 
     ceiling
     {
-        type            buoyantPressure;
-        value           uniform 100000;
+        type            calculated;
+        value           $internalField;
     }
 
     fixedWalls
     {
-        type            buoyantPressure;
-        value           uniform 100000;
+        type            calculated;
+        value           $internalField;
     }
 
     box
     {
-        type            buoyantPressure;
-        value           uniform 100000;
+        type            calculated;
+        value           $internalField;
     }
 }
 

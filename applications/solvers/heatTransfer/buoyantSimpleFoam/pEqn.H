@@ -1,11 +1,12 @@
 {
     rho = thermo.rho();
+    rho.relax();
 
     volScalarField rUA = 1.0/UEqn().A();
     surfaceScalarField rhorUAf("(rho*(1|A(U)))", fvc::interpolate(rho*rUA));
 
     U = rUA*UEqn().H();
-    //UEqn.clear();
+    UEqn.clear();
 
     phi = fvc::interpolate(rho)*(fvc::interpolate(U) & mesh.Sf());
     bool closedVolume = adjustPhi(phi, U, p_rgh);
@@ -20,7 +21,7 @@
             fvm::laplacian(rhorUAf, p_rgh) == fvc::div(phi)
         );
 
-        p_rghEqn.setReference(p_rghRefCell, p_rghRefValue);
+        p_rghEqn.setReference(pRefCell, getRefCellValue(p_rgh, pRefCell));
         p_rghEqn.solve();
 
         if (nonOrth == nNonOrthCorr)
@@ -42,13 +43,13 @@
 
     p = p_rgh + rho*gh;
 
-    // For closed-volume cases adjust the pressure and density levels
+    // For closed-volume cases adjust the pressure level
     // to obey overall mass continuity
     if (closedVolume)
     {
         p += (initialMass - fvc::domainIntegrate(psi*p))
             /fvc::domainIntegrate(psi);
-        p_rgh == p - rho*gh;
+        p_rgh = p - rho*gh;
     }
 
     rho = thermo.rho();

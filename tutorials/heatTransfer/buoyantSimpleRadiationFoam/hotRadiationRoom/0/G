@@ -25,7 +25,7 @@ boundaryField
         type            MarshakRadiation;
         T               T;
         emissivity      1;
-        value           uniform 0;
+//        value           uniform 0;
     }
 
     fixedWalls
@@ -33,7 +33,7 @@ boundaryField
         type            MarshakRadiation;
         T               T;
         emissivity      1;
-        value           uniform 0;
+//        value           uniform 0;
     }
 
     ceiling
@@ -41,7 +41,7 @@ boundaryField
         type            MarshakRadiation;
         T               T;
         emissivity      1;
-        value           uniform 0;
+ //       value           uniform 0;
     }
 
     box
@@ -49,7 +49,7 @@ boundaryField
         type            MarshakRadiation;
         T               T;
         emissivity      1;
-        value           uniform 0;
+//        value           uniform 0;
     }
 }
 
