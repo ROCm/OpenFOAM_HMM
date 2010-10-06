@@ -430,10 +430,7 @@ bool Foam::edgeIntersections::offsetPerturb
 
         point ctr = tri.centre();
 
-        // Get measure for tolerance.
-        scalar tolDim = 0.001*mag(tri.a() - ctr);
-
-        tri.classify(pHit.hitPoint(), tolDim, nearType, nearLabel);
+        tri.classify(pHit.hitPoint(), nearType, nearLabel);
 
         if (nearType == triPointRef::POINT || nearType == triPointRef::EDGE)
         {

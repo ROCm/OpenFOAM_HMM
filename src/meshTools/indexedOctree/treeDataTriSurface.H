@@ -60,20 +60,20 @@ class treeDataTriSurface
 
     // Private Member Functions
 
-        //- fast triangle nearest point calculation. Returns point in E0, E1
-        //  coordinate system:  base + s*E0 + t*E1
-        static scalar nearestCoords
-        (
-            const point& base,
-            const point& E0,
-            const point& E1,
-            const scalar a,
-            const scalar b,
-            const scalar c,
-            const point& P,
-            scalar& s,
-            scalar& t
-        );
+        // //- fast triangle nearest point calculation. Returns point in E0, E1
+        // //  coordinate system:  base + s*E0 + t*E1
+        // static scalar nearestCoords
+        // (
+        //     const point& base,
+        //     const point& E0,
+        //     const point& E1,
+        //     const scalar a,
+        //     const scalar b,
+        //     const scalar c,
+        //     const point& P,
+        //     scalar& s,
+        //     scalar& t
+        // );
 
 public:
 

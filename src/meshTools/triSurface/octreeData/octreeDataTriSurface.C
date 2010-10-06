@@ -43,7 +43,7 @@ Foam::scalar Foam::octreeDataTriSurface::tol(1E-6);
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Fast distance to triangle calculation. From
-// "Distance Between Point and Trangle in 3D"
+// "Distance Between Point and Triangle in 3D"
 // David Eberly, Magic Software Inc. Aug. 2003.
 // Works on function Q giving distance to point and tries to minimize this.
 void Foam::octreeDataTriSurface::nearestCoords

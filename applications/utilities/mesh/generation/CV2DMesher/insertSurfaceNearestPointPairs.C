@@ -177,7 +177,7 @@ void Foam::CV2D::insertSurfaceNearestPointPairs()
                     localPoints[f[0]],
                     localPoints[f[1]],
                     localPoints[f[2]]
-                ).classify(pHit.hitPoint(), 1e-6, nearType, nearLabel);
+                ).classify(pHit.hitPoint(), nearType, nearLabel);
 
                 // If point is on a edge check if it is an internal feature
 
