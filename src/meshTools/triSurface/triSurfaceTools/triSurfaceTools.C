@@ -2220,40 +2220,40 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
 
     if (nearType == triPointRef::NONE)
     {
+        vector sampleNearestVec = (sample - nearestPoint);
+
         // Nearest to face interior. Use faceNormal to determine side
-<<<<<<< HEAD
-        scalar c = (sample - nearestPoint) & surf.faceNormals()[nearestFaceI];
-=======
         scalar c = sampleNearestVec & surf.faceNormals()[nearestFaceI];
 
-        // If the sample is essentially on the face, do not check for
-        // it being perpendicular.
+        // // If the sample is essentially on the face, do not check for
+        // // it being perpendicular.
 
-        if (magSampleNearestVec > SMALL)
-        {
-            c /= magSampleNearestVec*mag(surf.faceNormals()[nearestFaceI]);
+        // scalar magSampleNearestVec = mag(sampleNearestVec);
 
-            if (mag(c) < 0.99)
-            {
-                FatalErrorIn("triSurfaceTools::surfaceSide")
-                    << "nearestPoint identified as being on triangle face "
-                    << "but vector from nearestPoint to sample is not "
-                    << "perpendicular to the normal." << nl
-                    << "sample: " << sample << nl
-                    << "nearestPoint: " << nearestPoint << nl
-                    << "sample - nearestPoint: " << sample - nearestPoint << nl
-                    << "normal: " << surf.faceNormals()[nearestFaceI] << nl
-                    << "mag(sample - nearestPoint): "
-                    << mag(sample - nearestPoint) << nl
-                    << "normalised dot product: " << c << nl
-                    << "triangle vertices: " << nl
-                    << "    " << points[f[0]] << nl
-                    << "    " << points[f[1]] << nl
-                    << "    " << points[f[2]] << nl
-                    << abort(FatalError);
-            }
-        }
->>>>>>> 0bb6ebd... ENH: Making nearestPointClassify query for triangle.
+        // if (magSampleNearestVec > SMALL)
+        // {
+        //     c /= magSampleNearestVec*mag(surf.faceNormals()[nearestFaceI]);
+
+        //     if (mag(c) < 0.99)
+        //     {
+        //         FatalErrorIn("triSurfaceTools::surfaceSide")
+        //             << "nearestPoint identified as being on triangle face "
+        //             << "but vector from nearestPoint to sample is not "
+        //             << "perpendicular to the normal." << nl
+        //             << "sample: " << sample << nl
+        //             << "nearestPoint: " << nearestPoint << nl
+        //             << "sample - nearestPoint: " << sample - nearestPoint << nl
+        //             << "normal: " << surf.faceNormals()[nearestFaceI] << nl
+        //             << "mag(sample - nearestPoint): "
+        //             << mag(sample - nearestPoint) << nl
+        //             << "normalised dot product: " << c << nl
+        //             << "triangle vertices: " << nl
+        //             << "    " << points[f[0]] << nl
+        //             << "    " << points[f[1]] << nl
+        //             << "    " << points[f[2]] << nl
+        //             << abort(FatalError);
+        //     }
+        // }
 
         if (c > 0)
         {
@@ -2273,26 +2273,26 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
         label edgeI = surf.faceEdges()[nearestFaceI][nearLabel];
 
         // if (debug)
-        {
-           // Check order of faceEdges same as face vertices.
-           const edge& e = surf.edges()[edgeI];
-           const labelList& meshPoints = surf.meshPoints();
-           const edge meshEdge(meshPoints[e[0]], meshPoints[e[1]]);
+        // {
+        //    // Check order of faceEdges same as face vertices.
+        //    const edge& e = surf.edges()[edgeI];
+        //    const labelList& meshPoints = surf.meshPoints();
+        //    const edge meshEdge(meshPoints[e[0]], meshPoints[e[1]]);
 
-           if
-           (
-               meshEdge
-            != edge(f[nearLabel], f[f.fcIndex(nearLabel)])
-           )
-           {
-               FatalErrorIn("triSurfaceTools::surfaceSide")
-                   << "Edge:" << edgeI << " local vertices:" << e
-                   << " mesh vertices:" << meshEdge
-                   << " not at position " << nearLabel
-                   << " in face " << f
-                   << abort(FatalError);
-           }
-        }
+        //    if
+        //    (
+        //        meshEdge
+        //     != edge(f[nearLabel], f[f.fcIndex(nearLabel)])
+        //    )
+        //    {
+        //        FatalErrorIn("triSurfaceTools::surfaceSide")
+        //            << "Edge:" << edgeI << " local vertices:" << e
+        //            << " mesh vertices:" << meshEdge
+        //            << " not at position " << nearLabel
+        //            << " in face " << f
+        //            << abort(FatalError);
+        //    }
+        // }
 
         return edgeSide(surf, sample, nearestPoint, edgeI);
     }
