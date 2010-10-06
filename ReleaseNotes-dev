@@ -1,0 +1,77 @@
+#                            -*- mode: org; -*-
+#
+#+TITLE:  OpenFOAM release notes for version dev
+#+AUTHOR:                      OpenCFD Ltd.
+#+DATE:                            TBA
+#+LINK:                  http://www.openfoam.com
+#+OPTIONS: author:nil ^:{}
+# Copyright (c) 2010 OpenCFD Ltd.
+
+* Overview
+  OpenFOAM-dev is the latest major release of OpenFOAM including many new
+  developments a number of bug-fixes.  This release passes our standard tests
+  and the tutorials have been broadly checked.  Please report any bugs by
+  following the link: http://www.openfoam.com/bugs.
+
+* GNU/Linux version
+  This release of OpenFOAM is distributed primarily in 2 ways: (1) as a Debian
+  pack containing binaries and source; (2) from the SourceForge source code
+  repository (see [[./README.org][README]]).
+
+  The Ubuntu/Debian pack is available for 32 and 64 bit versions of the 10.04
+  LTS operating system using the system compiler and libraries that will be
+  installed automatically from standard Debian packs.
+
+  To use the source version from the SourceForge repository, we provide a source
+  pack of third-party packages that can be compiled on the user's system.  This
+  does not include =gcc=, since the system installed version is typically
+  sufficient, but includes =paraview-3.8.0=, =openmpi-1.4.1=, =scotch_5.1=,
+  =metis-5.0pre2=, =ParMetis-3.1= and =ParMGridGen-1.0=.
+
+* Library developments
+  There have been a number of developments to the libraries to support the
+  extension of functionality in solver and utility applications.
+*** Core library
+    + Large number of code refinements and consistency improvements to support
+      other developments.
+*** Turbulence modelling
+*** Thermo-physical Models
+*** DSMC
+*** Dynamic Mesh
+*** Numerics
+
+* Solvers
+  A number of new solvers have been developed for a range of engineering
+  applications.  There has been a set of improvements to certain classes of
+  solver that are introduced in this release.
+*** *New* Solvers
+    + ...
+*** Modifications to multiphase and buoyant solvers
+    + ...
+*** Modifications to solvers for sensible enthalpy
+    + ...
+*** Modifications to steady-state compressible solvers
+    + ...
+*** Other modifications
+    + ...
+
+* Boundary conditions
+  New boundary conditions have been introduced to support new applications in
+  OpenFOAM.
+  + ...
+
+* Utilities
+  There have been some utilities added and updated in this release.
+*** *New* utilities
+    + ...
+*** Updated utilities
+    + ...
+
+* Post-processing
+  + =foamToEnsight=: new =-nodeValues= option to generate and output nodal
+    field data.
+
+* New tutorials
+  There is a large number of new tutorials to support the new solvers in the
+  release.
+  + ...
