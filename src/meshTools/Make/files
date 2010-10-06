@@ -44,7 +44,6 @@ octree/octreeDataFace.C
 octree/treeBoundBox.C
 octree/treeNodeName.C
 octree/treeLeafName.C
-octree/pointIndexHitIOList.C
 
 indexedOctree/indexedOctreeName.C
 indexedOctree/treeDataCell.C
