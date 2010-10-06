@@ -42,24 +42,26 @@ void Foam::singleCellFvMesh::agglomerateMesh
     const polyBoundaryMesh& oldPatches = mesh.boundaryMesh();
 
     // Check agglomeration within patch face range and continuous
-    labelList nAgglom(oldPatches.size());
+    labelList nAgglom(oldPatches.size(), 0);
 
     forAll(oldPatches, patchI)
     {
         const polyPatch& pp = oldPatches[patchI];
-
-        nAgglom[patchI] = max(agglom[patchI])+1;
-
-        forAll(pp, i)
+        if (pp.size() > 0)
         {
-            if (agglom[patchI][i] < 0  || agglom[patchI][i] >= pp.size())
+            nAgglom[patchI] = max(agglom[patchI])+1;
+
+            forAll(pp, i)
             {
-                FatalErrorIn
-                (
-                    "singleCellFvMesh::agglomerateMesh(..)"
-                )   << "agglomeration on patch " << patchI
-                    << " is out of range 0.." << pp.size()-1
-                    << exit(FatalError);
+                if (agglom[patchI][i] < 0  || agglom[patchI][i] >= pp.size())
+                {
+                    FatalErrorIn
+                    (
+                        "singleCellFvMesh::agglomerateMesh(..)"
+                    )   << "agglomeration on patch " << patchI
+                        << " is out of range 0.." << pp.size()-1
+                        << exit(FatalError);
+                }
             }
         }
     }
@@ -155,6 +157,8 @@ void Foam::singleCellFvMesh::agglomerateMesh
 
     forAll(oldPatches, patchI)
     {
+        patchStarts[patchI] = coarseI;
+
         const polyPatch& pp = oldPatches[patchI];
 
         if (pp.size() > 0)
@@ -169,8 +173,6 @@ void Foam::singleCellFvMesh::agglomerateMesh
 
             // From agglomeration to compact patch face
             labelList agglomToFace(nAgglom[patchI], -1);
-
-            patchStarts[patchI] = coarseI;
 
             forAll(pp, i)
             {
@@ -223,9 +225,9 @@ void Foam::singleCellFvMesh::agglomerateMesh
                     );
                 }
             }
-
-            patchSizes[patchI] = coarseI-patchStarts[patchI];
         }
+
+        patchSizes[patchI] = coarseI-patchStarts[patchI];
     }
 
     //Pout<< "patchStarts:" << patchStarts << endl;
