@@ -2794,6 +2794,30 @@ Foam::indexedOctree<Type>::getVolumeType
 }
 
 
+template <class Type>
+template <class CompareOp>
+void Foam::indexedOctree<Type>::findNear
+(
+    const scalar nearDist,
+    const indexedOctree<Type>& tree2,
+    CompareOp& cop
+) const
+{
+    findNear
+    (
+        nearDist,
+        true,
+        *this,
+        nodePlusOctant(0, 0),
+        bb(),
+        tree2,
+        nodePlusOctant(0, 0),
+        tree2.bb(),
+        cop
+    );
+}
+
+
 // Print contents of nodeI
 template <class Type>
 void Foam::indexedOctree<Type>::print
