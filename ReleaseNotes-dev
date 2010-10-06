@@ -69,7 +69,10 @@
 
 * Post-processing
   + =foamToEnsight=: new =-nodeValues= option to generate and output nodal
-    field data.
+    field data. This is optional and saves memory (compared to letting EnSight
+    do the interpolation) in case of meshes with large
+    amounts of polyhedral cells. On typical snappyHexMesh generated meshes
+    we've seen differences of 0.4 v.s. 2.5Gb memory usage.
 
 * New tutorials
   There is a large number of new tutorials to support the new solvers in the
