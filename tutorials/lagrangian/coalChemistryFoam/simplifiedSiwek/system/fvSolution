@@ -22,6 +22,13 @@ solvers
         solver          PCG;
         preconditioner  DIC;
         tolerance       1e-05;
+        relTol          0.1;
+    }
+
+   "(rho|G)Final"
+    {
+        $rho;
+        tolerance       1e-05;
         relTol          0;
     }
 
@@ -29,6 +36,13 @@ solvers
     {
         solver          PBiCG;
         preconditioner  DILU;
+        tolerance       1e-06;
+        relTol          0.1;
+    }
+
+    pFinal
+    {
+        $p;
         tolerance       1e-06;
         relTol          0;
     }
@@ -38,12 +52,27 @@ solvers
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-05;
+        relTol          0.1;
+    }
+
+    "(U|hs|R|k|epsilon)Final"
+    {
+        $U;
+        tolerance       1e-05;
         relTol          0;
     }
 
     "(Yi|CO2|O2|N2|CH4|H2|H2O|CO)"
     {
         solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-06;
+        relTol          0.1;
+    }
+
+    "(Yi|CO2|O2|N2|CH4|H2|H2O|CO)Final"
+    {
+        $Yi;
         preconditioner  DILU;
         tolerance       1e-06;
         relTol          0;

@@ -26,7 +26,20 @@ if (transonic)
             coalParcels.Srho()
         );
 
-        pEqn.solve();
+        pEqn.solve
+        (
+            mesh.solver
+            (
+                p.select
+                (
+                    (
+                        finalIter
+                     && corr == nCorr-1
+                     && nonOrth == nNonOrthCorr
+                    )
+                )
+            )
+        );
 
         if (nonOrth == nNonOrthCorr)
         {
@@ -54,7 +67,20 @@ else
             coalParcels.Srho()
         );
 
-        pEqn.solve();
+        pEqn.solve
+        (
+            mesh.solver
+            (
+                p.select
+                (
+                    (
+                        finalIter
+                     && corr == nCorr-1
+                     && nonOrth == nNonOrthCorr
+                    )
+                )
+            )
+        );
 
         if (nonOrth == nNonOrthCorr)
         {

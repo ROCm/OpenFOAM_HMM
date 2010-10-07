@@ -17,7 +17,7 @@ FoamFile
 
 libs            ("libcompressibleTurbulenceModel.so" "libcompressibleRASModels.so");
 
-application     chtMultiRegionFoam;
+application     chtMultiRegionSimpleFoam;
 
 startFrom       startTime;
 
@@ -25,14 +25,15 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         1000;
+endTime         2000;
 
 deltaT          1;
 
 writeControl    timeStep;
+
 writeInterval   100;
 
-purgeWrite      0;
+purgeWrite      5;
 
 writeFormat     ascii;
 

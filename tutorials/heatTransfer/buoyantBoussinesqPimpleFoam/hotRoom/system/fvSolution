@@ -17,17 +17,17 @@ FoamFile
 
 solvers
 {
-    p
+    p_rgh
     {
         solver          PCG;
         preconditioner  DIC;
         tolerance       1e-8;
-        relTol          0.1;
+        relTol          0.01;
     }
 
-    pFinal
+    p_rghFinal
     {
-        $p;
+        $p_rgh;
         relTol          0;
     }
 

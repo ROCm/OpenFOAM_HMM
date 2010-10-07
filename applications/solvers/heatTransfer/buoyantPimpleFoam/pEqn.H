@@ -1,11 +1,9 @@
 {
-    bool closedVolume = p.needReference();
-
     rho = thermo.rho();
 
     // Thermodynamic density needs to be updated by psi*d(p) after the
     // pressure solution - done in 2 parts. Part 1:
-    thermo.rho() -= psi*p;
+    thermo.rho() -= psi*p_rgh;
 
     volScalarField rUA = 1.0/UEqn.A();
     surfaceScalarField rhorUAf("(rho*(1|A(U)))", fvc::interpolate(rho*rUA));
@@ -18,24 +16,23 @@
       + fvc::ddtPhiCorr(rUA, rho, U, phi)
     );
 
-    surfaceScalarField buoyancyPhi =
-        rhorUAf*fvc::interpolate(rho)*(g & mesh.Sf());
+    surfaceScalarField buoyancyPhi = -rhorUAf*ghf*fvc::snGrad(rho)*mesh.magSf();
     phi += buoyancyPhi;
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
-        fvScalarMatrix pEqn
+        fvScalarMatrix p_rghEqn
         (
-            fvc::ddt(rho) + psi*correction(fvm::ddt(p))
+            fvc::ddt(rho) + psi*correction(fvm::ddt(p_rgh))
           + fvc::div(phi)
-          - fvm::laplacian(rhorUAf, p)
+          - fvm::laplacian(rhorUAf, p_rgh)
         );
 
-        pEqn.solve
+        p_rghEqn.solve
         (
             mesh.solver
             (
-                p.select
+                p_rgh.select
                 (
                     (
                         finalIter
@@ -49,34 +46,25 @@
         if (nonOrth == nNonOrthCorr)
         {
             // Calculate the conservative fluxes
-            phi += pEqn.flux();
+            phi += p_rghEqn.flux();
 
             // Explicitly relax pressure for momentum corrector
-            p.relax();
+            p_rgh.relax();
 
             // Correct the momentum source with the pressure gradient flux
             // calculated from the relaxed pressure
-            U += rUA*fvc::reconstruct((buoyancyPhi + pEqn.flux())/rhorUAf);
+            U += rUA*fvc::reconstruct((buoyancyPhi + p_rghEqn.flux())/rhorUAf);
             U.correctBoundaryConditions();
         }
     }
 
+    p = p_rgh + rho*gh;
+
     // Second part of thermodynamic density update
-    thermo.rho() += psi*p;
+    thermo.rho() += psi*p_rgh;
 
     DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
 
     #include "rhoEqn.H"
     #include "compressibleContinuityErrs.H"
-
-    // For closed-volume cases adjust the pressure and density levels
-    // to obey overall mass continuity
-    if (closedVolume)
-    {
-        p +=
-            (initialMass - fvc::domainIntegrate(psi*p))
-            /fvc::domainIntegrate(psi);
-        thermo.rho() = psi*p;
-        rho += (initialMass - fvc::domainIntegrate(rho))/totalVolume;
-    }
 }

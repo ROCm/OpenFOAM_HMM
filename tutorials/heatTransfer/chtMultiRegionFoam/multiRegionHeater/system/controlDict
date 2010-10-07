@@ -35,9 +35,9 @@ writeInterval   50;
 
 purgeWrite      0;
 
-writeFormat     ascii;
+writeFormat     binary;
 
-writePrecision  7;
+writePrecision  8;
 
 writeCompression off;
 
@@ -45,11 +45,12 @@ timeFormat      general;
 
 timePrecision   6;
 
-runTimeModifiable true;
+runTimeModifiable yes;
 
 maxCo           0.3;
 
-maxDi          10.0;
+// Maximum diffusion number
+maxDi           10.0;
 
 adjustTimeStep  yes;
 
