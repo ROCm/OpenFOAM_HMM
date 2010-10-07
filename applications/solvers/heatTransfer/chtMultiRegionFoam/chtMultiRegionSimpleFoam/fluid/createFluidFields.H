@@ -184,7 +184,10 @@
             i,
             new dimensionedScalar
             (
-                fluidRegions[i].solutionDict().subDict("SIMPLE").lookup("rhoMax")
+                fluidRegions[i].solutionDict().subDict("SIMPLE").lookup
+                (
+                    "rhoMax"
+                )
             )
         );
 
@@ -193,7 +196,10 @@
             i,
             new dimensionedScalar
             (
-                fluidRegions[i].solutionDict().subDict("SIMPLE").lookup("rhoMin")
+                fluidRegions[i].solutionDict().subDict("SIMPLE").lookup
+                (
+                    "rhoMin"
+                )
             )
         );
     }
