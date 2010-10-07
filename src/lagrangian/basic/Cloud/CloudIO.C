@@ -121,9 +121,9 @@ void Foam::Cloud<ParticleType>::initCloud(const bool checkClass)
     }
     else
     {
-        Pout<< "Cannot read particle positions file " << nl
+        Pout<< "Cannot read particle positions file:" << nl
             << "    " << ioP.path() << nl
-            << "    assuming the initial cloud contains 0 particles." << endl;
+            << "Assuming the initial cloud contains 0 particles." << endl;
     }
 
     // Ask for the tetBasePtIs to trigger all processors to build
