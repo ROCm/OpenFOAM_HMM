@@ -25,17 +25,17 @@ solvers
         relTol          0;
     }
 
-    p
+    p_rgh
     {
         solver          PCG;
         preconditioner  DIC;
         tolerance       1e-8;
-        relTol          0.1;
+        relTol          0.01;
     }
 
-    pFinal
+    p_rghFinal
     {
-        $p;
+        $p_rgh;
         relTol          0;
     }
 
@@ -44,7 +44,7 @@ solvers
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-6;
-        relTol          0;
+        relTol          0.1;
     }
 
     "(U|h|k|epsilon|R)Final"
@@ -56,7 +56,7 @@ solvers
 
 PIMPLE
 {
-    momentumPredictor no;
+    momentumPredictor yes;
     nOuterCorrectors 1;
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;

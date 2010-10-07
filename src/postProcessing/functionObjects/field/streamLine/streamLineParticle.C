@@ -168,7 +168,6 @@ bool Foam::streamLineParticle::move(streamLineParticle::trackData& td)
         td.keepParticle
     && !td.switchProcessor
     && lifeTime_ > 0
-    && tEnd > ROOTVSMALL
     )
     {
         // TBD: implement subcycling so step through cells in more than
@@ -191,6 +190,12 @@ bool Foam::streamLineParticle::move(streamLineParticle::trackData& td)
 
         tEnd -= dt;
         stepFraction() = 1.0 - tEnd/deltaT;
+
+        if (tEnd <= ROOTVSMALL)
+        {
+            // Force removal
+            lifeTime_ = 0;
+        }
     }
 
     if (!td.keepParticle || lifeTime_ == 0)

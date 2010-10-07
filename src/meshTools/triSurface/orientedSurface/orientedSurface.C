@@ -234,9 +234,7 @@ void Foam::orientedSurface::propagateOrientation
     (
         s,
         samplePoint,
-        nearestFaceI,
-        nearestPt,
-        10*SMALL
+        nearestFaceI
     );
 
     if (side == triSurfaceTools::UNKNOWN)

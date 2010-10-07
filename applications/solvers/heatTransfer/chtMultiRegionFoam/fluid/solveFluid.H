@@ -1,3 +1,8 @@
+if (finalIter)
+{
+    mesh.data::add("finalIteration", true);
+}
+
 if (oCorr == 0)
 {
     #include "rhoEqn.H"
@@ -16,3 +21,8 @@ for (int corr=0; corr<nCorr; corr++)
 turb.correct();
 
 rho = thermo.rho();
+
+if (finalIter)
+{
+    mesh.data::remove("finalIteration");
+}

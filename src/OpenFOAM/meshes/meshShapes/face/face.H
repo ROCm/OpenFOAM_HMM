@@ -126,6 +126,14 @@ class face
 
 public:
 
+    //- Return types for classify
+    enum proxType
+    {
+        NONE,
+        POINT,  // Close to point
+        EDGE    // Close to edge
+    };
+
     // Static data members
 
         static const char* const typeName;
@@ -247,6 +255,20 @@ public:
         (
             const point& p,
             const pointField& meshPoints
+        ) const;
+
+        //- Return nearest point to face and classify it:
+        //  + near point (nearType=POINT, nearLabel=0, 1, 2)
+        //  + near edge (nearType=EDGE, nearLabel=0, 1, 2)
+        //    Note: edges are counted from starting vertex so
+        //    e.g. edge n is from f[n] to f[0], where the face has n + 1
+        //    points
+        pointHit nearestPointClassify
+        (
+            const point& p,
+            const pointField& meshPoints,
+            label& nearType,
+            label& nearLabel
         ) const;
 
         //- Return contact sphere diameter

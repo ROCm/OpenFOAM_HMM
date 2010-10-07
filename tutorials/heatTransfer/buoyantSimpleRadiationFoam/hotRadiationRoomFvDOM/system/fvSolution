@@ -17,7 +17,7 @@ FoamFile
 
 solvers
 {
-    p
+    p_rgh
     {
         solver          GAMG;
         tolerance       1e-06;
@@ -47,11 +47,12 @@ SIMPLE
 
 relaxationFactors
 {
-    rho             1;
-    p               0.3;
+    rho             1.0;
+    p_rgh           0.3;
     U               0.7;
     h               0.7;
-    "(k|epsilon)"   0.7;
+    k               0.7;
+    epsilon         0.7;
     "ILambda.*"     0.7;
 }
 
