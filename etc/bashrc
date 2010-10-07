@@ -32,7 +32,7 @@
 #------------------------------------------------------------------------------
 
 export WM_PROJECT=OpenFOAM
-[ -z "$WM_PROJECT_VERSION" ] && export WM_PROJECT_VERSION=dev
+export WM_PROJECT_VERSION=dev
 
 ################################################################################
 # USER EDITABLE PART. Note changes made here may be lost with the next upgrade
@@ -131,7 +131,8 @@ unset WM_COMPILER_ARCH WM_COMPILER_LIB_ARCH
 # WM_COMPILE_OPTION = Opt | Debug | Prof
 : ${WM_COMPILE_OPTION:=Opt}; export WM_COMPILE_OPTION
 
-# WM_MPLIB = SYSTEMOPENMPI | OPENMPI | MPICH | MPICH-GM | HPMPI | GAMMA | MPI | QSMPI
+# WM_MPLIB = SYSTEMOPENMPI | OPENMPI | MPICH | MPICH-GM | HPMPI | GAMMA
+#                          | MPI | QSMPI
 : ${WM_MPLIB:=OPENMPI}; export WM_MPLIB
 
 
@@ -241,7 +242,8 @@ foamClean=$WM_PROJECT_DIR/bin/foamCleanPath
 cleaned=`$foamClean "$PATH" "$foamOldDirs"` && PATH="$cleaned"
 
 #- Clean LD_LIBRARY_PATH
-cleaned=`$foamClean "$LD_LIBRARY_PATH" "$foamOldDirs"` && LD_LIBRARY_PATH="$cleaned"
+cleaned=`$foamClean "$LD_LIBRARY_PATH" "$foamOldDirs"` \
+    && LD_LIBRARY_PATH="$cleaned"
 
 #- Clean MANPATH
 cleaned=`$foamClean "$MANPATH" "$foamOldDirs"` && MANPATH="$cleaned"
@@ -257,8 +259,13 @@ _foamSource $WM_PROJECT_DIR/etc/aliases.sh
 
 # Source user setup files for optional packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSource $WM_PROJECT_DIR/etc/apps/paraview3/bashrc
-_foamSource $WM_PROJECT_DIR/etc/apps/ensight/bashrc
+paraview3=`$WM_PROJECT_DIR/bin/foamEtcFile apps/paraview3/bashrc` \
+    && _foamSource $paraview3
+unset paraview3
+
+ensight=`$WM_PROJECT_DIR/bin/foamEtcFile apps/ensight/bashrc` \
+    && _foamSource $ensight
+unset ensight
 
 
 # Clean environment paths again. Only remove duplicates

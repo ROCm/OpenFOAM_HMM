@@ -44,8 +44,7 @@ if (turbulence)
 
 
     // Turbulent kinetic energy equation
-
-    solve
+    fvScalarMatrix kEqn
     (
         fvm::ddt(rho, k)
       + fvm::div(phi, k)
@@ -60,7 +59,8 @@ if (turbulence)
       - fvm::Sp(rho*epsilon/k, k)
     );
 
-    //FIXME: why no kEqn.relax()?
+    kEqn.relax();
+    kEqn.solve();
 
     bound(k, kMin);
 

@@ -293,11 +293,13 @@ int main(int argc, char *argv[])
         // From global region number to mesh patch.
         globalToPatch.setSize(surfaces.nRegions(), -1);
 
-        Info<< "Patch\tRegion" << nl
-            << "-----\t------"
+        Info<< "Patch\tType\tRegion" << nl
+            << "-----\t----\t------"
             << endl;
 
         const labelList& surfaceGeometry = surfaces.surfaces();
+        const PtrList<dictionary>& surfacePatchInfo = surfaces.patchInfo();
+
         forAll(surfaceGeometry, surfI)
         {
             label geomI = surfaceGeometry[surfI];
@@ -308,15 +310,34 @@ int main(int argc, char *argv[])
 
             forAll(regNames, i)
             {
-                label patchI = meshRefiner.addMeshedPatch
-                (
-                    regNames[i],
-                    wallPolyPatch::typeName
-                );
+                label globalRegionI = surfaces.globalRegion(surfI, i);
 
-                Info<< patchI << '\t' << regNames[i] << nl;
+                label patchI;
 
-                globalToPatch[surfaces.globalRegion(surfI, i)] = patchI;
+                if (surfacePatchInfo.set(globalRegionI))
+                {
+                    patchI = meshRefiner.addMeshedPatch
+                    (
+                        regNames[i],
+                        surfacePatchInfo[globalRegionI]
+                    );
+                }
+                else
+                {
+                    dictionary patchInfo;
+                    patchInfo.set("type", wallPolyPatch::typeName);
+
+                    patchI = meshRefiner.addMeshedPatch
+                    (
+                        regNames[i],
+                        patchInfo
+                    );
+                }
+
+                Info<< patchI << '\t' << mesh.boundaryMesh()[patchI].type()
+                    << '\t' << regNames[i] << nl;
+
+                globalToPatch[globalRegionI] = patchI;
             }
 
             Info<< nl;
@@ -431,7 +452,7 @@ int main(int argc, char *argv[])
     {
         cpuTime timer;
 
-        autoLayerDriver layerDriver(meshRefiner);
+        autoLayerDriver layerDriver(meshRefiner, globalToPatch);
 
         // Layer addition parameters
         layerParameters layerParams(layerDict, mesh.boundaryMesh());

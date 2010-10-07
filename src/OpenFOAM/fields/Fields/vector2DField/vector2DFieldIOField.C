@@ -41,8 +41,8 @@ namespace Foam
 
     defineTemplateTypeNameAndDebugWithName
     (
-        vector2DIOFieldField,
-        "vector2DCompactFieldField",
+        vector2DFieldCompactIOField,
+        "vector2DFieldCompactField",
         0
     );
 }

@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "IOField.H"
-#include "IOFieldField.H"
+#include "CompactIOField.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
@@ -89,7 +89,7 @@ Foam::tmp<Foam::IOField<Type> > Foam::reconstructLagrangianField
 
 
 template<class Type>
-Foam::tmp<Foam::IOFieldField<Foam::Field<Type>, Type> >
+Foam::tmp<Foam::CompactIOField<Foam::Field<Type>, Type> >
 Foam::reconstructLagrangianFieldField
 (
     const word& cloudName,
@@ -99,9 +99,9 @@ Foam::reconstructLagrangianFieldField
 )
 {
     // Construct empty field on mesh
-    tmp<IOFieldField<Field<Type>, Type > > tfield
+    tmp<CompactIOField<Field<Type>, Type > > tfield
     (
-        new IOFieldField<Field<Type>, Type>
+        new CompactIOField<Field<Type>, Type>
         (
             IOobject
             (
@@ -132,7 +132,7 @@ Foam::reconstructLagrangianFieldField
 
         if (localIOobject.headerOk())
         {
-            IOFieldField<Field<Type>, Type> fieldi(localIOobject);
+            CompactIOField<Field<Type>, Type> fieldi(localIOobject);
 
             label offset = field.size();
             field.setSize(offset + fieldi.size());
@@ -194,7 +194,7 @@ void Foam::reconstructLagrangianFieldFields
 )
 {
     {
-        const word fieldClassName(IOFieldField<Field<Type>, Type>::typeName);
+        const word fieldClassName(CompactIOField<Field<Type>, Type>::typeName);
 
         IOobjectList fields = objects.lookupClass(fieldClassName);
 

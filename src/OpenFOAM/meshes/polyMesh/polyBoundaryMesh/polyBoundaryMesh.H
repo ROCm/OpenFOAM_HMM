@@ -38,6 +38,7 @@ SourceFiles
 #include "polyPatchList.H"
 #include "regIOobject.H"
 #include "labelPair.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -150,6 +151,12 @@ public:
 
         //- Return a list of physical types
         wordList physicalTypes() const;
+
+        //- Return patch indices for all matches
+        labelList findIndices(const keyType&) const;
+
+        //- Return patch index for the first match, return -1 if not found
+        label findIndex(const keyType&) const;
 
         //- Find patch index given a name
         label findPatchID(const word& patchName) const;

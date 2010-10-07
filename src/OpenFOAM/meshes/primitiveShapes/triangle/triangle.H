@@ -79,21 +79,6 @@ class triangle
 
         PointRef a_, b_, c_;
 
-    // Private Member Functions
-
-        //- Fast distance to triangle calculation. From
-        //  "Distance Between Point and Trangle in 3D"
-        //  David Eberly, Magic Software Inc. Aug. 2002.
-        //  Works on function Q giving distance to point and tries to
-        //  minimize this.
-        static pointHit nearestPoint
-        (
-            const Point& baseVertex,
-            const vector& E0,
-            const vector& E1,
-            const point& P
-        );
-
 
 public:
 
@@ -202,24 +187,27 @@ public:
                 const scalar tol = 0.0
             ) const;
 
-            //- Return nearest point to p on triangle
-            inline pointHit nearestPoint
-            (
-                const point& p
-            ) const;
-
-            //- Classify point in triangle plane w.r.t. triangle edges.
-            //  - inside (true returned)/outside (false returned)
-            //  - near point (nearType=POINT, nearLabel=0, 1, 2)
-            //  - near edge (nearType=EDGE, nearLabel=0, 1, 2)
+            //- Find the nearest point to p on the triangle and classify it:
+            //  + near point (nearType=POINT, nearLabel=0, 1, 2)
+            //  + near edge (nearType=EDGE, nearLabel=0, 1, 2)
             //    Note: edges are counted from starting
             //    vertex so e.g. edge 2 is from f[2] to f[0]
-            //  tol is fraction to account for truncation error. Is only used
-            //  when comparing normalized (0..1) numbers.
+            pointHit nearestPointClassify
+            (
+                const point& p,
+                label& nearType,
+                label& nearLabel
+            ) const;
+
+            //- Return nearest point to p on triangle
+            inline pointHit nearestPoint(const point& p) const;
+
+            //- Classify nearest point to p in triangle plane
+            //  w.r.t. triangle edges and points.  Returns inside
+            //  (true)/outside (false).
             bool classify
             (
                 const point& p,
-                const scalar tol,
                 label& nearType,
                 label& nearLabel
             ) const;

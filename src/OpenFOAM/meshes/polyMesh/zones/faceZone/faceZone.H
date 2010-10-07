@@ -154,7 +154,7 @@ public:
         faceZone
         (
             const word& name,
-            const labelList& addr,
+            const unallocLabelList& addr,
             const boolList& fm,
             const label index,
             const faceZoneMesh& zm
@@ -184,7 +184,7 @@ public:
         faceZone
         (
             const faceZone&,
-            const labelList& addr,
+            const unallocLabelList& addr,
             const boolList& fm,
             const label index,
             const faceZoneMesh&
@@ -214,7 +214,7 @@ public:
         //  and zone mesh
         virtual autoPtr<faceZone> clone
         (
-            const labelList& addr,
+            const unallocLabelList& addr,
             const boolList& fm,
             const label index,
             const faceZoneMesh& zm
@@ -279,7 +279,7 @@ public:
         virtual void clearAddressing();
 
         //- Reset addressing and flip map (clearing demand-driven data)
-        virtual void resetAddressing(const labelList&, const boolList&);
+        virtual void resetAddressing(const unallocLabelList&, const boolList&);
 
         //- Check zone definition. Return true if in error.
         virtual bool checkDefinition(const bool report = false) const;

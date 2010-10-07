@@ -121,11 +121,15 @@ void Foam::Cloud<ParticleType>::initCloud(const bool checkClass)
     }
     else
     {
-        WarningIn("Cloud<ParticleType>::initCloud(const bool checkClass)")
-            << "Cannot read particle positions file " << nl
+        Pout<< "Cannot read particle positions file " << nl
             << "    " << ioP.path() << nl
             << "    assuming the initial cloud contains 0 particles." << endl;
     }
+
+    // Ask for the tetBasePtIs to trigger all processors to build
+    // them, otherwise, if some processors have no particles then
+    // there is a comms mismatch.
+    polyMesh_.tetBasePtIs();
 
     forAllIter(typename Cloud<ParticleType>, *this, pIter)
     {
@@ -225,7 +229,7 @@ template<class DataType>
 void Foam::Cloud<ParticleType>::checkFieldFieldIOobject
 (
     const Cloud<ParticleType>& c,
-    const IOFieldField<Field<DataType>, DataType>& data
+    const CompactIOField<Field<DataType>, DataType>& data
 ) const
 {
     if (data.size() != c.size())
@@ -235,7 +239,7 @@ void Foam::Cloud<ParticleType>::checkFieldFieldIOobject
             "void Cloud<ParticleType>::checkFieldFieldIOobject"
             "("
                 "const Cloud<ParticleType>&, "
-                "const IOFieldField<Field<DataType>, DataType>&"
+                "const CompactIOField<Field<DataType>, DataType>&"
             ") const"
         )   << "Size of " << data.name()
             << " field " << data.size()

@@ -112,7 +112,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             )
         );
 
-        faces_ = faceIOList
+        faces_ = faceCompactIOList
         (
             IOobject
             (
@@ -238,7 +238,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
         }
         else
         {
-            cellIOList cells
+            cellCompactIOList cells
             (
                 IOobject
                 (

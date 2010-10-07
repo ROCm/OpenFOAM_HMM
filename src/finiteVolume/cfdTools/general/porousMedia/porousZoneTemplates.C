@@ -66,7 +66,7 @@ void Foam::porousZone::addPowerLawResistance
         forAll(cells, i)
         {
             Udiag[cells[i]] +=
-            V[cells[i]]*rho[cells[i]]*C0*pow(magSqr(U[cells[i]]), C1m1b2);
+                V[cells[i]]*rho[cells[i]]*C0*pow(magSqr(U[cells[i]]), C1m1b2);
         }
     }
 }

@@ -38,7 +38,7 @@ SourceFiles
 #include "cloud.H"
 #include "IDLList.H"
 #include "IOField.H"
-#include "IOFieldField.H"
+#include "CompactIOField.H"
 #include "polyMesh.H"
 #include "indexedOctree.H"
 #include "treeDataCell.H"
@@ -350,7 +350,7 @@ public:
             void checkFieldFieldIOobject
             (
                 const Cloud<ParticleType>& c,
-                const IOFieldField<Field<DataType>, DataType>& data
+                const CompactIOField<Field<DataType>, DataType>& data
             ) const;
 
             //- Read the field data for the cloud of particles. Dummy at

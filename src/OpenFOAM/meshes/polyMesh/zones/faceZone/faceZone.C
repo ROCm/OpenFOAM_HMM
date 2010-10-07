@@ -180,7 +180,7 @@ void Foam::faceZone::checkAddressing() const
 Foam::faceZone::faceZone
 (
     const word& name,
-    const labelList& addr,
+    const unallocLabelList& addr,
     const boolList& fm,
     const label index,
     const faceZoneMesh& zm
@@ -242,7 +242,7 @@ Foam::faceZone::faceZone
 Foam::faceZone::faceZone
 (
     const faceZone& fz,
-    const labelList& addr,
+    const unallocLabelList& addr,
     const boolList& fm,
     const label index,
     const faceZoneMesh& zm
@@ -392,7 +392,7 @@ void Foam::faceZone::clearAddressing()
 
 void Foam::faceZone::resetAddressing
 (
-    const labelList& addr,
+    const unallocLabelList& addr,
     const boolList& flipMap
 )
 {
@@ -414,7 +414,7 @@ void Foam::faceZone::updateMesh(const mapPolyMesh& mpm)
 
     forAll(*this, i)
     {
-        label faceI = operator[](i);
+        const label faceI = operator[](i);
 
         if (faceMap[faceI] >= 0)
         {
@@ -454,7 +454,7 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
         boolList neiZoneFlip(mesh.nFaces()-mesh.nInternalFaces(), false);
         forAll(*this, i)
         {
-            label faceI = operator[](i);
+            const label faceI = operator[](i);
 
             if (!mesh.isInternalFace(faceI))
             {
@@ -469,13 +469,12 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
 
         forAll(*this, i)
         {
-            label faceI = operator[](i);
-
-            label patchI = bm.whichPatch(faceI);
+            const label faceI = operator[](i);
+            const label patchI = bm.whichPatch(faceI);
 
             if (patchI != -1 && bm[patchI].coupled())
             {
-                label bFaceI = faceI-mesh.nInternalFaces();
+                const label bFaceI = faceI-mesh.nInternalFaces();
 
                 // Check face in zone on both sides
                 if (myZoneFace[bFaceI] != neiZoneFace[bFaceI])

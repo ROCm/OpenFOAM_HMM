@@ -52,7 +52,7 @@ namespace kineticTheoryModels
 
 class viscosityModel
 {
-    // Private Member Functions
+    // Private member functions
 
         //- Disallow default bitwise copy construct
         viscosityModel(const viscosityModel&);

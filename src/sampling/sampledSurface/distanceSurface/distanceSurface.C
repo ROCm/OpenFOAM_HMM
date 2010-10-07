@@ -89,20 +89,29 @@ void Foam::distanceSurface::createGeometry()
 
         if (signed_)
         {
-            vectorField normal;
-            surfPtr_().getNormal(nearest, normal);
+            List<searchableSurface::volumeType> volType;
 
-            forAll(nearest, i)
+            surfPtr_().getVolumeType(cc, volType);
+
+            forAll(volType, i)
             {
-                vector d(cc[i]-nearest[i].hitPoint());
+                searchableSurface::volumeType vT = volType[i];
 
-                if ((d&normal[i]) > 0)
+                if (vT == searchableSurface::OUTSIDE)
                 {
-                    fld[i] = Foam::mag(d);
+                    fld[i] = Foam::mag(cc[i] - nearest[i].hitPoint());
+                }
+                else if (vT == searchableSurface::INSIDE)
+                {
+                    fld[i] = -Foam::mag(cc[i] - nearest[i].hitPoint());
                 }
                 else
                 {
-                    fld[i] = -Foam::mag(d);
+                    FatalErrorIn
+                    (
+                        "void Foam::distanceSurface::createGeometry()"
+                    )   << "getVolumeType failure, neither INSIDE or OUTSIDE"
+                        << exit(FatalError);
                 }
             }
         }
@@ -132,20 +141,30 @@ void Foam::distanceSurface::createGeometry()
 
             if (signed_)
             {
-                vectorField normal;
-                surfPtr_().getNormal(nearest, normal);
+                List<searchableSurface::volumeType> volType;
 
-                forAll(nearest, i)
+                surfPtr_().getVolumeType(cc, volType);
+
+                forAll(volType, i)
                 {
-                    vector d(cc[i]-nearest[i].hitPoint());
+                    searchableSurface::volumeType vT = volType[i];
 
-                    if ((d&normal[i]) > 0)
+                    if (vT == searchableSurface::OUTSIDE)
                     {
-                        fld[i] = Foam::mag(d);
+                        fld[i] = Foam::mag(cc[i] - nearest[i].hitPoint());
+                    }
+                    else if (vT == searchableSurface::INSIDE)
+                    {
+                        fld[i] = -Foam::mag(cc[i] - nearest[i].hitPoint());
                     }
                     else
                     {
-                        fld[i] = -Foam::mag(d);
+                        FatalErrorIn
+                        (
+                            "void Foam::distanceSurface::createGeometry()"
+                        )   << "getVolumeType failure, "
+                            << "neither INSIDE or OUTSIDE"
+                            << exit(FatalError);
                     }
                 }
             }
@@ -179,20 +198,31 @@ void Foam::distanceSurface::createGeometry()
 
         if (signed_)
         {
-            vectorField normal;
-            surfPtr_().getNormal(nearest, normal);
+            List<searchableSurface::volumeType> volType;
 
-            forAll(nearest, i)
+            surfPtr_().getVolumeType(pts, volType);
+
+            forAll(volType, i)
             {
-                vector d(pts[i]-nearest[i].hitPoint());
+                searchableSurface::volumeType vT = volType[i];
 
-                if ((d&normal[i]) > 0)
+                if (vT == searchableSurface::OUTSIDE)
                 {
-                    pointDistance_[i] = Foam::mag(d);
+                    pointDistance_[i] =
+                        Foam::mag(pts[i] - nearest[i].hitPoint());
+                }
+                else if (vT == searchableSurface::INSIDE)
+                {
+                    pointDistance_[i] =
+                        -Foam::mag(pts[i] - nearest[i].hitPoint());
                 }
                 else
                 {
-                    pointDistance_[i] = -Foam::mag(d);
+                    FatalErrorIn
+                    (
+                        "void Foam::distanceSurface::createGeometry()"
+                    )   << "getVolumeType failure, neither INSIDE or OUTSIDE"
+                        << exit(FatalError);
                 }
             }
         }
@@ -290,20 +320,17 @@ Foam::distanceSurface::distanceSurface
     signed_(readBool(dict.lookup("signed"))),
     regularise_(dict.lookupOrDefault("regularise", true)),
     average_(dict.lookupOrDefault("average", false)),
-    zoneName_(word::null),
+    zoneKey_(keyType::null),
     needsUpdate_(true),
     isoSurfPtr_(NULL),
     facesPtr_(NULL)
 {
-//    dict.readIfPresent("zone", zoneName_);
+//    dict.readIfPresent("zone", zoneKey_);
 //
-//    if (debug && zoneName_.size())
+//    if (debug && zoneKey_.size() && mesh.cellZones().findZoneID(zoneKey_) < 0)
 //    {
-//        if (mesh.cellZones().findZoneID(zoneName_) < 0)
-//        {
-//            Info<< "cellZone \"" << zoneName_
-//                << "\" not found - using entire mesh" << endl;
-//        }
+//        Info<< "cellZone " << zoneKey_
+//            << " not found - using entire mesh" << endl;
 //    }
 }
 

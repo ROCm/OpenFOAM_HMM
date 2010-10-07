@@ -28,7 +28,7 @@ Description
 
 SourceFiles
     dragModel.C
-    dragModelNew.C
+    newDragModel.C
 
 \*---------------------------------------------------------------------------*/
 

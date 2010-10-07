@@ -37,18 +37,18 @@ writeFormat     ascii;
 
 writePrecision  6;
 
-writeCompression off;
+writeCompression uncompressed;
 
 timeFormat      general;
 
 timePrecision   6;
 
-runTimeModifiable true;
+runTimeModifiable yes;
 
 adjustTimeStep  yes;
 
 maxCo           0.1;
-
+maxAlphaCo      0.1;
 maxDeltaT       1;
 
 

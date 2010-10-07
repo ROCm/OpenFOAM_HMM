@@ -224,7 +224,7 @@ addLayersControls
     //- If points get not extruded do nGrow layers of connected faces that are
     //  also not grown. This helps convergence of the layer addition process
     //  close to features.
-    nGrow 0;
+    nGrow 1;
 
 
     // Advanced settings
@@ -287,6 +287,9 @@ meshQualityControls
     //  is allowed. 0 is straight face, <0 would be convex face.
     //  Set to 180 to disable.
     maxConcave 80;
+
+    //- Minimum projected area v.s. actual area. Set to -1 to disable.
+    minFlatness 0.5;
 
     //- Minimum pyramid volume. Is absolute volume of cell pyramid.
     //  Set to very negative number (e.g. -1E30) to disable.

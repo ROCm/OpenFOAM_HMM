@@ -458,9 +458,7 @@ public:
         (
             const triSurface& surf,
             const point& sample,
-            const label nearestFaceI,   // nearest face
-            const point& nearestPt,     // nearest point on nearest face
-            const scalar tol            // tolerance for nearness test.
+            const label nearestFaceI
         );
 
     // Triangulation of faces

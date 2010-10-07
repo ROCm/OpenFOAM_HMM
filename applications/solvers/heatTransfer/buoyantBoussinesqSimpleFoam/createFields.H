@@ -64,6 +64,21 @@
         1.0 - beta*(T - TRef)
     );
 
+    // kinematic turbulent thermal thermal conductivity m2/s
+    Info<< "Reading field kappat\n" << endl;
+    volScalarField kappat
+    (
+        IOobject
+        (
+            "kappat",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
     Info<< "Calculating field g.h\n" << endl;
     volScalarField gh("gh", g & mesh.C());
     surfaceScalarField ghf("ghf", g & mesh.Cf());
@@ -81,29 +96,23 @@
         p_rgh + rhok*gh
     );
 
-    label p_rghRefCell = 0;
-    scalar p_rghRefValue = 0.0;
+    label pRefCell = 0;
+    scalar pRefValue = 0.0;
     setRefCell
     (
+        p,
         p_rgh,
         mesh.solutionDict().subDict("SIMPLE"),
-        p_rghRefCell,
-        p_rghRefValue
+        pRefCell,
+        pRefValue
     );
-
-    scalar pRefValue = 0.0;
 
     if (p_rgh.needReference())
     {
-        pRefValue = readScalar
-        (
-            mesh.solutionDict().subDict("SIMPLE").lookup("pRefValue")
-        );
-
         p += dimensionedScalar
         (
             "p",
             p.dimensions(),
-            pRefValue - getRefCellValue(p, p_rghRefCell)
+            pRefValue - getRefCellValue(p, pRefCell)
         );
     }

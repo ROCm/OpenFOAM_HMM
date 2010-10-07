@@ -31,7 +31,7 @@
 #------------------------------------------------------------------------------
 
 setenv WM_PROJECT OpenFOAM
-if ( ! $?WM_PROJECT_VERSION ) setenv WM_PROJECT_VERSION dev
+setenv WM_PROJECT_VERSION dev
 
 ################################################################################
 # USER EDITABLE PART. Note changes made here may be lost with the next upgrade
@@ -255,8 +255,17 @@ _foamSource $WM_PROJECT_DIR/etc/aliases.csh
 
 # Source user setup files for optional packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamSource $WM_PROJECT_DIR/etc/apps/paraview3/cshrc
-# _foamSource $WM_PROJECT_DIR/etc/apps/ensight/cshrc
+set paraview3=`$WM_PROJECT_DIR/bin/foamEtcFile apps/paraview3/cshrc`
+if ( $status == 0 ) then
+    _foamSource $paraview3
+endif
+unset paraview3
+
+set ensight=`$WM_PROJECT_DIR/bin/foamEtcFile apps/ensight/cshrc`
+if ( $status == 0 ) then
+    _foamSource $ensight
+endif
+unset ensight
 
 
 # Clean environment paths again. Only remove duplicates

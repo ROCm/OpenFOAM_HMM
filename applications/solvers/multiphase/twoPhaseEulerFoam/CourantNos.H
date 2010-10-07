@@ -5,7 +5,7 @@
     (
         mesh.surfaceInterpolation::deltaCoeffs()*mag(phia - phib)
        /mesh.magSf()
-    ).value()*runTime.deltaTValue();
+    ).value()*runTime.deltaT().value();
 
     Info<< "Max Ur Courant Number = " << UrCoNum << endl;
 

@@ -157,7 +157,7 @@ public:
         //  The begin-of-line (^) and end-of-line ($) anchors are implicit
         bool match(const string&, List<string>& groups) const;
 
-        //- Return true if the regex was found in within string
+        //- Return true if the regex was found within string
         bool search(const std::string& str) const
         {
             return std::string::npos != find(str);

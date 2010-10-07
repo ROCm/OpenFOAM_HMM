@@ -1,7 +1,10 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
 
-foamCleanTutorials cases
-rm -rf 0/alpha1.gz
+# Source tutorial clean functions
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions
+
+cleanCase
+rm -rf 0/alpha1
 
 # ----------------------------------------------------------------- end-of-file

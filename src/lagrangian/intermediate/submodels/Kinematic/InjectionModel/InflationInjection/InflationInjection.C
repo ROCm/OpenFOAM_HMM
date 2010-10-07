@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,6 @@ License
 #include "InflationInjection.H"
 #include "mathematicalConstants.H"
 #include "PackedBoolList.H"
-#include "Switch.H"
 #include "cellSet.H"
 #include "ListListOps.H"
 
@@ -127,7 +126,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
 
         if (cellOccupancy[cI].empty())
         {
-            if (!cellCentresUsed.found(cI))
+            if (selfSeed_ && !cellCentresUsed.found(cI))
             {
                 scalar dNew = parcelPDF_().sample();
 
@@ -136,7 +135,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
                     vectorPairScalarPair
                     (
                         Pair<vector>(mesh.cellCentres()[cI], vector::zero),
-                        Pair<scalar>(dNew, dNew)
+                        Pair<scalar>(dSeed_, dNew)
                     )
                 );
 
@@ -340,6 +339,8 @@ Foam::InflationInjection<CloudType>::InflationInjection
     newParticles_(),
     volumeAccumulator_(0.0),
     fraction_(1.0),
+    selfSeed_(this->coeffDict().lookupOrDefault("selfSeed", false)),
+    dSeed_(SMALL),
     parcelPDF_
     (
         pdfs::pdf::New
@@ -349,6 +350,11 @@ Foam::InflationInjection<CloudType>::InflationInjection
         )
     )
 {
+    if (selfSeed_)
+    {
+        dSeed_ = readScalar(this->coeffDict().lookup("dSeed"));
+    }
+
     cellSet generationCells(this->owner().mesh(), generationSetName_);
 
     generationCells_ = generationCells.toc();

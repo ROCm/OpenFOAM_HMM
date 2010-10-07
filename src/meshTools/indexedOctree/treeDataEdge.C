@@ -43,21 +43,7 @@ Foam::treeBoundBox Foam::treeDataEdge::calcBb(const label edgeI) const
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-// Construct from components
-Foam::treeDataEdge::treeDataEdge
-(
-    const bool cacheBb,
-    const edgeList& edges,
-    const pointField& points,
-    const labelList& edgeLabels
-)
-:
-    edges_(edges),
-    points_(points),
-    edgeLabels_(edgeLabels),
-    cacheBb_(cacheBb)
+void Foam::treeDataEdge::update()
 {
     if (cacheBb_)
     {
@@ -68,6 +54,42 @@ Foam::treeDataEdge::treeDataEdge
             bbs_[i] = calcBb(edgeLabels_[i]);
         }
     }
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::treeDataEdge::treeDataEdge
+(
+    const bool cacheBb,
+    const edgeList& edges,
+    const pointField& points,
+    const unallocLabelList& edgeLabels
+)
+:
+    edges_(edges),
+    points_(points),
+    edgeLabels_(edgeLabels),
+    cacheBb_(cacheBb)
+{
+    update();
+}
+
+
+Foam::treeDataEdge::treeDataEdge
+(
+    const bool cacheBb,
+    const edgeList& edges,
+    const pointField& points,
+    const Xfer<labelList>& edgeLabels
+)
+:
+    edges_(edges),
+    points_(points),
+    edgeLabels_(edgeLabels),
+    cacheBb_(cacheBb)
+{
+    update();
 }
 
 
@@ -121,7 +143,7 @@ bool Foam::treeDataEdge::overlaps
 // nearestPoint.
 void Foam::treeDataEdge::findNearest
 (
-    const labelList& indices,
+    const unallocLabelList& indices,
     const point& sample,
 
     scalar& nearestDistSqr,
@@ -131,7 +153,7 @@ void Foam::treeDataEdge::findNearest
 {
     forAll(indices, i)
     {
-        label index = indices[i];
+        const label index = indices[i];
 
         const edge& e = edges_[edgeLabels_[index]];
 
@@ -153,7 +175,7 @@ void Foam::treeDataEdge::findNearest
 //  Returns point and distance (squared)
 void Foam::treeDataEdge::findNearest
 (
-    const labelList& indices,
+    const unallocLabelList& indices,
     const linePointRef& ln,
 
     treeBoundBox& tightest,
@@ -167,7 +189,7 @@ void Foam::treeDataEdge::findNearest
 
     forAll(indices, i)
     {
-        label index = indices[i];
+        const label index = indices[i];
 
         const edge& e = edges_[edgeLabels_[index]];
 

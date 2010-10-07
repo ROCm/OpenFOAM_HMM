@@ -66,16 +66,16 @@ directMappedVelocityFluxFixedValueFvPatchField
         FatalErrorIn
         (
             "directMappedVelocityFluxFixedValueFvPatchField::"
-            "directMappedVelocityFluxFixedValueFvPatchField\n"
-            "(\n"
-            "    const directMappedVelocityFluxFixedValueFvPatchField&,\n"
-            "    const fvPatch&,\n"
-            "    const DimensionedField<vector, volMesh>&,\n"
-            "    const fvPatchFieldMapper&\n"
-            ")\n"
-        )   << "\n    patch type '" << p.type()
+            "directMappedVelocityFluxFixedValueFvPatchField"
+            "("
+                "const directMappedVelocityFluxFixedValueFvPatchField&, "
+                "const fvPatch&, "
+                "const DimensionedField<vector, volMesh>&, "
+                "const fvPatchFieldMapper&"
+            ")"
+        )   << "Patch type '" << p.type()
             << "' not type '" << directMappedPatchBase::typeName << "'"
-            << "\n    for patch " << p.name()
+            << " for patch " << p.name()
             << " of field " << dimensionedInternalField().name()
             << " in file " << dimensionedInternalField().objectPath()
             << exit(FatalError);
@@ -102,23 +102,16 @@ directMappedVelocityFluxFixedValueFvPatchField
             "directMappedVelocityFluxFixedValueFvPatchField"
             "("
                 "const fvPatch&, "
-                "const DimensionedField<vector, volMesh>& iF, "
+                "const DimensionedField<vector, volMesh>&, "
                 "const dictionary&"
             ")"
-        )   << "patch type '" << p.type()
+        )   << "Patch type '" << p.type()
             << "' not type '" << directMappedPatchBase::typeName << "'"
             << " for patch " << p.name()
             << " of field " << dimensionedInternalField().name()
             << " in file " << dimensionedInternalField().objectPath()
             << exit(FatalError);
     }
-
-    // Force calculation of schedule (uses parallel comms)
-    const directMappedPolyPatch& mpp = refCast<const directMappedPolyPatch>
-    (
-        this->patch().patch()
-    );
-    (void)mpp.map().schedule();
 }
 
 
@@ -191,8 +184,8 @@ void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
 
                 forAll(Upf, faceI)
                 {
-                    allUValues[faceStart++] = Upf[faceI];
-                    allPhiValues[faceStart] = phipf[faceI];
+                    allUValues[faceStart + faceI] = Upf[faceI];
+                    allPhiValues[faceStart + faceI] = phipf[faceI];
                 }
             }
 
@@ -205,7 +198,7 @@ void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
                 distMap.constructMap(),
                 allUValues
             );
-            newUValues = patch().patchSlice(newUValues);
+            newUValues = patch().patchSlice(allUValues);
 
             mapDistribute::distribute
             (
@@ -214,9 +207,9 @@ void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
                 distMap.constructSize(),
                 distMap.subMap(),
                 distMap.constructMap(),
-                newPhiValues
+                allPhiValues
             );
-            newPhiValues = patch().patchSlice(newPhiValues);
+            newPhiValues = patch().patchSlice(allPhiValues);
 
             break;
         }
@@ -257,9 +250,10 @@ void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
         {
             FatalErrorIn
             (
-                "directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()"
-            )<< "patch can only be used in NEARESTPATCHFACE or NEARESTFACE "
-             << "mode" << nl << abort(FatalError);
+                "directMappedVelocityFluxFixedValueFvPatchField::"
+                "updateCoeffs()"
+            )   << "patch can only be used in NEARESTPATCHFACE or NEARESTFACE "
+                << "mode" << nl << abort(FatalError);
         }
     }
 

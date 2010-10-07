@@ -15,7 +15,7 @@
 
     hsEqn.relax();
 
-    hsEqn.solve();
+    hsEqn.solve(mesh.solver(hs.select(finalIter)));
 
     thermo.correct();
 

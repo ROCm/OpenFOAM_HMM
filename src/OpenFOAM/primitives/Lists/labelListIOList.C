@@ -21,10 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Declaration of IOList and IOListList ClassNames for IOListLists that
-    do not have .C files.
-
 \*---------------------------------------------------------------------------*/
 
 #include "labelListIOList.H"
@@ -38,8 +34,8 @@ namespace Foam
 
     defineTemplateTypeNameAndDebugWithName
     (
-        labelIOListList,
-        "labelCompactListList",
+        labelListCompactIOList,
+        "labelListCompactList",
         0
     );
 }

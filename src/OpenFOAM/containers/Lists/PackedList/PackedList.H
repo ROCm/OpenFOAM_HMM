@@ -72,6 +72,23 @@ Note
         list[8] = 1;
     @endcode
 
+    Also note that all unused internal storage elements are guaranteed to
+    always be bit-wise zero. This property must not be violated by any
+    inheriting classes.
+
+    In addition to the normal output format, PackedList also supports a
+    compact ASCII format that may be convenient for user input in some
+    situations. The general format is a group of index/value pairs:
+    @verbatim
+        { (index1 value1) (index2 value2) (index3 value3) }
+    @endverbatim
+    The bool specialization just uses the indices corresponding to
+    non-zero entries instead of a index/value pair:
+    @verbatim
+        { index1 index2 index3 }
+    @endverbatim
+    In both cases, the supplied indices can be randomly ordered.
+
 SeeAlso
     Foam::DynamicList
 
@@ -85,6 +102,7 @@ SourceFiles
 #define PackedList_H
 
 #include "labelList.H"
+#include "UIndirectList.H"
 #include "StaticAssert.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -92,18 +110,34 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes
+class Istream;
+class Ostream;
+
 // Forward declaration of friend functions and operators
 template<unsigned nBits> class PackedList;
 
-// template<unsigned nBits>
-// Ostream& operator<<(Ostream&, const PackedList<nBits>&);
+template<unsigned nBits>
+Istream& operator>>(Istream&, PackedList<nBits>&);
+template<unsigned nBits>
+Ostream& operator<<(Ostream&, const PackedList<nBits>&);
 
 
 /*---------------------------------------------------------------------------*\
-                      Class PackedListName Declaration
+                       Class PackedListCore Declaration
 \*---------------------------------------------------------------------------*/
 
-TemplateName(PackedList);
+//- Template-invariant bits for PackedList
+struct PackedListCore
+{
+    //- Construct null
+    PackedListCore()
+    {}
+
+    //- Define template name and debug
+    ClassName("PackedList");
+};
+
 
 /*---------------------------------------------------------------------------*\
                          Class PackedList Declaration
@@ -112,24 +146,40 @@ TemplateName(PackedList);
 template<unsigned nBits=1>
 class PackedList
 :
+    public PackedListCore,
     private List<unsigned int>
 {
+protected:
+
     typedef unsigned int      StorageType;
     typedef List<StorageType> StorageList;
 
-    //- nBits must be positive (non-zero) and fit within the storage
-    //  For simplicity, assume 8-bit bytes
-    StaticAssert(nBits && nBits < (sizeof(StorageType) << 3));
+    // Protected Member Functions
+
+        //- Calculate the list length when packed
+        inline static label packedLength(const label);
+
+        //- Read a list entry (allows for specialization)
+        inline static unsigned int readValue(Istream&);
+
+        //- Read an index/value pair and set accordingly.
+        //  For bool specialization, read a single index value
+        inline void setPair(Istream&);
+
+
+private:
+
+    //- nBits must be positive (non-zero) and fit within the storage.
+    //  For efficiency, however, require packing at least 2 items otherwise
+    //  it is more efficient to use a normal list.
+    //  Thus max nBits is 1/2 of the base storage size.
+    //  For simplicity, assume 8-bit bytes in the assert.
+    StaticAssert(nBits && nBits <= (sizeof(StorageType) << 2));
 
     // Private data
 
         //- Number of nBits entries
         label size_;
-
-    // Private Member Functions
-
-        //- Calculate the list length when packed
-        inline static label packedLength(const label);
 
 
 public:
@@ -163,20 +213,26 @@ public:
         //- Null constructor
         inline PackedList();
 
-        //- Construct with given size, initializes list to 0.
+        //- Construct with given size, initializes list to 0
         explicit inline PackedList(const label size);
 
-        //- Construct with given size and value for all elements.
-        PackedList(const label size, const unsigned val);
+        //- Construct with given size and value for all elements
+        inline PackedList(const label size, const unsigned val);
 
-        //- Copy constructor.
+        //- Construct from Istream
+        inline PackedList(Istream&);
+
+        //- Copy constructor
         inline PackedList(const PackedList<nBits>&);
 
         //- Construct by transferring the parameter contents
         inline PackedList(const Xfer<PackedList<nBits> >&);
 
         //- Construct from a list of labels
-        explicit PackedList(const UList<label>&);
+        explicit inline PackedList(const UList<label>&);
+
+        //- Construct from an indirect list of labels
+        explicit inline PackedList(const UIndirectList<label>&);
 
         //- Clone
         inline autoPtr< PackedList<nBits> > clone() const;
@@ -209,29 +265,51 @@ public:
             inline bool unset(const label);
 
             //- Return the underlying packed storage
+            //  Manipulate with utmost caution
             inline List<unsigned int>& storage();
 
             //- Return the underlying packed storage
             inline const List<unsigned int>& storage() const;
+
+            //- The list length when packed
+            inline label packedLength() const;
+
+            //- Return the binary size in number of characters
+            //  used in the underlying storage
+            inline label byteSize() const;
 
             //- Count number of bits set, O(log(n))
             //  Uses the Hamming weight (population count) method
             //  http://en.wikipedia.org/wiki/Hamming_weight
             unsigned int count() const;
 
-            //- Return the values as a labelList
-            labelList values() const;
+            //- Return the values as a list of labels
+            Xfer<labelList> values() const;
 
-            //- Print values and information
-            Ostream& print(Ostream&) const;
+            //- Print bit patterns, optionally output unused elements
+            //
+            // addressable bits:
+            //   on: '1', off: '-'
+            //
+            // non-addressable bits:
+            //   on: '!', off: '.'
+            //
+            Ostream& printBits(Ostream&, const bool fullOutput=false) const;
+
+            //- Print information and bit patterns (with printBits)
+            Ostream& printInfo(Ostream&, const bool fullOutput=false) const;
+
 
         // Edit
 
             //- Trim any trailing zero elements
             bool trim();
 
-            //- Invert the bits in the addressable region.
+            //- Invert the bits in the addressable region
             void flip();
+
+            //- Clear all bits
+            inline void reset();
 
             //- Alter the size of the underlying storage.
             //  The addressed size will be truncated if needed to fit, but will
@@ -240,10 +318,10 @@ public:
 
             //- Reset addressable list size, does not shrink the allocated size.
             //  Optionally specify a value for new elements.
-            inline void resize(const label, const unsigned int& val = 0);
+            inline void resize(const label, const unsigned int& val = 0u);
 
             //- Alias for resize()
-            inline void setSize(const label, const unsigned int& val = 0);
+            inline void setSize(const label, const unsigned int& val = 0u);
 
             //- Reserve allocation space for at least this size.
             //  Never shrinks the allocated size.
@@ -269,10 +347,43 @@ public:
             inline Xfer<PackedList<nBits> > xfer();
 
 
+        // IO
+
+            //- Clear list and read from stream
+            Istream& read(Istream&);
+
+            //- Write, optionally with indexedOutput
+            //
+            // The indexed output may be convenient in some situations.
+            // The general format is a group of index/value pairs:
+            //  @verbatim
+            //      { (index1 value1) (index2 value2) (index3 value3) }
+            // @endverbatim
+            // The bool specialization just uses the indices corresponding to
+            // non-zero entries instead of a index/value pair:
+            // @verbatim
+            //     { index1 index2 index3 }
+            // @endverbatim
+            //
+            // Note the indexed output is only supported for ASCII streams.
+            Ostream& write
+            (
+                Ostream&,
+                const bool indexedOutput=false
+            ) const;
+
+
+            //- Write as a dictionary entry
+            void writeEntry(Ostream&) const;
+
+            //- Write as a dictionary entry with keyword
+            void writeEntry(const word& keyword, Ostream&) const;
+
+
     // Member operators
 
             //- Append a value at the end of the list
-            inline void append(const unsigned int val);
+            inline PackedList<nBits>& append(const unsigned int val);
 
             //- Remove and return the last element
             inline unsigned int remove();
@@ -287,23 +398,16 @@ public:
             inline iteratorBase operator[](const label);
 
             //- Assignment of all entries to the given value. Takes linear time.
-            inline void operator=(const unsigned int val);
+            inline PackedList<nBits>& operator=(const unsigned int val);
 
-            //- Assignment operator. Takes linear time.
-            void operator=(const PackedList<nBits>&);
+            //- Assignment operator.
+            PackedList<nBits>& operator=(const PackedList<nBits>&);
 
-            //- Assignment operator. Takes linear time.
-            void operator=(const UList<label>&);
+            //- Assignment operator.
+            PackedList<nBits>& operator=(const UList<label>&);
 
-
-        // Ostream operator
-
-         // // Write PackedList to Ostream.
-         // friend Ostream& operator<< <nBits>
-         // (
-         //     Ostream&,
-         //     const PackedList<nBits>&
-         // );
+            //- Assignment operator.
+            PackedList<nBits>& operator=(const UIndirectList<label>&);
 
 
     // Iterators and helpers
@@ -347,6 +451,15 @@ public:
 
         public:
 
+            // Member Functions
+
+                //- Return the element index corresponding to the iterator
+                inline label key() const;
+
+                //- Write index/value for a non-zero entry
+                //  The bool specialization writes the index only
+                inline bool writeIfSet(Ostream&) const;
+
             // Member Operators
 
                 //- Compare values (not positions)
@@ -365,8 +478,8 @@ public:
                 //  Never auto-vivify entries.
                 inline operator unsigned int () const;
 
-            //- Print value and information
-            Ostream& print(Ostream&) const;
+            //- Print information and values
+            Ostream& printInfo(Ostream&) const;
         };
 
 
@@ -376,11 +489,12 @@ public:
             public iteratorBase
         {
 
-            //- Disallow copy constructor from const_iterator -
-            //  violates const-ness!
+            //- Disallow copy constructor from const_iterator
+            //  This would violate const-ness!
             iterator(const const_iterator&);
 
-            //- Disallow assignment from const_iterator - violates const-ness!
+            //- Disallow assignment from const_iterator
+            //  This would violate const-ness!
             void operator=(const const_iterator&);
 
 
@@ -497,6 +611,20 @@ public:
         //- const_iterator set to beyond the end of the PackedList
         inline const_iterator end() const;
 
+
+    // IOstream Operators
+
+        friend Istream& operator>> <nBits>
+        (
+            Istream&,
+            PackedList<nBits>&
+        );
+
+        friend Ostream& operator<< <nBits>
+        (
+            Ostream&,
+            const PackedList<nBits>&
+        );
 };
 
 

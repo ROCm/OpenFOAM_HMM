@@ -44,15 +44,6 @@ namespace Foam
 
 class cellSets
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        cellSets(const cellSets&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const cellSets&);
-
-
 public:
 
         label nHexesWedges;

@@ -15,22 +15,35 @@ phi =
     );
 
 surfaceScalarField phiU("phiU", phi);
-phi += fvc::interpolate(rho)*(g & mesh.Sf())*rUAf;
+phi -= ghf*fvc::snGrad(rho)*rUAf*mesh.magSf();
 
 for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 {
-    fvScalarMatrix pEqn
+    fvScalarMatrix p_rghEqn
     (
-        fvm::laplacian(rUAf, p) == fvc::ddt(rho) + fvc::div(phi)
+        fvm::laplacian(rUAf, p_rgh) == fvc::ddt(rho) + fvc::div(phi)
     );
 
-    pEqn.setReference(pRefCell, pRefValue);
-    pEqn.solve();
+    p_rghEqn.setReference(pRefCell, getRefCellValue(p_rgh, pRefCell));
+    p_rghEqn.solve();
 
     if (nonOrth == nNonOrthCorr)
     {
-        phi -= pEqn.flux();
+        phi -= p_rghEqn.flux();
     }
+}
+
+p == p_rgh + rho*gh;
+
+if (p_rgh.needReference())
+{
+    p += dimensionedScalar
+    (
+        "p",
+        p.dimensions(),
+        pRefValue - getRefCellValue(p, pRefCell)
+    );
+    p_rgh = p - rho*gh;
 }
 
 #include "rhoEqn.H"

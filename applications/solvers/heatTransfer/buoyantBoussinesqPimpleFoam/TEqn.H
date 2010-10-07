@@ -1,9 +1,8 @@
 {
-    volScalarField kappaEff
-    (
-        "kappaEff",
-        turbulence->nu()/Pr + turbulence->nut()/Prt
-    );
+    kappat = turbulence->nut()/Prt;
+    kappat.correctBoundaryConditions();
+
+    volScalarField kappaEff("kappaEff", turbulence->nu()/Pr + kappat);
 
     fvScalarMatrix TEqn
     (
@@ -13,7 +12,7 @@
     );
 
     TEqn.relax();
-    TEqn.solve();
+    TEqn.solve(mesh.solver(T.select(finalIter)));
 
     rhok = 1.0 - beta*(T - TRef);
 }

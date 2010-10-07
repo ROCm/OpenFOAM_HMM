@@ -33,15 +33,14 @@ Description
 #define tensorFieldIOField_H
 
 #include "tensorField.H"
-#include "IOField.H"
-#include "IOFieldField.H"
+#include "CompactIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     typedef IOField<tensorField> tensorFieldIOField;
-    typedef IOFieldField<tensorField, tensor> tensorIOFieldField;
+    typedef CompactIOField<tensorField, tensor> tensorFieldCompactIOField;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

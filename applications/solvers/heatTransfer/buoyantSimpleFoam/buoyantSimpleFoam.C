@@ -62,10 +62,7 @@ int main(int argc, char *argv[])
         {
             #include "UEqn.H"
             #include "hEqn.H"
-            for (int i=0; i<3; i++)
-            {
             #include "pEqn.H"
-            }
         }
 
         turbulence->correct();

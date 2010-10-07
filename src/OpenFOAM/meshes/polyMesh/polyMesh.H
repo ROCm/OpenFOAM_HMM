@@ -101,7 +101,7 @@ private:
             pointIOField points_;
 
             //- Faces
-            faceIOList faces_;
+            faceCompactIOList faces_;
 
             //- Face owner
             labelIOList owner_;

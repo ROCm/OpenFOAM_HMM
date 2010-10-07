@@ -315,7 +315,7 @@ void Foam::surfaceIntersection::classifyHit
         surf2Pts[f2[0]],
         surf2Pts[f2[1]],
         surf2Pts[f2[2]]
-    ).classify(pHit.hitPoint(), tolDim, nearType, nearLabel);
+    ).classify(pHit.hitPoint(), nearType, nearLabel);
 
     // Classify points on edge of surface1
     label edgeEnd =

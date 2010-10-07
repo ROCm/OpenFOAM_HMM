@@ -14,12 +14,12 @@
         mesh
     );
 
-    Info<< "Reading field p\n" << endl;
-    volScalarField p
+    Info<< "Reading field p_rgh\n" << endl;
+    volScalarField p_rgh
     (
         IOobject
         (
-            "p",
+            "p_rgh",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -52,17 +52,6 @@
         incompressible::RASModel::New(U, phi, laminarTransport)
     );
 
-    label pRefCell = 0;
-    scalar pRefValue = 0.0;
-    setRefCell
-    (
-        p,
-        mesh.solutionDict().subDict("PIMPLE"),
-        pRefCell,
-        pRefValue
-    );
-
-
     // Kinematic density for buoyancy force
     volScalarField rhok
     (
@@ -74,3 +63,57 @@
         ),
         1.0 - beta*(T - TRef)
     );
+
+    // kinematic turbulent thermal thermal conductivity m2/s
+    Info<< "Reading field kappat\n" << endl;
+    volScalarField kappat
+    (
+        IOobject
+        (
+            "kappat",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
+    Info<< "Calculating field g.h\n" << endl;
+    volScalarField gh("gh", g & mesh.C());
+    surfaceScalarField ghf("ghf", g & mesh.Cf());
+
+    volScalarField p
+    (
+        IOobject
+        (
+            "p",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        p_rgh + rhok*gh
+    );
+
+    label pRefCell = 0;
+    scalar pRefValue = 0.0;
+    setRefCell
+    (
+        p,
+        p_rgh,
+        mesh.solutionDict().subDict("PIMPLE"),
+        pRefCell,
+        pRefValue
+    );
+
+    if (p_rgh.needReference())
+    {
+        p += dimensionedScalar
+        (
+            "p",
+            p.dimensions(),
+            pRefValue - getRefCellValue(p, pRefCell)
+        );
+    }
+

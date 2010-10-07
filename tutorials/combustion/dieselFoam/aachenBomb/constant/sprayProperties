@@ -127,8 +127,8 @@ hollowConeInjectorCoeffs
         {
             minValue        1e-06;
             maxValue        0.00015;
-            d               ( 0.00015 );
-            n               ( 3 );
+            d               0.00015;
+            n               3;
         }
 
         exponentialPDF

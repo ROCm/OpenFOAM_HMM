@@ -325,6 +325,13 @@ private:
 
         // Baffle handling
 
+            //- Get faces to repatch. Returns map from face to patch.
+            Map<label> getZoneBafflePatches
+            (
+                const bool allowBoundary,
+                const labelList& globalToPatch
+            ) const;
+
             //- Determine patches for baffles
             void getBafflePatches
             (
@@ -713,6 +720,14 @@ public:
                 const labelList& neiPatch
             );
 
+            //- Create baffles for faces straddling zoned surfaces. Return
+            //  baffles.
+            autoPtr<mapPolyMesh> createZoneBaffles
+            (
+                const labelList& globalToPatch,
+                List<labelPair>&
+            );
+
             //- Return a list of coupled face pairs, i.e. faces that
             //  use the same vertices.
             List<labelPair> getDuplicateFaces(const labelList& testFaces) const;
@@ -734,10 +749,10 @@ public:
 
             //- Helper:add patch to mesh. Update all registered fields.
             //  Use addMeshedPatch to add patches originating from surfaces.
-            static label addPatch(fvMesh&, const word& name, const word& type);
+            static label addPatch(fvMesh&, const word& name, const dictionary&);
 
             //- Add patch originating from meshing. Update meshedPatches_.
-            label addMeshedPatch(const word& name, const word& type);
+            label addMeshedPatch(const word& name, const dictionary&);
 
             //- Get patchIDs for patches added in addMeshedPatch.
             labelList meshedPatches() const;

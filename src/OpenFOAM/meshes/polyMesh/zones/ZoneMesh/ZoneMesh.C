@@ -250,23 +250,27 @@ Foam::labelList Foam::ZoneMesh<ZoneType, MeshType>::findIndices
 ) const
 {
     labelList indices;
-    if (key.isPattern())
+
+    if (!key.empty())
     {
-        indices = findStrings(key, this->names());
-    }
-    else
-    {
-        indices.setSize(this->size());
-        label nFound = 0;
-        forAll(*this, i)
+        if (key.isPattern())
         {
-            if (key == operator[](i).name())
-            {
-                indices[nFound++] = i;
-            }
+            indices = findStrings(key, this->names());
         }
-        indices.setSize(nFound);
-     }
+        else
+        {
+            indices.setSize(this->size());
+            label nFound = 0;
+            forAll(*this, i)
+            {
+                if (key == operator[](i).name())
+                {
+                    indices[nFound++] = i;
+                }
+            }
+            indices.setSize(nFound);
+        }
+    }
 
     return indices;
 }
@@ -278,22 +282,26 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findIndex
     const keyType& key
 ) const
 {
-    if (key.isPattern())
+    if (!key.empty())
     {
-        labelList indices = this->findIndices(key);
-        // return first element
-        if (!indices.empty())
+        if (key.isPattern())
         {
-            return indices[0];
-        }
-    }
-    else
-    {
-        forAll(*this, i)
-        {
-            if (key == operator[](i).name())
+            labelList indices = this->findIndices(key);
+
+            // return first element
+            if (!indices.empty())
             {
-                return i;
+                return indices[0];
+            }
+        }
+        else
+        {
+            forAll(*this, i)
+            {
+                if (key == operator[](i).name())
+                {
+                    return i;
+                }
             }
         }
     }
@@ -329,6 +337,24 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findZoneID
 
     // not found
     return -1;
+}
+
+
+template<class ZoneType, class MeshType>
+Foam::PackedBoolList Foam::ZoneMesh<ZoneType, MeshType>::findMatching
+(
+    const keyType& key
+) const
+{
+    PackedBoolList lst;
+
+    const labelList indices = this->findIndices(key);
+    forAll(indices, i)
+    {
+        lst |= static_cast<const labelList&>(this->operator[](indices[i]));
+    }
+
+    return lst;
 }
 
 
