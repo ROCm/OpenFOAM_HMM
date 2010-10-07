@@ -1,8 +1,3 @@
-rho = thermo.rho();
-rho = max(rho, rhoMin);
-rho = min(rho, rhoMax);
-rho.relax();
-
 if (pressureImplicitPorosity)
 {
     U = trTU()&UEqn().H();
@@ -63,6 +58,8 @@ else
 
 U.correctBoundaryConditions();
 
+bound(p, pMin);
+
 // For closed-volume cases adjust the pressure and density levels
 // to obey overall mass continuity
 if (closedVolume)
@@ -72,7 +69,5 @@ if (closedVolume)
 }
 
 rho = thermo.rho();
-rho = max(rho, rhoMin);
-rho = min(rho, rhoMax);
 rho.relax();
 Info<< "rho max/min : " << max(rho).value() << " " << min(rho).value() << endl;

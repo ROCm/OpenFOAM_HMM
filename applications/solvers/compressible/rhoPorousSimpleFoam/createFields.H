@@ -45,14 +45,9 @@
     scalar pRefValue = 0.0;
     setRefCell(p, mesh.solutionDict().subDict("SIMPLE"), pRefCell, pRefValue);
 
-    dimensionedScalar rhoMax
+    dimensionedScalar pMin
     (
-        mesh.solutionDict().subDict("SIMPLE").lookup("rhoMax")
-    );
-
-    dimensionedScalar rhoMin
-    (
-        mesh.solutionDict().subDict("SIMPLE").lookup("rhoMin")
+        mesh.solutionDict().subDict("SIMPLE").lookup("pMin")
     );
 
     Info<< "Creating turbulence model\n" << endl;
@@ -70,16 +65,29 @@
     dimensionedScalar initialMass = fvc::domainIntegrate(rho);
 
     thermalPorousZones pZones(mesh);
+    Switch pressureImplicitPorosity(false);
 
     // nUCorrectors used for pressureImplicitPorosity
     int nUCorr = 0;
-    const bool pressureImplicitPorosity =
-    (
-        pZones.size()
-     && mesh.solutionDict().subDict("SIMPLE").readIfPresent
-        (
-            "nUCorrectors",
-            nUCorr
-        )
-     && (nUCorr > 0)
-    );
+    if (pZones.size())
+    {
+        // nUCorrectors for pressureImplicitPorosity
+        if (mesh.solutionDict().subDict("SIMPLE").found("nUCorrectors"))
+        {
+            nUCorr = readInt
+            (
+                mesh.solutionDict().subDict("SIMPLE").lookup("nUCorrectors")
+            );
+        }
+
+        if (nUCorr > 0)
+        {
+            pressureImplicitPorosity = true;
+            Info<< "Using pressure implicit porosity" << endl;
+        }
+        else
+        {
+            Info<< "Using pressure explicit porosity" << endl;
+        }
+    }
+
