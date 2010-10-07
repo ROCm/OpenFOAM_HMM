@@ -22,6 +22,13 @@ solvers
         solver          PCG;
         preconditioner  DIC;
         tolerance       1e-5;
+        relTol          0.1;
+    }
+
+    rhoFinal
+    {
+        $rho;
+        tolerance       1e-5;
         relTol          0;
     }
 
@@ -65,7 +72,7 @@ solvers
         mergeLevels     1;
     }
 
-    h
+    "(U|h|k|epsilon)"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -73,26 +80,9 @@ solvers
         relTol          0.1;
     }
 
-    hFinal
+    "(U|h|k|epsilon)Final"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-5;
-        relTol          0;
-    }
-
-    k
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-5;
-        relTol          0;
-    }
-
-    epsilon
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
+        $U;
         tolerance       1e-5;
         relTol          0;
     }
