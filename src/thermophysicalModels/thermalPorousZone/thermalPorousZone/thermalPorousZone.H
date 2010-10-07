@@ -29,7 +29,8 @@ Description
     equations.
 
 See Also
-    porousZone, thermalPorousZones and coordinateSystems
+    porousZone, thermalPorousZones and coordinateSystems with run-time
+    selectable thermal model
 
 SourceFiles
     thermalPorousZone.C
@@ -40,6 +41,7 @@ SourceFiles
 #define thermalPorousZone_H
 
 #include "porousZone.H"
+#include "thermalModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,7 +52,7 @@ class fvMesh;
 class basicThermo;
 
 /*---------------------------------------------------------------------------*\
-                        Class thermalPorousZone Declaration
+                       Class thermalPorousZone Declaration
 \*---------------------------------------------------------------------------*/
 
 class thermalPorousZone
@@ -59,15 +61,14 @@ class thermalPorousZone
 {
     // Private data
 
-        //- Temperature in the porous-zone
-        dimensionedScalar T_;
-
-
         //- Disallow default bitwise copy construct
         thermalPorousZone(const thermalPorousZone&);
 
         //- Disallow default bitwise assignment
         void operator=(const thermalPorousZone&);
+
+        //- Thermal model
+        autoPtr<thermalModel> model_;
 
 
 public:
@@ -75,7 +76,12 @@ public:
     // Constructors
 
         //- Construct from components
-        thermalPorousZone(const keyType& key, const fvMesh&, const dictionary&);
+        thermalPorousZone
+        (
+            const keyType& key,
+            const fvMesh& mesh,
+            const dictionary& dict
+        );
 
         //- Return clone
         autoPtr<thermalPorousZone> clone() const
@@ -117,20 +123,6 @@ public:
 
 
     // Member Functions
-
-        // Access
-
-            //- Return the temperature in the porous-zone
-            const dimensionedScalar& T() const
-            {
-                return T_;
-            }
-
-            //- Edit access to the temperature in the porous-zone
-            dimensionedScalar& T()
-            {
-                return T_;
-            }
 
         //- Add the thermal source to the enthalpy equation
         void addEnthalpySource
