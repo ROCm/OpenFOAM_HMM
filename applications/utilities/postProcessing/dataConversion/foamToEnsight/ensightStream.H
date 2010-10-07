@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,62 +22,82 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::cellSets
+    Foam::ensightStream
 
 Description
+    Abstract base class for writing Ensight data
+
+SourceFiles
+    ensightStream.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellSets_H
-#define cellSets_H
+#ifndef ensightStream_H
+#define ensightStream_H
 
-#include "labelList.H"
+#include "fileName.H"
+#include "scalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+
 /*---------------------------------------------------------------------------*\
-                           Class cellSets Declaration
+                         Class ensightStream Declaration
 \*---------------------------------------------------------------------------*/
 
-class cellSets
+class ensightStream
 {
+    // Private data
+
+        const fileName name_;
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        ensightStream(const ensightStream&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const ensightStream&);
+
+
 public:
-
-        label nHexesWedges;
-        label nPrisms;
-        label nPyrs;
-        label nTets;
-        label nPolys;
-
-        labelList tets;
-        labelList pyrs;
-        labelList prisms;
-        labelList wedges;
-        labelList hexes;
-        labelList polys;
-
 
     // Constructors
 
-        //- Construct given the number ov cells
-        cellSets(const label nCells)
+        //- Construct from components
+        ensightStream(const fileName& f)
         :
-            nHexesWedges(0),
-            nPrisms(0),
-            nPyrs(0),
-            nTets(0),
-            nPolys(0),
-
-            tets(nCells),
-            pyrs(nCells),
-            prisms(nCells),
-            wedges(nCells),
-            hexes(nCells),
-            polys(nCells)
+            name_(f)
         {}
+
+
+    //- Destructor
+    virtual ~ensightStream()
+    {}
+
+
+    // Member Functions
+
+        const fileName& name() const
+        {
+            return name_;
+        }
+
+        virtual void write(const char*) = 0;
+
+        virtual void write(const int) = 0;
+
+        virtual void write(const scalarField&) = 0;
+
+        virtual void write(const List<int>&) = 0;
+
+        virtual void writePartHeader(const label) = 0;
+
+
+
 };
 
 
