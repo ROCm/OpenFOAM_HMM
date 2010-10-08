@@ -558,10 +558,10 @@ void ensightPointField
  
          if (patchNames.empty() || patchNames.found(patchName))
          {
-             const polyPatch& p = mesh.boundaryMesh()[patchi];
+             const fvPatch& p = mesh.boundary()[patchi];
              if
              (
-                 returnReduce(pf.boundaryField()[patchi].size(), sumOp<label>())
+                 returnReduce(p.size(), sumOp<label>())
                > 0
              )
              {
@@ -571,8 +571,8 @@ void ensightPointField
                  autoPtr<globalIndex> globalPointsPtr =
                  mesh.globalData().mergePoints
                  (
-                     p.meshPoints(),
-                     p.meshPointMap(),
+                     p.patch().meshPoints(),
+                     p.patch().meshPointMap(),
                      pointToGlobal,
                      uniqueMeshPointLabels
                  );
