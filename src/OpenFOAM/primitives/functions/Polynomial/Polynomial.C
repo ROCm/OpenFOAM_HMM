@@ -101,9 +101,12 @@ Foam::scalar Foam::Polynomial<PolySize>::evaluate(const scalar x) const
 {
     scalar y = this->v_[0];
 
-    for (label i=1; i<PolySize; i++)
+    // avoid costly pow() in calculation
+    scalar powX = x;
+    for (label i=1; i<PolySize; ++i)
     {
-        y += this->v_[i]*pow(x, i);
+        y += this->v_[i]*powX;
+        powX *= x;
     }
 
     if (logActive_)

@@ -32,8 +32,13 @@ Description
 #include "IFstream.H"
 #include "Polynomial.H"
 #include "Random.H"
+#include "cpuTime.H"
 
 using namespace Foam;
+
+const int nCoeffs = 8;
+const scalar coeff[] = { 0.11, 0.45, -0.94, 1.58, 2.58, 0.08, 3.15, -4.78 };
+
 
 scalar polyValue(const scalar x)
 {
@@ -65,10 +70,43 @@ scalar intPolyValue(const scalar x)
 }
 
 
+scalar polyValue1(const scalar x)
+{
+    // "normal" evaluation using pow()
+    scalar value = coeff[0];
+
+    for (int i=1; i < nCoeffs; ++i)
+    {
+        value += coeff[i]*pow(x, i);
+    }
+
+    return value;
+}
+
+
+// calculation avoiding pow()
+scalar polyValue2(const scalar x)
+{
+    scalar value = coeff[0];
+
+    scalar powX = x;
+    for (int i=1; i < nCoeffs; ++i, powX *= x)
+    {
+        value += coeff[i] * powX;
+    }
+
+    return value;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
+    const label n = 10000;
+    const label nIters = 1000;
+    scalar sum = 0.0;
+
     IFstream is("polyTestInput");
 
     Polynomial<8> poly("testPoly", is);
@@ -117,6 +155,62 @@ int main(int argc, char *argv[])
 
         Info<< endl;
     }
+
+
+    //
+    // test speed of Polynomial:
+    //
+    Info<< "start timing loops" << nl
+        << "~~~~~~~~~~~~~~~~~~" << endl;
+
+    cpuTime timer;
+
+    for (int loop = 0; loop < n; ++loop)
+    {
+        sum = 0.0;
+        for (label iter = 0; iter < nIters; ++iter)
+        {
+            sum += poly.evaluate(loop+iter);
+        }
+    }
+    Info<< "evaluate:     " << sum
+        << " in " << timer.cpuTimeIncrement() << " s\n";
+
+
+    for (int loop = 0; loop < n; ++loop)
+    {
+        sum = 0.0;
+        for (label iter = 0; iter < nIters; ++iter)
+        {
+            sum += polyValue(loop+iter);
+        }
+    }
+    Info<< "hard-coded 0: " << sum
+        << " in " << timer.cpuTimeIncrement() << " s\n";
+
+
+    for (int loop = 0; loop < n; ++loop)
+    {
+        sum = 0.0;
+        for (label iter = 0; iter < nIters; ++iter)
+        {
+            sum += polyValue1(loop+iter);
+        }
+    }
+    Info<< "hard-coded 1: " << sum
+        << " in " << timer.cpuTimeIncrement() << " s\n";
+
+    for (int loop = 0; loop < n; ++loop)
+    {
+        sum = 0.0;
+        for (label iter = 0; iter < nIters; ++iter)
+        {
+            sum += polyValue2(loop+iter);
+        }
+    }
+    Info<< "hard-coded 2: " << sum
+        << " in " << timer.cpuTimeIncrement() << " s\n";
+
 
     Info<< nl << "Done." << endl;
 
