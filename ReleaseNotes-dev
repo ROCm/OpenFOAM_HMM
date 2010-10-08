@@ -123,7 +123,6 @@
     fvSolution during a calculation
     + =streamLine=: generate streamlines; ouputs both trajectory and field data
 
-
 * New tutorials
   There is a large number of new tutorials to support the new solvers in the
   release.
