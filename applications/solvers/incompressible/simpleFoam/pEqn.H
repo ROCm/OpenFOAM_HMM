@@ -15,15 +15,8 @@
         );
 
         pEqn.setReference(pRefCell, pRefValue);
-        // retain the residual from the first iteration
-        if (nonOrth == 0)
-        {
-            pEqn.solve();
-        }
-        else
-        {
-            pEqn.solve();
-        }
+
+        pEqn.solve();
 
         if (nonOrth == nNonOrthCorr)
         {

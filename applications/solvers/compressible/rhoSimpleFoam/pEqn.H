@@ -30,15 +30,7 @@ if (transonic)
 
         pEqn.setReference(pRefCell, pRefValue);
 
-        // Retain the residual from the first iteration
-        if (nonOrth == 0)
-        {
-            pEqn.solve();
-        }
-        else
-        {
-            pEqn.solve();
-        }
+        pEqn.solve();
 
         if (nonOrth == nNonOrthCorr)
         {
@@ -60,15 +52,7 @@ else
 
         pEqn.setReference(pRefCell, pRefValue);
 
-        // Retain the residual from the first iteration
-        if (nonOrth == 0)
-        {
-            pEqn.solve();
-        }
-        else
-        {
-            pEqn.solve();
-        }
+        pEqn.solve();
 
         if (nonOrth == nNonOrthCorr)
         {
