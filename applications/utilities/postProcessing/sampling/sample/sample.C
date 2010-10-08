@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
         sampledSets::typeName,
         mesh,
         sampleDict,
-        IOobject::MUST_READ,
+        IOobject::MUST_READ_IF_MODIFIED,
         true
     );
 
@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
         sampledSurfaces::typeName,
         mesh,
         sampleDict,
-        IOobject::MUST_READ,
+        IOobject::MUST_READ_IF_MODIFIED,
         true
     );
 
