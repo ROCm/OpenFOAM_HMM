@@ -33,7 +33,50 @@ Foam::Polynomial<PolySize>::Polynomial()
     VectorSpace<Polynomial<PolySize>, scalar, PolySize>(),
     logActive_(false),
     logCoeff_(0.0)
-{}
+{
+    for (int i = 0; i < PolySize; ++i)
+    {
+        this->v_[i] = 0.0;
+    }
+}
+
+
+template<int PolySize>
+Foam::Polynomial<PolySize>::Polynomial(const scalar coeffs[PolySize])
+:
+    VectorSpace<Polynomial<PolySize>, scalar, PolySize>(),
+    logActive_(false),
+    logCoeff_(0.0)
+{
+    for (int i=0; i<PolySize; i++)
+    {
+        this->v_[i] = coeffs[i];
+    }
+}
+
+
+template<int PolySize>
+Foam::Polynomial<PolySize>::Polynomial(const UList<scalar>& coeffs)
+:
+    VectorSpace<Polynomial<PolySize>, scalar, PolySize>(),
+    logActive_(false),
+    logCoeff_(0.0)
+{
+    if (coeffs.size() != PolySize)
+    {
+        FatalErrorIn
+        (
+            "Polynomial<PolySize>::Polynomial(const UList<scalar>&)"
+        )   << "Size mismatch: Needed " << PolySize
+            << " but got " << coeffs.size()
+            << nl << exit(FatalError);
+    }
+
+    for (int i = 0; i < PolySize; ++i)
+    {
+        this->v_[i] = coeffs[i];
+    }
+}
 
 
 template<int PolySize>
@@ -173,13 +216,9 @@ Foam::Polynomial<PolySize>::integrateMinus1(const scalar intConstant)
     }
 
     newCoeffs[0] = intConstant;
-
-    if (PolySize > 0)
+    for (label i=1; i<PolySize; ++i)
     {
-        for (label i=1; i<PolySize; i++)
-        {
-            newCoeffs[i] = this->v_[i]/i;
-        }
+        newCoeffs[i] = this->v_[i]/i;
     }
 
     return newCoeffs;
