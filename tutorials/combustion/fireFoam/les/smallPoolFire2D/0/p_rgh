@@ -9,66 +9,44 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      blockMeshDict;
+    class       volScalarField;
+    location    "0";
+    object      p_rgh;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-convertToMeters 1;
+dimensions      [1 -1 -2 0 0 0 0];
 
-vertices
-(
-    ( 659600  4.7514e+06  1028)
-    ( 659600  4.7514e+06  2100)
-    ( 662300  4.7514e+06  2100)
-    ( 662300  4.7514e+06  1028)
-    ( 659600  4.7545e+06  1028)
-    ( 659600  4.7545e+06  2100)
-    ( 662300  4.7545e+06  2100)
-    ( 662300  4.7545e+06  1028)
-);
+internalField   uniform 101325;
 
-blocks
-(
-    hex (0 1 2 3 4 5 6 7) (20 60 60) simpleGrading (10.0 1 1)
-);
+boundaryField
+{
+    outlet
+    {
+        type            buoyantPressure;
+        value           uniform 101325;
+    }
 
-edges
-(
-);
-
-patches
-(
-    patch maxX
-    (
-        (3 7 6 2)
-    )
-    patch minZ
-    (
-        (0 4 7 3)
-    )
-    patch maxZ
-    (
-        (2 6 5 1)
-    )
-    patch minX
-    (
-        (1 5 4 0)
-    )
-    patch minY
-    (
-        (0 3 2 1)
-    )
-    patch maxY
-    (
-        (4 5 6 7)
-    )
-);
-
-mergePatchPairs
-(
-);
+    sides
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
+    base
+    {
+        type            buoyantPressure;
+        value           $internalField;
+    }
+    inlet
+    {
+        type            buoyantPressure;
+        value           $internalField;
+    }
+    frontBack
+    {
+        type            empty;
+    }
+}
 
 
 // ************************************************************************* //

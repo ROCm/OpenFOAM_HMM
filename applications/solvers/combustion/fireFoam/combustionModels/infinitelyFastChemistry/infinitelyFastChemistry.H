@@ -88,8 +88,9 @@ public:
         );
 
 
-    //- Destructor
-    virtual ~infinitelyFastChemistry();
+    // Destructor
+
+        virtual ~infinitelyFastChemistry();
 
 
     // Member Functions

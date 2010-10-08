@@ -2,31 +2,20 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      IDefault;
+    class       uniformDimensionedVectorField;
+    location    "constant";
+    object      g;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 0 -3 0 0 0 0];
-
-internalField   uniform 0;
-
-boundaryField
-{
-    ".*"
-    {
-        type            greyDiffusiveRadiation;
-        T               T;
-        emissivity      1.0;
-        value           uniform 0;
-    }
-}
+dimensions      [0 1 -2 0 0 0 0];
+value           (0 -9.8 0);
 
 // ************************************************************************* //

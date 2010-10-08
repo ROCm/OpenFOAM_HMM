@@ -9,66 +9,38 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      blockMeshDict;
+    class       polyBoundaryMesh;
+    location    "constant/polyMesh";
+    object      boundary;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-convertToMeters 1;
-
-vertices
+4
 (
-    ( 659600  4.7514e+06  1028)
-    ( 659600  4.7514e+06  2100)
-    ( 662300  4.7514e+06  2100)
-    ( 662300  4.7514e+06  1028)
-    ( 659600  4.7545e+06  1028)
-    ( 659600  4.7545e+06  2100)
-    ( 662300  4.7545e+06  2100)
-    ( 662300  4.7545e+06  1028)
-);
-
-blocks
-(
-    hex (0 1 2 3 4 5 6 7) (20 60 60) simpleGrading (10.0 1 1)
-);
-
-edges
-(
-);
-
-patches
-(
-    patch maxX
-    (
-        (3 7 6 2)
-    )
-    patch minZ
-    (
-        (0 4 7 3)
-    )
-    patch maxZ
-    (
-        (2 6 5 1)
-    )
-    patch minX
-    (
-        (1 5 4 0)
-    )
-    patch minY
-    (
-        (0 3 2 1)
-    )
-    patch maxY
-    (
-        (4 5 6 7)
-    )
-);
-
-mergePatchPairs
-(
-);
-
+    base
+    {
+        type            patch;
+        nFaces          4704;
+        startFace       1014300;
+    }
+    outlet
+    {
+        type            patch;
+        nFaces          4900;
+        startFace       1019004;
+    }
+    sides
+    {
+        type            patch;
+        nFaces          19600;
+        startFace       1023904;
+    }
+    inlet
+    {
+        type            patch;
+        nFaces          196;
+        startFace       1043504;
+    }
+)
 
 // ************************************************************************* //
