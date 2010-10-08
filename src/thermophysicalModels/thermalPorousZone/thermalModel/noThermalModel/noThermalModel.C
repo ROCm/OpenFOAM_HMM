@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,37 +21,53 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\*----------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
-#include "thermalPorousZone.H"
+#include "noThermalModel.H"
+#include "addToRunTimeSelectionTable.H"
 #include "basicThermo.H"
 #include "volFields.H"
 #include "fvMatrices.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(noThermalModel, 0);
+
+    addToRunTimeSelectionTable
+    (
+        thermalModel,
+        noThermalModel,
+        pZone
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::thermalPorousZone::thermalPorousZone
-(
-    const keyType& key,
-    const fvMesh& mesh,
-    const dictionary& dict
-)
+Foam::noThermalModel::noThermalModel(const porousZone& pZone)
 :
-    porousZone(key, mesh, dict),
-    model_(thermalModel::New(*this))
+    thermalModel(pZone)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor    * * * * * * * * * * * * * * //
+
+Foam::noThermalModel::~noThermalModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::thermalPorousZone::addEnthalpySource
+void Foam::noThermalModel::addEnthalpySource
 (
-    const basicThermo& thermo,
-    const volScalarField& rho,
-    fvScalarMatrix& hEqn
+    const basicThermo&,
+    const volScalarField&,
+    fvScalarMatrix&
 ) const
 {
-    model_->addEnthalpySource(thermo, rho, hEqn);
+    // do nothing
 }
 
 

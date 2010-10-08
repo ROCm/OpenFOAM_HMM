@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,37 +21,37 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\*----------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
-#include "thermalPorousZone.H"
-#include "basicThermo.H"
-#include "volFields.H"
-#include "fvMatrices.H"
+#include "thermalModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::thermalPorousZone::thermalPorousZone
+Foam::autoPtr<Foam::thermalModel> Foam::thermalModel::New
 (
-    const keyType& key,
-    const fvMesh& mesh,
-    const dictionary& dict
+    const porousZone& pZone
 )
-:
-    porousZone(key, mesh, dict),
-    model_(thermalModel::New(*this))
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::thermalPorousZone::addEnthalpySource
-(
-    const basicThermo& thermo,
-    const volScalarField& rho,
-    fvScalarMatrix& hEqn
-) const
 {
-    model_->addEnthalpySource(thermo, rho, hEqn);
+    const word modelType(pZone.dict().lookup("thermalModel"));
+
+    Info<< "Selecting thermalModel " << modelType << endl;
+
+    pZoneConstructorTable::iterator cstrIter =
+        pZoneConstructorTablePtr_->find(modelType);
+
+    if (cstrIter == pZoneConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "thermalModel::New(const porousZone&)"
+        )   << "Unknown thermalModel type "
+            << modelType << nl << nl
+            << "Valid thermalModel types are :" << endl
+            << pZoneConstructorTablePtr_->sortedToc()
+            << abort(FatalError);
+    }
+
+    return autoPtr<thermalModel>(cstrIter()(pZone));
 }
 
 

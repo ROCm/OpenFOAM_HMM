@@ -1,8 +1,3 @@
-rho = thermo.rho();
-rho = max(rho, rhoMin);
-rho = min(rho, rhoMax);
-rho.relax();
-
 if (pressureImplicitPorosity)
 {
     U = trTU()&UEqn().H();

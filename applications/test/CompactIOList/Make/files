@@ -1,0 +1,4 @@
+
+testCompactIOList.C
+
+EXE = $(FOAM_APPBIN)/CompactIOList
