@@ -249,7 +249,7 @@ void Foam::activeBaffleVelocityFvPatchVectorField::updateCoeffs()
                 min
                 (
                     openFraction_
-                  + max
+                  + min
                     (
                         this->db().time().deltaTValue()/openingTime_,
                         maxOpenFractionDelta_
