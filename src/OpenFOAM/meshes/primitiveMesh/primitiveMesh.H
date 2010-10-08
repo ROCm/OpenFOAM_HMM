@@ -686,8 +686,14 @@ public:
 
         // Useful derived info
 
-            //- Is the point in the cell bounding box
-            bool pointInCellBB(const point& p, label celli) const;
+            //- Is the point in the cell bounding box, option relative
+            //  tolerance to increase the effective size of the boundBox
+            bool pointInCellBB
+            (
+                const point& p,
+                label celli,
+                scalar tol = 0
+            ) const;
 
             //- Is the point in the cell
             bool pointInCell(const point& p, label celli) const;

@@ -9,41 +9,43 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      controlDict;
+    class       volVectorField;
+    location    "0";
+    object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     mdFoam;
+dimensions      [ 0 1 -1 0 0 0 0 ];
 
-startFrom       startTime;
+internalField   uniform ( 0 0 0 );
 
-startTime       0;
+boundaryField
+{
+    periodicX_half0
+    {
+        type            cyclic;
+    }
+    periodicY_half0
+    {
+        type            cyclic;
+    }
+    periodicZ_half0
+    {
+        type            cyclic;
+    }
+    periodicY_half1
+    {
+        type            cyclic;
+    }
+    periodicZ_half1
+    {
+        type            cyclic;
+    }
+    periodicX_half1
+    {
+        type            cyclic;
+    }
+}
 
-stopAt          endTime;
-
-endTime         2e-13;
-
-deltaT          1e-15;
-
-writeControl    runTime;
-
-writeInterval   5e-14;
-
-purgeWrite      0;
-
-writeFormat     ascii;
-
-writePrecision  12;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable true;
-
-adjustTimeStep  no;
 
 // ************************************************************************* //
