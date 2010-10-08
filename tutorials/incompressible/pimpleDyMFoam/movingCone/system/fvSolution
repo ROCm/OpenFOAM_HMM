@@ -35,8 +35,7 @@ solvers
 
     pFinal
     {
-        solver          PCG;
-        preconditioner  DIC;
+        $p;
         tolerance       1e-06;
         relTol          0;
     }
@@ -45,6 +44,13 @@ solvers
     {
         solver          PBiCG;
         preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0.1;
+    }
+
+    UFinal
+    {
+        $U;
         tolerance       1e-05;
         relTol          0;
     }

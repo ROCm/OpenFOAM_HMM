@@ -39,13 +39,43 @@
 *** DSMC
 *** Dynamic Mesh
 *** Numerics
+*** *Updated* command line help, e.g. `snappyHexMesh -help' now gives:
+
+    Usage: snappyHexMesh [OPTIONS]
+    options:
+      -case <dir>       specify alternate case directory, default is the cwd
+      -overwrite        overwrite existing mesh/results files
+      -parallel         run in parallel
+      -srcDoc           display source code in browser
+      -doc              display application documentation in browser
+      -help             print the usage
+
+*** *New* Surface film library
+    + Creation of films by particle addition, or initial film distribution
+    + Coupled with the lagrangian/intermediate cloud hierarchy library
+    + Hierarchical design, consisting of
+      + kinematic film: mass, momentum
+        + constant thermodynamic properties
+      + thermodynamic film: mass, momentum and enthalpy
+        + constant, or temperature dependant thermodynamic properties
+    + Sub-models:
+      + detachment/dripping whereby particles (re)enter the originating cloud
+        + particle sizes set according to PDF
+        + other properties set to ensure mass, momentum and energy conservation
+      + heat transfer to/from walls and film surface
+      + film evaporation and boiling
+    + Additional wall functions for primary region momentum and temperature
+      taking film into account
+    + Parallel aware
+*** *Updated* particle tracking algorithm
 
 * Solvers
   A number of new solvers have been developed for a range of engineering
   applications.  There has been a set of improvements to certain classes of
   solver that are introduced in this release.
 *** *New* Solvers
-    + ...
+    + =reactingParcelFilmFoam=: Lagrangian cloud and film transport in a
+      reacting gas phase system
 *** Modifications to multiphase and buoyant solvers
     + ...
 *** Modifications to solvers for sensible enthalpy
@@ -58,23 +88,43 @@
 * Boundary conditions
   New boundary conditions have been introduced to support new applications in
   OpenFOAM.
-  + ...
+  + *New* wall functions:
+    + kappatJayatillekeWallFunction: incompressible RAS thermal wall function
 
 * Utilities
   There have been some utilities added and updated in this release.
 *** *New* utilities
-    + ...
+    + =extrudeToRegionMesh=: Extrude faceZones into separate mesh (as a
+      different region)
+      + used to e.g. extrude baffles (extrude internal faces) or create
+        liquid film regions
+      + if extruding internal faces:
+         + create baffles in original mesh with directMappedWall patches
+      + if extruding boundary faces:
+        + convert boundary faces to directMappedWall patches
+      + extrude edges of faceZone as a <zone>_sidePatch
+      + extrude edges inbetween different faceZones as a
+        (nonuniformTransform)cyclic <zoneA>_<zoneB>
+      + extrudes into master direction (i.e. away from the owner cell
+        if flipMap is false)
 *** Updated utilities
     + ...
 
 * Post-processing
   + =foamToEnsight=: new =-nodeValues= option to generate and output nodal
-    field data. This is optional and saves memory (compared to letting EnSight
-    do the interpolation) in case of meshes with large
-    amounts of polyhedral cells. On typical snappyHexMesh generated meshes
-    we've seen differences of 0.4 v.s. 2.5Gb memory usage.
+    field data.
+  + Function objects:
+    + =residualControl=: new function object to allow users to terminate steady
+    state calculations when the defined residual levels are achieved
+    + =abortCalculation=: watches for presence of the named file in the
+    $FOAM_CASE directory and aborts the calculation if it is present
+    + =timeActivatedFileUpdate=: performs a file copy/replacement once a
+    specified time has been reached, e.g. to automagically change fvSchemes and
+    fvSolution during a calculation
+    + =streamLine=: generate streamlines; ouputs both trajectory and field data
 
 * New tutorials
   There is a large number of new tutorials to support the new solvers in the
   release.
-  + ...
+  + =reactingParcelFilmFoam= tutorials:
+    + multipleBoxes, hotBoxes, panel, evaporationTest

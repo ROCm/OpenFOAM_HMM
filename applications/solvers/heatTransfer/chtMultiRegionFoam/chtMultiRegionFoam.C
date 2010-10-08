@@ -93,6 +93,8 @@ int main(int argc, char *argv[])
         // --- PIMPLE loop
         for (int oCorr=0; oCorr<nOuterCorr; oCorr++)
         {
+            bool finalIter = oCorr == nOuterCorr-1;
+
             forAll(fluidRegions, i)
             {
                 Info<< "\nSolving for fluid region "

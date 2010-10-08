@@ -96,29 +96,23 @@
         p_rgh + rhok*gh
     );
 
-    label p_rghRefCell = 0;
-    scalar p_rghRefValue = 0.0;
+    label pRefCell = 0;
+    scalar pRefValue = 0.0;
     setRefCell
     (
+        p,
         p_rgh,
         mesh.solutionDict().subDict("SIMPLE"),
-        p_rghRefCell,
-        p_rghRefValue
+        pRefCell,
+        pRefValue
     );
-
-    scalar pRefValue = 0.0;
 
     if (p_rgh.needReference())
     {
-        pRefValue = readScalar
-        (
-            mesh.solutionDict().subDict("SIMPLE").lookup("pRefValue")
-        );
-
         p += dimensionedScalar
         (
             "p",
             p.dimensions(),
-            pRefValue - getRefCellValue(p, p_rghRefCell)
+            pRefValue - getRefCellValue(p, pRefCell)
         );
     }

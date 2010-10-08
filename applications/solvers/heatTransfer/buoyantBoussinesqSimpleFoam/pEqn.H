@@ -18,17 +18,9 @@
             fvm::laplacian(rUAf, p_rgh) == fvc::div(phi)
         );
 
-        p_rghEqn.setReference(p_rghRefCell, p_rghRefValue);
+        p_rghEqn.setReference(pRefCell, getRefCellValue(p_rgh, pRefCell));
 
-        // retain the residual from the first iteration
-        if (nonOrth == 0)
-        {
-            p_rghEqn.solve();
-        }
-        else
-        {
-            p_rghEqn.solve();
-        }
+        p_rghEqn.solve();
 
         if (nonOrth == nNonOrthCorr)
         {
@@ -55,7 +47,8 @@
         (
             "p",
             p.dimensions(),
-            pRefValue - getRefCellValue(p, p_rghRefCell)
+            pRefValue - getRefCellValue(p, pRefCell)
         );
+        p_rgh = p - rhok*gh;
     }
 }

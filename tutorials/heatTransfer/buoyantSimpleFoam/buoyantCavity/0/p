@@ -23,26 +23,26 @@ boundaryField
 {
     frontAndBack 
     {
-        type            buoyantPressure;
-        value           uniform 1e5;
+        type            calculated;
+        value           $internalField;
     }
 
     topAndBottom
     {
-        type            buoyantPressure;
-        value           uniform 1e5;
+        type            calculated;
+        value           $internalField;
     }
 
     hot
     {
-        type            buoyantPressure;
-        value           uniform 1e5;
+        type            calculated;
+        value           $internalField;
     }
 
     cold
     {
-        type            buoyantPressure;
-        value           uniform 1e5;
+        type            calculated;
+        value           $internalField;
     }
 }
 
