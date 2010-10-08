@@ -421,6 +421,74 @@ Distribution<Type>::raw() const
 
 
 template<class Type>
+Foam::List< Foam::List< Foam::Pair<Foam::scalar> > >Foam::
+Distribution<Type>::cumulativeNormalised() const
+{
+    List< List< Pair<scalar> > > normalisedDistribution = normalised();
+
+    List< List < Pair<scalar> > > cumulativeNormalisedDistribution =
+        normalisedDistribution;
+
+    for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
+    {
+        const List< Pair<scalar> >& normalisedCmpt =
+            normalisedDistribution[cmpt];
+
+        List< Pair<scalar> >& cumNormalisedCmpt =
+            cumulativeNormalisedDistribution[cmpt];
+
+        scalar sum = 0.0;
+
+        forAll(normalisedCmpt, i)
+        {
+            cumNormalisedCmpt[i].first() =
+                normalisedCmpt[i].first()
+              + 0.5*component(binWidth_, cmpt);
+
+            cumNormalisedCmpt[i].second() =
+                normalisedCmpt[i].second()*component(binWidth_, cmpt) + sum;
+
+            sum = cumNormalisedCmpt[i].second();
+        }
+    }
+
+    return cumulativeNormalisedDistribution;
+}
+
+
+template<class Type>
+Foam::List< Foam::List< Foam::Pair<Foam::scalar> > >Foam::
+Distribution<Type>::cumulativeRaw() const
+{
+    List< List< Pair<scalar> > > rawDistribution = raw();
+
+    List< List < Pair<scalar> > > cumulativeRawDistribution = rawDistribution;
+
+    for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
+    {
+        const List< Pair<scalar> >& rawCmpt = rawDistribution[cmpt];
+
+        List< Pair<scalar> >& cumRawCmpt = cumulativeRawDistribution[cmpt];
+
+        scalar sum = 0.0;
+
+        forAll(rawCmpt, i)
+        {
+            cumRawCmpt[i].first() =
+                rawCmpt[i].first()
+              + 0.5*component(binWidth_, cmpt);
+
+            cumRawCmpt[i].second() = rawCmpt[i].second() + sum;
+
+            sum = cumRawCmpt[i].second();
+        }
+    }
+
+    return cumulativeRawDistribution;
+}
+
+
+template<class Type>
 void Foam::Distribution<Type>::clear()
 {
     for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
@@ -435,7 +503,7 @@ void Foam::Distribution<Type>::clear()
 template<class Type>
 void Foam::Distribution<Type>::write(const fileName& filePrefix) const
 {
-    List< List<Pair<scalar> > > rawDistribution = raw();
+    List< List< Pair<scalar> > > rawDistribution = raw();
 
     List< List < Pair<scalar> > > normDistribution = normalised();
 
@@ -446,6 +514,32 @@ void Foam::Distribution<Type>::write(const fileName& filePrefix) const
         const List< Pair<scalar> >& normPairs = normDistribution[cmpt];
 
         OFstream os(filePrefix + '_' + pTraits<Type>::componentNames[cmpt]);
+
+        os  << "# key normalised raw" << endl;
+
+        forAll(normPairs, i)
+        {
+            os  << normPairs[i].first()
+                << ' ' << normPairs[i].second()
+                << ' ' << rawPairs[i].second()
+                << nl;
+        }
+    }
+
+    List< List< Pair<scalar> > > rawCumDist = cumulativeRaw();
+
+    List< List < Pair<scalar> > > normCumDist = cumulativeNormalised();
+
+    for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
+    {
+        const List< Pair<scalar> >& rawPairs = rawCumDist[cmpt];
+
+        const List< Pair<scalar> >& normPairs = normCumDist[cmpt];
+
+        OFstream os
+        (
+            filePrefix + "_cumulative_" + pTraits<Type>::componentNames[cmpt]
+        );
 
         os  << "# key normalised raw" << endl;
 
