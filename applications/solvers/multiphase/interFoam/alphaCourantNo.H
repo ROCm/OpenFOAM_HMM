@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Global
-    CourantNo
+    alphaCourantNo
 
 Description
     Calculates and outputs the mean and maximum Courant Numbers.
@@ -39,17 +39,14 @@ scalar meanAlphaCoNum = 0.0;
 
 if (mesh.nInternalFaces())
 {
-    surfaceScalarField alphaf = fvc::interpolate(alpha1);
+    scalarField sumPhi =
+        pos(alpha1 - 0.01)*pos(0.99 - alpha1)
+       *fvc::surfaceSum(mag(phi))().internalField();
 
-    surfaceScalarField SfUfbyDelta =
-        pos(alphaf - 0.01)*pos(0.99 - alphaf)
-       *mesh.surfaceInterpolation::deltaCoeffs()*mag(phi);
+    alphaCoNum = 0.5*max(sumPhi/mesh.V().field())*runTime.deltaT().value();
 
-    alphaCoNum = max(SfUfbyDelta/mesh.magSf())
-        .value()*runTime.deltaT().value();
-
-    meanAlphaCoNum = (sum(SfUfbyDelta)/sum(mesh.magSf()))
-        .value()*runTime.deltaT().value();
+    meanAlphaCoNum =
+        0.5*(sum(sumPhi)/sum(mesh.V().field()))*runTime.deltaT().value();
 }
 
 Info<< "Interface Courant Number mean: " << meanAlphaCoNum
