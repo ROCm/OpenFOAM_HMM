@@ -84,24 +84,20 @@ public:
     // Constructors
 
         //- Construct from components
-        NSRDSfunc1(scalar a, scalar b, scalar c, scalar d, scalar e)
-        :
-            a_(a),
-            b_(b),
-            c_(c),
-            d_(d),
-            e_(e)
-        {}
+        NSRDSfunc1
+        (
+            const scalar a,
+            const scalar b,
+            const scalar c,
+            const scalar d,
+            const scalar e
+        );
 
         //- Construct from Istream
-        NSRDSfunc1(Istream& is)
-        :
-            a_(readScalar(is)),
-            b_(readScalar(is)),
-            c_(readScalar(is)),
-            d_(readScalar(is)),
-            e_(readScalar(is))
-        {}
+        NSRDSfunc1(Istream& is);
+
+        //- Construct from dictionary
+        NSRDSfunc1(const dictionary& dict);
 
 
     // Member Functions
@@ -111,7 +107,6 @@ public:
         {
             return exp(a_ + b_/T + c_*log(T) + d_*pow(T, e_));
         }
-
 
         //- Write the function coefficients
         void writeData(Ostream& os) const

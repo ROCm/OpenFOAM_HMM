@@ -84,24 +84,20 @@ public:
     // Constructors
 
         //- Construct from components
-        NSRDSfunc14(scalar Tc, scalar a, scalar b, scalar c, scalar d)
-        :
-            Tc_(Tc),
-            a_(a),
-            b_(b),
-            c_(c),
-            d_(d)
-        {}
+        NSRDSfunc14
+        (
+            const scalar Tc,
+            const scalar a,
+            const scalar b,
+            const scalar c,
+            const scalar d
+        );
 
         //- Construct from Istream
-        NSRDSfunc14(Istream& is)
-        :
-            Tc_(readScalar(is)),
-            a_(readScalar(is)),
-            b_(readScalar(is)),
-            c_(readScalar(is)),
-            d_(readScalar(is))
-        {}
+        NSRDSfunc14(Istream& is);
+
+        //- Construct from dictionary
+        NSRDSfunc14(const dictionary& dict);
 
 
     // Member Functions
@@ -117,7 +113,6 @@ public:
                  + t*(a_*d_ + t*(c_*c_/3.0 + t*(0.5*c_*d_ + 0.2*d_*d_*t)))
                 );
         }
-
 
         //- Write the function coefficients
         void writeData(Ostream& os) const
