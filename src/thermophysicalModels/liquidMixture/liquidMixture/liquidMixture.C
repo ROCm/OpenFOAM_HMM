@@ -56,7 +56,11 @@ Foam::liquidMixture::liquidMixture
             properties_.set
             (
                 i,
-                liquid::New(subDictPtr->lookup(components_[i]))
+                liquid::New
+                (
+                    subDictPtr->subDict(components_[i]),
+                    components_[i]
+                )
             );
         }
         else
@@ -64,7 +68,11 @@ Foam::liquidMixture::liquidMixture
             properties_.set
             (
                 i,
-                liquid::New(thermophysicalProperties.lookup(components_[i]))
+                liquid::New
+                (
+                    thermophysicalProperties.subDict(components_[i]),
+                    components_[i]
+                )
             );
         }
     }
@@ -84,12 +92,8 @@ Foam::autoPtr<Foam::liquidMixture> Foam::liquidMixture::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::liquidMixture::Tc
-(
-    const scalarField& x
-) const
+Foam::scalar Foam::liquidMixture::Tc(const scalarField& x) const
 {
-
     scalar vTc = 0.0;
     scalar vc = 0.0;
 
@@ -104,10 +108,7 @@ Foam::scalar Foam::liquidMixture::Tc
 }
 
 
-Foam::scalar Foam::liquidMixture::Tpc
-(
-    const scalarField& x
-) const
+Foam::scalar Foam::liquidMixture::Tpc(const scalarField& x) const
 {
     scalar Tpc = 0.0;
     forAll(properties_, i)
@@ -119,10 +120,7 @@ Foam::scalar Foam::liquidMixture::Tpc
 }
 
 
-Foam::scalar Foam::liquidMixture::Ppc
-(
-    const scalarField& x
-) const
+Foam::scalar Foam::liquidMixture::Ppc(const scalarField& x) const
 {
     scalar Vc = 0.0;
     scalar Zc = 0.0;
@@ -136,10 +134,7 @@ Foam::scalar Foam::liquidMixture::Ppc
 }
 
 
-Foam::scalar Foam::liquidMixture::omega
-(
-    const scalarField& x
-) const
+Foam::scalar Foam::liquidMixture::omega(const scalarField& x) const
 {
     scalar omega = 0.0;
     forAll(properties_, i)
@@ -172,10 +167,7 @@ Foam::scalarField Foam::liquidMixture::Xs
 }
 
 
-Foam::scalar Foam::liquidMixture::W
-(
-    const scalarField& x
-) const
+Foam::scalar Foam::liquidMixture::W(const scalarField& x) const
 {
     scalar W = 0.0;
     forAll(properties_, i)
@@ -187,10 +179,7 @@ Foam::scalar Foam::liquidMixture::W
 }
 
 
-Foam::scalarField Foam::liquidMixture::Y
-(
-    const scalarField& X
-) const
+Foam::scalarField Foam::liquidMixture::Y(const scalarField& X) const
 {
     scalarField Y(X/W(X));
 
@@ -203,10 +192,7 @@ Foam::scalarField Foam::liquidMixture::Y
 }
 
 
-Foam::scalarField Foam::liquidMixture::X
-(
-    const scalarField& Y
-) const
+Foam::scalarField Foam::liquidMixture::X(const scalarField& Y) const
 {
     scalarField X(Y.size());
     scalar Winv = 0.0;
