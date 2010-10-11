@@ -100,6 +100,9 @@ public:
         //- Construct null
         Polynomial();
 
+        //- Construct from Istream
+        Polynomial(Istream& is);
+
         //- Construct from name and Istream
         Polynomial(const word& name, Istream& is);
 

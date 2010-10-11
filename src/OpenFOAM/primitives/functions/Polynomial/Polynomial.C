@@ -69,6 +69,15 @@ Foam::Polynomial<PolySize>::Polynomial(const word& name, Istream& is)
 
 
 template<int PolySize>
+Foam::Polynomial<PolySize>::Polynomial(Istream& is)
+:
+    VectorSpace<Polynomial<PolySize>, scalar, PolySize>(is),
+    logActive_(false),
+    logCoeff_(0.0)
+{}
+
+
+template<int PolySize>
 Foam::Polynomial<PolySize>::Polynomial
 (
     const Polynomial<PolySize>& poly
