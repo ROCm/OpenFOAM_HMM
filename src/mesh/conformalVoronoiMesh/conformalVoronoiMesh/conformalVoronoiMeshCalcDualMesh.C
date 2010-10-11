@@ -37,6 +37,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     wordList& patchNames,
     labelList& patchSizes,
     labelList& patchStarts,
+    pointField& cellCentres,
     bool filterFaces
 )
 {
@@ -54,7 +55,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     // The indices of the points are reset *which **destroys** the point-pair
     // matching*, so the type of each vertex is reset to avoid any ambiguity.
 
-    label dualCelli = 0;
+    label dualCellI = 0;
 
     for
     (
@@ -66,8 +67,8 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         if (vit->internalOrBoundaryPoint())
         {
             vit->type() = Vb::ptInternalPoint;
-            vit->index() = dualCelli;
-            dualCelli++;
+            vit->index() = dualCellI;
+            dualCellI++;
         }
         else
         {
@@ -190,7 +191,9 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     // deferredCollapseFaceSet(owner, neighbour, deferredCollapseFaces);
 
-    removeUnusedCells(owner, neighbour);
+    createCellCentres(cellCentres);
+
+    removeUnusedCells(owner, neighbour, cellCentres);
 
     removeUnusedPoints(faces, points);
 
@@ -1381,6 +1384,7 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
     wordList patchNames;
     labelList patchSizes;
     labelList patchStarts;
+    pointField cellCentres;
 
     timeCheck();
 
@@ -1397,20 +1401,20 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
         false
     );
 
-    removeUnusedCells(owner, neighbour);
+    createCellCentres(cellCentres);
 
-    IOobject io
-    (
-        "cvMesh_temporary",
-        runTime_.timeName(),
-        runTime_,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    );
+    removeUnusedCells(owner, neighbour, cellCentres);
 
     polyMesh pMesh
     (
-        io,
+        IOobject
+        (
+            "cvMesh_temporary",
+            runTime_.timeName(),
+            runTime_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
         xferCopy(pts),
         xferMove(faces),
         xferMove(owner),
@@ -1432,6 +1436,8 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
     }
 
     pMesh.addPatches(patches);
+
+    pMesh.overrideCellCentres(cellCentres);
 
     timeCheck();
 
@@ -1778,6 +1784,34 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 }
 
 
+void Foam::conformalVoronoiMesh::createCellCentres
+(
+    pointField& cellCentres
+) const
+{
+    cellCentres.setSize(number_of_vertices());
+
+    label vertI = 0;
+
+    for
+    (
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->internalOrBoundaryPoint())
+        {
+            cellCentres[vit->index()] = topoint(vit->point());
+
+            vertI++;
+        }
+    }
+
+    cellCentres.setSize(vertI);
+}
+
+
 void Foam::conformalVoronoiMesh::sortFaces
 (
     faceList& faces,
@@ -2020,7 +2054,8 @@ void Foam::conformalVoronoiMesh::removeUnusedPoints
 void Foam::conformalVoronoiMesh::removeUnusedCells
 (
     labelList& owner,
-    labelList& neighbour
+    labelList& neighbour,
+    pointField& cellCentres
 ) const
 {
     Info<< nl << "Removing unused cells" << endl;
@@ -2038,6 +2073,25 @@ void Foam::conformalVoronoiMesh::removeUnusedCells
     {
         cellUsed[neighbour[nI]] = true;
     }
+
+    label cellI = 0;
+
+    labelList oldToNew(cellCentres.size(), -1);
+
+    // Move all of the used cellCentres to the start of the pointField and
+    // truncate it
+
+    forAll(cellUsed, cellUI)
+    {
+        if (cellUsed[cellUI] == true)
+        {
+            oldToNew[cellUI] = cellI++;
+        }
+    }
+
+    inplaceReorder(oldToNew, cellCentres);
+
+    cellCentres.setSize(cellI);
 
     // Find all of the unused cells, create a list of them, then
     // subtract one from each owner and neighbour entry for each of

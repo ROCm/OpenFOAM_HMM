@@ -475,6 +475,7 @@ private:
             wordList& patchNames,
             labelList& patchSizes,
             labelList& patchStarts,
+            pointField& cellCentres,
             bool filterFaces
         );
 
@@ -603,6 +604,12 @@ private:
             bool includeEmptyPatches = false
         ) const;
 
+        //- Create the cell centres to use for the mesh
+        void createCellCentres
+        (
+            pointField& cellCentres
+        ) const;
+
         //- Sort the faces, owner and neighbour lists into
         //  upper-triangular order.  For internal faces only, use
         //  before adding patch faces
@@ -639,7 +646,8 @@ private:
         void removeUnusedCells
         (
             labelList& owner,
-            labelList& neighbour
+            labelList& neighbour,
+            pointField& cellCentres
         ) const;
 
         //- Disallow default bitwise copy construct
@@ -738,7 +746,8 @@ public:
                 labelList& neighbour,
                 wordList& patchNames,
                 labelList& patchSizes,
-                labelList& patchStarts
+                labelList& patchStarts,
+                const pointField& cellCentres
             ) const;
 
             //- Write points and faces as .obj file

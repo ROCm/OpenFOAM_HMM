@@ -102,18 +102,23 @@ void Foam::conformalVoronoiMesh::writeInternalDelaunayVertices
 
     internalDelaunayVertices.setSize(vertI);
 
-    IOobject io
+    pointIOField internalDVs
     (
-        "internalDelaunayVertices",
-        instance,
-        runTime_,
-        IOobject::NO_READ,
-        IOobject::AUTO_WRITE
+        IOobject
+        (
+            "internalDelaunayVertices",
+            instance,
+            runTime_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        internalDelaunayVertices
     );
 
-    Info<< nl << "Writing " << io.name() << " to " << io.instance() << endl;
-
-    pointIOField internalDVs(io, internalDelaunayVertices);
+    Info<< nl
+        << "Writing " << internalDVs.name()
+        << " to " << internalDVs.instance()
+        << endl;
 
     internalDVs.write();
 }
@@ -171,6 +176,7 @@ void Foam::conformalVoronoiMesh::writeMesh
         wordList patchNames;
         labelList patchSizes;
         labelList patchStarts;
+        pointField cellCentres;
 
         calcDualMesh
         (
@@ -181,6 +187,7 @@ void Foam::conformalVoronoiMesh::writeMesh
             patchNames,
             patchSizes,
             patchStarts,
+            cellCentres,
             filterFaces
         );
 
@@ -196,7 +203,8 @@ void Foam::conformalVoronoiMesh::writeMesh
             neighbour,
             patchNames,
             patchSizes,
-            patchStarts
+            patchStarts,
+            cellCentres
         );
     }
 }
@@ -212,7 +220,8 @@ void Foam::conformalVoronoiMesh::writeMesh
     labelList& neighbour,
     wordList& patchNames,
     labelList& patchSizes,
-    labelList& patchStarts
+    labelList& patchStarts,
+    const pointField& cellCentres
 ) const
 {
     if(cvMeshControls().objOutput())
@@ -220,18 +229,16 @@ void Foam::conformalVoronoiMesh::writeMesh
         writeObjMesh(points, faces, word(meshName + ".obj"));
     }
 
-    IOobject io
-    (
-        meshName,
-        instance,
-        runTime_,
-        IOobject::NO_READ,
-        IOobject::AUTO_WRITE
-    );
-
     fvMesh mesh
     (
-        io,
+        IOobject
+        (
+            meshName,
+            instance,
+            runTime_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
         xferMove(points),
         xferMove(faces),
         xferMove(owner),
@@ -260,6 +267,26 @@ void Foam::conformalVoronoiMesh::writeMesh
             << "Failed writing polyMesh."
             << exit(FatalError);
     }
+
+    pointIOField cellCs
+    (
+        IOobject
+        (
+            "cellCentres",
+            instance,
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        cellCentres
+    );
+
+    Info<< nl
+        << "Writing " << cellCs.name()
+        << " to " << cellCs.instance()
+        << endl;
+
+    cellCs.write();
 
     writeCellSizes(mesh);
 }
@@ -313,7 +340,7 @@ void Foam::conformalVoronoiMesh::writeCellSizes
             (
                 "targetCellSize",
                 mesh.polyMesh::instance(),
-                runTime_,
+                mesh,
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE
             ),
@@ -339,7 +366,7 @@ void Foam::conformalVoronoiMesh::writeCellSizes
             (
                 "targetCellVolume",
                 mesh.polyMesh::instance(),
-                runTime_,
+                mesh,
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE
             ),
@@ -358,7 +385,7 @@ void Foam::conformalVoronoiMesh::writeCellSizes
             (
                 "actualCellVolume",
                 mesh.polyMesh::instance(),
-                runTime_,
+                mesh,
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE
             ),
@@ -377,7 +404,7 @@ void Foam::conformalVoronoiMesh::writeCellSizes
             (
                 "equivalentCellSize",
                 mesh.polyMesh::instance(),
-                runTime_,
+                mesh,
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE
             ),

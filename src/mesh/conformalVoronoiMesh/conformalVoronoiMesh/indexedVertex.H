@@ -52,7 +52,7 @@ class indexedVertex
 {
     // Private data
 
-        //- The index for this triangle vertex
+        //- The index for this Delaunay vertex
         int index_;
 
         //- type of pair-point   :
