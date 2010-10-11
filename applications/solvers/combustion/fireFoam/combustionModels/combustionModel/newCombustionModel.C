@@ -21,32 +21,45 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "combustionModel.H"
 
-inline bool Foam::speciesTable::contains(const word& specieName) const
-{
-    return specieIndices_.found(specieName);
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-inline const Foam::word& Foam::speciesTable::operator[]
+Foam::autoPtr<Foam::combustionModel> Foam::combustionModel::New
 (
-    const label specieIndex
-) const
+    const dictionary& combustionProperties,
+    const hsCombustionThermo& thermo,
+    const compressible::turbulenceModel& turbulence,
+    const surfaceScalarField& phi,
+    const volScalarField& rho
+)
 {
-    return wordList::operator[](specieIndex);
-}
+    word combustionModelTypeName = combustionProperties.lookup
+    (
+        "combustionModel"
+    );
 
+    Info<< "Selecting combustion model " << combustionModelTypeName << endl;
 
-inline Foam::label Foam::speciesTable::operator[](const word& specieName) const
-{
-    return specieIndices_[specieName];
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(combustionModelTypeName);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "combustionModel::New"
+        )   << "Unknown combustionModel type "
+            << combustionModelTypeName << endl << endl
+            << "Valid  combustionModels are : " << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<combustionModel>
+        (cstrIter()(combustionProperties, thermo, turbulence, phi, rho));
 }
 
 
