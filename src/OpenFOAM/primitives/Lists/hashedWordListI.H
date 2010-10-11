@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,61 +23,43 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "speciesTable.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::speciesTable::setIndices()
+inline bool Foam::hashedWordList::contains(const word& name) const
 {
-    forAll(*this, i)
-    {
-        specieIndices_.insert(wordList::operator[](i), i);
-    }
+    return indices_.found(name);
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-// Construct from list of specie names
-Foam::speciesTable::speciesTable(const wordList& specieNames)
-:
-    wordList(specieNames)
+inline void Foam::hashedWordList::operator=(const UList<word>& lst)
 {
-    setIndices();
+    List<word>::operator=(lst);
+    rehash();
 }
 
 
-// Construct from number of species and list of specie names
-Foam::speciesTable::speciesTable(const label nSpecies, const char** specieNames)
-:
-    wordList(nSpecies)
+inline void Foam::hashedWordList::operator=(const hashedWordList& lst)
 {
-    forAll(*this, i)
-    {
-        wordList::operator[](i) = specieNames[i];
-    }
-
-    setIndices();
+    operator=(static_cast<const UList<word>&>(lst));
 }
 
 
-// Construct from Istream
-Foam::speciesTable::speciesTable(Istream& is)
-:
-    wordList(is)
+inline const Foam::word& Foam::hashedWordList::operator[]
+(
+    const label index
+) const
 {
-    setIndices();
+    return List<word>::operator[](index);
 }
 
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-Foam::Istream& Foam::operator>>(Istream& is, speciesTable& st)
+// could return -1 instead of bombing out
+inline Foam::label Foam::hashedWordList::operator[](const word& name) const
 {
-    is >> static_cast<wordList&>(st);
-    st.setIndices();
-
-    return is;
+    return indices_[name];
 }
+
 
 // ************************************************************************* //

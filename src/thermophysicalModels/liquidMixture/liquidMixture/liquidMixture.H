@@ -103,7 +103,7 @@ class liquidMixture
 {
     // Private data
 
-        // maximum reduced temperature
+        //- Maximum reduced temperature
         static const scalar TrMax;
 
         //- The names of the liquids
@@ -130,6 +130,7 @@ public:
 
     // Member Functions
 
+        //- Return the liquid names
         inline const List<word>& components() const
         {
             return components_;
@@ -140,6 +141,13 @@ public:
         {
             return properties_;
         }
+
+        //- Return the number of liquids in the mixture
+        inline label size() const
+        {
+            return components_.size();
+        }
+
 
         //- Calculate the critical temperature of mixture
         scalar Tc(const scalarField& x) const;
