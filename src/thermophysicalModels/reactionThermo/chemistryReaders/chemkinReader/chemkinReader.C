@@ -716,7 +716,7 @@ void Foam::chemkinReader::addReaction
                     Afactor*ArrheniusCoeffs[0],
                     ArrheniusCoeffs[1],
                     ArrheniusCoeffs[2]/RR,
-                    JanevCoeffs.begin()
+                    FixedList<scalar, 9>(JanevCoeffs)
                 )
             );
         }
@@ -738,7 +738,7 @@ void Foam::chemkinReader::addReaction
                     Afactor*ArrheniusCoeffs[0],
                     ArrheniusCoeffs[1],
                     ArrheniusCoeffs[2]/RR,
-                    powerSeriesCoeffs.begin()
+                    FixedList<scalar, 4>(powerSeriesCoeffs)
                 )
             );
         }
@@ -850,7 +850,6 @@ void Foam::chemkinReader::read
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::chemkinReader::chemkinReader
 (
     const fileName& CHEMKINFileName,
@@ -865,7 +864,6 @@ Foam::chemkinReader::chemkinReader
 }
 
 
-// Construct from components
 Foam::chemkinReader::chemkinReader(const dictionary& thermoDict)
 :
     lineNo_(1),
@@ -901,5 +899,6 @@ Foam::chemkinReader::chemkinReader(const dictionary& thermoDict)
 
     read(chemkinFile, thermoFile);
 }
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

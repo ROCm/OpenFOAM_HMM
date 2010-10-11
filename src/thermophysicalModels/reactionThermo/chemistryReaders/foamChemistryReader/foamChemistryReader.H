@@ -65,7 +65,7 @@ class foamChemistryReader
         speciesTable speciesTable_;
 
         //- List of the reactions
-        SLPtrList<Reaction<ThermoType> > reactions_;
+        ReactionList<ThermoType> reactions_;
 
 
     // Private Member Functions
@@ -117,9 +117,9 @@ public:
         }
 
         //- List of the reactions
-        const SLPtrList<Reaction<ThermoType> >& reactions() const
+        const PtrList<Reaction<ThermoType> >& reactions() const
         {
-            return reactions_;
+            return reactions_.reactions();
         }
 };
 

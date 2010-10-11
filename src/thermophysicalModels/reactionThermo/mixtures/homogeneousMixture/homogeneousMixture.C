@@ -48,8 +48,8 @@ Foam::homogeneousMixture<ThermoType>::homogeneousMixture
         mesh
     ),
 
-    reactants_(thermoDict.lookup("reactants")),
-    products_(thermoDict.lookup("products")),
+    reactants_(thermoDict.subDict("reactants")),
+    products_(thermoDict.subDict("products")),
     mixture_("mixture", reactants_),
     b_(Y("b"))
 {}
