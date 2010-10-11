@@ -46,10 +46,10 @@ class cellSets
 {
 public:
 
-        label nHexesWedges;
-        label nPrisms;
-        label nPyrs;
         label nTets;
+        label nPyrs;
+        label nPrisms;
+        label nHexesWedges;
         label nPolys;
 
         labelList tets;
@@ -57,6 +57,7 @@ public:
         labelList prisms;
         labelList wedges;
         labelList hexes;
+        labelList hexesWedges;
         labelList polys;
 
 
@@ -65,10 +66,10 @@ public:
         //- Construct given the number ov cells
         cellSets(const label nCells)
         :
-            nHexesWedges(0),
-            nPrisms(0),
-            nPyrs(0),
             nTets(0),
+            nPyrs(0),
+            nPrisms(0),
+            nHexesWedges(0),
             nPolys(0),
 
             tets(nCells),
@@ -76,6 +77,7 @@ public:
             prisms(nCells),
             wedges(nCells),
             hexes(nCells),
+            hexesWedges(nCells),
             polys(nCells)
         {}
 };
