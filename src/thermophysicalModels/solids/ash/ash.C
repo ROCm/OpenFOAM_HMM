@@ -33,6 +33,7 @@ namespace Foam
     defineTypeNameAndDebug(ash, 0);
     addToRunTimeSelectionTable(solid, ash,);
     addToRunTimeSelectionTable(solid, ash, Istream);
+    addToRunTimeSelectionTable(solid, ash, dictionary);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -59,6 +60,12 @@ Foam::ash::ash(const solid& s)
 Foam::ash::ash(Istream& is)
 :
     solid(is)
+{}
+
+
+Foam::ash::ash(const dictionary& dict)
+:
+    solid(dict)
 {}
 
 
