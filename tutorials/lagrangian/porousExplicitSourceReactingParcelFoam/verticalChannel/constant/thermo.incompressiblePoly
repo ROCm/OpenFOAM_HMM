@@ -1,5 +1,9 @@
-(
-N2 N2   1   28.0134
+N2
+{
+    nMoles          1;
+    molWeight       28.0134;
+    Hf              0;
+    Sf              0;
     rhoPolynomial
     (
         3.8936E+00
@@ -10,9 +14,7 @@ N2 N2   1   28.0134
         0
         0
         0
-    )
-    0.0                                 // Heat of formation
-    0.0                                 // Standard entropy
+    );
     cpPolynomial
     (
         9.7908E+02
@@ -23,7 +25,7 @@ N2 N2   1   28.0134
         0
         0
         0
-    )
+    );
     muPolynomial
     (
         1.5068E-06
@@ -34,7 +36,7 @@ N2 N2   1   28.0134
         0
         0
         0
-    )
+    );
     kappaPolynomial
     (
         3.1494E-03
@@ -45,55 +47,16 @@ N2 N2   1   28.0134
         0
         0
         0
-    )
-O2 O2   1   31.9988
-    rhoPolynomial
-    (
-        4.4475E+00
-       -1.8805E-02
-        3.6667E-05
-       -3.3323E-08
-        1.1410E-11
-        0
-        0
-        0
-    )
-    0.0                                 // Heat of formation
-    0.0                                 // Standard entropy
-    cpPolynomial
-    (
-        8.3484E+02
-        2.9297E-01
-       -1.4959E-04
-        3.4143E-07
-       -2.2786E-10
-        0
-        0
-        0
-    )
-    muPolynomial
-    (
-        1.5068E-06
-        6.1598E-08
-       -1.8188E-11
-        0
-        0
-        0
-        0
-        0
-    )
-    kappaPolynomial
-    (
-        1.6082E-04
-        8.5301E-05
-       -1.4998E-08
-        0
-        0
-        0
-        0
-        0
-    )
-H2O H2O 1   18.0153
+    );
+}
+
+
+H2O
+{
+    nMoles          1;
+    molWeight       18.0153;
+    Hf              -1.3423e07;
+    Sf               1.0482e04;
     rhoPolynomial
     (
         2.5039E+00
@@ -104,9 +67,7 @@ H2O H2O 1   18.0153
         0
         0
         0
-    )
-   -1.3423e07                                // Heat of formation [J/kg]
-    1.0482e04                                // Standard entropy [J/kg/K]
+    );
     cpPolynomial
     (
         1.5631E+03
@@ -117,7 +78,7 @@ H2O H2O 1   18.0153
         0
         0
         0
-    )
+    );
     muPolynomial
     (
         1.5068E-06
@@ -128,7 +89,7 @@ H2O H2O 1   18.0153
         0
         0
         0
-    )
+    );
     kappaPolynomial
     (
         3.7972E-03
@@ -139,8 +100,16 @@ H2O H2O 1   18.0153
         0
         0
         0
-    )
-air air 1   28.85
+    );
+}
+
+
+air
+{
+    nMoles          1;
+    molWeight       28.85;
+    Hf              0.0;
+    Sf              0.0;
     rhoPolynomial
     (
         4.0097E+00
@@ -151,9 +120,7 @@ air air 1   28.85
         0
         0
         0
-    )
-    0.0
-    0.0
+    );
     cpPolynomial
     (
         9.4876E+02
@@ -164,7 +131,7 @@ air air 1   28.85
         0
         0
         0
-    )
+    );
     muPolynomial
     (
         1.5061E-06
@@ -175,7 +142,7 @@ air air 1   28.85
         0
         0
         0
-    )
+    );
     kappaPolynomial
     (
         2.5219E-03
@@ -186,6 +153,6 @@ air air 1   28.85
         0
         0
         0
-    )
-)
+    );
+}
 

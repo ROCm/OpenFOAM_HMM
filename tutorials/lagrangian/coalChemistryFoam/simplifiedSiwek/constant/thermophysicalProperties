@@ -32,7 +32,10 @@ liquids
         H2O
     );
 
-    H2O             H2O defaultCoeffs;
+    H2O
+    {
+        defaultCoeffs   yes;
+    }
 }
 
 solids
@@ -43,8 +46,14 @@ solids
         ash
     );
 
-    C               C defaultCoeffs;
-    ash             ash defaultCoeffs;
+    C
+    {
+        defaultCoeffs   yes;
+    }
+    ash
+    {
+        defaultCoeffs   yes;
+    }
 }
 
 
