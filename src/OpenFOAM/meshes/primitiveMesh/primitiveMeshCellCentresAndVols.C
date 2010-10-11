@@ -28,6 +28,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveMesh.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -165,6 +166,43 @@ const Foam::scalarField& Foam::primitiveMesh::cellVolumes() const
     }
 
     return *cellVolumesPtr_;
+}
+
+
+void Foam::primitiveMesh::overrideCellCentres
+(
+    const vectorField& newCellCtrs
+) const
+{
+    if (newCellCtrs.size() != nCells())
+    {
+        FatalErrorIn
+        (
+            "void Foam::primitiveMesh::overrideCellCentres"
+            "("
+                "const vectorField& newCellCtrs"
+            ") const"
+        )
+            << "Size of new cell centres for override not equal to the "
+            << "number of cells in the mesh."
+            << abort(FatalError);
+    }
+
+    if (debug)
+    {
+        Pout<< "void Foam::primitiveMesh::overrideCellCentres"
+            << "(const vectorField& newCellCtrs) const : "
+            << "overriding cell centres." << endl;
+    }
+
+    deleteDemandDrivenData(cellCentresPtr_);
+    deleteDemandDrivenData(cellVolumesPtr_);
+
+    // Calculate the cell volumes - these are invariant with respect
+    // to the centre.
+    calcCellCentresAndVols();
+
+    *cellCentresPtr_ = newCellCtrs;
 }
 
 
