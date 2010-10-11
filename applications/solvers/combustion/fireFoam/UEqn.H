@@ -13,7 +13,9 @@ solve
   ==
     fvc::reconstruct
     (
-        fvc::interpolate(rho)*(g & mesh.Sf())
-      - fvc::snGrad(p)*mesh.magSf()
+        (
+          - ghf*fvc::snGrad(rho)
+          - fvc::snGrad(p_rgh)
+        )*mesh.magSf()
     )
 );

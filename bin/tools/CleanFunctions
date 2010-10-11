@@ -76,6 +76,11 @@ cleanCase()
            sets/streamLines \
            > /dev/null 2>&1
 
+    if [ -e constant/polyMesh/blockMeshDict.m4 ]
+    then
+        rm -f constant/polyMesh/blockMeshDict > /dev/null 2>&1
+    fi
+
     for f in `find . -name "*Dict"`
     do
         sed -e /arguments/d $f > temp.$$

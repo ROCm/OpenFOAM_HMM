@@ -15,8 +15,6 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs            ("libOpenFOAM.so" "libincompressibleTurbulenceModel.so" "libincompressibleRASModels.so");
-
 application     pimpleFoam;
 
 startFrom       startTime;
@@ -50,6 +48,13 @@ runTimeModifiable true;
 adjustTimeStep  yes;
 
 maxCo           5;
+
+libs
+(
+    "libOpenFOAM.so"
+    "libinterpolationTables_16x.so"
+    "libtabulatedWallFunctionFvPatchFields_16x.so"
+);
 
 functions
 {

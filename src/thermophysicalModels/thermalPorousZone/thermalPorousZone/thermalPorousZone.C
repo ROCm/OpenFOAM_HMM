@@ -24,9 +24,9 @@ License
 \*----------------------------------------------------------------------------*/
 
 #include "thermalPorousZone.H"
-#include "fvMesh.H"
-#include "fvMatrices.H"
 #include "basicThermo.H"
+#include "volFields.H"
+#include "fvMatrices.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -38,29 +38,8 @@ Foam::thermalPorousZone::thermalPorousZone
 )
 :
     porousZone(key, mesh, dict),
-    T_("T", dimTemperature, -GREAT)
-{
-    if (const dictionary* dictPtr = dict.subDictPtr("thermalModel"))
-    {
-        const word thermalModel(dictPtr->lookup("type"));
-
-        if (thermalModel == "fixedTemperature")
-        {
-            dictPtr->lookup("T") >> T_;
-        }
-        else
-        {
-            FatalIOErrorIn
-            (
-                "thermalPorousZone::thermalPorousZone"
-                "(const keyType&, const fvMesh&, const dictionary&)",
-                *dictPtr
-            )   << "thermalModel " << thermalModel << " is not supported" << nl
-                << "    Supported thermalModels are: fixedTemperature"
-                << exit(FatalIOError);
-        }
-    }
-}
+    model_(thermalModel::New(*this))
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -72,29 +51,7 @@ void Foam::thermalPorousZone::addEnthalpySource
     fvScalarMatrix& hEqn
 ) const
 {
-    const labelList& zones = this->zoneIds();
-    if (zones.empty() || T_.value() < 0.0)
-    {
-        return;
-    }
-
-    const scalarField& V = mesh().V();
-    scalarField& hDiag = hEqn.diag();
-    scalarField& hSource = hEqn.source();
-
-    // TODO: generalize for non-fixedTemperature methods
-    const scalar rate = 1e6;
-
-    forAll(zones, zoneI)
-    {
-        const labelList& cells = mesh().cellZones()[zones[zoneI]];
-
-        forAll(cells, i)
-        {
-            hDiag[cells[i]] += rate*V[cells[i]]*rho[cells[i]];
-            hSource[cells[i]] += rate*V[cells[i]]*rho[cells[i]]*T_.value();
-        }
-    }
+    model_->addEnthalpySource(thermo, rho, hEqn);
 }
 
 

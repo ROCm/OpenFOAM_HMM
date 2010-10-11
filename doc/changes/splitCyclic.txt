@@ -20,7 +20,8 @@ The disadvantages:
 - a patch-wise loop now might need to store data to go to the neighbour half
 since it is no longer handled in a single patch.
 - decomposed cyclics now require overlapping communications so will
-only work in non-blocking mode. Hence the underlying message passing library
+only work in 'nonBlocking' mode or 'blocking' (=buffered) mode but not
+in 'scheduled' mode. The underlying message passing library
 will require overlapping communications with message tags.
 - it is quite a code-change and there might be some oversights.
 - once converted (see foamUpgradeCyclics below) cases are not backwards
@@ -103,19 +104,14 @@ type 'processorCyclic'.
 
 
 - processor patches use overlapping communication using a different message
-tag. This maps straight through into the MPI message tag.
-See processorCyclicPolyPatch::tag(). This needs to be calculated the
-same on both sides so is calculated as
-        Pstream::nProcs()*max(myProcNo, neighbProcNo)
-      + min(myProcNo, neighbProcNo)
-which is
-- unique
-- commutative
-- does not interfere with the default tag (= 1)
+tag. This maps straight through into the MPI message tag. Each processor
+'interface' (processorPolyPatch, processorFvPatch, etc.) has a 'tag()'
+to use for communication.
 
 
 - when constructing a GeometricField from a dictionary it will explicitly
 check for non-existing entries for cyclic patches and exit with an error message
-warning to run foamUpgradeCyclics.
+warning to run foamUpgradeCyclics. (1.7.x will check if you are trying
+to run a case which has split cyclics)
 
 

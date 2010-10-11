@@ -101,8 +101,6 @@ U -= (fvc::grad(p0)*(1.0/AU - 1.0/AtU) + fvc::grad(p)/AtU);
 
 U.correctBoundaryConditions();
 
-bound(p, pMin);
-
 // For closed-volume cases adjust the pressure and density levels
 // to obey overall mass continuity
 if (closedVolume)
@@ -112,6 +110,8 @@ if (closedVolume)
 }
 
 rho = thermo.rho();
+rho = max(rho, rhoMin);
+rho = min(rho, rhoMax);
 
 if (!transonic)
 {

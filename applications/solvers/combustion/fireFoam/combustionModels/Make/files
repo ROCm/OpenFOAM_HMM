@@ -1,5 +1,5 @@
 combustionModel/combustionModel.C
-combustionModel/combustionModelNew.C
+combustionModel/newCombustionModel.C
 
 infinitelyFastChemistry/infinitelyFastChemistry.C
 

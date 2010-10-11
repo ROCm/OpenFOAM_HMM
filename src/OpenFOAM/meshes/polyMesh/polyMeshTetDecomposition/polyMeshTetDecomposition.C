@@ -27,7 +27,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::scalar Foam::polyMeshTetDecomposition::minTetQuality = 1e-9;
+// Note: the use of this tolerance is ad-hoc, there may be extreme
+// cases where the resulting tetrahedra still have particle tracking
+// problems.
+const Foam::scalar Foam::polyMeshTetDecomposition::minTetQuality = SMALL;
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //

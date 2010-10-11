@@ -44,15 +44,6 @@ namespace Foam
 
 class faceSets
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        faceSets(const faceSets&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const faceSets&);
-
-
 public:
 
         label nTris;

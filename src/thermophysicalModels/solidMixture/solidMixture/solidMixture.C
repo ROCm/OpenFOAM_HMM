@@ -35,6 +35,17 @@ Foam::solidMixture::solidMixture
     components_(thermophysicalProperties.lookup("solidComponents")),
     properties_(components_.size())
 {
+    // can use sub-dictionary "solidProperties" to avoid
+    // collisions with identically named gas-phase entries
+    const dictionary* subDictPtr = thermophysicalProperties.subDictPtr
+    (
+        "solidProperties"
+    );
+
+    const dictionary& props =
+    (
+        subDictPtr ? *subDictPtr : thermophysicalProperties
+    );
 
     forAll(components_, i)
     {
@@ -82,12 +93,12 @@ Foam::scalar Foam::solidMixture::rho
     const scalarField& X
 ) const
 {
-    scalar tmp = 0.0;
+    scalar val = 0.0;
     forAll(properties_, i)
     {
-        tmp += properties_[i].rho()*X[i];
+        val += properties_[i].rho()*X[i];
     }
-    return tmp;
+    return val;
 }
 
 
@@ -96,12 +107,12 @@ Foam::scalar Foam::solidMixture::cp
     const scalarField& Y
 ) const
 {
-    scalar tmp = 0.0;
+    scalar val = 0.0;
     forAll(properties_, i)
     {
-        tmp += properties_[i].cp()*Y[i];
+        val += properties_[i].cp()*Y[i];
     }
-    return tmp;
+    return val;
 }
 
 

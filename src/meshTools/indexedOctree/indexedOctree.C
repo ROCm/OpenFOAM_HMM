@@ -2056,6 +2056,180 @@ void Foam::indexedOctree<Type>::findBox
 }
 
 
+template <class Type>
+template <class CompareOp>
+void Foam::indexedOctree<Type>::findNear
+(
+    const scalar nearDist,
+    const bool okOrder,
+    const indexedOctree<Type>& tree1,
+    const labelBits index1,
+    const treeBoundBox& bb1,
+    const indexedOctree<Type>& tree2,
+    const labelBits index2,
+    const treeBoundBox& bb2,
+    CompareOp& cop
+)
+{
+    const vector nearSpan(nearDist, nearDist, nearDist);
+
+    if (tree1.isNode(index1))
+    {
+        const node& nod1 = tree1.nodes()[tree1.getNode(index1)];
+        const treeBoundBox searchBox
+        (
+            bb1.min()-nearSpan,
+            bb1.max()+nearSpan
+        );
+
+        if (tree2.isNode(index2))
+        {
+            if (bb2.overlaps(searchBox))
+            {
+                const node& nod2 = tree2.nodes()[tree2.getNode(index2)];
+
+                for (direction i2 = 0; i2 < nod2.subNodes_.size(); i2++)
+                {
+                    labelBits subIndex2 = nod2.subNodes_[i2];
+                    const treeBoundBox subBb2
+                    (
+                        tree2.isNode(subIndex2)
+                      ? tree2.nodes()[tree2.getNode(subIndex2)].bb_
+                      : bb2.subBbox(i2)
+                    );
+
+                    findNear
+                    (
+                        nearDist,
+                        !okOrder,
+                        tree2,
+                        subIndex2,
+                        subBb2,
+                        tree1,
+                        index1,
+                        bb1,
+                        cop
+                    );
+                }
+            }
+        }
+        else if (tree2.isContent(index2))
+        {
+            // index2 is leaf, index1 not yet.
+            for (direction i1 = 0; i1 < nod1.subNodes_.size(); i1++)
+            {
+                labelBits subIndex1 = nod1.subNodes_[i1];
+                const treeBoundBox subBb1
+                (
+                    tree1.isNode(subIndex1)
+                  ? tree1.nodes()[tree1.getNode(subIndex1)].bb_
+                  : bb1.subBbox(i1)
+                );
+
+                findNear
+                (
+                    nearDist,
+                    !okOrder,
+                    tree2,
+                    index2,
+                    bb2,
+                    tree1,
+                    subIndex1,
+                    subBb1,
+                    cop
+                );
+            }
+        }
+    }
+    else if (tree1.isContent(index1))
+    {
+        const treeBoundBox searchBox
+        (
+            bb1.min()-nearSpan,
+            bb1.max()+nearSpan
+        );
+
+        if (tree2.isNode(index2))
+        {
+            const node& nod2 =
+                tree2.nodes()[tree2.getNode(index2)];
+
+            if (bb2.overlaps(searchBox))
+            {
+                for (direction i2 = 0; i2 < nod2.subNodes_.size(); i2++)
+                {
+                    labelBits subIndex2 = nod2.subNodes_[i2];
+                    const treeBoundBox subBb2
+                    (
+                        tree2.isNode(subIndex2)
+                      ? tree2.nodes()[tree2.getNode(subIndex2)].bb_
+                      : bb2.subBbox(i2)
+                    );
+
+                    findNear
+                    (
+                        nearDist,
+                        !okOrder,
+                        tree2,
+                        subIndex2,
+                        subBb2,
+                        tree1,
+                        index1,
+                        bb1,
+                        cop
+                    );
+                }
+            }
+        }
+        else if (tree2.isContent(index2))
+        {
+            // Both are leaves. Check n^2.
+
+            const labelList& indices1 =
+                tree1.contents()[tree1.getContent(index1)];
+            const labelList& indices2 =
+                tree2.contents()[tree2.getContent(index2)];
+
+            forAll(indices1, i)
+            {
+                label shape1 = indices1[i];
+
+                forAll(indices2, j)
+                {
+                    label shape2 = indices2[j];
+
+                    if ((&tree1 != &tree2) || (shape1 != shape2))
+                    {
+                        if (okOrder)
+                        {
+                            cop
+                            (
+                                nearDist,
+                                tree1.shapes(),
+                                shape1,
+                                tree2.shapes(),
+                                shape2
+                            );
+                        }
+                        else
+                        {
+                            cop
+                            (
+                                nearDist,
+                                tree2.shapes(),
+                                shape2,
+                                tree1.shapes(),
+                                shape1
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 // Number of elements in node.
 template <class Type>
 Foam::label Foam::indexedOctree<Type>::countElements
@@ -2617,6 +2791,30 @@ Foam::indexedOctree<Type>::getVolumeType
     }
 
     return getVolumeType(0, sample);
+}
+
+
+template <class Type>
+template <class CompareOp>
+void Foam::indexedOctree<Type>::findNear
+(
+    const scalar nearDist,
+    const indexedOctree<Type>& tree2,
+    CompareOp& cop
+) const
+{
+    findNear
+    (
+        nearDist,
+        true,
+        *this,
+        nodePlusOctant(0, 0),
+        bb(),
+        tree2,
+        nodePlusOctant(0, 0),
+        tree2.bb(),
+        cop
+    );
 }
 
 

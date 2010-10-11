@@ -336,6 +336,22 @@ private:
                 labelHashSet& elements
             ) const;
 
+
+            template <class CompareOp>
+            static void findNear
+            (
+                const scalar nearDist,
+                const bool okOrder,
+                const indexedOctree<Type>& tree1,
+                const labelBits index1,
+                const treeBoundBox& bb1,
+                const indexedOctree<Type>& tree2,
+                const labelBits index2,
+                const treeBoundBox& bb2,
+                CompareOp& cop
+            );
+
+
         // Other
 
             //- Count number of elements on this and sublevels
@@ -580,6 +596,16 @@ public:
                 const scalar nearestDistSqr,
                 const point& sample
             );
+
+            //- Find near pairs and apply CompareOp to them.
+            //  tree2 can be *this or different tree.
+            template <class CompareOp>
+            void findNear
+            (
+                const scalar nearDist,
+                const indexedOctree<Type>& tree2,
+                CompareOp& cop
+            ) const;
 
 
         // Write

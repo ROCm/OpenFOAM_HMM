@@ -25,7 +25,7 @@ Application
     Co
 
 Description
-    Calculates and writes the Co number as a surfaceScalarField obtained
+    Calculates and writes the Co number as a volScalarField obtained
     from field phi.
 
     The -noWrite option just outputs the max values without writing the
@@ -37,52 +37,6 @@ Description
 #include "fvc.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    tmp<volScalarField> Co(const surfaceScalarField& Cof)
-    {
-        const fvMesh& mesh = Cof.mesh();
-
-        tmp<volScalarField> tCo
-        (
-            new volScalarField
-            (
-                IOobject
-                (
-                    "Co",
-                    mesh.time().timeName(),
-                    mesh
-                ),
-                mesh,
-                dimensionedScalar("0", Cof.dimensions(), 0)
-            )
-        );
-
-        volScalarField& Co = tCo();
-
-        // Set local references to mesh data
-        const unallocLabelList& owner = mesh.owner();
-        const unallocLabelList& neighbour = mesh.neighbour();
-
-        forAll(owner, facei)
-        {
-            label own = owner[facei];
-            label nei = neighbour[facei];
-
-            Co[own] = max(Co[own], Cof[facei]);
-            Co[nei] = max(Co[nei], Cof[facei]);
-        }
-
-        forAll(Co.boundaryField(), patchi)
-        {
-            Co.boundaryField()[patchi] = Cof.boundaryField()[patchi];
-        }
-
-        return tCo;
-    }
-}
-
 
 void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
@@ -98,15 +52,28 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 
     if (phiHeader.headerOk())
     {
-        autoPtr<surfaceScalarField> CoPtr;
+        volScalarField Co
+        (
+            IOobject
+            (
+                "Co",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ
+            ),
+            mesh,
+            dimensionedScalar("0", dimless, 0),
+            zeroGradientFvPatchScalarField::typeName
+        );
 
         Info<< "    Reading phi" << endl;
         surfaceScalarField phi(phiHeader, mesh);
-        Info<< "    Calculating Co" << endl;
 
         if (phi.dimensions() == dimensionSet(1, 0, -1, 0, 0))
         {
-            // compressible
+            Info<< "    Calculating compressible Co" << endl;
+
+            Info<< "    Reading rho" << endl;
             volScalarField rho
             (
                 IOobject
@@ -119,60 +86,34 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                 mesh
             );
 
-            CoPtr.set
-            (
-                new surfaceScalarField
-                (
-                    IOobject
-                    (
-                        "Cof",
-                        runTime.timeName(),
-                        mesh,
-                        IOobject::NO_READ
-                    ),
-                    (
-                        mesh.surfaceInterpolation::deltaCoeffs()
-                      * (mag(phi)/(fvc::interpolate(rho)*mesh.magSf()))
-                      * runTime.deltaT()
-                    )
-                )
-            );
+            Co.dimensionedInternalField() =
+                (0.5*runTime.deltaT())
+               *fvc::surfaceSum(mag(phi))().dimensionedInternalField()
+               /(rho*mesh.V());
+            Co.correctBoundaryConditions();
         }
         else if (phi.dimensions() == dimensionSet(0, 3, -1, 0, 0))
         {
-            // incompressible
-            CoPtr.set
-            (
-                new surfaceScalarField
-                (
-                    IOobject
-                    (
-                        "Cof",
-                        runTime.timeName(),
-                        mesh,
-                        IOobject::NO_READ
-                    ),
-                    (
-                        mesh.surfaceInterpolation::deltaCoeffs()
-                      * (mag(phi)/mesh.magSf())
-                      * runTime.deltaT()
-                    )
-                )
-            );
+            Info<< "    Calculating incompressible Co" << endl;
+
+            Co.dimensionedInternalField() =
+                (0.5*runTime.deltaT())
+               *fvc::surfaceSum(mag(phi))().dimensionedInternalField()
+               /mesh.V();
+            Co.correctBoundaryConditions();
         }
         else
         {
             FatalErrorIn(args.executable())
                 << "Incorrect dimensions of phi: " << phi.dimensions()
-                    << abort(FatalError);
+                << abort(FatalError);
         }
 
-        Info<< "Co max : " << max(CoPtr()).value() << endl;
+        Info<< "Co max : " << max(Co).value() << endl;
 
         if (writeResults)
         {
-            CoPtr().write();
-            Co(CoPtr())().write();
+            Co.write();
         }
     }
     else
@@ -182,5 +123,6 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 
     Info<< "\nEnd\n" << endl;
 }
+
 
 // ************************************************************************* //

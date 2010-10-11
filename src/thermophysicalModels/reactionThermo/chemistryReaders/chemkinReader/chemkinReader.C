@@ -858,7 +858,7 @@ Foam::chemkinReader::chemkinReader
 :
     lineNo_(1),
     specieNames_(10),
-    speciesTable_(static_cast<const wordList&>(wordList()))
+    speciesTable_()
 {
     read(CHEMKINFileName, thermoFileName);
 }
@@ -868,7 +868,7 @@ Foam::chemkinReader::chemkinReader(const dictionary& thermoDict)
 :
     lineNo_(1),
     specieNames_(10),
-    speciesTable_(static_cast<const wordList&>(wordList()))
+    speciesTable_()
 {
     fileName chemkinFile
     (
