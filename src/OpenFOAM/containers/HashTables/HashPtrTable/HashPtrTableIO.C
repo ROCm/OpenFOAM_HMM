@@ -27,6 +27,7 @@ License
 #include "Istream.H"
 #include "Ostream.H"
 #include "INew.H"
+#include "dictionary.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -137,6 +138,21 @@ void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
 }
 
 
+template<class T, class Key, class Hash>
+template<class INew>
+void Foam::HashPtrTable<T, Key, Hash>::read
+(
+    const dictionary& dict,
+    const INew& inewt
+)
+{
+    forAllConstIter(dictionary, dict, iter)
+    {
+        insert(iter().keyword(), inewt(dict.subDict(iter().keyword())).ptr());
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
@@ -151,6 +167,13 @@ template<class T, class Key, class Hash>
 Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(Istream& is)
 {
     read(is, INew<T>());
+}
+
+
+template<class T, class Key, class Hash>
+Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(const dictionary& dict)
+{
+    read(dict, INew<T>());
 }
 
 
