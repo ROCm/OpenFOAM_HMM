@@ -44,38 +44,38 @@ Description
     The look-up table ("speciesTable") file should be in constant
 
     i.e. dictionary
+    @verbatim
+        LookUpTableFileName     "speciesTable";
 
-    LookUpTableFileName     "speciesTable";
+        EhrrCoeff       0.0;
 
-    EhrrCoeff                0.0;
+        CO2
+        {
+            Tcommon     300.;   // Common Temp
+            invTemp     true;   // Is the polynomial using inverse temperature?
+            Tlow        300.;   // Low Temp
+            Thigh       2500.;  // High Temp
 
-    CO2
-    {
-        Tcommon         300.;   // Common Temp
-        invTemp         true;   // Is the polynomial using inverse temperature?
-        Tlow            300.;   // Low Temp
-        Thigh           2500.;  // High Temp
-
-        loTcoeffs       // coeffs for T < Tcommon
-        (
-            0           //  a0            +
-            0           //  a1*T          +
-            0           //  a2*T^(+/-)2   +
-            0           //  a3*T^(+/-)3   +
-            0           //  a4*T^(+/-)4   +
-            0           //  a5*T^(+/-)5   +
-        );
-        hiTcoeffs       // coeffs for T > Tcommon
-        (
-            18.741
-            -121.31e3
-            273.5e6
-            -194.05e9
-            56.31e12
-            -5.8169e15
-        );
-
-    }
+            loTcoeffs           // coeffs for T < Tcommon
+            (
+                0               //  a0            +
+                0               //  a1*T          +
+                0               //  a2*T^(+/-)2   +
+                0               //  a3*T^(+/-)3   +
+                0               //  a4*T^(+/-)4   +
+                0               //  a5*T^(+/-)5   +
+            );
+            hiTcoeffs           // coeffs for T > Tcommon
+            (
+                18.741
+                -121.31e3
+                273.5e6
+                -194.05e9
+                56.31e12
+                -5.8169e15
+            );
+        }
+    @endverbatim
 
 SourceFiles
     greyMeanAbsorptionEmission.C

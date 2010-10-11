@@ -31,6 +31,7 @@ License
 
 const Foam::scalar Foam::liquidMixture::TrMax = 0.999;
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::liquidMixture::liquidMixture
@@ -41,32 +42,26 @@ Foam::liquidMixture::liquidMixture
     components_(thermophysicalProperties.lookup("liquidComponents")),
     properties_(components_.size())
 {
-    // use sub-dictionary "liquidProperties" if possible to avoid
+    // can use sub-dictionary "liquidProperties" to avoid
     // collisions with identically named gas-phase entries
     // (eg, H2O liquid vs. gas)
+    const dictionary* subDictPtr = thermophysicalProperties.subDictPtr
+    (
+        "liquidProperties"
+    );
+
+    const dictionary& props =
+    (
+        subDictPtr ? *subDictPtr : thermophysicalProperties
+    );
+
     forAll(components_, i)
     {
-        const dictionary* subDictPtr = thermophysicalProperties.subDictPtr
+        properties_.set
         (
-            "liquidProperties"
+            i,
+            liquid::New(props.lookup(components_[i]))
         );
-
-        if (subDictPtr)
-        {
-            properties_.set
-            (
-                i,
-                liquid::New(subDictPtr->lookup(components_[i]))
-            );
-        }
-        else
-        {
-            properties_.set
-            (
-                i,
-                liquid::New(thermophysicalProperties.lookup(components_[i]))
-            );
-        }
     }
 }
 
