@@ -110,6 +110,9 @@ public:
         //- Construct from Istream
         N2(Istream& is);
 
+        //- Construct from dictionary
+        N2(const dictionary& dict);
+
 
     // Member Functions
 
