@@ -90,6 +90,11 @@ public:
 
     // Member Functions
 
+        virtual bool ascii() const
+        {
+            return false;
+        }
+
         virtual void write(const char* val)
         {
             char buffer[80] = {0};

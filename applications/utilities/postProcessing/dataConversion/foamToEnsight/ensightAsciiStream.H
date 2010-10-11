@@ -94,6 +94,11 @@ public:
 
     // Member Functions
 
+        virtual bool ascii() const
+        {
+            return true;
+        }
+
         virtual void write(const char* c)
         {
             str_ << c << nl;

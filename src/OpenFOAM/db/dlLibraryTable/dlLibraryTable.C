@@ -82,9 +82,8 @@ bool Foam::dlLibraryTable::open(const fileName& functionLibName)
         }
         else
         {
-            if (!loadedLibraries.found(functionLibPtr))
+            if (loadedLibraries.insert(functionLibPtr, functionLibName))
             {
-                loadedLibraries.insert(functionLibPtr, functionLibName);
                 return true;
             }
             else

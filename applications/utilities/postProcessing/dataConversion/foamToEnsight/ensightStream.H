@@ -86,6 +86,8 @@ public:
             return name_;
         }
 
+        virtual bool ascii() const = 0;
+
         virtual void write(const char*) = 0;
 
         virtual void write(const int) = 0;

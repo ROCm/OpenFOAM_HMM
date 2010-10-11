@@ -32,68 +32,21 @@ License
 #include "volPointInterpolation.H"
 #include "ensightBinaryStream.H"
 #include "ensightAsciiStream.H"
+#include "globalIndex.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-scalarField map
-(
-    const Field<Type>& vf,
-    const labelList& map,
-    const label cmpt
-)
-{
-    scalarField mf(map.size());
-
-    forAll(map, i)
-    {
-        mf[i] = component(vf[map[i]], cmpt);
-    }
-
-    return mf;
-}
-
-
-template<class Type>
-scalarField map
-(
-    const Field<Type>& vf,
-    const labelList& map1,
-    const labelList& map2,
-    const label cmpt
-)
-{
-    scalarField mf(map1.size() + map2.size());
-
-    forAll(map1, i)
-    {
-        mf[i] = component(vf[map1[i]], cmpt);
-    }
-
-    label offset = map1.size();
-
-    forAll(map2, i)
-    {
-        mf[i + offset] = component(vf[map2[i]], cmpt);
-    }
-
-    return mf;
-}
-
-
-template<class Type>
-void writeAllData
+void writeField
 (
     const char* key,
     const Field<Type>& vf,
-    const labelList& prims,
-    const label nPrims,
     ensightStream& ensightFile
 )
 {
-    if (nPrims)
+    if (returnReduce(vf.size(), sumOp<label>()) > 0)
     {
         if (Pstream::master())
         {
@@ -101,8 +54,7 @@ void writeAllData
 
             for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
             {
-                scalarField masterData(map(vf, prims, cmpt));
-                ensightFile.write(masterData);
+                ensightFile.write(vf.component(cmpt));
 
                 for (int slave=1; slave<Pstream::nProcs(); slave++)
                 {
@@ -117,48 +69,7 @@ void writeAllData
             for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
             {
                 OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-                toMaster<< map(vf, prims, cmpt);
-            }
-        }
-    }
-}
-
-
-template<class Type>
-void writeAllFaceData
-(
-    const char* key,
-    const labelList& prims,
-    const label nPrims,
-    const Field<Type>& pf,
-    ensightStream& ensightFile
-)
-{
-    if (nPrims)
-    {
-        if (Pstream::master())
-        {
-            ensightFile.write(key);
-
-            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
-            {
-                ensightFile.write(map(pf, prims, cmpt));
-
-                for (int slave=1; slave<Pstream::nProcs(); slave++)
-                {
-                    IPstream fromSlave(Pstream::scheduled, slave);
-                    scalarField pf(fromSlave);
-
-                    ensightFile.write(pf);
-                }
-            }
-        }
-        else
-        {
-            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
-            {
-                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-                toMaster<< map(pf, prims, cmpt);
+                toMaster<< vf.component(cmpt);
             }
         }
     }
@@ -183,30 +94,24 @@ bool writePatchField
             ensightFile.writePartHeader(ensightPatchI);
         }
 
-        writeAllFaceData
+        writeField
         (
             "tria3",
-            boundaryFaceSet.tris,
-            nfp.nTris,
-            pf,
+            Field<Type>(pf, boundaryFaceSet.tris),
             ensightFile
         );
 
-        writeAllFaceData
+        writeField
         (
             "quad4",
-            boundaryFaceSet.quads,
-            nfp.nQuads,
-            pf,
+            Field<Type>(pf, boundaryFaceSet.quads),
             ensightFile
         );
 
-        writeAllFaceData
+        writeField
         (
             "nsided",
-            boundaryFaceSet.polys,
-            nfp.nPolys,
-            pf,
+            Field<Type>(pf, boundaryFaceSet.polys),
             ensightFile
         );
 
@@ -369,8 +274,7 @@ void ensightField
     const labelList& tets = meshCellSets.tets;
     const labelList& pyrs = meshCellSets.pyrs;
     const labelList& prisms = meshCellSets.prisms;
-    const labelList& wedges = meshCellSets.wedges;
-    const labelList& hexes = meshCellSets.hexes;
+    const labelList& hexesWedges = meshCellSets.hexesWedges;
     const labelList& polys = meshCellSets.polys;
 
     ensightStream* ensightFilePtr = NULL;
@@ -421,68 +325,38 @@ void ensightField
             ensightFile.writePartHeader(1);
         }
 
-        if (meshCellSets.nHexesWedges)
-        {
-            if (Pstream::master())
-            {
-                ensightFile.write("hexa8");
+        writeField
+        (
+            "hexa8",
+            Field<Type>(vf, hexesWedges),
+            ensightFile
+        );
 
-                for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
-                {
-                    scalarField masterData(map(vf, hexes, wedges, cmpt));
-                    ensightFile.write(masterData);
-
-                    for (int slave=1; slave<Pstream::nProcs(); slave++)
-                    {
-                        IPstream fromSlave(Pstream::scheduled, slave);
-                        scalarField data(fromSlave);
-                        ensightFile.write(data);
-                    }
-                }
-            }
-            else
-            {
-                for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
-                {
-                    OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-                    toMaster<< map(vf, hexes, wedges, cmpt);
-                }
-            }
-        }
-
-        writeAllData
+        writeField
         (
             "penta6",
-            vf,
-            prisms,
-            meshCellSets.nPrisms,
+            Field<Type>(vf, prisms),
             ensightFile
         );
 
-        writeAllData
+        writeField
         (
             "pyramid5",
-            vf,
-            pyrs,
-            meshCellSets.nPyrs,
+            Field<Type>(vf, pyrs),
             ensightFile
         );
 
-        writeAllData
+        writeField
         (
             "tetra4",
-            vf,
-            tets,
-            meshCellSets.nTets,
+            Field<Type>(vf, tets),
             ensightFile
         );
 
-        writeAllData
+        writeField
         (
             "nfaced",
-            vf,
-            polys,
-            meshCellSets.nPolys,
+            Field<Type>(vf, polys),
             ensightFile
         );
     }
@@ -611,6 +485,12 @@ void ensightPointField
 
     word timeFile = prepend + itoa(timeIndex);
 
+    const fvMesh& mesh = eMesh.mesh();
+    const wordList& allPatchNames = eMesh.allPatchNames();
+    const wordHashSet& patchNames = eMesh.patchNames();
+    const wordHashSet& faceZoneNames = eMesh.faceZoneNames();
+
+
     ensightStream* ensightFilePtr = NULL;
     if (Pstream::master())
     {
@@ -622,7 +502,7 @@ void ensightPointField
             ensightFilePtr = new ensightBinaryStream
             (
                 postProcPath/ensightFileName,
-                eMesh.mesh().time()
+                mesh.time()
             );
         }
         else
@@ -630,7 +510,7 @@ void ensightPointField
             ensightFilePtr = new ensightAsciiStream
             (
                 postProcPath/ensightFileName,
-                eMesh.mesh().time()
+                mesh.time()
             );
         }
     }
@@ -656,38 +536,111 @@ void ensightPointField
             }
 
             ensightFile.write(pTraits<Type>::typeName);
-            ensightFile.write("part");
-            ensightFile.write(1);
+            ensightFile.writePartHeader(1);
         }
 
-        if (Pstream::master())
-        {
-            ensightFile.write("coordinates");
-
-            Field<Type> uniqueFld(pf.internalField(), eMesh.uniquePointMap());
-
-            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
-            {
-                ensightFile.write(uniqueFld.component(cmpt));
-
-                for (int slave=1; slave<Pstream::nProcs(); slave++)
-                {
-                    IPstream fromSlave(Pstream::scheduled, slave);
-                    scalarField data(fromSlave);
-                    ensightFile.write(data);
-                }
-            }
-        }
-        else
-        {
-            Field<Type> uniqueFld(pf.internalField(), eMesh.uniquePointMap());
-            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
-            {
-                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
-                toMaster<< uniqueFld.component(cmpt);
-            }
-        }
+        writeField
+        (
+            "coordinates",
+            Field<Type>(pf.internalField(), eMesh.uniquePointMap()),
+            ensightFile
+        );
     }
+
+
+     label ensightPatchI = eMesh.patchPartOffset();
+ 
+     forAll(allPatchNames, patchi)
+     {
+         const word& patchName = allPatchNames[patchi];
+ 
+         eMesh.barrier();
+ 
+         if (patchNames.empty() || patchNames.found(patchName))
+         {
+             const fvPatch& p = mesh.boundary()[patchi];
+             if
+             (
+                 returnReduce(p.size(), sumOp<label>())
+               > 0
+             )
+             {
+                 // Renumber the patch points/faces into unique points
+                 labelList pointToGlobal;
+                 labelList uniqueMeshPointLabels;
+                 autoPtr<globalIndex> globalPointsPtr =
+                 mesh.globalData().mergePoints
+                 (
+                     p.patch().meshPoints(),
+                     p.patch().meshPointMap(),
+                     pointToGlobal,
+                     uniqueMeshPointLabels
+                 );
+ 
+                 if (Pstream::master())
+                 {
+                     ensightFile.writePartHeader(ensightPatchI);
+                 }
+ 
+                 writeField
+                 (
+                     "coordinates",
+                     Field<Type>(pf.internalField(), uniqueMeshPointLabels),
+                     ensightFile
+                 );
+ 
+                 ensightPatchI++;
+             }
+         }
+     }
+ 
+     // write faceZones, if requested
+     if (faceZoneNames.size())
+     {
+         forAllConstIter(wordHashSet, faceZoneNames, iter)
+         {
+             const word& faceZoneName = iter.key();
+ 
+             eMesh.barrier();
+ 
+             label zoneID = mesh.faceZones().findZoneID(faceZoneName);
+ 
+             const faceZone& fz = mesh.faceZones()[zoneID];
+ 
+             if (returnReduce(fz().nPoints(), sumOp<label>()) > 0)
+             {
+                 // Renumber the faceZone points/faces into unique points
+                 labelList pointToGlobal;
+                 labelList uniqueMeshPointLabels;
+                 autoPtr<globalIndex> globalPointsPtr =
+                 mesh.globalData().mergePoints
+                 (
+                     fz().meshPoints(),
+                     fz().meshPointMap(),
+                     pointToGlobal,
+                     uniqueMeshPointLabels
+                 );
+ 
+                 if (Pstream::master())
+                 {
+                     ensightFile.writePartHeader(ensightPatchI);
+                 }
+ 
+                 writeField
+                 (
+                     "coordinates",
+                     Field<Type>
+                     (
+                         pf.internalField(),
+                         uniqueMeshPointLabels
+                     ),
+                     ensightFile
+                 );
+ 
+                 ensightPatchI++;
+             }
+         }
+     }
 
     if (Pstream::master())
     {

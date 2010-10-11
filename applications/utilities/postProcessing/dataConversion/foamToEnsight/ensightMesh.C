@@ -114,6 +114,7 @@ void Foam::ensightMesh::correct()
         labelList& prisms = meshCellSets_.prisms;
         labelList& wedges = meshCellSets_.wedges;
         labelList& hexes = meshCellSets_.hexes;
+        labelList& hexesWedges = meshCellSets_.hexesWedges;
         labelList& polys = meshCellSets_.polys;
 
         label nTets = 0;
@@ -121,6 +122,7 @@ void Foam::ensightMesh::correct()
         label nPrisms = 0;
         label nWedges = 0;
         label nHexes = 0;
+        label nHexesWedges = 0;
         label nPolys = 0;
 
         forAll(cellShapes, cellI)
@@ -143,10 +145,12 @@ void Foam::ensightMesh::correct()
             else if (cellModel == wedge)
             {
                 wedges[nWedges++] = cellI;
+                hexesWedges[nHexesWedges++] = cellI;
             }
             else if (cellModel == hex)
             {
                 hexes[nHexes++] = cellI;
+                hexesWedges[nHexesWedges++] = cellI;
             }
             else
             {
@@ -170,7 +174,7 @@ void Foam::ensightMesh::correct()
         meshCellSets_.nPrisms = nPrisms;
         reduce(meshCellSets_.nPrisms, sumOp<label>());
 
-        meshCellSets_.nHexesWedges = nHexes + nWedges;
+        meshCellSets_.nHexesWedges = nHexesWedges;
         reduce(meshCellSets_.nHexesWedges, sumOp<label>());
 
         meshCellSets_.nPolys = nPolys;
@@ -508,23 +512,43 @@ void Foam::ensightMesh::writePrims
     // Create a temp int array
     if (cellShapes.size())
     {
-        // All the cellShapes have the same number of elements!
-        int numIntElem = cellShapes.size()*cellShapes[0].size();
-        List<int> temp(numIntElem);
-
-        int n = 0;
-
-        forAll(cellShapes, i)
+        if (ensightGeometryFile.ascii())
         {
-            const cellShape& cellPoints = cellShapes[i];
+            // Workaround for paraview issue : write one cell per line
 
-            forAll(cellPoints, pointI)
+            forAll(cellShapes, i)
             {
-                temp[n] = cellPoints[pointI] + 1;
-                n++;
+                const cellShape& cellPoints = cellShapes[i];
+
+                List<int> temp(cellPoints.size());
+
+                forAll(cellPoints, pointI)
+                {
+                    temp[pointI] = cellPoints[pointI] + 1;
+                }
+                ensightGeometryFile.write(temp);
             }
         }
-        ensightGeometryFile.write(temp);
+        else
+        {
+            // All the cellShapes have the same number of elements!
+            int numIntElem = cellShapes.size()*cellShapes[0].size();
+            List<int> temp(numIntElem);
+
+            int n = 0;
+
+            forAll(cellShapes, i)
+            {
+                const cellShape& cellPoints = cellShapes[i];
+
+                forAll(cellPoints, pointI)
+                {
+                    temp[n] = cellPoints[pointI] + 1;
+                    n++;
+                }
+            }
+            ensightGeometryFile.write(temp);
+        }
     }
 }
 
