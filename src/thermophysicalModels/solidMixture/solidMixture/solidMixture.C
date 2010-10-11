@@ -41,7 +41,7 @@ Foam::solidMixture::solidMixture
         properties_.set
         (
             i,
-            solid::New(thermophysicalProperties.lookup(components_[i]))
+            solid::New(thermophysicalProperties.subDict(components_[i]))
         );
     }
 }
