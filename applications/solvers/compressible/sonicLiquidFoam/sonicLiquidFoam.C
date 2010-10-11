@@ -71,8 +71,8 @@ int main(int argc, char *argv[])
 
         for (int corr=0; corr<nCorr; corr++)
         {
-            volScalarField rUA = 1.0/UEqn.A();
-            U = rUA*UEqn.H();
+            volScalarField rAU = 1.0/UEqn.A();
+            U = rAU*UEqn.H();
 
             surfaceScalarField phid
             (
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
                 psi
                *(
                     (fvc::interpolate(U) & mesh.Sf())
-                  + fvc::ddtPhiCorr(rUA, rho, U, phi)
+                  + fvc::ddtPhiCorr(rAU, rho, U, phi)
                 )
             );
 
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
                 fvm::ddt(psi, p)
               + fvc::div(phi)
               + fvm::div(phid, p)
-              - fvm::laplacian(rho*rUA, p)
+              - fvm::laplacian(rho*rAU, p)
             );
 
             pEqn.solve();
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
 
             #include "compressibleContinuityErrs.H"
 
-            U -= rUA*fvc::grad(p);
+            U -= rAU*fvc::grad(p);
             U.correctBoundaryConditions();
         }
 

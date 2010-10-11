@@ -1,7 +1,7 @@
 rho = thermo.rho();
 
-volScalarField rUA = 1.0/UEqn.A();
-U = rUA*UEqn.H();
+volScalarField rAU = 1.0/UEqn.A();
+U = rAU*UEqn.H();
 
 surfaceScalarField phid
 (
@@ -9,7 +9,7 @@ surfaceScalarField phid
     fvc::interpolate(psi)
    *(
         (fvc::interpolate(U) & mesh.Sf())
-      + fvc::ddtPhiCorr(rUA, rho, U, phi)
+      + fvc::ddtPhiCorr(rAU, rho, U, phi)
     )
 );
 
@@ -19,7 +19,7 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     (
         fvm::ddt(psi, p)
       + fvm::div(phid, p)
-      - fvm::laplacian(rho*rUA, p)
+      - fvm::laplacian(rho*rAU, p)
     );
 
     pEqn.solve();
@@ -33,5 +33,5 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 #include "rhoEqn.H"
 #include "compressibleContinuityErrs.H"
 
-U -= rUA*fvc::grad(p);
+U -= rAU*fvc::grad(p);
 U.correctBoundaryConditions();
