@@ -46,6 +46,7 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 
 #include "continuityErrs.H"
 
+// Explicitly relax pressure for momentum corrector
 p.relax();
 
 // Make the fluxes relative to the mesh motion

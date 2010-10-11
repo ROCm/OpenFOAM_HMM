@@ -21,7 +21,7 @@ solvers
     {
         solver          PCG;
         preconditioner  DIC;
-        tolerance       0.01;
+        tolerance       0.02;
         relTol          0;
     }
 
@@ -30,7 +30,7 @@ solvers
         solver          PCG;
         preconditioner  DIC;
         tolerance       1e-06;
-        relTol          0.05;
+        relTol          0.01;
     }
 
     pFinal
@@ -66,10 +66,16 @@ solvers
 
 PIMPLE
 {
+    correctPhi          yes;
     nOuterCorrectors    2;
     nCorrectors         1;
     nNonOrthogonalCorrectors 0;
 }
 
+relaxationFactors
+{
+    U        1;
+    UFinal   1;
+}
 
 // ************************************************************************* //
