@@ -81,6 +81,13 @@ public:
             Istream& is
         );
 
+        //- Construct from dictionary
+        inline LangmuirHinshelwoodReactionRate
+        (
+            const speciesTable& species,
+            const dictionary& dict
+        );
+
 
     // Member Functions
 

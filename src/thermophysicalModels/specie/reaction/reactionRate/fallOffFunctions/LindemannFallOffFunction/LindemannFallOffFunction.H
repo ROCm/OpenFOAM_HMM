@@ -65,6 +65,9 @@ public:
         //- Construct from Istream
         inline LindemannFallOffFunction(Istream&);
 
+        //- Construct from dictionary
+        inline LindemannFallOffFunction(const dictionary& dict);
+
 
     // Member Functions
 

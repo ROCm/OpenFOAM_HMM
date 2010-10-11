@@ -23,35 +23,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-inline powerSeriesReactionRate::powerSeriesReactionRate
+inline Foam::powerSeriesReactionRate::powerSeriesReactionRate
 (
     const scalar A,
     const scalar beta,
     const scalar Ta,
-    const scalar b[]
+    const FixedList<scalar, nb_> b
 )
 :
     A_(A),
     beta_(beta),
-    Ta_(Ta)
-{
-    for (int n=0; n<nb_; n++)
-    {
-        b_[n] = b[n];
-    }
-}
+    Ta_(Ta),
+    b_(b)
+{}
 
 
-//- Construct from Istream
-inline powerSeriesReactionRate::powerSeriesReactionRate
+inline Foam::powerSeriesReactionRate::powerSeriesReactionRate
 (
     const speciesTable&,
     Istream& is
@@ -59,20 +48,29 @@ inline powerSeriesReactionRate::powerSeriesReactionRate
 :
     A_(readScalar(is.readBegin("powerSeriesReactionRate(Istream&)"))),
     beta_(readScalar(is)),
-    Ta_(readScalar(is))
+    Ta_(readScalar(is)),
+    b_(is)
 {
-    for (int n=0; n<nb_; n++)
-    {
-        is >> b_[n];
-    }
-
     is.readEnd("powerSeriesReactionRate(Istream&)");
 }
 
 
+inline Foam::powerSeriesReactionRate::powerSeriesReactionRate
+(
+    const speciesTable&,
+    const dictionary& dict
+)
+:
+    A_(readScalar(dict.lookup("A"))),
+    beta_(readScalar(dict.lookup("beta"))),
+    Ta_(readScalar(dict.lookup("Ta"))),
+    b_(dict.lookup("coeffs"))
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline scalar powerSeriesReactionRate::operator()
+inline Foam::scalar Foam::powerSeriesReactionRate::operator()
 (
     const scalar T,
     const scalar,
@@ -99,7 +97,11 @@ inline scalar powerSeriesReactionRate::operator()
 }
 
 
-inline Ostream& operator<<(Ostream& os, const powerSeriesReactionRate& psrr)
+inline Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const powerSeriesReactionRate& psrr
+)
 {
     os  << token::BEGIN_LIST
         << psrr.A_ << token::SPACE << psrr.beta_ << token::SPACE << psrr.Ta_;
@@ -114,9 +116,5 @@ inline Ostream& operator<<(Ostream& os, const powerSeriesReactionRate& psrr)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

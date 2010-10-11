@@ -25,7 +25,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 inline Foam::SRIFallOffFunction::SRIFallOffFunction
 (
     const scalar a,
@@ -43,7 +42,6 @@ inline Foam::SRIFallOffFunction::SRIFallOffFunction
 {}
 
 
-// Construct from Istream
 inline Foam::SRIFallOffFunction::SRIFallOffFunction(Istream& is)
 :
     a_(readScalar(is.readBegin("SRIFallOffFunction(Istream&)"))),
@@ -54,6 +52,16 @@ inline Foam::SRIFallOffFunction::SRIFallOffFunction(Istream& is)
 {
     is.readEnd("SRIFallOffFunction(Istream&)");
 }
+
+
+inline Foam::SRIFallOffFunction::SRIFallOffFunction(const dictionary& dict)
+:
+    a_(readScalar(dict.lookup("a"))),
+    b_(readScalar(dict.lookup("b"))),
+    c_(readScalar(dict.lookup("c"))),
+    d_(readScalar(dict.lookup("d"))),
+    e_(readScalar(dict.lookup("e")))
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

@@ -117,6 +117,9 @@ public:
         //- Construct from Istream
         eConstThermo(Istream&);
 
+        //- Construct from dictionary
+        eConstThermo(const dictionary& dict);
+
         //- Construct as named copy
         inline eConstThermo(const word&, const eConstThermo&);
 
@@ -125,6 +128,9 @@ public:
 
         // Selector from Istream
         inline static autoPtr<eConstThermo> New(Istream& is);
+
+        // Selector from dictionary
+        inline static autoPtr<eConstThermo> New(const dictionary& dict);
 
 
     // Member Functions

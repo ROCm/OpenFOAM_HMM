@@ -152,6 +152,19 @@ public:
             (species, thermoDatabase, is)
         );
 
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            Reaction,
+            dictionary,
+            (
+                const speciesTable& species,
+                const HashPtrTable<ReactionThermo>& thermoDatabase,
+                const dictionary& dict
+            ),
+            (species, thermoDatabase, dict)
+        );
+
 
     // Public classes
 
@@ -205,6 +218,14 @@ public:
             Istream& is
         );
 
+        //- Construct from dictionary
+        Reaction
+        (
+            const speciesTable& species,
+            const HashPtrTable<ReactionThermo>& thermoDatabase,
+            const dictionary& dict
+        );
+
         //- Construct and return a clone
         virtual autoPtr<Reaction<ReactionThermo> > clone() const
         {
@@ -229,12 +250,20 @@ public:
 
     // Selectors
 
-        //- Return a pointer to a new patchField created on freestore from input
+        //- Return a pointer to new patchField created on freestore from input
         static autoPtr<Reaction<ReactionThermo> > New
         (
             const speciesTable& species,
             const HashPtrTable<ReactionThermo>& thermoDatabase,
-            Istream&
+            Istream& is
+        );
+
+        //- Return a pointer to new patchField created on freestore from dict
+        static autoPtr<Reaction<ReactionThermo> > New
+        (
+            const speciesTable& species,
+            const HashPtrTable<ReactionThermo>& thermoDatabase,
+            const dictionary& dict
         );
 
 

@@ -40,6 +40,21 @@ Foam::polynomialTransport<Thermo, PolySize>::polynomialTransport(Istream& is)
 }
 
 
+template<class Thermo, int PolySize>
+Foam::polynomialTransport<Thermo, PolySize>::polynomialTransport
+(
+    const dictionary& dict
+)
+:
+    Thermo(dict),
+    muPolynomial_(dict.lookup("muPolynomial")),
+    kappaPolynomial_(dict.lookup("kappaPolynomial"))
+{
+    muPolynomial_ *= this->W();
+    kappaPolynomial_ *= this->W();
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class Thermo, int PolySize>

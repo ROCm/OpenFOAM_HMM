@@ -91,6 +91,13 @@ public:
             Istream& is
         );
 
+        //- Construct from dictionary
+        inline ChemicallyActivatedReactionRate
+        (
+            const speciesTable& species,
+            const dictionary& dict
+        );
+
 
     // Member Functions
 

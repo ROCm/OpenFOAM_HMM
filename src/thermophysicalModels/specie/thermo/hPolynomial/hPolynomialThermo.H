@@ -135,8 +135,11 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary
+        //- Construct from Istream
         hPolynomialThermo(Istream& is);
+
+        //- Construct from dictionary
+        hPolynomialThermo(const dictionary& dict);
 
         //- Construct as copy
         inline hPolynomialThermo(const hPolynomialThermo&);

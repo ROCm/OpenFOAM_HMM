@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,21 +22,25 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::thirdBodyArrheniusReactionRate
+    Foam::ReactionList
 
 Description
-    Arrhenius reaction rate enhanced by third-body interation.
+    List of templated reactions
 
 SourceFiles
-    thirdBodyArrheniusReactionRateI.H
+    ReactionList.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef thirdBodyArrheniusReactionRate_H
-#define thirdBodyArrheniusReactionRate_H
+#ifndef ReactionList_H
+#define ReactionList_H
 
-#include "ArrheniusReactionRate.H"
-#include "thirdBodyEfficiencies.H"
+#include "PtrList.H"
+#include "SLPtrList.H"
+#include "speciesTable.H"
+#include "HashPtrTable.H"
+#include "Reaction.H"
+#include "fileName.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,71 +48,75 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class thirdBodyArrheniusReactionRate Declaration
+                      Class ReactionList Declaration
 \*---------------------------------------------------------------------------*/
 
-class thirdBodyArrheniusReactionRate
+template<class ThermoType>
+class ReactionList
 :
-    ArrheniusReactionRate
+    private PtrList<Reaction<ThermoType> >
 {
     // Private data
 
-        thirdBodyEfficiencies thirdBodyEfficiencies_;
+        //- Reference to the table of species
+        const speciesTable& species_;
+
+        //- Reference to the thermo database
+        const HashPtrTable<ThermoType>& thermoDb_;
+
+        //- The dictionary used for construction
+        const dictionary dict_;
+
+
+    // Private Member Functions
+
+        //- Disallow default bitwise assignment
+        void operator=(const ReactionList&);
 
 
 public:
 
     // Constructors
 
-        //- Construct from components
-        inline thirdBodyArrheniusReactionRate
-        (
-            const scalar A,
-            const scalar beta,
-            const scalar Ta,
-            const thirdBodyEfficiencies& tbes
-        );
-
-        //- Construct from Istream
-        inline thirdBodyArrheniusReactionRate
+        //- Construct null
+        ReactionList
         (
             const speciesTable& species,
-            Istream& is
+            const HashPtrTable<ThermoType>& thermoDatabase
         );
 
         //- Construct from dictionary
-        inline thirdBodyArrheniusReactionRate
+        ReactionList
         (
             const speciesTable& species,
+            const HashPtrTable<ThermoType>& thermoDatabase,
             const dictionary& dict
         );
 
-
-    // Member Functions
-
-        //- Return the type name
-        static word type()
-        {
-            return "thirdBodyArrhenius";
-        }
-
-        inline scalar operator()
+        //- Construct from file using (Istream)
+        ReactionList
         (
-            const scalar T,
-            const scalar p,
-            const scalarField& c
-        ) const;
-
-
-    // Ostream Operator
-
-        inline friend Ostream& operator<<
-        (
-            Ostream&,
-            const thirdBodyArrheniusReactionRate&
+            const speciesTable& species,
+            const HashPtrTable<ThermoType>& thermoDatabase,
+            const fileName& fName
         );
-};
 
+        //- Construct copy
+        ReactionList(const ReactionList<ThermoType>& reactions);
+
+
+    //- Destructor
+    ~ReactionList();
+
+
+    // Public Member Functions
+
+        //- Read reactions from dictionary
+        bool readReactionDict();
+
+        //- Return the list of reactions
+        const PtrList<Reaction<ThermoType> >& reactions() const;
+};
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -116,7 +124,9 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "thirdBodyArrheniusReactionRateI.H"
+#ifdef NoRepository
+#   include "ReactionList.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

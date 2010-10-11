@@ -76,6 +76,9 @@ public:
         //- Construct from Istream
         inline TroeFallOffFunction(Istream&);
 
+        //- Construct from dictionary
+        inline TroeFallOffFunction(const dictionary& dict);
+
 
     // Member Functions
 

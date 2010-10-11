@@ -25,13 +25,18 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct null
 inline Foam::LindemannFallOffFunction::LindemannFallOffFunction()
 {}
 
 
-//- Construct from Istream
 inline Foam::LindemannFallOffFunction::LindemannFallOffFunction(Istream&)
+{}
+
+
+inline Foam::LindemannFallOffFunction::LindemannFallOffFunction
+(
+    const dictionary& dict
+)
 {}
 
 

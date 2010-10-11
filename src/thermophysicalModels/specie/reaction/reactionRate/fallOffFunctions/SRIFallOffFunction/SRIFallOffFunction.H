@@ -76,6 +76,9 @@ public:
         //- Construct from Istream
         inline SRIFallOffFunction(Istream&);
 
+        //- Construct from dictionary
+        inline SRIFallOffFunction(const dictionary& dict);
+
 
     // Member Functions
 

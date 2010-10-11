@@ -46,6 +46,13 @@ Foam::specieThermo<thermo>::specieThermo(Istream& is)
 }
 
 
+template<class thermo>
+Foam::specieThermo<thermo>::specieThermo(const dictionary& dict)
+:
+    thermo(dict)
+{}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 template<class thermo>

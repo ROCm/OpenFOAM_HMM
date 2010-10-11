@@ -119,6 +119,9 @@ public:
         //- Construct from Istream
         constTransport(Istream&);
 
+        //- Construct from dictionary
+        constTransport(const dictionary& dict);
+
 
     // Member functions
 

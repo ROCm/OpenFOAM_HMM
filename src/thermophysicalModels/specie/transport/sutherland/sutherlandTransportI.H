@@ -51,7 +51,6 @@ inline void sutherlandTransport<thermo>::calcCoeffs
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 template<class thermo>
 inline sutherlandTransport<thermo>::sutherlandTransport
 (
@@ -66,7 +65,6 @@ inline sutherlandTransport<thermo>::sutherlandTransport
 {}
 
 
-// Construct from components
 template<class thermo>
 inline sutherlandTransport<thermo>::sutherlandTransport
 (
@@ -81,7 +79,6 @@ inline sutherlandTransport<thermo>::sutherlandTransport
 }
 
 
-//- Construct as named copy
 template<class thermo>
 inline sutherlandTransport<thermo>::sutherlandTransport
 (
@@ -95,7 +92,6 @@ inline sutherlandTransport<thermo>::sutherlandTransport
 {}
 
 
-// Construct and return a clone
 template<class thermo>
 inline autoPtr<sutherlandTransport<thermo> > sutherlandTransport<thermo>::clone
 () const
@@ -107,7 +103,6 @@ inline autoPtr<sutherlandTransport<thermo> > sutherlandTransport<thermo>::clone
 }
 
 
-// Selector from Istream
 template<class thermo>
 inline autoPtr<sutherlandTransport<thermo> > sutherlandTransport<thermo>::New
 (
@@ -117,6 +112,19 @@ inline autoPtr<sutherlandTransport<thermo> > sutherlandTransport<thermo>::New
     return autoPtr<sutherlandTransport<thermo> >
     (
         new sutherlandTransport<thermo>(is)
+    );
+}
+
+
+template<class thermo>
+inline autoPtr<sutherlandTransport<thermo> > sutherlandTransport<thermo>::New
+(
+    const dictionary& dict
+)
+{
+    return autoPtr<sutherlandTransport<thermo> >
+    (
+        new sutherlandTransport<thermo>(dict)
     );
 }
 
@@ -131,7 +139,6 @@ inline scalar sutherlandTransport<thermo>::mu(const scalar T) const
 }
 
 
-// Thermal conductivity [W/mK]
 template<class thermo>
 inline scalar sutherlandTransport<thermo>::kappa(const scalar T) const
 {
@@ -140,7 +147,6 @@ inline scalar sutherlandTransport<thermo>::kappa(const scalar T) const
 }
 
 
-// Thermal diffusivity for enthalpy [kg/ms]
 template<class thermo>
 inline scalar sutherlandTransport<thermo>::alpha(const scalar T) const
 {

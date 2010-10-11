@@ -50,7 +50,7 @@ Ostream& operator<<(Ostream&, const thirdBodyEfficiencies&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class thirdBodyEfficiencies Declaration
+                  Class thirdBodyEfficiencies Declaration
 \*---------------------------------------------------------------------------*/
 
 class thirdBodyEfficiencies
@@ -78,6 +78,13 @@ public:
         (
             const speciesTable& species,
             Istream& is
+        );
+
+        //- Construct from dictionary
+        inline thirdBodyEfficiencies
+        (
+            const speciesTable& species,
+            const dictionary& dict
         );
 
 

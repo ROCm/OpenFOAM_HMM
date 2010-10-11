@@ -43,6 +43,16 @@ icoPolynomial<PolySize>::icoPolynomial(Istream& is)
 }
 
 
+template<int PolySize>
+icoPolynomial<PolySize>::icoPolynomial(const dictionary& dict)
+:
+    specie(dict),
+    rhoPolynomial_(dict.lookup("rhoPolynomial"))
+{
+    rhoPolynomial_ *= this->W();
+}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 template<int PolySize>

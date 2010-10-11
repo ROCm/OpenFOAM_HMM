@@ -23,35 +23,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-inline JanevReactionRate::JanevReactionRate
+inline Foam::JanevReactionRate::JanevReactionRate
 (
     const scalar A,
     const scalar beta,
     const scalar Ta,
-    const scalar b[]
+    const FixedList<scalar, nb_> b
 )
 :
     A_(A),
     beta_(beta),
-    Ta_(Ta)
-{
-    for (int n=0; n<nb_; n++)
-    {
-        b_[n] = b[n];
-    }
-}
+    Ta_(Ta),
+    b_(b)
+{}
 
 
-//- Construct from Istream
-inline JanevReactionRate::JanevReactionRate
+inline Foam::JanevReactionRate::JanevReactionRate
 (
     const speciesTable&,
     Istream& is
@@ -59,20 +48,29 @@ inline JanevReactionRate::JanevReactionRate
 :
     A_(readScalar(is.readBegin("JanevReactionRate(Istream&)"))),
     beta_(readScalar(is)),
-    Ta_(readScalar(is))
+    Ta_(readScalar(is)),
+    b_(is)
 {
-    for (int n=0; n<nb_; n++)
-    {
-        is >> b_[n];
-    }
-
     is.readEnd("JanevReactionRate(Istream&)");
 }
 
 
+inline Foam::JanevReactionRate::JanevReactionRate
+(
+    const speciesTable&,
+    const dictionary& dict
+)
+:
+    A_(readScalar(dict.lookup("A"))),
+    beta_(readScalar(dict.lookup("beta"))),
+    Ta_(readScalar(dict.lookup("Ta"))),
+    b_(dict.lookup("b"))
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline scalar JanevReactionRate::operator()
+inline Foam::scalar Foam::JanevReactionRate::operator()
 (
     const scalar T,
     const scalar,
@@ -106,7 +104,11 @@ inline scalar JanevReactionRate::operator()
 }
 
 
-inline Ostream& operator<<(Ostream& os, const JanevReactionRate& jrr)
+inline Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const JanevReactionRate& jrr
+)
 {
     os  << token::BEGIN_LIST
         << jrr.A_ << token::SPACE << jrr.beta_ << token::SPACE << jrr.Ta_;
@@ -121,9 +123,5 @@ inline Ostream& operator<<(Ostream& os, const JanevReactionRate& jrr)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

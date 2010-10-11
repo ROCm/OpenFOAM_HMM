@@ -44,6 +44,12 @@ speciesTransport::speciesTransport(Istream& is)
 }
 
 
+speciesTransport::speciesTransport(const dictionary& dict)
+:
+    janafThermo(dict)
+{}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Ostream& operator<<(Ostream& os, const speciesTransport& sTranport)

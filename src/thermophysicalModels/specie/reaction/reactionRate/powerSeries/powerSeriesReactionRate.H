@@ -37,6 +37,7 @@ SourceFiles
 
 #include "scalarField.H"
 #include "typeInfo.H"
+#include "FixedList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +57,7 @@ class powerSeriesReactionRate
         scalar Ta_;
 
         static const label nb_ = 4;
-        scalar b_[nb_];
+        FixedList<scalar, nb_> b_;
 
 
 public:
@@ -69,7 +70,7 @@ public:
             const scalar A,
             const scalar beta,
             const scalar Ta,
-            const scalar b[]
+            const FixedList<scalar, nb_> b
         );
 
         //- Construct from Istream
@@ -77,6 +78,13 @@ public:
         (
             const speciesTable& species,
             Istream& is
+        );
+
+        //- Construct from dictionary
+        inline powerSeriesReactionRate
+        (
+            const speciesTable& species,
+            const dictionary& dict
         );
 
 

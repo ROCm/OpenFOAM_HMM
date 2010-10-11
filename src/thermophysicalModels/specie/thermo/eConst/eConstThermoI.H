@@ -76,6 +76,17 @@ Foam::eConstThermo<equationOfState>::New(Istream& is)
 }
 
 
+template<class equationOfState>
+inline Foam::autoPtr<Foam::eConstThermo<equationOfState> >
+Foam::eConstThermo<equationOfState>::New(const dictionary& dict)
+{
+    return autoPtr<eConstThermo<equationOfState> >
+    (
+        new eConstThermo<equationOfState>(dict)
+    );
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class equationOfState>

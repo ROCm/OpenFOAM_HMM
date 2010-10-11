@@ -44,6 +44,15 @@ constTransport<thermo>::constTransport(Istream& is)
 }
 
 
+template<class thermo>
+constTransport<thermo>::constTransport(const dictionary& dict)
+:
+    thermo(dict),
+    Mu(readScalar(dict.lookup("Mu"))),
+    rPr(1.0/readScalar(dict.lookup("Pr")))
+{}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class thermo>

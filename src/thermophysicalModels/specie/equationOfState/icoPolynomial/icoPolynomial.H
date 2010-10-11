@@ -117,6 +117,9 @@ public:
         //- Construct from Istream
         icoPolynomial(Istream&);
 
+        //- Construct from dictionary
+        icoPolynomial(const dictionary& dict);
+
         //- Construct as copy
         inline icoPolynomial(const icoPolynomial&);
 
@@ -128,6 +131,9 @@ public:
 
         // Selector from Istream
         inline static autoPtr<icoPolynomial> New(Istream& is);
+
+        // Selector from dictionary
+        inline static autoPtr<icoPolynomial> New(const dictionary& dict);
 
 
     // Member functions

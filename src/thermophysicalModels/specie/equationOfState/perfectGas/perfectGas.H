@@ -63,6 +63,9 @@ public:
         //- Construct from Istream
         perfectGas(Istream&);
 
+        //- Construct from dictionary
+        perfectGas(const dictionary& dict);
+
         //- Construct as named copy
         inline perfectGas(const word& name, const perfectGas&);
 
@@ -71,6 +74,9 @@ public:
 
         // Selector from Istream
         inline static autoPtr<perfectGas> New(Istream& is);
+
+        // Selector from dictionary
+        inline static autoPtr<perfectGas> New(const dictionary& dict);
 
 
     // Member functions

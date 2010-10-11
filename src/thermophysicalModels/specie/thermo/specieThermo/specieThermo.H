@@ -124,6 +124,9 @@ public:
         //- Construct from Istream
         specieThermo(Istream&);
 
+        //- Construct from dictionary
+        specieThermo(const dictionary& dict);
+
         //- Construct as named copy
         inline specieThermo(const word& name, const specieThermo&);
 

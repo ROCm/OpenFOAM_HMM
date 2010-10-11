@@ -196,6 +196,22 @@ Foam::Reaction<ReactionThermo>::Reaction
 }
 
 
+template<class ReactionThermo>
+Foam::Reaction<ReactionThermo>::Reaction
+(
+    const speciesTable& species,
+    const HashPtrTable<ReactionThermo>& thermoDatabase,
+    const dictionary& dict
+)
+:
+    ReactionThermo(*thermoDatabase[species[0]]),
+    species_(species)
+{
+    setLRhs(IStringStream(dict.lookup("reaction"))());
+    setThermo(thermoDatabase);
+}
+
+
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 template<class ReactionThermo>
@@ -211,11 +227,11 @@ Foam::Reaction<ReactionThermo>::New
     {
         FatalIOErrorIn
         (
-            "Reaction<ReactionThermo>::New(const speciesTable& species,"
-            " const HashPtrTable<ReactionThermo>& thermoDatabase, Istream&)",
+            "Reaction<ReactionThermo>::New(const speciesTable&, "
+            " const HashPtrTable<ReactionThermo>&, Istream&)",
             is
         )   << "Reaction type not specified" << nl << nl
-            << "Valid Reaction types are :" << endl
+            << "Valid Reaction types are :" << nl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
@@ -229,12 +245,12 @@ Foam::Reaction<ReactionThermo>::New
     {
         FatalIOErrorIn
         (
-            "Reaction<ReactionThermo>::New(const speciesTable& species,"
-            " const HashPtrTable<ReactionThermo>& thermoDatabase, Istream&)",
+            "Reaction<ReactionThermo>::New(const speciesTable&, "
+            " const HashPtrTable<ReactionThermo>&, Istream&)",
             is
         )   << "Unknown reaction type "
             << reactionTypeName << nl << nl
-            << "Valid reaction types are :" << endl
+            << "Valid reaction types are :" << nl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
@@ -242,6 +258,44 @@ Foam::Reaction<ReactionThermo>::New
     return autoPtr<Reaction<ReactionThermo> >
     (
         cstrIter()(species, thermoDatabase, is)
+    );
+}
+
+
+template<class ReactionThermo>
+Foam::autoPtr<Foam::Reaction<ReactionThermo> >
+Foam::Reaction<ReactionThermo>::New
+(
+    const speciesTable& species,
+    const HashPtrTable<ReactionThermo>& thermoDatabase,
+    const dictionary& dict
+)
+{
+    const word& reactionTypeName = dict.dictName();
+
+    typename dictionaryConstructorTable::iterator cstrIter
+        = dictionaryConstructorTablePtr_->find(reactionTypeName);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "Reaction<ReactionThermo>::New"
+            "("
+                "const speciesTable&, "
+                "const HashPtrTable<ReactionThermo>&, "
+                "const dictionary&"
+            ")"
+        )   << "Unknown reaction type "
+            << reactionTypeName << nl << nl
+            << "Valid reaction types are :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<Reaction<ReactionThermo> >
+    (
+        cstrIter()(species, thermoDatabase, dict)
     );
 }
 

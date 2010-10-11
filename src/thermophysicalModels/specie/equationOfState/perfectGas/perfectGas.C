@@ -41,6 +41,12 @@ perfectGas::perfectGas(Istream& is)
 }
 
 
+perfectGas::perfectGas(const dictionary& dict)
+:
+    specie(dict)
+{}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 Ostream& operator<<(Ostream& os, const perfectGas& pg)

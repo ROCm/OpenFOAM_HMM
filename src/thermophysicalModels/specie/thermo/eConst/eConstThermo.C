@@ -39,6 +39,15 @@ Foam::eConstThermo<equationOfState>::eConstThermo(Istream& is)
 }
 
 
+template<class equationOfState>
+Foam::eConstThermo<equationOfState>::eConstThermo(const dictionary& dict)
+:
+    equationOfState(dict),
+    Cv_(readScalar(dict.lookup("Cv"))),
+    Hf_(readScalar(dict.lookup("Hf")))
+{}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 template<class equationOfState>

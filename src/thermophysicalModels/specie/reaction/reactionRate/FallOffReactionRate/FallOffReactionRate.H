@@ -90,6 +90,13 @@ public:
             Istream& is
         );
 
+        //- Construct from dictionary
+        inline FallOffReactionRate
+        (
+            const speciesTable& species,
+            const dictionary& dict
+        );
+
 
     // Member Functions
 

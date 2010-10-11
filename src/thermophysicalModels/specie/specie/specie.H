@@ -38,6 +38,7 @@ SourceFiles
 
 #include "word.H"
 #include "scalar.H"
+#include "dictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,11 +69,7 @@ class specie
     // Private Member Functions
 
         //- Construct from components without name
-        inline specie
-        (
-            const scalar nMoles,
-            const scalar molWeight
-        );
+        inline specie(const scalar nMoles, const scalar molWeight);
 
 
 public:
@@ -109,6 +106,9 @@ public:
 
         //- Construct from Istream
         specie(Istream&);
+
+        //- Construct from dictionary
+        specie(const dictionary& dict);
 
 
     // Member Functions

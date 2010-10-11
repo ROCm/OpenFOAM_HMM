@@ -51,6 +51,14 @@ Foam::specie::specie(Istream& is)
 }
 
 
+Foam::specie::specie(const dictionary& dict)
+:
+    name_(dict.dictName()),
+    nMoles_(readScalar(dict.lookup("nMoles"))),
+    molWeight_(readScalar(dict.lookup("molWeight")))
+{}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const specie& st)

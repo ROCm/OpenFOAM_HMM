@@ -23,15 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+#include "FixedList.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-inline LangmuirHinshelwoodReactionRate::LangmuirHinshelwoodReactionRate
+inline Foam::LangmuirHinshelwoodReactionRate::LangmuirHinshelwoodReactionRate
 (
     const scalar A[],
     const scalar Ta[],
@@ -52,8 +49,7 @@ inline LangmuirHinshelwoodReactionRate::LangmuirHinshelwoodReactionRate
 }
 
 
-//- Construct from Istream
-inline LangmuirHinshelwoodReactionRate::LangmuirHinshelwoodReactionRate
+inline Foam::LangmuirHinshelwoodReactionRate::LangmuirHinshelwoodReactionRate
 (
     const speciesTable& st,
     Istream& is
@@ -74,9 +70,30 @@ inline LangmuirHinshelwoodReactionRate::LangmuirHinshelwoodReactionRate
 }
 
 
+inline Foam::LangmuirHinshelwoodReactionRate::LangmuirHinshelwoodReactionRate
+(
+    const speciesTable& st,
+    const dictionary& dict
+)
+:
+    co_(st["CO"]),
+    c3h6_(st["C3H6"]),
+    no_(st["NO"])
+{
+    // read (A, Ta) pairs
+    FixedList<Tuple2<scalar, scalar>, n_> coeffs(dict.lookup("coeffs"));
+
+    forAll(coeffs, i)
+    {
+        A_[i] = coeffs[i].first();
+        Ta_[i] = coeffs[i].second();
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline scalar LangmuirHinshelwoodReactionRate::operator()
+inline Foam::scalar Foam::LangmuirHinshelwoodReactionRate::operator()
 (
     const scalar T,
     const scalar,
@@ -93,7 +110,7 @@ inline scalar LangmuirHinshelwoodReactionRate::operator()
 }
 
 
-inline Ostream& operator<<
+inline Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
     const LangmuirHinshelwoodReactionRate& lhrr
@@ -103,7 +120,8 @@ inline Ostream& operator<<
 
     for (int i=0; i<LangmuirHinshelwoodReactionRate::n_; i++)
     {
-        os  << token::SPACE << lhrr.A_[i] << token::SPACE << lhrr.Ta_[i];
+        os  << token::SPACE
+            << '(' << lhrr.A_[i] << token::SPACE << lhrr.Ta_[i] << ')';
     }
 
     os << token::END_LIST;
@@ -111,9 +129,5 @@ inline Ostream& operator<<
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -26,6 +26,34 @@ License
 #include "janafThermo.H"
 #include "IOstreams.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class equationOfState>
+void Foam::janafThermo<equationOfState>::checkInputData() const
+{
+    if (Tlow_ >= Thigh_)
+    {
+        FatalErrorIn("janafThermo<equationOfState>::check()")
+            << "Tlow(" << Tlow_ << ") >= Thigh(" << Thigh_ << ')'
+            << exit(FatalIOError);
+    }
+
+    if (Tcommon_ <= Tlow_)
+    {
+        FatalErrorIn("janafThermo<equationOfState>::check()")
+            << "Tcommon(" << Tcommon_ << ") <= Tlow(" << Tlow_ << ')'
+            << exit(FatalIOError);
+    }
+
+    if (Tcommon_ > Thigh_)
+    {
+        FatalErrorIn("janafThermo<equationOfState>::check()")
+            << "Tcommon(" << Tcommon_ << ") > Thigh(" << Thigh_ << ')'
+            << exit(FatalIOError);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class equationOfState>
@@ -36,58 +64,34 @@ Foam::janafThermo<equationOfState>::janafThermo(Istream& is)
     Thigh_(readScalar(is)),
     Tcommon_(readScalar(is))
 {
-    if (Tlow_ >= Thigh_)
+    checkInputData();
+
+    forAll(highCpCoeffs_, i)
     {
-        FatalIOErrorIn
-        (
-            "janafThermo<equationOfState>::janafThermo(Istream& is)",
-            is
-        )   << "Tlow(" << Tlow_ << ") >= Thigh(" << Thigh_ << ')'
-            << exit(FatalIOError);
+        is >> highCpCoeffs_[i];
     }
 
-    if (Tcommon_ <= Tlow_)
+    forAll(lowCpCoeffs_, i)
     {
-        FatalIOErrorIn
-        (
-            "janafThermo<equationOfState>::janafThermo(Istream& is)",
-            is
-        )   << "Tcommon(" << Tcommon_ << ") <= Tlow(" << Tlow_ << ')'
-            << exit(FatalIOError);
-    }
-
-    if (Tcommon_ > Thigh_)
-    {
-        FatalIOErrorIn
-        (
-            "janafThermo<equationOfState>::janafThermo(Istream& is)",
-            is
-        )   << "Tcommon(" << Tcommon_ << ") > Thigh(" << Thigh_ << ')'
-            << exit(FatalIOError);
-    }
-
-    for
-    (
-        register label coefLabel=0;
-        coefLabel<janafThermo<equationOfState>::nCoeffs_;
-        coefLabel++
-    )
-    {
-        is >> highCpCoeffs_[coefLabel];
-    }
-
-    for
-    (
-        register label coefLabel=0;
-        coefLabel<janafThermo<equationOfState>::nCoeffs_;
-        coefLabel++
-    )
-    {
-        is >> lowCpCoeffs_[coefLabel];
+        is >> lowCpCoeffs_[i];
     }
 
     // Check state of Istream
     is.check("janafThermo::janafThermo(Istream& is)");
+}
+
+
+template<class equationOfState>
+Foam::janafThermo<equationOfState>::janafThermo(const dictionary& dict)
+:
+    equationOfState(dict),
+    Tlow_(readScalar(dict.lookup("Tlow"))),
+    Thigh_(readScalar(dict.lookup("Thigh"))),
+    Tcommon_(readScalar(dict.lookup("Tcommon"))),
+    highCpCoeffs_(dict.lookup("highCpCoeffs")),
+    lowCpCoeffs_(dict.lookup("lowCpCoeffs"))
+{
+    checkInputData();
 }
 
 
@@ -107,26 +111,16 @@ Foam::Ostream& Foam::operator<<
 
     os << nl << "    ";
 
-    for
-    (
-        register label coefLabel=0;
-        coefLabel<janafThermo<equationOfState>::nCoeffs_;
-        coefLabel++
-    )
+    forAll(jt.highCpCoeffs_, i)
     {
-        os << jt.highCpCoeffs_[coefLabel] << ' ';
+        os << jt.highCpCoeffs_[i] << ' ';
     }
 
     os << nl << "    ";
 
-    for
-    (
-        register label coefLabel=0;
-        coefLabel<janafThermo<equationOfState>::nCoeffs_;
-        coefLabel++
-    )
+    forAll(jt.lowCpCoeffs_, i)
     {
-        os << jt.lowCpCoeffs_[coefLabel] << ' ';
+        os << jt.lowCpCoeffs_[i] << ' ';
     }
 
     os << endl;

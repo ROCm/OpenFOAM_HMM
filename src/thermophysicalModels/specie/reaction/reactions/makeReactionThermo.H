@@ -77,7 +77,15 @@ namespace Foam
         Reaction##Thermo,                                                     \
         ReactionType##Thermo##ReactionRate,                                   \
         Istream                                                               \
+    );                                                                        \
+                                                                              \
+    addToRunTimeSelectionTable                                                \
+    (                                                                         \
+        Reaction##Thermo,                                                     \
+        ReactionType##Thermo##ReactionRate,                                   \
+        dictionary                                                            \
     );
+
 
 #define makePressureDependentReaction\
 (                                                                             \

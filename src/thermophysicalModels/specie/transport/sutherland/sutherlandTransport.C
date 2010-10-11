@@ -44,6 +44,15 @@ sutherlandTransport<thermo>::sutherlandTransport(Istream& is)
 }
 
 
+template<class thermo>
+sutherlandTransport<thermo>::sutherlandTransport(const dictionary& dict)
+:
+    thermo(dict),
+    As(readScalar(dict.lookup("As"))),
+    Ts(readScalar(dict.lookup("Ts")))
+{}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class thermo>

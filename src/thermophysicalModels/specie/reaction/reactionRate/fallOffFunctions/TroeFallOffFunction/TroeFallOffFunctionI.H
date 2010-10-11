@@ -25,7 +25,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 inline Foam::TroeFallOffFunction::TroeFallOffFunction
 (
     const scalar alpha,
@@ -41,7 +40,6 @@ inline Foam::TroeFallOffFunction::TroeFallOffFunction
 {}
 
 
-// Construct from Istream
 inline Foam::TroeFallOffFunction::TroeFallOffFunction(Istream& is)
 :
     alpha_(readScalar(is.readBegin("TroeFallOffFunction(Istream&)"))),
@@ -51,6 +49,15 @@ inline Foam::TroeFallOffFunction::TroeFallOffFunction(Istream& is)
 {
     is.readEnd("TroeFallOffFunction(Istream&)");
 }
+
+
+inline Foam::TroeFallOffFunction::TroeFallOffFunction(const dictionary& dict)
+:
+    alpha_(readScalar(dict.lookup("alpha"))),
+    Tsss_(readScalar(dict.lookup("Tsss"))),
+    Ts_(readScalar(dict.lookup("Ts"))),
+    Tss_(readScalar(dict.lookup("Tss")))
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

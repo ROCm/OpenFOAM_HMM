@@ -38,6 +38,7 @@ SourceFiles
 #define janafThermo_H
 
 #include "scalar.H"
+#include "FixedList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -96,8 +97,11 @@ class janafThermo
 
 public:
 
+    // Public data
+
         static const int nCoeffs_ = 7;
-        typedef scalar coeffArray[7];
+        typedef FixedList<scalar, nCoeffs_> coeffArray;
+
 
 private:
 
@@ -111,6 +115,9 @@ private:
 
 
     // Private Member Functions
+
+        //- Check that input data is valid
+        void checkInputData() const;
 
         //- Check given temperature is within the range of the fitted coeffs
         inline void checkT(const scalar T) const;
@@ -136,6 +143,9 @@ public:
 
         //- Construct from Istream
         janafThermo(Istream&);
+
+        //- Construct from dictionary
+        janafThermo(const dictionary& dict);
 
         //- Construct as a named copy
         inline janafThermo(const word&, const janafThermo&);

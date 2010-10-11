@@ -23,15 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-inline thirdBodyArrheniusReactionRate::thirdBodyArrheniusReactionRate
+inline Foam::thirdBodyArrheniusReactionRate::thirdBodyArrheniusReactionRate
 (
     const scalar A,
     const scalar beta,
@@ -44,8 +38,7 @@ inline thirdBodyArrheniusReactionRate::thirdBodyArrheniusReactionRate
 {}
 
 
-//- Construct from Istream
-inline thirdBodyArrheniusReactionRate::thirdBodyArrheniusReactionRate
+inline Foam::thirdBodyArrheniusReactionRate::thirdBodyArrheniusReactionRate
 (
     const speciesTable& species,
     Istream& is
@@ -62,9 +55,24 @@ inline thirdBodyArrheniusReactionRate::thirdBodyArrheniusReactionRate
 }
 
 
+inline Foam::thirdBodyArrheniusReactionRate::thirdBodyArrheniusReactionRate
+(
+    const speciesTable& species,
+    const dictionary& dict
+)
+:
+    ArrheniusReactionRate
+    (
+        species,
+        dict
+    ),
+    thirdBodyEfficiencies_(species, dict)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline scalar thirdBodyArrheniusReactionRate::operator()
+inline Foam::scalar Foam::thirdBodyArrheniusReactionRate::operator()
 (
     const scalar T,
     const scalar p,
@@ -77,7 +85,7 @@ inline scalar thirdBodyArrheniusReactionRate::operator()
 }
 
 
-inline Ostream& operator<<
+inline Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
     const thirdBodyArrheniusReactionRate& arr
@@ -90,9 +98,5 @@ inline Ostream& operator<<
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

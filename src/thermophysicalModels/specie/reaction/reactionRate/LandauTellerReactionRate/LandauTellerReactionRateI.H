@@ -23,15 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-inline LandauTellerReactionRate::LandauTellerReactionRate
+inline Foam::LandauTellerReactionRate::LandauTellerReactionRate
 (
     const scalar A,
     const scalar beta,
@@ -48,8 +42,7 @@ inline LandauTellerReactionRate::LandauTellerReactionRate
 {}
 
 
-//- Construct from Istream
-inline LandauTellerReactionRate::LandauTellerReactionRate
+inline Foam::LandauTellerReactionRate::LandauTellerReactionRate
 (
     const speciesTable&,
     Istream& is
@@ -65,9 +58,23 @@ inline LandauTellerReactionRate::LandauTellerReactionRate
 }
 
 
+inline Foam::LandauTellerReactionRate::LandauTellerReactionRate
+(
+    const speciesTable&,
+    const dictionary& dict
+)
+:
+    A_(readScalar(dict.lookup("A"))),
+    beta_(readScalar(dict.lookup("beta"))),
+    Ta_(readScalar(dict.lookup("Ta"))),
+    B_(readScalar(dict.lookup("B"))),
+    C_(readScalar(dict.lookup("C")))
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline scalar LandauTellerReactionRate::operator()
+inline Foam::scalar Foam::LandauTellerReactionRate::operator()
 (
     const scalar T,
     const scalar,
@@ -107,7 +114,11 @@ inline scalar LandauTellerReactionRate::operator()
 }
 
 
-inline Ostream& operator<<(Ostream& os, const LandauTellerReactionRate& arr)
+inline Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const LandauTellerReactionRate& arr
+)
 {
     os  << token::BEGIN_LIST
         << arr.A_ << token::SPACE << arr.beta_ << token::SPACE << arr.Ta_
@@ -116,9 +127,5 @@ inline Ostream& operator<<(Ostream& os, const LandauTellerReactionRate& arr)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
