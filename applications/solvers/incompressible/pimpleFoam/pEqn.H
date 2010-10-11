@@ -1,4 +1,4 @@
-U = rUA*UEqn().H();
+U = rAU*UEqn().H();
 
 if (nCorr <= 1)
 {
@@ -6,7 +6,7 @@ if (nCorr <= 1)
 }
 
 phi = (fvc::interpolate(U) & mesh.Sf())
-    + fvc::ddtPhiCorr(rUA, U, phi);
+    + fvc::ddtPhiCorr(rAU, U, phi);
 
 adjustPhi(phi, U, p);
 
@@ -16,7 +16,7 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     // Pressure corrector
     fvScalarMatrix pEqn
     (
-        fvm::laplacian(rUA, p) == fvc::div(phi)
+        fvm::laplacian(rAU, p) == fvc::div(phi)
     );
 
     pEqn.setReference(pRefCell, pRefValue);
@@ -47,5 +47,5 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 // Explicitly relax pressure for momentum corrector
 p.relax();
 
-U -= rUA*fvc::grad(p);
+U -= rAU*fvc::grad(p);
 U.correctBoundaryConditions();

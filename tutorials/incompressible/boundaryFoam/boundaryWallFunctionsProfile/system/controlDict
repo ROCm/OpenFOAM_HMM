@@ -17,13 +17,6 @@ FoamFile
 
 application     boundaryFoam;
 
-libs
-(
-    "libOpenFOAM.so"
-    "libinterpolationTables_16x.so"
-    "libtabulatedWallFunctionFvPatchFields_16x.so"
-);
-
 startFrom       startTime;
 
 startTime       0;
@@ -54,5 +47,11 @@ runTimeModifiable true;
 
 graphFormat     raw;
 
+libs
+(
+    "libOpenFOAM.so"
+    "libinterpolationTables_16x.so"
+    "libtabulatedWallFunctionFvPatchFields_16x.so"
+);
 
 // ************************************************************************* //

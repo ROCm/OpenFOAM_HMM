@@ -15,15 +15,6 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs
-(
-    "libOpenFOAM.so"
-    "libcompressibleTurbulenceModel.so"
-    "libcompressibleRASModels.so"
-    "libSLGThermo.so"
-    "libsurfaceFilmModels.so"
-);
-
 application     reactingParcelFoam;
 
 startFrom       latestTime; // startTime;
@@ -60,5 +51,13 @@ maxCo           0.5;
 
 maxDeltaT       0.005;
 
+libs
+(
+    "libOpenFOAM.so"
+    "libcompressibleTurbulenceModel.so"
+    "libcompressibleRASModels.so"
+    "libSLGThermo.so"
+    "libsurfaceFilmModels.so"
+);
 
 // ************************************************************************* //

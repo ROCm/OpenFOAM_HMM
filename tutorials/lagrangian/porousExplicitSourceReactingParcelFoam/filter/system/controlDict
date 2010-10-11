@@ -15,8 +15,6 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs            ("libOpenFOAM.so" "libcompressibleTurbulenceModel.so" "libcompressibleRASModels.so" "libradiation.so");
-
 application     porousExplicitSourceReactingParcelFoam;
 
 startFrom       startTime;
@@ -53,5 +51,12 @@ maxCo           1.0;
 
 maxDeltaT       1;
 
+libs
+(
+    "libOpenFOAM.so"
+    "libcompressibleTurbulenceModel.so"
+    "libcompressibleRASModels.so"
+    "libradiation.so"
+);
 
 // ************************************************************************* //

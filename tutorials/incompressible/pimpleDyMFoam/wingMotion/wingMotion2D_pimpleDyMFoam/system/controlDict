@@ -49,14 +49,18 @@ adjustTimeStep  yes;
 
 maxCo           0.9;
 
-libs ("libforces.so");
+libs
+(
+    "libOpenFOAM.so"
+    "libforces.so"
+);
 
 functions
 {
     forces
     {
         type                forces;
-        functionObjectLibs  ( "libforces.so" );
+        functionObjectLibs  ("libforces.so");
         outputControl       timeStep;
         outputInterval      10;
         patches             (wing);
