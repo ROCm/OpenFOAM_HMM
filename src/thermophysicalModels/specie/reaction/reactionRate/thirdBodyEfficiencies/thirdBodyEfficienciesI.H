@@ -42,7 +42,7 @@ inline Foam::thirdBodyEfficiencies::thirdBodyEfficiencies
             "thirdBodyEfficiencies::thirdBodyEfficiencies"
             "(const speciesTable& species, const scalarList& efficiencies)"
         )   << "number of efficiencies = " << size()
-            << " is not equat to the number of species " << species_.size()
+            << " is not equal to the number of species " << species_.size()
             << exit(FatalError);
     }
 }
@@ -105,7 +105,7 @@ inline Foam::thirdBodyEfficiencies::thirdBodyEfficiencies
             "(const speciesTable& species, Istream& is)",
             is
         )   << "number of efficiencies = " << size()
-            << " is not equat to the number of species " << species_.size()
+            << " is not equal to the number of species " << species_.size()
             << exit(FatalIOError);
     }
 }

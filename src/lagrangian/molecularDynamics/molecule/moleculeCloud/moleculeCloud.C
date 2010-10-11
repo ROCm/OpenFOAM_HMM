@@ -1108,7 +1108,7 @@ Foam::moleculeCloud::moleculeCloud
     mesh_(mesh),
     pot_(pot),
     cellOccupancy_(mesh_.nCells()),
-    il_(mesh_, pot_.pairPotentials().rCutMax(), true),
+    il_(mesh_, pot_.pairPotentials().rCutMax(), false),
     constPropList_(),
     rndGen_(clock::getTime())
 {

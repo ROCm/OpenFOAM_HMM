@@ -205,6 +205,13 @@ void cyclicFvPatchField<Type>::updateInterfaceMatrix
 }
 
 
+template<class Type>
+void cyclicFvPatchField<Type>::write(Ostream& os) const
+{
+    fvPatchField<Type>::write(os);
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
