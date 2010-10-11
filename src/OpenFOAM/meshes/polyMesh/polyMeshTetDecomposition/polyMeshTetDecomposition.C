@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::scalar Foam::polyMeshTetDecomposition::minTetQuality = 1e-9;
+const Foam::scalar Foam::polyMeshTetDecomposition::minTetQuality = 1e-12;
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
