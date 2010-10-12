@@ -205,7 +205,7 @@ private:
         HashTable<List<specieElement> > specieComposition_;
 
         //- List of the reactions
-        SLPtrList<Reaction<gasThermoPhysics> > reactions_;
+        ReactionList<gasThermoPhysics> reactions_;
 
 
     // Private Member Functions
@@ -375,10 +375,9 @@ public:
         }
 
         //- List of the reactions
-        const PtrList<Reaction<gasThermoPhysics> >& reactions() const
+        const ReactionList<gasThermoPhysics>& reactions() const
         {
-            return PtrList<Reaction<gasThermoPhysics> >(reactions_);
-//            return reactions_;
+            return reactions_;
         }
 };
 

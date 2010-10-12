@@ -54,7 +54,7 @@ namespace Foam
 template<class ThermoType>
 class ReactionList
 :
-    private PtrList<Reaction<ThermoType> >
+    public SLPtrList<Reaction<ThermoType> >
 {
     // Private data
 
@@ -113,9 +113,6 @@ public:
 
         //- Read reactions from dictionary
         bool readReactionDict();
-
-        //- Return the list of reactions
-        const PtrList<Reaction<ThermoType> >& reactions() const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -858,7 +858,8 @@ Foam::chemkinReader::chemkinReader
 :
     lineNo_(1),
     specieNames_(10),
-    speciesTable_()
+    speciesTable_(),
+    reactions_(speciesTable_, speciesThermo_)
 {
     read(CHEMKINFileName, thermoFileName);
 }
@@ -868,7 +869,8 @@ Foam::chemkinReader::chemkinReader(const dictionary& thermoDict)
 :
     lineNo_(1),
     specieNames_(10),
-    speciesTable_()
+    speciesTable_(),
+    reactions_(speciesTable_, speciesThermo_)
 {
     fileName chemkinFile
     (

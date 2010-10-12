@@ -117,9 +117,9 @@ public:
         }
 
         //- List of the reactions
-        const PtrList<Reaction<ThermoType> >& reactions() const
+        const ReactionList<ThermoType>& reactions() const
         {
-            return reactions_.reactions();
+            return reactions_;
         }
 };
 

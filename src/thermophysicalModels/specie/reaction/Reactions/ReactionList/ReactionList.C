@@ -36,7 +36,7 @@ Foam::ReactionList<ThermoType>::ReactionList
     const HashPtrTable<ThermoType>& thermoDb
 )
 :
-    PtrList<Reaction<ThermoType> >(),
+    SLPtrList<Reaction<ThermoType> >(),
     species_(species),
     thermoDb_(thermoDb),
     dict_(dictionary::null)
@@ -51,7 +51,7 @@ Foam::ReactionList<ThermoType>::ReactionList
     const dictionary& dict
 )
 :
-    PtrList<Reaction<ThermoType> >(),
+    SLPtrList<Reaction<ThermoType> >(),
     species_(species),
     thermoDb_(thermoDb),
     dict_(dict)
@@ -68,7 +68,7 @@ Foam::ReactionList<ThermoType>::ReactionList
     const fileName& fName
 )
 :
-    PtrList<Reaction<ThermoType> >
+    SLPtrList<Reaction<ThermoType> >
     (
         dictionary(IFstream(fName)()).lookup("reactions"),
         Reaction<ThermoType>::iNew(species, thermoDb)
@@ -82,7 +82,7 @@ Foam::ReactionList<ThermoType>::ReactionList
 template<class ThermoType>
 Foam::ReactionList<ThermoType>::ReactionList(const ReactionList& reactions)
 :
-    PtrList<Reaction<ThermoType> >(reactions),
+    SLPtrList<Reaction<ThermoType> >(reactions),
     species_(reactions.species_),
     thermoDb_(reactions.thermoDb_),
     dict_(reactions.dict_)
@@ -102,34 +102,21 @@ template<class ThermoType>
 bool Foam::ReactionList<ThermoType>::readReactionDict()
 {
     const dictionary& reactions(dict_.subDict("reactions"));
-    PtrList<Reaction<ThermoType> > newPtrs(reactions.size());
 
-    label i = 0;
     forAllConstIter(dictionary, reactions, iter)
     {
-        newPtrs.set
+        this->append
         (
-            i++,
             Reaction<ThermoType>::New
             (
                 species_,
                 thermoDb_,
                 reactions.subDict(iter().keyword())
-            )
+            ).ptr()
         );
     }
 
-    PtrList<Reaction<ThermoType> >::transfer(newPtrs);
-
     return true;
-}
-
-
-template<class ThermoType>
-const Foam::PtrList<Foam::Reaction<ThermoType> >&
-Foam::ReactionList<ThermoType>::reactions() const
-{
-    return *this;
 }
 
 
