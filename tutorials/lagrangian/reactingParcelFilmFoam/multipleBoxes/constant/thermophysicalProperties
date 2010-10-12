@@ -32,7 +32,10 @@ liquids
         H2O
     );
 
-    H2O             H2O defaultCoeffs;
+    H2O
+    {
+        defaultCoeffs   yes;
+    }
 }
 
 solids
