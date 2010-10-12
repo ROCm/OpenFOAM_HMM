@@ -36,7 +36,7 @@ writeFormat     ascii;
 
 writePrecision  6;
 
-writeCompression off;
+writeCompression uncompressed;
 
 timeFormat      general;
 
@@ -44,7 +44,7 @@ timePrecision   6;
 
 graphFormat     raw;
 
-runTimeModifiable true;
+runTimeModifiable yes;
 
 adjustTimeStep  yes;
 

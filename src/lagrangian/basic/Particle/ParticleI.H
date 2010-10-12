@@ -970,11 +970,12 @@ inline void Foam::Particle<ParticleType>::initCellFacePt()
                 // number, but hasn't been able to find a cell to
                 // occupy.
 
-                if(!cloud_.polyMesh_.pointInCellBB(position_, oldCellI))
+                if(!cloud_.polyMesh_.pointInCellBB(position_, oldCellI, 0.1))
                 {
-                    // If the position is not inside the bound-box of
-                    // the cell that it thought it should be in, then
-                    // this is considered an error.
+                    // If the position is not inside the (slightly
+                    // extended) bound-box of the cell that it thought
+                    // it should be in, then this is considered an
+                    // error.
 
                     FatalErrorIn
                     (
@@ -985,18 +986,20 @@ inline void Foam::Particle<ParticleType>::initCellFacePt()
                         ")"
                     )   << "cell, tetFace and tetPt search failure at position "
                         << position_ << nl
+                        << "for requested cell " << oldCellI << nl
                         << abort(FatalError);
                 }
 
-                // The position is in the bound-box of the cell.  This
-                // situation may arise because the face decomposition
-                // of the cell is not the same as when the particle
-                // acquired the cell index.  For example, it has been
-                // read into a mesh that has made a different face
-                // base-point decision for a boundary face and now
-                // this particle is in a position that is not in the
-                // mesh.  Gradually move the particle towards the
-                // centre of the cell that it thought that it was in.
+                // The position is in the (slightly extended)
+                // bound-box of the cell.  This situation may arise
+                // because the face decomposition of the cell is not
+                // the same as when the particle acquired the cell
+                // index.  For example, it has been read into a mesh
+                // that has made a different face base-point decision
+                // for a boundary face and now this particle is in a
+                // position that is not in the mesh.  Gradually move
+                // the particle towards the centre of the cell that it
+                // thought that it was in.
 
                 cellI_ = oldCellI;
 

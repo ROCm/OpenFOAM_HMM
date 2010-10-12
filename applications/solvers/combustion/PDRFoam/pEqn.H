@@ -1,6 +1,6 @@
 rho = thermo.rho();
 
-volScalarField rUA = 1.0/UEqn.A();
+volScalarField rAU = 1.0/UEqn.A();
 U = invA & UEqn.H();
 
 if (transonic)
@@ -11,7 +11,7 @@ if (transonic)
         fvc::interpolate(psi)
        *(
             (fvc::interpolate(U) & mesh.Sf())
-          + fvc::ddtPhiCorr(rUA, rho, U, phi)
+          + fvc::ddtPhiCorr(rAU, rho, U, phi)
         )
     );
 
@@ -38,7 +38,7 @@ else
         fvc::interpolate(rho)*
         (
             (fvc::interpolate(U) & mesh.Sf())
-          + fvc::ddtPhiCorr(rUA, rho, U, phi)
+          + fvc::ddtPhiCorr(rAU, rho, U, phi)
         );
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)

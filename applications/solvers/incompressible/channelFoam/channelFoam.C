@@ -77,13 +77,13 @@ int main(int argc, char *argv[])
 
         // --- PISO loop
 
-        volScalarField rUA = 1.0/UEqn.A();
+        volScalarField rAU = 1.0/UEqn.A();
 
         for (int corr=0; corr<nCorr; corr++)
         {
-            U = rUA*UEqn.H();
+            U = rAU*UEqn.H();
             phi = (fvc::interpolate(U) & mesh.Sf())
-                + fvc::ddtPhiCorr(rUA, U, phi);
+                + fvc::ddtPhiCorr(rAU, U, phi);
 
             adjustPhi(phi, U, p);
 
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
             {
                 fvScalarMatrix pEqn
                 (
-                    fvm::laplacian(rUA, p) == fvc::div(phi)
+                    fvm::laplacian(rAU, p) == fvc::div(phi)
                 );
 
                 pEqn.setReference(pRefCell, pRefValue);
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
 
             #include "continuityErrs.H"
 
-            U -= rUA*fvc::grad(p);
+            U -= rAU*fvc::grad(p);
             U.correctBoundaryConditions();
         }
 
@@ -127,9 +127,9 @@ int main(int argc, char *argv[])
         // Calculate the pressure gradient increment needed to
         // adjust the average flow-rate to the correct value
         dimensionedScalar gragPplus =
-            (magUbar - magUbarStar)/rUA.weightedAverage(mesh.V());
+            (magUbar - magUbarStar)/rAU.weightedAverage(mesh.V());
 
-        U += flowDirection*rUA*gragPplus;
+        U += flowDirection*rAU*gragPplus;
 
         gradP += gragPplus;
 

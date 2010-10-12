@@ -1,56 +1,59 @@
 {
-    bool closedVolume = p.needReference();
+    bool closedVolume = p_rgh.needReference();
 
     rho = thermo.rho();
 
-    volScalarField rUA = 1.0/UEqn().A();
-    surfaceScalarField rhorUAf("(rho*(1|A(U)))", fvc::interpolate(rho*rUA));
+    volScalarField rAU = 1.0/UEqn().A();
+    surfaceScalarField rhorAUf("(rho*(1|A(U)))", fvc::interpolate(rho*rAU));
 
-    U = rUA*UEqn().H();
+    U = rAU*UEqn().H();
 
     surfaceScalarField phiU
     (
         fvc::interpolate(rho)
        *(
             (fvc::interpolate(U) & mesh.Sf())
-          + fvc::ddtPhiCorr(rUA, rho, U, phi)
+          + fvc::ddtPhiCorr(rAU, rho, U, phi)
         )
     );
 
-    phi = phiU + fvc::interpolate(rho)*(g & mesh.Sf())*rhorUAf;
+    phi = phiU - rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf();
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
-        fvScalarMatrix pEqn
+        fvScalarMatrix p_rghEqn
         (
-            fvm::ddt(psi, p)
+            fvm::ddt(psi, p_rgh) + fvc::ddt(psi, rho)*gh
           + fvc::div(phi)
-          - fvm::laplacian(rhorUAf, p)
+          - fvm::laplacian(rhorAUf, p_rgh)
         );
 
-        if
+        p_rghEqn.solve
         (
-            oCorr == nOuterCorr-1
-         && corr == nCorr-1
-         && nonOrth == nNonOrthCorr
-        )
-        {
-            pEqn.solve(mesh.solver(p.name() + "Final"));
-        }
-        else
-        {
-            pEqn.solve(mesh.solver(p.name()));
-        }
+            mesh.solver
+            (
+                p_rgh.select
+                (
+                    (
+                        oCorr == nOuterCorr-1
+                     && corr == nCorr-1
+                     && nonOrth == nNonOrthCorr
+                    )
+                )
+            )
+        );
 
         if (nonOrth == nNonOrthCorr)
         {
-            phi += pEqn.flux();
+            phi += p_rghEqn.flux();
         }
     }
 
     // Correct velocity field
-    U += rUA*fvc::reconstruct((phi - phiU)/rhorUAf);
+    U += rAU*fvc::reconstruct((phi - phiU)/rhorAUf);
     U.correctBoundaryConditions();
+
+    p = p_rgh + rho*gh;
 
     // Update pressure substantive derivative
     DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
@@ -65,9 +68,10 @@
     // to obey overall mass continuity
     if (closedVolume)
     {
-        p += (massIni - fvc::domainIntegrate(psi*p))
+        p += (initialMass - fvc::domainIntegrate(psi*p))
             /fvc::domainIntegrate(psi);
         rho = thermo.rho();
+        p_rgh = p - rho*gh;
     }
 
     // Update thermal conductivity

@@ -1,68 +1,65 @@
 {
     // From buoyantSimpleFoam
-
     rho = thermo.rho();
+    rho = max(rho, rhoMin[i]);
+    rho = min(rho, rhoMax[i]);
+    rho.relax();
 
-    volScalarField rUA = 1.0/UEqn().A();
-    surfaceScalarField rhorUAf("(rho*(1|A(U)))", fvc::interpolate(rho*rUA));
+    volScalarField rAU = 1.0/UEqn().A();
+    surfaceScalarField rhorAUf("(rho*(1|A(U)))", fvc::interpolate(rho*rAU));
 
-    U = rUA*UEqn().H();
+    U = rAU*UEqn().H();
     UEqn.clear();
 
     phi = fvc::interpolate(rho)*(fvc::interpolate(U) & mesh.Sf());
-    bool closedVolume = adjustPhi(phi, U, p);
+    bool closedVolume = adjustPhi(phi, U, p_rgh);
 
-    surfaceScalarField buoyancyPhi =
-        rhorUAf*fvc::interpolate(rho)*(g & mesh.Sf());
-    phi += buoyancyPhi;
+    surfaceScalarField buoyancyPhi = rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf();
+    phi -= buoyancyPhi;
 
     // Solve pressure
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
-        fvScalarMatrix pEqn
+        fvScalarMatrix p_rghEqn
         (
-            fvm::laplacian(rhorUAf, p) == fvc::div(phi)
+            fvm::laplacian(rhorAUf, p_rgh) == fvc::div(phi)
         );
 
-        pEqn.setReference(pRefCell, pRefValue);
+        p_rghEqn.setReference(pRefCell, getRefCellValue(p_rgh, pRefCell));
 
-        // retain the residual from the first iteration
-        if (nonOrth == 0)
-        {
-            pEqn.solve();
-        }
-        else
-        {
-            pEqn.solve();
-        }
+        p_rghEqn.solve();
 
         if (nonOrth == nNonOrthCorr)
         {
-            // For closed-volume cases adjust the pressure and density levels
-            // to obey overall mass continuity
-            if (closedVolume)
-            {
-                p += (initialMass - fvc::domainIntegrate(psi*p))
-                    /fvc::domainIntegrate(psi);
-            }
-
             // Calculate the conservative fluxes
-            phi -= pEqn.flux();
+            phi -= p_rghEqn.flux();
 
             // Explicitly relax pressure for momentum corrector
-            p.relax();
+            p_rgh.relax();
 
             // Correct the momentum source with the pressure gradient flux
             // calculated from the relaxed pressure
-            U += rUA*fvc::reconstruct((buoyancyPhi - pEqn.flux())/rhorUAf);
+            U -= rAU*fvc::reconstruct((buoyancyPhi + p_rghEqn.flux())/rhorAUf);
             U.correctBoundaryConditions();
         }
     }
 
+    p = p_rgh + rho*gh;
 
     #include "continuityErrs.H"
 
+    // For closed-volume cases adjust the pressure level
+    // to obey overall mass continuity
+    if (closedVolume)
+    {
+        p += (initialMass - fvc::domainIntegrate(psi*p))
+            /fvc::domainIntegrate(psi);
+        p_rgh = p - rho*gh;
+    }
+
     rho = thermo.rho();
+    rho = max(rho, rhoMin[i]);
+    rho = min(rho, rhoMax[i]);
     rho.relax();
 
     Info<< "Min/max rho:" << min(rho).value() << ' '

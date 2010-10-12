@@ -37,16 +37,15 @@ solvers
 SIMPLE
 {
     nNonOrthogonalCorrectors 0;
-    p_rghRefCell    0;
-    p_rghRefValue   0;
+    pRefCell        0;
     pRefValue       0;
 }
 
 relaxationFactors
 {
-    p_rgh           0.8;
+    p_rgh           0.7;
     U               0.2;
-    T               0.7;
+    T               0.5;
     "(k|epsilon)"   0.7;
 }
 

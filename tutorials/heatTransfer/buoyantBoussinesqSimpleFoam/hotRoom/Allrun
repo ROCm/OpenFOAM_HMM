@@ -8,6 +8,7 @@ application=`getApplication`
 
 compileApplication ../../buoyantPimpleFoam/hotRoom/setHotRoom
 runApplication blockMesh
+cp 0/T.org 0/T
 runApplication setHotRoom
 runApplication $application
 

@@ -165,7 +165,7 @@ public:
             ) const;
 
 
-        //- Cyclic coupled interface functions
+        // Cyclic coupled interface functions
 
             //- Does the patch field perform the transfromation
             virtual bool doTransform() const
@@ -190,6 +190,12 @@ public:
             {
                 return pTraits<Type>::rank;
             }
+
+
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

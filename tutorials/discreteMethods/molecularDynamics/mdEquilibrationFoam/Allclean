@@ -7,7 +7,7 @@ cd ${0%/*} || exit 1    # run from this directory
 (
     cd periodicCubeArgon || exit
 
-    rm -rf 0/*
+    rm -rf 0/lagrangian 0/uniform
     rm -f Ar-Ar
     rm -f electrostatic
     rm -f constant/idList
@@ -19,7 +19,7 @@ cd ${0%/*} || exit 1    # run from this directory
 (
     cd periodicCubeWater || exit
 
-    rm -rf 0/*
+    rm -rf 0/lagrangian 0/uniform
     rm -f O-O
     rm -f electrostatic
     rm -f constant/idList

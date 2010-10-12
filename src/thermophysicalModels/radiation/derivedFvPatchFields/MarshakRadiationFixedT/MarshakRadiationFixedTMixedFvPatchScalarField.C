@@ -78,24 +78,15 @@ MarshakRadiationFixedTMixedFvPatchScalarField
     Trad_("Trad", dict, p.size()),
     emissivity_(readScalar(dict.lookup("emissivity")))
 {
-    if (dict.found("value"))
-    {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-        refValue() = scalarField("refValue", dict, p.size());
-        refGrad() = scalarField("refGradient", dict, p.size());
-        valueFraction() = scalarField("valueFraction", dict, p.size());
-    }
-    else
-    {
-        refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Trad_);
-        refGrad() = 0.0;
-        valueFraction() = 1.0;
+    // refValue updated on each call to updateCoeffs()
+    refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Trad_);
 
-        fvPatchScalarField::operator=(refValue());
-    }
+    // zero gradient
+    refGrad() = 0.0;
+
+    valueFraction() = 1.0;
+
+    fvPatchScalarField::operator=(refValue());
 }
 
 

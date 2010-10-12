@@ -8,9 +8,5 @@
             << solidRegions[i].name() << nl << endl;
 
         Info<< "    Adding to thermos\n" << endl;
-        thermos.set
-        (
-            i,
-            basicSolidThermo::New(solidRegions[i])
-        );
+        thermos.set(i, basicSolidThermo::New(solidRegions[i]));
     }

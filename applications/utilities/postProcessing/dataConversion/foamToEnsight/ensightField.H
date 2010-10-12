@@ -35,7 +35,6 @@ SourceFiles
 #define ensightField_H
 
 #include "ensightMesh.H"
-#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,6 +47,7 @@ void ensightField
     const Foam::word& prepend,
     const Foam::label timeIndex,
     const bool binary,
+    const bool nodeValues,
     Foam::Ostream& ensightCaseFile
 );
 

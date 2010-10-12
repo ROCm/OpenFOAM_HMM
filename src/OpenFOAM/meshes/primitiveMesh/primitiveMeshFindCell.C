@@ -30,16 +30,33 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Is the point in the cell bounding box
-bool Foam::primitiveMesh::pointInCellBB(const point& p, label celli) const
+bool Foam::primitiveMesh::pointInCellBB
+(
+    const point& p,
+    label celli,
+    scalar tol
+) const
 {
-    return boundBox
+    boundBox bb
     (
         cells()[celli].points
         (
             faces(),
             points()
-        )
-    ).contains(p);
+        ),
+        false
+    );
+
+    if (tol > SMALL)
+    {
+        bb = boundBox
+        (
+            bb.min() - tol*bb.span(),
+            bb.max() + tol*bb.span()
+        );
+    }
+
+    return bb.contains(p);
 }
 
 

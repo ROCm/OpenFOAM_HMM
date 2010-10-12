@@ -121,11 +121,15 @@ void Foam::Cloud<ParticleType>::initCloud(const bool checkClass)
     }
     else
     {
-        WarningIn("Cloud<ParticleType>::initCloud(const bool checkClass)")
-            << "Cannot read particle positions file " << nl
+        Pout<< "Cannot read particle positions file:" << nl
             << "    " << ioP.path() << nl
-            << "    assuming the initial cloud contains 0 particles." << endl;
+            << "Assuming the initial cloud contains 0 particles." << endl;
     }
+
+    // Ask for the tetBasePtIs to trigger all processors to build
+    // them, otherwise, if some processors have no particles then
+    // there is a comms mismatch.
+    polyMesh_.tetBasePtIs();
 
     forAllIter(typename Cloud<ParticleType>, *this, pIter)
     {
