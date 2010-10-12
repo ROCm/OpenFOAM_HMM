@@ -37,8 +37,8 @@ template<class thermo>
 sutherlandTransport<thermo>::sutherlandTransport(Istream& is)
 :
     thermo(is),
-    As(readScalar(is)),
-    Ts(readScalar(is))
+    As_(readScalar(is)),
+    Ts_(readScalar(is))
 {
     is.check("sutherlandTransport<thermo>::sutherlandTransport(Istream&)");
 }
@@ -48,8 +48,8 @@ template<class thermo>
 sutherlandTransport<thermo>::sutherlandTransport(const dictionary& dict)
 :
     thermo(dict),
-    As(readScalar(dict.lookup("As"))),
-    Ts(readScalar(dict.lookup("Ts")))
+    As_(readScalar(dict.lookup("As"))),
+    Ts_(readScalar(dict.lookup("Ts")))
 {}
 
 
@@ -58,7 +58,7 @@ sutherlandTransport<thermo>::sutherlandTransport(const dictionary& dict)
 template<class thermo>
 Ostream& operator<<(Ostream& os, const sutherlandTransport<thermo>& st)
 {
-    os << static_cast<const thermo&>(st) << tab << st.As << tab << st.Ts;
+    os << static_cast<const thermo&>(st) << tab << st.As_ << tab << st.Ts_;
 
     os.check
     (

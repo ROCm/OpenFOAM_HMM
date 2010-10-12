@@ -43,9 +43,9 @@ inline void sutherlandTransport<thermo>::calcCoeffs
     scalar mu1rootT2 = mu1*sqrt(T2);
     scalar mu2rootT1 = mu2*rootT1;
 
-    Ts = (mu2rootT1 - mu1rootT2)/(mu1rootT2/T1 - mu2rootT1/T2);
+    Ts_ = (mu2rootT1 - mu1rootT2)/(mu1rootT2/T1 - mu2rootT1/T2);
 
-    As = mu1*(1.0 + Ts/T1)/rootT1;
+    As_ = mu1*(1.0 + Ts_/T1)/rootT1;
 }
 
 
@@ -60,8 +60,8 @@ inline sutherlandTransport<thermo>::sutherlandTransport
 )
 :
     thermo(t),
-    As(as),
-    Ts(ts)
+    As_(as),
+    Ts_(ts)
 {}
 
 
@@ -87,8 +87,8 @@ inline sutherlandTransport<thermo>::sutherlandTransport
 )
 :
     thermo(name, st),
-    As(st.As),
-    Ts(st.Ts)
+    As_(st.As_),
+    Ts_(st.Ts_)
 {}
 
 
@@ -135,7 +135,7 @@ inline autoPtr<sutherlandTransport<thermo> > sutherlandTransport<thermo>::New
 template<class thermo>
 inline scalar sutherlandTransport<thermo>::mu(const scalar T) const
 {
-    return As*::sqrt(T)/(1.0 + Ts/T);
+    return As_*::sqrt(T)/(1.0 + Ts_/T);
 }
 
 
@@ -172,8 +172,8 @@ inline sutherlandTransport<thermo>& sutherlandTransport<thermo>::operator=
 {
     thermo::operator=(st);
 
-    As = st.As;
-    Ts = st.Ts;
+    As_ = st.As_;
+    Ts_ = st.Ts_;
 
     return *this;
 }
@@ -199,8 +199,8 @@ inline sutherlandTransport<thermo> operator+
     return sutherlandTransport<thermo>
     (
         t,
-        molr1*st1.As + molr2*st2.As,
-        molr1*st1.Ts + molr2*st2.Ts
+        molr1*st1.As_ + molr2*st2.As_,
+        molr1*st1.Ts_ + molr2*st2.Ts_
     );
 }
 
@@ -223,8 +223,8 @@ inline sutherlandTransport<thermo> operator-
     return sutherlandTransport<thermo>
     (
         t,
-        molr1*st1.As - molr2*st2.As,
-        molr1*st1.Ts - molr2*st2.Ts
+        molr1*st1.As_ - molr2*st2.As_,
+        molr1*st1.Ts_ - molr2*st2.Ts_
     );
 }
 
@@ -239,8 +239,8 @@ inline sutherlandTransport<thermo> operator*
     return sutherlandTransport<thermo>
     (
         s*static_cast<const thermo&>(st),
-        st.As,
-        st.Ts
+        st.As_,
+        st.Ts_
     );
 }
 

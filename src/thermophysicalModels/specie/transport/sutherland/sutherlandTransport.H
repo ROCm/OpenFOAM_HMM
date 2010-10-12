@@ -101,7 +101,7 @@ class sutherlandTransport
     // Private data
 
         // Sutherland's coefficients
-        scalar As, Ts;
+        scalar As_, Ts_;
 
 
     // Private Member Functions
