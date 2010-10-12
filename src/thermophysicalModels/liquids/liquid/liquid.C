@@ -151,11 +151,7 @@ Foam::autoPtr<Foam::liquid> Foam::liquid::New(Istream& is)
 }
 
 
-Foam::autoPtr<Foam::liquid> Foam::liquid::New
-(
-    const dictionary& dict,
-    const word& name
-)
+Foam::autoPtr<Foam::liquid> Foam::liquid::New(const dictionary& dict)
 {
     if (debug)
     {
@@ -163,17 +159,20 @@ Foam::autoPtr<Foam::liquid> Foam::liquid::New
             << endl;
     }
 
+    const word& liquidTypeName = dict.dictName();
+
     const Switch defaultCoeffs(dict.lookup("defaultCoeffs"));
 
     if (defaultCoeffs)
     {
-        ConstructorTable::iterator cstrIter = ConstructorTablePtr_->find(name);
+        ConstructorTable::iterator cstrIter =
+            ConstructorTablePtr_->find(liquidTypeName);
 
         if (cstrIter == ConstructorTablePtr_->end())
         {
             FatalErrorIn("liquid::New(const dictionary&, const word&)")
                 << "Unknown liquid type "
-                << name << nl << nl
+                << liquidTypeName << nl << nl
                 << "Valid liquid types are:" << nl
                 << ConstructorTablePtr_->sortedToc()
                 << abort(FatalError);
@@ -184,19 +183,22 @@ Foam::autoPtr<Foam::liquid> Foam::liquid::New
     else
     {
         dictionaryConstructorTable::iterator cstrIter =
-            dictionaryConstructorTablePtr_->find(name);
+            dictionaryConstructorTablePtr_->find(liquidTypeName);
 
         if (cstrIter == dictionaryConstructorTablePtr_->end())
         {
             FatalErrorIn("liquid::New(const dictionary&, const word&)")
                 << "Unknown liquid type "
-                << name << nl << nl
+                << liquidTypeName << nl << nl
                 << "Valid liquid types are:" << nl
                 << dictionaryConstructorTablePtr_->sortedToc()
                 << abort(FatalError);
         }
 
-        return autoPtr<liquid>(cstrIter()(dict.subDict(name + "Coeffs")));
+        return autoPtr<liquid>
+        (
+            cstrIter()(dict.subDict(liquidTypeName + "Coeffs"))
+        );
     }
 }
 

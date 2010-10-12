@@ -57,11 +57,7 @@ Foam::liquidMixture::liquidMixture
 
     forAll(components_, i)
     {
-        properties_.set
-        (
-            i,
-            liquid::New(props.subDict(components_[i]), components_[i]);
-        );
+        properties_.set(i, liquid::New(props.subDict(components_[i])));
     }
 }
 

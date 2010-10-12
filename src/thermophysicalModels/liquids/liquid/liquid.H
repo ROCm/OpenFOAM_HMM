@@ -154,8 +154,8 @@ public:
         //- Return a pointer to a new liquid created from input
         static autoPtr<liquid> New(Istream& is);
 
-        //- Return a pointer to a new liquid created from dictionary and name
-        static autoPtr<liquid> New(const dictionary& dict, const word& name);
+        //- Return a pointer to a new liquid created from dictionary
+        static autoPtr<liquid> New(const dictionary& dict);
 
 
     //- Destructor
