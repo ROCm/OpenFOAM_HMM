@@ -34,15 +34,19 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<>
-const char*
-Foam::NamedEnum<Foam::refinementSurfaces::areaSelectionAlgo, 4>::names[] =
+namespace Foam
 {
-    "inside",
-    "outside",
-    "insidePoint",
-    "none"
-};
+    template<>
+    const char*
+    Foam::NamedEnum<Foam::refinementSurfaces::areaSelectionAlgo, 4>::names[] =
+    {
+        "inside",
+        "outside",
+        "insidePoint",
+        "none"
+    };
+}
+
 
 const Foam::NamedEnum<Foam::refinementSurfaces::areaSelectionAlgo, 4>
     Foam::refinementSurfaces::areaSelectionAlgoNames;
@@ -388,7 +392,7 @@ Foam::labelList Foam::refinementSurfaces::getClosedNamedSurfaces() const
 }
 
 
-// Get indices of named surfaces with a 
+// Get indices of named surfaces with a
 Foam::labelList Foam::refinementSurfaces::getInsidePointNamedSurfaces() const
 {
     labelList closed(cellZoneNames_.size());
@@ -411,9 +415,9 @@ Foam::labelList Foam::refinementSurfaces::getInsidePointNamedSurfaces() const
 // Foam::labelList Foam::refinementSurfaces::countRegions(const triSurface& s)
 // {
 //     const geometricSurfacePatchList& regions = s.patches();
-// 
+//
 //     labelList nTris(regions.size(), 0);
-// 
+//
 //     forAll(s, triI)
 //     {
 //         nTris[s[triI].region()]++;
@@ -433,15 +437,15 @@ Foam::labelList Foam::refinementSurfaces::getInsidePointNamedSurfaces() const
 // ) const
 // {
 //     const searchableSurface& geom = allGeometry_[surfaces_[surfI]];
-// 
+//
 //     // Get per element the region
 //     labelList region;
 //     geom.getRegion(info, region);
-// 
+//
 //     // Initialise fields to region wise minLevel
 //     minLevelField.setSize(ctrs.size());
 //     minLevelField = -1;
-// 
+//
 //     forAll(minLevelField, i)
 //     {
 //         if (info[i].hit())
@@ -449,12 +453,12 @@ Foam::labelList Foam::refinementSurfaces::getInsidePointNamedSurfaces() const
 //             minLevelField[i] = minLevel(surfI, region[i]);
 //         }
 //     }
-// 
+//
 //     // Find out if triangle inside shell with higher level
 //     // What level does shell want to refine fc to?
 //     labelList shellLevel;
 //     shells.findHigherLevel(ctrs, minLevelField, shellLevel);
-// 
+//
 //     forAll(minLevelField, i)
 //     {
 //         minLevelField[i] = max(minLevelField[i], shellLevel[i]);

@@ -49,19 +49,19 @@ Class
 
 defineTypeNameAndDebug(Foam::fileMonitor, 0);
 
-template<>
-const char* Foam::NamedEnum<Foam::fileMonitor::fileState, 3>::names[] =
-{
-    "unmodified",
-    "modified",
-    "deleted"
-};
 const Foam::NamedEnum<Foam::fileMonitor::fileState, 3>
     Foam::fileMonitor::fileStateNames_;
 
-
 namespace Foam
 {
+    template<>
+    const char* Foam::NamedEnum<Foam::fileMonitor::fileState, 3>::names[] =
+    {
+        "unmodified",
+        "modified",
+        "deleted"
+    };
+
     //- Reduction operator for PackedList of fileState
     class reduceFileStates
     {

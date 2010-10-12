@@ -49,17 +49,19 @@ namespace Foam
         distributedTriSurfaceMesh,
         dict
     );
+
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::distributedTriSurfaceMesh::distributionType,
+        3
+    >::names[] =
+    {
+        "follow",
+        "independent",
+        "frozen"
+    };
 }
-
-
-template<>
-const char*
-Foam::NamedEnum<Foam::distributedTriSurfaceMesh::distributionType, 3>::names[] =
-{
-    "follow",
-    "independent",
-    "frozen"
-};
 
 const Foam::NamedEnum<Foam::distributedTriSurfaceMesh::distributionType, 3>
     Foam::distributedTriSurfaceMesh::distributionTypeNames_;

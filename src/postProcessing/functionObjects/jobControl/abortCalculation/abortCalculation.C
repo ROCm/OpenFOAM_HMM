@@ -37,13 +37,21 @@ defineTypeNameAndDebug(Foam::abortCalculation, 0);
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<>
-const char* Foam::NamedEnum<Foam::abortCalculation::actionType, 3>::names[] =
+namespace Foam
 {
-    "noWriteNow",
-    "writeNow",
-    "nextWrite"
-};
+    template<>
+    const char* Foam::NamedEnum
+    <
+       Foam::abortCalculation::actionType,
+       3
+    >::names[] =
+    {
+        "noWriteNow",
+        "writeNow",
+        "nextWrite"
+    };
+}
+
 
 const Foam::NamedEnum<Foam::abortCalculation::actionType, 3>
     Foam::abortCalculation::actionTypeNames_;
