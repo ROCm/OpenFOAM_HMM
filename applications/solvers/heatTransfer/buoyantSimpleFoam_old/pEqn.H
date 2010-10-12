@@ -1,24 +1,24 @@
 {
     rho = thermo.rho();
 
-    volScalarField rUA = 1.0/UEqn().A();
-    surfaceScalarField rhorUAf("(rho*(1|A(U)))", fvc::interpolate(rho*rUA));
+    volScalarField rAU = 1.0/UEqn().A();
+    surfaceScalarField rhorAUf("(rho*(1|A(U)))", fvc::interpolate(rho*rAU));
 
-    U = rUA*UEqn().H();
+    U = rAU*UEqn().H();
     UEqn.clear();
 
     phi = fvc::interpolate(rho)*(fvc::interpolate(U) & mesh.Sf());
     bool closedVolume = adjustPhi(phi, U, p);
 
     surfaceScalarField buoyancyPhi =
-        rhorUAf*fvc::interpolate(rho)*(g & mesh.Sf());
+        rhorAUf*fvc::interpolate(rho)*(g & mesh.Sf());
     phi += buoyancyPhi;
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
         fvScalarMatrix pEqn
         (
-            fvm::laplacian(rhorUAf, p) == fvc::div(phi)
+            fvm::laplacian(rhorAUf, p) == fvc::div(phi)
         );
 
         pEqn.setReference(pRefCell, pRefValue);
@@ -42,8 +42,8 @@
 
             // Correct the momentum source with the pressure gradient flux
             // calculated from the relaxed pressure
-            U += rUA*(rho*g - fvc::grad(p));
-            //U += rUA*fvc::reconstruct((buoyancyPhi - pEqn.flux())/rhorUAf);
+            U += rAU*(rho*g - fvc::grad(p));
+            //U += rAU*fvc::reconstruct((buoyancyPhi - pEqn.flux())/rhorAUf);
             U.correctBoundaryConditions();
         }
     }

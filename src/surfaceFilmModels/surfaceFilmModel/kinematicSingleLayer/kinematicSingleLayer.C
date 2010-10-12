@@ -478,10 +478,10 @@ void Foam::surfaceFilmModels::kinematicSingleLayer::solveThickness
         Info<< "kinematicSingleLayer::solveThickness()" << endl;
     }
 
-    volScalarField rUA = 1.0/UEqn.A();
-    U_ = rUA*UEqn.H();
+    volScalarField rAU = 1.0/UEqn.A();
+    U_ = rAU*UEqn.H();
 
-    surfaceScalarField deltarUAf = fvc::interpolate(delta_*rUA);
+    surfaceScalarField deltarAUf = fvc::interpolate(delta_*rAU);
     surfaceScalarField rhof = fvc::interpolate(rho_);
 
     surfaceScalarField phiAdd
@@ -500,13 +500,13 @@ void Foam::surfaceFilmModels::kinematicSingleLayer::solveThickness
     (
         "phid",
         (fvc::interpolate(U_*rho_) & filmRegion_.Sf())
-      - deltarUAf*phiAdd*rhof
+      - deltarAUf*phiAdd*rhof
     );
     constrainFilmField(phid, 0.0);
 
-    surfaceScalarField ddrhorUAppf =
-        fvc::interpolate(delta_)*deltarUAf*rhof*fvc::interpolate(pp);
-//    constrainFilmField(ddrhorUAppf, 0.0);
+    surfaceScalarField ddrhorAUppf =
+        fvc::interpolate(delta_)*deltarAUf*rhof*fvc::interpolate(pp);
+//    constrainFilmField(ddrhorAUppf, 0.0);
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr_; nonOrth++)
     {
@@ -515,7 +515,7 @@ void Foam::surfaceFilmModels::kinematicSingleLayer::solveThickness
         (
             fvm::ddt(rho_, delta_)
           + fvm::div(phid, delta_)
-          - fvm::laplacian(ddrhorUAppf, delta_)
+          - fvm::laplacian(ddrhorAUppf, delta_)
          ==
             rhoSp_
         );
@@ -537,7 +537,7 @@ void Foam::surfaceFilmModels::kinematicSingleLayer::solveThickness
     delta_.max(0.0);
 
     // Update U field
-    U_ -= fvc::reconstruct(deltarUAf*phiAdd);
+    U_ -= fvc::reconstruct(deltarAUf*phiAdd);
 
     // Remove any patch-normal components of velocity
     U_ -= nHat_*(nHat_ & U_);

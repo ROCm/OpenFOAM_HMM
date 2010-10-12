@@ -1,6 +1,6 @@
 {
-    volScalarField rUA = 1.0/UEqn.A();
-    surfaceScalarField rUAf = fvc::interpolate(rUA);
+    volScalarField rAU = 1.0/UEqn.A();
+    surfaceScalarField rAUf = fvc::interpolate(rAU);
 
     tmp<fvScalarMatrix> p_rghEqnComp;
 
@@ -24,27 +24,27 @@
     }
 
 
-    U = rUA*UEqn.H();
+    U = rAU*UEqn.H();
 
     surfaceScalarField phiU
     (
         "phiU",
         (fvc::interpolate(U) & mesh.Sf())
-      + fvc::ddtPhiCorr(rUA, rho, U, phi)
+      + fvc::ddtPhiCorr(rAU, rho, U, phi)
     );
 
     phi = phiU +
         (
             fvc::interpolate(interface.sigmaK())*fvc::snGrad(alpha1)
           - ghf*fvc::snGrad(rho)
-        )*rUAf*mesh.magSf();
+        )*rAUf*mesh.magSf();
 
     for(int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
         fvScalarMatrix p_rghEqnIncomp
         (
             fvc::div(phi)
-          - fvm::laplacian(rUAf, p_rgh)
+          - fvm::laplacian(rAUf, p_rgh)
         );
 
         solve
@@ -75,7 +75,7 @@
         }
     }
 
-    U += rUA*fvc::reconstruct((phi - phiU)/rUAf);
+    U += rAU*fvc::reconstruct((phi - phiU)/rAUf);
     U.correctBoundaryConditions();
 
     p = max

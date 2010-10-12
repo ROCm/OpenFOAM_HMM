@@ -1,6 +1,6 @@
 rho = thermo.rho();
 
-U = rUA*UEqn().H();
+U = rAU*UEqn().H();
 
 if (nCorr <= 1)
 {
@@ -15,7 +15,7 @@ if (transonic)
         fvc::interpolate(psi)
        *(
             (fvc::interpolate(U) & mesh.Sf())
-          + fvc::ddtPhiCorr(rUA, rho, U, phi)
+          + fvc::ddtPhiCorr(rAU, rho, U, phi)
         )
     );
 
@@ -25,7 +25,7 @@ if (transonic)
         (
             fvm::ddt(psi, p)
           + fvm::div(phid, p)
-          - fvm::laplacian(rho*rUA, p)
+          - fvm::laplacian(rho*rAU, p)
         );
 
         pEqn.solve
@@ -55,7 +55,7 @@ else
         fvc::interpolate(rho)*
         (
             (fvc::interpolate(U) & mesh.Sf())
-          + fvc::ddtPhiCorr(rUA, rho, U, phi)
+          + fvc::ddtPhiCorr(rAU, rho, U, phi)
         );
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
@@ -65,7 +65,7 @@ else
         (
             fvm::ddt(psi, p)
           + fvc::div(phi)
-          - fvm::laplacian(rho*rUA, p)
+          - fvm::laplacian(rho*rAU, p)
         );
 
         pEqn.solve
@@ -101,7 +101,7 @@ rho = thermo.rho();
 Info<< "rho max/min : " << max(rho).value()
     << " " << min(rho).value() << endl;
 
-U -= rUA*fvc::grad(p);
+U -= rAU*fvc::grad(p);
 U.correctBoundaryConditions();
 
 DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);

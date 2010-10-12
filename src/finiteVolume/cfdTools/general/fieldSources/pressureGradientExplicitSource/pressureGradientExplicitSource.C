@@ -161,13 +161,13 @@ Foam::pressureGradientExplicitSource::Su() const
 
 void Foam::pressureGradientExplicitSource::update()
 {
-    const volScalarField& rUA =
+    const volScalarField& rAU =
         mesh_.lookupObject<volScalarField>("(1|A(" + U_.name() + "))");
 
     // Integrate flow variables over cell set
     scalar volTot = 0.0;
     scalar magUbarAve = 0.0;
-    scalar rUAave = 0.0;
+    scalar rAUave = 0.0;
     forAllConstIter(cellSet, selectedCellSet_, iter)
     {
         label cellI = iter.key();
@@ -176,27 +176,27 @@ void Foam::pressureGradientExplicitSource::update()
         volTot += volCell;
 
         magUbarAve += (flowDir_ & U_[cellI])*volCell;
-        rUAave += rUA[cellI]*volCell;
+        rAUave += rAU[cellI]*volCell;
     }
 
     // Collect across all processors
     reduce(volTot, sumOp<scalar>());
     reduce(magUbarAve, sumOp<scalar>());
-    reduce(rUAave, sumOp<scalar>());
+    reduce(rAUave, sumOp<scalar>());
 
     // Volume averages
     magUbarAve /= volTot;
-    rUAave /= volTot;
+    rAUave /= volTot;
 
     // Calculate the pressure gradient increment needed to adjust the average
     // flow-rate to the desired value
-    scalar gradPplus = (mag(Ubar_) - magUbarAve)/rUAave;
+    scalar gradPplus = (mag(Ubar_) - magUbarAve)/rAUave;
 
     // Apply correction to velocity field
     forAllConstIter(cellSet, selectedCellSet_, iter)
     {
         label cellI = iter.key();
-        U_[cellI] += flowDir_*rUA[cellI]*gradPplus;
+        U_[cellI] += flowDir_*rAU[cellI]*gradPplus;
     }
 
     // Update pressure gradient
