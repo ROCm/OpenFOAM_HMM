@@ -126,7 +126,7 @@ void Foam::cyclicPolyPatch::calcTransforms
     const UList<point>& half1Areas
 )
 {
-    if (debug)
+    if (debug && owner())
     {
         fileName casePath(boundaryMesh().mesh().time().path());
         {
