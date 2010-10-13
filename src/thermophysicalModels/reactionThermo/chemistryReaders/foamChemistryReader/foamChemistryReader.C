@@ -37,17 +37,11 @@ Foam::foamChemistryReader<ThermoType>::foamChemistryReader
 )
 :
     chemistryReader<ThermoType>(),
-    speciesThermo_(dictionary(IFstream(thermoFileName.expand())())),
-    speciesTable_
-    (
-        dictionary(IFstream(reactionsFileName.expand())()).lookup("species")
-    ),
-    reactions_
-    (
-        speciesTable_,
-        speciesThermo_,
-        dictionary(IFstream(reactionsFileName))
-    )
+    chemDict_(IFstream(reactionsFileName.expand())),
+    thermoDict_(IFstream(thermoFileName.expand())),
+    speciesThermo_(thermoDict_),
+    speciesTable_(chemDict_.lookup("species")),
+    reactions_(speciesTable_, speciesThermo_, chemDict_)
 {}
 
 
@@ -58,38 +52,23 @@ Foam::foamChemistryReader<ThermoType>::foamChemistryReader
 )
 :
     chemistryReader<ThermoType>(),
-    speciesThermo_
+    chemDict_
     (
-        dictionary
+        IFstream
         (
-            IFstream
-            (
-                fileName(thermoDict.lookup("foamChemistryThermoFile")).expand()
-            )()
-        )
+            fileName(thermoDict.lookup("foamChemistryFile")).expand()
+        )()
     ),
-    speciesTable_
+    thermoDict_
     (
-        dictionary
+        IFstream
         (
-            IFstream
-            (
-                fileName(thermoDict.lookup("foamChemistryFile")).expand()
-            )()
-        ).lookup("species")
+            fileName(thermoDict.lookup("foamChemistryThermoFile")).expand()
+        )()
     ),
-    reactions_
-    (
-        speciesTable_,
-        speciesThermo_,
-        dictionary
-        (
-            IFstream
-            (
-                fileName(thermoDict.lookup("foamChemistryFile")).expand()
-            )()
-        )
-    )
+    speciesThermo_(thermoDict_),
+    speciesTable_(chemDict_.lookup("species")),
+    reactions_(speciesTable_, speciesThermo_, chemDict_)
 {}
 
 

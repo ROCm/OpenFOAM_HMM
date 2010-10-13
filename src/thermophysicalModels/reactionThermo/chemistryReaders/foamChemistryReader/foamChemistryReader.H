@@ -39,7 +39,6 @@ SourceFiles
 #include "fileName.H"
 #include "typeInfo.H"
 #include "HashPtrTable.H"
-#include "SLPtrList.H"
 #include "labelList.H"
 #include "speciesTable.H"
 #include "atomicWeights.H"
@@ -58,6 +57,12 @@ class foamChemistryReader
 :
     public chemistryReader<ThermoType>
 {
+        //- Chemistry/reactions dictionary
+        dictionary chemDict_;
+
+        //- Thermo properties dictionary
+        dictionary thermoDict_;
+
         //- Table of the thermodynamic data given in the foamChemistry file
         HashPtrTable<ThermoType> speciesThermo_;
 
