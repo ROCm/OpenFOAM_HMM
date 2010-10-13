@@ -26,63 +26,54 @@ License
 #include "constTransport.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class thermo>
-constTransport<thermo>::constTransport(Istream& is)
+template<class Thermo>
+Foam::constTransport<Thermo>::constTransport(Istream& is)
 :
-    thermo(is),
-    Mu_(readScalar(is)),
+    Thermo(is),
+    mu_(readScalar(is)),
     rPr_(1.0/readScalar(is))
 {
     is.check("constTransport::constTransport(Istream& is)");
 }
 
 
-template<class thermo>
-constTransport<thermo>::constTransport(const dictionary& dict)
+template<class Thermo>
+Foam::constTransport<Thermo>::constTransport(const dictionary& dict)
 :
-    thermo(dict),
-    Mu_(readScalar(dict.lookup("Mu"))),
+    Thermo(dict),
+    mu_(readScalar(dict.lookup("mu"))),
     rPr_(1.0/readScalar(dict.lookup("Pr")))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class thermo>
-void constTransport<thermo>::constTransport::write(Ostream& os) const
+template<class Thermo>
+void Foam::constTransport<Thermo>::constTransport::write(Ostream& os) const
 {
     os  << this->name() << endl;
     os  << token::BEGIN_BLOCK  << incrIndent << nl;
-    thermo::write(os);
-    os.writeKeyword("Mu") << Mu_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Pr") << Mu_ << token::END_STATEMENT << nl;
+    Thermo::write(os);
+    os.writeKeyword("mu") << mu_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Pr") << 1.0/rPr_ << token::END_STATEMENT << nl;
     os  << decrIndent << token::END_BLOCK << nl;
 }
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-template<class thermo>
-Ostream& operator<<(Ostream& os, const constTransport<thermo>& ct)
+template<class Thermo>
+Foam::Ostream& Foam::operator<<(Ostream& os, const constTransport<Thermo>& ct)
 {
-    operator<<(os, static_cast<const thermo&>(ct));
-    os << tab << ct.Mu_ << tab << 1.0/ct.rPr_;
+    operator<<(os, static_cast<const Thermo&>(ct));
+    os << tab << ct.mu_ << tab << 1.0/ct.rPr_;
 
-    os.check("Ostream& operator<<(Ostream& os, const constTransport& ct)");
+    os.check("Ostream& operator<<(Ostream&, const constTransport&)");
 
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

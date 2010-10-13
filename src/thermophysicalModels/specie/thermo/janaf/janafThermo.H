@@ -26,7 +26,7 @@ Class
 
 Description
     JANAF tables based thermodynamics package templated
-    into the equationOfState.
+    into the equation of state.
 
 SourceFiles
     janafThermoI.H
@@ -47,41 +47,41 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-template<class equationOfState> class janafThermo;
+template<class EquationOfState> class janafThermo;
 
-template<class equationOfState>
-inline janafThermo<equationOfState> operator+
+template<class EquationOfState>
+inline janafThermo<EquationOfState> operator+
 (
-    const janafThermo<equationOfState>&,
-    const janafThermo<equationOfState>&
+    const janafThermo<EquationOfState>&,
+    const janafThermo<EquationOfState>&
 );
 
-template<class equationOfState>
-inline janafThermo<equationOfState> operator-
+template<class EquationOfState>
+inline janafThermo<EquationOfState> operator-
 (
-    const janafThermo<equationOfState>&,
-    const janafThermo<equationOfState>&
+    const janafThermo<EquationOfState>&,
+    const janafThermo<EquationOfState>&
 );
 
-template<class equationOfState>
-inline janafThermo<equationOfState> operator*
+template<class EquationOfState>
+inline janafThermo<EquationOfState> operator*
 (
     const scalar,
-    const janafThermo<equationOfState>&
+    const janafThermo<EquationOfState>&
 );
 
-template<class equationOfState>
-inline janafThermo<equationOfState> operator==
+template<class EquationOfState>
+inline janafThermo<EquationOfState> operator==
 (
-    const janafThermo<equationOfState>&,
-    const janafThermo<equationOfState>&
+    const janafThermo<EquationOfState>&,
+    const janafThermo<EquationOfState>&
 );
 
-template<class equationOfState>
+template<class EquationOfState>
 Ostream& operator<<
 (
     Ostream&,
-    const janafThermo<equationOfState>&
+    const janafThermo<EquationOfState>&
 );
 
 
@@ -89,10 +89,10 @@ Ostream& operator<<
                            Class janafThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class equationOfState>
+template<class EquationOfState>
 class janafThermo
 :
-    public equationOfState
+    public EquationOfState
 {
 
 public:
@@ -133,7 +133,7 @@ public:
         //- Construct from components
         inline janafThermo
         (
-            const equationOfState& st,
+            const EquationOfState& st,
             const scalar Tlow,
             const scalar Thigh,
             const scalar Tcommon,
@@ -185,25 +185,25 @@ public:
 
     // Friend operators
 
-        friend janafThermo operator+ <equationOfState>
+        friend janafThermo operator+ <EquationOfState>
         (
             const janafThermo&,
             const janafThermo&
         );
 
-        friend janafThermo operator- <equationOfState>
+        friend janafThermo operator- <EquationOfState>
         (
             const janafThermo&,
             const janafThermo&
         );
 
-        friend janafThermo operator* <equationOfState>
+        friend janafThermo operator* <EquationOfState>
         (
             const scalar,
             const janafThermo&
         );
 
-        friend janafThermo operator== <equationOfState>
+        friend janafThermo operator== <EquationOfState>
         (
             const janafThermo&,
             const janafThermo&
@@ -212,7 +212,7 @@ public:
 
     // Ostream Operator
 
-        friend Ostream& operator<< <equationOfState>
+        friend Ostream& operator<< <EquationOfState>
         (
             Ostream&,
             const janafThermo&

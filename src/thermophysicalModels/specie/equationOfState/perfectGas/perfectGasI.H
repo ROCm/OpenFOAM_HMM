@@ -25,17 +25,9 @@ License
 
 #include "perfectGas.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline perfectGas::perfectGas
-(
-    const specie& sp
-)
+inline Foam::perfectGas::perfectGas(const specie& sp)
 :
     specie(sp)
 {}
@@ -43,25 +35,28 @@ inline perfectGas::perfectGas
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline perfectGas::perfectGas(const word& name, const perfectGas& pg)
+inline Foam::perfectGas::perfectGas(const word& name, const perfectGas& pg)
 :
     specie(name, pg)
 {}
 
 
-inline autoPtr<perfectGas> perfectGas::clone() const
+inline Foam::autoPtr<Foam::perfectGas> Foam::perfectGas::clone() const
 {
     return autoPtr<perfectGas>(new perfectGas(*this));
 }
 
 
-inline autoPtr<perfectGas> perfectGas::New(Istream& is)
+inline Foam::autoPtr<Foam::perfectGas> Foam::perfectGas::New(Istream& is)
 {
     return autoPtr<perfectGas>(new perfectGas(is));
 }
 
 
-inline autoPtr<perfectGas> perfectGas::New(const dictionary& dict)
+inline Foam::autoPtr<Foam::perfectGas> Foam::perfectGas::New
+(
+    const dictionary& dict
+)
 {
     return autoPtr<perfectGas>(new perfectGas(dict));
 }
@@ -69,19 +64,19 @@ inline autoPtr<perfectGas> perfectGas::New(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline scalar perfectGas::rho(scalar p, scalar T) const
+inline Foam::scalar Foam::perfectGas::rho(scalar p, scalar T) const
 {
     return p/(R()*T);
 }
 
 
-inline scalar perfectGas::psi(scalar, scalar T) const
+inline Foam::scalar Foam::perfectGas::psi(scalar, scalar T) const
 {
     return 1.0/(R()*T);
 }
 
 
-inline scalar perfectGas::Z(scalar, scalar) const
+inline Foam::scalar Foam::perfectGas::Z(scalar, scalar) const
 {
     return 1.0;
 }
@@ -89,19 +84,19 @@ inline scalar perfectGas::Z(scalar, scalar) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void perfectGas::operator+=(const perfectGas& pg)
+inline void Foam::perfectGas::operator+=(const perfectGas& pg)
 {
     specie::operator+=(pg);
 }
 
 
-inline void perfectGas::operator-=(const perfectGas& pg)
+inline void Foam::perfectGas::operator-=(const perfectGas& pg)
 {
     specie::operator-=(pg);
 }
 
 
-inline void perfectGas::operator*=(const scalar s)
+inline void Foam::perfectGas::operator*=(const scalar s)
 {
     specie::operator*=(s);
 }
@@ -109,7 +104,7 @@ inline void perfectGas::operator*=(const scalar s)
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-inline perfectGas operator+
+inline Foam::perfectGas Foam::operator+
 (
     const perfectGas& pg1,
     const perfectGas& pg2
@@ -123,7 +118,7 @@ inline perfectGas operator+
 }
 
 
-inline perfectGas operator-
+inline Foam::perfectGas Foam::operator-
 (
     const perfectGas& pg1,
     const perfectGas& pg2
@@ -137,7 +132,7 @@ inline perfectGas operator-
 }
 
 
-inline perfectGas operator*
+inline Foam::perfectGas Foam::operator*
 (
     const scalar s,
     const perfectGas& pg
@@ -147,7 +142,7 @@ inline perfectGas operator*
 }
 
 
-inline perfectGas operator==
+inline Foam::perfectGas Foam::operator==
 (
     const perfectGas& pg1,
     const perfectGas& pg2
@@ -156,9 +151,5 @@ inline perfectGas operator==
     return pg2 - pg1;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

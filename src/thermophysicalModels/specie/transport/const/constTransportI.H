@@ -23,58 +23,53 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class thermo>
-inline constTransport<thermo>::constTransport
+template<class Thermo>
+inline Foam::constTransport<Thermo>::constTransport
 (
-    const thermo& t,
+    const Thermo& t,
     const scalar mu,
     const scalar Pr
 )
 :
-    thermo(t),
-    Mu_(mu),
+    Thermo(t),
+    mu_(mu),
     rPr_(1.0/Pr)
 {}
 
 
-template<class thermo>
-inline constTransport<thermo>::constTransport
+template<class Thermo>
+inline Foam::constTransport<Thermo>::constTransport
 (
     const word& name,
     const constTransport& ct
 )
 :
-    thermo(name, ct),
-    Mu_(ct.Mu_),
+    Thermo(name, ct),
+    mu_(ct.mu_),
     rPr_(ct.rPr_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class thermo>
-inline scalar constTransport<thermo>::mu(const scalar) const
+template<class Thermo>
+inline Foam::scalar Foam::constTransport<Thermo>::mu(const scalar) const
 {
-    return Mu_;
+    return mu_;
 }
 
 
-template<class thermo>
-inline scalar constTransport<thermo>::kappa(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::constTransport<Thermo>::kappa(const scalar T) const
 {
     return this->Cp(T)*mu(T)*rPr_;
 }
 
 
-template<class thermo>
-inline scalar constTransport<thermo>::alpha(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::constTransport<Thermo>::alpha(const scalar T) const
 {
     scalar Cp_ = this->Cp(T);
 
@@ -88,15 +83,15 @@ inline scalar constTransport<thermo>::alpha(const scalar T) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-template<class thermo>
-inline constTransport<thermo>& constTransport<thermo>::operator=
+template<class Thermo>
+inline Foam::constTransport<Thermo>& Foam::constTransport<Thermo>::operator=
 (
-    const constTransport<thermo>& ct
+    const constTransport<Thermo>& ct
 )
 {
-    thermo::operator=(ct);
+    Thermo::operator=(ct);
 
-    Mu_ = ct.Mu_;
+    mu_ = ct.mu_;
     rPr_ = ct.rPr_;
 
     return *this;
@@ -105,83 +100,79 @@ inline constTransport<thermo>& constTransport<thermo>::operator=
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-template<class thermo>
-inline constTransport<thermo> operator+
+template<class Thermo>
+inline Foam::constTransport<Thermo> Foam::operator+
 (
-    const constTransport<thermo>& ct1,
-    const constTransport<thermo>& ct2
+    const constTransport<Thermo>& ct1,
+    const constTransport<Thermo>& ct2
 )
 {
-    thermo t
+    Thermo t
     (
-        static_cast<const thermo&>(ct1) + static_cast<const thermo&>(ct2)
+        static_cast<const Thermo&>(ct1) + static_cast<const Thermo&>(ct2)
     );
 
     scalar molr1 = ct1.nMoles()/t.nMoles();
     scalar molr2 = ct2.nMoles()/t.nMoles();
 
-    return constTransport<thermo>
+    return constTransport<Thermo>
     (
         t,
-        molr1*ct1.Mu_ + molr2*ct2.Mu_,
+        molr1*ct1.mu_ + molr2*ct2.mu_,
         molr1*ct1.rPr_ + molr2*ct2.rPr_
     );
 }
 
 
-template<class thermo>
-inline constTransport<thermo> operator-
+template<class Thermo>
+inline Foam::constTransport<Thermo> Foam::operator-
 (
-    const constTransport<thermo>& ct1,
-    const constTransport<thermo>& ct2
+    const constTransport<Thermo>& ct1,
+    const constTransport<Thermo>& ct2
 )
 {
-    thermo t
+    Thermo t
     (
-        static_cast<const thermo&>(ct1) - static_cast<const thermo&>(ct2)
+        static_cast<const Thermo&>(ct1) - static_cast<const Thermo&>(ct2)
     );
 
     scalar molr1 = ct1.nMoles()/t.nMoles();
     scalar molr2 = ct2.nMoles()/t.nMoles();
 
-    return constTransport<thermo>
+    return constTransport<Thermo>
     (
         t,
-        molr1*ct1.Mu_ - molr2*ct2.Mu_,
+        molr1*ct1.mu_ - molr2*ct2.mu_,
         molr1*ct1.rPr_ - molr2*ct2.rPr_
     );
 }
 
 
-template<class thermo>
-inline constTransport<thermo> operator*
+template<class Thermo>
+inline Foam::constTransport<Thermo> Foam::operator*
 (
     const scalar s,
-    const constTransport<thermo>& ct
+    const constTransport<Thermo>& ct
 )
 {
-    return constTransport<thermo>
+    return constTransport<Thermo>
     (
-        s*static_cast<const thermo&>(ct),
-        ct.Mu_,
+        s*static_cast<const Thermo&>(ct),
+        ct.mu_,
         ct.rPr_
     );
 }
 
 
-template<class thermo>
-inline constTransport<thermo> operator==
+template<class Thermo>
+inline Foam::constTransport<Thermo> Foam::operator==
 (
-    const constTransport<thermo>& ct1,
-    const constTransport<thermo>& ct2
+    const constTransport<Thermo>& ct1,
+    const constTransport<Thermo>& ct2
 )
 {
     return ct2 - ct1;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

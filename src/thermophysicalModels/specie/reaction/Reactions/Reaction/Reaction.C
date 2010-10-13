@@ -380,6 +380,7 @@ Foam::scalar Foam::Reaction<ReactionThermo>::kr
     return 0.0;
 }
 
+
 template<class ReactionThermo>
 Foam::scalar Foam::Reaction<ReactionThermo>::kr
 (

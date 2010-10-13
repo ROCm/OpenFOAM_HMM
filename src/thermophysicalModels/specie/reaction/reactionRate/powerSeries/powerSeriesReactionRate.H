@@ -56,8 +56,8 @@ class powerSeriesReactionRate
         scalar beta_;
         scalar Ta_;
 
-        static const label nb_ = 4;
-        FixedList<scalar, nb_> b_;
+        static const label nCoeff_ = 4;
+        FixedList<scalar, nCoeff_> coeffs_;
 
 
 public:
@@ -70,7 +70,7 @@ public:
             const scalar A,
             const scalar beta,
             const scalar Ta,
-            const FixedList<scalar, nb_> b
+            const FixedList<scalar, nCoeff_> coeffs
         );
 
         //- Construct from Istream

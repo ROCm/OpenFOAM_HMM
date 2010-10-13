@@ -25,15 +25,15 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class equationOfState>
-inline Foam::eConstThermo<equationOfState>::eConstThermo
+template<class EquationOfState>
+inline Foam::eConstThermo<EquationOfState>::eConstThermo
 (
-    const equationOfState& st,
+    const EquationOfState& st,
     const scalar cv,
     const scalar hf
 )
 :
-    equationOfState(st),
+    EquationOfState(st),
     Cv_(cv),
     Hf_(hf)
 {}
@@ -41,56 +41,56 @@ inline Foam::eConstThermo<equationOfState>::eConstThermo
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class equationOfState>
-inline Foam::eConstThermo<equationOfState>::eConstThermo
+template<class EquationOfState>
+inline Foam::eConstThermo<EquationOfState>::eConstThermo
 (
     const word& name,
-    const eConstThermo<equationOfState>& ct
+    const eConstThermo<EquationOfState>& ct
 )
 :
-    equationOfState(name, ct),
+    EquationOfState(name, ct),
     Cv_(ct.Cv_),
     Hf_(ct.Hf_)
 {}
 
 
-template<class equationOfState>
-inline Foam::autoPtr<Foam::eConstThermo<equationOfState> >
-Foam::eConstThermo<equationOfState>::clone() const
+template<class EquationOfState>
+inline Foam::autoPtr<Foam::eConstThermo<EquationOfState> >
+Foam::eConstThermo<EquationOfState>::clone() const
 {
-    return autoPtr<eConstThermo<equationOfState> >
+    return autoPtr<eConstThermo<EquationOfState> >
     (
-        new eConstThermo<equationOfState>(*this)
+        new eConstThermo<EquationOfState>(*this)
     );
 }
 
 
-template<class equationOfState>
-inline Foam::autoPtr<Foam::eConstThermo<equationOfState> >
-Foam::eConstThermo<equationOfState>::New(Istream& is)
+template<class EquationOfState>
+inline Foam::autoPtr<Foam::eConstThermo<EquationOfState> >
+Foam::eConstThermo<EquationOfState>::New(Istream& is)
 {
-    return autoPtr<eConstThermo<equationOfState> >
+    return autoPtr<eConstThermo<EquationOfState> >
     (
-        new eConstThermo<equationOfState>(is)
+        new eConstThermo<EquationOfState>(is)
     );
 }
 
 
-template<class equationOfState>
-inline Foam::autoPtr<Foam::eConstThermo<equationOfState> >
-Foam::eConstThermo<equationOfState>::New(const dictionary& dict)
+template<class EquationOfState>
+inline Foam::autoPtr<Foam::eConstThermo<EquationOfState> >
+Foam::eConstThermo<EquationOfState>::New(const dictionary& dict)
 {
-    return autoPtr<eConstThermo<equationOfState> >
+    return autoPtr<eConstThermo<EquationOfState> >
     (
-        new eConstThermo<equationOfState>(dict)
+        new eConstThermo<EquationOfState>(dict)
     );
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class equationOfState>
-inline Foam::scalar Foam::eConstThermo<equationOfState>::cp
+template<class EquationOfState>
+inline Foam::scalar Foam::eConstThermo<EquationOfState>::cp
 (
     const scalar
 ) const
@@ -99,8 +99,8 @@ inline Foam::scalar Foam::eConstThermo<equationOfState>::cp
 }
 
 
-template<class equationOfState>
-inline Foam::scalar Foam::eConstThermo<equationOfState>::h
+template<class EquationOfState>
+inline Foam::scalar Foam::eConstThermo<EquationOfState>::h
 (
     const scalar T
 ) const
@@ -109,8 +109,8 @@ inline Foam::scalar Foam::eConstThermo<equationOfState>::h
 }
 
 
-template<class equationOfState>
-inline Foam::scalar Foam::eConstThermo<equationOfState>::hs
+template<class EquationOfState>
+inline Foam::scalar Foam::eConstThermo<EquationOfState>::hs
 (
     const scalar T
 ) const
@@ -119,35 +119,38 @@ inline Foam::scalar Foam::eConstThermo<equationOfState>::hs
 }
 
 
-template<class equationOfState>
-inline Foam::scalar Foam::eConstThermo<equationOfState>::hc() const
+template<class EquationOfState>
+inline Foam::scalar Foam::eConstThermo<EquationOfState>::hc() const
 {
     return Hf_*this->W();
 }
 
 
-template<class equationOfState>
-inline Foam::scalar Foam::eConstThermo<equationOfState>::s
+template<class EquationOfState>
+inline Foam::scalar Foam::eConstThermo<EquationOfState>::s
 (
     const scalar T
 ) const
 {
-    notImplemented("scalar eConstThermo::s(const scalar T) const");
+    notImplemented
+    (
+        "scalar eConstThermo<EquationOfState>::s(const scalar) const"
+    );
     return T;
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-template<class equationOfState>
-inline void Foam::eConstThermo<equationOfState>::operator+=
+template<class EquationOfState>
+inline void Foam::eConstThermo<EquationOfState>::operator+=
 (
-    const eConstThermo<equationOfState>& ct
+    const eConstThermo<EquationOfState>& ct
 )
 {
     scalar molr1 = this->nMoles();
 
-    equationOfState::operator+=(ct);
+    EquationOfState::operator+=(ct);
 
     molr1 /= this->nMoles();
     scalar molr2 = ct.nMoles()/this->nMoles();
@@ -157,15 +160,15 @@ inline void Foam::eConstThermo<equationOfState>::operator+=
 }
 
 
-template<class equationOfState>
-inline void Foam::eConstThermo<equationOfState>::operator-=
+template<class EquationOfState>
+inline void Foam::eConstThermo<EquationOfState>::operator-=
 (
-    const eConstThermo<equationOfState>& ct
+    const eConstThermo<EquationOfState>& ct
 )
 {
     scalar molr1 = this->nMoles();
 
-    equationOfState::operator-=(ct);
+    EquationOfState::operator-=(ct);
 
     molr1 /= this->nMoles();
     scalar molr2 = ct.nMoles()/this->nMoles();
@@ -177,20 +180,20 @@ inline void Foam::eConstThermo<equationOfState>::operator-=
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-template<class equationOfState>
-inline Foam::eConstThermo<equationOfState> Foam::operator+
+template<class EquationOfState>
+inline Foam::eConstThermo<EquationOfState> Foam::operator+
 (
-    const eConstThermo<equationOfState>& ct1,
-    const eConstThermo<equationOfState>& ct2
+    const eConstThermo<EquationOfState>& ct1,
+    const eConstThermo<EquationOfState>& ct2
 )
 {
-    equationOfState eofs
+    EquationOfState eofs
     (
-        static_cast<const equationOfState&>(ct1)
-      + static_cast<const equationOfState&>(ct2)
+        static_cast<const EquationOfState&>(ct1)
+      + static_cast<const EquationOfState&>(ct2)
     );
 
-    return eConstThermo<equationOfState>
+    return eConstThermo<EquationOfState>
     (
         eofs,
         ct1.nMoles()/eofs.nMoles()*ct1.Cv_
@@ -201,20 +204,20 @@ inline Foam::eConstThermo<equationOfState> Foam::operator+
 }
 
 
-template<class equationOfState>
-inline Foam::eConstThermo<equationOfState> Foam::operator-
+template<class EquationOfState>
+inline Foam::eConstThermo<EquationOfState> Foam::operator-
 (
-    const eConstThermo<equationOfState>& ct1,
-    const eConstThermo<equationOfState>& ct2
+    const eConstThermo<EquationOfState>& ct1,
+    const eConstThermo<EquationOfState>& ct2
 )
 {
-    equationOfState eofs
+    EquationOfState eofs
     (
-        static_cast<const equationOfState&>(ct1)
-      - static_cast<const equationOfState&>(ct2)
+        static_cast<const EquationOfState&>(ct1)
+      - static_cast<const EquationOfState&>(ct2)
     );
 
-    return eConstThermo<equationOfState>
+    return eConstThermo<EquationOfState>
     (
         eofs,
         ct1.nMoles()/eofs.nMoles()*ct1.Cv_
@@ -225,27 +228,27 @@ inline Foam::eConstThermo<equationOfState> Foam::operator-
 }
 
 
-template<class equationOfState>
-inline Foam::eConstThermo<equationOfState> Foam::operator*
+template<class EquationOfState>
+inline Foam::eConstThermo<EquationOfState> Foam::operator*
 (
     const scalar s,
-    const eConstThermo<equationOfState>& ct
+    const eConstThermo<EquationOfState>& ct
 )
 {
-    return eConstThermo<equationOfState>
+    return eConstThermo<EquationOfState>
     (
-        s*static_cast<const equationOfState&>(ct),
+        s*static_cast<const EquationOfState&>(ct),
         ct.Cv_,
         ct.Hf_
     );
 }
 
 
-template<class equationOfState>
-inline Foam::eConstThermo<equationOfState> Foam::operator==
+template<class EquationOfState>
+inline Foam::eConstThermo<EquationOfState> Foam::operator==
 (
-    const eConstThermo<equationOfState>& ct1,
-    const eConstThermo<equationOfState>& ct2
+    const eConstThermo<EquationOfState>& ct1,
+    const eConstThermo<EquationOfState>& ct2
 )
 {
     return ct2 - ct1;

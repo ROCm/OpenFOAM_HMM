@@ -51,52 +51,52 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-template<class thermo> class sutherlandTransport;
+template<class Thermo> class sutherlandTransport;
 
-template<class thermo>
-inline sutherlandTransport<thermo> operator+
+template<class Thermo>
+inline sutherlandTransport<Thermo> operator+
 (
-    const sutherlandTransport<thermo>&,
-    const sutherlandTransport<thermo>&
+    const sutherlandTransport<Thermo>&,
+    const sutherlandTransport<Thermo>&
 );
 
-template<class thermo>
-inline sutherlandTransport<thermo> operator-
+template<class Thermo>
+inline sutherlandTransport<Thermo> operator-
 (
-    const sutherlandTransport<thermo>&,
-    const sutherlandTransport<thermo>&
+    const sutherlandTransport<Thermo>&,
+    const sutherlandTransport<Thermo>&
 );
 
-template<class thermo>
-inline sutherlandTransport<thermo> operator*
+template<class Thermo>
+inline sutherlandTransport<Thermo> operator*
 (
     const scalar,
-    const sutherlandTransport<thermo>&
+    const sutherlandTransport<Thermo>&
 );
 
-template<class thermo>
-inline sutherlandTransport<thermo> operator==
+template<class Thermo>
+inline sutherlandTransport<Thermo> operator==
 (
-    const sutherlandTransport<thermo>&,
-    const sutherlandTransport<thermo>&
+    const sutherlandTransport<Thermo>&,
+    const sutherlandTransport<Thermo>&
 );
 
-template<class thermo>
+template<class Thermo>
 Ostream& operator<<
 (
     Ostream&,
-    const sutherlandTransport<thermo>&
+    const sutherlandTransport<Thermo>&
 );
 
 
 /*---------------------------------------------------------------------------*\
-                           Class sutherlandTransport Declaration
+                    Class sutherlandTransport Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class thermo>
+template<class Thermo>
 class sutherlandTransport
 :
-    public thermo
+    public Thermo
 {
     // Private data
 
@@ -122,15 +122,15 @@ public:
         //- Construct from components
         inline sutherlandTransport
         (
-            const thermo& t,
-            const scalar as,
-            const scalar ts
+            const Thermo& t,
+            const scalar As,
+            const scalar Ts
         );
 
         //- Construct from two viscosities
         inline sutherlandTransport
         (
-            const thermo& t,
+            const Thermo& t,
             const scalar mu1, const scalar T1,
             const scalar mu2, const scalar T2
         );
@@ -182,25 +182,25 @@ public:
 
     // Friend operators
 
-        friend sutherlandTransport operator+ <thermo>
+        friend sutherlandTransport operator+ <Thermo>
         (
             const sutherlandTransport&,
             const sutherlandTransport&
         );
 
-        friend sutherlandTransport operator- <thermo>
+        friend sutherlandTransport operator- <Thermo>
         (
             const sutherlandTransport&,
             const sutherlandTransport&
         );
 
-        friend sutherlandTransport operator* <thermo>
+        friend sutherlandTransport operator* <Thermo>
         (
             const scalar,
             const sutherlandTransport&
         );
 
-        friend sutherlandTransport operator== <thermo>
+        friend sutherlandTransport operator== <Thermo>
         (
             const sutherlandTransport&,
             const sutherlandTransport&
@@ -209,7 +209,7 @@ public:
 
     // Ostream Operator
 
-        friend Ostream& operator<< <thermo>
+        friend Ostream& operator<< <Thermo>
         (
             Ostream&,
             const sutherlandTransport&

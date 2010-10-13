@@ -26,28 +26,23 @@ License
 #include "sutherlandTransport.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class thermo>
-sutherlandTransport<thermo>::sutherlandTransport(Istream& is)
+template<class Thermo>
+Foam::sutherlandTransport<Thermo>::sutherlandTransport(Istream& is)
 :
-    thermo(is),
+    Thermo(is),
     As_(readScalar(is)),
     Ts_(readScalar(is))
 {
-    is.check("sutherlandTransport<thermo>::sutherlandTransport(Istream&)");
+    is.check("sutherlandTransport<Thermo>::sutherlandTransport(Istream&)");
 }
 
 
-template<class thermo>
-sutherlandTransport<thermo>::sutherlandTransport(const dictionary& dict)
+template<class Thermo>
+Foam::sutherlandTransport<Thermo>::sutherlandTransport(const dictionary& dict)
 :
-    thermo(dict),
+    Thermo(dict),
     As_(readScalar(dict.lookup("As"))),
     Ts_(readScalar(dict.lookup("Ts")))
 {}
@@ -55,35 +50,34 @@ sutherlandTransport<thermo>::sutherlandTransport(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class thermo>
-void sutherlandTransport<thermo>::write(Ostream& os) const
+template<class Thermo>
+void Foam::sutherlandTransport<Thermo>::write(Ostream& os) const
 {
     os  << this->name() << endl;
     os  << token::BEGIN_BLOCK  << incrIndent << nl;
-    thermo::write(os);
+    Thermo::write(os);
     os.writeKeyword("As") << As_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Ts") << As_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Ts") << Ts_ << token::END_STATEMENT << nl;
     os  << decrIndent << token::END_BLOCK << nl;
 }
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-template<class thermo>
-Ostream& operator<<(Ostream& os, const sutherlandTransport<thermo>& st)
+template<class Thermo>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os, const sutherlandTransport<Thermo>& st
+)
 {
-    os << static_cast<const thermo&>(st) << tab << st.As_ << tab << st.Ts_;
+    os << static_cast<const Thermo&>(st) << tab << st.As_ << tab << st.Ts_;
 
     os.check
     (
-        "Ostream& operator<<(Ostream&, const sutherlandTransport<thermo>&)"
+        "Ostream& operator<<(Ostream&, const sutherlandTransport<Thermo>&)"
     );
 
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

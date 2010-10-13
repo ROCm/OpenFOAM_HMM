@@ -30,13 +30,13 @@ inline Foam::powerSeriesReactionRate::powerSeriesReactionRate
     const scalar A,
     const scalar beta,
     const scalar Ta,
-    const FixedList<scalar, nb_> b
+    const FixedList<scalar, nCoeff_> coeffs
 )
 :
     A_(A),
     beta_(beta),
     Ta_(Ta),
-    b_(b)
+    coeffs_(coeffs)
 {}
 
 
@@ -49,7 +49,7 @@ inline Foam::powerSeriesReactionRate::powerSeriesReactionRate
     A_(readScalar(is.readBegin("powerSeriesReactionRate(Istream&)"))),
     beta_(readScalar(is)),
     Ta_(readScalar(is)),
-    b_(is)
+    coeffs_(is)
 {
     is.readEnd("powerSeriesReactionRate(Istream&)");
 }
@@ -64,7 +64,7 @@ inline Foam::powerSeriesReactionRate::powerSeriesReactionRate
     A_(readScalar(dict.lookup("A"))),
     beta_(readScalar(dict.lookup("beta"))),
     Ta_(readScalar(dict.lookup("Ta"))),
-    b_(dict.lookup("coeffs"))
+    coeffs_(dict.lookup("coeffs"))
 {}
 
 
@@ -86,9 +86,9 @@ inline Foam::scalar Foam::powerSeriesReactionRate::operator()
 
     scalar expArg = 0.0;
 
-    for (int n=0; n<nb_; n++)
+    forAll(coeffs_, n)
     {
-        expArg += b_[n]/pow(T, n);
+        expArg += coeffs_[n]/pow(T, n);
     }
 
     lta *= exp(expArg);
@@ -102,7 +102,7 @@ inline void Foam::powerSeriesReactionRate::write(Ostream& os) const
     os.writeKeyword("A") << A_ << token::END_STATEMENT << nl;
     os.writeKeyword("beta") << beta_ << token::END_STATEMENT << nl;
     os.writeKeyword("Ta") << Ta_ << token::END_STATEMENT << nl;
-    os.writeKeyword("b") << b_ << token::END_STATEMENT << nl;
+    os.writeKeyword("coeffs") << coeffs_ << token::END_STATEMENT << nl;
 }
 
 
@@ -115,9 +115,9 @@ inline Foam::Ostream& Foam::operator<<
     os  << token::BEGIN_LIST
         << psrr.A_ << token::SPACE << psrr.beta_ << token::SPACE << psrr.Ta_;
 
-    for (int n=0; n<powerSeriesReactionRate::nb_; n++)
+    for (int n=0; n<powerSeriesReactionRate::nCoeff_; n++)
     {
-        os  << token::SPACE << psrr.b_[n];
+        os  << token::SPACE << psrr.coeffs_[n];
     }
 
     os << token::END_LIST;

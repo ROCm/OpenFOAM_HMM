@@ -29,14 +29,9 @@ License
 #include "speciesTransport.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-speciesTransport::speciesTransport(Istream& is)
+Foam::speciesTransport::speciesTransport(Istream& is)
 :
     janafThermo(is)
 {
@@ -44,7 +39,7 @@ speciesTransport::speciesTransport(Istream& is)
 }
 
 
-speciesTransport::speciesTransport(const dictionary& dict)
+Foam::speciesTransport::speciesTransport(const dictionary& dict)
 :
     janafThermo(dict)
 {}
@@ -52,7 +47,7 @@ speciesTransport::speciesTransport(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void speciesTransport::write(Ostream& os) const
+void Foam::speciesTransport::write(Ostream& os) const
 {
     os  << this->name() << endl;
     os  << token::BEGIN_BLOCK << incrIndent << nl;
@@ -63,18 +58,14 @@ void speciesTransport::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const speciesTransport& sTranport)
+Foam::Ostream& Foam::operator<<(Ostream& os, const speciesTransport& sTranport)
 {
     os << (const janafThermo&)sTranport;
 
-    os.check("Ostream& operator<<(Ostream& os, const speciesTransport& st)");
+    os.check("Ostream& operator<<(Ostream&, const speciesTransport)");
 
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

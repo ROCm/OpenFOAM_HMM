@@ -27,23 +27,23 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class thermo>
-inline Foam::specieThermo<thermo>::specieThermo
+template<class Thermo>
+inline Foam::specieThermo<Thermo>::specieThermo
 (
-    const thermo& sp
+    const Thermo& sp
 )
 :
-    thermo(sp)
+    Thermo(sp)
 {}
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::T
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::T
 (
     scalar f,
     scalar T0,
-    scalar (specieThermo<thermo>::*F)(const scalar) const,
-    scalar (specieThermo<thermo>::*dFdT)(const scalar) const
+    scalar (specieThermo<Thermo>::*F)(const scalar) const,
+    scalar (specieThermo<Thermo>::*dFdT)(const scalar) const
 ) const
 {
     scalar Test = T0;
@@ -60,9 +60,9 @@ inline Foam::scalar Foam::specieThermo<thermo>::T
         {
             FatalErrorIn
             (
-                "specieThermo<thermo>::T(scalar f, scalar T0, "
-                "scalar (specieThermo<thermo>::*F)(const scalar) const, "
-                "scalar (specieThermo<thermo>::*dFdT)(const scalar) const"
+                "specieThermo<Thermo>::T(scalar f, scalar T0, "
+                "scalar (specieThermo<Thermo>::*F)(const scalar) const, "
+                "scalar (specieThermo<Thermo>::*dFdT)(const scalar) const"
                 ") const"
             )   << "Maximum number of iterations exceeded"
                 << abort(FatalError);
@@ -76,127 +76,127 @@ inline Foam::scalar Foam::specieThermo<thermo>::T
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class thermo>
-inline Foam::specieThermo<thermo>::specieThermo
+template<class Thermo>
+inline Foam::specieThermo<Thermo>::specieThermo
 (
     const word& name,
     const specieThermo& st
 )
 :
-    thermo(name, st)
+    Thermo(name, st)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::cv(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::cv(const scalar T) const
 {
     return this->cp(T) - this->RR;
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::gamma(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::gamma(const scalar T) const
 {
     scalar CP = this->cp(T);
     return CP/(CP - this->RR);
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::e(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::e(const scalar T) const
 {
     return this->h(T) - this->RR*(T - this->Tstd);
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::es(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::es(const scalar T) const
 {
     return this->hs(T) - this->RR*(T - this->Tstd);
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::g(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::g(const scalar T) const
 {
     return this->h(T) - T*this->s(T);
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::a(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::a(const scalar T) const
 {
     return this->e(T) - T*this->s(T);
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::Cp(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::Cp(const scalar T) const
 {
     return this->cp(T)/this->W();
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::Cv(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::Cv(const scalar T) const
 {
     return this->cv(T)/this->W();
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::H(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::H(const scalar T) const
 {
     return this->h(T)/this->W();
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::Hs(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::Hs(const scalar T) const
 {
     return this->hs(T)/this->W();
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::Hc() const
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::Hc() const
 {
     return this->hc()/this->W();
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::S(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::S(const scalar T) const
 {
     return this->s(T)/this->W();
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::E(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::E(const scalar T) const
 {
     return this->e(T)/this->W();
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::G(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::G(const scalar T) const
 {
     return this->g(T)/this->W();
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::A(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::A(const scalar T) const
 {
     return this->a(T)/this->W();
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::K(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::K(const scalar T) const
 {
     scalar arg = -this->nMoles()*this->g(T)/(this->RR*T);
 
@@ -211,15 +211,15 @@ inline Foam::scalar Foam::specieThermo<thermo>::K(const scalar T) const
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::Kp(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::Kp(const scalar T) const
 {
     return K(T);
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::Kc(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::Kc(const scalar T) const
 {
     if (equal(this->nMoles(), SMALL))
     {
@@ -232,8 +232,8 @@ inline Foam::scalar Foam::specieThermo<thermo>::Kc(const scalar T) const
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::Kx
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::Kx
 (
     const scalar T,
     const scalar p
@@ -250,8 +250,8 @@ inline Foam::scalar Foam::specieThermo<thermo>::Kx
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::Kn
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::Kn
 (
     const scalar T,
     const scalar p,
@@ -269,117 +269,117 @@ inline Foam::scalar Foam::specieThermo<thermo>::Kn
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::TH
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::TH
 (
     const scalar h,
     const scalar T0
 ) const
 {
-    return T(h, T0, &specieThermo<thermo>::H, &specieThermo<thermo>::Cp);
+    return T(h, T0, &specieThermo<Thermo>::H, &specieThermo<Thermo>::Cp);
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::THs
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::THs
 (
     const scalar hs,
     const scalar T0
 ) const
 {
-    return T(hs, T0, &specieThermo<thermo>::Hs, &specieThermo<thermo>::Cp);
+    return T(hs, T0, &specieThermo<Thermo>::Hs, &specieThermo<Thermo>::Cp);
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::specieThermo<thermo>::TE
+template<class Thermo>
+inline Foam::scalar Foam::specieThermo<Thermo>::TE
 (
     const scalar e,
     const scalar T0
 ) const
 {
-    return T(e, T0, &specieThermo<thermo>::E, &specieThermo<thermo>::Cv);
+    return T(e, T0, &specieThermo<Thermo>::E, &specieThermo<Thermo>::Cv);
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-template<class thermo>
-inline void Foam::specieThermo<thermo>::operator+=
+template<class Thermo>
+inline void Foam::specieThermo<Thermo>::operator+=
 (
-    const specieThermo<thermo>& st
+    const specieThermo<Thermo>& st
 )
 {
-    thermo::operator+=(st);
+    Thermo::operator+=(st);
 }
 
 
-template<class thermo>
-inline void Foam::specieThermo<thermo>::operator-=
+template<class Thermo>
+inline void Foam::specieThermo<Thermo>::operator-=
 (
-    const specieThermo<thermo>& st
+    const specieThermo<Thermo>& st
 )
 {
-    thermo::operator-=(st);
+    Thermo::operator-=(st);
 }
 
 
-template<class thermo>
-inline void Foam::specieThermo<thermo>::operator*=(const scalar s)
+template<class Thermo>
+inline void Foam::specieThermo<Thermo>::operator*=(const scalar s)
 {
-    thermo::operator*=(s);
+    Thermo::operator*=(s);
 }
 
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-template<class thermo>
-inline Foam::specieThermo<thermo> Foam::operator+
+template<class Thermo>
+inline Foam::specieThermo<Thermo> Foam::operator+
 (
-    const specieThermo<thermo>& st1,
-    const specieThermo<thermo>& st2
+    const specieThermo<Thermo>& st1,
+    const specieThermo<Thermo>& st2
 )
 {
-    return specieThermo<thermo>
+    return specieThermo<Thermo>
     (
-        static_cast<const thermo&>(st1) + static_cast<const thermo&>(st2)
+        static_cast<const Thermo&>(st1) + static_cast<const Thermo&>(st2)
     );
 }
 
 
-template<class thermo>
-inline Foam::specieThermo<thermo> Foam::operator-
+template<class Thermo>
+inline Foam::specieThermo<Thermo> Foam::operator-
 (
-    const specieThermo<thermo>& st1,
-    const specieThermo<thermo>& st2
+    const specieThermo<Thermo>& st1,
+    const specieThermo<Thermo>& st2
 )
 {
-    return specieThermo<thermo>
+    return specieThermo<Thermo>
     (
-        static_cast<const thermo&>(st1) - static_cast<const thermo&>(st2)
+        static_cast<const Thermo&>(st1) - static_cast<const Thermo&>(st2)
     );
 }
 
 
-template<class thermo>
-inline Foam::specieThermo<thermo> Foam::operator*
+template<class Thermo>
+inline Foam::specieThermo<Thermo> Foam::operator*
 (
     const scalar s,
-    const specieThermo<thermo>& st
+    const specieThermo<Thermo>& st
 )
 {
-    return specieThermo<thermo>
+    return specieThermo<Thermo>
     (
-        s*static_cast<const thermo&>(st)
+        s*static_cast<const Thermo&>(st)
     );
 }
 
 
-template<class thermo>
-inline Foam::specieThermo<thermo> Foam::operator==
+template<class Thermo>
+inline Foam::specieThermo<Thermo> Foam::operator==
 (
-    const specieThermo<thermo>& st1,
-    const specieThermo<thermo>& st2
+    const specieThermo<Thermo>& st1,
+    const specieThermo<Thermo>& st2
 )
 {
     return st2 - st1;

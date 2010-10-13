@@ -26,14 +26,9 @@ License
 #include "perfectGas.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-perfectGas::perfectGas(Istream& is)
+Foam::perfectGas::perfectGas(Istream& is)
 :
     specie(is)
 {
@@ -41,7 +36,7 @@ perfectGas::perfectGas(Istream& is)
 }
 
 
-perfectGas::perfectGas(const dictionary& dict)
+Foam::perfectGas::perfectGas(const dictionary& dict)
 :
     specie(dict)
 {}
@@ -49,7 +44,7 @@ perfectGas::perfectGas(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void perfectGas::write(Ostream& os) const
+void Foam::perfectGas::write(Ostream& os) const
 {
     specie::write(os);
 }
@@ -57,7 +52,7 @@ void perfectGas::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const perfectGas& pg)
+Foam::Ostream& Foam::operator<<(Ostream& os, const perfectGas& pg)
 {
     os  << static_cast<const specie&>(pg);
 
@@ -65,9 +60,5 @@ Ostream& operator<<(Ostream& os, const perfectGas& pg)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -23,7 +23,7 @@ mixture
     molWeight       28.96;
     Cp              1004.4;
     Hf              0;
-    Mu              1.831e-05;
+    mu              1.831e-05;
     Pr              0.705;
 }
 

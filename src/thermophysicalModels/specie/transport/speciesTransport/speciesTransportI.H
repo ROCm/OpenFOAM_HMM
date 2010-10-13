@@ -23,25 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from speciesThermo
-inline speciesTransport::speciesTransport
-(
-    const janafThermo& sThermo
-)
+inline Foam::speciesTransport::speciesTransport(const janafThermo& sThermo)
 :
     janafThermo(sThermo)
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

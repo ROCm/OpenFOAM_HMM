@@ -46,41 +46,41 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-template<class equationOfState> class eConstThermo;
+template<class EquationOfState> class eConstThermo;
 
-template<class equationOfState>
-inline eConstThermo<equationOfState> operator+
+template<class EquationOfState>
+inline eConstThermo<EquationOfState> operator+
 (
-    const eConstThermo<equationOfState>&,
-    const eConstThermo<equationOfState>&
+    const eConstThermo<EquationOfState>&,
+    const eConstThermo<EquationOfState>&
 );
 
-template<class equationOfState>
-inline eConstThermo<equationOfState> operator-
+template<class EquationOfState>
+inline eConstThermo<EquationOfState> operator-
 (
-    const eConstThermo<equationOfState>&,
-    const eConstThermo<equationOfState>&
+    const eConstThermo<EquationOfState>&,
+    const eConstThermo<EquationOfState>&
 );
 
-template<class equationOfState>
-inline eConstThermo<equationOfState> operator*
+template<class EquationOfState>
+inline eConstThermo<EquationOfState> operator*
 (
     const scalar,
-    const eConstThermo<equationOfState>&
+    const eConstThermo<EquationOfState>&
 );
 
-template<class equationOfState>
-inline eConstThermo<equationOfState> operator==
+template<class EquationOfState>
+inline eConstThermo<EquationOfState> operator==
 (
-    const eConstThermo<equationOfState>&,
-    const eConstThermo<equationOfState>&
+    const eConstThermo<EquationOfState>&,
+    const eConstThermo<EquationOfState>&
 );
 
-template<class equationOfState>
+template<class EquationOfState>
 Ostream& operator<<
 (
     Ostream&,
-    const eConstThermo<equationOfState>&
+    const eConstThermo<EquationOfState>&
 );
 
 
@@ -88,10 +88,10 @@ Ostream& operator<<
                         Class eConstThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class equationOfState>
+template<class EquationOfState>
 class eConstThermo
 :
-    public equationOfState
+    public EquationOfState
 {
     // Private data
 
@@ -104,7 +104,7 @@ class eConstThermo
         //- Construct from components
         inline eConstThermo
         (
-            const equationOfState& st,
+            const EquationOfState& st,
             const scalar cv,
             const scalar hf
         );
@@ -167,25 +167,25 @@ public:
 
     // Friend operators
 
-        friend eConstThermo operator+ <equationOfState>
+        friend eConstThermo operator+ <EquationOfState>
         (
             const eConstThermo&,
             const eConstThermo&
         );
 
-        friend eConstThermo operator- <equationOfState>
+        friend eConstThermo operator- <EquationOfState>
         (
             const eConstThermo&,
             const eConstThermo&
         );
 
-        friend eConstThermo operator* <equationOfState>
+        friend eConstThermo operator* <EquationOfState>
         (
             const scalar,
             const eConstThermo&
         );
 
-        friend eConstThermo operator== <equationOfState>
+        friend eConstThermo operator== <EquationOfState>
         (
             const eConstThermo&,
             const eConstThermo&
@@ -194,7 +194,7 @@ public:
 
     // IOstream Operators
 
-        friend Ostream& operator<< <equationOfState>
+        friend Ostream& operator<< <EquationOfState>
         (
             Ostream&,
             const eConstThermo&

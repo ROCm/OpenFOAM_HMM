@@ -28,21 +28,21 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class equationOfState>
-Foam::eConstThermo<equationOfState>::eConstThermo(Istream& is)
+template<class EquationOfState>
+Foam::eConstThermo<EquationOfState>::eConstThermo(Istream& is)
 :
-    equationOfState(is),
+    EquationOfState(is),
     Cv_(readScalar(is)),
     Hf_(readScalar(is))
 {
-    is.check("eConstThermo::eConstThermo(Istream& is)");
+    is.check("eConstThermo<EquationOfState>::eConstThermo(Istream&)");
 }
 
 
-template<class equationOfState>
-Foam::eConstThermo<equationOfState>::eConstThermo(const dictionary& dict)
+template<class EquationOfState>
+Foam::eConstThermo<EquationOfState>::eConstThermo(const dictionary& dict)
 :
-    equationOfState(dict),
+    EquationOfState(dict),
     Cv_(readScalar(dict.lookup("Cv"))),
     Hf_(readScalar(dict.lookup("Hf")))
 {}
@@ -50,10 +50,10 @@ Foam::eConstThermo<equationOfState>::eConstThermo(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class equationOfState>
-void Foam::eConstThermo<equationOfState>::write(Ostream& os) const
+template<class EquationOfState>
+void Foam::eConstThermo<EquationOfState>::write(Ostream& os) const
 {
-    equationOfState::write(os);
+    EquationOfState::write(os);
     os.writeKeyword("Cv") << Cv_ << token::END_STATEMENT << nl;
     os.writeKeyword("Hf") << Hf_ << token::END_STATEMENT << nl;
 }
@@ -61,17 +61,17 @@ void Foam::eConstThermo<equationOfState>::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-template<class equationOfState>
+template<class EquationOfState>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const eConstThermo<equationOfState>& ct
+    const eConstThermo<EquationOfState>& ct
 )
 {
-    os  << static_cast<const equationOfState&>(ct) << tab
+    os  << static_cast<const EquationOfState&>(ct) << tab
         << ct.Cv_ << tab << ct.Hf_;
 
-    os.check("Ostream& operator<<(Ostream& os, const eConstThermo& ct)");
+    os.check("Ostream& operator<<(Ostream&, const eConstThermo&)");
     return os;
 }
 
