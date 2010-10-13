@@ -34,17 +34,14 @@ Description
 
     if (mesh.nInternalFaces())
     {
-        surfaceScalarField SfUfbyDelta =
-            mesh.surfaceInterpolation::deltaCoeffs()
-        *mag(phiSt/fvc::interpolate(rho));
+        scalarField sumPhi =
+            fvc::surfaceSum(mag(phiSt))().internalField()
+           /rho.internalField();
 
-        StCoNum =
-            max(SfUfbyDelta/mesh.magSf()).value()
-           *runTime.deltaTValue();
+        StCoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
 
         meanStCoNum =
-            (sum(SfUfbyDelta)/sum(mesh.magSf())).value()
-        *runTime.deltaTValue();
+            0.5*(gSum(sumPhi)/gSum(mesh.V().field()))*runTime.deltaTValue();
     }
 
     Info<< "St courant Number mean: " << meanStCoNum
