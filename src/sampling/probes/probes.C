@@ -163,7 +163,7 @@ Foam::label Foam::probes::prepare()
 
             if (debug)
             {
-                Info<< "open  probe stream: " << sPtr->name() << endl;
+                Info<< "open probe stream: " << sPtr->name() << endl;
             }
 
             probeFilePtrs_.insert(fieldName, sPtr);
