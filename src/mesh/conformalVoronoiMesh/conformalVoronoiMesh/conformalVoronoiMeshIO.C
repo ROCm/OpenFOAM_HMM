@@ -29,6 +29,7 @@ License
 #include "zeroGradientPointPatchField.H"
 #include "pointMesh.H"
 #include "pointFields.H"
+#include "wallPolyPatch.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -249,14 +250,15 @@ void Foam::conformalVoronoiMesh::writeMesh
 
     forAll (patches, p)
     {
-        patches[p] = new polyPatch
+        patches[p] = polyPatch::New
         (
+            wallPolyPatch::typeName,
             patchNames[p],
             patchSizes[p],
             patchStarts[p],
             p,
             mesh.boundaryMesh()
-        );
+        ).ptr();
     }
 
     mesh.addFvPatches(patches);
