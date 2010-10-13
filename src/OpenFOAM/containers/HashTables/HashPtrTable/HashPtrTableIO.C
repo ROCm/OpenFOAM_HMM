@@ -153,6 +153,24 @@ void Foam::HashPtrTable<T, Key, Hash>::read
 }
 
 
+template<class T, class Key, class Hash>
+void Foam::HashPtrTable<T, Key, Hash>::write(Ostream& os) const
+{
+
+    for
+    (
+        typename HashPtrTable<T, Key, Hash>::const_iterator
+        iter = this->begin();
+        iter != this->end();
+        ++iter
+    )
+    {
+        const T* ptr = iter();
+        ptr->write(os);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>

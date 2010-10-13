@@ -121,6 +121,9 @@ public:
             //- Clear all entries from table
             void clear();
 
+            //- Write
+            void write(Ostream& os) const;
+
 
     // Member Operators
 
