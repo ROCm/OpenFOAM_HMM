@@ -114,7 +114,7 @@ Foam::ePsiThermo<MixtureType>::ePsiThermo(const fvMesh& mesh)
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionSet(0, 2, -2, 0, 0),
+        dimEnergy/dimMass,
         this->eBoundaryTypes()
     )
 {
@@ -245,7 +245,7 @@ Foam::tmp<Foam::volScalarField> Foam::ePsiThermo<MixtureType>::Cp() const
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimMass/dimEnergy/dimTemperature
+            dimEnergy/dimMass/dimTemperature
         )
     );
 
@@ -308,7 +308,7 @@ Foam::tmp<Foam::volScalarField> Foam::ePsiThermo<MixtureType>::Cv() const
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimMass/dimEnergy/dimTemperature
+            dimEnergy/dimMass/dimTemperature
         )
     );
 

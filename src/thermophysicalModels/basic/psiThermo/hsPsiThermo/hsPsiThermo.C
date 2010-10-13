@@ -243,7 +243,7 @@ Foam::tmp<Foam::volScalarField> Foam::hsPsiThermo<MixtureType>::Cp() const
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimMass/dimEnergy/dimTemperature
+            dimEnergy/dimMass/dimTemperature
         )
     );
 
