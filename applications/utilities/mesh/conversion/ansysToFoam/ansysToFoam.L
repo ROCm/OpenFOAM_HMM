@@ -569,20 +569,30 @@ int main(int argc, char *argv[])
         << "as type patch. Please reset after mesh conversion as necessary."
         << endl;
 
-    wordList patchTypes(patchFaces.size(), polyPatch::typeName);
-    wordList patchPhysicalTypes(patchFaces.size());
+    PtrList<dictionary> patchDicts;
 
     preservePatchTypes
     (
         runTime,
         runTime.constant(),
-        polyMesh::defaultRegion,
+        polyMesh::meshSubDir,
         patchNames,
-        patchTypes,
+        patchDicts,
         defaultFacesName,
-        defaultFacesType,
-        patchPhysicalTypes
+        defaultFacesType
     );
+
+    // Add information to dictionary
+    forAll(patchNames, patchI)
+    {
+        if (!patchDicts.set(patchI))
+        {
+            patchDicts.set(patchI, new dictionary());
+        }
+        // Add but not overwrite
+        patchDicts[patchI].add("type", polyPatch::typeName, false);
+    }
+
 
     polyMesh pShapeMesh
     (
@@ -596,10 +606,9 @@ int main(int argc, char *argv[])
         cellShapes,
         patchFaces,
         patchNames,
-        patchTypes,
+        patchDicts,
         defaultFacesName,
-        defaultFacesType,
-        patchPhysicalTypes
+        defaultFacesType
     );
 
 

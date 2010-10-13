@@ -43,7 +43,6 @@ Description
 #include "polyMesh.H"
 #include "wallPolyPatch.H"
 #include "symmetryPolyPatch.H"
-#include "preservePatchTypes.H"
 #include "cellShape.H"
 #include "cellModeller.H"
 #include "mergePoints.H"

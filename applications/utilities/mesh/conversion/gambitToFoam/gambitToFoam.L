@@ -818,24 +818,32 @@ int main(int argc, char *argv[])
     // Scale points
     points *= scaleFactor;
 
-    wordList patchTypes(boundary.size(), polyPatch::typeName);
+    PtrList<dictionary> patchDicts(boundary.size());
     word defaultFacesName = "defaultFaces";
     word defaultFacesType = emptyPolyPatch::typeName;
-    wordList patchPhysicalTypes(boundary.size());
 
     preservePatchTypes
     (
         runTime,
         runTime.constant(),
-        polyMesh::defaultRegion,
+        polyMesh::meshSubDir,
         patchNames,
-        patchTypes,
+        patchDicts,
         defaultFacesName,
-        defaultFacesType,
-        patchPhysicalTypes
+        defaultFacesType
     );
 
-    // Mesh will auto-write on construction
+    // Add information to dictionary
+    forAll(patchNames, patchI)
+    {
+        if (!patchDicts.set(patchI))
+        {
+            patchDicts.set(patchI, new dictionary());
+        }
+        // Add but not overwrite
+        patchDicts[patchI].add("type", polyPatch::typeName, false);
+    }
+
     polyMesh pShapeMesh
     (
         IOobject
@@ -848,10 +856,9 @@ int main(int argc, char *argv[])
         cells,
         boundary,
         patchNames,
-        patchTypes,
+        patchDicts,
         defaultFacesName,
-        defaultFacesType,
-        patchPhysicalTypes
+        defaultFacesType
     );
 
     // Set the precision of the points data to 10
