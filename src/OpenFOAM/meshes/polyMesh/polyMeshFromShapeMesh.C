@@ -698,6 +698,7 @@ Foam::polyMesh::polyMesh
     const Xfer<pointField>& points,
     const cellShapeList& cellsAsShapes,
     const faceListList& boundaryFaces,
+    const wordList& boundaryPatchNames,
     const PtrList<dictionary>& boundaryDicts,
     const word& defaultBoundaryPatchName,
     const word& defaultBoundaryPatchType,
@@ -832,12 +833,6 @@ Foam::polyMesh::polyMesh
     // Remove all of the old mesh files if they exist
     removeFiles(instance());
 
-    wordList boundaryPatchNames(boundaryDicts.size());
-    forAll(boundaryDicts, patchI)
-    {
-        boundaryDicts[patchI].lookup("name") >> boundaryPatchNames[patchI];
-    }
-
     // Calculate faces and cells
     labelList patchSizes;
     labelList patchStarts;
@@ -858,7 +853,7 @@ Foam::polyMesh::polyMesh
 
     // Warning: Patches can only be added once the face list is
     // completed, as they hold a subList of the face list
-    forAll(boundaryFaces, patchI)
+    forAll(boundaryDicts, patchI)
     {
         dictionary patchDict(boundaryDicts[patchI]);
 

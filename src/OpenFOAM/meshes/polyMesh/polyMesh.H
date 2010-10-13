@@ -280,6 +280,7 @@ public:
             const Xfer<pointField>& points,
             const cellShapeList& shapes,
             const faceListList& boundaryFaces,
+            const wordList& boundaryPatchNames,
             const PtrList<dictionary>& boundaryDicts,
             const word& defaultBoundaryPatchName,
             const word& defaultBoundaryPatchType,

@@ -578,7 +578,6 @@ int main(int argc, char *argv[])
     wordList patchTypes(npatch);
     word defaultFacesName = "defaultFaces";
     word defaultFacesType = wallPolyPatch::typeName;
-    wordList patchPhysicalTypes(npatch);
 
     label nCreatedPatches = 0;
 
@@ -707,17 +706,29 @@ int main(int argc, char *argv[])
     patchTypes.setSize(nCreatedPatches);
     patchNames.setSize(nCreatedPatches);
 
+    PtrList<dictionary> patchDicts;
+
     preservePatchTypes
     (
         runTime,
         runTime.constant(),
-        polyMesh::defaultRegion,
+        polyMesh::meshSubDir,
         patchNames,
-        patchTypes,
+        patchDicts,
         defaultFacesName,
-        defaultFacesType,
-        patchPhysicalTypes
+        defaultFacesType
     );
+
+    // Add information to dictionary
+    forAll(patchNames, patchI)
+    {
+        if (!patchDicts.set(patchI))
+        {
+            patchDicts.set(patchI, new dictionary());
+        }
+        // Add but not overwrite
+        patchDicts[patchI].add("type", patchTypes[patchI], false);
+    }
 
     polyMesh pShapeMesh
     (
@@ -731,10 +742,9 @@ int main(int argc, char *argv[])
         cellShapes,
         boundary,
         patchNames,
-        patchTypes,
+        patchDicts,
         defaultFacesName,
-        defaultFacesType,
-        patchPhysicalTypes
+        defaultFacesType
     );
 
     // Set the precision of the points data to 10

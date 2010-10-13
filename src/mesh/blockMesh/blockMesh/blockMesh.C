@@ -89,7 +89,6 @@ Foam::PtrList<Foam::dictionary> Foam::blockMesh::patchDicts() const
         patchTopologies[patchI].write(os);
         IStringStream is(os.str());
         patchDicts.set(patchI, new dictionary(is));
-        patchDicts[patchI].set("name", patchTopologies[patchI].name());
     }
     return patchDicts;
 }
@@ -134,12 +133,12 @@ const Foam::faceListList& Foam::blockMesh::patches() const
 }
 
 
-//Foam::wordList Foam::blockMesh::patchNames() const
-//{
-//    return topology().boundaryMesh().names();
-//}
-//
-//
+Foam::wordList Foam::blockMesh::patchNames() const
+{
+    return topology().boundaryMesh().names();
+}
+
+
 //Foam::wordList Foam::blockMesh::patchTypes() const
 //{
 //    return topology().boundaryMesh().types();

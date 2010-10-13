@@ -42,12 +42,12 @@ if (adjustTimeStep)
     (
         min
         (
-            deltaTFact*runTime.deltaT().value(),
+            deltaTFact*runTime.deltaTValue(),
             maxDeltaT
         )
     );
 
-    Info<< "deltaT = " <<  runTime.deltaT().value() << endl;
+    Info<< "deltaT = " <<  runTime.deltaTValue() << endl;
 }
 
 // ************************************************************************* //

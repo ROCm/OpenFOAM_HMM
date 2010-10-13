@@ -30,10 +30,10 @@ Description
 \*---------------------------------------------------------------------------*/
 
 {
-    scalar sumLocalContErr = runTime.deltaT().value()*
+    scalar sumLocalContErr = runTime.deltaTValue()*
         mag(fvc::div(phia))().weightedAverage(mesh.V()).value();
 
-    scalar globalContErr = runTime.deltaT().value()*
+    scalar globalContErr = runTime.deltaTValue()*
         fvc::div(phia)().weightedAverage(mesh.V()).value();
     cumulativeContErr += globalContErr;
 

@@ -163,6 +163,7 @@ void Foam::ensightMesh::correct()
         prisms.setSize(nPrisms);
         wedges.setSize(nWedges);
         hexes.setSize(nHexes);
+        hexesWedges.setSize(nHexesWedges);
         polys.setSize(nPolys);
 
         meshCellSets_.nTets = nTets;

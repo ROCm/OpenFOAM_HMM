@@ -34,14 +34,13 @@ scalar meanMeshCoNum = 0.0;
 
 if (mesh.nInternalFaces())
 {
-    surfaceScalarField SfUfbyDelta =
-        mesh.surfaceInterpolation::deltaCoeffs()*mag(mesh.phi());
+    scalarField sumPhi =
+        fvc::surfaceSum(mag(mesh.phi()))().internalField();
 
-    meshCoNum = max(SfUfbyDelta/mesh.magSf())
-        .value()*runTime.deltaTValue();
+    meshCoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
 
-    meanMeshCoNum = (sum(SfUfbyDelta)/sum(mesh.magSf()))
-        .value()*runTime.deltaTValue();
+    meanMeshCoNum =
+        0.5*(gSum(sumPhi)/gSum(mesh.V().field()))*runTime.deltaTValue();
 }
 
 Info<< "Mesh Courant Number mean: " << meanMeshCoNum

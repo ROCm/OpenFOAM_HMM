@@ -412,6 +412,8 @@ Foam::meshReader::polyBoundaryPatches(const polyMesh& mesh)
 
     List<polyPatch*> p(nPatches);
 
+    // All patch dictionaries
+    PtrList<dictionary> patchDicts(patchNames_.size());
     // Default boundary patch types
     word defaultFacesType(emptyPolyPatch::typeName);
 
@@ -422,20 +424,37 @@ Foam::meshReader::polyBoundaryPatches(const polyMesh& mesh)
         mesh.instance(),
         mesh.meshDir(),
         patchNames_,
-        patchTypes_,
+        patchDicts,
         "defaultFaces",
-        defaultFacesType,
-        patchPhysicalTypes_
+        defaultFacesType
     );
+    forAll(patchDicts, patchI)
+    {
+        if (!patchDicts.set(patchI))
+        {
+            patchDicts.set(patchI, new dictionary());
+        }
+        dictionary& patchDict = patchDicts[patchI];
+
+        // add but not overwrite type
+        patchDict.add("type", patchTypes_[patchI], false);
+        if (patchPhysicalTypes_.size() && patchPhysicalTypes_[patchI].size())
+        {
+            patchDict.add("startFace", patchPhysicalTypes_[patchI], false);
+        }
+
+        // overwrite sizes and start
+        patchDict.add("nFaces", patchSizes_[patchI], true);
+        patchDict.add("startFace", patchStarts_[patchI], true);
+    }
+
 
     forAll(patchStarts_, patchI)
     {
         p[patchI] = polyPatch::New
         (
-            patchTypes_[patchI],
             patchNames_[patchI],
-            patchSizes_[patchI],
-            patchStarts_[patchI],
+            patchDicts[patchI],
             patchI,
             mesh.boundaryMesh()
         ).ptr();
