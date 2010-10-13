@@ -51,6 +51,12 @@ SeeAlso
 namespace Foam
 {
 
+// Forward declaration
+class PackedBoolList;
+
+//- @typedef A List of PackedBoolList
+typedef List<PackedBoolList> PackedBoolListList;
+
 /*---------------------------------------------------------------------------*\
                        Class PackedBoolList Declaration
 \*---------------------------------------------------------------------------*/
