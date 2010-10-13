@@ -53,16 +53,9 @@ maxDeltaT       0.025;
 
 libs
 (
+    "libOpenFOAM.so"
     "libincompressibleRASModels.so"
     "libforces.so"
 );
-
-
-// libs
-// (
-//     "libgenericPatchFields.so"
-//     "libincompressibleRASModels.so"
-//     "libforces.so"
-// );
 
 // ************************************************************************* //

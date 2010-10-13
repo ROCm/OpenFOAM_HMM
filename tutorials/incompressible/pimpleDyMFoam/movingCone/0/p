@@ -20,27 +20,27 @@ internalField   uniform 0;
 
 boundaryField
 {
-    movingWall      
+    movingWall
     {
         type            zeroGradient;
     }
 
-    farFieldMoving  
+    farFieldMoving
     {
         type            zeroGradient;
     }
 
-    fixedWall       
+    fixedWall
     {
         type            zeroGradient;
     }
 
-    axis            
+    axis
     {
         type            symmetryPlane;
     }
 
-    left            
+    left
     {
         type            totalPressure;
         p0              uniform 0;
@@ -52,17 +52,17 @@ boundaryField
         value           uniform 0;
     }
 
-    farField        
+    farField
     {
         type            zeroGradient;
     }
 
-    back            
+    back
     {
         type            wedge;
     }
 
-    front           
+    front
     {
         type            wedge;
     }

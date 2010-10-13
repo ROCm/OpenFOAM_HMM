@@ -14,8 +14,6 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs            ("libincompressibleRASModels.so");
-
 application     simpleFoam;
 
 startFrom       startTime;
@@ -46,6 +44,11 @@ timePrecision   6;
 
 runTimeModifiable true;
 
+libs
+(
+    "libOpenFOAM.so"
+    "libincompressibleRASModels.so"
+);
 
 functions
 {

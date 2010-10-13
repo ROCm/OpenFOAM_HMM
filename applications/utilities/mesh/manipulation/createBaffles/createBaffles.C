@@ -153,6 +153,12 @@ int main(int argc, char *argv[])
         "internalFacesOnly",
         "do not convert boundary faces"
     );
+    argList::addBoolOption
+    (
+        "updateFields",
+        "update fields to include new patches:"
+        " NOTE: updated field values may need to be edited"
+    );
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -235,39 +241,45 @@ int main(int argc, char *argv[])
     IOobjectList objects(mesh, runTime.timeName());
 
     // Read vol fields.
+    if (args.optionFound("updateFields"))
+    {
+        Info<< "Reading geometric fields" << nl << endl;
+        PtrList<volScalarField> vsFlds;
+        ReadFields(mesh, objects, vsFlds);
 
-    PtrList<volScalarField> vsFlds;
-    ReadFields(mesh, objects, vsFlds);
+        PtrList<volVectorField> vvFlds;
+        ReadFields(mesh, objects, vvFlds);
 
-    PtrList<volVectorField> vvFlds;
-    ReadFields(mesh, objects, vvFlds);
+        PtrList<volSphericalTensorField> vstFlds;
+        ReadFields(mesh, objects, vstFlds);
 
-    PtrList<volSphericalTensorField> vstFlds;
-    ReadFields(mesh, objects, vstFlds);
+        PtrList<volSymmTensorField> vsymtFlds;
+        ReadFields(mesh, objects, vsymtFlds);
 
-    PtrList<volSymmTensorField> vsymtFlds;
-    ReadFields(mesh, objects, vsymtFlds);
+        PtrList<volTensorField> vtFlds;
+        ReadFields(mesh, objects, vtFlds);
 
-    PtrList<volTensorField> vtFlds;
-    ReadFields(mesh, objects, vtFlds);
+        // Read surface fields.
 
-    // Read surface fields.
+        PtrList<surfaceScalarField> ssFlds;
+        ReadFields(mesh, objects, ssFlds);
 
-    PtrList<surfaceScalarField> ssFlds;
-    ReadFields(mesh, objects, ssFlds);
+        PtrList<surfaceVectorField> svFlds;
+        ReadFields(mesh, objects, svFlds);
 
-    PtrList<surfaceVectorField> svFlds;
-    ReadFields(mesh, objects, svFlds);
+        PtrList<surfaceSphericalTensorField> sstFlds;
+        ReadFields(mesh, objects, sstFlds);
 
-    PtrList<surfaceSphericalTensorField> sstFlds;
-    ReadFields(mesh, objects, sstFlds);
+        PtrList<surfaceSymmTensorField> ssymtFlds;
+        ReadFields(mesh, objects, ssymtFlds);
 
-    PtrList<surfaceSymmTensorField> ssymtFlds;
-    ReadFields(mesh, objects, ssymtFlds);
-
-    PtrList<surfaceTensorField> stFlds;
-    ReadFields(mesh, objects, stFlds);
-
+        PtrList<surfaceTensorField> stFlds;
+        ReadFields(mesh, objects, stFlds);
+    }
+    else
+    {
+        Info<< "Not updating geometric fields" << nl << endl;
+    }
 
     // Mesh change container
     polyTopoChange meshMod(mesh);

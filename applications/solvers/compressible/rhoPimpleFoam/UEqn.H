@@ -9,7 +9,7 @@ tmp<fvVectorMatrix> UEqn
 
 UEqn().relax();
 
-volScalarField rUA = 1.0/UEqn().A();
+volScalarField rAU = 1.0/UEqn().A();
 
 if (momentumPredictor)
 {
@@ -17,6 +17,6 @@ if (momentumPredictor)
 }
 else
 {
-    U = rUA*(UEqn().H() - fvc::grad(p));
+    U = rAU*(UEqn().H() - fvc::grad(p));
     U.correctBoundaryConditions();
 }
