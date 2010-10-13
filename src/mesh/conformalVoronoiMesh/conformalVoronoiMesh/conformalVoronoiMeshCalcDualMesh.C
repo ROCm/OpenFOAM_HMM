@@ -1445,11 +1445,32 @@ Foam::label Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     Info << endl;
 
+    DynamicList<label> checkFaces(pMesh.nFaces());
+
+    const vectorField& fAreas = pMesh.faceAreas();
+
+    scalar faceAreaLimit = SMALL;
+
+    forAll(fAreas, fI)
+    {
+        if (mag(fAreas[fI]) > faceAreaLimit)
+        {
+            checkFaces.append(fI);
+        }
+    }
+
+    if (checkFaces.size() < fAreas.size())
+    {
+        Info<< "Excluding " << fAreas.size() - checkFaces.size()
+            << " faces from check, < " << faceAreaLimit << " area" << endl;
+    }
+
     motionSmoother::checkMesh
     (
         false,
         pMesh,
         cvMeshControls().cvMeshDict().subDict("meshQualityControls"),
+        checkFaces,
         wrongFaces
     );
 
