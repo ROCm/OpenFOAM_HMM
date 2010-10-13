@@ -292,6 +292,31 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         neighbour_.write();
     }
 
+    // Read cell centres if present
+    pointIOField cellCentres
+    (
+        IOobject
+        (
+            "cellCentres",
+            time().findInstance
+            (
+                meshDir(),
+                "cellCentres",
+                IOobject::READ_IF_PRESENT
+            ),
+            meshSubDir,
+            *this,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        )
+    );
+
+    if (cellCentres.headerOk())
+    {
+        Pout<< "Reading cell centres" << endl;
+        overrideCellCentres(cellCentres);
+    }
+
     // Calculate topology for the patches (processor-processor comms etc.)
     boundary_.updateMesh();
 
