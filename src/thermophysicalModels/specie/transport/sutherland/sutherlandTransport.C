@@ -53,6 +53,19 @@ sutherlandTransport<thermo>::sutherlandTransport(const dictionary& dict)
 {}
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class thermo>
+void sutherlandTransport<thermo>::write(Ostream& os) const
+{
+    os  << this->name() << endl;
+    os  << token::BEGIN_BLOCK  << incrIndent << nl;
+    thermo::write(os);
+    os.writeKeyword("As") << As_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Ts") << As_ << token::END_STATEMENT << nl;
+    os  << decrIndent << token::END_BLOCK << nl;
+}
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class thermo>

@@ -110,6 +110,20 @@ inline Foam::scalar Foam::LangmuirHinshelwoodReactionRate::operator()
 }
 
 
+inline void Foam::LangmuirHinshelwoodReactionRate::write(Ostream& os) const
+{
+    FixedList<Tuple2<scalar, scalar>, n_> coeffs;
+
+    forAll(coeffs, i)
+    {
+        coeffs[i].first() = A_[i];
+        coeffs[i].second() = Ta_[i];
+    }
+
+    os.writeKeyword("coeffs") << coeffs << nl;
+}
+
+
 inline Foam::Ostream& Foam::operator<<
 (
     Ostream& os,

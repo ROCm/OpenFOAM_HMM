@@ -37,8 +37,8 @@ template<class thermo>
 constTransport<thermo>::constTransport(Istream& is)
 :
     thermo(is),
-    Mu(readScalar(is)),
-    rPr(1.0/readScalar(is))
+    Mu_(readScalar(is)),
+    rPr_(1.0/readScalar(is))
 {
     is.check("constTransport::constTransport(Istream& is)");
 }
@@ -48,9 +48,23 @@ template<class thermo>
 constTransport<thermo>::constTransport(const dictionary& dict)
 :
     thermo(dict),
-    Mu(readScalar(dict.lookup("Mu"))),
-    rPr(1.0/readScalar(dict.lookup("Pr")))
+    Mu_(readScalar(dict.lookup("Mu"))),
+    rPr_(1.0/readScalar(dict.lookup("Pr")))
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class thermo>
+void constTransport<thermo>::constTransport::write(Ostream& os) const
+{
+    os  << this->name() << endl;
+    os  << token::BEGIN_BLOCK  << incrIndent << nl;
+    thermo::write(os);
+    os.writeKeyword("Mu") << Mu_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Pr") << Mu_ << token::END_STATEMENT << nl;
+    os  << decrIndent << token::END_BLOCK << nl;
+}
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
@@ -59,7 +73,7 @@ template<class thermo>
 Ostream& operator<<(Ostream& os, const constTransport<thermo>& ct)
 {
     operator<<(os, static_cast<const thermo&>(ct));
-    os << tab << ct.Mu << tab << 1.0/ct.rPr;
+    os << tab << ct.Mu_ << tab << 1.0/ct.rPr_;
 
     os.check("Ostream& operator<<(Ostream& os, const constTransport& ct)");
 

@@ -95,6 +95,19 @@ Foam::FallOffReactionRate<ReactionRate, FallOffFunction>::operator()
 
 
 template<class ReactionRate, class FallOffFunction>
+inline void Foam::FallOffReactionRate<ReactionRate, FallOffFunction>::write
+(
+    Ostream& os
+) const
+{
+    k0_.write(os);
+    kInf_.write(os);
+    F_.write(os);
+    thirdBodyEfficiencies_.write(os);
+}
+
+
+template<class ReactionRate, class FallOffFunction>
 inline Foam::Ostream& Foam::operator<<
 (
     Ostream& os,

@@ -55,6 +55,22 @@ Foam::polynomialTransport<Thermo, PolySize>::polynomialTransport
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Thermo, int PolySize>
+void Foam::polynomialTransport<Thermo, PolySize>::write(Ostream& os) const
+{
+    os  << this->name() << endl;
+    os  << token::BEGIN_BLOCK << incrIndent << nl;
+    Thermo::write(os);
+    os.writeKeyword("muPolynomial") << muPolynomial_/this->W()
+        << token::END_STATEMENT << nl;
+    os.writeKeyword("kappaPolynomial") << kappaPolynomial_/this->W()
+        << token::END_STATEMENT << nl;
+    os   << decrIndent << token::END_BLOCK << nl;
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class Thermo, int PolySize>

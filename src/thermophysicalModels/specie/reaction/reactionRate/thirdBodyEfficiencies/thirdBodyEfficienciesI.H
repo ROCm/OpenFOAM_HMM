@@ -161,6 +161,19 @@ inline Foam::scalar Foam::thirdBodyEfficiencies::M(const scalarList& c) const
 }
 
 
+inline void Foam::thirdBodyEfficiencies::write(Ostream& os) const
+{
+    List<Tuple2<word, scalar> > coeffs(species_.size());
+    forAll(coeffs, i)
+    {
+        coeffs[i].first() = species_[i];
+        coeffs[i].second() = operator[](i);
+    }
+
+    os.writeKeyword("coeffs") << coeffs << token::END_STATEMENT << nl;
+}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 inline Foam::Ostream& Foam::operator<<

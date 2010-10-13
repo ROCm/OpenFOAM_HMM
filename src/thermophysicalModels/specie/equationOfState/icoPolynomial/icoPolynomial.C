@@ -53,6 +53,17 @@ icoPolynomial<PolySize>::icoPolynomial(const dictionary& dict)
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<int PolySize>
+void icoPolynomial<PolySize>::write(Ostream& os) const
+{
+    specie::write(os);
+    os.writeKeyword("rhoPolynomial") << rhoPolynomial_/this->W()
+        << token::END_STATEMENT << nl;
+}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 template<int PolySize>

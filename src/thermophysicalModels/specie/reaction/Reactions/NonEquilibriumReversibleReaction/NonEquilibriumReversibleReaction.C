@@ -136,7 +136,8 @@ void Foam::NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::write
 ) const
 {
     Reaction<ReactionThermo>::write(os);
-    os  << token::SPACE << fk_ << token::SPACE << rk_;
+    fk_.write(os);
+    rk_.write(os);
 }
 
 

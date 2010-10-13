@@ -30,7 +30,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 template<class thermo>
 inline constTransport<thermo>::constTransport
 (
@@ -40,12 +39,11 @@ inline constTransport<thermo>::constTransport
 )
 :
     thermo(t),
-    Mu(mu),
-    rPr(1.0/Pr)
+    Mu_(mu),
+    rPr_(1.0/Pr)
 {}
 
 
-// Construct as named copy
 template<class thermo>
 inline constTransport<thermo>::constTransport
 (
@@ -54,30 +52,27 @@ inline constTransport<thermo>::constTransport
 )
 :
     thermo(name, ct),
-    Mu(ct.Mu),
-    rPr(ct.rPr)
+    Mu_(ct.Mu_),
+    rPr_(ct.rPr_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Dynamic viscosity [kg/ms]
 template<class thermo>
 inline scalar constTransport<thermo>::mu(const scalar) const
 {
-    return Mu;
+    return Mu_;
 }
 
 
-// Thermal conductivity [W/mK]
 template<class thermo>
 inline scalar constTransport<thermo>::kappa(const scalar T) const
 {
-    return this->Cp(T)*mu(T)*rPr;
+    return this->Cp(T)*mu(T)*rPr_;
 }
 
 
-// Thermal diffusivity for enthalpy [kg/ms]
 template<class thermo>
 inline scalar constTransport<thermo>::alpha(const scalar T) const
 {
@@ -87,7 +82,7 @@ inline scalar constTransport<thermo>::alpha(const scalar T) const
     scalar CpBar =
         (deltaT*(this->H(T) - this->H(specie::Tstd)) + Cp_)/(sqr(deltaT) + 1);
 
-    return Cp_*mu(T)*rPr/CpBar;
+    return Cp_*mu(T)*rPr_/CpBar;
 }
 
 
@@ -101,8 +96,8 @@ inline constTransport<thermo>& constTransport<thermo>::operator=
 {
     thermo::operator=(ct);
 
-    Mu = ct.Mu;
-    rPr = ct.rPr;
+    Mu_ = ct.Mu_;
+    rPr_ = ct.rPr_;
 
     return *this;
 }
@@ -128,8 +123,8 @@ inline constTransport<thermo> operator+
     return constTransport<thermo>
     (
         t,
-        molr1*ct1.Mu + molr2*ct2.Mu,
-        molr1*ct1.rPr + molr2*ct2.rPr
+        molr1*ct1.Mu_ + molr2*ct2.Mu_,
+        molr1*ct1.rPr_ + molr2*ct2.rPr_
     );
 }
 
@@ -152,8 +147,8 @@ inline constTransport<thermo> operator-
     return constTransport<thermo>
     (
         t,
-        molr1*ct1.Mu - molr2*ct2.Mu,
-        molr1*ct1.rPr - molr2*ct2.rPr
+        molr1*ct1.Mu_ - molr2*ct2.Mu_,
+        molr1*ct1.rPr_ - molr2*ct2.rPr_
     );
 }
 
@@ -168,8 +163,8 @@ inline constTransport<thermo> operator*
     return constTransport<thermo>
     (
         s*static_cast<const thermo&>(ct),
-        ct.Mu,
-        ct.rPr
+        ct.Mu_,
+        ct.rPr_
     );
 }
 

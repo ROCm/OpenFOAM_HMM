@@ -56,7 +56,7 @@ inline Ostream& operator<<
 
 
 /*---------------------------------------------------------------------------*\
-              Class FallOffReactionRate Declaration
+                    Class FallOffReactionRate Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ReactionRate, class FallOffFunction>
@@ -112,6 +112,9 @@ public:
             const scalar p,
             const scalarField& c
         ) const;
+
+        //- Write to stream
+        inline void write(Ostream& os) const;
 
 
     // Ostream Operator

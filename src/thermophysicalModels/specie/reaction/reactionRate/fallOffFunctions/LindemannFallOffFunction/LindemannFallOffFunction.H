@@ -49,7 +49,7 @@ Ostream& operator<<(Ostream&, const LindemannFallOffFunction&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class LindemannFallOffFunction Declaration
+                 Class LindemannFallOffFunction Declaration
 \*---------------------------------------------------------------------------*/
 
 class LindemannFallOffFunction
@@ -82,6 +82,9 @@ public:
             const scalar T,
             const scalar Pr
         ) const;
+
+        //- Write to stream
+        inline void write(Ostream& os) const;
 
 
     // Ostream Operator

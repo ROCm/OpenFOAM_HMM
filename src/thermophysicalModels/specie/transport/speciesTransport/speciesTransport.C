@@ -50,6 +50,17 @@ speciesTransport::speciesTransport(const dictionary& dict)
 {}
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void speciesTransport::write(Ostream& os) const
+{
+    os  << this->name() << endl;
+    os  << token::BEGIN_BLOCK << incrIndent << nl;
+    janafThermo::write(os);
+    os  << decrIndent << token::END_BLOCK << nl;
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Ostream& operator<<(Ostream& os, const speciesTransport& sTranport)

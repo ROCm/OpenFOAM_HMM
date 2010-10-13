@@ -81,14 +81,22 @@ public:
 
     // Member functions
 
-        //- Return density [kg/m^3]
-        inline scalar rho(scalar p, scalar T) const;
+        // Fundamental properties
 
-        //- Return compressibility rho/p [s^2/m^2]
-        inline scalar psi(scalar p, scalar T) const;
+            //- Return density [kg/m^3]
+            inline scalar rho(scalar p, scalar T) const;
 
-        //- Return compression factor []
-        inline scalar Z(scalar p, scalar T) const;
+            //- Return compressibility rho/p [s^2/m^2]
+            inline scalar psi(scalar p, scalar T) const;
+
+            //- Return compression factor []
+            inline scalar Z(scalar p, scalar T) const;
+
+
+        // I-O
+
+            //- Write to Ostream
+            void write(Ostream& os) const;
 
 
     // Member operators

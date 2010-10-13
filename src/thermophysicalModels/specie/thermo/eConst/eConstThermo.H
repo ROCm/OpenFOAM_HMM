@@ -135,7 +135,7 @@ public:
 
     // Member Functions
 
-        // Fundamaental properties
+        // Fundamental properties
 
             //- Heat capacity at constant pressure [J/(kmol K)]
             inline scalar cp(const scalar T) const;
@@ -151,6 +151,12 @@ public:
 
             //- Entropy [J/(kmol K)]
             inline scalar s(const scalar T) const;
+
+
+        // I-O
+
+            //- Write to Ostream
+            void write(Ostream& os) const;
 
 
     // Member operators

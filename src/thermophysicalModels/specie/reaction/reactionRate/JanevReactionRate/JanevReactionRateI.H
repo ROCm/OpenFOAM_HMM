@@ -104,6 +104,15 @@ inline Foam::scalar Foam::JanevReactionRate::operator()
 }
 
 
+inline void Foam::JanevReactionRate::write(Ostream& os) const
+{
+    os.writeKeyword("A") << A_ << nl;
+    os.writeKeyword("beta") << beta_ << nl;
+    os.writeKeyword("Ta") << Ta_ << nl;
+    os.writeKeyword("b") << b_ << nl;
+}
+
+
 inline Foam::Ostream& Foam::operator<<
 (
     Ostream& os,

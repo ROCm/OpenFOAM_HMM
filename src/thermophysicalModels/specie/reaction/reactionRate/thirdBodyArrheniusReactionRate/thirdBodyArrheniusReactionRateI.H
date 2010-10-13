@@ -85,6 +85,13 @@ inline Foam::scalar Foam::thirdBodyArrheniusReactionRate::operator()
 }
 
 
+inline void Foam::thirdBodyArrheniusReactionRate::write(Ostream& os) const
+{
+    ArrheniusReactionRate::write(os);
+    thirdBodyEfficiencies_.write(os);
+}
+
+
 inline Foam::Ostream& Foam::operator<<
 (
     Ostream& os,

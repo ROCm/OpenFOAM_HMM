@@ -150,20 +150,28 @@ public:
 
     // Member Functions
 
-        //- Heat capacity at constant pressure [J/(kmol K)]
-        inline scalar cp(const scalar T) const;
+        // Fundamental properties
 
-        //- Enthalpy [J/kmol]
-        inline scalar h(const scalar T) const;
+            //- Heat capacity at constant pressure [J/(kmol K)]
+            inline scalar cp(const scalar T) const;
 
-        //- Sensible enthalpy [J/kmol]
-        inline scalar hs(const scalar T) const;
+            //- Enthalpy [J/kmol]
+            inline scalar h(const scalar T) const;
 
-        //- Chemical enthalpy [J/kmol]
-        inline scalar hc() const;
+            //- Sensible enthalpy [J/kmol]
+            inline scalar hs(const scalar T) const;
 
-        //- Entropy [J/(kmol K)]
-        inline scalar s(const scalar T) const;
+            //- Chemical enthalpy [J/kmol]
+            inline scalar hc() const;
+
+            //- Entropy [J/(kmol K)]
+            inline scalar s(const scalar T) const;
+
+
+        // I-O
+
+            //- Write to Ostream
+            void write(Ostream& os) const;
 
 
     // Member operators

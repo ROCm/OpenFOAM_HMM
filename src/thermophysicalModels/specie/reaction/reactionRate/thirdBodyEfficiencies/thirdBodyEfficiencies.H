@@ -93,6 +93,10 @@ public:
         //- Calculate and return M, the concentration of the third-bodies
         inline scalar M(const scalarList& c) const;
 
+        //- Write to stream
+        inline void write(Ostream& os) const;
+
+
 
     // Ostream Operator
 

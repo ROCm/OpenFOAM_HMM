@@ -113,6 +113,9 @@ public:
 
         //- Read reactions from dictionary
         bool readReactionDict();
+
+        //- Write
+        void write(Ostream& os) const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

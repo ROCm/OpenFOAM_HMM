@@ -95,6 +95,22 @@ Foam::janafThermo<equationOfState>::janafThermo(const dictionary& dict)
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class equationOfState>
+void Foam::janafThermo<equationOfState>::write(Ostream& os) const
+{
+    equationOfState::write(os);
+    os.writeKeyword("Tlow") << Tlow_ << token::END_STATEMENT << endl;
+    os.writeKeyword("Thigh") << Thigh_ << token::END_STATEMENT << endl;
+    os.writeKeyword("Tcommon") << Tcommon_ << token::END_STATEMENT << endl;
+    os.writeKeyword("highCpCoeffs") << highCpCoeffs_ << token::END_STATEMENT
+        << endl;
+    os.writeKeyword("lowCpCoeffs") << lowCpCoeffs_ << token::END_STATEMENT
+        << endl;
+}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 template<class equationOfState>

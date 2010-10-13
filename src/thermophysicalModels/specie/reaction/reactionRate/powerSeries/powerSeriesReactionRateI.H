@@ -97,6 +97,15 @@ inline Foam::scalar Foam::powerSeriesReactionRate::operator()
 }
 
 
+inline void Foam::powerSeriesReactionRate::write(Ostream& os) const
+{
+    os.writeKeyword("A") << A_ << token::END_STATEMENT << nl;
+    os.writeKeyword("beta") << beta_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Ta") << Ta_ << token::END_STATEMENT << nl;
+    os.writeKeyword("b") << b_ << token::END_STATEMENT << nl;
+}
+
+
 inline Foam::Ostream& Foam::operator<<
 (
     Ostream& os,

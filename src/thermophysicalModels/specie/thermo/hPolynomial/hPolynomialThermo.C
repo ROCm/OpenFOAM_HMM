@@ -84,6 +84,22 @@ Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class EquationOfState, int PolySize>
+void Foam::hPolynomialThermo<EquationOfState, PolySize>::write
+(
+    Ostream& os
+) const
+{
+    EquationOfState::write(os);
+    os.writeKeyword("Hf") << Hf_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Sf") << Sf_ << token::END_STATEMENT << nl;
+    os.writeKeyword("cpPolynomial") << cpPolynomial_/this->W()
+        << token::END_STATEMENT << nl;
+}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 template<class EquationOfState, int PolySize>

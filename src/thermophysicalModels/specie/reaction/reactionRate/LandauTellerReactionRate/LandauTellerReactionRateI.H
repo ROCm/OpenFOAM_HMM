@@ -114,6 +114,16 @@ inline Foam::scalar Foam::LandauTellerReactionRate::operator()
 }
 
 
+inline void Foam::LandauTellerReactionRate::write(Ostream& os) const
+{
+    os.writeKeyword("A") << A_ << token::END_STATEMENT << nl;
+    os.writeKeyword("beta") << beta_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Ta") << Ta_ << token::END_STATEMENT << nl;
+    os.writeKeyword("B") << B_ << token::END_STATEMENT << nl;
+    os.writeKeyword("C") << C_ << token::END_STATEMENT << nl;
+}
+
+
 inline Foam::Ostream& Foam::operator<<
 (
     Ostream& os,

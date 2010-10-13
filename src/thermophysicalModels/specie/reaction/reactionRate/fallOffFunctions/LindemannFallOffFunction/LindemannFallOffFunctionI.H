@@ -52,6 +52,10 @@ inline Foam::scalar Foam::LindemannFallOffFunction::operator()
 }
 
 
+inline void Foam::LindemannFallOffFunction::write(Ostream& os) const
+{}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 inline Foam::Ostream& Foam::operator<<

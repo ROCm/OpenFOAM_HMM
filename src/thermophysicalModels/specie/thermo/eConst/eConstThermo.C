@@ -48,6 +48,17 @@ Foam::eConstThermo<equationOfState>::eConstThermo(const dictionary& dict)
 {}
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class equationOfState>
+void Foam::eConstThermo<equationOfState>::write(Ostream& os) const
+{
+    equationOfState::write(os);
+    os.writeKeyword("Cv") << Cv_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Hf") << Hf_ << token::END_STATEMENT << nl;
+}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 template<class equationOfState>

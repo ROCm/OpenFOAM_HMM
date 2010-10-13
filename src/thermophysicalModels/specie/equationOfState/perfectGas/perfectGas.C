@@ -47,6 +47,14 @@ perfectGas::perfectGas(const dictionary& dict)
 {}
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void perfectGas::write(Ostream& os) const
+{
+    specie::write(os);
+}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 Ostream& operator<<(Ostream& os, const perfectGas& pg)

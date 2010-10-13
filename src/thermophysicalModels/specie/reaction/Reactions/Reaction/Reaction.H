@@ -124,7 +124,13 @@ private:
 
     // Private Member Functions
 
+        //- Return string representation of reaction
+        string reactionStr() const;
+
+        //- Construct the left- and right-hand-side reaction coefficients
         void setLRhs(Istream&);
+
+        //- Construct reaction thermo
         void setThermo(const HashPtrTable<ReactionThermo>& thermoDatabase);
 
         //- Disallow default bitwise assignment

@@ -86,6 +86,15 @@ inline Foam::scalar Foam::TroeFallOffFunction::operator()
 }
 
 
+inline void Foam::TroeFallOffFunction::write(Ostream& os) const
+{
+    os.writeKeyword("alpha") << alpha_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Tsss") << Tsss_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Ts") << Ts_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Tss") << Tss_ << token::END_STATEMENT << nl;
+}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 inline Foam::Ostream& Foam::operator<<

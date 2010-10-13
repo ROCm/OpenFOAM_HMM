@@ -115,6 +115,9 @@ public:
 
         // Access
 
+            //- Name
+            inline const word& name() const;
+
             //- Molecular weight [kg/kmol]
             inline scalar W() const;
 
@@ -123,6 +126,12 @@ public:
 
             //- Gas constant [J/(kg K)]
             inline scalar R() const;
+
+
+        // I-O
+
+            //- Write to Ostream
+            void write(Ostream& os) const;
 
 
     // Member operators

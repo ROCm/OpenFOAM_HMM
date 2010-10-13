@@ -251,6 +251,12 @@ public:
             inline scalar TE(const scalar E, const scalar T0) const;
 
 
+        // I-O
+
+            //- Write to Ostream
+            void write(Ostream& os) const;
+
+
     // Member operators
 
         inline void operator+=(const specieThermo&);

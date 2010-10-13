@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class LandauTellerReactionRate Declaration
+                   Class LandauTellerReactionRate Declaration
 \*---------------------------------------------------------------------------*/
 
 class LandauTellerReactionRate
@@ -56,6 +56,7 @@ class LandauTellerReactionRate
         scalar Ta_;
         scalar B_;
         scalar C_;
+
 
 public:
 
@@ -100,6 +101,9 @@ public:
             const scalar p,
             const scalarField& c
         ) const;
+
+        //- Write to stream
+        inline void write(Ostream& os) const;
 
 
     // Ostream Operator

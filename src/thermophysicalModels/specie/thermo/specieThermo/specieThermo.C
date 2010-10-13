@@ -53,6 +53,15 @@ Foam::specieThermo<thermo>::specieThermo(const dictionary& dict)
 {}
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class thermo>
+void Foam::specieThermo<thermo>::write(Ostream& os) const
+{
+    thermo::write(os);
+}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 template<class thermo>

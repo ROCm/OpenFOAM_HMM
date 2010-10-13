@@ -107,6 +107,20 @@ inline Foam::scalar Foam::ChemicallyActivatedReactionRate
 
 
 template<class ReactionRate, class ChemicallyActivationFunction>
+inline void Foam::ChemicallyActivatedReactionRate
+<
+    ReactionRate,
+    ChemicallyActivationFunction
+>::write(Ostream& os) const
+{
+    k0_.write(os);
+    kInf_.write(os);
+    F_.write(os);
+    thirdBodyEfficiencies_.write(os);
+}
+
+
+template<class ReactionRate, class ChemicallyActivationFunction>
 inline Foam::Ostream& Foam::operator<<
 (
     Ostream& os,

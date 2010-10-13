@@ -116,6 +116,9 @@ public:
             const scalarField& c
         ) const;
 
+        //- Write to stream
+        inline void write(Ostream& os) const;
+
 
     // Ostream Operator
 

@@ -98,7 +98,7 @@ void Foam::IrreversibleReaction<ReactionThermo, ReactionRate>::write
 ) const
 {
     Reaction<ReactionThermo>::write(os);
-    os  << token::SPACE << k_;
+    k_.write(os);
 }
 
 

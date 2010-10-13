@@ -94,8 +94,11 @@ class constTransport
 {
     // Private data
 
-        //- Constant viscosity and reciprocal Prandtl Number.
-        scalar Mu, rPr;
+        //- Constant viscosity [Pa.s]
+        scalar Mu_;
+
+        //- Reciprocal Prandtl Number []
+        scalar rPr_;
 
 
     // Private Member Functions
@@ -136,6 +139,9 @@ public:
 
         // Species diffusivity
         //inline scalar D(const scalar T) const;
+
+        //- Write to Ostream
+        void write(Ostream& os) const;
 
 
     // Member operators

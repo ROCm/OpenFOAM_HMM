@@ -168,6 +168,9 @@ public:
         // Species diffusivity
         //inline scalar D(const scalar T) const;
 
+        //- Write to Ostream
+        void write(Ostream& os) const;
+
 
     // Member operators
 
