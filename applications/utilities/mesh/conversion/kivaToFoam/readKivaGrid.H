@@ -459,7 +459,6 @@ wordList patchNames(nPatches);
 wordList patchTypes(nPatches);
 word defaultFacesName = "defaultFaces";
 word defaultFacesType = emptyPolyPatch::typeName;
-wordList patchPhysicalTypes(nPatches);
 
 label nAddedPatches = 0;
 
@@ -535,17 +534,27 @@ forAll(boundary, patchi)
     }
 }
 
+PtrList<dictionary> patchDicts;
 preservePatchTypes
 (
     runTime,
     runTime.constant(),
-    polyMesh::defaultRegion,
+    polyMesh::meshSubDir,
     patchNames,
-    patchTypes,
+    patchDicts,
     defaultFacesName,
-    defaultFacesType,
-    patchPhysicalTypes
+    defaultFacesType
 );
+// Add information to dictionary
+forAll(patchNames, patchI)
+{
+    if (!patchDicts.set(patchI))
+    {
+        patchDicts.set(patchI, new dictionary());
+    }
+    // Add but not overwrite
+    patchDicts[patchI].add("type", patchTypes[patchI], false);
+}
 
 // Build the mesh and write it out
 polyMesh pShapeMesh
@@ -560,10 +569,9 @@ polyMesh pShapeMesh
     cellShapes,
     boundary,
     patchNames,
-    patchTypes,
+    patchDicts,
     defaultFacesName,
-    defaultFacesType,
-    patchPhysicalTypes
+    defaultFacesType
 );
 
 Info << "Writing polyMesh" << endl;

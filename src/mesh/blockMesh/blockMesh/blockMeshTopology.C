@@ -189,6 +189,7 @@ bool Foam::blockMesh::readPatches
 bool Foam::blockMesh::readBoundary
 (
     const dictionary& meshDescription,
+    wordList& patchNames,
     faceListList& tmpBlocksPatches,
     PtrList<dictionary>& patchDicts
 )
@@ -201,6 +202,7 @@ bool Foam::blockMesh::readBoundary
         meshDescription.lookup("boundary")
     );
 
+    patchNames.setSize(patchesInfo.size());
     tmpBlocksPatches.setSize(patchesInfo.size());
     patchDicts.setSize(patchesInfo.size());
 
@@ -215,9 +217,9 @@ bool Foam::blockMesh::readBoundary
                 << " valid dictionary." << exit(FatalIOError);
         }
 
-        // Construct dictionary and add name
+        patchNames[patchI] = patchInfo.keyword();
+        // Construct dictionary
         patchDicts.set(patchI, new dictionary(patchInfo.dict()));
-        patchDicts[patchI].set("name", patchInfo.keyword());
         // Read block faces
         patchDicts[patchI].lookup("faces") >> tmpBlocksPatches[patchI];
 
@@ -472,7 +474,8 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
 
         Info<< nl << "Reading physicalType from existing boundary file" << endl;
 
-        wordList patchPhysicalTypes(tmpBlocksPatches.size());
+        PtrList<dictionary> patchDicts(patchNames.size());
+        word defaultFacesType;
 
         preservePatchTypes
         (
@@ -480,31 +483,29 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
             meshDescription.time().constant(),
             polyMesh::meshSubDir,
             patchNames,
-            patchTypes,
+            patchDicts,
             defaultPatchName,
-            defaultPatchType,
-            patchPhysicalTypes
+            defaultPatchType
         );
 
 
-        // Convert into dictionary
-        PtrList<dictionary> patchDicts(patchNames.size());
+        // Add cyclic info (might not be present from older file)
         forAll(patchDicts, patchI)
         {
-            patchDicts.set(patchI, new dictionary());
-            patchDicts[patchI].set("name", patchNames[patchI]);
-            patchDicts[patchI].set("type", patchTypes[patchI]);
+            if (!patchDicts.set(patchI))
+            {
+                patchDicts.set(patchI, new dictionary());
+            }
+
+            dictionary& dict = patchDicts[patchI];
+
+            // Add but not override type
+            dict.add("type", patchTypes[patchI], false);
+
+            // Override neighbourpatch name
             if (nbrPatchNames[patchI] != word::null)
             {
-                patchDicts[patchI].set("neighbourPatch", nbrPatchNames[patchI]);
-            }
-            if (patchPhysicalTypes[patchI] != word::null)
-            {
-                patchDicts[patchI].set
-                (
-                    "physicalType",
-                    patchPhysicalTypes[patchI]
-                );
+                dict.set("neighbourPatch", nbrPatchNames[patchI]);
             }
         }
 
@@ -523,6 +524,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
             xferCopy(blockPointField_),   // copy these points, do NOT move
             tmpBlockCells,
             tmpBlocksPatches,
+            patchNames,
             patchDicts,
             defaultPatchName,
             defaultPatchType
@@ -530,12 +532,14 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
     }
     else if (meshDescription.found("boundary"))
     {
+        wordList patchNames;
         faceListList tmpBlocksPatches;
         PtrList<dictionary> patchDicts;
 
         topologyOK = topologyOK && readBoundary
         (
             meshDescription,
+            patchNames,
             tmpBlocksPatches,
             patchDicts
         );
@@ -553,6 +557,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
         cellShapeList tmpBlockCells(blocks.size());
         createCellShapes(tmpBlockCells);
 
+        // Extract 
 
         blockMeshPtr = new polyMesh
         (
@@ -568,6 +573,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
             xferCopy(blockPointField_),   // copy these points, do NOT move
             tmpBlockCells,
             tmpBlocksPatches,
+            patchNames,
             patchDicts,
             defaultPatchName,
             defaultPatchType

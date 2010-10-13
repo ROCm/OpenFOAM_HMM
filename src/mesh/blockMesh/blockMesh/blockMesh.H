@@ -121,6 +121,7 @@ class blockMesh
         bool readBoundary
         (
             const dictionary& meshDescription,
+            wordList& patchNames,
             faceListList& tmpBlocksPatches,
             PtrList<dictionary>& patchDicts
         );
@@ -185,8 +186,8 @@ public:
             //- Get patch information from the topology mesh
             PtrList<dictionary> patchDicts() const;
 
-//            wordList patchNames() const;
-//
+            wordList patchNames() const;
+
 //            wordList patchTypes() const;
 //
 //            wordList patchPhysicalTypes() const;
