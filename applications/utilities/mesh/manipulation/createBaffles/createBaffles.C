@@ -43,6 +43,8 @@ Description
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "ZoneIDs.H"
+#include "fvMeshMapper.H"
+#include "SetPatchFields.H"
 
 using namespace Foam;
 
@@ -241,45 +243,39 @@ int main(int argc, char *argv[])
     IOobjectList objects(mesh, runTime.timeName());
 
     // Read vol fields.
-    if (args.optionFound("updateFields"))
-    {
-        Info<< "Reading geometric fields" << nl << endl;
-        PtrList<volScalarField> vsFlds;
-        ReadFields(mesh, objects, vsFlds);
+    Info<< "Reading geometric fields" << nl << endl;
+    PtrList<volScalarField> vsFlds;
+    ReadFields(mesh, objects, vsFlds);
 
-        PtrList<volVectorField> vvFlds;
-        ReadFields(mesh, objects, vvFlds);
+    PtrList<volVectorField> vvFlds;
+    ReadFields(mesh, objects, vvFlds);
 
-        PtrList<volSphericalTensorField> vstFlds;
-        ReadFields(mesh, objects, vstFlds);
+    PtrList<volSphericalTensorField> vstFlds;
+    ReadFields(mesh, objects, vstFlds);
 
-        PtrList<volSymmTensorField> vsymtFlds;
-        ReadFields(mesh, objects, vsymtFlds);
+    PtrList<volSymmTensorField> vsymtFlds;
+    ReadFields(mesh, objects, vsymtFlds);
 
-        PtrList<volTensorField> vtFlds;
-        ReadFields(mesh, objects, vtFlds);
+    PtrList<volTensorField> vtFlds;
+    ReadFields(mesh, objects, vtFlds);
 
-        // Read surface fields.
+    // Read surface fields.
 
-        PtrList<surfaceScalarField> ssFlds;
-        ReadFields(mesh, objects, ssFlds);
+    PtrList<surfaceScalarField> ssFlds;
+    ReadFields(mesh, objects, ssFlds);
 
-        PtrList<surfaceVectorField> svFlds;
-        ReadFields(mesh, objects, svFlds);
+    PtrList<surfaceVectorField> svFlds;
+    ReadFields(mesh, objects, svFlds);
 
-        PtrList<surfaceSphericalTensorField> sstFlds;
-        ReadFields(mesh, objects, sstFlds);
+    PtrList<surfaceSphericalTensorField> sstFlds;
+    ReadFields(mesh, objects, sstFlds);
 
-        PtrList<surfaceSymmTensorField> ssymtFlds;
-        ReadFields(mesh, objects, ssymtFlds);
+    PtrList<surfaceSymmTensorField> ssymtFlds;
+    ReadFields(mesh, objects, ssymtFlds);
 
-        PtrList<surfaceTensorField> stFlds;
-        ReadFields(mesh, objects, stFlds);
-    }
-    else
-    {
-        Info<< "Not updating geometric fields" << nl << endl;
-    }
+    PtrList<surfaceTensorField> stFlds;
+    ReadFields(mesh, objects, stFlds);
+
 
     // Mesh change container
     polyTopoChange meshMod(mesh);
@@ -483,6 +479,58 @@ int main(int argc, char *argv[])
 
     // Update fields
     mesh.updateMesh(map);
+
+    // Correct boundary faces mapped-out-of-nothing.
+    {
+        fvMeshMapper mapper(mesh, map);
+        bool hasWarned = false;
+        forAll(newMasterPatches, i)
+        {
+            label patchI = newMasterPatches[i];
+            const fvPatchMapper& pm = mapper.boundaryMap()[patchI];
+            if (pm.sizeBeforeMapping() == 0)
+            {
+                if (!hasWarned)
+                {
+                    hasWarned = true;
+                    WarningIn(args.executable())
+                        << "Setting field on boundary faces to zero." << endl
+                        << "You might have to edit these fields." << endl;
+                }
+
+                SetPatchFields(vsFlds, patchI, pTraits<scalar>::zero);
+                SetPatchFields(vvFlds, patchI, pTraits<vector>::zero);
+                SetPatchFields(vstFlds, patchI, pTraits<sphericalTensor>::zero);
+                SetPatchFields(vsymtFlds, patchI, pTraits<symmTensor>::zero);
+                SetPatchFields(vtFlds, patchI, pTraits<tensor>::zero);
+
+                SetPatchFields(ssFlds, patchI, pTraits<scalar>::zero);
+                SetPatchFields(svFlds, patchI, pTraits<vector>::zero);
+                SetPatchFields(sstFlds, patchI, pTraits<sphericalTensor>::zero);
+                SetPatchFields(ssymtFlds, patchI, pTraits<symmTensor>::zero);
+                SetPatchFields(stFlds, patchI, pTraits<tensor>::zero);
+            }
+        }
+        forAll(newSlavePatches, i)
+        {
+            label patchI = newSlavePatches[i];
+            const fvPatchMapper& pm = mapper.boundaryMap()[patchI];
+            if (pm.sizeBeforeMapping() == 0)
+            {
+                SetPatchFields(vsFlds, patchI, pTraits<scalar>::zero);
+                SetPatchFields(vvFlds, patchI, pTraits<vector>::zero);
+                SetPatchFields(vstFlds, patchI, pTraits<sphericalTensor>::zero);
+                SetPatchFields(vsymtFlds, patchI, pTraits<symmTensor>::zero);
+                SetPatchFields(vtFlds, patchI, pTraits<tensor>::zero);
+
+                SetPatchFields(ssFlds, patchI, pTraits<scalar>::zero);
+                SetPatchFields(svFlds, patchI, pTraits<vector>::zero);
+                SetPatchFields(sstFlds, patchI, pTraits<sphericalTensor>::zero);
+                SetPatchFields(ssymtFlds, patchI, pTraits<symmTensor>::zero);
+                SetPatchFields(stFlds, patchI, pTraits<tensor>::zero);
+            }
+        }
+    }
 
     // Move mesh (since morphing might not do this)
     if (map().hasMotionPoints())
