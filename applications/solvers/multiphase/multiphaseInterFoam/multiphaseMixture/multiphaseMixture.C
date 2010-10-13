@@ -457,12 +457,12 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseMixture::K
 }
 
 
-Foam::tmp<Foam::surfaceScalarField>
+Foam::tmp<Foam::volScalarField>
 Foam::multiphaseMixture::nearInterface() const
 {
-    tmp<surfaceScalarField> tnearInt
+    tmp<volScalarField> tnearInt
     (
-        new surfaceScalarField
+        new volScalarField
         (
             IOobject
             (
@@ -477,8 +477,7 @@ Foam::multiphaseMixture::nearInterface() const
 
     forAllConstIter(PtrDictionary<phase>, phases_, iter)
     {
-        surfaceScalarField alphaf = fvc::interpolate(iter());
-        tnearInt() = max(tnearInt(), pos(alphaf - 0.01)*pos(0.99 - alphaf));
+        tnearInt() = max(tnearInt(), pos(iter() - 0.01)*pos(0.99 - iter()));
     }
 
     return tnearInt;
