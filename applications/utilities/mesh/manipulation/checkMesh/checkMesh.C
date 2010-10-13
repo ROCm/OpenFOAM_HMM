@@ -91,6 +91,22 @@ int main(int argc, char *argv[])
             // Clear mesh before checking
             mesh.clearOut();
 
+            pointIOField overrideCCs
+            (
+                IOobject
+                (
+                    "cellCentres",
+                    runTime.constant(),
+                    runTime,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                )
+            );
+
+            Info<< "Read " << overrideCCs.size() << " cell centres" << endl;
+
+            mesh.overrideCellCentres(overrideCCs);
+
             // Reconstruct globalMeshData
             mesh.globalData();
 
