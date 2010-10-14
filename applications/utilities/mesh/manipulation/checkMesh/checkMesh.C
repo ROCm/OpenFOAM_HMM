@@ -96,16 +96,20 @@ int main(int argc, char *argv[])
                 IOobject
                 (
                     "cellCentres",
-                    runTime.constant(),
+                    mesh.pointsInstance(),
+                    polyMesh::meshSubDir,
                     runTime,
-                    IOobject::MUST_READ,
+                    IOobject::READ_IF_PRESENT,
                     IOobject::NO_WRITE
                 )
             );
 
-            Info<< "Read " << overrideCCs.size() << " cell centres" << endl;
+            if (overrideCCs.headerOk())
+            {
+                Info<< "Read " << overrideCCs.size() << " cell centres" << endl;
 
-            mesh.overrideCellCentres(overrideCCs);
+                mesh.overrideCellCentres(overrideCCs);
+            }
 
             // Reconstruct globalMeshData
             mesh.globalData();

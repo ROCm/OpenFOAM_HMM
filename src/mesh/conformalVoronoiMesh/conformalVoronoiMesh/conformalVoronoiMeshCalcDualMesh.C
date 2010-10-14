@@ -96,14 +96,13 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     indexDualVertices(points, boundaryPts);
 
     {
-        // No-risk face filtering to get rid of zero area faces and
-        // establish if the mesh can be produced at all to the
+        // Ideally requires a no-risk face filtering to get rid of zero area
+        // faces and establish if the mesh can be produced at all to the
         // specified criteria
 
         Info<< nl << "Merging close points" << endl;
 
-        // There is no guarantee that a merge of close points is
-        // no-risk, but it seems to work using 1e-4 as the mergeClosenessCoeff
+        // There is no guarantee that a merge of close points is no-risk
         mergeCloseDualVertices(points, boundaryPts);
     }
 

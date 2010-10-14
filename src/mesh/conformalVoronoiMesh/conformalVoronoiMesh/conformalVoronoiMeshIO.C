@@ -275,7 +275,8 @@ void Foam::conformalVoronoiMesh::writeMesh
         IOobject
         (
             "cellCentres",
-            instance,
+            mesh.pointsInstance(),
+            fvMesh::meshSubDir,
             mesh,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
