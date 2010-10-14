@@ -221,7 +221,7 @@ void Foam::Reaction<ReactionThermo>::setLRhs(Istream& is)
         }
     }
 
-    FatalIOErrorIn("Reaction<ReactionThermo>::lrhs(Istream& is)", is)
+    FatalIOErrorIn("Reaction<ReactionThermo>::setLRhs(Istream& is)", is)
         << "Cannot continue reading reaction data from stream"
         << exit(FatalIOError);
 }
@@ -254,7 +254,7 @@ Foam::Reaction<ReactionThermo>::Reaction
     ReactionThermo(*thermoDatabase[species[0]]),
     species_(species)
 {
-    setLRhs(dict.lookup("reaction"));
+    setLRhs(IStringStream(dict.lookup("reaction"))());
     setThermo(thermoDatabase);
 }
 
