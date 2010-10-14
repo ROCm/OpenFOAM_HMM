@@ -84,8 +84,8 @@ const ThermoType& Foam::homogeneousMixture<ThermoType>::mixture
 template<class ThermoType>
 void Foam::homogeneousMixture<ThermoType>::read(const dictionary& thermoDict)
 {
-    reactants_ = ThermoType(thermoDict.lookup("reactants"));
-    products_ = ThermoType(thermoDict.lookup("products"));
+    reactants_ = ThermoType(thermoDict.subDict("reactants"));
+    products_ = ThermoType(thermoDict.subDict("products"));
 }
 
 

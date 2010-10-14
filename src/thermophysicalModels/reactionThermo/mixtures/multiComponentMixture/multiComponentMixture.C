@@ -38,7 +38,7 @@ const ThermoType& Foam::multiComponentMixture<ThermoType>::constructSpeciesData
         speciesData_.set
         (
             i,
-            new ThermoType(thermoDict.lookup(species_[i]))
+            new ThermoType(thermoDict.subDict(species_[i]))
         );
     }
 
@@ -155,7 +155,7 @@ void Foam::multiComponentMixture<ThermoType>::read
 {
     forAll(species_, i)
     {
-        speciesData_[i] = ThermoType(thermoDict.lookup(species_[i]));
+        speciesData_[i] = ThermoType(thermoDict.subDict(species_[i]));
     }
 }
 
