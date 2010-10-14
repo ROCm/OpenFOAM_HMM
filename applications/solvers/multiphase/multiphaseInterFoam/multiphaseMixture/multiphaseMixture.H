@@ -258,7 +258,7 @@ public:
 
         //- Indicator of the proximity of the interface
         //  Field values are 1 near and 0 away for the interface.
-        tmp<surfaceScalarField> nearInterface() const;
+        tmp<volScalarField> nearInterface() const;
 
         //- Solve for the mixture phase-fractions
         void solve();

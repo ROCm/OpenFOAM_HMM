@@ -184,14 +184,14 @@ do
                     # Set colour
                     colour="${colourList[$colourIndex]}"
 
-                    if [ "$host" = "$HOST" ]; then
+                    if [ "$host" = "$HOSTNAME" ]; then
                         eval $* 2>&1 | colourPipe "$colour"
                     else
                         ssh $host "$sourceFoam 2>/dev/null; cd $PWD && $rcmd" 2>&1 | colourPipe "$colour"
                     fi
                     retval=$?
                 else
-                    if [ "$host" = "$HOST" ]; then
+                    if [ "$host" = "$HOSTNAME" ]; then
                         eval $* 2>&1
                     else
                         ssh $host "$sourceFoam 2>/dev/null; cd $PWD && $rcmd" 2>&1

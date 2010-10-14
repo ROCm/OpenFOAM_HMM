@@ -52,7 +52,6 @@ Usage
 
 #include "blockMesh.H"
 #include "attachPolyTopoChanger.H"
-#include "preservePatchTypes.H"
 #include "emptyPolyPatch.H"
 #include "cellSet.H"
 
@@ -219,6 +218,7 @@ int main(int argc, char *argv[])
         xferCopy(blocks.points()),           // could we re-use space?
         blocks.cells(),
         blocks.patches(),
+        blocks.patchNames(),
         blocks.patchDicts(),
         defaultFacesName,
         defaultFacesType

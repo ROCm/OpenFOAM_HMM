@@ -22,44 +22,45 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Global
-    CourantNo
+    Foam::SetPatchFields
 
 Description
-    Calculates and outputs the maximum Courant Number.
+    Helper routine to initialise a patch field to a constant value
+
+SourceFiles
+    SetPatchFields.C
 
 \*---------------------------------------------------------------------------*/
 
+#ifndef SetPatchFields_H
+#define SetPatchFields_H
 
-scalar CoNum = 0.0;
-scalar meanCoNum = 0.0;
-scalar waveCoNum = 0.0;
+#include "PtrList.H"
 
-if (mesh.nInternalFaces())
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    scalarField sumPhi =
-        fvc::surfaceSum(mag(phi))().internalField()
-       /h.internalField();
 
-    CoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
+//- Helper routine to read fields
+template<class GeoField>
+void SetPatchFields
+(
+    PtrList<GeoField>& fields,
+    const label patchI,
+    const typename GeoField::value_type& initVal
+);
 
-    meanCoNum =
-        0.5*(gSum(sumPhi)/gSum(mesh.V().field()))*runTime.deltaTValue();
+} // End namespace Foam
 
-    // Gravity wave Courant number
-    waveCoNum = 0.25*gMax
-    (
-        fvc::surfaceSum
-        (
-            fvc::interpolate(sqrt(h))*mesh.magSf()
-        )().internalField()/mesh.V().field()
-    )*sqrt(magg).value()*runTime.deltaTValue();
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Info<< "Courant number mean: " << meanCoNum
-    << " max: " << CoNum << endl;
+#ifdef NoRepository
+#   include "SetPatchFields.C"
+#endif
 
-Info<< "Gravity wave Courant number max: " << waveCoNum
-    << endl;
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#endif
 
 // ************************************************************************* //

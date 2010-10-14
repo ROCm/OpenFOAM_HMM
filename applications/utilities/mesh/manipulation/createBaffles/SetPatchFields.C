@@ -21,45 +21,27 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Global
-    CourantNo
-
-Description
-    Calculates and outputs the maximum Courant Number.
-
 \*---------------------------------------------------------------------------*/
 
+#include "SetPatchFields.H"
 
-scalar CoNum = 0.0;
-scalar meanCoNum = 0.0;
-scalar waveCoNum = 0.0;
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-if (mesh.nInternalFaces())
+template<class GeoField>
+void Foam::SetPatchFields
+(
+    PtrList<GeoField>& fields,
+    const label patchI,
+    const typename GeoField::value_type& initVal
+)
 {
-    scalarField sumPhi =
-        fvc::surfaceSum(mag(phi))().internalField()
-       /h.internalField();
-
-    CoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
-
-    meanCoNum =
-        0.5*(gSum(sumPhi)/gSum(mesh.V().field()))*runTime.deltaTValue();
-
-    // Gravity wave Courant number
-    waveCoNum = 0.25*gMax
-    (
-        fvc::surfaceSum
-        (
-            fvc::interpolate(sqrt(h))*mesh.magSf()
-        )().internalField()/mesh.V().field()
-    )*sqrt(magg).value()*runTime.deltaTValue();
+    forAll(fields, i)
+    {
+        typename GeoField::PatchFieldType& pfld =
+            fields[i].boundaryField()[patchI];
+        pfld == initVal;
+    }
 }
-
-Info<< "Courant number mean: " << meanCoNum
-    << " max: " << CoNum << endl;
-
-Info<< "Gravity wave Courant number max: " << waveCoNum
-    << endl;
 
 
 // ************************************************************************* //

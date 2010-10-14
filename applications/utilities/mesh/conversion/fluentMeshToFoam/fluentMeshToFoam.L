@@ -45,7 +45,6 @@ Description
 #include "emptyPolyPatch.H"
 #include "wallPolyPatch.H"
 #include "symmetryPolyPatch.H"
-#include "preservePatchTypes.H"
 #include "cellShape.H"
 #include "faceSet.H"
 #include "cellSet.H"
@@ -1542,17 +1541,6 @@ int main(int argc, char *argv[])
     }
     repatcher.repatch();
 
-    preservePatchTypes
-    (
-        runTime,
-        runTime.constant(),
-        polyMesh::defaultRegion,
-        patchNames,
-        patchTypes,
-        defaultFacesName,
-        defaultFacesType,
-        patchPhysicalTypes
-    );
 
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(10);

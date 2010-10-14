@@ -34,14 +34,7 @@ Description
 #include "Time.H"
 #include "IFstream.H"
 #include "OFstream.H"
-#include "meshTools.H"
-#include "polyMesh.H"
-#include "wallPolyPatch.H"
-#include "symmetryPolyPatch.H"
-#include "preservePatchTypes.H"
-#include "cellShape.H"
-#include "cellModeller.H"
-#include "mergePoints.H"
+#include "pointField.H"
 #include "unitConversion.H"
 
 using namespace Foam;
