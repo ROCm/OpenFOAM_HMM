@@ -87,8 +87,7 @@ _foamSource()
 
 
 # Add in preset user or site preferences:
-foamPrefs=`$WM_PROJECT_DIR/bin/foamEtcFile prefs.sh` && _foamSource $foamPrefs
-unset foamPrefs
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile prefs.sh`
 
 # Evaluate command-line parameters
 while [ $# -gt 0 ]
@@ -259,13 +258,8 @@ _foamSource $WM_PROJECT_DIR/etc/aliases.sh
 
 # Source user setup files for optional packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-paraview3=`$WM_PROJECT_DIR/bin/foamEtcFile apps/paraview3/bashrc` \
-    && _foamSource $paraview3
-unset paraview3
-
-ensight=`$WM_PROJECT_DIR/bin/foamEtcFile apps/ensight/bashrc` \
-    && _foamSource $ensight
-unset ensight
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile apps/paraview3/bashrc`
+_foamSource `$WM_PROJECT_DIR/bin/foamEtcFile apps/ensight/bashrc`
 
 
 # Clean environment paths again. Only remove duplicates
