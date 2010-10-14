@@ -22,10 +22,16 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
+    Foam::stringUList
+
+Description
+    A UList of strings.
+
+Typedef
     Foam::stringList
 
 Description
-    List of strings.
+    A List of strings.
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,6 +45,8 @@ Description
 
 namespace Foam
 {
+    typedef UList<string> stringUList;
+
     typedef List<string> stringList;
 }
 

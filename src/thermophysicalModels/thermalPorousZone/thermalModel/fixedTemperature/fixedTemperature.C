@@ -33,6 +33,8 @@ License
 
 namespace Foam
 {
+namespace porousMedia
+{
     defineTypeNameAndDebug(fixedTemperature, 0);
 
     addToRunTimeSelectionTable
@@ -42,11 +44,12 @@ namespace Foam
         pZone
     );
 }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fixedTemperature::fixedTemperature(const porousZone& pZone)
+Foam::porousMedia::fixedTemperature::fixedTemperature(const porousZone& pZone)
 :
     thermalModel(pZone, typeName),
     T_(readScalar(coeffDict_.lookup("T")))
@@ -55,13 +58,13 @@ Foam::fixedTemperature::fixedTemperature(const porousZone& pZone)
 
 // * * * * * * * * * * * * * * * * Destructor    * * * * * * * * * * * * * * //
 
-Foam::fixedTemperature::~fixedTemperature()
+Foam::porousMedia::fixedTemperature::~fixedTemperature()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::fixedTemperature::addEnthalpySource
+void Foam::porousMedia::fixedTemperature::addEnthalpySource
 (
     const basicThermo& thermo,
     const volScalarField& rho,

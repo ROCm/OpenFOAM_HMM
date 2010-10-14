@@ -33,20 +33,23 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(noThermalModel, 0);
+namespace porousMedia
+{
+   defineTypeNameAndDebug(noThermalModel, 0);
 
-    addToRunTimeSelectionTable
-    (
-        thermalModel,
-        noThermalModel,
-        pZone
-    );
+   addToRunTimeSelectionTable
+   (
+       thermalModel,
+       noThermalModel,
+       pZone
+   );
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::noThermalModel::noThermalModel(const porousZone& pZone)
+Foam::porousMedia::noThermalModel::noThermalModel(const porousZone& pZone)
 :
     thermalModel(pZone)
 {}
@@ -54,13 +57,13 @@ Foam::noThermalModel::noThermalModel(const porousZone& pZone)
 
 // * * * * * * * * * * * * * * * * Destructor    * * * * * * * * * * * * * * //
 
-Foam::noThermalModel::~noThermalModel()
+Foam::porousMedia::noThermalModel::~noThermalModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::noThermalModel::addEnthalpySource
+void Foam::porousMedia::noThermalModel::addEnthalpySource
 (
     const basicThermo&,
     const volScalarField&,

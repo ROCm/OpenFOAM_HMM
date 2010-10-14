@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fixedTemperature
+    Foam::porousMedia::fixedTemperature
 
 Description
-    Fixed temperature model
+    Fixed temperature model for porous media
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,6 +39,8 @@ Description
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace porousMedia
 {
 
 /*---------------------------------------------------------------------------*\
@@ -85,6 +87,10 @@ public:
         ) const;
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace porousMedia
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

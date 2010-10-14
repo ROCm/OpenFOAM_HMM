@@ -59,6 +59,7 @@ template<class T> class SubList;
 template<class T> class UList;
 template<class T> Ostream& operator<<(Ostream&, const UList<T>&);
 
+typedef UList<label> labelUList;
 
 /*---------------------------------------------------------------------------*\
                            Class UList Declaration

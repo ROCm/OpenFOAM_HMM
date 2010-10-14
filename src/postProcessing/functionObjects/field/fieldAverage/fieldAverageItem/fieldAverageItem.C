@@ -27,12 +27,16 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<>
-const char* Foam::NamedEnum<Foam::fieldAverageItem::baseType, 2>::names[] =
+namespace Foam
 {
-    "iteration",
-    "time"
-};
+    template<>
+    const char* Foam::NamedEnum<Foam::fieldAverageItem::baseType, 2>::names[] =
+    {
+        "iteration",
+        "time"
+    };
+}
+
 
 const Foam::NamedEnum<Foam::fieldAverageItem::baseType, 2>
     Foam::fieldAverageItem::baseTypeNames_;

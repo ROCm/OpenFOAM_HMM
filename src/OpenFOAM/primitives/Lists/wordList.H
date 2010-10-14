@@ -22,10 +22,16 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
+    Foam::wordUList
+
+Description
+    A UList of words.
+
+Typedef
     Foam::wordList
 
 Description
-    List of words.
+    A List of words.
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,6 +45,8 @@ Description
 
 namespace Foam
 {
+    typedef UList<word> wordUList;
+
     typedef List<word> wordList;
 }
 

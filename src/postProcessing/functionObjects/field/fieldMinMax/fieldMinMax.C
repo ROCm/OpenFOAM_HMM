@@ -33,13 +33,15 @@ License
 
 defineTypeNameAndDebug(Foam::fieldMinMax, 0);
 
-
-template<>
-const char* Foam::NamedEnum<Foam::fieldMinMax::modeType, 2>::names[] =
+namespace Foam
 {
-    "magnitude",
-    "component"
-};
+    template<>
+    const char* Foam::NamedEnum<Foam::fieldMinMax::modeType, 2>::names[] =
+    {
+        "magnitude",
+        "component"
+    };
+}
 
 
 const Foam::NamedEnum<Foam::fieldMinMax::modeType, 2>

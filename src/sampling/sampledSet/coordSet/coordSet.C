@@ -27,15 +27,19 @@ License
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-template<>
-const char* Foam::NamedEnum<Foam::coordSet::coordFormat, 5>::names[] =
+namespace Foam
 {
-    "xyz",
-    "x",
-    "y",
-    "z",
-    "distance"
-};
+    template<>
+    const char* Foam::NamedEnum<Foam::coordSet::coordFormat, 5>::names[] =
+    {
+        "xyz",
+        "x",
+        "y",
+        "z",
+        "distance"
+    };
+}
+
 
 const Foam::NamedEnum<Foam::coordSet::coordFormat, 5>
     Foam::coordSet::coordFormatNames_;

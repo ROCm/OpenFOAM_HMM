@@ -27,16 +27,19 @@ License
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-template<>
-const char* Foam::NamedEnum
-<
-    Foam::outputFilterOutputControl::outputControls,
-    2
->::names[] =
+namespace Foam
 {
-    "timeStep",
-    "outputTime"
-};
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::outputFilterOutputControl::outputControls,
+        2
+    >::names[] =
+    {
+        "timeStep",
+        "outputTime"
+    };
+}
 
 const Foam::NamedEnum<Foam::outputFilterOutputControl::outputControls, 2>
     Foam::outputFilterOutputControl::outputControlNames_;
