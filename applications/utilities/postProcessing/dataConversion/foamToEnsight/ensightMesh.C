@@ -70,12 +70,15 @@ void Foam::ensightMesh::correct()
         // Patches are output. Check that they're synced.
         mesh_.boundaryMesh().checkParallelSync(true);
 
-        allPatchNames_ = wordList::subList
-        (
-            mesh_.boundaryMesh().names(),
-            mesh_.boundary().size()
-          - mesh_.globalData().processorPatches().size()
-        );
+        allPatchNames_ = mesh_.boundaryMesh().names();
+        if (Pstream::parRun())
+        {
+            allPatchNames_.setSize
+            (
+                mesh_.boundary().size()
+              - mesh_.globalData().processorPatches().size()
+            );
+        }
 
         if (patches_)
         {
