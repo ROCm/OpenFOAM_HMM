@@ -260,7 +260,7 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
                 allValues
             );
 
-            newValues = this->patch().patchSlice(allValues);
+            newValues.transfer(allValues);
 
             break;
         }
