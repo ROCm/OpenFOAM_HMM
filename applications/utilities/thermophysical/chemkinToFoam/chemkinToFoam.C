@@ -48,11 +48,13 @@ int main(int argc, char *argv[])
 
     OFstream reactionsFile(args[3]);
     reactionsFile
-        << "species" << cr.species() << token::END_STATEMENT << nl << nl
-        << "reactions" << cr.reactions() << token::END_STATEMENT << endl;
+        << "species" << cr.species() << token::END_STATEMENT << nl << nl;
+
+    cr.reactions().write(reactionsFile);
+
 
     OFstream thermoFile(args[4]);
-    thermoFile<< cr.speciesThermo() << endl;
+    cr.speciesThermo().write(thermoFile);
 
     Info<< "End\n" << endl;
 

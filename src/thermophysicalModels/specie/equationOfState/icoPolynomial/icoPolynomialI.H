@@ -83,6 +83,17 @@ Foam::icoPolynomial<PolySize>::New(Istream& is)
 }
 
 
+template<int PolySize>
+inline Foam::autoPtr<Foam::icoPolynomial<PolySize> >
+Foam::icoPolynomial<PolySize>::New(const dictionary& dict)
+{
+    return autoPtr<icoPolynomial<PolySize> >
+    (
+        new icoPolynomial<PolySize>(dict)
+    );
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<int PolySize>

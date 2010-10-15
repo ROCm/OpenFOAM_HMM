@@ -23,8 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "basicMixture.H"
 #include "fvMesh.H"
 
@@ -39,11 +37,7 @@ defineTypeNameAndDebug(basicMixture, 0);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-basicMixture::basicMixture
-(
-    const dictionary&,
-    const fvMesh&
-)
+basicMixture::basicMixture(const dictionary&, const fvMesh&)
 {}
 
 

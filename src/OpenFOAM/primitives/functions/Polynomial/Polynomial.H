@@ -110,6 +110,9 @@ public:
         //- Construct from a list of coefficients
         explicit Polynomial(const UList<scalar>& coeffs);
 
+        //- Construct from Istream
+        Polynomial(Istream& is);
+
         //- Construct from name and Istream
         Polynomial(const word& name, Istream& is);
 

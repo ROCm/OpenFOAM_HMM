@@ -39,15 +39,14 @@ scalar meanAlphaCoNum = 0.0;
 
 if (mesh.nInternalFaces())
 {
-    surfaceScalarField SfUfbyDelta =
-        mixture.nearInterface()
-       *mesh.surfaceInterpolation::deltaCoeffs()*mag(phi);
+    scalarField sumPhi =
+        mixture.nearInterface()().internalField()
+       *fvc::surfaceSum(mag(phi))().internalField();
 
-    alphaCoNum = max(SfUfbyDelta/mesh.magSf())
-        .value()*runTime.deltaT().value();
+    alphaCoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
 
-    meanAlphaCoNum = (sum(SfUfbyDelta)/sum(mesh.magSf()))
-        .value()*runTime.deltaT().value();
+    meanAlphaCoNum =
+        0.5*(gSum(sumPhi)/gSum(mesh.V().field()))*runTime.deltaTValue();
 }
 
 Info<< "Interface Courant Number mean: " << meanAlphaCoNum

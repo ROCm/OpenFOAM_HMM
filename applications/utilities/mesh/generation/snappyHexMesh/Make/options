@@ -11,7 +11,7 @@ EXE_INC = \
 EXE_LIBS = \
     -lfiniteVolume \
     -ldecompositionMethods \
-    -L$(FOAM_MPI_LIBBIN) -lptscotchDecomp \
+    -L$(FOAM_LIBBIN)/dummy -lptscotchDecomp \
     -lmeshTools \
     -ldynamicMesh \
     -lautoMesh

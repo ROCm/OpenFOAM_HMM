@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  dev.thermoChemDicts                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -10,12 +10,22 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "constant";
     object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 thermoType      hPsiThermo<pureMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>>;
 
-mixture         air 1 28.96 1004.4 0 1.831e-05 0.705;
+mixture
+{
+    nMoles          1;
+    molWeight       28.96;
+    Cp              1004.4;
+    Hf              0;
+    mu              1.831e-05;
+    Pr              0.705;
+}
+
 
 // ************************************************************************* //

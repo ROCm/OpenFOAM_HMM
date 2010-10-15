@@ -110,6 +110,9 @@ public:
         //- Construct from Istream
         C7H8(Istream& is);
 
+        //- Construct from dictionary
+        C7H8(const dictionary& dict);
+
 
     // Member Functions
 

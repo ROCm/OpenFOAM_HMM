@@ -26,64 +26,54 @@ License
 #include "janafThermo.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class equationOfState>
-Foam::janafThermo<equationOfState>::janafThermo(Istream& is)
-:
-    equationOfState(is),
-    Tlow_(readScalar(is)),
-    Thigh_(readScalar(is)),
-    Tcommon_(readScalar(is))
+template<class EquationOfState>
+void Foam::janafThermo<EquationOfState>::checkInputData() const
 {
     if (Tlow_ >= Thigh_)
     {
-        FatalIOErrorIn
-        (
-            "janafThermo<equationOfState>::janafThermo(Istream& is)",
-            is
-        )   << "Tlow(" << Tlow_ << ") >= Thigh(" << Thigh_ << ')'
+        FatalErrorIn("janafThermo<EquationOfState>::check()")
+            << "Tlow(" << Tlow_ << ") >= Thigh(" << Thigh_ << ')'
             << exit(FatalIOError);
     }
 
     if (Tcommon_ <= Tlow_)
     {
-        FatalIOErrorIn
-        (
-            "janafThermo<equationOfState>::janafThermo(Istream& is)",
-            is
-        )   << "Tcommon(" << Tcommon_ << ") <= Tlow(" << Tlow_ << ')'
+        FatalErrorIn("janafThermo<EquationOfState>::check()")
+            << "Tcommon(" << Tcommon_ << ") <= Tlow(" << Tlow_ << ')'
             << exit(FatalIOError);
     }
 
     if (Tcommon_ > Thigh_)
     {
-        FatalIOErrorIn
-        (
-            "janafThermo<equationOfState>::janafThermo(Istream& is)",
-            is
-        )   << "Tcommon(" << Tcommon_ << ") > Thigh(" << Thigh_ << ')'
+        FatalErrorIn("janafThermo<EquationOfState>::check()")
+            << "Tcommon(" << Tcommon_ << ") > Thigh(" << Thigh_ << ')'
             << exit(FatalIOError);
     }
+}
 
-    for
-    (
-        register label coefLabel=0;
-        coefLabel<janafThermo<equationOfState>::nCoeffs_;
-        coefLabel++
-    )
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class EquationOfState>
+Foam::janafThermo<EquationOfState>::janafThermo(Istream& is)
+:
+    EquationOfState(is),
+    Tlow_(readScalar(is)),
+    Thigh_(readScalar(is)),
+    Tcommon_(readScalar(is))
+{
+    checkInputData();
+
+    forAll(highCpCoeffs_, i)
     {
-        is >> highCpCoeffs_[coefLabel];
+        is >> highCpCoeffs_[i];
     }
 
-    for
-    (
-        register label coefLabel=0;
-        coefLabel<janafThermo<equationOfState>::nCoeffs_;
-        coefLabel++
-    )
+    forAll(lowCpCoeffs_, i)
     {
-        is >> lowCpCoeffs_[coefLabel];
+        is >> lowCpCoeffs_[i];
     }
 
     // Check state of Istream
@@ -91,49 +81,69 @@ Foam::janafThermo<equationOfState>::janafThermo(Istream& is)
 }
 
 
+template<class EquationOfState>
+Foam::janafThermo<EquationOfState>::janafThermo(const dictionary& dict)
+:
+    EquationOfState(dict),
+    Tlow_(readScalar(dict.lookup("Tlow"))),
+    Thigh_(readScalar(dict.lookup("Thigh"))),
+    Tcommon_(readScalar(dict.lookup("Tcommon"))),
+    highCpCoeffs_(dict.lookup("highCpCoeffs")),
+    lowCpCoeffs_(dict.lookup("lowCpCoeffs"))
+{
+    checkInputData();
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class EquationOfState>
+void Foam::janafThermo<EquationOfState>::write(Ostream& os) const
+{
+    EquationOfState::write(os);
+    os.writeKeyword("Tlow") << Tlow_ << token::END_STATEMENT << endl;
+    os.writeKeyword("Thigh") << Thigh_ << token::END_STATEMENT << endl;
+    os.writeKeyword("Tcommon") << Tcommon_ << token::END_STATEMENT << endl;
+    os.writeKeyword("highCpCoeffs") << highCpCoeffs_ << token::END_STATEMENT
+        << endl;
+    os.writeKeyword("lowCpCoeffs") << lowCpCoeffs_ << token::END_STATEMENT
+        << endl;
+}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-template<class equationOfState>
+template<class EquationOfState>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const janafThermo<equationOfState>& jt
+    const janafThermo<EquationOfState>& jt
 )
 {
-    os  << static_cast<const equationOfState&>(jt) << nl
+    os  << static_cast<const EquationOfState&>(jt) << nl
         << "    " << jt.Tlow_
         << tab << jt.Thigh_
         << tab << jt.Tcommon_;
 
     os << nl << "    ";
 
-    for
-    (
-        register label coefLabel=0;
-        coefLabel<janafThermo<equationOfState>::nCoeffs_;
-        coefLabel++
-    )
+    forAll(jt.highCpCoeffs_, i)
     {
-        os << jt.highCpCoeffs_[coefLabel] << ' ';
+        os << jt.highCpCoeffs_[i] << ' ';
     }
 
     os << nl << "    ";
 
-    for
-    (
-        register label coefLabel=0;
-        coefLabel<janafThermo<equationOfState>::nCoeffs_;
-        coefLabel++
-    )
+    forAll(jt.lowCpCoeffs_, i)
     {
-        os << jt.lowCpCoeffs_[coefLabel] << ' ';
+        os << jt.lowCpCoeffs_[i] << ' ';
     }
 
     os << endl;
 
     os.check
     (
-        "operator<<(Ostream& os, const janafThermo<equationOfState>& jt)"
+        "operator<<(Ostream& os, const janafThermo<EquationOfState>& jt)"
     );
 
     return os;

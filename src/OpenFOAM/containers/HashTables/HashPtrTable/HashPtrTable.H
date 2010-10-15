@@ -72,6 +72,11 @@ class HashPtrTable
         template<class INew>
         void read(Istream&, const INew& inewt);
 
+        //- Read from dictionary using given dictionary constructor class
+        template<class INew>
+        void read(const dictionary& dict, const INew& inewt);
+
+
 
 public:
 
@@ -90,6 +95,10 @@ public:
 
         //- Construct from Istream using default Istream constructor class
         HashPtrTable(Istream&);
+
+        //- Construct from dictionary using default dictionary constructor
+        //  class
+        HashPtrTable(const dictionary& dict);
 
         //- Construct as copy
         HashPtrTable(const HashPtrTable<T, Key, Hash>&);
@@ -111,6 +120,9 @@ public:
 
             //- Clear all entries from table
             void clear();
+
+            //- Write
+            void write(Ostream& os) const;
 
 
     // Member Operators

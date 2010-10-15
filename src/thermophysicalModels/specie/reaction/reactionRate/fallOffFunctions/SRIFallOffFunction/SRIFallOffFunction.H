@@ -49,7 +49,7 @@ Ostream& operator<<(Ostream&, const SRIFallOffFunction&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class SRIFallOffFunction Declaration
+                    Class SRIFallOffFunction Declaration
 \*---------------------------------------------------------------------------*/
 
 class SRIFallOffFunction
@@ -76,6 +76,9 @@ public:
         //- Construct from Istream
         inline SRIFallOffFunction(Istream&);
 
+        //- Construct from dictionary
+        inline SRIFallOffFunction(const dictionary& dict);
+
 
     // Member Functions
 
@@ -90,6 +93,9 @@ public:
             const scalar T,
             const scalar Pr
         ) const;
+
+        //- Write to stream
+        inline void write(Ostream& os) const;
 
 
     // Ostream Operator

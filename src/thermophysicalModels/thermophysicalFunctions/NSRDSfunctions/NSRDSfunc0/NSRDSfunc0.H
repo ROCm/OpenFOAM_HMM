@@ -84,26 +84,21 @@ public:
     // Constructors
 
         //- Construct from components
-        NSRDSfunc0(scalar a, scalar b, scalar c, scalar d, scalar e, scalar f)
-        :
-            a_(a),
-            b_(b),
-            c_(c),
-            d_(d),
-            e_(e),
-            f_(f)
-        {}
+        NSRDSfunc0
+        (
+            const scalar a,
+            const scalar b,
+            const scalar c,
+            const scalar d,
+            const scalar e,
+            const scalar f
+        );
 
         //- Construct from Istream
-        NSRDSfunc0(Istream& is)
-        :
-            a_(readScalar(is)),
-            b_(readScalar(is)),
-            c_(readScalar(is)),
-            d_(readScalar(is)),
-            e_(readScalar(is)),
-            f_(readScalar(is))
-        {}
+        NSRDSfunc0(Istream& is);
+
+        //- Construct from dictionary
+        NSRDSfunc0(const dictionary& dict);
 
 
     // Member Functions
@@ -113,7 +108,6 @@ public:
         {
             return ((((f_*T + e_)*T + d_)*T + c_)*T + b_)*T + a_;
         }
-
 
         //- Write the function coefficients
         void writeData(Ostream& os) const

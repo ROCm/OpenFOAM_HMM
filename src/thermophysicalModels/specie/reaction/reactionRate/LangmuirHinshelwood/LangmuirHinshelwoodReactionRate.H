@@ -81,6 +81,13 @@ public:
             Istream& is
         );
 
+        //- Construct from dictionary
+        inline LangmuirHinshelwoodReactionRate
+        (
+            const speciesTable& species,
+            const dictionary& dict
+        );
+
 
     // Member Functions
 
@@ -96,6 +103,9 @@ public:
             const scalar p,
             const scalarField& c
         ) const;
+
+        //- Write to stream
+        inline void write(Ostream& os) const;
 
 
     // Ostream Operator

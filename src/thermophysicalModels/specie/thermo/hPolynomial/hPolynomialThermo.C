@@ -56,6 +56,50 @@ Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
 }
 
 
+template<class EquationOfState, int PolySize>
+Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
+(
+    const dictionary& dict
+)
+:
+    EquationOfState(dict),
+    Hf_(readScalar(dict.lookup("Hf"))),
+    Sf_(readScalar(dict.lookup("Sf"))),
+    cpPolynomial_(dict.lookup("cpPolynomial")),
+    hPolynomial_(),
+    sPolynomial_()
+{
+    Hf_ *= this->W();
+    Sf_ *= this->W();
+    cpPolynomial_ *= this->W();
+
+    hPolynomial_ = cpPolynomial_.integrate();
+    sPolynomial_ = cpPolynomial_.integrateMinus1();
+
+    // Offset h poly so that it is relative to the enthalpy at Tstd
+    hPolynomial_[0] += Hf_ - hPolynomial_.evaluate(specie::Tstd);
+
+    // Offset s poly so that it is relative to the entropy at Tstd
+    sPolynomial_[0] += Sf_ - sPolynomial_.evaluate(specie::Tstd);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class EquationOfState, int PolySize>
+void Foam::hPolynomialThermo<EquationOfState, PolySize>::write
+(
+    Ostream& os
+) const
+{
+    EquationOfState::write(os);
+    os.writeKeyword("Hf") << Hf_/this->W() << token::END_STATEMENT << nl;
+    os.writeKeyword("Sf") << Sf_/this->W() << token::END_STATEMENT << nl;
+    os.writeKeyword("cpPolynomial") << cpPolynomial_/this->W()
+        << token::END_STATEMENT << nl;
+}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 template<class EquationOfState, int PolySize>
@@ -67,7 +111,7 @@ Foam::Ostream& Foam::operator<<
 {
     os  << static_cast<const EquationOfState&>(pt) << tab
         << pt.Hf_/pt.W() << tab
-        << pt.Sf_ << tab
+        << pt.Sf_/pt.W() << tab
         << "cpPolynomial" << tab << pt.cpPolynomial_/pt.W();
 
     os.check

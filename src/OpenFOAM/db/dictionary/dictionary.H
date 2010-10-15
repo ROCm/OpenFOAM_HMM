@@ -111,6 +111,23 @@ public:
         {
             return name_;
         }
+
+        //- Return the local dictionary name (final part of scoped name)
+        const word dictName() const
+        {
+            const word scopedName = name_.name();
+
+            string::size_type i = scopedName.rfind(':');
+
+            if (i == scopedName.npos)
+            {
+                return scopedName;
+            }
+            else
+            {
+                return scopedName.substr(i + 1, scopedName.npos);
+            }
+        }
 };
 
 

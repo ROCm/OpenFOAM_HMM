@@ -77,6 +77,9 @@ public:
         //- Construct from Istream
         ash(Istream& is);
 
+        //- Construct from dictionary
+        ash(const dictionary& dict);
+
 
     // I-O
 

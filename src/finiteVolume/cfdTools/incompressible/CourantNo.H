@@ -37,10 +37,10 @@ if (mesh.nInternalFaces())
     scalarField sumPhi =
         fvc::surfaceSum(mag(phi))().internalField();
 
-    CoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaT().value();
+    CoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
 
     meanCoNum =
-        0.5*(gSum(sumPhi)/sum(mesh.V().field()))*runTime.deltaT().value();
+        0.5*(gSum(sumPhi)/gSum(mesh.V().field()))*runTime.deltaTValue();
 }
 
 Info<< "Courant Number mean: " << meanCoNum

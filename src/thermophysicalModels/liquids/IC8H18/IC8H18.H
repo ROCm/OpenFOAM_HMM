@@ -110,6 +110,9 @@ public:
         //- Construct from Istream
         IC8H18(Istream& is);
 
+        //- Construct from dictionary
+        IC8H18(const dictionary& dict);
+
 
     // Member Functions
 

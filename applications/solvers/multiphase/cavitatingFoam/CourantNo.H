@@ -35,19 +35,21 @@ scalar acousticCoNum = 0.0;
 
 if (mesh.nInternalFaces())
 {
-    surfaceScalarField SfUfbyDelta =
-        mesh.surfaceInterpolation::deltaCoeffs()*mag(phiv);
+    scalarField sumPhi =
+        fvc::surfaceSum(mag(phiv))().internalField();
 
-    CoNum = max(SfUfbyDelta/mesh.magSf())
-        .value()*runTime.deltaTValue();
+    CoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
 
-    meanCoNum = (sum(SfUfbyDelta)/sum(mesh.magSf()))
-        .value()*runTime.deltaTValue();
+    meanCoNum =
+        0.5*(gSum(sumPhi)/gSum(mesh.V().field()))*runTime.deltaTValue();
 
-    acousticCoNum = max
+    acousticCoNum = 0.5*gMax
     (
-        mesh.surfaceInterpolation::deltaCoeffs()/sqrt(fvc::interpolate(psi))
-    ).value()*runTime.deltaTValue();
+        fvc::surfaceSum
+        (
+            fvc::interpolate(scalar(1)/sqrt(psi))*mesh.magSf()
+        )().internalField()/mesh.V().field()
+    )*runTime.deltaTValue();
 }
 
 Info<< "phiv Courant Number mean: " << meanCoNum

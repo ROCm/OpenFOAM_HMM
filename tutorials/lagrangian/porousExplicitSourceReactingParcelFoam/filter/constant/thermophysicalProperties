@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  dev.thermoChemDicts                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -25,21 +25,17 @@ foamChemistryThermoFile "$FOAM_CASE/constant/thermo.incompressiblePoly";
 
 liquids
 {
-    liquidComponents
-    (
-        H2O
-    );
-
-    H2O             H2O defaultCoeffs;
+    liquidComponents ( H2O );
+    H2O
+    {
+        defaultCoeffs   yes;
+    }
 }
 
 solids
 {
-    solidComponents
-    (
-    );
+    solidComponents ( );
 }
-
 
 inertSpecie     N2;
 

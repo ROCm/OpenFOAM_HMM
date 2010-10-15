@@ -32,6 +32,7 @@ namespace Foam
     defineTypeNameAndDebug(solid, 0);
     defineRunTimeSelectionTable(solid,);
     defineRunTimeSelectionTable(solid, Istream);
+    defineRunTimeSelectionTable(solid, dictionary);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -60,6 +61,16 @@ Foam::solid::solid(Istream& is)
     K_(readScalar(is)),
     Hf_(readScalar(is)),
     emissivity_(readScalar(is))
+{}
+
+
+Foam::solid::solid(const dictionary& dict)
+:
+    rho_(readScalar(dict.lookup("rho"))),
+    cp_(readScalar(dict.lookup("cp"))),
+    K_(readScalar(dict.lookup("K"))),
+    Hf_(readScalar(dict.lookup("Hf"))),
+    emissivity_(readScalar(dict.lookup("emissivity")))
 {}
 
 
