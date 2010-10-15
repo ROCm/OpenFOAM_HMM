@@ -100,6 +100,11 @@ public:
 
     // Member Functions
 
+        virtual sourceType setType() const
+        {
+            return CELLSETSOURCE;
+        }
+
         virtual void applyToSet
         (
             const topoSetSource::setAction action,

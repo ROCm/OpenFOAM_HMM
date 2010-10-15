@@ -6,6 +6,5 @@ cd ${0%/*} || exit 1    # run from this directory
 
 cleanCase
 cp 0/T.org 0/T
-wclean setHotRoom
 
 # ----------------------------------------------------------------- end-of-file
