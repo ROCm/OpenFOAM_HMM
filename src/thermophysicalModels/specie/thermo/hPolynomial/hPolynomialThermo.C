@@ -111,7 +111,7 @@ Foam::Ostream& Foam::operator<<
 {
     os  << static_cast<const EquationOfState&>(pt) << tab
         << pt.Hf_/pt.W() << tab
-        << pt.Sf_ << tab
+        << pt.Sf_/pt.W() << tab
         << "cpPolynomial" << tab << pt.cpPolynomial_/pt.W();
 
     os.check
