@@ -49,11 +49,7 @@ Foam::solidMixture::solidMixture
 
     forAll(components_, i)
     {
-        properties_.set
-        (
-            i,
-            solid::New(props.lookup(components_[i]))
-        );
+        properties_.set(i, solid::New(props.subDict(components_[i])));
     }
 }
 

@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::noThermalModel
+    Foam::porousMedia::noThermalModel
 
 Description
-    Dummy model for 'none' option
+    A dummy thermal model porous media, corresponding to the 'none' option
 
 \*---------------------------------------------------------------------------*/
 
@@ -40,9 +40,11 @@ Description
 
 namespace Foam
 {
+namespace porousMedia
+{
 
 /*---------------------------------------------------------------------------*\
-                      Class noThermalModel Declaration
+                       Class noThermalModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class noThermalModel
@@ -59,7 +61,7 @@ public:
     // Constructors
 
         //- Construct from porous zone
-        noThermalModel(const porousZone& pZone);
+        noThermalModel(const porousZone&);
 
 
     //- Destructor
@@ -77,6 +79,10 @@ public:
         ) const;
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace porousMedia
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

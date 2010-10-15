@@ -23,16 +23,11 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 template<class ReactionRate, class FallOffFunction>
-inline FallOffReactionRate<ReactionRate, FallOffFunction>::FallOffReactionRate
+inline Foam::FallOffReactionRate<ReactionRate, FallOffFunction>::
+FallOffReactionRate
 (
     const ReactionRate& k0,
     const ReactionRate& kInf,
@@ -47,9 +42,9 @@ inline FallOffReactionRate<ReactionRate, FallOffFunction>::FallOffReactionRate
 {}
 
 
-//- Construct from Istream
 template<class ReactionRate, class FallOffFunction>
-inline FallOffReactionRate<ReactionRate, FallOffFunction>::FallOffReactionRate
+inline Foam::FallOffReactionRate<ReactionRate, FallOffFunction>::
+FallOffReactionRate
 (
     const speciesTable& species,
     Istream& is
@@ -64,10 +59,26 @@ inline FallOffReactionRate<ReactionRate, FallOffFunction>::FallOffReactionRate
 }
 
 
+template<class ReactionRate, class FallOffFunction>
+inline Foam::FallOffReactionRate<ReactionRate, FallOffFunction>::
+FallOffReactionRate
+(
+    const speciesTable& species,
+    const dictionary& dict
+)
+:
+    k0_(species, dict),
+    kInf_(species, dict),
+    F_(dict),
+    thirdBodyEfficiencies_(species, dict)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ReactionRate, class FallOffFunction>
-inline scalar FallOffReactionRate<ReactionRate, FallOffFunction>::operator()
+inline Foam::scalar
+Foam::FallOffReactionRate<ReactionRate, FallOffFunction>::operator()
 (
     const scalar T,
     const scalar p,
@@ -84,7 +95,20 @@ inline scalar FallOffReactionRate<ReactionRate, FallOffFunction>::operator()
 
 
 template<class ReactionRate, class FallOffFunction>
-inline Ostream& operator<<
+inline void Foam::FallOffReactionRate<ReactionRate, FallOffFunction>::write
+(
+    Ostream& os
+) const
+{
+    k0_.write(os);
+    kInf_.write(os);
+    F_.write(os);
+    thirdBodyEfficiencies_.write(os);
+}
+
+
+template<class ReactionRate, class FallOffFunction>
+inline Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
     const FallOffReactionRate<ReactionRate, FallOffFunction>& forr
@@ -99,9 +123,5 @@ inline Ostream& operator<<
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

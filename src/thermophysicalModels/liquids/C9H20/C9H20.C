@@ -33,6 +33,7 @@ namespace Foam
     defineTypeNameAndDebug(C9H20, 0);
     addToRunTimeSelectionTable(liquid, C9H20,);
     addToRunTimeSelectionTable(liquid, C9H20, Istream);
+    addToRunTimeSelectionTable(liquid, C9H20, dictionary);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -143,6 +144,25 @@ Foam::C9H20::C9H20(Istream& is)
     Kg_(is),
     sigma_(is),
     D_(is)
+{}
+
+
+Foam::C9H20::C9H20(const dictionary& dict)
+:
+    liquid(dict),
+    rho_(dict.subDict("rho")),
+    pv_(dict.subDict("pv")),
+    hl_(dict.subDict("hl")),
+    cp_(dict.subDict("cp")),
+    h_(dict.subDict("h")),
+    cpg_(dict.subDict("cpg")),
+    B_(dict.subDict("B")),
+    mu_(dict.subDict("mu")),
+    mug_(dict.subDict("mug")),
+    K_(dict.subDict("K")),
+    Kg_(dict.subDict("Kg")),
+    sigma_(dict.subDict("sigma")),
+    D_(dict.subDict("D"))
 {}
 
 

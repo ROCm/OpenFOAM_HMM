@@ -22,10 +22,16 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
+    Foam::vectorUList
+
+Description
+    A UList of vectors.
+
+Typedef
     Foam::vectorList
 
 Description
-    List of vectors.
+    A List of vectors.
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,6 +45,8 @@ Description
 
 namespace Foam
 {
+    typedef UList<vector> vectorUList;
+
     typedef List<vector> vectorList;
 }
 

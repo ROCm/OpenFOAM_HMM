@@ -88,6 +88,17 @@ Foam::polynomialTransport<Thermo, PolySize>::New(Istream& is)
 }
 
 
+template<class Thermo, int PolySize>
+inline Foam::autoPtr<Foam::polynomialTransport<Thermo, PolySize> >
+Foam::polynomialTransport<Thermo, PolySize>::New(const dictionary& dict)
+{
+    return autoPtr<polynomialTransport<Thermo, PolySize> >
+    (
+        new polynomialTransport<Thermo, PolySize>(dict)
+    );
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Thermo, int PolySize>

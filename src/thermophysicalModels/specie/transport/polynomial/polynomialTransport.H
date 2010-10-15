@@ -127,11 +127,17 @@ public:
         //- Construct from Istream
         polynomialTransport(Istream& is);
 
+        //- Construct from dictionary
+        polynomialTransport(const dictionary& dict);
+
         //- Construct and return a clone
         inline autoPtr<polynomialTransport> clone() const;
 
         // Selector from Istream
         inline static autoPtr<polynomialTransport> New(Istream& is);
+
+        // Selector from dictionary
+        inline static autoPtr<polynomialTransport> New(const dictionary& dict);
 
 
     // Member functions
@@ -147,6 +153,9 @@ public:
 
         // Species diffusivity
         //inline scalar D(const scalar T) const;
+
+        //- Write to Ostream
+        void write(Ostream& os) const;
 
 
     // Member operators

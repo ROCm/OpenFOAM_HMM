@@ -33,6 +33,7 @@ namespace Foam
     defineTypeNameAndDebug(CaCO3, 0);
     addToRunTimeSelectionTable(solid, CaCO3,);
     addToRunTimeSelectionTable(solid, CaCO3, Istream);
+    addToRunTimeSelectionTable(solid, CaCO3, dictionary);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -59,6 +60,12 @@ Foam::CaCO3::CaCO3(const solid& s)
 Foam::CaCO3::CaCO3(Istream& is)
 :
     solid(is)
+{}
+
+
+Foam::CaCO3::CaCO3(const dictionary& dict)
+:
+    solid(dict)
 {}
 
 

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  dev.thermoChemDicts                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -20,7 +20,15 @@ thermoType      ePsiThermo<pureMixture<constTransport<specieThermo<hConstThermo<
 // Note: these are the properties for a "normalised" inviscid gas
 //       for which the speed of sound is 1 m/s at a temperature of 1K
 //       and gamma = 7/5
-mixture         normalisedGas 1 11640.31 2.5 0 0 1;
+mixture
+{
+    nMoles          1;
+    molWeight       11640.3;
+    Cp              2.5;
+    Hf              0;
+    mu              0;
+    Pr              1;
+}
 
 
 // ************************************************************************* //

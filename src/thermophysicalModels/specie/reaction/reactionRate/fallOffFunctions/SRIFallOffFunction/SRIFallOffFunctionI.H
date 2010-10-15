@@ -25,7 +25,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 inline Foam::SRIFallOffFunction::SRIFallOffFunction
 (
     const scalar a,
@@ -43,7 +42,6 @@ inline Foam::SRIFallOffFunction::SRIFallOffFunction
 {}
 
 
-// Construct from Istream
 inline Foam::SRIFallOffFunction::SRIFallOffFunction(Istream& is)
 :
     a_(readScalar(is.readBegin("SRIFallOffFunction(Istream&)"))),
@@ -56,6 +54,16 @@ inline Foam::SRIFallOffFunction::SRIFallOffFunction(Istream& is)
 }
 
 
+inline Foam::SRIFallOffFunction::SRIFallOffFunction(const dictionary& dict)
+:
+    a_(readScalar(dict.lookup("a"))),
+    b_(readScalar(dict.lookup("b"))),
+    c_(readScalar(dict.lookup("c"))),
+    d_(readScalar(dict.lookup("d"))),
+    e_(readScalar(dict.lookup("e")))
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline Foam::scalar Foam::SRIFallOffFunction::operator()
@@ -66,6 +74,16 @@ inline Foam::scalar Foam::SRIFallOffFunction::operator()
 {
     scalar X = 1.0/(1.0 + sqr(log10(max(Pr, SMALL))));
     return d_*pow(a_*exp(-b_/T) + exp(-T/c_), X)*pow(T, e_);
+}
+
+
+inline void Foam::SRIFallOffFunction::write(Ostream& os) const
+{
+    os.writeKeyword("a") << a_ << token::END_STATEMENT << nl;
+    os.writeKeyword("b") << b_ << token::END_STATEMENT << nl;
+    os.writeKeyword("c") << c_ << token::END_STATEMENT << nl;
+    os.writeKeyword("d") << d_ << token::END_STATEMENT << nl;
+    os.writeKeyword("e") << e_ << token::END_STATEMENT << nl;
 }
 
 

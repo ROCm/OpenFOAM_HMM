@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::thermalModel
+    Foam::porousMedia::thermalModel
 
 Description
-    Base class for selecting the temperature specification models
+    Base class to select the temperature specification models for porousMedia
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,10 +43,14 @@ Description
 namespace Foam
 {
 
+// Forward declaration of classes
 class basicThermo;
 
+namespace porousMedia
+{
+
 /*---------------------------------------------------------------------------*\
-                      Class thermalModel Declaration
+                        Class thermalModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class thermalModel
@@ -84,10 +88,10 @@ public:
     // Constructors
 
         //- Construct null from porous zone
-        thermalModel(const porousZone& pZone);
+        thermalModel(const porousZone&);
 
         //- Construct from porous zone and model type name
-        thermalModel(const porousZone& pZone, const word& modelType);
+        thermalModel(const porousZone&, const word& modelType);
 
 
     //- Destructor
@@ -95,7 +99,7 @@ public:
 
 
     //- Selector
-    static autoPtr<thermalModel> New(const porousZone& pZone);
+    static autoPtr<thermalModel> New(const porousZone&);
 
 
     // Member Functions
@@ -109,6 +113,10 @@ public:
         ) const = 0;
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace porousMedia
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

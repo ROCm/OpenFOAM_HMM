@@ -22,10 +22,16 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
+    Foam::scalarUList
+
+Description
+    A UList of scalars.
+
+Typedef
     Foam::scalarList
 
 Description
-    List of scalars.
+    A List of scalars.
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,6 +45,8 @@ Description
 
 namespace Foam
 {
+    typedef UList<scalar> scalarUList;
+
     typedef List<scalar> scalarList;
     typedef List<scalarList> scalarListList;
 }

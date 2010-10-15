@@ -110,6 +110,9 @@ public:
         //- Construct from Istream
         CH3OH(Istream& is);
 
+        //- Construct from dictionary
+        CH3OH(const dictionary& dict);
+
 
     // Member Functions
 

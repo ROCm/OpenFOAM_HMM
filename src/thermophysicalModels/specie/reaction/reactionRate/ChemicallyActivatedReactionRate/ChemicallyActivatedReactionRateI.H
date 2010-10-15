@@ -25,16 +25,12 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-// Construct from components
 template<class ReactionRate, class ChemicallyActivationFunction>
-inline
-ChemicallyActivatedReactionRate<ReactionRate, ChemicallyActivationFunction>::
-ChemicallyActivatedReactionRate
+inline Foam::ChemicallyActivatedReactionRate
+<
+    ReactionRate,
+    ChemicallyActivationFunction
+>::ChemicallyActivatedReactionRate
 (
     const ReactionRate& k0,
     const ReactionRate& kInf,
@@ -49,11 +45,12 @@ ChemicallyActivatedReactionRate
 {}
 
 
-//- Construct from Istream
 template<class ReactionRate, class ChemicallyActivationFunction>
-inline
-ChemicallyActivatedReactionRate<ReactionRate, ChemicallyActivationFunction>::
-ChemicallyActivatedReactionRate
+inline Foam::ChemicallyActivatedReactionRate
+<
+    ReactionRate,
+    ChemicallyActivationFunction
+>::ChemicallyActivatedReactionRate
 (
     const speciesTable& species,
     Istream& is
@@ -68,11 +65,32 @@ ChemicallyActivatedReactionRate
 }
 
 
+template<class ReactionRate, class ChemicallyActivationFunction>
+inline Foam::ChemicallyActivatedReactionRate
+<
+    ReactionRate,
+    ChemicallyActivationFunction
+>::ChemicallyActivatedReactionRate
+(
+    const speciesTable& species,
+    const dictionary& dict
+)
+:
+    k0_(species, dict),
+    kInf_(species, dict),
+    F_(dict),
+    thirdBodyEfficiencies_(species, dict)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ReactionRate, class ChemicallyActivationFunction>
-inline scalar ChemicallyActivatedReactionRate
-    <ReactionRate, ChemicallyActivationFunction>::operator()
+inline Foam::scalar Foam::ChemicallyActivatedReactionRate
+<
+    ReactionRate,
+    ChemicallyActivationFunction
+>::operator()
 (
     const scalar T,
     const scalar p,
@@ -89,7 +107,21 @@ inline scalar ChemicallyActivatedReactionRate
 
 
 template<class ReactionRate, class ChemicallyActivationFunction>
-inline Ostream& operator<<
+inline void Foam::ChemicallyActivatedReactionRate
+<
+    ReactionRate,
+    ChemicallyActivationFunction
+>::write(Ostream& os) const
+{
+    k0_.write(os);
+    kInf_.write(os);
+    F_.write(os);
+    thirdBodyEfficiencies_.write(os);
+}
+
+
+template<class ReactionRate, class ChemicallyActivationFunction>
+inline Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
     const ChemicallyActivatedReactionRate
@@ -102,9 +134,5 @@ inline Ostream& operator<<
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

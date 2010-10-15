@@ -77,6 +77,9 @@ public:
         //- Construct from Istream
         CaCO3(Istream& is);
 
+        //- Construct from dictionary
+        CaCO3(const dictionary& dict);
+
 
     // I-O
 

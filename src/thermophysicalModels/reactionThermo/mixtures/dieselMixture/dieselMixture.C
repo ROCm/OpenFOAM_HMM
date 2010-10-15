@@ -50,9 +50,9 @@ Foam::dieselMixture<ThermoType>::dieselMixture
 
     stoicRatio_(thermoDict.lookup("stoichiometricAirFuelMassRatio")),
 
-    fuel_(thermoDict.lookup("fuel")),
-    oxidant_(thermoDict.lookup("oxidant")),
-    products_(thermoDict.lookup("burntProducts")),
+    fuel_(thermoDict.subDict("fuel")),
+    oxidant_(thermoDict.subDict("oxidant")),
+    products_(thermoDict.subDict("burntProducts")),
 
     mixture_("mixture", fuel_),
 
@@ -91,9 +91,9 @@ const ThermoType& Foam::dieselMixture<ThermoType>::mixture
 template<class ThermoType>
 void Foam::dieselMixture<ThermoType>::read(const dictionary& thermoDict)
 {
-    fuel_ = ThermoType(thermoDict.lookup("fuel"));
-    oxidant_ = ThermoType(thermoDict.lookup("oxidant"));
-    products_ = ThermoType(thermoDict.lookup("burntProducts"));
+    fuel_ = ThermoType(thermoDict.subDict("fuel"));
+    oxidant_ = ThermoType(thermoDict.subDict("oxidant"));
+    products_ = ThermoType(thermoDict.subDict("burntProducts"));
 }
 
 

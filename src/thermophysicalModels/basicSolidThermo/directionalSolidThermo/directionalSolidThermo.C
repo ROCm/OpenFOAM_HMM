@@ -228,8 +228,6 @@ Foam::directionalSolidThermo::directionalSolidThermo(const fvMesh& mesh)
         }
     }
 
-
-
     correct();
 }
 
@@ -269,7 +267,7 @@ Foam::symmTensor Foam::directionalSolidThermo::transformPrincipal
         tt.yx()*st.x()*tt.zx()
       + tt.yy()*st.y()*tt.zy()
       + tt.yz()*st.z()*tt.zz(),
-        
+
         tt.zx()*st.x()*tt.zx()
       + tt.zy()*st.y()*tt.zy()
       + tt.zz()*st.z()*tt.zz()
@@ -419,9 +417,9 @@ Foam::tmp<Foam::volScalarField> Foam::directionalSolidThermo::K() const
         const vector& v = KValues_[i];
         if
         (
-            v.x() != v.y() 
-         || v.x() != v.z() 
-         || v.y() != v.z() 
+            v.x() != v.y()
+         || v.x() != v.z()
+         || v.y() != v.z()
         )
         {
             FatalErrorIn("directionalSolidThermo::K() const")
@@ -597,9 +595,9 @@ Foam::tmp<Foam::scalarField> Foam::directionalSolidThermo::K
         const vector& v = KValues_[i];
         if
         (
-            v.x() != v.y() 
-         || v.x() != v.z() 
-         || v.y() != v.z() 
+            v.x() != v.y()
+         || v.x() != v.z()
+         || v.y() != v.z()
         )
         {
             FatalErrorIn("directionalSolidThermo::K() const")
@@ -634,7 +632,7 @@ Foam::tmp<Foam::symmTensorField> Foam::directionalSolidThermo::directionalK
 
     tmp<symmTensorField> tglobalK(new symmTensorField(localK.size()));
     transformField(tglobalK(), ccTransforms_.boundaryField()[patchI], localK);
-    
+
     return tglobalK;
 }
 

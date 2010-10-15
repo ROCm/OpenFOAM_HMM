@@ -38,6 +38,7 @@ SourceFiles
 #include "typeInfo.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "dictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,8 +49,8 @@ class solid;
 
 Ostream& operator<<
 (
-     Ostream&,
-     const solid&
+    Ostream&,
+    const solid&
 );
 
 
@@ -104,6 +105,15 @@ public:
         (is)
     );
 
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        solid,
+        dictionary,
+        (const dictionary& dict),
+        (dict)
+    );
+
 
     // Constructors
 
@@ -120,8 +130,14 @@ public:
         //- Construct from Istream
         solid(Istream& is);
 
+        //- Construct from dictionary
+        solid(const dictionary& dict);
+
         //- Return a pointer to a new solid created from input
         static autoPtr<solid> New(Istream& is);
+
+        //- Return a pointer to a new solid created from dictionary
+        static autoPtr<solid> New(const dictionary& dict);
 
 
     //- Destructor

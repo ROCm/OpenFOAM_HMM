@@ -40,6 +40,7 @@ SourceFiles
 #include "typeInfo.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "dictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -113,6 +114,15 @@ public:
             (is)
         );
 
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            liquid,
+            dictionary,
+            (const dictionary& dict),
+            (dict)
+        );
+
 
     // Constructors
 
@@ -130,35 +140,22 @@ public:
             scalar dipm,
             scalar omega,
             scalar delta
-        )
-        :
-            W_(W),
-            Tc_(Tc),
-            Pc_(Pc),
-            Vc_(Vc),
-            Zc_(Zc),
-            Tt_(Tt),
-            Pt_(Pt),
-            Tb_(Tb),
-            dipm_(dipm),
-            omega_(omega),
-            delta_(delta)
-        {}
+        );
 
         //- Construct from Istream
-        liquid(Istream& is)
-        :
-            W_(readScalar(is)),
-            Tc_(readScalar(is)),
-            Pc_(readScalar(is)),
-            Vc_(readScalar(is)),
-            dipm_(readScalar(is)),
-            omega_(readScalar(is)),
-            delta_(readScalar(is))
-        {}
+        liquid(Istream& is);
+
+        //- Construct from dictionary
+        liquid(const dictionary& dict);
+
+
+    // Selectors
 
         //- Return a pointer to a new liquid created from input
         static autoPtr<liquid> New(Istream& is);
+
+        //- Return a pointer to a new liquid created from dictionary
+        static autoPtr<liquid> New(const dictionary& dict);
 
 
     //- Destructor

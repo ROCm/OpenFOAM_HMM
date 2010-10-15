@@ -32,13 +32,17 @@ License
 
 defineTypeNameAndDebug(Foam::UPstream, 0);
 
-template<>
-const char* Foam::NamedEnum<Foam::UPstream::commsTypes, 3>::names[] =
+namespace Foam
 {
-    "blocking",
-    "scheduled",
-    "nonBlocking"
-};
+    template<>
+    const char* Foam::NamedEnum<Foam::UPstream::commsTypes, 3>::names[] =
+    {
+        "blocking",
+        "scheduled",
+        "nonBlocking"
+    };
+}
+
 
 const Foam::NamedEnum<Foam::UPstream::commsTypes, 3>
     Foam::UPstream::commsTypeNames;
