@@ -93,8 +93,8 @@ void Foam::hPolynomialThermo<EquationOfState, PolySize>::write
 ) const
 {
     EquationOfState::write(os);
-    os.writeKeyword("Hf") << Hf_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Sf") << Sf_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Hf") << Hf_/this->W() << token::END_STATEMENT << nl;
+    os.writeKeyword("Sf") << Sf_/this->W() << token::END_STATEMENT << nl;
     os.writeKeyword("cpPolynomial") << cpPolynomial_/this->W()
         << token::END_STATEMENT << nl;
 }
