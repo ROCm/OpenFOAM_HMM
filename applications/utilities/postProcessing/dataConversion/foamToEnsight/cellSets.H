@@ -57,7 +57,6 @@ public:
         labelList prisms;
         labelList wedges;
         labelList hexes;
-        labelList hexesWedges;
         labelList polys;
 
 
@@ -77,7 +76,6 @@ public:
             prisms(nCells),
             wedges(nCells),
             hexes(nCells),
-            hexesWedges(nCells),
             polys(nCells)
         {}
 };

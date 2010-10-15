@@ -39,6 +39,32 @@ using namespace Foam;
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class Type>
+Field<Type> map
+(
+    const Field<Type>& vf,
+    const labelList& map1,
+    const labelList& map2
+)
+{
+    Field<Type> mf(map1.size() + map2.size());
+
+    forAll(map1, i)
+    {
+        mf[i] = vf[map1[i]];
+    }
+
+    label offset = map1.size();
+
+    forAll(map2, i)
+    {
+        mf[i + offset] = vf[map2[i]];
+    }
+
+    return mf;
+}
+
+
+template<class Type>
 void writeField
 (
     const char* key,
@@ -274,7 +300,8 @@ void ensightField
     const labelList& tets = meshCellSets.tets;
     const labelList& pyrs = meshCellSets.pyrs;
     const labelList& prisms = meshCellSets.prisms;
-    const labelList& hexesWedges = meshCellSets.hexesWedges;
+    const labelList& wedges = meshCellSets.wedges;
+    const labelList& hexes = meshCellSets.hexes;
     const labelList& polys = meshCellSets.polys;
 
     ensightStream* ensightFilePtr = NULL;
@@ -328,7 +355,7 @@ void ensightField
         writeField
         (
             "hexa8",
-            Field<Type>(vf, hexesWedges),
+            map(vf, hexes, wedges),
             ensightFile
         );
 

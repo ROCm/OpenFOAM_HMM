@@ -117,7 +117,6 @@ void Foam::ensightMesh::correct()
         labelList& prisms = meshCellSets_.prisms;
         labelList& wedges = meshCellSets_.wedges;
         labelList& hexes = meshCellSets_.hexes;
-        labelList& hexesWedges = meshCellSets_.hexesWedges;
         labelList& polys = meshCellSets_.polys;
 
         label nTets = 0;
@@ -125,7 +124,6 @@ void Foam::ensightMesh::correct()
         label nPrisms = 0;
         label nWedges = 0;
         label nHexes = 0;
-        label nHexesWedges = 0;
         label nPolys = 0;
 
         forAll(cellShapes, cellI)
@@ -148,12 +146,10 @@ void Foam::ensightMesh::correct()
             else if (cellModel == wedge)
             {
                 wedges[nWedges++] = cellI;
-                hexesWedges[nHexesWedges++] = cellI;
             }
             else if (cellModel == hex)
             {
                 hexes[nHexes++] = cellI;
-                hexesWedges[nHexesWedges++] = cellI;
             }
             else
             {
@@ -166,7 +162,6 @@ void Foam::ensightMesh::correct()
         prisms.setSize(nPrisms);
         wedges.setSize(nWedges);
         hexes.setSize(nHexes);
-        hexesWedges.setSize(nHexesWedges);
         polys.setSize(nPolys);
 
         meshCellSets_.nTets = nTets;
@@ -178,7 +173,7 @@ void Foam::ensightMesh::correct()
         meshCellSets_.nPrisms = nPrisms;
         reduce(meshCellSets_.nPrisms, sumOp<label>());
 
-        meshCellSets_.nHexesWedges = nHexesWedges;
+        meshCellSets_.nHexesWedges = nWedges+nHexes;
         reduce(meshCellSets_.nHexesWedges, sumOp<label>());
 
         meshCellSets_.nPolys = nPolys;
