@@ -33,17 +33,17 @@ inline Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
     const EquationOfState& pt,
     const scalar Hf,
     const scalar Sf,
-    const Polynomial<PolySize>& cpPoly,
-    const typename Polynomial<PolySize>::intPolyType& hPoly,
-    const Polynomial<PolySize>& sPoly
+    const Polynomial<PolySize>& CpCoeffs,
+    const typename Polynomial<PolySize>::intPolyType& hCoeffs,
+    const Polynomial<PolySize>& sCoeffs
 )
 :
     EquationOfState(pt),
     Hf_(Hf),
     Sf_(Sf),
-    cpPolynomial_(cpPoly),
-    hPolynomial_(hPoly),
-    sPolynomial_(sPoly)
+    CpCoeffs_(CpCoeffs),
+    hCoeffs_(hCoeffs),
+    sCoeffs_(sCoeffs)
 {}
 
 
@@ -58,9 +58,9 @@ inline Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
     EquationOfState(pt),
     Hf_(pt.Hf_),
     Sf_(pt.Sf_),
-    cpPolynomial_(pt.cpPolynomial_),
-    hPolynomial_(pt.hPolynomial_),
-    sPolynomial_(pt.sPolynomial_)
+    CpCoeffs_(pt.CpCoeffs_),
+    hCoeffs_(pt.hCoeffs_),
+    sCoeffs_(pt.sCoeffs_)
 {}
 
 
@@ -74,9 +74,9 @@ inline Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
     EquationOfState(name, pt),
     Hf_(pt.Hf_),
     Sf_(pt.Sf_),
-    cpPolynomial_(pt.cpPolynomial_),
-    hPolynomial_(pt.hPolynomial_),
-    sPolynomial_(pt.sPolynomial_)
+    CpCoeffs_(pt.CpCoeffs_),
+    hCoeffs_(pt.hCoeffs_),
+    sCoeffs_(pt.sCoeffs_)
 {}
 
 
@@ -88,7 +88,7 @@ inline Foam::scalar Foam::hPolynomialThermo<EquationOfState, PolySize>::cp
     const scalar T
 ) const
 {
-    return cpPolynomial_.evaluate(T);
+    return CpCoeffs_.evaluate(T);
 }
 
 
@@ -98,7 +98,7 @@ inline Foam::scalar Foam::hPolynomialThermo<EquationOfState, PolySize>::h
     const scalar T
 ) const
 {
-    return hPolynomial_.evaluate(T);
+    return hCoeffs_.evaluate(T);
 }
 
 
@@ -126,7 +126,7 @@ inline Foam::scalar Foam::hPolynomialThermo<EquationOfState, PolySize>::s
     const scalar T
 ) const
 {
-    return sPolynomial_.evaluate(T);
+    return sCoeffs_.evaluate(T);
 }
 
 
@@ -143,9 +143,9 @@ Foam::hPolynomialThermo<EquationOfState, PolySize>::operator=
 
     Hf_ = pt.Hf_;
     Sf_ = pt.Sf_;
-    cpPolynomial_ = pt.cpPolynomial_;
-    hPolynomial_ = pt.hPolynomial_;
-    sPolynomial_ = pt.sPolynomial_;
+    CpCoeffs_ = pt.CpCoeffs_;
+    hCoeffs_ = pt.hCoeffs_;
+    sCoeffs_ = pt.sCoeffs_;
 
     return *this;
 }
@@ -166,9 +166,9 @@ inline void Foam::hPolynomialThermo<EquationOfState, PolySize>::operator+=
 
     Hf_ = molr1*Hf_ + molr2*pt.Hf_;
     Sf_ = molr1*Sf_ + molr2*pt.Sf_;
-    cpPolynomial_ = molr1*cpPolynomial_ + molr2*pt.cpPolynomial_;
-    hPolynomial_ = molr1*hPolynomial_ + molr2*pt.hPolynomial_;
-    sPolynomial_ = molr1*sPolynomial_ + molr2*pt.sPolynomial_;
+    CpCoeffs_ = molr1*CpCoeffs_ + molr2*pt.CpCoeffs_;
+    hCoeffs_ = molr1*hCoeffs_ + molr2*pt.hCoeffs_;
+    sCoeffs_ = molr1*sCoeffs_ + molr2*pt.sCoeffs_;
 }
 
 
@@ -187,9 +187,9 @@ inline void Foam::hPolynomialThermo<EquationOfState, PolySize>::operator-=
 
     Hf_ = molr1*Hf_ - molr2*pt.Hf_;
     Sf_ = molr1*Sf_ - molr2*pt.Sf_;
-    cpPolynomial_ = molr1*cpPolynomial_ - molr2*pt.cpPolynomial_;
-    hPolynomial_ = molr1*hPolynomial_ - molr2*pt.hPolynomial_;
-    sPolynomial_ = molr1*sPolynomial_ - molr2*pt.sPolynomial_;
+    CpCoeffs_ = molr1*CpCoeffs_ - molr2*pt.CpCoeffs_;
+    hCoeffs_ = molr1*hCoeffs_ - molr2*pt.hCoeffs_;
+    sCoeffs_ = molr1*sCoeffs_ - molr2*pt.sCoeffs_;
 }
 
 
@@ -223,9 +223,9 @@ inline Foam::hPolynomialThermo<EquationOfState, PolySize> Foam::operator+
         eofs,
         molr1*pt1.Hf_ + molr2*pt2.Hf_,
         molr1*pt1.Sf_ + molr2*pt2.Sf_,
-        molr1*pt1.cpPolynomial_ + molr2*pt2.cpPolynomial_,
-        molr1*pt1.hPolynomial_ + molr2*pt2.hPolynomial_,
-        molr1*pt1.sPolynomial_ + molr2*pt2.sPolynomial_
+        molr1*pt1.CpCoeffs_ + molr2*pt2.CpCoeffs_,
+        molr1*pt1.hCoeffs_ + molr2*pt2.hCoeffs_,
+        molr1*pt1.sCoeffs_ + molr2*pt2.sCoeffs_
     );
 }
 
@@ -248,9 +248,9 @@ inline Foam::hPolynomialThermo<EquationOfState, PolySize> Foam::operator-
         eofs,
         molr1*pt1.Hf_ - molr2*pt2.Hf_,
         molr1*pt1.Sf_ - molr2*pt2.Sf_,
-        molr1*pt1.cpPolynomial_ - molr2*pt2.cpPolynomial_,
-        molr1*pt1.hPolynomial_ - molr2*pt2.hPolynomial_,
-        molr1*pt1.sPolynomial_ - molr2*pt2.sPolynomial_
+        molr1*pt1.CpCoeffs_ - molr2*pt2.CpCoeffs_,
+        molr1*pt1.hCoeffs_ - molr2*pt2.hCoeffs_,
+        molr1*pt1.sCoeffs_ - molr2*pt2.sCoeffs_
     );
 }
 
@@ -267,9 +267,9 @@ inline Foam::hPolynomialThermo<EquationOfState, PolySize> Foam::operator*
         s*static_cast<const EquationOfState&>(pt),
         pt.Hf_,
         pt.Sf_,
-        pt.cpPolynomial_,
-        pt.hPolynomial_,
-        pt.sPolynomial_
+        pt.CpCoeffs_,
+        pt.hCoeffs_,
+        pt.sCoeffs_
     );
 }
 

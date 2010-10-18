@@ -45,15 +45,18 @@ namespace Foam
         slidingInterface,
         dictionary
     );
+
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::slidingInterface::typeOfMatch,
+        2
+    >::names[] =
+    {
+        "integral",
+        "partial"
+    };
 }
-
-
-template<>
-const char* Foam::NamedEnum<Foam::slidingInterface::typeOfMatch, 2>::names[] =
-{
-    "integral",
-    "partial"
-};
 
 
 const Foam::NamedEnum<Foam::slidingInterface::typeOfMatch, 2>

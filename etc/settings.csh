@@ -108,6 +108,12 @@ case OpenFOAM:
         set gmp_version=gmp-4.2.4
         set mpfr_version=mpfr-2.4.1
         breaksw
+    case Clang:
+        # using clang - not gcc
+        setenv WM_CC 'clang'
+        setenv WM_CXX 'clang++'
+        set clang_version=llvm-2.8
+        breaksw
     default:
         echo
         echo "Warning in $WM_PROJECT_DIR/etc/settings.csh:"
@@ -159,6 +165,25 @@ case OpenFOAM:
     endif
     unset gcc_version gccDir
     unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
+
+    if ( $?clang_version ) then
+        set clangDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH/$clang_version
+
+        # Check that the compiler directory can be found
+        if ( ! -d "$clangDir" ) then
+            echo
+            echo "Warning in $WM_PROJECT_DIR/etc/settings.csh:"
+            echo "    Cannot find $clangDir installation."
+            echo "    Please install this compiler version or if you wish to use the system compiler,"
+            echo "    change the 'compilerInstall' setting to 'system' in this file"
+            echo
+        endif
+
+        _foamAddMan     $clangDir/man
+        _foamAddPath    $clangDir/bin
+    endif
+    unset clang_version clangDir
+
     breaksw
 endsw
 

@@ -68,7 +68,7 @@ class thermalPorousZone
         void operator=(const thermalPorousZone&);
 
         //- Thermal model
-        autoPtr<thermalModel> model_;
+        autoPtr<porousMedia::thermalModel> model_;
 
 
 public:

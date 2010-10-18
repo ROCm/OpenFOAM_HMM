@@ -109,6 +109,9 @@ public:
         //- Construct from Istream
         C8H10(Istream& is);
 
+        //- Construct from dictionary
+        C8H10(const dictionary& dict);
+
 
     // Member Functions
 

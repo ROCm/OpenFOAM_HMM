@@ -29,13 +29,29 @@
   =metis-5.0pre2=, =ParMetis-3.1= and =ParMGridGen-1.0=.
 
 * Library developments
+
   There have been a number of developments to the libraries to support the
   extension of functionality in solver and utility applications.
 *** Core library
     + Large number of code refinements and consistency improvements to support
       other developments.
 *** Turbulence modelling
-*** Thermo-physical Models
+*** *Updated* thermophysical libraries
+    + Now use the more descriptive dictionary input format, e.g. for a single
+      component mixture:
+
+    thermoType      hPsiThermo<pureMixture<sutherlandTransport<specieThermo<hConstThermo<perfectGas>>>>>;
+
+    mixture
+    {
+        nMoles      1;
+        molWeight   28.9;
+        Cp          1007;
+        Hf          0;
+        As          1.4792e-06;
+        Ts          116;
+    }
+
 *** DSMC
 *** Dynamic Mesh
 *** Numerics
@@ -67,8 +83,10 @@
     + Additional wall functions for primary region momentum and temperature
       taking film into account
     + Parallel aware
+*** *New* ptscotch decomposition method
 *** *Updated* particle tracking algorithm
-
+*** *Updated* split cyclics into two separate patches. See doc/changed/splitCyclics.txt
+*** *New* compact binary I/O for faces and cells. This speeds up reading/writing meshes in binary.
 * Solvers
   A number of new solvers have been developed for a range of engineering
   applications.  There has been a set of improvements to certain classes of
@@ -108,10 +126,12 @@
       + extrudes into master direction (i.e. away from the owner cell
         if flipMap is false)
 *** Updated utilities
-    + ...
-
+    + =setFields=: optionally use faceSets to set patch values (see e.g. hotRoom tutorial).
+    + =blockMesh=: specify patches via dictionary instead of type only. This
+      makes rereading the boundary superfluous. see
+      e.g. pitzDailyDirectMapped tutorial.
 * Post-processing
-  + =foamToEnsight=: new =-nodeValues= option to generate and output nodal
+  + =foamToEnsight=: parallel continuous data. new =-nodeValues= option to generate and output nodal
     field data.
   + Function objects:
     + =residualControl=: new function object to allow users to terminate steady

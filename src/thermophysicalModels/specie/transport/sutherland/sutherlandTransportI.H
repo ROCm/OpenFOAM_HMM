@@ -25,15 +25,10 @@ License
 
 #include "specie.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class thermo>
-inline void sutherlandTransport<thermo>::calcCoeffs
+template<class Thermo>
+inline void Foam::sutherlandTransport<Thermo>::calcCoeffs
 (
     const scalar mu1, const scalar T1,
     const scalar mu2, const scalar T2
@@ -43,106 +38,119 @@ inline void sutherlandTransport<thermo>::calcCoeffs
     scalar mu1rootT2 = mu1*sqrt(T2);
     scalar mu2rootT1 = mu2*rootT1;
 
-    Ts = (mu2rootT1 - mu1rootT2)/(mu1rootT2/T1 - mu2rootT1/T2);
+    Ts_ = (mu2rootT1 - mu1rootT2)/(mu1rootT2/T1 - mu2rootT1/T2);
 
-    As = mu1*(1.0 + Ts/T1)/rootT1;
+    As_ = mu1*(1.0 + Ts_/T1)/rootT1;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-template<class thermo>
-inline sutherlandTransport<thermo>::sutherlandTransport
+template<class Thermo>
+inline Foam::sutherlandTransport<Thermo>::sutherlandTransport
 (
-    const thermo& t,
-    const scalar as,
-    const scalar ts
+    const Thermo& t,
+    const scalar As,
+    const scalar Ts
 )
 :
-    thermo(t),
-    As(as),
-    Ts(ts)
+    Thermo(t),
+    As_(As),
+    Ts_(Ts)
 {}
 
 
-// Construct from components
-template<class thermo>
-inline sutherlandTransport<thermo>::sutherlandTransport
+template<class Thermo>
+inline Foam::sutherlandTransport<Thermo>::sutherlandTransport
 (
-    const thermo& t,
+    const Thermo& t,
     const scalar mu1, const scalar T1,
     const scalar mu2, const scalar T2
 )
 :
-    thermo(t)
+    Thermo(t)
 {
     calcCoeffs(mu1, T1, mu2, T2);
 }
 
 
-//- Construct as named copy
-template<class thermo>
-inline sutherlandTransport<thermo>::sutherlandTransport
+template<class Thermo>
+inline Foam::sutherlandTransport<Thermo>::sutherlandTransport
 (
     const word& name,
     const sutherlandTransport& st
 )
 :
-    thermo(name, st),
-    As(st.As),
-    Ts(st.Ts)
+    Thermo(name, st),
+    As_(st.As_),
+    Ts_(st.Ts_)
 {}
 
 
-// Construct and return a clone
-template<class thermo>
-inline autoPtr<sutherlandTransport<thermo> > sutherlandTransport<thermo>::clone
-() const
+template<class Thermo>
+inline Foam::autoPtr<Foam::sutherlandTransport<Thermo> >
+Foam::sutherlandTransport<Thermo>::clone() const
 {
-    return autoPtr<sutherlandTransport<thermo> >
+    return autoPtr<sutherlandTransport<Thermo> >
     (
-        new sutherlandTransport<thermo>(*this)
+        new sutherlandTransport<Thermo>(*this)
     );
 }
 
 
-// Selector from Istream
-template<class thermo>
-inline autoPtr<sutherlandTransport<thermo> > sutherlandTransport<thermo>::New
+template<class Thermo>
+inline Foam::autoPtr<Foam::sutherlandTransport<Thermo> >
+Foam::sutherlandTransport<Thermo>::New
 (
     Istream& is
 )
 {
-    return autoPtr<sutherlandTransport<thermo> >
+    return autoPtr<sutherlandTransport<Thermo> >
     (
-        new sutherlandTransport<thermo>(is)
+        new sutherlandTransport<Thermo>(is)
+    );
+}
+
+
+template<class Thermo>
+inline Foam::autoPtr<Foam::sutherlandTransport<Thermo> >
+Foam::sutherlandTransport<Thermo>::New
+(
+    const dictionary& dict
+)
+{
+    return autoPtr<sutherlandTransport<Thermo> >
+    (
+        new sutherlandTransport<Thermo>(dict)
     );
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Dynamic viscosity [kg/ms]
-template<class thermo>
-inline scalar sutherlandTransport<thermo>::mu(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::sutherlandTransport<Thermo>::mu(const scalar T) const
 {
-    return As*::sqrt(T)/(1.0 + Ts/T);
+    return As_*::sqrt(T)/(1.0 + Ts_/T);
 }
 
 
-// Thermal conductivity [W/mK]
-template<class thermo>
-inline scalar sutherlandTransport<thermo>::kappa(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::sutherlandTransport<Thermo>::kappa
+(
+    const scalar T
+) const
 {
     scalar Cv_ = this->Cv(T);
     return mu(T)*Cv_*(1.32 + 1.77*this->R()/Cv_);
 }
 
 
-// Thermal diffusivity for enthalpy [kg/ms]
-template<class thermo>
-inline scalar sutherlandTransport<thermo>::alpha(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::sutherlandTransport<Thermo>::alpha
+(
+    const scalar T
+) const
 {
     scalar Cv_ = this->Cv(T);
     scalar R_ = this->R();
@@ -158,16 +166,17 @@ inline scalar sutherlandTransport<thermo>::alpha(const scalar T) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-template<class thermo>
-inline sutherlandTransport<thermo>& sutherlandTransport<thermo>::operator=
+template<class Thermo>
+inline Foam::sutherlandTransport<Thermo>&
+Foam::sutherlandTransport<Thermo>::operator=
 (
-    const sutherlandTransport<thermo>& st
+    const sutherlandTransport<Thermo>& st
 )
 {
-    thermo::operator=(st);
+    Thermo::operator=(st);
 
-    As = st.As;
-    Ts = st.Ts;
+    As_ = st.As_;
+    Ts_ = st.Ts_;
 
     return *this;
 }
@@ -175,83 +184,79 @@ inline sutherlandTransport<thermo>& sutherlandTransport<thermo>::operator=
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-template<class thermo>
-inline sutherlandTransport<thermo> operator+
+template<class Thermo>
+inline Foam::sutherlandTransport<Thermo> Foam::operator+
 (
-    const sutherlandTransport<thermo>& st1,
-    const sutherlandTransport<thermo>& st2
+    const sutherlandTransport<Thermo>& st1,
+    const sutherlandTransport<Thermo>& st2
 )
 {
-    thermo t
+    Thermo t
     (
-        static_cast<const thermo&>(st1) + static_cast<const thermo&>(st2)
+        static_cast<const Thermo&>(st1) + static_cast<const Thermo&>(st2)
     );
 
     scalar molr1 = st1.nMoles()/t.nMoles();
     scalar molr2 = st2.nMoles()/t.nMoles();
 
-    return sutherlandTransport<thermo>
+    return sutherlandTransport<Thermo>
     (
         t,
-        molr1*st1.As + molr2*st2.As,
-        molr1*st1.Ts + molr2*st2.Ts
+        molr1*st1.As_ + molr2*st2.As_,
+        molr1*st1.Ts_ + molr2*st2.Ts_
     );
 }
 
 
-template<class thermo>
-inline sutherlandTransport<thermo> operator-
+template<class Thermo>
+inline Foam::sutherlandTransport<Thermo> Foam::operator-
 (
-    const sutherlandTransport<thermo>& st1,
-    const sutherlandTransport<thermo>& st2
+    const sutherlandTransport<Thermo>& st1,
+    const sutherlandTransport<Thermo>& st2
 )
 {
-    thermo t
+    Thermo t
     (
-        static_cast<const thermo&>(st1) - static_cast<const thermo&>(st2)
+        static_cast<const Thermo&>(st1) - static_cast<const Thermo&>(st2)
     );
 
     scalar molr1 = st1.nMoles()/t.nMoles();
     scalar molr2 = st2.nMoles()/t.nMoles();
 
-    return sutherlandTransport<thermo>
+    return sutherlandTransport<Thermo>
     (
         t,
-        molr1*st1.As - molr2*st2.As,
-        molr1*st1.Ts - molr2*st2.Ts
+        molr1*st1.As_ - molr2*st2.As_,
+        molr1*st1.Ts_ - molr2*st2.Ts_
     );
 }
 
 
-template<class thermo>
-inline sutherlandTransport<thermo> operator*
+template<class Thermo>
+inline Foam::sutherlandTransport<Thermo> Foam::operator*
 (
     const scalar s,
-    const sutherlandTransport<thermo>& st
+    const sutherlandTransport<Thermo>& st
 )
 {
-    return sutherlandTransport<thermo>
+    return sutherlandTransport<Thermo>
     (
-        s*static_cast<const thermo&>(st),
-        st.As,
-        st.Ts
+        s*static_cast<const Thermo&>(st),
+        st.As_,
+        st.Ts_
     );
 }
 
 
-template<class thermo>
-inline sutherlandTransport<thermo> operator==
+template<class Thermo>
+inline Foam::sutherlandTransport<Thermo> Foam::operator==
 (
-    const sutherlandTransport<thermo>& st1,
-    const sutherlandTransport<thermo>& st2
+    const sutherlandTransport<Thermo>& st1,
+    const sutherlandTransport<Thermo>& st2
 )
 {
     return st2 - st1;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

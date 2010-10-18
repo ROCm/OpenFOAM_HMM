@@ -26,7 +26,7 @@ Class
 
 Description
     JANAF tables based thermodynamics package templated
-    into the equationOfState.
+    into the equation of state.
 
 SourceFiles
     janafThermoI.H
@@ -38,6 +38,7 @@ SourceFiles
 #define janafThermo_H
 
 #include "scalar.H"
+#include "FixedList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,41 +47,41 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-template<class equationOfState> class janafThermo;
+template<class EquationOfState> class janafThermo;
 
-template<class equationOfState>
-inline janafThermo<equationOfState> operator+
+template<class EquationOfState>
+inline janafThermo<EquationOfState> operator+
 (
-    const janafThermo<equationOfState>&,
-    const janafThermo<equationOfState>&
+    const janafThermo<EquationOfState>&,
+    const janafThermo<EquationOfState>&
 );
 
-template<class equationOfState>
-inline janafThermo<equationOfState> operator-
+template<class EquationOfState>
+inline janafThermo<EquationOfState> operator-
 (
-    const janafThermo<equationOfState>&,
-    const janafThermo<equationOfState>&
+    const janafThermo<EquationOfState>&,
+    const janafThermo<EquationOfState>&
 );
 
-template<class equationOfState>
-inline janafThermo<equationOfState> operator*
+template<class EquationOfState>
+inline janafThermo<EquationOfState> operator*
 (
     const scalar,
-    const janafThermo<equationOfState>&
+    const janafThermo<EquationOfState>&
 );
 
-template<class equationOfState>
-inline janafThermo<equationOfState> operator==
+template<class EquationOfState>
+inline janafThermo<EquationOfState> operator==
 (
-    const janafThermo<equationOfState>&,
-    const janafThermo<equationOfState>&
+    const janafThermo<EquationOfState>&,
+    const janafThermo<EquationOfState>&
 );
 
-template<class equationOfState>
+template<class EquationOfState>
 Ostream& operator<<
 (
     Ostream&,
-    const janafThermo<equationOfState>&
+    const janafThermo<EquationOfState>&
 );
 
 
@@ -88,16 +89,19 @@ Ostream& operator<<
                            Class janafThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class equationOfState>
+template<class EquationOfState>
 class janafThermo
 :
-    public equationOfState
+    public EquationOfState
 {
 
 public:
 
+    // Public data
+
         static const int nCoeffs_ = 7;
-        typedef scalar coeffArray[7];
+        typedef FixedList<scalar, nCoeffs_> coeffArray;
+
 
 private:
 
@@ -111,6 +115,9 @@ private:
 
 
     // Private Member Functions
+
+        //- Check that input data is valid
+        void checkInputData() const;
 
         //- Check given temperature is within the range of the fitted coeffs
         inline void checkT(const scalar T) const;
@@ -126,7 +133,7 @@ public:
         //- Construct from components
         inline janafThermo
         (
-            const equationOfState& st,
+            const EquationOfState& st,
             const scalar Tlow,
             const scalar Thigh,
             const scalar Tcommon,
@@ -137,26 +144,37 @@ public:
         //- Construct from Istream
         janafThermo(Istream&);
 
+        //- Construct from dictionary
+        janafThermo(const dictionary& dict);
+
         //- Construct as a named copy
         inline janafThermo(const word&, const janafThermo&);
 
 
     // Member Functions
 
-        //- Heat capacity at constant pressure [J/(kmol K)]
-        inline scalar cp(const scalar T) const;
+        // Fundamental properties
 
-        //- Enthalpy [J/kmol]
-        inline scalar h(const scalar T) const;
+            //- Heat capacity at constant pressure [J/(kmol K)]
+            inline scalar cp(const scalar T) const;
 
-        //- Sensible enthalpy [J/kmol]
-        inline scalar hs(const scalar T) const;
+            //- Enthalpy [J/kmol]
+            inline scalar h(const scalar T) const;
 
-        //- Chemical enthalpy [J/kmol]
-        inline scalar hc() const;
+            //- Sensible enthalpy [J/kmol]
+            inline scalar hs(const scalar T) const;
 
-        //- Entropy [J/(kmol K)]
-        inline scalar s(const scalar T) const;
+            //- Chemical enthalpy [J/kmol]
+            inline scalar hc() const;
+
+            //- Entropy [J/(kmol K)]
+            inline scalar s(const scalar T) const;
+
+
+        // I-O
+
+            //- Write to Ostream
+            void write(Ostream& os) const;
 
 
     // Member operators
@@ -167,25 +185,25 @@ public:
 
     // Friend operators
 
-        friend janafThermo operator+ <equationOfState>
+        friend janafThermo operator+ <EquationOfState>
         (
             const janafThermo&,
             const janafThermo&
         );
 
-        friend janafThermo operator- <equationOfState>
+        friend janafThermo operator- <EquationOfState>
         (
             const janafThermo&,
             const janafThermo&
         );
 
-        friend janafThermo operator* <equationOfState>
+        friend janafThermo operator* <EquationOfState>
         (
             const scalar,
             const janafThermo&
         );
 
-        friend janafThermo operator== <equationOfState>
+        friend janafThermo operator== <EquationOfState>
         (
             const janafThermo&,
             const janafThermo&
@@ -194,7 +212,7 @@ public:
 
     // Ostream Operator
 
-        friend Ostream& operator<< <equationOfState>
+        friend Ostream& operator<< <EquationOfState>
         (
             Ostream&,
             const janafThermo&

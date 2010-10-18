@@ -47,6 +47,7 @@ namespace Foam
 
 defineTemplateTypeNameAndDebug(gasReaction, 0);
 defineTemplateRunTimeSelectionTable(gasReaction, Istream);
+defineTemplateRunTimeSelectionTable(gasReaction, dictionary);
 
 
 // * * * * * * * * * * * * * Make CHEMKIN reactions  * * * * * * * * * * * * //

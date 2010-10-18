@@ -33,20 +33,20 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(alphaContactAngleFvPatchScalarField, 0);
-}
 
-template<>
-const char* Foam::NamedEnum
-<
-    Foam::alphaContactAngleFvPatchScalarField::limitControls,
-    4
->::names[] =
-{
-    "none",
-    "gradient",
-    "zeroGradient",
-    "alpha"
-};
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::alphaContactAngleFvPatchScalarField::limitControls,
+        4
+    >::names[] =
+    {
+        "none",
+        "gradient",
+        "zeroGradient",
+        "alpha"
+    };
+}
 
 const Foam::NamedEnum
 <

@@ -49,7 +49,7 @@ Ostream& operator<<(Ostream&, const TroeFallOffFunction&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class TroeFallOffFunction Declaration
+                     Class TroeFallOffFunction Declaration
 \*---------------------------------------------------------------------------*/
 
 class TroeFallOffFunction
@@ -76,6 +76,9 @@ public:
         //- Construct from Istream
         inline TroeFallOffFunction(Istream&);
 
+        //- Construct from dictionary
+        inline TroeFallOffFunction(const dictionary& dict);
+
 
     // Member Functions
 
@@ -90,6 +93,9 @@ public:
             const scalar T,
             const scalar Pr
         ) const;
+
+        //- Write to stream
+        inline void write(Ostream& os) const;
 
 
     // Ostream Operator

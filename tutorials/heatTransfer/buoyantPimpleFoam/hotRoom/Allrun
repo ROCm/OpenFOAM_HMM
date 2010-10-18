@@ -7,9 +7,8 @@ cd ${0%/*} || exit 1    # run from this directory
 # Get application name
 application=`getApplication`
 
-compileApplication setHotRoom
 runApplication blockMesh
-runApplication setHotRoom
+runApplication setFields
 runApplication $application
 
 # ----------------------------------------------------------------- end-of-file

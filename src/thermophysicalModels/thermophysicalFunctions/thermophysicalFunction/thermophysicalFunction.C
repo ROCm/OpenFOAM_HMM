@@ -34,6 +34,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(thermophysicalFunction, 0);
     defineRunTimeSelectionTable(thermophysicalFunction, Istream);
+    defineRunTimeSelectionTable(thermophysicalFunction, dictionary);
 }
 
 
@@ -69,5 +70,38 @@ Foam::autoPtr<Foam::thermophysicalFunction> Foam::thermophysicalFunction::New
 
     return autoPtr<thermophysicalFunction>(cstrIter()(is));
 }
+
+
+Foam::autoPtr<Foam::thermophysicalFunction> Foam::thermophysicalFunction::New
+(
+    const dictionary& dict
+)
+{
+    if (debug)
+    {
+        Info<< "thermophysicalFunction::New(const dictionary&) : "
+            << "constructing thermophysicalFunction"
+            << endl;
+    }
+
+    const word thermophysicalFunctionType(dict.lookup("functionType"));
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(thermophysicalFunctionType);
+
+    if (cstrIter == IstreamConstructorTablePtr_->end())
+    {
+        FatalErrorIn("thermophysicalFunction::New(const dictionary&)")
+            << "Unknown thermophysicalFunction type "
+            << thermophysicalFunctionType
+            << nl << nl
+            << "Valid thermophysicalFunction types are :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << abort(FatalError);
+    }
+
+    return autoPtr<thermophysicalFunction>(cstrIter()(dict));
+}
+
 
 // ************************************************************************* //

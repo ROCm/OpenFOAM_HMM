@@ -32,27 +32,30 @@ License
 
 defineTypeNameAndDebug(Foam::Time, 0);
 
-template<>
-const char* Foam::NamedEnum<Foam::Time::stopAtControls, 4>::names[] =
+namespace Foam
 {
-    "endTime",
-    "noWriteNow",
-    "writeNow",
-    "nextWrite"
-};
+    template<>
+    const char* Foam::NamedEnum<Foam::Time::stopAtControls, 4>::names[] =
+    {
+        "endTime",
+        "noWriteNow",
+        "writeNow",
+        "nextWrite"
+    };
+
+    template<>
+    const char* Foam::NamedEnum<Foam::Time::writeControls, 5>::names[] =
+    {
+        "timeStep",
+        "runTime",
+        "adjustableRunTime",
+        "clockTime",
+        "cpuTime"
+    };
+}
 
 const Foam::NamedEnum<Foam::Time::stopAtControls, 4>
     Foam::Time::stopAtControlNames_;
-
-template<>
-const char* Foam::NamedEnum<Foam::Time::writeControls, 5>::names[] =
-{
-    "timeStep",
-    "runTime",
-    "adjustableRunTime",
-    "clockTime",
-    "cpuTime"
-};
 
 const Foam::NamedEnum<Foam::Time::writeControls, 5>
     Foam::Time::writeControlNames_;

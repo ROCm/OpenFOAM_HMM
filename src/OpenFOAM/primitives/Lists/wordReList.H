@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,10 +22,16 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
+    Foam::wordReUList
+
+Description
+    A UList of wordRe (word or regular expression)
+
+Typedef
     Foam::wordReList
 
 Description
-    List of wordRe (word or regular expression)
+    A List of wordRe (word or regular expression)
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,6 +45,8 @@ Description
 
 namespace Foam
 {
+    typedef UList<wordRe> wordReUList;
+
     typedef List<wordRe> wordReList;
 }
 

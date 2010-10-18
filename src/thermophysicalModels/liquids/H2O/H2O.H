@@ -109,6 +109,9 @@ public:
         //- Construct from Istream
         H2O(Istream& is);
 
+        //- Construct from dictionary
+        H2O(const dictionary& dict);
+
 
     // Member Functions
 

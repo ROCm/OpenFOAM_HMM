@@ -29,21 +29,24 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(thermalModel, 0);
-    defineRunTimeSelectionTable(thermalModel, pZone);
+namespace porousMedia
+{
+   defineTypeNameAndDebug(thermalModel, 0);
+   defineRunTimeSelectionTable(thermalModel, pZone);
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::thermalModel::thermalModel(const porousZone& pZone)
+Foam::porousMedia::thermalModel::thermalModel(const porousZone& pZone)
 :
     pZone_(pZone),
     coeffDict_(dictionary::null)
 {}
 
 
-Foam::thermalModel::thermalModel
+Foam::porousMedia::thermalModel::thermalModel
 (
     const porousZone& pZone,
     const word& modelType
@@ -56,7 +59,7 @@ Foam::thermalModel::thermalModel
 
 // * * * * * * * * * * * * * * * * Destructor    * * * * * * * * * * * * * * //
 
-Foam::thermalModel::~thermalModel()
+Foam::porousMedia::thermalModel::~thermalModel()
 {}
 
 

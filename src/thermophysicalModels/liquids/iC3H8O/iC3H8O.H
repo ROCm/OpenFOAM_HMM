@@ -108,6 +108,9 @@ public:
         //- Construct from Istream
         iC3H8O(Istream& is);
 
+        //- Construct from dictionary
+        iC3H8O(const dictionary& dict);
+
 
     // Member Functions
 

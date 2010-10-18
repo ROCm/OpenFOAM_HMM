@@ -27,7 +27,8 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::thermalModel> Foam::thermalModel::New
+Foam::autoPtr<Foam::porousMedia::thermalModel>
+Foam::porousMedia::thermalModel::New
 (
     const porousZone& pZone
 )
@@ -43,7 +44,7 @@ Foam::autoPtr<Foam::thermalModel> Foam::thermalModel::New
     {
         FatalErrorIn
         (
-            "thermalModel::New(const porousZone&)"
+            "porousMedia::thermalModel::New(const porousZone&)"
         )   << "Unknown thermalModel type "
             << modelType << nl << nl
             << "Valid thermalModel types are :" << endl
@@ -51,7 +52,7 @@ Foam::autoPtr<Foam::thermalModel> Foam::thermalModel::New
             << abort(FatalError);
     }
 
-    return autoPtr<thermalModel>(cstrIter()(pZone));
+    return autoPtr<porousMedia::thermalModel>(cstrIter()(pZone));
 }
 
 

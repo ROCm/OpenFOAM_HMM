@@ -23,9 +23,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "Tuple2.H"
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct from components
 inline Foam::thirdBodyEfficiencies::thirdBodyEfficiencies
 (
     const speciesTable& species,
@@ -48,7 +49,6 @@ inline Foam::thirdBodyEfficiencies::thirdBodyEfficiencies
 }
 
 
-//- Construct from Istream
 inline Foam::thirdBodyEfficiencies::thirdBodyEfficiencies
 (
     const speciesTable& species,
@@ -111,6 +111,42 @@ inline Foam::thirdBodyEfficiencies::thirdBodyEfficiencies
 }
 
 
+inline Foam::thirdBodyEfficiencies::thirdBodyEfficiencies
+(
+    const speciesTable& species,
+    const dictionary& dict
+)
+:
+    scalarList(species.size()),
+    species_(species)
+{
+    if (dict.found("coeffs"))
+    {
+        List<Tuple2<word, scalar> > coeffs(dict.lookup("coeffs"));
+        if (coeffs.size() != species_.size())
+        {
+            FatalErrorIn
+            (
+                "thirdBodyEfficiencies::thirdBodyEfficiencies"
+                "(const speciesTable&, const dictionary&)"
+            )   << "number of efficiencies = " << coeffs.size()
+                << " is not equat to the number of species " << species_.size()
+                << exit(FatalIOError);
+        }
+
+        forAll(coeffs, i)
+        {
+            operator[](species[coeffs[i].first()]) = coeffs[i].second();
+        }
+    }
+    else
+    {
+        scalar defaultEff = readScalar(dict.lookup("defaultEfficiency"));
+        scalarList::operator=(defaultEff);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member functions  * * * * * * * * * * * * * //
 
 inline Foam::scalar Foam::thirdBodyEfficiencies::M(const scalarList& c) const
@@ -122,6 +158,19 @@ inline Foam::scalar Foam::thirdBodyEfficiencies::M(const scalarList& c) const
     }
 
     return M;
+}
+
+
+inline void Foam::thirdBodyEfficiencies::write(Ostream& os) const
+{
+    List<Tuple2<word, scalar> > coeffs(species_.size());
+    forAll(coeffs, i)
+    {
+        coeffs[i].first() = species_[i];
+        coeffs[i].second() = operator[](i);
+    }
+
+    os.writeKeyword("coeffs") << coeffs << token::END_STATEMENT << nl;
 }
 
 

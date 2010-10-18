@@ -67,6 +67,18 @@ public:
 
     // Public data types
 
+        //- Enumeration defining the types of sources
+        enum sourceType
+        {
+            CELLSETSOURCE,
+            FACESETSOURCE,
+            POINTSETSOURCE,
+
+            CELLZONESOURCE,
+            FACEZONESOURCE,
+            POINTZONESOURCE
+        };
+
         //- Enumeration defining the valid actions
         enum setAction
         {
@@ -267,6 +279,8 @@ public:
 
 
     // Member Functions
+
+        virtual sourceType setType() const = 0;
 
         virtual void applyToSet(const setAction action, topoSet&) const = 0;
 

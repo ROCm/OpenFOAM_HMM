@@ -110,6 +110,9 @@ public:
         //- Construct from Istream
         C4H10O(Istream& is);
 
+        //- Construct from dictionary
+        C4H10O(const dictionary& dict);
+
 
     // Member Functions
 

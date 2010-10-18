@@ -50,7 +50,7 @@ Ostream& operator<<(Ostream&, const thirdBodyEfficiencies&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class thirdBodyEfficiencies Declaration
+                  Class thirdBodyEfficiencies Declaration
 \*---------------------------------------------------------------------------*/
 
 class thirdBodyEfficiencies
@@ -80,11 +80,22 @@ public:
             Istream& is
         );
 
+        //- Construct from dictionary
+        inline thirdBodyEfficiencies
+        (
+            const speciesTable& species,
+            const dictionary& dict
+        );
+
 
     // Member functions
 
         //- Calculate and return M, the concentration of the third-bodies
         inline scalar M(const scalarList& c) const;
+
+        //- Write to stream
+        inline void write(Ostream& os) const;
+
 
 
     // Ostream Operator
