@@ -36,20 +36,11 @@ inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
 )
 :
     dict_(parentDict.subDict("constantProperties")),
-    rhoMin_(dimensionedScalar(dict_.lookup("rhoMin")).value()),
-    rho0_(dimensionedScalar(dict_.lookup("rho0")).value()),
-    minParticleMass_
-    (
-        dimensionedScalar(dict_.lookup("minParticleMass")).value()
-    ),
-    youngsModulus_
-    (
-        dimensionedScalar(dict_.lookup("youngsModulus")).value()
-    ),
-    poissonsRatio_
-    (
-        dimensionedScalar(dict_.lookup("poissonsRatio")).value()
-    )
+    rhoMin_(readScalar(dict_.lookup("rhoMin"))),
+    rho0_(readScalar(dict_.lookup("rho0"))),
+    minParticleMass_(readScalar(dict_.lookup("minParticleMass"))),
+    youngsModulus_(readScalar(dict_.lookup("youngsModulus"))),
+    poissonsRatio_(readScalar(dict_.lookup("poissonsRatio")))
 {}
 
 

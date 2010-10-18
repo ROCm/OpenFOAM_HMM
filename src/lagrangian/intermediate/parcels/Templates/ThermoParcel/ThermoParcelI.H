@@ -32,12 +32,12 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
 )
 :
     KinematicParcel<ParcelType>::constantProperties(parentDict),
-    T0_(dimensionedScalar(this->dict().lookup("T0")).value()),
-    TMin_(dimensionedScalar(this->dict().lookup("TMin")).value()),
-    cp0_(dimensionedScalar(this->dict().lookup("cp0")).value()),
-    epsilon0_(dimensionedScalar(this->dict().lookup("epsilon0")).value()),
-    f0_(dimensionedScalar(this->dict().lookup("f0")).value()),
-    Pr_(dimensionedScalar(this->dict().lookup("Pr")).value())
+    T0_(readScalar(this->dict().lookup("T0"))),
+    TMin_(readScalar(this->dict().lookup("TMin"))),
+    cp0_(readScalar(this->dict().lookup("cp0"))),
+    epsilon0_(readScalar(this->dict().lookup("epsilon0"))),
+    f0_(readScalar(this->dict().lookup("f0"))),
+    Pr_(readScalar(this->dict().lookup("Pr")))
 {}
 
 

@@ -32,10 +32,10 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
 )
 :
     ThermoParcel<ParcelType>::constantProperties(parentDict),
-    pMin_(dimensionedScalar(this->dict().lookup("pMin")).value()),
+    pMin_(readScalar(this->dict().lookup("pMin"))),
     constantVolume_(this->dict().lookup("constantVolume")),
-    Tvap_(dimensionedScalar(this->dict().lookup("Tvap")).value()),
-    Tbp_(dimensionedScalar(this->dict().lookup("Tbp")).value())
+    Tvap_(readScalar(this->dict().lookup("Tvap"))),
+    Tbp_(readScalar(this->dict().lookup("Tbp")))
 {}
 
 

@@ -33,11 +33,8 @@ constantProperties
 )
 :
     ReactingParcel<ParcelType>::constantProperties(parentDict),
-    LDevol_(dimensionedScalar(this->dict().lookup("LDevol")).value()),
-    hRetentionCoeff_
-    (
-        dimensionedScalar(this->dict().lookup("hRetentionCoeff")).value()
-    )
+    LDevol_(readScalar(this->dict().lookup("LDevol"))),
+    hRetentionCoeff_(readScalar(this->dict().lookup("hRetentionCoeff")))
 {
     if ((hRetentionCoeff_ < 0) || (hRetentionCoeff_ > 1))
     {
