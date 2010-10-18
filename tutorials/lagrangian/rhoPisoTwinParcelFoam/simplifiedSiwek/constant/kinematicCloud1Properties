@@ -34,13 +34,15 @@ solution
     }
 }
 
-parcelTypeId    2;
-
 constantProperties
 {
+    parcelTypeId    2;
+
     rhoMin          1e-15;
     minParticleMass 1e-15;
+
     rho0            5000;
+
     youngsModulus   1e9;
     poissonsRatio   0.35;
 }

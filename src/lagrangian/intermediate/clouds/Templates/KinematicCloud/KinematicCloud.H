@@ -201,10 +201,6 @@ protected:
         //- Sub-models dictionary
         const dictionary& subModelProperties_;
 
-        //- Parcel type id - used to flag the type of parcels issued by this
-        //  cloud
-        const label parcelTypeId_;
-
         //- Flag to correct cell values with latest transfer information
         //  during the lagrangian timestep
         const Switch cellValueSourceCorrection_;
@@ -360,9 +356,6 @@ public:
 
 
             // Cloud data
-
-                //- Return the parcel type id
-                inline label parcelTypeId() const;
 
                 //- Return refernce to the random object
                 inline Random& rndGen();

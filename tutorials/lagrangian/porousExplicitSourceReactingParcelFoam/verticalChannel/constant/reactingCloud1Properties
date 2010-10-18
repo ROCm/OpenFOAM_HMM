@@ -38,28 +38,31 @@ solution
     }
 }
 
-radiation       off;
-
-parcelTypeId    1;
-
 constantProperties
 {
+    parcelTypeId    1;
+
     rhoMin          1e-15;
     TMin            200;
     pMin            1000;
-    rho0            1000;
-    youngsModulus   1e9;
-    poissonsRatio   0.35;
     minParticleMass 1e-15;
+
+    rho0            1000;
     T0              350;
     cp0             4100;
+
+    youngsModulus   1e9;
+    poissonsRatio   0.35;
+
     epsilon0        1;
     f0              0.5;
+
     Tvap            273;
     Tbp             373;
     Pr              0.7;
     LDevol          0;
     hRetentionCoeff 1;
+
     constantVolume  false;
 }
 
@@ -98,6 +101,8 @@ subModels
     SurfaceFilmModel none;
 
     CollisionModel none;
+
+    radiation       off;
 
     PatchInjectionCoeffs
     {

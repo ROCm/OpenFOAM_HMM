@@ -96,6 +96,10 @@ public:
             //- Constant properties dictionary
             const dictionary dict_;
 
+            //- Parcel type id - used for post-processing to flag the type
+            //  of parcels issued by this cloud
+            const label parcelTypeId_;
+
             //- Minimum density [kg/m3]
             const scalar rhoMin_;
 
@@ -121,6 +125,9 @@ public:
 
             //- Return const access to the constant properties dictionary
             inline const dictionary& dict() const;
+
+            //- Return const access to the parcel type id
+            inline label parcelTypeId() const;
 
             //- Return const access to the minimum density
             inline scalar rhoMin() const;

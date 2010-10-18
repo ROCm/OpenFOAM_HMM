@@ -318,7 +318,6 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     solution_(mesh_, particleProperties_.subDict("solution")),
     constProps_(particleProperties_),
     subModelProperties_(particleProperties_.subDict("subModels")),
-    parcelTypeId_(readLabel(particleProperties_.lookup("parcelTypeId"))),
     cellValueSourceCorrection_
     (
         particleProperties_.lookup("cellValueSourceCorrection")

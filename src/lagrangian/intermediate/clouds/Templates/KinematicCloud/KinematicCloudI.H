@@ -94,13 +94,6 @@ inline bool Foam::KinematicCloud<ParcelType>::hasWallImpactDistance() const
 
 
 template<class ParcelType>
-inline Foam::label Foam::KinematicCloud<ParcelType>::parcelTypeId() const
-{
-    return parcelTypeId_;
-}
-
-
-template<class ParcelType>
 inline const Foam::fvMesh& Foam::KinematicCloud<ParcelType>::mesh() const
 {
     return mesh_;

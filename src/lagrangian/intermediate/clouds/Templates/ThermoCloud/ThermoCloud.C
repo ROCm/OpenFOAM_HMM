@@ -170,7 +170,7 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
             this->solution().integrationSchemes()
         )
     ),
-    radiation_(this->particleProperties().lookup("radiation")),
+    radiation_(this->subModelProperties().lookup("radiation")),
     hsTrans_
     (
         IOobject

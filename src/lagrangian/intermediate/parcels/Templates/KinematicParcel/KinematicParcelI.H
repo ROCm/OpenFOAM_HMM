@@ -36,6 +36,7 @@ inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
 )
 :
     dict_(parentDict.subDict("constantProperties")),
+    parcelTypeId_(readLabel(dict_.lookup("parcelTypeId"))),
     rhoMin_(readScalar(dict_.lookup("rhoMin"))),
     rho0_(readScalar(dict_.lookup("rho0"))),
     minParticleMass_(readScalar(dict_.lookup("minParticleMass"))),
@@ -79,7 +80,7 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
 :
     Particle<ParcelType>(owner, position, cellI, tetFaceI, tetPtI),
     active_(true),
-    typeId_(owner.parcelTypeId()),
+    typeId_(owner.constProps().parcelTypeId()),
     nParticle_(0),
     d_(0.0),
     dTarget_(0.0),
@@ -143,6 +144,14 @@ inline const Foam::dictionary&
 Foam::KinematicParcel<ParcelType>::constantProperties::dict() const
 {
     return dict_;
+}
+
+
+template<class ParcelType>
+inline Foam::label
+Foam::KinematicParcel<ParcelType>::constantProperties::parcelTypeId() const
+{
+    return parcelTypeId_;
 }
 
 
