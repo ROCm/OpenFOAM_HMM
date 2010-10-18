@@ -15,13 +15,30 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-active          true;
+solution
+{
+    active          true;
+    coupled         false;
+    cellValueSourceCorrection off;
+
+    interpolationSchemes
+    {
+        rho             cell;
+        U               cellPoint;
+        mu              cell;
+        T               cell;
+        Cp              cell;
+        p               cell;
+    }
+
+    integrationSchemes
+    {
+        U               Euler;
+        T               Euler;
+    }
+}
 
 radiation       off;
-
-coupled         false;
-
-cellValueSourceCorrection off;
 
 parcelTypeId    1;
 
@@ -44,22 +61,6 @@ constantProperties
     LDevol          0;
     hRetentionCoeff 1;
     constantVolume  false;
-}
-
-interpolationSchemes
-{
-    rho             cell;
-    U               cellPoint;
-    mu              cell;
-    T               cell;
-    Cp              cell;
-    p               cell;
-}
-
-integrationSchemes
-{
-    U               Euler;
-    T               Euler;
 }
 
 particleForces

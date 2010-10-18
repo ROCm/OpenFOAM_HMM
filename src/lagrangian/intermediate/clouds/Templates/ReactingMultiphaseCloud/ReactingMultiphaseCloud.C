@@ -46,37 +46,37 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::evolveCloud()
 
     autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
     (
-        this->interpolationSchemes(),
+        this->solution().interpolationSchemes(),
         this->rho()
     );
 
     autoPtr<interpolation<vector> > UInterp = interpolation<vector>::New
     (
-        this->interpolationSchemes(),
+        this->solution().interpolationSchemes(),
         this->U()
     );
 
     autoPtr<interpolation<scalar> > muInterp = interpolation<scalar>::New
     (
-        this->interpolationSchemes(),
+        this->solution().interpolationSchemes(),
         this->mu()
     );
 
     autoPtr<interpolation<scalar> > TInterp = interpolation<scalar>::New
     (
-        this->interpolationSchemes(),
+        this->solution().interpolationSchemes(),
         T
     );
 
     autoPtr<interpolation<scalar> > cpInterp = interpolation<scalar>::New
     (
-        this->interpolationSchemes(),
+        this->solution().interpolationSchemes(),
         cp
     );
 
     autoPtr<interpolation<scalar> > pInterp = interpolation<scalar>::New
     (
-        this->interpolationSchemes(),
+        this->solution().interpolationSchemes(),
         p
     );
 
@@ -108,7 +108,7 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::evolveCloud()
 
     this->injection().inject(td);
 
-    if (this->coupled())
+    if (this->solution().coupled())
     {
         resetSourceTerms();
     }
@@ -245,7 +245,7 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::resetSourceTerms()
 template<class ParcelType>
 void Foam::ReactingMultiphaseCloud<ParcelType>::evolve()
 {
-    if (this->active())
+    if (this->solution().active())
     {
         preEvolve();
 

@@ -25,6 +25,65 @@ License
 
 #include "fvmSup.H"
 
+// * * * * * * * * * * * cloudSolution Member Functions  * * * * * * * * * * //
+
+template<class ParcelType>
+inline const Foam::fvMesh&
+Foam::KinematicCloud<ParcelType>::cloudSolution::mesh() const
+{
+    return mesh_;
+}
+
+
+template<class ParcelType>
+inline const Foam::dictionary&
+Foam::KinematicCloud<ParcelType>::cloudSolution::dict() const
+{
+    return dict_;
+}
+
+
+template<class ParcelType>
+inline const Foam::Switch
+Foam::KinematicCloud<ParcelType>::cloudSolution::active() const
+{
+    return active_;
+}
+
+
+template<class ParcelType>
+inline const Foam::Switch
+Foam::KinematicCloud<ParcelType>::cloudSolution::coupled() const
+{
+    return coupled_;
+}
+
+
+template<class ParcelType>
+inline const Foam::Switch
+Foam::KinematicCloud<ParcelType>::cloudSolution::cellValueSourceCorrection()
+const
+{
+    return cellValueSourceCorrection_;
+}
+
+
+template<class ParcelType>
+inline const Foam::dictionary&
+Foam::KinematicCloud<ParcelType>::cloudSolution::interpolationSchemes() const
+{
+    return dict_.subDict("interpolationSchemes");
+}
+
+
+template<class ParcelType>
+inline const Foam::dictionary&
+Foam::KinematicCloud<ParcelType>::cloudSolution::integrationSchemes() const
+{
+    return dict_.subDict("integrationSchemes");
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -57,10 +116,10 @@ Foam::KinematicCloud<ParcelType>::particleProperties() const
 
 
 template<class ParcelType>
-inline const Foam::dictionary&
-Foam::KinematicCloud<ParcelType>::subModelProperties() const
+inline const typename Foam::KinematicCloud<ParcelType>::cloudSolution&
+Foam::KinematicCloud<ParcelType>::solution() const
 {
-    return subModelProperties_;
+    return solution_;
 }
 
 
@@ -73,24 +132,10 @@ Foam::KinematicCloud<ParcelType>::constProps() const
 
 
 template<class ParcelType>
-inline const Foam::Switch Foam::KinematicCloud<ParcelType>::active() const
+inline const Foam::dictionary&
+Foam::KinematicCloud<ParcelType>::subModelProperties() const
 {
-    return active_;
-}
-
-
-template<class ParcelType>
-inline const Foam::Switch Foam::KinematicCloud<ParcelType>::coupled() const
-{
-    return coupled_;
-}
-
-
-template <class ParcelType>
-inline const Foam::Switch
-Foam::KinematicCloud<ParcelType>::cellValueSourceCorrection() const
-{
-    return cellValueSourceCorrection_;
+    return subModelProperties_;
 }
 
 
@@ -129,14 +174,6 @@ inline const Foam::particleForces&
 Foam::KinematicCloud<ParcelType>::forces() const
 {
     return forces_;
-}
-
-
-template<class ParcelType>
-inline const Foam::dictionary&
-Foam::KinematicCloud<ParcelType>::interpolationSchemes() const
-{
-    return interpolationSchemes_;
 }
 
 

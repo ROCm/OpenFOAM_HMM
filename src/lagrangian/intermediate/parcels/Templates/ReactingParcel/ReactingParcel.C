@@ -333,7 +333,7 @@ void Foam::ReactingParcel<ParcelType>::calc
 
     // Accumulate carrier phase source terms
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if (td.cloud().coupled())
+    if (td.cloud().solution().coupled())
     {
         // Transfer mass lost from particle to carrier mass source
         forAll(dMassPC, i)
@@ -356,7 +356,7 @@ void Foam::ReactingParcel<ParcelType>::calc
     {
         td.keepParticle = false;
 
-        if (td.cloud().coupled())
+        if (td.cloud().solution().coupled())
         {
             // Absorb parcel into carrier phase
             forAll(Y_, i)

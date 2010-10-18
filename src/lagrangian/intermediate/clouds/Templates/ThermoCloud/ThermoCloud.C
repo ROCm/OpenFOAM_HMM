@@ -46,31 +46,31 @@ void Foam::ThermoCloud<ParcelType>::evolveCloud()
 
     autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
     (
-        this->interpolationSchemes(),
+        this->solution().interpolationSchemes(),
         this->rho()
     );
 
     autoPtr<interpolation<vector> > UInterp = interpolation<vector>::New
     (
-        this->interpolationSchemes(),
+        this->solution().interpolationSchemes(),
         this->U()
     );
 
     autoPtr<interpolation<scalar> > muInterp = interpolation<scalar>::New
     (
-        this->interpolationSchemes(),
+        this->solution().interpolationSchemes(),
         this->mu()
     );
 
     autoPtr<interpolation<scalar> > TInterp = interpolation<scalar>::New
     (
-        this->interpolationSchemes(),
+        this->solution().interpolationSchemes(),
         T
     );
 
     autoPtr<interpolation<scalar> > cpInterp = interpolation<scalar>::New
     (
-        this->interpolationSchemes(),
+        this->solution().interpolationSchemes(),
         cp
     );
 
@@ -101,7 +101,7 @@ void Foam::ThermoCloud<ParcelType>::evolveCloud()
 
     this->injection().inject(td);
 
-    if (this->coupled())
+    if (this->solution().coupled())
     {
         resetSourceTerms();
     }
@@ -167,7 +167,7 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
         scalarIntegrationScheme::New
         (
             "T",
-            this->particleProperties().subDict("integrationSchemes")
+            this->solution().integrationSchemes()
         )
     ),
     radiation_(this->particleProperties().lookup("radiation")),
@@ -236,7 +236,7 @@ void Foam::ThermoCloud<ParcelType>::resetSourceTerms()
 template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::evolve()
 {
-    if (this->active())
+    if (this->solution().active())
     {
         preEvolve();
 

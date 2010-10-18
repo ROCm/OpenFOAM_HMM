@@ -105,6 +105,83 @@ class KinematicCloud
         void operator=(const KinematicCloud&);
 
 
+public:
+
+    // Cloud solution helper class
+    class cloudSolution
+    {
+        // Private Data
+
+            //- Reference to the mesh
+            const fvMesh& mesh_;
+
+            //- Dictionary used during construction
+            dictionary dict_;
+
+            //- Cloud active flag
+            const Switch active_;
+
+
+            // Run-time options
+
+                //- Flag to indicate whether parcels are coupled to the carrier
+                //  phase, i.e. whether or not to generate source terms for
+                //  carrier phase
+                Switch coupled_;
+
+                //- Flag to correct cell values with latest transfer information
+                //  during the lagrangian timestep
+                Switch cellValueSourceCorrection_;
+
+
+    public:
+
+        // Constructors
+
+            //- Construct null from mesh reference
+            cloudSolution(const fvMesh& mesh);
+
+            //- Construct from mesh and dictionary
+            cloudSolution(const fvMesh& mesh, const dictionary& dict);
+
+            //- Construct copy
+            cloudSolution(const cloudSolution& cs);
+
+
+        //- Destructor
+        virtual ~cloudSolution();
+
+
+        // Member functions
+
+            //- Read properties from dictionary
+            void read();
+
+            // Access
+
+                //- Return reference to the mesh
+                inline const fvMesh& mesh() const;
+
+                //- Return const access to the dictionary
+                inline const dictionary& dict() const;
+
+                //- Return the active flag
+                inline const Switch active() const;
+
+                //- Return const access to the coupled flag
+                inline const Switch coupled() const;
+
+                //- Return const access to the cell value correction flag
+                inline const Switch cellValueSourceCorrection() const;
+
+                //- Interpolation schemes dictionary
+                inline const dictionary& interpolationSchemes() const;
+
+                //- Integration schemes dictionary
+                inline const dictionary& integrationSchemes() const;
+    };
+
+
 protected:
 
     // Protected data
@@ -115,22 +192,18 @@ protected:
         //- Dictionary of particle properties
         IOdictionary particleProperties_;
 
-        //- Sub-models dictionary
-        const dictionary& subModelProperties_;
+        //- Solution properties
+        cloudSolution solution_;
 
         //- Parcel constant properties
         typename ParcelType::constantProperties constProps_;
 
-        //- Cloud active flag
-        const Switch active_;
+        //- Sub-models dictionary
+        const dictionary& subModelProperties_;
 
         //- Parcel type id - used to flag the type of parcels issued by this
         //  cloud
         const label parcelTypeId_;
-
-        //- Flag to indicate whether parcels are coupled to the carrier phase
-        //  i.e. whether or not to generate source terms for carrier phase
-        const Switch coupled_;
 
         //- Flag to correct cell values with latest transfer information
         //  during the lagrangian timestep
@@ -163,9 +236,6 @@ protected:
 
         //- Optional particle forces
         particleForces forces_;
-
-        //- Interpolation schemes dictionary
-        dictionary interpolationSchemes_;
 
 
         // References to the cloud sub-models
@@ -278,27 +348,21 @@ public:
                 //- Return particle properties dictionary
                 inline const IOdictionary& particleProperties() const;
 
-                //- Return reference to the sub-models dictionary
-                inline const dictionary& subModelProperties() const;
+                //- Return const access to the solution properties
+                inline const cloudSolution& solution() const;
 
                 //- Return the constant properties
                 inline const typename ParcelType::constantProperties&
                     constProps() const;
 
+                    //- Return reference to the sub-models dictionary
+                inline const dictionary& subModelProperties() const;
+
 
             // Cloud data
 
-                //- Return the active flag
-                inline const Switch active() const;
-
                 //- Return the parcel type id
                 inline label parcelTypeId() const;
-
-                //- Return coupled flag
-                inline const Switch coupled() const;
-
-                //- Return cell value correction flag
-                inline const Switch cellValueSourceCorrection() const;
 
                 //- Return refernce to the random object
                 inline Random& rndGen();
@@ -330,12 +394,6 @@ public:
 
             //- Optional particle forces
             inline const particleForces& forces() const;
-
-
-            // Interpolations
-
-                //- Return reference to the interpolation dictionary
-                inline const dictionary& interpolationSchemes() const;
 
 
             // Sub-models

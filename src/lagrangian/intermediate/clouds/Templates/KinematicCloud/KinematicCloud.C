@@ -36,13 +36,72 @@ License
 #include "PostProcessingModel.H"
 #include "SurfaceFilmModel.H"
 
+// * * * * * * * * * * * * * * cloudSolution * * * * * * * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::cloudSolution::read()
+{
+    dict_.lookup("coupled") >> coupled_;
+}
+
+
+template<class ParcelType>
+Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
+(
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+:
+    mesh_(mesh),
+    dict_(dict),
+    active_(dict.lookup("active")),
+    coupled_(false)
+{
+    if (active_)
+    {
+        read();
+    }
+}
+
+
+template<class ParcelType>
+Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
+(
+    const cloudSolution& cs
+)
+:
+    mesh_(cs.mesh_),
+    dict_(cs.dict_),
+    active_(cs.active_),
+    coupled_(cs.coupled_)
+{}
+
+
+template<class ParcelType>
+Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
+(
+    const fvMesh& mesh
+)
+:
+    mesh_(mesh),
+    dict_(dictionary::null),
+    active_(false),
+    coupled_(false)
+{}
+
+
+template<class ParcelType>
+Foam::KinematicCloud<ParcelType>::cloudSolution::~cloudSolution()
+{}
+
+
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::preEvolve()
 {
     this->dispersion().cacheFields(true);
-    forces_.cacheFields(true, interpolationSchemes_);
+    forces_.cacheFields(true, solution_.interpolationSchemes());
     updateCellOccupancy();
 }
 
@@ -98,21 +157,21 @@ void Foam::KinematicCloud<ParcelType>::evolveCloud()
     autoPtr<interpolation<scalar> > rhoInterpolator =
         interpolation<scalar>::New
         (
-            interpolationSchemes_,
+            solution_.interpolationSchemes(),
             rho_
         );
 
     autoPtr<interpolation<vector> > UInterpolator =
         interpolation<vector>::New
         (
-            interpolationSchemes_,
+            solution_.interpolationSchemes(),
             U_
         );
 
     autoPtr<interpolation<scalar> > muInterpolator =
         interpolation<scalar>::New
         (
-            interpolationSchemes_,
+            solution_.interpolationSchemes(),
             mu_
         );
 
@@ -141,7 +200,7 @@ void Foam::KinematicCloud<ParcelType>::evolveCloud()
 
     this->injection().inject(td);
 
-    if (coupled_)
+    if (solution_.coupled())
     {
         resetSourceTerms();
     }
@@ -223,7 +282,7 @@ void Foam::KinematicCloud<ParcelType>::postEvolve()
     }
 
     this->dispersion().cacheFields(false);
-    forces_.cacheFields(false, interpolationSchemes_);
+    forces_.cacheFields(false, solution_.interpolationSchemes());
 
     this->postProcessing().post();
 }
@@ -256,11 +315,10 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
             IOobject::NO_WRITE
         )
     ),
+    solution_(mesh_, particleProperties_.subDict("solution")),
     constProps_(particleProperties_),
     subModelProperties_(particleProperties_.subDict("subModels")),
-    active_(particleProperties_.lookup("active")),
     parcelTypeId_(readLabel(particleProperties_.lookup("parcelTypeId"))),
-    coupled_(particleProperties_.lookup("coupled")),
     cellValueSourceCorrection_
     (
         particleProperties_.lookup("cellValueSourceCorrection")
@@ -272,7 +330,6 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     mu_(mu),
     g_(g),
     forces_(mesh_, particleProperties_, g_.value()),
-    interpolationSchemes_(particleProperties_.subDict("interpolationSchemes")),
     dispersionModel_
     (
         DispersionModel<KinematicCloud<ParcelType> >::New
@@ -335,7 +392,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
         vectorIntegrationScheme::New
         (
             "U",
-            particleProperties_.subDict("integrationSchemes")
+            solution_.integrationSchemes()
         )
     ),
     UTrans_
@@ -397,7 +454,7 @@ void Foam::KinematicCloud<ParcelType>::resetSourceTerms()
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::evolve()
 {
-    if (active_)
+    if (solution_.active())
     {
         preEvolve();
 

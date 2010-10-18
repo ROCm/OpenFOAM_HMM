@@ -15,11 +15,24 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-active          true;
+solution
+{
+    active          true;
+    coupled         true;
+    cellValueSourceCorrection on;
 
-coupled         true;
+    interpolationSchemes
+    {
+        rho             cell;
+        U               cellPoint;
+        mu              cell;
+    }
 
-cellValueSourceCorrection on;
+    integrationSchemes
+    {
+        U               Euler;
+    }
+}
 
 parcelTypeId    2;
 
@@ -30,18 +43,6 @@ constantProperties
     rho0            5000;
     youngsModulus   1e9;
     poissonsRatio   0.35;
-}
-
-interpolationSchemes
-{
-    rho             cell;
-    U               cellPoint;
-    mu              cell;
-}
-
-integrationSchemes
-{
-    U               Euler;
 }
 
 particleForces

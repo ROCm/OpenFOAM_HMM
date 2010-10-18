@@ -135,7 +135,7 @@ void Foam::ReactingCloud<ParcelType>::evolveCloud()
 
     this->injection().inject(td);
 
-    if (this->coupled())
+    if (this->solution().coupled())
     {
         resetSourceTerms();
     }
@@ -286,7 +286,7 @@ void Foam::ReactingCloud<ParcelType>::resetSourceTerms()
 template<class ParcelType>
 void Foam::ReactingCloud<ParcelType>::evolve()
 {
-    if (this->active())
+    if (this->solution().active())
     {
         preEvolve();
 

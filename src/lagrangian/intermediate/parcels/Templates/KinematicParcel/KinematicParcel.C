@@ -127,7 +127,7 @@ void Foam::KinematicParcel<ParcelType>::calc
 
     // Accumulate carrier phase source terms
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if (td.cloud().coupled())
+    if (td.cloud().solution().coupled())
     {
         // Update momentum transfer
         td.cloud().UTrans()[cellI] += np0*dUTrans;
@@ -301,7 +301,7 @@ bool Foam::KinematicParcel<ParcelType>::move(TrackData& td)
                     // Update cell based properties
                     p.setCellValues(td, dt, cellI);
 
-                    if (td.cloud().cellValueSourceCorrection())
+                    if (td.cloud().solution().cellValueSourceCorrection())
                     {
                         p.cellValueSourceCorrection(td, dt, cellI);
                     }
