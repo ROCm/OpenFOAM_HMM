@@ -37,9 +37,9 @@ template<int PolySize>
 icoPolynomial<PolySize>::icoPolynomial(Istream& is)
 :
     specie(is),
-    rhoPolynomial_("rhoPolynomial", is)
+    rhoCoeffs_("rhoCoeffs<" + Foam::name(PolySize) + '>', is)
 {
-    rhoPolynomial_ *= this->W();
+    rhoCoeffs_ *= this->W();
 }
 
 
@@ -47,9 +47,9 @@ template<int PolySize>
 icoPolynomial<PolySize>::icoPolynomial(const dictionary& dict)
 :
     specie(dict),
-    rhoPolynomial_(dict.lookup("rhoPolynomial"))
+    rhoCoeffs_(dict.lookup("rhoCoeffs<" + Foam::name(PolySize) + '>'))
 {
-    rhoPolynomial_ *= this->W();
+    rhoCoeffs_ *= this->W();
 }
 
 
@@ -59,8 +59,8 @@ template<int PolySize>
 void icoPolynomial<PolySize>::write(Ostream& os) const
 {
     specie::write(os);
-    os.writeKeyword("rhoPolynomial") << rhoPolynomial_/this->W()
-        << token::END_STATEMENT << nl;
+    os.writeKeyword(word("rhoCoeffs<" + Foam::name(PolySize) + '>'))
+        << rhoCoeffs_/this->W() << token::END_STATEMENT << nl;
 }
 
 
@@ -70,7 +70,8 @@ template<int PolySize>
 Ostream& operator<<(Ostream& os, const icoPolynomial<PolySize>& ip)
 {
     os  << static_cast<const specie&>(ip) << tab
-        << "rhoPolynomial" << tab << ip.rhoPolynomial_/ip.W();
+        << "rhoCoeffs<" << Foam::name(PolySize) << '>' << tab
+        << ip.rhoCoeffs_/ip.W();
 
     os.check
     (

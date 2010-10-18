@@ -107,14 +107,15 @@ class hPolynomialThermo
         //  Note: input in [J/kg/K], but internally uses [J/kmol/K]
         scalar Sf_;
 
-        //- Specific heat at constant pressure [J/(kg.K)]
-        Polynomial<PolySize> cpPolynomial_;
+        //- Specific heat at constant pressure polynomial coeffs [J/(kg.K)]
+        Polynomial<PolySize> CpCoeffs_;
 
-        //- Enthalpy - derived from cp [J/kg] - relative to Tstd
-        typename Polynomial<PolySize>::intPolyType hPolynomial_;
+        //- Enthalpy polynomial coeffs - derived from cp [J/kg]
+        //  NOTE: relative to Tstd
+        typename Polynomial<PolySize>::intPolyType hCoeffs_;
 
-        //- Entropy - derived from cp [J/(kg.K)] - relative to Tstd
-        Polynomial<PolySize> sPolynomial_;
+        //- Entropy - derived from Cp [J/(kg.K)] - relative to Tstd
+        Polynomial<PolySize> sCoeffs_;
 
 
     // Private Member Functions
@@ -125,9 +126,9 @@ class hPolynomialThermo
             const EquationOfState& pt,
             const scalar Hf,
             const scalar Sf,
-            const Polynomial<PolySize>& cpPoly,
-            const typename Polynomial<PolySize>::intPolyType& hPoly,
-            const Polynomial<PolySize>& sPoly
+            const Polynomial<PolySize>& CpCoeffs,
+            const typename Polynomial<PolySize>::intPolyType& hCoeffs,
+            const Polynomial<PolySize>& sCoeffs
         );
 
 
