@@ -57,6 +57,14 @@ Foam::KinematicCloud<ParcelType>::particleProperties() const
 
 
 template<class ParcelType>
+inline const Foam::dictionary&
+Foam::KinematicCloud<ParcelType>::subModelProperties() const
+{
+    return subModelProperties_;
+}
+
+
+template<class ParcelType>
 inline const typename ParcelType::constantProperties&
 Foam::KinematicCloud<ParcelType>::constProps() const
 {

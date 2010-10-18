@@ -115,6 +115,9 @@ protected:
         //- Dictionary of particle properties
         IOdictionary particleProperties_;
 
+        //- Sub-models dictionary
+        const dictionary& subModelProperties_;
+
         //- Parcel constant properties
         typename ParcelType::constantProperties constProps_;
 
@@ -274,6 +277,9 @@ public:
 
                 //- Return particle properties dictionary
                 inline const IOdictionary& particleProperties() const;
+
+                //- Return reference to the sub-models dictionary
+                inline const dictionary& subModelProperties() const;
 
                 //- Return the constant properties
                 inline const typename ParcelType::constantProperties&

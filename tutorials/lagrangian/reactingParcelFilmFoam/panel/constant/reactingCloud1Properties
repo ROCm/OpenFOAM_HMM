@@ -17,26 +17,6 @@ FoamFile
 
 active          false; // true;
 
-InjectionModel  none;
-
-DragModel       SphereDrag;
-
-DispersionModel none;
-
-PatchInteractionModel StandardWallInteraction;
-
-HeatTransferModel none;
-
-CompositionModel SinglePhaseMixture;
-
-PhaseChangeModel none;
-
-PostProcessingModel none;
-
-CollisionModel none;
-
-SurfaceFilmModel ThermoSurfaceFilm;
-
 radiation       off;
 
 coupled         true;
@@ -88,24 +68,47 @@ particleForces
     paramagnetic        off;
 }
 
-StandardWallInteractionCoeffs
+subModels
 {
-    type            rebound;
-}
+    InjectionModel  none;
 
-SinglePhaseMixtureCoeffs
-{
-    phases
-    (
-        liquid
-        {
-            H2O 1;
-        }
-    );
-}
+    DragModel       SphereDrag;
 
-ThermoSurfaceFilmCoeffs
-{}
+    DispersionModel none;
+
+    PatchInteractionModel StandardWallInteraction;
+
+    HeatTransferModel none;
+
+    CompositionModel SinglePhaseMixture;
+
+    PhaseChangeModel none;
+
+    PostProcessingModel none;
+
+    CollisionModel none;
+
+    SurfaceFilmModel ThermoSurfaceFilm;
+
+    StandardWallInteractionCoeffs
+    {
+        type            rebound;
+    }
+
+    SinglePhaseMixtureCoeffs
+    {
+        phases
+        (
+            liquid
+            {
+                H2O 1;
+            }
+        );
+    }
+
+    ThermoSurfaceFilmCoeffs
+    {}
+}
 
 
 // ************************************************************************* //

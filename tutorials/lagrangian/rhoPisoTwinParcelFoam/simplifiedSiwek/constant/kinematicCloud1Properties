@@ -17,20 +17,6 @@ FoamFile
 
 active          true;
 
-InjectionModel  ManualInjection;
-
-DragModel       SphereDrag;
-
-DispersionModel StochasticDispersionRAS;
-
-PatchInteractionModel StandardWallInteraction;
-
-PostProcessingModel none;
-
-SurfaceFilmModel none;
-
-CollisionModel none;
-
 coupled         true;
 
 cellValueSourceCorrection on;
@@ -66,54 +52,71 @@ particleForces
     paramagnetic        off;
 }
 
-ManualInjectionCoeffs
+subModels
 {
-    massTotal       massTotal [ 1 0 0 0 0 ] 0.0002;
-    parcelBasisType mass;
-    SOI             0;
-    positionsFile   "kinematicCloud1Positions";
-    U0              ( 0 0 0 );
-    parcelPDF
+    InjectionModel  ManualInjection;
+
+    DragModel       SphereDrag;
+
+    DispersionModel StochasticDispersionRAS;
+
+    PatchInteractionModel StandardWallInteraction;
+
+    PostProcessingModel none;
+
+    SurfaceFilmModel none;
+
+    CollisionModel none;
+
+    ManualInjectionCoeffs
     {
-        pdfType         RosinRammler;
-        RosinRammlerPDF
+        massTotal       massTotal [ 1 0 0 0 0 ] 0.0002;
+        parcelBasisType mass;
+        SOI             0;
+        positionsFile   "kinematicCloud1Positions";
+        U0              ( 0 0 0 );
+        parcelPDF
         {
-            minValue        5e-05;
-            maxValue        0.0001;
-            d               7.5e-05;
-            n               0.5;
+            pdfType         RosinRammler;
+            RosinRammlerPDF
+            {
+                minValue        5e-05;
+                maxValue        0.0001;
+                d               7.5e-05;
+                n               0.5;
+            }
         }
     }
-}
 
-ConeInjectionCoeffs
-{
-    SOI             0.001;
-    duration        0.005;
-    position        ( 0.25 0.25 0.05 );
-    direction       ( 0 -1 0 );
-    parcelsPerSecond 10000;
-    flowRateProfile Constant 0.01;
-    Umag            Constant 50;
-    thetaInner      Constant 0;
-    thetaOuter      Constant 30;
-
-    parcelPDF
+    ConeInjectionCoeffs
     {
-        pdfType         RosinRammler;
-        RosinRammlerPDF
+        SOI             0.001;
+        duration        0.005;
+        position        ( 0.25 0.25 0.05 );
+        direction       ( 0 -1 0 );
+        parcelsPerSecond 10000;
+        flowRateProfile Constant 0.01;
+        Umag            Constant 50;
+        thetaInner      Constant 0;
+        thetaOuter      Constant 30;
+
+        parcelPDF
         {
-            minValue        5e-05;
-            maxValue        0.0001;
-            d               ( 7.5e-05 );
-            n               ( 0.5 );
+            pdfType         RosinRammler;
+            RosinRammlerPDF
+            {
+                minValue        5e-05;
+                maxValue        0.0001;
+                d               ( 7.5e-05 );
+                n               ( 0.5 );
+            }
         }
     }
-}
 
-StandardWallInteractionCoeffs
-{
-    type            rebound;
+    StandardWallInteractionCoeffs
+    {
+        type            rebound;
+    }
 }
 
 

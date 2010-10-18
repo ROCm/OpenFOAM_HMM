@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -16,26 +16,6 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 active          true;
-
-InjectionModel  ConeInjectionMP;
-
-DragModel       SphereDrag;
-
-DispersionModel none;
-
-CollisionModel  none;
- 
-PatchInteractionModel StandardWallInteraction;
-
-HeatTransferModel none; //RanzMarshall;
-
-CompositionModel SinglePhaseMixture;
-
-PhaseChangeModel none; // LiquidEvaporation;
-
-PostProcessingModel none;
-
-SurfaceFilmModel ThermoSurfaceFilm; // none;
 
 radiation       off;
 
@@ -88,94 +68,117 @@ particleForces
     paramagnetic    off;
 }
 
-ConeInjectionCoeffs
+subModels
 {
-    SOI             0.000;
-    duration        10.000;
-    position        (0.5 0.8 1.45);
-    direction       (0 -0.5 -1);
-    massTotal       massTotal [ 1 0 0 0 0 ] 0.025; // 1e-3;
-    parcelsPerSecond 500;
-    parcelBasisType mass;
-    flowRateProfile constant 0.01;
-    Umag            constant 5;
-    thetaInner      constant 0;
-    thetaOuter      constant 30;
+    InjectionModel  ConeInjectionMP;
 
-    parcelPDF
+    DragModel       SphereDrag;
+
+    DispersionModel none;
+
+    CollisionModel  none;
+
+    PatchInteractionModel StandardWallInteraction;
+
+    HeatTransferModel none; //RanzMarshall;
+
+    CompositionModel SinglePhaseMixture;
+
+    PhaseChangeModel none; // LiquidEvaporation;
+
+    PostProcessingModel none;
+
+    SurfaceFilmModel ThermoSurfaceFilm; // none;
+
+    ConeInjectionCoeffs
     {
-        pdfType         RosinRammler;
-        RosinRammlerPDF
+        SOI             0.000;
+        duration        10.000;
+        position        (0.5 0.8 1.45);
+        direction       (0 -0.5 -1);
+        massTotal       massTotal [ 1 0 0 0 0 ] 0.025; // 1e-3;
+        parcelsPerSecond 500;
+        parcelBasisType mass;
+        flowRateProfile constant 0.01;
+        Umag            constant 5;
+        thetaInner      constant 0;
+        thetaOuter      constant 30;
+
+        parcelPDF
         {
-            minValue        5e-04;
-            maxValue        0.0012;
-            d               7.5e-05;
-            n               0.5;
+            pdfType         RosinRammler;
+            RosinRammlerPDF
+            {
+                minValue        5e-04;
+                maxValue        0.0012;
+                d               7.5e-05;
+                n               0.5;
+            }
         }
     }
-}
 
-ConeInjectionMPCoeffs
-{                    
-    SOI             0.000;
-    duration        20.000;
-    positionsFile   "reactingCloud1Positions";
-    axesFile        "reactingCloud1Axes";     
-    massTotal       massTotal [ 1 0 0 0 0 ] 10;
-    parcelsPerInjector 20000;                                            
-    parcelsPerSecond 500;                                                
-    parcelBasisType mass;                                                
-    flowRateProfile constant 0.1;                                        
-    Umag            constant 3.0;                                        
-    thetaInner      constant 0;                                          
-    thetaOuter      constant 45;                                         
+    ConeInjectionMPCoeffs
+    {
+        SOI             0.000;
+        duration        20.000;
+        positionsFile   "reactingCloud1Positions";
+        axesFile        "reactingCloud1Axes";
+        massTotal       massTotal [ 1 0 0 0 0 ] 10;
+        parcelsPerInjector 20000;
+        parcelsPerSecond 500;
+        parcelBasisType mass;
+        flowRateProfile constant 0.1;
+        Umag            constant 3.0;
+        thetaInner      constant 0;
+        thetaOuter      constant 45;
 
-    parcelPDF                           
-    {                                   
-        pdfType         RosinRammler;   
-        RosinRammlerPDF                 
-        {                               
-            minValue        5e-04;      
-            maxValue        0.0012;     
-            d               7.5e-05;
-            n               0.5;    
-        }                               
-    }                                   
-
-}
-
-
-StandardWallInteractionCoeffs
-{
-    type            rebound;
-}
-
-RanzMarshallCoeffs
-{
-    BirdCorrection  false;
-}
-
-SinglePhaseMixtureCoeffs
-{
-    phases
-    (
-        liquid
+        parcelPDF
         {
-            H2O 1;
+            pdfType         RosinRammler;
+            RosinRammlerPDF
+            {
+                minValue        5e-04;
+                maxValue        0.0012;
+                d               7.5e-05;
+                n               0.5;
+            }
         }
-    );
-}
 
-LiquidEvaporationCoeffs
-{
-    activeLiquids
-    (
-        H2O
-    );
-}
+    }
 
-ThermoSurfaceFilmCoeffs
-{}
+
+    StandardWallInteractionCoeffs
+    {
+        type            rebound;
+    }
+
+    RanzMarshallCoeffs
+    {
+        BirdCorrection  false;
+    }
+
+    SinglePhaseMixtureCoeffs
+    {
+        phases
+        (
+            liquid
+            {
+                H2O 1;
+            }
+        );
+    }
+
+    LiquidEvaporationCoeffs
+    {
+        activeLiquids
+        (
+            H2O
+        );
+    }
+
+    ThermoSurfaceFilmCoeffs
+    {}
+}
 
 
 // ************************************************************************* //

@@ -17,31 +17,6 @@ FoamFile
 
 active          true;
 
-InjectionModel  ReactingMultiphaseLookupTableInjection;
-//InjectionModel  ManualInjection;
-
-DragModel       SphereDrag;
-
-DispersionModel none;
-
-PatchInteractionModel LocalInteraction;
-
-HeatTransferModel RanzMarshall;
-
-CompositionModel SingleMixtureFraction;
-
-PhaseChangeModel LiquidEvaporation;
-
-PostProcessingModel PatchPostProcessing;
-
-DevolatilisationModel none;
-
-SurfaceReactionModel none;
-
-SurfaceFilmModel none;
-
-CollisionModel none;
-
 radiation       off;
 
 coupled         true;
@@ -95,102 +70,111 @@ particleForces
     paramagnetic        off;
 }
 
-ManualInjectionCoeffs
+subModels
 {
-    massTotal       massTotal [ 1 0 0 0 0 ] 1e-3;
-    parcelBasisType mass;
-    SOI             0.5;
-    positionsFile   "reactingCloud1Positions";
-    U0              ( 0 0 0 );
-    parcelPDF
+    InjectionModel  ReactingMultiphaseLookupTableInjection;
+
+    DragModel       SphereDrag;
+
+    DispersionModel none;
+
+    PatchInteractionModel LocalInteraction;
+
+    HeatTransferModel RanzMarshall;
+
+    CompositionModel SingleMixtureFraction;
+
+    PhaseChangeModel LiquidEvaporation;
+
+    PostProcessingModel PatchPostProcessing;
+
+    DevolatilisationModel none;
+
+    SurfaceReactionModel none;
+
+    SurfaceFilmModel none;
+
+    CollisionModel none;
+
+    ReactingMultiphaseLookupTableInjectionCoeffs
     {
-        pdfType         uniform;
-        uniformPDF
-        {
-            minValue        1e-04;
-            maxValue        1e-04;
-        }
+        massTotal       massTotal [ 1 0 0 0 0 ] 1e-2;
+        parcelBasisType mass;
+        SOI             0.5;
+        inputFile       "parcelInjectionProperties";
+        duration        1.0;
+        parcelsPerSecond 250;
     }
-}
 
-ReactingMultiphaseLookupTableInjectionCoeffs
-{
-    massTotal       massTotal [ 1 0 0 0 0 ] 1e-2;
-    parcelBasisType mass;
-    SOI             0.5;
-    inputFile       "parcelInjectionProperties";
-    duration        1.0;
-    parcelsPerSecond 250;
-}
+    StandardWallInteractionCoeffs
+    {
+        type            rebound;
+    }
 
-StandardWallInteractionCoeffs
-{
-    type            rebound;
-}
+    LocalInteractionCoeffs
+    {
+        patches
+        (
+            walls
+            {
+                type    rebound;
+            }
+            cycLeft_half0
+            {
+                type    rebound;
+            }
+            cycLeft_half1
+            {
+                type    rebound;
+            }
+        );
+    }
 
-LocalInteractionCoeffs
-{
-    patches
-    (
-        walls
-        {
-            type    rebound;
-        }
-        cycLeft_half0
-        {
-            type    rebound;
-        }
-        cycLeft_half1
-        {
-            type    rebound;
-        }
-    );
-}
+    RanzMarshallCoeffs
+    {
+        BirdCorrection  true;
+    }
 
-RanzMarshallCoeffs
-{
-    BirdCorrection  true;
-}
+    SingleMixtureFractionCoeffs
+    {
+        phases
+        (
+            gas
+            {
+            }
+            liquid
+            {
+                H2O 1;
+            }
+            solid
+            {
+            }
+        );
+        YGasTot0        0;
+        YLiquidTot0     1;
+        YSolidTot0      0;
+    }
 
-SingleMixtureFractionCoeffs
-{
-    phases
-    (
-        gas
-        {
-        }
-        liquid
-        {
-            H2O 1;
-        }
-        solid
-        {
-        }
-    );
-    YGasTot0        0;
-    YLiquidTot0     1;
-    YSolidTot0      0;
-}
+    LiquidEvaporationCoeffs
+    {
+        enthalpyTransfer enthalpyDifference;
 
-LiquidEvaporationCoeffs
-{
-    enthalpyTransfer enthalpyDifference;
+        activeLiquids
+        (
+            H2O
+        );
+    }
 
-    activeLiquids
-    (
-        H2O
-    );
-}
+    PatchPostProcessingCoeffs
+    {
+        maxStoredParcels 20;
 
-PatchPostProcessingCoeffs
-{
-    maxStoredParcels 20;
-
-    patches
-    (
-        cycLeft_half0
-        cycLeft_half1
-    );
+        patches
+        (
+            cycLeft_half0
+            cycLeft_half1
+        );
+    }
 }
 
 

@@ -17,30 +17,6 @@ FoamFile
 
 active          true;
 
-InjectionModel  ManualInjection;
-
-DragModel       SphereDrag;
-
-DispersionModel StochasticDispersionRAS;
-
-PatchInteractionModel StandardWallInteraction;
-
-HeatTransferModel RanzMarshall;
-
-CompositionModel SingleMixtureFraction;
-
-PhaseChangeModel LiquidEvaporation;
-
-DevolatilisationModel ConstantRateDevolatilisation;
-
-SurfaceReactionModel COxidationKineticDiffusionLimitedRate;
-
-PostProcessingModel none;
-
-CollisionModel  none;
-
-SurfaceFilmModel none;
-
 radiation       on;
 
 coupled         true;
@@ -94,85 +70,112 @@ particleForces
     paramagnetic        off;
 }
 
-ManualInjectionCoeffs
+subModels
 {
-    massTotal       massTotal [ 1 0 0 0 0 ] 0.0001;
-    parcelBasisType mass;
-    SOI             0;
-    positionsFile   "coalCloud1Positions";
-    U0              ( 0 -10 0 );
-    parcelPDF
+    InjectionModel  ManualInjection;
+
+    DragModel       SphereDrag;
+
+    DispersionModel StochasticDispersionRAS;
+
+    PatchInteractionModel StandardWallInteraction;
+
+    HeatTransferModel RanzMarshall;
+
+    CompositionModel SingleMixtureFraction;
+
+    PhaseChangeModel LiquidEvaporation;
+
+    DevolatilisationModel ConstantRateDevolatilisation;
+
+    SurfaceReactionModel COxidationKineticDiffusionLimitedRate;
+
+    PostProcessingModel none;
+
+    CollisionModel  none;
+
+    SurfaceFilmModel none;
+
+    ManualInjectionCoeffs
     {
-        pdfType         RosinRammler;
-        RosinRammlerPDF
+        massTotal       massTotal [ 1 0 0 0 0 ] 0.0001;
+        parcelBasisType mass;
+        SOI             0;
+        positionsFile   "coalCloud1Positions";
+        U0              ( 0 -10 0 );
+        parcelPDF
         {
-            minValue        5e-06;
-            maxValue        0.0005;
-            d               5e-05;
-            n               0.5;
+            pdfType         RosinRammler;
+            RosinRammlerPDF
+            {
+                minValue        5e-06;
+                maxValue        0.0005;
+                d               5e-05;
+                n               0.5;
+            }
         }
     }
-}
 
-StandardWallInteractionCoeffs
-{
-    type            rebound;
-    e               1;
-    mu              0;
-}
+    StandardWallInteractionCoeffs
+    {
+        type            rebound;
+        e               1;
+        mu              0;
+    }
 
-RanzMarshallCoeffs
-{
-    BirdCorrection  true;
-}
+    RanzMarshallCoeffs
+    {
+        BirdCorrection  true;
+    }
 
-SingleMixtureFractionCoeffs
-{
-    phases
-    (
-        gas
-        {
-            CH4 0.604;
-            H2 0.099;
-            CO2 0.297;
-        }
-        liquid
-        {
-            H2O 1;
-        }
-        solid
-        {
-            ash 0.136304;
-            C 0.863696;
-        }
-    );
-    YGasTot0        0.211;
-    YLiquidTot0     0.026;
-    YSolidTot0      0.763;
-}
+    SingleMixtureFractionCoeffs
+    {
+        phases
+        (
+            gas
+            {
+                CH4 0.604;
+                H2 0.099;
+                CO2 0.297;
+            }
+            liquid
+            {
+                H2O 1;
+            }
+            solid
+            {
+                ash 0.136304;
+                C 0.863696;
+            }
+        );
+        YGasTot0        0.211;
+        YLiquidTot0     0.026;
+        YSolidTot0      0.763;
+    }
 
-LiquidEvaporationCoeffs
-{
-    enthalpyTransfer enthalpyDifference;
+    LiquidEvaporationCoeffs
+    {
+        enthalpyTransfer enthalpyDifference;
 
-    activeLiquids
-    (
-        H2O
-    );
-}
+        activeLiquids
+        (
+            H2O
+        );
+    }
 
-ConstantRateDevolatilisationCoeffs
-{
-    A0              A0 [ 0 0 -1 0 0 ] 12;
-    volatileResidualCoeff 0.001;
-}
+    ConstantRateDevolatilisationCoeffs
+    {
+        A0              A0 [ 0 0 -1 0 0 ] 12;
+        volatileResidualCoeff 0.001;
+    }
 
-COxidationKineticDiffusionLimitedRateCoeffs
-{
-    Sb              Sb [ 0 0 0 0 0 ] 2.667;
-    C1              C1 [ 0 0 0 0 0] 5.0E-12;
-    C2              C2 [ 0 0 0 0 0] 0.002;
-    E               E  [ 0 0 0 0 0] 7.9E+07;
+    COxidationKineticDiffusionLimitedRateCoeffs
+    {
+        Sb              Sb [ 0 0 0 0 0 ] 2.667;
+        C1              C1 [ 0 0 0 0 0] 5.0E-12;
+        C2              C2 [ 0 0 0 0 0] 0.002;
+        E               E  [ 0 0 0 0 0] 7.9E+07;
+    }
 }
 
 

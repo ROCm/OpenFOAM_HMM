@@ -156,7 +156,7 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
     (
         DevolatilisationModel<ReactingMultiphaseCloud<ParcelType> >::New
         (
-            this->particleProperties(),
+            this->subModelProperties(),
             *this
         )
     ),
@@ -164,7 +164,7 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
     (
         SurfaceReactionModel<ReactingMultiphaseCloud<ParcelType> >::New
         (
-            this->particleProperties(),
+            this->subModelProperties(),
             *this
         )
     ),

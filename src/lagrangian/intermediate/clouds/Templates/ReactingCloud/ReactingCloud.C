@@ -183,7 +183,7 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
     (
         CompositionModel<ReactingCloud<ParcelType> >::New
         (
-            this->particleProperties(),
+            this->subModelProperties(),
             *this
         )
     ),
@@ -191,7 +191,7 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
     (
         PhaseChangeModel<ReactingCloud<ParcelType> >::New
         (
-            this->particleProperties(),
+            this->subModelProperties(),
             *this
         )
     ),

@@ -17,22 +17,6 @@ FoamFile
 
 active          true;
 
-InjectionModel  ManualInjection;
-
-DragModel       SphereDrag;
-
-DispersionModel StochasticDispersionRAS;
-
-PatchInteractionModel StandardWallInteraction;
-
-HeatTransferModel RanzMarshall;
-
-PostProcessingModel none;
-
-CollisionModel  none;
-
-SurfaceFilmModel none;
-
 radiation       on;
 
 coupled         true;
@@ -79,36 +63,55 @@ particleForces
     paramagnetic        off;
 }
 
-ManualInjectionCoeffs
+subModels
 {
-    massTotal       massTotal [ 1 0 0 0 0 ] 0.0001;
-    parcelBasisType mass;
-    SOI             0;
-    positionsFile   "limestonePositions";
-    U0              ( 0 0 0 );
-    parcelPDF
+    InjectionModel  ManualInjection;
+
+    DragModel       SphereDrag;
+
+    DispersionModel StochasticDispersionRAS;
+
+    PatchInteractionModel StandardWallInteraction;
+
+    HeatTransferModel RanzMarshall;
+
+    PostProcessingModel none;
+
+    CollisionModel  none;
+
+    SurfaceFilmModel none;
+
+    ManualInjectionCoeffs
     {
-        pdfType         RosinRammler;
-        RosinRammlerPDF
+        massTotal       massTotal [ 1 0 0 0 0 ] 0.0001;
+        parcelBasisType mass;
+        SOI             0;
+        positionsFile   "limestonePositions";
+        U0              ( 0 0 0 );
+        parcelPDF
         {
-            minValue        5e-06;
-            maxValue        0.000565;
-            d               4.8e-05;
-            n               0.5;
+            pdfType         RosinRammler;
+            RosinRammlerPDF
+            {
+                minValue        5e-06;
+                maxValue        0.000565;
+                d               4.8e-05;
+                n               0.5;
+            }
         }
     }
-}
 
-StandardWallInteractionCoeffs
-{
-    type            rebound;
-    e               1;
-    mu              0;
-}
+    StandardWallInteractionCoeffs
+    {
+        type            rebound;
+        e               1;
+        mu              0;
+    }
 
-RanzMarshallCoeffs
-{
-    BirdCorrection  false;
+    RanzMarshallCoeffs
+    {
+        BirdCorrection  false;
+    }
 }
 
 

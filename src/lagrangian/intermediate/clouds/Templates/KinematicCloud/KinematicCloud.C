@@ -257,6 +257,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
         )
     ),
     constProps_(particleProperties_),
+    subModelProperties_(particleProperties_.subDict("subModels")),
     active_(particleProperties_.lookup("active")),
     parcelTypeId_(readLabel(particleProperties_.lookup("parcelTypeId"))),
     coupled_(particleProperties_.lookup("coupled")),
@@ -276,7 +277,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     (
         DispersionModel<KinematicCloud<ParcelType> >::New
         (
-            particleProperties_,
+            subModelProperties_,
             *this
         )
     ),
@@ -284,7 +285,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     (
         DragModel<KinematicCloud<ParcelType> >::New
         (
-            particleProperties_,
+            subModelProperties_,
             *this
         )
     ),
@@ -292,7 +293,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     (
         InjectionModel<KinematicCloud<ParcelType> >::New
         (
-            particleProperties_,
+            subModelProperties_,
             *this
         )
     ),
@@ -300,7 +301,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     (
         CollisionModel<KinematicCloud<ParcelType> >::New
         (
-            particleProperties_,
+            subModelProperties_,
             *this
         )
     ),
@@ -308,7 +309,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     (
         PatchInteractionModel<KinematicCloud<ParcelType> >::New
         (
-            particleProperties_,
+            subModelProperties_,
             *this
         )
     ),
@@ -316,7 +317,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     (
         PostProcessingModel<KinematicCloud<ParcelType> >::New
         (
-            this->particleProperties_,
+            subModelProperties_,
             *this
         )
     ),
@@ -324,7 +325,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     (
         SurfaceFilmModel<KinematicCloud<ParcelType> >::New
         (
-            this->particleProperties_,
+            subModelProperties_,
             *this,
             g
         )

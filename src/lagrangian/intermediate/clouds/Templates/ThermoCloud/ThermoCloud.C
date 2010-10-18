@@ -158,7 +158,7 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
     (
         HeatTransferModel<ThermoCloud<ParcelType> >::New
         (
-            this->particleProperties(),
+            this->subModelProperties(),
             *this
         )
     ),

@@ -17,30 +17,6 @@ FoamFile
 
 active          true;
 
-InjectionModel  PatchInjection;
-
-DragModel       SphereDrag;
-
-DispersionModel StochasticDispersionRAS;
-
-PatchInteractionModel StandardWallInteraction;
-
-HeatTransferModel RanzMarshall;
-
-CompositionModel SingleMixtureFraction;
-
-PhaseChangeModel LiquidEvaporation;
-
-DevolatilisationModel none;
-
-SurfaceReactionModel none;
-
-PostProcessingModel PatchPostProcessing;
-
-SurfaceFilmModel none;
-
-CollisionModel none;
-
 radiation       off;
 
 coupled         true;
@@ -96,93 +72,120 @@ particleForces
     paramagnetic    off;
 }
 
-PatchInjectionCoeffs
+subModels
 {
-    SOI             0.01;
-    massTotal       massTotal [ 1 0 0 0 0 ] 8;
-    parcelBasisType mass;
-    patchName       inletCentral;
-    duration        10000;
-    parcelsPerSecond 1e5;
-    U0              (40 0 0);
-    flowRateProfile constant 1;
-    parcelPDF
+    InjectionModel  PatchInjection;
+
+    DragModel       SphereDrag;
+
+    DispersionModel StochasticDispersionRAS;
+
+    PatchInteractionModel StandardWallInteraction;
+
+    HeatTransferModel RanzMarshall;
+
+    CompositionModel SingleMixtureFraction;
+
+    PhaseChangeModel LiquidEvaporation;
+
+    DevolatilisationModel none;
+
+    SurfaceReactionModel none;
+
+    PostProcessingModel PatchPostProcessing;
+
+    SurfaceFilmModel none;
+
+    CollisionModel none;
+
+    PatchInjectionCoeffs
     {
-        pdfType         general;
-        generalPDF
+        SOI             0.01;
+        massTotal       massTotal [ 1 0 0 0 0 ] 8;
+        parcelBasisType mass;
+        patchName       inletCentral;
+        duration        10000;
+        parcelsPerSecond 1e5;
+        U0              (40 0 0);
+        flowRateProfile constant 1;
+        parcelPDF
         {
-            distribution
-            (
-                (10e-06      0.0025)
-                (15e-06      0.0528)
-                (20e-06      0.2795)
-                (25e-06      1.0918)
-                (30e-06      2.3988)
-                (35e-06      4.4227)
-                (40e-06      6.3888)
-                (45e-06      8.6721)
-                (50e-06      10.3153)
-                (55e-06      11.6259)
-                (60e-06      12.0030)
-                (65e-06      10.4175)
-                (70e-06      10.8427)
-                (75e-06      8.0016)
-                (80e-06      6.1333)
-                (85e-06      3.8827)
-                (90e-06      3.4688)
-            );
+            pdfType         general;
+            generalPDF
+            {
+                distribution
+                (
+                    (10e-06      0.0025)
+                    (15e-06      0.0528)
+                    (20e-06      0.2795)
+                    (25e-06      1.0918)
+                    (30e-06      2.3988)
+                    (35e-06      4.4227)
+                    (40e-06      6.3888)
+                    (45e-06      8.6721)
+                    (50e-06      10.3153)
+                    (55e-06      11.6259)
+                    (60e-06      12.0030)
+                    (65e-06      10.4175)
+                    (70e-06      10.8427)
+                    (75e-06      8.0016)
+                    (80e-06      6.1333)
+                    (85e-06      3.8827)
+                    (90e-06      3.4688)
+                );
+            }
         }
     }
-}
 
-StandardWallInteractionCoeffs
-{
-    type            rebound;
-}
+    StandardWallInteractionCoeffs
+    {
+        type            rebound;
+    }
 
-RanzMarshallCoeffs
-{
-    BirdCorrection  off;
-}
+    RanzMarshallCoeffs
+    {
+        BirdCorrection  off;
+    }
 
-SingleMixtureFractionCoeffs
-{
-    phases
-    (
-        gas
-        {
-        }
-        liquid
-        {
-            H2O 1;
-        }
-        solid
-        {
-        }
-    );
-    YGasTot0        0;
-    YLiquidTot0     1;
-    YSolidTot0      0;
-}
+    SingleMixtureFractionCoeffs
+    {
+        phases
+        (
+            gas
+            {
+            }
+            liquid
+            {
+                H2O 1;
+            }
+            solid
+            {
+            }
+        );
+        YGasTot0        0;
+        YLiquidTot0     1;
+        YSolidTot0      0;
+    }
 
-LiquidEvaporationCoeffs
-{
-    enthalpyTransfer enthalpyDifference;
+    LiquidEvaporationCoeffs
+    {
+        enthalpyTransfer enthalpyDifference;
 
-    activeLiquids
-    (
-        H2O
-    );
-}
+        activeLiquids
+        (
+            H2O
+        );
+    }
 
-PatchPostProcessingCoeffs
-{
-    maxStoredParcels 100;
+    PatchPostProcessingCoeffs
+    {
+        maxStoredParcels 100;
 
-    patches
-    (
-        outlet
-    );
+        patches
+        (
+            outlet
+        );
+    }
 }
 
 

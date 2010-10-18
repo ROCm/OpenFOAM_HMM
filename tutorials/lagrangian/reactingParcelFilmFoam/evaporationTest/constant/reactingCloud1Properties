@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -16,26 +16,6 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 active          false; // true;
-
-InjectionModel  none;
-
-DragModel       SphereDrag;
-
-DispersionModel none;
-
-PatchInteractionModel StandardWallInteraction;
-
-CollisionModel  none;
-
-HeatTransferModel none;
-
-CompositionModel SinglePhaseMixture;
-
-PhaseChangeModel none;
-
-PostProcessingModel none;
-
-SurfaceFilmModel ThermoSurfaceFilm;
 
 radiation       off;
 
@@ -88,24 +68,47 @@ particleForces
     paramagnetic    off;
 }
 
-StandardWallInteractionCoeffs
+subModels
 {
-    type            rebound;
-}
+    InjectionModel  none;
 
-SinglePhaseMixtureCoeffs
-{
-    phases
-    (
-        liquid
-        {
-            H2O 1;
-        }
-    );
-}
+    DragModel       SphereDrag;
 
-ThermoSurfaceFilmCoeffs
-{}
+    DispersionModel none;
+
+    PatchInteractionModel StandardWallInteraction;
+
+    CollisionModel  none;
+
+    HeatTransferModel none;
+
+    CompositionModel SinglePhaseMixture;
+
+    PhaseChangeModel none;
+
+    PostProcessingModel none;
+
+    SurfaceFilmModel ThermoSurfaceFilm;
+
+    StandardWallInteractionCoeffs
+    {
+        type            rebound;
+    }
+
+    SinglePhaseMixtureCoeffs
+    {
+        phases
+        (
+            liquid
+            {
+                H2O 1;
+            }
+        );
+    }
+
+    ThermoSurfaceFilmCoeffs
+    {}
+}
 
 
 // ************************************************************************* //

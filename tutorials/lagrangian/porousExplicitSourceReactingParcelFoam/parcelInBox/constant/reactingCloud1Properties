@@ -17,30 +17,6 @@ FoamFile
 
 active          true;
 
-InjectionModel  ManualInjection;
-
-DragModel       SphereDrag;
-
-DispersionModel none;
-
-PatchInteractionModel StandardWallInteraction;
-
-HeatTransferModel RanzMarshall;
-
-CompositionModel SingleMixtureFraction;
-
-PhaseChangeModel LiquidEvaporation;
-
-DevolatilisationModel none;
-
-SurfaceReactionModel none;
-
-PostProcessingModel none;
-
-SurfaceFilmModel none;
-
-CollisionModel none;
-
 radiation       off;
 
 coupled         false;
@@ -96,71 +72,98 @@ particleForces
     paramagnetic    off;
 }
 
-ManualInjectionCoeffs
+subModels
 {
-    massTotal       massTotal [ 1 0 0 0 0 ] 5.23599e-10; // 1 droplet of density 1000 kg/m3
-    parcelBasisType mass;
-    SOI             0;
-    positionsFile   "reactingCloud1Positions";
-    U0              (0 0 0);
-    parcelPDF
+    InjectionModel  ManualInjection;
+
+    DragModel       SphereDrag;
+
+    DispersionModel none;
+
+    PatchInteractionModel StandardWallInteraction;
+
+    HeatTransferModel RanzMarshall;
+
+    CompositionModel SingleMixtureFraction;
+
+    PhaseChangeModel LiquidEvaporation;
+
+    DevolatilisationModel none;
+
+    SurfaceReactionModel none;
+
+    PostProcessingModel none;
+
+    SurfaceFilmModel none;
+
+    CollisionModel none;
+
+    ManualInjectionCoeffs
     {
-        pdfType         uniform;
-        uniformPDF
+        massTotal       massTotal [ 1 0 0 0 0 ] 5.23599e-10; // 1 droplet of density 1000 kg/m3
+        parcelBasisType mass;
+        SOI             0;
+        positionsFile   "reactingCloud1Positions";
+        U0              (0 0 0);
+        parcelPDF
         {
-            minValue        100e-06;
-            maxValue        100e-06;
+            pdfType         uniform;
+            uniformPDF
+            {
+                minValue        100e-06;
+                maxValue        100e-06;
+            }
         }
     }
-}
-StandardWallInteractionCoeffs
-{
-    type            rebound;
-}
+    StandardWallInteractionCoeffs
+    {
+        type            rebound;
+    }
 
-RanzMarshallCoeffs
-{
-    BirdCorrection  off;
-}
+    RanzMarshallCoeffs
+    {
+        BirdCorrection  off;
+    }
 
-SingleMixtureFractionCoeffs
-{
-    phases
-    (
-        gas
-        {
-        }
-        liquid
-        {
-            H2O 1;
-        }
-        solid
-        {
-        }
-    );
-    YGasTot0        0;
-    YLiquidTot0     1;
-    YSolidTot0      0;
-}
+    SingleMixtureFractionCoeffs
+    {
+        phases
+        (
+            gas
+            {
+            }
+            liquid
+            {
+                H2O 1;
+            }
+            solid
+            {
+            }
+        );
+        YGasTot0        0;
+        YLiquidTot0     1;
+        YSolidTot0      0;
+    }
 
-LiquidEvaporationCoeffs
-{
-    enthalpyTransfer enthalpyDifference; // latentHeat;
+    LiquidEvaporationCoeffs
+    {
+        enthalpyTransfer enthalpyDifference; // latentHeat;
 
-    activeLiquids
-    (
-        H2O
-    );
-}
+        activeLiquids
+        (
+            H2O
+        );
+    }
 
-PatchPostProcessingCoeffs
-{
-    maxStoredParcels 100;
+    PatchPostProcessingCoeffs
+    {
+        maxStoredParcels 100;
 
-    patches
-    (
-        outlet
-    );
+        patches
+        (
+            outlet
+        );
+    }
 }
 
 
