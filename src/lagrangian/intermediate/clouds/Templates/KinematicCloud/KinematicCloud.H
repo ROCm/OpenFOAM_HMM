@@ -214,13 +214,13 @@ protected:
 
         // References to the carrier gas fields
 
-            //- Density
+            //- Density [kg/m3]
             const volScalarField& rho_;
 
-            //- Velocity
+            //- Velocity [m/s]
             const volVectorField& U_;
 
-            //- Dynamic viscosity
+            //- Dynamic viscosity [Pa.s]
             const volScalarField& mu_;
 
 

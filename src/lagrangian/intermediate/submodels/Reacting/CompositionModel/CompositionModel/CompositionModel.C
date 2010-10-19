@@ -368,7 +368,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::H
                      Y[i]
                     *(
                         thermo_.solids().properties()[gid].Hf()
-                      + thermo_.solids().properties()[gid].cp()*T
+                      + thermo_.solids().properties()[gid].Cp()*T
                      );
             }
             break;
@@ -433,7 +433,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::Hs
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                HsMixture += Y[i]*thermo_.solids().properties()[gid].cp()*T;
+                HsMixture += Y[i]*thermo_.solids().properties()[gid].Cp()*T;
             }
             break;
         }
@@ -517,7 +517,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::Hc
 
 
 template<class CloudType>
-Foam::scalar Foam::CompositionModel<CloudType>::cp
+Foam::scalar Foam::CompositionModel<CloudType>::Cp
 (
     const label phaseI,
     const scalarField& Y,
@@ -526,7 +526,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::cp
 ) const
 {
     const phaseProperties& props = phaseProps_[phaseI];
-    scalar cpMixture = 0.0;
+    scalar CpMixture = 0.0;
     switch (props.phase())
     {
         case phaseProperties::GAS:
@@ -534,7 +534,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::cp
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                cpMixture += Y[i]*thermo_.carrier().Cp(gid, T);
+                CpMixture += Y[i]*thermo_.carrier().Cp(gid, T);
             }
             break;
         }
@@ -543,7 +543,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::cp
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                cpMixture += Y[i]*thermo_.liquids().properties()[gid].cp(p, T);
+                CpMixture += Y[i]*thermo_.liquids().properties()[gid].Cp(p, T);
             }
             break;
         }
@@ -552,7 +552,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::cp
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                cpMixture += Y[i]*thermo_.solids().properties()[gid].cp();
+                CpMixture += Y[i]*thermo_.solids().properties()[gid].Cp();
             }
             break;
         }
@@ -560,7 +560,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::cp
         {
             FatalErrorIn
             (
-                "Foam::scalar Foam::CompositionModel<CloudType>::cp"
+                "Foam::scalar Foam::CompositionModel<CloudType>::Cp"
                 "("
                     "const label, "
                     "const scalarField&, "
@@ -571,7 +571,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::cp
         }
     }
 
-    return cpMixture;
+    return CpMixture;
 }
 
 

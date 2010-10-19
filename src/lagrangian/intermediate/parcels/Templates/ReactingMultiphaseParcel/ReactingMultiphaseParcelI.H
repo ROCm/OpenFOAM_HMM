@@ -54,30 +54,13 @@ template<class ParcelType>
 inline Foam::ReactingMultiphaseParcel<ParcelType>::trackData::trackData
 (
     ReactingMultiphaseCloud<ParcelType>& cloud,
-    const constantProperties& constProps,
-    const interpolation<scalar>& rhoInterp,
-    const interpolation<vector>& UInterp,
-    const interpolation<scalar>& muInterp,
-    const interpolation<scalar>& TInterp,
     const interpolation<scalar>& CpInterp,
-    const interpolation<scalar>& pInterp,
-    const vector& g
+    typename ReactingParcel<ParcelType>::trackData::trackPart part
 )
 :
-    ReactingParcel<ParcelType>::trackData
-    (
-        cloud,
-        constProps,
-        rhoInterp,
-        UInterp,
-        muInterp,
-        TInterp,
-        CpInterp,
-        pInterp,
-        g
-    ),
+    ReactingParcel<ParcelType>::trackData(cloud, CpInterp, part),
     cloud_(cloud),
-    constProps_(constProps)
+    constProps_(cloud.constProps())
 {}
 
 

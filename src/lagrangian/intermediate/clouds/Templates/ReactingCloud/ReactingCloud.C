@@ -67,58 +67,15 @@ void Foam::ReactingCloud<ParcelType>::preEvolve()
 template<class ParcelType>
 void Foam::ReactingCloud<ParcelType>::evolveCloud()
 {
-    const volScalarField& T = this->thermo().thermo().T();
-    const volScalarField cp = this->thermo().thermo().Cp();
-    const volScalarField& p = this->thermo().thermo().p();
+    const volScalarField Cp = this->thermo().thermo().Cp();
 
-    autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > CpInterp = interpolation<scalar>::New
     (
         this->solution().interpolationSchemes(),
-        this->rho()
+        Cp
     );
 
-    autoPtr<interpolation<vector> > UInterp = interpolation<vector>::New
-    (
-        this->solution().interpolationSchemes(),
-        this->U()
-    );
-
-    autoPtr<interpolation<scalar> > muInterp = interpolation<scalar>::New
-    (
-        this->solution().interpolationSchemes(),
-        this->mu()
-    );
-
-    autoPtr<interpolation<scalar> > TInterp = interpolation<scalar>::New
-    (
-        this->solution().interpolationSchemes(),
-        T
-    );
-
-    autoPtr<interpolation<scalar> > cpInterp = interpolation<scalar>::New
-    (
-        this->solution().interpolationSchemes(),
-        cp
-    );
-
-    autoPtr<interpolation<scalar> > pInterp = interpolation<scalar>::New
-    (
-        this->solution().interpolationSchemes(),
-        p
-    );
-
-    typename ParcelType::trackData td
-    (
-        *this,
-        constProps_,
-        rhoInterp(),
-        UInterp(),
-        muInterp(),
-        TInterp(),
-        cpInterp(),
-        pInterp(),
-        this->g().value()
-    );
+    typename ParcelType::trackData td(*this, CpInterp());
 
     label preInjectionSize = this->size();
 

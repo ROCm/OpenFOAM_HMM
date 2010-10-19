@@ -190,7 +190,7 @@ void Foam::ReactingLookupTableInjection<CloudType>::setProperties
     parcel.T() = injectors_[injectorI].T();
 
     // set particle specific heat capacity
-    parcel.cp() = injectors_[injectorI].cp();
+    parcel.Cp() = injectors_[injectorI].Cp();
 
     // set particle component mass fractions
     parcel.Y() = injectors_[injectorI].Y();

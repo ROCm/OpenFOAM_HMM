@@ -34,7 +34,7 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
     KinematicParcel<ParcelType>::constantProperties(parentDict),
     T0_(readScalar(this->dict().lookup("T0"))),
     TMin_(readScalar(this->dict().lookup("TMin"))),
-    cp0_(readScalar(this->dict().lookup("cp0"))),
+    Cp0_(readScalar(this->dict().lookup("Cp0"))),
     epsilon0_(readScalar(this->dict().lookup("epsilon0"))),
     f0_(readScalar(this->dict().lookup("f0"))),
     Pr_(readScalar(this->dict().lookup("Pr")))
@@ -45,28 +45,22 @@ template<class ParcelType>
 inline Foam::ThermoParcel<ParcelType>::trackData::trackData
 (
     ThermoCloud<ParcelType>& cloud,
-    const constantProperties& constProps,
-    const interpolation<scalar>& rhoInterp,
-    const interpolation<vector>& UInterp,
-    const interpolation<scalar>& muInterp,
-    const interpolation<scalar>& TInterp,
-    const interpolation<scalar>& cpInterp,
-    const vector& g
+    const interpolation<scalar>& CpInterp,
+    typename KinematicParcel<ParcelType>::trackData::trackPart part
 )
 :
-    KinematicParcel<ParcelType>::trackData
-    (
-        cloud,
-        constProps,
-        rhoInterp,
-        UInterp,
-        muInterp,
-        g
-    ),
+    KinematicParcel<ParcelType>::trackData(cloud, part),
     cloud_(cloud),
-    constProps_(constProps),
-    TInterp_(TInterp),
-    cpInterp_(cpInterp)
+    constProps_(cloud.constProps()),
+    TInterp_
+    (
+        interpolation<scalar>::New
+        (
+            cloud.solution().interpolationSchemes(),
+            cloud.T()
+        )
+    ),
+    CpInterp_(CpInterp)
 {}
 
 
@@ -82,9 +76,9 @@ inline Foam::ThermoParcel<ParcelType>::ThermoParcel
 :
     KinematicParcel<ParcelType>(owner, position, cellI, tetFaceI, tetPtI),
     T_(0.0),
-    cp_(0.0),
+    Cp_(0.0),
     Tc_(0.0),
-    cpc_(0.0)
+    Cpc_(0.0)
 {}
 
 
@@ -125,9 +119,9 @@ inline Foam::ThermoParcel<ParcelType>::ThermoParcel
         constProps
     ),
     T_(constProps.T0()),
-    cp_(constProps.cp0()),
+    Cp_(constProps.Cp0()),
     Tc_(0.0),
-    cpc_(0.0)
+    Cpc_(0.0)
 {}
 
 
@@ -151,9 +145,9 @@ Foam::ThermoParcel<ParcelType>::constantProperties::TMin() const
 
 template <class ParcelType>
 inline Foam::scalar
-Foam::ThermoParcel<ParcelType>::constantProperties::cp0() const
+Foam::ThermoParcel<ParcelType>::constantProperties::Cp0() const
 {
-    return cp0_;
+    return Cp0_;
 }
 
 
@@ -203,15 +197,15 @@ template<class ParcelType>
 inline const Foam::interpolation<Foam::scalar>&
 Foam::ThermoParcel<ParcelType>::trackData::TInterp() const
 {
-    return TInterp_;
+    return TInterp_();
 }
 
 
 template<class ParcelType>
 inline const Foam::interpolation<Foam::scalar>&
-Foam::ThermoParcel<ParcelType>::trackData::cpInterp() const
+Foam::ThermoParcel<ParcelType>::trackData::CpInterp() const
 {
-    return cpInterp_;
+    return CpInterp_;
 }
 
 
@@ -225,16 +219,16 @@ inline Foam::scalar Foam::ThermoParcel<ParcelType>::T() const
 
 
 template<class ParcelType>
-inline Foam::scalar Foam::ThermoParcel<ParcelType>::cp() const
+inline Foam::scalar Foam::ThermoParcel<ParcelType>::Cp() const
 {
-    return cp_;
+    return Cp_;
 }
 
 
 template<class ParcelType>
 inline Foam::scalar Foam::ThermoParcel<ParcelType>::hs() const
 {
-    return cp_*(T_ - 298.15);
+    return Cp_*(T_ - 298.15);
 }
 
 
@@ -246,9 +240,9 @@ inline Foam::scalar& Foam::ThermoParcel<ParcelType>::T()
 
 
 template<class ParcelType>
-inline Foam::scalar& Foam::ThermoParcel<ParcelType>::cp()
+inline Foam::scalar& Foam::ThermoParcel<ParcelType>::Cp()
 {
-    return cp_;
+    return Cp_;
 }
 
 

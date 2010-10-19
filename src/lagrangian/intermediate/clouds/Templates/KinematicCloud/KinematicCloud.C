@@ -154,36 +154,7 @@ void Foam::KinematicCloud<ParcelType>::updateCellOccupancy()
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::evolveCloud()
 {
-    autoPtr<interpolation<scalar> > rhoInterpolator =
-        interpolation<scalar>::New
-        (
-            solution_.interpolationSchemes(),
-            rho_
-        );
-
-    autoPtr<interpolation<vector> > UInterpolator =
-        interpolation<vector>::New
-        (
-            solution_.interpolationSchemes(),
-            U_
-        );
-
-    autoPtr<interpolation<scalar> > muInterpolator =
-        interpolation<scalar>::New
-        (
-            solution_.interpolationSchemes(),
-            mu_
-        );
-
-    typename ParcelType::trackData td
-    (
-        *this,
-        constProps_,
-        rhoInterpolator(),
-        UInterpolator(),
-        muInterpolator(),
-        g_.value()
-    );
+    typename ParcelType::trackData td(*this);
 
     label preInjectionSize = this->size();
 

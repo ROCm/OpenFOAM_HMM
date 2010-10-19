@@ -83,7 +83,7 @@ public:
             const scalar TMin_;
 
             //- Particle specific heat capacity [J/(kg.K)]
-            const scalar cp0_;
+            const scalar Cp0_;
 
             //- Particle emissivity [] (radiation)
             const scalar epsilon0_;
@@ -112,7 +112,7 @@ public:
 
                 //- Return const access to the particle specific heat capacity
                 //  [J/(kg.K)]
-                inline scalar cp0() const;
+                inline scalar Cp0() const;
 
                 //- Return const access to the particle emissivity []
                 //  Active for radiation only
@@ -144,10 +144,10 @@ public:
             // Interpolators for continuous phase fields
 
                 //- Temperature field interpolator
-                const interpolation<scalar>& TInterp_;
+                autoPtr<interpolation<scalar> > TInterp_;
 
                 //- Specific heat capacity field interpolator
-                const interpolation<scalar>& cpInterp_;
+                const interpolation<scalar>& CpInterp_;
 
 
     public:
@@ -158,13 +158,9 @@ public:
             inline trackData
             (
                 ThermoCloud<ParcelType>& cloud,
-                const constantProperties& constProps,
-                const interpolation<scalar>& rhoInterp,
-                const interpolation<vector>& UInterp,
-                const interpolation<scalar>& muInterp,
-                const interpolation<scalar>& TInterp,
-                const interpolation<scalar>& cpInterp,
-                const vector& g
+                const interpolation<scalar>& CpInterp,
+                typename KinematicParcel<ParcelType>::trackData::trackPart
+                    part = KinematicParcel<ParcelType>::trackData::tpLinearTrack
             );
 
 
@@ -182,7 +178,7 @@ public:
 
             //- Return const access to the interpolator for continuous
             //  phase specific heat capacity field
-            inline const interpolation<scalar>& cpInterp() const;
+            inline const interpolation<scalar>& CpInterp() const;
     };
 
 
@@ -196,7 +192,7 @@ protected:
             scalar T_;
 
             //- Specific heat capacity [J/(kg.K)]
-            scalar cp_;
+            scalar Cp_;
 
 
         // Cell-based quantities
@@ -205,7 +201,7 @@ protected:
             scalar Tc_;
 
             //- Specific heat capacity [J/(kg.K)]
-            scalar cpc_;
+            scalar Cpc_;
 
 
     // Protected Member Functions
@@ -223,7 +219,7 @@ protected:
             const scalar d,            // diameter
             const scalar rho,          // density
             const scalar T,            // temperature
-            const scalar cp,           // specific heat capacity
+            const scalar Cp,           // specific heat capacity
             const scalar NCpW,         // Sum of N*Cp*W of emission species
             const scalar Sh,           // explicit particle enthalpy source
             scalar& dhsTrans           // sensible enthalpy transfer to carrier
@@ -302,7 +298,7 @@ public:
             inline scalar T() const;
 
             //- Return const access to specific heat capacity
-            inline scalar cp() const;
+            inline scalar Cp() const;
 
             //- Return the parcel sensible enthalpy
             inline scalar hs() const;
@@ -314,7 +310,7 @@ public:
             inline scalar& T();
 
             //- Return access to specific heat capacity
-            inline scalar& cp();
+            inline scalar& Cp();
 
 
         // Main calculation loop

@@ -127,15 +127,10 @@ public:
             inline trackData
             (
                 ReactingMultiphaseCloud<ParcelType>& cloud,
-                const constantProperties& constProps,
-                const interpolation<scalar>& rhoInterp,
-                const interpolation<vector>& UInterp,
-                const interpolation<scalar>& muInterp,
-                const interpolation<scalar>& TInterp,
                 const interpolation<scalar>& CpInterp,
-                const interpolation<scalar>& pInterp,
-                const vector& g
-            );
+                typename ReactingParcel<ParcelType>::trackData::trackPart
+                    part = ReactingParcel<ParcelType>::trackData::tpLinearTrack
+             );
 
 
         // Member functions
@@ -154,7 +149,7 @@ private:
 
         //- Return the mixture effective specific heat capacity
         template<class TrackData>
-        scalar cpEff
+        scalar CpEff
         (
             TrackData& td,
             const scalar p,

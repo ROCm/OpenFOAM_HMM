@@ -139,14 +139,9 @@ public:
             inline trackData
             (
                 ReactingCloud<ParcelType>& cloud,
-                const constantProperties& constProps,
-                const interpolation<scalar>& rhoInterp,
-                const interpolation<vector>& UInterp,
-                const interpolation<scalar>& muInterp,
-                const interpolation<scalar>& TInterp,
                 const interpolation<scalar>& CpInterp,
-                const interpolation<scalar>& pInterp,
-                const vector& g
+                typename ThermoParcel<ParcelType>::trackData::trackPart
+                    part = ThermoParcel<ParcelType>::trackData::tpLinearTrack
             );
 
 

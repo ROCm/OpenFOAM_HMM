@@ -43,30 +43,21 @@ template<class ParcelType>
 inline Foam::ReactingParcel<ParcelType>::trackData::trackData
 (
     ReactingCloud<ParcelType>& cloud,
-    const constantProperties& constProps,
-    const interpolation<scalar>& rhoInterp,
-    const interpolation<vector>& UInterp,
-    const interpolation<scalar>& muInterp,
-    const interpolation<scalar>& TInterp,
     const interpolation<scalar>& CpInterp,
-    const interpolation<scalar>& pInterp,
-    const vector& g
+    typename ThermoParcel<ParcelType>::trackData::trackPart part
 )
 :
-    ThermoParcel<ParcelType>::trackData
-    (
-        cloud,
-        constProps,
-        rhoInterp,
-        UInterp,
-        muInterp,
-        TInterp,
-        CpInterp,
-        g
-    ),
+    ThermoParcel<ParcelType>::trackData(cloud, CpInterp, part),
     cloud_(cloud),
-    constProps_(constProps),
-    pInterp_(pInterp)
+    constProps_(cloud.constProps()),
+    pInterp_
+    (
+        interpolation<scalar>::New
+        (
+            cloud.solution().interpolationSchemes(),
+            cloud.p()
+        )
+    )
 {}
 
 

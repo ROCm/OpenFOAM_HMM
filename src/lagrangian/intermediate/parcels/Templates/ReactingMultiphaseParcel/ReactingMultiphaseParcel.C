@@ -44,7 +44,7 @@ const Foam::label Foam::ReactingMultiphaseParcel<ParcelType>::SLD(2);
 
 template<class ParcelType>
 template<class TrackData>
-Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::cpEff
+Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::CpEff
 (
     TrackData& td,
     const scalar p,
@@ -55,9 +55,9 @@ Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::cpEff
 ) const
 {
     return
-        this->Y_[GAS]*td.cloud().composition().cp(idG, YGas_, p, T)
-      + this->Y_[LIQ]*td.cloud().composition().cp(idL, YLiquid_, p, T)
-      + this->Y_[SLD]*td.cloud().composition().cp(idS, YSolid_, p, T);
+        this->Y_[GAS]*td.cloud().composition().Cp(idG, YGas_, p, T)
+      + this->Y_[LIQ]*td.cloud().composition().Cp(idL, YLiquid_, p, T)
+      + this->Y_[SLD]*td.cloud().composition().Cp(idS, YSolid_, p, T);
 }
 
 
@@ -164,19 +164,19 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::cellValueSourceCorrection
     scalar massCellNew = massCell + addedMass;
     this->Uc_ += td.cloud().UTrans()[cellI]/massCellNew;
 
-    scalar cpEff = 0;
+    scalar CpEff = 0;
     if (addedMass > ROOTVSMALL)
     {
         forAll(td.cloud().rhoTrans(), i)
         {
             scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
-            cpEff += Y*td.cloud().thermo().carrier().Cp(i, this->Tc_);
+            CpEff += Y*td.cloud().thermo().carrier().Cp(i, this->Tc_);
         }
     }
-    const scalar cpc = td.cpInterp().psi()[cellI];
-    this->cpc_ = (massCell*cpc + addedMass*cpEff)/massCellNew;
+    const scalar Cpc = td.CpInterp().psi()[cellI];
+    this->Cpc_ = (massCell*Cpc + addedMass*CpEff)/massCellNew;
 
-    this->Tc_ += td.cloud().hsTrans()[cellI]/(this->cpc_*massCellNew);
+    this->Tc_ += td.cloud().hsTrans()[cellI]/(this->Cpc_*massCellNew);
 }
 
 
@@ -196,7 +196,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     const vector& U0 = this->U_;
     const scalar rho0 = this->rho_;
     const scalar T0 = this->T_;
-    const scalar cp0 = this->cp_;
+    const scalar Cp0 = this->Cp_;
     const scalar mass0 = this->mass();
 
     const scalar pc = this->pc_;
@@ -367,7 +367,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             d0,
             rho0,
             T0,
-            cp0,
+            Cp0,
             NCpW,
             Sh,
             dhsTrans
@@ -466,7 +466,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
 
     else
     {
-        this->cp_ = cpEff(td, pc, T1, idG, idL, idS);
+        this->Cp_ = CpEff(td, pc, T1, idG, idL, idS);
         this->T_ = T1;
         this->U_ = U1;
 

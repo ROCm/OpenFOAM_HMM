@@ -88,19 +88,19 @@ void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection
     scalar massCellNew = massCell + addedMass;
     this->Uc_ += td.cloud().UTrans()[cellI]/massCellNew;
 
-    scalar cpEff = 0;
+    scalar CpEff = 0;
     if (addedMass > ROOTVSMALL)
     {
         forAll(td.cloud().rhoTrans(), i)
         {
             scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
-            cpEff += Y*td.cloud().composition().carrier().Cp(i, this->Tc_);
+            CpEff += Y*td.cloud().composition().carrier().Cp(i, this->Tc_);
         }
     }
-    const scalar cpc = td.cpInterp().psi()[cellI];
-    this->cpc_ = (massCell*cpc + addedMass*cpEff)/massCellNew;
+    const scalar Cpc = td.CpInterp().psi()[cellI];
+    this->Cpc_ = (massCell*Cpc + addedMass*CpEff)/massCellNew;
 
-    this->Tc_ += td.cloud().hsTrans()[cellI]/(this->cpc_*massCellNew);
+    this->Tc_ += td.cloud().hsTrans()[cellI]/(this->Cpc_*massCellNew);
 }
 
 
@@ -162,7 +162,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
     rhos = 0;
     mus = 0;
     kappa = 0;
-    scalar cps = 0;
+    scalar Cps = 0;
     scalar sumYiSqrtW = 0;
     scalar sumYiCbrtW = 0;
 
@@ -174,7 +174,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
         rhos += Xs[i]*td.cloud().thermo().carrier().W(i);
         mus += Ys[i]*sqrtW*td.cloud().thermo().carrier().mu(i, T);
         kappa += Ys[i]*cbrtW*td.cloud().thermo().carrier().kappa(i, T);
-        cps += Xs[i]*td.cloud().thermo().carrier().Cp(i, T);
+        Cps += Xs[i]*td.cloud().thermo().carrier().Cp(i, T);
 
         sumYiSqrtW += Ys[i]*sqrtW;
         sumYiCbrtW += Ys[i]*cbrtW;
@@ -183,7 +183,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
     rhos *= pc_/(specie::RR*T);
     mus /= sumYiSqrtW;
     kappa /= sumYiCbrtW;
-    Pr = cps*mus/kappa;
+    Pr = Cps*mus/kappa;
 }
 
 
@@ -226,7 +226,7 @@ void Foam::ReactingParcel<ParcelType>::calc
     const vector& U0 = this->U_;
     const scalar rho0 = this->rho_;
     const scalar T0 = this->T_;
-    const scalar cp0 = this->cp_;
+    const scalar Cp0 = this->Cp_;
     const scalar mass0 = this->mass();
 
 
@@ -315,7 +315,7 @@ void Foam::ReactingParcel<ParcelType>::calc
             d0,
             rho0,
             T0,
-            cp0,
+            Cp0,
             NCpW,
             Sh,
             dhsTrans
@@ -377,7 +377,7 @@ void Foam::ReactingParcel<ParcelType>::calc
 
     else
     {
-        this->cp_ = td.cloud().composition().cp(0, Y_, pc_, T1);
+        this->Cp_ = td.cloud().composition().Cp(0, Y_, pc_, T1);
         this->T_ = T1;
         this->U_ = U1;
 

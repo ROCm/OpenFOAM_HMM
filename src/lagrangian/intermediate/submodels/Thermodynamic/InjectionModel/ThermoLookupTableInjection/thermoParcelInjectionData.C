@@ -38,7 +38,7 @@ Foam::thermoParcelInjectionData::thermoParcelInjectionData()
 :
     kinematicParcelInjectionData(),
     T_(0.0),
-    cp_(0.0)
+    Cp_(0.0)
 {}
 
 
@@ -49,7 +49,7 @@ Foam::thermoParcelInjectionData::thermoParcelInjectionData
 :
     kinematicParcelInjectionData(dict),
     T_(readScalar(dict.lookup("T"))),
-    cp_(readScalar(dict.lookup("cp")))
+    Cp_(readScalar(dict.lookup("Cp")))
 {}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

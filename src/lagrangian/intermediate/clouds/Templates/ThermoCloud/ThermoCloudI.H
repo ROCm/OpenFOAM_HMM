@@ -45,6 +45,20 @@ inline const Foam::SLGThermo& Foam::ThermoCloud<ParcelType>::thermo() const
 
 
 template<class ParcelType>
+inline const Foam::volScalarField& Foam::ThermoCloud<ParcelType>::T() const
+{
+    return T_;
+}
+
+
+template<class ParcelType>
+inline const Foam::volScalarField& Foam::ThermoCloud<ParcelType>::p() const
+{
+    return p_;
+}
+
+
+template<class ParcelType>
 inline const Foam::HeatTransferModel<Foam::ThermoCloud<ParcelType> >&
 Foam::ThermoCloud<ParcelType>::heatTransfer() const
 {

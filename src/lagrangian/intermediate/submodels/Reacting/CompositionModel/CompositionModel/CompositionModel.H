@@ -242,7 +242,7 @@ public:
             ) const;
 
             //- Return specific heat caoacity for the phase phaseI
-            virtual scalar cp
+            virtual scalar Cp
             (
                 const label phaseI,
                 const scalarField& Y,

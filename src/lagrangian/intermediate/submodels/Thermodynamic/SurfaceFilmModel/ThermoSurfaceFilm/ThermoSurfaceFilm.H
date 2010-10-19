@@ -66,7 +66,7 @@ protected:
             scalarList TFilmPatch_;
 
             //- Film specific heat capacity / patch face
-            scalarList cpFilmPatch_;
+            scalarList CpFilmPatch_;
 
 
     // Protected functions

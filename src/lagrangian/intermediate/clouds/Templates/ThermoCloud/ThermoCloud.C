@@ -41,50 +41,15 @@ void Foam::ThermoCloud<ParcelType>::preEvolve()
 template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::evolveCloud()
 {
-    const volScalarField& T = thermo_.thermo().T();
-    const volScalarField cp = thermo_.thermo().Cp();
+    const volScalarField Cp = thermo_.thermo().Cp();
 
-    autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > CpInterp = interpolation<scalar>::New
     (
         this->solution().interpolationSchemes(),
-        this->rho()
+        Cp
     );
 
-    autoPtr<interpolation<vector> > UInterp = interpolation<vector>::New
-    (
-        this->solution().interpolationSchemes(),
-        this->U()
-    );
-
-    autoPtr<interpolation<scalar> > muInterp = interpolation<scalar>::New
-    (
-        this->solution().interpolationSchemes(),
-        this->mu()
-    );
-
-    autoPtr<interpolation<scalar> > TInterp = interpolation<scalar>::New
-    (
-        this->solution().interpolationSchemes(),
-        T
-    );
-
-    autoPtr<interpolation<scalar> > cpInterp = interpolation<scalar>::New
-    (
-        this->solution().interpolationSchemes(),
-        cp
-    );
-
-    typename ParcelType::trackData td
-    (
-        *this,
-        constProps_,
-        rhoInterp(),
-        UInterp(),
-        muInterp(),
-        TInterp(),
-        cpInterp(),
-        this->g().value()
-    );
+    typename ParcelType::trackData td(*this, CpInterp());
 
     label preInjectionSize = this->size();
 
@@ -154,6 +119,8 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
     thermoCloud(),
     constProps_(this->particleProperties()),
     thermo_(thermo),
+    T_(thermo.thermo().T()),
+    p_(thermo.thermo().p()),
     heatTransferModel_
     (
         HeatTransferModel<ThermoCloud<ParcelType> >::New
@@ -220,7 +187,7 @@ void Foam::ThermoCloud<ParcelType>::checkParcelProperties
     if (!fullyDescribed)
     {
         parcel.T() = constProps_.T0();
-        parcel.cp() = constProps_.cp0();
+        parcel.Cp() = constProps_.Cp0();
     }
 }
 

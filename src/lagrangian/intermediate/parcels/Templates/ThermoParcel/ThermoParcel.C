@@ -43,7 +43,7 @@ void Foam::ThermoParcel<ParcelType>::setCellValues
 
     tetIndices tetIs = this->currentTetIndices();
 
-    cpc_ = td.cpInterp().interpolate(this->position(), tetIs);
+    Cpc_ = td.CpInterp().interpolate(this->position(), tetIs);
 
     Tc_ = td.TInterp().interpolate(this->position(), tetIs);
 
@@ -76,8 +76,8 @@ void Foam::ThermoParcel<ParcelType>::cellValueSourceCorrection
 {
     this->Uc_ += td.cloud().UTrans()[cellI]/this->massCell(cellI);
 
-    scalar cpMean = td.cpInterp().psi()[cellI];
-    Tc_ += td.cloud().hsTrans()[cellI]/(cpMean*this->massCell(cellI));
+    const scalar CpMean = td.CpInterp().psi()[cellI];
+    Tc_ += td.cloud().hsTrans()[cellI]/(CpMean*this->massCell(cellI));
 }
 
 
@@ -108,7 +108,7 @@ void Foam::ThermoParcel<ParcelType>::calcSurfaceValues
     mus = td.muInterp().interpolate (this->position(), tetIs)/factor;
 
     Pr = td.constProps().Pr();
-    kappa = cpc_*mus/Pr;
+    kappa = Cpc_*mus/Pr;
 }
 
 
@@ -128,7 +128,7 @@ void Foam::ThermoParcel<ParcelType>::calc
     const vector U0 = this->U_;
     const scalar rho0 = this->rho_;
     const scalar T0 = this->T_;
-    const scalar cp0 = this->cp_;
+    const scalar Cp0 = this->Cp_;
     const scalar mass0 = this->mass();
 
 
@@ -176,7 +176,7 @@ void Foam::ThermoParcel<ParcelType>::calc
             d0,
             rho0,
             T0,
-            cp0,
+            Cp0,
             NCpW,
             Sh,
             dhsTrans
@@ -222,7 +222,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     const scalar d,
     const scalar rho,
     const scalar T,
-    const scalar cp,
+    const scalar Cp,
     const scalar NCpW,
     const scalar Sh,
     scalar& dhsTrans
@@ -238,7 +238,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 
     if (mag(htc) < ROOTVSMALL && !td.cloud().radiation())
     {
-        return max(T + dt*Sh/(this->volume(d)*rho*cp), td.constProps().TMin());
+        return max(T + dt*Sh/(this->volume(d)*rho*Cp), td.constProps().TMin());
     }
 
     const scalar As = this->areaS(d);
@@ -255,7 +255,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
         ap = (ap + epsilon*Gc/(4.0*htc))/(1.0 + epsilon*sigma*pow3(T)/htc);
         bp += 6.0*(epsilon*(Gc/4.0 - sigma*pow4(T)));
     }
-    bp /= rho*d*cp*(ap - T);
+    bp /= rho*d*Cp*(ap - T);
 
     // Integrate to find the new parcel temperature
     IntegrationScheme<scalar>::integrationResult Tres =
@@ -279,9 +279,9 @@ Foam::ThermoParcel<ParcelType>::ThermoParcel
 :
     KinematicParcel<ParcelType>(p),
     T_(p.T_),
-    cp_(p.cp_),
+    Cp_(p.Cp_),
     Tc_(p.Tc_),
-    cpc_(p.cpc_)
+    Cpc_(p.Cpc_)
 {}
 
 

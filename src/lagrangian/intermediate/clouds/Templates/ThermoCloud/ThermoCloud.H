@@ -85,6 +85,12 @@ protected:
             //- SLG thermodynamics package
             const SLGThermo& thermo_;
 
+            //- Temperature [K]
+            const volScalarField& T_;
+
+            //- Pressure [Pa]
+            const volScalarField& p_;
+
 
         // References to the cloud sub-models
 
@@ -162,6 +168,12 @@ public:
 
             //- Return const access to thermo package
             inline const SLGThermo& thermo() const;
+
+            //- Return const access to the carrier temperature field
+            inline const volScalarField& T() const;
+
+            //- Return const access to the carrier prressure field
+            inline const volScalarField& p() const;
 
 
             // Sub-models

@@ -49,21 +49,37 @@ template <class ParcelType>
 inline Foam::KinematicParcel<ParcelType>::trackData::trackData
 (
     KinematicCloud<ParcelType>& cloud,
-    const constantProperties& constProps,
-    const interpolation<scalar>& rhoInterp,
-    const interpolation<vector>& UInterp,
-    const interpolation<scalar>& muInterp,
-    const vector& g,
     trackPart part
 )
 :
     Particle<ParcelType>::trackData(cloud),
     cloud_(cloud),
-    constProps_(constProps),
-    rhoInterp_(rhoInterp),
-    UInterp_(UInterp),
-    muInterp_(muInterp),
-    g_(g),
+    constProps_(cloud.constProps()),
+    rhoInterp_
+    (
+        interpolation<scalar>::New
+        (
+            cloud.solution().interpolationSchemes(),
+            cloud.rho()
+        )
+    ),
+    UInterp_
+    (
+        interpolation<vector>::New
+        (
+            cloud.solution().interpolationSchemes(),
+            cloud.U()
+        )
+    ),
+    muInterp_
+    (
+        interpolation<scalar>::New
+        (
+            cloud.solution().interpolationSchemes(),
+            cloud.mu()
+        )
+    ),
+    g_(cloud.g().value()),
     part_(part)
 {}
 
@@ -219,7 +235,7 @@ template<class ParcelType>
 inline const Foam::interpolation<Foam::scalar>&
 Foam::KinematicParcel<ParcelType>::trackData::rhoInterp() const
 {
-    return rhoInterp_;
+    return rhoInterp_();
 }
 
 
@@ -227,7 +243,7 @@ template <class ParcelType>
 inline const Foam::interpolation<Foam::vector>&
 Foam::KinematicParcel<ParcelType>::trackData::UInterp() const
 {
-    return UInterp_;
+    return UInterp_();
 }
 
 
@@ -235,7 +251,7 @@ template<class ParcelType>
 inline const Foam::interpolation<Foam::scalar>&
 Foam::KinematicParcel<ParcelType>::trackData::muInterp() const
 {
-    return muInterp_;
+    return muInterp_();
 }
 
 
@@ -248,8 +264,7 @@ Foam::KinematicParcel<ParcelType>::trackData::g() const
 
 
 template<class ParcelType>
-inline
-typename Foam::KinematicParcel<ParcelType>::trackData::trackPart
+inline typename Foam::KinematicParcel<ParcelType>::trackData::trackPart
 Foam::KinematicParcel<ParcelType>::trackData::part() const
 {
     return part_;
@@ -257,8 +272,7 @@ Foam::KinematicParcel<ParcelType>::trackData::part() const
 
 
 template<class ParcelType>
-inline
-typename Foam::KinematicParcel<ParcelType>::trackData::trackPart&
+inline typename Foam::KinematicParcel<ParcelType>::trackData::trackPart&
 Foam::KinematicParcel<ParcelType>::trackData::part()
 {
     return part_;
@@ -497,16 +511,14 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::mass() const
 
 
 template <class ParcelType>
-inline Foam::scalar
-Foam::KinematicParcel<ParcelType>::momentOfInertia() const
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::momentOfInertia() const
 {
     return 0.1*mass()*sqr(d_);
 }
 
 
 template <class ParcelType>
-inline Foam::vector
-Foam::KinematicParcel<ParcelType>::omega() const
+inline Foam::vector Foam::KinematicParcel<ParcelType>::omega() const
 {
     return angularMomentum_/momentOfInertia();
 }
@@ -520,8 +532,7 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::volume() const
 
 
 template <class ParcelType>
-inline Foam::scalar
-Foam::KinematicParcel<ParcelType>::volume(const scalar d)
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::volume(const scalar d)
 {
     return pi/6.0*pow3(d);
 }
@@ -535,8 +546,7 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::areaP() const
 
 
 template <class ParcelType>
-inline Foam::scalar
-Foam::KinematicParcel<ParcelType>::areaP(const scalar d)
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::areaP(const scalar d)
 {
     return 0.25*areaS(d);
 }
@@ -550,16 +560,14 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::areaS() const
 
 
 template <class ParcelType>
-inline Foam::scalar
-Foam::KinematicParcel<ParcelType>::areaS(const scalar d)
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::areaS(const scalar d)
 {
     return pi*d*d;
 }
 
 
 template <class ParcelType>
-inline Foam::scalar
-Foam::KinematicParcel<ParcelType>::Re
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::Re
 (
     const vector& U,
     const scalar d,

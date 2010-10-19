@@ -175,13 +175,14 @@ public:
             // Interpolators for continuous phase fields
 
                 //- Density interpolator
-                const interpolation<scalar>& rhoInterp_;
+                autoPtr<interpolation<scalar> > rhoInterp_;
 
                 //- Velocity interpolator
-                const interpolation<vector>& UInterp_;
+                autoPtr<interpolation<vector> > UInterp_;
 
                 //- Dynamic viscosity interpolator
-                const interpolation<scalar>& muInterp_;
+                autoPtr<interpolation<scalar> > muInterp_;
+
 
             //- Local gravitational or other body-force acceleration
             const vector& g_;
@@ -199,11 +200,6 @@ public:
             inline trackData
             (
                 KinematicCloud<ParcelType>& cloud,
-                const constantProperties& constProps,
-                const interpolation<scalar>& rhoInterp,
-                const interpolation<vector>& UInterp,
-                const interpolation<scalar>& muInterp,
-                const vector& g,
                 trackPart part = tpLinearTrack
             );
 
