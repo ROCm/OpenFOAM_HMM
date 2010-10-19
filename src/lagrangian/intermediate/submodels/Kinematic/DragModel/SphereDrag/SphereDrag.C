@@ -30,11 +30,11 @@ License
 template <class CloudType>
 Foam::SphereDrag<CloudType>::SphereDrag
 (
-    const dictionary& dict,
+    const dictionary&,
     CloudType& owner
 )
 :
-    DragModel<CloudType>(dict, owner)
+    DragModel<CloudType>(owner)
 {}
 
 

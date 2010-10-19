@@ -30,7 +30,7 @@ License
 template <class CloudType>
 Foam::NoDrag<CloudType>::NoDrag(const dictionary& dict, CloudType& owner)
 :
-    DragModel<CloudType>(dict, owner)
+    DragModel<CloudType>(owner)
 {}
 
 

@@ -57,6 +57,9 @@ class DragModel
         //- The cloud dictionary
         const dictionary& dict_;
 
+        //- The model coefficients dictionary
+        const dictionary& coeffDict_;
+
         //- Reference to the owner cloud class
         CloudType& owner_;
 
@@ -82,11 +85,15 @@ public:
 
     // Constructors
 
+        //- Construct null from owner
+        DragModel(CloudType& owner);
+
         //- Construct from components
         DragModel
         (
             const dictionary& dict,
-            CloudType& owner
+            CloudType& owner,
+            const word& type
         );
 
 
@@ -109,6 +116,9 @@ public:
 
         //- Return the dictionary
         const dictionary& dict() const;
+
+        //- Return the coefficients dictionary
+        const dictionary& coeffDict() const;
 
 
     // Member Functions

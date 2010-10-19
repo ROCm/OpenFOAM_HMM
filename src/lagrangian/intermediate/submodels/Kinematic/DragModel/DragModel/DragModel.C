@@ -28,13 +28,24 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
+Foam::DragModel<CloudType>::DragModel(CloudType& owner)
+:
+    dict_(dictionary::null),
+    coeffDict_(dictionary::null),
+    owner_(owner)
+{}
+
+
+template<class CloudType>
 Foam::DragModel<CloudType>::DragModel
 (
     const dictionary& dict,
-    CloudType& owner
+    CloudType& owner,
+    const word& type
 )
 :
     dict_(dict),
+    coeffDict_(dict.subDict(type + "Coeffs")),
     owner_(owner)
 {}
 
@@ -59,6 +70,13 @@ template<class CloudType>
 const Foam::dictionary& Foam::DragModel<CloudType>::dict() const
 {
     return dict_;
+}
+
+
+template<class CloudType>
+const Foam::dictionary& Foam::DragModel<CloudType>::coeffDict() const
+{
+    return coeffDict_;
 }
 
 
