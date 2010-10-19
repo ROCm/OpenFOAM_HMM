@@ -55,6 +55,7 @@ Description
 #include "edgeStats.H"
 #include "treeDataTriSurface.H"
 #include "indexedOctree.H"
+#include "globalMeshData.H"
 
 using namespace Foam;
 
