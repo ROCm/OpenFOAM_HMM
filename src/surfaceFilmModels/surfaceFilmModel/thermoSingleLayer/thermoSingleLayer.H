@@ -27,7 +27,7 @@ Class
 Description
     Thermodynamic form of single-cell layer surface film model
 
-    Note: defining enthalpy as cp(T - Tstd) - when using liquids from the
+    Note: defining enthalpy as Cp(T - Tstd) - when using liquids from the
     thermophysical library, their enthalpies are calculated similarly, where
     Tstd = 298.15 K
 
@@ -90,7 +90,7 @@ protected:
             // Fields
 
                 //- Specific heat capacity / [J/kg/K]
-                volScalarField cp_;
+                volScalarField Cp_;
 
                 //- Thermal conductivity / [W/m/K]
                 volScalarField kappa_;
@@ -218,7 +218,7 @@ public:
             // Fields
 
                 //- Return the film specific heat capacity [J/kg/K]
-                virtual const volScalarField& cp() const;
+                virtual const volScalarField& Cp() const;
 
                 //- Return the film thermal conductivity [W/m/K]
                 virtual const volScalarField& kappa() const;

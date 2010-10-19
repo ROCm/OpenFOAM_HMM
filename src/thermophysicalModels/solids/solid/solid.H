@@ -67,7 +67,7 @@ class solid
         scalar rho_;
 
         //- Specific heat capacity [J/(kg.K)]
-        scalar cp_;
+        scalar Cp_;
 
         //- Thermal conductivity [W/(m.K)]
         scalar K_;
@@ -121,7 +121,7 @@ public:
         solid
         (
             scalar rho,
-            scalar cp,
+            scalar Cp,
             scalar K,
             scalar Hf,
             scalar emissivity
@@ -153,7 +153,7 @@ public:
             inline scalar rho() const;
 
             //- Specific heat capacity [J/(kg.K)]
-            inline scalar cp() const;
+            inline scalar Cp() const;
 
             //- Thermal conductivity [W/(m.K)]
             inline scalar K() const;

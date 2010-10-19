@@ -148,7 +148,7 @@ public:
            virtual const volScalarField& Tw() const;
 
            //- Return the film specific heat capacity [J/kg/K]
-           virtual const volScalarField& cp() const;
+           virtual const volScalarField& Cp() const;
 
            //- Return the film thermal conductivity [W/m/K]
            virtual const volScalarField& kappa() const;

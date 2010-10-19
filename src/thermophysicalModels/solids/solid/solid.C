@@ -40,14 +40,14 @@ namespace Foam
 Foam::solid::solid
 (
     scalar rho,
-    scalar cp,
+    scalar Cp,
     scalar K,
     scalar Hf,
     scalar emissivity
 )
 :
     rho_(rho),
-    cp_(cp),
+    Cp_(Cp),
     K_(K),
     Hf_(Hf),
     emissivity_(emissivity)
@@ -57,7 +57,7 @@ Foam::solid::solid
 Foam::solid::solid(Istream& is)
 :
     rho_(readScalar(is)),
-    cp_(readScalar(is)),
+    Cp_(readScalar(is)),
     K_(readScalar(is)),
     Hf_(readScalar(is)),
     emissivity_(readScalar(is))
@@ -67,7 +67,7 @@ Foam::solid::solid(Istream& is)
 Foam::solid::solid(const dictionary& dict)
 :
     rho_(readScalar(dict.lookup("rho"))),
-    cp_(readScalar(dict.lookup("cp"))),
+    Cp_(readScalar(dict.lookup("Cp"))),
     K_(readScalar(dict.lookup("K"))),
     Hf_(readScalar(dict.lookup("Hf"))),
     emissivity_(readScalar(dict.lookup("emissivity")))
@@ -79,7 +79,7 @@ Foam::solid::solid(const dictionary& dict)
 void Foam::solid::writeData(Ostream& os) const
 {
     os  << rho_ << token::SPACE
-        << cp_ << token::SPACE
+        << Cp_ << token::SPACE
         << K_ << token::SPACE
         << Hf_ << token::SPACE
         << emissivity_;

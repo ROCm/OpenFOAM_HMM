@@ -98,7 +98,7 @@ Foam::scalar Foam::solidMixture::rho
 }
 
 
-Foam::scalar Foam::solidMixture::cp
+Foam::scalar Foam::solidMixture::Cp
 (
     const scalarField& Y
 ) const
@@ -106,7 +106,7 @@ Foam::scalar Foam::solidMixture::cp
     scalar val = 0.0;
     forAll(properties_, i)
     {
-        val += properties_[i].cp()*Y[i];
+        val += properties_[i].Cp()*Y[i];
     }
     return val;
 }

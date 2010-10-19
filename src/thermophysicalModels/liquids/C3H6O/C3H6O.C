@@ -57,7 +57,7 @@ Foam::C3H6O::C3H6O()
     rho_(71.426784, 0.2576, 508.2, 0.29903),
     pv_(70.72, -5.685, -7.351, 6.3e-06, 2.0),
     hl_(508.20, 846590.909090909, 1.036, -1.294, 0.672, 0.0),
-    cp_
+    Cp_
     (
         2334.71074380165,
        -3.04752066115702,
@@ -75,7 +75,7 @@ Foam::C3H6O::C3H6O()
         2.96573691460055e-06,
         0.0
     ),
-    cpg_(828.512396694215, 2830.57851239669, 1250.0, 1234.50413223141, -524.4),
+    Cpg_(828.512396694215, 2830.57851239669, 1250.0, 1234.50413223141, -524.4),
     B_
     (
         0.00190599173553719,
@@ -115,9 +115,9 @@ Foam::C3H6O::C3H6O
     rho_(density),
     pv_(vapourPressure),
     hl_(heatOfVapourisation),
-    cp_(heatCapacity),
+    Cp_(heatCapacity),
     h_(enthalpy),
-    cpg_(idealGasHeatCapacity),
+    Cpg_(idealGasHeatCapacity),
     B_(secondVirialCoeff),
     mu_(dynamicViscosity),
     mug_(vapourDynamicViscosity),
@@ -134,9 +134,9 @@ Foam::C3H6O::C3H6O(Istream& is)
     rho_(is),
     pv_(is),
     hl_(is),
-    cp_(is),
+    Cp_(is),
     h_(is),
-    cpg_(is),
+    Cpg_(is),
     B_(is),
     mu_(is),
     mug_(is),
@@ -153,9 +153,9 @@ Foam::C3H6O::C3H6O(const dictionary& dict)
     rho_(dict.subDict("rho")),
     pv_(dict.subDict("pv")),
     hl_(dict.subDict("hl")),
-    cp_(dict.subDict("cp")),
+    Cp_(dict.subDict("Cp")),
     h_(dict.subDict("h")),
-    cpg_(dict.subDict("cpg")),
+    Cpg_(dict.subDict("Cpg")),
     B_(dict.subDict("B")),
     mu_(dict.subDict("mu")),
     mug_(dict.subDict("mug")),

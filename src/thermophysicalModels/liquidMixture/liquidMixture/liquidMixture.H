@@ -207,7 +207,7 @@ public:
         ) const;
 
         //- Calculate the mixture heat capacity [J/(kg K)]
-        scalar cp
+        scalar Cp
         (
             const scalar p,
             const scalar T,

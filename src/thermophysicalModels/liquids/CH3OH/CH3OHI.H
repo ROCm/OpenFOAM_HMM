@@ -41,9 +41,9 @@ inline Foam::scalar Foam::CH3OH::hl(scalar p, scalar T) const
 }
 
 
-inline Foam::scalar Foam::CH3OH::cp(scalar p, scalar T) const
+inline Foam::scalar Foam::CH3OH::Cp(scalar p, scalar T) const
 {
-    return cp_.f(p, T);
+    return Cp_.f(p, T);
 }
 
 
@@ -53,9 +53,9 @@ inline Foam::scalar Foam::CH3OH::h(scalar p, scalar T) const
 }
 
 
-inline Foam::scalar Foam::CH3OH::cpg(scalar p, scalar T) const
+inline Foam::scalar Foam::CH3OH::Cpg(scalar p, scalar T) const
 {
-    return cpg_.f(p, T);
+    return Cpg_.f(p, T);
 }
 
 

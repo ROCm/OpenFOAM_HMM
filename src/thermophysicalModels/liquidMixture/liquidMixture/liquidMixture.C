@@ -256,25 +256,25 @@ Foam::scalar Foam::liquidMixture::hl
 }
 
 
-Foam::scalar Foam::liquidMixture::cp
+Foam::scalar Foam::liquidMixture::Cp
 (
     const scalar p,
     const scalar T,
     const scalarField& x
 ) const
 {
-    scalar cp = 0.0;
+    scalar Cp = 0.0;
 
     forAll(properties_, i)
     {
         if (x[i] > SMALL)
         {
             scalar Ti = min(TrMax*properties_[i].Tc(), T);
-            cp += x[i]*properties_[i].cp(p, Ti)*properties_[i].W();
+            Cp += x[i]*properties_[i].Cp(p, Ti)*properties_[i].W();
         }
     }
 
-    return cp/W(x);
+    return Cp/W(x);
 }
 
 

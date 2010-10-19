@@ -116,7 +116,7 @@ public:
 
         //- Calculate the mixture heat capacity [J/(kg K)] as a function
         //  of mass fractions
-        scalar cp(const scalarField& Y) const;
+        scalar Cp(const scalarField& Y) const;
 };
 
 

@@ -213,13 +213,13 @@ public:
             virtual scalar hl(scalar p, scalar T) const = 0;
 
             //- Liquid heat capacity [J/(kg K)]
-            virtual scalar cp(scalar p, scalar T) const = 0;
+            virtual scalar Cp(scalar p, scalar T) const = 0;
 
             //- Liquid enthalpy [J/kg] - reference to 298.15 K
             virtual scalar h(scalar p, scalar T) const = 0;
 
             //- Ideal gas heat capacity [J/(kg K)]
-            virtual scalar cpg(scalar p, scalar T) const = 0;
+            virtual scalar Cpg(scalar p, scalar T) const = 0;
 
             //- Liquid viscosity [Pa s]
             virtual scalar mu(scalar p, scalar T) const = 0;

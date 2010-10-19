@@ -31,9 +31,9 @@ inline Foam::scalar Foam::solid::rho() const
 }
 
 
-inline Foam::scalar Foam::solid::cp() const
+inline Foam::scalar Foam::solid::Cp() const
 {
-    return cp_;
+    return Cp_;
 }
 
 
