@@ -36,7 +36,22 @@
     + Large number of code refinements and consistency improvements to support
       other developments.
 *** Turbulence modelling
-*** Thermo-physical Models
+*** *Updated* thermophysical libraries
+    + Now use the more descriptive dictionary input format, e.g. for a single
+      component mixture:
+
+    thermoType      hPsiThermo<pureMixture<sutherlandTransport<specieThermo<hConstThermo<perfectGas>>>>>;
+
+    mixture
+    {
+        nMoles      1;
+        molWeight   28.9;
+        Cp          1007;
+        Hf          0;
+        As          1.4792e-06;
+        Ts          116;
+    }
+
 *** DSMC
 *** Dynamic Mesh
 *** Numerics

@@ -31,11 +31,11 @@ template<int PolySize>
 inline Foam::icoPolynomial<PolySize>::icoPolynomial
 (
     const specie& sp,
-    const Polynomial<PolySize>& rhoPoly
+    const Polynomial<PolySize>& rhoCoeffs
 )
 :
     specie(sp),
-    rhoPolynomial_(rhoPoly)
+    rhoCoeffs_(rhoCoeffs)
 {}
 
 
@@ -48,7 +48,7 @@ inline Foam::icoPolynomial<PolySize>::icoPolynomial
 )
 :
     specie(ip),
-    rhoPolynomial_(ip.rhoPolynomial_)
+    rhoCoeffs_(ip.rhoCoeffs_)
 {}
 
 
@@ -60,7 +60,7 @@ inline Foam::icoPolynomial<PolySize>::icoPolynomial
 )
 :
     specie(name, ip),
-    rhoPolynomial_(ip.rhoPolynomial_)
+    rhoCoeffs_(ip.rhoCoeffs_)
 {}
 
 
@@ -99,7 +99,7 @@ Foam::icoPolynomial<PolySize>::New(const dictionary& dict)
 template<int PolySize>
 inline Foam::scalar Foam::icoPolynomial<PolySize>::rho(scalar, scalar T) const
 {
-    return rhoPolynomial_.evaluate(T)/this->W();
+    return rhoCoeffs_.evaluate(T)/this->W();
 }
 
 
@@ -127,7 +127,7 @@ inline Foam::icoPolynomial<PolySize>& Foam::icoPolynomial<PolySize>::operator=
 {
     specie::operator=(ip);
 
-    rhoPolynomial_ = ip.rhoPolynomial_;
+    rhoCoeffs_ = ip.rhoCoeffs_;
 
     return *this;
 }
@@ -146,7 +146,7 @@ inline void Foam::icoPolynomial<PolySize>::operator+=
     molr1 /= this->nMoles();
     scalar molr2 = ip.nMoles()/this->nMoles();
 
-    rhoPolynomial_ = molr1*rhoPolynomial_ + molr2*ip.rhoPolynomial_;
+    rhoCoeffs_ = molr1*rhoCoeffs_ + molr2*ip.rhoCoeffs_;
 }
 
 
@@ -163,7 +163,7 @@ inline void Foam::icoPolynomial<PolySize>::operator-=
     molr1 /= this->nMoles();
     scalar molr2 = ip.nMoles()/this->nMoles();
 
-    rhoPolynomial_ = molr1*rhoPolynomial_ - molr2*ip.rhoPolynomial_;
+    rhoCoeffs_ = molr1*rhoCoeffs_ - molr2*ip.rhoCoeffs_;
 }
 
 
@@ -191,7 +191,7 @@ Foam::icoPolynomial<PolySize> Foam::operator+
     (
         static_cast<const specie&>(ip1)
       + static_cast<const specie&>(ip2),
-        molr1*ip1.rhoPolynomial_ + molr2*ip2.rhoPolynomial_
+        molr1*ip1.rhoCoeffs_ + molr2*ip2.rhoCoeffs_
     );
 }
 
@@ -211,7 +211,7 @@ Foam::icoPolynomial<PolySize> Foam::operator-
     (
         static_cast<const specie&>(ip1)
       - static_cast<const specie&>(ip2),
-        molr1*ip1.rhoPolynomial_ - molr2*ip2.rhoPolynomial_
+        molr1*ip1.rhoCoeffs_ - molr2*ip2.rhoCoeffs_
     );
 }
 
@@ -226,7 +226,7 @@ Foam::icoPolynomial<PolySize> Foam::operator*
     return icoPolynomial<PolySize>
     (
         s*static_cast<const specie&>(ip),
-        ip.rhoPolynomial_
+        ip.rhoCoeffs_
     );
 }
 

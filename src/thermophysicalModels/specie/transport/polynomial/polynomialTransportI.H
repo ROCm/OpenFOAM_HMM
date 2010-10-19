@@ -34,8 +34,8 @@ inline Foam::polynomialTransport<Thermo, PolySize>::polynomialTransport
 )
 :
     Thermo(pt),
-    muPolynomial_(pt.muPolynomial_),
-    kappaPolynomial_(pt.kappaPolynomial_)
+    muCoeffs_(pt.muCoeffs_),
+    kappaCoeffs_(pt.kappaCoeffs_)
 {}
 
 
@@ -43,13 +43,13 @@ template<class Thermo, int PolySize>
 inline Foam::polynomialTransport<Thermo, PolySize>::polynomialTransport
 (
     const Thermo& t,
-    const Polynomial<PolySize>& muPoly,
-    const Polynomial<PolySize>& kappaPoly
+    const Polynomial<PolySize>& muCoeffs,
+    const Polynomial<PolySize>& kappaCoeffs
 )
 :
     Thermo(t),
-    muPolynomial_(muPoly),
-    kappaPolynomial_(kappaPoly)
+    muCoeffs_(muCoeffs),
+    kappaCoeffs_(kappaCoeffs)
 {}
 
 
@@ -61,8 +61,8 @@ inline Foam::polynomialTransport<Thermo, PolySize>::polynomialTransport
 )
 :
     Thermo(name, pt),
-    muPolynomial_(pt.muPolynomial_),
-    kappaPolynomial_(pt.kappaPolynomial_)
+    muCoeffs_(pt.muCoeffs_),
+    kappaCoeffs_(pt.kappaCoeffs_)
 {}
 
 
@@ -107,7 +107,7 @@ inline Foam::scalar Foam::polynomialTransport<Thermo, PolySize>::mu
     const scalar T
 ) const
 {
-    return muPolynomial_.evaluate(T)/this->W();
+    return muCoeffs_.evaluate(T)/this->W();
 }
 
 
@@ -117,7 +117,7 @@ inline Foam::scalar Foam::polynomialTransport<Thermo, PolySize>::kappa
     const scalar T
 ) const
 {
-    return kappaPolynomial_.evaluate(T)/this->W();
+    return kappaCoeffs_.evaluate(T)/this->W();
 }
 
 
@@ -147,8 +147,8 @@ Foam::polynomialTransport<Thermo, PolySize>::operator=
 {
     Thermo::operator=(pt);
 
-    muPolynomial_ = pt.muPolynomial_;
-    kappaPolynomial_ = pt.kappaPolynomial_;
+    muCoeffs_ = pt.muCoeffs_;
+    kappaCoeffs_ = pt.kappaCoeffs_;
 
     return *this;
 }
@@ -167,8 +167,8 @@ inline void Foam::polynomialTransport<Thermo, PolySize>::operator+=
     molr1 /= this->nMoles();
     scalar molr2 = pt.nMoles()/this->nMoles();
 
-    muPolynomial_ = molr1*muPolynomial_ + molr2*pt.muPolynomial_;
-    kappaPolynomial_ = molr1*kappaPolynomial_ + molr2*pt.kappaPolynomial_;
+    muCoeffs_ = molr1*muCoeffs_ + molr2*pt.muCoeffs_;
+    kappaCoeffs_ = molr1*kappaCoeffs_ + molr2*pt.kappaCoeffs_;
 }
 
 
@@ -185,8 +185,8 @@ inline void Foam::polynomialTransport<Thermo, PolySize>::operator-=
     molr1 /= this->nMoles();
     scalar molr2 = pt.nMoles()/this->nMoles();
 
-    muPolynomial_ = molr1*muPolynomial_ - molr2*pt.muPolynomial_;
-    kappaPolynomial_ = molr1*kappaPolynomial_ - molr2*pt.kappaPolynomial_;
+    muCoeffs_ = molr1*muCoeffs_ - molr2*pt.muCoeffs_;
+    kappaCoeffs_ = molr1*kappaCoeffs_ - molr2*pt.kappaCoeffs_;
 }
 
 
@@ -220,8 +220,8 @@ inline Foam::polynomialTransport<Thermo, PolySize> Foam::operator+
     return polynomialTransport<Thermo, PolySize>
     (
         t,
-        molr1*pt1.muPolynomial_ + molr2*pt2.muPolynomial_,
-        molr1*pt1.kappaPolynomial_ + molr2*pt2.kappaPolynomial_
+        molr1*pt1.muCoeffs_ + molr2*pt2.muCoeffs_,
+        molr1*pt1.kappaCoeffs_ + molr2*pt2.kappaCoeffs_
     );
 }
 
@@ -244,8 +244,8 @@ inline Foam::polynomialTransport<Thermo, PolySize> Foam::operator-
     return polynomialTransport<Thermo, PolySize>
     (
         t,
-        molr1*pt1.muPolynomial_ - molr2*pt2.muPolynomial_,
-        molr1*pt1.kappaPolynomial_ - molr2*pt2.kappaPolynomial_
+        molr1*pt1.muCoeffs_ - molr2*pt2.muCoeffs_,
+        molr1*pt1.kappaCoeffs_ - molr2*pt2.kappaCoeffs_
     );
 }
 
@@ -260,8 +260,8 @@ inline Foam::polynomialTransport<Thermo, PolySize> Foam::operator*
     return polynomialTransport<Thermo, PolySize>
     (
         s*static_cast<const Thermo&>(pt),
-        pt.muPolynomial_,
-        pt.kappaPolynomial_
+        pt.muCoeffs_,
+        pt.kappaCoeffs_
     );
 }
 

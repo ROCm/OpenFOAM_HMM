@@ -98,9 +98,9 @@ class icoPolynomial
 {
     // Private data
 
-        //- Density
+        //- Density polynomial coefficients
         //  Note: input in [kg/m3], but internally uses [kg/m3/kmol]
-        Polynomial<PolySize> rhoPolynomial_;
+        Polynomial<PolySize> rhoCoeffs_;
 
 
 public:

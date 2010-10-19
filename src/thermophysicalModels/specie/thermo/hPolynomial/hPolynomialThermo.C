@@ -37,22 +37,22 @@ Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
     EquationOfState(is),
     Hf_(readScalar(is)),
     Sf_(readScalar(is)),
-    cpPolynomial_("cpPolynomial", is),
-    hPolynomial_(),
-    sPolynomial_()
+    CpCoeffs_("CpCoeffs<" + Foam::name(PolySize) + '>', is),
+    hCoeffs_(),
+    sCoeffs_()
 {
     Hf_ *= this->W();
     Sf_ *= this->W();
-    cpPolynomial_ *= this->W();
+    CpCoeffs_ *= this->W();
 
-    hPolynomial_ = cpPolynomial_.integrate();
-    sPolynomial_ = cpPolynomial_.integrateMinus1();
+    hCoeffs_ = CpCoeffs_.integrate();
+    sCoeffs_ = CpCoeffs_.integrateMinus1();
 
     // Offset h poly so that it is relative to the enthalpy at Tstd
-    hPolynomial_[0] += Hf_ - hPolynomial_.evaluate(specie::Tstd);
+    hCoeffs_[0] += Hf_ - hCoeffs_.evaluate(specie::Tstd);
 
     // Offset s poly so that it is relative to the entropy at Tstd
-    sPolynomial_[0] += Sf_ - sPolynomial_.evaluate(specie::Tstd);
+    sCoeffs_[0] += Sf_ - sCoeffs_.evaluate(specie::Tstd);
 }
 
 
@@ -65,22 +65,22 @@ Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
     EquationOfState(dict),
     Hf_(readScalar(dict.lookup("Hf"))),
     Sf_(readScalar(dict.lookup("Sf"))),
-    cpPolynomial_(dict.lookup("cpPolynomial")),
-    hPolynomial_(),
-    sPolynomial_()
+    CpCoeffs_(dict.lookup("CpCoeffs<" + Foam::name(PolySize) + '>')),
+    hCoeffs_(),
+    sCoeffs_()
 {
     Hf_ *= this->W();
     Sf_ *= this->W();
-    cpPolynomial_ *= this->W();
+    CpCoeffs_ *= this->W();
 
-    hPolynomial_ = cpPolynomial_.integrate();
-    sPolynomial_ = cpPolynomial_.integrateMinus1();
+    hCoeffs_ = CpCoeffs_.integrate();
+    sCoeffs_ = CpCoeffs_.integrateMinus1();
 
     // Offset h poly so that it is relative to the enthalpy at Tstd
-    hPolynomial_[0] += Hf_ - hPolynomial_.evaluate(specie::Tstd);
+    hCoeffs_[0] += Hf_ - hCoeffs_.evaluate(specie::Tstd);
 
     // Offset s poly so that it is relative to the entropy at Tstd
-    sPolynomial_[0] += Sf_ - sPolynomial_.evaluate(specie::Tstd);
+    sCoeffs_[0] += Sf_ - sCoeffs_.evaluate(specie::Tstd);
 }
 
 
@@ -95,8 +95,8 @@ void Foam::hPolynomialThermo<EquationOfState, PolySize>::write
     EquationOfState::write(os);
     os.writeKeyword("Hf") << Hf_/this->W() << token::END_STATEMENT << nl;
     os.writeKeyword("Sf") << Sf_/this->W() << token::END_STATEMENT << nl;
-    os.writeKeyword("cpPolynomial") << cpPolynomial_/this->W()
-        << token::END_STATEMENT << nl;
+    os.writeKeyword(word("CpCoeffs<" + Foam::name(PolySize) + '>'))
+        << CpCoeffs_/this->W() << token::END_STATEMENT << nl;
 }
 
 
@@ -112,7 +112,8 @@ Foam::Ostream& Foam::operator<<
     os  << static_cast<const EquationOfState&>(pt) << tab
         << pt.Hf_/pt.W() << tab
         << pt.Sf_/pt.W() << tab
-        << "cpPolynomial" << tab << pt.cpPolynomial_/pt.W();
+        << "CpCoeffs<" << Foam::name(PolySize) << '>' << tab
+        << pt.CpCoeffs_/pt.W();
 
     os.check
     (
