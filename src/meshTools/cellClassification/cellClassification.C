@@ -322,7 +322,7 @@ void Foam::cellClassification::markCells
         changedFaces,                       // Labels of changed faces
         changedFacesInfo,                   // Information on changed faces
         cellInfoList,                       // Information on all cells
-        mesh_.globalData().nTotalCells()    // max iterations
+        mesh_.globalData().nTotalCells()+1  // max iterations
     );
 
     // Get information out of cellInfoList
