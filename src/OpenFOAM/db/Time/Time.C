@@ -245,13 +245,13 @@ Foam::Time::Time
     readLibs_(controlDict_, "libs"),
     functionObjects_(*this)
 {
+    setControls();
+
     // Time objects not registered so do like objectRegistry::checkIn ourselves.
     if (runTimeModifiable_)
     {
         controlDict_.watchIndex() = addWatch(controlDict_.filePath());
     }
-
-    setControls();
 }
 
 
@@ -307,14 +307,18 @@ Foam::Time::Time
     readLibs_(controlDict_, "libs"),
     functionObjects_(*this)
 {
+    setControls();
 
     // Time objects not registered so do like objectRegistry::checkIn ourselves.
     if (runTimeModifiable_)
     {
-        controlDict_.watchIndex() = addWatch(controlDict_.filePath());
+        // File might not exist yet.
+        fileName f(controlDict_.filePath());
+        if (f != fileName::null)
+        {
+            controlDict_.watchIndex() = addWatch(f);
+        }
     }
-
-    setControls();
 }
 
 
