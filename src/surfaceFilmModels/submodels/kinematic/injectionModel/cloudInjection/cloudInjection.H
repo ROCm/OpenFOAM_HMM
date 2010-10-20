@@ -37,6 +37,7 @@ SourceFiles
 
 #include "injectionModel.H"
 #include "pdf.H"
+#include "cachedRandom.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,7 +73,7 @@ protected:
         scalar particlesPerParcel_;
 
         //- Random number generator
-        Random rndGen_;
+        cachedRandom rndGen_;
 
         //- Parcel size PDF model
         const autoPtr<pdfs::pdf> parcelPDF_;
