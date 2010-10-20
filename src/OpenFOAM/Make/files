@@ -61,7 +61,7 @@ sha1 = primitives/hashes/SHA1
 $(sha1)/SHA1.C
 $(sha1)/SHA1Digest.C
 
-primitives/random/Random.C
+primitives/random/Random/Random.C
 
 containers/HashTables/HashTable/HashTableCore.C
 containers/HashTables/StaticHashTable/StaticHashTableCore.C
