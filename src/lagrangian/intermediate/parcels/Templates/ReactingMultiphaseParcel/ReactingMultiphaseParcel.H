@@ -225,9 +225,7 @@ protected:
             const scalar T,            // temperature
             const scalar mass,         // mass
             const scalar mass0,        // mass (initial on injection)
-            const label idVolatile,    // id of volatile phase
-            const scalar YVolatileTot, // total volatile mass fraction
-            const scalarField& YVolatile, // volatile component mass fractions
+            const scalarField& YGasEff,// Gas component mass fractions
             bool& canCombust,          // 'can combust' flag
             scalarField& dMassDV,      // mass transfer - local to particle
             scalar& Sh,                // explicit particle enthalpy source

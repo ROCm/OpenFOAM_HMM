@@ -52,13 +52,19 @@ class ConstantRateDevolatilisation
 
         // Model constants
 
-            //- Rate constant (suggested default = 12) [1/s]
-            const scalar A0_;
+            //- List of volatile data - (name A0)
+            List<Tuple2<word, scalar> > volatileData_;
+
+            //- List of initial volatile mass fractions
+            List<scalar> YVolatile0_;
+
+            //- Mapping between local and cloud gaseous species
+            List<label> volatileToGasMap_;
 
             //- Volatile residual coefficient (0-1)
             //  When the fraction of volatiles are depleted below this
             //  threshold, combustion can occur
-            const scalar volatileResidualCoeff_;
+            const scalar residualCoeff_;
 
 
 public:
@@ -95,15 +101,15 @@ public:
     // Member Functions
 
         //- Update model
-        virtual scalar calculate
+        virtual void calculate
         (
             const scalar dt,
             const scalar mass0,
             const scalar mass,
             const scalar T,
-            const scalar YVolatile0,
-            const scalar YVolatile,
-            bool& canCombust
+            const scalarField& YGasEff,
+            bool& canCombust,
+            scalarField& dMassDV
         ) const;
 };
 

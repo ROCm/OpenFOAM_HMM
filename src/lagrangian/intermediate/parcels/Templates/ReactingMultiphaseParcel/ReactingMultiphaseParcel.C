@@ -287,9 +287,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         T0,
         mass0,
         this->mass0_,
-        idG,
-        YMix[GAS],
-        YGas_,
+        YMix[GAS]*YGas_,
         canCombust_,
         dMassDV,
         Sh,
@@ -494,9 +492,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
     const scalar T,
     const scalar mass,
     const scalar mass0,
-    const label idVolatile,
-    const scalar YVolatileTot,
-    const scalarField& YVolatile,
+    const scalarField& YGasEff,
     bool& canCombust,
     scalarField& dMassDV,
     scalar& Sh,
@@ -510,30 +506,29 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
     if
     (
         !td.cloud().devolatilisation().active()
-     || T < td.constProps().Tvap()
+     || T < td.cloud().constProps().Tvap()
     )
     {
         return;
     }
 
     // Total mass of volatiles evolved
-    const scalar dMassTot = td.cloud().devolatilisation().calculate
+    td.cloud().devolatilisation().calculate
     (
         dt,
         mass0,
         mass,
         T,
-        td.cloud().composition().YMixture0()[idVolatile],
-        YVolatileTot,
-        canCombust
+        YGasEff,
+        canCombust,
+        dMassDV
     );
 
-    // Volatile mass transfer - equal components of each volatile specie
-    dMassDV = YVolatile*dMassTot;
+    scalar dMassTot = sum(dMassDV);
 
     td.cloud().addToMassDevolatilisation(this->nParticle_*dMassTot);
 
-    Sh -= dMassTot*td.constProps().LDevol()/dt;
+    Sh -= dMassTot*td.cloud().constProps().LDevol()/dt;
 
     // Molar average molecular weight of carrier mix
     const scalar Wc = this->rhoc_*specie::RR*this->Tc_/this->pc_;
@@ -546,8 +541,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
         const scalar beta = sqr(cbrt(15.0) + cbrt(15.0));
         const label id =
             td.cloud().composition().localToGlobalCarrierId(GAS, i);
-        const scalar Cp = td.cloud().thermo().carrier().Cp(id, Ts);
-        const scalar W = td.cloud().thermo().carrier().W(id);
+        const scalar Cp = td.cloud().mcCarrierThermo().speciesData()[id].Cp(Ts);
+        const scalar W = td.cloud().mcCarrierThermo().speciesData()[id].W();
         const scalar Ni = dMassDV[i]/(this->areaS(d)*dt*W);
 
         // Dab calc'd using API vapour mass diffusivity function

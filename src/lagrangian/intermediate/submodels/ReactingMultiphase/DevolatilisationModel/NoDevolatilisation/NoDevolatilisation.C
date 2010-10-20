@@ -65,21 +65,19 @@ bool Foam::NoDevolatilisation<CloudType>::active() const
 
 
 template<class CloudType>
-Foam::scalar Foam::NoDevolatilisation<CloudType>::calculate
+void Foam::NoDevolatilisation<CloudType>::calculate
 (
     const scalar,
     const scalar,
     const scalar,
     const scalar,
-    const scalar,
-    const scalar,
-    bool& canCombust
+    const scalarField&,
+    bool& canCombust,
+    scalarField&
 ) const
 {
     // Model does not stop combustion taking place
     canCombust = true;
-
-    return 0.0;
 }
 
 

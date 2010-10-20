@@ -82,15 +82,15 @@ public:
         virtual bool active() const;
 
         //- Update model
-        virtual scalar calculate
+        virtual void calculate
         (
-            const scalar,
-            const scalar,
-            const scalar,
-            const scalar,
-            const scalar,
-            const scalar,
-            bool&
+            const scalar dt,
+            const scalar mass0,
+            const scalar mass,
+            const scalar T,
+            const scalarField& YGasEff,
+            bool& canCombust,
+            scalarField& dMassDV
         ) const;
 };
 

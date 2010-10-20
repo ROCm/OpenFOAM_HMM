@@ -69,15 +69,15 @@ Foam::DevolatilisationModel<CloudType>::~DevolatilisationModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::scalar Foam::DevolatilisationModel<CloudType>::calculate
+void Foam::DevolatilisationModel<CloudType>::calculate
 (
     const scalar,
     const scalar,
     const scalar,
     const scalar,
-    const scalar,
-    const scalar,
-    bool&
+    const scalarField&,
+    bool&,
+    scalarField&
 ) const
 {
     notImplemented
@@ -88,13 +88,11 @@ Foam::scalar Foam::DevolatilisationModel<CloudType>::calculate
             "const scalar, "
             "const scalar, "
             "const scalar, "
-            "const scalar, "
-            "const scalar, "
+            "const scalarField&, "
             "bool&, "
+            "scalarField&"
         ") const"
     );
-
-    return 0.0;
 }
 
 

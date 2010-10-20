@@ -115,15 +115,15 @@ public:
     // Member Functions
 
         //- Update model
-        virtual scalar calculate
+        virtual void calculate
         (
             const scalar dt,
             const scalar mass0,
             const scalar mass,
             const scalar T,
-            const scalar YVolatile0,
-            const scalar YVolatile,
-            bool& canCombust
+            const scalarField& YGasEff,
+            bool& canCombust,
+            scalarField& dMassDV
         ) const;
 };
 
