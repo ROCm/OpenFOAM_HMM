@@ -75,6 +75,29 @@ Foam::COxidationMurphyShaddix<CloudType>::COxidationMurphyShaddix
 }
 
 
+template<class CloudType>
+Foam::COxidationMurphyShaddix<CloudType>::COxidationMurphyShaddix
+(
+    const COxidationMurphyShaddix<CloudType>& srm
+)
+:
+    SurfaceReactionModel<CloudType>(srm),
+    D0_(srm.D0_),
+    rho0_(srm.rho0_),
+    T0_(srm.T0_),
+    Dn_(srm.Dn_),
+    A_(srm.A_),
+    E_(srm.E_),
+    n_(srm.n_),
+    WVol_(srm.WVol_),
+    CsLocalId_(srm.CsLocalId_),
+    O2GlobalId_(srm.O2GlobalId_),
+    CO2GlobalId_(srm.CO2GlobalId_),
+    WC_(srm.WC_),
+    WO2_(srm.WO2_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -83,13 +106,6 @@ Foam::COxidationMurphyShaddix<CloudType>::~COxidationMurphyShaddix()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::COxidationMurphyShaddix<CloudType>::active() const
-{
-    return true;
-}
-
 
 template<class CloudType>
 Foam::scalar Foam::COxidationMurphyShaddix<CloudType>::calculate
@@ -206,7 +222,7 @@ Foam::scalar Foam::COxidationMurphyShaddix<CloudType>::calculate
 
     const scalar HC =
         this->owner().composition().solids().properties()[CsLocalId_].Hf()
-      + this->owner().composition().solids().properties()[CsLocalId_].cp()*T;
+      + this->owner().composition().solids().properties()[CsLocalId_].Cp()*T;
     const scalar HCO2 = this->owner().thermo().carrier().H(CO2GlobalId_, T);
     const scalar HO2 = this->owner().thermo().carrier().H(O2GlobalId_, T);
 

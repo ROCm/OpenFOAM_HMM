@@ -78,6 +78,26 @@ COxidationKineticDiffusionLimitedRate
 }
 
 
+template<class CloudType>
+Foam::COxidationKineticDiffusionLimitedRate<CloudType>::
+COxidationKineticDiffusionLimitedRate
+(
+    const COxidationKineticDiffusionLimitedRate<CloudType>& srm
+)
+:
+    SurfaceReactionModel<CloudType>(srm),
+    Sb_(srm.Sb_),
+    C1_(srm.C1_),
+    C2_(srm.C2_),
+    E_(srm.E_),
+    CsLocalId_(srm.CsLocalId_),
+    O2GlobalId_(srm.O2GlobalId_),
+    CO2GlobalId_(srm.CO2GlobalId_),
+    WC_(srm.WC_),
+    WO2_(srm.WO2_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -87,13 +107,6 @@ Foam::COxidationKineticDiffusionLimitedRate<CloudType>::
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::COxidationKineticDiffusionLimitedRate<CloudType>::active() const
-{
-    return true;
-}
-
 
 template<class CloudType>
 Foam::scalar Foam::COxidationKineticDiffusionLimitedRate<CloudType>::calculate
