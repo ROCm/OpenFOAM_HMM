@@ -61,20 +61,20 @@ void Foam::PatchPostProcessing<CloudType>::write()
 
         if (Pstream::master())
         {
-            fileName outputDir;
+            fileName outputDir = this->owner().time().path();
 
             if (Pstream::parRun())
             {
                 // Put in undecomposed case (Note: gives problems for
                 // distributed data running)
                 outputDir =
-                    mesh_.time().path()/".."/"postProcessing"/cloud::prefix/
+                    outputDir/".."/"postProcessing"/cloud::prefix/
                     this->owner().name()/this->owner().time().timeName();
             }
             else
             {
                 outputDir =
-                    mesh_.time().path()/"postProcessing"/cloud::prefix/
+                    outputDir/"postProcessing"/cloud::prefix/
                     this->owner().name()/this->owner().time().timeName();
             }
 
@@ -86,7 +86,7 @@ void Foam::PatchPostProcessing<CloudType>::write()
                 outputDir/patchNames_[patchI] + ".post",
                 IOstream::ASCII,
                 IOstream::currentVersion,
-                mesh_.time().writeCompression()
+                this->owner().time().writeCompression()
             );
 
             List<string> globalData;
@@ -120,15 +120,15 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
 )
 :
     PostProcessingModel<CloudType>(dict, owner, typeName),
-    mesh_(owner.mesh()),
     maxStoredParcels_(readLabel(this->coeffDict().lookup("maxStoredParcels"))),
     patchNames_(this->coeffDict().lookup("patches")),
     patchData_(patchNames_.size()),
     patchIds_(patchNames_.size())
 {
+    const polyBoundaryMesh& bMesh = this->owner().mesh().boundaryMesh();
     forAll(patchNames_, patchI)
     {
-        const label id = mesh_.boundaryMesh().findPatchID(patchNames_[patchI]);
+        const label id = bMesh.findPatchID(patchNames_[patchI]);
         if (id < 0)
         {
             FatalErrorIn
@@ -139,12 +139,26 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
                     "CloudType& owner"
                 ")"
             )<< "Requested patch " << patchNames_[patchI] << " not found" << nl
-             << "Available patches are: " << mesh_.boundaryMesh().names() << nl
+             << "Available patches are: " << bMesh.names() << nl
              << exit(FatalError);
         }
         patchIds_[patchI] = id;
     }
 }
+
+
+template<class CloudType>
+Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
+(
+    const PatchPostProcessing<CloudType>& ppm
+)
+:
+    PostProcessingModel<CloudType>(ppm),
+    maxStoredParcels_(ppm.maxStoredParcels_),
+    patchNames_(ppm.patchNames_),
+    patchData_(ppm.patchData_),
+    patchIds_(ppm.patchIds_)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -155,13 +169,6 @@ Foam::PatchPostProcessing<CloudType>::~PatchPostProcessing()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::PatchPostProcessing<CloudType>::active() const
-{
-    return true;
-}
-
 
 template<class CloudType>
 void Foam::PatchPostProcessing<CloudType>::postPatch
@@ -178,6 +185,11 @@ void Foam::PatchPostProcessing<CloudType>::postPatch
         patchData_[localPatchI].append(data.str());
     }
 }
+
+
+template<class CloudType>
+void Foam::PatchPostProcessing<CloudType>::postFace(const parcelType&)
+{}
 
 
 // ************************************************************************* //

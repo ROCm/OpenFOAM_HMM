@@ -157,6 +157,24 @@ Foam::ManualInjection<CloudType>::ManualInjection
 }
 
 
+template<class CloudType>
+Foam::ManualInjection<CloudType>::ManualInjection
+(
+    const ManualInjection<CloudType>& im
+)
+:
+    InjectionModel<CloudType>(im),
+    positionsFile_(im.positionsFile_),
+    positions_(im.positions_),
+    diameters_(im.diameters_),
+    injectorCells_(im.injectorCells_),
+    injectorTetFaces_(im.injectorTetFaces_),
+    injectorTetPts_(im.injectorTetPts_),
+    U0_(im.U0_),
+    parcelPDF_(im.parcelPDF_().clone().ptr())
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -165,13 +183,6 @@ Foam::ManualInjection<CloudType>::~ManualInjection()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::ManualInjection<CloudType>::active() const
-{
-    return true;
-}
-
 
 template<class CloudType>
 Foam::scalar Foam::ManualInjection<CloudType>::timeEnd() const

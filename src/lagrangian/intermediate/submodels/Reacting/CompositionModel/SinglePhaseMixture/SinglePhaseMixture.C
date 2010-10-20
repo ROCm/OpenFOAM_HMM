@@ -91,6 +91,19 @@ Foam::SinglePhaseMixture<CloudType>::SinglePhaseMixture
 }
 
 
+template<class CloudType>
+Foam::SinglePhaseMixture<CloudType>::SinglePhaseMixture
+(
+    const SinglePhaseMixture<CloudType>& cm
+)
+:
+    CompositionModel<CloudType>(cm),
+    idGas_(cm.idGas_),
+    idLiquid_(cm.idLiquid_),
+    idSolid_(cm.idSolid_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>

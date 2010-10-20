@@ -334,7 +334,7 @@ rotationalKineticEnergyOfSystem() const
 
 
 template<class ParcelType>
-inline Foam::Random& Foam::KinematicCloud<ParcelType>::rndGen()
+inline Foam::cachedRandom& Foam::KinematicCloud<ParcelType>::rndGen()
 {
     return rndGen_;
 }

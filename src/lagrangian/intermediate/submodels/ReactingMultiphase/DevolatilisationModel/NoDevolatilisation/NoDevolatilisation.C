@@ -38,6 +38,16 @@ Foam::NoDevolatilisation<CloudType>::NoDevolatilisation
 {}
 
 
+template<class CloudType>
+Foam::NoDevolatilisation<CloudType>::NoDevolatilisation
+(
+    const NoDevolatilisation<CloudType>& dm
+)
+:
+    DevolatilisationModel<CloudType>(dm.owner_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template <class CloudType>
@@ -69,7 +79,6 @@ Foam::scalar Foam::NoDevolatilisation<CloudType>::calculate
     // Model does not stop combustion taking place
     canCombust = true;
 
-    // Nothing more to do...
     return 0.0;
 }
 

@@ -293,7 +293,11 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     (
         particleProperties_.lookup("cellValueSourceCorrection")
     ),
-    rndGen_(label(0)),
+    rndGen_
+    (
+        label(0),
+        readLabel(particleProperties_.lookup("randomSampleSize"))
+    ),
     cellOccupancyPtr_(),
     rho_(rho),
     U_(U),

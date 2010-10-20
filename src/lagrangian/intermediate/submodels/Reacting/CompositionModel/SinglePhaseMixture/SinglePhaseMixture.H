@@ -83,6 +83,18 @@ public:
         //- Construct from dictionary
         SinglePhaseMixture(const dictionary& dict, CloudType& owner);
 
+        //- Construct copy
+        SinglePhaseMixture(const SinglePhaseMixture<CloudType>& cm);
+
+        //- Construct and return a clone
+        virtual autoPtr<CompositionModel<CloudType> > clone() const
+        {
+            return autoPtr<CompositionModel<CloudType> >
+            (
+                new SinglePhaseMixture<CloudType>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~SinglePhaseMixture();

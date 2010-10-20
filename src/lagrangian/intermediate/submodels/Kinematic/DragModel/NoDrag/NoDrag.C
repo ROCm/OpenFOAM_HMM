@@ -34,6 +34,13 @@ Foam::NoDrag<CloudType>::NoDrag(const dictionary& dict, CloudType& owner)
 {}
 
 
+template<class CloudType>
+Foam::NoDrag<CloudType>::NoDrag(const NoDrag<CloudType>& dm)
+:
+    DragModel<CloudType>(dm.owner_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template <class CloudType>

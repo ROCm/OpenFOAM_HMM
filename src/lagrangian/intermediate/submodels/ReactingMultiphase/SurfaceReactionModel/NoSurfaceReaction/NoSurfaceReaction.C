@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::NoSurfaceReaction<CloudType>::NoSurfaceReaction
 (
     const dictionary&,
@@ -35,6 +35,16 @@ Foam::NoSurfaceReaction<CloudType>::NoSurfaceReaction
 )
 :
     SurfaceReactionModel<CloudType>(owner)
+{}
+
+
+template<class CloudType>
+Foam::NoSurfaceReaction<CloudType>::NoSurfaceReaction
+(
+    const NoSurfaceReaction<CloudType>& srm
+)
+:
+    SurfaceReactionModel<CloudType>(srm.owner_)
 {}
 
 

@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "GradientDispersionRAS.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -35,8 +36,23 @@ Foam::GradientDispersionRAS<CloudType>::GradientDispersionRAS
 )
 :
     DispersionRASModel<CloudType>(dict, owner),
-    gradkPtr_(NULL)
+    gradkPtr_(NULL),
+    ownGradK_(false)
 {}
+
+
+template<class CloudType>
+Foam::GradientDispersionRAS<CloudType>::GradientDispersionRAS
+(
+    GradientDispersionRAS<CloudType>& dm
+)
+:
+    DispersionRASModel<CloudType>(dm),
+    gradkPtr_(dm.gradkPtr_),
+    ownGradK_(dm.ownGradK_)
+{
+    dm.ownGradK_ = false;
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -51,13 +67,6 @@ Foam::GradientDispersionRAS<CloudType>::~GradientDispersionRAS()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::GradientDispersionRAS<CloudType>::active() const
-{
-    return true;
-}
-
-
-template<class CloudType>
 void Foam::GradientDispersionRAS<CloudType>::cacheFields(const bool store)
 {
     DispersionRASModel<CloudType>::cacheFields(store);
@@ -65,13 +74,15 @@ void Foam::GradientDispersionRAS<CloudType>::cacheFields(const bool store)
     if (store)
     {
         gradkPtr_ = fvc::grad(*this->kPtr_).ptr();
+        ownGradK_ = true;
     }
     else
     {
-        if (gradkPtr_)
+        if (ownGradK_)
         {
-            delete gradkPtr_;
+            deleteDemandDrivenData(gradkPtr_);
             gradkPtr_ = NULL;
+            ownGradK_ = false;
         }
     }
 }
@@ -88,6 +99,8 @@ Foam::vector Foam::GradientDispersionRAS<CloudType>::update
     scalar& tTurb
 )
 {
+    cachedRandom& rnd = this->owner().rndGen();
+
     const scalar cps = 0.16432;
 
     const volScalarField& k = *this->kPtr_;
@@ -120,8 +133,8 @@ Foam::vector Foam::GradientDispersionRAS<CloudType>::update
             scalar rsq = 10.0;
             while ((rsq > 1.0) || (rsq == 0.0))
             {
-                x1 = 2.0*this->owner().rndGen().scalar01() - 1.0;
-                x2 = 2.0*this->owner().rndGen().scalar01() - 1.0;
+                x1 = 2.0*rnd.sample01<scalar>() - 1.0;
+                x2 = 2.0*rnd.sample01<scalar>() - 1.0;
                 rsq = x1*x1 + x2*x2;
             }
 

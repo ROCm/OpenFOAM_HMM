@@ -55,16 +55,16 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
 )
 :
     PatchInteractionModel<CloudType>(dict, cloud, typeName),
-    patchProperties_(this->coeffDict().lookup("patches")),
-    patchIds_(patchProperties_.size())
+    patchData_(this->coeffDict().lookup("patches")),
+    patchIds_(patchData_.size())
 {
     const polyMesh& mesh = cloud.mesh();
     const polyBoundaryMesh& bMesh = mesh.boundaryMesh();
 
     // check that user patches are valid region patches
-    forAll(patchProperties_, patchI)
+    forAll(patchData_, patchI)
     {
-        const word& patchName = patchProperties_[patchI].patchName();
+        const word& patchName = patchData_[patchI].patchName();
         patchIds_[patchI] = bMesh.findPatchID(patchName);
         if (patchIds_[patchI] < 0)
         {
@@ -97,16 +97,16 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
     }
 
     // check that interactions are valid/specified
-    forAll(patchProperties_, patchI)
+    forAll(patchData_, patchI)
     {
         const word& interactionTypeName =
-            patchProperties_[patchI].interactionTypeName();
+            patchData_[patchI].interactionTypeName();
         const typename PatchInteractionModel<CloudType>::interactionType& it =
             this->wordToInteractionType(interactionTypeName);
 
         if (it == PatchInteractionModel<CloudType>::itOther)
         {
-            const word& patchName = patchProperties_[patchI].patchName();
+            const word& patchName = patchData_[patchI].patchName();
             FatalErrorIn("LocalInteraction(const dictionary&, CloudType&)")
                 << "Unknown patch interaction type "
                 << interactionTypeName << " for patch " << patchName
@@ -118,6 +118,18 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
 }
 
 
+template<class CloudType>
+Foam::LocalInteraction<CloudType>::LocalInteraction
+(
+    const LocalInteraction<CloudType>& pim
+)
+:
+    PatchInteractionModel<CloudType>(pim),
+    patchData_(pim.patchData_),
+    patchIds_(pim.patchIds_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template <class CloudType>
@@ -126,13 +138,6 @@ Foam::LocalInteraction<CloudType>::~LocalInteraction()
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::LocalInteraction<CloudType>::active() const
-{
-    return true;
-}
-
 
 template <class CloudType>
 bool Foam::LocalInteraction<CloudType>::correct
@@ -155,7 +160,7 @@ bool Foam::LocalInteraction<CloudType>::correct
         typename PatchInteractionModel<CloudType>::interactionType it =
             this->wordToInteractionType
             (
-                patchProperties_[patchI].interactionTypeName()
+                patchData_[patchI].interactionTypeName()
             );
 
         switch (it)
@@ -192,10 +197,10 @@ bool Foam::LocalInteraction<CloudType>::correct
 
                 if (Un > 0)
                 {
-                    U -= (1.0 + patchProperties_[patchI].e())*Un*nw;
+                    U -= (1.0 + patchData_[patchI].e())*Un*nw;
                 }
 
-                U -= patchProperties_[patchI].mu()*Ut;
+                U -= patchData_[patchI].mu()*Ut;
 
                 // Return velocity to global space
                 U += Up;
@@ -208,15 +213,16 @@ bool Foam::LocalInteraction<CloudType>::correct
                 (
                     "bool LocalInteraction<CloudType>::correct"
                     "("
+                        "typename CloudType::parcelType&, "
                         "const polyPatch&, "
-                        "const label, "
                         "bool&, "
-                        "vector&"
+                        "scalar&, "
+                        "const tetIndices&"
                     ") const"
                 )   << "Unknown interaction type "
-                    << patchProperties_[patchI].interactionTypeName()
+                    << patchData_[patchI].interactionTypeName()
                     << "(" << it << ") for patch "
-                    << patchProperties_[patchI].patchName()
+                    << patchData_[patchI].patchName()
                     << ". Valid selections are:" << this->interactionTypeNames_
                     << endl << abort(FatalError);
             }

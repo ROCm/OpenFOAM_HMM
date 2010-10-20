@@ -37,9 +37,9 @@ void Foam::InjectionModel<CloudType>::readProps()
     IOobject propsDictHeader
     (
         "injectionProperties",
-        owner_.db().time().timeName(),
-        "uniform"/cloud::prefix/owner_.name(),
-        owner_.db(),
+        this->owner().db().time().timeName(),
+        "uniform"/cloud::prefix/this->owner().name(),
+        this->owner().db(),
         IOobject::MUST_READ_IF_MODIFIED,
         IOobject::NO_WRITE,
         false
@@ -60,16 +60,16 @@ void Foam::InjectionModel<CloudType>::readProps()
 template<class CloudType>
 void Foam::InjectionModel<CloudType>::writeProps()
 {
-    if (owner_.db().time().outputTime())
+    if (this->owner().db().time().outputTime())
     {
         IOdictionary propsDict
         (
             IOobject
             (
                 "injectionProperties",
-                owner_.db().time().timeName(),
-                "uniform"/cloud::prefix/owner_.name(),
-                owner_.db(),
+                this->owner().db().time().timeName(),
+                "uniform"/cloud::prefix/this->owner().name(),
+                this->owner().db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
@@ -83,6 +83,58 @@ void Foam::InjectionModel<CloudType>::writeProps()
 
         propsDict.regIOobject::write();
     }
+}
+
+
+template<class CloudType>
+Foam::label Foam::InjectionModel<CloudType>::parcelsToInject
+(
+    const scalar time0,
+    const scalar time1
+) const
+{
+    notImplemented
+    (
+        "Foam::label Foam::InjectionModel<CloudType>::parcelsToInject"
+        "("
+            "const scalar, "
+            "const scalar"
+        ") const"
+    );
+
+    return 0;
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::InjectionModel<CloudType>::volumeToInject
+(
+    const scalar time0,
+    const scalar time1
+) const
+{
+    notImplemented
+    (
+        "Foam::scalar Foam::InjectionModel<CloudType>::volumeToInject"
+        "("
+            "const scalar, "
+            "const scalar"
+        ") const"
+    );
+
+    return 0.0;
+}
+
+
+template<class CloudType>
+bool Foam::InjectionModel<CloudType>::validInjection(const label parcelI)
+{
+    notImplemented
+    (
+        "bool Foam::InjectionModel<CloudType>::validInjection(const label)"
+    );
+
+    return false;
 }
 
 
@@ -138,11 +190,11 @@ bool Foam::InjectionModel<CloudType>::findCellAtPosition
     bool errorOnNotFound
 )
 {
-    const volVectorField& cellCentres = owner_.mesh().C();
+    const volVectorField& cellCentres = this->owner().mesh().C();
 
     const vector p0 = position;
 
-    owner_.findCellFacePt
+    this->owner().findCellFacePt
     (
         position,
         cellI,
@@ -172,13 +224,13 @@ bool Foam::InjectionModel<CloudType>::findCellAtPosition
     // probably on an edge
     if (procI == -1)
     {
-        cellI = owner_.mesh().findNearestCell(position);
+        cellI = this->owner().mesh().findNearestCell(position);
 
         if (cellI >= 0)
         {
             position += SMALL*(cellCentres[cellI] - position);
 
-            if (owner_.mesh().pointInCell(position, cellI))
+            if (this->owner().mesh().pointInCell(position, cellI))
             {
                 procI = Pstream::myProcNo();
             }
@@ -283,7 +335,7 @@ void Foam::InjectionModel<CloudType>::postInjectCheck
     if (allParcelsAdded > 0)
     {
         Info<< nl
-            << "--> Cloud: " << owner_.name() << nl
+            << "--> Cloud: " << this->owner().name() << nl
             << "    Added " << allParcelsAdded << " new parcels" << nl << endl;
     }
 
@@ -294,7 +346,7 @@ void Foam::InjectionModel<CloudType>::postInjectCheck
     massInjected_ += returnReduce(massAdded, sumOp<scalar>());
 
     // Update time for start of next injection
-    time0_ = owner_.db().time().value();
+    time0_ = this->owner().db().time().value();
 
     // Increment number of injections
     nInjections_++;
@@ -309,9 +361,7 @@ void Foam::InjectionModel<CloudType>::postInjectCheck
 template<class CloudType>
 Foam::InjectionModel<CloudType>::InjectionModel(CloudType& owner)
 :
-    dict_(dictionary::null),
-    owner_(owner),
-    coeffDict_(dictionary::null),
+    SubModelBase<CloudType>(owner),
     SOI_(0.0),
     volumeTotal_(0.0),
     massTotal_(0.0),
@@ -335,12 +385,10 @@ Foam::InjectionModel<CloudType>::InjectionModel
     const word& type
 )
 :
-    dict_(dict),
-    owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs")),
-    SOI_(readScalar(coeffDict_.lookup("SOI"))),
+    SubModelBase<CloudType>(owner, dict, type),
+    SOI_(readScalar(this->coeffDict().lookup("SOI"))),
     volumeTotal_(0.0),
-    massTotal_(dimensionedScalar(coeffDict_.lookup("massTotal")).value()),
+    massTotal_(readScalar(this->coeffDict().lookup("massTotal"))),
     massInjected_(0.0),
     nInjections_(0),
     parcelsAddedTotal_(0),
@@ -355,7 +403,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
     Info<< "    Constructing " << owner.mesh().nGeometricD() << "-D injection"
         << endl;
 
-    const word parcelBasisType = coeffDict_.lookup("parcelBasisType");
+    const word parcelBasisType = this->coeffDict().lookup("parcelBasisType");
 
     if (parcelBasisType == "mass")
     {
@@ -373,7 +421,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
             << "variable now does not determine anything."
             << endl;
 
-        nParticleFixed_ = readScalar(coeffDict_.lookup("nParticle"));
+        nParticleFixed_ = readScalar(this->coeffDict().lookup("nParticle"));
     }
     else
     {
@@ -393,6 +441,26 @@ Foam::InjectionModel<CloudType>::InjectionModel
 }
 
 
+template<class CloudType>
+Foam::InjectionModel<CloudType>::InjectionModel
+(
+    const InjectionModel<CloudType>& im
+)
+:
+    SubModelBase<CloudType>(im),
+    SOI_(im.SOI_),
+    volumeTotal_(im.volumeTotal_),
+    massTotal_(im.massTotal_),
+    massInjected_(im.massInjected_),
+    nInjections_(im.nInjections_),
+    parcelsAddedTotal_(im.parcelsAddedTotal_),
+    parcelBasis_(im.parcelBasis_),
+    nParticleFixed_(im.nParticleFixed_),
+    time0_(im.time0_),
+    timeStep0_(im.timeStep0_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -403,17 +471,29 @@ Foam::InjectionModel<CloudType>::~InjectionModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
+Foam::scalar Foam::InjectionModel<CloudType>::timeEnd() const
+{
+    notImplemented
+    (
+        "Foam::scalar Foam::InjectionModel<CloudType>::timeEnd() const"
+    );
+
+    return 0.0;
+}
+
+
+template<class CloudType>
 template<class TrackData>
 void Foam::InjectionModel<CloudType>::inject(TrackData& td)
 {
-    if (!active())
+    if (this->active())
     {
         return;
     }
 
-    const scalar time = owner_.db().time().value();
-    const scalar carrierDt = owner_.db().time().deltaTValue();
-    const polyMesh& mesh = owner_.mesh();
+    const scalar time = this->owner().db().time().value();
+    const scalar carrierDt = this->owner().db().time().deltaTValue();
+    const polyMesh& mesh = this->owner().mesh();
 
     // Prepare for next time step
     label parcelsAdded = 0;
@@ -509,6 +589,68 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     }
 
     postInjectCheck(parcelsAdded, massAdded);
+}
+
+
+template<class CloudType>
+void Foam::InjectionModel<CloudType>::setPositionAndCell
+(
+    const label parcelI,
+    const label nParcels,
+    const scalar time,
+    vector& position,
+    label& cellOwner,
+    label& tetFaceI,
+    label& tetPtI
+)
+{
+    notImplemented
+    (
+        "void Foam::InjectionModel<CloudType>::setPositionAndCell"
+        "("
+            "const label, "
+            "const label, "
+            "const scalar, "
+            "vector&, "
+            "label&, "
+            "label&, "
+            "label&"
+        ")"
+    );
+}
+
+
+template<class CloudType>
+void Foam::InjectionModel<CloudType>::setProperties
+(
+    const label parcelI,
+    const label nParcels,
+    const scalar time,
+    typename CloudType::parcelType& parcel
+)
+{
+    notImplemented
+    (
+        "void Foam::InjectionModel<CloudType>::setProperties"
+        "("
+            "const label, "
+            "const label, "
+            "const scalar, "
+            "typename CloudType::parcelType&"
+        ")"
+    );
+}
+
+
+template<class CloudType>
+bool Foam::InjectionModel<CloudType>::fullyDescribed() const
+{
+    notImplemented
+    (
+        "bool Foam::InjectionModel<CloudType>::fullyDescribed() const"
+    );
+
+    return false;
 }
 
 

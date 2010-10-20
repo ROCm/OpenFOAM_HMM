@@ -51,19 +51,9 @@ namespace Foam
 
 template<class CloudType>
 class DragModel
+:
+    public SubModelBase<CloudType>
 {
-    // Private data
-
-        //- The cloud dictionary
-        const dictionary& dict_;
-
-        //- The model coefficients dictionary
-        const dictionary& coeffDict_;
-
-        //- Reference to the owner cloud class
-        CloudType& owner_;
-
-
 public:
 
     //- Runtime type information
@@ -96,6 +86,18 @@ public:
             const word& type
         );
 
+        //- Construct copy
+        DragModel(const DragModel<CloudType>& dm);
+
+        //- Construct and return a clone
+        virtual autoPtr<DragModel<CloudType> > clone() const
+        {
+            return autoPtr<DragModel<CloudType> >
+            (
+                new DragModel<CloudType>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~DragModel();
@@ -109,25 +111,10 @@ public:
     );
 
 
-    // Access
-
-        //- Return the owner cloud object
-        const CloudType& owner() const;
-
-        //- Return the dictionary
-        const dictionary& dict() const;
-
-        //- Return the coefficients dictionary
-        const dictionary& coeffDict() const;
-
-
     // Member Functions
 
-        //- Flag to indicate whether model activates drag model
-        virtual bool active() const = 0;
-
         //- Return drag coefficient
-        virtual scalar Cd(const scalar Re) const = 0;
+        virtual scalar Cd(const scalar Re) const;
 
         //- Return momentum transfer coefficient
         //  Drag force per unit particle surface area = utc(U - Up)

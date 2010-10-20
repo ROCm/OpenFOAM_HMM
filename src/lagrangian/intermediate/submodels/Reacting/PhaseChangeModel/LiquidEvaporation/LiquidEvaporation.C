@@ -106,6 +106,20 @@ Foam::LiquidEvaporation<CloudType>::LiquidEvaporation
 }
 
 
+template<class CloudType>
+Foam::LiquidEvaporation<CloudType>::LiquidEvaporation
+(
+    const LiquidEvaporation<CloudType>& pcm
+)
+:
+    PhaseChangeModel<CloudType>(pcm),
+    liquids_(pcm.owner().thermo().liquids()),
+    activeLiquids_(pcm.activeLiquids_),
+    liqToCarrierMap_(pcm.liqToCarrierMap_),
+    liqToLiqMap_(pcm.liqToLiqMap_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template <class CloudType>
@@ -114,13 +128,6 @@ Foam::LiquidEvaporation<CloudType>::~LiquidEvaporation()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::LiquidEvaporation<CloudType>::active() const
-{
-    return true;
-}
-
 
 template<class CloudType>
 void Foam::LiquidEvaporation<CloudType>::calculate

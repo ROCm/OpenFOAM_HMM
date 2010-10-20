@@ -59,6 +59,18 @@ public:
         //- Construct from dictionary
         NoDevolatilisation(const dictionary&, CloudType& owner);
 
+        //- Construct copy
+        NoDevolatilisation(const NoDevolatilisation<CloudType>& dm);
+
+        //- Construct and return a clone
+        virtual autoPtr<DevolatilisationModel<CloudType> > clone() const
+        {
+            return autoPtr<DevolatilisationModel<CloudType> >
+            (
+                new NoDevolatilisation<CloudType>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~NoDevolatilisation();

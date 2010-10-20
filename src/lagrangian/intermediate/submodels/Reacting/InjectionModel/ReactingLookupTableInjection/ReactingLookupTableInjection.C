@@ -122,6 +122,23 @@ Foam::ReactingLookupTableInjection<CloudType>::ReactingLookupTableInjection
 }
 
 
+template<class CloudType>
+Foam::ReactingLookupTableInjection<CloudType>::ReactingLookupTableInjection
+(
+    const ReactingLookupTableInjection<CloudType>& im
+)
+:
+    InjectionModel<CloudType>(im),
+    inputFileName_(im.inputFileName_),
+    duration_(im.duration_),
+    nParcelsPerSecond_(im.nParcelsPerSecond_),
+    injectors_(im.injectors_),
+    injectorCells_(im.injectorCells_),
+    injectorTetFaces_(im.injectorTetFaces_),
+    injectorTetPts_(im.injectorTetPts_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -130,13 +147,6 @@ Foam::ReactingLookupTableInjection<CloudType>::~ReactingLookupTableInjection()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::ReactingLookupTableInjection<CloudType>::active() const
-{
-    return true;
-}
-
 
 template<class CloudType>
 Foam::scalar Foam::ReactingLookupTableInjection<CloudType>::timeEnd() const

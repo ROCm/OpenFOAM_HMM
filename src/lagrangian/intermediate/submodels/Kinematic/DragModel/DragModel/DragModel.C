@@ -30,9 +30,7 @@ License
 template<class CloudType>
 Foam::DragModel<CloudType>::DragModel(CloudType& owner)
 :
-    dict_(dictionary::null),
-    coeffDict_(dictionary::null),
-    owner_(owner)
+    SubModelBase<CloudType>(owner)
 {}
 
 
@@ -44,9 +42,14 @@ Foam::DragModel<CloudType>::DragModel
     const word& type
 )
 :
-    dict_(dict),
-    coeffDict_(dict.subDict(type + "Coeffs")),
-    owner_(owner)
+    SubModelBase<CloudType>(owner, dict, type)
+{}
+
+
+template<class CloudType>
+Foam::DragModel<CloudType>::DragModel(const DragModel<CloudType>& dm)
+:
+    SubModelBase<CloudType>(dm)
 {}
 
 
@@ -60,23 +63,13 @@ Foam::DragModel<CloudType>::~DragModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-const CloudType& Foam::DragModel<CloudType>::owner() const
+Foam::scalar Foam::DragModel<CloudType>::Cd(const scalar) const
 {
-    return owner_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::DragModel<CloudType>::dict() const
-{
-    return dict_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::DragModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
+    notImplemented
+    (
+        "Foam::scalar Foam::DragModel<CloudType>::Cd(const scalar) const"
+    );
+    return 0.0;
 }
 
 

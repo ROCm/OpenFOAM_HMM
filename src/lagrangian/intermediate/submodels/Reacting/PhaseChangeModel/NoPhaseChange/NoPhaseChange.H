@@ -58,6 +58,18 @@ public:
         //- Construct from dictionary
         NoPhaseChange(const dictionary&, CloudType&);
 
+        //- Construct copy
+        NoPhaseChange(const NoPhaseChange<CloudType>& pcm);
+
+        //- Construct and return a clone
+        virtual autoPtr<PhaseChangeModel<CloudType> > clone() const
+        {
+            return autoPtr<PhaseChangeModel<CloudType> >
+            (
+                new NoPhaseChange<CloudType>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~NoPhaseChange();

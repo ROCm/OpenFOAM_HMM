@@ -49,7 +49,7 @@ SourceFiles
 #include "kinematicCloud.H"
 #include "IOdictionary.H"
 #include "autoPtr.H"
-#include "Random.H"
+#include "cachedRandom.H"
 #include "fvMesh.H"
 #include "volFields.H"
 #include "fvMatrices.H"
@@ -206,7 +206,7 @@ protected:
         const Switch cellValueSourceCorrection_;
 
         //- Random number generator - used by some injection routines
-        Random rndGen_;
+        cachedRandom rndGen_;
 
         //- Cell occupancy information for each parcel, (demand driven)
         autoPtr<List<DynamicList<ParcelType*> > > cellOccupancyPtr_;
@@ -358,7 +358,7 @@ public:
             // Cloud data
 
                 //- Return refernce to the random object
-                inline Random& rndGen();
+                inline cachedRandom& rndGen();
 
                 //- Return the cell occupancy information for each
                 //  parcel, non-const access, the caller is

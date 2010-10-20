@@ -56,11 +56,19 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        SphereDrag
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+        SphereDrag(const dictionary& dict, CloudType& owner);
+
+        //- Construct copy
+        SphereDrag(const SphereDrag<CloudType>& dm);
+
+        //- Construct and return a clone
+        virtual autoPtr<DragModel<CloudType> > clone() const
+        {
+            return autoPtr<DragModel<CloudType> >
+            (
+                new SphereDrag<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -68,9 +76,6 @@ public:
 
 
     // Member Functions
-
-        //- Flag to indicate whether model activates drag model
-        bool active() const;
 
         //- Return drag coefficient
         scalar Cd(const scalar Re) const;

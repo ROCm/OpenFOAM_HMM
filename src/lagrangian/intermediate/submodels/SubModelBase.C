@@ -24,68 +24,101 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NonSphereDrag.H"
+#include "SubModelBase.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::NonSphereDrag<CloudType>::NonSphereDrag
-(
-    const dictionary& dict,
-    CloudType& owner
-)
+Foam::SubModelBase<CloudType>::SubModelBase(CloudType& owner)
 :
-    DragModel<CloudType>(dict, owner, typeName),
-    phi_(readScalar(this->coeffDict().lookup("phi"))),
-    a_(exp(2.3288 - 6.4581*phi_ + 2.4486*sqr(phi_))),
-    b_(0.0964 + 0.5565*phi_),
-    c_(exp(4.9050 - 13.8944*phi_ + 18.4222*sqr(phi_) - 10.2599*pow3(phi_))),
-    d_(exp(1.4681 + 12.2584*phi_ - 20.7322*sqr(phi_) + 15.8855*pow3(phi_)))
-{
-    if (phi_ <= 0 || phi_ > 1)
-    {
-        FatalErrorIn
-        (
-            "NonSphereDrag<CloudType>::NonSphereDrag"
-            "("
-                "const dictionary&, "
-                "CloudType&"
-            ")"
-        )   << "Ratio of surface of sphere having same volume as particle to "
-            << "actual surface area of particle (phi) must be greater than 0 "
-            << "and less than or equal to 1" << exit(FatalError);
-    }
-}
+    owner_(owner),
+    dict_(dictionary::null),
+    coeffDict_(dictionary::null)
+{}
 
 
 template<class CloudType>
-Foam::NonSphereDrag<CloudType>::NonSphereDrag
+Foam::SubModelBase<CloudType>::SubModelBase
 (
-    const NonSphereDrag<CloudType>& dm
+    CloudType& owner,
+    const dictionary& dict,
+    const word& name
 )
 :
-    DragModel<CloudType>(dm),
-    phi_(dm.phi_),
-    a_(dm.a_),
-    b_(dm.b_),
-    c_(dm.c_),
-    d_(dm.d_)
+    owner_(owner),
+    dict_(dict),
+    coeffDict_(dict.subDict(name + "Coeffs"))
+{}
+
+
+template<class CloudType>
+Foam::SubModelBase<CloudType>::SubModelBase(const SubModelBase<CloudType>& smb)
+:
+    owner_(smb.owner_),
+    dict_(smb.dict_),
+    coeffDict_(smb.coeffDict_)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::NonSphereDrag<CloudType>::~NonSphereDrag()
+Foam::SubModelBase<CloudType>::~SubModelBase()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::scalar Foam::NonSphereDrag<CloudType>::Cd(const scalar Re) const
+const CloudType& Foam::SubModelBase<CloudType>::owner() const
 {
-    return 24.0/(Re + ROOTVSMALL)*(1.0 + a_*pow(Re, b_)) + Re*c_/(Re + d_);
+    return owner_;
+}
+
+
+template<class CloudType>
+const Foam::dictionary& Foam::SubModelBase<CloudType>::dict() const
+{
+    return dict_;
+}
+
+
+template<class CloudType>
+const Foam::dictionary& Foam::SubModelBase<CloudType>::coeffDict() const
+{
+    return coeffDict_;
+}
+
+
+template<class CloudType>
+CloudType& Foam::SubModelBase<CloudType>::owner()
+{
+    return owner_;
+}
+
+
+template<class CloudType>
+bool Foam::SubModelBase<CloudType>::active() const
+{
+    return true;
+}
+
+
+template<class CloudType>
+void  Foam::SubModelBase<CloudType>::cacheFields(const bool)
+{
+    // do nothing
+}
+
+
+template<class CloudType>
+void Foam::SubModelBase<CloudType>::write(Ostream& os) const
+{
+    os.writeKeyword("owner") << owner_.name() << token::END_STATEMENT << nl;
+
+    // not writing complete cloud dictionary, only coeffs
+//    os  << dict_;
+    os  << coeffDict_;
 }
 
 

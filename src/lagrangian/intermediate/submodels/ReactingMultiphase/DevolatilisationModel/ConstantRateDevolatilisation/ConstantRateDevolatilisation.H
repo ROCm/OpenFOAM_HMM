@@ -70,11 +70,22 @@ public:
     // Constructors
 
         //- Construct from dictionary
+        ConstantRateDevolatilisation(const dictionary& dict, CloudType& owner);
+
+        //- Construct copy
         ConstantRateDevolatilisation
         (
-            const dictionary& dict,
-            CloudType& owner
+            const ConstantRateDevolatilisation<CloudType>& dm
         );
+
+        //- Construct and return a clone
+        virtual autoPtr<DevolatilisationModel<CloudType> > clone() const
+        {
+            return autoPtr<DevolatilisationModel<CloudType> >
+            (
+                new ConstantRateDevolatilisation<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -82,9 +93,6 @@ public:
 
 
     // Member Functions
-
-        //- Flag to indicate whether model activates devolatilisation model
-        virtual bool active() const;
 
         //- Update model
         virtual scalar calculate

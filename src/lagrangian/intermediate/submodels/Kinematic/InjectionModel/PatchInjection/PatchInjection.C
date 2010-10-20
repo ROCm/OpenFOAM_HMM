@@ -76,6 +76,7 @@ Foam::PatchInjection<CloudType>::PatchInjection
 :
     InjectionModel<CloudType>(dict, owner, typeName),
     patchName_(this->coeffDict().lookup("patchName")),
+    patchId_(owner.mesh().boundaryMesh().findPatchID(patchName_)),
     duration_(readScalar(this->coeffDict().lookup("duration"))),
     parcelsPerSecond_
     (
@@ -84,26 +85,16 @@ Foam::PatchInjection<CloudType>::PatchInjection
     U0_(this->coeffDict().lookup("U0")),
     flowRateProfile_
     (
-        DataEntry<scalar>::New
-        (
-            "flowRateProfile",
-            this->coeffDict()
-        )
+        DataEntry<scalar>::New("flowRateProfile", this->coeffDict())
     ),
     parcelPDF_
     (
-        pdfs::pdf::New
-        (
-            this->coeffDict().subDict("parcelPDF"),
-            owner.rndGen()
-        )
+        pdfs::pdf::New(this->coeffDict().subDict("parcelPDF"), owner.rndGen())
     ),
-    injectorCells_(),
+    cellOwners_(),
     fraction_(1.0)
 {
-    const label patchId = owner.mesh().boundaryMesh().findPatchID(patchName_);
-
-    if (patchId < 0)
+    if (patchId_ < 0)
     {
         FatalErrorIn
         (
@@ -117,11 +108,11 @@ Foam::PatchInjection<CloudType>::PatchInjection
             << nl << exit(FatalError);
     }
 
-    const polyPatch& patch = owner.mesh().boundaryMesh()[patchId];
+    const polyPatch& patch = owner.mesh().boundaryMesh()[patchId_];
 
-    injectorCells_ = patch.faceCells();
+    cellOwners_ = patch.faceCells();
 
-    label patchSize = injectorCells_.size();
+    label patchSize = cellOwners_.size();
     label totalPatchSize = patchSize;
     reduce(totalPatchSize, sumOp<label>());
     fraction_ = scalar(patchSize)/totalPatchSize;
@@ -132,6 +123,25 @@ Foam::PatchInjection<CloudType>::PatchInjection
 }
 
 
+template<class CloudType>
+Foam::PatchInjection<CloudType>::PatchInjection
+(
+    const PatchInjection<CloudType>& im
+)
+:
+    InjectionModel<CloudType>(im),
+    patchName_(im.patchName_),
+    patchId_(im.patchId_),
+    duration_(im.duration_),
+    parcelsPerSecond_(im.parcelsPerSecond_),
+    U0_(im.U0_),
+    flowRateProfile_(im.flowRateProfile_().clone().ptr()),
+    parcelPDF_(im.parcelPDF_().clone().ptr()),
+    cellOwners_(im.cellOwners_),
+    fraction_(im.fraction_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -140,13 +150,6 @@ Foam::PatchInjection<CloudType>::~PatchInjection()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::PatchInjection<CloudType>::active() const
-{
-    return true;
-}
-
 
 template<class CloudType>
 Foam::scalar Foam::PatchInjection<CloudType>::timeEnd() const
@@ -167,26 +170,29 @@ void Foam::PatchInjection<CloudType>::setPositionAndCell
     label& tetPtI
 )
 {
-    if (injectorCells_.size() > 0)
+    if (cellOwners_.size() > 0)
     {
-        label cellI = this->owner().rndGen().integer
-        (
-            0,
-            injectorCells_.size() - 1
-        );
+        cachedRandom& rnd = this->owner().rndGen();
+        label cellI = rnd.position<label>(0, cellOwners_.size() - 1);
 
-        cellOwner = injectorCells_[cellI];
+        cellOwner = cellOwners_[cellI];
 
-        // The position is at the cell centre, which could be in any
-        // tet of the decomposed cell, so arbitrarily choose the first
-        // face of the cell as the tetFace and the first point after
-        // the base point on the face as the tetPt.  The tracking will
-        // pick the cell consistent with the motion in the first
-        // tracking step.
+        // The position is between the face and cell centre, which could be
+        // in any tet of the decomposed cell, so arbitrarily choose the first
+        // face of the cell as the tetFace and the first point after the base
+        // point on the face as the tetPt.  The tracking will pick the cell
+        // consistent with the motion in the firsttracking step.
         tetFaceI = this->owner().mesh().cells()[cellOwner][0];
         tetPtI = 1;
 
-        position = this->owner().mesh().C()[cellOwner];
+        // position perturbed between cell and patch face centres
+        const vector& pc = this->owner().mesh().C()[cellOwner];
+        const vector& pf =
+            this->owner().mesh().Cf().boundaryField()[patchId_][cellI];
+
+        const scalar a = rnd.sample01<scalar>();
+        const vector d = pf - pc;
+        position = pc + 0.5*a*d;
     }
     else
     {

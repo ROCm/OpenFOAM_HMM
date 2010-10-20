@@ -71,7 +71,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
 
     newParticles_.clear();
 
-    Random& rnd = this->owner().rndGen();
+    cachedRandom& rnd = this->owner().rndGen();
 
     // Diameter factor, when splitting particles into 4, this is the
     // factor that modifies the diameter.
@@ -118,7 +118,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
         }
 
         label cI =
-            generationCells_[rnd.integer(0, generationCells_.size() - 1)];
+            generationCells_[rnd.position(0, generationCells_.size() - 1)];
 
         // Pick a particle at random from the cell - if there are
         // none, insert one at the cell centre.  Otherwise, split an
@@ -146,7 +146,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
         }
         else
         {
-            label cPI = rnd.integer(0, cellOccupancy[cI].size() - 1);
+            label cPI = rnd.position(0, cellOccupancy[cI].size() - 1);
 
             // This has to be a reference to the pointer so that it
             // can be set to NULL when the particle is deleted.
@@ -157,7 +157,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
                 scalar pD = pPtr->d();
 
                 // Select bigger particles by preference
-                if ((pD/pPtr->dTarget()) < rnd.scalar01())
+                if ((pD/pPtr->dTarget()) < rnd.sample01<scalar>())
                 {
                     continue;
                 }
@@ -390,6 +390,29 @@ Foam::InflationInjection<CloudType>::InflationInjection
 }
 
 
+template<class CloudType>
+Foam::InflationInjection<CloudType>::InflationInjection
+(
+    const Foam::InflationInjection<CloudType>& im
+)
+:
+    InjectionModel<CloudType>(im),
+    generationSetName_(im.generationSetName_),
+    inflationSetName_(im.inflationSetName_),
+    generationCells_(im.generationCells_),
+    inflationCells_(im.inflationCells_),
+    duration_(im.duration_),
+    flowRateProfile_(im.flowRateProfile_().clone().ptr()),
+    growthRate_(im.growthRate_().clone().ptr()),
+    newParticles_(im.newParticles_),
+    volumeAccumulator_(im.volumeAccumulator_),
+    fraction_(im.fraction_),
+    selfSeed_(im.selfSeed_),
+    dSeed_(im.dSeed_),
+    parcelPDF_(im.parcelPDF_().clone().ptr())
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -398,13 +421,6 @@ Foam::InflationInjection<CloudType>::~InflationInjection()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::InflationInjection<CloudType>::active() const
-{
-    return true;
-}
-
 
 template<class CloudType>
 Foam::scalar Foam::InflationInjection<CloudType>::timeEnd() const

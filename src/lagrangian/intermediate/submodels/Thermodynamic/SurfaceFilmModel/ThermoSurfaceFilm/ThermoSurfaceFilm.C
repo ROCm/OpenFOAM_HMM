@@ -42,6 +42,18 @@ Foam::ThermoSurfaceFilm<CloudType>::ThermoSurfaceFilm
 {}
 
 
+template<class CloudType>
+Foam::ThermoSurfaceFilm<CloudType>::ThermoSurfaceFilm
+(
+    const ThermoSurfaceFilm<CloudType>& sfm
+)
+:
+    SurfaceFilmModel<CloudType>(sfm),
+    TFilmPatch_(sfm.TFilmPatch_),
+    CpFilmPatch_(sfm.CpFilmPatch_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -50,13 +62,6 @@ Foam::ThermoSurfaceFilm<CloudType>::~ThermoSurfaceFilm()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::ThermoSurfaceFilm<CloudType>::active() const
-{
-    return true;
-}
-
 
 template<class CloudType>
 bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel

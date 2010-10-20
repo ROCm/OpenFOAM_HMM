@@ -38,6 +38,16 @@ Foam::NoHeatTransfer<CloudType>::NoHeatTransfer
 {}
 
 
+template<class CloudType>
+Foam::NoHeatTransfer<CloudType>::NoHeatTransfer
+(
+    const NoHeatTransfer<CloudType>& htm
+)
+:
+    HeatTransferModel<CloudType>(htm.owner_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template <class CloudType>
@@ -46,13 +56,6 @@ Foam::NoHeatTransfer<CloudType>::~NoHeatTransfer()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template <class CloudType>
-bool Foam::NoHeatTransfer<CloudType>::active() const
-{
-    return false;
-}
-
 
 template <class CloudType>
 Foam::scalar Foam::NoHeatTransfer<CloudType>::Nu

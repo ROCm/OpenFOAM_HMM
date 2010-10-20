@@ -63,7 +63,20 @@ public:
     // Constructors
 
         //- Construct from dictionary
+        //- Construct from dictionary
         Rebound(const dictionary& dict, CloudType& cloud);
+
+        //- Construct copy
+        Rebound(const Rebound<CloudType>& pim);
+
+        //- Construct and return a clone
+        virtual autoPtr<PatchInteractionModel<CloudType> > clone() const
+        {
+            return autoPtr<PatchInteractionModel<CloudType> >
+            (
+                new Rebound<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -71,10 +84,6 @@ public:
 
 
     // Member Functions
-
-        //- Flag to indicate whether model activates patch interaction model
-        virtual bool active() const;
-
         //- Apply velocity correction
         //  Returns true if particle remains in same cell
         virtual bool correct

@@ -59,6 +59,18 @@ public:
         //- Construct from dictionary
         NoHeatTransfer(const dictionary&, CloudType& owner);
 
+        //- Construct copy
+        NoHeatTransfer(const NoHeatTransfer<CloudType>& im);
+
+        //- Construct and return a clone
+        virtual autoPtr<HeatTransferModel<CloudType> > clone() const
+        {
+            return autoPtr<HeatTransferModel<CloudType> >
+            (
+                new NoHeatTransfer<CloudType>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~NoHeatTransfer();
@@ -66,15 +78,8 @@ public:
 
     // Member Functions
 
-        //- Flag to indicate whether model activates heat transfer model
-        virtual bool active() const;
-
         //- Nusselt number
-        virtual scalar Nu
-        (
-            const scalar,
-            const scalar
-        ) const;
+        virtual scalar Nu(const scalar, const scalar) const;
 
         //- Prandtl number
         virtual scalar Pr() const;

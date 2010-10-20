@@ -39,6 +39,14 @@ Foam::Rebound<CloudType>::Rebound
 {}
 
 
+template<class CloudType>
+Foam::Rebound<CloudType>::Rebound(const Rebound<CloudType>& pim)
+:
+    PatchInteractionModel<CloudType>(pim),
+    UFactor_(pim.UFactor_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -47,13 +55,6 @@ Foam::Rebound<CloudType>::~Rebound()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::Rebound<CloudType>::active() const
-{
-    return true;
-}
-
 
 template<class CloudType>
 bool Foam::Rebound<CloudType>::correct

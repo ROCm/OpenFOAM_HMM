@@ -35,11 +35,8 @@ using namespace Foam::constant;
 template<class CloudType>
 Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel(CloudType& owner)
 :
-    dict_(dictionary::null),
-    owner_(owner),
+    SubModelBase<CloudType>(owner),
     g_(dimensionedVector("zero", dimAcceleration, vector::zero)),
-    coeffDict_(dictionary::null),
-    active_(false),
     massParcelPatch_(0),
     diameterParcelPatch_(0),
     UFilmPatch_(0),
@@ -58,17 +55,31 @@ Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel
     const word& type
 )
 :
-    dict_(dict),
-    owner_(owner),
+    SubModelBase<CloudType>(owner, dict, type),
     g_(g),
-    coeffDict_(dict.subDict(type + "Coeffs")),
-    active_(true),
     massParcelPatch_(0),
     diameterParcelPatch_(0),
     UFilmPatch_(0),
     rhoFilmPatch_(0),
     nParcelsTransferred_(0),
     nParcelsInjected_(0)
+{}
+
+
+template<class CloudType>
+Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel
+(
+    const SurfaceFilmModel<CloudType>& sfm
+)
+:
+    SubModelBase<CloudType>(sfm),
+    g_(sfm.g_),
+    massParcelPatch_(sfm.massParcelPatch_),
+    diameterParcelPatch_(sfm.diameterParcelPatch_),
+    UFilmPatch_(sfm.UFilmPatch_),
+    rhoFilmPatch_(sfm.rhoFilmPatch_),
+    nParcelsTransferred_(sfm.nParcelsTransferred_),
+    nParcelsInjected_(sfm.nParcelsInjected_)
 {}
 
 
@@ -82,10 +93,30 @@ Foam::SurfaceFilmModel<CloudType>::~SurfaceFilmModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
+bool Foam::SurfaceFilmModel<CloudType>::transferParcel
+(
+    const parcelType& p,
+    const label patchI
+)
+{
+    notImplemented
+    (
+        "bool Foam::SurfaceFilmModel<CloudType>::transferParcel"
+        "("
+            "const parcelType&, "
+            "const label"
+        ")"
+    );
+
+    return false;
+}
+
+
+template<class CloudType>
 template<class TrackData>
 void Foam::SurfaceFilmModel<CloudType>::inject(TrackData& td)
 {
-    if (!active_)
+    if (!this->active())
     {
         return;
     }
@@ -198,6 +229,13 @@ void Foam::SurfaceFilmModel<CloudType>::setParcelProperties
     p.rho() = rhoFilmPatch_[filmFaceI];
 
     p.nParticle() = massParcelPatch_[filmFaceI]/p.rho()/vol;
+}
+
+
+template<class CloudType>
+void Foam::SurfaceFilmModel<CloudType>::info(Ostream& os) const
+{
+    // do nothing
 }
 
 

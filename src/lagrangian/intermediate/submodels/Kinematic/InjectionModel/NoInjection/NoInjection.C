@@ -63,6 +63,13 @@ Foam::NoInjection<CloudType>::NoInjection
 {}
 
 
+template<class CloudType>
+Foam::NoInjection<CloudType>::NoInjection(const NoInjection<CloudType>& im)
+:
+    InjectionModel<CloudType>(im.owner_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>

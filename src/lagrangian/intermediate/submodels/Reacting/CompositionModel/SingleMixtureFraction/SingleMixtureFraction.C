@@ -135,6 +135,20 @@ Foam::SingleMixtureFraction<CloudType>::SingleMixtureFraction
 }
 
 
+template<class CloudType>
+Foam::SingleMixtureFraction<CloudType>::SingleMixtureFraction
+(
+    const SingleMixtureFraction<CloudType>& cm
+)
+:
+    CompositionModel<CloudType>(cm),
+    idGas_(cm.idGas_),
+    idLiquid_(cm.idLiquid_),
+    idSolid_(cm.idSolid_),
+    YMixture0_(cm.YMixture0_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>

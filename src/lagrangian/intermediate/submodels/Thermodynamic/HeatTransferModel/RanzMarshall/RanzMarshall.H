@@ -58,11 +58,19 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        RanzMarshall
-        (
-            const dictionary& dict,
-            CloudType& cloud
-        );
+        RanzMarshall(const dictionary& dict, CloudType& cloud);
+
+        //- Construct copy
+        RanzMarshall(const RanzMarshall<CloudType>& im);
+
+        //- Construct and return a clone
+        virtual autoPtr<HeatTransferModel<CloudType> > clone() const
+        {
+            return autoPtr<HeatTransferModel<CloudType> >
+            (
+                new RanzMarshall<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -70,12 +78,6 @@ public:
 
 
     // Member Functions
-
-        // Access
-
-            //- Flag to indicate whether model activates heat transfer model
-            virtual bool active() const;
-
 
         // Evaluation
 

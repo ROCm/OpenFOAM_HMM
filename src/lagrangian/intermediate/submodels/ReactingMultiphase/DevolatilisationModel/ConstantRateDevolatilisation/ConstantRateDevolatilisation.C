@@ -43,6 +43,18 @@ Foam::ConstantRateDevolatilisation<CloudType>::ConstantRateDevolatilisation
 {}
 
 
+template <class CloudType>
+Foam::ConstantRateDevolatilisation<CloudType>::ConstantRateDevolatilisation
+(
+    const ConstantRateDevolatilisation<CloudType>& dm
+)
+:
+    DevolatilisationModel<CloudType>(dm),
+    A0_(dm.A0_),
+    volatileResidualCoeff_(dm.volatileResidualCoeff_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template <class CloudType>
@@ -51,13 +63,6 @@ Foam::ConstantRateDevolatilisation<CloudType>::~ConstantRateDevolatilisation()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::ConstantRateDevolatilisation<CloudType>::active() const
-{
-    return true;
-}
-
 
 template<class CloudType>
 Foam::scalar Foam::ConstantRateDevolatilisation<CloudType>::calculate

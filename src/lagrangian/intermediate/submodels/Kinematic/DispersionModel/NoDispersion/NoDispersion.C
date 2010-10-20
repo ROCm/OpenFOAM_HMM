@@ -28,13 +28,16 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::NoDispersion<CloudType>::NoDispersion
-(
-    const dictionary&,
-    CloudType& owner
-)
+Foam::NoDispersion<CloudType>::NoDispersion(const dictionary&, CloudType& owner)
 :
     DispersionModel<CloudType>(owner)
+{}
+
+
+template<class CloudType>
+Foam::NoDispersion<CloudType>::NoDispersion(NoDispersion<CloudType>& dm)
+:
+    DispersionModel<CloudType>(dm.owner_)
 {}
 
 
@@ -51,13 +54,6 @@ template<class CloudType>
 bool Foam::NoDispersion<CloudType>::active() const
 {
     return false;
-}
-
-
-template<class CloudType>
-void Foam::NoDispersion<CloudType>::cacheFields(const bool)
-{
-// do nothing
 }
 
 

@@ -110,15 +110,24 @@ public:
         //- Construct from dictionary
         NonSphereDrag(const dictionary& dict, CloudType& owner);
 
+        //- Construct copy
+        NonSphereDrag(const NonSphereDrag<CloudType>& dm);
+
+        //- Construct and return a clone
+        virtual autoPtr<DragModel<CloudType> > clone() const
+        {
+            return autoPtr<DragModel<CloudType> >
+            (
+                new NonSphereDrag<CloudType>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~NonSphereDrag();
 
 
     // Member Functions
-
-        //- Flag to indicate whether model activates drag model
-        bool active() const;
 
         //- Return drag coefficient
         scalar Cd(const scalar Re) const;

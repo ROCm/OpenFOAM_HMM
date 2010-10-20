@@ -89,43 +89,14 @@ Foam::ConeInjection<CloudType>::ConeInjection
     ),
     flowRateProfile_
     (
-        DataEntry<scalar>::New
-        (
-            "flowRateProfile",
-            this->coeffDict()
-        )
+        DataEntry<scalar>::New("flowRateProfile", this->coeffDict())
     ),
-    Umag_
-    (
-        DataEntry<scalar>::New
-        (
-            "Umag",
-            this->coeffDict()
-        )
-    ),
-    thetaInner_
-    (
-        DataEntry<scalar>::New
-        (
-            "thetaInner",
-            this->coeffDict()
-        )
-    ),
-    thetaOuter_
-    (
-        DataEntry<scalar>::New
-        (
-            "thetaOuter",
-            this->coeffDict()
-        )
-    ),
+    Umag_(DataEntry<scalar>::New("Umag", this->coeffDict())),
+    thetaInner_(DataEntry<scalar>::New("thetaInner", this->coeffDict())),
+    thetaOuter_(DataEntry<scalar>::New("thetaOuter", this->coeffDict())),
     parcelPDF_
     (
-        pdfs::pdf::New
-        (
-            this->coeffDict().subDict("parcelPDF"),
-            owner.rndGen()
-        )
+        pdfs::pdf::New(this->coeffDict().subDict("parcelPDF"), owner.rndGen())
     ),
     tanVec1_(vector::zero),
     tanVec2_(vector::zero)
@@ -137,9 +108,10 @@ Foam::ConeInjection<CloudType>::ConeInjection
     vector tangent = vector::zero;
     scalar magTangent = 0.0;
 
+    cachedRandom& rnd = this->owner().rndGen();
     while (magTangent < SMALL)
     {
-        vector v = this->owner().rndGen().vector01();
+        vector v = rnd.sample01<vector>();
 
         tangent = v - (v & direction_)*direction_;
         magTangent = mag(tangent);
@@ -162,6 +134,30 @@ Foam::ConeInjection<CloudType>::ConeInjection
 }
 
 
+template<class CloudType>
+Foam::ConeInjection<CloudType>::ConeInjection
+(
+    const ConeInjection<CloudType>& im
+)
+:
+    InjectionModel<CloudType>(im),
+    duration_(im.duration_),
+    position_(im.position_),
+    injectorCell_(im.injectorCell_),
+    injectorTetFace_(im.injectorTetFace_),
+    injectorTetPt_(im.injectorTetPt_),
+    direction_(im.direction_),
+    parcelsPerSecond_(im.parcelsPerSecond_),
+    flowRateProfile_(im.flowRateProfile_().clone().ptr()),
+    Umag_(im.Umag_().clone().ptr()),
+    thetaInner_(im.thetaInner_().clone().ptr()),
+    thetaOuter_(im.thetaOuter_().clone().ptr()),
+    parcelPDF_(im.parcelPDF_().clone().ptr()),
+    tanVec1_(im.tanVec1_),
+    tanVec2_(im.tanVec2_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -170,13 +166,6 @@ Foam::ConeInjection<CloudType>::~ConeInjection()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::ConeInjection<CloudType>::active() const
-{
-    return true;
-}
-
 
 template<class CloudType>
 Foam::scalar Foam::ConeInjection<CloudType>::timeEnd() const
@@ -207,24 +196,26 @@ void Foam::ConeInjection<CloudType>::setPositionAndCell
 template<class CloudType>
 void Foam::ConeInjection<CloudType>::setProperties
 (
-    const label parcelI,
+    const label,
     const label,
     const scalar time,
     typename CloudType::parcelType& parcel
 )
 {
+    cachedRandom& rnd = this->owner().rndGen();
+
     // set particle velocity
     const scalar deg2Rad = pi/180.0;
 
     scalar t = time - this->SOI_;
     scalar ti = thetaInner_().value(t);
     scalar to = thetaOuter_().value(t);
-    scalar coneAngle = this->owner().rndGen().scalar01()*(to - ti) + ti;
+    scalar coneAngle = deg2Rad*rnd.position<scalar>(ti, to);
 
     coneAngle *= deg2Rad;
     scalar alpha = sin(coneAngle);
     scalar dcorr = cos(coneAngle);
-    scalar beta = twoPi*this->owner().rndGen().scalar01();
+    scalar beta = twoPi*rnd.sample01<scalar>();
 
     vector normal = alpha*(tanVec1_*cos(beta) + tanVec2_*sin(beta));
     vector dirVec = dcorr*direction_;
