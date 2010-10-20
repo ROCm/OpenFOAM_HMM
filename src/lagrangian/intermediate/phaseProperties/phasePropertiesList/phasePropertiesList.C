@@ -27,6 +27,14 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::phasePropertiesList::phasePropertiesList()
+:
+    props_(),
+    phaseTypeNames_(),
+    stateLabels_()
+{}
+
+
 Foam::phasePropertiesList::phasePropertiesList
 (
     Istream& is,

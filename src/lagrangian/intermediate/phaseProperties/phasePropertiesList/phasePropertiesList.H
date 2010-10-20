@@ -65,14 +65,20 @@ class phasePropertiesList
 
 public:
 
-    //- Constructor
-    phasePropertiesList
-    (
-        Istream& is,
-        const wordList& gasNames,
-        const wordList& liquidNames,
-        const wordList& solidNames
-    );
+     // Constructors
+
+        //- Construct null
+        phasePropertiesList();
+
+        //- Construct from components
+        phasePropertiesList
+        (
+            Istream& is,
+            const wordList& gasNames,
+            const wordList& liquidNames,
+            const wordList& solidNames
+        );
+
 
     //- Destructor
     ~phasePropertiesList();
