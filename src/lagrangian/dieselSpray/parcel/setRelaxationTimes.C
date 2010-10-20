@@ -65,7 +65,7 @@ void Foam::parcel::setRelaxationTimes
     // calculate mixture properties
     scalar W = 0.0;
     scalar kMixture = 0.0;
-    scalar cpMixture = 0.0;
+    scalar CpMixture = 0.0;
     scalar muf = 0.0;
 
     for (label i=0; i<Ns; i++)
@@ -74,7 +74,7 @@ void Foam::parcel::setRelaxationTimes
         W += Y/sDB.gasProperties()[i].W();
         // Using mass-fractions to average...
         kMixture += Y*sDB.gasProperties()[i].kappa(Tf);
-        cpMixture += Y*sDB.gasProperties()[i].Cp(Tf);
+        CpMixture += Y*sDB.gasProperties()[i].Cp(Tf);
         muf += Y*sDB.gasProperties()[i].mu(Tf);
     }
     W = 1.0/W;
@@ -98,7 +98,7 @@ void Foam::parcel::setRelaxationTimes
     scalar nuf = muf/rho;
 
     scalar liquidDensity = fuels.rho(pressure, T(), X());
-    scalar liquidcL = fuels.cp(pressure, T(), X());
+    scalar liquidcL = fuels.Cp(pressure, T(), X());
     scalar heatOfVapour = fuels.hl(pressure, T(), X());
 
     // calculate the partial rho of the fuel vapour
@@ -130,7 +130,7 @@ void Foam::parcel::setRelaxationTimes
     }
 
     scalar Reynolds = Re(Up, nuf);
-    scalar Prandtl = Pr(cpMixture, muf, kMixture);
+    scalar Prandtl = Pr(CpMixture, muf, kMixture);
 
     // calculate the characteritic times
 
@@ -280,7 +280,7 @@ void Foam::parcel::setRelaxationTimes
                 tauBoiling[i] = sDB.evaporation().boilingTime
                 (
                     fuels.properties()[i].rho(pressure, Td),
-                    fuels.properties()[i].cp(pressure, Td),
+                    fuels.properties()[i].Cp(pressure, Td),
                     heatOfVapour,
                     kMixture,
                     Nusselt,
@@ -292,7 +292,7 @@ void Foam::parcel::setRelaxationTimes
                     tBoilingSurface,
                     vapourSurfaceEnthalpy,
                     vapourFarEnthalpy,
-                    cpMixture,
+                    CpMixture,
                     temperature,
                     kLiquid
                 );

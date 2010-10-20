@@ -138,7 +138,7 @@ public:
             const vector& axisOfSymmetry,
             const vector& axisOfWedge,
             const vector& axisOfWedgeNormal,
-            Random& rndGen
+            cachedRandom& rndGen
         ) const;
 
         //- Return the number of holes

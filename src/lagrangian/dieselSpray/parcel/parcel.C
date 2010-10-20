@@ -521,7 +521,7 @@ void Foam::parcel::updateParcelProperties
 
         scalar Taverage = TDroplet + (Tg - TDroplet)/3.0;
         // for a liquid Cl \approx Cp
-        scalar liquidcL = sDB.fuels().cp(pg, TDroplet, X());
+        scalar liquidcL = sDB.fuels().Cp(pg, TDroplet, X());
 
         cpMix = 0.0;
         for (label i=0; i<Ns; i++)

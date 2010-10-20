@@ -37,7 +37,7 @@ Foam::autoPtr<Foam::collisionModel> Foam::collisionModel::New
 (
     const dictionary& dict,
     spray& sm,
-    Random& rndGen
+    cachedRandom& rndGen
 )
 {
     const word modelType(dict.lookup("collisionModel"));

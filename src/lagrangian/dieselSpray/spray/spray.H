@@ -39,7 +39,7 @@ Description
 #include "liquid.H"
 #include "autoPtr.H"
 #include "liquidMixture.H"
-#include "Random.H"
+#include "cachedRandom.H"
 #include "thermoPhysicsTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -76,7 +76,7 @@ class spray
             const fvMesh& mesh_;
 
             //- Random number generator
-            Random rndGen_;
+            cachedRandom rndGen_;
 
         //- Acceleration due to gravity
         const vector& g_;
@@ -250,7 +250,7 @@ public:
             inline tmp<volScalarField> evaporationSource(const label i) const;
             inline tmp<volScalarField> heatTransferSource() const;
 
-            inline Random& rndGen();
+            inline cachedRandom& rndGen();
             inline label subCycles() const;
             inline const vector& g() const;
 

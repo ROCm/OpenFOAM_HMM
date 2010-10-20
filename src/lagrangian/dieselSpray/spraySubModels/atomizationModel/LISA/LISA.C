@@ -54,7 +54,6 @@ Foam::LISA::LISA
 :
     atomizationModel(dict, sm),
     coeffsDict_(dict.subDict(typeName + "Coeffs")),
-    rndGen_(sm.rndGen()),
     Cl_(readScalar(coeffsDict_.lookup("Cl"))),
     cTau_(readScalar(coeffsDict_.lookup("cTau"))),
     Q_(readScalar(coeffsDict_.lookup("Q"))),
@@ -361,8 +360,8 @@ void Foam::LISA::atomizeParcel
 
         do
         {
-            x = minValue + range*rndGen_.scalar01();
-            y = rndGen_.scalar01();
+            x = minValue + range*rndGen_.sample01<scalar>();
+            y = rndGen_.sample01<scalar>();
 
             scalar xx = pow(x/dD, nExp);
 
