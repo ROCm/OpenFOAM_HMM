@@ -141,6 +141,11 @@ public:
             //- Particle constant properties
             const constantProperties& constProps_;
 
+            //- Local copy of specific heat field
+            //  Cp not stored on acrrier thermo, but returned as tmp<...>
+            const volScalarField Cp_;
+
+
             // Interpolators for continuous phase fields
 
                 //- Temperature field interpolator
@@ -158,7 +163,6 @@ public:
             inline trackData
             (
                 ThermoCloud<ParcelType>& cloud,
-                const interpolation<scalar>& CpInterp,
                 typename KinematicParcel<ParcelType>::trackData::trackPart
                     part = KinematicParcel<ParcelType>::trackData::tpLinearTrack
             );

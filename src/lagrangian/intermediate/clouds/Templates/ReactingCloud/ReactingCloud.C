@@ -67,15 +67,7 @@ void Foam::ReactingCloud<ParcelType>::preEvolve()
 template<class ParcelType>
 void Foam::ReactingCloud<ParcelType>::evolveCloud()
 {
-    const volScalarField Cp = this->thermo().thermo().Cp();
-
-    autoPtr<interpolation<scalar> > CpInterp = interpolation<scalar>::New
-    (
-        this->solution().interpolationSchemes(),
-        Cp
-    );
-
-    typename ParcelType::trackData td(*this, CpInterp());
+    typename ParcelType::trackData td(*this);
 
     label preInjectionSize = this->size();
 

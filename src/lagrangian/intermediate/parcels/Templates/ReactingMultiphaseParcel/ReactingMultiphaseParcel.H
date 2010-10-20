@@ -127,7 +127,6 @@ public:
             inline trackData
             (
                 ReactingMultiphaseCloud<ParcelType>& cloud,
-                const interpolation<scalar>& CpInterp,
                 typename ReactingParcel<ParcelType>::trackData::trackPart
                     part = ReactingParcel<ParcelType>::trackData::tpLinearTrack
              );

@@ -45,13 +45,24 @@ template<class ParcelType>
 inline Foam::ThermoParcel<ParcelType>::trackData::trackData
 (
     ThermoCloud<ParcelType>& cloud,
-    const interpolation<scalar>& CpInterp,
     typename KinematicParcel<ParcelType>::trackData::trackPart part
 )
 :
     KinematicParcel<ParcelType>::trackData(cloud, part),
     cloud_(cloud),
     constProps_(cloud.constProps()),
+    Cp_
+    (
+        IOobject
+        (
+            "Cp",
+            cloud.db().time().timeName(),
+            cloud.db(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        cloud.thermo().thermo().Cp()
+    ),
     TInterp_
     (
         interpolation<scalar>::New
@@ -60,7 +71,14 @@ inline Foam::ThermoParcel<ParcelType>::trackData::trackData
             cloud.T()
         )
     ),
-    CpInterp_(CpInterp)
+    CpInterp_
+    (
+        interpolation<scalar>::New
+        (
+            cloud.solution().interpolationSchemes(),
+            Cp_
+        )
+    )
 {}
 
 

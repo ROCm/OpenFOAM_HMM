@@ -139,7 +139,6 @@ public:
             inline trackData
             (
                 ReactingCloud<ParcelType>& cloud,
-                const interpolation<scalar>& CpInterp,
                 typename ThermoParcel<ParcelType>::trackData::trackPart
                     part = ThermoParcel<ParcelType>::trackData::tpLinearTrack
             );
