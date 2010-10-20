@@ -48,7 +48,6 @@ inline Foam::ReactingParcel<ParcelType>::trackData::trackData
 :
     ThermoParcel<ParcelType>::trackData(cloud, part),
     cloud_(cloud),
-    constProps_(cloud.constProps()),
     pInterp_
     (
         interpolation<scalar>::New
@@ -164,14 +163,6 @@ inline Foam::ReactingCloud<ParcelType>&
 Foam::ReactingParcel<ParcelType>::trackData::cloud()
 {
     return cloud_;
-}
-
-
-template<class ParcelType>
-inline const typename Foam::ReactingParcel<ParcelType>::constantProperties&
-Foam::ReactingParcel<ParcelType>::trackData::constProps() const
-{
-    return constProps_;
 }
 
 

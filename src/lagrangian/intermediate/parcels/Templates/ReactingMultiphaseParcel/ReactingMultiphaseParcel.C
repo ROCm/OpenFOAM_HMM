@@ -422,7 +422,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     // Remove the particle when mass falls below minimum threshold
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    if (mass1 < td.constProps().minParticleMass())
+    if (mass1 < td.cloud().constProps().minParticleMass())
     {
         td.keepParticle = false;
 
@@ -469,7 +469,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         this->U_ = U1;
 
         // Update particle density or diameter
-        if (td.constProps().constantVolume())
+        if (td.cloud().constProps().constantVolume())
         {
             this->rho_ = mass1/this->volume();
         }
@@ -541,8 +541,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
         const scalar beta = sqr(cbrt(15.0) + cbrt(15.0));
         const label id =
             td.cloud().composition().localToGlobalCarrierId(GAS, i);
-        const scalar Cp = td.cloud().mcCarrierThermo().speciesData()[id].Cp(Ts);
-        const scalar W = td.cloud().mcCarrierThermo().speciesData()[id].W();
+        const scalar Cp = td.cloud().thermo().carrier().Cp(id, Ts);
+        const scalar W = td.cloud().thermo().carrier().W(id);
         const scalar Ni = dMassDV[i]/(this->areaS(d)*dt*W);
 
         // Dab calc'd using API vapour mass diffusivity function
@@ -615,12 +615,12 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
     );
 
     const scalar xsi = min(T/5000.0, 1.0);
-    const scalar hRetentionCoeffMod =
-        (1.0 - xsi*xsi)*td.constProps().hRetentionCoeff();
+    const scalar coeff =
+        (1.0 - xsi*xsi)*td.cloud().constProps().hRetentionCoeff();
 
-    Sh += hRetentionCoeffMod*hReaction/dt;
+    Sh += coeff*hReaction/dt;
 
-    dhsTrans += (1.0 - hRetentionCoeffMod)*hReaction;
+    dhsTrans += (1.0 - coeff)*hReaction;
 }
 
 

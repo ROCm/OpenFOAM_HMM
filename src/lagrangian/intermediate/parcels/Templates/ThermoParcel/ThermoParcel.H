@@ -138,9 +138,6 @@ public:
             //- Reference to the cloud containing this particle
             ThermoCloud<ParcelType>& cloud_;
 
-            //- Particle constant properties
-            const constantProperties& constProps_;
-
             //- Local copy of specific heat field
             //  Cp not stored on acrrier thermo, but returned as tmp<...>
             const volScalarField Cp_;
@@ -172,9 +169,6 @@ public:
 
             //- Return access to the owner cloud
             inline ThermoCloud<ParcelType>& cloud();
-
-            //- Return const access to the owner cloud
-            inline const constantProperties& constProps() const;
 
             //- Return const access to the interpolator for continuous
             //  phase temperature field

@@ -50,7 +50,6 @@ inline Foam::ThermoParcel<ParcelType>::trackData::trackData
 :
     KinematicParcel<ParcelType>::trackData(cloud, part),
     cloud_(cloud),
-    constProps_(cloud.constProps()),
     Cp_
     (
         IOobject
@@ -200,14 +199,6 @@ inline Foam::ThermoCloud<ParcelType>&
 Foam::ThermoParcel<ParcelType>::trackData::cloud()
 {
     return cloud_;
-}
-
-
-template <class ParcelType>
-inline const typename Foam::ThermoParcel<ParcelType>::constantProperties&
-Foam::ThermoParcel<ParcelType>::trackData::constProps() const
-{
-    return constProps_;
 }
 
 

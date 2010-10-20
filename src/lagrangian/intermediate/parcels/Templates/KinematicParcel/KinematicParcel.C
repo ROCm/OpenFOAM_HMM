@@ -40,7 +40,7 @@ void Foam::KinematicParcel<ParcelType>::setCellValues
 
     rhoc_ = td.rhoInterp().interpolate(this->position(), tetIs);
 
-    if (rhoc_ < td.constProps().rhoMin())
+    if (rhoc_ < td.cloud().constProps().rhoMin())
     {
         WarningIn
         (
@@ -51,9 +51,9 @@ void Foam::KinematicParcel<ParcelType>::setCellValues
                 "const label"
             ")"
         )   << "Limiting observed density in cell " << cellI << " to "
-            << td.constProps().rhoMin() <<  nl << endl;
+            << td.cloud().constProps().rhoMin() <<  nl << endl;
 
-        rhoc_ = td.constProps().rhoMin();
+        rhoc_ = td.cloud().constProps().rhoMin();
     }
 
     Uc_ = td.UInterp().interpolate(this->position(), tetIs);

@@ -48,7 +48,7 @@ void Foam::ReactingParcel<ParcelType>::setCellValues
         this->currentTetIndices()
     );
 
-    if (pc_ < td.constProps().pMin())
+    if (pc_ < td.cloud().constProps().pMin())
     {
         WarningIn
         (
@@ -59,9 +59,9 @@ void Foam::ReactingParcel<ParcelType>::setCellValues
                 "const label"
             ")"
         )   << "Limiting observed pressure in cell " << cellI << " to "
-            << td.constProps().pMin() <<  nl << endl;
+            << td.cloud().constProps().pMin() <<  nl << endl;
 
-        pc_ = td.constProps().pMin();
+        pc_ = td.cloud().constProps().pMin();
     }
 }
 
@@ -352,7 +352,7 @@ void Foam::ReactingParcel<ParcelType>::calc
 
     // Remove the particle when mass falls below minimum threshold
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if (mass1 < td.constProps().minParticleMass())
+    if (mass1 < td.cloud().constProps().minParticleMass())
     {
         td.keepParticle = false;
 
@@ -382,7 +382,7 @@ void Foam::ReactingParcel<ParcelType>::calc
         this->U_ = U1;
 
         // Update particle density or diameter
-        if (td.constProps().constantVolume())
+        if (td.cloud().constProps().constantVolume())
         {
             this->rho_ = mass1/this->volume();
         }
@@ -425,7 +425,7 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     if
     (
         !td.cloud().phaseChange().active()
-     || T < td.constProps().Tvap()
+     || T < td.cloud().constProps().Tvap()
      || YPhase < SMALL
     )
     {

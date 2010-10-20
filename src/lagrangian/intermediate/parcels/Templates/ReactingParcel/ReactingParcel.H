@@ -121,9 +121,6 @@ public:
             //- Reference to the cloud containing this particle
             ReactingCloud<ParcelType>& cloud_;
 
-            //- Particle constant properties
-            const constantProperties& constProps_;
-
             //- Interpolator for continuous phase pressure field
             const interpolation<scalar>& pInterp_;
 
@@ -148,9 +145,6 @@ public:
 
             //- Return access to the owner cloud
             inline ReactingCloud<ParcelType>& cloud();
-
-            //- Return const access to the constant properties
-            inline const constantProperties& constProps() const;
 
             //- Return const access to the interpolator for continuous
             //  phase pressure field

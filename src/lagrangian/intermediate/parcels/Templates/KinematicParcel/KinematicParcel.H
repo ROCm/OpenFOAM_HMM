@@ -168,9 +168,6 @@ public:
             //- Reference to the cloud containing this particle
             KinematicCloud<ParcelType>& cloud_;
 
-            //- Particle constant properties
-            const constantProperties& constProps_;
-
 
             // Interpolators for continuous phase fields
 
@@ -208,9 +205,6 @@ public:
 
             //- Return access to the owner cloud
             inline KinematicCloud<ParcelType>& cloud();
-
-            //- Return const access to the constant properties
-            inline const constantProperties& constProps() const;
 
             //- Return conat access to the interpolator for continuous
             //  phase density field

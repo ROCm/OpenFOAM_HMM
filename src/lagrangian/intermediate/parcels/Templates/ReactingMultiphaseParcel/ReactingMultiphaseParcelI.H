@@ -58,8 +58,7 @@ inline Foam::ReactingMultiphaseParcel<ParcelType>::trackData::trackData
 )
 :
     ReactingParcel<ParcelType>::trackData(cloud, part),
-    cloud_(cloud),
-    constProps_(cloud.constProps())
+    cloud_(cloud)
 {}
 
 
@@ -155,15 +154,6 @@ inline Foam::ReactingMultiphaseCloud<ParcelType>&
 Foam::ReactingMultiphaseParcel<ParcelType>::trackData::cloud()
 {
     return cloud_;
-}
-
-
-template<class ParcelType>
-inline const typename Foam::ReactingMultiphaseParcel<ParcelType>::
-constantProperties&
-Foam::ReactingMultiphaseParcel<ParcelType>::trackData::constProps() const
-{
-    return constProps_;
 }
 
 

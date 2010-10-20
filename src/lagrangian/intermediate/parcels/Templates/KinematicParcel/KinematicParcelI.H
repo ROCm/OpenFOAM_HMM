@@ -54,7 +54,6 @@ inline Foam::KinematicParcel<ParcelType>::trackData::trackData
 :
     Particle<ParcelType>::trackData(cloud),
     cloud_(cloud),
-    constProps_(cloud.constProps()),
     rhoInterp_
     (
         interpolation<scalar>::New
@@ -220,14 +219,6 @@ inline Foam::KinematicCloud<ParcelType>&
 Foam::KinematicParcel<ParcelType>::trackData::cloud()
 {
     return cloud_;
-}
-
-
-template <class ParcelType>
-inline const typename Foam::KinematicParcel<ParcelType>::constantProperties&
-Foam::KinematicParcel<ParcelType>::trackData::constProps() const
-{
-    return constProps_;
 }
 
 

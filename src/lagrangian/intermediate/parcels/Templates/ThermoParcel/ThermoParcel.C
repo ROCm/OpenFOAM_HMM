@@ -47,7 +47,7 @@ void Foam::ThermoParcel<ParcelType>::setCellValues
 
     Tc_ = td.TInterp().interpolate(this->position(), tetIs);
 
-    if (Tc_ < td.constProps().TMin())
+    if (Tc_ < td.cloud().constProps().TMin())
     {
         WarningIn
         (
@@ -58,9 +58,9 @@ void Foam::ThermoParcel<ParcelType>::setCellValues
                 "const label"
             ")"
         )   << "Limiting observed temperature in cell " << cellI << " to "
-            << td.constProps().TMin() <<  nl << endl;
+            << td.cloud().constProps().TMin() <<  nl << endl;
 
-        Tc_ = td.constProps().TMin();
+        Tc_ = td.cloud().constProps().TMin();
     }
 }
 
@@ -107,7 +107,7 @@ void Foam::ThermoParcel<ParcelType>::calcSurfaceValues
 
     mus = td.muInterp().interpolate (this->position(), tetIs)/factor;
 
-    Pr = td.constProps().Pr();
+    Pr = td.cloud().constProps().Pr();
     kappa = Cpc_*mus/Pr;
 }
 
@@ -238,7 +238,12 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 
     if (mag(htc) < ROOTVSMALL && !td.cloud().radiation())
     {
-        return max(T + dt*Sh/(this->volume(d)*rho*Cp), td.constProps().TMin());
+        return
+            max
+            (
+                T + dt*Sh/(this->volume(d)*rho*Cp),
+                td.cloud().constProps().TMin()
+            );
     }
 
     const scalar As = this->areaS(d);
@@ -250,7 +255,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
             td.cloud().mesh().objectRegistry::lookupObject<volScalarField>("G");
         const scalar Gc = G[cellI];
         const scalar sigma = physicoChemical::sigma.value();
-        const scalar epsilon = td.constProps().epsilon0();
+        const scalar epsilon = td.cloud().constProps().epsilon0();
 
         ap = (ap + epsilon*Gc/(4.0*htc))/(1.0 + epsilon*sigma*pow3(T)/htc);
         bp += 6.0*(epsilon*(Gc/4.0 - sigma*pow4(T)));
@@ -261,7 +266,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     IntegrationScheme<scalar>::integrationResult Tres =
         td.cloud().TIntegrator().integrate(T, dt, ap, bp);
 
-    scalar Tnew = max(Tres.value(), td.constProps().TMin());
+    scalar Tnew = max(Tres.value(), td.cloud().constProps().TMin());
 
     dhsTrans += dt*htc*As*(0.5*(T + Tnew) - Tc_);
 

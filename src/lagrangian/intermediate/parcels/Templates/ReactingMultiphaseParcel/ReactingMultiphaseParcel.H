@@ -115,9 +115,6 @@ public:
             //- Reference to the cloud containing this particle
             ReactingMultiphaseCloud<ParcelType>& cloud_;
 
-            //- Particle constant properties
-            const constantProperties& constProps_;
-
 
     public:
 
@@ -136,9 +133,6 @@ public:
 
             //- Return access to the owner cloud
             inline ReactingMultiphaseCloud<ParcelType>& cloud();
-
-            //- Return const access to the constant properties
-            inline const constantProperties& constProps() const;
     };
 
 
