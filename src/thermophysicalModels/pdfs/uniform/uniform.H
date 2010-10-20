@@ -73,11 +73,16 @@ public:
     // Constructors
 
         //- Construct from components
-        uniform
-        (
-            const dictionary& dict,
-            Random& rndGen
-        );
+        uniform(const dictionary& dict, cachedRandom& rndGen);
+
+        //- Construct copy
+        uniform(const uniform& p);
+
+        //- Construct and return a clone
+        virtual autoPtr<pdf> clone() const
+        {
+            return autoPtr<pdf>(new uniform(*this));
+        }
 
 
     //- Destructor

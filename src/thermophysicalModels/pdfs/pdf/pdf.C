@@ -61,10 +61,22 @@ void Foam::pdfs::pdf::check() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pdfs::pdf::pdf(const word& name, const dictionary& dict, Random& rndGen)
+Foam::pdfs::pdf::pdf
+(
+    const word& name,
+    const dictionary& dict,
+    cachedRandom& rndGen
+)
 :
     pdfDict_(dict.subDict(name + "PDF")),
     rndGen_(rndGen)
+{}
+
+
+Foam::pdfs::pdf::pdf(const pdf& p)
+:
+    pdfDict_(p.pdfDict_),
+    rndGen_(p.rndGen_)
 {}
 
 
@@ -72,6 +84,29 @@ Foam::pdfs::pdf::pdf(const word& name, const dictionary& dict, Random& rndGen)
 
 Foam::pdfs::pdf::~pdf()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::scalar Foam::pdfs::pdf::sample() const
+{
+    notImplemented("Foam::scalar Foam::pdfs::pdf::sample() const");
+    return 0.0;
+}
+
+
+Foam::scalar Foam::pdfs::pdf::minValue() const
+{
+    notImplemented("Foam::scalar Foam::pdfs::pdf::minValue() const");
+    return 0.0;
+}
+
+
+Foam::scalar Foam::pdfs::pdf::maxValue() const
+{
+    notImplemented("Foam::scalar Foam::pdfs::pdf::maxValue() const");
+    return 0.0;
+}
 
 
 // ************************************************************************* //
