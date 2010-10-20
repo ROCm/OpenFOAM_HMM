@@ -31,8 +31,10 @@ template<class Type>
 Foam::Constant<Type>::Constant(const word& entryName, Istream& is)
 :
     DataEntry<Type>(entryName),
-    value_(is)
-{}
+    value_(pTraits<Type>::zero)
+{
+    is  >> value_;
+}
 
 
 template<class Type>
@@ -40,22 +42,6 @@ Foam::Constant<Type>::Constant(const Constant<Type>& cnst)
 :
     DataEntry<Type>(cnst),
     value_(cnst.value_)
-{}
-
-
-template<>
-Foam::Constant<Foam::label>::Constant(const word& entryName, Istream& is)
-:
-    DataEntry<label>(entryName),
-    value_(readLabel(is))
-{}
-
-
-template<>
-Foam::Constant<Foam::scalar>::Constant(const word& entryName, Istream& is)
-:
-    DataEntry<scalar>(entryName),
-    value_(readScalar(is))
 {}
 
 

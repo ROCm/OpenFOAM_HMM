@@ -30,6 +30,7 @@ License
 template<class Type>
 Foam::DataEntry<Type>::DataEntry(const word& entryName)
 :
+    refCount(),
     name_(entryName)
 {}
 
@@ -37,6 +38,7 @@ Foam::DataEntry<Type>::DataEntry(const word& entryName)
 template<class Type>
 Foam::DataEntry<Type>::DataEntry(const DataEntry<Type>& de)
 :
+    refCount(),
     name_(de.name_)
 {}
 
@@ -54,6 +56,31 @@ template<class Type>
 const Foam::word& Foam::DataEntry<Type>::name() const
 {
     return name_;
+}
+
+
+template<class Type>
+Type Foam::DataEntry<Type>::value(const scalar x) const
+{
+    notImplemented("Type Foam::DataEntry<Type>::value(const scalar) const");
+
+    return pTraits<Type>::zero;
+}
+
+
+template<class Type>
+Type Foam::DataEntry<Type>::integrate(const scalar x1, const scalar x2) const
+{
+    notImplemented
+    (
+        "Type Foam::DataEntry<Type>::integrate"
+        "("
+            "const scalar, "
+            "const scalar"
+        ") const"
+    );
+
+    return pTraits<Type>::zero;
 }
 
 
