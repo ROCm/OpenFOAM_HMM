@@ -113,6 +113,15 @@ public:
         //- Construct from dictionary
         C9H20(const dictionary& dict);
 
+        //- Construct copy
+        C9H20(const C9H20& liq);
+
+        //- Construct and return clone
+        virtual autoPtr<liquid> clone() const
+        {
+            return autoPtr<liquid>(new C9H20(*this));
+        }
+
 
     // Member Functions
 

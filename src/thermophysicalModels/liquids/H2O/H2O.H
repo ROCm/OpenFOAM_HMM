@@ -112,6 +112,15 @@ public:
         //- Construct from dictionary
         H2O(const dictionary& dict);
 
+        //- Construct copy
+        H2O(const H2O& liq);
+
+        //- Construct and return clone
+        virtual autoPtr<liquid> clone() const
+        {
+            return autoPtr<liquid>(new H2O(*this));
+        }
+
 
     // Member Functions
 

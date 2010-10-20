@@ -119,7 +119,21 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        liquidMixture(const dictionary&);
+        liquidMixture(const dictionary& dict);
+
+        //- Construct copy
+        liquidMixture(const liquidMixture& lm);
+
+        //- Construct and return a clone
+        virtual autoPtr<liquidMixture> clone() const
+        {
+            return autoPtr<liquidMixture>(new liquidMixture(*this));
+        }
+
+
+    //- Destructor
+    virtual ~liquidMixture()
+    {}
 
 
     // Selectors

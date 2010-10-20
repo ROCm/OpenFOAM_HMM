@@ -135,6 +135,15 @@ public:
         //- Construct from dictionary
         IDEA(const dictionary& dict);
 
+        //- Construct copy
+        IDEA(const IDEA& liq);
+
+        //- Construct and return clone
+        virtual autoPtr<liquid> clone() const
+        {
+            return autoPtr<liquid>(new IDEA(*this));
+        }
+
 
     // Member Functions
 

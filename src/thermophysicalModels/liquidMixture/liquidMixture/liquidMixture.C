@@ -62,6 +62,18 @@ Foam::liquidMixture::liquidMixture
 }
 
 
+Foam::liquidMixture::liquidMixture(const liquidMixture& lm)
+:
+    components_(lm.components_),
+    properties_(lm.properties_.size())
+{
+    forAll(properties_, i)
+    {
+        properties_.set(i, lm.properties_(i)->clone());
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::liquidMixture> Foam::liquidMixture::New

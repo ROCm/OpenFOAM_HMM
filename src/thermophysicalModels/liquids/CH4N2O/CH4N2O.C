@@ -151,4 +151,23 @@ Foam::CH4N2O::CH4N2O(const dictionary& dict)
 {}
 
 
+Foam::CH4N2O::CH4N2O(const CH4N2O& liq)
+:
+    liquid(liq),
+    rho_(liq.rho_),
+    pv_(liq.pv_),
+    hl_(liq.hl_),
+    Cp_(liq.Cp_),
+    h_(liq.h_),
+    Cpg_(liq.Cpg_),
+    B_(liq.B_),
+    mu_(liq.mu_),
+    mug_(liq.mug_),
+    K_(liq.K_),
+    Kg_(liq.Kg_),
+    sigma_(liq.sigma_),
+    D_(liq.D_)
+{}
+
+
 // ************************************************************************* //
