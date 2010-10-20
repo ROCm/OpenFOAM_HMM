@@ -74,6 +74,16 @@ Foam::solid::solid(const dictionary& dict)
 {}
 
 
+Foam::solid::solid(const solid& s)
+:
+    rho_(s.rho_),
+    Cp_(s.Cp_),
+    K_(s.K_),
+    Hf_(s.Hf_),
+    emissivity_(s.emissivity_)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::solid::writeData(Ostream& os) const

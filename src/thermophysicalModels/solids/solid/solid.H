@@ -133,6 +133,18 @@ public:
         //- Construct from dictionary
         solid(const dictionary& dict);
 
+        //- Construct copy
+        solid(const solid& s);
+
+        //- Construct and return clone
+        virtual autoPtr<solid> clone() const
+        {
+            return autoPtr<solid>(new solid(*this));
+        }
+
+
+    // Selectors
+
         //- Return a pointer to a new solid created from input
         static autoPtr<solid> New(Istream& is);
 

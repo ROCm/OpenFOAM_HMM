@@ -54,6 +54,18 @@ Foam::solidMixture::solidMixture
 }
 
 
+Foam::solidMixture::solidMixture(const solidMixture& s)
+:
+    components_(s.components_),
+    properties_(s.properties_.size())
+{
+    forAll(properties_, i)
+    {
+        properties_.set(i, s.properties_(i)->clone());
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::solidMixture> Foam::solidMixture::New
