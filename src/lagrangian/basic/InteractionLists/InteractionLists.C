@@ -1077,6 +1077,29 @@ void Foam::InteractionLists<ParticleType>::writeReferredWallFaces() const
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParticleType>
+Foam::InteractionLists<ParticleType>::InteractionLists(const polyMesh& mesh)
+:
+    mesh_(mesh),
+    cloud_(mesh_, "NULL_Cloud", IDLList<ParticleType>()),
+    writeCloud_(false),
+    cellMapPtr_(),
+    wallFaceMapPtr_(),
+    globalTransforms_(mesh_),
+    maxDistance_(0.0),
+    dil_(),
+    dwfil_(),
+    ril_(),
+    rilInverse_(),
+    cellIndexAndTransformToDistribute_(),
+    wallFaceIndexAndTransformToDistribute_(),
+    referredWallFaces_(),
+    UName_("unknown_UName"),
+    referredWallData_(),
+    referredParticles_()
+{}
+
+
+template<class ParticleType>
 Foam::InteractionLists<ParticleType>::InteractionLists
 (
     const polyMesh& mesh,
@@ -1105,6 +1128,7 @@ Foam::InteractionLists<ParticleType>::InteractionLists
 {
     buildInteractionLists();
 }
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 

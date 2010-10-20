@@ -216,6 +216,9 @@ public:
 
     // Constructors
 
+        //- Construct null from mesh
+        InteractionLists(const polyMesh& mesh);
+
         //- Construct and call function to create all information from
         //  the mesh
         InteractionLists
