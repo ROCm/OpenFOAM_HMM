@@ -65,8 +65,6 @@ Foam::ConstantRateDevolatilisation<CloudType>::ConstantRateDevolatilisation
         forAll(volatileData_, i)
         {
             const word& specieName = volatileData_[i].first();
-            Info<< "    " << specieName << endl;
-
             const label id = owner.composition().localId(idGas, specieName);
             volatileToGasMap_[i] = id;
             YVolatile0_[i] = YGasTot*YGas[id];
