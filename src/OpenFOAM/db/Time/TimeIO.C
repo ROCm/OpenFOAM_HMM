@@ -211,10 +211,7 @@ void Foam::Time::readModifiedObjects()
         // valid filePath).
         // Note: requires same ordering in objectRegistries on different
         // processors!
-        monitor_.updateStates(Pstream::parRun());
-
-//Pout<< "Time : runTimeModifiable_ and watchIndex:"
-//    << controlDict_.watchIndex() << endl;
+        monitorPtr_().updateStates(Pstream::parRun());
 
         // Time handling is special since controlDict_ is the one dictionary
         // that is not registered to any database.

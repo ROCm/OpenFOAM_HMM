@@ -73,7 +73,7 @@ class Time
     // Private data
 
         //- file-change monitor for all registered files
-        mutable fileMonitor monitor_;
+        mutable autoPtr<fileMonitor> monitorPtr_;
 
         //- The controlDict
         IOdictionary controlDict_;

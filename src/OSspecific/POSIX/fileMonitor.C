@@ -159,15 +159,21 @@ namespace Foam
         {
             if (inotifyFd_ < 0)
             {
-                WarningIn("fileMonitorWatcher(const label)")
-                    << "Failed allocating an inotify descriptor : "
-                    << string(strerror(errno)) << endl
-                    << "    Please increase the number of allowable "
-                    << "inotify instances" << endl
-                    << "    (/proc/sys/fs/inotify/max_user_instances on Linux)"
-                    << endl
-                    << "    Continuing without additional file monitoring."
-                    << endl;
+                static bool hasWarned = false;
+                if (!hasWarned)
+                {
+                    hasWarned = true;
+                    WarningIn("fileMonitorWatcher(const label)")
+                        << "Failed allocating an inotify descriptor : "
+                        << string(strerror(errno)) << endl
+                        << "    Please increase the number of allowable "
+                        << "inotify instances" << endl
+                        << "    (/proc/sys/fs/inotify/max_user_instances"
+                        << " on Linux)" << endl
+                        << "    or switch off runTimeModifiable." << endl
+                        << "    Continuing without additional file monitoring."
+                        << endl;
+                }
             }
         }
 
