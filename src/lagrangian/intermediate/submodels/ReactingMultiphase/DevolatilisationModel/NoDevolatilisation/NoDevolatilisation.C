@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::NoDevolatilisation<CloudType>::NoDevolatilisation
 (
     const dictionary&,
@@ -50,7 +50,7 @@ Foam::NoDevolatilisation<CloudType>::NoDevolatilisation
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::NoDevolatilisation<CloudType>::~NoDevolatilisation()
 {}
 

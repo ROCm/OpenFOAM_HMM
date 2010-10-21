@@ -28,7 +28,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template <class ParcelType>
+template<class ParcelType>
 Foam::string Foam::ReactingMultiphaseParcel<ParcelType>::propHeader =
     ReactingParcel<ParcelType>::propHeader
   + " nGas(Y1..YN)"

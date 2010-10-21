@@ -122,7 +122,7 @@ public:
     friend Ostream& operator<< <Type>
     (
         Ostream&,
-        const Constant<Type>&
+        const Table<Type>&
     );
 };
 

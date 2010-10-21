@@ -210,7 +210,7 @@ void Foam::ThermoParcel<ParcelType>::calc
 
 
 template<class ParcelType>
-template <class TrackData>
+template<class TrackData>
 Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 (
     TrackData& td,
@@ -276,7 +276,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class ParcelType>
+template<class ParcelType>
 Foam::ThermoParcel<ParcelType>::ThermoParcel
 (
     const ThermoParcel<ParcelType>& p

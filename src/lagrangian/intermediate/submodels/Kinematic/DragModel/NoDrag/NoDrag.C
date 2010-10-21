@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::NoDrag<CloudType>::NoDrag(const dictionary& dict, CloudType& owner)
 :
     DragModel<CloudType>(owner)
@@ -43,7 +43,7 @@ Foam::NoDrag<CloudType>::NoDrag(const NoDrag<CloudType>& dm)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::NoDrag<CloudType>::~NoDrag()
 {}
 

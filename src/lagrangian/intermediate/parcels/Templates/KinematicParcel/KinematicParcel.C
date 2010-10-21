@@ -215,7 +215,7 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class ParcelType>
+template<class ParcelType>
 Foam::KinematicParcel<ParcelType>::KinematicParcel
 (
     const KinematicParcel<ParcelType>& p

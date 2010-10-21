@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::SphereDrag<CloudType>::SphereDrag
 (
     const dictionary&,
@@ -47,14 +47,14 @@ Foam::SphereDrag<CloudType>::SphereDrag(const SphereDrag<CloudType>& dm)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::SphereDrag<CloudType>::~SphereDrag()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::scalar Foam::SphereDrag<CloudType>::Cd(const scalar Re) const
 {
     scalar Cd;

@@ -65,10 +65,13 @@ Foam::polynomial::~polynomial()
 
 Foam::scalar Foam::polynomial::value(const scalar x) const
 {
-    scalar y = 0.0;
-    forAll(coeffs_, i)
+    scalar y = coeffs_[0].first();
+    scalar powX = x;
+
+    for (label i = 1; i < coeffs_.size(); i++)
     {
-        y += coeffs_[i].first()*pow(x, coeffs_[i].second());
+        y +=  coeffs_[i].first()*powX;
+        powX *= x;
     }
 
     return y;

@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::NoHeatTransfer<CloudType>::NoHeatTransfer
 (
     const dictionary&,
@@ -50,14 +50,14 @@ Foam::NoHeatTransfer<CloudType>::NoHeatTransfer
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::NoHeatTransfer<CloudType>::~NoHeatTransfer()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::scalar Foam::NoHeatTransfer<CloudType>::Nu
 (
     const scalar,
@@ -68,7 +68,7 @@ Foam::scalar Foam::NoHeatTransfer<CloudType>::Nu
 }
 
 
-template <class CloudType>
+template<class CloudType>
 Foam::scalar Foam::NoHeatTransfer<CloudType>::Pr() const
 {
     return 1.0;

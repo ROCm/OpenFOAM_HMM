@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::label Foam::PatchPostProcessing<CloudType>::applyToPatch
 (
     const label globalPatchI

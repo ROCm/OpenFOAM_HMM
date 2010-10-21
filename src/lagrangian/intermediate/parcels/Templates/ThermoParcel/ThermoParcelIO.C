@@ -28,7 +28,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template <class ParcelType>
+template<class ParcelType>
 Foam::string Foam::ThermoParcel<ParcelType>::propHeader =
     KinematicParcel<ParcelType>::propHeader
   + " T"

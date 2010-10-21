@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
 (
     const dictionary& dict,
@@ -91,14 +91,14 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::StandardWallInteraction<CloudType>::~StandardWallInteraction()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 bool Foam::StandardWallInteraction<CloudType>::correct
 (
     typename CloudType::parcelType& p,

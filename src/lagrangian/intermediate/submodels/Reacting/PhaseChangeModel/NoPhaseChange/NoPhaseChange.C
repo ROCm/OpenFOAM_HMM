@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::NoPhaseChange<CloudType>::NoPhaseChange
 (
     const dictionary&,
@@ -50,7 +50,7 @@ Foam::NoPhaseChange<CloudType>::NoPhaseChange
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::NoPhaseChange<CloudType>::~NoPhaseChange()
 {}
 

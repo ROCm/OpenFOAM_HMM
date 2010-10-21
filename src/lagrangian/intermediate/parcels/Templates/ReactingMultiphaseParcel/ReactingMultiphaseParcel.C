@@ -626,7 +626,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class ParcelType>
+template<class ParcelType>
 Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
 (
     const ReactingMultiphaseParcel<ParcelType>& p

@@ -30,7 +30,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template <class ParcelType>
+template<class ParcelType>
 Foam::string Foam::KinematicParcel<ParcelType>::propHeader =
     Particle<ParcelType>::propHeader
   + " active"
@@ -56,7 +56,7 @@ Foam::string Foam::KinematicParcel<ParcelType>::propHeader =
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class ParcelType>
+template<class ParcelType>
 Foam::KinematicParcel<ParcelType>::KinematicParcel
 (
     const Cloud<ParcelType>& cloud,

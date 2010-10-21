@@ -504,7 +504,7 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class ParcelType>
+template<class ParcelType>
 Foam::ReactingParcel<ParcelType>::ReactingParcel
 (
     const ReactingParcel<ParcelType>& p

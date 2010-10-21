@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 void Foam::WallSpringSliderDashpot<CloudType>::findMinMaxProperties
 (
     scalar& rMin,
@@ -70,7 +70,7 @@ void Foam::WallSpringSliderDashpot<CloudType>::findMinMaxProperties
 }
 
 
-template <class CloudType>
+template<class CloudType>
 void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 (
     typename CloudType::parcelType& p,
@@ -144,7 +144,7 @@ void Foam::WallSpringSliderDashpot<CloudType>::evaluateWall
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::WallSpringSliderDashpot<CloudType>::WallSpringSliderDashpot
 (
     const dictionary& dict,
@@ -194,7 +194,7 @@ Foam::WallSpringSliderDashpot<CloudType>::WallSpringSliderDashpot
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::WallSpringSliderDashpot<CloudType>::~WallSpringSliderDashpot()
 {}
 

@@ -80,13 +80,6 @@ public:
         DispersionModel
         (
             const dictionary& dict,
-            CloudType& owner
-        );
-
-        //- Construct from components
-        DispersionModel
-        (
-            const dictionary& dict,
             CloudType& owner,
             const word& type
         );

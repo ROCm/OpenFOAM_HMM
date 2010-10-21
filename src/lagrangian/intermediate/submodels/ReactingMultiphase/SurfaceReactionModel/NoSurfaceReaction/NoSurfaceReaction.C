@@ -50,7 +50,7 @@ Foam::NoSurfaceReaction<CloudType>::NoSurfaceReaction
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::NoSurfaceReaction<CloudType>::~NoSurfaceReaction()
 {}
 

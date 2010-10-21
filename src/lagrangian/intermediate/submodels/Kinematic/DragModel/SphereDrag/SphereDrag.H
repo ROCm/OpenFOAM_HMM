@@ -39,7 +39,7 @@ Description
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                           Class SphereDrag Declaration
+                         Class SphereDrag Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>

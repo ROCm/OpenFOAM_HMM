@@ -43,7 +43,7 @@ namespace Foam
                          Class RanzMarshall Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class CloudType>
+template<class CloudType>
 class RanzMarshall
 :
     public HeatTransferModel<CloudType>

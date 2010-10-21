@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::label Foam::LocalInteraction<CloudType>::applyToPatch
 (
     const label globalPatchI
@@ -47,7 +47,7 @@ Foam::label Foam::LocalInteraction<CloudType>::applyToPatch
 
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::LocalInteraction<CloudType>::LocalInteraction
 (
     const dictionary& dict,
@@ -132,14 +132,14 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::LocalInteraction<CloudType>::~LocalInteraction()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 bool Foam::LocalInteraction<CloudType>::correct
 (
     typename CloudType::parcelType& p,

@@ -52,7 +52,7 @@ class GradientDispersionRAS
 {
 protected:
 
-    // Locally cached turbulence fields
+    // Protected data
 
         // Locally cached turbulence fields
 

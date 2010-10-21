@@ -144,7 +144,7 @@ inline Foam::ThermoParcel<ParcelType>::ThermoParcel
 
 // * * * * * * * * * constantProperties Member Functions * * * * * * * * * * //
 
-template <class ParcelType>
+template<class ParcelType>
 inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::T0() const
 {
@@ -152,7 +152,7 @@ Foam::ThermoParcel<ParcelType>::constantProperties::T0() const
 }
 
 
-template <class ParcelType>
+template<class ParcelType>
 inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::TMin() const
 {
@@ -160,7 +160,7 @@ Foam::ThermoParcel<ParcelType>::constantProperties::TMin() const
 }
 
 
-template <class ParcelType>
+template<class ParcelType>
 inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::Cp0() const
 {
@@ -168,7 +168,7 @@ Foam::ThermoParcel<ParcelType>::constantProperties::Cp0() const
 }
 
 
-template <class ParcelType>
+template<class ParcelType>
 inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::epsilon0() const
 {
@@ -176,7 +176,7 @@ Foam::ThermoParcel<ParcelType>::constantProperties::epsilon0() const
 }
 
 
-template <class ParcelType>
+template<class ParcelType>
 inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::f0() const
 {
@@ -184,7 +184,7 @@ Foam::ThermoParcel<ParcelType>::constantProperties::f0() const
 }
 
 
-template <class ParcelType>
+template<class ParcelType>
 inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::Pr() const
 {

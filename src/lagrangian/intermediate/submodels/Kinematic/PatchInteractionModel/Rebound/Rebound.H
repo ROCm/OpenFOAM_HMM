@@ -63,7 +63,6 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        //- Construct from dictionary
         Rebound(const dictionary& dict, CloudType& cloud);
 
         //- Construct copy

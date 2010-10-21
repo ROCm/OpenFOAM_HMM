@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 void Foam::PairSpringSliderDashpot<CloudType>::findMinMaxProperties
 (
     scalar& RMin,
@@ -79,7 +79,7 @@ void Foam::PairSpringSliderDashpot<CloudType>::findMinMaxProperties
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::PairSpringSliderDashpot<CloudType>::PairSpringSliderDashpot
 (
     const dictionary& dict,
@@ -121,7 +121,7 @@ Foam::PairSpringSliderDashpot<CloudType>::PairSpringSliderDashpot
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::PairSpringSliderDashpot<CloudType>::~PairSpringSliderDashpot()
 {}
 

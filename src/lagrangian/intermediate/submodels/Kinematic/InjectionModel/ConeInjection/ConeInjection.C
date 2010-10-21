@@ -26,6 +26,7 @@ License
 #include "ConeInjection.H"
 #include "DataEntry.H"
 #include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 using namespace Foam::constant::mathematical;
 
@@ -204,15 +205,11 @@ void Foam::ConeInjection<CloudType>::setProperties
 {
     cachedRandom& rnd = this->owner().rndGen();
 
-    // set particle velocity
-    const scalar deg2Rad = pi/180.0;
-
     scalar t = time - this->SOI_;
     scalar ti = thetaInner_().value(t);
     scalar to = thetaOuter_().value(t);
-    scalar coneAngle = deg2Rad*rnd.position<scalar>(ti, to);
+    scalar coneAngle = degToRad(rnd.position<scalar>(ti, to));
 
-    coneAngle *= deg2Rad;
     scalar alpha = sin(coneAngle);
     scalar dcorr = cos(coneAngle);
     scalar beta = twoPi*rnd.sample01<scalar>();

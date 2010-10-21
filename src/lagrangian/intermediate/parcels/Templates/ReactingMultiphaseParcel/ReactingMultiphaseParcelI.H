@@ -62,7 +62,7 @@ inline Foam::ReactingMultiphaseParcel<ParcelType>::trackData::trackData
 {}
 
 
-template <class ParcelType>
+template<class ParcelType>
 inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
 (
     ReactingMultiphaseCloud<ParcelType>& owner,
