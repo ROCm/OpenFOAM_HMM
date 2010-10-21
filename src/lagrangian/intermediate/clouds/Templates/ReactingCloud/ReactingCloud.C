@@ -81,61 +81,6 @@ void Foam::ReactingCloud<ParcelType>::checkSuppliedComposition
 
 
 template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::preEvolve()
-{
-    ThermoCloud<ParcelType>::preEvolve();
-}
-
-
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::evolveCloud()
-{
-    typename ParcelType::trackData td(*this);
-
-    label preInjectionSize = this->size();
-
-    this->surfaceFilm().inject(td);
-
-    // Update the cellOccupancy if the size of the cloud has changed
-    // during the injection.
-    if (preInjectionSize != this->size())
-    {
-        this->updateCellOccupancy();
-
-        preInjectionSize = this->size();
-    }
-
-    this->injection().inject(td);
-
-    if (this->solution().coupled())
-    {
-        resetSourceTerms();
-    }
-
-    // Assume that motion will update the cellOccupancy as necessary
-    // before it is required.
-    motion(td);
-}
-
-
-template<class ParcelType>
-void  Foam::ReactingCloud<ParcelType>::motion
-(
-    typename ParcelType::trackData& td
-)
-{
-    ThermoCloud<ParcelType>::motion(td);
-}
-
-
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::postEvolve()
-{
-    ThermoCloud<ParcelType>::postEvolve();
-}
-
-
-template<class ParcelType>
 void Foam::ReactingCloud<ParcelType>::cloudReset(ReactingCloud<ParcelType>& c)
 {
     ThermoCloud<ParcelType>::cloudReset(c);
@@ -319,11 +264,13 @@ void Foam::ReactingCloud<ParcelType>::evolve()
 {
     if (this->solution().active())
     {
-        preEvolve();
+        typename ParcelType::trackData td(*this);
 
-        evolveCloud();
+        this->preEvolve();
 
-        postEvolve();
+        this->evolveCloud(td);
+
+        this->postEvolve();
 
         info();
         Info<< endl;

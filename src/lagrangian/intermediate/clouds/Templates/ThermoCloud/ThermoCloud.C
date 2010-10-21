@@ -55,61 +55,6 @@ void Foam::ThermoCloud<ParcelType>::restoreState()
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::preEvolve()
-{
-    KinematicCloud<ParcelType>::preEvolve();
-}
-
-
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::evolveCloud()
-{
-    typename ParcelType::trackData td(*this);
-
-    label preInjectionSize = this->size();
-
-    // Update the cellOccupancy if the size of the cloud has changed
-    // during the injection.
-    this->surfaceFilm().inject(td);
-
-    if (preInjectionSize != this->size())
-    {
-        this->updateCellOccupancy();
-
-        preInjectionSize = this->size();
-    }
-
-    this->injection().inject(td);
-
-    if (this->solution().coupled())
-    {
-        resetSourceTerms();
-    }
-
-    // Assume that motion will update the cellOccupancy as necessary
-    // before it is required.
-    motion(td);
-}
-
-
-template<class ParcelType>
-void  Foam::ThermoCloud<ParcelType>::motion
-(
-    typename ParcelType::trackData& td
-)
-{
-    KinematicCloud<ParcelType>::motion(td);
-}
-
-
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::postEvolve()
-{
-    KinematicCloud<ParcelType>::postEvolve();
-}
-
-
-template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::cloudReset(ThermoCloud<ParcelType>& c)
 {
     KinematicCloud<ParcelType>::cloudReset(c);
@@ -294,11 +239,13 @@ void Foam::ThermoCloud<ParcelType>::evolve()
 {
     if (this->solution().active())
     {
-        preEvolve();
+        typename ParcelType::trackData td(*this);
 
-        evolveCloud();
+        this->preEvolve();
 
-        postEvolve();
+        this->evolveCloud(td);
+
+        this->postEvolve();
 
         info();
         Info<< endl;

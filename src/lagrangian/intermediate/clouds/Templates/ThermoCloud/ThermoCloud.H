@@ -133,18 +133,6 @@ protected:
 
         // Cloud evolution functions
 
-            //- Pre-evolve
-            void preEvolve();
-
-            //- Evolve the cloud
-            void evolveCloud();
-
-            //- Particle motion
-            void motion(typename ParcelType::trackData& td);
-
-            //- Post-evolve
-            void postEvolve();
-
             //- Reset state of cloud
             void cloudReset(ThermoCloud<ParcelType>& c);
 

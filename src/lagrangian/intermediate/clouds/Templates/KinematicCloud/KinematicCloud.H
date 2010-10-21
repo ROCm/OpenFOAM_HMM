@@ -297,7 +297,7 @@ protected:
             void updateCellOccupancy();
 
             //- Evolve the cloud
-            void evolveCloud();
+            void evolveCloud(typename ParcelType::trackData& td);
 
             //- Particle motion
             void motion(typename ParcelType::trackData& td);

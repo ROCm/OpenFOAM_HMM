@@ -179,10 +179,11 @@ void Foam::KinematicCloud<ParcelType>::updateCellOccupancy()
 
 
 template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::evolveCloud()
+void Foam::KinematicCloud<ParcelType>::evolveCloud
+(
+    typename ParcelType::trackData& td
+)
 {
-    typename ParcelType::trackData td(*this);
-
     label preInjectionSize = this->size();
 
     this->surfaceFilm().inject(td);
@@ -195,7 +196,6 @@ void Foam::KinematicCloud<ParcelType>::evolveCloud()
 
         preInjectionSize = this->size();
     }
-
     this->injection().inject(td);
 
     if (solution_.coupled())
@@ -572,9 +572,11 @@ void Foam::KinematicCloud<ParcelType>::evolve()
 {
     if (solution_.active())
     {
+        typename ParcelType::trackData td(*this);
+
         preEvolve();
 
-        evolveCloud();
+        evolveCloud(td);
 
         postEvolve();
 
