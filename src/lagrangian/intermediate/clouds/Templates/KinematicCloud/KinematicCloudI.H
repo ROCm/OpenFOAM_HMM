@@ -171,6 +171,22 @@ Foam::KinematicCloud<ParcelType>::forces() const
 
 
 template<class ParcelType>
+inline const Foam::CollisionModel<Foam::KinematicCloud<ParcelType> >&
+Foam::KinematicCloud<ParcelType>::collision() const
+{
+    return collisionModel_();
+}
+
+
+template<class ParcelType>
+inline Foam::CollisionModel<Foam::KinematicCloud<ParcelType> >&
+Foam::KinematicCloud<ParcelType>::collision()
+{
+    return collisionModel_();
+}
+
+
+template<class ParcelType>
 inline const Foam::DispersionModel<Foam::KinematicCloud<ParcelType> >&
 Foam::KinematicCloud<ParcelType>::dispersion() const
 {
@@ -215,22 +231,6 @@ inline Foam::InjectionModel<Foam::KinematicCloud<ParcelType> >&
 Foam::KinematicCloud<ParcelType>::injection()
 {
     return injectionModel_();
-}
-
-
-template<class ParcelType>
-inline const Foam::CollisionModel<Foam::KinematicCloud<ParcelType> >&
-Foam::KinematicCloud<ParcelType>::collision() const
-{
-    return collisionModel_();
-}
-
-
-template<class ParcelType>
-inline Foam::CollisionModel<Foam::KinematicCloud<ParcelType> >&
-Foam::KinematicCloud<ParcelType>::collision()
-{
-    return collisionModel_();
 }
 
 
@@ -357,7 +357,15 @@ template<class ParcelType>
 inline Foam::DimensionedField<Foam::vector, Foam::volMesh>&
 Foam::KinematicCloud<ParcelType>::UTrans()
 {
-    return UTrans_;
+    return UTrans_();
+}
+
+
+template<class ParcelType>
+inline const Foam::DimensionedField<Foam::vector, Foam::volMesh>&
+Foam::KinematicCloud<ParcelType>::UTrans() const
+{
+    return UTrans_();
 }
 
 
@@ -388,7 +396,7 @@ Foam::KinematicCloud<ParcelType>::SU() const
     );
 
     vectorField& SU = tSU().field();
-    SU = UTrans_/(mesh_.V()*this->db().time().deltaT());
+    SU = UTrans()/(mesh_.V()*this->db().time().deltaT());
 
     return tSU;
 }

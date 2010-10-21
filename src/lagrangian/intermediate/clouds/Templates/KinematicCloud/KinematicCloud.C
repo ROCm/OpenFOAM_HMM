@@ -28,10 +28,10 @@ License
 #include "interpolation.H"
 #include "subCycleTime.H"
 
+#include "CollisionModel.H"
 #include "DispersionModel.H"
 #include "DragModel.H"
 #include "InjectionModel.H"
-#include "CollisionModel.H"
 #include "PatchInteractionModel.H"
 #include "PostProcessingModel.H"
 #include "SurfaceFilmModel.H"
@@ -42,6 +42,7 @@ template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::cloudSolution::read()
 {
     dict_.lookup("coupled") >> coupled_;
+    dict_.lookup("cellValueSourceCorrection") >> cellValueSourceCorrection_;
 }
 
 
@@ -55,7 +56,8 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
     mesh_(mesh),
     dict_(dict),
     active_(dict.lookup("active")),
-    coupled_(false)
+    coupled_(false),
+    cellValueSourceCorrection_(false)
 {
     if (active_)
     {
@@ -73,7 +75,8 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
     mesh_(cs.mesh_),
     dict_(cs.dict_),
     active_(cs.active_),
-    coupled_(cs.coupled_)
+    coupled_(cs.coupled_),
+    cellValueSourceCorrection_(cs.cellValueSourceCorrection_)
 {}
 
 
@@ -86,13 +89,37 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
     mesh_(mesh),
     dict_(dictionary::null),
     active_(false),
-    coupled_(false)
+    coupled_(false),
+    cellValueSourceCorrection_(false)
 {}
 
 
 template<class ParcelType>
 Foam::KinematicCloud<ParcelType>::cloudSolution::~cloudSolution()
 {}
+
+
+// * * * * * * * * * * * * *  Private Member Functions * * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::storeState()
+{
+    cloudCopyPtr_.reset
+    (
+        static_cast<KinematicCloud<ParcelType>*>
+        (
+            clone(this->name() + "Copy").ptr()
+        )
+    );
+}
+
+
+template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::restoreState()
+{
+    cloudReset(cloudCopyPtr_());
+    cloudCopyPtr_.clear();
+}
 
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
@@ -259,6 +286,24 @@ void Foam::KinematicCloud<ParcelType>::postEvolve()
 }
 
 
+template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::cloudReset(KinematicCloud<ParcelType>& c)
+{
+    Cloud<ParcelType>::cloudReset(c);
+
+    rndGen_ = c.rndGen_;
+
+    collisionModel_ = c.collisionModel_->clone();
+    dispersionModel_= c.dispersionModel_->clone();
+    dragModel_ = c.dragModel_->clone();
+    injectionModel_ = c.injectionModel_->clone();
+    patchInteractionModel_ = c.patchInteractionModel_->clone();
+    postProcessingModel_ = c.postProcessingModel_->clone();
+
+    UIntegrator_ = c.UIntegrator_->clone();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -274,6 +319,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
 :
     Cloud<ParcelType>(rho.mesh(), cloudName, false),
     kinematicCloud(),
+    cloudCopyPtr_(NULL),
     mesh_(rho.mesh()),
     particleProperties_
     (
@@ -289,10 +335,6 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     solution_(mesh_, particleProperties_.subDict("solution")),
     constProps_(particleProperties_),
     subModelProperties_(particleProperties_.subDict("subModels")),
-    cellValueSourceCorrection_
-    (
-        particleProperties_.lookup("cellValueSourceCorrection")
-    ),
     rndGen_
     (
         label(0),
@@ -304,6 +346,14 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     mu_(mu),
     g_(g),
     forces_(mesh_, particleProperties_, g_.value()),
+    collisionModel_
+    (
+        CollisionModel<KinematicCloud<ParcelType> >::New
+        (
+            subModelProperties_,
+            *this
+        )
+    ),
     dispersionModel_
     (
         DispersionModel<KinematicCloud<ParcelType> >::New
@@ -323,14 +373,6 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     injectionModel_
     (
         InjectionModel<KinematicCloud<ParcelType> >::New
-        (
-            subModelProperties_,
-            *this
-        )
-    ),
-    collisionModel_
-    (
-        CollisionModel<KinematicCloud<ParcelType> >::New
         (
             subModelProperties_,
             *this
@@ -371,17 +413,20 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     ),
     UTrans_
     (
-        IOobject
+        new DimensionedField<vector, volMesh>
         (
-            this->name() + "UTrans",
-            this->db().time().timeName(),
-            this->db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        mesh_,
-        dimensionedVector("zero", dimMass*dimVelocity, vector::zero)
+            IOobject
+            (
+                this->name() + "UTrans",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedVector("zero", dimMass*dimVelocity, vector::zero)
+        )
     )
 {
     if (readFields)
@@ -389,6 +434,103 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
         ParcelType::readFields(*this);
     }
 }
+
+
+template<class ParcelType>
+Foam::KinematicCloud<ParcelType>::KinematicCloud
+(
+    KinematicCloud<ParcelType>& c,
+    const word& name
+)
+:
+    Cloud<ParcelType>(c.mesh(), name, c),
+    kinematicCloud(),
+    cloudCopyPtr_(NULL),
+    mesh_(c.mesh()),
+    particleProperties_(c.particleProperties_),
+    solution_(c.solution_),
+    constProps_(c.constProps_),
+    subModelProperties_(c.subModelProperties_),
+    rndGen_(c.rndGen_, true),
+    cellOccupancyPtr_(c.cellOccupancyPtr_->clone()),
+    rho_(c.rho_),
+    U_(c.U_),
+    mu_(c.mu_),
+    g_(c.g_),
+    forces_(c.forces_),
+    collisionModel_(c.collisionModel_->clone()),
+    dispersionModel_(c.dispersionModel_->clone()),
+    dragModel_(c.dragModel_->clone()),
+    injectionModel_(c.injectionModel_->clone()),
+    patchInteractionModel_(c.patchInteractionModel_->clone()),
+    postProcessingModel_(c.postProcessingModel_->clone()),
+    surfaceFilmModel_(c.surfaceFilmModel_->clone()),
+    UIntegrator_(c.UIntegrator_->clone()),
+    UTrans_
+    (
+        new DimensionedField<vector, volMesh>
+        (
+            IOobject
+            (
+                this->name() + "UTrans",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            c.UTrans_().dimensions(),
+            c.UTrans_().field()
+        )
+    )
+{}
+
+
+template<class ParcelType>
+Foam::KinematicCloud<ParcelType>::KinematicCloud
+(
+    const fvMesh& mesh,
+    const word& name,
+    const KinematicCloud<ParcelType>& c
+)
+:
+    Cloud<ParcelType>(mesh, name, IDLList<ParcelType>()),
+    kinematicCloud(),
+    cloudCopyPtr_(NULL),
+    mesh_(mesh),
+    particleProperties_
+    (
+        IOobject
+        (
+            name + "Properties",
+            mesh.time().constant(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    ),
+    solution_(mesh),
+    constProps_(dictionary::null),
+    subModelProperties_(dictionary::null),
+    rndGen_(0, 0),
+    cellOccupancyPtr_(NULL),
+    rho_(c.rho_),
+    U_(c.U_),
+    mu_(c.mu_),
+    g_(c.g_),
+    forces_(mesh),
+    collisionModel_(NULL),
+    dispersionModel_(NULL),
+    dragModel_(NULL),
+    injectionModel_(NULL),
+    patchInteractionModel_(NULL),
+    postProcessingModel_(NULL),
+    surfaceFilmModel_(NULL),
+    UIntegrator_(NULL),
+    UTrans_(NULL)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -421,7 +563,7 @@ void Foam::KinematicCloud<ParcelType>::checkParcelProperties
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::resetSourceTerms()
 {
-    UTrans_.field() = vector::zero;
+    UTrans_->field() = vector::zero;
 }
 
 

@@ -63,7 +63,19 @@ class ThermoCloud
     public KinematicCloud<ParcelType>,
     public thermoCloud
 {
-    // Private Member Functions
+    // Private data
+
+        //- Cloud copy pointer
+        autoPtr<ThermoCloud<ParcelType> > cloudCopyPtr_;
+
+
+    // Private member functions
+
+        //- Store the current cloud state
+        void storeState();
+
+        //- Reset the current cloud to the previously stored state
+        void restoreState();
 
         //- Disallow default bitwise copy construct
         ThermoCloud(const ThermoCloud&);
@@ -114,7 +126,7 @@ protected:
         // Sources
 
             //- Sensible enthalpy transfer [J/kg]
-            DimensionedField<scalar, volMesh> hsTrans_;
+            autoPtr<DimensionedField<scalar, volMesh> > hsTrans_;
 
 
     // Protected Member Functions
@@ -133,6 +145,9 @@ protected:
             //- Post-evolve
             void postEvolve();
 
+            //- Reset state of cloud
+            void cloudReset(ThermoCloud<ParcelType>& c);
+
 
 public:
 
@@ -148,6 +163,35 @@ public:
             const SLGThermo& thermo,
             bool readFields = true
         );
+
+        //- Copy constructor with new name
+        ThermoCloud(ThermoCloud<ParcelType>& c, const word& name);
+
+        //- Copy constructor with new name - creates bare cloud
+        ThermoCloud
+        (
+            const fvMesh& mesh,
+            const word& name,
+            const ThermoCloud<ParcelType>& c
+        );
+
+        //- Construct and return clone based on (this) with new name
+        virtual autoPtr<Cloud<ParcelType> > clone(const word& name)
+        {
+            return autoPtr<Cloud<ParcelType> >
+            (
+                new ThermoCloud(*this, name)
+            );
+        }
+
+        //- Construct and return bare clone based on (this) with new name
+        virtual autoPtr<Cloud<ParcelType> > cloneBare(const word& name) const
+        {
+            return autoPtr<Cloud<ParcelType> >
+            (
+                new ThermoCloud(this->mesh(), name, *this)
+            );
+        }
 
 
     //- Destructor
@@ -201,6 +245,10 @@ public:
 
                     //- Sensible enthalpy transfer [J/kg]
                     inline DimensionedField<scalar, volMesh>& hsTrans();
+
+                    //- Sensible enthalpy transfer [J/kg]
+                    inline const DimensionedField<scalar, volMesh>&
+                        hsTrans() const;
 
                     //- Return enthalpy source [J/kg/m3/s]
                     inline tmp<DimensionedField<scalar, volMesh> > Sh() const;

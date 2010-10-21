@@ -65,6 +65,9 @@ namespace Foam
 // Forward declaration of classes
 
 template<class CloudType>
+class CollisionModel;
+
+template<class CloudType>
 class DispersionModel;
 
 template<class CloudType>
@@ -72,9 +75,6 @@ class DragModel;
 
 template<class CloudType>
 class InjectionModel;
-
-template<class CloudType>
-class CollisionModel;
 
 template<class CloudType>
 class PatchInteractionModel;
@@ -96,7 +96,19 @@ class KinematicCloud
     public Cloud<ParcelType>,
     public kinematicCloud
 {
+    // Private data
+
+        //- Cloud copy pointer
+        autoPtr<KinematicCloud<ParcelType> > cloudCopyPtr_;
+
+
     // Private Member Functions
+
+        //- Store the current cloud state
+        void storeState();
+
+        //- Reset the current cloud to the previously stored state
+        void restoreState();
 
         //- Disallow default bitwise copy construct
         KinematicCloud(const KinematicCloud&);
@@ -201,10 +213,6 @@ protected:
         //- Sub-models dictionary
         const dictionary& subModelProperties_;
 
-        //- Flag to correct cell values with latest transfer information
-        //  during the lagrangian timestep
-        const Switch cellValueSourceCorrection_;
-
         //- Random number generator - used by some injection routines
         cachedRandom rndGen_;
 
@@ -236,6 +244,10 @@ protected:
 
         // References to the cloud sub-models
 
+            //- Collision model
+            autoPtr<CollisionModel<KinematicCloud<ParcelType> > >
+                collisionModel_;
+
             //- Dispersion model
             autoPtr<DispersionModel<KinematicCloud<ParcelType> > >
                 dispersionModel_;
@@ -246,10 +258,6 @@ protected:
             //- Injector model
             autoPtr<InjectionModel<KinematicCloud<ParcelType> > >
                 injectionModel_;
-
-            //- Collision model
-            autoPtr<CollisionModel<KinematicCloud<ParcelType> > >
-                collisionModel_;
 
             //- Patch interaction model
             autoPtr<PatchInteractionModel<KinematicCloud<ParcelType> > >
@@ -273,7 +281,7 @@ protected:
         // Sources
 
             //- Momentum
-            DimensionedField<vector, volMesh> UTrans_;
+            autoPtr<DimensionedField<vector, volMesh> > UTrans_;
 
 
         // Cloud evolution functions
@@ -300,6 +308,9 @@ protected:
             //- Post-evolve
             void postEvolve();
 
+            //- Reset state of cloud
+            void cloudReset(KinematicCloud<ParcelType>& c);
+
 
 public:
 
@@ -315,6 +326,35 @@ public:
             const dimensionedVector& g,
             bool readFields = true
         );
+
+        //- Copy constructor with new name
+        KinematicCloud(KinematicCloud<ParcelType>& c, const word& name);
+
+        //- Copy constructor with new name - creates bare cloud
+        KinematicCloud
+        (
+            const fvMesh& mesh,
+            const word& name,
+            const KinematicCloud<ParcelType>& c
+        );
+
+        //- Construct and return clone based on (this) with new name
+        virtual autoPtr<Cloud<ParcelType> > clone(const word& name)
+        {
+            return autoPtr<Cloud<ParcelType> >
+            (
+                new KinematicCloud(*this, name)
+            );
+        }
+
+        //- Construct and return bare clone based on (this) with new name
+        virtual autoPtr<Cloud<ParcelType> > cloneBare(const word& name) const
+        {
+            return autoPtr<Cloud<ParcelType> >
+            (
+                new KinematicCloud(this->mesh(), name, *this)
+            );
+        }
 
 
     //- Destructor
@@ -391,6 +431,14 @@ public:
 
             // Sub-models
 
+                //- Return const access to the collision model
+                inline const CollisionModel<KinematicCloud<ParcelType> >&
+                    collision() const;
+
+                //- Return reference to the collision model
+                inline CollisionModel<KinematicCloud<ParcelType> >&
+                    collision();
+
                 //- Return const-access to the dispersion model
                 inline const DispersionModel<KinematicCloud<ParcelType> >&
                     dispersion() const;
@@ -410,15 +458,6 @@ public:
                 //- Return reference to the injection model
                 inline InjectionModel<KinematicCloud<ParcelType> >&
                     injection();
-
-                //- Return const access to the collision model
-                inline
-                const CollisionModel<KinematicCloud<ParcelType> >&
-                    collision() const;
-
-                //- Return reference to the collision model
-                inline CollisionModel<KinematicCloud<ParcelType> >&
-                    collision();
 
                 //- Return const-access to the patch interaction model
                 inline const PatchInteractionModel<KinematicCloud<ParcelType> >&
@@ -449,6 +488,10 @@ public:
 
                     //- Return reference to momentum source
                     inline DimensionedField<vector, volMesh>& UTrans();
+
+                    //- Return const reference to momentum source
+                    inline const DimensionedField<vector, volMesh>&
+                        UTrans() const;
 
                     //- Return tmp momentum source term - fully explicit
                     inline tmp<DimensionedField<vector, volMesh> > SU() const;

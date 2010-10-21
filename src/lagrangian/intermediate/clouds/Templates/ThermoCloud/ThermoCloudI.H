@@ -85,7 +85,15 @@ template<class ParcelType>
 inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
 Foam::ThermoCloud<ParcelType>::hsTrans()
 {
-    return hsTrans_;
+    return hsTrans_();
+}
+
+
+template<class ParcelType>
+inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::ThermoCloud<ParcelType>::hsTrans() const
+{
+    return hsTrans_();
 }
 
 
@@ -106,7 +114,7 @@ Foam::ThermoCloud<ParcelType>::Sh() const
                 IOobject::AUTO_WRITE,
                 false
             ),
-            hsTrans_/(this->mesh().V()*this->db().time().deltaT())
+            hsTrans_()/(this->mesh().V()*this->db().time().deltaT())
         )
     );
 

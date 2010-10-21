@@ -69,7 +69,19 @@ class ReactingCloud
 
 private:
 
-    // Private Member Functions
+    // Private data
+
+        //- Cloud copy pointer
+        autoPtr<ReactingCloud<ParcelType> > cloudCopyPtr_;
+
+
+    // Private member functions
+
+        //- Store the current cloud state
+        void storeState();
+
+        //- Reset the current cloud to the previously stored state
+        void restoreState();
 
         //- Disallow default bitwise copy construct
         ReactingCloud(const ReactingCloud&);
@@ -136,6 +148,9 @@ protected:
             //- Post-evolve
             void postEvolve();
 
+            //- Reset state of cloud
+            void cloudReset(ReactingCloud<ParcelType>& c);
+
 
 public:
 
@@ -151,6 +166,35 @@ public:
             const SLGThermo& thermo,
             bool readFields = true
         );
+
+        //- Copy constructor with new name
+        ReactingCloud(ReactingCloud<ParcelType>& c, const word& name);
+
+        //- Copy constructor with new name - creates bare cloud
+        ReactingCloud
+        (
+            const fvMesh& mesh,
+            const word& name,
+            const ReactingCloud<ParcelType>& c
+        );
+
+        //- Construct and return clone based on (this) with new name
+        virtual autoPtr<Cloud<ParcelType> > clone(const word& name)
+        {
+            return autoPtr<Cloud<ParcelType> >
+            (
+                new ReactingCloud(*this, name)
+            );
+        }
+
+        //- Construct and return bare clone based on (this) with new name
+        virtual autoPtr<Cloud<ParcelType> > cloneBare(const word& name) const
+        {
+            return autoPtr<Cloud<ParcelType> >
+            (
+                new ReactingCloud(this->mesh(), name, *this)
+            );
+        }
 
 
     //- Destructor

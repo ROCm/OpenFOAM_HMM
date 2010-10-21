@@ -28,6 +28,29 @@ License
 #include "DevolatilisationModel.H"
 #include "SurfaceReactionModel.H"
 
+// * * * * * * * * * * * * *  Private Member Functions * * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::ReactingMultiphaseCloud<ParcelType>::storeState()
+{
+    cloudCopyPtr_.reset
+    (
+        static_cast<ReactingMultiphaseCloud<ParcelType>*>
+        (
+            clone(this->name() + "Copy").ptr()
+        )
+    );
+}
+
+
+template<class ParcelType>
+void Foam::ReactingMultiphaseCloud<ParcelType>::restoreState()
+{
+    cloudReset(cloudCopyPtr_());
+    cloudCopyPtr_.clear();
+}
+
+
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 template<class ParcelType>
@@ -85,6 +108,22 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::postEvolve()
 }
 
 
+template<class ParcelType>
+void Foam::ReactingMultiphaseCloud<ParcelType>::cloudReset
+(
+    ReactingMultiphaseCloud<ParcelType>& c
+)
+{
+    ReactingCloud<ParcelType>::cloudReset(c);
+
+    devolatilisationModel_ = c.devolatilisationModel_->clone();
+    surfaceReactionModel_ = c.surfaceReactionModel_->clone();
+
+    dMassDevolatilisation_ = c.dMassDevolatilisation_;
+    dMassSurfaceReaction_ = c.dMassSurfaceReaction_;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -100,6 +139,7 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
 :
     ReactingCloud<ParcelType>(cloudName, rho, U, g, thermo, false),
     reactingMultiphaseCloud(),
+    cloudCopyPtr_(NULL),
     constProps_(this->particleProperties()),
     devolatilisationModel_
     (
@@ -117,13 +157,51 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
             *this
         )
     ),
-    dMassDevolatilisation_(0.0)
+    dMassDevolatilisation_(0.0),
+    dMassSurfaceReaction_(0.0)
 {
     if (readFields)
     {
         ParcelType::readFields(*this);
     }
 }
+
+
+template<class ParcelType>
+Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
+(
+    ReactingMultiphaseCloud<ParcelType>& c,
+    const word& name
+)
+:
+    ReactingCloud<ParcelType>(c, name),
+    reactingMultiphaseCloud(),
+    cloudCopyPtr_(NULL),
+    constProps_(c.constProps_),
+    devolatilisationModel_(c.devolatilisationModel_->clone()),
+    surfaceReactionModel_(c.surfaceReactionModel_->clone()),
+    dMassDevolatilisation_(c.dMassDevolatilisation_),
+    dMassSurfaceReaction_(c.dMassSurfaceReaction_)
+{}
+
+
+template<class ParcelType>
+Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
+(
+    const fvMesh& mesh,
+    const word& name,
+    const ReactingMultiphaseCloud<ParcelType>& c
+)
+:
+    ReactingCloud<ParcelType>(mesh, name, c),
+    reactingMultiphaseCloud(),
+    cloudCopyPtr_(NULL),
+    constProps_(c.constProps_),
+    devolatilisationModel_(NULL),
+    surfaceReactionModel_(NULL),
+    dMassDevolatilisation_(0.0),
+    dMassSurfaceReaction_(0.0)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

@@ -28,6 +28,29 @@ License
 #include "CompositionModel.H"
 #include "PhaseChangeModel.H"
 
+// * * * * * * * * * * * * *  Private Member Functions * * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::storeState()
+{
+    cloudCopyPtr_.reset
+    (
+        static_cast<ReactingCloud<ParcelType>*>
+        (
+            clone(this->name() + "Copy").ptr()
+        )
+    );
+}
+
+
+template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::restoreState()
+{
+    cloudReset(cloudCopyPtr_());
+    cloudCopyPtr_.clear();
+}
+
+
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -112,6 +135,18 @@ void Foam::ReactingCloud<ParcelType>::postEvolve()
 }
 
 
+template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::cloudReset(ReactingCloud<ParcelType>& c)
+{
+    ThermoCloud<ParcelType>::cloudReset(c);
+
+    compositionModel_ = c.compositionModel_->clone();
+    phaseChangeModel_ = c.phaseChangeModel_->clone();
+
+    dMassPhaseChange_ = c.dMassPhaseChange_;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -127,6 +162,7 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
 :
     ThermoCloud<ParcelType>(cloudName, rho, U, g, thermo, false),
     reactingCloud(),
+    cloudCopyPtr_(NULL),
     constProps_(this->particleProperties()),
     compositionModel_
     (
@@ -176,6 +212,52 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
         ParcelType::readFields(*this);
     }
 }
+
+
+template<class ParcelType>
+Foam::ReactingCloud<ParcelType>::ReactingCloud
+(
+    ReactingCloud<ParcelType>& c,
+    const word& name
+)
+:
+    ThermoCloud<ParcelType>(c, name),
+    reactingCloud(),
+    cloudCopyPtr_(NULL),
+    constProps_(c.constProps_),
+    compositionModel_(c.compositionModel_->clone()),
+    phaseChangeModel_(c.phaseChangeModel_->clone()),
+    rhoTrans_(c.rhoTrans_.size()),
+    dMassPhaseChange_(c.dMassPhaseChange_)
+{
+    forAll(c.rhoTrans_, i)
+    {
+        rhoTrans_.set
+        (
+            i,
+            new DimensionedField<scalar, volMesh>(c.rhoTrans_[i])
+        );
+    }
+}
+
+
+template<class ParcelType>
+Foam::ReactingCloud<ParcelType>::ReactingCloud
+(
+    const fvMesh& mesh,
+    const word& name,
+    const ReactingCloud<ParcelType>& c
+)
+:
+    ThermoCloud<ParcelType>(mesh, name, c),
+    reactingCloud(),
+    cloudCopyPtr_(NULL),
+    constProps_(c.constProps_),
+    compositionModel_(NULL),
+    phaseChangeModel_(NULL),
+    rhoTrans_(0),
+    dMassPhaseChange_(0.0)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

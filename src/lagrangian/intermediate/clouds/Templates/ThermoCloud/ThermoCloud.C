@@ -29,6 +29,29 @@ License
 
 #include "HeatTransferModel.H"
 
+// * * * * * * * * * * * * *  Private Member Functions * * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::storeState()
+{
+    cloudCopyPtr_.reset
+    (
+        static_cast<ThermoCloud<ParcelType>*>
+        (
+            clone(this->name() + "Copy").ptr()
+        )
+    );
+}
+
+
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::restoreState()
+{
+    cloudReset(cloudCopyPtr_());
+    cloudCopyPtr_.clear();
+}
+
+
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 template<class ParcelType>
@@ -86,6 +109,18 @@ void Foam::ThermoCloud<ParcelType>::postEvolve()
 }
 
 
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::cloudReset(ThermoCloud<ParcelType>& c)
+{
+    KinematicCloud<ParcelType>::cloudReset(c);
+
+    heatTransferModel_ = c.heatTransferModel_->clone();
+    TIntegrator_ = c.TIntegrator_->clone();
+
+    radiation_ = c.radiation_;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -109,6 +144,7 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
         false
     ),
     thermoCloud(),
+    cloudCopyPtr_(NULL),
     constProps_(this->particleProperties()),
     thermo_(thermo),
     T_(thermo.thermo().T()),
@@ -132,17 +168,20 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
     radiation_(this->subModelProperties().lookup("radiation")),
     hsTrans_
     (
-        IOobject
+        new DimensionedField<scalar, volMesh>
         (
-            this->name() + "hsTrans",
-            this->db().time().timeName(),
-            this->db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        this->mesh(),
-        dimensionedScalar("zero", dimEnergy, 0.0)
+            IOobject
+            (
+                this->name() + "hsTrans",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            this->mesh(),
+            dimensionedScalar("zero", dimEnergy, 0.0)
+        )
     )
 {
     if (readFields)
@@ -150,6 +189,64 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
         ParcelType::readFields(*this);
     }
 }
+
+
+template<class ParcelType>
+Foam::ThermoCloud<ParcelType>::ThermoCloud
+(
+    ThermoCloud<ParcelType>& c,
+    const word& name
+)
+:
+    KinematicCloud<ParcelType>(c, name),
+    thermoCloud(),
+    cloudCopyPtr_(NULL),
+    constProps_(c.particleProperties_),
+    thermo_(c.thermo_),
+    T_(c.T()),
+    p_(c.p()),
+    heatTransferModel_(c.heatTransferModel_->clone()),
+    TIntegrator_(c.TIntegrator_->clone()),
+    radiation_(c.radiation_),
+    hsTrans_
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                this->name() + "hsTrans",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            c.hsTrans()
+        )
+    )
+{}
+
+
+template<class ParcelType>
+Foam::ThermoCloud<ParcelType>::ThermoCloud
+(
+    const fvMesh& mesh,
+    const word& name,
+    const ThermoCloud<ParcelType>& c
+)
+:
+    KinematicCloud<ParcelType>(mesh, name, c),
+    thermoCloud(),
+    cloudCopyPtr_(NULL),
+    constProps_(c.particleProperties_),
+    thermo_(c.thermo()),
+    T_(c.T()),
+    p_(c.p()),
+    heatTransferModel_(NULL),
+    TIntegrator_(NULL),
+    radiation_(false),
+    hsTrans_(NULL)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -188,7 +285,7 @@ template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::resetSourceTerms()
 {
     KinematicCloud<ParcelType>::resetSourceTerms();
-    hsTrans_.field() = 0.0;
+    hsTrans_->field() = 0.0;
 }
 
 
