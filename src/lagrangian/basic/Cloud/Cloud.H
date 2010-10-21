@@ -318,6 +318,9 @@ public:
             //- Remove particle from cloud and delete
             void deleteParticle(ParticleType&);
 
+            //- Reset the particles
+            void cloudReset(const Cloud<ParticleType>& c);
+
             //- Move the particles
             //  passing the TrackingData to the track function
             template<class TrackingData>

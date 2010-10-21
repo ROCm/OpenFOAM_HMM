@@ -385,6 +385,16 @@ void Foam::Cloud<ParticleType>::deleteParticle(ParticleType& p)
 
 
 template<class ParticleType>
+void Foam::Cloud<ParticleType>::cloudReset(const Cloud<ParticleType>& c)
+{
+    // Reset particle cound and particles only
+    // - not changing the cloud object registry or reference to the polyMesh
+    particleCount_ = 0;
+    IDLList<ParticleType>::operator=(c);
+}
+
+
+template<class ParticleType>
 template<class TrackingData>
 void Foam::Cloud<ParticleType>::move(TrackingData& td)
 {
