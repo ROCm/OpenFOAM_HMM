@@ -575,99 +575,99 @@ void ensightPointField
     }
 
 
-     label ensightPatchI = eMesh.patchPartOffset();
+    label ensightPatchI = eMesh.patchPartOffset();
  
-     forAll(allPatchNames, patchi)
-     {
-         const word& patchName = allPatchNames[patchi];
+    forAll(allPatchNames, patchi)
+    {
+        const word& patchName = allPatchNames[patchi];
  
-         eMesh.barrier();
+        eMesh.barrier();
  
-         if (patchNames.empty() || patchNames.found(patchName))
-         {
-             const fvPatch& p = mesh.boundary()[patchi];
-             if
-             (
-                 returnReduce(p.size(), sumOp<label>())
-               > 0
-             )
-             {
-                 // Renumber the patch points/faces into unique points
-                 labelList pointToGlobal;
-                 labelList uniqueMeshPointLabels;
-                 autoPtr<globalIndex> globalPointsPtr =
-                 mesh.globalData().mergePoints
-                 (
-                     p.patch().meshPoints(),
-                     p.patch().meshPointMap(),
-                     pointToGlobal,
-                     uniqueMeshPointLabels
-                 );
+        if (patchNames.empty() || patchNames.found(patchName))
+        {
+            const fvPatch& p = mesh.boundary()[patchi];
+            if
+            (
+                returnReduce(p.size(), sumOp<label>())
+              > 0
+            )
+            {
+                // Renumber the patch points/faces into unique points
+                labelList pointToGlobal;
+                labelList uniqueMeshPointLabels;
+                autoPtr<globalIndex> globalPointsPtr =
+                mesh.globalData().mergePoints
+                (
+                    p.patch().meshPoints(),
+                    p.patch().meshPointMap(),
+                    pointToGlobal,
+                    uniqueMeshPointLabels
+                );
  
-                 if (Pstream::master())
-                 {
-                     ensightFile.writePartHeader(ensightPatchI);
-                 }
+                if (Pstream::master())
+                {
+                    ensightFile.writePartHeader(ensightPatchI);
+                }
  
-                 writeField
-                 (
-                     "coordinates",
-                     Field<Type>(pf.internalField(), uniqueMeshPointLabels),
-                     ensightFile
-                 );
+                writeField
+                (
+                    "coordinates",
+                    Field<Type>(pf.internalField(), uniqueMeshPointLabels),
+                    ensightFile
+                );
  
-                 ensightPatchI++;
-             }
-         }
-     }
+                ensightPatchI++;
+            }
+        }
+    }
  
-     // write faceZones, if requested
-     if (faceZoneNames.size())
-     {
-         forAllConstIter(wordHashSet, faceZoneNames, iter)
-         {
-             const word& faceZoneName = iter.key();
- 
-             eMesh.barrier();
- 
-             label zoneID = mesh.faceZones().findZoneID(faceZoneName);
- 
-             const faceZone& fz = mesh.faceZones()[zoneID];
- 
-             if (returnReduce(fz().nPoints(), sumOp<label>()) > 0)
-             {
-                 // Renumber the faceZone points/faces into unique points
-                 labelList pointToGlobal;
-                 labelList uniqueMeshPointLabels;
-                 autoPtr<globalIndex> globalPointsPtr =
-                 mesh.globalData().mergePoints
-                 (
-                     fz().meshPoints(),
-                     fz().meshPointMap(),
-                     pointToGlobal,
-                     uniqueMeshPointLabels
-                 );
- 
-                 if (Pstream::master())
-                 {
-                     ensightFile.writePartHeader(ensightPatchI);
-                 }
- 
-                 writeField
-                 (
-                     "coordinates",
-                     Field<Type>
-                     (
-                         pf.internalField(),
-                         uniqueMeshPointLabels
-                     ),
-                     ensightFile
-                 );
- 
-                 ensightPatchI++;
-             }
-         }
-     }
+    // write faceZones, if requested
+    if (faceZoneNames.size())
+    {
+        forAllConstIter(wordHashSet, faceZoneNames, iter)
+        {
+            const word& faceZoneName = iter.key();
+
+            eMesh.barrier();
+
+            label zoneID = mesh.faceZones().findZoneID(faceZoneName);
+
+            const faceZone& fz = mesh.faceZones()[zoneID];
+
+            if (returnReduce(fz().nPoints(), sumOp<label>()) > 0)
+            {
+                // Renumber the faceZone points/faces into unique points
+                labelList pointToGlobal;
+                labelList uniqueMeshPointLabels;
+                autoPtr<globalIndex> globalPointsPtr =
+                mesh.globalData().mergePoints
+                (
+                    fz().meshPoints(),
+                    fz().meshPointMap(),
+                    pointToGlobal,
+                    uniqueMeshPointLabels
+                );
+
+                if (Pstream::master())
+                {
+                    ensightFile.writePartHeader(ensightPatchI);
+                }
+
+                writeField
+                (
+                    "coordinates",
+                    Field<Type>
+                    (
+                        pf.internalField(),
+                        uniqueMeshPointLabels
+                    ),
+                    ensightFile
+                );
+
+                ensightPatchI++;
+            }
+        }
+    }
 
     if (Pstream::master())
     {
