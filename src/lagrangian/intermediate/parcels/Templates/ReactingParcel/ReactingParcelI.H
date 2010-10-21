@@ -170,7 +170,7 @@ template<class ParcelType>
 inline const Foam::interpolation<Foam::scalar>&
 Foam::ReactingParcel<ParcelType>::trackData::pInterp() const
 {
-    return pInterp_;
+    return pInterp_();
 }
 
 

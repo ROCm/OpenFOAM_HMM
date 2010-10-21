@@ -138,7 +138,7 @@ public:
             //- Reference to the cloud containing this particle
             ThermoCloud<ParcelType>& cloud_;
 
-            //- Local copy of specific heat field
+            //- Local copy of carrier specific heat field
             //  Cp not stored on acrrier thermo, but returned as tmp<...>
             const volScalarField Cp_;
 
@@ -149,7 +149,7 @@ public:
                 autoPtr<interpolation<scalar> > TInterp_;
 
                 //- Specific heat capacity field interpolator
-                const interpolation<scalar>& CpInterp_;
+                autoPtr<interpolation<scalar> > CpInterp_;
 
 
     public:
@@ -169,6 +169,9 @@ public:
 
             //- Return access to the owner cloud
             inline ThermoCloud<ParcelType>& cloud();
+
+            //- Return access to the locally stored carrier Cp field
+            inline const volScalarField& Cp() const;
 
             //- Return const access to the interpolator for continuous
             //  phase temperature field

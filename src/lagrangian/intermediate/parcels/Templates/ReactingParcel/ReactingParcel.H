@@ -122,7 +122,7 @@ public:
             ReactingCloud<ParcelType>& cloud_;
 
             //- Interpolator for continuous phase pressure field
-            const interpolation<scalar>& pInterp_;
+            autoPtr<interpolation<scalar> > pInterp_;
 
 
     public:

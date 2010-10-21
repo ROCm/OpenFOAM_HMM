@@ -203,6 +203,14 @@ Foam::ThermoParcel<ParcelType>::trackData::cloud()
 
 
 template<class ParcelType>
+inline const Foam::volScalarField&
+Foam::ThermoParcel<ParcelType>::trackData::Cp() const
+{
+    return Cp_;
+}
+
+
+template<class ParcelType>
 inline const Foam::interpolation<Foam::scalar>&
 Foam::ThermoParcel<ParcelType>::trackData::TInterp() const
 {
@@ -214,7 +222,7 @@ template<class ParcelType>
 inline const Foam::interpolation<Foam::scalar>&
 Foam::ThermoParcel<ParcelType>::trackData::CpInterp() const
 {
-    return CpInterp_;
+    return CpInterp_();
 }
 
 
