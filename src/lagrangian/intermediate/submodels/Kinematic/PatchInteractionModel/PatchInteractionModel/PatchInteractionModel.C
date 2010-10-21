@@ -124,8 +124,7 @@ Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
 )
 :
     SubModelBase<CloudType>(owner, dict, type),
-//    UName_(this->coeffDict().lookupOrDefault<word>("UName", "U"))
-    UName_(this->coeffDict().lookup("UName"))
+    UName_(this->coeffDict().lookupOrDefault("UName", word("U")))
 {}
 
 
