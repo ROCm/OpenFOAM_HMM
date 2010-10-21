@@ -91,7 +91,7 @@ Foam::label Foam::InjectionModel<CloudType>::parcelsToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     notImplemented
     (
@@ -111,7 +111,7 @@ Foam::scalar Foam::InjectionModel<CloudType>::volumeToInject
 (
     const scalar time0,
     const scalar time1
-) const
+)
 {
     notImplemented
     (
@@ -162,10 +162,10 @@ void Foam::InjectionModel<CloudType>::prepareForNextTimeStep
     scalar t1 = time - SOI_;
 
     // Number of parcels to inject
-    newParcels = parcelsToInject(t0, t1);
+    newParcels = this->parcelsToInject(t0, t1);
 
     // Volume of parcels to inject
-    newVolume = volumeToInject(t0, t1);
+    newVolume = this->volumeToInject(t0, t1);
 
     // Hold previous time if no parcels, but non-zero volume fraction
     if ((newParcels == 0) && (newVolume > 0.0))
@@ -486,7 +486,7 @@ template<class CloudType>
 template<class TrackData>
 void Foam::InjectionModel<CloudType>::inject(TrackData& td)
 {
-    if (this->active())
+    if (!this->active())
     {
         return;
     }

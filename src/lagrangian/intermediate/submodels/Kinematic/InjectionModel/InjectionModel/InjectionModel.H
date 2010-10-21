@@ -143,18 +143,10 @@ protected:
     // Protected Member Functions
 
         //- Number of parcels to introduce over the time step relative to SOI
-        virtual label parcelsToInject
-        (
-            const scalar time0,
-            const scalar time1
-        ) const;
+        virtual label parcelsToInject(const scalar time0, const scalar time1);
 
         //- Volume of parcels to introduce over the time step relative to SOI
-        virtual scalar volumeToInject
-        (
-            const scalar time0,
-            const scalar time1
-        ) const;
+        virtual scalar volumeToInject(const scalar time0, const scalar time1);
 
         //- Additional flag to identify whether or not injection of parcelI is
         //  permitted

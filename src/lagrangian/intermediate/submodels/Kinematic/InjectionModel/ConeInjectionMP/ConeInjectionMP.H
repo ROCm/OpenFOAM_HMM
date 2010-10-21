@@ -128,10 +128,10 @@ protected:
 
     // Protected Member Functions
 
-        //- Number of parcels to introduce over the time step
+        //- Number of parcels to introduce over the time step relative to SOI
         virtual label parcelsToInject(const scalar time0, const scalar time1);
 
-        //- Number of parcels to introduce over the time step
+        //- Volume of parcels to introduce over the time step relative to SOI
         virtual scalar volumeToInject(const scalar time0, const scalar time1);
 
 
