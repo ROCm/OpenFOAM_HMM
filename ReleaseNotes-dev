@@ -87,6 +87,10 @@
 *** *Updated* particle tracking algorithm
 *** *Updated* split cyclics into two separate patches. See doc/changed/splitCyclics.txt
 *** *New* compact binary I/O for faces and cells. This speeds up reading/writing meshes in binary.
+*** *Updated* runTimeModifiable
+    + on linux uses inotify instead of time stamps - more efficient for large
+      numbers of monitored files. No more fileModificationSkew needed.
+    + single integer reduction instead of one reduction per monitored file.
 * Solvers
   A number of new solvers have been developed for a range of engineering
   applications.  There has been a set of improvements to certain classes of
@@ -125,6 +129,8 @@
         (nonuniformTransform)cyclic <zoneA>_<zoneB>
       + extrudes into master direction (i.e. away from the owner cell
         if flipMap is false)
+    + =topoSet=: replacement of cellSet,faceSet,pointSet utilities.
+      Comparable to a dictionary driven =setSet= utility.
 *** Updated utilities
     + =setFields=: optionally use faceSets to set patch values (see e.g. hotRoom tutorial).
     + =blockMesh=: specify patches via dictionary instead of type only. This
@@ -133,6 +139,8 @@
 * Post-processing
   + =foamToEnsight=: parallel continuous data. new =-nodeValues= option to generate and output nodal
     field data.
+  + =singleCellMesh=: new utility to convert mesh and fields to a single cell
+    mesh. Great for postprocessing.
   + Function objects:
     + =residualControl=: new function object to allow users to terminate steady
     state calculations when the defined residual levels are achieved
