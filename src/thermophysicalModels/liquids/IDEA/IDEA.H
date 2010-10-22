@@ -132,6 +132,9 @@ public:
         //- Construct from Istream
         IDEA(Istream& is);
 
+        //- Construct from dictionary
+        IDEA(const dictionary& dict);
+
 
     // Member Functions
 

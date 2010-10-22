@@ -29,7 +29,7 @@ Description
 #include "sammMesh.H"
 #include "Time.H"
 #include "wallPolyPatch.H"
-#include "cyclicPolyPatch.H"
+#include "oldCyclicPolyPatch.H"
 #include "symmetryPolyPatch.H"
 #include "preservePatchTypes.H"
 #include "IFstream.H"
@@ -208,7 +208,7 @@ void sammMesh::readBoundary()
             {
                 // incorrect. should be cyclicPatch but this
                 // requires info on connected faces.
-                patchTypes_[patchLabel] = cyclicPolyPatch::typeName;
+                patchTypes_[patchLabel] = oldCyclicPolyPatch::typeName;
             }
             else
             {

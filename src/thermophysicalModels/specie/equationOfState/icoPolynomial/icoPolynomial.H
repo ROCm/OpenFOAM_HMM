@@ -98,9 +98,9 @@ class icoPolynomial
 {
     // Private data
 
-        //- Density
+        //- Density polynomial coefficients
         //  Note: input in [kg/m3], but internally uses [kg/m3/kmol]
-        Polynomial<PolySize> rhoPolynomial_;
+        Polynomial<PolySize> rhoCoeffs_;
 
 
 public:
@@ -117,6 +117,9 @@ public:
         //- Construct from Istream
         icoPolynomial(Istream&);
 
+        //- Construct from dictionary
+        icoPolynomial(const dictionary& dict);
+
         //- Construct as copy
         inline icoPolynomial(const icoPolynomial&);
 
@@ -129,17 +132,28 @@ public:
         // Selector from Istream
         inline static autoPtr<icoPolynomial> New(Istream& is);
 
+        // Selector from dictionary
+        inline static autoPtr<icoPolynomial> New(const dictionary& dict);
+
 
     // Member functions
 
-        //- Return density [kg/m^3]
-        inline scalar rho(scalar p, scalar T) const;
+        // Fundamental properties
 
-        //- Return compressibility rho/p [s^2/m^2]
-        inline scalar psi(scalar p, scalar T) const;
+            //- Return density [kg/m^3]
+            inline scalar rho(scalar p, scalar T) const;
 
-        //- Return compression factor []
-        inline scalar Z(scalar p, scalar T) const;
+            //- Return compressibility rho/p [s^2/m^2]
+            inline scalar psi(scalar p, scalar T) const;
+
+            //- Return compression factor []
+            inline scalar Z(scalar p, scalar T) const;
+
+
+        // I-O
+
+            //- Write to Ostream
+            void write(Ostream& os) const;
 
 
     // Member operators

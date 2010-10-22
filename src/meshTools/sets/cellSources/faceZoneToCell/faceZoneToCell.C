@@ -32,13 +32,16 @@ License
 
 namespace Foam
 {
+    defineTypeNameAndDebug(faceZoneToCell, 0);
+    addToRunTimeSelectionTable(topoSetSource, faceZoneToCell, word);
+    addToRunTimeSelectionTable(topoSetSource, faceZoneToCell, istream);
 
-defineTypeNameAndDebug(faceZoneToCell, 0);
-
-addToRunTimeSelectionTable(topoSetSource, faceZoneToCell, word);
-
-addToRunTimeSelectionTable(topoSetSource, faceZoneToCell, istream);
-
+    template<>
+    const char* Foam::NamedEnum<Foam::faceZoneToCell::faceAction, 2>::names[] =
+    {
+        "master",
+        "slave"
+    };
 }
 
 
@@ -49,14 +52,6 @@ Foam::topoSetSource::addToUsageTable Foam::faceZoneToCell::usage_
     "    Select master or slave side of the faceZone."
     " Note:accepts wildcards for zone.\n\n"
 );
-
-
-template<>
-const char* Foam::NamedEnum<Foam::faceZoneToCell::faceAction, 2>::names[] =
-{
-    "master",
-    "slave"
-};
 
 
 const Foam::NamedEnum<Foam::faceZoneToCell::faceAction, 2>

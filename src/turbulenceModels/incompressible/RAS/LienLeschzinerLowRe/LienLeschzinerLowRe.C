@@ -172,7 +172,7 @@ LienLeschzinerLowRe::LienLeschzinerLowRe
     (
         IOobject
         (
-            "epsilon",
+            "nut",
             runTime_.timeName(),
             mesh_,
             IOobject::NO_READ,

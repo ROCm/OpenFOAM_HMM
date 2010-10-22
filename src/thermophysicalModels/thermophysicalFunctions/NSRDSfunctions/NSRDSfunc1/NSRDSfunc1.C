@@ -30,14 +30,48 @@ License
 
 namespace Foam
 {
+    defineTypeNameAndDebug(NSRDSfunc1, 0);
+    addToRunTimeSelectionTable(thermophysicalFunction, NSRDSfunc1, Istream);
+    addToRunTimeSelectionTable(thermophysicalFunction, NSRDSfunc1, dictionary);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(NSRDSfunc1, 0);
-addToRunTimeSelectionTable(thermophysicalFunction, NSRDSfunc1, Istream);
+Foam::NSRDSfunc1::NSRDSfunc1
+(
+    const scalar a,
+    const scalar b,
+    const scalar c,
+    const scalar d,
+    const scalar e
+)
+:
+    a_(a),
+    b_(b),
+    c_(c),
+    d_(d),
+    e_(e)
+{}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+Foam::NSRDSfunc1::NSRDSfunc1(Istream& is)
+:
+    a_(readScalar(is)),
+    b_(readScalar(is)),
+    c_(readScalar(is)),
+    d_(readScalar(is)),
+    e_(readScalar(is))
+{}
+
+
+Foam::NSRDSfunc1::NSRDSfunc1(const dictionary& dict)
+:
+    a_(readScalar(dict.lookup("a"))),
+    b_(readScalar(dict.lookup("b"))),
+    c_(readScalar(dict.lookup("c"))),
+    d_(readScalar(dict.lookup("d"))),
+    e_(readScalar(dict.lookup("e")))
+{}
+
 
 // ************************************************************************* //

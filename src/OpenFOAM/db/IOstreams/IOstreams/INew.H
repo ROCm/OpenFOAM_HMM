@@ -25,7 +25,7 @@ Class
     Foam::INew
 
 Description
-    A helper class when constructing from an Istream
+    A helper class when constructing from an Istream or dictionary
 
 \*---------------------------------------------------------------------------*/
 
@@ -52,17 +52,32 @@ class INew
 
 public:
 
+    //- Construct null
     INew()
     {}
 
+    //- Construct from Istream
     autoPtr<T> operator()(Istream& is) const
     {
         return T::New(is);
     }
 
+    //- Construct from word and Istream
     autoPtr<T> operator()(const word&, Istream& is) const
     {
         return T::New(is);
+    }
+
+    //- Construct from dictionary
+    autoPtr<T> operator()(const dictionary& dict) const
+    {
+        return T::New(dict);
+    }
+
+    //- Construct from word and dictionary
+    autoPtr<T> operator()(const word&, const dictionary& dict) const
+    {
+        return T::New(dict);
     }
 };
 

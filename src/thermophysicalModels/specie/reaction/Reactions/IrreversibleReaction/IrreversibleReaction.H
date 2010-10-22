@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class IrreversibleReaction Declaration
+                    Class IrreversibleReaction Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ReactionThermo, class ReactionRate>
@@ -94,6 +94,14 @@ public:
             const speciesTable& species,
             const HashPtrTable<ReactionThermo>& thermoDatabase,
             Istream& is
+        );
+
+        //- Construct from dictionary
+        IrreversibleReaction
+        (
+            const speciesTable& species,
+            const HashPtrTable<ReactionThermo>& thermoDatabase,
+            const dictionary& dict
         );
 
         //- Construct and return a clone

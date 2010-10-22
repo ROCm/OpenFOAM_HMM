@@ -22,10 +22,16 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
+    Foam::symmTensorUList
+
+Description
+    A UList of symmTensors.
+
+Typedef
     Foam::symmTensorList
 
 Description
-    List of symmTensors.
+    A List of symmTensors.
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,6 +45,8 @@ Description
 
 namespace Foam
 {
+    typedef UList<symmTensor> symmTensorUList;
+
     typedef List<symmTensor> symmTensorList;
 }
 

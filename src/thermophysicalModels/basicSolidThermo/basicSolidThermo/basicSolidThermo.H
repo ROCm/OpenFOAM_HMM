@@ -46,7 +46,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                            Class basicSolidThermo Declaration
+                       Class basicSolidThermo Declaration
 \*---------------------------------------------------------------------------*/
 
 class basicSolidThermo
@@ -69,8 +69,7 @@ public:
     TypeName("basicSolidThermo");
 
 
-    // Declare run-time constructor selection tables
-
+    //- Declare run-time constructor selection tables
     declareRunTimeSelectionTable
     (
         autoPtr,
@@ -91,9 +90,8 @@ public:
         static autoPtr<basicSolidThermo> New(const fvMesh&);
 
 
-    // Destructor
-
-        virtual ~basicSolidThermo();
+    //- Destructor
+    virtual ~basicSolidThermo();
 
 
     // Member Functions
@@ -149,6 +147,7 @@ public:
                 //- Emissivity []
                 virtual tmp<scalarField> emissivity(const label) const = 0;
 
+
 //        // Point wise properties
 //
 //            //- Density [kg/m3]
@@ -165,6 +164,7 @@ public:
 //
 //            //- Emissivity []
 //            virtual scalar emissivity(const scalar T) const = 0;
+
 
         // I-O
 

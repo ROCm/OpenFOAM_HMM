@@ -33,13 +33,16 @@ License
 
 namespace Foam
 {
+    defineTypeNameAndDebug(pointToFace, 0);
+    addToRunTimeSelectionTable(topoSetSource, pointToFace, word);
+    addToRunTimeSelectionTable(topoSetSource, pointToFace, istream);
 
-defineTypeNameAndDebug(pointToFace, 0);
-
-addToRunTimeSelectionTable(topoSetSource, pointToFace, word);
-
-addToRunTimeSelectionTable(topoSetSource, pointToFace, istream);
-
+    template<>
+    const char* Foam::NamedEnum<Foam::pointToFace::pointAction, 2>::names[] =
+    {
+        "any",
+        "all"
+    };
 }
 
 
@@ -51,13 +54,6 @@ Foam::topoSetSource::addToUsageTable Foam::pointToFace::usage_
     "    -any point in the pointSet\n"
     "    -all points in the pointSet\n\n"
 );
-
-template<>
-const char* Foam::NamedEnum<Foam::pointToFace::pointAction, 2>::names[] =
-{
-    "any",
-    "all"
-};
 
 const Foam::NamedEnum<Foam::pointToFace::pointAction, 2>
     Foam::pointToFace::pointActionNames_;

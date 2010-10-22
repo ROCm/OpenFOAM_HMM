@@ -51,7 +51,7 @@ Foam::hCombustionThermo::hCombustionThermo(const fvMesh& mesh)
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionSet(0, 2, -2, 0, 0),
+        dimEnergy/dimMass,
         this->hBoundaryTypes()
     )
 {}

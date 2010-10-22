@@ -22,6 +22,12 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
+    Foam::boolUList
+
+Description
+    A UList of bool
+
+Typedef
     Foam::boolList
 
 Description
@@ -39,6 +45,8 @@ Description
 
 namespace Foam
 {
+    typedef UList<bool> boolUList;
+
     typedef List<bool> boolList;
     typedef List<List<bool> > boolListList;
 }

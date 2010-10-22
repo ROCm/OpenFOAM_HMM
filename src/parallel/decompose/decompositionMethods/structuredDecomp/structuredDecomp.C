@@ -148,7 +148,7 @@ Foam::labelList Foam::structuredDecomp::decompose
         patchData,
         faceData,
         cellData,
-        mesh.globalData().nTotalCells()
+        mesh.globalData().nTotalCells()+1
     );
 
     // And extract

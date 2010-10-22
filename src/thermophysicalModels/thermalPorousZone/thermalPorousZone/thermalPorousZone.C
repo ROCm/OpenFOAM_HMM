@@ -38,7 +38,7 @@ Foam::thermalPorousZone::thermalPorousZone
 )
 :
     porousZone(key, mesh, dict),
-    model_(thermalModel::New(*this))
+    model_(porousMedia::thermalModel::New(*this))
 {}
 
 

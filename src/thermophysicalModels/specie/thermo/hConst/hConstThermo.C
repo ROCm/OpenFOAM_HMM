@@ -39,6 +39,26 @@ Foam::hConstThermo<equationOfState>::hConstThermo(Istream& is)
 }
 
 
+template<class equationOfState>
+Foam::hConstThermo<equationOfState>::hConstThermo(const dictionary& dict)
+:
+    equationOfState(dict),
+    Cp_(readScalar(dict.lookup("Cp"))),
+    Hf_(readScalar(dict.lookup("Hf")))
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class equationOfState>
+void Foam::hConstThermo<equationOfState>::write(Ostream& os) const
+{
+    equationOfState::write(os);
+    os.writeKeyword("Cp") << Cp_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Hf") << Hf_ << token::END_STATEMENT << nl;
+}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 template<class equationOfState>

@@ -22,10 +22,16 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
+    Foam::fileNameUList
+
+Description
+    A UList of fileNames.
+
+Typedef
     Foam::fileNameList
 
 Description
-    List of fileNames.
+    A List of fileNames.
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,6 +45,8 @@ Description
 
 namespace Foam
 {
+    typedef UList<fileName> fileNameUList;
+
     typedef List<fileName> fileNameList;
 }
 

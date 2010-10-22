@@ -6,9 +6,8 @@ cd ${0%/*} || exit 1    # run from this directory
 
 application=`getApplication`
 
-compileApplication ../../buoyantPimpleFoam/hotRoom/setHotRoom
 runApplication blockMesh
-runApplication setHotRoom
+runApplication setFields
 runApplication $application
 
 # ----------------------------------------------------------------- end-of-file

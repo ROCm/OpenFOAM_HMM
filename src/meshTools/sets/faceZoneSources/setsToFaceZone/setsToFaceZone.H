@@ -97,6 +97,11 @@ public:
 
     // Member Functions
 
+        virtual sourceType setType() const
+        {
+            return FACEZONESOURCE;
+        }
+
         virtual void applyToSet
         (
             const topoSetSource::setAction action,

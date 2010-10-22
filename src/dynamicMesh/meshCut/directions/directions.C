@@ -32,20 +32,23 @@ License
 #include "meshTools.H"
 #include "hexMatcher.H"
 #include "Switch.H"
+#include "globalMeshData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<>
-const char* Foam::NamedEnum<Foam::directions::directionType, 3>::names[] =
+namespace Foam
 {
-    "tan1",
-    "tan2",
-    "normal"
-};
+    template<>
+    const char* Foam::NamedEnum<Foam::directions::directionType, 3>::names[] =
+    {
+        "tan1",
+        "tan2",
+        "normal"
+    };
+}
 
 const Foam::NamedEnum<Foam::directions::directionType, 3>
     Foam::directions::directionTypeNames_;
-
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -204,7 +207,7 @@ Foam::vectorField Foam::directions::propagateDirection
         mesh,
         changedFaces,
         changedFacesInfo,
-        mesh.nCells()
+        mesh.globalData().nTotalCells()+1
     );
 
     const List<directionInfo>& cellInfo = directionCalc.allCellInfo();

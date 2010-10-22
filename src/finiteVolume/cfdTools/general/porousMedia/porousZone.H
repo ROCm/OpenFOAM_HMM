@@ -21,6 +21,12 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Namespace
+    Foam::porousMedia
+
+Description
+    Namespace for models related to porous media
+
 Class
     Foam::porousZone
 
