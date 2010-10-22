@@ -979,7 +979,10 @@ void Foam::InteractionLists<ParticleType>::fillReferredParticleCloud()
 
             forAllConstIter(typename IDLList<ParticleType>, refCell, iter)
             {
-                cloud_.addParticle(iter().clone().ptr());
+                cloud_.addParticle
+                (
+                    static_cast<ParticleType*>(iter().clone().ptr())
+                );
             }
         }
     }

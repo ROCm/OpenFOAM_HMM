@@ -99,14 +99,36 @@ public:
         //- Construct as a copy
         basicThermoParcel(const basicThermoParcel& p);
 
+        //- Construct as a copy
+        basicThermoParcel
+        (
+            const basicThermoParcel& p,
+            const ThermoCloud<basicThermoParcel>& c
+        );
+
         //- Construct and return a clone
-        autoPtr<basicThermoParcel> clone() const
+        virtual autoPtr<Particle<basicThermoParcel> > clone() const
         {
-            return
-                autoPtr<basicThermoParcel>
+            return autoPtr<Particle<basicThermoParcel> >
+            (
+                new basicThermoParcel(*this)
+            );
+        }
+
+        //- Construct and return a clone
+        virtual autoPtr<Particle<basicThermoParcel> > clone
+        (
+            const Cloud<basicThermoParcel>& c
+        ) const
+        {
+            return autoPtr<Particle<basicThermoParcel> >
+            (
+                new basicThermoParcel
                 (
-                    new basicThermoParcel(*this)
-                );
+                    *this,
+                    static_cast<const ThermoCloud<basicThermoParcel>&>(c)
+                )
+            );
         }
 
 

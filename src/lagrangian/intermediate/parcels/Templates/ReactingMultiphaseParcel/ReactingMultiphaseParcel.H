@@ -315,14 +315,36 @@ public:
         //- Construct as a copy
         ReactingMultiphaseParcel(const ReactingMultiphaseParcel& p);
 
-        //- Construct and return a clone
-        autoPtr<ReactingMultiphaseParcel> clone() const
+        //- Construct as a copy
+        ReactingMultiphaseParcel
+        (
+            const ReactingMultiphaseParcel& p,
+            const ReactingMultiphaseCloud<ParcelType>& c
+        );
+
+        //- Construct and return a (basic particle) clone
+        virtual autoPtr<Particle<ParcelType> > clone() const
         {
-            return
-                autoPtr<ReactingMultiphaseParcel>
+            return autoPtr<Particle<ParcelType> >
+            (
+                new ReactingMultiphaseParcel(*this)
+            );
+        }
+
+        //- Construct and return a (basic particle) clone
+        virtual autoPtr<Particle<ParcelType> > clone
+        (
+            const Cloud<ParcelType>& c
+        ) const
+        {
+            return autoPtr<Particle<ParcelType> >
+            (
+                new ReactingMultiphaseParcel
                 (
-                    new ReactingMultiphaseParcel(*this)
-                );
+                    *this,
+                    static_cast<const ReactingMultiphaseCloud<ParcelType>&>(c)
+                )
+            );
         }
 
 

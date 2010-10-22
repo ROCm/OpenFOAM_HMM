@@ -52,6 +52,46 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::active() const
 
 
 template<class ParcelType>
+inline const Foam::dictionary&
+Foam::KinematicCloud<ParcelType>::cloudSolution::sourceTermDict() const
+{
+    return dict_.subDict("sourceTerms");
+}
+
+
+template<class ParcelType>
+inline const Foam::dictionary&
+Foam::KinematicCloud<ParcelType>::cloudSolution::interpolationSchemes() const
+{
+    return dict_.subDict("interpolationSchemes");
+}
+
+
+template<class ParcelType>
+inline const Foam::dictionary&
+Foam::KinematicCloud<ParcelType>::cloudSolution::integrationSchemes() const
+{
+    return dict_.subDict("integrationSchemes");
+}
+
+
+template<class ParcelType>
+inline const Foam::Switch
+Foam::KinematicCloud<ParcelType>::cloudSolution::transient() const
+{
+    return transient_;
+}
+
+
+template<class ParcelType>
+inline const Foam::Switch
+Foam::KinematicCloud<ParcelType>::cloudSolution::steadyState() const
+{
+    return !transient_;
+}
+
+
+template<class ParcelType>
 inline const Foam::Switch
 Foam::KinematicCloud<ParcelType>::cloudSolution::coupled() const
 {
@@ -69,18 +109,18 @@ const
 
 
 template<class ParcelType>
-inline const Foam::dictionary&
-Foam::KinematicCloud<ParcelType>::cloudSolution::interpolationSchemes() const
+inline Foam::scalar
+Foam::KinematicCloud<ParcelType>::cloudSolution::maxTrackTime() const
 {
-    return dict_.subDict("interpolationSchemes");
+    return maxTrackTime_;
 }
 
 
 template<class ParcelType>
-inline const Foam::dictionary&
-Foam::KinematicCloud<ParcelType>::cloudSolution::integrationSchemes() const
+inline const Foam::Switch
+Foam::KinematicCloud<ParcelType>::cloudSolution::resetSourcesOnStartup() const
 {
-    return dict_.subDict("integrationSchemes");
+    return resetSourcesOnStartup_;
 }
 
 

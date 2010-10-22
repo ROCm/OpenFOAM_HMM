@@ -109,6 +109,11 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
     {
         ParcelType::readFields(*this);
     }
+
+    if (this->solution().resetSourcesOnStartup())
+    {
+        resetSourceTerms();
+    }
 }
 
 
@@ -221,14 +226,31 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::evolve()
     {
         typename ParcelType::trackData td(*this);
 
-        this->preEvolve();
+        if (this->solution().transient())
+        {
+            this->preEvolve();
 
-        this->evolveCloud(td);
+            this->evolveCloud(td);
+        }
+        else
+        {
+            storeState();
+
+            this->preEvolve();
+
+            this->evolveCloud(td);
+
+            this->relaxSources();
+        }
+
+        info();
 
         this->postEvolve();
 
-        info();
-        Info<< endl;
+        if (this->solution().steadyState())
+        {
+            restoreState();
+        }
     }
 }
 

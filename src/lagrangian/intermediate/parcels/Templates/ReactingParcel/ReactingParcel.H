@@ -261,12 +261,38 @@ public:
         );
 
         //- Construct as a copy
+        ReactingParcel
+        (
+            const ReactingParcel& p,
+            const ReactingCloud<ParcelType>& c
+        );
+
+        //- Construct as a copy
         ReactingParcel(const ReactingParcel& p);
 
-        //- Construct and return a clone
-        autoPtr<ReactingParcel> clone() const
+        //- Construct and return a (basic particle) clone
+        virtual autoPtr<Particle<ParcelType> > clone() const
         {
-            return autoPtr<ReactingParcel>(new ReactingParcel(*this));
+            return autoPtr<Particle<ParcelType> >
+            (
+                new ReactingParcel<ParcelType>(*this)
+            );
+        }
+
+        //- Construct and return a (basic particle) clone
+        virtual autoPtr<Particle<ParcelType> > clone
+        (
+            const Cloud<ParcelType>& c
+        ) const
+        {
+            return autoPtr<Particle<ParcelType> >
+            (
+                new ReactingParcel<ParcelType>
+                (
+                    *this,
+                    static_cast<const ReactingCloud<ParcelType>&>(c)
+                )
+            );
         }
 
 

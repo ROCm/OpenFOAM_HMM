@@ -517,6 +517,20 @@ Foam::ReactingParcel<ParcelType>::ReactingParcel
 {}
 
 
+template<class ParcelType>
+Foam::ReactingParcel<ParcelType>::ReactingParcel
+(
+    const ReactingParcel<ParcelType>& p,
+    const ReactingCloud<ParcelType>& c
+)
+:
+    ThermoParcel<ParcelType>(p),
+    mass0_(p.mass0_),
+    Y_(p.Y_),
+    pc_(p.pc_)
+{}
+
+
 // * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
 
 #include "ReactingParcelIO.C"

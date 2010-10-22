@@ -92,6 +92,22 @@ void Foam::ReactingCloud<ParcelType>::cloudReset(ReactingCloud<ParcelType>& c)
 }
 
 
+template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::relaxSources()
+{
+    ThermoCloud<ParcelType>::relaxSources();
+
+    forAll(rhoTrans_, fieldI)
+    {
+        DimensionedField<scalar, volMesh>& rhoT =
+            rhoTrans_[fieldI];
+        const DimensionedField<scalar, volMesh>& rhoT0 =
+            cloudCopyPtr_->rhoTrans()[fieldI];
+        this->relax(rhoT, rhoT0, "rho");
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -155,6 +171,11 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
     if (readFields)
     {
         ParcelType::readFields(*this);
+    }
+
+    if (this->solution().resetSourcesOnStartup())
+    {
+        resetSourceTerms();
     }
 }
 
@@ -266,14 +287,31 @@ void Foam::ReactingCloud<ParcelType>::evolve()
     {
         typename ParcelType::trackData td(*this);
 
-        this->preEvolve();
+        if (this->solution().transient())
+        {
+            this->preEvolve();
 
-        this->evolveCloud(td);
+            this->evolveCloud(td);
+        }
+        else
+        {
+            storeState();
+
+            this->preEvolve();
+
+            this->evolveCloud(td);
+
+            relaxSources();
+        }
+
+        info();
 
         this->postEvolve();
 
-        info();
-        Info<< endl;
+        if (this->solution().steadyState())
+        {
+            restoreState();
+        }
     }
 }
 

@@ -290,6 +290,21 @@ Foam::ThermoParcel<ParcelType>::ThermoParcel
 {}
 
 
+template<class ParcelType>
+Foam::ThermoParcel<ParcelType>::ThermoParcel
+(
+    const ThermoParcel<ParcelType>& p,
+    const ThermoCloud<ParcelType>& c
+)
+:
+    KinematicParcel<ParcelType>(p, c),
+    T_(p.T_),
+    Cp_(p.Cp_),
+    Tc_(p.Tc_),
+    Cpc_(p.Cpc_)
+{}
+
+
 // * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
 
 #include "ThermoParcelIO.C"

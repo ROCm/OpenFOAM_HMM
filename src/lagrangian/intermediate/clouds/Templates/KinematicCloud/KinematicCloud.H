@@ -27,14 +27,16 @@ Class
 Description
     Templated base class for kinematic cloud
 
-    - Kinematic only
+    - holds a 'cloudSolution' class that stores all relevant solution info
+
+    - sub-models:
+      - Collision model
       - Dispersion model
       - Drag model
       - Injection model
       - Patch interaction model
       - Post-processing model
       - Surface film model
-      - Collision model
 
 SourceFiles
     KinematicCloudI.H
@@ -133,6 +135,9 @@ public:
             //- Cloud active flag
             const Switch active_;
 
+            //- Transient flag
+            Switch transient_;
+
 
             // Run-time options
 
@@ -144,6 +149,19 @@ public:
                 //- Flag to correct cell values with latest transfer information
                 //  during the lagrangian timestep
                 Switch cellValueSourceCorrection_;
+
+                //- Maximum particle track time [s]
+                scalar maxTrackTime_;
+
+                //- Flag to indicate whether coupling source terms should be
+                //  reset on start-up/first read
+                Switch resetSourcesOnStartup_;
+
+
+        // Private Member Functions
+
+            //- Disallow default bitwise assignment
+            void operator=(const cloudSolution&);
 
 
     public:
@@ -169,7 +187,11 @@ public:
             //- Read properties from dictionary
             void read();
 
+
             // Access
+
+                //- Return relaxation coefficient for field
+                scalar relaxCoeff(const word& fieldName) const;
 
                 //- Return reference to the mesh
                 inline const fvMesh& mesh() const;
@@ -180,17 +202,41 @@ public:
                 //- Return the active flag
                 inline const Switch active() const;
 
+                //- Return const access to the transient flag
+                inline const Switch transient() const;
+
+                //- Return const access to the steady flag
+                inline const Switch steadyState() const;
+
                 //- Return const access to the coupled flag
                 inline const Switch coupled() const;
 
                 //- Return const access to the cell value correction flag
                 inline const Switch cellValueSourceCorrection() const;
 
+                //- Return const access to the particle track time
+                inline scalar maxTrackTime() const;
+
+                //- Return const access to the reset sources flag
+                inline const Switch resetSourcesOnStartup() const;
+
+                //- Source terms dictionary
+                inline const dictionary& sourceTermDict() const;
+
                 //- Interpolation schemes dictionary
                 inline const dictionary& interpolationSchemes() const;
 
                 //- Integration schemes dictionary
                 inline const dictionary& integrationSchemes() const;
+
+
+        // Helper functions
+
+            //- Returns true if sources are active (at this time)
+            bool sourceActive() const;
+
+            //- Returns true if writing this step
+            bool writeThisStep() const;
     };
 
 
@@ -310,6 +356,9 @@ protected:
 
             //- Reset state of cloud
             void cloudReset(KinematicCloud<ParcelType>& c);
+
+            //- Apply relaxation to (steady state) cloud sources
+            void relaxSources();
 
 
 public:
@@ -543,10 +592,19 @@ public:
                 const bool fullyDescribed
             );
 
-            //- Reset the spray source terms
+            //- Reset the cloud source terms
             void resetSourceTerms();
 
-            //- Evolve the spray (inject, inject)
+            //- Relax field
+            template<class Type>
+            void relax
+            (
+                DimensionedField<Type, volMesh>& field,
+                const DimensionedField<Type, volMesh>& field0,
+                const word& name
+            ) const;
+
+            //- Evolve the cloud
             void evolve();
 };
 

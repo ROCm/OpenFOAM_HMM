@@ -66,6 +66,15 @@ void Foam::ThermoCloud<ParcelType>::cloudReset(ThermoCloud<ParcelType>& c)
 }
 
 
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::relaxSources()
+{
+    KinematicCloud<ParcelType>::relaxSources();
+
+    this->relax(hsTrans_(), cloudCopyPtr_->hsTrans(), "hs");
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -132,6 +141,11 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
     if (readFields)
     {
         ParcelType::readFields(*this);
+    }
+
+    if (this->solution().resetSourcesOnStartup())
+    {
+        resetSourceTerms();
     }
 }
 
@@ -241,14 +255,31 @@ void Foam::ThermoCloud<ParcelType>::evolve()
     {
         typename ParcelType::trackData td(*this);
 
-        this->preEvolve();
+        if (this->solution().transient())
+        {
+            this->preEvolve();
 
-        this->evolveCloud(td);
+            this->evolveCloud(td);
+        }
+        else
+        {
+            storeState();
+
+            this->preEvolve();
+
+            this->evolveCloud(td);
+
+            relaxSources();
+        }
+
+        info();
 
         this->postEvolve();
 
-        info();
-        Info<< endl;
+        if (this->solution().steadyState())
+        {
+            restoreState();
+        }
     }
 }
 

@@ -198,6 +198,25 @@ Foam::Particle<ParticleType>::Particle(const Particle<ParticleType>& p)
 {}
 
 
+template<class ParticleType>
+Foam::Particle<ParticleType>::Particle
+(
+    const Particle<ParticleType>& p,
+    const Cloud<ParticleType>& c
+)
+:
+    cloud_(c),
+    position_(p.position_),
+    cellI_(p.cellI_),
+    faceI_(p.faceI_),
+    stepFraction_(p.stepFraction_),
+    tetFaceI_(p.tetFaceI_),
+    tetPtI_(p.tetPtI_),
+    origProc_(p.origProc_),
+    origId_(p.origId_)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParticleType>

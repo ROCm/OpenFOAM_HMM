@@ -639,6 +639,20 @@ Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
 {}
 
 
+template<class ParcelType>
+Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
+(
+    const ReactingMultiphaseParcel<ParcelType>& p,
+    const ReactingMultiphaseCloud<ParcelType>& c
+)
+:
+    ReactingParcel<ParcelType>(p, c),
+    YGas_(p.YGas_),
+    YLiquid_(p.YLiquid_),
+    YSolid_(p.YSolid_)
+{}
+
+
 // * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
 
 #include "ReactingMultiphaseParcelIO.C"

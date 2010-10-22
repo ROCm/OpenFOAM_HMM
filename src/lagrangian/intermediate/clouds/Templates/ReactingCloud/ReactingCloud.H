@@ -139,6 +139,9 @@ protected:
             //- Reset state of cloud
             void cloudReset(ReactingCloud<ParcelType>& c);
 
+            //- Apply relaxation to (steady state) cloud sources
+            void relaxSources();
+
 
 public:
 
@@ -253,10 +256,10 @@ public:
                 const bool fullyDescribed
             );
 
-            //- Reset the spray source terms
+            //- Reset the cloud source terms
             void resetSourceTerms();
 
-            //- Evolve the spray (inject, move)
+            //- Evolve the cloud
             void evolve();
 };
 

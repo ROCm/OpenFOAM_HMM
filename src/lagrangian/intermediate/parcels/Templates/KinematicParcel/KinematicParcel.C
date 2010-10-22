@@ -240,11 +240,41 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
 {}
 
 
+template<class ParcelType>
+Foam::KinematicParcel<ParcelType>::KinematicParcel
+(
+    const KinematicParcel<ParcelType>& p,
+    const KinematicCloud<ParcelType>& c
+)
+:
+    Particle<ParcelType>(p, c),
+    typeId_(p.typeId_),
+    nParticle_(p.nParticle_),
+    d_(p.d_),
+    dTarget_(p.dTarget_),
+    U_(p.U_),
+    f_(p.f_),
+    angularMomentum_(p.angularMomentum_),
+    torque_(p.torque_),
+    rho_(p.rho_),
+    tTurb_(p.tTurb_),
+    UTurb_(p.UTurb_),
+    collisionRecords_(p.collisionRecords_),
+    rhoc_(p.rhoc_),
+    Uc_(p.Uc_),
+    muc_(p.muc_)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
 template<class TrackData>
-bool Foam::KinematicParcel<ParcelType>::move(TrackData& td)
+bool Foam::KinematicParcel<ParcelType>::move
+(
+    TrackData& td,
+    const scalar trackTime
+)
 {
     ParcelType& p = static_cast<ParcelType&>(*this);
 
@@ -254,8 +284,6 @@ bool Foam::KinematicParcel<ParcelType>::move(TrackData& td)
     const polyMesh& mesh = td.cloud().pMesh();
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
 
-    const scalar deltaT = mesh.time().deltaTValue();
-
     switch (td.part())
     {
         case TrackData::tpVelocityHalfStep:
@@ -263,16 +291,16 @@ bool Foam::KinematicParcel<ParcelType>::move(TrackData& td)
             // First and last leapfrog velocity adjust part, required
             // before and after tracking and force calculation
 
-            p.U() += 0.5*deltaT*p.f()/p.mass();
+            p.U() += 0.5*trackTime*p.f()/p.mass();
 
-            angularMomentum_ += 0.5*deltaT*torque_;
+            angularMomentum_ += 0.5*trackTime*torque_;
 
             break;
         }
 
         case TrackData::tpLinearTrack:
         {
-            scalar tEnd = (1.0 - p.stepFraction())*deltaT;
+            scalar tEnd = (1.0 - p.stepFraction())*trackTime;
             const scalar dtMax = tEnd;
 
             while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
@@ -293,7 +321,7 @@ bool Foam::KinematicParcel<ParcelType>::move(TrackData& td)
                 }
 
                 tEnd -= dt;
-                p.stepFraction() = 1.0 - tEnd/deltaT;
+                p.stepFraction() = 1.0 - tEnd/trackTime;
 
                 // Avoid problems with extremely small timesteps
                 if (dt > ROOTVSMALL)

@@ -41,8 +41,16 @@ License
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::cloudSolution::read()
 {
+    dict_.lookup("transient") >> transient_;
     dict_.lookup("coupled") >> coupled_;
     dict_.lookup("cellValueSourceCorrection") >> cellValueSourceCorrection_;
+
+    if (steadyState())
+    {
+        dict_.lookup("maxTrackTime") >> maxTrackTime_;
+        dict_.subDict("sourceTerms").lookup("resetOnStartup")
+            >> resetSourcesOnStartup_;
+    }
 }
 
 
@@ -56,8 +64,11 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
     mesh_(mesh),
     dict_(dict),
     active_(dict.lookup("active")),
+    transient_(false),
     coupled_(false),
-    cellValueSourceCorrection_(false)
+    cellValueSourceCorrection_(false),
+    maxTrackTime_(0.0),
+    resetSourcesOnStartup_(false)
 {
     if (active_)
     {
@@ -75,8 +86,11 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
     mesh_(cs.mesh_),
     dict_(cs.dict_),
     active_(cs.active_),
+    transient_(cs.transient_),
     coupled_(cs.coupled_),
-    cellValueSourceCorrection_(cs.cellValueSourceCorrection_)
+    cellValueSourceCorrection_(cs.cellValueSourceCorrection_),
+    maxTrackTime_(cs.maxTrackTime_),
+    resetSourcesOnStartup_(cs.resetSourcesOnStartup_)
 {}
 
 
@@ -89,14 +103,41 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
     mesh_(mesh),
     dict_(dictionary::null),
     active_(false),
+    transient_(false),
     coupled_(false),
-    cellValueSourceCorrection_(false)
+    cellValueSourceCorrection_(false),
+    maxTrackTime_(0.0),
+    resetSourcesOnStartup_(false)
 {}
 
 
 template<class ParcelType>
 Foam::KinematicCloud<ParcelType>::cloudSolution::~cloudSolution()
 {}
+
+
+template<class ParcelType>
+Foam::scalar Foam::KinematicCloud<ParcelType>::cloudSolution::relaxCoeff
+(
+    const word& fieldName
+) const
+{
+    return readScalar(sourceTermDict().subDict(fieldName).lookup("alpha"));
+}
+
+
+template<class ParcelType>
+bool Foam::KinematicCloud<ParcelType>::cloudSolution::sourceActive() const
+{
+    return coupled_ && (active_ || steadyState());
+}
+
+
+template<class ParcelType>
+bool Foam::KinematicCloud<ParcelType>::cloudSolution::writeThisStep() const
+{
+    return active_ && mesh_.time().outputTime();
+}
 
 
 // * * * * * * * * * * * * *  Private Member Functions * * * * * * * * * * * //
@@ -127,6 +168,8 @@ void Foam::KinematicCloud<ParcelType>::restoreState()
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::preEvolve()
 {
+    Info<< "\nSolving cloud " << this->name() << endl;
+
     this->dispersion().cacheFields(true);
     forces_.cacheFields(true, solution_.interpolationSchemes());
     updateCellOccupancy();
@@ -184,28 +227,41 @@ void Foam::KinematicCloud<ParcelType>::evolveCloud
     typename ParcelType::trackData& td
 )
 {
-    label preInjectionSize = this->size();
-
-    this->surfaceFilm().inject(td);
-
-    // Update the cellOccupancy if the size of the cloud has changed
-    // during the injection.
-    if (preInjectionSize != this->size())
-    {
-        updateCellOccupancy();
-
-        preInjectionSize = this->size();
-    }
-    this->injection().inject(td);
-
     if (solution_.coupled())
     {
         resetSourceTerms();
     }
 
-    // Assume that motion will update the cellOccupancy as necessary
-    // before it is required.
-    motion(td);
+    if (solution_.transient())
+    {
+        label preInjectionSize = this->size();
+
+        this->surfaceFilm().inject(td);
+
+        // Update the cellOccupancy if the size of the cloud has changed
+        // during the injection.
+        if (preInjectionSize != this->size())
+        {
+            updateCellOccupancy();
+
+            preInjectionSize = this->size();
+        }
+        this->injection().inject(td);
+
+
+        // Assume that motion will update the cellOccupancy as necessary
+        // before it is required.
+        motion(td);
+    }
+    else
+    {
+//        this->surfaceFilm().injectStreadyState(td);
+
+        this->injection().injectSteadyState(td, solution_.maxTrackTime());
+
+        td.part() = ParcelType::trackData::tpVelocityHalfStep;
+        Cloud<ParcelType>::move(td, solution_.maxTrackTime());
+    }
 }
 
 
@@ -254,10 +310,10 @@ void  Foam::KinematicCloud<ParcelType>::moveCollide
 )
 {
     td.part() = ParcelType::trackData::tpVelocityHalfStep;
-    Cloud<ParcelType>::move(td);
+    Cloud<ParcelType>::move(td, this->db().time().deltaTValue());
 
     td.part() = ParcelType::trackData::tpLinearTrack;
-    Cloud<ParcelType>::move(td);
+    Cloud<ParcelType>::move(td, this->db().time().deltaTValue());
 
     // td.part() = ParcelType::trackData::tpRotationalTrack;
     // Cloud<ParcelType>::move(td);
@@ -267,13 +323,15 @@ void  Foam::KinematicCloud<ParcelType>::moveCollide
     this->collision().collide();
 
     td.part() = ParcelType::trackData::tpVelocityHalfStep;
-    Cloud<ParcelType>::move(td);
+    Cloud<ParcelType>::move(td, this->db().time().deltaTValue());
 }
 
 
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::postEvolve()
 {
+    Info<< endl;
+
     if (debug)
     {
         this->writePositions();
@@ -301,6 +359,13 @@ void Foam::KinematicCloud<ParcelType>::cloudReset(KinematicCloud<ParcelType>& c)
     postProcessingModel_ = c.postProcessingModel_->clone();
 
     UIntegrator_ = c.UIntegrator_->clone();
+}
+
+
+template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::relaxSources()
+{
+    this->relax(UTrans_(), cloudCopyPtr_->UTrans(), "U");
 }
 
 
@@ -433,6 +498,11 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     {
         ParcelType::readFields(*this);
     }
+
+    if (solution_.resetSourcesOnStartup())
+    {
+        resetSourceTerms();
+    }
 }
 
 
@@ -555,7 +625,7 @@ void Foam::KinematicCloud<ParcelType>::checkParcelProperties
         parcel.rho() = constProps_.rho0();
     }
 
-    scalar carrierDt = this->db().time().deltaTValue();
+    const scalar carrierDt = this->db().time().deltaTValue();
     parcel.stepFraction() = (carrierDt - lagrangianDt)/carrierDt;
 }
 
@@ -563,7 +633,22 @@ void Foam::KinematicCloud<ParcelType>::checkParcelProperties
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::resetSourceTerms()
 {
-    UTrans_->field() = vector::zero;
+    UTrans().field() = vector::zero;
+}
+
+
+template<class ParcelType>
+template<class Type>
+void Foam::KinematicCloud<ParcelType>::relax
+(
+    DimensionedField<Type, volMesh>& field,
+    const DimensionedField<Type, volMesh>& field0,
+    const word& name
+) const
+{
+    const scalar coeff = solution_.relaxCoeff(name);
+
+    field = field0 + coeff*(field - field0);
 }
 
 
@@ -574,14 +659,31 @@ void Foam::KinematicCloud<ParcelType>::evolve()
     {
         typename ParcelType::trackData td(*this);
 
-        preEvolve();
+        if (solution_.transient())
+        {
+            preEvolve();
 
-        evolveCloud(td);
+            evolveCloud(td);
+        }
+        else
+        {
+            storeState();
+
+            preEvolve();
+
+            evolveCloud(td);
+
+            relaxSources();
+        }
+
+        info();
 
         postEvolve();
 
-        info();
-        Info<< endl;
+        if (solution_.steadyState())
+        {
+            restoreState();
+        }
     }
 }
 

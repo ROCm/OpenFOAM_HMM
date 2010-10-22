@@ -361,10 +361,28 @@ public:
         //- Construct as a copy
         Particle(const Particle& p);
 
+        //- Construct as a copy
+        Particle(const Particle& p, const Cloud<ParticleType>& c);
+
         //- Construct a clone
-        autoPtr<ParticleType> clone() const
+        virtual autoPtr<Particle<ParticleType> > clone() const
         {
-            return autoPtr<Particle>(new Particle(*this));
+            return autoPtr<Particle<ParticleType> >
+            (
+                new Particle<ParticleType>(*this)
+            );
+        }
+
+        //- Construct a clone
+        virtual autoPtr<Particle<ParticleType> > clone
+        (
+            const Cloud<ParticleType>& c
+        ) const
+        {
+            return autoPtr<Particle<ParticleType> >
+            (
+                new Particle<ParticleType>(*this, c)
+            );
         }
 
 

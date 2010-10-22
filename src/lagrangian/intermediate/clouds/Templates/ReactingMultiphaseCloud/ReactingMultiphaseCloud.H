@@ -237,10 +237,10 @@ public:
                 const bool fullyDescribed
             );
 
-            //- Reset the spray source terms
+            //- Reset the cloud source terms
             void resetSourceTerms();
 
-            //- Evolve the spray (inject, move)
+            //- Evolve the cloud
             void evolve();
 };
 

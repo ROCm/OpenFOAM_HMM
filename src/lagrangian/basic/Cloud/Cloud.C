@@ -396,7 +396,7 @@ void Foam::Cloud<ParticleType>::cloudReset(const Cloud<ParticleType>& c)
 
 template<class ParticleType>
 template<class TrackingData>
-void Foam::Cloud<ParticleType>::move(TrackingData& td)
+void Foam::Cloud<ParticleType>::move(TrackingData& td, const scalar trackTime)
 {
     const polyBoundaryMesh& pbm = pMesh().boundaryMesh();
     const globalMeshData& pData = polyMesh_.globalData();
@@ -454,7 +454,7 @@ void Foam::Cloud<ParticleType>::move(TrackingData& td)
             ParticleType& p = pIter();
 
             // Move the particle
-            bool keepParticle = p.move(td);
+            bool keepParticle = p.move(td, trackTime);
 
             // If the particle is to be kept
             // (i.e. it hasn't passed through an inlet or outlet)

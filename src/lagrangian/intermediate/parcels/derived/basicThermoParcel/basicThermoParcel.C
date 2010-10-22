@@ -108,6 +108,16 @@ Foam::basicThermoParcel::basicThermoParcel
 {}
 
 
+Foam::basicThermoParcel::basicThermoParcel
+(
+    const basicThermoParcel& p,
+    const ThermoCloud<basicThermoParcel>& c
+)
+:
+    ThermoParcel<basicThermoParcel>(p, c)
+{}
+
+
 // * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
 
 Foam::basicThermoParcel::~basicThermoParcel()

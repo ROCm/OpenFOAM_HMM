@@ -366,10 +366,33 @@ public:
         //- Construct as a copy
         KinematicParcel(const KinematicParcel& p);
 
-        //- Construct and return a clone
-        autoPtr<KinematicParcel> clone() const
+        //- Construct as a copy
+        KinematicParcel
+        (
+            const KinematicParcel& p,
+            const KinematicCloud<ParcelType>& c
+        );
+
+        //- Construct and return a (basic particle) clone
+        virtual autoPtr<Particle<ParcelType> > clone() const
         {
-            return autoPtr<KinematicParcel>(new KinematicParcel(*this));
+            return autoPtr<Particle<ParcelType> >(new KinematicParcel(*this));
+        }
+
+        //- Construct and return a (basic particle) clone
+        virtual autoPtr<Particle<ParcelType> > clone
+        (
+            const Cloud<ParcelType>& c
+        ) const
+        {
+            return autoPtr<Particle<ParcelType> >
+            (
+                new KinematicParcel
+                (
+                    *this,
+                    static_cast<const KinematicCloud<ParcelType>&>(c)
+                )
+            );
         }
 
 
@@ -543,7 +566,7 @@ public:
 
             //- Move the parcel
             template<class TrackData>
-            bool move(TrackData& td);
+            bool move(TrackData& td, const scalar trackTime);
 
 
         // Patch interactions
