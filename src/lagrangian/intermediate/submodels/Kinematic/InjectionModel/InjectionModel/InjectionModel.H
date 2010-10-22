@@ -280,6 +280,10 @@ public:
             template<class TrackData>
             void inject(TrackData& td);
 
+            //- Main injection loop - steady-state
+            template<class TrackData>
+            void injectSteadyState(TrackData& td, const scalar trackTime);
+
 
         // Injection geometry
 

@@ -593,6 +593,105 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
 
 
 template<class CloudType>
+template<class TrackData>
+void Foam::InjectionModel<CloudType>::injectSteadyState
+(
+    TrackData& td,
+    const scalar trackTime
+)
+{
+    if (!this->active())
+    {
+        return;
+    }
+
+    const polyMesh& mesh = this->owner().mesh();
+
+    // Reset counters
+    time0_ = 0.0;
+    label parcelsAdded = 0;
+    scalar massAdded = 0.0;
+
+    // Set number of new parcels to inject based on first second of injection
+    label newParcels = parcelsToInject(0.0, 1.0);
+
+    // Inject new parcels
+    for (label parcelI = 0; parcelI < newParcels; parcelI++)
+    {
+        // Volume to inject is split equally amongst all parcel streams
+        scalar newVolume = volumeTotal_/newParcels;
+
+        // Determine the injection position and owner cell,
+        // tetFace and tetPt
+        label cellI = -1;
+        label tetFaceI = -1;
+        label tetPtI = -1;
+
+        vector pos = vector::zero;
+
+        setPositionAndCell
+        (
+            parcelI,
+            newParcels,
+            0.0,
+            pos,
+            cellI,
+            tetFaceI,
+            tetPtI
+        );
+
+        if (cellI > -1)
+        {
+            // Apply corrections to position for 2-D cases
+            meshTools::constrainToMeshCentre(mesh, pos);
+
+            // Create a new parcel
+            parcelType* pPtr = new parcelType
+            (
+                td.cloud(),
+                pos,
+                cellI,
+                tetFaceI,
+                tetPtI
+            );
+
+            // Assign new parcel properties in injection model
+            setProperties(parcelI, newParcels, 0.0, *pPtr);
+
+            // Check new parcel properties
+            td.cloud().checkParcelProperties(*pPtr, 0.0, fullyDescribed());
+
+            // Apply correction to velocity for 2-D cases
+            meshTools::constrainDirection
+            (
+                mesh,
+                mesh.solutionD(),
+                pPtr->U()
+            );
+
+            // Number of particles per parcel
+            pPtr->nParticle() =
+                setNumberOfParticles
+                (
+                    1,
+                    newVolume,
+                    pPtr->d(),
+                    pPtr->rho()
+                );
+
+            // Add the new parcel
+            td.cloud().addParticle(pPtr);
+
+            massAdded += pPtr->nParticle()*pPtr->mass();
+            parcelsAdded++;
+        }
+    }
+
+    postInjectCheck(parcelsAdded, massAdded);
+}
+
+
+template<class CloudType>
 void Foam::InjectionModel<CloudType>::setPositionAndCell
 (
     const label parcelI,
