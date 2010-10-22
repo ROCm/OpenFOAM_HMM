@@ -43,7 +43,7 @@ Description
 #include "polyMeshZipUpCells.H"
 #include "wallPolyPatch.H"
 #include "symmetryPolyPatch.H"
-#include "cyclicPolyPatch.H"
+#include "oldCyclicPolyPatch.H"
 #include "Swap.H"
 #include "IFstream.H"
 #include "readHexLabel.H"
@@ -900,7 +900,7 @@ int main(int argc, char *argv[])
     fluentToFoamType.insert("interface", polyPatch::typeName);
     fluentToFoamType.insert("internal", polyPatch::typeName);
     fluentToFoamType.insert("solid", polyPatch::typeName);
-    fluentToFoamType.insert("fan", cyclicPolyPatch::typeName);
+    fluentToFoamType.insert("fan", oldCyclicPolyPatch::typeName);
     fluentToFoamType.insert("radiator", polyPatch::typeName);
     fluentToFoamType.insert("porous-jump", polyPatch::typeName);
 

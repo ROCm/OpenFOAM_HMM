@@ -196,7 +196,7 @@ const word* kivaPatchTypes[nBCs] =
     &polyPatch::typeName,
     &polyPatch::typeName,
     &symmetryPolyPatch::typeName,
-    &cyclicPolyPatch::typeName
+    &oldCyclicPolyPatch::typeName
 };
 
 enum patchTypeNames
