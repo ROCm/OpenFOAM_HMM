@@ -69,9 +69,9 @@ template<class ParcelType>
 inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
 Foam::ReactingCloud<ParcelType>::Srho(const label i) const
 {
-    tmp<volScalarField> tRhoi
+    tmp<DimensionedField<scalar, volMesh> > tRhoi
     (
-        new volScalarField
+        new DimensionedField<scalar, volMesh>
         (
             IOobject
             (
@@ -94,16 +94,16 @@ Foam::ReactingCloud<ParcelType>::Srho(const label i) const
 
     if (this->solution().sourceActive())
     {
-        scalarField& rhoi = tRhoi().internalField();
+        scalarField& rhoi = tRhoi();
         rhoi = rhoTrans_[i]/(this->db().time().deltaT()*this->mesh().V());
 
         return tRhoi;
     }
     else
     {
-        return tmp<volScalarField>
+        return tmp<DimensionedField<scalar, volMesh> >
         (
-            new volScalarField
+            new DimensionedField<scalar, volMesh>
             (
                 IOobject
                 (
@@ -151,7 +151,7 @@ Foam::ReactingCloud<ParcelType>::Srho() const
 
     if (this->solution().sourceActive())
     {
-        scalarField& sourceField = trhoTrans().field();
+        scalarField& sourceField = trhoTrans();
         forAll(rhoTrans_, i)
         {
             sourceField += rhoTrans_[i];
