@@ -308,7 +308,8 @@ protected:
             const scalar rho,          // density
             const scalar mass,         // mass
             const vector& Su,          // explicit particle momentum source
-            vector& dUTrans            // momentum transfer to carrier
+            vector& dUTrans,           // momentum transfer to carrier
+            scalar& Cud                // linearised drag coefficient
         ) const;
 
 

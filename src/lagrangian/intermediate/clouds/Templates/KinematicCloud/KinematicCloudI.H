@@ -410,38 +410,54 @@ Foam::KinematicCloud<ParcelType>::UTrans() const
 
 
 template<class ParcelType>
-inline Foam::tmp<Foam::DimensionedField<Foam::vector, Foam::volMesh> >
-Foam::KinematicCloud<ParcelType>::SU() const
+inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::KinematicCloud<ParcelType>::UCoeff()
 {
-    tmp<DimensionedField<vector, volMesh> > tSU
-    (
-        new DimensionedField<vector, volMesh>
-        (
-            IOobject
-            (
-                this->name() + "SU",
-                this->db().time().timeName(),
-                this->mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            this->mesh(),
-            dimensionedVector
-            (
-                "zero",
-                dimDensity*dimVelocity/dimTime,
-                vector::zero
-            )
-        )
-    );
+    return UCoeff_();
+}
+
+
+template<class ParcelType>
+inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::KinematicCloud<ParcelType>::UCoeff() const
+{
+    return UCoeff_();
+}
+
+
+template<class ParcelType>
+inline Foam::tmp<Foam::fvVectorMatrix>
+Foam::KinematicCloud<ParcelType>::SU(volVectorField& U) const
+{
+    if (debug)
+    {
+        Info<< "UTrans min/max = " << min(UTrans()).value() << ", "
+            << max(UTrans()).value() << nl
+            << "UCoeff min/max = " << min(UCoeff()).value() << ", "
+            << max(UCoeff()).value() << endl;
+    }
 
     if (solution_.sourceActive())
     {
-        vectorField& SU = tSU().field();
-        SU = UTrans()/(mesh_.V()*this->db().time().deltaT());
+        if (solution_.semiImplicit("UTrans"))
+        {
+            return
+                UTrans()/(mesh_.V()*this->db().time().deltaT())
+              + fvm::SuSp(-UCoeff().dimensionedInternalField()/mesh_.V(), U)
+              + UCoeff()/mesh_.V()*U;
+        }
+        else
+        {
+            tmp<fvVectorMatrix> tfvm(new fvVectorMatrix(U, dimForce));
+            fvVectorMatrix& fvm = tfvm();
+
+            fvm.source() = -UTrans()/(this->db().time().deltaT());
+
+            return tfvm;
+        }
     }
 
-    return tSU;
+    return tmp<fvVectorMatrix>(new fvVectorMatrix(U, dimForce));
 }
 
 

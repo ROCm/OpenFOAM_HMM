@@ -303,6 +303,7 @@ void Foam::ReactingParcel<ParcelType>::calc
     // ~~~~~~~~~~~~~
 
     // Calculate new particle temperature
+    scalar Cuh = 0.0;
     scalar T1 =
         calcHeatTransfer
         (
@@ -318,7 +319,8 @@ void Foam::ReactingParcel<ParcelType>::calc
             Cp0,
             NCpW,
             Sh,
-            dhsTrans
+            dhsTrans,
+            Cuh
         );
 
 
@@ -326,8 +328,23 @@ void Foam::ReactingParcel<ParcelType>::calc
     // ~~~~~~
 
     // Calculate new particle velocity
+    scalar Cud = 0.0;
     vector U1 =
-        calcVelocity(td, dt, cellI, Re, mus, d0, U0, rho0, mass0, Su, dUTrans);
+        calcVelocity
+        (
+            td,
+            dt,
+            cellI,
+            Re,
+            mus,
+            d0,
+            U0,
+            rho0,
+            mass0,
+            Su,
+            dUTrans,
+            Cud
+        );
 
     dUTrans += 0.5*(mass0 - mass1)*(U0 + U1);
 
@@ -345,8 +362,14 @@ void Foam::ReactingParcel<ParcelType>::calc
         // Update momentum transfer
         td.cloud().UTrans()[cellI] += np0*dUTrans;
 
+        // Update momentum transfer coefficient
+        td.cloud().UCoeff()[cellI] += np0*0.5*(mass0 + mass1)*Cud;
+
         // Update sensible enthalpy transfer
         td.cloud().hsTrans()[cellI] += np0*dhsTrans;
+
+        // Update sensible enthalpy coefficient
+        td.cloud().hsCoeff()[cellI] += np0*Cuh*this->areaS();
     }
 
 

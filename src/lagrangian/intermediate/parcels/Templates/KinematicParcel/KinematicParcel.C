@@ -121,8 +121,23 @@ void Foam::KinematicParcel<ParcelType>::calc
     // ~~~~~~
 
     // Calculate new particle velocity
+    scalar Cud = 0.0;
     vector U1 =
-        calcVelocity(td, dt, cellI, Re, muc_, d0, U0, rho0, mass0, Su, dUTrans);
+        calcVelocity
+        (
+            td,
+            dt,
+            cellI,
+            Re,
+            muc_,
+            d0,
+            U0,
+            rho0,
+            mass0,
+            Su,
+            dUTrans,
+            Cud
+        );
 
 
     // Accumulate carrier phase source terms
@@ -131,6 +146,9 @@ void Foam::KinematicParcel<ParcelType>::calc
     {
         // Update momentum transfer
         td.cloud().UTrans()[cellI] += np0*dUTrans;
+
+        // Update momentum transfer coefficient
+        td.cloud().UCoeff()[cellI] += np0*mass0*Cud;
     }
 
 
@@ -154,7 +172,8 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     const scalar rho,
     const scalar mass,
     const vector& Su,
-    vector& dUTrans
+    vector& dUTrans,
+    scalar& Cud
 ) const
 {
     const polyMesh& mesh = this->cloud().pMesh();
@@ -165,7 +184,7 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     tetIndices tetIs = this->currentTetIndices();
 
     // Momentum source due to particle forces
-    const vector FCoupled = mass*td.cloud().forces().calcCoupled
+    const vector Fcp = mass*td.cloud().forces().calcCoupled
     (
         this->position(),
         tetIs,
@@ -177,7 +196,7 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
         d
     );
 
-    const vector FNonCoupled = mass*td.cloud().forces().calcNonCoupled
+    const vector Fncp = mass*td.cloud().forces().calcNonCoupled
     (
         this->position(),
         tetIs,
@@ -195,15 +214,17 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 
     // Update velocity - treat as 3-D
     const scalar As = this->areaS(d);
-    const vector ap = Uc_ + (FCoupled + FNonCoupled + Su)/(utc*As);
+    const vector ap = Uc_ + (Fcp + Fncp + Su)/(utc*As);
     const scalar bp = 6.0*utc/(rho*d);
+
+    Cud = bp;
 
     IntegrationScheme<vector>::integrationResult Ures =
         td.cloud().UIntegrator().integrate(U, dt, ap, bp);
 
     vector Unew = Ures.value();
 
-    dUTrans += dt*(utc*As*(Ures.average() - Uc_) - FCoupled);
+    dUTrans += dt*(utc*As*(Ures.average() - Uc_) - Fcp);
 
     // Apply correction to velocity and dUTrans for reduced-D cases
     meshTools::constrainDirection(mesh, mesh.solutionD(), Unew);

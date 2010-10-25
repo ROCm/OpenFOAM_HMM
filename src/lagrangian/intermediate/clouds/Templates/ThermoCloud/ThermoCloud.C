@@ -103,7 +103,25 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
             this->mesh(),
             dimensionedScalar("zero", dimEnergy, 0.0)
         )
+    ),
+    hsCoeff_
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                this->name() + "hsCoeff",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
+            ),
+            this->mesh(),
+            dimensionedScalar("zero", dimEnergy/dimTime/dimTemperature, 0.0),
+            zeroGradientFvPatchScalarField::typeName
+        )
     )
+
 {
     if (readFields)
     {
@@ -149,6 +167,22 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
             ),
             c.hsTrans()
         )
+    ),
+    hsCoeff_
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                this->name() + "hsCoeff",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            c.hsCoeff()
+        )
     )
 {}
 
@@ -171,7 +205,8 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
     heatTransferModel_(NULL),
     TIntegrator_(NULL),
     radiation_(false),
-    hsTrans_(NULL)
+    hsTrans_(NULL),
+    hsCoeff_(NULL)
 {}
 
 
@@ -233,6 +268,7 @@ void Foam::ThermoCloud<ParcelType>::resetSourceTerms()
 {
     KinematicCloud<ParcelType>::resetSourceTerms();
     hsTrans_->field() = 0.0;
+    hsCoeff_->field() = 0.0;
 }
 
 

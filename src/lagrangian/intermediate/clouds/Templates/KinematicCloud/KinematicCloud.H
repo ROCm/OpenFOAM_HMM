@@ -187,6 +187,9 @@ public:
                 //- Return relaxation coefficient for field
                 scalar relaxCoeff(const word& fieldName) const;
 
+                //- Return semi-implicit flag coefficient for field
+                bool semiImplicit(const word& fieldName) const;
+
                 //- Return reference to the mesh
                 inline const fvMesh& mesh() const;
 
@@ -322,6 +325,9 @@ protected:
 
             //- Momentum
             autoPtr<DimensionedField<vector, volMesh> > UTrans_;
+
+            //- Coefficient for carrier phase U equation
+            autoPtr<DimensionedField<scalar, volMesh> > UCoeff_;
 
 
         // Cloud evolution functions
@@ -536,8 +542,15 @@ public:
                     inline const DimensionedField<vector, volMesh>&
                         UTrans() const;
 
-                    //- Return tmp momentum source term - fully explicit
-                    inline tmp<DimensionedField<vector, volMesh> > SU() const;
+                     //- Return coefficient for carrier phase U equation
+                    inline DimensionedField<scalar, volMesh>& UCoeff();
+
+                    //- Return const coefficient for carrier phase U equation
+                    inline const DimensionedField<scalar, volMesh>&
+                        UCoeff() const;
+
+                    //- Return tmp momentum source term
+                    inline tmp<fvVectorMatrix> SU(volVectorField& U) const;
 
 
         // Check

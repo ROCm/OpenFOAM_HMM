@@ -98,34 +98,60 @@ Foam::ThermoCloud<ParcelType>::hsTrans() const
 
 
 template<class ParcelType>
-inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
-Foam::ThermoCloud<ParcelType>::Sh() const
+inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::ThermoCloud<ParcelType>::hsCoeff()
 {
-    tmp<DimensionedField<scalar, volMesh> > tSh
-    (
-        new DimensionedField<scalar, volMesh>
-        (
-            IOobject
-            (
-                this->name() + "Sh",
-                this->db().time().timeName(),
-                this->mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            this->mesh(),
-            dimensionedScalar("zero", dimEnergy/dimVolume/dimTime, 0.0)
-        )
-    );
+    return hsCoeff_();
+}
+
+
+template<class ParcelType>
+inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::ThermoCloud<ParcelType>::hsCoeff() const
+{
+    return hsCoeff_();
+}
+
+
+template<class ParcelType>
+inline Foam::tmp<Foam::fvScalarMatrix>
+Foam::ThermoCloud<ParcelType>::Sh(volScalarField& hs) const
+{
+    if (debug)
+    {
+        Info<< "hsTrans min/max = " << min(hsTrans()).value() << ", "
+            << max(hsTrans()).value() << nl
+            << "hsCoeff min/max = " << min(hsCoeff()).value() << ", "
+            << max(hsCoeff()).value() << endl;
+    }
 
     if (this->solution().sourceActive())
     {
-        scalarField& Sh = tSh();
-        Sh = hsTrans_()/(this->mesh().V()*this->db().time().deltaT());
+        if (this->solution().semiImplicit("hsTrans"))
+        {
+            const volScalarField Cp = thermo_.thermo().Cp();
+
+            return
+                hsTrans()/(this->mesh().V()*this->db().time().deltaT())
+              + fvm::SuSp
+                (
+                   -hsCoeff().dimensionedInternalField()/(Cp*this->mesh().V()),
+                    hs
+                )
+              + hsCoeff()/(Cp*this->mesh().V())*hs;
+        }
+        else
+        {
+            tmp<fvScalarMatrix> tfvm(new fvScalarMatrix(hs, dimEnergy/dimTime));
+            fvScalarMatrix& fvm = tfvm();
+
+            fvm.source() = -hsTrans()/(this->db().time().deltaT());
+
+            return tfvm;
+        }
     }
 
-    return tSh;
+    return tmp<fvScalarMatrix>(new fvScalarMatrix(hs, dimEnergy/dimTime));
 }
 
 

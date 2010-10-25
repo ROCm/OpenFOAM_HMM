@@ -127,6 +127,16 @@ Foam::scalar Foam::KinematicCloud<ParcelType>::cloudSolution::relaxCoeff
 
 
 template<class ParcelType>
+bool Foam::KinematicCloud<ParcelType>::cloudSolution::semiImplicit
+(
+    const word& fieldName
+) const
+{
+    return readBool(sourceTermDict().subDict(fieldName).lookup("semiImplicit"));
+}
+
+
+template<class ParcelType>
 bool Foam::KinematicCloud<ParcelType>::cloudSolution::sourceActive() const
 {
     return coupled_ && (active_ || steadyState());
@@ -495,6 +505,22 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
             mesh_,
             dimensionedVector("zero", dimMass*dimVelocity, vector::zero)
         )
+    ),
+    UCoeff_
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                this->name() + "UCoeff",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
+            ),
+            mesh_,
+            dimensionedScalar("zero",  dimMass/dimTime, 0.0)
+        )
     )
 {
     if (readFields)
@@ -556,7 +582,24 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
             c.UTrans_().dimensions(),
             c.UTrans_().field()
         )
+    ),
+    UCoeff_
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                name + "UCoeff",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            c.UCoeff_()
+        )
     )
+
 {}
 
 
@@ -602,7 +645,8 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     postProcessingModel_(NULL),
     surfaceFilmModel_(NULL),
     UIntegrator_(NULL),
-    UTrans_(NULL)
+    UTrans_(NULL),
+    UCoeff_(NULL)
 {}
 
 
@@ -658,6 +702,7 @@ template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::resetSourceTerms()
 {
     UTrans().field() = vector::zero;
+    UCoeff().field() = 0.0;
 }
 
 

@@ -164,6 +164,7 @@ void Foam::ThermoParcel<ParcelType>::calc
     scalar NCpW = 0.0;
 
     // Calculate new particle velocity
+    scalar Cuh = 0.0;
     scalar T1 =
         calcHeatTransfer
         (
@@ -179,7 +180,8 @@ void Foam::ThermoParcel<ParcelType>::calc
             Cp0,
             NCpW,
             Sh,
-            dhsTrans
+            dhsTrans,
+            Cuh
         );
 
 
@@ -187,8 +189,23 @@ void Foam::ThermoParcel<ParcelType>::calc
     // ~~~~~~
 
     // Calculate new particle velocity
+    scalar Cud = 0.0;
     vector U1 =
-        calcVelocity(td, dt, cellI, Re, mus, d0, U0, rho0, mass0, Su, dUTrans);
+        calcVelocity
+        (
+            td,
+            dt,
+            cellI,
+            Re,
+            mus,
+            d0,
+            U0,
+            rho0,
+            mass0,
+            Su,
+            dUTrans,
+            Cud
+        );
 
 
     //  Accumulate carrier phase source terms
@@ -198,8 +215,14 @@ void Foam::ThermoParcel<ParcelType>::calc
         // Update momentum transfer
         td.cloud().UTrans()[cellI] += np0*dUTrans;
 
+        // Update momentum transfer coefficient
+        td.cloud().UCoeff()[cellI] += np0*mass0*Cud;
+
         // Update sensible enthalpy transfer
         td.cloud().hsTrans()[cellI] += np0*dhsTrans;
+
+        // Update sensible enthalpy coefficient
+        td.cloud().hsCoeff()[cellI] += np0*Cuh*this->areaS();
     }
 
     // Set new particle properties
@@ -225,7 +248,8 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     const scalar Cp,
     const scalar NCpW,
     const scalar Sh,
-    scalar& dhsTrans
+    scalar& dhsTrans,
+    scalar& Cuh
 )
 {
     if (!td.cloud().heatTransfer().active())
@@ -269,6 +293,8 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     scalar Tnew = max(Tres.value(), td.cloud().constProps().TMin());
 
     dhsTrans += dt*htc*As*(0.5*(T + Tnew) - Tc_);
+
+    Cuh = bp;
 
     return Tnew;
 }

@@ -122,6 +122,9 @@ protected:
             //- Sensible enthalpy transfer [J/kg]
             autoPtr<DimensionedField<scalar, volMesh> > hsTrans_;
 
+            //- Coefficient for carrier phase hs equation [W/K]
+            autoPtr<DimensionedField<scalar, volMesh> > hsCoeff_;
+
 
     // Protected Member Functions
 
@@ -232,8 +235,15 @@ public:
                     inline const DimensionedField<scalar, volMesh>&
                         hsTrans() const;
 
-                    //- Return enthalpy source [J/kg/m3/s]
-                    inline tmp<DimensionedField<scalar, volMesh> > Sh() const;
+                    //- Return coefficient for carrier phase hs equation
+                    inline DimensionedField<scalar, volMesh>& hsCoeff();
+
+                    //- Return const coefficient for carrier phase hs equation
+                    inline const DimensionedField<scalar, volMesh>&
+                        hsCoeff() const;
+
+                    //- Return sensible enthalpy source term [J/kg/m3/s]
+                    inline tmp<fvScalarMatrix> Sh(volScalarField& hs) const;
 
 
                 // Radiation - overrides thermoCloud virtual abstract members
