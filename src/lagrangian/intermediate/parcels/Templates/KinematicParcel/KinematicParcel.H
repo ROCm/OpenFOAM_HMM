@@ -267,6 +267,9 @@ protected:
             //- Density [kg/m3]
             scalar rho_;
 
+            //- Age [s]
+            scalar age_;
+
             //- Time spent in turbulent eddy [s]
             scalar tTurb_;
 
@@ -430,6 +433,9 @@ public:
             //- Return const access to density
             inline scalar rho() const;
 
+            //- Return const access to the age
+            inline scalar age() const;
+
             //- Return const access to time spent in turbulent eddy
             inline scalar tTurb() const;
 
@@ -471,6 +477,9 @@ public:
 
             //- Return access to density
             inline scalar& rho();
+
+            //- Return access to the age
+            inline scalar& age();
 
             //- Return access to time spent in turbulent eddy
             inline scalar& tTurb();

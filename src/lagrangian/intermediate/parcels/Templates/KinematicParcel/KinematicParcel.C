@@ -231,6 +231,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     angularMomentum_(p.angularMomentum_),
     torque_(p.torque_),
     rho_(p.rho_),
+    age_(p.age_),
     tTurb_(p.tTurb_),
     UTurb_(p.UTurb_),
     collisionRecords_(p.collisionRecords_),
@@ -257,6 +258,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     angularMomentum_(p.angularMomentum_),
     torque_(p.torque_),
     rho_(p.rho_),
+    age_(p.age_),
     tTurb_(p.tTurb_),
     UTurb_(p.UTurb_),
     collisionRecords_(p.collisionRecords_),
@@ -344,6 +346,8 @@ bool Foam::KinematicParcel<ParcelType>::move
                         td.switchProcessor = true;
                     }
                 }
+
+                p.age() += dt;
             }
 
             break;

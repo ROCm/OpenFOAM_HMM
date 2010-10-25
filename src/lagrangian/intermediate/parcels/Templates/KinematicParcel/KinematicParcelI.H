@@ -104,6 +104,7 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     angularMomentum_(vector::zero),
     torque_(vector::zero),
     rho_(0.0),
+    age_(0.0),
     tTurb_(0.0),
     UTurb_(vector::zero),
     collisionRecords_(),
@@ -143,6 +144,7 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     angularMomentum_(angularMomentum0),
     torque_(torque0),
     rho_(constProps.rho0()),
+    age_(0.0),
     tTurb_(0.0),
     UTurb_(vector::zero),
     collisionRecords_(),
@@ -346,6 +348,13 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::rho() const
 
 
 template<class ParcelType>
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::age() const
+{
+    return age_;
+}
+
+
+template<class ParcelType>
 inline Foam::scalar Foam::KinematicParcel<ParcelType>::tTurb() const
 {
     return tTurb_;
@@ -434,6 +443,13 @@ template<class ParcelType>
 inline Foam::scalar& Foam::KinematicParcel<ParcelType>::rho()
 {
     return rho_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar& Foam::KinematicParcel<ParcelType>::age()
+{
+    return age_;
 }
 
 
