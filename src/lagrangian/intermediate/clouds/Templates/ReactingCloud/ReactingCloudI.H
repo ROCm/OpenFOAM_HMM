@@ -69,7 +69,61 @@ template<class ParcelType>
 inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
 Foam::ReactingCloud<ParcelType>::Srho(const label i) const
 {
-    return rhoTrans_[i]/(this->db().time().deltaT()*this->mesh().V());
+    tmp<volScalarField> tRhoi
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                this->name() + "rhoTrans",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            this->mesh(),
+            dimensionedScalar
+            (
+                "zero",
+                rhoTrans_[0].dimensions()/dimTime/dimVolume,
+                0.0
+            )
+        )
+    );
+
+    if (this->solution().sourceActive())
+    {
+        scalarField& rhoi = tRhoi().internalField();
+        rhoi = rhoTrans_[i]/(this->db().time().deltaT()*this->mesh().V());
+
+        return tRhoi;
+    }
+    else
+    {
+        return tmp<volScalarField>
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    this->name() + "rhoTrans",
+                    this->db().time().timeName(),
+                    this->db(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                this->mesh(),
+                dimensionedScalar
+                (
+                    "zero",
+                    rhoTrans_[0].dimensions()/dimTime/dimVolume,
+                    0.0
+                )
+            )
+        );
+    }
 }
 
 
@@ -95,13 +149,20 @@ Foam::ReactingCloud<ParcelType>::Srho() const
         )
     );
 
-    scalarField& sourceField = trhoTrans().field();
-    forAll(rhoTrans_, i)
+    if (this->solution().sourceActive())
     {
-        sourceField += rhoTrans_[i];
-    }
+        scalarField& sourceField = trhoTrans().field();
+        forAll(rhoTrans_, i)
+        {
+            sourceField += rhoTrans_[i];
+        }
 
-    return trhoTrans/(this->db().time().deltaT()*this->mesh().V());
+        return trhoTrans/(this->db().time().deltaT()*this->mesh().V());
+    }
+    else
+    {
+        return trhoTrans;
+    }
 }
 
 

@@ -423,20 +423,23 @@ Foam::KinematicCloud<ParcelType>::SU() const
                 this->db().time().timeName(),
                 this->mesh(),
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE
+                IOobject::NO_WRITE
             ),
             this->mesh(),
             dimensionedVector
             (
-                 "zero",
-                 dimDensity*dimVelocity/dimTime,
-                 vector::zero
+                "zero",
+                dimDensity*dimVelocity/dimTime,
+                vector::zero
             )
         )
     );
 
-    vectorField& SU = tSU().field();
-    SU = UTrans()/(mesh_.V()*this->db().time().deltaT());
+    if (solution_.sourceActive())
+    {
+        vectorField& SU = tSU().field();
+        SU = UTrans()/(mesh_.V()*this->db().time().deltaT());
+    }
 
     return tSU;
 }

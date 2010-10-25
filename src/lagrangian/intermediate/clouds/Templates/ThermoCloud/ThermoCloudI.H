@@ -111,12 +111,19 @@ Foam::ThermoCloud<ParcelType>::Sh() const
                 this->db().time().timeName(),
                 this->mesh(),
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
+                IOobject::NO_WRITE,
                 false
             ),
-            hsTrans_()/(this->mesh().V()*this->db().time().deltaT())
+            this->mesh(),
+            dimensionedScalar("zero", dimEnergy/dimVolume/dimTime, 0.0)
         )
     );
+
+    if (this->solution().sourceActive())
+    {
+        scalarField& Sh = tSh();
+        Sh = hsTrans_()/(this->mesh().V()*this->db().time().deltaT());
+    }
 
     return tSh;
 }
