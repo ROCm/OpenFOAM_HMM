@@ -6,8 +6,8 @@
       - fvm::laplacian(turbulence->alphaEff(), hs)
      ==
         DpDt
-     +  coalParcels.Sh()
-     +  limestoneParcels.Sh()
+     +  coalParcels.Sh(hs)
+     +  limestoneParcels.Sh(hs)
      +  enthalpySource.Su()
      +  radiation->Shs(thermo)
      +  chemistrySh
