@@ -71,12 +71,6 @@ class ThermoCloud
 
     // Private member functions
 
-        //- Store the current cloud state
-        void storeState();
-
-        //- Reset the current cloud to the previously stored state
-        void restoreState();
-
         //- Disallow default bitwise copy construct
         ThermoCloud(const ThermoCloud&);
 
@@ -135,9 +129,6 @@ protected:
 
             //- Reset state of cloud
             void cloudReset(ThermoCloud<ParcelType>& c);
-
-            //- Apply relaxation to (steady state) cloud sources
-            void relaxSources();
 
 
 public:
@@ -257,12 +248,6 @@ public:
                     inline tmp<volScalarField> sigmap() const;
 
 
-        // Check
-
-            //- Print cloud information
-            void info() const;
-
-
         // Cloud evolution functions
 
             //- Check parcel properties
@@ -273,11 +258,27 @@ public:
                 const bool fullyDescribed
             );
 
+            //- Store the current cloud state
+            void storeState();
+
+            //- Reset the current cloud to the previously stored state
+            void restoreState();
+
             //- Reset the cloud source terms
             void resetSourceTerms();
 
+            //- Apply relaxation to (steady state) cloud sources
+            void relaxSources();
+
             //- Evolve the cloud
             void evolve();
+
+
+        // Check
+
+            //- Print cloud information
+            void info() const;
+
 };
 
 

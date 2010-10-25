@@ -28,29 +28,6 @@ License
 #include "CompositionModel.H"
 #include "PhaseChangeModel.H"
 
-// * * * * * * * * * * * * *  Private Member Functions * * * * * * * * * * * //
-
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::storeState()
-{
-    cloudCopyPtr_.reset
-    (
-        static_cast<ReactingCloud<ParcelType>*>
-        (
-            clone(this->name() + "Copy").ptr()
-        )
-    );
-}
-
-
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::restoreState()
-{
-    cloudReset(cloudCopyPtr_());
-    cloudCopyPtr_.clear();
-}
-
-
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -89,22 +66,6 @@ void Foam::ReactingCloud<ParcelType>::cloudReset(ReactingCloud<ParcelType>& c)
     phaseChangeModel_ = c.phaseChangeModel_->clone();
 
     dMassPhaseChange_ = c.dMassPhaseChange_;
-}
-
-
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::relaxSources()
-{
-    ThermoCloud<ParcelType>::relaxSources();
-
-    forAll(rhoTrans_, fieldI)
-    {
-        DimensionedField<scalar, volMesh>& rhoT =
-            rhoTrans_[fieldI];
-        const DimensionedField<scalar, volMesh>& rhoT0 =
-            cloudCopyPtr_->rhoTrans()[fieldI];
-        this->relax(rhoT, rhoT0, "rho");
-    }
 }
 
 
@@ -158,9 +119,8 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
                     this->name() + "rhoTrans_" + specieName,
                     this->db().time().timeName(),
                     this->db(),
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::AUTO_WRITE
                 ),
                 this->mesh(),
                 dimensionedScalar("zero", dimMass, 0.0)
@@ -198,10 +158,23 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
 {
     forAll(c.rhoTrans_, i)
     {
+        const word& specieName = this->thermo().carrier().species()[i];
         rhoTrans_.set
         (
             i,
-            new DimensionedField<scalar, volMesh>(c.rhoTrans_[i])
+            new DimensionedField<scalar, volMesh>
+            (
+                IOobject
+                (
+                    this->name() + "rhoTrans_" + specieName,
+                    this->db().time().timeName(),
+                    this->db(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                c.rhoTrans_[i]
+            )
         );
     }
 }
@@ -270,6 +243,27 @@ void Foam::ReactingCloud<ParcelType>::checkParcelProperties
 
 
 template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::storeState()
+{
+    cloudCopyPtr_.reset
+    (
+        static_cast<ReactingCloud<ParcelType>*>
+        (
+            clone(this->name() + "Copy").ptr()
+        )
+    );
+}
+
+
+template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::restoreState()
+{
+    cloudReset(cloudCopyPtr_());
+    cloudCopyPtr_.clear();
+}
+
+
+template<class ParcelType>
 void Foam::ReactingCloud<ParcelType>::resetSourceTerms()
 {
     ThermoCloud<ParcelType>::resetSourceTerms();
@@ -281,38 +275,37 @@ void Foam::ReactingCloud<ParcelType>::resetSourceTerms()
 
 
 template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::relaxSources()
+{
+    ThermoCloud<ParcelType>::relaxSources();
+
+    forAll(rhoTrans_, fieldI)
+    {
+        DimensionedField<scalar, volMesh>& rhoT =
+            rhoTrans_[fieldI];
+        const DimensionedField<scalar, volMesh>& rhoT0 =
+            cloudCopyPtr_->rhoTrans()[fieldI];
+        this->relax(rhoT, rhoT0, "rho");
+    }
+}
+
+
+template<class ParcelType>
 void Foam::ReactingCloud<ParcelType>::evolve()
 {
     if (this->solution().active())
     {
         typename ParcelType::trackData td(*this);
 
-        if (this->solution().transient())
-        {
-            this->preEvolve();
-
-            this->evolveCloud(td);
-        }
-        else
-        {
-            storeState();
-
-            this->preEvolve();
-
-            this->evolveCloud(td);
-
-            relaxSources();
-        }
-
-        info();
-
-        this->postEvolve();
-
-        if (this->solution().steadyState())
-        {
-            restoreState();
-        }
+        this->solve(td);
     }
+}
+
+
+template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::addToMassPhaseChange(const scalar dMass)
+{
+    dMassPhaseChange_ += dMass;
 }
 
 
@@ -323,13 +316,6 @@ void Foam::ReactingCloud<ParcelType>::info() const
 
     Info<< "    Mass transfer phase change      = "
         << returnReduce(dMassPhaseChange_, sumOp<scalar>()) << nl;
-}
-
-
-template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::addToMassPhaseChange(const scalar dMass)
-{
-    dMassPhaseChange_ += dMass;
 }
 
 

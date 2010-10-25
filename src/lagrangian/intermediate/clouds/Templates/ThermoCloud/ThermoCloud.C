@@ -29,29 +29,6 @@ License
 
 #include "HeatTransferModel.H"
 
-// * * * * * * * * * * * * *  Private Member Functions * * * * * * * * * * * //
-
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::storeState()
-{
-    cloudCopyPtr_.reset
-    (
-        static_cast<ThermoCloud<ParcelType>*>
-        (
-            clone(this->name() + "Copy").ptr()
-        )
-    );
-}
-
-
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::restoreState()
-{
-    cloudReset(cloudCopyPtr_());
-    cloudCopyPtr_.clear();
-}
-
-
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 template<class ParcelType>
@@ -63,15 +40,6 @@ void Foam::ThermoCloud<ParcelType>::cloudReset(ThermoCloud<ParcelType>& c)
     TIntegrator_ = c.TIntegrator_->clone();
 
     radiation_ = c.radiation_;
-}
-
-
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::relaxSources()
-{
-    KinematicCloud<ParcelType>::relaxSources();
-
-    this->relax(hsTrans_(), cloudCopyPtr_->hsTrans(), "hs");
 }
 
 
@@ -129,9 +97,8 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
                 this->name() + "hsTrans",
                 this->db().time().timeName(),
                 this->db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
             ),
             this->mesh(),
             dimensionedScalar("zero", dimEnergy, 0.0)
@@ -241,10 +208,40 @@ void Foam::ThermoCloud<ParcelType>::checkParcelProperties
 
 
 template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::storeState()
+{
+    cloudCopyPtr_.reset
+    (
+        static_cast<ThermoCloud<ParcelType>*>
+        (
+            clone(this->name() + "Copy").ptr()
+        )
+    );
+}
+
+
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::restoreState()
+{
+    cloudReset(cloudCopyPtr_());
+    cloudCopyPtr_.clear();
+}
+
+
+template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::resetSourceTerms()
 {
     KinematicCloud<ParcelType>::resetSourceTerms();
     hsTrans_->field() = 0.0;
+}
+
+
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::relaxSources()
+{
+    KinematicCloud<ParcelType>::relaxSources();
+
+    this->relax(hsTrans_(), cloudCopyPtr_->hsTrans(), "hs");
 }
 
 
@@ -255,31 +252,7 @@ void Foam::ThermoCloud<ParcelType>::evolve()
     {
         typename ParcelType::trackData td(*this);
 
-        if (this->solution().transient())
-        {
-            this->preEvolve();
-
-            this->evolveCloud(td);
-        }
-        else
-        {
-            storeState();
-
-            this->preEvolve();
-
-            this->evolveCloud(td);
-
-            relaxSources();
-        }
-
-        info();
-
-        this->postEvolve();
-
-        if (this->solution().steadyState())
-        {
-            restoreState();
-        }
+        this->solve(td);
     }
 }
 

@@ -75,12 +75,6 @@ class ReactingMultiphaseCloud
 
     // Private member functions
 
-        //- Store the current cloud state
-        void storeState();
-
-        //- Reset the current cloud to the previously stored state
-        void restoreState();
-
         //- Disallow default bitwise copy construct
         ReactingMultiphaseCloud(const ReactingMultiphaseCloud&);
 
@@ -217,9 +211,6 @@ public:
 
         // Check
 
-            //- Print cloud information
-            void info() const;
-
             //- Add to cumulative volatilisation mass transfer
             void addToMassDevolatilisation(const scalar dMass);
 
@@ -237,11 +228,20 @@ public:
                 const bool fullyDescribed
             );
 
+            //- Store the current cloud state
+            void storeState();
+
+            //- Reset the current cloud to the previously stored state
+            void restoreState();
+
             //- Reset the cloud source terms
             void resetSourceTerms();
 
             //- Evolve the cloud
             void evolve();
+
+            //- Print cloud information
+            void info() const;
 };
 
 

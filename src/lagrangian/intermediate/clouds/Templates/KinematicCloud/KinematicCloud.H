@@ -106,12 +106,6 @@ class KinematicCloud
 
     // Private Member Functions
 
-        //- Store the current cloud state
-        void storeState();
-
-        //- Reset the current cloud to the previously stored state
-        void restoreState();
-
         //- Disallow default bitwise copy construct
         KinematicCloud(const KinematicCloud&);
 
@@ -332,6 +326,9 @@ protected:
 
         // Cloud evolution functions
 
+            //- Solve the cloud - calls all evolution functions
+            void solve(typename ParcelType::trackData& td);
+
             //- Pre-evolve
             void preEvolve();
 
@@ -356,9 +353,6 @@ protected:
 
             //- Reset state of cloud
             void cloudReset(KinematicCloud<ParcelType>& c);
-
-            //- Apply relaxation to (steady state) cloud sources
-            void relaxSources();
 
 
 public:
@@ -563,9 +557,6 @@ public:
             //- Total rotational kinetic energy in the system
             inline scalar rotationalKineticEnergyOfSystem() const;
 
-            //- Print cloud information
-            void info() const;
-
 
             // Fields
 
@@ -592,6 +583,12 @@ public:
                 const bool fullyDescribed
             );
 
+            //- Store the current cloud state
+            void storeState();
+
+            //- Reset the current cloud to the previously stored state
+            void restoreState();
+
             //- Reset the cloud source terms
             void resetSourceTerms();
 
@@ -604,8 +601,14 @@ public:
                 const word& name
             ) const;
 
+            //- Apply relaxation to (steady state) cloud sources
+            void relaxSources();
+
             //- Evolve the cloud
             void evolve();
+
+            //- Print cloud information
+            void info() const;
 };
 
 

@@ -140,30 +140,41 @@ bool Foam::KinematicCloud<ParcelType>::cloudSolution::writeThisStep() const
 }
 
 
-// * * * * * * * * * * * * *  Private Member Functions * * * * * * * * * * * //
-
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::storeState()
-{
-    cloudCopyPtr_.reset
-    (
-        static_cast<KinematicCloud<ParcelType>*>
-        (
-            clone(this->name() + "Copy").ptr()
-        )
-    );
-}
-
-
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::restoreState()
-{
-    cloudReset(cloudCopyPtr_());
-    cloudCopyPtr_.clear();
-}
-
-
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::solve
+(
+    typename ParcelType::trackData& td
+)
+{
+    if (solution_.transient())
+    {
+        preEvolve();
+
+        evolveCloud(td);
+    }
+    else
+    {
+        td.cloud().storeState();
+
+        preEvolve();
+
+        evolveCloud(td);
+
+        td.cloud().relaxSources();
+    }
+
+    td.cloud().info();
+
+    postEvolve();
+
+    if (solution_.steadyState())
+    {
+        td.cloud().restoreState();
+    }
+}
+
 
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::preEvolve()
@@ -362,13 +373,6 @@ void Foam::KinematicCloud<ParcelType>::cloudReset(KinematicCloud<ParcelType>& c)
 }
 
 
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::relaxSources()
-{
-    this->relax(UTrans_(), cloudCopyPtr_->UTrans(), "U");
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -485,9 +489,8 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
                 this->name() + "UTrans",
                 this->db().time().timeName(),
                 this->db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
             ),
             mesh_,
             dimensionedVector("zero", dimMass*dimVelocity, vector::zero)
@@ -631,6 +634,27 @@ void Foam::KinematicCloud<ParcelType>::checkParcelProperties
 
 
 template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::storeState()
+{
+    cloudCopyPtr_.reset
+    (
+        static_cast<KinematicCloud<ParcelType>*>
+        (
+            clone(this->name() + "Copy").ptr()
+        )
+    );
+}
+
+
+template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::restoreState()
+{
+    cloudReset(cloudCopyPtr_());
+    cloudCopyPtr_.clear();
+}
+
+
+template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::resetSourceTerms()
 {
     UTrans().field() = vector::zero;
@@ -653,37 +677,20 @@ void Foam::KinematicCloud<ParcelType>::relax
 
 
 template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::relaxSources()
+{
+    this->relax(UTrans_(), cloudCopyPtr_->UTrans(), "U");
+}
+
+
+template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::evolve()
 {
     if (solution_.active())
     {
         typename ParcelType::trackData td(*this);
 
-        if (solution_.transient())
-        {
-            preEvolve();
-
-            evolveCloud(td);
-        }
-        else
-        {
-            storeState();
-
-            preEvolve();
-
-            evolveCloud(td);
-
-            relaxSources();
-        }
-
-        info();
-
-        postEvolve();
-
-        if (solution_.steadyState())
-        {
-            restoreState();
-        }
+        solve(td);
     }
 }
 
