@@ -439,11 +439,11 @@ Foam::KinematicCloud<ParcelType>::SU(volVectorField& U) const
 
     if (solution_.sourceActive())
     {
-        if (solution_.semiImplicit("UTrans"))
+        if (solution_.semiImplicit("U"))
         {
             return
                 UTrans()/(mesh_.V()*this->db().time().deltaT())
-              + fvm::SuSp(-UCoeff().dimensionedInternalField()/mesh_.V(), U)
+              + fvm::SuSp(-UCoeff()/mesh_.V(), U)
               + UCoeff()/mesh_.V()*U;
         }
         else

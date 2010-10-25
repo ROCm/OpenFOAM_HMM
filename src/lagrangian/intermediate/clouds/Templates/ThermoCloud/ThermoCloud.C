@@ -117,8 +117,7 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
                 IOobject::AUTO_WRITE
             ),
             this->mesh(),
-            dimensionedScalar("zero", dimEnergy/dimTime/dimTemperature, 0.0),
-            zeroGradientFvPatchScalarField::typeName
+            dimensionedScalar("zero", dimEnergy/dimTime/dimTemperature, 0.0)
         )
     )
 

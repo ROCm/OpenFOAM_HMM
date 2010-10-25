@@ -127,17 +127,13 @@ Foam::ThermoCloud<ParcelType>::Sh(volScalarField& hs) const
 
     if (this->solution().sourceActive())
     {
-        if (this->solution().semiImplicit("hsTrans"))
+        if (this->solution().semiImplicit("hs"))
         {
             const volScalarField Cp = thermo_.thermo().Cp();
 
             return
                 hsTrans()/(this->mesh().V()*this->db().time().deltaT())
-              + fvm::SuSp
-                (
-                   -hsCoeff().dimensionedInternalField()/(Cp*this->mesh().V()),
-                    hs
-                )
+              + fvm::SuSp(-hsCoeff()/(Cp*this->mesh().V()), hs)
               + hsCoeff()/(Cp*this->mesh().V())*hs;
         }
         else

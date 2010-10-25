@@ -219,6 +219,13 @@ public:
                     inline PtrList<DimensionedField<scalar, volMesh> >&
                         rhoTrans();
 
+                    //- Return mass source term for specie i - specie eqn
+                    inline tmp<fvScalarMatrix> SYi
+                    (
+                        const label i,
+                        volScalarField& Yi
+                    ) const;
+
                     //- Return tmp mass source for field i - fully explicit
                     inline tmp<DimensionedField<scalar, volMesh> >
                         Srho(const label i) const;
@@ -226,6 +233,9 @@ public:
                     //- Return tmp total mass source for carrier phase
                     //  - fully explicit
                     inline tmp<DimensionedField<scalar, volMesh> > Srho() const;
+
+                    //- Return total mass source term [kg/m3/s]
+                    inline tmp<fvScalarMatrix> Srho(volScalarField& rho) const;
 
 
         // Check

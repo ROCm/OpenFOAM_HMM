@@ -66,6 +66,62 @@ Foam::ReactingCloud<ParcelType>::rhoTrans()
 
 
 template<class ParcelType>
+inline Foam::tmp<Foam::fvScalarMatrix>
+Foam::ReactingCloud<ParcelType>::SYi
+(
+    const label i,
+    volScalarField& Yi
+) const
+{
+    if (this->solution().sourceActive())
+    {
+        if (this->solution().semiImplicit("Yi"))
+        {
+            tmp<volScalarField> trhoTrans
+            (
+                new volScalarField
+                (
+                    IOobject
+                    (
+                        this->name() + "rhoTrans",
+                        this->db().time().timeName(),
+                        this->db(),
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE,
+                        false
+                    ),
+                    this->mesh(),
+                    dimensionedScalar("zero", dimMass/dimTime/dimVolume, 0.0)
+                )
+            );
+
+            volScalarField& sourceField = trhoTrans();
+
+            sourceField.internalField() =
+                rhoTrans_[i]/(this->db().time().deltaT()*this->mesh().V());
+
+            const dimensionedScalar YiSMALL("YiSMALL", dimless, SMALL);
+
+            return
+                fvm::Sp(neg(sourceField)*sourceField/(Yi + YiSMALL), Yi)
+              + pos(sourceField)*sourceField;
+        }
+        else
+        {
+            tmp<fvScalarMatrix> tfvm(new fvScalarMatrix(Yi, dimMass/dimTime));
+            fvScalarMatrix& fvm = tfvm();
+
+            fvm.source() = -rhoTrans_[i]/this->db().time().deltaT();
+
+            return tfvm;
+        }
+    }
+
+    return tmp<fvScalarMatrix>(new fvScalarMatrix(Yi, dimMass/dimTime));
+}
+
+
+template<class ParcelType>
 inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
 Foam::ReactingCloud<ParcelType>::Srho(const label i) const
 {
@@ -163,6 +219,82 @@ Foam::ReactingCloud<ParcelType>::Srho() const
     {
         return trhoTrans;
     }
+}
+
+
+template<class ParcelType>
+inline Foam::tmp<Foam::fvScalarMatrix>
+Foam::ReactingCloud<ParcelType>::Srho(volScalarField& rho) const
+{
+    if (this->solution().sourceActive())
+    {
+        if (this->solution().semiImplicit("rho"))
+        {
+            tmp<volScalarField> trhoTrans
+            (
+                new volScalarField
+                (
+                    IOobject
+                    (
+                        this->name() + "rhoTrans",
+                        this->db().time().timeName(),
+                        this->db(),
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE,
+                        false
+                    ),
+                    this->mesh(),
+                    dimensionedScalar("zero", dimMass/dimTime/dimVolume, 0.0)
+                )
+            );
+
+            scalarField& sourceField = trhoTrans();
+
+            forAll(rhoTrans_, i)
+            {
+                sourceField += rhoTrans_[i];
+            }
+            sourceField /= this->db().time().deltaT()*this->mesh().V();
+
+            return fvm::SuSp(trhoTrans()/rho, rho);
+        }
+        else
+        {
+            tmp<fvScalarMatrix> tfvm(new fvScalarMatrix(rho, dimMass/dimTime));
+            fvScalarMatrix& fvm = tfvm();
+
+            tmp<volScalarField> trhoTrans
+            (
+                new volScalarField
+                (
+                    IOobject
+                    (
+                        this->name() + "rhoTrans",
+                        this->db().time().timeName(),
+                        this->db(),
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE,
+                        false
+                    ),
+                    this->mesh(),
+                    dimensionedScalar("zero", dimMass, 0.0)
+                )
+            );
+
+            scalarField& sourceField = trhoTrans();
+
+            forAll(rhoTrans_, i)
+            {
+                sourceField += rhoTrans_[i];
+            }
+
+            fvm.source() = -trhoTrans()/this->db().time().deltaT();
+
+            return tfvm;
+        }
+    }
+
+    return tmp<fvScalarMatrix>(new fvScalarMatrix(rho, dimMass/dimTime));
 }
 
 
