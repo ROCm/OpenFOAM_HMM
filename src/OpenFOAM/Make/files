@@ -347,6 +347,7 @@ $(basicPolyPatches)/generic/genericPolyPatch.C
 constraintPolyPatches = $(polyPatches)/constraint
 $(constraintPolyPatches)/cyclic/cyclicPolyPatch.C
 $(constraintPolyPatches)/cyclicSlip/cyclicSlipPolyPatch.C
+$(constraintPolyPatches)/oldCyclic/oldCyclicPolyPatch.C
 $(constraintPolyPatches)/empty/emptyPolyPatch.C
 $(constraintPolyPatches)/nonuniformTransformCyclic/nonuniformTransformCyclicPolyPatch.C
 $(constraintPolyPatches)/processorCyclic/processorCyclicPolyPatch.C

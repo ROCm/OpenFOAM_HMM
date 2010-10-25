@@ -2332,7 +2332,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
         seedFacesInfo.clear();
 
         // Iterate until no change. Now 2:1 face difference should be satisfied
-        levelCalc.iterate(mesh_.globalData().nTotalFaces());
+        levelCalc.iterate(mesh_.globalData().nTotalFaces()+1);
 
 
         // Now check point-connected cells (face-connected cells already ok):
@@ -2836,7 +2836,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
         seedFacesInfo,
         allFaceInfo,
         allCellInfo,
-        mesh_.globalData().nTotalCells()
+        mesh_.globalData().nTotalCells()+1
     );
 
 

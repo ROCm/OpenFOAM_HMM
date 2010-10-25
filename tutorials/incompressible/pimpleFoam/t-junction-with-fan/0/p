@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [ 0 2 -2 0 0 0 0 ];
+dimensions      [0 2 -2 0 0 0 0];
 
 internalField   uniform 100000;
 
@@ -24,14 +24,12 @@ boundaryField
     inlet
     {
         type            timeVaryingTotalPressure;
-        p0              100040;
-        outOfBounds     clamp;
-        fileName        "$FOAM_CASE/constant/p0vsTime";
-        U               U;
-        phi             phi;
         rho             none;
         psi             none;
         gamma           1;
+        p0              100040;
+        fileName        "$FOAM_CASE/constant/p0vsTime";
+        outOfBounds     clamp;
         value           uniform 100040;
     }
     outlet1
@@ -52,19 +50,19 @@ boundaryField
     {
         type            fan;
         patchType       cyclic;
-        f               2 ( 50 -0.1 );
-        value           $internalField;
-    }
-    defaultFaces
-    {
-        type            zeroGradient;
+        f               2(100 -0.1);
+        value           uniform 0;
     }
     fan_half1
     {
         type            fan;
         patchType       cyclic;
-        f               2 ( 50 -0.1 );
-        value           $internalField;
+        f               2(100 -0.1);
+        value           uniform 0;
+    }
+    defaultFaces
+    {
+        type            zeroGradient;
     }
 }
 

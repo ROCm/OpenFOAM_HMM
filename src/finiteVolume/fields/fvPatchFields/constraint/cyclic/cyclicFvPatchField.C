@@ -172,6 +172,23 @@ tmp<Field<Type> > cyclicFvPatchField<Type>::patchNeighbourField() const
 
 
 template<class Type>
+const cyclicFvPatchField<Type>& cyclicFvPatchField<Type>::neighbourPatchField()
+const
+{
+    const GeometricField<Type, fvPatchField, volMesh>& fld =
+    static_cast<const GeometricField<Type, fvPatchField, volMesh>&>
+    (
+        this->internalField()
+    );
+
+    return refCast<const cyclicFvPatchField<Type> >
+    (
+        fld.boundaryField()[this->cyclicPatch().neighbPatchID()]
+    );
+}
+
+
+template<class Type>
 void cyclicFvPatchField<Type>::updateInterfaceMatrix
 (
     const scalarField& psiInternal,
