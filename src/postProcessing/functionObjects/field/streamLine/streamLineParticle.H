@@ -157,9 +157,9 @@ public:
         streamLineParticle(const streamLineParticle& c);
 
         //- Construct and return a clone
-        autoPtr<streamLineParticle> clone() const
+        autoPtr<Particle<streamLineParticle> > clone() const
         {
-            return autoPtr<streamLineParticle>
+            return autoPtr<Particle<streamLineParticle> >
             (
                 new streamLineParticle(*this)
             );
@@ -173,7 +173,7 @@ public:
         // Tracking
 
             //- Track all particles to their end point
-            bool move(trackData&);
+            bool move(trackData&, const scalar trackTime);
 
 
             //- Overridable function to handle the particle hitting a patch

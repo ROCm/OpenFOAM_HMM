@@ -251,9 +251,9 @@ public:
         );
 
         //- Construct and return a clone
-        autoPtr<molecule> clone() const
+        autoPtr<Particle<molecule> > clone() const
         {
-            return autoPtr<molecule>(new molecule(*this));
+            return autoPtr<Particle<molecule> >(new molecule(*this));
         }
 
 
@@ -261,7 +261,7 @@ public:
 
         // Tracking
 
-            bool move(trackData&);
+            bool move(trackData&, const scalar trackTime);
 
             void transformProperties(const tensor& T);
 

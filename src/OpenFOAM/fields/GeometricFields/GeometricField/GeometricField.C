@@ -327,7 +327,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const PtrList<PatchField<Type> >& ptfl
 )
 :
-    DimensionedField<Type, GeoMesh>(io, mesh, ds, iField, false),
+    DimensionedField<Type, GeoMesh>(io, mesh, ds, iField),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(NULL),
     fieldPrevIterPtr_(NULL),

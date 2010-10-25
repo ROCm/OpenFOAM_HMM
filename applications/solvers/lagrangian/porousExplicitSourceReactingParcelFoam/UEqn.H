@@ -6,7 +6,7 @@
       + turbulence->divDevRhoReff(U)
      ==
         rho.dimensionedInternalField()*g
-      + parcels.SU()
+      + parcels.SU(U)
       + momentumSource.Su()
     );
 

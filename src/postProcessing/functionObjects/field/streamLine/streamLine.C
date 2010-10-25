@@ -233,10 +233,13 @@ void Foam::streamLine::track()
         allVectors_
     );
 
+
+    // Set very large dt. Note: cannot use GREAT since 1/GREAT is SMALL
+    // which is a trigger value for the tracking...
+    const scalar trackTime = Foam::sqrt(GREAT);
+
     // Track
-    //Pout<< "Tracking particles." << endl;
-    particles.move(td);
-    //Pout<< "Finished tracking particles." << endl;
+    particles.move(td, trackTime);
 }
 
 

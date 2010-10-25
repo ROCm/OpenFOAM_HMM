@@ -80,29 +80,27 @@ Foam::molecule::trackData::trackData
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
-bool Foam::molecule::move(molecule::trackData& td)
+bool Foam::molecule::move(molecule::trackData& td, const scalar trackTime)
 {
     td.switchProcessor = false;
     td.keepParticle = true;
 
     const constantProperties& constProps(td.molCloud().constProps(id_));
 
-    scalar deltaT = cloud().pMesh().time().deltaTValue();
-
     if (td.part() == 0)
     {
         // First leapfrog velocity adjust part, required before tracking+force
         // part
 
-        v_ += 0.5*deltaT*a_;
+        v_ += 0.5*trackTime*a_;
 
-        pi_ += 0.5*deltaT*tau_;
+        pi_ += 0.5*trackTime*tau_;
     }
     else if (td.part() == 1)
     {
         // Leapfrog tracking part
 
-        scalar tEnd = (1.0 - stepFraction())*deltaT;
+        scalar tEnd = (1.0 - stepFraction())*trackTime;
         scalar dtMax = tEnd;
 
         while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
@@ -113,7 +111,7 @@ bool Foam::molecule::move(molecule::trackData& td)
             dt *= trackToFace(position() + dt*v_, td);
 
             tEnd -= dt;
-            stepFraction() = 1.0 - tEnd/deltaT;
+            stepFraction() = 1.0 - tEnd/trackTime;
         }
     }
     else if (td.part() == 2)
@@ -130,26 +128,26 @@ bool Foam::molecule::move(molecule::trackData& td)
 
             if (!constProps.linearMolecule())
             {
-                R = rotationTensorX(0.5*deltaT*pi_.x()/momentOfInertia.xx());
+                R = rotationTensorX(0.5*trackTime*pi_.x()/momentOfInertia.xx());
                 pi_ = pi_ & R;
                 Q_ = Q_ & R;
             }
 
-            R = rotationTensorY(0.5*deltaT*pi_.y()/momentOfInertia.yy());
+            R = rotationTensorY(0.5*trackTime*pi_.y()/momentOfInertia.yy());
             pi_ = pi_ & R;
             Q_ = Q_ & R;
 
-            R = rotationTensorZ(deltaT*pi_.z()/momentOfInertia.zz());
+            R = rotationTensorZ(trackTime*pi_.z()/momentOfInertia.zz());
             pi_ = pi_ & R;
             Q_ = Q_ & R;
 
-            R = rotationTensorY(0.5*deltaT*pi_.y()/momentOfInertia.yy());
+            R = rotationTensorY(0.5*trackTime*pi_.y()/momentOfInertia.yy());
             pi_ = pi_ & R;
             Q_ = Q_ & R;
 
             if (!constProps.linearMolecule())
             {
-                R = rotationTensorX(0.5*deltaT*pi_.x()/momentOfInertia.xx());
+                R = rotationTensorX(0.5*trackTime*pi_.x()/momentOfInertia.xx());
                 pi_ = pi_ & R;
                 Q_ = Q_ & R;
             }
@@ -177,9 +175,9 @@ bool Foam::molecule::move(molecule::trackData& td)
             tau_ += (constProps.siteReferencePositions()[s] ^ (Q_.T() & f));
         }
 
-        v_ += 0.5*deltaT*a_;
+        v_ += 0.5*trackTime*a_;
 
-        pi_ += 0.5*deltaT*tau_;
+        pi_ += 0.5*trackTime*tau_;
 
         if (constProps.pointMolecule())
         {

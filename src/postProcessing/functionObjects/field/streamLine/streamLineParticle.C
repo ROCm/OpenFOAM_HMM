@@ -152,15 +152,16 @@ Foam::streamLineParticle::streamLineParticle
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::streamLineParticle::move(streamLineParticle::trackData& td)
+bool Foam::streamLineParticle::move
+(
+    streamLineParticle::trackData& td,
+    const scalar trackTime
+)
 {
     td.switchProcessor = false;
     td.keepParticle = true;
 
-    // Set very large dt. Note: cannot use GREAT since 1/GREAT is SMALL
-    // which is a trigger value for the tracking...
-    scalar deltaT = Foam::sqrt(GREAT);  //cloud().pMesh().time().deltaTValue();
-    scalar tEnd = (1.0 - stepFraction())*deltaT;
+    scalar tEnd = (1.0 - stepFraction())*trackTime;
     scalar dtMax = tEnd;
 
     while
@@ -189,7 +190,7 @@ bool Foam::streamLineParticle::move(streamLineParticle::trackData& td)
         dt *= trackToFace(position()+dt*U, td);
 
         tEnd -= dt;
-        stepFraction() = 1.0 - tEnd/deltaT;
+        stepFraction() = 1.0 - tEnd/trackTime;
 
         if (tEnd <= ROOTVSMALL)
         {

@@ -47,7 +47,7 @@ namespace Foam
 class trackedParticleCloud;
 
 /*---------------------------------------------------------------------------*\
-                           Class trackedParticle Declaration
+                     Class trackedParticle Declaration
 \*---------------------------------------------------------------------------*/
 
 class trackedParticle
@@ -67,6 +67,7 @@ class trackedParticle
 
         //- passive label
         label j_;
+
 
 public:
 
@@ -135,9 +136,12 @@ public:
         );
 
         //- Construct and return a clone
-        autoPtr<trackedParticle> clone() const
+        autoPtr<Particle<trackedParticle> > clone() const
         {
-            return autoPtr<trackedParticle>(new trackedParticle(*this));
+            return autoPtr<Particle<trackedParticle> >
+            (
+                new trackedParticle(*this)
+            );
         }
 
 
@@ -166,7 +170,7 @@ public:
         // Tracking
 
             //- Track all particles to their end point
-            bool move(trackData&);
+            bool move(trackData&, const scalar);
 
 
             //- Overridable function to handle the particle hitting a patch
