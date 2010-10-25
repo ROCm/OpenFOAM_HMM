@@ -66,6 +66,11 @@
       -doc              display application documentation in browser
       -help             print the usage
 
+*** *New* basicSolidThermo solids thermophysical library
+    + Used in all conjugate heat transfer solvers
+      + constant properties
+      + temperature dependent properties
+      + temperature and direction (in local coordinate system) dependent properties
 *** *New* Surface film library
     + Creation of films by particle addition, or initial film distribution
     + Coupled with the lagrangian/intermediate cloud hierarchy library
@@ -152,7 +157,9 @@
     + =streamLine=: generate streamlines; ouputs both trajectory and field data
 
 * New tutorials
-  There is a large number of new tutorials to support the new solvers in the
+  There is a large number of new tutorials for existing and new solvers in the
   release.
   + =reactingParcelFilmFoam= tutorials:
     + multipleBoxes, hotBoxes, panel, evaporationTest
+  + =interDyMFoam= tutorials:
+    + testTubeMixer: showcases =solidBodyMotionFunction=
