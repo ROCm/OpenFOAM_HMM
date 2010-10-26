@@ -180,17 +180,31 @@ Foam::label Foam::ptscotchDecomp::decompose
 //            Info<< "Dumping Scotch graph file to " << str.name() << endl
 //                << "Use this in combination with gpart." << endl;
 //
-//            label version = 0;
+//            // Distributed graph file (.grf)
+//            label version = 2;
 //            str << version << nl;
-//            // Numer of vertices
-//            str << xadj.size()-1 << ' ' << adjncy.size() << nl;
+//            // Number of files
+
+//            // Number of files (procglbnbr)
+//            str << Pstream::nProcs();
+//            // My file number (procloc)
+//            str << ' ' << Pstream::myProcNo() << nl;
+//
+//            // Total number of vertices (vertglbnbr)
+//            str << returnReduce(mesh.nCells(), sumOp<label>());
+//            // Total number of connections (edgeglbnbr)
+//            str << ' ' << returnReduce(xadj[mesh.nCells()], sumOp<label>())
+//                << nl;
+//            // Local number of vertices (vertlocnbr)
+//            str << mesh.nCells();
+//            // Local number of connections (edgelocnbr)
+//            str << ' ' << xadj[mesh.nCells()] << nl;
 //            // Numbering starts from 0
 //            label baseval = 0;
-//            // Has weights?
-//            label hasEdgeWeights = 0;
-//            label hasVertexWeights = 0;
-//            label numericflag = 10*hasEdgeWeights+hasVertexWeights;
-//            str << baseval << ' ' << numericflag << nl;
+//            // Start of my global vertices (procdsptab[proclocnum])
+//            str << ' ' << globalCells.toGlobal(0);
+//            100*hasVertlabels+10*hasEdgeWeights+1*hasVertWeighs
+//            str << ' ' << "0" << nl;
 //            for (label cellI = 0; cellI < xadj.size()-1; cellI++)
 //            {
 //                label start = xadj[cellI];

@@ -32,6 +32,7 @@ License
 #include "meshTools.H"
 #include "hexMatcher.H"
 #include "Switch.H"
+#include "globalMeshData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -206,7 +207,7 @@ Foam::vectorField Foam::directions::propagateDirection
         mesh,
         changedFaces,
         changedFacesInfo,
-        mesh.nCells()
+        mesh.globalData().nTotalCells()+1
     );
 
     const List<directionInfo>& cellInfo = directionCalc.allCellInfo();

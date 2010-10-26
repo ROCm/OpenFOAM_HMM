@@ -245,13 +245,14 @@ Foam::Time::Time
     readLibs_(controlDict_, "libs"),
     functionObjects_(*this)
 {
+    setControls();
+
     // Time objects not registered so do like objectRegistry::checkIn ourselves.
     if (runTimeModifiable_)
     {
+        monitorPtr_.reset(new fileMonitor());
         controlDict_.watchIndex() = addWatch(controlDict_.filePath());
     }
-
-    setControls();
 }
 
 
@@ -307,14 +308,20 @@ Foam::Time::Time
     readLibs_(controlDict_, "libs"),
     functionObjects_(*this)
 {
+    setControls();
 
     // Time objects not registered so do like objectRegistry::checkIn ourselves.
     if (runTimeModifiable_)
     {
-        controlDict_.watchIndex() = addWatch(controlDict_.filePath());
-    }
+        monitorPtr_.reset(new fileMonitor());
 
-    setControls();
+        // File might not exist yet.
+        fileName f(controlDict_.filePath());
+        if (f != fileName::null)
+        {
+            controlDict_.watchIndex() = addWatch(f);
+        }
+    }
 }
 
 
@@ -388,18 +395,18 @@ Foam::Time::~Time()
 
 Foam::label Foam::Time::addWatch(const fileName& fName) const
 {
-    return monitor_.addWatch(fName);
+    return monitorPtr_().addWatch(fName);
 }
 
 
 bool Foam::Time::removeWatch(const label watchIndex) const
 {
-    return monitor_.removeWatch(watchIndex);
+    return monitorPtr_().removeWatch(watchIndex);
 }
 
 const Foam::fileName& Foam::Time::getFile(const label watchIndex) const
 {
-    return monitor_.getFile(watchIndex);
+    return monitorPtr_().getFile(watchIndex);
 }
 
 
@@ -408,13 +415,13 @@ Foam::fileMonitor::fileState Foam::Time::getState
     const label watchFd
 ) const
 {
-    return monitor_.getState(watchFd);
+    return monitorPtr_().getState(watchFd);
 }
 
 
 void Foam::Time::setUnmodified(const label watchFd) const
 {
-    monitor_.setUnmodified(watchFd);
+    monitorPtr_().setUnmodified(watchFd);
 }
 
 

@@ -140,7 +140,17 @@ public:
             //- Return the "jump" across the patch.
             virtual tmp<Field<Type> > jump() const
             {
-                return jump_;
+                if (this->cyclicPatch().owner())
+                {
+                    return jump_;
+                }
+                else
+                {
+                    return refCast<const fanFvPatchField<Type> >
+                    (
+                        this->neighbourPatchField()
+                    ).jump();
+                }
             }
 
 

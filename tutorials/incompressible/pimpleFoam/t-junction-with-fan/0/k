@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [ 0 2 -2 0 0 0 0 ];
+dimensions      [0 2 -2 0 0 0 0];
 
 internalField   uniform 1;
 
@@ -42,9 +42,13 @@ boundaryField
     baffles
     {
         type            kqRWallFunction;
-        value           uniform 1;
+        value           uniform 0;
     }
     fan_half0
+    {
+        type            cyclic;
+    }
+    fan_half1
     {
         type            cyclic;
     }
@@ -52,10 +56,6 @@ boundaryField
     {
         type            kqRWallFunction;
         value           uniform 1;
-    }
-    fan_half1
-    {
-        type            cyclic;
     }
 }
 
