@@ -23,6 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "specie.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 inline Foam::scalar Foam::solid::rho() const
@@ -46,6 +48,18 @@ inline Foam::scalar Foam::solid::K() const
 inline Foam::scalar Foam::solid::Hf() const
 {
     return Hf_;
+}
+
+
+inline Foam::scalar Foam::solid::H(const scalar T) const
+{
+    return Hs(T) + Hf_;
+}
+
+
+inline Foam::scalar Foam::solid::Hs(const scalar T) const
+{
+    return Cp_*(T - specie::Tstd);
 }
 
 
