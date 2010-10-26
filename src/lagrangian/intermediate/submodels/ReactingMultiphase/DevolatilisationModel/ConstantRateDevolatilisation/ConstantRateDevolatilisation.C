@@ -110,6 +110,7 @@ void Foam::ConstantRateDevolatilisation<CloudType>::calculate
     scalarField& dMassDV
 ) const
 {
+    bool done = true;
     forAll(volatileData_, i)
     {
         const label id = volatileToGasMap_[i];
@@ -117,9 +118,7 @@ void Foam::ConstantRateDevolatilisation<CloudType>::calculate
         const scalar massVolatile = mass*YGasEff[id];
 
         // Combustion allowed once all volatile components evolved
-        canCombust =
-            canCombust
-         && (massVolatile <= residualCoeff_*massVolatile0);
+        done = done && (massVolatile <= residualCoeff_*massVolatile0);
 
         // Model coefficients
         const scalar A0 = volatileData_[i].second();
@@ -127,6 +126,8 @@ void Foam::ConstantRateDevolatilisation<CloudType>::calculate
         // Mass transferred from particle to carrier gas phase
         dMassDV = min(dt*A0*massVolatile0, massVolatile);
     }
+
+    canCombust = done;
 }
 
 
