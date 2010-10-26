@@ -25,16 +25,6 @@ License
 
 #include "basicThermoParcel.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    defineTypeNameAndDebug(basicThermoParcel, 0);
-    defineParticleTypeNameAndDebug(basicThermoParcel, 0);
-    defineParcelTypeNameAndDebug(basicThermoParcel, 0);
-};
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::basicThermoParcel::basicThermoParcel

@@ -78,6 +78,22 @@ void Foam::ThermoParcel<ParcelType>::cellValueSourceCorrection
 
     const scalar CpMean = td.CpInterp().psi()[cellI];
     Tc_ += td.cloud().hsTrans()[cellI]/(CpMean*this->massCell(cellI));
+
+    if (Tc_ < td.cloud().constProps().TMin())
+    {
+        WarningIn
+        (
+            "void Foam::ThermoParcel<ParcelType>::cellValueSourceCorrection"
+            "("
+                "TrackData&, "
+                "const scalar, "
+                "const label"
+            ")"
+        )   << "Limiting observed temperature in cell " << cellI << " to "
+            << td.cloud().constProps().TMin() <<  nl << endl;
+
+        Tc_ = td.cloud().constProps().TMin();
+    }
 }
 
 
@@ -98,14 +114,34 @@ void Foam::ThermoParcel<ParcelType>::calcSurfaceValues
     // Surface temperature using two thirds rule
     Ts = (2.0*T + Tc_)/3.0;
 
-    tetIndices tetIs = this->currentTetIndices();
+    if (Ts < td.cloud().constProps().TMin())
+    {
+        WarningIn
+        (
+            "void Foam::ThermoParcel<ParcelType>::calcSurfaceValues"
+            "("
+                "TrackData&, "
+                "const label, "
+                "const scalar, "
+                "scalar&, "
+                "scalar&, "
+                "scalar&, "
+                "scalar&, "
+                "scalar&"
+            ") const"
+        )   << "Limiting parcel surface temperature to "
+            << td.cloud().constProps().TMin() <<  nl << endl;
+
+        Ts = td.cloud().constProps().TMin();
+    }
 
     // Assuming thermo props vary linearly with T for small dT
-    scalar factor = td.TInterp().interpolate (this->position(), tetIs)/Ts;
+    const scalar TRatio = Tc_/Ts;
 
-    rhos = this->rhoc_*factor;
+    rhos = this->rhoc_*TRatio;
 
-    mus = td.muInterp().interpolate (this->position(), tetIs)/factor;
+    tetIndices tetIs = this->currentTetIndices();
+    mus = td.muInterp().interpolate(this->position(), tetIs)/TRatio;
 
     Pr = td.cloud().constProps().Pr();
     kappa = Cpc_*mus/Pr;
@@ -270,6 +306,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
             );
     }
 
+    htc = max(htc, ROOTVSMALL);
     const scalar As = this->areaS(d);
     scalar ap = Tc_ + Sh/As/htc;
     scalar bp = 6.0*(Sh/As + htc*(Tc_ - T));
@@ -284,7 +321,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
         ap = (ap + epsilon*Gc/(4.0*htc))/(1.0 + epsilon*sigma*pow3(T)/htc);
         bp += 6.0*(epsilon*(Gc/4.0 - sigma*pow4(T)));
     }
-    bp /= rho*d*Cp*(ap - T);
+    bp /= rho*d*Cp*(ap - T) + ROOTVSMALL;
 
     // Integrate to find the new parcel temperature
     IntegrationScheme<scalar>::integrationResult Tres =

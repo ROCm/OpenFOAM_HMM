@@ -101,6 +101,22 @@ void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection
     this->Cpc_ = (massCell*Cpc + addedMass*CpEff)/massCellNew;
 
     this->Tc_ += td.cloud().hsTrans()[cellI]/(this->Cpc_*massCellNew);
+
+    if (this->Tc_ < td.cloud().constProps().TMin())
+    {
+        WarningIn
+        (
+            "void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection"
+            "("
+                "TrackData&, "
+                "const scalar, "
+                "const label"
+            ")"
+        )   << "Limiting observed temperature in cell " << cellI << " to "
+            << td.cloud().constProps().TMin() <<  nl << endl;
+
+        this->Tc_ = td.cloud().constProps().TMin();
+    }
 }
 
 
@@ -124,14 +140,14 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
         return;
     }
 
+    const SLGThermo& thermo = td.cloud().thermo();
+
     // Far field carrier  molar fractions
     scalarField Xinf(td.cloud().thermo().carrier().species().size());
 
     forAll(Xinf, i)
     {
-        Xinf[i] =
-            td.cloud().thermo().carrier().Y(i)[cellI]
-           /td.cloud().thermo().carrier().W(i);
+        Xinf[i] = thermo.carrier().Y(i)[cellI]/thermo.carrier().W(i);
     }
     Xinf /= sum(Xinf);
 
@@ -153,7 +169,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
         const scalar Csi = Cs[i] + Xsff*Xinf[i]*CsTot;
 
         Xs[i] = (2.0*Csi + Xinf[i]*CsTot)/3.0;
-        Ys[i] = Xs[i]*td.cloud().thermo().carrier().W(i);
+        Ys[i] = Xs[i]*thermo.carrier().W(i);
     }
     Xs /= sum(Xs);
     Ys /= sum(Ys);
@@ -168,13 +184,14 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
 
     forAll(Ys, i)
     {
-        const scalar sqrtW = sqrt(td.cloud().thermo().carrier().W(i));
-        const scalar cbrtW = cbrt(td.cloud().thermo().carrier().W(i));
+        const scalar W = thermo.carrier().W(i);
+        const scalar sqrtW = sqrt(W);
+        const scalar cbrtW = cbrt(W);
 
-        rhos += Xs[i]*td.cloud().thermo().carrier().W(i);
-        mus += Ys[i]*sqrtW*td.cloud().thermo().carrier().mu(i, T);
-        kappa += Ys[i]*cbrtW*td.cloud().thermo().carrier().kappa(i, T);
-        Cps += Xs[i]*td.cloud().thermo().carrier().Cp(i, T);
+        rhos += Xs[i]*W;
+        mus += Ys[i]*sqrtW*thermo.carrier().mu(i, T);
+        kappa += Ys[i]*cbrtW*thermo.carrier().kappa(i, T);
+        Cps += Xs[i]*thermo.carrier().Cp(i, T);
 
         sumYiSqrtW += Ys[i]*sqrtW;
         sumYiCbrtW += Ys[i]*cbrtW;
@@ -547,7 +564,7 @@ Foam::ReactingParcel<ParcelType>::ReactingParcel
     const ReactingCloud<ParcelType>& c
 )
 :
-    ThermoParcel<ParcelType>(p),
+    ThermoParcel<ParcelType>(p, c),
     mass0_(p.mass0_),
     Y_(p.Y_),
     pc_(p.pc_)

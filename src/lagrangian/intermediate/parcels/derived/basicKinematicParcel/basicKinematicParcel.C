@@ -25,16 +25,6 @@ License
 
 #include "basicKinematicParcel.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    defineTypeNameAndDebug(basicKinematicParcel, 0);
-    defineParticleTypeNameAndDebug(basicKinematicParcel, 0);
-    defineParcelTypeNameAndDebug(basicKinematicParcel, 0);
-};
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::basicKinematicParcel::basicKinematicParcel

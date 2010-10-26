@@ -177,6 +177,22 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::cellValueSourceCorrection
     this->Cpc_ = (massCell*Cpc + addedMass*CpEff)/massCellNew;
 
     this->Tc_ += td.cloud().hsTrans()[cellI]/(this->Cpc_*massCellNew);
+
+    if (this->Tc_ < td.cloud().constProps().TMin())
+    {
+        WarningIn
+        (
+            "void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection"
+            "("
+                "TrackData&, "
+                "const scalar, "
+                "const label"
+            ")"
+        )   << "Limiting observed temperature in cell " << cellI << " to "
+            << td.cloud().constProps().TMin() <<  nl << endl;
+
+        this->Tc_ = td.cloud().constProps().TMin();
+    }
 }
 
 
