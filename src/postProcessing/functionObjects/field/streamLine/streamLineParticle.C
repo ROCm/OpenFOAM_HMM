@@ -36,6 +36,24 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+// Estimate dt to cross cell in a few steps
+Foam::scalar Foam::streamLineParticle::calcSubCycleDeltaT
+(
+    streamLineParticle::trackData& td,
+    const scalar dt,
+    const vector& U
+) const
+{
+    streamLineParticle testParticle(*this);
+    bool oldKeepParticle = td.keepParticle;
+    bool oldSwitchProcessor = td.switchProcessor;
+    scalar fraction = testParticle.trackToFace(position()+dt*U, td);
+    td.keepParticle = oldKeepParticle;
+    td.switchProcessor = oldSwitchProcessor;
+    // Adapt the dt to subdivide the trajectory into 4 substeps.
+    return dt *fraction/td.nSubCycle_;
+}
+
 Foam::vector Foam::streamLineParticle::interpolateFields
 (
     const streamLineParticle::trackData& td,
@@ -170,33 +188,55 @@ bool Foam::streamLineParticle::move(streamLineParticle::trackData& td)
     && lifeTime_ > 0
     )
     {
-        // TBD: implement subcycling so step through cells in more than
-        //      one step.
-
         // set the lagrangian time-step
         scalar dt = min(dtMax, tEnd);
 
-        // Store current position and sampled velocity.
-        --lifeTime_;
-        sampledPositions_.append(position());
-        vector U = interpolateFields(td, position(), cell());
-
-        if (!td.trackForward_)
+        // Cross cell in steps
+        for (label subIter = 0; subIter < td.nSubCycle_; subIter++)
         {
-            U = -U;
-        }
+            --lifeTime_;
 
-        dt *= trackToFace(position()+dt*U, td);
+            // Store current position and sampled velocity.
+            sampledPositions_.append(position());
+            vector U = interpolateFields(td, position(), cell());
 
-        tEnd -= dt;
-        stepFraction() = 1.0 - tEnd/deltaT;
+            if (!td.trackForward_)
+            {
+                U = -U;
+            }
 
-        if (tEnd <= ROOTVSMALL)
-        {
-            // Force removal
-            lifeTime_ = 0;
+
+            if (subIter == 0 && td.nSubCycle_ > 1)
+            {
+                // Adapt dt to cross cell in a few steps
+                dt = calcSubCycleDeltaT(td, dt, U);
+            }
+            else if (subIter == td.nSubCycle_-1)
+            {
+                // Do full step on last subcycle
+                dt = min(dtMax, tEnd);
+            }
+
+
+            scalar fraction = trackToFace(position()+dt*U, td);
+            dt *= fraction;
+
+            tEnd -= dt;
+            stepFraction() = 1.0 - tEnd/deltaT;
+
+            if (tEnd <= ROOTVSMALL)
+            {
+                // Force removal
+                lifeTime_ = 0;
+            }
+
+            if (!td.keepParticle || td.switchProcessor || lifeTime_ == 0)
+            {
+                break;
+            }
         }
     }
+
 
     if (!td.keepParticle || lifeTime_ == 0)
     {
