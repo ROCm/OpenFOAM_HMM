@@ -69,6 +69,10 @@ Foam::COxidationDiffusionLimitedRate<CloudType>::COxidationDiffusionLimitedRate
         )   << "Stoichiometry of reaction, Sb, must be greater than zero" << nl
             << exit(FatalError);
     }
+
+    const scalar YCloc = owner.composition().Y0(idSolid)[CsLocalId_];
+    const scalar YSolidTot = owner.composition().YMixture0()[idSolid];
+    Info<< "    C(s): particle mass fraction = " << YCloc*YSolidTot << endl;
 }
 
 

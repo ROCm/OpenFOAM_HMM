@@ -72,6 +72,10 @@ Foam::COxidationMurphyShaddix<CloudType>::COxidationMurphyShaddix
     WO2_ = owner.thermo().carrier().W(O2GlobalId_);
     const scalar WCO2 = owner.thermo().carrier().W(CO2GlobalId_);
     WC_ = WCO2 - WO2_;
+
+    const scalar YCloc = owner.composition().Y0(idSolid)[CsLocalId_];
+    const scalar YSolidTot = owner.composition().YMixture0()[idSolid];
+    Info<< "    C(s): particle mass fraction = " << YCloc*YSolidTot << endl;
 }
 
 

@@ -61,6 +61,10 @@ COxidationKineticDiffusionLimitedRate
     const scalar WCO2 = owner.thermo().carrier().W(CO2GlobalId_);
     WC_ = WCO2 - WO2_;
     HcCO2_ = owner.thermo().carrier().Hc(CO2GlobalId_);
+
+    const scalar YCloc = owner.composition().Y0(idSolid)[CsLocalId_];
+    const scalar YSolidTot = owner.composition().YMixture0()[idSolid];
+    Info<< "    C(s): particle mass fraction = " << YCloc*YSolidTot << endl;
 }
 
 
