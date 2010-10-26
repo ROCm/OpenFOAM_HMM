@@ -21,12 +21,22 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-function
-    Foam::fvc::smooth
+InNamespace
+    Foam::fvc
 
 Description
-    Function that uses smoothData to apply spatial smoothing of a
-    volume field using the FaceCellWave algorithm
+    Provides functions smooth spread and sweep which use the FaceCellWave
+    algorithm to smooth and redistribute the first field argument.
+
+    smooth: smooths the field by ensuring the values in neighbouring
+            cells are at least coeff* the cell value.
+
+    spread: redistributes the field by spreading the maximum value within
+            the region defined by the value and gradient of alpha.
+
+    sweep: redistributes the field by sweeping the maximum value where the
+           gradient of alpha is large away from that starting point of the
+           sweep.
 
 SourceFiles
     fvcSmooth.C

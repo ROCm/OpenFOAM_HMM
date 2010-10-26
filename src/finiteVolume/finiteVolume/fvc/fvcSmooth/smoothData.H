@@ -25,9 +25,9 @@ Class
     Foam::smoothData
 
 Description
-    Helper class used by the smoothVolField class
+    Helper class used by the fvc::smooth and fvc::spread functions.
 
-Files
+SourceFiles
     smoothData.H
     smoothDataI.H
 
