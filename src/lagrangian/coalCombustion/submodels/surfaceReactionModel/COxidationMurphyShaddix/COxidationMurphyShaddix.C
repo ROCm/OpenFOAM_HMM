@@ -139,9 +139,10 @@ Foam::scalar Foam::COxidationMurphyShaddix<CloudType>::calculate
         return 0.0;
     }
 
+    const SLGThermo& thermo = this->owner().thermo();
+
     // Cell carrier phase O2 species density [kg/m^3]
-    const scalar rhoO2 =
-        rhoc*this->owner().thermo().carrier().Y(O2GlobalId_)[cellI];
+    const scalar rhoO2 = rhoc*thermo.carrier().Y(O2GlobalId_)[cellI];
 
     if (rhoO2 < SMALL)
     {
@@ -220,11 +221,9 @@ Foam::scalar Foam::COxidationMurphyShaddix<CloudType>::calculate
     // Add to particle mass transfer
     dMassSolid[CsLocalId_] += dOmega*WC_;
 
-    const scalar HC =
-        this->owner().composition().solids().properties()[CsLocalId_].Hf()
-      + this->owner().composition().solids().properties()[CsLocalId_].Cp()*T;
-    const scalar HCO2 = this->owner().thermo().carrier().H(CO2GlobalId_, T);
-    const scalar HO2 = this->owner().thermo().carrier().H(O2GlobalId_, T);
+    const scalar HC = thermo.solids().properties()[CsLocalId_].H(T);
+    const scalar HCO2 = thermo.carrier().H(CO2GlobalId_, T);
+    const scalar HO2 = thermo.carrier().H(O2GlobalId_, T);
 
     // Heat of reaction
     return dOmega*(WC_*HC + WO2_*HO2 - (WC_ + WO2_)*HCO2);
