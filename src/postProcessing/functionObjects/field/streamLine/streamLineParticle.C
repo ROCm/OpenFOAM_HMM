@@ -51,8 +51,9 @@ Foam::scalar Foam::streamLineParticle::calcSubCycleDeltaT
     td.keepParticle = oldKeepParticle;
     td.switchProcessor = oldSwitchProcessor;
     // Adapt the dt to subdivide the trajectory into 4 substeps.
-    return dt *fraction/td.nSubCycle_;
+    return dt*fraction/td.nSubCycle_;
 }
+
 
 Foam::vector Foam::streamLineParticle::interpolateFields
 (
