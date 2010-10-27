@@ -33,13 +33,21 @@ License
 template<class CloudType>
 void Foam::ParticleTracks<CloudType>::write()
 {
-    if (this->owner().solution().writeThisStep())
+    if (cloudPtr_.valid())
     {
         cloudPtr_->write();
 
         if (resetOnWrite_)
         {
             cloudPtr_->clear();
+        }
+    }
+    else
+    {
+        if (debug)
+        {
+            Info<< "void Foam::ParticleTracks<CloudType>::write()" << nl
+                << "cloupPtr invalid" << endl;
         }
     }
 }
