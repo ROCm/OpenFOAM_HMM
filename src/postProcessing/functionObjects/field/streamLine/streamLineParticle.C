@@ -223,7 +223,7 @@ bool Foam::streamLineParticle::move
             dt *= fraction;
 
             tEnd -= dt;
-            stepFraction() = 1.0 - tEnd/deltaT;
+            stepFraction() = 1.0 - tEnd/trackTime;
 
             if (tEnd <= ROOTVSMALL)
             {
