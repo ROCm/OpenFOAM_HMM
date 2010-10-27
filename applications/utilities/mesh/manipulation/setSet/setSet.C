@@ -934,18 +934,31 @@ int main(int argc, char *argv[])
                 {
                     char* linePtr = readline("readline>");
 
-                    rawLine = string(linePtr);
-
-                    if (*linePtr)
+                    if (linePtr)
                     {
-                        add_history(linePtr);
-                        write_history(historyFile);
-                    }
+                        rawLine = string(linePtr);
 
-                    free(linePtr);   // readline uses malloc, not new.
+                        if (*linePtr)
+                        {
+                            add_history(linePtr);
+                            write_history(historyFile);
+                        }
+
+                        free(linePtr);   // readline uses malloc, not new.
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
 #               else
                 {
+                    if (!std::cin.good())
+                    {
+                        Info<< "End of cin" << endl;
+                        // No error.
+                        break;
+                    }
                     Info<< "Command>" << flush;
                     std::getline(std::cin, rawLine);
                 }

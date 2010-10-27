@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2010-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,63 +21,19 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InNamespace
-    Foam::fvc
-
-Description
-    Provides functions smooth spread and sweep which use the FaceCellWave
-    algorithm to smooth and redistribute the first field argument.
-
-    smooth: smooths the field by ensuring the values in neighbouring
-            cells are at least coeff* the cell value.
-
-    spread: redistributes the field by spreading the maximum value within
-            the region defined by the value and gradient of alpha.
-
-    sweep: redistributes the field by sweeping the maximum value where the
-           gradient of alpha is large away from that starting point of the
-           sweep.
-
-SourceFiles
-    fvcSmooth.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvcSmooth_H
-#define fvcSmooth_H
-
-#include "volFieldsFwd.H"
+#include "localEulerDdtScheme.H"
+#include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace fvc
+namespace fv
 {
-    void smooth
-    (
-        volScalarField& field,
-        const scalar coeff
-    );
-
-    void spread
-    (
-        volScalarField& field,
-        const volScalarField& alpha,
-        const label nLayers
-    );
-
-    void sweep
-    (
-        volScalarField& field,
-        const volScalarField& alpha,
-        const label nLayers
-    );
+    makeFvDdtScheme(localEulerDdtScheme)
 }
 }
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

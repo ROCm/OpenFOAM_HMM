@@ -72,6 +72,7 @@ public:
         const PtrList<interpolationCellPoint<vector> >& vvInterp_;
         const label UIndex_;
         const bool trackForward_;
+        const label nSubCycle_;
 
         DynamicList<vectorList>& allPositions_;
         List<DynamicList<scalarList> >& allScalars_;
@@ -87,6 +88,7 @@ public:
                 const PtrList<interpolationCellPoint<vector> >& vvInterp,
                 const label UIndex,
                 const bool trackForward,
+                const label nSubCycle,
                 DynamicList<List<point> >& allPositions,
                 List<DynamicList<scalarList> >& allScalars,
                 List<DynamicList<vectorList> >& allVectors
@@ -97,6 +99,7 @@ public:
                 vvInterp_(vvInterp),
                 UIndex_(UIndex),
                 trackForward_(trackForward),
+                nSubCycle_(nSubCycle),
                 allPositions_(allPositions),
                 allScalars_(allScalars),
                 allVectors_(allVectors)
@@ -122,6 +125,15 @@ private:
 
 
     // Private Member Functions
+
+        //- Estimate dt to cross from current face to next one in nSubCycle
+        //  steps.
+        scalar calcSubCycleDeltaT
+        (
+            streamLineParticle::trackData& td,
+            const scalar dt,
+            const vector& U
+        ) const;
 
         //- Interpolate all quantities; return interpolated velocity.
         vector interpolateFields

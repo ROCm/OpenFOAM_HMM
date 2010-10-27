@@ -255,8 +255,7 @@ void Foam::fvc::sweep
             changedFaces.append(facei);
             changedFacesInfo.append
             (
-                sweepData(max(field[own], field[nbr]),
-                Cf[facei])
+                sweepData(max(field[own], field[nbr]), Cf[facei])
             );
         }
     }

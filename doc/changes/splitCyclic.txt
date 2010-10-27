@@ -59,6 +59,14 @@ It will check if anything needs to be converted, backup the current file to .old
 and split any cyclic patchFields into two entries.
 
 
+Mesh converters
+---------------
+Most mesh formats use cyclics in a single patch (i.e. the old way).
+The converters have been adapted to use the patch 'oldCyclic' instead of
+'cyclic'. oldCyclic uses the 17x automatic ordering but writes 'type cyclic'
+so afterwards foamUpgradeCyclics can be run to upgrade.
+
+
 decomposePar
 ------------
 Decomposes cyclics into processorCyclic:
