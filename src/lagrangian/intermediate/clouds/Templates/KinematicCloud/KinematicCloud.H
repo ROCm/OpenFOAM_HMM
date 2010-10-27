@@ -418,6 +418,9 @@ public:
 
         // Access
 
+            //- Return a reference to the cloud copy
+            inline const KinematicCloud& cloudCopy() const;
+
             //- If the collision model controls the wall interaction,
             //  then the wall impact distance should be zero.
             //  Otherwise, it should be allowed to be the value from
@@ -615,7 +618,7 @@ public:
             ) const;
 
             //- Apply relaxation to (steady state) cloud sources
-            void relaxSources();
+            void relaxSources(const KinematicCloud<ParcelType>& cloudOldTime);
 
             //- Evolve the cloud
             void evolve();

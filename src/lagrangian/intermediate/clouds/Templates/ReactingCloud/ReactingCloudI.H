@@ -26,6 +26,14 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
+inline const ReactingCloud<ParcelType>&
+Foam::ReactingCloud<ParcelType>::cloudCopy() const
+{
+    return cloudCopyPtr_();
+}
+
+
+template<class ParcelType>
 inline const typename ParcelType::constantProperties&
 Foam::ReactingCloud<ParcelType>::constProps() const
 {
@@ -54,6 +62,15 @@ inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
 Foam::ReactingCloud<ParcelType>::rhoTrans(const label i)
 {
     return rhoTrans_[i];
+}
+
+
+template<class ParcelType>
+inline
+const Foam::PtrList<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >&
+Foam::ReactingCloud<ParcelType>::rhoTrans() const
+{
+    return rhoTrans_;
 }
 
 

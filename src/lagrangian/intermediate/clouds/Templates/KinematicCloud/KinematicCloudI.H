@@ -127,6 +127,14 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::resetSourcesOnStartup() const
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
+inline const KinematicCloud<ParcelType>&
+Foam::KinematicCloud<ParcelType>::cloudCopy() const
+{
+    return cloudCopyPtr_();
+}
+
+
+template<class ParcelType>
 inline bool Foam::KinematicCloud<ParcelType>::hasWallImpactDistance() const
 {
     return !collision().controlsWallInteraction();

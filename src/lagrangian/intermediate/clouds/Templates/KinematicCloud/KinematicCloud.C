@@ -172,7 +172,7 @@ void Foam::KinematicCloud<ParcelType>::solve
 
         evolveCloud(td);
 
-        td.cloud().relaxSources();
+        td.cloud().relaxSources(td.cloud().cloudCopy());
     }
 
     td.cloud().info();
@@ -545,13 +545,13 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     Cloud<ParcelType>(c.mesh(), name, c),
     kinematicCloud(),
     cloudCopyPtr_(NULL),
-    mesh_(c.mesh()),
+    mesh_(c.mesh_),
     particleProperties_(c.particleProperties_),
     solution_(c.solution_),
     constProps_(c.constProps_),
     subModelProperties_(c.subModelProperties_),
     rndGen_(c.rndGen_, true),
-    cellOccupancyPtr_(c.cellOccupancyPtr_->clone()),
+    cellOccupancyPtr_(NULL),
     rho_(c.rho_),
     U_(c.U_),
     mu_(c.mu_),
@@ -578,9 +578,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
                 IOobject::NO_WRITE,
                 false
             ),
-            mesh_,
-            c.UTrans_().dimensions(),
-            c.UTrans_().field()
+            c.UTrans_()
         )
     ),
     UCoeff_
@@ -722,9 +720,12 @@ void Foam::KinematicCloud<ParcelType>::relax
 
 
 template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::relaxSources()
+void Foam::KinematicCloud<ParcelType>::relaxSources
+(
+    const KinematicCloud<ParcelType>& cloudOldTime
+)
 {
-    this->relax(UTrans_(), cloudCopyPtr_->UTrans(), "U");
+    this->relax(UTrans_(), cloudOldTime.UTrans(), "U");
 }
 
 

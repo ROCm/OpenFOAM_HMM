@@ -187,6 +187,9 @@ public:
 
         // Access
 
+            //- Return a reference to the cloud copy
+            inline const ReactingMultiphaseCloud& cloudCopy() const;
+
             //- Return the constant properties
             inline const typename ParcelType::constantProperties&
                 constProps() const;

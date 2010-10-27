@@ -272,11 +272,14 @@ void Foam::ThermoCloud<ParcelType>::resetSourceTerms()
 
 
 template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::relaxSources()
+void Foam::ThermoCloud<ParcelType>::relaxSources
+(
+    const ThermoCloud<ParcelType>& cloudOldTime
+)
 {
-    KinematicCloud<ParcelType>::relaxSources();
+    KinematicCloud<ParcelType>::relaxSources(cloudOldTime);
 
-    this->relax(hsTrans_(), cloudCopyPtr_->hsTrans(), "hs");
+    this->relax(hsTrans_(), cloudOldTime.hsTrans(), "hs");
 }
 
 

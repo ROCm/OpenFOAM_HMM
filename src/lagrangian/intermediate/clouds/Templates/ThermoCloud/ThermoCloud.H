@@ -191,6 +191,9 @@ public:
 
         // Access
 
+            //- Return a reference to the cloud copy
+            inline const ThermoCloud& cloudCopy() const;
+
             //- Return the constant properties
             inline const typename ParcelType::constantProperties&
                 constProps() const;
@@ -278,7 +281,7 @@ public:
             void resetSourceTerms();
 
             //- Apply relaxation to (steady state) cloud sources
-            void relaxSources();
+            void relaxSources(const ThermoCloud<ParcelType>& cloudOldTime);
 
             //- Evolve the cloud
             void evolve();

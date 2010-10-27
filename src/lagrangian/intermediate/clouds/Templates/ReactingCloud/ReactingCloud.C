@@ -275,16 +275,19 @@ void Foam::ReactingCloud<ParcelType>::resetSourceTerms()
 
 
 template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::relaxSources()
+void Foam::ReactingCloud<ParcelType>::relaxSources
+(
+    const ReactingCloud<ParcelType>& cloudOldTime
+)
 {
-    ThermoCloud<ParcelType>::relaxSources();
+    typedef DimensionedField<scalar, volMesh> dsfType;
+
+    ThermoCloud<ParcelType>::relaxSources(cloudOldTime);
 
     forAll(rhoTrans_, fieldI)
     {
-        DimensionedField<scalar, volMesh>& rhoT =
-            rhoTrans_[fieldI];
-        const DimensionedField<scalar, volMesh>& rhoT0 =
-            cloudCopyPtr_->rhoTrans()[fieldI];
+        dsfType& rhoT = rhoTrans_[fieldI];
+        const dsfType& rhoT0 = cloudOldTime.rhoTrans()[fieldI];
         this->relax(rhoT, rhoT0, "rho");
     }
 }

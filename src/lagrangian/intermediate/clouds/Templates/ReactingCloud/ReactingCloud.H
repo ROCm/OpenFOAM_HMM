@@ -191,6 +191,9 @@ public:
 
         // Access
 
+            //- Return a reference to the cloud copy
+            inline const ReactingCloud& cloudCopy() const;
+
             //- Return the constant properties
             inline const typename ParcelType::constantProperties&
                 constProps() const;
@@ -214,6 +217,10 @@ public:
                     //- Return reference to mass source for field i
                     inline DimensionedField<scalar, volMesh>&
                         rhoTrans(const label i);
+
+                    //- Return const access to mass source fields
+                    inline const PtrList<DimensionedField<scalar, volMesh> >&
+                        rhoTrans() const;
 
                     //- Return reference to mass source fields
                     inline PtrList<DimensionedField<scalar, volMesh> >&
@@ -264,7 +271,7 @@ public:
             void resetSourceTerms();
 
             //- Apply relaxation to (steady state) cloud sources
-            void relaxSources();
+            void relaxSources(const ReactingCloud<ParcelType>& cloudOldTime);
 
             //- Evolve the cloud
             void evolve();
