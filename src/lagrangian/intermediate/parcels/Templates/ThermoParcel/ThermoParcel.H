@@ -151,6 +151,9 @@ public:
                 //- Specific heat capacity field interpolator
                 autoPtr<interpolation<scalar> > CpInterp_;
 
+                //- Radiation field interpolator
+                autoPtr<interpolation<scalar> > GInterp_;
+
 
     public:
 
@@ -180,6 +183,10 @@ public:
             //- Return const access to the interpolator for continuous
             //  phase specific heat capacity field
             inline const interpolation<scalar>& CpInterp() const;
+
+            //- Return const access to the interpolator for continuous
+            //  radiation field
+            inline const interpolation<scalar>& GInterp() const;
     };
 
 

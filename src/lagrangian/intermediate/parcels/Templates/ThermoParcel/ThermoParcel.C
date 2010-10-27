@@ -312,9 +312,8 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     scalar bp = 6.0*(Sh/As + htc*(Tc_ - T));
     if (td.cloud().radiation())
     {
-        const scalarField& G =
-            td.cloud().mesh().objectRegistry::lookupObject<volScalarField>("G");
-        const scalar Gc = G[cellI];
+        tetIndices tetIs = this->currentTetIndices();
+        const scalar Gc = td.GInterp().interpolate(this->position(), tetIs);
         const scalar sigma = physicoChemical::sigma.value();
         const scalar epsilon = td.cloud().constProps().epsilon0();
 

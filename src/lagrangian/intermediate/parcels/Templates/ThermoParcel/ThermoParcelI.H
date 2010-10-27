@@ -77,8 +77,21 @@ inline Foam::ThermoParcel<ParcelType>::trackData::trackData
             cloud.solution().interpolationSchemes(),
             Cp_
         )
-    )
-{}
+    ),
+    GInterp_(NULL)
+{
+    if (cloud.radiation())
+    {
+        GInterp_.reset
+        (
+            interpolation<scalar>::New
+            (
+                cloud.solution().interpolationSchemes(),
+                cloud.mesh().objectRegistry::lookupObject<volScalarField>("G")
+            ).ptr()
+        );
+    }
+}
 
 
 template<class ParcelType>
@@ -223,6 +236,24 @@ inline const Foam::interpolation<Foam::scalar>&
 Foam::ThermoParcel<ParcelType>::trackData::CpInterp() const
 {
     return CpInterp_();
+}
+
+
+template<class ParcelType>
+inline const Foam::interpolation<Foam::scalar>&
+Foam::ThermoParcel<ParcelType>::trackData::GInterp() const
+{
+    if (!GInterp_.valid())
+    {
+        FatalErrorIn
+        (
+            "inline const Foam::interpolation<Foam::scalar>&"
+            "Foam::ThermoParcel<ParcelType>::trackData::GInterp() const"
+        )   << "Radiation G interpolation object not set"
+            << abort(FatalError);
+    }
+
+    return GInterp_();
 }
 
 
