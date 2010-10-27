@@ -280,7 +280,7 @@ void Foam::KinematicCloud<ParcelType>::evolveCloud
 
         this->injection().injectSteadyState(td, solution_.maxTrackTime());
 
-        td.part() = ParcelType::trackData::tpVelocityHalfStep;
+        td.part() = ParcelType::trackData::tpLinearTrack;
         Cloud<ParcelType>::move(td, solution_.maxTrackTime());
     }
 }
