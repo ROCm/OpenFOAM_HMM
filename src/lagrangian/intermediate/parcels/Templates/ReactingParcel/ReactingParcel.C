@@ -489,13 +489,13 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     // Limit phase change mass by availability of each specie
     dMassPC = min(mass*YPhase*YComponents, dMassPC);
 
-    scalar dMassTot = sum(dMassPC);
+    const scalar dMassTot = sum(dMassPC);
 
     // Add to cumulative phase change mass
     td.cloud().addToMassPhaseChange(this->nParticle_*dMassTot);
 
     // Average molecular weight of carrier mix - assumes perfect gas
-    scalar Wc = this->rhoc_*specie::RR*this->Tc_/this->pc_;
+    const scalar Wc = this->rhoc_*specie::RR*this->Tc_/this->pc_;
 
     forAll(YComponents, i)
     {
