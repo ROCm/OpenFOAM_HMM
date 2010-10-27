@@ -243,6 +243,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
 )
 :
     Particle<ParcelType>(p),
+    active_(p.active_),
     typeId_(p.typeId_),
     nParticle_(p.nParticle_),
     d_(p.d_),
@@ -270,6 +271,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
 )
 :
     Particle<ParcelType>(p, c),
+    active_(p.active_),
     typeId_(p.typeId_),
     nParticle_(p.nParticle_),
     d_(p.d_),
@@ -391,6 +393,20 @@ bool Foam::KinematicParcel<ParcelType>::move
 
     return td.keepParticle;
 }
+
+
+template<class ParcelType>
+template<class TrackData>
+void Foam::KinematicParcel<ParcelType>::hitFace(TrackData& td)
+{
+    ParcelType& p = static_cast<ParcelType&>(*this);
+    td.cloud().postProcessing().postFace(p);
+}
+
+
+template<class ParcelType>
+void Foam::KinematicParcel<ParcelType>::hitFace(int& td)
+{}
 
 
 template<class ParcelType>

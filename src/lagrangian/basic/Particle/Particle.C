@@ -499,6 +499,9 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
 
     } while (faceI_ < 0);
 
+    ParticleType& p = static_cast<ParticleType&>(*this);
+    p.hitFace(td);
+
     if (cloud_.internalFace(faceI_))
     {
         // Change tet ownership because a tri face has been crossed,
@@ -527,8 +530,6 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
     }
     else
     {
-        ParticleType& p = static_cast<ParticleType&>(*this);
-
         label origFaceI = faceI_;
         label patchI = patch(faceI_);
 
@@ -641,9 +642,7 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
                 vector nHat = wallTri.normal();
                 nHat /= mag(nHat);
 
-                const ParticleType& p = static_cast<const ParticleType&>(*this);
-
-                scalar r = p.wallImpactDistance(nHat);
+                const scalar r = p.wallImpactDistance(nHat);
 
                 // Removing (approximately) the wallTri normal
                 // component of the existing correction, to avoid the
@@ -691,6 +690,12 @@ void Foam::Particle<ParticleType>::transformProperties(const tensor&)
 
 template<class ParticleType>
 void Foam::Particle<ParticleType>::transformProperties(const vector&)
+{}
+
+
+template<class ParticleType>
+template<class TrackData>
+void Foam::Particle<ParticleType>::hitFace(TrackData&)
 {}
 
 

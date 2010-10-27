@@ -581,6 +581,14 @@ public:
 
         // Patch interactions
 
+            //- Overridable function to handle the particle hitting a face
+            //  without trackData
+            void hitFace(int& td);
+
+            //- Overridable function to handle the particle hitting a face
+            template<class TrackData>
+            void hitFace(TrackData& td);
+
             //- Overridable function to handle the particle hitting a patch
             //  Executed before other patch-hitting functions
             template<class TrackData>
