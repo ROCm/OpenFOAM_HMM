@@ -102,7 +102,7 @@ protected:
         // Global injection properties
 
             //- Start of injection [s]
-            const scalar SOI_;
+            scalar SOI_;
 
             //- Total volume of particles introduced by this injector [m^3]
             //  - scaled to ensure massTotal is achieved

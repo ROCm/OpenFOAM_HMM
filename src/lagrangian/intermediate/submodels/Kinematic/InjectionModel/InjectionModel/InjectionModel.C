@@ -255,7 +255,10 @@ bool Foam::InjectionModel<CloudType>::findCellAtPosition
                 "Foam::InjectionModel<CloudType>::findCellAtPosition"
                 "("
                     "label&, "
-                    "vector&"
+                    "label&, "
+                    "label&, "
+                    "vector&, "
+                    "bool"
                 ")"
             )   << "Cannot find parcel injection cell. "
                 << "Parcel position = " << p0 << nl
@@ -386,9 +389,9 @@ Foam::InjectionModel<CloudType>::InjectionModel
 )
 :
     SubModelBase<CloudType>(owner, dict, type),
-    SOI_(readScalar(this->coeffDict().lookup("SOI"))),
+    SOI_(0.0),
     volumeTotal_(0.0),
-    massTotal_(readScalar(this->coeffDict().lookup("massTotal"))),
+    massTotal_(0.0),
     massInjected_(0.0),
     nInjections_(0),
     parcelsAddedTotal_(0),
@@ -402,6 +405,16 @@ Foam::InjectionModel<CloudType>::InjectionModel
     //   due to lazy evaluation of valid mesh dimensions
     Info<< "    Constructing " << owner.mesh().nGeometricD() << "-D injection"
         << endl;
+
+    if (owner.solution().transient())
+    {
+        this->coeffDict().lookup("massTotal") >> massTotal_;
+        this->coeffDict().lookup("SOI") >> SOI_;
+    }
+    else
+    {
+        this->coeffDict().lookup("massFlowRate") >> massTotal_;
+    }
 
     const word parcelBasisType = this->coeffDict().lookup("parcelBasisType");
 
