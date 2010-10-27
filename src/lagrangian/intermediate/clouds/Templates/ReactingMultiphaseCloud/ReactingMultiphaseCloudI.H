@@ -26,7 +26,7 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
-inline const ReactingMultiphaseCloud<ParcelType>&
+inline const Foam::ReactingMultiphaseCloud<ParcelType>&
 Foam::ReactingMultiphaseCloud<ParcelType>::cloudCopy() const
 {
     return cloudCopyPtr_();

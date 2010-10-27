@@ -30,7 +30,7 @@ using namespace Foam::constant;
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
-inline const ThermoCloud<ParcelType>&
+inline const Foam::ThermoCloud<ParcelType>&
 Foam::ThermoCloud<ParcelType>::cloudCopy() const
 {
     return cloudCopyPtr_();

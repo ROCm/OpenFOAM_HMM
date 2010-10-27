@@ -127,7 +127,7 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::resetSourcesOnStartup() const
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
-inline const KinematicCloud<ParcelType>&
+inline const Foam::KinematicCloud<ParcelType>&
 Foam::KinematicCloud<ParcelType>::cloudCopy() const
 {
     return cloudCopyPtr_();

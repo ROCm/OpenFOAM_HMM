@@ -26,7 +26,7 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
-inline const ReactingCloud<ParcelType>&
+inline const Foam::ReactingCloud<ParcelType>&
 Foam::ReactingCloud<ParcelType>::cloudCopy() const
 {
     return cloudCopyPtr_();
@@ -169,34 +169,9 @@ Foam::ReactingCloud<ParcelType>::Srho(const label i) const
     {
         scalarField& rhoi = tRhoi();
         rhoi = rhoTrans_[i]/(this->db().time().deltaT()*this->mesh().V());
+    }
 
-        return tRhoi;
-    }
-    else
-    {
-        return tmp<DimensionedField<scalar, volMesh> >
-        (
-            new DimensionedField<scalar, volMesh>
-            (
-                IOobject
-                (
-                    this->name() + "rhoTrans",
-                    this->db().time().timeName(),
-                    this->db(),
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                this->mesh(),
-                dimensionedScalar
-                (
-                    "zero",
-                    rhoTrans_[0].dimensions()/dimTime/dimVolume,
-                    0.0
-                )
-            )
-        );
-    }
+    return tRhoi;
 }
 
 
@@ -218,7 +193,12 @@ Foam::ReactingCloud<ParcelType>::Srho() const
                 false
             ),
             this->mesh(),
-            dimensionedScalar("zero", rhoTrans_[0].dimensions(), 0.0)
+            dimensionedScalar
+            (
+                "zero",
+                rhoTrans_[0].dimensions()/dimTime/dimVolume,
+                0.0
+            )
         )
     );
 
@@ -230,12 +210,10 @@ Foam::ReactingCloud<ParcelType>::Srho() const
             sourceField += rhoTrans_[i];
         }
 
-        return trhoTrans/(this->db().time().deltaT()*this->mesh().V());
+        sourceField /= this->db().time().deltaT()*this->mesh().V();
     }
-    else
-    {
-        return trhoTrans;
-    }
+
+    return trhoTrans;
 }
 
 
@@ -245,27 +223,28 @@ Foam::ReactingCloud<ParcelType>::Srho(volScalarField& rho) const
 {
     if (this->solution().sourceActive())
     {
+        tmp<volScalarField> trhoTrans
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    this->name() + "rhoTrans",
+                    this->db().time().timeName(),
+                    this->db(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                this->mesh(),
+                dimensionedScalar("zero", dimMass/dimTime/dimVolume, 0.0)
+            )
+        );
+
+        scalarField& sourceField = trhoTrans();
+
         if (this->solution().semiImplicit("rho"))
         {
-            tmp<volScalarField> trhoTrans
-            (
-                new volScalarField
-                (
-                    IOobject
-                    (
-                        this->name() + "rhoTrans",
-                        this->db().time().timeName(),
-                        this->db(),
-                        IOobject::NO_READ,
-                        IOobject::NO_WRITE,
-                        false
-                    ),
-                    this->mesh(),
-                    dimensionedScalar("zero", dimMass/dimTime/dimVolume, 0.0)
-                )
-            );
-
-            scalarField& sourceField = trhoTrans();
 
             forAll(rhoTrans_, i)
             {
@@ -279,26 +258,6 @@ Foam::ReactingCloud<ParcelType>::Srho(volScalarField& rho) const
         {
             tmp<fvScalarMatrix> tfvm(new fvScalarMatrix(rho, dimMass/dimTime));
             fvScalarMatrix& fvm = tfvm();
-
-            tmp<volScalarField> trhoTrans
-            (
-                new volScalarField
-                (
-                    IOobject
-                    (
-                        this->name() + "rhoTrans",
-                        this->db().time().timeName(),
-                        this->db(),
-                        IOobject::NO_READ,
-                        IOobject::NO_WRITE,
-                        false
-                    ),
-                    this->mesh(),
-                    dimensionedScalar("zero", dimMass, 0.0)
-                )
-            );
-
-            scalarField& sourceField = trhoTrans();
 
             forAll(rhoTrans_, i)
             {
