@@ -1,4 +1,4 @@
-Info<< "Reading chemistry properties\n" << endl;
+// Info<< "Reading chemistry properties\n" << endl;
 
 IOdictionary chemistryProperties
 (

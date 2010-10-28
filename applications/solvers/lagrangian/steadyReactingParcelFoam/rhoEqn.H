@@ -40,6 +40,9 @@ Description
     );
 
     rhoEqn.solve();
+
+    Info<< "rho min/max = " << min(rho).value() << ", " << max(rho).value()
+        << endl;
 }
 
 // ************************************************************************* //

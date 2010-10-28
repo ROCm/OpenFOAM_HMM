@@ -1,22 +1,23 @@
+if (chemistry.chemistry())
 {
     Info<< "Solving chemistry" << endl;
 
-    chemistry.solve
-    (
-        runTime.value() - runTime.deltaTValue(),
-        runTime.deltaTValue()
-    );
+    // update reaction rates
+    chemistry.calculate();
 
     // turbulent time scale
     if (turbulentReaction)
     {
-        DimensionedField<scalar, volMesh> tk =
-            Cmix*sqrt(turbulence->muEff()/rho/turbulence->epsilon());
-        DimensionedField<scalar, volMesh> tc =
-            chemistry.tc()().dimensionedInternalField();
+        typedef DimensionedField<scalar, volMesh> dsfType;
 
-        // Chalmers PaSR model
-        kappa = (runTime.deltaT() + tc)/(runTime.deltaT() + tc + tk);
+        const dimensionedScalar e0("e0", sqr(dimLength)/pow3(dimTime), SMALL);
+
+        const dsfType tk =
+            Cmix*sqrt(turbulence->muEff()/rho/(turbulence->epsilon() + e0));
+
+        const dsfType tc = chemistry.tc()().dimensionedInternalField();
+
+        kappa = tc/(tc + tk);
     }
     else
     {

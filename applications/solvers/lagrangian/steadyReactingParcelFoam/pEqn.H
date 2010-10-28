@@ -43,6 +43,11 @@
         }
     }
 
+    // Explicitly relax pressure for momentum corrector
+    p.relax();
+
+    Info<< "p min/max = " << min(p).value() << ", " << max(p).value() << endl;
+
     // Second part of thermodynamic density update
     thermo.rho() += psi*p;
 
