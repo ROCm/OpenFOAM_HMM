@@ -160,7 +160,7 @@ void Foam::KinematicCloud<ParcelType>::solve
 {
     if (solution_.transient())
     {
-        preEvolve();
+        td.cloud().preEvolve();
 
         evolveCloud(td);
     }
@@ -168,7 +168,7 @@ void Foam::KinematicCloud<ParcelType>::solve
     {
         td.cloud().storeState();
 
-        preEvolve();
+        td.cloud().preEvolve();
 
         evolveCloud(td);
 
@@ -177,7 +177,7 @@ void Foam::KinematicCloud<ParcelType>::solve
 
     td.cloud().info();
 
-    postEvolve();
+    td.cloud().postEvolve();
 
     if (solution_.steadyState())
     {
@@ -250,7 +250,7 @@ void Foam::KinematicCloud<ParcelType>::evolveCloud
 {
     if (solution_.coupled())
     {
-        resetSourceTerms();
+        td.cloud().resetSourceTerms();
     }
 
     if (solution_.transient())
