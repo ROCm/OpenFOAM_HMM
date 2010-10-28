@@ -78,6 +78,9 @@ public:
 
     // Member Functions
 
+        //- Flag to indicate whether model activates heat transfer model
+        virtual bool active() const;
+
         //- Nusselt number
         virtual scalar Nu(const scalar, const scalar) const;
 
