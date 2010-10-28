@@ -69,7 +69,8 @@ Foam::Analytical<Type>::integrate
 
     const scalar expTerm = exp(min(50, -beta*dt));
 
-    retValue.average() = alpha + (phi - alpha)*(1 - expTerm)/(beta*dt);
+    retValue.average() =
+        alpha + (phi - alpha)*(1 - expTerm)/(beta*dt + ROOTVSMALL);
     retValue.value() =  alpha + (phi - alpha)*expTerm;
 
     return retValue;
