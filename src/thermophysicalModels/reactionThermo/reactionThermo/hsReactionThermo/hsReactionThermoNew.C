@@ -94,8 +94,6 @@ Foam::autoPtr<Foam::hsReactionThermo> Foam::hsReactionThermo::NewType
         ).lookup("thermoType")
     );
 
-    Info<< "Selecting thermodynamics package " << modelType << endl;
-
     if (modelType.find(thermoType) == string::npos)
     {
         wordList allModels = fvMeshConstructorTablePtr_->sortedToc();
@@ -112,8 +110,8 @@ Foam::autoPtr<Foam::hsReactionThermo> Foam::hsReactionThermo::NewType
         (
             "autoPtr<hsReactionThermo> hsReactionThermo::NewType"
             "("
-            "const fvMesh&, "
-            "const word&"
+                "const fvMesh&, "
+                "const word&"
             ")"
         )   << "Inconsistent thermo package selected:" << nl << nl
             << modelType << nl << nl << "Please select a "
