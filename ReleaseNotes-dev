@@ -91,6 +91,9 @@
 *** *New* ptscotch decomposition method
 *** *Updated* particle tracking algorithm
 *** *Updated* split cyclics into two separate patches. See doc/changed/splitCyclics.txt
+  * *Updated* interpolation (volPointInterpolation) now works without the
+    globalPointPatch. Moving mesh cases can now be run non-parallel and
+    continued in parallel and reconstructed without any limitation.
 *** *New* compact binary I/O for faces and cells. This speeds up reading/writing meshes in binary.
 *** *Updated* runTimeModifiable
     + on linux uses inotify instead of time stamps - more efficient for large
