@@ -19,6 +19,21 @@
         piso.lookupOrDefault<label>("nAlphaSpreadIter", 1)
     );
 
+    scalar alphaSpreadDiff
+    (
+        piso.lookupOrDefault<label>("alphaSpreadDiff", 0.2)
+    );
+
+    scalar alphaSpreadMax
+    (
+        piso.lookupOrDefault<label>("alphaSpreadMax", 0.99)
+    );
+
+    scalar alphaSpreadMin
+    (
+        piso.lookupOrDefault<label>("alphaSpreadMin", 0.01)
+    );
+
     label nAlphaSweepIter
     (
         piso.lookupOrDefault<label>("nAlphaSweepIter", 5)
@@ -36,30 +51,31 @@
 
     volScalarField rDeltaT0 = rDeltaT;
 
-    // Set the reciprocal time-step using an effective maximum Courant number
-    rDeltaT = max
+    // Set the reciprocal time-step from the local Courant number
+    rDeltaT.dimensionedInternalField() = max
     (
         1/dimensionedScalar("maxDeltaT", dimTime, maxDeltaT),
-        fvc::surfaceSum
-        (
-            mag(rhoPhi)*mesh.deltaCoeffs()/(maxCo*mesh.magSf())
-        )/rho
+        fvc::surfaceSum(mag(rhoPhi))().dimensionedInternalField()
+       /((2*maxCo)*mesh.V()*rho.dimensionedInternalField())
     );
 
-    // Limit the time-step further in the region of the interface
+    if (maxAlphaCo < maxCo)
     {
-        surfaceScalarField alphaf = fvc::interpolate(alpha1);
-
-        surfaceScalarField SfUfbyDelta =
-            pos(alphaf - 0.01)*pos(0.99 - alphaf)
-           *mesh.surfaceInterpolation::deltaCoeffs()*mag(phi);
-
-        rDeltaT = max
+        // Further limit the reciprocal time-step
+        // in the vicinity of the interface
+        rDeltaT.dimensionedInternalField() = max
         (
-            rDeltaT,
-            fvc::surfaceSum(mag(SfUfbyDelta/(maxAlphaCo*mesh.magSf())))
+            rDeltaT.dimensionedInternalField(),
+            pos(alpha1.dimensionedInternalField() - 0.01)
+           *pos(0.99 - alpha1.dimensionedInternalField())
+           *fvc::surfaceSum(mag(phi))().dimensionedInternalField()
+           /((2*maxAlphaCo)*mesh.V())
         );
     }
+
+    // Update tho boundary values of the reciprocal time-step
+    rDeltaT.correctBoundaryConditions();
+
     Info<< "Flow time scale min/max = "
         << gMin(1/rDeltaT.internalField())
         << ", " << gMax(1/rDeltaT.internalField()) << endl;
@@ -71,12 +87,20 @@
 
     if (nAlphaSpreadIter > 0)
     {
-        fvc::spread(rDeltaT, alpha1, nAlphaSpreadIter);
+        fvc::spread
+        (
+            rDeltaT,
+            alpha1,
+            nAlphaSpreadIter,
+            alphaSpreadDiff,
+            alphaSpreadMax,
+            alphaSpreadMin
+        );
     }
 
     if (nAlphaSweepIter > 0)
     {
-        fvc::sweep(rDeltaT, alpha1, nAlphaSweepIter);
+        fvc::sweep(rDeltaT, alpha1, nAlphaSweepIter, alphaSpreadDiff);
     }
 
     Info<< "Flow time scale min/max = "

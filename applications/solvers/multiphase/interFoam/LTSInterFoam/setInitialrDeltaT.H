@@ -14,7 +14,8 @@ volScalarField rDeltaT
         IOobject::AUTO_WRITE
     ),
     mesh,
-    1/dimensionedScalar("maxDeltaT", dimTime, maxDeltaT)
+    1/dimensionedScalar("maxDeltaT", dimTime, maxDeltaT),
+    zeroGradientFvPatchScalarField::typeName
 );
 
 volScalarField rSubDeltaT
