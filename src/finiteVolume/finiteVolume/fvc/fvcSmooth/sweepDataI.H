@@ -29,7 +29,7 @@ License
 
 inline bool Foam::sweepData::update
 (
-    const sweepData::sweepData& svf,
+    const sweepData& svf,
     const point& position,
     const scalar tol
 )

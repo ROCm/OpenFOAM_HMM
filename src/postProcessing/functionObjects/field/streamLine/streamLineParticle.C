@@ -51,8 +51,9 @@ Foam::scalar Foam::streamLineParticle::calcSubCycleDeltaT
     td.keepParticle = oldKeepParticle;
     td.switchProcessor = oldSwitchProcessor;
     // Adapt the dt to subdivide the trajectory into 4 substeps.
-    return dt *fraction/td.nSubCycle_;
+    return dt*fraction/td.nSubCycle_;
 }
+
 
 Foam::vector Foam::streamLineParticle::interpolateFields
 (
@@ -191,8 +192,12 @@ bool Foam::streamLineParticle::move(streamLineParticle::trackData& td)
         // set the lagrangian time-step
         scalar dt = min(dtMax, tEnd);
 
-        // Cross cell in steps
-        for (label subIter = 0; subIter < td.nSubCycle_; subIter++)
+        // Cross cell in steps:
+        // - at subiter 0 calculate dt to cross cell in nSubCycle steps
+        // - at the last subiter do all of the remaining track
+        // - do a few more subiters than nSubCycle since velocity might
+        //   be decreasing
+        for (label subIter = 0; subIter < 2*td.nSubCycle_; subIter++)
         {
             --lifeTime_;
 
