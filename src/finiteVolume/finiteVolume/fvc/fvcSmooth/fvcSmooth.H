@@ -28,15 +28,18 @@ Description
     Provides functions smooth spread and sweep which use the FaceCellWave
     algorithm to smooth and redistribute the first field argument.
 
-    smooth: smooths the field by ensuring the values in neighbouring
-            cells are at least coeff* the cell value.
+    smooth: smooths the field by ensuring the values in neighbouring cells are
+            at least coeff* the cell value.
 
-    spread: redistributes the field by spreading the maximum value within
-            the region defined by the value and gradient of alpha.
+    spread: redistributes the field by spreading the maximum value within the
+            region defined by the value (being between alphaMax and alphaMin)
+            and gradient of alpha (where the difference between the values in
+            neighbouring cells is larger than alphaDiff).
 
     sweep: redistributes the field by sweeping the maximum value where the
-           gradient of alpha is large away from that starting point of the
-           sweep.
+           gradient of alpha is large (where the difference between the values
+           in neighbouring cells is larger than alphaDiff) away from that
+           starting point of the sweep.
 
 SourceFiles
     fvcSmooth.C
@@ -64,14 +67,18 @@ namespace fvc
     (
         volScalarField& field,
         const volScalarField& alpha,
-        const label nLayers
+        const label nLayers,
+        const scalar alphaDiff = 0.2,
+        const scalar alphaMax = 0.99,
+        const scalar alphaMin = 0.01
     );
 
     void sweep
     (
         volScalarField& field,
         const volScalarField& alpha,
-        const label nLayers
+        const label nLayers,
+        const scalar alphaDiff = 0.2
     );
 }
 }

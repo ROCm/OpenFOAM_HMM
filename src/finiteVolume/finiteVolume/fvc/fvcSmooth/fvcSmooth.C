@@ -123,7 +123,10 @@ void Foam::fvc::spread
 (
     volScalarField& field,
     const volScalarField& alpha,
-    const label nLayers
+    const label nLayers,
+    const scalar alphaDiff,
+    const scalar alphaMax,
+    const scalar alphaMin
 )
 {
     const fvMesh& mesh = field.mesh();
@@ -153,11 +156,11 @@ void Foam::fvc::spread
 
         if
         (
-            (alpha[own] > 0.01 && alpha[own] < 0.99)
-         || (alpha[nbr] > 0.01 && alpha[nbr] < 0.99)
+            (alpha[own] > alphaMin && alpha[own] < alphaMax)
+         || (alpha[nbr] > alphaMin && alpha[nbr] < alphaMax)
         )
         {
-            if (mag(alpha[own] - alpha[nbr]) > 0.2)
+            if (mag(alpha[own] - alpha[nbr]) > alphaDiff)
             {
                 changedFaces.append(facei);
                 changedFacesInfo.append
@@ -185,11 +188,14 @@ void Foam::fvc::spread
 
                 if
                 (
-                    (alpha[own] > 0.01 && alpha[own] < 0.99)
-                 || (alphapn[patchFacei] > 0.01 && alphapn[patchFacei] < 0.99)
+                    (alpha[own] > alphaMin && alpha[own] < alphaMax)
+                 || (
+                        alphapn[patchFacei] > alphaMin
+                     && alphapn[patchFacei] < alphaMax
+                    )
                 )
                 {
-                    if (mag(alpha[own] - alphapn[patchFacei]) > 0.2)
+                    if (mag(alpha[own] - alphapn[patchFacei]) > alphaDiff)
                     {
                         changedFaces.append(facei);
                         changedFacesInfo.append(smoothData(field[own]));
@@ -227,7 +233,8 @@ void Foam::fvc::sweep
 (
     volScalarField& field,
     const volScalarField& alpha,
-    const label nLayers
+    const label nLayers,
+    const scalar alphaDiff
 )
 {
     const fvMesh& mesh = field.mesh();
@@ -250,7 +257,7 @@ void Foam::fvc::sweep
         const label own = owner[facei];
         const label nbr = neighbour[facei];
 
-        if (mag(alpha[own] - alpha[nbr]) > 0.2)
+        if (mag(alpha[own] - alpha[nbr]) > alphaDiff)
         {
             changedFaces.append(facei);
             changedFacesInfo.append
@@ -275,7 +282,7 @@ void Foam::fvc::sweep
                 scalarField alphapn =
                     alpha.boundaryField()[patchi].patchNeighbourField();
 
-                if (mag(alpha[own] - alphapn[patchFacei]) > 0.2)
+                if (mag(alpha[own] - alphapn[patchFacei]) > alphaDiff)
                 {
                     changedFaces.append(facei);
                     changedFacesInfo.append
