@@ -37,20 +37,14 @@ Foam::scalar Foam::compressibleCourantNo
     scalar CoNum = 0.0;
     scalar meanCoNum = 0.0;
 
-    //- Can have fluid domains with 0 cells so do not test.
-    //if (mesh.nInternalFaces())
-    {
-        surfaceScalarField SfUfbyDelta =
-            mesh.surfaceInterpolation::deltaCoeffs()
-          * mag(phi)
-          / fvc::interpolate(rho);
+    scalarField sumPhi =
+        fvc::surfaceSum(mag(phi))().internalField()
+       /rho.internalField();
 
-        CoNum = max(SfUfbyDelta/mesh.magSf())
-            .value()*runTime.deltaT().value();
+    CoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
 
-        meanCoNum = (sum(SfUfbyDelta)/sum(mesh.magSf()))
-            .value()*runTime.deltaT().value();
-    }
+    meanCoNum =
+        0.5*(gSum(sumPhi)/gSum(mesh.V().field()))*runTime.deltaTValue();
 
     Info<< "Region: " << mesh.name() << " Courant Number mean: " << meanCoNum
         << " max: " << CoNum << endl;

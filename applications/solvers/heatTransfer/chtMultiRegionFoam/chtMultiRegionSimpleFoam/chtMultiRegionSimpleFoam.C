@@ -34,7 +34,6 @@ Description
 #include "turbulenceModel.H"
 #include "fixedGradientFvPatchFields.H"
 #include "regionProperties.H"
-#include "compressibleCourantNo.H"
 #include "basicSolidThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
