@@ -22,19 +22,28 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    chtMultiRegionSimpleFoam
+    interFoam
 
 Description
-    Steady-state version of chtMultiRegionFoam
+    Solver for 2 incompressible, isothermal immiscible fluids using a VOF
+    (volume of fluid) phase-fraction based interface capturing approach.
+
+    The momentum and other fluid properties are of the "mixture" and a single
+    momentum equation is solved.
+
+    Turbulence modelling is generic, i.e.  laminar, RAS or LES may be selected.
+
+    For a two-fluid approach see twoPhaseEulerFoam.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "basicPsiThermo.H"
+#include "MULES.H"
+#include "subCycle.H"
+#include "interfaceProperties.H"
+#include "twoPhaseMixture.H"
 #include "turbulenceModel.H"
-#include "fixedGradientFvPatchFields.H"
-#include "regionProperties.H"
-#include "basicSolidThermo.H"
+#include "fvcSmooth.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,38 +51,38 @@ int main(int argc, char *argv[])
 {
     #include "setRootCase.H"
     #include "createTime.H"
-
-    regionProperties rp(runTime);
-
-    #include "createFluidMeshes.H"
-    #include "createSolidMeshes.H"
-
-    #include "createFluidFields.H"
-    #include "createSolidFields.H"
-
+    #include "createMesh.H"
+    #include "readPISOControls.H"
     #include "initContinuityErrs.H"
+    #include "createFields.H"
+    #include "correctPhi.H"
+    #include "CourantNo.H"
+    #include "setInitialrDeltaT.H"
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    while (runTime.loop())
+    Info<< "\nStarting time loop\n" << endl;
+
+    while (runTime.run())
     {
+        #include "readPISOControls.H"
+
+        runTime++;
+
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        forAll(fluidRegions, i)
-        {
-            Info<< "\nSolving for fluid region "
-                << fluidRegions[i].name() << endl;
-            #include "setRegionFluidFields.H"
-            #include "readFluidMultiRegionSIMPLEControls.H"
-            #include "solveFluid.H"
-        }
+        #include "setrDeltaT.H"
 
-        forAll(solidRegions, i)
+        twoPhaseProperties.correct();
+
+        #include "alphaEqnSubCycle.H"
+        turbulence->correct();
+        #include "UEqn.H"
+
+        // --- PISO loop
+        for (int corr=0; corr<nCorr; corr++)
         {
-            Info<< "\nSolving for solid region "
-                << solidRegions[i].name() << endl;
-            #include "setRegionSolidFields.H"
-            #include "readSolidMultiRegionSIMPLEControls.H"
-            #include "solveSolid.H"
+            #include "pEqn.H"
         }
 
         runTime.write();

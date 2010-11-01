@@ -21,28 +21,63 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Calculates and outputs the mean and maximum Courant Numbers for the fluid
-    regions
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef compressibleCourantNo_H
-#define compressibleCourantNo_H
+#include "MULES.H"
+#include "upwind.H"
+#include "uncorrectedSnGrad.H"
+#include "gaussConvectionScheme.H"
+#include "gaussLaplacianScheme.H"
+#include "uncorrectedSnGrad.H"
+#include "surfaceInterpolate.H"
+#include "fvcSurfaceIntegrate.H"
+#include "slicedSurfaceFields.H"
+#include "syncTools.H"
 
-#include "fvMesh.H"
+#include "fvCFD.H"
 
-namespace Foam
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+void Foam::MULES::explicitLTSSolve
+(
+    volScalarField& psi,
+    const surfaceScalarField& phi,
+    surfaceScalarField& phiPsi,
+    const scalar psiMax,
+    const scalar psiMin
+)
 {
-    scalar compressibleCourantNo
+    explicitLTSSolve
     (
-        const fvMesh& mesh,
-        const Time& runTime,
-        const volScalarField& rho,
-        const surfaceScalarField& phi
+        geometricOneField(),
+        psi,
+        phi,
+        phiPsi,
+        zeroField(), zeroField(),
+        psiMax, psiMin
     );
 }
 
-#endif
+
+void Foam::MULES::implicitSolve
+(
+    volScalarField& psi,
+    const surfaceScalarField& phi,
+    surfaceScalarField& phiPsi,
+    const scalar psiMax,
+    const scalar psiMin
+)
+{
+    implicitSolve
+    (
+        geometricOneField(),
+        psi,
+        phi,
+        phiPsi,
+        zeroField(), zeroField(),
+        psiMax, psiMin
+    );
+}
+
 
 // ************************************************************************* //

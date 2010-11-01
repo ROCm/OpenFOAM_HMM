@@ -1,11 +1,15 @@
 EXE_INC = \
-    -IalphaContactAngle \
+    -I.. \
     -I$(LIB_SRC)/transportModels \
     -I$(LIB_SRC)/transportModels/incompressible/lnInclude \
     -I$(LIB_SRC)/transportModels/interfaceProperties/lnInclude \
+    -I$(LIB_SRC)/turbulenceModels/incompressible/turbulenceModel \
     -I$(LIB_SRC)/finiteVolume/lnInclude
 
-LIB_LIBS = \
-    -linterfaceProperties \
+EXE_LIBS = \
+    -ltwoPhaseInterfaceProperties \
     -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModel \
+    -lincompressibleRASModels \
+    -lincompressibleLESModels \
     -lfiniteVolume

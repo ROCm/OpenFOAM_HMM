@@ -28,8 +28,8 @@ License
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList()
 :
-    List<T>(SizeInc),
-    capacity_(SizeInc)
+    List<T>(0),
+    capacity_(0)
 {
     List<T>::size(0);
 }

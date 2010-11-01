@@ -92,6 +92,9 @@ class streamLine
         //- Maximum lifetime (= number of cells) of particle
         label lifeTime_;
 
+        //- Number of subcycling steps
+        label nSubCycle_;
+
         //- Optional specified name of particles
         word cloudName_;
 

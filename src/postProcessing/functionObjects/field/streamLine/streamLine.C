@@ -53,16 +53,10 @@ void Foam::streamLine::track()
         initialParticles
     );
 
-    //Pout<< "Seeding particles." << endl;
-
     const sampledSet& seedPoints = sampledSetPtr_();
 
     forAll(seedPoints, i)
     {
-        //Pout<< "Seeded particle at " << seedPoints[i]
-        //    << " at cell:" << seedPoints.cells()[i]
-        //    << endl;
-
         particles.addParticle
         (
             new streamLineParticle
@@ -228,15 +222,14 @@ void Foam::streamLine::track()
         vvInterp,
         UIndex,         // index of U in vvInterp
         trackForward_,  // track in +u direction
+        nSubCycle_,     // step through cells in steps?
         allTracks_,
         allScalars_,
         allVectors_
     );
 
     // Track
-    //Pout<< "Tracking particles." << endl;
     particles.move(td);
-    //Pout<< "Finished tracking particles." << endl;
 }
 
 
@@ -296,6 +289,19 @@ void Foam::streamLine::read(const dictionary& dict)
         UName_ = dict.lookupOrDefault<word>("U", "U");
         dict.lookup("trackForward") >> trackForward_;
         dict.lookup("lifeTime") >> lifeTime_;
+        if (lifeTime_ < 1)
+        {
+            FatalErrorIn(":streamLine::read(const dictionary&)")
+                << "Illegal value " << lifeTime_ << " for lifeTime"
+                << exit(FatalError);
+        }
+
+        dict.lookup("nSubCycle") >> nSubCycle_;
+        if (nSubCycle_ < 1)
+        {
+            nSubCycle_ = 1;
+        }
+
         cloudName_ = dict.lookupOrDefault<word>("cloudName", "streamLine");
         dict.lookup("seedSampleSet") >> seedSet_;
 
@@ -323,7 +329,6 @@ void Foam::streamLine::execute()
 {
 //    const Time& runTime = const_cast<Time&>(obr_.time());
 //    Pout<< "**streamLine::execute : time:" << runTime.timeName() << endl;
-//    Pout<< "**streamLine::execute : time:" << runTime.timeIndex() << endl;
 //
 //    bool isOutputTime = false;
 //

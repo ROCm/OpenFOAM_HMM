@@ -66,6 +66,11 @@
       -doc              display application documentation in browser
       -help             print the usage
 
+*** *New* basicSolidThermo solids thermophysical library
+    + Used in all conjugate heat transfer solvers
+      + constant properties
+      + temperature dependent properties
+      + temperature and direction (in local coordinate system) dependent properties
 *** *New* Surface film library
     + Creation of films by particle addition, or initial film distribution
     + Coupled with the lagrangian/intermediate cloud hierarchy library
@@ -86,7 +91,14 @@
 *** *New* ptscotch decomposition method
 *** *Updated* particle tracking algorithm
 *** *Updated* split cyclics into two separate patches. See doc/changed/splitCyclics.txt
+  * *Updated* interpolation (volPointInterpolation) now works without the
+    globalPointPatch. Moving mesh cases can now be run non-parallel and
+    continued in parallel and reconstructed without any limitation.
 *** *New* compact binary I/O for faces and cells. This speeds up reading/writing meshes in binary.
+*** *Updated* runTimeModifiable
+    + on linux uses inotify instead of time stamps - more efficient for large
+      numbers of monitored files. No more fileModificationSkew needed.
+    + single integer reduction instead of one reduction per monitored file.
 * Solvers
   A number of new solvers have been developed for a range of engineering
   applications.  There has been a set of improvements to certain classes of
@@ -125,6 +137,8 @@
         (nonuniformTransform)cyclic <zoneA>_<zoneB>
       + extrudes into master direction (i.e. away from the owner cell
         if flipMap is false)
+    + =topoSet=: replacement of cellSet,faceSet,pointSet utilities.
+      Comparable to a dictionary driven =setSet= utility.
 *** Updated utilities
     + =setFields=: optionally use faceSets to set patch values (see e.g. hotRoom tutorial).
     + =blockMesh=: specify patches via dictionary instead of type only. This
@@ -133,6 +147,8 @@
 * Post-processing
   + =foamToEnsight=: parallel continuous data. new =-nodeValues= option to generate and output nodal
     field data.
+  + =singleCellMesh=: new utility to convert mesh and fields to a single cell
+    mesh. Great for postprocessing.
   + Function objects:
     + =residualControl=: new function object to allow users to terminate steady
     state calculations when the defined residual levels are achieved
@@ -144,7 +160,9 @@
     + =streamLine=: generate streamlines; ouputs both trajectory and field data
 
 * New tutorials
-  There is a large number of new tutorials to support the new solvers in the
+  There is a large number of new tutorials for existing and new solvers in the
   release.
   + =reactingParcelFilmFoam= tutorials:
     + multipleBoxes, hotBoxes, panel, evaporationTest
+  + =interDyMFoam= tutorials:
+    + testTubeMixer: showcases =solidBodyMotionFunction=

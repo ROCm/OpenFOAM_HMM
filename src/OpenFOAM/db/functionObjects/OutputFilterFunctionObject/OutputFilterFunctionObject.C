@@ -128,7 +128,10 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::start()
 
 
 template<class OutputFilter>
-bool Foam::OutputFilterFunctionObject<OutputFilter>::execute()
+bool Foam::OutputFilterFunctionObject<OutputFilter>::execute
+(
+    const bool forceWrite
+)
 {
     if (enabled_)
     {
@@ -139,7 +142,7 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::execute()
 
         ptr_->execute();
 
-        if (outputControl_.output())
+        if (forceWrite || outputControl_.output())
         {
             ptr_->write();
         }

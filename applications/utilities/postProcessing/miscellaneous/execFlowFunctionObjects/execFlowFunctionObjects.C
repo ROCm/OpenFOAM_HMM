@@ -68,13 +68,13 @@ namespace Foam
 
             functionObjectList fol(runTime, dict);
             fol.start();
-            fol.execute();
+            fol.execute(true);  // override outputControl - force writing
         }
         else
         {
             functionObjectList fol(runTime);
             fol.start();
-            fol.execute();
+            fol.execute(true);  // override outputControl - force writing
         }
     }
 }

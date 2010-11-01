@@ -170,7 +170,9 @@ namespace Foam
                         << "inotify instances" << endl
                         << "    (/proc/sys/fs/inotify/max_user_instances"
                         << " on Linux)" << endl
-                        << "    or switch off runTimeModifiable." << endl
+                        << "    , switch off runTimeModifiable." << endl
+                        << "    or compile this file with FOAM_USE_STAT to use"
+                        << " time stamps instead of inotify." << endl
                         << "    Continuing without additional file monitoring."
                         << endl;
                 }
