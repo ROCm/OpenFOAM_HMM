@@ -51,9 +51,13 @@ densityWeightedStochastic::densityWeightedStochastic
 :
     initialPointsMethod(typeName, initialPointsDict, cvMesh),
     totalVolume_(readScalar(detailsDict().lookup("totalVolume"))),
-    maxDensity_
+    minCellSize_
     (
-        1.0/pow3(readScalar(detailsDict().lookup("minCellSize")))
+        detailsDict().lookupOrDefault<scalar>("minCellSize", GREAT)
+    ),
+    minCellSizeLimit_
+    (
+        detailsDict().lookupOrDefault<scalar>("minCellSizeLimit", 0.0)
     )
 {}
 
@@ -76,6 +80,8 @@ std::vector<Vb::Point> densityWeightedStochastic::initialPoints() const
 
     label trialPoints = 0;
 
+    scalar maxDensity = 1/pow3(max(minCellSize_, SMALL));
+
     while (volumeAdded < totalVolume_)
     {
         trialPoints++;
@@ -91,10 +97,19 @@ std::vector<Vb::Point> densityWeightedStochastic::initialPoints() const
 
         scalar localSize = cvMesh_.cellSizeControl().cellSize(p);
 
+        if (localSize < minCellSize_)
+        {
+            minCellSize_ = max(localSize, minCellSizeLimit_);
+
+            // 1/(minimum cell size)^3, gives the maximum permissible point
+            // density
+            maxDensity = 1/pow3(max(minCellSize_, SMALL));
+        }
+
         scalar localDensity = 1/pow3(max(localSize, SMALL));
 
         // Accept possible placements proportional to the relative local density
-        if (localDensity/maxDensity_ > rndGen.scalar01())
+        if (localDensity/maxDensity > rndGen.scalar01())
         {
             // Determine if the point is "wellInside" the domain
             if
@@ -116,7 +131,8 @@ std::vector<Vb::Point> densityWeightedStochastic::initialPoints() const
     Info<< nl << "    " << typeName << " - "
         << trialPoints << " locations queried ("
         << scalar(initialPoints.size())/scalar(trialPoints)
-        << " success rate)" << endl;
+        << " success rate).  minCellSize " << minCellSize_
+        << endl;
 
     return initialPoints;
 }

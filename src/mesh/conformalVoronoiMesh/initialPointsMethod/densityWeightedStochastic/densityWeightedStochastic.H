@@ -25,6 +25,8 @@ Class
     Foam::densityWeightedStochastic
 
 Description
+    Choose random points inside the domain and place them with a probability
+    proportional to the target density of points.
 
 SourceFiles
     densityWeightedStochastic.C
@@ -44,7 +46,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class densityWeightedStochastic Declaration
+                   Class densityWeightedStochastic Declaration
 \*---------------------------------------------------------------------------*/
 
 class densityWeightedStochastic
@@ -59,9 +61,13 @@ private:
         //- The total volume to be filled
         scalar totalVolume_;
 
-        //- 1/(minimum cell size)^3, gives the maximum permissible point
-        //  density
-        scalar maxDensity_;
+        //- Working variable for minimum cell size, a starting value may be
+        //  specified in the dictionary
+        mutable scalar minCellSize_;
+
+        //- Smallest minimum cell size allowed, i.e. to avoid high initial
+        //  population of areas of small size
+        scalar minCellSizeLimit_;
 
 
 public:
