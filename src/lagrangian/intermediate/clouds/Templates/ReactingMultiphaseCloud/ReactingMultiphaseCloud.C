@@ -220,7 +220,7 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::resetSourceTerms()
 template<class ParcelType>
 void Foam::ReactingMultiphaseCloud<ParcelType>::evolve()
 {
-    if (this->solution().active())
+    if (this->solution().canEvolve())
     {
         typename ParcelType::trackData td(*this);
 

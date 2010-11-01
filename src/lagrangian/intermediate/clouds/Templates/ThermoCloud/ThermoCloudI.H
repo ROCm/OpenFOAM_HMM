@@ -133,7 +133,7 @@ Foam::ThermoCloud<ParcelType>::Sh(volScalarField& hs) const
             << max(hsCoeff()).value() << endl;
     }
 
-    if (this->solution().sourceActive())
+    if (this->solution().coupled())
     {
         if (this->solution().semiImplicit("hs"))
         {

@@ -47,6 +47,7 @@ void Foam::KinematicCloud<ParcelType>::cloudSolution::read()
 
     if (steadyState())
     {
+        dict_.lookup("calcFrequency") >> calcFrequency_;
         dict_.lookup("maxTrackTime") >> maxTrackTime_;
         dict_.subDict("sourceTerms").lookup("resetOnStartup")
             >> resetSourcesOnStartup_;
@@ -65,6 +66,9 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
     dict_(dict),
     active_(dict.lookup("active")),
     transient_(false),
+    calcFrequency_(1),
+    iter_(1),
+    deltaT_(0.0),
     coupled_(false),
     cellValueSourceCorrection_(false),
     maxTrackTime_(0.0),
@@ -87,6 +91,9 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
     dict_(cs.dict_),
     active_(cs.active_),
     transient_(cs.transient_),
+    calcFrequency_(cs.calcFrequency_),
+    iter_(cs.iter_),
+    deltaT_(cs.deltaT_),
     coupled_(cs.coupled_),
     cellValueSourceCorrection_(cs.cellValueSourceCorrection_),
     maxTrackTime_(cs.maxTrackTime_),
@@ -104,6 +111,9 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::cloudSolution
     dict_(dictionary::null),
     active_(false),
     transient_(false),
+    calcFrequency_(0),
+    iter_(0),
+    deltaT_(0.0),
     coupled_(false),
     cellValueSourceCorrection_(false),
     maxTrackTime_(0.0),
@@ -137,14 +147,36 @@ bool Foam::KinematicCloud<ParcelType>::cloudSolution::semiImplicit
 
 
 template<class ParcelType>
-bool Foam::KinematicCloud<ParcelType>::cloudSolution::sourceActive() const
+bool Foam::KinematicCloud<ParcelType>::cloudSolution::solveThisStep() const
 {
-    return coupled_ && (active_ || steadyState());
+    return
+        active_
+     && (
+            mesh_.time().outputTime()
+         || (mesh_.time().timeIndex() % calcFrequency_ == 0)
+        );
 }
 
 
 template<class ParcelType>
-bool Foam::KinematicCloud<ParcelType>::cloudSolution::writeThisStep() const
+bool Foam::KinematicCloud<ParcelType>::cloudSolution::canEvolve()
+{
+    // Set the calculation time step
+    if (transient_)
+    {
+        deltaT_ = mesh_.time().deltaTValue();
+    }
+    else
+    {
+        deltaT_ = maxTrackTime_;
+    }
+
+    return solveThisStep();
+}
+
+
+template<class ParcelType>
+bool Foam::KinematicCloud<ParcelType>::cloudSolution::output() const
 {
     return active_ && mesh_.time().outputTime();
 }
@@ -278,10 +310,10 @@ void Foam::KinematicCloud<ParcelType>::evolveCloud
     {
 //        this->surfaceFilm().injectStreadyState(td);
 
-        this->injection().injectSteadyState(td, solution_.maxTrackTime());
+        this->injection().injectSteadyState(td, solution_.deltaT());
 
         td.part() = ParcelType::trackData::tpLinearTrack;
-        Cloud<ParcelType>::move(td, solution_.maxTrackTime());
+        Cloud<ParcelType>::move(td,  solution_.deltaT());
     }
 }
 
@@ -331,10 +363,10 @@ void  Foam::KinematicCloud<ParcelType>::moveCollide
 )
 {
     td.part() = ParcelType::trackData::tpVelocityHalfStep;
-    Cloud<ParcelType>::move(td, this->db().time().deltaTValue());
+    Cloud<ParcelType>::move(td,  solution_.deltaT());
 
     td.part() = ParcelType::trackData::tpLinearTrack;
-    Cloud<ParcelType>::move(td, this->db().time().deltaTValue());
+    Cloud<ParcelType>::move(td,  solution_.deltaT());
 
     // td.part() = ParcelType::trackData::tpRotationalTrack;
     // Cloud<ParcelType>::move(td);
@@ -344,7 +376,7 @@ void  Foam::KinematicCloud<ParcelType>::moveCollide
     this->collision().collide();
 
     td.part() = ParcelType::trackData::tpVelocityHalfStep;
-    Cloud<ParcelType>::move(td, this->db().time().deltaTValue());
+    Cloud<ParcelType>::move(td,  solution_.deltaT());
 }
 
 
@@ -362,6 +394,8 @@ void Foam::KinematicCloud<ParcelType>::postEvolve()
     forces_.cacheFields(false, solution_.interpolationSchemes());
 
     this->postProcessing().post();
+
+    solution_.nextIter();
 }
 
 
@@ -732,7 +766,7 @@ void Foam::KinematicCloud<ParcelType>::relaxSources
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::evolve()
 {
-    if (solution_.active())
+    if (solution_.canEvolve())
     {
         typename ParcelType::trackData td(*this);
 

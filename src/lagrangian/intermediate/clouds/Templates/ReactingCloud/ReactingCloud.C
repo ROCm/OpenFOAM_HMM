@@ -297,7 +297,7 @@ void Foam::ReactingCloud<ParcelType>::relaxSources
 template<class ParcelType>
 void Foam::ReactingCloud<ParcelType>::evolve()
 {
-    if (this->solution().active())
+    if (this->solution().canEvolve())
     {
         typename ParcelType::trackData td(*this);
 

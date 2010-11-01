@@ -92,6 +92,36 @@ Foam::KinematicCloud<ParcelType>::cloudSolution::steadyState() const
 
 
 template<class ParcelType>
+inline Foam::label
+Foam::KinematicCloud<ParcelType>::cloudSolution::calcFrequency() const
+{
+    return calcFrequency_;
+}
+
+
+template<class ParcelType>
+inline Foam::label Foam::KinematicCloud<ParcelType>::cloudSolution::iter() const
+{
+    return iter_;
+}
+
+
+template<class ParcelType>
+inline Foam::label Foam::KinematicCloud<ParcelType>::cloudSolution::nextIter()
+{
+    return ++iter_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::KinematicCloud<ParcelType>::cloudSolution::deltaT() const
+{
+    return deltaT_;
+}
+
+
+template<class ParcelType>
 inline const Foam::Switch
 Foam::KinematicCloud<ParcelType>::cloudSolution::coupled() const
 {
@@ -159,6 +189,14 @@ Foam::KinematicCloud<ParcelType>::particleProperties() const
 template<class ParcelType>
 inline const typename Foam::KinematicCloud<ParcelType>::cloudSolution&
 Foam::KinematicCloud<ParcelType>::solution() const
+{
+    return solution_;
+}
+
+
+template<class ParcelType>
+inline typename Foam::KinematicCloud<ParcelType>::cloudSolution&
+Foam::KinematicCloud<ParcelType>::solution()
 {
     return solution_;
 }
@@ -445,7 +483,7 @@ Foam::KinematicCloud<ParcelType>::SU(volVectorField& U) const
             << max(UCoeff()).value() << endl;
     }
 
-    if (solution_.sourceActive())
+    if (solution_.coupled())
     {
         if (solution_.semiImplicit("U"))
         {

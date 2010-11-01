@@ -286,7 +286,7 @@ void Foam::ThermoCloud<ParcelType>::relaxSources
 template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::evolve()
 {
-    if (this->solution().active())
+    if (this->solution().canEvolve())
     {
         typename ParcelType::trackData td(*this);
 

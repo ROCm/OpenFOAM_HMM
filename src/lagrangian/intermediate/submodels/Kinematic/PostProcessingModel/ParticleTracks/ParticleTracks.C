@@ -105,7 +105,7 @@ void Foam::ParticleTracks<CloudType>::postFace(const parcelType& p)
 {
     if
     (
-        this->owner().solution().writeThisStep()
+        this->owner().solution().output()
      || this->owner().solution().transient()
     )
     {

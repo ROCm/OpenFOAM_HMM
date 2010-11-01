@@ -90,7 +90,7 @@ Foam::ReactingCloud<ParcelType>::SYi
     volScalarField& Yi
 ) const
 {
-    if (this->solution().sourceActive())
+    if (this->solution().coupled())
     {
         if (this->solution().semiImplicit("Yi"))
         {
@@ -165,7 +165,7 @@ Foam::ReactingCloud<ParcelType>::Srho(const label i) const
         )
     );
 
-    if (this->solution().sourceActive())
+    if (this->solution().coupled())
     {
         scalarField& rhoi = tRhoi();
         rhoi = rhoTrans_[i]/(this->db().time().deltaT()*this->mesh().V());
@@ -202,7 +202,7 @@ Foam::ReactingCloud<ParcelType>::Srho() const
         )
     );
 
-    if (this->solution().sourceActive())
+    if (this->solution().coupled())
     {
         scalarField& sourceField = trhoTrans();
         forAll(rhoTrans_, i)
@@ -221,7 +221,7 @@ template<class ParcelType>
 inline Foam::tmp<Foam::fvScalarMatrix>
 Foam::ReactingCloud<ParcelType>::Srho(volScalarField& rho) const
 {
-    if (this->solution().sourceActive())
+    if (this->solution().coupled())
     {
         tmp<volScalarField> trhoTrans
         (

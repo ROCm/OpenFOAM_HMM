@@ -132,6 +132,16 @@ public:
             //- Transient flag
             Switch transient_;
 
+            //- Calculation frequency - carrier steps per cloud step
+            //  NOTE: Steady operation only
+            label calcFrequency_;
+
+            //- Current cloud iteration
+            label iter_;
+
+            //- Cloud solution time step
+            scalar deltaT_;
+
 
             // Run-time options
 
@@ -205,6 +215,18 @@ public:
                 //- Return const access to the steady flag
                 inline const Switch steadyState() const;
 
+                //- Return const access to the calculation frequency
+                inline label calcFrequency() const;
+
+                //- Return const access to the current cloud iteration
+                inline label iter() const;
+
+                //- Increment and return iter counter
+                inline label nextIter();
+
+                //- Return the time step
+                inline scalar deltaT() const;
+
                 //- Return const access to the coupled flag
                 inline const Switch coupled() const;
 
@@ -229,11 +251,15 @@ public:
 
         // Helper functions
 
-            //- Returns true if sources are active (at this time)
-            bool sourceActive() const;
+            //- Returns true if performing a cloud iteration this calc step
+            bool solveThisStep() const;
+
+            //- Returns true if possible to evolve the cloud and sets timestep
+            //  parameters
+            bool canEvolve();
 
             //- Returns true if writing this step
-            bool writeThisStep() const;
+            bool output() const;
     };
 
 
@@ -438,6 +464,9 @@ public:
 
                 //- Return const access to the solution properties
                 inline const cloudSolution& solution() const;
+
+                //- Return access to the solution properties
+                inline cloudSolution& solution();
 
                 //- Return the constant properties
                 inline const typename ParcelType::constantProperties&
