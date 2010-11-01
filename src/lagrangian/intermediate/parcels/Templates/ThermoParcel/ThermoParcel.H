@@ -98,7 +98,16 @@ public:
     public:
 
         // Constructors
-        constantProperties(const dictionary& parentDict);
+
+            //- Null constructor
+            constantProperties();
+
+            //- Copy constructor
+            constantProperties(const constantProperties& cp);
+
+            //- Constructor from dictionary
+            constantProperties(const dictionary& parentDict);
+
 
         // Member functions
 

@@ -30,6 +30,36 @@ using namespace Foam::constant::mathematical;
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
+inline
+Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties()
+:
+    dict_(dictionary::null),
+    parcelTypeId_(-1),
+    rhoMin_(0.0),
+    rho0_(0.0),
+    minParticleMass_(0.0),
+    youngsModulus_(0.0),
+    poissonsRatio_(0.0)
+{}
+
+
+template<class ParcelType>
+inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
+(
+    const constantProperties& cp
+)
+:
+    dict_(cp.dict_),
+    parcelTypeId_(cp.parcelTypeId_),
+    rhoMin_(cp.rhoMin_),
+    rho0_(cp.rho0_),
+    minParticleMass_(cp.minParticleMass_),
+    youngsModulus_(cp.youngsModulus_),
+    poissonsRatio_(cp.poissonsRatio_)
+{}
+
+
+template<class ParcelType>
 inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
 (
     const dictionary& parentDict

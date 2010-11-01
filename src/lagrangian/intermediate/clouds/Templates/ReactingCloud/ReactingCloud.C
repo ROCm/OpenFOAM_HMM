@@ -191,8 +191,9 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
     ThermoCloud<ParcelType>(mesh, name, c),
     reactingCloud(),
     cloudCopyPtr_(NULL),
-    constProps_(c.constProps_),
-    compositionModel_(NULL),
+    constProps_(),
+    compositionModel_(c.compositionModel_->clone()),
+//    compositionModel_(NULL),
     phaseChangeModel_(NULL),
     rhoTrans_(0),
     dMassPhaseChange_(0.0)

@@ -26,6 +26,31 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
+inline
+Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
+constantProperties()
+:
+    ReactingParcel<ParcelType>::constantProperties(),
+    LDevol_(0.0),
+    hRetentionCoeff_(0.0)
+{}
+
+
+template<class ParcelType>
+inline
+Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
+constantProperties
+(
+    const constantProperties& cp
+)
+:
+    ReactingParcel<ParcelType>::constantProperties(cp),
+    LDevol_(cp.LDevol_),
+    hRetentionCoeff_(cp.hRetentionCoeff_)
+{}
+
+
+template<class ParcelType>
 inline Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
 constantProperties
 (

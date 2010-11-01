@@ -123,7 +123,7 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
     ReactingCloud<ParcelType>(mesh, name, c),
     reactingMultiphaseCloud(),
     cloudCopyPtr_(NULL),
-    constProps_(c.constProps_),
+    constProps_(),
     devolatilisationModel_(NULL),
     surfaceReactionModel_(NULL),
     dMassDevolatilisation_(0.0),

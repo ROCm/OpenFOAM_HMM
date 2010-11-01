@@ -26,6 +26,32 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
+inline
+Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties()
+:
+    ThermoParcel<ParcelType>::constantProperties(),
+    pMin_(0.0),
+    constantVolume_(false),
+    Tvap_(0.0),
+    Tbp_(0.0)
+{}
+
+
+template<class ParcelType>
+inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
+(
+    const constantProperties& cp
+)
+:
+    ThermoParcel<ParcelType>::constantProperties(cp),
+    pMin_(cp.pMin_),
+    constantVolume_(cp.constantVolume_),
+    Tvap_(cp.Tvap_),
+    Tbp_(cp.Tbp_)
+{}
+
+
+template<class ParcelType>
 inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
 (
     const dictionary& parentDict

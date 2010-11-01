@@ -26,6 +26,35 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
+inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties()
+:
+    KinematicParcel<ParcelType>::constantProperties(),
+    T0_(0.0),
+    TMin_(0.0),
+    Cp0_(0.0),
+    epsilon0_(0.0),
+    f0_(0.0),
+    Pr_(0.0)
+{}
+
+
+template<class ParcelType>
+inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
+(
+    const constantProperties& cp
+)
+:
+    KinematicParcel<ParcelType>::constantProperties(cp),
+    T0_(cp.T0_),
+    TMin_(cp.TMin_),
+    Cp0_(cp.Cp0_),
+    epsilon0_(cp.epsilon0_),
+    f0_(cp.f0_),
+    Pr_(cp.Pr_)
+{}
+
+
+template<class ParcelType>
 inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
 (
     const dictionary& parentDict

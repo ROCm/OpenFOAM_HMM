@@ -197,7 +197,7 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
     KinematicCloud<ParcelType>(mesh, name, c),
     thermoCloud(),
     cloudCopyPtr_(NULL),
-    constProps_(c.particleProperties_),
+    constProps_(),
     thermo_(c.thermo()),
     T_(c.T()),
     p_(c.p()),

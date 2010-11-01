@@ -626,7 +626,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
         )
     ),
     solution_(mesh),
-    constProps_(dictionary::null),
+    constProps_(),
     subModelProperties_(dictionary::null),
     rndGen_(0, 0),
     cellOccupancyPtr_(NULL),
