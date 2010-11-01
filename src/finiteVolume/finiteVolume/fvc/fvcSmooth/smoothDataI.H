@@ -27,7 +27,7 @@ License
 
 inline bool Foam::smoothData::update
 (
-    const smoothData::smoothData& svf,
+    const smoothData& svf,
     const scalar scale,
     const scalar tol
 )
