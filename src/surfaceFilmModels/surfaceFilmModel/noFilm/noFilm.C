@@ -199,10 +199,10 @@ const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::Tw() const
 }
 
 
-const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::cp() const
+const Foam::volScalarField& Foam::surfaceFilmModels::noFilm::Cp() const
 {
-    FatalErrorIn("const volScalarField& noFilm::cp() const")
-        << "cp field not available for " << type() << abort(FatalError);
+    FatalErrorIn("const volScalarField& noFilm::Cp() const")
+        << "Cp field not available for " << type() << abort(FatalError);
 
     return volScalarField::null();
 }

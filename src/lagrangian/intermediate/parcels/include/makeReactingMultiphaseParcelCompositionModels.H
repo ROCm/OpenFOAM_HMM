@@ -29,6 +29,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "ReactingMultiphaseCloud.H"
+#include "NoComposition.H"
 #include "SingleMixtureFraction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -36,6 +37,13 @@ License
 #define makeReactingMultiphaseParcelCompositionModels(ParcelType)             \
                                                                               \
     makeCompositionModel(ReactingCloud<ParcelType>);                          \
+                                                                              \
+    makeCompositionModelType                                                  \
+    (                                                                         \
+        NoComposition,                                                        \
+        ReactingCloud,                                                        \
+        ParcelType                                                            \
+    );                                                                        \
                                                                               \
     makeCompositionModelType                                                  \
     (                                                                         \

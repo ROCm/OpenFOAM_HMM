@@ -58,18 +58,10 @@ namespace Foam
 
 template<class CloudType>
 class CompositionModel
+:
+    public SubModelBase<CloudType>
 {
     // Private data
-
-        //- The cloud dictionary
-        const dictionary& dict_;
-
-        //- Reference to the owner injection class
-        CloudType& owner_;
-
-        //- The coefficients dictionary
-        const dictionary& coeffDict_;
-
         //- Reference to the thermo database
         const SLGThermo& thermo_;
 
@@ -98,6 +90,9 @@ public:
 
     // Constructors
 
+        //- Construct null from owner
+        CompositionModel(CloudType& owner);
+
         //- Construct from dictionary
         CompositionModel
         (
@@ -105,6 +100,18 @@ public:
             CloudType& owner,
             const word& type
         );
+
+        //- Construct copy
+        CompositionModel(const CompositionModel<CloudType>& cm);
+
+        //- Construct and return a clone
+        virtual autoPtr<CompositionModel<CloudType> > clone() const
+        {
+            return autoPtr<CompositionModel<CloudType> >
+            (
+                new CompositionModel<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -122,15 +129,6 @@ public:
     // Member Functions
 
         // Access
-
-            //- Return the cloud object
-            const CloudType& owner() const;
-
-            //- Return the cloud dictionary
-            const dictionary& dict() const;
-
-            //- Return the coefficients dictionary
-            const dictionary& coeffDict() const;
 
             //- Return the thermo database
             const SLGThermo& thermo() const;
@@ -197,19 +195,19 @@ public:
 
                 //- Return the list of mixture mass fractions
                 //  If only 1 phase, return component fractions of that phase
-                virtual const scalarField& YMixture0() const = 0;
+                virtual const scalarField& YMixture0() const;
 
                 // Indices of gas, liquid and solid phases in phase properties
                 // list - returns -1 if not applicable
 
                     //- Gas id
-                    virtual label idGas() const = 0;
+                    virtual label idGas() const;
 
                     //- Liquid id
-                    virtual label idLiquid() const = 0;
+                    virtual label idLiquid() const;
 
                     //- Solid id
-                    virtual label idSolid() const = 0;
+                    virtual label idSolid() const;
 
 
         // Evaluation
@@ -242,7 +240,7 @@ public:
             ) const;
 
             //- Return specific heat caoacity for the phase phaseI
-            virtual scalar cp
+            virtual scalar Cp
             (
                 const label phaseI,
                 const scalarField& Y,

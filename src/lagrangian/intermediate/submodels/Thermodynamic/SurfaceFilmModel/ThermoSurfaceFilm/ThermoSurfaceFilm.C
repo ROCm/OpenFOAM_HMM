@@ -38,7 +38,19 @@ Foam::ThermoSurfaceFilm<CloudType>::ThermoSurfaceFilm
 :
     SurfaceFilmModel<CloudType>(dict, owner, g, typeName),
     TFilmPatch_(0),
-    cpFilmPatch_(0)
+    CpFilmPatch_(0)
+{}
+
+
+template<class CloudType>
+Foam::ThermoSurfaceFilm<CloudType>::ThermoSurfaceFilm
+(
+    const ThermoSurfaceFilm<CloudType>& sfm
+)
+:
+    SurfaceFilmModel<CloudType>(sfm),
+    TFilmPatch_(sfm.TFilmPatch_),
+    CpFilmPatch_(sfm.CpFilmPatch_)
 {}
 
 
@@ -50,13 +62,6 @@ Foam::ThermoSurfaceFilm<CloudType>::~ThermoSurfaceFilm()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::ThermoSurfaceFilm<CloudType>::active() const
-{
-    return true;
-}
-
 
 template<class CloudType>
 bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
@@ -140,8 +145,8 @@ void Foam::ThermoSurfaceFilm<CloudType>::cacheFilmFields
     TFilmPatch_ = filmModel.Ts().boundaryField()[filmPatchI];
     distMap.distribute(TFilmPatch_);
 
-    cpFilmPatch_ = filmModel.cp().boundaryField()[filmPatchI];
-    distMap.distribute(cpFilmPatch_);
+    CpFilmPatch_ = filmModel.Cp().boundaryField()[filmPatchI];
+    distMap.distribute(CpFilmPatch_);
 }
 
 
@@ -156,7 +161,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::setParcelProperties
 
     // Set parcel properties
     p.T() = TFilmPatch_[filmFaceI];
-    p.cp() = cpFilmPatch_[filmFaceI];
+    p.Cp() = CpFilmPatch_[filmFaceI];
 }
 
 

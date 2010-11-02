@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 void Foam::WallLocalSpringSliderDashpot<CloudType>::findMinMaxProperties
 (
     scalar& rMin,
@@ -70,7 +70,7 @@ void Foam::WallLocalSpringSliderDashpot<CloudType>::findMinMaxProperties
 }
 
 
-template <class CloudType>
+template<class CloudType>
 void Foam::WallLocalSpringSliderDashpot<CloudType>::evaluateWall
 (
     typename CloudType::parcelType& p,
@@ -155,7 +155,7 @@ void Foam::WallLocalSpringSliderDashpot<CloudType>::evaluateWall
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::WallLocalSpringSliderDashpot<CloudType>::WallLocalSpringSliderDashpot
 (
     const dictionary& dict,
@@ -224,26 +224,19 @@ Foam::WallLocalSpringSliderDashpot<CloudType>::WallLocalSpringSliderDashpot
 
         patchMap_[wallPatchIndices[wPI]] = wPI;
 
-        scalar nu = dimensionedScalar
-        (
-            patchCoeffDict.lookup("poissonsRatio")
-        ).value();
+        scalar nu = readScalar(patchCoeffDict.lookup("poissonsRatio"));
 
-        scalar E = dimensionedScalar
-        (
-            patchCoeffDict.lookup("youngsModulus")
-        ).value();
+        scalar E = readScalar(patchCoeffDict.lookup("youngsModulus"));
 
         Estar_[wPI] = 1/((1 - sqr(pNu))/pE + (1 - sqr(nu))/E);
 
         Gstar_[wPI] = 1/(2*((2 + pNu - sqr(pNu))/pE + (2 + nu - sqr(nu))/E));
 
-        alpha_[wPI] =
-            dimensionedScalar(patchCoeffDict.lookup("alpha")).value();
+        alpha_[wPI] = readScalar(patchCoeffDict.lookup("alpha"));
 
-        b_[wPI] = dimensionedScalar(patchCoeffDict.lookup("b")).value();
+        b_[wPI] = readScalar(patchCoeffDict.lookup("b"));
 
-        mu_[wPI] = dimensionedScalar(patchCoeffDict.lookup("mu")).value();
+        mu_[wPI] = readScalar(patchCoeffDict.lookup("mu"));
 
         if (Estar_[wPI] > maxEstar)
         {
@@ -257,7 +250,7 @@ Foam::WallLocalSpringSliderDashpot<CloudType>::WallLocalSpringSliderDashpot
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
+template<class CloudType>
 Foam::WallLocalSpringSliderDashpot<CloudType>::~WallLocalSpringSliderDashpot()
 {}
 

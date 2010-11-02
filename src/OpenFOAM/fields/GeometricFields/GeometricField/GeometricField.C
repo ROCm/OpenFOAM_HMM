@@ -209,7 +209,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const word& patchFieldType
 )
 :
-    DimensionedField<Type, GeoMesh>(io, mesh, ds),
+    DimensionedField<Type, GeoMesh>(io, mesh, ds, false),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(NULL),
     fieldPrevIterPtr_(NULL),
@@ -240,7 +240,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const wordList& actualPatchTypes
 )
 :
-    DimensionedField<Type, GeoMesh>(io, mesh, ds),
+    DimensionedField<Type, GeoMesh>(io, mesh, ds, false),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(NULL),
     fieldPrevIterPtr_(NULL),
@@ -267,7 +267,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const word& patchFieldType
 )
 :
-    DimensionedField<Type, GeoMesh>(io, mesh, dt),
+    DimensionedField<Type, GeoMesh>(io, mesh, dt, false),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(NULL),
     fieldPrevIterPtr_(NULL),
@@ -297,7 +297,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const wordList& actualPatchTypes
 )
 :
-    DimensionedField<Type, GeoMesh>(io, mesh, dt),
+    DimensionedField<Type, GeoMesh>(io, mesh, dt, false),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(NULL),
     fieldPrevIterPtr_(NULL),
@@ -351,7 +351,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const Mesh& mesh
 )
 :
-    DimensionedField<Type, GeoMesh>(io, mesh, dimless),
+    DimensionedField<Type, GeoMesh>(io, mesh, dimless, false),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(NULL),
     fieldPrevIterPtr_(NULL),
@@ -392,7 +392,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     Istream& is
 )
 :
-    DimensionedField<Type, GeoMesh>(io, mesh, dimless),
+    DimensionedField<Type, GeoMesh>(io, mesh, dimless, false),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(NULL),
     fieldPrevIterPtr_(NULL),
@@ -431,7 +431,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const dictionary& dict
 )
 :
-    DimensionedField<Type, GeoMesh>(io, mesh, dimless),
+    DimensionedField<Type, GeoMesh>(io, mesh, dimless, false),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(NULL),
     fieldPrevIterPtr_(NULL),

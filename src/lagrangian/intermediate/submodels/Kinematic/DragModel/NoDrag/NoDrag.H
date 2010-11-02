@@ -56,11 +56,19 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        NoDrag
-        (
-            const dictionary&,
-            CloudType&
-        );
+        NoDrag(const dictionary&, CloudType&);
+
+        //- Construct copy
+        NoDrag(const NoDrag<CloudType>& dm);
+
+        //- Construct and return a clone
+        virtual autoPtr<DragModel<CloudType> > clone() const
+        {
+            return autoPtr<DragModel<CloudType> >
+            (
+                new NoDrag<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor

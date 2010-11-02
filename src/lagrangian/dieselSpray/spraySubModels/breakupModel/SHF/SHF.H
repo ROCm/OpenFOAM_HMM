@@ -66,8 +66,6 @@ private:
         // reference to gravity
         const vector& g_;
 
-        Random& rndGen_;
-
         // model constants
 
         scalar weCorrCoeff_;

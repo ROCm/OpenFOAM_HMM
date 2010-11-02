@@ -43,7 +43,7 @@ SourceFiles
 #include "runTimeSelectionTables.H"
 #include "vector.H"
 #include "scalarField.H"
-#include "Random.H"
+#include "cachedRandom.H"
 #include "liquidMixture.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -120,7 +120,7 @@ public:
             const vector& axisOfSymmetry,
             const vector& axisOfWedge,
             const vector& axisOfWedgeNormal,
-            Random& rndGen
+            cachedRandom& rndGen
         ) const = 0;
 
         //- Return the number of holes

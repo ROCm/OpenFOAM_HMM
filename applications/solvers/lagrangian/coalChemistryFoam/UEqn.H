@@ -5,8 +5,8 @@
       + turbulence->divDevRhoReff(U)
      ==
         rho.dimensionedInternalField()*g
-      + coalParcels.SU()
-      + limestoneParcels.SU()
+      + coalParcels.SU(U)
+      + limestoneParcels.SU(U)
     );
 
     UEqn.relax();

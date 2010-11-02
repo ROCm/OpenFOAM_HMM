@@ -27,7 +27,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct from components
 Foam::trackedParticle::trackedParticle
 (
     const Cloud<trackedParticle>& c,
@@ -49,7 +48,6 @@ Foam::trackedParticle::trackedParticle
 {}
 
 
-//- Construct from Istream
 Foam::trackedParticle::trackedParticle
 (
     const Cloud<trackedParticle>& c,
@@ -89,13 +87,16 @@ Foam::trackedParticle::trackedParticle
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::trackedParticle::move(trackedParticle::trackData& td)
+bool Foam::trackedParticle::move
+(
+    trackedParticle::trackData& td,
+    const scalar trackedParticle
+)
 {
     td.switchProcessor = false;
     td.keepParticle = true;
 
-    scalar deltaT = cloud().pMesh().time().deltaTValue();
-    scalar tEnd = (1.0 - stepFraction())*deltaT;
+    scalar tEnd = (1.0 - stepFraction())*trackedParticle;
     scalar dtMax = tEnd;
 
     while (td.keepParticle && !td.switchProcessor && tEnd > SMALL)
@@ -109,7 +110,7 @@ bool Foam::trackedParticle::move(trackedParticle::trackData& td)
         dt *= trackToFace(end_, td);
 
         tEnd -= dt;
-        stepFraction() = 1.0 - tEnd/deltaT;
+        stepFraction() = 1.0 - tEnd/trackedParticle;
     }
 
     return td.keepParticle;

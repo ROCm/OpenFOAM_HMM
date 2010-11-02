@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,34 +23,37 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "CollisionModel.H"
+#include "NoComposition.H"
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-const Foam::dictionary& Foam::CollisionModel<CloudType>::dict() const
-{
-    return dict_;
-}
-
-
-template<class CloudType>
-const CloudType& Foam::CollisionModel<CloudType>::owner() const
-{
-    return owner_;
-}
-
-
-template<class CloudType>
-CloudType& Foam::CollisionModel<CloudType>::owner()
-{
-    return owner_;
-}
+Foam::NoComposition<CloudType>::NoComposition
+(
+    const dictionary&,
+    CloudType& owner
+)
+:
+    CompositionModel<CloudType>(owner)
+{}
 
 
 template<class CloudType>
-const Foam::dictionary& Foam::CollisionModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
-}
+Foam::NoComposition<CloudType>::NoComposition
+(
+    const NoComposition<CloudType>& cm
+)
+:
+    CompositionModel<CloudType>(cm)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::NoComposition<CloudType>::~NoComposition()
+{}
 
 
 // ************************************************************************* //
+

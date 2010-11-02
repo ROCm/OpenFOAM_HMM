@@ -56,8 +56,7 @@ Foam::blobsSheetAtomization::blobsSheetAtomization
     atomizationModel(dict, sm),
     coeffsDict_(dict.subDict(typeName + "Coeffs")),
     B_(readScalar(coeffsDict_.lookup("B"))),
-    angle_(readScalar(coeffsDict_.lookup("angle"))),
-    rndGen_(sm.rndGen())
+    angle_(readScalar(coeffsDict_.lookup("angle")))
 {}
 
 

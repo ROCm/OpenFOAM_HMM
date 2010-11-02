@@ -54,6 +54,18 @@ Foam::solidMixture::solidMixture
 }
 
 
+Foam::solidMixture::solidMixture(const solidMixture& s)
+:
+    components_(s.components_),
+    properties_(s.properties_.size())
+{
+    forAll(properties_, i)
+    {
+        properties_.set(i, s.properties_(i)->clone());
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::solidMixture> Foam::solidMixture::New
@@ -98,7 +110,7 @@ Foam::scalar Foam::solidMixture::rho
 }
 
 
-Foam::scalar Foam::solidMixture::cp
+Foam::scalar Foam::solidMixture::Cp
 (
     const scalarField& Y
 ) const
@@ -106,7 +118,7 @@ Foam::scalar Foam::solidMixture::cp
     scalar val = 0.0;
     forAll(properties_, i)
     {
-        val += properties_[i].cp()*Y[i];
+        val += properties_[i].Cp()*Y[i];
     }
     return val;
 }

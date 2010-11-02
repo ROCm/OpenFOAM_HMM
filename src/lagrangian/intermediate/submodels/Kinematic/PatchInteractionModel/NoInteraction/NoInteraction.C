@@ -23,31 +23,70 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "NoInteraction.H"
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
 template<class CloudType>
-const Foam::dictionary& Foam::PostProcessingModel<CloudType>::dict() const
+Foam::NoInteraction<CloudType>::NoInteraction
+(
+    const dictionary&,
+    CloudType& owner
+)
+:
+    PatchInteractionModel<CloudType>(owner)
+{}
+
+
+template<class CloudType>
+Foam::NoInteraction<CloudType>::NoInteraction
+(
+    const NoInteraction<CloudType>& pim
+)
+:
+    PatchInteractionModel<CloudType>(pim)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::NoInteraction<CloudType>::~NoInteraction()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+bool Foam::NoInteraction<CloudType>::active() const
 {
-    return dict_;
+    return false;
 }
 
 
 template<class CloudType>
-const CloudType& Foam::PostProcessingModel<CloudType>::owner() const
+bool Foam::NoInteraction<CloudType>::correct
+(
+    typename CloudType::parcelType& p,
+    const polyPatch&,
+    bool&,
+    const scalar,
+    const tetIndices&
+) const
 {
-    return owner_;
-}
+    notImplemented
+    (
+        "bool Foam::NoInteraction<CloudType>::correct"
+        "("
+            "typename CloudType::parcelType& , "
+            "const polyPatch&, "
+            "bool&, "
+            "const scalarr, "
+            "vector&"
+        ") const"
+    );
 
-
-template<class CloudType>
-CloudType& Foam::PostProcessingModel<CloudType>::owner()
-{
-    return owner_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::PostProcessingModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
+    return false;
 }
 
 

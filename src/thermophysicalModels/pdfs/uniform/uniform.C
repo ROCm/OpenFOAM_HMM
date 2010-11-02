@@ -39,7 +39,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pdfs::uniform::uniform(const dictionary& dict, Random& rndGen)
+Foam::pdfs::uniform::uniform(const dictionary& dict, cachedRandom& rndGen)
 :
     pdf(typeName, dict, rndGen),
     minValue_(readScalar(pdfDict_.lookup("minValue"))),
@@ -48,6 +48,14 @@ Foam::pdfs::uniform::uniform(const dictionary& dict, Random& rndGen)
 {
     check();
 }
+
+
+Foam::pdfs::uniform::uniform(const uniform& p)
+:
+    pdf(p),
+    minValue_(p.minValue_),
+    maxValue_(p.maxValue_)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -60,7 +68,7 @@ Foam::pdfs::uniform::~uniform()
 
 Foam::scalar Foam::pdfs::uniform::sample() const
 {
-    return (minValue_ + rndGen_.scalar01()*range_);
+    return rndGen_.position<scalar>(minValue_, maxValue_);
 }
 
 

@@ -116,6 +116,9 @@ public:
 
     // Constructors
 
+        //- Construct null from mesh reference
+        particleForces(const fvMesh& mesh);
+
         //- Construct from mesh, dictionary and gravity
         particleForces
         (

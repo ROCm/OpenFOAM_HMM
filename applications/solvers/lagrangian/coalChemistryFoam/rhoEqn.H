@@ -35,7 +35,7 @@ Description
         fvm::ddt(rho)
       + fvc::div(phi)
       ==
-        coalParcels.Srho()
+        coalParcels.Srho(rho)
     );
 }
 

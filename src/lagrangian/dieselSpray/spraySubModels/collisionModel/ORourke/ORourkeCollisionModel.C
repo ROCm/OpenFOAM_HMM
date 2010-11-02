@@ -48,7 +48,7 @@ Foam::ORourkeCollisionModel::ORourkeCollisionModel
 (
     const dictionary& dict,
     spray& sm,
-    Random& rndGen
+    cachedRandom& rndGen
 )
 :
     collisionModel(dict, sm, rndGen),

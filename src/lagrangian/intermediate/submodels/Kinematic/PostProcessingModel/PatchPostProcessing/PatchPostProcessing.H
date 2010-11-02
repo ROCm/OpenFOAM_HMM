@@ -55,9 +55,6 @@ class PatchPostProcessing
 
         typedef typename CloudType::parcelType parcelType;
 
-        //- Reference to the mesh
-        const polyMesh& mesh_;
-
         //- Maximum number of parcels to store
         label maxStoredParcels_;
 
@@ -96,6 +93,18 @@ public:
         //- Construct from dictionary
         PatchPostProcessing(const dictionary& dict, CloudType& owner);
 
+        //- Construct copy
+        PatchPostProcessing(const PatchPostProcessing<CloudType>& ppm);
+
+        //- Construct and return a clone
+        virtual autoPtr<PostProcessingModel<CloudType> > clone() const
+        {
+            return autoPtr<PostProcessingModel<CloudType> >
+            (
+                new PatchPostProcessing<CloudType>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~PatchPostProcessing();
@@ -104,9 +113,6 @@ public:
     // Member Functions
 
         // Access
-
-            //- Return const access to the mesh
-            inline const polyMesh& mesh() const;
 
             //- Return maximum number of parcels to store per patch
             inline label maxStoredParcels() const;
@@ -120,15 +126,11 @@ public:
 
         // Evaluation
 
-            //- Flag to indicate whether model activates post-processing model
-            virtual bool active() const;
-
             //- Gather post-processing info on patch
-            virtual void postPatch
-            (
-                const parcelType& p,
-                const label patchI
-            );
+            virtual void postPatch(const parcelType& p, const label patchI);
+
+            //- Gather particle data when hit face - not used
+            virtual void postFace(const parcelType& p);
 };
 
 

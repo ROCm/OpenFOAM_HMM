@@ -105,15 +105,27 @@ public:
             CloudType& owner
         );
 
+        //- Construct copy
+        COxidationDiffusionLimitedRate
+        (
+            const COxidationDiffusionLimitedRate<CloudType>& srm
+        );
+
+        //- Construct and return a clone
+        virtual autoPtr<SurfaceReactionModel<CloudType> > clone() const
+        {
+            return autoPtr<SurfaceReactionModel<CloudType> >
+            (
+                new COxidationDiffusionLimitedRate<CloudType>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~COxidationDiffusionLimitedRate();
 
 
     // Member Functions
-
-        //- Flag to indicate whether model activates surface reaction model
-        virtual bool active() const;
 
         //- Update surface reactions
         virtual scalar calculate

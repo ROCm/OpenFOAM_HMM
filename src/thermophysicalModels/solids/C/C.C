@@ -69,6 +69,12 @@ Foam::C::C(const dictionary& dict)
 {}
 
 
+Foam::C::C(const C& s)
+:
+    solid(s)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::C::writeData(Ostream& os) const

@@ -39,7 +39,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pdfs::general::general(const dictionary& dict, Random& rndGen)
+Foam::pdfs::general::general(const dictionary& dict, cachedRandom& rndGen)
 :
     pdf(typeName, dict, rndGen),
     xy_(pdfDict_.lookup("distribution")),
@@ -74,6 +74,17 @@ Foam::pdfs::general::general(const dictionary& dict, Random& rndGen)
 }
 
 
+Foam::pdfs::general::general(const general& p)
+:
+    pdf(p),
+    xy_(p.xy_),
+    nEntries_(p.nEntries_),
+    minValue_(p.minValue_),
+    maxValue_(p.maxValue_),
+    integral_(p.integral_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::pdfs::general::~general()
@@ -84,7 +95,7 @@ Foam::pdfs::general::~general()
 
 Foam::scalar Foam::pdfs::general::sample() const
 {
-    scalar y = rndGen_.scalar01();
+    scalar y = rndGen_.sample01<scalar>();
 
     // find the interval where y is in the table
     label n=1;

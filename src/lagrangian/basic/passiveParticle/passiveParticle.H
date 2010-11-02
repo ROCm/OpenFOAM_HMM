@@ -99,9 +99,12 @@ public:
         {}
 
         //- Construct and return a clone
-        autoPtr<passiveParticle> clone() const
+        virtual autoPtr<Particle<passiveParticle> > clone() const
         {
-            return autoPtr<passiveParticle>(new passiveParticle(*this));
+            return autoPtr<Particle<passiveParticle> >
+            (
+                new passiveParticle(*this)
+            );
         }
 };
 

@@ -76,7 +76,7 @@ void Foam::spray::move()
         srhos_[i] = 0.0;
     }
 
-    Cloud<parcel>::move(*this);
+    Cloud<parcel>::move(*this, runTime_.deltaTValue());
 }
 
 

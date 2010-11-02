@@ -57,11 +57,19 @@ public:
     // Constructors
 
         //- Construct from components
-        NoDispersion
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+        NoDispersion(const dictionary& dict, CloudType& owner);
+
+        //- Construct copy
+        NoDispersion(NoDispersion<CloudType>& dm);
+
+        //- Construct and return a clone
+        virtual autoPtr<DispersionModel<CloudType> > clone()
+        {
+            return autoPtr<DispersionModel<CloudType> >
+            (
+                new NoDispersion<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
@@ -72,9 +80,6 @@ public:
 
         //- Flag to indicate whether model activates injection model
         virtual bool active() const;
-
-        //- Cache carrier fields
-        virtual void cacheFields(const bool store);
 
         //- Update (disperse particles)
         virtual vector update

@@ -40,6 +40,16 @@ Foam::NoSurfaceFilm<CloudType>::NoSurfaceFilm
 {}
 
 
+template<class CloudType>
+Foam::NoSurfaceFilm<CloudType>::NoSurfaceFilm
+(
+    const NoSurfaceFilm<CloudType>& sfm
+)
+:
+    SurfaceFilmModel<CloudType>(sfm.owner_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>

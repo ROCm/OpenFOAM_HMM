@@ -107,15 +107,35 @@ Foam::PatchInteractionModel<CloudType>::wordToInteractionType
 template<class CloudType>
 Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
 (
+    CloudType& owner
+)
+:
+    SubModelBase<CloudType>(owner),
+    UName_("unknown_UName")
+{}
+
+
+template<class CloudType>
+Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
+(
     const dictionary& dict,
     CloudType& owner,
     const word& type
 )
 :
-    dict_(dict),
-    owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs")),
-    UName_(coeffDict_.lookupOrDefault<word>("UName", "U"))
+    SubModelBase<CloudType>(owner, dict, type),
+    UName_(this->coeffDict().lookupOrDefault("UName", word("U")))
+{}
+
+
+template<class CloudType>
+Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
+(
+    const PatchInteractionModel<CloudType>& pim
+)
+:
+    SubModelBase<CloudType>(pim),
+    UName_(pim.UName_)
 {}
 
 
@@ -129,32 +149,34 @@ Foam::PatchInteractionModel<CloudType>::~PatchInteractionModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-const CloudType&
-Foam::PatchInteractionModel<CloudType>::owner() const
-{
-    return owner_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::PatchInteractionModel<CloudType>::dict() const
-{
-    return dict_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary&
-Foam::PatchInteractionModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
-}
-
-
-template<class CloudType>
 const Foam::word& Foam::PatchInteractionModel<CloudType>::UName() const
 {
     return UName_;
+}
+
+
+template<class CloudType>
+bool Foam::PatchInteractionModel<CloudType>::correct
+(
+    typename CloudType::parcelType&,
+    const polyPatch&,
+    bool&,
+    const scalar,
+    const tetIndices&
+) const
+{
+    notImplemented
+    (
+        "bool Foam::PatchInteractionModel<CloudType>::correct"
+        "("
+            "typename CloudType::parcelType&, "
+            "const polyPatch&, "
+            "bool&, "
+            "const scalar, "
+            "const tetIndices& "
+        ") const"
+    );
+    return false;
 }
 
 

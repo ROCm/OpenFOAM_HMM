@@ -147,6 +147,29 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
 }
 
 
+template<class CloudType>
+Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
+(
+    const FieldActivatedInjection<CloudType>& im
+)
+:
+    InjectionModel<CloudType>(im),
+    factor_(im.factor_),
+    referenceField_(im.referenceField_),
+    thresholdField_(im.thresholdField_),
+    positionsFile_(im.positionsFile_),
+    positions_(im.positions_),
+    injectorCells_(im.injectorCells_),
+    injectorTetFaces_(im.injectorTetFaces_),
+    injectorTetPts_(im.injectorTetPts_),
+    nParcelsPerInjector_(im.nParcelsPerInjector_),
+    nParcelsInjected_(im.nParcelsInjected_),
+    U0_(im.U0_),
+    diameters_(im.diameters_),
+    parcelPDF_(im.parcelPDF_().clone().ptr())
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>

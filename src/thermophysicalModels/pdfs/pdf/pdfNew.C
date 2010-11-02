@@ -30,7 +30,7 @@ License
 Foam::autoPtr<Foam::pdfs::pdf> Foam::pdfs::pdf::New
 (
     const dictionary& dict,
-    Random& rndGen
+    cachedRandom& rndGen
 )
 {
     const word modelType(dict.lookup("pdfType"));
@@ -42,7 +42,7 @@ Foam::autoPtr<Foam::pdfs::pdf> Foam::pdfs::pdf::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalErrorIn("pdfs::pdf::New(const dictionary&, Random&)")
+        FatalErrorIn("pdfs::pdf::New(const dictionary&, cachedRandom&)")
             << "Unknown pdf type " << modelType << nl << nl
             << "Valid pdf types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()

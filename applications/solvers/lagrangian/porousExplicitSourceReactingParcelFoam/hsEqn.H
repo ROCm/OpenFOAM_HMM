@@ -37,7 +37,7 @@
           - fvm::laplacian(turbulence->alphaEff(), hs)
          ==
             pWork()
-          + parcels.Sh()
+          + parcels.Sh(hs)
           + radiation->Shs(thermo)
           + energySource.Su()
           + chemistrySh

@@ -50,14 +50,14 @@ Foam::COxidationMurphyShaddix<CloudType>::COxidationMurphyShaddix
         owner,
         typeName
     ),
-    D0_(dimensionedScalar(this->coeffDict().lookup("D0")).value()),
-    rho0_(dimensionedScalar(this->coeffDict().lookup("rho0")).value()),
-    T0_(dimensionedScalar(this->coeffDict().lookup("T0")).value()),
-    Dn_(dimensionedScalar(this->coeffDict().lookup("Dn")).value()),
-    A_(dimensionedScalar(this->coeffDict().lookup("A")).value()),
-    E_(dimensionedScalar(this->coeffDict().lookup("E")).value()),
-    n_(dimensionedScalar(this->coeffDict().lookup("n")).value()),
-    WVol_(dimensionedScalar(this->coeffDict().lookup("WVol")).value()),
+    D0_(readScalar(this->coeffDict().lookup("D0"))),
+    rho0_(readScalar(this->coeffDict().lookup("rho0"))),
+    T0_(readScalar(this->coeffDict().lookup("T0"))),
+    Dn_(readScalar(this->coeffDict().lookup("Dn"))),
+    A_(readScalar(this->coeffDict().lookup("A"))),
+    E_(readScalar(this->coeffDict().lookup("E"))),
+    n_(readScalar(this->coeffDict().lookup("n"))),
+    WVol_(readScalar(this->coeffDict().lookup("WVol"))),
     CsLocalId_(-1),
     O2GlobalId_(owner.composition().globalCarrierId("O2")),
     CO2GlobalId_(owner.composition().globalCarrierId("CO2")),
@@ -72,7 +72,34 @@ Foam::COxidationMurphyShaddix<CloudType>::COxidationMurphyShaddix
     WO2_ = owner.thermo().carrier().W(O2GlobalId_);
     const scalar WCO2 = owner.thermo().carrier().W(CO2GlobalId_);
     WC_ = WCO2 - WO2_;
+
+    const scalar YCloc = owner.composition().Y0(idSolid)[CsLocalId_];
+    const scalar YSolidTot = owner.composition().YMixture0()[idSolid];
+    Info<< "    C(s): particle mass fraction = " << YCloc*YSolidTot << endl;
 }
+
+
+template<class CloudType>
+Foam::COxidationMurphyShaddix<CloudType>::COxidationMurphyShaddix
+(
+    const COxidationMurphyShaddix<CloudType>& srm
+)
+:
+    SurfaceReactionModel<CloudType>(srm),
+    D0_(srm.D0_),
+    rho0_(srm.rho0_),
+    T0_(srm.T0_),
+    Dn_(srm.Dn_),
+    A_(srm.A_),
+    E_(srm.E_),
+    n_(srm.n_),
+    WVol_(srm.WVol_),
+    CsLocalId_(srm.CsLocalId_),
+    O2GlobalId_(srm.O2GlobalId_),
+    CO2GlobalId_(srm.CO2GlobalId_),
+    WC_(srm.WC_),
+    WO2_(srm.WO2_)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -83,13 +110,6 @@ Foam::COxidationMurphyShaddix<CloudType>::~COxidationMurphyShaddix()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::COxidationMurphyShaddix<CloudType>::active() const
-{
-    return true;
-}
-
 
 template<class CloudType>
 Foam::scalar Foam::COxidationMurphyShaddix<CloudType>::calculate
@@ -123,9 +143,10 @@ Foam::scalar Foam::COxidationMurphyShaddix<CloudType>::calculate
         return 0.0;
     }
 
+    const SLGThermo& thermo = this->owner().thermo();
+
     // Cell carrier phase O2 species density [kg/m^3]
-    const scalar rhoO2 =
-        rhoc*this->owner().thermo().carrier().Y(O2GlobalId_)[cellI];
+    const scalar rhoO2 = rhoc*thermo.carrier().Y(O2GlobalId_)[cellI];
 
     if (rhoO2 < SMALL)
     {
@@ -204,11 +225,9 @@ Foam::scalar Foam::COxidationMurphyShaddix<CloudType>::calculate
     // Add to particle mass transfer
     dMassSolid[CsLocalId_] += dOmega*WC_;
 
-    const scalar HC =
-        this->owner().composition().solids().properties()[CsLocalId_].Hf()
-      + this->owner().composition().solids().properties()[CsLocalId_].cp()*T;
-    const scalar HCO2 = this->owner().thermo().carrier().H(CO2GlobalId_, T);
-    const scalar HO2 = this->owner().thermo().carrier().H(O2GlobalId_, T);
+    const scalar HC = thermo.solids().properties()[CsLocalId_].H(T);
+    const scalar HCO2 = thermo.carrier().H(CO2GlobalId_, T);
+    const scalar HO2 = thermo.carrier().H(O2GlobalId_, T);
 
     // Heat of reaction
     return dOmega*(WC_*HC + WO2_*HO2 - (WC_ + WO2_)*HCO2);

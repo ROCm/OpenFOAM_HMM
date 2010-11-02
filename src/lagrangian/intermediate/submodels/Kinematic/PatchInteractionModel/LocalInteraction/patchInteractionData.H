@@ -103,46 +103,7 @@ public:
                 Istream& is,
                 patchInteractionData& pid
             );
-/*            {
-                is.check
-                (
-                    "Istream& operator>>"
-                    "(Istream&, patchInteractionData&)"
-                );
-
-                const dictionaryEntry entry(dictionary::null, is);
-
-                pid.patchName_ = entry.keyword();
-                entry.lookup("type") >> pid.interactionTypeName_;
-                pid.e_ = entry.lookupOrDefault<scalar>("e", 1.0);
-                pid.mu_ = entry.lookupOrDefault<scalar>("mu", 0.0);
-
-                if
-                (
-                    PatchInteractionModel<CloudType>::wordToInteractionType
-                    (
-                        pid.interactionTypeName_
-                    )
-                == PatchInteractionModel<CloudType>::itOther)
-                {
-                    FatalErrorIn
-                    (
-                        "friend Istream& operator>>"
-                        "("
-                            "Istream&, "
-                            "patchInteractionData&"
-                        ")"
-                    )   << "Unknown patch interaction type "
-                        << pid.interactionTypeName_
-                        << ". Valid selections are:"
-                        << PatchInteractionModel<CloudType>::
-                        interactionTypeNames_
-                        << endl << abort(FatalError);
-                }
-
-                return is;
-            }
-*/};
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

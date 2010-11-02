@@ -39,6 +39,7 @@ SourceFiles
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "SubModelBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,6 +52,8 @@ namespace Foam
 
 template<class CloudType>
 class PhaseChangeModel
+:
+    public SubModelBase<CloudType>
 {
 public:
 
@@ -70,15 +73,6 @@ public:
 protected:
 
     // Protected data
-
-        //- The cloud dictionary
-        const dictionary& dict_;
-
-        //- Reference to the owner cloud class
-        CloudType& owner_;
-
-        //- The coefficient dictionary
-        const dictionary coeffDict_;
 
         //- Enthalpy transfer type enumeration
         enthalpyTransferType enthalpyTransfer_;
@@ -125,6 +119,18 @@ public:
             const word& type
         );
 
+        //- Construct copy
+        PhaseChangeModel(const PhaseChangeModel<CloudType>& pcm);
+
+        //- Construct and return a clone
+        virtual autoPtr<PhaseChangeModel<CloudType> > clone() const
+        {
+            return autoPtr<PhaseChangeModel<CloudType> >
+            (
+                new PhaseChangeModel<CloudType>(*this)
+            );
+        }
+
 
     //- Destructor
     virtual ~PhaseChangeModel();
@@ -140,23 +146,11 @@ public:
 
     // Access
 
-        //- Return the owner cloud object
-        const CloudType& owner() const;
-
-        //- Return the cloud dictionary
-        const dictionary& dict() const;
-
-        //- Return the coefficient dictionary
-        const dictionary& coeffDict() const;
-
         //- Return the enthalpy transfer type enumeration
         const enthalpyTransferType& enthalpyTransfer() const;
 
 
     // Member Functions
-
-        //- Flag to indicate whether model activates phase change model
-        virtual bool active() const = 0;
 
         //- Update model
         virtual void calculate
@@ -170,7 +164,7 @@ public:
             const scalar Ts,
             const scalar pc,
             scalarField& dMassPC
-        ) const = 0;
+        ) const;
 };
 
 
