@@ -154,9 +154,9 @@ Foam::WallSpringSliderDashpot<CloudType>::WallSpringSliderDashpot
     WallModel<CloudType>(dict, cloud, typeName),
     Estar_(),
     Gstar_(),
-    alpha_(dimensionedScalar(this->coeffDict().lookup("alpha")).value()),
-    b_(dimensionedScalar(this->coeffDict().lookup("b")).value()),
-    mu_(dimensionedScalar(this->coeffDict().lookup("mu")).value()),
+    alpha_(readScalar(this->coeffDict().lookup("alpha"))),
+    b_(readScalar(this->coeffDict().lookup("b"))),
+    mu_(readScalar(this->coeffDict().lookup("mu"))),
     collisionResolutionSteps_
     (
         readScalar
@@ -172,15 +172,9 @@ Foam::WallSpringSliderDashpot<CloudType>::WallSpringSliderDashpot
         volumeFactor_ = readScalar(this->coeffDict().lookup("volumeFactor"));
     }
 
-    scalar nu = dimensionedScalar
-    (
-        this->coeffDict().lookup("poissonsRatio")
-    ).value();
+    scalar nu = readScalar(this->coeffDict().lookup("poissonsRatio"));
 
-    scalar E = dimensionedScalar
-    (
-        this->coeffDict().lookup("youngsModulus")
-    ).value();
+    scalar E = readScalar(this->coeffDict().lookup("youngsModulus"));
 
     scalar pNu = this->owner().constProps().poissonsRatio();
 

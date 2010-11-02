@@ -42,9 +42,9 @@ COxidationKineticDiffusionLimitedRate
         owner,
         typeName
     ),
-    C1_(dimensionedScalar(this->coeffDict().lookup("C1")).value()),
-    C2_(dimensionedScalar(this->coeffDict().lookup("C2")).value()),
-    E_(dimensionedScalar(this->coeffDict().lookup("E")).value()),
+    C1_(readScalar(this->coeffDict().lookup("C1"))),
+    C2_(readScalar(this->coeffDict().lookup("C2"))),
+    E_(readScalar(this->coeffDict().lookup("E"))),
     CsLocalId_(-1),
     O2GlobalId_(owner.composition().globalCarrierId("O2")),
     CO2GlobalId_(owner.composition().globalCarrierId("CO2")),
