@@ -150,7 +150,7 @@ protected:
         template<class Type2>
         void addToInternalField
         (
-            const unallocLabelList& addr,
+            const labelUList& addr,
             const Field<Type2>& pf,
             Field<Type2>& intf
         ) const;
@@ -158,7 +158,7 @@ protected:
         template<class Type2>
         void addToInternalField
         (
-            const unallocLabelList& addr,
+            const labelUList& addr,
             const tmp<Field<Type2> >& tpf,
             Field<Type2>& intf
         ) const;
@@ -167,7 +167,7 @@ protected:
         template<class Type2>
         void subtractFromInternalField
         (
-            const unallocLabelList& addr,
+            const labelUList& addr,
             const Field<Type2>& pf,
             Field<Type2>& intf
         ) const;
@@ -175,7 +175,7 @@ protected:
         template<class Type2>
         void subtractFromInternalField
         (
-            const unallocLabelList& addr,
+            const labelUList& addr,
             const tmp<Field<Type2> >& tpf,
             Field<Type2>& intf
         ) const;
@@ -203,7 +203,7 @@ protected:
             template<template<class> class ListType>
             void setValuesFromList
             (
-                const unallocLabelList& cells,
+                const labelUList& cells,
                 const ListType<Type>& values
             );
 
@@ -327,7 +327,7 @@ public:
             //  and eliminate the corresponding equations from the matrix.
             void setValues
             (
-                const unallocLabelList& cells,
+                const labelUList& cells,
                 const UList<Type>& values
             );
 
@@ -335,7 +335,7 @@ public:
             //  and eliminate the corresponding equations from the matrix.
             void setValues
             (
-                const unallocLabelList& cells,
+                const labelUList& cells,
                 const UIndirectList<Type>& values
             );
 

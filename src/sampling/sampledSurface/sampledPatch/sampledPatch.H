@@ -86,7 +86,7 @@ class sampledPatch
 
 
         //- remap action on triangulation or cleanup
-        virtual void remapFaces(const UList<label>& faceMap);
+        virtual void remapFaces(const labelUList& faceMap);
 
 public:
 

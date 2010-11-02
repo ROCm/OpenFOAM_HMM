@@ -136,7 +136,7 @@ protected:
         (
             ensightFile& os,
             const List<scalar>& field,
-            const List<label>& idList
+            const labelUList& idList
         ) const;
 
         //- track points used

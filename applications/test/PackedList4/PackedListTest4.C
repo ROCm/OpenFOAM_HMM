@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
         (list3 |= list2).printBits(Info);
     }
 
-    Info<< "\noperator|= with UList<label>\n";
+    Info<< "\noperator|= with labelUList\n";
     {
         PackedBoolList list3 = list1;
         (list3 |= list2Labels).printBits(Info);
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
         (list3 += list2).printBits(Info);
     }
 
-    Info<< "\noperator+= with UList<label>\n";
+    Info<< "\noperator+= with labelUList\n";
     {
         PackedBoolList list3 = list1;
         (list3 += list2Labels).printBits(Info);
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
         (list3 -= list2).printBits(Info);
     }
 
-    Info<< "\noperator-= with UList<label>\n";
+    Info<< "\noperator-= with labelUList\n";
     {
         PackedBoolList list3 = list1;
         (list3 -= list2Labels).printBits(Info);

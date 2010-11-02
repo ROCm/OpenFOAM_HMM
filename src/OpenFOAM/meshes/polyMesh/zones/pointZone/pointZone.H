@@ -112,7 +112,7 @@ public:
         pointZone
         (
             const word& name,
-            const unallocLabelList& addr,
+            const labelUList& addr,
             const label index,
             const pointZoneMesh&
         );
@@ -140,7 +140,7 @@ public:
         pointZone
         (
             const pointZone&,
-            const unallocLabelList& addr,
+            const labelUList& addr,
             const label index,
             const pointZoneMesh&
         );
@@ -170,7 +170,7 @@ public:
         (
             const pointZoneMesh& zm,
             const label index,
-            const unallocLabelList& addr
+            const labelUList& addr
         ) const
         {
             return autoPtr<pointZone>
@@ -226,7 +226,7 @@ public:
         void operator=(const pointZone&);
 
         //- Assign addressing, clearing demand-driven data
-        void operator=(const unallocLabelList&);
+        void operator=(const labelUList&);
 
         //- Assign addressing, clearing demand-driven data
         void operator=(const Xfer<labelList>&);

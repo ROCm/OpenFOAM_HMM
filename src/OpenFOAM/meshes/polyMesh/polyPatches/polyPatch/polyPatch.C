@@ -171,7 +171,7 @@ Foam::polyPatch::polyPatch
     const polyPatch& pp,
     const polyBoundaryMesh& bm,
     const label index,
-    const unallocLabelList& mapAddressing,
+    const labelUList& mapAddressing,
     const label newStart
 )
 :
@@ -273,7 +273,7 @@ Foam::tmp<Foam::vectorField> Foam::polyPatch::faceCellCentres() const
     // get reference to global cell centres
     const vectorField& gcc = boundaryMesh_.mesh().cellCentres();
 
-    const unallocLabelList& faceCells = this->faceCells();
+    const labelUList& faceCells = this->faceCells();
 
     forAll(faceCells, facei)
     {
@@ -284,7 +284,7 @@ Foam::tmp<Foam::vectorField> Foam::polyPatch::faceCellCentres() const
 }
 
 
-const Foam::unallocLabelList& Foam::polyPatch::faceCells() const
+const Foam::labelUList& Foam::polyPatch::faceCells() const
 {
     if (!faceCellsPtr_)
     {

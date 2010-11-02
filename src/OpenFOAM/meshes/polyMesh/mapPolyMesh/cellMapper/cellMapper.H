@@ -131,7 +131,7 @@ public:
         }
 
         //- Return direct addressing
-        virtual const unallocLabelList& directAddressing() const;
+        virtual const labelUList& directAddressing() const;
 
         //- Return interpolated addressing
         virtual const labelListList& addressing() const;

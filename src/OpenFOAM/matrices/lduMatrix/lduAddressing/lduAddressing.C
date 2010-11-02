@@ -42,7 +42,7 @@ void Foam::lduAddressing::calcLosort() const
     // and resizing list
     labelList nNbrOfFace(size(), 0);
 
-    const unallocLabelList& nbr = upperAddr();
+    const labelUList& nbr = upperAddr();
 
     forAll(nbr, nbrI)
     {
@@ -181,7 +181,7 @@ Foam::lduAddressing::~lduAddressing()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::unallocLabelList& Foam::lduAddressing::losortAddr() const
+const Foam::labelUList& Foam::lduAddressing::losortAddr() const
 {
     if (!losortPtr_)
     {
@@ -192,7 +192,7 @@ const Foam::unallocLabelList& Foam::lduAddressing::losortAddr() const
 }
 
 
-const Foam::unallocLabelList& Foam::lduAddressing::ownerStartAddr() const
+const Foam::labelUList& Foam::lduAddressing::ownerStartAddr() const
 {
     if (!ownerStartPtr_)
     {
@@ -203,7 +203,7 @@ const Foam::unallocLabelList& Foam::lduAddressing::ownerStartAddr() const
 }
 
 
-const Foam::unallocLabelList& Foam::lduAddressing::losortStartAddr() const
+const Foam::labelUList& Foam::lduAddressing::losortStartAddr() const
 {
     if (!losortStartPtr_)
     {
@@ -225,7 +225,7 @@ Foam::label Foam::lduAddressing::triIndex(const label a, const label b) const
 
     label endLabel = ownerStartAddr()[own + 1];
 
-    const unallocLabelList& neighbour = upperAddr();
+    const labelUList& neighbour = upperAddr();
 
     for (label i = startLabel; i < endLabel; i++)
     {

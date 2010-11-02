@@ -36,7 +36,7 @@ const Foam::labelList Foam::emptyLabelList = Foam::labelList(0);
 Foam::labelList Foam::invert
 (
     const label len,
-    const UList<label>& map
+    const labelUList& map
 )
 {
     labelList inverse(len, -1);
@@ -49,7 +49,7 @@ Foam::labelList Foam::invert
         {
             if (inverse[newPos] >= 0)
             {
-                FatalErrorIn("invert(const label, const UList<label>&)")
+                FatalErrorIn("invert(const label, const labelUList&)")
                     << "Map is not one-to-one. At index " << i
                     << " element " << newPos << " has already occurred before"
                     << nl << "Please use invertOneToMany instead"
@@ -66,7 +66,7 @@ Foam::labelList Foam::invert
 Foam::labelListList Foam::invertOneToMany
 (
     const label len,
-    const UList<label>& map
+    const labelUList& map
 )
 {
     labelList nElems(len, 0);

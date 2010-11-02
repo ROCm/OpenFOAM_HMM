@@ -244,7 +244,7 @@ void processorFvPatchField<Type>::updateInterfaceMatrix
 
     // Multiply the field by coefficients and add into the result
 
-    const unallocLabelList& faceCells = this->patch().faceCells();
+    const labelUList& faceCells = this->patch().faceCells();
 
     forAll(faceCells, elemI)
     {

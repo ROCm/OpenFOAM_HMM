@@ -41,7 +41,7 @@ void Foam::nearWallDistNoSearch::doAll()
 
         if (isA<wallFvPatch>(patches[patchI]))
         {
-            const unallocLabelList& faceCells = patches[patchI].faceCells();
+            const labelUList& faceCells = patches[patchI].faceCells();
 
             const fvPatchVectorField& patchCentres
                 = cellCentres.boundaryField()[patchI];

@@ -59,7 +59,7 @@ Foam::CompactListList<T, Container>::CompactListList(const List<Container>& ll)
 template<class T, class Container>
 Foam::CompactListList<T, Container>::CompactListList
 (
-    const UList<label>& rowSizes
+    const labelUList& rowSizes
 )
 :
     size_(rowSizes.size()),
@@ -80,7 +80,7 @@ Foam::CompactListList<T, Container>::CompactListList
 template<class T, class Container>
 Foam::CompactListList<T, Container>::CompactListList
 (
-    const UList<label>& rowSizes,
+    const labelUList& rowSizes,
     const T& t
 )
 :
@@ -178,7 +178,7 @@ void Foam::CompactListList<T, Container>::setSize
 
 
 template<class T, class Container>
-void Foam::CompactListList<T, Container>::setSize(const UList<label>& rowSizes)
+void Foam::CompactListList<T, Container>::setSize(const labelUList& rowSizes)
 {
     size_ = rowSizes.size();
     offsets_.setSize(rowSizes.size()+1);

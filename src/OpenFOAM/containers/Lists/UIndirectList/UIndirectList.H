@@ -58,7 +58,7 @@ class UIndirectList
     // Private data
 
         UList<T>& completeList_;
-        const UList<label>& addressing_;
+        const labelUList& addressing_;
 
 
 public:
@@ -66,7 +66,7 @@ public:
     // Constructors
 
         //- Construct given the complete list and the addressing array
-        inline UIndirectList(const UList<T>&, const UList<label>&);
+        inline UIndirectList(const UList<T>&, const labelUList&);
 
 
     // Member Functions

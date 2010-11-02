@@ -56,7 +56,7 @@ emptyFvPatch::emptyFvPatch(const polyPatch& patch, const fvBoundaryMesh& bm)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const unallocLabelList& emptyFvPatch::faceCells() const
+const labelUList& emptyFvPatch::faceCells() const
 {
     return faceCells_;
 }

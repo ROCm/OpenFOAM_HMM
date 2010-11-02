@@ -324,8 +324,8 @@ void Foam::MULES::limiter
 
     const fvMesh& mesh = psi.mesh();
 
-    const unallocLabelList& owner = mesh.owner();
-    const unallocLabelList& neighb = mesh.neighbour();
+    const labelUList& owner = mesh.owner();
+    const labelUList& neighb = mesh.neighbour();
     tmp<volScalarField::DimensionedInternalField> tVsc = mesh.Vsc();
     const scalarField& V = tVsc();
     const scalar deltaT = mesh.time().deltaTValue();

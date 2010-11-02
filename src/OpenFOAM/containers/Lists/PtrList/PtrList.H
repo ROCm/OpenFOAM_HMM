@@ -208,7 +208,7 @@ public:
             //- Reorders elements. Ordering does not have to be done in
             //  ascending or descending order. Reordering has to be unique.
             //  (is shuffle)
-            void reorder(const UList<label>&);
+            void reorder(const labelUList&);
 
 
     // Member operators

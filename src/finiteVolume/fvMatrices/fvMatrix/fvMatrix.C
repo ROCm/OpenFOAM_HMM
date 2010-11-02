@@ -36,7 +36,7 @@ template<class Type>
 template<class Type2>
 void Foam::fvMatrix<Type>::addToInternalField
 (
-    const unallocLabelList& addr,
+    const labelUList& addr,
     const Field<Type2>& pf,
     Field<Type2>& intf
 ) const
@@ -45,7 +45,7 @@ void Foam::fvMatrix<Type>::addToInternalField
     {
         FatalErrorIn
         (
-            "fvMatrix<Type>::addToInternalField(const unallocLabelList&, "
+            "fvMatrix<Type>::addToInternalField(const labelUList&, "
             "const Field&, Field&)"
         )   << "sizes of addressing and field are different"
             << abort(FatalError);
@@ -62,7 +62,7 @@ template<class Type>
 template<class Type2>
 void Foam::fvMatrix<Type>::addToInternalField
 (
-    const unallocLabelList& addr,
+    const labelUList& addr,
     const tmp<Field<Type2> >& tpf,
     Field<Type2>& intf
 ) const
@@ -76,7 +76,7 @@ template<class Type>
 template<class Type2>
 void Foam::fvMatrix<Type>::subtractFromInternalField
 (
-    const unallocLabelList& addr,
+    const labelUList& addr,
     const Field<Type2>& pf,
     Field<Type2>& intf
 ) const
@@ -85,7 +85,7 @@ void Foam::fvMatrix<Type>::subtractFromInternalField
     {
         FatalErrorIn
         (
-            "fvMatrix<Type>::addToInternalField(const unallocLabelList&, "
+            "fvMatrix<Type>::addToInternalField(const labelUList&, "
             "const Field&, Field&)"
         )   << "sizes of addressing and field are different"
             << abort(FatalError);
@@ -102,7 +102,7 @@ template<class Type>
 template<class Type2>
 void Foam::fvMatrix<Type>::subtractFromInternalField
 (
-    const unallocLabelList& addr,
+    const labelUList& addr,
     const tmp<Field<Type2> >& tpf,
     Field<Type2>& intf
 ) const
@@ -167,7 +167,7 @@ void Foam::fvMatrix<Type>::addBoundarySource
             tmp<Field<Type> > tpnf = ptf.patchNeighbourField();
             const Field<Type>& pnf = tpnf();
 
-            const unallocLabelList& addr = lduAddr().patchAddr(patchI);
+            const labelUList& addr = lduAddr().patchAddr(patchI);
 
             forAll(addr, facei)
             {
@@ -182,15 +182,15 @@ template<class Type>
 template<template<class> class ListType>
 void Foam::fvMatrix<Type>::setValuesFromList
 (
-    const unallocLabelList& cellLabels,
+    const labelUList& cellLabels,
     const ListType<Type>& values
 )
 {
     const fvMesh& mesh = psi_.mesh();
 
     const cellList& cells = mesh.cells();
-    const unallocLabelList& own = mesh.owner();
-    const unallocLabelList& nei = mesh.neighbour();
+    const labelUList& own = mesh.owner();
+    const labelUList& nei = mesh.neighbour();
 
     scalarField& Diag = diag();
     Field<Type>& psi =
@@ -486,7 +486,7 @@ Foam::fvMatrix<Type>::~fvMatrix()
 template<class Type>
 void Foam::fvMatrix<Type>::setValues
 (
-    const unallocLabelList& cellLabels,
+    const labelUList& cellLabels,
     const UList<Type>& values
 )
 {
@@ -497,7 +497,7 @@ void Foam::fvMatrix<Type>::setValues
 template<class Type>
 void Foam::fvMatrix<Type>::setValues
 (
-    const unallocLabelList& cellLabels,
+    const labelUList& cellLabels,
     const UIndirectList<Type>& values
 )
 {
@@ -553,7 +553,7 @@ void Foam::fvMatrix<Type>::relax(const scalar alpha)
 
         if (ptf.size())
         {
-            const unallocLabelList& pa = lduAddr().patchAddr(patchI);
+            const labelUList& pa = lduAddr().patchAddr(patchI);
             Field<Type>& iCoeffs = internalCoeffs_[patchI];
 
             if (ptf.coupled())
@@ -600,7 +600,7 @@ void Foam::fvMatrix<Type>::relax(const scalar alpha)
 
         if (ptf.size())
         {
-            const unallocLabelList& pa = lduAddr().patchAddr(patchI);
+            const labelUList& pa = lduAddr().patchAddr(patchI);
             Field<Type>& iCoeffs = internalCoeffs_[patchI];
 
             if (ptf.coupled())

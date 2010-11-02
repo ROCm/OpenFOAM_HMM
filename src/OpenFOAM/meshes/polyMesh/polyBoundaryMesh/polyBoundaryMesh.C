@@ -805,7 +805,7 @@ void Foam::polyBoundaryMesh::updateMesh()
 }
 
 
-void Foam::polyBoundaryMesh::reorder(const UList<label>& oldToNew)
+void Foam::polyBoundaryMesh::reorder(const labelUList& oldToNew)
 {
     // Change order of patches
     polyPatchList::reorder(oldToNew);

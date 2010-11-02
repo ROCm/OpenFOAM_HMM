@@ -119,7 +119,7 @@ public:
 
         //- Construct from a list of labels
         //  using the labels as indices to indicate which bits are set
-        explicit inline PackedBoolList(const UList<label>& indices);
+        explicit inline PackedBoolList(const labelUList& indices);
 
         //- Construct from a list of labels
         //  using the labels as indices to indicate which bits are set
@@ -141,7 +141,7 @@ public:
 
             //- Set the listed indices. Return number of elements changed.
             //  Does auto-vivify for non-existent entries.
-            label set(const UList<label>& indices);
+            label set(const labelUList& indices);
 
             //- Set the listed indices. Return number of elements changed.
             //  Does auto-vivify for non-existent entries.
@@ -152,7 +152,7 @@ public:
 
             //- Unset the listed indices. Return number of elements changed.
             //  Never auto-vivify entries.
-            label unset(const UList<label>& indices);
+            label unset(const labelUList& indices);
 
             //- Unset the listed indices. Return number of elements changed.
             //  Never auto-vivify entries.
@@ -163,7 +163,7 @@ public:
 
             //- Subset with the listed indices.
             //  Return number of elements subsetted.
-            label subset(const UList<label>& indices);
+            label subset(const labelUList& indices);
 
             //- Subset with the listed indices.
             //  Return number of elements subsetted.
@@ -204,7 +204,7 @@ public:
 
             //- Assignment operator,
             //  using the labels as indices to indicate which bits are set
-            inline PackedBoolList& operator=(const UList<label>& indices);
+            inline PackedBoolList& operator=(const labelUList& indices);
 
             //- Assignment operator,
             //  using the labels as indices to indicate which bits are set
@@ -218,7 +218,7 @@ public:
 
             //- And operator (lists may be dissimilar sizes)
             //  using the labels as indices to indicate which bits are set
-            inline PackedBoolList& operator&=(const UList<label>& indices);
+            inline PackedBoolList& operator&=(const labelUList& indices);
 
             //- And operator (lists may be dissimilar sizes)
             //  using the labels as indices to indicate which bits are set
@@ -233,7 +233,7 @@ public:
 
             //- Or operator (lists may be dissimilar sizes),
             //  using the labels as indices to indicate which bits are set
-            inline PackedBoolList& operator|=(const UList<label>& indices);
+            inline PackedBoolList& operator|=(const labelUList& indices);
 
             //- Or operator (lists may be dissimilar sizes),
             //  using the labels as indices to indicate which bits are set
@@ -244,7 +244,7 @@ public:
             inline PackedBoolList& operator+=(const PackedList<1>&);
 
             //- Add entries to this list, synonymous with the or operator
-            inline PackedBoolList& operator+=(const UList<label>& indices);
+            inline PackedBoolList& operator+=(const labelUList& indices);
 
             //- Add entries to this list, synonymous with the or operator
             inline PackedBoolList& operator+=(const UIndirectList<label>&);
@@ -253,7 +253,7 @@ public:
             inline PackedBoolList& operator-=(const PackedList<1>&);
 
             //- Remove entries from this list - unset the specified bits
-            inline PackedBoolList& operator-=(const UList<label>& indices);
+            inline PackedBoolList& operator-=(const labelUList& indices);
 
             //- Remove entries from this list - unset the specified bits
             inline PackedBoolList& operator-=(const UIndirectList<label>&);

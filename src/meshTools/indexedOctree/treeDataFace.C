@@ -80,7 +80,7 @@ Foam::treeDataFace::treeDataFace
 (
     const bool cacheBb,
     const primitiveMesh& mesh,
-    const unallocLabelList& faceLabels
+    const labelUList& faceLabels
 )
 :
     mesh_(mesh),
@@ -482,7 +482,7 @@ bool Foam::treeDataFace::overlaps
 // nearestPoint.
 void Foam::treeDataFace::findNearest
 (
-    const unallocLabelList& indices,
+    const labelUList& indices,
     const point& sample,
 
     scalar& nearestDistSqr,

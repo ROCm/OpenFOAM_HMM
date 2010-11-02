@@ -150,7 +150,7 @@ bool Foam::sampledPatch::update()
 // remap action on triangulation
 void Foam::sampledPatch::remapFaces
 (
-    const UList<label>& faceMap
+    const labelUList& faceMap
 )
 {
     // recalculate the cells cut

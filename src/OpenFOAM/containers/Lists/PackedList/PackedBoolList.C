@@ -188,7 +188,7 @@ void Foam::PackedBoolList::set(const PackedList<1>& lst)
 }
 
 
-Foam::label Foam::PackedBoolList::set(const UList<label>& indices)
+Foam::label Foam::PackedBoolList::set(const labelUList& indices)
 {
     return setIndices(indices);
 }
@@ -216,7 +216,7 @@ void Foam::PackedBoolList::unset(const PackedList<1>& lst)
 }
 
 
-Foam::label Foam::PackedBoolList::unset(const UList<label>& indices)
+Foam::label Foam::PackedBoolList::unset(const labelUList& indices)
 {
     return unsetIndices(indices);
 }
@@ -249,7 +249,7 @@ void Foam::PackedBoolList::subset(const PackedList<1>& lst)
 }
 
 
-Foam::label Foam::PackedBoolList::subset(const UList<label>& indices)
+Foam::label Foam::PackedBoolList::subset(const labelUList& indices)
 {
     return subsetIndices(indices);
 }

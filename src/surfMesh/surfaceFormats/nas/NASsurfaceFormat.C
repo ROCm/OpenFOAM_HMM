@@ -228,7 +228,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
         else if (cmd == "CQUAD4")
         {
             face fQuad(4);
-            UList<label>& f = static_cast<UList<label>&>(fQuad);
+            labelUList& f = static_cast<labelUList&>(fQuad);
 
             label groupId = readLabel(IStringStream(line.substr(16,8))());
             fQuad[0] = readLabel(IStringStream(line.substr(24,8))());

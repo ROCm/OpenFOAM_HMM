@@ -74,7 +74,7 @@ void Foam::meshToMesh::calcAddressing()
     forAll(patchesFrom, patchI)
     {
         // get reference to cells next to the boundary
-        const unallocLabelList& bCells = patchesFrom[patchI].faceCells();
+        const labelUList& bCells = patchesFrom[patchI].faceCells();
 
         forAll(bCells, faceI)
         {

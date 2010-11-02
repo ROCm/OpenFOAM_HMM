@@ -207,7 +207,7 @@ inline void Foam::CompactListList<T, Container>::resize
 template<class T, class Container>
 inline void Foam::CompactListList<T, Container>::resize
 (
-    const UList<label>& rowSizes
+    const labelUList& rowSizes
 )
 {
     this->setSize(rowSizes);

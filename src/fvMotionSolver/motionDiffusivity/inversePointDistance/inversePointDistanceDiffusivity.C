@@ -161,7 +161,7 @@ void Foam::inversePointDistanceDiffusivity::correct()
 
         if (patchSet.found(patchI))
         {
-            const unallocLabelList& faceCells = bfld.patch().faceCells();
+            const labelUList& faceCells = bfld.patch().faceCells();
 
             forAll(bfld, i)
             {
