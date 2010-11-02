@@ -48,6 +48,11 @@
 #         eg,  export WM_NCOMPPROCS=$(wmakeScheduler -count)
 #
 #-------------------------------------------------------------------------------
+
+# csh sets HOST, bash sets HOSTNAME
+: ${HOST:=$HOSTNAME}
+
+
 lockDir=$HOME/.$WM_PROJECT/.wmake
 # fallback - 1 core on current host
 : ${WM_HOSTS:=$HOST:1}
@@ -184,14 +189,14 @@ do
                     # Set colour
                     colour="${colourList[$colourIndex]}"
 
-                    if [ "$host" = "$HOSTNAME" ]; then
+                    if [ "$host" = "$HOST" ]; then
                         eval $* 2>&1 | colourPipe "$colour"
                     else
                         ssh $host "$sourceFoam 2>/dev/null; cd $PWD && $rcmd" 2>&1 | colourPipe "$colour"
                     fi
                     retval=$?
                 else
-                    if [ "$host" = "$HOSTNAME" ]; then
+                    if [ "$host" = "$HOST" ]; then
                         eval $* 2>&1
                     else
                         ssh $host "$sourceFoam 2>/dev/null; cd $PWD && $rcmd" 2>&1

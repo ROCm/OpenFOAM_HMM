@@ -108,7 +108,7 @@ public:
             }
 
             //- Return processor number
-            virtual const cyclicLduInterface& neighbPatch() const
+            virtual const cyclicFvPatch& neighbPatch() const
             {
                 return refCast<const cyclicFvPatch>
                 (

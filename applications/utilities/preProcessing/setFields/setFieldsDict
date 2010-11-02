@@ -23,7 +23,20 @@ defaultFieldValues
 
 regions
 (
+    // Set cell values
+    // (does zerogradient on boundaries)
     boxToCell
+    {
+        box (0 0 -1) (0.1461 0.292 1);
+
+        fieldValues
+        (
+            volScalarFieldValue gamma 1
+        );
+    }
+
+    // Set patch values (using ==)
+    boxToFace
     {
         box (0 0 -1) (0.1461 0.292 1);
 

@@ -6,5 +6,6 @@ wmake
 wmake interDyMFoam
 wmake MRFInterFoam
 wmake porousInterFoam
+wmake LTSInterFoam
 
 # ----------------------------------------------------------------- end-of-file

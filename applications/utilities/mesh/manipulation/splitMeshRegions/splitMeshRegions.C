@@ -34,8 +34,12 @@ Description
     - any face inbetween differing cellZones (-cellZones)
 
     Output is:
-    - volScalarField with regions as different scalars (-detectOnly) or
-    - mesh with multiple regions or
+    - volScalarField with regions as different scalars (-detectOnly)
+            or
+    - mesh with multiple regions and directMapped patches. These patches
+      either cover the whole interface between two region (default) or
+      only part according to faceZones (-useFaceZones)
+            or
     - mesh with cells put into cellZones (-makeCellZones)
 
     Note:
@@ -495,18 +499,70 @@ labelList getNonRegionCells(const labelList& cellRegion, const label regionI)
 }
 
 
-// Get per region-region interface the sizes. If sumParallel sums sizes.
+void addToInterface
+(
+    const polyMesh& mesh,
+    const label zoneID,
+    const label ownRegion,
+    const label neiRegion,
+    EdgeMap<Map<label> >& regionsToSize
+)
+{
+    edge interface
+    (
+        min(ownRegion, neiRegion),
+        max(ownRegion, neiRegion)
+    );
+
+    EdgeMap<Map<label> >::iterator iter = regionsToSize.find
+    (
+        interface
+    );
+
+    if (iter != regionsToSize.end())
+    {
+        // Check if zone present
+        Map<label>::iterator zoneFnd = iter().find(zoneID);
+        if (zoneFnd != iter().end())
+        {
+            // Found zone. Increment count.
+            zoneFnd()++;
+        }
+        else
+        {
+            // New or no zone. Insert with count 1.
+            iter().insert(zoneID, 1);
+        }
+    }
+    else
+    {
+        // Create new interface of size 1.
+        Map<label> zoneToSize;
+        zoneToSize.insert(zoneID, 1);
+        regionsToSize.insert(interface, zoneToSize);
+    }
+}
+
+
+// Get region-region interface name and sizes.
 // Returns interfaces as straight list for looping in identical order.
 void getInterfaceSizes
 (
     const polyMesh& mesh,
+    const bool useFaceZones,
     const labelList& cellRegion,
-    const bool sumParallel,
+    const wordList& regionNames,
 
     edgeList& interfaces,
-    EdgeMap<label>& interfaceSizes
+    List<Pair<word> >& interfaceNames,
+    labelList& interfaceSizes,
+    labelList& faceToInterface
 )
 {
+    // From region-region to faceZone (or -1) to number of faces.
+
+    EdgeMap<Map<label> > regionsToSize;
+
 
     // Internal faces
     // ~~~~~~~~~~~~~~
@@ -518,22 +574,14 @@ void getInterfaceSizes
 
         if (ownRegion != neiRegion)
         {
-            edge interface
+            addToInterface
             (
-                min(ownRegion, neiRegion),
-                max(ownRegion, neiRegion)
+                mesh,
+                (useFaceZones ? mesh.faceZones().whichZone(faceI) : -1),
+                ownRegion,
+                neiRegion,
+                regionsToSize
             );
-
-            EdgeMap<label>::iterator iter = interfaceSizes.find(interface);
-
-            if (iter != interfaceSizes.end())
-            {
-                iter()++;
-            }
-            else
-            {
-                interfaceSizes.insert(interface, 1);
-            }
         }
     }
 
@@ -558,27 +606,19 @@ void getInterfaceSizes
 
         if (ownRegion != neiRegion)
         {
-            edge interface
+            addToInterface
             (
-                min(ownRegion, neiRegion),
-                max(ownRegion, neiRegion)
+                mesh,
+                (useFaceZones ? mesh.faceZones().whichZone(faceI) : -1),
+                ownRegion,
+                neiRegion,
+                regionsToSize
             );
-
-            EdgeMap<label>::iterator iter = interfaceSizes.find(interface);
-
-            if (iter != interfaceSizes.end())
-            {
-                iter()++;
-            }
-            else
-            {
-                interfaceSizes.insert(interface, 1);
-            }
         }
     }
 
 
-    if (sumParallel && Pstream::parRun())
+    if (Pstream::parRun())
     {
         if (Pstream::master())
         {
@@ -592,35 +632,43 @@ void getInterfaceSizes
             {
                 IPstream fromSlave(Pstream::blocking, slave);
 
-                EdgeMap<label> slaveSizes(fromSlave);
+                EdgeMap<Map<label> > slaveSizes(fromSlave);
 
-                forAllConstIter(EdgeMap<label>, slaveSizes, slaveIter)
+                forAllConstIter(EdgeMap<Map<label> >, slaveSizes, slaveIter)
                 {
-                    EdgeMap<label>::iterator masterIter =
-                        interfaceSizes.find(slaveIter.key());
+                    EdgeMap<Map<label> >::iterator masterIter =
+                        regionsToSize.find(slaveIter.key());
 
-                    if (masterIter != interfaceSizes.end())
+                    if (masterIter != regionsToSize.end())
                     {
-                        masterIter() += slaveIter();
+                        // Same inter-region
+                        const Map<label>& slaveInfo = slaveIter();
+                        Map<label>& masterInfo = masterIter();
+
+                        forAllConstIter(Map<label>, slaveInfo, iter)
+                        {
+                            label zoneID = iter.key();
+                            label slaveSize = iter();
+
+                            Map<label>::iterator zoneFnd = masterInfo.find
+                            (
+                                zoneID
+                            );
+                            if (zoneFnd != masterInfo.end())
+                            {
+                                zoneFnd() += slaveSize;
+                            }
+                            else
+                            {
+                                masterInfo.insert(zoneID, slaveSize);
+                            }
+                        }
                     }
                     else
                     {
-                        interfaceSizes.insert(slaveIter.key(), slaveIter());
+                        regionsToSize.insert(slaveIter.key(), slaveIter());
                     }
                 }
-            }
-
-            // Distribute
-            for
-            (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
-                slave++
-            )
-            {
-                // Receive the edges using shared points from the slave.
-                OPstream toSlave(Pstream::blocking, slave);
-                toSlave << interfaceSizes;
             }
         }
         else
@@ -628,21 +676,125 @@ void getInterfaceSizes
             // Send to master
             {
                 OPstream toMaster(Pstream::blocking, Pstream::masterNo());
-                toMaster << interfaceSizes;
-            }
-            // Receive from master
-            {
-                IPstream fromMaster(Pstream::blocking, Pstream::masterNo());
-                fromMaster >> interfaceSizes;
+                toMaster << regionsToSize;
             }
         }
     }
 
-    // Make sure all processors have interfaces in same order
-    interfaces = interfaceSizes.toc();
-    if (sumParallel)
+    // Rework 
+
+    Pstream::scatter(regionsToSize);
+
+
+
+    // Now we have the global sizes of all inter-regions.
+    // Invert this on master and distribute.
+    label nInterfaces = 0;
+    forAllConstIter(EdgeMap<Map<label> >, regionsToSize, iter)
     {
-        Pstream::scatter(interfaces);
+        const Map<label>& info = iter();
+        nInterfaces += info.size();
+    }
+
+    interfaces.setSize(nInterfaces);
+    interfaceNames.setSize(nInterfaces);
+    interfaceSizes.setSize(nInterfaces);
+    EdgeMap<Map<label> > regionsToInterface(nInterfaces);
+
+    nInterfaces = 0;
+    forAllConstIter(EdgeMap<Map<label> >, regionsToSize, iter)
+    {
+        const edge& e = iter.key();
+        const word& name0 = regionNames[e[0]];
+        const word& name1 = regionNames[e[1]];
+
+        const Map<label>& info = iter();
+        forAllConstIter(Map<label>, info, infoIter)
+        {
+            interfaces[nInterfaces] = iter.key();
+            label zoneID = infoIter.key();
+            if (zoneID == -1)
+            {
+                interfaceNames[nInterfaces] = Pair<word>
+                (
+                    name0 + "_to_" + name1,
+                    name1 + "_to_" + name0
+                );
+            }
+            else
+            {
+                const word& zoneName = mesh.faceZones()[zoneID].name();
+                interfaceNames[nInterfaces] = Pair<word>
+                (
+                    zoneName + "_" + name0 + "_to_" + name1,
+                    zoneName + "_" + name1 + "_to_" + name0
+                );
+            }
+            interfaceSizes[nInterfaces] = infoIter();
+
+            Map<label> zoneAndInterface;
+            zoneAndInterface.insert(zoneID, nInterfaces);
+            regionsToInterface.insert(e, zoneAndInterface);
+
+            nInterfaces++;
+        }
+    }
+
+
+    // Now all processor have consistent interface information
+
+    Pstream::scatter(interfaces);
+    Pstream::scatter(interfaceNames);
+    Pstream::scatter(interfaceSizes);
+    Pstream::scatter(regionsToInterface);
+
+    // Mark all inter-region faces.
+    faceToInterface.setSize(mesh.nFaces(), -1);
+
+    forAll(mesh.faceNeighbour(), faceI)
+    {
+        label ownRegion = cellRegion[mesh.faceOwner()[faceI]];
+        label neiRegion = cellRegion[mesh.faceNeighbour()[faceI]];
+
+        if (ownRegion != neiRegion)
+        {
+            label zoneID = -1;
+            if (useFaceZones)
+            {
+                zoneID = mesh.faceZones().whichZone(faceI);
+            }
+
+            edge interface
+            (
+                min(ownRegion, neiRegion),
+                max(ownRegion, neiRegion)
+            );
+
+            faceToInterface[faceI] = regionsToInterface[interface][zoneID];
+        }
+    }
+    forAll(coupledRegion, i)
+    {
+        label faceI = i+mesh.nInternalFaces();
+        label ownRegion = cellRegion[mesh.faceOwner()[faceI]];
+        label neiRegion = coupledRegion[i];
+
+        if (ownRegion != neiRegion)
+        {
+            label zoneID = -1;
+            if (useFaceZones)
+            {
+                zoneID = mesh.faceZones().whichZone(faceI);
+            }
+
+            edge interface
+            (
+                min(ownRegion, neiRegion),
+                max(ownRegion, neiRegion)
+            );
+
+            faceToInterface[faceI] = regionsToInterface[interface][zoneID];
+        }
     }
 }
 
@@ -650,11 +802,15 @@ void getInterfaceSizes
 // Create mesh for region.
 autoPtr<mapPolyMesh> createRegionMesh
 (
-    const labelList& cellRegion,
-    const EdgeMap<label>& interfaceToPatch,
     const fvMesh& mesh,
+    // Region info
+    const labelList& cellRegion,
     const label regionI,
     const word& regionName,
+    // Interface info
+    const labelList& interfacePatches,
+    const labelList& faceToInterface,
+
     autoPtr<fvMesh>& newMesh
 )
 {
@@ -739,6 +895,7 @@ autoPtr<mapPolyMesh> createRegionMesh
     forAll(exposedFaces, i)
     {
         label faceI = exposedFaces[i];
+        label interfaceI = faceToInterface[faceI];
 
         label ownRegion = cellRegion[mesh.faceOwner()[faceI]];
         label neiRegion = -1;
@@ -751,6 +908,10 @@ autoPtr<mapPolyMesh> createRegionMesh
         {
             neiRegion = coupledRegion[faceI-mesh.nInternalFaces()];
         }
+
+
+        // Check which side is being kept - determines which of the two
+        // patches will be used.
 
         label otherRegion = -1;
 
@@ -773,19 +934,14 @@ autoPtr<mapPolyMesh> createRegionMesh
                 << exit(FatalError);
         }
 
-        if (otherRegion != -1)
+        // Find the patch.
+        if (regionI < otherRegion)
         {
-            edge interface(regionI, otherRegion);
-
-            // Find the patch.
-            if (regionI < otherRegion)
-            {
-                exposedPatchIDs[i] = interfaceToPatch[interface];
-            }
-            else
-            {
-                exposedPatchIDs[i] = interfaceToPatch[interface]+1;
-            }
+            exposedPatchIDs[i] = interfacePatches[interfaceI];
+        }
+        else
+        {
+            exposedPatchIDs[i] = interfacePatches[interfaceI]+1;
         }
     }
 
@@ -821,7 +977,8 @@ void createAndWriteRegion
     const fvMesh& mesh,
     const labelList& cellRegion,
     const wordList& regionNames,
-    const EdgeMap<label>& interfaceToPatch,
+    const labelList& faceToInterface,
+    const labelList& interfacePatches,
     const label regionI,
     const word& newMeshInstance
 )
@@ -832,21 +989,22 @@ void createAndWriteRegion
     autoPtr<fvMesh> newMesh;
     autoPtr<mapPolyMesh> map = createRegionMesh
     (
-        cellRegion,
-        interfaceToPatch,
         mesh,
+        cellRegion,
         regionI,
         regionNames[regionI],
+        interfacePatches,
+        faceToInterface,
         newMesh
     );
 
 
     // Make map of all added patches
-    labelHashSet addedPatches(2*interfaceToPatch.size());
-    forAllConstIter(EdgeMap<label>, interfaceToPatch, iter)
+    labelHashSet addedPatches(2*interfacePatches.size());
+    forAll(interfacePatches, interfaceI)
     {
-        addedPatches.insert(iter());
-        addedPatches.insert(iter()+1);
+        addedPatches.insert(interfacePatches[interfaceI]);
+        addedPatches.insert(interfacePatches[interfaceI]+1);
     }
 
     Info<< "Mapping fields" << endl;
@@ -1074,70 +1232,67 @@ void createAndWriteRegion
 // First one is for minimumregion to maximumregion.
 // Note that patches get created in same order on all processors (if parallel)
 // since looping over synchronised 'interfaces'.
-EdgeMap<label> addRegionPatches
+labelList addRegionPatches
 (
     fvMesh& mesh,
-    const labelList& cellRegion,
-    const label nCellRegions,
+    const wordList& regionNames,
     const edgeList& interfaces,
-    const EdgeMap<label>& interfaceSizes,
-    const wordList& regionNames
+    const List<Pair<word> >& interfaceNames
 )
 {
-    // Check that all patches are present in same order.
-    mesh.boundaryMesh().checkParallelSync(true);
-
     Info<< nl << "Adding patches" << nl << endl;
 
-    EdgeMap<label> interfaceToPatch(nCellRegions);
+    labelList interfacePatches(interfaces.size());
 
     forAll(interfaces, interI)
     {
         const edge& e = interfaces[interI];
+        const Pair<word>& names = interfaceNames[interI];
 
-        if (interfaceSizes[e] > 0)
-        {
-            const word inter1 = regionNames[e[0]] + "_to_" + regionNames[e[1]];
-            const word inter2 = regionNames[e[1]] + "_to_" + regionNames[e[0]];
+        //Info<< "For interface " << interI
+        //    << " between regions " << e
+        //    << " trying to add patches " << names << endl;
 
-            directMappedWallPolyPatch patch1
-            (
-                inter1,
-                0,                  // overridden
-                0,                  // overridden
-                0,                  // overridden
-                regionNames[e[1]],  // sampleRegion
-                directMappedPatchBase::NEARESTPATCHFACE,
-                inter2,             // samplePatch
-                point::zero,        // offset
-                mesh.boundaryMesh()
-            );
 
-            label patchI = addPatch(mesh, patch1);
+        directMappedWallPolyPatch patch1
+        (
+            names[0],
+            0,                  // overridden
+            0,                  // overridden
+            0,                  // overridden
+            regionNames[e[1]],  // sampleRegion
+            directMappedPatchBase::NEARESTPATCHFACE,
+            names[1],           // samplePatch
+            point::zero,        // offset
+            mesh.boundaryMesh()
+        );
 
-            directMappedWallPolyPatch patch2
-            (
-                inter2,
-                0,
-                0,
-                0,
-                regionNames[e[0]],  // sampleRegion
-                directMappedPatchBase::NEARESTPATCHFACE,
-                inter1,
-                point::zero,        // offset
-                mesh.boundaryMesh()
-            );
-            addPatch(mesh, patch2);
+        interfacePatches[interI] = addPatch(mesh, patch1);
 
-            Info<< "For interface between region " << e[0]
-                << " and " << e[1] << " added patch " << patchI
-                << " " << mesh.boundaryMesh()[patchI].name()
-                << endl;
+        directMappedWallPolyPatch patch2
+        (
+            names[1],
+            0,
+            0,
+            0,
+            regionNames[e[0]],  // sampleRegion
+            directMappedPatchBase::NEARESTPATCHFACE,
+            names[0],
+            point::zero,        // offset
+            mesh.boundaryMesh()
+        );
+        addPatch(mesh, patch2);
 
-            interfaceToPatch.insert(e, patchI);
-        }
+        Info<< "For interface between region " << regionNames[e[0]]
+            << " and " << regionNames[e[1]] << " added patches" << endl
+            << "    " << interfacePatches[interI]
+            << "\t" << mesh.boundaryMesh()[interfacePatches[interI]].name()
+            << endl
+            << "    " << interfacePatches[interI]+1
+            << "\t" << mesh.boundaryMesh()[interfacePatches[interI]+1].name()
+            << endl;
     }
-    return interfaceToPatch;
+    return interfacePatches;
 }
 
 
@@ -1193,76 +1348,6 @@ label findCorrespondingRegion
 
     return regionI;
 }
-
-
-//// Checks if cellZone has corresponding cellRegion.
-//label findCorrespondingRegion
-//(
-//    const cellZoneMesh& cellZones,
-//    const labelList& existingZoneID,    // per cell the (unique) zoneID
-//    const labelList& cellRegion,
-//    const label nCellRegions,
-//    const label zoneI
-//)
-//{
-//    // Region corresponding to zone. Start off with special value: no
-//    // corresponding region.
-//    label regionI = labelMax;
-//
-//    const cellZone& cz = cellZones[zoneI];
-//
-//    if (cz.empty())
-//    {
-//        // My local portion is empty. Maps to any empty cellZone. Mark with
-//        // special value which can get overwritten by other processors.
-//        regionI = -1;
-//    }
-//    else
-//    {
-//        regionI = cellRegion[cz[0]];
-//
-//        forAll(cz, i)
-//        {
-//            if (cellRegion[cz[i]] != regionI)
-//            {
-//                regionI = labelMax;
-//                break;
-//            }
-//        }
-//    }
-//
-//    // Determine same zone over all processors.
-//    reduce(regionI, maxOp<label>());
-//
-//
-//    // 2. All of region present?
-//
-//    if (regionI == labelMax)
-//    {
-//        regionI = -1;
-//    }
-//    else if (regionI != -1)
-//    {
-//        forAll(cellRegion, cellI)
-//        {
-//            if
-//            (
-//                cellRegion[cellI] == regionI
-//             && existingZoneID[cellI] != zoneI
-//            )
-//            {
-//                // cellI in regionI but not in zoneI
-//                regionI = -1;
-//                break;
-//            }
-//        }
-//        // If one in error, all should be in error. Note that branch
-//        // gets taken on all procs.
-//        reduce(regionI, minOp<label>());
-//    }
-//
-//    return regionI;
-//}
 
 
 // Get zone per cell
@@ -1484,6 +1569,7 @@ void writeCellToRegion(const fvMesh& mesh, const labelList& cellRegion)
 }
 
 
+
 // Main program:
 
 int main(int argc, char *argv[])
@@ -1541,6 +1627,11 @@ int main(int argc, char *argv[])
         "sloppyCellZones",
         "try to match heuristically regions to existing cell zones"
     );
+    argList::addBoolOption
+    (
+        "useFaceZones",
+        "use faceZones to patch inter-region faces instead of single patch"
+    );
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -1564,6 +1655,8 @@ int main(int argc, char *argv[])
     const bool overwrite        = args.optionFound("overwrite");
     const bool detectOnly       = args.optionFound("detectOnly");
     const bool sloppyCellZones  = args.optionFound("sloppyCellZones");
+    const bool useFaceZones     = args.optionFound("useFaceZones");
+
     if
     (
         (useCellZonesOnly || useCellZonesFile)
@@ -1577,6 +1670,20 @@ int main(int argc, char *argv[])
             << " (which imply a split based on topology)"
             << exit(FatalError);
     }
+
+
+    if (useFaceZones)
+    {
+        Info<< "Using current faceZones to divide inter-region interfaces"
+            << " into multiple patches."
+            << nl << endl;
+    }
+    else
+    {
+        Info<< "Creating single patch per inter-region interface."
+            << nl << endl;
+    }
+
 
 
     if (insidePoint && largestOnly)
@@ -1768,6 +1875,7 @@ int main(int argc, char *argv[])
     writeCellToRegion(mesh, cellRegion);
 
 
+
     // Sizes per region
     // ~~~~~~~~~~~~~~~~
 
@@ -1805,34 +1913,48 @@ int main(int argc, char *argv[])
 
 
 
-    // Since we're going to mess with patches make sure all non-processor ones
-    // are on all processors.
+    // Since we're going to mess with patches and zones make sure all
+    // is synchronised
     mesh.boundaryMesh().checkParallelSync(true);
+    mesh.faceZones().checkParallelSync(true);
 
 
-    // Sizes of interface between regions. From pair of regions to number of
-    // faces.
+    // Interfaces
+    // ----------
+    // per interface:
+    // - the two regions on either side
+    // - the name
+    // - the (global) size
     edgeList interfaces;
-    EdgeMap<label> interfaceSizes;
+    List<Pair<word> > interfaceNames;
+    labelList interfaceSizes;
+    // per face the interface
+    labelList faceToInterface;
+
     getInterfaceSizes
     (
         mesh,
+        useFaceZones,
         cellRegion,
-        true,      // sum in parallel?
+        regionNames,
 
         interfaces,
-        interfaceSizes
+        interfaceNames,
+        interfaceSizes,
+        faceToInterface
     );
 
-    Info<< "Sizes inbetween regions:" << nl << nl
-        << "Region\tRegion\tFaces" << nl
-        << "------\t------\t-----" << endl;
+    Info<< "Sizes of interfaces between regions:" << nl << nl
+        << "Interface\tRegion\tRegion\tFaces" << nl
+        << "---------\t------\t------\t-----" << endl;
 
     forAll(interfaces, interI)
     {
         const edge& e = interfaces[interI];
 
-        Info<< e[0] << '\t' << e[1] << '\t' << interfaceSizes[e] << nl;
+        Info<< interI
+            << "\t\t" << e[0] << '\t' << e[1]
+            << '\t' << interfaceSizes[interI] << nl;
     }
     Info<< endl;
 
@@ -1982,16 +2104,14 @@ int main(int argc, char *argv[])
         // Add all possible patches. Empty ones get filtered later on.
         Info<< nl << "Adding patches" << nl << endl;
 
-        EdgeMap<label> interfaceToPatch
+        labelList interfacePatches
         (
             addRegionPatches
             (
                 mesh,
-                cellRegion,
-                nCellRegions,
+                regionNames,
                 interfaces,
-                interfaceSizes,
-                regionNames
+                interfaceNames
             )
         );
 
@@ -2041,7 +2161,8 @@ int main(int argc, char *argv[])
                 mesh,
                 cellRegion,
                 regionNames,
-                interfaceToPatch,
+                faceToInterface,
+                interfacePatches,
                 regionI,
                 (overwrite ? oldInstance : runTime.timeName())
             );
@@ -2059,7 +2180,8 @@ int main(int argc, char *argv[])
                 mesh,
                 cellRegion,
                 regionNames,
-                interfaceToPatch,
+                faceToInterface,
+                interfacePatches,
                 regionI,
                 (overwrite ? oldInstance : runTime.timeName())
             );
@@ -2078,7 +2200,8 @@ int main(int argc, char *argv[])
                     mesh,
                     cellRegion,
                     regionNames,
-                    interfaceToPatch,
+                    faceToInterface,
+                    interfacePatches,
                     regionI,
                     (overwrite ? oldInstance : runTime.timeName())
                 );

@@ -94,13 +94,13 @@ class polynomialTransport
 {
     // Private data
 
-        //- Dynamic viscosity
+        //- Dynamic viscosity polynomial coefficients
         //  Note: input in [Pa.s], but internally uses [Pa.s/kmol]
-        Polynomial<PolySize> muPolynomial_;
+        Polynomial<PolySize> muCoeffs_;
 
-        //- Thermal conductivity
+        //- Thermal conductivity polynomial coefficients
         //  Note: input in [W/m/K], but internally uses [W/m/K/kmol]
-        Polynomial<PolySize> kappaPolynomial_;
+        Polynomial<PolySize> kappaCoeffs_;
 
 
     // Private Member Functions

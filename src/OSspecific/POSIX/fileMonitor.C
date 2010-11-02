@@ -39,7 +39,7 @@ Class
 #else
 #   include <sys/inotify.h>
 #   include <sys/ioctl.h>
-
+#   include <errno.h>
 #   define EVENT_SIZE  ( sizeof (struct inotify_event) )
 #   define EVENT_LEN   (EVENT_SIZE + 16)
 #   define EVENT_BUF_LEN     ( 1024 * EVENT_LEN )
@@ -144,7 +144,7 @@ namespace Foam
 
 #else
         //- File descriptor for the inotify instance
-        int fd;
+        int inotifyFd_;
 
         //- Current watchIDs and corresponding directory id
         DynamicList<label> dirWatches_;
@@ -153,23 +153,47 @@ namespace Foam
         //- initialise inotify
         inline fileMonitorWatcher(const label sz = 20)
         :
-            fd(inotify_init()),
+            inotifyFd_(inotify_init()),
             dirWatches_(sz),
             dirFiles_(sz)
-        {}
+        {
+            if (inotifyFd_ < 0)
+            {
+                static bool hasWarned = false;
+                if (!hasWarned)
+                {
+                    hasWarned = true;
+                    WarningIn("fileMonitorWatcher(const label)")
+                        << "Failed allocating an inotify descriptor : "
+                        << string(strerror(errno)) << endl
+                        << "    Please increase the number of allowable "
+                        << "inotify instances" << endl
+                        << "    (/proc/sys/fs/inotify/max_user_instances"
+                        << " on Linux)" << endl
+                        << "    , switch off runTimeModifiable." << endl
+                        << "    or compile this file with FOAM_USE_STAT to use"
+                        << " time stamps instead of inotify." << endl
+                        << "    Continuing without additional file monitoring."
+                        << endl;
+                }
+            }
+        }
 
         //- remove all watches
         inline ~fileMonitorWatcher()
         {
-            forAll(dirWatches_, i)
+            if (inotifyFd_ >= 0)
             {
-                if (dirWatches_[i] >= 0)
+                forAll(dirWatches_, i)
                 {
-                    if (inotify_rm_watch(fd, int(dirWatches_[i])))
+                    if (dirWatches_[i] >= 0)
                     {
-                        WarningIn("fileMonitor::~fileMonitor()")
-                            << "Failed deleting directory watch "
-                            << dirWatches_[i] << endl;
+                        if (inotify_rm_watch(inotifyFd_, int(dirWatches_[i])))
+                        {
+                            WarningIn("fileMonitor::~fileMonitor()")
+                                << "Failed deleting directory watch "
+                                << dirWatches_[i] << endl;
+                        }
                     }
                 }
             }
@@ -177,10 +201,15 @@ namespace Foam
 
         inline bool addWatch(const label watchFd, const fileName& fName)
         {
+            if (inotifyFd_ < 0)
+            {
+                return false;
+            }
+
             // Add/retrieve watch on directory containing file
             label dirWatchID = inotify_add_watch
             (
-                fd,
+                inotifyFd_,
                 fName.path().c_str(),
                 IN_CLOSE_WRITE
             );
@@ -189,7 +218,8 @@ namespace Foam
             {
                 FatalErrorIn("addWatch(const label, const fileName&)")
                     << "Failed adding watch " << watchFd
-                    << " to directory " << fName
+                    << " to directory " << fName << " due to "
+                    << string(strerror(errno))
                     << exit(FatalError);
             }
 
@@ -209,6 +239,11 @@ namespace Foam
 
         inline bool removeWatch(const label watchFd)
         {
+            if (inotifyFd_ < 0)
+            {
+                return false;
+            }
+
             dirWatches_[watchFd] = -1;
             return true;
         }
@@ -263,11 +298,11 @@ void Foam::fileMonitor::checkFiles() const
         fd_set fdSet;
         // Add notify descriptor to select fd_set
         FD_ZERO(&fdSet);
-        FD_SET(watcher_->fd, &fdSet);
+        FD_SET(watcher_->inotifyFd_, &fdSet);
 
         int ready = select
         (
-            watcher_->fd+1,     // num filedescriptors in fdSet
+            watcher_->inotifyFd_+1,     // num filedescriptors in fdSet
             &fdSet,             // fdSet with only inotifyFd
             NULL,               // No writefds
             NULL,               // No errorfds
@@ -280,15 +315,15 @@ void Foam::fileMonitor::checkFiles() const
                 << "Problem in issuing select."
                 << abort(FatalError);
         }
-        else if (FD_ISSET(watcher_->fd, &fdSet))
+        else if (FD_ISSET(watcher_->inotifyFd_, &fdSet))
         {
             // Read events
-            ssize_t nBytes = read(watcher_->fd, buffer, EVENT_BUF_LEN);
+            ssize_t nBytes = read(watcher_->inotifyFd_, buffer, EVENT_BUF_LEN);
 
             if (nBytes < 0)
             {
                 FatalErrorIn("fileMonitor::updateStates(const fileName&)")
-                    << "read of " << watcher_->fd
+                    << "read of " << watcher_->inotifyFd_
                     << " failed with " << label(nBytes)
                     << abort(FatalError);
             }
@@ -364,6 +399,7 @@ Foam::label Foam::fileMonitor::addWatch(const fileName& fName)
     label watchFd;
 
     label sz = freeWatchFds_.size();
+
     if (sz)
     {
         watchFd = freeWatchFds_[sz-1];
